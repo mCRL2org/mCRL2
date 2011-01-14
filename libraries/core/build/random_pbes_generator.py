@@ -240,7 +240,7 @@ class binary_operator:
 
     # returns True if both arguments are minimal
     def is_minimal(self):
-        result = self.x.is_minimal() and isinstance(self.x, bool) and self.y.is_minimal() and isinstance(self.y, bool)
+        result = is_boolean_constant(self.x) and is_boolean_constant(self.y)
         print '<M>', result, self, self.__class__
         return result
 

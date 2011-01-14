@@ -594,49 +594,6 @@ void test_substitutions3()
   core::garbage_collect();
 }
 
-std::string PFNF1 =
-  "pbes                                                    \n"
-  "nu X(b:Bool) = (val(b) && (X(b) || (X(!b) && X(!!b)))); \n"
-  "                                                        \n"
-  "init X(true);                                           \n"
-  ;
-
-std::string PFNF2 = 
-  "pbes                                                        \n"
-  "nu X(m:Nat) = (forall n:Nat. X(n)) && (forall j:Nat. X(j)); \n"
-  "                                                            \n"
-  "init X(0);                                                  \n"
-  ;
-
-void test_pfnf(const std::string& pbes_spec)
-{
-  std::cerr << "--- test_pfnf ---" << std::endl;
-  pbes<> p = txt2pbes(pbes_spec);
-  std::cerr << "- before:" << std::endl;
-  std::cerr << pp(p) << std::endl;
-  pfnf_rewriter<pbes_expression> R;
-  pbesrewr(p, R);
-  std::cerr << "- after:" << std::endl;
-  std::cerr << pp(p) << std::endl;
-  std::cerr << "-----------------" << std::endl;
-  core::garbage_collect();
-}
-
-void test_pfnf_rewriter()
-{
-  using namespace pbes_system;
-
-  test_pfnf(PFNF1);
-  test_pfnf(PFNF2);
-
-  pfnf_rewriter<pbes_expression> R;
-  pbes_expression x = parse_pbes_expression("val(n1 > 3) && forall b: Bool. forall n: Nat. val(n > 3) || exists n:Nat. val(n > 5)", VARIABLE_SPECIFICATION);
-  pbes_expression y = R(x);
-
-  // TODO: add real test cases for PFNF rewriter
-  core::garbage_collect();
-}
-
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -648,7 +605,6 @@ int test_main(int argc, char* argv[])
   test_substitutions1();
   test_substitutions2();
   test_substitutions3();
-  test_pfnf_rewriter();
 
 #if defined(MCRL2_PBES_EXPRESSION_BUILDER_DEBUG) || defined(MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG)
   BOOST_CHECK(false);

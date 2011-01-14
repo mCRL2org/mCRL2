@@ -98,7 +98,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         }
         case pfnf:
         {
-          pfnf_rewriter<pbes_expression> pbesr;
+          pfnf_rewriter pbesr;
           pbesrewr(p, pbesr);
           break;
         }

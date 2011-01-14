@@ -183,22 +183,21 @@ namespace pbes_system {
   };
 
   /// \brief A rewriter that brings PBES expressions into PFNF normal form.
-  template <typename Term>
   class pfnf_rewriter
   {
     public:
       /// \brief The term type
-      typedef typename core::term_traits<Term>::term_type term_type;
+      typedef pbes_expression term_type;
 
       /// \brief The variable type
-      typedef typename core::term_traits<Term>::variable_type variable_type;
+      typedef data::variable variable_type;
 
       /// \brief Rewrites a pbes expression.
       /// \param x A term
       /// \return The rewrite result.
-      term_type operator()(const term_type& x) const
+      pbes_expression operator()(const pbes_expression& x) const
       {
-        pbes_system::detail::pfnf_visitor<term_type> visitor;
+        pbes_system::detail::pfnf_visitor visitor;
         visitor.visit(x);
         return visitor.evaluate();
       }
@@ -208,7 +207,7 @@ namespace pbes_system {
       /// \param sigma A substitution function
       /// \return The rewrite result.
       template <typename SubstitutionFunction>
-      term_type operator()(const term_type& x, SubstitutionFunction sigma) const
+      pbes_expression operator()(const pbes_expression& x, SubstitutionFunction sigma) const
       {
         return sigma(this->operator()(x));
       }

@@ -20,7 +20,6 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/detail/pfnf_visitor.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -163,35 +162,6 @@ pbes_system::pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
-void test_pfnf_expression(std::string s)
-{
-  pbes_system::detail::pfnf_visitor<pbes_system::pbes_expression> visitor;
-  pbes_system::pbes_expression t1 = expr(s);
-  visitor.visit(t1);
-  pbes_system::pbes_expression t2 = visitor.evaluate();
-  data::rewriter datar;
-  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
-  if (R(t1) != R(t2))
-  {
-    BOOST_CHECK(R(t1) == R(t2));
-    std::cout << "--- failed test --- " << std::endl;
-    std::cout << "t1    " << core::pp(t1) << std::endl;
-    std::cout << "t2    " << core::pp(t2) << std::endl;
-    std::cout << "R(t1) " << core::pp(R(t1)) << std::endl;
-    std::cout << "R(t2) " << core::pp(R(t2)) << std::endl;
-  }
-  core::garbage_collect();
-}
-
-void test_pfnf_visitor()
-{
-  test_pfnf_expression("forall m:Nat. false");
-  test_pfnf_expression("X && Y(3) || X");
-  // test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
-  // test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
-  core::garbage_collect();
-}
-
 inline
 pbes_expression parse(const std::string& expr)
 {
@@ -252,7 +222,6 @@ int test_main(int argc, char** argv)
   test_normalize1();
   test_normalize2();
   test_normalize3();
-  test_pfnf_visitor();
   test_normalize_and_or();
 
   return 0;
