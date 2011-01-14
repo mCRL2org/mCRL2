@@ -17,7 +17,7 @@ set(testdir "${CMAKE_BINARY_DIR}/mcrl2-testoutput")
 message( STATUS  "Preparing release tool tests" )
 
 # Set lts different lts output formats
-set(LTS_EXTS "lts;aut;svc;dot;fsm;bcg" )
+set(LTS_EXTS "lts;aut;svc;dot;fsm" )
 # Set location of mcf formula's
 set(SET_OF_MCF "${CMAKE_SOURCE_DIR}/examples/modal-formulas/nodeadlock.mcf;${CMAKE_SOURCE_DIR}/examples/modal-formulas/nolivelock.mcf")
 
