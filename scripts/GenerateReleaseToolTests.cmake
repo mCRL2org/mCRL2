@@ -46,11 +46,19 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
 
   	# Take first action
     string(REGEX REPLACE "act +(.*)" "\\1" fst_act "${output}")
+
+		  #Meanwile, write line of the first declared actions to file.
+	    #This action is used for hiding (e.g. ltscompare)
+      string(REGEX MATCH "^[^:\;]+" fst_line_act "${fst_act}")
+			#Remove spacing
+      string(REGEX REPLACE " " "" fst_line_act "${fst_line_act}")
+		  #Write line of the first declared actions to file.
+	    #This action is used for hiding (e.g. ltscompare,ltsconvert)
+		  write_file(${testdir}/${rname}_hide_action.txt "${fst_line_act}")
+
+		# And now take the first action	
     string(REGEX MATCH "^[^,:\;]+" fst_act "${fst_act}")
   	# Find corresponding sorts
-
-		#message( "${fst_act}" )
-
   	if( "${output}" MATCHES ":" )
 
     string(REGEX REPLACE ".*:(.*)" "\\1" fst_act_sorts "${output}")
@@ -85,6 +93,7 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
 		 #message("act ${fst_act}${lpsactionrename_postfix};\nvar${lpsactionrename_vardecl}\nrename\n  ${fst_act}${lpsactionrename_varlist} => ${fst_act}${lpsactionrename_postfix};" )
 
     write_file(${testdir}/${rname}_rename.txt "act ${fst_act}${lpsactionrename_postfix};\nvar${lpsactionrename_vardecl}\nrename\n  ${fst_act}${lpsactionrename_varlist} => ${fst_act}${lpsactionrename_postfix};" )
+
 endforeach()
 
 
@@ -249,11 +258,16 @@ macro( gen_lps2lts_release_tests )
   FOREACH( i ${SET_OF_LPS_FILES} )
 
 					get_filename_component( save ${i} NAME_WE)
+		      file(STRINGS ${testdir}/${save}_hide_action.txt act)
+
+					set( fst_act "" )
+					string(REGEX MATCH "[^,]*" fst_act "${act}" )
 
 					add_lps2lts_release_test( "${i}" "" "${save}" )
-					add_lps2lts_release_test( "${i}" "-atau" "")
+					add_lps2lts_release_test( "${i}" "-a${act}" "")
 					add_lps2lts_release_test( "${i}" "-b10" "")
 					add_lps2lts_release_test( "${i}" "-ctau" "")
+					add_lps2lts_release_test( "${i}" "-c${fst_act}" "")
 					add_lps2lts_release_test( "${i}" "-D" "")
 					add_lps2lts_release_test( "${i}" "--error-trace" "")
 					add_lps2lts_release_test( "${i}" "-ftree" "")
@@ -413,8 +427,6 @@ macro( add_lpsactionrename_release_test INPUT ARGS)
   set_tests_properties("lpsactionrename_${POST_FIX_TEST}" PROPERTIES DEPENDS "${SET_OF_MCRL22LPS_TESTS}" )
 endmacro( add_lpsactionrename_release_test INPUT ARGS)
 
-#write_file(${testdir}/rename.txt "rename tau => delta;" )
-
 macro( gen_lpsactionrename_release_tests )
 
   FOREACH( i ${SET_OF_LPS_FILES} )
@@ -543,7 +555,6 @@ macro( gen_lpsconfcheck_release_tests )
 					add_lpsconfcheck_release_test( "${i}" "-rinnerp" )
 					add_lpsconfcheck_release_test( "${i}" "-s10;-i${testdir}/true.txt" )
 					add_lpsconfcheck_release_test( "${i}" "-t10;-i${testdir}/true.txt" )
-					add_lpsconfcheck_release_test( "${i}" "-y;-i${testdir}/false.txt" )
 					add_lpsconfcheck_release_test( "${i}" "-zario;-i${testdir}/true.txt" )
 					add_lpsconfcheck_release_test( "${i}" "-zcvc;-i${testdir}/true.txt" )
 	ENDFOREACH( )
@@ -741,6 +752,8 @@ macro( gen_ltsconvert_release_tests )
 	  get_filename_component( ext ${i} EXT )
 	  get_filename_component( name ${i} NAME_WE )
 
+		file(STRINGS ${testdir}/${name}_hide_action.txt act)
+
 	  add_ltsconvert_release_test( "${i}" "" )
 	  add_ltsconvert_release_test( "${i}" "-D" )
 	  add_ltsconvert_release_test( "${i}" "-ebisim" )
@@ -751,7 +764,7 @@ macro( gen_ltsconvert_release_tests )
 	  add_ltsconvert_release_test( "${i}" "-eweak-trace" )
 	  add_ltsconvert_release_test( "${i}" "-n" )
 	  add_ltsconvert_release_test( "${i}" "--no-reach" )
-	  add_ltsconvert_release_test( "${i}" "--tau=tau,delta" )
+	  add_ltsconvert_release_test( "${i}" "--tau=${act}" )
 
   ENDFOREACH( )
 endmacro( gen_ltsconvert_release_tests )
@@ -782,6 +795,8 @@ macro( gen_ltscompare_release_tests )
 	  get_filename_component( ext ${i} EXT )
 	  get_filename_component( name ${i} NAME_WE )
 
+		file(STRINGS ${testdir}/${name}_hide_action.txt act)
+
 	  add_ltscompare_release_test( "${i}" "-c;-ebranching-bisim" )
 	  add_ltscompare_release_test( "${i}" "-c;-edpbranching-bisim" )
 	  add_ltscompare_release_test( "${i}" "-c;-esim" )
@@ -789,7 +804,7 @@ macro( gen_ltscompare_release_tests )
 	  add_ltscompare_release_test( "${i}" "-c;-eweak-trace" )
 	  add_ltscompare_release_test( "${i}" "-psim" )
 	  add_ltscompare_release_test( "${i}" "-pweak-trace" )
-	  add_ltscompare_release_test( "${i}" "-ebisim;--tau=tau" )
+	  add_ltscompare_release_test( "${i}" "-ebisim;--tau=${act}" )
 
   ENDFOREACH( )
 endmacro( gen_ltscompare_release_tests )

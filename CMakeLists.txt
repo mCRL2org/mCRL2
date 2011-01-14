@@ -974,7 +974,7 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
 ##---------------------------------------
 
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateReleaseToolTests.cmake)
-#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" )
+run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" )
 
 	
 if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
