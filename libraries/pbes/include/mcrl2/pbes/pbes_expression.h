@@ -850,10 +850,10 @@ namespace pbes_expr_optimized {
     else if(is_propositional_variable_instantiation(t)) {
       return propositional_variable_instantiation(t).parameters().empty();
     }
-    else if(is_pbes_true(t)) {
+    else if(is_true(t)) {
       return true;
     }
-    else if(is_pbes_false(t)) {
+    else if(is_false(t)) {
       return true;
     }
 

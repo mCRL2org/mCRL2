@@ -48,7 +48,7 @@ namespace core {
       void add_to_context(const std::string& id)
       {
         std::string::size_type i = id.find_last_not_of("0123456789");
-        if (i == std::string::npos)
+        if (i == std::string::npos || id.size() == i + 1) // string does not end with a number
         {
           m_index[id] = -1;
         }

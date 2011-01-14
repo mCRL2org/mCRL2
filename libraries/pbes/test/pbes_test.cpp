@@ -363,6 +363,20 @@ void test_io()
 }
 #endif // MCRL2_ENABLE_IO_TEST
 
+void test_is_bes()
+{
+  // found with random testing 14-1-2011
+  using namespace pbes_system;
+  std::string text =
+    "pbes nu X =       \n"
+    "       val(true); \n"
+    "                  \n"
+    "init X;           \n"
+    ;
+  pbes<> p = txt2pbes(text);
+  BOOST_CHECK(p.is_bes()); 
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -375,6 +389,7 @@ int test_main(int argc, char** argv)
   test_pbes_expression();
   test_instantiate_global_variables();
   test_find_sort_expressions();
+  test_is_bes();
 
 #ifdef MCRL2_ENABLE_IO_TEST
   test_io();

@@ -44,6 +44,7 @@ def last_word(line):
     words = line.strip().split()
     return words[len(words) - 1]
 
+# returns True, False or None if a timeout occurs
 def run_pbes2bool(filename, timeout = 3):
     dummy, text = timeout_command('pbes2bool %s' % filename, timeout)
     if text == None:
@@ -66,6 +67,36 @@ def run_pbesparelm(pbesfile1, pbesfile2, timeout = 10):
 def run_pbespareqelm(pbesfile1, pbesfile2, timeout = 10):
     timeout_command('pbespareqelm %s %s' % (pbesfile1, pbesfile2), timeout)
 
+# returns the output of pbespp
 def run_pbespp(pbesfile, timeout = 10):
     text, dummy = timeout_command('pbespp %s' % pbesfile, timeout)
     return text
+
+# returns True if the operation succeeded within the given amount of time
+def run_pbes2bes(pbesfile, besfile, strategy = 'lazy', output = 'bes', selection = '', timeout = 10):
+    options = '-s%s -o%s' % (strategy, output)
+    if selection != '':
+        options = options + ' -f%s' % selection
+    dummy, text = timeout_command('pbes2bes %s %s %s' % (options, pbesfile, besfile), timeout)
+    if text == None:
+        print 'WARNING: timeout on %s' % pbesfile     
+        return False
+    if text.startswith('error'):
+        print 'WARNING: pbes2bes failed on %s' % pbesfile     
+        return False
+    return True
+
+# returns True, False or None if a timeout occurs
+def run_bessolve(filename, strategy = 'spm', timeout = 10):
+    command = 'bessolve -s%s %s' % (strategy, filename)
+    text, dummy = timeout_command(command, timeout)
+    if text == None:
+        print 'WARNING: timeout on "%s"' % command
+        return None
+    result = last_word(text)
+    if result == 'true':
+        return True
+    elif result == 'false':
+        return False
+    print 'WARNING: unknown failure on "%s"' % command
+    return None

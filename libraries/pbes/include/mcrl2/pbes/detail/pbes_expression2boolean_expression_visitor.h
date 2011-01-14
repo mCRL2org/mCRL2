@@ -46,10 +46,21 @@ namespace detail {
     /// \brief Visit data_expression node
     /// \param e A term
     /// \return The result of visiting the node
-    bool visit_data_expression(const term_type& /* e */, const data_term_type& /* d */)
+    bool visit_data_expression(const term_type& e, const data_term_type& /* d */)
     {
-      throw mcrl2::runtime_error("data_expression encountered in pbes_expression2boolean_expression_visitor");
-      return super::continue_recursion;
+      if (tr::is_true(e))
+      {
+        expression_stack.push_back(br::true_());
+      }
+      else if (tr::is_false(e))
+      {
+        expression_stack.push_back(br::false_());
+      }
+      else
+      {     
+        throw mcrl2::runtime_error("data_expression encountered in pbes_expression2boolean_expression_visitor");
+      }
+      return super::continue_recursion;       
     }
 
     /// \brief Visit true node
