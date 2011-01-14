@@ -24,11 +24,10 @@ def test_pbes2bes(p, filename):
 equation_count = 2
 atom_count = 2
 propvar_count = 2
-use_quantifiers = False
+use_quantifiers = True
 
 for i in range(10000):
     filename = 'pbes2bes'
-    filename = 'b%02d' % i
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     if not test_pbes2bes(p, filename):
         m = CounterExampleMinimizer(p, lambda x: test_pbes2bes(x, filename + '_minimize'), 'pbes2bes')
