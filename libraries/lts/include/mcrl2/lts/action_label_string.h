@@ -21,7 +21,9 @@
 
 #include <string>
 #include <vector>
+#include <iterator>
 #include "mcrl2/exception.h"
+#include "mcrl2/core/text_utility.h"
 
 namespace mcrl2
 {
@@ -50,9 +52,21 @@ namespace detail
 
       /* \brief An auxiliary function to hide actions. As strings have no structure, hiding of
        *        actions is not possible, and this method will just throw an exception error. */
-      void hide_actions(const std::vector<std::string> &)
+      void hide_actions(const std::vector<std::string> &string_vector )
       {
-        throw mcrl2::runtime_error("Cannot hide action labels, as actions are strings without structure");
+				// Rename action label to tau
+        for( std::vector<std::string>::const_iterator i = string_vector.begin(); i != string_vector.end(); ++i )
+				{
+						// Actions that have parameters have priority over actions without while renaming.
+						std::string ns(   core::regex_replace( *i + "\\([^\\)]*\\)" , "tau" , *this ) );
+						ns = core::regex_replace( *i , "tau" , ns ) ;
+						assign( ns );
+				}
+				// Remove all "tau|", since this indicates that we are dealing with a multi-action
+				std::string ns( core::regex_replace( "tau\\|" , "" , *this ) );
+				// Remove "|tau" from end of multi-action one still exists
+				ns =  core::regex_replace( "\\|tau$" , "" , ns ) ;
+				assign(ns);
       }
       
       /* \brief A comparison operator comparing the action_label_strings in the same way as strings.
