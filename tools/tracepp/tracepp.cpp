@@ -102,19 +102,15 @@ static void trace2statevector(ostream &os, Trace&trace)
     {
       os << ATgetName(ATgetAFun(act));
     }
-    os << "-> ";
+    os << "-> " << std::endl;
     ATermAppl CurrentState = trace.currentState();
     if ( CurrentState != NULL )
     {
       print_state(os, trace.currentState());
     }
-    os << std::endl;
     act = trace.nextAction();
-    if (act != NULL && CurrentState != NULL)
-    {
-      print_state(os, trace.currentState());
-    }
   }
+  os << std::endl;
 }
 
 static void trace2aut(ostream &os, Trace &trace)
