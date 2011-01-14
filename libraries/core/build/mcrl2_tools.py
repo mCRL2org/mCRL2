@@ -56,7 +56,7 @@ def run_txt2pbes(txtfile, pbesfile):
     run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
 
 def run_pbesabstract(pbesfile1, pbesfile2, abstraction_value, selection = '*(*:*)'):
-    run_program('pbesabstract', '--select=%s --abstraction-value=%s %s %s' % (selection, abstraction_value, pbesfile1, pbesfile2))
+    run_program('pbesabstract', '--select=%s --abstraction-value=%d %s %s' % (selection, abstraction_value, pbesfile1, pbesfile2))
 
 def run_pbesconstelm(pbesfile1, pbesfile2, rewriter = 'quantifier-all', timeout = 10):
     timeout_command('pbesconstelm -p%s %s %s' % (rewriter, pbesfile1, pbesfile2), timeout)
