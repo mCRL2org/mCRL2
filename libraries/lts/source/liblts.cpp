@@ -116,17 +116,17 @@ lts_type guess_format(string const& s)
   return lts_none;
 }
 
-static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "bcg", "dot", "svc" };
+static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot", "svc", "bcg" };
 
-static std::string extension_strings[] = { "", "lts", "aut", "fsm", "bcg", "dot", "svc" };
+static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot", "svc", "bcg" };
 
 static std::string type_desc_strings[] = { "unknown LTS format",
                                            "mCRL2 LTS format",
                                            "Aldebaran format (CADP)",
                                            "Finite State Machine format",
-                                           "Binary Coded Graph format (CADP)" 
                                            "GraphViz format",
                                            "SVC format",
+                                           "Binary Coded Graph format (CADP)"
                                          };
 
 

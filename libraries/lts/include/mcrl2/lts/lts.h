@@ -50,16 +50,18 @@ namespace mcrl2
       lts_lts,  /**< mCRL2 SVC format */
       lts_aut,  /**< Ald&eacute;baran format (CADP) */
       lts_fsm,  /**< FSM format */
+      lts_dot, /**< GraphViz format */
+      lts_svc,  /**< SVC format 
+                  * \note The svc format is outdated. */  
 #ifdef USE_BCG
       lts_bcg,  /**< BCG format
                   * \note Only available if the LTS library is built with BCG
                   * support.*/
+      lts_type_max = lts_bcg,
+#else
+      lts_type_max = lts_svc,
 #endif
-      lts_dot, /**< GraphViz format */
-      lts_svc,  /**< SVC format 
-                  * \note The svc format is outdated. */  
-      lts_type_min = lts_none,
-      lts_type_max = lts_svc
+      lts_type_min = lts_none
     };
 
 
