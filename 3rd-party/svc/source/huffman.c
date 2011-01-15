@@ -66,6 +66,7 @@ int HFinit(HFtree *tree, HTable *terms)
    tree->codes->parent=NULL;
    tree->codes->frequency=0L;
    tree->codes->term=NULL;
+   ATprotect(&tree->codes->term);
 
    /* Create the leaf for the escape code */
 
@@ -75,7 +76,7 @@ int HFinit(HFtree *tree, HTable *terms)
    tree->codes->low->parent=tree->codes;
    tree->codes->low->frequency=0L; 
    tree->codes->low->term=ESCAPE_SEQUENCE;
-
+   ATprotect(&tree->codes->low->term);
    /* Store the escape sequence term */
 
    tree->top=tree->codes->low;
@@ -109,6 +110,7 @@ void HFfreeLoop(struct HFnode *node){
    if(node!=NULL){
       HFfreeLoop(node->low);
       HFfreeLoop(node->high);
+      ATunprotect(&node->term);
       free(node);
    }
 }
@@ -279,10 +281,10 @@ static void HFupdate(HFtree *tree, struct HFnode *current ){
 
 
 
-int HFdecodeATerm(BitStream *fp, HFtree *tree, ATerm *term){
+int HFdecodeATerm(BitStream *fp, HFtree *tree, ATerm *term)
+{
    Bit bit;
    struct HFnode *current;
-
 
    current=tree->codes;
    while(current!=NULL){
@@ -491,6 +493,7 @@ static struct HFnode *HFadd(HFtree *tree, ATerm term){
       newNode->parent=tmp->parent;
       newNode->frequency=0L;
       newNode->term=term;
+      ATprotect(&newNode->term);
       tmp->parent->high=newNode;
 
       BLinsert(&tree->blockList, newNode);
@@ -511,6 +514,7 @@ static struct HFnode *HFadd(HFtree *tree, ATerm term){
       newNode->parent=tmp->parent;
       newNode->frequency=tmp->frequency;
       newNode->term=NULL;
+      ATprotect(&newNode->term);
       if (tmp->parent->low==tmp){
          tmp->parent->low=newNode;
       } else {
@@ -530,6 +534,7 @@ static struct HFnode *HFadd(HFtree *tree, ATerm term){
       newNode->high->parent=newNode;
       newNode->high->frequency=0L;
       newNode->high->term=term;
+      ATprotect(&newNode->high->term);
 
       BLinsert(&tree->blockList, newNode);
       BLinsert(&tree->blockList, newNode->high);
