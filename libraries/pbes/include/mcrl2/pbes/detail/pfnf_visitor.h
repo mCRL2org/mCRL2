@@ -173,12 +173,9 @@ namespace detail {
       if (!name_clashes.empty())
       {
         core::number_postfix_generator generator;
-        for (std::vector<data::variable_list>::const_iterator i = quantifier_stack.begin(); i != quantifier_stack.end(); ++i)
+        for (std::set<data::variable>::const_iterator i = left_variables.begin(); i != left_variables.end(); ++i)
         {
-          for (data::variable_list::const_iterator j = i->begin(); j != i->end(); ++j)
-          {
-            generator.add_to_context(std::string(j->name()));
-          }
+          generator.add_to_context(std::string(i->name()));
         }
         variable_variable_substitution sigma;
         for (std::set<data::variable>::iterator i = name_clashes.begin(); i != name_clashes.end(); ++i)

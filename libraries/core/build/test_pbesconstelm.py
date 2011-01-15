@@ -20,9 +20,9 @@ def test_pbesconstelm(p, filename):
       return True
     return answer1 == answer2
 
-equation_count = 2
-atom_count = 2
-propvar_count = 2
+equation_count = 3
+atom_count = 4
+propvar_count = 3
 use_quantifiers = True
 
 for i in range(10000):

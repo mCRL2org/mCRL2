@@ -8,15 +8,6 @@ from path import *
 from mcrl2_classes import *
 from mcrl2_utility import *
 
-BUILDER_FUNCTION = r'''EXPRESSION operator()(const QUALIFIED_NODE& x)
-{
-  static_cast<Derived&>(*this).enter(x);
-  VISIT_FUNCTIONS
-  static_cast<Derived&>(*this).leave(x);
-  return result;
-}
-'''
-
 def compare_classes(x, y):
     if 'X' in x.modifiers() and 'X' in y.modifiers():
         return cmp(x.index, y.index)
@@ -41,31 +32,6 @@ def make_traverser(filename, classnames, all_classes):
 
     insert_text_in_file(filename, text, 'generated code')
 
-def create_builder_file(filename, namespace):
-    text = '''// Author(s): Wieger Wesselink
-// Copyright: see the accompanying file COPYING or copy at
-// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
-//
-// Distributed under the Boost Software License, Version 1.0.
-// (See accompanying file LICENSE_1_0.txt or copy at
-// http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \\file FILENAME
-/// \\brief The content of this file is included in other header
-/// files, to prevent duplication.
-
-//--- start generated code ---//
-//--- end generated code ---//
-'''
-
-    #if path(filename).exists():
-    #    path(filename).remove()
-    if not path(filename).exists():
-        name = re.sub(r'\.\./\.\.', 'mcrl2', filename)
-        text = re.sub('FILENAME', name, text)
-        path(filename).write_text(text)
-    #os.system('svn add %s' % filename)
-
 def make_builder(filename, builder_name, class_map, all_classes, namespace, expression, dependencies, modifiability_map):
     BUILDER = '''  template <template <class> class Builder, class Derived>
   struct <BUILDER_NAME>: public Builder<Derived>
@@ -79,7 +45,6 @@ def make_builder(filename, builder_name, class_map, all_classes, namespace, expr
   };
 '''
     classnames = parse_classnames(class_map[namespace], namespace)
-    create_builder_file(filename, namespace)
 
     result = []
     classes = [all_classes[name] for name in classnames]   

@@ -7,14 +7,20 @@ import random
 from path import *
 from mcrl2_tools import *
 
+PREDICATE_INTEGERS = ['m', 'n']
+PREDICATE_BOOLEANS = ['b', 'c']
+QUANTIFIER_INTEGERS = ['t', 'u', 'v', 'w']
+INTEGERS = PREDICATE_INTEGERS + QUANTIFIER_INTEGERS
+BOOLEANS = PREDICATE_BOOLEANS
+
 # As a convention we use that k, m, n are always natural numbers and
 # b, c, d are always booleans.
 
 # Adds a type ':Bool' or ':Nat' to the name of a variable
 def add_type(var):
-    if var in ['b', 'c', 'd']:
+    if var in BOOLEANS:
         return '%s:Bool' % var
-    elif var in ['u', 'v', 'm', 'n']:
+    elif var in INTEGERS:
         return '%s:Nat' % var
     return None
 
@@ -38,7 +44,6 @@ class bool:
         print '<M>', result, self, self.__class__
         return result
 
-    # loops over minimizes
     def minimize(self, call_back, level):
         if level == 0 and not is_boolean_constant(self):
             value = self.value
@@ -70,7 +75,6 @@ class nat:
         print '<M>', result, self, self.__class__
         return result
 
-    # loops over minimizes
     def minimize(self, call_back, level):
         if level == 0 and not is_natural_constant(self):
             value = self.value
@@ -215,6 +219,9 @@ class unary_operator:
                 self.x = bool('true')
                 print '<CHANGE>', x, '->', self.x
                 call_back()
+                self.x = bool('false')
+                print '<CHANGE>', x, '->', self.x
+                call_back()
                 self.x = x
         else:
             self.x.minimize(call_back, level - 1)
@@ -252,10 +259,16 @@ class binary_operator:
                 self.x = bool('true')
                 print '<CHANGE>', x, '->', self.x
                 call_back()
+                self.x = bool('false')
+                print '<CHANGE>', x, '->', self.x
+                call_back()
                 self.x = x
             if not is_boolean_constant(self.y):
                 y = self.y
                 self.y = bool('true')
+                print '<CHANGE>', y, '->', self.y
+                call_back()
+                self.y = bool('false')
                 print '<CHANGE>', y, '->', self.y
                 call_back()
                 self.y = y
@@ -276,10 +289,19 @@ class quantifier:
         return '%s %s.(%s)' % (quantor, add_type(x), y)
 
     def finish(self, freevars, negated):
-        if self.x in freevars:
-            self.y.finish(freevars, negated)
+        qvar = []
+        for q in QUANTIFIER_INTEGERS:
+            if not q in freevars:
+                qvar.append(q)
+        if len(qvar) == 0:
+            raise Exception('error: quantifier nesting depth exceeded')
+        var, dummy = pick_element(qvar)
+        self.x = var
+        if self.quantor == 'exists':
+            self.y = or_(bool('val(%s < 3)' % var), self.y)
         else:
-            self.y.finish(freevars + [self.x], negated)
+            self.y = and_(bool('val(%s < 3)' % var), self.y)
+        self.y.finish(freevars + [self.x], negated)
 
     # returns True if the formula is minimal
     def is_minimal(self):
@@ -293,6 +315,9 @@ class quantifier:
             if not is_boolean_constant(self.y):
                 y = self.y
                 self.y = bool('true')
+                print '<CHANGE>', y, '->', self.y
+                call_back()
+                self.y = bool('false')
                 print '<CHANGE>', y, '->', self.y
                 call_back()
                 self.y = y
@@ -312,13 +337,13 @@ def implies(x, y):
     return binary_operator('=>', x, y)
 
 def forall(x):
-    var, dummy = pick_element(['u', 'v'])
-    phi = and_(bool('val(%s < 3)' % var), x)
+    var = nat()
+    phi = x
     return quantifier('forall', var, phi)
 
 def exists(x):
-    var, dummy = pick_element(['u', 'v'])
-    phi = or_(bool('val(%s < 3)' % var), x)
+    var = nat()
+    phi = x
     return quantifier('exists', var, phi)
 
 def equal_to(x, y):
@@ -359,7 +384,7 @@ def pick_elements(s, n):
 def make_predvar(n, size = random.randint(0, 2)):
     name = 'X%d' % n
     arguments = []
-    variables = ['b', 'c', 'm', 'n']
+    variables = PREDICATE_INTEGERS + PREDICATE_BOOLEANS
     for i in range(size):
         v, variables = pick_element(variables)
         arguments.append(v)
@@ -375,8 +400,8 @@ def make_predvars(n):
 # Creates elementary random boolean terms, with free variables
 # from the set freevars.
 def make_atoms(freevars, add_val = True):
-    naturals = set(freevars).intersection(set(['u', 'v', 'm', 'n']))
-    booleans = set(freevars).intersection(set(['b', 'c', 'd']))
+    naturals = set(freevars).intersection(set(INTEGERS))
+    booleans = set(freevars).intersection(set(BOOLEANS))
     result = []
     for m in naturals:
         result.append('%s > 0' % m)
@@ -399,7 +424,7 @@ def make_boolean(freevars, add_val = True):
     return x
 
 def make_natural(freevars, add_val = True):
-    naturals = set(freevars).intersection(set(['u', 'v', 'm', 'n']))
+    naturals = set(freevars).intersection(set(INTEGERS))
     result = []
     result.append('0')   
     result.append('1')
@@ -414,9 +439,9 @@ def make_predvar_instantiations(predvars):
     for X in predvars:
         args = []
         for a in X.args:
-            if a in ['b', 'c', 'd']:
+            if a in BOOLEANS:
                 args.append(bool())
-            elif a in ['u', 'v', 'm', 'n']:
+            elif a in INTEGERS:
                 args.append(nat())
         result.append(propvar(X.name, args))
     return result
@@ -445,28 +470,32 @@ def join_terms(terms):
 def make_pbes(equation_count, atom_count = 5, propvar_count = 3, use_quantifiers = True):
     global operators
     if use_quantifiers:
-      operators = [not_, and_, or_, implies, forall, exists]
+      operators = [not_, and_, or_, implies, not_, and_, or_, implies, forall, exists]
     else:
       operators = [not_, and_, or_, implies]
-    predvars = make_predvars(equation_count)
-    equations = []
-    for i in range(equation_count):
-        terms = make_terms(predvars, atom_count, propvar_count)
-        while len(terms) > 1:
-            terms = join_terms(terms)
-        sigma, dummy = pick_element(['mu', 'nu'])
-        equations.append(equation(sigma, predvars[i], terms[0]))
-    X = predvars[0]
-    args = []
-    for a in X.args:
-        if a in ['b', 'c', 'd']:
-            args.append('true')
-        elif a in ['u', 'v', 'm', 'n']:
-            args.append('0')
-    init = propvar(X.name, args)
-    p = pbes(equations, init)
-    p.finish()
-    return p
+    while True:
+        try:
+            predvars = make_predvars(equation_count)
+            equations = []
+            for i in range(equation_count):
+                terms = make_terms(predvars, atom_count, propvar_count)
+                while len(terms) > 1:
+                    terms = join_terms(terms)
+                sigma, dummy = pick_element(['mu', 'nu'])
+                equations.append(equation(sigma, predvars[i], terms[0]))
+            X = predvars[0]
+            args = []
+            for a in X.args:
+                if a in BOOLEANS:
+                    args.append('true')
+                elif a in INTEGERS:
+                    args.append('0')
+            init = propvar(X.name, args)
+            p = pbes(equations, init)
+            p.finish()
+            return p
+        except Exception as inst:
+            print inst
 
 class CounterExampleMinimizer:
     def __init__(self, pbes, solver, name):

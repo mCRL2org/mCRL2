@@ -17,6 +17,7 @@
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
+#include "../../../tools/pbespgsolve/pbespgsolve.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -126,16 +127,27 @@ void test_pfnf_rewriter()
   core::garbage_collect();
 }
 
+bool pbespgsolve(const pbes<>& p)
+{
+  pbes<> q = p;
+  utilities::execution_timer timer("pbes_solve_test");
+  pbespgsolve_options options;
+  pbespgsolve_algorithm algorithm(timer, options);
+  return algorithm.run(q);
+}
+
 void test_pfnf_rewriter2(const std::string& text)
 {
   pbes<> p = txt2pbes(text); 
-  bool result1 = pbes2_bool_test(p);
+  // N.B. Using pbes2_bool_test instead of pbespgsolve fails!
+  bool result1 = pbespgsolve(p);
   pfnf_rewriter R;
   pbesrewr(p, R);
   BOOST_CHECK(p.is_well_typed());
   std::cout << "\ntest_pfnf_rewriter2\n" << pp(p) << std::endl;
-  bool result2 = pbes2_bool_test(p);
+  bool result2 = pbespgsolve(p);
   BOOST_CHECK(result1 == result2);
+  core::garbage_collect();
 }
 
 void test_pfnf_rewriter2()
@@ -158,6 +170,19 @@ void test_pfnf_rewriter2()
     ;
   test_pfnf_rewriter2(text);
   core::garbage_collect();
+
+  // problematic case found by random tests 15-1-2011
+  text =
+    "pbes nu X0(m: Nat) =                                                                                                                                                                  \n"
+    "       ((false && (forall u: Nat. false)) && false && (forall v: Nat. val(!(v < 3)) && (forall u: Nat. val(!(u < 3)) && val(!(v == u))))) || (exists u: Nat. val(!(u < 3)) || false); \n"
+    "     mu X1 =                                                                                                                                                                          \n"
+    "       true;                                                                                                                                                                          \n"
+    "     mu X2 =                                                                                                                                                                          \n"
+    "       true && false;                                                                                                                                                                 \n"
+    "                                                                                                                                                                                      \n"
+    "init X0(0);                                                                                                                                                                           \n"
+    ;
+  test_pfnf_rewriter2(text);
 }
 
 int test_main(int argc, char** argv)
@@ -166,7 +191,7 @@ int test_main(int argc, char** argv)
 
   test_pfnf_visitor();
   test_pfnf_rewriter();
-  //test_pfnf_rewriter2(); This test fails due to a problem in pbes2bool
+  test_pfnf_rewriter2();
 
   return 0;
 }
