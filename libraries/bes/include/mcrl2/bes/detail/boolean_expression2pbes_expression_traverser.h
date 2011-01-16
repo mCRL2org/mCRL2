@@ -12,6 +12,7 @@
 #ifndef MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
 #define MCRL2_BES_DETAIL_BOOLEAN_EXPRESSION2PBES_EXPRESSION_TRAVERSER_H
 
+#include <cassert>
 #include <vector>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/bes/traverser.h"
@@ -35,52 +36,61 @@ namespace detail {
     /// \brief A stack containing PBES expressions.
     atermpp::vector<pbes_system::pbes_expression> expression_stack;
 
+    void push(const pbes_system::pbes_expression& x)
+    {
+      expression_stack.push_back(x);
+    }
+
+    pbes_system::pbes_expression pop()
+    {
+      assert(!expression_stack.empty());
+      pbes_system::pbes_expression result = expression_stack.back();
+      expression_stack.pop_back();
+      return result;
+    }
+
     /// \brief Returns the top element of the expression stack, which is the result of the conversion.
     pbes_system::pbes_expression result() const
     {
+      assert(!expression_stack.empty());
       return expression_stack.back();
     }
 
     /// \brief Enter true node
     void enter(const true_& /* x */)
     {
-      expression_stack.push_back(tr::true_());
+      push(tr::true_());
     }
 
     /// \brief Enter false node
-    void enter_false(const false_& /* x */)
+    void enter(const false_& /* x */)
     {
-      expression_stack.push_back(tr::false_());
+      push(tr::false_());
     }
 
     /// \brief Leave not node
     void leave(const not_& /* x */)
     {
-      pbes_system::pbes_expression b = expression_stack.back();
-      expression_stack.pop_back();
-      expression_stack.push_back(tr::not_(b));
+      pbes_system::pbes_expression b = pop();
+      push(tr::not_(b));
     }
 
     /// \brief Leave and node
     void leave(const and_& /* x */)
     {
       // join the two expressions on top of the stack
-      pbes_system::pbes_expression right = expression_stack.back();
-      expression_stack.pop_back();
-      pbes_system::pbes_expression left  = expression_stack.back();
-      expression_stack.pop_back();
-      expression_stack.push_back(tr::and_(left, right));
+      pbes_system::pbes_expression right = pop();
+      pbes_system::pbes_expression left  = pop();
+      push(tr::and_(left, right));
     }
 
     /// \brief Leave or node
     void leave(const or_& /* x */)
     {
       // join the two expressions on top of the stack
-      pbes_system::pbes_expression right = expression_stack.back();
-      expression_stack.pop_back();
-      pbes_system::pbes_expression left  = expression_stack.back();
-      expression_stack.pop_back();
-      expression_stack.push_back(tr::or_(left, right));
+      pbes_system::pbes_expression right = pop();
+      pbes_system::pbes_expression left  = pop();
+      push(tr::or_(left, right));
     }
 
     /// \brief Enter imp node
@@ -88,11 +98,9 @@ namespace detail {
     void leave(const imp& /* x */)
     {
       // join the two expressions on top of the stack
-      pbes_system::pbes_expression right = expression_stack.back();
-      expression_stack.pop_back();
-      pbes_system::pbes_expression left  = expression_stack.back();
-      expression_stack.pop_back();
-      expression_stack.push_back(tr::imp(left, right));
+      pbes_system::pbes_expression right = pop();
+      pbes_system::pbes_expression left  = pop();
+      push(tr::imp(left, right));
     }
 
     /// \brief Enter propositional_variable node
@@ -100,7 +108,7 @@ namespace detail {
     /// \param X A propositional variable
     void enter(const boolean_variable& x)
     {
-      expression_stack.push_back(pbes_system::propositional_variable_instantiation(x.name(), data::data_expression_list()));
+      push(pbes_system::propositional_variable_instantiation(x.name(), data::data_expression_list()));
     }
   };
 
