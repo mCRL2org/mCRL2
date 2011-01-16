@@ -76,7 +76,7 @@ namespace lts
       { 
         using namespace std;
         std::cerr << "Hiding actions in a .svc file is not possible, because the labels do not necessarily have an action structure \n";
-        return true;
+        return false;
       }
   };
 

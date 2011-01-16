@@ -52,21 +52,22 @@ namespace detail
 
       /* \brief An auxiliary function to hide actions. As strings have no structure, hiding of
        *        actions is not possible, and this method will just throw an exception error. */
-      void hide_actions(const std::vector<std::string> &string_vector )
+      bool hide_actions(const std::vector<std::string> &string_vector )
       {
-				// Rename action label to tau
+        // Rename action label to tau
         for( std::vector<std::string>::const_iterator i = string_vector.begin(); i != string_vector.end(); ++i )
-				{
-						// Actions that have parameters have priority over actions without while renaming.
-						std::string ns(   core::regex_replace( *i + "\\([^\\)]*\\)" , "tau" , *this ) );
-						ns = core::regex_replace( *i , "tau" , ns ) ;
-						assign( ns );
-				}
-				// Remove all "tau|", since this indicates that we are dealing with a multi-action
-				std::string ns( core::regex_replace( "tau\\|" , "" , *this ) );
-				// Remove "|tau" from end of multi-action one still exists
-				ns =  core::regex_replace( "\\|tau$" , "" , ns ) ;
-				assign(ns);
+        {
+          // Actions that have parameters have priority over actions without while renaming.
+          std::string ns(   core::regex_replace( *i + "\\([^\\)]*\\)" , "tau" , *this ) );
+          ns = core::regex_replace( *i , "tau" , ns ) ;
+          assign( ns );
+        }
+        // Remove all "tau|", since this indicates that we are dealing with a multi-action
+        std::string ns( core::regex_replace( "tau\\|" , "" , *this ) );
+        // Remove "|tau" from end of multi-action one still exists
+        ns =  core::regex_replace( "\\|tau$" , "" , ns ) ;
+        assign(ns);
+        return ns=="tau";
       }
       
       /* \brief A comparison operator comparing the action_label_strings in the same way as strings.

@@ -412,8 +412,8 @@ namespace mcrl2
           for(labels_size_type i=0; i< num_action_labels(); ++i)
           { 
             ACTION_LABEL_T a=action_label(i);
-            a.hide_actions(tau_actions);
-            set_action_label(i,a);
+            bool is_tau=a.hide_actions(tau_actions);
+            set_action_label(i,a,is_tau);
           }
         
           // Now the actions have been adapted to the hiding operator. Check now whether actions
