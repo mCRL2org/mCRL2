@@ -54,6 +54,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/map_substitution.h"
+#include "mcrl2/data/normalize_sorts.h"
 
 //mCRL2 processes
 #include "mcrl2/process/process_expression.h"
@@ -2948,7 +2949,7 @@ class specification_basic_type:public boost::noncopyable
            constructors.push_back(sc_emptystack);
            //add data declarations for structured sort
            spec.data.add_alias(alias(stack_sort_alias,structured_sort(constructors)));
-           stacksort=spec.data.normalise_sorts(stack_sort_alias);
+           stacksort=data::normalize_sorts(stack_sort_alias,spec.data);
            push=sc_push.constructor_function(stack_sort_alias);
            emptystack=sc_emptystack.constructor_function(stack_sort_alias);
            empty=sc_emptystack.recogniser_function(stack_sort_alias);
@@ -7200,7 +7201,7 @@ class specification_basic_type:public boost::noncopyable
       return t3;
     }
 
-    /* normalise the sorts in action_label_lists */
+    /* normalise the sorts in action_label_lists * /
     action_label_list normalise_sorts_action_labels(
                 const action_label_list &l,
                 const data_specification &data) const
@@ -7240,7 +7241,7 @@ class specification_basic_type:public boost::noncopyable
                              (i->is_delta()?i->assignments():data.normalise_sorts(i->assignments()))));
       }
       return reverse(result);
-    }
+    } */
 
 
 }; // End of the class specification basictype
@@ -7279,23 +7280,23 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   const summand_list result = spec.transform(init,parameters,initial_state);
 
   // compute global variables
-  data::variable_list globals1 = spec.data.normalise_sorts(spec.SieveProcDataVarsSummands(spec.global_variables,result,parameters));
-  data::variable_list globals2 = spec.data.normalise_sorts(spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters));
+  data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,result,parameters);
+  data::variable_list globals2 = spec.SieveProcDataVarsAssignments(spec.global_variables,initial_state,parameters);
   atermpp::set<data::variable> global_variables;
   global_variables.insert(globals1.begin(), globals1.end());
   global_variables.insert(globals2.begin(), globals2.end());
 
-  linear_process lps(spec.data.normalise_sorts(parameters),
+  linear_process lps(parameters,
                      deadlock_summand_vector(),
                      action_summand_vector());
-  lps.set_summands(spec.normalise_sorts(result,spec.data));
+  lps.set_summands(result);
 
   lps::specification spec1(
               spec.data,
-              spec.normalise_sorts_action_labels(spec.acts,spec.data),
+              spec.acts,
               global_variables,
               lps,
-              process_initializer(spec.data.normalise_sorts(initial_state)));
+              process_initializer(initial_state));
 
   // add missing sorts to the data specification
   lps::complete_data_specification(spec1);
