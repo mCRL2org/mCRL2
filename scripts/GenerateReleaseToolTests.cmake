@@ -32,8 +32,6 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
 	#message( STATUS  "+ Generating rename file: ${rname}_rename.txt" )
 
 	 file(STRINGS ${i} output NEWLINE_CONSUME )
-
-
 	 #message( ${output} )
 
    # remove comment from files
@@ -94,6 +92,8 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
 
     write_file(${testdir}/${rname}_rename.txt "act ${fst_act}${lpsactionrename_postfix};\nvar${lpsactionrename_vardecl}\nrename\n  ${fst_act}${lpsactionrename_varlist} => ${fst_act}${lpsactionrename_postfix};" )
 
+		#Copy files from examples directory to testdir (Required for "lts2lps" -m argument) 
+		configure_file(${i} ${testdir}/${rname}.mcrl2 COPYONLY)
 endforeach()
 
 
