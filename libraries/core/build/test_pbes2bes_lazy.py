@@ -27,9 +27,9 @@ propvar_count = 2
 use_quantifiers = True
 
 for i in range(10000):
-    filename = 'pbes2bes'
+    filename = 'pbes2bes_lazy'
     p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
     if not test_pbes2bes(p, filename):
-        m = CounterExampleMinimizer(p, lambda x: test_pbes2bes(x, filename + '_minimize'), 'pbes2bes')
+        m = CounterExampleMinimizer(p, lambda x: test_pbes2bes(x, filename + '_minimize'), 'pbes2bes_lazy')
         m.minimize()
         raise Exception('Test %s.txt failed' % filename)

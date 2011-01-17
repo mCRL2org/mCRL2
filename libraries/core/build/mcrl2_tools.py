@@ -73,8 +73,8 @@ def run_pbespp(pbesfile, timeout = 10):
     return text
 
 # returns True if the operation succeeded within the given amount of time
-def run_pbes2bes(pbesfile, besfile, strategy = 'lazy', output = 'bes', selection = '', timeout = 10):
-    options = '-s%s -o%s' % (strategy, output)
+def run_pbes2bes(pbesfile, besfile, strategy = 'lazy', selection = '', timeout = 10):
+    options = '-s%s' % (strategy)
     if selection != '':
         options = options + ' -f%s' % selection
     dummy, text = timeout_command('pbes2bes %s %s %s' % (options, pbesfile, besfile), timeout)
@@ -82,7 +82,7 @@ def run_pbes2bes(pbesfile, besfile, strategy = 'lazy', output = 'bes', selection
         print 'WARNING: timeout on %s' % pbesfile     
         return False
     if text.startswith('error'):
-        print 'WARNING: pbes2bes failed on %s' % pbesfile     
+        print 'WARNING: pbes2bes failed on %s (%s)' % (pbesfile, text)
         return False
     return True
 
