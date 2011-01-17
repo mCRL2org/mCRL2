@@ -13,8 +13,10 @@
 #define MCRL2_PBES_DETAIL_BOOLEAN_SIMPLIFY_BUILDER_H
 
 #include <set>
+#include <string>
 #include <utility>
 #include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 

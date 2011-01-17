@@ -9,10 +9,14 @@
 /// \file mcrl2/bes/traverser.h
 /// \brief add your file description here.
 
+// To avoid circular inclusion problems
+#ifndef MCRL2_BES_BOOLEAN_EQUATION_SYSTEM_H
+#include "mcrl2/bes/boolean_equation_system.h"
+#endif
+
 #ifndef MCRL2_BES_TRAVERSER_H
 #define MCRL2_BES_TRAVERSER_H
 
-#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/core/traverser.h"
 
 namespace mcrl2 {
