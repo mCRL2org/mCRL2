@@ -261,7 +261,7 @@ macro( gen_lps2lts_release_tests )
 		      file(STRINGS ${testdir}/${save}_hide_action.txt act)
 
 					set( fst_act "" )
-					string(REGEX MATCH "[^,]*" fst_act "${act}" )
+					string(REGEX MATCH "[^,]+" fst_act "${act}" )
 
 					add_lps2lts_release_test( "${i}" "" "${save}" )
 					add_lps2lts_release_test( "${i}" "-a${act}" "")
