@@ -166,7 +166,7 @@ class lts2lps_tool : public input_output_tool
       */
       data_specification data;
       action_label_list action_labels;
-      const variable_list process_parameters;  // Process parameters remain empty.
+      variable_list process_parameters;  
       bool extra_data_is_defined=false;
 
       /* Read data specification (if any) */ 
@@ -181,6 +181,7 @@ class lts2lps_tool : public input_output_tool
         spec.load(datafile.c_str());
         data=spec.data();
         action_labels=spec.action_labels();
+        process_parameters=spec.process().process_parameters();
         extra_data_is_defined=true;
       }
       else

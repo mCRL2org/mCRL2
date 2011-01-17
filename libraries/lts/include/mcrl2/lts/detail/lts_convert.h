@@ -744,21 +744,25 @@ namespace detail
 
       state_label_lts translate_state(const state_label_fsm &l) const
       {
+        // If process_parameters are not empty, we use them to check that the sorts of its variables  match.
         atermpp::vector < data::data_expression > state_label;
         size_t idx=0;
         const data::variable_list &parameters=m_lts_out.process_parameters();
         data::variable_list::const_iterator parameter_iterator=parameters.begin();
-        for(state_label_fsm::const_iterator i=l.begin(); i!=l.end(); ++i, ++parameter_iterator, ++idx)
+        for(state_label_fsm::const_iterator i=l.begin(); i!=l.end(); ++i, ++idx)
         { 
-          assert(parameter_iterator!=parameters.end());
+          assert(parameters.empty() || parameter_iterator!=parameters.end());
           const data::data_expression d=data::parse_data_expression(m_lts_in.state_element_value(idx,*i),m_lts_out.data());
-          if (d.sort()!=parameter_iterator->sort())
+          if (!parameters.empty()  && (d.sort()!=parameter_iterator->sort()))
           {
             throw mcrl2::runtime_error("Sort of parameter " + pp(*parameter_iterator) + ":" +
                                                 pp(parameter_iterator->sort()) + " does not match with that of actual value " +
                                                 pp(d) + "."); 
           }
           state_label.push_back(d);
+          if (!parameters.empty())
+          { ++parameter_iterator;
+          }
         }
         assert(parameter_iterator==parameters.end());
          
