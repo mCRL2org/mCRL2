@@ -1,46 +1,32 @@
-#~ Copyright 2010 Wieger Wesselink.
+#~ Copyright 2010, 2011 Wieger Wesselink.
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-import os
 from path import *
 from random_pbes_generator import *
+from mcrl2_tools import *
 
-def last_word(line):
-    words = line.strip().split()
-    return words[len(words) - 1]
-
-def test_pbes(filename, equation_count, atom_count = 5, propvar_count = 3):
+def test_pbes_solvers(p, filename):
     txtfile = filename + '.txt'
-    besfile = filename + '.bes'
-    pbesfile = filename + '.pbes'
-    answerfile = 'temp.answer'
-    p = make_pbes(equation_count, atom_count, propvar_count)
     path(txtfile).write_text('%s' % p)
-    os.system('txt2pbes %s %s' % (txtfile, pbesfile))
+    pbesfile = filename + '.pbes'
+    run_txt2pbes(txtfile, pbesfile)
+    answer1 = run_pbes2bool(pbesfile)
+    answer2 = run_pbespgsolve(pbesfile)
+    print filename, answer1, answer2   
+    if answer1 == None or answer2 == None:
+      return True
+    return answer1 == answer2
 
-    # pbes2bool
-    os.system('pbes2bool %s >& %s' % (pbesfile, answerfile))
-    answer1 = last_word(path(answerfile).text())
-
-    # pbespgsolve
-    os.system('pbespgsolve -l1000 -d %s >& %s' % (pbesfile, answerfile))
-    answer2 = last_word(path(answerfile).text())
-
-    # bessolve
-    os.system('pbes2bes -v -l1000 %s %s >& %s' % (pbesfile, besfile, answerfile))
-    if last_word(path(answerfile).text()) == "limit":
-        answer3 = 'unknown'
-    else:
-        os.system('bessolve %s >& %s' % (besfile, answerfile))
-        answer3 = last_word(path(answerfile).text())
-
-    print 'FILE', filename, answer1, answer2, answer3
-    if answer1 != answer2 or (answer3 != 'unknown' and answer1 != answer3):
-    #print 'FILE', filename, answer2, answer3
-    #if answer2 != answer3:
-        print 'ERROR!!!!!!!!!!!!!!!!!!!!!!!!!!'
-        path('error.txt').write_text('error in %s\n' % filename, append=True)
+equation_count = 5
+atom_count = 4
+propvar_count = 3
+use_quantifiers = True
 
 for i in range(10000):
-    test_pbes('%02d' % i, 5, 4, 3)
+    filename = 'pbes_solvers'
+    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
+    if not test_pbes_solvers(p, filename):
+        m = CounterExampleMinimizer(p, lambda x: test_pbes_solvers(x, filename + '_minimize'), 'pbes_solvers')
+        m.minimize()
+        raise Exception('Test %s.txt failed' % filename)

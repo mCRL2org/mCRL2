@@ -52,6 +52,14 @@ def run_pbes2bool(filename, timeout = 3):
         return None
     return last_word(text) == 'true'
 
+# returns True, False or None if a timeout occurs
+def run_pbespgsolve(filename, timeout = 3):
+    dummy, text = timeout_command('pbespgsolve %s' % filename, timeout)
+    if text == None:
+        print 'WARNING: timeout on %s' % filename
+        return None
+    return last_word(text) == 'true'
+
 def run_txt2pbes(txtfile, pbesfile):
     run_program('txt2pbes', '%s %s' % (txtfile, pbesfile))
 
