@@ -39,12 +39,11 @@ namespace detail
 {
 
 template <class LTS_TYPE>
-    void merge(LTS_TYPE &l1, const LTS_TYPE &l2)
+void merge(LTS_TYPE &l1, const LTS_TYPE &l2)
 { 
   const size_t old_nstates=l1.num_states();
   l1.set_num_states(l1.num_states() + l2.num_states());
   
-
   // The resulting LTS will have state information only if BOTH LTSs
   // currently have state information.
   if ( l1.has_state_info() && l2.has_state_info() )
@@ -60,111 +59,49 @@ template <class LTS_TYPE>
     l1.clear_state_labels();
   }
 
+  // Before we can set the label data in a new transitions
+  // array, we first have to collect the labels of both LTSs in a
+  // map, of which the second element indicates the new index of each action label.
+  
+  typedef typename LTS_TYPE::action_label_t type1;
+  typedef typename LTS_TYPE::labels_size_type type2;
+  atermpp::map < type1,type2 > labs;
 
-  typename LTS_TYPE::labels_size_type new_nlabels = 0;
-  // if (l1.has_label_info() && l2.has_label_info())
-  // {
-    // Before we can set the label data in the realloc'ed transitions
-    // array, we first have to collect the labels of both LTSs in a
-    // map, of which the second element indicates the index of each action label.
-    // ATermIndexedSet labs = ATindexedSetCreate(l1.num_action_labels() + l2.num_action_labels(),75);
-    typedef typename LTS_TYPE::action_label_t type1;
-    typedef typename LTS_TYPE::labels_size_type type2;
-    atermpp::map < type1,type2 > labs;
-    // ATbool b;
-
-    // Add the labels of this LTS and count the number of labels that
-    // the resulting LTS will contain
-    for (size_t i = 0; i < l1.num_action_labels(); ++i)
+  // Put the labels of the LTS l1 in a map.
+  for (size_t i = 0; i < l1.num_action_labels(); ++i)
+  {
+    labs.insert(std::pair <typename LTS_TYPE::action_label_t,typename LTS_TYPE::labels_size_type> 
+             (l1.action_label(i),i));
+  }
+  // Add the labels for the LTS l2, and put them there with a new index if it was
+  // not added yet.
+  
+  for (size_t i=0; i<l2.num_action_labels(); ++i)
+  {
+    if (labs.insert(std::pair <type1,type2> 
+             (l2.action_label(i),l1.num_action_labels())).second)
     {
-      if (labs.insert(std::pair <typename LTS_TYPE::action_label_t,typename LTS_TYPE::labels_size_type> 
-               (l1.action_label(i),new_nlabels)).second)
-      {
-        ++new_nlabels;
-      } 
+      l1.add_action(l2.action_label(i),l2.is_tau(i));
     }
-    // Same for LTS l2
-    for (size_t i=0; i<l2.num_action_labels(); ++i)
-    {
-      if (labs.insert(std::pair <type1,type2> 
-               (l2.action_label(i),new_nlabels)).second)
-      {
-        ++new_nlabels;
-      }
-    }
+  }
 
-    // Update the tau-information
-    std::vector<bool> new_taus(new_nlabels,false);
-    for (size_t i = 0; i < l1.num_action_labels(); ++i)
-    { 
-      assert(labs[l1.action_label(i)] < (size_t)new_taus.size());
-      new_taus[labs[l1.action_label(i)]] = l1.is_tau(i);
-    }
-    for (size_t i = 0; i < l2.num_action_labels(); ++i)
-    { 
-      assert(labs[l2.action_label(i)] < new_taus.size());
-      new_taus[labs[l2.action_label(i)]] = l2.is_tau(i);
-    }
+  // Update the label numbers of all transitions of the LTS l1 to reflect
+  // the new indices as given by labs.
+  for (transition_range r = l1.get_transitions(); !r.empty(); r.advance_begin(1))
+  {
+    r.front().set_label(labs[l1.action_label(r.front().label())]);
+  }
     
-    // Store the label values contained in the indexed set
-    l1.clear_actions(); 
-
-    for (typename atermpp::map < type1,type2 >::const_iterator i = labs.begin(); i != labs.end(); ++i)
-    {
-      l1.add_action(i->first,new_taus[i->second]);
-    }
-
-    // Update the label numbers of all transitions of this LTS to
-    // the new indices as given by the indexed set.
-    
-    for (transition_range r = l1.get_transitions(); !r.empty(); r.advance_begin(1))
-    { 
-      r.front().set_label(labs[l1.action_label(r.front().label())]);
-    }
-    // Now add the transition labels of LTS l2
-
-    // Now add the source and target states of the transitions of LTS l2.
-    // The labels will be added below, depending on whether there is label
-    // information in both LTSs.
-    for (transition_const_range r = l2.get_transitions(); !r.empty(); r.advance_begin(1))
-    { const transition transition_to_add=r.front();
-      l1.add_transition(transition(transition_to_add.from()+old_nstates,
+  // Now add the transition labels of LTS l2
+  // Now add the source and target states of the transitions of LTS l2.
+  // The labels will be added below, depending on whether there is label
+  // information in both LTSs.
+  for (transition_const_range r = l2.get_transitions(); !r.empty(); r.advance_begin(1))
+  { const transition transition_to_add=r.front();
+    l1.add_transition(transition(transition_to_add.from()+old_nstates,
                                 labs[l2.action_label(transition_to_add.label())],
                                 transition_to_add.to()+old_nstates));
-    }
-  //}
-  /* else
-  {
-    // One of the LTSs does not have label info, so the resulting LTS
-    // will not have label info either. Moreover, we consider the sets
-    // of labels of the LTSs to be disjoint
-    const size_t old_nlabels=l1.num_action_labels();
-
-    // Remove label info from this LTS, if any
-    if ( l1.has_label_info() )
-    {
-      l1.set_num_action_labels(old_nlabels,false);
-    }
-    // Now add the source and target states of the transitions of LTS l2.
-    // The labels will be added below, depending on whether there is label
-    // information in both LTSs.
-    
-    // Add taus from LTS l2
-    for (size_t i = 0; i < l2.num_action_labels(); ++i)
-    {
-      l1.add_label(l2.is_tau(i));
-    }
-
-    for (transition_const_range r = l2.get_transitions(); !r.empty(); r.advance_begin(1))
-    { const transition transition_to_add=r.front();
-      l1.add_transition(transition(transition_to_add.from()+old_nstates,
-                                   transition_to_add.label()+old_nlabels,
-                                   transition_to_add.to()+old_nstates));
-    }
-
-  } */
-
-  // Update the fields that have not been updated yet
+  }
 }
 } // namespace detail
 } // namespace lts
