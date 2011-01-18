@@ -95,7 +95,7 @@ namespace lps {
   {
     return data::replace_free_variables(container, substitution, bound);
   }
-#endif MCRL2_NEW_REPLACE_VARIABLES
+#endif // MCRL2_NEW_REPLACE_VARIABLES
 //--- end generated lps replace code ---//
 
 } // namespace lps

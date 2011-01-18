@@ -95,7 +95,7 @@ namespace action_formulas {
   {
     return data::replace_free_variables(container, substitution, bound);
   }
-#endif MCRL2_NEW_REPLACE_VARIABLES
+#endif // MCRL2_NEW_REPLACE_VARIABLES
 //--- end generated action_formulas replace code ---//
 
 } // namespace action_formulas
@@ -177,7 +177,7 @@ namespace regular_formulas {
   {
     return data::replace_free_variables(container, substitution, bound);
   }
-#endif MCRL2_NEW_REPLACE_VARIABLES
+#endif // MCRL2_NEW_REPLACE_VARIABLES
 //--- end generated regular_formulas replace code ---//
 
 } // namespace regular_formulas
@@ -259,7 +259,7 @@ namespace state_formulas {
   {
     return data::replace_free_variables(container, substitution, bound);
   }
-#endif MCRL2_NEW_REPLACE_VARIABLES
+#endif // MCRL2_NEW_REPLACE_VARIABLES
 //--- end generated state_formulas replace code ---//
 
 } // namespace state_formulas

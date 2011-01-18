@@ -112,7 +112,7 @@ namespace mcrl2 {
       /// \return the result of substitution
       template < typename Expression >
       static Expression generic_apply(Substitution const& s, Expression const& e) {
-        return replace_variables(e, s);
+        return data::replace_variables(e, s);
       }
     };
 
@@ -147,7 +147,7 @@ namespace mcrl2 {
       /// \return the result of substitution
       template < typename Expression >
       static Expression generic_apply(Substitution const& s, Expression const& e) {
-        return replace_free_variables(e, s);
+        return data::replace_free_variables(e, s);
       }
     };
 

@@ -23,7 +23,7 @@ namespace pbes_system {
   template <template <class> class Builder, class Derived>
   struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
   {
-    typedef data::add_data_variable_binding<Builder, Derived>
+    typedef data::add_data_variable_binding<Builder, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();

@@ -177,7 +177,7 @@ namespace detail {
   {
     return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
   }
-#endif MCRL2_NEW_REPLACE_VARIABLES
+#endif // MCRL2_NEW_REPLACE_VARIABLES
 //--- end generated data replace code ---//
 
 } // namespace data

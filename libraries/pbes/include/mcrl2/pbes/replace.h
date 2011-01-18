@@ -101,7 +101,7 @@ namespace pbes_system {
   {
     return data::replace_free_variables(container, substitution, bound);
   }
-#endif MCRL2_NEW_REPLACE_VARIABLES
+#endif // MCRL2_NEW_REPLACE_VARIABLES
 //--- end generated pbes_system replace code ---//
 
 /// \cond INTERNAL_DOCS
