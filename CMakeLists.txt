@@ -980,23 +980,23 @@ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" )
 if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 
 	set(SET_OF_MCRL2_FILES 
-		     ${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2
-		    ;${CMAKE_SOURCE_DIR}/examples/language/small2.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/upcast.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/list.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/funccomp.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/struct.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/forall.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/small3.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2
+  	     ${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2
+  	    ;${CMAKE_SOURCE_DIR}/examples/language/small2.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/upcast.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/list.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/funccomp.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/struct.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/forall.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/small3.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2
 			  ;${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/exists.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/exists.mcrl2
+  		  ;${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2
 				# ;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-r2.mcrl2
 				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage.mcrl2
 				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-r3.mcrl2
