@@ -258,7 +258,7 @@ namespace data {
           std::cerr << " ------------> " << result << std::endl;
           return result;
         # else
-          return reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma))));
+          return reconstruct(m_rewriter->rewrite(implement(data::replace_free_variables(d, sigma))));
         #endif
       }
   };

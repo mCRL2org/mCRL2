@@ -25,6 +25,7 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/replace.h"
 
 namespace mcrl2 {
 
@@ -244,7 +245,7 @@ namespace mcrl2 {
         void update_action_summand(action_summand& s)
         {
           s.condition() = m_if_trees(s.condition());
-          s.multi_action().actions() = data::replace_free_variables(s.multi_action().actions(), m_if_trees);
+          s.multi_action().actions() = lps::replace_free_variables(s.multi_action().actions(), m_if_trees);
           s.multi_action().time() = m_if_trees(s.multi_action().time());
           s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
         }

@@ -18,6 +18,7 @@
 #include "mcrl2/data/map_substitution.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
+#include "mcrl2/modal_formula/replace.h"
 
 namespace mcrl2 {
 
@@ -153,7 +154,7 @@ state_formula rename_variables(const state_formula& f, IdentifierGenerator& gene
     replacements[*i] = data::variable(generator(i->name()), i->sort());
   }
 
-  return data::replace_variables(f, replacements);
+  return state_formulas::replace_variables(f, replacements);
 }
 
 } // namespace state_formulas

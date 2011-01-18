@@ -18,10 +18,91 @@
 #include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/add_binding.h"
+#include "mcrl2/pbes/builder.h"    
+#include "mcrl2/pbes/replace.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
+
+//--- start generated pbes_system replace code ---//
+#ifdef MCRL2_NEW_REPLACE_VARIABLES
+  template <typename T, typename Substitution>
+  void replace_variables(T& x,
+                         Substitution sigma,
+                         typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                        )
+  {
+    core::make_update_apply_builder<pbes_system::data_expression_builder>(sigma)(x);
+  }
+
+  template <typename T, typename Substitution>
+  T replace_variables(const T& x,
+                      Substitution sigma,
+                      typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                     )
+  {   
+    return core::make_update_apply_builder<pbes_system::data_expression_builder>(sigma)(x);
+  }
+
+  template <typename T, typename Substitution>
+  void replace_free_variables(T& x,
+                              Substitution sigma,
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+  {
+    data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x);
+  }
+
+  template <typename T, typename Substitution>
+  T replace_free_variables(const T& x,
+                           Substitution sigma,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          )
+  {
+    return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x);
+  }
+
+  template <typename T, typename Substitution, typename VariableContainer>
+  void replace_free_variables(T& x,
+                              Substitution sigma,
+                              const VariableContainer& bound_variables,
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+  {
+    data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables);
+  }
+
+  template <typename T, typename Substitution, typename VariableContainer>
+  T replace_free_variables(const T& x,
+                           Substitution sigma,
+                           const VariableContainer& bound_variables,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          )
+  {
+    return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables);
+  }
+#else
+  template < typename Container, typename Substitution >
+  Container replace_variables(Container const& container, Substitution substitution)
+  {
+    return data::replace_variables(container, substitution);
+  }
+  
+  template <typename Container, typename Substitution >
+  Container replace_free_variables(Container const& container, Substitution substitution)
+  {
+    return data::replace_free_variables(container, substitution);
+  }
+
+  template <typename Container, typename Substitution , typename VariableSequence >
+  Container replace_free_variables(Container const& container, Substitution substitution, VariableSequence const& bound)
+  {
+    return data::replace_free_variables(container, substitution, bound);
+  }
+#endif MCRL2_NEW_REPLACE_VARIABLES
+//--- end generated pbes_system replace code ---//
 
 /// \cond INTERNAL_DOCS
 template <typename ReplaceFunction>
@@ -175,7 +256,7 @@ struct substitute_propositional_variable_helper
     }
     else
     {
-      return data::replace_variables(replacement_, data::make_double_sequence_substitution_adaptor(variable_.parameters(), t.parameters()));
+      return pbes_system::replace_variables(replacement_, data::make_double_sequence_substitution_adaptor(variable_.parameters(), t.parameters()));
     }
   }
 };
@@ -200,7 +281,7 @@ struct substitute_propositional_variable_helper
         pbes_system::pbes_expression result = x;
         if (m_X.name() == x.name())
         {
-          result = data::replace_variables(m_phi, data::make_double_sequence_substitution_adaptor(m_X.parameters(), x.parameters()));
+          result = pbes_system::replace_variables(m_phi, data::make_double_sequence_substitution_adaptor(m_X.parameters(), x.parameters()));
         }
         return result;
       }
@@ -225,7 +306,7 @@ struct prop_var_substitution: public std::unary_function<propositional_variable_
     {
       return x;
     }
-    return data::replace_variables(phi, data::make_double_sequence_substitution_adaptor(X.parameters(), x.parameters()));
+    return pbes_system::replace_variables(phi, data::make_double_sequence_substitution_adaptor(X.parameters(), x.parameters()));
   }
 };
 

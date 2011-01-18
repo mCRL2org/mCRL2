@@ -30,32 +30,32 @@ namespace lps {
     using super::increase_bind_count;
     using super::decrease_bind_count;
 
-    void enter()(const action_summand& x)
+    void enter(const action_summand& x)
     {
       increase_bind_count(x.summation_variables());
     }
 
-    void leave()(const action_summand& x)
+    void leave(const action_summand& x)
     {
       decrease_bind_count(x.summation_variables());
     }
 
-    void enter()(const deadlock_summand& x)
+    void enter(const deadlock_summand& x)
     {
       increase_bind_count(x.summation_variables());
     }
 
-    void leave()(const deadlock_summand& x)
+    void leave(const deadlock_summand& x)
     {
       decrease_bind_count(x.summation_variables());
     }
 
-    void enter()(const linear_process& x)
+    void enter(const linear_process& x)
     {
       increase_bind_count(x.process_parameters());
     }
 
-    void leave()(const linear_process& x)
+    void leave(const linear_process& x)
     {
       decrease_bind_count(x.process_parameters());
     }

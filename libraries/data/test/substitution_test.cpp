@@ -6,6 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
+#include <functional>
 #include <string>
 #include <utility>
 
@@ -24,6 +25,7 @@
 #include "mcrl2/data/map_substitution.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/data/replace.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -78,8 +80,11 @@ void test_basic()
 //  BOOST_CHECK(st(lambda(y,y)) != lambda(y,y));
 //  BOOST_CHECK(st(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
   st[y] = x;
+
+#ifndef MCRL2_NEW_REPLACE_VARIABLES
   BOOST_CHECK(st(lambda(y,y)) == lambda(x,x));
   BOOST_CHECK(st(lambda(y,y)(x) + y) == lambda(x,x)(x) + x);
+#endif
 
   // Replacing free variables only
   mutable_map_substitution< atermpp::map< variable, data_expression >, structural_substitution > sb;
@@ -88,6 +93,88 @@ void test_basic()
 
   BOOST_CHECK(sb(lambda(y,y)) == lambda(y,y));
   BOOST_CHECK(sb(lambda(y,y)(x) + y) == lambda(y,y)(x) + c);
+  core::garbage_collect();
+}
+
+struct my_assignment_list_substitution: public std::unary_function<variable, data_expression>
+{
+  typedef variable variable_type;
+  typedef data_expression expression_type;
+
+  assignment_list assignments;
+
+  my_assignment_list_substitution(assignment_list assignments_)
+    : assignments(assignments_)
+  {}
+  
+  data_expression operator()(const variable& v) const
+  {
+    for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
+    {
+      if (i->lhs() == v)
+      {
+        return i->rhs();
+      }
+    }
+    return v;
+  }
+};
+
+void test_my_assignment_list_substitution()
+{
+  variable x("x", sort_nat::nat());
+  variable y("y", sort_nat::nat());
+  variable z("z", sort_nat::nat());
+  variable u("u", sort_nat::nat());
+
+  assignment xy(x,y);
+  assignment uz(u,z);
+  assignment_list l(make_list(xy, uz));
+
+  my_assignment_list_substitution f(l);
+
+  BOOST_CHECK(f(x) == y);
+  BOOST_CHECK(f(y) == y);
+  BOOST_CHECK(f(z) == z);
+  BOOST_CHECK(f(u) == z);
+
+  assignment yz(y,z);
+  l = make_list(xy, uz, yz);
+  my_assignment_list_substitution g(l);
+
+  BOOST_CHECK(g(x) == y); // Assignments are not simultaneous, hence we expect y
+  BOOST_CHECK(g(y) == z);
+  BOOST_CHECK(g(z) == z);
+  BOOST_CHECK(g(u) == z);
+  core::garbage_collect();
+}
+
+void test_my_list_substitution()
+{
+  using namespace atermpp;
+
+  variable x("x", sort_nat::nat());
+  variable y("y", sort_nat::nat());
+  variable z("z", sort_nat::nat());
+  variable u("u", sort_nat::nat());
+
+  variable y1("y1", sort_nat::nat());
+
+  assignment xy(x,y);
+  assignment uz(u,z);
+  assignment_list l(make_list(xy, uz));
+  assignment_list r = make_list(assignment(x, y1));
+
+  BOOST_CHECK(replace_variables(x,  my_assignment_list_substitution(r)) == y1);
+  BOOST_CHECK(replace_variables(y,  my_assignment_list_substitution(r)) == y);
+  BOOST_CHECK(replace_variables(z,  my_assignment_list_substitution(r)) == z);
+  BOOST_CHECK(replace_variables(u,  my_assignment_list_substitution(r)) == u);
+std::cerr << replace_variables(xy,  my_assignment_list_substitution(r)) << std::endl;
+  BOOST_CHECK(replace_variables(xy, my_assignment_list_substitution(r)) == assignment(y1,y));
+  BOOST_CHECK(replace_variables(uz, my_assignment_list_substitution(r)) == uz);
+std::cerr << replace_variables(l,   my_assignment_list_substitution(r)) << std::endl;
+  BOOST_CHECK(replace_variables(l,  my_assignment_list_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
+  core::garbage_collect();
 }
 
 void test_assignment_list_substitution()
@@ -116,6 +203,7 @@ void test_assignment_list_substitution()
   BOOST_CHECK(g(y) == z);
   BOOST_CHECK(g(z) == z);
   BOOST_CHECK(g(u) == z);
+  core::garbage_collect();
 }
 
 void test_list_substitution()
@@ -144,6 +232,7 @@ std::cerr << replace_variables(xy, assignment_list_substitution(r)) << std::endl
 
 std::cerr << replace_variables(l, assignment_list_substitution(r)) << std::endl;
   BOOST_CHECK(replace_variables(l, assignment_list_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
+  core::garbage_collect();
 }
 
 void test_mutable_substitution_adapter()
@@ -167,6 +256,7 @@ void test_mutable_substitution_adapter()
   BOOST_CHECK(h(y) == z);
   h[z] = x;
   BOOST_CHECK(h(y) == x);
+  core::garbage_collect();
 }
 
 void test_mutable_substitution()
@@ -186,6 +276,7 @@ void test_mutable_substitution()
   mutable_map_substitution< atermpp::map< variable, variable > > sigmaprime;
 
   sigma[v] = v;
+  core::garbage_collect();
 }
 
 void test_map_substitution_adapter()
@@ -200,26 +291,21 @@ void test_map_substitution_adapter()
   mapping[v] = vv;
 
   BOOST_CHECK(sigma(v) == vv);
+  core::garbage_collect();
 }
 
 int test_main(int a, char**aa)
 {
   MCRL2_ATERMPP_INIT(a, aa);
 
+  test_my_assignment_list_substitution();
+  test_my_list_substitution();
+
   test_basic();
-  core::garbage_collect();
-
   test_assignment_list_substitution();
-  core::garbage_collect();
-
   test_list_substitution();
-  core::garbage_collect();
-
   test_mutable_substitution_adapter();
-  core::garbage_collect();
-
   test_mutable_substitution();
-  core::garbage_collect();
 
   return EXIT_SUCCESS;
 }

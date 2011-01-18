@@ -27,6 +27,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
@@ -119,9 +120,9 @@ namespace detail {
       {
         for (std::vector<propositional_variable_instantiation>::iterator i = rhs.begin(); i != rhs.end(); ++i)
         {
-          *i = data::replace_free_variables(*i, variable_data_expression_substitution(sigma));
+          *i = pbes_system::replace_free_variables(*i, variable_data_expression_substitution(sigma));
         }
-        static_cast<pbes_expression&>(*this) = data::replace_free_variables(*this, variable_data_expression_substitution(sigma));
+        static_cast<pbes_expression&>(*this) = pbes_system::replace_free_variables(*this, variable_data_expression_substitution(sigma));
       }
     };
 
@@ -152,7 +153,7 @@ namespace detail {
         {
           i->substitute(sigma);
         }
-        static_cast<pbes_expression&>(*this) = data::replace_free_variables(*this, variable_data_expression_substitution(sigma));
+        static_cast<pbes_expression&>(*this) = pbes_system::replace_free_variables(*this, variable_data_expression_substitution(sigma));
       }
     };
 
