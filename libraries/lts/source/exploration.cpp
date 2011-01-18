@@ -96,10 +96,10 @@ namespace mcrl2
 
       lg_error = false;
 
-      if(lgopts->specification == lps::specification())
+      /* if(lgopts->specification == lps::specification())
       {
         throw mcrl2::runtime_error("lps2lts algorithm class instantiated without linear process.");
-      }
+      } */
 
       lgopts->specification.instantiate_global_variables();
 

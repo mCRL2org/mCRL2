@@ -252,6 +252,7 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
   SVCsetCreator(&f,const_cast < char* > ("liblts (mCRL2)"));
 
   assert(l.initial_state()< ((size_t)1 << (sizeof(int)*8-1)));
+ATfprintf(stderr,"INITIAL STATE %d %d\n",l.initial_state(),l.has_state_info());
   SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? (ATerm)(ATermAppl)l.state_label(l.initial_state()) : (ATerm) ATmakeInt((int)l.initial_state()) ,&b));
 
   SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
