@@ -129,6 +129,10 @@ void mcrl2::lts::lts_fsm_t::load(const std::string &filename)
     }
     is.close();
   }
+  if (num_states()==0)
+  { 
+    add_state();
+  }
   set_initial_state(0);
 }
 
