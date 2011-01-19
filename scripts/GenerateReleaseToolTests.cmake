@@ -1051,6 +1051,9 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
   		set(lpsactionrename_varlist "${lpsactionrename_varlist},v${cnt}") 
       set(cnt "${cnt}'")
     endforeach()
+		if( NOT "${lpsactionrename_vardecl}" STREQUAL "" )
+     set(lpsactionrename_vardecl "\nvar${lpsactionrename_vardecl}")
+		endif( NOT "${lpsactionrename_vardecl}" STREQUAL "" )
 
     string( REGEX REPLACE "^," "(" lpsactionrename_varlist ${lpsactionrename_varlist} )
   	set( lpsactionrename_varlist "${lpsactionrename_varlist})" )
@@ -1065,7 +1068,7 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
   					 ALPHABET abcdefghijklmnopgrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWZ 
   					 lpsactionrename_postfix )
 
-    write_file(${testdir}/${BASENAME_TEST}_rename.txt "act ${fst_act}${lpsactionrename_postfix};\nvar${lpsactionrename_vardecl}\nrename\n  ${fst_act}${lpsactionrename_varlist} => ${fst_act}${lpsactionrename_postfix};" )
+    write_file(${testdir}/${BASENAME_TEST}_rename.txt "act ${fst_act}${lpsactionrename_postfix};${lpsactionrename_vardecl}\nrename\n  ${fst_act}${lpsactionrename_varlist} => ${fst_act}${lpsactionrename_postfix};" )
 		endif( NOT "${output}" STREQUAL "" )
 
 		#Copy files from examples directory to testdir (Required for "lts2lps" -m argument) 
