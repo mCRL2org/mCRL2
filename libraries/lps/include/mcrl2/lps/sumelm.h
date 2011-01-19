@@ -44,7 +44,7 @@ namespace mcrl2 {
           data_expression new_rhs(replace_free_variables(rhs, make_map_substitution_adapter(replacements)));
           for (std::map<variable, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
           {
-            i->second = assignment(lhs, new_rhs)(i->second);
+            i->second = data::replace_free_variables(i->second, assignment(lhs, new_rhs));
           }
           replacements[lhs] = new_rhs;
         }

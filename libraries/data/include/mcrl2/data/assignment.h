@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_ASSIGNMENT_H
 #define MCRL2_DATA_ASSIGNMENT_H
 
+#include <stdexcept>
 #include "boost/iterator/transform_iterator.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -152,7 +153,8 @@ class assignment: public assignment_expression
     template < typename Expression >
     data_expression operator()(const Expression& x) const
     {
-      return data::replace_free_variables< Expression, assignment const& >(x, *this);
+      throw std::runtime_error("data::assignment::operator(const Expression&) is a deprecated interface!");
+      return data_expression();
     }
 //--- end user section assignment ---//
 };
