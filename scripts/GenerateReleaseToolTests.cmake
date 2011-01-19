@@ -1033,6 +1033,7 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
 
 		# And now take the first action	
     string(REGEX MATCH "^[^,:\;]+" fst_act "${fst_act}")
+    string(REGEX REPLACE " " "" fst_act "${fst_act}")
   	# Find corresponding sorts
   	if( "${output}" MATCHES ":" )
 
