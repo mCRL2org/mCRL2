@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_REPLACE_H
 #define MCRL2_LPS_REPLACE_H
 
-#include "mcrl2/data/detail/replace.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/lps/add_binding.h"
 #include "mcrl2/lps/builder.h"
 
@@ -97,6 +97,18 @@ namespace lps {
   }
 #endif // MCRL2_NEW_REPLACE_VARIABLES
 //--- end generated lps replace code ---//
+
+#ifndef MCRL2_NEW_REPLACE_VARIABLES
+  template <typename Substitution>
+  void replace_free_variables(multi_action& m, Substitution substitution)
+  {
+    m.actions() = lps::replace_free_variables(m.actions(), substitution);
+    if (m.has_time())
+    {
+      m.time() = data::replace_free_variables(m.time(), substitution);
+    }
+  }
+#endif // MCRL2_NEW_REPLACE_VARIABLES
 
 } // namespace lps
 

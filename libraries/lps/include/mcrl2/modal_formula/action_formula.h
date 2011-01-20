@@ -13,7 +13,7 @@
 #define MCRL2_MODAL_ACTION_FORMULA_H
 
 #include <iostream> // for debugging
-
+#include <stdexcept>
 #include <string>
 #include <cassert>
 #include "mcrl2/atermpp/aterm_traits.h"
@@ -52,6 +52,7 @@ class action_formula: public atermpp::aterm_appl
     template <typename Substitution>
     action_formula substitute(Substitution f) const
     {
+      throw std::runtime_error("action_formula::substitute(Substitution) is a deprecated interface!");
       return action_formula(f(atermpp::aterm(*this)));
     }
 

@@ -15,6 +15,7 @@
 #define MCRL2_PBES_PBES_EXPRESSION_H
 
 #include <iterator>
+#include <stdexcept>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -63,6 +64,7 @@ class pbes_expression: public atermpp::aterm_appl
     template <typename Substitution>
     pbes_expression substitute(Substitution f) const
     {
+      throw std::runtime_error("pbes_expression::substitute(Substitution) is a deprecated interface!");
       return pbes_expression(f(*this));
     }
 

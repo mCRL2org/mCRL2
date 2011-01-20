@@ -13,6 +13,7 @@
 #define MCRL2_LPS_MULTI_ACTION_H
 
 #include <iterator>
+#include <stdexcept>
 #include <sstream>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/make_list.h"
@@ -142,6 +143,7 @@ namespace lps {
       template <typename Substitution>
       multi_action substitute(Substitution f)
       {
+        throw std::runtime_error("multi_action::substitute(Substitution) is a deprecated interface!");
         return multi_action(m_actions.substitute(f), f(m_time));
       }
 
