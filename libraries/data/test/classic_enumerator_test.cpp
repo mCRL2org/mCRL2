@@ -15,6 +15,7 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/classic_enumerator.h"
@@ -62,7 +63,7 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
   rewriter evaluator(d);
 
   for (enumerator_type i(d, v, evaluator, c); --t != 0 && i != enumerator_type(); ++i) {
-    std::clog << mcrl2::core::pp((*i)(c)) << std::endl;
+    std::clog << mcrl2::core::pp(data::replace_free_variables(c, *i)) << std::endl;
   }
 }
 
