@@ -974,29 +974,36 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
 ##---------------------------------------
 
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateReleaseToolTests.cmake)
-run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" )
+
+# Usage run_release_tests( "/path/to/mcrl2file" "list of tests to disable" )
+run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" "")
 
 	
 if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2"				 "lts2lps")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small2.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/upcast.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/list.mcrl2"				 "")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/funccomp.mcrl2"		 "lpsparunfold") # rinner + lpsconfcheck, lpsinvelm = SEGFAULT
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/struct.mcrl2"			 "lpsparunfold") #Lps has no process parameters
+ #run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/forall.mcrl2"			 "lpsparunfold") #Lps has no process parameters
+ #run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/exists.mcrl2"			 "lpsparunfold") #Lps has no process parameters
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small3.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2"				 "lts2lps")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2"				 "lpsparunfold")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2"			 "lpsparunfold")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2"			 "lpsparunfold")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2"			 "lpsparunfold")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "")
 
-	set(SET_OF_MCRL2_FILES 
-  	     ${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2
-  	    ;${CMAKE_SOURCE_DIR}/examples/language/small2.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/upcast.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/list.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/funccomp.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/struct.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/forall.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/small3.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2
-			  ;${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/exists.mcrl2
-  		  ;${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2
+#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/bke/bke.mcrl2" "" )
+#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/mpsu/mpsu.mcrl2" "")
+#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp_bw/abp_bw.mcrl2" "")
+#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/bakery/bakery.mcrl2" "")
+#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/industrial/chatbox/chatbox.mcrl2" "")
+
 				# ;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-r2.mcrl2
 				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage.mcrl2
 				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-r3.mcrl2
@@ -1075,7 +1082,6 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_1.mcrl2
 				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_2.mcrl2
 				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_3.mcrl2
-				)
   run_release_tests( "${SET_OF_MCRL2_FILES}" )
   
 endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
