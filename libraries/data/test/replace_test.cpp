@@ -136,7 +136,7 @@ void test_assignment_list()
   data_expression t  = and_(equal_to(d1, e1), not_equal_to(e2, d3));
   data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));
   data_expression t1 = partial_replace(t, assignment_list_replacer(assignment_list(l.begin(), l.end())));
-  data_expression t2 = assignment_list_substitution(assignment_list(l.begin(), l.end()))(t);
+  data_expression t2 = data::replace_free_variables(t, assignment_list_substitution(assignment_list(l.begin(), l.end())));
   std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
   std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
@@ -192,8 +192,8 @@ void test_variable_replace()
   l.push_back(e3);
 
   data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  data_expression t1 = make_double_sequence_substitution_adaptor(variables, replacements)(t);
-  data_expression t2 = make_double_sequence_substitution_adaptor(v, l)(t);
+  data_expression t1 = data::replace_free_variables(t, make_double_sequence_substitution_adaptor(variables, replacements));
+  data_expression t2 = data::replace_free_variables(t, make_double_sequence_substitution_adaptor(v, l));
   std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
   std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
@@ -204,10 +204,10 @@ void test_variable_replace()
   BOOST_CHECK(t1 == replace_variables(t, make_double_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == replace_variables(t, make_double_sequence_substitution(v, l)));
   BOOST_CHECK(t1 == replace_variables(t, make_map_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == make_double_sequence_substitution_adaptor(variables, replacements)(t));
-  BOOST_CHECK(t1 == make_double_sequence_substitution(variables, replacements)(t));
-  BOOST_CHECK(t1 == make_double_sequence_substitution(v, l)(t));
-  BOOST_CHECK(t1 == make_map_substitution(variables, replacements)(t));
+  BOOST_CHECK(t1 == replace_free_variables(t, make_double_sequence_substitution_adaptor(variables, replacements)));
+  BOOST_CHECK(t1 == replace_free_variables(t, make_double_sequence_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == replace_free_variables(t, make_double_sequence_substitution(v, l)));
+  BOOST_CHECK(t1 == replace_free_variables(t, make_map_substitution(variables, replacements)));
 }
 
 void test_replace_with_binders()
