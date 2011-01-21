@@ -23,6 +23,8 @@
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/map_substitution.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
@@ -615,7 +617,8 @@ namespace detail {
             {
               for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
               {
-                data_term_type e1 = datar(data::make_map_substitution_adapter(e_constraints)(*i));
+                // TODO: why not use R(t, sigma) interface here?
+                data_term_type e1 = datar(data::replace_free_variables(*i, data::make_map_substitution_adapter(e_constraints)));
                 if (core::term_traits<data_term_type>::is_constant(e1))
                 {
                   m_constraints[*j] = e1;
@@ -638,7 +641,8 @@ namespace detail {
                 {
                   continue;
                 }
-                data_term_type ei = datar(data::make_map_substitution_adapter(e_constraints)(*i));
+                // TODO: why not use R(t, sigma) interface here?
+                data_term_type ei = datar(data::replace_free_variables(*i, data::make_map_substitution_adapter(e_constraints)));
                 if (ci != ei)
                 {
                   ci = *j;
@@ -740,7 +744,7 @@ namespace detail {
       {
         if (check_log_level(level))
         {
-          std::clog << "\nEvaluated condition " << core::pp(data::make_map_substitution_adapter(u.constraints())(e.condition())) << " to " << core::pp(value) << std::endl;
+          std::clog << "\nEvaluated condition " << core::pp(data::replace_free_variables(e.condition(), data::make_map_substitution_adapter(u.constraints()))) << " to " << core::pp(value) << std::endl;
         }
       }
 
@@ -748,7 +752,7 @@ namespace detail {
       {
         if (check_log_level(level))
         {
-          std::clog << "\nCould not evaluate condition " << core::pp(data::make_map_substitution_adapter(u.constraints())(e.condition())) << " to true or false";
+          std::clog << "\nCould not evaluate condition " << core::pp(data::replace_free_variables(e.condition(), data::make_map_substitution_adapter(u.constraints()))) << " to true or false";
         }
       }
 
@@ -881,7 +885,8 @@ namespace detail {
             vertex& v = m_vertices[e.target().name()];
             LOG_EDGE_UPDATE(2, e, u, v);
 
-            term_type value = m_pbes_rewriter(data::make_map_substitution_adapter(u.constraints())(e.condition()));
+            // TODO: why not use R(t, sigma) interface here?
+            term_type value = m_pbes_rewriter(e.condition(), data::make_map_substitution_adapter(u.constraints()));
             LOG_CONDITION(2, e, u, value);
 
             if (!tr::is_false(value) && !tr::is_true(value))
@@ -936,7 +941,7 @@ namespace detail {
             *i = pbes_equation(
               i->symbol(),
               i->variable(),
-              data::make_map_substitution_adapter(v.constraints())(i->formula())
+              pbes_system::replace_free_variables(i->formula(), data::make_map_substitution_adapter(v.constraints()))
             );
           }
         }

@@ -12,6 +12,7 @@
 #ifndef _MCRL2_DATA_SUBSTITUTION__HPP_
 #define _MCRL2_DATA_SUBSTITUTION__HPP_
 
+#include <stdexcept>
 #include <sstream>
 
 #include "boost/type_traits/remove_cv.hpp"
@@ -216,7 +217,8 @@ namespace mcrl2 {
          **/
         template < typename OtherExpression >
         OtherExpression operator()(OtherExpression const& e) const {
-          return SubstitutionProcedure< Derived >::apply(static_cast< Derived const& >(*this), e);
+          throw std::runtime_error("data::substitution::operator(const OtherExpression&) is a deprecated interface!");
+          return e;
         }
 
         /** \brief Comparison operation between substitutions

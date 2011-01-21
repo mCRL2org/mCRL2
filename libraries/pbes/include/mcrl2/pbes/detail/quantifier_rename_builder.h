@@ -120,7 +120,7 @@ struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
   /// \return The result of visiting the node
   pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
-    return pbes_expression(data::make_sequence_substitution_adaptor(replacements)(d));
+    return data::replace_free_variables(d, data::make_sequence_substitution_adaptor(replacements));
   }
 
   /// \brief Visit forall node

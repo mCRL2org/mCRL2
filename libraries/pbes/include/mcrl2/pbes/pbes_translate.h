@@ -332,9 +332,9 @@ lps2pbes_increase_indent();
             data::variable_list y = atermpp::convert<data::variable_list>(fresh_variables(yi, context));
 //std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
 //std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
-            ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
+            ci = data::replace_free_variables(ci, make_double_sequence_substitution_adaptor(yi, y));
             lps::replace_free_variables(ai, make_double_sequence_substitution_adaptor(yi, y));
-            gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
+            gi = data::replace_free_variables(gi, make_double_sequence_substitution_adaptor(yi, y));
             data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
@@ -366,9 +366,9 @@ lps2pbes_increase_indent();
 
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
-            ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
+            ci = data::replace_free_variables(ci, make_double_sequence_substitution_adaptor(yi, y));
             lps::replace_free_variables(ai, make_double_sequence_substitution_adaptor(yi, y));
-            gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
+            gi = data::replace_free_variables(gi, make_double_sequence_substitution_adaptor(yi, y));
             data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
@@ -819,9 +819,9 @@ lps2pbes_increase_indent();
 
             pbes_expression rhs = RHS(f0, phi, lps, context);
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
-            ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
+            ci = data::replace_free_variables(ci, make_double_sequence_substitution_adaptor(yi, y));
             ai = lps::replace_free_variables(ai, make_double_sequence_substitution_adaptor(yi, y));
-            gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
+            gi = data::replace_free_variables(gi, make_double_sequence_substitution_adaptor(yi, y));
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             rhs = pbes_system::replace_free_variables(rhs, data::assignment_list_substitution(gi));
@@ -845,9 +845,9 @@ lps2pbes_increase_indent();
 
             pbes_expression rhs = RHS(f0, phi, lps, context);
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
-            ci = make_double_sequence_substitution_adaptor(yi, y)(ci);
+            ci = data::replace_free_variables(ci, make_double_sequence_substitution_adaptor(yi, y));
             ai = lps::replace_free_variables(ai, make_double_sequence_substitution_adaptor(yi, y));
-            gi = make_double_sequence_substitution_adaptor(yi, y)(gi);
+            gi = data::replace_free_variables(gi, make_double_sequence_substitution_adaptor(yi, y));
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
             rhs = pbes_system::replace_free_variables(rhs, data::assignment_list_substitution(gi));

@@ -58,7 +58,7 @@ namespace mcrl2 {
         void apply_substitution(deadlock_summand& s, Substitution& sigma)
         {
           s.condition() = m_rewriter(s.condition(), sigma);
-          s.deadlock().time() = sigma(s.deadlock().time());
+          s.deadlock().time() = data::replace_free_variables(s.deadlock().time(), sigma);
         }
 
         template <typename SummandType, typename Container>

@@ -181,7 +181,7 @@ namespace mcrl2 {
         ///        vector of assignments to Boolean variables.
         data::assignment_list replace_enumerated_parameters_in_assignments(data::assignment_list v)
         {
-          v = m_if_trees(v);
+          v = data::replace_free_variables(v, m_if_trees);
 
           data::assignment_vector result;
           for (data::assignment_list::const_iterator i = v.begin(); i != v.end(); ++i)
@@ -244,17 +244,17 @@ namespace mcrl2 {
         /// \brief Update an action summand with the new Boolean parameters
         void update_action_summand(action_summand& s)
         {
-          s.condition() = m_if_trees(s.condition());
+          s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
           s.multi_action().actions() = lps::replace_free_variables(s.multi_action().actions(), m_if_trees);
-          s.multi_action().time() = m_if_trees(s.multi_action().time());
+          s.multi_action().time() = data::replace_free_variables(s.multi_action().time(), m_if_trees);
           s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
         }
 
         /// \brief Update a deadlock summand with the new Boolean parameters
         void update_deadlock_summand(deadlock_summand& s)
         {
-          s.condition() = m_if_trees(s.condition());
-          s.deadlock().time() = m_if_trees(s.deadlock().time());
+          s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
+          s.deadlock().time() = data::replace_free_variables(s.deadlock().time(), m_if_trees);
         }
 
       public:
