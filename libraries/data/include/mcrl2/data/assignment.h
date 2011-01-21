@@ -31,10 +31,6 @@ namespace mcrl2 {
 
   namespace data {
 
-    // forward declaration for application operation of assignment
-    template <typename Container, typename Substitution >
-    Container replace_free_variables(Container const& container, Substitution replace_function);
-
     class assignment_expression: public atermpp::aterm_appl,
                                  public core::substitution_function<variable, data_expression>
     {
@@ -222,7 +218,8 @@ class identifier_assignment: public assignment_expression
     template < typename Expression >
     data_expression operator()(const Expression& x) const
     {
-      return data::replace_free_variables< Expression, assignment const& >(x, *this);
+      throw std::runtime_error("data::identifier_assignment::operator(const Expression&) is a deprecated interface!");
+      return data_expression();
     }
 //--- end user section identifier_assignment ---//
 };
