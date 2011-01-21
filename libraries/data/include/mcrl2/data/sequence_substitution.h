@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_SEQUENCE_SUBSTITUTION_H__
 #define MCRL2_DATA_SEQUENCE_SUBSTITUTION_H__
 
+#include <functional>
 #include "boost/type_traits/remove_reference.hpp"
 #include "boost/type_traits/add_reference.hpp"
 #include "boost/type_traits/add_const.hpp"
@@ -22,6 +23,7 @@ namespace mcrl2 {
 
 namespace data {
 
+#ifndef MCRL2_NEW_SEQUENCE_SUBSTITUTION
   template < typename VariableSequence,
                template < typename Substitution > class SubstitutionProcedure = structural_substitution >
   class sequence_substitution;
@@ -253,6 +255,139 @@ namespace data {
   {
     return double_sequence_substitution< VariableSequence const&, ExpressionSequence const& >(vc, ec);
   }
+
+#else // MCRL2_NEW_SEQUENCE_SUBSTITUTION
+
+  template <typename VariableSequence, typename ExpressionSequence>
+  struct double_sequence_substitution_adaptor: public std::unary_function<typename VariableSequence::value_type, typename ExpressionSequence::value_type>
+  {
+    /// \brief type used to represent variables
+    typedef typename VariableSequence::value_type variable_type;
+
+    /// \brief type used to represent expressions
+    typedef typename ExpressionSequence::value_type  expression_type;
+ 
+    const VariableSequence& variables;
+    const ExpressionSequence& expressions;
+ 
+    double_sequence_substitution_adaptor(const VariableSequence& variables_, const ExpressionSequence& expressions_)
+      : variables(variables_),
+        expressions(expressions_)
+    {
+      assert(variables.size() == expressions.size());
+    }
+    
+    expression_type operator()(const variable_type& v) const
+    {
+      typename VariableSequence::const_iterator i = variables.begin();
+      typename ExpressionSequence::const_iterator j = expressions.begin();
+      
+      for ( ; i != variables.end(); ++i, ++j)
+      {
+        if (*i == v)
+        {
+          return *j;
+        }
+      }
+      return v;
+    }
+  };
+
+  template <typename VariableSequence, typename ExpressionSequence>
+  double_sequence_substitution_adaptor<VariableSequence, ExpressionSequence>
+  make_double_sequence_substitution_adaptor(const VariableSequence vc, const ExpressionSequence& ec)
+  {
+    return double_sequence_substitution_adaptor<VariableSequence, ExpressionSequence>(vc, ec);
+  }
+
+  template <typename VariableSequence, typename ExpressionSequence>
+  struct double_sequence_substitution: public std::unary_function<typename VariableSequence::value_type, typename ExpressionSequence::value_type>
+  {
+    /// \brief type used to represent variables
+    typedef typename VariableSequence::value_type variable_type;
+
+    /// \brief type used to represent expressions
+    typedef typename ExpressionSequence::value_type  expression_type;
+ 
+    const VariableSequence& variables;
+    const ExpressionSequence& expressions;
+ 
+    double_sequence_substitution(const VariableSequence& variables_, const ExpressionSequence& expressions_)
+      : variables(variables_),
+        expressions(expressions_)
+    {
+      assert(variables.size() == expressions.size());
+    }
+    
+    expression_type operator()(const variable_type& v) const
+    {
+      typename VariableSequence::const_iterator i = variables.begin();
+      typename ExpressionSequence::const_iterator j = expressions.begin();
+      
+      for ( ; i != variables.end(); ++i, ++j)
+      {
+        if (*i == v)
+        {
+          return *j;
+        }
+      }
+      return v;
+    }
+  };
+
+  template <typename VariableSequence, typename ExpressionSequence>
+  double_sequence_substitution<VariableSequence, ExpressionSequence>
+  make_double_sequence_substitution(const VariableSequence vc, const ExpressionSequence& ec)
+  {
+    return double_sequence_substitution<VariableSequence, ExpressionSequence>(vc, ec);
+  }
+
+/*
+  template <typename VariableSequence, typename ExpressionSequence>
+  struct double_sequence_substitution: public std::unary_function<typename VariableSequence::value_type, typename ExpressionSequence::value_type>
+  {
+    /// \brief type used to represent variables
+    typedef typename VariableSequence::value_type variable_type;
+
+    /// \brief type used to represent expressions
+    typedef typename ExpressionSequence::value_type  expression_type;
+ 
+    VariableSequence variables;
+    ExpressionSequence expressions;
+
+    double_sequence_substitution()
+    {}
+ 
+    double_sequence_substitution(const VariableSequence& variables_, const ExpressionSequence& expressions_)
+      : variables(variables_),
+        expressions(expressions_)
+    {}
+    
+    expression_type operator()(const variable_type& v) const
+    {
+      typename VariableSequence::const_iterator i = variables.begin();
+      typename ExpressionSequence::const_iterator j = expressions.begin();
+      
+      for ( ; i != variables.end(); ++i, ++j)
+      {
+        if (*i == v)
+        {
+          return *j;
+        }
+      }
+      return v;
+    }
+  };
+
+  template <typename VariableSequence, typename ExpressionSequence>
+  double_sequence_substitution<VariableSequence, ExpressionSequence>
+  make_double_sequence_substitution(const VariableSequence vc, const ExpressionSequence& ec)
+  {
+    return double_sequence_substitution<VariableSequence, ExpressionSequence>(vc, ec);
+  }
+*/
+
+#endif // MCRL2_NEW_SEQUENCE_SUBSTITUTION
 
 } // namespace data
 
