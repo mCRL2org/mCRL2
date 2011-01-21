@@ -11,7 +11,6 @@
 cmake_minimum_required (VERSION 2.6)
 message(STATUS "CMAKE VERSION: ${CMAKE_VERSION}")
 project (MCRL2)
-
 # Commonly used options
 # ---------------------
 #
@@ -73,6 +72,9 @@ project (MCRL2)
 #
 #   http://www.cmake.org/cmake/help/cmake2.6docs.html#prop_dir:COMPILE_DEFINITIONS
 #
+
+
+set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" ) 
 
 # Variables required for an additional build type "Maintainer"
 
@@ -366,6 +368,15 @@ else( MCRL2_SVN_LABEL STREQUAL "" )
 endif( MCRL2_SVN_LABEL STREQUAL "" )
 
 message(STATUS "SVN revision: ${SVN_REV}")
+
+##---------------------------------------------------
+## Find cvc3 
+##---------------------------------------------------
+
+find_package( cvc3 )
+if( cvc3_FOUND )
+  message(STATUS "CVC3 version: ${cvc3_VERSION}")
+endif( cvc3_FOUND )
 
 ##---------------------------------------------------
 ## Set Boost configuration

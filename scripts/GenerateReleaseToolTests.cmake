@@ -379,7 +379,9 @@ macro( gen_lpsinvelm_release_tests )
 		add_lpsinvelm_release_test( "-t10;-i${testdir}/true.txt" )
 		add_lpsinvelm_release_test( "-y;-i${testdir}/false.txt" )
 		# add_lpsinvelm_release_test( "-zario;-i${testdir}/true.txt" )
-		# add_lpsinvelm_release_test( "-zcvc;-i${testdir}/true.txt" )
+		if( cvc3_FOUND )
+		  add_lpsinvelm_release_test( "-zcvc;-i${testdir}/true.txt" )
+		endif( cvc3_FOUND )
 endmacro( gen_lpsinvelm_release_tests )
 
 #########################
@@ -421,7 +423,9 @@ macro( gen_lpsconfcheck_release_tests )
 	add_lpsconfcheck_release_test( "-s10;-i${testdir}/true.txt" )
 	add_lpsconfcheck_release_test( "-t10;-i${testdir}/true.txt" )
 	#	add_lpsconfcheck_release_test( "-zario;-i${testdir}/true.txt" )
-	# add_lpsconfcheck_release_test( "-zcvc;-i${testdir}/true.txt" )
+	if( cvc3_FOUND )
+	  add_lpsconfcheck_release_test( "-zcvc;-i${testdir}/true.txt" )
+	endif( cvc3_FOUND )
 endmacro( gen_lpsconfcheck_release_tests )
 
 #########################
