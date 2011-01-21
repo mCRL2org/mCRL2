@@ -41,7 +41,6 @@ namespace tools {
         desc.add_option("smt-solver", make_mandatory_argument< smt_solver_type >("SOLVER"),
           "use SOLVER to remove inconsistent paths from the internally used "
           "BDDs (by default, no path elimination is applied):\n"
-          "  'ario' for the SMT solver Ario, or\n"
           "  'cvc' for the SMT solver CVC3",
           'z');
       }
@@ -68,7 +67,7 @@ namespace tools {
                     std::string known_issues = ""
                    )
         : Tool(name, author, what_is, tool_description, known_issues),
-          m_solver_type(mcrl2::data::detail::solver_type_ario)
+          m_solver_type(mcrl2::data::detail::solver_type_cvc)
       {}
 
       /// \brief Returns the rewrite strategy

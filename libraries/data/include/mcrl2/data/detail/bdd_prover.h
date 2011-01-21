@@ -381,7 +381,7 @@ class BDD_Prover: public Prover {
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
-      SMT_Solver_Type a_solver_type = solver_type_ario,
+      SMT_Solver_Type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
       : Prover(data_spec, a_rewrite_strategy, a_time_limit),
         f_data_spec(data_spec),

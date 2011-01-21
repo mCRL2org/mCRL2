@@ -30,7 +30,6 @@ namespace mcrl2 {
 
       /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers.
       enum SMT_Solver_Type {
-        solver_type_ario,
         solver_type_cvc,
         solver_type_cvc_fast
       };
@@ -47,10 +46,7 @@ namespace mcrl2 {
 
         s = solver_type_cvc;
 
-        if (strncmp(solver_type, "ario", 5) == 0) {
-          s = solver_type_ario;
-        }
-        else if (strncmp(solver_type, "cvc", 3) == 0) {
+        if (strncmp(solver_type, "cvc", 3) == 0) {
           if (solver_type[3] != '\0') {
             is.setstate(std::ios_base::failbit);
           }
@@ -65,7 +61,6 @@ namespace mcrl2 {
       /// \brief standard conversion from solvert type to stream
       inline std::ostream& operator<<(std::ostream& os, mcrl2::data::detail::SMT_Solver_Type s) {
         static char const* solvers[] = {
-          "ario",
           "cvc",
         };
 
@@ -220,13 +215,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
     BDD_Path_Eliminator(SMT_Solver_Type a_solver_type)
     {
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
-      if (a_solver_type == solver_type_ario) {
-        if (mcrl2::data::detail::prover::ario_smt_solver::usable()) {
-          f_smt_solver = new mcrl2::data::detail::prover::ario_smt_solver();
-
-          return;
-        }
-      } else if (a_solver_type == solver_type_cvc) {
+      if (a_solver_type == solver_type_cvc) {
         if (mcrl2::data::detail::prover::cvc_smt_solver::usable()) {
           f_smt_solver = new mcrl2::data::detail::prover::cvc_smt_solver();
 

@@ -89,7 +89,7 @@ class Invariant_Eliminator {
       const mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       const int a_time_limit = 0,
       const bool a_path_eliminator = false,
-      const mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_ario,
+      const mcrl2::data::detail::SMT_Solver_Type a_solver_type = mcrl2::data::detail::solver_type_cvc,
       const bool a_apply_induction = false,
       const bool a_simplify_all = false
     );
