@@ -941,8 +941,8 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
 
                 updates = []          
                 for c in classes:
-                    if not is_dependent_type(dependencies, c.classname(True)):
-                        continue
+                    #if not is_dependent_type(dependencies, c.classname(True)):
+                    #    continue
                     is_function = c.is_function_name(True)
                     if is_modifiable_type(c.classname(True), modifiability_map):
                       # this one applies to action_formula <-> multi_action, for which the conversion is problematic
@@ -1076,9 +1076,9 @@ def update_dependencies(all_classes, dependencies):
         if dependencies[classname] == True:
 
             # this is needed because of poor choices in the internal format
-            if 'X' in c.modifiers():
-               for expr in all_classes[classname].expression_classes():
-                   update_dependency(expr, all_classes, dependencies, value = True)
+            #if 'X' in c.modifiers():
+            #   for expr in all_classes[classname].expression_classes():
+            #       update_dependency(expr, all_classes, dependencies, value = True)
             continue
 
         # check expression class dependencies

@@ -72,22 +72,6 @@ namespace process {
       return result;
     }
     
-    process::process_expression operator()(const process::delta& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
-    }
-    
-    process::process_expression operator()(const process::tau& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
-    }
-    
     process::process_expression operator()(const process::sum& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -252,7 +236,6 @@ namespace process {
     void operator()(process::process_specification& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      static_cast<Derived&>(*this)(x.global_variables());
       static_cast<Derived&>(*this)(x.equations());
       x.init() = static_cast<Derived&>(*this)(x.init());
       static_cast<Derived&>(*this).leave(x);
@@ -261,7 +244,7 @@ namespace process {
     process::process_equation operator()(const process::process_equation& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_equation result = process::process_equation(x.identifier(), static_cast<Derived&>(*this)(x.formal_parameters()), static_cast<Derived&>(*this)(x.expression()));
+      process::process_equation result = process::process_equation(x.identifier(), x.formal_parameters(), static_cast<Derived&>(*this)(x.expression()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -282,26 +265,10 @@ namespace process {
       return result;
     }
     
-    process::process_expression operator()(const process::delta& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
-    }
-    
-    process::process_expression operator()(const process::tau& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
-    }
-    
     process::process_expression operator()(const process::sum& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_expression result = process::sum(static_cast<Derived&>(*this)(x.bound_variables()), static_cast<Derived&>(*this)(x.operand()));
+      process::process_expression result = process::sum(x.bound_variables(), static_cast<Derived&>(*this)(x.operand()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -462,7 +429,6 @@ namespace process {
     void operator()(process::process_specification& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      static_cast<Derived&>(*this)(x.global_variables());
       static_cast<Derived&>(*this)(x.equations());
       x.init() = static_cast<Derived&>(*this)(x.init());
       static_cast<Derived&>(*this).leave(x);
@@ -471,7 +437,7 @@ namespace process {
     process::process_equation operator()(const process::process_equation& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_equation result = process::process_equation(x.identifier(), static_cast<Derived&>(*this)(x.formal_parameters()), static_cast<Derived&>(*this)(x.expression()));
+      process::process_equation result = process::process_equation(x.identifier(), x.formal_parameters(), static_cast<Derived&>(*this)(x.expression()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -479,17 +445,17 @@ namespace process {
     process::process_expression operator()(const process::process_instance& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_expression result = process::process_instance(x.identifier(), static_cast<Derived&>(*this)(x.actual_parameters()));
+      // skip
       static_cast<Derived&>(*this).leave(x);
-      return result;
+      return x;
     }
     
     process::process_expression operator()(const process::process_instance_assignment& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_expression result = process::process_instance_assignment(x.identifier(), static_cast<Derived&>(*this)(x.assignments()));
+      // skip
       static_cast<Derived&>(*this).leave(x);
-      return result;
+      return x;
     }
     
     process::process_expression operator()(const process::delta& x)
@@ -511,7 +477,7 @@ namespace process {
     process::process_expression operator()(const process::sum& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_expression result = process::sum(static_cast<Derived&>(*this)(x.bound_variables()), static_cast<Derived&>(*this)(x.operand()));
+      process::process_expression result = process::sum(x.bound_variables(), static_cast<Derived&>(*this)(x.operand()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -567,7 +533,7 @@ namespace process {
     process::process_expression operator()(const process::at& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_expression result = process::at(static_cast<Derived&>(*this)(x.operand()), static_cast<Derived&>(*this)(x.time_stamp()));
+      process::process_expression result = process::at(static_cast<Derived&>(*this)(x.operand()), x.time_stamp());
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -583,7 +549,7 @@ namespace process {
     process::process_expression operator()(const process::if_then& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_expression result = process::if_then(static_cast<Derived&>(*this)(x.condition()), static_cast<Derived&>(*this)(x.then_case()));
+      process::process_expression result = process::if_then(x.condition(), static_cast<Derived&>(*this)(x.then_case()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -591,7 +557,7 @@ namespace process {
     process::process_expression operator()(const process::if_then_else& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      process::process_expression result = process::if_then_else(static_cast<Derived&>(*this)(x.condition()), static_cast<Derived&>(*this)(x.then_case()), static_cast<Derived&>(*this)(x.else_case()));
+      process::process_expression result = process::if_then_else(x.condition(), static_cast<Derived&>(*this)(x.then_case()), static_cast<Derived&>(*this)(x.else_case()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }

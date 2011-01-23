@@ -68,22 +68,6 @@ namespace pbes_system {
       return result;
     }
     
-    pbes_system::pbes_expression operator()(const pbes_system::true_& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
-    }
-    
-    pbes_system::pbes_expression operator()(const pbes_system::false_& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
-    }
-    
     pbes_system::pbes_expression operator()(const pbes_system::not_& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -163,18 +147,9 @@ namespace pbes_system {
     using super::leave;
     using super::operator();
 
-    pbes_system::propositional_variable operator()(const pbes_system::propositional_variable& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      pbes_system::propositional_variable result = pbes_system::propositional_variable(x.name(), static_cast<Derived&>(*this)(x.parameters()));
-      static_cast<Derived&>(*this).leave(x);
-      return result;
-    }
-    
     void operator()(pbes_system::pbes_equation& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      x.variable() = static_cast<Derived&>(*this)(x.variable());
       x.formula() = static_cast<Derived&>(*this)(x.formula());
       static_cast<Derived&>(*this).leave(x);
     }
@@ -184,7 +159,6 @@ namespace pbes_system {
     {
       static_cast<Derived&>(*this).enter(x);  
       static_cast<Derived&>(*this)(x.equations());
-      static_cast<Derived&>(*this)(x.global_variables());
       x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
       static_cast<Derived&>(*this).leave(x);
     }
@@ -195,22 +169,6 @@ namespace pbes_system {
       pbes_system::pbes_expression result = pbes_system::propositional_variable_instantiation(x.name(), static_cast<Derived&>(*this)(x.parameters()));
       static_cast<Derived&>(*this).leave(x);
       return result;
-    }
-    
-    pbes_system::pbes_expression operator()(const pbes_system::true_& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
-    }
-    
-    pbes_system::pbes_expression operator()(const pbes_system::false_& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
     }
     
     pbes_system::pbes_expression operator()(const pbes_system::not_& x)
@@ -248,7 +206,7 @@ namespace pbes_system {
     pbes_system::pbes_expression operator()(const pbes_system::forall& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      pbes_system::pbes_expression result = pbes_system::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+      pbes_system::pbes_expression result = pbes_system::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -256,7 +214,7 @@ namespace pbes_system {
     pbes_system::pbes_expression operator()(const pbes_system::exists& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      pbes_system::pbes_expression result = pbes_system::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+      pbes_system::pbes_expression result = pbes_system::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -292,18 +250,9 @@ namespace pbes_system {
     using super::leave;
     using super::operator();
 
-    pbes_system::propositional_variable operator()(const pbes_system::propositional_variable& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      pbes_system::propositional_variable result = pbes_system::propositional_variable(x.name(), static_cast<Derived&>(*this)(x.parameters()));
-      static_cast<Derived&>(*this).leave(x);
-      return result;
-    }
-    
     void operator()(pbes_system::pbes_equation& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      x.variable() = static_cast<Derived&>(*this)(x.variable());
       x.formula() = static_cast<Derived&>(*this)(x.formula());
       static_cast<Derived&>(*this).leave(x);
     }
@@ -313,17 +262,15 @@ namespace pbes_system {
     {
       static_cast<Derived&>(*this).enter(x);  
       static_cast<Derived&>(*this)(x.equations());
-      static_cast<Derived&>(*this)(x.global_variables());
-      x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
       static_cast<Derived&>(*this).leave(x);
     }
     
     pbes_system::pbes_expression operator()(const pbes_system::propositional_variable_instantiation& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      pbes_system::pbes_expression result = pbes_system::propositional_variable_instantiation(x.name(), static_cast<Derived&>(*this)(x.parameters()));
+      // skip
       static_cast<Derived&>(*this).leave(x);
-      return result;
+      return x;
     }
     
     pbes_system::pbes_expression operator()(const pbes_system::true_& x)
@@ -377,7 +324,7 @@ namespace pbes_system {
     pbes_system::pbes_expression operator()(const pbes_system::forall& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      pbes_system::pbes_expression result = pbes_system::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+      pbes_system::pbes_expression result = pbes_system::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -385,7 +332,7 @@ namespace pbes_system {
     pbes_system::pbes_expression operator()(const pbes_system::exists& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      pbes_system::pbes_expression result = pbes_system::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+      pbes_system::pbes_expression result = pbes_system::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }

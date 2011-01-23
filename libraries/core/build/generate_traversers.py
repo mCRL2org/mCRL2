@@ -53,7 +53,7 @@ def make_builder(filename, builder_name, class_map, all_classes, namespace, expr
     classes.sort(compare_classes)
 
     for c in classes:
-        if is_dependent_type(dependencies, c.classname(True)):
+        if is_dependent_type(dependencies, c.classname(True)) or ('E' in c.modifiers() and c.superclass(True) == expression):
             result.append(c.builder_function(all_classes, dependencies, modifiability_map))
     visit_text = indent_text('\n'.join(result), '    ')
     text = BUILDER
@@ -93,6 +93,8 @@ if __name__ == "__main__":
     action_formula_dependencies     = find_dependencies(all_classes, 'action_formulas::action_formula')
     regular_formula_dependencies    = find_dependencies(all_classes, 'regular_formulas::regular_formula')
     state_formula_dependencies      = find_dependencies(all_classes, 'state_formulas::state_formula')
+
+    print_dependencies(data_expression_dependencies, "hallo")
 
     modifiability_map = make_modifiability_map(all_classes)
 

@@ -31,7 +31,7 @@ namespace bes {
     bes::boolean_equation operator()(const bes::boolean_equation& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      bes::boolean_equation result = bes::boolean_equation(x.symbol(), static_cast<Derived&>(*this)(x.variable()), static_cast<Derived&>(*this)(x.formula()));
+      bes::boolean_equation result = bes::boolean_equation(x.symbol(), x.variable(), static_cast<Derived&>(*this)(x.formula()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }

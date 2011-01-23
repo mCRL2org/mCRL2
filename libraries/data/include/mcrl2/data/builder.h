@@ -49,14 +49,6 @@ namespace data {
     using super::leave;
     using super::operator();
 
-    data::data_expression operator()(const data::identifier& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      // skip
-      static_cast<Derived&>(*this).leave(x);
-      return x;
-    }
-    
     data::data_expression operator()(const data::variable& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -100,7 +92,7 @@ namespace data {
     data::assignment_expression operator()(const data::identifier_assignment& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      data::assignment_expression result = data::identifier_assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+      data::assignment_expression result = data::identifier_assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -306,7 +298,7 @@ namespace data {
     data::assignment_expression operator()(const data::assignment& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      data::assignment_expression result = data::assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+      data::assignment_expression result = data::assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -314,7 +306,7 @@ namespace data {
     data::assignment_expression operator()(const data::identifier_assignment& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      data::assignment_expression result = data::identifier_assignment(static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+      data::assignment_expression result = data::identifier_assignment(x.lhs(), static_cast<Derived&>(*this)(x.rhs()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -322,7 +314,7 @@ namespace data {
     data::abstraction operator()(const data::forall& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      data::abstraction result = data::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+      data::abstraction result = data::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -330,7 +322,7 @@ namespace data {
     data::abstraction operator()(const data::exists& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      data::abstraction result = data::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+      data::abstraction result = data::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -338,7 +330,7 @@ namespace data {
     data::abstraction operator()(const data::lambda& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      data::abstraction result = data::lambda(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+      data::abstraction result = data::lambda(x.variables(), static_cast<Derived&>(*this)(x.body()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
@@ -346,7 +338,7 @@ namespace data {
     data::data_equation operator()(const data::data_equation& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      data::data_equation result = data::data_equation(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.condition()), static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
+      data::data_equation result = data::data_equation(x.variables(), static_cast<Derived&>(*this)(x.condition()), static_cast<Derived&>(*this)(x.lhs()), static_cast<Derived&>(*this)(x.rhs()));
       static_cast<Derived&>(*this).leave(x);
       return result;
     }

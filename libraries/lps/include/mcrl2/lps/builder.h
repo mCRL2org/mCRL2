@@ -146,7 +146,6 @@ namespace lps {
     void operator()(lps::deadlock_summand& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      x.summation_variables() = static_cast<Derived&>(*this)(x.summation_variables());
       x.condition() = static_cast<Derived&>(*this)(x.condition());
       static_cast<Derived&>(*this)(x.deadlock());
       static_cast<Derived&>(*this).leave(x);
@@ -155,7 +154,6 @@ namespace lps {
     void operator()(lps::action_summand& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      x.summation_variables() = static_cast<Derived&>(*this)(x.summation_variables());
       x.condition() = static_cast<Derived&>(*this)(x.condition());
       static_cast<Derived&>(*this)(x.multi_action());
       x.assignments() = static_cast<Derived&>(*this)(x.assignments());
@@ -173,7 +171,6 @@ namespace lps {
     void operator()(lps::linear_process& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      x.process_parameters() = static_cast<Derived&>(*this)(x.process_parameters());
       static_cast<Derived&>(*this)(x.deadlock_summands());
       static_cast<Derived&>(*this)(x.action_summands());
       static_cast<Derived&>(*this).leave(x);
@@ -182,7 +179,6 @@ namespace lps {
     void operator()(lps::specification& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      static_cast<Derived&>(*this)(x.global_variables());
       static_cast<Derived&>(*this)(x.process());
       x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
       static_cast<Derived&>(*this).leave(x);

@@ -84,6 +84,14 @@ namespace detail {
       x.variable() = static_cast<Derived&>(*this)(x.variable());
       x.formula() = static_cast<Derived&>(*this)(x.formula());
     }   
+
+    template <typename Container>
+    void operator()(pbes<Container>& x)
+    {
+      static_cast<Derived&>(*this)(x.equations());
+      x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+      static_cast<Derived&>(*this)(x.global_variables());
+    }
   };
 
 
@@ -161,6 +169,14 @@ namespace detail {
       x.variable() = static_cast<Derived&>(*this)(x.variable());
       x.formula() = static_cast<Derived&>(*this)(x.formula());
     }   
+
+    template <typename Container>
+    void operator()(pbes<Container>& x)
+    {
+      static_cast<Derived&>(*this)(x.equations());
+      x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+      static_cast<Derived&>(*this)(x.global_variables());
+    }
   };
 } // namespace detail
 /// \endcond
