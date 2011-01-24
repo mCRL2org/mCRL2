@@ -9,10 +9,14 @@
 /// \file mcrl2/pbes/add_binding.h
 /// \brief add your file description here.
 
+// to avoid circular header file problems
+#ifndef MCRL2_PBES_H
+#include "mcrl2/pbes/pbes.h"
+#endif
+
 #ifndef MCRL2_PBES_ADD_BINDING_H
 #define MCRL2_PBES_ADD_BINDING_H
 
-#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/data/add_binding.h"
 
 namespace mcrl2 {

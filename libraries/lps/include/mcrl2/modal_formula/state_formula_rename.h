@@ -14,11 +14,10 @@
 
 #include <deque>
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/replace.h"
-#include "mcrl2/data/map_substitution.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
-#include "mcrl2/modal_formula/replace.h"
+#include "mcrl2/modal_formula/substitute.h"
 
 namespace mcrl2 {
 
@@ -147,14 +146,14 @@ state_formula rename_variables(const state_formula& f, IdentifierGenerator& gene
   std::set<data::variable> src = data::find_free_variables(static_cast< atermpp::aterm_appl const& >(f));
 
   // create a mapping of replacements
-  data::mutable_map_substitution<> replacements;
+  data::mutable_associative_container_substitution<> replacements;
 
   for (std::set<data::variable>::const_iterator i = src.begin(); i != src.end(); ++i)
   {
     replacements[*i] = data::variable(generator(i->name()), i->sort());
   }
 
-  return state_formulas::replace_variables(f, replacements);
+  return state_formulas::substitute_variables(f, replacements);
 }
 
 } // namespace state_formulas

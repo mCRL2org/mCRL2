@@ -49,6 +49,14 @@ namespace data {
     using super::leave;
     using super::operator();
 
+    data::data_expression operator()(const data::identifier& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     data::data_expression operator()(const data::variable& x)
     {
       static_cast<Derived&>(*this).enter(x);  

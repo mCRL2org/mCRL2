@@ -24,8 +24,6 @@ namespace mcrl2 {
 
 namespace data {
 
-#ifndef MCRL2_NEW_SEQUENCE_SUBSTITUTION
-
 /// \cond INTERNAL_DOCS
 namespace detail {
   template< >
@@ -70,34 +68,6 @@ class assignment_list_substitution : public sequence_substitution< atermpp::term
       : sequence_substitution< atermpp::term_list< assignment >, textual_substitution >(assignments)
     {}
 };
-
-#else // MCRL2_NEW_SEQUENCE_SUBSTITUTION
-
-struct assignment_list_substitution : public std::unary_function<variable, data_expression>
-{
-  typedef variable variable_type;
-  typedef data_expression expression_type;
-
-  assignment_list assignments;
-
-  assignment_list_substitution(assignment_list assignments_)
-    : assignments(assignments_)
-  {}
-  
-  data_expression operator()(const variable& v) const
-  {
-    for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
-    {
-      if (i->lhs() == v)
-      {
-        return i->rhs();
-      }
-    }
-    return v;
-  }
-};
-
-#endif // MCRL2_NEW_SEQUENCE_SUBSTITUTION
 
 } // namespace data
 

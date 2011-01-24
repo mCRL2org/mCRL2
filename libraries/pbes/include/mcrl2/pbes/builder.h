@@ -68,6 +68,22 @@ namespace pbes_system {
       return result;
     }
     
+    pbes_system::pbes_expression operator()(const pbes_system::true_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    pbes_system::pbes_expression operator()(const pbes_system::false_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     pbes_system::pbes_expression operator()(const pbes_system::not_& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -169,6 +185,22 @@ namespace pbes_system {
       pbes_system::pbes_expression result = pbes_system::propositional_variable_instantiation(x.name(), static_cast<Derived&>(*this)(x.parameters()));
       static_cast<Derived&>(*this).leave(x);
       return result;
+    }
+    
+    pbes_system::pbes_expression operator()(const pbes_system::true_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    pbes_system::pbes_expression operator()(const pbes_system::false_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
     }
     
     pbes_system::pbes_expression operator()(const pbes_system::not_& x)

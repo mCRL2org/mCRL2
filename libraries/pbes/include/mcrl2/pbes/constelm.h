@@ -22,9 +22,9 @@
 #include <algorithm>
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/data/map_substitution.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
@@ -618,7 +618,7 @@ namespace detail {
               for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
               {
                 // TODO: why not use R(t, sigma) interface here?
-                data_term_type e1 = datar(data::replace_free_variables(*i, data::make_map_substitution_adapter(e_constraints)));
+                data_term_type e1 = datar(*i, data::make_associative_container_substitution(e_constraints));
                 if (core::term_traits<data_term_type>::is_constant(e1))
                 {
                   m_constraints[*j] = e1;
@@ -642,7 +642,7 @@ namespace detail {
                   continue;
                 }
                 // TODO: why not use R(t, sigma) interface here?
-                data_term_type ei = datar(data::replace_free_variables(*i, data::make_map_substitution_adapter(e_constraints)));
+                data_term_type ei = datar(*i, data::make_associative_container_substitution(e_constraints));
                 if (ci != ei)
                 {
                   ci = *j;
@@ -744,7 +744,7 @@ namespace detail {
       {
         if (check_log_level(level))
         {
-          std::clog << "\nEvaluated condition " << core::pp(data::replace_free_variables(e.condition(), data::make_map_substitution_adapter(u.constraints()))) << " to " << core::pp(value) << std::endl;
+          std::clog << "\nEvaluated condition " << core::pp(data::substitute_free_variables(e.condition(), data::make_associative_container_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
         }
       }
 
@@ -752,7 +752,7 @@ namespace detail {
       {
         if (check_log_level(level))
         {
-          std::clog << "\nCould not evaluate condition " << core::pp(data::replace_free_variables(e.condition(), data::make_map_substitution_adapter(u.constraints()))) << " to true or false";
+          std::clog << "\nCould not evaluate condition " << core::pp(data::substitute_free_variables(e.condition(), data::make_associative_container_substitution(u.constraints()))) << " to true or false";
         }
       }
 
@@ -886,7 +886,7 @@ namespace detail {
             LOG_EDGE_UPDATE(2, e, u, v);
 
             // TODO: why not use R(t, sigma) interface here?
-            term_type value = m_pbes_rewriter(e.condition(), data::make_map_substitution_adapter(u.constraints()));
+            term_type value = m_pbes_rewriter(e.condition(), data::make_associative_container_substitution(u.constraints()));
             LOG_CONDITION(2, e, u, value);
 
             if (!tr::is_false(value) && !tr::is_true(value))
@@ -941,7 +941,7 @@ namespace detail {
             *i = pbes_equation(
               i->symbol(),
               i->variable(),
-              pbes_system::replace_free_variables(i->formula(), data::make_map_substitution_adapter(v.constraints()))
+              pbes_system::substitute_free_variables(i->formula(), data::make_associative_container_substitution(v.constraints()))
             );
           }
         }

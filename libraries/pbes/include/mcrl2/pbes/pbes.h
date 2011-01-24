@@ -29,10 +29,10 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
@@ -389,7 +389,7 @@ class pbes
     /// an exception is thrown.
     void instantiate_global_variables()
     {
-      data::mutable_map_substitution<> sigma;
+      data::mutable_associative_container_substitution<> sigma;
       data::representative_generator default_expression_generator(data());
       std::set<data::variable> to_be_removed;
       const atermpp::set<data::variable>& v = global_variables();

@@ -31,6 +31,22 @@ namespace action_formulas {
     using super::leave;
     using super::operator();
 
+    action_formulas::action_formula operator()(const action_formulas::true_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    action_formulas::action_formula operator()(const action_formulas::false_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     action_formulas::action_formula operator()(const action_formulas::not_& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -118,6 +134,22 @@ namespace action_formulas {
     using super::leave;
     using super::operator();
 
+    action_formulas::action_formula operator()(const action_formulas::true_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    action_formulas::action_formula operator()(const action_formulas::false_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     action_formulas::action_formula operator()(const action_formulas::not_& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -342,6 +374,14 @@ namespace regular_formulas {
     using super::leave;
     using super::operator();
 
+    regular_formulas::regular_formula operator()(const regular_formulas::nil& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     regular_formulas::regular_formula operator()(const regular_formulas::seq& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -400,6 +440,14 @@ namespace regular_formulas {
     using super::leave;
     using super::operator();
 
+    regular_formulas::regular_formula operator()(const regular_formulas::nil& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     regular_formulas::regular_formula operator()(const regular_formulas::seq& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -558,6 +606,22 @@ namespace state_formulas {
     using super::leave;
     using super::operator();
 
+    state_formulas::state_formula operator()(const state_formulas::true_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    state_formulas::state_formula operator()(const state_formulas::false_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     state_formulas::state_formula operator()(const state_formulas::not_& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -622,12 +686,28 @@ namespace state_formulas {
       return result;
     }
     
+    state_formulas::state_formula operator()(const state_formulas::yaled& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     state_formulas::state_formula operator()(const state_formulas::yaled_timed& x)
     {
       static_cast<Derived&>(*this).enter(x);  
       state_formulas::state_formula result = state_formulas::yaled_timed(static_cast<Derived&>(*this)(x.time_stamp()));
       static_cast<Derived&>(*this).leave(x);
       return result;
+    }
+    
+    state_formulas::state_formula operator()(const state_formulas::delay& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
     }
     
     state_formulas::state_formula operator()(const state_formulas::delay_timed& x)
@@ -700,6 +780,22 @@ namespace state_formulas {
     using super::leave;
     using super::operator();
 
+    state_formulas::state_formula operator()(const state_formulas::true_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    state_formulas::state_formula operator()(const state_formulas::false_& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     state_formulas::state_formula operator()(const state_formulas::not_& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -764,12 +860,28 @@ namespace state_formulas {
       return result;
     }
     
+    state_formulas::state_formula operator()(const state_formulas::yaled& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     state_formulas::state_formula operator()(const state_formulas::yaled_timed& x)
     {
       static_cast<Derived&>(*this).enter(x);  
       state_formulas::state_formula result = state_formulas::yaled_timed(static_cast<Derived&>(*this)(x.time_stamp()));
       static_cast<Derived&>(*this).leave(x);
       return result;
+    }
+    
+    state_formulas::state_formula operator()(const state_formulas::delay& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
     }
     
     state_formulas::state_formula operator()(const state_formulas::delay_timed& x)

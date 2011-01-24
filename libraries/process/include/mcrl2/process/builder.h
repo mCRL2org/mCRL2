@@ -72,6 +72,22 @@ namespace process {
       return result;
     }
     
+    process::process_expression operator()(const process::delta& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    process::process_expression operator()(const process::tau& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
     process::process_expression operator()(const process::sum& x)
     {
       static_cast<Derived&>(*this).enter(x);  
@@ -263,6 +279,22 @@ namespace process {
       process::process_expression result = process::process_instance_assignment(x.identifier(), static_cast<Derived&>(*this)(x.assignments()));
       static_cast<Derived&>(*this).leave(x);
       return result;
+    }
+    
+    process::process_expression operator()(const process::delta& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
+    }
+    
+    process::process_expression operator()(const process::tau& x)
+    {
+      static_cast<Derived&>(*this).enter(x);  
+      // skip
+      static_cast<Derived&>(*this).leave(x);
+      return x;
     }
     
     process::process_expression operator()(const process::sum& x)

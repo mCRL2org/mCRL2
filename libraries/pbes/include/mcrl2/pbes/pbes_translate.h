@@ -24,10 +24,12 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
-#include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/substitute.h"
 #include "mcrl2/modal_formula/find.h"
+#include "mcrl2/modal_formula/substitute.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/mucalculus.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
@@ -37,7 +39,7 @@
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/monotonicity.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 #include "mcrl2/pbes/detail/lps2pbes_indenter.h"
 
@@ -227,14 +229,14 @@ lps2pbes_increase_indent();
         action_formulas::action_formula alpha = arg(b);
         std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), x.time(), b));
         data::variable_list b = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
-        result = z::forall(b, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_double_sequence_substitution_adaptor(v, b))));
+        result = z::forall(b, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       } else if (a::is_exists(b)) {
         data::variable_list v = var(b);
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
         std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), x.time(), b));
         data::variable_list b = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
-        result = z::exists(b, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_double_sequence_substitution_adaptor(v, b))));
+        result = z::exists(b, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       } else {
         throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
       }
@@ -332,9 +334,9 @@ lps2pbes_increase_indent();
             data::variable_list y = atermpp::convert<data::variable_list>(fresh_variables(yi, context));
 //std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
 //std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
-            ci = data::replace_free_variables(ci, make_double_sequence_substitution_adaptor(yi, y));
-            lps::replace_free_variables(ai, make_double_sequence_substitution_adaptor(yi, y));
-            gi = data::replace_free_variables(gi, make_double_sequence_substitution_adaptor(yi, y));
+            ci = data::substitute_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
+            lps::substitute_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
+            gi = data::substitute_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
             data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
@@ -342,8 +344,8 @@ lps2pbes_increase_indent();
             pbes_expression p3 = d::greater(ti, T);
 
             // N.B. The order of these two substitutions is important!
-            rhs = pbes_system::replace_free_variables(rhs, data::assignment_list_substitution(gi));
-            rhs = pbes_system::replace_free_variables(rhs, data::assignment(T, ti));
+            rhs = pbes_system::substitute_free_variables(rhs, data::assignment_sequence_substitution(gi));
+            rhs = pbes_system::substitute_free_variables(rhs, data::assignment(T, ti));
 
             pbes_expression p = pbes_expr::forall(y, imp(and_(and_(p1, p2), p3), rhs));
             v.push_back(p);
@@ -366,9 +368,9 @@ lps2pbes_increase_indent();
 
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
-            ci = data::replace_free_variables(ci, make_double_sequence_substitution_adaptor(yi, y));
-            lps::replace_free_variables(ai, make_double_sequence_substitution_adaptor(yi, y));
-            gi = data::replace_free_variables(gi, make_double_sequence_substitution_adaptor(yi, y));
+            ci = data::substitute_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
+            lps::substitute_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
+            gi = data::substitute_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
             data::data_expression ti = ai.time();
 
             pbes_expression p1 = sat_top(ai, alpha);
@@ -376,8 +378,8 @@ lps2pbes_increase_indent();
             pbes_expression p3 = d::greater(ti, T);
             
             // N.B. The order of these two substitutions is important!
-            rhs = pbes_system::replace_free_variables(rhs, data::assignment_list_substitution(gi));
-            rhs = pbes_system::replace_free_variables(rhs, data::assignment(T, ti));
+            rhs = pbes_system::substitute_free_variables(rhs, data::assignment_sequence_substitution(gi));
+            rhs = pbes_system::substitute_free_variables(rhs, data::assignment(T, ti));
 
             pbes_expression p = pbes_expr::exists(y, and_(and_(and_(p1, p2), p3), rhs));
             v.push_back(p);
@@ -727,7 +729,7 @@ lps2pbes_increase_indent();
         {
           std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), b));
           data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
-          result = p::forall(y, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_double_sequence_substitution_adaptor(v, y))));
+          result = p::forall(y, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
         else
           result = sat_top(x, alpha);
@@ -738,7 +740,7 @@ lps2pbes_increase_indent();
         {
           std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), b));
           data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
-          result = p::exists(y, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_double_sequence_substitution_adaptor(v, y))));
+          result = p::exists(y, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
         else
           result = sat_top(x, alpha);
@@ -819,12 +821,12 @@ lps2pbes_increase_indent();
 
             pbes_expression rhs = RHS(f0, phi, lps, context);
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
-            ci = data::replace_free_variables(ci, make_double_sequence_substitution_adaptor(yi, y));
-            ai = lps::replace_free_variables(ai, make_double_sequence_substitution_adaptor(yi, y));
-            gi = data::replace_free_variables(gi, make_double_sequence_substitution_adaptor(yi, y));
+            ci = data::substitute_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
+            ai = lps::substitute_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
+            gi = data::substitute_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
-            rhs = pbes_system::replace_free_variables(rhs, data::assignment_list_substitution(gi));
+            rhs = pbes_system::substitute_free_variables(rhs, data::assignment_sequence_substitution(gi));
 
             pbes_expression p = pbes_expr::forall(y, imp(and_(p1, p2), rhs));
             v.push_back(p);
@@ -845,12 +847,12 @@ lps2pbes_increase_indent();
 
             pbes_expression rhs = RHS(f0, phi, lps, context);
             data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
-            ci = data::replace_free_variables(ci, make_double_sequence_substitution_adaptor(yi, y));
-            ai = lps::replace_free_variables(ai, make_double_sequence_substitution_adaptor(yi, y));
-            gi = data::replace_free_variables(gi, make_double_sequence_substitution_adaptor(yi, y));
+            ci = data::substitute_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
+            ai = lps::substitute_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
+            gi = data::substitute_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
             pbes_expression p1 = sat_top(ai, alpha);
             pbes_expression p2 = ci;
-            rhs = pbes_system::replace_free_variables(rhs, data::assignment_list_substitution(gi));
+            rhs = pbes_system::substitute_free_variables(rhs, data::assignment_sequence_substitution(gi));
 
             pbes_expression p = pbes_expr::exists(y, and_(and_(p1, p2), rhs));
             v.push_back(p);

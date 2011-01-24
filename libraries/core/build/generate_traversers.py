@@ -53,7 +53,7 @@ def make_builder(filename, builder_name, class_map, all_classes, namespace, expr
     classes.sort(compare_classes)
 
     for c in classes:
-        if is_dependent_type(dependencies, c.classname(True)) or ('E' in c.modifiers() and c.superclass(True) == expression):
+        if is_dependent_type(dependencies, c.classname(True)) or ('E' in c.modifiers() and is_dependent_type(dependencies, c.superclass(True))):
             result.append(c.builder_function(all_classes, dependencies, modifiability_map))
     visit_text = indent_text('\n'.join(result), '    ')
     text = BUILDER
