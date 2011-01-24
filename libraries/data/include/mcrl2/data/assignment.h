@@ -22,7 +22,6 @@
 #include "mcrl2/atermpp/combine_iterator.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/identifier.h"
 #include "mcrl2/data/variable.h"
@@ -32,9 +31,11 @@ namespace mcrl2 {
   namespace data {
 
     class assignment_expression: public atermpp::aterm_appl,
-                                 public core::substitution_function<variable, data_expression>
+                                 public std::unary_function<variable, data_expression>
     {
       public:
+        typedef variable variable_type;
+        typedef data_expression expression_type;
 
         assignment_expression()
          : atermpp::aterm_appl(core::detail::constructWhrDecl())
@@ -65,41 +66,6 @@ namespace mcrl2 {
     typedef atermpp::term_list<assignment_expression> assignment_expression_list;
     /// \brief vector of assignment expressions
     typedef atermpp::vector<assignment_expression>    assignment_expression_vector;
-
-//    class assignment_expression: public atermpp::aterm_appl,
-//                                 public core::substitution_function<variable, data_expression>
-//    {
-//      public:
-//
-//        assignment_expression()
-//         : atermpp::aterm_appl(core::detail::constructWhrDecl())
-//        {}
-//
-//        assignment_expression(atermpp::aterm_appl term)
-//         : atermpp::aterm_appl(term)
-//        {
-//          assert(core::detail::check_rule_WhrDecl(term));
-//        }
-//
-//        assignment_expression(const variable v, const data_expression d)
-//         : atermpp::aterm_appl(core::detail::gsMakeDataVarIdInit(v,d))
-//        {}
-//
-//        variable lhs() const
-//        {
-//          return atermpp::arg1(*this);
-//        }
-//
-//        data_expression rhs() const
-//        {
-//          return atermpp::arg2(*this);
-//        }
-//    };
-//
-//    /// \brief list of assignment expressions
-//    typedef atermpp::term_list<assignment_expression> assignment_expression_list;
-//    /// \brief vector of assignment expressions
-//    typedef atermpp::vector<assignment_expression>    assignment_expression_vector;
 
 //--- start generated classes ---//
 

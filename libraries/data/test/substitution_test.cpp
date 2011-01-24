@@ -16,9 +16,9 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/assignment_list_substitution.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/mutable_substitution_adapter.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
@@ -236,7 +236,7 @@ std::cerr << replace_variables(l, assignment_list_substitution(r)) << std::endl;
   core::garbage_collect();
 }
 
-void test_mutable_substitution_adapter()
+void test_mutable_substitution_composer()
 {
   mutable_map_substitution< > f;
   variable x("x", sort_nat::nat());
@@ -244,11 +244,11 @@ void test_mutable_substitution_adapter()
   variable z("z", sort_nat::nat());
   f[x] = y;
 
-  mutable_substitution_adapter<mutable_map_substitution< > > g(f);
+  mutable_substitution_composer<mutable_map_substitution< > > g(f);
   BOOST_CHECK(g(x) == y);
 
   assignment a(y, z);
-  mutable_substitution_adapter<assignment> h(a);
+  mutable_substitution_composer<assignment> h(a);
 #ifdef MCRL2_NEW_REPLACE_VARIABLES
 // the old replace interface does not work here...
   BOOST_CHECK(replace_free_variables(x, h) == x);
@@ -308,7 +308,7 @@ int test_main(int a, char**aa)
   test_basic();
   test_assignment_list_substitution();
   test_list_substitution();
-  test_mutable_substitution_adapter();
+  test_mutable_substitution_composer();
   test_mutable_substitution();
 
   return EXIT_SUCCESS;

@@ -12,13 +12,13 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
+#include <functional>
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/sequence.h"
-#include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
@@ -34,10 +34,13 @@ namespace data {
 namespace detail {
 
   template <typename VariableContainer, typename ExpressionContainer>
-  struct data_enumerator_replace_helper: public core::substitution_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
+  struct data_enumerator_replace_helper: public std::unary_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
   {
     const VariableContainer& variables_;
     const ExpressionContainer& replacements_;
+
+    typedef typename VariableContainer::value_type variable_type;
+    typedef typename ExpressionContainer::value_type expression_type;
 
     data_enumerator_replace_helper(const VariableContainer& variables,
                                    const ExpressionContainer& replacements

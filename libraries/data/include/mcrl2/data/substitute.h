@@ -151,19 +151,19 @@ namespace detail {
     }
   };
 
-  template <typename VariableSequence, typename ExpressionSequence>
-  struct sequence_sequence_substitution: public std::unary_function<typename VariableSequence::value_type, typename ExpressionSequence::value_type>
+  template <typename VariableContainer, typename ExpressionContainer>
+  struct sequence_sequence_substitution: public std::unary_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
   {
     /// \brief type used to represent variables
-    typedef typename VariableSequence::value_type variable_type;
+    typedef typename VariableContainer::value_type variable_type;
 
     /// \brief type used to represent expressions
-    typedef typename ExpressionSequence::value_type  expression_type;
+    typedef typename ExpressionContainer::value_type  expression_type;
  
-    const VariableSequence& variables;
-    const ExpressionSequence& expressions;
+    const VariableContainer& variables;
+    const ExpressionContainer& expressions;
  
-    sequence_sequence_substitution(const VariableSequence& variables_, const ExpressionSequence& expressions_)
+    sequence_sequence_substitution(const VariableContainer& variables_, const ExpressionContainer& expressions_)
       : variables(variables_),
         expressions(expressions_)
     {
@@ -172,8 +172,8 @@ namespace detail {
     
     expression_type operator()(const variable_type& v) const
     {
-      typename VariableSequence::const_iterator i = variables.begin();
-      typename ExpressionSequence::const_iterator j = expressions.begin();
+      typename VariableContainer::const_iterator i = variables.begin();
+      typename ExpressionContainer::const_iterator j = expressions.begin();
       
       for ( ; i != variables.end(); ++i, ++j)
       {
@@ -186,18 +186,18 @@ namespace detail {
     }
   };
 
-  template <typename VariableSequence, typename ExpressionSequence>
-  sequence_sequence_substitution<VariableSequence, ExpressionSequence>
-  make_sequence_sequence_substitution(const VariableSequence& vc, const ExpressionSequence& ec)
+  template <typename VariableContainer, typename ExpressionContainer>
+  sequence_sequence_substitution<VariableContainer, ExpressionContainer>
+  make_sequence_sequence_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
   {
-    return sequence_sequence_substitution<VariableSequence, ExpressionSequence>(vc, ec);
+    return sequence_sequence_substitution<VariableContainer, ExpressionContainer>(vc, ec);
   }
 
   template <typename AssociativeContainer>
-  struct associative_container_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::value_type>
+  struct associative_container_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
   {
     typedef typename AssociativeContainer::key_type variable_type;
-    typedef typename AssociativeContainer::value_type expression_type;
+    typedef typename AssociativeContainer::mapped_type expression_type;
   
     const AssociativeContainer& m_map;
 
@@ -220,7 +220,7 @@ namespace detail {
   }
 
   template <typename AssociativeContainer = atermpp::map<variable,data_expression> >
-  struct mutable_associative_container_substitution : public std::unary_function<variable, data_expression>
+  struct mutable_associative_container_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
   {
     typedef variable variable_type;
     typedef data_expression expression_type;
@@ -328,6 +328,112 @@ namespace detail {
   make_associative_container_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
   {
     return associative_container_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
+  }
+
+  /// \brief An adapter that makes an arbitrary substitution function mutable.
+  template <typename Substitution>
+  class mutable_substitution_composer: public std::unary_function<typename Substitution::variable_type, typename Substitution::expression_type>
+  {
+    public:
+      /// \brief type used to represent variables
+      typedef typename Substitution::variable_type variable_type;
+
+      /// \brief type used to represent expressions
+      typedef typename Substitution::expression_type expression_type;
+
+      /// \brief Wrapper class for internal storage and substitution updates using operator()
+      typedef typename mutable_associative_container_substitution<atermpp::map<variable_type, expression_type> >::assignment assignment;
+
+      /// \brief The type of the wrapped substitution
+      typedef Substitution substitution_type;
+
+    protected:
+      /// \brief The wrapped substitution
+      const Substitution& f_;
+
+      /// \brief An additional mutable substitution
+      mutable_associative_container_substitution<atermpp::map<variable_type, expression_type> > g_;
+
+    public:
+      /// \brief Constructor
+      mutable_substitution_composer(const Substitution& f)
+        : f_(f)
+      {}
+
+      /// \brief Apply on single single variable expression
+      /// \param[in] v the variable for which to give the associated expression
+      /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+      expression_type operator()(variable_type const& v) const {
+        return data::substitute_free_variables(f_(v), g_);
+      }
+
+      assignment operator[](variable_type const& v) {
+        return g_[v];
+      }
+
+      /// \brief Returns the wrapped substitution
+      /// \return The wrapped substitution
+      const substitution_type& substitution() const
+      {
+        return f_;
+      }
+  };
+
+  /// \brief Specialization for mutable_associative_container_substitution.
+  template <typename AssociativeContainer>
+  class mutable_substitution_composer<mutable_associative_container_substitution<AssociativeContainer> >: public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
+  {
+    public:
+      /// \brief The type of the wrapped substitution
+      typedef mutable_associative_container_substitution<AssociativeContainer> substitution_type;
+
+      /// \brief type used to represent variables
+      typedef typename substitution_type::variable_type variable_type;
+
+      /// \brief type used to represent expressions
+      typedef typename substitution_type::expression_type expression_type;
+
+      /// \brief Wrapper class for internal storage and substitution updates using operator()
+      typedef typename substitution_type::assignment assignment;
+
+    protected:
+      /// \brief object on which substitution manipulations are performed
+      mutable_associative_container_substitution<AssociativeContainer>& g_;
+
+    public:
+
+      /// \brief Constructor with mutable substitution object
+      /// \param[in,out] g underlying substitution object
+      mutable_substitution_composer(mutable_associative_container_substitution<AssociativeContainer>& g)
+        : g_(g)
+      {}
+
+      /// \brief Apply on single single variable expression
+      /// \param[in] v the variable for which to give the associated expression
+      /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
+      expression_type operator()(variable_type const& v) const {
+        return g_(v);
+      }
+
+      assignment operator[](variable_type const& v) {
+        return g_[v];
+      }
+
+      /// \brief Returns the wrapped substitution
+      /// \return The wrapped substitution
+      const substitution_type& substitution() const
+      {
+        return g_;
+      }
+  };
+
+  /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+  /// \param[in] sigma a constant reference to an object of a mutable_substitution_composer instance
+  /// \return A string representation of the map.
+  template <typename Substitution>
+  std::string to_string(const mutable_substitution_composer<Substitution>& sigma)
+  {
+    return to_string(sigma.substitution());
   }
 
 } // namespace data

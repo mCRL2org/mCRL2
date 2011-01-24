@@ -13,6 +13,7 @@
 #define MCRL2_DATA_DETAIL_REPLACE_H
 
 #include <algorithm>
+#include <functional>
 #include <iterator>
 #include <utility>
 
@@ -23,7 +24,6 @@
 #include "boost/utility/enable_if.hpp"
 
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/core/substitution_function.h"
 #include "mcrl2/core/deprecation.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/manipulator.h"
