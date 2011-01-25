@@ -14,7 +14,7 @@
 
 #include <utility>
 #include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/data/sequence_substitution.h"
+#include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/builder.h"
 

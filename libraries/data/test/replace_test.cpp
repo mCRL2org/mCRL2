@@ -25,7 +25,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/map_substitution.h"
-#include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"

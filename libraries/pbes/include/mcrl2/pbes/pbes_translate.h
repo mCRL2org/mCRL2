@@ -22,7 +22,6 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/lps/specification.h"
