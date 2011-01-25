@@ -72,18 +72,6 @@ class action: public atermpp::aterm_appl
     {
       return m_arguments;
     }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    action substitute(Substitution f)
-    {
-      return action(f(atermpp::aterm_appl(*this)));
-    }
 };
 
 /// Read-only singly linked list of actions

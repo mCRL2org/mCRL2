@@ -80,18 +80,6 @@ namespace lps {
         return m_time;
       }
 
-      /// \brief Applies a low level substitution function to this term and returns the result.
-      /// \param f A
-      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-      /// \deprecated
-      /// \return The substitution result.
-      template <typename Substitution>
-      deadlock substitute(Substitution f)
-      {
-        return deadlock(substitute(f, m_time));
-      }
-
       /// \brief Returns a string representation of the deadlock
       std::string to_string() const
       {

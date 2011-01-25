@@ -134,19 +134,6 @@ namespace lps {
         return front(m_actions).arguments();
       }
 
-      /// \brief Applies a low level substitution function to this term and returns the result.
-      /// \param f A
-      /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-      /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-      /// \deprecated
-      /// \return The substitution result.
-      template <typename Substitution>
-      multi_action substitute(Substitution f)
-      {
-        throw std::runtime_error("multi_action::substitute(Substitution) is a deprecated interface!");
-        return multi_action(m_actions.substitute(f), f(m_time));
-      }
-
       /// \brief Returns a string representation of the multi action
       std::string to_string() const
       {

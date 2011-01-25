@@ -18,6 +18,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"
@@ -27,6 +28,7 @@
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/lps/substitute.h"
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -339,9 +341,9 @@ namespace lps {
         }
       }
 
-      lps::substitute(rcond, mcrl2::data::make_map_substitution_adapter(renamings));
-      lps::substitute(rleft, mcrl2::data::make_map_substitution_adapter(renamings));
-      lps::substitute(rright, mcrl2::data::make_map_substitution_adapter(renamings));
+      rcond = data::substitute_free_variables(rcond, mcrl2::data::make_associative_container_substitution(renamings));
+      rleft = lps::substitute_free_variables(rleft, mcrl2::data::make_associative_container_substitution(renamings));
+      rright = lps::substitute_free_variables(rright, mcrl2::data::make_associative_container_substitution(renamings));
     }
 
   } // namespace detail
