@@ -18,7 +18,6 @@
 
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
-#include "mcrl2/data/substitute.h"
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/substitute.h"
@@ -50,8 +49,8 @@ namespace mcrl2 {
         void apply_substitution(action_summand& s, Substitution& sigma)
         {
           s.condition() = m_rewriter(s.condition(), sigma);
-          lps::substitute_free_variables(s.multi_action(), sigma);
-          s.assignments() = data::substitute_variables(s.assignments(), sigma);
+          substitute(s.multi_action(), sigma);
+          s.assignments() = replace_variables(s.assignments(), sigma);
         }
 
         // Temporary solution, should be replace with lps substitution
