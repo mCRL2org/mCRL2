@@ -18,6 +18,7 @@
 
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
+#include "mcrl2/data/substitute.h"
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/substitute.h"
@@ -50,7 +51,7 @@ namespace mcrl2 {
         {
           s.condition() = m_rewriter(s.condition(), sigma);
           substitute(s.multi_action(), sigma);
-          s.assignments() = replace_variables(s.assignments(), sigma);
+          s.assignments() = data::substitute_variables(s.assignments(), sigma);
         }
 
         // Temporary solution, should be replace with lps substitution
