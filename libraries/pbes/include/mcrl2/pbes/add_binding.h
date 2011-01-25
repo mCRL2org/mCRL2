@@ -63,6 +63,18 @@ namespace pbes_system {
     {
       decrease_bind_count(x.variables());
     }
+
+    template <typename Container>
+    void enter(const pbes<Container>& x)
+    {
+      increase_bind_count(x.global_variables());
+    }
+
+    template <typename Container>
+    void leave(const pbes<Container>& x)
+    {
+      increase_bind_count(x.global_variables());
+    }
   };
 
 } // namespace pbes_system

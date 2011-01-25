@@ -30,7 +30,7 @@ void operator()(const lps::action& x)
 void operator()(const lps::deadlock& x)
 {
   static_cast<Derived&>(*this).enter(x);
-  if (x.has_time()) static_cast<Derived&>(*this)(x.time());;
+  if (x.has_time()) static_cast<Derived&>(*this)(x.time());
   static_cast<Derived&>(*this).leave(x);
 }
 
@@ -38,7 +38,7 @@ void operator()(const lps::multi_action& x)
 {
   static_cast<Derived&>(*this).enter(x);
   static_cast<Derived&>(*this)(x.actions());
-  if (x.has_time()) static_cast<Derived&>(*this)(x.time());;
+  if (x.has_time()) static_cast<Derived&>(*this)(x.time());
   static_cast<Derived&>(*this).leave(x);
 }
 

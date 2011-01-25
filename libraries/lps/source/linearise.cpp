@@ -1289,7 +1289,7 @@ class specification_basic_type:public boost::noncopyable
          { sigma[*i]=*j;
          }
        }
-       return data::substitute_free_variables(tl, data::make_associative_container_substitution(sigma));
+       return data::substitute_free_variables(atermpp::convert<data::data_expression_list>(tl), data::make_associative_container_substitution(sigma));
     }
 
     data_expression substitute_data(
@@ -1311,7 +1311,6 @@ class specification_basic_type:public boost::noncopyable
       }
       const data_expression result=data::substitute_free_variables(t, make_associative_container_substitution(sigma));
       return result;
-
     }
 
     action_list substitute_multiaction(

@@ -54,7 +54,7 @@ namespace lps {
     void operator()(lps::deadlock& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      x.time() = static_cast<Derived&>(*this)(x.time());
+      if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());
       static_cast<Derived&>(*this).leave(x);
     }
     
@@ -62,7 +62,7 @@ namespace lps {
     {
       static_cast<Derived&>(*this).enter(x);  
       x.actions() = static_cast<Derived&>(*this)(x.actions());
-      x.time() = static_cast<Derived&>(*this)(x.time());
+      if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());
       static_cast<Derived&>(*this).leave(x);
     }
     
@@ -136,7 +136,7 @@ namespace lps {
     void operator()(lps::deadlock& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      x.time() = static_cast<Derived&>(*this)(x.time());
+      if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());
       static_cast<Derived&>(*this).leave(x);
     }
     
@@ -144,7 +144,7 @@ namespace lps {
     {
       static_cast<Derived&>(*this).enter(x);  
       x.actions() = static_cast<Derived&>(*this)(x.actions());
-      x.time() = static_cast<Derived&>(*this)(x.time());
+      if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());
       static_cast<Derived&>(*this).leave(x);
     }
     

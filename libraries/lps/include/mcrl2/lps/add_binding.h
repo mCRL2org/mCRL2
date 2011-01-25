@@ -59,6 +59,16 @@ namespace lps {
     {
       decrease_bind_count(x.process_parameters());
     }
+
+    void enter(const specification& x)
+    {
+      increase_bind_count(x.global_variables());
+    }
+
+    void leave(const specification& x)
+    {
+      increase_bind_count(x.global_variables());
+    }
   };
 
 } // namespace lps

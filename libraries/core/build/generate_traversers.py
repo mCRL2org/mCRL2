@@ -27,7 +27,7 @@ def make_traverser(filename, classnames, all_classes):
     #----------------------------------------------------------------------------------------#
     # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
     # TODO: investigate if the time interface can be improved
-    text = re.sub(r'static_cast<Derived&>\(\*this\)\(x.time\(\)\)', 'if (x.has_time()) static_cast<Derived&>(*this)(x.time());', text)
+    text = re.sub(r'static_cast<Derived&>\(\*this\)\(x.time\(\)\);', 'if (x.has_time()) static_cast<Derived&>(*this)(x.time());', text)
     #----------------------------------------------------------------------------------------#
 
     insert_text_in_file(filename, text, 'generated code')
@@ -59,6 +59,13 @@ def make_builder(filename, builder_name, class_map, all_classes, namespace, expr
     text = BUILDER
     text = re.sub('<BUILDER_NAME>', builder_name, text)
     text = re.sub('<VISIT_TEXT>', visit_text, text)
+
+    #----------------------------------------------------------------------------------------#
+    # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
+    # TODO: investigate if the time interface can be improved
+    text = re.sub(r'x.time\(\) = static_cast<Derived&>\(\*this\)\(x.time\(\)\);', 'if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());', text)
+    #----------------------------------------------------------------------------------------#
+
     insert_text_in_file(filename, text, 'generated %s code' % builder_name)
 
 if __name__ == "__main__":
