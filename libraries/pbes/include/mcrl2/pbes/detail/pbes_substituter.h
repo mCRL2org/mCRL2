@@ -18,7 +18,7 @@
 #define MCRL2_PBES_DETAIL_PBES_SUBSTITUTER_H
 
 #include <vector>
-#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/pbes/detail/substitute_builder.h"
 
 namespace mcrl2 {
@@ -92,7 +92,7 @@ namespace detail {
     /// \param d A data expression
     data::data_expression substitute_copy(const data::data_expression& d) const    
     {                                         
-      return data::replace_free_variables(d, sigma);
+      return data::substitute_free_variables(d, sigma);
     } 
 
     /// \brief Applies the substitution to a data expression

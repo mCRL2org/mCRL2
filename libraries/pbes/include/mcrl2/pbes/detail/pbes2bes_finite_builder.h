@@ -14,7 +14,7 @@
 
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 
@@ -96,7 +96,7 @@ struct pbes2bes_finite_builder: public pbes_expr_builder<pbes_expression, Substi
   /// \return The result of visiting the node
   pbes_expression visit_data_expression(const pbes_expression& e, const data::data_expression& d, Substitution& sigma)
   {
-    return data::replace_free_variables(d, sigma);
+    return data::substitute_free_variables(d, sigma);
   }
 
   /// \brief Visit propositional_variable node
