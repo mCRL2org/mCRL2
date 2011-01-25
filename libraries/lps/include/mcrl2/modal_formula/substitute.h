@@ -12,7 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_SUBSTITUTE_H
 #define MCRL2_MODAL_FORMULA_SUBSTITUTE_H
 
-#include "mcrl2/data/detail/replace.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/modal_formula/add_binding.h"
 #include "mcrl2/modal_formula/builder.h"    
 

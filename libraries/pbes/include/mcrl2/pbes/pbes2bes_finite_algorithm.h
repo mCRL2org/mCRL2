@@ -19,7 +19,6 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/substitute.h"

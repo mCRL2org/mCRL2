@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/replace.h
+/// \file mcrl2/data/detail/manipulator.h
 /// \brief Contains a function for replacing data variables in a term.
 
 #ifndef MCRL2_DATA_DETAIL_EXPRESSION_MANIPULATOR_H

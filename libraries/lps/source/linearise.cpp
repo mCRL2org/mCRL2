@@ -1298,7 +1298,7 @@ class specification_basic_type:public boost::noncopyable
                      const data_expression t)
     { /* The code below could be replaced by the code below, but this is too inefficient,
          as the reverse operator is expensive:
-          return data::replace_free_variables(t,make_map_substitution(atermpp::reverse(vars), atermpp::reverse(terms)));
+         <snip>
       */
       std::map < variable, data_expression > sigma;
       data_expression_list::const_iterator j=terms.begin();

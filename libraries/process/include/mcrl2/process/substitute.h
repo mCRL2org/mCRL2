@@ -12,7 +12,7 @@
 #ifndef MCRL2_PROCESS_SUBSTITUTE_H
 #define MCRL2_PROCESS_SUBSTITUTE_H
 
-#include "mcrl2/data/detail/replace.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/process/add_binding.h"
 #include "mcrl2/process/builder.h"    
 

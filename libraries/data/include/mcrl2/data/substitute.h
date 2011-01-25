@@ -380,17 +380,17 @@ namespace detail {
 
   /// \brief Utility function for creating a associative_container_substitution_adapter.
   template <typename VariableContainer, typename ExpressionContainer, typename MapContainer>
-  associative_container_substitution<MapContainer>
-  make_associative_container_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
+  mutable_associative_container_substitution<MapContainer>
+  make_mutable_associative_container_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
   {
-    return associative_container_substitution<MapContainer>(vc, ec);
+    return mutable_associative_container_substitution<MapContainer>(vc, ec);
   }
 
   template <typename VariableContainer, typename ExpressionContainer>
-  associative_container_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >
-  make_associative_container_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
+  mutable_associative_container_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >
+  make_mutable_associative_container_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
   {
-    return associative_container_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
+    return mutable_associative_container_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
   }
 
   /// \brief An adapter that makes an arbitrary substitution function mutable.

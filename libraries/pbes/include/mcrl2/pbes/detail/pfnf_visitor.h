@@ -25,7 +25,6 @@
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/core/identifier_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"

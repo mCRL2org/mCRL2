@@ -13,7 +13,6 @@
 #define MCRL2_LPS_DETAIL_LPS_REPLACER_H
 
 #include <vector>
-#include "mcrl2/data/replace.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2 {

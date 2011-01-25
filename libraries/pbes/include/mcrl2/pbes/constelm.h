@@ -23,7 +23,6 @@
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/substitute.h"
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"

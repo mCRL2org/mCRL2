@@ -17,7 +17,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/detail/lps_substituter.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
@@ -48,7 +47,7 @@ void test_replace()
   variable c("c", sort_bool::bool_());
   variable d("d", sort_bool::bool_());
   assignment a(c, d);
-  summand t = data::replace_variables(s, a);
+  summand t = lps::substitute_variables(s, a);
   std::cout << "<s>" << pp(s) << std::endl;
   std::cout << "<t>" << pp(t) << std::endl;
   core::garbage_collect();
