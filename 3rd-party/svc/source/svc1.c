@@ -81,7 +81,8 @@ int svcInit(ltsFile *file, char *filename, SVCfileMode fileMode, SVCbool *indexe
             /* The first 30 bytes are reserved for de file index,
                bodyPosition must be always 30  
             */
-            if (file->bodyPosition!=30) {
+            if ((file->bodyPosition!=30) && (file->bodyPosition!=0))
+            {
                  svcErrno=EINDEX;
                  return -1;
                  }
@@ -236,7 +237,14 @@ int svcReadHeader(ltsFile *file, struct ltsHeader *header){
 
 /* Read the next transition from `file' into `transition' */
 
-int svcReadNextTransition(ltsFile *file, struct ltsTransition *transition){ 
+int svcReadNextTransition(ltsFile *file, struct ltsTransition *transition)
+{ 
+    if (file->bodyPosition==0) 
+    {
+      svcErrno=EINDEX;
+      return -1;
+    }
+
 
    if (file->firstTransition) {
       CSflush(file->csStates);
