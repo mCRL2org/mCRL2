@@ -49,7 +49,7 @@ namespace mcrl2 {
         void apply_substitution(action_summand& s, Substitution& sigma)
         {
           s.condition() = m_rewriter(s.condition(), sigma);
-          substitute(s.multi_action(), sigma);
+          lps::substitute_free_variables(s.multi_action(), sigma);
           s.assignments() = replace_variables(s.assignments(), sigma);
         }
 
