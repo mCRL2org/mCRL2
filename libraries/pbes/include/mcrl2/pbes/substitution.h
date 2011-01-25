@@ -59,7 +59,7 @@ namespace pbes_system {
         const data::data_expression_list& e = v.parameters();
 
         // return phi[d := e]
-        pbes_system::substitute_free_variables(phi, data::make_sequence_sequence_substitution(d, e));
+        phi = pbes_system::substitute_free_variables(phi, data::make_sequence_sequence_substitution(d, e));
         return phi;
       }
 
