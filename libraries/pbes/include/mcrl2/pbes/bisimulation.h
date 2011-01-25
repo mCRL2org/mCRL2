@@ -20,11 +20,10 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
+#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/substitute.h"
@@ -231,8 +230,10 @@ public:
     /// \detail After this substitution the following holds:
     /// \f[ ((param(p)\cup glob(p))\cap ((param(q)\cup glob(q))=\emptyset \f]
     /// where param(p) denotes p.process().process_parameters() and glob(p) denotes p.global_variables().
-    data::mutable_map_substitution<> resolve_name_clashes(const specification& p, const specification& q) const
+    atermpp::map<data::variable, data::variable> compute_name_clashes(const specification& p, const specification& q) const
     {
+      atermpp::map<data::variable, data::variable> result;
+
       std::set<data::variable> pvars;
       pvars.insert(p.global_variables().begin(), p.global_variables().end());
       pvars.insert(p.process().process_parameters().begin(), p.process().process_parameters().end());
@@ -241,39 +242,44 @@ public:
       qvars.insert(q.global_variables().begin(), q.global_variables().end());
       qvars.insert(q.process().process_parameters().begin(), q.process().process_parameters().end());
       
-      // compute name clashes between pvars and qvars
-      std::set<core::identifier_string> pnames;
+      // put the names of variables appearing in pvars in an identifier generator
+      data::set_identifier_generator generator;
       for (std::set<data::variable>::iterator i = pvars.begin(); i != pvars.end(); ++i)
       {
-        pnames.insert(i->name());
-      }
-      std::set<data::variable> name_clashes;
-      for (std::set<data::variable>::iterator i = qvars.begin(); i != qvars.end(); ++i)
-      {
-        if (pnames.find(i->name()) != pnames.end())
-        {
-          name_clashes.insert(*i);
-        }
+        generator.add_identifier(i->name());
       }
 
-      // collect the variables appearing in p and q and put store them in an identifier generator
-      data::set_identifier_generator generator;
-      std::set<data::variable> pqvars;
-      lps::find_variables(p, std::inserter(pqvars, pqvars.end()));
-      lps::find_variables(q, std::inserter(pqvars, pqvars.end()));
-      for (std::set<data::variable>::iterator i = pqvars.begin(); i != pqvars.end(); ++i)
+      // generate renamings for variables appearing in qvars
+      for (std::set<data::variable>::iterator i = qvars.begin(); i != qvars.end(); ++i)
       {
-        generator.add_identifier(i->name());
-      }     
-        
-      // give the clashing variables new values that do not appear in pqvars
-      data::mutable_map_substitution<> result;
-      for (std::set<data::variable>::iterator i = name_clashes.begin(); i != name_clashes.end(); ++i)
-      {
-        result[*i] = data::variable(generator(i->name()), i->sort());
+        data::variable v(generator(i->name()), i->sort());
+        if (v != *i)
+        {
+          result[*i] = v;
+        }
       }
       
       return result;
+    }
+
+    /// \brief Resolves name clashes between model and spec.
+    void resolve_name_clashes(const specification& model, specification& spec)
+    {
+      atermpp::map<data::variable, data::variable> sigma = compute_name_clashes(model, spec);
+
+      if (sigma.empty())
+      {
+        return;
+      }
+      
+      // rename unbound data variables
+      data::detail::make_substitute_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(data::make_associative_container_substitution(sigma))(spec);
+        
+      // rename process parameters
+      spec.process().process_parameters() = data::substitute_variables(spec.process().process_parameters(), data::make_associative_container_substitution(sigma));
+
+      // rename global variable declaration
+      data::substitute_variables(spec.global_variables(), data::make_associative_container_substitution(sigma));
     }
 
     /// \brief Initializes the name lookup table.
@@ -422,9 +428,8 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
     {
       namespace z = pbes_expr_optimized;
 
-      data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
       specification spec1 = spec;
-      lps::substitute(spec1, sigma, true);
+      resolve_name_clashes(model, spec1);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -522,9 +527,8 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
     pbes<> run(const specification& model, const specification& spec)
     {
       namespace z = pbes_expr_optimized;
-      data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
       specification spec1 = spec;
-      lps::substitute(spec1, sigma, true);
+      resolve_name_clashes(model, spec1);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -692,9 +696,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     pbes<> run(const specification& model, const specification& spec)
     {
       namespace z = pbes_expr_optimized;
-      data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
       specification spec1 = spec;
-      lps::substitute(spec1, sigma, true);
+      resolve_name_clashes(model, spec1);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);
@@ -753,9 +756,8 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
     pbes<> run(const specification& model, const specification& spec)
     {
       namespace z = pbes_expr_optimized;
-      data::mutable_map_substitution<> sigma = resolve_name_clashes(model, spec);
       specification spec1 = spec;
-      lps::substitute(spec1, sigma, true);
+      resolve_name_clashes(model, spec1);
       const linear_process& m = model.process();
       const linear_process& s = spec1.process();
       init(m, s);

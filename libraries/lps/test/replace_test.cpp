@@ -18,7 +18,6 @@
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/substitute.h"
-#include "mcrl2/lps/detail/lps_substituter.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -89,17 +88,11 @@ void test_lps_substituter()
 {
   specification spec1 = parse_linear_process_specification(SPEC1a);
   specification spec2 = parse_linear_process_specification(SPEC1b);
-  data::mutable_map_substitution<> sigma;
+  data::mutable_associative_container_substitution<> sigma;
   sigma[variable("s", sort_pos::pos())] = sort_pos::pos(3);
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
-  lps::detail::lps_substituter<data::mutable_map_substitution<> > subst(sigma);
 
-  data::data_expression d;
-  subst(d);
-  data::assignment a;
-  subst(a);
-
-  subst(spec1);
+  lps::substitute_variables(spec1, sigma);
   std::cerr << pp(spec1.process()) << std::endl;
   std::cerr << "-------------------------------------" << std::endl;
   std::cerr << pp(spec2.process()) << std::endl;
@@ -111,10 +104,9 @@ void test_lps_substitute()
 {
   data::variable v("v", sort_pos::pos());
   data::variable w("w", sort_pos::pos());
-  data::mutable_map_substitution<> sigma;
+  data::mutable_associative_container_substitution<> sigma;
   sigma[v] = w;
-
-  lps::substitute(v, sigma, false);
+  lps::substitute_free_variables(v, sigma);
   core::garbage_collect();
 }
 
