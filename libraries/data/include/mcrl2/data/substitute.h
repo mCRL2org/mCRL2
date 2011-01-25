@@ -184,6 +184,13 @@ namespace detail {
       }
       return v;
     }
+
+    template <typename Expression>
+    expression_type operator()(const Expression& x) const
+    {
+      throw std::runtime_error("data::sequence_sequence_substitution::operator(const Expression&) is a deprecated interface!");
+      return data_expression();
+    }
   };
 
   template <typename VariableContainer, typename ExpressionContainer>
@@ -209,6 +216,13 @@ namespace detail {
     {
       typename AssociativeContainer::const_iterator i = m_map.find(v);
       return i == m_map.end() ? v : i->second;
+    }
+
+    template <typename Expression>
+    expression_type operator()(const Expression& x) const
+    {
+      throw std::runtime_error("data::associative_container_substitution::operator(const Expression&) is a deprecated interface!");
+      return data_expression();
     }
   };
 
@@ -278,6 +292,13 @@ namespace detail {
     {
       typename AssociativeContainer::const_iterator i = m_map.find(v);
       return i == m_map.end() ? v : i->second;
+    }
+
+    template <typename Expression>
+    expression_type operator()(const Expression& x) const
+    {
+      throw std::runtime_error("data::mutable_associative_container_substitution::operator(const Expression&) is a deprecated interface!");
+      return data_expression();
     }
 
     assignment operator[](variable_type const& v) {
@@ -367,6 +388,13 @@ namespace detail {
         return data::substitute_free_variables(f_(v), g_);
       }
 
+      template <typename Expression>
+      expression_type operator()(const Expression& x) const
+      {
+        throw std::runtime_error("data::mutable_substitution_composer::operator(const Expression&) is a deprecated interface!");
+        return data_expression();
+      }
+
       assignment operator[](variable_type const& v) {
         return g_[v];
       }
@@ -413,6 +441,13 @@ namespace detail {
       /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
       expression_type operator()(variable_type const& v) const {
         return g_(v);
+      }
+
+      template <typename Expression>
+      expression_type operator()(const Expression& x) const
+      {
+        throw std::runtime_error("data::mutable_substitution_composer<mutable_associative_container_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
+        return data_expression();
       }
 
       assignment operator[](variable_type const& v) {

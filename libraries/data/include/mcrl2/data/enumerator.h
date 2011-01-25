@@ -22,7 +22,7 @@
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/exception.h"
 
@@ -32,41 +32,6 @@ namespace data {
 
 /// \cond INTERNAL_DOCS
 namespace detail {
-
-  template <typename VariableContainer, typename ExpressionContainer>
-  struct data_enumerator_replace_helper: public std::unary_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
-  {
-    const VariableContainer& variables_;
-    const ExpressionContainer& replacements_;
-
-    typedef typename VariableContainer::value_type variable_type;
-    typedef typename ExpressionContainer::value_type expression_type;
-
-    data_enumerator_replace_helper(const VariableContainer& variables,
-                                   const ExpressionContainer& replacements
-                                  )
-      : variables_(variables), replacements_(replacements)
-    {
-      assert(variables.size() == replacements.size());
-    }
-
-    /// \brief Function call operator
-    /// \param t A data variable
-    /// \return The function result
-    data_expression operator()(variable const& t) const
-    {
-      typename VariableContainer::const_iterator i = variables_.begin();
-      typename ExpressionContainer::const_iterator j = replacements_.begin();
-      for (; i != variables_.end(); ++i, ++j)
-      {
-        if (*i == t)
-        {
-          return data_expression(ATermAppl(*j));
-        }
-      }
-      return t;
-    }
-  };
 
   struct data_enumerator_helper
   {
@@ -84,7 +49,8 @@ namespace detail {
     /// \brief Function call operator
     void operator()()
     {
-      data_expression d(replace_variables(e_, data_enumerator_replace_helper<variable_list, atermpp::vector<data_expression_with_variables> >(e_.variables(), values_)));
+      data_expression d = data::substitute_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
+
       // 9/8/2009. Changed line below from std::vector<variable> to atermpp::vector<variable> because it appears that 
       // at times variables can occur only in this vector of variables, causing problems when garbage collected.
       // Jan Friso Groote.
