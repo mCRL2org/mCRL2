@@ -39,7 +39,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
-#include <mcrl2/lps/constelm.h>
+#include "mcrl2/lps/constelm.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/lps/find.h"
 
@@ -55,11 +55,12 @@
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/normalize_sorts.h"
+#include "mcrl2/data/substitute.h"
 
 //mCRL2 processes
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_equation.h"
-#include <mcrl2/process/process_specification.h>
+#include "mcrl2/process/process_specification.h"
 
 // Boost utilities
 #include "boost/format.hpp"
@@ -1288,7 +1289,7 @@ class specification_basic_type:public boost::noncopyable
          { sigma[*i]=*j;
          }
        }
-       return data::replace_free_variables(tl,make_map_substitution_adapter(sigma));
+       return data::substitute_free_variables(tl, data::make_associative_container_substitution(sigma));
     }
 
     data_expression substitute_data(
@@ -1308,7 +1309,7 @@ class specification_basic_type:public boost::noncopyable
         { sigma[*i]=*j;
         }
       }
-      const data_expression result=data::replace_free_variables(t,make_map_substitution_adapter(sigma));
+      const data_expression result=data::substitute_free_variables(t, make_associative_container_substitution(sigma));
       return result;
 
     }

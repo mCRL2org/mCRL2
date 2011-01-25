@@ -21,7 +21,7 @@
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/substitution.h"
-#include "mcrl2/data/replace.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
@@ -54,7 +54,7 @@ namespace mcrl2 {
         atermpp::map<data::variable, atermpp::vector<data::data_expression> > m_enumerated_elements;
 
         /// Mapping of variables to corresponding if-tree
-        data::mutable_map_substitution<> m_if_trees;
+        data::mutable_associative_container_substitution<> m_if_trees;
 
         /// \brief Build an if-then-else tree of enumerated elements in terms
         ///        of new parameters.
@@ -181,7 +181,7 @@ namespace mcrl2 {
         ///        vector of assignments to Boolean variables.
         data::assignment_list replace_enumerated_parameters_in_assignments(data::assignment_list v)
         {
-          v = data::replace_free_variables(v, m_if_trees);
+          v = data::substitute_free_variables(v, m_if_trees);
 
           data::assignment_vector result;
           for (data::assignment_list::const_iterator i = v.begin(); i != v.end(); ++i)
@@ -244,17 +244,17 @@ namespace mcrl2 {
         /// \brief Update an action summand with the new Boolean parameters
         void update_action_summand(action_summand& s)
         {
-          s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
+          s.condition() = data::substitute_free_variables(s.condition(), m_if_trees);
           s.multi_action().actions() = lps::substitute_free_variables(s.multi_action().actions(), m_if_trees);
-          s.multi_action().time() = data::replace_free_variables(s.multi_action().time(), m_if_trees);
+          s.multi_action().time() = data::substitute_free_variables(s.multi_action().time(), m_if_trees);
           s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
         }
 
         /// \brief Update a deadlock summand with the new Boolean parameters
         void update_deadlock_summand(deadlock_summand& s)
         {
-          s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
-          s.deadlock().time() = data::replace_free_variables(s.deadlock().time(), m_if_trees);
+          s.condition() = data::substitute_free_variables(s.condition(), m_if_trees);
+          s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), m_if_trees);
         }
 
       public:

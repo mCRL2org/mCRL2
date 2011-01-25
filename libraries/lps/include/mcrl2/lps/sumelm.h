@@ -41,10 +41,10 @@ namespace mcrl2 {
         {
           using namespace mcrl2::data;
           // First apply already present substitutions to rhs
-          data_expression new_rhs(replace_free_variables(rhs, make_map_substitution_adapter(replacements)));
+          data_expression new_rhs(lps::substitute_free_variables(rhs, data::make_associative_container_substitution(replacements)));
           for (std::map<variable, data_expression>::iterator i = replacements.begin(); i != replacements.end(); ++i)
           {
-            i->second = data::replace_free_variables(i->second, assignment(lhs, new_rhs));
+            i->second = lps::substitute_free_variables(i->second, assignment(lhs, new_rhs));
           }
           replacements[lhs] = new_rhs;
         }
@@ -176,9 +176,9 @@ namespace mcrl2 {
           atermpp::map<variable, data_expression> substitutions;
           data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
 
-          s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
-          substitute(s.multi_action(), make_map_substitution_adapter(substitutions));
-          s.assignments() = replace_free_variables(s.assignments(), make_map_substitution_adapter(substitutions));
+          s.condition() = lps::substitute_free_variables(new_condition, data::make_associative_container_substitution(substitutions));
+          substitute(s.multi_action(), data::make_associative_container_substitution(substitutions));
+          s.assignments() = lps::substitute_free_variables(s.assignments(), data::make_associative_container_substitution(substitutions));
 
           const size_t var_count = s.summation_variables().size();
           remove_unused_summand_variables(s);
@@ -194,8 +194,8 @@ namespace mcrl2 {
           std::map<variable, data_expression> substitutions;
           data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
 
-          s.condition() = replace_free_variables(new_condition, make_map_substitution_adapter(substitutions));
-          s.deadlock().time() = replace_free_variables(s.deadlock().time(), make_map_substitution_adapter(substitutions));
+          s.condition() = lps::substitute_free_variables(new_condition, data::make_associative_container_substitution(substitutions));
+          s.deadlock().time() = lps::substitute_free_variables(s.deadlock().time(), data::make_associative_container_substitution(substitutions));
 
           const size_t var_count = s.summation_variables().size();
           remove_unused_summand_variables(s);

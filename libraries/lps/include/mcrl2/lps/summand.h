@@ -377,47 +377,6 @@ summand set_assignments(summand s, data::assignment_list assignments)
                 );
 }
 
-/// \brief Applies a substitution function to data expressions appearing in this summand.
-/// \param s                         A summand
-/// \param f A function that models the concept UnaryFunction with dependent
-/// types argument_type and result_type equal to data_expression.
-/// \param substitute_condition      If true, the substitution is applied to the condition
-/// \param substitute_actions        If true, the substitution is applied to the arguments of actions
-/// \param substitute_time           If true, the substitution is applied to the time
-/// \param substitute_next_state     If true, the substitution is applied to the next state expressions
-/// \return The substitution result.
-template <typename UnaryFunction>
-summand replace_data_expressions(const summand& s,
-                                 UnaryFunction f,
-                                 bool substitute_condition  = true,
-                                 bool substitute_actions    = true,
-                                 bool substitute_time       = true,
-                                 bool substitute_next_state = true)
-{
-  data::data_expression condition = s.condition();
-  action_list actions = s.actions();
-  data::data_expression time = s.time();
-  data::assignment_list assignments = s.assignments();
-
-  if (substitute_condition)
-  {
-    condition = data::replace_free_variables(f, condition);
-  }
-  if (substitute_actions && !s.is_delta())
-  {
-    actions = substitute(f, actions);
-  }
-  if (substitute_time && s.has_time())
-  {
-    time = data::replace_free_variables(time, f);
-  }
-  if (substitute_next_state)
-  {
-    assignments = data::replace_free_variables(assignments, f);
-  }
-  return summand(s.summation_variables(), condition, s.is_delta(), actions, time, assignments);
-}
-
 /// \brief Read-only singly linked list of summands
 typedef atermpp::term_list<summand> summand_list;
 

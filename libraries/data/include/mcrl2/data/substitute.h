@@ -200,6 +200,48 @@ namespace detail {
     return sequence_sequence_substitution<VariableContainer, ExpressionContainer>(vc, ec);
   }
 
+  template <typename Container>
+  struct pair_sequence_substitution: public std::unary_function<typename Container::value_type::first_type, typename Container::value_type::second_type>
+  {
+    /// \brief type used to represent variables
+    typedef typename Container::value_type::first_type variable_type;
+
+    /// \brief type used to represent expressions
+    typedef typename Container::value_type::second_type expression_type;
+ 
+    const Container& container;
+ 
+    pair_sequence_substitution(const Container& container_)
+      : container(container_)
+    {}
+    
+    expression_type operator()(const variable_type& v) const
+    {
+      for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+      {
+        if (i->first == v)
+        {
+          return i->second;
+        }
+      }
+      return v;
+    }
+
+    template <typename Expression>
+    expression_type operator()(const Expression& x) const
+    {
+      throw std::runtime_error("data::pair_sequence_substitution::operator(const Expression&) is a deprecated interface!");
+      return data_expression();
+    }
+  };
+
+  template <typename Container>
+  pair_sequence_substitution<Container>
+  make_pair_sequence_substitution(const Container& c)
+  {
+    return pair_sequence_substitution<Container>(c);
+  }
+
   template <typename AssociativeContainer>
   struct associative_container_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
   {
