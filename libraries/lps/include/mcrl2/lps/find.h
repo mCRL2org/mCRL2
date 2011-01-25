@@ -148,10 +148,7 @@ namespace lps {
   bool search_free_variable(const Container& container, const data::variable& d)
   {
     // TODO: replace this by a more efficient implementation
-std::cerr << "<search_free_variable>" << std::endl;
-std::cerr << pp(container) << std::endl;
     std::set<data::variable> variables = lps::find_free_variables(container);
-std::cerr << core::detail::print_pp_set(variables) << std::endl;
     return variables.find(d) != variables.end();
   }
 
