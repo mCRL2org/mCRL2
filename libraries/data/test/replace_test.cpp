@@ -29,7 +29,6 @@
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
-#include "mcrl2/data/assignment_list_substitution.h"
 
 using namespace atermpp;
 using namespace mcrl2;

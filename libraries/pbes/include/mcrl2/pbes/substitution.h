@@ -13,7 +13,6 @@
 #define MCRL2_PBES_SUBSTITUTION_H
 
 #include "mcrl2/data/substitution.h"
-#include "mcrl2/data/sequence_substitution.h"
 #include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/detail/propositional_variable_substituter.h"
 
@@ -60,7 +59,7 @@ namespace pbes_system {
         const data::data_expression_list& e = v.parameters();
 
         // return phi[d := e]
-        pbes_system::substitute_gcc_workaround(phi, data::make_double_sequence_substitution_adaptor(d, e));
+        pbes_system::substitute_free_variables(phi, data::make_sequence_sequence_substitution(d, e));
         return phi;
       }
 
