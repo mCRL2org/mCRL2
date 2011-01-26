@@ -1071,7 +1071,6 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_1.mcrl2
 				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_2.mcrl2
 				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_3.mcrl2
-  run_release_tests( "${SET_OF_MCRL2_FILES}" )
   
 endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 
