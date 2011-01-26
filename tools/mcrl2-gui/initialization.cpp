@@ -50,7 +50,6 @@ Initialization::Initialization() {
 	m_extention_tool_mapping.insert(pair<string, string> ("txt", "txt"));
 	m_extention_tool_mapping.insert(pair<string, string> ("chi", "chi"));
 	m_extention_tool_mapping.insert(pair<string, string> ("lysa", "lysa"));
-	m_extention_tool_mapping.insert(pair<string, string> ("pnml", "pnml"));
 	m_extention_tool_mapping.insert(pair<string, string> ("tbf", "tbf"));
 	m_extention_tool_mapping.insert(pair<string, string> ("gra", "gra"));
 

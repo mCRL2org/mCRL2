@@ -88,8 +88,6 @@ import os
 # |-                                                                  
 # | [[User manual/lps2torx|lps2torx]]                                 ||align="center"| -
 # |-                                                                  
-# | [[User manual/pnml2mcrl2|pnml2mcrl2]]                             ||align="center"| -
-# |-                                                                  
 # | [[User manual/tbf2lps|tbf2lps]]                                   ||align="center"| -
 # |}
 
@@ -146,7 +144,6 @@ pbespareqelm      | +               | ? | +
 pbespgsolve       | +               | ? | +
 pbespp            | +               | ? | -
 pbesrewr          | +               | ? | +                                                              
-pnml2mcrl2        | +               | ? | -
 sim               | +               | ? | -                                                                      
 squadt            | +               | ? | not applicable
 tbf2lps           | +               | ? | -                                                               
