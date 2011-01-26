@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/pbes2bes_algorithm.h
+/// \file mcrl2/pbes/pbesinst_algorithm.h
 /// \brief Algorithm for instantiating a PBES.
 
 #include <set>
@@ -16,45 +16,45 @@
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
-#include "mcrl2/pbes/detail/pbes2bes_rewriter.h"
+#include "mcrl2/pbes/detail/pbesinst_rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 
-#ifdef PBES2BES_FINITE_ALGORITHM
-#include "mcrl2/pbes/detail/pbes2bes_finite_builder.h"
+#ifdef PBESINST_FINITE_ALGORITHM
+#include "mcrl2/pbes/detail/pbesinst_finite_builder.h"
 #endif
 
-#ifndef MCRL2_PBES_PBES2BES_ALGORITHM_H
-#define MCRL2_PBES_PBES2BES_ALGORITHM_H
+#ifndef MCRL2_PBES_PBESINST_ALGORITHM_H
+#define MCRL2_PBES_PBESINST_ALGORITHM_H
 
 namespace mcrl2 {
 
 namespace pbes_system {
 
-  using detail::pbes2bes_substitution_function;
-  using detail::pbes2bes_rewriter;
+  using detail::pbesinst_substitution_function;
+  using detail::pbesinst_rewriter;
 
   /// \brief Stream operator
   /// \param out An output stream
-  /// \param sigma A pbes2bes substitution function
+  /// \param sigma A pbesinst substitution function
   /// \return The output stream
-  std::ostream& operator<<(std::ostream& out, const pbes2bes_substitution_function& sigma)
+  std::ostream& operator<<(std::ostream& out, const pbesinst_substitution_function& sigma)
   {
-    for (pbes2bes_substitution_function::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+    for (pbesinst_substitution_function::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
     {
       out << "  " << core::pp(i->first) << " -> " << core::pp(i->second) << std::endl;
     }
     return out;
   }
 
-  /// \brief Creates a substitution function for the pbes2bes rewriter.
+  /// \brief Creates a substitution function for the pbesinst rewriter.
   /// \param v A sequence of data variables
   /// \param e A sequence of data expressions
   /// \return The substitution that maps the i-th element of \p v to the i-th element of \p e
   inline
-  pbes2bes_substitution_function make_pbes2bes_substitution(data::variable_list v, data::data_expression_list e)
+  pbesinst_substitution_function make_pbesinst_substitution(data::variable_list v, data::data_expression_list e)
   {
     assert(v.size() == e.size());
-    pbes2bes_substitution_function sigma;
+    pbesinst_substitution_function sigma;
     data::variable_list::iterator i = v.begin();
     data::data_expression_list::iterator j = e.begin();
 
@@ -65,12 +65,12 @@ namespace pbes_system {
     return sigma;
   }
 
-  /// \brief Algorithm class for the pbes2bes instantiation algorithm.
-  class pbes2bes_algorithm: public core::algorithm
+  /// \brief Algorithm class for the pbesinst instantiation algorithm.
+  class pbesinst_algorithm: public core::algorithm
   {
     protected:
       /// \brief The rewriter.
-      pbes2bes_rewriter R;
+      pbesinst_rewriter R;
 
       /// \brief The number of generated equations.
       int m_equation_count;
@@ -113,7 +113,7 @@ namespace pbes_system {
       /// \param rewriter_strategy A strategy for the data rewriter
       /// \param print_equations If true, the generated equations are printed
       /// \param print_rewriter_output If true, invocations of the rewriter are printed
-      pbes2bes_algorithm(data::data_specification const& data_spec,
+      pbesinst_algorithm(data::data_specification const& data_spec,
                          data::rewriter::strategy rewriter_strategy = data::rewriter::jitty,
                          bool print_equations = false,
                          bool print_rewriter_output = false,
@@ -149,7 +149,7 @@ namespace pbes_system {
           propositional_variable_instantiation X_e = R.rename(X);
           int index = equation_index[X.name()];
           const pbes_equation& eqn = p.equations()[index];
-          pbes2bes_substitution_function sigma = make_pbes2bes_substitution(eqn.variable().parameters(), X.parameters());
+          pbesinst_substitution_function sigma = make_pbesinst_substitution(eqn.variable().parameters(), X.parameters());
           pbes_expression phi = eqn.formula();
           pbes_expression_with_propositional_variables psi_e = R(phi, sigma);
           for (propositional_variable_instantiation_list::iterator i = psi_e.propositional_variables().begin(); i != psi_e.propositional_variables().end(); ++i)
@@ -192,7 +192,7 @@ namespace pbes_system {
 
       /// \brief Returns the flag for printing rewriter invocations
       /// \return The flag for printing rewriter invocations
-      pbes2bes_rewriter& rewriter()
+      pbesinst_rewriter& rewriter()
       {
         return R;
       }
@@ -202,4 +202,4 @@ namespace pbes_system {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_PBES2BES_ALGORITHM_H
+#endif // MCRL2_PBES_PBESINST_ALGORITHM_H

@@ -6,10 +6,10 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/pbes2bes.h
+/// \file mcrl2/pbes/pbesinst.h
 
-#ifndef MCRL2_PBES_PBES2BES_H
-#define MCRL2_PBES_PBES2BES_H
+#ifndef MCRL2_PBES_PBESINST_H
+#define MCRL2_PBES_PBESINST_H
 
 #include <set>
 #include <string>
@@ -126,7 +126,7 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
       // }
       else
       {
-        throw mcrl2::runtime_error(std::string("pbes2bes: could not rename the variable ") + core::pp(propositional_variable_instantiation(propvar_name, del)));
+        throw mcrl2::runtime_error(std::string("pbesinst: could not rename the variable ") + core::pp(propositional_variable_instantiation(propvar_name, del)));
       }
     }
   }
@@ -424,4 +424,4 @@ namespace atermpp {
 } // namespace atermpp
 /// \endcond
 
-#endif // MCRL2_PBES_PBES2BES_H
+#endif // MCRL2_PBES_PBESINST_H

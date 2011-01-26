@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/pbes2bes_rewriter.h
-/// \brief Rewriter for the pbes2bes algorithm.
+/// \file mcrl2/pbes/detail/pbesinst_rewriter.h
+/// \brief Rewriter for the pbesinst algorithm.
 
-#ifndef MCRL2_PBES_DETAIL_PBES2BES_REWRITER_H
-#define MCRL2_PBES_DETAIL_PBES2BES_REWRITER_H
+#ifndef MCRL2_PBES_DETAIL_PBESINST_REWRITER_H
+#define MCRL2_PBES_DETAIL_PBESINST_REWRITER_H
 
 #include <iostream>
 #include "mcrl2/atermpp/map.h"
@@ -28,23 +28,23 @@ namespace pbes_system {
 
 namespace detail {
 
-  /// \brief The substitution function used by the pbes2bes rewriter.
-  typedef data::mutable_map_substitution<atermpp::map<data::variable, data::data_expression_with_variables> > pbes2bes_substitution_function;
+  /// \brief The substitution function used by the pbesinst rewriter.
+  typedef data::mutable_map_substitution<atermpp::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
 
   /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
   /// As a side effect propositional variable instantiations are being renamed
   /// using a rename function.
   template <typename DataRewriter, typename DataEnumerator>
-  struct pbes2bes_rewrite_builder: public enumerate_quantifiers_builder<pbes_expression_with_propositional_variables, DataRewriter, DataEnumerator, pbes2bes_substitution_function>
+  struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expression_with_propositional_variables, DataRewriter, DataEnumerator, pbesinst_substitution_function>
   {
-    typedef enumerate_quantifiers_builder<pbes_expression_with_propositional_variables, DataRewriter, DataEnumerator, pbes2bes_substitution_function> super;
+    typedef enumerate_quantifiers_builder<pbes_expression_with_propositional_variables, DataRewriter, DataEnumerator, pbesinst_substitution_function> super;
     typedef typename super::term_type term_type;
     typedef typename super::data_term_type data_term_type;
     typedef typename super::variable_sequence_type variable_sequence_type;
     typedef typename core::term_traits<term_type>::propositional_variable_type propositional_variable_type;
     typedef core::term_traits<term_type> tr;
 
-    pbes2bes_rewrite_builder(DataRewriter& datar, DataEnumerator& datae)
+    pbesinst_rewrite_builder(DataRewriter& datar, DataEnumerator& datae)
       : super(datar, datae)
     {}
 
@@ -82,7 +82,7 @@ namespace detail {
           // }
           else
           {
-            throw mcrl2::runtime_error(std::string("pbes2bes_rewrite_builder: could not rename the variable ") + core::pp(v));
+            throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + core::pp(v));
           }
         }
       }
@@ -95,7 +95,7 @@ namespace detail {
     /// \param v A propositional variable
     /// \param sigma A substitution function
     /// \return The result of visiting the node
-    term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbes2bes_substitution_function& sigma)
+    term_type visit_propositional_variable(const term_type& x, const propositional_variable_type& v, pbesinst_substitution_function& sigma)
     {
       term_type y = super::visit_propositional_variable(x, v, sigma);
       term_type result = term_type(rename(y), y.variables(), atermpp::make_list(y));
@@ -104,11 +104,11 @@ namespace detail {
   };
 
   /// A rewriter that simplifies expressions and eliminates quantifiers using enumeration.
-  class pbes2bes_rewriter
+  class pbesinst_rewriter
   {
     public:
       typedef pbes_expression_with_propositional_variables term_type;
-      typedef data::data_enumerator<data::number_postfix_generator> pbes2bes_enumerator;
+      typedef data::data_enumerator<data::number_postfix_generator> pbesinst_enumerator;
       typedef data::data_expression_with_variables data_term_type;
       typedef data::variable variable_type;
 
@@ -116,7 +116,7 @@ namespace detail {
       /// \param data_spec A data specification
       /// \param rewriter_strategy A rewriter strategy
       /// \param print_rewriter_output If true, rewriter output is printed to standard error
-      pbes2bes_rewriter(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_rewriter_output = false)
+      pbesinst_rewriter(data::data_specification const& data_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty, bool print_rewriter_output = false)
        :
          datar(data_spec, rewriter_strategy),
          datarv(data_spec),
@@ -130,8 +130,8 @@ namespace detail {
       /// \return The rewrite result.
       term_type operator()(const term_type& x)
       {
-        pbes2bes_substitution_function sigma;
-        pbes2bes_rewrite_builder<data::rewriter_with_variables, pbes2bes_enumerator> r(datarv, datae);
+        pbesinst_substitution_function sigma;
+        pbesinst_rewrite_builder<data::rewriter_with_variables, pbesinst_enumerator> r(datarv, datae);
         term_type result = r(x, sigma);
         if (m_print_rewriter_output)
         {
@@ -144,9 +144,9 @@ namespace detail {
       /// \param x A term
       /// \param sigma A substitution function
       /// \return The rewrite result.
-      term_type operator()(const term_type& x, pbes2bes_substitution_function& sigma)
+      term_type operator()(const term_type& x, pbesinst_substitution_function& sigma)
       {
-        pbes2bes_rewrite_builder<data::rewriter_with_variables, pbes2bes_enumerator> r(datarv, datae);
+        pbesinst_rewrite_builder<data::rewriter_with_variables, pbesinst_enumerator> r(datarv, datae);
         term_type result = r(x, sigma);
         if (m_print_rewriter_output)
         {
@@ -170,7 +170,7 @@ namespace detail {
       /// \return A name that uniquely corresponds to the propositional variable.
       term_type rename(const term_type& v)
       {
-        pbes2bes_rewrite_builder<data::rewriter_with_variables, pbes2bes_enumerator> r(datarv, datae);
+        pbesinst_rewrite_builder<data::rewriter_with_variables, pbesinst_enumerator> r(datarv, datae);
         return r.rename(v);
       }
 
@@ -178,7 +178,7 @@ namespace detail {
       data::rewriter datar;
       data::rewriter_with_variables datarv;
       data::number_postfix_generator name_generator;
-      pbes2bes_enumerator datae;
+      pbesinst_enumerator datae;
       bool m_print_rewriter_output;
   };
   
@@ -188,4 +188,4 @@ namespace detail {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_PBES2BES_REWRITER_H
+#endif // MCRL2_PBES_DETAIL_PBESINST_REWRITER_H

@@ -7,7 +7,7 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(pbes2bes)
+project(pbesinst)
 cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 2.6)
 # ########## mcrl2_tools_pbes2bes executable ##########
 
 add_executable(${PROJECT_NAME}
-  pbes2bes.cpp
+  pbesinst.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)

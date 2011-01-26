@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file pbes2bes.cpp
+/// \file pbesinst.cpp
 /// \brief Add your file description here.
 
 #include "boost.hpp" // precompiled headers
@@ -26,9 +26,9 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/pbes2bes.h"
-#include "mcrl2/pbes/pbes2bes_algorithm.h"
-#include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
+#include "mcrl2/pbes/pbesinst.h"
+#include "mcrl2/pbes/pbesinst_algorithm.h"
+#include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -42,8 +42,8 @@ using utilities::make_optional_argument;
 using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 
-/// The pbes2bes tool.
-class pbes2bes_tool: public rewriter_tool<input_output_tool> 
+/// The pbesinst tool.
+class pbesinst_tool: public rewriter_tool<input_output_tool> 
 {
   protected:
     typedef rewriter_tool<input_output_tool> super;
@@ -218,9 +218,9 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
 
   public:
     /// Constructor.
-    pbes2bes_tool()
+    pbesinst_tool()
       : super(
-          "pbes2bes",
+          "pbesinst",
           "Wieger Wesselink; Alexander van Dam and Tim Willemse",
           "compute a BES out of a PBES",
           "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
@@ -244,7 +244,7 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
 
       if (core::gsVerbose)
       {
-        std::cerr << "parameters of pbes2bes:" << std::endl;
+        std::cerr << "parameters of pbesinst:" << std::endl;
         std::cerr << "  input file:         " << m_input_filename << std::endl;
         std::cerr << "  output file:        " << m_output_filename << std::endl;
         std::cerr << "  strategy:           " << strategy_string() << std::endl;
@@ -273,13 +273,13 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
 
       if (m_strategy == ts_lazy)
       {
-        pbes2bes_algorithm algorithm(p.data(), rewrite_strategy(), false, false, log_level);
+        pbesinst_algorithm algorithm(p.data(), rewrite_strategy(), false, false, log_level);
         algorithm.run(p);
         p = algorithm.get_result();
       }
       else if (m_strategy == ts_finite)
       {
-        pbes2bes_finite_algorithm algorithm(rewrite_strategy(), log_level);
+        pbesinst_finite_algorithm algorithm(rewrite_strategy(), log_level);
         detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, m_finite_parameter_selection);
         algorithm.run(p, parameter_map);
       }
@@ -312,10 +312,10 @@ class pbes2bes_tool: public rewriter_tool<input_output_tool>
 
 //Main Program
 //------------
-/// \brief Main program for pbes2bes
+/// \brief Main program for pbesinst
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return pbes2bes_tool().execute(argc, argv);
+  return pbesinst_tool().execute(argc, argv);
 }
