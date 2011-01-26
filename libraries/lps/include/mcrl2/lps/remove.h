@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_REMOVE_H
 #define MCRL2_LPS_REMOVE_H
 
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
 #include "mcrl2/lps/substitute.h"
 
@@ -80,7 +81,7 @@ namespace detail {
   inline
   void remove_singleton_sorts(specification& spec)
   {
-    data::mutable_map_substitution<> sigma;
+    data::mutable_associative_container_substitution<> sigma;
     std::set<data::variable> to_be_removed;
     const data::variable_list& p = spec.process().process_parameters();
     for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)

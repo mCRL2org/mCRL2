@@ -9,25 +9,21 @@
 /// \file mcrl2/lps/substitute.h
 /// \brief add your file description here.
 
+// avoid circular header file dependencies
+#ifndef MCRL2_LPS_SPECIFICATION_H
+#include "mcrl2/lps/specification.h"
+#endif
+
 #ifndef MCRL2_LPS_SUBSTITUTE_H
 #define MCRL2_LPS_SUBSTITUTE_H
 
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/lps/add_binding.h"
 #include "mcrl2/lps/builder.h"
-#include "mcrl2/lps/detail/lps_substituter.h"
 
 namespace mcrl2 {
 
 namespace lps {
-
-  /// \brief Applies a substitution to an LPS data type.
-  template <typename Object, typename Substitution>
-  void substitute(Object& o, const Substitution& sigma, bool replace_parameters)
-  {
-    lps::detail::lps_substituter<Substitution> r(sigma, replace_parameters);
-    r(o);
-  }
 
 //--- start generated lps replace code ---//
 template <typename T, typename Substitution>

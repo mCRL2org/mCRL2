@@ -27,10 +27,7 @@
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/lps/process_initializer.h"
-#include "mcrl2/lps/substitute_fwd.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/map_substitution.h"
-#include "mcrl2/data/representative_generator.h"
 
 namespace mcrl2 {
 
@@ -52,6 +49,7 @@ std::set<data::variable> find_free_variables(Container const& container);
 class specification;
 atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
+namespace detail { void instantiate_global_variables(specification&); }
 
 /// \brief Linear process specification.
 // sort ...;
@@ -252,23 +250,7 @@ class specification
     /// an exception is thrown.
     void instantiate_global_variables()
     {
-      data::mutable_map_substitution<> sigma;
-      data::representative_generator default_expression_generator(data());
-      std::set<data::variable> to_be_removed;
-      const atermpp::set<data::variable>& v = global_variables();
-      for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
-      {
-        data::data_expression d = default_expression_generator(i->sort());
-        if (d == data::data_expression())
-        {
-          throw mcrl2::runtime_error("Error in specification::instantiate_global_variables: could not instantiate " + pp(*i));
-        }
-        sigma[*i] = d;
-        to_be_removed.insert(*i);
-      }
-      lps::substitute(*this, sigma, false);
-      lps::remove_parameters(*this, to_be_removed);
-      assert(global_variables().empty());
+      lps::detail::instantiate_global_variables(*this);
     }
 
     ~specification()
@@ -344,6 +326,10 @@ bool operator!=(const specification& spec1, const specification& spec2)
 
 #ifndef MCRL2_LPS_PRINT_H
 #include "mcrl2/lps/print.h"
+#endif
+
+#ifndef MCRL2_LPS_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #endif
 
 #endif // MCRL2_LPS_SPECIFICATION_H                                                                                       

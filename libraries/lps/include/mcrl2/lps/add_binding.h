@@ -9,6 +9,11 @@
 /// \file mcrl2/lps/add_binding.h
 /// \brief add your file description here.
 
+// avoid circular header file dependencies
+#ifndef MCRL2_LPS_SPECIFICATION_H
+#include "mcrl2/lps/specification.h"
+#endif
+
 #ifndef MCRL2_LPS_ADD_BINDING_H
 #define MCRL2_LPS_ADD_BINDING_H
 
