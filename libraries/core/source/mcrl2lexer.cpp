@@ -94,9 +94,9 @@ typedef unsigned int flex_uint32_t;
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
-#include <cstdio>
 #include <cstdlib>
 #include <cstring>
+#include <cstdio>
 /* end standard C++ headers. */
 
 #ifdef __cplusplus
@@ -1951,7 +1951,6 @@ int yyFlexLexer::yy_get_next_buffer()
 	mcrl2yyfree((void *) b  );
 }
 
-
 /* Initializes or reinitializes a buffer.
  * This function is sometimes called more than once on the same buffer,
  * such as during a yyrestart() or at EOF.
@@ -2290,6 +2289,7 @@ int mcrl2_lexer::yywrap(void) {
 void mcrl2_lexer::process_string(void) {
   col_nr += YYLeng();
   mcrl2yylval.appl = gsString2ATermAppl(YYText());
+  // Protect the contents of mcrl2yylval.appl by adding it to an indexed set.
   ATbool dummy;
   ATindexedSetPut(mcrl2_parser_protect_table,(ATerm)mcrl2yylval.appl,&dummy);
 }

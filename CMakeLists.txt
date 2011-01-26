@@ -73,7 +73,7 @@ project (MCRL2)
 #   http://www.cmake.org/cmake/help/cmake2.6docs.html#prop_dir:COMPILE_DEFINITIONS
 #
 
-
+# Set path where additional modules can be found
 set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" ) 
 
 # Variables required for an additional build type "Maintainer"
@@ -348,21 +348,13 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
 set(MCRL2_SVN_LABEL "" CACHE STRING "Overwrite SVN revision with a custom string" )
 if( MCRL2_SVN_LABEL STREQUAL "" )
-  find_program(SVNVERSION
-    svnversion
-    /usr/local/bin
-    /usr/pkg/bin
-    /usr/bin
-  )
-
-  if(SVNVERSION)
-    execute_process(COMMAND ${SVNVERSION} ${CMAKE_SOURCE_DIR}
-      OUTPUT_VARIABLE SVN_REV
-      OUTPUT_STRIP_TRAILING_WHITESPACE
-    )
-  else(SVNVERSION)
+FIND_PACKAGE(Subversion)
+  IF(SUBVERSION_FOUND)
+    Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
+	  set(SVN_REV ${Project_WC_REVISION})
+  ELSE(SUBVERSION_FOUND)
     set(SVN_REV "Unknown")
-  endif(SVNVERSION)
+  ENDIF(SUBVERSION_FOUND)
 else( MCRL2_SVN_LABEL STREQUAL "" )
   set( SVN_REV ${MCRL2_SVN_LABEL} )	
 endif( MCRL2_SVN_LABEL STREQUAL "" )
@@ -1161,52 +1153,58 @@ endif(Boost_FOUND)
 ## Target parsers
 ##---------------------------------------------------
 
-if(UNIX)
+find_package(BISON)
+find_package(FLEX)
+
+if(FLEX_FOUND AND BISON_FOUND)
+
+	message( STATUS "Flex version: ${FLEX_VERSION}")
+	message( STATUS "Bison version: ${BISON_VERSION}")
 
   add_custom_target(mcrl2parser
-    flex -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll
-    COMMAND bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy
-    COMMAND sed -i -e 's+include \"mcrl2parser.h\"+include \"mcrl2/core/detail/mcrl2parser.h\"+' mcrl2parser.cpp
-    COMMAND sed -i -e '/isatty/d' mcrl2lexer.cpp
+    ${FLEX_EXECUTABLE} -Pmcrl2 -omcrl2lexer.cpp mcrl2lexer.ll
+    COMMAND ${BISON_EXECUTABLE} -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2parser.cpp mcrl2parser.yy
+		COMMAND ${CMAKE_COMMAND} -DPARSER="mcrl2" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/core/source
   )
 
   add_custom_target(chiparser
-    flex -Pchi -ochilexer.cpp chilexer.ll
-    COMMAND bison -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy
-    COMMAND sed -i -e '/isatty/d' chilexer.cpp
+    ${FLEX_EXECUTABLE} -Pchi -ochilexer.cpp chilexer.ll
+    COMMAND ${BISON_EXECUTABLE} -p chi --defines=chiparser.h -o chiparser.cpp chiparser.yy
+		COMMAND ${CMAKE_COMMAND} -DPARSER="chi" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/chi2mcrl2
   )
 
   add_custom_target(lysaparser
-    flex -Plysa -olysalexer.cpp lysalexer.ll
-    COMMAND bison -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy
-    COMMAND sed -i -e '/isatty/d' lysalexer.cpp
+    ${FLEX_EXECUTABLE} -Plysa -olysalexer.cpp lysalexer.ll
+    COMMAND ${BISON_EXECUTABLE} -p lysa --defines=lysaparser.h -o lysaparser.cpp lysaparser.yy
+		COMMAND ${CMAKE_COMMAND} -DPARSER="lysa" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/tools/lysa2mcrl2
   )
 
   add_custom_target(liblts_fsmparser
-    flex -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll
-    COMMAND bison -p fsm --defines=../include/mcrl2/lts/detail/liblts_fsmparser.h -o liblts_fsmparser.cpp liblts_fsmparser.yy
-    COMMAND sed -i -e 's+include \"liblts_fsmparser.h\"+include \"mcrl2/lts/detail/liblts_fsmparser.h\"+' liblts_fsmparser.cpp
-    COMMAND sed -i -e '/isatty/d' liblts_fsmlexer.cpp
+    ${FLEX_EXECUTABLE} -Pfsm -oliblts_fsmlexer.cpp liblts_fsmlexer.ll
+    COMMAND ${BISON_EXECUTABLE} -p fsm --defines=../include/mcrl2/lts/detail/liblts_fsmparser.h -o liblts_fsmparser.cpp liblts_fsmparser.yy
+		COMMAND ${CMAKE_COMMAND} -DPARSER="fsm" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/lts/source
   )
 
   add_custom_target(liblts_dotparser
-    flex -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll
-    COMMAND bison -p dot --defines=../include/mcrl2/lts/detail/liblts_dotparser.h -o liblts_dotparser.cpp liblts_dotparser.yy
-    COMMAND sed -i -e 's+include \"liblts_dotparser.h\"+include \"mcrl2/lts/detail/liblts_dotparser.h\"+' liblts_dotparser.cpp
-    COMMAND sed -i -e '/isatty/d' liblts_dotlexer.cpp
+    ${FLEX_EXECUTABLE} -Pdot -oliblts_dotlexer.cpp liblts_dotlexer.ll
+    COMMAND ${BISON_EXECUTABLE} -p dot --defines=../include/mcrl2/lts/detail/liblts_dotparser.h -o liblts_dotparser.cpp liblts_dotparser.yy
+		COMMAND ${CMAKE_COMMAND} -DPARSER="dot" -P ${CMAKE_SOURCE_DIR}/scripts/PostProcessParsers.cmake
     WORKING_DIRECTORY ${CMAKE_SOURCE_DIR}/libraries/lts/source
   )
 
-  add_custom_target(parsers
-    cp /usr/include/FlexLexer.h ${CMAKE_SOURCE_DIR}/build/workarounds
-  )
+  get_filename_component(FLEX_INCLUDE_DIR ${FLEX_EXECUTABLE} PATH)
+  string(REPLACE "/bin" "/include" FLEX_INCLUDE_DIR ${FLEX_INCLUDE_DIR})
 
-  add_dependencies(parsers mcrl2parser chiparser lysaparser liblts_fsmparser liblts_dotparser)
-endif(UNIX)
+  add_custom_target(parsers
+		 ${CMAKE_COMMAND} -E copy "${FLEX_INCLUDE_DIR}/FlexLexer.h" "${CMAKE_SOURCE_DIR}/build/workarounds"
+  )
+  add_dependencies( parsers mcrl2parser chiparser lysaparser liblts_fsmparser liblts_dotparser )
+
+endif(FLEX_FOUND AND BISON_FOUND)
 
 
 ##---------------------------------------------------
