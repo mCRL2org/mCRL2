@@ -180,7 +180,7 @@ namespace data {
     data::structured_sort_constructor_argument operator()(const data::structured_sort_constructor_argument& x)
     {
       static_cast<Derived&>(*this).enter(x);  
-      data::structured_sort_constructor_argument result = data::structured_sort_constructor_argument(x.name(), static_cast<Derived&>(*this)(x.sort()));
+      data::structured_sort_constructor_argument result = data::structured_sort_constructor_argument(static_cast<Derived&>(*this)(x.sort()), x.name());
       static_cast<Derived&>(*this).leave(x);
       return result;
     }
