@@ -28,8 +28,8 @@ namespace mcrl2 {
 
     namespace detail {
 
-//--- start generated class structured_sort_constructor_argument ---//
-//--- end generated class structured_sort_constructor_argument ---//
+//--- start generated class structured_sort_constructor_argument_base ---//
+//--- end generated class structured_sort_constructor_argument_base ---//
 
 /// \brief An argument of a constructor of a structured sort
 class structured_sort_constructor_argument_base: public atermpp::aterm_appl
@@ -125,19 +125,25 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
 
         /// \brief Constructor
         ///
-        /// \param[in] sort The sort of the argument.
         /// \param[in] name The name of the argument.
-        /// The default name, the empty string, signifies that there is no name.
-        structured_sort_constructor_argument(const sort_expression& sort, const core::identifier_string& name = no_identifier())
+        /// \param[in] sort The sort of the argument.
+        structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)
           : detail::structured_sort_constructor_argument_base(make_argument(sort, name))
         {}
 
         /// \brief Constructor
         ///
         /// \param[in] sort The sort of the argument.
+        structured_sort_constructor_argument(const sort_expression& sort)
+          : detail::structured_sort_constructor_argument_base(make_argument(sort, no_identifier()))
+        {}
+
+        /// \brief Constructor
+        ///
         /// \param[in] name The name of the argument.
+        /// \param[in] sort The sort of the argument.
         /// The default name, the empty string, signifies that there is no name.
-        structured_sort_constructor_argument(const sort_expression& sort, const std::string& name)
+        structured_sort_constructor_argument(const std::string& name, const sort_expression& sort)
           : detail::structured_sort_constructor_argument_base(make_argument(sort, detail::make_identifier(name)))
         {}
 
@@ -145,7 +151,7 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
         ///
         /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
         template < size_t S >
-        structured_sort_constructor_argument(const sort_expression& sort, const char (&name)[S])
+        structured_sort_constructor_argument(const char (&name)[S], const sort_expression& sort)
           : detail::structured_sort_constructor_argument_base(make_argument(sort, detail::make_identifier(name)))
         {}
 

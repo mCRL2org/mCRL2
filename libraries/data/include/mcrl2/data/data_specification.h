@@ -225,8 +225,8 @@ namespace mcrl2 {
                      j!=ssca.end(); ++j)
               {
                 normalised_ssa=push_front(normalised_ssa, 
-                            structured_sort_constructor_argument(
-                                    find_normal_form(j->sort(),map1,map2,sorts_already_seen),j->name()));
+                            structured_sort_constructor_argument(j->name(),
+                                    find_normal_form(j->sort(),map1,map2,sorts_already_seen)));
               }
 
               normalised_constructors=push_front(
@@ -315,7 +315,8 @@ namespace mcrl2 {
                         !ra.empty(); ra.advance_begin(1))
               {
                 new_arguments.push_back(structured_sort_constructor_argument(
-                             normalise_sorts_helper(ra.front().sort()), ra.front().name()));
+                             ra.front().name(),
+                             normalise_sorts_helper(ra.front().sort())));
               }
               new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
             }

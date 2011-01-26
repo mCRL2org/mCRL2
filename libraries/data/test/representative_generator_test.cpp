@@ -39,8 +39,8 @@ void test_representative_generator()
               );
 
   atermpp::vector< data::structured_sort_constructor_argument > arguments;
-  arguments.push_back(structured_sort_constructor_argument(basic_sort("E"), "s"));
-  arguments.push_back(structured_sort_constructor_argument(sort_nat::nat(), "n"));
+  arguments.push_back(structured_sort_constructor_argument("s", basic_sort("E")));
+  arguments.push_back(structured_sort_constructor_argument("n", sort_nat::nat()));
 
   atermpp::vector< structured_sort_constructor > constructors;
   constructors.push_back(structured_sort_constructor("d", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));

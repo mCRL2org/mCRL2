@@ -2935,12 +2935,10 @@ class specification_basic_type:public boost::noncopyable
            basic_sort stack_sort_alias(spec.fresh_name("Stack"));
            structured_sort_constructor_argument_vector sp_push_arguments;
            for (variable_list::const_iterator l = pl.begin() ; l!=pl.end() ; ++l)
-           { sp_push_arguments.push_back(structured_sort_constructor_argument(l->sort(),
-                               spec.fresh_name("get" + std::string(l->name()))));
+           { sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_name("get" + std::string(l->name())), l->sort()));
              sorts=push_front(sorts,l->sort());
            }
-           sp_push_arguments.push_back(structured_sort_constructor_argument(stack_sort_alias,
-                               spec.fresh_name("pop")));
+           sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_name("pop"), stack_sort_alias));
            sorts=reverse(sorts);
            structured_sort_constructor sc_push(spec.fresh_name("push"), sp_push_arguments);
            structured_sort_constructor sc_emptystack(spec.fresh_name("emptystack"),spec.fresh_name("isempty"));
