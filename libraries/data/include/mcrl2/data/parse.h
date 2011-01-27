@@ -145,7 +145,7 @@ namespace data {
     // Undo sort renamings for compatibility with type checker
     // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     data_vars = atermpp::reverse(data_vars);
-    data_vars = normalize_sorts(data_vars,data_spec);
+    data_vars = data_spec.normalise_sorts(data_vars);
 
     // Check that variables do not have equal names.
     for(variable_list::const_iterator v=data_vars.begin(); v!=data_vars.end(); ++v)
