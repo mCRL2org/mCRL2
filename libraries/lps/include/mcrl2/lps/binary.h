@@ -246,7 +246,10 @@ namespace mcrl2 {
         {
           s.condition() = data::substitute_free_variables(s.condition(), m_if_trees);
           s.multi_action().actions() = lps::substitute_free_variables(s.multi_action().actions(), m_if_trees);
-          s.multi_action().time() = data::substitute_free_variables(s.multi_action().time(), m_if_trees);
+          if (s.multi_action().has_time())
+          {
+            s.multi_action().time() = data::substitute_free_variables(s.multi_action().time(), m_if_trees);
+          }
           s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
         }
 
@@ -254,7 +257,10 @@ namespace mcrl2 {
         void update_deadlock_summand(deadlock_summand& s)
         {
           s.condition() = data::substitute_free_variables(s.condition(), m_if_trees);
-          s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), m_if_trees);
+          if (s.deadlock().has_time())
+          {
+            s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), m_if_trees);
+          }
         }
 
       public:
