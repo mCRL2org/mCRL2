@@ -46,7 +46,6 @@ std::set<data::variable> find_free_variables(Container const& container);
 class specification;
 atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
-namespace detail { void instantiate_global_variables(specification&); }
 
 /// \brief Linear process specification.
 // sort ...;
@@ -242,14 +241,6 @@ class specification
       return m_initial_process;
     }
 
-    /// \brief Attempts to eliminate the free variables of the specification, by substituting
-    /// a constant value for them. If no constant value is found for one of the variables,
-    /// an exception is thrown.
-    void instantiate_global_variables()
-    {
-      lps::detail::instantiate_global_variables(*this);
-    }
-
     ~specification()
     {
       m_initial_process.unprotect();
@@ -315,10 +306,6 @@ bool operator!=(const specification& spec1, const specification& spec2)
 
 #ifndef MCRL2_LPS_PRINT_H
 #include "mcrl2/lps/print.h"
-#endif
-
-#ifndef MCRL2_LPS_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
-#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #endif
 
 #endif // MCRL2_LPS_SPECIFICATION_H                                                                                       

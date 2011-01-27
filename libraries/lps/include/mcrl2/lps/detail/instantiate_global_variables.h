@@ -21,9 +21,6 @@ namespace mcrl2 {
 
 namespace lps {
 
-//template <typename Object, typename SetContainer>
-//void remove_parameters(Object& o, const SetContainer& to_be_removed);
-
 namespace detail {
 
   inline
@@ -43,11 +40,10 @@ namespace detail {
         sigma[*i] = d;
         to_be_removed.insert(*i);
       }
-      //lps::substitute_free_variables(spec.process(), sigma);
+      lps::substitute_free_variables(spec.process(), sigma);
       spec.initial_process() = lps::substitute_free_variables(spec.initial_process(), sigma);
       spec.action_labels() = lps::substitute_free_variables(spec.action_labels(), sigma);
-      lps::remove_parameters(spec, to_be_removed);
-      assert(spec.global_variables().empty());
+      spec.global_variables().clear();
   }
 
 } // namespace detail
@@ -55,13 +51,5 @@ namespace detail {
 } // namespace lps
 
 } // namespace mcrl2
-
-#ifndef MCRL2_LPS_REMOVE_H
-#include "mcrl2/lps/remove.h"
-#endif
-
-#ifndef MCRL2_LPS_SUBSTITUTE_H
-#include "mcrl2/lps/substitute.h"
-#endif
 
 #endif // MCRL2_LPS_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H

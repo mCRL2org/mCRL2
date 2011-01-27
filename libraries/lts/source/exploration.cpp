@@ -21,6 +21,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/detail/lps2lts_lts.h"
@@ -101,7 +102,7 @@ namespace mcrl2
         throw mcrl2::runtime_error("lps2lts algorithm class instantiated without linear process.");
       } */
 
-      lgopts->specification.instantiate_global_variables();
+      lps::detail::instantiate_global_variables(lgopts->specification);
 
       if ( lgopts->bithashing )
       {

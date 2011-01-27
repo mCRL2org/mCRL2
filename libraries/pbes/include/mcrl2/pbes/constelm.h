@@ -22,6 +22,7 @@
 #include <algorithm>
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/pbes.h"

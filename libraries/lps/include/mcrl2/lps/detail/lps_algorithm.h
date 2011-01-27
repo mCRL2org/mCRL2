@@ -27,6 +27,7 @@
 #include "mcrl2/lps/rewrite.h"  
 #include "mcrl2/lps/substitute.h"  
 #include "mcrl2/lps/remove.h"  
+#include "mcrl2/lps/detail/instantiate_global_variables.h"
 
 namespace mcrl2 {
 
@@ -127,7 +128,7 @@ namespace detail {
       /// an exception is thrown.
       void instantiate_free_variables()
       {
-        m_spec.instantiate_global_variables();
+        lps::detail::instantiate_global_variables(m_spec);
       }
 
       /// \brief Removes formal parameters from the specification

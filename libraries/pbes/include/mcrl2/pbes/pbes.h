@@ -31,7 +31,6 @@
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/data/substitution.h"
-#include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"
@@ -53,14 +52,6 @@ using mcrl2::core::pp;
 template <typename Container> class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
-template <typename Container>
-void remove_pbes_parameters(pbes<Container>& x,
-                            const std::set<data::variable>& to_be_removed
-                           );
-
-template <typename Object, typename Substitution>
-void substitute(Object& o, const Substitution& sigma, bool replace_parameters);
-                     
 template <typename Container>
 std::set<data::variable> find_free_variables(Container const& container);
 
@@ -384,29 +375,6 @@ class pbes
       return true;
     }
 
-    /// \brief Attempts to eliminate the free variables of the PBES, by substituting
-    /// a constant value for them. If no constant value is found for one of the variables,
-    /// an exception is thrown.
-    void instantiate_global_variables()
-    {
-      data::mutable_associative_container_substitution<> sigma;
-      data::representative_generator default_expression_generator(data());
-      std::set<data::variable> to_be_removed;
-      const atermpp::set<data::variable>& v = global_variables();
-      for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
-      {
-        data::data_expression d = default_expression_generator(i->sort());
-        if (d == data::data_expression())
-        {
-          throw mcrl2::runtime_error("Error in pbes::instantiate_global_variables: could not instantiate " + pp(*i));
-        }
-        sigma[*i] = d;
-        to_be_removed.insert(*i);
-      }
-      pbes_system::substitute(*this, sigma, false);
-      pbes_system::remove_pbes_parameters(*this, to_be_removed);
-      assert(global_variables().empty());
-    }
 
     /// \brief Writes the pbes to file.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
@@ -763,14 +731,6 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 };
 }
 /// \endcond
-
-#ifndef MCRL2_PBES_REMOVE_PARAMETERS_H
-#include "mcrl2/pbes/remove_parameters.h"
-#endif
-
-#ifndef MCRL2_PBES_SUBSTITUTE_H
-#include "mcrl2/pbes/substitute.h"
-#endif
 
 #ifndef MCRL2_PBES_FIND_H
 #include "mcrl2/pbes/find.h"

@@ -18,6 +18,7 @@
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbesinst_rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 #ifdef PBESINST_FINITE_ALGORITHM
 #include "mcrl2/pbes/detail/pbesinst_finite_builder.h"
@@ -128,7 +129,7 @@ namespace pbes_system {
       /// \param p A PBES
       void run(pbes<>& p)
       {
-        p.instantiate_global_variables();
+        pbes_system::detail::instantiate_global_variables(p);
 
         // initialize equation_index and E
         int eqn_index = 0;

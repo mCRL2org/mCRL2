@@ -26,6 +26,7 @@
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 namespace mcrl2 {
 
@@ -174,7 +175,7 @@ template <typename PbesRewriter>
 pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
-  pbes_spec.instantiate_global_variables();
+  pbes_system::detail::instantiate_global_variables(pbes_spec);
   core::gsVerboseMsg("Using lazy approach...\n");
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
@@ -275,7 +276,7 @@ template <typename PbesRewriter>
 pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
-  pbes_spec.instantiate_global_variables();
+  pbes_system::detail::instantiate_global_variables(pbes_spec);
   core::gsVerboseMsg("Using finite approach...\n");
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();

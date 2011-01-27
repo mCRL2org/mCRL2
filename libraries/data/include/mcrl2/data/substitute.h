@@ -380,6 +380,12 @@ namespace detail {
     const_iterator find(variable_type const& v) const {
       return m_map.find(v);
     }
+    
+    /// \brief Returns true if the substitution is empty
+    bool empty()
+    {
+      return m_map.empty();
+    }
   };
 
   /// \brief Utility function for creating a associative_container_substitution_adapter.

@@ -14,7 +14,6 @@
 
 #include "mcrl2/data/substitution.h"
 #include "mcrl2/pbes/substitute.h"
-#include "mcrl2/pbes/detail/propositional_variable_substituter.h"
 
 namespace mcrl2 {
 

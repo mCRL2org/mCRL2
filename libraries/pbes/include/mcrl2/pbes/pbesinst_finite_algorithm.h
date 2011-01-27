@@ -19,10 +19,12 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/data/classic_enumerator.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 namespace mcrl2 {
 
@@ -195,7 +197,7 @@ namespace detail {
         data::detail::rewrite_container(e_copy, super::m_data_rewriter, sigma);
 
         data::data_expression_list di_copy = atermpp::convert<data::data_expression_list>(di);
-        pbes_system::substitute_gcc_workaround(di_copy, *i);
+        di_copy = data::substitute_free_variables(di_copy, *i);
 
         data::data_expression c = make_condition(di_copy, d_copy);
 //std::clog << "c = " << core::pp(c) << std::endl;
@@ -303,7 +305,7 @@ namespace detail {
                const pbesinst_variable_map& variable_map
               )
       {
-        p.instantiate_global_variables();
+        pbes_system::detail::instantiate_global_variables(p);
         m_equation_count = 0;
 
         // compute index map corresponding to the variable map

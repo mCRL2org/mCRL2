@@ -35,6 +35,7 @@
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 #include <boost/filesystem/operations.hpp>
 
@@ -324,7 +325,7 @@ void test_instantiate_global_variables()
   pbes<> p = lps2pbes(spec, formula, timed);
   std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
-  p.instantiate_global_variables();
+  pbes_system::detail::instantiate_global_variables(p);
   std::cout << "<after>" << pp(p) << std::endl;
   core::garbage_collect();
 }
