@@ -9,11 +9,6 @@
 /// \file mcrl2/lps/substitute.h
 /// \brief add your file description here.
 
-// avoid circular header file dependencies
-#ifndef MCRL2_LPS_SPECIFICATION_H
-#include "mcrl2/lps/specification.h"
-#endif
-
 #ifndef MCRL2_LPS_SUBSTITUTE_H
 #define MCRL2_LPS_SUBSTITUTE_H
 

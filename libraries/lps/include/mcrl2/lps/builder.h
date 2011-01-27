@@ -9,11 +9,6 @@
 /// \file mcrl2/lps/builder.h
 /// \brief add your file description here.
 
-// to prevent circular header file dependencies
-#ifndef MCRL2_LPS_SPECIFICATION_H
-#include "mcrl2/lps/specification.h"
-#endif
-
 #ifndef MCRL2_LPS_BUILDER_H
 #define MCRL2_LPS_BUILDER_H
 

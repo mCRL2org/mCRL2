@@ -34,9 +34,6 @@ namespace mcrl2 {
 /// \brief The main namespace for the LPS library.
 namespace lps {
 
-template <typename Object, typename SetContainer>
-void remove_parameters(Object& o, const SetContainer& to_be_removed);
-
 template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o);
 
@@ -307,14 +304,6 @@ bool operator!=(const specification& spec1, const specification& spec2)
 } // namespace lps                                                                                         
 
 } // namespace mcrl2                                                                                        
-
-#ifndef MCRL2_LPS_REMOVE_H
-#include "mcrl2/lps/remove.h"
-#endif
-
-#ifndef MCRL2_LPS_SUBSTITUTE_H
-#include "mcrl2/lps/substitute.h"
-#endif
 
 #ifndef MCRL2_LPS_WELL_TYPED_H
 #include "mcrl2/lps/well_typed.h"

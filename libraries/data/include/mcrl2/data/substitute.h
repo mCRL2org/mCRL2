@@ -53,6 +53,10 @@ namespace detail {
       }
       return sigma(v);
     }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
   };
   
   template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
