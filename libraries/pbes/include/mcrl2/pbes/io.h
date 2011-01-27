@@ -16,7 +16,7 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/bes/io.h"
-#include "mcrl2/pbes/pbes2besconversion.h"
+#include "mcrl2/pbes/pbesinstconversion.h"
 #include "mcrl2/core/messaging.h"
 
 namespace mcrl2 {
@@ -61,7 +61,7 @@ namespace pbes_system {
         {
           throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
         }
-        bes::boolean_equation_system<> bes_spec = pbes2besconversion(pbes_spec);
+        bes::boolean_equation_system<> bes_spec = pbesinstconversion(pbes_spec);
         if (aterm_ascii)
         {
           core::gsVerboseMsg("Saving result in ATerm ascii format...\n");

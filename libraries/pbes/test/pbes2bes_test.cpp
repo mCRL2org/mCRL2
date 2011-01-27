@@ -23,11 +23,11 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/pbes2bes.h"
+#include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/pbes2bes_algorithm.h"
-#include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
+#include "mcrl2/pbes/pbesinst_algorithm.h"
+#include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -35,19 +35,19 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 inline
-pbes<> pbes2bes_lazy(const pbes<>& p)
+pbes<> pbesinst_lazy(const pbes<>& p)
 {
   pbes<> q = p;
-  pbes2bes_algorithm algorithm(q.data());
+  pbesinst_algorithm algorithm(q.data());
   algorithm.run(q);
   return algorithm.get_result();
 }
 
 inline
-pbes<> pbes2bes_finite(const pbes<>& p)
+pbes<> pbesinst_finite(const pbes<>& p)
 {
   pbes<> q = p;
-  pbes2bes_finite_algorithm algorithm(data::rewriter::jitty, 2);
+  pbesinst_finite_algorithm algorithm(data::rewriter::jitty, 2);
   algorithm.run(q);
   return q;
 }
@@ -166,7 +166,7 @@ std::string random2 =
   "init X0(0, true);                                                                                                                                                                                                                                                                                                                                                                                                                                                                                           \n"
   ;
 
-// This pbes triggered an error with pbes2bes finite
+// This pbes triggered an error with pbesinst finite
 std::string random3 =
   "pbes                                                                                                                                                                                                                                                                                                                                                              \n"
   "mu X0(n:Nat, c:Bool) = ((!(((val(n < 2)) && (!X1)) && (exists k:Nat.((val(k < 3)) || (val(c)))))) && (((forall n:Nat.((val(n < 3)) && (!X4(n > 1)))) || (!(val(n > 1)))) => (val(true)))) && (exists n:Nat.((val(n < 3)) || (exists k:Nat.((val(k < 3)) || (forall m:Nat.((val(m < 3)) && (X0(k + 1, n < 3))))))));                                               \n"
@@ -195,12 +195,12 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
     try
     {
       using namespace pbes_system;
-      pbes<> q1 = pbes2bes_finite(p);
+      pbes<> q1 = pbesinst_finite(p);
       std::cout << core::pp(q1) << std::endl;
     }
     catch (mcrl2::runtime_error e)
     {
-      std::cout << "pbes2bes failed: " << e.what() << std::endl;
+      std::cout << "pbesinst failed: " << e.what() << std::endl;
     }
   }
 
@@ -210,18 +210,18 @@ void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
     try
     {
       using namespace pbes_system;
-      pbes<> q1 = pbes2bes_lazy(p);
+      pbes<> q1 = pbesinst_lazy(p);
       std::cout << core::pp(q1) << std::endl;
     }
     catch (mcrl2::runtime_error e)
     {
-      std::cout << "pbes2bes failed: " << e.what() << std::endl;
+      std::cout << "pbesinst failed: " << e.what() << std::endl;
     }
   }
   core::garbage_collect();
 }
 
-void test_pbes2bes()
+void test_pbesinst()
 {
   test_pbes(test1, true, false);
   test_pbes(test2, true, true);
@@ -336,10 +336,10 @@ void test_cabp()
   std::string expr = "(exists d_RM_00: DATA. (val(d_RM_00 == d1) && val(s31_RM == 1)) && X(2, bit0, frame(d_RM_00, b_RM), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || (((((((((((exists d_RM_00: DATA. (val(!(d_RM_00 == d1)) && val(s31_RM == 1)) && Y(2, bit0, frame(d_RM_00, b_RM), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || (exists e4_RF1_00: Bool, d4_RF1_00: DATA. val((s32_K == 3 && s33_RF1 == 1) && if(e4_RF1_00, frame(d4_RF1_00, invert(b_RF1)), frame(d4_RF1_00, b_RF1)) == f_K) && Y(s31_RM, b_RM, f_RM, 1, frame(d1, bit0), if(e4_RF1_00, 1, 2), if(e4_RF1_00, d1, d4_RF1_00), b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1))) || val(s32_K == 4 && s33_RF1 == 1) && Y(s31_RM, b_RM, f_RM, 1, frame(d1, bit0), 1, d1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s33_RF1 == 2) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, 3, d1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s35_L == 1) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 2, b_AS1, s36_AR1, b_AR1)) || (exists e5_L_00: Enum3. val(C3_fun2(e5_L_00, true, true, true) && s35_L == 2) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, C3_fun(e5_L_00, 1, 3, 4), C3_fun3(e5_L_00, bit0, b_L, bit0), s36_AR1, b_AR1))) || val(s35_L == 4 && s36_AR1 == 1) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 1, bit0, 1, b_AR1)) || (exists e7_AR1_00: Bool. val((s35_L == 3 && s36_AR1 == 1) && if(e7_AR1_00, b_AR1, invert(b_AR1)) == b_L) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, 1, bit0, if(e7_AR1_00, 2, 1), b_AR1))) || val(s33_RF1 == 3) && Y(s31_RM, b_RM, f_RM, s32_K, f_K, 1, d1, invert(b_RF1), invert(b_AS1), s35_L, b_L, s36_AR1, b_AR1)) || (exists e_K_00: Enum3. val(C3_fun2(e_K_00, true, true, true) && s32_K == 2) && Y(s31_RM, b_RM, f_RM, C3_fun(e_K_00, 1, 3, 4), C3_fun1(e_K_00, frame(d1, bit0), f_K, frame(d1, bit0)), s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1))) || val(s31_RM == 2 && s32_K == 1) && Y(2, bit0, f_RM, 2, f_RM, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, s36_AR1, b_AR1)) || val(s31_RM == 2 && s36_AR1 == 2) && Y(1, invert(getb(f_RM)), frame(d1, bit0), s32_K, f_K, s33_RF1, d_RF1, b_RF1, b_AS1, s35_L, b_L, 1, invert(b_AR1))";
   std::string subst = "s31_RM:Pos := 2; b_RM:bit := bit0; f_RM:Frame := frame(d2, bit0); s32_K:Pos := 3; f_K:Frame := frame(d2, bit0); s33_RF1:Pos := 1; d_RF1:DATA := d1; b_RF1:bit := bit0; b_AS1:bit := bit1; s35_L:Pos := 1; b_L:bit := bit0; s36_AR1:Pos := 1; b_AR1:bit := bit0";
 
-  pbes2bes_substitution_function sigma;
+  pbesinst_substitution_function sigma;
   pbes_expression t = parse_pbes_expression(expr, subst, p, sigma);
-  pbes2bes_algorithm algorithm(p.data());
-  pbes2bes_rewriter& R = algorithm.rewriter();
+  pbesinst_algorithm algorithm(p.data());
+  pbesinst_rewriter& R = algorithm.rewriter();
   pbes_expression z = R(t, sigma);
   core::garbage_collect();
 }
@@ -452,15 +452,15 @@ void test_balancing_plat()
   state_formulas::state_formula formula = state_formulas::parse_state_formula(NO_DEADLOCK, spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-  pbes_system::pbes2bes_algorithm algorithm(p.data());
+  pbes_system::pbesinst_algorithm algorithm(p.data());
   algorithm.run(p);
   pbes<> q = algorithm.get_result();
 }
 
-void test_pbes2bes_finite()
+void test_pbesinst_finite()
 {
   pbes<> p = txt2pbes(random3);
-  pbes<> q = pbes2bes_finite(p);
+  pbes<> q = pbesinst_finite(p);
   std::cerr << pbes_system::pp(q) << std::endl;
 
   std::string text =
@@ -474,8 +474,8 @@ void test_pbes2bes_finite()
     ;
   size_t log_level = 2;
   pbes<> p1 = txt2pbes(text);
-  pbes2bes_finite_algorithm algorithm(data::rewriter::jitty, log_level);
-  pbes2bes_variable_map variable_map = detail::parse_pbes_parameter_map(p1, "X(*:D)");
+  pbesinst_finite_algorithm algorithm(data::rewriter::jitty, log_level);
+  pbesinst_variable_map variable_map = detail::parse_pbes_parameter_map(p1, "X(*:D)");
   algorithm.run(p1, variable_map);        
 }
 
@@ -483,8 +483,8 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 	pbes_system::detail::set_bes_equation_limit(100000);
-  test_pbes2bes();
-  test_pbes2bes_finite();
+  test_pbesinst();
+  test_pbesinst_finite();
 
 #ifdef MCRL2_EXTENDED_TESTS
   test_cabp();

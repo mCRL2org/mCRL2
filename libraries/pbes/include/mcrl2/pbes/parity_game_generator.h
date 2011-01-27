@@ -164,7 +164,7 @@ namespace pbes_system {
         }
       }
 
-      /// \brief Generates a substitution function for the pbes2bes rewriter.
+      /// \brief Generates a substitution function for the pbesinst rewriter.
       /// \param v A sequence of data variables
       /// \param e A sequence of data expressions
       /// \return A sugstitution function.

@@ -24,7 +24,7 @@ using utilities::interface_description;
 using utilities::make_optional_argument;
 using utilities::tools::tool;
 
-/// The pbes2bes tool.
+/// The pbesinst tool.
 class my_tool: public tool
 {
   protected:

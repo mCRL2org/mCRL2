@@ -17,7 +17,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/pbes2bes.h"
+#include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 
 namespace mcrl2 {
@@ -28,7 +28,7 @@ namespace pbes_system {
 /// \param p A PBES
 /// \param lazy If true, the lazy instantiation algorithm is used, otherwise the finite instantiation algorithm.
 /// \return A bes.
-pbes<> pbes2bes(const pbes<>& p, bool lazy = false)
+pbes<> pbesinst(const pbes<>& p, bool lazy = false)
 {
   typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;

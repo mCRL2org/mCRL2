@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/pbes2besconversion.h
+/// \file mcrl2/pbes/pbesinstconversion.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_PBES2BESCONVERSION_H
-#define MCRL2_PBES_PBES2BESCONVERSION_H
+#ifndef MCRL2_PBES_PBESINSTCONVERSION_H
+#define MCRL2_PBES_PBESINSTCONVERSION_H
 
 #include <cassert>
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -24,7 +24,7 @@ namespace pbes_system {
   /// \brief Converts a propositional variable into a boolean variable
   /// \param v A propositional variable
   inline
-  bes::boolean_variable pbes2besconversion(const propositional_variable_instantiation& v)
+  bes::boolean_variable pbesinstconversion(const propositional_variable_instantiation& v)
   {
     return bes::boolean_variable(v.name());
   }
@@ -32,7 +32,7 @@ namespace pbes_system {
   /// \brief Converts a PBES expression into a boolean expression
   /// \param x A PBES expression
   inline
-  bes::boolean_expression pbes2besconversion(const pbes_expression& x)
+  bes::boolean_expression pbesinstconversion(const pbes_expression& x)
   {
     pbes_system::detail::pbes_expression2boolean_expression_visitor<pbes_system::pbes_expression> visitor;
     visitor.visit(x);
@@ -42,25 +42,25 @@ namespace pbes_system {
   /// \brief Converts a PBES equation into a boolean equation
   /// \param x A PBES equation
   inline
-  bes::boolean_equation pbes2besconversion(const pbes_equation& eq)
+  bes::boolean_equation pbesinstconversion(const pbes_equation& eq)
   {
-    return bes::boolean_equation(eq.symbol(), bes::boolean_variable(eq.variable().name()), pbes2besconversion(eq.formula()));
+    return bes::boolean_equation(eq.symbol(), bes::boolean_variable(eq.variable().name()), pbesinstconversion(eq.formula()));
   }
 
   /// \brief Converts a PBES into a BES
   /// \param p A PBES
   /// \pre The PBES must be a BES
   inline
-  bes::boolean_equation_system<> pbes2besconversion(const pbes<>& p)
+  bes::boolean_equation_system<> pbesinstconversion(const pbes<>& p)
   {
     assert(p.is_bes());
 
     atermpp::vector<bes::boolean_equation> equations;
     for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
     {
-      equations.push_back(pbes2besconversion(*i));
+      equations.push_back(pbesinstconversion(*i));
     }
-    bes::boolean_expression initial_state = pbes2besconversion(p.initial_state());
+    bes::boolean_expression initial_state = pbesinstconversion(p.initial_state());
 
     return bes::boolean_equation_system<>(equations, initial_state);
   }
@@ -69,4 +69,4 @@ namespace pbes_system {
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_PBES2BESCONVERSION_H
+#endif // MCRL2_PBES_PBESINSTCONVERSION_H

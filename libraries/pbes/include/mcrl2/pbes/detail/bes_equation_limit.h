@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/detail/bes_equation_limit.h
-/// \brief A global variable for counting the number of BES equations in pbes2bes
+/// \brief A global variable for counting the number of BES equations in pbesinst
 /// and parity_game_generator. If the number of equations exceeds a limit, an
 /// exception is thrown. A static template class variable is used, that can be
 /// set from everywhere.

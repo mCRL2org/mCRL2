@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/detail/pbes2bes_finite_builder.h
+/// \file mcrl2/pbes/detail/pbesinst_finite_builder.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_DETAIL_PBES2BES_FINITE_BUILDER_H
-#define MCRL2_PBES_DETAIL_PBES2BES_FINITE_BUILDER_H
+#ifndef MCRL2_PBES_DETAIL_PBESINST_FINITE_BUILDER_H
+#define MCRL2_PBES_DETAIL_PBESINST_FINITE_BUILDER_H
 
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/classic_enumerator.h"
@@ -26,7 +26,7 @@ namespace detail {
 
 /// Visitor that applies a propositional variable substitution to a pbes expression.
 template <typename DataRewriter, typename RenameFunction, typename Substitution>
-struct pbes2bes_finite_builder: public pbes_expr_builder<pbes_expression, Substitution>
+struct pbesinst_finite_builder: public pbes_expr_builder<pbes_expression, Substitution>
 {
   typedef core::term_traits<pbes_expression> tr;
   
@@ -35,7 +35,7 @@ struct pbes2bes_finite_builder: public pbes_expr_builder<pbes_expression, Substi
   const data::data_specification& m_dataspec;
   std::map<core::identifier_string, std::vector<data::variable> >& m_finite_variables;
   
-  pbes2bes_finite_builder(const DataRewriter& r, RenameFunction& rho, const data::data_specification& dataspec, std::map<core::identifier_string, std::vector<data::variable> >& finite_variables)
+  pbesinst_finite_builder(const DataRewriter& r, RenameFunction& rho, const data::data_specification& dataspec, std::map<core::identifier_string, std::vector<data::variable> >& finite_variables)
     : m_rewriter(r), m_rename(rho), m_dataspec(dataspec), m_finite_variables(finite_variables)
   {}
 
@@ -131,4 +131,4 @@ struct pbes2bes_finite_builder: public pbes_expr_builder<pbes_expression, Substi
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_DETAIL_PBES2BES_FINITE_BUILDER_H
+#endif // MCRL2_PBES_DETAIL_PBESINST_FINITE_BUILDER_H

@@ -29,7 +29,7 @@ namespace pbes_system {
 
 namespace detail {
 
-    /// \brief Data structure for storing the variables that should be expanded by the finite pbes2bes algorithm.
+    /// \brief Data structure for storing the variables that should be expanded by the finite pbesinst algorithm.
     typedef atermpp::map<core::identifier_string, std::vector<data::variable> > pbes_parameter_map;
 
     /// \brief Returns true if the declaration text matches with the variable d.
@@ -82,7 +82,7 @@ namespace detail {
       return std::vector<data::variable>(result.begin(), result.end());
     }
 
-    /// \brief Parses parameter selection for finite pbes2bes algorithm
+    /// \brief Parses parameter selection for finite pbesinst algorithm
     inline
     pbes_parameter_map parse_pbes_parameter_map(const pbes<>& p, const std::string& text)
     {

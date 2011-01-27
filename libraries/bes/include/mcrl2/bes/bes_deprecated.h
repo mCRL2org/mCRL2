@@ -1503,7 +1503,7 @@ namespace bes
       /// pbes expressions are translated into the internal format belonging to the rewriter. The
       /// advantage of this is that the rewriter does not have to translate the data expressions
       /// to internal format the next time the rewriter is applied to it. This is for instance useful
-      /// in the tool pbes2bool (or pbes2bes) where pbes expressions must iteratively be rewritten.
+      /// in the tool pbes2bool (or pbesinst) where pbes expressions must iteratively be rewritten.
       
       inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
                          mcrl2::pbes_system::pbes_expression p)
