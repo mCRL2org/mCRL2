@@ -24,7 +24,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/pbes2besconversion.h"
+#include "mcrl2/pbes/pbesinstconversion.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -56,7 +56,7 @@ class txt2pbes_tool: public input_output_tool
         std::ifstream from(input_filename().c_str());
         p = pbes_system::txt2pbes(from);
       }
-      bes::boolean_equation_system<> b = pbes_system::pbes2besconversion(p);
+      bes::boolean_equation_system<> b = pbes_system::pbesinstconversion(p);
       b.save(output_filename());
       return true;
     }
