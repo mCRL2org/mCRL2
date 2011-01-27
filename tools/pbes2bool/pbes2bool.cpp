@@ -50,6 +50,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
@@ -295,7 +296,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
         }
       }
       p.normalize();
-      p.instantiate_global_variables();
+      pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
       
       data::rewriter datar= (opt_data_elm) ?
