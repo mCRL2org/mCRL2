@@ -189,9 +189,6 @@ BOOST_AUTO_TEST_CASE(prover_options) {
   };
 
   // testing smt prover type extraction
-  string_to_prover_type_test< true >("ario");
-  string_to_prover_type_test< false >("arion");
-  string_to_prover_type_test< false >("aario");
   string_to_prover_type_test< false >("ar");
   string_to_prover_type_test< false >("cvc-");
   string_to_prover_type_test< false >("cvca");
@@ -203,8 +200,6 @@ BOOST_AUTO_TEST_CASE(prover_options) {
 
   // Missing mandatory argument for option --smt-solver
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver"), std::runtime_error);
-  // Valid smt-solver option with valid argument
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --smt-solver=ario"));
   // Valid smt-solver option with valid argument
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -zcvc"));
   // Valid smt-solver option with invalid argument
