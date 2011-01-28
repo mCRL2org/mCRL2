@@ -38,7 +38,7 @@ namespace mcrl2 {
     template<typename DataRewriter>
     class binary_algorithm: public lps::detail::lps_algorithm
     {
-        typedef data::classic_enumerator< data::mutable_map_substitution< >, data::rewriter, data::selectors::select_not< false > > enumerator_type;
+        typedef data::classic_enumerator< data::mutable_associative_container_substitution< >, data::rewriter, data::selectors::select_not< false > > enumerator_type;
 
       protected:
         /// Rewriter
