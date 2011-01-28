@@ -25,19 +25,19 @@ using namespace mcrl2::data;
 
 template < typename Rewriter >
 void representation_check(Rewriter& R, data_expression const& input, data_expression const& expected, const data_specification &spec) {
-  data_expression output(R(spec.normalise_sorts(input)));
+  data_expression output(R(normalize_sorts(input,spec)));
 
-  BOOST_CHECK(spec.normalise_sorts(expected) == output);
+  BOOST_CHECK(normalize_sorts(expected,spec) == output);
 
-  if (output != spec.normalise_sorts(expected)) {
+  if (output != normalize_sorts(expected,spec)) {
     std::clog << "--- test failed --- " << core::pp(input) << " ->* " << core::pp(expected) << std::endl
               << "input    " << core::pp(input) << std::endl
               << "expected " << core::pp(expected) << std::endl
               << "R(input) " << core::pp(output) << std::endl
               << " -- term representations -- " << std::endl
               << "input    " << input << std::endl
-              << "expected " << spec.normalise_sorts(expected)<< std::endl
-              << "R(input) " << spec.normalise_sorts(output) << std::endl;
+              << "expected " << normalize_sorts(expected,spec)<< std::endl
+              << "R(input) " << normalize_sorts(output,spec) << std::endl;
   }
 }
 
@@ -90,20 +90,20 @@ void number_test() {
   mcrl2::data::rewriter R(specification);
 
   representation_check(R, number(sort_pos::pos(), "1"), sort_pos::c1(),specification);
-  representation_check(R, number(sort_nat::nat(), "1"), R(specification.normalise_sorts(pos2nat(sort_pos::c1()))),specification);
+  representation_check(R, number(sort_nat::nat(), "1"), R(normalize_sorts(pos2nat(sort_pos::c1()),specification)),specification);
   representation_check(R, number(sort_int::int_(), "-1"), R(cneg(sort_pos::c1())),specification);
-  representation_check(R, specification.normalise_sorts(number(sort_real::real_(), "1")), R(specification.normalise_sorts(pos2real(sort_pos::c1()))),specification);
+  representation_check(R, normalize_sorts(number(sort_real::real_(), "1"),specification), R(normalize_sorts(pos2real(sort_pos::c1()),specification)),specification);
 
   representation_check(R, pos("11"), cdub(true_(), cdub(true_(), cdub(false_(), c1()))),specification);
   representation_check(R, pos(12), cdub(false_(), cdub(false_(), cdub(true_(), c1()))),specification);
-  representation_check(R, nat("18"), R(specification.normalise_sorts(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1()))))))),specification);
-  representation_check(R, nat(12), R(specification.normalise_sorts(pos2nat(cdub(false_(), cdub(false_(), cdub(true_(), c1())))))),specification);
+  representation_check(R, nat("18"), R(normalize_sorts(pos2nat(cdub(false_(), cdub(true_(), cdub(false_(), cdub(false_(), c1()))))),specification)),specification);
+  representation_check(R, nat(12), R(normalize_sorts(pos2nat(cdub(false_(), cdub(false_(), cdub(true_(), c1())))),specification)),specification);
   representation_check(R, int_("0"), R(nat2int(c0())),specification);
   representation_check(R, int_("-1"), cneg(c1()),specification);
   representation_check(R, int_(-2), cneg(cdub(false_(), c1())),specification);
-  representation_check(R, real_("0"), R(specification.normalise_sorts(nat2real(c0()))),specification);
-  representation_check(R, real_("-1"), R(specification.normalise_sorts(int2real(cneg(c1())))),specification);
-  representation_check(R, real_(-2), R(specification.normalise_sorts(int2real(cneg(cdub(false_(), c1()))))),specification);
+  representation_check(R, real_("0"), R(normalize_sorts(nat2real(c0()),specification)),specification);
+  representation_check(R, real_("-1"), R(normalize_sorts(int2real(cneg(c1())),specification)),specification);
+  representation_check(R, real_(-2), R(normalize_sorts(int2real(cneg(cdub(false_(), c1()))),specification)),specification);
 
 }
 

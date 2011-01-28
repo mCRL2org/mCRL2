@@ -145,7 +145,7 @@ namespace data {
     // Undo sort renamings for compatibility with type checker
     // data_vars = data::detail::undo_compatibility_renamings(data_spec, data_vars);
     data_vars = atermpp::reverse(data_vars);
-    data_vars = data_spec.normalise_sorts(data_vars);
+    data_vars = normalize_sorts(data_vars,data_spec);
 
     // Check that variables do not have equal names.
     for(variable_list::const_iterator v=data_vars.begin(); v!=data_vars.end(); ++v)
@@ -364,10 +364,10 @@ namespace data {
     //  throw mcrl2::runtime_error("error type checking sort expression");
     sort_expression result(sort_expr);
     type_check(result, data_spec);
-    return data_spec.normalise_sorts(result);
+    return normalize_sorts(result,data_spec);
     // Undo sort renamings for compatibility with type checker
     // sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
-    // return data_spec.normalise_sorts(sort_expression(sort_expr));
+    // return normalize_sorts(sort_expression(sort_expr),data_spec);
   }
 
   /// \brief Parses and type checks a sort expression.

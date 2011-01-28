@@ -374,8 +374,6 @@ class specification_basic_type:public boost::noncopyable
 
     void insert_equation(const data_equation eqn)
     {
-      // if (!options.norewrite) rewr.add_rule(mcrl2::data::data_equation(eqn));
-      // if (!options.norewrite) rewr.add_rule(data.normalise_sorts(eqn));
       data.add_equation(eqn);
     }
 
@@ -3925,7 +3923,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression_list args;
       data_expression_list xxxterm;
 
-      const sort_expression normalised_sort=sort; // data.normalise_sorts(sort);
+      const sort_expression normalised_sort=sort; 
       const variable v1=get_fresh_variable("x",normalised_sort);
       const size_t n=enumeratedtypes[index].size;
       for(size_t j=0; (j<n); j++)
@@ -7197,49 +7195,6 @@ class specification_basic_type:public boost::noncopyable
       AddTerminationActionIfNecessary(t3);
       return t3;
     }
-
-    /* normalise the sorts in action_label_lists * /
-    action_label_list normalise_sorts_action_labels(
-                const action_label_list &l,
-                const data_specification &data) const
-    { action_label_list result;
-      for(action_label_list::const_iterator i=l.begin(); i!=l.end(); ++i)
-      { result=push_back(result,action_label(i->name(),data.normalise_sorts(i->sorts())));
-      }
-      return reverse(result);
-    }
-
-    action_list normalise_sorts(
-                const action_list &l,
-                const data_specification &data)
-    { action_list result;
-      for(action_list::const_iterator i=l.begin(); i!=l.end(); ++i)
-      { const action_label label(i->label());
-        result=push_back(result,
-                  action(action_label(label.name(),data.normalise_sorts(label.sorts())),
-                         data.normalise_sorts(i->arguments()))
-                 );
-      }
-      return reverse(result);
-    }
-
-    summand_list normalise_sorts(
-                const summand_list &l,
-                const data_specification &data)
-    { summand_list result;
-      for(summand_list::const_iterator i=l.begin(); i!=l.end(); ++i)
-      { result=push_back(result,
-                    summand_(data.normalise_sorts(i->summation_variables()),
-                             data.normalise_sorts(i->condition()),
-                             i->is_delta(),
-                             (i->is_delta()?i->actions():normalise_sorts(i->actions(),data)),
-                             i->has_time(),
-                             (i->has_time()?data.normalise_sorts(i->time()):i->time()),
-                             (i->is_delta()?i->assignments():data.normalise_sorts(i->assignments()))));
-      }
-      return reverse(result);
-    } */
-
 
 }; // End of the class specification basictype
 

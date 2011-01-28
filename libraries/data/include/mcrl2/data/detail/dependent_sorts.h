@@ -67,7 +67,7 @@ namespace mcrl2 {
               {
                 for (boost::iterator_range< sort_expression_list::iterator > i(function_sort(r.front().sort()).domain()); !i.empty(); i.advance_begin(1))
                 {
-                  if (i.front() != s && (!is_basic_sort(i.front()) || m_specification.normalise_sorts(i.front()) != s))
+                  if (i.front() != s && (!is_basic_sort(i.front()) || normalize_sorts(i.front(),m_specification) != s))
                   {
                     static_cast< super& >(*this)(i.front());
                   }
@@ -90,7 +90,7 @@ namespace mcrl2 {
 
           void enter(const basic_sort& s)
           {
-            sort_expression actual_sort = m_specification.normalise_sorts(s);
+            sort_expression actual_sort = normalize_sorts(s,m_specification);
 
             if (actual_sort == s)
             {

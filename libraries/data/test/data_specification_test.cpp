@@ -324,9 +324,9 @@ void test_is_certainly_finite()
   spec.add_alias(alias(basic_sort("a0"), s0));
   spec.add_alias(alias(basic_sort("a1"), s1));
 
-  BOOST_CHECK(spec.is_certainly_finite(spec.normalise_sorts(basic_sort("a"))));
-  BOOST_CHECK(!spec.is_certainly_finite(spec.normalise_sorts(basic_sort("a0"))));
-  BOOST_CHECK(!spec.is_certainly_finite(spec.normalise_sorts(basic_sort("a1"))));
+  BOOST_CHECK(spec.is_certainly_finite(normalize_sorts(basic_sort("a"),spec)));
+  BOOST_CHECK(!spec.is_certainly_finite(normalize_sorts(basic_sort("a0"),spec)));
+  BOOST_CHECK(!spec.is_certainly_finite(normalize_sorts(basic_sort("a1"),spec)));
 
   using namespace sort_list;
 
@@ -407,12 +407,12 @@ void test_system_defined()
     "sort E = D;"
     "sort F = E;");
   BOOST_CHECK(specification.constructors(::sort_set::set_(sort_nat::nat())) == specification.constructors(basic_sort("D")));
-  BOOST_CHECK(specification.constructors(specification.normalise_sorts(basic_sort("D"))) == 
-                     specification.constructors(specification.normalise_sorts(basic_sort("E"))));
-  BOOST_CHECK(specification.mappings(specification.normalise_sorts(basic_sort("D"))) == 
-              specification.mappings(specification.normalise_sorts(basic_sort("E"))));
-  BOOST_CHECK(specification.constructors(specification.normalise_sorts(basic_sort("D"))) == 
-                     specification.constructors(specification.normalise_sorts(basic_sort("F"))));
+  BOOST_CHECK(specification.constructors(normalize_sorts(basic_sort("D"),specification)) == 
+                     specification.constructors(normalize_sorts(basic_sort("E"),specification)));
+  BOOST_CHECK(specification.mappings(normalize_sorts(basic_sort("D"),specification)) == 
+              specification.mappings(normalize_sorts(basic_sort("E"),specification)));
+  BOOST_CHECK(specification.constructors(normalize_sorts(basic_sort("D"),specification)) == 
+                     specification.constructors(normalize_sorts(basic_sort("F"),specification)));
 
   data_specification copy = specification;
 
@@ -512,7 +512,7 @@ void test_utility_functionality()
 
 
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) != sorts.end());
-  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), spec.normalise_sorts(a)) != sorts.end());
+  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(a,spec)) != sorts.end());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) != sorts.end());
 
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) == mappings.end());
@@ -548,12 +548,12 @@ void test_normalisation()
   specification.add_alias(alias(S, set_(A)));
   specification.add_alias(alias(B, bag(A)));
 
-  BOOST_CHECK(specification.normalise_sorts(L) == specification.normalise_sorts(list(A)));
-  BOOST_CHECK(specification.normalise_sorts(list(L)) == specification.normalise_sorts(list(list(A))));
-  BOOST_CHECK(specification.normalise_sorts(S) == specification.normalise_sorts(set_(A)));
-  BOOST_CHECK(specification.normalise_sorts(list(S)) == specification.normalise_sorts(list(set_(A))));
-  BOOST_CHECK(specification.normalise_sorts(B) == specification.normalise_sorts(bag(A)));
-  BOOST_CHECK(specification.normalise_sorts(list(B)) == specification.normalise_sorts(list(bag(A))));
+  BOOST_CHECK(normalize_sorts(L,specification) == normalize_sorts(list(A),specification));
+  BOOST_CHECK(normalize_sorts(list(L),specification) == normalize_sorts(list(list(A)),specification));
+  BOOST_CHECK(normalize_sorts(S,specification) == normalize_sorts(set_(A),specification));
+  BOOST_CHECK(normalize_sorts(list(S),specification) == normalize_sorts(list(set_(A)),specification));
+  BOOST_CHECK(normalize_sorts(B,specification) == normalize_sorts(bag(A),specification));
+  BOOST_CHECK(normalize_sorts(list(B),specification) == normalize_sorts(list(bag(A)),specification));
 
   specification = parse_data_specification(
     "sort A = struct a(B);"
@@ -574,11 +574,11 @@ void test_normalisation()
   structured_sort sB(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
 
   data_specification::sorts_const_range sorts(specification.sorts());
-  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), specification.normalise_sorts(sA)) != sorts.end());
-  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), specification.normalise_sorts(sB)) != sorts.end());
+  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sA,specification)) != sorts.end());
+  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sB,specification)) != sorts.end());
 
-  BOOST_CHECK(specification.normalise_sorts(sA) == specification.normalise_sorts(specification.normalise_sorts(sA)));
-  BOOST_CHECK(specification.normalise_sorts(sB) == specification.normalise_sorts(specification.normalise_sorts(sB)));
+  BOOST_CHECK(normalize_sorts(sA,specification) == normalize_sorts(normalize_sorts(sA,specification),specification));
+  BOOST_CHECK(normalize_sorts(sB,specification) == normalize_sorts(normalize_sorts(sB,specification),specification));
 }
 
 void test_copy()
@@ -603,7 +603,7 @@ void test_copy()
 
   core::garbage_collect();
 
-  BOOST_CHECK(other.normalise_sorts(basic_sort("A")) == other.normalise_sorts(basic_sort("S")));
+  BOOST_CHECK(normalize_sorts(basic_sort("A"),other) == normalize_sorts(basic_sort("S"),other));
 
   data_specification::sorts_const_range sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), basic_sort("A")) == sorts.end());

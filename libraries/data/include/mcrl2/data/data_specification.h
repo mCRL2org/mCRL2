@@ -38,6 +38,7 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/function_update.h"
+#include "mcrl2/data/detail/normalize_sorts_fwd.h"
 
 // sorts
 #include "mcrl2/data/sort_expression.h"
@@ -60,12 +61,18 @@ namespace mcrl2 {
 
   namespace data {
 
-    namespace detail {
-      data_equation translate_user_notation_data_equation(const data_equation& x);
-    }
-
     // prototype
     class data_specification;
+
+    /// \cond INTERNAL_DOCS
+    namespace detail {
+      data_equation translate_user_notation_data_equation(const data_equation& x);
+    } // namespace detail
+
+    /* sort_expression normalize_sorts(const sort_expression& x,
+                                    const data_specification& data_spec);
+
+    class data_specification; */
 
     // prototype, find.h included at the end of this file to prevent circular dependencies.
     template < typename Container >
@@ -514,7 +521,7 @@ namespace mcrl2 {
         /// \note this operation does not invalidate iterators of sorts_const_range
         void add_system_defined_sort(const sort_expression& s) const
         {
-          sort_expression normalised(normalise_sorts(s));
+          sort_expression normalised(normalize_sorts(s,*this));
           if(!is_function_sort(normalised))
           {
             m_normalised_sorts.insert(normalised);
@@ -530,7 +537,7 @@ namespace mcrl2 {
         /// \note this operation does not invalidate iterators of constructors_const_range
         inline
         void add_system_defined_constructor(const function_symbol& f) const
-        { add_function(m_normalised_constructors,normalise_sorts(f));
+        { add_function(m_normalised_constructors,normalize_sorts(f,*this));
         }
   
         /// \brief Adds a mapping to this specification, and marks it as system
@@ -541,7 +548,7 @@ namespace mcrl2 {
         /// \post is_system_defined(f) == true
         /// \note this operation does not invalidate iterators of mappings_const_range
         void add_system_defined_mapping(const function_symbol& f) const
-        { add_function(m_normalised_mappings,normalise_sorts(f));
+        { add_function(m_normalised_mappings,normalize_sorts(f,*this));
         }
   
         /// \brief Adds an equation to this specification, and marks it as system
@@ -552,7 +559,7 @@ namespace mcrl2 {
         /// \post is_system_defined(f) == true
         /// \note this operation does not invalidate iterators of equations_const_range
         void add_system_defined_equation(const data_equation& e) const
-        { m_normalised_equations.insert(normalise_sorts(e));
+        { m_normalised_equations.insert(normalize_sorts(e,*this));
         }
   
         /// \brief Adds constructors, mappings and equations for a structured sort
@@ -560,7 +567,7 @@ namespace mcrl2 {
         ///
         /// \param[in] sort A sort expression that is representing the structured sort.
         void insert_mappings_constructors_for_structured_sort(const structured_sort &sort) const
-        { add_system_defined_sort(normalise_sorts(sort));
+        { add_system_defined_sort(normalize_sorts(sort,*this));
 
           structured_sort s_sort(sort);
           function_symbol_vector f(s_sort.constructor_functions(sort));
@@ -607,7 +614,7 @@ namespace mcrl2 {
 
         void add_standard_mappings_and_equations(sort_expression const& sort) const
         {
-          function_symbol_vector symbols(standard_generate_functions_code(normalise_sorts(sort)));
+          function_symbol_vector symbols(standard_generate_functions_code(normalize_sorts(sort,*this)));
 
           for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
           { add_function(m_normalised_mappings,*i);
@@ -775,7 +782,7 @@ namespace mcrl2 {
       {
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
-        return constructors_const_range(m_normalised_constructors.equal_range(normalise_sorts(s)));
+        return constructors_const_range(m_normalised_constructors.equal_range(normalize_sorts(s,*this)));
       }
 
       /// \brief Gets all mappings in this specification including those that are system defined.
@@ -813,7 +820,7 @@ namespace mcrl2 {
       {
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
-        return mappings_const_range(m_normalised_mappings.equal_range(normalise_sorts(s)));
+        return mappings_const_range(m_normalised_mappings.equal_range(normalize_sorts(s,*this)));
       }
 
       /// \brief Gets all equations in this specification including those that are system defined
@@ -887,7 +894,7 @@ namespace mcrl2 {
       /// \param[in] a an alias
       /// \pre !search_sort(s.name()) || is_alias(s.name()) || constructors(s.name()).empty()
       /// \note this operation does not invalidate iterators of aliases_const_range
-      /// \post is_alias(s.name()) && normalise_sorts(s.name()) = normalise_sorts(s.reference())
+      /// \post is_alias(s.name()) && normalize_sorts(s.name(),*this) = normalize_sorts(s.reference(),*this)
       void add_alias(alias const& a)
       {
         assert(m_data_specification_is_type_checked);
@@ -1031,8 +1038,8 @@ namespace mcrl2 {
         for(sort_to_symbol_map::const_iterator i=m_constructors.begin();
              i!=m_constructors.end(); ++i)
         { 
-          const sort_expression normalised_sort=normalise_sorts(i->first);
-          const function_symbol normalised_constructor=normalise_sorts(i->second);
+          const sort_expression normalised_sort=normalize_sorts(i->first,*this);
+          const function_symbol normalised_constructor=normalize_sorts(i->second,*this);
 
           mappings_const_range range(m_normalised_constructors.equal_range(normalised_constructor.sort().target_sort()));
           if (std::find(range.begin(), range.end(), normalised_constructor) == range.end())
@@ -1047,8 +1054,8 @@ namespace mcrl2 {
         for(sort_to_symbol_map::const_iterator i=m_mappings.begin();
              i!=m_mappings.end(); ++i)
         { 
-          const sort_expression normalised_sort=normalise_sorts(i->first);
-          const function_symbol normalised_mapping=normalise_sorts(i->second);
+          const sort_expression normalised_sort=normalize_sorts(i->first,*this);
+          const function_symbol normalised_mapping=normalize_sorts(i->second,*this);
 
           mappings_const_range range(m_normalised_mappings.equal_range(normalised_mapping.sort().target_sort()));
           if (std::find(range.begin(), range.end(), normalised_mapping) == range.end())
@@ -1251,7 +1258,7 @@ namespace mcrl2 {
         {
           insert_mappings_constructors_for_structured_sort(sort);
         }
-        const sort_expression normalised_sort=normalise_sorts(sort);
+        const sort_expression normalised_sort=normalize_sorts(sort,*this);
         add_standard_mappings_and_equations(normalised_sort);
       }
 
@@ -1315,14 +1322,14 @@ namespace mcrl2 {
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
         return normalise_sorts_helper(e);
-      }
+      } 
       
       /// \brief Normalises a data expression by replacing all sorts in it by a unique 
       /// representative sort.
       /// \details See the explanation of normalise_sorts(sort_expression).
       /// \param[in] e a data expression
       /// \result a data expression e with normalised sorts 
-      data_expression normalise_sorts(data_expression const& e) const
+      /* data_expression normalise_sorts(data_expression const& e) const
       { 
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
@@ -1375,32 +1382,32 @@ namespace mcrl2 {
         {
           throw mcrl2::runtime_error("normalise_sorts: unexpected expression " + e.to_string() + " occurred.");
         }
-      }
+      } */
 
       /// \brief Normalises a variable v by replacing sorts in it by a unique representative sort.
       /// \details See the explanation of normalise_sorts(sort_expression).
       /// \param[in] v a variable
       /// \result a variable with a normalised sort expression
-      variable normalise_sorts(variable const& v) const
+      /* variable normalise_sorts(variable const& v) const
       { 
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
         return variable(v.name(),normalise_sorts(v.sort()));
-      }
+      } */
  
       /// \brief Normalises the sorts in a function symbol.
-      function_symbol normalise_sorts(function_symbol const& f) const
+      /* function_symbol normalise_sorts(function_symbol const& f) const
       {
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
         return function_symbol(f.name(),normalise_sorts(f.sort()));
-      }
+      } */
 
       /// \brief Normalises an equation e by replacing sorts in it by a unique representative sort.
       /// \details See the explanation of normalise_sorts(sort_expression).
       /// \param[in] e a data_equation.
       /// \result a variable with a normalised sort expression
-      data_equation normalise_sorts(const data_equation& e) const
+      /* data_equation normalise_sorts(const data_equation& e) const
       { 
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
@@ -1408,24 +1415,24 @@ namespace mcrl2 {
                              normalise_sorts(e.condition()),
                              normalise_sorts(e.lhs()),
                              normalise_sorts(e.rhs())); 
-      }
+      } */
 
       /// \brief Normalises an assignment a by replacing sorts in it by a unique representative sort.
       /// \details See the explanation of normalise_sorts(sort_expression).
       /// \param[in] a an assignment
       /// \result an assignment with normalised sort expressions
-      assignment normalise_sorts(assignment const& a) const
+      /* assignment normalise_sorts(assignment const& a) const
       { 
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
         return assignment(normalise_sorts(a.lhs()),normalise_sorts(a.rhs()));
-      }
+      } */
 
       /// \brief Normalises a atermpp list l by replacing sorts in it by a unique representative sort.
       /// \details See the explanation of normalise_sorts(sort_expression).
       /// \param[in] l a list of variables 
       /// \result a variable list with a normalised sort expression
-      template < typename T>
+      /* template < typename T>
       atermpp::term_list <T> normalise_sorts(atermpp::term_list < T > const& l) const
       { 
         assert(m_data_specification_is_type_checked);
@@ -1433,10 +1440,10 @@ namespace mcrl2 {
         atermpp::term_list <T> result;
         for(typename atermpp::term_list <T>::const_iterator i=l.begin();
                 i!=l.end(); ++i)
-        { result=push_front(result,normalise_sorts(*i));
+        { result=push_front(result,normalize_sorts(*i,*this));
         }
         return reverse(result);
-      } 
+      } */
 
       /// \brief Removes sort from specification.
       /// Note that this also removes aliases for the sort but does not remove
@@ -1449,7 +1456,7 @@ namespace mcrl2 {
       {
         assert(m_data_specification_is_type_checked);
         m_sorts.erase(s);
-        m_normalised_sorts.erase(normalise_sorts(s));
+        m_normalised_sorts.erase(normalize_sorts(s,*this));
       }
 
       /// \brief Removes alias from specification.
@@ -1473,7 +1480,7 @@ namespace mcrl2 {
       void remove_constructor(const function_symbol& f)
       {
         assert(m_data_specification_is_type_checked);
-        remove_function(m_normalised_constructors,normalise_sorts(f));
+        remove_function(m_normalised_constructors,normalize_sorts(f,*this));
         remove_function(m_constructors,f);
       }
 
@@ -1488,7 +1495,7 @@ namespace mcrl2 {
       {
         assert(m_data_specification_is_type_checked);
         remove_function(m_mappings,f);
-        remove_function(m_normalised_mappings,normalise_sorts(f));
+        remove_function(m_normalised_mappings,normalize_sorts(f,*this));
       }
 
       /// \brief Removes equation from specification.
@@ -1502,7 +1509,7 @@ namespace mcrl2 {
         assert(m_data_specification_is_type_checked);
         const data_equation e1=data::detail::translate_user_notation_data_equation(e);
         m_equations.erase(e1);
-        m_normalised_equations.erase(normalise_sorts(e1));
+        m_normalised_equations.erase(normalize_sorts(e1,*this));
       }
 
       /// \brief Checks whether two sort expressions represent the same sort
@@ -1513,8 +1520,8 @@ namespace mcrl2 {
       {
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
-        const sort_expression normalised_sort1=normalise_sorts(s1);
-        const sort_expression normalised_sort2=normalise_sorts(s2);
+        const sort_expression normalised_sort1=normalize_sorts(s1,*this);
+        const sort_expression normalised_sort2=normalize_sorts(s2,*this);
         return (normalised_sort1 == normalised_sort2);
       }
 
@@ -1533,7 +1540,7 @@ namespace mcrl2 {
       {
         assert(m_data_specification_is_type_checked);
         normalise_specification_if_required();
-        const sort_expression normalised_sort=normalise_sorts(s);
+        const sort_expression normalised_sort=normalize_sorts(s,*this);
         return !is_function_sort(normalised_sort) && !constructors(normalised_sort).empty();
       }
 
@@ -1676,6 +1683,8 @@ namespace mcrl2 {
 #ifndef MCRL2_DATA_TRANSLATE_USER_NOTATION_H
 #include "mcrl2/data/translate_user_notation.h"
 #endif
+
+#include "mcrl2/data/normalize_sorts.h"
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H
 

@@ -107,11 +107,13 @@ namespace mcrl2 {
 
           // For normalising sort expressions
           sort_expression implement(sort_expression const& expression)
-          { const sort_expression normalised_sort=m_data_specification->normalise_sorts(expression);
+          { const sort_expression normalised_sort=normalize_sorts(expression,*m_data_specification);
             if (expression!=normalised_sort)
-            { std::cerr << "WARNING: SORT " << expression << " should be equal to the normalised sort " << m_data_specification->normalise_sorts(expression) << ".\nThis shows that the sorts in the input have not properly been normalised\n";
+            { std::cerr << "WARNING: SORT " << expression << " should be equal to the normalised sort " << 
+                       normalize_sorts(expression,*m_data_specification) << 
+                             ".\nThis shows that the sorts in the input have not properly been normalised\n";
             }
-            return normalised_sort; // m_data_specification->normalise_sorts(expression);
+            return normalised_sort; 
           }
 
           function_symbol implement(function_symbol const& f)
