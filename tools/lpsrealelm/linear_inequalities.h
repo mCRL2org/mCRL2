@@ -21,7 +21,6 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 #include <algorithm>
@@ -120,7 +119,7 @@ class linear_inequality
             const data_expression d=i->first;
             result=sort_real::plus(result,sort_real::times(d,i->second));
           }
-          return r(result,make_map_substitution_adapter(beta));
+          return r(result,make_associative_container_substitution(beta));
         }
 
         std::string string() const

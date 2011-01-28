@@ -29,10 +29,8 @@
 #include <cassert>
 
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
-#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
@@ -229,7 +227,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           }
           else if (match_and_remove(s,"e ") || match_and_remove(s,"eval "))
           { data_expression term = parse_term(s,spec,context_variables);
-            cout << pp(rewr(term,make_map_substitution_adapter(assignments))) << "\n";
+            cout << pp(rewr(term,make_associative_container_substitution(assignments))) << "\n";
           }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
@@ -272,7 +270,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             s = s.substr(assign_pos+1);
             data_expression term = parse_term(s,spec,context_variables);
             variable var(varname,term.sort());
-            term = rewr(term,make_map_substitution_adapter(assignments));
+            term = rewr(term,make_associative_container_substitution(assignments));
             cout << pp(term) << "\n";
             assignments[var]=term;
             context_variables.insert(var);
