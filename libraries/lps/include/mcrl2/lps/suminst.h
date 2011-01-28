@@ -29,7 +29,7 @@ namespace mcrl2 {
     class suminst_algorithm: public lps::detail::lps_algorithm
     {
 
-        typedef data::classic_enumerator< data::mutable_map_substitution< >, data::rewriter, data::selectors::select_not< false > > enumerator_type;
+        typedef data::classic_enumerator< data::mutable_associative_container_substitution<>, data::rewriter, data::selectors::select_not< false > > enumerator_type;
 
       protected:
         /// Only instantiate finite sorts
@@ -50,7 +50,7 @@ namespace mcrl2 {
         {
           s.condition() = m_rewriter(s.condition(), sigma);
           lps::substitute_free_variables(s.multi_action(), sigma);
-          s.assignments() = replace_variables(s.assignments(), sigma);
+          s.assignments() = data::substitute_variables(s.assignments(), sigma);
         }
 
         // Temporary solution, should be replace with lps substitution

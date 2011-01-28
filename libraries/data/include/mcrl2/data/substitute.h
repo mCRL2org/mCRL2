@@ -386,6 +386,18 @@ namespace detail {
     {
       return m_map.empty();
     }
+
+    template <typename Substitution>
+    bool operator==(const Substitution& other) const
+    {
+      return false;
+    }
+    
+    // Needed by classic_enumerator
+    bool operator==(const mutable_associative_container_substitution<AssociativeContainer>& other) const
+    {
+      return m_map == other.m_map;
+    }
   };
 
   /// \brief Utility function for creating a associative_container_substitution_adapter.
@@ -522,6 +534,22 @@ namespace detail {
   {
     return to_string(sigma.substitution());
   }
+
+//    /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+//    /// \param sigma a substitution.
+//    /// \return A string representation of the map.
+//    template <typename Substitution>
+//    std::string to_string(const Substitution& sigma)
+//    {
+//      std::stringstream result;
+//      result << "[";
+//      for (typename Substitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+//      {
+//        result << (i == sigma.begin() ? "" : "; ") << data::pp(i->first) << ":" << data::pp(i->first.sort()) << " := " << data::pp(i->second);
+//      }
+//      result << "]";
+//      return result.str();
+//    }
 
 } // namespace data
 

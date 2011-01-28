@@ -20,7 +20,6 @@
 #include "boost/type_traits/remove_reference.hpp"
 #include "boost/iterator/filter_iterator.hpp"
 
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/print.h"
 
 namespace mcrl2 {
@@ -88,34 +87,6 @@ namespace mcrl2 {
       }
     }
     /// \endcond
-
-    /** \brief Procedure to be used with substitution to apply immediate textual substitution an expression
-     *
-     * The structure of expressions is completely ignored when doing
-     * replacements. Pay careful attention to the fact that using this
-     * procedure may result in terms that are not valid data expressions.
-     *
-     * The replacements are given by an object of type Substitution.
-     *
-     * Type parameters:
-     *  \arg Substitution a model of Substitution
-     *
-     * Examples: 
-     *  - [x := true, y := false] applied to x && y results in true && false
-     *  - [x := y, y := false] applied to x && y results in y && false
-     *  - [x := true, y := false] applied to lambda x:Bool. x && y results in lambda true:Bool. true && false
-     **/
-    template < typename Substitution >
-    struct textual_substitution : public detail::substitution_procedure< textual_substitution< Substitution > > {
-      /// Function Arguments:
-      ///  \param[in] s a substitution object that is only used for variable lookup
-      ///  \param[in] e the expression on which to apply variable replacement according to the substitution
-      /// \return the result of substitution
-      template < typename Expression >
-      static Expression generic_apply(Substitution const& s, Expression const& e) {
-        return data::replace_variables(e, s);
-      }
-    };
 
     /** \brief Procedure to be used with substitution to apply immediate structural substitution an expression
      *

@@ -72,20 +72,6 @@ void test_basic()
   BOOST_CHECK(data::substitute_free_variables(lambda(x,x), s) == lambda(x,x));
   BOOST_CHECK(data::substitute_free_variables(lambda(x,y), s) == lambda(x,c));
 
-  // Replacing free as well as bound variables
-  mutable_map_substitution< atermpp::map< variable, data_expression >, textual_substitution > st;
-
-  st[y] = c;
-
-  // The following should result in assertion failure:
-//  BOOST_CHECK(st(lambda(y,y)) != lambda(y,y));
-//  BOOST_CHECK(st(application(lambda(y,y),x) + y) != application(lambda(y,y), x) + c);
-  st[y] = x;
-
-// 20-01-2010 Removed these tests, since we don't want substitute_free_variables to touch variables of lambda expressions (Wieger).
-//  BOOST_CHECK(data::substitute_free_variables(lambda(y,y), st) == lambda(x,x));
-//  BOOST_CHECK(data::substitute_free_variables(lambda(y,y)(x) + y, st) == lambda(x,x)(x) + x);
-
   // Replacing free variables only
   mutable_map_substitution< atermpp::map< variable, data_expression >, structural_substitution > sb;
 
