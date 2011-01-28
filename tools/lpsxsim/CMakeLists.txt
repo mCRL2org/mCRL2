@@ -174,7 +174,6 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 if( NOT WIN32 )
-  add_subdirectory ( plugins/garage )
   add_subdirectory ( plugins/trace )
 endif( NOT WIN32 )
 
