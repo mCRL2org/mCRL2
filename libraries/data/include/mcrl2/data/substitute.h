@@ -544,21 +544,21 @@ namespace detail {
     return to_string(sigma.substitution());
   }
 
-//    /// \brief Returns a string representation of the map, for example [a := 3, b := true].
-//    /// \param sigma a substitution.
-//    /// \return A string representation of the map.
-//    template <typename Substitution>
-//    std::string to_string(const Substitution& sigma)
-//    {
-//      std::stringstream result;
-//      result << "[";
-//      for (typename Substitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
-//      {
-//        result << (i == sigma.begin() ? "" : "; ") << data::pp(i->first) << ":" << data::pp(i->first.sort()) << " := " << data::pp(i->second);
-//      }
-//      result << "]";
-//      return result.str();
-//    }
+  /// \brief Returns a string representation of the map, for example [a := 3, b := true].
+  /// \param sigma a substitution.
+  /// \return A string representation of the map.
+  template <typename Substitution>
+  std::string to_string(const Substitution& sigma)
+  {
+    std::stringstream result;
+    result << "[";
+    for (typename Substitution::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+    {
+      result << (i == sigma.begin() ? "" : "; ") << data::pp(i->first) << ":" << data::pp(i->first.sort()) << " := " << data::pp(i->second);
+    }
+    result << "]";
+    return result.str();
+  }
 
 } // namespace data
 

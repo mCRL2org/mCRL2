@@ -20,7 +20,6 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/fresh_variable_generator.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"

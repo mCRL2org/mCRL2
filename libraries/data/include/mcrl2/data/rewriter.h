@@ -27,7 +27,6 @@
 #include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/substitute.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/exception.h"
 

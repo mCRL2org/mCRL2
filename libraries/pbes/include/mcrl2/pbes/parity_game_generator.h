@@ -24,7 +24,6 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
@@ -83,7 +82,7 @@ namespace pbes_system {
       typedef core::term_traits<pbes_expression> tr;
 
       /// \brief Substitution function type used by the PBES rewriter.
-      typedef data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > substitution_function;
+      typedef data::mutable_associative_container_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > substitution_function;
 
       /// \brief The PBES that is being solved.
       pbes<>& m_pbes;

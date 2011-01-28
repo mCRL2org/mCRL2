@@ -19,7 +19,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/expression_traits.h"
-#include "mcrl2/data/mutable_substitution_adapter.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/bes/detail/boolean_simplify_builder.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
@@ -250,7 +249,7 @@ namespace pbes_system {
       /// \return The rewrite result.
       term_type operator()(const term_type& x) const
       {
-        typedef data::mutable_map_substitution<atermpp::map< variable_type, data_term_type> > substitution_function;
+        typedef data::mutable_associative_container_substitution<atermpp::map< variable_type, data_term_type> > substitution_function;
         typedef core::term_traits<term_type> tr;
 
         substitution_function sigma;
@@ -270,7 +269,7 @@ std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(resu
       template <typename SubstitutionFunction>
       term_type operator()(const term_type& x, SubstitutionFunction sigma) const
       {
-        typedef data::mutable_substitution_adapter<SubstitutionFunction> substitution_function;
+        typedef data::mutable_substitution_composer<SubstitutionFunction> substitution_function;
         typedef core::term_traits<term_type> tr;
 
         detail::enumerate_quantifiers_builder<Term, DataRewriter, DataEnumerator, substitution_function> r(m_rewriter, m_enumerator, m_enumerate_infinite_sorts);

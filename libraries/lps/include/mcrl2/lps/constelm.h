@@ -21,7 +21,6 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"

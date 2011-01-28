@@ -22,7 +22,6 @@
 #include "mcrl2/atermpp/algorithm.h"
 
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/map_substitution.h"
 
 namespace mcrl2 {
   namespace data {

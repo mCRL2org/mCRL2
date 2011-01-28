@@ -19,7 +19,6 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/core/garbage_collection.h"

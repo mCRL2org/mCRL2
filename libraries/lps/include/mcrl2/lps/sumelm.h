@@ -18,7 +18,6 @@
 #ifndef MCRL2_LPS_SUMELM_H
 #define MCRL2_LPS_SUMELM_H
 
-#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"

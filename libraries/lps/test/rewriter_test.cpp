@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"

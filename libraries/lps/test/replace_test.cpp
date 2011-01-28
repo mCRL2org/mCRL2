@@ -15,7 +15,6 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/detail/specification_property_map.h"

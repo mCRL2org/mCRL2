@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_SUBSTITUTION_H
 #define MCRL2_PBES_SUBSTITUTION_H
 
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/pbes/substitute.h"
 
 namespace mcrl2 {

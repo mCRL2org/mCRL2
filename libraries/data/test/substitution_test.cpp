@@ -16,12 +16,10 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/substitute.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/substitute.h"
@@ -268,21 +266,6 @@ void test_mutable_substitution()
   core::garbage_collect();
 }
 
-void test_map_substitution_adapter()
-{
-  atermpp::map< variable, variable > mapping;
-  variable v("v", sort_nat::nat());
-  variable vv("vv", sort_nat::nat());
-
-  // Compile test
-  map_substitution< atermpp::map< variable, variable > const& > sigma(mapping);
-
-  mapping[v] = vv;
-
-  BOOST_CHECK(substitute_free_variables(v, sigma) == vv);
-  core::garbage_collect();
-}
-
 int test_main(int a, char**aa)
 {
   MCRL2_ATERMPP_INIT(a, aa);
@@ -293,7 +276,6 @@ int test_main(int a, char**aa)
   test_basic();
   test_assignment_sequence_substitution();
   test_list_substitution();
-  test_mutable_substitution_composer();
   test_mutable_substitution();
 
   return EXIT_SUCCESS;

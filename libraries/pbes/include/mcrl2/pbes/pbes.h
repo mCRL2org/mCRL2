@@ -30,7 +30,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/substitute.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"

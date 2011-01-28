@@ -21,12 +21,37 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/detail/classic_enumerator_impl.h"
 #include "mcrl2/data/detail/enum/standard.h"
 
 namespace mcrl2 {
   namespace data {
+
+    /** \brief Function object for applying substitutions to an expression
+     *
+     * \arg[in] Expression the type of the resulting rexpression
+     **/
+    template < typename Expression >
+    class apply_to_expression {
+
+      private:
+
+        Expression m_base_expression;
+      
+      public:
+
+        apply_to_expression(Expression const& e) : m_base_expression(e)
+        {}
+
+        apply_to_expression()
+        {}
+
+        template < typename Substitution >
+        Expression operator()(Substitution const& s) const
+        {
+          return s(m_base_expression);
+        }
+    };
 
     /** \brief Selection predicates for data expressions for use with enumerator components
      **/

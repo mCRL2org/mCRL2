@@ -21,7 +21,6 @@
 #include "mcrl2/core/algorithm.h"  
 #include "mcrl2/data/find.h"  
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/specification.h"  
 #include "mcrl2/lps/find.h"  
 #include "mcrl2/lps/rewrite.h"  
