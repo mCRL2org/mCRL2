@@ -191,64 +191,6 @@ inline bool get_fixpoint_symbol(const propositional_variable_instantiation curre
   return false;
 }
 
-
-/// \brief Gives the instantiated right hand side for a propositional_variable_instantiation
-
-/* template <typename Container>
-inline pbes_expression give_the_instantiated_rhs(
-                   const propositional_variable_instantiation current_variable_instantiation,
-                   pbes<Container> pbes_spec,
-                   const data::rewriter& r,
-                   const bool use_internal_rewriter_format=false)
-{
-  Container eqsys = pbes_spec.equations();
-
-  // Fill the pbes_equations table
-
-  assert(eqsys.size()>0); // There should be at least one equation
-  fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
-
-  pbes_equation current_pbeq;
-  for (typename Container::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
-  {
-    if (current_variable_instantiation.name()==eqi->variable().name())
-    { current_pbeq=pbes_equation(eqi->symbol(),eqi->variable(),eqi->formula());
-      break;
-    }
-  }
-
-  data::data_expression_list::iterator elist=current_variable_instantiation.parameters().begin();
-
-  data::mutable_map_substitution< > sigma;
-  for(data::variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
-               vlist!=current_pbeq.variable().parameters().end() ; vlist++)
-  {
-    assert(elist!=current_variable_instantiation.parameters().end());
-
-    if (use_internal_rewriter_format)
-    { assert(0); // Internal format is not treated separately.
-      / * r.setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
- *    * /
-    }
-    else
-    {
-      // r.setSubstitution(*vlist,*elist);
-      sigma[*vlist]=*elist;
-    }
-    elist++;
-  }
-  assert(elist==current_variable_instantiation.parameters().end());
-  return  pbes_expression_substitute_and_rewrite(
-                                current_pbeq.formula(),
-                                pbes_spec.data(),
-                                r,
-                                use_internal_rewriter_format,
-                                sigma);
-} */
-
-
-
-
 /**************************************************************************************************/
 
 // given a pbes expression of the form p1 && p2 && .... && pn, this will yield a
@@ -362,7 +304,7 @@ static void restore_saved_substitution(const atermpp::map<data::variable,data::d
                    const data::data_specification &data,
                    const data::rewriter& r,
                    const bool use_internal_rewrite_format,
-                   data::mutable_map_substitution< > &sigma) */
+                   data::mutable_associative_container_substitution< > &sigma) */
 
 inline pbes_expression pbes_expression_substitute_and_rewrite(
                    const pbes_expression &p,

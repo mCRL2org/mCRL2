@@ -101,7 +101,7 @@ void test2()
   BOOST_CHECK(r(d1) == r(d2));
 
   std::string var_decl = "m, n: Pos;\n";
-  mutable_map_substitution< > sigma;
+  mutable_associative_container_substitution<> sigma;
   sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
   sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
@@ -156,7 +156,7 @@ void test3()
 template <typename Rewriter>
 void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification &data_spec, std::string substitutions)
 {
-  mutable_map_substitution< atermpp::map< variable, data_expression > > sigma;
+  mutable_associative_container_substitution< atermpp::map< variable, data_expression > > sigma;
   data::detail::parse_substitutions(substitutions, data_spec, sigma);
   data_expression d1 = parse_data_expression(expr1, declarations, data_spec);
   data_expression d2 = parse_data_expression(expr2, declarations, data_spec);
