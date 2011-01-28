@@ -262,7 +262,16 @@ namespace detail {
     expression_type operator()(const variable_type& v) const
     {
       typename AssociativeContainer::const_iterator i = m_map.find(v);
-      return i == m_map.end() ? v : i->second;
+      if (i == m_map.end())
+      {
+        return v;
+      }
+      else
+      {
+        return i->second;
+      }
+      // N.B. This does not work!
+      // return i == m_map.end() ? v : i->second;
     }
 
     template <typename Expression>
