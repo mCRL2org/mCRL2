@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2 {
 
