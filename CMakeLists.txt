@@ -8,7 +8,7 @@
 
 # Set Warning
 
-cmake_minimum_required (VERSION 2.6)
+cmake_minimum_required (VERSION 2.8)
 message(STATUS "CMAKE VERSION: ${CMAKE_VERSION}")
 project (MCRL2)
 # Commonly used options
