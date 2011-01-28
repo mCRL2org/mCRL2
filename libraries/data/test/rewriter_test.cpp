@@ -113,7 +113,7 @@ void test2()
 
 void test3()
 {
-  typedef mutable_map_substitution< atermpp::map< variable, data_expression_with_variables > > substitution_function;
+  typedef mutable_associative_container_substitution< atermpp::map< variable, data_expression_with_variables > > substitution_function;
 
   data_specification data_spec = parse_data_specification(
     "map dummy1:Pos;  \n"
@@ -142,7 +142,7 @@ void test3()
   sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
   sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
 
-  data_expression_with_variables sigma_m = sigma(m);
+  data_expression_with_variables sigma_m = data::substitute_variables(static_cast<const data_expression&>(m), sigma);
 
   data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
   data_expression_with_variables d2(parse_data_expression("7"));

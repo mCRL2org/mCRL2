@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H
 #define MCRL2_DATA_DATA_EXPRESSION_WITH_VARIABLES_H
 
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
@@ -37,15 +38,21 @@ namespace data {
 
       /// \brief Constructor. Creates a data expression with an empty sequence of variables.
       /// \param term A term
-      data_expression_with_variables(atermpp::aterm_appl term)
+      data_expression_with_variables(const atermpp::aterm_appl& term)
         : data_expression(term)
       {}
 
       /// \brief Constructor. Creates a data expression with an empty sequence of variables.
       /// \param term A term
-      data_expression_with_variables(ATermAppl term)
-        : data_expression(term)
+      data_expression_with_variables(const variable& v)
+        : data_expression(v), m_variables(atermpp::make_list(v))
       {}
+
+//      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
+//      /// \param term A term
+//      data_expression_with_variables(ATermAppl term)
+//        : data_expression(term)
+//      {}
 
       /// \brief Constructor.
       /// \param expression A data expression
