@@ -282,8 +282,8 @@ namespace detail {
   template <typename AssociativeContainer = atermpp::map<variable,data_expression> >
   struct mutable_associative_container_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
   {
-    typedef variable variable_type;
-    typedef data_expression expression_type;
+    typedef typename AssociativeContainer::key_type variable_type;
+    typedef typename AssociativeContainer::mapped_type expression_type;
     typedef typename AssociativeContainer::const_iterator const_iterator;
     typedef typename AssociativeContainer::iterator iterator;
   
