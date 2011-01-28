@@ -119,7 +119,8 @@ namespace mcrl2 {
       /// \return the result of substitution
       template < typename Expression >
       static Expression generic_apply(Substitution const& s, Expression const& e) {
-        return data::replace_free_variables(e, s);
+        throw std::runtime_error("substitution::generic_apply is a deprecated interface");
+        return e;
       }
     };
 
