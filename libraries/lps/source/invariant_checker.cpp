@@ -44,8 +44,10 @@ using namespace mcrl2::core;
     // --------------------------------------------------------------------------------------------
 
     void Invariant_Checker::save_dot_file(int a_summand_number) {
-      if (f_dot_file_name.empty()) {
-        std::ostringstream v_file_name(f_dot_file_name);
+      if (! f_dot_file_name.empty() ) {
+        std::ostringstream v_file_name;
+
+        v_file_name << f_dot_file_name;
 
         if (a_summand_number == -1) {
           v_file_name << "-init.dot";
