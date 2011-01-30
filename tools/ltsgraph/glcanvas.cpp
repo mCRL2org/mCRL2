@@ -219,6 +219,7 @@ void GLCanvas::display()
       std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
     }
   }
+  SwapBuffers();
 }
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/)
@@ -240,7 +241,6 @@ void GLCanvas::onPaint(wxPaintEvent& /*event*/)
   }
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   display();
-  SwapBuffers();
 }
 
 void GLCanvas::onSize(wxSizeEvent& /*event*/)
