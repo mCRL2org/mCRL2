@@ -547,7 +547,6 @@ void test_normalisation()
   specification.add_alias(alias(L, list(A)));
   specification.add_alias(alias(S, set_(A)));
   specification.add_alias(alias(B, bag(A)));
-
   BOOST_CHECK(normalize_sorts(L,specification) == normalize_sorts(list(A),specification));
   BOOST_CHECK(normalize_sorts(list(L),specification) == normalize_sorts(list(list(A)),specification));
   BOOST_CHECK(normalize_sorts(S,specification) == normalize_sorts(set_(A),specification));
@@ -613,7 +612,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
-  test_sorts();
+  /* test_sorts();
   core::garbage_collect();
 
   test_constructors();
@@ -635,7 +634,7 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   test_utility_functionality();
-  core::garbage_collect();
+  core::garbage_collect(); */
 
   test_normalisation();
   core::garbage_collect();

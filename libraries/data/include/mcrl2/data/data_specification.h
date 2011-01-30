@@ -281,7 +281,8 @@ namespace mcrl2 {
 
           const atermpp::map< sort_expression, sort_expression >::const_iterator i1=m_normalised_aliases.find(e);
           if (i1!=m_normalised_aliases.end())
-          { return i1->second;
+          { 
+            return i1->second;
           }
 
           sort_expression new_sort=e; // This will be a placeholder for the sort of which all
@@ -1297,26 +1298,6 @@ namespace mcrl2 {
       /// \param[in] e a sort expression
       /// \result a sort expression with normalised sorts satisfying 
       /// normalise_sorts(e) = normalise_sorts(normalise_sorts(e))
-      // template <typename Object> Object normalise_sorts(const Object& o) const;
-      /* { 
-           assert(m_data_specification_is_type_checked);
-           normalise_specification_if_required();
-           std::cerr << "Object " << o << "\n";
-           substitution < Object, sort_expression, Object > sigma(m_normalised_aliases);
-           return sigma(o);
-      } */
-      
-      /// \brief Normalises a sort expression by replacing sorts by a unique representative sort.
-      /// \details Sort aliases and structured sorts have as effect that different sort names
-      /// represent the same sort. E.g. after the alias sort A=B, the sort A and B are the same,
-      /// and every object of sort A is an object of sort B. As all algorithms use syntactic equality
-      /// to check whether objects are the same, the sorts A and B must be made equal. This is done
-      /// by defining a unique representative for each sort, and to replace each sort by this representative.
-      /// For sort aliases, the reprentative is always the sort at the right hand side, and for structured
-      /// sorts the sort at the left hand side is taken.
-      /// \param[in] e a sort expression
-      /// \result a sort expression with normalised sorts satisfying 
-      /// normalise_sorts(e) = normalise_sorts(normalise_sorts(e))
       sort_expression normalise_sorts(const sort_expression & e) const
       {
         assert(m_data_specification_is_type_checked);
@@ -1324,127 +1305,6 @@ namespace mcrl2 {
         return normalise_sorts_helper(e);
       } 
       
-      /// \brief Normalises a data expression by replacing all sorts in it by a unique 
-      /// representative sort.
-      /// \details See the explanation of normalise_sorts(sort_expression).
-      /// \param[in] e a data expression
-      /// \result a data expression e with normalised sorts 
-      /* data_expression normalise_sorts(data_expression const& e) const
-      { 
-        assert(m_data_specification_is_type_checked);
-        normalise_specification_if_required();
-        if (is_abstraction(e))
-        { const abstraction a(e);
-          const variable_list variables=a.variables();
-          variable_vector normalised_variables;
-          for(variable_list::const_iterator i=variables.begin();
-                i!=variables.end(); ++i)
-          { normalised_variables.push_back(variable(i->name(),normalise_sorts(i->sort())));
-          }
-
-          return abstraction(a.binding_operator(),normalised_variables,normalise_sorts(a.body()));
-        }
-        else if (is_application(e))
-        { 
-          const application a(e);
-          const data_expression_list args=a.arguments();
-          data_expression_vector normalised_arguments;
-          for(data_expression_list::const_iterator i=args.begin();
-              i!=args.end(); ++i)
-          { 
-            normalised_arguments.push_back(normalise_sorts(*i));
-          }
-          return application(normalise_sorts(a.head()),normalised_arguments);
-        }
-        else if (is_function_symbol(e))
-        { 
-          return function_symbol(function_symbol(e).name(),normalise_sorts(e.sort()));
-        }
-        else if (is_variable(e))
-        { 
-          return variable(variable(e).name(),normalise_sorts(e.sort()));
-        }
-        else if (is_where_clause(e))
-        {
-          const where_clause w(e);
-          const assignment_list decls=w.declarations();
-          assignment_vector normalised_assignments;
-          for(atermpp::term_list <assignment>::const_iterator i=decls.begin();
-                 i!=decls.end(); ++i)
-          { const variable v=i->lhs();
-            const data_expression exp=i->rhs();
-            normalised_assignments.push_back(assignment(normalise_sorts(v),normalise_sorts(exp)));
-          }
-
-          return where_clause(normalise_sorts(w.body()),normalised_assignments);
-        }
-        else
-        {
-          throw mcrl2::runtime_error("normalise_sorts: unexpected expression " + e.to_string() + " occurred.");
-        }
-      } */
-
-      /// \brief Normalises a variable v by replacing sorts in it by a unique representative sort.
-      /// \details See the explanation of normalise_sorts(sort_expression).
-      /// \param[in] v a variable
-      /// \result a variable with a normalised sort expression
-      /* variable normalise_sorts(variable const& v) const
-      { 
-        assert(m_data_specification_is_type_checked);
-        normalise_specification_if_required();
-        return variable(v.name(),normalise_sorts(v.sort()));
-      } */
- 
-      /// \brief Normalises the sorts in a function symbol.
-      /* function_symbol normalise_sorts(function_symbol const& f) const
-      {
-        assert(m_data_specification_is_type_checked);
-        normalise_specification_if_required();
-        return function_symbol(f.name(),normalise_sorts(f.sort()));
-      } */
-
-      /// \brief Normalises an equation e by replacing sorts in it by a unique representative sort.
-      /// \details See the explanation of normalise_sorts(sort_expression).
-      /// \param[in] e a data_equation.
-      /// \result a variable with a normalised sort expression
-      /* data_equation normalise_sorts(const data_equation& e) const
-      { 
-        assert(m_data_specification_is_type_checked);
-        normalise_specification_if_required();
-        return data_equation(normalise_sorts(e.variables()),
-                             normalise_sorts(e.condition()),
-                             normalise_sorts(e.lhs()),
-                             normalise_sorts(e.rhs())); 
-      } */
-
-      /// \brief Normalises an assignment a by replacing sorts in it by a unique representative sort.
-      /// \details See the explanation of normalise_sorts(sort_expression).
-      /// \param[in] a an assignment
-      /// \result an assignment with normalised sort expressions
-      /* assignment normalise_sorts(assignment const& a) const
-      { 
-        assert(m_data_specification_is_type_checked);
-        normalise_specification_if_required();
-        return assignment(normalise_sorts(a.lhs()),normalise_sorts(a.rhs()));
-      } */
-
-      /// \brief Normalises a atermpp list l by replacing sorts in it by a unique representative sort.
-      /// \details See the explanation of normalise_sorts(sort_expression).
-      /// \param[in] l a list of variables 
-      /// \result a variable list with a normalised sort expression
-      /* template < typename T>
-      atermpp::term_list <T> normalise_sorts(atermpp::term_list < T > const& l) const
-      { 
-        assert(m_data_specification_is_type_checked);
-        normalise_specification_if_required();
-        atermpp::term_list <T> result;
-        for(typename atermpp::term_list <T>::const_iterator i=l.begin();
-                i!=l.end(); ++i)
-        { result=push_front(result,normalize_sorts(*i,*this));
-        }
-        return reverse(result);
-      } */
-
       /// \brief Removes sort from specification.
       /// Note that this also removes aliases for the sort but does not remove
       /// constructors, mappings and equations.

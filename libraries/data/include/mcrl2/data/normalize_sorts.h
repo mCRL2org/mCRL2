@@ -29,12 +29,14 @@ namespace detail {
     
     normalize_sorts_function(const data_specification& data_spec)
       : m_data_spec(data_spec)
-    {}
+    { 
+    }
 
     sort_expression operator()(const sort_expression& x)
     {
       return m_data_spec.normalise_sorts(x);
     }
+
   };
 
 } // namespace detail
@@ -45,7 +47,8 @@ namespace detail {
                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* /* = 0 */
                       )
   {
-    core::make_update_apply_builder<data::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+    core::make_update_apply_builder<data::sort_expression_builder>
+                        (data::detail::normalize_sorts_function(data_spec))(x);
   }
 
   template <typename T>
@@ -54,7 +57,35 @@ namespace detail {
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* /* = 0 */
                    )
   {
-    return core::make_update_apply_builder<data::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+    return core::make_update_apply_builder<data::sort_expression_builder>
+                        (data::detail::normalize_sorts_function(data_spec))(x);
+  }
+
+  /* The functions below are defined as the function normalize_sorts
+     above does not work on other sorts than sort expressions. */
+
+  inline sort_expression normalize_sorts(const basic_sort& x, 
+                                  const data::data_specification& data_spec)
+  {
+    return normalize_sorts(static_cast<sort_expression>(x),data_spec);
+  }
+
+  inline sort_expression normalize_sorts(const function_sort& x,
+                                  const data::data_specification& data_spec)
+  {
+    return normalize_sorts(static_cast<sort_expression>(x),data_spec);
+  }
+
+  inline sort_expression normalize_sorts(const container_sort& x,
+                                  const data::data_specification& data_spec)
+  {
+    return normalize_sorts(static_cast<sort_expression>(x),data_spec);
+  }
+
+  inline sort_expression normalize_sorts(const structured_sort& x,
+                                  const data::data_specification& data_spec)
+  {
+    return normalize_sorts(static_cast<sort_expression>(x),data_spec);
   }
 
 } // namespace data
