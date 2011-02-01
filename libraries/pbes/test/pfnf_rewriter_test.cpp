@@ -139,12 +139,19 @@ bool pbespgsolve(const pbes<>& p)
 void test_pfnf_rewriter2(const std::string& text)
 {
   pbes<> p = txt2pbes(text); 
+  std::cout << "\ntest_pfnf_rewriter2\n" << std::endl;
+  std::cout << "--- before ---\n";
+  std::cout << pp(p) << std::endl;
+
   // N.B. Using pbes2_bool_test instead of pbespgsolve fails!
   bool result1 = pbespgsolve(p);
   pfnf_rewriter R;
   pbesrewr(p, R);
+
+  std::cout << "--- after ---\n";
+  std::cout << pp(p) << std::endl;
+
   BOOST_CHECK(p.is_well_typed());
-  std::cout << "\ntest_pfnf_rewriter2\n" << pp(p) << std::endl;
   bool result2 = pbespgsolve(p);
   BOOST_CHECK(result1 == result2);
   core::garbage_collect();
