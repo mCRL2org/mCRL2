@@ -270,72 +270,6 @@ namespace mcrl2 {
           return result_sort;
         }
 
-        ///\brief Adds system defined sorts and standard mappings for all internally used sorts
-
-        ///\brief Normalise sorts.
-        sort_expression normalise_sorts_helper(const sort_expression & e) const
-        { // This routine takes the map m_normalised_aliases which contains pairs of sort expressions
-          // <A,B> and takes all these pairs as rewrite rules, which are applied to e using an innermost
-          // strategy. Note that it is assumed that m_normalised_aliases contain rewrite rules <A,B>, such
-          // that B is a normal form. This allows to check that if e matches A, then we can return B.
-
-          const atermpp::map< sort_expression, sort_expression >::const_iterator i1=m_normalised_aliases.find(e);
-          if (i1!=m_normalised_aliases.end())
-          { 
-            return i1->second;
-          }
-
-          sort_expression new_sort=e; // This will be a placeholder for the sort of which all
-                                      // arguments will be normalised.
-
-          // We do not have to do anything if e is a basic sort, as new_sort=e.
-          if (is_function_sort(e))
-          { // Rewrite the arguments into normal form.
-            atermpp::vector< sort_expression > new_domain;
-            for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(e).domain());
-                      !r.empty(); r.advance_begin(1))
-            { new_domain.push_back(normalise_sorts_helper(r.front()));
-            }
-            new_sort=function_sort(new_domain, normalise_sorts_helper(function_sort(e).codomain()));
-          }
-          else if (is_container_sort(e))
-          { // Rewrite the argument of the container sort to normal form.
-            new_sort=container_sort(
-                              container_sort(e).container_name(),
-                              normalise_sorts_helper(container_sort(e).element_sort()));
-
-          }
-          else if (is_structured_sort(e))
-          { // Rewrite the argument sorts to normal form.
-            atermpp::vector< structured_sort_constructor > new_constructors;
-            for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors());
-                            !r.empty(); r.advance_begin(1))
-            {
-              atermpp::vector< structured_sort_constructor_argument > new_arguments;
-              for (structured_sort_constructor::arguments_const_range ra(r.front().arguments());
-                        !ra.empty(); ra.advance_begin(1))
-              {
-                new_arguments.push_back(structured_sort_constructor_argument(
-                             ra.front().name(),
-                             normalise_sorts_helper(ra.front().sort())));
-              }
-              new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
-            }
-            new_sort=structured_sort(new_constructors);
-          }
-
-          // The arguments of new_sort are now in normal form.
-          // Rewrite it to normal form.
-          const atermpp::map< sort_expression, sort_expression >::const_iterator i2=m_normalised_aliases.find(new_sort);
-          if (i2!=m_normalised_aliases.end())
-          {
-            new_sort=normalise_sorts_helper(i2->second); // rewrite the result until normal form.
-          }
-          m_normalised_aliases[e]=new_sort; // recall for later use. Note that e==new_sort is a possibility.
-          return new_sort;
-        }
-
-
         ///\brief Builds a specification from aterm
         void build_from_aterm(const atermpp::aterm_appl& t);
 
@@ -1287,24 +1221,6 @@ namespace mcrl2 {
         return i->second;
       } */
 
-      /// \brief Normalises a sort expression by replacing sorts by a unique representative sort.
-      /// \details Sort aliases and structured sorts have as effect that different sort names
-      /// represent the same sort. E.g. after the alias sort A=B, the sort A and B are the same,
-      /// and every object of sort A is an object of sort B. As all algorithms use syntactic equality
-      /// to check whether objects are the same, the sorts A and B must be made equal. This is done
-      /// by defining a unique representative for each sort, and to replace each sort by this representative.
-      /// For sort aliases, the reprentative is always the sort at the right hand side, and for structured
-      /// sorts the sort at the left hand side is taken.
-      /// \param[in] e a sort expression
-      /// \result a sort expression with normalised sorts satisfying 
-      /// normalise_sorts(e) = normalise_sorts(normalise_sorts(e))
-      sort_expression normalise_sorts(const sort_expression & e) const
-      {
-        assert(m_data_specification_is_type_checked);
-        normalise_specification_if_required();
-        return normalise_sorts_helper(e);
-      } 
-      
       /// \brief Removes sort from specification.
       /// Note that this also removes aliases for the sort but does not remove
       /// constructors, mappings and equations.

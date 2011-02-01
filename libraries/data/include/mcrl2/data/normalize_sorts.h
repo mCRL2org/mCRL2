@@ -22,22 +22,83 @@ namespace mcrl2 {
 namespace data {
 
 namespace detail {
-  
+
   struct normalize_sorts_function: public std::unary_function<data::sort_expression, data::sort_expression>
   {
-    const data_specification& m_data_spec;
+    /* const data_specification& m_data_spec; */
+    const atermpp::map< sort_expression, sort_expression > &m_normalised_aliases;
     
     normalize_sorts_function(const data_specification& data_spec)
-      : m_data_spec(data_spec)
+      : m_normalised_aliases(data_spec.sort_alias_map())
     { 
     }
 
-    sort_expression operator()(const sort_expression& x)
-    {
-      return m_data_spec.normalise_sorts(x);
+    ///\brief Normalise sorts.
+    sort_expression operator()(const sort_expression& e)
+    { 
+      // This routine takes the map m_normalised_aliases which contains pairs of sort expressions
+      // <A,B> and takes all these pairs as rewrite rules, which are applied to e using an innermost
+      // strategy. Note that it is assumed that m_normalised_aliases contain rewrite rules <A,B>, such
+      // that B is a normal form. This allows to check that if e matches A, then we can return B.
+
+      const atermpp::map< sort_expression, sort_expression >::const_iterator i1=m_normalised_aliases.find(e);
+      if (i1!=m_normalised_aliases.end())
+      { 
+        return i1->second;
+      }
+
+      sort_expression new_sort=e; // This will be a placeholder for the sort of which all
+                                  // arguments will be normalised.
+
+      // We do not have to do anything if e is a basic sort, as new_sort=e.
+      if (is_function_sort(e))
+      { // Rewrite the arguments into normal form.
+        atermpp::vector< sort_expression > new_domain;
+        for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(e).domain());
+                  !r.empty(); r.advance_begin(1))
+        { 
+          new_domain.push_back(this->operator()(r.front()));
+        }
+        new_sort=function_sort(new_domain, this->operator()(function_sort(e).codomain()));
+      }
+      else if (is_container_sort(e))
+      { // Rewrite the argument of the container sort to normal form.
+        new_sort=container_sort(
+                          container_sort(e).container_name(),
+                          this->operator()(container_sort(e).element_sort()));
+
+      }
+      else if (is_structured_sort(e))
+      { // Rewrite the argument sorts to normal form.
+        atermpp::vector< structured_sort_constructor > new_constructors;
+        for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors());
+                        !r.empty(); r.advance_begin(1))
+        {
+          atermpp::vector< structured_sort_constructor_argument > new_arguments;
+          for (structured_sort_constructor::arguments_const_range ra(r.front().arguments());
+                    !ra.empty(); ra.advance_begin(1))
+          {
+            new_arguments.push_back(structured_sort_constructor_argument(
+                         ra.front().name(),
+                         this->operator()(ra.front().sort())));
+          }
+          new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
+        }
+        new_sort=structured_sort(new_constructors);
+      }
+
+      // The arguments of new_sort are now in normal form.
+      // Rewrite it to normal form.
+      const atermpp::map< sort_expression, sort_expression >::const_iterator i2=m_normalised_aliases.find(new_sort);
+      if (i2!=m_normalised_aliases.end())
+      {
+        new_sort=this->operator()(i2->second); // rewrite the result until normal form.
+      }
+      // m_normalised_aliases[e]=new_sort; // recall for later use. Note that e==new_sort is a possibility.
+      return new_sort;
     }
 
-  };
+  }; 
 
 } // namespace detail
 

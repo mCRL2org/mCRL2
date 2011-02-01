@@ -16,7 +16,7 @@
 #define MCRL2_DATA_DETAIL_INTERNAL_FORMAT_CONVERSION_H__
 
 #include "translate_user_notation_to_internal_format.h"
-#include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
 namespace mcrl2 {
@@ -43,7 +43,7 @@ namespace mcrl2 {
 
           sort_expression operator()(sort_expression const& s)
           {
-            return m_data_specification.normalise_sorts(s);
+            return normalize_sorts(s,m_data_specification);
           }
 
           identifier operator()(identifier const& i)
@@ -53,7 +53,7 @@ namespace mcrl2 {
 
           variable operator()(variable const& v)
           {
-            return variable(v.name(), m_data_specification.normalise_sorts(v.sort()));
+            return variable(v.name(), normalize_sorts(v.sort(),m_data_specification));
           }
 
           data_equation operator()(data_equation const& e)
@@ -72,7 +72,7 @@ namespace mcrl2 {
               return number(expression.sort(), name);
             } */
 
-            return function_symbol(expression.name(), m_data_specification.normalise_sorts(expression.sort()));
+            return function_symbol(expression.name(), normalize_sorts(expression.sort(),m_data_specification));
           }
 
           where_clause operator()(where_clause const& expression)
@@ -131,7 +131,7 @@ namespace mcrl2 {
 
       /// \brief Convenience overload for converting data/sort expressions using with atermpp:: functionality
       /// \param[in] term sort or data expression
-      template <typename T>
+      /* template <typename T>
       inline
       atermpp::term_list <T> internal_format_conversion_list(
                                  const atermpp::term_list<T> terms, 
@@ -145,11 +145,11 @@ namespace mcrl2 {
         }
 
         return atermpp::reverse(result); 
-      }
+      } */
 
       /// \brief Convenience overload for use with atermpp:: functionality
       /// \param[in] term process, linear process specification or pbes
-      inline
+      /* inline
       atermpp::aterm_appl internal_format_conversion_deprecated(atermpp::aterm_appl term, data_specification const& specification)
       {
         atermpp::aterm_appl deprecated_data_specification=*term.begin(); // Do not use the data specification that
@@ -169,7 +169,7 @@ namespace mcrl2 {
         }
 
         return atermpp::aterm_appl(term.function(), arguments.begin(), arguments.end());
-      }
+      } */
 
     } // namespace detail
   } // namespace data
