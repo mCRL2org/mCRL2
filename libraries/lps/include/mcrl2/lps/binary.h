@@ -180,7 +180,10 @@ namespace mcrl2 {
         ///        vector of assignments to Boolean variables.
         data::assignment_list replace_enumerated_parameters_in_assignments(data::assignment_list v)
         {
-          v = data::substitute_free_variables(v, m_if_trees);
+          // We use substitute_variables, to make sure that the binding variables of assignments are ignored.
+          // Note that this operation is safe because the generated fresh variables can not clash with other
+          // binding variables.
+          v = data::substitute_variables(v, m_if_trees);
 
           data::assignment_vector result;
           for (data::assignment_list::const_iterator i = v.begin(); i != v.end(); ++i)
