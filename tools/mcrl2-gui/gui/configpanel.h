@@ -24,12 +24,14 @@
 #include <wx/scrolwin.h>
 #include <wx/gbsizer.h>
 #include <wx/event.h>
+#include <wx/filename.h>
 
 enum ToolStatus { STATUS_NONE, STATUS_RUNNING, STATUS_COMPLETE, STATUS_FAILED};
 
 
 #define ID_RUN_TOOL 1000
 #define ID_OUTPUT_FILE 1001
+#define ID_OUTPUT_EXT 1002
 
 BEGIN_DECLARE_EVENT_TYPES()
     DECLARE_EVENT_TYPE(wxEVT_UPDATE_PROJECT_TREE, 7777)
@@ -108,15 +110,38 @@ public:
       suggested_output_file->SetPath(filesuggestion);
       fgs->Add(suggested_output_file, wxGBPosition(row, 1), wxGBSpan(1,2));
 
+      // Display different output formats if there are more than one
+      if( tool.m_extentions.size() > 1 ){
+        ++row;
+        int select = 0;
+        wxArrayString sa;
+        for( std::vector<std::string>::iterator it = tool.m_extentions.begin();
+            it != tool.m_extentions.end();
+            ++it){
+            sa.Add( wxString( it->c_str() , wxConvUTF8) );
+
+            if( it->compare( m_tool.m_output_type ) == 0 ){
+              select = std::distance( tool.m_extentions.begin() , it  );
+            }
+
+        }
+
+        output_ext = new wxRadioBox(top, ID_OUTPUT_EXT, wxString(
+          "format", wxConvUTF8), wxDefaultPosition, wxDefaultSize, sa
+          ,0, wxRA_SPECIFY_COLS
+          );
+
+        output_ext->SetSelection( select );
+
+        fgs->Add( output_ext , wxGBPosition(row, 1), wxGBSpan(1,2) );
+      }
+
       suggested_output_file->SetMinSize(wxSize(350,25));
       suggested_output_file->SetTextCtrlProportion(6);
 
       m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
     }
 
-
-
-    ++row;
     //fgs->Add(new wxStaticLine(top,wxID_ANY, wxDefaultPosition, wxSize(800,1)), wxGBPosition(row,0), wxGBSpan(1,3));
 		/* Display RUN & ABORT button */
 		m_runbutton = new wxButton(top, ID_RUN_TOOL, wxT("Run"));
@@ -481,6 +506,8 @@ public:
 
 	wxFilePickerCtrl *suggested_output_file;
 
+	wxRadioBox *output_ext;
+
 	long m_pid;
 
 private:
@@ -556,6 +583,15 @@ private:
 	    SwitchToToolOutputNotebook();
 	  }
 
+	  void OnChangeExtension( wxCommandEvent& ){
+
+	    // Change extension
+	    wxFileName file = wxFileName( suggested_output_file->GetTextCtrlValue() );
+	    file.ClearExt();
+	    file.SetExt( output_ext->GetStringSelection() );
+	    suggested_output_file->SetPath( file.GetFullPath() );
+	  }
+
 DECLARE_EVENT_TABLE()
 };
 BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
@@ -566,6 +602,7 @@ BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
 		EVT_MY_PROCESS_END( wxID_ANY, ConfigPanel::OnProcessEnd )
 		EVT_MY_PROCESS_RUN( wxID_ANY, ConfigPanel::OnRunClick )
 		EVT_MY_PROCESS_PRODUCES_OUTPUT( wxID_ANY, ConfigPanel::OnToolHasOutput )
+		EVT_RADIOBOX(ID_OUTPUT_EXT, ConfigPanel::OnChangeExtension )
 END_EVENT_TABLE ()
 
 #endif /* MCRL2_GUI_CONFIGPANEL_H_ */

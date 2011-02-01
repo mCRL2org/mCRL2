@@ -322,6 +322,15 @@ vector<Tool> Initialization::Read_tools() {
 		value = child->GetAttribute( wxT("output_format"), wxEmptyString );
 		tool.m_output_type = value.mb_str();
 
+    for( multimap<std::string,std::string>::iterator it = m_extention_tool_mapping.begin();
+        it !=  m_extention_tool_mapping.end();
+        ++it){
+
+       if (it->second.compare( tool.m_output_type ) == 0 ){
+         tool.m_extentions.push_back( it->first );
+       }
+    };
+
 		value = child->GetAttribute( wxT("location"), wxEmptyString );
 		std::string location = std::string(value.mb_str());
     if (location.empty()){

@@ -49,6 +49,7 @@ struct Tool
     vector<Tool_option> m_tool_options;
     tool_type m_tool_type;
     string m_category;
+    vector<string> m_extentions;
 };
 
 struct FileIO {
