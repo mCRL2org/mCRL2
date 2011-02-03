@@ -14,6 +14,7 @@
 
 #include <wx/wx.h>
 #include <wx/frame.h>
+#include <wx/aui/aui.h>
 
 #ifndef LTSGRAPH_H
   #include "ltsgraph.h"
@@ -72,6 +73,9 @@ class MainFrame : public wxFrame
 	void onResetPan(wxCommandEvent& event);
 	void onMode(wxCommandEvent& event);
 	void onShowSystem(wxCommandEvent& event);
+
+  wxAuiManager m_mgr;
+
 
   DECLARE_EVENT_TABLE()
 };

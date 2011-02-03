@@ -17,7 +17,7 @@
 #include "ids.h"
 
 using namespace IDS;
-BEGIN_EVENT_TABLE(AlgoDialog, wxDialog)
+BEGIN_EVENT_TABLE(AlgoDialog, wxPanel)
   EVT_SPINCTRL(myID_RADIUS_SPIN, AlgoDialog::onRadius)
   EVT_CHECKBOX(myID_CURVES_CHECK, AlgoDialog::onCurves)
   EVT_CHECKBOX(myID_TRANS_CHECK, AlgoDialog::onTransLabels)
@@ -26,8 +26,10 @@ BEGIN_EVENT_TABLE(AlgoDialog, wxDialog)
 END_EVENT_TABLE()
 
 AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
-  : wxDialog(parent, wxID_ANY, wxT("Layout"), wxDefaultPosition,
-             wxDefaultSize, wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
+  : wxPanel(parent, wxID_ANY, wxDefaultPosition,
+             wxDefaultSize
+             //,wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER
+             )
 
 {
   app = owner;

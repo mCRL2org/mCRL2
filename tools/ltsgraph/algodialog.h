@@ -17,7 +17,7 @@
 #include <wx/clrpicker.h>
 #include "ltsgraph.h"
 
-class AlgoDialog : public wxDialog
+class AlgoDialog : public wxPanel
 {
   public:
     AlgoDialog(LTSGraph* owner, wxWindow* parent);

@@ -20,7 +20,7 @@
 #include "export_xml.h"
 #include "export_latex.h"
 #include "mcrl2/lts/lts_io.h"
-
+#include <wx/aui/aui.h>
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -63,21 +63,29 @@ MainFrame::MainFrame(LTSGraph* owner)
 {
   app = owner;
 
-  algoDlg = new AlgoDialog(app, this);
-  infoDlg = new InfoDialog(this);
-
-  setupMenuBar();
-  setupMainArea();
-
   SetSize(800, 600);
   CentreOnScreen();
 
-  algoDlg->CentreOnParent();
-  infoDlg->CentreOnParent();
+  m_mgr.SetManagedWindow(this);
+
+  algoDlg = new AlgoDialog(app, this);
+  infoDlg = new InfoDialog(this);
+
+  setupMainArea();
+  setupMenuBar();
+
+  //algoDlg->CentreOnParent();
+  //infoDlg->CentreOnParent();
+
+  m_mgr.AddPane(algoDlg, wxRIGHT, wxT("Optimization panel"));
+  m_mgr.Update();
+
 }
 
 MainFrame::~MainFrame()
-{}
+{
+  m_mgr.UnInit();
+}
 
 void MainFrame::setupMenuBar()
 {
@@ -118,7 +126,7 @@ void MainFrame::setupMenuBar()
   toolsMenu->Append(myID_TOGGLE_POSITIONING, wxT("Toggle optimisation... \tCTRL-T"),
                     wxT("Activates or deactivates the layout optimisation algorithm."));
   toolsMenu->AppendSeparator();
-  toolsMenu->Append(wxID_PREFERENCES, wxT("O&ptimization... \tCTRL-p"),
+  toolsMenu->Append(wxID_PREFERENCES, wxT("Show/Hide O&ptimization panel... \tCTRL-p"),
                     wxT("Display dialog for layout optimization algorithm."));
   toolsMenu->Append(myID_DLG_INFO, wxT("&Information... \tCTRL-n"),
                     wxT("Display dialog with information about this LTS."));
@@ -140,18 +148,9 @@ void MainFrame::setupMenuBar()
 
 void MainFrame::setupMainArea()
 {
-  wxFlexGridSizer* mainSizer = new wxFlexGridSizer(1,1,0,0);
-  mainSizer->AddGrowableCol(0);
-  mainSizer->AddGrowableRow(0);
-
   int attribList[] = {WX_GL_RGBA, WX_GL_DOUBLEBUFFER, 0 };
   glCanvas = new GLCanvas(app, this, wxDefaultSize, attribList);
-
-  mainSizer->Add(glCanvas, 1, wxALIGN_CENTER|wxEXPAND|wxALL, 0);
-
-  mainSizer->Fit(this);
-  SetSizer(mainSizer);
-  Layout();
+  m_mgr.AddPane(glCanvas, wxCENTER);
 }
 
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
@@ -329,7 +328,12 @@ void MainFrame::onInfo(wxCommandEvent& /* event */)
 
 void MainFrame::onAlgo(wxCommandEvent& /* event */)
 {
-  algoDlg->Show();
+  if (m_mgr.GetPane( algoDlg ).IsShown() ){
+    m_mgr.GetPane( algoDlg ).Hide();
+  } else {
+    m_mgr.GetPane( algoDlg ).Show();
+  }
+  m_mgr.Update();
 }
 
 void MainFrame::setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl)
