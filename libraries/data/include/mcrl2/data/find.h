@@ -158,38 +158,6 @@ std::set<sort_expression> find_sort_expressions(Container const& container)
   return result;
 }
 
-/// \brief Returns true if the term has a given sort identifier as subterm.
-/// \param[in] container an expression or container of expressions
-/// \param[in] s A sort identifier
-/// \return True if the term has a given sort identifier as subterm.
-template <typename Container>
-bool search_basic_sort(Container const& container, const basic_sort& s)
-{
-  return core::detail::make_search_helper<basic_sort, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
-}
-
-/// \brief Returns all sort identifiers that occur in the term t
-/// \param[in] container an expression or container of expressions
-/// \param[out] o an output iterator
-/// \return All sort identifiers that occur in the term t
-template <typename Container, typename OutputIterator>
-void find_basic_sorts(Container const& container, OutputIterator o)
-{
-  return core::detail::make_find_helper<basic_sort, detail::sort_traverser>(o)(container);
-}
-
-/// \brief Returns all basic sorts that occur in the term t
-/// \param[in] container an expression or container of expressions
-/// \param[in] o an output iterator
-/// \return All sort expressions that occur in the term t
-template <typename Container>
-std::set<basic_sort> find_basic_sorts(Container const& container)
-{
-  std::set<basic_sort> result;
-  find_basic_sorts(container, std::inserter(result, result.end()));
-  return result;
-}
-
 /// \brief Returns true if the term has a given identifier as subterm.
 /// \param[in] container an expression or container of expressions
 /// \param[in] s An identifier

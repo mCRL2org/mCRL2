@@ -104,30 +104,6 @@ int test_main(int argc, char* argv[])
   std::set<variable> vV = find_variables(V);
   BOOST_CHECK(vS == vV);
 
-  //--- search_basic_sort ---//
-  BOOST_CHECK( search_basic_sort(y, sort_nat::nat()  ));
-  BOOST_CHECK( search_basic_sort(y, sort_pos::pos()  ));
-  BOOST_CHECK( search_basic_sort(y, sort_bool::bool_()));
-  BOOST_CHECK(!search_basic_sort(y, sort_real::real_() ));
-  BOOST_CHECK( search_basic_sort(S, sort_bool::bool_()));
-  BOOST_CHECK(!search_basic_sort(S, sort_real::real_() ));
-  BOOST_CHECK( search_basic_sort(V, sort_bool::bool_()));
-  BOOST_CHECK(!search_basic_sort(V, sort_real::real_() ));
-
-  core::garbage_collect();
-
-  //--- find_basic_sorts ---//
-  std::set<basic_sort> s = find_basic_sorts(y);
-  BOOST_CHECK(std::find(s.begin(), s.end(), sort_nat::nat()) != s.end());
-  BOOST_CHECK(std::find(s.begin(), s.end(), sort_pos::pos()) != s.end());
-  BOOST_CHECK(std::find(s.begin(), s.end(), sort_bool::bool_()) != s.end());
-
-  std::set<basic_sort> sS = find_basic_sorts(S);
-  std::set<basic_sort> sV = find_basic_sorts(V);
-  BOOST_CHECK(sS == sV);
-
-  core::garbage_collect();
-
   //--- find_sort_expressions ---//
   std::set<sort_expression> e = find_sort_expressions(q1);
   BOOST_CHECK(std::find(e.begin(), e.end(), sort_nat::nat())   != e.end());
@@ -158,8 +134,6 @@ int test_main(int argc, char* argv[])
   core::garbage_collect();
 
   //--- data_specification ---//
-  BOOST_CHECK(search_basic_sort(data_specification().sorts(), sort_bool::bool_()));
-  BOOST_CHECK(search_sort_expression(data_specification().sorts(), sort_bool::bool_()));
   BOOST_CHECK(search_data_expression(data_specification().constructors(), sort_bool::true_()));
   BOOST_CHECK(!search_variable(data_specification().sorts(), variable("a", sort_bool::bool_())));
 
