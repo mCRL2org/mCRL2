@@ -231,11 +231,6 @@ class specification_basic_type:public boost::noncopyable
       acts.protect();
       acts=as;
       storeact(acts);
-      // global_variables.protect();
-      // for(atermpp::set <data::variable>::const_reverse_iterator i=glob_vars.rbegin();
-      //                i!=glob_vars.rend(); ++i)
-      // { global_variables=push_front(global_variables,*i);
-      // }
       procs=ps;
       storeprocs(procs);
       initdatavars.protect();
@@ -268,7 +263,6 @@ class specification_basic_type:public boost::noncopyable
         stack_operations_list=temp;
       }
       acts.unprotect();
-      // global_variables.unprotect();
       initdatavars.unprotect();
       terminationAction.unprotect();
       terminatedProcId.unprotect();
@@ -3075,6 +3069,11 @@ class specification_basic_type:public boost::noncopyable
 
     };
 
+    bool is_global_variable(const data_expression d) const
+    { 
+      return is_variable(d) && global_variables.count(d)>0;
+    }
+
     data_expression getvar(const variable var,
                            const stacklisttype &stack)
     { /* first search whether the variable is a free process variable */
@@ -4392,12 +4391,12 @@ class specification_basic_type:public boost::noncopyable
         const data_expression_list auxargs= *auxrename_list_args;
         ++auxrename_list_args;
         const data_expression auxresult1=substitute_data(auxargs,auxpars,condition);
-        if (equalterm==data_expression())
+        if (equalterm==data_expression()||is_global_variable(equalterm))
         { equalterm=auxresult1;
         }
         else
         { if (equaluptillnow)
-          { equaluptillnow=(auxresult1==equalterm);
+          { equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
           }
         }
         auxresult=push_front(auxresult,auxresult1);
@@ -4482,12 +4481,12 @@ class specification_basic_type:public boost::noncopyable
               f= *d1;
               const data_expression auxresult1=substitute_data(auxargs,auxpars,f);
 
-              if (equalterm==data_expression())
+              if (equalterm==data_expression()||is_global_variable(equalterm))
               { equalterm=auxresult1;
               }
               else
               { if (equaluptillnow)
-                { equaluptillnow=(equalterm==auxresult1);
+                { equaluptillnow=((equalterm==auxresult1)||is_global_variable(auxresult1));
               } }
               auxresult=push_front(auxresult,auxresult1);
             }
@@ -4560,12 +4559,12 @@ class specification_basic_type:public boost::noncopyable
             ++auxrename_list_args;
 
             const data_expression auxresult1=substitute_time(auxargs,auxpars,actiontime);
-            if (equalterm==data_expression())
+            if (equalterm==data_expression()||is_global_variable(equalterm))
             { equalterm=auxresult1;
             }
             else
             { if (equaluptillnow)
-              { equaluptillnow=(auxresult1==equalterm);
+              { equaluptillnow=((auxresult1==equalterm)||is_global_variable(auxresult1));
               }
             }
             auxresult=push_front(auxresult,auxresult1);
@@ -4620,11 +4619,11 @@ class specification_basic_type:public boost::noncopyable
           nextstateparameter=getRHSassignment(*var_it,nextstate);
 
           data_expression auxresult1=substitute_data(auxargs,auxpars,nextstateparameter);
-          if (equalterm==data_expression())
+          if (equalterm==data_expression()||is_global_variable(equalterm))
           { equalterm=auxresult1;
           }
           else if (equaluptillnow)
-          { equaluptillnow=(equalterm==auxresult1);
+          { equaluptillnow=((equalterm==auxresult1)||is_global_variable(auxresult1));
           }
 
           auxresult=push_front(auxresult,auxresult1);
