@@ -511,8 +511,8 @@ lps::specification action_rename(
   using namespace std;
 
   const atermpp::vector <action_rename_rule> rename_rules = action_rename_spec.rules();
-  summand_list lps_old_summands = lps_old_spec.process().summands();
-  summand_list lps_summands; //for changes in lps_old_summands
+  action_summand_vector lps_old_action_summands = lps_old_spec.process().action_summands();
+  deadlock_summand_vector lps_deadlock_summands = lps_old_spec.process().deadlock_summands();
   action_list lps_new_actions;
 
   data::postfix_identifier_generator generator("");
@@ -524,7 +524,7 @@ lps::specification action_rename(
   }
   for(atermpp::vector <action_rename_rule>::const_iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
   {
-    summand_list lps_new_summands;
+    action_summand_vector lps_new_action_summands;
 
     data_expression rule_condition = i->condition();
     action rule_old_action =  i->lhs();
@@ -591,16 +591,15 @@ lps::specification action_rename(
     assert(variables_in_old_rule.empty());
 
 
-    lps_summands = summand_list();
     //go through the summands of the old lps
     if (gsDebug)
-    { std::cerr << "Summands found: " << lps_old_summands.size() << "\n";
+    { std::cerr << "Action summands found: " << lps_old_action_summands.size() << "\n";
     }
-    for(summand_list::iterator losi = lps_old_summands.begin();
-                                    losi != lps_old_summands.end(); ++losi)
+    for(action_summand_vector::const_iterator losi = lps_old_action_summands.begin();
+                                             losi != lps_old_action_summands.end(); ++losi)
     {
-      summand lps_old_summand = *losi;
-      action_list lps_old_actions = lps_old_summand.actions();
+      action_summand lps_old_action_summand = *losi;
+      action_list lps_old_actions = lps_old_action_summand.multi_action().actions();
 
       /* For each individual action in the multi-action, for which the
          rename rule applies, two new summands must be made, namely one
@@ -609,12 +608,12 @@ lps::specification action_rename(
          with k summands 2^k new summands can result. */
 
       atermpp::vector < variable_list >
-                           lps_new_sum_vars(1,lps_old_summand.summation_variables());
+                           lps_new_sum_vars(1,lps_old_action_summand.summation_variables());
       atermpp::vector < data_expression >
-                         lps_new_condition(1,lps_old_summand.condition());
+                         lps_new_condition(1,lps_old_action_summand.condition());
       atermpp::vector < action_list > 
                            lps_new_actions(1,action_list());
-      std::vector < bool > lps_new_actions_is_delta(1,lps_old_summand.is_delta());
+      std::vector < bool > lps_new_actions_is_delta(1,false);
 
       if (gsDebug)
       { std::cerr << "Actions in summand found: " << lps_old_actions.size() << "\n";
@@ -623,7 +622,7 @@ lps::specification action_rename(
                 loai != lps_old_actions.end(); loai++)
       {
         action lps_old_action = *loai;
-        //std::cerr << "Considering " << lps_old_action << "\nand " << rule_old_action << "\n";
+        
         if (equal_signatures(lps_old_action, rule_old_action))
         {
           if (gsDebug)
@@ -635,12 +634,6 @@ lps::specification action_rename(
           action renamed_rule_old_action=rule_old_action;
           action renamed_rule_new_action=rule_new_action;
           detail::rename_renamerule_variables(renamed_rule_condition, renamed_rule_old_action, renamed_rule_new_action, generator);
-
-          /*
-          if (is_nil(renamed_rule_condition))
-          { renamed_rule_condition=sort_bool::true_();
-          }
-          */ // JK 15/10/2009 condition is always a data expression
 
           //go through the arguments of the action
           data_expression_list::iterator
@@ -810,7 +803,7 @@ lps::specification action_rename(
 
       } //end of action list iterator
 
-      /* Add the summands to lps_new_summands */
+      /* Add the summands to lps_new_action_summands or to the deadlock summands*/
 
       atermpp::vector < action_list > :: iterator i_act=lps_new_actions.begin();
       std::vector < bool > :: iterator i_act_is_delta=lps_new_actions_is_delta.begin();
@@ -818,26 +811,36 @@ lps::specification action_rename(
       for( atermpp::vector < data_expression > :: iterator i_cond=lps_new_condition.begin() ;
            i_cond!=lps_new_condition.end() ; i_cond++)
       { //create a summand for the new lps
-        summand lps_new_summand = summand( *i_sumvars,
-                                           *i_cond,
-                                           *i_act_is_delta,
-                                           reverse(*i_act),
-                                           lps_old_summand.time(),
-                                           lps_old_summand.assignments());
-        lps_new_summands = push_front(lps_new_summands, lps_new_summand);
+        if (*i_act_is_delta)
+        {
+          // Create a deadlock summand.
+          const deadlock_summand d(*i_sumvars,
+                                   *i_cond,
+                                   deadlock(lps_old_action_summand.multi_action().time()));
+          lps_deadlock_summands.push_back(d);
+        }
+        else
+        { // create an action summand.
+          action_summand lps_new_summand(*i_sumvars,
+                                         *i_cond,
+                                         multi_action(reverse(*i_act), lps_old_action_summand.multi_action().time()),
+                                         lps_old_action_summand.assignments());
+          lps_new_action_summands.push_back(lps_new_summand);
+        }
         i_act++;
         i_sumvars++;
       }
     } // end of summand list iterator
-    lps_old_summands = lps_new_summands;
+    lps_old_action_summands = lps_new_action_summands;
   } //end of rename rule iterator
 
   if (gsDebug)
   { std::cerr << "Simplifying the result...\n";
   }
 
-  linear_process new_process = lps_old_spec.process();
-  new_process.set_summands(lps_old_summands); // These are the renamed sumands.
+  linear_process new_process(lps_old_spec.process().process_parameters(),
+                             lps_deadlock_summands,
+                             lps_old_action_summands);
 
   // add action_rename_spec.action_labels to action_rename_spec.action_labels without adding duplates.
   action_label_list all=action_rename_spec.action_labels();
