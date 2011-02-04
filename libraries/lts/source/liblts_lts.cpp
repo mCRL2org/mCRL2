@@ -164,7 +164,14 @@ static void read_from_lts(lts_lts_t &l, string const& filename)
  *                       format (or NULL for none).
  * \pre                  The LTS in filename is a mCRL2 SVC without extra
  *                       information. */
-static void add_extra_mcrl2_lts_data(std::string const &filename, ATermAppl data_spec, ATermList params, ATermList act_labels)
+static void add_extra_mcrl2_lts_data(
+                     const std::string &filename, 
+                     const bool has_data_spec,
+                     const ATermAppl data_spec, 
+                     const bool has_params,
+                     const ATermList params, 
+                     const bool has_act_labels,
+                     const ATermList act_labels)
 {
   FILE *f = fopen(filename.c_str(),"ab");
   if ( f == NULL )
@@ -173,9 +180,9 @@ static void add_extra_mcrl2_lts_data(std::string const &filename, ATermAppl data
     return;
   }
   
-  ATerm arg1 = (ATerm) ((data_spec == NULL)?gsMakeNil():data_spec);
-  ATerm arg2 = (ATerm) ((params == NULL)?gsMakeNil():ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params));
-  ATerm arg3 = (ATerm) ((ATisEmpty(act_labels))?gsMakeNil():core::detail::gsMakeActSpec(act_labels));
+  ATerm arg1 = (ATerm) (has_data_spec?data_spec:gsMakeNil());
+  ATerm arg2 = (ATerm) (has_params?ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params):gsMakeNil());
+  ATerm arg3 = (ATerm) (has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
   ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
 
   /* From the remarks on MSDN:
@@ -272,7 +279,7 @@ static void write_to_lts(const lts_lts_t& l, string const& filename)
   ATermAppl  data_spec = mcrl2::data::detail::data_specification_to_aterm_data_spec(l.data());
   ATermList params = l.process_parameters(); 
   ATermList act_spec = l.action_labels(); 
-  add_extra_mcrl2_lts_data(filename,data_spec,params,act_spec);
+  add_extra_mcrl2_lts_data(filename,l.has_data(),data_spec,l.has_process_parameters(),params,l.has_action_labels(),act_spec);
 }
 
 namespace mcrl2

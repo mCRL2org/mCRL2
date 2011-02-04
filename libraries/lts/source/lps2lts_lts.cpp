@@ -34,13 +34,7 @@ namespace mcrl2
     void lps2lts_lts::open_lts(const char *filename, lps2lts_lts_options &opts)
     {
       lts_filename = std::string(filename);
-      if ( term_nil == atermpp::aterm_appl() )
-      {
-        term_nil = gsMakeNil();
-        term_nil.protect();
-        afun_pair = atermpp::function_symbol("pair", 2, false);
-        afun_pair.protect();
-      }
+      
       lts_opts = opts;
       switch ( lts_opts.outformat )
       {
