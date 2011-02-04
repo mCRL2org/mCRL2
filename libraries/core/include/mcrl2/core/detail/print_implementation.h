@@ -1384,14 +1384,14 @@ reconstruct_container_expression(ATermAppl Part)
     //gsDebugMsg("Reconstructing implementation of set comprehension\n");
     //part is an internal set representation;
     //replace by a finite set to set conversion or a set comprehension.
-    sort_expression element_sort = *function_sort(sort_set::left(expr).sort()).domain().begin();
+    sort_expression element_sort(*function_sort(sort_set::left(expr).sort()).domain().begin());
     if (is_false_function_function_symbol(sort_set::left(expr)))
     {
       Part = reconstruct_container_expression(static_cast<ATermAppl>(setfset(element_sort, sort_set::right(expr))));
     }
     else if (is_true_function_function_symbol(sort_set::left(expr)))
     {
-      Part = static_cast<ATermAppl>(setcomplement(setfset(element_sort, sort_set::right(expr))));
+      Part = static_cast<ATermAppl>(setcomplement(element_sort, setfset(element_sort, sort_set::right(expr))));
     }
     else
     {
