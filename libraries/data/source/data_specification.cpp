@@ -9,21 +9,8 @@
 /// \file mcrl2/data/data_specification.h
 /// \brief The class data_specification.
 
-#include <algorithm>
-#include <functional>
-#include <iostream>
-#include <map>
-
-#include "boost/bind.hpp"
-
-#include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/atermpp/substitute.h"
-#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/detail/sequence_algorithm.h"
-#include "mcrl2/data/application.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/detail/dependent_sorts.h"
 
 namespace mcrl2 {
 
@@ -62,26 +49,32 @@ namespace mcrl2 {
 
 
     class finiteness_helper 
-    { protected:
+    { 
+      protected:
 
-        typedef std::set< sort_expression >             dependent_sort_set;
-        data_specification const&                       m_specification;
-        std::map< sort_expression, dependent_sort_set > m_dependent_sorts;
-        std::multiset< sort_expression >                m_visiting;
-        dependent_sort_set const& dependent_sorts(sort_expression const& s)
+        data_specification const& m_specification;
+        std::set< sort_expression > m_visiting;
+
+        bool is_finite_aux(const sort_expression s)
         {
-          std::map< sort_expression, dependent_sort_set >::iterator i = m_dependent_sorts.find(s);
-          if (i == m_dependent_sorts.end())
+          for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
           {
-            i = m_dependent_sorts.insert(i, std::make_pair(s, static_cast< dependent_sort_set const& >(
-						data::find_dependent_sorts(m_specification, s))));
-          }
-          return i->second;
-        }
+// ATfprintf(stderr,"Constructor %t\n",(ATermAppl)r.front());
+            if (is_function_sort(r.front().sort()))
+            {
+              const function_sort f_sort(r.front().sort());
+              const sort_expression_list l=f_sort.domain();
 
-        bool search(dependent_sort_set const& source, sort_expression const& s)
-        {
-          return source.find(s) != source.end();
+              for (sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+              {
+                if (!is_finite(*i))
+                {
+                  return false;
+                }
+              }
+            }
+          }
+          return true;
         }
 
       public:
@@ -91,72 +84,54 @@ namespace mcrl2 {
 
         bool is_finite(const sort_expression& s)
         {
+// ATfprintf(stderr,"Is finite %t\n",(ATermAppl)s);
+          assert(s==normalize_sorts(s,m_specification));
+          if (m_visiting.count(s)>0)
+          {
+            return false;
+          }
+
+          m_visiting.insert(s);
+
+          bool result=false;
           if (is_basic_sort(s))
           {
-            return is_finite(basic_sort(s));
+            result=is_finite(basic_sort(s));
           }
           else if (is_container_sort(s))
           {
-            return is_finite(container_sort(s));
+            result=is_finite(container_sort(s));
           }
           else if (is_function_sort(s))
           {
-            return is_finite(function_sort(s));
+            result=is_finite(function_sort(s));
           }
           else if (is_structured_sort(s))
           {
-            return is_finite(structured_sort(s));
+            result=is_finite(structured_sort(s));
           }
 
-          return false;
+          m_visiting.erase(s);
+// ATfprintf(stderr,"IS finite result %d\n",result);
+          return result;
         }
 
         bool is_finite(const basic_sort& s)
         {
-          // sort_expression actual_sort = m_specification.find_referenced_sort(s);
-          sort_expression actual_sort = s;
-
-          if (actual_sort != s)
-          {
-            return is_finite(actual_sort);
-          }
-          else {
-            m_visiting.insert(s);
-
-            for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
-            {
-              if (is_function_sort(r.front().sort()))
-              {
-                for (boost::iterator_range< dependent_sort_set::const_iterator > c(dependent_sorts(r.front().sort())); !c.empty(); c.advance_begin(1))
-                {
-                  if (!is_function_sort(c.front()))
-                  {
-                    if ((c.front() == s) || (m_visiting.find(c.front()) == m_visiting.end() && !is_finite(c.front())))
-                    {
-                      return false;
-                    }
-                  }
-                }
-              }
-            }
-
-            m_visiting.erase(m_visiting.find(s));
-          }
-
-          return !search(dependent_sorts(s), s) && !m_specification.constructors(actual_sort).empty();
+          return is_finite_aux(s);
         }
 
         bool is_finite(const function_sort& s)
         {
-          for (boost::iterator_range< sort_expression_list::iterator > i(s.domain()); !i.empty(); i.advance_begin(1))
+          for (sort_expression_list::const_iterator i=s.domain().begin(); i!=s.domain().end(); ++i)
           {
-            if (m_visiting.find(i.front()) == m_visiting.end() && !is_finite(i.front()))
+            if (!is_finite(*i))
             {
               return false;
             }
           }
 
-          return (s.codomain() != s) ? is_finite(s.codomain()) : false;
+          return is_finite(s.codomain());
         }
 
         bool is_finite(const container_sort& s)
@@ -166,24 +141,13 @@ namespace mcrl2 {
 
         bool is_finite(const alias& s)
         {
-          return is_finite(s.reference());
+          assert(0);
+          return false;
         }
 
         bool is_finite(const structured_sort& s)
         {
-          m_visiting.insert(s);
-
-          for (boost::iterator_range< dependent_sort_set::const_iterator > c(dependent_sorts(s)); !c.empty(); c.advance_begin(1))
-          {
-            if (m_visiting.find(c.front()) == m_visiting.end() && !is_finite(c.front()))
-            {
-              return false;
-            }
-          }
-
-          m_visiting.erase(m_visiting.find(s));
-
-          return true;
+          return is_finite_aux(s);
         }
     };
 
@@ -194,7 +158,10 @@ namespace mcrl2 {
     ///      false otherwise.
     bool data_specification::is_certainly_finite(const sort_expression& s) const
     {
-      return finiteness_helper(*this).is_finite(s);
+// ATfprintf(stderr,"Is certainly finite %t\n",(ATermAppl)s);
+      const bool result=finiteness_helper(*this).is_finite(s);
+// if (result) ATfprintf(stderr,"Yes\n"); else ATfprintf(stderr,"No\n");
+      return result;
     }
 
     bool data_specification::is_well_typed() const

@@ -18,7 +18,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/dependent_sorts.h"
+// #include "mcrl2/data/detail/dependent_sorts.h"
 
 namespace mcrl2 {
 
@@ -107,25 +107,7 @@ namespace mcrl2 {
 
           core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
 
-          /* for(std::set< function_symbol >::const_iterator i=used_symbols.begin();
-                 i!=used_symbols.end(); ++i)
-          { std::cerr  << "Used symbol in equation " << *i << "\n";
-          }
-
-          for(std::set< function_symbol >::const_iterator i=m_used_symbols.begin();
-                 i!=m_used_symbols.end(); ++i)
-          { std::cerr  << "Used symbol in context " << *i << "\n";
-          } */
-
           return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
-          /* bool result=std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
-          if (result) 
-          { std::cerr << "True +++++++++++++++++++++++++++++++++++++++\n";
-          }
-          else
-          { std::cerr << "False +++++++++++++++++++++++++++++++++++++++\n";
-          }
-          return result;  */
         }
 
         /// \brief context is a range of function symbols
@@ -168,10 +150,6 @@ namespace mcrl2 {
 
           add_data_specification_symbols(specification);
 
-          /* for(std::set < function_symbol > :: const_iterator i=m_used_symbols.begin();
-                   i!=m_used_symbols.end(); ++i)
-          { std::cerr << "SYMBOL USED: " << *i << "\n";
-          } */
         }
     };
 
