@@ -110,7 +110,14 @@ namespace bes {
       }
 
       std::string successors;
-      std::getline(from, successors, '"');
+      std::getline(from, successors);
+      // Rest of line. First remove comments
+      size_t index = successors.find('"');
+      if(index != std::string::npos)
+      {
+        successors = successors.substr(0, index);
+      }
+
       successors = core::remove_whitespace(successors);
       std::vector<std::string> v(core::split(successors,","));
       for(std::vector<std::string>::const_iterator i = v.begin(); i != v.end(); ++i)
@@ -121,9 +128,6 @@ namespace bes {
         tmp >> id;
         node.successors.insert(id);
       }
-
-      // Drop any comments; basically ignore the rest of the line...
-      from.ignore(8196, '\n');
 
       game[node.id] = node;
     }
