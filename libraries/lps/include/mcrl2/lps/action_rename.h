@@ -25,7 +25,8 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
+// #include "mcrl2/data/detail/internal_format_conversion.h"
+#include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/lps/substitute.h"
 
@@ -54,34 +55,42 @@ namespace mcrl2 {
 namespace lps {
 
   /// \brief Right hand side of an action rename rule
-  class action_rename_rule_rhs: public atermpp::aterm_appl
+  class action_rename_rule_rhs 
   {
+    action m_act;
+    bool m_is_delta;
+    bool m_is_tau;
+
     public:
       /// \brief Constructor.
       action_rename_rule_rhs()
-        : atermpp::aterm_appl(core::detail::constructActionRenameRuleRHS())
+        : m_act(),
+          m_is_delta(false),
+          m_is_tau(false)
       { }
 
       /// \brief Constructor.
       /// \param t A term
       action_rename_rule_rhs(atermpp::aterm_appl t)
-        : atermpp::aterm_appl(t)
+        : m_act(core::detail::gsIsDelta(t)||core::detail::gsIsTau(t)?action():t),
+          m_is_delta(core::detail::gsIsDelta(t)),
+          m_is_tau(core::detail::gsIsTau(t))
       {
-        assert(core::detail::check_rule_ActionRenameRuleRHS(m_term));
+        assert(core::detail::check_rule_ActionRenameRuleRHS(t));
       }
 
       /// \brief Returns true if the right hand side is equal to delta.
       /// \return True if the right hand side is equal to delta.
       bool is_delta() const
       {
-        return core::detail::gsIsDelta(*this);
+        return m_is_delta;
       }
 
       /// \brief Returns true if the right hand side is equal to tau.
       /// \return True if the right hand side is equal to tau.
       bool is_tau() const
       {
-        return core::detail::gsIsTau(*this);
+        return m_is_tau;
       }
 
       /// \brief Returns the action.
@@ -89,7 +98,25 @@ namespace lps {
       /// \return The action.
       action act() const
       {
-        return *this;
+        return m_act;
+      }
+
+      /// \brief Protects the aterms in this class
+      void protect()
+      { 
+        m_act.protect();
+      }
+
+      /// \brief Unprotects the aterms in this class
+      void unprotect()
+      { 
+        m_act.unprotect();
+      }
+      
+      /// \brief Marks the aterms in this class
+      void mark()
+      { 
+        m_act.mark();
       }
   };
 
@@ -97,7 +124,7 @@ namespace lps {
 //                      <ParamIdOrAction>, <ActionRenameRuleRHS>)
 
   /// \brief Action rename rule
-  class action_rename_rule: public atermpp::aterm_appl
+  class action_rename_rule
   {
     protected:
       /// \brief The data variables of the rule
@@ -112,11 +139,16 @@ namespace lps {
       /// \brief right hand side of the rule
       action_rename_rule_rhs   m_rhs;
 
-      /// \brief Initialize the action rename rule with an aterm_appl.
+    public:
+      /// \brief Constructor.
+      action_rename_rule()
+      { }
+
+      /// \brief Constructor.
       /// \param t A term
-      void init_term(atermpp::aterm_appl t)
+      action_rename_rule(atermpp::aterm_appl t)
       {
-        m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
+        assert(core::detail::check_rule_ActionRenameRule(t));
         atermpp::aterm_appl::iterator i = t.begin();
         m_variables       = atermpp::aterm_list(*i++);
         m_condition       = atermpp::aterm_appl(*i++);
@@ -124,26 +156,21 @@ namespace lps {
         m_rhs             = atermpp::aterm_appl(*i);
       }
 
-    public:
-      /// \brief Constructor.
-      action_rename_rule()
-        : atermpp::aterm_appl(core::detail::constructActionRenameRule())
-      { }
-
       /// \brief Constructor.
       /// \param t A term
-      action_rename_rule(atermpp::aterm_appl t)
-        : atermpp::aterm_appl(t)
-      {
-        assert(core::detail::check_rule_ActionRenameRule(m_term));
-        init_term(t);
+      action_rename_rule(const data::variable_list    variables,
+                         const data::data_expression  condition,
+                         const action                 lhs,
+                         const action_rename_rule_rhs rhs)
+        : m_variables(variables), m_condition(condition), m_lhs(lhs), m_rhs(rhs)
+      { 
       }
 
       /// \brief Returns the variables of the rule.
       /// \return The variables of the rule.
       data::variable_list variables() const
       {
-        return m_variables;
+        return m_variables; 
       }
 
       /// \brief Returns the condition of the rule.
@@ -166,13 +193,40 @@ namespace lps {
       {
         return m_rhs;
       }
+      //
+      /// \brief Protects the aterms in this class
+      void protect()
+      { 
+        m_variables.protect();
+        m_condition.protect();
+        m_lhs.protect();
+        m_rhs.protect();
+      }
+
+      /// \brief Unprotects the aterms in this class
+      void unprotect()
+      { 
+        m_variables.unprotect();
+        m_condition.unprotect();
+        m_lhs.unprotect();
+        m_rhs.unprotect();
+      }
+      
+      /// \brief Marks the aterms in this class
+      void mark()
+      { 
+        m_variables.mark();
+        m_condition.mark();
+        m_lhs.mark();
+        m_rhs.mark();
+      }
   };
 
   /// \brief Read-only singly linked list of action rename rules
-  typedef atermpp::term_list<action_rename_rule> action_rename_rule_list;
+  // typedef atermpp::term_list<action_rename_rule> action_rename_rule_list;
 
   /// \brief Action rename specification
-  class action_rename_specification: public atermpp::aterm_appl
+  class action_rename_specification
   {
     protected:
 
@@ -183,102 +237,69 @@ namespace lps {
       action_label_list        m_action_labels;
 
       /// \brief The action rename rules of the action rename specification
-      action_rename_rule_list  m_rules;
-
-      /// \brief Initialize the action_rename_specification with an aterm_appl.
-      /// \param t A term
-      void init_term(atermpp::aterm_appl t)
-      {
-        m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
-        atermpp::aterm_appl::iterator i = t.begin();
-        m_data            = atermpp::aterm_appl(*i++);
-        m_action_labels   = atermpp::aterm_appl(*i++)(0);
-        m_rules           = atermpp::aterm_appl(*i)(0);
-      }
+      atermpp::vector <action_rename_rule>  m_rules;
 
     public:
       /// \brief Constructor.
       action_rename_specification()
-        : atermpp::aterm_appl(core::detail::constructActionRenameSpec())
       { }
 
       /// \brief Constructor.
       /// \param t A term
       action_rename_specification(atermpp::aterm_appl t)
-        : atermpp::aterm_appl(t)
       {
-        assert(core::detail::check_rule_ActionRenameSpec(m_term));
-        init_term(t);
-      }
+        assert(core::detail::check_rule_ActionRenameSpec(t));
+        atermpp::aterm_appl::iterator i = t.begin();
+        m_data            = atermpp::aterm_appl(*i++);
+        m_action_labels   = atermpp::aterm_appl(*i++)(0);
+
+        atermpp::aterm_list rules_list = atermpp::aterm_appl(*i)(0);
+        for(atermpp::aterm_list::const_iterator i=rules_list.begin(); i!=rules_list.end(); ++i)
+        { 
+          m_rules.push_back(action_rename_rule(*i));
+        }
+      } 
 
       /// \brief Constructor.
       /// \param data A data specification
       /// \param action_labels A sequence of action labels
       /// \param rules A sequence of action rename rules
-      action_rename_specification(data::data_specification const& data, action_label_list action_labels, action_rename_rule_list rules)
+      action_rename_specification(
+                      const data::data_specification &data, 
+                      const action_label_list action_labels, 
+                      const atermpp::vector <action_rename_rule> &rules)
         :
           m_data(data),
           m_action_labels(action_labels),
           m_rules(rules)
       {
-          m_term = reinterpret_cast<ATerm>(
+          /* m_term = reinterpret_cast<ATerm>(
           core::detail::gsMakeActionRenameSpec(
             data::detail::data_specification_to_aterm_data_spec(data),
             core::detail::gsMakeActSpec(action_labels),
             core::detail::gsMakeActionRenameRules(rules)
           )
-        );
-      }
-
-      /// \brief Reads the action rename specification from file.
-      /// \param filename A string
-      /// If filename is nonempty, input is read from the file named filename.
-      /// If filename is empty, input is read from stdin.
-      void load(const std::string& filename)
-      {
-        atermpp::aterm t = core::detail::load_aterm(filename);
-        if (!t || t.type() != AT_APPL || !core::detail::gsIsActionRenameSpec(atermpp::aterm_appl(t)))
-        {
-          throw runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an action rename specification");
-        }
-        init_term(atermpp::aterm_appl(t));
-        if (!is_well_typed())
-        {
-          throw runtime_error("action rename specification is not well typed (action_rename_specification::load())");
-        }
-      }
-
-      /// \brief Writes the action rename specification to file.
-      /// \param filename A string
-      /// If filename is nonempty, output is written to the file named filename.
-      /// If filename is empty, output is written to stdout.
-      /// \param binary
-      /// If binary is true the linear process is saved in compressed binary format.
-      /// Otherwise an ascii representation is saved. In general the binary format is
-      /// much more compact than the ascii representation.
-      void save(const std::string& filename, bool binary = true)
-      {
-        if (!is_well_typed())
-        {
-          throw runtime_error("action rename specification is not well typed (action_rename_specification::save())");
-        }
-        core::detail::save_aterm(m_term, filename, binary);
+        ); */
       }
 
       /// \brief Returns the data action_rename_specification.
       /// \return The data action_rename_specification.
       data::data_specification data() const
-      { return m_data; }
+      { 
+        return m_data; 
+      }
 
       /// \brief Returns the sequence of action labels
       /// \return A sequence of action labels containing all action
       /// labels occurring in the action_rename_specification (but it can have more).
       action_label_list action_labels() const
-      { return m_action_labels; }
+      { 
+        return m_action_labels; 
+      }
 
       /// \brief Returns the action rename rules.
       /// \return The action rename rules.
-      action_rename_rule_list rules() const
+      atermpp::vector <action_rename_rule> rules() const
       {
         return m_rules;
       }
@@ -289,7 +310,70 @@ namespace lps {
       {
         return true;
       }
+      /// \brief Protects the aterms in this class
+      void protect()
+      { 
+        // m_data.protect();
+        m_action_labels.protect();
+      }
+
+      /// \brief Unprotects the aterms in this class
+      void unprotect()
+      { 
+        // m_data.unprotect();
+        m_action_labels.unprotect();
+      }
+      
+      /// \brief Marks the aterms in this class
+      void mark()
+      { 
+        // m_data.mark();
+        m_action_labels.mark();
+      }
   };
+
+}}
+
+/// \cond INTERNAL_DOCS
+namespace atermpp {
+template<>
+struct aterm_traits<mcrl2::lps::action_rename_rule_rhs>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::action_rename_rule_rhs t)   { t.act().protect(); }
+  static void unprotect(mcrl2::lps::action_rename_rule_rhs t) { t.act().unprotect(); }
+  static void mark(mcrl2::lps::action_rename_rule_rhs t)      { t.act().mark(); }
+  //static ATerm term(mcrl2::lps::action_rename_rule_rhs t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::action_rename_rule_rhs& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<mcrl2::lps::action_rename_rule>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::action_rename_rule t)   { t.protect(); }
+  static void unprotect(mcrl2::lps::action_rename_rule t) { t.unprotect(); }
+  static void mark(mcrl2::lps::action_rename_rule t)      { t.mark(); }
+  //static ATerm term(mcrl2::lps::action_rename_rule t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::action_rename_rule& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<mcrl2::lps:: action_rename_specification>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::action_rename_specification t)   { t.protect(); }
+  static void unprotect(mcrl2::lps::action_rename_specification t) { t.unprotect(); }
+  static void mark(mcrl2::lps::action_rename_specification t)      { t.mark(); }
+  //static ATerm term(mcrl2::lps::action_rename_specification t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::action_rename_specification& t)    { return &t.term(); }
+};
+} // namespace atermpp
+/// \endcond
+
+namespace mcrl2 {
+
+namespace lps {
 
 /// \cond INTERNAL_DOCS
   namespace detail {
@@ -345,6 +429,37 @@ namespace lps {
       rright = lps::substitute_free_variables(rright, mcrl2::data::make_associative_container_substitution(renamings));
     }
 
+    action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(
+                                            const action_rename_rule_rhs &arr,
+                                            data::data_specification &data_spec)
+    {
+      if (arr.is_delta() || arr.is_tau())
+      return arr;
+      
+      return data::translate_user_notation(normalize_sorts(arr.act(),data_spec));
+    }
+
+
+    action_rename_specification translate_user_notation_and_normalise_sorts_action_rename_spec(const action_rename_specification &ars)
+    {
+      data::data_specification data_spec=ars.data();
+      data_spec.declare_data_specification_to_be_type_checked();
+      const action_label_list al=data::translate_user_notation(normalize_sorts(ars.action_labels(),data_spec));
+
+      atermpp::vector<action_rename_rule> l(ars.rules());
+      for(atermpp::vector<action_rename_rule>::iterator i=l.begin(); 
+              i!=l.end(); ++i)
+      { 
+        *i = action_rename_rule(normalize_sorts(i->variables(),data_spec),
+                                data::translate_user_notation(normalize_sorts(i->condition(),data_spec)),
+                                data::translate_user_notation(normalize_sorts(i->lhs(),data_spec)),
+                                translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(i->rhs(),data_spec));
+      }
+     
+      return action_rename_specification(data_spec,al,l);
+    }
+    
+
   } // namespace detail
   /// \endcond
 
@@ -366,8 +481,10 @@ namespace lps {
     /* copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data()); */
     ATermAppl lps_spec = specification_to_aterm(copy_specification);
     result           = detail::type_check_action_rename_specification(result, lps_spec);
-    result           = data::detail::internal_format_conversion_term(result,spec.data());
-    return action_rename_specification(result);
+    action_rename_specification result_act(result);
+    return detail::translate_user_notation_and_normalise_sorts_action_rename_spec(result_act);
+    /* result           = data::detail::internal_format_conversion_term(result,spec.data());
+    return action_rename_specification(result); */
   }
 
 
@@ -393,7 +510,7 @@ lps::specification action_rename(
   using namespace mcrl2::lps;
   using namespace std;
 
-  action_rename_rule_list rename_rules = action_rename_spec.rules();
+  const atermpp::vector <action_rename_rule> rename_rules = action_rename_spec.rules();
   summand_list lps_old_summands = lps_old_spec.process().summands();
   summand_list lps_summands; //for changes in lps_old_summands
   action_list lps_new_actions;
@@ -401,14 +518,11 @@ lps::specification action_rename(
   data::postfix_identifier_generator generator("");
   generator.add_to_context(specification_to_aterm(lps_old_spec));
 
-  bool to_tau=false;
-  bool to_delta=false;
-
   //go through the rename rules of the rename file
   if (gsDebug)
   { std::cerr << "Rename rules found: " << rename_rules.size() << "\n";
   }
-  for(action_rename_rule_list::iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
+  for(atermpp::vector <action_rename_rule>::const_iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
   {
     summand_list lps_new_summands;
 
@@ -417,18 +531,9 @@ lps::specification action_rename(
     action rule_new_action;
     action_rename_rule_rhs new_element = i->rhs();
 
-    if(is_action(new_element))
-    {
-      rule_new_action =  action(new_element);
-      to_tau = false;
-      to_delta = false;
-    }
-    else
-    {
-      rule_new_action = action();
-      if(mcrl2::core::detail::gsIsTau(new_element)){ to_tau = true; to_delta = false;}
-      else if (mcrl2::core::detail::gsIsDelta(new_element)){ to_tau = false; to_delta = true;}
-    }
+    rule_new_action =  new_element.act();
+    const bool to_tau = new_element.is_tau();
+    const bool to_delta = new_element.is_delta();
 
     // Check here that the arguments of the rule_old_action only consist
     // of uniquely occurring variables or closed terms. Furthermore, check that the variables

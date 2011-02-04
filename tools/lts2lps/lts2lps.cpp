@@ -25,7 +25,7 @@
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
+// #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/lps/parse.h"
