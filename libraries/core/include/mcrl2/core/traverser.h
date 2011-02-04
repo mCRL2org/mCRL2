@@ -189,6 +189,44 @@ namespace core {
       { }
   };
 
+  /**
+   * \brief expression traverser that visits all sub expressions
+   *
+   * Types:
+   *  \arg Derived the type of a derived class, as per CRTP
+   *
+   **/
+  template <typename Derived>
+  class new_traverser
+  {
+    public:
+
+      template <typename Expression>
+      void enter(Expression const&)
+      {}
+
+      template <typename Expression>
+      void leave(Expression const&)
+      {}
+
+      // traverse containers
+      template <typename Container>
+      void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+      {
+        for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+        {
+          static_cast<Derived&>(*this)(*i);
+        }
+      }
+
+      // TODO: This dependency on identifier_string should be moved elsewhere...
+      void operator()(const core::identifier_string& x)
+      {
+        static_cast<Derived&>(*this).enter(x);
+        static_cast<Derived&>(*this).leave(x);
+      }
+  };
+
 } // namespace core
 
 } // namespace mcrl2

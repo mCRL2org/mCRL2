@@ -151,6 +151,16 @@ namespace pbes_system {
     }
     
   };
+
+  /// \brief Builder class
+  template <typename Derived>
+  struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
+  {
+    typedef add_sort_expressions<data::sort_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
 //--- end generated add_sort_expressions code ---//
 
 // Adds data expression traversal to a builder
@@ -270,6 +280,16 @@ namespace pbes_system {
     }
     
   };
+
+  /// \brief Builder class
+  template <typename Derived>
+  struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
+  {
+    typedef add_data_expressions<data::data_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
 //--- end generated add_data_expressions code ---//
 
 // Adds pbes expression traversal to a builder
@@ -388,29 +408,8 @@ namespace pbes_system {
     }
     
   };
-//--- end generated add_pbes_expressions code ---//
 
-  /// \brief Traversal class for sort expressions
-  template <typename Derived>
-  struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
-  {
-    typedef add_sort_expressions<data::sort_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
-  {
-    typedef add_data_expressions<data::data_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for pbes expressions
+  /// \brief Builder class
   template <typename Derived>
   struct pbes_expression_builder: public add_pbes_expressions<core::builder, Derived>
   {
@@ -419,6 +418,7 @@ namespace pbes_system {
     using super::leave;
     using super::operator();
   };
+//--- end generated add_pbes_expressions code ---//
 
 } // namespace pbes_system
 

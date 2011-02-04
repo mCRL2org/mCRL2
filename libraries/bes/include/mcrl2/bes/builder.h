@@ -117,9 +117,8 @@ namespace bes {
     }
     
   };
-//--- end generated add_boolean_expressions code ---//
 
-  /// \brief Traversal class for boolean expressions
+  /// \brief Builder class
   template <typename Derived>
   struct boolean_expression_builder: public add_boolean_expressions<core::builder, Derived>
   {
@@ -128,6 +127,7 @@ namespace bes {
     using super::leave;
     using super::operator();
   };
+//--- end generated add_boolean_expressions code ---//
 
 } // namespace bes
 

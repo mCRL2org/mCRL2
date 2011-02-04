@@ -237,6 +237,16 @@ namespace process {
     }
     
   };
+
+  /// \brief Builder class
+  template <typename Derived>
+  struct sort_expression_builder: public add_sort_expressions<lps::sort_expression_builder, Derived>
+  {
+    typedef add_sort_expressions<lps::sort_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
 //--- end generated add_sort_expressions code ---//
 
 // Adds data expression traversal to a builder
@@ -445,6 +455,16 @@ namespace process {
       return result;
     }
     
+  };
+
+  /// \brief Builder class
+  template <typename Derived>
+  struct data_expression_builder: public add_data_expressions<lps::data_expression_builder, Derived>
+  {
+    typedef add_data_expressions<lps::data_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
   };
 //--- end generated add_data_expressions code ---//
 
@@ -655,29 +675,8 @@ namespace process {
     }
     
   };
-//--- end generated add_process_expressions code ---//
 
-  /// \brief Traversal class for sort expressions
-  template <typename Derived>
-  struct sort_expression_builder: public add_sort_expressions<lps::sort_expression_builder, Derived>
-  {
-    typedef add_sort_expressions<lps::sort_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  struct data_expression_builder: public add_data_expressions<lps::data_expression_builder, Derived>
-  {
-    typedef add_data_expressions<lps::data_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for process expressions
+  /// \brief Builder class
   template <typename Derived>
   struct process_expression_builder: public add_process_expressions<core::builder, Derived>
   {
@@ -686,6 +685,7 @@ namespace process {
     using super::leave;
     using super::operator();
   };
+//--- end generated add_process_expressions code ---//
 
 } // namespace process
 

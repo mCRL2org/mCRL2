@@ -251,6 +251,16 @@ namespace data {
     }
     
   };
+
+  /// \brief Builder class
+  template <typename Derived>
+  struct sort_expression_builder: public add_sort_expressions<core::builder, Derived>
+  {
+    typedef add_sort_expressions<core::builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
 //--- end generated add_sort_expressions code ---//
 
 // Adds data expression traversal to a builder
@@ -387,19 +397,8 @@ namespace data {
     }
     
   };
-//--- end generated add_data_expressions code ---//
 
-  /// \brief Traversal class for sort expressions
-  template <typename Derived>
-  struct sort_expression_builder: public add_sort_expressions<core::builder, Derived>
-  {
-    typedef add_sort_expressions<core::builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for data expressions
+  /// \brief Builder class
   template <typename Derived>
   struct data_expression_builder: public add_data_expressions<core::builder, Derived>
   {
@@ -408,6 +407,7 @@ namespace data {
     using super::leave;
     using super::operator();
   };
+//--- end generated add_data_expressions code ---//
 
 } // namespace data
 

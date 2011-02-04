@@ -22,9 +22,9 @@ namespace mcrl2 {
 
 namespace action_formulas {
 
-//--- start generated add_action_formula_sort_expressions code ---//
+//--- start generated action_formulas::add_sort_expressions code ---//
   template <template <class> class Builder, class Derived>
-  struct add_action_formula_sort_expressions: public Builder<Derived>
+  struct add_sort_expressions: public Builder<Derived>
   {
     typedef Builder<Derived> super;
     using super::enter;
@@ -123,11 +123,21 @@ namespace action_formulas {
     }
     
   };
-//--- end generated add_action_formula_sort_expressions code ---//
 
-//--- start generated add_action_formula_data_expressions code ---//
+  /// \brief Builder class
+  template <typename Derived>
+  struct sort_expression_builder: public add_sort_expressions<lps::sort_expression_builder, Derived>
+  {
+    typedef add_sort_expressions<lps::sort_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
+//--- end generated action_formulas::add_sort_expressions code ---//
+
+//--- start generated action_formulas::add_data_expressions code ---//
   template <template <class> class Builder, class Derived>
-  struct add_action_formula_data_expressions: public Builder<Derived>
+  struct add_data_expressions: public Builder<Derived>
   {
     typedef Builder<Derived> super;
     using super::enter;
@@ -226,9 +236,19 @@ namespace action_formulas {
     }
     
   };
-//--- end generated add_action_formula_data_expressions code ---//
 
-//--- start generated add_action_formula_expressions code ---//
+  /// \brief Builder class
+  template <typename Derived>
+  struct data_expression_builder: public add_data_expressions<lps::data_expression_builder, Derived>
+  {
+    typedef add_data_expressions<lps::data_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
+//--- end generated action_formulas::add_data_expressions code ---//
+
+//--- start generated action_formulas::add_action_formula_expressions code ---//
   template <template <class> class Builder, class Derived>
   struct add_action_formula_expressions: public Builder<Derived>
   {
@@ -329,29 +349,8 @@ namespace action_formulas {
     }
     
   };
-//--- end generated add_action_formula_expressions code ---//
 
-  /// \brief Traversal class for sort expressions
-  template <typename Derived>
-  struct sort_expression_builder: public add_action_formula_sort_expressions<lps::sort_expression_builder, Derived>
-  {
-    typedef add_action_formula_sort_expressions<lps::sort_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  struct data_expression_builder: public add_action_formula_data_expressions<lps::data_expression_builder, Derived>
-  {
-    typedef add_action_formula_data_expressions<lps::data_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for action formulas
+  /// \brief Builder class
   template <typename Derived>
   struct action_formula_builder: public add_action_formula_expressions<core::builder, Derived>
   {
@@ -360,14 +359,15 @@ namespace action_formulas {
     using super::leave;
     using super::operator();
   };
+//--- end generated action_formulas::add_action_formula_expressions code ---//
 
 } // namespace action_formulas
 
 namespace regular_formulas {
 
-//--- start generated add_regular_formula_sort_expressions code ---//
+//--- start generated regular_formulas::add_sort_expressions code ---//
   template <template <class> class Builder, class Derived>
-  struct add_regular_formula_sort_expressions: public Builder<Derived>
+  struct add_sort_expressions: public Builder<Derived>
   {
     typedef Builder<Derived> super;
     using super::enter;
@@ -429,11 +429,21 @@ namespace regular_formulas {
     }
     
   };
-//--- end generated add_regular_formula_sort_expressions code ---//
 
-//--- start generated add_regular_formula_data_expressions code ---//
+  /// \brief Builder class
+  template <typename Derived>
+  struct sort_expression_builder: public add_sort_expressions<action_formulas::sort_expression_builder, Derived>
+  {
+    typedef add_sort_expressions<action_formulas::sort_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
+//--- end generated regular_formulas::add_sort_expressions code ---//
+
+//--- start generated regular_formulas::add_data_expressions code ---//
   template <template <class> class Builder, class Derived>
-  struct add_regular_formula_data_expressions: public Builder<Derived>
+  struct add_data_expressions: public Builder<Derived>
   {
     typedef Builder<Derived> super;
     using super::enter;
@@ -495,9 +505,19 @@ namespace regular_formulas {
     }
     
   };
-//--- end generated add_regular_formula_data_expressions code ---//
 
-//--- start generated add_regular_formula_expressions code ---//
+  /// \brief Builder class
+  template <typename Derived>
+  struct data_expression_builder: public add_data_expressions<action_formulas::data_expression_builder, Derived>
+  {
+    typedef add_data_expressions<action_formulas::data_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
+//--- end generated regular_formulas::add_data_expressions code ---//
+
+//--- start generated regular_formulas::add_regular_formula_expressions code ---//
   template <template <class> class Builder, class Derived>
   struct add_regular_formula_expressions: public Builder<Derived>
   {
@@ -561,29 +581,8 @@ namespace regular_formulas {
     }
     
   };
-//--- end generated add_regular_formula_expressions code ---//
 
-  /// \brief Traversal class for sort expressions
-  template <typename Derived>
-  struct sort_expression_builder: public add_regular_formula_sort_expressions<action_formulas::sort_expression_builder, Derived>
-  {
-    typedef add_regular_formula_sort_expressions<action_formulas::sort_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  struct data_expression_builder: public add_regular_formula_data_expressions<action_formulas::data_expression_builder, Derived>
-  {
-    typedef add_regular_formula_data_expressions<action_formulas::data_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for regular formulas
+  /// \brief Builder class
   template <typename Derived>
   struct regular_formula_builder: public add_regular_formula_expressions<core::builder, Derived>
   {
@@ -592,14 +591,15 @@ namespace regular_formulas {
     using super::leave;
     using super::operator();
   };
+//--- end generated regular_formulas::add_regular_formula_expressions code ---//
 
 } // namespace regular_formulas
 
 namespace state_formulas {
 
-//--- start generated add_state_formula_sort_expressions code ---//
+//--- start generated state_formulas::add_sort_expressions code ---//
   template <template <class> class Builder, class Derived>
-  struct add_state_formula_sort_expressions: public Builder<Derived>
+  struct add_sort_expressions: public Builder<Derived>
   {
     typedef Builder<Derived> super;
     using super::enter;
@@ -769,11 +769,21 @@ namespace state_formulas {
     }
     
   };
-//--- end generated add_state_formula_sort_expressions code ---//
 
-//--- start generated add_state_formula_data_expressions code ---//
+  /// \brief Builder class
+  template <typename Derived>
+  struct sort_expression_builder: public add_sort_expressions<regular_formulas::sort_expression_builder, Derived>
+  {
+    typedef add_sort_expressions<regular_formulas::sort_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
+//--- end generated state_formulas::add_sort_expressions code ---//
+
+//--- start generated state_formulas::add_data_expressions code ---//
   template <template <class> class Builder, class Derived>
-  struct add_state_formula_data_expressions: public Builder<Derived>
+  struct add_data_expressions: public Builder<Derived>
   {
     typedef Builder<Derived> super;
     using super::enter;
@@ -943,9 +953,19 @@ namespace state_formulas {
     }
     
   };
-//--- end generated add_state_formula_data_expressions code ---//
 
-//--- start generated add_state_formula_expressions code ---//
+  /// \brief Builder class
+  template <typename Derived>
+  struct data_expression_builder: public add_data_expressions<regular_formulas::data_expression_builder, Derived>
+  {
+    typedef add_data_expressions<regular_formulas::data_expression_builder, Derived> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  };
+//--- end generated state_formulas::add_data_expressions code ---//
+
+//--- start generated state_formulas::add_state_formula_expressions code ---//
   template <template <class> class Builder, class Derived>
   struct add_state_formula_expressions: public Builder<Derived>
   {
@@ -1117,29 +1137,8 @@ namespace state_formulas {
     }
     
   };
-//--- end generated add_state_formula_expressions code ---//
 
-  /// \brief Traversal class for sort expressions
-  template <typename Derived>
-  struct sort_expression_builder: public add_state_formula_sort_expressions<regular_formulas::sort_expression_builder, Derived>
-  {
-    typedef add_state_formula_sort_expressions<regular_formulas::sort_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for data expressions
-  template <typename Derived>
-  struct data_expression_builder: public add_state_formula_data_expressions<regular_formulas::data_expression_builder, Derived>
-  {
-    typedef add_state_formula_data_expressions<regular_formulas::data_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
-
-  /// \brief Traversal class for state formulas
+  /// \brief Builder class
   template <typename Derived>
   struct state_formula_builder: public add_state_formula_expressions<core::builder, Derived>
   {
@@ -1148,6 +1147,7 @@ namespace state_formulas {
     using super::leave;
     using super::operator();
   };
+//--- end generated state_formulas::add_state_formula_expressions code ---//
 
 } // namespace state_formulas
 

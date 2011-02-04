@@ -144,7 +144,7 @@ specification(const data::data_specification& data, const action_label_list& act
 '''
 
 PROCESS_CLASSES = r'''
-process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const atermpp::set<data::variable>& global_variables, const atermpp::vector<process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
+process_specification(const data::data_specification& data, const lps::action_label_list& action_labels, const atermpp::set<data::variable>& global_variables, const atermpp::vector<process::process_equation>& equations, const process_expression& init)           | M | ProcSpec    | A process specification
 process_identifier(const core::identifier_string& name, const data::sort_expression_list& sorts)                                                                                 : atermpp::aterm_appl | C | ProcVarId   | A process identifier
 process_equation(const process_identifier& identifier, const data::variable_list& formal_parameters, const process_expression& expression)                                       : atermpp::aterm_appl | C | ProcEqn     | A process equation
 rename_expression(core::identifier_string source, core::identifier_string target)                                                                                                : atermpp::aterm_appl | C | RenameExpr  | A rename expression
@@ -900,6 +900,57 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             if f.is_template():
                 text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
             return text           
+
+    def traverser_function(self, all_classes, dependencies):
+        text = r'''void operator()(const <CLASS_NAME>& x)
+{
+  static_cast<Derived&>(*this).enter(x);<VISIT_TEXT>
+  static_cast<Derived&>(*this).leave(x);
+}
+'''
+        classname = self.classname(True)
+        visit_text = ''
+        dependent = False
+        if 'X' in self.modifiers():
+            classes = [all_classes[name] for name in self.expression_classes()]          
+            classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
+            classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
+
+            updates = []          
+            for c in classes:
+                is_function = c.is_function_name(True)
+                updates.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, c.classname(True)))
+            if len(updates) == 0:
+                visit_text = '// skip'
+            else:
+                visit_text = '%s result;\n' % classname + '\nelse '.join(updates)
+        else:
+            if 'E' in self.modifiers():
+                return_type = self.superclass(include_namespace = True)
+            else:
+                return_type = classname
+
+            updates = []          
+            f = self.constructor
+            for p in f.parameters():
+                ptype = p.type(include_modifiers = False, include_namespace = True)
+                if is_dependent_type(dependencies, ptype):
+                    dependent = True
+                    updates.append('static_cast<Derived&>(*this)(x.%s());' % p.name())
+            if dependent:
+                visit_text = '\n'.join(updates)
+            else:
+                visit_text = '// skip'
+   
+        # fix the layout
+        if visit_text != '':
+            visit_text = indent_text('\n' + visit_text, '  ')       
+
+        text = re.sub('<CLASS_NAME>', classname, text)
+        text = re.sub('<VISIT_TEXT>', visit_text, text)
+        if self.constructor.is_template():
+            text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
+        return text
 
     def builder_function(self, all_classes, dependencies, modifiability_map):
         text = r'''<RETURN_TYPE> operator()(<CONST><CLASS_NAME>& x)
