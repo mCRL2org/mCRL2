@@ -34,7 +34,7 @@
 #include <sstream>
 
 //Tool framework
-#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -66,17 +66,16 @@ using namespace ::bes;
 //------------------------------------------
 
 using namespace mcrl2;
-using utilities::tools::input_tool;
+using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
+class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
 {
   protected:
     // Tool options.
     /// The output file name
-    std::string m_output_filename;
     std::string opt_outputformat;              // The output format
     ::bes::transformation_strategy opt_strategy; // The strategy
     bool opt_use_hashtables;                   // The hashtable option
@@ -85,40 +84,10 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
     bool opt_data_elm;                         // The data elimination option
     std::string opt_counter_example_file;      // The counter example file name
 
-    typedef pbes_rewriter_tool<rewriter_tool<input_tool> > super;
+    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
     std::string default_rewriter() const
     { return "quantifier-all";
-    }
-
-    /// \brief Checks if the number of positional options is OK.
-    /// \param parser A command line parser
-    void check_positional_options(const command_line_parser& parser)
-    {
-      if (2 < parser.arguments.size())
-      {
-        parser.error("too many file arguments");
-      }
-    }
-
-    /// \brief Returns a message about the output filename
-    std::string output_file_message() const
-    {
-      std::ostringstream out;
-      out << "Output written to " << ((m_output_filename.empty())? "standard output" : ("'" + m_output_filename + "'"));
-      return out.str();
-    }
-
-    /// \brief Adds a message about input and output files to the given description.
-    std::string make_tool_description(const std::string& description) const
-    {
-      return description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used. ";
-    }
-
-    // Overload synopsis to cope with optional OUTFILE
-    std::string synopsis() const
-    {
-      return "[OPTION]...[INFILE [OUTFILE]]\n";
     }
 
   public:
@@ -138,35 +107,21 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
         opt_counter_example_file("")
     {}
 
-    /// \brief Returns a const reference to the output filename.
-    const std::string& output_filename() const
-    {
-      return m_output_filename;
-    }
-
-    /// \brief Returns a reference to the output filename.
-    std::string& output_filename()
-    {
-      return m_output_filename;
-    }
 
   protected:
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
 
-      input_tool::parse_options(parser);
-      if (1 < parser.arguments.size())
-      {
-        m_output_filename = parser.arguments[1];
-      }
+      input_output_tool::parse_options(parser);
 
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_outputformat              = "bes";
+      opt_outputformat              = "cwi";
       opt_strategy                  = lazy;
 
-      if (parser.options.count("output")) { // Output format
+      if (parser.options.count("output")) // Output format
+      {
         std::string format = parser.option_argument("output");
 
         if (!((format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes"))) {
@@ -176,7 +131,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
         opt_outputformat = format;
       }
 
-      if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
+      if (parser.options.count("strategy")) // Bes solving strategy (currently only one available)
+      {
         int strategy = parser.option_argument_as< int >("strategy");
 
         switch (strategy) {
@@ -233,8 +189,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
           "use output format FORMAT:\n"
           " 'vasy',\n"
           " 'pbes' (save as a PBES in internal format),\n"
-          " 'cwi',\n"
-          " 'bes' (default, save as a BES in internal format)",
+          " 'cwi' (default),\n"
+          " 'bes' (save as a BES in internal format)",
           'o').
         add_option("tree",
           "store state in a tree (for memory efficiency)",

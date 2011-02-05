@@ -74,9 +74,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 {
   protected:
     // Tool options.
-    /// The output file name
-    std::string m_output_filename;
-    std::string opt_outputformat;              // The output format
     ::bes::transformation_strategy opt_strategy; // The strategy
     bool opt_use_hashtables;                   // The hashtable option
     bool opt_construct_counter_example;        // The counter example option
@@ -90,35 +87,10 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
     { return "quantifier-all";
     }
 
-    /// \brief Checks if the number of positional options is OK.
-    /// \param parser A command line parser
-    void check_positional_options(const command_line_parser& parser)
-    {
-      if (2 < parser.arguments.size())
-      {
-        parser.error("too many file arguments");
-      }
-    }
-
-    /// \brief Returns a message about the output filename
-    std::string output_file_message() const
-    {
-      std::ostringstream out;
-      out << "Output written to " << ((m_output_filename.empty())? "standard output" : ("'" + m_output_filename + "'"));
-      return out.str();
-    }
-
-    /// \brief Adds a message about input and output files to the given description.
-    std::string make_tool_description(const std::string& description) const
-    {
-      // return core::word_wrap_text(description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.");
-      return description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.";
-    }
-
     // Overload synopsis to cope with optional OUTFILE
     std::string synopsis() const
     {
-      return "[OPTION]...[INFILE [OUTFILE]]\n";
+      return "[OPTION]...[INFILE]\n";
     }
 
   public:
@@ -126,10 +98,9 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
       : super(
           NAME,
           AUTHOR,
-          "Generate a BES from a PBES and solve it, unless indicated otherwise",
-          "Solves PBES from INFILE, or if so indicated writes an equivalent BES to OUTFILE. "
-          "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
-        opt_outputformat("none"),
+          "Generate a BES from a PBES and solve it. ",
+          "Solves PBES from INFILE. "
+          "If INFILE is not present, stdin is used. "),
         opt_strategy(::bes::lazy),
         opt_use_hashtables(false),
         opt_construct_counter_example(false),
@@ -138,44 +109,24 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
         opt_counter_example_file("")
     {}
 
-    /// \brief Returns a const reference to the output filename.
-    const std::string& output_filename() const
-    {
-      return m_output_filename;
-    }
-
-    /// \brief Returns a reference to the output filename.
-    std::string& output_filename()
-    {
-      return m_output_filename;
-    }
-
   protected:
     void parse_options(const command_line_parser& parser)
     { super::parse_options(parser);
 
       input_tool::parse_options(parser);
-      if (1 < parser.arguments.size())
-      {
-        m_output_filename = parser.arguments[1];
-      }
 
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
       opt_construct_counter_example = 0 < parser.options.count("counter");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_outputformat              = "none";
       opt_strategy                  = lazy;
 
-      if (parser.options.count("output")) { // Output format
+      if (parser.options.count("output")) // Output format is deprecated.
+      { 
         std::string format = parser.option_argument("output");
-
-        if (!((format == "none") || (format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes"))) {
-          parser.error("unknown output format specified (got `" + format + "')");
-        }
-
-        opt_outputformat = format;
+        parser.error("the option --output or -o is deprecated. Used the tool pbes2bes for this functionality. ");
       }
+
 
       if (parser.options.count("strategy")) { // Bes solving strategy (currently only one available)
         int strategy = parser.option_argument_as< int >("strategy");
@@ -246,12 +197,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
           'H').
         add_option("output",
           make_mandatory_argument("FORMAT"),
-          "use output format FORMAT:\n"
-          " 'none' (default),\n"
-          " 'vasy',\n"
-          " 'pbes' (save as a PBES in internal format),\n"
-          " 'cwi',\n"
-          " 'bes' (save as a BES in internal format)",
+          "use output format FORMAT (this option is deprecated. Use the tool pbes2bes instead).\n",
           'o').
         add_option("tree",
           "store state in a tree (for memory efficiency)",
@@ -271,7 +217,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
       {
         std::cerr << "pbes2bool parameters:" << std::endl;
         std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
         std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
         std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
       }
@@ -389,30 +334,6 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
         }
       } */
 
-      if (opt_outputformat == "cwi")
-      { // in CWI format only if the result is a BES, otherwise Binary
-        save_bes_in_cwi_format(m_output_filename,bes_equations);
-        return true;
-      }
-      if (opt_outputformat == "vasy")
-      { //Save resulting bes if necessary.
-        save_bes_in_vasy_format(m_output_filename,bes_equations);
-        return true;
-      }
-      if (opt_outputformat == "pbes")
-      { //Save resulting bes if necessary.
-        save_bes_in_pbes_format(m_output_filename,bes_equations,p);
-        return true;
-      }
-      if (opt_outputformat == "bes")
-      {
-        save_bes_in_bes_format(m_output_filename,bes_equations);
-        return true;
-      }
-
-
-      assert(opt_outputformat=="none");
-
       timer().start("solving");
       bool result=solve_bes(bes_equations,
                             opt_use_hashtables,
@@ -439,14 +360,6 @@ public:
 
 		m_gui_options["counter"] = create_checkbox_widget();
 		m_gui_options["hashtables"] = create_checkbox_widget();
-
-		values.clear();
-		values.push_back("none");
-		values.push_back("vasy");
-		values.push_back("pbes");
-		values.push_back("cwi");
-		values.push_back("bes");
-		m_gui_options["output"] = create_radiobox_widget(values);
 
 		values.clear();
 		values.push_back("simplify");
