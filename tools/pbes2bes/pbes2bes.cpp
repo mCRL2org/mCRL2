@@ -117,7 +117,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_outputformat              = "cwi";
+      opt_outputformat              = "bes";
       opt_strategy                  = lazy;
 
       if (parser.options.count("output")) // Output format
@@ -189,8 +189,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
           "use output format FORMAT:\n"
           " 'vasy',\n"
           " 'pbes' (save as a PBES in internal format),\n"
-          " 'cwi' (default),\n"
-          " 'bes' (save as a BES in internal format)",
+          " 'cwi',\n"
+          " 'bes' (default, save as a BES in internal format)",
           'o').
         add_option("tree",
           "store state in a tree (for memory efficiency)",
