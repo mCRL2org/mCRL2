@@ -1039,6 +1039,281 @@ macro( gen_besinfo_release_tests )
 					add_besinfo_release_test(  "-f" )
 endmacro( gen_besinfo_release_tests )
 
+###################
+## Macro bespp  ##
+###################
+
+macro( add_bespp_release_test ARGS SAVE)
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+	foreach(MCF ${SET_OF_MCF} )
+    get_filename_component( mcf_name ${MCF} NAME_WE)
+  	if( NOT ${SAVE} )
+      ADD_TEST("bespp_${POST_FIX_TEST}_${mcf_name}" ${bespp_BINARY_DIR}/bespp ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.bes ${testdir}/${BASENAME_TEST}_${mcf_name}_bes.txt )
+  	else( NOT ${SAVE} )
+      ADD_TEST("bespp_${POST_FIX_TEST}_${mcf_name}" ${bespp_BINARY_DIR}/bespp ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.bes )
+  	endif( NOT ${SAVE} )
+	  set_tests_properties("bespp_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "pbes2bes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
+	endforeach()
+
+endmacro( add_bespp_release_test ARGS SAVE)
+
+macro( gen_bespp_release_tests )
+					add_bespp_release_test(  "-fdefault" "SAVE")
+					add_bespp_release_test(  "-fdebug" "")
+					add_bespp_release_test(  "-finternal" "")
+					add_bespp_release_test(  "-finternal-debug" "")
+endmacro( gen_bespp_release_tests )
+
+###################
+## Macro bessolve  ##
+###################
+
+macro( add_bessolve_release_test ARGS )
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+	foreach(MCF ${SET_OF_MCF} )
+    get_filename_component( mcf_name ${MCF} NAME_WE)
+    ADD_TEST("bessolve_${POST_FIX_TEST}_${mcf_name}" ${bessolve_BINARY_DIR}/bessolve ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.bes )
+	  set_tests_properties("bessolve_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "pbes2bes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
+	endforeach()
+
+endmacro( add_bessolve_release_test ARGS )
+
+macro( gen_bessolve_release_tests )
+					add_bessolve_release_test(  "-sgauss" )
+					add_bessolve_release_test(  "-sspm" )
+endmacro( gen_bessolve_release_tests )
+
+###################
+## Macro besconvert  ##
+###################
+
+macro( add_besconvert_release_test ARGS )
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+	foreach(MCF ${SET_OF_MCF} )
+    get_filename_component( mcf_name ${MCF} NAME_WE)
+    ADD_TEST("besconvert_${POST_FIX_TEST}_${mcf_name}" ${besconvert_BINARY_DIR}/besconvert ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.bes )
+	  set_tests_properties("besconvert_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "pbes2bes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
+	endforeach()
+
+endmacro( add_besconvert_release_test ARGS )
+
+macro( gen_besconvert_release_tests )
+					add_besconvert_release_test(  "-ebisim" )
+					add_besconvert_release_test(  "-estuttering" )
+endmacro( gen_besconvert_release_tests )
+
+###################
+## Macro pbesabstract  ##
+###################
+
+macro( add_pbesabstract_release_test ARGS )
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+	foreach(MCF ${SET_OF_MCF} )
+    get_filename_component( mcf_name ${MCF} NAME_WE)
+    ADD_TEST("pbesabstract_${POST_FIX_TEST}_${mcf_name}" ${pbesabstract_BINARY_DIR}/pbesabstract ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.pbes ${testdir}/dummy.pbes )
+	  set_tests_properties("pbesabstract_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "lps2pbes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
+	endforeach()
+
+endmacro( add_pbesabstract_release_test ARGS )
+
+macro( gen_pbesabstract_release_tests )
+					add_pbesabstract_release_test(  "-atrue" )
+					add_pbesabstract_release_test(  "-a1" )
+					add_pbesabstract_release_test(  "-afalse" )
+					add_pbesabstract_release_test(  "-a0" )
+					#					add_pbesabstract_release_test(  "-f*(*:Bool)" )
+endmacro( gen_pbesabstract_release_tests )
+
+###################
+## Macro pbesinst  ##
+###################
+
+macro( add_pbesinst_release_test ARGS )
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+	set(EXT "pbes")
+  if( "${ARGS}" STREQUAL "-obes" )
+					set( EXT "bes" )
+  endif( "${ARGS}" STREQUAL "-obes" )
+
+  if( "${ARGS}" STREQUAL "-ocwi" )
+					set( EXT "cwi" )
+  endif( "${ARGS}" STREQUAL "-ocwi" )
+
+	foreach(MCF ${SET_OF_MCF} )
+    get_filename_component( mcf_name ${MCF} NAME_WE)
+    ADD_TEST("pbesinst_${POST_FIX_TEST}_${mcf_name}" ${pbesinst_BINARY_DIR}/pbesinst ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.pbes ${testdir}/dummy.${EXT} )
+	  set_tests_properties("pbesinst_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "lps2pbes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
+	endforeach()
+
+endmacro( add_pbesinst_release_test ARGS )
+
+macro( gen_pbesinst_release_tests )
+					add_pbesinst_release_test(  "" )
+					#					add_pbesinst_release_test(  "-f*(*:Bool)" )
+					add_pbesinst_release_test(  "-opbes" )
+					add_pbesinst_release_test(  "-obes" )
+					add_pbesinst_release_test(  "-cwi" )
+					add_pbesinst_release_test(  "-slazy" )
+					add_pbesinst_release_test(  "-sfinite" )
+					add_pbesinst_release_test(  "-rjitty" )
+					add_pbesinst_release_test(  "-rjittyp" )
+					add_pbesinst_release_test(  "-rinner" )
+					add_pbesinst_release_test(  "-rinnerp" )
+          if( NOT WIN32 )
+					  add_pbesinst_release_test(  "-rjittyc" )
+					  add_pbesinst_release_test(  "-rinnerc" )
+          endif( NOT WIN32 )
+endmacro( gen_pbesinst_release_tests )
+
+###################
+## Macro pbespareqelm  ##
+###################
+
+macro( add_pbespareqelm_release_test ARGS )
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+	foreach(MCF ${SET_OF_MCF} )
+    get_filename_component( mcf_name ${MCF} NAME_WE)
+    ADD_TEST("pbespareqelm_${POST_FIX_TEST}_${mcf_name}" ${pbespareqelm_BINARY_DIR}/pbespareqelm ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.pbes ${testdir}/dummy.pbes )
+	  set_tests_properties("pbespareqelm_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "lps2pbes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
+	endforeach()
+
+endmacro( add_pbespareqelm_release_test ARGS )
+
+macro( gen_pbespareqelm_release_tests )
+					add_pbespareqelm_release_test(  "" )
+					add_pbespareqelm_release_test(  "-i" )
+					add_pbespareqelm_release_test(  "-psimplify" )
+					add_pbespareqelm_release_test(  "-pquantifier-all" )
+					add_pbespareqelm_release_test(  "-pquantifier-finite" )
+					add_pbespareqelm_release_test(  "-ppfnf" )
+					add_pbespareqelm_release_test(  "-rjitty" )
+					add_pbespareqelm_release_test(  "-rjittyp" )
+					add_pbespareqelm_release_test(  "-rinner" )
+					add_pbespareqelm_release_test(  "-rinnerp" )
+          if( NOT WIN32 )
+					  add_pbespareqelm_release_test(  "-rjittyc" )
+					  add_pbespareqelm_release_test(  "-rinnerc" )
+          endif( NOT WIN32 )
+endmacro( gen_pbespareqelm_release_tests )
+
+###################
+## Macro pbespgsolve  ##
+###################
+
+macro( add_pbespgsolve_release_test ARGS )
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+	foreach(MCF ${SET_OF_MCF} )
+    get_filename_component( mcf_name ${MCF} NAME_WE)
+    ADD_TEST("pbespgsolve_${POST_FIX_TEST}_${mcf_name}" ${pbespgsolve_BINARY_DIR}/pbespgsolve ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.pbes )
+	  set_tests_properties("pbespgsolve_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "lps2pbes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
+	endforeach()
+
+endmacro( add_pbespgsolve_release_test ARGS )
+
+macro( gen_pbespgsolve_release_tests )
+					add_pbespgsolve_release_test(  "" )
+					add_pbespgsolve_release_test(  "-c" )
+					add_pbespgsolve_release_test(  "-e" )
+					add_pbespgsolve_release_test(  "-sspm" )
+					add_pbespgsolve_release_test(  "-srecursive" )
+endmacro( gen_pbespgsolve_release_tests )
+
+###################
+## Macro lpsbisim2pbes  ##
+###################
+
+macro( add_lpsbisim2pbes_release_test ARGS )
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+  ADD_TEST("lpsbisim2pbes_${POST_FIX_TEST}" ${lpsbisim2pbes_BINARY_DIR}/lpsbisim2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}.lps )
+  set_tests_properties("lpsbisim2pbes_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+
+endmacro( add_lpsbisim2pbes_release_test ARGS )
+
+macro( gen_lpsbisim2pbes_release_tests )
+					add_lpsbisim2pbes_release_test(  "" )
+					add_lpsbisim2pbes_release_test(  "-b0" )
+					add_lpsbisim2pbes_release_test(  "-b1" )
+					add_lpsbisim2pbes_release_test(  "-b2" )
+					add_lpsbisim2pbes_release_test(  "-b3" )
+					add_lpsbisim2pbes_release_test(  "-n" )
+endmacro( gen_lpsbisim2pbes_release_tests )
+
+######################
+## Macro txt2bes  ##
+######################
+
+macro( add_txt2bes_release_test ARGS)
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+	foreach(MCF ${SET_OF_MCF} )
+    get_filename_component( mcf_name ${MCF} NAME_WE)
+
+    ADD_TEST("txt2bes_${POST_FIX_TEST}_${mcf_name}" 
+						${txt2bes_BINARY_DIR}/txt2bes ${ARGS} 
+						${testdir}/${BASENAME_TEST}_${mcf_name}_bes.txt 
+						${testdir}/dummy.pbes )
+	  set_tests_properties("txt2bes_${POST_FIX_TEST}_${mcf_name}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+    set_tests_properties("txt2bes_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "bespp_${BASENAME_TEST}-ARGS-fdefault_${mcf_name}" )
+	endforeach()
+endmacro( add_txt2bes_release_test ARGS)
+
+macro( gen_txt2bes_release_tests )
+  add_txt2bes_release_test( "" )
+endmacro( gen_txt2bes_release_tests )
+
 ##############################
 ## tool testcase generation ##
 ##############################
@@ -1282,9 +1557,54 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
   if( index_find LESS 0 )
     gen_besinfo_release_tests()
 	endif()
-  
+
+	list(FIND SET_OF_DISABLED_TESTS "bespp" index_find)
+  if( index_find LESS 0 )
+    gen_bespp_release_tests()
+	endif()
+
   if(MCRL2_ENABLE_EXPERIMENTAL)
-  # add_subdirectory ( tools/pbes2bes )
+	  list(FIND SET_OF_DISABLED_TESTS "besconvert" index_find)
+    if( index_find LESS 0 )
+      gen_besconvert_release_tests()
+	  endif()
+
+		list(FIND SET_OF_DISABLED_TESTS "bessolve" index_find)
+    if( index_find LESS 0 )
+      gen_bessolve_release_tests()
+	  endif()
+
+		list(FIND SET_OF_DISABLED_TESTS "pbesabstract" index_find)
+    if( index_find LESS 0 )
+      gen_pbesabstract_release_tests()
+	  endif()
+
+		list(FIND SET_OF_DISABLED_TESTS "pbesinst" index_find)
+    if( index_find LESS 0 )
+      gen_pbesinst_release_tests()
+	  endif()
+
+		list(FIND SET_OF_DISABLED_TESTS "pbespareqelm" index_find)
+    if( index_find LESS 0 )
+      gen_pbespareqelm_release_tests()
+	  endif()
+
+		list(FIND SET_OF_DISABLED_TESTS "pbespgsolve" index_find)
+    if( index_find LESS 0 )
+      gen_pbespgsolve_release_tests()
+	  endif()
+
+		list(FIND SET_OF_DISABLED_TESTS "lpsbisim2pbes" index_find)
+    if( index_find LESS 0 )
+      gen_lpsbisim2pbes_release_tests()
+	  endif()
+  
+	  list(FIND SET_OF_DISABLED_TESTS "txt2bes" index_find)
+    if( index_find LESS 0 )
+      gen_txt2bes_release_tests()
+	  endif()
+	
+	# add_subdirectory ( tools/pbes2bes )
 	#  gen_pbes2bes_release_tests()
   	#  gen_besconvert_release_tests()
   # add_subdirectory ( tools/bessolve )
