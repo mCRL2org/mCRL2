@@ -14,6 +14,11 @@
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/invariant_eliminator.h"
 
+
+namespace mcrl2 {
+namespace lps {
+namespace detail {
+
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
@@ -41,7 +46,7 @@ using namespace mcrl2::lps;
                             a_summand.assignments());
       }
       
-      f_bdd_prover.set_formula((ATermAppl)v_formula);
+      f_bdd_prover.set_formula(v_formula);
       if (f_bdd_prover.is_contradiction() == answer_yes) 
       {
         return summand(variable_list(),sort_bool::false_(),deadlock(sort_real::real_(0)));
@@ -120,3 +125,9 @@ using namespace mcrl2::lps;
       v_process.set_summands(v_simplified_summands);
       return specification(f_lps.data(),f_lps.action_labels(),f_lps.global_variables(),v_process, f_lps.initial_process());
     }
+
+
+} // namespace detail
+} // namespace lps
+} // namespace mcrl2
+

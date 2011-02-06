@@ -19,6 +19,10 @@
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/exception.h"
 
+namespace mcrl2 {
+namespace lps {
+namespace detail {
+
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
@@ -26,32 +30,32 @@ using namespace mcrl2::core;
 // Class Invariant_Checker ------------------------------------------------------------------------
   // Class Invariant_Checker - Functions declared private -----------------------------------------
 
-    void Invariant_Checker::print_counter_example() {
-      if (f_counter_example) {
-        ATermAppl v_counter_example;
-
-        v_counter_example = f_bdd_prover.get_counter_example();
-        if (v_counter_example == 0) {
-          throw mcrl2::runtime_error(
-           "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
-           "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
-        } else {
-          gsMessage("  Counter example: %P\n", v_counter_example);
-        }
+    void Invariant_Checker::print_counter_example() 
+    {
+      if (f_counter_example) 
+      {
+        data_expression v_counter_example(f_bdd_prover.get_counter_example());
+        assert(v_counter_example!=0);
+        std::cerr << "  Counter example: " << pp(v_counter_example) << "\n";
       }
     }
 
     // --------------------------------------------------------------------------------------------
 
-    void Invariant_Checker::save_dot_file(int a_summand_number) {
-      if (! f_dot_file_name.empty() ) {
+    void Invariant_Checker::save_dot_file(int a_summand_number) 
+    {
+      if (! f_dot_file_name.empty() ) 
+      {
         std::ostringstream v_file_name;
 
         v_file_name << f_dot_file_name;
 
-        if (a_summand_number == -1) {
+        if (a_summand_number == -1) 
+        {
           v_file_name << "-init.dot";
-        } else {
+        } 
+        else 
+        {
           v_file_name << "-" << a_summand_number << ".dot";
         }
         f_bdd2dot.output_bdd(f_bdd_prover.get_bdd(), v_file_name.str().c_str());
@@ -60,28 +64,26 @@ using namespace mcrl2::core;
 
     // --------------------------------------------------------------------------------------------
 
-    bool Invariant_Checker::check_init(ATermAppl a_invariant) {
-      ATermList v_assignments = ATLgetArgument(f_init, 0);
-      ATermAppl v_assignment;
-      ATermAppl v_variable;
-      ATermAppl v_expression;
-      ATermList v_substitutions = ATmakeList0();
-      ATermAppl v_substitution;
-
-      while (!ATisEmpty(v_assignments)) {
-        v_assignment = ATAgetFirst(v_assignments);
-        v_variable = ATAgetArgument(v_assignment, 0);
-        v_expression = ATAgetArgument(v_assignment, 1);
-        v_substitution = gsMakeSubst_Appl(v_variable, v_expression);
-        v_substitutions = ATinsert(v_substitutions, (ATerm) v_substitution);
-        v_assignments = ATgetNext(v_assignments);
+    bool Invariant_Checker::check_init(const data_expression a_invariant) 
+    {
+      atermpp::map < variable, data_expression> v_substitutions;
+      const assignment_list l=f_init.assignments();
+      for(assignment_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+      {
+        v_substitutions[i->lhs()]=i->rhs();
       }
-      a_invariant = gsSubstValues_Appl(v_substitutions, a_invariant, true);
-      f_bdd_prover.set_formula(a_invariant);
-      if (f_bdd_prover.is_tautology() == answer_yes) {
+
+      data_expression b_invariant = data::substitute_free_variables(a_invariant,
+                   data::make_associative_container_substitution(v_substitutions));
+      f_bdd_prover.set_formula(b_invariant);
+      if (f_bdd_prover.is_tautology() == answer_yes) 
+      {
         return true;
-      } else {
-        if (f_bdd_prover.is_contradiction() != answer_yes) {
+      } 
+      else 
+      {
+        if (f_bdd_prover.is_contradiction() != answer_yes) 
+        {
           print_counter_example();
           save_dot_file(-1);
         }
@@ -91,33 +93,34 @@ using namespace mcrl2::core;
 
     // --------------------------------------------------------------------------------------------
 
-    bool Invariant_Checker::check_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number) {
-      ATermAppl v_condition = ATAgetArgument(a_summand, 1);
-      ATermList v_assignments = ATLgetArgument(a_summand, 4);
-      ATermAppl v_assignment;
-      ATermAppl v_variable;
-      ATermAppl v_expression;
-      ATermList v_substitutions = ATmakeList0();
-      ATermAppl v_substitution;
+    bool Invariant_Checker::check_summand(
+                   const data::data_expression a_invariant, 
+                   const lps::action_summand a_summand, 
+                   const size_t a_summand_number) 
+    {
+      using namespace mcrl2::data::sort_bool;
+      const data_expression v_condition = a_summand.condition();
+      const assignment_list v_assignments = a_summand.assignments();
 
-      while (!ATisEmpty(v_assignments)) {
-        v_assignment = ATAgetFirst(v_assignments);
-        v_variable = ATAgetArgument(v_assignment, 0);
-        v_expression = ATAgetArgument(v_assignment, 1);
-        v_substitution = gsMakeSubst_Appl(v_variable, v_expression);
-        v_substitutions = ATinsert(v_substitutions, (ATerm) v_substitution);
-        v_assignments = ATgetNext(v_assignments);
+      atermpp::map < variable, data_expression> v_substitutions;
+
+      for(assignment_list::const_iterator i=v_assignments.begin(); i!=v_assignments.end(); ++i)
+      {
+        v_substitutions[i->lhs()]=i->rhs();
       }
 
-      ATermAppl v_subst_invariant = gsSubstValues_Appl(v_substitutions, a_invariant, true);
-      ATermAppl v_formula = mcrl2::data::sort_bool::and_(data_expression(a_invariant), data_expression(v_condition));
+      const data_expression v_subst_invariant = data::substitute_free_variables(a_invariant,
+                     data::make_associative_container_substitution(v_substitutions));
 
-      v_formula = mcrl2::data::sort_bool::implies(data_expression(v_formula), data_expression(v_subst_invariant));
+      const data_expression v_formula = implies(and_(a_invariant, v_condition), v_subst_invariant);
       f_bdd_prover.set_formula(v_formula);
-      if (f_bdd_prover.is_tautology() == answer_yes) {
+      if (f_bdd_prover.is_tautology() == answer_yes) 
+      {
         gsVerboseMsg("The invariant holds for summand %d.\n", a_summand_number);
         return true;
-      } else {
+      } 
+      else 
+      {
         gsMessage("The invariant does not hold for summand %d.\n", a_summand_number);
         if (f_bdd_prover.is_contradiction() != answer_yes) {
           print_counter_example();
@@ -129,16 +132,15 @@ using namespace mcrl2::core;
 
     // --------------------------------------------------------------------------------------------
 
-    bool Invariant_Checker::check_summands(ATermAppl a_invariant) {
-      ATermList v_summands = f_summands;
-      ATermAppl v_summand;
+    bool Invariant_Checker::check_summands(const data::data_expression a_invariant) 
+    {
       bool v_result = true;
-      int v_summand_number = 1;
+      size_t v_summand_number = 1;
 
-      while (!ATisEmpty(v_summands) && (f_all_violations || v_result) ) {
-        v_summand = ATAgetFirst(v_summands);
-        v_result = check_summand(a_invariant, v_summand, v_summand_number) && v_result;
-        v_summands = ATgetNext(v_summands);
+      for(action_summand_vector::const_iterator i=f_summands.begin();
+               i!=f_summands.end() && (f_all_violations || v_result); ++i)
+      {
+        v_result = check_summand(a_invariant, *i, v_summand_number) && v_result;
         v_summand_number++;
       }
       return v_result;
@@ -153,7 +155,7 @@ using namespace mcrl2::core;
       f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)
     {
       f_init = a_lps.initial_process();
-      f_summands = a_lps.process().summands();
+      f_summands = a_lps.process().action_summands();
       f_counter_example = a_counter_example;
       f_all_violations = a_all_violations;
       f_dot_file_name = a_dot_file_name;
@@ -167,28 +169,44 @@ using namespace mcrl2::core;
 
     // --------------------------------------------------------------------------------------------
 
-    bool Invariant_Checker::check_invariant(ATermAppl a_invariant) {
+    bool Invariant_Checker::check_invariant(const data::data_expression a_invariant) 
+    {
       bool v_result = true;
 
-      if (check_init(a_invariant)) {
+      if (check_init(a_invariant)) 
+      {
         gsVerboseMsg("The invariant holds for the initial state.\n");
-      } else {
+      } 
+      else 
+      {
         gsMessage("The invariant does not hold for the initial state.\n");
         v_result = false;
       }
-      if ((f_all_violations || v_result)) {
-        if (check_summands(a_invariant)) {
+      if ((f_all_violations || v_result)) 
+      {
+        if (check_summands(a_invariant)) 
+        {
           gsVerboseMsg("The invariant holds for all summands.\n");
-        } else {
+        } 
+        else 
+        {
           gsMessage("The invariant does not hold for all summands.\n");
           v_result = false;
         }
       }
-      if (v_result) {
+      if (v_result) 
+      {
         gsMessage("The invariant holds for this LPS.\n");
-      } else {
+      } 
+      else 
+      {
         gsMessage("The invariant does not hold for this LPS.\n");
       }
 
       return v_result;
     }
+
+} // namespace detail
+} // namespace lps
+} // namespace mcrl2
+

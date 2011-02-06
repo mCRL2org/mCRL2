@@ -451,16 +451,25 @@ class BDD_Prover: public Prover {
     }
 
     /// \brief Returns all the guards on a path in the BDD that leads to a leaf labelled "false", if such a leaf exists.
-    virtual ATermAppl get_counter_example(){
+    virtual ATermAppl get_counter_example()
+    {
       ATermAppl v_result;
 
       update_answers();
       if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes)) {
         core::gsDebugMsg("The formula appears to be satisfiable.\n");
         v_result = get_branch(f_bdd, false);
-      } else {
+      } 
+      else 
+      {
         core::gsDebugMsg("The formula is a contradiction or a tautology.\n");
         v_result = 0;
+      }
+      if (v_result==0)
+      { 
+        throw mcrl2::runtime_error(
+           "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
+           "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
       }
       return v_result;
     }

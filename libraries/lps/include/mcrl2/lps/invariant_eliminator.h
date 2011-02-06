@@ -70,6 +70,12 @@
   /// parameter a_simplify_all is set, the condition of each summand is replaced by the BDD obtained from the prover after
   /// proving that summand's formula.
 
+
+namespace mcrl2 {
+namespace lps {
+namespace detail {
+
+
 class Invariant_Eliminator {
   private:
     mcrl2::data::detail::BDD_Prover f_bdd_prover;
@@ -105,5 +111,8 @@ class Invariant_Eliminator {
               const bool a_no_elimination, 
               const size_t a_summand_number);
 };
+} // namespace detail
+} // namespace lps
+} // namespace mcrl2
 
 #endif

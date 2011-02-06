@@ -64,20 +64,24 @@
   /// parameter a_invariant holds for the initial state and all the generated formulas are tautologies according to the
   /// prover, it is an invariant.
 
+namespace mcrl2 {
+namespace lps {
+namespace detail {
+
 class Invariant_Checker {
   private:
     mcrl2::data::detail::BDD_Prover f_bdd_prover;
     BDD2Dot f_bdd2dot;
-    ATermAppl f_init;
-    ATermList f_summands;
+    process_initializer f_init;
+    action_summand_vector f_summands;
     bool f_counter_example;
     bool f_all_violations;
     std::string f_dot_file_name;
     void print_counter_example();
     void save_dot_file(int a_summand_number);
-    bool check_init(ATermAppl a_invariant);
-    bool check_summand(ATermAppl a_invariant, ATermAppl a_summand, int a_summand_number);
-    bool check_summands(ATermAppl a_invariant);
+    bool check_init(const data::data_expression a_invariant);
+    bool check_summand(const data::data_expression a_invariant, const action_summand a_summand, const size_t a_summand_number);
+    bool check_summands(const data::data_expression a_invariant);
   public:
 
     /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
@@ -97,7 +101,11 @@ class Invariant_Checker {
     ~Invariant_Checker();
 
     /// precondition: the argument passed as parameter a_invariant is a valid expression in internal mCRL2 format
-    bool check_invariant(ATermAppl a_invariant);
+    bool check_invariant(const data::data_expression a_invariant);
 };
+
+} // namespace detail
+} // namespace lps
+} // namespace mcrl2
 
 #endif

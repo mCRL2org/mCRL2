@@ -18,48 +18,19 @@
 #include "mcrl2/core/detail/struct_core.h"
 
 namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace data {
+namespace detail {
+
 /**
  * \brief Converts to textual representation for a boolean
  * \param[in] b the boolean to convert
  * \note for writing to stream consider using std::boolalpha
  **/
-inline const char* bool_to_char_string(bool b) {
+inline const char* bool_to_char_string(bool b) 
+{
   return (b) ? "true" : "false";
 }
 
-inline
-ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
-{
-  f=NULL;
-  ATprotectAppl(&f);
-  return v;
-}
-
-
-// Eventually, these two functions should probably be moved into core
-/**
- * \brief Creates an identifier for the for the ctau action
- **/
-inline ATermAppl make_ctau_act_id() {
-  static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, mcrl2::core::detail::gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, ATtrue)), ATmakeList0()));
-
-  assert(ctau_act_id);
-
-  return ctau_act_id;
-}
-
-/**
- * \brief Creates the ctau action
- **/
-inline ATermAppl make_ctau_action() {
-  static ATermAppl ctau_action = initAtermAppl(ctau_action, mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), ATmakeList0()));
-
-  assert(ctau_action);
-
-  return ctau_action;
-}
     }
   }
 }

@@ -23,6 +23,7 @@
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
+#include "mcrl2/lps/linear_process.h"
 
     /** \brief A class that takes a linear process specification and checks all tau-summands of that LPS for confluence.
         \brief The tau actions of all confluent tau-summands are renamed to ctau.
@@ -126,6 +127,44 @@
 
         If there already is an action named ctau present in the LPS passed as parameter a_lps, an error will be reported. */
 
+
+namespace mcrl2 {
+namespace lps {
+namespace detail {
+
+inline
+ATermAppl initAtermAppl(ATermAppl& f, ATermAppl v)
+{     
+  f=NULL;
+  ATprotectAppl(&f);
+  return v;
+}
+
+/**
+ * \brief Creates an identifier for the for the ctau action 
+ **/
+inline action_label make_ctau_act_id()
+{
+  static ATermAppl ctau_act_id = initAtermAppl(ctau_act_id, mcrl2::core::detail::gsMakeActId(ATmakeAppl0(ATmakeAFun("ctau", 0, ATtrue)), ATmakeList0()));
+
+  assert(ctau_act_id);
+
+  return action_label(ctau_act_id);
+}     
+
+/**   
+ * \brief Creates the ctau action
+ **/  
+inline action make_ctau_action()    
+{
+  static ATermAppl ctau_action = initAtermAppl(ctau_action, mcrl2::core::detail::gsMakeAction(make_ctau_act_id(), ATmakeList0()));
+
+  assert(ctau_action);
+
+  return action(ctau_action);
+}
+
+
 class Confluence_Checker {
   private:
     /// \brief Class that can check if two summands are disjoint.
@@ -164,7 +203,7 @@ class Confluence_Checker {
     size_t f_number_of_summands;
 
     /// \brief An integer array, storing intermediate results per summand.
-    size_t* f_intermediate;
+    std::vector <size_t> f_intermediate;
 
     /// \brief Writes a dot file of the BDD created when checking the confluence of summands a_summand_number_1 and a_summand_number_2.
     void save_dot_file(size_t a_summand_number_1, size_t a_summand_number_2);
@@ -173,17 +212,28 @@ class Confluence_Checker {
     void print_counter_example();
 
     /// \brief Checks the confluence of summand a_summand_1 and a_summand_2
-    bool check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, size_t a_summand_number_1, ATermAppl a_summand_2, size_t a_summand_number_2);
+    bool check_summands(
+                   const data::data_expression a_invariant, 
+                   const action_summand a_summand_1, 
+                   const size_t a_summand_number_1, 
+                   const action_summand a_summand_2, 
+                   const size_t a_summand_number_2);
 
     /// \brief Checks the confluence of summand a_summand concerning all other tau-summands.
-    ATermAppl check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, size_t a_summand_number, bool& a_is_marked);
+    action_summand check_confluence_and_mark_summand(
+                   const data::data_expression a_invariant, 
+                   const action_summand a_summand, 
+                   const size_t a_summand_number, 
+                   bool& a_is_marked);
+
   public:
     /// \brief Constructor that initializes Confluence_Checker::f_lps, Confluence_Checker::f_bdd_prover,
     /// \brief Confluence_Checker::f_generate_invariants and Confluence_Checker::f_dot_file_name.
     /// precondition: the argument passed as parameter a_lps is a valid mCRL2 LPS
     /// precondition: the argument passed as parameter a_time_limit is greater than or equal to 0. If the argument is equal
     /// to 0, no time limit will be enforced
-    Confluence_Checker(
+    Confluence_Checker
+    (
       mcrl2::lps::specification const& a_lps,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
@@ -204,7 +254,10 @@ class Confluence_Checker {
     /// precondition: the argument passed as parameter a_invariant is an expression of sort Bool in internal mCRL2 format
     /// precondition: the argument passed as parameter a_summand_number corresponds with a summand of the LPS for which
     /// confluence must be checked (lowest summand has number 1). If this number is 0 confluence for all summands is checked.
-    ATermAppl check_confluence_and_mark(ATermAppl a_invariant, size_t a_summand_number);
+    specification check_confluence_and_mark(const data::data_expression a_invariant, const size_t a_summand_number);
 };
 
+} // namespace detail
+} // namespace lps
+} // namespace mcrl2
 #endif

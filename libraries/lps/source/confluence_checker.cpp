@@ -11,6 +11,7 @@
 #include <cstdlib>
 #include <cstring>
 #include <string>
+#include <algorithm>
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/aterm_ext.h"
@@ -19,88 +20,93 @@
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/exception.h"
 
+
+namespace mcrl2 {
+namespace lps {
+namespace detail {
+
+
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-// Auxiliary functions ----------------------------------------------------------------------------
+  // Auxiliary functions ----------------------------------------------------------------------------
 
-  bool is_tau_summand(ATermAppl a_summand) {
-    ATermAppl v_multi_action_or_delta = ATAgetArgument(a_summand, 2);
-    if (gsIsMultAct(v_multi_action_or_delta)) {
-      return ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
-    } else {
-      return false;
-    }
-  }
+  atermpp::map < variable,data_expression> get_substitutions_from_assignments(const assignment_list a_assignments) 
+  {
+    atermpp::map < variable,data_expression> v_substitutions;
 
-  bool is_delta_summand(ATermAppl a_summand) {
-    return gsIsDelta(ATAgetArgument(a_summand, 2));
-  }
-
-  ATermList get_substitutions_from_assignments(ATermList a_assignments) {
-    ATermAppl v_assignment;
-    ATermAppl v_variable;
-    ATermAppl v_expression;
-    ATermAppl v_substitution;
-    ATermList v_substitutions = ATmakeList0();
-
-    while (!ATisEmpty(a_assignments)) {
-      v_assignment = ATAgetFirst(a_assignments);
-      v_variable = ATAgetArgument(v_assignment, 0);
-      v_expression = ATAgetArgument(v_assignment, 1);
-      v_substitution = gsMakeSubst_Appl(v_variable, v_expression);
-      v_substitutions = ATinsert(v_substitutions, (ATerm) v_substitution);
-      a_assignments = ATgetNext(a_assignments);
+    for(assignment_list::const_iterator i=a_assignments.begin(); i!=a_assignments.end(); ++i)
+    {
+      v_substitutions[i->lhs()]=i->rhs();
     }
     return v_substitutions;
   }
 
   // ----------------------------------------------------------------------------------------------
 
-  ATermAppl get_subst_equation_from_assignments(
-    ATermList a_variables, ATermList a_assignments_1, ATermList a_assignments_2, ATermList a_substitutions_1, ATermList a_substitutions_2
-  ) {
-    ATermAppl v_result = sort_bool::true_();
-    ATermAppl v_variable;
-    ATermAppl v_assignment_1, v_assignment_2;
-    ATermAppl v_variable_1 = 0, v_variable_2 = 0, v_expression_1 = 0, v_expression_2 = 0;
+  data_expression get_subst_equation_from_assignments(
+              const variable_list a_variables, 
+              assignment_list a_assignments_1, 
+              assignment_list a_assignments_2, 
+              const atermpp::map<variable,data_expression> &a_substitutions_1, 
+              const atermpp::map<variable,data_expression> &a_substitutions_2) 
+  {
+    data_expression v_result = sort_bool::true_();
+    
+    const assignment_list v_assignment_1, v_assignment_2;
+    variable v_variable_1, v_variable_2; 
+    data_expression v_expression_1, v_expression_2;
     bool v_next_1 = true, v_next_2 = true;
 
-    while (!ATisEmpty(a_variables)) {
-      v_variable = ATAgetFirst(a_variables);
-      a_variables = ATgetNext(a_variables);
-      if (!ATisEmpty(a_assignments_1) && v_next_1) {
-        v_assignment_1 = ATAgetFirst(a_assignments_1);
-        a_assignments_1 = ATgetNext(a_assignments_1);
-        v_variable_1 = ATAgetArgument(v_assignment_1, 0);
-        v_expression_1 = ATAgetArgument(v_assignment_1, 1);
-        v_expression_1 = gsSubstValues_Appl(a_substitutions_2, v_expression_1, true);
+    for(variable_list::const_iterator i=a_variables.begin(); i!=a_variables.end(); )
+    {
+      variable v_variable = *i;
+      ++i;
+
+      if (!a_assignments_1.empty() && v_next_1) 
+      {
+        const assignment v_assignment_1 = a_assignments_1.front();
+        a_assignments_1 = pop_front(a_assignments_1);
+        v_variable_1 = v_assignment_1.lhs();
+        v_expression_1 = v_assignment_1.rhs();
+        v_expression_1 = data::substitute_free_variables(v_expression_1,
+                                  data::make_associative_container_substitution(a_substitutions_2));
       }
-      if (!ATisEmpty(a_assignments_2) && v_next_2) {
-        v_assignment_2 = ATAgetFirst(a_assignments_2);
-        a_assignments_2 = ATgetNext(a_assignments_2);
-        v_variable_2 = ATAgetArgument(v_assignment_2, 0);
-        v_expression_2 = ATAgetArgument(v_assignment_2, 1);
-        v_expression_2 = gsSubstValues_Appl(a_substitutions_1, v_expression_2, true);
+      if (!a_assignments_2.empty() && v_next_2) 
+      {
+        const assignment v_assignment_2 = a_assignments_2.front();
+        a_assignments_2 = pop_front(a_assignments_2);
+        v_variable_2 = v_assignment_2.lhs();
+        v_expression_2 = v_assignment_2.rhs();
+        v_expression_2 = data::substitute_free_variables(v_expression_2,
+                                  data::make_associative_container_substitution(a_substitutions_1));
       }
-      while (v_variable != v_variable_1 && v_variable != v_variable_2 && !ATisEmpty(a_variables)) {
-        v_variable = ATAgetFirst(a_variables);
-        a_variables = ATgetNext(a_variables);
+      while (v_variable != v_variable_1 && v_variable != v_variable_2 && i!=a_variables.end()) 
+      {
+        v_variable = *i;
+        ++i;
       }
-      if (v_variable_1 == v_variable_2) {
-        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_expression_2)));
+      if (v_variable_1 == v_variable_2) 
+      {
+        v_result = sort_bool::and_(v_result, equal_to(v_expression_1, v_expression_2));
         v_next_1 = true;
         v_next_2 = true;
-      } else if (v_variable == v_variable_1) {
-        v_variable_1 = gsSubstValues_Appl(a_substitutions_1, v_variable_1, true);
-        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_variable_1)));
+      } 
+      else if (v_variable == v_variable_1) 
+      {
+        v_variable_1 = data::substitute_free_variables(v_variable_1,
+                                  data::make_associative_container_substitution(a_substitutions_1));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(v_expression_1, data_expression(v_variable_1)));
         v_next_1 = true;
         v_next_2 = false;
-      } else if (v_variable == v_variable_2) {
-        v_variable_2 = gsSubstValues_Appl(a_substitutions_2, v_variable_2, true);
+      } 
+      else if (v_variable == v_variable_2) 
+      {
+        v_variable_2 = data::substitute_free_variables(v_variable_2,
+                                  data::make_associative_container_substitution(a_substitutions_2));
         v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_2), data_expression(v_variable_2)));
         v_next_1 = false;
         v_next_2 = true;
@@ -111,147 +117,148 @@ using namespace mcrl2::core::detail;
 
   // ----------------------------------------------------------------------------------------------
 
-  ATermAppl get_equation_from_assignments(ATermList a_variables, ATermList a_assignments_1, ATermList a_assignments_2) {
-    ATermAppl v_result = sort_bool::true_();
-    ATermAppl v_variable;
-    ATermAppl v_assignment_1, v_assignment_2;
-    ATermAppl v_variable_1 = 0, v_variable_2 = 0, v_expression_1 = 0, v_expression_2 = 0;
+  data_expression get_equation_from_assignments(
+                  const variable_list a_variables, 
+                  assignment_list a_assignments_1, 
+                  assignment_list a_assignments_2) 
+  {
+    data_expression v_result = sort_bool::true_();
+    assignment v_assignment_1, v_assignment_2;
     bool v_next_1 = true, v_next_2 = true;
 
-    while (!ATisEmpty(a_variables))
+    for(variable_list::const_iterator i=a_variables.begin(); i!=a_variables.end(); )
     {
-      v_variable = ATAgetFirst(a_variables);
-      a_variables = ATgetNext(a_variables);
-      if (!ATisEmpty(a_assignments_1) && v_next_1) {
-        v_assignment_1 = ATAgetFirst(a_assignments_1);
-        a_assignments_1 = ATgetNext(a_assignments_1);
-        v_variable_1 = ATAgetArgument(v_assignment_1, 0);
-        v_expression_1 = ATAgetArgument(v_assignment_1, 1);
+      variable v_variable_1, v_variable_2;
+      data_expression v_expression_1, v_expression_2;
+      variable v_variable = *i;
+      ++i;
+      if (!a_assignments_1.empty() && v_next_1) 
+      {
+        v_assignment_1 = a_assignments_1.front();
+        a_assignments_1 = pop_front(a_assignments_1);
+        v_variable_1 = v_assignment_1.lhs();
+        v_expression_1 = v_assignment_1.rhs();
       }
-      if (!ATisEmpty(a_assignments_2) && v_next_2) {
-        v_assignment_2 = ATAgetFirst(a_assignments_2);
-        a_assignments_2 = ATgetNext(a_assignments_2);
-        v_variable_2 = ATAgetArgument(v_assignment_2, 0);
-        v_expression_2 = ATAgetArgument(v_assignment_2, 1);
+      if (!a_assignments_2.empty() && v_next_2) 
+      {
+        v_assignment_2 = a_assignments_2.front();
+        a_assignments_2 = pop_front(a_assignments_2);
+        v_variable_2 = v_assignment_2.lhs();
+        v_expression_2 = v_assignment_2.rhs();
       }
-      while (v_variable != v_variable_1 && v_variable != v_variable_2 && !ATisEmpty(a_variables)) {
-        v_variable = ATAgetFirst(a_variables);
-        a_variables = ATgetNext(a_variables);
+      while (v_variable != v_variable_1 && v_variable != v_variable_2 && i!=a_variables.end()) 
+      {
+        v_variable = *i;
+        ++i;
       }
-      if (v_variable_1 == v_variable_2) {
+      if (v_variable_1 == v_variable_2) 
+      {
         v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_expression_2)));
         v_next_1 = true;
         v_next_2 = true;
-      } else if (v_variable == v_variable_1) {
-        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_variable_1)));
+      } 
+      else if (v_variable == v_variable_1) 
+      {
+        v_result = sort_bool::and_(v_result, equal_to(v_expression_1, data_expression(v_variable_1)));
         v_next_1 = true;
         v_next_2 = false;
-      } else if (v_variable == v_variable_2) {
-        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_2), data_expression(v_variable_2)));
+      } 
+      else if (v_variable == v_variable_2) 
+      {
+        v_result = sort_bool::and_(v_result, equal_to(v_expression_2, data_expression(v_variable_2)));
         v_next_1 = false;
         v_next_2 = true;
       }
     }
-    assert(ATisEmpty(a_assignments_1)); // If this is not the case, the assignments do not have the
-    assert(ATisEmpty(a_assignments_2)); // same order as the list of variables. This means that some equations
+    assert(a_assignments_1.empty()); // If this is not the case, the assignments do not have the
+    assert(a_assignments_2.empty()); // same order as the list of variables. This means that some equations
                                         // have not been generated.
     return v_result;
   }
 
   // ----------------------------------------------------------------------------------------------
 
-  ATermAppl get_subst_equation_from_actions(ATermList a_actions, ATermList a_substitutions) {
-    ATermAppl v_result = sort_bool::true_();
-    ATermAppl v_action;
-    ATermList v_expressions;
-    ATermAppl v_expression;
-    ATermAppl v_subst_expression;
+  data_expression get_subst_equation_from_actions(
+                const action_list a_actions, 
+                const atermpp::map<variable,data_expression> &a_substitutions) 
+  {
+    data_expression v_result = sort_bool::true_();
 
-    while (!ATisEmpty(a_actions)) {
-      v_action = ATAgetFirst(a_actions);
-      v_expressions = ATLgetArgument(v_action, 1);
-      while (!ATisEmpty(v_expressions)) {
-        v_expression = ATAgetFirst(v_expressions);
-        v_subst_expression = gsSubstValues_Appl(a_substitutions, v_expression, true);
-        v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression), data_expression(v_subst_expression)));
-        v_expressions = ATgetNext(v_expressions);
+    for(action_list::const_iterator i=a_actions.begin(); i!=a_actions.end(); ++i)
+    {
+      const data_expression_list v_expressions = i->arguments(); 
+      while (!v_expressions.empty()) 
+      for(data_expression_list::const_iterator j=v_expressions.begin(); j!=v_expressions.end(); ++j)
+      {
+        const data_expression v_subst_expression = data::substitute_free_variables(*j,
+                                  data::make_associative_container_substitution(a_substitutions));
+        v_result = sort_bool::and_(data_expression(v_result), equal_to(*j, v_subst_expression));
       }
-      a_actions = ATgetNext(a_actions);
     }
     return v_result;
   }
 
   // ----------------------------------------------------------------------------------------------
 
-  ATermAppl get_confluence_condition(ATermAppl a_invariant, ATermAppl a_summand_1, ATermAppl a_summand_2, ATermList a_variables)
+  data_expression get_confluence_condition(
+                const data_expression a_invariant, 
+                const action_summand a_summand_1, 
+                const action_summand a_summand_2, 
+                const variable_list a_variables)
   {
-    assert(is_tau_summand(a_summand_1));
-    assert(!is_delta_summand(a_summand_2));
-    ATermAppl v_rhs;
+    assert(a_summand_1.is_tau());
 
-    ATermAppl v_condition_1 = ATAgetArgument(a_summand_1, 1);
-    ATermList v_assignments_1 = ATLgetArgument(a_summand_1, 4);
-    ATermList v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
-    ATermAppl v_condition_2 = ATAgetArgument(a_summand_2, 1);
-    ATermAppl v_lhs = sort_bool::and_(data_expression(v_condition_1), data_expression(v_condition_2));
-    v_lhs = sort_bool::and_(data_expression(v_lhs), data_expression(a_invariant));
-    ATermList v_assignments_2 = ATLgetArgument(a_summand_2, 4);
-    ATermList v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
-    ATermAppl v_subst_condition_1 = gsSubstValues_Appl(v_substitutions_2, v_condition_1, true);
-    ATermAppl v_subst_condition_2 = gsSubstValues_Appl(v_substitutions_1, v_condition_2, true);
-    ATermAppl v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
+    const data_expression v_condition_1 = a_summand_1.condition();
+    const assignment_list v_assignments_1 = a_summand_1.assignments();
 
-    ATermList v_actions = ATLgetArgument(ATAgetArgument(a_summand_2, 2), 0);
-    if (ATisEmpty(v_actions)) {
+    atermpp::map < variable,data_expression> v_substitutions_1 = get_substitutions_from_assignments(v_assignments_1);
+    const data_expression v_condition_2 = a_summand_2.condition();
+    const data_expression v_lhs = sort_bool::and_(sort_bool::and_(v_condition_1, v_condition_2), a_invariant);
+    const assignment_list v_assignments_2 = a_summand_2.assignments();
+
+    atermpp::map < variable,data_expression> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
+    const data_expression v_subst_condition_1 = data::substitute_free_variables(v_condition_1,
+                                  data::make_associative_container_substitution(v_substitutions_2));
+    const data_expression v_subst_condition_2 = data::substitute_free_variables(v_condition_2,
+                                  data::make_associative_container_substitution(v_substitutions_1));
+    const data_expression v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
+
+    const action_list v_actions =a_summand_2.multi_action().actions();
+    data_expression v_rhs;
+
+    if (v_actions.empty()) 
+    {
       // tau-summand
-      ATermAppl v_equation = get_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2);
-      v_rhs = sort_bool::and_(data_expression(v_subst_condition_1), data_expression(v_subst_condition_2));
-      v_rhs = sort_bool::and_(data_expression(v_rhs), data_expression(v_subst_equation));
-      v_rhs = sort_bool::or_(data_expression(v_equation), data_expression(v_rhs));
-    } else {
+      const data_expression  v_equation = get_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2);
+      v_rhs = sort_bool::and_(v_subst_condition_1, v_subst_condition_2);
+      v_rhs = sort_bool::and_(v_rhs, v_subst_equation);
+      v_rhs = sort_bool::or_(v_equation, v_rhs);
+    } 
+    else 
+    {
       // non-tau-summand
-      ATermAppl v_actions_equation = get_subst_equation_from_actions(v_actions, v_substitutions_1);
-      v_rhs = sort_bool::and_(data_expression(v_subst_condition_1), data_expression(v_subst_condition_2));
-      v_rhs = sort_bool::and_(data_expression(v_rhs), data_expression(v_actions_equation));
-      v_rhs = sort_bool::and_(data_expression(v_rhs), data_expression(v_subst_equation));
+      const data_expression v_actions_equation = get_subst_equation_from_actions(v_actions, v_substitutions_1);
+      v_rhs = sort_bool::and_(v_subst_condition_1, v_subst_condition_2);
+      v_rhs = sort_bool::and_(v_rhs, v_actions_equation);
+      v_rhs = sort_bool::and_(v_rhs, data_expression(v_subst_equation));
     }
-    return sort_bool::implies(data_expression(v_lhs), data_expression(v_rhs));
+    return sort_bool::implies(v_lhs, v_rhs);
   }
 
   // --------------------------------------------------------------------------------------------
 
-  bool has_ctau_action(mcrl2::lps::specification const& a_lps) {
-    ATermList v_action_specification;
-    ATermAppl v_action;
-    ATermAppl v_ctau_action;
-
-    v_ctau_action = make_ctau_act_id();
-    v_action_specification = a_lps.action_labels();
-    while (!ATisEmpty(v_action_specification)) {
-      v_action = ATAgetFirst(v_action_specification);
-      if (v_action == v_ctau_action) {
-        return true;
-      }
-      v_action_specification = ATgetNext(v_action_specification);
-    }
-    return false;
+  bool has_ctau_action(const specification &a_lps) 
+  {
+    const action_label_list v_action_specification = a_lps.action_labels();
+    return std::find(v_action_specification.begin(),v_action_specification.end(),make_ctau_act_id())!=v_action_specification.end();
   }
 
-  // --------------------------------------------------------------------------------------------
-
-  ATermAppl add_ctau_action(ATermAppl a_lps) {
-    ATermList v_action_specification;
-
-    v_action_specification = ATLgetArgument(ATAgetArgument(a_lps, 1), 0);
-    v_action_specification = ATinsert(v_action_specification, (ATerm) make_ctau_act_id());
-    a_lps = ATsetArgument(a_lps, (ATerm) gsMakeActSpec(v_action_specification), 1);
-    return a_lps;
-  }
 
 // Class Confluence_Checker -----------------------------------------------------------------------
   // Class Confluence_Checker - Functions declared private ----------------------------------------
 
-    void Confluence_Checker::save_dot_file(size_t a_summand_number_1, size_t a_summand_number_2) {
+    void Confluence_Checker::save_dot_file(size_t a_summand_number_1, size_t a_summand_number_2) 
+    {
       if (!f_dot_file_name.empty()) 
       {
         std::ostringstream v_file_name(f_dot_file_name);
@@ -264,79 +271,101 @@ using namespace mcrl2::core::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    void Confluence_Checker::print_counter_example() {
-      if (f_counter_example) {
-        ATermAppl v_counter_example;
-
-        v_counter_example = f_bdd_prover.get_counter_example();
-        if (v_counter_example == 0) {
-          throw mcrl2::runtime_error(
-            "Cannot print counter example. This is probably caused by an abrupt stop of the\n"
-            "conversion from expression to EQ-BDD. This typically occurs when a time limit is set."
-          );
-        } else {
-          gsMessage("  Counter example: %P\n", v_counter_example);
-        }
+    void Confluence_Checker::print_counter_example() 
+    {
+      if (f_counter_example) 
+      {
+        const data_expression v_counter_example(f_bdd_prover.get_counter_example());
+        std::cerr << "  Counter example: " << pp(v_counter_example) << "\n";
       }
     }
 
     // --------------------------------------------------------------------------------------------
 
-    bool Confluence_Checker::check_summands(ATermAppl a_invariant, ATermAppl a_summand_1, size_t a_summand_number_1, ATermAppl a_summand_2, size_t a_summand_number_2) {
-      assert(is_tau_summand(a_summand_1));
-      ATermList v_variables = ATLgetArgument(ATAgetArgument(specification_to_aterm(f_lps), 3), 0);
+    bool Confluence_Checker::check_summands(
+                   const data_expression a_invariant,
+                   const action_summand a_summand_1,
+                   const size_t a_summand_number_1,
+                   const action_summand a_summand_2,
+                   const size_t a_summand_number_2)
+    {
+      assert(a_summand_1.is_tau());
+      
+      const variable_list v_variables = f_lps.process().process_parameters(); 
       bool v_is_confluent = true;
 
-      if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2)) {
+      if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2)) 
+      {
         gsMessage(":");
-      } else {
-        if (!is_delta_summand(a_summand_2)) {
-          ATermAppl v_condition = get_confluence_condition(a_invariant, a_summand_1, a_summand_2, v_variables);
-          f_bdd_prover.set_formula(v_condition);
-          if (f_bdd_prover.is_tautology() == answer_yes) {
-            gsMessage("+");
-          } else {
-            if (f_generate_invariants) {
-              ATermAppl v_new_invariant = f_bdd_prover.get_bdd();
-              gsVerboseMsg("\nChecking invariant: %P\n", v_new_invariant);
-              if (f_invariant_checker.check_invariant(v_new_invariant)) {
-                gsVerboseMsg("Invariant holds\n");
-                gsMessage("i");
-              } else {
-                gsVerboseMsg("Invariant doesn't hold\n");
-                v_is_confluent = false;
-                if (f_check_all) {
-                  gsMessage("-");
-                } else {
-                  gsMessage("Not confluent with summand %d.", a_summand_number_2);
-                }
-                print_counter_example();
-                save_dot_file(a_summand_number_1, a_summand_number_2);
-              }
-            } else {
+      } 
+      else 
+      {
+        const data_expression v_condition = get_confluence_condition(a_invariant, a_summand_1, a_summand_2, v_variables);
+        f_bdd_prover.set_formula(v_condition);
+        if (f_bdd_prover.is_tautology() == answer_yes) 
+        {
+          gsMessage("+");
+        } 
+        else 
+        {
+          if (f_generate_invariants) 
+          {
+            const data_expression v_new_invariant(f_bdd_prover.get_bdd());
+            if (core::gsVerbose)
+            { 
+              std::cerr << "\nChecking invariant: " << pp(v_new_invariant) << "\n";
+            }
+            if (f_invariant_checker.check_invariant(v_new_invariant)) 
+            {
+              gsVerboseMsg("Invariant holds\n");
+              gsMessage("i");
+            } 
+            else 
+            {
+              gsVerboseMsg("Invariant doesn't hold\n");
               v_is_confluent = false;
-              if (f_check_all) {
+              if (f_check_all) 
+              {
                 gsMessage("-");
-              } else {
+              } 
+              else 
+              {
                 gsMessage("Not confluent with summand %d.", a_summand_number_2);
               }
               print_counter_example();
               save_dot_file(a_summand_number_1, a_summand_number_2);
             }
+          } 
+          else 
+          {
+            v_is_confluent = false;
+            if (f_check_all) 
+            {
+              gsMessage("-");
+            } 
+            else 
+            {
+              gsMessage("Not confluent with summand %d.", a_summand_number_2);
+            }
+            print_counter_example();
+            save_dot_file(a_summand_number_1, a_summand_number_2);
           }
-        } else {
-          gsMessage("!");
         }
+        
       }
       return v_is_confluent;
     }
 
     // --------------------------------------------------------------------------------------------
 
-    ATermAppl Confluence_Checker::check_confluence_and_mark_summand(ATermAppl a_invariant, ATermAppl a_summand, size_t a_summand_number, bool& a_is_marked) {
-      assert(is_tau_summand(a_summand));
-      ATermList v_summands = ATLgetArgument(ATAgetArgument(specification_to_aterm(f_lps), 3), 1);
-      ATermAppl v_summand, v_marked_summand;
+    action_summand Confluence_Checker::check_confluence_and_mark_summand(
+                   const data_expression a_invariant,
+                   const action_summand a_summand,
+                   const size_t a_summand_number,
+                   bool& a_is_marked)
+    {
+      assert(a_summand.is_tau());
+      const action_summand_vector v_summands = f_lps.process().action_summands();
       size_t v_summand_number = 1;
       bool v_is_confluent = true;
       bool v_current_summands_are_confluent;
@@ -346,57 +375,83 @@ using namespace mcrl2::core::detail;
       // which requires quantification. Otherwise tau.a+tau.b will be designated
       // tau-confluent, if linearised with summand clustering.
 
-      ATermList a_summand_sum_variables=ATLgetArgument(a_summand,0);
-      if (!ATisEmpty(a_summand_sum_variables))
-      { v_is_confluent = false;
+      const variable_list a_summand_sum_variables=a_summand.summation_variables();
+      if (!a_summand_sum_variables.empty())
+      { 
+        v_is_confluent = false;
         gsMessage("Summand %d is not proven confluent because it contains a sum operator.",a_summand_number);
       }
 
-      while (!ATisEmpty(v_summands) && (v_is_confluent || f_check_all)) {
-        v_summand = ATAgetFirst(v_summands);
-        v_summands = ATgetNext(v_summands);
+      for(action_summand_vector::const_iterator i=v_summands.begin(); 
+                 i!=v_summands.end() && (v_is_confluent || f_check_all); ++i)
+      {
+        const action_summand v_summand = *i;
 
-        if (v_summand_number < a_summand_number) {
-          if (f_intermediate[v_summand_number] > a_summand_number) {
+        if (v_summand_number < a_summand_number) 
+        {
+          if (f_intermediate[v_summand_number] > a_summand_number) 
+          {
             gsMessage(".");
             v_summand_number++;
-          } else {
-            if (f_intermediate[v_summand_number] == a_summand_number) {
-              if (f_check_all) {
+          } 
+          else 
+          {
+            if (f_intermediate[v_summand_number] == a_summand_number) 
+            {
+              if (f_check_all) 
+              {
                 gsMessage("-");
-              } else {
+              } 
+              else 
+              {
                 gsMessage("Not confluent with summand %d.", v_summand_number);
               }
               v_is_confluent = false;
-            } else {
+            } 
+            else 
+            {
               v_current_summands_are_confluent = check_summands(a_invariant, a_summand, a_summand_number, v_summand, v_summand_number);
-              if (v_current_summands_are_confluent) {
+              if (v_current_summands_are_confluent) 
+              {
                 v_summand_number++;
-              } else {
+              } 
+              else 
+              {
                 v_is_confluent = false;
               }
             }
           }
-        } else {
+        } 
+        else 
+        {
           v_current_summands_are_confluent = check_summands(a_invariant, a_summand, a_summand_number, v_summand, v_summand_number);
-          if (v_current_summands_are_confluent) {
+          if (v_current_summands_are_confluent) 
+          {
             v_summand_number++;
-          } else {
+          } 
+          else 
+          {
             v_is_confluent = false;
           }
         }
       }
 
-      if (!f_check_all) {
+      if (!f_check_all) 
+      {
         f_intermediate[a_summand_number] = v_summand_number;
       }
 
-      if (v_is_confluent) {
+      if (v_is_confluent) 
+      {
         gsMessage("Confluent with all summands.");
         a_is_marked = true;
-        v_marked_summand = ATsetArgument(a_summand, (ATerm) gsMakeMultAct(ATmakeList1((ATerm) make_ctau_action())), 2);
-        return v_marked_summand;
-      } else {
+        return action_summand(a_summand.summation_variables(),
+                              a_summand.condition(),
+                              multi_action(make_ctau_action()),
+                              a_summand.assignments());
+      } 
+      else 
+      {
         return a_summand;
       }
     }
@@ -424,7 +479,9 @@ using namespace mcrl2::core::detail;
       f_counter_example(a_counter_example),
       f_dot_file_name(a_dot_file_name),
       f_generate_invariants(a_generate_invariants)
-    { if (has_ctau_action(a_lps)) {
+    { 
+      if (has_ctau_action(a_lps)) 
+      {
         throw mcrl2::runtime_error("An action named \'ctau\' already exists.\n");
       }
     }
@@ -436,49 +493,49 @@ using namespace mcrl2::core::detail;
 
     // --------------------------------------------------------------------------------------------
 
-    ATermAppl Confluence_Checker::check_confluence_and_mark(ATermAppl a_invariant, size_t a_summand_number) {
-      ATermAppl v_process_equation = linear_process_to_aterm(f_lps.process()); //ATAgetArgument(f_lps, 3);
-      ATermList v_summands = ATLgetArgument(v_process_equation, 1);
-      ATermAppl v_summand;
-      ATermList v_marked_summands = ATmakeList0();
-      ATermAppl v_marked_summand;
-      ATermAppl v_multi_actions_or_delta;
-      ATermList v_multi_actions;
+    specification Confluence_Checker::check_confluence_and_mark(const data_expression a_invariant, const size_t a_summand_number)
+    {
+      const linear_process v_process_equation = f_lps.process(); 
+      action_summand_vector v_summands = v_process_equation.action_summands();
       bool v_is_marked = false;
       size_t v_summand_number = 1;
 
-      f_number_of_summands = ATgetLength(v_summands);
-      f_intermediate = (size_t*) calloc(f_number_of_summands + 2, sizeof(size_t));
-      if (f_intermediate == 0) {
-        gsErrorMsg("Insufficient memory.\n");
-      }
+      f_number_of_summands = v_summands.size();
+      f_intermediate = std::vector<size_t>(f_number_of_summands + 2, 0);
 
-      while (!ATisEmpty(v_summands)) {
-        v_summand = ATAgetFirst(v_summands);
-        v_marked_summand = v_summand;
-        if ((a_summand_number == v_summand_number) || (a_summand_number == 0)) {
-          if (is_tau_summand(v_summand)) {
-            v_multi_actions_or_delta = ATAgetArgument(v_summand, 2);
-            v_multi_actions = ATLgetArgument(v_multi_actions_or_delta, 0);
+      for(action_summand_vector::iterator i=v_summands.begin(); i!=v_summands.end(); ++i)
+      {
+        const action_summand v_summand = *i;
+        if ((a_summand_number == v_summand_number) || (a_summand_number == 0)) 
+        {
+          if (v_summand.is_tau()) 
+          {
             gsMessage("tau-summand %2d: ", v_summand_number);
-            v_marked_summand = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
+            *i = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
             gsMessage("\n");
           }
         }
-        v_marked_summands = ATinsert(v_marked_summands, (ATerm) v_marked_summand);
-        v_summands = ATgetNext(v_summands);
         v_summand_number++;
       }
-      v_marked_summands = ATreverse(v_marked_summands);
-      v_process_equation = ATsetArgument(v_process_equation, (ATerm) v_marked_summands, 1);
-      ATermAppl v_lps = ATsetArgument(specification_to_aterm(f_lps), (ATerm) v_process_equation, 3);
+      const linear_process new_process_equation(
+                              v_process_equation.process_parameters(),
+                              v_process_equation.deadlock_summands(),
+                              v_summands); 
 
-      if (v_is_marked && !has_ctau_action(f_lps)) {
-        v_lps = add_ctau_action(v_lps);
+      action_label_list v_act_decls=f_lps.action_labels();
+      if (v_is_marked && !has_ctau_action(f_lps)) 
+      {
+        v_act_decls = push_front(v_act_decls,make_ctau_act_id());
       }
 
-      free(f_intermediate);
-      f_intermediate = 0;
+      specification v_lps(f_lps.data(),v_act_decls,f_lps.global_variables(),new_process_equation,f_lps.initial_process());
+
+      f_intermediate = std::vector<size_t>();
 
       return v_lps;
     }
+
+} // namespace detail
+} // namespace lps
+} // namespace mcrl2
+

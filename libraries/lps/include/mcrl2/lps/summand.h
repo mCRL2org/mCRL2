@@ -217,17 +217,6 @@ class summand: public atermpp::aterm_appl
     /// \return True if the multi-action corresponding to this summand is equal to tau.
     bool is_tau() const
     {
-      // return !is_delta() && actions().size() == 1 && core::detail::gsIsTau(actions().front());
-
-      /*
-      // Written by Luc Engelen; no idea what it does.
-      ATermAppl v_multi_action_or_delta = ATAgetArgument(*this, 2);
-      if (gsIsMultAct(v_multi_action_or_delta)) {
-        return ATisEmpty(ATLgetArgument(v_multi_action_or_delta, 0));
-      } else {
-        return false;
-      }
-      */
       return !is_delta() && actions().empty();
     }
 
