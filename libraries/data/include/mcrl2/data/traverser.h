@@ -9,6 +9,11 @@
 /// \file mcrl2/data/traverser.h
 /// \brief add your file description here.
 
+// To avoid circular header dependency problems
+#ifndef MCRL2_DATA_DATA_SPECIFICATION_H
+#include "mcrl2/data/data_specification.h"
+#endif
+
 #ifndef MCRL2_DATA_TRAVERSER_H
 #define MCRL2_DATA_TRAVERSER_H
 

@@ -167,7 +167,7 @@ namespace mcrl2 {
 
                 const data_expression body(implement(expression.body()));
                 const atermpp::term_list< variable > free_variables = atermpp::convert< atermpp::term_list< variable > >
-                                                        (implement(find_free_variables(expression, bound_variables)));
+                                                        (implement(find_free_variables_with_bound(expression, bound_variables)));
 
                 function_sort lambdaAt_function_sort(make_sort_range(bound_variables), sort_expression(body.sort()));
                 if (!free_variables.empty())

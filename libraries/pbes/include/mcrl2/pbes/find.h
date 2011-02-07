@@ -23,11 +23,103 @@
 #include "mcrl2/pbes/detail/pbes_free_variable_finder.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/traverser.h"
+#include "mcrl2/pbes/add_binding.h"
 #include "mcrl2/exception.h"
                                  
 namespace mcrl2 {                
                                  
 namespace pbes_system {          
+
+//--- start generated pbes_system find code ---//
+#ifdef MCRL2_NEW_FIND_VARIABLES
+  /// \brief Returns all variables that occur in an object
+  /// \param[in] x an object containing variables
+  /// \param[in,out] o an output iterator to which all variables occurring in x are written.
+  /// \return All variables that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_variables(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_variables_traverser<pbes_system::traverser>(o)(x);
+  }
+
+  /// \brief Returns all variables that occur in an object
+  /// \param[in] x an object containing variables
+  /// \return All variables that occur in the object x
+  template <typename T>
+  std::set<data::variable> find_variables(const T& x)
+  {
+    std::set<data::variable> result;
+    pbes_system::find_variables(x, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \brief Returns all variables that occur in an object
+  /// \param[in] x an object containing variables
+  /// \param[in,out] o an output iterator to which all variables occurring in x are added.
+  /// \return All free variables that occur in the object x
+  template <typename T, typename OutputIterator>
+  void find_free_variables(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_free_variables_traverser<pbes_system::variable_traverser, pbes_system::add_data_variable_binding>(o)(x);
+  }
+
+  /// \brief Returns all variables that occur in an object
+  /// \param[in] x an object containing variables
+  /// \param[in,out] o an output iterator to which all variables occurring in x are written.
+  /// \param[in] bound a container of variables
+  /// \return All free variables that occur in the object x
+  template <typename T, typename OutputIterator, typename VariableContainer>
+  void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
+  {
+    data::detail::make_find_free_variables_traverser<pbes_system::variable_traverser, pbes_system::add_data_variable_binding>(o, bound)(x);
+  }
+
+  /// \brief Returns all variables that occur in an object
+  /// \param[in] x an object containing variables
+  /// \return All free variables that occur in the object x
+  template <typename T>
+  std::set<data::variable> find_free_variables(const T& x)
+  {
+    std::set<data::variable> result;
+    pbes_system::find_free_variables(x, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \brief Returns all variables that occur in an object
+  /// \param[in] x an object containing variables
+  /// \param[in] bound a bound a container of variables
+  /// \return All free variables that occur in the object x
+  template <typename T, typename VariableContainer>
+  std::set<data::variable> find_free_variables_with_bound(const T& x, VariableContainer const& bound)
+  {
+    std::set<data::variable> result;
+    pbes_system::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
+    return result;
+  }
+
+  /// \brief Returns all identifiers that occur in an object
+  /// \param[in] x an object containing identifiers
+  /// \param[in,out] o an output iterator to which all identifiers occurring in x are written.
+  /// \return All identifiers that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_identifiers(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_identifiers_traverser<pbes_system::traverser>(o)(x);
+  }
+  
+  /// \brief Returns all identifiers that occur in an object
+  /// \param[in] x an object containing identifiers
+  /// \return All identifiers that occur in the object x
+  template <typename T>
+  std::set<core::identifier> find_identifiers(const T& x)
+  {
+    std::set<core::identifier> result;
+    pbes_system::find_identifiers(x, std::inserter(result, result.end()), bound);
+    return result;
+  }
+ 
+#endif // MCRL2_NEW_FIND_VARIABLES
+//--- end generated pbes_system find code ---//
 
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions

@@ -64,7 +64,8 @@ SUBSTITUTE_FUNCTION_TEXT = '''template <typename T, typename Substitution>
   }
 '''
 
-FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occur in an object
+FIND_VARIABLES_FUNCTION_TEXT = '''#ifdef MCRL2_NEW_FIND_VARIABLES
+  /// \\\\brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are written.
   /// \\\\return All variables that occur in the term x
@@ -90,7 +91,7 @@ FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occ
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
   /// \\\\return All free variables that occur in the object x
   template <typename T, typename OutputIterator>
-  void find_free_variables(const T& x, OutputIterator o, typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
+  void find_free_variables(const T& x, OutputIterator o)
   {
     data::detail::make_find_free_variables_traverser<NAMESPACE::variable_traverser, NAMESPACE::add_data_variable_binding>(o)(x);
   }
@@ -101,7 +102,7 @@ FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occ
   /// \param[in] bound a container of variables
   /// \\\\return All free variables that occur in the object x
   template <typename T, typename OutputIterator, typename VariableContainer>
-  void find_free_variables(const T& x, OutputIterator o, const VariableContainer& bound)
+  void find_free_variables_with_bound(const T& x, OutputIterator o, const VariableContainer& bound)
   {
     data::detail::make_find_free_variables_traverser<NAMESPACE::variable_traverser, NAMESPACE::add_data_variable_binding>(o, bound)(x);
   }
@@ -122,12 +123,35 @@ FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occ
   /// \param[in] bound a bound a container of variables
   /// \\\\return All free variables that occur in the object x
   template <typename T, typename VariableContainer>
-  std::set<data::variable> find_free_variables(const T& x, VariableContainer const& bound, typename atermpp::detail::enable_if_container<VariableContainer, data::variable>::type* = 0)
+  std::set<data::variable> find_free_variables_with_bound(const T& x, VariableContainer const& bound)
   {
     std::set<data::variable> result;
-    NAMESPACE::find_free_variables(x, std::inserter(result, result.end()), bound);
+    NAMESPACE::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
+
+  /// \\\\brief Returns all identifiers that occur in an object
+  /// \param[in] x an object containing identifiers
+  /// \param[in,out] o an output iterator to which all identifiers occurring in x are written.
+  /// \\\\return All identifiers that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_identifiers(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_identifiers_traverser<NAMESPACE::traverser>(o)(x);
+  }
+  
+  /// \\\\brief Returns all identifiers that occur in an object
+  /// \param[in] x an object containing identifiers
+  /// \\\\return All identifiers that occur in the object x
+  template <typename T>
+  std::set<core::identifier> find_identifiers(const T& x)
+  {
+    std::set<core::identifier> result;
+    NAMESPACE::find_identifiers(x, std::inserter(result, result.end()), bound);
+    return result;
+  }
+ 
+#endif // MCRL2_NEW_FIND_VARIABLES
 '''
 
 def generate_code(filename, namespace, label, text):
@@ -148,6 +172,7 @@ def generate_substitute_functions():
     generate_code('../../process/include/mcrl2/process/substitute.h'  , 'process'         , 'replace', SUBSTITUTE_FUNCTION_TEXT)
 
 def generate_find_variable_functions():
+    generate_code('../../data/include/mcrl2/data/find.h'        , 'data'            , 'find', FIND_VARIABLES_FUNCTION_TEXT)
     generate_code('../../lps/include/mcrl2/lps/find.h'          , 'lps'             , 'find', FIND_VARIABLES_FUNCTION_TEXT)
     generate_code('../../lps/include/mcrl2/modal_formula/find.h', 'action_formulas' , 'find', FIND_VARIABLES_FUNCTION_TEXT)
     generate_code('../../lps/include/mcrl2/modal_formula/find.h', 'regular_formulas', 'find', FIND_VARIABLES_FUNCTION_TEXT)

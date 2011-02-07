@@ -78,4 +78,8 @@ template <typename T, typename Substitution>
   }
 //--- end generated process replace code ---//
 
+} // namespace process
+
+} // namespace mcrl2
+
 #endif // MCRL2_PROCESS_SUBSTITUTE_H
