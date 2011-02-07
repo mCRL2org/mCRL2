@@ -42,20 +42,17 @@ const std::string case_3(
 
 static bool check_for_ctau(lps::specification const& s)  // s1 is an lps.
 {
-  ATermList v_summands = static_cast< ATermList >(s.process().summands());
+  const action_summand_vector v_summands = s.process().action_summands();
 
-  for( ;  !ATisEmpty(v_summands) ; v_summands=ATgetNext(v_summands))
-  { ATermAppl v_summand=ATAgetFirst(v_summands);
-    ATermAppl v_multi_action_or_delta = ATAgetArgument(v_summand, 2);
-    if (mcrl2::core::detail::gsIsMultAct(v_multi_action_or_delta))
-    {
-      ATermList v_actions=ATLgetArgument(v_multi_action_or_delta, 0);
-      for( ; !ATisEmpty(v_actions) ; v_actions=ATgetNext(v_actions))
-      { ATermAppl v_action=ATAgetFirst(v_actions);
-        char *v_actionname=ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(v_action,0),0)));
-        if (strcmp(v_actionname,"ctau")==0)
-        { return true;
-        }
+  for(action_summand_vector::const_iterator i=v_summands.begin(); i!=v_summands.end(); ++i) 
+  { 
+    const action_list al=i->multi_action().actions();
+    if (al.size()==1)
+    { 
+      const action_label lab=al.front().label();
+      if (lab.name()=="ctau")
+      { 
+        return true;
       }
     }
   }
