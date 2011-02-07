@@ -11,6 +11,7 @@
 
 import os
 import re
+from optparse import OptionParser
 from path import *
 
 TOOLS = '''
@@ -90,21 +91,46 @@ def process_authors(filename):
   text = re.compile(r'^(Implemented by .*);', re.M).sub(r'\1, with contributions from', text)
   path(filename).write_text(text)
 
-# create subdirectory output/User_manual if it doesn't exist
-if not os.path.exists('output/User_manual'):
-    os.makedirs('output/User_manual')
+def main():
+    usage = "usage: %prog [options]"
+    parser = OptionParser(usage)
+    parser.add_option("-t", "--tooldir", dest="tooldir", help="the tools directory")
+    parser.add_option("-g", "--generate-pages", action="store_true", help="generate manual pages for selected tools")
+    parser.add_option("-i", "--import-pages", action="store_false", help="import manual pages into mediawiki")
+    parser.add_option("-u", "--user", dest="user", help="the mediawiki user name")
+    (options, args) = parser.parse_args()
 
-# generate tool pages
-for tool in TOOLS.split():
-    filename = 'output/User_manual%s%s' % (os.sep, tool)
-    os.system('..%sstage%s%s --generate-wiki-page > %s' % (os.sep, os.sep, tool, filename))
-    process_authors(filename)
+    # create subdirectory output/User_manual if it doesn't exist
+    if not os.path.exists('output/User_manual'):
+        os.makedirs('output/User_manual')
 
-# update tool pages with custom additions
-for tool in TOOLS.split():
-    filename = 'output/User_manual%s%s' % (os.sep, tool)
-    manual = path(filename).text()
-    if extended_short_description.has_key(tool):
-        manual = re.compile(r'(== Short Description ==.*)(== Options ==)', re.S).sub(r'\1' + extended_short_description[tool] + r'\2', manual)
-        path(filename).write_text(manual)
+    if options.generate_pages:
+        # generate tool pages
+        for toolname in TOOLS.split():
+            filename = 'output/User_manual%s%s' % (os.sep, toolname)
+            if options.tooldir == None:
+                tool = toolname
+            else:
+                tool = path(options.tooldir) / toolname
+            print tool
+            os.system('%s --generate-wiki-page > %s' % (tool, filename))
+            process_authors(filename)
+        
+        # update tool pages with custom additions
+        for toolname in TOOLS.split():
+            filename = 'output/User_manual%s%s' % (os.sep, toolname)
+            manual = path(filename).text()
+            if extended_short_description.has_key(toolname):
+                manual = re.compile(r'(== Short Description ==.*)(== Options ==)', re.S).sub(r'\1' + extended_short_description[tool] + r'\2', manual)
+                path(filename).write_text(manual)
 
+        # import changes into mediawiki
+        if options.import_pages:
+            os.chdir('output')
+            for file in path('.').walkfiles():
+                file = re.sub(r'^\.\/', '', file)
+                cmd = 'php /var/www/win/mcrl2/wiki/maintenance/importTextFile.php --user %s --comment update --title %s %s' % (options.user, file, file)
+                os.system(cmd)
+
+if __name__ == '__main__':
+    main()
