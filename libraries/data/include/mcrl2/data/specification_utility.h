@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/specification_utility.cpp
+/// \file mcrl2/data/specification_utility.h
 /// \brief Utility functionality for working with specficiations
 
 #ifndef MCRL2_DATA_SPECIFICATION_UTILITY_H__
@@ -20,8 +20,9 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/algorithm.h"
-
+#include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/substitute.h"
 
 namespace mcrl2 {
   namespace data {
@@ -88,7 +89,7 @@ namespace mcrl2 {
                 o2variables.advance_begin(1);
               }
 
-              if (normalised_o1 == data::make_map_substitution_adapter(renamings)(normalised_o2)) {
+              if (normalised_o1 == data::make_associative_container_substitution(renamings)(normalised_o2)) {
                 return true;
               }
             }
