@@ -146,7 +146,7 @@ namespace detail {
         std::pair<size_t, size_t>  equation_counts              = compute_equation_counts(p);
         size_t block_nesting_depth                                    = compute_block_nesting_depth(p);
         atermpp::set<data::variable>           declared_free_variables      = p.global_variables();
-        std::set<data::variable>               used_free_variables          = find_free_variables(p);
+        std::set<data::variable>               used_free_variables          = pbes_system::find_free_variables(p);
         std::set<propositional_variable>       binding_variables            = p.binding_variables();
         std::set<propositional_variable>       occurring_variables          = p.occurring_variables();
 

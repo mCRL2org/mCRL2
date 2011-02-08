@@ -15,6 +15,7 @@
 #include <deque>
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/substitute.h"
+#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/substitute.h"
@@ -143,7 +144,7 @@ template <typename IdentifierGenerator>
 state_formula rename_variables(const state_formula& f, IdentifierGenerator& generator)
 {
   // find all data variables in f
-  std::set<data::variable> src = data::find_free_variables(static_cast< atermpp::aterm_appl const& >(f));
+  std::set<data::variable> src = state_formulas::find_free_variables(f);
 
   // create a mapping of replacements
   data::mutable_associative_container_substitution<> replacements;

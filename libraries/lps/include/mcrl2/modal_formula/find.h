@@ -45,7 +45,6 @@ namespace action_formulas {
     return result;
   }
 
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -89,7 +88,6 @@ namespace action_formulas {
     action_formulas::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
-#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -139,7 +137,6 @@ namespace regular_formulas {
     return result;
   }
 
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -183,7 +180,6 @@ namespace regular_formulas {
     regular_formulas::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
-#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -233,7 +229,6 @@ namespace state_formulas {
     return result;
   }
 
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -277,7 +272,6 @@ namespace state_formulas {
     state_formulas::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
-#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -300,80 +294,6 @@ namespace state_formulas {
     return result;
   }
 //--- end generated state_formulas find code ---//
-
-/*
-  /// \brief Returns all data variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \param[in,out] o an output iterator to which all data variables occurring in t
-  ///             are added.
-  /// \return All data variables that occur in the term t
-  template <typename Container, typename OutputIterator>
-  void find_variables(Container const& container, OutputIterator o)
-  {
-    core::detail::make_find_helper<data::variable, state_formulas::traverser, OutputIterator>(o)(container);
-  }
-
-  /// \brief Returns all data variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \return All data variables that occur in the term t
-  template <typename Container>
-  std::set<data::variable> find_variables(Container const& container)
-  {
-    std::set<data::variable> result;
-    state_formulas::find_variables(container, std::inserter(result, result.end()));
-    return result;
-  }
-*/
-
-  /// \brief Returns all data variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \param[in,out] o an output iterator to which all data variables occurring in t
-  ///             are added.
-  /// \return All data variables that occur in the term t
-  template <typename Container, typename OutputIterator>
-  void find_free_variables(Container const& container, OutputIterator o,
-  		           typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
-  {
-    data::detail::make_free_variable_find_helper<state_formulas::binding_aware_traverser>(o)(container);
-  }
-
-  /// \brief Returns all data variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \param[in,out] o an output iterator to which all data variables occurring in t
-  ///             are added.
-  /// \param[in] bound a set of variables that should be considered as bound
-  /// \return All data variables that occur in the term t
-  /// TODO prevent copy of Sequence
-  template <typename Container, typename OutputIterator, typename Sequence>
-  void find_free_variables(Container const& container, OutputIterator o, Sequence const& bound)
-  {
-    data::detail::make_free_variable_find_helper<state_formulas::binding_aware_traverser>(bound, o)(container);
-  }
-
-  /// \brief Returns all data variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \return All data variables that occur in the term t
-  template <typename Container>
-  std::set<data::variable> find_free_variables(Container const& container)
-  {
-    std::set<data::variable> result;
-    state_formulas::find_free_variables(container, std::inserter(result, result.end()));
-    return result;
-  }
-
-  /// \brief Returns all data variables that occur in a range of expressions
-  /// \param[in] container a container with expressions
-  /// \param[in] bound a set of variables that should be considered as bound
-  /// \return All data variables that occur in the term t
-  /// TODO prevent copy of Sequence
-  template <typename Container, typename Sequence>
-  std::set<data::variable> find_free_variables(Container const& container, Sequence const& bound,
-                                          typename atermpp::detail::enable_if_container<Sequence, data::variable>::type* = 0)
-  {
-    std::set<data::variable> result;
-    state_formulas::find_free_variables(container, std::inserter(result, result.end()), bound);
-    return result;
-  }
 
   /// \brief Returns all sort expressions that occur in the term t
   /// \param[in] container an expression or container of expressions

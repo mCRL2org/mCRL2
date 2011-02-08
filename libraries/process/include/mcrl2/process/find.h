@@ -47,7 +47,6 @@ namespace process {
     return result;
   }
 
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -91,7 +90,6 @@ namespace process {
     process::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
-#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -138,6 +136,7 @@ namespace process {
     return result;
   }
 */
+/*
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \param[in,out] o an output iterator to which all data variables occurring in t
@@ -187,7 +186,7 @@ namespace process {
     process::find_free_variables(container, std::inserter(result, result.end()), bound);
     return result;
   }
-
+*/
   /// \brief Returns all sort expressions that occur in the term t
   /// \param[in] container an expression or container of expressions
   /// \param[in] o an output iterator

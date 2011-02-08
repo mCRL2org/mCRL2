@@ -26,7 +26,7 @@
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/well_typed.h"
+#include "mcrl2/lps/detail/lps_well_typed_checker.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2 {

@@ -85,7 +85,6 @@ FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occ
     return result;
   }
 
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \\\\brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -129,7 +128,6 @@ FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occ
     NAMESPACE::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
-#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \\\\brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers

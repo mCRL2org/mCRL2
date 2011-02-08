@@ -40,9 +40,6 @@ void find_sort_expressions(Container const& container, OutputIterator o);
 template <typename Object>
 bool is_well_typed(const Object& o);
 
-template <typename Container>
-std::set<data::variable> find_free_variables(Container const& container);
-
 class specification;
 atermpp::aterm_appl specification_to_aterm(const specification&);
 void complete_data_specification(lps::specification&);
@@ -296,16 +293,16 @@ bool operator!=(const specification& spec1, const specification& spec2)
 
 } // namespace mcrl2                                                                                        
 
-#ifndef MCRL2_LPS_WELL_TYPED_H
-#include "mcrl2/lps/well_typed.h"
-#endif
-
 #ifndef MCRL2_LPS_FIND_H
 #include "mcrl2/lps/find.h"
 #endif
 
 #ifndef MCRL2_LPS_PRINT_H
 #include "mcrl2/lps/print.h"
+#endif
+
+#ifndef MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
+#include "mcrl2/lps/detail/lps_well_typed_checker.h"
 #endif
 
 #endif // MCRL2_LPS_SPECIFICATION_H                                                                                       

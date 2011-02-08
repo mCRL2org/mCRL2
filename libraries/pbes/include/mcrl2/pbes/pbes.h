@@ -251,7 +251,7 @@ class pbes
         m_equations(equations),
         m_initial_state(initial_state)
     {
-      m_global_variables = find_free_variables(*this);
+      m_global_variables = pbes_system::find_free_variables(*this);
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
@@ -528,7 +528,7 @@ class pbes
 
       std::set<data::sort_expression> declared_sorts = data::detail::make_set(data().sorts());
       const atermpp::set<data::variable>& declared_global_variables = global_variables();
-      std::set<data::variable> occurring_global_variables = find_free_variables(*this);
+      std::set<data::variable> occurring_global_variables = pbes_system::find_free_variables(*this);
       std::set<data::variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
       atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
       atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();

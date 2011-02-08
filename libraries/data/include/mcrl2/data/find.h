@@ -171,7 +171,6 @@ namespace detail {
     return result;
   }
 
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -215,7 +214,6 @@ namespace detail {
     data::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
-#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -272,56 +270,6 @@ template <typename Container>
 bool search_variable(Container const& container, const variable& v)
 {
   return core::detail::make_search_helper<variable, detail::selective_data_traverser>(detail::compare_variable(v)).apply(container);
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \param[in,out] o an output iterator to which all data variables occurring in t
-///             are added.
-/// \return All data variables that occur in the term t
-template <typename Container, typename OutputIterator>
-void find_free_variables(Container const& container, OutputIterator o,
-		           typename atermpp::detail::disable_if_container<OutputIterator>::type* = 0)
-{
-  detail::make_free_variable_find_helper<detail::binding_aware_traverser>(o)(container);
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \param[in,out] o an output iterator to which all data variables occurring in t
-///             are added.
-/// \param[in] bound a set of variables that should be considered as bound
-/// \return All data variables that occur in the term t
-/// TODO prevent copy of Sequence
-template <typename Container, typename OutputIterator, typename Sequence>
-void find_free_variables_with_bound(Container const& container, OutputIterator o, Sequence const& bound)
-{
-  detail::make_free_variable_find_helper<detail::binding_aware_traverser>(bound, o)(container);
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \return All data variables that occur in the term t
-template <typename Container>
-std::set<variable> find_free_variables(Container const& container)
-{
-  std::set<variable> result;
-  find_free_variables(container, std::inserter(result, result.end()));
-  return result;
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \param[in] bound a set of variables that should be considered as bound
-/// \return All data variables that occur in the term t
-/// TODO prevent copy of Sequence
-template <typename Container, typename Sequence>
-std::set<variable> find_free_variables_with_bound(Container const& container, Sequence const& bound,
-                                        typename atermpp::detail::enable_if_container<Sequence, variable>::type* = 0)
-{
-  std::set<variable> result;
-  find_free_variables_with_bound(container, std::inserter(result, result.end()), bound);
-  return result;
 }
 
 /// \brief Returns true if the term has a given variable as subterm.

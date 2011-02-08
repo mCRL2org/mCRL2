@@ -9,22 +9,21 @@
 /// \file mcrl2/lps/detail/lps_well_typed_checker.h
 /// \brief add your file description here.
 
-// This is to deal with circular header file dependencies
-#ifndef MCRL2_LPS_SPECIFICATION_H
-#include "mcrl2/lps/specification.h"
-#endif
-
 #ifndef MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
 #define MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
 
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/find.h"
+#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
 namespace mcrl2 {
 
 namespace lps {
+
+  template <typename T>
+  std::set<data::variable> find_free_variables(const T& x);
 
 namespace detail {
 
@@ -374,6 +373,14 @@ namespace detail {
   };
 
 } // namespace detail
+
+  /// \brief Checks well typedness of an LPS object.
+  template <typename Object>
+  bool is_well_typed(const Object& o)
+  {
+    lps::detail::lps_well_typed_checker checker;
+    return checker(o);
+  }
 
 } // namespace lps
 
