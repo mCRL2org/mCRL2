@@ -30,6 +30,45 @@ namespace mcrl2 {
                                  
 namespace pbes_system {          
 
+namespace detail {
+
+  template <template <class> class Traverser, class OutputIterator>
+  struct find_propositional_variables_traverser: public Traverser<find_propositional_variables_traverser<Traverser, OutputIterator> >
+  {
+    typedef Traverser<find_propositional_variables_traverser<Traverser, OutputIterator> > super; 
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  
+    OutputIterator out;
+  
+    find_propositional_variables_traverser(OutputIterator out_)
+      : out(out_)
+    {}
+
+    // instead of deriving from a traverser in the data library
+    void operator()(const data::data_expression&)
+    {}
+  
+    void operator()(const propositional_variable_instantiation& v)
+    {
+      *out = v;
+    }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+  };
+
+  template <template <class> class Traverser, class OutputIterator>
+  find_propositional_variables_traverser<Traverser, OutputIterator>
+  make_find_propositional_variables_traverser(OutputIterator out)
+  {
+    return find_propositional_variables_traverser<Traverser, OutputIterator>(out);
+  } 
+
+} // namespace detail
+
 //--- start generated pbes_system find code ---//
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
@@ -147,7 +186,7 @@ namespace pbes_system {
   template <typename Container, typename OutputIterator>
   void find_propositional_variable_instantiations(Container const& container, OutputIterator o)
   {
-    core::detail::make_find_helper<propositional_variable_instantiation, pbes_system::traverser, OutputIterator>(o)(container);
+    pbes_system::detail::make_find_propositional_variables_traverser<pbes_system::pbes_expression_traverser>(o)(container);
   }
 
   /// \brief Returns all data variables that occur in a range of expressions

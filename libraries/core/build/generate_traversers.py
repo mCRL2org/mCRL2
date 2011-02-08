@@ -252,7 +252,7 @@ if __name__ == "__main__":
     make_traverser_new('../../lps/include/mcrl2/modal_formula/traverser.h', 'identifier_string_traverser', 'add_traverser_identifier_strings', 'regular_formulas::identifier_string_traverser', class_map, all_classes, 'state_formulas'  , 'core::identifier_string', identifier_string_dependencies)
 
     # pbes_expression_traverser
-    make_traverser_new('../../pbes/include/mcrl2/pbes/traverser.h', 'pbes_expression_traverser', 'add_traverser_pbes_expressions', 'core::traverser', class_map, all_classes, 'pbes_system', 'pbes_system::pbes_expression', pbes_expression_dependencies)
+    make_traverser_new('../../pbes/include/mcrl2/pbes/traverser.h', 'pbes_expression_traverser', 'add_traverser_pbes_expressions', 'pbes_system::empty_data_expression_traverser', class_map, all_classes, 'pbes_system', 'pbes_system::pbes_expression', pbes_expression_dependencies)
 
     # boolean_expression_traverser
     make_traverser_new('../../bes/include/mcrl2/bes/traverser.h', 'boolean_expression_traverser', 'add_traverser_boolean_expressions', 'core::traverser', class_map, all_classes, 'bes', 'bes::boolean_expression', boolean_expression_dependencies)

@@ -24,82 +24,23 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-  /// \brief Traversal class for PBES data types
-  template <typename Derived>
-  class traverser: public data::traverser<Derived>
+/// \brief Traversal class for pbes_expressions. Used as a base class for pbes_expression_traverser.
+template <typename Derived>
+struct empty_data_expression_traverser: public core::traverser<Derived>
+{
+  typedef core::traverser<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  pbes_expression operator()(const data::data_expression& x)
   {
-    public:
-      typedef data::traverser<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-#include "mcrl2/pbes/detail/traverser.inc.h"
-  };
-
-  template <typename Derived>
-  class binding_aware_traverser_helper: public data::binding_aware_traverser<Derived>
-  {
-    public:
-      typedef data::binding_aware_traverser<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-      using super::increase_bind_count;
-      using super::decrease_bind_count;
-
-#include "mcrl2/pbes/detail/traverser.inc.h"
-  };
-
-  template <typename Derived>
-  class binding_aware_traverser: public binding_aware_traverser_helper<Derived>
-  {
-    public:
-      typedef binding_aware_traverser_helper<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-      using super::increase_bind_count;
-      using super::decrease_bind_count;
-
-      void operator()(pbes_equation const& x)
-      {
-        increase_bind_count(x.variable().parameters());
-        super::operator()(x);
-        decrease_bind_count(x.variable().parameters());
-      }
-
-      void operator()(exists const& x)
-      {
-        increase_bind_count(x.variables());
-        super::operator()(x);
-        decrease_bind_count(x.variables());
-      }
-
-      void operator()(forall const& x)
-      {
-        increase_bind_count(x.variables());
-        super::operator()(x);
-        decrease_bind_count(x.variables());
-      }
-  };
-
-  /// \brief Selective traversal class for PBES data types
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, pbes_system::traverser>
-  {
-    public:
-      typedef core::selective_traverser<Derived, AdaptablePredicate, pbes_system::traverser> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-      selective_traverser()
-      { }
-
-      selective_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
 
 //--- start generated add_traverser_sort_expressions code ---//
   template <template <class> class Traverser, class Derived>
@@ -464,9 +405,9 @@ namespace pbes_system {
 
   /// \brief Traverser class
   template <typename Derived>
-  struct pbes_expression_traverser: public add_traverser_pbes_expressions<core::traverser, Derived>
+  struct pbes_expression_traverser: public add_traverser_pbes_expressions<pbes_system::empty_data_expression_traverser, Derived>
   {
-    typedef add_traverser_pbes_expressions<core::traverser, Derived> super;
+    typedef add_traverser_pbes_expressions<pbes_system::empty_data_expression_traverser, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();

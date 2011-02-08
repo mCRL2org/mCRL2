@@ -23,19 +23,15 @@ namespace pbes_system {
 
 /// \cond INTERNAL_DOCS
 // \brief Visitor for checking if a pbes expression is normalized.
-struct is_normalized_traverser: public traverser<is_normalized_traverser>
+struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_traverser>
 {
-  typedef traverser<is_normalized_traverser> super;
+  typedef pbes_expression_traverser<is_normalized_traverser> super;
   using super::enter;
   using super::leave;
   using super::operator();
 
 #if BOOST_MSVC
-    template <typename Container >
-    void operator()(Container const& a)
-    {
-      super::operator()(a);
-    }
+#include "mcrl2/core/detail/traverser_msvc_inc.h"
 #endif
   
   bool result;
