@@ -64,8 +64,7 @@ SUBSTITUTE_FUNCTION_TEXT = '''template <typename T, typename Substitution>
   }
 '''
 
-FIND_VARIABLES_FUNCTION_TEXT = '''#ifdef MCRL2_NEW_FIND_VARIABLES
-  /// \\\\brief Returns all variables that occur in an object
+FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are written.
   /// \\\\return All variables that occur in the term x
@@ -86,6 +85,7 @@ FIND_VARIABLES_FUNCTION_TEXT = '''#ifdef MCRL2_NEW_FIND_VARIABLES
     return result;
   }
 
+#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \\\\brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -129,6 +129,7 @@ FIND_VARIABLES_FUNCTION_TEXT = '''#ifdef MCRL2_NEW_FIND_VARIABLES
     NAMESPACE::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
+#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \\\\brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -144,14 +145,12 @@ FIND_VARIABLES_FUNCTION_TEXT = '''#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \param[in] x an object containing identifiers
   /// \\\\return All identifiers that occur in the object x
   template <typename T>
-  std::set<core::identifier> find_identifiers(const T& x)
+  std::set<core::identifier_string> find_identifiers(const T& x)
   {
-    std::set<core::identifier> result;
-    NAMESPACE::find_identifiers(x, std::inserter(result, result.end()), bound);
+    std::set<core::identifier_string> result;
+    NAMESPACE::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
- 
-#endif // MCRL2_NEW_FIND_VARIABLES
 '''
 
 def generate_code(filename, namespace, label, text):

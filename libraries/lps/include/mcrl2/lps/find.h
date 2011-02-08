@@ -27,7 +27,6 @@ namespace mcrl2 {
 namespace lps {
 
 //--- start generated lps find code ---//
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are written.
@@ -49,6 +48,7 @@ namespace lps {
     return result;
   }
 
+#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -92,6 +92,7 @@ namespace lps {
     lps::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
+#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -107,16 +108,15 @@ namespace lps {
   /// \param[in] x an object containing identifiers
   /// \return All identifiers that occur in the object x
   template <typename T>
-  std::set<core::identifier> find_identifiers(const T& x)
+  std::set<core::identifier_string> find_identifiers(const T& x)
   {
-    std::set<core::identifier> result;
-    lps::find_identifiers(x, std::inserter(result, result.end()), bound);
+    std::set<core::identifier_string> result;
+    lps::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
- 
-#endif // MCRL2_NEW_FIND_VARIABLES
 //--- end generated lps find code ---//
 
+/*
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \param[in,out] o an output iterator to which all data variables occurring in t
@@ -138,6 +138,7 @@ namespace lps {
     lps::find_variables(container, std::inserter(result, result.end()));
     return result;
   }
+*/
 
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions

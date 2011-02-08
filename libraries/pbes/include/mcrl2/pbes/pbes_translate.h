@@ -226,14 +226,14 @@ lps2pbes_increase_indent();
         data::variable_list v = var(b);
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), x.time(), b));
+        std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
         data::variable_list b = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
         result = z::forall(b, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       } else if (a::is_exists(b)) {
         data::variable_list v = var(b);
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), x.time(), b));
+        std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
         data::variable_list b = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
         result = z::exists(b, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       } else {
@@ -304,13 +304,13 @@ lps2pbes_increase_indent();
         } 
         else if (s::is_forall(f)) 
         {
-          std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
+          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::forall(a::var(f), RHS(f0, a::arg(f), lps, T, context));
         } 
         else if (s::is_exists(f)) 
         {
-          std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
+          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(a::var(f), RHS(f0, a::arg(f), lps, T, context));
         } 
@@ -470,11 +470,11 @@ lps2pbes_increase_indent();
         } else if (s::is_imp(f)) {
           result = z::and_(RHS(f0, a::left(f), lps, T, context), RHS(f0, s::not_(a::right(f)), lps, T, context));
         } else if (s::is_forall(f)) {
-          std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
+          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, T, context));
         } else if (s::is_exists(f)) {
-          std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
+          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::forall(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, T, context));
         } else if (s::is_must(f)) {
@@ -726,7 +726,7 @@ lps2pbes_increase_indent();
         action_formulas::action_formula alpha = arg(b);
         if (v.size() > 0)
         {
-          std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), b));
+          std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
           data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
           result = p::forall(y, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
@@ -737,7 +737,7 @@ lps2pbes_increase_indent();
         action_formulas::action_formula alpha = arg(b);
         if (v.size() > 0)
         {
-          std::set<std::string> names = data::detail::find_variable_name_strings(make_list(x.actions(), b));
+          std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
           data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
           result = p::exists(y, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
@@ -794,13 +794,13 @@ lps2pbes_increase_indent();
           // DANGEROUS! result = imp(RHS(f0, a::left(f), lps, context), RHS(f0, a::right(f), lps, context));
           result = z::or_(RHS(f0, s::not_(a::left(f)), lps, context), RHS(f0, a::right(f), lps, context));
         } else if (s::is_forall(f)) {
-          std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
+          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::forall(a::var(f), RHS(f0, a::arg(f), lps, context));
         } 
         else if (s::is_exists(f)) 
         {
-          std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
+          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(a::var(f), RHS(f0, a::arg(f), lps, context));
         } 
@@ -889,11 +889,11 @@ lps2pbes_increase_indent();
         } else if (s::is_imp(f)) {
           result = z::and_(RHS(f0, a::left(f), lps, context), RHS(f0, s::not_(a::right(f)), lps, context));
         } else if (s::is_forall(f)) {
-          std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
+          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, context));
         } else if (s::is_exists(f)) {
-          std::set<std::string> names = data::detail::find_variable_name_strings(a::var(f));
+          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::forall(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, context));
         } else if (s::is_must(f)) {

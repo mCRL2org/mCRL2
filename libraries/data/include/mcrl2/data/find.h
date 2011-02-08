@@ -49,7 +49,7 @@ namespace detail {
       : out(out_)
     {}
   
-    void operator()(const identifier& v)
+    void operator()(const core::identifier_string& v)
     {
       *out = v;
     }
@@ -150,7 +150,6 @@ namespace detail {
 } // namespace detail
 
 //--- start generated data find code ---//
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are written.
@@ -172,6 +171,7 @@ namespace detail {
     return result;
   }
 
+#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -215,6 +215,7 @@ namespace detail {
     data::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
+#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -230,16 +231,15 @@ namespace detail {
   /// \param[in] x an object containing identifiers
   /// \return All identifiers that occur in the object x
   template <typename T>
-  std::set<core::identifier> find_identifiers(const T& x)
+  std::set<core::identifier_string> find_identifiers(const T& x)
   {
-    std::set<core::identifier> result;
-    data::find_identifiers(x, std::inserter(result, result.end()), bound);
+    std::set<core::identifier_string> result;
+    data::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
- 
-#endif // MCRL2_NEW_FIND_VARIABLES
 //--- end generated data find code ---//
 
+/*
 /// \brief Returns all data variables that occur in a range of expressions
 /// \param[in] container a container with expressions
 /// \param[in,out] o an output iterator to which all data variables occurring in t
@@ -261,6 +261,7 @@ std::set<variable> find_variables(Container const& container)
   find_variables(container, std::inserter(result, result.end()));
   return result;
 }
+*/
 
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param[in] container an expression or container with expressions
@@ -375,28 +376,6 @@ bool search_identifiers(Container const& container, const core::identifier_strin
   return core::detail::make_search_helper<core::identifier_string, detail::selective_sort_traverser>(boost::bind(std::equal_to<core::identifier_string>(), s, _1)).apply(container);
 }
 
-/// \brief Returns all identifiers that occur in the term t
-/// \param[in] container an expression or container of expressions
-/// \param[out] o an output iterator
-/// \return All sort identifiers that occur in the term t
-template <typename Container, typename OutputIterator>
-void find_identifiers(Container const& container, OutputIterator o)
-{
-  return core::detail::make_find_helper<core::identifier_string, detail::sort_traverser>(o)(container);
-}
-
-/// \brief Returns all basic sorts that occur in the term t
-/// \param[in] container an expression or container of expressions
-/// \param[in] o an output iterator
-/// \return All sort expressions that occur in the term t
-template <typename Container>
-std::set<core::identifier_string> find_identifiers(Container const& container)
-{
-  std::set<core::identifier_string> result;
-  find_identifiers(container, std::inserter(result, result.end()));
-  return result;
-}
-
 /// \brief Returns true if the term has a given data expression as subterm.
 /// \param[in] container an expression or container of expressions
 /// \param[in] s A data expression
@@ -427,46 +406,48 @@ std::set<data_expression> find_data_expressions(Container const& container)
   return result;
 }
 
-/// \cond INTERNAL_DOCS
-namespace detail {
-
-  /// \brief Returns all names of data variables that occur in the term t
-  /// \param t A term
-  /// \return All names of data variables that occur in the term t
-  template <typename Term>
-  std::set<core::identifier_string> find_variable_names(Term t)
-  {
-    // find all data variables in t
-    std::set<variable> variables = data::find_variables(t);
-
-    std::set<core::identifier_string> result;
-    for (std::set<variable>::iterator j = variables.begin(); j != variables.end(); ++j)
-    {
-      result.insert(j->name());
-    }
-    return result;
-  }
-
-/// \brief Returns all names of data variables that occur in the term t
-/// \param t A term
-/// \return All names of data variables that occur in the term t
-template <typename Term>
-std::set<std::string> find_variable_name_strings(Term t)
+/// \brief Returns the names of a set of data variables.
+/// \param variables A set of data variables
+inline
+std::set<core::identifier_string> variable_names(const std::set<data::variable>& variables)
 {
-  // find all data variables in t
-  std::set<variable> variables(find_variables(t));
-
-  std::set<std::string> result;
-  for (std::set<variable>::iterator j = variables.begin(); j != variables.end(); ++j)
+  std::set<core::identifier_string> result;
+  for (std::set<variable>::iterator i = variables.begin(); i != variables.end(); ++i)
   {
-    result.insert(j->name());
+    result.insert(i->name());
   }
   return result;
 }
 
-} // namespace detail
-/// \endcond
+/// \brief Returns the names of a set of data variables as a set of strings.
+/// \param variables A set of data variables
+inline
+std::set<std::string> variable_name_strings(const std::set<data::variable>& variables)
+{
+  std::set<std::string> result;
+  for (std::set<variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+  {
+    result.insert(std::string(i->name()));
+  }
+  return result;
+}
 
+/// \brief Returns the names of a set of data variables.
+/// \param variables A set of data variables
+inline
+std::set<std::string> variable_name_strings(const std::set<data::variable>& variables1, const std::set<data::variable>& variables2)
+{
+  std::set<std::string> result;
+  for (std::set<variable>::iterator i = variables1.begin(); i != variables1.end(); ++i)
+  {
+    result.insert(std::string(i->name()));
+  }
+  for (std::set<variable>::iterator i = variables2.begin(); i != variables2.end(); ++i)
+  {
+    result.insert(std::string(i->name()));
+  }
+  return result;
+}
 
 } // namespace data
 

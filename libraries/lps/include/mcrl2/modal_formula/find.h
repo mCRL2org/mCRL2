@@ -24,7 +24,6 @@ namespace mcrl2 {
 namespace action_formulas {
 
 //--- start generated action_formulas find code ---//
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are written.
@@ -46,6 +45,7 @@ namespace action_formulas {
     return result;
   }
 
+#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -89,6 +89,7 @@ namespace action_formulas {
     action_formulas::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
+#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -104,14 +105,12 @@ namespace action_formulas {
   /// \param[in] x an object containing identifiers
   /// \return All identifiers that occur in the object x
   template <typename T>
-  std::set<core::identifier> find_identifiers(const T& x)
+  std::set<core::identifier_string> find_identifiers(const T& x)
   {
-    std::set<core::identifier> result;
-    action_formulas::find_identifiers(x, std::inserter(result, result.end()), bound);
+    std::set<core::identifier_string> result;
+    action_formulas::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
- 
-#endif // MCRL2_NEW_FIND_VARIABLES
 //--- end generated action_formulas find code ---//
 
 } // namespace action_formulas
@@ -119,7 +118,6 @@ namespace action_formulas {
 namespace regular_formulas {
 
 //--- start generated regular_formulas find code ---//
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are written.
@@ -141,6 +139,7 @@ namespace regular_formulas {
     return result;
   }
 
+#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -184,6 +183,7 @@ namespace regular_formulas {
     regular_formulas::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
+#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -199,14 +199,12 @@ namespace regular_formulas {
   /// \param[in] x an object containing identifiers
   /// \return All identifiers that occur in the object x
   template <typename T>
-  std::set<core::identifier> find_identifiers(const T& x)
+  std::set<core::identifier_string> find_identifiers(const T& x)
   {
-    std::set<core::identifier> result;
-    regular_formulas::find_identifiers(x, std::inserter(result, result.end()), bound);
+    std::set<core::identifier_string> result;
+    regular_formulas::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
- 
-#endif // MCRL2_NEW_FIND_VARIABLES
 //--- end generated regular_formulas find code ---//
 
 } // namespace regular_formulas
@@ -214,7 +212,6 @@ namespace regular_formulas {
 namespace state_formulas {
 
 //--- start generated state_formulas find code ---//
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are written.
@@ -236,6 +233,7 @@ namespace state_formulas {
     return result;
   }
 
+#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -279,6 +277,7 @@ namespace state_formulas {
     state_formulas::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
+#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -294,16 +293,15 @@ namespace state_formulas {
   /// \param[in] x an object containing identifiers
   /// \return All identifiers that occur in the object x
   template <typename T>
-  std::set<core::identifier> find_identifiers(const T& x)
+  std::set<core::identifier_string> find_identifiers(const T& x)
   {
-    std::set<core::identifier> result;
-    state_formulas::find_identifiers(x, std::inserter(result, result.end()), bound);
+    std::set<core::identifier_string> result;
+    state_formulas::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
- 
-#endif // MCRL2_NEW_FIND_VARIABLES
 //--- end generated state_formulas find code ---//
 
+/*
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \param[in,out] o an output iterator to which all data variables occurring in t
@@ -325,6 +323,7 @@ namespace state_formulas {
     state_formulas::find_variables(container, std::inserter(result, result.end()));
     return result;
   }
+*/
 
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions
@@ -394,23 +393,6 @@ namespace state_formulas {
   {
     std::set<data::sort_expression> result;
     state_formulas::find_sort_expressions(container, std::inserter(result, result.end()));
-    return result;
-  }
-
-  /// \brief Returns all names of data variables that occur in the term t
-  /// \param t A term
-  /// \return All names of data variables that occur in the term t
-  template <typename Term>
-  std::set<core::identifier_string> find_variable_names(Term t)
-  {
-    // find all data variables in t
-    std::set<data::variable> variables = state_formulas::find_variables(t);
-
-    std::set<core::identifier_string> result;
-    for (std::set<data::variable>::iterator j = variables.begin(); j != variables.end(); ++j)
-    {
-      result.insert(j->name());
-    }
     return result;
   }
 

@@ -189,7 +189,7 @@ namespace core {
     static inline
     bool is_constant(term_type t)
     {
-      return find_variables(t).empty();
+      return data::find_variables(t).empty();
     }
 
     /// \brief Pretty print function

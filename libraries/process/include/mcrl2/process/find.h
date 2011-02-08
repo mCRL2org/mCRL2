@@ -26,7 +26,6 @@ namespace mcrl2 {
 namespace process {
 
 //--- start generated process find code ---//
-#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are written.
@@ -48,6 +47,7 @@ namespace process {
     return result;
   }
 
+#ifdef MCRL2_NEW_FIND_VARIABLES
   /// \brief Returns all variables that occur in an object
   /// \param[in] x an object containing variables
   /// \param[in,out] o an output iterator to which all variables occurring in x are added.
@@ -91,6 +91,7 @@ namespace process {
     process::find_free_variables_with_bound(x, std::inserter(result, result.end()), bound);
     return result;
   }
+#endif // MCRL2_NEW_FIND_VARIABLES
 
   /// \brief Returns all identifiers that occur in an object
   /// \param[in] x an object containing identifiers
@@ -106,16 +107,15 @@ namespace process {
   /// \param[in] x an object containing identifiers
   /// \return All identifiers that occur in the object x
   template <typename T>
-  std::set<core::identifier> find_identifiers(const T& x)
+  std::set<core::identifier_string> find_identifiers(const T& x)
   {
-    std::set<core::identifier> result;
-    process::find_identifiers(x, std::inserter(result, result.end()), bound);
+    std::set<core::identifier_string> result;
+    process::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
- 
-#endif // MCRL2_NEW_FIND_VARIABLES
 //--- end generated process find code ---//
 
+/*
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \param[in,out] o an output iterator to which all data variables occurring in t
@@ -137,7 +137,7 @@ namespace process {
     process::find_variables(container, std::inserter(result, result.end()));
     return result;
   }
-
+*/
   /// \brief Returns all data variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \param[in,out] o an output iterator to which all data variables occurring in t
