@@ -24,21 +24,17 @@ namespace state_formulas {
 namespace detail {
 
   /// \brief Traverser that checks for name clashes in nested mu's/nu's.
-  class state_formula_name_clash_checker: public state_formulas::traverser<state_formula_name_clash_checker>
+  class state_formula_name_clash_checker: public state_formulas::state_formula_traverser<state_formula_name_clash_checker>
   {
     public:
-      typedef state_formulas::traverser<state_formula_name_clash_checker> super;
+      typedef state_formulas::state_formula_traverser<state_formula_name_clash_checker> super;
 
       using super::operator();
       using super::enter;
       using super::leave;
 
 #if BOOST_MSVC
-  template <typename Container>
-  void operator()(Container const& x)
-  {
-    super::operator()(x);
-  }
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
      
       /// \brief The stack of names.

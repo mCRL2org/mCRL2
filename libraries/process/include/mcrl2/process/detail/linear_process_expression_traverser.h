@@ -24,9 +24,9 @@ namespace detail {
 
   /// \brief Checks if a process equation is linear.
   /// Use the is_linear() member function for this.
-  struct linear_process_expression_traverser: public traverser<linear_process_expression_traverser>
+  struct linear_process_expression_traverser: public process_expression_traverser<linear_process_expression_traverser>
   {
-    typedef traverser<linear_process_expression_traverser> super;
+    typedef process_expression_traverser<linear_process_expression_traverser> super;
     using super::enter;
     using super::leave;
     using super::operator();

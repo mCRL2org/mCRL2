@@ -21,74 +21,31 @@ namespace mcrl2 {
 
 namespace action_formulas {
 
-  /// \brief Traversal class for action formula data types
-  template <typename Derived>
-  class traverser: public lps::traverser<Derived>
+/// \brief Base class for action_formula_traverser.
+template <typename Derived>
+struct action_formula_traverser_base: public core::traverser<Derived>
+{
+  typedef core::traverser<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  action_formula operator()(const data::data_expression& x)
   {
-    public:
-      typedef lps::traverser<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
 
-// Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/modal_formula/detail/action_formula_traverser.inc.h"
-  };
-
-  template <typename Derived>
-  class binding_aware_traverser_helper: public lps::binding_aware_traverser<Derived>
+  action_formula operator()(const lps::multi_action& x)
   {
-    public:
-      typedef lps::binding_aware_traverser<Derived> super;     
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-#include "mcrl2/modal_formula/detail/action_formula_traverser.inc.h"
-  };
-
-  /// \brief Handle binding variables.
-  template <typename Derived>
-  class binding_aware_traverser : public binding_aware_traverser_helper<Derived>
-  {
-    public:
-      typedef binding_aware_traverser_helper<Derived> super;      
-      using super::operator();
-      using super::enter;
-      using super::leave;
-      using super::increase_bind_count;
-      using super::decrease_bind_count;
-      
-      void operator()(exists const& x)
-      {
-        increase_bind_count(x.variables());
-        super::operator()(x);
-        decrease_bind_count(x.variables());
-      }
-      
-      void operator()(forall const& x)
-      {
-        increase_bind_count(x.variables());
-        super::operator()(x);
-        decrease_bind_count(x.variables());
-      }
-  };
-
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, action_formulas::traverser>
-  {
-    public:
-      typedef core::selective_traverser<Derived, AdaptablePredicate, action_formulas::traverser> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-      selective_traverser()
-      { }
-
-      selective_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
 
 //--- start generated action_formulas::add_traverser_sort_expressions code ---//
   template <template <class> class Traverser, class Derived>
@@ -403,9 +360,9 @@ namespace action_formulas {
 
   /// \brief Traverser class
   template <typename Derived>
-  struct action_formula_traverser: public add_traverser_action_formula_expressions<core::traverser, Derived>
+  struct action_formula_traverser: public add_traverser_action_formula_expressions<action_formulas::action_formula_traverser_base, Derived>
   {
-    typedef add_traverser_action_formula_expressions<core::traverser, Derived> super;
+    typedef add_traverser_action_formula_expressions<action_formulas::action_formula_traverser_base, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();
@@ -634,47 +591,23 @@ namespace action_formulas {
 
 namespace regular_formulas {
 
-  /// \brief Traversal class for regular formula data types
-  template <typename Derived>
-  class traverser: public action_formulas::traverser<Derived>
+/// \brief Traversal class for regular_formula_traverser. Used as a base class for pbes_expression_traverser.
+template <typename Derived>
+struct regular_formula_traverser_base: public core::traverser<Derived>
+{
+  typedef core::traverser<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  regular_formula operator()(const data::data_expression& x)
   {
-    public:
-      typedef action_formulas::traverser<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-// Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/modal_formula/detail/regular_formula_traverser.inc.h"
-  };
-
-  template <typename Derived>
-  class binding_aware_traverser: public action_formulas::binding_aware_traverser<Derived>
-  {
-    public:
-      typedef action_formulas::binding_aware_traverser<Derived> super;     
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-#include "mcrl2/modal_formula/detail/regular_formula_traverser.inc.h"
-  };
-
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, regular_formulas::traverser>
-  {
-    public:
-      typedef core::selective_traverser<Derived, AdaptablePredicate, regular_formulas::traverser> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-      selective_traverser()
-      { }
-
-      selective_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
 
 //--- start generated regular_formulas::add_traverser_sort_expressions code ---//
   template <template <class> class Traverser, class Derived>
@@ -883,9 +816,9 @@ namespace regular_formulas {
 
   /// \brief Traverser class
   template <typename Derived>
-  struct regular_formula_traverser: public add_traverser_regular_formula_expressions<core::traverser, Derived>
+  struct regular_formula_traverser: public add_traverser_regular_formula_expressions<regular_formulas::regular_formula_traverser_base, Derived>
   {
-    typedef add_traverser_regular_formula_expressions<core::traverser, Derived> super;
+    typedef add_traverser_regular_formula_expressions<regular_formulas::regular_formula_traverser_base, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();
@@ -1040,74 +973,23 @@ namespace regular_formulas {
 
 namespace state_formulas {
 
-  /// \brief Traversal class for state formula data types
-  template <typename Derived>
-  class traverser: public regular_formulas::traverser<Derived>
+/// \brief Traversal class for pbes_expressions. Used as a base class for pbes_expression_traverser.
+template <typename Derived>
+struct state_formula_traverser_base: public core::traverser<Derived>
+{
+  typedef core::traverser<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  state_formula operator()(const data::data_expression& x)
   {
-    public:
-      typedef regular_formulas::traverser<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-// Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/modal_formula/detail/state_formula_traverser.inc.h"
-  };
-
-  template <typename Derived>
-  class binding_aware_traverser_helper: public regular_formulas::binding_aware_traverser<Derived>
-  {
-    public:
-      typedef regular_formulas::binding_aware_traverser<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-#include "mcrl2/modal_formula/detail/state_formula_traverser.inc.h"
-  };
-
-  /// \brief Handle binding variables.
-  template <typename Derived>
-  class binding_aware_traverser : public binding_aware_traverser_helper<Derived>
-  {
-    public:
-      typedef binding_aware_traverser_helper<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-      using super::increase_bind_count;
-      using super::decrease_bind_count;
-
-    void operator()(exists const& x)
-    {
-      increase_bind_count(x.variables());
-      super::operator()(x);
-      decrease_bind_count(x.variables());
-    }
-
-    void operator()(forall const& x)
-    {
-      increase_bind_count(x.variables());
-      super::operator()(x);
-      decrease_bind_count(x.variables());
-    }
-  };
-
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, state_formulas::traverser>
-  {
-    public:
-      typedef core::selective_traverser<Derived, AdaptablePredicate, state_formulas::traverser> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-      selective_traverser()
-      { }
-
-      selective_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
 
 //--- start generated state_formulas::add_traverser_sort_expressions code ---//
   template <template <class> class Traverser, class Derived>
@@ -1617,9 +1499,9 @@ namespace state_formulas {
 
   /// \brief Traverser class
   template <typename Derived>
-  struct state_formula_traverser: public add_traverser_state_formula_expressions<core::traverser, Derived>
+  struct state_formula_traverser: public add_traverser_state_formula_expressions<state_formulas::state_formula_traverser_base, Derived>
   {
-    typedef add_traverser_state_formula_expressions<core::traverser, Derived> super;
+    typedef add_traverser_state_formula_expressions<state_formulas::state_formula_traverser_base, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();

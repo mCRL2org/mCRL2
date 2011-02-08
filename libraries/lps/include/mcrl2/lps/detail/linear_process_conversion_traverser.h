@@ -28,9 +28,9 @@ namespace detail {
 
   /// \brief Converts a process expression into linear process format.
   /// Use the \p convert member functions for this.
-  struct linear_process_conversion_traverser: public traverser<linear_process_conversion_traverser>
+  struct linear_process_conversion_traverser: public process_expression_traverser<linear_process_conversion_traverser>
   {
-    typedef traverser<linear_process_conversion_traverser> super;
+    typedef process_expression_traverser<linear_process_conversion_traverser> super;
     using super::enter;
     using super::leave;
     using super::operator();

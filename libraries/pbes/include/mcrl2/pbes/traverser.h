@@ -26,7 +26,7 @@ namespace pbes_system {
 
 /// \brief Traversal class for pbes_expressions. Used as a base class for pbes_expression_traverser.
 template <typename Derived>
-struct empty_data_expression_traverser: public core::traverser<Derived>
+struct pbes_expression_traverser_base: public core::traverser<Derived>
 {
   typedef core::traverser<Derived> super;
   using super::operator();
@@ -405,9 +405,9 @@ struct empty_data_expression_traverser: public core::traverser<Derived>
 
   /// \brief Traverser class
   template <typename Derived>
-  struct pbes_expression_traverser: public add_traverser_pbes_expressions<pbes_system::empty_data_expression_traverser, Derived>
+  struct pbes_expression_traverser: public add_traverser_pbes_expressions<pbes_system::pbes_expression_traverser_base, Derived>
   {
-    typedef add_traverser_pbes_expressions<pbes_system::empty_data_expression_traverser, Derived> super;
+    typedef add_traverser_pbes_expressions<pbes_system::pbes_expression_traverser_base, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();

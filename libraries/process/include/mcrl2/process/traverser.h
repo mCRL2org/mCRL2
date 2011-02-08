@@ -25,49 +25,23 @@ namespace mcrl2 {
 
 namespace process {
 
-  /// \brief Traversal class for process data types
-  template <typename Derived>
-  class traverser: public data::traverser<Derived>
+/// \brief Traversal class for actions. Used as a base class for process_expression_traverser.
+template <typename Derived>
+struct process_expression_traverser_base: public core::traverser<Derived>
+{
+  typedef core::traverser<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  process_expression operator()(const lps::action& x)
   {
-    public:
-      typedef data::traverser<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-#include "mcrl2/lps/detail/traverser.inc.h" // needed for traversal of lps::action
-#include "mcrl2/process/detail/traverser.inc.h"
-  };
-
-  template <typename Derived>
-  class binding_aware_traverser: public data::binding_aware_traverser<Derived>
-  {
-    public:
-      typedef data::binding_aware_traverser<Derived> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-#include "mcrl2/lps/detail/traverser.inc.h" // needed for traversal of lps::action
-#include "mcrl2/process/detail/traverser.inc.h"
-  };
-
-  /// \brief Selective traversal class for process data types
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, process::traverser>
-  {
-    public:
-      typedef core::selective_traverser<Derived, AdaptablePredicate, process::traverser> super;
-      using super::operator();
-      using super::enter;
-      using super::leave;
-
-      selective_traverser()
-      { }
-
-      selective_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
 
 //--- start generated add_traverser_sort_expressions code ---//
   template <template <class> class Traverser, class Derived>
@@ -688,9 +662,9 @@ namespace process {
 
   /// \brief Traverser class
   template <typename Derived>
-  struct process_expression_traverser: public add_traverser_process_expressions<core::traverser, Derived>
+  struct process_expression_traverser: public add_traverser_process_expressions<process::process_expression_traverser_base, Derived>
   {
-    typedef add_traverser_process_expressions<core::traverser, Derived> super;
+    typedef add_traverser_process_expressions<process::process_expression_traverser_base, Derived> super;
     using super::enter;
     using super::leave;
     using super::operator();

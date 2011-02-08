@@ -26,7 +26,6 @@
 #include "mcrl2/data/function_update.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/detail/sort_traverser.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 

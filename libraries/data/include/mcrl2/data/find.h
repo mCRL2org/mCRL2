@@ -24,7 +24,6 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/core/detail/find_impl.h"
 #include "mcrl2/data/detail/find_impl.h"
-#include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/detail/traverser.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/traverser.h"

@@ -9,6 +9,11 @@
 /// \file mcrl2/process/add_binding.h
 /// \brief add your file description here.
 
+// to avoid circular header file problems
+#ifndef MCRL2_PROCESS_PROCESS_SPECIFICATION_H
+#include "mcrl2/process/process_specification.h"
+#endif
+
 #ifndef MCRL2_PROCESS_ADD_BINDING_H
 #define MCRL2_PROCESS_ADD_BINDING_H
 

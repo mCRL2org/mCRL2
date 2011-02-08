@@ -19,9 +19,6 @@
 #include "mcrl2/lps/traverser.h"
 #include "mcrl2/lps/add_binding.h"
 
-#include "mcrl2/core/detail/find_impl.h"
-#include "mcrl2/data/detail/find_impl.h"
-
 namespace mcrl2 {
 
 namespace lps {
