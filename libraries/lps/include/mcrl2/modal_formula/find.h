@@ -31,7 +31,7 @@ namespace action_formulas {
   template <typename T, typename OutputIterator>
   void find_variables(const T& x, OutputIterator o)
   {
-    data::detail::make_find_variables_traverser<action_formulas::traverser>(o)(x);
+    data::detail::make_find_variables_traverser<action_formulas::variable_traverser>(o)(x);
   }
 
   /// \brief Returns all variables that occur in an object
@@ -96,7 +96,7 @@ namespace action_formulas {
   template <typename T, typename OutputIterator>
   void find_identifiers(const T& x, OutputIterator o)
   {
-    data::detail::make_find_identifiers_traverser<action_formulas::traverser>(o)(x);
+    data::detail::make_find_identifiers_traverser<action_formulas::identifier_string_traverser>(o)(x);
   }
   
   /// \brief Returns all identifiers that occur in an object
@@ -107,6 +107,27 @@ namespace action_formulas {
   {
     std::set<core::identifier_string> result;
     action_formulas::find_identifiers(x, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \param[in,out] o an output iterator to which all sort expressions occurring in x are written.
+  /// \return All sort expressions that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_sort_expressions(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_sort_expressions_traverser<action_formulas::sort_expression_traverser>(o)(x);
+  }
+  
+  /// \brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \return All sort expressions that occur in the object x
+  template <typename T>
+  std::set<data::sort_expression> find_sort_expressions(const T& x)
+  {
+    std::set<data::sort_expression> result;
+    action_formulas::find_sort_expressions(x, std::inserter(result, result.end()));
     return result;
   }
 //--- end generated action_formulas find code ---//
@@ -123,7 +144,7 @@ namespace regular_formulas {
   template <typename T, typename OutputIterator>
   void find_variables(const T& x, OutputIterator o)
   {
-    data::detail::make_find_variables_traverser<regular_formulas::traverser>(o)(x);
+    data::detail::make_find_variables_traverser<regular_formulas::variable_traverser>(o)(x);
   }
 
   /// \brief Returns all variables that occur in an object
@@ -188,7 +209,7 @@ namespace regular_formulas {
   template <typename T, typename OutputIterator>
   void find_identifiers(const T& x, OutputIterator o)
   {
-    data::detail::make_find_identifiers_traverser<regular_formulas::traverser>(o)(x);
+    data::detail::make_find_identifiers_traverser<regular_formulas::identifier_string_traverser>(o)(x);
   }
   
   /// \brief Returns all identifiers that occur in an object
@@ -199,6 +220,27 @@ namespace regular_formulas {
   {
     std::set<core::identifier_string> result;
     regular_formulas::find_identifiers(x, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \param[in,out] o an output iterator to which all sort expressions occurring in x are written.
+  /// \return All sort expressions that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_sort_expressions(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_sort_expressions_traverser<regular_formulas::sort_expression_traverser>(o)(x);
+  }
+  
+  /// \brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \return All sort expressions that occur in the object x
+  template <typename T>
+  std::set<data::sort_expression> find_sort_expressions(const T& x)
+  {
+    std::set<data::sort_expression> result;
+    regular_formulas::find_sort_expressions(x, std::inserter(result, result.end()));
     return result;
   }
 //--- end generated regular_formulas find code ---//
@@ -215,7 +257,7 @@ namespace state_formulas {
   template <typename T, typename OutputIterator>
   void find_variables(const T& x, OutputIterator o)
   {
-    data::detail::make_find_variables_traverser<state_formulas::traverser>(o)(x);
+    data::detail::make_find_variables_traverser<state_formulas::variable_traverser>(o)(x);
   }
 
   /// \brief Returns all variables that occur in an object
@@ -280,7 +322,7 @@ namespace state_formulas {
   template <typename T, typename OutputIterator>
   void find_identifiers(const T& x, OutputIterator o)
   {
-    data::detail::make_find_identifiers_traverser<state_formulas::traverser>(o)(x);
+    data::detail::make_find_identifiers_traverser<state_formulas::identifier_string_traverser>(o)(x);
   }
   
   /// \brief Returns all identifiers that occur in an object
@@ -293,28 +335,28 @@ namespace state_formulas {
     state_formulas::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
-//--- end generated state_formulas find code ---//
 
-  /// \brief Returns all sort expressions that occur in the term t
-  /// \param[in] container an expression or container of expressions
-  /// \param[in] o an output iterator
-  /// \return All sort expressions that occur in the term t
-  template <typename Container, typename OutputIterator>
-  void find_sort_expressions(Container const& container, OutputIterator o)
+  /// \brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \param[in,out] o an output iterator to which all sort expressions occurring in x are written.
+  /// \return All sort expressions that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_sort_expressions(const T& x, OutputIterator o)
   {
-    core::detail::make_find_helper<data::sort_expression, state_formulas::traverser>(o)(container);
+    data::detail::make_find_sort_expressions_traverser<state_formulas::sort_expression_traverser>(o)(x);
   }
-
-  /// \brief Returns all sort expressions that occur in the term t
-  /// \param[in] container an expression or container of expressions
-  /// \return All sort expressions that occur in the term t
-  template <typename Container>
-  std::set<data::sort_expression> find_sort_expressions(Container const& container)
+  
+  /// \brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \return All sort expressions that occur in the object x
+  template <typename T>
+  std::set<data::sort_expression> find_sort_expressions(const T& x)
   {
     std::set<data::sort_expression> result;
-    state_formulas::find_sort_expressions(container, std::inserter(result, result.end()));
+    state_formulas::find_sort_expressions(x, std::inserter(result, result.end()));
     return result;
   }
+//--- end generated state_formulas find code ---//
 
 } // namespace state_formulas
 

@@ -67,6 +67,40 @@ namespace detail {
   }
 
   template <template <class> class Traverser, class OutputIterator>
+  struct find_sort_expressions_traverser: public Traverser<find_sort_expressions_traverser<Traverser, OutputIterator> >
+  {
+    typedef Traverser<find_sort_expressions_traverser<Traverser, OutputIterator> > super; 
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  
+    OutputIterator out;
+  
+    find_sort_expressions_traverser(OutputIterator out_)
+      : out(out_)
+    {}
+  
+    void operator()(const data::sort_expression& v)
+    {
+      *out = v;
+
+      // also traverse sub-expressions!
+      super::operator()(v);
+    }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+  };
+
+  template <template <class> class Traverser, class OutputIterator>
+  find_sort_expressions_traverser<Traverser, OutputIterator>
+  make_find_sort_expressions_traverser(OutputIterator out)
+  {
+    return find_sort_expressions_traverser<Traverser, OutputIterator>(out);
+  }
+
+  template <template <class> class Traverser, class OutputIterator>
   struct find_variables_traverser: public Traverser<find_variables_traverser<Traverser, OutputIterator> >
   {
     typedef Traverser<find_variables_traverser<Traverser, OutputIterator> > super; 
@@ -157,7 +191,7 @@ namespace detail {
   template <typename T, typename OutputIterator>
   void find_variables(const T& x, OutputIterator o)
   {
-    data::detail::make_find_variables_traverser<data::traverser>(o)(x);
+    data::detail::make_find_variables_traverser<data::variable_traverser>(o)(x);
   }
 
   /// \brief Returns all variables that occur in an object
@@ -222,7 +256,7 @@ namespace detail {
   template <typename T, typename OutputIterator>
   void find_identifiers(const T& x, OutputIterator o)
   {
-    data::detail::make_find_identifiers_traverser<data::traverser>(o)(x);
+    data::detail::make_find_identifiers_traverser<data::identifier_string_traverser>(o)(x);
   }
   
   /// \brief Returns all identifiers that occur in an object
@@ -235,31 +269,28 @@ namespace detail {
     data::find_identifiers(x, std::inserter(result, result.end()));
     return result;
   }
+
+  /// \brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \param[in,out] o an output iterator to which all sort expressions occurring in x are written.
+  /// \return All sort expressions that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_sort_expressions(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_sort_expressions_traverser<data::sort_expression_traverser>(o)(x);
+  }
+  
+  /// \brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \return All sort expressions that occur in the object x
+  template <typename T>
+  std::set<data::sort_expression> find_sort_expressions(const T& x)
+  {
+    std::set<data::sort_expression> result;
+    data::find_sort_expressions(x, std::inserter(result, result.end()));
+    return result;
+  }
 //--- end generated data find code ---//
-
-/*
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \param[in,out] o an output iterator to which all data variables occurring in t
-///             are added.
-/// \return All data variables that occur in the term t
-template <typename Container, typename OutputIterator>
-void find_variables(Container const& container, OutputIterator o)
-{
-  core::detail::make_find_helper<variable, detail::traverser>(o)(container);
-}
-
-/// \brief Returns all data variables that occur in a range of expressions
-/// \param[in] container a container with expressions
-/// \return All data variables that occur in the term t
-template <typename Container>
-std::set<variable> find_variables(Container const& container)
-{
-  std::set<variable> result;
-  find_variables(container, std::inserter(result, result.end()));
-  return result;
-}
-*/
 
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param[in] container an expression or container with expressions
@@ -291,27 +322,6 @@ template <typename Container>
 bool search_sort_expression(Container const& container, const sort_expression& s)
 {
   return core::detail::make_search_helper<sort_expression, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
-}
-
-/// \brief Returns all sort expressions that occur in the term t
-/// \param[in] container an expression or container of expressions
-/// \param[in] o an output iterator
-/// \return All sort expressions that occur in the term t
-template <typename Container, typename OutputIterator>
-void find_sort_expressions(Container const& container, OutputIterator o)
-{
-  core::detail::make_find_helper<sort_expression, detail::sort_traverser>(o)(container);
-}
-
-/// \brief Returns all sort expressions that occur in the term t
-/// \param[in] container an expression or container of expressions
-/// \return All sort expressions that occur in the term t
-template <typename Container>
-std::set<sort_expression> find_sort_expressions(Container const& container)
-{
-  std::set<sort_expression> result;
-  find_sort_expressions(container, std::inserter(result, result.end()));
-  return result;
 }
 
 /// \brief Returns true if the term has a given identifier as subterm.

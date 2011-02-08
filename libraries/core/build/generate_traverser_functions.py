@@ -71,7 +71,7 @@ FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occ
   template <typename T, typename OutputIterator>
   void find_variables(const T& x, OutputIterator o)
   {
-    data::detail::make_find_variables_traverser<NAMESPACE::traverser>(o)(x);
+    data::detail::make_find_variables_traverser<NAMESPACE::variable_traverser>(o)(x);
   }
 
   /// \\\\brief Returns all variables that occur in an object
@@ -136,7 +136,7 @@ FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occ
   template <typename T, typename OutputIterator>
   void find_identifiers(const T& x, OutputIterator o)
   {
-    data::detail::make_find_identifiers_traverser<NAMESPACE::traverser>(o)(x);
+    data::detail::make_find_identifiers_traverser<NAMESPACE::identifier_string_traverser>(o)(x);
   }
   
   /// \\\\brief Returns all identifiers that occur in an object
@@ -147,6 +147,27 @@ FIND_VARIABLES_FUNCTION_TEXT = '''  /// \\\\brief Returns all variables that occ
   {
     std::set<core::identifier_string> result;
     NAMESPACE::find_identifiers(x, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \\\\brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \param[in,out] o an output iterator to which all sort expressions occurring in x are written.
+  /// \\\\return All sort expressions that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_sort_expressions(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_sort_expressions_traverser<NAMESPACE::sort_expression_traverser>(o)(x);
+  }
+  
+  /// \\\\brief Returns all sort expressions that occur in an object
+  /// \param[in] x an object containing sort expressions
+  /// \\\\return All sort expressions that occur in the object x
+  template <typename T>
+  std::set<data::sort_expression> find_sort_expressions(const T& x)
+  {
+    std::set<data::sort_expression> result;
+    NAMESPACE::find_sort_expressions(x, std::inserter(result, result.end()));
     return result;
   }
 '''
