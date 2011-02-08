@@ -38,7 +38,9 @@ namespace mcrl2 {
         throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
       }
       sort_expr = sort_expression(t);
+#ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
       assert(!search_sort_expression(sort_expr, unknown_sort()));
+#endif
     }
 
     /** \brief     Type check a data expression.
@@ -77,7 +79,9 @@ namespace mcrl2 {
       else
       {
         data_expr = data_expression(t);
+#ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS
         assert(!search_sort_expression(data_expr, unknown_sort()));
+#endif        
       }
     }
 

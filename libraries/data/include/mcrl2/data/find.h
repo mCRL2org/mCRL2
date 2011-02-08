@@ -357,7 +357,6 @@ bool search_variable(Container const& container, const variable& v)
 {
   std::set<data::variable> variables = data::find_variables(container);
   return variables.find(v) != variables.end();
-//  return core::detail::make_search_helper<variable, detail::selective_data_traverser>(detail::compare_variable(v)).apply(container);
 }
 
 /// \brief Returns true if the term has a given variable as subterm.
@@ -369,7 +368,6 @@ bool search_free_variable(Container container, const variable& v)
 {
   std::set<data::variable> variables = data::find_free_variables(container);
   return variables.find(v) != variables.end();
-//  return detail::make_free_variable_search_helper<detail::selective_binding_aware_traverser>(detail::compare_variable(v)).apply(container);
 }
 
 /// \brief Returns true if the term has a given sort expression as subterm.
@@ -379,9 +377,8 @@ bool search_free_variable(Container container, const variable& v)
 template <typename Container>
 bool search_sort_expression(Container const& container, const sort_expression& s)
 {
-//  std::set<data::sort_expression> sort_expressions = data::find_sort_expressions(container);
-//  return sort_expressions.find(s) != sort_expressions.end();
-  return core::detail::make_search_helper<sort_expression, detail::selective_sort_traverser>(detail::compare_sort(s)).apply(container);
+  std::set<data::sort_expression> sort_expressions = data::find_sort_expressions(container);
+  return sort_expressions.find(s) != sort_expressions.end();
 }
 
 /// \brief Returns true if the term has a given data expression as subterm.
@@ -391,9 +388,8 @@ bool search_sort_expression(Container const& container, const sort_expression& s
 template <typename Container>
 bool search_data_expression(Container const& container, const data_expression& s)
 {
-//  std::set<data::data_expression> data_expressions = data::find_data_expressions(container);
-//  return data_expressions.find(s) != data_expressions.end();
-  return core::detail::make_search_helper<data_expression, detail::selective_data_traverser>(detail::compare_term<data_expression>(s)).apply(container);
+  std::set<data::data_expression> data_expressions = data::find_data_expressions(container);
+  return data_expressions.find(s) != data_expressions.end();
 }
 
 /// \brief Returns the names of a set of data variables.
