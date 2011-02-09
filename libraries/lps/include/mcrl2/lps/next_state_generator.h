@@ -17,11 +17,9 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/shared_ptr.hpp>
 
-#include "mcrl2/core/detail/find_impl.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/data/detail/traverser.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/lps/nextstate/standard.h"
@@ -38,39 +36,6 @@ namespace lps {
       const specification& m_specification;
       legacy_rewriter m_rewriter;
       data::enumerator_factory<mcrl2::data::classic_enumerator<> > m_enumerator;
-
-      // Find function symbols not part of the data specification of lps_spec
-      std::set<data::function_symbol> find_function_symbols(const specification& lps_spec, bool add_symbols_for_global_variables = true) const
-      {
-        std::set<data::function_symbol> result;
-
-        atermpp::aterm_appl context(specification_to_aterm(lps_spec));
-        atermpp::aterm_appl::const_iterator start = ++context.begin();
-
-        ++start;
-
-        if (add_symbols_for_global_variables)
-        {
-          data::variable_list variables(atermpp::aterm_appl(*start)(0));
-
-          // Compensate for symbols that could be used as part of an instantiation of free variables
-          for (data::variable_list::const_iterator j = variables.begin(); j != variables.end(); ++j)
-          {
-            data::data_specification::constructors_const_range r = lps_spec.data().constructors(j->sort());
-            result.insert(r.begin(), r.end());
-            r = lps_spec.data().mappings(j->sort());
-            result.insert(r.begin(), r.end());
-          }
-        }
-
-        // Trick, traverse all but the data specification
-        for (atermpp::aterm_appl::const_iterator i = ++start; i != context.end(); ++i)
-        {
-          core::detail::make_find_helper<data::function_symbol, data::detail::traverser>
-                 (std::inserter(result, result.end()))(*i);
-        }
-        return result;
-      }
 
     public:
       /// \brief A type that represents a transition to a 'next' state.
@@ -205,7 +170,7 @@ namespace lps {
       /// is thrown if the specification contains deadlock summands.
       next_state_generator(const specification& lps_spec)
         : m_specification(lps_spec),
-          m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), find_function_symbols(lps_spec))),
+          m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables())),
           m_enumerator(lps_spec.data(), m_rewriter)
       {
         if (!lps_spec.process().deadlock_summands().empty())
