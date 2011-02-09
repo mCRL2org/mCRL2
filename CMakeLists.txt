@@ -1338,4 +1338,10 @@ if(EXISTS /etc/redhat-release )
   set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxGTK >= ${MCRL2_WX_VER}, wxGTK-gl >= ${MCRL2_WX_VER}, wxBase >= ${MCRL2_WX_VER}, boost-system >= ${MCRL2_BOOST_VER}, boost-serialization >= ${MCRL2_BOOST_VER}, boost-signals >= ${MCRL2_BOOST_VER}, boost-filesystem >= ${MCRL2_BOOST_VER}, boost-regex >= ${MCRL2_BOOST_VER}")
 endif(EXISTS /etc/redhat-release )
 
+# Debian/Ubuntu dependencies
+if(EXISTS /etc/debian_version )
+	message(STATUS "Distribution: Debian/Ubuntu" )
+  set(CPACK_DEBIAN_PACKAGE_DEPENDS "gcc, debhelper (>= 5), libboost-dev (>=${MCRL2_BOOST_VER}), libwxgtk2.8-dev, libwxgtk2.8-0, libglu1-mesa-dev (>= 7.0.1)")
+endif(EXISTS /etc/debian_version )
+
 include(CPack)
