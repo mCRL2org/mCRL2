@@ -15,11 +15,45 @@
 #include <iterator>
 #include "mcrl2/bes/boolean_expression.h"
 #include "mcrl2/bes/traverser.h"
-#include "mcrl2/core/detail/find_impl.h"
 
 namespace mcrl2 {
 
 namespace bes {
+
+namespace detail {
+
+  template <template <class> class Traverser, class OutputIterator>
+  struct find_boolean_variables_traverser: public Traverser<find_boolean_variables_traverser<Traverser, OutputIterator> >
+  {
+    typedef Traverser<find_boolean_variables_traverser<Traverser, OutputIterator> > super; 
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  
+    OutputIterator out;
+  
+    find_boolean_variables_traverser(OutputIterator out_)
+      : out(out_)
+    {}
+
+    void operator()(const boolean_variable& v)
+    {
+      *out = v;
+    }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+  };
+
+  template <template <class> class Traverser, class OutputIterator>
+  find_boolean_variables_traverser<Traverser, OutputIterator>
+  make_find_boolean_variables_traverser(OutputIterator out)
+  {
+    return find_boolean_variables_traverser<Traverser, OutputIterator>(out);
+  } 
+
+} // namespace detail
 
   /// \brief Returns all boolean variables that occur in a range of expressions
   /// \param[in] container a container with expressions
@@ -27,40 +61,21 @@ namespace bes {
   ///             are added.
   /// \return All variables that occur in the term t
   template <typename Container, typename OutputIterator>
-  void find_variables(Container const& container, OutputIterator o)
+  void find_boolean_variables(Container const& container, OutputIterator o)
   {
-    core::detail::make_find_helper<boolean_variable, bes::traverser, OutputIterator>(o)(container);
+    bes::detail::make_find_boolean_variables_traverser<bes::boolean_expression_traverser>(o)(container);
   }
 
   /// \brief Returns all variables that occur in a range of expressions
   /// \param[in] container a container with expressions
   /// \return All variables that occur in the term t
   template <typename Container>
-  std::set<boolean_variable> find_variables(Container const& container)
+  std::set<boolean_variable> find_boolean_variables(Container const& container)
   {
     std::set<boolean_variable> result;
-    bes::find_variables(container, std::inserter(result, result.end()));
+    bes::find_boolean_variables(container, std::inserter(result, result.end()));
     return result;
   }
-
-  // TODO: this is a temporary solution
-  struct compare_boolean_variable
-  {
-    const boolean_variable& m_variable;
-  
-    compare_boolean_variable(const boolean_variable& t)
-     : m_variable(t)
-    {}
-  
-    /// \brief Function call operator
-    /// \param t A term
-    /// \return The function result
-    template <typename Variable>
-    bool operator()(const Variable& t) const
-    {
-      return m_variable == t;
-    }
-  };
 
   /// \brief Returns true if the term has a given boolean variable as subterm.
   /// \param[in] container an expression or container with expressions
@@ -68,9 +83,10 @@ namespace bes {
   /// \param d A boolean variable
   /// \return True if the term has a given boolean variable as subterm.
   template <typename Container>
-  bool search_variable(Container const& container, const boolean_variable& v)
+  bool search_boolean_variable(Container const& container, const boolean_variable& v)
   {
-    return core::detail::make_search_helper<boolean_variable, bes::selective_traverser>(compare_boolean_variable(v)).apply(container);
+    std::set<boolean_variable> boolean_variables = bes::find_boolean_variables(container);
+    return boolean_variables.find(v) != boolean_variables.end();
   }
 
 } // namespace bes

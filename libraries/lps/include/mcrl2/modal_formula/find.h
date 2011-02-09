@@ -12,12 +12,9 @@
 #ifndef MCRL2_MODAL_FORMULA_FIND_H
 #define MCRL2_MODAL_FORMULA_FIND_H
 
-#include "mcrl2/core/detail/find_impl.h"
-#include "mcrl2/data/detail/find_impl.h"
 #include "mcrl2/data/variable.h"                         
 #include "mcrl2/modal_formula/traverser.h"              
 #include "mcrl2/modal_formula/add_binding.h"
-#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 

@@ -16,15 +16,10 @@
 #include <iterator>
 #include <functional>
 #include <set>
-#include "boost/bind.hpp"
-#include "boost/utility/enable_if.hpp"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/core/detail/find_impl.h"
-#include "mcrl2/data/detail/find_impl.h"
-#include "mcrl2/data/detail/traverser.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/traverser.h"
 

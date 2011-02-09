@@ -24,9 +24,9 @@ namespace bes {
 
 namespace detail {
 
-  struct boolean_expression2pbes_expression_traverser: public bes::traverser<boolean_expression2pbes_expression_traverser>
+  struct boolean_expression2pbes_expression_traverser: public bes::boolean_expression_traverser<boolean_expression2pbes_expression_traverser>
   {
-    typedef bes::traverser<boolean_expression2pbes_expression_traverser> super;
+    typedef bes::boolean_expression_traverser<boolean_expression2pbes_expression_traverser> super;
     typedef core::term_traits<pbes_system::pbes_expression> tr;
 
     using super::operator();

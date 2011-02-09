@@ -290,7 +290,7 @@ namespace bes {
         // add successor information
         for (atermpp::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
         {
-          std::set<boolean_variable> succ = bes::find_variables(i->formula());
+          std::set<boolean_variable> succ = bes::find_boolean_variables(i->formula());
           vertex_map::iterator k = m_vertices.find(i->variable());
           std::vector<vertex*>& k_successors = k->second.successors;
           for (std::set<boolean_variable>::iterator j = succ.begin(); j != succ.end(); ++j)

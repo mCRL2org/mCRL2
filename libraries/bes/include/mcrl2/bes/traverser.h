@@ -23,45 +23,6 @@ namespace mcrl2 {
 
 namespace bes {
 
-  /// \brief Traversal class for BES data types
-  template <typename Derived>
-  class traverser: public core::traverser<Derived>
-  {
-    public:
-      typedef core::traverser<Derived> super;
-
-      using super::enter;
-      using super::leave;
-      using super::operator();
-
-      void operator()(const core::identifier_string& )
-      { }
-
-      void operator()(const fixpoint_symbol& )
-      { }
-
-// Include file with traverse member functions. This is to avoid duplication.
-#include "mcrl2/bes/detail/traverser.inc.h"
-  };
-
-  /// \brief Selective traversal class for BES data types
-  template <typename Derived, typename AdaptablePredicate>
-  class selective_traverser : public core::selective_traverser<Derived, AdaptablePredicate, bes::traverser>
-  {
-    public:
-      typedef core::selective_traverser<Derived, AdaptablePredicate, bes::traverser> super;
-
-      using super::enter;
-      using super::leave;
-      using super::operator();
-
-      selective_traverser()
-      { }
-
-      selective_traverser(AdaptablePredicate predicate) : super(predicate)
-      { }
-  };
-
 //--- start generated add_traverser_boolean_expressions code ---//
   template <template <class> class Traverser, class Derived>
   struct add_traverser_boolean_expressions: public Traverser<Derived>

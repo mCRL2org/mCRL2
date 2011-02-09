@@ -15,8 +15,6 @@
 #include <set>
 #include <iterator>
 #include <functional>
-#include "mcrl2/core/detail/find_impl.h"     
-#include "mcrl2/data/detail/find_impl.h"     
 #include "mcrl2/data/variable.h" 
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/pbes_expression.h"

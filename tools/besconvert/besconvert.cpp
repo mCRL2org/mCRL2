@@ -208,7 +208,7 @@ namespace mcrl2 {
               ++current_block;
             }
 
-            std::set<boolean_variable> occurring_variables = bes::find_variables(i->formula());
+            std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
             occurring_variable_count += occurring_variables.size();
 
             statistics[i->variable()] = std::make_pair(current_block, get_operand(i->formula()));
@@ -248,7 +248,7 @@ namespace mcrl2 {
             }
 
             // Edges to successors
-            std::set<boolean_variable> occurring_variables = bes::find_variables(i->formula());
+            std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
             for(std::set<boolean_variable>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
             {
               std::stringstream label;

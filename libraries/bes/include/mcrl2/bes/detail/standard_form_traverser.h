@@ -35,10 +35,10 @@ namespace detail {
   typedef std::pair<boolean_expression, standard_form_type> standard_form_pair;
 
   /// \brief Traverser that implements the standard form normalization.
-  class standard_form_traverser: public bes::traverser<standard_form_traverser>
+  class standard_form_traverser: public bes::boolean_expression_traverser<standard_form_traverser>
   {
     public:
-      typedef bes::traverser<standard_form_traverser> super;
+      typedef bes::boolean_expression_traverser<standard_form_traverser> super;
       typedef core::term_traits<boolean_expression> tr;
 
       using super::operator();

@@ -23,10 +23,10 @@
 using namespace mcrl2;
 using namespace mcrl2::bes;
 
-class custom_traverser: public traverser<custom_traverser>
+class custom_traverser: public boolean_expression_traverser<custom_traverser>
 {
   public:
-    typedef traverser<custom_traverser> super;
+    typedef boolean_expression_traverser<custom_traverser> super;
       
     using super::enter;
     using super::leave;
@@ -55,10 +55,10 @@ void test_custom_traverser()
   core::garbage_collect();
 }
 
-class traverser1: public traverser<traverser1>
+class traverser1: public boolean_variable_traverser<traverser1>
 {
   public:
-    typedef traverser<traverser1> super;
+    typedef boolean_variable_traverser<traverser1> super;
       
     using super::enter;
     using super::leave;

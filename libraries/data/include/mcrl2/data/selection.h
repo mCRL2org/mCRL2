@@ -18,7 +18,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
-// #include "mcrl2/data/detail/dependent_sorts.h"
+#include "mcrl2/data/detail/traverser.h"
 
 namespace mcrl2 {
 

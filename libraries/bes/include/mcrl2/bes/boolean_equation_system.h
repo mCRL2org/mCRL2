@@ -35,7 +35,7 @@ namespace bes {
 
 // forward declarations
 template <typename Container, typename OutputIterator>
-void find_variables(Container const& container, OutputIterator o);
+void find_boolean_variables(Container const& container, OutputIterator o);
 
 /// \brief boolean equation system
   // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
@@ -187,9 +187,9 @@ void find_variables(Container const& container, OutputIterator o);
         std::set<boolean_variable> result;
         for (typename Container::const_iterator i = m_equations.begin(); i != m_equations.end(); ++i)
         {
-          find_variables(i->formula(), std::inserter(result, result.end()));
+          find_boolean_variables(i->formula(), std::inserter(result, result.end()));
         }
-        find_variables(m_initial_state, std::inserter(result, result.end()));
+        find_boolean_variables(m_initial_state, std::inserter(result, result.end()));
         return result;
       }
 

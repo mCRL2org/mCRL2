@@ -108,7 +108,6 @@ namespace mcrl2 {
           print_traverser_base(std::ostream& o)
             : super(o)
           {}
-#include "mcrl2/data/detail/traverser.inc.h"
       };
 
       template <typename Derived>

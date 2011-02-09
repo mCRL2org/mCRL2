@@ -12,12 +12,8 @@
 #ifndef MCRL2_PROCESS_FIND_H
 #define MCRL2_PROCESS_FIND_H
 
-#include "mcrl2/data/variable.h"
-#include "mcrl2/exception.h"
-
-#include "mcrl2/core/detail/find_impl.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/find_impl.h"
+#include "mcrl2/data/variable.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/add_binding.h"
 
