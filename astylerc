@@ -1,0 +1,12 @@
+--indent=spaces=2
+--brackets=break
+--indent-classes
+--indent-switches
+--indent-preprocessor
+--indent-col1-comments
+--min-conditional-indent=0
+--pad-header
+--unpad-paren
+--add-brackets
+--convert-tabs
+--align-pointer=type
