@@ -1058,6 +1058,7 @@ macro( add_bespp_release_test ARGS SAVE)
   	else( NOT ${SAVE} )
       ADD_TEST("bespp_${POST_FIX_TEST}_${mcf_name}" ${bespp_BINARY_DIR}/bespp ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.bes )
   	endif( NOT ${SAVE} )
+	  set_tests_properties("bespp_${POST_FIX_TEST}_${mcf_name}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 	  set_tests_properties("bespp_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "pbes2bes_${BASENAME_TEST}-ARGS_${mcf_name}" )
 	endforeach()
 
@@ -1085,6 +1086,7 @@ macro( add_bessolve_release_test ARGS )
 	foreach(MCF ${SET_OF_MCF} )
     get_filename_component( mcf_name ${MCF} NAME_WE)
     ADD_TEST("bessolve_${POST_FIX_TEST}_${mcf_name}" ${bessolve_BINARY_DIR}/bessolve ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.bes )
+	  set_tests_properties("bessolve_${POST_FIX_TEST}_${mcf_name}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 	  set_tests_properties("bessolve_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "pbes2bes_${BASENAME_TEST}-ARGS_${mcf_name}" )
 	endforeach()
 
@@ -1110,6 +1112,7 @@ macro( add_besconvert_release_test ARGS )
 	foreach(MCF ${SET_OF_MCF} )
     get_filename_component( mcf_name ${MCF} NAME_WE)
     ADD_TEST("besconvert_${POST_FIX_TEST}_${mcf_name}" ${besconvert_BINARY_DIR}/besconvert ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.bes )
+	  set_tests_properties("besconvert_${POST_FIX_TEST}_${mcf_name}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 	  set_tests_properties("besconvert_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "pbes2bes_${BASENAME_TEST}-ARGS_${mcf_name}" )
 	endforeach()
 
@@ -1135,6 +1138,7 @@ macro( add_pbesabstract_release_test ARGS )
 	foreach(MCF ${SET_OF_MCF} )
     get_filename_component( mcf_name ${MCF} NAME_WE)
     ADD_TEST("pbesabstract_${POST_FIX_TEST}_${mcf_name}" ${pbesabstract_BINARY_DIR}/pbesabstract ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.pbes ${testdir}/dummy.pbes )
+	  set_tests_properties("pbesabstract_${POST_FIX_TEST}_${mcf_name}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 	  set_tests_properties("pbesabstract_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "lps2pbes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
 	endforeach()
 
@@ -1172,6 +1176,7 @@ macro( add_pbesinst_release_test ARGS )
 	foreach(MCF ${SET_OF_MCF} )
     get_filename_component( mcf_name ${MCF} NAME_WE)
     ADD_TEST("pbesinst_${POST_FIX_TEST}_${mcf_name}" ${pbesinst_BINARY_DIR}/pbesinst ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.pbes ${testdir}/dummy.${EXT} )
+	  set_tests_properties("pbesinst_${POST_FIX_TEST}_${mcf_name}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 	  set_tests_properties("pbesinst_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "lps2pbes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
 	endforeach()
 
@@ -1210,6 +1215,7 @@ macro( add_pbespareqelm_release_test ARGS )
 	foreach(MCF ${SET_OF_MCF} )
     get_filename_component( mcf_name ${MCF} NAME_WE)
     ADD_TEST("pbespareqelm_${POST_FIX_TEST}_${mcf_name}" ${pbespareqelm_BINARY_DIR}/pbespareqelm ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.pbes ${testdir}/dummy.pbes )
+	  set_tests_properties("pbespareqelm_${POST_FIX_TEST}_${mcf_name}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 	  set_tests_properties("pbespareqelm_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "lps2pbes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
 	endforeach()
 
@@ -1247,6 +1253,7 @@ macro( add_pbespgsolve_release_test ARGS )
 	foreach(MCF ${SET_OF_MCF} )
     get_filename_component( mcf_name ${MCF} NAME_WE)
     ADD_TEST("pbespgsolve_${POST_FIX_TEST}_${mcf_name}" ${pbespgsolve_BINARY_DIR}/pbespgsolve ${ARGS} ${testdir}/${BASENAME_TEST}_${mcf_name}.pbes )
+	  set_tests_properties("pbespgsolve_${POST_FIX_TEST}_${mcf_name}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
 	  set_tests_properties("pbespgsolve_${POST_FIX_TEST}_${mcf_name}" PROPERTIES DEPENDS "lps2pbes_${BASENAME_TEST}-ARGS-f${mcf_name}" )
 	endforeach()
 
@@ -1273,6 +1280,7 @@ macro( add_lpsbisim2pbes_release_test ARGS )
 	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
 
   ADD_TEST("lpsbisim2pbes_${POST_FIX_TEST}" ${lpsbisim2pbes_BINARY_DIR}/lpsbisim2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}.lps )
+	set_tests_properties("lpsbisim2pbes_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
   set_tests_properties("lpsbisim2pbes_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
 
 endmacro( add_lpsbisim2pbes_release_test ARGS )
@@ -1313,6 +1321,36 @@ endmacro( add_txt2bes_release_test ARGS)
 macro( gen_txt2bes_release_tests )
   add_txt2bes_release_test( "" )
 endmacro( gen_txt2bes_release_tests )
+
+########################
+## Macro lpsrealelm  ##
+########################
+
+macro( add_lpsrealelm_release_test ARGS)
+	set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+    set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+	ENDFOREACH( )
+	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+  ADD_TEST("lpsrealelm_${POST_FIX_TEST}" ${lpsrealelm_BINARY_DIR}/lpsrealelm ${ARGS} ${testdir}/${BASENAME_TEST}.lps  ${testdir}/dummy.lps )
+	set_tests_properties("lpsrealelm_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+  set_tests_properties("lpsrealelm_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
+endmacro( add_lpsrealelm_release_test ARGS)
+
+macro( gen_lpsrealelm_release_tests )
+  add_lpsrealelm_release_test( "")
+  add_lpsrealelm_release_test( "--max=10" )
+  add_lpsrealelm_release_test( "-rjitty" )
+  add_lpsrealelm_release_test( "-rjittyp" )
+  add_lpsrealelm_release_test( "-rinner" )
+  add_lpsrealelm_release_test( "-rinnerp" )
+	if( NOT WIN32 )
+    add_lpsrealelm_release_test(  "-rjittyc" )
+    add_lpsrealelm_release_test(  "-rinnerc" )
+	endif( NOT WIN32 )
+endmacro( gen_lpsrealelm_release_tests )
 
 ##############################
 ## tool testcase generation ##
@@ -1564,6 +1602,11 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
 	endif()
 
   if(MCRL2_ENABLE_EXPERIMENTAL)
+	  list(FIND SET_OF_DISABLED_TESTS "lpsrealelm" index_find)
+    if( index_find LESS 0 )
+      gen_lpsrealelm_release_tests()
+	  endif()
+
 	  list(FIND SET_OF_DISABLED_TESTS "besconvert" index_find)
     if( index_find LESS 0 )
       gen_besconvert_release_tests()

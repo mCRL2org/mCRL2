@@ -1308,4 +1308,34 @@ set(CPACK_RPM_PACKAGE_GROUP "Devel")
 set(CPACK_RPM_PACKAGE_DESCRIPTION ${CMAKE_SOURCE_DIR}/README)
 set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
 
+
+# Distro versions
+# /etc/debian_version
+# /etc/gentoo-release
+# /etc/knoppix-version
+# /etc/mandrake-release
+# /etc/pardus-release
+# /etc/puppyversion
+# /etc/redhat-release
+# /etc/sabayon-release
+# /etc/slackware-version
+# /etc/SuSE-release
+# /etc/xandros-desktop-version
+# /etc/zenwalk-version
+
+set(MCRL2_BOOST_VER "1.35" ) 
+set(MCRL2_WX_VER    "2.8" ) 
+
+# OpenSuSE RPM dependencies
+if(EXISTS /etc/SuSE-release )
+	message(STATUS "Distribution: OpenSuSE" )
+  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxWidgets >= ${MCRL2_WX_VER}, wxWidgets-gl >= ${MCRL2_WX_VER}, boost-devel >= ${MCRL2_BOOST_VER}")
+endif(EXISTS /etc/SuSE-release )
+
+# Fedora/RedHat RPM dependencies
+if(EXISTS /etc/redhat-release )
+	message(STATUS "Distribution: RedHat/Fedora" )
+  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxGTK >= ${MCRL2_WX_VER}, wxGTK-gl >= ${MCRL2_WX_VER}, wxBase >= ${MCRL2_WX_VER}, boost-system >= ${MCRL2_BOOST_VER}, boost-serialization >= ${MCRL2_BOOST_VER}, boost-signals >= ${MCRL2_BOOST_VER}, boost-filesystem >= ${MCRL2_BOOST_VER}, boost-regex >= ${MCRL2_BOOST_VER}")
+endif(EXISTS /etc/redhat-release )
+
 include(CPack)
