@@ -31,7 +31,7 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
   using super::operator();
 
 #if BOOST_MSVC
-#include "mcrl2/core/detail/traverser_msvc_inc.h"
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
   
   bool result;
