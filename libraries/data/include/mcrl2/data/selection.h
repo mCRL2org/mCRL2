@@ -14,11 +14,9 @@
 
 #include <algorithm>
 
-#include "mcrl2/core/detail/find_impl.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/detail/traverser.h"
 
 namespace mcrl2 {
 
@@ -36,10 +34,8 @@ namespace mcrl2 {
      * initialisation time and overall performance.
      **/
     class used_data_equation_selector 
-    {
-      
+    {     
       private:
-
         std::set< function_symbol > m_used_symbols;
 
         template < typename Range >
@@ -65,27 +61,26 @@ namespace mcrl2 {
           {
              std::set< function_symbol > used_symbols;
 
-             core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
+             data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end()))(i->lhs());
 
              symbols_for_equation[*i].swap(used_symbols);
           }
 
           for (std::set< data_equation >::size_type n = 0, m = equations.size(); n != m; n = m, m = equations.size())
           {
-			for (std::set< data_equation >::iterator i = equations.begin(); i != equations.end(); )
-			{
-			  if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
+			      for (std::set< data_equation >::iterator i = equations.begin(); i != equations.end(); )
+			      {
+			        if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
               {
-                core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
-                core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
-
+                data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
+                data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
                 equations.erase(i++);
               }
-			  else
-			  {
-				++i;
-			  }
-			}
+			        else
+			        {
+				      ++i;
+			        }
+			      }
           }
         }
 
@@ -105,7 +100,7 @@ namespace mcrl2 {
           
           std::set< function_symbol > used_symbols;
 
-          core::detail::make_find_helper< function_symbol, detail::traverser >(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
+          data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
 
           return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
         }
@@ -118,39 +113,25 @@ namespace mcrl2 {
           add_data_specification_symbols(data_spec);
         }
 
-        // temporary measure: use aterm
-        /// \deprecated
-        used_data_equation_selector(data_specification const& specification, atermpp::aterm_appl const& context, bool add_symbols_for_global_variables = true)
+        used_data_equation_selector(const data_specification& specification,
+                                    const std::set<function_symbol>& function_symbols,
+                                    const atermpp::set<data::variable>& global_variables,
+                                    bool add_symbols_for_global_variables = true
+                                   )
         {
-          atermpp::aterm_appl::const_iterator start = ++context.begin();
-
-          if (core::detail::gsIsLinProcSpec(context))
-          {
-            ++start;
-          }
-
           if (add_symbols_for_global_variables)
           {
-            variable_list variables(atermpp::aterm_appl(*start)(0));
-
             // Compensate for symbols that could be used as part of an instantiation of free variables
-            for (variable_list::const_iterator j = variables.begin(); j != variables.end(); ++j)
+            for (atermpp::set<data::variable>::const_iterator j = global_variables.begin(); j != global_variables.end(); ++j)
             {
               add_symbols(specification.constructors(j->sort()));
               add_symbols(specification.mappings(j->sort()));
             }
           }
-
-          // Trick, traverse all but the data specification
-          for (atermpp::aterm_appl::const_iterator i = ++start; i != context.end(); ++i)
-          {
-            core::detail::make_find_helper< function_symbol, detail::traverser >
-                   (std::inserter(m_used_symbols, m_used_symbols.end()))(*i);
-          }
-
+          m_used_symbols.insert(function_symbols.begin(), function_symbols.end());
           add_data_specification_symbols(specification);
-
         }
+
     };
 
   } // namespace data

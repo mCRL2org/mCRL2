@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/trace/trace.h"
@@ -121,10 +122,14 @@ namespace mcrl2
 
         lgopts->m_rewriter.reset(
                     new mcrl2::data::rewriter(lgopts->specification.data(),
-                    mcrl2::data::used_data_equation_selector(
+                        mcrl2::data::used_data_equation_selector(
                            lgopts->specification.data(), 
-                           mcrl2::lps::specification_to_aterm(lgopts->specification)), 
-                    lgopts->strat));
+                           lps::find_function_symbols(lgopts->specification),
+                           lgopts->specification.global_variables(), 
+                           lgopts->strat
+                       )
+                    )
+                 );
       }
       else 
       {

@@ -61,6 +61,37 @@ namespace detail {
   }
 
   template <template <class> class Traverser, class OutputIterator>
+  struct find_function_symbols_traverser: public Traverser<find_function_symbols_traverser<Traverser, OutputIterator> >
+  {
+    typedef Traverser<find_function_symbols_traverser<Traverser, OutputIterator> > super; 
+    using super::enter;
+    using super::leave;
+    using super::operator();
+  
+    OutputIterator out;
+  
+    find_function_symbols_traverser(OutputIterator out_)
+      : out(out_)
+    {}
+  
+    void operator()(const function_symbol& v)
+    {
+      *out = v;
+    }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+  };
+
+  template <template <class> class Traverser, class OutputIterator>
+  find_function_symbols_traverser<Traverser, OutputIterator>
+  make_find_function_symbols_traverser(OutputIterator out)
+  {
+    return find_function_symbols_traverser<Traverser, OutputIterator>(out);
+  }
+
+  template <template <class> class Traverser, class OutputIterator>
   struct find_sort_expressions_traverser: public Traverser<find_sort_expressions_traverser<Traverser, OutputIterator> >
   {
     typedef Traverser<find_sort_expressions_traverser<Traverser, OutputIterator> > super; 
@@ -316,6 +347,27 @@ namespace detail {
   {
     std::set<data::sort_expression> result;
     data::find_sort_expressions(x, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \param[in,out] o an output iterator to which all function symbols occurring in x are written.
+  /// \return All function symbols that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_function_symbols(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(o)(x);
+  }
+  
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \return All function symbols that occur in the object x
+  template <typename T>
+  std::set<data::function_symbol> find_function_symbols(const T& x)
+  {
+    std::set<data::function_symbol> result;
+    data::find_function_symbols(x, std::inserter(result, result.end()));
     return result;
   }
 //--- end generated data find code ---//

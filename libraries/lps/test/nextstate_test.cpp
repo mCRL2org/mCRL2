@@ -17,6 +17,7 @@
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/find.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -43,7 +44,7 @@ void test_nextstate(specification s, size_t expected_states, size_t expected_tra
   s.process().deadlock_summands().clear(); // It is important to clear the deadlock summands if per_summand = false
 
   legacy_rewriter R(s.data(),
-           mcrl2::data::used_data_equation_selector(s.data(), lps::specification_to_aterm(s)));
+           mcrl2::data::used_data_equation_selector(s.data(), lps::find_function_symbols(s), s.global_variables()));
 
   mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > E(s.data(), R);
 

@@ -127,6 +127,27 @@ namespace action_formulas {
     action_formulas::find_sort_expressions(x, std::inserter(result, result.end()));
     return result;
   }
+
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \param[in,out] o an output iterator to which all function symbols occurring in x are written.
+  /// \return All function symbols that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_function_symbols(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_function_symbols_traverser<action_formulas::data_expression_traverser>(o)(x);
+  }
+  
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \return All function symbols that occur in the object x
+  template <typename T>
+  std::set<data::function_symbol> find_function_symbols(const T& x)
+  {
+    std::set<data::function_symbol> result;
+    action_formulas::find_function_symbols(x, std::inserter(result, result.end()));
+    return result;
+  }
 //--- end generated action_formulas find code ---//
 
 } // namespace action_formulas
@@ -240,6 +261,27 @@ namespace regular_formulas {
     regular_formulas::find_sort_expressions(x, std::inserter(result, result.end()));
     return result;
   }
+
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \param[in,out] o an output iterator to which all function symbols occurring in x are written.
+  /// \return All function symbols that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_function_symbols(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_function_symbols_traverser<regular_formulas::data_expression_traverser>(o)(x);
+  }
+  
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \return All function symbols that occur in the object x
+  template <typename T>
+  std::set<data::function_symbol> find_function_symbols(const T& x)
+  {
+    std::set<data::function_symbol> result;
+    regular_formulas::find_function_symbols(x, std::inserter(result, result.end()));
+    return result;
+  }
 //--- end generated regular_formulas find code ---//
 
 } // namespace regular_formulas
@@ -351,6 +393,27 @@ namespace state_formulas {
   {
     std::set<data::sort_expression> result;
     state_formulas::find_sort_expressions(x, std::inserter(result, result.end()));
+    return result;
+  }
+
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \param[in,out] o an output iterator to which all function symbols occurring in x are written.
+  /// \return All function symbols that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_function_symbols(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_function_symbols_traverser<state_formulas::data_expression_traverser>(o)(x);
+  }
+  
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \return All function symbols that occur in the object x
+  template <typename T>
+  std::set<data::function_symbol> find_function_symbols(const T& x)
+  {
+    std::set<data::function_symbol> result;
+    state_formulas::find_function_symbols(x, std::inserter(result, result.end()));
     return result;
   }
 //--- end generated state_formulas find code ---//

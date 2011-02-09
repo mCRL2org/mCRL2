@@ -174,6 +174,27 @@ namespace detail {
     pbes_system::find_sort_expressions(x, std::inserter(result, result.end()));
     return result;
   }
+
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \param[in,out] o an output iterator to which all function symbols occurring in x are written.
+  /// \return All function symbols that occur in the term x
+  template <typename T, typename OutputIterator>
+  void find_function_symbols(const T& x, OutputIterator o)
+  {
+    data::detail::make_find_function_symbols_traverser<pbes_system::data_expression_traverser>(o)(x);
+  }
+  
+  /// \brief Returns all function symbols that occur in an object
+  /// \param[in] x an object containing function symbols
+  /// \return All function symbols that occur in the object x
+  template <typename T>
+  std::set<data::function_symbol> find_function_symbols(const T& x)
+  {
+    std::set<data::function_symbol> result;
+    pbes_system::find_function_symbols(x, std::inserter(result, result.end()));
+    return result;
+  }
 //--- end generated pbes_system find code ---//
 
   /// \brief Returns all data variables that occur in a range of expressions
