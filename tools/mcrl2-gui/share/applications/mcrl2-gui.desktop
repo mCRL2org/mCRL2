@@ -1,0 +1,9 @@
+#!/usr/bin/env xdg-open
+[Desktop Entry]
+Name=mCRL2
+Exec=mcrl2-gui
+Terminal=false
+Icon=mcrl2-gui
+Encoding=UTF-8
+Type=Application
+Categories=Office;Math;

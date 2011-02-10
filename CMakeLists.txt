@@ -1305,7 +1305,17 @@ set(CPACK_RESOURCE_FILE_README  ${CMAKE_CURRENT_BINARY_DIR}/README.txt )
 #Variables for RPM packaging
 set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
 set(CPACK_RPM_PACKAGE_GROUP "Devel")
-set(CPACK_RPM_PACKAGE_DESCRIPTION ${CMAKE_SOURCE_DIR}/README)
+set(CPACK_RPM_PACKAGE_DESCRIPTION "the mCRL2 formal specification language toolset 
+ mCRL2 stands for micro Common Representation Language 2.  It is a
+ specification language that can be used to specify and analyse the
+ behaviour of distributed systems and protocols and is the successor to
+ muCRL.  Using its accompanying toolset, systems can be analysed and
+ verified automatically.
+ 
+ This toolset supports a collection of tools for linearisation, simulation,
+ state-space exploration and generation and tools to optimise and analyse
+ specifications.  Moreover, state spaces can be manipulated, visualised and
+ analysed.")
 set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
 
 

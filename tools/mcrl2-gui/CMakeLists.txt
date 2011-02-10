@@ -21,6 +21,13 @@ if(NOT APPLE)
   configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png" COPYONLY )
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png DESTINATION share/mcrl2)
+
+  if( UNIX )
+		# Install desktop icons			
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/icons/mcrl2-gui.png DESTINATION share/icons)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications)
+  endif( UNIX )
+
 else(NOT APPLE)
   # Copy directly into application
   configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY )
