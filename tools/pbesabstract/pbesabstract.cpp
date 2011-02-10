@@ -47,7 +47,7 @@ class pbes_abstract_tool: public input_output_tool
     {
       super::add_options(desc);
       desc.add_option("select",
-          make_optional_argument("NAME", ""),
+          make_optional_argument("NUM", ""),
           "select the PBES parameters that are allowed to be abstracted. Wild cards are allowed\n"
           "\n"
           "Examples:\n\n"
@@ -56,8 +56,8 @@ class pbes_abstract_tool: public input_output_tool
           "          *(*:Bool)",
           'f');
         desc.add_option("abstraction-value",
-          make_optional_argument("NAME", "1"),
-          "the abstraction value (true/1 or false/0)",
+          make_optional_argument("NUM", "1"),
+          "the abstraction value 0 (false) or 1 (true)",
           'a');
     }
 
