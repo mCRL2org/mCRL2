@@ -17,16 +17,14 @@
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
-
-//using namespace mcrl2::data;
-//using namespace mcrl2::pbes_system::pbes_expr;
+#include "mcrl2/exception.h"
 
 using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
-using utilities::make_optional_argument;
+using utilities::make_mandatory_argument;
 using utilities::tools::tool;
 
 /// \brief Base class for tools that take a file as input.
@@ -104,17 +102,35 @@ class input_input_tool: public tool
     }
 };
 
+enum bisimulation_type
+{
+  strong_bisim,
+  weak_bisim,
+  branching_bisim,
+  branching_sim
+};
+
+bisimulation_type parse_bisimulation_type(const std::string& type)
+{
+  if (type == "strong-bisim"        ) return strong_bisim;
+  else if (type == "weak-bisim"     ) return weak_bisim;  
+  else if (type == "branching-bisim") return branching_bisim;
+  else if (type == "branching-sim"  ) return branching_sim;
+  throw mcrl2::runtime_error(std::string("unknown bisimulation type ") + type + "!");
+  return strong_bisim;
+}
+
 std::string print_bisimulation_type(int type)
 {
   switch (type)
   {
-    case 0:
-      return "branching bisimulation";
-    case 1:
+    case strong_bisim:
       return "strong bisimulation";
-    case 2:
+    case weak_bisim:
       return "weak bisimulation";
-    case 3:
+    case branching_bisim:
+      return "branching bisimulation";
+    case branching_sim:
       return "branching simulation equivalence";
   }
   return "unknown type";
@@ -127,7 +143,7 @@ class lpsbisim2pbes_tool: public input_input_tool
     std::string m_output_filename;
 
     /// \brief The type of bisimulation
-    int bisimulation_type;
+    bisimulation_type m_bisimulation_type;
 
     /// \brief If true the result is normalized
     bool normalize;
@@ -150,18 +166,21 @@ class lpsbisim2pbes_tool: public input_input_tool
       }
       normalize = parser.options.count("normalize") > 0;
 
-      bisimulation_type = parser.option_argument_as< int >("bisimulation-type");
-      if (bisimulation_type < 0 || bisimulation_type > 3)
-      {
-        throw std::runtime_error("Error: illegal bisimulation type specified.");
-      }
+      m_bisimulation_type = parse_bisimulation_type(parser.option_argument("bisimulation"));
     }
 
     void add_options(interface_description& desc) /*< One can add command line
                      options by overriding the virtual function `add_options`. >*/
     {
       desc.add_option("normalize", "normalize the result", 'n');
-      desc.add_option("bisimulation-type", make_optional_argument("NAME", "0"), "the type of bisimulation", 'b');
+      desc.add_option("bisimulation", make_mandatory_argument("NAME"),
+                      "generate a PBES for the bisimulation type NAME:\n"
+                      "'strong-bisim' for strong bisimilarity,\n"
+                      "'weak-bisim' for weak bisimilarity,'\n"
+                      "'branching-bisim' for branching bisimilarity,\n"
+                      "'branching-sim' for branching simulation equivalence"
+                      ,'b'
+                     );
     }
 
   public:
@@ -173,11 +192,6 @@ class lpsbisim2pbes_tool: public input_input_tool
         "Reads two files containing an LPS, and computes a PBES that expresses "
         "bisimulation between the two. If OUTFILE is not present, standard "
         "output is used.\n"
-        "Four types of bisimulation are supported:\n"
-        "  0 : branching bisimulation\n"
-        "  1 : strong bisimulation\n"
-        "  2 : weak bisimulation\n"
-        "  3 : branching simulation equivalence"
       )
     {}
 
@@ -204,25 +218,25 @@ class lpsbisim2pbes_tool: public input_input_tool
         std::clog << "  input file 1 :         " << input_filename1() << std::endl;
         std::clog << "  input file 2 :         " << input_filename2() << std::endl;
         std::clog << "  output file  :         " << output_filename() << std::endl;
-        std::clog << "  bisimulation :         " << print_bisimulation_type(bisimulation_type) << std::endl;
+        std::clog << "  bisimulation :         " << print_bisimulation_type(m_bisimulation_type) << std::endl;
         std::clog << "  normalize    :         " << normalize << std::endl;
       }
 
       M.load(input_filename1());
       S.load(input_filename2());
       pbes<> result;
-      switch (bisimulation_type)
+      switch (m_bisimulation_type)
       {
-        case 0:
-          result = branching_bisimulation(M, S);
-          break;
-        case 1:
+        case strong_bisim:
           result = strong_bisimulation(M, S);
           break;
-        case 2:
+        case weak_bisim:
           result = weak_bisimulation(M, S);
           break;
-        case 3:
+        case branching_bisim:
+          result = branching_bisimulation(M, S);
+          break;
+        case branching_sim:
           result = branching_simulation_equivalence(M, S);
           break;
       }
