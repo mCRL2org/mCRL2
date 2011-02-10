@@ -16,33 +16,33 @@
 
 namespace grape
 {
-  namespace libgrape
-  {
+namespace libgrape
+{
 
-    /**
-     * \short Represents a coordinate on a 2D plane.
-     */
-    struct coordinate
-    {
-        float m_x; /**< x-coordinate. */
-        float m_y; /**< y-coordinate. */
+/**
+ * \short Represents a coordinate on a 2D plane.
+ */
+struct coordinate
+{
+  float m_x; /**< x-coordinate. */
+  float m_y; /**< y-coordinate. */
 
-        /** @return True if the given coordinate is the same as the object. */
-        bool operator==( const coordinate &p_c );
-        /** Assigns the coordinate @p p_c to this instance of the coordinate. */
-        coordinate & operator=( const coordinate &p_c );
-        /** @return Return the coordinate that is the difference between the two coordinates. */
-        coordinate operator-(const coordinate &p_c);
-        /** @return Return the coordinate that is the sum of the two coordinates. */
-        coordinate operator+(const coordinate &p_c);
-    };
+  /** @return True if the given coordinate is the same as the object. */
+  bool operator==(const coordinate& p_c);
+  /** Assigns the coordinate @p p_c to this instance of the coordinate. */
+  coordinate& operator=(const coordinate& p_c);
+  /** @return Return the coordinate that is the difference between the two coordinates. */
+  coordinate operator-(const coordinate& p_c);
+  /** @return Return the coordinate that is the sum of the two coordinates. */
+  coordinate operator+(const coordinate& p_c);
+};
 
-    /**
-     * List of coordinate. Represents a list of coordinates.
-     */
-    WX_DECLARE_OBJARRAY( coordinate, list_of_coordinate );
+/**
+ * List of coordinate. Represents a list of coordinates.
+ */
+WX_DECLARE_OBJARRAY(coordinate, list_of_coordinate);
 
-  } // namespace libgrape
+} // namespace libgrape
 } // namespace grape
 
 #endif // LIBGRAPE_COORDINATE_H

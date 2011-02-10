@@ -17,7 +17,8 @@
 
 #include "aterm2.h"
 
-namespace atermpp {
+namespace atermpp
+{
 
 class aterm;
 
@@ -43,17 +44,22 @@ struct non_aterm_traits
   /// \param t A term
   /// \return The ATerm that corresponds to the term t.
   static T term(const T& t)
-  { return t; }
+  {
+    return t;
+  }
 
   /// \brief Returns a pointer to the ATerm that corresponds to the term t.
   /// \param t A term
   /// \return A pointer to the  ATerm that corresponds to the term t.
   static const T* ptr(const T& t)
-  { return &t; }
+  {
+    return &t;
+  }
 };
 
 template < typename T, typename C = void >
-struct select_traits_base {
+struct select_traits_base
+{
   typedef non_aterm_traits< T > base_type;
 };
 
@@ -61,40 +67,85 @@ struct select_traits_base {
 /// with the garbage collector, and how it can be converted to an ATerm.
 template <typename T>
 struct aterm_traits: public select_traits_base< T >::base_type
-{};
+  {};
 
 /// \cond INTERNAL_DOCS
 template <>
 struct aterm_traits<ATerm>
 {
   typedef ATerm aterm_type;
-  static void protect(ATerm* t)       { ATprotect(t); }
-  static void unprotect(ATerm* t)     { ATunprotect(t); }
-  static void mark(ATerm t)           { ATmarkTerm(t); }
-  static ATerm term(ATerm t)          { return t; }
-  static ATerm* ptr(ATerm& t)         { return &t; }
+  static void protect(ATerm* t)
+  {
+    ATprotect(t);
+  }
+  static void unprotect(ATerm* t)
+  {
+    ATunprotect(t);
+  }
+  static void mark(ATerm t)
+  {
+    ATmarkTerm(t);
+  }
+  static ATerm term(ATerm t)
+  {
+    return t;
+  }
+  static ATerm* ptr(ATerm& t)
+  {
+    return &t;
+  }
 };
 
 template <>
 struct aterm_traits<ATermList>
 {
   typedef ATermList aterm_type;
-  static void protect(ATermList* t)   { aterm_traits<ATerm>::protect(reinterpret_cast<ATerm*>(t)); }
-  static void unprotect(ATermList* t) { aterm_traits<ATerm>::unprotect(reinterpret_cast<ATerm*>(t)); }
-  static void mark(ATermList t)       { aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t)); }
-  static ATerm term(ATermList t)      { return reinterpret_cast<ATerm>(t); }
-  static ATerm* ptr(ATermList& t)     { return reinterpret_cast<ATerm*>(&t); }
+  static void protect(ATermList* t)
+  {
+    aterm_traits<ATerm>::protect(reinterpret_cast<ATerm*>(t));
+  }
+  static void unprotect(ATermList* t)
+  {
+    aterm_traits<ATerm>::unprotect(reinterpret_cast<ATerm*>(t));
+  }
+  static void mark(ATermList t)
+  {
+    aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t));
+  }
+  static ATerm term(ATermList t)
+  {
+    return reinterpret_cast<ATerm>(t);
+  }
+  static ATerm* ptr(ATermList& t)
+  {
+    return reinterpret_cast<ATerm*>(&t);
+  }
 };
 
 template <>
 struct aterm_traits<ATermAppl>
 {
   typedef ATermAppl aterm_type;
-  static void protect(ATermAppl* t)   { aterm_traits<ATerm>::protect(reinterpret_cast<ATerm*>(t)); }
-  static void unprotect(ATermAppl* t) { aterm_traits<ATerm>::unprotect(reinterpret_cast<ATerm*>(t)); }
-  static void mark(ATermAppl t)       { aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t)); }
-  static ATerm term(ATermAppl t)      { return reinterpret_cast<ATerm>(t); }
-  static ATerm* ptr(ATermAppl& t)     { return reinterpret_cast<ATerm*>(&t); }
+  static void protect(ATermAppl* t)
+  {
+    aterm_traits<ATerm>::protect(reinterpret_cast<ATerm*>(t));
+  }
+  static void unprotect(ATermAppl* t)
+  {
+    aterm_traits<ATerm>::unprotect(reinterpret_cast<ATerm*>(t));
+  }
+  static void mark(ATermAppl t)
+  {
+    aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t));
+  }
+  static ATerm term(ATermAppl t)
+  {
+    return reinterpret_cast<ATerm>(t);
+  }
+  static ATerm* ptr(ATermAppl& t)
+  {
+    return reinterpret_cast<ATerm*>(&t);
+  }
 };
 
 /* template <>
@@ -123,11 +174,26 @@ template <>
 struct aterm_traits<ATermInt>
 {
   typedef ATermInt aterm_type;
-  static void protect(ATermInt* t)    { aterm_traits<ATerm>::protect(reinterpret_cast<ATerm*>(t)); }
-  static void unprotect(ATermInt* t)  { aterm_traits<ATerm>::unprotect(reinterpret_cast<ATerm*>(t)); }
-  static void mark(ATermInt t)        { aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t)); }
-  static ATerm term(ATermInt t)       { return reinterpret_cast<ATerm>(t); }
-  static ATerm* ptr(ATermInt& t)      { return reinterpret_cast<ATerm*>(&t); }
+  static void protect(ATermInt* t)
+  {
+    aterm_traits<ATerm>::protect(reinterpret_cast<ATerm*>(t));
+  }
+  static void unprotect(ATermInt* t)
+  {
+    aterm_traits<ATerm>::unprotect(reinterpret_cast<ATerm*>(t));
+  }
+  static void mark(ATermInt t)
+  {
+    aterm_traits<ATerm>::mark(reinterpret_cast<ATerm>(t));
+  }
+  static ATerm term(ATermInt t)
+  {
+    return reinterpret_cast<ATerm>(t);
+  }
+  static ATerm* ptr(ATermInt& t)
+  {
+    return reinterpret_cast<ATerm*>(&t);
+  }
 };
 /// \endcond
 

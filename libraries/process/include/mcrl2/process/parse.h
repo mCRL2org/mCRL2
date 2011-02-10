@@ -23,66 +23,68 @@
 #include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/translate_user_notation.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace process {
+namespace process
+{
 
-  /// \brief Parses a process specification from an input stream
-  /// \param spec_stream An input stream
-  /// \param alpha_reduce Indicates whether alphabet reductions need to be performed
-  /// \return The parse result
-  inline
-  process_specification parse_process_specification(
-                                  std::istream& spec_stream, 
-                                  const bool alpha_reduce=false)
+/// \brief Parses a process specification from an input stream
+/// \param spec_stream An input stream
+/// \param alpha_reduce Indicates whether alphabet reductions need to be performed
+/// \return The parse result
+inline
+process_specification parse_process_specification(
+  std::istream& spec_stream,
+  const bool alpha_reduce=false)
+{
+  ATermAppl x = core::parse_proc_spec(spec_stream);
+  if (x == NULL)
   {
-    ATermAppl x = core::parse_proc_spec(spec_stream);
-    if (x == NULL)
-    {
-      throw mcrl2::runtime_error("parse error");
-    }
-
-    process_specification result(x, false);
-    type_check(result);
-    if (alpha_reduce)
-    {
-      apply_alphabet_reduction(result);
-    }
-    process::translate_user_notation(result);
-    process::normalize_sorts(result, result.data());
-
-    return result;
+    throw mcrl2::runtime_error("parse error");
   }
 
-  /// \brief Parses a process specification from a string
-  /// \param spec_string A string
-  /// \param alpha_reduce Indicates whether alphabet reductions needdto be performed
-  /// \return The parse result
-  inline
-  process_specification parse_process_specification(
-                                  const std::string& spec_string, 
-                                  const bool alpha_reduce=false)
+  process_specification result(x, false);
+  type_check(result);
+  if (alpha_reduce)
   {
-    std::istringstream spec_stream(spec_string);
-    return parse_process_specification(spec_stream, alpha_reduce);
+    apply_alphabet_reduction(result);
   }
+  process::translate_user_notation(result);
+  process::normalize_sorts(result, result.data());
 
-  /// \brief Parses and type checks a process expression.
-  /// \param[in] text The input text containing a process expression.
-  /// \param[in] data_decl A declaration of data and actions ("glob m:Nat; act a:Nat;").
-  /// \param[in] proc_decl A process declaration ("proc P(n: Nat);").
-  inline
-  process_expression parse_process_expression(const std::string& text,
-                                              const std::string& data_decl,
-                                              const std::string& proc_decl
-                                             )
-  {
-    std::string proc_text = core::regex_replace(";", " = delta;", proc_decl);
-    std::string init_text = "init\n     " + text + ";\n";
-    std::string spec_text = data_decl + "\n" + proc_text + "\n" + init_text;
-    process_specification spec = parse_process_specification(spec_text);
-    return spec.init();
-  }
+  return result;
+}
+
+/// \brief Parses a process specification from a string
+/// \param spec_string A string
+/// \param alpha_reduce Indicates whether alphabet reductions needdto be performed
+/// \return The parse result
+inline
+process_specification parse_process_specification(
+  const std::string& spec_string,
+  const bool alpha_reduce=false)
+{
+  std::istringstream spec_stream(spec_string);
+  return parse_process_specification(spec_stream, alpha_reduce);
+}
+
+/// \brief Parses and type checks a process expression.
+/// \param[in] text The input text containing a process expression.
+/// \param[in] data_decl A declaration of data and actions ("glob m:Nat; act a:Nat;").
+/// \param[in] proc_decl A process declaration ("proc P(n: Nat);").
+inline
+process_expression parse_process_expression(const std::string& text,
+    const std::string& data_decl,
+    const std::string& proc_decl
+                                           )
+{
+  std::string proc_text = core::regex_replace(";", " = delta;", proc_decl);
+  std::string init_text = "init\n     " + text + ";\n";
+  std::string spec_text = data_decl + "\n" + proc_text + "\n" + init_text;
+  process_specification spec = parse_process_specification(spec_text);
+  return spec.init();
+}
 
 } // namespace process
 

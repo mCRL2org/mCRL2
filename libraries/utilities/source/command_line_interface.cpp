@@ -21,7 +21,7 @@
 #include <iterator>
 
 #if !defined(MCRL2_DISABLE_BOOST_REGEX)
-  #include <boost/regex.hpp>
+#include <boost/regex.hpp>
 #endif
 
 #include <fstream>
@@ -39,890 +39,1036 @@
 
 #include "mcrl2/exception.h"
 
-namespace mcrl2 {
-  namespace utilities {
+namespace mcrl2
+{
+namespace utilities
+{
 
-    template <typename Iter>
-    std::string substring(const std::string& s, Iter first, Iter last)
+template <typename Iter>
+std::string substring(const std::string& s, Iter first, Iter last)
+{
+  assert(last <= s.end());
+  return s.substr(first - s.begin(), last - first);
+}
+
+/// \cond INTERNAL
+/**
+ * Inserts newline characters while reading the input from left to right.
+ * When a newline is inserted the next read newline is discarded.
+ *  - if a newline is read the previous line was wrapped the first
+ *
+ * To force a new-line at some position add two successive newline characters.
+ *
+ * \param[in] input the input string
+ * \param[in] indent used as fixed indentation after end of line
+ * \param[in] width the maximum width of the text
+ * \pre 0 < width and no word can be longer than width
+ * \return string with newlines inserted such that the number of characters
+ * between any two consecutive newlines is smaller than width
+ **/
+static std::string word_wrap(std::string const& input, const size_t width, std::string const& indent = "")
+{
+  std::ostringstream out;
+
+  std::string            variable_indent = input.substr(0, input.find_first_not_of(" \t"));
+  std::string::size_type space_left      = width;
+
+  std::string::const_iterator i = input.begin();
+  std::string::const_iterator word_start = i;
+
+  while (i != input.end())
+  {
+    if (space_left - (i - word_start) < 1)   // line too long
     {
-      assert(last <= s.end());
-      return s.substr(first - s.begin(), last - first);
+
+      out << std::endl << indent << variable_indent << substring(input, word_start, i);
+
+      space_left = width - (i - word_start) - variable_indent.size();
+      word_start = i;
+    }
+    else if (*i == '\n')
+    {
+      if (word_start != i)
+      {
+        out << substring(input, word_start, i);
+      }
+
+      ++i;
+
+      // store new indent
+      std::string::size_type start = i - input.begin();
+      std::string::size_type end   = input.find_first_not_of(" \t", start);
+
+      if (end != std::string::npos)
+      {
+        i              += end - start;
+        variable_indent = input.substr(start, end - start);
+      }
+      else
+      {
+        variable_indent.clear();
+      }
+
+      // copy word and newline
+      out << std::endl << indent << variable_indent;
+
+      space_left = width - variable_indent.size();
+      word_start = i;
+    }
+    else if (1 < space_left && (*i == ' ' || *i == '\t'))
+    {
+      out << substring(input, word_start, ++i);
+
+      space_left -= i - word_start;
+      word_start  = i;
+    }
+    else
+    {
+      ++i;
+    }
+  }
+
+  out << substring(input, word_start, input.end());
+
+  return out.str();
+}
+
+/**
+ * \param[in] left_width the width of the left column
+ * \param[in] right_width the width of the right column
+ * \return formatted string that represents the option description
+ **/
+std::string interface_description::option_descriptor::textual_description(
+  const size_t left_width, const size_t right_width) const
+{
+  std::ostringstream s;
+  std::string        options;
+
+  if (m_short != '\0')
+  {
+    options = "  -" + std::string(1, m_short);
+
+    if (m_argument.get() != 0)
+    {
+      options += (m_argument->is_optional()) ?
+                 "[" + m_argument->get_name() + "]" : m_argument->get_name();
     }
 
-    /// \cond INTERNAL
-    /**
-     * Inserts newline characters while reading the input from left to right.
-     * When a newline is inserted the next read newline is discarded.
-     *  - if a newline is read the previous line was wrapped the first
-     *
-     * To force a new-line at some position add two successive newline characters.
-     *
-     * \param[in] input the input string
-     * \param[in] indent used as fixed indentation after end of line
-     * \param[in] width the maximum width of the text
-     * \pre 0 < width and no word can be longer than width
-     * \return string with newlines inserted such that the number of characters
-     * between any two consecutive newlines is smaller than width
-     **/
-    static std::string word_wrap(std::string const& input, const size_t width, std::string const& indent = "") {
-      std::ostringstream out;
+    options += ", ";
+  }
+  else
+  {
+    options = "      ";
+  }
 
-      std::string            variable_indent = input.substr(0, input.find_first_not_of(" \t"));
-      std::string::size_type space_left      = width;
+  options += "--" + m_long;
 
-      std::string::const_iterator i = input.begin();
-      std::string::const_iterator word_start = i;
-
-      while (i != input.end()) {
-        if (space_left - (i - word_start) < 1) { // line too long
-
-          out << std::endl << indent << variable_indent << substring(input, word_start, i);
-
-          space_left = width - (i - word_start) - variable_indent.size();
-          word_start = i;
-        }
-        else if (*i == '\n') {
-          if (word_start != i) {
-            out << substring(input, word_start, i);
-          }
-
-          ++i;
-
-          // store new indent
-          std::string::size_type start = i - input.begin();
-          std::string::size_type end   = input.find_first_not_of(" \t", start);
-
-          if (end != std::string::npos) {
-            i              += end - start;
-            variable_indent = input.substr(start, end - start);
-          }
-          else {
-            variable_indent.clear();
-          }
-
-          // copy word and newline
-          out << std::endl << indent << variable_indent;
-
-          space_left = width - variable_indent.size();
-          word_start = i;
-        }
-        else if (1 < space_left && (*i == ' ' || *i == '\t')) {
-          out << substring(input, word_start, ++i);
-
-          space_left -= i - word_start;
-          word_start  = i;
-        }
-        else {
-          ++i;
-        }
-      }
-
-      out << substring(input, word_start, input.end());
-
-      return out.str();
-    }
-
-    /**
-     * \param[in] left_width the width of the left column
-     * \param[in] right_width the width of the right column
-     * \return formatted string that represents the option description
-     **/
-    std::string interface_description::option_descriptor::textual_description(
-                        const size_t left_width, const size_t right_width) const {
-      std::ostringstream s;
-      std::string        options;
-
-      if (m_short != '\0') {
-        options = "  -" + std::string(1, m_short);
-
-        if (m_argument.get() != 0) {
-          options += (m_argument->is_optional()) ?
-                "[" + m_argument->get_name() + "]" : m_argument->get_name();
-        }
-
-        options += ", ";
-      }
-      else {
-        options = "      ";
-      }
-
-      options += "--" + m_long;
-
-      if (m_argument.get() != 0) {
-        options += ((m_argument->is_optional()) ?
+  if (m_argument.get() != 0)
+  {
+    options += ((m_argument->is_optional()) ?
                 "[=" + m_argument->get_name() + "]" : "=" + m_argument->get_name());
-      }
+  }
 
-      if (options.size() < left_width) {
-        s << options << std::string(left_width - options.size(), ' ');
-      }
-      else {
-        s << options << std::endl << std::string(left_width, ' ');
-      }
+  if (options.size() < left_width)
+  {
+    s << options << std::string(left_width - options.size(), ' ');
+  }
+  else
+  {
+    s << options << std::endl << std::string(left_width, ' ');
+  }
 
-      s << word_wrap(m_description, right_width, std::string(left_width, ' ')) << std::endl;
+  s << word_wrap(m_description, right_width, std::string(left_width, ' ')) << std::endl;
 
-      return s.str();
+  return s.str();
+}
+
+std::string interface_description::option_descriptor::man_page_description() const
+{
+
+  std::ostringstream s;
+
+  s << ".TP" << std::endl;
+
+  if (m_short != '\0')
+  {
+    s << "\\fB-" << std::string(1, m_short) << "\\fR";
+
+    if (m_argument.get() != 0)
+    {
+      if (m_argument->is_optional())
+      {
+        s << "[\\fI" << m_argument->get_name() << "\\fR]";
+      }
+      else
+      {
+        s << "\\fI" << m_argument->get_name() << "\\fR";
+      }
     }
 
-    std::string interface_description::option_descriptor::man_page_description() const {
+    s << ", ";
+  }
 
-      std::ostringstream s;
+  s << "\\fB--" << m_long << "\\fR";
 
-      s << ".TP" << std::endl;
+  if (m_argument.get() != 0)
+  {
+    s << ((m_argument->is_optional()) ?
+          "[=\\fI" + m_argument->get_name() + "\\fR]" :
+          "=\\fI" + m_argument->get_name() + "\\fR");
+  }
 
-      if (m_short != '\0') {
-        s << "\\fB-" << std::string(1, m_short) << "\\fR";
+  s << std::endl
+    << boost::xpressive::regex_replace(word_wrap(m_description, 80),
+                                       boost::xpressive::sregex(boost::xpressive::as_xpr('\'')), std::string("\\&'")) << std::endl;
 
-        if (m_argument.get() != 0) {
-          if (m_argument->is_optional()) {
-            s << "[\\fI" << m_argument->get_name() << "\\fR]";
-          }
-          else {
-            s << "\\fI" << m_argument->get_name() << "\\fR";
-          }
-        }
+  return s.str();
+}
 
-        s << ", ";
+std::string interface_description::option_descriptor::wiki_page_description() const
+{
+
+  std::ostringstream s;
+
+  s << "; ";
+
+  if (m_short != '\0')
+  {
+    s << "<tt>-" << std::string(1, m_short) << "</tt>";
+
+    if (m_argument.get() != 0)
+    {
+      if (m_argument->is_optional())
+      {
+        s << "[''" << m_argument->get_name() << "'']";
       }
-
-      s << "\\fB--" << m_long << "\\fR";
-
-      if (m_argument.get() != 0) {
-        s << ((m_argument->is_optional()) ?
-              "[=\\fI" + m_argument->get_name() + "\\fR]" :
-              "=\\fI" + m_argument->get_name() + "\\fR");
+      else
+      {
+        s << "''" << m_argument->get_name() << "''";
       }
-
-      s << std::endl
-        << boost::xpressive::regex_replace(word_wrap(m_description, 80),
-			 boost::xpressive::sregex(boost::xpressive::as_xpr('\'')), std::string("\\&'")) << std::endl;
-
-      return s.str();
     }
 
-    std::string interface_description::option_descriptor::wiki_page_description() const {
+    s << ", ";
+  }
 
-      std::ostringstream s;
+  s << "<tt>--" << m_long << "</tt>";
 
-      s << "; ";
+  std::string description(m_description);
 
-      if (m_short != '\0') {
-        s << "<tt>-" << std::string(1, m_short) << "</tt>";
+  if (m_argument.get() != 0)
+  {
+    s << ((m_argument->is_optional()) ?
+          "[=''" + m_argument->get_name() + "'']" :
+          "=''" + m_argument->get_name() + "''");
 
-        if (m_argument.get() != 0) {
-          if (m_argument->is_optional()) {
-            s << "[''" << m_argument->get_name() << "'']";
-          }
-          else {
-            s << "''" << m_argument->get_name() << "''";
-          }
-        }
+    boost::replace_all(description, m_argument->get_name(), std::string("''") + m_argument->get_name() + "''");
+  }
 
-        s << ", ";
-      }
+  boost::xpressive::mark_tag option(1);
 
-      s << "<tt>--" << m_long << "</tt>";
-
-      std::string description(m_description);
-
-      if (m_argument.get() != 0) {
-        s << ((m_argument->is_optional()) ?
-              "[=''" + m_argument->get_name() + "'']" :
-              "=''" + m_argument->get_name() + "''");
-
-        boost::replace_all(description, m_argument->get_name(), std::string("''") + m_argument->get_name() + "''");
-      }
-
-      boost::xpressive::mark_tag option(1);
-
-      // Following line:
-      //
+  // Following line:
+  //
 #if defined(MCRL2_DISABLE_BOOST_REGEX)
-         description = boost::xpressive::regex_replace(description, boost::xpressive::sregex(~boost::xpressive::_w >> (option= '-' >> -*boost::xpressive::as_xpr('-') >> +boost::xpressive::_w)), std::string("<tt>$1</tt>"));
+  description = boost::xpressive::regex_replace(description, boost::xpressive::sregex(~boost::xpressive::_w >> (option= '-' >> -*boost::xpressive::as_xpr('-') >> +boost::xpressive::_w)), std::string("<tt>$1</tt>"));
 #else
-      //
-      // Should be equal to: 
-      // -- begin --
-      //
-      //
-      boost::regex e( "(--\\w*)|(-\\w*)" );
-      description = boost::regex_replace(description, e, "<tt>$&</tt>" );
-      // -- end --
+  //
+  // Should be equal to:
+  // -- begin --
+  //
+  //
+  boost::regex e("(--\\w*)|(-\\w*)");
+  description = boost::regex_replace(description, e, "<tt>$&</tt>");
+  // -- end --
 #endif // defined(MCRL2_DISABLE_BOOST_REGEX)
 
-      s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
+  s << std::endl << ": " << word_wrap(description, 80) << std::endl << std::endl;
 
-      return s.str();
-    }
+  return s.str();
+}
 
-    interface_description::option_descriptor const& interface_description::find_option(std::string const& long_identifier) const {
-      option_map::const_iterator i(m_options.find(long_identifier));
+interface_description::option_descriptor const& interface_description::find_option(std::string const& long_identifier) const
+{
+  option_map::const_iterator i(m_options.find(long_identifier));
 
-      if (i == m_options.end()) {
-        throw std::logic_error("Find operation for invalid option `" +  long_identifier + "'\n");
-      }
+  if (i == m_options.end())
+  {
+    throw std::logic_error("Find operation for invalid option `" +  long_identifier + "'\n");
+  }
 
-      return i->second;
-    }
-    /// \endcond
+  return i->second;
+}
+/// \endcond
 
-    interface_description::mandatory_argument< std::string >
-         make_mandatory_argument(std::string const& name, std::string const& default_value) {
+interface_description::mandatory_argument< std::string >
+make_mandatory_argument(std::string const& name, std::string const& default_value)
+{
 
-      return interface_description::mandatory_argument< std::string >(name, default_value);
-    }
+  return interface_description::mandatory_argument< std::string >(name, default_value);
+}
 
-    interface_description::mandatory_argument< std::string >
-      make_mandatory_argument(std::string const& name) {
+interface_description::mandatory_argument< std::string >
+make_mandatory_argument(std::string const& name)
+{
 
-      return interface_description::mandatory_argument< std::string >(name);
-    }
+  return interface_description::mandatory_argument< std::string >(name);
+}
 
-    interface_description::optional_argument< std::string >
-         make_optional_argument(std::string const& name, std::string const& default_value) {
+interface_description::optional_argument< std::string >
+make_optional_argument(std::string const& name, std::string const& default_value)
+{
 
-      return interface_description::optional_argument< std::string >(name, default_value);
-    }
+  return interface_description::optional_argument< std::string >(name, default_value);
+}
 
 
-    interface_description& interface_description::get_standard_description() {
-      static interface_description d;
+interface_description& interface_description::get_standard_description()
+{
+  static interface_description d;
 
-      return d;
-    }
+  return d;
+}
 
-    interface_description::interface_description(std::string const& path,
-          std::string const& name, std::string const& authors,
-          std::string const& what_is, std::string const& synopsis,
-          std::string const& description, std::string const& known_issues) :
-                          m_options(get_standard_description().m_options),
-                          m_path(path), m_name(name), m_authors(authors),
-                          m_what_is(what_is), m_usage(synopsis), m_description(description),
-                          m_known_issues(known_issues),
-                          m_short_to_long(get_standard_description().m_short_to_long) {
+interface_description::interface_description(std::string const& path,
+    std::string const& name, std::string const& authors,
+    std::string const& what_is, std::string const& synopsis,
+    std::string const& description, std::string const& known_issues) :
+  m_options(get_standard_description().m_options),
+  m_path(path), m_name(name), m_authors(authors),
+  m_what_is(what_is), m_usage(synopsis), m_description(description),
+  m_known_issues(known_issues),
+  m_short_to_long(get_standard_description().m_short_to_long)
+{
 
-      m_usage = m_usage.substr(0, m_usage.find_last_of('\n'));
+  m_usage = m_usage.substr(0, m_usage.find_last_of('\n'));
 
-      // Add mandatory options
-      add_hidden_option("help", "display help information", 'h');
-      add_hidden_option("version", "display version information");
-      add_hidden_option("quiet", "do not display warning messages", 'q');
-      add_hidden_option("verbose", "display short intermediate messages", 'v');
-      add_hidden_option("debug", "display detailed intermediate messages", 'd');
-    }
+  // Add mandatory options
+  add_hidden_option("help", "display help information", 'h');
+  add_hidden_option("version", "display version information");
+  add_hidden_option("quiet", "do not display warning messages", 'q');
+  add_hidden_option("verbose", "display short intermediate messages", 'v');
+  add_hidden_option("debug", "display detailed intermediate messages", 'd');
+}
 
-    std::string interface_description::copyright_message() {
-      return "Copyright (c) " + copyright_period() +
-                                        " Technische Universiteit Eindhoven.\n"
-        "This is free software.  You may redistribute copies of it under the\n"
-        "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
-        "There is NO WARRANTY, to the extent permitted by law.\n";
-    }
+std::string interface_description::copyright_message()
+{
+  return "Copyright (c) " + copyright_period() +
+         " Technische Universiteit Eindhoven.\n"
+         "This is free software.  You may redistribute copies of it under the\n"
+         "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
+         "There is NO WARRANTY, to the extent permitted by law.\n";
+}
 
-    std::string interface_description::version_information() const {
-      return m_name + " mCRL2 toolset " + version_tag() + " (revision " + revision() + ")\n" +
+std::string interface_description::version_information() const
+{
+  return m_name + " mCRL2 toolset " + version_tag() + " (revision " + revision() + ")\n" +
          copyright_message() + "\nWritten by " + m_authors + ".\n";
-    }
+}
 
-    std::string interface_description::textual_description() const {
-      std::ostringstream s;
+std::string interface_description::textual_description() const
+{
+  std::ostringstream s;
 
-      s << "Usage: " << m_path << " " << m_usage << std::endl
-        << word_wrap(m_description, 80) << std::endl << std::endl;
+  s << "Usage: " << m_path << " " << m_usage << std::endl
+    << word_wrap(m_description, 80) << std::endl << std::endl;
 
-      if (5 < m_options.size()) { // tool-specific options
-        option_map::const_iterator        i = m_options.begin();
-        short_to_long_map::const_iterator j = m_short_to_long.begin();
+  if (5 < m_options.size())   // tool-specific options
+  {
+    option_map::const_iterator        i = m_options.begin();
+    short_to_long_map::const_iterator j = m_short_to_long.begin();
 
-        s << "Options:" << std::endl;
+    s << "Options:" << std::endl;
 
-        while (true) {
-          option_descriptor const* option;
+    while (true)
+    {
+      option_descriptor const* option;
 
-          // skip options without short identifier
-          while (i != m_options.end() && i->second.m_short != '\0') {
-            ++i;
-          }
-
-          if (j != m_short_to_long.end()) {
-            if (i != m_options.end()) {
-              if (i->second.m_long[0] < j->first) {
-                option = &(i++)->second;
-              }
-              else {
-                if (i->first == j->second) {
-                  ++i;
-                }
-
-                option = &m_options.find((j++)->second)->second;
-              }
-            }
-            else {
-              option = &m_options.find((j++)->second)->second;
-            }
-          }
-          else if (i != m_options.end()) {
-            option = &(i++)->second;
-          }
-          else {
-            break;
-          }
-
-          if (option->m_show) {
-            s << option->textual_description(27, 53);
-          }
-        }
-
-        s << std::endl;
-      }
-
-      s << "Standard options:" << std::endl
-        << m_options.find("quiet")->second.textual_description(27, 53)
-        << m_options.find("verbose")->second.textual_description(27, 53)
-        << m_options.find("debug")->second.textual_description(27, 53)
-        << m_options.find("help")->second.textual_description(27, 53)
-        << m_options.find("version")->second.textual_description(27, 53)
-        << std::endl;
-
-      if (!m_known_issues.empty()) {
-        s << "Known Issues:" << std::endl
-          << word_wrap(m_known_issues, 80) << std::endl << std::endl;
-      }
-
-      s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
-        << std::endl
-        << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
-
-      return s.str();
-    }
-
-    inline static std::string mark_name_in_usage(std::string const& usage, std::string begin, std::string end) {
-      std::string result;
-      bool        name_character = false;
-
-      result.reserve(2 * usage.size());
-
-      for (std::string::const_iterator i = usage.begin(); i != usage.end(); ++i) {
-        if (*i == '[') {
-          name_character = true;
-          result.append("[" + begin);
-        }
-        else if ((*i == ' ') || (*i == ']')) {
-          if (name_character) {
-            result.append(end);
-
-            name_character = false;
-          }
-          result.append(1, *i);
-        }
-        else {
-          result.append(1, *i);
-        }
-      }
-
-      return result;
-    }
-
-    std::string interface_description::man_page() const {
-      std::ostringstream s;
-
-      s.imbue(std::locale(s.getloc()));
-
-      s << ".\\\" " << "Manual page for " << m_name << " revision " << revision() << "." << " .\\\"" << std::endl
-        << ".\\\" " << "Generated from " << m_name << " --generate-man-page." << " .\\\""<< std::endl;
-
-      // Determine month and year, to prevent using boost date/time
-      time_t rawtime;
-      struct tm * timeinfo;
-      char buffer [80];
-      time ( &rawtime );
-      timeinfo = localtime ( &rawtime );
-      strftime (buffer,80,"%B %Y",timeinfo);
-
-      std::string name_upper = m_name;
-      std::transform(name_upper.begin(), name_upper.end(), name_upper.begin(), ::toupper);
-      s << ".TH " << name_upper << " \"1\" \""
-                  << std::string(buffer) << "\" \""
-                  << m_name << " mCRL2 toolset " << version_tag()
-        << "\" \"User Commands\"" << std::endl;
-
-      s << ".SH NAME" << std::endl
-        << m_name << " \\- " << m_what_is << std::endl;
-
-      s << ".SH SYNOPSIS" << std::endl
-        << ".B " << m_name << std::endl
-        << mark_name_in_usage(m_usage, "\\fI", "\\fR") << std::endl;
-
-      s << ".SH DESCRIPTION" << std::endl
-        << word_wrap(m_description, 80) << std::endl;
-
-      if (0 < m_options.size()) {
-        s << ".SH OPTIONS" << std::endl
-          << ".TP" << std::endl
-          << "\\fIOPTION\\fR can be any of the following:" << std::endl;
-
-        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-          option_descriptor const& option(i->second);
-
-          if (option.m_show) {
-            s << option.man_page_description();
-          }
-        }
-      }
-
-      s << ".TP" << std::endl;
-
-      if (0 < m_options.size()) {
-        s << "Standard options:" << std::endl;
-      }
-      else {
-        s << "\\fIOPTION\\fR can be any of the following standard options:\n";
-      }
-      s << m_options.find("quiet")->second.man_page_description()
-        << m_options.find("verbose")->second.man_page_description()
-        << m_options.find("debug")->second.man_page_description()
-        << m_options.find("help")->second.man_page_description()
-        << m_options.find("version")->second.man_page_description()
-        << std::endl;
-
-      if (!m_known_issues.empty()) {
-        s << ".SH \"KNOWN ISSUES\"" << std::endl
-          << word_wrap(m_known_issues, 80) << std::endl;
-      }
-
-      s << ".SH AUTHOR" << std::endl
-        << "Written by " << m_authors << "." << std::endl;
-      s << ".SH \"REPORTING BUGS\"" << std::endl
-        << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
-      s << ".SH COPYRIGHT" << std::endl
-        << "Copyright \\(co " + copyright_period() +
-                                        " Technische Universiteit Eindhoven.\n"
-        << ".br" << std::endl
-        << "This is free software.  You may redistribute copies of it under the\n"
-           "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
-           "There is NO WARRANTY, to the extent permitted by law.\n";
-      s << ".SH \"SEE ALSO\"" << std::endl
-        << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
-
-      return s.str();
-    }
-
-    std::map<std::string, std::string> interface_description::get_long_argument_with_description() {
-    	std::map<std::string, std::string> result;
-
-        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-            option_descriptor const& option(i->second);
-
-        	result.insert(std::pair<std::string, std::string>(option.m_long ,option.m_description));
-        }
-    	return result;
-    }
-
-    std::string interface_description::wiki_page() const {
-      std::ostringstream s;
-
-      s << "{{Hierarchy header}}" << std::endl
-        << std::endl;
-
-      s << "== Synopsis ==" << std::endl
-        << "<tt>'''" << m_name << "'''"
-        << mark_name_in_usage(m_usage, "''", "''") << "</tt>" << std::endl;
-      s << "== Short Description ==" << std::endl
-        << word_wrap(m_description, 80) << std::endl;
-
-      if (0 < m_options.size()) {
-        s << "== Options ==" << std::endl
-          << std::endl
-          << "''OPTION'' can be any of the following:" << std::endl;
-
-        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-          option_descriptor const& option(i->second);
-
-          if (option.m_show) {
-            s << option.wiki_page_description();
-          }
-        }
-      }
-
-      if (0 < m_options.size()) {
-        s << "Standard options:" << std::endl
-          << std::endl;
-      }
-      else {
-        s << "''OPTION'' can be any of the following standard options:" << std::endl;
-      }
-      s << m_options.find("quiet")->second.wiki_page_description()
-        << m_options.find("verbose")->second.wiki_page_description()
-        << m_options.find("debug")->second.wiki_page_description()
-        << m_options.find("help")->second.wiki_page_description()
-        << m_options.find("version")->second.wiki_page_description();
-
-      if (!m_known_issues.empty()) {
-        s << "== Kown Issues" << std::endl
-          << word_wrap(m_known_issues, 80) << std::endl;
-      }
-
-      s << "== Author ==" << std::endl
-        << std::endl
-        << "Written by " << m_authors << "." << std::endl
-        << std::endl;
-      s << "== Reporting bugs ==" << std::endl
-        << std::endl
-        << "Report bugs at [http://www.mcrl2.org/issuetracker]." << std::endl
-        << "{{Hierarchy footer}}" << std::endl;
-
-      return s.str();
-    }
-
-    /**
-     * The interface description specifies the available options and their
-     * possible arguments. This procedure traverses the command-line arguments
-     * in a left-to-right fashion and assigns those arguments to options. The
-     * output is a pair of a map and a vector: the option map and the arguments
-     * vector. The option map (a multimap) maps an options found as argument to
-     * its argument or an empty string (in case of no argument). The arguments
-     * vector contains command line arguments that were not recognised as
-     * option or argument to option.
-     *
-     * \param[in] d interface description
-     * \param[in] arguments vector (as ordered list) with command line arguments
-     * \throw std::runtime_error with parse error message
-     **/
-    void command_line_parser::collect(interface_description& d, std::vector< std::string > const& arguments) {
-      std::vector< std::string >::const_iterator i = arguments.begin();
-
-      if (arguments.size() == 0) {
-        return;
-      }
-
-#if defined(__APPLE__)
-      if (1 < arguments.size() && arguments[1].substr(0, 7) == "-psn_0_") { // Skip Apple serial number
+      // skip options without short identifier
+      while (i != m_options.end() && i->second.m_short != '\0')
+      {
         ++i;
       }
-#endif
 
-      while (++i != arguments.end()) {
-        std::string const& argument(*i);
-
-        if (1 < argument.size() && argument[0] == '-') {
-          if (argument[1] == '-') {
-            // Assume that the argument is a long option
-            std::string option(argument, 2);
-
-            if (option.find_first_of('=') < option.size()) {
-              // remove argument to single out the long option
-              option.resize(option.find_first_of('='));
-            }
-
-            if (d.m_options.find(option) == d.m_options.end()) {
-              if (argument == "--generate-man-page" || argument == "--generate-wiki-page") {
-                // Special option
-                m_options.insert(std::make_pair(argument.substr(2), ""));
-              }
-              else {
-                error("command line argument `--" + option + "' not recognised");
-              }
-            }
-            else {
-              std::string const& long_option = (d.m_options.find(option))->first;
-
-              interface_description::option_descriptor const& descriptor =
-                                            (d.m_options.find(long_option))->second;
-
-              if (argument.size() == option.size() + 2) { // no argument
-                if (descriptor.needs_argument()) {
-                  error("expected argument to option `--" + option + "'!");
-                }
-                else if (descriptor.m_argument.get() == 0) {
-                  m_options.insert(std::make_pair(long_option, ""));
-                }
-                else {
-                  m_options.insert(std::make_pair(long_option,
-                                    descriptor.m_argument->get_default()));
-                }
-              }
-              else {
-                std::string option_argument(argument, option.size() + 3);
-
-                if (!descriptor.accepts_argument()) {
-                  error("did not expect argument to option `--" + option + "'");
-                }
-                else if (!descriptor.m_argument->validate(option_argument)) {
-                  error("argument `" + option_argument + "' to option `--" + option + "' is invalid");
-                }
-
-                m_options.insert(std::make_pair(long_option, option_argument));
-              }
-            }
-
-            continue;
+      if (j != m_short_to_long.end())
+      {
+        if (i != m_options.end())
+        {
+          if (i->second.m_long[0] < j->first)
+          {
+            option = &(i++)->second;
           }
-          else {
-            try {
-              for (std::string::size_type j = 1; j < argument.size(); ++j) {
-                std::string option(1, argument[j]);
-
-                // Assume that the argument is a short option
-                if (d.m_short_to_long.find(argument[j]) == d.m_short_to_long.end()) {
-                  error("command line argument `-" + option + "' not recognised");
-                }
-                else {
-                  std::string const& long_option =
-                      d.m_options.find(d.m_short_to_long[argument[j]])->first;
-
-                  interface_description::option_descriptor const& descriptor =
-                                              (d.m_options.find(long_option))->second;
-
-                  if (argument.size() - j == 1) { // the last option without argument
-                    if (!descriptor.accepts_argument()) { // no argument needed
-                      m_options.insert(std::make_pair(long_option, ""));
-                    }
-                    else if (descriptor.needs_argument()) {
-                      if (++i != arguments.end()) { // next command line argument is option argument
-                        m_options.insert(std::make_pair(long_option, std::string(*i)));
-                      }
-                      else {
-                        error("expected argument to option `-" + option + "'");
-                      }
-                    }
-                    else {
-                      m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
-                    }
-                  }
-                  else { // intermediate option or option with argument
-                    if (d.m_options.find(long_option)->second.accepts_argument()) {
-                      std::string option_argument(argument, j + 1);
-
-                      if (!descriptor.accepts_argument()) {
-                        error("did not expect argument to option `-" + option + "'");
-                      }
-                      else if (!descriptor.m_argument->validate(option_argument)) {
-                        error("argument `" + option_argument + "' to option `-" + option + "' is invalid");
-                      }
-
-                      // must be the last option, so take the remainder as option argument
-                      m_options.insert(std::make_pair(long_option, option_argument));
-
-                      break;
-                    }
-                    else {
-                      m_options.insert(std::make_pair(long_option, ""));
-                    }
-                  }
-                }
-              }
-            }
-            catch (std::runtime_error&) { // parse error
-              if (argument.substr(1, 3) == "at-") { // does not match option pattern for ATerm library
-                continue;
-              }
-
-              throw;
+          else
+          {
+            if (i->first == j->second)
+            {
+              ++i;
             }
 
-            continue;
+            option = &m_options.find((j++)->second)->second;
           }
         }
+        else
+        {
+          option = &m_options.find((j++)->second)->second;
+        }
+      }
+      else if (i != m_options.end())
+      {
+        option = &(i++)->second;
+      }
+      else
+      {
+        break;
+      }
 
-        m_arguments.push_back(argument);
+      if (option->m_show)
+      {
+        s << option->textual_description(27, 53);
       }
     }
 
-    /// \cond INTERNAL
-    /**
-     * Converts an array of C-style strings and a count to an STL vector of STL strings.
-     *
-     * \param[in] count the number of arguments
-     * \param[in] arguments C-style array with arguments as C-style zero-terminated string
-     **/
-    std::vector< std::string > command_line_parser::convert(const int count, char const* const* const arguments) {
-      std::vector< std::string > result;
+    s << std::endl;
+  }
 
-      if (0 < count) {
-        result.resize(count);
+  s << "Standard options:" << std::endl
+    << m_options.find("quiet")->second.textual_description(27, 53)
+    << m_options.find("verbose")->second.textual_description(27, 53)
+    << m_options.find("debug")->second.textual_description(27, 53)
+    << m_options.find("help")->second.textual_description(27, 53)
+    << m_options.find("version")->second.textual_description(27, 53)
+    << std::endl;
 
-        std::vector< std::string >::reverse_iterator j = result.rbegin();
+  if (!m_known_issues.empty())
+  {
+    s << "Known Issues:" << std::endl
+      << word_wrap(m_known_issues, 80) << std::endl << std::endl;
+  }
 
-        for (char const* const* i = &arguments[count - 1]; i != &arguments[0]; --i) {
-          *(j++) = std::string(*i);
-        }
-      }
+  s << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl
+    << std::endl
+    << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
 
-      return result;
+  return s.str();
+}
+
+inline static std::string mark_name_in_usage(std::string const& usage, std::string begin, std::string end)
+{
+  std::string result;
+  bool        name_character = false;
+
+  result.reserve(2 * usage.size());
+
+  for (std::string::const_iterator i = usage.begin(); i != usage.end(); ++i)
+  {
+    if (*i == '[')
+    {
+      name_character = true;
+      result.append("[" + begin);
     }
+    else if ((*i == ' ') || (*i == ']'))
+    {
+      if (name_character)
+      {
+        result.append(end);
 
-#ifndef __CYGWIN__ // wstring is not available for cygwin
-    /**
-     * Converts an array of C-style strings and a count to an STL vector of STL strings.
-     *
-     * \param[in] count the number of arguments
-     * \param[in] arguments C-style array with arguments as C-style zero-terminated string
-     * \pre arguments uses UTF-8 encoding
-     **/
-    std::vector< std::string > command_line_parser::convert(const int count, wchar_t const* const* const arguments) {
-      std::vector< std::string > result;
-
-      if (0 < count) {
-        std::ostringstream converter;
-
-        result.resize(count);
-
-        std::vector< std::string >::reverse_iterator j = result.rbegin();
-
-        for (wchar_t const* const* i = &arguments[count - 1]; i != &arguments[0]; --i) {
-          std::wstring argument(*i);
-
-          *(j++) = std::string(argument.begin(), argument.end());
-        }
+        name_character = false;
       }
-
-      return result;
+      result.append(1, *i);
     }
-    /// \endcond
-#endif // __CYGWIN__
-
-    /**
-     * \param[in] message the body of the exception message
-     * \throw std::runtime_error with an appropriately formatted versions of the message argument
-     **/
-    void command_line_parser::error(std::string const& message) const {
-      throw std::runtime_error(m_interface.m_name + ": " + message
-                + "\nTry `" + m_interface.m_name + " --help' for more information.");
+    else
+    {
+      result.append(1, *i);
     }
+  }
 
-    /**
-     * Parses a string as if it were an unparsed command line and stores it as
-     * an array of C-style strings and a count to an STL vector of STL strings.
-     *
-     * It parses the following grammar:
-     *
-     * \verbatim
-     *  command     ::= name white-space* argument
-     *  argument    ::= ( non-white-space | block ) +
-     *  block       ::= "'" ( character ) * "'" | '"' ( character )* '"'
-     *  white-space ::= ' ' | '\t'
-     * \endverbatim
-     *
-     * Where `non-white-space' is a character that is neither space nor tab;
-     * and `name' is a path to a file in the local filesystem and operating
-     * system path syntax.
-     *
-     * The strings that represent 'name' and 'argument' are identified from
-     * left-to-right and stored in the output vector.
-     *
-     * \note This method is includes specifically for on MS Windows systems. On
-     * such systems the command used to start the program is not always
-     * available in another form than the unparsed command line.
-     *
-     * \param[in] arguments C-style zero-terminated string
-     **/
-    std::vector< std::string > command_line_parser::parse_command_line(char const* const arguments) {
-      std::vector< std::string > result;
+  return result;
+}
 
-      if (arguments != 0) {
-        char const* current = arguments;
+std::string interface_description::man_page() const
+{
+  std::ostringstream s;
 
-        while (*current != '\0') {
-          // skip initial white space
-          while (*current == '\0' || *current == ' ') {
-            ++current;
-          }
+  s.imbue(std::locale(s.getloc()));
 
-          if (*current != '\0') {
-            char const* current_argument = current;
+  s << ".\\\" " << "Manual page for " << m_name << " revision " << revision() << "." << " .\\\"" << std::endl
+    << ".\\\" " << "Generated from " << m_name << " --generate-man-page." << " .\\\""<< std::endl;
 
-            do {
-              if (*current == '\'') {
-                do {
-                  ++current;
-                }
-                while (*current != '\0' && *current != '\'');
+  // Determine month and year, to prevent using boost date/time
+  time_t rawtime;
+  struct tm* timeinfo;
+  char buffer [80];
+  time(&rawtime);
+  timeinfo = localtime(&rawtime);
+  strftime(buffer,80,"%B %Y",timeinfo);
 
-                if (*current == '\'') {
-                  ++current;
-                }
-              }
-              else if (*current == '\"') {
-                do {
-                  ++current;
-                }
-                while (*current != '\0' && *current != '\"');
+  std::string name_upper = m_name;
+  std::transform(name_upper.begin(), name_upper.end(), name_upper.begin(), ::toupper);
+  s << ".TH " << name_upper << " \"1\" \""
+    << std::string(buffer) << "\" \""
+    << m_name << " mCRL2 toolset " << version_tag()
+    << "\" \"User Commands\"" << std::endl;
 
-                if (*current == '\"') {
-                  ++current;
-                }
-              }
-              else {
-                ++current;
-              }
-            }
-            while (*current != '\0' && *current != ' ');
+  s << ".SH NAME" << std::endl
+    << m_name << " \\- " << m_what_is << std::endl;
 
-            result.push_back(std::string(current_argument, current - current_argument));
-          }
-        }
-      }
+  s << ".SH SYNOPSIS" << std::endl
+    << ".B " << m_name << std::endl
+    << mark_name_in_usage(m_usage, "\\fI", "\\fR") << std::endl;
 
-      return result;
-    }
+  s << ".SH DESCRIPTION" << std::endl
+    << word_wrap(m_description, 80) << std::endl;
 
-    std::string const& command_line_parser::option_argument(std::string const& long_identifier) const {
-      if (options.count(long_identifier) == 0) {
-        interface_description::option_descriptor const& option(m_interface.find_option(long_identifier));
+  if (0 < m_options.size())
+  {
+    s << ".SH OPTIONS" << std::endl
+      << ".TP" << std::endl
+      << "\\fIOPTION\\fR can be any of the following:" << std::endl;
 
-        if (option.needs_argument() || option.argument().has_default()) { // mandatory argument with default value
-          return option.get_default();
-        }
-        else {
-          throw std::logic_error("Fatal error: argument requested of unspecified option!");
-        }
-      }
-      else if (!m_interface.m_options.find(long_identifier)->second.accepts_argument()) {
-        throw std::logic_error("Fatal error: argument requested of option that does not take an argument!");
-      }
+    for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+    {
+      option_descriptor const& option(i->second);
 
-      return options.find(long_identifier)->second;
-    }
-
-    /**
-     * \param[in] d the interface description
-     **/
-    void command_line_parser::process_default_options(interface_description& d) {
-      if (d.m_options.find("cli-testing-no-duplicate-option-checking") == d.m_options.end()) {
-        for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i) {
-          if (1 < m_options.count(i->first)) {
-            error("option -" + (d.long_to_short(i->first) != '\0' ?
-                   std::string(1, d.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
-          }
-        }
-      }
-
-      m_continue = false;
-
-      if (m_options.count("help")) {
-        std::cout << d.textual_description();
-      }
-      else if (m_options.count("version")) {
-        std::cout << d.version_information();
-      }
-      else if (m_options.count("generate-man-page")) {
-        std::cout << d.man_page();
-      }
-      else if (m_options.count("generate-wiki-page")) {
-        std::cout << d.wiki_page();
-      }
-      else {
-        typedef std::vector< bool (*)(command_line_parser&) > action_list;
-
-        action_list& actions(get_registered_actions());
-
-        m_continue = true;
-
-        for (action_list::const_iterator i = actions.begin(); m_continue && i != actions.end(); ++i) {
-          m_continue &= (*i)(*this);
-        }
+      if (option.m_show)
+      {
+        s << option.man_page_description();
       }
     }
   }
+
+  s << ".TP" << std::endl;
+
+  if (0 < m_options.size())
+  {
+    s << "Standard options:" << std::endl;
+  }
+  else
+  {
+    s << "\\fIOPTION\\fR can be any of the following standard options:\n";
+  }
+  s << m_options.find("quiet")->second.man_page_description()
+    << m_options.find("verbose")->second.man_page_description()
+    << m_options.find("debug")->second.man_page_description()
+    << m_options.find("help")->second.man_page_description()
+    << m_options.find("version")->second.man_page_description()
+    << std::endl;
+
+  if (!m_known_issues.empty())
+  {
+    s << ".SH \"KNOWN ISSUES\"" << std::endl
+      << word_wrap(m_known_issues, 80) << std::endl;
+  }
+
+  s << ".SH AUTHOR" << std::endl
+    << "Written by " << m_authors << "." << std::endl;
+  s << ".SH \"REPORTING BUGS\"" << std::endl
+    << "Report bugs at <http://www.mcrl2.org/issuetracker>." << std::endl;
+  s << ".SH COPYRIGHT" << std::endl
+    << "Copyright \\(co " + copyright_period() +
+    " Technische Universiteit Eindhoven.\n"
+    << ".br" << std::endl
+    << "This is free software.  You may redistribute copies of it under the\n"
+    "terms of the Boost Software License <http://www.boost.org/LICENSE_1_0.txt>.\n"
+    "There is NO WARRANTY, to the extent permitted by law.\n";
+  s << ".SH \"SEE ALSO\"" << std::endl
+    << "See also the manual at <http://www.mcrl2.org/mcrl2/wiki/index.php/User_manual/" << m_name << ">.\n";
+
+  return s.str();
+}
+
+std::map<std::string, std::string> interface_description::get_long_argument_with_description()
+{
+  std::map<std::string, std::string> result;
+
+  for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+  {
+    option_descriptor const& option(i->second);
+
+    result.insert(std::pair<std::string, std::string>(option.m_long ,option.m_description));
+  }
+  return result;
+}
+
+std::string interface_description::wiki_page() const
+{
+  std::ostringstream s;
+
+  s << "{{Hierarchy header}}" << std::endl
+    << std::endl;
+
+  s << "== Synopsis ==" << std::endl
+    << "<tt>'''" << m_name << "'''"
+    << mark_name_in_usage(m_usage, "''", "''") << "</tt>" << std::endl;
+  s << "== Short Description ==" << std::endl
+    << word_wrap(m_description, 80) << std::endl;
+
+  if (0 < m_options.size())
+  {
+    s << "== Options ==" << std::endl
+      << std::endl
+      << "''OPTION'' can be any of the following:" << std::endl;
+
+    for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+    {
+      option_descriptor const& option(i->second);
+
+      if (option.m_show)
+      {
+        s << option.wiki_page_description();
+      }
+    }
+  }
+
+  if (0 < m_options.size())
+  {
+    s << "Standard options:" << std::endl
+      << std::endl;
+  }
+  else
+  {
+    s << "''OPTION'' can be any of the following standard options:" << std::endl;
+  }
+  s << m_options.find("quiet")->second.wiki_page_description()
+    << m_options.find("verbose")->second.wiki_page_description()
+    << m_options.find("debug")->second.wiki_page_description()
+    << m_options.find("help")->second.wiki_page_description()
+    << m_options.find("version")->second.wiki_page_description();
+
+  if (!m_known_issues.empty())
+  {
+    s << "== Kown Issues" << std::endl
+      << word_wrap(m_known_issues, 80) << std::endl;
+  }
+
+  s << "== Author ==" << std::endl
+    << std::endl
+    << "Written by " << m_authors << "." << std::endl
+    << std::endl;
+  s << "== Reporting bugs ==" << std::endl
+    << std::endl
+    << "Report bugs at [http://www.mcrl2.org/issuetracker]." << std::endl
+    << "{{Hierarchy footer}}" << std::endl;
+
+  return s.str();
+}
+
+/**
+ * The interface description specifies the available options and their
+ * possible arguments. This procedure traverses the command-line arguments
+ * in a left-to-right fashion and assigns those arguments to options. The
+ * output is a pair of a map and a vector: the option map and the arguments
+ * vector. The option map (a multimap) maps an options found as argument to
+ * its argument or an empty string (in case of no argument). The arguments
+ * vector contains command line arguments that were not recognised as
+ * option or argument to option.
+ *
+ * \param[in] d interface description
+ * \param[in] arguments vector (as ordered list) with command line arguments
+ * \throw std::runtime_error with parse error message
+ **/
+void command_line_parser::collect(interface_description& d, std::vector< std::string > const& arguments)
+{
+  std::vector< std::string >::const_iterator i = arguments.begin();
+
+  if (arguments.size() == 0)
+  {
+    return;
+  }
+
+#if defined(__APPLE__)
+  if (1 < arguments.size() && arguments[1].substr(0, 7) == "-psn_0_")   // Skip Apple serial number
+  {
+    ++i;
+  }
+#endif
+
+  while (++i != arguments.end())
+  {
+    std::string const& argument(*i);
+
+    if (1 < argument.size() && argument[0] == '-')
+    {
+      if (argument[1] == '-')
+      {
+        // Assume that the argument is a long option
+        std::string option(argument, 2);
+
+        if (option.find_first_of('=') < option.size())
+        {
+          // remove argument to single out the long option
+          option.resize(option.find_first_of('='));
+        }
+
+        if (d.m_options.find(option) == d.m_options.end())
+        {
+          if (argument == "--generate-man-page" || argument == "--generate-wiki-page")
+          {
+            // Special option
+            m_options.insert(std::make_pair(argument.substr(2), ""));
+          }
+          else
+          {
+            error("command line argument `--" + option + "' not recognised");
+          }
+        }
+        else
+        {
+          std::string const& long_option = (d.m_options.find(option))->first;
+
+          interface_description::option_descriptor const& descriptor =
+            (d.m_options.find(long_option))->second;
+
+          if (argument.size() == option.size() + 2)   // no argument
+          {
+            if (descriptor.needs_argument())
+            {
+              error("expected argument to option `--" + option + "'!");
+            }
+            else if (descriptor.m_argument.get() == 0)
+            {
+              m_options.insert(std::make_pair(long_option, ""));
+            }
+            else
+            {
+              m_options.insert(std::make_pair(long_option,
+                                              descriptor.m_argument->get_default()));
+            }
+          }
+          else
+          {
+            std::string option_argument(argument, option.size() + 3);
+
+            if (!descriptor.accepts_argument())
+            {
+              error("did not expect argument to option `--" + option + "'");
+            }
+            else if (!descriptor.m_argument->validate(option_argument))
+            {
+              error("argument `" + option_argument + "' to option `--" + option + "' is invalid");
+            }
+
+            m_options.insert(std::make_pair(long_option, option_argument));
+          }
+        }
+
+        continue;
+      }
+      else
+      {
+        try
+        {
+          for (std::string::size_type j = 1; j < argument.size(); ++j)
+          {
+            std::string option(1, argument[j]);
+
+            // Assume that the argument is a short option
+            if (d.m_short_to_long.find(argument[j]) == d.m_short_to_long.end())
+            {
+              error("command line argument `-" + option + "' not recognised");
+            }
+            else
+            {
+              std::string const& long_option =
+                d.m_options.find(d.m_short_to_long[argument[j]])->first;
+
+              interface_description::option_descriptor const& descriptor =
+                (d.m_options.find(long_option))->second;
+
+              if (argument.size() - j == 1)   // the last option without argument
+              {
+                if (!descriptor.accepts_argument())   // no argument needed
+                {
+                  m_options.insert(std::make_pair(long_option, ""));
+                }
+                else if (descriptor.needs_argument())
+                {
+                  if (++i != arguments.end())   // next command line argument is option argument
+                  {
+                    m_options.insert(std::make_pair(long_option, std::string(*i)));
+                  }
+                  else
+                  {
+                    error("expected argument to option `-" + option + "'");
+                  }
+                }
+                else
+                {
+                  m_options.insert(std::make_pair(long_option, descriptor.m_argument->get_default()));
+                }
+              }
+              else   // intermediate option or option with argument
+              {
+                if (d.m_options.find(long_option)->second.accepts_argument())
+                {
+                  std::string option_argument(argument, j + 1);
+
+                  if (!descriptor.accepts_argument())
+                  {
+                    error("did not expect argument to option `-" + option + "'");
+                  }
+                  else if (!descriptor.m_argument->validate(option_argument))
+                  {
+                    error("argument `" + option_argument + "' to option `-" + option + "' is invalid");
+                  }
+
+                  // must be the last option, so take the remainder as option argument
+                  m_options.insert(std::make_pair(long_option, option_argument));
+
+                  break;
+                }
+                else
+                {
+                  m_options.insert(std::make_pair(long_option, ""));
+                }
+              }
+            }
+          }
+        }
+        catch (std::runtime_error&)   // parse error
+        {
+          if (argument.substr(1, 3) == "at-")   // does not match option pattern for ATerm library
+          {
+            continue;
+          }
+
+          throw;
+        }
+
+        continue;
+      }
+    }
+
+    m_arguments.push_back(argument);
+  }
+}
+
+/// \cond INTERNAL
+/**
+ * Converts an array of C-style strings and a count to an STL vector of STL strings.
+ *
+ * \param[in] count the number of arguments
+ * \param[in] arguments C-style array with arguments as C-style zero-terminated string
+ **/
+std::vector< std::string > command_line_parser::convert(const int count, char const* const* const arguments)
+{
+  std::vector< std::string > result;
+
+  if (0 < count)
+  {
+    result.resize(count);
+
+    std::vector< std::string >::reverse_iterator j = result.rbegin();
+
+    for (char const* const* i = &arguments[count - 1]; i != &arguments[0]; --i)
+    {
+      *(j++) = std::string(*i);
+    }
+  }
+
+  return result;
+}
+
+#ifndef __CYGWIN__ // wstring is not available for cygwin
+/**
+ * Converts an array of C-style strings and a count to an STL vector of STL strings.
+ *
+ * \param[in] count the number of arguments
+ * \param[in] arguments C-style array with arguments as C-style zero-terminated string
+ * \pre arguments uses UTF-8 encoding
+ **/
+std::vector< std::string > command_line_parser::convert(const int count, wchar_t const* const* const arguments)
+{
+  std::vector< std::string > result;
+
+  if (0 < count)
+  {
+    std::ostringstream converter;
+
+    result.resize(count);
+
+    std::vector< std::string >::reverse_iterator j = result.rbegin();
+
+    for (wchar_t const* const* i = &arguments[count - 1]; i != &arguments[0]; --i)
+    {
+      std::wstring argument(*i);
+
+      *(j++) = std::string(argument.begin(), argument.end());
+    }
+  }
+
+  return result;
+}
+/// \endcond
+#endif // __CYGWIN__
+
+/**
+ * \param[in] message the body of the exception message
+ * \throw std::runtime_error with an appropriately formatted versions of the message argument
+ **/
+void command_line_parser::error(std::string const& message) const
+{
+  throw std::runtime_error(m_interface.m_name + ": " + message
+                           + "\nTry `" + m_interface.m_name + " --help' for more information.");
+}
+
+/**
+ * Parses a string as if it were an unparsed command line and stores it as
+ * an array of C-style strings and a count to an STL vector of STL strings.
+ *
+ * It parses the following grammar:
+ *
+ * \verbatim
+ *  command     ::= name white-space* argument
+ *  argument    ::= ( non-white-space | block ) +
+ *  block       ::= "'" ( character ) * "'" | '"' ( character )* '"'
+ *  white-space ::= ' ' | '\t'
+ * \endverbatim
+ *
+ * Where `non-white-space' is a character that is neither space nor tab;
+ * and `name' is a path to a file in the local filesystem and operating
+ * system path syntax.
+ *
+ * The strings that represent 'name' and 'argument' are identified from
+ * left-to-right and stored in the output vector.
+ *
+ * \note This method is includes specifically for on MS Windows systems. On
+ * such systems the command used to start the program is not always
+ * available in another form than the unparsed command line.
+ *
+ * \param[in] arguments C-style zero-terminated string
+ **/
+std::vector< std::string > command_line_parser::parse_command_line(char const* const arguments)
+{
+  std::vector< std::string > result;
+
+  if (arguments != 0)
+  {
+    char const* current = arguments;
+
+    while (*current != '\0')
+    {
+      // skip initial white space
+      while (*current == '\0' || *current == ' ')
+      {
+        ++current;
+      }
+
+      if (*current != '\0')
+      {
+        char const* current_argument = current;
+
+        do
+        {
+          if (*current == '\'')
+          {
+            do
+            {
+              ++current;
+            }
+            while (*current != '\0' && *current != '\'');
+
+            if (*current == '\'')
+            {
+              ++current;
+            }
+          }
+          else if (*current == '\"')
+          {
+            do
+            {
+              ++current;
+            }
+            while (*current != '\0' && *current != '\"');
+
+            if (*current == '\"')
+            {
+              ++current;
+            }
+          }
+          else
+          {
+            ++current;
+          }
+        }
+        while (*current != '\0' && *current != ' ');
+
+        result.push_back(std::string(current_argument, current - current_argument));
+      }
+    }
+  }
+
+  return result;
+}
+
+std::string const& command_line_parser::option_argument(std::string const& long_identifier) const
+{
+  if (options.count(long_identifier) == 0)
+  {
+    interface_description::option_descriptor const& option(m_interface.find_option(long_identifier));
+
+    if (option.needs_argument() || option.argument().has_default())   // mandatory argument with default value
+    {
+      return option.get_default();
+    }
+    else
+    {
+      throw std::logic_error("Fatal error: argument requested of unspecified option!");
+    }
+  }
+  else if (!m_interface.m_options.find(long_identifier)->second.accepts_argument())
+  {
+    throw std::logic_error("Fatal error: argument requested of option that does not take an argument!");
+  }
+
+  return options.find(long_identifier)->second;
+}
+
+/**
+ * \param[in] d the interface description
+ **/
+void command_line_parser::process_default_options(interface_description& d)
+{
+  if (d.m_options.find("cli-testing-no-duplicate-option-checking") == d.m_options.end())
+  {
+    for (option_map::const_iterator i = m_options.begin(); i != m_options.end(); ++i)
+    {
+      if (1 < m_options.count(i->first))
+      {
+        error("option -" + (d.long_to_short(i->first) != '\0' ?
+                            std::string(1, d.long_to_short(i->first)).append(", --") : "-") + i->first + " specified more than once");
+      }
+    }
+  }
+
+  m_continue = false;
+
+  if (m_options.count("help"))
+  {
+    std::cout << d.textual_description();
+  }
+  else if (m_options.count("version"))
+  {
+    std::cout << d.version_information();
+  }
+  else if (m_options.count("generate-man-page"))
+  {
+    std::cout << d.man_page();
+  }
+  else if (m_options.count("generate-wiki-page"))
+  {
+    std::cout << d.wiki_page();
+  }
+  else
+  {
+    typedef std::vector< bool (*)(command_line_parser&) > action_list;
+
+    action_list& actions(get_registered_actions());
+
+    m_continue = true;
+
+    for (action_list::const_iterator i = actions.begin(); m_continue && i != actions.end(); ++i)
+    {
+      m_continue &= (*i)(*this);
+    }
+  }
+}
+}
 }

@@ -20,79 +20,79 @@
 
 class Diagram : public Colleague
 {
-public:
-	// -- constructors and destructor -------------------------------
-    Diagram( Mediator* m );
-	virtual ~Diagram();
+  public:
+    // -- constructors and destructor -------------------------------
+    Diagram(Mediator* m);
+    virtual ~Diagram();
 
     // -- set functions ---------------------------------------------
-    void addShape( Shape *s );
-    void moveShapeToFront( const size_t &idx );
-    void moveShapeToBack( const size_t &idx );
-    void moveShapeForward( const size_t &idx );
-    void moveShapeBackward( const size_t &idx );
+    void addShape(Shape* s);
+    void moveShapeToFront(const size_t& idx);
+    void moveShapeToBack(const size_t& idx);
+    void moveShapeForward(const size_t& idx);
+    void moveShapeBackward(const size_t& idx);
 
-    void setShowGrid( const bool &flag );
-    void setSnapGrid( const bool &flag );
+    void setShowGrid(const bool& flag);
+    void setSnapGrid(const bool& flag);
 
     // -- get functions ---------------------------------------------
     size_t getSizeShapes();
-    Shape* getShape( const size_t &idx );
+    Shape* getShape(const size_t& idx);
 
     bool getSnapGrid();
-    double getGridInterval( GLCanvas* canvas );
+    double getGridInterval(GLCanvas* canvas);
     double getAngleInterval();
-    void getGridCoordinates( double &xLeft, double &xRight, double &yTop, double &yBottom);
+    void getGridCoordinates(double& xLeft, double& xRight, double& yTop, double& yBottom);
 
     // -- clear functions -------------------------------------------
-    void deleteShape( const size_t &idx );
+    void deleteShape(const size_t& idx);
 
     // -- vis functions ---------------------------------------------
     void visualize(
-        const bool &inSelectMode,
-        GLCanvas* canvas );
+      const bool& inSelectMode,
+      GLCanvas* canvas);
     void visualize(
-        const bool &inSelectMode,
-        GLCanvas* canvas,
-        const std::vector< Attribute* > attrs,
-        const std::vector< double > attrValIdcs );
+      const bool& inSelectMode,
+      GLCanvas* canvas,
+      const std::vector< Attribute* > attrs,
+      const std::vector< double > attrValIdcs);
     void visualize(
-        const bool &inSelectMode,
-        GLCanvas* canvas,
-        const std::vector< Attribute* > attrs,
-        const std::vector< double > attrValIdcs,
-	const double &pix );
+      const bool& inSelectMode,
+      GLCanvas* canvas,
+      const std::vector< Attribute* > attrs,
+      const std::vector< double > attrValIdcs,
+      const double& pix);
     void visualize(
-        const bool &inSelectMode,
-        GLCanvas* canvas,
-        const double &opacity,
-        const std::vector< Attribute* > attrs,
-        const std::vector< double > attrValIdcs );
+      const bool& inSelectMode,
+      GLCanvas* canvas,
+      const double& opacity,
+      const std::vector< Attribute* > attrs,
+      const std::vector< double > attrValIdcs);
 
 
-protected:
+  protected:
     // -- private utility functions ---------------------------------
     void initGridSettings();
 
     void drawAxes(
-        const bool &inSelectMode,
-        GLCanvas* canvas );
+      const bool& inSelectMode,
+      GLCanvas* canvas);
     void drawBorder(
-        const bool &inSelectMode,
-        GLCanvas* canvas );
+      const bool& inSelectMode,
+      GLCanvas* canvas);
     void drawBorderFlush(
-        const bool &inSelectMode,
-        GLCanvas* canvas );
+      const bool& inSelectMode,
+      GLCanvas* canvas);
     void drawBorderFlush(
-        const bool &inSelectMode,
-        GLCanvas* canvas,
-        const double &opacity );
+      const bool& inSelectMode,
+      GLCanvas* canvas,
+      const double& opacity);
     void drawGrid(
-        const bool &inSelectMode,
-        GLCanvas* canvas );
+      const bool& inSelectMode,
+      GLCanvas* canvas);
     void drawShapes(
-        const bool &inSelectMode,
-        GLCanvas* canvas );
+      const bool& inSelectMode,
+      GLCanvas* canvas);
 
     // -- data members ----------------------------------------------
     std::vector< Shape* > shapes; // composition

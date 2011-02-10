@@ -28,12 +28,12 @@
 
 class Examiner : public wxEvtHandler, public Visualizer
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     Examiner(
-        Mediator* m,
-        Graph* g,
-        GLCanvas* c );
+      Mediator* m,
+      Graph* g,
+      GLCanvas* c);
     virtual ~Examiner();
 
     // -- get functions ---------------------------------------------
@@ -46,23 +46,23 @@ public:
     size_t getIdxClstSel();
 
     // -- set functions ---------------------------------------------
-    static void setColorClr( const ColorRGB &col );
-    static void setColorTxt( const ColorRGB &col );
-    static void setSizeTxt( const int &sze );
-    static void setColorBdl( const ColorRGB &col );
+    static void setColorClr(const ColorRGB& col);
+    static void setColorTxt(const ColorRGB& col);
+    static void setSizeTxt(const int& sze);
+    static void setColorBdl(const ColorRGB& col);
 
-    static void setBlendType( const int &type );
+    static void setBlendType(const int& type);
 
-    void setDiagram( Diagram *dgrm );
+    void setDiagram(Diagram* dgrm);
     void setFrame(
-        Cluster* frme,
-        const std::vector< Attribute* > &attrs,
-        ColorRGB col );
+      Cluster* frme,
+      const std::vector< Attribute* > &attrs,
+      ColorRGB col);
     void clrFrame();
 
     void addFrameHist(
-        Cluster* frme,
-        const std::vector< Attribute* > &attrs );
+      Cluster* frme,
+      const std::vector< Attribute* > &attrs);
     void clrFrameHist();
     void clrFrameHistCur();
     size_t getSizeFramesHist();
@@ -74,38 +74,38 @@ public:
     void handleSendDgrmSetToTrace();
 
     // -- visualization functions  ----------------------------------
-    void visualize( const bool &inSelectMode );
+    void visualize(const bool& inSelectMode);
 
     // -- event handlers --------------------------------------------
     void handleSizeEvent();
 
     void handleMouseLftDownEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseLftUpEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseLftDClickEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseRgtDownEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseRgtUpEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseMotionEvent(
-        const int &x,
-        const int &y );
-    void handleKeyDownEvent( const int &keyCode );
+      const int& x,
+      const int& y);
+    void handleKeyDownEvent(const int& keyCode);
 
-protected:
+  protected:
     // -- utility functions -----------------------------------------
-/*
-    void initAttributes( const std::vector< Attribute* > &attrs );
-    void initFrames();
-    void initBundles();
-*/
+    /*
+        void initAttributes( const std::vector< Attribute* > &attrs );
+        void initFrames();
+        void initBundles();
+    */
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
     void calcPosFrame();
@@ -116,7 +116,7 @@ protected:
     void clearFrames();
 
     // -- hit detection ---------------------------------------------
-    void handleHits( const std::vector< int > &ids );
+    void handleHits(const std::vector< int > &ids);
     void handleIconRwnd();
     void handleIconLft();
     /*
@@ -124,20 +124,20 @@ protected:
     */
     void handleIconRgt();
     void processHits(
-        GLint hits,
-        GLuint buffer[] );
+      GLint hits,
+      GLuint buffer[]);
 
     // -- utility drawing functions ---------------------------------
     void clear();
 
-    void drawFrame( const bool &inSelectMode );
-    void drawFramesHist( const bool &inSelectMode );
-    void drawControls( const bool &inSelectMode );
+    void drawFrame(const bool& inSelectMode);
+    void drawFramesHist(const bool& inSelectMode);
+    void drawControls(const bool& inSelectMode);
 
     // -- utility event handlers ------------------------------------
-/*
-    void onTimer( wxTimerEvent &e );
-*/
+    /*
+        void onTimer( wxTimerEvent &e );
+    */
     // -- static variables ------------------------------------------
 
     static ColorRGB colClr;
@@ -148,14 +148,14 @@ protected:
 
     enum
     {
-        ID_ICON_CLR,
-        ID_ICON_MORE,
-        ID_ICON_RWND,
-        ID_ICON_LFT,
-        ID_ICON_RGT,
-        ID_ICON_PLAY,
-        ID_FRAME,
-        ID_FRAME_HIST
+      ID_ICON_CLR,
+      ID_ICON_MORE,
+      ID_ICON_RWND,
+      ID_ICON_LFT,
+      ID_ICON_RGT,
+      ID_ICON_PLAY,
+      ID_FRAME,
+      ID_FRAME_HIST
     };
 
     // -- data members ----------------------------------------------

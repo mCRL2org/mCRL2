@@ -16,14 +16,20 @@
     aborted by calling aborted() in time-consuming procedures. */
 class Abortable
 {
-public:
+  public:
     //! Abort all abortable processes.
-    static void abort_all() { global_abort_ = true; }
+    static void abort_all()
+    {
+      global_abort_ = true;
+    }
 
     //! Returns whether this instance has been aborted.
-    bool aborted() { return global_abort_; }
+    bool aborted()
+    {
+      return global_abort_;
+    }
 
-private:
+  private:
     static volatile bool global_abort_;
 };
 

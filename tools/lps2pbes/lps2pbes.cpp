@@ -29,7 +29,7 @@ using mcrl2::core::gsVerboseMsg;
 
 class lps2pbes_tool : public input_output_tool
 {
-  typedef input_output_tool super;
+    typedef input_output_tool super;
 
   protected:
     bool timed;
@@ -44,9 +44,9 @@ class lps2pbes_tool : public input_output_tool
     {
       super::add_options(desc);
       desc.add_option("formula", make_mandatory_argument("FILE"),
-          "use the state formula from FILE", 'f');
+                      "use the state formula from FILE", 'f');
       desc.add_option("timed",
-          "use the timed version of the algorithm, even for untimed LPS's", 't');
+                      "use the timed version of the algorithm, even for untimed LPS's", 't');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -56,21 +56,22 @@ class lps2pbes_tool : public input_output_tool
       timed     = 0 < parser.options.count("timed");
 
       //check for presence of -f
-      if (parser.options.count("formula")) {
+      if (parser.options.count("formula"))
+      {
         formfilename = parser.option_argument("formula");
       }
     }
 
   public:
     lps2pbes_tool() : super(
-      "lps2pbes",
-      "Wieger Wesselink; Tim Willemse",
-      "generate a PBES from an LPS and a state formula",
-      "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
-      "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
-      "present, stdout is used. If INFILE is not present, stdin is used.\n"
-      "\n"
-      "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/mcrl2/wiki/index.php/Language_reference/mu-calculus_syntax>."
+        "lps2pbes",
+        "Wieger Wesselink; Tim Willemse",
+        "generate a PBES from an LPS and a state formula",
+        "Convert the state formula in FILE and the LPS in INFILE to a parameterised "
+        "boolean equation system (PBES) and save it to OUTFILE. If OUTFILE is not "
+        "present, stdout is used. If INFILE is not present, stdin is used.\n"
+        "\n"
+        "The concrete syntax of state formulas can be found at <http://www.mcrl2.org/mcrl2/wiki/index.php/Language_reference/mu-calculus_syntax>."
       )
     {}
 
@@ -80,11 +81,14 @@ class lps2pbes_tool : public input_output_tool
       {
         throw mcrl2::runtime_error("option -f is not specified");
       }
-     
+
       //load LPS
-      if (input_filename().empty()) {
+      if (input_filename().empty())
+      {
         gsVerboseMsg("reading LPS from stdin...\n");
-      } else {
+      }
+      else
+      {
         gsVerboseMsg("reading LPS from file '%s'...\n", input_filename().c_str());
       }
       lps::specification spec;
@@ -92,7 +96,8 @@ class lps2pbes_tool : public input_output_tool
       //load formula file
       gsVerboseMsg("reading input from file '%s'...\n", formfilename.c_str());
       std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
-      if (!instream.is_open()) {
+      if (!instream.is_open())
+      {
         throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
       }
       state_formulas::state_formula formula = state_formulas::parse_state_formula(instream, spec);
@@ -101,9 +106,12 @@ class lps2pbes_tool : public input_output_tool
       gsVerboseMsg("converting state formula and LPS to a PBES...\n");
       pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed);
       //save the result
-      if (output_filename().empty()) {
+      if (output_filename().empty())
+      {
         gsVerboseMsg("writing PBES to stdout...\n");
-      } else {
+      }
+      else
+      {
         gsVerboseMsg("writing PBES to file '%s'...\n", output_filename().c_str());
       }
       result.save(output_filename());
@@ -115,7 +123,7 @@ class lps2pbes_tool : public input_output_tool
 class lps2pbes_gui_tool: public mcrl2_gui_tool<lps2pbes_tool>
 {
   public:
-	lps2pbes_gui_tool()
+    lps2pbes_gui_tool()
     {
       m_gui_options["timed"] = create_checkbox_widget();
       m_gui_options["formula"] = create_filepicker_widget("modal mu-calculus files (*.mcf)|*.mcf|Text files(*.txt)|*.txt|All Files (*.*)|*.*");

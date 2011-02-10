@@ -6,10 +6,10 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-void AT_initList(int argc, char *argv[]);
+  void AT_initList(int argc, char* argv[]);
 
 #ifdef __cplusplus
 }
-#endif/* __cplusplus */ 
+#endif/* __cplusplus */
 
 #endif

@@ -17,7 +17,7 @@
 
 namespace atermpp
 {
-  /// \brief Dictionary based on ATerms.
+/// \brief Dictionary based on ATerms.
 /*   class dictionary: public aterm, boost::noncopyable
   {
    public:

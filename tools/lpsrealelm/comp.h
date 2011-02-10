@@ -26,7 +26,7 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 
 /// \brief A local class defining a data type for use in lpsrealelm.
-/// \details The defined data type is 
+/// \details The defined data type is
 ///          sort Comp = struct smaller?is_smaller | equal?is_equal | larger?is_larger;
 
 class comp_struct:public structured_sort
@@ -39,30 +39,35 @@ class comp_struct:public structured_sort
     function_symbol f_is_equal;
     function_symbol f_is_larger;
 
-    static structured_sort_constructor &c_smaller()
-    { static structured_sort_constructor c_smaller("smaller","is_smaller");
+    static structured_sort_constructor& c_smaller()
+    {
+      static structured_sort_constructor c_smaller("smaller","is_smaller");
       return c_smaller;
     }
 
-    static structured_sort_constructor &c_equal()
-    { static structured_sort_constructor c_equal("equal","is_equal");
+    static structured_sort_constructor& c_equal()
+    {
+      static structured_sort_constructor c_equal("equal","is_equal");
       return c_equal;
     }
 
-    static structured_sort_constructor &c_larger()
-    { static structured_sort_constructor c_larger("larger","is_larger");
+    static structured_sort_constructor& c_larger()
+    {
+      static structured_sort_constructor c_larger("larger","is_larger");
       return c_larger;
     }
 
-    static basic_sort &comp_sort()
-    { static basic_sort comp_sort("Comp");
+    static basic_sort& comp_sort()
+    {
+      static basic_sort comp_sort("Comp");
       return comp_sort;
     }
 
   public:
     comp_struct():
-           structured_sort(make_vector(c_smaller(),c_equal(),c_larger()))
-    { c_smaller().protect(); 
+      structured_sort(make_vector(c_smaller(),c_equal(),c_larger()))
+    {
+      c_smaller().protect();
       c_equal().protect();
       c_larger().protect();
       comp_sort().protect();
@@ -76,36 +81,44 @@ class comp_struct:public structured_sort
     }
 
     sort_expression sort() const
-    { // return *this;
+    {
+      // return *this;
       return comp_sort();
     }
 
     basic_sort basic_sort_name() const
-    { return comp_sort();
-    } 
+    {
+      return comp_sort();
+    }
 
     data_expression smaller() const
-    { return f_smaller;
+    {
+      return f_smaller;
     }
 
     data_expression equal() const
-    { return f_equal;
+    {
+      return f_equal;
     }
 
     data_expression larger() const
-    { return f_larger;
+    {
+      return f_larger;
     }
 
     data_expression is_smaller(const data_expression& e) const
-    { return f_is_smaller(e);
+    {
+      return f_is_smaller(e);
     }
 
     data_expression is_equal(const data_expression& e) const
-    { return f_is_equal(e);
+    {
+      return f_is_equal(e);
     }
 
     data_expression is_larger(const data_expression& e) const
-    { return f_is_larger(e);
+    {
+      return f_is_larger(e);
     }
 };
 

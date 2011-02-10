@@ -19,12 +19,12 @@ using namespace std;
 
 // --------------------
 DropTarget::DropTarget(
-    wxWindow* ownr,
-    Mediator* m )
-    : Colleague( m )
+  wxWindow* ownr,
+  Mediator* m)
+  : Colleague(m)
 // --------------------
 {
-    owner = ownr;
+  owner = ownr;
 }
 
 
@@ -32,7 +32,7 @@ DropTarget::DropTarget(
 DropTarget::~DropTarget()
 // ----------------------
 {
-    owner = NULL;
+  owner = NULL;
 }
 
 
@@ -41,35 +41,41 @@ DropTarget::~DropTarget()
 
 // -------------------------
 bool DropTarget::OnDropText(
-    wxCoord x,
-    wxCoord y,
-    const wxString &text )
+  wxCoord x,
+  wxCoord y,
+  const wxString& text)
 // -------------------------
 {
-    vector< wxString > tokens;
-    int    srcId;
-    vector< int > data;
+  vector< wxString > tokens;
+  int    srcId;
+  vector< int > data;
 
-    wxStringTokenizer tkz(
-        text,         // string
-        wxString( wxT(" ") ) ); // delimiters
-    while( tkz.HasMoreTokens() )
-        tokens.push_back( tkz.GetNextToken() );
+  wxStringTokenizer tkz(
+    text,         // string
+    wxString(wxT(" ")));    // delimiters
+  while (tkz.HasMoreTokens())
+  {
+    tokens.push_back(tkz.GetNextToken());
+  }
 
-    // get src id
-    if ( tokens.size() > 0 )
-        srcId = Utils::strToInt( string(tokens[0].mb_str(wxConvUTF8)) );
-    // get remaining data
-    for ( size_t i = 1; i < tokens.size(); ++i )
-        data.push_back( Utils::strToInt( string(tokens[i].mb_str(wxConvUTF8)) ));
+  // get src id
+  if (tokens.size() > 0)
+  {
+    srcId = Utils::strToInt(string(tokens[0].mb_str(wxConvUTF8)));
+  }
+  // get remaining data
+  for (size_t i = 1; i < tokens.size(); ++i)
+  {
+    data.push_back(Utils::strToInt(string(tokens[i].mb_str(wxConvUTF8))));
+  }
 
-    mediator->handleDragDrop(
-        srcId,
-        owner->GetId(),
-        x,
-        y,
-        data );
-    return true;
+  mediator->handleDragDrop(
+    srcId,
+    owner->GetId(),
+    x,
+    y,
+    data);
+  return true;
 }
 
 

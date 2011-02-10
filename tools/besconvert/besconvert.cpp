@@ -32,418 +32,420 @@
 using namespace mcrl2::bes;
 using namespace mcrl2::utilities::tools;
 
-namespace mcrl2 {
-  namespace bes {
+namespace mcrl2
+{
+namespace bes
+{
 
-    template<typename Container = atermpp::vector<boolean_equation> >
-    class bes_reduction_algorithm
+template<typename Container = atermpp::vector<boolean_equation> >
+class bes_reduction_algorithm
+{
+  public:
+    enum equivalence_t
     {
-      public:
-        enum equivalence_t
-        {
-          eq_none, /**< Unknown or no equivalence */
-          eq_bisim, /**< Strong bisimulation equivalence */
-          eq_oblivious_bisim, /**< Oblivious bisimulation equivalence */
-          eq_stut /**< Stuttering equivalence */
-        };
-
-      protected:
-        boolean_equation_system<Container>& m_bes;
-        equivalence_t m_equivalence;
-        lts::lts_lts_t m_lts;
-
-        std::set<equivalence_t> m_allowed_equivalences;
-        std::map<equivalence_t, std::string> m_equivalence_strings;
-
-        enum boolean_operand_t { BOOL_AND, BOOL_OR, BOOL_VAR };
-
-      public:
-        equivalence_t parse_equivalence(std::string const& s)
-        {
-          if (s == m_equivalence_strings[eq_bisim])
-          {
-            return eq_bisim;
-          }
-          else if (s == m_equivalence_strings[eq_oblivious_bisim])
-          {
-            return eq_oblivious_bisim;
-          }
-          else if (s == m_equivalence_strings[eq_stut])
-          {
-            return eq_stut;
-          }
-          else
-          {
-            return eq_none;
-          }
-        }
-
-        std::string string_for_equivalence(const equivalence_t& eq)
-        {
-          return m_equivalence_strings[eq];
-        }
-
-        const std::set<equivalence_t> &allowed_eqs() const
-        {
-          return m_allowed_equivalences;
-        }
-
-        std::string allowed_equivalences()
-        {
-          std::set<std::string> tmp;
-          for(typename std::set<equivalence_t>::const_iterator i = allowed_eqs().begin(); i != allowed_eqs().end(); ++i)
-          {
-            tmp.insert(string_for_equivalence(*i));
-          }
-          return core::string_join(tmp, ", ");
-        }
-
-      protected:
-        void initialise_allowed_eqs()
-        {
-          m_allowed_equivalences.insert(eq_bisim);
-          m_allowed_equivalences.insert(eq_stut);
-          m_equivalence_strings[eq_bisim] = "bisim";
-          m_equivalence_strings[eq_stut] = "stuttering";
-          m_equivalence_strings[eq_oblivious_bisim] = "oblivious";
-          m_equivalence_strings[eq_none] = "none";
-        }
-
-        boolean_operand_t get_operand(boolean_expression const& e)
-        {
-          typedef core::term_traits<boolean_expression> tr;
-
-          if(tr::is_and(e))
-          {
-            return BOOL_AND;
-          }
-          else if(tr::is_or(e))
-          {
-            return BOOL_OR;
-          }
-          else if(tr::is_variable(e))
-          {
-            return BOOL_VAR;
-          }
-          else
-          {
-            throw mcrl2::runtime_error("Unexpected operand occurred as top-level symbol in " + tr::pp(e) + ", expected only &&, || or a variable");
-          }
-        }
-
-        boolean_operand_t string_to_operand(std::string const& s)
-        {
-          int i = atoi(s.c_str());
-          if(i == 0)
-          {
-            return BOOL_AND;
-          }
-          else if(i == 1)
-          {
-            return BOOL_OR;
-          }
-          else if(i == 2)
-          {
-            return BOOL_VAR;
-          }
-          else
-          {
-            throw mcrl2::runtime_error("Unknown operand string " + s);
-          }
-        }
-
-        std::string print_operand(const boolean_operand_t o)
-        {
-          switch(o)
-          {
-            case BOOL_AND:
-              return "&&";
-            case BOOL_OR:
-              return "||";
-            case BOOL_VAR:
-              return "var";
-            default:
-              throw mcrl2::runtime_error("Unexpected case when printing operand.");
-          }
-        }
-
-        /// \brief Translate a BES to an LTS.
-        /// \pre m_bes is in SRF.
-        ///
-        /// Tranlation of m_bes to an LTS in m_lts, according to the following rules.
-        /// m_lts consists of one vertex for each equation, as well as an additional
-        /// vertex d, which has no outgoing transitions.
-        /// The transition relation is as follows.
-        /// X -tau-> Y if Y in rhs(X) and block(X) = block(Y) and op(X) = op(Y)
-        /// X -"block(Y),op(Y)"-> Y if Y in rhs(X) and block(X) != block(Y) or op(X) != op(Y)
-        /// X -"block(X),op(X)"-> d.
-        /// Initial state of the lts is the state representing the initial equation of the BES.
-        void bes_to_lts()
-        {
-          if(core::gsDebug)
-          {
-            std::cerr << "Tranforming BES to LTS" << std::endl;
-          }
-
-          if(m_bes.initial_state() != m_bes.equations().begin()->variable())
-          {
-            throw mcrl2::runtime_error("The first equation is not the variable designated as initial. This situation is not handled by the tool.");
-          }
-
-
-          // Collect block indices and operands of all equations
-          std::map<boolean_variable, std::pair<size_t, boolean_operand_t> > statistics;
-          std::map<boolean_variable, size_t> indices;
-
-          size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
-
-          size_t current_block = 0;
-          size_t index = 0;
-          fixpoint_symbol sigma = fixpoint_symbol::nu();
-          for(typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
-          {
-            if(i->symbol() != sigma)
-            {
-              sigma = i->symbol();
-              ++current_block;
-            }
-
-            std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
-            occurring_variable_count += occurring_variables.size();
-
-            statistics[i->variable()] = std::make_pair(current_block, get_operand(i->formula()));
-            indices[i->variable()] = index++;
-          }
-
-          size_t transitioncount = occurring_variable_count + m_bes.equations().size();
-          size_t statecount = m_bes.equations().size();// + 1;
-          size_t initial_state = 0;
-          std::stringstream aut;
-          aut << "des(0," << transitioncount << "," << statecount << ")" << std::endl;
-
-          m_lts.set_num_states(statecount, false);
-          m_lts.set_initial_state(initial_state);
-
-          atermpp::indexed_set labs(100,50);
-
-          for(typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
-          {
-            std::pair<size_t, boolean_operand_t> info = statistics[i->variable()];
-            size_t from = indices[i->variable()];
-            
-            // Create selfloop self:block(...),op(...)
-            // recording block and operand.
-            {
-              std::stringstream label;
-              label << "self:block(" << info.first << "),op(" << info.second << ")";
-              lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
-              size_t label_index = labs.index(t);
-              if ( label_index == ATERM_NON_EXISTING_POSITION )
-              {
-                std::pair<int, bool> put_result = labs.put(t);
-                label_index = put_result.first;
-                m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),false);
-              }
-              m_lts.add_transition(lts::transition(from,label_index,from));
-            }
-
-            // Edges to successors
-            std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
-            for(std::set<boolean_variable>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
-            {
-              std::stringstream label;
-              std::pair<size_t, boolean_operand_t> info_target = statistics[*j];
-              if(info == info_target)
-              {
-                label << "tau";
-              }
-              else
-              {
-                label << "block(" << info_target.first << "),op(" << info_target.second << ")";
-              }
-              size_t to = indices[*j];
-              lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
-              size_t label_index = labs.index(t);
-              if ( label_index == ATERM_NON_EXISTING_POSITION )
-              {
-                std::pair<int, bool> put_result = labs.put(t);
-                label_index = put_result.first;
-                m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
-              }
-              m_lts.add_transition(lts::transition(from,label_index,to));
-            }
-          }
-
-        }
-
-        void reduce_lts()
-        {
-          if(core::gsDebug)
-          {
-            std::cerr << "Reduce LTS" << std::endl;
-          }
-          switch(m_equivalence)
-          {
-            case eq_bisim:
-              lts::detail::bisimulation_reduce(m_lts, false, false);
-              break;
-            case eq_stut:
-              lts::detail::bisimulation_reduce(m_lts, true, true);
-              break;
-            default:
-              throw mcrl2::runtime_error("Reduction using " + string_for_equivalence(m_equivalence) + " not supported.");
-          }
-        }
-
-        /// \brief Transform LTS back to BES.
-        /// Reverse of tranlation LTS to BES. Unicity of labels was guaranteed by
-        /// the self-loops.
-        void lts_to_bes()
-        {
-          if(core::gsDebug)
-          {
-            std::cerr << "Transforming reduced LTS to BES." << std::endl;
-          }
-
-          // Build formulas
-          size_t cur_state = 0;
-          m_lts.sort_transitions(lts::src_lbl_tgt);
-          lts::transition_const_range transitions(m_lts.get_transitions());
-          lts::transition_const_range::const_iterator i = transitions.begin();
-
-          atermpp::map<size_t, atermpp::vector<boolean_equation> > blocks;
-
-          while(i != transitions.end())
-          {
-            atermpp::vector<boolean_variable> variables;
-            size_t block = 0;
-            boolean_operand_t op = BOOL_VAR;
-            cur_state = i->from();
-
-            while(i->from() == cur_state && i != transitions.end())
-            {
-              std::string label = pp(m_lts.action_label(i->label()));
-              size_t index = label.find(":");
-              if(index != std::string::npos)
-              {
-                // Self-loop recording info detected,
-                // determine block and operand
-                // first remove self: from label
-                label = label.substr(index+1, label.size());
-                size_t comma_pos = label.find(",");
-
-                std::string block_str = label.substr(0,comma_pos);
-                block_str.replace(0,block_str.find("(")+1,"");
-                block_str.replace(block_str.find(")"),1,"");
-
-                std::string op_str = label.substr(comma_pos);
-                op_str.replace(0,op_str.find("(")+1,"");
-                op_str.replace(op_str.find(")"),1,"");
-
-                block = atoi(block_str.c_str());
-                op = string_to_operand(op_str);
-              }
-              else
-              {
-                // Construct part of formula
-                std::stringstream name;
-                name << "X" << i->to();
-                variables.push_back(boolean_variable(name.str()));
-              }
-              ++i;
-            }
-
-            fixpoint_symbol fp;
-            if(block % 2 == 0)
-            {
-              fp = fixpoint_symbol::nu();
-            }
-            else
-            {
-              fp = fixpoint_symbol::mu();
-            }
-
-            boolean_expression expr;
-            switch(op)
-            {
-              case BOOL_AND:
-                expr = join_and(variables.begin(), variables.end());
-                break;
-              case BOOL_OR:
-                expr = join_or(variables.begin(), variables.end());
-                break;
-              case BOOL_VAR:
-                assert(variables.size() == 1);
-                expr = *(variables.begin());
-                break;
-              default:
-                throw mcrl2::runtime_error("Unexpected operand");
-            }
-            std::stringstream name;
-            name << "X" << cur_state;
-            boolean_equation eq(fp, boolean_variable(name.str()), expr);
-            blocks[block].push_back(eq);
-          }
-
-          atermpp::vector<boolean_equation> eqns;
-          for(size_t i = 0; i <= blocks.size(); ++i)
-          {
-            atermpp::map<size_t, atermpp::vector<boolean_equation> >::const_iterator j = blocks.find(i);
-            if(j != blocks.end())
-            {
-              eqns.insert(eqns.end(), j->second.begin(), j->second.end());
-            }
-          }
-          
-          m_bes.equations().swap(eqns);
-          std::stringstream name;
-          name << "X" << m_lts.initial_state();
-          m_bes.initial_state() = boolean_variable(name.str());
-        }
-
-      public:
-        bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut)
-          : m_bes(v_bes),
-            m_equivalence(equivalence)
-        {
-          initialise_allowed_eqs();
-        }
-
-        void run(utilities::execution_timer& timing)
-        {
-          if(core::gsVerbose)
-          {
-            std::cerr << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
-          }
-          if(core::gsDebug)
-          {
-            std::cerr << "Converting BES to standard form" << std::endl;
-          }
-
-          timing.start("standard form conversion");
-          make_standard_form(m_bes, true);
-          timing.finish("standard form conversion");
-
-          if(core::gsDebug)
-          {
-            std::cerr << "BES Reduction algorithm initialised" << std::endl;
-          }
-
-          timing.start("conversion to LTS");
-          bes_to_lts();
-          timing.finish("conversion to LTS");
-
-          timing.start("reduction");
-          reduce_lts();
-          timing.finish("reduction");
-
-          timing.start("conversion to BES");
-          lts_to_bes();
-          timing.finish("conversion to BES");
-        }
-
+      eq_none, /**< Unknown or no equivalence */
+      eq_bisim, /**< Strong bisimulation equivalence */
+      eq_oblivious_bisim, /**< Oblivious bisimulation equivalence */
+      eq_stut /**< Stuttering equivalence */
     };
-  } // namespace bes
+
+  protected:
+    boolean_equation_system<Container>& m_bes;
+    equivalence_t m_equivalence;
+    lts::lts_lts_t m_lts;
+
+    std::set<equivalence_t> m_allowed_equivalences;
+    std::map<equivalence_t, std::string> m_equivalence_strings;
+
+    enum boolean_operand_t { BOOL_AND, BOOL_OR, BOOL_VAR };
+
+  public:
+    equivalence_t parse_equivalence(std::string const& s)
+    {
+      if (s == m_equivalence_strings[eq_bisim])
+      {
+        return eq_bisim;
+      }
+      else if (s == m_equivalence_strings[eq_oblivious_bisim])
+      {
+        return eq_oblivious_bisim;
+      }
+      else if (s == m_equivalence_strings[eq_stut])
+      {
+        return eq_stut;
+      }
+      else
+      {
+        return eq_none;
+      }
+    }
+
+    std::string string_for_equivalence(const equivalence_t& eq)
+    {
+      return m_equivalence_strings[eq];
+    }
+
+    const std::set<equivalence_t> &allowed_eqs() const
+    {
+      return m_allowed_equivalences;
+    }
+
+    std::string allowed_equivalences()
+    {
+      std::set<std::string> tmp;
+      for (typename std::set<equivalence_t>::const_iterator i = allowed_eqs().begin(); i != allowed_eqs().end(); ++i)
+      {
+        tmp.insert(string_for_equivalence(*i));
+      }
+      return core::string_join(tmp, ", ");
+    }
+
+  protected:
+    void initialise_allowed_eqs()
+    {
+      m_allowed_equivalences.insert(eq_bisim);
+      m_allowed_equivalences.insert(eq_stut);
+      m_equivalence_strings[eq_bisim] = "bisim";
+      m_equivalence_strings[eq_stut] = "stuttering";
+      m_equivalence_strings[eq_oblivious_bisim] = "oblivious";
+      m_equivalence_strings[eq_none] = "none";
+    }
+
+    boolean_operand_t get_operand(boolean_expression const& e)
+    {
+      typedef core::term_traits<boolean_expression> tr;
+
+      if (tr::is_and(e))
+      {
+        return BOOL_AND;
+      }
+      else if (tr::is_or(e))
+      {
+        return BOOL_OR;
+      }
+      else if (tr::is_variable(e))
+      {
+        return BOOL_VAR;
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Unexpected operand occurred as top-level symbol in " + tr::pp(e) + ", expected only &&, || or a variable");
+      }
+    }
+
+    boolean_operand_t string_to_operand(std::string const& s)
+    {
+      int i = atoi(s.c_str());
+      if (i == 0)
+      {
+        return BOOL_AND;
+      }
+      else if (i == 1)
+      {
+        return BOOL_OR;
+      }
+      else if (i == 2)
+      {
+        return BOOL_VAR;
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Unknown operand string " + s);
+      }
+    }
+
+    std::string print_operand(const boolean_operand_t o)
+    {
+      switch (o)
+      {
+        case BOOL_AND:
+          return "&&";
+        case BOOL_OR:
+          return "||";
+        case BOOL_VAR:
+          return "var";
+        default:
+          throw mcrl2::runtime_error("Unexpected case when printing operand.");
+      }
+    }
+
+    /// \brief Translate a BES to an LTS.
+    /// \pre m_bes is in SRF.
+    ///
+    /// Tranlation of m_bes to an LTS in m_lts, according to the following rules.
+    /// m_lts consists of one vertex for each equation, as well as an additional
+    /// vertex d, which has no outgoing transitions.
+    /// The transition relation is as follows.
+    /// X -tau-> Y if Y in rhs(X) and block(X) = block(Y) and op(X) = op(Y)
+    /// X -"block(Y),op(Y)"-> Y if Y in rhs(X) and block(X) != block(Y) or op(X) != op(Y)
+    /// X -"block(X),op(X)"-> d.
+    /// Initial state of the lts is the state representing the initial equation of the BES.
+    void bes_to_lts()
+    {
+      if (core::gsDebug)
+      {
+        std::cerr << "Tranforming BES to LTS" << std::endl;
+      }
+
+      if (m_bes.initial_state() != m_bes.equations().begin()->variable())
+      {
+        throw mcrl2::runtime_error("The first equation is not the variable designated as initial. This situation is not handled by the tool.");
+      }
+
+
+      // Collect block indices and operands of all equations
+      std::map<boolean_variable, std::pair<size_t, boolean_operand_t> > statistics;
+      std::map<boolean_variable, size_t> indices;
+
+      size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
+
+      size_t current_block = 0;
+      size_t index = 0;
+      fixpoint_symbol sigma = fixpoint_symbol::nu();
+      for (typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      {
+        if (i->symbol() != sigma)
+        {
+          sigma = i->symbol();
+          ++current_block;
+        }
+
+        std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
+        occurring_variable_count += occurring_variables.size();
+
+        statistics[i->variable()] = std::make_pair(current_block, get_operand(i->formula()));
+        indices[i->variable()] = index++;
+      }
+
+      size_t transitioncount = occurring_variable_count + m_bes.equations().size();
+      size_t statecount = m_bes.equations().size();// + 1;
+      size_t initial_state = 0;
+      std::stringstream aut;
+      aut << "des(0," << transitioncount << "," << statecount << ")" << std::endl;
+
+      m_lts.set_num_states(statecount, false);
+      m_lts.set_initial_state(initial_state);
+
+      atermpp::indexed_set labs(100,50);
+
+      for (typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
+      {
+        std::pair<size_t, boolean_operand_t> info = statistics[i->variable()];
+        size_t from = indices[i->variable()];
+
+        // Create selfloop self:block(...),op(...)
+        // recording block and operand.
+        {
+          std::stringstream label;
+          label << "self:block(" << info.first << "),op(" << info.second << ")";
+          lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
+          size_t label_index = labs.index(t);
+          if (label_index == ATERM_NON_EXISTING_POSITION)
+          {
+            std::pair<int, bool> put_result = labs.put(t);
+            label_index = put_result.first;
+            m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),false);
+          }
+          m_lts.add_transition(lts::transition(from,label_index,from));
+        }
+
+        // Edges to successors
+        std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
+        for (std::set<boolean_variable>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
+        {
+          std::stringstream label;
+          std::pair<size_t, boolean_operand_t> info_target = statistics[*j];
+          if (info == info_target)
+          {
+            label << "tau";
+          }
+          else
+          {
+            label << "block(" << info_target.first << "),op(" << info_target.second << ")";
+          }
+          size_t to = indices[*j];
+          lps::action t(lps::action_label(core::identifier_string(label.str()), data::sort_expression_list()), data::data_expression_list());
+          size_t label_index = labs.index(t);
+          if (label_index == ATERM_NON_EXISTING_POSITION)
+          {
+            std::pair<int, bool> put_result = labs.put(t);
+            label_index = put_result.first;
+            m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
+          }
+          m_lts.add_transition(lts::transition(from,label_index,to));
+        }
+      }
+
+    }
+
+    void reduce_lts()
+    {
+      if (core::gsDebug)
+      {
+        std::cerr << "Reduce LTS" << std::endl;
+      }
+      switch (m_equivalence)
+      {
+        case eq_bisim:
+          lts::detail::bisimulation_reduce(m_lts, false, false);
+          break;
+        case eq_stut:
+          lts::detail::bisimulation_reduce(m_lts, true, true);
+          break;
+        default:
+          throw mcrl2::runtime_error("Reduction using " + string_for_equivalence(m_equivalence) + " not supported.");
+      }
+    }
+
+    /// \brief Transform LTS back to BES.
+    /// Reverse of tranlation LTS to BES. Unicity of labels was guaranteed by
+    /// the self-loops.
+    void lts_to_bes()
+    {
+      if (core::gsDebug)
+      {
+        std::cerr << "Transforming reduced LTS to BES." << std::endl;
+      }
+
+      // Build formulas
+      size_t cur_state = 0;
+      m_lts.sort_transitions(lts::src_lbl_tgt);
+      lts::transition_const_range transitions(m_lts.get_transitions());
+      lts::transition_const_range::const_iterator i = transitions.begin();
+
+      atermpp::map<size_t, atermpp::vector<boolean_equation> > blocks;
+
+      while (i != transitions.end())
+      {
+        atermpp::vector<boolean_variable> variables;
+        size_t block = 0;
+        boolean_operand_t op = BOOL_VAR;
+        cur_state = i->from();
+
+        while (i->from() == cur_state && i != transitions.end())
+        {
+          std::string label = pp(m_lts.action_label(i->label()));
+          size_t index = label.find(":");
+          if (index != std::string::npos)
+          {
+            // Self-loop recording info detected,
+            // determine block and operand
+            // first remove self: from label
+            label = label.substr(index+1, label.size());
+            size_t comma_pos = label.find(",");
+
+            std::string block_str = label.substr(0,comma_pos);
+            block_str.replace(0,block_str.find("(")+1,"");
+            block_str.replace(block_str.find(")"),1,"");
+
+            std::string op_str = label.substr(comma_pos);
+            op_str.replace(0,op_str.find("(")+1,"");
+            op_str.replace(op_str.find(")"),1,"");
+
+            block = atoi(block_str.c_str());
+            op = string_to_operand(op_str);
+          }
+          else
+          {
+            // Construct part of formula
+            std::stringstream name;
+            name << "X" << i->to();
+            variables.push_back(boolean_variable(name.str()));
+          }
+          ++i;
+        }
+
+        fixpoint_symbol fp;
+        if (block % 2 == 0)
+        {
+          fp = fixpoint_symbol::nu();
+        }
+        else
+        {
+          fp = fixpoint_symbol::mu();
+        }
+
+        boolean_expression expr;
+        switch (op)
+        {
+          case BOOL_AND:
+            expr = join_and(variables.begin(), variables.end());
+            break;
+          case BOOL_OR:
+            expr = join_or(variables.begin(), variables.end());
+            break;
+          case BOOL_VAR:
+            assert(variables.size() == 1);
+            expr = *(variables.begin());
+            break;
+          default:
+            throw mcrl2::runtime_error("Unexpected operand");
+        }
+        std::stringstream name;
+        name << "X" << cur_state;
+        boolean_equation eq(fp, boolean_variable(name.str()), expr);
+        blocks[block].push_back(eq);
+      }
+
+      atermpp::vector<boolean_equation> eqns;
+      for (size_t i = 0; i <= blocks.size(); ++i)
+      {
+        atermpp::map<size_t, atermpp::vector<boolean_equation> >::const_iterator j = blocks.find(i);
+        if (j != blocks.end())
+        {
+          eqns.insert(eqns.end(), j->second.begin(), j->second.end());
+        }
+      }
+
+      m_bes.equations().swap(eqns);
+      std::stringstream name;
+      name << "X" << m_lts.initial_state();
+      m_bes.initial_state() = boolean_variable(name.str());
+    }
+
+  public:
+    bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut)
+      : m_bes(v_bes),
+        m_equivalence(equivalence)
+    {
+      initialise_allowed_eqs();
+    }
+
+    void run(utilities::execution_timer& timing)
+    {
+      if (core::gsVerbose)
+      {
+        std::cerr << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
+      }
+      if (core::gsDebug)
+      {
+        std::cerr << "Converting BES to standard form" << std::endl;
+      }
+
+      timing.start("standard form conversion");
+      make_standard_form(m_bes, true);
+      timing.finish("standard form conversion");
+
+      if (core::gsDebug)
+      {
+        std::cerr << "BES Reduction algorithm initialised" << std::endl;
+      }
+
+      timing.start("conversion to LTS");
+      bes_to_lts();
+      timing.finish("conversion to LTS");
+
+      timing.start("reduction");
+      reduce_lts();
+      timing.finish("reduction");
+
+      timing.start("conversion to BES");
+      lts_to_bes();
+      timing.finish("conversion to BES");
+    }
+
+};
+} // namespace bes
 } // namespace mcrl2
 
 
@@ -462,38 +464,39 @@ class bes_bisimulation_tool: public super
       super::add_options(desc);
 
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
-        "generate an equivalent BES, preserving equivalence NAME:\n"
-        "supported equivalences: bisim, stuttering (default stuttering)", 'e');
+                      "generate an equivalent BES, preserving equivalence NAME:\n"
+                      "supported equivalences: bisim, stuttering (default stuttering)", 'e');
     }
 
     void parse_options(const mcrl2::utilities::command_line_parser& parser)
     {
       super::parse_options(parser);
 
-      if (parser.options.count("equivalence")) {
+      if (parser.options.count("equivalence"))
+      {
         boolean_equation_system<> b; // TODO: build proper solution.
         mcrl2::bes::bes_reduction_algorithm<> a(b);
         std::cerr << "Allowed eqs: " << a.allowed_equivalences() << std::endl;
         equivalence = a.parse_equivalence(parser.option_argument("equivalence"));
-        if( a.allowed_eqs().count(equivalence) == 0 )
+        if (a.allowed_eqs().count(equivalence) == 0)
         {
           parser.error("option -e/--equivalence has illegal argument '" +
-            parser.option_argument("equivalence") + "'");
+                       parser.option_argument("equivalence") + "'");
         }
       }
-    }      
+    }
 
   public:
 
     bes_bisimulation_tool()
       : super(
-          "bes_bisimulation",
-          "Jeroen Keiren",
-          "reduce a BES (or PBES) using (variations of) behavioural equivalences",
-          "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
-          "If INFILE is not "
-          "present, stdin is used. If OUTFILE is not present, stdout is used."),
-        equivalence(bes_reduction_algorithm<>::eq_stut)
+        "bes_bisimulation",
+        "Jeroen Keiren",
+        "reduce a BES (or PBES) using (variations of) behavioural equivalences",
+        "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
+        "If INFILE is not "
+        "present, stdin is used. If OUTFILE is not present, stdout is used."),
+      equivalence(bes_reduction_algorithm<>::eq_stut)
     {}
 
     bool run()
@@ -508,7 +511,7 @@ class bes_bisimulation_tool: public super
       core::gsVerboseMsg("done\n");
       bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence).run(timer());
       b.save(m_output_filename);
-      
+
       return true;
     }
 };

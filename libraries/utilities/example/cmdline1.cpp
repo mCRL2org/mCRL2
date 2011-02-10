@@ -34,7 +34,7 @@ class my_tool: public tool
     {
       return "[OPTION]... [FIRST]\n";
     }
-    
+
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
     {
@@ -55,9 +55,9 @@ class my_tool: public tool
       if (0 < parser.arguments.size())
       {
         std::string s = parser.arguments[0];
-        std::cout << "positional option 1: " << s << std::endl;       
+        std::cout << "positional option 1: " << s << std::endl;
       }
-      
+
       std::cout << "--- parser arguments ---" << std::endl;
       for (command_line_parser::option_map::const_iterator i = parser.options.begin(); i != parser.options.end(); ++i)
       {
@@ -69,41 +69,41 @@ class my_tool: public tool
     {
       super::add_options(desc);
       desc
-        /// string option with default value 'name1'
-        .add_option("option1",
-          make_optional_argument("NAME", "name1"),
-          "string option NAME:\n"
-          "  'name1' (default),\n"
-          "  'name2', or\n"
-          "  'name3'.",
-          'o')
-        /// integer option with default value 1
-        .add_option("option2",
-          make_optional_argument("NAME", "1"),
-          "integer option",
-          'i')
-        /// boolean option with default value true
-        .add_option("option3",
-          make_optional_argument("NAME", "1"),
-          "boolean option",
-          'b')
-        /// boolean flag (default off)
-        .add_option("option4",
-          "boolean option",
-          'a')
-        ;
+      /// string option with default value 'name1'
+      .add_option("option1",
+                  make_optional_argument("NAME", "name1"),
+                  "string option NAME:\n"
+                  "  'name1' (default),\n"
+                  "  'name2', or\n"
+                  "  'name3'.",
+                  'o')
+      /// integer option with default value 1
+      .add_option("option2",
+                  make_optional_argument("NAME", "1"),
+                  "integer option",
+                  'i')
+      /// boolean option with default value true
+      .add_option("option3",
+                  make_optional_argument("NAME", "1"),
+                  "boolean option",
+                  'b')
+      /// boolean flag (default off)
+      .add_option("option4",
+                  "boolean option",
+                  'a')
+      ;
     }
 
   public:
     /// Constructor.
     my_tool()
       : super(
-          "My tool",
-          "John Doe",
-          "One line description",
-          "First line of the long description. "
-          "Second line of the long description."
-        )
+        "My tool",
+        "John Doe",
+        "One line description",
+        "First line of the long description. "
+        "Second line of the long description."
+      )
     {}
 
     /// Runs the tool.

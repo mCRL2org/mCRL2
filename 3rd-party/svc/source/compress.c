@@ -24,221 +24,267 @@
 #include <svc/compress.h>
 
 static char buffer[102400];
-static void calcDelta(CompressedStream *, long *);
-static void uncalcDelta(CompressedStream *, long *);
+static void calcDelta(CompressedStream*, long*);
+static void uncalcDelta(CompressedStream*, long*);
 
 
 
-CompressedStream *CSinit(HTable *table, BitStream *bs, int indexed){
-   CompressedStream *ret;
+CompressedStream* CSinit(HTable* table, BitStream* bs, int indexed)
+{
+  CompressedStream* ret;
 
-   ret=(CompressedStream *)malloc(sizeof(CompressedStream));
-   if(indexed){
-      ret->indices=table;   
-      HTinit(&ret->deltas);
-      HFinit(&ret->tree, &ret->deltas);
-   } else {
-      HTinit(&ret->deltas);
-      HFinit(&ret->tree, table);
-   }
+  ret=(CompressedStream*)malloc(sizeof(CompressedStream));
+  if (indexed)
+  {
+    ret->indices=table;
+    HTinit(&ret->deltas);
+    HFinit(&ret->tree, &ret->deltas);
+  }
+  else
+  {
+    HTinit(&ret->deltas);
+    HFinit(&ret->tree, table);
+  }
 
-   ret->bs=bs;
-   ret->last=0;
-   ret->preLast=0;
+  ret->bs=bs;
+  ret->last=0;
+  ret->preLast=0;
 
-   return ret;
+  return ret;
 }
 
 
-void CSfree(CompressedStream *cs){
+void CSfree(CompressedStream* cs)
+{
 
-   HFfree(&cs->tree);
-   HTfree(&cs->deltas);
-   free(cs);
+  HFfree(&cs->tree);
+  HTfree(&cs->deltas);
+  free(cs);
 
 }
 
-int CSreadIndex(CompressedStream *cs, ATerm *term){
-   long index;
-   if(HFdecodeIndex(cs->bs, &cs->tree, &index)){
-      uncalcDelta(cs,&index);
-      *term=(ATerm)ATmakeInt(index); 
-         HTinsert(cs->indices,*term,NULL); /* IZAK */
+int CSreadIndex(CompressedStream* cs, ATerm* term)
+{
+  long index;
+  if (HFdecodeIndex(cs->bs, &cs->tree, &index))
+  {
+    uncalcDelta(cs,&index);
+    *term=(ATerm)ATmakeInt(index);
+    HTinsert(cs->indices,*term,NULL); /* IZAK */
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
+}
+
+
+int CSreadATerm(CompressedStream* cs, ATerm* term)
+{
+
+  if (HFdecodeATerm(cs->bs, &cs->tree, term))
+  {
+
+    if (*term==NULL)
+    {
+      return 0;
+    }
+    else
+    {
       return 1;
-   } else {
-      return 0;
-   }
-}
-
-
-int CSreadATerm(CompressedStream *cs, ATerm *term){
-
-   if(HFdecodeATerm(cs->bs, &cs->tree, term)){
-
-      if(*term==NULL){
-         return 0;
-      } else {
-         return 1;
-      }
-   } else {
-      return 0;
-   }
+    }
+  }
+  else
+  {
+    return 0;
+  }
 
 }
 
-int CSureadATerm(CompressedStream *cs, ATerm *term){
+int CSureadATerm(CompressedStream* cs, ATerm* term)
+{
 
-   if (BSreadString(cs->bs,buffer)){
-      *term=ATreadFromString(buffer);
-      return 1;
-   } else {
-      return 0;
-   }
+  if (BSreadString(cs->bs,buffer))
+  {
+    *term=ATreadFromString(buffer);
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
 }
 
-int CSreadString(CompressedStream *cs, char **str){
-   ATerm term;
+int CSreadString(CompressedStream* cs, char** str)
+{
+  ATerm term;
 
-   /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<str>", str)){ */
-   if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_APPL &&
-           !ATisQuoted(ATgetAFun(term)))
-   {
-     *str =ATgetName(ATgetAFun(term));
-     return 1;
-   } 
-   else 
-   {
-      return 0;
-   }
-
-}
-
-int CSureadString(CompressedStream *cs, char **str){
-
-   if(BSreadString(cs->bs, buffer)){
-/*
-ATfprintf(stderr, "Uread %s\n", buffer);
-*/
-      *str=buffer;
-      return 1;
-   } else {
-      return 0;
-   }
-}
-
-
-int CSreadInt(CompressedStream *cs, long *n){
-   ATerm term;
-
-   /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<int>", &n)) */
-   if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_INT)
-   {
-      *n =ATgetInt((ATermInt)term);
-      return 1;
-   } 
-   else 
-   {
-      return 0;
-   }
+  /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<str>", str)){ */
+  if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_APPL &&
+      !ATisQuoted(ATgetAFun(term)))
+  {
+    *str =ATgetName(ATgetAFun(term));
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
 
 }
 
-int CSureadInt(CompressedStream *cs, long *n){
+int CSureadString(CompressedStream* cs, char** str)
+{
 
-   if (BSreadInt(cs->bs,n)){
-/*
-fprintf(stderr, "Read int %ld\n", *n);
-*/
-      return 1;
-   } else {
-      return 0;
-   }
-
+  if (BSreadString(cs->bs, buffer))
+  {
+    /*
+    ATfprintf(stderr, "Uread %s\n", buffer);
+    */
+    *str=buffer;
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
 }
 
 
+int CSreadInt(CompressedStream* cs, long* n)
+{
+  ATerm term;
 
-int CSwriteIndex(CompressedStream *cs, ATerm term){
-   long index;
-
-
-   if(term==NULL){
-      return HFencodeIndex(cs->bs, &cs->tree, NO_INT); 
-   } else {
-      if(!HTmember(cs->indices,term,&index)){
-         index=HTinsert(cs->indices,term,NULL);
-      }
-      calcDelta(cs, &index);
-
-      return HFencodeIndex(cs->bs, &cs->tree, index); 
-   }
-}
-
-
-int CSwriteATerm(CompressedStream *cs, ATerm term){
-
-   return HFencodeATerm(cs->bs, &cs->tree, term); 
-}
-
-int CSuwriteATerm(CompressedStream *cs, ATerm term){
-
-   BSwriteString(cs->bs,ATwriteToString(term));
-   return 1;
-}
-int CSwriteString(CompressedStream *cs, char *str){
-
-   return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeAppl(ATmakeAFun(str,0,ATfalse)));
-}
-
-int CSuwriteString(CompressedStream *cs, char *str){
-   BSwriteString(cs->bs,str);
-   return 1;
-}
-int CSwriteInt(CompressedStream *cs, long n){
-
-/*
-ATfprintf(stderr,"Write int %d\n", n);
-*/
-
-   return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeInt(n));
-}
-int CSuwriteInt(CompressedStream *cs, long n){
-   BSwriteInt(cs->bs,n);
-   return 1;
-}
-
-void  CSflush(CompressedStream *cs){
-
-   BSflush(cs->bs);
+  /* if(HFdecodeATerm(cs->bs, &cs->tree, &term) && ATmatch(term, "<int>", &n)) */
+  if (HFdecodeATerm(cs->bs, &cs->tree, &term) && ATgetType(term)==AT_INT)
+  {
+    *n =ATgetInt((ATermInt)term);
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
 
 }
 
-int  CSseek(CompressedStream *cs, long offset, int whence){
+int CSureadInt(CompressedStream* cs, long* n)
+{
 
-   return BSseek(cs->bs, offset, whence);
-}
+  if (BSreadInt(cs->bs,n))
+  {
+    /*
+    fprintf(stderr, "Read int %ld\n", *n);
+    */
+    return 1;
+  }
+  else
+  {
+    return 0;
+  }
 
-long CStell(CompressedStream *cs){
-
-   return BStell(cs->bs);
 }
 
 
 
-static void calcDelta(CompressedStream *bs, long *n){
-   long tmp;
+int CSwriteIndex(CompressedStream* cs, ATerm term)
+{
+  long index;
 
-   tmp=*n;
-   *n=*n-bs->preLast;
-   bs->preLast=bs->last;
-   bs->last=tmp;
+
+  if (term==NULL)
+  {
+    return HFencodeIndex(cs->bs, &cs->tree, NO_INT);
+  }
+  else
+  {
+    if (!HTmember(cs->indices,term,&index))
+    {
+      index=HTinsert(cs->indices,term,NULL);
+    }
+    calcDelta(cs, &index);
+
+    return HFencodeIndex(cs->bs, &cs->tree, index);
+  }
 }
 
-static void uncalcDelta(CompressedStream *bs, long *n){
-   long tmp;
 
-   tmp=*n;
-   *n=*n+bs->preLast;
-   bs->preLast=bs->last;
-   bs->last=*n;
+int CSwriteATerm(CompressedStream* cs, ATerm term)
+{
+
+  return HFencodeATerm(cs->bs, &cs->tree, term);
+}
+
+int CSuwriteATerm(CompressedStream* cs, ATerm term)
+{
+
+  BSwriteString(cs->bs,ATwriteToString(term));
+  return 1;
+}
+int CSwriteString(CompressedStream* cs, char* str)
+{
+
+  return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeAppl(ATmakeAFun(str,0,ATfalse)));
+}
+
+int CSuwriteString(CompressedStream* cs, char* str)
+{
+  BSwriteString(cs->bs,str);
+  return 1;
+}
+int CSwriteInt(CompressedStream* cs, long n)
+{
+
+  /*
+  ATfprintf(stderr,"Write int %d\n", n);
+  */
+
+  return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeInt(n));
+}
+int CSuwriteInt(CompressedStream* cs, long n)
+{
+  BSwriteInt(cs->bs,n);
+  return 1;
+}
+
+void  CSflush(CompressedStream* cs)
+{
+
+  BSflush(cs->bs);
+
+}
+
+int  CSseek(CompressedStream* cs, long offset, int whence)
+{
+
+  return BSseek(cs->bs, offset, whence);
+}
+
+long CStell(CompressedStream* cs)
+{
+
+  return BStell(cs->bs);
+}
+
+
+
+static void calcDelta(CompressedStream* bs, long* n)
+{
+  long tmp;
+
+  tmp=*n;
+  *n=*n-bs->preLast;
+  bs->preLast=bs->last;
+  bs->last=tmp;
+}
+
+static void uncalcDelta(CompressedStream* bs, long* n)
+{
+  long tmp;
+
+  tmp=*n;
+  *n=*n+bs->preLast;
+  bs->preLast=bs->last;
+  bs->last=*n;
 }

@@ -19,51 +19,53 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/process/action_name_multiset.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace process {
+namespace process
+{
 
-  /// \brief Process identifier
-  //<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
-  class process_identifier: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      process_identifier()
-        : atermpp::aterm_appl(core::detail::constructProcVarId())
-      {}
+/// \brief Process identifier
+//<ProcVarId>    ::= ProcVarId(<String>, <SortExpr>*)
+class process_identifier: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Constructor.
+    process_identifier()
+      : atermpp::aterm_appl(core::detail::constructProcVarId())
+    {}
 
-      /// \brief Constructor.
-      /// \param term A term
-      process_identifier(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_ProcVarId(m_term));
-      }
+    /// \brief Constructor.
+    /// \param term A term
+    process_identifier(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_ProcVarId(m_term));
+    }
 
-      /// \brief Constructor.
-      process_identifier(core::identifier_string name, data::sort_expression_list sorts)
-        : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list<data::sort_expression>(sorts.begin(), sorts.end())))
-      {}
+    /// \brief Constructor.
+    process_identifier(core::identifier_string name, data::sort_expression_list sorts)
+      : atermpp::aterm_appl(core::detail::gsMakeProcVarId(name, atermpp::term_list<data::sort_expression>(sorts.begin(), sorts.end())))
+    {}
 
-      /// \brief Returns the name of the process identifier
-      /// \return The name of the process identifier
-      core::identifier_string name() const
-      {
-        using namespace atermpp;
-        return arg1(*this);
-      }
+    /// \brief Returns the name of the process identifier
+    /// \return The name of the process identifier
+    core::identifier_string name() const
+    {
+      using namespace atermpp;
+      return arg1(*this);
+    }
 
-      /// \brief Returns the sorts of the process identifier
-      /// \return The sorts of the process identifier
-      data::sort_expression_list sorts() const
-      {
-        using namespace atermpp;
-        return data::sort_expression_list(
-          atermpp::term_list_iterator<data::sort_expression>(list_arg2(*this)),
-          atermpp::term_list_iterator<data::sort_expression>());
-      }
-  };
+    /// \brief Returns the sorts of the process identifier
+    /// \return The sorts of the process identifier
+    data::sort_expression_list sorts() const
+    {
+      using namespace atermpp;
+      return data::sort_expression_list(
+               atermpp::term_list_iterator<data::sort_expression>(list_arg2(*this)),
+               atermpp::term_list_iterator<data::sort_expression>());
+    }
+};
 
 } // namespace process
 

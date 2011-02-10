@@ -19,11 +19,11 @@ class SmallProgressMeasures;
     with the small progress measures parity game solver. */
 class LiftingStrategy
 {
-public:
+  public:
 
     /*! Construct a strategy for the given parity game. */
-    LiftingStrategy(const ParityGame &game)
-        : graph_(game.graph()), game_(game) { };
+    LiftingStrategy(const ParityGame& game)
+      : graph_(game.graph()), game_(game) { };
 
     /*! Destroy the strategy */
     virtual ~LiftingStrategy() { };
@@ -42,17 +42,20 @@ public:
     virtual verti next(verti prev_vertex, bool prev_lifted) = 0;
 
     /*! Returns an estimation of the peak memory use for this strategy. */
-    virtual size_t memory_use() const { return 0; }
+    virtual size_t memory_use() const
+    {
+      return 0;
+    }
 
-protected:
-    const StaticGraph &graph_;          //!< the game graph to work on
-    const ParityGame &game_;            //!< the parity game to work on
+  protected:
+    const StaticGraph& graph_;          //!< the game graph to work on
+    const ParityGame& game_;            //!< the parity game to work on
 };
 
 /*! Abstract base class for lifting strategy factories. */
 class LiftingStrategyFactory
 {
-public:
+  public:
     virtual ~LiftingStrategyFactory();
 
     /*! Creates a lifting strategy factory from a string description. Returns
@@ -89,12 +92,12 @@ public:
             oldmaxmeasure
                 Older implementation of max. measure lifting strategy.
     */
-    static LiftingStrategyFactory *create(const std::string &description);
+    static LiftingStrategyFactory* create(const std::string& description);
 
     /*! Create a lifting strategy for the given game, to be used by the given
         Small Progress Measures solver. */
-    virtual LiftingStrategy *create( const ParityGame &game,
-                                     const SmallProgressMeasures &spm ) = 0;
+    virtual LiftingStrategy* create(const ParityGame& game,
+                                    const SmallProgressMeasures& spm) = 0;
 };
 
 

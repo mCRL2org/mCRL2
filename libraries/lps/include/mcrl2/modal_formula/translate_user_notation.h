@@ -18,65 +18,69 @@
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace action_formulas {
+namespace action_formulas
+{
 
-  template <typename T>
-  void translate_user_notation(T& x,
-                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                              )
-  {
-    core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
-  }
+template <typename T>
+void translate_user_notation(T& x,
+                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                            )
+{
+  core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+}
 
-  template <typename T>
-  T translate_user_notation(const T& x,
-                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                           )
-  {
-    return core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
-  }
+template <typename T>
+T translate_user_notation(const T& x,
+                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                         )
+{
+  return core::make_update_apply_builder<action_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+}
 
 } // namespace action_formulas
 
-namespace regular_formulas {
+namespace regular_formulas
+{
 
-  template <typename T>
-  void translate_user_notation(T& x,
-                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                              )
-  {
-    core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
-  }
+template <typename T>
+void translate_user_notation(T& x,
+                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                            )
+{
+  core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+}
 
-  template <typename T>
-  T translate_user_notation(const T& x,
-                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                           )
-  {
-    return core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
-  }
+template <typename T>
+T translate_user_notation(const T& x,
+                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                         )
+{
+  return core::make_update_apply_builder<regular_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+}
 
 } // namespace regular_formulas
 
-namespace state_formulas {
+namespace state_formulas
+{
 
-  template <typename T>
-  void translate_user_notation(T& x,
-                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                              )
-  {
-    core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
-  }
+template <typename T>
+void translate_user_notation(T& x,
+                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                            )
+{
+  core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+}
 
-  template <typename T>
-  T translate_user_notation(const T& x,
-                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                           )
-  {
-    return core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
-  }
+template <typename T>
+T translate_user_notation(const T& x,
+                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                         )
+{
+  return core::make_update_apply_builder<state_formulas::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+}
 
 } // namespace state_formulas
 

@@ -10,7 +10,7 @@
 /** \file
  *
  * \brief This file contains a class that contains labelled transition systems in aut format.
- * \details A labelled transition system in aut format is a transition system 
+ * \details A labelled transition system in aut format is a transition system
  * with empty state labels, and strings as transition labels.
  * \author Jan Friso Groote
  */
@@ -29,41 +29,41 @@ namespace mcrl2
 {
 namespace lts
 {
-  /** \brief A simple labelled transition format with only strings as action labels.
-   *  \detail This lts format corresponds to the Ceasar/Aldebaran labelled transition
-   *  system format. There are no state labels, only transition labels which are plain
-   *  strings. 
-   */
-  class lts_aut_t : public lts< detail::state_label_empty, detail::action_label_string >
-  {
-    public:
+/** \brief A simple labelled transition format with only strings as action labels.
+ *  \detail This lts format corresponds to the Ceasar/Aldebaran labelled transition
+ *  system format. There are no state labels, only transition labels which are plain
+ *  strings.
+ */
+class lts_aut_t : public lts< detail::state_label_empty, detail::action_label_string >
+{
+  public:
 
-      /** \brief Provides the type of this lts, in casu lts_aut.
-      */
-      lts_type type()
-      {
-        return lts_aut;
-      }
-     
-      /** \brief Load the labelled transition system from a file.
-       *  \details If the filename is empty, the result is read from stdin.
-                   The input file must be in .aut format.
-       *  \param[in] filename Name of the file from which this lts is read.
-       */
-      void load(const std::string &filename);
+    /** \brief Provides the type of this lts, in casu lts_aut.
+    */
+    lts_type type()
+    {
+      return lts_aut;
+    }
 
-      /** \brief Load the labelled transition system from an input stream.
-       *  \details The input stream must be in .aut format. 
-       *  \param[in] is The input stream.
-       */
-      void load(std::istream &is);
+    /** \brief Load the labelled transition system from a file.
+     *  \details If the filename is empty, the result is read from stdin.
+                 The input file must be in .aut format.
+     *  \param[in] filename Name of the file from which this lts is read.
+     */
+    void load(const std::string& filename);
 
-      /** \brief Save the labelled transition system to file.
-       *  \details If the filename is empty, the result is written to stdout.
-       *  \param[in] filename Name of the file to which this lts is written.
-       */
-      void save(const std::string &filename) const;
-  };
+    /** \brief Load the labelled transition system from an input stream.
+     *  \details The input stream must be in .aut format.
+     *  \param[in] is The input stream.
+     */
+    void load(std::istream& is);
+
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is written to stdout.
+     *  \param[in] filename Name of the file to which this lts is written.
+     */
+    void save(const std::string& filename) const;
+};
 
 } // namespace lts
 } // namespace mcrl2

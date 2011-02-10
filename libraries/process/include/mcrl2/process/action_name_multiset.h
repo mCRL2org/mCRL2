@@ -19,44 +19,46 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace process {
+namespace process
+{
 
-  //<MultActName>  ::= MultActName(<String>+)
-  /// \brief Multiset of action names
-  class action_name_multiset: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      action_name_multiset()
-        : atermpp::aterm_appl(core::detail::constructMultActName())
-      {}
+//<MultActName>  ::= MultActName(<String>+)
+/// \brief Multiset of action names
+class action_name_multiset: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Constructor.
+    action_name_multiset()
+      : atermpp::aterm_appl(core::detail::constructMultActName())
+    {}
 
-      /// \brief Constructor.
-      /// \param term A term
-      action_name_multiset(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_MultActName(m_term));
-      }
+    /// \brief Constructor.
+    /// \param term A term
+    action_name_multiset(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_MultActName(m_term));
+    }
 
-      /// \brief Constructor.
-      action_name_multiset(core::identifier_string_list names)
-        : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
-      {}
+    /// \brief Constructor.
+    action_name_multiset(core::identifier_string_list names)
+      : atermpp::aterm_appl(core::detail::gsMakeMultActName(names))
+    {}
 
-      /// \brief Returns the names of the multi-action
-      /// \return The names of the multi-action
-      core::identifier_string_list names() const
-      {
-        using namespace atermpp;
-        return list_arg1(*this);
-      }
-  };
+    /// \brief Returns the names of the multi-action
+    /// \return The names of the multi-action
+    core::identifier_string_list names() const
+    {
+      using namespace atermpp;
+      return list_arg1(*this);
+    }
+};
 
-  /// \brief Read-only singly linked list of action_name_multiset expressions
-  typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
+/// \brief Read-only singly linked list of action_name_multiset expressions
+typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
 
 } // namespace process
 

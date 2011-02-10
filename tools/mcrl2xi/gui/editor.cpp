@@ -18,170 +18,189 @@
 #include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
 
-xEditor::xEditor(wxWindow *parent, wxWindowID id, outputpanel *output ) :
-  wxAuiNotebook( parent , id )
-  {
-    p_output = output;
-  };
+xEditor::xEditor(wxWindow* parent, wxWindowID id, outputpanel* output) :
+  wxAuiNotebook(parent , id)
+{
+  p_output = output;
+};
 
-  void xEditor::AddEmptyPage(){
-    p_data_editor = new xStcEditor( this, wxID_ANY );
-    this->AddPage(p_data_editor, wxT("new"));
-    p_data_editor->SetFocus();
-    p_data_editor->SetFileInUse( wxEmptyString );
-    p_data_editor->SetSavePoint();
-    p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxT("Created new specification")
-			   + wxTextFile::GetEOL());
+void xEditor::AddEmptyPage()
+{
+  p_data_editor = new xStcEditor(this, wxID_ANY);
+  this->AddPage(p_data_editor, wxT("new"));
+  p_data_editor->SetFocus();
+  p_data_editor->SetFileInUse(wxEmptyString);
+  p_data_editor->SetSavePoint();
+  p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                       + wxT("Created new specification")
+                       + wxTextFile::GetEOL());
+
+}
+
+bool xEditor::LoadFile(const wxString& filename)
+{
+  p_data_editor = new xStcEditor(this, wxID_ANY);
+  this->AddPage(p_data_editor, wxFileName(filename).GetFullName());
+  p_data_editor->SetFocus();
+  p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                       + wxT("Opened file:")
+                       + filename
+                       + wxTextFile::GetEOL());
+
+  try
+  {
+    wxFileName fn = wxFileName(filename);
+
+    // Load datafile from LPS
+    if (fn.GetExt() == wxT("lps"))
+    {
+      mcrl2::lps::specification spec;
+      spec.load(std::string(filename.mb_str(wxConvUTF8)));
+      p_data_editor->Clear();
+      p_data_editor->AppendText(wxString(mcrl2::lps::pp(spec).c_str(), wxConvUTF8));
+      p_data_editor->SetFileInUse(filename);
+      p_data_editor->SetSavePoint();
+      return true;
+    };
+
+    // Load text for unknown extensions
+    {
+      p_data_editor->Clear();
+
+      wxTextFile file(filename);
+
+      file.Open();
+      wxString i;
+      for (i = file.GetFirstLine(); !file.Eof();
+           i = file.GetNextLine())
+      {
+        p_data_editor->AppendText(i + wxTextFile::GetEOL());
+      }
+      file.Close();
+      p_data_editor->SetSavePoint();
+      p_data_editor->SetFileInUse(filename);
+      return true;
+    };
+
+    return false;
+  }
+  catch (mcrl2::runtime_error& e)
+  {
+    {
+      p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                           + wxString(e.what(), wxConvUTF8)
+                           + wxTextFile::GetEOL());
+    }
 
   }
+  return false;
+};
 
-  bool xEditor::LoadFile( const wxString &filename ){
-    p_data_editor = new xStcEditor( this, wxID_ANY );
-    this->AddPage(p_data_editor, wxFileName(filename).GetFullName());
-    p_data_editor->SetFocus();
-    p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxT("Opened file:")
-			   + filename
-			   + wxTextFile::GetEOL());
+wxString xEditor::GetStringFromDataEditor()
+{
+  if ((xStcEditor*) GetPage(GetSelection()))
+  {
+    return ((xStcEditor*) GetPage(GetSelection())) -> GetText();
+  }
+  return wxEmptyString;
+};
 
-    try{
-      wxFileName fn = wxFileName(filename);
+wxString xEditor::GetFileInUse()
+{
+  if ((xStcEditor*) GetPage(GetSelection()))
+  {
+    return ((xStcEditor*) GetPage(GetSelection())) -> GetFileInUse();
+  }
+  return wxEmptyString;
+};
 
-      // Load datafile from LPS
-      if(fn.GetExt() == wxT("lps")){
-        mcrl2::lps::specification spec;
-        spec.load(std::string(filename.mb_str(wxConvUTF8)));
-        p_data_editor->Clear();
-        p_data_editor->AppendText( wxString( mcrl2::lps::pp(spec).c_str(), wxConvUTF8 ) );
-        p_data_editor->SetFileInUse( filename );
-        p_data_editor->SetSavePoint();
-        return true;
-      };
+bool xEditor::SaveFile(const wxString& filename)
+{
 
-      // Load text for unknown extensions
-      {
-        p_data_editor->Clear();
+  p_data_editor = (xStcEditor*) this->GetPage(this->GetSelection());
 
-        wxTextFile file(filename);
+  p_output->Clear();
+  try
+  {
 
-        file.Open();
-        wxString i;
-        for ( i = file.GetFirstLine(); !file.Eof();
-            i = file.GetNextLine() )
-        {
-          p_data_editor->AppendText( i + wxTextFile::GetEOL() );
-        }
-        file.Close();
-        p_data_editor->SetSavePoint();
-        p_data_editor->SetFileInUse( filename );
-        return true;
-      };
+    if (filename == wxEmptyString)
+    {
+      p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                           + wxT("Cannot save to empty file")
+                           + wxTextFile::GetEOL());
 
       return false;
     }
-    catch (mcrl2::runtime_error &e) {
+    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                         + wxT("Saving:")
+                         + filename
+                         + wxTextFile::GetEOL());
+
+    /* Action for saving to lps */
+    if (wxFileName(filename).GetExt() == wxT("lps"))
     {
-      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxString( e.what(), wxConvUTF8)
-			   + wxTextFile::GetEOL());    }
+      p_output->AppendText(wxString("+++ WARNING +++++++++++++++++++++++++++++++++++", wxConvUTF8) + wxTextFile::GetEOL());
+      p_output->AppendText(wxString("+++ Formatting and comments will be removed +++", wxConvUTF8) + wxTextFile::GetEOL());
+      p_output->AppendText(wxString("+++++++++++++++++++++++++++++++++++++++++++++++", wxConvUTF8) + wxTextFile::GetEOL());
 
+      p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                           + wxT("Parsing and type checking specification")
+                           + filename
+                           + wxTextFile::GetEOL());
+
+      std::string str_spec = std::string(GetStringFromDataEditor().mb_str());
+      mcrl2::lps::specification spec = mcrl2::lps::parse_linear_process_specification(str_spec);
+      spec.save(std::string(filename.mb_str()));
+
+      p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                           + wxT("Succesfully saved to: ")
+                           + filename
+                           + wxTextFile::GetEOL());
+
+      /* Reassign filename in use */
+      p_data_editor->SetFileInUse(filename);
+      this->SetPageText(GetSelection(), wxFileName(filename).GetFullName()) ;
+      p_data_editor->SetSavePoint();
+      return true;
     }
-    return false;
-  };
 
-  wxString xEditor::GetStringFromDataEditor(){
-    if (( xStcEditor *) GetPage(GetSelection())){
-      return (( xStcEditor *) GetPage(GetSelection())) -> GetText();
-    }
-    return wxEmptyString;
-  };
+    /* Action for saving to text for any other extension*/
+    {
+      wxString spec = GetStringFromDataEditor();
 
-  wxString xEditor::GetFileInUse(){
-    if (( xStcEditor *) GetPage(GetSelection())){
-      return (( xStcEditor *) GetPage(GetSelection())) -> GetFileInUse();
-    }
-    return wxEmptyString;
-  };
+      wxFile f(filename, wxFile::write);
+      if (f.Write(spec, wxConvUTF8))
+      {
 
-  bool xEditor::SaveFile( const wxString &filename ){
-
-    p_data_editor = (xStcEditor*) this->GetPage(this->GetSelection());
-
-    p_output->Clear();
-    try{
-
-      if (filename == wxEmptyString){
-		      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxT("Cannot save to empty file")
-			   + wxTextFile::GetEOL());
-
-        return false;
-      }
-      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxT("Saving:")
-			   + filename
-			   + wxTextFile::GetEOL());
-
-      /* Action for saving to lps */
-      if(wxFileName(filename).GetExt() == wxT("lps")){
-        p_output->AppendText( wxString("+++ WARNING +++++++++++++++++++++++++++++++++++", wxConvUTF8) + wxTextFile::GetEOL());
-        p_output->AppendText( wxString("+++ Formatting and comments will be removed +++", wxConvUTF8) + wxTextFile::GetEOL());
-        p_output->AppendText( wxString("+++++++++++++++++++++++++++++++++++++++++++++++", wxConvUTF8) + wxTextFile::GetEOL());
-
-        p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxT("Parsing and type checking specification")
-			   + filename
-			   + wxTextFile::GetEOL());
-
-        std::string str_spec = std::string(GetStringFromDataEditor().mb_str());
-        mcrl2::lps::specification spec = mcrl2::lps::parse_linear_process_specification( str_spec );
-        spec.save(std::string(filename.mb_str()));
-
-        p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxT("Succesfully saved to: ")
-			   + filename
-			   + wxTextFile::GetEOL());
+        p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                             + wxT("Succesfully saved to: ")
+                             + filename
+                             + wxTextFile::GetEOL());
 
         /* Reassign filename in use */
-        p_data_editor->SetFileInUse( filename );
-        this->SetPageText( GetSelection(), wxFileName(filename).GetFullName() ) ;
-        p_data_editor->SetSavePoint();
-        return true;
+        p_data_editor->SetFileInUse(filename);
+        this->SetPageText(GetSelection(), wxFileName(filename).GetFullName()) ;
       }
-
-      /* Action for saving to text for any other extension*/
+      else
       {
-        wxString spec = GetStringFromDataEditor();
-
-        wxFile f( filename, wxFile::write);
-        if(f.Write( spec, wxConvUTF8 )){
-
-			p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxT("Succesfully saved to: ")
-			   + filename
-			   + wxTextFile::GetEOL());
-
-		  /* Reassign filename in use */
-          p_data_editor->SetFileInUse( filename );
-          this->SetPageText( GetSelection(), wxFileName(filename).GetFullName() ) ;
-        } else {
-			p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxT("Failed to saved to: ")
-			   + filename
-			   + wxTextFile::GetEOL());
-        }
-        p_data_editor->SetSavePoint();
-        return true;
+        p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                             + wxT("Failed to saved to: ")
+                             + filename
+                             + wxTextFile::GetEOL());
       }
-
-    } catch ( mcrl2::runtime_error e) {
-      p_output->AppendText( wxString( p_output->PrintTime().c_str(), wxConvUTF8) 
-		       + wxString( e.what(), wxConvUTF8)
-			   + wxTextFile::GetEOL());    
+      p_data_editor->SetSavePoint();
+      return true;
     }
 
+  }
+  catch (mcrl2::runtime_error e)
+  {
+    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
+                         + wxString(e.what(), wxConvUTF8)
+                         + wxTextFile::GetEOL());
+  }
 
-    return true;
-  };
+
+  return true;
+};
 

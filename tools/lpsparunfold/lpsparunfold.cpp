@@ -49,21 +49,21 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
     typedef rewriter_tool<input_output_tool> super;
 
     std::set< size_t > m_set_index; ///< Options of the algorithm
-    std::string m_unfoldsort;    
+    std::string m_unfoldsort;
     size_t m_repeat_unfold;
     bool m_add_distribution_laws;
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("index", make_mandatory_argument("[NUM]"), 
-           "unfolds process parameters for comma separated indices", 'i');
+      desc.add_option("index", make_mandatory_argument("[NUM]"),
+                      "unfolds process parameters for comma separated indices", 'i');
       desc.add_option("sort", make_mandatory_argument("NAME"),
-          "unfolds all process parameters of sort NAME", 's');
+                      "unfolds all process parameters of sort NAME", 's');
       desc.add_option("repeat", make_mandatory_argument("NUM"),
-          "repeat unfold NUM times", 'n');
-      desc.add_option("laws", 
-          "generates additional distribution laws for projection and determine functions", 'l');
+                      "repeat unfold NUM times", 'n');
+      desc.add_option("laws",
+                      "generates additional distribution laws for projection and determine functions", 'l');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -80,33 +80,35 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
       if (0 < parser.options.count("index"))
       {
         std::string  m_string_index;
- 
+
         m_string_index = parser.option_argument_as< std::string  >("index");
 
         size_t s_index = m_string_index.find_first_of(",");
         size_t s_old_index=0;
-        char *p;
+        char* p;
 
-        while( s_index != std::string::npos ) 
+        while (s_index != std::string::npos)
         {
           errno = 0;
-          long val = strtol(m_string_index.substr( s_old_index, s_index - s_old_index  ).c_str(), &p ,10 );
+          long val = strtol(m_string_index.substr(s_old_index, s_index - s_old_index).c_str(), &p ,10);
           /* Check for various possible errors */
-          if (errno != 0 || *p != '\0') {
+          if (errno != 0 || *p != '\0')
+          {
             parser.error("Parsed an invalid index value");
           }
-          m_set_index.insert( val );
+          m_set_index.insert(val);
           s_old_index = s_index+1;
           s_index = m_string_index.find_first_of(",",s_old_index);
         }
 
         errno =0;
-        long val = strtol(m_string_index.substr( s_old_index, s_index - s_old_index  ).c_str(), &p ,10 );
+        long val = strtol(m_string_index.substr(s_old_index, s_index - s_old_index).c_str(), &p ,10);
         /* Check for various possible errors */
-        if (errno != 0 || *p != '\0') {
+        if (errno != 0 || *p != '\0')
+        {
           parser.error("Parsed an invalid index value");
         }
-        m_set_index.insert( val );
+        m_set_index.insert(val);
       }
 
       // Parse string argument NAME for sort argument
@@ -119,91 +121,92 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
       if (0 < parser.options.count("repeat"))
       {
         m_repeat_unfold = parser.option_argument_as< size_t  >("repeat");
-      } 
+      }
 
       m_add_distribution_laws = false;
       if (0 < parser.options.count("laws"))
       {
         m_add_distribution_laws = true;
-      } 
+      }
     }
 
   public:
 
     parunfold_tool()
       : super(
-          "lpsparunfold",
-          "Frank Stappers",
-          "unfolds process parameter of an LPS",
-          "Unfolds a set of given process parameters of the linear process specification (LPS) "
-          "in INFILE and writes the result to OUTFILE. If INFILE is not present, stdin is "
-          "used. If OUTFILE is not present, stdout is used."
-        )
+        "lpsparunfold",
+        "Frank Stappers",
+        "unfolds process parameter of an LPS",
+        "Unfolds a set of given process parameters of the linear process specification (LPS) "
+        "in INFILE and writes the result to OUTFILE. If INFILE is not present, stdin is "
+        "used. If OUTFILE is not present, stdout is used."
+      )
     {}
 
     ///Reads a specification from input_file,
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
-      if( (m_set_index.empty() && m_unfoldsort.empty()) ||
-       		(!m_set_index.empty() && !m_unfoldsort.empty())
-       		){
-       	std::cout << "Specify either --sort=SORT or --index=NUM to unfold process parameters." << std::endl;
-       	return false;
-       }
+      if ((m_set_index.empty() && m_unfoldsort.empty()) ||
+          (!m_set_index.empty() && !m_unfoldsort.empty())
+         )
+      {
+        std::cout << "Specify either --sort=SORT or --index=NUM to unfold process parameters." << std::endl;
+        return false;
+      }
 
-    	lps::specification lps_specification;
+      lps::specification lps_specification;
 
       lps_specification.load(m_input_filename);
 
-      for(size_t i =0; i != m_repeat_unfold; ++i )
+      for (size_t i =0; i != m_repeat_unfold; ++i)
       {
-        mcrl2::core::gsVerboseMsg("Pass: %d of %d\n", i+1, m_repeat_unfold );
+        mcrl2::core::gsVerboseMsg("Pass: %d of %d\n", i+1, m_repeat_unfold);
 
         //Calculate process parameters indices where m_unfoldsort occurs
-        if (!m_unfoldsort.empty() )
+        if (!m_unfoldsort.empty())
         {
           m_set_index.clear();
-  
-          mcrl2::data::basic_sort b_sort( m_unfoldsort );
-  
-          if (!search_sort_expression( lps_specification.data().sorts(), b_sort ))
+
+          mcrl2::data::basic_sort b_sort(m_unfoldsort);
+
+          if (!search_sort_expression(lps_specification.data().sorts(), b_sort))
           {
             std::cerr << "No sorts found of name " << m_unfoldsort << std::endl;
             break;
-          } 
+          }
           mcrl2::data::assignment_list assignments = lps_specification.initial_process().assignments();
-          for(mcrl2::data::assignment_list::iterator k = assignments.begin()
-                                                   ; k != assignments.end()
-                                                   ; ++k)
+          for (mcrl2::data::assignment_list::iterator k = assignments.begin()
+               ; k != assignments.end()
+               ; ++k)
           {
-            if( k ->lhs().sort() == b_sort )
-              {  
-                m_set_index.insert (std::distance(assignments.begin(),k ) );
-              }
-  
-/*          This code has been changed by JFG because with the new sort library sorts in linear processes
-            should be uniquely defined. There are no sort aliases anymore. 
-  
-            mcrl2::data::data_specification::aliases_const_range aliases = lps_specification.data().aliases( k ->lhs().sort());
-            for(mcrl2::data::data_specification::aliases_const_range::iterator j = aliases.begin()
-                                             ; j != aliases.end()
-                                             ; ++j)
+            if (k ->lhs().sort() == b_sort)
             {
-              if( b_sort == j->name())
-              { 
-                m_set_index.insert (std::distance(assignments.begin(),k ) );
-              }
+              m_set_index.insert(std::distance(assignments.begin(),k));
             }
-*/
 
-            if ( b_sort == k ->lhs().sort())
-            { 
-              m_set_index.insert (std::distance(assignments.begin(),k ) );
+            /*          This code has been changed by JFG because with the new sort library sorts in linear processes
+                        should be uniquely defined. There are no sort aliases anymore.
+
+                        mcrl2::data::data_specification::aliases_const_range aliases = lps_specification.data().aliases( k ->lhs().sort());
+                        for(mcrl2::data::data_specification::aliases_const_range::iterator j = aliases.begin()
+                                                         ; j != aliases.end()
+                                                         ; ++j)
+                        {
+                          if( b_sort == j->name())
+                          {
+                            m_set_index.insert (std::distance(assignments.begin(),k ) );
+                          }
+                        }
+            */
+
+            if (b_sort == k ->lhs().sort())
+            {
+              m_set_index.insert(std::distance(assignments.begin(),k));
             }
-          }      
-  
-          if ( m_set_index.empty() )
+          }
+
+          if (m_set_index.empty())
           {
             std::cerr << "No process parameters found of sort " << m_unfoldsort << std::endl;
             break;
@@ -213,12 +216,12 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
         //Unfold process parameters for calculated indices
         std::set< size_t > h_set_index = m_set_index;
         while (!h_set_index.empty())
-          {
-            lpsparunfold lpsparunfold( lps_specification, m_add_distribution_laws );
-            size_t index = *(max_element( h_set_index.begin(), h_set_index.end() ) );
-            lps_specification = lpsparunfold.algorithm( index );
-            h_set_index.erase( index );
-          }
+        {
+          lpsparunfold lpsparunfold(lps_specification, m_add_distribution_laws);
+          size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
+          lps_specification = lpsparunfold.algorithm(index);
+          h_set_index.erase(index);
+        }
       }
       lps_specification.save(m_output_filename);
 
@@ -230,7 +233,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 class lps_parunfold_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<parunfold_tool>
 {
   public:
-	lps_parunfold_gui_tool()
+    lps_parunfold_gui_tool()
     {
       m_gui_options["index"] = create_textctrl_widget();
       m_gui_options["laws"] = create_checkbox_widget();

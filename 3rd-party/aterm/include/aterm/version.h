@@ -6,11 +6,11 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-extern char *at_version;
-extern char *at_date;
+  extern char* at_version;
+  extern char* at_date;
 
 #ifdef __cplusplus
 }
-#endif/* __cplusplus */ 
+#endif/* __cplusplus */
 
 #endif

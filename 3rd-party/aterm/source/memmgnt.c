@@ -21,10 +21,10 @@ void free_unused_blocks();
 
 /* static int total_count=0; */
 
-void *AT_malloc(size_t size)
-{ 
+void* AT_malloc(size_t size)
+{
   void* ptr=malloc(size);
-  if (!ptr) 
+  if (!ptr)
   {
     free_unused_blocks();
     ptr=malloc(size);
@@ -32,10 +32,10 @@ void *AT_malloc(size_t size)
   return ptr;
 }
 
-void *AT_calloc(size_t nmemb, size_t size)
-{ 
+void* AT_calloc(size_t nmemb, size_t size)
+{
   void* ptr=calloc(nmemb, size);
-  if (!ptr) 
+  if (!ptr)
   {
     free_unused_blocks();
     ptr=calloc(nmemb, size);
@@ -43,10 +43,11 @@ void *AT_calloc(size_t nmemb, size_t size)
   return ptr;
 }
 
-void *AT_realloc(void *ptr, size_t size)
+void* AT_realloc(void* ptr, size_t size)
 {
   void* newptr=realloc(ptr, size);
-  if (!newptr) {
+  if (!newptr)
+  {
     free_unused_blocks();
     newptr=realloc(ptr, size);
   }
@@ -72,27 +73,35 @@ void AT_initMemmgnt()
 size_t new_block_size(size_t old_size, size_t min_size, size_t max_size)
 {
   size_t m;
-	
+
   if (low_memory)  /* In low memory mode acquire the least ammount of memory needed */
+  {
     return min_size;
-    
+  }
+
   if (max_size < min_size) /* maxsize >= minsize */
+  {
     max_size = min_size;
-  
+  }
+
   if (max_size < old_size) /* Don't shrink blocks */
+  {
     return old_size;
-    
+  }
+
   /* Reserve a bit extra space for future growth */
   /* m = max_size + (max_size - old_size)/2;  JFG ODD TO RESERVE 1.5 times the memory.
      tenzij er sprake is van groeiend geheugen.  */
   m = max_size;
   if (m < MIN_BLOCK_SIZE)
+  {
     return MIN_BLOCK_SIZE;
-    
+  }
+
   return m;
 }
 
-ATprotected_block find_best_unused_block(size_t minsize, size_t maxsize) 
+ATprotected_block find_best_unused_block(size_t minsize, size_t maxsize)
 {
   /* Returns a block that has at least minsize room, and is the closest match
    * to maxsize
@@ -101,27 +110,36 @@ ATprotected_block find_best_unused_block(size_t minsize, size_t maxsize)
   size_t bestsize = -1;
   size_t unused_blocks_count = 0;
   size_t optsize = maxsize + maxsize/2;
-  
-  if (maxsize < minsize) maxsize = minsize;
-  
-  while ( (block) && (bestsize!=optsize) ) 
+
+  if (maxsize < minsize)
   {
-    if (block->size >= minsize) {
-      if (!best) {
-      	/* Found a first match */
-      	best = block;
-      	bestsize = block->size;
+    maxsize = minsize;
+  }
+
+  while ((block) && (bestsize!=optsize))
+  {
+    if (block->size >= minsize)
+    {
+      if (!best)
+      {
+        /* Found a first match */
+        best = block;
+        bestsize = block->size;
       }
-      else if (bestsize < optsize) {
-      	/* Current best block is smaller than optsize, find one that is bigger than current block */
-      	if (block->size > bestsize) {
-      	  best = block;
-      	  bestsize = block->size;
-      	}
+      else if (bestsize < optsize)
+      {
+        /* Current best block is smaller than optsize, find one that is bigger than current block */
+        if (block->size > bestsize)
+        {
+          best = block;
+          bestsize = block->size;
+        }
       }
-      else {
-      	/* Current best block is bigger than optsize, find the smallest block greater or equal to optsize */
-        if ((block->size >= optsize) && (block->size < bestsize)) {
+      else
+      {
+        /* Current best block is bigger than optsize, find the smallest block greater or equal to optsize */
+        if ((block->size >= optsize) && (block->size < bestsize))
+        {
           best = block;
           bestsize = block->size;
         }
@@ -131,30 +149,36 @@ ATprotected_block find_best_unused_block(size_t minsize, size_t maxsize)
     block = block->next;
     unused_blocks_count = 0;
   }
-  
-  if (best) {
+
+  if (best)
+  {
     /* Found a matching block. Unlink it from unused blocks chain */
-  	
-    if (best->prev) {
+
+    if (best->prev)
+    {
       best->prev->next = best->next;
-      if (best->next) {
+      if (best->next)
+      {
         best->next->prev = best->prev;
       }
     }
-    else {
+    else
+    {
       unused_blocks = best->next;
-      if (best->next) {
+      if (best->next)
+      {
         best->next->prev = NULL;
       }
     }
   }
-  else if (unused_blocks_count > MAX_UNUSED_BLOCKS) {
+  else if (unused_blocks_count > MAX_UNUSED_BLOCKS)
+  {
     /* Remove the oldest block from the unused chain */
-  	
+
     tail->prev->next = NULL;
     AT_free(tail);
   }
-  
+
   return best;
 }
 
@@ -164,49 +188,54 @@ ATprotected_block find_free_block(size_t minsize, size_t maxsize)
 {
   ATprotected_block block;
   size_t blocksize;
-  
+
   /* Try to find an unused block that fits  */
   block = find_best_unused_block(minsize, maxsize);
-  if (!block) 
+  if (!block)
   {
     /* No existing block matches, create a new block */
     blocksize = new_block_size(0, minsize, maxsize);
 
     block = (ATprotected_block) AT_malloc(malloc_size(blocksize));
-    if ((!block) && (blocksize > maxsize)) 
+    if ((!block) && (blocksize > maxsize))
     {
       /* Out of memory, try again with maximum block size */
       blocksize = maxsize;
       block = (ATprotected_block) AT_malloc(malloc_size(blocksize));
     }
-    if ((!block) && (blocksize > minsize)) {
+    if ((!block) && (blocksize > minsize))
+    {
       /* Out of memory, try again with minimum block size */
       blocksize = minsize;
       block = (ATprotected_block) AT_malloc(malloc_size(blocksize));
     }
-    if (!block) {
+    if (!block)
+    {
       return NULL;
     }
-    
+
     block->term = (ATerm*)((char*)block + sizeof(struct _ATprotected_block));
     block->size = blocksize;
   }
-  
+
   assert(block->size >= minsize);
 
   /* Clear the protected area */
-  if (minsize > 0) {
+  if (minsize > 0)
+  {
     memset((void*)block->term, 0, minsize*sizeof(ATerm));
   }
   block->protsize = minsize;
 
   /* Link block to protected blocks chain head */
   if (protected_blocks)
+  {
     protected_blocks->prev = block;
+  }
   block->next = protected_blocks;
   block->prev = NULL;
   protected_blocks = block;
-  
+
   return block;
 }
 
@@ -222,7 +251,7 @@ void free_blocks(ATprotected_block block)
 {
   /* Free given block and all blocks from this block onward */
   ATprotected_block next;
-  while (block) 
+  while (block)
   {
     next = block->next;
     AT_free(block);
@@ -233,14 +262,14 @@ void free_blocks(ATprotected_block block)
 void free_unused_blocks()
 {
   /* Free all blocks in the unused blocks chain */
-  free_blocks(unused_blocks); 
+  free_blocks(unused_blocks);
   unused_blocks = NULL;
 }
 
 void free_protected_blocks()
 {
   /* Free all blocks in the protected blocks chain */
-  free_blocks(protected_blocks); 
+  free_blocks(protected_blocks);
   protected_blocks = NULL;
 }
 
@@ -248,40 +277,47 @@ void free_block(ATprotected_block block)
 {
   /* Free a single block */
 
-  /* Unlink the block from the chain */  
-  if (block->prev) {
+  /* Unlink the block from the chain */
+  if (block->prev)
+  {
     block->prev->next = block->next;
     if (block->next)
+    {
       block->next->prev = block->prev;
+    }
   }
-  else 
+  else
   {
     /* Blocks that are freed should not be part of the unused blocks
     if (block->protsize >= 0) [This succeeds always....]
     {  */
-      protected_blocks = block->next;
+    protected_blocks = block->next;
     /* }
     else
-    { 
+    {
       unused_blocks = block->next;
     } */
-      
+
     if (block->next)
+    {
       block->next->prev = NULL;
+    }
   }
-    
-  if (!low_memory) 
+
+  if (!low_memory)
   {
     /* Don't actually free the block, but move it to the unused blocks chain */
     block->protsize = -1;
-    
+
     if (unused_blocks)
+    {
       unused_blocks->prev = block;
+    }
     block->next = unused_blocks;
     block->prev = NULL;
     unused_blocks = block;
   }
-  else 
+  else
   {
     AT_free((void*)block);
   }
@@ -290,144 +326,170 @@ void free_block(ATprotected_block block)
 ATprotected_block resize_block(ATprotected_block block, size_t minsize, size_t maxsize)
 {
   ATprotected_block newblock;
-  
+
   /* Calculate new block size */
   size_t blocksize = new_block_size(block->size, minsize, maxsize);
 
-  if (blocksize != block->size) 
+  if (blocksize != block->size)
   {
     /* New block size differs from old block, reallocate the block */
     newblock = (ATprotected_block)AT_realloc((void*)block, malloc_size(blocksize));
 
-    if ((!newblock)&&(blocksize > maxsize)) {
-      /* Realloc failed; try with maximum size */ 
+    if ((!newblock)&&(blocksize > maxsize))
+    {
+      /* Realloc failed; try with maximum size */
       blocksize = maxsize;
       newblock = (ATprotected_block)AT_realloc((void*)block, malloc_size(blocksize));
     }
 
-    if ((!newblock)&&(blocksize > minsize)) {
-      /* Realloc failed; try with minimum size */ 
+    if ((!newblock)&&(blocksize > minsize))
+    {
+      /* Realloc failed; try with minimum size */
       blocksize = minsize;
       newblock = (ATprotected_block)AT_realloc((void*)block, malloc_size(blocksize));
     }
 
-    if (!newblock) {
+    if (!newblock)
+    {
       return NULL;
     }
-    
+
     newblock->term = (ATerm*)((char*)newblock + sizeof(struct _ATprotected_block));
     newblock->size = blocksize;
 
-    /* Update the chain links */    
-    if (newblock->prev) {
+    /* Update the chain links */
+    if (newblock->prev)
+    {
       newblock->prev->next = newblock;
     }
-    else {
+    else
+    {
       protected_blocks = newblock;
     }
 
     if (newblock->next)
+    {
       newblock->next->prev = newblock;
+    }
   }
-  else {
+  else
+  {
     /* No change in blocksize */
     newblock = block;
   }
 
   /* Clear the newly protected part of the block */
-  if (newblock->protsize < minsize) {
+  if (newblock->protsize < minsize)
+  {
     memset((void*)(&newblock->term[newblock->protsize]), 0, (minsize-newblock->protsize)*sizeof(ATerm));
   }
   newblock->protsize = minsize;
-  
+
   return newblock;
 }
 
-ATerm *AT_alloc_protected(size_t size)
+ATerm* AT_alloc_protected(size_t size)
 {
-  /* Allocate a protected block of ATerms with the exact size given 
+  /* Allocate a protected block of ATerms with the exact size given
    */
   ATprotected_block block = find_free_block(size, size);
   if (!block)
+  {
     return NULL;
+  }
   return block->term;
 }
 
-ATerm *AT_alloc_protected_minmax(size_t minsize, size_t maxsize)
+ATerm* AT_alloc_protected_minmax(size_t minsize, size_t maxsize)
 {
   /* Allocate a protected block of ATerms with minsize protected items, but create room to
    * grow to maxsize efficiently
    */
   ATprotected_block block = find_free_block(minsize, maxsize);
   if (!block)
+  {
     return NULL;
+  }
   return block->term;
 }
 
-ATerm *AT_realloc_protected(ATerm *term, size_t size)
+ATerm* AT_realloc_protected(ATerm* term, size_t size)
 {
   /* Resize an existing block to the new protected size
    */
   ATprotected_block block;
-  
+
   if (!term)
+  {
     return AT_alloc_protected(size);
+  }
 
   block = find_block(term);
   assert(block);
-    
+
   block = resize_block(block, size, size);
   if (!block)
+  {
     return NULL;
+  }
 
   return block->term;
 }
 
-ATerm *AT_realloc_protected_minmax(ATerm *term, size_t minsize, size_t maxsize)
+ATerm* AT_realloc_protected_minmax(ATerm* term, size_t minsize, size_t maxsize)
 {
   /* Resize a protected block of ATerms to minsize protected items, but create room to
    * grow to maxsize efficiently
    */
   ATprotected_block block;
-  
+
   if (!term)
+  {
     return AT_alloc_protected_minmax(minsize, maxsize);
+  }
 
   block = find_block(term);
   assert(block);
-    
+
   block = resize_block(block, minsize, maxsize);
   if (!block)
+  {
     return NULL;
+  }
 
   return block->term;
 }
 
-ATerm *AT_grow_protected(ATerm* term, size_t size)
+ATerm* AT_grow_protected(ATerm* term, size_t size)
 {
   /* Increase the protected area of the block to size
    */
   ATprotected_block block;
-  
+
   if (!term)
+  {
     return AT_alloc_protected(size);
+  }
 
   block = find_block(term);
   assert(block);
-  
-  if (block->protsize < size) {
+
+  if (block->protsize < size)
+  {
     block = resize_block(block, size, block->size);
     if (!block)
+    {
       return NULL;
+    }
   }
 
   return block->term;
-} 
+}
 
 void AT_free_protected(ATerm* term)
 {
   /* Free a protected block */
-  if (term) 
+  if (term)
   {
     ATprotected_block block = find_block(term);
     assert(block);

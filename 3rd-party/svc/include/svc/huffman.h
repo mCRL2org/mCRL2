@@ -1,4 +1,4 @@
-/* 
+/*
    SVC -- the SVC (Systems Validation Centre) file format library
 
    Copyright (C) 2000  Stichting Mathematisch Centrum, Amsterdam,
@@ -22,43 +22,45 @@
 
 #ifndef __HUFFMANHEADER
 #define __HUFFMANHEADER
- 
+
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #include "hashtable.h"
 #include "blocklist.h"
 #include "lz.h"
 
 
-struct HFnode {
-   struct HFnode *high, *low, *parent, *next, *previous;
-   tBlock  *block;
-   unsigned long frequency;
-   ATerm        term;
-};
+  struct HFnode
+  {
+    struct HFnode* high, *low, *parent, *next, *previous;
+    tBlock*  block;
+    unsigned long frequency;
+    ATerm        term;
+  };
 
-typedef struct {
-   struct HFnode *codes, *top;
-   HTable *terms;
-   BList blockList;  
-   LZbuffer buffer;
-} HFtree;
-   
+  typedef struct
+  {
+    struct HFnode* codes, *top;
+    HTable* terms;
+    BList blockList;
+    LZbuffer buffer;
+  } HFtree;
 
 
-int HFinit(HFtree *, HTable *);
-void HFfree(HFtree *);
 
-int HFencodeATerm(BitStream *, HFtree *, ATerm);
-int HFencodeIndex(BitStream *, HFtree *, long);
-int HFdecodeATerm(BitStream *, HFtree *, ATerm *);
-int HFdecodeIndex(BitStream *, HFtree *, long *);
+  int HFinit(HFtree*, HTable*);
+  void HFfree(HFtree*);
+
+  int HFencodeATerm(BitStream*, HFtree*, ATerm);
+  int HFencodeIndex(BitStream*, HFtree*, long);
+  int HFdecodeATerm(BitStream*, HFtree*, ATerm*);
+  int HFdecodeIndex(BitStream*, HFtree*, long*);
 
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif

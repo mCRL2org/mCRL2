@@ -25,52 +25,53 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 
-typedef unsigned short Bool;
-typedef struct HFnode *HFcursor;
+  typedef unsigned short Bool;
+  typedef struct HFnode* HFcursor;
 
-typedef struct {
-   struct HFnode *first, *last;
-   unsigned long frequency;
-} tBlock;
+  typedef struct
+  {
+    struct HFnode* first, *last;
+    unsigned long frequency;
+  } tBlock;
 
-typedef tBlock *BLcursor;
+  typedef tBlock* BLcursor;
 
-typedef tBlock *BList;
-
-
-
+  typedef tBlock* BList;
 
 
 
-void BLinit(BList *);
+
+
+
+  void BLinit(BList*);
 
 #define BLfirst(list) (list->first)
 #define BLnext(list) (list->last->next?list->last->next->block:NULL)
 #define BLprevious(list) (list->first->previous?list->first->previous->block:NULL)
 #define BLfrequency(cursor) (cursor->frequency)
 
-void BLinsert(BList *, struct HFnode *);
-void BLdeleteNode(BList *, struct HFnode *);
-void BLdelete(BList *, BLcursor);
-void BLfree(BList *);
+  void BLinsert(BList*, struct HFnode*);
+  void BLdeleteNode(BList*, struct HFnode*);
+  void BLdelete(BList*, BLcursor);
+  void BLfree(BList*);
 
-void Binit(tBlock *);
+  void Binit(tBlock*);
 #define Bfirst(list) (list->first)
 #define Blast(list) (list->last)
 #define Bnext(list) (list->next)
 #define Bprevious(list) (list->previous)
 
-void BLswap(BList *, struct HFnode *, struct HFnode *);
-void Binsert(tBlock *, struct HFnode *);
-void Bdelete(tBlock *, HFcursor);
-unsigned long Bfrequency(tBlock *);
-void Bfree(tBlock *);
+  void BLswap(BList*, struct HFnode*, struct HFnode*);
+  void Binsert(tBlock*, struct HFnode*);
+  void Bdelete(tBlock*, HFcursor);
+  unsigned long Bfrequency(tBlock*);
+  void Bfree(tBlock*);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif

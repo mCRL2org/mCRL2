@@ -23,7 +23,8 @@ class message_relay;
 
 static void relay_message(const ::mcrl2::core::messageType t, const char* data);
 
-class text_control_buf : public std::streambuf {
+class text_control_buf : public std::streambuf
+{
 
   private:
 
@@ -31,30 +32,34 @@ class text_control_buf : public std::streambuf {
 
   public:
 
-   text_control_buf(wxTextCtrl& control) : std::streambuf(), m_control(control) {
-   }
+    text_control_buf(wxTextCtrl& control) : std::streambuf(), m_control(control)
+    {
+    }
 
-   int overflow(int c) {
-     m_control.AppendText(wxString(static_cast< wxChar >(c)));
+    int overflow(int c)
+    {
+      m_control.AppendText(wxString(static_cast< wxChar >(c)));
 
-     return 1;
-   }
+      return 1;
+    }
 
-   std::streamsize xsputn(const char * s, std::streamsize n) {
-     m_control.AppendText(wxString(s, wxConvLocal, n));
+    std::streamsize xsputn(const char* s, std::streamsize n)
+    {
+      m_control.AppendText(wxString(s, wxConvLocal, n));
 
-     pbump(n);
+      pbump(n);
 
-     return n;
-   }
+      return n;
+    }
 };
 
 class message_relay;
 
 std::auto_ptr < message_relay > communicator;
 
-class message_relay {
-  friend void relay_message(const ::mcrl2::core::messageType, const char* data);
+class message_relay
+{
+    friend void relay_message(const ::mcrl2::core::messageType, const char* data);
 
   private:
 
@@ -63,39 +68,46 @@ class message_relay {
 
   private:
 
-    static bool initialise_once(wxTextCtrl& control) {
+    static bool initialise_once(wxTextCtrl& control)
+    {
       communicator.reset(new message_relay(control));
 
       return true;
     }
 
-    message_relay(wxTextCtrl& control) : m_control(control) {
+    message_relay(wxTextCtrl& control) : m_control(control)
+    {
       m_error_stream = std::cerr.rdbuf(new text_control_buf(m_control));
 
       mcrl2::core::gsSetCustomMessageHandler(relay_message);
     }
 
-    void message(const char* data) {
+    void message(const char* data)
+    {
       m_control.AppendText(wxString(data, wxConvLocal));
     }
 
   public:
 
-    static bool initialise(wxTextCtrl& control) {
+    static bool initialise(wxTextCtrl& control)
+    {
       static bool initialised = initialise_once(control);
 
       return initialised;
     }
 
-    ~message_relay() {
+    ~message_relay()
+    {
       mcrl2::core::gsSetCustomMessageHandler(0);
 
       delete std::cerr.rdbuf(m_error_stream);
     }
 };
 
-static void relay_message(const ::mcrl2::core::messageType t, const char* data) {
-  switch (t) {
+static void relay_message(const ::mcrl2::core::messageType t, const char* data)
+{
+  switch (t)
+  {
     case mcrl2::core::gs_notice:
       break;
     case mcrl2::core::gs_warning:
@@ -107,8 +119,8 @@ static void relay_message(const ::mcrl2::core::messageType t, const char* data) 
   }
 }
 
-grape_logpanel::grape_logpanel(wxWindow *p_parent)
-: wxTextCtrl(p_parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP)
+grape_logpanel::grape_logpanel(wxWindow* p_parent)
+  : wxTextCtrl(p_parent, wxID_ANY, wxEmptyString, wxDefaultPosition, wxDefaultSize, wxTE_MULTILINE | wxTE_READONLY | wxTE_DONTWRAP)
 {
   message_relay::initialise(*this);
 }

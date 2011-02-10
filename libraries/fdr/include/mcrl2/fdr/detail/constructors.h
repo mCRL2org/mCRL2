@@ -15,11 +15,14 @@
 #include "mcrl2/fdr/detail/utility.h"
 #include "mcrl2/fdr/detail/term_functions.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
-namespace detail {
+namespace detail
+{
 
 //--- start generated code ---//
 ATermAppl constructRepInternalChoice();

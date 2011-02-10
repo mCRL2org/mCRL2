@@ -17,9 +17,11 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated classes ---//
 /// \brief Container type
@@ -188,7 +190,7 @@ bool is_fbag_container(const container_type& t)
 
 //--- end generated classes ---//
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 #endif // MCRL2_DATA_CONTAINER_TYPE_H

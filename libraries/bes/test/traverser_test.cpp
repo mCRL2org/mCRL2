@@ -27,7 +27,7 @@ class custom_traverser: public boolean_expression_traverser<custom_traverser>
 {
   public:
     typedef boolean_expression_traverser<custom_traverser> super;
-      
+
     using super::enter;
     using super::leave;
     using super::operator();
@@ -59,7 +59,7 @@ class traverser1: public boolean_variable_traverser<traverser1>
 {
   public:
     typedef boolean_variable_traverser<traverser1> super;
-      
+
     using super::enter;
     using super::leave;
     using super::operator();
@@ -69,9 +69,9 @@ class traverser1: public boolean_variable_traverser<traverser1>
     unsigned int expression_count;
 
     traverser1()
-    : variable_count(0),
-      equation_count(0),
-      expression_count(0)
+      : variable_count(0),
+        equation_count(0),
+        expression_count(0)
     {}
 
     void enter(const boolean_variable& v)

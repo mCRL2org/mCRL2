@@ -15,12 +15,12 @@
 
 /* ---------------- hash_table_iterator ----------------------------- */
 
-hash_table2_iterator::hash_table2_iterator(hash_table2 *ht)
+hash_table2_iterator::hash_table2_iterator(hash_table2* ht)
   : hash_table(ht)
 {
   bucket_it = hash_table->buckets.begin();
   while (bucket_it != hash_table->buckets.end()
-      && (bucket_it->next == REMOVED))
+         && (bucket_it->next == REMOVED))
   {
     ++bucket_it;
   }
@@ -32,14 +32,14 @@ void hash_table2_iterator::operator ++()
   {
     ++bucket_it;
     while (bucket_it != hash_table->buckets.end()
-        && (bucket_it->next == REMOVED))
+           && (bucket_it->next == REMOVED))
     {
       ++bucket_it;
     }
   }
 }
 
-hash_table3_iterator::hash_table3_iterator(hash_table3 *ht)
+hash_table3_iterator::hash_table3_iterator(hash_table3* ht)
   : hash_table(ht)
 {
   bucket_it = hash_table->buckets.begin();

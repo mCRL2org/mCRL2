@@ -24,7 +24,7 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class binary_tool: public rewriter_tool<input_output_tool> 
+class binary_tool: public rewriter_tool<input_output_tool>
 {
   protected:
 
@@ -34,13 +34,13 @@ class binary_tool: public rewriter_tool<input_output_tool>
 
     binary_tool()
       : super(
-          "lpsbinary",
-          "Jeroen Keiren",
-          "replace finite sort variables by vectors of boolean variables in an LPS",
-          "Replace finite sort variables by vectors of boolean variables in the LPS in "
-          "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
-          "If OUTFILE is not present, stdout is used"
-        )
+        "lpsbinary",
+        "Jeroen Keiren",
+        "replace finite sort variables by vectors of boolean variables in an LPS",
+        "Replace finite sort variables by vectors of boolean variables in the LPS in "
+        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
+        "If OUTFILE is not present, stdout is used"
+      )
     {}
 
     bool run()
@@ -60,7 +60,7 @@ class binary_tool: public rewriter_tool<input_output_tool>
 class binary_gui_tool: public mcrl2_gui_tool<binary_tool>
 {
   public:
-	binary_gui_tool()
+    binary_gui_tool()
     {
       add_rewriter_widget();
     }

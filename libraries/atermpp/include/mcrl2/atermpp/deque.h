@@ -17,7 +17,8 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "protaterm.h"          // IProtectedATerm
 
-namespace atermpp {
+namespace atermpp
+{
 
 /// \brief Protected deque container.
 template <class T, class Allocator = std::allocator<T> >
@@ -26,7 +27,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     deque()
-     : IProtectedATerm()
+      : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -79,23 +80,23 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
-        /// \brief Constructor.
-        /// \param first The start of a range of elements.
-        /// \param last The end of a range of elements.
+    /// \brief Constructor.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
     template<class InIt>
-        deque(InIt first, InIt last)
+    deque(InIt first, InIt last)
       : std::deque<T, Allocator>(first, last),
         IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
 
-        /// \brief Constructor.
-        /// \param first The start of a range of elements.
-        /// \param last The end of a range of elements.
-        /// \param a An allocator.
+    /// \brief Constructor.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param a An allocator.
     template<class InIt>
-        deque(InIt first, InIt last, const Allocator& a)
+    deque(InIt first, InIt last, const Allocator& a)
       : std::deque<T, Allocator>(first, last, a),
         IProtectedATerm()
     {
@@ -112,7 +113,7 @@ class deque: public std::deque<T, Allocator>, IProtectedATerm
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-std::cout << "atermpp::deque.ATprotectTerms() : protecting " << deque<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::deque.ATprotectTerms() : protecting " << deque<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::deque<T, Allocator>::iterator i = std::deque<T, Allocator>::begin(); i != std::deque<T, Allocator>::end(); ++i)
       {

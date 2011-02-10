@@ -1,4 +1,4 @@
-// Author(s): Frank Stappers 
+// Author(s): Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -16,17 +16,18 @@
 #include <wx/aui/auibook.h>
 
 
-class xEditor: public wxAuiNotebook {
-public:
-	xEditor(wxWindow *parent, wxWindowID id, outputpanel *output );
-	void AddEmptyPage();
-	bool LoadFile( const wxString &filename );
-	bool SaveFile( const wxString &filename );
-	wxString GetStringFromDataEditor();
-	wxString GetFileInUse();
-private:
-	outputpanel *p_output;
-	xStcEditor *p_data_editor;
+class xEditor: public wxAuiNotebook
+{
+  public:
+    xEditor(wxWindow* parent, wxWindowID id, outputpanel* output);
+    void AddEmptyPage();
+    bool LoadFile(const wxString& filename);
+    bool SaveFile(const wxString& filename);
+    wxString GetStringFromDataEditor();
+    wxString GetFileInUse();
+  private:
+    outputpanel* p_output;
+    xStcEditor* p_data_editor;
 };
 
 

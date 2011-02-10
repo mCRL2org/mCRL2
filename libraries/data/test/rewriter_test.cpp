@@ -57,8 +57,8 @@ void test1()
   using namespace mcrl2::data::sort_nat;
 
   std::string DATA_SPEC1 =
-  "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
-  ;
+    "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
+    ;
   data_specification data = parse_data_specification(DATA_SPEC1);
   rewriter datar(data);
   variable x("x", sort_nat::nat());
@@ -67,7 +67,7 @@ void test1()
   data_expression t = datar(greater(minimum(x,y), z));
 
   BOOST_CHECK(datar(plus(parse_data_expression("1"),
-    parse_data_expression("2"))) == datar(parse_data_expression("3")));
+                         parse_data_expression("2"))) == datar(parse_data_expression("3")));
 
   // copy a rewriter
   data::rewriter datar1 = datar;
@@ -116,14 +116,14 @@ void test3()
   typedef mutable_associative_container_substitution< atermpp::map< variable, data_expression_with_variables > > substitution_function;
 
   data_specification data_spec = parse_data_specification(
-    "map dummy1:Pos;  \n"
-    "var dummy2:Bool; \n"
-    "    dummy3:Pos;  \n"
-    "    dummy4:Nat;  \n"
-    "    dummy5:Int;  \n"
-    "    dummy6:Real; \n"
-    "eqn dummy1 = 1;  \n"
-  );
+                                   "map dummy1:Pos;  \n"
+                                   "var dummy2:Bool; \n"
+                                   "    dummy3:Pos;  \n"
+                                   "    dummy4:Nat;  \n"
+                                   "    dummy5:Int;  \n"
+                                   "    dummy6:Real; \n"
+                                   "eqn dummy1 = 1;  \n"
+                                 );
   rewriter_with_variables r(data_spec);
   data_expression x = parse_data_expression("b == b", "b: Bool;\n");
   std::set<variable> v = find_variables(x);
@@ -154,7 +154,7 @@ void test3()
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification &data_spec, std::string substitutions)
+void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitutions)
 {
   mutable_associative_container_substitution< atermpp::map< variable, data_expression > > sigma;
   data::detail::parse_substitutions(substitutions, data_spec, sigma);

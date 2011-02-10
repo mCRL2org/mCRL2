@@ -1,4 +1,4 @@
-/* 
+/*
    SVC -- the SVC (Systems Validation Centre) file format library
 
    Copyright (C) 2000  Stichting Mathematisch Centrum, Amsterdam,
@@ -25,7 +25,7 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #include "aterm1.h"
 #include "code.h"
@@ -35,25 +35,26 @@ extern "C" {
 #define SEARCHBUF_SIZE    (256*128)
 #define LOOKAHEADBUF_SIZE 255
 
-typedef unsigned char LZtoken[3]; /* CHANGED FROM 2 */
-typedef struct  {
-   unsigned char search[SEARCHBUF_SIZE];
-   int last;
-   int read, written;
-} LZbuffer;
+  typedef unsigned char LZtoken[3]; /* CHANGED FROM 2 */
+  typedef struct
+  {
+    unsigned char search[SEARCHBUF_SIZE];
+    int last;
+    int read, written;
+  } LZbuffer;
 
 
 
-void LZinit(LZbuffer *buffer);
-int LZwriteATerm(BitStream *fp, LZbuffer *buffer, ATerm term);
-int LZreadATerm(BitStream *fp, LZbuffer *buffer, ATerm *term);
-int LZwriteString(BitStream *fp, LZbuffer *buffer, char *str);
-int LZreadString(BitStream *fp, LZbuffer *buffer, char **str);
-int LZwriteInt(BitStream *fp, LZbuffer *buffer, long n);
-int LZreadInt(BitStream *fp, LZbuffer *buffer, long *n);
+  void LZinit(LZbuffer* buffer);
+  int LZwriteATerm(BitStream* fp, LZbuffer* buffer, ATerm term);
+  int LZreadATerm(BitStream* fp, LZbuffer* buffer, ATerm* term);
+  int LZwriteString(BitStream* fp, LZbuffer* buffer, char* str);
+  int LZreadString(BitStream* fp, LZbuffer* buffer, char** str);
+  int LZwriteInt(BitStream* fp, LZbuffer* buffer, long n);
+  int LZreadInt(BitStream* fp, LZbuffer* buffer, long* n);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif

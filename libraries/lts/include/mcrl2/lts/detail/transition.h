@@ -33,7 +33,7 @@ inline bool compare_transitions_slt(const transition t1, const transition t2)
   {
     return t1.to() < t2.to();
   }
-} 
+}
 
 inline bool compare_transitions_lts(const transition t1, const transition t2)
 {
@@ -49,7 +49,7 @@ inline bool compare_transitions_lts(const transition t1, const transition t2)
   {
     return t1.from() < t2.from();
   }
-} 
+}
 
 } // detail
 } // lts

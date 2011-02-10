@@ -15,76 +15,76 @@
 
 namespace grape
 {
-  namespace grapeapp
-  {
-    /**
-     * \short Represents the help event.
-     */
-    class grape_event_help : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_help( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_help( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+namespace grapeapp
+{
+/**
+ * \short Represents the help event.
+ */
+class grape_event_help : public grape_event_base
+{
+  private:
+  public:
 
     /**
-     * \short Represents the about event.
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
      */
-    class grape_event_about : public grape_event_base
-    {
-      private:
-      public:
+    grape_event_help(grape_frame* p_main_frame);
 
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_about( grape_frame *p_main_frame );
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_help(void);
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_about( void );
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
 
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
 
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
-  }
+/**
+ * \short Represents the about event.
+ */
+class grape_event_about : public grape_event_base
+{
+  private:
+  public:
+
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_about(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_about(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+}
 }
 
 #endif // GRAPE_EVENT_HELP_H

@@ -29,22 +29,22 @@ class Visualizer: public Subscriber
     Visualizer(Mediator* owner,Settings* ss);
     ~Visualizer();
 
-    void computeBoundsInfo(float &bcw,float &bch);
+    void computeBoundsInfo(float& bcw,float& bch);
     float getHalfStructureHeight() const;
     void notify(SettingID s);
-    void setLTS(LTS *l,bool compute_ratio);
+    void setLTS(LTS* l,bool compute_ratio);
     void notifyMarkStyleChanged();
     void notifyStatePositionsChanged();
     void notifyVisStyleChanged();
 
     void drawStates(bool simulating);
     void drawSimStates(std::vector<State*> historicStates, State*
-        currState, Transition* chosenTrans);
+                       currState, Transition* chosenTrans);
 
     void drawTransitions(bool draw_fp,bool draw_bp);
     void drawSimTransitions(bool draw_fp, bool draw_bp,
-        std::vector<Transition*> historicTrans, std::vector<Transition*>
-        posTrans, Transition* chosenTrans);
+                            std::vector<Transition*> historicTrans, std::vector<Transition*>
+                            posTrans, Transition* chosenTrans);
 
     void drawStructure();
     void sortClusters(Vector3D viewpoint);
@@ -54,9 +54,9 @@ class Visualizer: public Subscriber
     float cos_obt;
     float sin_obt;
     LTS* lts;
-    VisObjectFactory *visObjectFactory;
+    VisObjectFactory* visObjectFactory;
     Mediator* mediator;
-    PrimitiveFactory *primitiveFactory;
+    PrimitiveFactory* primitiveFactory;
     Settings* settings;
     VisStyle visStyle;
     bool create_objects;
@@ -66,8 +66,8 @@ class Visualizer: public Subscriber
 
     void computeAbsPos();
     void computeStateAbsPos(Cluster* root,int rot);
-    void computeSubtreeBounds(Cluster* root,float &boundWidth,
-                              float &boundHeight);
+    void computeSubtreeBounds(Cluster* root,float& boundWidth,
+                              float& boundHeight);
     void drawBackPointer(State* startState,State* endState);
     void drawForwardPointer(State* startState,State* endState);
     void drawLoop(State* state);
@@ -75,8 +75,8 @@ class Visualizer: public Subscriber
     void drawTransitions(Cluster* root,bool disp_fp,bool disp_bp);
 
     void traverseTree(bool co);
-    void traverseTreeC(Cluster *root, bool topClosed, int rot);
-    void traverseTreeT(Cluster *root, bool topClosed, int rot);
+    void traverseTreeC(Cluster* root, bool topClosed, int rot);
+    void traverseTreeT(Cluster* root, bool topClosed, int rot);
     void updateColors();
 };
 

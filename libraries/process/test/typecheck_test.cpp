@@ -27,14 +27,14 @@ void test_typechecker_case(std::string const& spec, bool const expected_result)
   std::clog << std::endl
             << "<---- testing specification: ---->" << std::endl
             << spec << std::endl;
-  if(expected_result)
+  if (expected_result)
   {
     std::clog << "expected result: success" << std::endl;
     try
     {
       process::parse_process_specification(spec);
     }
-    catch(mcrl2::runtime_error& e) // Catch errors and print them, such that all cases are treated.
+    catch (mcrl2::runtime_error& e) // Catch errors and print them, such that all cases are treated.
     {
       std::clog << "type checking failed with error: " << std::endl
                 << e.what() << std::endl;
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_bug_528c)
     "var  x:S;                           \n"
     "eqn  count(x) = 0;                  \n"
     "init delta;                         \n",
-  true
+    true
   );
 }
 

@@ -23,39 +23,39 @@
 
 class DistrPlot : public Visualizer
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     DistrPlot(
-        Mediator* m,
-        Graph* g,
-        GLCanvas* c );
+      Mediator* m,
+      Graph* g,
+      GLCanvas* c);
     virtual ~DistrPlot();
 
     // -- set data functions ----------------------------------------
     void setValues(
-        const size_t &idx,
-        const std::vector< size_t > &num );
+      const size_t& idx,
+      const std::vector< size_t > &num);
     void clearValues();
 
-	void setDiagram( Diagram* dgrm );
+    void setDiagram(Diagram* dgrm);
 
     // -- visualization functions  ----------------------------------
-    void visualize( const bool &inSelectMode );
-    void drawAxes( const bool &inSelectMode );
-    void drawLabels( const bool &inSelectMode );
-    void drawPlot( const bool &inSelectMode );
-    void drawDiagram( const bool &inSelectMode );
+    void visualize(const bool& inSelectMode);
+    void drawAxes(const bool& inSelectMode);
+    void drawLabels(const bool& inSelectMode);
+    void drawPlot(const bool& inSelectMode);
+    void drawDiagram(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
-		const int &x,
-		const int &y );
+      const int& x,
+      const int& y);
     /*
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
 
-protected:
+  protected:
     // -- utility data functions ------------------------------------
     void calcMaxNumber();
 
@@ -63,15 +63,15 @@ protected:
     // ***
     //void clear();
     void setScalingTransf();
-    void displTooltip( const size_t &posIdx );
+    void displTooltip(const size_t& posIdx);
 
     void calcPositions();
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
     void processHits(
-        GLint hits,
-        GLuint buffer[] );
+      GLint hits,
+      GLuint buffer[]);
 
     // -- data members ----------------------------------------------
     // data
@@ -83,8 +83,8 @@ protected:
     int    maxWthHintPx; // width cannot be greater than this
     double width;        // actual width calculated & used for every bar
     std::vector< Position2D > positions;
-	// diagram
-	Diagram*   diagram;        // association, user-defined diagram
+    // diagram
+    Diagram*   diagram;        // association, user-defined diagram
     double     scaleDgrm;      // scale factor for diagram
     Position2D posDgrm;        // positions of diagram
     bool       showDgrm;       // show or hide diagram

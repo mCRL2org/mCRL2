@@ -18,146 +18,149 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/algorithm.h"  
-#include "mcrl2/data/find.h"  
+#include "mcrl2/core/algorithm.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/specification.h"  
-#include "mcrl2/lps/find.h"  
-#include "mcrl2/lps/rewrite.h"  
-#include "mcrl2/lps/substitute.h"  
-#include "mcrl2/lps/remove.h"  
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/find.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-namespace detail {
+namespace detail
+{
 
-  /// \brief Algorithm class for algorithms on linear process specifications.
-  class lps_algorithm: public core::algorithm
-  {
-    protected:
-      /// \brief The specification that is processed by the algorithm
-      specification& m_spec;
-     
-      template <typename OutIter>
-      void sumelm_find_variables(const action_summand& s, OutIter result) const
-      {
-        data::find_free_variables(s.condition(), result);
-        lps::find_free_variables(s.multi_action(), result);
-        data::find_free_variables(s.assignments(), result);
-      }
-    
-      template <typename OutIter>
-      void sumelm_find_variables(const deadlock_summand& s, OutIter result) const
-      {
-        data::find_free_variables(s.condition(), result);
-        lps::find_free_variables(s.deadlock(), result);
-      }
-    
-      template <typename SummandType>
-      void remove_unused_summand_variables(SummandType& summand_)
-      {
-        data::variable_vector new_summation_variables;
-    
-        std::set<data::variable> occurring_vars;
-        sumelm_find_variables(summand_, std::inserter(occurring_vars, occurring_vars.end()));
-    
-        std::set<data::variable> summation_variables(atermpp::convert<std::set<data::variable> >(summand_.summation_variables()));
-        std::set_intersection(summation_variables.begin(), summation_variables.end(),
+/// \brief Algorithm class for algorithms on linear process specifications.
+class lps_algorithm: public core::algorithm
+{
+  protected:
+    /// \brief The specification that is processed by the algorithm
+    specification& m_spec;
+
+    template <typename OutIter>
+    void sumelm_find_variables(const action_summand& s, OutIter result) const
+    {
+      data::find_free_variables(s.condition(), result);
+      lps::find_free_variables(s.multi_action(), result);
+      data::find_free_variables(s.assignments(), result);
+    }
+
+    template <typename OutIter>
+    void sumelm_find_variables(const deadlock_summand& s, OutIter result) const
+    {
+      data::find_free_variables(s.condition(), result);
+      lps::find_free_variables(s.deadlock(), result);
+    }
+
+    template <typename SummandType>
+    void remove_unused_summand_variables(SummandType& summand_)
+    {
+      data::variable_vector new_summation_variables;
+
+      std::set<data::variable> occurring_vars;
+      sumelm_find_variables(summand_, std::inserter(occurring_vars, occurring_vars.end()));
+
+      std::set<data::variable> summation_variables(atermpp::convert<std::set<data::variable> >(summand_.summation_variables()));
+      std::set_intersection(summation_variables.begin(), summation_variables.end(),
                             occurring_vars.begin(), occurring_vars.end(),
                             std::inserter(new_summation_variables, new_summation_variables.end()));
-    
-        summand_.summation_variables() = atermpp::convert<data::variable_list>(new_summation_variables);
-      }
 
-    public:
-      /// \brief Constructor
-      lps_algorithm(specification& spec, bool verbose = false)
-        : 
-          core::algorithm(verbose ? 1 : 0),
-          m_spec(spec)
-      {}
+      summand_.summation_variables() = atermpp::convert<data::variable_list>(new_summation_variables);
+    }
 
-      /// \brief Constructor
-      lps_algorithm(specification& spec, size_t loglevel)
-        : 
-          core::algorithm(loglevel),
-          m_spec(spec)
-      {}
+  public:
+    /// \brief Constructor
+    lps_algorithm(specification& spec, bool verbose = false)
+      :
+      core::algorithm(verbose ? 1 : 0),
+      m_spec(spec)
+    {}
 
-      /// \brief Flag for verbose output
-      bool verbose() const
+    /// \brief Constructor
+    lps_algorithm(specification& spec, size_t loglevel)
+      :
+      core::algorithm(loglevel),
+      m_spec(spec)
+    {}
+
+    /// \brief Flag for verbose output
+    bool verbose() const
+    {
+      return verbose_level() >= 1;
+    }
+
+    /// \brief Applies the next state substitution to the variable v.
+    data::data_expression next_state(const summand& s, const data::variable& v) const
+    {
+      assert(!s.is_delta());
+      const data::assignment_list& a = s.assignments();
+      for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
       {
-        return verbose_level() >= 1;
-      }
-
-      /// \brief Applies the next state substitution to the variable v.
-      data::data_expression next_state(const summand& s, const data::variable& v) const
-      {
-        assert(!s.is_delta());
-        const data::assignment_list& a = s.assignments();
-        for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+        if (i->lhs() == v)
         {
-          if (i->lhs() == v)
-          {
-            return i->rhs();
-          }
+          return i->rhs();
         }
-        return v; // no assignment to v found, so return v itself
       }
+      return v; // no assignment to v found, so return v itself
+    }
 
-      /// \brief Applies the next state substitution to the variable v.
-      data::data_expression next_state(const action_summand& s, const data::variable& v) const
+    /// \brief Applies the next state substitution to the variable v.
+    data::data_expression next_state(const action_summand& s, const data::variable& v) const
+    {
+      const data::assignment_list& a = s.assignments();
+      for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
       {
-        const data::assignment_list& a = s.assignments();
-        for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
+        if (i->lhs() == v)
         {
-          if (i->lhs() == v)
-          {
-            return i->rhs();
-          }
+          return i->rhs();
         }
-        return v; // no assignment to v found, so return v itself
       }
+      return v; // no assignment to v found, so return v itself
+    }
 
-      /// \brief Attempts to eliminate the free variables of the specification, by substituting
-      /// a constant value for them. If no constant value is found for one of the variables,
-      /// an exception is thrown.
-      void instantiate_free_variables()
-      {
-        lps::detail::instantiate_global_variables(m_spec);
-      }
+    /// \brief Attempts to eliminate the free variables of the specification, by substituting
+    /// a constant value for them. If no constant value is found for one of the variables,
+    /// an exception is thrown.
+    void instantiate_free_variables()
+    {
+      lps::detail::instantiate_global_variables(m_spec);
+    }
 
-      /// \brief Removes formal parameters from the specification
-      void remove_parameters(const std::set<data::variable>& to_be_removed)
-      {
-        lps::remove_parameters(m_spec, to_be_removed);       
-      }
-      
-      /// \brief Removes parameters with a singleton sort
-      void remove_singleton_sorts()
-      {
-        lps::remove_singleton_sorts(m_spec);
-      }
-      
-      /// \brief Removes summands with condition equal to false
-      void remove_trivial_summands()
-      {
-        lps::remove_trivial_summands(m_spec);
-      }
+    /// \brief Removes formal parameters from the specification
+    void remove_parameters(const std::set<data::variable>& to_be_removed)
+    {
+      lps::remove_parameters(m_spec, to_be_removed);
+    }
 
-      /// \brief Removes unused summand variables.
-      void remove_unused_summand_variables()
-      {
-        action_summand_vector& v = m_spec.process().action_summands();
-        std::for_each(v.begin(), v.end(), boost::bind(&lps_algorithm::remove_unused_summand_variables<action_summand>, this, _1));
+    /// \brief Removes parameters with a singleton sort
+    void remove_singleton_sorts()
+    {
+      lps::remove_singleton_sorts(m_spec);
+    }
 
-        deadlock_summand_vector& w = m_spec.process().deadlock_summands();
-        std::for_each(w.begin(), w.end(), boost::bind(&lps_algorithm::remove_unused_summand_variables<deadlock_summand>, this, _1));
-      }
-  };
+    /// \brief Removes summands with condition equal to false
+    void remove_trivial_summands()
+    {
+      lps::remove_trivial_summands(m_spec);
+    }
+
+    /// \brief Removes unused summand variables.
+    void remove_unused_summand_variables()
+    {
+      action_summand_vector& v = m_spec.process().action_summands();
+      std::for_each(v.begin(), v.end(), boost::bind(&lps_algorithm::remove_unused_summand_variables<action_summand>, this, _1));
+
+      deadlock_summand_vector& w = m_spec.process().deadlock_summands();
+      std::for_each(w.begin(), w.end(), boost::bind(&lps_algorithm::remove_unused_summand_variables<deadlock_summand>, this, _1));
+    }
+};
 
 } // namespace detail
 

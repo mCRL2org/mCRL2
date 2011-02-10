@@ -87,14 +87,14 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
     }
 
   public:
-     paritygame_tool()
+    paritygame_tool()
       : super(
-          "paritygame",
-          "Wieger Wesselink",
-          "Reads a file containing a pbes, and generates a parity game.",
-          "Convert the PBES in INFILE to parity game and write the result to OUTFILE. If INFILE is not "
-          "present, stdin is used. If OUTFILE is not present, stdout is used. By default a min-parity game is generated."),
-        m_max_pg(false)
+        "paritygame",
+        "Wieger Wesselink",
+        "Reads a file containing a pbes, and generates a parity game.",
+        "Convert the PBES in INFILE to parity game and write the result to OUTFILE. If INFILE is not "
+        "present, stdin is used. If OUTFILE is not present, stdout is used. By default a min-parity game is generated."),
+      m_max_pg(false)
     {}
 
     bool run()
@@ -109,7 +109,7 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
       pbes_system::pbes<> p;
       p.load(m_input_filename);
 
-      if(!m_max_pg)
+      if (!m_max_pg)
       {
         run1(p, true);
       }

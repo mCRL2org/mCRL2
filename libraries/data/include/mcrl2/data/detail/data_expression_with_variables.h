@@ -17,36 +17,38 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-  /// \brief Data expression with a sequence of variables attached to it
-  /// The intended use case is to store the free variables of the expression.
-  class data_expression_with_variables: public data_expression
-  {
-    protected:
+/// \brief Data expression with a sequence of variables attached to it
+/// The intended use case is to store the free variables of the expression.
+class data_expression_with_variables: public data_expression
+{
+  protected:
 
-      /// \brief The attached variables.
-      variable_list m_variables;
+    /// \brief The attached variables.
+    variable_list m_variables;
 
-    public:
+  public:
 
-      /// \brief Constructor.
-      data_expression_with_variables()
-      {}
+    /// \brief Constructor.
+    data_expression_with_variables()
+    {}
 
-      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
-      /// \param term A term
-      data_expression_with_variables(const atermpp::aterm_appl& term)
-        : data_expression(term)
-      {}
+    /// \brief Constructor. Creates a data expression with an empty sequence of variables.
+    /// \param term A term
+    data_expression_with_variables(const atermpp::aterm_appl& term)
+      : data_expression(term)
+    {}
 
-      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
-      /// \param term A term
-      data_expression_with_variables(const variable& v)
-        : data_expression(v), m_variables(atermpp::make_list(v))
-      {}
+    /// \brief Constructor. Creates a data expression with an empty sequence of variables.
+    /// \param term A term
+    data_expression_with_variables(const variable& v)
+      : data_expression(v), m_variables(atermpp::make_list(v))
+    {}
 
 //      /// \brief Constructor. Creates a data expression with an empty sequence of variables.
 //      /// \param term A term
@@ -54,51 +56,70 @@ namespace data {
 //        : data_expression(term)
 //      {}
 
-      /// \brief Constructor.
-      /// \param expression A data expression
-      /// \param variables A sequence of data variables
-      template < typename Container >
-      data_expression_with_variables(data_expression expression, const Container& variables)
-        : data_expression(expression), m_variables(atermpp::convert< variable_list >(variables))
-      {}
+    /// \brief Constructor.
+    /// \param expression A data expression
+    /// \param variables A sequence of data variables
+    template < typename Container >
+    data_expression_with_variables(data_expression expression, const Container& variables)
+      : data_expression(expression), m_variables(atermpp::convert< variable_list >(variables))
+    {}
 
-      /// \brief Return the variables.
-      /// \return The variables of the data expression.
-      variable_list variables() const
-      {
-        return m_variables;
-      }
+    /// \brief Return the variables.
+    /// \return The variables of the data expression.
+    variable_list variables() const
+    {
+      return m_variables;
+    }
 
-      /// \brief Return the variables.
-      /// \return The variables of the data expression.
-      variable_list& variables()
-      {
-        return m_variables;
-      }
+    /// \brief Return the variables.
+    /// \return The variables of the data expression.
+    variable_list& variables()
+    {
+      return m_variables;
+    }
 
-      /// \brief Returns true if the sequence of variables is empty.
-      /// \return True if the sequence of variables is empty.
-      bool is_constant() const
-      {
-        return m_variables.empty();
-      }
-  };
+    /// \brief Returns true if the sequence of variables is empty.
+    /// \return True if the sequence of variables is empty.
+    bool is_constant() const
+    {
+      return m_variables.empty();
+    }
+};
 
 } // namespace data
 
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp {
+namespace atermpp
+{
 template<>
 struct aterm_traits<mcrl2::data::data_expression_with_variables >
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::data::data_expression_with_variables t)   { t.protect(); t.variables().protect(); }
-  static void unprotect(mcrl2::data::data_expression_with_variables t) { t.unprotect(); t.variables().unprotect(); }
-  static void mark(mcrl2::data::data_expression_with_variables t)      { t.mark(); t.variables().mark(); }
-  static ATerm term(mcrl2::data::data_expression_with_variables t)     { return t.term(); }
-  static ATerm* ptr(mcrl2::data::data_expression_with_variables& t)    { return &t.term(); }
+  static void protect(mcrl2::data::data_expression_with_variables t)
+  {
+    t.protect();
+    t.variables().protect();
+  }
+  static void unprotect(mcrl2::data::data_expression_with_variables t)
+  {
+    t.unprotect();
+    t.variables().unprotect();
+  }
+  static void mark(mcrl2::data::data_expression_with_variables t)
+  {
+    t.mark();
+    t.variables().mark();
+  }
+  static ATerm term(mcrl2::data::data_expression_with_variables t)
+  {
+    return t.term();
+  }
+  static ATerm* ptr(mcrl2::data::data_expression_with_variables& t)
+  {
+    return &t.term();
+  }
 };
 } // namespace atermpp
 /// \endcond

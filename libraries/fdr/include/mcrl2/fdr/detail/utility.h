@@ -18,16 +18,19 @@
 #include <aterm2.h>
 #include <cassert>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
-namespace detail {
+namespace detail
+{
 
 //Ret: quoted constant s, if s != NULL
 //     unquoted constant Nil, if s == NULL
 inline
-ATermAppl gsString2ATermAppl(const char *s)
+ATermAppl gsString2ATermAppl(const char* s)
 {
   return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
 }
@@ -49,14 +52,20 @@ bool check_list_argument(Term t, CheckFunction f, size_t minimum_size)
 {
   atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (t.type() != AT_LIST)
+  {
     return false;
+  }
   atermpp::aterm_list l(term);
   if (l.size() < minimum_size)
+  {
     return false;
+  }
   for (atermpp::aterm_list::iterator i = l.begin(); i != l.end(); ++i)
   {
     if (!f(*i))
+    {
       return false;
+    }
   }
   return true;
 }

@@ -24,75 +24,78 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \cond INTERNAL_DOCS
-namespace detail {
+namespace detail
+{
 
-  /// \brief Removes elements with indices in a given sequence from the sequence l
-  /// \param l A sequence of terms
-  /// \param to_be_removed A sequence of integers
-  /// \return The removal result
-  template <typename Term>
-  atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::vector<size_t>& to_be_removed)
+/// \brief Removes elements with indices in a given sequence from the sequence l
+/// \param l A sequence of terms
+/// \param to_be_removed A sequence of integers
+/// \return The removal result
+template <typename Term>
+atermpp::term_list<Term> remove_elements(atermpp::term_list<Term> l, const std::vector<size_t>& to_be_removed)
+{
+  size_t index = 0;
+  atermpp::vector<Term> result;
+  std::vector<size_t>::const_iterator j = to_be_removed.begin();
+  for (typename atermpp::term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++index)
   {
-    size_t index = 0;
-    atermpp::vector<Term> result;
-    std::vector<size_t>::const_iterator j = to_be_removed.begin();
-    for (typename atermpp::term_list<Term>::iterator i = l.begin(); i != l.end(); ++i, ++index)
+    if (j != to_be_removed.end() && index == *j)
     {
-      if (j != to_be_removed.end() && index == *j)
-      {
-        ++j;
-      }
-      else
-      {
-        result.push_back(*i);
-      }
+      ++j;
     }
-    return atermpp::convert< atermpp::term_list< Term > >(result);
+    else
+    {
+      result.push_back(*i);
+    }
+  }
+  return atermpp::convert< atermpp::term_list< Term > >(result);
+}
+
+template <typename Derived>
+struct remove_parameters_builder: public pbes_system::pbes_expression_builder<Derived>
+{
+  typedef pbes_system::pbes_expression_builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  const std::vector<size_t>& to_be_removed;
+
+  remove_parameters_builder(const std::vector<size_t>& to_be_removed_)
+    : to_be_removed(to_be_removed_)
+  {}
+
+  propositional_variable operator()(const propositional_variable& x)
+  {
+    return propositional_variable(x.name(), detail::remove_elements(x.parameters(), to_be_removed));
   }
 
-  template <typename Derived>
-  struct remove_parameters_builder: public pbes_system::pbes_expression_builder<Derived>
+  pbes_expression operator()(const propositional_variable_instantiation& x)
   {
-    typedef pbes_system::pbes_expression_builder<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  
-    const std::vector<size_t>& to_be_removed;
-  
-    remove_parameters_builder(const std::vector<size_t>& to_be_removed_)
-      : to_be_removed(to_be_removed_)
-    {}
+    return propositional_variable_instantiation(x.name(), detail::remove_elements(x.parameters(), to_be_removed));
+  }
 
-    propositional_variable operator()(const propositional_variable& x)
-    {
-      return propositional_variable(x.name(), detail::remove_elements(x.parameters(), to_be_removed));
-    }
+  void operator()(pbes_equation& x)
+  {
+    x.variable() = static_cast<Derived&>(*this)(x.variable());
+    x.formula() = static_cast<Derived&>(*this)(x.formula());
+  }
 
-    pbes_expression operator()(const propositional_variable_instantiation& x)
-    {
-      return propositional_variable_instantiation(x.name(), detail::remove_elements(x.parameters(), to_be_removed));
-    }
- 
-    void operator()(pbes_equation& x)
-    {
-      x.variable() = static_cast<Derived&>(*this)(x.variable());
-      x.formula() = static_cast<Derived&>(*this)(x.formula());
-    }   
-
-    template <typename Container>
-    void operator()(pbes<Container>& x)
-    {
-      static_cast<Derived&>(*this)(x.equations());
-      x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
-      static_cast<Derived&>(*this)(x.global_variables());
-    }
-  };
+  template <typename Container>
+  void operator()(pbes<Container>& x)
+  {
+    static_cast<Derived&>(*this)(x.equations());
+    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    static_cast<Derived&>(*this)(x.global_variables());
+  }
+};
 
 
 } // namespace detail
@@ -125,59 +128,60 @@ void remove_parameters(T& x,
 }
 
 /// \cond INTERNAL_DOCS
-namespace detail {
+namespace detail
+{
 
-  template <typename Derived>
-  struct map_based_remove_parameters_builder: public pbes_expression_builder<Derived>
+template <typename Derived>
+struct map_based_remove_parameters_builder: public pbes_expression_builder<Derived>
+{
+  typedef pbes_expression_builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed;
+
+  map_based_remove_parameters_builder(const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed_)
+    : to_be_removed(to_be_removed_)
+  {}
+
+  propositional_variable operator()(const propositional_variable& x)
   {
-    typedef pbes_expression_builder<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  
-    const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed;
-  
-    map_based_remove_parameters_builder(const std::map<core::identifier_string, std::vector<size_t> >& to_be_removed_)
-      : to_be_removed(to_be_removed_)
-    {}
-
-    propositional_variable operator()(const propositional_variable& x)
+    std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(x.name());
+    if (i == to_be_removed.end())
     {
-      std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(x.name());
-      if (i == to_be_removed.end())
-      {
-        return x;
-      }
+      return x;
+    }
+    return remove_parameters(x, i->second);
+  }
+
+  pbes_expression operator()(const propositional_variable_instantiation& x)
+  {
+    std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(x.name());
+    if (i == to_be_removed.end())
+    {
+      return x;
+    }
+    else
+    {
       return remove_parameters(x, i->second);
     }
+  }
 
-    pbes_expression operator()(const propositional_variable_instantiation& x)
-    {
-      std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(x.name());
-      if (i == to_be_removed.end())
-      {
-        return x;
-      }
-      else
-      {
-        return remove_parameters(x, i->second);
-      }
-    }
- 
-    void operator()(pbes_equation& x)
-    {
-      x.variable() = static_cast<Derived&>(*this)(x.variable());
-      x.formula() = static_cast<Derived&>(*this)(x.formula());
-    }   
+  void operator()(pbes_equation& x)
+  {
+    x.variable() = static_cast<Derived&>(*this)(x.variable());
+    x.formula() = static_cast<Derived&>(*this)(x.formula());
+  }
 
-    template <typename Container>
-    void operator()(pbes<Container>& x)
-    {
-      static_cast<Derived&>(*this)(x.equations());
-      x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
-      static_cast<Derived&>(*this)(x.global_variables());
-    }
-  };
+  template <typename Container>
+  void operator()(pbes<Container>& x)
+  {
+    static_cast<Derived&>(*this)(x.equations());
+    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    static_cast<Derived&>(*this)(x.global_variables());
+  }
+};
 } // namespace detail
 /// \endcond
 
@@ -208,69 +212,70 @@ void remove_parameters(T& x,
 }
 
 /// \cond INTERNAL_DOCS
-namespace detail {
+namespace detail
+{
 
-  template <typename Derived>
-  struct set_based_remove_parameters_builder: public pbes_expression_builder<Derived>
+template <typename Derived>
+struct set_based_remove_parameters_builder: public pbes_expression_builder<Derived>
+{
+  typedef pbes_expression_builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  const std::set<data::variable>& to_be_removed;
+
+  set_based_remove_parameters_builder(const std::set<data::variable>& to_be_removed_)
+    : to_be_removed(to_be_removed_)
+  {}
+
+  void remove_parameters(atermpp::set<data::variable>& x) const
   {
-    typedef pbes_expression_builder<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  
-    const std::set<data::variable>& to_be_removed;
-  
-    set_based_remove_parameters_builder(const std::set<data::variable>& to_be_removed_)
-      : to_be_removed(to_be_removed_)
-    {}
-
-    void remove_parameters(atermpp::set<data::variable>& x) const
+    for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
     {
-      for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
+      x.erase(*i);
+    }
+  }
+
+  data::variable_list operator()(const data::variable_list& l) const
+  {
+    std::vector<data::variable> result;
+    for (data::variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+    {
+      if (to_be_removed.find(*i) == to_be_removed.end())
       {
-        x.erase(*i);
+        result.push_back(*i);
       }
     }
+    return data::variable_list(result.begin(), result.end());
+  }
 
-    data::variable_list operator()(const data::variable_list& l) const
-    {
-      std::vector<data::variable> result;
-      for (data::variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
-      {
-        if (to_be_removed.find(*i) == to_be_removed.end())
-        {
-          result.push_back(*i);
-        }
-      }
-      return data::variable_list(result.begin(), result.end());
-    }
+  data::assignment_list operator()(const data::assignment_list& l) const
+  {
+    std::vector<data::assignment> a(l.begin(), l.end());
+    a.erase(std::remove_if(a.begin(), a.end(), data::detail::has_left_hand_side_in(to_be_removed)), a.end());
+    return data::assignment_list(a.begin(), a.end());
+  }
 
-    data::assignment_list operator()(const data::assignment_list& l) const
-    {
-      std::vector<data::assignment> a(l.begin(), l.end());
-      a.erase(std::remove_if(a.begin(), a.end(), data::detail::has_left_hand_side_in(to_be_removed)), a.end());
-      return data::assignment_list(a.begin(), a.end());
-    }
+  propositional_variable operator()(const propositional_variable& x) const
+  {
+    return propositional_variable(x.name(), static_cast<Derived&>(*this)(x.parameters()));
+  }
 
-    propositional_variable operator()(const propositional_variable& x) const
-    {
-      return propositional_variable(x.name(), static_cast<Derived&>(*this)(x.parameters()));
-    } 
+  void operator()(pbes_equation& x)
+  {
+    x.variable() = static_cast<Derived&>(*this)(x.variable());
+    x.formula() = static_cast<Derived&>(*this)(x.formula());
+  }
 
-    void operator()(pbes_equation& x)
-    {
-      x.variable() = static_cast<Derived&>(*this)(x.variable());
-      x.formula() = static_cast<Derived&>(*this)(x.formula());
-    }
-    
-    template <typename Container>
-    void operator()(pbes<Container>& x)
-    {
-      static_cast<Derived&>(*this)(x.equations());
-      x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
-      remove_parameters(x.global_variables());
-    }
-  };
+  template <typename Container>
+  void operator()(pbes<Container>& x)
+  {
+    static_cast<Derived&>(*this)(x.equations());
+    x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
+    remove_parameters(x.global_variables());
+  }
+};
 } // namespace detail
 /// \endcond
 

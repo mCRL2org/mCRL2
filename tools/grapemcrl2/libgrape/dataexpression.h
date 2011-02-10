@@ -15,69 +15,69 @@
 
 namespace grape
 {
-  namespace libgrape
-  {
+namespace libgrape
+{
+
+/**
+ * \short Represents a data expression.
+ */
+class dataexpression
+{
+  protected:
+    wxString        m_expression;     /**< The data expression's text */
+    sortexpression  m_sortexpression; /**< The data expression's sort */
+  private:
+  public:
+    /**
+     * Default constructor.
+     * Initializes dataexpression.
+     */
+    dataexpression(void);
 
     /**
-     * \short Represents a data expression.
+     * Copy constructor
+     * Creates a new data expression based on an existing one.
+     * @param p_dataexpression The data expression to copy.
      */
-    class dataexpression
-    {
-      protected:
-        wxString        m_expression;     /**< The data expression's text */
-        sortexpression  m_sortexpression; /**< The data expression's sort */
-      private:
-      public:
-        /**
-         * Default constructor.
-         * Initializes dataexpression.
-         */
-        dataexpression( void );
-
-        /**
-         * Copy constructor
-         * Creates a new data expression based on an existing one.
-         * @param p_dataexpression The data expression to copy.
-         */
-        dataexpression( const dataexpression &p_dataexpression );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~dataexpression( void );
-
-        /**
-         * Data expression assignment function
-         * @param p_expression The new data expression
-         */
-        void set_expression( const wxString &p_expression );
-
-        /**
-         * Data expression retrieval function
-         * @return The data expression
-         */
-        wxString get_expression( void ) const;
-
-        /**
-         * Data expression type assignment function
-         * @param p_type The new data expression type
-         */
-        void set_type( const wxString &p_type );
-
-        /**
-         * Data expression type retreival function
-         * @return The data expression type
-         */
-        wxString get_type( void ) const;
-    };
+    dataexpression(const dataexpression& p_dataexpression);
 
     /**
-     * List of dataexpression. Represents a list of dataexpression datatypes.
+     * Default destructor.
+     * Frees allocated memory.
      */
-    WX_DECLARE_OBJARRAY( dataexpression, list_of_dataexpression );
+    ~dataexpression(void);
 
-  } // namespace libgrape
+    /**
+     * Data expression assignment function
+     * @param p_expression The new data expression
+     */
+    void set_expression(const wxString& p_expression);
+
+    /**
+     * Data expression retrieval function
+     * @return The data expression
+     */
+    wxString get_expression(void) const;
+
+    /**
+     * Data expression type assignment function
+     * @param p_type The new data expression type
+     */
+    void set_type(const wxString& p_type);
+
+    /**
+     * Data expression type retreival function
+     * @return The data expression type
+     */
+    wxString get_type(void) const;
+};
+
+/**
+ * List of dataexpression. Represents a list of dataexpression datatypes.
+ */
+WX_DECLARE_OBJARRAY(dataexpression, list_of_dataexpression);
+
+} // namespace libgrape
 } // namespace grape
 
 #endif // LIBGRAPE_DATAEXPRESSION_H

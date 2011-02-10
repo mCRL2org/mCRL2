@@ -15,9 +15,11 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/identifier_generator.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
 /// \brief Identifier generator that stores the identifiers of the
 /// context in a set.

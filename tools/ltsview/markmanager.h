@@ -54,15 +54,15 @@ class MarkManager
 
     int getNumMarkedStates();
     int getNumMarkedTransitions();
-    void setLTS(LTS *l,bool need_reset);
+    void setLTS(LTS* l,bool need_reset);
     void setMarkStyle(MarkStyle ms);
     MarkStyle getMarkStyle();
     void setActionMark(int l,bool b);
     void markClusters();
 
-    bool isMarked(State *s);
-    bool isMarked(Cluster *s);
-    bool isMarked(Transition *t);
+    bool isMarked(State* s);
+    bool isMarked(Cluster* s);
+    bool isMarked(Transition* t);
 
   private:
     std::vector< MarkRule* > mark_rules;
@@ -75,11 +75,11 @@ class MarkManager
     int num_marked_states_all;
     int num_marked_transitions;
     int num_active_mark_rules;
-    LTS *lts;
+    LTS* lts;
 
     void activateMarkRule(int mr);
     void deactivateMarkRule(int mr);
-    bool matchesRule(State *s,int mr);
+    bool matchesRule(State* s,int mr);
     void recomputeMarkedStateNumbers();
     void reset();
 };

@@ -15,45 +15,47 @@
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
-    /// \brief existential quantification.
+/// \brief existential quantification.
+///
+class exists: public abstraction
+{
+  public:
+
+    /// Constructor.
     ///
-    class exists: public abstraction
+    /// \param[in] d A data expression
+    /// \pre d has the internal structure of an abstraction.
+    /// \pre d is an existential quantification.
+    exists(const data_expression& d)
+      : abstraction(d)
     {
-      public:
+      assert(is_abstraction(d));
+      assert(abstraction(d).binding_operator() == exists_binder());
+    }
 
-        /// Constructor.
-        ///
-        /// \param[in] d A data expression
-        /// \pre d has the internal structure of an abstraction.
-        /// \pre d is an existential quantification.
-        exists(const data_expression& d)
-          : abstraction(d)
-        {
-          assert(is_abstraction(d));
-          assert(abstraction(d).binding_operator() == exists_binder());
-        }
+    /// Constructor.
+    ///
+    /// \param[in] variables A nonempty list of binding variables (objects of type variable).
+    /// \param[in] body The body of the exists abstraction.
+    /// \pre variables is not empty.
+    template < typename Container >
+    exists(const Container& variables,
+           const data_expression& body,
+           typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+      : abstraction(exists_binder(), variables, body)
+    {
+      assert(!variables.empty());
+    }
 
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty list of binding variables (objects of type variable).
-        /// \param[in] body The body of the exists abstraction.
-        /// \pre variables is not empty.
-        template < typename Container >
-        exists(const Container& variables,
-               const data_expression& body,
-               typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(exists_binder(), variables, body)
-        {
-          assert(!variables.empty());
-        }
+}; // class exists
 
-    }; // class exists
-
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

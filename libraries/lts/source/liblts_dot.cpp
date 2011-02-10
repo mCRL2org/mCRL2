@@ -28,17 +28,17 @@ namespace mcrl2
 namespace lts
 {
 
-void lts_dot_t::load(const string & filename)
+void lts_dot_t::load(const string& filename)
 {
   if (filename=="")
-  { 
+  {
     parse_dot(cin,*this);
   }
-  else 
+  else
   {
     std::ifstream is(filename.c_str());
 
-    if ( !is.is_open() )
+    if (!is.is_open())
     {
       throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for reading.");
     }
@@ -49,37 +49,37 @@ void lts_dot_t::load(const string & filename)
 
 }
 
-void lts_dot_t::save(const string &filename) const 
+void lts_dot_t::save(const string& filename) const
 {
   ofstream os(filename.c_str());
-  if ( !os.is_open() )
+  if (!os.is_open())
   {
     throw mcrl2::runtime_error("cannot open DOT file '" + filename + "' for writing.");
     return;
   }
 
   // Language definition seems to suggest that the name is optional, but tools seem to think otherwise
-  os << "digraph \"" << filename << "\" {" << endl; 
+  os << "digraph \"" << filename << "\" {" << endl;
   // os << "size=\"7,10.5\";" << endl;
   os << "center = TRUE;" << endl;
   os << "mclimit = 10.0;" << endl;
   os << "nodesep = 0.05;" << endl;
   os << "node [ width=0.25, height=0.25, label=\"\" ];" << endl;
-  if ( num_states() > 0 )
+  if (num_states() > 0)
   {
-    if ( has_state_info() )
-    { 
+    if (has_state_info())
+    {
       os << state_label(initial_state()).name();
     }
     else
-    { 
+    {
       os << "S" << initial_state();
     }
 
     os << " [ peripheries=2 ];" << endl;
     for (size_t i=0; i<num_states(); i++)
     {
-      if ( has_state_info() )
+      if (has_state_info())
       {
         os << state_label(i).name() << " [ label=\"" << state_label(i).label() << "\" ];" << endl;
       }
@@ -92,14 +92,14 @@ void lts_dot_t::save(const string &filename) const
   for (transition_const_range t=get_transitions();  !t.empty(); t.advance_begin(1))
   {
     if (has_state_info())
-    { 
-      os << state_label(t.front().from()).name() << "->" << state_label(t.front().to()).name() << "[label=\"" << 
-            mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
+    {
+      os << state_label(t.front().from()).name() << "->" << state_label(t.front().to()).name() << "[label=\"" <<
+         mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
     }
     else
     {
-      os << "S" << t.front().from() << " -> " << "S" << t.front().to() << "[label=\"" << 
-            mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
+      os << "S" << t.front().from() << " -> " << "S" << t.front().to() << "[label=\"" <<
+         mcrl2::lts::detail::pp(action_label(t.front().label())) << "\"];" << endl;
     }
   }
 

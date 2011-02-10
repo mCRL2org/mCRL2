@@ -27,9 +27,11 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/assignment.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace state_formulas {
+namespace state_formulas
+{
 
 //--- start generated classes ---//
 /// \brief A state formula
@@ -754,35 +756,35 @@ bool is_mu(const state_formula& t)
 
 //--- end generated classes ---//
 
-  /// \cond INTERNAL_DOCS
-  //
-  /// \brief Function that determines if a state formula is time dependent
-  struct is_timed_subterm
+/// \cond INTERNAL_DOCS
+//
+/// \brief Function that determines if a state formula is time dependent
+struct is_timed_subterm
+{
+  /// \brief Function call operator
+  /// \param t A term
+  /// \return The function result
+  bool operator()(const atermpp::aterm_appl& t) const
   {
-    /// \brief Function call operator
-    /// \param t A term
-    /// \return The function result
-    bool operator()(const atermpp::aterm_appl& t) const
-    {
-      return (is_state_formula(t) && (is_delay_timed(t) || is_yaled_timed(t)))
-        || (action_formulas::is_action_formula(t) && action_formulas::is_at(t));
-    }
-  };
-  /// \endcond
-
-  /// \brief Returns true if the formula is timed.
-  /// \return True if the formula is timed.
-  inline
-  bool state_formula::has_time() const
-  {
-    return atermpp::find_if(*this, is_timed_subterm()) != atermpp::aterm();
+    return (is_state_formula(t) && (is_delay_timed(t) || is_yaled_timed(t)))
+           || (action_formulas::is_action_formula(t) && action_formulas::is_at(t));
   }
+};
+/// \endcond
 
-  /// \brief Returns a pretty print representation of f.
-  inline std::string pp(const state_formula& f)
-  {
-    return core::pp(f);
-  }
+/// \brief Returns true if the formula is timed.
+/// \return True if the formula is timed.
+inline
+bool state_formula::has_time() const
+{
+  return atermpp::find_if(*this, is_timed_subterm()) != atermpp::aterm();
+}
+
+/// \brief Returns a pretty print representation of f.
+inline std::string pp(const state_formula& f)
+{
+  return core::pp(f);
+}
 
 } // namespace state_formulas
 

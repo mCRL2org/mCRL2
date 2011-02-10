@@ -52,7 +52,7 @@ class Cluster
     void severDescendant(int i);
 
     // Restores the severance
-    void healSeverance( int i);
+    void healSeverance(int i);
     bool hasSeveredDescendants();
     void setAncestor(Cluster* c);
     Cluster* getAncestor() const;

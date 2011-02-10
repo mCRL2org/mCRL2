@@ -19,23 +19,25 @@
 #include "mcrl2/data/builder.h"
 // #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-  class data_specification;
+class data_specification;
 
-  template <typename T>
-  void normalize_sorts(T& x,
-                       const data::data_specification& data_spec,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                      );
+template <typename T>
+void normalize_sorts(T& x,
+                     const data::data_specification& data_spec,
+                     typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                    );
 
-  template <typename T>
-  T normalize_sorts(const T& x,
-                    const data::data_specification& data_spec,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                   );
+template <typename T>
+T normalize_sorts(const T& x,
+                  const data::data_specification& data_spec,
+                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                 );
 
 } // namespace data
 

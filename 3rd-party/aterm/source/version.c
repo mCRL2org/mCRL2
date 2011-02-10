@@ -1,13 +1,13 @@
 #include "version.h"
 
 #ifdef VERSION
-char *at_version = VERSION;
+char* at_version = VERSION;
 #else
-char *at_version = "unavailable";
+char* at_version = "unavailable";
 #endif
 
 #ifdef CURDATE
-char *at_date = CURDATE;
+char* at_date = CURDATE;
 #else
-char *at_date = "unavailable";
+char* at_date = "unavailable";
 #endif

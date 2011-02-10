@@ -1,4 +1,4 @@
-/* 
+/*
    SVC -- the SVC (Systems Validation Centre) file format library
 
    Copyright (C) 2000  Stichting Mathematisch Centrum, Amsterdam,
@@ -24,24 +24,25 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 
 #define PT_INITIALSIZE 1024
 
 
-typedef struct{
-   long size;
-   void **nodes;
-} PTable;
+  typedef struct
+  {
+    long size;
+    void** nodes;
+  } PTable;
 
 
-void PTinit(PTable *);
-void PTput(PTable *, long index, void *ptr);
-void *PTget(PTable *, long index);
-void PTfree(PTable *);
+  void PTinit(PTable*);
+  void PTput(PTable*, long index, void* ptr);
+  void* PTget(PTable*, long index);
+  void PTfree(PTable*);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 

@@ -18,99 +18,102 @@
 #include "mcrl2/bes/traverser.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace bes {
+namespace bes
+{
 
-namespace detail {
+namespace detail
+{
 
-  struct boolean_expression2pbes_expression_traverser: public bes::boolean_expression_traverser<boolean_expression2pbes_expression_traverser>
+struct boolean_expression2pbes_expression_traverser: public bes::boolean_expression_traverser<boolean_expression2pbes_expression_traverser>
+{
+  typedef bes::boolean_expression_traverser<boolean_expression2pbes_expression_traverser> super;
+  typedef core::term_traits<pbes_system::pbes_expression> tr;
+
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  /// \brief A stack containing PBES expressions.
+  atermpp::vector<pbes_system::pbes_expression> expression_stack;
+
+  void push(const pbes_system::pbes_expression& x)
   {
-    typedef bes::boolean_expression_traverser<boolean_expression2pbes_expression_traverser> super;
-    typedef core::term_traits<pbes_system::pbes_expression> tr;
+    expression_stack.push_back(x);
+  }
 
-    using super::operator();
-    using super::enter;
-    using super::leave;
-    
-    /// \brief A stack containing PBES expressions.
-    atermpp::vector<pbes_system::pbes_expression> expression_stack;
+  pbes_system::pbes_expression pop()
+  {
+    assert(!expression_stack.empty());
+    pbes_system::pbes_expression result = expression_stack.back();
+    expression_stack.pop_back();
+    return result;
+  }
 
-    void push(const pbes_system::pbes_expression& x)
-    {
-      expression_stack.push_back(x);
-    }
+  /// \brief Returns the top element of the expression stack, which is the result of the conversion.
+  pbes_system::pbes_expression result() const
+  {
+    assert(!expression_stack.empty());
+    return expression_stack.back();
+  }
 
-    pbes_system::pbes_expression pop()
-    {
-      assert(!expression_stack.empty());
-      pbes_system::pbes_expression result = expression_stack.back();
-      expression_stack.pop_back();
-      return result;
-    }
+  /// \brief Enter true node
+  void enter(const true_& /* x */)
+  {
+    push(tr::true_());
+  }
 
-    /// \brief Returns the top element of the expression stack, which is the result of the conversion.
-    pbes_system::pbes_expression result() const
-    {
-      assert(!expression_stack.empty());
-      return expression_stack.back();
-    }
+  /// \brief Enter false node
+  void enter(const false_& /* x */)
+  {
+    push(tr::false_());
+  }
 
-    /// \brief Enter true node
-    void enter(const true_& /* x */)
-    {
-      push(tr::true_());
-    }
+  /// \brief Leave not node
+  void leave(const not_& /* x */)
+  {
+    pbes_system::pbes_expression b = pop();
+    push(tr::not_(b));
+  }
 
-    /// \brief Enter false node
-    void enter(const false_& /* x */)
-    {
-      push(tr::false_());
-    }
+  /// \brief Leave and node
+  void leave(const and_& /* x */)
+  {
+    // join the two expressions on top of the stack
+    pbes_system::pbes_expression right = pop();
+    pbes_system::pbes_expression left  = pop();
+    push(tr::and_(left, right));
+  }
 
-    /// \brief Leave not node
-    void leave(const not_& /* x */)
-    {
-      pbes_system::pbes_expression b = pop();
-      push(tr::not_(b));
-    }
+  /// \brief Leave or node
+  void leave(const or_& /* x */)
+  {
+    // join the two expressions on top of the stack
+    pbes_system::pbes_expression right = pop();
+    pbes_system::pbes_expression left  = pop();
+    push(tr::or_(left, right));
+  }
 
-    /// \brief Leave and node
-    void leave(const and_& /* x */)
-    {
-      // join the two expressions on top of the stack
-      pbes_system::pbes_expression right = pop();
-      pbes_system::pbes_expression left  = pop();
-      push(tr::and_(left, right));
-    }
+  /// \brief Enter imp node
+  /// \param e A term
+  void leave(const imp& /* x */)
+  {
+    // join the two expressions on top of the stack
+    pbes_system::pbes_expression right = pop();
+    pbes_system::pbes_expression left  = pop();
+    push(tr::imp(left, right));
+  }
 
-    /// \brief Leave or node
-    void leave(const or_& /* x */)
-    {
-      // join the two expressions on top of the stack
-      pbes_system::pbes_expression right = pop();
-      pbes_system::pbes_expression left  = pop();
-      push(tr::or_(left, right));
-    }
-
-    /// \brief Enter imp node
-    /// \param e A term
-    void leave(const imp& /* x */)
-    {
-      // join the two expressions on top of the stack
-      pbes_system::pbes_expression right = pop();
-      pbes_system::pbes_expression left  = pop();
-      push(tr::imp(left, right));
-    }
-
-    /// \brief Enter propositional_variable node
-    /// \param e A term
-    /// \param X A propositional variable
-    void enter(const boolean_variable& x)
-    {
-      push(pbes_system::propositional_variable_instantiation(x.name(), data::data_expression_list()));
-    }
-  };
+  /// \brief Enter propositional_variable node
+  /// \param e A term
+  /// \param X A propositional variable
+  void enter(const boolean_variable& x)
+  {
+    push(pbes_system::propositional_variable_instantiation(x.name(), data::data_expression_list()));
+  }
+};
 
 } // namespace detail
 

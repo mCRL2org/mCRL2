@@ -16,9 +16,11 @@
 #include "mcrl2/fdr/name.h"
 #include "mcrl2/fdr/type_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated vartype expression class declarations ---//
 /// \brief class vartype_expression
@@ -84,23 +86,23 @@ class branch: public vartype_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a simplebranch expression
-    /// \param t A term
-    /// \return True if it is a simplebranch expression
-    inline
-    bool is_simplebranch(const vartype_expression& t)
-    {
-      return fdr::detail::gsIsSimpleBranch(t);
-    }
+/// \brief Test for a simplebranch expression
+/// \param t A term
+/// \return True if it is a simplebranch expression
+inline
+bool is_simplebranch(const vartype_expression& t)
+{
+  return fdr::detail::gsIsSimpleBranch(t);
+}
 
-    /// \brief Test for a branch expression
-    /// \param t A term
-    /// \return True if it is a branch expression
-    inline
-    bool is_branch(const vartype_expression& t)
-    {
-      return fdr::detail::gsIsBranch(t);
-    }
+/// \brief Test for a branch expression
+/// \param t A term
+/// \return True if it is a branch expression
+inline
+bool is_branch(const vartype_expression& t)
+{
+  return fdr::detail::gsIsBranch(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

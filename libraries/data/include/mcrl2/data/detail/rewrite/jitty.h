@@ -14,47 +14,50 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
 class RewriterJitty: public Rewriter
 {
-	public:
-		RewriterJitty(const data_specification &DataSpec);
-		~RewriterJitty();
+  public:
+    RewriterJitty(const data_specification& DataSpec);
+    ~RewriterJitty();
 
-		RewriteStrategy getStrategy();
+    RewriteStrategy getStrategy();
 
-		ATermAppl rewrite(ATermAppl Term);
+    ATermAppl rewrite(ATermAppl Term);
 
-		ATerm toRewriteFormat(ATermAppl Term);
-		ATermAppl fromRewriteFormat(ATerm Term);
-		ATerm rewriteInternal(ATerm Term);
+    ATerm toRewriteFormat(ATermAppl Term);
+    ATermAppl fromRewriteFormat(ATerm Term);
+    ATerm rewriteInternal(ATerm Term);
 
-		bool addRewriteRule(ATermAppl Rule);
-		bool removeRewriteRule(ATermAppl Rule);
+    bool addRewriteRule(ATermAppl Rule);
+    bool removeRewriteRule(ATermAppl Rule);
 
-	private:
-		unsigned int num_opids;
-		size_t max_vars;
-		bool need_rebuild;
+  private:
+    unsigned int num_opids;
+    size_t max_vars;
+    bool need_rebuild;
 
-		ATermAppl jitty_true;
+    ATermAppl jitty_true;
 
-		ATermTable term2int;
-		ATermAppl *int2term;
-		ATermTable jitty_eqns;
-		ATermList *jitty_strat;
+    ATermTable term2int;
+    ATermAppl* int2term;
+    ATermTable jitty_eqns;
+    ATermList* jitty_strat;
 
-		ATermAppl rewrite_aux(ATermAppl Term);
+    ATermAppl rewrite_aux(ATermAppl Term);
 
-		ATerm OpId2Int(ATermAppl Term, bool add_opids);
-		ATermAppl toInner(ATermAppl Term, bool add_opids);
-		ATermAppl fromInner(ATermAppl Term);
+    ATerm OpId2Int(ATermAppl Term, bool add_opids);
+    ATermAppl toInner(ATermAppl Term, bool add_opids);
+    ATermAppl fromInner(ATermAppl Term);
 };
-    }
-  }
+}
+}
 }
 
 #endif

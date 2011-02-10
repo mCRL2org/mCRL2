@@ -1,4 +1,4 @@
-// Author(s): Frank Stappers 
+// Author(s): Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -31,51 +31,52 @@
 #include <wx/fdrepdlg.h>
 
 // Define main frame
-class MainFrame: public wxFrame {
+class MainFrame: public wxFrame
+{
 
-public:
-	MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size, mcrl2::data::rewriter::strategy rewrite_strategy);
-	~MainFrame();
-	void OnQuit(wxCommandEvent& /*event*/) ;
-	void OnOpenFile(wxCommandEvent& /*event*/) ;
-  void LoadFile(wxString filename);
-  void OnSaveFile(wxCommandEvent& /*event*/);
-  void OnSaveFileAs(wxCommandEvent& /*event*/);
-  void OnToggleOutputPanel(wxCommandEvent& /*event*/);
-  void OnToggleOptionsPanel(wxCommandEvent& /*event*/);
-  void OnClosePane(wxAuiManagerEvent& event );
-  void OnResetLayout(wxCommandEvent& /*event*/);
-  void OnEdit (wxCommandEvent &event);
-  void UpdateEdtFocus(wxCommandEvent& event);
-  void UpdateTxtFocus(wxCommandEvent& event);
-  void SetStatus(wxCommandEvent& event);
-  void OnNewFile(wxCommandEvent& /*event*/);
-  void OnEvaluate(wxCommandEvent& e);
-  void OnTypeCheck(wxCommandEvent& e);
-  void OnWrapmode(wxCommandEvent& /*event*/);
-  void OnOpenFind(wxCommandEvent& /*event*/);
-  void UpdateEditMenu();
-private:
-  void OnFindClose(wxFindDialogEvent& /* event */);
-  void OnFind(wxFindDialogEvent& event);
+  public:
+    MainFrame(const wxString& title, const wxPoint& pos, const wxSize& size, mcrl2::data::rewriter::strategy rewrite_strategy);
+    ~MainFrame();
+    void OnQuit(wxCommandEvent& /*event*/) ;
+    void OnOpenFile(wxCommandEvent& /*event*/) ;
+    void LoadFile(wxString filename);
+    void OnSaveFile(wxCommandEvent& /*event*/);
+    void OnSaveFileAs(wxCommandEvent& /*event*/);
+    void OnToggleOutputPanel(wxCommandEvent& /*event*/);
+    void OnToggleOptionsPanel(wxCommandEvent& /*event*/);
+    void OnClosePane(wxAuiManagerEvent& event);
+    void OnResetLayout(wxCommandEvent& /*event*/);
+    void OnEdit(wxCommandEvent& event);
+    void UpdateEdtFocus(wxCommandEvent& event);
+    void UpdateTxtFocus(wxCommandEvent& event);
+    void SetStatus(wxCommandEvent& event);
+    void OnNewFile(wxCommandEvent& /*event*/);
+    void OnEvaluate(wxCommandEvent& e);
+    void OnTypeCheck(wxCommandEvent& e);
+    void OnWrapmode(wxCommandEvent& /*event*/);
+    void OnOpenFind(wxCommandEvent& /*event*/);
+    void UpdateEditMenu();
+  private:
+    void OnFindClose(wxFindDialogEvent& /* event */);
+    void OnFind(wxFindDialogEvent& event);
 
-	wxMenu *m_PanelMenu;
-  wxMenu *editMenu;
-  wxMenu *viewMenu;
-	wxAuiManager m_mgr;
-	wxString m_default_perspective;
-  xEditor *editor;
-  Options *options;
-  outputpanel *output;
-  xStcEditor *focussed_editor;
-  myTextControl *focussed_txtCtrl;
+    wxMenu* m_PanelMenu;
+    wxMenu* editMenu;
+    wxMenu* viewMenu;
+    wxAuiManager m_mgr;
+    wxString m_default_perspective;
+    xEditor* editor;
+    Options* options;
+    outputpanel* output;
+    xStcEditor* focussed_editor;
+    myTextControl* focussed_txtCtrl;
 
-  xStcEditor *focussed_editor_for_find;
+    xStcEditor* focussed_editor_for_find;
 
-  wxFindReplaceData findData;
-  wxFindReplaceDialog *m_dlgReplace;
+    wxFindReplaceData findData;
+    wxFindReplaceDialog* m_dlgReplace;
 
-  DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };
 
 #endif /* MCRL2XI_MAINFRAME_H_ */

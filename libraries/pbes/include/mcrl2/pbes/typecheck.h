@@ -15,28 +15,30 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-    /** \brief     Type check a parsed mCRL2 pbes specification.
-     *  Throws an exception if something went wrong.
-     *  \param[in] pbes_spec A process specification  that has not been type checked.
-     *  \post      pbes_spec is type checked.
-     **/
+/** \brief     Type check a parsed mCRL2 pbes specification.
+ *  Throws an exception if something went wrong.
+ *  \param[in] pbes_spec A process specification  that has not been type checked.
+ *  \post      pbes_spec is type checked.
+ **/
 
-  template <typename Container>
-    void type_check(pbes<Container>& pbes_spec)
-    {
-      // TODO: replace all this nonsense code by a proper type check implementation
-      ATermAppl t = pbes_to_aterm(pbes_spec);
-      t = core::type_check_pbes_spec(t);
-      if (!t)
-      {
-        throw mcrl2::runtime_error("could not type check " + core::pp(t));
-      }
-      pbes_spec = pbes<Container>(t,true);
-    }
+template <typename Container>
+void type_check(pbes<Container>& pbes_spec)
+{
+  // TODO: replace all this nonsense code by a proper type check implementation
+  ATermAppl t = pbes_to_aterm(pbes_spec);
+  t = core::type_check_pbes_spec(t);
+  if (!t)
+  {
+    throw mcrl2::runtime_error("could not type check " + core::pp(t));
+  }
+  pbes_spec = pbes<Container>(t,true);
+}
 
 } // namespace pbes_system
 

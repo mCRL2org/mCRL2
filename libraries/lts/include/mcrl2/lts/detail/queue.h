@@ -18,132 +18,135 @@
 
 namespace mcrl2
 {
-  namespace lts
-  {
+namespace lts
+{
 
-    class queue
+class queue
+{
+  private:
+    atermpp::deque <ATerm> queue_get;
+    atermpp::deque <ATerm> queue_put;
+    size_t queue_size_max;        // This is the maximal allowed size of a queue
+    size_t queue_put_count_extra; // This represents the number of elements that
+    // did not fit in the queue.
+    bool queue_size_fixed;
+
+    ATerm add_to_full_queue(ATerm state)
     {
-      private:
-        atermpp::deque <ATerm> queue_get;
-        atermpp::deque <ATerm> queue_put;
-        size_t queue_size_max;        // This is the maximal allowed size of a queue
-        size_t queue_put_count_extra; // This represents the number of elements that
-                                             // did not fit in the queue.
-        bool queue_size_fixed;
+      /* We wish that every state has equal chance of being in the queue.
+       * Let N be the size of the queue and M the number of states from which
+       * we can choose. (Note that N <= M; otherwise every state is simply in
+       * the queue. We show that addition of state i, with N < i <= M, should
+       * be done with chance N/i and at random in the queue. With induction
+       * on the difference between M-N we show that doing so leads to a
+       * uniform distribution (i.e. every state has chance N/M of being in the
+       * queue):
+       *
+       * M-N = 0:   Trivial.
+       * M-N = k+1: We added the last state, M, with probability N/M, so we
+       *            need only consider the other states. Before adding state M
+       *            they are in the queue with probability N/(M-1) (by
+       *            induction) and if the last state is added, they are still
+       *            in the queue afterwards with probability 1-1/N. So:
+       *
+       *              N/(M-1) ( N/M ( 1 - 1/N ) + ( 1 - N/M ) )
+       *            =
+       *              N/(M-1) ( N/M (N-1)/N + (M-N)/M )
+       *            =
+       *              N/(M-1) ( (N-1)/M + (M-N)/M )
+       *            =
+       *              N/(M-1) (M-1)/M
+       *            =
+       *              N/M
+       *
+       *
+       * Here we have that N = queue_size and
+       * i = queue_put_count + queue_put_count_extra.
+       */
 
-        ATerm add_to_full_queue(ATerm state)
-        {
-          /* We wish that every state has equal chance of being in the queue.
-           * Let N be the size of the queue and M the number of states from which
-           * we can choose. (Note that N <= M; otherwise every state is simply in
-           * the queue. We show that addition of state i, with N < i <= M, should
-           * be done with chance N/i and at random in the queue. With induction
-           * on the difference between M-N we show that doing so leads to a
-           * uniform distribution (i.e. every state has chance N/M of being in the
-           * queue):
-           *
-           * M-N = 0:   Trivial.
-           * M-N = k+1: We added the last state, M, with probability N/M, so we
-           *            need only consider the other states. Before adding state M
-           *            they are in the queue with probability N/(M-1) (by
-           *            induction) and if the last state is added, they are still
-           *            in the queue afterwards with probability 1-1/N. So:
-           *
-           *              N/(M-1) ( N/M ( 1 - 1/N ) + ( 1 - N/M ) )
-           *            =
-           *              N/(M-1) ( N/M (N-1)/N + (M-N)/M )
-           *            =
-           *              N/(M-1) ( (N-1)/M + (M-N)/M )
-           *            =
-           *              N/(M-1) (M-1)/M
-           *            =
-           *              N/M
-           *
-           *
-           * Here we have that N = queue_size and
-           * i = queue_put_count + queue_put_count_extra.
-           */
+      assert(queue_size_max==queue_put.size());
+      queue_put_count_extra++;
+      if ((rand() % (queue_put.size() + queue_put_count_extra)) < queue_put.size())
+      {
+        size_t pos = rand() % queue_put.size();
+        ATerm old_state = queue_put[pos];
+        queue_put[pos] = state;
+        return old_state;
+      }
+      return state;
+    }
 
-          assert(queue_size_max==queue_put.size());
-          queue_put_count_extra++;
-          if ((rand() % (queue_put.size() + queue_put_count_extra)) < queue_put.size())
-          {
-            size_t pos = rand() % queue_put.size();
-            ATerm old_state = queue_put[pos];
-            queue_put[pos] = state;
-            return old_state;
-          }
-          return state;
-        }
+  public:
+    queue() :
+      queue_get(), queue_put(),
+      queue_size_max(UINT_MAX),
+      queue_put_count_extra(0),
+      queue_size_fixed(false)
+    {
+    }
 
-      public:
-        queue() :
-          queue_get(), queue_put(), 
-          queue_size_max(UINT_MAX), 
-          queue_put_count_extra(0), 
-          queue_size_fixed(false)
-        {
-        }
+    ~queue()
+    {
+    }
 
-        ~queue()
-        {
-        }
+    size_t max_size() const
+    {
+      return queue_size_max;
+    }
 
-        size_t max_size() const
-        {
-          return queue_size_max;
-        }
+    void set_max_size(size_t max_size)
+    {
+      queue_size_max = max_size;
+      queue_size_fixed=true;
+      if (queue_put.size() > queue_size_max)
+      {
+        queue_put.resize(queue_size_max);
+        std::cerr << "Warning: resizing put queue loses elements" << std::endl;
+      }
+      if (queue_get.size() > queue_size_max)
+      {
+        queue_get.resize(queue_size_max);
+        std::cerr << "Warning: resizing get queue loses elements" << std::endl;
+      }
+    }
 
-        void set_max_size(size_t max_size)
-        {
-          queue_size_max = max_size;
-          queue_size_fixed=true;
-          if (queue_put.size() > queue_size_max)
-          { queue_put.resize(queue_size_max);
-            std::cerr << "Warning: resizing put queue loses elements" << std::endl;
-          }
-          if (queue_get.size() > queue_size_max)
-          { queue_get.resize(queue_size_max);
-            std::cerr << "Warning: resizing get queue loses elements" << std::endl;
-          }
-        }
+    // Queue
+    ATerm add_to_queue(ATerm state)
+    {
+      if ((queue_size_fixed) && queue_put.size()>=queue_size_max)
+      {
+        assert(queue_put.size()==queue_size_max);
+        return add_to_full_queue(state);
+      }
 
-        // Queue
-        ATerm add_to_queue(ATerm state)
-        {
-          if ((queue_size_fixed) && queue_put.size()>=queue_size_max)
-          { assert(queue_put.size()==queue_size_max);
-            return add_to_full_queue(state);
-          }
+      queue_put.push_back(state);
 
-          queue_put.push_back(state);
+      return NULL;
+    }
 
-          return NULL;
-        }
+    ATerm get_from_queue()
+    {
+      if (queue_get.size()==0)
+      {
+        return NULL;
+      }
+      else
+      {
+        ATerm result=queue_get.front();
+        queue_get.pop_front();
+        return result;
+      }
+    }
 
-        ATerm get_from_queue()
-        {
-          if (queue_get.size()==0)
-          {
-            return NULL;
-          }
-          else
-          {
-            ATerm result=queue_get.front();
-            queue_get.pop_front();
-            return result;
-          }
-        }
+    void
+    swap_queues()
+    {
+      queue_get.swap(queue_put);
+      queue_put_count_extra = 0;
+    }
+};
 
-        void
-        swap_queues()
-        {
-          queue_get.swap(queue_put);
-          queue_put_count_extra = 0;
-        }
-    };
-
-  }
+}
 
 }
 

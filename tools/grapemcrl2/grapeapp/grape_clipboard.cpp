@@ -14,28 +14,29 @@
 #include "grape_frame.h"
 #include "specification.h"
 
-namespace grape {
+namespace grape
+{
 
 using namespace grape::grapeapp;
 using namespace grape::libgrape;
 
-grape_clipboard::grape_clipboard( grape_frame* p_main_frame )
+grape_clipboard::grape_clipboard(grape_frame* p_main_frame)
 {
   m_main_frame = p_main_frame;
   m_objects.Empty();
 }
 
-grape_clipboard::~grape_clipboard( void )
+grape_clipboard::~grape_clipboard(void)
 {
   m_objects.Clear();
 }
 
-void grape_clipboard::add( libgrape::arr_object_ptr p_objects )
+void grape_clipboard::add(libgrape::arr_object_ptr p_objects)
 {
   m_objects = p_objects;
 }
 
-arr_object_ptr grape_clipboard::get( void )
+arr_object_ptr grape_clipboard::get(void)
 {
   return m_objects;
 }

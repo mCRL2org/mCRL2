@@ -291,14 +291,14 @@ void where_declaration_test()
   basic_sort s("S");
   variable x("x", s);
   variable y("y", s);
-  
+
   assignment xy(x,y);
   assignment_vector xyl(atermpp::make_vector(xy));
   boost::iterator_range<assignment_vector::const_iterator> xy_range(xyl);
   where_clause wxy(x, xy_range);
   BOOST_CHECK(wxy.body() == x);
   BOOST_CHECK(wxy.declarations() == xy_range);
-  
+
   data_expression wxy_e(wxy);
   where_clause wxy_e_(wxy_e);
   BOOST_CHECK(wxy_e_ == wxy);

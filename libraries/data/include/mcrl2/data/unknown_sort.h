@@ -15,9 +15,11 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class unknown_sort ---//
 /// \brief Unknown sort expression
@@ -39,7 +41,7 @@ class unknown_sort: public sort_expression
 };
 //--- end generated class unknown_sort ---//
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

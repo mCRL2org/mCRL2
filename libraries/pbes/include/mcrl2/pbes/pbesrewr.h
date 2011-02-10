@@ -15,39 +15,41 @@
 #include <algorithm>
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-  /// \cond INTERNAL_DOCS
-  template <typename PbesRewriter>
-  struct rewrite_equation
+/// \cond INTERNAL_DOCS
+template <typename PbesRewriter>
+struct rewrite_equation
+{
+  PbesRewriter& pbesr;
+
+  rewrite_equation(PbesRewriter& r)
+    : pbesr(r)
+  {}
+
+  /// \brief Applies a rewriter to a PBES equation
+  /// \param eq A PBES equation
+  /// \return The rewritten PBES equation
+  pbes_equation operator()(const pbes_equation& eq)
   {
-    PbesRewriter& pbesr;
-
-    rewrite_equation(PbesRewriter& r)
-      : pbesr(r)
-    {}
-
-    /// \brief Applies a rewriter to a PBES equation
-    /// \param eq A PBES equation
-    /// \return The rewritten PBES equation
-    pbes_equation operator()(const pbes_equation& eq)
-    {
-      return pbes_equation(eq.symbol(), eq.variable(), pbesr(eq.formula()));
-    }
-  };
-  /// \endcond
-
-  /// \brief Applies a rewriter to a PBES.
-  /// \param p A PBES
-  /// \param pbesr A PBES rewriter
-  /// \return The PBES obtained from \p p by applying the rewriter on all pbes expressions in \p p
-  template <typename Container, typename PbesRewriter>
-  void pbesrewr(pbes<Container>& p, PbesRewriter pbesr)
-  {
-    std::transform(p.equations().begin(), p.equations().end(), p.equations().begin(), rewrite_equation<PbesRewriter>(pbesr));
+    return pbes_equation(eq.symbol(), eq.variable(), pbesr(eq.formula()));
   }
+};
+/// \endcond
+
+/// \brief Applies a rewriter to a PBES.
+/// \param p A PBES
+/// \param pbesr A PBES rewriter
+/// \return The PBES obtained from \p p by applying the rewriter on all pbes expressions in \p p
+template <typename Container, typename PbesRewriter>
+void pbesrewr(pbes<Container>& p, PbesRewriter pbesr)
+{
+  std::transform(p.equations().begin(), p.equations().end(), p.equations().begin(), rewrite_equation<PbesRewriter>(pbesr));
+}
 
 } // namespace pbes_system
 

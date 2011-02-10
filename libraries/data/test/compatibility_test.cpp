@@ -33,12 +33,13 @@ void compatibility_test()
   );
 
   atermpp::aterm_appl data_spec_aterm = mcrl2::core::parse_data_spec(data_stream);
-  if (data_spec_aterm == 0) {
+  if (data_spec_aterm == 0)
+  {
     throw mcrl2::runtime_error("Error while parsing data specification");
   }
   data::data_specification data_spec(data_spec_aterm);
   data::type_check(data_spec);
-  
+
   atermpp::aterm_appl data_spec_aterm_new =
     mcrl2::data::detail::data_specification_to_aterm_data_spec(
       data_spec

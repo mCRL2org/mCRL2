@@ -21,59 +21,63 @@
 #include "mcrl2/modal_formula/translate_user_notation.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace state_formulas {
+namespace state_formulas
+{
 
-  /// \brief Translates regular formulas appearing in f into action formulas.
-  /// \param f A state formula
-  inline
-  void translate_regular_formula(state_formula& f)
+/// \brief Translates regular formulas appearing in f into action formulas.
+/// \param f A state formula
+inline
+void translate_regular_formula(state_formula& f)
+{
+  ATermAppl result = core::translate_reg_frms(f);
+  if (result == NULL)
   {
-    ATermAppl result = core::translate_reg_frms(f);
-    if (result == NULL)
-    {
-      throw mcrl2::runtime_error("formula translation error");
-    }
-    f = state_formula(result);
+    throw mcrl2::runtime_error("formula translation error");
   }
+  f = state_formula(result);
+}
 
-  /// \brief Parses a state formula from an input stream
-  // spec may be updated as the data implementation of the state formula
-  // may cause internal names to change.
-  /// \param formula_stream A stream from which can be read
-  /// \param spec A linear process specification
-  /// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous
-  /// \return The converted modal formula
-  inline
-  state_formula parse_state_formula(std::istream& from, lps::specification& spec, bool check_monotonicity = true)
+/// \brief Parses a state formula from an input stream
+// spec may be updated as the data implementation of the state formula
+// may cause internal names to change.
+/// \param formula_stream A stream from which can be read
+/// \param spec A linear process specification
+/// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous
+/// \return The converted modal formula
+inline
+state_formula parse_state_formula(std::istream& from, lps::specification& spec, bool check_monotonicity = true)
+{
+  ATermAppl result = core::parse_state_frm(from);
+  if (result == NULL)
   {
-    ATermAppl result = core::parse_state_frm(from);
-    if (result == NULL)
-      throw mcrl2::runtime_error("parse error in parse_state_frm()");
-    state_formula f = atermpp::aterm_appl(result);
-    type_check(f, spec, check_monotonicity);
-    translate_regular_formula(f);
-
-    spec.data().add_context_sorts(state_formulas::find_sort_expressions((f)));
-    f = state_formulas::translate_user_notation(f);
-    f = state_formulas::normalize_sorts(f, spec.data());
-      
-    return f;
+    throw mcrl2::runtime_error("parse error in parse_state_frm()");
   }
+  state_formula f = atermpp::aterm_appl(result);
+  type_check(f, spec, check_monotonicity);
+  translate_regular_formula(f);
 
-  /// \brief Parses a state formula from text
-  // spec may be updated as the data implementation of the state formula
-  // may cause internal names to change.
-  /// \param formula_text A string
-  /// \param spec A linear process specification
-  /// \return The converted modal formula
-  inline
-  state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, bool check_monotonicity = true)
-  {
-    std::stringstream formula_stream(formula_text);
-    return parse_state_formula(formula_stream, spec, check_monotonicity);
-  }
+  spec.data().add_context_sorts(state_formulas::find_sort_expressions((f)));
+  f = state_formulas::translate_user_notation(f);
+  f = state_formulas::normalize_sorts(f, spec.data());
+
+  return f;
+}
+
+/// \brief Parses a state formula from text
+// spec may be updated as the data implementation of the state formula
+// may cause internal names to change.
+/// \param formula_text A string
+/// \param spec A linear process specification
+/// \return The converted modal formula
+inline
+state_formula parse_state_formula(const std::string& formula_text, lps::specification& spec, bool check_monotonicity = true)
+{
+  std::stringstream formula_stream(formula_text);
+  return parse_state_formula(formula_stream, spec, check_monotonicity);
+}
 
 } // namespace state_formulas
 

@@ -14,25 +14,25 @@
 
 namespace MathUtils
 {
-  int round_to_int(float f)
+int round_to_int(float f)
+{
+  if (f >= 0.0f)
   {
-    if (f >= 0.0f)
-    {
-      return static_cast< int > (f + 0.5f);
-    }
-    else
-    {
-      return static_cast< int > (f - 0.5f);
-    }
+    return static_cast< int >(f + 0.5f);
   }
+  else
+  {
+    return static_cast< int >(f - 0.5f);
+  }
+}
 
-  float deg_to_rad(float deg)
-  {
-    return deg * static_cast<float>(PI) / 180.0f;
-  }
+float deg_to_rad(float deg)
+{
+  return deg * static_cast<float>(PI) / 180.0f;
+}
 
-  float rad_to_deg(float rad)
-  {
-    return rad * 180.0f / static_cast<float>(PI);
-  }
+float rad_to_deg(float rad)
+{
+  return rad * 180.0f / static_cast<float>(PI);
+}
 }

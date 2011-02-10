@@ -37,19 +37,25 @@
 
 class FocusListLiftingStrategy : public LiftingStrategy
 {
-public:
-    FocusListLiftingStrategy( const ParityGame &game,
-                              bool backward, size_t max_size );
+  public:
+    FocusListLiftingStrategy(const ParityGame& game,
+                             bool backward, size_t max_size);
     verti next(verti prev_vertex, bool prev_lifted);
     size_t memory_use() const;
-    bool backward() const { return lls_.backward()!=0; }
-    bool max_size() const { return max_size_!=0; }
+    bool backward() const
+    {
+      return lls_.backward()!=0;
+    }
+    bool max_size() const
+    {
+      return max_size_!=0;
+    }
 
-protected:
+  protected:
     verti pass1(verti prev_vertex, bool prev_lifted);
     verti pass2(verti prev_vertex, bool prev_lifted);
 
-private:
+  private:
     typedef std::list<std::pair<verti, unsigned> > focus_list;
 
     const size_t max_size_;             //!< maximum allowed focus list size
@@ -69,14 +75,14 @@ private:
 
 class FocusListLiftingStrategyFactory : public LiftingStrategyFactory
 {
-public:
+  public:
     FocusListLiftingStrategyFactory(bool backward, double ratio)
-        : backward_(backward), ratio_(ratio > 0 ? ratio : 0.1) { };
+      : backward_(backward), ratio_(ratio > 0 ? ratio : 0.1) { };
 
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm );
+    LiftingStrategy* create(const ParityGame& game,
+                            const SmallProgressMeasures& spm);
 
-private:
+  private:
     const bool      backward_;
     const double    ratio_;
 };

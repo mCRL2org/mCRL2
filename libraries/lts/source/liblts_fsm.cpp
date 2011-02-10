@@ -23,7 +23,7 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
 
 
-static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
+static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
 {
   // determine number of state parameters
   size_t num_params;
@@ -31,13 +31,13 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
 
   // print parameters with used values
   gsVerboseMsg("writing parameter table...\n");
-  for(size_t i=0; i<num_params; i++)
+  for (size_t i=0; i<num_params; i++)
   {
 
-    const std::vector < std::string > vals = l.state_element_values(i); 
+    const std::vector < std::string > vals = l.state_element_values(i);
     os << l.process_parameter(i).first << "(" << vals.size() << ") " << l.process_parameter(i).second << " ";
 
-    for(std::vector < std::string >::const_iterator j=vals.begin(); j!=vals.end(); ++j)
+    for (std::vector < std::string >::const_iterator j=vals.begin(); j!=vals.end(); ++j)
     {
       os << " \"" << *j << "\"";
     }
@@ -47,31 +47,31 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
   // print states
   gsVerboseMsg("writing states...\n");
   os << "---" << std::endl;
-  for(size_t i=0; i<l.num_states(); i++)
+  for (size_t i=0; i<l.num_states(); i++)
   {
     size_t idx = i;
     // make sure that the initial state is first
     if (i == 0)
     {
       idx = l.initial_state();
-    } 
+    }
     else if (i == l.initial_state())
     {
       idx = 0;
     }
-    
+
     if (l.has_state_info())
-    { 
+    {
       const state_label_fsm state_pars=l.state_label(idx);
 
-      for(size_t j=0; j<state_pars.size() ; j++)
+      for (size_t j=0; j<state_pars.size() ; j++)
       {
-        if (j > 0) 
+        if (j > 0)
         {
           os << " ";
         }
         os << state_pars[j];
-  
+
       }
       os << std::endl;
     }
@@ -84,18 +84,20 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
   {
     transition::size_type from = t.front().from();
     // correct state numbering
-    if ( from == 0 )
+    if (from == 0)
     {
       from = l.initial_state();
-    } else if ( from == l.initial_state() )
+    }
+    else if (from == l.initial_state())
     {
       from = 0;
     }
     transition::size_type to = t.front().to();
-    if ( to == 0 )
+    if (to == 0)
     {
       to = l.initial_state();
-    } else if ( to == l.initial_state() )
+    }
+    else if (to == l.initial_state())
     {
       to = 0;
     }
@@ -106,37 +108,39 @@ static void write_to_fsm(std::ostream &os, const lts_fsm_t &l)
   }
 }
 
-void mcrl2::lts::lts_fsm_t::load(const std::string &filename)
+void mcrl2::lts::lts_fsm_t::load(const std::string& filename)
 {
   if (filename.empty())
-  { 
+  {
     if (!parse_fsm(std::cin,*this))
-    { throw mcrl2::runtime_error("Error parsing .fsm file from standard input.");
+    {
+      throw mcrl2::runtime_error("Error parsing .fsm file from standard input.");
     }
   }
-  else 
-  { 
+  else
+  {
     std::ifstream is(filename.c_str());
 
-    if ( !is.is_open() )
+    if (!is.is_open())
     {
       throw mcrl2::runtime_error("Cannot open .fsm file " + filename + ".");
     }
 
 
     if (!parse_fsm(is,*this))
-    { throw mcrl2::runtime_error("Error parsing .fsm file");
+    {
+      throw mcrl2::runtime_error("Error parsing .fsm file");
     }
     is.close();
   }
   if (num_states()==0)
-  { 
+  {
     add_state();
   }
   set_initial_state(0);
 }
 
-void mcrl2::lts::lts_fsm_t::save(const std::string &filename) const
+void mcrl2::lts::lts_fsm_t::save(const std::string& filename) const
 {
   if (filename=="")
   {
@@ -146,7 +150,7 @@ void mcrl2::lts::lts_fsm_t::save(const std::string &filename) const
   {
     std::ofstream os(filename.c_str());
 
-    if ( !os.is_open() )
+    if (!os.is_open())
     {
       throw mcrl2::runtime_error("Cannot create .fsm file '" + filename + ".");
       return;

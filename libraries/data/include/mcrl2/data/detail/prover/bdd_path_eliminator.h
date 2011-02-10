@@ -24,74 +24,85 @@
 #include "mcrl2/data/detail/prover/bdd_manipulator.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
-      /// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers.
-      enum SMT_Solver_Type {
-        solver_type_cvc,
-        solver_type_cvc_fast
-      };
+/// \brief The enumaration type SMT_Solver_Type enumerates all available SMT solvers.
+enum SMT_Solver_Type
+{
+  solver_type_cvc,
+  solver_type_cvc_fast
+};
 
-      /// \brief standard conversion from stream to solver type
-      inline
-      std::istream& operator>>(std::istream& is, mcrl2::data::detail::SMT_Solver_Type& s) {
-        char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
+/// \brief standard conversion from stream to solver type
+inline
+std::istream& operator>>(std::istream& is, mcrl2::data::detail::SMT_Solver_Type& s)
+{
+  char solver_type[10] = { 0, 0, 0, 0, 0, 0, 0, 0, 0 };
 
-        using namespace mcrl2::data::detail;
+  using namespace mcrl2::data::detail;
 
-        /// no standard conversion available function, so implement on-the-spot
-        is.readsome(solver_type, 10);
+  /// no standard conversion available function, so implement on-the-spot
+  is.readsome(solver_type, 10);
 
-        s = solver_type_cvc;
+  s = solver_type_cvc;
 
-        if (strncmp(solver_type, "cvc", 3) == 0) {
-          if (solver_type[3] != '\0') {
-            is.setstate(std::ios_base::failbit);
-          }
-        }
-        else {
-          is.setstate(std::ios_base::failbit);
-        }
+  if (strncmp(solver_type, "cvc", 3) == 0)
+  {
+    if (solver_type[3] != '\0')
+    {
+      is.setstate(std::ios_base::failbit);
+    }
+  }
+  else
+  {
+    is.setstate(std::ios_base::failbit);
+  }
 
-        return is;
-      }
+  return is;
+}
 
-      /// \brief standard conversion from solvert type to stream
-      inline std::ostream& operator<<(std::ostream& os, mcrl2::data::detail::SMT_Solver_Type s) {
-        static char const* solvers[] = {
-          "cvc",
-        };
+/// \brief standard conversion from solvert type to stream
+inline std::ostream& operator<<(std::ostream& os, mcrl2::data::detail::SMT_Solver_Type s)
+{
+  static char const* solvers[] =
+  {
+    "cvc",
+  };
 
-        os << solvers[s];
+  os << solvers[s];
 
-        return os;
-      }
+  return os;
+}
 
-  /** \brief Base class for eliminating inconsistent paths from BDDs.
-   *
-   * \detail
-   * The class BDD_Path_Eliminator is a base class for classes that
-   * eliminate inconsistent paths from BDDs. The class
-   * BDD_Path_Eliminator inherits from the class BDD_Simplifier. It uses
-   * an SMT solver to eliminate inconsistent paths from BDDs. The
-   * parameter a_solver_type of the constructor
-   * BDD_Path_Eliminator::BDD_Path_Eliminator is used to indicate which
-   * SMT solver should be used for this task. A path in a BDD is
-   * constructed by selecting a set of guards as follows: starting at
-   * the root node, one of the two edges at each guard is followed until
-   * a leaf is reached. Each time the true-edge is chosen, the guard is
-   * added to the set. Each time the false-edge is chosen, the negation
-   * of the guard is added to the set. If the conjunction of all
-   * elements in this set is a contradiction, the path
-   * is inconsistent.
+/** \brief Base class for eliminating inconsistent paths from BDDs.
+ *
+ * \detail
+ * The class BDD_Path_Eliminator is a base class for classes that
+ * eliminate inconsistent paths from BDDs. The class
+ * BDD_Path_Eliminator inherits from the class BDD_Simplifier. It uses
+ * an SMT solver to eliminate inconsistent paths from BDDs. The
+ * parameter a_solver_type of the constructor
+ * BDD_Path_Eliminator::BDD_Path_Eliminator is used to indicate which
+ * SMT solver should be used for this task. A path in a BDD is
+ * constructed by selecting a set of guards as follows: starting at
+ * the root node, one of the two edges at each guard is followed until
+ * a leaf is reached. Each time the true-edge is chosen, the guard is
+ * added to the set. Each time the false-edge is chosen, the negation
+ * of the guard is added to the set. If the conjunction of all
+ * elements in this set is a contradiction, the path
+ * is inconsistent.
 
-   * The method BDD_Path_Eliminator::simplify receives a BDD as
-   * parameter a_bdd and returns the equivalent BDD from which all
-   * inconsistent paths have been removed.
-  */
-class BDD_Path_Eliminator: public BDD_Simplifier {
+ * The method BDD_Path_Eliminator::simplify receives a BDD as
+ * parameter a_bdd and returns the equivalent BDD from which all
+ * inconsistent paths have been removed.
+*/
+class BDD_Path_Eliminator: public BDD_Simplifier
+{
 
   private:
 
@@ -111,10 +122,14 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
     /// \param a_path A list of guards and negated guards, representing a path in a BDD.
     /// \param a_guard A guard or a negated guard.
     /// \param a_minimal A boolean value indicating whether or not minimal sets of possibly inconsistent guards are constructed.
-    ATermList create_condition(ATermList a_path, ATermAppl a_guard, bool a_minimal) {
-      if (!a_minimal) {
+    ATermList create_condition(ATermList a_path, ATermAppl a_guard, bool a_minimal)
+    {
+      if (!a_minimal)
+      {
         return ATinsert(a_path, (ATerm) a_guard);
-      } else {
+      }
+      else
+      {
         ATermList v_set;
         ATermList v_auxiliary_set;
         ATermList v_iterate_over_set;
@@ -124,17 +139,21 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
 
         v_set = ATmakeList1((ATerm) a_guard);
         v_auxiliary_set = ATmakeList0();
-        while (v_set != v_auxiliary_set) {
+        while (v_set != v_auxiliary_set)
+        {
           v_auxiliary_set = v_set;
           v_iterate_over_set = v_set;
-          while (!ATisEmpty(v_iterate_over_set)) {
+          while (!ATisEmpty(v_iterate_over_set))
+          {
             v_guard_from_set = core::ATAgetFirst(v_iterate_over_set);
             v_iterate_over_set = ATgetNext(v_iterate_over_set);
             v_iterate_over_path = a_path;
-            while (!ATisEmpty(v_iterate_over_path)) {
+            while (!ATisEmpty(v_iterate_over_path))
+            {
               v_guard_from_path = core::ATAgetFirst(v_iterate_over_path);
               v_iterate_over_path = ATgetNext(v_iterate_over_path);
-              if (variables_overlap(v_guard_from_set, v_guard_from_path)) {
+              if (variables_overlap(v_guard_from_set, v_guard_from_path))
+              {
                 v_set = ATinsert(v_set, (ATerm) v_guard_from_path);
                 a_path = ATremoveElement(a_path, (ATerm) v_guard_from_path);
               }
@@ -151,12 +170,14 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
     /// \param a_path A list of guards and negated guards, representing a path in a BDD.
     ATermAppl aux_simplify(ATermAppl a_bdd, ATermList a_path)
     {
-      if (f_deadline != 0 && (f_deadline - time(0)) < 0) {
+      if (f_deadline != 0 && (f_deadline - time(0)) < 0)
+      {
         core::gsDebugMsg("The time limit has passed.\n");
         return a_bdd;
       }
 
-      if (f_bdd_info.is_true(a_bdd) || f_bdd_info.is_false(a_bdd)) {
+      if (f_bdd_info.is_true(a_bdd) || f_bdd_info.is_false(a_bdd))
+      {
         return a_bdd;
       }
 
@@ -164,23 +185,29 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
       ATermAppl v_negated_guard = sort_bool::not_(data_expression(v_guard));
       ATermList v_true_condition = create_condition(a_path, v_guard, true);
       bool v_true_branch_enabled = f_smt_solver->is_satisfiable(v_true_condition);
-      if (!v_true_branch_enabled) {
+      if (!v_true_branch_enabled)
+      {
         ATermList v_false_path = ATinsert(a_path, (ATerm) v_negated_guard);
         return aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path);
-      } else {
+      }
+      else
+      {
         ATermList v_false_condition = create_condition(a_path, v_negated_guard, true);
         bool v_false_branch_enabled = f_smt_solver->is_satisfiable(v_false_condition);
-        if (!v_false_branch_enabled) {
+        if (!v_false_branch_enabled)
+        {
           ATermList v_true_path = ATinsert(a_path, (ATerm) v_guard);
           return aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path);
-        } else {
+        }
+        else
+        {
           ATermList v_true_path = ATinsert(a_path, (ATerm) v_guard);
           ATermList v_false_path = ATinsert(a_path, (ATerm) v_negated_guard);
           return f_bdd_manipulator.make_reduced_if_then_else(
-            v_guard,
-            aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path),
-            aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path)
-          );
+                   v_guard,
+                   aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path),
+                   aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path)
+                 );
         }
       }
     }
@@ -190,16 +217,21 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
     /// \param a_expression_2 An arbitrary expression.
     bool variables_overlap(ATermAppl a_expression_1, ATermAppl a_expression_2)
     {
-      if (core::detail::gsIsOpId(a_expression_1)) {
+      if (core::detail::gsIsOpId(a_expression_1))
+      {
         return false;
-      } else if (core::detail::gsIsDataVarId(a_expression_1)) {
+      }
+      else if (core::detail::gsIsDataVarId(a_expression_1))
+      {
         return core::gsOccurs((ATerm) a_expression_1, (ATerm) a_expression_2);
-      } else {
-        assert (data::is_application(a_expression_1));
+      }
+      else
+      {
+        assert(data::is_application(a_expression_1));
         data::application a = data::application(data::data_expression(a_expression_1));
         for (data_expression_list::const_iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
         {
-          if(variables_overlap(*i, a_expression_2))
+          if (variables_overlap(*i, a_expression_2))
           {
             return true;
           }
@@ -215,19 +247,25 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
     BDD_Path_Eliminator(SMT_Solver_Type a_solver_type)
     {
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
-      if (a_solver_type == solver_type_cvc) {
-        if (mcrl2::data::detail::prover::cvc_smt_solver::usable()) {
+      if (a_solver_type == solver_type_cvc)
+      {
+        if (mcrl2::data::detail::prover::cvc_smt_solver::usable())
+        {
           f_smt_solver = new mcrl2::data::detail::prover::cvc_smt_solver();
 
           return;
         }
-      } else if (a_solver_type == solver_type_cvc_fast) {
+      }
+      else if (a_solver_type == solver_type_cvc_fast)
+      {
 #ifdef HAVE_CVC
         f_smt_solver = new SMT_Solver_CVC_Fast();
 #else
         throw mcrl2::runtime_error("The fast implementation of CVC Lite is not available.");
 #endif
-      } else {
+      }
+      else
+      {
         throw mcrl2::runtime_error("An unknown SMT solver type was passed as argument.");
       }
 #else
@@ -247,8 +285,8 @@ class BDD_Path_Eliminator: public BDD_Simplifier {
     }
 };
 
-    }
-  }
+}
+}
 }
 
 #endif

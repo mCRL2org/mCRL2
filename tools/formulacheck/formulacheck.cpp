@@ -43,7 +43,8 @@ using namespace mcrl2::utilities::tools;
 /// More information about the tool and the classes used can be found in the corresponding tool manual page.
 /// \brief The class Form_Check uses an instance of the class Formula_Checker to check whether
 /// \brief or not the formula specified by m_input_filename is a tautology or a contradiction.
-class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
+class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
+{
   private:
     /// \brief The name of the file containing the data specification.
     /// \brief If this string is 0, a minimal data specification is used.
@@ -80,16 +81,20 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
       f_apply_induction = 0 < parser.options.count("induction");
       f_witness         = 0 < parser.options.count("witness");
 
-      if (parser.options.count("spec")) {
+      if (parser.options.count("spec"))
+      {
         f_spec_file_name = parser.option_argument_as< std::string >("spec");
       }
-      if (parser.options.count("print-dot")) {
+      if (parser.options.count("print-dot"))
+      {
         f_dot_file_name = parser.option_argument_as< std::string >("print-dot");
       }
-      if (parser.options.count("time-limit")) {
+      if (parser.options.count("time-limit"))
+      {
         f_time_limit = parser.option_argument_as< int >("time-limit");
       }
-      if (parser.options.count("smt-solver")) {
+      if (parser.options.count("smt-solver"))
+      {
         f_path_eliminator = true;
       }
     }
@@ -99,21 +104,21 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
       super::add_options(desc);
 
       desc.
-        add_option("spec", make_mandatory_argument("SPECFILE"),
-          "check the formula against the data types from the LPS or PBES in SPECFILE", 's').
-        add_option("counter-example",
-          "display a valuation for which the formula does not hold, in case it is neither a "
-          "contradiction nor a tautology", 'c').
-        add_option("witness",
-          "display a valuation for which the formula holds, in case it is neither a "
-          "contradiction nor a tautology", 'w').
-        add_option("print-dot", make_mandatory_argument("PREFIX"),
-          "save a .dot file of the resulting BDD if it is impossible to determine whether "
-          "the formula is a contradiction or a tautology; PREFIX will be used as prefix of "
-          "the output files", 'p').
-        add_option("time-limit", make_mandatory_argument("LIMIT"),
-          "spend at most LIMIT seconds on proving a single formula", 't').
-        add_option("induction", "apply induction on lists", 'o');
+      add_option("spec", make_mandatory_argument("SPECFILE"),
+                 "check the formula against the data types from the LPS or PBES in SPECFILE", 's').
+      add_option("counter-example",
+                 "display a valuation for which the formula does not hold, in case it is neither a "
+                 "contradiction nor a tautology", 'c').
+      add_option("witness",
+                 "display a valuation for which the formula holds, in case it is neither a "
+                 "contradiction nor a tautology", 'w').
+      add_option("print-dot", make_mandatory_argument("PREFIX"),
+                 "save a .dot file of the resulting BDD if it is impossible to determine whether "
+                 "the formula is a contradiction or a tautology; PREFIX will be used as prefix of "
+                 "the output files", 'p').
+      add_option("time-limit", make_mandatory_argument("LIMIT"),
+                 "spend at most LIMIT seconds on proving a single formula", 't').
+      add_option("induction", "apply induction on lists", 'o');
     }
 
     /// \brief Load formula from the file mentioned in infilename, if infilename
@@ -122,7 +127,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
     /// \return The formula stored in infilename
     data_expression load_formula(const std::string& infilename, data_specification& specification)
     {
-      if(infilename.empty())
+      if (infilename.empty())
       {
         return parse_data_expression(std::cin, specification);
       }
@@ -147,27 +152,29 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
     ///  LPS, PBES or data specification, the data specification of this LPS or PBES is
     ///  returned;
     ///  if infilename is empty, a minimal data specification is returned
-    data_specification load_specification(const std::string &infilename)
+    data_specification load_specification(const std::string& infilename)
     {
-      if (!infilename.empty()) 
+      if (!infilename.empty())
       {
         //load data specification from file infilename
         gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
-        try {
+        try
+        {
           lps::specification s;
           s.load(infilename);
           return s.data();
         }
-        catch(mcrl2::runtime_error&)
-        {}
+        catch (mcrl2::runtime_error&)
+          {}
 
-        try {
+        try
+        {
           mcrl2::pbes_system::pbes<> p;
           p.load(infilename);
           return p.data();
         }
-        catch(mcrl2::runtime_error&)
-        {}
+        catch (mcrl2::runtime_error&)
+          {}
 
         throw mcrl2::runtime_error("'" + infilename + "' does not contain an LPS, PBES or data specification");
       }
@@ -198,7 +205,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> > {
     {
       data_specification specification = load_specification(f_spec_file_name);
       data_expression formula = load_formula(m_input_filename, specification);
-      
+
       if (formula == data_expression())
       {
         throw mcrl2::runtime_error("no formula in input");

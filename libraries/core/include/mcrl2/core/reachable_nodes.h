@@ -18,64 +18,67 @@
 #include <iterator>
 #include <vector>
 
-namespace mcrl2 {
-  
-namespace core {
+namespace mcrl2
+{
+
+namespace core
+{
 
 /// \cond INTERNAL_DOCS
-namespace detail {
+namespace detail
+{
 
-  template <typename Graph>
-  struct reachable_nodes_recorder: public boost::default_dfs_visitor
+template <typename Graph>
+struct reachable_nodes_recorder: public boost::default_dfs_visitor
+{
+  typedef typename Graph::vertex_descriptor vertex_descriptor;
+  std::vector<size_t>& m_result;
+
+  reachable_nodes_recorder(std::vector<size_t>& result)
+    : m_result(result)
+  {}
+
+  /// \brief Is called whenever a new vertex is discovered
+  /// \param u A vertex
+  /// \param g A graph
+  void discover_vertex(vertex_descriptor u, const Graph& g)
   {
-    typedef typename Graph::vertex_descriptor vertex_descriptor;
-    std::vector<size_t>& m_result;
-  
-    reachable_nodes_recorder(std::vector<size_t>& result)
-      : m_result(result)
-    {}
-  
-    /// \brief Is called whenever a new vertex is discovered
-    /// \param u A vertex
-    /// \param g A graph
-    void discover_vertex(vertex_descriptor u, const Graph& g)
-    {
-      m_result.push_back(boost::get(boost::vertex_index, g)[u]);
-    }
-  };
-} // namespace detail
-  /// \endcond
-  
-  /// \brief Compute reachable nodes in a graph.
-  /// \param g A graph.
-  /// \param first Iterator to the first node.
-  /// \param last Iterator to the last node.
-  /// \return The indices of the nodes that are reachable from the nodes
-  /// given by the range of vertex descriptors [first, last].
-  template <typename Graph, typename Iter>
-  std::vector<size_t> reachable_nodes(const Graph& g, Iter first, Iter last)
-  {
-    typedef boost::color_traits<boost::default_color_type> Color;
-    typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
-    typedef typename boost::graph_traits<Graph>::edge_descriptor edge_descriptor;
-
-    std::vector<size_t> result;
-    detail::reachable_nodes_recorder<Graph> recorder(result);
-    std::vector<boost::default_color_type> colormap(boost::num_vertices(g), Color::white());
-
-    for (Iter i = first; i != last; ++i)
-    {
-      boost::default_color_type c = Color::white();
-      boost::depth_first_visit(g, 
-                               *i,
-                               recorder,
-                               boost::make_iterator_property_map(colormap.begin(), boost::get(boost::vertex_index, g), c)
-                              );
-    }
-
-    return result;
+    m_result.push_back(boost::get(boost::vertex_index, g)[u]);
   }
-  
+};
+} // namespace detail
+/// \endcond
+
+/// \brief Compute reachable nodes in a graph.
+/// \param g A graph.
+/// \param first Iterator to the first node.
+/// \param last Iterator to the last node.
+/// \return The indices of the nodes that are reachable from the nodes
+/// given by the range of vertex descriptors [first, last].
+template <typename Graph, typename Iter>
+std::vector<size_t> reachable_nodes(const Graph& g, Iter first, Iter last)
+{
+  typedef boost::color_traits<boost::default_color_type> Color;
+  typedef typename boost::graph_traits<Graph>::vertex_descriptor vertex_descriptor;
+  typedef typename boost::graph_traits<Graph>::edge_descriptor edge_descriptor;
+
+  std::vector<size_t> result;
+  detail::reachable_nodes_recorder<Graph> recorder(result);
+  std::vector<boost::default_color_type> colormap(boost::num_vertices(g), Color::white());
+
+  for (Iter i = first; i != last; ++i)
+  {
+    boost::default_color_type c = Color::white();
+    boost::depth_first_visit(g,
+                             *i,
+                             recorder,
+                             boost::make_iterator_property_map(colormap.begin(), boost::get(boost::vertex_index, g), c)
+                            );
+  }
+
+  return result;
+}
+
 } // namespace core
 
 } // namespace mcrl2

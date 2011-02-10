@@ -16,85 +16,88 @@
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
 #include "mcrl2/lps/substitute.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-namespace detail {
+namespace detail
+{
 
-  /// \brief Function object that checks if a summand has a false condition
-  struct is_trivial_summand
+/// \brief Function object that checks if a summand has a false condition
+struct is_trivial_summand
+{
+  bool operator()(const summand_base& s) const
   {
-    bool operator()(const summand_base& s) const
-    {
-      return s.condition() == data::sort_bool::false_();
-    }
-  };
+    return s.condition() == data::sort_bool::false_();
+  }
+};
 
-  /// \brief Function object that checks if a sort is a singleton sort.
-  /// Note that it is an approximation, meaning that in some cases it
-  /// may return false whereas in reality the answer is true.
-  struct is_singleton_sort
+/// \brief Function object that checks if a sort is a singleton sort.
+/// Note that it is an approximation, meaning that in some cases it
+/// may return false whereas in reality the answer is true.
+struct is_singleton_sort
+{
+  const data::data_specification& m_data_spec;
+
+  is_singleton_sort(const data::data_specification& data_spec)
+    : m_data_spec(data_spec)
+  {}
+
+  bool operator()(const data::sort_expression& s) const
   {
-    const data::data_specification& m_data_spec;
-
-    is_singleton_sort(const data::data_specification& data_spec)
-      : m_data_spec(data_spec)
-    {}
-
-    bool operator()(const data::sort_expression& s) const
+    data::data_specification::constructors_const_range c = m_data_spec.constructors(s);
+    if (boost::distance(c) != 1)
     {
-      data::data_specification::constructors_const_range c = m_data_spec.constructors(s);
-      if (boost::distance(c) != 1)
-      {
-        return false;
-      }
-      data::function_symbol f = *c.begin();
-      return !is_function_sort(f.sort());
+      return false;
     }
-  };
+    data::function_symbol f = *c.begin();
+    return !is_function_sort(f.sort());
+  }
+};
 
 } // namespace detail
 
-  /// \brief Rewrites an LPS data type.
-  template <typename Object, typename SetContainer>
-  void remove_parameters(Object& o, const SetContainer& to_be_removed)
-  {
-    lps::detail::lps_parameter_remover<SetContainer> r(to_be_removed);
-    r(o);
-  }
+/// \brief Rewrites an LPS data type.
+template <typename Object, typename SetContainer>
+void remove_parameters(Object& o, const SetContainer& to_be_removed)
+{
+  lps::detail::lps_parameter_remover<SetContainer> r(to_be_removed);
+  r(o);
+}
 
-  /// \brief Removes summands with condition equal to false from a linear process specification
-  /// \param spec A linear process specification
-  inline
-  void remove_trivial_summands(specification& spec)
-  {
-    action_summand_vector& v = spec.process().action_summands();
-    v.erase(std::remove_if(v.begin(), v.end(), lps::detail::is_trivial_summand()), v.end());
+/// \brief Removes summands with condition equal to false from a linear process specification
+/// \param spec A linear process specification
+inline
+void remove_trivial_summands(specification& spec)
+{
+  action_summand_vector& v = spec.process().action_summands();
+  v.erase(std::remove_if(v.begin(), v.end(), lps::detail::is_trivial_summand()), v.end());
 
-    deadlock_summand_vector& w = spec.process().deadlock_summands();
-    w.erase(std::remove_if(w.begin(), w.end(), lps::detail::is_trivial_summand()), w.end());
-  }
+  deadlock_summand_vector& w = spec.process().deadlock_summands();
+  w.erase(std::remove_if(w.begin(), w.end(), lps::detail::is_trivial_summand()), w.end());
+}
 
-  /// \brief Removes parameters with a singleton sort from a linear process specification
-  /// \param spec A linear process specification
-  inline
-  void remove_singleton_sorts(specification& spec)
+/// \brief Removes parameters with a singleton sort from a linear process specification
+/// \param spec A linear process specification
+inline
+void remove_singleton_sorts(specification& spec)
+{
+  data::mutable_associative_container_substitution<> sigma;
+  std::set<data::variable> to_be_removed;
+  const data::variable_list& p = spec.process().process_parameters();
+  for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)
   {
-    data::mutable_associative_container_substitution<> sigma;
-    std::set<data::variable> to_be_removed;
-    const data::variable_list& p = spec.process().process_parameters();
-    for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)
+    if (lps::detail::is_singleton_sort(spec.data())(i->sort()))
     {
-      if (lps::detail::is_singleton_sort(spec.data())(i->sort()))
-      {
-        sigma[*i] = *spec.data().constructors(i->sort()).begin();
-        to_be_removed.insert(*i);
-      }
+      sigma[*i] = *spec.data().constructors(i->sort()).begin();
+      to_be_removed.insert(*i);
     }
-    lps::substitute_variables(spec, sigma);
-    lps::remove_parameters(spec, to_be_removed);
   }
+  lps::substitute_variables(spec, sigma);
+  lps::remove_parameters(spec, to_be_removed);
+}
 
 } // namespace lps
 

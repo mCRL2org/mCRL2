@@ -1,4 +1,4 @@
-// Author(s): Frank Stappers 
+// Author(s): Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -20,8 +20,9 @@
 #include "mcrl2/data/rewriter.h"
 #include "subactions.h"
 
-enum {
-	OPTION_EVAL = 900,
+enum
+{
+  OPTION_EVAL = 900,
   OPTION_TC,
   OPTION_SOLVE,
   OPTION_SOLVE_ABORT,
@@ -29,29 +30,30 @@ enum {
 
 };
 
-class Options: public wxPanel {
+class Options: public wxPanel
+{
 
-public:
+  public:
 
-  Options(wxWindow *parent, wxWindowID id, xEditor *editor, outputpanel *output, mcrl2::data::rewriter::strategy rewrite_strategy);
-	void OnEval(wxCommandEvent& /*event*/);
-	void SolveExpr(wxCommandEvent& /*event*/);
-	void OnTypeCheck(wxCommandEvent& /*event*/);
-	void OnSize(wxSizeEvent& /*event*/);
-private:
+    Options(wxWindow* parent, wxWindowID id, xEditor* editor, outputpanel* output, mcrl2::data::rewriter::strategy rewrite_strategy);
+    void OnEval(wxCommandEvent& /*event*/);
+    void SolveExpr(wxCommandEvent& /*event*/);
+    void OnTypeCheck(wxCommandEvent& /*event*/);
+    void OnSize(wxSizeEvent& /*event*/);
+  private:
 //  wxTextCtrl *EvalExpr;
 //  wxPanel *data_expression_panel;
-	xEditor *p_editor;
-	outputpanel *p_output;
+    xEditor* p_editor;
+    outputpanel* p_output;
 
-	typeCheckSpec *tc;
-	evalDataExpr *ev;
-	solveDataExpr *sd;
+    typeCheckSpec* tc;
+    evalDataExpr* ev;
+    solveDataExpr* sd;
 
 
-  mcrl2::data::rewriter::strategy m_rewrite_strategy;
+    mcrl2::data::rewriter::strategy m_rewrite_strategy;
 
-DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };
 
 #endif

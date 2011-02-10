@@ -30,7 +30,7 @@ variable bool_(std::string name)
 template <typename Derived>
 struct my_builder: public add_data_variable_binding<data::data_expression_builder, Derived>
 {
-  typedef add_data_variable_binding<data::data_expression_builder, Derived> super; 
+  typedef add_data_variable_binding<data::data_expression_builder, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -51,7 +51,7 @@ struct my_builder: public add_data_variable_binding<data::data_expression_builde
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
 struct replace_free_variables_builder: public Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> >
 {
-  typedef Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> > super; 
+  typedef Binder<Builder, replace_free_variables_builder<Builder, Binder, Substitution> > super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -66,7 +66,7 @@ struct replace_free_variables_builder: public Binder<Builder, replace_free_varia
 
   template <typename VariableContainer>
   replace_free_variables_builder(Substitution sigma_, const VariableContainer& bound_variables)
-    : sigma(sigma_)   
+    : sigma(sigma_)
   {
     increase_bind_count(bound_variables);
   }
@@ -94,7 +94,7 @@ struct subst: public std::unary_function<data::variable, data::data_expression>
       return bool_("d");
     }
     return bool_("e");
-  } 
+  }
 };
 
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>

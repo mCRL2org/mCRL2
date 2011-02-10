@@ -97,7 +97,7 @@ void test_remove_parameters()
 
   // check the result
   std::string expected_result = "process_parameter_names =";
-  lps::detail::specification_property_map info(spec);  
+  lps::detail::specification_property_map info(spec);
   BOOST_CHECK(data::detail::compare_property_maps("test_remove_parameters", info, expected_result));
   core::garbage_collect();
 

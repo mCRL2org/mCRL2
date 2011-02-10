@@ -20,42 +20,47 @@
 #include "mcrl2/data/detail/prover/utilities.h"
 #include "time.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
-  /// \brief An enumerated type respresenting the answers "yes", "no" and "undefined".
-  /// The term "formula" in the following text denotes arbitrary expressions of sort Bool in the mCRL2 format.
-  ///
-  /// The Prover class is a base class for provers. Provers take formulas as input and indicate if these formulas are
-  /// tautologies or contradictions. Since provers are not necessarily complete, a prover can be unable to determine if a
-  /// formula is a tautology or a contradiction for some formulas. If this is the case, the prover will indicate this fact.
-  /// A prover uses a rewriter to rewrite parts of the formulas it manipulates. The constructor Prover::Prover initializes
-  /// the prover's rewriter with the data equations in internal mCRL2 format passed as parameter a_equations and the rewrite
-  /// strategy passed as parameter a_strategy. To limit the number of seconds spent on proving a single formula, a time
-  /// limit can be set. This time limit can be set initially by the constructor Prover::Prover and can be changed afterwards
-  /// using the method Prover::set_time_limit. If the time limit is set to 0, no time limit will be enforced.
-  ///
-  /// Once a prover is created, the formula to be proven can be set using the method Prover::set_formula. The method
-  /// Prover::set_formula takes a propositional formula in internal mCRL2 format as parameter a_formula.
-  ///
-  /// The methods Prover::is_tautology and Prover::is_contradiction can then indicate whether or not this formula is a
-  /// tautology or a contradiction. These methods will return answer_yes, answer_no or answer_undefined.
-  ///
-  /// If a formula is neither a tautology nor a contradiction according to the prover, a so called witness or counter
-  /// example can be returned by the methods Prover::get_witness and Prover::get_counter_example. A witness is a valuation
-  /// for which the formula holds, a counter example is a valuation for which it does not hold.
+/// \brief An enumerated type respresenting the answers "yes", "no" and "undefined".
+/// The term "formula" in the following text denotes arbitrary expressions of sort Bool in the mCRL2 format.
+///
+/// The Prover class is a base class for provers. Provers take formulas as input and indicate if these formulas are
+/// tautologies or contradictions. Since provers are not necessarily complete, a prover can be unable to determine if a
+/// formula is a tautology or a contradiction for some formulas. If this is the case, the prover will indicate this fact.
+/// A prover uses a rewriter to rewrite parts of the formulas it manipulates. The constructor Prover::Prover initializes
+/// the prover's rewriter with the data equations in internal mCRL2 format passed as parameter a_equations and the rewrite
+/// strategy passed as parameter a_strategy. To limit the number of seconds spent on proving a single formula, a time
+/// limit can be set. This time limit can be set initially by the constructor Prover::Prover and can be changed afterwards
+/// using the method Prover::set_time_limit. If the time limit is set to 0, no time limit will be enforced.
+///
+/// Once a prover is created, the formula to be proven can be set using the method Prover::set_formula. The method
+/// Prover::set_formula takes a propositional formula in internal mCRL2 format as parameter a_formula.
+///
+/// The methods Prover::is_tautology and Prover::is_contradiction can then indicate whether or not this formula is a
+/// tautology or a contradiction. These methods will return answer_yes, answer_no or answer_undefined.
+///
+/// If a formula is neither a tautology nor a contradiction according to the prover, a so called witness or counter
+/// example can be returned by the methods Prover::get_witness and Prover::get_counter_example. A witness is a valuation
+/// for which the formula holds, a counter example is a valuation for which it does not hold.
 
-enum Answer {
+enum Answer
+{
   answer_yes,
   answer_no,
   answer_undefined
 };
 
-  /// \brief A base class for provers. Provers take an expression of sort Bool in internal mCRL2 format and
-  /// \brief can indicate whether or not this expression is a tautology or a contradiction.
+/// \brief A base class for provers. Provers take an expression of sort Bool in internal mCRL2 format and
+/// \brief can indicate whether or not this expression is a tautology or a contradiction.
 
-class Prover {
+class Prover
+{
   protected:
     /// \brief An expression of sort Bool in the internal format of mCRL2.
     ATermAppl f_formula;
@@ -85,59 +90,69 @@ class Prover {
     time_t f_deadline;
   public:
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
-    Prover(const data_specification &a_data_spec,
-      mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
-      int a_time_limit = 0)
+    Prover(const data_specification& a_data_spec,
+           mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
+           int a_time_limit = 0)
     {
       f_time_limit = a_time_limit;
       f_processed = false;
 
-      switch (a_rewrite_strategy) {
-        case (mcrl2::data::rewriter::innermost): {
+      switch (a_rewrite_strategy)
+      {
+        case(mcrl2::data::rewriter::innermost):
+        {
           f_rewriter = createRewriter(a_data_spec, GS_REWR_INNER);
           f_info = new AI_Inner(f_rewriter);
           f_manipulator = new AM_Inner(f_rewriter, f_info);
           break;
         }
-        case (mcrl2::data::rewriter::jitty): {
+        case(mcrl2::data::rewriter::jitty):
+        {
           f_rewriter = createRewriter(a_data_spec, GS_REWR_JITTY);
           f_info = new AI_Jitty(f_rewriter);
           f_manipulator = new AM_Jitty(f_rewriter, f_info);
           break;
         }
 #ifdef MCRL2_INNERC_AVAILABLE
-        case (mcrl2::data::rewriter::innermost_compiling): {
+        case(mcrl2::data::rewriter::innermost_compiling):
+        {
           throw mcrl2::runtime_error("The compiled innermost rewriter is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #endif
-        case (mcrl2::data::rewriter::innermost_prover): {
+        case(mcrl2::data::rewriter::innermost_prover):
+        {
           throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #ifdef MCRL2_INNERC_AVAILABLE
-        case (mcrl2::data::rewriter::innermost_compiling_prover): {
+        case(mcrl2::data::rewriter::innermost_compiling_prover):
+        {
           throw mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-        case (mcrl2::data::rewriter::jitty_compiling): {
+        case(mcrl2::data::rewriter::jitty_compiling):
+        {
           throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #endif
-        case (mcrl2::data::rewriter::jitty_prover): {
+        case(mcrl2::data::rewriter::jitty_prover):
+        {
           throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #ifdef MCRL2_JITTYC_AVAILABLE
-        case (mcrl2::data::rewriter::jitty_compiling_prover): {
+        case(mcrl2::data::rewriter::jitty_compiling_prover):
+        {
           throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
         }
 #endif
-        default: {
+        default:
+        {
           throw mcrl2::runtime_error("Unknown type of rewriter.");
           break;
         }
@@ -192,13 +207,13 @@ class Prover {
     virtual ATermAppl get_counter_example() = 0;
 
     /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
-    Rewriter *get_rewriter()
+    Rewriter* get_rewriter()
     {
       return f_rewriter;
     }
 };
-    }
-  }
+}
+}
 }
 
 #endif

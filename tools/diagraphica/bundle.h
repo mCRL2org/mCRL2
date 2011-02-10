@@ -22,41 +22,41 @@
 
 class Bundle
 {
-public:
-	// -- constructors and destructors ------------------------------
+  public:
+    // -- constructors and destructors ------------------------------
     Bundle();
-    Bundle( const size_t &idx );
-    Bundle( const Bundle &bdl );
+    Bundle(const size_t& idx);
+    Bundle(const Bundle& bdl);
     virtual ~Bundle();
 
     // -- set functions ---------------------------------------------
-    void setIndex( const size_t &idx );
-    void setParent( Bundle* p );
-    void addChild( Bundle* c );
-    void setInCluster( Cluster* in );
-    void setOutCluster( Cluster* out );
-    void addEdge( Edge* e );
-    void setEdges( const std::vector< Edge* > &e );
+    void setIndex(const size_t& idx);
+    void setParent(Bundle* p);
+    void addChild(Bundle* c);
+    void setInCluster(Cluster* in);
+    void setOutCluster(Cluster* out);
+    void addEdge(Edge* e);
+    void setEdges(const std::vector< Edge* > &e);
     void updateLabel(
-        const std::string &lbl,
-        const std::string &status );
+      const std::string& lbl,
+      const std::string& status);
 
     // -- get functions ---------------------------------------------
     size_t getIndex();
     Bundle* getParent();
     size_t getSizeChildren();
-    Bundle* getChild( const size_t &idx );
+    Bundle* getChild(const size_t& idx);
     Cluster* getInCluster();
     Cluster* getOutCluster();
     size_t getSizeEdges();
-    Edge* getEdge( const size_t &idx );
-    void getLabels( std::vector< std::string > &lbls );
+    Edge* getEdge(const size_t& idx);
+    void getLabels(std::vector< std::string > &lbls);
     void getLabels(
-        std::vector< std::string > &lbls,
-        std::vector< std::string > &status );
+      std::vector< std::string > &lbls,
+      std::vector< std::string > &status);
     void getLabels(
-        std::string &separator,
-        std::string &lbls );
+      std::string& separator,
+      std::string& lbls);
 
     // -- clear functions -------------------------------------------
     void clearParent();
@@ -65,13 +65,13 @@ public:
     void clearOutCluster();
     void clearEdges();
 
-protected:
+  protected:
     // -- data members ----------------------------------------------
-	size_t index;
+    size_t index;
     Bundle* parent;
     std::vector< Bundle* > children; // association
     Cluster* inCluster;         // association
-	Cluster* outCluster;        // association
+    Cluster* outCluster;        // association
     std::vector< Edge* > edges;      // association
     std::map< std::string, std::string > labels;
 };

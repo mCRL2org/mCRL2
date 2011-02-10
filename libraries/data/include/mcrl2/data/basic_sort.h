@@ -22,9 +22,11 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class basic_sort ---//
 /// \brief A basic sort
@@ -61,12 +63,12 @@ class basic_sort: public sort_expression
 };
 //--- end generated class basic_sort ---//
 
-    /// \brief list of basic sorts
-    typedef atermpp::term_list<basic_sort> basic_sort_list;
-    /// \brief vector of basic sorts
-    typedef atermpp::vector<basic_sort> basic_sort_vector;
+/// \brief list of basic sorts
+typedef atermpp::term_list<basic_sort> basic_sort_list;
+/// \brief vector of basic sorts
+typedef atermpp::vector<basic_sort> basic_sort_vector;
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

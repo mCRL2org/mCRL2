@@ -1,4 +1,4 @@
-// Author(s): Frank Stappers 
+// Author(s): Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //

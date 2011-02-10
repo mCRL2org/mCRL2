@@ -41,7 +41,7 @@ using utilities::tools::input_output_tool;
 using namespace mcrl2::utilities::tools;
 
 //Functions used by the main program
-static ATermAppl translate_file(t_options &options);
+static ATermAppl translate_file(t_options& options);
 
 // Main
 class chi2mcrl2_tool: public input_output_tool
@@ -52,14 +52,14 @@ class chi2mcrl2_tool: public input_output_tool
   public:
     chi2mcrl2_tool()
       : super(
-          TOOLNAME,
-          AUTHOR,
-          "convert a Chi (v1.0) model to an mCRL2 specification",
-          "Convert a Chi model in INFILE to an mCRL2 specification, and write it to "
-          "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present, "
-          "stdout is used. INFILE is supposed to conform to v1.0 without time and continious "
-          "behaviour."
-          "\n\n")
+        TOOLNAME,
+        AUTHOR,
+        "convert a Chi (v1.0) model to an mCRL2 specification",
+        "Convert a Chi model in INFILE to an mCRL2 specification, and write it to "
+        "OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not present, "
+        "stdout is used. INFILE is supposed to conform to v1.0 without time and continious "
+        "behaviour."
+        "\n\n")
     {}
 
   protected:
@@ -67,19 +67,22 @@ class chi2mcrl2_tool: public input_output_tool
     t_options options;
 
     void parse_options(const command_line_parser& parser)
-    { super::parse_options(parser);
+    {
+      super::parse_options(parser);
 
       options.no_statepar = false;
-      if (parser.options.count("no-state")) {
+      if (parser.options.count("no-state"))
+      {
         options.no_statepar = true;
       }
     }
 
     void add_options(interface_description& desc)
-    { super::add_options(desc);
+    {
+      super::add_options(desc);
       desc.add_option("no-state",
-                    "no state parameters are generated when translating Chi "
-                    "a model", 'n');
+                      "no state parameters are generated when translating Chi "
+                      "a model", 'n');
     }
 
   public:
@@ -97,21 +100,23 @@ class chi2mcrl2_tool: public input_output_tool
 
       gsDebugMsg("Transforming AST to mcrl2 specification\n");
       if (asttransform.translator(result))
-        {
-          mcrl2spec = asttransform.getResult();
-        }
+      {
+        mcrl2spec = asttransform.getResult();
+      }
 
       FILE* OutStream = stdout;
 
-      if (!output_filename().empty()) {
+      if (!output_filename().empty())
+      {
         OutStream = fopen(output_filename().c_str(),"w");
 
-        if (OutStream == 0) {
+        if (OutStream == 0)
+        {
           throw mcrl2::runtime_error("cannot open file '" + output_filename() + "' for writing\n");
         }
       }
 
-      fputs (mcrl2spec.c_str(), OutStream);
+      fputs(mcrl2spec.c_str(), OutStream);
 
       fclose(OutStream);
 
@@ -120,7 +125,7 @@ class chi2mcrl2_tool: public input_output_tool
 
 };
 
-ATermAppl translate_file(t_options &options)
+ATermAppl translate_file(t_options& options)
 {
   ATermAppl result = NULL;
 
@@ -130,14 +135,17 @@ ATermAppl translate_file(t_options &options)
     //parse specification from stdin
     gsVerboseMsg("Parsing input from stdin...\n");
     result = parse_stream(cin);
-  } else {
+  }
+  else
+  {
     //parse specification from infilename
     ifstream instream(options.infilename.c_str());
-    if (!instream.is_open()) {
+    if (!instream.is_open())
+    {
       throw mcrl2::runtime_error("cannot open input file '" + options.infilename + "'");
     }
     gsVerboseMsg("Parsing input file '%s'...\n", options.infilename.c_str());
-	result = parse_stream(instream);
+    result = parse_stream(instream);
     instream.close();
   }
 
@@ -151,13 +159,13 @@ ATermAppl translate_file(t_options &options)
 class chi2mcrl2_gui_tool: public mcrl2_gui_tool<chi2mcrl2_tool>
 {
   public:
-	chi2mcrl2_gui_tool()
+    chi2mcrl2_gui_tool()
     {
       m_gui_options["no-state"] = create_checkbox_widget();
     }
 };
 
-int main(int argc, char *argv[])
+int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   return chi2mcrl2_gui_tool().execute(argc,argv);

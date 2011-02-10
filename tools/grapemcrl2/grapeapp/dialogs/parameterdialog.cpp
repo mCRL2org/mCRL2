@@ -19,23 +19,23 @@
 
 using namespace grape::grapeapp;
 
-grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declarations)
-: wxDialog( 0, wxID_ANY, _T("Set parameter initialisation"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE )
+grape_parameter_dialog::grape_parameter_dialog(list_of_decl& p_parameter_declarations)
+  : wxDialog(0, wxID_ANY, _T("Set parameter initialisation"), wxDefaultPosition, wxDefaultSize, wxDEFAULT_DIALOG_STYLE)
 {
-  wxPanel *panel = new wxPanel(this);
+  wxPanel* panel = new wxPanel(this);
 
-  wxGridSizer *grid = new wxFlexGridSizer(2, 3, 0);
+  wxGridSizer* grid = new wxFlexGridSizer(2, 3, 0);
 
   // refers to
-  wxBoxSizer *vsizer = new wxBoxSizer( wxVERTICAL );
-  wxStaticText *text = new wxStaticText( panel, wxID_ANY, _T( "Parameter:" ) );
-  grid->Add( text, 0 );
+  wxBoxSizer* vsizer = new wxBoxSizer(wxVERTICAL);
+  wxStaticText* text = new wxStaticText(panel, wxID_ANY, _T("Parameter:"));
+  grid->Add(text, 0);
   vsizer->Add(grid, 0, wxALL, 5);
 
   // create grid
-  m_grid = new wxGrid( panel, GRAPE_GRID_PARAM, wxDefaultPosition, wxSize(400, 300));
-  m_grid->CreateGrid( (unsigned int) p_parameter_declarations.GetCount(), 2 );
-  for ( unsigned int i = 0; i < p_parameter_declarations.GetCount(); ++i )
+  m_grid = new wxGrid(panel, GRAPE_GRID_PARAM, wxDefaultPosition, wxSize(400, 300));
+  m_grid->CreateGrid((unsigned int) p_parameter_declarations.GetCount(), 2);
+  for (unsigned int i = 0; i < p_parameter_declarations.GetCount(); ++i)
   {
     // fill cells
     decl_init decl;
@@ -47,24 +47,24 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
     m_grid->SetCellValue(i, 1, _T(""));
   }
 
-  m_grid->SetColSize( 0, 170 );
-  m_grid->SetColSize( 1, 100 );
+  m_grid->SetColSize(0, 170);
+  m_grid->SetColSize(1, 100);
   m_grid->SetColLabelValue(0, _T("Name"));
   m_grid->SetColLabelValue(1, _T("Value"));
   m_grid->SetRowLabelSize(0);
 
-  vsizer->Add(m_grid, 1, wxEXPAND );
- 
-  panel->SetSizer( vsizer );
+  vsizer->Add(m_grid, 1, wxEXPAND);
 
-  wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
+  panel->SetSizer(vsizer);
 
-  wnd_sizer->Add(panel, 1, wxEXPAND, 0 );
+  wxBoxSizer* wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
-  wnd_sizer->AddSpacer ( 5 );
+  wnd_sizer->Add(panel, 1, wxEXPAND, 0);
+
+  wnd_sizer->AddSpacer(5);
 
   // create buttons
-  wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
+  wxSizer* sizer = CreateButtonSizer(wxOK | wxCANCEL);
   sizer->Layout();
   wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1);
 
@@ -74,13 +74,13 @@ grape_parameter_dialog::grape_parameter_dialog(list_of_decl &p_parameter_declara
   wnd_sizer->SetSizeHints(this);
 
   m_grid->SetFocus();
-  
+
   check_parameters();
   CentreOnParent();
 }
 
 grape_parameter_dialog::grape_parameter_dialog()
-: wxDialog()
+  : wxDialog()
 {
   // shouldn't be called
 }
@@ -103,29 +103,29 @@ list_of_decl_init grape_parameter_dialog::get_initialisations() const
 void grape_parameter_dialog::check_parameters()
 {
   bool valid = true;
-  
-  for ( int i = 0; i < m_grid->GetNumberRows(); ++i )
+
+  for (int i = 0; i < m_grid->GetNumberRows(); ++i)
   {
-    valid = valid && ( !m_grid->GetCellValue(i, 1).IsEmpty() );
+    valid = valid && (!m_grid->GetCellValue(i, 1).IsEmpty());
   }
-    
+
   FindWindow(GetAffirmativeId())->Enable(valid);
 }
 
-void grape_parameter_dialog::event_change_text( wxGridEvent &/*p_event*/ )
+void grape_parameter_dialog::event_change_text(wxGridEvent& /*p_event*/)
 {
   check_parameters();
 }
 
 
-void grape_parameter_dialog::event_ok(wxCommandEvent &WXUNUSED(p_event))
+void grape_parameter_dialog::event_ok(wxCommandEvent& WXUNUSED(p_event))
 {
   // save initialisation
-  for ( int i = 0; i < m_grid->GetNumberRows(); ++i )
+  for (int i = 0; i < m_grid->GetNumberRows(); ++i)
   {
     m_init[i].set_value(m_grid->GetCellValue(i, 1));
   }
-  
+
   EndModal(wxID_OK);
 }
 

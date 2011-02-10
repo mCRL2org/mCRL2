@@ -24,33 +24,33 @@
 #include "visualizer.h"
 
 #ifdef __APPLE__
-  #include <OpenGL/glu.h>
+#include <OpenGL/glu.h>
 #else
-  #include <GL/glu.h>
+#include <GL/glu.h>
 #endif
 
 using namespace IDs;
 
 BEGIN_EVENT_TABLE(GLCanvas,wxGLCanvas)
-    EVT_MOTION(GLCanvas::onMouseMove)
-    EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
-    EVT_LEFT_DOWN(GLCanvas::onMouseDown)
-    EVT_LEFT_UP(GLCanvas::onMouseUp)
-    EVT_LEFT_DCLICK(GLCanvas::onMouseDClick)
-    EVT_RIGHT_DOWN(GLCanvas::onMouseDown)
-    EVT_RIGHT_UP(GLCanvas::onMouseUp)
-    EVT_MIDDLE_DOWN(GLCanvas::onMouseDown)
-    EVT_MIDDLE_UP(GLCanvas::onMouseUp)
-    EVT_MOUSEWHEEL(GLCanvas::onMouseWheel)
-    EVT_PAINT(GLCanvas::onPaint)
-    EVT_SIZE(GLCanvas::onSize)
-    EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
+  EVT_MOTION(GLCanvas::onMouseMove)
+  EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
+  EVT_LEFT_DOWN(GLCanvas::onMouseDown)
+  EVT_LEFT_UP(GLCanvas::onMouseUp)
+  EVT_LEFT_DCLICK(GLCanvas::onMouseDClick)
+  EVT_RIGHT_DOWN(GLCanvas::onMouseDown)
+  EVT_RIGHT_UP(GLCanvas::onMouseUp)
+  EVT_MIDDLE_DOWN(GLCanvas::onMouseDown)
+  EVT_MIDDLE_UP(GLCanvas::onMouseUp)
+  EVT_MOUSEWHEEL(GLCanvas::onMouseWheel)
+  EVT_PAINT(GLCanvas::onPaint)
+  EVT_SIZE(GLCanvas::onSize)
+  EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
 END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(Mediator* owner,wxWindow* parent,Settings* ss,
-    const wxSize &size,int* attribList)
+                   const wxSize& size,int* attribList)
   : wxGLCanvas(parent,wxID_ANY,wxDefaultPosition,size,wxSUNKEN_BORDER,
-         wxT(""),attribList), simReader(NULL)
+               wxT(""),attribList), simReader(NULL)
 {
   mediator = owner;
   settings = ss;
@@ -101,14 +101,14 @@ void GLCanvas::initialize()
 
   RGB_Color c = settings->getRGB(BackgroundColor);
   glClearColor(c.red() / 255.0f, c.green() / 255.0f, c.blue() / 255.0f,
-      1.0f);
+               1.0f);
   glClearDepth(1.0);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   SwapBuffers();
   displayAllowed = true;
 }
 
-void GLCanvas::getMaxViewportDims(int *w,int* h)
+void GLCanvas::getMaxViewportDims(int* w,int* h)
 {
   GLint dims[2];
   glGetIntegerv(GL_MAX_VIEWPORT_DIMS,dims);
@@ -132,7 +132,7 @@ void GLCanvas::resetView()
   display();
 }
 
-void GLCanvas::setVisualizer(Visualizer *vis)
+void GLCanvas::setVisualizer(Visualizer* vis)
 {
   visualizer = vis;
 }
@@ -153,7 +153,7 @@ void GLCanvas::notify(SettingID s)
   {
     RGB_Color c = settings->getRGB(BackgroundColor);
     glClearColor(c.red() / 255.0f, c.green() / 255.0f, c.blue() /
-        255.0f, 1.0f);
+                 255.0f, 1.0f);
   }
 }
 
@@ -194,136 +194,136 @@ void GLCanvas::display(bool coll_caller, bool selecting)
     glClear(GL_COLOR_BUFFER_BIT|GL_DEPTH_BUFFER_BIT);
 
     glPushMatrix();
-      glLoadIdentity();
+    glLoadIdentity();
 
-      if (!lightRenderMode || settings->getBool(NavLighting))
-      {
-        glEnable(GL_NORMALIZE);
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
-      }
-      else
-      {
-        glDisable(GL_NORMALIZE);
-        glDisable(GL_LIGHTING);
-        glDisable(GL_LIGHT0);
-      }
-
-      if (!lightRenderMode || settings->getBool(NavSmoothShading))
-      {
-        glShadeModel(GL_SMOOTH);
-      }
-      else
-      {
-        glShadeModel(GL_FLAT);
-      }
-
-      if (settings->getBool(DisplayWireframe))
-      {
-        glPolygonMode(GL_FRONT,GL_LINE);
-      }
-      else
-      {
-        glPolygonMode(GL_FRONT,GL_FILL);
-      }
-
-      // apply panning, zooming and rotating transformations
-      glTranslatef(moveVector.x(), moveVector.y(), moveVector.z() - startPosZ);
-      glRotatef(angleY,1.0f,0.0f,0.0f);
-      glRotatef(angleX,0.0f,1.0f,0.0f);
-
-      // structure will be drawn around the positive z-axis starting from the
-      // origin, so rotate to make the z-axis point downwards
-      glRotatef(90.0f,1.0f,0.0f,0.0f);
-
-      // translate along the z-axis to make the vertical center of the structure
-      // end up in the current origin
-      float halfHeight = visualizer->getHalfStructureHeight();
-      glTranslatef(0.0f,0.0f,-halfHeight);
-
-      if (simulating)
-      {
-        visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState(),
-          sim->getChosenTrans());
-      }
-      if (!lightRenderMode || settings->getBool(NavShowStates))
-      {
-
-        if (settings->getBool(DisplayStates))
-        {
-          // Identify that we are drawing states
-          glPushName(STATE);
-          visualizer->drawStates(simulating);
-          glPopName();
-        }
-      }
-
-      // Disable lighting while drawing transitions, otherwise their colours
-      // change with the viewpoint
+    if (!lightRenderMode || settings->getBool(NavLighting))
+    {
+      glEnable(GL_NORMALIZE);
+      glEnable(GL_LIGHTING);
+      glEnable(GL_LIGHT0);
+    }
+    else
+    {
       glDisable(GL_NORMALIZE);
       glDisable(GL_LIGHTING);
       glDisable(GL_LIGHT0);
+    }
 
-      visualizer->drawTransitions(
-          settings->getBool(DisplayTransitions)
-            && (!lightRenderMode || settings->getBool(NavShowTransitions)),
-          settings->getBool(DisplayBackpointers)
-            && (!lightRenderMode || settings->getBool(NavShowBackpointers)));
+    if (!lightRenderMode || settings->getBool(NavSmoothShading))
+    {
+      glShadeModel(GL_SMOOTH);
+    }
+    else
+    {
+      glShadeModel(GL_FLAT);
+    }
 
-      if (simulating)
+    if (settings->getBool(DisplayWireframe))
+    {
+      glPolygonMode(GL_FRONT,GL_LINE);
+    }
+    else
+    {
+      glPolygonMode(GL_FRONT,GL_FILL);
+    }
+
+    // apply panning, zooming and rotating transformations
+    glTranslatef(moveVector.x(), moveVector.y(), moveVector.z() - startPosZ);
+    glRotatef(angleY,1.0f,0.0f,0.0f);
+    glRotatef(angleX,0.0f,1.0f,0.0f);
+
+    // structure will be drawn around the positive z-axis starting from the
+    // origin, so rotate to make the z-axis point downwards
+    glRotatef(90.0f,1.0f,0.0f,0.0f);
+
+    // translate along the z-axis to make the vertical center of the structure
+    // end up in the current origin
+    float halfHeight = visualizer->getHalfStructureHeight();
+    glTranslatef(0.0f,0.0f,-halfHeight);
+
+    if (simulating)
+    {
+      visualizer->drawSimStates(sim->getStateHis(), sim->getCurrState(),
+                                sim->getChosenTrans());
+    }
+    if (!lightRenderMode || settings->getBool(NavShowStates))
+    {
+
+      if (settings->getBool(DisplayStates))
       {
-        // Draw transitions followed during simulation and the possible
-        // transitions going out of the current state.
-        // Identify that we are drawing selectable sim states in this mode.
-        visualizer->drawSimTransitions(
-          !lightRenderMode || settings->getBool(NavShowTransitions),
-          !lightRenderMode || settings->getBool(NavShowBackpointers),
-          sim->getTransHis(), sim->getPosTrans(), sim->getChosenTrans());
+        // Identify that we are drawing states
+        glPushName(STATE);
+        visualizer->drawStates(simulating);
+        glPopName();
       }
+    }
 
-      // Enable lighting again, if required
-      if (!lightRenderMode || settings->getBool(NavLighting))
-      {
-        glEnable(GL_NORMALIZE);
-        glEnable(GL_LIGHTING);
-        glEnable(GL_LIGHT0);
-      }
+    // Disable lighting while drawing transitions, otherwise their colours
+    // change with the viewpoint
+    glDisable(GL_NORMALIZE);
+    glDisable(GL_LIGHTING);
+    glDisable(GL_LIGHT0);
 
-      if (!lightRenderMode || settings->getBool(NavTransparency))
-      {
-        // determine current viewpoint in world coordinates
-        glPushMatrix();
-          glLoadIdentity();
-          glTranslatef(0.0f,0.0f,halfHeight);
-          glRotatef(-90.0f ,1.0f,0.0f,0.0f);
-          glRotatef(-angleX,0.0f,1.0f,0.0f);
-          glRotatef(-angleY,1.0f,0.0f,0.0f);
-          glTranslatef(-moveVector.x(),-moveVector.y(),-moveVector.z() + startPosZ);
-          GLfloat M[16];
-          glGetFloatv(GL_MODELVIEW_MATRIX,M);
-          Vector3D viewpoint = Vector3D(M[12],M[13],M[14]);
-        glPopMatrix();
-        // sort clusters on distance to viewpoint
-        visualizer->sortClusters(viewpoint);
-      }
+    visualizer->drawTransitions(
+      settings->getBool(DisplayTransitions)
+      && (!lightRenderMode || settings->getBool(NavShowTransitions)),
+      settings->getBool(DisplayBackpointers)
+      && (!lightRenderMode || settings->getBool(NavShowBackpointers)));
 
-      // draw the structure
-      glEnable(GL_BLEND);
-      glDepthMask(GL_FALSE);
-      glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
-      // Identify that we are drawing clusters
-      glPushName(CLUSTER);
-      visualizer->drawStructure();
-      glPopName();
-      glDepthMask(GL_TRUE);
-      glBlendFunc(GL_ONE, GL_ZERO);
-      glDisable(GL_BLEND);
+    if (simulating)
+    {
+      // Draw transitions followed during simulation and the possible
+      // transitions going out of the current state.
+      // Identify that we are drawing selectable sim states in this mode.
+      visualizer->drawSimTransitions(
+        !lightRenderMode || settings->getBool(NavShowTransitions),
+        !lightRenderMode || settings->getBool(NavShowBackpointers),
+        sim->getTransHis(), sim->getPosTrans(), sim->getChosenTrans());
+    }
 
-      // do not show the picture in the canvas if we are collecting data
-      if (!collectingData && !selecting)
-      {
-        SwapBuffers();
-      }
+    // Enable lighting again, if required
+    if (!lightRenderMode || settings->getBool(NavLighting))
+    {
+      glEnable(GL_NORMALIZE);
+      glEnable(GL_LIGHTING);
+      glEnable(GL_LIGHT0);
+    }
+
+    if (!lightRenderMode || settings->getBool(NavTransparency))
+    {
+      // determine current viewpoint in world coordinates
+      glPushMatrix();
+      glLoadIdentity();
+      glTranslatef(0.0f,0.0f,halfHeight);
+      glRotatef(-90.0f ,1.0f,0.0f,0.0f);
+      glRotatef(-angleX,0.0f,1.0f,0.0f);
+      glRotatef(-angleY,1.0f,0.0f,0.0f);
+      glTranslatef(-moveVector.x(),-moveVector.y(),-moveVector.z() + startPosZ);
+      GLfloat M[16];
+      glGetFloatv(GL_MODELVIEW_MATRIX,M);
+      Vector3D viewpoint = Vector3D(M[12],M[13],M[14]);
+      glPopMatrix();
+      // sort clusters on distance to viewpoint
+      visualizer->sortClusters(viewpoint);
+    }
+
+    // draw the structure
+    glEnable(GL_BLEND);
+    glDepthMask(GL_FALSE);
+    glBlendFunc(GL_SRC_ALPHA,GL_ONE_MINUS_SRC_ALPHA);
+    // Identify that we are drawing clusters
+    glPushName(CLUSTER);
+    visualizer->drawStructure();
+    glPopName();
+    glDepthMask(GL_TRUE);
+    glBlendFunc(GL_ONE, GL_ZERO);
+    glDisable(GL_BLEND);
+
+    // do not show the picture in the canvas if we are collecting data
+    if (!collectingData && !selecting)
+    {
+      SwapBuffers();
+    }
     glPopMatrix();
 
     GLenum gl_error_code = glGetError();
@@ -351,7 +351,7 @@ void GLCanvas::reshape()
     glMatrixMode(GL_PROJECTION);
     glLoadIdentity();
     gluPerspective(60.0f, static_cast<GLfloat>(width) /
-        static_cast<GLfloat>(height), nearPlane, farPlane);
+                   static_cast<GLfloat>(height), nearPlane, farPlane);
     glMatrixMode(GL_MODELVIEW);
   }
 }
@@ -482,7 +482,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
     {
       case myID_ZOOM :
         delta = Vector3D(0.0f, 0.0f, 0.01f * (startPosZ -
-              moveVector.z()) * (oldMouseY - newMouseY));
+                                              moveVector.z()) * (oldMouseY - newMouseY));
         moveVector = moveVector + delta;
         oldMouseY = newMouseY;
         display();
@@ -490,8 +490,8 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 
       case myID_PAN :
         delta = Vector3D(-0.0015f * (startPosZ - moveVector.z()) *
-            (oldMouseX - newMouseX), 0.0015f * (startPosZ -
-              moveVector.z()) * (oldMouseY - newMouseY), 0.0f);
+                         (oldMouseX - newMouseX), 0.0015f * (startPosZ -
+                             moveVector.z()) * (oldMouseY - newMouseY), 0.0f);
         moveVector = moveVector + delta;
         oldMouseX = newMouseX;
         oldMouseY = newMouseY;
@@ -501,16 +501,29 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
       case myID_ROTATE :
         angleX -= 0.5f*(oldMouseX-newMouseX);
         angleY -= 0.5f*(oldMouseY-newMouseY);
-        if (angleX >= 360.0f) angleX -= 360.0f;
-        if (angleY >= 360.0f) angleY -= 360.0f;
-        if (angleX < 0.0f) angleX += 360.0f;
-        if (angleY < 0.0f) angleY += 360.0f;
+        if (angleX >= 360.0f)
+        {
+          angleX -= 360.0f;
+        }
+        if (angleY >= 360.0f)
+        {
+          angleY -= 360.0f;
+        }
+        if (angleX < 0.0f)
+        {
+          angleX += 360.0f;
+        }
+        if (angleY < 0.0f)
+        {
+          angleY += 360.0f;
+        }
         oldMouseX = newMouseX;
         oldMouseY = newMouseY;
         display();
         break;
 
-      default : break;
+      default :
+        break;
     }
   }
   else
@@ -522,7 +535,7 @@ void GLCanvas::onMouseMove(wxMouseEvent& event)
 void GLCanvas::onMouseWheel(wxMouseEvent& event)
 {
   Vector3D delta = Vector3D(0.0f, 0.0f,
-      0.001f * (startPosZ - moveVector.z()) * event.GetWheelRotation());
+                            0.001f * (startPosZ - moveVector.z()) * event.GetWheelRotation());
   moveVector = moveVector + delta;
   display();
 }
@@ -535,12 +548,12 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res)
   glReadBuffer(GL_BACK);
   glPixelStorei(GL_PACK_ALIGNMENT,1);
 
-  TRcontext *tr_context = trNew();
+  TRcontext* tr_context = trNew();
   trTileSize(tr_context, w_block, h_block, 0);
   trImageSize(tr_context, w_res, h_res);
 
   unsigned char* pixdata = (unsigned char*)malloc(w_res * h_res * 3 *
-      sizeof(unsigned char));
+                           sizeof(unsigned char));
   if (pixdata == NULL)
   {
     trDelete(tr_context);
@@ -550,7 +563,7 @@ unsigned char* GLCanvas::getPictureData(int w_res,int h_res)
   trImageBuffer(tr_context, GL_RGB, GL_UNSIGNED_BYTE, pixdata);
   trRowOrder(tr_context, TR_TOP_TO_BOTTOM);
   trPerspective(tr_context, 60.0f,
-      (GLfloat)(w_block)/(GLfloat)(h_block), nearPlane, farPlane);
+                (GLfloat)(w_block)/(GLfloat)(h_block), nearPlane, farPlane);
 
   collectingData = true;
   int more = 1;
@@ -620,7 +633,7 @@ void GLCanvas::selChange()
 }
 
 
-void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC)
+void GLCanvas::processHits(const GLint hits, GLuint* buffer, bool doubleC)
 {
   // This method selects the object clicked.
   //
@@ -639,10 +652,10 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC)
   float minDepth = 0;
   GLuint names;
   bool stateSelected = false; // Gives the selection of states precedence over
-                              // the selection of clusters.
+  // the selection of clusters.
 
   // Choose the nearest object and store it.
-  for(GLint j=0; j < hits; ++j)
+  for (GLint j=0; j < hits; ++j)
   {
 
     names = *buffer;
@@ -658,7 +671,7 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC)
     for (unsigned int k = 0; k < names; k++)
     {
       if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
-          objType == SIMSTATE))
+                                     objType == SIMSTATE))
       {
         selectedObject[k] = *buffer;
       }
@@ -666,7 +679,7 @@ void GLCanvas::processHits(const GLint hits, GLuint *buffer, bool doubleC)
     }
 
     if (minDepth < curMinDepth && (!stateSelected || objType == STATE ||
-        objType == SIMSTATE) && names > 0)
+                                   objType == SIMSTATE) && names > 0)
     {
       stateSelected = objType == STATE || objType == SIMSTATE;
       curMinDepth = minDepth;
@@ -716,7 +729,7 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC)
   GLsizei bufsize = mediator->getNumberOfObjects() * 6;
   if (GetContext())
   {
-    GLuint *selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
+    GLuint* selectBuf = (GLuint*) malloc(bufsize * sizeof(GLuint));
     GLint  hits;
     GLint viewport[4];
 
@@ -735,13 +748,13 @@ void GLCanvas::pickObjects(int x, int y, bool doubleC)
     // Create 3x3 pixel picking region near cursor location
     gluPickMatrix((GLdouble) x, (GLdouble)  viewport[3] - y,
                   3.0, 3.0, viewport);
-        int width,height;
+    int width,height;
     GetClientSize(&width,&height);
     gluPerspective(60.0f,(GLfloat)(width)/(GLfloat)(height),
                    nearPlane, farPlane);
 
     glMatrixMode(GL_MODELVIEW); // Switch to Modelview matrix in order to
-                                // calculate rotations etc.
+    // calculate rotations etc.
 
     display(false, true);
     glMatrixMode(GL_PROJECTION);

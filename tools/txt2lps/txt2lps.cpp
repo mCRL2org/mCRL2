@@ -28,29 +28,29 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class txt2lps_tool : public input_output_tool 
+class txt2lps_tool : public input_output_tool
 {
-  typedef input_output_tool super;
+    typedef input_output_tool super;
 
   public:
 
     txt2lps_tool() : super(
-             TOOLNAME,
-             AUTHOR,
-             "translates an mCRL2 specification of a linear process into an LPS",
-             "Translates the mCRL2 specification in INFILE and writes the resulting LPS to "
-             "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
-             "present, standard input is used.")
+        TOOLNAME,
+        AUTHOR,
+        "translates an mCRL2 specification of a linear process into an LPS",
+        "Translates the mCRL2 specification in INFILE and writes the resulting LPS to "
+        "OUTFILE. If OUTFILE is not present, standard output is used. If INFILE is not "
+        "present, standard input is used.")
     {}
 
-    bool run() 
-    {     
+    bool run()
+    {
       lps::specification spec;
 
-      if (input_filename().empty()) 
+      if (input_filename().empty())
       {
         spec = lps::parse_linear_process_specification(std::cin);
-      } 
+      }
       else
       {
         std::ifstream from(input_filename().c_str());
@@ -58,7 +58,7 @@ class txt2lps_tool : public input_output_tool
         {
           throw mcrl2::runtime_error("Could not read from input file: " + input_filename());
         }
-        spec = lps::parse_linear_process_specification(from);       
+        spec = lps::parse_linear_process_specification(from);
       }
       spec.save(output_filename());
       return true;
@@ -66,14 +66,15 @@ class txt2lps_tool : public input_output_tool
 
 };
 
-class txt2lps_gui_tool: public mcrl2_gui_tool<txt2lps_tool> {
-public:
-	txt2lps_gui_tool() {}
+class txt2lps_gui_tool: public mcrl2_gui_tool<txt2lps_tool>
+{
+  public:
+    txt2lps_gui_tool() {}
 };
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  
+
   return txt2lps_gui_tool().execute(argc, argv);
 }

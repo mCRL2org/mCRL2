@@ -28,7 +28,7 @@ class Simulation;
 class Cluster_iterator
 {
   public:
-    Cluster_iterator(LTS *l);
+    Cluster_iterator(LTS* l);
     virtual ~Cluster_iterator() {}
     void operator++();
     Cluster* operator*();
@@ -36,7 +36,7 @@ class Cluster_iterator
   protected:
     int rank;
     size_t cluster;
-    LTS *lts;
+    LTS* lts;
     bool is_valid();
     virtual void next();
 };
@@ -44,7 +44,7 @@ class Cluster_iterator
 class Reverse_cluster_iterator: public Cluster_iterator
 {
   public:
-    Reverse_cluster_iterator(LTS *l);
+    Reverse_cluster_iterator(LTS* l);
     ~Reverse_cluster_iterator() {}
     bool is_end();
   protected:
@@ -54,14 +54,14 @@ class Reverse_cluster_iterator: public Cluster_iterator
 class State_iterator
 {
   public:
-    State_iterator(LTS *l);
+    State_iterator(LTS* l);
     ~State_iterator();
     void operator++();
     State* operator*();
     bool is_end();
   private:
     std::vector<State*>::iterator state_it;
-    LTS *lts;
+    LTS* lts;
 };
 
 class LTS
@@ -95,7 +95,7 @@ class LTS
     // ATerm getStateParameterValue(State* state,size_t param);
     size_t getStateParameterValue(State* state,size_t param);
     std::string getStateParameterValueStr(State* state,
-        size_t param);
+                                          size_t param);
     // atermpp::set<ATerm> getClusterParameterValues(Cluster* c, size_t param);
     std::set<std::string> getClusterParameterValues(Cluster* c, size_t param);
     // std::string prettyPrintParameterValue(ATerm parvalue);
@@ -107,7 +107,7 @@ class LTS
     void positionStates(StatePositioningStyle s);
     void rankStates(RankStyle rs);
 
-    bool readFromFile(const std::string &filename);
+    bool readFromFile(const std::string& filename);
 
     int getZoomLevel() const;
     void setZoomLevel(const int level);
@@ -163,7 +163,7 @@ class LTS
     LTS(Mediator* owner, LTS* parent, bool fromAbove);
 
     void clearRanksAndClusters();
-    void clusterTree(State* s,Cluster *c,bool cyclic);
+    void clusterTree(State* s,Cluster* c,bool cyclic);
 
     void visit(State* s);
 

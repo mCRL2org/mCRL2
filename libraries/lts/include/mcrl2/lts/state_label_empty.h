@@ -24,28 +24,28 @@ namespace lts
 namespace detail
 {
 
-  /** \brief Contains empty state values, used for lts's without state valued.
-   *  \detail Empty state values are used in labelled transition
-   *          systems which do not have state values, such as
-   *          the .aut and the .bcg format. */
-  class state_label_empty
-  {
-    public:
+/** \brief Contains empty state values, used for lts's without state valued.
+ *  \detail Empty state values are used in labelled transition
+ *          systems which do not have state values, such as
+ *          the .aut and the .bcg format. */
+class state_label_empty
+{
+  public:
 
-      /* \brief Equality on empty state labels. Always returns true.
-      */
-      bool operator ==(const state_label_empty &) const
-      {
-        return true;
-      }
+    /* \brief Equality on empty state labels. Always returns true.
+    */
+    bool operator ==(const state_label_empty&) const
+    {
+      return true;
+    }
 
-      /* \brief Non equality on empty state labels. Always returns false.
-      */
-      bool operator !=(const state_label_empty &other) const
-      {
-        return !(*this==other);
-      }
-  };
+    /* \brief Non equality on empty state labels. Always returns false.
+    */
+    bool operator !=(const state_label_empty& other) const
+    {
+      return !(*this==other);
+    }
+};
 
 } // namespace detail
 

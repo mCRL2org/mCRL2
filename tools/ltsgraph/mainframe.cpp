@@ -58,8 +58,8 @@ END_EVENT_TABLE()
 
 MainFrame::MainFrame(LTSGraph* owner)
   : wxFrame(NULL, wxID_ANY, wxT("LTSGraph"),
-    wxDefaultPosition, wxDefaultSize,
-    wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE)
+            wxDefaultPosition, wxDefaultSize,
+            wxDEFAULT_FRAME_STYLE|wxFULL_REPAINT_ON_RESIZE)
 {
   app = owner;
 
@@ -94,11 +94,11 @@ void MainFrame::setupMenuBar()
   // File menu
   wxMenu* fileMenu = new wxMenu;
   fileMenu->Append(wxID_OPEN, wxT("&Open...\tCTRL-o"),
-               wxT("Read an LTS from a file."));
+                   wxT("Read an LTS from a file."));
   fileMenu->Append(myID_IMPORT, wxT("&Import...\tCTRL-i"),
-      wxT("Read an LTS Layout from a file."));
+                   wxT("Read an LTS Layout from a file."));
   fileMenu->Append(myID_MENU_EXPORT, wxT("E&xport to...\tCTRL-x"),
-               wxT("Export this LTS to file."));
+                   wxT("Export this LTS to file."));
 
   fileMenu->Append(wxID_EXIT, wxT("&Quit \tCTRL-q"), wxT("Quit LTSGraph."));
 
@@ -156,13 +156,13 @@ void MainFrame::setupMainArea()
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a file"), wxEmptyString, wxEmptyString,
-    wxString(("All supported formats ("+
-             mcrl2::lts::detail::lts_extensions_as_string()+
-             ")|"+
-             mcrl2::lts::detail::lts_extensions_as_string(";")+
-             "|All files (*.*)|*.*").c_str(),
-             wxConvLocal),
-    wxFD_OPEN|wxFD_CHANGE_DIR);
+                      wxString(("All supported formats ("+
+                                mcrl2::lts::detail::lts_extensions_as_string()+
+                                ")|"+
+                                mcrl2::lts::detail::lts_extensions_as_string(";")+
+                                "|All files (*.*)|*.*").c_str(),
+                               wxConvLocal),
+                      wxFD_OPEN|wxFD_CHANGE_DIR);
 
   if (dialog.ShowModal() == wxID_OK)
   {
@@ -173,19 +173,21 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
     app->openFile(stPath);
   }
 }
-void MainFrame::onSelect(wxCommandEvent& /*event*/) {
+void MainFrame::onSelect(wxCommandEvent& /*event*/)
+{
   app->setTool(false);
 }
 
-void MainFrame::onColour(wxCommandEvent& /*event*/) {
+void MainFrame::onColour(wxCommandEvent& /*event*/)
+{
   app->setTool(true);
 }
 
 void MainFrame::onImport(wxCommandEvent& /*event*/)
 {
   wxFileDialog dialog(this, wxT("Select a layout file"), wxEmptyString, wxEmptyString,
-    wxT("XML layout file (*.xml)|*.xml|All files (*.*)|*.*"),
-    wxFD_OPEN|wxFD_CHANGE_DIR);
+                      wxT("XML layout file (*.xml)|*.xml|All files (*.*)|*.*"),
+                      wxFD_OPEN|wxFD_CHANGE_DIR);
 
   if (dialog.ShowModal() == wxID_OK)
   {
@@ -207,7 +209,7 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   wxString defaultFileName(app->getFileName().c_str(), wxConvLocal);
 
   // Strip extension from filename
-  if(defaultFileName.Find('.') != -1 )
+  if (defaultFileName.Find('.') != -1)
   {
     defaultFileName = defaultFileName.BeforeLast('.');
   }
@@ -217,19 +219,19 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
   std::auto_ptr< Exporter > exporter;
   wxString fileName;
 
-  while(!startExport)
+  while (!startExport)
   {
-    if(dialog.ShowModal() == wxID_CANCEL)
+    if (dialog.ShowModal() == wxID_CANCEL)
     {
       return;
     }
 
     fileName = dialog.GetPath();
     wxString extension = fileName.AfterLast('.');
-    if(extension == fileName)
+    if (extension == fileName)
     {
       // No extension given, get it from the filter index
-      switch(dialog.GetFilterIndex())
+      switch (dialog.GetFilterIndex())
       {
         case 0: // SVG item
           fileName.Append(wxT(".svg"));
@@ -268,22 +270,25 @@ void MainFrame::onExport(wxCommandEvent& /*event*/)
     }
     // Check if the file exsits
     wxFileName fn(fileName);
-    if(fn.FileExists()) {
+    if (fn.FileExists())
+    {
       wxMessageDialog fileExistDialog(
         this,
         wxT("The file ") + fileName + wxT(" already exists, overwrite?\n"),
         wxT("File exists"),
         wxYES_NO | wxNO_DEFAULT | wxICON_EXCLAMATION);
-      if(fileExistDialog.ShowModal() == wxID_YES) {
+      if (fileExistDialog.ShowModal() == wxID_YES)
+      {
         startExport = true;
       }
     }
-    else {
+    else
+    {
       startExport = true;
     }
   }
 
-  if(exporter->export_to(fileName))
+  if (exporter->export_to(fileName))
   {
     wxMessageDialog msgDlg(
       this,
@@ -328,10 +333,13 @@ void MainFrame::onInfo(wxCommandEvent& /* event */)
 
 void MainFrame::onAlgo(wxCommandEvent& /* event */)
 {
-  if (m_mgr.GetPane( algoDlg ).IsShown() ){
-    m_mgr.GetPane( algoDlg ).Hide();
-  } else {
-    m_mgr.GetPane( algoDlg ).Show();
+  if (m_mgr.GetPane(algoDlg).IsShown())
+  {
+    m_mgr.GetPane(algoDlg).Hide();
+  }
+  else
+  {
+    m_mgr.GetPane(algoDlg).Show();
   }
   m_mgr.Update();
 }
@@ -347,38 +355,40 @@ void MainFrame::setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl)
 
 void MainFrame::onResetAll(wxCommandEvent& /*evt*/)
 {
-	glCanvas->ResetAll();
-	glCanvas->display();
+  glCanvas->ResetAll();
+  glCanvas->display();
 }
 
 void MainFrame::onResetRot(wxCommandEvent& /*evt*/)
 {
-	glCanvas->ResetRot();
-	glCanvas->display();
+  glCanvas->ResetRot();
+  glCanvas->display();
 }
 
 void MainFrame::onResetPan(wxCommandEvent& /*evt*/)
 {
-	glCanvas->ResetPan();
-	glCanvas->display();
+  glCanvas->ResetPan();
+  glCanvas->display();
 }
 
 void MainFrame::onMode(wxCommandEvent& event)
 {
-	glCanvas->setMode(event.GetId());
-	glCanvas->display();
+  glCanvas->setMode(event.GetId());
+  glCanvas->display();
 }
 
 void MainFrame::onShowSystem(wxCommandEvent& /*evt*/)
 {
-	glCanvas->showSystem();
-	glCanvas->display();
+  glCanvas->showSystem();
+  glCanvas->display();
 }
 
 void MainFrame::onToggle3D(wxCommandEvent& /*evt*/)
 {
-	if(glCanvas->get3D())
-	app->forceWalls();
-	glCanvas->changeDrawMode();
-	glCanvas->display();
+  if (glCanvas->get3D())
+  {
+    app->forceWalls();
+  }
+  glCanvas->changeDrawMode();
+  glCanvas->display();
 }

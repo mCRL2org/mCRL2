@@ -37,19 +37,20 @@ using namespace grape::mcrl2gen;
 
 using namespace std;
 
-void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid, int error)
+void grape::grapeapp::display_message(grape_frame* p_main_frame, bool is_valid, int error)
 {
   int nl = p_main_frame->get_logpanel()->GetNumberOfLines();
   if (is_valid)
   {
     // display message in statusbar
-    p_main_frame->get_statusbar()->SetStatusText( p_main_frame->get_logpanel()->GetLineText(nl-2) );  
-  } 
+    p_main_frame->get_statusbar()->SetStatusText(p_main_frame->get_logpanel()->GetLineText(nl-2));
+  }
   else
   {
     // display message in box
     wxString message;
-    if (nl > 1) {
+    if (nl > 1)
+    {
       message = p_main_frame->get_logpanel()->GetLineText(nl-2);
       for (int i = 0; i < nl-2; ++i)
       {
@@ -61,63 +62,63 @@ void grape::grapeapp::display_message(grape_frame *p_main_frame, bool is_valid, 
       message = p_main_frame->get_logpanel()->GetValue();
     }
 
-    switch ( error )
+    switch (error)
     {
-    case CONVERSION_ERROR:
-      message = _T("Export to mCRL2 failed: \n\n") + message;
-      break;
-    case XML_ERROR:
-      message = _T("XML error: \n\n") + message;
-      break;
-    case DATA_TYPE_SPEC_PARSE_ERROR:
-      message = _T("Data type specification could not be parsed: \n\n") + message;
-      break;
-    case DATA_TYPE_SPEC_TYPE_CHECK_ERROR:
-      message = _T("Data type specification could not be type checked: \n\n") + message;
-      break;
-    case ARCH_DIA_ERROR:
-      message = _T("Architecture diagram error: \n\n") + message;
-      break;
-    case PROC_DIA_ERROR:
-      message = _T("Process diagram error: \n\n") + message;
-      break;
-    case PROC_DIA_PARSE_ERROR:
-      message = _T("Process diagram could not be parsed: \n\n") + message;
-      break;
-    case PROC_DIA_TYPE_CHECK_ERROR:
-      message = _T("Process diagram could not be type checked: \n\n") + message;
-      break;
-    case SPEC_ERROR:
-      message = _T("Specification error: \n\n") + message;
-      break;
-    default:
-      message = _T("Unknown error: \n\n") + message;
-      break;
+      case CONVERSION_ERROR:
+        message = _T("Export to mCRL2 failed: \n\n") + message;
+        break;
+      case XML_ERROR:
+        message = _T("XML error: \n\n") + message;
+        break;
+      case DATA_TYPE_SPEC_PARSE_ERROR:
+        message = _T("Data type specification could not be parsed: \n\n") + message;
+        break;
+      case DATA_TYPE_SPEC_TYPE_CHECK_ERROR:
+        message = _T("Data type specification could not be type checked: \n\n") + message;
+        break;
+      case ARCH_DIA_ERROR:
+        message = _T("Architecture diagram error: \n\n") + message;
+        break;
+      case PROC_DIA_ERROR:
+        message = _T("Process diagram error: \n\n") + message;
+        break;
+      case PROC_DIA_PARSE_ERROR:
+        message = _T("Process diagram could not be parsed: \n\n") + message;
+        break;
+      case PROC_DIA_TYPE_CHECK_ERROR:
+        message = _T("Process diagram could not be type checked: \n\n") + message;
+        break;
+      case SPEC_ERROR:
+        message = _T("Specification error: \n\n") + message;
+        break;
+      default:
+        message = _T("Unknown error: \n\n") + message;
+        break;
     }
-    wxMessageBox( message, (error==CONVERSION_ERROR?_T("Export error"):_T("Validation error")), wxOK | wxICON_ERROR );
-  }    
+    wxMessageBox(message, (error==CONVERSION_ERROR?_T("Export error"):_T("Validation error")), wxOK | wxICON_ERROR);
+  }
 }
 
-grape_event_select_diagram::grape_event_select_diagram(grape_frame *p_main_frame, const wxString &p_diagram_name)
-: grape_event_base(p_main_frame, false, _T("diagram select"))
+grape_event_select_diagram::grape_event_select_diagram(grape_frame* p_main_frame, const wxString& p_diagram_name)
+  : grape_event_base(p_main_frame, false, _T("diagram select"))
 {
   m_diagram_name = p_diagram_name;
-  diagram* dia_ptr = find_diagram( p_diagram_name );
+  diagram* dia_ptr = find_diagram(p_diagram_name);
 
   m_diagram = 0;
   m_diagram_type = GRAPE_NO_DIAGRAM;
-  if ( dia_ptr != 0 )
+  if (dia_ptr != 0)
   {
     m_diagram = dia_ptr->get_id();
     // perform a dynamic cast to determine the diagram type
-    process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*> ( dia_ptr );
-    if ( proc_dia_ptr != 0 )
+    process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*>(dia_ptr);
+    if (proc_dia_ptr != 0)
     {
       m_diagram_type = GRAPE_PROCESS_DIAGRAM;
     }
     else
     {
-      assert(  dynamic_cast<architecture_diagram*> ( dia_ptr ) != 0 );
+      assert(dynamic_cast<architecture_diagram*>(dia_ptr) != 0);
       m_diagram_type = GRAPE_ARCHITECTURE_DIAGRAM;
     }
   }
@@ -129,34 +130,34 @@ grape_event_select_diagram::~grape_event_select_diagram(void)
 
 bool grape_event_select_diagram::Do(void)
 {
-  switch ( m_diagram_type )
+  switch (m_diagram_type)
   {
     case GRAPE_PROCESS_DIAGRAM:
     {
-      diagram* dia_ptr = find_diagram( m_diagram );
-      m_main_frame->get_glcanvas()->set_diagram( dia_ptr );
-      m_main_frame->set_mode( GRAPE_MODE_PROC );
+      diagram* dia_ptr = find_diagram(m_diagram);
+      m_main_frame->get_glcanvas()->set_diagram(dia_ptr);
+      m_main_frame->set_mode(GRAPE_MODE_PROC);
       break;
     }
     case GRAPE_ARCHITECTURE_DIAGRAM:
     {
-      diagram* arch_ptr = find_diagram( m_diagram );
-      m_main_frame->get_glcanvas()->set_diagram( arch_ptr );
-      m_main_frame->set_mode( GRAPE_MODE_ARCH );
+      diagram* arch_ptr = find_diagram(m_diagram);
+      m_main_frame->get_glcanvas()->set_diagram(arch_ptr);
+      m_main_frame->set_mode(GRAPE_MODE_ARCH);
       break;
     }
     default:
     {
-      m_main_frame->get_glcanvas()->set_diagram( 0 );
-      m_main_frame->set_mode( GRAPE_MODE_SPEC );
+      m_main_frame->get_glcanvas()->set_diagram(0);
+      m_main_frame->set_mode(GRAPE_MODE_SPEC);
       break;
     }
   }
   // deselect all objects if a diagram is selected
-  if ( m_main_frame->get_glcanvas()->get_diagram() )
+  if (m_main_frame->get_glcanvas()->get_diagram())
   {
-    grape_event_deselect_all* event = new grape_event_deselect_all( m_main_frame );
-    m_main_frame->get_event_handler()->Submit(event, false );
+    grape_event_deselect_all* event = new grape_event_deselect_all(m_main_frame);
+    m_main_frame->get_event_handler()->Submit(event, false);
   }
 
   // refresh visuals
@@ -170,8 +171,8 @@ bool grape_event_select_diagram::Undo(void)
   return true;
 }
 
-grape_event_rename_diagram::grape_event_rename_diagram(grape_frame *p_main_frame, const wxString &p_new_name, diagram* p_dia)
-: grape_event_base(p_main_frame, true, _T("rename"))
+grape_event_rename_diagram::grape_event_rename_diagram(grape_frame* p_main_frame, const wxString& p_new_name, diagram* p_dia)
+  : grape_event_base(p_main_frame, true, _T("rename"))
 {
   m_diagram = p_dia->get_id();
   m_orig_name = p_dia->get_name();
@@ -179,111 +180,115 @@ grape_event_rename_diagram::grape_event_rename_diagram(grape_frame *p_main_frame
   m_diagram = p_dia->get_id();
 
   m_diagram_type = GRAPE_NO_DIAGRAM;
-  if ( p_dia != 0 )
+  if (p_dia != 0)
   {
     // perform a dynamic cast to determine the diagram type
-    process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*> ( p_dia );
-    if ( proc_dia_ptr != 0 )
+    process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*>(p_dia);
+    if (proc_dia_ptr != 0)
     {
       m_diagram_type = GRAPE_PROCESS_DIAGRAM;
     }
     else
     {
-      assert(  dynamic_cast<architecture_diagram*> ( p_dia ) != 0 );
+      assert(dynamic_cast<architecture_diagram*>(p_dia) != 0);
       m_diagram_type = GRAPE_ARCHITECTURE_DIAGRAM;
     }
   }
 }
 
-grape_event_rename_diagram::~grape_event_rename_diagram( void )
+grape_event_rename_diagram::~grape_event_rename_diagram(void)
 {
 }
 
-bool grape_event_rename_diagram::Do( void )
+bool grape_event_rename_diagram::Do(void)
 {
-  grape_specification *spec = m_main_frame->get_grape_specification();
-  diagram* dia_ptr = find_diagram( m_diagram );
+  grape_specification* spec = m_main_frame->get_grape_specification();
+  diagram* dia_ptr = find_diagram(m_diagram);
   // update grapespecification
-  dia_ptr->set_name( m_new_name );
+  dia_ptr->set_name(m_new_name);
 
-  switch ( m_diagram_type )
+  switch (m_diagram_type)
   {
     case GRAPE_PROCESS_DIAGRAM:
     {
-      m_main_frame->set_mode( GRAPE_MODE_PROC );
+      m_main_frame->set_mode(GRAPE_MODE_PROC);
       // check whether any architecturereferences exist that should no longer point to the old name.
-      spec->check_references( m_new_name, static_cast<process_diagram*> ( dia_ptr ) );
-      grape_listbox *proc_list = m_main_frame->get_process_diagram_listbox();
-      proc_list->SetString( proc_list->FindString( m_orig_name, true ), m_new_name );
-      int pos = proc_list->FindString( m_new_name, true);
-      proc_list->SetSelection( pos );
+      spec->check_references(m_new_name, static_cast<process_diagram*>(dia_ptr));
+      grape_listbox* proc_list = m_main_frame->get_process_diagram_listbox();
+      proc_list->SetString(proc_list->FindString(m_orig_name, true), m_new_name);
+      int pos = proc_list->FindString(m_new_name, true);
+      proc_list->SetSelection(pos);
       // show selected diagram
-      grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_new_name);
+      grape_event_select_diagram* event = new grape_event_select_diagram(m_main_frame, m_new_name);
       m_main_frame->get_event_handler()->Submit(event, false);
       break;
     }
     case GRAPE_ARCHITECTURE_DIAGRAM:
     {
-      m_main_frame->set_mode( GRAPE_MODE_ARCH );
+      m_main_frame->set_mode(GRAPE_MODE_ARCH);
       // check whether any  architecturereferences exist that should point to the new name.
-      spec->check_references( m_new_name, static_cast<architecture_diagram*> ( dia_ptr ) );
-      grape_listbox *arch_list = m_main_frame->get_architecture_diagram_listbox();
-      arch_list->SetString( arch_list->FindString( m_orig_name, true ), m_new_name );
-      int pos = arch_list->FindString( m_new_name, true);
-      arch_list->SetSelection( pos );
+      spec->check_references(m_new_name, static_cast<architecture_diagram*>(dia_ptr));
+      grape_listbox* arch_list = m_main_frame->get_architecture_diagram_listbox();
+      arch_list->SetString(arch_list->FindString(m_orig_name, true), m_new_name);
+      int pos = arch_list->FindString(m_new_name, true);
+      arch_list->SetSelection(pos);
       // show selected diagram
-      grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_new_name);
+      grape_event_select_diagram* event = new grape_event_select_diagram(m_main_frame, m_new_name);
       m_main_frame->get_event_handler()->Submit(event, false);
       break;
     }
-    default: m_main_frame->set_mode( GRAPE_MODE_SPEC ); break;
+    default:
+      m_main_frame->set_mode(GRAPE_MODE_SPEC);
+      break;
   }
 
   finish_modification();
   return true;
 }
 
-bool grape_event_rename_diagram::Undo( void )
+bool grape_event_rename_diagram::Undo(void)
 {
-  grape_specification *spec = m_main_frame->get_grape_specification();
-  diagram* dia_ptr = find_diagram( m_diagram );
+  grape_specification* spec = m_main_frame->get_grape_specification();
+  diagram* dia_ptr = find_diagram(m_diagram);
 
   // update grapespecification
-  dia_ptr->set_name( m_orig_name );
+  dia_ptr->set_name(m_orig_name);
 
-  switch ( m_diagram_type )
+  switch (m_diagram_type)
   {
     case GRAPE_PROCESS_DIAGRAM:
     {
-      m_main_frame->set_mode( GRAPE_MODE_PROC );
+      m_main_frame->set_mode(GRAPE_MODE_PROC);
       // check whether any architecturereferences exist that should no longer point to the old name.
-      spec->check_references( m_new_name, static_cast<process_diagram*> ( dia_ptr ) );
-      grape_listbox *proc_list = m_main_frame->get_process_diagram_listbox();
-      proc_list->SetString( proc_list->FindString( m_new_name, true ), m_orig_name );
-      int pos = proc_list->FindString( m_orig_name, true );
-      proc_list->SetSelection( pos );
+      spec->check_references(m_new_name, static_cast<process_diagram*>(dia_ptr));
+      grape_listbox* proc_list = m_main_frame->get_process_diagram_listbox();
+      proc_list->SetString(proc_list->FindString(m_new_name, true), m_orig_name);
+      int pos = proc_list->FindString(m_orig_name, true);
+      proc_list->SetSelection(pos);
       break;
     }
     case GRAPE_ARCHITECTURE_DIAGRAM:
     {
-      m_main_frame->set_mode( GRAPE_MODE_ARCH );
+      m_main_frame->set_mode(GRAPE_MODE_ARCH);
       // check whether any  architecturereferences exist that should point to the old name.
-      spec->check_references( m_new_name, static_cast<architecture_diagram*> ( dia_ptr ) );
-      grape_listbox *arch_list = m_main_frame->get_architecture_diagram_listbox();
-      arch_list->SetString( arch_list->FindString( m_new_name, true ), m_orig_name );
-      int pos = arch_list->FindString( m_orig_name, true );
-      arch_list->SetSelection( pos );
+      spec->check_references(m_new_name, static_cast<architecture_diagram*>(dia_ptr));
+      grape_listbox* arch_list = m_main_frame->get_architecture_diagram_listbox();
+      arch_list->SetString(arch_list->FindString(m_new_name, true), m_orig_name);
+      int pos = arch_list->FindString(m_orig_name, true);
+      arch_list->SetSelection(pos);
       break;
     }
-    default: m_main_frame->set_mode( GRAPE_MODE_SPEC ); break;
+    default:
+      m_main_frame->set_mode(GRAPE_MODE_SPEC);
+      break;
   }
 
   finish_modification();
   return true;
 }
 
-grape_event_dialog_rename_diagram::grape_event_dialog_rename_diagram(grape_frame *p_main_frame )
-: grape_event_base(p_main_frame, false, _T("rename diagram"))
+grape_event_dialog_rename_diagram::grape_event_dialog_rename_diagram(grape_frame* p_main_frame)
+  : grape_event_base(p_main_frame, false, _T("rename diagram"))
 {
   m_old_name = wxEmptyString;
   m_new_name = wxEmptyString;
@@ -297,60 +302,60 @@ bool grape_event_dialog_rename_diagram::Do(void)
 {
   bool retry = false;
   m_old_name = m_main_frame->get_architecture_diagram_listbox()->GetStringSelection();
-  if ( m_old_name.IsEmpty() )
+  if (m_old_name.IsEmpty())
   {
     m_old_name = m_main_frame->get_process_diagram_listbox()->GetStringSelection();
   }
 
-  arr_architecture_diagram *arr_arch_dia = m_main_frame->get_grape_specification()->get_architecture_diagram_list();
-  arr_process_diagram *arr_proc_dia = m_main_frame->get_grape_specification()->get_process_diagram_list();
+  arr_architecture_diagram* arr_arch_dia = m_main_frame->get_grape_specification()->get_architecture_diagram_list();
+  arr_process_diagram* arr_proc_dia = m_main_frame->get_grape_specification()->get_process_diagram_list();
 
-  grape_text_dlg dialog( _T("Rename diagram"), _T("Please enter a name for the diagram."), m_old_name, false );
+  grape_text_dlg dialog(_T("Rename diagram"), _T("Please enter a name for the diagram."), m_old_name, false);
   wxString p_new_name;
-  bool m_pressed_ok = dialog.show_modal( p_new_name );
+  bool m_pressed_ok = dialog.show_modal(p_new_name);
   p_new_name.Trim(true);
   p_new_name.Trim(false);
-  if ( !m_pressed_ok || p_new_name.IsEmpty() || ( p_new_name == m_old_name ) )
+  if (!m_pressed_ok || p_new_name.IsEmpty() || (p_new_name == m_old_name))
   {
     return false;
   }
   else
   {
-    for ( unsigned int i = 0; i < arr_arch_dia->GetCount(); ++i )
+    for (unsigned int i = 0; i < arr_arch_dia->GetCount(); ++i)
     {
-      if ( ( arr_arch_dia->Item( i ).get_name() == p_new_name ) && ( arr_arch_dia->Item( i ).get_name() != m_old_name ) )
+      if ((arr_arch_dia->Item(i).get_name() == p_new_name) && (arr_arch_dia->Item(i).get_name() != m_old_name))
       {
-        wxMessageBox( _T("The name is already in the specification."), _T("Notification"), wxOK | wxICON_INFORMATION, m_main_frame );
+        wxMessageBox(_T("The name is already in the specification."), _T("Notification"), wxOK | wxICON_INFORMATION, m_main_frame);
         retry = true;
         break;
       }
     }
-    for ( unsigned int i = 0; i < arr_proc_dia->GetCount(); ++i )
+    for (unsigned int i = 0; i < arr_proc_dia->GetCount(); ++i)
     {
-      if ( ( arr_proc_dia->Item( i ).get_name() == p_new_name ) && ( arr_proc_dia->Item( i ).get_name() != m_old_name ) )
+      if ((arr_proc_dia->Item(i).get_name() == p_new_name) && (arr_proc_dia->Item(i).get_name() != m_old_name))
       {
-        wxMessageBox( _T("The name is already in the specification."), _T("Notification"), wxOK | wxICON_INFORMATION, m_main_frame );
+        wxMessageBox(_T("The name is already in the specification."), _T("Notification"), wxOK | wxICON_INFORMATION, m_main_frame);
         retry = true;
         break;
       }
     }
 
-    if ( retry )
+    if (retry)
     {
-      grape_event_dialog_rename_diagram *event = new grape_event_dialog_rename_diagram( m_main_frame );
-      return m_main_frame->get_event_handler()->Submit( event, false );
+      grape_event_dialog_rename_diagram* event = new grape_event_dialog_rename_diagram(m_main_frame);
+      return m_main_frame->get_event_handler()->Submit(event, false);
     }
     else
     {
       // retrieve the to be renamed diagram
-      diagram* dia_ptr = find_diagram( m_old_name );
-      assert( dia_ptr != 0 );
+      diagram* dia_ptr = find_diagram(m_old_name);
+      assert(dia_ptr != 0);
 
       // save the rename operation
       m_new_name = p_new_name;
 
-      grape_event_rename_diagram *event = new grape_event_rename_diagram(m_main_frame, m_new_name, dia_ptr);
-      return m_main_frame->get_event_handler()->Submit( event, true );
+      grape_event_rename_diagram* event = new grape_event_rename_diagram(m_main_frame, m_new_name, dia_ptr);
+      return m_main_frame->get_event_handler()->Submit(event, true);
     }
   }
   return true;
@@ -362,8 +367,8 @@ bool grape_event_dialog_rename_diagram::Undo(void)
   return true;
 }
 
-grape_event_remove_diagram::grape_event_remove_diagram(grape_frame *p_main_frame, diagram* p_dia_ptr, bool p_normal )
-: grape_event_base(p_main_frame, true, _T("remove diagram"))
+grape_event_remove_diagram::grape_event_remove_diagram(grape_frame* p_main_frame, diagram* p_dia_ptr, bool p_normal)
+  : grape_event_base(p_main_frame, true, _T("remove diagram"))
 {
   m_comments.Empty();
   m_reference_states.Empty();
@@ -377,104 +382,104 @@ grape_event_remove_diagram::grape_event_remove_diagram(grape_frame *p_main_frame
   m_process_references.Empty();
 
   // retrieve the current diagram.
-  assert( p_dia_ptr != 0 );
+  assert(p_dia_ptr != 0);
   m_diagram = p_dia_ptr->get_id();
   m_name = p_dia_ptr->get_name();
-  architecture_diagram* arch_dia_ptr = dynamic_cast<architecture_diagram*> ( p_dia_ptr );
-  if ( arch_dia_ptr != 0 )
+  architecture_diagram* arch_dia_ptr = dynamic_cast<architecture_diagram*>(p_dia_ptr);
+  if (arch_dia_ptr != 0)
   {
     m_type = GRAPE_ARCHITECTURE_DIAGRAM;
 
     // Fill the corresponding remove event arrays.
-    for ( unsigned int i = 0; i < arch_dia_ptr->count_comment(); ++i )
+    for (unsigned int i = 0; i < arch_dia_ptr->count_comment(); ++i)
     {
-      comment* comm_ptr = arch_dia_ptr->get_comment( i );
-      grape_event_remove_comment* event = new grape_event_remove_comment( m_main_frame, comm_ptr, arch_dia_ptr );
-      m_comments.Add( event );
+      comment* comm_ptr = arch_dia_ptr->get_comment(i);
+      grape_event_remove_comment* event = new grape_event_remove_comment(m_main_frame, comm_ptr, arch_dia_ptr);
+      m_comments.Add(event);
     }
-    for ( unsigned int i = 0; i < arch_dia_ptr->count_architecture_reference(); ++i )
+    for (unsigned int i = 0; i < arch_dia_ptr->count_architecture_reference(); ++i)
     {
-      architecture_reference* arch_ref_ptr = arch_dia_ptr->get_architecture_reference( i );
+      architecture_reference* arch_ref_ptr = arch_dia_ptr->get_architecture_reference(i);
       grape_event_remove_architecture_reference* event = new
-        grape_event_remove_architecture_reference( m_main_frame, arch_ref_ptr, arch_dia_ptr, p_normal );
-      m_architecture_references.Add( event );
+      grape_event_remove_architecture_reference(m_main_frame, arch_ref_ptr, arch_dia_ptr, p_normal);
+      m_architecture_references.Add(event);
     }
-    for ( unsigned int i = 0; i < arch_dia_ptr->count_process_reference(); ++i )
+    for (unsigned int i = 0; i < arch_dia_ptr->count_process_reference(); ++i)
     {
-      process_reference* proc_ref_ptr = arch_dia_ptr->get_process_reference( i );
+      process_reference* proc_ref_ptr = arch_dia_ptr->get_process_reference(i);
       grape_event_remove_process_reference* event = new
-        grape_event_remove_process_reference( m_main_frame, proc_ref_ptr, arch_dia_ptr, p_normal );
-      m_process_references.Add( event );
+      grape_event_remove_process_reference(m_main_frame, proc_ref_ptr, arch_dia_ptr, p_normal);
+      m_process_references.Add(event);
     }
-    if ( !p_normal )
+    if (!p_normal)
     {
-      for ( unsigned int i = 0; i < arch_dia_ptr->count_channel(); ++i )
+      for (unsigned int i = 0; i < arch_dia_ptr->count_channel(); ++i)
       {
-        channel* chan_ptr = arch_dia_ptr->get_channel( i );
+        channel* chan_ptr = arch_dia_ptr->get_channel(i);
         grape_event_remove_channel* event = new
-          grape_event_remove_channel( m_main_frame, chan_ptr, arch_dia_ptr, p_normal );
-        m_channels.Add( event );
+        grape_event_remove_channel(m_main_frame, chan_ptr, arch_dia_ptr, p_normal);
+        m_channels.Add(event);
       }
-      for ( unsigned int i = 0; i < arch_dia_ptr->count_channel_communication(); ++i )
+      for (unsigned int i = 0; i < arch_dia_ptr->count_channel_communication(); ++i)
       {
-        channel_communication* comm_ptr = arch_dia_ptr->get_channel_communication( i );
+        channel_communication* comm_ptr = arch_dia_ptr->get_channel_communication(i);
         grape_event_remove_channel_communication* event = new
-          grape_event_remove_channel_communication( m_main_frame, comm_ptr, arch_dia_ptr, p_normal );
-        m_channel_communications.Add( event );
+        grape_event_remove_channel_communication(m_main_frame, comm_ptr, arch_dia_ptr, p_normal);
+        m_channel_communications.Add(event);
       }
     }
   }
   else
   {
-    process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*> ( p_dia_ptr );
-    assert( proc_dia_ptr != 0 );
+    process_diagram* proc_dia_ptr = dynamic_cast<process_diagram*>(p_dia_ptr);
+    assert(proc_dia_ptr != 0);
     m_type = GRAPE_PROCESS_DIAGRAM;
 
     m_preamble = *(proc_dia_ptr->get_preamble());
 
     // Fill the corresponding remove event arrays.
-    for ( unsigned int i = 0; i < proc_dia_ptr->count_comment(); ++i )
+    for (unsigned int i = 0; i < proc_dia_ptr->count_comment(); ++i)
     {
-      comment* comm_ptr = proc_dia_ptr->get_comment( i );
-      grape_event_remove_comment* event = new grape_event_remove_comment( m_main_frame, comm_ptr, proc_dia_ptr );
-      m_comments.Add( event );
+      comment* comm_ptr = proc_dia_ptr->get_comment(i);
+      grape_event_remove_comment* event = new grape_event_remove_comment(m_main_frame, comm_ptr, proc_dia_ptr);
+      m_comments.Add(event);
     }
-    for ( unsigned int i = 0; i < proc_dia_ptr->count_terminating_transition(); ++i )
+    for (unsigned int i = 0; i < proc_dia_ptr->count_terminating_transition(); ++i)
     {
-      terminating_transition* tt_ptr = proc_dia_ptr->get_terminating_transition( i );
-      grape_event_remove_terminating_transition* event = new grape_event_remove_terminating_transition( m_main_frame, tt_ptr, proc_dia_ptr );
-      m_terminating_transitions.Add( event );
+      terminating_transition* tt_ptr = proc_dia_ptr->get_terminating_transition(i);
+      grape_event_remove_terminating_transition* event = new grape_event_remove_terminating_transition(m_main_frame, tt_ptr, proc_dia_ptr);
+      m_terminating_transitions.Add(event);
     }
-    for ( unsigned int i = 0; i < proc_dia_ptr->count_nonterminating_transition(); ++i )
+    for (unsigned int i = 0; i < proc_dia_ptr->count_nonterminating_transition(); ++i)
     {
-      nonterminating_transition* ntt_ptr = proc_dia_ptr->get_nonterminating_transition( i );
-      grape_event_remove_nonterminating_transition* event = new grape_event_remove_nonterminating_transition( m_main_frame, ntt_ptr, proc_dia_ptr );
-      m_nonterminating_transitions.Add( event );
+      nonterminating_transition* ntt_ptr = proc_dia_ptr->get_nonterminating_transition(i);
+      grape_event_remove_nonterminating_transition* event = new grape_event_remove_nonterminating_transition(m_main_frame, ntt_ptr, proc_dia_ptr);
+      m_nonterminating_transitions.Add(event);
     }
-    for ( unsigned int i = 0; i < proc_dia_ptr->count_initial_designator(); ++i )
+    for (unsigned int i = 0; i < proc_dia_ptr->count_initial_designator(); ++i)
     {
-      initial_designator* init_ptr = proc_dia_ptr->get_initial_designator( i );
-      grape_event_remove_initial_designator* event = new grape_event_remove_initial_designator( m_main_frame, init_ptr, proc_dia_ptr );
-      m_initial_designators.Add( event );
+      initial_designator* init_ptr = proc_dia_ptr->get_initial_designator(i);
+      grape_event_remove_initial_designator* event = new grape_event_remove_initial_designator(m_main_frame, init_ptr, proc_dia_ptr);
+      m_initial_designators.Add(event);
     }
-    for ( unsigned int i = 0; i < proc_dia_ptr->count_reference_state(); ++i )
+    for (unsigned int i = 0; i < proc_dia_ptr->count_reference_state(); ++i)
     {
-      reference_state* ref_state_ptr = proc_dia_ptr->get_reference_state( i );
+      reference_state* ref_state_ptr = proc_dia_ptr->get_reference_state(i);
       // boolean flag set to p_normal to indicate if it's a normal event. See documentation of m_normal of this event.
-      grape_event_remove_reference_state* event = new grape_event_remove_reference_state( m_main_frame, ref_state_ptr, proc_dia_ptr, p_normal );
-      m_reference_states.Add( event );
+      grape_event_remove_reference_state* event = new grape_event_remove_reference_state(m_main_frame, ref_state_ptr, proc_dia_ptr, p_normal);
+      m_reference_states.Add(event);
     }
-    for ( unsigned int i = 0; i < proc_dia_ptr->count_state(); ++i )
+    for (unsigned int i = 0; i < proc_dia_ptr->count_state(); ++i)
     {
-      state* state_ptr = proc_dia_ptr->get_state( i );
+      state* state_ptr = proc_dia_ptr->get_state(i);
       // boolean flag set to p_normal to indicate if it's a normal event. See documentation of m_normal of this event.
-      grape_event_remove_state* event = new grape_event_remove_state( m_main_frame, state_ptr, proc_dia_ptr, p_normal );
-      m_states.Add( event );
+      grape_event_remove_state* event = new grape_event_remove_state(m_main_frame, state_ptr, proc_dia_ptr, p_normal);
+      m_states.Add(event);
     }
   }
 }
 
-grape_event_remove_diagram::~grape_event_remove_diagram( void )
+grape_event_remove_diagram::~grape_event_remove_diagram(void)
 {
   m_comments.Clear();
   m_reference_states.Clear();
@@ -487,289 +492,289 @@ grape_event_remove_diagram::~grape_event_remove_diagram( void )
   m_process_references.Clear();
 }
 
-bool grape_event_remove_diagram::Do( void )
+bool grape_event_remove_diagram::Do(void)
 {
   grape_specification* spec = m_main_frame->get_grape_specification();
-  if ( m_type == GRAPE_ARCHITECTURE_DIAGRAM )
+  if (m_type == GRAPE_ARCHITECTURE_DIAGRAM)
   {
-    architecture_diagram* del_arch_dia_ptr = static_cast<architecture_diagram*> ( find_diagram( m_diagram, m_type ) );
-    for ( unsigned int i = 0; i < m_channel_communications.GetCount(); ++i )
+    architecture_diagram* del_arch_dia_ptr = static_cast<architecture_diagram*>(find_diagram(m_diagram, m_type));
+    for (unsigned int i = 0; i < m_channel_communications.GetCount(); ++i)
     {
-      grape_event_remove_channel_communication event = m_channel_communications.Item( i );
+      grape_event_remove_channel_communication event = m_channel_communications.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_channels.GetCount(); ++i)
     {
-      grape_event_remove_channel event = m_channels.Item( i );
+      grape_event_remove_channel event = m_channels.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_architecture_references.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_architecture_references.GetCount(); ++i)
     {
-      grape_event_remove_architecture_reference event = m_architecture_references.Item( i );
+      grape_event_remove_architecture_reference event = m_architecture_references.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_process_references.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_process_references.GetCount(); ++i)
     {
-      grape_event_remove_process_reference event = m_process_references.Item( i );
+      grape_event_remove_process_reference event = m_process_references.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_comments.GetCount(); ++i)
     {
-      grape_event_remove_comment event = m_comments.Item( i );
+      grape_event_remove_comment event = m_comments.Item(i);
       event.Do();
     }
 
     // check whether any architecturereferences exist that should no longer point to the diagram.
     architecture_diagram* dummy = 0;
-    spec->check_references( del_arch_dia_ptr->get_name(), dummy );
+    spec->check_references(del_arch_dia_ptr->get_name(), dummy);
 
     // update architecture listbox
-    grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
-    int pos = arch_listbox->FindString( del_arch_dia_ptr->get_name(), true );
-    arch_listbox->Delete( pos );
-    if ( pos > 0 )
+    grape_listbox* arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+    int pos = arch_listbox->FindString(del_arch_dia_ptr->get_name(), true);
+    arch_listbox->Delete(pos);
+    if (pos > 0)
     {
-      arch_listbox->Select( pos - 1 );
+      arch_listbox->Select(pos - 1);
     }
     else
     {
       // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
       if (!m_main_frame->get_process_diagram_listbox()->IsEmpty())
       {
-      	m_main_frame->get_process_diagram_listbox()->Select( 0 );
-  	  }
+        m_main_frame->get_process_diagram_listbox()->Select(0);
+      }
     }
 
     // update grape mode
     wxString m_selected_diagram = arch_listbox->GetStringSelection();
-    if ( m_selected_diagram == wxEmptyString )
+    if (m_selected_diagram == wxEmptyString)
     {
       // if this is also empty there will be no selection; grape_event_select_diagram will process according to that.
       m_selected_diagram = m_main_frame->get_process_diagram_listbox()->GetStringSelection();
     }
 
     // select new diagram
-    grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_selected_diagram);
+    grape_event_select_diagram* event = new grape_event_select_diagram(m_main_frame, m_selected_diagram);
     m_main_frame->get_event_handler()->Submit(event, false);
 
     // remove diagram from grapespecification
-    spec->remove_architecture_diagram( del_arch_dia_ptr );
+    spec->remove_architecture_diagram(del_arch_dia_ptr);
   }
   else
   {
-    assert( m_type == GRAPE_PROCESS_DIAGRAM); // If this assertion fails, then the diagram was of type GRAPE_NO_DIAGRAM ( a serious error );
-    process_diagram* proc_dia_ptr = static_cast<process_diagram*> ( find_diagram( m_diagram, m_type ) );
-    for ( unsigned int i = 0; i < m_terminating_transitions.GetCount(); ++i )
+    assert(m_type == GRAPE_PROCESS_DIAGRAM);  // If this assertion fails, then the diagram was of type GRAPE_NO_DIAGRAM ( a serious error );
+    process_diagram* proc_dia_ptr = static_cast<process_diagram*>(find_diagram(m_diagram, m_type));
+    for (unsigned int i = 0; i < m_terminating_transitions.GetCount(); ++i)
     {
-      grape_event_remove_terminating_transition event = m_terminating_transitions.Item( i );
+      grape_event_remove_terminating_transition event = m_terminating_transitions.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_nonterminating_transitions.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_nonterminating_transitions.GetCount(); ++i)
     {
-      grape_event_remove_nonterminating_transition event = m_nonterminating_transitions.Item( i );
+      grape_event_remove_nonterminating_transition event = m_nonterminating_transitions.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_initial_designators.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_initial_designators.GetCount(); ++i)
     {
-      grape_event_remove_initial_designator event = m_initial_designators.Item( i );
+      grape_event_remove_initial_designator event = m_initial_designators.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_reference_states.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_reference_states.GetCount(); ++i)
     {
-      grape_event_remove_reference_state event = m_reference_states.Item( i );
+      grape_event_remove_reference_state event = m_reference_states.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_states.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_states.GetCount(); ++i)
     {
-      grape_event_remove_state event = m_states.Item( i );
+      grape_event_remove_state event = m_states.Item(i);
       event.Do();
     }
-    for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_comments.GetCount(); ++i)
     {
-      grape_event_remove_comment event = m_comments.Item( i );
+      grape_event_remove_comment event = m_comments.Item(i);
       event.Do();
     }
     // check whether any processreferences exist that should no longer point to the diagram.
     process_diagram* dummy = 0;
-    spec->check_references( proc_dia_ptr->get_name(), dummy );
+    spec->check_references(proc_dia_ptr->get_name(), dummy);
 
     // update process listbox
-    grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
-    int pos = proc_listbox->FindString( proc_dia_ptr->get_name(), true );
-    proc_listbox->Delete( pos );
-    if ( pos > 0 )
+    grape_listbox* proc_listbox = m_main_frame->get_process_diagram_listbox();
+    int pos = proc_listbox->FindString(proc_dia_ptr->get_name(), true);
+    proc_listbox->Delete(pos);
+    if (pos > 0)
     {
-      proc_listbox->Select( pos - 1 );
+      proc_listbox->Select(pos - 1);
     }
     else
     {
       // if the architecture diagram listbox is empty, there will be no selection, try process diagram listbox
       if (!m_main_frame->get_architecture_diagram_listbox()->IsEmpty())
       {
-        m_main_frame->get_architecture_diagram_listbox()->Select( 0 );
+        m_main_frame->get_architecture_diagram_listbox()->Select(0);
       }
     }
 
     // update grape mode
     wxString m_selected_diagram = proc_listbox->GetStringSelection();
-    if ( m_selected_diagram == wxEmptyString )
+    if (m_selected_diagram == wxEmptyString)
     {
       // if this is also empty there will be no selection; grape_event_select_diagram will process according to that.
       m_selected_diagram = m_main_frame->get_architecture_diagram_listbox()->GetStringSelection();
     }
 
     // select new diagram
-    grape_event_select_diagram *event = new grape_event_select_diagram(m_main_frame, m_selected_diagram);
+    grape_event_select_diagram* event = new grape_event_select_diagram(m_main_frame, m_selected_diagram);
     m_main_frame->get_event_handler()->Submit(event, false);
 
     // remove diagram from grapespecification
-    spec->remove_process_diagram( proc_dia_ptr );
+    spec->remove_process_diagram(proc_dia_ptr);
   }
 
   finish_modification();
   return true;
 }
 
-bool grape_event_remove_diagram::Undo( void )
+bool grape_event_remove_diagram::Undo(void)
 {
   grape_specification* spec = m_main_frame->get_grape_specification();
-  if ( m_type == GRAPE_ARCHITECTURE_DIAGRAM )
+  if (m_type == GRAPE_ARCHITECTURE_DIAGRAM)
   {
-    architecture_diagram* arch_dia_ptr = spec->add_architecture_diagram( m_diagram );
-    arch_dia_ptr->set_name( m_name );
-    for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
+    architecture_diagram* arch_dia_ptr = spec->add_architecture_diagram(m_diagram);
+    arch_dia_ptr->set_name(m_name);
+    for (unsigned int i = 0; i < m_comments.GetCount(); ++i)
     {
-      grape_event_remove_comment event = m_comments.Item( i );
+      grape_event_remove_comment event = m_comments.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_process_references.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_process_references.GetCount(); ++i)
     {
-      grape_event_remove_process_reference event = m_process_references.Item( i );
+      grape_event_remove_process_reference event = m_process_references.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_architecture_references.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_architecture_references.GetCount(); ++i)
     {
-      grape_event_remove_architecture_reference event = m_architecture_references.Item( i );
+      grape_event_remove_architecture_reference event = m_architecture_references.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_channels.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_channels.GetCount(); ++i)
     {
-      grape_event_remove_channel event = m_channels.Item( i );
+      grape_event_remove_channel event = m_channels.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_channel_communications.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_channel_communications.GetCount(); ++i)
     {
-      grape_event_remove_channel_communication event = m_channel_communications.Item( i );
+      grape_event_remove_channel_communication event = m_channel_communications.Item(i);
       event.Undo();
     }
     // check whether any architecturereferences exist that should point to the diagram.
-    spec->check_references( arch_dia_ptr->get_name(), arch_dia_ptr );
+    spec->check_references(arch_dia_ptr->get_name(), arch_dia_ptr);
 
-    m_main_frame->get_glcanvas()->set_diagram( arch_dia_ptr );
+    m_main_frame->get_glcanvas()->set_diagram(arch_dia_ptr);
 
     // update grape mode
-    m_main_frame->set_mode( GRAPE_MODE_ARCH );
+    m_main_frame->set_mode(GRAPE_MODE_ARCH);
 
     // update architecture diagram listbox
-    grape_listbox *arch_listbox = m_main_frame->get_architecture_diagram_listbox();
-    int pos = arch_listbox->Append( arch_dia_ptr->get_name() );
-    arch_listbox->Select( pos );
+    grape_listbox* arch_listbox = m_main_frame->get_architecture_diagram_listbox();
+    int pos = arch_listbox->Append(arch_dia_ptr->get_name());
+    arch_listbox->Select(pos);
   }
   else
   {
-    process_diagram* proc_dia_ptr = spec->add_process_diagram( m_diagram );
-    proc_dia_ptr->set_name( m_name );
-    proc_dia_ptr->set_preamble( m_preamble );
-    for ( unsigned int i = 0; i < m_comments.GetCount(); ++i )
+    process_diagram* proc_dia_ptr = spec->add_process_diagram(m_diagram);
+    proc_dia_ptr->set_name(m_name);
+    proc_dia_ptr->set_preamble(m_preamble);
+    for (unsigned int i = 0; i < m_comments.GetCount(); ++i)
     {
-      grape_event_remove_comment event = m_comments.Item( i );
+      grape_event_remove_comment event = m_comments.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_states.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_states.GetCount(); ++i)
     {
-      grape_event_remove_state event = m_states.Item( i );
+      grape_event_remove_state event = m_states.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_reference_states.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_reference_states.GetCount(); ++i)
     {
-      grape_event_remove_reference_state event = m_reference_states.Item( i );
+      grape_event_remove_reference_state event = m_reference_states.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_initial_designators.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_initial_designators.GetCount(); ++i)
     {
-      grape_event_remove_initial_designator event = m_initial_designators.Item( i );
+      grape_event_remove_initial_designator event = m_initial_designators.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_nonterminating_transitions.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_nonterminating_transitions.GetCount(); ++i)
     {
-      grape_event_remove_nonterminating_transition event = m_nonterminating_transitions.Item( i );
+      grape_event_remove_nonterminating_transition event = m_nonterminating_transitions.Item(i);
       event.Undo();
     }
-    for ( unsigned int i = 0; i < m_terminating_transitions.GetCount(); ++i )
+    for (unsigned int i = 0; i < m_terminating_transitions.GetCount(); ++i)
     {
-      grape_event_remove_terminating_transition event = m_terminating_transitions.Item( i );
+      grape_event_remove_terminating_transition event = m_terminating_transitions.Item(i);
       event.Undo();
     }
     // check whether any architecturereferences exist that should point to the diagram.
-    spec->check_references( proc_dia_ptr->get_name(), proc_dia_ptr );
+    spec->check_references(proc_dia_ptr->get_name(), proc_dia_ptr);
 
-    m_main_frame->get_glcanvas()->set_diagram( proc_dia_ptr );
+    m_main_frame->get_glcanvas()->set_diagram(proc_dia_ptr);
 
     // update grape mode
-    m_main_frame->set_mode( GRAPE_MODE_PROC );
+    m_main_frame->set_mode(GRAPE_MODE_PROC);
 
     // update process diagram listbox
-    grape_listbox *proc_listbox = m_main_frame->get_process_diagram_listbox();
-    int pos = proc_listbox->Append( proc_dia_ptr->get_name() );
-    proc_listbox->Select( pos );
+    grape_listbox* proc_listbox = m_main_frame->get_process_diagram_listbox();
+    int pos = proc_listbox->Append(proc_dia_ptr->get_name());
+    proc_listbox->Select(pos);
   }
 
   finish_modification();
   return true;
 }
 
-grape_event_export_current_diagram_image::grape_event_export_current_diagram_image( grape_frame *p_main_frame )
-: grape_event_base( p_main_frame, false, _T( "export current diagram to image" ) )
+grape_event_export_current_diagram_image::grape_event_export_current_diagram_image(grape_frame* p_main_frame)
+  : grape_event_base(p_main_frame, false, _T("export current diagram to image"))
 {
 }
 
-grape_event_export_current_diagram_image::~grape_event_export_current_diagram_image( void )
+grape_event_export_current_diagram_image::~grape_event_export_current_diagram_image(void)
 {
 }
 
-bool grape_event_export_current_diagram_image::Do( void )
+bool grape_event_export_current_diagram_image::Do(void)
 {
 
-  diagram *export_diagram= m_main_frame->get_glcanvas()->get_diagram();
+  diagram* export_diagram= m_main_frame->get_glcanvas()->get_diagram();
   wxString diagram_name = export_diagram->get_name();
 
   // display save dialog
-  wxFileDialog save_dialog( m_main_frame, _T( "Export to image..." ),  m_main_frame->get_filename().GetPath(), m_main_frame->get_filename().GetName() + _T( "_" ) + diagram_name, _T( "PNG files ( *.png )|*.png|BMP files ( *.bmp )|*.bmp" ), wxFD_SAVE | wxFD_OVERWRITE_PROMPT );
+  wxFileDialog save_dialog(m_main_frame, _T("Export to image..."),  m_main_frame->get_filename().GetPath(), m_main_frame->get_filename().GetName() + _T("_") + diagram_name, _T("PNG files ( *.png )|*.png|BMP files ( *.bmp )|*.bmp"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
   int result = save_dialog.ShowModal();
 
-  if ( result == wxID_OK )
+  if (result == wxID_OK)
   {
     // get filename
-    wxFileName filename( save_dialog.GetPath() );
-    if ( ( filename.GetExt().Lower() != _T("png") ) && ( filename.GetExt().Lower() != _T("bmp") ) )
+    wxFileName filename(save_dialog.GetPath());
+    if ((filename.GetExt().Lower() != _T("png")) && (filename.GetExt().Lower() != _T("bmp")))
     {
       wxString fullname = filename.GetFullName();
-      filename.SetName( fullname );
-      if ( save_dialog.GetFilterIndex() == 1 )
+      filename.SetName(fullname);
+      if (save_dialog.GetFilterIndex() == 1)
       {
-        filename.SetExt( _T("bmp") );
+        filename.SetExt(_T("bmp"));
       }
       else
       {
-        filename.SetExt( _T("png") );
+        filename.SetExt(_T("png"));
       }
-      if ( filename.FileExists() )
+      if (filename.FileExists())
       {
         wxString s = _T("The file ");
         s += filename.GetFullPath();
-        s += _T(" already exists, do you wish to overwrite this file?" );
-        int result = wxMessageBox( s, _T("Question"), wxYES_NO | wxICON_QUESTION, m_main_frame );
-        if ( result == wxNO )
+        s += _T(" already exists, do you wish to overwrite this file?");
+        int result = wxMessageBox(s, _T("Question"), wxYES_NO | wxICON_QUESTION, m_main_frame);
+        if (result == wxNO)
         {
           cerr << "Exporting Aborted" << endl;
           return false;
@@ -781,7 +786,7 @@ bool grape_event_export_current_diagram_image::Do( void )
     size_t count = m_main_frame->get_glcanvas()->count_visual_object();
     int maxx = 0;
     int maxy = 0;
-    for ( size_t i = 0; i < count; ++i )
+    for (size_t i = 0; i < count; ++i)
     {
       visual_object* vis_obj = m_main_frame->get_glcanvas()->get_visual_object(i);
       if (vis_obj != 0)
@@ -813,7 +818,7 @@ bool grape_event_export_current_diagram_image::Do( void )
     //don't export if the opengl canvas size is zero
     if ((sub_image_width == 0) || (sub_image_height == 0))
     {
-      wxMessageBox( _T("Image could not be exported, because the canvas is too small."), _T("Notification"), wxOK | wxICON_EXCLAMATION, m_main_frame );
+      wxMessageBox(_T("Image could not be exported, because the canvas is too small."), _T("Notification"), wxOK | wxICON_EXCLAMATION, m_main_frame);
 
     }
     else
@@ -825,7 +830,7 @@ bool grape_event_export_current_diagram_image::Do( void )
       //update application
       wxSafeYield();
 
-      grape_event_deselect_all *event = new grape_event_deselect_all(m_main_frame);
+      grape_event_deselect_all* event = new grape_event_deselect_all(m_main_frame);
       m_main_frame->get_event_handler()->Submit(event, false);
 
       for (int x = 0; x < maxx; x+=sub_image_width)
@@ -853,13 +858,13 @@ bool grape_event_export_current_diagram_image::Do( void )
 
       bool save_success;
 
-      if ( filename.GetExt().Lower() == _T("bmp") )
+      if (filename.GetExt().Lower() == _T("bmp"))
       {
-        save_success = save_image.SaveFile( filename.GetFullPath(), wxBITMAP_TYPE_BMP);
+        save_success = save_image.SaveFile(filename.GetFullPath(), wxBITMAP_TYPE_BMP);
       }
       else
       {
-        save_success = save_image.SaveFile( filename.GetFullPath(), wxBITMAP_TYPE_PNG);
+        save_success = save_image.SaveFile(filename.GetFullPath(), wxBITMAP_TYPE_PNG);
       }
       //display message
       cerr << "Done" << endl;
@@ -870,14 +875,14 @@ bool grape_event_export_current_diagram_image::Do( void )
   return false;
 }
 
-bool grape_event_export_current_diagram_image::Undo( void )
+bool grape_event_export_current_diagram_image::Undo(void)
 {
   // cannot be undone
   return true;
 }
 
-grape_event_export_current_diagram_mcrl2::grape_event_export_current_diagram_mcrl2(grape_frame *p_main_frame)
-: grape_event_base(p_main_frame, false, _T("export current diagram to mCRL2"))
+grape_event_export_current_diagram_mcrl2::grape_event_export_current_diagram_mcrl2(grape_frame* p_main_frame)
+  : grape_event_base(p_main_frame, false, _T("export current diagram to mCRL2"))
 {
 }
 
@@ -889,31 +894,31 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
 {
   // clear logpanel and catch cout
   m_main_frame->get_logpanel()->Clear();
-  
+
   // convert specification to XML
   wxString empty_filename = wxEmptyString;
-  grape_specification *export_spec = m_main_frame->get_grape_specification();
+  grape_specification* export_spec = m_main_frame->get_grape_specification();
   wxXmlDocument export_doc = xml_convert(*export_spec, empty_filename, 2, false);
   convert_spaces(export_doc);
 
   // determine current diagram and ask for a parameter initialisation in case it is a process diagram
-  diagram *export_diagram = m_main_frame->get_glcanvas()->get_diagram();
+  diagram* export_diagram = m_main_frame->get_glcanvas()->get_diagram();
   wxString diagram_id;
   diagram_id.Printf(_T("%d"), export_diagram->get_id());
   wxString diagram_name = export_diagram->get_name();
-  architecture_diagram *arch_diag = dynamic_cast<architecture_diagram*>(export_diagram);
-    
+  architecture_diagram* arch_diag = dynamic_cast<architecture_diagram*>(export_diagram);
+
   // export process diagram
   list_of_decl_init param_init;
-  process_diagram *proc_diag = dynamic_cast<process_diagram*>(export_diagram);
-  if(proc_diag != 0)
+  process_diagram* proc_diag = dynamic_cast<process_diagram*>(export_diagram);
+  if (proc_diag != 0)
   {
     // validate process diagram
     try
     {
       validate_process_diagram(export_doc, diagram_id);
     }
-    catch ( int i )
+    catch (int i)
     {
       display_message(m_main_frame, false, i);
       return false;
@@ -924,13 +929,16 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
 
     // get parameter initialisation
     param_init.Empty();
-    preamble *export_preamble = proc_diag->get_preamble();
+    preamble* export_preamble = proc_diag->get_preamble();
 
     list_of_decl params = export_preamble->get_parameter_declarations_list();
-    if(params.GetCount() > 0)
+    if (params.GetCount() > 0)
     {
-      grape_parameter_dialog *dialog = new grape_parameter_dialog(params);
-      if (!dialog->show_modal()) return false;
+      grape_parameter_dialog* dialog = new grape_parameter_dialog(params);
+      if (!dialog->show_modal())
+      {
+        return false;
+      }
       param_init = dialog->get_initialisations();
       delete dialog;
       try
@@ -951,7 +959,7 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
     {
       validate_architecture_diagram(export_doc, diagram_id);
     }
-    catch ( int i )
+    catch (int i)
     {
       display_message(m_main_frame, false, i);
       return false;
@@ -960,58 +968,64 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
 
   // display save dialog
   wxFileDialog save_dialog(m_main_frame, _T("Export to mCRL2..."), m_main_frame->get_filename().GetPath(), m_main_frame->get_filename().GetName() + _T("_") + diagram_name, _T("mCRL2 files ( *.mcrl2 )|*.mcrl2"), wxFD_SAVE | wxFD_OVERWRITE_PROMPT);
-  if (save_dialog.ShowModal() == wxID_CANCEL ) return false;
-  
+  if (save_dialog.ShowModal() == wxID_CANCEL)
+  {
+    return false;
+  }
+
   // get filename
-  wxFileName filename( save_dialog.GetPath() );
-  if ( filename.GetExt().Lower() != _T("mcrl2") )
+  wxFileName filename(save_dialog.GetPath());
+  if (filename.GetExt().Lower() != _T("mcrl2"))
   {
     wxString fullname = filename.GetFullName();
-    filename.SetName( fullname );
-    filename.SetExt( _T("mcrl2") );
-    if ( filename.FileExists() )
+    filename.SetName(fullname);
+    filename.SetExt(_T("mcrl2"));
+    if (filename.FileExists())
     {
       wxString s = _T("The file ");
       s += filename.GetFullPath();
-      s += _T(" already exists, do you wish to overwrite this file?" );
-      int result = wxMessageBox( s, _T("Question"), wxYES_NO | wxICON_QUESTION, m_main_frame );
-      if ( result == wxNO ) return false;
-    }    
+      s += _T(" already exists, do you wish to overwrite this file?");
+      int result = wxMessageBox(s, _T("Question"), wxYES_NO | wxICON_QUESTION, m_main_frame);
+      if (result == wxNO)
+      {
+        return false;
+      }
+    }
   }
 
   // clear logpanel and catch cout
   m_main_frame->get_logpanel()->Clear();
 
-  wxString export_name = filename.GetFullPath(); 
-  if(arch_diag != 0)
+  wxString export_name = filename.GetFullPath();
+  if (arch_diag != 0)
   {
     // export architecture diagram
     try
     {
       export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, mcrl2::core::gsVerbose);
     }
-    catch ( int i )
-    { 
+    catch (int i)
+    {
       display_message(m_main_frame, false, i);
       return false;
     }
   }
-  else if(proc_diag != 0)
+  else if (proc_diag != 0)
   {
     // export process diagram
     try
     {
       export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, mcrl2::core::gsVerbose);
     }
-    catch ( int i )
+    catch (int i)
     {
       display_message(m_main_frame, false, i);
       return false;
     }
   }
-  
+
   display_message(m_main_frame, true, 0);
-  
+
   return true;
 }
 
@@ -1021,8 +1035,8 @@ bool grape_event_export_current_diagram_mcrl2::Undo(void)
   return true;
 }
 
-grape_event_validate_diagram::grape_event_validate_diagram(grape_frame *p_main_frame)
-: grape_event_base(p_main_frame, false, _T("validate current diagram"))
+grape_event_validate_diagram::grape_event_validate_diagram(grape_frame* p_main_frame)
+  : grape_event_base(p_main_frame, false, _T("validate current diagram"))
 {
 }
 
@@ -1037,37 +1051,37 @@ bool grape_event_validate_diagram::Do(void)
 
   // convert specification to XML
   wxString empty_filename = wxEmptyString;
-  grape_specification *validate_spec = m_main_frame->get_grape_specification();
+  grape_specification* validate_spec = m_main_frame->get_grape_specification();
   wxXmlDocument validate_doc = xml_convert(*validate_spec, empty_filename, 2, false);
   convert_spaces(validate_doc);
 
-  diagram *dia = m_main_frame->get_glcanvas()->get_diagram();
+  diagram* dia = m_main_frame->get_glcanvas()->get_diagram();
   int diagram_id = dia->get_id();
   wxString d_id;
   d_id.Printf(_T("%u"), diagram_id);
 
   // determine type of diagram to validate
-  architecture_diagram *arch_dia = dynamic_cast<architecture_diagram*>(dia);
-  process_diagram *proc_dia = dynamic_cast<process_diagram*>(dia);
+  architecture_diagram* arch_dia = dynamic_cast<architecture_diagram*>(dia);
+  process_diagram* proc_dia = dynamic_cast<process_diagram*>(dia);
   if (arch_dia != 0)
   {
     try
     {
       validate_architecture_diagram(validate_doc, d_id);
     }
-    catch ( int i )
+    catch (int i)
     {
       display_message(m_main_frame, false, i);
       return false;
     }
   }
-  else if(proc_dia != 0)
+  else if (proc_dia != 0)
   {
     try
     {
       validate_process_diagram(validate_doc, d_id);
     }
-    catch ( int i )
+    catch (int i)
     {
       display_message(m_main_frame, false, i);
       return false;
@@ -1075,7 +1089,7 @@ bool grape_event_validate_diagram::Do(void)
   }
 
   display_message(m_main_frame, true, 0);
-    
+
   return true;
 }
 
@@ -1084,8 +1098,8 @@ bool grape_event_validate_diagram::Undo(void)
   return true;
 }
 
-grape_event_delete_selected_objects::grape_event_delete_selected_objects( grape_frame *p_main_frame )
-: grape_event_base( p_main_frame, true, _T( "delete selected objects" ) )
+grape_event_delete_selected_objects::grape_event_delete_selected_objects(grape_frame* p_main_frame)
+  : grape_event_base(p_main_frame, true, _T("delete selected objects"))
 {
   m_comment.Empty();
   m_state.Empty();
@@ -1101,124 +1115,137 @@ grape_event_delete_selected_objects::grape_event_delete_selected_objects( grape_
   // fill the remove event arrays
   // determine the type of diagram.
   diagram* dia = m_main_frame->get_glcanvas()->get_diagram();
-  architecture_diagram* arch_dia = dynamic_cast<architecture_diagram*> ( dia );
-  if ( arch_dia != 0 )
+  architecture_diagram* arch_dia = dynamic_cast<architecture_diagram*>(dia);
+  if (arch_dia != 0)
   {
     // walk through the list of selected objects.
-    for ( unsigned int i = 0; i < arch_dia->count_selected_objects(); ++i )
+    for (unsigned int i = 0; i < arch_dia->count_selected_objects(); ++i)
     {
-      object* obj_ptr = arch_dia->get_selected_object( i );
+      object* obj_ptr = arch_dia->get_selected_object(i);
       object_type obj_type = obj_ptr->get_type();
-      switch ( obj_type )
+      switch (obj_type)
       {
         case COMMENT:
         {
-          grape_event_remove_comment* event = new grape_event_remove_comment( m_main_frame,
-                                                  static_cast<comment*> ( obj_ptr ), dia );
-          m_comment.Add( event );
+          grape_event_remove_comment* event = new grape_event_remove_comment(m_main_frame,
+              static_cast<comment*>(obj_ptr), dia);
+          m_comment.Add(event);
           break;
         }
         case CHANNEL:
         {
-          grape_event_remove_channel* event = new grape_event_remove_channel( m_main_frame,
-                                                  static_cast<channel*> ( obj_ptr ), arch_dia );
-          m_channel.Add( event );
+          grape_event_remove_channel* event = new grape_event_remove_channel(m_main_frame,
+              static_cast<channel*>(obj_ptr), arch_dia);
+          m_channel.Add(event);
           break;
         }
         case CHANNEL_COMMUNICATION:
         {
-          grape_event_remove_channel_communication* event = new grape_event_remove_channel_communication( m_main_frame,
-                                                  static_cast<channel_communication*> ( obj_ptr ), arch_dia );
-          m_c_comm.Add( event );
+          grape_event_remove_channel_communication* event = new grape_event_remove_channel_communication(m_main_frame,
+              static_cast<channel_communication*>(obj_ptr), arch_dia);
+          m_c_comm.Add(event);
           break;
         }
         case PROCESS_REFERENCE:
         {
-          grape_event_remove_process_reference* event = new grape_event_remove_process_reference( m_main_frame,
-                                                  static_cast<process_reference*> ( obj_ptr ), arch_dia );
-          m_proc_ref.Add( event );
+          grape_event_remove_process_reference* event = new grape_event_remove_process_reference(m_main_frame,
+              static_cast<process_reference*>(obj_ptr), arch_dia);
+          m_proc_ref.Add(event);
           break;
         }
         case ARCHITECTURE_REFERENCE:
         {
           grape_event_remove_architecture_reference* event = new grape_event_remove_architecture_reference
-                                    ( m_main_frame, static_cast<architecture_reference*> ( obj_ptr ), arch_dia );
-          m_arch_ref.Add( event );
+          (m_main_frame, static_cast<architecture_reference*>(obj_ptr), arch_dia);
+          m_arch_ref.Add(event);
           break;
         }
-        case INITIAL_DESIGNATOR:break;
-        case STATE:break;
-        case REFERENCE_STATE:break;
-        case NONTERMINATING_TRANSITION:break;
-        case TERMINATING_TRANSITION:break;
-        case NONE: break;
-        default: /* assert( false ); */ break;
+        case INITIAL_DESIGNATOR:
+          break;
+        case STATE:
+          break;
+        case REFERENCE_STATE:
+          break;
+        case NONTERMINATING_TRANSITION:
+          break;
+        case TERMINATING_TRANSITION:
+          break;
+        case NONE:
+          break;
+        default: /* assert( false ); */
+          break;
       }
     }
   }
   else
   {
-    process_diagram* proc_dia = dynamic_cast<process_diagram*> ( dia );
-    assert( proc_dia != 0 );
+    process_diagram* proc_dia = dynamic_cast<process_diagram*>(dia);
+    assert(proc_dia != 0);
     // walk through the list of selected objects.
-    for ( unsigned int i = 0; i < proc_dia->count_selected_objects(); ++i )
+    for (unsigned int i = 0; i < proc_dia->count_selected_objects(); ++i)
     {
-      object* obj_ptr = proc_dia->get_selected_object( i );
+      object* obj_ptr = proc_dia->get_selected_object(i);
       object_type obj_type = obj_ptr->get_type();
-      switch ( obj_type )
+      switch (obj_type)
       {
         case COMMENT:
         {
-          grape_event_remove_comment* event = new grape_event_remove_comment( m_main_frame,
-                                                  static_cast<comment*> ( obj_ptr ), dia );
-          m_comment.Add( event );
+          grape_event_remove_comment* event = new grape_event_remove_comment(m_main_frame,
+              static_cast<comment*>(obj_ptr), dia);
+          m_comment.Add(event);
           break;
         }
         case INITIAL_DESIGNATOR:
         {
-          grape_event_remove_initial_designator* event = new grape_event_remove_initial_designator( m_main_frame,
-                                                  static_cast<initial_designator*> ( obj_ptr ), proc_dia );
-          m_init.Add( event );
+          grape_event_remove_initial_designator* event = new grape_event_remove_initial_designator(m_main_frame,
+              static_cast<initial_designator*>(obj_ptr), proc_dia);
+          m_init.Add(event);
           break;
         }
         case STATE:
         {
-          grape_event_remove_state* event = new grape_event_remove_state( m_main_frame,
-                                                  static_cast<state*> ( obj_ptr ), proc_dia );
-          m_state.Add( event );
+          grape_event_remove_state* event = new grape_event_remove_state(m_main_frame,
+              static_cast<state*>(obj_ptr), proc_dia);
+          m_state.Add(event);
           break;
         }
         case REFERENCE_STATE:
         {
-          grape_event_remove_reference_state* event = new grape_event_remove_reference_state( m_main_frame,
-                                                  static_cast<reference_state*> ( obj_ptr ), proc_dia );
-          m_ref_state.Add( event );
+          grape_event_remove_reference_state* event = new grape_event_remove_reference_state(m_main_frame,
+              static_cast<reference_state*>(obj_ptr), proc_dia);
+          m_ref_state.Add(event);
           break;
         }
         case NONTERMINATING_TRANSITION:
         {
-          grape_event_remove_nonterminating_transition* event = new grape_event_remove_nonterminating_transition( m_main_frame, static_cast<nonterminating_transition*> ( obj_ptr ), proc_dia );
-          m_ntt.Add( event );
+          grape_event_remove_nonterminating_transition* event = new grape_event_remove_nonterminating_transition(m_main_frame, static_cast<nonterminating_transition*>(obj_ptr), proc_dia);
+          m_ntt.Add(event);
           break;
         }
         case TERMINATING_TRANSITION:
         {
-          grape_event_remove_terminating_transition* event = new grape_event_remove_terminating_transition( m_main_frame, static_cast<terminating_transition*> ( obj_ptr ), proc_dia );
-          m_tt.Add( event );
+          grape_event_remove_terminating_transition* event = new grape_event_remove_terminating_transition(m_main_frame, static_cast<terminating_transition*>(obj_ptr), proc_dia);
+          m_tt.Add(event);
           break;
         }
-        case CHANNEL:break;
-        case CHANNEL_COMMUNICATION: break;
-        case PROCESS_REFERENCE: break;
-        case ARCHITECTURE_REFERENCE: break;
-        case NONE:break;
-        default: /* assert( false ); */ break;
+        case CHANNEL:
+          break;
+        case CHANNEL_COMMUNICATION:
+          break;
+        case PROCESS_REFERENCE:
+          break;
+        case ARCHITECTURE_REFERENCE:
+          break;
+        case NONE:
+          break;
+        default: /* assert( false ); */
+          break;
       }
     }
   }
 }
 
-grape_event_delete_selected_objects::~grape_event_delete_selected_objects( void )
+grape_event_delete_selected_objects::~grape_event_delete_selected_objects(void)
 {
   m_comment.Clear();
   m_state.Clear();
@@ -1232,61 +1259,61 @@ grape_event_delete_selected_objects::~grape_event_delete_selected_objects( void 
   m_arch_ref.Clear();
 }
 
-bool grape_event_delete_selected_objects::Do( void )
+bool grape_event_delete_selected_objects::Do(void)
 {
   // Note: Perform the remove Do events in the correct order, or there will be trouble.
-  for ( unsigned int i = 0; i < m_comment.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_comment.GetCount(); ++i)
   {
-    grape_event_remove_comment event = m_comment.Item( i );
+    grape_event_remove_comment event = m_comment.Item(i);
     event.Do();
   }
-  for ( unsigned int i = 0; i < m_ntt.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_ntt.GetCount(); ++i)
   {
-    grape_event_remove_nonterminating_transition event = m_ntt.Item( i );
+    grape_event_remove_nonterminating_transition event = m_ntt.Item(i);
     event.Do();
   }
-  for ( unsigned int i = 0; i < m_tt.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_tt.GetCount(); ++i)
   {
-    grape_event_remove_terminating_transition event = m_tt.Item( i );
+    grape_event_remove_terminating_transition event = m_tt.Item(i);
     event.Do();
   }
-  for ( unsigned int i = 0; i < m_init.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_init.GetCount(); ++i)
   {
-    grape_event_remove_initial_designator event = m_init.Item( i );
+    grape_event_remove_initial_designator event = m_init.Item(i);
     event.Do();
   }
   // Perform remove of state and reference state after the remove of transitions and initial designators
-  for ( unsigned int i = 0; i < m_state.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_state.GetCount(); ++i)
   {
-    grape_event_remove_state event = m_state.Item( i );
+    grape_event_remove_state event = m_state.Item(i);
     event.Do();
   }
-  for ( unsigned int i = 0; i < m_ref_state.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_ref_state.GetCount(); ++i)
   {
-    grape_event_remove_reference_state event = m_ref_state.Item( i );
+    grape_event_remove_reference_state event = m_ref_state.Item(i);
     event.Do();
   }
   // Perform remove of channel communications
-  for ( unsigned int i = 0; i < m_c_comm.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_c_comm.GetCount(); ++i)
   {
-    grape_event_remove_channel_communication event = m_c_comm.Item( i );
+    grape_event_remove_channel_communication event = m_c_comm.Item(i);
     event.Do();
   }
   // Then channels
-  for ( unsigned int i = 0; i < m_channel.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_channel.GetCount(); ++i)
   {
-    grape_event_remove_channel event = m_channel.Item( i );
+    grape_event_remove_channel event = m_channel.Item(i);
     event.Do();
   }
   // And lastly references
-  for ( unsigned int i = 0; i < m_proc_ref.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_proc_ref.GetCount(); ++i)
   {
-    grape_event_remove_process_reference event = m_proc_ref.Item( i );
+    grape_event_remove_process_reference event = m_proc_ref.Item(i);
     event.Do();
   }
-  for ( unsigned int i = 0; i < m_arch_ref.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_arch_ref.GetCount(); ++i)
   {
-    grape_event_remove_architecture_reference event = m_arch_ref.Item( i );
+    grape_event_remove_architecture_reference event = m_arch_ref.Item(i);
     event.Do();
   }
 
@@ -1294,63 +1321,63 @@ bool grape_event_delete_selected_objects::Do( void )
   return true;
 }
 
-bool grape_event_delete_selected_objects::Undo( void )
+bool grape_event_delete_selected_objects::Undo(void)
 {
   // Note: Perform the remove Undo events in the correct order, or there will be trouble.
-  for ( unsigned int i = 0; i < m_comment.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_comment.GetCount(); ++i)
   {
-    grape_event_remove_comment event = m_comment.Item( i );
+    grape_event_remove_comment event = m_comment.Item(i);
     event.Undo();
   }
 
   // Perform put back state and reference state before transitions and initial designators
-  for ( unsigned int i = 0; i < m_state.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_state.GetCount(); ++i)
   {
-    grape_event_remove_state event = m_state.Item( i );
+    grape_event_remove_state event = m_state.Item(i);
     event.Undo();
   }
-  for ( unsigned int i = 0; i < m_ref_state.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_ref_state.GetCount(); ++i)
   {
-    grape_event_remove_reference_state event = m_ref_state.Item( i );
+    grape_event_remove_reference_state event = m_ref_state.Item(i);
     event.Undo();
   }
-  for ( unsigned int i = 0; i < m_ntt.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_ntt.GetCount(); ++i)
   {
-    grape_event_remove_nonterminating_transition event = m_ntt.Item( i );
+    grape_event_remove_nonterminating_transition event = m_ntt.Item(i);
     event.Undo();
   }
-  for ( unsigned int i = 0; i < m_tt.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_tt.GetCount(); ++i)
   {
-    grape_event_remove_terminating_transition event = m_tt.Item( i );
+    grape_event_remove_terminating_transition event = m_tt.Item(i);
     event.Undo();
   }
-  for ( unsigned int i = 0; i < m_init.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_init.GetCount(); ++i)
   {
-    grape_event_remove_initial_designator event = m_init.Item( i );
+    grape_event_remove_initial_designator event = m_init.Item(i);
     event.Undo();
   }
 
   // Begin with references
-  for ( unsigned int i = 0; i < m_proc_ref.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_proc_ref.GetCount(); ++i)
   {
-    grape_event_remove_process_reference event = m_proc_ref.Item( i );
+    grape_event_remove_process_reference event = m_proc_ref.Item(i);
     event.Undo();
   }
-  for ( unsigned int i = 0; i < m_arch_ref.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_arch_ref.GetCount(); ++i)
   {
-    grape_event_remove_architecture_reference event = m_arch_ref.Item( i );
+    grape_event_remove_architecture_reference event = m_arch_ref.Item(i);
     event.Undo();
   }
   // Then channels
-  for ( unsigned int i = 0; i < m_channel.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_channel.GetCount(); ++i)
   {
-    grape_event_remove_channel event = m_channel.Item( i );
+    grape_event_remove_channel event = m_channel.Item(i);
     event.Undo();
   }
   // Then channel communications
-  for ( unsigned int i = 0; i < m_c_comm.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_c_comm.GetCount(); ++i)
   {
-    grape_event_remove_channel_communication event = m_c_comm.Item( i );
+    grape_event_remove_channel_communication event = m_c_comm.Item(i);
     event.Undo();
   }
 

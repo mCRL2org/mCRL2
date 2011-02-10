@@ -47,11 +47,17 @@ struct fg_replacer
   aterm_appl operator()(aterm_appl t) const
   {
     if (t.function().name() == "f")
+    {
       return aterm_appl(function_symbol("g", t.function().arity()), aterm_list(t.begin(), t.end()));
+    }
     else if (t.function().name() == "g")
+    {
       return aterm_appl(function_symbol("f", t.function().arity()), aterm_list(t.begin(), t.end()));
+    }
     else
+    {
       return t;
+    }
   }
 };
 
@@ -61,11 +67,17 @@ struct fg_partial_replacer
   std::pair<aterm_appl, bool> operator()(aterm_appl t) const
   {
     if (t.function().name() == "f")
+    {
       return std::make_pair(aterm_appl(function_symbol("g", t.function().arity()), aterm_list(t.begin(), t.end())), false);
+    }
     else if (t.function().name() == "g")
+    {
       return std::make_pair(aterm_appl(function_symbol("f", t.function().arity()), aterm_list(t.begin(), t.end())), false);
+    }
     else
+    {
       return std::make_pair(t, true);
+    }
   }
 };
 

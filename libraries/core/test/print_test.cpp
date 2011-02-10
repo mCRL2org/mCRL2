@@ -35,7 +35,7 @@ void test_print()
 
   // print using the two argument function print
   BOOST_CHECK(core::print(s) == "abc");
-  
+
   core::garbage_collect();
 }
 

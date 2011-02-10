@@ -16,67 +16,69 @@
 #include <cassert>
 #include "boost/current_function.hpp"
 
-namespace mcrl2 {
-  /// \brief The main namespace for the Core library.
-  namespace core {
+namespace mcrl2
+{
+/// \brief The main namespace for the Core library.
+namespace core
+{
 
-      //Message printing options
-      //------------------------
+//Message printing options
+//------------------------
 
-      /// \brief Printing of warnings, verbose information and extended debugging
-      ///      information during program execution is disabled.
-      void gsSetQuietMsg();
+/// \brief Printing of warnings, verbose information and extended debugging
+///      information during program execution is disabled.
+void gsSetQuietMsg();
 
-      /// \brief Printing of warnings during program execution is enabled. Printing of
-      ///      verbose information and extended debugging information is disabled.
-      void gsSetNormalMsg();
+/// \brief Printing of warnings during program execution is enabled. Printing of
+///      verbose information and extended debugging information is disabled.
+void gsSetNormalMsg();
 
-      /// \brief Printing of warnings and verbose information during program execution
-      ///      is enabled. Printing of extended debugging information is disabled.
-      void gsSetVerboseMsg();
+/// \brief Printing of warnings and verbose information during program execution
+///      is enabled. Printing of extended debugging information is disabled.
+void gsSetVerboseMsg();
 
-      /// \brief Printing of warnings, verbose information and extended debugging
-      ///      information during program execution is enabled.
-      void gsSetDebugMsg();
+/// \brief Printing of warnings, verbose information and extended debugging
+///      information during program execution is enabled.
+void gsSetDebugMsg();
 
-      /// \brief If gsQuiet is set, printing of warnings, verbose information and extended debugging
-      /// information during program execution is disabled.
-      extern bool gsQuiet;
+/// \brief If gsQuiet is set, printing of warnings, verbose information and extended debugging
+/// information during program execution is disabled.
+extern bool gsQuiet;
 
-      /// \brief If gsWarning is set, printing of warnings during program execution is enabled. Printing of
-      /// verbose information and extended debugging information is disabled.
-      extern bool gsWarning;
+/// \brief If gsWarning is set, printing of warnings during program execution is enabled. Printing of
+/// verbose information and extended debugging information is disabled.
+extern bool gsWarning;
 
-      /// \brief If gsVerbose is set, printing of warnings and verbose information during program execution
-      /// is enabled. Printing of extended debugging information is disabled.
-      extern bool gsVerbose;
+/// \brief If gsVerbose is set, printing of warnings and verbose information during program execution
+/// is enabled. Printing of extended debugging information is disabled.
+extern bool gsVerbose;
 
-      /// \brief If gsDebug is set, printing of warnings, verbose information and extended debugging
-      /// information during program execution is enabled.
-      extern bool gsDebug;
+/// \brief If gsDebug is set, printing of warnings, verbose information and extended debugging
+/// information during program execution is enabled.
+extern bool gsDebug;
 
-      /// \brief Type for message distinction (by purpose).
-      enum messageType {gs_notice, gs_warning, gs_error};
+/// \brief Type for message distinction (by purpose).
+enum messageType {gs_notice, gs_warning, gs_error};
 
-      /// \brief Function for printing regular messages  .
-      void gsMessage(const char *Format, ...);
-      /// \brief Function for printing error messages.
-      void gsErrorMsg(const char *Format, ...);
-      /// \brief Function for printing verbose messages.
-      void gsVerboseMsg(const char *Format, ...);
-      /// \brief Function for printing warning messages.
-      void gsWarningMsg(const char *Format, ...);
-      /// \brief Function for printing debug messages.
-      void gsDebugMsg(const char *Format, ...);
-      /// \brief Function for printing debug messages.
-      void gsDebugMsgFunc(const char *FuncName, const char *Format, ...);
+/// \brief Function for printing regular messages  .
+void gsMessage(const char* Format, ...);
+/// \brief Function for printing error messages.
+void gsErrorMsg(const char* Format, ...);
+/// \brief Function for printing verbose messages.
+void gsVerboseMsg(const char* Format, ...);
+/// \brief Function for printing warning messages.
+void gsWarningMsg(const char* Format, ...);
+/// \brief Function for printing debug messages.
+void gsDebugMsg(const char* Format, ...);
+/// \brief Function for printing debug messages.
+void gsDebugMsgFunc(const char* FuncName, const char* Format, ...);
 
-      /// \brief Function for printing debug messages.
+/// \brief Function for printing debug messages.
 #define gsDebugMsg(...)        gsDebugMsgFunc(BOOST_CURRENT_FUNCTION, __VA_ARGS__)
 
-      /// \brief Replaces message_handler by the function pointer passed as argument.
-      void gsSetCustomMessageHandler(void (*)(messageType, const char*));
-  }
+/// \brief Replaces message_handler by the function pointer passed as argument.
+void gsSetCustomMessageHandler(void (*)(messageType, const char*));
+}
 }
 
 #endif

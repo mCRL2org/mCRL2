@@ -17,9 +17,11 @@
 #include "mcrl2/fdr/seq_expression_fwd.h"
 #include "mcrl2/fdr/set_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated generator class declarations ---//
 /// \brief A set generator

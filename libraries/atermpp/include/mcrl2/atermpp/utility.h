@@ -18,14 +18,14 @@
 namespace atermpp
 {
 
-  /// \brief Make a term from a string pattern.
-  /// \param pattern A string
-  /// \return The term constructed from the pattern.
-  inline
-  aterm make_term(const std::string& pattern)
-  {
-    return aterm(ATreadFromString(const_cast<char*>(pattern.c_str())));
-  }
+/// \brief Make a term from a string pattern.
+/// \param pattern A string
+/// \return The term constructed from the pattern.
+inline
+aterm make_term(const std::string& pattern)
+{
+  return aterm(ATreadFromString(const_cast<char*>(pattern.c_str())));
+}
 
 
 } // namespace atermpp

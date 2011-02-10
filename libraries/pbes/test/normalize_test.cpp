@@ -123,9 +123,9 @@ void test_normalize3()
 {
   // test case from Aad Mathijssen, 1-4-2008
   lps::specification spec = lps::linearise(
-    "proc P = tau.P;\n"
-    "init P;        \n"
-  );
+                              "proc P = tau.P;\n"
+                              "init P;        \n"
+                            );
   state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
@@ -165,7 +165,7 @@ pbes_system::pbes_expression expr(const std::string& text)
 inline
 pbes_expression parse(const std::string& expr)
 {
-  std::string var_decl = 
+  std::string var_decl =
     "datavar    \n"
     "  m: Nat;  \n"
     "  n: Nat;  \n"
@@ -183,14 +183,14 @@ pbes_expression parse(const std::string& expr)
 inline
 std::string print(const pbes_expression& x)
 {
-	return core::pp(x);
+  return core::pp(x);
 }
 
 inline
 pbes_expression norm(const pbes_expression& x)
 {
   return detail::normalize_and_or(x);
-}    
+}
 
 void test_normalize_and_or_equality(std::string expr1, std::string expr2)
 {
@@ -199,19 +199,19 @@ void test_normalize_and_or_equality(std::string expr1, std::string expr2)
     expr2,
     parse,
     print,
-	  std::equal_to<pbes_expression>(),
-	  norm,
+    std::equal_to<pbes_expression>(),
+    norm,
     "normalize_and_or",
-	  norm,
+    norm,
     "normalize_and_or"
   );
 }
 
 void test_normalize_and_or()
 {
-	test_normalize_and_or_equality("X && Y", "Y && X");
-	test_normalize_and_or_equality("X && X && Y", "X && Y && X");
-	test_normalize_and_or_equality("X && X && Y", "Y && X && X");
+  test_normalize_and_or_equality("X && Y", "Y && X");
+  test_normalize_and_or_equality("X && X && Y", "X && Y && X");
+  test_normalize_and_or_equality("X && X && Y", "Y && X && X");
   core::garbage_collect();
 }
 

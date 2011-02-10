@@ -33,11 +33,11 @@ class lpsinfo_tool: public input_tool
   public:
     lpsinfo_tool()
       : super(
-          TOOLNAME,
-          AUTHOR,
-          "display basic information about an LPS",
-          "Print basic information on the linear process specification (LPS) in INFILE.")
-     {}
+        TOOLNAME,
+        AUTHOR,
+        "display basic information about an LPS",
+        "Print basic information on the linear process specification (LPS) in INFILE.")
+    {}
 
   public:
 

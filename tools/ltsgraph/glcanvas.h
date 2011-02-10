@@ -15,31 +15,31 @@
 #include <wx/glcanvas.h>
 
 #ifndef LTSGRAPH3D_H
-  #include "ltsgraph.h"
+#include "ltsgraph.h"
 #else
-  class LTSGraph;
+class LTSGraph;
 #endif
 
 #ifndef VISUALIZER_H
-  #include "visualizer.h"
+#include "visualizer.h"
 #else
-  class Visualizer;
+class Visualizer;
 #endif
 
 class GLCanvas : public wxGLCanvas
 {
   public:
     GLCanvas(
-          LTSGraph* app,
-          wxWindow* parent,
-          const wxSize &size = wxDefaultSize,
-          int* attribList = NULL);
+      LTSGraph* app,
+      wxWindow* parent,
+      const wxSize& size = wxDefaultSize,
+      int* attribList = NULL);
 
     ~GLCanvas();
 
     void display();
     void initialize();
-    void setVisualizer(Visualizer *vis);
+    void setVisualizer(Visualizer* vis);
 
     void onPaint(wxPaintEvent& event);
     void onSize(wxSizeEvent& event);
@@ -56,45 +56,45 @@ class GLCanvas : public wxGLCanvas
     void onMouseRgtUp(wxMouseEvent& event);
     void onMouseWhl(wxMouseEvent& event);
     void onMouseDblClck(wxMouseEvent& event);
-	void onMouseMidUp(wxMouseEvent& event);
-	void onMouseMidDown(wxMouseEvent& event);
+    void onMouseMidUp(wxMouseEvent& event);
+    void onMouseMidDown(wxMouseEvent& event);
 
-    void getSize(double & width, double & height, double & depth);
-	void ResetAll();
-	void ResetPan();
-	void ResetRot();
-	void setMode(int tool);
-	void changeDrawMode();
-	void showSystem();
-	double getPixelSize();
+    void getSize(double& width, double& height, double& depth);
+    void ResetAll();
+    void ResetPan();
+    void ResetRot();
+    void setMode(int tool);
+    void changeDrawMode();
+    void showSystem();
+    double getPixelSize();
     double getAspectRatio() const;
-	double getMaxDepth() const;
-	void getMdlvwMtrx(double * mtrx);
-	void getCamPos(double & x, double & y, double & z);
-	bool get3D();
+    double getMaxDepth() const;
+    void getMdlvwMtrx(double* mtrx);
+    void getCamPos(double& x, double& y, double& z);
+    bool get3D();
 
   private:
     LTSGraph* owner;
     Visualizer* visualizer;
     bool displayAllowed;
-	bool panning;
-	bool dispSystem;
-	bool usingTool;
+    bool panning;
+    bool dispSystem;
+    bool usingTool;
     double scaleFactor, maxDepth;
     int oldX, oldY;
-	float lookX, lookY, lookZ, rotX, rotY;
-	double currentModelviewMatrix[16];
-	int currentTool;
-	bool calcRot;
-	bool drawIn3D;
+    float lookX, lookY, lookZ, rotX, rotY;
+    double currentModelviewMatrix[16];
+    int currentTool;
+    bool calcRot;
+    bool drawIn3D;
 
-	void normalizeMatrix();
+    void normalizeMatrix();
     bool pickObjects3d(int x, int y, wxMouseEvent const&);
-	void pickObjects(int x, int y, wxMouseEvent const&);
-    void processHits(const GLint hits, GLuint * buffer, wxMouseEvent const&);
-	void setMouseCursor(int theTool);
+    void pickObjects(int x, int y, wxMouseEvent const&);
+    void processHits(const GLint hits, GLuint* buffer, wxMouseEvent const&);
+    void setMouseCursor(int theTool);
 
-  DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };
 
 #endif //GLCANVAS_H

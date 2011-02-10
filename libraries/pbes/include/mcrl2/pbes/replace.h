@@ -18,9 +18,11 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 struct prop_var_substitution: public std::unary_function<propositional_variable_instantiation, pbes_expression>
 {
@@ -48,8 +50,8 @@ struct prop_var_substitution: public std::unary_function<propositional_variable_
 /// \return The result of the substitution.
 inline
 pbes_expression substitute_propositional_variable(const pbes_expression& x,
-                                                  const propositional_variable& X,
-                                                  const pbes_expression& phi)
+    const propositional_variable& X,
+    const pbes_expression& phi)
 {
   return core::make_update_apply_builder<pbes_expression_builder>(prop_var_substitution(X, phi))(x);
 }

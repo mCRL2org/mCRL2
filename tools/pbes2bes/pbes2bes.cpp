@@ -1,4 +1,4 @@
-// Author(s): Jan Friso Groote 
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -88,30 +88,32 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
     std::string default_rewriter() const
-    { return "quantifier-all";
+    {
+      return "quantifier-all";
     }
 
   public:
     pbes2bes_tool()
       : super(
-          NAME,
-          AUTHOR,
-          "Generate a BES from a PBES. ",
-          "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
-          "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
-        opt_outputformat("bes"),
-        opt_strategy(::bes::lazy),
-        opt_use_hashtables(false),
-        opt_construct_counter_example(false),
-        opt_store_as_tree(false),
-        opt_data_elm(true),
-        opt_counter_example_file("")
+        NAME,
+        AUTHOR,
+        "Generate a BES from a PBES. ",
+        "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
+        "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
+      opt_outputformat("bes"),
+      opt_strategy(::bes::lazy),
+      opt_use_hashtables(false),
+      opt_construct_counter_example(false),
+      opt_store_as_tree(false),
+      opt_data_elm(true),
+      opt_counter_example_file("")
     {}
 
 
   protected:
     void parse_options(const command_line_parser& parser)
-    { super::parse_options(parser);
+    {
+      super::parse_options(parser);
 
       input_output_tool::parse_options(parser);
 
@@ -125,7 +127,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       {
         std::string format = parser.option_argument("output");
 
-        if (!((format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes"))) {
+        if (!((format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes")))
+        {
           parser.error("unknown output format specified (got `" + format + "')");
         }
 
@@ -136,19 +139,20 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       {
         int strategy = parser.option_argument_as< int >("strategy");
 
-        switch (strategy) {
+        switch (strategy)
+        {
           case 0:
-           opt_strategy = lazy;
-           break;
+            opt_strategy = lazy;
+            break;
           case 1:
-           opt_strategy = optimize;
-           break;
+            opt_strategy = optimize;
+            break;
           case 2:
-           opt_strategy = on_the_fly;
-           break;
+            opt_strategy = on_the_fly;
+            break;
           case 3:
-           opt_strategy = on_the_fly_with_fixed_points;
-           break;
+            opt_strategy = on_the_fly_with_fixed_points;
+            break;
           default:
             parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
         }
@@ -159,46 +163,46 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
     {
       super::add_options(desc);
       desc.
-        add_option("strategy", make_mandatory_argument("STRAT"),
-          "use strategy STRAT (default '0');\n"
-          " 0) Compute all boolean equations which can be reached"
-          " from the initial state, without optimization"
-          " (default). This is is the most data efficient"
-          " option per generated equation.\n"
-          " 1) Optimize by immediately substituting the right"
-          " hand sides for already investigated variables"
-          " that are true or false when generating an"
-          " expression. This is as memory efficient as 0.\n"
-          " 2) In addition to 1, also substitute variables that"
-          " are true or false into an already generated right"
-          " hand side. This can mean that certain variables"
-          " become unreachable (e.g. X0 in X0 and X1, when X1"
-          " becomes false, assuming X0 does not occur"
-          " elsewhere. It will be maintained which variables"
-          " have become unreachable as these do not have to be"
-          " investigated. Depending on the PBES, this can"
-          " reduce the size of the generated BES substantially"
-          " but requires a larger memory footprint.\n"
-          " 3) In addition to 2, investigate for generated"
-          " variables whether they occur on a loop, such that"
-          " they can be set to true or false, depending on the"
-          " fixed point symbol. This can increase the time"
-          " needed to generate an equation substantially",
-          's').
-        add_option("output",
-          make_mandatory_argument("FORMAT"),
-          "use output format FORMAT:\n"
-          " 'vasy',\n"
-          " 'pbes' (save as a PBES in internal format),\n"
-          " 'cwi',\n"
-          " 'bes' (default, save as a BES in internal format)",
-          'o').
-        add_option("tree",
-          "store state in a tree (for memory efficiency)",
-          't').
-        add_option("unused_data",
-          "do not remove unused parts of the data specification",
-          'u');
+      add_option("strategy", make_mandatory_argument("STRAT"),
+                 "use strategy STRAT (default '0');\n"
+                 " 0) Compute all boolean equations which can be reached"
+                 " from the initial state, without optimization"
+                 " (default). This is is the most data efficient"
+                 " option per generated equation.\n"
+                 " 1) Optimize by immediately substituting the right"
+                 " hand sides for already investigated variables"
+                 " that are true or false when generating an"
+                 " expression. This is as memory efficient as 0.\n"
+                 " 2) In addition to 1, also substitute variables that"
+                 " are true or false into an already generated right"
+                 " hand side. This can mean that certain variables"
+                 " become unreachable (e.g. X0 in X0 and X1, when X1"
+                 " becomes false, assuming X0 does not occur"
+                 " elsewhere. It will be maintained which variables"
+                 " have become unreachable as these do not have to be"
+                 " investigated. Depending on the PBES, this can"
+                 " reduce the size of the generated BES substantially"
+                 " but requires a larger memory footprint.\n"
+                 " 3) In addition to 2, investigate for generated"
+                 " variables whether they occur on a loop, such that"
+                 " they can be set to true or false, depending on the"
+                 " fixed point symbol. This can increase the time"
+                 " needed to generate an equation substantially",
+                 's').
+      add_option("output",
+                 make_mandatory_argument("FORMAT"),
+                 "use output format FORMAT:\n"
+                 " 'vasy',\n"
+                 " 'pbes' (save as a PBES in internal format),\n"
+                 " 'cwi',\n"
+                 " 'bes' (default, save as a BES in internal format)",
+                 'o').
+      add_option("tree",
+                 "store state in a tree (for memory efficiency)",
+                 't').
+      add_option("unused_data",
+                 "do not remove unused parts of the data specification",
+                 'u');
     }
 
   public:
@@ -222,7 +226,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       {
         p.load(m_input_filename);
       }
-      catch(mcrl2::runtime_error& e)
+      catch (mcrl2::runtime_error& e)
       {
         try
         {
@@ -230,7 +234,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
           b.load(m_input_filename);
           p = mcrl2::bes::bes2pbes(b);
         }
-        catch(mcrl2::runtime_error&) // Throw original exception after trying both pbes and bes fails
+        catch (mcrl2::runtime_error&) // Throw original exception after trying both pbes and bes fails
         {
           throw(e);
         }
@@ -238,22 +242,22 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       p.normalize();
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
-      
+
       data::rewriter datar= (opt_data_elm) ?
-            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy()) :
-            data::rewriter(p.data(), rewrite_strategy());
+                            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy()) :
+                            data::rewriter(p.data(), rewrite_strategy());
 
       timer().start("instantiation");
       ::bes::boolean_equation_system bes_equations=
-                    ::bes::boolean_equation_system(
-                            p,
-                            datar,
-                            opt_strategy,
-                            opt_store_as_tree,
-                            opt_construct_counter_example,
-                            opt_use_hashtables);
+        ::bes::boolean_equation_system(
+          p,
+          datar,
+          opt_strategy,
+          opt_store_as_tree,
+          opt_construct_counter_example,
+          opt_use_hashtables);
       timer().finish("instantiation");
-      
+
       // pbes rewriter
       /* The code below can be reactivated, once the pbes_rewriters deliver acceptable performance.
          As it stands their performance is so bad, that they cannot be used.
@@ -284,7 +288,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
                                                              data::data_enumerator<> >
                           pbesr(datarv, datae, enumerate_infinite_sorts);
           pbesrewr(p,pbesr);  // Simplify p such that this does not need to be done
-                              // repeatedly. 
+                              // repeatedly.
           bes_equations=::bes::boolean_equation_system(
                             p,
                             pbesr,
@@ -305,7 +309,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
                           pbesr1(datarv, datae, enumerate_infinite_sorts1);
           pbesrewr(p,pbesr1);  // Simplify p such that this does not need to be done
                                // repeatedly, without expanding quantifiers over infinite
-                               // domains. 
+                               // domains.
           const bool enumerate_infinite_sorts2 = true;
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
                                                              data::data_enumerator<> >
@@ -330,17 +334,20 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       } */
 
       if (opt_outputformat == "cwi")
-      { // in CWI format only if the result is a BES, otherwise Binary
+      {
+        // in CWI format only if the result is a BES, otherwise Binary
         save_bes_in_cwi_format(m_output_filename,bes_equations);
         return true;
       }
       if (opt_outputformat == "vasy")
-      { //Save resulting bes if necessary.
+      {
+        //Save resulting bes if necessary.
         save_bes_in_vasy_format(m_output_filename,bes_equations);
         return true;
       }
       if (opt_outputformat == "pbes")
-      { //Save resulting bes if necessary.
+      {
+        //Save resulting bes if necessary.
         save_bes_in_pbes_format(m_output_filename,bes_equations,p);
         return true;
       }
@@ -357,46 +364,48 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
 
 };
 
-class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool> {
-public:
-	pbes2bes_gui_tool() {
+class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool>
+{
+  public:
+    pbes2bes_gui_tool()
+    {
 
-		std::vector<std::string> values;
+      std::vector<std::string> values;
 
-		m_gui_options["counter"] = create_checkbox_widget();
-		m_gui_options["hashtables"] = create_checkbox_widget();
+      m_gui_options["counter"] = create_checkbox_widget();
+      m_gui_options["hashtables"] = create_checkbox_widget();
 
-		values.clear();
-		values.push_back("vasy");
-		values.push_back("pbes");
-		values.push_back("cwi");
-		values.push_back("bes");
-		m_gui_options["output"] = create_radiobox_widget(values);
+      values.clear();
+      values.push_back("vasy");
+      values.push_back("pbes");
+      values.push_back("cwi");
+      values.push_back("bes");
+      m_gui_options["output"] = create_radiobox_widget(values);
 
-		values.clear();
-		values.push_back("simplify");
-		values.push_back("quantifier-all");
-		values.push_back("quantifier-finite");
-		values.push_back("pfnf");
-		m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
+      values.clear();
+      values.push_back("simplify");
+      values.push_back("quantifier-all");
+      values.push_back("quantifier-finite");
+      values.push_back("pfnf");
+      m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
 
-		add_rewriter_widget();
+      add_rewriter_widget();
 
-		values.clear();
-		values.push_back("0");
-		values.push_back("1");
-		values.push_back("2");
-		values.push_back("3");
-		m_gui_options["strategy"] = create_radiobox_widget(values);
+      values.clear();
+      values.push_back("0");
+      values.push_back("1");
+      values.push_back("2");
+      values.push_back("3");
+      m_gui_options["strategy"] = create_radiobox_widget(values);
 
-		m_gui_options["tree"] = create_checkbox_widget();
-		m_gui_options["unused_data"] = create_checkbox_widget();
-	}
+      m_gui_options["tree"] = create_checkbox_widget();
+      m_gui_options["unused_data"] = create_checkbox_widget();
+    }
 };
 
 int main(int argc, char* argv[])
 {
-   MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-   return pbes2bes_gui_tool().execute(argc, argv);
+  return pbes2bes_gui_tool().execute(argc, argv);
 }

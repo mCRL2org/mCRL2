@@ -140,31 +140,31 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
     {
       super::add_options(desc);
       desc.
-        add_option("invariant", make_mandatory_argument("INVFILE"),
-          "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
-        add_option("summand", make_mandatory_argument("NUM"),
-          "eliminate or simplify the summand with number NUM only", 's').
-        add_option("check-all",
-          "check the confluence of tau-summands regarding all other summands, instead of "
-          "continuing with the next tau-summand as soon as a summand is encountered that "
-          "is not confluent with the current tau-summand", 'a').
-        add_option("generate-invariants",
-          "try to prove that the reduced confluence condition is an invariant of the LPS, "
-          "in case the confluence condition is not a tautology", 'g').
-        add_option("no-check",
-          "do not check if the invariant holds before checking for for confluence", 'n').
-        add_option("no-marking",
-          "do not mark the confluent tau-summands; since there are no changes made to the LPS, "
-          "nothing is written to OUTFILE", 'm').
-        add_option("counter-example",
-          "display a valuation for which the confluence condition does not hold, in case the "
-          "encountered condition is neither a contradiction nor a tautolgy", 'c').
-        add_option("print-dot", make_mandatory_argument("PREFIX"),
-          "save a .dot file of the resulting BDD in case two summands cannot be proven "
-          "confluent; PREFIX will be used as prefix of the output files", 'p').
-        add_option("time-limit", make_mandatory_argument("LIMIT"),
-          "spend at most LIMIT seconds on proving a single formula", 't').
-        add_option("induction", "apply induction on lists", 'o');
+      add_option("invariant", make_mandatory_argument("INVFILE"),
+                 "use the boolean formula (an mCRL2 data expression of sort Bool) in INVFILE as invariant", 'i').
+      add_option("summand", make_mandatory_argument("NUM"),
+                 "eliminate or simplify the summand with number NUM only", 's').
+      add_option("check-all",
+                 "check the confluence of tau-summands regarding all other summands, instead of "
+                 "continuing with the next tau-summand as soon as a summand is encountered that "
+                 "is not confluent with the current tau-summand", 'a').
+      add_option("generate-invariants",
+                 "try to prove that the reduced confluence condition is an invariant of the LPS, "
+                 "in case the confluence condition is not a tautology", 'g').
+      add_option("no-check",
+                 "do not check if the invariant holds before checking for for confluence", 'n').
+      add_option("no-marking",
+                 "do not mark the confluent tau-summands; since there are no changes made to the LPS, "
+                 "nothing is written to OUTFILE", 'm').
+      add_option("counter-example",
+                 "display a valuation for which the confluence condition does not hold, in case the "
+                 "encountered condition is neither a contradiction nor a tautolgy", 'c').
+      add_option("print-dot", make_mandatory_argument("PREFIX"),
+                 "save a .dot file of the resulting BDD in case two summands cannot be proven "
+                 "confluent; PREFIX will be used as prefix of the output files", 'p').
+      add_option("time-limit", make_mandatory_argument("LIMIT"),
+                 "spend at most LIMIT seconds on proving a single formula", 't').
+      add_option("induction", "apply induction on lists", 'o');
     }
 
   public:
@@ -176,97 +176,100 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
         "Checks which tau-summands of the mCRL2 LPS in INFILE are confluent, marks them by "
         "renaming them to ctau, and write the result to OUTFILE. If INFILE is not present "
         "stdin is used. If OUTFILE is not present, stdout is used."),
-    m_summand_number(0),
-    m_generate_invariants(false),
-    m_no_check(false),
-    m_no_marking(false),
-    m_check_all(false),
-    m_counter_example(false),
-    m_dot_file_name(""),
-    m_time_limit(0),
-    m_path_eliminator(false),
-    m_apply_induction(false),
-    m_invariant(mcrl2::data::sort_bool::true_())
-  {}
+      m_summand_number(0),
+      m_generate_invariants(false),
+      m_no_check(false),
+      m_no_marking(false),
+      m_check_all(false),
+      m_counter_example(false),
+      m_dot_file_name(""),
+      m_time_limit(0),
+      m_path_eliminator(false),
+      m_apply_induction(false),
+      m_invariant(mcrl2::data::sort_bool::true_())
+    {}
 
-  bool run()
-  {
-
-    if (core::gsVerbose)
+    bool run()
     {
-      std::cerr << "lpsconfcheck parameters:" << std::endl;
-      std::cerr << "  input file:         " << m_input_filename << std::endl;
-      std::cerr << "  output file:        " << m_output_filename << std::endl;
-      std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
-    }
 
-    lps::specification specification;
-
-    specification.load(m_input_filename);
-
-    if (!m_invariant_filename.empty())
-    {
-      std::ifstream instream(m_invariant_filename.c_str());
-
-      if (!instream.is_open())
+      if (core::gsVerbose)
       {
-        throw mcrl2::runtime_error("cannot open input file '" + m_invariant_filename + "'");
+        std::cerr << "lpsconfcheck parameters:" << std::endl;
+        std::cerr << "  input file:         " << m_input_filename << std::endl;
+        std::cerr << "  output file:        " << m_output_filename << std::endl;
+        std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
       }
 
-      gsVerboseMsg("parsing input file '%s'...\n", m_invariant_filename.c_str());
+      lps::specification specification;
 
-      m_invariant = parse_data_expression(instream, specification.data());
+      specification.load(m_input_filename);
 
-      instream.close();
-    }
-
-    if (check_invariant(specification))
-    {
-      Confluence_Checker v_confluence_checker(
-        specification, rewrite_strategy(), 
-        m_time_limit, m_path_eliminator, solver_type(), 
-        m_apply_induction, m_no_marking, m_check_all, 
-        m_counter_example, m_generate_invariants, m_dot_file_name);
-
-      specification = lps::specification(v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number));
-
-      if (!m_no_marking)
+      if (!m_invariant_filename.empty())
       {
-        specification.save(m_output_filename);
+        std::ifstream instream(m_invariant_filename.c_str());
+
+        if (!instream.is_open())
+        {
+          throw mcrl2::runtime_error("cannot open input file '" + m_invariant_filename + "'");
+        }
+
+        gsVerboseMsg("parsing input file '%s'...\n", m_invariant_filename.c_str());
+
+        m_invariant = parse_data_expression(instream, specification.data());
+
+        instream.close();
       }
+
+      if (check_invariant(specification))
+      {
+        Confluence_Checker v_confluence_checker(
+          specification, rewrite_strategy(),
+          m_time_limit, m_path_eliminator, solver_type(),
+          m_apply_induction, m_no_marking, m_check_all,
+          m_counter_example, m_generate_invariants, m_dot_file_name);
+
+        specification = lps::specification(v_confluence_checker.check_confluence_and_mark(m_invariant, m_summand_number));
+
+        if (!m_no_marking)
+        {
+          specification.save(m_output_filename);
+        }
+      }
+
+      return true;
     }
 
-    return true;
-  }
+    /// \brief Checks whether or not the invariant holds, if
+    /// Checks if the formula in the file m_invariant_filename is an invariant,
+    /// if the flag m_no_check is set to false and
+    /// m_invariant_filename differs from 0.
+    /// \return true, if the invariant holds or no invariant is specified.
+    ///         false, if the invariant does not hold.
+    bool check_invariant(lps::specification const& specification) const
+    {
+      if (!m_invariant_filename.empty())
+      {
+        if (!m_no_check)
+        {
+          Invariant_Checker v_invariant_checker(specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), false, false, false, m_dot_file_name);
 
-  /// \brief Checks whether or not the invariant holds, if
-  /// Checks if the formula in the file m_invariant_filename is an invariant,
-  /// if the flag m_no_check is set to false and
-  /// m_invariant_filename differs from 0.
-  /// \return true, if the invariant holds or no invariant is specified.
-  ///         false, if the invariant does not hold.
-  bool check_invariant(lps::specification const& specification) const
-  {
-    if (!m_invariant_filename.empty()) {
-      if (!m_no_check) {
-        Invariant_Checker v_invariant_checker(specification, rewrite_strategy(), m_time_limit, m_path_eliminator, solver_type(), false, false, false, m_dot_file_name);
+          return v_invariant_checker.check_invariant(m_invariant);
+        }
+        else
+        {
+          gsWarningMsg("The invariant is not checked; it may not hold for this LPS.\n");
+        }
+      }
 
-        return v_invariant_checker.check_invariant(m_invariant);
-      }
-      else {
-        gsWarningMsg("The invariant is not checked; it may not hold for this LPS.\n");
-      }
+      return true;
     }
-
-    return true;
-  }
 
 };
 
 class lpsconfcheck_gui_tool: public mcrl2_gui_tool<confcheck_tool>
 {
   public:
-	lpsconfcheck_gui_tool()
+    lpsconfcheck_gui_tool()
     {
       m_gui_options["check-all"] = create_checkbox_widget();
       m_gui_options["counter-example"] = create_checkbox_widget();

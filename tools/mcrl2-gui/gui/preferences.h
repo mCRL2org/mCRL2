@@ -1,4 +1,4 @@
-// Author(s): Frank Stappers 
+// Author(s): Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -24,72 +24,75 @@ using namespace std;
 
 class CustomDialog : public wxDialog
 {
-private:
+  private:
     MimeManager* m_mm;
-    wxFilePickerCtrl *fp;
-    wxTextCtrl *tc;
+    wxFilePickerCtrl* fp;
+    wxTextCtrl* tc;
 
-public:
-    CustomDialog(const wxString & title, wxString ext, wxString cmd, MimeManager *mm)
-           : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(400, 140))
+  public:
+    CustomDialog(const wxString& title, wxString ext, wxString cmd, MimeManager* mm)
+      : wxDialog(NULL, -1, title, wxDefaultPosition, wxSize(400, 140))
     {
 
       m_mm = mm;
 
-      wxPanel *panel = new wxPanel(this, -1);
+      wxPanel* panel = new wxPanel(this, -1);
 
-        wxBoxSizer *vbox = new wxBoxSizer(wxVERTICAL);
-        wxBoxSizer *hbox = new wxBoxSizer(wxHORIZONTAL);
+      wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
+      wxBoxSizer* hbox = new wxBoxSizer(wxHORIZONTAL);
 
-        new wxStaticBox(panel, -1, wxT("Mapping"),
-            wxPoint(5, 5), wxSize(390, 85));
-        new wxStaticText(panel, -1,
-            wxT("Extension"), wxPoint(15, 25));
-        tc = new wxTextCtrl(panel, -1, ext,
-            wxPoint(95, 25));
+      new wxStaticBox(panel, -1, wxT("Mapping"),
+                      wxPoint(5, 5), wxSize(390, 85));
+      new wxStaticText(panel, -1,
+                       wxT("Extension"), wxPoint(15, 25));
+      tc = new wxTextCtrl(panel, -1, ext,
+                          wxPoint(95, 25));
 
-        if(title.compare(wxT("Edit")) == 0){
-          tc->Enable(false);
-        }
+      if (title.compare(wxT("Edit")) == 0)
+      {
+        tc->Enable(false);
+      }
 
 
-        new wxStaticText(panel, -1,
-            wxT("Command"), wxPoint(15, 55));
+      new wxStaticText(panel, -1,
+                       wxT("Command"), wxPoint(15, 55));
 
-        fp = new wxFilePickerCtrl(panel, wxID_ANY,  cmd,
-            wxT("Select a program"), wxT("*.*"), wxPoint(95 , 55), wxDefaultSize,
-            wxFLP_USE_TEXTCTRL | wxFLP_OPEN );
+      fp = new wxFilePickerCtrl(panel, wxID_ANY,  cmd,
+                                wxT("Select a program"), wxT("*.*"), wxPoint(95 , 55), wxDefaultSize,
+                                wxFLP_USE_TEXTCTRL | wxFLP_OPEN);
 
-        fp->SetSize(wxSize(250,10));
+      fp->SetSize(wxSize(250,10));
 
-        wxButton *okButton = new wxButton(this, wxID_OK, wxT("Ok"),
-            wxDefaultPosition, wxSize(95, 30));
-        wxButton *closeButton = new wxButton(this, wxID_CANCEL, wxT("Cancel"),
-            wxDefaultPosition, wxSize(95, 30));
+      wxButton* okButton = new wxButton(this, wxID_OK, wxT("Ok"),
+                                        wxDefaultPosition, wxSize(95, 30));
+      wxButton* closeButton = new wxButton(this, wxID_CANCEL, wxT("Cancel"),
+                                           wxDefaultPosition, wxSize(95, 30));
 
-        hbox->Add(okButton, 1);
-        hbox->Add(closeButton, 1, wxLEFT, 5);
+      hbox->Add(okButton, 1);
+      hbox->Add(closeButton, 1, wxLEFT, 5);
 
-        vbox->Add(panel, 1);
-        vbox->Add(hbox, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);
+      vbox->Add(panel, 1);
+      vbox->Add(hbox, 0, wxALIGN_CENTER | wxTOP | wxBOTTOM, 10);
 
-        SetSizer(vbox);
+      SetSizer(vbox);
 
-        Centre();
-        ShowModal();
+      Centre();
+      ShowModal();
 
-        Destroy();
+      Destroy();
 
     }
 
-    void OnOkClick(wxCommandEvent& /*evt*/){
-      m_mm->removeExtensionMapping( tc->GetLineText(0) );
-      m_mm->addExtensionMapping( tc->GetLineText(0) , fp->GetTextCtrlValue() );
+    void OnOkClick(wxCommandEvent& /*evt*/)
+    {
+      m_mm->removeExtensionMapping(tc->GetLineText(0));
+      m_mm->addExtensionMapping(tc->GetLineText(0) , fp->GetTextCtrlValue());
       EndModal(wxID_OK);
     }
     ;
 
-    void OnCancelClick(wxCommandEvent& /*evt*/){
+    void OnCancelClick(wxCommandEvent& /*evt*/)
+    {
       EndModal(wxID_CANCEL);
     }
 
@@ -100,9 +103,10 @@ public:
 BEGIN_EVENT_TABLE(CustomDialog, wxDialog)
   EVT_BUTTON(wxID_OK, CustomDialog::OnOkClick)
   EVT_BUTTON(wxID_CANCEL, CustomDialog::OnCancelClick)
-END_EVENT_TABLE ()
+END_EVENT_TABLE()
 
-class Preferences: public wxDialog{
+class Preferences: public wxDialog
+{
   public:
     Preferences():wxDialog(NULL, wxID_ANY, wxT("Preferences"), wxDefaultPosition, wxSize(500, 300))
     {
@@ -117,7 +121,7 @@ class Preferences: public wxDialog{
 
 
       listview = new wxListView(this, wxID_ANY, wxDefaultPosition, wxDefaultSize,
-                            wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES|wxBORDER_SUNKEN);
+                                wxLC_REPORT|wxLC_SINGLE_SEL|wxLC_VRULES|wxLC_HRULES|wxBORDER_SUNKEN);
 
       listview->InsertColumn(0, wxT("Extension"), wxLIST_FORMAT_CENTRE);
       listview->InsertColumn(1, wxT("Command"), wxLIST_FORMAT_LEFT);
@@ -125,9 +129,10 @@ class Preferences: public wxDialog{
       map<wxString,wxString> mapping = mm.getExtensionCommandMapping();
       map<wxString,wxString>::iterator b = mapping.begin();
 
-      for( map<wxString,wxString>::iterator i = mapping.begin(); i != mapping.end(); ++i ){
-        listview->InsertItem( distance(b, i), i->first );
-        listview->SetItem(distance(b, i), 1, i->second );
+      for (map<wxString,wxString>::iterator i = mapping.begin(); i != mapping.end(); ++i)
+      {
+        listview->InsertItem(distance(b, i), i->first);
+        listview->SetItem(distance(b, i), 1, i->second);
       }
 
       box->AddSpacer(10);
@@ -159,7 +164,8 @@ class Preferences: public wxDialog{
       Destroy();
     }
 
-    void UpdateItems(){
+    void UpdateItems()
+    {
       listview->ClearAll();
       listview->InsertColumn(0, wxT("Extension"), wxLIST_FORMAT_CENTRE);
       listview->InsertColumn(1, wxT("Command"), wxLIST_FORMAT_LEFT);
@@ -167,35 +173,40 @@ class Preferences: public wxDialog{
       map<wxString,wxString> mapping = mm.getExtensionCommandMapping();
       map<wxString,wxString>::iterator b = mapping.begin();
 
-      for( map<wxString,wxString>::iterator i = mapping.begin(); i != mapping.end(); ++i ){
-        listview->InsertItem( distance(b, i), i->first );
-        listview->SetItem(distance(b, i), 1, i->second );
+      for (map<wxString,wxString>::iterator i = mapping.begin(); i != mapping.end(); ++i)
+      {
+        listview->InsertItem(distance(b, i), i->first);
+        listview->SetItem(distance(b, i), 1, i->second);
       }
 
     }
 
-    void OnNewClick(wxCommandEvent& /*evt*/){
+    void OnNewClick(wxCommandEvent& /*evt*/)
+    {
       long i = listview->GetFocusedItem();
-      if( i != -1 ){
+      if (i != -1)
+      {
         map<wxString, wxString>  m = mm.getExtensionCommandMapping();
         CustomDialog
-            *cd =
-                new CustomDialog(
-                    wxT("New"),
-                    wxT(""),
-                    wxT(""),
-                    &mm);
+        *cd =
+          new CustomDialog(
+          wxT("New"),
+          wxT(""),
+          wxT(""),
+          &mm);
         cd->Show(true);
         UpdateItems();
       }
     }
 
-    void OnDeleteClick(wxCommandEvent& /*evt*/){
+    void OnDeleteClick(wxCommandEvent& /*evt*/)
+    {
       long i = listview->GetFocusedItem();
 
-      if( i != -1 ){
+      if (i != -1)
+      {
         wxString s = listview->GetItemText(i);
-        wxMessageDialog *dial = new wxMessageDialog(NULL,
+        wxMessageDialog* dial = new wxMessageDialog(NULL,
             wxT("Are you sure to remove the command associated for \"") + s + wxT("\"?"), wxT("Question"),
             wxYES_NO | wxNO_DEFAULT | wxICON_QUESTION);
         if (dial->ShowModal() == wxID_YES)
@@ -207,28 +218,32 @@ class Preferences: public wxDialog{
       }
     }
 
-    void OnEditClick(wxCommandEvent& /*evt*/){
+    void OnEditClick(wxCommandEvent& /*evt*/)
+    {
       long i = listview->GetFocusedItem();
-      if( i != -1 ){
+      if (i != -1)
+      {
         map<wxString, wxString>  m = mm.getExtensionCommandMapping();
         CustomDialog
-            *cd =
-                new CustomDialog(
-                    wxT("Edit"),
-                    listview->GetItemText(i),
-                    m.find(listview->GetItemText(i))->second,
-                    &mm);
+        *cd =
+          new CustomDialog(
+          wxT("Edit"),
+          listview->GetItemText(i),
+          m.find(listview->GetItemText(i))->second,
+          &mm);
         cd->Show(true);
         UpdateItems();
       }
     }
 
-    void OnSaveClick(wxCommandEvent& /*evt*/){
+    void OnSaveClick(wxCommandEvent& /*evt*/)
+    {
       mm.saveExtensionMapping();
       Destroy();
     }
 
-    void OnCancelClick(wxCommandEvent& /*evt*/){
+    void OnCancelClick(wxCommandEvent& /*evt*/)
+    {
       Destroy();
     }
 
@@ -239,20 +254,22 @@ class Preferences: public wxDialog{
 
   private:
 
-    void OnSelect(wxListEvent& /*evt*/){
+    void OnSelect(wxListEvent& /*evt*/)
+    {
       m_edit_button->Enable(true);
       m_delete_button->Enable(true);
     }
 
-    void OnDeSelect(wxListEvent& /*evt*/){
+    void OnDeSelect(wxListEvent& /*evt*/)
+    {
       m_edit_button->Enable(false);
       m_delete_button->Enable(false);
     }
 
-    wxListView *listview;
+    wxListView* listview;
 
-    wxButton *m_edit_button;
-    wxButton *m_delete_button;
+    wxButton* m_edit_button;
+    wxButton* m_delete_button;
 
     MimeManager mm;
 
@@ -270,7 +287,7 @@ BEGIN_EVENT_TABLE(Preferences, wxDialog)
   EVT_LIST_ITEM_SELECTED(wxID_ANY, Preferences::OnSelect)
   EVT_LIST_ITEM_DESELECTED(wxID_ANY, Preferences::OnDeSelect)
 
-END_EVENT_TABLE ()
+END_EVENT_TABLE()
 
 
 #endif /* MCRL2_GUI_PREFERENCES_H_ */

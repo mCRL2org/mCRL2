@@ -19,9 +19,11 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_label
@@ -45,7 +47,7 @@ class action_label: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param t A term
     action_label(atermpp::aterm_appl t)
-     : atermpp::aterm_appl(t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_ActId(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
@@ -56,10 +58,10 @@ class action_label: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param name A
     /// \param sorts A sequence of sort expressions
-    action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
-     : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
-       m_name(name),
-       m_sorts(sorts)
+    action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)
+      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
+        m_name(name),
+        m_sorts(sorts)
     {}
 
     /// \brief Returns the name of the action label.

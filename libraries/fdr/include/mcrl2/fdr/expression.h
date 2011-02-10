@@ -21,9 +21,11 @@
 #include "mcrl2/fdr/numeric_expression_fwd.h"
 #include "mcrl2/fdr/tuple_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated  expression class declarations ---//
 /// \brief class expression

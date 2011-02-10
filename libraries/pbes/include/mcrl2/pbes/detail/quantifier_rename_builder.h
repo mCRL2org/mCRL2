@@ -24,23 +24,39 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/substitute.h"
 
-namespace atermpp {
-  /// \cond INTERNAL_DOCS
-  template<>
-  struct aterm_traits<std::pair<mcrl2::data::variable, mcrl2::data::variable> >
+namespace atermpp
+{
+/// \cond INTERNAL_DOCS
+template<>
+struct aterm_traits<std::pair<mcrl2::data::variable, mcrl2::data::variable> >
+{
+  typedef ATermAppl aterm_type;
+  static void protect(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)
   {
-    typedef ATermAppl aterm_type;
-    static void protect(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)   { t.first.protect();   t.second.protect();   }
-    static void unprotect(std::pair<mcrl2::data::variable, mcrl2::data::variable> t) { t.first.unprotect(); t.second.unprotect(); }
-    static void mark(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)      { t.first.mark();      t.second.mark();      }
-  };
+    t.first.protect();
+    t.second.protect();
+  }
+  static void unprotect(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)
+  {
+    t.first.unprotect();
+    t.second.unprotect();
+  }
+  static void mark(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)
+  {
+    t.first.mark();
+    t.second.mark();
+  }
+};
 } // namespace atermpp
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
 /// Visitor that renames quantifier variables, to make sure that within the scope of a quantifier
 /// variable, no other quantifier variables or free variables with the same name occur.

@@ -103,7 +103,7 @@ float Vector3D::dot_product(const Vector3D& w) const
 Vector3D Vector3D::cross_product(const Vector3D& w) const
 {
   return Vector3D(
-      _y * w.z() - _z * w.y(),
-      _z * w.x() - _x * w.z(),
-      _x * w.y() - _y * w.x() );
+           _y * w.z() - _z * w.y(),
+           _z * w.x() - _x * w.z(),
+           _x * w.y() - _y * w.x());
 }

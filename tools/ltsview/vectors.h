@@ -21,8 +21,14 @@ class Vector2D
     Vector2D operator-(const Vector2D& v) const;
     Vector2D operator*(float s) const;
     void toPolar(float& angle, float& radius) const;
-    float x() const { return _x; }
-    float y() const { return _y; }
+    float x() const
+    {
+      return _x;
+    }
+    float y() const
+    {
+      return _y;
+    }
 
     static Vector2D fromPolar(float angle, float radius);
 
@@ -45,9 +51,18 @@ class Vector3D
     Vector3D operator+(const Vector3D& w) const;
     Vector3D operator-(const Vector3D& w) const;
     Vector3D operator*(float s) const;
-    float x() const { return _x; }
-    float y() const { return _y; }
-    float z() const { return _z; }
+    float x() const
+    {
+      return _x;
+    }
+    float y() const
+    {
+      return _y;
+    }
+    float z() const
+    {
+      return _z;
+    }
 
   private:
     float _x;

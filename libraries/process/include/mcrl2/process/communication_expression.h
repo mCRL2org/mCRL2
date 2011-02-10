@@ -18,52 +18,54 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/process/action_name_multiset.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace process {
+namespace process
+{
 
-  //<CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
-  /// \brief Communication expression
-  class communication_expression: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      communication_expression()
-        : atermpp::aterm_appl(core::detail::constructCommExpr())
-      {}
+//<CommExpr>     ::= CommExpr(<MultActName>, <StringOrNil>)
+/// \brief Communication expression
+class communication_expression: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Constructor.
+    communication_expression()
+      : atermpp::aterm_appl(core::detail::constructCommExpr())
+    {}
 
-      /// \brief Constructor.
-      /// \param term A term
-      communication_expression(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_CommExpr(m_term));
-      }
+    /// \brief Constructor.
+    /// \param term A term
+    communication_expression(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_CommExpr(m_term));
+    }
 
-      /// \brief Constructor.
-      communication_expression(action_name_multiset action_name, core::identifier_string name)
-        : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
-      {}
+    /// \brief Constructor.
+    communication_expression(action_name_multiset action_name, core::identifier_string name)
+      : atermpp::aterm_appl(core::detail::gsMakeCommExpr(action_name, name))
+    {}
 
-      /// \brief Returns the name of the action
-      /// \return The name of the action
-      action_name_multiset action_name() const
-      {
-        using namespace atermpp;
-        return arg1(*this);
-      }
+    /// \brief Returns the name of the action
+    /// \return The name of the action
+    action_name_multiset action_name() const
+    {
+      using namespace atermpp;
+      return arg1(*this);
+    }
 
-      /// \brief Returns the name of the communication expression
-      /// \return The name of the communication expression
-      core::identifier_string name() const
-      {
-        using namespace atermpp;
-        return arg2(*this);
-      }
-  };
+    /// \brief Returns the name of the communication expression
+    /// \return The name of the communication expression
+    core::identifier_string name() const
+    {
+      using namespace atermpp;
+      return arg2(*this);
+    }
+};
 
-  /// \brief Read-only singly linked list of communication expressions
-  typedef atermpp::term_list<communication_expression> communication_expression_list;
+/// \brief Read-only singly linked list of communication expressions
+typedef atermpp::term_list<communication_expression> communication_expression_list;
 
 } // namespace process
 

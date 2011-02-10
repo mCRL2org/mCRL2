@@ -10,7 +10,7 @@
 /** \file lts_bcg.h
  *
  * \brief This file contains a class that contains labelled transition systems in bcg format.
- * \details A labelled transition system in bcg format is a transition system 
+ * \details A labelled transition system in bcg format is a transition system
  * with as state labels vectors of strings, and as transition labels strings.
  * \author Jan Friso Groote
  */
@@ -28,33 +28,33 @@ namespace mcrl2
 {
 namespace lts
 {
-  /** \brief This class contains labelled transition systemis corresponding to the BCG labelled transition system format
-            used in the Ceasar/Aldebaran toolset developed at INRIA in Grenoble.
-     \detail In this lts format there are no state labels, and action labels are strings.
-  */
-  class lts_bcg_t : public lts< detail::state_label_empty, detail::action_label_string >
-  {
-    public:
- 
-      /** \brief Provides the type of this lts, in casu lts_bcg.
-      */
-      lts_type type() const
-      {
-        return lts_bcg;
-      }
+/** \brief This class contains labelled transition systemis corresponding to the BCG labelled transition system format
+          used in the Ceasar/Aldebaran toolset developed at INRIA in Grenoble.
+   \detail In this lts format there are no state labels, and action labels are strings.
+*/
+class lts_bcg_t : public lts< detail::state_label_empty, detail::action_label_string >
+{
+  public:
 
-      /** \brief Save the labelled transition system to file.
-       *  \details If the filename is empty, the result is read from stdin.
-       *  \param[in] filename Name of the file from which this lts is read.
-       */
-      void load(const std::string &filename);
+    /** \brief Provides the type of this lts, in casu lts_bcg.
+    */
+    lts_type type() const
+    {
+      return lts_bcg;
+    }
 
-      /** \brief Save the labelled transition system to file.
-       *  \details If the filename is empty, the result is written to stdout.
-       *  \param[in] filename Name of the file to which this lts is written.
-       */
-      void save(const std::string &filename) const;
-  };
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is read from stdin.
+     *  \param[in] filename Name of the file from which this lts is read.
+     */
+    void load(const std::string& filename);
+
+    /** \brief Save the labelled transition system to file.
+     *  \details If the filename is empty, the result is written to stdout.
+     *  \param[in] filename Name of the file to which this lts is written.
+     */
+    void save(const std::string& filename) const;
+};
 
 } // namespace lts
 } // namespace mcrl2

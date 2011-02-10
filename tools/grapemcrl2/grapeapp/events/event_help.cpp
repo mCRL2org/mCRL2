@@ -17,26 +17,27 @@
 
 #include "event_help.h"
 
-namespace grape {
+namespace grape
+{
 
 using namespace grape::grapeapp;
 
-grape_event_help::grape_event_help( grape_frame *p_main_frame )
-: grape_event_base( p_main_frame, false, _T( "show help" ) )
+grape_event_help::grape_event_help(grape_frame* p_main_frame)
+  : grape_event_base(p_main_frame, false, _T("show help"))
 {
 }
 
-grape_event_help::~grape_event_help( void )
+grape_event_help::~grape_event_help(void)
 {
 }
 
-bool grape_event_help::Do( void )
+bool grape_event_help::Do(void)
 {
   m_main_frame->get_help_controller()->DisplayContents();
   return true;
 }
 
-bool grape_event_help::Undo( void )
+bool grape_event_help::Undo(void)
 {
   // cannot be undone
   return true;
@@ -46,21 +47,21 @@ bool grape_event_help::Undo( void )
 
 using namespace grape::grapeapp;
 
-grape_event_about::grape_event_about( grape_frame *p_main_frame )
-: grape_event_base( p_main_frame, false, _T( "show about box" ) )
+grape_event_about::grape_event_about(grape_frame* p_main_frame)
+  : grape_event_base(p_main_frame, false, _T("show about box"))
 {
 }
 
-grape_event_about::~grape_event_about( void )
+grape_event_about::~grape_event_about(void)
 {
 }
 
-bool grape_event_about::Do( void )
+bool grape_event_about::Do(void)
 {
   return true;
 }
 
-bool grape_event_about::Undo( void )
+bool grape_event_about::Undo(void)
 {
   // cannot be undone
   return true;

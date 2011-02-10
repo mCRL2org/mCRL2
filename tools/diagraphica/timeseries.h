@@ -27,82 +27,82 @@
 
 class TimeSeries : public wxEvtHandler, public Visualizer
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     TimeSeries(
-        Mediator* m,
-        Graph* g,
-        GLCanvas* c );
+      Mediator* m,
+      Graph* g,
+      GLCanvas* c);
     virtual ~TimeSeries();
 
     // -- get functions ---------------------------------------------
     static bool getUseShading();
-    void getIdcsClstMarked( std::set< size_t > &idcs );
+    void getIdcsClstMarked(std::set< size_t > &idcs);
     void getIdcsClstMarked(
-        std::set< size_t > &idcs ,
-        ColorRGB &col );
+      std::set< size_t > &idcs ,
+      ColorRGB& col);
     void getIdxMseOver(
-        size_t &idxLeaf,
-        std::set< size_t > &idcsBndl,
-        ColorRGB &colLeaf );
+      size_t& idxLeaf,
+      std::set< size_t > &idcsBndl,
+      ColorRGB& colLeaf);
     void getCurrIdxDgrm(
-        size_t &idxLeaf,
-        std::set< size_t > &idcsBndl,
-        ColorRGB &colLeaf );
+      size_t& idxLeaf,
+      std::set< size_t > &idcsBndl,
+      ColorRGB& colLeaf);
     void getAnimIdxDgrm(
-        size_t &idxLeaf,
-        std::set< size_t > &idcsBndl,
-        ColorRGB &colLeaf );
-    void getAttrIdcs( std::vector< size_t > &idcs );
+      size_t& idxLeaf,
+      std::set< size_t > &idcsBndl,
+      ColorRGB& colLeaf);
+    void getAttrIdcs(std::vector< size_t > &idcs);
 
     // -- set functions ---------------------------------------------
-    static void setUseShading( const bool &useShd );
-    static void setColorClr( const ColorRGB &col );
-    static void setColorTxt( const ColorRGB &col );
-    static void setSizeTxt( const int &sze );
+    static void setUseShading(const bool& useShd);
+    static void setColorClr(const ColorRGB& col);
+    static void setColorTxt(const ColorRGB& col);
+    static void setSizeTxt(const int& sze);
 
-    void setDiagram( Diagram *dgrm );
-    void initAttributes( const std::vector< size_t > attrIdcs );
+    void setDiagram(Diagram* dgrm);
+    void initAttributes(const std::vector< size_t > attrIdcs);
     void clearData();
 
-    void markItems( Cluster* frame );
-    void markItems( const std::vector< Cluster* > frames );
+    void markItems(Cluster* frame);
+    void markItems(const std::vector< Cluster* > frames);
 
     void handleSendDgrmSglToExnr();
 
     // -- visualization functions  ----------------------------------
-    void visualize( const bool &inSelectMode );
+    void visualize(const bool& inSelectMode);
 
     // -- event handlers --------------------------------------------
     void handleMouseLftDownEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseLftUpEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseLftDClickEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseRgtDownEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseRgtUpEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseMotionEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseWheelIncEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseWheelDecEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseLeaveEvent();
-    void handleKeyDownEvent( const int &keyCode );
-    void handleKeyUpEvent( const int &keyCode );
+    void handleKeyDownEvent(const int& keyCode);
+    void handleKeyUpEvent(const int& keyCode);
 
-protected:
+  protected:
     // -- utility functions -----------------------------------------
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
@@ -112,39 +112,39 @@ protected:
     void clearAttributes();
 
     // -- utility event handlers ------------------------------------
-    void onTimer( wxTimerEvent &e );
-    void handleRwndDiagram( const int &dgrmIdx );
-    void handlePrevDiagram( const int &dgrmIdx );
-    void handlePlayDiagram( const size_t &dgrmIdx );
-    void handleNextDiagram( const int &dgrmIdx );
+    void onTimer(wxTimerEvent& e);
+    void handleRwndDiagram(const int& dgrmIdx);
+    void handlePrevDiagram(const int& dgrmIdx);
+    void handlePlayDiagram(const size_t& dgrmIdx);
+    void handleNextDiagram(const int& dgrmIdx);
 
     // -- hit detection ---------------------------------------------
-    void handleHits( const std::vector< int > &ids );
+    void handleHits(const std::vector< int > &ids);
     void processHits(
-        GLint hits,
-        GLuint buffer[] );
+      GLint hits,
+      GLuint buffer[]);
 
     // -- utility drawing functions ---------------------------------
     void clear();
-    void drawSlider( const bool &inSelectMode );
-    void drawScale( const bool &inSelectMode );
-    void drawMarkedItems( const bool &inSelectMode );
-    void drawAxes( const bool &inSelectMode );
-    void drawAttrVals( const bool &inSelectMode );
-    void drawDiagrams( const bool &inSelectMode );
-    void drawMouseOver( const bool &inSelectMode );
-    void drawLabels( const bool &inSelectMode );
+    void drawSlider(const bool& inSelectMode);
+    void drawScale(const bool& inSelectMode);
+    void drawMarkedItems(const bool& inSelectMode);
+    void drawAxes(const bool& inSelectMode);
+    void drawAttrVals(const bool& inSelectMode);
+    void drawDiagrams(const bool& inSelectMode);
+    void drawMouseOver(const bool& inSelectMode);
+    void drawLabels(const bool& inSelectMode);
 
     void handleHitSlider();
     void handleDragSliderHdl();
     void handleDragSliderHdlLft();
     void handleDragSliderHdlRgt();
 
-    void handleHitItems( const int &idx );
-    void handleDragItems( const int &idx );
+    void handleHitItems(const int& idx);
+    void handleDragItems(const int& idx);
 
-    void handleShowDiagram( const int &dgrmIdx );
-    void handleDragDiagram( const int &dgrmIdx );
+    void handleShowDiagram(const int& dgrmIdx);
+    void handleDragDiagram(const int& dgrmIdx);
 
     // -- static variables ------------------------------------------
     static ColorRGB colClr;
@@ -153,29 +153,29 @@ protected:
     static ColorRGB colMrk;
     enum
     {
-        ID_TIMER,
-        ID_CANVAS,
-        ID_SLIDER,
-        ID_SLIDER_HDL,
-        ID_SLIDER_HDL_LFT,
-        ID_SLIDER_HDL_RGT,
-        ID_ITEMS,
-        ID_DIAGRAM,
-        ID_DIAGRAM_CLSE,
-        ID_DIAGRAM_MORE,
-        ID_DIAGRAM_RWND,
-        ID_DIAGRAM_PREV,
-        ID_DIAGRAM_PLAY,
-        ID_DIAGRAM_NEXT,
-        DRAG_DIR_NULL,
-        DRAG_DIR_LFT,
-        DRAG_DIR_RGT,
-        DRAG_STATUS_NONE,
-        DRAG_STATUS_SLDR,
-        DRAG_STATUS_SLDR_LFT,
-        DRAG_STATUS_SLDR_RGT,
-        DRAG_STATUS_ITMS,
-        DRAG_STATUS_DGRM
+      ID_TIMER,
+      ID_CANVAS,
+      ID_SLIDER,
+      ID_SLIDER_HDL,
+      ID_SLIDER_HDL_LFT,
+      ID_SLIDER_HDL_RGT,
+      ID_ITEMS,
+      ID_DIAGRAM,
+      ID_DIAGRAM_CLSE,
+      ID_DIAGRAM_MORE,
+      ID_DIAGRAM_RWND,
+      ID_DIAGRAM_PREV,
+      ID_DIAGRAM_PLAY,
+      ID_DIAGRAM_NEXT,
+      DRAG_DIR_NULL,
+      DRAG_DIR_LFT,
+      DRAG_DIR_RGT,
+      DRAG_STATUS_NONE,
+      DRAG_STATUS_SLDR,
+      DRAG_STATUS_SLDR_LFT,
+      DRAG_STATUS_SLDR_RGT,
+      DRAG_STATUS_ITMS,
+      DRAG_STATUS_DGRM
     };
 
     // -- data members ----------------------------------------------

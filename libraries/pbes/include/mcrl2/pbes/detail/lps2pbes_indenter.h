@@ -12,42 +12,44 @@
 #ifndef MCRL2_PBES_DETAIL_LPS2PBES_INDENTER_H
 #define MCRL2_PBES_DETAIL_LPS2PBES_INDENTER_H
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 //namespace detail {
 
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
 // use a static variable to store the indentation depth
 /// \cond INTERNAL_DOCS
-  template <class T> // note, T is only a dummy
-  struct lps2pbes_indenter
-  {
-    // The amount of indentation
-    static size_t depth;
-  };
+template <class T> // note, T is only a dummy
+struct lps2pbes_indenter
+{
+  // The amount of indentation
+  static size_t depth;
+};
 
-  template <class T>
-  size_t lps2pbes_indenter<T>::depth = 0;
+template <class T>
+size_t lps2pbes_indenter<T>::depth = 0;
 
-  inline
-  std::string lps2pbes_indent()
-  {
-    return std::string(lps2pbes_indenter<int>::depth, ' ');
-  }
+inline
+std::string lps2pbes_indent()
+{
+  return std::string(lps2pbes_indenter<int>::depth, ' ');
+}
 
-  inline
-  void lps2pbes_increase_indent()
-  {
-    lps2pbes_indenter<int>::depth += 2;
-  }
+inline
+void lps2pbes_increase_indent()
+{
+  lps2pbes_indenter<int>::depth += 2;
+}
 
-  inline
-  void lps2pbes_decrease_indent()
-  {
-    lps2pbes_indenter<int>::depth -= 2;
-  }
+inline
+void lps2pbes_decrease_indent()
+{
+  lps2pbes_indenter<int>::depth -= 2;
+}
 
 /// \endcond
 #endif // MCRL2_PBES_TRANSLATE_DEBUG

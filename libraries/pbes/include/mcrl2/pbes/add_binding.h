@@ -19,63 +19,65 @@
 
 #include "mcrl2/data/add_binding.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-  /// \brief Maintains a multiset of bound data variables during traversal
-  template <template <class> class Builder, class Derived>
-  struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
+/// \brief Maintains a multiset of bound data variables during traversal
+template <template <class> class Builder, class Derived>
+struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
+{
+  typedef data::add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void enter(pbes_equation const& x)
   {
-    typedef data::add_data_variable_binding<Builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
+    increase_bind_count(x.variable().parameters());
+  }
 
-    void enter(pbes_equation const& x)
-    {
-      increase_bind_count(x.variable().parameters());
-    }
+  void leave(pbes_equation const& x)
+  {
+    decrease_bind_count(x.variable().parameters());
+  }
 
-    void leave(pbes_equation const& x)
-    {
-      decrease_bind_count(x.variable().parameters());
-    }
+  void enter(exists const& x)
+  {
+    increase_bind_count(x.variables());
+  }
 
-    void enter(exists const& x)
-    {
-      increase_bind_count(x.variables());
-    }
-    
-    void leave(exists const& x)
-    {
-      decrease_bind_count(x.variables());
-    }
-    
-    void enter(forall const& x)
-    {
-      increase_bind_count(x.variables());
-    }
+  void leave(exists const& x)
+  {
+    decrease_bind_count(x.variables());
+  }
 
-    void leave(forall const& x)
-    {
-      decrease_bind_count(x.variables());
-    }
+  void enter(forall const& x)
+  {
+    increase_bind_count(x.variables());
+  }
 
-    template <typename Container>
-    void enter(const pbes<Container>& x)
-    {
-      increase_bind_count(x.global_variables());
-    }
+  void leave(forall const& x)
+  {
+    decrease_bind_count(x.variables());
+  }
 
-    template <typename Container>
-    void leave(const pbes<Container>& x)
-    {
-      increase_bind_count(x.global_variables());
-    }
-  };
+  template <typename Container>
+  void enter(const pbes<Container>& x)
+  {
+    increase_bind_count(x.global_variables());
+  }
+
+  template <typename Container>
+  void leave(const pbes<Container>& x)
+  {
+    increase_bind_count(x.global_variables());
+  }
+};
 
 } // namespace pbes_system
 

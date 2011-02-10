@@ -324,7 +324,7 @@ void test_cabp()
     "                r7|s7->c7, r8|s8->c8},                                        \n"
     "               S || K || R || AS || L || AR )));                              \n"
     ;
-  
+
   std::string INFINITELY_OFTEN_SEND = "nu X. mu Y. (<r1(d1)>X || <!r1(d1)>Y)";
 
   // create a pbes p
@@ -446,7 +446,7 @@ void test_balancing_plat()
     "                                                                                      \n"
     " init BalancingAct(C,0,0);                                                            \n"
     ;
-  
+
   const std::string NO_DEADLOCK = "[true*]<true>true";
 
   lps::specification spec = lps::linearise(BALANCE_PLAT_SPECIFICATION);
@@ -477,13 +477,13 @@ void test_pbesinst_finite()
   pbes<> p1 = txt2pbes(text);
   pbesinst_finite_algorithm algorithm(data::rewriter::jitty, log_level);
   pbesinst_variable_map variable_map = detail::parse_pbes_parameter_map(p1, "X(*:D)");
-  algorithm.run(p1, variable_map);        
+  algorithm.run(p1, variable_map);
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
-	pbes_system::detail::set_bes_equation_limit(100000);
+  pbes_system::detail::set_bes_equation_limit(100000);
   test_pbesinst();
   test_pbesinst_finite();
 

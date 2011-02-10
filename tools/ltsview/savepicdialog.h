@@ -21,7 +21,8 @@ class wxSpinCtrl;
 class wxSpinEvent;
 class wxStatusBar;
 
-class SavePicDialog : public wxDialog {
+class SavePicDialog : public wxDialog
+{
   public:
     static const int myID_F_BUTTON = wxID_HIGHEST + 1;
     static const int myID_W_SPIN = myID_F_BUTTON + 1;
@@ -30,7 +31,7 @@ class SavePicDialog : public wxDialog {
     static const int myID_FT_CHOICE = myID_AR_CHECK + 1;
 
     SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
-        wxFileName filename);
+                  wxFileName filename);
     ~SavePicDialog();
     void onARCheck(wxCommandEvent& event);
     void onSpin(wxSpinEvent& event);

@@ -85,7 +85,7 @@ void test_system_defined_sorts()
   // std::cout << "<dataspec>" << data::pp(spec.data()) << std::endl;
 
   boost::iterator_range<data_specification::constructors_const_iterator> r = spec.data().constructors(data::sort_nat::nat());
-  
+
   // make a copy of the range, since it is a filter iterator
   std::vector< data::function_symbol > c;
   std::copy(r.begin(), r.end(), std::back_inserter(c));

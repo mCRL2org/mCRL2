@@ -16,48 +16,51 @@
 #include <vector>
 #include <boost/utility.hpp> // next()
 
-namespace mcrl2 {
-  
-namespace core {
+namespace mcrl2
+{
+
+namespace core
+{
 
 /// \cond INTERNAL_DOCS
-namespace detail {
+namespace detail
+{
 
-  /// \brief Assignment function object
-  struct foreach_sequence_assign
+/// \brief Assignment function object
+struct foreach_sequence_assign
+{
+  /// \brief Function call operator
+  /// \param t1 An object
+  /// \param t2 A value
+  template <typename T1, typename T2>
+  void operator()(T1& t1, const T2& t2) const
   {
-    /// \brief Function call operator
-    /// \param t1 An object
-    /// \param t2 A value
-    template <typename T1, typename T2>
-    void operator()(T1& t1, const T2& t2) const
-    {
-      t1 = t2;
-    }
-  };
-  
-  /// \brief Implementation of the foreach_sequence algorithm
-  /// \param first Start of a sequence container
-  /// \param last End of a sequence container
-  /// \param i An output iterator to where the generated sequences are written.
-  /// \param f Function that is called for each generated sequence
-  /// \param assign Assignment operator for assigning a value to a sequence element
-  template <typename Iter1, typename Iter2, typename SequenceFunction, typename Assign>
-  void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f, Assign assign)
+    t1 = t2;
+  }
+};
+
+/// \brief Implementation of the foreach_sequence algorithm
+/// \param first Start of a sequence container
+/// \param last End of a sequence container
+/// \param i An output iterator to where the generated sequences are written.
+/// \param f Function that is called for each generated sequence
+/// \param assign Assignment operator for assigning a value to a sequence element
+template <typename Iter1, typename Iter2, typename SequenceFunction, typename Assign>
+void foreach_sequence_impl(Iter1 first, Iter1 last, Iter2 i, SequenceFunction f, Assign assign)
+{
+  if (first == last)
   {
-    if (first == last)
+    f();
+  }
+  else
+  {
+    for (typename std::iterator_traits<Iter1>::value_type::const_iterator j = first->begin(); j != first->end(); ++j)
     {
-      f();
-    }
-    else
-    {
-      for (typename std::iterator_traits<Iter1>::value_type::const_iterator j = first->begin(); j != first->end(); ++j)
-      {
-        assign(*i, *j);
-        foreach_sequence_impl(boost::next(first), last, boost::next(i), f, assign);
-      }
+      assign(*i, *j);
+      foreach_sequence_impl(boost::next(first), last, boost::next(i), f, assign);
     }
   }
+}
 
 } // namespace detail
 /// \endcond
@@ -73,9 +76,9 @@ namespace detail {
 /// \param f A function that is called for each generated sequence.
 /// \param assign The assign operation is called to assign values to the generated sequence.
 template <typename SequenceContainer,
-          typename OutIter,
-          typename SequenceFunction,
-          typename Assign>
+         typename OutIter,
+         typename SequenceFunction,
+         typename Assign>
 void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f, Assign assign)
 {
   detail::foreach_sequence_impl(X.begin(),
@@ -95,8 +98,8 @@ void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f,
 /// \param i An output iterator to where the generated sequences are written.
 /// \param f A function that is called for each generated sequence.
 template <typename SequenceContainer,
-          typename OutIter,
-          typename SequenceFunction>
+         typename OutIter,
+         typename SequenceFunction>
 void foreach_sequence(const SequenceContainer& X, OutIter i, SequenceFunction f)
 {
   foreach_sequence(X, i, f, detail::foreach_sequence_assign());

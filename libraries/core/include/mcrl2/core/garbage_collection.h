@@ -14,17 +14,19 @@
 
 #include "gc.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace core {
+namespace core
+{
 
-  /// \brief Calls the ATerm Library garbage collector if the flag MCRL2_WITH_GARBAGE_COLLECTION is set.
-  inline void garbage_collect()
-  {
+/// \brief Calls the ATerm Library garbage collector if the flag MCRL2_WITH_GARBAGE_COLLECTION is set.
+inline void garbage_collect()
+{
 #ifdef MCRL2_WITH_GARBAGE_COLLECTION
-    AT_collect();
+  AT_collect();
 #endif
-  }
+}
 
 } // namespace core
 

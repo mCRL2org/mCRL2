@@ -36,10 +36,10 @@ void test_case_1()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1,r).run();
-std::clog << pp(s0) << std::endl;
-std::clog << pp(s1) << std::endl;
+  std::clog << pp(s0) << std::endl;
+  std::clog << pp(s1) << std::endl;
   summand_list summands1 = s1.process().summands();
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -64,8 +64,9 @@ void test_case_2()
   suminst_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
   std::cerr << "SUMMANDS " << summands1 << "\n";
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
-  { std::cerr << "LEEG " << i->summation_variables() << "\n";
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  {
+    std::cerr << "LEEG " << i->summation_variables() << "\n";
     BOOST_CHECK(i->summation_variables().empty());
   }
 
@@ -89,7 +90,7 @@ void test_case_3()
   suminst_algorithm<rewriter>(s1, r).run();
   summand_list summands1 = s1.process().summands();
   bool sum_occurs = false;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     sum_occurs = sum_occurs || !i->summation_variables().empty();
   }
@@ -117,9 +118,9 @@ void test_case_4()
   summand_list summands1 = s1.process().summands();
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
-    if(i->is_tau())
+    if (i->is_tau())
     {
       tau_sum_occurs = tau_sum_occurs || !i->summation_variables().empty();
     }
@@ -155,9 +156,9 @@ void test_case_5()
   summand_list summands1 = s1.process().summands();
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
-    if(i->is_tau())
+    if (i->is_tau())
     {
       tau_sum_occurs = tau_sum_occurs || !i->summation_variables().empty();
     }
@@ -182,7 +183,7 @@ void test_case_6()
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, false).run();
   summand_list summands1 = s1.process().summands();
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -203,7 +204,7 @@ void test_case_7()
   suminst_algorithm<rewriter>(s1, r, false).run();
   summand_list summands1 = s1.process().summands();
   int sum_count = 0;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     sum_count += i->summation_variables().size();
   }

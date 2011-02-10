@@ -18,23 +18,23 @@
 
 // ------------------------------
 PopupFrame::PopupFrame(
-    Mediator* m,
-    wxWindow* parent,
-    wxWindowID id,
-    wxString title,
-    wxPoint position,
-    wxSize size )
-    : wxFrame(
-        parent,
-        id,
-        wxString( title ),
-        position,
-        size,
-        wxDEFAULT_FRAME_STYLE |
-        wxFRAME_FLOAT_ON_PARENT |
-		wxFRAME_TOOL_WINDOW |
-        wxFRAME_NO_TASKBAR ),
-      Colleague( m )
+  Mediator* m,
+  wxWindow* parent,
+  wxWindowID id,
+  wxString title,
+  wxPoint position,
+  wxSize size)
+  : wxFrame(
+    parent,
+    id,
+    wxString(title),
+    position,
+    size,
+    wxDEFAULT_FRAME_STYLE |
+    wxFRAME_FLOAT_ON_PARENT |
+    wxFRAME_TOOL_WINDOW |
+    wxFRAME_NO_TASKBAR),
+  Colleague(m)
 // ------------------------------
 {}
 
@@ -49,20 +49,20 @@ PopupFrame::~PopupFrame()
 
 
 // --------------------------------------------
-void PopupFrame::OnClose( wxCloseEvent& /*event*/ )
+void PopupFrame::OnClose(wxCloseEvent& /*event*/)
 // --------------------------------------------
 {
-    mediator->handleCloseFrame( this );
-    this->Destroy();
+  mediator->handleCloseFrame(this);
+  this->Destroy();
 }
 
 
 // -- implement event table -----------------------------------------
 
 
-BEGIN_EVENT_TABLE( PopupFrame, wxFrame )
-    // close event
-    EVT_CLOSE( PopupFrame::OnClose )
+BEGIN_EVENT_TABLE(PopupFrame, wxFrame)
+  // close event
+  EVT_CLOSE(PopupFrame::OnClose)
 END_EVENT_TABLE()
 
 

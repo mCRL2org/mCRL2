@@ -40,9 +40,12 @@ static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
 {
   std::string result("state(");
   size_t index = 0;
-  for(atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
+  for (atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
   {
-    if(index++ != 0) { result.append(", "); }
+    if (index++ != 0)
+    {
+      result.append(", ");
+    }
 
     result.append(core::pp(atermpp::aterm(info.export_term(static_cast<ATerm>(*i)))));
   }
@@ -53,10 +56,10 @@ static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
 static std::string print_assignments(atermpp::aterm_list a, ns_info const& info)
 {
   atermpp::aterm_list res;
-  for(atermpp::aterm_list::const_iterator i = a.begin(); i != a.end(); ++i)
+  for (atermpp::aterm_list::const_iterator i = a.begin(); i != a.end(); ++i)
   {
     ATermAppl t = atermpp::aterm_appl(*i);
-    if(t == gsMakeNil())
+    if (t == gsMakeNil())
     {
       res = atermpp::push_front(res, atermpp::aterm(t));
     }
@@ -93,112 +96,124 @@ static std::string print_assignments(atermpp::aterm_list a, ns_info const& info)
  * determine which elements should be true by recursively "dividing" the
  * array in two parts using /2.
  */
-static void fill_tree_init(bool *init, size_t n, size_t l)
+static void fill_tree_init(bool* init, size_t n, size_t l)
 {
-        if ( l == 0 )
-                return;
+  if (l == 0)
+  {
+    return;
+  }
 
-        if ( n > 2 )
-        {
-                fill_tree_init(init,n/2,l/2);
-                fill_tree_init(init+n/2,n-n/2,l-l/2);
-        } else /* n == 2 */ {
-                init[1] = true;
-        }
+  if (n > 2)
+  {
+    fill_tree_init(init,n/2,l/2);
+    fill_tree_init(init+n/2,n-n/2,l-l/2);
+  }
+  else /* n == 2 */
+  {
+    init[1] = true;
+  }
 }
-ATerm NextStateStandard::buildTree(ATerm *args)
+ATerm NextStateStandard::buildTree(ATerm* args)
 {
-        size_t n,m;
+  size_t n,m;
 
-        if ( info.statelen == 0 )
-                return (ATerm) info.nil;
+  if (info.statelen == 0)
+  {
+    return (ATerm) info.nil;
+  }
 
-        if ( tree_init == NULL )
-        {
-                tree_init = (bool *) malloc(info.statelen*sizeof(bool));
-                for (size_t i=0; i<info.statelen; i++)
-                        tree_init[i] = false;
-                n = 1;
-                while ( n <= info.statelen )
-                {
-                        n *= 2;
-                }
-                n /= 2;
-                fill_tree_init(tree_init,info.statelen,info.statelen-n);
-        }
+  if (tree_init == NULL)
+  {
+    tree_init = (bool*) malloc(info.statelen*sizeof(bool));
+    for (size_t i=0; i<info.statelen; i++)
+    {
+      tree_init[i] = false;
+    }
+    n = 1;
+    while (n <= info.statelen)
+    {
+      n *= 2;
+    }
+    n /= 2;
+    fill_tree_init(tree_init,info.statelen,info.statelen-n);
+  }
 
-        n = 0;
-        m = 0;
-        while ( n < info.statelen )
-        {
-                if ( tree_init[n] )
-                {
-                        args[m-1] = (ATerm) ATmakeAppl2(info.pairAFun,args[m-1],args[n]);
-                } else {
-                        args[m] = args[n];
-                        m++;
-                }
-                n++;
-        }
+  n = 0;
+  m = 0;
+  while (n < info.statelen)
+  {
+    if (tree_init[n])
+    {
+      args[m-1] = (ATerm) ATmakeAppl2(info.pairAFun,args[m-1],args[n]);
+    }
+    else
+    {
+      args[m] = args[n];
+      m++;
+    }
+    n++;
+  }
 
-        n = m;
-        while ( n > 1 )
-        {
-                for (size_t i=0; i<n; i+=2)
-                {
-                        args[i/2] = (ATerm) ATmakeAppl2(info.pairAFun,args[i],args[i+1]);
-                }
+  n = m;
+  while (n > 1)
+  {
+    for (size_t i=0; i<n; i+=2)
+    {
+      args[i/2] = (ATerm) ATmakeAppl2(info.pairAFun,args[i],args[i+1]);
+    }
 
-                n /= 2;
-        }
+    n /= 2;
+  }
 
-        return args[0];
+  return args[0];
 }
 
 ATerm NextStateStandard::getTreeElement(ATerm tree, size_t index)
 {
-        size_t n = info.statelen;
-        size_t m = 0;
-        while ( m+1 != n )
-        {
-                size_t t = (m+n)/2;
+  size_t n = info.statelen;
+  size_t m = 0;
+  while (m+1 != n)
+  {
+    size_t t = (m+n)/2;
 
-                assert( (ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun) );
+    assert((ATgetType(tree) == AT_APPL) && ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun));
 
-                if ( index < t )
-                {
-                        tree = ATgetArgument((ATermAppl) tree,0);
-                        n = t;
-                } else {
-                        tree = ATgetArgument((ATermAppl) tree,1);
-                        m = t;
-                }
-        }
+    if (index < t)
+    {
+      tree = ATgetArgument((ATermAppl) tree,0);
+      n = t;
+    }
+    else
+    {
+      tree = ATgetArgument((ATermAppl) tree,1);
+      m = t;
+    }
+  }
 
-        return tree;
+  return tree;
 }
 
 size_t NextStateStandard::getStateLength()
 {
-        return info.statelen;
+  return info.statelen;
 }
 
 ATermAppl NextStateStandard::getStateArgument(ATerm state, size_t index)
 {
-        switch ( info.stateformat )
-        {
-                case GS_STATE_VECTOR:
-                        return info.export_term(ATgetArgument((ATermAppl) state,index));
-                case GS_STATE_TREE:
-                        return info.export_term(getTreeElement(state,index));
-                default:
-                        return NULL;
-        }
+  switch (info.stateformat)
+  {
+    case GS_STATE_VECTOR:
+      return info.export_term(ATgetArgument((ATermAppl) state,index));
+    case GS_STATE_TREE:
+      return info.export_term(getTreeElement(state,index));
+    default:
+      return NULL;
+  }
 }
 
 ATermAppl NextStateStandard::makeStateVector(ATerm state)
 {
-  if ( !stateAFun_made )
+  if (!stateAFun_made)
   {
     stateAFun_made = true;
     info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
@@ -218,517 +233,538 @@ static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars = NULL)
 
 static bool statearg_match_list(ATermList arg, ATermList pat, ATermTable vars)
 {
-        assert(ATgetLength(arg) == ATgetLength(pat));
-        bool r = true;
+  assert(ATgetLength(arg) == ATgetLength(pat));
+  bool r = true;
 
-        while (!ATisEmpty(arg) && r)
-        {
-                r = r && statearg_match(ATAgetFirst(arg), ATAgetFirst(pat), vars);
-                arg = ATgetNext(arg);
-                pat = ATgetNext(pat);
-        }
+  while (!ATisEmpty(arg) && r)
+  {
+    r = r && statearg_match(ATAgetFirst(arg), ATAgetFirst(pat), vars);
+    arg = ATgetNext(arg);
+    pat = ATgetNext(pat);
+  }
 
-        return r;
+  return r;
 }
 
 static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars)
 {
-        ATermTable tmp_vars = vars;
-        if ( vars == NULL )
-        {
-                tmp_vars = ATtableCreate(20,50);
-        }
+  ATermTable tmp_vars = vars;
+  if (vars == NULL)
+  {
+    tmp_vars = ATtableCreate(20,50);
+  }
 
 
-        bool r;
-        if ( gsIsDataAppl(pat) )
-        {
-                if ( !gsIsDataAppl(arg) )
-                {
-                        r = false;
-                } else {
-                        r = statearg_match(ATAgetArgument(arg,0),ATAgetArgument(pat,0),tmp_vars)
-                         && statearg_match_list(ATLgetArgument(arg,1),ATLgetArgument(pat,1),tmp_vars);
-                }
-        } else if  ( gsIsDataVarId(pat) )
-        {
-                ATerm val = ATtableGet(tmp_vars,(ATerm) pat);
-                if ( val == NULL )
-                {
-                        ATtablePut(tmp_vars,(ATerm) pat, (ATerm) arg);
-                        r = true;
-                } else if ( ATisEqual(arg,val) )
-                {
-                        r = true;
-                } else {
-                        r = false;
-                }
-        } else {
-                r = ATisEqual(arg,pat);
-        }
+  bool r;
+  if (gsIsDataAppl(pat))
+  {
+    if (!gsIsDataAppl(arg))
+    {
+      r = false;
+    }
+    else
+    {
+      r = statearg_match(ATAgetArgument(arg,0),ATAgetArgument(pat,0),tmp_vars)
+          && statearg_match_list(ATLgetArgument(arg,1),ATLgetArgument(pat,1),tmp_vars);
+    }
+  }
+  else if (gsIsDataVarId(pat))
+  {
+    ATerm val = ATtableGet(tmp_vars,(ATerm) pat);
+    if (val == NULL)
+    {
+      ATtablePut(tmp_vars,(ATerm) pat, (ATerm) arg);
+      r = true;
+    }
+    else if (ATisEqual(arg,val))
+    {
+      r = true;
+    }
+    else
+    {
+      r = false;
+    }
+  }
+  else
+  {
+    r = ATisEqual(arg,pat);
+  }
 
-        if ( vars == NULL )
-        {
-                ATtableDestroy(tmp_vars);
-        }
+  if (vars == NULL)
+  {
+    ATtableDestroy(tmp_vars);
+  }
 
-        return r;
+  return r;
 }
 
 ATerm NextStateStandard::parseStateVector(ATermAppl state, ATerm match)
 {
-        if ( !stateAFun_made )
-        {
-                stateAFun_made = true;
-                info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
-                ATprotectAFun(info.stateAFun);
-        }
+  if (!stateAFun_made)
+  {
+    stateAFun_made = true;
+    info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+    ATprotectAFun(info.stateAFun);
+  }
 
-        if ( ATisEqualAFun(info.stateAFun,ATgetAFun(state)) )
-        {
-                bool valid = true;
-                ATermList l = info.procvars;
-                for (size_t i=0; i<info.statelen; i++)
-                {
-                        stateargs[i] = ATgetArgument(state,i);
-                        if ( mcrl2::data::data_expression((ATermAppl) stateargs[i]).sort() != mcrl2::data::data_expression(ATAgetFirst(l)).sort())
-                        {
-                                valid = false;
-                                break;
-                        }
-                        if ( (match != NULL) && !statearg_match((ATermAppl) stateargs[i],getStateArgument(match,i)) )
-                        {
-                                valid = false;
-                                break;
-                        }
-                        stateargs[i] = info.import_term((ATermAppl) stateargs[i]);
-                        l = ATgetNext(l);
-                }
-                if ( valid )
-                {
-                        switch ( info.stateformat )
-                        {
-                                case GS_STATE_VECTOR:
-                                        return (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
-                                        break;
-                                case GS_STATE_TREE:
-                                        return (ATerm) buildTree(stateargs);
-                                        break;
-                                default:
-                                        break;
-                        }
-                }
-        }
+  if (ATisEqualAFun(info.stateAFun,ATgetAFun(state)))
+  {
+    bool valid = true;
+    ATermList l = info.procvars;
+    for (size_t i=0; i<info.statelen; i++)
+    {
+      stateargs[i] = ATgetArgument(state,i);
+      if (mcrl2::data::data_expression((ATermAppl) stateargs[i]).sort() != mcrl2::data::data_expression(ATAgetFirst(l)).sort())
+      {
+        valid = false;
+        break;
+      }
+      if ((match != NULL) && !statearg_match((ATermAppl) stateargs[i],getStateArgument(match,i)))
+      {
+        valid = false;
+        break;
+      }
+      stateargs[i] = info.import_term((ATermAppl) stateargs[i]);
+      l = ATgetNext(l);
+    }
+    if (valid)
+    {
+      switch (info.stateformat)
+      {
+        case GS_STATE_VECTOR:
+          return (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+          break;
+        case GS_STATE_TREE:
+          return (ATerm) buildTree(stateargs);
+          break;
+        default:
+          break;
+      }
+    }
+  }
 
-        return NULL;
+  return NULL;
 }
 
 ATerm NextStateStandard::SetVars(ATerm a, ATermList free_vars)
 {
-        if ( !usedummies )
-        {
-                return a;
-        }
+  if (!usedummies)
+  {
+    return a;
+  }
 
-        mcrl2::data::representative_generator generator(info.m_specification);
+  mcrl2::data::representative_generator generator(info.m_specification);
 
-        if ( ATisList(a) )
-        {
-                ATermList l = (ATermList) a;
-                ATermList m = ATmakeList0();
-                for (; !ATisEmpty(l); l=ATgetNext(l))
-                {
-                        m = ATinsert(m,SetVars(ATgetFirst(l),free_vars));
-                }
-                return (ATerm) ATreverse(m);
-        } else if ( gsIsDataVarId((ATermAppl) a) )
-        {
-                if ( ATindexOf(free_vars,a,0) != ATERM_NON_EXISTING_POSITION )
-                {
-                        return reinterpret_cast< ATerm >(static_cast< ATermAppl >(
-                                generator(mcrl2::data::sort_expression(ATAgetArgument((ATermAppl) a,1)))));
-                } else {
-                        return a;
-                }
-        } else if ( gsIsDataAppl((ATermAppl) a) )
-        {
-                return (ATerm) gsMakeDataAppl((ATermAppl) SetVars(ATgetArgument((ATermAppl) a,0),free_vars),(ATermList) SetVars(ATgetArgument((ATermAppl) a,1),free_vars));
-        } else {
-                return a;
-        }
+  if (ATisList(a))
+  {
+    ATermList l = (ATermList) a;
+    ATermList m = ATmakeList0();
+    for (; !ATisEmpty(l); l=ATgetNext(l))
+    {
+      m = ATinsert(m,SetVars(ATgetFirst(l),free_vars));
+    }
+    return (ATerm) ATreverse(m);
+  }
+  else if (gsIsDataVarId((ATermAppl) a))
+  {
+    if (ATindexOf(free_vars,a,0) != ATERM_NON_EXISTING_POSITION)
+    {
+      return reinterpret_cast< ATerm >(static_cast< ATermAppl >(
+                                         generator(mcrl2::data::sort_expression(ATAgetArgument((ATermAppl) a,1)))));
+    }
+    else
+    {
+      return a;
+    }
+  }
+  else if (gsIsDataAppl((ATermAppl) a))
+  {
+    return (ATerm) gsMakeDataAppl((ATermAppl) SetVars(ATgetArgument((ATermAppl) a,0),free_vars),(ATermList) SetVars(ATgetArgument((ATermAppl) a,1),free_vars));
+  }
+  else
+  {
+    return a;
+  }
 }
 
 ATermList NextStateStandard::ListToFormat(ATermList l,ATermList free_vars)
 {
-        if ( ATisEmpty(l) )
-        {
-                return l;
-        } else {
-                return ATinsert(ListToFormat(ATgetNext(l),free_vars),info.import_term((ATermAppl) SetVars(ATgetFirst(l),free_vars)));
-        }
+  if (ATisEmpty(l))
+  {
+    return l;
+  }
+  else
+  {
+    return ATinsert(ListToFormat(ATgetNext(l),free_vars),info.import_term((ATermAppl) SetVars(ATgetFirst(l),free_vars)));
+  }
 }
 
 #define LISTFROMFORMAT_IMPLEMENTATION \
-        if ( ATisEmpty(l) ) \
-        { \
-                return l; \
-        } else { \
-                return ATinsert(ListFromFormat(ATgetNext(l)),(ATerm) info.export_term(ATgetFirst(l))); \
-        }
+  if ( ATisEmpty(l) ) \
+  { \
+    return l; \
+  } else { \
+    return ATinsert(ListFromFormat(ATgetNext(l)),(ATerm) info.export_term(ATgetFirst(l))); \
+  }
 ATermList NextStateStandard::ListFromFormat(ATermList l)
 {
-        LISTFROMFORMAT_IMPLEMENTATION
+  LISTFROMFORMAT_IMPLEMENTATION
 }
 
 ATermList NextStateGeneratorStandard::ListFromFormat(ATermList l)
 {
-        LISTFROMFORMAT_IMPLEMENTATION
+  LISTFROMFORMAT_IMPLEMENTATION
 }
 
 ATermAppl NextStateStandard::ActionToRewriteFormat(ATermAppl act, ATermList free_vars)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateStandard::ActionToRewriteFormat(act, free_vars) called, with" << std::endl <<
-                     "  act = " << atermpp::aterm_appl(act) << std::endl <<
-                     "  act (human readable): " << core::pp(atermpp::aterm_appl(act)) << std::endl <<
-                     "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
+  std::clog << "NextStateStandard::ActionToRewriteFormat(act, free_vars) called, with" << std::endl <<
+            "  act = " << atermpp::aterm_appl(act) << std::endl <<
+            "  act (human readable): " << core::pp(atermpp::aterm_appl(act)) << std::endl <<
+            "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
-        ATermList l = ATLgetArgument(act,0);
-        ATermList m = ATmakeList0();
+  ATermList l = ATLgetArgument(act,0);
+  ATermList m = ATmakeList0();
 
-        for (; !ATisEmpty(l); l=ATgetNext(l))
-        {
-                ATermAppl a = ATAgetFirst(l);
-                a = gsMakeAction(ATAgetArgument(a,0),ListToFormat(ATLgetArgument(a,1),free_vars));
-                m = ATinsert(m,(ATerm) a);
-        }
-        m = ATreverse(m);
+  for (; !ATisEmpty(l); l=ATgetNext(l))
+  {
+    ATermAppl a = ATAgetFirst(l);
+    a = gsMakeAction(ATAgetArgument(a,0),ListToFormat(ATLgetArgument(a,1),free_vars));
+    m = ATinsert(m,(ATerm) a);
+  }
+  m = ATreverse(m);
 
-        return gsMakeMultAct(m);
+  return gsMakeMultAct(m);
 }
 
 ATermList NextStateStandard::AssignsToRewriteFormat(ATermList assigns, ATermList free_vars)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateStandard::AssignsToRewriteFormat(assigns, free_vars) called, with: " << std::endl <<
-                     "  assigns = " << atermpp::aterm_list(assigns) << std::endl <<
-                     "  (human readable assigns): " << pp(atermpp::aterm_list(assigns)) << std::endl <<
-                     "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
+  std::clog << "NextStateStandard::AssignsToRewriteFormat(assigns, free_vars) called, with: " << std::endl <<
+            "  assigns = " << atermpp::aterm_list(assigns) << std::endl <<
+            "  (human readable assigns): " << pp(atermpp::aterm_list(assigns)) << std::endl <<
+            "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
-        size_t i = 0;
-        for (ATermList l=pars; !ATisEmpty(l); l=ATgetNext(l),i++)
-        {
-                bool set = false;
+  size_t i = 0;
+  for (ATermList l=pars; !ATisEmpty(l); l=ATgetNext(l),i++)
+  {
+    bool set = false;
 
-                for (ATermList m=assigns; !ATisEmpty(m); m=ATgetNext(m))
-                {
-                        if ( ATisEqual(ATAgetArgument(ATAgetFirst(m),0),ATAgetFirst(l)) )
-                        {
-                                stateargs[i] = info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(m),1),free_vars));
-                                set = true;
-                                break;
-                        }
-                }
-                if ( !set )
-                {
-                        stateargs[i] = (ATerm) gsMakeNil();
-                }
-        }
+    for (ATermList m=assigns; !ATisEmpty(m); m=ATgetNext(m))
+    {
+      if (ATisEqual(ATAgetArgument(ATAgetFirst(m),0),ATAgetFirst(l)))
+      {
+        stateargs[i] = info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(m),1),free_vars));
+        set = true;
+        break;
+      }
+    }
+    if (!set)
+    {
+      stateargs[i] = (ATerm) gsMakeNil();
+    }
+  }
 
-        ATermList r = ATmakeList0();
-        i=info.statelen;
-        while ( i != 0 )
-        {
-                i--;
-                r = ATinsert(r,stateargs[i]);
-        }
-        return r;
+  ATermList r = ATmakeList0();
+  i=info.statelen;
+  while (i != 0)
+  {
+    i--;
+    r = ATinsert(r,stateargs[i]);
+  }
+  return r;
 }
 
 NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format,
-         enumerator_factory_type& enumerator_factory) : info(spec.data(), enumerator_factory)
+                                     enumerator_factory_type& enumerator_factory) : info(spec.data(), enumerator_factory)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateStandard::NextateStandard(spec, allow_free_vars, state_format, enumerator_factory), with" <<  std::endl <<
-                     "  allow_free_vars = " << allow_free_vars << std::endl <<
-                     "  state_format = " << state_format << std::endl <<
-                     "  LPS= " << mcrl2::lps::pp(spec) << std::endl;
+  std::clog << "NextStateStandard::NextateStandard(spec, allow_free_vars, state_format, enumerator_factory), with" <<  std::endl <<
+            "  allow_free_vars = " << allow_free_vars << std::endl <<
+            "  state_format = " << state_format << std::endl <<
+            "  LPS= " << mcrl2::lps::pp(spec) << std::endl;
 #endif
-        ATermList l,m,n,free_vars;
+  ATermList l,m,n,free_vars;
 
-        next_id = 0;
-        info.current_id = &current_id;
+  next_id = 0;
+  info.current_id = &current_id;
 
-        info.parent = this;
+  info.parent = this;
 
-        usedummies = !allow_free_vars;
+  usedummies = !allow_free_vars;
 
-        tree_init = NULL;
+  tree_init = NULL;
 
-        info.stateformat = state_format;
-        info.pairAFun = ATmakeAFun("@STATE_PAIR@",2,ATfalse);
-        ATprotectAFun(info.pairAFun);
+  info.stateformat = state_format;
+  info.pairAFun = ATmakeAFun("@STATE_PAIR@",2,ATfalse);
+  ATprotectAFun(info.pairAFun);
 
-        info.nil = NULL;
-        ATprotectAppl(&info.nil);
-        info.nil = gsMakeNil();
+  info.nil = NULL;
+  ATprotectAppl(&info.nil);
+  info.nil = gsMakeNil();
 
-        // Declare all constructors to the rewriter to prevent unnecessary compilation.
-        // This can be removed if the jittyc or innerc compilers are not in use anymore.
-        // In certain cases it could be useful to add the mappings also, but this appears to
-        // give a substantial performance penalty, due to the addition of symbols to the
-        // rewriter that are not used. 
-        for(mcrl2::data::data_specification::constructors_const_range c=spec.data().constructors();
-                                        !c.empty() ; c.advance_begin(1))
-        {
-          info.import_term(mcrl2::data::data_expression(c.front()));
-        }
-        
-        free_vars = atermpp::convert< mcrl2::data::variable_list >(spec.global_variables());
+  // Declare all constructors to the rewriter to prevent unnecessary compilation.
+  // This can be removed if the jittyc or innerc compilers are not in use anymore.
+  // In certain cases it could be useful to add the mappings also, but this appears to
+  // give a substantial performance penalty, due to the addition of symbols to the
+  // rewriter that are not used.
+  for (mcrl2::data::data_specification::constructors_const_range c=spec.data().constructors();
+       !c.empty() ; c.advance_begin(1))
+  {
+    info.import_term(mcrl2::data::data_expression(c.front()));
+  }
 
-        pars = NULL;
-        ATprotectList(&pars);
-        pars = spec.process().process_parameters();
+  free_vars = atermpp::convert< mcrl2::data::variable_list >(spec.global_variables());
 
-        info.statelen = ATgetLength(pars);
-        if ( info.stateformat == GS_STATE_VECTOR )
-        {
-                stateAFun_made = true;
-                info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
-                ATprotectAFun(info.stateAFun);
-        } else {
-                stateAFun_made = false;
-        }
+  pars = NULL;
+  ATprotectList(&pars);
+  pars = spec.process().process_parameters();
 
-        info.procvars = NULL;
-        ATprotectList(&info.procvars);
-        info.procvars = spec.process().process_parameters();
+  info.statelen = ATgetLength(pars);
+  if (info.stateformat == GS_STATE_VECTOR)
+  {
+    stateAFun_made = true;
+    info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+    ATprotectAFun(info.stateAFun);
+  }
+  else
+  {
+    stateAFun_made = false;
+  }
 
-        stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
-        for (size_t i=0; i<info.statelen; i++)
-        {
-          stateargs[i] = NULL;
-        }
-        ATprotectArray(stateargs,info.statelen);
+  info.procvars = NULL;
+  ATprotectList(&info.procvars);
+  info.procvars = spec.process().process_parameters();
 
-        smndAFun = ATmakeAFun("@SMND@",4,ATfalse);
-        ATprotectAFun(smndAFun);
-        ATermList sums = spec.process().summands();
-        l = ATmakeList0();
-        for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
-        {
-                if ( b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)) ) // Summand is timed
-                {
-                        gsWarningMsg("specification uses time, which is (currently) not supported; ignoring timing\n");
-                        b = false;
-                }
-                if ( !gsIsDelta(ATAgetArgument(ATAgetFirst(sums),2)) )
-                {
-                        l = ATinsert(l,ATgetFirst(sums));
-                }
-        }
-        sums = ATreverse(l);
-        info.num_summands = ATgetLength(sums);
-        info.num_prioritised = 0;
-        info.summands = (ATermAppl *) malloc(info.num_summands*sizeof(ATermAppl));
-        for (size_t i=0; i<info.num_summands; i++)
-        {
-                info.summands[i] = NULL;
-        }
-        ATprotectArray((ATerm *) info.summands,info.num_summands);
-        for (size_t i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
-        {
-          info.summands[i] = 
-             ATmakeAppl4(
-                smndAFun,
-                ATgetArgument(ATAgetFirst(sums),0),
-                info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),
-                (ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),
-                (ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
-        }
+  stateargs = (ATerm*) malloc(info.statelen*sizeof(ATerm));
+  for (size_t i=0; i<info.statelen; i++)
+  {
+    stateargs[i] = NULL;
+  }
+  ATprotectArray(stateargs,info.statelen);
 
-        l = pars;
-        m = spec.initial_process().assignments();
+  smndAFun = ATmakeAFun("@SMND@",4,ATfalse);
+  ATprotectAFun(smndAFun);
+  ATermList sums = spec.process().summands();
+  l = ATmakeList0();
+  for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
+  {
+    if (b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)))   // Summand is timed
+    {
+      gsWarningMsg("specification uses time, which is (currently) not supported; ignoring timing\n");
+      b = false;
+    }
+    if (!gsIsDelta(ATAgetArgument(ATAgetFirst(sums),2)))
+    {
+      l = ATinsert(l,ATgetFirst(sums));
+    }
+  }
+  sums = ATreverse(l);
+  info.num_summands = ATgetLength(sums);
+  info.num_prioritised = 0;
+  info.summands = (ATermAppl*) malloc(info.num_summands*sizeof(ATermAppl));
+  for (size_t i=0; i<info.num_summands; i++)
+  {
+    info.summands[i] = NULL;
+  }
+  ATprotectArray((ATerm*) info.summands,info.num_summands);
+  for (size_t i=0; !ATisEmpty(sums); sums=ATgetNext(sums),i++)
+  {
+    info.summands[i] =
+      ATmakeAppl4(
+        smndAFun,
+        ATgetArgument(ATAgetFirst(sums),0),
+        info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),
+        (ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),
+        (ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
+  }
 
-        for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
-        {
-          n = m;
-          bool set = false;
-          for (; !ATisEmpty(n); n=ATgetNext(n))
-          {
-            if ( ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)) )
-            {
-              stateargs[i] = info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars));
-              set = true;
-              break;
-            }
-          }
-          if ( !set )
-          {
-            gsErrorMsg("Parameter '%T' does not have an initial value.",ATgetArgument(ATAgetFirst(l),0));
-            initial_state = NULL;
-            ATprotect(&initial_state);
-            return;
-          }
-        }
+  l = pars;
+  m = spec.initial_process().assignments();
 
-        // Rewrite the state arguments en block, as otherwise the generation of new symbols in the 
-        // rewriter is intermingled with rewriting, causing the rewriter to rewrite too often.
-        for (size_t i=0; i<info.statelen; i++)
-        {
-          stateargs[i] = info.m_rewriter(stateargs[i]);
-        }
+  for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l), i++)
+  {
+    n = m;
+    bool set = false;
+    for (; !ATisEmpty(n); n=ATgetNext(n))
+    {
+      if (ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)))
+      {
+        stateargs[i] = info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars));
+        set = true;
+        break;
+      }
+    }
+    if (!set)
+    {
+      gsErrorMsg("Parameter '%T' does not have an initial value.",ATgetArgument(ATAgetFirst(l),0));
+      initial_state = NULL;
+      ATprotect(&initial_state);
+      return;
+    }
+  }
 
-        initial_state = NULL;
-        ATprotect(&initial_state);
-        switch ( info.stateformat )
-        {
-                case GS_STATE_VECTOR:
-                        initial_state = (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
-                        break;
-                case GS_STATE_TREE:
-                        initial_state = (ATerm) buildTree(stateargs);
-                        break;
-                default:
-                        break;
-        }
+  // Rewrite the state arguments en block, as otherwise the generation of new symbols in the
+  // rewriter is intermingled with rewriting, causing the rewriter to rewrite too often.
+  for (size_t i=0; i<info.statelen; i++)
+  {
+    stateargs[i] = info.m_rewriter(stateargs[i]);
+  }
+
+  initial_state = NULL;
+  ATprotect(&initial_state);
+  switch (info.stateformat)
+  {
+    case GS_STATE_VECTOR:
+      initial_state = (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+      break;
+    case GS_STATE_TREE:
+      initial_state = (ATerm) buildTree(stateargs);
+      break;
+    default:
+      break;
+  }
 }
 
 NextStateStandard::~NextStateStandard()
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateStandard::~NextStateStandard called" << std::endl;
+  std::clog << "NextStateStandard::~NextStateStandard called" << std::endl;
 #endif
-        ATunprotect(&initial_state);
+  ATunprotect(&initial_state);
 
-        ATunprotectArray(stateargs);
+  ATunprotectArray(stateargs);
 
-        ATunprotectAppl(&info.nil);
+  ATunprotectAppl(&info.nil);
 
-        ATunprotectAFun(info.pairAFun);
+  ATunprotectAFun(info.pairAFun);
 
-        ATunprotectList(&pars);
-        if ( stateAFun_made )
-        {
-                ATunprotectAFun(info.stateAFun);
-        }
+  ATunprotectList(&pars);
+  if (stateAFun_made)
+  {
+    ATunprotectAFun(info.stateAFun);
+  }
 
-        ATunprotectList(&info.procvars);
+  ATunprotectList(&info.procvars);
 
-        ATunprotectAFun(smndAFun);
-        ATunprotectArray((ATerm *) info.summands);
-        free(info.summands);
+  ATunprotectAFun(smndAFun);
+  ATunprotectArray((ATerm*) info.summands);
+  free(info.summands);
 
-        free(tree_init);
+  free(tree_init);
 }
 
-static bool only_action(ATermList ma, const char *action)
+static bool only_action(ATermList ma, const char* action)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "only_action(ma, action) called, with " << std::endl <<
-                     "  ma = " << atermpp::aterm_list(ma) << std::endl <<
-                     "  action = " << std::string(action) << std::endl;
+  std::clog << "only_action(ma, action) called, with " << std::endl <<
+            "  ma = " << atermpp::aterm_list(ma) << std::endl <<
+            "  action = " << std::string(action) << std::endl;
 #endif
-        if ( ATisEmpty(ma) )
-        {
-                return false;
-        }
+  if (ATisEmpty(ma))
+  {
+    return false;
+  }
 
-        for (;!ATisEmpty(ma); ma=ATgetNext(ma))
-        {
-                if ( strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(ATAgetFirst(ma),0),0))),action) )
-                {
-                        return false;
-                }
-        }
-        return true;
+  for (; !ATisEmpty(ma); ma=ATgetNext(ma))
+  {
+    if (strcmp(ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(ATAgetFirst(ma),0),0))),action))
+    {
+      return false;
+    }
+  }
+  return true;
 }
-void NextStateStandard::prioritise(const char *action)
+void NextStateStandard::prioritise(const char* action)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextstateStandard::prioritise called" << std::endl;
+  std::clog << "NextstateStandard::prioritise called" << std::endl;
 #endif
-        // XXX this function invalidates currently used generators!
-        // perhaps
-        bool is_tau = !strcmp(action,"tau");
-        size_t pos = 0;
-        size_t rest = 0;
+  // XXX this function invalidates currently used generators!
+  // perhaps
+  bool is_tau = !strcmp(action,"tau");
+  size_t pos = 0;
+  size_t rest = 0;
 
-        while ( pos < info.num_summands )
-        {
-                ATermAppl s = info.summands[pos];
-                ATermList ma = ATLgetArgument(ATAgetArgument(s,2),0);
-                if ( (is_tau && ATisEmpty(ma)) || (!is_tau && only_action(ma,action)) )
-                {
-                        //if ( rest < pos )
-                        //{
-                                info.summands[pos] = info.summands[rest];
-                                info.summands[rest] = s;
-                        //}
-                        rest++;
-                }
-                pos++;
-        }
+  while (pos < info.num_summands)
+  {
+    ATermAppl s = info.summands[pos];
+    ATermList ma = ATLgetArgument(ATAgetArgument(s,2),0);
+    if ((is_tau && ATisEmpty(ma)) || (!is_tau && only_action(ma,action)))
+    {
+      //if ( rest < pos )
+      //{
+      info.summands[pos] = info.summands[rest];
+      info.summands[rest] = s;
+      //}
+      rest++;
+    }
+    pos++;
+  }
 
-        info.num_prioritised += rest;
+  info.num_prioritised += rest;
 }
 
 ATerm NextStateStandard::getInitialState()
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateStandard::getInitialState()." << std::endl <<
+  std::clog << "NextStateStandard::getInitialState()." << std::endl <<
             "Result: " << atermpp::aterm(initial_state) << std::endl <<
             "Result (human readable): " << print_state(atermpp::aterm_appl(initial_state), info) << std::endl;
 #endif
-        return initial_state;
+  return initial_state;
 }
 
-NextStateGenerator *NextStateStandard::getNextStates(ATerm state, NextStateGenerator *old)
+NextStateGenerator* NextStateStandard::getNextStates(ATerm state, NextStateGenerator* old)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateStandard::getNextStates(state, old) called, with " <<
-                     "  state = " << atermpp::aterm(state) << "old = " << old << std::endl <<
-                     "  (human readable state) " << print_state(atermpp::aterm_appl(state), info) << std::endl;
+  std::clog << "NextStateStandard::getNextStates(state, old) called, with " <<
+            "  state = " << atermpp::aterm(state) << "old = " << old << std::endl <<
+            "  (human readable state) " << print_state(atermpp::aterm_appl(state), info) << std::endl;
 #endif
-        if ( old == NULL )
-        {
-                return new NextStateGeneratorStandard(state,info,next_id++);
-        }
+  if (old == NULL)
+  {
+    return new NextStateGeneratorStandard(state,info,next_id++);
+  }
 
-        static_cast< NextStateGeneratorStandard* >(old)->reset(state);
+  static_cast< NextStateGeneratorStandard* >(old)->reset(state);
 
-        return old;
+  return old;
 }
 
-class NextStateGeneratorSummand : public NextStateGeneratorStandard {
+class NextStateGeneratorSummand : public NextStateGeneratorStandard
+{
 
   public:
 
     NextStateGeneratorSummand(size_t summand, ATerm state, ns_info& info, size_t identifier)
-                          : NextStateGeneratorStandard(state, info, identifier, true, summand) {
+      : NextStateGeneratorStandard(state, info, identifier, true, summand)
+    {
 
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorSummand(summand, state, info, identifier)" <<
-                     "  summand = " << summand << std::endl <<
-                     "  state = " << atermpp::aterm(state) << std::endl <<
-                     "  (human readable state) " << print_state(atermpp::aterm_appl(state), info) << std::endl <<
-                     "  identifier = " << identifier << std::endl;
+      std::clog << "NextStateGeneratorSummand(summand, state, info, identifier)" <<
+                "  summand = " << summand << std::endl <<
+                "  state = " << atermpp::aterm(state) << std::endl <<
+                "  (human readable state) " << print_state(atermpp::aterm_appl(state), info) << std::endl <<
+                "  identifier = " << identifier << std::endl;
 #endif
       assert(summand < info.num_summands);
     }
 };
 
-NextStateGenerator *NextStateStandard::getNextStates(ATerm state, size_t index, NextStateGenerator *old)
+NextStateGenerator* NextStateStandard::getNextStates(ATerm state, size_t index, NextStateGenerator* old)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateStandard::getNextStates(state, index, old) called, with " <<
-                      "  state = " << atermpp::aterm(state) << std::endl <<
-                      "  (human readable state) " << print_state(atermpp::aterm_appl(state), info) << std::endl <<
-                      "  index = " << index << std::endl <<
-                      "  old = " << old << std::endl;
+  std::clog << "NextStateStandard::getNextStates(state, index, old) called, with " <<
+            "  state = " << atermpp::aterm(state) << std::endl <<
+            "  (human readable state) " << print_state(atermpp::aterm_appl(state), info) << std::endl <<
+            "  index = " << index << std::endl <<
+            "  old = " << old << std::endl;
 #endif
   assert(index < info.num_summands);
-  if ( old != 0 ) {
+  if (old != 0)
+  {
     static_cast< NextStateGeneratorSummand* >(old)->reset(state, index);
 
     return old;
@@ -740,298 +776,302 @@ NextStateGenerator *NextStateStandard::getNextStates(ATerm state, size_t index, 
 ATerm NextStateGeneratorStandard::makeNewState(ATerm old, ATermList assigns)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::makeNewState(old, assigns) called, with " << std::endl <<
-                     "  old = " << atermpp::aterm(old) << std::endl <<
-                     "  (human readable old): " << print_state(atermpp::aterm_appl(old), info) << std::endl <<
-                     "  assigns = " << atermpp::aterm_list(assigns) << std::endl; std::clog <<
-                     "  (human readable assigns): " << print_assignments(atermpp::aterm_list(assigns), info) << std::endl;
+  std::clog << "NextStateGeneratorStandard::makeNewState(old, assigns) called, with " << std::endl <<
+            "  old = " << atermpp::aterm(old) << std::endl <<
+            "  (human readable old): " << print_state(atermpp::aterm_appl(old), info) << std::endl <<
+            "  assigns = " << atermpp::aterm_list(assigns) << std::endl;
+  std::clog <<
+            "  (human readable assigns): " << print_assignments(atermpp::aterm_list(assigns), info) << std::endl;
 #endif
-        ATermList l;
+  ATermList l;
 
-        if ( *info.current_id != id )
-        {
-                set_substitutions();
-        }
+  if (*info.current_id != id)
+  {
+    set_substitutions();
+  }
 
-        l = info.procvars;
-        for (size_t i=0; i<info.statelen; i++)
-        {
-                ATerm a = ATgetFirst(assigns);
-                assigns = ATgetNext(assigns);
-                if ( ATisEqual(a,info.nil) )
-                {
-                        switch ( info.stateformat )
-                        {
-                                default:
-                                case GS_STATE_VECTOR:
-                                        stateargs[i] = ATgetArgument((ATermAppl) old,i);
-                                        break;
-                                case GS_STATE_TREE:
+  l = info.procvars;
+  for (size_t i=0; i<info.statelen; i++)
+  {
+    ATerm a = ATgetFirst(assigns);
+    assigns = ATgetNext(assigns);
+    if (ATisEqual(a,info.nil))
+    {
+      switch (info.stateformat)
+      {
+        default:
+        case GS_STATE_VECTOR:
+          stateargs[i] = ATgetArgument((ATermAppl) old,i);
+          break;
+        case GS_STATE_TREE:
 //                                      stateargs[i] = getTreeElement(old,i);
-                                        stateargs[i] = info.m_rewriter.internally_associated_value((ATermAppl) ATgetFirst(l));
-                                        if ( ATisEqual(stateargs[i], ATgetFirst(l)) ) // Make sure substitutions were not reset by enumerator
-                                        {
-                                                set_substitutions();
-                                                stateargs[i] = info.m_rewriter.internally_associated_value((ATermAppl) ATgetFirst(l));
-                                        }
-                                        break;
-                        }
-                } else {
+          stateargs[i] = info.m_rewriter.internally_associated_value((ATermAppl) ATgetFirst(l));
+          if (ATisEqual(stateargs[i], ATgetFirst(l)))   // Make sure substitutions were not reset by enumerator
+          {
+            set_substitutions();
+            stateargs[i] = info.m_rewriter.internally_associated_value((ATermAppl) ATgetFirst(l));
+          }
+          break;
+      }
+    }
+    else
+    {
 
-                        stateargs[i] = info.m_rewriter(a);
-                        // The assertion below is not true if there are global variables, 
-                        // which is for instance the case for lpsxsim and lpssim.
-                        // assert(mcrl2::data::find_variables(atermpp::make_list(mcrl2::data::data_expression(info.export_term(stateargs[i])))).empty());
-                }
-                l = ATgetNext(l);
-        }
-        switch ( info.stateformat )
-        {
-                ATerm r;
-                case GS_STATE_VECTOR:
-                        r = (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
+      stateargs[i] = info.m_rewriter(a);
+      // The assertion below is not true if there are global variables,
+      // which is for instance the case for lpsxsim and lpssim.
+      // assert(mcrl2::data::find_variables(atermpp::make_list(mcrl2::data::data_expression(info.export_term(stateargs[i])))).empty());
+    }
+    l = ATgetNext(l);
+  }
+  switch (info.stateformat)
+  {
+      ATerm r;
+    case GS_STATE_VECTOR:
+      r = (ATerm) ATmakeApplArray(info.stateAFun,stateargs);
 
-                        return r;
-                case GS_STATE_TREE:
-                        return info.parent->buildTree(stateargs);
-                default:
-                        return NULL;
-        }
+      return r;
+    case GS_STATE_TREE:
+      return info.parent->buildTree(stateargs);
+    default:
+      return NULL;
+  }
 }
 
 ATermAppl NextStateGeneratorStandard::rewrActionArgs(ATermAppl act)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::rewrActionArgs(act) called, with " << std::endl <<
-                     "  act = " << atermpp::aterm_appl(act) << std::endl;
+  std::clog << "NextStateGeneratorStandard::rewrActionArgs(act) called, with " << std::endl <<
+            "  act = " << atermpp::aterm_appl(act) << std::endl;
 #endif
-        ATermList l = ATLgetArgument(act,0);
-        ATermList m = ATmakeList0();
+  ATermList l = ATLgetArgument(act,0);
+  ATermList m = ATmakeList0();
 
-        for (; !ATisEmpty(l); l=ATgetNext(l))
-        {
-                ATermAppl a = ATAgetFirst(l);
-                a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter(ATLgetArgument(a,1))));
-                m = ATinsert(m,(ATerm) a);
-        }
-        m = ATreverse(m);
+  for (; !ATisEmpty(l); l=ATgetNext(l))
+  {
+    ATermAppl a = ATAgetFirst(l);
+    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter(ATLgetArgument(a,1))));
+    m = ATinsert(m,(ATerm) a);
+  }
+  m = ATreverse(m);
 
-        return gsMakeMultAct(m);
+  return gsMakeMultAct(m);
 }
 
-void NextStateGeneratorStandard::SetTreeStateVars(ATerm tree, ATermList *vars)
+void NextStateGeneratorStandard::SetTreeStateVars(ATerm tree, ATermList* vars)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::SetTreeStateVars(tree, vars) called, with " << std::endl <<
-                     "  tree = " << atermpp::aterm(tree) << std::endl <<
-                     "  *vars = " << atermpp::aterm_list(*vars) << std::endl;
+  std::clog << "NextStateGeneratorStandard::SetTreeStateVars(tree, vars) called, with " << std::endl <<
+            "  tree = " << atermpp::aterm(tree) << std::endl <<
+            "  *vars = " << atermpp::aterm_list(*vars) << std::endl;
 #endif
 
-        if ( ATgetType(tree) == AT_APPL )
-        {
-                if ( ATisEqual(tree,info.nil) )
-                {
-                        return;
-                } else if ( ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun) )
-                {
-                        SetTreeStateVars(ATgetArgument((ATermAppl) tree,0),vars);
-                        SetTreeStateVars(ATgetArgument((ATermAppl) tree,1),vars);
-                        return;
-                }
-        }
+  if (ATgetType(tree) == AT_APPL)
+  {
+    if (ATisEqual(tree,info.nil))
+    {
+      return;
+    }
+    else if (ATisEqualAFun(ATgetAFun((ATermAppl) tree),info.pairAFun))
+    {
+      SetTreeStateVars(ATgetArgument((ATermAppl) tree,0),vars);
+      SetTreeStateVars(ATgetArgument((ATermAppl) tree,1),vars);
+      return;
+    }
+  }
 
-        info.m_rewriter.set_internally_associated_value((ATermAppl) ATgetFirst(*vars), tree);
-        *vars = ATgetNext(*vars);
+  info.m_rewriter.set_internally_associated_value((ATermAppl) ATgetFirst(*vars), tree);
+  *vars = ATgetNext(*vars);
 }
 
-NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info &Info, size_t identifier, bool SingleSummand, size_t SingleSummandIndex) : info(Info)
+NextStateGeneratorStandard::NextStateGeneratorStandard(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand, size_t SingleSummandIndex) : info(Info)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::NextStateGeneratorStandard(State, Info, identifier, SingleSummand) called, with " << std::endl <<
-                     "  State = " << atermpp::aterm(State) <<
-                     "  State (human readable): " << print_state(atermpp::aterm_appl(State), info) << std::endl <<
-                     "  identifier = " << identifier << std::endl <<
-                     "  SingleSummand = " << (SingleSummand?"true":"false") << std::endl <<
-                     "  SingleSummandIndex = " << SingleSummandIndex << std::endl;
+  std::clog << "NextStateGeneratorStandard::NextStateGeneratorStandard(State, Info, identifier, SingleSummand) called, with " << std::endl <<
+            "  State = " << atermpp::aterm(State) <<
+            "  State (human readable): " << print_state(atermpp::aterm_appl(State), info) << std::endl <<
+            "  identifier = " << identifier << std::endl <<
+            "  SingleSummand = " << (SingleSummand?"true":"false") << std::endl <<
+            "  SingleSummandIndex = " << SingleSummandIndex << std::endl;
 #endif
-        id = identifier;
-        // error = false;
-        single_summand = SingleSummand;
+  id = identifier;
+  // error = false;
+  single_summand = SingleSummand;
 
-        cur_state = NULL;
-        cur_act = NULL;
-        cur_nextstate = NULL;
-        ATprotect(&cur_state);
-        ATprotect(&cur_act);
-        ATprotectList(&cur_nextstate);
+  cur_state = NULL;
+  cur_act = NULL;
+  cur_nextstate = NULL;
+  ATprotect(&cur_state);
+  ATprotect(&cur_act);
+  ATprotectList(&cur_nextstate);
 
-        stateargs = (ATerm *) malloc(info.statelen*sizeof(ATerm));
-        for (size_t i=0; i<info.statelen; i++)
-        {
-                stateargs[i] = NULL;
-        }
-        ATprotectArray(stateargs,info.statelen);
+  stateargs = (ATerm*) malloc(info.statelen*sizeof(ATerm));
+  for (size_t i=0; i<info.statelen; i++)
+  {
+    stateargs[i] = NULL;
+  }
+  ATprotectArray(stateargs,info.statelen);
 
-        reset(State, SingleSummandIndex);
+  reset(State, SingleSummandIndex);
 }
 
 NextStateGeneratorStandard::~NextStateGeneratorStandard()
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::~NextStateGeneratorStandard called" << std::endl;
+  std::clog << "NextStateGeneratorStandard::~NextStateGeneratorStandard called" << std::endl;
 #endif
-        ATunprotectArray(stateargs);
-        free(stateargs);
+  ATunprotectArray(stateargs);
+  free(stateargs);
 
-        ATunprotectList(&cur_nextstate);
-        ATunprotect(&cur_act);
-        ATunprotect(&cur_state);
+  ATunprotectList(&cur_nextstate);
+  ATunprotect(&cur_act);
+  ATunprotect(&cur_state);
 }
 
 void NextStateGeneratorStandard::set_substitutions()
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::set_substitutions called" << std::endl;
+  std::clog << "NextStateGeneratorStandard::set_substitutions called" << std::endl;
 #endif
 
-        ATermList l = info.procvars;
-        switch ( info.stateformat )
+  ATermList l = info.procvars;
+  switch (info.stateformat)
+  {
+    case GS_STATE_VECTOR:
+      for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
+      {
+        ATerm a = ATgetArgument((ATermAppl) cur_state,i);
+        if (!ATisEqual(a,info.nil))
         {
-                case GS_STATE_VECTOR:
-                        for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
-                        {
-                                ATerm a = ATgetArgument((ATermAppl) cur_state,i);
-                                if ( !ATisEqual(a,info.nil) )
-                                {
-                                        info.m_rewriter.set_internally_associated_value((ATermAppl) ATgetFirst(l), a);
+          info.m_rewriter.set_internally_associated_value((ATermAppl) ATgetFirst(l), a);
 #ifdef MCRL2_NEXTSTATE_DEBUG
-                                std::cerr << "Set substitution " << pp(info.export_term(ATgetFirst(l))) << ":=" << 
-                                                     pp(info.export_term(a)) << "\n";
+          std::cerr << "Set substitution " << pp(info.export_term(ATgetFirst(l))) << ":=" <<
+                    pp(info.export_term(a)) << "\n";
 #endif
-                                }
-                        }
-                        break;
-                case GS_STATE_TREE:
-                        SetTreeStateVars(cur_state,&l);
-                        break;
         }
+      }
+      break;
+    case GS_STATE_TREE:
+      SetTreeStateVars(cur_state,&l);
+      break;
+  }
 
-        *info.current_id = id;
+  *info.current_id = id;
 }
 
 void NextStateGeneratorStandard::reset(ATerm State, size_t SummandIndex)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::reset(State, SummandIndex) called with:" << std::endl <<
-                     "  State = " << atermpp::aterm(State) << std::endl <<
-                     "  State (human readable) = " << print_state(atermpp::aterm_appl(State), info) << std::endl <<
-                     "  SummandIndex = " << SummandIndex << std::endl;
+  std::clog << "NextStateGeneratorStandard::reset(State, SummandIndex) called with:" << std::endl <<
+            "  State = " << atermpp::aterm(State) << std::endl <<
+            "  State (human readable) = " << print_state(atermpp::aterm_appl(State), info) << std::endl <<
+            "  SummandIndex = " << SummandIndex << std::endl;
 #endif
-        // error = false;
+  // error = false;
 
-        cur_state = State;
+  cur_state = State;
 
-        set_substitutions();
+  set_substitutions();
 
-        if ( info.num_summands == 0 )
-        {
-          valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
-        }
-        else
-        {
-          assert(SummandIndex < info.num_summands);
+  if (info.num_summands == 0)
+  {
+    valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
+  }
+  else
+  {
+    assert(SummandIndex < info.num_summands);
 #ifdef MCRL2_NEXTSTATE_DEBUG
-          std::clog << "Getting solutions for this summand" << std::endl <<
+    std::clog << "Getting solutions for this summand" << std::endl <<
               "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[SummandIndex],0)) << std::endl <<
               "                 " << pp(atermpp::aterm(ATLgetArgument(info.summands[SummandIndex],0))) << std::endl <<
               "  Condition: " << atermpp::aterm(ATgetArgument(info.summands[SummandIndex],1)) << std::endl <<
               "             " << pp(atermpp::aterm_appl(info.export_term(ATgetArgument(info.summands[SummandIndex],1)))) << std::endl;
 #endif
 
-          cur_act = ATgetArgument(info.summands[SummandIndex],2);
-          cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);
-          
-          valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
-                                     ATgetArgument(info.summands[SummandIndex],1));
-        }
+    cur_act = ATgetArgument(info.summands[SummandIndex],2);
+    cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);
 
-        sum_idx = SummandIndex + 1;
+    valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
+                               ATgetArgument(info.summands[SummandIndex],1));
+  }
+
+  sum_idx = SummandIndex + 1;
 }
 
-bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool *prioritised)
+bool NextStateGeneratorStandard::next(ATermAppl* Transition, ATerm* State, bool* prioritised)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::next(Transition, State, prioritised) called" << std::endl;
+  std::clog << "NextStateGeneratorStandard::next(Transition, State, prioritised) called" << std::endl;
 #endif
 
-        while ( valuations == ns_info::enumerator_type() && (sum_idx < info.num_summands) ) // valuations is empty.
-        {
-          if (single_summand) 
-          {
+  while (valuations == ns_info::enumerator_type() && (sum_idx < info.num_summands))   // valuations is empty.
+  {
+    if (single_summand)
+    {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::next: single_summand is true, and no next state found in this summand;" << std::endl <<
-                     "  sum_idx was: " << sum_idx << std::endl;
+      std::clog << "NextStateGeneratorStandard::next: single_summand is true, and no next state found in this summand;" << std::endl <<
+                "  sum_idx was: " << sum_idx << std::endl;
 #endif
-            return false;
-          }
+      return false;
+    }
 
-          cur_act = ATgetArgument(info.summands[sum_idx],2);
-          cur_nextstate = (ATermList) ATgetArgument(info.summands[sum_idx],3);
+    cur_act = ATgetArgument(info.summands[sum_idx],2);
+    cur_nextstate = (ATermList) ATgetArgument(info.summands[sum_idx],3);
 
-          if ( *info.current_id != id )
-          {
-            set_substitutions();
-          }
+    if (*info.current_id != id)
+    {
+      set_substitutions();
+    }
 
 #ifdef MCRL2_NEXTSTATE_DEBUG
-          std::clog << "Getting solutions for summand " << sum_idx << std::endl <<
-                        "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0)) << std::endl <<
-                        "                 " << pp(atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0))) << std::endl <<
-                        "  Condition: " << atermpp::aterm(ATgetArgument(info.summands[sum_idx],1)) << std::endl <<
-                        "             " << pp(atermpp::aterm_appl(info.export_term(ATgetArgument(info.summands[sum_idx],1)))) << std::endl;
+    std::clog << "Getting solutions for summand " << sum_idx << std::endl <<
+              "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0)) << std::endl <<
+              "                 " << pp(atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0))) << std::endl <<
+              "  Condition: " << atermpp::aterm(ATgetArgument(info.summands[sum_idx],1)) << std::endl <<
+              "             " << pp(atermpp::aterm_appl(info.export_term(ATgetArgument(info.summands[sum_idx],1)))) << std::endl;
 #endif
 
-          valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
-                                    ATgetArgument(info.summands[sum_idx],1));
+    valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
+                               ATgetArgument(info.summands[sum_idx],1));
 
-          ++sum_idx;
-        }
-        
-        if ( valuations != ns_info::enumerator_type() ) // valuations contains unprocessed valuations.
-        {
-          if ( *info.current_id != id )
-          { 
-                  set_substitutions();
-          }
-          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) 
-          { 
-                       
-            info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
-          }
+    ++sum_idx;
+  }
 
-          *Transition = rewrActionArgs((ATermAppl) cur_act);
-          *State = (ATerm) makeNewState(cur_state,cur_nextstate);
+  if (valuations != ns_info::enumerator_type())   // valuations contains unprocessed valuations.
+  {
+    if (*info.current_id != id)
+    {
+      set_substitutions();
+    }
+    for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i)
+    {
 
-          if ( prioritised != NULL )
-          {
-                  *prioritised = (sum_idx <= info.num_prioritised);
-          }
+      info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
+    }
 
-          for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i) 
-          {
-            info.m_rewriter.clear_internally_associated_value(i->first);
-          }
-          ++valuations;
+    *Transition = rewrActionArgs((ATermAppl) cur_act);
+    *State = (ATerm) makeNewState(cur_state,cur_nextstate);
 
-          return true;
-        } 
-        else 
-        {
-          *Transition = NULL;
-          *State = NULL;
-        }
+    if (prioritised != NULL)
+    {
+      *prioritised = (sum_idx <= info.num_prioritised);
+    }
 
-        return false;
+    for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i)
+    {
+      info.m_rewriter.clear_internally_associated_value(i->first);
+    }
+    ++valuations;
+
+    return true;
+  }
+  else
+  {
+    *Transition = NULL;
+    *State = NULL;
+  }
+
+  return false;
 }
 
 /* bool NextStateGeneratorStandard::errorOccurred()
@@ -1042,14 +1082,14 @@ bool NextStateGeneratorStandard::next(ATermAppl *Transition, ATerm *State, bool 
 ATerm NextStateGeneratorStandard::get_state() const
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "NextStateGeneratorStandard::get_state() called" << std::endl <<
-                     "  result: " << atermpp::aterm(cur_state) << std::endl <<
-                     "  result (human readable): " << print_state(atermpp::aterm_appl(cur_state), info) << std::endl;
+  std::clog << "NextStateGeneratorStandard::get_state() called" << std::endl <<
+            "  result: " << atermpp::aterm(cur_state) << std::endl <<
+            "  result (human readable): " << print_state(atermpp::aterm_appl(cur_state), info) << std::endl;
 #endif
-        return cur_state;
+  return cur_state;
 }
 
-NextState *createNextState(
+NextState* createNextState(
   mcrl2::lps::specification const& spec,
   NextStateStandard::enumerator_factory_type& e,
   bool allow_free_vars,
@@ -1058,9 +1098,9 @@ NextState *createNextState(
 )
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
-        std::clog << "createNextState(spec, e, allow_free_vars, state_format, strategy) called" << std::endl;
+  std::clog << "createNextState(spec, e, allow_free_vars, state_format, strategy) called" << std::endl;
 #endif
-  switch ( strategy )
+  switch (strategy)
   {
     default:
     case nsStandard:

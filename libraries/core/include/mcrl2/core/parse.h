@@ -16,8 +16,10 @@
 #include <iostream>
 #include <aterm2.h>
 
-namespace mcrl2 {
-  namespace core {
+namespace mcrl2
+{
+namespace core
+{
 
 /** \brief  Parse an mCRL2 identifier.
   * \param[in] se_stream An input stream from which can be read.
@@ -25,7 +27,7 @@ namespace mcrl2 {
   * \return The parsed identifier, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_identifier(std::istream &se_stream);
+ATermAppl parse_identifier(std::istream& se_stream);
 
 
 /** \brief  Parse an mCRL2 sort expression.
@@ -34,7 +36,7 @@ ATermAppl parse_identifier(std::istream &se_stream);
   * \return The parsed sort expression, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_sort_expr(std::istream &se_stream);
+ATermAppl parse_sort_expr(std::istream& se_stream);
 
 
 /** \brief  Parse an mCRL2 data expression.
@@ -43,7 +45,7 @@ ATermAppl parse_sort_expr(std::istream &se_stream);
   * \return The parsed data expression, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_data_expr(std::istream &de_stream);
+ATermAppl parse_data_expr(std::istream& de_stream);
 
 
 /** \brief  Parse an mCRL2 data specification.
@@ -52,7 +54,7 @@ ATermAppl parse_data_expr(std::istream &de_stream);
   * \return The parsed data specification, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_data_spec(std::istream &ps_stream);
+ATermAppl parse_data_spec(std::istream& ps_stream);
 
 
 /** \brief  Parse an mCRL2 multiaction.
@@ -61,7 +63,7 @@ ATermAppl parse_data_spec(std::istream &ps_stream);
   * \return The parsed multiaction, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_mult_act(std::istream &ma_stream);
+ATermAppl parse_mult_act(std::istream& ma_stream);
 
 
 /** \brief  Parse an mCRL2 process expression.
@@ -70,7 +72,7 @@ ATermAppl parse_mult_act(std::istream &ma_stream);
   * \return The parsed process expression, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_proc_expr(std::istream &pe_stream);
+ATermAppl parse_proc_expr(std::istream& pe_stream);
 
 
 /** \brief  Parse an mCRL2 process specification.
@@ -80,7 +82,7 @@ ATermAppl parse_proc_expr(std::istream &pe_stream);
   * \return the parsed process specification, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_proc_spec(std::istream &ps_stream);
+ATermAppl parse_proc_spec(std::istream& ps_stream);
 
 
 /** \brief  Parse an mCRL2 state formula.
@@ -89,7 +91,7 @@ ATermAppl parse_proc_spec(std::istream &ps_stream);
   * \return The parsed state formula, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_state_frm(std::istream &sf_stream);
+ATermAppl parse_state_frm(std::istream& sf_stream);
 
 
 /** \brief  Parse an mCRL2 action rename specification.
@@ -99,7 +101,7 @@ ATermAppl parse_state_frm(std::istream &sf_stream);
   * \return The parsed rename rule file, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_action_rename_spec(std::istream &sf_stream);
+ATermAppl parse_action_rename_spec(std::istream& sf_stream);
 
 
 /** \brief  Parse an mCRL2 parameterised boolean equation system (PBES)
@@ -110,7 +112,7 @@ ATermAppl parse_action_rename_spec(std::istream &sf_stream);
   * \return The parsed PBES specification, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
+ATermAppl parse_pbes_spec(std::istream& pbes_spec_stream);
 
 
 /** \brief  Parse mCRL2 data variables, according to the syntax of
@@ -121,7 +123,7 @@ ATermAppl parse_pbes_spec(std::istream &pbes_spec_stream);
   * \return The parsed list of data variables, if everything went well;
   *         NULL, otherwise.
 **/
-ATermList parse_data_vars(std::istream &sf_stream);
+ATermList parse_data_vars(std::istream& sf_stream);
 
 /** \brief  Returns wheter s is a valid user identifier
  *  \param[in] s An input string
@@ -130,7 +132,7 @@ ATermList parse_data_vars(std::istream &sf_stream);
 **/
 bool is_user_identifier(std::string const& s);
 
-  }
+}
 }
 
 #endif // MCRL2_PARSE_H

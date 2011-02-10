@@ -12,4 +12,7 @@
 
 #include "mcrl2/utilities/toolset_revision.h"
 
-std::string mcrl2::utilities::get_toolset_revision() { return MCRL2_REVISION; }
+std::string mcrl2::utilities::get_toolset_revision()
+{
+  return MCRL2_REVISION;
+}

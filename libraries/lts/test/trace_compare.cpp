@@ -14,16 +14,16 @@
 
 using namespace mcrl2::lts;
 
-int test_main(int argc, char **argv)
+int test_main(int argc, char** argv)
 {
   lts_aut_t l1;
   lts_aut_t l2;
   lts_aut_t l3;
   lts_aut_t l4;
-  const detail::action_label_string lab_a ("a");
-  const detail::action_label_string lab_b ("b");
-  const detail::action_label_string lab_c ("c");
-  const detail::action_label_string lab_tau ("tau");
+  const detail::action_label_string lab_a("a");
+  const detail::action_label_string lab_b("b");
+  const detail::action_label_string lab_c("c");
+  const detail::action_label_string lab_tau("tau");
 
   for (int i=0; i<5; i++)
   {
@@ -75,20 +75,20 @@ int test_main(int argc, char **argv)
   l4.add_transition(transition(0,0,1));
   l4.add_transition(transition(1,1,2));
   l4.add_transition(transition(1,1,3));
-  BOOST_CHECK( compare(l1,l2,lts_eq_trace) );
-  BOOST_CHECK( compare(l2,l1,lts_eq_trace) );
+  BOOST_CHECK(compare(l1,l2,lts_eq_trace));
+  BOOST_CHECK(compare(l2,l1,lts_eq_trace));
 
-  BOOST_CHECK( ! compare(l1,l3,lts_eq_trace) );
-  BOOST_CHECK( ! compare(l3,l1,lts_eq_trace) );
+  BOOST_CHECK(! compare(l1,l3,lts_eq_trace));
+  BOOST_CHECK(! compare(l3,l1,lts_eq_trace));
 
-  BOOST_CHECK( ! compare(l1,l4,lts_eq_trace) );
-  BOOST_CHECK( ! compare(l4,l1,lts_eq_trace) );
+  BOOST_CHECK(! compare(l1,l4,lts_eq_trace));
+  BOOST_CHECK(! compare(l4,l1,lts_eq_trace));
 
-  BOOST_CHECK( compare(l2,l3,lts_eq_weak_trace) );
-  BOOST_CHECK( compare(l3,l2,lts_eq_weak_trace) );
+  BOOST_CHECK(compare(l2,l3,lts_eq_weak_trace));
+  BOOST_CHECK(compare(l3,l2,lts_eq_weak_trace));
 
-  BOOST_CHECK( ! compare(l3,l4,lts_eq_weak_trace) );
-  BOOST_CHECK( ! compare(l4,l3,lts_eq_weak_trace) );
+  BOOST_CHECK(! compare(l3,l4,lts_eq_weak_trace));
+  BOOST_CHECK(! compare(l4,l3,lts_eq_weak_trace));
 
   return 0;
 }

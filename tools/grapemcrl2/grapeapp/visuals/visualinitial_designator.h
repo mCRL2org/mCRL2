@@ -17,59 +17,59 @@ using namespace grape::libgrape;
 
 namespace grape
 {
-  using libgrape::initial_designator;
+using libgrape::initial_designator;
 
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+/**
+ * \short Represents a visualinitial_designator.
+ */
+class visualinitial_designator : public visual_object
+{
+  private:
+  protected:
+  public:
+
     /**
-     * \short Represents a visualinitial_designator.
+     * Default constructor.
+     * Initializes visual_initial_designator.
+     * @pre: p_initial_designator should be pointed to an existing initial designator
      */
-    class visualinitial_designator : public visual_object
-    {
-      private:
-      protected:
-      public:
+    visualinitial_designator(initial_designator* p_initial_designator = 0);
 
-        /**
-         * Default constructor.
-         * Initializes visual_initial_designator.
-         * @pre: p_initial_designator should be pointed to an existing initial designator
-         */
-        visualinitial_designator( initial_designator* p_initial_designator = 0 );
+    /**
+     * Copy constructor.
+     * Creates a new visual_initial_designator based on an existing visual_initial_designator
+     * @param p_initial_designator The visual_initial_designator to be copied.
+     */
+    visualinitial_designator(const visualinitial_designator& p_initial_designator);
 
-        /**
-         * Copy constructor.
-         * Creates a new visual_initial_designator based on an existing visual_initial_designator
-         * @param p_initial_designator The visual_initial_designator to be copied.
-         */
-        visualinitial_designator( const visualinitial_designator &p_initial_designator );
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~visualinitial_designator(void);
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~visualinitial_designator( void );
+    /**
+     * Draw initial designator
+     */
+    void draw(void);
 
-        /**
-         * Draw initial designator
-         */
-        void draw( void );
+    /**
+     * Test if coordinate is inside the object
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate is inside the drawn object.
+     */
+    bool is_inside(libgrape::coordinate& p_coord);
 
-        /**
-         * Test if coordinate is inside the object
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate is inside the drawn object.
-         */
-        bool is_inside( libgrape::coordinate &p_coord );
-
-        /**
-         * Test if coordinate is on the border of the object
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate on the border of a drawn object.
-         */
-        grape_direction is_on_border( libgrape::coordinate &p_coord );
-    };
-  } // namespace grapeapp
+    /**
+     * Test if coordinate is on the border of the object
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate on the border of a drawn object.
+     */
+    grape_direction is_on_border(libgrape::coordinate& p_coord);
+};
+} // namespace grapeapp
 } // namespace grape
 
 #endif // VISUALS_VISUALINITIAL_DESIGNATOR_H

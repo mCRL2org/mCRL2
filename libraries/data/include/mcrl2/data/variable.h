@@ -23,9 +23,11 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class variable ---//
 /// \brief A data variable
@@ -74,17 +76,17 @@ typedef atermpp::vector<variable>    variable_vector;
 
 //--- end generated class variable ---//
 
-    /// \brief Converts an container with variables to a variable_list
-    /// \param r A range of variables.
-    /// \note This function uses implementation details of the iterator type
-    /// and hence is sometimes efficient than copying all elements of the list.
-    template < typename Container >
-    inline variable_list make_variable_list(Container const& r, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-    {
-      return atermpp::convert< variable_list >(r);
-    }
+/// \brief Converts an container with variables to a variable_list
+/// \param r A range of variables.
+/// \note This function uses implementation details of the iterator type
+/// and hence is sometimes efficient than copying all elements of the list.
+template < typename Container >
+inline variable_list make_variable_list(Container const& r, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+{
+  return atermpp::convert< variable_list >(r);
+}
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

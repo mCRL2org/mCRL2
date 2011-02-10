@@ -37,8 +37,8 @@ void test_parse_bes()
   std::stringstream from(bes1);
   from >> b;
   std::cout << "b = \n" << pp(b) << std::endl;
-  
-  // check if the pretty printed BES can be parsed again  
+
+  // check if the pretty printed BES can be parsed again
   std::string bes2 = pp(b);
   std::stringstream from2(bes1);
   from2 >> b;
@@ -64,7 +64,7 @@ void test_pbes()
   bes_stream >> b;
 
   std::stringstream out;
-  bes::bes2cwi(b.equations().begin(), b.equations().end(), out); 
+  bes::bes2cwi(b.equations().begin(), b.equations().end(), out);
   core::garbage_collect();
 }
 

@@ -19,17 +19,17 @@ class Node;
 
 class Edge
 {
-public:
-	// -- constructors and destructor -------------------------------
+  public:
+    // -- constructors and destructor -------------------------------
     Edge(
-        const size_t &idx,
-        const std::string &lbl );
-	virtual ~Edge();
+      const size_t& idx,
+      const std::string& lbl);
+    virtual ~Edge();
 
     // -- set functions ---------------------------------------------
-    void setInNode( Node* in );
-    void setOutNode( Node* out );
-    void setBundle( Bundle* b );
+    void setInNode(Node* in);
+    void setOutNode(Node* out);
+    void setBundle(Bundle* b);
 
     // -- get functions ---------------------------------------------
     size_t getIndex();
@@ -43,12 +43,12 @@ public:
     void clearOutNode();
     void clearBundle();
 
-protected:
+  protected:
     // -- data members ----------------------------------------------
-	size_t index;      // index in list of graph edges
+    size_t index;      // index in list of graph edges
     std::string label;   // "action label"
     Node* inNode;   // association
-	Node* outNode;  // association
+    Node* outNode;  // association
     Bundle* bundle; // association
 };
 

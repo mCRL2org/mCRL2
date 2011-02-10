@@ -22,44 +22,44 @@
 
 class CorrlPlot : public Visualizer
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     CorrlPlot(
-        Mediator* m,
-        Graph* g,
-        GLCanvas* c );
+      Mediator* m,
+      Graph* g,
+      GLCanvas* c);
     virtual ~CorrlPlot();
 
     // -- set data functions ----------------------------------------
     void setValues(
-        const size_t &idx1,
-        const size_t &idx2,
-        const std::vector< std::vector< size_t > > &mapXY,
-        const std::vector< std::vector< int > > &num );
+      const size_t& idx1,
+      const size_t& idx2,
+      const std::vector< std::vector< size_t > > &mapXY,
+      const std::vector< std::vector< int > > &num);
     void clearValues();
 
-  	void setDiagram( Diagram* dgrm );
+    void setDiagram(Diagram* dgrm);
 
     // -- visualization functions  ----------------------------------
-    void visualize( const bool &inSelectMode );
+    void visualize(const bool& inSelectMode);
     void drawAxes(
-        const bool &inSelectMode,
-        const std::string &xLbl,
-        const std::string &yLbl );
-    void drawLabels( const bool &inSelectMode );
-    void drawPlot( const bool &inSelectMode );
-    void drawDiagram( const bool &inSelectMode );
+      const bool& inSelectMode,
+      const std::string& xLbl,
+      const std::string& yLbl);
+    void drawLabels(const bool& inSelectMode);
+    void drawPlot(const bool& inSelectMode);
+    void drawDiagram(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
-		const int &x,
-		const int &y );
+      const int& x,
+      const int& y);
     /*
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
 
-protected:
+  protected:
     // -- utility data functions ------------------------------------
     void initLabels();
     void calcMaxNumber();
@@ -69,16 +69,16 @@ protected:
     //void clear();
     void setScalingTransf();
     void displTooltip(
-        const int &xIdx,
-        const int &yIdx );
+      const int& xIdx,
+      const int& yIdx);
 
     void calcPositions();
     void clearPositions();
 
     // -- hit detection ---------------------------------------------
     void processHits(
-        GLint hits,
-        GLuint buffer[] );
+      GLint hits,
+      GLuint buffer[]);
 
     // -- data members ----------------------------------------------
 

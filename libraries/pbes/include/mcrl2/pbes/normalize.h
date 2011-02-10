@@ -17,9 +17,11 @@
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/data/bool.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \cond INTERNAL_DOCS
 // \brief Visitor for checking if a pbes expression is normalized.
@@ -33,7 +35,7 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
 #if BOOST_MSVC
 #include "mcrl2/core/detail/traverser_msvc.inc.h"
 #endif
-  
+
   bool result;
 
   is_normalized_traverser()
@@ -78,49 +80,85 @@ pbes_expression normalize(pbes_expression f)
   if (is_pbes_not(f))
   {
     f = arg(f); // remove the not
-    if (data::is_data_expression(f)) {
+    if (data::is_data_expression(f))
+    {
       return data::sort_bool::not_(f);
-    } else if (is_pbes_true(f)) {
+    }
+    else if (is_pbes_true(f))
+    {
       return p::false_();
-    } else if (is_pbes_false(f)) {
+    }
+    else if (is_pbes_false(f))
+    {
       return p::true_();
-    } else if (is_pbes_not(f)) {
+    }
+    else if (is_pbes_not(f))
+    {
       return normalize(arg(f));
-    } else if (is_pbes_and(f)) {
+    }
+    else if (is_pbes_and(f))
+    {
       return p::or_(normalize(not_(left(f))), normalize(not_(right(f))));
-    } else if (is_pbes_or(f)) {
+    }
+    else if (is_pbes_or(f))
+    {
       return p::and_(normalize(not_(left(f))), normalize(not_(right(f))));
-    } else if (is_pbes_imp(f)) {
+    }
+    else if (is_pbes_imp(f))
+    {
       return p::and_(normalize(left(f)), normalize(not_(right(f))));
-    } else if (is_pbes_forall(f)) {
+    }
+    else if (is_pbes_forall(f))
+    {
       return p::exists(var(f), normalize(not_(arg(f))));
-    } else if (is_pbes_exists(f)) {
+    }
+    else if (is_pbes_exists(f))
+    {
       return p::forall(var(f), normalize(not_(arg(f))));
-    } else if (is_propositional_variable_instantiation(f)) {
+    }
+    else if (is_propositional_variable_instantiation(f))
+    {
       throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
     }
   }
   else // !is_pbes_not(f)
   {
-    if (data::is_data_expression(f)) {
+    if (data::is_data_expression(f))
+    {
       return f;
-    } else if (is_pbes_true(f)) {
+    }
+    else if (is_pbes_true(f))
+    {
       return f;
-    } else if (is_pbes_false(f)) {
+    }
+    else if (is_pbes_false(f))
+    {
       return f;
-    //} else if (is_not(f)) {
-    // ;
-    } else if (is_pbes_and(f)) {
+      //} else if (is_not(f)) {
+      // ;
+    }
+    else if (is_pbes_and(f))
+    {
       return p::and_(normalize(left(f)), normalize(right(f)));
-    } else if (is_pbes_or(f)) {
+    }
+    else if (is_pbes_or(f))
+    {
       return p::or_(normalize(left(f)), normalize(right(f)));
-    } else if (is_pbes_imp(f)) {
+    }
+    else if (is_pbes_imp(f))
+    {
       return p::or_(normalize(not_(left(f))), normalize(right(f)));
-    } else if (is_pbes_forall(f)) {
+    }
+    else if (is_pbes_forall(f))
+    {
       return pbes_expr::forall(var(f), normalize(arg(f)));
-    } else if (is_pbes_exists(f)) {
+    }
+    else if (is_pbes_exists(f))
+    {
       return pbes_expr::exists(var(f), normalize(arg(f)));
-    } else if (is_propositional_variable_instantiation(f)) {
+    }
+    else if (is_propositional_variable_instantiation(f))
+    {
       return f;
     }
   }

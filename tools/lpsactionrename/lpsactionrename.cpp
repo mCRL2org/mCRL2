@@ -40,13 +40,13 @@ using mcrl2::utilities::tools::rewriter_tool;
 
 class action_rename_tool: public rewriter_tool<input_output_tool >
 {
-  //Type definitions
-  //----------------
-  typedef rewriter_tool<input_output_tool> super;
+    //Type definitions
+    //----------------
+    typedef rewriter_tool<input_output_tool> super;
 
   protected:
     //t_phase represents the phases at which the program should be able to stop
-   typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL} t_phase;
+    typedef enum { PH_NONE, PH_PARSE, PH_TYPE_CHECK, PH_DATA_IMPL} t_phase;
 
     //t_tool_options represents the options of the tool
 
@@ -65,19 +65,19 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
     {
       super::add_options(desc);
       desc.add_option("renamefile", make_mandatory_argument("NAME"),
-              "use the rename rules from NAME", 'f');
+                      "use the rename rules from NAME", 'f');
       desc.add_option("no-rewrite",
-              "do not rewrite data expressions while renaming; use when the rewrite system "
-              "does not terminate", 'o');
+                      "do not rewrite data expressions while renaming; use when the rewrite system "
+                      "does not terminate", 'o');
       desc.add_option("no-sumelm",
-                "do not apply sum elimination to the final result", 'm');
+                      "do not apply sum elimination to the final result", 'm');
       desc.add_option("end-phase", make_mandatory_argument("PHASE"),
-                "stop conversion and output the action rename specification after phase PHASE: "
-                "'pa' (parsing), "
-                "'tc' (type checking) "
-                , 'p');
+                      "stop conversion and output the action rename specification after phase PHASE: "
+                      "'pa' (parsing), "
+                      "'tc' (type checking) "
+                      , 'p');
       desc.add_option("pretty",
-                "return a pretty printed version of the output", 'P');
+                      "return a pretty printed version of the output", 'P');
 
     }
 
@@ -94,11 +94,16 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
         std::string phase = parser.option_argument("end-phase");
 
         if (std::strncmp(phase.c_str(), "pa", 3) == 0)
-        { m_end_phase = PH_PARSE;
-        } else if (std::strncmp(phase.c_str(), "tc", 3) == 0)
-        { m_end_phase = PH_TYPE_CHECK;
-        } else
-        { parser.error("option -p has illegal argument '" + phase + "'");
+        {
+          m_end_phase = PH_PARSE;
+        }
+        else if (std::strncmp(phase.c_str(), "tc", 3) == 0)
+        {
+          m_end_phase = PH_TYPE_CHECK;
+        }
+        else
+        {
+          parser.error("option -p has illegal argument '" + phase + "'");
         }
       }
 
@@ -108,24 +113,27 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
   public:
     action_rename_tool()
       : super(
-          TOOLNAME,
-          AUTHOR,
-          "rename actions of an LPS",
-          "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
-          "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
-        ),
-        m_pretty(false),
-        m_rewrite(true),
-        m_sumelm(true),
-        m_end_phase(PH_NONE)
+        TOOLNAME,
+        AUTHOR,
+        "rename actions of an LPS",
+        "Apply the action rename specification in FILE to the LPS in INFILE and save it to OUTFILE. "
+        "If OUTFILE is not present, stdout is used. If INFILE is not present, stdin is used."
+      ),
+      m_pretty(false),
+      m_rewrite(true),
+      m_sumelm(true),
+      m_end_phase(PH_NONE)
     {}
 
     bool run()
     {
       //load LPS
-      if (input_filename().empty()) {
+      if (input_filename().empty())
+      {
         gsVerboseMsg("reading LPS from stdin...\n");
-      } else {
+      }
+      else
+      {
         gsVerboseMsg("reading LPS from file '%s'...\n", input_filename().c_str());
       }
       specification lps_old_spec;
@@ -143,30 +151,36 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       // Note that all parsed data and action declarations in rename_stream are
       // added to lps_old_spec.
       action_rename_specification action_rename_spec =
-                      parse_action_rename_specification(rename_stream,lps_old_spec);
+        parse_action_rename_specification(rename_stream,lps_old_spec);
       rename_stream.close();
 
       //rename all assigned actions
       gsVerboseMsg("renaming actions in LPS...\n");
       specification lps_new_spec = action_rename(action_rename_spec, lps_old_spec);
       data::rewriter datar;
-      if (m_rewrite) {
+      if (m_rewrite)
+      {
         gsVerboseMsg("rewriting data expressions in LPS...\n");
         datar = create_rewriter(lps_new_spec.data());
         lps::rewrite(lps_new_spec, datar);
       }
-      if(m_sumelm) {
+      if (m_sumelm)
+      {
         gsVerboseMsg("applying sum elimination...\n");
         sumelm_algorithm(lps_new_spec, core::gsVerbose||core::gsDebug).run();
-        if(m_rewrite) {
+        if (m_rewrite)
+        {
           gsVerboseMsg("rewriting data expressions in LPS...\n");
           lps::rewrite(lps_new_spec, datar);
         }
       }
       //save the result
-      if (output_filename().empty()) {
+      if (output_filename().empty())
+      {
         gsVerboseMsg("writing LPS to stdout...\n");
-      } else {
+      }
+      else
+      {
         gsVerboseMsg("writing LPS to file '%s'...\n", output_filename().c_str());
       }
       lps_new_spec.save(output_filename());
@@ -179,7 +193,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
 class action_rename_gui_tool: public mcrl2_gui_tool<action_rename_tool>
 {
   public:
-	action_rename_gui_tool()
+    action_rename_gui_tool()
     {
       m_gui_options["renamefile"] = create_filepicker_widget("Text files(*.txt)|*.txt|mCRL2-rename files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
       m_gui_options["no-sumelm"] = create_checkbox_widget();
@@ -198,7 +212,7 @@ class action_rename_gui_tool: public mcrl2_gui_tool<action_rename_tool>
 
 int main(int argc, char* argv[])
 {
-   MCRL2_ATERMPP_INIT(argc, argv)
+  MCRL2_ATERMPP_INIT(argc, argv)
 
-   return action_rename_gui_tool().execute(argc, argv);
+  return action_rename_gui_tool().execute(argc, argv);
 }

@@ -15,7 +15,7 @@
 
 using namespace mcrl2::lts;
 
-Graph* LTSImporter::importFile(const std::string &fn)
+Graph* LTSImporter::importFile(const std::string& fn)
 {
   Graph* result = new Graph();
   mcrl2::lts::lts_fsm_t fileLTS;
@@ -30,43 +30,43 @@ Graph* LTSImporter::importFile(const std::string &fn)
     std::map<size_t, State*> numsToStates;
     // bool hasParams = fileLTS.has_process_parameters();
     std::vector<std::string> parameters;
-    for(size_t i = 0; i < fileLTS.process_parameters().size(); ++i) 
+    for (size_t i = 0; i < fileLTS.process_parameters().size(); ++i)
     {
       parameters.push_back(fileLTS.process_parameter(i).first);
     }
 
 
-    for(unsigned int si = 0; si< fileLTS.num_states(); ++si)
+    for (unsigned int si = 0; si< fileLTS.num_states(); ++si)
     {
       std::map<std::string, std::string> stateValues;
 
       unsigned int stNum = si;
       State* s = new State(stNum,
-                        stNum == initialState);
+                           stNum == initialState);
       result->addState(s);
 
       std::pair<unsigned int, State*> pNumToState(stNum, s);
       numsToStates.insert(pNumToState);
 
-      if(s->isInitialState())
+      if (s->isInitialState())
       {
         result->setInitialState(s);
       }
 
-      for(size_t i = 0; i < parameters.size(); ++i) 
+      for (size_t i = 0; i < parameters.size(); ++i)
       {
-          std::pair<std::string, std::string> stateValue(
-              parameters[i],
-              fileLTS.state_element_value(i,fileLTS.state_label(stNum)[i]));
-          stateValues.insert(stateValue); 
+        std::pair<std::string, std::string> stateValue(
+          parameters[i],
+          fileLTS.state_element_value(i,fileLTS.state_label(stNum)[i]));
+        stateValues.insert(stateValue);
       }
       s->setParameters(stateValues);
 
       // Generate a random position (x, y, z) for this state
-      int x = static_cast<int> (
+      int x = static_cast<int>(
                 (rand() / static_cast<float>(RAND_MAX) - .5) * 2000
               );
-      int y = static_cast<int> (
+      int y = static_cast<int>(
                 (rand() / static_cast<float>(RAND_MAX) - .5) * 2000
               );
       int z = static_cast<int>(
@@ -75,13 +75,14 @@ Graph* LTSImporter::importFile(const std::string &fn)
 
       s->setX(x);
       s->setY(y);
-	  s->setZ(z);
+      s->setZ(z);
     }
 
-    for(mcrl2::lts::transition_const_range r = fileLTS.get_transitions(); !r.empty(); r.advance_begin(1))
-    { const transition ti=r.front();
+    for (mcrl2::lts::transition_const_range r = fileLTS.get_transitions(); !r.empty(); r.advance_begin(1))
+    {
+      const transition ti=r.front();
       size_t idFrom, idTo;
-      State *stFrom, *stTo;
+      State* stFrom, *stTo;
 
       std::string label = mcrl2::lts::detail::pp(fileLTS.action_label(ti.label()));
       idFrom = ti.from();

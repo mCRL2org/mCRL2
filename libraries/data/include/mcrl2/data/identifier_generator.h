@@ -19,9 +19,11 @@
 #include "mcrl2/core/find.h"
 #include "mcrl2/atermpp/container_utility.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
 /// \brief Identifier generator that generates names with a postfix consisting of a number.
 class number_postfix_generator
@@ -32,7 +34,7 @@ class number_postfix_generator
 
     /// \brief An index.
     unsigned int m_index;
-  
+
   public:
     /// \brief Constructor.
     number_postfix_generator()
@@ -43,7 +45,7 @@ class number_postfix_generator
     /// \param prefix A string
     /// \param index A positive integer
     number_postfix_generator(const std::string& prefix, unsigned int index = 0)
-     : m_prefix(prefix), m_index(index)
+      : m_prefix(prefix), m_index(index)
     {}
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
@@ -136,7 +138,7 @@ class identifier_generator
     /// \param s An identifier.
     /// \return True if the identifier appears in the context.
     virtual bool has_identifier(core::identifier_string s) const = 0;
-   
+
     /// \brief Returns a fresh identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
     /// \param hint A string

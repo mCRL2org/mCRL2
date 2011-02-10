@@ -33,123 +33,137 @@
 #include "mcrl2/atermpp/aterm_list_iterator.h"
 #include "mcrl2/atermpp/container_utility.h"
 
-namespace atermpp {
+namespace atermpp
+{
 
-    /// \cond INTERNAL_DOCS
-    namespace detail {
+/// \cond INTERNAL_DOCS
+namespace detail
+{
 
-      template < typename Expression, typename Predicate, typename OutputIterator >
-      class filter_insert_iterator {
+template < typename Expression, typename Predicate, typename OutputIterator >
+class filter_insert_iterator
+{
 
-        public:
+  public:
 
-          typedef std::output_iterator_tag iterator_category;
-          typedef Expression               value_type;
-          typedef void                     difference_type;
-          typedef void                     pointer;
-          typedef void                     reference;
+    typedef std::output_iterator_tag iterator_category;
+    typedef Expression               value_type;
+    typedef void                     difference_type;
+    typedef void                     pointer;
+    typedef void                     reference;
 
-          struct proxy {
-            Predicate      m_filter;
-            OutputIterator m_sink;
+    struct proxy
+    {
+      Predicate      m_filter;
+      OutputIterator m_sink;
 
-            void operator=(Expression const& p) {
-              if (m_filter(p)) {
-                *m_sink = static_cast< typename OutputIterator::value_type >(p);
-              }
-            }
-
-            proxy(Predicate const& filter, OutputIterator const& sink) : m_filter(filter), m_sink(sink) {
-            }
-          };
-
-        private:
-
-          proxy m_proxy;
-
-        public:
-
-          proxy& operator*() {
-            return m_proxy;
-          }
-
-          filter_insert_iterator& operator++() {
-            return *this;
-          }
-
-          filter_insert_iterator& operator++(int) {
-            return *this;
-          }
-
-          filter_insert_iterator(Predicate const& m_filter, OutputIterator const& sink) : m_proxy(m_filter, sink) {
-          }
-      };
-
-      // factory method
-      // \param[in] predicate is a filter predicate
-      // \parampin] filter is a filter predicate
-      template < typename Container, typename Predicate >
-      inline filter_insert_iterator< typename Container::value_type, Predicate, std::insert_iterator< Container > >
-      make_filter_inserter(Container& c, Predicate const& filter, typename boost::enable_if< typename is_container< Container >::type >::type* = 0) {
-        return filter_insert_iterator< typename Container::value_type, Predicate, std::insert_iterator< Container > >(filter, std::inserter(c, c.end()));
-      }
-
-      // factory method
-      // \param[in] predicate is a filter predicate
-      // \parampin] filter is a filter predicate
-      template < typename Expression, typename Predicate, typename OutputIterator >
-      inline filter_insert_iterator< Expression, Predicate, OutputIterator >
-      make_filter_inserter(Predicate const& filter, OutputIterator& o) {
-        return filter_insert_iterator< Expression, Predicate, OutputIterator >(filter, o);
-      }
-
-      template < typename Iterator, typename AdaptableUnaryPredicate >
-      class filter_iterator : public boost::iterator_adaptor<
-                 atermpp::detail::filter_iterator< Iterator, AdaptableUnaryPredicate >, Iterator > {
-
-        friend class boost::iterator_core_access;
-
-        protected:
-
-          AdaptableUnaryPredicate    m_predicate;
-          Iterator                   m_end;
-
-          void increment()
-          {
-            if (this->base_reference() != m_end)
-            {
-              while (++this->base_reference() != m_end && !m_predicate(*(this->base_reference())))
-              { }
-            }
-          }
-
-        public:
-
-          filter_iterator(AdaptableUnaryPredicate predicate, boost::iterator_range< Iterator > const& range) :
-                 filter_iterator::iterator_adaptor_(range.begin()), m_predicate(predicate), m_end(range.end())
-          {}
-
-          filter_iterator(AdaptableUnaryPredicate predicate, Iterator begin, Iterator end) :
-                 filter_iterator::iterator_adaptor_(begin), m_predicate(predicate), m_end(end)
-          {}
-
-          filter_iterator(AdaptableUnaryPredicate predicate, Iterator end) :
-                 filter_iterator::iterator_adaptor_(end), m_predicate(predicate), m_end(end)
-          {}
-      };
-
-
-      template < typename AdaptableUnaryPredicate, typename Iterator >
-      boost::iterator_range< filter_iterator< Iterator, AdaptableUnaryPredicate > >
-      make_filter_iterator_range(boost::iterator_range< Iterator > const& r, AdaptableUnaryPredicate predicate)
+      void operator=(Expression const& p)
       {
-        typedef filter_iterator< Iterator, AdaptableUnaryPredicate > iterator_type;
-
-        return boost::iterator_range< iterator_type >(
-                    iterator_type(predicate, r), iterator_type(predicate, r.end()));
+        if (m_filter(p))
+        {
+          *m_sink = static_cast< typename OutputIterator::value_type >(p);
+        }
       }
 
-    } // namespace detail
+      proxy(Predicate const& filter, OutputIterator const& sink) : m_filter(filter), m_sink(sink)
+      {
+      }
+    };
+
+  private:
+
+    proxy m_proxy;
+
+  public:
+
+    proxy& operator*()
+    {
+      return m_proxy;
+    }
+
+    filter_insert_iterator& operator++()
+    {
+      return *this;
+    }
+
+    filter_insert_iterator& operator++(int)
+    {
+      return *this;
+    }
+
+    filter_insert_iterator(Predicate const& m_filter, OutputIterator const& sink) : m_proxy(m_filter, sink)
+    {
+    }
+};
+
+// factory method
+// \param[in] predicate is a filter predicate
+// \parampin] filter is a filter predicate
+template < typename Container, typename Predicate >
+inline filter_insert_iterator< typename Container::value_type, Predicate, std::insert_iterator< Container > >
+make_filter_inserter(Container& c, Predicate const& filter, typename boost::enable_if< typename is_container< Container >::type >::type* = 0)
+{
+  return filter_insert_iterator< typename Container::value_type, Predicate, std::insert_iterator< Container > >(filter, std::inserter(c, c.end()));
+}
+
+// factory method
+// \param[in] predicate is a filter predicate
+// \parampin] filter is a filter predicate
+template < typename Expression, typename Predicate, typename OutputIterator >
+inline filter_insert_iterator< Expression, Predicate, OutputIterator >
+make_filter_inserter(Predicate const& filter, OutputIterator& o)
+{
+  return filter_insert_iterator< Expression, Predicate, OutputIterator >(filter, o);
+}
+
+template < typename Iterator, typename AdaptableUnaryPredicate >
+class filter_iterator : public boost::iterator_adaptor<
+  atermpp::detail::filter_iterator< Iterator, AdaptableUnaryPredicate >, Iterator >
+{
+
+    friend class boost::iterator_core_access;
+
+  protected:
+
+    AdaptableUnaryPredicate    m_predicate;
+    Iterator                   m_end;
+
+    void increment()
+    {
+      if (this->base_reference() != m_end)
+      {
+        while (++this->base_reference() != m_end && !m_predicate(*(this->base_reference())))
+          { }
+      }
+    }
+
+  public:
+
+    filter_iterator(AdaptableUnaryPredicate predicate, boost::iterator_range< Iterator > const& range) :
+      filter_iterator::iterator_adaptor_(range.begin()), m_predicate(predicate), m_end(range.end())
+    {}
+
+    filter_iterator(AdaptableUnaryPredicate predicate, Iterator begin, Iterator end) :
+      filter_iterator::iterator_adaptor_(begin), m_predicate(predicate), m_end(end)
+    {}
+
+    filter_iterator(AdaptableUnaryPredicate predicate, Iterator end) :
+      filter_iterator::iterator_adaptor_(end), m_predicate(predicate), m_end(end)
+    {}
+};
+
+
+template < typename AdaptableUnaryPredicate, typename Iterator >
+boost::iterator_range< filter_iterator< Iterator, AdaptableUnaryPredicate > >
+make_filter_iterator_range(boost::iterator_range< Iterator > const& r, AdaptableUnaryPredicate predicate)
+{
+  typedef filter_iterator< Iterator, AdaptableUnaryPredicate > iterator_type;
+
+  return boost::iterator_range< iterator_type >(
+           iterator_type(predicate, r), iterator_type(predicate, r.end()));
+}
+
+} // namespace detail
 
 } // namespace atermpp
 

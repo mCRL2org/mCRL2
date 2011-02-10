@@ -39,35 +39,36 @@ using namespace IDs;
 
 // Event table
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
-  EVT_MENU  (wxID_OPEN, MainFrame::onOpen)
-  EVT_MENU  (myID_OPEN_TRACE, MainFrame::onOpenTrace)
-  EVT_MENU  (myID_SAVEPIC, MainFrame::onSavePic)
-  EVT_MENU  (myID_SAVEVEC, MainFrame::onSaveVec)
-  EVT_MENU  (myID_SAVETXT, MainFrame::onSaveText)
-  EVT_MENU  (wxID_EXIT, MainFrame::onExit)
-  EVT_MENU  (wxID_RESET, MainFrame::onResetView)
-  EVT_MENU  (myID_DISPLAY_STATES,MainFrame::onDisplay)
-  EVT_MENU  (myID_DISPLAY_TRANSITIONS,MainFrame::onDisplay)
-  EVT_MENU  (myID_DISPLAY_BACKPOINTERS,MainFrame::onDisplay)
-  EVT_MENU  (myID_DISPLAY_WIREFRAME,MainFrame::onDisplay)
-  EVT_MENU  (wxID_PREFERENCES,MainFrame::onSettings)
-  EVT_MENU  (myID_INFO,MainFrame::onInfo)
-  EVT_MENU  (myID_MARK,MainFrame::onMark)
-  EVT_MENU  (myID_SIM, MainFrame::onSim)
-  EVT_MENU  (myID_PAN,MainFrame::onActivateTool)
-  EVT_MENU  (myID_ROTATE,MainFrame::onActivateTool)
-  EVT_MENU  (myID_SELECT,MainFrame::onActivateTool)
-  EVT_MENU  (myID_ZOOM,MainFrame::onActivateTool)
-  EVT_MENU  (myID_ZOOM_IN_ABOVE, MainFrame::onZoomInAbove)
-  EVT_MENU  (myID_ZOOM_IN_BELOW, MainFrame::onZoomInBelow)
-  EVT_MENU  (myID_ZOOM_OUT, MainFrame::onZoomOut)
+  EVT_MENU(wxID_OPEN, MainFrame::onOpen)
+  EVT_MENU(myID_OPEN_TRACE, MainFrame::onOpenTrace)
+  EVT_MENU(myID_SAVEPIC, MainFrame::onSavePic)
+  EVT_MENU(myID_SAVEVEC, MainFrame::onSaveVec)
+  EVT_MENU(myID_SAVETXT, MainFrame::onSaveText)
+  EVT_MENU(wxID_EXIT, MainFrame::onExit)
+  EVT_MENU(wxID_RESET, MainFrame::onResetView)
+  EVT_MENU(myID_DISPLAY_STATES,MainFrame::onDisplay)
+  EVT_MENU(myID_DISPLAY_TRANSITIONS,MainFrame::onDisplay)
+  EVT_MENU(myID_DISPLAY_BACKPOINTERS,MainFrame::onDisplay)
+  EVT_MENU(myID_DISPLAY_WIREFRAME,MainFrame::onDisplay)
+  EVT_MENU(wxID_PREFERENCES,MainFrame::onSettings)
+  EVT_MENU(myID_INFO,MainFrame::onInfo)
+  EVT_MENU(myID_MARK,MainFrame::onMark)
+  EVT_MENU(myID_SIM, MainFrame::onSim)
+  EVT_MENU(myID_PAN,MainFrame::onActivateTool)
+  EVT_MENU(myID_ROTATE,MainFrame::onActivateTool)
+  EVT_MENU(myID_SELECT,MainFrame::onActivateTool)
+  EVT_MENU(myID_ZOOM,MainFrame::onActivateTool)
+  EVT_MENU(myID_ZOOM_IN_ABOVE, MainFrame::onZoomInAbove)
+  EVT_MENU(myID_ZOOM_IN_BELOW, MainFrame::onZoomInBelow)
+  EVT_MENU(myID_ZOOM_OUT, MainFrame::onZoomOut)
 
 //  EVT_IDLE(MainFrame::onIdle)
   EVT_CLOSE(MainFrame::onClose)
 END_EVENT_TABLE()
 
 MainFrame::MainFrame(Mediator* owner,Settings* ss)
-  : wxFrame(NULL,wxID_ANY,wxT("LTSView"))  {
+  : wxFrame(NULL,wxID_ANY,wxT("LTSView"))
+{
 //  previousTime = 0.0;
 //  frameCount = 0;
   mediator = owner;
@@ -96,7 +97,8 @@ void MainFrame::setSim(Simulation* sim)
   simDialog->setSim(sim);
 }
 
-void MainFrame::setupMenuBar() {
+void MainFrame::setupMenuBar()
+{
   // Set up the menu bar
   wxMenuBar* menuBar = new wxMenuBar;
   wxMenu* fileMenu = new wxMenu;
@@ -106,49 +108,49 @@ void MainFrame::setupMenuBar() {
   wxMenu* helpMenu = new wxMenu;
 
   fileMenu->Append(wxID_OPEN,wxT("&Open...\tCtrl+O"),
-    wxT("Load an LTS from file"));
+                   wxT("Load an LTS from file"));
   fileMenu->Append(myID_OPEN_TRACE, wxT("Open &Trace...\tCtrl+T"),
-    wxT("Open a trace for this file"));
+                   wxT("Open a trace for this file"));
   fileMenu->AppendSeparator();
   exportMenu->Append(myID_SAVEPIC,wxT("&Bitmap..."),
-      wxT("Export picture to bitmap"));
+                     wxT("Export picture to bitmap"));
   exportMenu->Append(myID_SAVETXT,wxT("&Text..."),
-      wxT("Export picture to text"));
+                     wxT("Export picture to text"));
   exportMenu->Append(myID_SAVEVEC,wxT("&Vector..."),
-      wxT("Export picture to vector graphics"));
+                     wxT("Export picture to vector graphics"));
   fileMenu->AppendSubMenu(exportMenu,wxT("Export"),wxT("Export picture"));
   fileMenu->AppendSeparator();
   fileMenu->Append(wxID_EXIT, wxT("E&xit\tCtrl+Q"), wxT("Exit application"));
 
   viewMenu->Append(wxID_RESET, wxT("&Reset viewpoint\tF2"),
-      wxT("Set the viewpoint to the default position"));
+                   wxT("Set the viewpoint to the default position"));
   viewMenu->AppendSeparator();
   viewMenu->Append(myID_ZOOM_IN_ABOVE, wxT("Zoom into &above\tZ"),
-      wxT("Zooms into the selected cluster and the clusters above it"));
+                   wxT("Zooms into the selected cluster and the clusters above it"));
   viewMenu->Append(myID_ZOOM_IN_BELOW, wxT("Zoom into &below\tX"),
-      wxT("Zooms into the selected cluster and the clusters below it"));
+                   wxT("Zooms into the selected cluster and the clusters below it"));
   viewMenu->Append(myID_ZOOM_OUT, wxT("Zoom &out\tC"),
-      wxT("Zooms out one level"));
+                   wxT("Zooms out one level"));
   viewMenu->AppendSeparator();
   viewMenu->AppendCheckItem(myID_DISPLAY_STATES, wxT("Display &states\tF3"),
-      wxT("Show/hide individual states"));
+                            wxT("Show/hide individual states"));
   viewMenu->AppendCheckItem(myID_DISPLAY_TRANSITIONS,
-    wxT("Display &transitions\tF4"), wxT("Show/hide individual transitions"));
+                            wxT("Display &transitions\tF4"), wxT("Show/hide individual transitions"));
   viewMenu->AppendCheckItem(myID_DISPLAY_BACKPOINTERS,
-    wxT("Display &backpointers\tF5"), wxT("Show/hide backpointers"));
+                            wxT("Display &backpointers\tF5"), wxT("Show/hide backpointers"));
   viewMenu->AppendCheckItem(myID_DISPLAY_WIREFRAME,
-      wxT("Display &wireframe\tF6"),wxT("Toggle wireframe/surface"));
+                            wxT("Display &wireframe\tF6"),wxT("Toggle wireframe/surface"));
   viewMenu->AppendSeparator();
   viewMenu->Append(wxID_PREFERENCES,wxT("S&ettings..."),
-    wxT("Show the settings panel"));
+                   wxT("Show the settings panel"));
 
   viewMenu->Check(myID_DISPLAY_STATES,settings->getBool(DisplayStates));
   viewMenu->Check(myID_DISPLAY_TRANSITIONS,
-    settings->getBool(DisplayTransitions));
+                  settings->getBool(DisplayTransitions));
   viewMenu->Check(myID_DISPLAY_BACKPOINTERS,
-    settings->getBool(DisplayBackpointers));
+                  settings->getBool(DisplayBackpointers));
   viewMenu->Check(myID_DISPLAY_WIREFRAME,
-    settings->getBool(DisplayWireframe));
+                  settings->getBool(DisplayWireframe));
 
   toolMenu->AppendRadioItem(myID_SELECT,wxT("&Select\tS"),wxT("Select tool"));
   toolMenu->AppendRadioItem(myID_PAN,wxT("&Pan\tD"),wxT("Pan tool"));
@@ -156,9 +158,9 @@ void MainFrame::setupMenuBar() {
   toolMenu->AppendRadioItem(myID_ROTATE,wxT("&Rotate\tF"),wxT("Rotate tool"));
   toolMenu->AppendSeparator();
   toolMenu->Append(myID_INFO, wxT("&Information...\tCtrl+I"),
-      wxT("Show information dialog"));
+                   wxT("Show information dialog"));
   toolMenu->Append(myID_SIM, wxT("Sim&ulation...\tCtrl+S"),
-      wxT("Show simulation dialog"));
+                   wxT("Show simulation dialog"));
   toolMenu->Append(myID_MARK, wxT("&Mark...\tCtrl+M"), wxT("Show mark dialog"));
 
   helpMenu->Append(wxID_HELP,wxT("&Contents"),wxT("Show help contents"));
@@ -173,7 +175,8 @@ void MainFrame::setupMenuBar() {
   SetMenuBar(menuBar);
 }
 
-void MainFrame::setupMainArea() {
+void MainFrame::setupMainArea()
+{
   wxFlexGridSizer* mainSizer = new wxFlexGridSizer(1,1,0,0);
   mainSizer->AddGrowableCol(0);
   mainSizer->AddGrowableRow(0);
@@ -189,26 +192,29 @@ void MainFrame::setupMainArea() {
   Layout();
 }
 
-GLCanvas* MainFrame::getGLCanvas() const {
+GLCanvas* MainFrame::getGLCanvas() const
+{
   return glCanvas;
 }
 
-void MainFrame::setFileInfo(wxFileName fn) {
+void MainFrame::setFileInfo(wxFileName fn)
+{
   filename.Assign(fn);
 }
 
 void MainFrame::onOpen(wxCommandEvent& /*event*/)
 {
   wxString filemask = wxString(("All supported files (" +
-        mcrl2::lts::detail::lts_extensions_as_string() +
-        ")|" +
-        mcrl2::lts::detail::lts_extensions_as_string(";") +
-        "|All files (*.*)|*.*").c_str(),
-        wxConvLocal);
+                                mcrl2::lts::detail::lts_extensions_as_string() +
+                                ")|" +
+                                mcrl2::lts::detail::lts_extensions_as_string(";") +
+                                "|All files (*.*)|*.*").c_str(),
+                               wxConvLocal);
   wxFileDialog dialog(this,wxT("Open LTS"),
-      filename.GetPath(),filename.GetFullName(),filemask,wxFD_OPEN);
+                      filename.GetPath(),filename.GetFullName(),filemask,wxFD_OPEN);
   dialog.CentreOnParent();
-  if (dialog.ShowModal() == wxID_OK) {
+  if (dialog.ShowModal() == wxID_OK)
+  {
     filename.Assign(dialog.GetPath());
     mediator->openFile(string(filename.GetFullPath().mb_str(wxConvUTF8)));
   }
@@ -218,7 +224,7 @@ void MainFrame::onOpenTrace(wxCommandEvent& /*event*/)
 {
   wxString filemask = wxT("Traces (*.trc)|*.trc|All files (*.*)|*.*");
   wxFileDialog dialog(this, wxT("Open Trace"),
-    filename.GetPath(), wxEmptyString,filemask,wxFD_OPEN);
+                      filename.GetPath(), wxEmptyString,filemask,wxFD_OPEN);
   dialog.CentreOnParent();
   if (dialog.ShowModal() == wxID_OK)
   {
@@ -252,18 +258,19 @@ void MainFrame::onSaveVec(wxCommandEvent& /*event*/)
 void MainFrame::onSaveText(wxCommandEvent& /*event*/)
 {
   wxString new_file = wxFileSelector(wxT("Select a file"),filename.GetPath(),
-    wxT(""),wxT(""),wxT("*.*"),wxFD_SAVE,this);
+                                     wxT(""),wxT(""),wxT("*.*"),wxFD_SAVE,this);
   if (!new_file.empty())
   {
     mediator->exportToText(static_cast<std::string>(new_file.mb_str(wxConvUTF8)));
   }
 }
 
-void MainFrame::onExit(wxCommandEvent& /*event*/) {
+void MainFrame::onExit(wxCommandEvent& /*event*/)
+{
   Close();
 }
 
-void MainFrame::onClose(wxCloseEvent &event)
+void MainFrame::onClose(wxCloseEvent& event)
 {
   if (settingsDialog != NULL)
   {
@@ -287,37 +294,52 @@ void MainFrame::onClose(wxCloseEvent &event)
   event.Skip();
 }
 
-void MainFrame::onActivateTool(wxCommandEvent& event) {
+void MainFrame::onActivateTool(wxCommandEvent& event)
+{
   glCanvas->setActiveTool(event.GetId());
 }
 
-void MainFrame::onResetView(wxCommandEvent& /*event*/) {
+void MainFrame::onResetView(wxCommandEvent& /*event*/)
+{
   glCanvas->resetView();
 }
 
-void MainFrame::onDisplay(wxCommandEvent& event) {
-  if (event.GetId() == myID_DISPLAY_STATES) {
+void MainFrame::onDisplay(wxCommandEvent& event)
+{
+  if (event.GetId() == myID_DISPLAY_STATES)
+  {
     settings->setBool(DisplayStates,event.IsChecked());
-  } else if (event.GetId() == myID_DISPLAY_TRANSITIONS) {
+  }
+  else if (event.GetId() == myID_DISPLAY_TRANSITIONS)
+  {
     settings->setBool(DisplayTransitions,event.IsChecked());
-  } else if (event.GetId() == myID_DISPLAY_BACKPOINTERS) {
+  }
+  else if (event.GetId() == myID_DISPLAY_BACKPOINTERS)
+  {
     settings->setBool(DisplayBackpointers,event.IsChecked());
-  } else if (event.GetId() == myID_DISPLAY_WIREFRAME) {
+  }
+  else if (event.GetId() == myID_DISPLAY_WIREFRAME)
+  {
     settings->setBool(DisplayWireframe,event.IsChecked());
-  } else {
+  }
+  else
+  {
     return;
   }
   glCanvas->display();
 }
 
-void MainFrame::onSettings(wxCommandEvent& /*event*/) {
-  if (settingsDialog == NULL) {
+void MainFrame::onSettings(wxCommandEvent& /*event*/)
+{
+  if (settingsDialog == NULL)
+  {
     settingsDialog = new SettingsDialog(this,glCanvas,settings);
   }
   settingsDialog->Show();
 }
 
-void MainFrame::onInfo(wxCommandEvent& /*event*/) {
+void MainFrame::onInfo(wxCommandEvent& /*event*/)
+{
   infoDialog->Show();
 }
 
@@ -349,10 +371,11 @@ void MainFrame::onZoomOut(wxCommandEvent& /*event*/)
   glCanvas->display();
 }
 
-void MainFrame::createProgressDialog(const string& title,const string& text) {
+void MainFrame::createProgressDialog(const string& title,const string& text)
+{
   progDialog = new wxProgressDialog(wxString(title.c_str(),wxConvUTF8),
-      wxString(text.c_str(),wxConvUTF8),100,this,
-      wxPD_APP_MODAL|wxPD_AUTO_HIDE);
+                                    wxString(text.c_str(),wxConvUTF8),100,this,
+                                    wxPD_APP_MODAL|wxPD_AUTO_HIDE);
   progDialog->SetMinSize(wxSize(400,100));
   progDialog->SetSize(wxSize(400,100));
   progDialog->CentreOnParent();
@@ -360,10 +383,13 @@ void MainFrame::createProgressDialog(const string& title,const string& text) {
   progDialog->Show();
 }
 
-void MainFrame::updateProgressDialog(int val,string msg) {
-  if (progDialog != NULL) {
+void MainFrame::updateProgressDialog(int val,string msg)
+{
+  if (progDialog != NULL)
+  {
     progDialog->Update(val,wxString(msg.c_str(),wxConvUTF8));
-    if (val == 100) {
+    if (val == 100)
+    {
       progDialog->Close();
       progDialog->Destroy();
       progDialog = NULL;
@@ -371,7 +397,8 @@ void MainFrame::updateProgressDialog(int val,string msg) {
   }
 }
 
-void MainFrame::showMessage(string title,string text) {
+void MainFrame::showMessage(string title,string text)
+{
   wxMessageDialog* msgDialog = new wxMessageDialog(this,
       wxString(text.c_str(),wxConvLocal),wxString(title.c_str(),wxConvLocal),
       wxOK);
@@ -380,49 +407,62 @@ void MainFrame::showMessage(string title,string text) {
   msgDialog->Destroy();
 }
 
-void MainFrame::loadTitle() {
+void MainFrame::loadTitle()
+{
   wxString fn = filename.GetFullName();
-  if (fn != wxEmptyString) {
+  if (fn != wxEmptyString)
+  {
     SetTitle(fn + wxT(" - LTSView"));
-  } else {
+  }
+  else
+  {
     SetTitle(wxT("LTSView"));
   }
 }
 
-void MainFrame::setNumberInfo(int ns,int nt,int nc,int nr) {
+void MainFrame::setNumberInfo(int ns,int nt,int nc,int nr)
+{
   infoDialog->setLTSInfo(ns,nt,nc,nr);
 }
 
-void MainFrame::setMarkedStatesInfo(int number) {
+void MainFrame::setMarkedStatesInfo(int number)
+{
   infoDialog->setNumMarkedStates(number);
 }
 
-void MainFrame::setMarkedTransitionsInfo(int number) {
+void MainFrame::setMarkedTransitionsInfo(int number)
+{
   infoDialog->setNumMarkedTransitions(number);
 }
 
-void MainFrame::addMarkRule(wxString str,int mr) {
+void MainFrame::addMarkRule(wxString str,int mr)
+{
   markDialog->addMarkRule(str,mr);
 }
 
-void MainFrame::replaceMarkRule(wxString str,int mr) {
+void MainFrame::replaceMarkRule(wxString str,int mr)
+{
   markDialog->replaceMarkRule(str,mr);
 }
 
-void MainFrame::resetMarkRules() {
+void MainFrame::resetMarkRules()
+{
   markDialog->resetMarkRules();
 }
 
-void MainFrame::setActionLabels(vector< string > &labels) {
+void MainFrame::setActionLabels(vector< string > &labels)
+{
   markDialog->setActionLabels(labels);
 }
 
-void MainFrame::startRendering() {
+void MainFrame::startRendering()
+{
   SetStatusText(wxT("Rendering..."),0);
   //GetStatusBar()->Update();
 }
 
-void MainFrame::stopRendering() {
+void MainFrame::stopRendering()
+{
   /*double currentTime = clock() / CLOCKS_PER_SEC;
   ++frameCount;
   if (currentTime-previousTime > 1.0) {
@@ -435,19 +475,23 @@ void MainFrame::stopRendering() {
   GetStatusBar()->Update();
 }
 
-void MainFrame::resetParameters() {
+void MainFrame::resetParameters()
+{
   infoDialog->resetParameterNames();
 }
 
-void MainFrame::resetParameterValues() {
+void MainFrame::resetParameterValues()
+{
   infoDialog->resetParameterValues();
 }
 
-void MainFrame::addParameter(int i,std::string par) {
+void MainFrame::addParameter(int i,std::string par)
+{
   infoDialog->setParameterName(i,par);
 }
 
-void MainFrame::setParameterValue(int i,std::string value) {
+void MainFrame::setParameterValue(int i,std::string value)
+{
   infoDialog->setParameterValue(i,value);
 }
 

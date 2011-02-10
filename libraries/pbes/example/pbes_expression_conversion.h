@@ -4,9 +4,11 @@
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/data/detail/optimized_rewriter.h"
 
-namespace lps {
+namespace lps
+{
 
-namespace detail {
+namespace detail
+{
 
 struct to_rewriter_format_builder: public pbes_expression_builder
 {
@@ -18,7 +20,7 @@ struct to_rewriter_format_builder: public pbes_expression_builder
 
   pbes_expression visit_data_expression(const pbes_expression& /* e */, const data_expression& d)
   {
-std::cout << "<data>" << d << std::endl;
+    std::cout << "<data>" << d << std::endl;
     return pbes_expression(r.to_rewriter_format(d));
   }
 };

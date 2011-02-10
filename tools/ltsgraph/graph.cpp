@@ -25,7 +25,7 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-  for(size_t i = 0; i < states.size(); ++i)
+  for (size_t i = 0; i < states.size(); ++i)
   {
     delete states[i];
   }
@@ -71,8 +71,9 @@ State* Graph::selectState(size_t s)
   }
 }
 
-void Graph::colourState(size_t s, wxColour colour) {
-  if(s < states.size())
+void Graph::colourState(size_t s, wxColour colour)
+{
+  if (s < states.size())
   {
     states[s]->setColour(colour);
   }

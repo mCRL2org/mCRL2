@@ -22,7 +22,7 @@ typedef core::term_traits<boolean_expression> tr;
 
 void test_join()
 {
-  boolean_variable X("X"); 
+  boolean_variable X("X");
   boolean_expression Z1 = X;
   boolean_expression Z2(X);
   boolean_expression Z3;
@@ -129,7 +129,7 @@ void test_boolean_equation()
   expected.insert(Z);
 
   std::set<boolean_variable> found;
-  
+
   find_boolean_variables(Y, std::inserter(found, found.end()));
   find_boolean_variables(Z, std::inserter(found, found.end()));
   BOOST_CHECK(found == expected);

@@ -10,7 +10,7 @@
 /** \file
  *
  * \brief This file contains a class that contains labelled transition systems in aut format.
- * \details A labelled transition system in aut format is a transition system 
+ * \details A labelled transition system in aut format is a transition system
  * with as state labels vectors of strings, and as transition labels strings.
  * \author Jan Friso Groote
  */
@@ -32,58 +32,58 @@ namespace lts
 namespace detail
 {
 
-  /** \brief This class contains strings to be used as values for action labels in lts's.
-   *  \details These action labels are used in the aut, fsm, bcg and dot format to represent
-   *           values for the action labels in transitions.
-   */
-  class action_label_string: public std::string
-  { 
-    public:
+/** \brief This class contains strings to be used as values for action labels in lts's.
+ *  \details These action labels are used in the aut, fsm, bcg and dot format to represent
+ *           values for the action labels in transitions.
+ */
+class action_label_string: public std::string
+{
+  public:
 
-      /* \brief Default constructor. The label will contain the default string.
-       */
-      action_label_string()
-      {}
+    /* \brief Default constructor. The label will contain the default string.
+     */
+    action_label_string()
+    {}
 
-      /* \brief A constructor, where the string s is taken to become the action label.
-       */
-      action_label_string(const std::string &s):std::string(s)
-      {}
+    /* \brief A constructor, where the string s is taken to become the action label.
+     */
+    action_label_string(const std::string& s):std::string(s)
+    {}
 
-      /* \brief An auxiliary function to hide actions. As strings have no structure, hiding of
-       *        actions is not possible, and this method will just throw an exception error. */
-      bool hide_actions(const std::vector<std::string> &string_vector )
+    /* \brief An auxiliary function to hide actions. As strings have no structure, hiding of
+     *        actions is not possible, and this method will just throw an exception error. */
+    bool hide_actions(const std::vector<std::string> &string_vector)
+    {
+      // Rename action label to tau
+      for (std::vector<std::string>::const_iterator i = string_vector.begin(); i != string_vector.end(); ++i)
       {
-        // Rename action label to tau
-        for( std::vector<std::string>::const_iterator i = string_vector.begin(); i != string_vector.end(); ++i )
-        {
-          // Actions that have parameters have priority over actions without while renaming.
-          std::string ns(   core::regex_replace( *i + "\\([^\\)]*\\)" , "tau" , *this ) );
-          ns = core::regex_replace( *i , "tau" , ns ) ;
-          assign( ns );
-        }
-        // Remove all "tau|", since this indicates that we are dealing with a multi-action
-        std::string ns( core::regex_replace( "tau\\|" , "" , *this ) );
-        // Remove "|tau" from end of multi-action one still exists
-        ns =  core::regex_replace( "\\|tau$" , "" , ns ) ;
+        // Actions that have parameters have priority over actions without while renaming.
+        std::string ns(core::regex_replace(*i + "\\([^\\)]*\\)" , "tau" , *this));
+        ns = core::regex_replace(*i , "tau" , ns) ;
         assign(ns);
-        return ns=="tau";
       }
-      
-      /* \brief A comparison operator comparing the action_label_strings in the same way as strings.
-      */
-      bool operator<(const action_label_string &l) const
-      { 
-        return std::string(*this)<std::string(l);
-      }
-  };
+      // Remove all "tau|", since this indicates that we are dealing with a multi-action
+      std::string ns(core::regex_replace("tau\\|" , "" , *this));
+      // Remove "|tau" from end of multi-action one still exists
+      ns =  core::regex_replace("\\|tau$" , "" , ns) ;
+      assign(ns);
+      return ns=="tau";
+    }
 
-  /* \brief A pretty print operator on action labels, returning it as a string.
-  */
-  inline std::string pp(const action_label_string &l)
-  {
-    return l;
-  }
+    /* \brief A comparison operator comparing the action_label_strings in the same way as strings.
+    */
+    bool operator<(const action_label_string& l) const
+    {
+      return std::string(*this)<std::string(l);
+    }
+};
+
+/* \brief A pretty print operator on action labels, returning it as a string.
+*/
+inline std::string pp(const action_label_string& l)
+{
+  return l;
+}
 
 } // namespace detail
 

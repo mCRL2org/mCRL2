@@ -31,11 +31,14 @@
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/find.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Returns true if the names of the given variables are unique.
 /// \param variables A sequence of data variables
@@ -67,7 +70,9 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
   for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
   {
     if (v.find(i->lhs()) == v.end())
+    {
       return false;
+    }
   }
   return true;
 }
@@ -76,7 +81,7 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
 template <typename T, typename UnaryPredicate>
 void set_remove_if(std::set<T>& s, UnaryPredicate f)
 {
-  for (typename std::set<T>::iterator i = s.begin(); i != s.end(); )
+  for (typename std::set<T>::iterator i = s.begin(); i != s.end();)
   {
     if (f(*i))
     {
@@ -95,8 +100,10 @@ void set_remove_if(std::set<T>& s, UnaryPredicate f)
 /// \return True if the sort is contained in <tt>sorts</tt>
 inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts)
 {
-  struct local {
-    static bool is_not_function_sort(atermpp::aterm_appl t) {
+  struct local
+  {
+    static bool is_not_function_sort(atermpp::aterm_appl t)
+    {
       return is_sort_expression(t) && !is_function_sort(t);
     }
   };
@@ -105,26 +112,34 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
   set_remove_if(s_sorts, boost::bind(&local::is_not_function_sort, _1));
   for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
   {
-    if (sorts.find(*i) == sorts.end()) {
-      // sort *i is not well-typed, a system defined sort or an alias 
-      if (!(is_system_defined(*i)) && is_alias(*i)) {
+    if (sorts.find(*i) == sorts.end())
+    {
+      // sort *i is not well-typed, a system defined sort or an alias
+      if (!(is_system_defined(*i)) && is_alias(*i))
+      {
         alias sort_alias(*i);
 
-        if (sorts.find(sort_alias.name()) == sorts.end()) {
+        if (sorts.find(sort_alias.name()) == sorts.end())
+        {
           // sort_alias.reference() is a basic, structured or container sort
           sort_expression sort_reference(sort_alias.reference());
 
-          if (sorts.find(sort_reference) == sorts.end()) {
+          if (sorts.find(sort_reference) == sorts.end())
+          {
             // sort_reference is structured or container sort
-            if (is_structured_sort(sort_reference)) {
+            if (is_structured_sort(sort_reference))
+            {
               assert(false);
             }
-            else if (is_container_sort(sort_reference)) {
-              if (sorts.find(container_sort(sort_reference).element_sort()) == sorts.end()) {
+            else if (is_container_sort(sort_reference))
+            {
+              if (sorts.find(container_sort(sort_reference).element_sort()) == sorts.end())
+              {
                 return false;
               }
             }
-            else {
+            else
+            {
               assert(false);
             }
           }
@@ -148,7 +163,9 @@ bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>&
   for (Iterator i = first; i != last; ++i)
   {
     if (!check_sort(*i, sorts))
+    {
       return false;
+    }
   }
   return true;
 }
@@ -163,7 +180,9 @@ bool check_variable_sorts(const VariableContainer& variables, const std::set<sor
   for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     if (!check_sort(i->sort(), sorts))
+    {
       return false;
+    }
   }
   return true;
 }
@@ -178,7 +197,9 @@ bool check_variable_names(variable_list const& variables, const std::set<core::i
   for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     if (names.find(i->name()) != names.end())
+    {
       return false;
+    }
   }
   return true;
 }
@@ -194,7 +215,9 @@ bool check_data_spec_sorts(boost::iterator_range< ForwardTraversalIterator > con
   for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
   {
     if (!check_sort(i->sort(), sorts))
+    {
       return false;
+    }
   }
   return true;
 }

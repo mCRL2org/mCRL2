@@ -102,7 +102,7 @@ void test_lps_print_lists()
   print(spec);
 
   BOOST_CHECK(output.str() == LIST_SPEC);
-  if(output.str() != LIST_SPEC)
+  if (output.str() != LIST_SPEC)
   {
     std::clog << "output.str() == LIST_SPEC failed: [" << output.str() << " == " << LIST_SPEC << "]" << std::endl;
   }
@@ -113,7 +113,7 @@ void test_lps_print_lists()
   list_print(list_false_true);
   BOOST_CHECK(list_output.str() == "[false, true]");
 
-  if(list_output.str() != "[false, true]")
+  if (list_output.str() != "[false, true]")
   {
     std::clog << "list_output.str() == [false, true] failed: [" << list_output.str() << " == " << "[false, true]" << "]" << std::endl;
   }

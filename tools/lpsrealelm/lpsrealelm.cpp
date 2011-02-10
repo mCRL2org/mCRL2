@@ -50,7 +50,8 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       super::parse_options(parser);
 
       if (parser.options.count("max")>0)
-      { max_iterations = parser.option_argument_as< unsigned int > ("max");
+      {
+        max_iterations = parser.option_argument_as< unsigned int > ("max");
       }
     }
 
@@ -58,20 +59,20 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
     {
       super::add_options(desc);
       desc.
-        add_option("max",
-                   make_mandatory_argument("NUM"),
-                   "perform at most NUM iterations");
+      add_option("max",
+                 make_mandatory_argument("NUM"),
+                 "perform at most NUM iterations");
     }
 
   public:
     lpsrealelm_tool()
       : super(
-          TOOLNAME,
-          AUTHORS,
-          "remove real numbers from an LPS",
-          "Remove Real numbers from the linear process specification (LPS) in "
-          "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "),
-        max_iterations(DEFAULT_MAX_ITERATIONS)
+        TOOLNAME,
+        AUTHORS,
+        "remove real numbers from an LPS",
+        "Remove Real numbers from the linear process specification (LPS) in "
+        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "),
+      max_iterations(DEFAULT_MAX_ITERATIONS)
     {}
 
     /// Runs the algorithm.
@@ -96,7 +97,8 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       specification new_spec = realelm(lps_specification, max_iterations, r);
 
       if (core::gsVerbose)
-      { std::cerr << "Real time abstraction completed, saving to " << m_output_filename << "\n";
+      {
+        std::cerr << "Real time abstraction completed, saving to " << m_output_filename << "\n";
       }
       new_spec.save(m_output_filename);
 

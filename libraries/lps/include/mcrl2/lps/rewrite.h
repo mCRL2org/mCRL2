@@ -15,25 +15,27 @@
 #ifndef MCRL2_LPS_REWRITE_H
 #define MCRL2_LPS_REWRITE_H
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-  /// \brief Rewrites an LPS data type.
-  template <typename Object, typename DataRewriter>
-  void rewrite(Object& o, const DataRewriter& R)
-  {
-    lps::detail::lps_rewriter<DataRewriter> r(R);
-    r(o);
-  }
+/// \brief Rewrites an LPS data type.
+template <typename Object, typename DataRewriter>
+void rewrite(Object& o, const DataRewriter& R)
+{
+  lps::detail::lps_rewriter<DataRewriter> r(R);
+  r(o);
+}
 
-  /// \brief Rewrites an LPS data type.
-  template <typename Object, typename DataRewriter, typename Substitution>
-  void rewrite(Object& o, const DataRewriter& R, const Substitution& sigma)
-  {
-    data::rewriter_adapter<DataRewriter, Substitution> Rsigma(R, sigma);
-    rewrite(o, Rsigma);
-  }
+/// \brief Rewrites an LPS data type.
+template <typename Object, typename DataRewriter, typename Substitution>
+void rewrite(Object& o, const DataRewriter& R, const Substitution& sigma)
+{
+  data::rewriter_adapter<DataRewriter, Substitution> Rsigma(R, sigma);
+  rewrite(o, Rsigma);
+}
 
 } // namespace lps
 

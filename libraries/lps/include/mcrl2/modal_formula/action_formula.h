@@ -21,9 +21,11 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/multi_action.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace action_formulas {
+namespace action_formulas
+{
 
 //--- start generated classes ---//
 /// \brief An action formula

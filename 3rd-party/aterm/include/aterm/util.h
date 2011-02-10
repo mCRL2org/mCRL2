@@ -9,19 +9,19 @@ extern "C"
 #endif/* __cplusplus */
 
 #ifndef streq
-#  define streq(s,t)	(!(strcmp(s,t)))
+#  define streq(s,t)  (!(strcmp(s,t)))
 #endif
 
 #ifndef MIN
-#  define MIN(a,b)	((a) < (b) ? (a) : (b))
+#  define MIN(a,b)  ((a) < (b) ? (a) : (b))
 #endif
 
 #ifndef MAX
-#  define MAX(a,b)	((a) > (b) ? (a) : (b))
+#  define MAX(a,b)  ((a) > (b) ? (a) : (b))
 #endif
 
 #ifdef __cplusplus
 }
-#endif/* __cplusplus */ 
+#endif/* __cplusplus */
 
 #endif

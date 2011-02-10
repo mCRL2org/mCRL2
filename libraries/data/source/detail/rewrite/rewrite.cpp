@@ -36,258 +36,266 @@ using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 using namespace std;
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
 Rewriter::Rewriter()
 {
-	substs = NULL;
-	substs_size = 0;
+  substs = NULL;
+  substs_size = 0;
 }
 
 Rewriter::~Rewriter()
 {
-	if ( substs_size > 0 )
-	{
-		ATunprotectArray(substs);
-	}
-	free(substs);
+  if (substs_size > 0)
+  {
+    ATunprotectArray(substs);
+  }
+  free(substs);
 }
 
 ATermList Rewriter::rewriteList(ATermList Terms)
 {
-	ATermList l = ATmakeList0();
-	for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
-	{
-		l = ATinsert(l,(ATerm) rewrite((ATermAppl) ATgetFirst(Terms)));
-	}
-	return ATreverse(l);
+  ATermList l = ATmakeList0();
+  for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
+  {
+    l = ATinsert(l,(ATerm) rewrite((ATermAppl) ATgetFirst(Terms)));
+  }
+  return ATreverse(l);
 }
 
 ATerm Rewriter::toRewriteFormat(ATermAppl Term)
 {
-	return (ATerm) Term;
+  return (ATerm) Term;
 }
 
 ATermAppl Rewriter::fromRewriteFormat(ATerm Term)
 {
-	return (ATermAppl) Term;
+  return (ATermAppl) Term;
 }
 
 ATerm Rewriter::rewriteInternal(ATerm Term)
 {
-	return (ATerm) rewrite((ATermAppl) Term);
+  return (ATerm) rewrite((ATermAppl) Term);
 }
 
 ATermList Rewriter::rewriteInternalList(ATermList Terms)
 {
-	ATermList l = ATmakeList0();
-	for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
-	{
-		l = ATinsert(l,rewriteInternal(ATgetFirst(Terms)));
-	}
-	return ATreverse(l);
+  ATermList l = ATmakeList0();
+  for (; !ATisEmpty(Terms); Terms=ATgetNext(Terms))
+  {
+    l = ATinsert(l,rewriteInternal(ATgetFirst(Terms)));
+  }
+  return ATreverse(l);
 }
 
 bool Rewriter::addRewriteRule(ATermAppl /*Rule*/)
 {
-	return false;
+  return false;
 }
 
 bool Rewriter::removeRewriteRule(ATermAppl /*Rule*/)
 {
-	return false;
+  return false;
 }
 
 void Rewriter::setSubstitution(ATermAppl Var, ATermAppl Expr)
 {
-	setSubstitutionInternal(Var,toRewriteFormat(Expr));
+  setSubstitutionInternal(Var,toRewriteFormat(Expr));
 }
 
 void Rewriter::setSubstitutionList(ATermList Substs)
 {
-	for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
-	{
-		ATermAppl h = (ATermAppl) ATgetFirst(Substs);
-		setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),toRewriteFormat((ATermAppl) ATgetArgument(h,1)));
-	}
+  for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
+  {
+    ATermAppl h = (ATermAppl) ATgetFirst(Substs);
+    setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),toRewriteFormat((ATermAppl) ATgetArgument(h,1)));
+  }
 }
 
 void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
-	long n = ATgetAFun(ATgetArgument(Var,0));
+  long n = ATgetAFun(ATgetArgument(Var,0));
 
-	if ( n >= substs_size )
-	{
-		long newsize;
+  if (n >= substs_size)
+  {
+    long newsize;
 
-		if ( n >= 2*substs_size )
-		{
-			if ( n < 1024 )
-			{
-				newsize = 1024;
-			} else {
-				newsize = n+1;
-			}
-		} else {
-			newsize = 2*substs_size;
-		}
+    if (n >= 2*substs_size)
+    {
+      if (n < 1024)
+      {
+        newsize = 1024;
+      }
+      else
+      {
+        newsize = n+1;
+      }
+    }
+    else
+    {
+      newsize = 2*substs_size;
+    }
 
-		if ( substs_size > 0 )
-		{
-			ATunprotectArray(substs);
-		}
-		substs = (ATerm *) realloc(substs,newsize*sizeof(ATerm));
+    if (substs_size > 0)
+    {
+      ATunprotectArray(substs);
+    }
+    substs = (ATerm*) realloc(substs,newsize*sizeof(ATerm));
 
-		if ( substs == NULL )
-		{
-			throw mcrl2::runtime_error("Failed to increase the size of a substitution array.");
-		}
+    if (substs == NULL)
+    {
+      throw mcrl2::runtime_error("Failed to increase the size of a substitution array.");
+    }
 
-		for (long i=substs_size; i<newsize; i++)
-		{
-			substs[i]=NULL;
-		}
+    for (long i=substs_size; i<newsize; i++)
+    {
+      substs[i]=NULL;
+    }
 
-		ATprotectArray(substs,newsize);
-		substs_size = newsize;
-	}
+    ATprotectArray(substs,newsize);
+    substs_size = newsize;
+  }
 
-	substs[n] = Expr;
+  substs[n] = Expr;
 }
 
 void Rewriter::setSubstitutionInternalList(ATermList Substs)
 {
-	for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
-	{
-		ATermAppl h = (ATermAppl) ATgetFirst(Substs);
-		setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),ATgetArgument(h,1));
-	}
+  for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
+  {
+    ATermAppl h = (ATermAppl) ATgetFirst(Substs);
+    setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),ATgetArgument(h,1));
+  }
 }
 
 ATermAppl Rewriter::getSubstitution(ATermAppl Var)
 {
-	return fromRewriteFormat(lookupSubstitution(Var));
+  return fromRewriteFormat(lookupSubstitution(Var));
 }
 
 ATerm Rewriter::getSubstitutionInternal(ATermAppl Var)
 {
-	return lookupSubstitution(Var);
+  return lookupSubstitution(Var);
 }
 
 void Rewriter::clearSubstitution(ATermAppl Var)
 {
-	long n = ATgetAFun(ATgetArgument(Var,0));
+  long n = ATgetAFun(ATgetArgument(Var,0));
 
-	if ( n < substs_size )
-	{
-		substs[n] = NULL;
-	}
+  if (n < substs_size)
+  {
+    substs[n] = NULL;
+  }
 }
 
 void Rewriter::clearSubstitutions()
 {
-	for (long i=0; i<substs_size; i++)
-	{
-		substs[i] = NULL;
-	}
+  for (long i=0; i<substs_size; i++)
+  {
+    substs[i] = NULL;
+  }
 }
 
 void Rewriter::clearSubstitutions(ATermList Vars)
 {
-	for (; !ATisEmpty(Vars); Vars=ATgetNext(Vars))
-	{
-		clearSubstitution((ATermAppl) ATgetFirst(Vars));
-	}
+  for (; !ATisEmpty(Vars); Vars=ATgetNext(Vars))
+  {
+    clearSubstitution((ATermAppl) ATgetFirst(Vars));
+  }
 }
 
 ATerm Rewriter::lookupSubstitution(ATermAppl Var)
 {
-	long n = ATgetAFun(ATgetArgument(Var,0));
+  long n = ATgetAFun(ATgetArgument(Var,0));
 
-	if ( n >= substs_size )
-	{
-		return (ATerm) Var;
-	}
+  if (n >= substs_size)
+  {
+    return (ATerm) Var;
+  }
 
-	ATerm r = substs[n];
+  ATerm r = substs[n];
 
-	if ( r == NULL )
-	{
-		return (ATerm) Var;
-	}
+  if (r == NULL)
+  {
+    return (ATerm) Var;
+  }
 
-	return r;
+  return r;
 }
 
 
-Rewriter *createRewriter(const data_specification &DataSpec, RewriteStrategy Strategy)
+Rewriter* createRewriter(const data_specification& DataSpec, RewriteStrategy Strategy)
 {
-	switch ( Strategy )
-	{
-		case GS_REWR_INNER:
-			return new RewriterInnermost(DataSpec);
-		case GS_REWR_JITTY:
-			return new RewriterJitty(DataSpec);
+  switch (Strategy)
+  {
+    case GS_REWR_INNER:
+      return new RewriterInnermost(DataSpec);
+    case GS_REWR_JITTY:
+      return new RewriterJitty(DataSpec);
 #ifdef MCRL2_INNERC_AVAILABLE
-		case GS_REWR_INNERC:
-			return new RewriterCompilingInnermost(DataSpec);
+    case GS_REWR_INNERC:
+      return new RewriterCompilingInnermost(DataSpec);
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-		case GS_REWR_JITTYC:
-			return new RewriterCompilingJitty(DataSpec);
+    case GS_REWR_JITTYC:
+      return new RewriterCompilingJitty(DataSpec);
 #endif
-		case GS_REWR_INNER_P:
-			return new RewriterProver(DataSpec,mcrl2::data::rewriter::innermost);
-		case GS_REWR_JITTY_P:
-			return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty);
+    case GS_REWR_INNER_P:
+      return new RewriterProver(DataSpec,mcrl2::data::rewriter::innermost);
+    case GS_REWR_JITTY_P:
+      return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty);
 #ifdef MCRL2_INNERC_AVAILABLE
-		case GS_REWR_INNERC_P:
-			return new RewriterProver(DataSpec,data::rewriter::innermost_compiling);
+    case GS_REWR_INNERC_P:
+      return new RewriterProver(DataSpec,data::rewriter::innermost_compiling);
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-		case GS_REWR_JITTYC_P:
-			return new RewriterProver(DataSpec,data::rewriter::jitty_compiling);
+    case GS_REWR_JITTYC_P:
+      return new RewriterProver(DataSpec,data::rewriter::jitty_compiling);
 #endif
-		default:
-			return NULL;
-	}
+    default:
+      return NULL;
+  }
 }
 
 //Prototype
-static void checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars = NULL);
+static void checkVars(ATermAppl Expr, ATermList Vars, ATermList* UsedVars = NULL);
 
-static void checkVars(ATermList Exprs, ATermList Vars, ATermList *UsedVars = NULL)
+static void checkVars(ATermList Exprs, ATermList Vars, ATermList* UsedVars = NULL)
 {
-        assert(ATgetType(Exprs) == AT_LIST);
+  assert(ATgetType(Exprs) == AT_LIST);
 
-        for( ; !ATisEmpty(Exprs); Exprs = ATgetNext(Exprs))
-        {
-                checkVars((ATermAppl) ATAgetFirst(Exprs),Vars,UsedVars);
-        }
+  for (; !ATisEmpty(Exprs); Exprs = ATgetNext(Exprs))
+  {
+    checkVars((ATermAppl) ATAgetFirst(Exprs),Vars,UsedVars);
+  }
 }
 
-static void checkVars(ATermAppl Expr, ATermList Vars, ATermList *UsedVars)
+static void checkVars(ATermAppl Expr, ATermList Vars, ATermList* UsedVars)
 {
-	assert(ATgetType(Expr) == AT_APPL);
+  assert(ATgetType(Expr) == AT_APPL);
 
-	if ( gsIsDataAppl(Expr) )
-	{
-		checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars);
-		checkVars((ATermList) ATLgetArgument(Expr,1),Vars,UsedVars);
-	} else if ( gsIsDataVarId(Expr) )
-	{
-		if ( (UsedVars != NULL) && (ATindexOf(*UsedVars,(ATerm) Expr,0) == ATERM_NON_EXISTING_POSITION) )
-		{
-			*UsedVars = ATinsert(*UsedVars,(ATerm) Expr);
-		}
+  if (gsIsDataAppl(Expr))
+  {
+    checkVars((ATermAppl) ATgetArgument(Expr,0),Vars,UsedVars);
+    checkVars((ATermList) ATLgetArgument(Expr,1),Vars,UsedVars);
+  }
+  else if (gsIsDataVarId(Expr))
+  {
+    if ((UsedVars != NULL) && (ATindexOf(*UsedVars,(ATerm) Expr,0) == ATERM_NON_EXISTING_POSITION))
+    {
+      *UsedVars = ATinsert(*UsedVars,(ATerm) Expr);
+    }
 
-		if ( ATindexOf(Vars,(ATerm) Expr,0) == ATERM_NON_EXISTING_POSITION )
-		{
-			throw Expr;
-		}
-	}
+    if (ATindexOf(Vars,(ATerm) Expr,0) == ATERM_NON_EXISTING_POSITION)
+    {
+      throw Expr;
+    }
+  }
 }
 
 //Prototype
@@ -295,74 +303,78 @@ static void checkPattern(ATermAppl p);
 
 static void checkPattern(ATermList l)
 {
-        for( ; !ATisEmpty(l); l = ATgetNext(l) )
-        {
-                checkPattern(ATAgetFirst(l));
-        }
+  for (; !ATisEmpty(l); l = ATgetNext(l))
+  {
+    checkPattern(ATAgetFirst(l));
+  }
 }
 
 static void checkPattern(ATermAppl p)
 {
-	if ( gsIsDataAppl(p) )
-        {
-		if ( gsIsDataVarId(ATAgetArgument(p,0)) )
-		{
-			throw string("variable "+PrintPart_CXX(ATgetArgument(p,0),ppDefault)+" is used as head symbol in an application, which is not supported");
-		}
-		checkPattern(ATAgetArgument(p,0));
-		checkPattern(ATLgetArgument(p,1));
-	}
+  if (gsIsDataAppl(p))
+  {
+    if (gsIsDataVarId(ATAgetArgument(p,0)))
+    {
+      throw string("variable "+PrintPart_CXX(ATgetArgument(p,0),ppDefault)+" is used as head symbol in an application, which is not supported");
+    }
+    checkPattern(ATAgetArgument(p,0));
+    checkPattern(ATLgetArgument(p,1));
+  }
 }
 
 void CheckRewriteRule(ATermAppl DataEqn)
 {
-	assert(gsIsDataEqn(DataEqn));
+  assert(gsIsDataEqn(DataEqn));
 
-	ATermList rule_vars = ATLgetArgument(DataEqn,0);
+  ATermList rule_vars = ATLgetArgument(DataEqn,0);
 
-	// collect variables from lhs and check that they are in rule_vars
-	ATermList lhs_vars = ATmakeList0();
-	try
-	{
-		checkVars(ATAgetArgument(DataEqn,2),rule_vars,&lhs_vars);
-	} catch ( ATermAppl var )
-	{
-		// This should never occur if DataEqn is a valid data equation
-		gsMessage("Data Equation: %T\n", DataEqn);
-		assert(0);
-		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in left-hand side of equation but is not defined (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+")");
-	}
+  // collect variables from lhs and check that they are in rule_vars
+  ATermList lhs_vars = ATmakeList0();
+  try
+  {
+    checkVars(ATAgetArgument(DataEqn,2),rule_vars,&lhs_vars);
+  }
+  catch (ATermAppl var)
+  {
+    // This should never occur if DataEqn is a valid data equation
+    gsMessage("Data Equation: %T\n", DataEqn);
+    assert(0);
+    throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in left-hand side of equation but is not defined (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+")");
+  }
 
-	// check that variables from the condition occur in the lhs
-	try
-	{
-		checkVars(ATAgetArgument(DataEqn,1),lhs_vars);
-	} catch ( ATermAppl var )
-	{
-		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in condition of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
-	}
+  // check that variables from the condition occur in the lhs
+  try
+  {
+    checkVars(ATAgetArgument(DataEqn,1),lhs_vars);
+  }
+  catch (ATermAppl var)
+  {
+    throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in condition of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
+  }
 
-	// check that variables from the rhs are occur in the lhs
-	try
-	{
-		checkVars(ATAgetArgument(DataEqn,3),lhs_vars);
-	} catch ( ATermAppl var )
-	{
-		throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in right-hand side of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
-	}
+  // check that variables from the rhs are occur in the lhs
+  try
+  {
+    checkVars(ATAgetArgument(DataEqn,3),lhs_vars);
+  }
+  catch (ATermAppl var)
+  {
+    throw runtime_error("variable "+PrintPart_CXX((ATerm) var,ppDefault)+" occurs in right-hand side of equation but not in left-hand side (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
+  }
 
-	// check that the lhs is a supported pattern
-	if ( gsIsDataVarId(ATAgetArgument(DataEqn,2)) )
-	{
-		throw runtime_error("left-hand side of equation is a variable; this is not allowed for rewriting");
-	}
-	try
-	{
-		checkPattern(ATAgetArgument(DataEqn,2));
-	} catch ( string &s )
-	{
-		throw runtime_error(s+" (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
-	}
+  // check that the lhs is a supported pattern
+  if (gsIsDataVarId(ATAgetArgument(DataEqn,2)))
+  {
+    throw runtime_error("left-hand side of equation is a variable; this is not allowed for rewriting");
+  }
+  try
+  {
+    checkPattern(ATAgetArgument(DataEqn,2));
+  }
+  catch (string& s)
+  {
+    throw runtime_error(s+" (in equation: "+PrintPart_CXX((ATerm) DataEqn,ppDefault)+"); equation cannot be used as rewrite rule");
+  }
 }
 
 bool isValidRewriteRule(ATermAppl DataEqn)
@@ -371,83 +383,110 @@ bool isValidRewriteRule(ATermAppl DataEqn)
   {
     CheckRewriteRule(DataEqn);
     return true;
-  } catch ( runtime_error& )
+  }
+  catch (runtime_error&)
   {
     return false;
   }
 }
 
-void PrintRewriteStrategy(FILE *stream, RewriteStrategy strat)
+void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
 {
-  if (strat == GS_REWR_INNER) {
+  if (strat == GS_REWR_INNER)
+  {
     fprintf(stream, "inner");
 #ifdef MCRL2_INNERC_AVAILABLE
-  } else if (strat == GS_REWR_INNERC) {
+  }
+  else if (strat == GS_REWR_INNERC)
+  {
     fprintf(stream, "innerc");
 #endif
-  } else if (strat == GS_REWR_JITTY) {
+  }
+  else if (strat == GS_REWR_JITTY)
+  {
     fprintf(stream, "jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
-  } else if (strat == GS_REWR_JITTYC) {
+  }
+  else if (strat == GS_REWR_JITTYC)
+  {
     fprintf(stream, "jittyc");
 #endif
-  } else if (strat == GS_REWR_INNER_P) {
+  }
+  else if (strat == GS_REWR_INNER_P)
+  {
     fprintf(stream, "innerp");
 #ifdef MCRL2_INNERC_AVAILABLE
-  } else if (strat == GS_REWR_INNERC_P) {
+  }
+  else if (strat == GS_REWR_INNERC_P)
+  {
     fprintf(stream, "innercp");
 #endif
-  } else if (strat == GS_REWR_JITTY_P) {
+  }
+  else if (strat == GS_REWR_JITTY_P)
+  {
     fprintf(stream, "jittyp");
 #ifdef MCRL2_JITTYC_AVAILABLE
-  } else if (strat == GS_REWR_JITTYC_P) {
+  }
+  else if (strat == GS_REWR_JITTYC_P)
+  {
     fprintf(stream, "jittycp");
 #endif
-  } else {
+  }
+  else
+  {
     fprintf(stream, "invalid");
   }
 }
 
-RewriteStrategy RewriteStrategyFromString(const char *s)
+RewriteStrategy RewriteStrategyFromString(const char* s)
 {
   static RewriteStrategy strategies[9] = { GS_REWR_INVALID,
 #ifdef MCRL2_INNERC_AVAILABLE
-          GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_INNER_P, GS_REWR_INNERC_P,
+                                         GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_INNER_P, GS_REWR_INNERC_P,
 #else
-          GS_REWR_INNER, GS_REWR_INVALID, GS_REWR_INNER_P, GS_REWR_INVALID,
+                                         GS_REWR_INNER, GS_REWR_INVALID, GS_REWR_INNER_P, GS_REWR_INVALID,
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
-          GS_REWR_JITTY, GS_REWR_JITTYC, GS_REWR_JITTY_P, GS_REWR_JITTYC_P };
+                                         GS_REWR_JITTY, GS_REWR_JITTYC, GS_REWR_JITTY_P, GS_REWR_JITTYC_P
+                                         };
 #else
-          GS_REWR_JITTY, GS_REWR_INVALID, GS_REWR_JITTY_P, GS_REWR_INVALID };
+                                         GS_REWR_JITTY, GS_REWR_INVALID, GS_REWR_JITTY_P, GS_REWR_INVALID
+                                         };
 #endif
 
   size_t main_strategy = 0; // default invalid
 
-  if (std::strncmp(&s[0], "inner", 5) == 0) { // not jitty{,c,cp} inner{,c,cp}
+  if (std::strncmp(&s[0], "inner", 5) == 0)   // not jitty{,c,cp} inner{,c,cp}
+  {
     main_strategy = 1;
   }
-  else if (std::strncmp(&s[0], "jitty", 5) == 0) { // jitty{,c,cp}
+  else if (std::strncmp(&s[0], "jitty", 5) == 0)   // jitty{,c,cp}
+  {
     main_strategy = 5;
   }
 
-  if (s[5] == '\0') { // interpreting
+  if (s[5] == '\0')   // interpreting
+  {
     return strategies[main_strategy];
   }
-  else if (s[6] == '\0') {
-    if (s[5] == 'c') { // compiling
+  else if (s[6] == '\0')
+  {
+    if (s[5] == 'c')   // compiling
+    {
       return strategies[main_strategy + 1];
     }
-    else if (s[5] == 'p') { // with prover
+    else if (s[5] == 'p')   // with prover
+    {
       return strategies[main_strategy + 2];
     }
   }
-  else if (s[5] == 'c' && s[6] == 'p' && s[7] == '\0') { // compiling with prover
+  else if (s[5] == 'c' && s[6] == 'p' && s[7] == '\0')   // compiling with prover
+  {
     return strategies[main_strategy + 3];
   }
 
   return GS_REWR_INVALID;
 }
-    }
-  }
+}
+}
 }

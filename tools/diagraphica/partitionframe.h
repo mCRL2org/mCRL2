@@ -19,46 +19,46 @@
 
 class PartitionFrame : public PopupFrame
 {
-public:
+  public:
     // -- constructors and desctructor ------------------------------
     PartitionFrame(
-        Mediator* m,
-        wxWindow* parent,
-        wxWindowID id,
-        wxString title,
-        wxPoint position,
-        wxSize size,
-        wxString attrName,
-        size_t minParts,
-        size_t maxParts,
-        size_t curParts );
+      Mediator* m,
+      wxWindow* parent,
+      wxWindowID id,
+      wxString title,
+      wxPoint position,
+      wxSize size,
+      wxString attrName,
+      size_t minParts,
+      size_t maxParts,
+      size_t curParts);
     virtual ~PartitionFrame();
 
     // -- set functions ---------------------------------------------
     // INSERT
 
-protected:
+  protected:
     // -- event handlers --------------------------------------------
-    void onButton( wxCommandEvent &e );
-    void onComboBox( wxCommandEvent &e );
-    void onSpinCtrl( wxSpinEvent &e );
-    void onSpinCtrlText( wxCommandEvent &e );
+    void onButton(wxCommandEvent& e);
+    void onComboBox(wxCommandEvent& e);
+    void onSpinCtrl(wxSpinEvent& e);
+    void onSpinCtrlText(wxCommandEvent& e);
 
-private:
+  private:
     // -- utility functions -----------------------------------------
     // INSERT
 
     // -- GUI initialization ----------------------------------------
     void initFrame(
-        wxString attrName,
-        size_t minParts,
-        size_t maxParts,
-        size_t curParts );
+      wxString attrName,
+      size_t minParts,
+      size_t maxParts,
+      size_t curParts);
     void initWidgets(
-        wxString attrName,
-        size_t minParts,
-        size_t maxParts,
-        size_t curParts );
+      wxString attrName,
+      size_t minParts,
+      size_t maxParts,
+      size_t curParts);
     void initCanvas();
     void initButtons();
 
@@ -77,10 +77,10 @@ private:
     // -- ID's ------------------------------------------------------
     enum
     {
-        ID_SPIN_CTRL_NUMBER,
-        ID_COMBO_BOX_METHOD,
-        ID_BUTTON_CANCEL,
-        ID_BUTTON_OK
+      ID_SPIN_CTRL_NUMBER,
+      ID_COMBO_BOX_METHOD,
+      ID_BUTTON_CANCEL,
+      ID_BUTTON_OK
     };
 
     // -- declare event table ---------------------------------------

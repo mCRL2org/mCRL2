@@ -20,49 +20,49 @@ class Bundle;
 
 class Cluster
 {
-public:
-	// -- constructors and destructors ------------------------------
+  public:
+    // -- constructors and destructors ------------------------------
     Cluster();
-    Cluster( const std::vector< size_t > &crd );
-    Cluster( const Cluster &clst );
+    Cluster(const std::vector< size_t > &crd);
+    Cluster(const Cluster& clst);
     virtual ~Cluster();
 
     // -- set functions ---------------------------------------------
-    void setCoord( const std::vector< size_t > &crd  );
-    void setIndex( const size_t &idx );
-    void setParent( Cluster* p );
-    void addChild( Cluster* c );
-    void setChildren( const std::vector< Cluster* > &c );
-    void addNode( Node* n );
-    void setNodes( const std::vector< Node* > &n );
+    void setCoord(const std::vector< size_t > &crd);
+    void setIndex(const size_t& idx);
+    void setParent(Cluster* p);
+    void addChild(Cluster* c);
+    void setChildren(const std::vector< Cluster* > &c);
+    void addNode(Node* n);
+    void setNodes(const std::vector< Node* > &n);
 
-    void setAttribute( Attribute* attr );
-    void setAttrValIdx( const size_t &idx );
+    void setAttribute(Attribute* attr);
+    void setAttrValIdx(const size_t& idx);
 
-    void addInBundle( Bundle* b );
-    void setInBundles( const std::vector< Bundle* > b );
-    void addOutBundle( Bundle* b );
-    void setOutBundles( const std::vector< Bundle* > b );
+    void addInBundle(Bundle* b);
+    void setInBundles(const std::vector< Bundle* > b);
+    void addOutBundle(Bundle* b);
+    void setOutBundles(const std::vector< Bundle* > b);
 
     // -- get functions ---------------------------------------------
     size_t getSizeCoord();
-    size_t getCoord( const size_t &idx );
-    void getCoord( std::vector< size_t > &crd );
+    size_t getCoord(const size_t& idx);
+    void getCoord(std::vector< size_t > &crd);
     size_t getIndex();
     Cluster* getParent();
     size_t getSizeChildren();
-    Cluster* getChild( const size_t &idx );
+    Cluster* getChild(const size_t& idx);
     size_t getSizeNodes();
-    Node* getNode( const size_t &idx );
+    Node* getNode(const size_t& idx);
     size_t getSizeDescNodes();
 
     Attribute* getAttribute();
     size_t getAttrValIdx();
 
     size_t getSizeInBundles();
-    Bundle* getInBundle( const size_t &idx );
+    Bundle* getInBundle(const size_t& idx);
     size_t getSizeOutBundles();
-    Bundle* getOutBundle( const size_t &idx );
+    Bundle* getOutBundle(const size_t& idx);
 
     // -- clear functions -------------------------------------------
     void clearParent();
@@ -72,9 +72,9 @@ public:
     void clearInBundles();
     void clearOutBundles();
 
-protected:
+  protected:
     // -- utility functions -----------------------------------------
-    void getSizeDescNodes( Cluster* curClst, size_t &sum );
+    void getSizeDescNodes(Cluster* curClst, size_t& sum);
 
     // -- data members ----------------------------------------------
     std::vector< size_t >      coord;

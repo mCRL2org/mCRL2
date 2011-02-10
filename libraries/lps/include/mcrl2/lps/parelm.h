@@ -29,9 +29,11 @@
 #include "mcrl2/lps/detail/lps_well_typed_checker.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 /// \brief Algorithm class for elimination of unused parameters from a linear
 /// process specification
@@ -68,27 +70,27 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         }
       }
     }
-    
+
     /// \brief First version of parelm1
     void parelm1()
     {
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "--- parelm 1 ---" << std::endl;
+      std::clog << "--- parelm 1 ---" << std::endl;
 #endif
       std::set<data::variable> process_parameters = atermpp::convert<std::set<data::variable> >(m_spec.process().process_parameters());
 
       // significant variables may not be removed by parelm
       std::set<data::variable> significant_variables = transition_variables();
-    
+
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "initial significant variables: ";
-  for (std::set<data::variable>::iterator i = significant_variables.begin(); i != significant_variables.end(); ++i)
-  {
-    std::clog << core::pp(*i) << " ";
-  }
-  std::clog << std::endl;
+      std::clog << "initial significant variables: ";
+      for (std::set<data::variable>::iterator i = significant_variables.begin(); i != significant_variables.end(); ++i)
+      {
+        std::clog << core::pp(*i) << " ";
+      }
+      std::clog << std::endl;
 #endif
-    
+
       // recursively extend the set of significant variables
       std::set<data::variable> todo = significant_variables;
       while (!todo.empty())
@@ -108,17 +110,17 @@ class parelm_algorithm: public lps::detail::lps_algorithm
             todo.insert(new_variables.begin(), new_variables.end());
             significant_variables.insert(new_variables.begin(), new_variables.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  for (std::set<data::variable>::iterator k = new_variables.begin(); k != new_variables.end(); ++k)
-  {
-    std::clog << "found dependency " << pp(x) << " -> " << pp(*k) << std::endl;
-  }
+            for (std::set<data::variable>::iterator k = new_variables.begin(); k != new_variables.end(); ++k)
+            {
+              std::clog << "found dependency " << pp(x) << " -> " << pp(*k) << std::endl;
+            }
 #endif
           }
         }
       }
       std::set<data::variable> to_be_removed = data::detail::set_difference(process_parameters, significant_variables);
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "to be removed: " << core::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
+      std::clog << "to be removed: " << core::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
@@ -129,21 +131,21 @@ class parelm_algorithm: public lps::detail::lps_algorithm
     void parelm2()
     {
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "--- parelm 2 ---" << std::endl;
+      std::clog << "--- parelm 2 ---" << std::endl;
 #endif
       std::set<data::variable> process_parameters = atermpp::convert<std::set<data::variable> >(m_spec.process().process_parameters());
-    
+
       // create a mapping m from process parameters to integers
       std::map<data::variable, size_t> m;
       int index = 0;
       for (std::set<data::variable>::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "vertex " << index << " = " << pp(*i) << std::endl;
+        std::clog << "vertex " << index << " = " << pp(*i) << std::endl;
 #endif
         m[*i] = index++;
       }
-    
+
       // compute the initial set v of significant variables
       std::set<data::variable> significant_variables = transition_variables();
       std::vector<size_t> v;
@@ -168,7 +170,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
           {
             size_t k0 = m[*k];
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "edge " << j0 << " -> " << k0 << std::endl;
+            std::clog << "edge " << j0 << " -> " << k0 << std::endl;
 #endif
             boost::add_edge(j0, k0, G);
           }
@@ -176,23 +178,23 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       }
 
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "initial significant variables: ";
-  for (std::vector<size_t>::iterator k = v.begin(); k != v.end(); ++k)
-  {
-    std::clog << *k << " ";
-  }
-  std::clog << std::endl;
-#endif   
-    
+      std::clog << "initial significant variables: ";
+      for (std::vector<size_t>::iterator k = v.begin(); k != v.end(); ++k)
+      {
+        std::clog << *k << " ";
+      }
+      std::clog << std::endl;
+#endif
+
       // compute the reachable nodes (i.e. the significant parameters)
       std::vector<size_t> r1 = mcrl2::core::reachable_nodes(G, v.begin(), v.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "reachable nodes: ";
-  for (std::vector<size_t>::iterator k = r1.begin(); k != r1.end(); ++k)
-  {
-    std::clog << *k << " ";
-  }
-  std::clog << std::endl;
+      std::clog << "reachable nodes: ";
+      for (std::vector<size_t>::iterator k = r1.begin(); k != r1.end(); ++k)
+      {
+        std::clog << *k << " ";
+      }
+      std::clog << std::endl;
 #endif
       std::set<size_t> r2(r1.begin(), r1.end());
       std::set<data::variable> to_be_removed;
@@ -204,13 +206,13 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         }
       }
 #ifdef MCRL2_LPS_PARELM_DEBUG
-  std::clog << "to be removed: " << core::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
+      std::clog << "to be removed: " << core::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
       assert(is_well_typed(m_spec));
     }
-    
+
   public:
 
     /// \brief Constructor

@@ -14,101 +14,139 @@
 
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-  /// \brief Returns true if the pbes expression is monotonous.
-  /// \param f A pbes expression
-  /// \return True if the pbes expression is monotonous.
-  inline
-  bool is_monotonous(pbes_expression f, const std::set<core::identifier_string>& negated_variables)
+/// \brief Returns true if the pbes expression is monotonous.
+/// \param f A pbes expression
+/// \return True if the pbes expression is monotonous.
+inline
+bool is_monotonous(pbes_expression f, const std::set<core::identifier_string>& negated_variables)
+{
+  namespace p = pbes_expr;
+  using namespace accessors;
+
+  //--- handle negations ---//
+  if (is_not(f))
   {
-    namespace p = pbes_expr;
-    using namespace accessors;
-  
-    //--- handle negations ---//
-    if (is_not(f))
+    f = arg(f); // remove the not
+    if (data::is_data_expression(f))
     {
-      f = arg(f); // remove the not
-      if (data::is_data_expression(f)) {
-        return true;
-      } else if (is_true(f)) {
-        return true;
-      } else if (is_false(f)) {
-        return true;
-      } else if (is_not(f)) {
-        return is_monotonous(arg(f), negated_variables);
-      } else if (is_and(f)) {
-        return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
-      } else if (is_or(f)) {
-        return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
-      } else if (is_imp(f)) {
-        return is_monotonous(left(f), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
-      } else if (is_forall(f)) {
-        return is_monotonous(p::not_(arg(f)), negated_variables);
-      } else if (is_exists(f)) {
-        return is_monotonous(p::not_(arg(f)), negated_variables);
-      } else if (is_propositional_variable_instantiation(f)) {
-        return negated_variables.find(name(f)) != negated_variables.end();
-	  }
+      return true;
     }
-  
-    //--- handle everything except negations ---//
-    if (data::is_data_expression(f)) {
-      return true;
-    } else if (is_true(f)) {
-      return true;
-    } else if (is_false(f)) {
-      return true;
-    } else if (is_and(f)) {
-      return is_monotonous(left(f), negated_variables) && is_monotonous(right(f), negated_variables);
-    } else if (is_or(f)) {
-      return is_monotonous(left(f), negated_variables) && is_monotonous(right(f), negated_variables);
-    } else if (is_imp(f)) {
-      return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(right(f), negated_variables);
-    } else if (is_forall(f)) {
-      return is_monotonous(arg(f), negated_variables);
-    } else if (is_exists(f)) {
-      return is_monotonous(arg(f), negated_variables);
-    } else if (is_propositional_variable_instantiation(f)) {
-      return negated_variables.find(name(f)) == negated_variables.end();
-    }
-  
-    throw mcrl2::runtime_error(std::string("is_monotonous(pbes_expression) error: unknown argument ") + f.to_string());
-    return false;
-  }
-  
-  /// \brief Returns true if the pbes expression is monotonous.
-  /// \param f A pbes expression
-  /// \return True if the pbes expression is monotonous.
-  inline
-  bool is_monotonous(pbes_expression f)
-  {
-    std::set<core::identifier_string> negated_variables;
-    return is_monotonous(f, negated_variables);
-  }
-
-  /// \brief Returns true if the pbes equation is monotonous.
-  inline
-  bool is_monotonous(const pbes_equation& e)
-  {
-    return is_monotonous(e.formula());
-  }
-
-  /// \brief Returns true if the pbes is monotonous.
-  template <typename Container>
-  bool is_monotonous(const pbes<Container>& p)
-  {
-    for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+    else if (is_true(f))
     {
-      if (!is_monotonous(*i))
-      {
-        return false;
-      }
+      return true;
     }
+    else if (is_false(f))
+    {
+      return true;
+    }
+    else if (is_not(f))
+    {
+      return is_monotonous(arg(f), negated_variables);
+    }
+    else if (is_and(f))
+    {
+      return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
+    }
+    else if (is_or(f))
+    {
+      return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
+    }
+    else if (is_imp(f))
+    {
+      return is_monotonous(left(f), negated_variables) && is_monotonous(p::not_(right(f)), negated_variables);
+    }
+    else if (is_forall(f))
+    {
+      return is_monotonous(p::not_(arg(f)), negated_variables);
+    }
+    else if (is_exists(f))
+    {
+      return is_monotonous(p::not_(arg(f)), negated_variables);
+    }
+    else if (is_propositional_variable_instantiation(f))
+    {
+      return negated_variables.find(name(f)) != negated_variables.end();
+    }
+  }
+
+  //--- handle everything except negations ---//
+  if (data::is_data_expression(f))
+  {
     return true;
   }
+  else if (is_true(f))
+  {
+    return true;
+  }
+  else if (is_false(f))
+  {
+    return true;
+  }
+  else if (is_and(f))
+  {
+    return is_monotonous(left(f), negated_variables) && is_monotonous(right(f), negated_variables);
+  }
+  else if (is_or(f))
+  {
+    return is_monotonous(left(f), negated_variables) && is_monotonous(right(f), negated_variables);
+  }
+  else if (is_imp(f))
+  {
+    return is_monotonous(p::not_(left(f)), negated_variables) && is_monotonous(right(f), negated_variables);
+  }
+  else if (is_forall(f))
+  {
+    return is_monotonous(arg(f), negated_variables);
+  }
+  else if (is_exists(f))
+  {
+    return is_monotonous(arg(f), negated_variables);
+  }
+  else if (is_propositional_variable_instantiation(f))
+  {
+    return negated_variables.find(name(f)) == negated_variables.end();
+  }
+
+  throw mcrl2::runtime_error(std::string("is_monotonous(pbes_expression) error: unknown argument ") + f.to_string());
+  return false;
+}
+
+/// \brief Returns true if the pbes expression is monotonous.
+/// \param f A pbes expression
+/// \return True if the pbes expression is monotonous.
+inline
+bool is_monotonous(pbes_expression f)
+{
+  std::set<core::identifier_string> negated_variables;
+  return is_monotonous(f, negated_variables);
+}
+
+/// \brief Returns true if the pbes equation is monotonous.
+inline
+bool is_monotonous(const pbes_equation& e)
+{
+  return is_monotonous(e.formula());
+}
+
+/// \brief Returns true if the pbes is monotonous.
+template <typename Container>
+bool is_monotonous(const pbes<Container>& p)
+{
+  for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+  {
+    if (!is_monotonous(*i))
+    {
+      return false;
+    }
+  }
+  return true;
+}
 
 } // namespace pbes_system
 

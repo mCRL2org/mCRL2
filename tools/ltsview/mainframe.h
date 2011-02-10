@@ -30,7 +30,8 @@ class Mediator;
 class Settings;
 class Simulation;
 
-class MainFrame : public wxFrame {
+class MainFrame : public wxFrame
+{
   public:
     MainFrame(Mediator* owner,Settings* ss);
     void addMarkRule(wxString str,int mr);

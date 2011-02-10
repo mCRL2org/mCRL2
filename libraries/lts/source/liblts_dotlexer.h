@@ -14,9 +14,9 @@ class dot_lexer
     std::map < std::string, size_t> labelTable;
     std::map < std::string, size_t> stateTable;
     std::vector < std::string > state_sequence;
-    mcrl2::lts::lts_dot_t *dot_lts;
+    mcrl2::lts::lts_dot_t* dot_lts;
 };
 
-extern dot_lexer *dot_lexer_obj;
+extern dot_lexer* dot_lexer_obj;
 
 #endif

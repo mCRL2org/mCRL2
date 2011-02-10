@@ -22,7 +22,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
 
-class sumelm_tool: public input_output_tool 
+class sumelm_tool: public input_output_tool
 {
   protected:
 
@@ -32,12 +32,12 @@ class sumelm_tool: public input_output_tool
 
     sumelm_tool()
       : super(
-          "lpssumelm",
-          "Jeroen Keiren",
-          "remove superfluous summations from an LPS",
-          "Remove superfluous summations from the linear process specification (LPS) in "
-          "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
-          "If OUTFILE is not present, stdout is used.")
+        "lpssumelm",
+        "Jeroen Keiren",
+        "remove superfluous summations from an LPS",
+        "Remove superfluous summations from the linear process specification (LPS) in "
+        "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
+        "If OUTFILE is not present, stdout is used.")
     {}
 
     ///Reads a specification from input_file,
@@ -62,7 +62,7 @@ class sumelm_tool: public input_output_tool
 class sumelm_gui_tool: public mcrl2_gui_tool<sumelm_tool>
 {
   public:
-	sumelm_gui_tool()
+    sumelm_gui_tool()
     { }
 };
 

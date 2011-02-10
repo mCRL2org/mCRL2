@@ -18,28 +18,29 @@
 #include "geometric.h"
 #include "mcrl2/utilities/font_renderer.h"
 
-namespace grape {
+namespace grape
+{
 
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities::wx;
 
-visualcomment::visualcomment( comment* p_comment )
+visualcomment::visualcomment(comment* p_comment)
 {
   m_object = p_comment;
 }
 
-visualcomment::visualcomment( const visualcomment &p_visualcomment )
-: visual_object( p_visualcomment )
+visualcomment::visualcomment(const visualcomment& p_visualcomment)
+  : visual_object(p_visualcomment)
 {
 }
 
-visualcomment::~visualcomment( void )
+visualcomment::~visualcomment(void)
 {
 }
 
-void visualcomment::draw( void )
+void visualcomment::draw(void)
 {
-  comment *c = static_cast<comment *>(m_object);
+  comment* c = static_cast<comment*>(m_object);
 
   float width = m_object->get_width();
   float height = m_object->get_height();
@@ -52,46 +53,46 @@ void visualcomment::draw( void )
   if (attached_object != 0)
   {
     // draw dashed attached object line
-    draw_line( m_object->get_coordinate(), attached_object->get_coordinate(), c->get_reference_selected(), g_color_black, true);
+    draw_line(m_object->get_coordinate(), attached_object->get_coordinate(), c->get_reference_selected(), g_color_black, true);
   }
 
   // draw comment
-  draw_filled_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), selected, g_color_comment);
+  draw_filled_rectangle(m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), selected, g_color_comment);
 
   // draw comment text
-  grape_glcanvas::get_font_renderer()->draw_wrapped_text( std::string(text.fn_str()), x+0.01f, x+width-0.01f, y+height-0.01f, y+0.01f, 0.0015f, al_left, al_top );
+  grape_glcanvas::get_font_renderer()->draw_wrapped_text(std::string(text.fn_str()), x+0.01f, x+width-0.01f, y+height-0.01f, y+0.01f, 0.0015f, al_left, al_top);
 
   // draw comment reference rectangle
   if (m_object->get_selected())
   {
-    draw_filled_rectangle( get_reference_coordinate(), 0.04f, 0.04f, selected, g_color_white);
-  } 
+    draw_filled_rectangle(get_reference_coordinate(), 0.04f, 0.04f, selected, g_color_white);
+  }
 
   // draw bounding box
-  draw_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected() );
+  draw_bounding_box(m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), m_object->get_selected());
 }
 
-bool visualcomment::is_inside( libgrape::coordinate &p_coord )
-{  
-  comment *c = static_cast<comment *>(m_object);
+bool visualcomment::is_inside(libgrape::coordinate& p_coord)
+{
+  comment* c = static_cast<comment*>(m_object);
   object* attached_object = c->get_attached_object();
 
-  // test if the mouse is on the reference line  
+  // test if the mouse is on the reference line
   if (attached_object != 0)
   {
- //   c->set_reference_selected(is_inside_line( m_object->get_coordinate(), attached_object->get_coordinate(), p_coord));
-  }   
-  
-  return c->get_reference_selected() || is_inside_rectangle( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord ) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
+//   c->set_reference_selected(is_inside_line( m_object->get_coordinate(), attached_object->get_coordinate(), p_coord));
+  }
+
+  return c->get_reference_selected() || is_inside_rectangle(m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord) || (grab_bounding_box(m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected()) != GRAPE_DIR_NONE);
 }
 
-grape_direction visualcomment::is_on_border( libgrape::coordinate &p_coord )
+grape_direction visualcomment::is_on_border(libgrape::coordinate& p_coord)
 {
   // test if a coordinate is on the border of a architecture refernece
-  return grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() );
+  return grab_bounding_box(m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected());
 }
 
-bool visualcomment::is_inside_reference( libgrape::coordinate &p_coord )
+bool visualcomment::is_inside_reference(libgrape::coordinate& p_coord)
 {
   return is_inside_rectangle(get_reference_coordinate(), 0.04f, 0.04f, p_coord);
 }

@@ -58,13 +58,13 @@ class besinfo_tool: public input_tool
   public:
     besinfo_tool()
       : super(
-          "besinfo",
-          "Jeroen Keiren",
-          "display basic information about a BES",
-          super::make_tool_description("Print basic information about the BES in INFILE.")
-        ),
-        opt_full(false)
-     {}
+        "besinfo",
+        "Jeroen Keiren",
+        "display basic information about a BES",
+        super::make_tool_description("Print basic information about the BES in INFILE.")
+      ),
+      opt_full(false)
+    {}
 
     /// If BES can be loaded from file_name, then
     /// - Show if BES is closed and if it is well formed

@@ -30,9 +30,11 @@
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/find.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief Algorithm class for the parelm algorithm
 class pbes_parelm_algorithm
@@ -261,7 +263,7 @@ class pbes_parelm_algorithm
       if (mcrl2::core::gsDebug)
       {
         std::cerr << "\ninfluential parameters:" << std::endl;
-        for(std::set<size_t>::iterator i = v.begin(); i != v.end(); ++i)
+        for (std::set<size_t>::iterator i = v.begin(); i != v.end(); ++i)
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::variable v1 = predicate_variables[*i];
@@ -272,7 +274,7 @@ class pbes_parelm_algorithm
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
         edge_iterator last  = e.second;
-        for( ; first != last; ++first)
+        for (; first != last; ++first)
         {
           edge_descriptor e = *first;
           size_t i1 = boost::source(e, G);

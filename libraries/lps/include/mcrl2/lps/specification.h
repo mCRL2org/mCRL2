@@ -29,10 +29,12 @@
 #include "mcrl2/lps/process_initializer.h"
 #include "mcrl2/data/data_specification.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
 /// \brief The main namespace for the LPS library.
-namespace lps {
+namespace lps
+{
 
 template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o);
@@ -129,11 +131,11 @@ class specification
                   const linear_process& lps,
                   const process_initializer& initial_process)
       :
-        m_data(data),
-        m_action_labels(action_labels),
-        m_global_variables(global_variables),
-        m_process(lps),
-        m_initial_process(initial_process)
+      m_data(data),
+      m_action_labels(action_labels),
+      m_global_variables(global_variables),
+      m_process(lps),
+      m_initial_process(initial_process)
     {
       m_initial_process.protect();
     }
@@ -143,7 +145,7 @@ class specification
     /// If filename is nonempty, input is read from the file named filename.
     /// If filename is empty, input is read from standard input.
     void load(const std::string& filename)
-    { 
+    {
       atermpp::aterm t = core::detail::load_aterm(filename);
       if (!t || t.type() != AT_APPL || !core::detail::gsIsLinProcSpec(atermpp::aterm_appl(t)))
       {
@@ -152,7 +154,7 @@ class specification
       //store the term locally
       construct_from_aterm(atermpp::aterm_appl(t));
       // The well typedness check is only done in debug mode, since for large
-      // LPSs it takes too much time                                        
+      // LPSs it takes too much time
       assert(is_well_typed(*this));
     }
 
@@ -167,7 +169,7 @@ class specification
     void save(const std::string& filename, bool binary = true) const
     {
       // The well typedness check is only done in debug mode, since for large
-      // LPSs it takes too much time                                        
+      // LPSs it takes too much time
       assert(is_well_typed(*this));
       specification tmp(*this);
       // tmp.data() = data::remove_all_system_defined(tmp.data());
@@ -191,24 +193,32 @@ class specification
     /// \brief Returns the data specification.
     /// \return The data specification.
     const data::data_specification& data() const
-    { return m_data; }
+    {
+      return m_data;
+    }
 
     /// \brief Returns a reference to the data specification.
     /// \return The data specification.
     data::data_specification& data()
-    { return m_data; }
+    {
+      return m_data;
+    }
 
     /// \brief Returns a sequence of action labels.
     /// This sequence contains all action labels occurring in the specification (but it can have more).
     /// \return A sequence of action labels.
     const action_label_list& action_labels() const
-    { return m_action_labels; }
+    {
+      return m_action_labels;
+    }
 
     /// \brief Returns a sequence of action labels.
     /// This sequence contains all action labels occurring in the specification (but it can have more).
     /// \return A sequence of action labels.
     action_label_list& action_labels()
-    { return m_action_labels; }
+    {
+      return m_action_labels;
+    }
 
     /// \brief Returns the declared free variables of the LPS.
     /// \return The declared free variables of the LPS.
@@ -260,12 +270,12 @@ inline
 atermpp::aterm_appl specification_to_aterm(const specification& spec)
 {
   return core::detail::gsMakeLinProcSpec(
-      data::detail::data_specification_to_aterm_data_spec(spec.data()),
-      core::detail::gsMakeActSpec(spec.action_labels()),
-      core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
-      linear_process_to_aterm(spec.process()),
-      spec.initial_process()
-  );
+           data::detail::data_specification_to_aterm_data_spec(spec.data()),
+           core::detail::gsMakeActSpec(spec.action_labels()),
+           core::detail::gsMakeGlobVarSpec(atermpp::convert<data::variable_list>(spec.global_variables())),
+           linear_process_to_aterm(spec.process()),
+           spec.initial_process()
+         );
 }
 
 /// \brief Pretty print function
@@ -289,9 +299,9 @@ bool operator!=(const specification& spec1, const specification& spec2)
   return !(spec1 == spec2);
 }
 
-} // namespace lps                                                                                         
+} // namespace lps
 
-} // namespace mcrl2                                                                                        
+} // namespace mcrl2
 
 #ifndef MCRL2_LPS_FIND_H
 #include "mcrl2/lps/find.h"

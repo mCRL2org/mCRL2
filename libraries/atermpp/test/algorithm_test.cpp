@@ -75,7 +75,9 @@ void test_for_each()
   std::set<std::string> names;
   for_each(t, for_each_proc(names));
   for (std::set<std::string>::iterator i = names.begin(); i != names.end(); ++i)
+  {
     std::cout << *i << " ";
+  }
   BOOST_CHECK(names.find("h") != names.end());
   BOOST_CHECK(names.find("g") != names.end());
   BOOST_CHECK(names.find("x") != names.end());

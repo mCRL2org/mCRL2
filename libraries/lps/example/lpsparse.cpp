@@ -24,9 +24,10 @@ using mcrl2::utilities::tools::input_tool;
 ATerm parse_streams_new(std::vector<std::istream*> &streams, bool print_parse_errors);
 
 // copy some code from core library
-ATerm parse_tagged_stream_new(const std::string &tag, std::istream &stream) {
+ATerm parse_tagged_stream_new(const std::string& tag, std::istream& stream)
+{
   std::vector<std::istream*> *streams = new std::vector<std::istream*>();
-  std::istringstream *tag_stream = new std::istringstream(tag);
+  std::istringstream* tag_stream = new std::istringstream(tag);
   streams->push_back(tag_stream);
   streams->push_back(&stream);
   ATerm result = parse_streams_new(*streams, true);
@@ -35,9 +36,10 @@ ATerm parse_tagged_stream_new(const std::string &tag, std::istream &stream) {
   return result;
 }
 
-ATermAppl parse_proc_spec_new(std::istream &ps_stream) {                    
-  return (ATermAppl) parse_tagged_stream_new("proc_spec", ps_stream); 
-}                                                                  
+ATermAppl parse_proc_spec_new(std::istream& ps_stream)
+{
+  return (ATermAppl) parse_tagged_stream_new("proc_spec", ps_stream);
+}
 
 /// \brief     Parses a process specification.
 /// \param[in] ps_stream An input stream from which can be read.
@@ -51,7 +53,9 @@ ATermAppl parse_process_specification_new(std::istream& ps_stream)
 {
   ATermAppl result = parse_proc_spec_new(ps_stream);
   if (result == NULL)
+  {
     throw mcrl2::runtime_error("parse error");
+  }
   return result;
 }
 
@@ -67,7 +71,9 @@ ATermAppl parse_process_specification_old(std::istream& ps_stream)
 {
   ATermAppl result = core::parse_proc_spec(ps_stream);
   if (result == NULL)
+  {
     throw mcrl2::runtime_error("parse error");
+  }
   return result;
 }
 
@@ -79,31 +85,31 @@ class lps_parse_tool: public input_tool
   public:
     lps_parse_tool()
       : super(
-          "lpsparse",
-          "Wieger Wesselink",
-          "test parsing of an mCRL2 specification",
-          "Parse an mCRL2 specification in two different ways and compare the results."
-          "If INFILE is not present, standard input is used"
-        )
+        "lpsparse",
+        "Wieger Wesselink",
+        "test parsing of an mCRL2 specification",
+        "Parse an mCRL2 specification in two different ways and compare the results."
+        "If INFILE is not present, standard input is used"
+      )
     {}
 
     atermpp::aterm_appl parse_old(std::string filename)
     {
-    	std::ifstream from(filename.c_str());
+      std::ifstream from(filename.c_str());
       return parse_process_specification_old(from);
     }
 
     atermpp::aterm_appl parse_new(std::string filename)
     {
-    	std::ifstream from(filename.c_str());
+      std::ifstream from(filename.c_str());
       return parse_process_specification_new(from);
     }
 
     bool run()
     {
-    	atermpp::aterm_appl t1 = parse_old(input_filename());
-    	atermpp::aterm_appl t2 = parse_new(input_filename());
-    	std::cout << (t1 == t2 ? "EQUAL" : "NOT EQUAL") << std::endl;
+      atermpp::aterm_appl t1 = parse_old(input_filename());
+      atermpp::aterm_appl t2 = parse_new(input_filename());
+      std::cout << (t1 == t2 ? "EQUAL" : "NOT EQUAL") << std::endl;
       return true;
     }
 };

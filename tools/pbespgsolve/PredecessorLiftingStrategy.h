@@ -30,7 +30,7 @@
 
 class PredecessorLiftingStrategy : public LiftingStrategy
 {
-public:
+  public:
     /*! Construct a new predecessor lifting strategy instance.
 
         If `stack` is set to true, vertices are removed in last-in-first-out
@@ -40,34 +40,40 @@ public:
         backward (for a stack, this actually causes the nodes to be extracted
         in forward order instead of in reverse).
     */
-    PredecessorLiftingStrategy( const ParityGame &game,
-                                bool backward, bool stack );
+    PredecessorLiftingStrategy(const ParityGame& game,
+                               bool backward, bool stack);
     ~PredecessorLiftingStrategy();
     verti next(verti prev_vertex, bool prev_lifted);
     size_t memory_use() const;
 
-    bool backward() const { return backward_; }
-    bool stack() const { return stack_; }
+    bool backward() const
+    {
+      return backward_;
+    }
+    bool stack() const
+    {
+      return stack_;
+    }
 
-private:
+  private:
     const bool backward_;
     const bool stack_;
-    bool *queued_;
-    verti *queue_;
+    bool* queued_;
+    verti* queue_;
     size_t queue_size_, queue_capacity_, queue_begin_, queue_end_;
 };
 
 
 class PredecessorLiftingStrategyFactory : public LiftingStrategyFactory
 {
-public:
+  public:
     PredecessorLiftingStrategyFactory(bool backward = false, bool stack = false)
-        : backward_(backward), stack_(stack) { };
+      : backward_(backward), stack_(stack) { };
 
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm );
+    LiftingStrategy* create(const ParityGame& game,
+                            const SmallProgressMeasures& spm);
 
-private:
+  private:
     const bool backward_, stack_;
 };
 

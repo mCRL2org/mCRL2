@@ -24,9 +24,11 @@
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 class linear_process; // prototype declaration
 
@@ -40,10 +42,10 @@ class linear_process
     /// \brief The process parameters of the process
     data::variable_list m_process_parameters;
 
-    /// \brief The deadlock summands of the process   
+    /// \brief The deadlock summands of the process
     deadlock_summand_vector m_deadlock_summands;
 
-    /// \brief The action summands of the process   
+    /// \brief The action summands of the process
     action_summand_vector m_action_summands;
 
   public:
@@ -53,13 +55,13 @@ class linear_process
 
     /// \brief Constructor.
     linear_process(const data::variable_list& process_parameters,
-        const deadlock_summand_vector& deadlock_summands,
-        const action_summand_vector& action_summands
-       )
-     :
-       m_process_parameters(process_parameters),
-       m_deadlock_summands (deadlock_summands ),
-       m_action_summands   (action_summands   )
+                   const deadlock_summand_vector& deadlock_summands,
+                   const action_summand_vector& action_summands
+                  )
+      :
+      m_process_parameters(process_parameters),
+      m_deadlock_summands(deadlock_summands),
+      m_action_summands(action_summands)
     { }
 
     /// \brief Set the summands of the linear process
@@ -167,15 +169,21 @@ class linear_process
     {
       for (action_summand_vector::const_iterator i = m_action_summands.begin(); i != m_action_summands.end(); ++i)
       {
-        if(i->has_time()) return true;
+        if (i->has_time())
+        {
+          return true;
+        }
       }
       for (deadlock_summand_vector::const_iterator i = m_deadlock_summands.begin(); i != m_deadlock_summands.end(); ++i)
       {
-        if(i->deadlock().has_time()) return true;
+        if (i->deadlock().has_time())
+        {
+          return true;
+        }
       }
       return false;
     }
-  };
+};
 
 /// \brief Conversion to ATermAppl.
 /// \return The action summand converted to ATerm format.
@@ -183,9 +191,9 @@ inline
 atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 {
   return core::detail::gsMakeLinearProcess(
-    p.process_parameters(),
-    p.summands()
-  );
+           p.process_parameters(),
+           p.summands()
+         );
 }
 
 /// \brief Pretty print the linear process

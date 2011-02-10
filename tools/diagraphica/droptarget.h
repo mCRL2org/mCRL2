@@ -20,20 +20,20 @@
 
 class DropTarget : public Colleague, public wxTextDropTarget
 {
-public:
-	// -- constructors and destructor -------------------------------
+  public:
+    // -- constructors and destructor -------------------------------
     DropTarget(
-        wxWindow* ownr,
-        Mediator* m );
-	virtual ~DropTarget();
+      wxWindow* ownr,
+      Mediator* m);
+    virtual ~DropTarget();
 
     // -- overridden functions from wxTextDropTarget ----------------
     virtual bool OnDropText(
-        wxCoord x,
-        wxCoord y,
-        const wxString &text );
+      wxCoord x,
+      wxCoord y,
+      const wxString& text);
 
-protected:
+  protected:
     // -- data members ----------------------------------------------
     wxWindow* owner; // association
 };

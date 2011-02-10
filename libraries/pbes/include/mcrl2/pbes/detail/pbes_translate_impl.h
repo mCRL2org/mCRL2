@@ -33,11 +33,14 @@
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Returns the free variables of a pbes expression
 /// \param e A PBES expression
@@ -99,7 +102,7 @@ data::variable_list mu_variables(state_formulas::state_formula f)
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
   data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::variable_list result;
-  for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
     result = atermpp::push_front(result, i->lhs());
   }
@@ -115,7 +118,7 @@ data::data_expression_list mu_expressions(state_formulas::state_formula f)
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
   data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::data_expression_list result;
-  for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
     result = atermpp::push_front(result, i->rhs());
   }

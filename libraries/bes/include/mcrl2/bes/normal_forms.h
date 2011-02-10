@@ -15,19 +15,21 @@
 #include "mcrl2/bes/detail/standard_form_traverser.h"
 //#include "mcrl2/bes/detail/standard_form_visitor.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace bes {
+namespace bes
+{
 
-  /// \brief Transforms a BES into standard form.
-  /// \param eqn A boolean equation system
-  /// \param recursive_form Determines whether or not the result will be in standard recursive normal form
-  void make_standard_form(boolean_equation_system<>& eqn, bool recursive_form = false)
-  {
-    detail::standard_form_traverser t(recursive_form);
-    t(eqn);
-    eqn.equations() = t.m_equations;
-  }
+/// \brief Transforms a BES into standard form.
+/// \param eqn A boolean equation system
+/// \param recursive_form Determines whether or not the result will be in standard recursive normal form
+void make_standard_form(boolean_equation_system<>& eqn, bool recursive_form = false)
+{
+  detail::standard_form_traverser t(recursive_form);
+  t(eqn);
+  eqn.equations() = t.m_equations;
+}
 
 } // namespace bes
 

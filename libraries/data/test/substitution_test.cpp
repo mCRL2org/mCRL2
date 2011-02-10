@@ -27,11 +27,13 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
-data_expression operator+(data_expression const& l, data_expression const& r) {
+data_expression operator+(data_expression const& l, data_expression const& r)
+{
   return sort_nat::plus(l, r);
 }
 
-data_expression operator*(data_expression const& l, data_expression const& r) {
+data_expression operator*(data_expression const& l, data_expression const& r)
+{
   return sort_nat::times(l, r);
 }
 
@@ -57,7 +59,7 @@ void test_basic()
 
   BOOST_CHECK(c + x == c + x);
   BOOST_CHECK(data::substitute_free_variables(data_expression(c + x), s) == c + x);
-  BOOST_CHECK(data::substitute_free_variables(data_expression(c + x * y ), s) == c + x * y);
+  BOOST_CHECK(data::substitute_free_variables(data_expression(c + x * y), s) == c + x * y);
 
   s[y] = c;
 
@@ -90,7 +92,7 @@ struct my_assignment_sequence_substitution: public std::unary_function<variable,
   my_assignment_sequence_substitution(assignment_list assignments_)
     : assignments(assignments_)
   {}
-  
+
   data_expression operator()(const variable& v) const
   {
     for (assignment_list::const_iterator i = assignments.begin(); i != assignments.end(); ++i)
@@ -153,10 +155,10 @@ void test_my_list_substitution()
   BOOST_CHECK(substitute_variables(y,  my_assignment_sequence_substitution(r)) == y);
   BOOST_CHECK(substitute_variables(z,  my_assignment_sequence_substitution(r)) == z);
   BOOST_CHECK(substitute_variables(u,  my_assignment_sequence_substitution(r)) == u);
-std::cerr << substitute_variables(xy,  my_assignment_sequence_substitution(r)) << std::endl;
+  std::cerr << substitute_variables(xy,  my_assignment_sequence_substitution(r)) << std::endl;
 //  BOOST_CHECK(substitute_variables(xy, my_assignment_sequence_substitution(r)) == assignment(y1,y));
   BOOST_CHECK(substitute_variables(uz, my_assignment_sequence_substitution(r)) == uz);
-std::cerr << substitute_variables(l,   my_assignment_sequence_substitution(r)) << std::endl;
+  std::cerr << substitute_variables(l,   my_assignment_sequence_substitution(r)) << std::endl;
 //  BOOST_CHECK(substitute_variables(l,  my_assignment_sequence_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
   core::garbage_collect();
 }
@@ -210,11 +212,11 @@ void test_list_substitution()
   BOOST_CHECK(substitute_variables(y, assignment_sequence_substitution(r)) == y);
   BOOST_CHECK(substitute_variables(z, assignment_sequence_substitution(r)) == z);
   BOOST_CHECK(substitute_variables(u, assignment_sequence_substitution(r)) == u);
-std::cerr << substitute_variables(xy, assignment_sequence_substitution(r)) << std::endl;
+  std::cerr << substitute_variables(xy, assignment_sequence_substitution(r)) << std::endl;
 //  BOOST_CHECK(substitute_variables(xy, assignment_sequence_substitution(r)) == assignment(y1,y));
   BOOST_CHECK(substitute_variables(uz, assignment_sequence_substitution(r)) == uz);
 
-std::cerr << substitute_variables(l, assignment_sequence_substitution(r)) << std::endl;
+  std::cerr << substitute_variables(l, assignment_sequence_substitution(r)) << std::endl;
 //  BOOST_CHECK(substitute_variables(l, assignment_sequence_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
   core::garbage_collect();
 }
@@ -266,7 +268,7 @@ void test_mutable_substitution()
   core::garbage_collect();
 }
 
-int test_main(int a, char**aa)
+int test_main(int a, char** aa)
 {
   MCRL2_ATERMPP_INIT(a, aa);
 

@@ -21,35 +21,35 @@ using namespace std;
 Bundle::Bundle()
 // -------------
 {
-    index = NON_EXISTING;
-    parent = NULL;
-    inCluster = NULL;
-    outCluster = NULL;
+  index = NON_EXISTING;
+  parent = NULL;
+  inCluster = NULL;
+  outCluster = NULL;
 }
 
 
 // -----------------------------
-Bundle::Bundle( const size_t &idx )
+Bundle::Bundle(const size_t& idx)
 // -----------------------------
 {
-    index      = idx;
-    parent     = NULL;
-	inCluster  = NULL;
-	outCluster = NULL;
+  index      = idx;
+  parent     = NULL;
+  inCluster  = NULL;
+  outCluster = NULL;
 }
 
 
 // --------------------------------
-Bundle::Bundle( const Bundle &bdl )
+Bundle::Bundle(const Bundle& bdl)
 // --------------------------------
 {
-    index      = bdl.index;
-    parent     = bdl.parent;
-    children   = bdl.children;
-    inCluster  = bdl.inCluster;
-	outCluster = bdl.outCluster;
-    edges      = bdl.edges;
-    labels     = bdl.labels;
+  index      = bdl.index;
+  parent     = bdl.parent;
+  children   = bdl.children;
+  inCluster  = bdl.inCluster;
+  outCluster = bdl.outCluster;
+  edges      = bdl.edges;
+  labels     = bdl.labels;
 }
 
 
@@ -57,11 +57,11 @@ Bundle::Bundle( const Bundle &bdl )
 Bundle::~Bundle()
 // --------------
 {
-    clearParent();
-    clearChildren();
-    clearInCluster();
-    clearOutCluster();
-    clearEdges();
+  clearParent();
+  clearChildren();
+  clearInCluster();
+  clearOutCluster();
+  clearEdges();
 }
 
 
@@ -69,75 +69,77 @@ Bundle::~Bundle()
 
 
 // ------------------------------------
-void Bundle::setIndex( const size_t &idx )
+void Bundle::setIndex(const size_t& idx)
 // ------------------------------------
 {
-    index = idx;
+  index = idx;
 }
 
 
 // --------------------------------
-void Bundle::setParent( Bundle* p )
+void Bundle::setParent(Bundle* p)
 // --------------------------------
 {
-    parent = p;
+  parent = p;
 }
 
 
 // -------------------------------
-void Bundle::addChild( Bundle* c )
+void Bundle::addChild(Bundle* c)
 // -------------------------------
 {
-    children.push_back( c );
+  children.push_back(c);
 }
 
 
 // -------------------------------------
-void Bundle::setInCluster( Cluster* in )
+void Bundle::setInCluster(Cluster* in)
 // -------------------------------------
 {
-    inCluster = in;
+  inCluster = in;
 }
 
 
 // ---------------------------------------
-void Bundle::setOutCluster( Cluster* out )
+void Bundle::setOutCluster(Cluster* out)
 // ---------------------------------------
 {
-    outCluster = out;
+  outCluster = out;
 }
 
 
 // ----------------------------
-void Bundle::addEdge( Edge* e )
+void Bundle::addEdge(Edge* e)
 // ----------------------------
 {
-    edges.push_back( e );
+  edges.push_back(e);
 
-    labels.insert( pair< string, string >( e->getLabel(), "MAY" ) );
+  labels.insert(pair< string, string >(e->getLabel(), "MAY"));
 }
 
 
 // ----------------------------------------------
-void Bundle::setEdges( const vector< Edge* > &e )
+void Bundle::setEdges(const vector< Edge* > &e)
 // ----------------------------------------------
 {
-    clearEdges();
-    edges = e;
+  clearEdges();
+  edges = e;
 
-    labels.clear();
-    for( size_t i = 0; i < edges.size(); ++i )
-        labels.insert( pair< string, string >( edges[i]->getLabel(), "MAY" ) );
+  labels.clear();
+  for (size_t i = 0; i < edges.size(); ++i)
+  {
+    labels.insert(pair< string, string >(edges[i]->getLabel(), "MAY"));
+  }
 }
 
 
 // -----------------------
 void Bundle::updateLabel(
-    const string &lbl,
-    const string &status )
+  const string& lbl,
+  const string& status)
 // -----------------------
 {
-    labels[lbl] = status;
+  labels[lbl] = status;
 }
 
 
@@ -148,7 +150,7 @@ void Bundle::updateLabel(
 size_t Bundle::getIndex()
 // -------------------
 {
-    return index;
+  return index;
 }
 
 
@@ -156,7 +158,7 @@ size_t Bundle::getIndex()
 Bundle* Bundle::getParent()
 // ------------------------
 {
-    return parent;
+  return parent;
 }
 
 
@@ -164,18 +166,20 @@ Bundle* Bundle::getParent()
 size_t Bundle::getSizeChildren()
 // --------------------------
 {
-    return children.size();
+  return children.size();
 }
 
 
 // ---------------------------------------
-Bundle* Bundle::getChild( const size_t &idx )
+Bundle* Bundle::getChild(const size_t& idx)
 // ---------------------------------------
 {
-    Bundle* result = NULL;
-    if ( idx < children.size() )
-        result = children[idx];
-    return result;
+  Bundle* result = NULL;
+  if (idx < children.size())
+  {
+    result = children[idx];
+  }
+  return result;
 }
 
 
@@ -183,7 +187,7 @@ Bundle* Bundle::getChild( const size_t &idx )
 Cluster* Bundle::getInCluster()
 // ----------------------------
 {
-    return inCluster;
+  return inCluster;
 }
 
 
@@ -191,7 +195,7 @@ Cluster* Bundle::getInCluster()
 Cluster* Bundle::getOutCluster()
 // -----------------------------
 {
-    return outCluster;
+  return outCluster;
 }
 
 
@@ -199,79 +203,85 @@ Cluster* Bundle::getOutCluster()
 size_t Bundle::getSizeEdges()
 // -----------------------
 {
-    return edges.size();
+  return edges.size();
 }
 
 
 // ------------------------------------
-Edge* Bundle::getEdge( const size_t &idx )
+Edge* Bundle::getEdge(const size_t& idx)
 // ------------------------------------
 {
-    if ( idx < edges.size() )
-        return edges[idx];
-    else
-        throw mcrl2::runtime_error( "Error retrieving bundle edge." );
+  if (idx < edges.size())
+  {
+    return edges[idx];
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error retrieving bundle edge.");
+  }
 
 }
 
 
 // ---------------------------------------------
-void Bundle::getLabels( vector< string > &lbls )
+void Bundle::getLabels(vector< string > &lbls)
 // ---------------------------------------------
 {
-    lbls.clear();
+  lbls.clear();
 
-    map< string, string >::iterator it;
-    for( it = labels.begin(); it != labels.end(); ++it )
-    {
-        lbls.push_back( it->first );
-        //status.push_back( it.second );
-    }
+  map< string, string >::iterator it;
+  for (it = labels.begin(); it != labels.end(); ++it)
+  {
+    lbls.push_back(it->first);
+    //status.push_back( it.second );
+  }
 
 }
 
 
 // ---------------------------
 void Bundle::getLabels(
-    vector< string > &lbls,
-    vector< string > &status )
+  vector< string > &lbls,
+  vector< string > &status)
 // ---------------------------
 {
-    lbls.clear();
-    status.clear();
+  lbls.clear();
+  status.clear();
 
-    map< string, string >::iterator it;
-    for( it = labels.begin(); it != labels.end(); ++it )
-    {
-        lbls.push_back( it->first );
-        status.push_back( it->second );
-    }
+  map< string, string >::iterator it;
+  for (it = labels.begin(); it != labels.end(); ++it)
+  {
+    lbls.push_back(it->first);
+    status.push_back(it->second);
+  }
 }
 
 
 // --------------------
 void Bundle::getLabels(
-    string &separator,
-    string &lbls )
+  string& separator,
+  string& lbls)
 // --------------------
 {
-    lbls = "";
+  lbls = "";
 
-    size_t size  = labels.size();
-    size_t count = 0;
+  size_t size  = labels.size();
+  size_t count = 0;
 
-    map< string, string >::iterator it;
-    for( it = labels.begin(); it != labels.end(); ++it )
+  map< string, string >::iterator it;
+  for (it = labels.begin(); it != labels.end(); ++it)
+  {
+    count += 1;
+    lbls  += it->first;
+    lbls  += "[";
+    lbls  += it->second;
+    lbls  += "]";
+
+    if (count < size)
     {
-        count += 1;
-        lbls  += it->first;
-        lbls  += "[";
-        lbls  += it->second;
-        lbls  += "]";
-
-        if ( count < size )
-            lbls += separator;
+      lbls += separator;
     }
+  }
 }
 
 
@@ -282,7 +292,7 @@ void Bundle::getLabels(
 void Bundle::clearParent()
 // -----------------------
 {
-    parent = NULL;
+  parent = NULL;
 }
 
 
@@ -290,9 +300,11 @@ void Bundle::clearParent()
 void Bundle::clearChildren()
 // -------------------------
 {
-    for ( size_t i = 0; i < children.size(); ++i )
-        children[i] = NULL;
-    children.clear();
+  for (size_t i = 0; i < children.size(); ++i)
+  {
+    children[i] = NULL;
+  }
+  children.clear();
 }
 
 
@@ -300,7 +312,7 @@ void Bundle::clearChildren()
 void Bundle::clearInCluster()
 // --------------------------
 {
-    inCluster = NULL;
+  inCluster = NULL;
 }
 
 
@@ -308,7 +320,7 @@ void Bundle::clearInCluster()
 void Bundle::clearOutCluster()
 // ---------------------------
 {
-    outCluster = NULL;
+  outCluster = NULL;
 }
 
 
@@ -316,11 +328,13 @@ void Bundle::clearOutCluster()
 void Bundle::clearEdges()
 // ----------------------
 {
-    for ( size_t i = 0; i < edges.size(); ++i )
-        edges[i] = NULL;
-    edges.clear();
+  for (size_t i = 0; i < edges.size(); ++i)
+  {
+    edges[i] = NULL;
+  }
+  edges.clear();
 
-    labels.clear();
+  labels.clear();
 }
 
 

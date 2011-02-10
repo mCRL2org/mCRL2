@@ -20,9 +20,11 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace core {
+namespace core
+{
 
 /// \brief Returns the set of all identifier strings occurring in the term t
 /// \param t A term
@@ -40,10 +42,10 @@ template <typename Term>
 std::set<core::identifier_string> find_identifiers(atermpp::vector<Term> v)
 {
   std::set<core::identifier_string> result;
-  for(typename atermpp::vector<Term>::const_iterator i = v.begin(); i != v.end(); ++i)
+  for (typename atermpp::vector<Term>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
     std::set<core::identifier_string> intermediate = find_identifiers(*i);
-    for(std::set<core::identifier_string>::const_iterator j = intermediate.begin(); j != intermediate.end(); ++j)
+    for (std::set<core::identifier_string>::const_iterator j = intermediate.begin(); j != intermediate.end(); ++j)
     {
       result.insert(*j);
     }

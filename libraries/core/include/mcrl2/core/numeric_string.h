@@ -15,28 +15,36 @@
 #include <stdlib.h>
 #include <math.h>
 
-namespace mcrl2 {
-  namespace core {
+namespace mcrl2
+{
+namespace core
+{
 
-    //String representations of numbers
-    //---------------------------------
+//String representations of numbers
+//---------------------------------
 
-    /**
-     * \brief Computes number of characters of the decimal representation
-     * \param[in] n an integer number
-     * \return the number of characters of the decimal representation of n
-     **/
-    inline
-    size_t NrOfChars(const ptrdiff_t n)
-    {
-      if (n > 0)
-        return (size_t) floor(log10((double) n)) + 1;
-      else if (n == 0)
-        return 1;
-      else //n < 0
-        return (size_t) floor(log10((double)-n)) + 2;
-    }
+/**
+ * \brief Computes number of characters of the decimal representation
+ * \param[in] n an integer number
+ * \return the number of characters of the decimal representation of n
+ **/
+inline
+size_t NrOfChars(const ptrdiff_t n)
+{
+  if (n > 0)
+  {
+    return (size_t) floor(log10((double) n)) + 1;
   }
+  else if (n == 0)
+  {
+    return 1;
+  }
+  else //n < 0
+  {
+    return (size_t) floor(log10((double)-n)) + 2;
+  }
+}
+}
 }
 
 #endif

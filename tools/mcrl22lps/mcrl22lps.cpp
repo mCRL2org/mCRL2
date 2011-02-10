@@ -47,7 +47,7 @@ using mcrl2::lps::linearise;
 
 class mcrl22lps_tool : public rewriter_tool< input_output_tool >
 {
-  typedef rewriter_tool< input_output_tool > super;
+    typedef rewriter_tool< input_output_tool > super;
 
   private:
     t_lin_options m_linearisation_options;
@@ -60,52 +60,52 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
     {
       super::add_options(desc);
       desc.add_option("lin-method", make_mandatory_argument("NAME"),
-          "use linearisation method NAME:\n"
-          "  'regular' for generating an LPS in regular form\n"
-          "  (specification should be regular, default),\n"
-          "  'regular2' for a variant of 'regular' that uses more data variables\n"
-          "  (useful when 'regular' does not work), or\n"
-          "  'stack' for using stack data types\n"
-          "  (useful when 'regular' and 'regular2' do not work)"
-          , 'l');
+                      "use linearisation method NAME:\n"
+                      "  'regular' for generating an LPS in regular form\n"
+                      "  (specification should be regular, default),\n"
+                      "  'regular2' for a variant of 'regular' that uses more data variables\n"
+                      "  (useful when 'regular' does not work), or\n"
+                      "  'stack' for using stack data types\n"
+                      "  (useful when 'regular' and 'regular2' do not work)"
+                      , 'l');
       desc.add_option("cluster",
-          "all actions in the final LPS are clustered", 'c');
+                      "all actions in the final LPS are clustered", 'c');
       desc.add_option("no-cluster",
-          "the actions in intermediate LPSs are not clustered "
-          "(default behaviour is that intermediate LPSs are "
-          "clustered and the final LPS is not clustered)", 'n');
+                      "the actions in intermediate LPSs are not clustered "
+                      "(default behaviour is that intermediate LPSs are "
+                      "clustered and the final LPS is not clustered)", 'n');
       desc.add_option("no-alpha",
-          "alphabet reductions are not applied", 'z');
+                      "alphabet reductions are not applied", 'z');
       desc.add_option("newstate",
-          "state variables are encoded using enumerated types "
-          "(requires linearisation method 'regular' or 'regular2'); without this option numbers are used", 'w');
+                      "state variables are encoded using enumerated types "
+                      "(requires linearisation method 'regular' or 'regular2'); without this option numbers are used", 'w');
       desc.add_option("binary",
-          "when clustering use binary case functions instead of "
-          "n-ary; in the presence of -w/--newstate, state variables are "
-          "encoded by a vector of boolean variables", 'b');
+                      "when clustering use binary case functions instead of "
+                      "n-ary; in the presence of -w/--newstate, state variables are "
+                      "encoded by a vector of boolean variables", 'b');
       desc.add_option("statenames",
-          "the names of state variables are derived from the specification", 'a');
+                      "the names of state variables are derived from the specification", 'a');
       desc.add_option("no-rewrite",
-          "do not rewrite data terms while linearising; useful when the rewrite "
-          "system does not terminate", 'o');
+                      "do not rewrite data terms while linearising; useful when the rewrite "
+                      "system does not terminate", 'o');
       desc.add_option("no-globvars",
-          "instantiate don't care values with arbitrary constants, "
-          "instead of modelling them by global variables. This has no effect"
-          "on global variable that are declared in the specification.", 'f');
+                      "instantiate don't care values with arbitrary constants, "
+                      "instead of modelling them by global variables. This has no effect"
+                      "on global variable that are declared in the specification.", 'f');
       desc.add_option("no-sumelm",
-          "avoid applying sum elimination in parallel composition", 'm');
+                      "avoid applying sum elimination in parallel composition", 'm');
       desc.add_option("no-deltaelm",
-          "avoid removing spurious delta summands", 'g');
+                      "avoid removing spurious delta summands", 'g');
       desc.add_option("delta",
-          "add a true->delta summands to each state in each process; "
-          "these delta's subsume all other conditional timed delta's, "
-          "effectively reducing the number of delta summands drastically "
-          "in the resulting linear process; speeds up linearisation ", 'D');
+                      "add a true->delta summands to each state in each process; "
+                      "these delta's subsume all other conditional timed delta's, "
+                      "effectively reducing the number of delta summands drastically "
+                      "in the resulting linear process; speeds up linearisation ", 'D');
       desc.add_option("no-constelm",
-          "do not try to apply constant elimination when generating a linear "
-          "process.");
+                      "do not try to apply constant elimination when generating a linear "
+                      "process.");
       desc.add_option("check-only",
-          "check syntax and static semantics; do not linearise", 'e');
+                      "check syntax and static semantics; do not linearise", 'e');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -127,24 +127,34 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm");
       m_linearisation_options.lin_method = lmRegular;
 
-      if (0 < parser.options.count("lin-method")) {
-        if (1 < parser.options.count("lin-method")) {
+      if (0 < parser.options.count("lin-method"))
+      {
+        if (1 < parser.options.count("lin-method"))
+        {
           parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
         }
         std::string lin_method_str(parser.option_argument("lin-method"));
-        if (lin_method_str == "stack") {
+        if (lin_method_str == "stack")
+        {
           m_linearisation_options.lin_method = lmStack;
-        } else if (lin_method_str == "regular") {
+        }
+        else if (lin_method_str == "regular")
+        {
           m_linearisation_options.lin_method = lmRegular;
-        } else if (lin_method_str == "regular2") {
+        }
+        else if (lin_method_str == "regular2")
+        {
           m_linearisation_options.lin_method = lmRegular2;
-        } else {
+        }
+        else
+        {
           parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
         }
       }
 
       //check for dangerous and illegal option combinations
-      if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack) {
+      if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack)
+      {
         parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
       }
 
@@ -156,46 +166,57 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
   public:
 
     mcrl22lps_tool() : super(
-             TOOLNAME,
-             AUTHOR,
-             "translate an mCRL2 specification to an LPS",
-             "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
-             "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-             "stdin is used."), noalpha(false), opt_check_only(false)
+        TOOLNAME,
+        AUTHOR,
+        "translate an mCRL2 specification to an LPS",
+        "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
+        "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
+        "stdin is used."), noalpha(false), opt_check_only(false)
     {}
 
-    bool run() 
-    { //linearise infilename with options
+    bool run()
+    {
+      //linearise infilename with options
       process_specification spec;
-      if (m_linearisation_options.infilename.empty()) 
-      { //parse specification from stdin
+      if (m_linearisation_options.infilename.empty())
+      {
+        //parse specification from stdin
         gsVerboseMsg("reading input from stdin...\n");
         spec = parse_process_specification(std::cin,!noalpha);
-      } 
-      else 
-      { //parse specification from infilename
+      }
+      else
+      {
+        //parse specification from infilename
         gsVerboseMsg("reading input from file '%s'...\n", m_linearisation_options.infilename.c_str());
         std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
-        if (!instream.is_open()) {
+        if (!instream.is_open())
+        {
           throw mcrl2::runtime_error("cannot open input file: " + m_linearisation_options.infilename);
         }
         spec = parse_process_specification(instream,!noalpha);
         instream.close();
       }
       //report on well-formedness (if needed)
-      if (opt_check_only) {
-        if (m_linearisation_options.infilename.empty()) {
+      if (opt_check_only)
+      {
+        if (m_linearisation_options.infilename.empty())
+        {
           gsMessage("stdin contains a well-formed mCRL2 specification\n");
-        } else {
+        }
+        else
+        {
           gsMessage("the file '%s' contains a well-formed mCRL2 specification\n", m_linearisation_options.infilename.c_str());
         }
         return true;
       }
       //store the result
       mcrl2::lps::specification linear_spec(linearise(spec,m_linearisation_options));
-      if (m_linearisation_options.outfilename.empty()) {
+      if (m_linearisation_options.outfilename.empty())
+      {
         gsVerboseMsg("writing LPS to stdout...\n");
-      } else {
+      }
+      else
+      {
         gsVerboseMsg("writing LPS to file '%s'...\n", m_linearisation_options.outfilename.c_str());
       }
       linear_spec.save(m_linearisation_options.outfilename);
@@ -206,7 +227,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
 class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
 {
   public:
-	mcrl22lps_gui_tool()
+    mcrl22lps_gui_tool()
     {
 
       m_gui_options["statenames"] = create_checkbox_widget();
@@ -238,7 +259,7 @@ class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  
+
   return mcrl22lps_gui_tool().execute(argc, argv);
 }
 

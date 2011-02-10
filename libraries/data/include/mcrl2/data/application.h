@@ -21,11 +21,14 @@
 #include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/convert.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
-    namespace detail {
+namespace detail
+{
 //--- start generated class application ---//
 //--- end generated class application ---//
 
@@ -68,141 +71,146 @@ class application_base: public data_expression
     }
 };
 
-    } // namespace detail
+} // namespace detail
 
-    /// \brief application a data expression of a function sort to a number
-    ///        of arguments.
+/// \brief application a data expression of a function sort to a number
+///        of arguments.
+///
+/// An example of an application is f(x,y), where f is the head of the
+/// application, and x,y are the arguments.
+class application: public detail::application_base
+{
+  public:
+
+    /// \brief Default constructor for an application, note that this is not
+    ///        a valid data expression.
     ///
-    /// An example of an application is f(x,y), where f is the head of the
-    /// application, and x,y are the arguments.
-    class application: public detail::application_base
+    application()
+      : detail::application_base(core::detail::constructDataAppl())
+    {}
+
+    ///\overload
+    application(atermpp::aterm_appl term)
+      : detail::application_base(term)
+    {}
+
+    ///\overload
+    application(const data_expression& head, data_expression_list const& arguments)
+      : detail::application_base(head, arguments)
+    {}
+
+    ///\overload
+    template < typename Container >
+    application(const data_expression& head,
+                const Container& arguments,
+                typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
+      : detail::application_base(head, arguments)
     {
-      public:
+      // Due to sort aliasing, it is possible that the sort of a function symbol is
+      // not a function sort, but an alias of function sort. Therefore, the asserts below are
+      // not always valid.
+      // assert(is_function_sort(head.sort()));
+      // assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));
+      assert(!arguments.empty());
+    }
 
-        /// \brief Default constructor for an application, note that this is not
-        ///        a valid data expression.
-        ///
-        application()
-          : detail::application_base(core::detail::constructDataAppl())
-        {}
-
-        ///\overload
-        application(atermpp::aterm_appl term)
-          : detail::application_base(term)
-        {}
-
-        ///\overload
-        application(const data_expression& head, data_expression_list const& arguments)
-          : detail::application_base(head, arguments)
-        {}
-
-        ///\overload
-        template < typename Container >
-        application(const data_expression& head,
-                    const Container& arguments,
-                    typename atermpp::detail::enable_if_container< Container, data_expression >::type* = 0)
-          : detail::application_base(head, arguments)
-        { // Due to sort aliasing, it is possible that the sort of a function symbol is
-          // not a function sort, but an alias of function sort. Therefore, the asserts below are
-          // not always valid.
-          // assert(is_function_sort(head.sort()));
-          // assert(function_sort(head.sort()).domain().size() == static_cast< size_t >(boost::distance(arguments)));
-          assert(!arguments.empty());
-        }
-
-        /// \brief Returns the first argument of the application
-        /// \pre head() is a binary operator
-        /// \return arguments()[0]
-        inline
-        data_expression left() const
-        {
-          assert(arguments().size() == 2);
-          return *(arguments().begin());
-        }
-
-        /// \brief Returns the second argument of the application
-        /// \pre head() is a binary operator
-        /// \return arguments()[1]
-        inline
-        data_expression right() const
-        {
-          assert(arguments().size() == 2);
-          return *(++(arguments().begin()));
-        }
-    }; // class application
-
-    /// \brief get first argument
-    /// \pre  is_application(e) && !application(e).arguments().empty()
-    inline data_expression first_argument(data_expression const& e)
+    /// \brief Returns the first argument of the application
+    /// \pre head() is a binary operator
+    /// \return arguments()[0]
+    inline
+    data_expression left() const
     {
-      assert(!application(e).arguments().empty());
-
-      return *(application(e).arguments().begin());
+      assert(arguments().size() == 2);
+      return *(arguments().begin());
     }
 
-    /// \brief get last argument
-    /// \pre  is_application(e) && !application(e).arguments().empty()
-    inline data_expression last_argument(data_expression const& e)
+    /// \brief Returns the second argument of the application
+    /// \pre head() is a binary operator
+    /// \return arguments()[1]
+    inline
+    data_expression right() const
     {
-      assert(!application(e).arguments().empty());
-
-      data_expression_list r(application(e).arguments());
-
-      for (data_expression_list::const_iterator i = r.begin(), j = i; i != r.end(); i = j++)
-      {
-        if (j == r.end())
-        {
-          return *i;
-        }
-      }
-
-      return *r.begin();
+      assert(arguments().size() == 2);
+      return *(++(arguments().begin()));
     }
+}; // class application
 
-    /// \brief Apply data expression to a data expression
-    inline application make_application(data_expression const& head,
-                                        data_expression const& e0)
-    { // Due to sort aliasing, the asserts below are not necessarily
-      // valid anymore.
-      // assert(is_function_sort(head.sort()));
-      // assert(function_sort(head.sort()).domain().size() == 1);
-      return application(head, atermpp::make_list(e0));
+/// \brief get first argument
+/// \pre  is_application(e) && !application(e).arguments().empty()
+inline data_expression first_argument(data_expression const& e)
+{
+  assert(!application(e).arguments().empty());
+
+  return *(application(e).arguments().begin());
+}
+
+/// \brief get last argument
+/// \pre  is_application(e) && !application(e).arguments().empty()
+inline data_expression last_argument(data_expression const& e)
+{
+  assert(!application(e).arguments().empty());
+
+  data_expression_list r(application(e).arguments());
+
+  for (data_expression_list::const_iterator i = r.begin(), j = i; i != r.end(); i = j++)
+  {
+    if (j == r.end())
+    {
+      return *i;
     }
+  }
 
-    /// \brief Apply data expression to two data expression
-    inline application make_application(data_expression const& head,
-                                        data_expression const& e0,
-                                        data_expression const& e1)
-    { // See above for the reason to outcomment the asserts below
-      // assert(is_function_sort(head.sort()));
-      // assert(function_sort(head.sort()).domain().size() == 2);
-      return application(head, atermpp::make_list(e0, e1));
-    }
+  return *r.begin();
+}
 
-    /// \brief Apply data expression to three data expression
-    inline application make_application(data_expression const& head,
-                                        data_expression const& e0,
-                                        data_expression const& e1,
-                                        data_expression const& e2)
-    { // See above for the reason to outcomment the asserts below
-      // assert(is_function_sort(head.sort()));
-      // assert(function_sort(head.sort()).domain().size() == 3);
-      return application(head, atermpp::make_list(e0, e1, e2));
-    }
+/// \brief Apply data expression to a data expression
+inline application make_application(data_expression const& head,
+                                    data_expression const& e0)
+{
+  // Due to sort aliasing, the asserts below are not necessarily
+  // valid anymore.
+  // assert(is_function_sort(head.sort()));
+  // assert(function_sort(head.sort()).domain().size() == 1);
+  return application(head, atermpp::make_list(e0));
+}
 
-    /// \brief Apply data expression to four data expression
-    inline application make_application(data_expression const& head,
-                                        data_expression const& e0,
-                                        data_expression const& e1,
-                                        data_expression const& e2,
-                                        data_expression const& e3)
-    { // See above for the reason to outcomment the asserts below
-      // assert(is_function_sort(head.sort()));
-      // assert(function_sort(head.sort()).domain().size() == 4);
-      return application(head, atermpp::make_list(e0, e1, e2, e3));
-    }
+/// \brief Apply data expression to two data expression
+inline application make_application(data_expression const& head,
+                                    data_expression const& e0,
+                                    data_expression const& e1)
+{
+  // See above for the reason to outcomment the asserts below
+  // assert(is_function_sort(head.sort()));
+  // assert(function_sort(head.sort()).domain().size() == 2);
+  return application(head, atermpp::make_list(e0, e1));
+}
 
-  } // namespace data
+/// \brief Apply data expression to three data expression
+inline application make_application(data_expression const& head,
+                                    data_expression const& e0,
+                                    data_expression const& e1,
+                                    data_expression const& e2)
+{
+  // See above for the reason to outcomment the asserts below
+  // assert(is_function_sort(head.sort()));
+  // assert(function_sort(head.sort()).domain().size() == 3);
+  return application(head, atermpp::make_list(e0, e1, e2));
+}
+
+/// \brief Apply data expression to four data expression
+inline application make_application(data_expression const& head,
+                                    data_expression const& e0,
+                                    data_expression const& e1,
+                                    data_expression const& e2,
+                                    data_expression const& e3)
+{
+  // See above for the reason to outcomment the asserts below
+  // assert(is_function_sort(head.sort()));
+  // assert(function_sort(head.sort()).domain().size() == 4);
+  return application(head, atermpp::make_list(e0, e1, e2, e3));
+}
+
+} // namespace data
 
 } // namespace mcrl2
 

@@ -15,39 +15,42 @@
 #include "boost/call_traits.hpp"
 #include "boost/iterator/iterator_adaptor.hpp"
 
-namespace atermpp {
+namespace atermpp
+{
 
-    /// \cond INTERNAL_DOCS
-    namespace detail {
+/// \cond INTERNAL_DOCS
+namespace detail
+{
 
-      // \note the dereference operation returns (re-)evaluates the function
-      template < typename AdaptableUnaryFunction, typename Iterator, typename Value = typename AdaptableUnaryFunction::result_type >
-      class transform_iterator : public boost::iterator_adaptor<
-                 atermpp::detail::transform_iterator< AdaptableUnaryFunction, Iterator, Value >,
-                                                        Iterator, Value, boost::use_default, Value > {
+// \note the dereference operation returns (re-)evaluates the function
+template < typename AdaptableUnaryFunction, typename Iterator, typename Value = typename AdaptableUnaryFunction::result_type >
+class transform_iterator : public boost::iterator_adaptor<
+  atermpp::detail::transform_iterator< AdaptableUnaryFunction, Iterator, Value >,
+  Iterator, Value, boost::use_default, Value >
+{
 
-        friend class boost::iterator_core_access;
+    friend class boost::iterator_core_access;
 
-        private:
+  private:
 
-          AdaptableUnaryFunction m_transformer;
+    AdaptableUnaryFunction m_transformer;
 
-          Value dereference() const
-          {
-            return m_transformer(*(this->base_reference()));
-          }
+    Value dereference() const
+    {
+      return m_transformer(*(this->base_reference()));
+    }
 
-        public:
+  public:
 
-          transform_iterator(Iterator const& iterator) : transform_iterator::iterator_adaptor_(iterator)
-          {}
+    transform_iterator(Iterator const& iterator) : transform_iterator::iterator_adaptor_(iterator)
+    {}
 
-          transform_iterator(Iterator const& iterator, typename boost::call_traits< AdaptableUnaryFunction >::param_type transformer) :
-                                                         transform_iterator::iterator_adaptor_(iterator), m_transformer(transformer)
-          {}
-      };
+    transform_iterator(Iterator const& iterator, typename boost::call_traits< AdaptableUnaryFunction >::param_type transformer) :
+      transform_iterator::iterator_adaptor_(iterator), m_transformer(transformer)
+    {}
+};
 
-    } // namespace detail
+} // namespace detail
 
 } // namespace atermpp
 

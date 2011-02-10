@@ -83,13 +83,13 @@ int test_main(int argc, char* argv[])
   data_expression y = sort_bool::or_(equal_to(p1, p2), sort_bool::and_(x, b2));
 
   //--- search_variable ---//
-  BOOST_CHECK( search_variable(x, n1));
-  BOOST_CHECK( search_variable(x, n2));
-  BOOST_CHECK( search_variable(x, n3));
+  BOOST_CHECK(search_variable(x, n1));
+  BOOST_CHECK(search_variable(x, n2));
+  BOOST_CHECK(search_variable(x, n3));
   BOOST_CHECK(!search_variable(x, n4));
-  BOOST_CHECK( search_variable(S, n1));
+  BOOST_CHECK(search_variable(S, n1));
   BOOST_CHECK(!search_variable(S, n2));
-  BOOST_CHECK( search_variable(V, n1));
+  BOOST_CHECK(search_variable(V, n1));
   BOOST_CHECK(!search_variable(V, n2));
 
   core::garbage_collect();

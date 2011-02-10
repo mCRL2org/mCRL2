@@ -17,9 +17,11 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/action_label.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 /// \brief Represents an action.
 // <Action>       ::= Action(<ActId>, <DataExpr>*)
@@ -42,7 +44,7 @@ class action: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param t A term
     action(atermpp::aterm_appl t)
-     : atermpp::aterm_appl(t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_Action(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
@@ -54,9 +56,9 @@ class action: public atermpp::aterm_appl
     /// \param label An action label
     /// \param arguments A sequence of data expressions
     action(const action_label& label, const data::data_expression_list& arguments)
-     : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments)),
-       m_label(label),
-       m_arguments(arguments)
+      : atermpp::aterm_appl(core::detail::gsMakeAction(label, arguments)),
+        m_label(label),
+        m_arguments(arguments)
     {}
 
     /// \brief Returns the label of the action.
@@ -95,13 +97,17 @@ inline
 bool equal_signatures(const action& a, const action& b)
 {
   if (a.label() != b.label())
+  {
     return false;
+  }
 
   const data::data_expression_list& a_args = a.arguments();
   const data::data_expression_list& b_args = b.arguments();
 
   if (a_args.size() != b_args.size())
+  {
     return false;
+  }
 
   return std::equal(a_args.begin(), a_args.end(), b_args.begin(), mcrl2::data::detail::equal_data_expression_sort());
 }

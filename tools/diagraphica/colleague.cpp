@@ -17,18 +17,18 @@
 
 
 // --------------------------------
-Colleague::Colleague( Mediator* m )
+Colleague::Colleague(Mediator* m)
 // --------------------------------
 {
-    mediator = m;
+  mediator = m;
 }
 
 
 // -----------------------------------------------
-Colleague::Colleague( const Colleague &colleague )
+Colleague::Colleague(const Colleague& colleague)
 // -----------------------------------------------
 {
-    mediator = colleague.mediator;
+  mediator = colleague.mediator;
 }
 
 
@@ -36,7 +36,7 @@ Colleague::Colleague( const Colleague &colleague )
 Colleague::~Colleague()
 // --------------------
 {
-    mediator = NULL;
+  mediator = NULL;
 }
 
 

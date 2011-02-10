@@ -21,11 +21,11 @@
 using namespace std;
 using namespace MathUtils;
 
-FSMStatePositioner::FSMStatePositioner(LTS *l)
+FSMStatePositioner::FSMStatePositioner(LTS* l)
   : StatePositioner(l)
 {
   for (Cluster_iterator cluster_it = lts->getClusterIterator();
-      ! cluster_it.is_end(); ++cluster_it)
+       ! cluster_it.is_end(); ++cluster_it)
   {
     slot_info[*cluster_it] = new ClusterSlotInfo(*cluster_it);
   }
@@ -34,7 +34,7 @@ FSMStatePositioner::FSMStatePositioner(LTS *l)
 FSMStatePositioner::~FSMStatePositioner()
 {
   for (map< Cluster*, ClusterSlotInfo* >::iterator slot_info_it =
-      slot_info.begin(); slot_info_it != slot_info.end(); ++slot_info_it)
+         slot_info.begin(); slot_info_it != slot_info.end(); ++slot_info_it)
   {
     delete slot_info_it->second;
   }
@@ -53,7 +53,7 @@ void FSMStatePositioner::bottomUpPass()
 {
   // Process states bottom-up, keeping edges as short as possible.
   for (Reverse_cluster_iterator ci = lts->getReverseClusterIterator();
-      !ci.is_end(); ++ci)
+       !ci.is_end(); ++ci)
   {
     Cluster* cluster = *ci;
     for (int s = 0; s < cluster->getNumStates(); ++s)
@@ -89,7 +89,7 @@ void FSMStatePositioner::bottomUpPass()
         vector< State* > successors;
         getSuccessors(state, successors);
         Vector2D position = sumStateVectorsInMultipleClusters(
-            successors, cluster->getBaseRadius());
+                              successors, cluster->getBaseRadius());
         requestStatePosition(state, position);
       }
     }
@@ -101,8 +101,8 @@ void FSMStatePositioner::topDownPass()
   // Assumption: unpositioned_states is sorted bottom-up
   vector< State* > unpositioned_temp;
   for (vector< State* >::reverse_iterator state_it =
-      unpositioned_states.rbegin(); state_it != unpositioned_states.rend();
-      ++state_it)
+         unpositioned_states.rbegin(); state_it != unpositioned_states.rend();
+       ++state_it)
   {
     State* state = *state_it;
     if (state->getCluster()->isCentered())
@@ -130,7 +130,7 @@ void FSMStatePositioner::topDownPass()
 void FSMStatePositioner::resolveUnpositioned()
 {
   for (vector< State* >::iterator state_it = unpositioned_states.begin();
-      state_it != unpositioned_states.end(); ++state_it)
+       state_it != unpositioned_states.end(); ++state_it)
   {
     State* state = *state_it;
     ClusterSlotInfo* cs_info = slot_info[state->getCluster()];
@@ -141,28 +141,28 @@ void FSMStatePositioner::resolveUnpositioned()
 }
 
 Vector2D FSMStatePositioner::sumStateVectorsInSingleCluster(
-    vector< State* > &states)
+  vector< State* > &states)
 {
   Vector2D sum_vector = Vector2D(0, 0);
   for (vector< State* >::iterator state_it = states.begin(); state_it !=
-      states.end(); ++state_it)
+       states.end(); ++state_it)
   {
     State* state = *state_it;
-    if ( ! state->isCentered() )
+    if (! state->isCentered())
     {
       sum_vector += Vector2D::fromPolar(state->getPositionAngle(),
-          state->getPositionRadius());
+                                        state->getPositionRadius());
     }
   }
   return sum_vector;
 }
 
 Vector2D FSMStatePositioner::sumStateVectorsInMultipleClusters(
-    vector< State* > &states, float rim_radius)
+  vector< State* > &states, float rim_radius)
 {
   Vector2D sum_vector = Vector2D(0, 0);
   for (vector< State* >::iterator state_it = states.begin(); state_it !=
-      states.end(); ++state_it)
+       states.end(); ++state_it)
   {
     State* state = *state_it;
     if (state->getCluster()->isCentered())
@@ -170,17 +170,17 @@ Vector2D FSMStatePositioner::sumStateVectorsInMultipleClusters(
       if (!state->isCentered())
       {
         sum_vector += Vector2D::fromPolar(state->getPositionAngle(),
-            state->getPositionRadius());
+                                          state->getPositionRadius());
       }
     }
     else
     {
       sum_vector += Vector2D::fromPolar(state->getCluster()->getPosition(),
-          rim_radius);
+                                        rim_radius);
       if (!state->isCentered())
       {
         sum_vector += Vector2D::fromPolar(state->getPositionAngle() +
-            state->getCluster()->getPosition(), state->getPositionRadius());
+                                          state->getCluster()->getPosition(), state->getPositionRadius());
       }
     }
   }
@@ -190,9 +190,9 @@ Vector2D FSMStatePositioner::sumStateVectorsInMultipleClusters(
 bool FSMStatePositioner::allStatesCentered(vector< State* > &states)
 {
   for (vector< State* >::iterator state = states.begin(); state !=
-      states.end(); ++state)
+       states.end(); ++state)
   {
-    if ( ! (**state).isCentered() )
+    if (!(**state).isCentered())
     {
       return false;
     }
@@ -214,7 +214,7 @@ void FSMStatePositioner::getPredecessors(State* state, vector< State* >&
 }
 
 void FSMStatePositioner::getSuccessors(State* state, vector< State* >&
-    successors)
+                                       successors)
 {
   for (int t = 0; t < state->getNumOutTransitions(); ++t)
   {
@@ -260,7 +260,7 @@ const float ClusterSlotInfo::MIN_DELTA_SLOT = 0.22f;
 ClusterSlotInfo::ClusterSlotInfo(Cluster* cluster)
 {
   int num_rings = 1 + static_cast<int>(cluster->getTopRadius() /
-      MIN_DELTA_RING);
+                                       MIN_DELTA_RING);
   if (num_rings > 1)
   {
     delta_ring = cluster->getTopRadius() / static_cast<float>(num_rings - 1);
@@ -294,8 +294,8 @@ inline int ClusterSlotInfo::getNumSlots(int ring)
   return num_slots[ring];
 }
 
-void ClusterSlotInfo::getPolarCoordinates(int ring, int slot, float &angle,
-    float &radius)
+void ClusterSlotInfo::getPolarCoordinates(int ring, int slot, float& angle,
+    float& radius)
 {
   radius = delta_ring * ring;
   angle = rad_to_deg(2 * static_cast<float>(PI) * slot / num_slots[ring]);
@@ -308,17 +308,17 @@ Vector2D ClusterSlotInfo::getVector(int ring, int slot)
   return Vector2D::fromPolar(angle, radius);
 }
 
-void ClusterSlotInfo::findNearestSlot(Vector2D &position, int &ring, int
-    &slot)
+void ClusterSlotInfo::findNearestSlot(Vector2D& position, int& ring, int
+                                      &slot)
 {
   float angle, radius;
   position.toPolar(angle, radius);
   ring = min(round_to_int(radius / delta_ring), getNumRings() - 1);
   slot = round_to_int(num_slots[ring] * deg_to_rad(angle) / (2 * static_cast<float>(PI))) %
-    getNumSlots(ring);
+         getNumSlots(ring);
 }
 
-void ClusterSlotInfo::findNearestFreeSlot(int &ring, int &slot)
+void ClusterSlotInfo::findNearestFreeSlot(int& ring, int& slot)
 {
   SlotSet visited_slots;
   queue< Slot > to_visit_slots;
@@ -352,8 +352,8 @@ void ClusterSlotInfo::findNearestFreeSlot(int &ring, int &slot)
         if (next_ring > 0)
         {
           next_slot = round_to_int(static_cast<float>(slot) /
-              static_cast<float>(getNumSlots(ring)) * getNumSlots(next_ring)) %
-            getNumSlots(ring);
+                                   static_cast<float>(getNumSlots(ring)) * getNumSlots(next_ring)) %
+                      getNumSlots(ring);
         }
         if (visited_slots.find(Slot(next_ring, next_slot)) == visited_slots.end())
         {
@@ -366,7 +366,7 @@ void ClusterSlotInfo::findNearestFreeSlot(int &ring, int &slot)
   }
 }
 
-void ClusterSlotInfo::findFarthestFreeSlot(int &ring, int &slot)
+void ClusterSlotInfo::findFarthestFreeSlot(int& ring, int& slot)
 {
   if (occupied_slots.empty())
   {
@@ -382,10 +382,10 @@ void ClusterSlotInfo::findFarthestFreeSlot(int &ring, int &slot)
       Vector2D slot_vector = getVector(r, s);
       float min_distance = numeric_limits< float >::max();
       for (SlotSet::iterator occupied_slot = occupied_slots.begin();
-          occupied_slot != occupied_slots.end(); ++occupied_slot)
+           occupied_slot != occupied_slots.end(); ++occupied_slot)
       {
         Vector2D delta_vector = slot_vector - getVector(occupied_slot->ring,
-            occupied_slot->slot);
+                                occupied_slot->slot);
         min_distance = min(min_distance, delta_vector.length());
       }
       if (min_distance > max_min_distance)

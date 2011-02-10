@@ -34,12 +34,12 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
 
 
-static void read_from_svc(lts_svc_t &l, string const& filename)
+static void read_from_svc(lts_svc_t& l, string const& filename)
 {
   SVCfile f;
   SVCbool b;
 
-  if ( SVCopen(&f,const_cast< char* >(filename.c_str()),SVCread,&b) )
+  if (SVCopen(&f,const_cast< char* >(filename.c_str()),SVCread,&b))
   {
     throw mcrl2::runtime_error("cannot open SVC file '" + filename + "' for reading.");
   }
@@ -47,7 +47,7 @@ static void read_from_svc(lts_svc_t &l, string const& filename)
   bool svc_file_has_state_info = (SVCgetIndexFlag(&f) == SVCfalse);
 
   assert(SVCgetInitialState(&f)==0);
-  if ( svc_file_has_state_info )
+  if (svc_file_has_state_info)
   {
     l.add_state(state_label_svc((ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) SVCgetInitialState(&f))));
   }
@@ -61,16 +61,16 @@ static void read_from_svc(lts_svc_t &l, string const& filename)
   SVCstateIndex from, to;
   SVClabelIndex label;
   SVCparameterIndex param;
-  while ( SVCgetNextTransition(&f,&from,&label,&to,&param) )
+  while (SVCgetNextTransition(&f,&from,&label,&to,&param))
   {
-    size_t max = (size_t) ((from > to)?from:to);
+    size_t max = (size_t)((from > to)?from:to);
     for (size_t i=l.num_states(); i<=max; i++)
     {
-      if ( svc_file_has_state_info )
+      if (svc_file_has_state_info)
       {
         l.add_state(state_label_svc((ATermAppl)SVCstate2ATerm(&f,(SVCstateIndex) i)));
-      } 
-      else 
+      }
+      else
       {
         l.add_state();
       }
@@ -93,37 +93,37 @@ static void write_to_svc(const lts_svc_t& l, const string& filename)
 {
   SVCfile f;
   SVCbool b = l.has_state_info() ? SVCfalse : SVCtrue;
-  if ( SVCopen(&f,const_cast< char* >(filename.c_str()),SVCwrite,&b) )
+  if (SVCopen(&f,const_cast< char* >(filename.c_str()),SVCwrite,&b))
   {
     throw mcrl2::runtime_error("cannot open SVC file '" + filename + "' for writing.");
   }
 
-  if ( l.has_state_info() )
+  if (l.has_state_info())
   {
-    SVCsetType(&f,const_cast < char* > ("SVC+info"));
-  } 
-  else 
+    SVCsetType(&f,const_cast < char* >("SVC+info"));
+  }
+  else
   {
-    SVCsetType(&f,const_cast < char* > ("SVC"));
+    SVCsetType(&f,const_cast < char* >("SVC"));
   }
 
-  SVCsetCreator(&f,const_cast < char* > ("liblts (mCRL2)"));
+  SVCsetCreator(&f,const_cast < char* >("liblts (mCRL2)"));
 
   assert(l.initial_state()< ((size_t)1 << (sizeof(int)*8-1)));
-  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ? 
-              (ATerm)l.state_label(l.initial_state()) : (ATerm) ATmakeInt((int)l.initial_state()) ,&b));
+  SVCsetInitialState(&f,SVCnewState(&f, l.has_state_info() ?
+                                    (ATerm)l.state_label(l.initial_state()) : (ATerm) ATmakeInt((int)l.initial_state()) ,&b));
 
   SVCparameterIndex param = SVCnewParameter(&f,(ATerm) ATmakeList0(),&b);
-  
+
   for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {
     assert(t.front().from() < ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ? 
-                (ATerm)l.state_label(t.front().from()) : (ATerm) ATmakeInt((int)t.front().from()) ,&b);
+    SVCstateIndex from = SVCnewState(&f, l.has_state_info() ?
+                                     (ATerm)l.state_label(t.front().from()) : (ATerm) ATmakeInt((int)t.front().from()) ,&b);
     SVClabelIndex label = SVCnewLabel(&f, (ATerm)l.action_label(t.front().label()),&b);
     assert(t.front().to() < ((size_t)1 << (sizeof(int)*8-1)));
-    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_label(t.front().to()) : 
-                        (ATerm) ATmakeInt((int)t.front().to()) ,&b);
+    SVCstateIndex to = SVCnewState(&f, l.has_state_info() ? (ATerm)l.state_label(t.front().to()) :
+                                   (ATerm) ATmakeInt((int)t.front().to()) ,&b);
     SVCputTransition(&f,from,label,to,param);
   }
 
@@ -135,23 +135,23 @@ namespace mcrl2
 namespace lts
 {
 
-void lts_svc_t::load(const std::string &filename)
+void lts_svc_t::load(const std::string& filename)
 {
- if (filename=="")
- { 
-   throw mcrl2::runtime_error("Cannot read svc/lts file " + filename + " from stdin");
- }
- else
- {
-   read_from_svc(*this,filename);
- }
+  if (filename=="")
+  {
+    throw mcrl2::runtime_error("Cannot read svc/lts file " + filename + " from stdin");
+  }
+  else
+  {
+    read_from_svc(*this,filename);
+  }
 
 }
 
-void lts_svc_t::save(const std::string &filename) const
+void lts_svc_t::save(const std::string& filename) const
 {
   if (filename=="")
-  { 
+  {
     throw mcrl2::runtime_error("Cannot write svc file " + filename + " to stdout");
   }
   else

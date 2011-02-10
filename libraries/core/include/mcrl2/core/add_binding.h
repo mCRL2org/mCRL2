@@ -15,63 +15,65 @@
 #include <set>
 #include "mcrl2/atermpp/container_utility.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace core {
+namespace core
+{
 
-  /// \brief Traverser that defines functions for maintaining bound variables.
-  template <template <class> class Traverser, typename Derived, typename Variable>
-  class add_binding : public Traverser<Derived>
-  {
-    public:
-      typedef Traverser<Derived> super;
-      typedef Variable variable_type;
-      using super::operator();
-      using super::enter;
-      using super::leave;
+/// \brief Traverser that defines functions for maintaining bound variables.
+template <template <class> class Traverser, typename Derived, typename Variable>
+class add_binding : public Traverser<Derived>
+{
+  public:
+    typedef Traverser<Derived> super;
+    typedef Variable variable_type;
+    using super::operator();
+    using super::enter;
+    using super::leave;
 
-    protected:
-      std::multiset<variable_type> m_bound_variables;
+  protected:
+    std::multiset<variable_type> m_bound_variables;
 
-      /// \brief Add a variable to the multiset of bound variables.
-      void increase_bind_count(const variable_type& var)
+    /// \brief Add a variable to the multiset of bound variables.
+    void increase_bind_count(const variable_type& var)
+    {
+      m_bound_variables.insert(var);
+    }
+
+    /// \brief Add a sequence of variables to the multiset of bound variables.
+    template <typename Container>
+    void increase_bind_count(const Container& variables, typename atermpp::detail::enable_if_container<Container, variable_type>::type* = 0)
+    {
+      for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
       {
-        m_bound_variables.insert(var);
+        m_bound_variables.insert(*i);
       }
+    }
 
-      /// \brief Add a sequence of variables to the multiset of bound variables.
-      template <typename Container>
-      void increase_bind_count(const Container& variables, typename atermpp::detail::enable_if_container<Container, variable_type>::type* = 0)
-      {
-        for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
-        {
-          m_bound_variables.insert(*i);
-        }
-      }
+    /// \brief Remove a variable from the multiset of bound variables.
+    void decrease_bind_count(const variable_type& var)
+    {
+      m_bound_variables.erase(m_bound_variables.find(var));
+    }
 
-      /// \brief Remove a variable from the multiset of bound variables.
-      void decrease_bind_count(const variable_type& var)
+    /// \brief Remove a sequence of variables from the multiset of bound variables.
+    template <typename Container>
+    void decrease_bind_count(const Container& variables, typename atermpp::detail::enable_if_container<Container, variable_type>::type* = 0)
+    {
+      for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
       {
-        m_bound_variables.erase(m_bound_variables.find(var));
+        m_bound_variables.erase(m_bound_variables.find(*i));
       }
+    }
 
-      /// \brief Remove a sequence of variables from the multiset of bound variables.
-      template <typename Container>
-      void decrease_bind_count(const Container& variables, typename atermpp::detail::enable_if_container<Container, variable_type>::type* = 0)
-      {
-        for (typename Container::const_iterator i = variables.begin(); i != variables.end(); ++i)
-        {
-          m_bound_variables.erase(m_bound_variables.find(*i));
-        }
-      }
-
-    public:
-      /// \brief Returns true if the variable v is bound.
-      bool is_bound(variable_type const& v) const
-      {
-        return m_bound_variables.find(v) != m_bound_variables.end();
-      }
-  };
+  public:
+    /// \brief Returns true if the variable v is bound.
+    bool is_bound(variable_type const& v) const
+    {
+      return m_bound_variables.find(v) != m_bound_variables.end();
+    }
+};
 
 } // namespace core
 

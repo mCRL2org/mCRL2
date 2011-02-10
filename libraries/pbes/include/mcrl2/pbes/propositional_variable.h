@@ -24,9 +24,11 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/parse.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief A propositional variable declaration.
 // <PropVarDecl>  ::= PropVarDecl(<String>, <DataVarId>*)
@@ -42,7 +44,7 @@ class propositional_variable: public atermpp::aterm_appl
   public:
     /// \brief Type of the parameters.
     typedef data::variable parameter_type;
-    
+
     /// \brief Constructor.
     propositional_variable()
       : atermpp::aterm_appl(core::detail::constructPropVarDecl())

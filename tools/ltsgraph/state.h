@@ -20,9 +20,9 @@
 #include <wx/gdicmn.h>
 
 #ifndef TRANSITION_H
-  #include "transition.h"
+#include "transition.h"
 #else
-  class Transition;
+class Transition;
 #endif
 
 class State
@@ -53,7 +53,7 @@ class State
     Utils::Vect getPosition() const;
     double getX() const;
     double getY() const;
-	double getZ() const;
+    double getZ() const;
 
     std::string getLabel() const;
     size_t getValue() const;
@@ -73,7 +73,7 @@ class State
     void setPosition(Utils::Vect p);
     void setX(const double x);
     void setY(const double y);
-	void setZ(const double z);
+    void setZ(const double z);
     void setParameters(std::map<std::string, std::string>& params);
 
     void setColour(const wxColour colour);

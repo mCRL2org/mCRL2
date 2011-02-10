@@ -14,59 +14,62 @@
 
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
-  template <typename Term>
-  struct compare_pbes_expression_visitor: public free_variable_visitor<Term>
+template <typename Term>
+struct compare_pbes_expression_visitor: public free_variable_visitor<Term>
+{
+  typedef free_variable_visitor<Term> super;
+  typedef typename super::term_type term_type;
+  typedef typename pbes_expression_visitor<term_type>::variable_sequence_type variable_sequence_type;
+  typedef typename pbes_expression_visitor<term_type>::propositional_variable_type propositional_variable_type;
+
+  bool has_quantifiers;
+  bool has_predicate_variables;
+
+  compare_pbes_expression_visitor()
+    : has_quantifiers(false),
+      has_predicate_variables(false)
+  {}
+
+  /// \brief Visit forall node
+  /// \param e A term
+  /// \param v A sequence of data variables
+  /// \return The result of visiting the node
+  bool visit_forall(const term_type& e, const variable_sequence_type& v, const term_type& x)
   {
-    typedef free_variable_visitor<Term> super;
-    typedef typename super::term_type term_type;
-    typedef typename pbes_expression_visitor<term_type>::variable_sequence_type variable_sequence_type;
-    typedef typename pbes_expression_visitor<term_type>::propositional_variable_type propositional_variable_type;
-                        
-    bool has_quantifiers;      
-    bool has_predicate_variables;
-    
-    compare_pbes_expression_visitor()
-      : has_quantifiers(false),
-        has_predicate_variables(false)
-    {}
-                                   
-    /// \brief Visit forall node
-    /// \param e A term
-    /// \param v A sequence of data variables
-    /// \return The result of visiting the node
-    bool visit_forall(const term_type& e, const variable_sequence_type& v, const term_type& x)
-    {
-      has_quantifiers = true;
-      return super::visit_forall(e, v, x);
-    }               
+    has_quantifiers = true;
+    return super::visit_forall(e, v, x);
+  }
 
-    /// \brief Visit exists node
-    /// \param e A term
-    /// \param v A sequence of data variables
-    /// \return The result of visiting the node
-    bool visit_exists(const term_type& e, const variable_sequence_type& v, const term_type& x)
-    {
-      has_quantifiers = true;
-      return super::visit_exists(e, v, x); 
-    }
+  /// \brief Visit exists node
+  /// \param e A term
+  /// \param v A sequence of data variables
+  /// \return The result of visiting the node
+  bool visit_exists(const term_type& e, const variable_sequence_type& v, const term_type& x)
+  {
+    has_quantifiers = true;
+    return super::visit_exists(e, v, x);
+  }
 
-    /// \brief Visit propositional_variable node
-    /// \param e A term
-    /// \param v A propositional variable instantiation
-    /// \return The result of visiting the node
-    bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v)
-    {
-      has_predicate_variables = true;
-      return super::visit_propositional_variable(e, v);
-    }
-    
-  };
+  /// \brief Visit propositional_variable node
+  /// \param e A term
+  /// \param v A propositional variable instantiation
+  /// \return The result of visiting the node
+  bool visit_propositional_variable(const term_type& e, const propositional_variable_type& v)
+  {
+    has_predicate_variables = true;
+    return super::visit_propositional_variable(e, v);
+  }
+
+};
 
 } // namespace detail
 

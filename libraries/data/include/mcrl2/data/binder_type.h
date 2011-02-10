@@ -17,9 +17,11 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated classes ---//
 /// \brief Binder
@@ -216,7 +218,7 @@ bool is_lambda_binder(const binder_type& t)
 
 //--- end generated classes ---//
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 #endif // MCRL2_DATA_BINDER_TYPE_H

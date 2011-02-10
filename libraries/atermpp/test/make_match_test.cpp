@@ -28,7 +28,7 @@ void test_make_match()
   int i;
   bool x;
 
-  /* match has been removed from the ATerm library. 
+  /* match has been removed from the ATerm library.
   x = match(make_term("f(16)"), "f(<int>)", i);
   BOOST_CHECK(x);
   BOOST_CHECK(i == 16);

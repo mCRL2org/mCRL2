@@ -34,14 +34,15 @@ struct legacy_rewriter : public mcrl2::data::rewriter
 
   template < typename EquationSelector >
   legacy_rewriter(mcrl2::data::data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
-                                 mcrl2::data::rewriter(d, selector, s)
+    mcrl2::data::rewriter(d, selector, s)
   { }
 
   legacy_rewriter(mcrl2::data::rewriter const& other) :
-                                 mcrl2::data::rewriter(other)
+    mcrl2::data::rewriter(other)
   { }
 
-  legacy_rewriter() {
+  legacy_rewriter()
+  {
     assert(false);
   }
 
@@ -81,20 +82,20 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   /// \param[in] s substitution to apply to expression
   /// \return an expression equivalent to m_rewriter(s(e))
   template < typename Substitution >
-  atermpp::aterm operator()(atermpp::aterm const& e, Substitution const& s) const 
+  atermpp::aterm operator()(atermpp::aterm const& e, Substitution const& s) const
   {
     mcrl2::data::detail::Rewriter& local_rewriter(*m_rewriter);
 
-    for (typename Substitution::const_iterator i(s.begin()); i != s.end(); ++i) 
+    for (typename Substitution::const_iterator i(s.begin()); i != s.end(); ++i)
     {
       local_rewriter.setSubstitutionInternal(static_cast< ATermAppl >(i->first),
-          static_cast< ATerm >(i->second));
+                                             static_cast< ATerm >(i->second));
     }
 
     ATerm result = local_rewriter.rewriteInternal(static_cast< ATerm >(e));
 
     // Subtle removal as NextStateGenerator requires substitutions for other variables
-    for (typename Substitution::const_iterator i(s.begin()); i != s.end(); ++i) 
+    for (typename Substitution::const_iterator i(s.begin()); i != s.end(); ++i)
     {
       local_rewriter.clearSubstitution(static_cast< ATermAppl >(i->first));
     }
@@ -143,7 +144,8 @@ struct legacy_selector
 
   /// \brief returns true if and only if the argument is equal to true
   template < typename ExpressionType >
-  static bool test(ExpressionType const& e) {
+  static bool test(ExpressionType const& e)
+  {
     return e == term();
   }
 };
@@ -169,7 +171,7 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
       boost::shared_ptr< typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type > context()
       {
         return boost::shared_ptr< typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type >(
-            new typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type(*standard_factory::m_enumeration_context, *standard_factory::m_evaluator));
+                 new typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type(*standard_factory::m_enumeration_context, *standard_factory::m_evaluator));
       }
     };
 
@@ -185,13 +187,13 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
     }
 
     legacy_enumerator_factory(legacy_enumerator_factory const& other) :
-        mcrl2::data::enumerator_factory< Enumerator >(other),
-        m_local_evaluator(other.m_local_evaluator)
+      mcrl2::data::enumerator_factory< Enumerator >(other),
+      m_local_evaluator(other.m_local_evaluator)
     {
     }
 
     Enumerator make(ATermList v, ATerm c)
-    { 
+    {
       return mcrl2::data::enumerator_factory< Enumerator >::make(atermpp::term_list< mcrl2::data::variable >(v), atermpp::aterm(c));
     }
 
@@ -202,87 +204,91 @@ class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumer
     }
 };
 
-namespace mcrl2 {
-  namespace data {
+namespace mcrl2
+{
+namespace data
+{
 
-    // The following specialisations are here as a bridge to use the
-    // classic_enumerator on terms in rewrite format. Actually classic
-    // enumerator was built to function at the level of data expressions, but
-    // since there is an isomorphism between terms in both formats it is
-    // possible to replace only the methods below (since these are the only
-    // onse to make any specific assumptions about the format).
-    namespace detail {
+// The following specialisations are here as a bridge to use the
+// classic_enumerator on terms in rewrite format. Actually classic
+// enumerator was built to function at the level of data expressions, but
+// since there is an isomorphism between terms in both formats it is
+// possible to replace only the methods below (since these are the only
+// onse to make any specific assumptions about the format).
+namespace detail
+{
 
-      // Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
-      template < >
-      inline
-      bool classic_enumerator_impl< mcrl2::data::mutable_associative_container_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
-                  legacy_rewriter, legacy_selector >::increment() 
-      {
-        ATermList assignment_list;
+// Specialisation of classic_enumerator_impl to circumvent data reconstruction trick
+template < >
+inline
+bool classic_enumerator_impl< mcrl2::data::mutable_associative_container_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
+     legacy_rewriter, legacy_selector >::increment()
+{
+  ATermList assignment_list;
 
-        while (m_generator.next(&assignment_list)) {
+  while (m_generator.next(&assignment_list))
+  {
 
-          for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
-                             i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i) 
-          {
-            m_substitution[static_cast< variable_type >((*i)(0))] = (*i)(1);
-          }
-
-          if (legacy_selector::test(m_evaluator(m_condition, m_substitution))) 
-          { 
-             return true;
-          }
-        }
-
-        return false;
-      }
-
-      // Specialisation of classic_enumerator_impl to circumvent data implementation trick
-      template < >
-      template < typename Container >
-      bool classic_enumerator_impl< mcrl2::data::mutable_associative_container_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
-                  legacy_rewriter, legacy_selector >::initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type*) 
-      { 
-        m_shared_context->m_enumerator.findSolutions(atermpp::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
-
-        return increment();
-      }
+    for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);
+         i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i)
+    {
+      m_substitution[static_cast< variable_type >((*i)(0))] = (*i)(1);
     }
 
-    // Assumes that all terms are in internal rewrite format.
-    template <>
-    struct expression_traits< atermpp::aterm >
+    if (legacy_selector::test(m_evaluator(m_condition, m_substitution)))
     {
-      static legacy_rewriter& get_rewriter()
-      {
-        static legacy_rewriter local_rewriter = legacy_rewriter(mcrl2::data::rewriter());
-
-        return local_rewriter;
-      }
-
-      static atermpp::aterm false_()
-      {
-        return get_rewriter().translate(mcrl2::data::sort_bool::false_());
-      }
-
-      static atermpp::aterm true_()
-      {
-        return get_rewriter().translate(mcrl2::data::sort_bool::true_());
-      }
-    };
+      return true;
+    }
   }
+
+  return false;
+}
+
+// Specialisation of classic_enumerator_impl to circumvent data implementation trick
+template < >
+template < typename Container >
+bool classic_enumerator_impl< mcrl2::data::mutable_associative_container_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
+     legacy_rewriter, legacy_selector >::initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type*)
+{
+  m_shared_context->m_enumerator.findSolutions(atermpp::convert< atermpp::term_list< variable_type > >(v), m_condition, true, &m_generator); // Changed one but last argument to true to check that enumerated conditions always reduce to true or false 7/12/2009 JFG
+
+  return increment();
+}
+}
+
+// Assumes that all terms are in internal rewrite format.
+template <>
+struct expression_traits< atermpp::aterm >
+{
+  static legacy_rewriter& get_rewriter()
+  {
+    static legacy_rewriter local_rewriter = legacy_rewriter(mcrl2::data::rewriter());
+
+    return local_rewriter;
+  }
+
+  static atermpp::aterm false_()
+  {
+    return get_rewriter().translate(mcrl2::data::sort_bool::false_());
+  }
+
+  static atermpp::aterm true_()
+  {
+    return get_rewriter().translate(mcrl2::data::sort_bool::true_());
+  }
+};
+}
 }
 
 
 struct ns_info
 {
-  NextStateStandard *parent;
+  NextStateStandard* parent;
 
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator<
-      mcrl2::data::mutable_associative_container_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
-                                             legacy_rewriter, legacy_selector > enumerator_type;
+  mcrl2::data::mutable_associative_container_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
+        legacy_rewriter, legacy_selector > enumerator_type;
 
   typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
 
@@ -291,7 +297,7 @@ struct ns_info
   legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
 
   size_t num_summands;
-  ATermAppl *summands;
+  ATermAppl* summands;
   size_t num_prioritised;
   ATermList procvars;
   int stateformat;
@@ -299,12 +305,12 @@ struct ns_info
   AFun pairAFun;
   size_t statelen;
   AFun stateAFun;
-  size_t *current_id;
+  size_t* current_id;
 
-  enumerator_type get_sols(ATermList v, ATerm c) 
-  { 
+  enumerator_type get_sols(ATermList v, ATerm c)
+  {
     const enumerator_type m=m_enumerator_factory->make(v, c);
-    
+
     return m;
   }
 
@@ -322,7 +328,8 @@ struct ns_info
           mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& factory) :
     m_specification(specification),
     m_enumerator_factory(new enumerator_factory_type(factory)),
-    m_rewriter(m_enumerator_factory->get_evaluator()) {
+    m_rewriter(m_enumerator_factory->get_evaluator())
+  {
 
     // Configure selector to compare with term that represents false
     legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool::true_());
@@ -333,10 +340,10 @@ struct ns_info
 class NextStateGeneratorStandard : public NextStateGenerator
 {
   public:
-    NextStateGeneratorStandard(ATerm State, ns_info &Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
+    NextStateGeneratorStandard(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
     ~NextStateGeneratorStandard();
 
-    bool next(ATermAppl *Transition, ATerm *State, bool *prioritised = NULL);
+    bool next(ATermAppl* Transition, ATerm* State, bool* prioritised = NULL);
 
     // bool errorOccurred();
 
@@ -356,13 +363,13 @@ class NextStateGeneratorStandard : public NextStateGenerator
     ATerm cur_act;
     ATermList cur_nextstate;
 
-    ATerm *stateargs;
+    ATerm* stateargs;
 
     ns_info::enumerator_type valuations;
 
     void set_substitutions();
 
-    void SetTreeStateVars(ATerm tree, ATermList *vars);
+    void SetTreeStateVars(ATerm tree, ATermList* vars);
     ATermAppl rewrActionArgs(ATermAppl act);
     ATerm makeNewState(ATerm old, ATermList assigns);
     ATermList ListFromFormat(ATermList l);
@@ -370,28 +377,29 @@ class NextStateGeneratorStandard : public NextStateGenerator
 
 class NextStateStandard : public NextState
 {
-  friend class NextStateGeneratorStandard;
+    friend class NextStateGeneratorStandard;
   public:
-                typedef mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory_type;
+    typedef mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory_type;
     NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, enumerator_factory_type& e);
     ~NextStateStandard();
 
-    void prioritise(const char *action);
+    void prioritise(const char* action);
 
     ATerm getInitialState();
-    NextStateGenerator *getNextStates(ATerm state, NextStateGenerator *old = NULL);
-    NextStateGenerator *getNextStates(ATerm state, size_t group, NextStateGenerator *old = NULL);
+    NextStateGenerator* getNextStates(ATerm state, NextStateGenerator* old = NULL);
+    NextStateGenerator* getNextStates(ATerm state, size_t group, NextStateGenerator* old = NULL);
 
-                void gatherGroupInformation();
+    void gatherGroupInformation();
 
     size_t getGroupCount() const;
     size_t getStateLength();
     ATermAppl getStateArgument(ATerm state, size_t index);
     ATermAppl makeStateVector(ATerm state);
     ATerm parseStateVector(ATermAppl state, ATerm match = NULL);
-                mcrl2::data::rewriter& getRewriter() { // Deprecated. Do not use.
-                  return const_cast< legacy_rewriter& >(info.m_rewriter);
-                }
+    mcrl2::data::rewriter& getRewriter()   // Deprecated. Do not use.
+    {
+      return const_cast< legacy_rewriter& >(info.m_rewriter);
+    }
 
   private:
     ns_info info;
@@ -403,13 +411,13 @@ class NextStateStandard : public NextState
     bool usedummies;
 
     AFun smndAFun;
-    bool *tree_init;
-    ATerm *stateargs;
+    bool* tree_init;
+    ATerm* stateargs;
 
     ATermList pars;
     ATerm initial_state;
 
-    ATerm buildTree(ATerm *args);
+    ATerm buildTree(ATerm* args);
     ATerm getTreeElement(ATerm tree, size_t index);
 
     ATerm SetVars(ATerm a, ATermList free_vars);

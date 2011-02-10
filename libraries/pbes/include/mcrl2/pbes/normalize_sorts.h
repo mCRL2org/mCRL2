@@ -16,27 +16,29 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-  template <typename T>
-  void normalize_sorts(T& x,
-                       const data::data_specification& data_spec,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                      )
-  {
-    core::make_update_apply_builder<pbes_system::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
-  }
+template <typename T>
+void normalize_sorts(T& x,
+                     const data::data_specification& data_spec,
+                     typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                    )
+{
+  core::make_update_apply_builder<pbes_system::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+}
 
-  template <typename T>
-  T normalize_sorts(const T& x,
-                    const data::data_specification& data_spec,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                   )
-  {
-    return core::make_update_apply_builder<pbes_system::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
-  }
+template <typename T>
+T normalize_sorts(const T& x,
+                  const data::data_specification& data_spec,
+                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                 )
+{
+  return core::make_update_apply_builder<pbes_system::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+}
 
 } // namespace pbes_system
 

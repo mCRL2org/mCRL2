@@ -27,12 +27,15 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \cond INTERNAL_DOCS
-struct t_instantiations {
+struct t_instantiations
+{
   data::variable_list finite_var;     // List of all finite variables
   data::variable_list infinite_var;   // List of all infinite variables
   data::data_expression_list finite_exp;   // List of all finite expressions
@@ -112,12 +115,14 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
     for (data::data_expression_list::iterator del_i = del.begin(); del_i != del.end(); del_i++)
     {
       if (is_function_symbol(*del_i))
-      { //If p is a OpId
+      {
+        //If p is a OpId
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
       }
       else if (is_application(*del_i))
-      { // If p is a data application
+      {
+        // If p is a data application
         propvar_name_current += "@";
         propvar_name_current += mcrl2::core::pp(*del_i);
       }
@@ -136,7 +141,7 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
 
 /// \brief Create a new propositional variable instantiation with instantiated values and infinite variables
 /// \param propvarinst A propositional variable instantiation
-propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table *enumerated_sorts)
+propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table* enumerated_sorts)
 {
   data::data_expression_list finite_expression;
   data::data_expression_list infinite_expression;
@@ -144,13 +149,16 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
   for (data::data_expression_list::iterator p = propvarinst.parameters().begin(); p != propvarinst.parameters().end(); p++)
   {
     if (enumerated_sorts->get(p->sort()) != NULL)
-    { //sort is finite
+    {
+      //sort is finite
       if (is_function_symbol(*p))
-      { // If p is a correct data operation
+      {
+        // If p is a correct data operation
         finite_expression = push_back(finite_expression, *p);
       }
       else if (is_variable(*p))
-      { // If p is a freevar
+      {
+        // If p is a freevar
         throw mcrl2::runtime_error(
           "The propositional variable contains a variable of finite sort.\n"
           "Can not handle variables of finite sort when creating a propositional variable name.\n"
@@ -159,7 +167,8 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
       }
     }
     else
-    { //sort is infinite
+    {
+      //sort is infinite
       infinite_expression = push_back(infinite_expression, *p);
     }
   }
@@ -254,7 +263,9 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
 
     if (++nr_of_equations % 1000 == 0)
+    {
       core::gsVerboseMsg("At equation %d\n", nr_of_equations);
+    }
   }
 
   core::gsVerboseMsg("Sorting result...\n");
@@ -338,7 +349,8 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
     {
       atermpp::vector< t_instantiations > intermediate_instantiation_list;
       if (sort_enumerations.get(p->sort()) == NULL)
-      { // The sort is infinite
+      {
+        // The sort is infinite
         for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
         {
           current_values = *inst_i;
@@ -348,7 +360,8 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
         }
       }
       else
-      { // The sort is finite
+      {
+        // The sort is finite
         current_values.finite_var = push_back(current_values.finite_var, *p);
         data::data_expression_list enumerations = sort_enumerations.get(p->sort());
 
@@ -391,7 +404,9 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
       result_eqsys.push_back(pbes_equation(eq_i->symbol(), propvar_current, current_expression));
 
       if (++nr_of_equations % 1000 == 0)
+      {
         core::gsVerboseMsg("At Boolean equation %d\n", nr_of_equations);
+      }
 
     }
   }
@@ -411,16 +426,26 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp {
-  using mcrl2::pbes_system::t_instantiations;
+namespace atermpp
+{
+using mcrl2::pbes_system::t_instantiations;
 
-  template<>
-  struct aterm_traits<t_instantiations>
+template<>
+struct aterm_traits<t_instantiations>
+{
+  static void protect(t_instantiations t)
   {
-    static void protect(t_instantiations t) { t.protect(); }
-    static void unprotect(t_instantiations t) { t.unprotect(); }
-    static void mark(t_instantiations t) { t.mark(); }
-  };
+    t.protect();
+  }
+  static void unprotect(t_instantiations t)
+  {
+    t.unprotect();
+  }
+  static void mark(t_instantiations t)
+  {
+    t.mark();
+  }
+};
 } // namespace atermpp
 /// \endcond
 

@@ -21,21 +21,21 @@
 
 class StandardSimulator: virtual public SimulatorInterface
 {
-public:
+  public:
     // constructors and destructors
     StandardSimulator();
     virtual ~StandardSimulator();
 
     virtual void LoadSpec(mcrl2::lps::specification const& spec);
     /* Load mCRL2 specification spec for simulation */
-    virtual void LoadView(const std::string &filename);
+    virtual void LoadView(const std::string& filename);
     /* Load DLL filename as simulation view */
     virtual void SetTauPrioritisation(bool enable = true);
     /* Enable/disable (simplistic) tau-prioritisation */
-    virtual void LoadTrace(const std::string &filename);
+    virtual void LoadTrace(const std::string& filename);
     /* Load trace from filename
      * This function throws a string on errors */
-    virtual void SaveTrace(const std::string &filename);
+    virtual void SaveTrace(const std::string& filename);
     /* Save current trace to filename
      * This function throws a string on errors */
     virtual bool IsActive();
@@ -49,8 +49,8 @@ public:
     mcrl2::data::rewriter::strategy rewr_strat;
 
     // SimulatorInterface methods
-    virtual void Register(SimulatorViewInterface *View);
-    virtual void Unregister(SimulatorViewInterface *View);
+    virtual void Register(SimulatorViewInterface* View);
+    virtual void Unregister(SimulatorViewInterface* View);
     virtual ATermList GetParameters();
     virtual void Reset();
     virtual void Reset(ATerm State);
@@ -58,7 +58,7 @@ public:
     virtual bool Redo();
     virtual ATerm GetState();
     virtual ATermList GetNextStates();
-    virtual NextState *GetNextState();
+    virtual NextState* GetNextState();
     virtual bool ChooseTransition(size_t index);
     virtual size_t GetTraceLength();
     virtual size_t GetTracePos();
@@ -69,13 +69,13 @@ public:
     virtual bool SetTrace(ATermList Trace, size_t From);
     virtual void InitialiseViews();
 
-private:
+  private:
     void traceReset(ATerm state);
     void traceSetNext(ATermList transition);
     ATermList traceUndo();
     ATermList traceRedo();
 
-private:
+  private:
     bool tau_prior;
     bool error;
     ATermList state_vars;
@@ -88,10 +88,10 @@ private:
     ATermIndexedSet seen_states;
     std::auto_ptr< mcrl2::data::rewriter >  m_rewriter;
     std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > > m_enumerator_factory;
-    NextState *nextstate;
-    NextStateGenerator *nextstategen;
+    NextState* nextstate;
+    NextStateGenerator* nextstategen;
 
-private:
+  private:
     void SetCurrentState(ATerm state);
     void UpdateTransitions();
 };

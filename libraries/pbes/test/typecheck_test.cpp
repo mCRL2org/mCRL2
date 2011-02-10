@@ -20,7 +20,7 @@
 
 using namespace mcrl2;
 
-void test_pbes_specification(const std::string &pbes_in, bool test_type_checker = true)
+void test_pbes_specification(const std::string& pbes_in, bool test_type_checker = true)
 {
   std::istringstream pbes_in_stream(pbes_in);
   ATermAppl pbes_aterm = core::parse_pbes_spec(pbes_in_stream);
@@ -30,10 +30,11 @@ void test_pbes_specification(const std::string &pbes_in, bool test_type_checker 
   //std::cerr << "The following PBES specifications should be the same:" << std::endl << pbes_in << std::endl << "and" << std::endl << pbes_out << std::endl;
   BOOST_CHECK(pbes_in == pbes_out);
 
-  if (test_type_checker) {
+  if (test_type_checker)
+  {
     pbes_system::pbes<> p(pbes_aterm);
     pbes_system::type_check(p);
- 
+
     //pbes_out = core::PrintPart_CXX((ATerm) pbes_aterm);
     pbes_out = pbes_system::pp(p);
     //std::cerr << "The following PBES specifications should be the same:" << std::endl << pbes_in  << std::endl << "and" << std::endl << pbes_out << std::endl;

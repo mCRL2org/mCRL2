@@ -19,72 +19,75 @@
 #include "mcrl2/lps/linear_process.h"
 #include "mcrl2/lps/specification.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-namespace detail {
+namespace detail
+{
 
-  /// \brief Returns the process parameter names of a linear process
-  /// \param p A linear process
-  /// \return The process parameter names of a linear process
-  inline
-  std::set<core::identifier_string> process_parameter_names(const linear_process& p)
+/// \brief Returns the process parameter names of a linear process
+/// \param p A linear process
+/// \return The process parameter names of a linear process
+inline
+std::set<core::identifier_string> process_parameter_names(const linear_process& p)
+{
+  std::set<core::identifier_string> result;
+  data::variable_list parameters(p.process_parameters());
+  result.insert(boost::make_transform_iterator(parameters.begin(), data::detail::variable_name()),
+                boost::make_transform_iterator(parameters.end()  , data::detail::variable_name()));
+  return result;
+}
+
+/// \brief Returns the free variable names of a linear process
+/// \param p A linear process
+/// \return The free variable names of a linear process
+inline
+std::set<core::identifier_string> global_variable_names(const linear_process& p)
+{
+  /*
+      std::set<core::identifier_string> result;
+      data::variable_list global_variables(p.global_variables());
+      result.insert(boost::make_transform_iterator(global_variables.begin(), data::detail::variable_name()),
+                    boost::make_transform_iterator(global_variables.end()  , data::detail::variable_name()));
+      return result;
+  */
+  return std::set<core::identifier_string>();
+}
+
+/// \brief Returns the free variable names of a linear process specification
+/// \param p A linear process
+/// \return The free variable names of a linear process specification
+inline
+std::set<core::identifier_string> global_variable_names(const specification& spec)
+{
+  std::set<core::identifier_string> result;
+  const atermpp::set<data::variable>& global_variables = spec.global_variables();
+  result.insert(boost::make_transform_iterator(global_variables.begin(), data::detail::variable_name()),
+                boost::make_transform_iterator(global_variables.end()  , data::detail::variable_name()));
+  return result;
+}
+
+/// \brief Returns the summation variable names of a linear process
+/// \param p A linear process
+/// \return The summation variable names of a linear process
+inline
+std::set<core::identifier_string> summand_variable_names(const linear_process& p)
+{
+  std::set<core::identifier_string> result;
+  summand_list summands = p.summands();
+  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
-    std::set<core::identifier_string> result;
-    data::variable_list parameters(p.process_parameters());
-    result.insert(boost::make_transform_iterator(parameters.begin(), data::detail::variable_name()),
-                  boost::make_transform_iterator(parameters.end()  , data::detail::variable_name()));
-    return result;
+    data::variable_list summation_variables(i->summation_variables());
+    result.insert(
+      boost::make_transform_iterator(summation_variables.begin(), data::detail::variable_name()),
+      boost::make_transform_iterator(summation_variables.end(),   data::detail::variable_name())
+    );
   }
-
-  /// \brief Returns the free variable names of a linear process
-  /// \param p A linear process
-  /// \return The free variable names of a linear process
-  inline
-  std::set<core::identifier_string> global_variable_names(const linear_process& p)
-  {
-/*
-    std::set<core::identifier_string> result;
-    data::variable_list global_variables(p.global_variables());
-    result.insert(boost::make_transform_iterator(global_variables.begin(), data::detail::variable_name()),
-                  boost::make_transform_iterator(global_variables.end()  , data::detail::variable_name()));
-    return result;
-*/
-    return std::set<core::identifier_string>();
-  }
-
-  /// \brief Returns the free variable names of a linear process specification
-  /// \param p A linear process
-  /// \return The free variable names of a linear process specification
-  inline
-  std::set<core::identifier_string> global_variable_names(const specification& spec)
-  {
-    std::set<core::identifier_string> result;
-    const atermpp::set<data::variable>& global_variables = spec.global_variables();
-    result.insert(boost::make_transform_iterator(global_variables.begin(), data::detail::variable_name()),
-                  boost::make_transform_iterator(global_variables.end()  , data::detail::variable_name()));
-    return result;
-  }
-
-  /// \brief Returns the summation variable names of a linear process
-  /// \param p A linear process
-  /// \return The summation variable names of a linear process
-  inline
-  std::set<core::identifier_string> summand_variable_names(const linear_process& p)
-  {
-    std::set<core::identifier_string> result;
-    summand_list summands = p.summands();
-    for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
-    {
-      data::variable_list summation_variables(i->summation_variables());
-      result.insert(
-        boost::make_transform_iterator(summation_variables.begin(), data::detail::variable_name()),
-        boost::make_transform_iterator(summation_variables.end(),   data::detail::variable_name())
-      );
-    }
-    return result;
-  }
+  return result;
+}
 
 } // namespace detail
 

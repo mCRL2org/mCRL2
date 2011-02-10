@@ -14,7 +14,7 @@
 #include <iostream>
 #include <wx/xml/xml.h>
 
-Graph* XMLImporter::importFile(const std::string &filename)
+Graph* XMLImporter::importFile(const std::string& filename)
 {
   try
   {
@@ -23,125 +23,134 @@ Graph* XMLImporter::importFile(const std::string &filename)
     g = new Graph();
 
     wxXmlDocument wx_doc;
-		wx_doc.Load(wxString(filename.c_str(), wxConvUTF8));
+    wx_doc.Load(wxString(filename.c_str(), wxConvUTF8));
 
-		wxXmlNode *node = wx_doc.GetRoot();
+    wxXmlNode* node = wx_doc.GetRoot();
 
-		if (node->GetName() != wxT("Graph")){
-			throw "Expected Graph to be root node";
-		}
+    if (node->GetName() != wxT("Graph"))
+    {
+      throw "Expected Graph to be root node";
+    }
 
-		wxXmlNode *graph_child = node->GetChildren();
+    wxXmlNode* graph_child = node->GetChildren();
 
-		while(graph_child){
-			if( graph_child->GetName() == wxT("State") ){
-				wxString ret_value;
+    while (graph_child)
+    {
+      if (graph_child->GetName() == wxT("State"))
+      {
+        wxString ret_value;
 
-				unsigned long value;
-				graph_child->GetAttribute( wxT("value"), &ret_value );
-				ret_value.ToULong( &value );
+        unsigned long value;
+        graph_child->GetAttribute(wxT("value"), &ret_value);
+        ret_value.ToULong(&value);
 
-				bool isInitial;
-				graph_child->GetAttribute( wxT("isInitial"), &ret_value );
-				isInitial = (ret_value == wxT("1"));
+        bool isInitial;
+        graph_child->GetAttribute(wxT("isInitial"), &ret_value);
+        isInitial = (ret_value == wxT("1"));
 
-				double x;
-				graph_child->GetAttribute( wxT("x"), &ret_value );
-				ret_value.ToDouble( &x );
+        double x;
+        graph_child->GetAttribute(wxT("x"), &ret_value);
+        ret_value.ToDouble(&x);
 
-				double y;
-				graph_child->GetAttribute( wxT("y"), &ret_value );
-				ret_value.ToDouble( &y );
+        double y;
+        graph_child->GetAttribute(wxT("y"), &ret_value);
+        ret_value.ToDouble(&y);
 
-				double z;
-				graph_child->GetAttribute( wxT("z"), &ret_value );
-				ret_value.ToDouble( &z );
+        double z;
+        graph_child->GetAttribute(wxT("z"), &ret_value);
+        ret_value.ToDouble(&z);
 
-				graph_child->GetAttribute( wxT("red"), &ret_value );
-				int red = wxAtoi(ret_value);
+        graph_child->GetAttribute(wxT("red"), &ret_value);
+        int red = wxAtoi(ret_value);
 
-				graph_child->GetAttribute( wxT("green"), &ret_value );
-				int green = wxAtoi(ret_value);
+        graph_child->GetAttribute(wxT("green"), &ret_value);
+        int green = wxAtoi(ret_value);
 
-				graph_child->GetAttribute( wxT("blue"), &ret_value );
-				int blue = wxAtoi(ret_value);
+        graph_child->GetAttribute(wxT("blue"), &ret_value);
+        int blue = wxAtoi(ret_value);
 
         wxColour colour(red, green, blue);
 
         std::map<std::string, std::string> parameters;
 
-				wxXmlNode *state_child = graph_child->GetChildren();
-				while (state_child){
-          if (state_child->GetName() == wxT( "Parameter" ) ){
-							wxXmlNode *parameter_child = state_child->GetChildren();
+        wxXmlNode* state_child = graph_child->GetChildren();
+        while (state_child)
+        {
+          if (state_child->GetName() == wxT("Parameter"))
+          {
+            wxXmlNode* parameter_child = state_child->GetChildren();
 
-							while( parameter_child ){
-								wxString name;
-                parameter_child->GetAttribute( wxT("name"), &name );
-                wxString content = parameter_child->GetContent();
+            while (parameter_child)
+            {
+              wxString name;
+              parameter_child->GetAttribute(wxT("name"), &name);
+              wxString content = parameter_child->GetContent();
 
 
-                std::pair<std::string, std::string> p( std::string(name.mb_str()), std::string(content.mb_str()));
-                parameters.insert(p);
+              std::pair<std::string, std::string> p(std::string(name.mb_str()), std::string(content.mb_str()));
+              parameters.insert(p);
 
-                parameter_child = parameter_child->GetNext();
-							}
-					}
+              parameter_child = parameter_child->GetNext();
+            }
+          }
 
-					state_child = state_child->GetNext();
-				}
+          state_child = state_child->GetNext();
+        }
 
         State* s = new State(value, isInitial);
         s->setX(x);
         s->setY(y);
-		    s->setZ(z);
+        s->setZ(z);
         s->setColour(colour);
         s->setParameters(parameters);
         g->addState(s);
 
-			}
+      }
 
-			graph_child = graph_child->GetNext();
-		}
+      graph_child = graph_child->GetNext();
+    }
 
-		graph_child = node->GetChildren();
+    graph_child = node->GetChildren();
 
     // All states have been created, now iterate over the transitions
-		while(graph_child){
-			if( graph_child->GetName() == wxT("Transition") ){
-				wxString ret_value;
+    while (graph_child)
+    {
+      if (graph_child->GetName() == wxT("Transition"))
+      {
+        wxString ret_value;
 
-				unsigned long from;
-				graph_child->GetAttribute( wxT("from"), &ret_value );
-				ret_value.ToULong( &from );
+        unsigned long from;
+        graph_child->GetAttribute(wxT("from"), &ret_value);
+        ret_value.ToULong(&from);
 
-				unsigned long to;
-				graph_child->GetAttribute( wxT("to"), &ret_value );
-				ret_value.ToULong( &to );
+        unsigned long to;
+        graph_child->GetAttribute(wxT("to"), &ret_value);
+        ret_value.ToULong(&to);
 
-				graph_child->GetAttribute( wxT("label"), &ret_value );
-				std::string label = std::string(ret_value.mb_str()) ;
-				
-				double x;
-				graph_child->GetAttribute( wxT("x"), &ret_value );
-				ret_value.ToDouble( &x );
+        graph_child->GetAttribute(wxT("label"), &ret_value);
+        std::string label = std::string(ret_value.mb_str()) ;
 
-				double y;
-				graph_child->GetAttribute( wxT("y"), &ret_value );
-				ret_value.ToDouble( &y );
+        double x;
+        graph_child->GetAttribute(wxT("x"), &ret_value);
+        ret_value.ToDouble(&x);
 
-				double z;
-				graph_child->GetAttribute( wxT("z"), &ret_value );
-				ret_value.ToDouble( &z );
+        double y;
+        graph_child->GetAttribute(wxT("y"), &ret_value);
+        ret_value.ToDouble(&y);
 
-        if(from == to)
+        double z;
+        graph_child->GetAttribute(wxT("z"), &ret_value);
+        ret_value.ToDouble(&z);
+
+        if (from == to)
         {
           State* s = g->getState(from);
           Transition* t = new Transition(s, s, label);
           t->setControl(x, y, z);
           s->addSelfLoop(t);
         }
-        else{
+        else
+        {
           State* fromState = g->getState(from);
           State* toState = g->getState(to);
           Transition* t = new Transition(fromState, toState, label);
@@ -153,11 +162,11 @@ Graph* XMLImporter::importFile(const std::string &filename)
           toState->addInTransition(t);
         }
       }
-			graph_child = graph_child->GetNext();
-		}
+      graph_child = graph_child->GetNext();
+    }
     return g;
   }
-  catch(std::exception& e)
+  catch (std::exception& e)
   {
     std::cerr << "Could not load XML file: " << e.what();
     return NULL;

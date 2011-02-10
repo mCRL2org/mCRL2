@@ -15,35 +15,44 @@
 #include <ctime>
 #include "aterm2.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
-  /** \brief A base class for simplifying binary decision diagrams.
-   *
-   * \detail
-   * These classes take a BDD as input and try to simplify this BDD.
-   * The method BDD_Simplifier::simplify receives a BDD as parameter
-   * a_bdd and tries to find an equivalent BDD that is smaller. It
-   * returns the reduced BDD if such a BDD is found. If a reduced BDD is
-   * not found, the original BDD is returned.
-  */
+/** \brief A base class for simplifying binary decision diagrams.
+ *
+ * \detail
+ * These classes take a BDD as input and try to simplify this BDD.
+ * The method BDD_Simplifier::simplify receives a BDD as parameter
+ * a_bdd and tries to find an equivalent BDD that is smaller. It
+ * returns the reduced BDD if such a BDD is found. If a reduced BDD is
+ * not found, the original BDD is returned.
+*/
 
-class BDD_Simplifier {
+class BDD_Simplifier
+{
   protected:
     /// \brief An integer representing the moment in time when the maximal amount of seconds has been spent on simplifying
     /// \brief the BDD.
     time_t f_deadline;
   public:
     /// \brief Destructor without any additional functionality.
-    virtual ~BDD_Simplifier() {
+    virtual ~BDD_Simplifier()
+    {
     }
 
     /// \brief Sets the attribute BDD_Simplifier::f_deadline.
-    void set_time_limit(time_t a_time_limit) {
-      if (a_time_limit == 0) {
+    void set_time_limit(time_t a_time_limit)
+    {
+      if (a_time_limit == 0)
+      {
         f_deadline = 0;
-      } else {
+      }
+      else
+      {
         f_deadline = time(0) + a_time_limit;
       }
     }
@@ -53,12 +62,13 @@ class BDD_Simplifier {
     /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
     /// expression with an expression of sort Bool  as guard, and a then-branch and an else-branch that again follow these
     /// restrictions
-    virtual ATermAppl simplify(ATermAppl a_bdd) {
+    virtual ATermAppl simplify(ATermAppl a_bdd)
+    {
       return a_bdd;
     }
 };
-    }
-  }
+}
+}
 }
 
 #endif

@@ -15,9 +15,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 class trname_expression;
 typedef atermpp::term_list<trname_expression> trname_expression_list;

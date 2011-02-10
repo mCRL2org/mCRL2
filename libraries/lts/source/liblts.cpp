@@ -52,61 +52,67 @@ namespace detail
 
 atermpp::vector < ATermAppl > state_label_lts::vector_templates;
 
-lps::specification const& empty_specification() 
+lps::specification const& empty_specification()
 {
   static lps::specification dummy;
 
   return dummy;
 }
 
-lts_type guess_format(string const& s) 
+lts_type guess_format(string const& s)
 {
   string::size_type pos = s.find_last_of('.');
 
-  if ( pos != string::npos )
+  if (pos != string::npos)
   {
     string ext = s.substr(pos+1);
 
-    if ( ext == "aut" )
+    if (ext == "aut")
     {
       if (core::gsVerbose)
-      { std::cerr << "Detected Aldebaran extension.\n";
+      {
+        std::cerr << "Detected Aldebaran extension.\n";
       }
       return lts_aut;
-    } 
-    else if ( ext == "lts" )
+    }
+    else if (ext == "lts")
     {
       if (core::gsVerbose)
-      { std::cerr << "Detected mCRL2 extension.\n";
+      {
+        std::cerr << "Detected mCRL2 extension.\n";
       }
       return lts_lts;
-    } 
-    else if ( ext == "svc" )
+    }
+    else if (ext == "svc")
     {
       if (core::gsVerbose)
-      { std::cerr << "Detected SVC extension; assuming mCRL2 format.\n";
+      {
+        std::cerr << "Detected SVC extension; assuming mCRL2 format.\n";
       }
       return lts_lts;
-    } 
-    else if ( ext == "fsm" )
+    }
+    else if (ext == "fsm")
     {
       if (core::gsVerbose)
-      { std::cerr << "Detected Finite State Machine extension.\n";
+      {
+        std::cerr << "Detected Finite State Machine extension.\n";
       }
       return lts_fsm;
-    } 
-    else if ( ext == "dot" )
+    }
+    else if (ext == "dot")
     {
       if (core::gsVerbose)
-      { std::cerr << "Detected GraphViz extension.\n";
+      {
+        std::cerr << "Detected GraphViz extension.\n";
       }
       return lts_dot;
 #ifdef USE_BCG
-    } 
-    else if ( ext == "bcg" )
+    }
+    else if (ext == "bcg")
     {
       if (core::gsVerbose)
-      { std::cerr << "Detected Binary Coded Graph extension.\n";
+      {
+        std::cerr << "Detected Binary Coded Graph extension.\n";
       }
       return lts_bcg;
 #endif
@@ -121,67 +127,68 @@ static std::string type_strings[] = { "unknown", "lts", "aut", "fsm", "dot", "sv
 static std::string extension_strings[] = { "", "lts", "aut", "fsm", "dot", "svc", "bcg" };
 
 static std::string type_desc_strings[] = { "unknown LTS format",
-                                           "mCRL2 LTS format",
-                                           "Aldebaran format (CADP)",
-                                           "Finite State Machine format",
-                                           "GraphViz format",
-                                           "SVC format",
-                                           "Binary Coded Graph format (CADP)"
+    "mCRL2 LTS format",
+    "Aldebaran format (CADP)",
+    "Finite State Machine format",
+    "GraphViz format",
+    "SVC format",
+    "Binary Coded Graph format (CADP)"
                                          };
 
 
-static std::string mime_type_strings[] = { "", 
-                                           "application/lts", 
-                                           "text/aut", 
-                                           "text/fsm", 
-                                           "application/bcg", 
-                                           "text/dot", 
-                                           "application/svc"
+static std::string mime_type_strings[] = { "",
+    "application/lts",
+    "text/aut",
+    "text/fsm",
+    "application/bcg",
+    "text/dot",
+    "application/svc"
                                          };
 
-lts_type parse_format(std::string const& s) 
+lts_type parse_format(std::string const& s)
 {
-  if ( s == "lts")
+  if (s == "lts")
   {
     return lts_lts;
-  } 
-  else if ( s == "aut" )
+  }
+  else if (s == "aut")
   {
     return lts_aut;
-  } 
-  else if ( s == "fsm" )
+  }
+  else if (s == "fsm")
   {
     return lts_fsm;
-  } 
+  }
 #ifdef USE_BCG
-  else if ( s == "bcg" )
+  else if (s == "bcg")
   {
     return lts_bcg;
   }
 #endif
-  else if ( s == "dot" )
+  else if (s == "dot")
   {
     return lts_dot;
-  } 
-  else if ( s == "svc" )
+  }
+  else if (s == "svc")
   {
     return lts_svc;
-  }  
+  }
 
   return lts_none;
 }
 
-std::string string_for_type(const lts_type type) 
+std::string string_for_type(const lts_type type)
 {
   return (type_strings[type]);
 }
 
-std::string extension_for_type(const lts_type type) 
+std::string extension_for_type(const lts_type type)
 {
   return (extension_strings[type]);
 }
 
-std::string mime_type_for_type(const lts_type type) {
+std::string mime_type_for_type(const lts_type type)
+{
   return (mime_type_strings[type]);
 }
 
@@ -190,7 +197,7 @@ static const std::set<lts_type> &initialise_supported_lts_formats()
   static std::set<lts_type> s;
   for (size_t i = lts_type_min; i<1+(size_t)lts_type_max; ++i)
   {
-    if ( lts_none != (lts_type) i )
+    if (lts_none != (lts_type) i)
     {
       s.insert((lts_type) i);
     }
@@ -213,17 +220,18 @@ std::string supported_lts_formats_text(lts_type default_format, const std::set<l
   {
     r += "  '" + type_strings[*i] + "' for the " + type_desc_strings[*i];
 
-    if ( *i == default_format )
+    if (*i == default_format)
     {
       r += " (default)";
     }
 
-	// Still unsafe if types.size() < 2
-	assert(types.size() >= 2);
-    if ( i == types.end() - 2 )
+    // Still unsafe if types.size() < 2
+    assert(types.size() >= 2);
+    if (i == types.end() - 2)
     {
       r += ", or\n";
-    } else if ( i != types.end() - 1)
+    }
+    else if (i != types.end() - 1)
     {
       r += ",\n";
     }
@@ -237,7 +245,7 @@ std::string supported_lts_formats_text(const std::set<lts_type> &supported)
   return supported_lts_formats_text(lts_none,supported);
 }
 
-std::string lts_extensions_as_string(const std::string &sep, const std::set<lts_type> &supported)
+std::string lts_extensions_as_string(const std::string& sep, const std::set<lts_type> &supported)
 {
   vector<lts_type> types(supported.begin(),supported.end());
   std::sort(types.begin(),types.end(),boost::bind(lts_named_cmp<lts_type>,extension_strings,_1,_2));
@@ -246,14 +254,16 @@ std::string lts_extensions_as_string(const std::string &sep, const std::set<lts_
   bool first = true;
   for (vector<lts_type>::iterator i=types.begin(); i!=types.end(); i++)
   {
-    if ( extension_strings[*i] == prev ) // avoid mentioning extensions more than once
+    if (extension_strings[*i] == prev)   // avoid mentioning extensions more than once
     {
       continue;
     }
-    if ( first )
+    if (first)
     {
       first = false;
-    } else {
+    }
+    else
+    {
       r += sep;
     }
     r += "*." + extension_strings[*i];

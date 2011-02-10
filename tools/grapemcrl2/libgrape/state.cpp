@@ -17,19 +17,19 @@
 
 using namespace grape::libgrape;
 
-state::state( void )
-: compound_state( STATE )
+state::state(void)
+  : compound_state(STATE)
 {
   m_name = wxEmptyString;
 }
 
-state::state( const state &p_state )
-: compound_state( p_state )
+state::state(const state& p_state)
+  : compound_state(p_state)
 {
   m_name = p_state.m_name;
 }
 
-state::~state( void )
+state::~state(void)
 {
   // Remove all references from initial designators to this state.
 
@@ -37,7 +37,7 @@ state::~state( void )
   size_t count = m_designates.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    initial_designator* init_ptr = m_designates.Item( i );
+    initial_designator* init_ptr = m_designates.Item(i);
     init_ptr->detach();
   }
 
@@ -47,7 +47,7 @@ state::~state( void )
   count = m_beginstate.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    transition* trans_ptr = m_beginstate.Item( i );
+    transition* trans_ptr = m_beginstate.Item(i);
     trans_ptr->detach_beginstate();
   }
 
@@ -57,7 +57,7 @@ state::~state( void )
   count = m_endstate.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    nonterminating_transition* trans_ptr = m_endstate.Item( i );
+    nonterminating_transition* trans_ptr = m_endstate.Item(i);
     trans_ptr->detach_endstate();
   }
 
@@ -70,4 +70,4 @@ state::~state( void )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_state )
+WX_DEFINE_OBJARRAY(arr_state)

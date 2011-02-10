@@ -24,12 +24,14 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 
 template < typename Rewriter >
-void representation_check(Rewriter& R, data_expression const& input, data_expression const& expected, const data_specification &spec) {
+void representation_check(Rewriter& R, data_expression const& input, data_expression const& expected, const data_specification& spec)
+{
   data_expression output(R(normalize_sorts(input,spec)));
 
   BOOST_CHECK(normalize_sorts(expected,spec) == output);
 
-  if (output != normalize_sorts(expected,spec)) {
+  if (output != normalize_sorts(expected,spec))
+  {
     std::clog << "--- test failed --- " << core::pp(input) << " ->* " << core::pp(expected) << std::endl
               << "input    " << core::pp(input) << std::endl
               << "expected " << core::pp(expected) << std::endl
@@ -41,7 +43,8 @@ void representation_check(Rewriter& R, data_expression const& input, data_expres
   }
 }
 
-void number_test() {
+void number_test()
+{
   using namespace sort_bool;
   using namespace sort_pos;
   using namespace sort_nat;
@@ -107,7 +110,8 @@ void number_test() {
 
 }
 
-void list_construction_test() {
+void list_construction_test()
+{
   using namespace mcrl2::data::sort_list;
   using namespace mcrl2::data::sort_bool;
 
@@ -124,10 +128,11 @@ void list_construction_test() {
 
   representation_check(R, sort_list::list(bool_(), boost::make_iterator_range(expressions)),
                        R(cons_(bool_(), expressions[0], cons_(bool_(), expressions[1],
-                             cons_(bool_(), expressions[2], cons_(bool_(), expressions[3], nil(bool_())))))),specification);
+                               cons_(bool_(), expressions[2], cons_(bool_(), expressions[3], nil(bool_())))))),specification);
 }
 
-void convert_test() {
+void convert_test()
+{
 
   std::vector< data_expression > l;
 

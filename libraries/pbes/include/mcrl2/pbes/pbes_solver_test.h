@@ -30,9 +30,11 @@
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/pbes/pbesrewr.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief Straightforward solver for pbesses
 /// \detail This solver gets a parameterised boolean equation system.
@@ -43,24 +45,25 @@ namespace pbes_system {
 ///         these. This method uses the same code as pbes2bool (except that
 ///         pbes2bool uses more advanced features).
 
-template < typename Container > 
+template < typename Container >
 bool pbes2_bool_test(pbes< Container > &pbes_spec)
-{ // Generate an enumerator, a data rewriter and a pbes rewriter.
-  data::rewriter datar(pbes_spec.data(), 
+{
+  // Generate an enumerator, a data rewriter and a pbes rewriter.
+  data::rewriter datar(pbes_spec.data(),
                        mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_system::find_function_symbols(pbes_spec), pbes_spec.global_variables()),
                        mcrl2::data::rewriter::jitty);
-            // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
+  // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
   data::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter_with_variables datarv(datar);
   data::data_enumerator<> datae(pbes_spec.data(), datar, generator);
   const bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,data::data_enumerator<> >
-                          pbesr(datarv, datae, enumerate_infinite_sorts);
-  // The use of a pbesrewriter is switched off, because the pbesrewriter is too slow for the time being. 
-  // ::bes::boolean_equation_system bes_equations(pbes_spec, pbesr); 
+  pbesr(datarv, datae, enumerate_infinite_sorts);
+  // The use of a pbesrewriter is switched off, because the pbesrewriter is too slow for the time being.
+  // ::bes::boolean_equation_system bes_equations(pbes_spec, pbesr);
   ::bes::boolean_equation_system bes_equations(pbes_spec, datar);
   return solve_bes(bes_equations,false,false);
-} 
+}
 
 } // namespace pbes_system
 } // namespace mcrl2

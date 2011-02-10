@@ -79,7 +79,7 @@ const std::string LPSINFO =
   "used_multi_action_count      = 9                                                                                                           \n"
   "used_multi_actions           = {a1, c2}; {c3}; {c5}; {c6}; {i,j}; {r1}; {s4}                                                               \n"
   ;
-  
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

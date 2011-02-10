@@ -18,7 +18,8 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "protaterm.h"          // IProtectedATerm
 
-namespace atermpp {
+namespace atermpp
+{
 
 /// \brief Protected set container.
 template<class T, class Compare = std::less<T>, class Allocator = std::allocator<T> >
@@ -107,7 +108,7 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-std::cout << "atermpp::set.ATprotectTerms() : protecting " << set<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::set.ATprotectTerms() : protecting " << set<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::set<T, Compare, Allocator>::iterator i = std::set<T, Compare, Allocator>::begin(); i != std::set<T, Compare, Allocator>::end(); ++i)
       {
@@ -123,7 +124,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     multiset()
-     : IProtectedATerm()
+      : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -202,7 +203,7 @@ class multiset: public std::multiset<T, Compare, Allocator>, IProtectedATerm
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-std::cout << "atermpp::multiset.ATprotectTerms() : protecting " << multiset<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::multiset.ATprotectTerms() : protecting " << multiset<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::multiset<T, Compare, Allocator>::iterator i = std::multiset<T, Compare, Allocator>::begin(); i != std::multiset<T, Compare, Allocator>::end(); ++i)
       {

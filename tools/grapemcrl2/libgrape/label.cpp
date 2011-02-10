@@ -26,11 +26,11 @@ using namespace mcrl2::core::detail;
 using namespace grape::libgrape;
 using namespace std;
 
-label::label( void )
+label::label(void)
 {
 }
 
-label::label( const label &p_label )
+label::label(const label& p_label)
 {
   m_actions = p_label.m_actions;
   m_declarations = p_label.m_declarations;
@@ -39,47 +39,47 @@ label::label( const label &p_label )
   m_condition = p_label.m_condition;
 }
 
-label::~label( void )
+label::~label(void)
 {
   m_variable_updates.Clear();
 }
 
-wxString label::get_text( void ) const
+wxString label::get_text(void) const
 {
   wxString result = _T("");
-  if ( !get_declarations_text().IsEmpty() )
+  if (!get_declarations_text().IsEmpty())
   {
-    result += get_declarations_text() + _T( "." );
+    result += get_declarations_text() + _T(".");
   }
-  if ( !get_condition().IsEmpty() )
+  if (!get_condition().IsEmpty())
   {
-    result += _T( "[" ) + get_condition() + _T( "]" );
+    result += _T("[") + get_condition() + _T("]");
   }
   result += get_actions_text();
-  if ( !get_timestamp().IsEmpty() )
+  if (!get_timestamp().IsEmpty())
   {
-    result += _T( "@" ) + get_timestamp();
+    result += _T("@") + get_timestamp();
   }
-  if ( !get_variable_updates_text().IsEmpty() )
+  if (!get_variable_updates_text().IsEmpty())
   {
-    result += _T( "/" ) + get_variable_updates_text();
+    result += _T("/") + get_variable_updates_text();
   }
   return result;
 }
 
-list_of_action &label::get_actions( void )
+list_of_action& label::get_actions(void)
 {
   return m_actions;
 }
 
-void label::set_actions_text( const wxString &p_actions )
+void label::set_actions_text(const wxString& p_actions)
 {
   m_actions.Clear();
 
   std::istringstream r(string(p_actions.mb_str()).c_str());
   atermpp::aterm_appl a_parsed_multi_action(mcrl2::core::parse_mult_act(r));
 
-  if ( a_parsed_multi_action )
+  if (a_parsed_multi_action)
   {
     // get list of ParamId's from MultAct
     atermpp::aterm_list al(a_parsed_multi_action.argument(0));
@@ -94,102 +94,106 @@ void label::set_actions_text( const wxString &p_actions )
   }
 }
 
-wxString label::get_actions_text( void ) const
+wxString label::get_actions_text(void) const
 {
   wxString result = wxEmptyString;
   size_t count = m_actions.GetCount();
-  for ( size_t i = 0; i < count; ++i )
+  for (size_t i = 0; i < count; ++i)
   {
-    action action = m_actions.Item( i );
+    action action = m_actions.Item(i);
     result += action.get_text();
-    if ( i < count - 1 )
+    if (i < count - 1)
     {
-      result += _T( "|" );
+      result += _T("|");
     }
   }
   return result;
 }
 
-list_of_decl &label::get_declarations( void )
+list_of_decl& label::get_declarations(void)
 {
   return m_declarations;
 }
 
-wxString label::get_declarations_text( void ) const
+wxString label::get_declarations_text(void) const
 {
   wxString result = wxEmptyString;
   size_t count = m_declarations.GetCount();
-  for ( size_t i = 0; i < count; ++i )
+  for (size_t i = 0; i < count; ++i)
   {
-    decl declaration = m_declarations.Item( i );
-    result += declaration.get_name() + _T( ":" ) + declaration.get_type();
-    if ( i < count - 1 )
+    decl declaration = m_declarations.Item(i);
+    result += declaration.get_name() + _T(":") + declaration.get_type();
+    if (i < count - 1)
     {
-      result += _T( "," );
+      result += _T(",");
     }
   }
   return result;
 }
 
-wxString label::get_timestamp( void ) const
+wxString label::get_timestamp(void) const
 {
   return m_timestamp.get_expression();
 }
 
-list_of_varupdate &label::get_variable_updates( void )
+list_of_varupdate& label::get_variable_updates(void)
 {
   return m_variable_updates;
 }
 
-wxString label::get_variable_updates_text( void ) const
+wxString label::get_variable_updates_text(void) const
 {
   wxString result = wxEmptyString;
   size_t count = m_variable_updates.GetCount();
-  if ( count > 0 )
+  if (count > 0)
   {
-    for ( size_t i = 0; i < count; ++i )
+    for (size_t i = 0; i < count; ++i)
     {
-      result += m_variable_updates.Item( i ).get_varupdate();
-      if ( i < count - 1 ) result += _T( "," );
+      result += m_variable_updates.Item(i).get_varupdate();
+      if (i < count - 1)
+      {
+        result += _T(",");
+      }
     }
   }
   return result;
 }
 
-wxString label::get_condition( void ) const
+wxString label::get_condition(void) const
 {
   return m_condition.get_expression();
 }
 
-void label::set_declarations( const list_of_decl &p_declarations )
+void label::set_declarations(const list_of_decl& p_declarations)
 {
   m_declarations = p_declarations;
 }
 
-void label::set_condition( const wxString &p_condition )
+void label::set_condition(const wxString& p_condition)
 {
-  m_condition.set_expression( p_condition );
+  m_condition.set_expression(p_condition);
 }
 
-void label::set_actions( const list_of_action &p_actions )
+void label::set_actions(const list_of_action& p_actions)
 {
   m_actions = p_actions;
 }
 
-void label::set_timestamp( const wxString &p_timestamp )
+void label::set_timestamp(const wxString& p_timestamp)
 {
-  m_timestamp.set_expression( p_timestamp );
+  m_timestamp.set_expression(p_timestamp);
 }
 
-void label::set_variable_updates( const list_of_varupdate &p_variable_updates )
+void label::set_variable_updates(const list_of_varupdate& p_variable_updates)
 {
   m_variable_updates = p_variable_updates;
 }
 
-void label::set_variable_updates_text(wxString p_variable_updates )
+void label::set_variable_updates_text(wxString p_variable_updates)
 {
   wxString text = p_variable_updates;
-  text.Trim(true); text.Trim(false);
+  text.Trim(true);
+  text.Trim(false);
   wxString lhs, rhs, rlhs, delimiter;
   ssize_t index = -1, index2 = -1;
   ssize_t loop = 0;
@@ -220,8 +224,10 @@ void label::set_variable_updates_text(wxString p_variable_updates )
         index2 = rlhs.Len();
       }
       rhs = rlhs.Mid(0, index2);
-      lhs.Trim(true); lhs.Trim(false);
-      rhs.Trim(true); rhs.Trim(false);
+      lhs.Trim(true);
+      lhs.Trim(false);
+      rhs.Trim(true);
+      rhs.Trim(false);
       if (!lhs.IsEmpty() && !rhs.IsEmpty())
       {
         varupdate varupdate;
@@ -236,10 +242,11 @@ void label::set_variable_updates_text(wxString p_variable_updates )
   }
 }
 
-void label::set_declarations_text( wxString p_declarations )
+void label::set_declarations_text(wxString p_declarations)
 {
   wxString text = p_declarations;
-  text.Trim(true); text.Trim(false);
+  text.Trim(true);
+  text.Trim(false);
   wxString sub_text;
   ssize_t index = -1;
 
@@ -248,7 +255,10 @@ void label::set_declarations_text( wxString p_declarations )
   while (!text.IsEmpty())
   {
     index = text.First(_T(","));
-    if (index == -1) index = text.Len();
+    if (index == -1)
+    {
+      index = text.Len();
+    }
 
     decl decl;
 
@@ -266,4 +276,4 @@ void label::set_declarations_text( wxString p_declarations )
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_label )
+WX_DEFINE_OBJARRAY(list_of_label)

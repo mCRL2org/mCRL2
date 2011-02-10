@@ -43,7 +43,7 @@ void test_case_1()
   specification s1 = s0;
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
     BOOST_CHECK(data::find_variables(i->condition()).empty());
@@ -66,7 +66,7 @@ void test_case_2()
   specification s1 = s0;
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -91,7 +91,7 @@ void test_case_3()
   specification s1 = s0;
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
     BOOST_CHECK(data::find_variables(i->condition()).empty());
@@ -114,7 +114,7 @@ void test_case_4()
   specification s1 = s0;
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
     BOOST_CHECK(data::find_variables(i->condition()).empty());
@@ -140,7 +140,7 @@ void test_case_5()
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   std::set<variable> parameters = mcrl2::data::find_variables(s1.process().process_parameters());
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
 
@@ -148,8 +148,8 @@ void test_case_5()
     // are process parameters
     std::set<variable> condition_vars = data::find_variables(i->condition());
     for (std::set<variable>::iterator j = condition_vars.begin()
-        ; j != condition_vars.end()
-        ; ++j)
+                                          ; j != condition_vars.end()
+         ; ++j)
     {
       BOOST_CHECK(parameters.find(*j) != parameters.end());
     }
@@ -158,8 +158,8 @@ void test_case_5()
     {
       std::set<variable> time_vars = data::find_variables(i->time());
       for (std::set<variable>::iterator j = time_vars.begin()
-          ; j != time_vars.end()
-          ; ++j)
+                                            ; j != time_vars.end()
+           ; ++j)
       {
         BOOST_CHECK(parameters.find(*j) != parameters.end());
       }
@@ -186,7 +186,7 @@ void test_case_6()
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -196,7 +196,8 @@ void test_case_6()
   BOOST_CHECK(sumvar_count == 1);
   BOOST_CHECK(s0 == s1);
 
-  if (!(s0 == s1) || sumvar_count != 1) {
+  if (!(s0 == s1) || sumvar_count != 1)
+  {
     std::clog << "Input specification  : " << lps::pp(s0) << std::endl
               << "Output specification : " << lps::pp(s1) << std::endl;
   }
@@ -233,7 +234,7 @@ void test_case_7()
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -264,7 +265,7 @@ void test_case_8()
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -292,7 +293,7 @@ void test_case_9()
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -307,9 +308,9 @@ void test_case_10()
 {
   std::clog << "Test case 10" << std::endl;
   const std::string text(
-  "act a:Nat;\n"
-  "proc P(n0: Nat) = sum n: Nat. (n == n0 && n == 1) -> a(n0) . P(n);\n"
-  "init P(0);\n"
+    "act a:Nat;\n"
+    "proc P(n0: Nat) = sum n: Nat. (n == n0 && n == 1) -> a(n0) . P(n);\n"
+    "init P(0);\n"
   );
 
   specification s0 = parse_linear_process_specification(text);
@@ -317,7 +318,7 @@ void test_case_10()
   sumelm_algorithm(s1).run();
   summand_list summands1 = s1.process().summands();
   int sumvar_count = 0;
-  for(summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->condition() != sort_bool::true_());
     if (!i->summation_variables().empty())
@@ -327,7 +328,8 @@ void test_case_10()
   }
   BOOST_CHECK(sumvar_count == 0);
 
-  if (!(s0 == s1)) {
+  if (!(s0 == s1))
+  {
     std::clog << "Input specification  : " << lps::pp(s0) << std::endl
               << "Output specification : " << lps::pp(s1) << std::endl;
   }

@@ -32,12 +32,14 @@ typedef int pid_t;
 
 #define WNOHANG 0x00000001
 
-inline intptr_t waitpid(pid_t pid, int* status, int options) {
+inline intptr_t waitpid(pid_t pid, int* status, int options)
+{
 
-  return _cwait (status, pid, _WAIT_CHILD);
+  return _cwait(status, pid, _WAIT_CHILD);
 }
 
-inline double round(double d) {
+inline double round(double d)
+{
   return (std::floor(d));
 }
 

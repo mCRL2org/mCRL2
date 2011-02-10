@@ -57,7 +57,8 @@ const std::string case_last(
   "proc X(id : Nat, n : Nat, dd:D) = sum d:D. a(id).X(id,(n + 1) mod 10, d);\n\n"
   "init allow({a},X(1,0,d1) || X(2,0,d1));\n");
 
-class group_information {
+class group_information
+{
 
   private:
 
@@ -74,7 +75,8 @@ class group_information {
     /**
      * \brief constructor from an mCRL2 lps
      **/
-    group_information(mcrl2::lps::specification const& l) : m_model(l) {
+    group_information(mcrl2::lps::specification const& l) : m_model(l)
+    {
       gather(l);
     }
 
@@ -82,11 +84,13 @@ class group_information {
      * \brief The number of groups (summands in the LPS)
      * \return lps::specification(l).summands().size()
      **/
-    inline size_t number_of_groups() const {
+    inline size_t number_of_groups() const
+    {
       return m_group_indices.size();
     }
 
-    inline size_t number_of_parameters() const {
+    inline size_t number_of_parameters() const
+    {
       return m_model.process().process_parameters().size();
     }
 
@@ -95,19 +99,23 @@ class group_information {
      * \param[in] index the selected summand
      * \returns reference to a vector of indices of parameters
      **/
-    inline std::vector< size_t > const& operator[](size_t index) const {
+    inline std::vector< size_t > const& operator[](size_t index) const
+    {
       return m_group_indices[index];
     }
 };
 
-void group_information::gather(mcrl2::lps::specification const& l) {
+void group_information::gather(mcrl2::lps::specification const& l)
+{
   using namespace mcrl2;
 
   using data::find_variables;
   using data::variable;
 
-  struct local {
-    static void add_used_variables(std::set< variable >& r, std::set< variable > const& c) {
+  struct local
+  {
+    static void add_used_variables(std::set< variable >& r, std::set< variable > const& c)
+    {
       r.insert(c.begin(), c.end());
     }
   };
@@ -122,20 +130,24 @@ void group_information::gather(mcrl2::lps::specification const& l) {
 
   m_group_indices.resize(summands.size());
 
-  for (std::vector< lps::summand >::const_iterator i = summands.begin(); i != summands.end(); ++i) {
+  for (std::vector< lps::summand >::const_iterator i = summands.begin(); i != summands.end(); ++i)
+  {
     std::set< variable > used_variables;
 
     local::add_used_variables(used_variables, find_variables(i->condition()));
     local::add_used_variables(used_variables, lps::find_variables(i->actions()));
 
-    if (i->has_time()) {
+    if (i->has_time())
+    {
       local::add_used_variables(used_variables, find_variables(i->time()));
     }
 
     data::assignment_list assignments(i->assignments());
 
-    for (data::assignment_list::const_iterator j = assignments.begin(); j != assignments.end(); ++j) {
-      if(j->lhs() != j->rhs()) {
+    for (data::assignment_list::const_iterator j = assignments.begin(); j != assignments.end(); ++j)
+    {
+      if (j->lhs() != j->rhs())
+      {
         local::add_used_variables(used_variables, find_variables(j->lhs()));
         local::add_used_variables(used_variables, find_variables(j->rhs()));
       }
@@ -149,30 +161,36 @@ void group_information::gather(mcrl2::lps::specification const& l) {
 
     std::vector< variable > parameters_list(specification.process_parameters().begin(), specification.process_parameters().end());
 
-    for (std::vector< variable >::const_iterator j = parameters_list.begin(); j != parameters_list.end(); ++j) {
-      if (used_parameters.find(*j) != used_parameters.end()) {
+    for (std::vector< variable >::const_iterator j = parameters_list.begin(); j != parameters_list.end(); ++j)
+    {
+      if (used_parameters.find(*j) != used_parameters.end())
+      {
         m_group_indices[i - summands.begin()].push_back(j - parameters_list.begin());
       }
     }
   }
 }
 
-void check_info(mcrl2::lps::specification const& model) {
+void check_info(mcrl2::lps::specification const& model)
+{
   group_information info(model);
 
   BOOST_CHECK(info.number_of_groups() == model.process().summand_count());
 
 #ifdef SHOW_INFO
-  for (size_t i = 0; i < info.number_of_groups(); ++i) {
+  for (size_t i = 0; i < info.number_of_groups(); ++i)
+  {
     std::vector< size_t > const& group_info(info[i]);
 
     std::cerr << "group " << i << " : {";
 
-    if (!group_info.empty()) {
+    if (!group_info.empty())
+    {
       std::cerr << group_info[0];
     }
 
-    for (std::vector< size_t >::const_iterator j = ++group_info.begin(); j < group_info.end(); ++j) {
+    for (std::vector< size_t >::const_iterator j = ++group_info.begin(); j < group_info.end(); ++j)
+    {
 
       std::cerr << "," << *j;
     }
@@ -182,7 +200,8 @@ void check_info(mcrl2::lps::specification const& model) {
 #endif
 }
 
-int test_main(int argc, char** argv) {
+int test_main(int argc, char** argv)
+{
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv);
 
   using namespace mcrl2;
@@ -199,7 +218,8 @@ int test_main(int argc, char** argv) {
 
   lps::specification model(linearise(case_no_influenced_parameters));
 
-  if (1 < argc) {
+  if (1 < argc)
+  {
     model.load(argv[1]);
 
     model.process().deadlock_summands().clear();
@@ -216,19 +236,23 @@ int test_main(int argc, char** argv) {
     stack.push(explorer->getInitialState());
     known.insert(stack.top());
 
-    while (!stack.empty()) {
+    while (!stack.empty())
+    {
       ATerm     current(stack.top());
 
       stack.pop();
 
-      for (size_t i = 0; i < model.process().summand_count(); ++i) {
+      for (size_t i = 0; i < model.process().summand_count(); ++i)
+      {
         ATerm     state;
         ATermAppl transition;
 
         std::auto_ptr< NextStateGenerator > generator(explorer->getNextStates(current, i));
 
-        while (generator->next(&transition, &state)) {
-          if (known.find(state) == known.end()) {
+        while (generator->next(&transition, &state))
+        {
+          if (known.find(state) == known.end())
+          {
             ATwarning("%t\n", state);
 
             known.insert(state);

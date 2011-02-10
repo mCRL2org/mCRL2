@@ -39,12 +39,12 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
   public:
     pbes_rewriter()
       : super(
-          "pbesrewr",
-          "Jan Friso Groote and Wieger Wesselink",
-          "rewrite and simplify a PBES",
-          "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
-          "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
-        )
+        "pbesrewr",
+        "Jan Friso Groote and Wieger Wesselink",
+        "rewrite and simplify a PBES",
+        "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
+        "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
+      )
     {}
 
     bool run()
@@ -104,9 +104,10 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         }
         case prover:
         default:
-        { // Just ignore.
+        {
+          // Just ignore.
           assert(0);  // The PBES rewriter cannot be activated through
-                      // the commandline. So, we cannot end up here.
+          // the commandline. So, we cannot end up here.
           break;
         }
       }
@@ -119,21 +120,23 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
 };
 
-class pbes_rewriter_gui: public mcrl2_gui_tool<pbes_rewriter> {
-public:
-	pbes_rewriter_gui() {
+class pbes_rewriter_gui: public mcrl2_gui_tool<pbes_rewriter>
+{
+  public:
+    pbes_rewriter_gui()
+    {
 
-		std::vector<std::string> values;
+      std::vector<std::string> values;
 
-		values.clear();
-		values.push_back("simplify");
-		values.push_back("quantifier-all");
-		values.push_back("quantifier-finite");
-		values.push_back("pfnf");
-		m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
+      values.clear();
+      values.push_back("simplify");
+      values.push_back("quantifier-all");
+      values.push_back("quantifier-finite");
+      values.push_back("pfnf");
+      m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
 
-                add_rewriter_widget();
-	}
+      add_rewriter_widget();
+    }
 };
 int main(int argc, char* argv[])
 {

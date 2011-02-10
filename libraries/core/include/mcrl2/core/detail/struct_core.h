@@ -20,9 +20,12 @@
 #include <assert.h>
 
 
-namespace mcrl2 {
-  namespace core {
-    namespace detail {
+namespace mcrl2
+{
+namespace core
+{
+namespace detail
+{
 
 //Global precondition: the ATerm library has been initialised
 
@@ -3732,13 +3735,16 @@ ATermAppl gsMakeWhr(ATermAppl DataExpr_0, ATermList WhrDecl_1)
 //-------------------------------------------------
 
 inline
-ATermAppl gsString2ATermAppl(const char *s)
+ATermAppl gsString2ATermAppl(const char* s)
 //Ret: quoted constant s, if s != NULL
 //     unquoted constant Nil, if s == NULL
 {
-  if (s != NULL) {
+  if (s != NULL)
+  {
     return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
-  } else {
+  }
+  else
+  {
     return gsMakeNil();
   }
 }
@@ -3752,13 +3758,16 @@ bool gsIsString(ATermAppl term)
 }
 
 inline
-char *gsATermAppl2String(ATermAppl term)
+char* gsATermAppl2String(ATermAppl term)
 //Ret: string s, if term is a quoted constant s
 //     NULL, otherwise
 {
-  if (gsIsString(term)) {
+  if (gsIsString(term))
+  {
     return ATgetName(ATgetAFun(term));
-  } else {
+  }
+  else
+  {
     return NULL;
   }
 }
@@ -3767,21 +3776,43 @@ inline
 bool gsIsNumericString(const char* s)
 //Ret: true if s is of form "0 | -? [1-9][0-9]*", false otherwise
 {
-  if (s == NULL) return false;
-  if (s[0] == '\0') return false;
-  if (s[0] == '-') ++s;
-  if (s[0] == '\0') return false;
-  if (s[0] == '0') {
+  if (s == NULL)
+  {
+    return false;
+  }
+  if (s[0] == '\0')
+  {
+    return false;
+  }
+  if (s[0] == '-')
+  {
     ++s;
-    if (s[0] == '\0') return true;
-    else return false;
+  }
+  if (s[0] == '\0')
+  {
+    return false;
+  }
+  if (s[0] == '0')
+  {
+    ++s;
+    if (s[0] == '\0')
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
   for (; s[0] != '\0'; ++s)
-    if(!isdigit(s[0])) return false;
+    if (!isdigit(s[0]))
+    {
+      return false;
+    }
   return true;
 }
 
-ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
+ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix);
 //Pre: Term is an ATerm containing ATermAppl's and ATermList's only
 //     s is not NULL
 //Ret: "s", if it does not occur in Term, and TryNoSuffix holds
@@ -3807,7 +3838,7 @@ inline
 bool gsIsDataExpr(ATermAppl Term)
 {
   return gsIsId(Term)    || gsIsDataVarId(Term)    || gsIsOpId(Term)    ||
-    gsIsDataAppl(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
+         gsIsDataAppl(Term) || gsIsBinder(Term)     || gsIsWhr(Term);
 }
 
 ///\return Term is a state formula
@@ -3815,23 +3846,23 @@ inline
 bool gsIsStateFrm(ATermAppl Term)
 {
   return gsIsDataExpr(Term)
-      || gsIsStateTrue(Term)
-      || gsIsStateFalse(Term)
-      || gsIsStateNot(Term)
-      || gsIsStateAnd(Term)
-      || gsIsStateOr(Term)
-      || gsIsStateImp(Term)
-      || gsIsStateForall(Term)
-      || gsIsStateExists(Term)
-      || gsIsStateMust(Term)
-      || gsIsStateMay(Term)
-      || gsIsStateYaled(Term)
-      || gsIsStateYaledTimed(Term)
-      || gsIsStateDelay(Term)
-      || gsIsStateDelayTimed(Term)
-      || gsIsStateVar(Term)
-      || gsIsStateNu(Term)
-      || gsIsStateMu(Term);
+         || gsIsStateTrue(Term)
+         || gsIsStateFalse(Term)
+         || gsIsStateNot(Term)
+         || gsIsStateAnd(Term)
+         || gsIsStateOr(Term)
+         || gsIsStateImp(Term)
+         || gsIsStateForall(Term)
+         || gsIsStateExists(Term)
+         || gsIsStateMust(Term)
+         || gsIsStateMay(Term)
+         || gsIsStateYaled(Term)
+         || gsIsStateYaledTimed(Term)
+         || gsIsStateDelay(Term)
+         || gsIsStateDelayTimed(Term)
+         || gsIsStateVar(Term)
+         || gsIsStateNu(Term)
+         || gsIsStateMu(Term);
 }
 
 ///\pre Term is not NULL
@@ -3862,27 +3893,27 @@ inline
 bool gsIsProcExpr(ATermAppl Term)
 {
   return gsIsParamId(Term)
-      || gsIsIdAssignment(Term)
-      || gsIsAction(Term)
-      || gsIsProcess(Term)
-      || gsIsProcessAssignment(Term)
-      || gsIsDelta(Term)
-      || gsIsTau (Term)
-      || gsIsSum(Term)
-      || gsIsBlock(Term)
-      || gsIsHide(Term)
-      || gsIsRename(Term)
-      || gsIsComm(Term)
-      || gsIsAllow(Term)
-      || gsIsSync(Term)
-      || gsIsAtTime(Term)
-      || gsIsSeq(Term)
-      || gsIsIfThen(Term)
-      || gsIsIfThenElse(Term)
-      || gsIsBInit(Term)
-      || gsIsMerge(Term)
-      || gsIsLMerge(Term)
-      || gsIsChoice(Term);
+         || gsIsIdAssignment(Term)
+         || gsIsAction(Term)
+         || gsIsProcess(Term)
+         || gsIsProcessAssignment(Term)
+         || gsIsDelta(Term)
+         || gsIsTau(Term)
+         || gsIsSum(Term)
+         || gsIsBlock(Term)
+         || gsIsHide(Term)
+         || gsIsRename(Term)
+         || gsIsComm(Term)
+         || gsIsAllow(Term)
+         || gsIsSync(Term)
+         || gsIsAtTime(Term)
+         || gsIsSeq(Term)
+         || gsIsIfThen(Term)
+         || gsIsIfThenElse(Term)
+         || gsIsBInit(Term)
+         || gsIsMerge(Term)
+         || gsIsLMerge(Term)
+         || gsIsChoice(Term);
 }
 
 // PBES's
@@ -3894,16 +3925,16 @@ inline
 bool gsIsPBExpr(ATermAppl Term)
 {
   return gsIsDataExpr(Term)
-      || gsIsPBESTrue(Term)
-      || gsIsPBESFalse(Term)
-      || gsIsPBESNot(Term)
-      || gsIsPBESAnd(Term)
-      || gsIsPBESOr(Term)
-      || gsIsPBESImp(Term)
-      || gsIsPBESForall(Term)
-      || gsIsPBESExists(Term)
-      || gsIsPropVarInst(Term)
-  ;
+         || gsIsPBESTrue(Term)
+         || gsIsPBESFalse(Term)
+         || gsIsPBESNot(Term)
+         || gsIsPBESAnd(Term)
+         || gsIsPBESOr(Term)
+         || gsIsPBESImp(Term)
+         || gsIsPBESForall(Term)
+         || gsIsPBESExists(Term)
+         || gsIsPropVarInst(Term)
+         ;
 }
 
 ///\pre Term is not NULL
@@ -3920,8 +3951,8 @@ bool gsIsFixpoint(ATermAppl Term)
 ATermAppl gsSortMultAct(ATermAppl MultAct);
 
 
-    }
-  }
+}
+}
 }
 
 #endif // MCRL2_LIBSTRUCT_CORE_H

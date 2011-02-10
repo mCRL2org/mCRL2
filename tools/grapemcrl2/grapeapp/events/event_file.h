@@ -15,317 +15,317 @@
 
 namespace grape
 {
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+
+/**
+ * \short Represents the new event.
+ */
+class grape_event_new : public grape_event_base
+{
+  private:
+  public:
 
     /**
-     * \short Represents the new event.
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
      */
-    class grape_event_new : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_new( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_new( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+    grape_event_new(grape_frame* p_main_frame);
 
     /**
-     * \short Represents the open event.
+     * Default destructor.
+     * Frees allocated memory.
      */
-    class grape_event_open : public grape_event_base
-    {
-      private:
-        wxFileName      m_filename;     /**< Filename optionally provided by the command line */
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         * @param p_filename The file name of the to be opened grape specification.
-         */
-        grape_event_open( grape_frame *p_main_frame,  const wxString &p_filename = wxEmptyString );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_open( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+    ~grape_event_new(void);
 
     /**
-     * \short Represents the close event.
+     * Overloaded Do function.
+     * Performs the event.
      */
-    class grape_event_close : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_close( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_close( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+    bool Do(void);
 
     /**
-     * \short Represents the save event.
+     * Overloaded Undo function.
+     * Reverts the event.
      */
-    class grape_event_save : public grape_event_base
-    {
-      private:
-      public:
+    bool Undo(void);
+};
 
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_save( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_save( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+/**
+ * \short Represents the open event.
+ */
+class grape_event_open : public grape_event_base
+{
+  private:
+    wxFileName      m_filename;     /**< Filename optionally provided by the command line */
+  public:
 
     /**
-     * \short Represents the save as event.
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     * @param p_filename The file name of the to be opened grape specification.
      */
-    class grape_event_saveas : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_saveas( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_saveas( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+    grape_event_open(grape_frame* p_main_frame,  const wxString& p_filename = wxEmptyString);
 
     /**
-     * \short Represents the print event.
+     * Default destructor.
+     * Frees allocated memory.
      */
-    class grape_event_print : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_print( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_print( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+    ~grape_event_open(void);
 
     /**
-     * \short Represents the import event.
+     * Overloaded Do function.
+     * Performs the event.
      */
-    class grape_event_import : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_import( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_import( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+    bool Do(void);
 
     /**
-     * \short Represents the validate event for the datatype specification.
+     * Overloaded Undo function.
+     * Reverts the event.
      */
-    class grape_event_validate_datatype_specification : public grape_event_base
-    {
-      private:
-      public:
+    bool Undo(void);
+};
 
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_validate_datatype_specification( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_validate_datatype_specification( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+/**
+ * \short Represents the close event.
+ */
+class grape_event_close : public grape_event_base
+{
+  private:
+  public:
 
     /**
-     * \short Represents the export to mcrl2 event for the datatype specification.
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
      */
-    class grape_event_export_datatype_specification_mcrl2 : public grape_event_base
-    {
-      private:
-      public:
+    grape_event_close(grape_frame* p_main_frame);
 
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_export_datatype_specification_mcrl2( grape_frame *p_main_frame );
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_close(void);
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_export_datatype_specification_mcrl2( void );
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
 
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
 
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
-  }
+/**
+ * \short Represents the save event.
+ */
+class grape_event_save : public grape_event_base
+{
+  private:
+  public:
+
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_save(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_save(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+
+/**
+ * \short Represents the save as event.
+ */
+class grape_event_saveas : public grape_event_base
+{
+  private:
+  public:
+
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_saveas(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_saveas(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+
+/**
+ * \short Represents the print event.
+ */
+class grape_event_print : public grape_event_base
+{
+  private:
+  public:
+
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_print(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_print(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+
+/**
+ * \short Represents the import event.
+ */
+class grape_event_import : public grape_event_base
+{
+  private:
+  public:
+
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_import(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_import(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+
+/**
+ * \short Represents the validate event for the datatype specification.
+ */
+class grape_event_validate_datatype_specification : public grape_event_base
+{
+  private:
+  public:
+
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_validate_datatype_specification(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_validate_datatype_specification(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+
+/**
+ * \short Represents the export to mcrl2 event for the datatype specification.
+ */
+class grape_event_export_datatype_specification_mcrl2 : public grape_event_base
+{
+  private:
+  public:
+
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_export_datatype_specification_mcrl2(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_export_datatype_specification_mcrl2(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+}
 }
 
 #endif // GRAPE_EVENT_FILE_H

@@ -17,18 +17,20 @@
 #include <sstream>
 #include "mcrl2/process/process_specification.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace process {
+namespace process
+{
 
-    /// \brief     Applies alphabet reduction to a process specification.
-    /// \param[in,out] p An mCRL2 process specificiation that has been
-    ///            type checked.
-    /// \post      Alphabet reductions have been applied to p.
-    /// \exception mcrl2::runtime_error Alphabet reduction failed. 
-    void apply_alphabet_reduction(process_specification& p);
+/// \brief     Applies alphabet reduction to a process specification.
+/// \param[in,out] p An mCRL2 process specificiation that has been
+///            type checked.
+/// \post      Alphabet reductions have been applied to p.
+/// \exception mcrl2::runtime_error Alphabet reduction failed.
+void apply_alphabet_reduction(process_specification& p);
 
-  } // namespace process
+} // namespace process
 
 } // namespace mcrl2
 

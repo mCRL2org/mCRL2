@@ -17,11 +17,14 @@
 #include <set>
 #include <vector>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Returns true if the sequence [first, last) contains duplicates.
 /// \param first Start of a sequence

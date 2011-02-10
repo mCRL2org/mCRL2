@@ -36,7 +36,8 @@ using namespace mcrl2::data::sort_nat;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-bool print_check(data_expression const& left, std::string const& right) {
+bool print_check(data_expression const& left, std::string const& right)
+{
   if (pp(left) != right)
   {
     std::clog << "pp(" << pp(left) << ") != " << right << std::endl;
@@ -53,9 +54,10 @@ bool print_check(data_expression const& left, std::string const& right) {
 }
 
 template <typename Container>
-bool print_container_check(Container const& c) {
+bool print_container_check(Container const& c)
+{
   std::string r = pp(c);
-  if(r == "")
+  if (r == "")
   {
     std::clog << "error printing container" << std::endl;
     return false;
@@ -66,13 +68,15 @@ bool print_container_check(Container const& c) {
 
 #define PRINT_CHECK(x,y) BOOST_CHECK(print_check(x,y))
 
-BOOST_AUTO_TEST_CASE(test_function_symbol_print) {
+BOOST_AUTO_TEST_CASE(test_function_symbol_print)
+{
   function_symbol f("f", sort_bool::bool_());
 
   PRINT_CHECK(f, "f");
 }
 
-BOOST_AUTO_TEST_CASE(test_application_print) {
+BOOST_AUTO_TEST_CASE(test_application_print)
+{
   function_symbol f("f", make_function_sort(bool_(), bool_()));
   function_symbol g("g", make_function_sort(bool_(), nat(), bool_()));
 
@@ -81,7 +85,8 @@ BOOST_AUTO_TEST_CASE(test_application_print) {
   PRINT_CHECK(g(f(true_()), sort_nat::nat(10)), "g(f(true), 10)");
 }
 
-BOOST_AUTO_TEST_CASE(test_abstraction_print) {
+BOOST_AUTO_TEST_CASE(test_abstraction_print)
+{
   using namespace sort_pos;
   using namespace sort_nat;
 
@@ -98,7 +103,8 @@ BOOST_AUTO_TEST_CASE(test_abstraction_print) {
   PRINT_CHECK(forall(x, exists(y, not_equal_to(xy[0], pos2nat(xy[1])))), "forall x: Nat. exists y: Pos. x != y");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_print) {
+BOOST_AUTO_TEST_CASE(test_list_print)
+{
   using namespace sort_bool;
   using namespace sort_list;
 
@@ -155,10 +161,11 @@ BOOST_AUTO_TEST_CASE(test_list_print) {
   data_expression l2(sort_list::list(sort_bool::bool_(), v));
   BOOST_CHECK(print_check(l2, "[true, false, true, true]"));
 
-  
+
 }
 
-BOOST_AUTO_TEST_CASE(test_set_print) {
+BOOST_AUTO_TEST_CASE(test_set_print)
+{
   using namespace sort_bool;
   using namespace sort_set;
   using namespace sort_fset;
@@ -185,7 +192,8 @@ BOOST_AUTO_TEST_CASE(test_set_print) {
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat. y == 0)(x) }"), "{ x: Nat | (lambda y: Nat. y == 0)(x) }"));
 }
 
-BOOST_AUTO_TEST_CASE(test_bag_print) {
+BOOST_AUTO_TEST_CASE(test_bag_print)
+{
   using namespace sort_bool;
   using namespace sort_bag;
   using namespace sort_fbag;

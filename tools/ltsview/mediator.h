@@ -20,7 +20,8 @@ class State;
 class Cluster;
 class Transition;
 
-class Mediator {
+class Mediator
+{
   public:
     virtual ~Mediator() {}
     virtual void activateMarkRule(int index,bool activate) = 0;
@@ -48,9 +49,9 @@ class Mediator {
 
     virtual MatchStyle getMatchStyle() = 0;
     virtual MarkStyle getMarkStyle() = 0;
-    virtual bool isMarked(State *s) = 0;
-    virtual bool isMarked(Cluster *c) = 0;
-    virtual bool isMarked(Transition *t) = 0;
+    virtual bool isMarked(State* s) = 0;
+    virtual bool isMarked(Cluster* c) = 0;
+    virtual bool isMarked(Transition* t) = 0;
 
     // Reports an error to the user through a message box.
     virtual void reportError(std::string const& error) = 0;

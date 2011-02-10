@@ -21,7 +21,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
 
-class untime_tool: public input_output_tool 
+class untime_tool: public input_output_tool
 {
   protected:
 
@@ -31,12 +31,12 @@ class untime_tool: public input_output_tool
 
     untime_tool()
       : super(
-          "lpsuntime",
-          "Jeroen Keiren",
-          "remove time from an LPS",
-          "Remove time from the linear process specification (LPS) in INFILE and write the "
-          "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not "
-          "present, stdout is used.")
+        "lpsuntime",
+        "Jeroen Keiren",
+        "remove time from an LPS",
+        "Remove time from the linear process specification (LPS) in INFILE and write the "
+        "result to OUTFILE. If INFILE is not present, stdin is used. If OUTFILE is not "
+        "present, stdout is used.")
     {}
 
     bool run()
@@ -54,10 +54,12 @@ class untime_tool: public input_output_tool
 
 };
 
-class untime_gui_tool: public mcrl2_gui_tool<untime_tool> {
-public:
-	untime_gui_tool() {
-	}
+class untime_gui_tool: public mcrl2_gui_tool<untime_tool>
+{
+  public:
+    untime_gui_tool()
+    {
+    }
 };
 
 int main(int argc, char** argv)

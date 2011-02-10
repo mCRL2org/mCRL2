@@ -18,25 +18,25 @@
 
 using namespace grape::libgrape;
 
-process_reference::process_reference( void )
-: compound_reference( PROCESS_REFERENCE )
+process_reference::process_reference(void)
+  : compound_reference(PROCESS_REFERENCE)
 {
   m_parameter_assignments.Clear();
   m_refers_to_process = 0;
 }
 
-process_reference::process_reference( const process_reference &p_process_ref )
-: compound_reference( p_process_ref )
+process_reference::process_reference(const process_reference& p_process_ref)
+  : compound_reference(p_process_ref)
 {
   m_parameter_assignments = p_process_ref.m_parameter_assignments;
   m_refers_to_process = p_process_ref.m_refers_to_process;
 }
 
-process_reference::~process_reference( void )
+process_reference::~process_reference(void)
 {
 
   // Remove all references to this object.
-  for ( unsigned int i = 0; i < m_has_channel.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_has_channel.GetCount(); ++i)
   {
     channel* channel_ptr = m_has_channel.Item(i);
     channel_ptr->detach_reference();
@@ -47,39 +47,39 @@ process_reference::~process_reference( void )
   m_parameter_assignments.Clear();
 }
 
-process_diagram* process_reference::get_relationship_refers_to( void )
+process_diagram* process_reference::get_relationship_refers_to(void)
 {
   return m_refers_to_process;
 }
 
-void process_reference::set_relationship_refers_to( process_diagram* p_proc_diagram )
+void process_reference::set_relationship_refers_to(process_diagram* p_proc_diagram)
 {
   m_refers_to_process = p_proc_diagram;
 }
 
-list_of_varupdate process_reference::get_parameter_updates( void ) const
+list_of_varupdate process_reference::get_parameter_updates(void) const
 {
   return m_parameter_assignments;
 }
 
-void process_reference::set_parameter_updates( const list_of_varupdate& p_parameter_assignments )
+void process_reference::set_parameter_updates(const list_of_varupdate& p_parameter_assignments)
 {
   m_parameter_assignments = p_parameter_assignments;
 }
 
-bool process_reference::set_text( const wxString &p_text )
+bool process_reference::set_text(const wxString& p_text)
 {
   bool valid = true;
   m_parameter_assignments.Empty();
-  wxStringTokenizer tkw( p_text, _T(";") );
+  wxStringTokenizer tkw(p_text, _T(";"));
   varupdate var_update;
-  while( tkw.HasMoreTokens() )
+  while (tkw.HasMoreTokens())
   {
     wxString token = tkw.GetNextToken();
-    valid &= var_update.set_varupdate( token );
+    valid &= var_update.set_varupdate(token);
     if (valid)
     {
-      m_parameter_assignments.Add( var_update );
+      m_parameter_assignments.Add(var_update);
     }
   }
   return valid;
@@ -88,15 +88,15 @@ bool process_reference::set_text( const wxString &p_text )
 wxString process_reference::get_text() const
 {
   wxString result;
-  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i)
   {
-    varupdate parameter_assignment = m_parameter_assignments.Item( i );
-    result += parameter_assignment.get_varupdate() + _T( ";\n" );
+    varupdate parameter_assignment = m_parameter_assignments.Item(i);
+    result += parameter_assignment.get_varupdate() + _T(";\n");
   }
   return result;
 }
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_process_reference )
+WX_DEFINE_OBJARRAY(arr_process_reference)
 

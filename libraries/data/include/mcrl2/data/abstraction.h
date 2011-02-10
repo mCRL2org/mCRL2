@@ -19,9 +19,11 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class abstraction ---//
 /// \brief An abstraction expression.
@@ -69,7 +71,7 @@ class abstraction: public data_expression
 };
 //--- end generated class abstraction ---//
 
-   } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

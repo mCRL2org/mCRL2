@@ -23,9 +23,11 @@
 #include "mcrl2/process/rename_expression.h"
 #include "mcrl2/process/communication_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace process {
+namespace process
+{
 
 // Make the LPS action visible.
 using lps::action;

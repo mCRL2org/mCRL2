@@ -31,9 +31,11 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 using atermpp::detail::operator+;
 using namespace data;
@@ -124,7 +126,7 @@ class bisimulation_algorithm
       }
     }
 
-public:
+  public:
     /// \brief Creates a name for the propositional variable Xpq
     /// \param p A linear process
     /// \param q A linear process
@@ -241,7 +243,7 @@ public:
       std::set<data::variable> qvars;
       qvars.insert(q.global_variables().begin(), q.global_variables().end());
       qvars.insert(q.process().process_parameters().begin(), q.process().process_parameters().end());
-      
+
       // put the names of variables appearing in pvars in an identifier generator
       data::set_identifier_generator generator;
       for (std::set<data::variable>::iterator i = pvars.begin(); i != pvars.end(); ++i)
@@ -258,7 +260,7 @@ public:
           result[*i] = v;
         }
       }
-      
+
       return result;
     }
 
@@ -271,10 +273,10 @@ public:
       {
         return;
       }
-      
+
       // rename unbound data variables
       data::detail::make_substitute_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(data::make_associative_container_substitution(sigma))(spec);
-        
+
       // rename process parameters
       spec.process().process_parameters() = data::substitute_variables(spec.process().process_parameters(), data::make_associative_container_substitution(sigma));
 

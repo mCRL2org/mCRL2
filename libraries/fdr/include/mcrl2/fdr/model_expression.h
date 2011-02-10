@@ -14,9 +14,11 @@
 
 #include "mcrl2/fdr/term_include_files.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated model expression class declarations ---//
 /// \brief class model_expression
@@ -70,23 +72,23 @@ class t: public model_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a nil expression
-    /// \param t A term
-    /// \return True if it is a nil expression
-    inline
-    bool is_nil(const model_expression& t)
-    {
-      return fdr::detail::gsIsNil(t);
-    }
+/// \brief Test for a nil expression
+/// \param t A term
+/// \return True if it is a nil expression
+inline
+bool is_nil(const model_expression& t)
+{
+  return fdr::detail::gsIsNil(t);
+}
 
-    /// \brief Test for a t expression
-    /// \param t A term
-    /// \return True if it is a t expression
-    inline
-    bool is_t(const model_expression& t)
-    {
-      return fdr::detail::gsIsT(t);
-    }
+/// \brief Test for a t expression
+/// \param t A term
+/// \return True if it is a t expression
+inline
+bool is_t(const model_expression& t)
+{
+  return fdr::detail::gsIsT(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

@@ -37,16 +37,16 @@ class LTSView :
   public Subscriber
 {
     typedef mcrl2::utilities::wx::tool< LTSView,
-       mcrl2::utilities::tools::input_tool > super;
+            mcrl2::utilities::tools::input_tool > super;
 
   private:
-    LTS *lts;
+    LTS* lts;
     unsigned int colourCounter;
-    GLCanvas *glCanvas;
-    MainFrame *mainFrame;
-    Settings *settings;
-    Visualizer *visualizer;
-    MarkManager *markManager;
+    GLCanvas* glCanvas;
+    MainFrame* mainFrame;
+    Settings* settings;
+    Visualizer* visualizer;
+    MarkManager* markManager;
 
     void applyMarkStyle();
     void setFSMStyle();
@@ -67,9 +67,9 @@ class LTSView :
     void exportToText(std::string filename);
     MarkStyle getMarkStyle();
     MatchStyle getMatchStyle();
-    bool isMarked(State *s);
-    bool isMarked(Cluster *s);
-    bool isMarked(Transition *t);
+    bool isMarked(State* s);
+    bool isMarked(Cluster* s);
+    bool isMarked(Transition* t);
     RGB_Color getMarkRuleColor(int mr);
     RGB_Color getNewRuleColour();
     std::string getVersionString();
@@ -86,7 +86,7 @@ class LTSView :
     int getNumberOfParams() const;
     std::string getActionLabel(const int i) const;
     std::string getParName(const int i) const;
-    std::string getParValue(State *s, const int j) const;
+    std::string getParValue(State* s, const int j) const;
     void selectStateByID(const int id);
     void selectCluster(const int rank, const int pos);
     void deselect();
@@ -107,14 +107,14 @@ class LTSView :
     DECLARE_EVENT_TABLE()
 };
 
-  class LTSView_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<LTSView>
-  {
-    public:
-  	LTSView_gui_tool()
-      {
-        //m_gui_options["no-state"] = create_checkbox_widget();
-      }
-  };
+class LTSView_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<LTSView>
+{
+  public:
+    LTSView_gui_tool()
+    {
+      //m_gui_options["no-state"] = create_checkbox_widget();
+    }
+};
 
 DECLARE_APP(LTSView_gui_tool)
 

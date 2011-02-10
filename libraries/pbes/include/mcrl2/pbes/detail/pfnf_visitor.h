@@ -30,26 +30,29 @@
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
-  /// \brief Concatenates two containers
-  /// \param x A container
-  /// \param y A container
-  /// \return The concatenation of x and y
-  template <typename Container>
-  Container concat(const Container& x, const Container& y)
-  {
-    Container result = x;
-    result.insert(result.end(), y.begin(), y.end());
-    return result;
-  }
+/// \brief Concatenates two containers
+/// \param x A container
+/// \param y A container
+/// \return The concatenation of x and y
+template <typename Container>
+Container concat(const Container& x, const Container& y)
+{
+  Container result = x;
+  result.insert(result.end(), y.begin(), y.end());
+  return result;
+}
 
-  struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
-  {
+struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
+{
     typedef pfnf_visitor self;
     typedef pbes_expression_visitor<pbes_expression> super;
     typedef core::term_traits<pbes_expression> tr;
@@ -60,7 +63,7 @@ namespace detail {
     struct variable_variable_substitution: public std::unary_function<data::variable, data::variable>
     {
       atermpp::map<data::variable, data::variable> sigma;
-        
+
       data::variable operator()(const data::variable& v) const
       {
         atermpp::map<data::variable, data::variable>::const_iterator i = sigma.find(v);
@@ -86,13 +89,13 @@ namespace detail {
     {
       typedef data::variable variable_type;
       typedef data::data_expression expression_type;
-      
+
       const variable_variable_substitution& sigma;
-      
+
       variable_data_expression_substitution(const variable_variable_substitution& sigma_)
         : sigma(sigma_)
       {}
-      
+
       data::data_expression operator()(const data::variable& v) const
       {
         return sigma(v);
@@ -104,7 +107,7 @@ namespace detail {
     struct implication: public pbes_expression
     {
       std::vector<propositional_variable_instantiation> rhs;
-        
+
       implication(const atermpp::aterm_appl& x, const std::vector<propositional_variable_instantiation>& rhs_)
         : pbes_expression(x),
           rhs(rhs_)
@@ -113,7 +116,7 @@ namespace detail {
       implication(const atermpp::aterm_appl& x)
         : pbes_expression(x)
       {}
-      
+
       // applies a substitution to variables
       void substitute(const variable_variable_substitution& sigma)
       {
@@ -130,7 +133,7 @@ namespace detail {
     {
       std::vector<quantifier> quantifiers;
       atermpp::vector<implication> implications;
-        
+
       expression(const atermpp::aterm_appl& x, const std::vector<quantifier>& quantifiers_, const atermpp::vector<implication>& implications_)
         : pbes_expression(x),
           quantifiers(quantifiers_),
@@ -440,7 +443,7 @@ namespace detail {
       expression_stack.push_back(expression(h, q, g));
       return super::continue_recursion;
     }
-  };
+};
 
 } // namespace detail
 

@@ -14,9 +14,11 @@
 
 #include "mcrl2/data/set_identifier_generator.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
 /// \brief Identifier generator that uses a given postfix as a hint for generating identifiers.
 class postfix_identifier_generator: public set_identifier_generator

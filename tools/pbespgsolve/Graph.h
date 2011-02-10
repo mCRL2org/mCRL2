@@ -26,9 +26,9 @@ typedef size_t edgei;    //!< type used to number edges
     and E edges, and can store either edge successors, predecessors, or both. */
 class StaticGraph
 {
-public:
+  public:
     /*! Iterator used to iterate over predecessor/successor vertices. */
-    typedef const verti *const_iterator;
+    typedef const verti* const_iterator;
 
     /*! A list of edges */
     typedef std::vector<std::pair<verti, verti> > edge_list;
@@ -42,9 +42,9 @@ public:
         but this requires more memory. */
     enum EdgeDirection
     {
-        EDGE_SUCCESSOR      = 1,
-        EDGE_PREDECESSOR    = 2,
-        EDGE_BIDIRECTIONAL  = 3
+      EDGE_SUCCESSOR      = 1,
+      EDGE_PREDECESSOR    = 2,
+      EDGE_BIDIRECTIONAL  = 3
     };
 
     StaticGraph();          /*!< Construct an empty static graph. */
@@ -61,76 +61,93 @@ public:
     void assign(edge_list edges, EdgeDirection edge_dir);
 
     /*! Write raw graph data to output stream */
-    void write_raw(std::ostream &os) const;
+    void write_raw(std::ostream& os) const;
 
     /*! Read raw graph data from input stream */
-    void read_raw(std::istream &is);
+    void read_raw(std::istream& is);
 
     /*! Returns the memory used to store the graph data. */
     size_t memory_use() const;
 
-    verti V() const { return V_; }  /*!< Return number of vertices in the graph */
-    edgei E() const { return E_; }  /*!< Return number of edges in the graph */
+    verti V() const
+    {
+      return V_;  /*!< Return number of vertices in the graph */
+    }
+    edgei E() const
+    {
+      return E_;  /*!< Return number of edges in the graph */
+    }
 
     /*! Return direction of edges stored. */
-    EdgeDirection edge_dir() const { return edge_dir_; }
+    EdgeDirection edge_dir() const
+    {
+      return edge_dir_;
+    }
 
     /*! Returns an iterator pointing to the first successor of vertex `v`. */
-    const_iterator succ_begin(verti v) const {
-        return &successors_[successor_index_[v]];
+    const_iterator succ_begin(verti v) const
+    {
+      return &successors_[successor_index_[v]];
     }
 
     /*! Returns an iterator pointing past the last successor of vertex `v`. */
-    const_iterator succ_end(verti v) const {
-        return &successors_[successor_index_[v + 1]];
+    const_iterator succ_end(verti v) const
+    {
+      return &successors_[successor_index_[v + 1]];
     }
 
     /*! Returns an iterator pointing to the first predecessor of vertex `v`. */
-    const_iterator pred_begin(verti v) const {
-        return &predecessors_[predecessor_index_[v]];
+    const_iterator pred_begin(verti v) const
+    {
+      return &predecessors_[predecessor_index_[v]];
     }
 
     /*! Returns an iterator pointing past the last predecessor of vertex `v`. */
-    const_iterator pred_end(verti v) const {
-        return &predecessors_[predecessor_index_[v + 1]];
+    const_iterator pred_end(verti v) const
+    {
+      return &predecessors_[predecessor_index_[v + 1]];
     }
 
     /*! Returns whether `v' has a successor `w'. */
-    bool has_succ(verti v, verti w) const {
-        return std::binary_search(succ_begin(v), succ_end(v), w);
+    bool has_succ(verti v, verti w) const
+    {
+      return std::binary_search(succ_begin(v), succ_end(v), w);
     }
 
     /*! Returns whether `w' has a predecessor `v'. */
-    bool has_pred(verti w, verti v) const {
-        return std::binary_search(pred_begin(w), pred_end(w), v);
+    bool has_pred(verti w, verti v) const
+    {
+      return std::binary_search(pred_begin(w), pred_end(w), v);
     }
 
     /*! Returns the degree for vertex `v'. */
-    edgei degree(verti v) const {
-        return indegree(v) + outdegree(v);
+    edgei degree(verti v) const
+    {
+      return indegree(v) + outdegree(v);
     }
 
     /*! Returns the outdegree for vertex `v'. */
-    edgei outdegree(verti v) const {
-        return succ_end(v) - succ_begin(v);
+    edgei outdegree(verti v) const
+    {
+      return succ_end(v) - succ_begin(v);
     }
 
     /*! Returns the indegree for vertex `v'. */
-    edgei indegree(verti v) const 
+    edgei indegree(verti v) const
     {
-        return pred_end(v) - pred_begin(v);
+      return pred_end(v) - pred_begin(v);
     }
 
-protected:
+  protected:
     /*! Frees allocated memory and then reallocates memory to store a graph
         with `V` vertices and `E` edges. */
     void reset(verti V, edgei E, EdgeDirection edge_dir);
 
-private:
-    explicit StaticGraph(const StaticGraph &graph);
-    StaticGraph &operator=(const StaticGraph &graph);
+  private:
+    explicit StaticGraph(const StaticGraph& graph);
+    StaticGraph& operator=(const StaticGraph& graph);
 
-private:
+  private:
     verti V_;  /*!< number of vertices */
     edgei E_;  /*!< number of edges */
 
@@ -138,17 +155,17 @@ private:
         If edges are pairs of nodes (i,j), then `successors` is the list of
         successors (j's) obtained after sorting edges by predecessors (i's),
         and vice versa for `predecessors`. */
-    verti *successors_, *predecessors_;
+    verti* successors_, *predecessors_;
 
     /*! Indices into the successor/predecessor lists (of size V + 1).
         successor_index[i] is the lowest index of an edge in `successors` with
         a predecessor >= i; successor_index[V] is E. */
-    edgei *successor_index_, *predecessor_index_;
+    edgei* successor_index_, *predecessor_index_;
 
     /*! Direction of stored edges. */
     EdgeDirection edge_dir_;
 
-private:
+  private:
     /* This is a bit of a hack to allow the small progress measures code to
        do a preprocessing pass for nodes with self-loops. */
     friend class SmallProgressMeasures;

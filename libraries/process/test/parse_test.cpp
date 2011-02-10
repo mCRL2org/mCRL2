@@ -22,15 +22,15 @@
 using namespace mcrl2;
 using namespace mcrl2::process;
 
-std::string DATA_DECL = 
+std::string DATA_DECL =
   "glob                   \n"
   "  m: Nat;              \n"
-  "                       \n" 
+  "                       \n"
   "act                    \n"
   "  a: Nat;              \n"
   ;
 
-std::string PROC_DECL = 
+std::string PROC_DECL =
   "proc P(n:Nat);         \n"
   ;
 
@@ -44,8 +44,8 @@ void test_parse_process_specification()
     "proc P(i,j: Nat) = P(1, 1); \n"
     "                                               \n"
     "init P(i = 1, j = v);                          \n"
-    ; 
-  
+    ;
+
   process_specification p = parse_process_specification(text);
 }
 

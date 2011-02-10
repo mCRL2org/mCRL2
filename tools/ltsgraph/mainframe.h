@@ -17,21 +17,21 @@
 #include <wx/aui/aui.h>
 
 #ifndef LTSGRAPH_H
-  #include "ltsgraph.h"
+#include "ltsgraph.h"
 #else
-  class LTSGraph; // Forward declaration
+class LTSGraph; // Forward declaration
 #endif
 
 #ifndef GLCANVAS_H
-  #include "glcanvas.h"
+#include "glcanvas.h"
 #else
-  class GLCanvas;
+class GLCanvas;
 #endif
 
 #ifndef ALGO_DIALOG_H
-  #include "algodialog.h"
+#include "algodialog.h"
 #else
-  class AlgoDialog;
+class AlgoDialog;
 #endif
 
 #include "infodialog.h"
@@ -39,18 +39,18 @@
 class MainFrame : public wxFrame
 {
   public:
-    MainFrame(LTSGraph *owner);
-		~MainFrame();
+    MainFrame(LTSGraph* owner);
+    ~MainFrame();
 
     GLCanvas* getGLCanvas();
 
     void setLTSInfo(size_t is, size_t ns, size_t nt, size_t nl);
 
   private:
-    LTSGraph *app;
-    GLCanvas *glCanvas;
-    AlgoDialog *algoDlg;
-    InfoDialog *infoDlg;
+    LTSGraph* app;
+    GLCanvas* glCanvas;
+    AlgoDialog* algoDlg;
+    InfoDialog* infoDlg;
 
     void setupMenuBar();
     void setupMainArea();
@@ -63,21 +63,21 @@ class MainFrame : public wxFrame
     void onInfo(wxCommandEvent& event);
     void onTogglePositioning(wxCommandEvent& event);
     void onToggleVector(wxCommandEvent& event);
-	void onToggle3D(wxCommandEvent& event);
+    void onToggle3D(wxCommandEvent& event);
     void onExport(wxCommandEvent& event);
     void onImport(wxCommandEvent& event);
     void onSelect(wxCommandEvent& event);
     void onColour(wxCommandEvent& event);
-	void onResetAll(wxCommandEvent& event);
-	void onResetRot(wxCommandEvent& event);
-	void onResetPan(wxCommandEvent& event);
-	void onMode(wxCommandEvent& event);
-	void onShowSystem(wxCommandEvent& event);
+    void onResetAll(wxCommandEvent& event);
+    void onResetRot(wxCommandEvent& event);
+    void onResetPan(wxCommandEvent& event);
+    void onMode(wxCommandEvent& event);
+    void onShowSystem(wxCommandEvent& event);
 
-  wxAuiManager m_mgr;
+    wxAuiManager m_mgr;
 
 
-  DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };
 
 #endif // MAINFRAME_H

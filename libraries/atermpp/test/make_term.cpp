@@ -24,7 +24,7 @@ void foo()
   const int i       = 42;
   const char* blob  = "12345678";
   const double r    = 3.14;
-  const char *func  = "f";
+  const char* func  = "f";
 
   aterm term[4];
   aterm list[3];

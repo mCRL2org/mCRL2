@@ -55,12 +55,14 @@ void State::setShowStateVector(const bool value)
 void State::addOutTransition(Transition* ot)
 {
   State* to = ot->getTo();
-  if (hasTransitionTo(to)) {
+  if (hasTransitionTo(to))
+  {
     outCurve += .025;
     ot->setControlAlpha(outCurve * M_PI);
   }
   // If the target of this transition has a returning transition, we curve it
-  else if(to->hasTransitionTo(this)) {
+  else if (to->hasTransitionTo(this))
+  {
     ot->setControlAlpha(.25 * M_PI);
   }
 
@@ -78,15 +80,18 @@ void State::addSelfLoop(Transition* sl)
   selfLoops.push_back(sl);
 }
 
-void State::setParameters(std::map<std::string, std::string>& params) {
+void State::setParameters(std::map<std::string, std::string>& params)
+{
   parameterValues = params;
 }
 
-void State::setColour(const wxColour colour) {
+void State::setColour(const wxColour colour)
+{
   this->colour = colour;
 }
 
-wxColour State::getColour() const {
+wxColour State::getColour() const
+{
   return colour;
 }
 
@@ -222,7 +227,8 @@ bool State::isDragged() const
   return dragged;
 }
 
-const std::map<std::string, std::string>& State::getParameters() const {
+const std::map<std::string, std::string>& State::getParameters() const
+{
   return parameterValues;
 }
 
@@ -230,7 +236,8 @@ bool State::hasTransitionTo(State* to)
 {
   bool result = false;
 
-  for(size_t i = 0; i < outTransitions.size() && !result; ++i) {
+  for (size_t i = 0; i < outTransitions.size() && !result; ++i)
+  {
     result = outTransitions[i]->getTo() == to;
   }
 

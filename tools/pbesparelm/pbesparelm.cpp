@@ -25,17 +25,17 @@ using namespace mcrl2::utilities::tools;
 //[pbes_parelm_tool
 class pbes_parelm_tool: public input_output_tool
 {
-  typedef input_output_tool super;
+    typedef input_output_tool super;
 
   public:
     pbes_parelm_tool()
       : super(
-          "pbesparelm",
-          "Wieger Wesselink; Simon Janssen and Tim Willemse",
-          "remove unused parameters from a PBES",
-          "Reads a file containing a PBES, and applies parameter elimination to it. If OUTFILE "
-          "is not present, standard output is used. If INFILE is not present, standard input is used."
-        )
+        "pbesparelm",
+        "Wieger Wesselink; Simon Janssen and Tim Willemse",
+        "remove unused parameters from a PBES",
+        "Reads a file containing a PBES, and applies parameter elimination to it. If OUTFILE "
+        "is not present, standard output is used. If INFILE is not present, standard input is used."
+      )
     {}
 
     bool run() /*< The virtual function `run` executes the tool.
@@ -67,9 +67,10 @@ class pbes_parelm_tool: public input_output_tool
 
 };
 
-class pbes_parelm_gui_tool: public mcrl2_gui_tool<pbes_parelm_tool> {
-public:
-	pbes_parelm_gui_tool() {}
+class pbes_parelm_gui_tool: public mcrl2_gui_tool<pbes_parelm_tool>
+{
+  public:
+    pbes_parelm_gui_tool() {}
 };
 int main(int argc, char** argv)
 {

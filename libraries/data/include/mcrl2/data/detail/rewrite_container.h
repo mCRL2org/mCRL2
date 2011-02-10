@@ -16,45 +16,48 @@
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/rewriter.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-namespace detail {
+namespace detail
+{
 
-  template <typename ExpressionContainer, typename Rewriter>
-  void rewrite_container(ExpressionContainer& v, const Rewriter& rewr)
+template <typename ExpressionContainer, typename Rewriter>
+void rewrite_container(ExpressionContainer& v, const Rewriter& rewr)
+{
+  for (typename ExpressionContainer::iterator i = v.begin(); i != v.end(); ++i)
   {
-    for (typename ExpressionContainer::iterator i = v.begin(); i != v.end(); ++i)
-    {
-      *i = rewr(*i);
-    }
+    *i = rewr(*i);
   }
+}
 
-  template <typename ExpressionContainer, typename Rewriter, typename Substitution>
-  void rewrite_container(ExpressionContainer& v, const Rewriter& rewr, const Substitution& sigma)
+template <typename ExpressionContainer, typename Rewriter, typename Substitution>
+void rewrite_container(ExpressionContainer& v, const Rewriter& rewr, const Substitution& sigma)
+{
+  for (typename ExpressionContainer::iterator i = v.begin(); i != v.end(); ++i)
   {
-    for (typename ExpressionContainer::iterator i = v.begin(); i != v.end(); ++i)
-    {
-      *i = rewr(*i, sigma);
-    }
+    *i = rewr(*i, sigma);
   }
+}
 
-  template <typename Rewriter>
-  void rewrite_container(data::data_expression_list& v, const Rewriter& rewr)
-  {
-    std::vector<data_expression> tmp(v.begin(), v.end());
-    rewrite_container(tmp, rewr);
-    v = atermpp::convert<data::data_expression_list>(tmp);
-  }
+template <typename Rewriter>
+void rewrite_container(data::data_expression_list& v, const Rewriter& rewr)
+{
+  std::vector<data_expression> tmp(v.begin(), v.end());
+  rewrite_container(tmp, rewr);
+  v = atermpp::convert<data::data_expression_list>(tmp);
+}
 
-  template <typename Rewriter, typename Substitution>
-  void rewrite_container(data::data_expression_list& v, const Rewriter& rewr, const Substitution& sigma)
-  {
-    std::vector<data_expression> tmp(v.begin(), v.end());
-    rewrite_container(tmp, rewr, sigma);
-    v = atermpp::convert<data::data_expression_list>(tmp);
-  }
+template <typename Rewriter, typename Substitution>
+void rewrite_container(data::data_expression_list& v, const Rewriter& rewr, const Substitution& sigma)
+{
+  std::vector<data_expression> tmp(v.begin(), v.end());
+  rewrite_container(tmp, rewr, sigma);
+  v = atermpp::convert<data::data_expression_list>(tmp);
+}
 
 } // namespace detail
 

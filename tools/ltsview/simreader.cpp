@@ -16,7 +16,8 @@
 simReader::simReader(Simulation* s)
   : sim(s)
 {
-  if (s != NULL) {
+  if (s != NULL)
+  {
     connection = sim->connect(boost::bind(&simReader::refresh, this));
     chooseConnection = sim->connectSel(boost::bind(&simReader::selChange,
                                        this));
@@ -39,5 +40,5 @@ void simReader::setSim(Simulation* s)
   sim = s;
   connection = sim->connect(boost::bind(&simReader::refresh, this));
   chooseConnection = sim->connectSel(boost::bind(&simReader::selChange,
-                                       this));
+                                     this));
 }

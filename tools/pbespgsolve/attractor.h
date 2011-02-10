@@ -16,8 +16,8 @@
     and stores it in-place in `vertices'. If `strategy' is not NULL, it is
     updated for all vertices added that are controlled by `player'. */
 template<class SetT>
-void make_attractor_set( const ParityGame &game, ParityGame::Player player,
-                         SetT &vertices, ParityGame::Strategy *strategy );
+void make_attractor_set(const ParityGame& game, ParityGame::Player player,
+                        SetT& vertices, ParityGame::Strategy* strategy);
 
 #include "attractor_impl.h"
 

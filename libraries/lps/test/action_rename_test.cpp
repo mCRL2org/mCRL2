@@ -21,19 +21,20 @@ using lps::action_rename_specification;
 // using lps::action_rename;
 
 void test1()
-{ // Check a renaming when more than one renaming rule
+{
+  // Check a renaming when more than one renaming rule
   // for one action is present.
   const std::string SPEC =
-  "act a:Nat;                               \n"
-  "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
-  "init P(0);                               \n";
+    "act a:Nat;                               \n"
+    "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
+    "init P(0);                               \n";
 
   const std::string AR_SPEC =
-  "act b,c:Nat;\n"
-  "var n:Nat;\n"
-  "rename \n"
-  "  (n>4)  -> a(n) => b(n); \n"
-  "  (n<22) -> a(n) => c(n); \n";
+    "act b,c:Nat;\n"
+    "var n:Nat;\n"
+    "rename \n"
+    "  (n>4)  -> a(n) => b(n); \n"
+    "  (n<22) -> a(n) => c(n); \n";
 
   specification spec = lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
@@ -43,22 +44,23 @@ void test1()
 }
 
 void test2()
-{ // Check whether new declarations in the rename file
+{
+  // Check whether new declarations in the rename file
   // are read properly. Check for renamings of more than one action.
   const std::string SPEC =
-  "act a,b:Nat;                             \n"
-  "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
-  "init P(0);                               \n";
+    "act a,b:Nat;                             \n"
+    "proc P(n:Nat) = sum m: Nat. a(m). P(m);  \n"
+    "init P(0);                               \n";
 
   const std::string AR_SPEC =
-  "map f:Nat->Nat; \n"
-  "var n':Nat; \n"
-  "eqn f(n')=3; \n"
-  "act c:Nat; \n"
-  "var n:Nat; \n"
-  "rename \n"
-  "  (f(n)>23) -> a(n) => b(n); \n"
-  "  b(n) => c(n); \n";
+    "map f:Nat->Nat; \n"
+    "var n':Nat; \n"
+    "eqn f(n')=3; \n"
+    "act c:Nat; \n"
+    "var n:Nat; \n"
+    "rename \n"
+    "  (f(n)>23) -> a(n) => b(n); \n"
+    "  b(n) => c(n); \n";
 
   specification spec = lps::linearise(SPEC);
   std::istringstream ar_spec_stream(AR_SPEC);
@@ -67,7 +69,7 @@ void test2()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
-int test_main(int argc, char** argv )
+int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   test1();

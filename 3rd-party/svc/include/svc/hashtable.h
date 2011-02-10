@@ -1,4 +1,4 @@
-/* 
+/*
    SVC -- the SVC (Systems Validation Centre) file format library
 
    Copyright (C) 2000  Stichting Mathematisch Centrum, Amsterdam,
@@ -25,27 +25,28 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #include "aterm2.h"
 #include "ptable.h"
 
-typedef struct {
-   ATermIndexedSet terms;
-   PTable pointers;
-} HTable;
+  typedef struct
+  {
+    ATermIndexedSet terms;
+    PTable pointers;
+  } HTable;
 
-int HTinit (HTable *);
-void HTfree(HTable *);
-unsigned int HTinsert (HTable *, ATerm, void *);
-int HTmember (HTable *, ATerm, long*);
-ATerm HTgetTerm(HTable *, long);
-void *HTgetPtr(HTable *, long);
-void HTsetPtr(HTable *, long, void *);
+  int HTinit(HTable*);
+  void HTfree(HTable*);
+  unsigned int HTinsert(HTable*, ATerm, void*);
+  int HTmember(HTable*, ATerm, long*);
+  ATerm HTgetTerm(HTable*, long);
+  void* HTgetPtr(HTable*, long);
+  void HTsetPtr(HTable*, long, void*);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif
 

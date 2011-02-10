@@ -16,19 +16,19 @@
 
 class BitmapPanel : public wxPanel
 {
-public:
+  public:
     // -- constructors and desctructor ------------------------------
     BitmapPanel(
-        wxWindow* parent,
-        wxSize size,
-        const char* const* image );
+      wxWindow* parent,
+      wxSize size,
+      const char* const* image);
     virtual ~BitmapPanel();
 
-protected:
+  protected:
     // -- event handlers --------------------------------------------
-    void onEvtPaint( wxPaintEvent& event );
+    void onEvtPaint(wxPaintEvent& event);
 
-private:
+  private:
     // -- data members ----------------------------------------------
     wxBitmap* bitmap;
 

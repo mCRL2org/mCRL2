@@ -32,7 +32,7 @@ BEGIN_EVENT_TABLE(SaveVecDialog,wxDialog)
 END_EVENT_TABLE()
 
 SaveVecDialog::SaveVecDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
-    wxFileName filename)
+                             wxFileName filename)
   : wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition)
 {
   statusbar = sb;
@@ -43,15 +43,15 @@ SaveVecDialog::SaveVecDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   f_formats.push_back(GL2PS_PDF);
   f_formats.push_back(GL2PS_SVG);
 
-  f_desc.push_back( wxT("PostScript") );
-  f_desc.push_back( wxT("Encapsulated PostScript") );
-  f_desc.push_back( wxT("Portable Document Format") );
-  f_desc.push_back( wxT("Scalable Vector Graphics") );
+  f_desc.push_back(wxT("PostScript"));
+  f_desc.push_back(wxT("Encapsulated PostScript"));
+  f_desc.push_back(wxT("Portable Document Format"));
+  f_desc.push_back(wxT("Scalable Vector Graphics"));
 
-  f_exts.push_back( wxT("ps") );
-  f_exts.push_back( wxT("eps") );
-  f_exts.push_back( wxT("pdf") );
-  f_exts.push_back( wxT("svg") );
+  f_exts.push_back(wxT("ps"));
+  f_exts.push_back(wxT("eps"));
+  f_exts.push_back(wxT("pdf"));
+  f_exts.push_back(wxT("svg"));
 
   wxArrayString fts;
   unsigned int default_id = 0;
@@ -65,7 +65,7 @@ SaveVecDialog::SaveVecDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   }
 
   ft_choice = new wxChoice(this,myID_FT_CHOICE,wxDefaultPosition,
-      wxDefaultSize,fts);
+                           wxDefaultSize,fts);
   ft_choice->SetSelection(default_id);
 
   f_name.Assign(filename);
@@ -91,12 +91,12 @@ SaveVecDialog::SaveVecDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   wxFlexGridSizer* controlSizer = new wxFlexGridSizer(2,3,0,0);
   // Row 0
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File:")),0,
-    wxEXPAND|wxALL,5);
+                    wxEXPAND|wxALL,5);
   controlSizer->Add(f_text,0,wxEXPAND|wxALL,5);
   controlSizer->Add(f_button,0,wxEXPAND|wxALL,5);
   // Row 1
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File type:")),0,
-    wxEXPAND|wxALL,5);
+                    wxEXPAND|wxALL,5);
   controlSizer->Add(ft_choice,0,wxEXPAND|wxALL,5);
   controlSizer->AddSpacer(0);
 
@@ -123,7 +123,7 @@ SaveVecDialog::~SaveVecDialog()
 void SaveVecDialog::onChangeFile(wxCommandEvent& /*event*/)
 {
   wxString new_file = wxFileSelector(wxT("Select a file"),f_name.GetPath(),
-    f_name.GetFullName(),wxT(""),wxT("*.*"),wxFD_SAVE,this);
+                                     f_name.GetFullName(),wxT(""),wxT("*.*"),wxFD_SAVE,this);
   if (!new_file.empty())
   {
     f_name.Assign(new_file);
@@ -132,7 +132,10 @@ void SaveVecDialog::onChangeFile(wxCommandEvent& /*event*/)
     // type)
     wxString ext = f_name.GetExt();
     unsigned int i = 0;
-    while (i < f_exts.size() && f_exts[i] != ext) ++i;
+    while (i < f_exts.size() && f_exts[i] != ext)
+    {
+      ++i;
+    }
     if (i < f_exts.size())
     {
       ft_choice->SetSelection(i);
@@ -162,13 +165,13 @@ void SaveVecDialog::onChoice(wxCommandEvent& event)
 
 void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
 {
-  FILE *fp = fopen(f_name.GetFullPath().mb_str(wxConvUTF8), "wb");
+  FILE* fp = fopen(f_name.GetFullPath().mb_str(wxConvUTF8), "wb");
   if (fp == NULL)
   {
     wxMessageDialog msgDialog(GetParent(),
-        wxT("Could not open file for writing:\n\n")
-        + f_name.GetFullPath(), wxT("Error writing file"),
-        wxOK | wxICON_ERROR);
+                              wxT("Could not open file for writing:\n\n")
+                              + f_name.GetFullPath(), wxT("Error writing file"),
+                              wxOK | wxICON_ERROR);
     msgDialog.ShowModal();
     return;
   }
@@ -186,7 +189,7 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
   GLint begstate;
   GLint endstate = GL2PS_OVERFLOW;
   GLint options = GL2PS_SILENT | GL2PS_USE_CURRENT_VIEWPORT
-    | GL2PS_BEST_ROOT;
+                  | GL2PS_BEST_ROOT;
 
   if (bg_check->GetValue())
   {
@@ -218,8 +221,8 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
     buffsize += 1024*1024;
     begstate =
       gl2psBeginPage(f_name.GetFullName().mb_str(wxConvUTF8), "LTSView", NULL,
-          f_formats[ft_choice->GetSelection()], GL2PS_BSP_SORT, options,
-          GL_RGBA, 0, NULL, 0, 0, 0, buffsize, fp, "" );
+                     f_formats[ft_choice->GetSelection()], GL2PS_BSP_SORT, options,
+                     GL_RGBA, 0, NULL, 0, 0, 0, buffsize, fp, "");
     if (begstate == GL2PS_ERROR)
     {
       break;
@@ -235,8 +238,8 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
     statusbar->SetStatusText(wxT("Save picture failed"));
     statusbar->Update();
     wxMessageDialog msgDialog(GetParent(),
-        wxT("Saving picture failed with an unknown error."),
-        wxT("Save picture failed"), wxOK | wxICON_ERROR);
+                              wxT("Saving picture failed with an unknown error."),
+                              wxT("Save picture failed"), wxOK | wxICON_ERROR);
     msgDialog.ShowModal();
   }
   else
@@ -244,9 +247,9 @@ void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
     statusbar->SetStatusText(wxT("Done"));
     statusbar->Update();
     wxMessageDialog msgDialog(GetParent(),
-        wxT("The picture was saved to file:\n\n") +
-        f_name.GetFullPath(), wxT("Picture saved"),
-        wxOK | wxICON_INFORMATION);
+                              wxT("The picture was saved to file:\n\n") +
+                              f_name.GetFullPath(), wxT("Picture saved"),
+                              wxOK | wxICON_INFORMATION);
     msgDialog.ShowModal();
   }
   statusbar->SetStatusText(wxT(""));
@@ -261,8 +264,8 @@ void SaveVecDialog::update_file_name()
   if (text.Len() > MAX_LABEL_LENGTH)
   {
     text = text.Left((MAX_LABEL_LENGTH - 3) / 2)
-      + wxT("...")
-      + text.Right((MAX_LABEL_LENGTH - 3) / 2 + (MAX_LABEL_LENGTH - 3) % 2);
+           + wxT("...")
+           + text.Right((MAX_LABEL_LENGTH - 3) / 2 + (MAX_LABEL_LENGTH - 3) % 2);
   }
   f_text->SetLabel(text);
 }

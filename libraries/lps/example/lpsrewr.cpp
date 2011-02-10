@@ -29,7 +29,7 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
     {
       super::add_options(desc);
       desc.add_hidden_option("benchmark", utilities::make_mandatory_argument("NUM"),
-              "rewrite data expressions NUM times; do not save output", 'b');
+                             "rewrite data expressions NUM times; do not save output", 'b');
     }
 
     /// Parse the non-default options.
@@ -57,15 +57,15 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
   public:
     lps_rewriter_tool()
       : super(
-          "lpsrewr",
-          "Wieger Wesselink",
-          "rewrite data expressions in an LPS",
-          "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
-          "If OUTFILE is not present, standard output is used. If INFILE is not present,"
-          "standard input is used"
-        ),
-        m_benchmark(false),
-        m_bench_times(1)
+        "lpsrewr",
+        "Wieger Wesselink",
+        "rewrite data expressions in an LPS",
+        "Rewrite data expressions of the LPS in INFILE and save the result to OUTFILE."
+        "If OUTFILE is not present, standard output is used. If INFILE is not present,"
+        "standard input is used"
+      ),
+      m_benchmark(false),
+      m_bench_times(1)
     {}
 
     bool run()
@@ -77,7 +77,7 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
       {
         run_bench_mark(spec, R);
       }
-      lps::rewrite(spec, R);     
+      lps::rewrite(spec, R);
       spec.save(output_filename());
       return true;
     }

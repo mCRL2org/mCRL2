@@ -16,76 +16,90 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/container_utility.h"
 
-namespace atermpp {
+namespace atermpp
+{
 
-    /// \cond INTERNAL_DOCS
-    namespace detail {
+/// \cond INTERNAL_DOCS
+namespace detail
+{
 
-      template < typename Container >
-      struct container_value {
-        typedef typename Container::value_type type;
-      };
+template < typename Container >
+struct container_value
+{
+  typedef typename Container::value_type type;
+};
 
-      template < >
-      struct container_value< ATermList > {
-        typedef atermpp::aterm type;
-      };
+template < >
+struct container_value< ATermList >
+{
+  typedef atermpp::aterm type;
+};
 
-      template < typename TargetContainer, typename SourceContainer,
-                 typename TargetExpression = typename container_value< TargetContainer >::type,
-                 typename SourceExpression = typename container_value< SourceContainer >::type >
-      struct converter {
-        template < typename Container >
-        static TargetContainer convert(Container const& l) {
-          return TargetContainer(l.begin(), l.end());
-        }
-      };
+template < typename TargetContainer, typename SourceContainer,
+         typename TargetExpression = typename container_value< TargetContainer >::type,
+         typename SourceExpression = typename container_value< SourceContainer >::type >
+struct converter
+{
+  template < typename Container >
+  static TargetContainer convert(Container const& l)
+  {
+    return TargetContainer(l.begin(), l.end());
+  }
+};
 
-      // Specialisation for ATermList
-      template < typename TargetContainer, typename TargetExpression >
-      struct converter< TargetContainer, ATermList, TargetExpression, atermpp::aterm > :
-                 public converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm > {
+// Specialisation for ATermList
+template < typename TargetContainer, typename TargetExpression >
+struct converter< TargetContainer, ATermList, TargetExpression, atermpp::aterm > :
+  public converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm >
+{
 
-        static TargetContainer convert(ATermList l) {
-          return converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm >::convert(atermpp::term_list< TargetExpression >(l));
-        }
-      };
+  static TargetContainer convert(ATermList l)
+  {
+    return converter< TargetContainer, atermpp::term_list< TargetExpression >, TargetExpression, atermpp::aterm >::convert(atermpp::term_list< TargetExpression >(l));
+  }
+};
 
-      // Copy to from term list to term list
-      template < typename TargetExpression, typename SourceExpression >
-      struct converter< atermpp::term_list< TargetExpression >,
-                        atermpp::term_list< SourceExpression >,
-	                TargetExpression, SourceExpression > {
+// Copy to from term list to term list
+template < typename TargetExpression, typename SourceExpression >
+struct converter< atermpp::term_list< TargetExpression >,
+    atermpp::term_list< SourceExpression >,
+    TargetExpression, SourceExpression >
+{
 
-        static atermpp::term_list< TargetExpression >
-	convert(atermpp::term_list< SourceExpression > const& r) {
-          return atermpp::term_list< TargetExpression >(r);
-        }
-      };
+  static atermpp::term_list< TargetExpression >
+  convert(atermpp::term_list< SourceExpression > const& r)
+  {
+    return atermpp::term_list< TargetExpression >(r);
+  }
+};
 
-      template < typename TargetExpression, typename SourceExpression >
-      struct converter< atermpp::term_list< TargetExpression >,
-                        boost::iterator_range< atermpp::term_list_iterator< SourceExpression > >,
-	                TargetExpression, SourceExpression > {
+template < typename TargetExpression, typename SourceExpression >
+struct converter< atermpp::term_list< TargetExpression >,
+    boost::iterator_range< atermpp::term_list_iterator< SourceExpression > >,
+    TargetExpression, SourceExpression >
+{
 
-        static atermpp::term_list< TargetExpression >
-	convert(boost::iterator_range< atermpp::term_list_iterator< SourceExpression > > const& r) {
+  static atermpp::term_list< TargetExpression >
+  convert(boost::iterator_range< atermpp::term_list_iterator< SourceExpression > > const& r)
+  {
 
-          if (ATisEmpty(r.end().list())) {
-            return atermpp::term_list< TargetExpression >(r.begin().list());
-          }
-
-          return atermpp::term_list< TargetExpression >(r.begin(), r.end());
-        }
-      };
-    } // namespace detail
-    /// \endcond
-
-    /// \brief Convert container with expressions to a new container with expressions
-    template < typename TargetContainer, typename SourceContainer >
-    TargetContainer convert(SourceContainer const& c) {
-      return detail::converter< TargetContainer, SourceContainer >::convert(c);
+    if (ATisEmpty(r.end().list()))
+    {
+      return atermpp::term_list< TargetExpression >(r.begin().list());
     }
+
+    return atermpp::term_list< TargetExpression >(r.begin(), r.end());
+  }
+};
+} // namespace detail
+/// \endcond
+
+/// \brief Convert container with expressions to a new container with expressions
+template < typename TargetContainer, typename SourceContainer >
+TargetContainer convert(SourceContainer const& c)
+{
+  return detail::converter< TargetContainer, SourceContainer >::convert(c);
+}
 
 } // namespace atermpp
 

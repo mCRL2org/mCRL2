@@ -12,7 +12,7 @@
 
 #include <iostream>
 #include <string>
-#include <boost/lexical_cast.hpp>                                                                                              
+#include <boost/lexical_cast.hpp>
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/utilities/tool.h"
@@ -38,7 +38,7 @@ class input_input_tool: public tool
 
     /// The second input file name
     std::string m_input_filename2;
-    
+
     /// \brief Checks if the number of positional options is OK.
     /// \param parser A command line parser
     void check_positional_options(const command_line_parser& parser)
@@ -71,10 +71,10 @@ class input_input_tool: public tool
   public:
     /// \brief Constructor.
     input_input_tool(const std::string& name,
-               const std::string& author,
-               const std::string& what_is,
-               const std::string& tool_description
-              )
+                     const std::string& author,
+                     const std::string& what_is,
+                     const std::string& tool_description
+                    )
       : tool(name, author, what_is, tool_description)
     {
     }
@@ -108,10 +108,14 @@ std::string print_bisimulation_type(int type)
 {
   switch (type)
   {
-    case 0: return "branching bisimulation";
-    case 1: return "strong bisimulation";
-    case 2: return "weak bisimulation";
-    case 3: return "branching simulation equivalence";
+    case 0:
+      return "branching bisimulation";
+    case 1:
+      return "strong bisimulation";
+    case 2:
+      return "weak bisimulation";
+    case 3:
+      return "branching simulation equivalence";
   }
   return "unknown type";
 }
@@ -124,17 +128,17 @@ class lpsbisim2pbes_tool: public input_input_tool
 
     /// \brief The type of bisimulation
     int bisimulation_type;
-    
+
     /// \brief If true the result is normalized
     bool normalize;
-   
+
     /// \brief Returns the synopsis of the tool.
     /// \return The string "[OPTION]... INFILE1 INFILE2 [OUTFILE]\n"
     std::string synopsis() const
     {
       return "[OPTION]... INFILE1 INFILE2 [OUTFILE]\n";
     }
-    
+
     /// \brief Parse non-standard options
     /// \param parser A command line parser
     void parse_options(const command_line_parser& parser)
@@ -163,18 +167,18 @@ class lpsbisim2pbes_tool: public input_input_tool
   public:
     lpsbisim2pbes_tool()
       : input_input_tool(
-          "lpsbisim2pbes",
-          "Wieger Wesselink; Tim Willemse and Bas Ploeger",
-          "computes a bisimulation relation between two LPSs",
-          "Reads two files containing an LPS, and computes a PBES that expresses "
-          "bisimulation between the two. If OUTFILE is not present, standard "
-          "output is used.\n"
-          "Four types of bisimulation are supported:\n"
-          "  0 : branching bisimulation\n"
-          "  1 : strong bisimulation\n"
-          "  2 : weak bisimulation\n"
-          "  3 : branching simulation equivalence"
-        )
+        "lpsbisim2pbes",
+        "Wieger Wesselink; Tim Willemse and Bas Ploeger",
+        "computes a bisimulation relation between two LPSs",
+        "Reads two files containing an LPS, and computes a PBES that expresses "
+        "bisimulation between the two. If OUTFILE is not present, standard "
+        "output is used.\n"
+        "Four types of bisimulation are supported:\n"
+        "  0 : branching bisimulation\n"
+        "  1 : strong bisimulation\n"
+        "  2 : weak bisimulation\n"
+        "  3 : branching simulation equivalence"
+      )
     {}
 
     /// \brief Returns a const reference to the output filename.
@@ -182,7 +186,7 @@ class lpsbisim2pbes_tool: public input_input_tool
     {
       return m_output_filename;
     }
-    
+
     /// \brief Returns a reference to the output filename.
     std::string& output_filename()
     {
@@ -203,16 +207,24 @@ class lpsbisim2pbes_tool: public input_input_tool
         std::clog << "  bisimulation :         " << print_bisimulation_type(bisimulation_type) << std::endl;
         std::clog << "  normalize    :         " << normalize << std::endl;
       }
-                            
+
       M.load(input_filename1());
       S.load(input_filename2());
       pbes<> result;
       switch (bisimulation_type)
       {
-        case 0: result = branching_bisimulation(M, S); break;
-        case 1: result = strong_bisimulation(M, S); break;
-        case 2: result = weak_bisimulation(M, S); break;
-        case 3: result = branching_simulation_equivalence(M, S); break;
+        case 0:
+          result = branching_bisimulation(M, S);
+          break;
+        case 1:
+          result = strong_bisimulation(M, S);
+          break;
+        case 2:
+          result = weak_bisimulation(M, S);
+          break;
+        case 3:
+          result = branching_simulation_equivalence(M, S);
+          break;
       }
       if (normalize)
       {

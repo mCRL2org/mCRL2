@@ -22,12 +22,12 @@ using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
 const std::string SPECIFICATION =
-"act a;                                  \n"
-"                                        \n"
-"proc P(b:Bool) = a. P(b);               \n"
-"                                        \n"
-"init P(false);                          \n"
-;
+  "act a;                                  \n"
+  "                                        \n"
+  "proc P(b:Bool) = a. P(b);               \n"
+  "                                        \n"
+  "init P(false);                          \n"
+  ;
 
 int test_main(int argc, char** argv)
 {

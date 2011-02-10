@@ -21,63 +21,67 @@
 #include "mcrl2/data/detail/prover/induction.h"
 #include "mcrl2/data/detail/prover/utilities.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
-  /** \brief A prover that uses EQ-BDDs.
-   *
-   * \detail
-   * A class based on the Prover class that takes an expression of sort
-   * Bool in internal mCRL2 format and creates the corresponding EQ-BDD.
-   * Using this EQ-BDD, the class can determine if the original
-   * formula is a tautology or a contradiction. The term "formula" in
-   * the following text denotes arbitrary expressions of sort Bool in
-   * the mCRL2 format.
-   *
-   * A prover uses a rewriter to rewrite parts of the formulas it
-   * manipulates. The constructor BDD_Prover::BDD_Prover initializes the
-   * prover's rewriter with the data equations in internal mCRL2 format
-   * contained in the LPS passed as parameter a_lps and the rewrite
-   * strategy passed as parameter a_rewrite_strategy. The parameter
-   * a_rewrite_strategy can be set to either GS_REWR_INNER,
-   * GS_REWR_INNERC, GS_REWR_JITTY or GS_REWR_JITTYC. To limit the
-   * number of seconds spent on proving a single formula, a time limit
-   * can be set. If the time limit is set to 0, no time limit will be
-   * enforced. The parameter a_apply_induction indicates whether or
-   * induction on lists is applied. The constructor
-   * BDD_Prover::BDD_Prover has two additional parameters,
-   * a_path_eliminator and a_solver_type. The parameter
-   * a_path_eliminator can be used to enable the use of an instance of
-   * the class BDD_Path_Eliminator. Instances of this class use an SMT
-   * solver to eliminate inconsistent paths from BDDs. The parameter
-   * a_solver_type can be used to indicate which SMT solver should be
-   * used for this task. Either the SMT solver ario
-   * (http://www.eecs.umich.edu/~ario/) or cvc-lite
-   * (http://www.cs.nyu.edu/acsys/cvcl/) can be used. To use one of
-   * these solvers, the directory containing the corresponding
-   * executable must be in the path. If the parameter a_path_eliminator
-   * is set to false, the parameter a_solver_type is ignored and no
-   * instance of the class BDD_Path_Eliminator is initialized.
-   *
-   * The formula to be handled is set using the method
-   * Prover::set_formula inherited from the class Prover. An entity of
-   * the class BDD_Prover uses binary decision diagrams to determine if
-   * a given formula is a tautology or a contradiction. The resulting
-   * BDD can be retreived using the method BDD_Prover::get_bdd.
-   *
-   * The methods BDD_Prover::is_tautology and
-   * BDD_Prover::is_contradiction indicate whether or not a formula is a
-   * tautology or a contradiction. These methods will return answer_yes,
-   * answer_no or answer_undefined. If a formula is neither a tautology
-   * nor a contradiction according to the prover, a so called witness or
-   * counter example can be returned by the methods
-   * BDD_Prover::get_witness and BDD_Prover::get_counter_example. A
-   * witness is a valuation for which the formula holds, a counter
-   * example is a valuation for which it does not hold.
-  */
+/** \brief A prover that uses EQ-BDDs.
+ *
+ * \detail
+ * A class based on the Prover class that takes an expression of sort
+ * Bool in internal mCRL2 format and creates the corresponding EQ-BDD.
+ * Using this EQ-BDD, the class can determine if the original
+ * formula is a tautology or a contradiction. The term "formula" in
+ * the following text denotes arbitrary expressions of sort Bool in
+ * the mCRL2 format.
+ *
+ * A prover uses a rewriter to rewrite parts of the formulas it
+ * manipulates. The constructor BDD_Prover::BDD_Prover initializes the
+ * prover's rewriter with the data equations in internal mCRL2 format
+ * contained in the LPS passed as parameter a_lps and the rewrite
+ * strategy passed as parameter a_rewrite_strategy. The parameter
+ * a_rewrite_strategy can be set to either GS_REWR_INNER,
+ * GS_REWR_INNERC, GS_REWR_JITTY or GS_REWR_JITTYC. To limit the
+ * number of seconds spent on proving a single formula, a time limit
+ * can be set. If the time limit is set to 0, no time limit will be
+ * enforced. The parameter a_apply_induction indicates whether or
+ * induction on lists is applied. The constructor
+ * BDD_Prover::BDD_Prover has two additional parameters,
+ * a_path_eliminator and a_solver_type. The parameter
+ * a_path_eliminator can be used to enable the use of an instance of
+ * the class BDD_Path_Eliminator. Instances of this class use an SMT
+ * solver to eliminate inconsistent paths from BDDs. The parameter
+ * a_solver_type can be used to indicate which SMT solver should be
+ * used for this task. Either the SMT solver ario
+ * (http://www.eecs.umich.edu/~ario/) or cvc-lite
+ * (http://www.cs.nyu.edu/acsys/cvcl/) can be used. To use one of
+ * these solvers, the directory containing the corresponding
+ * executable must be in the path. If the parameter a_path_eliminator
+ * is set to false, the parameter a_solver_type is ignored and no
+ * instance of the class BDD_Path_Eliminator is initialized.
+ *
+ * The formula to be handled is set using the method
+ * Prover::set_formula inherited from the class Prover. An entity of
+ * the class BDD_Prover uses binary decision diagrams to determine if
+ * a given formula is a tautology or a contradiction. The resulting
+ * BDD can be retreived using the method BDD_Prover::get_bdd.
+ *
+ * The methods BDD_Prover::is_tautology and
+ * BDD_Prover::is_contradiction indicate whether or not a formula is a
+ * tautology or a contradiction. These methods will return answer_yes,
+ * answer_no or answer_undefined. If a formula is neither a tautology
+ * nor a contradiction according to the prover, a so called witness or
+ * counter example can be returned by the methods
+ * BDD_Prover::get_witness and BDD_Prover::get_counter_example. A
+ * witness is a valuation for which the formula holds, a counter
+ * example is a valuation for which it does not hold.
+*/
 
-class BDD_Prover: public Prover {
+class BDD_Prover: public Prover
+{
   private:
 
     /// \brief Flag indicating whether or not the result of the comparison between the first two arguments
@@ -93,7 +97,7 @@ class BDD_Prover: public Prover {
     bool f_apply_induction;
 
     /// \brief A data specification.
-    const data_specification &f_data_spec;
+    const data_specification& f_data_spec;
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
@@ -130,7 +134,8 @@ class BDD_Prover: public Prover {
 
       core::gsDebugMsg("Formula rewritten and oriented: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
 
-      while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd) {
+      while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd)
+      {
         v_previous_2 = v_previous_1;
         v_previous_1 = f_internal_bdd;
         f_internal_bdd = bdd_down(f_internal_bdd);
@@ -154,30 +159,38 @@ class BDD_Prover: public Prover {
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    ATerm bdd_down(ATerm a_formula, std::string& a_indent){
+    ATerm bdd_down(ATerm a_formula, std::string& a_indent)
+    {
       a_indent.append("  ");
 
-      if (f_time_limit != 0 && (f_deadline - time(0)) <= 0) {
+      if (f_time_limit != 0 && (f_deadline - time(0)) <= 0)
+      {
         core::gsDebugMsg("The time limit has passed.\n");
         return a_formula;
       }
 
-      if (f_info->is_true(a_formula)) {
+      if (f_info->is_true(a_formula))
+      {
         return a_formula;
       }
-      if (f_info->is_false(a_formula)) {
+      if (f_info->is_false(a_formula))
+      {
         return a_formula;
       }
 
       ATerm v_bdd = ATtableGet(f_formula_to_bdd, a_formula);
-      if (v_bdd) {
+      if (v_bdd)
+      {
         return v_bdd;
       }
 
       ATerm v_guard = smallest(a_formula);
-      if (!v_guard) {
+      if (!v_guard)
+      {
         return a_formula;
-      } else {
+      }
+      else
+      {
         core::gsDebugMsg("%sSmallest guard: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_guard));
       }
 
@@ -211,7 +224,8 @@ class BDD_Prover: public Prover {
       time_t v_new_time_limit;
 
       v_new_time_limit = f_deadline - time(0);
-      if (v_new_time_limit > 0 || f_time_limit == 0) {
+      if (v_new_time_limit > 0 || f_time_limit == 0)
+      {
         core::gsDebugMsg("Simplifying the BDD:\n");
         f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(0)));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
@@ -222,50 +236,67 @@ class BDD_Prover: public Prover {
     /// \brief Updates the values of Prover::f_tautology and Prover::f_contradiction.
     void update_answers()
     {
-      if (!f_processed) {
+      if (!f_processed)
+      {
         build_bdd();
         eliminate_paths();
         ATermAppl v_original_formula = f_formula;
         ATermAppl v_original_bdd = f_bdd;
-        if (f_apply_induction && !(f_bdd_info.is_true(f_bdd) || f_bdd_info.is_false(f_bdd))) {
+        if (f_apply_induction && !(f_bdd_info.is_true(f_bdd) || f_bdd_info.is_false(f_bdd)))
+        {
           f_induction.initialize(v_original_formula);
-          while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd)) {
+          while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
+          {
             core::gsDebugMsg("Applying induction.\n");
             f_formula = f_induction.apply_induction();
             build_bdd();
             eliminate_paths();
           }
-          if (f_bdd_info.is_true(f_bdd)) {
+          if (f_bdd_info.is_true(f_bdd))
+          {
             f_tautology = answer_yes;
             f_contradiction = answer_no;
-          } else {
+          }
+          else
+          {
             v_original_formula = sort_bool::not_(data_expression(v_original_formula));
             f_bdd = v_original_bdd;
             f_induction.initialize(v_original_formula);
-            while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd)) {
+            while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
+            {
               core::gsDebugMsg("Applying induction on the negated formula.\n");
               f_formula = f_induction.apply_induction();
               build_bdd();
               eliminate_paths();
             }
-            if (f_bdd_info.is_true(f_bdd)) {
+            if (f_bdd_info.is_true(f_bdd))
+            {
               f_bdd = sort_bool::false_();
               f_tautology = answer_no;
               f_contradiction = answer_yes;
-            } else {
+            }
+            else
+            {
               f_bdd = v_original_bdd;
               f_tautology = answer_undefined;
               f_contradiction = answer_undefined;
             }
           }
-        } else {
-          if (f_bdd_info.is_true(f_bdd)) {
+        }
+        else
+        {
+          if (f_bdd_info.is_true(f_bdd))
+          {
             f_tautology = answer_yes;
             f_contradiction = answer_no;
-          } else if (f_bdd_info.is_false(f_bdd)) {
+          }
+          else if (f_bdd_info.is_false(f_bdd))
+          {
             f_tautology = answer_no;
             f_contradiction = answer_yes;
-          } else {
+          }
+          else
+          {
             f_tautology = answer_undefined;
             f_contradiction = answer_undefined;
           }
@@ -277,21 +308,27 @@ class BDD_Prover: public Prover {
     /// \brief Returns the smallest guard in the formula a_formula.
     ATerm smallest(ATerm a_formula)
     {
-      if (f_info->is_variable(a_formula)) {
-        if (f_info->has_type_bool(a_formula)) {
+      if (f_info->is_variable(a_formula))
+      {
+        if (f_info->has_type_bool(a_formula))
+        {
           return a_formula;
-        } else {
+        }
+        else
+        {
           return 0;
         }
       }
-      if (f_info->is_true(a_formula) || f_info->is_false(a_formula)) {
+      if (f_info->is_true(a_formula) || f_info->is_false(a_formula))
+      {
         return 0;
       }
 
       ATerm v_result;
 
       v_result = ATtableGet(f_smallest, a_formula);
-      if (v_result) {
+      if (v_result)
+      {
         return v_result;
       }
 
@@ -301,22 +338,30 @@ class BDD_Prover: public Prover {
 
       v_length = f_info->get_number_of_arguments(a_formula);
 
-      for (i = 0; i < v_length; i++) {
+      for (i = 0; i < v_length; i++)
+      {
         v_small = smallest(f_info->get_argument(a_formula, i));
-        if (v_small) {
-          if (v_result) {
-            if (f_info->lpo1(v_result, v_small)) {
+        if (v_small)
+        {
+          if (v_result)
+          {
+            if (f_info->lpo1(v_result, v_small))
+            {
               v_result = v_small;
             }
-          } else {
+          }
+          else
+          {
             v_result = v_small;
           }
         }
       }
-      if (!v_result && f_info->has_type_bool(a_formula)) {
+      if (!v_result && f_info->has_type_bool(a_formula))
+      {
         v_result = a_formula;
       }
-      if (v_result) {
+      if (v_result)
+      {
         ATtablePut(f_smallest, a_formula, v_result);
       }
 
@@ -324,29 +369,42 @@ class BDD_Prover: public Prover {
     }
 
     /// \brief Returns branch of the BDD a_bdd, depending on the polarity a_polarity.
-    ATermAppl get_branch(ATermAppl a_bdd, bool a_polarity){
+    ATermAppl get_branch(ATermAppl a_bdd, bool a_polarity)
+    {
       ATermAppl v_result;
 
-      if (f_bdd_info.is_if_then_else(a_bdd)) {
+      if (f_bdd_info.is_if_then_else(a_bdd))
+      {
         ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
         ATermAppl v_true_branch = f_bdd_info.get_true_branch(a_bdd);
         ATermAppl v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         ATermAppl v_branch = get_branch(v_true_branch, a_polarity);
-        if (v_branch == 0) {
+        if (v_branch == 0)
+        {
           v_branch = get_branch(v_false_branch, a_polarity);
-          if (v_branch == 0) {
+          if (v_branch == 0)
+          {
             v_result = 0;
-          } else {
+          }
+          else
+          {
             data_expression v_term = sort_bool::not_(data_expression(v_guard));
             v_result = lazy::and_(data_expression(v_branch), v_term);
           }
-        } else {
+        }
+        else
+        {
           v_result = lazy::and_(data_expression(v_branch), data_expression(v_guard));
         }
-      } else {
-        if ((f_bdd_info.is_true(a_bdd) && a_polarity) || (f_bdd_info.is_false(a_bdd) && !a_polarity)) {
+      }
+      else
+      {
+        if ((f_bdd_info.is_true(a_bdd) && a_polarity) || (f_bdd_info.is_false(a_bdd) && !a_polarity))
+        {
           v_result = sort_bool::true_();
-        } else {
+        }
+        else
+        {
           v_result = 0;
         }
       }
@@ -399,9 +457,12 @@ class BDD_Prover: public Prover {
         bool_to_char_string(f_reverse),
         bool_to_char_string(f_full)
       );
-      if (a_path_eliminator) {
+      if (a_path_eliminator)
+      {
         f_bdd_simplifier = new BDD_Path_Eliminator(a_solver_type);
-      } else {
+      }
+      else
+      {
         f_bdd_simplifier = new BDD_Simplifier();
       }
     }
@@ -440,10 +501,13 @@ class BDD_Prover: public Prover {
       ATermAppl v_result;
 
       update_answers();
-      if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes)) {
+      if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes))
+      {
         core::gsDebugMsg("The formula appears to be satisfiable.\n");
         v_result = get_branch(f_bdd, true);
-      } else {
+      }
+      else
+      {
         core::gsDebugMsg("The formula is a contradiction or a tautology.\n");
         v_result = 0;
       }
@@ -456,27 +520,28 @@ class BDD_Prover: public Prover {
       ATermAppl v_result;
 
       update_answers();
-      if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes)) {
+      if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes))
+      {
         core::gsDebugMsg("The formula appears to be satisfiable.\n");
         v_result = get_branch(f_bdd, false);
-      } 
-      else 
+      }
+      else
       {
         core::gsDebugMsg("The formula is a contradiction or a tautology.\n");
         v_result = 0;
       }
       if (v_result==0)
-      { 
+      {
         throw mcrl2::runtime_error(
-           "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
-           "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
+          "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
+          "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
       }
       return v_result;
     }
 
 };
-    }
-  }
+}
+}
 }
 
 #endif

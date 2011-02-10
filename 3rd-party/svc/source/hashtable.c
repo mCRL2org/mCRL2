@@ -19,7 +19,7 @@
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
    $Id: hashtable.c,v 1.2 2008/09/30 08:22:51 bertl Exp $ */
-/* 
+/*
  * This module implements a hash table for storing mCRL states,
  * represented as term-number pairs. All the states stored in a
  * table are protected by being inserted in a protected ATerm
@@ -33,9 +33,9 @@
    - indices returned are in the range 1..N, but internally in the
      term table the entries are in the range 0..N-1
    - hash table is parameter instead of global variable
-   - errors are flagged by return value instead of error message 
+   - errors are flagged by return value instead of error message
    Changes per 1/5/00 by Izak van Langevelde:
-   - use the new ATerm lib with indexed sets*/ 
+   - use the new ATerm lib with indexed sets*/
 
 #include <svc/hashtable.h>
 
@@ -43,8 +43,8 @@
 
 
 /* ======= Initialize the hash table ======= */
-int HTinit (HTable *table)
-{ 
+int HTinit(HTable* table)
+{
 
   table->terms=ATindexedSetCreate(PT_INITIALSIZE, 75);
   PTinit(&table->pointers);
@@ -52,36 +52,38 @@ int HTinit (HTable *table)
   return 0;
 }
 
-void HTfree(HTable *table){
+void HTfree(HTable* table)
+{
 
   ATindexedSetDestroy(table->terms);
   PTfree(&table->pointers);
 }
 
-unsigned int HTinsert (HTable *table, ATerm a, void *ptr) {
+unsigned int HTinsert(HTable* table, ATerm a, void* ptr)
+{
   ATbool _new;
   unsigned int ret;
 
-  ret= (unsigned int)ATindexedSetPut(table->terms, a, &_new); 
+  ret= (unsigned int)ATindexedSetPut(table->terms, a, &_new);
   PTput(&table->pointers,ret,ptr);
 
   return ret;
 }
 
 
-int HTmember (HTable *table, ATerm a, long *pn)
-{ 
+int HTmember(HTable* table, ATerm a, long* pn)
+{
   int index;
   index=(int)ATindexedSetGetIndex(table->terms,a);
 
   if (index!=-1)
   {
-     *pn=index;
-     return 1;
-  } 
-  else 
+    *pn=index;
+    return 1;
+  }
+  else
   {
-     return 0;
+    return 0;
   }
 
 }
@@ -89,7 +91,8 @@ int HTmember (HTable *table, ATerm a, long *pn)
 /*----------------------------------------------------------*/
 /* Get the term belonging to an index */
 
-ATerm HTgetTerm(HTable *table, long n) { 
+ATerm HTgetTerm(HTable* table, long n)
+{
 
   return ATindexedSetGetElem(table->terms,n);
 
@@ -99,13 +102,15 @@ ATerm HTgetTerm(HTable *table, long n) {
 /*----------------------------------------------------------*/
 /* Get the stored pointer belonging to an index */
 
-void *HTgetPtr(HTable *table, long n) { 
+void* HTgetPtr(HTable* table, long n)
+{
 
-   return PTget(&table->pointers,n);
+  return PTget(&table->pointers,n);
 }
 
 
-void HTsetPtr(HTable *table, long n, void *ptr) { 
+void HTsetPtr(HTable* table, long n, void* ptr)
+{
 
-   PTput(&table->pointers, n,ptr);
+  PTput(&table->pointers, n,ptr);
 }

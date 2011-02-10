@@ -21,8 +21,10 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-namespace mcrl2 {
-  namespace core {
+namespace mcrl2
+{
+namespace core
+{
 
 //local declarations
 //------------------
@@ -73,105 +75,133 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
   {
     //part is a data expression, a multiaction, a state variable or a data
     //variable declaration (with or without initialisation); return part
-  } else if (gsIsStateMust(part)) {
+  }
+  else if (gsIsStateMust(part))
+  {
     //part is the must operator; return equivalent non-regular formula
     ATermAppl reg_frm = ATAgetArgument(part, 0);
     ATermAppl phi = ATAgetArgument(part, 1);
-    if (gsIsRegNil(reg_frm)) {
+    if (gsIsRegNil(reg_frm))
+    {
       //red([nil]phi) -> red([false*]phi)
       part = translate_reg_frms_appl(
-        gsMakeStateMust(gsMakeRegTransOrNil(gsMakeStateFalse()), phi));
-    } else if (gsIsRegSeq(reg_frm)) {
+               gsMakeStateMust(gsMakeRegTransOrNil(gsMakeStateFalse()), phi));
+    }
+    else if (gsIsRegSeq(reg_frm))
+    {
       ATermAppl R1 = ATAgetArgument(reg_frm, 0);
       ATermAppl R2 = ATAgetArgument(reg_frm, 1);
       //red([R1.R2]phi) -> red([R1][R2]phi)
       part = translate_reg_frms_appl(
-        gsMakeStateMust(R1, gsMakeStateMust(R2, phi)));
-    } else if (gsIsRegAlt(reg_frm)) {
+               gsMakeStateMust(R1, gsMakeStateMust(R2, phi)));
+    }
+    else if (gsIsRegAlt(reg_frm))
+    {
       ATermAppl R1 = ATAgetArgument(reg_frm, 0);
       ATermAppl R2 = ATAgetArgument(reg_frm, 1);
       //red([R1+R2]phi) -> red([R1]phi) && red([R2]phi)
       part = gsMakeStateAnd(
-        translate_reg_frms_appl(gsMakeStateMust(R1,phi)),
-        translate_reg_frms_appl(gsMakeStateMust(R2,phi))
-      );
-    } else if (gsIsRegTrans(reg_frm)) {
+               translate_reg_frms_appl(gsMakeStateMust(R1,phi)),
+               translate_reg_frms_appl(gsMakeStateMust(R2,phi))
+             );
+    }
+    else if (gsIsRegTrans(reg_frm))
+    {
       ATermAppl R = ATAgetArgument(reg_frm, 0);
       //red([R+]phi) -> red([R.R*]phi)
       part = translate_reg_frms_appl(
-        gsMakeStateMust(gsMakeRegSeq(R,gsMakeRegTransOrNil(R)),phi));
-    } else if (gsIsRegTransOrNil(reg_frm)) {
+               gsMakeStateMust(gsMakeRegSeq(R,gsMakeRegTransOrNil(R)),phi));
+    }
+    else if (gsIsRegTransOrNil(reg_frm))
+    {
       ATermAppl R = ATAgetArgument(reg_frm, 0);
       //red([R*]phi) -> nu X. red(phi) && red([R]X),
       //where X does not occur free in phi and R
       ATermAppl X =
         create_fresh_var_name(true, ATmakeList2((ATerm) phi, (ATerm) R));
       part = gsMakeStateNu(X, ATmakeList0(), gsMakeStateAnd(
-        translate_reg_frms_appl(phi),
-        translate_reg_frms_appl(gsMakeStateMust(R,gsMakeStateVar(X, ATmakeList0())))
-      ));
-    } else {
+                             translate_reg_frms_appl(phi),
+                             translate_reg_frms_appl(gsMakeStateMust(R,gsMakeStateVar(X, ATmakeList0())))
+                           ));
+    }
+    else
+    {
       //reg_frm is an action formula; reduce phi
       part = gsMakeStateMust(reg_frm, translate_reg_frms_appl(phi));
     }
-  } else if (gsIsStateMay(part)) {
+  }
+  else if (gsIsStateMay(part))
+  {
     //part is the may operator; return equivalent non-regular formula
     ATermAppl reg_frm = ATAgetArgument(part, 0);
     ATermAppl phi = ATAgetArgument(part, 1);
-    if (gsIsRegNil(reg_frm)) {
+    if (gsIsRegNil(reg_frm))
+    {
       //red(<nil>phi) -> red(<false*>phi)
       part = translate_reg_frms_appl(
-        gsMakeStateMay(gsMakeRegTransOrNil(gsMakeStateFalse()), phi));
-    } else if (gsIsRegSeq(reg_frm)) {
+               gsMakeStateMay(gsMakeRegTransOrNil(gsMakeStateFalse()), phi));
+    }
+    else if (gsIsRegSeq(reg_frm))
+    {
       ATermAppl R1 = ATAgetArgument(reg_frm, 0);
       ATermAppl R2 = ATAgetArgument(reg_frm, 1);
       //red(<R1.R2>phi) -> red(<R1><R2>phi)
       part = translate_reg_frms_appl(
-        gsMakeStateMay(R1, gsMakeStateMay(R2, phi)));
-    } else if (gsIsRegAlt(reg_frm)) {
+               gsMakeStateMay(R1, gsMakeStateMay(R2, phi)));
+    }
+    else if (gsIsRegAlt(reg_frm))
+    {
       ATermAppl R1 = ATAgetArgument(reg_frm, 0);
       ATermAppl R2 = ATAgetArgument(reg_frm, 1);
       //red(<R1+R2>phi) -> red(<R1>phi) || red(<R2>phi)
       part = gsMakeStateOr(
-        translate_reg_frms_appl(gsMakeStateMay(R1,phi)),
-        translate_reg_frms_appl(gsMakeStateMay(R2,phi))
-      );
-    } else if (gsIsRegTrans(reg_frm)) {
+               translate_reg_frms_appl(gsMakeStateMay(R1,phi)),
+               translate_reg_frms_appl(gsMakeStateMay(R2,phi))
+             );
+    }
+    else if (gsIsRegTrans(reg_frm))
+    {
       ATermAppl R = ATAgetArgument(reg_frm, 0);
       //red(<R+>phi) -> red(<R.R*>phi)
       part = translate_reg_frms_appl(
-        gsMakeStateMay(gsMakeRegSeq(R,gsMakeRegTransOrNil(R)),phi));
-    } else if (gsIsRegTransOrNil(reg_frm)) {
+               gsMakeStateMay(gsMakeRegSeq(R,gsMakeRegTransOrNil(R)),phi));
+    }
+    else if (gsIsRegTransOrNil(reg_frm))
+    {
       ATermAppl R = ATAgetArgument(reg_frm, 0);
       //red(<R*>phi) -> mu X. red(phi) || red(<R>X),
       //where X does not occur free in phi and R
       ATermAppl X =
         create_fresh_var_name(true, ATmakeList2((ATerm) phi, (ATerm) R));
       part = gsMakeStateMu(X, ATmakeList0(), gsMakeStateOr(
-        translate_reg_frms_appl(phi),
-        translate_reg_frms_appl(gsMakeStateMay(R,gsMakeStateVar(X, ATmakeList0())))
-      ));
-    } else {
+                             translate_reg_frms_appl(phi),
+                             translate_reg_frms_appl(gsMakeStateMay(R,gsMakeStateVar(X, ATmakeList0())))
+                           ));
+    }
+    else
+    {
       //reg_frm is an action formula; reduce phi
       part = gsMakeStateMay(reg_frm, translate_reg_frms_appl(phi));
     }
-  } else {
+  }
+  else
+  {
     //implement expressions in the arguments of part
     AFun head = ATgetAFun(part);
     int nr_args = ATgetArity(head);
-    if (nr_args > 0) 
+    if (nr_args > 0)
     {
       MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATerm,nr_args);
-      for (int i = 0; i < nr_args; i++) 
+      for (int i = 0; i < nr_args; i++)
       {
         ATerm arg = ATgetArgument(part, i);
         if (ATgetType(arg) == AT_APPL)
-        { 
+        {
           args[i] = (ATerm) translate_reg_frms_appl((ATermAppl) arg);
         }
         else //ATgetType(arg) == AT_LIST
-        { 
-           args[i] = (ATerm) translate_reg_frms_list((ATermList) arg);
+        {
+          args[i] = (ATerm) translate_reg_frms_list((ATermList) arg);
         }
       }
       part = ATmakeApplArray(head, args);
@@ -183,7 +213,8 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
 ATermList translate_reg_frms_list(ATermList parts)
 {
   ATermList result = ATmakeList0();
-  while (!ATisEmpty(parts)) {
+  while (!ATisEmpty(parts))
+  {
     result =
       ATinsert(result, (ATerm) translate_reg_frms_appl(ATAgetFirst(parts)));
     parts = ATgetNext(parts);
@@ -194,13 +225,14 @@ ATermList translate_reg_frms_list(ATermList parts)
 ATermAppl create_new_var_name(bool cap, int index)
 {
   gsDebugMsg("creating variable with index %d and cap %s\n",
-    index, cap?"true":"false");
+             index, cap?"true":"false");
   int suffix = index / 3;
 
   std::ostringstream s;
 
   //choose x/X, y/Y or z/Z
-  switch (index % 3) {
+  switch (index % 3)
+  {
     case 0:
       s << (cap?'X':'x');
       break;
@@ -226,7 +258,8 @@ ATermAppl create_fresh_var_name(bool cap, ATermList terms)
   ATermAppl result = NULL;
   bool done = false;
   //iteratively create a unique variable and perform a number of checks on it;
-  for (int i = 0; !done; i++) {
+  for (int i = 0; !done; i++)
+  {
     //create variable with index i; capitalise variable if cap
     result = create_new_var_name(cap, i);
     //check if the new variable occurs in terms
@@ -235,5 +268,5 @@ ATermAppl create_fresh_var_name(bool cap, ATermList terms)
   return result;
 }
 
-  }   // namespace core
+}   // namespace core
 }     // namespace mcrl2

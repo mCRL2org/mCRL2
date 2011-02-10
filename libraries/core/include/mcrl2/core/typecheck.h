@@ -15,8 +15,10 @@
 #include <aterm2.h>
 #include "mcrl2/atermpp/vector.h"
 
-namespace mcrl2 {
-  namespace core {
+namespace mcrl2
+{
+namespace core
+{
 
 /** \brief     Type check a parsed mCRL2 data specification.
  *  \param[in] data_spec An ATerm representation of an mCRL2 data
@@ -120,9 +122,9 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
  *             returned.
  **/
 ATermAppl type_check_mult_act(
-                    ATermAppl mult_act, 
-                    ATermAppl data_spec,
-                    ATermList action_labels);
+  ATermAppl mult_act,
+  ATermAppl data_spec,
+  ATermList action_labels);
 
 
 /** \brief     Type check a parsed mCRL2 multiaction list with respect to a
@@ -140,9 +142,9 @@ ATermAppl type_check_mult_act(
  *             an exception is raised.
  **/
 ATermList type_check_mult_actions(
-                    ATermList mult_actions, 
-                    ATermAppl data_spec,
-                    ATermList action_labels);
+  ATermList mult_actions,
+  ATermAppl data_spec,
+  ATermList action_labels);
 
 
 /** \brief     Type check a parsed mCRL2 process expression with respect to a
@@ -213,7 +215,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl spec);
  **/
 ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec);
 
-  }
+}
 }
 
 #endif // PARSER_TYPECHECK_H

@@ -25,7 +25,7 @@ class VisObjectFactory
     VisObjectFactory();
     ~VisObjectFactory();
     void clear();
-    void drawObjects(PrimitiveFactory *pf,unsigned char alpha,bool texture);
+    void drawObjects(PrimitiveFactory* pf,unsigned char alpha,bool texture);
     int makeObject(int primitive, std::vector<int> &ids);
     void sortObjects(Vector3D viewpoint);
     void updateObjectColor(int obj, RGB_Color color);

@@ -23,9 +23,9 @@ class fsm_lexer
     // AFun const_ATtype;
     // AFun const_ATvalue;
 
-    mcrl2::lts::lts_fsm_t *fsm_lts;
+    mcrl2::lts::lts_fsm_t* fsm_lts;
 };
 
-extern fsm_lexer *fsm_lexer_obj;
+extern fsm_lexer* fsm_lexer_obj;
 
 #endif

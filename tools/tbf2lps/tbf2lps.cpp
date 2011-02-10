@@ -32,48 +32,53 @@ using namespace mcrl2::core;
 
 class tbf2lps_tool: public input_output_tool
 {
-  typedef input_output_tool super;
+    typedef input_output_tool super;
 
   public:
     tbf2lps_tool()
       : super(NAME, AUTHOR,
-          "convert a muCRL LPE to an mCRL2 LPS",
-          "Read mCRL LPS from INFILE, convert it to a mCRL2 LPS and save the result to "
-          "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-          "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
-          "\n"
-          "This conversion assumes that Bool is the boolean sort with "
-          "constructors T and F. Additionally, the following "
-          "conversions on the data specification will be applied:\n"
-          "  constructors T, F: -> Bool are replaced by true and false,\n"
-          "  mapping and: Bool # Bool -> Bool is replaced by ||, and\n"
-          "  mapping eq: S # S -> Bool is replaced by == for each sort S"
-        ),
-        m_not_convert_mappings(true)
+              "convert a muCRL LPE to an mCRL2 LPS",
+              "Read mCRL LPS from INFILE, convert it to a mCRL2 LPS and save the result to "
+              "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
+              "stdin is used. To use stdin and save the output to a file, use '-' for INFILE.\n"
+              "\n"
+              "This conversion assumes that Bool is the boolean sort with "
+              "constructors T and F. Additionally, the following "
+              "conversions on the data specification will be applied:\n"
+              "  constructors T, F: -> Bool are replaced by true and false,\n"
+              "  mapping and: Bool # Bool -> Bool is replaced by ||, and\n"
+              "  mapping eq: S # S -> Bool is replaced by == for each sort S"
+             ),
+      m_not_convert_mappings(true)
     {}
 
     bool run()
     {
       ATermAppl mcrl_spec;
 
-      if (input_filename().empty()) {
+      if (input_filename().empty())
+      {
         gsVerboseMsg("reading mCRL LPS from stdin...\n");
 
         mcrl_spec = (ATermAppl) ATreadFromFile(stdin);
 
-        if (mcrl_spec == 0) {
+        if (mcrl_spec == 0)
+        {
           throw mcrl2::runtime_error("could not read mCRL LPS from '" + input_filename() + "'");
         }
-        if (!is_mCRL_spec(mcrl_spec)) {
+        if (!is_mCRL_spec(mcrl_spec))
+        {
           throw mcrl2::runtime_error("stdin does not contain an mCRL LPS");
         }
       }
-      else {
+      else
+      {
         gsVerboseMsg("reading mCRL LPS from '%s'...\n", input_filename().c_str());
 
-        FILE *in_stream = fopen(input_filename().c_str(), "rb");
+        FILE* in_stream = fopen(input_filename().c_str(), "rb");
 
-        if (in_stream == 0) {
+        if (in_stream == 0)
+        {
           throw mcrl2::runtime_error("could not open input file '" + input_filename() + "' for reading");
         }
 
@@ -81,10 +86,12 @@ class tbf2lps_tool: public input_output_tool
 
         fclose(in_stream);
 
-        if (mcrl_spec == 0) {
+        if (mcrl_spec == 0)
+        {
           throw mcrl2::runtime_error("could not read mCRL LPS from '" + input_filename() + "'");
         }
-        if (!is_mCRL_spec(mcrl_spec)) {
+        if (!is_mCRL_spec(mcrl_spec))
+        {
           throw mcrl2::runtime_error("'" + input_filename() + "' does not contain an mCRL LPS");
         }
       }
@@ -95,17 +102,20 @@ class tbf2lps_tool: public input_output_tool
       ATermAppl spec = translate(mcrl_spec,true,m_not_convert_mappings);
       ATprotectAppl(&spec);
 
-      if (output_filename().empty()) {
+      if (output_filename().empty())
+      {
         gsVerboseMsg("writing mCRL2 LPS to stdout...\n");
 
         ATwriteToSAFFile((ATerm) spec, stdout);
       }
-      else {
+      else
+      {
         gsVerboseMsg("writing mCRL2 LPS to '%s'...\n", output_filename().c_str());
 
-        FILE *outstream = fopen(output_filename().c_str(), "wb");
+        FILE* outstream = fopen(output_filename().c_str(), "wb");
 
-        if (outstream == NULL) {
+        if (outstream == NULL)
+        {
           throw mcrl2::runtime_error("cannot open output file '" + output_filename() + "'");
         }
 
@@ -123,7 +133,7 @@ class tbf2lps_tool: public input_output_tool
     {
       input_output_tool::add_options(desc);
       desc.add_option("no-conv-map",
-        "do not apply conversion of mappings and equations", 'n');
+                      "do not apply conversion of mappings and equations", 'n');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -133,14 +143,16 @@ class tbf2lps_tool: public input_output_tool
     }
 };
 
-class tbf2lps_gui_tool: public mcrl2_gui_tool<tbf2lps_tool> {
-public:
-	tbf2lps_gui_tool() {
-		m_gui_options["no-conv-map"] = create_checkbox_widget();
-	}
+class tbf2lps_gui_tool: public mcrl2_gui_tool<tbf2lps_tool>
+{
+  public:
+    tbf2lps_gui_tool()
+    {
+      m_gui_options["no-conv-map"] = create_checkbox_widget();
+    }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MCRL2_ATERM_INIT(argc, argv)
   return tbf2lps_gui_tool().execute(argc, argv);

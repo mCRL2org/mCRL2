@@ -22,16 +22,16 @@
 
 class XSimTrace: public wxFrame, public SimulatorViewInterface
 {
-public:
+  public:
     // constructors and destructors
-    XSimTrace( wxWindow *parent );
-/*    XSimTrace( wxWindow *parent, wxWindowID id, const wxString &title,
-        const wxPoint& pos = wxDefaultPosition,
-        const wxSize& size = wxDefaultSize,
-        long style = wxDEFAULT_FRAME_STYLE ) : XSimTrace(parent);*/
+    XSimTrace(wxWindow* parent);
+    /*    XSimTrace( wxWindow *parent, wxWindowID id, const wxString &title,
+            const wxPoint& pos = wxDefaultPosition,
+            const wxSize& size = wxDefaultSize,
+            long style = wxDEFAULT_FRAME_STYLE ) : XSimTrace(parent);*/
 
     // SimulatorViewInterface
-    virtual void Registered(SimulatorInterface *Simulator);
+    virtual void Registered(SimulatorInterface* Simulator);
     virtual void Unregistered();
     virtual void Initialise(ATermList Pars);
     virtual void StateChanged(ATermAppl Transition, ATerm State, ATermList NextStates);
@@ -41,27 +41,27 @@ public:
     virtual void TraceChanged(ATermList Trace, size_t From);
     virtual void TracePosChanged(ATermAppl Transition, ATerm State, size_t Index);
 
-private:
+  private:
     // WDR: method declarations for XSimMain
     void AddState(ATermAppl Transition, ATerm State, bool enabled);
     void _add_state(ATermAppl Transition, ATerm State, bool enabled);
     void _reset(ATerm State);
     void _update();
 
-private:
+  private:
     // WDR: member variable declarations for XSimMain
-    wxListView *traceview;
-    SimulatorInterface *simulator;
+    wxListView* traceview;
+    SimulatorInterface* simulator;
     size_t current_pos;
 
-private:
+  private:
     // WDR: handler declarations for XSimMain
-    void OnCloseWindow( wxCloseEvent &event );
-    void OnListItemActivated( wxListEvent &event );
+    void OnCloseWindow(wxCloseEvent& event);
+    void OnListItemActivated(wxListEvent& event);
 
-private:
+  private:
 
-private:
+  private:
     DECLARE_EVENT_TABLE()
 };
 

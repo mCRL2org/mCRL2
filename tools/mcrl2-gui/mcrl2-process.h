@@ -15,108 +15,119 @@
 #include <wx/listbox.h>
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_END, 7777)
+DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_END, 7777)
 END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_END)
 
 // it may also be convenient to define an event table macro for this event type
 #define EVT_MY_PROCESS_END(id, fn) \
-    DECLARE_EVENT_TABLE_ENTRY( \
-        wxEVT_MY_PROCESS_END, id, wxID_ANY, \
-        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
-        (wxObject *) NULL \
-    ),
+  DECLARE_EVENT_TABLE_ENTRY( \
+                             wxEVT_MY_PROCESS_END, id, wxID_ANY, \
+                             (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+                             (wxObject *) NULL \
+                           ),
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN, 7777)
+DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN, 7777)
 END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN)
 
 #define EVT_MY_PROCESS_RUN(id, fn) \
-    DECLARE_EVENT_TABLE_ENTRY( \
-        wxEVT_MY_PROCESS_RUN, id, wxID_ANY, \
-        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
-        (wxObject *) NULL \
-    ),
+  DECLARE_EVENT_TABLE_ENTRY( \
+                             wxEVT_MY_PROCESS_RUN, id, wxID_ANY, \
+                             (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+                             (wxObject *) NULL \
+                           ),
 
 BEGIN_DECLARE_EVENT_TYPES()
-    DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_OUTPUT, 7777)
+DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_OUTPUT, 7777)
 END_DECLARE_EVENT_TYPES()
 
 DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_OUTPUT)
 
 #define EVT_MY_PROCESS_PRODUCES_OUTPUT(id, fn) \
-    DECLARE_EVENT_TABLE_ENTRY( \
-        wxEVT_MY_PROCESS_PRODUCES_OUTPUT, id, wxID_ANY, \
-        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
-        (wxObject *) NULL \
-    ),
+  DECLARE_EVENT_TABLE_ENTRY( \
+                             wxEVT_MY_PROCESS_PRODUCES_OUTPUT, id, wxID_ANY, \
+                             (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+                             (wxObject *) NULL \
+                           ),
 
 
 
 
 class MyPipedProcess;
-WX_DEFINE_ARRAY_PTR(MyPipedProcess *, MyActiveProcessArray)
+WX_DEFINE_ARRAY_PTR(MyPipedProcess*, MyActiveProcessArray)
 ;
 MyActiveProcessArray running_processes;
 
-class MyProcess: public wxProcess {
-public:
-	MyProcess(wxProcess *parent ) :
-		wxProcess(parent) {
-		//m_parent = parent;
-	}
+class MyProcess: public wxProcess
+{
+  public:
+    MyProcess(wxProcess* parent) :
+      wxProcess(parent)
+    {
+      //m_parent = parent;
+    }
 
-	virtual void OnTerminate(int /* pid */, int /* status */) {
-		// Delete object
-		delete this;
-	}
-	;
+    virtual void OnTerminate(int /* pid */, int /* status */)
+    {
+      // Delete object
+      delete this;
+    }
+    ;
 };
 
 // A Process for redirecting the output
-class MyPipedProcess: public MyProcess {
-public:
+class MyPipedProcess: public MyProcess
+{
+  public:
 
-	long m_ext_pid;
+    long m_ext_pid;
 
-	wxWindow *m_parent;
+    wxWindow* m_parent;
 
-	MyPipedProcess(wxWindow *parent) :
-		MyProcess(NULL) {
-		Redirect();
-		m_parent = parent;
-	}
-
-	void AddAsyncProcess(wxTextCtrl *output ) {
-		m_listbox_output = output;
-		running_processes.Add(this);
-	}
-
-	virtual void OnTerminate(int pid, int status) {
-		// show output remainder
-		while (HasInput())
-			;
-
-		running_processes.Remove(this);
-
-		MyProcess::OnTerminate(pid, status);
-
-    wxCommandEvent eventCustom(wxEVT_MY_PROCESS_END);
-    wxPostEvent(m_parent, eventCustom);
-
-    if(status){
-      wxMessageDialog *dial = new wxMessageDialog(NULL,
-            wxString::Format(_T("Tool exited with status: %d"), status) , wxT("Error"), wxOK);
-      dial->ShowModal();
+    MyPipedProcess(wxWindow* parent) :
+      MyProcess(NULL)
+    {
+      Redirect();
+      m_parent = parent;
     }
-	}
-	;
 
-	virtual bool HasInput() {
-		bool hasInput = false;
+    void AddAsyncProcess(wxTextCtrl* output)
+    {
+      m_listbox_output = output;
+      running_processes.Add(this);
+    }
+
+    virtual void OnTerminate(int pid, int status)
+    {
+      // show output remainder
+      while (HasInput())
+      {
+        ;
+      }
+
+      running_processes.Remove(this);
+
+      MyProcess::OnTerminate(pid, status);
+
+      wxCommandEvent eventCustom(wxEVT_MY_PROCESS_END);
+      wxPostEvent(m_parent, eventCustom);
+
+      if (status)
+      {
+        wxMessageDialog* dial = new wxMessageDialog(NULL,
+            wxString::Format(_T("Tool exited with status: %d"), status) , wxT("Error"), wxOK);
+        dial->ShowModal();
+      }
+    }
+    ;
+
+    virtual bool HasInput()
+    {
+      bool hasInput = false;
 
       if (IsInputAvailable())
       {
@@ -127,9 +138,9 @@ public:
         m_msg << tis.ReadLine();
         if (m_listbox_output != NULL)
         {
-		  int old = m_listbox_output->GetNumberOfLines();
+          int old = m_listbox_output->GetNumberOfLines();
 
-		  m_listbox_output->AppendText(m_msg + wxT("\n") );
+          m_listbox_output->AppendText(m_msg + wxT("\n"));
 
           if (m_listbox_output == wxWindow::FindFocus())
           {
@@ -138,50 +149,53 @@ public:
             //m_listbox_output->SetSelection(wxNOT_FOUND);
           }
 
-			if (old <  m_listbox_output->GetNumberOfLines() && (!m_msg.empty()) ){
-			  wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
-			  wxPostEvent(m_parent, eventCustom);
-			}
+          if (old <  m_listbox_output->GetNumberOfLines() && (!m_msg.empty()))
+          {
+            wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
+            wxPostEvent(m_parent, eventCustom);
+          }
 
         }
         m_msg.Clear();
         hasInput = true;
       }
 
-		if (IsErrorAvailable()) {
-      wxTextInputStream tis(*GetErrorStream());
-      wxString m_msg;
-      // assumption output is line buffered
-      m_msg << tis.ReadLine();
-      if (m_listbox_output != NULL)
+      if (IsErrorAvailable())
       {
-
-		int old = m_listbox_output->GetNumberOfLines();
-
-        m_listbox_output->AppendText(m_msg + wxT("\n"));
-        if (m_listbox_output == wxWindow::FindFocus())
+        wxTextInputStream tis(*GetErrorStream());
+        wxString m_msg;
+        // assumption output is line buffered
+        m_msg << tis.ReadLine();
+        if (m_listbox_output != NULL)
         {
-          // AutoScroll
-  //        m_listbox_output->Select(m_listbox_output->GetCount() - 1);
-  //        m_listbox_output->SetSelection(wxNOT_FOUND);
+
+          int old = m_listbox_output->GetNumberOfLines();
+
+          m_listbox_output->AppendText(m_msg + wxT("\n"));
+          if (m_listbox_output == wxWindow::FindFocus())
+          {
+            // AutoScroll
+            //        m_listbox_output->Select(m_listbox_output->GetCount() - 1);
+            //        m_listbox_output->SetSelection(wxNOT_FOUND);
+          }
+
+          if (old <  m_listbox_output->GetNumberOfLines() && (!m_msg.empty()))
+          {
+            wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
+            wxPostEvent(m_parent, eventCustom);
+          }
         }
 
-        if (old <  m_listbox_output->GetNumberOfLines() && (!m_msg.empty()) ){
-          wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
-          wxPostEvent(m_parent, eventCustom);
-        }
+        m_msg.Clear();
+
+        hasInput = true;
       }
 
-      m_msg.Clear();
-
-      hasInput = true;
+      return hasInput;
     }
-
-		return hasInput;
-	}
-	;
-protected:
-	wxTextCtrl *m_listbox_output;
+    ;
+  protected:
+    wxTextCtrl* m_listbox_output;
 };
 
 #endif /* MCRL2_GUI_PROCESS_H_ */

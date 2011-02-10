@@ -19,47 +19,47 @@
 
 namespace grape
 {
-  namespace grapeapp
-  {
+namespace grapeapp
+{
 
-    class grape_frame;
+class grape_frame;
+
+/**
+ * \short Represents the main frame of the application.
+ */
+class grape_clipboard
+{
+  private:
+    grape_frame*       m_main_frame;       /**< A pointer to the main frame. */
+    libgrape::arr_object_ptr     m_objects;          /**< The list of objects put on the clipboard. */
+  protected:
+  public:
+    /**
+     * Initialization constructor.
+     * Initializes the clipboard.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_clipboard(grape_frame* p_main_frame);
 
     /**
-     * \short Represents the main frame of the application.
+     * Default destructor.
+     * Frees allocated memory.
      */
-    class grape_clipboard
-    {
-      private:
-        grape_frame       *m_main_frame;       /**< A pointer to the main frame. */
-        libgrape::arr_object_ptr     m_objects;          /**< The list of objects put on the clipboard. */
-      protected:
-      public:
-        /**
-         * Initialization constructor.
-         * Initializes the clipboard.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_clipboard( grape_frame *p_main_frame );
+    ~grape_clipboard(void);
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_clipboard( void );
+    /**
+     * Function to add an object to the clipboard
+     * @param p_objects The objects to be added to the clipboard
+     */
+    void add(libgrape::arr_object_ptr p_objects);
 
-        /**
-         * Function to add an object to the clipboard
-         * @param p_objects The objects to be added to the clipboard
-         */
-        void add( libgrape::arr_object_ptr p_objects );
-
-        /**
-         * Function to get an object from the clipboard
-         * @return The object added to the clipboard
-         */
-        libgrape::arr_object_ptr get( void );
-    };
-  } // namespace grapeapp
+    /**
+     * Function to get an object from the clipboard
+     * @return The object added to the clipboard
+     */
+    libgrape::arr_object_ptr get(void);
+};
+} // namespace grapeapp
 } // namespace grape
 
 #endif // GRAPEAPP_GRAPE_CLIPBOARD_H

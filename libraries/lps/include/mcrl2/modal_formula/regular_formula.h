@@ -23,9 +23,11 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace regular_formulas {
+namespace regular_formulas
+{
 
 //--- start generated classes ---//
 /// \brief A regular formula

@@ -16,21 +16,23 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/pbes/pbes.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-  template <typename Container>
-  inline
-  std::string pp(pbes<Container> pbes_spec, core::t_pp_format pp_format = core::ppDefault)
+template <typename Container>
+inline
+std::string pp(pbes<Container> pbes_spec, core::t_pp_format pp_format = core::ppDefault)
+{
+  if (pp_format == core::ppDefault || pp_format == core::ppInternal)
   {
-    if (pp_format == core::ppDefault || pp_format == core::ppInternal)
-    {
-      //pbes_spec.data() = mcrl2::data::remove_all_system_defined(pbes_spec.data());
-    }
-
-    return core::pp(pbes_to_aterm(pbes_spec), pp_format);
+    //pbes_spec.data() = mcrl2::data::remove_all_system_defined(pbes_spec.data());
   }
+
+  return core::pp(pbes_to_aterm(pbes_spec), pp_format);
+}
 
 } // namespace pbes
 

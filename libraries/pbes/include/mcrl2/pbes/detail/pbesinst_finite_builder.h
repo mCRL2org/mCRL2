@@ -18,23 +18,26 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
 /// Visitor that applies a propositional variable substitution to a pbes expression.
 template <typename DataRewriter, typename RenameFunction, typename Substitution>
 struct pbesinst_finite_builder: public pbes_expr_builder<pbes_expression, Substitution>
 {
   typedef core::term_traits<pbes_expression> tr;
-  
+
   const DataRewriter& m_rewriter;
   RenameFunction& m_rename;
   const data::data_specification& m_dataspec;
   std::map<core::identifier_string, std::vector<data::variable> >& m_finite_variables;
-  
+
   pbesinst_finite_builder(const DataRewriter& r, RenameFunction& rho, const data::data_specification& dataspec, std::map<core::identifier_string, std::vector<data::variable> >& finite_variables)
     : m_rewriter(r), m_rename(rho), m_dataspec(dataspec), m_finite_variables(finite_variables)
   {}
@@ -120,7 +123,7 @@ struct pbesinst_finite_builder: public pbes_expr_builder<pbes_expression, Substi
       data::data_expression_list e_infinite = rewrite(infinite_expressions, *i);
       result.insert(tr::and_(c, propositional_variable_instantiation(Y, e_infinite)));
     }
-    
+
     return pbes_expr::join_or(result.begin(), result.end());
   }
 };

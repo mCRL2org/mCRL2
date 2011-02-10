@@ -14,7 +14,7 @@
 #include <wx/bitmap.h>
 #include <wx/hashmap.h>
 
-WX_DECLARE_STRING_HASH_MAP( wxBitmap, IconMap );
+WX_DECLARE_STRING_HASH_MAP(wxBitmap, IconMap);
 
 /**
  * Initializes the mapping with array icons.

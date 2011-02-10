@@ -23,49 +23,49 @@
 
 class CombnPlot : public Visualizer
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     CombnPlot(
-        Mediator* m,
-        Graph* g,
-        GLCanvas* c );
+      Mediator* m,
+      Graph* g,
+      GLCanvas* c);
     virtual ~CombnPlot();
 
     // -- set data functions ----------------------------------------
     void setValues(
-        const std::vector< size_t > &attrIndcs,
-        std::vector< std::vector< size_t > > &combs,
-        std::vector< size_t > &number );
+      const std::vector< size_t > &attrIndcs,
+      std::vector< std::vector< size_t > > &combs,
+      std::vector< size_t > &number);
     void clearValues();
 
-  	void setDiagram( Diagram* dgrm );
+    void setDiagram(Diagram* dgrm);
 
     // -- set vis settings functions --------------------------------
 
     // -- visualization functions  ----------------------------------
-    void visualize( const bool &inSelectMode );
-    void drawAxes( const bool &inSelectMode );
-    void drawAxesBC( const bool &inSelectMode );
-    void drawAxesCP( const bool &inSelectMode );
-    void drawLabels( const bool &inSelectMode );
-    void drawLabelsBC( const bool &inSelectMode );
-    void drawLabelsCP( const bool &inSelectMode );
-    void drawPlot( const bool &inSelectMode );
-    void drawPlotBC( const bool &inSelectMode );
-    void drawPlotCP( const bool &inSelectMode );
-    void drawMousePos( const bool &inSelectMode );
-    void drawDiagram( const bool &inSelectMode );
+    void visualize(const bool& inSelectMode);
+    void drawAxes(const bool& inSelectMode);
+    void drawAxesBC(const bool& inSelectMode);
+    void drawAxesCP(const bool& inSelectMode);
+    void drawLabels(const bool& inSelectMode);
+    void drawLabelsBC(const bool& inSelectMode);
+    void drawLabelsCP(const bool& inSelectMode);
+    void drawPlot(const bool& inSelectMode);
+    void drawPlotBC(const bool& inSelectMode);
+    void drawPlotCP(const bool& inSelectMode);
+    void drawMousePos(const bool& inSelectMode);
+    void drawDiagram(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
     void handleMouseMotionEvent(
-		const int &x,
-		const int &y );
+      const int& x,
+      const int& y);
     /*
     void handleMouseEnterEvent();
     void handleMouseLeaveEvent();
     */
 
-protected:
+  protected:
     // -- utility data functions ------------------------------------
     void initLabels();
     void calcMaxAttrCard();
@@ -75,7 +75,7 @@ protected:
     // ***
     //void clear();
     void setScalingTransf();
-    void displTooltip( const size_t &posIdx );
+    void displTooltip(const size_t& posIdx);
 
     void calcPositions();
     void calcPosBC();
@@ -84,8 +84,8 @@ protected:
 
     // -- hit detection ---------------------------------------------
     void processHits(
-        GLint hits,
-        GLuint buffer[] );
+      GLint hits,
+      GLuint buffer[]);
 
     // -- data members ----------------------------------------------
     enum
@@ -113,8 +113,8 @@ protected:
     bool   mouseInside;
     size_t    mouseCombnIdx;
 
-  	// diagram
-	Diagram*      diagram;         // association, user-defined diagram
+    // diagram
+    Diagram*      diagram;         // association, user-defined diagram
     double        scaleDgrm;       // scale factor for diagram
     Position2D    posDgrm;         // positions of diagram
     bool          showDgrm;        // show or hide diagram

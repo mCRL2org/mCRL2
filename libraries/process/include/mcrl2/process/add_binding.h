@@ -20,21 +20,23 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/lps/add_binding.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace process {
+namespace process
+{
 
-  /// \brief Maintains a multiset of bound data variables during traversal
-  template <template <class> class Builder, class Derived>
-  struct add_data_variable_binding: public lps::add_data_variable_binding<Builder, Derived>
-  {
-    typedef lps::add_data_variable_binding<Builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
-  };
+/// \brief Maintains a multiset of bound data variables during traversal
+template <template <class> class Builder, class Derived>
+struct add_data_variable_binding: public lps::add_data_variable_binding<Builder, Derived>
+{
+  typedef lps::add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+};
 
 } // namespace process
 

@@ -36,7 +36,7 @@ BEGIN_EVENT_TABLE(SavePicDialog,wxDialog)
 END_EVENT_TABLE()
 
 SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
-    wxFileName filename)
+                             wxFileName filename)
   : wxDialog(parent,-1,wxT("Save Picture"),wxDefaultPosition)
 {
   statusbar = sb;
@@ -49,7 +49,7 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   updateAspectRatio();
 
   ar_check = new wxCheckBox(this, myID_AR_CHECK,
-      wxT("Maintain aspect ratio"));
+                            wxT("Maintain aspect ratio"));
   ar_check->SetValue(true);
 
   wxArrayString fts;
@@ -60,20 +60,20 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
 #if (wxUSE_STL == 1)
   for (wxList::const_iterator i = handlers.begin(); i != handlers.end(); ++i)
   {
-    const wxString extension = static_cast < wxImageHandler* > (*i)->GetExtension();
+    const wxString extension = static_cast < wxImageHandler* >(*i)->GetExtension();
 #else
   for (wxNode* node = handlers.GetFirst(); node != NULL; node = node->GetNext())
   {
-    const wxString extension = static_cast < wxImageHandler* > (node->GetData())->GetExtension();
+    const wxString extension = static_cast < wxImageHandler* >(node->GetData())->GetExtension();
 #endif
     if (extension != wxT("ani") && extension != wxT("cur") && extension != wxT("ico"))
     {
 #if (wxUSE_STL == 1)
-      const wxString name = static_cast < wxImageHandler* > (*i)->GetName();
-      const wxString type = static_cast < wxImageHandler* > (*i)->GetMimeType();
+      const wxString name = static_cast < wxImageHandler* >(*i)->GetName();
+      const wxString type = static_cast < wxImageHandler* >(*i)->GetMimeType();
 #else
-      const wxString name = static_cast < wxImageHandler* > (node->GetData())->GetName();
-      const wxString type = static_cast < wxImageHandler* > (node->GetData())->GetMimeType();
+      const wxString name = static_cast < wxImageHandler* >(node->GetData())->GetName();
+      const wxString type = static_cast < wxImageHandler* >(node->GetData())->GetMimeType();
 #endif
       if (extension == wxT("jpg"))
       {
@@ -99,25 +99,25 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   }
 
   ft_choice = new wxChoice(this,myID_FT_CHOICE,wxDefaultPosition,wxDefaultSize,
-    fts);
+                           fts);
   ft_choice->SetSelection(png_id);
 
   f_name.Assign(filename);
   f_name.SetExt(f_exts.Item(ft_choice->GetSelection()));
   f_text = new wxStaticText(this,-1,wxT(""),wxDefaultPosition,
-      wxSize(300,-1),wxST_NO_AUTORESIZE);
+                            wxSize(300,-1),wxST_NO_AUTORESIZE);
   update_file_name();
   f_button = new wxButton(this,myID_F_BUTTON,wxT("Change..."));
 
   wxFlexGridSizer* controlSizer = new wxFlexGridSizer(5,3,0,0);
   // Row 0
   controlSizer->Add(new wxStaticText(this,-1,wxT("Width:")),0,
-    wxEXPAND|wxALL,5);
+                    wxEXPAND|wxALL,5);
   controlSizer->Add(w_spin,0,wxEXPAND|wxALL,5);
   controlSizer->AddSpacer(0);
   // Row 1
   controlSizer->Add(new wxStaticText(this,-1,wxT("Height:")),0,
-    wxEXPAND|wxALL,5);
+                    wxEXPAND|wxALL,5);
   controlSizer->Add(h_spin,0,wxEXPAND|wxALL,5);
   controlSizer->AddSpacer(0);
   // Row 2
@@ -126,12 +126,12 @@ SavePicDialog::SavePicDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
   controlSizer->AddSpacer(0);
   // Row 3
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File:")),0,
-    wxEXPAND|wxALL,5);
+                    wxEXPAND|wxALL,5);
   controlSizer->Add(f_text,0,wxEXPAND|wxALL,5);
   controlSizer->Add(f_button,0,wxEXPAND|wxALL,5);
   // Row 4
   controlSizer->Add(new wxStaticText(this,wxID_ANY,wxT("File type:")),0,
-    wxEXPAND|wxALL,5);
+                    wxEXPAND|wxALL,5);
   controlSizer->Add(ft_choice,0,wxEXPAND|wxALL,5);
   controlSizer->AddSpacer(0);
 
@@ -180,7 +180,7 @@ void SavePicDialog::update_w_spin()
   w_spin->SetValue(MathUtils::round_to_int(h_spin->GetValue() * ar));
 }
 
-void SavePicDialog::onARCheck(wxCommandEvent &event)
+void SavePicDialog::onARCheck(wxCommandEvent& event)
 {
   if (event.IsChecked())
   {
@@ -207,7 +207,7 @@ void SavePicDialog::onSpin(wxSpinEvent& event)
 void SavePicDialog::onChangeFile(wxCommandEvent& /*event*/)
 {
   wxString new_file = wxFileSelector(wxT("Select a file"),f_name.GetPath(),
-    f_name.GetFullName(),wxT(""),wxT("*.*"),wxFD_SAVE,this);
+                                     f_name.GetFullName(),wxT(""),wxT("*.*"),wxFD_SAVE,this);
   if (!new_file.empty())
   {
     f_name.Assign(new_file);
@@ -289,7 +289,7 @@ void SavePicDialog::OnOK(wxCommandEvent& /*event*/)
     statusbar->SetStatusText(wxT("Done"));
     statusbar->Update();
     wxMessageDialog msgDialog(GetParent(),wxT("The picture was saved to file:\n\n") +
-        f_name.GetFullPath(),wxT("Picture saved"),wxOK|wxICON_INFORMATION);
+                              f_name.GetFullPath(),wxT("Picture saved"),wxOK|wxICON_INFORMATION);
     msgDialog.ShowModal();
   }
   statusbar->SetStatusText(wxT(""));
@@ -304,8 +304,8 @@ void SavePicDialog::update_file_name()
   if (text.Len() > MAX_LABEL_LENGTH)
   {
     text = text.Left((MAX_LABEL_LENGTH - 3) / 2)
-      + wxT("...")
-      + text.Right((MAX_LABEL_LENGTH - 3) / 2 + (MAX_LABEL_LENGTH - 3) % 2);
+           + wxT("...")
+           + text.Right((MAX_LABEL_LENGTH - 3) / 2 + (MAX_LABEL_LENGTH - 3) % 2);
   }
   f_text->SetLabel(text);
 }

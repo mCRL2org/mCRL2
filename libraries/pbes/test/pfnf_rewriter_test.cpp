@@ -48,7 +48,7 @@ const std::string VARIABLE_SPECIFICATION =
   "  X1: Bool;     \n"
   "  X2: Nat, Nat; \n"
   "  X3: Bool, Nat;\n"
-  "  X4: Nat, Bool;\n"  
+  "  X4: Nat, Bool;\n"
   ;
 
 inline
@@ -110,8 +110,8 @@ void test_pfnf_rewriter()
     "                                                        \n"
     "init X(true);                                           \n"
     ;
-  
-  std::string PFNF2 = 
+
+  std::string PFNF2 =
     "pbes                                                        \n"
     "nu X(m:Nat) = (forall n:Nat. X(n)) && (forall j:Nat. X(j)); \n"
     "                                                            \n"
@@ -138,7 +138,7 @@ bool pbespgsolve(const pbes<>& p)
 
 void test_pfnf_rewriter2(const std::string& text)
 {
-  pbes<> p = txt2pbes(text); 
+  pbes<> p = txt2pbes(text);
   std::cout << "\ntest_pfnf_rewriter2\n" << std::endl;
   std::cout << "--- before ---\n";
   std::cout << pp(p) << std::endl;
@@ -167,7 +167,7 @@ void test_pfnf_rewriter2()
     "init X;                                                      \n"
     ;
   test_pfnf_rewriter2(text);
-  
+
   text =
     "pbes                                                                                   \n"
     "nu X = (exists v: Nat. (val(v > 4) || Y(v))) && (forall v: Nat. (val(v < 3) && Y(v))); \n"

@@ -28,47 +28,47 @@ using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
 const std::string SPECIFICATION =
-"% Test Case 3                                                     \n"
-"%                                                                 \n"
-"% rename:                                                         \n"
-"% var                                                             \n"
-"%   x:Bool;                                                       \n"
-"%   y:Nat;                                                        \n"
-"%   z:Nat;                                                        \n"
-"% rename                                                          \n"
-"%   a(x,y) => a(x,y);                                             \n"
-"                                                                  \n"
-"act                                                               \n"
-"  a: Bool#Nat;                                                    \n"
-"                                                                  \n"
-"proc                                                              \n"
-"  X(x:Bool, y:Nat)= sum z:Nat. (y<=z && z<3) -> a(x,y).X(!x,y+1); \n"
-"                                                                  \n"
-"init                                                              \n"
-"  X(true,0);                                                      \n"
-;
+  "% Test Case 3                                                     \n"
+  "%                                                                 \n"
+  "% rename:                                                         \n"
+  "% var                                                             \n"
+  "%   x:Bool;                                                       \n"
+  "%   y:Nat;                                                        \n"
+  "%   z:Nat;                                                        \n"
+  "% rename                                                          \n"
+  "%   a(x,y) => a(x,y);                                             \n"
+  "                                                                  \n"
+  "act                                                               \n"
+  "  a: Bool#Nat;                                                    \n"
+  "                                                                  \n"
+  "proc                                                              \n"
+  "  X(x:Bool, y:Nat)= sum z:Nat. (y<=z && z<3) -> a(x,y).X(!x,y+1); \n"
+  "                                                                  \n"
+  "init                                                              \n"
+  "  X(true,0);                                                      \n"
+  ;
 
 const std::string SPECIFICATION2 =
-"act a:Nat;                              \n"
-"                                        \n"
-"map smaller: Nat#Nat -> Bool;           \n"
-"                                        \n"
-"var x,y : Nat;                          \n"
-"                                        \n"
-"eqn smaller(x,y) = x < y;               \n"
-"                                        \n"
-"proc P(n:Nat) = sum m: Nat. a(m). P(m); \n"
-"                                        \n"
-"init P(0);                              \n"
-;
+  "act a:Nat;                              \n"
+  "                                        \n"
+  "map smaller: Nat#Nat -> Bool;           \n"
+  "                                        \n"
+  "var x,y : Nat;                          \n"
+  "                                        \n"
+  "eqn smaller(x,y) = x < y;               \n"
+  "                                        \n"
+  "proc P(n:Nat) = sum m: Nat. a(m). P(m); \n"
+  "                                        \n"
+  "init P(0);                              \n"
+  ;
 
 const std::string SPECIFICATION3 =
-"act a;                                  \n"
-"                                        \n"
-"proc P(b:Bool) = a. P(b);               \n"
-"                                        \n"
-"init P(false);                          \n"
-;
+  "act a;                                  \n"
+  "                                        \n"
+  "proc P(b:Bool) = a. P(b);               \n"
+  "                                        \n"
+  "init P(false);                          \n"
+  ;
 
 void test_lps_rename()
 {

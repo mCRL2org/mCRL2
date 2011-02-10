@@ -19,20 +19,20 @@
 using namespace grape::libgrape;
 
 reference_state::reference_state(void)
-: compound_state( REFERENCE_STATE )
+  : compound_state(REFERENCE_STATE)
 {
   m_parameter_assignments.Empty();
   m_refers_to_process = 0;
 }
 
-reference_state::reference_state( const reference_state &p_ref_state )
-: compound_state( p_ref_state )
+reference_state::reference_state(const reference_state& p_ref_state)
+  : compound_state(p_ref_state)
 {
   m_parameter_assignments = p_ref_state.m_parameter_assignments;
   m_refers_to_process = p_ref_state.m_refers_to_process;
 }
 
-reference_state::~reference_state( void )
+reference_state::~reference_state(void)
 {
   // Remove all references from initial designators to this state.
 
@@ -40,7 +40,7 @@ reference_state::~reference_state( void )
   size_t count = m_designates.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    initial_designator* init_ptr = m_designates.Item( i );
+    initial_designator* init_ptr = m_designates.Item(i);
     init_ptr->detach();
   }
 
@@ -50,7 +50,7 @@ reference_state::~reference_state( void )
   count = m_beginstate.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    transition* trans_ptr = m_beginstate.Item( i );
+    transition* trans_ptr = m_beginstate.Item(i);
     trans_ptr->detach_beginstate();
   }
 
@@ -60,7 +60,7 @@ reference_state::~reference_state( void )
   count = m_endstate.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    nonterminating_transition* trans_ptr = m_endstate.Item( i );
+    nonterminating_transition* trans_ptr = m_endstate.Item(i);
     trans_ptr->detach_endstate();
   }
 
@@ -71,39 +71,39 @@ reference_state::~reference_state( void )
   m_parameter_assignments.Clear();
 }
 
-process_diagram* reference_state::get_relationship_refers_to( void )
+process_diagram* reference_state::get_relationship_refers_to(void)
 {
   return m_refers_to_process;
 }
 
-void reference_state::set_relationship_refers_to( process_diagram* p_proc_diagram )
+void reference_state::set_relationship_refers_to(process_diagram* p_proc_diagram)
 {
   m_refers_to_process = p_proc_diagram;
 }
 
-list_of_varupdate reference_state::get_parameter_updates( void ) const
+list_of_varupdate reference_state::get_parameter_updates(void) const
 {
   return m_parameter_assignments;
 }
 
-void reference_state::set_parameter_updates( const list_of_varupdate& p_parameter_assignments )
+void reference_state::set_parameter_updates(const list_of_varupdate& p_parameter_assignments)
 {
   m_parameter_assignments = p_parameter_assignments;
 }
 
-bool reference_state::set_text( const wxString &p_text )
+bool reference_state::set_text(const wxString& p_text)
 {
   bool valid = true;
   m_parameter_assignments.Empty();
-  wxStringTokenizer tkw( p_text, _T(";") );
+  wxStringTokenizer tkw(p_text, _T(";"));
   varupdate var_update;
-  while( tkw.HasMoreTokens() )
+  while (tkw.HasMoreTokens())
   {
     wxString token = tkw.GetNextToken();
-    valid &= var_update.set_varupdate( token );
+    valid &= var_update.set_varupdate(token);
     if (valid)
     {
-      m_parameter_assignments.Add( var_update );
+      m_parameter_assignments.Add(var_update);
     }
   }
   return true;
@@ -112,14 +112,14 @@ bool reference_state::set_text( const wxString &p_text )
 wxString reference_state::get_text() const
 {
   wxString result;
-  for ( unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i )
+  for (unsigned int i = 0; i < m_parameter_assignments.GetCount(); ++i)
   {
-    varupdate parameter_assignment = m_parameter_assignments.Item( i );
-    result += parameter_assignment.get_lhs() + _T( ":=" ) + parameter_assignment.get_rhs() + _T( ";\n" );
+    varupdate parameter_assignment = m_parameter_assignments.Item(i);
+    result += parameter_assignment.get_lhs() + _T(":=") + parameter_assignment.get_rhs() + _T(";\n");
   }
   return result;
 }
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_reference_state )
+WX_DEFINE_OBJARRAY(arr_reference_state)

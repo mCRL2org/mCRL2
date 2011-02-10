@@ -16,9 +16,11 @@
 #include "mcrl2/fdr/expression_fwd.h"
 #include "mcrl2/fdr/process_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated any expression class declarations ---//
 /// \brief class any_expression
@@ -82,23 +84,23 @@ class proc: public any_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a expr expression
-    /// \param t A term
-    /// \return True if it is a expr expression
-    inline
-    bool is_expr(const any_expression& t)
-    {
-      return fdr::detail::gsIsExpr(t);
-    }
+/// \brief Test for a expr expression
+/// \param t A term
+/// \return True if it is a expr expression
+inline
+bool is_expr(const any_expression& t)
+{
+  return fdr::detail::gsIsExpr(t);
+}
 
-    /// \brief Test for a proc expression
-    /// \param t A term
-    /// \return True if it is a proc expression
-    inline
-    bool is_proc(const any_expression& t)
-    {
-      return fdr::detail::gsIsProc(t);
-    }
+/// \brief Test for a proc expression
+/// \param t A term
+/// \return True if it is a proc expression
+inline
+bool is_proc(const any_expression& t)
+{
+  return fdr::detail::gsIsProc(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

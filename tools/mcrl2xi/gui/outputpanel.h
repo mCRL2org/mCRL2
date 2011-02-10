@@ -15,10 +15,10 @@
 #include <wx/wx.h>
 #include <wx/textctrl.h>
 
-    class outputpanel : public wxTextCtrl
-    {
-      public:
-        outputpanel(wxWindow *p_parent);
-        std::string PrintTime();
-    };
+class outputpanel : public wxTextCtrl
+{
+  public:
+    outputpanel(wxWindow* p_parent);
+    std::string PrintTime();
+};
 #endif // MCRL2XI_OUTPUTPANEL_H

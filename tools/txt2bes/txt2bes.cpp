@@ -33,24 +33,24 @@ using namespace mcrl2::utilities::tools;
 
 class txt2pbes_tool: public input_output_tool
 {
-  typedef input_output_tool super;
+    typedef input_output_tool super;
 
   public:
     txt2pbes_tool()
       : super(NAME, AUTHOR,
-          "parse a textual description of a BES",
-          "Parse the textual description of a BES from INFILE and write it to OUTFILE. "
-          "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
-        )
+              "parse a textual description of a BES",
+              "Parse the textual description of a BES from INFILE and write it to OUTFILE. "
+              "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
+             )
     {}
 
     bool run()
     {
       pbes_system::pbes<> p;
-      if (input_filename().empty()) 
-      { 
+      if (input_filename().empty())
+      {
         p = pbes_system::txt2pbes(std::cin);
-      } 
+      }
       else
       {
         std::ifstream from(input_filename().c_str());
@@ -62,9 +62,10 @@ class txt2pbes_tool: public input_output_tool
     }
 };
 
-class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool> {
-public:
-	txt2pbes_gui_tool() {}
+class txt2pbes_gui_tool: public mcrl2_gui_tool<txt2pbes_tool>
+{
+  public:
+    txt2pbes_gui_tool() {}
 };
 
 

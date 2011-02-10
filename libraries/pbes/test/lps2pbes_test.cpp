@@ -46,44 +46,44 @@ namespace fs = boost::filesystem;
 #endif
 
 const std::string ABP_SPECIFICATION =
-"% This file contains the alternating bit protocol, as described in W.J.    \n"
-"% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
-"%                                                                          \n"
-"% The only exception is that the domain D consists of two data elements to \n"
-"% facilitate simulation.                                                   \n"
-"                                                                           \n"
-"sort                                                                       \n"
-"  D     = struct d1 | d2;                                                  \n"
-"  Error = struct e;                                                        \n"
-"                                                                           \n"
-"act                                                                        \n"
-"  r1,s4: D;                                                                \n"
-"  s2,r2,c2: D # Bool;                                                      \n"
-"  s3,r3,c3: D # Bool;                                                      \n"
-"  s3,r3,c3: Error;                                                         \n"
-"  s5,r5,c5: Bool;                                                          \n"
-"  s6,r6,c6: Bool;                                                          \n"
-"  s6,r6,c6: Error;                                                         \n"
-"  i;                                                                       \n"
-"                                                                           \n"
-"proc                                                                       \n"
-"  S(b:Bool)     = sum d:D. r1(d).T(d,b);                                   \n"
-"  T(d:D,b:Bool) = s2(d,b).(r6(b).S(!b)+(r6(!b)+r6(e)).T(d,b));             \n"
-"                                                                           \n"
-"  R(b:Bool)     = sum d:D. r3(d,b).s4(d).s5(b).R(!b)+                      \n"
-"                  (sum d:D.r3(d,!b)+r3(e)).s5(!b).R(b);                    \n"
-"                                                                           \n"
-"  K             = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;           \n"
-"                                                                           \n"
-"  L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;                   \n"
-"                                                                           \n"
-"init                                                                       \n"
-"  allow({r1,s4,c2,c3,c5,c6,i},                                             \n"
-"    comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},                     \n"
-"        S(true) || K || L || R(true)                                       \n"
-"    )                                                                      \n"
-"  );                                                                       \n"
-;
+  "% This file contains the alternating bit protocol, as described in W.J.    \n"
+  "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
+  "%                                                                          \n"
+  "% The only exception is that the domain D consists of two data elements to \n"
+  "% facilitate simulation.                                                   \n"
+  "                                                                           \n"
+  "sort                                                                       \n"
+  "  D     = struct d1 | d2;                                                  \n"
+  "  Error = struct e;                                                        \n"
+  "                                                                           \n"
+  "act                                                                        \n"
+  "  r1,s4: D;                                                                \n"
+  "  s2,r2,c2: D # Bool;                                                      \n"
+  "  s3,r3,c3: D # Bool;                                                      \n"
+  "  s3,r3,c3: Error;                                                         \n"
+  "  s5,r5,c5: Bool;                                                          \n"
+  "  s6,r6,c6: Bool;                                                          \n"
+  "  s6,r6,c6: Error;                                                         \n"
+  "  i;                                                                       \n"
+  "                                                                           \n"
+  "proc                                                                       \n"
+  "  S(b:Bool)     = sum d:D. r1(d).T(d,b);                                   \n"
+  "  T(d:D,b:Bool) = s2(d,b).(r6(b).S(!b)+(r6(!b)+r6(e)).T(d,b));             \n"
+  "                                                                           \n"
+  "  R(b:Bool)     = sum d:D. r3(d,b).s4(d).s5(b).R(!b)+                      \n"
+  "                  (sum d:D.r3(d,!b)+r3(e)).s5(!b).R(b);                    \n"
+  "                                                                           \n"
+  "  K             = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;           \n"
+  "                                                                           \n"
+  "  L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;                   \n"
+  "                                                                           \n"
+  "init                                                                       \n"
+  "  allow({r1,s4,c2,c3,c5,c6,i},                                             \n"
+  "    comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},                     \n"
+  "        S(true) || K || L || R(true)                                       \n"
+  "    )                                                                      \n"
+  "  );                                                                       \n"
+  ;
 
 const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
@@ -107,10 +107,10 @@ void test_lps2pbes()
   bool timed = false;
 
   SPECIFICATION =
-  "act a;                                  \n"
-  "proc X(n : Nat) = (n > 2) -> a. X(n+1); \n"
-  "init X(3);                              \n"
-  ;
+    "act a;                                  \n"
+    "proc X(n : Nat) = (n > 2) -> a. X(n+1); \n"
+    "init X(3);                              \n"
+    ;
   FORMULA = "true => false";
   spec    = linearise(SPECIFICATION);
   formula = state_formulas::parse_state_formula(FORMULA, spec);
@@ -118,10 +118,10 @@ void test_lps2pbes()
   BOOST_CHECK(p.is_well_typed());
 
   SPECIFICATION =
-  "act a : Nat;                           \n"
-  "proc X(n:Nat) = (n>2) -> a(n). X(n+1); \n"
-  "init X(3);                             \n"
-  ;
+    "act a : Nat;                           \n"
+    "proc X(n:Nat) = (n>2) -> a(n). X(n+1); \n"
+    "init X(3);                             \n"
+    ;
   FORMULA = "nu X. (X && forall m:Nat. [a(m)]false)";
   spec    = linearise(SPECIFICATION);
   formula = state_formulas::parse_state_formula(FORMULA, spec);
@@ -129,22 +129,22 @@ void test_lps2pbes()
   BOOST_CHECK(p.is_well_typed());
 
   SPECIFICATION =
-  "act a;         \n"
-  "proc X = a. X; \n"
-  "init X;        \n"
-  ;
+    "act a;         \n"
+    "proc X = a. X; \n"
+    "init X;        \n"
+    ;
   FORMULA =
-  "(                                 \n"
-  "  ( mu A. [!a]A)                  \n"
-  "||                                \n"
-  "  ( mu B. exists t3:Pos . [!a]B ) \n"
-  ")                                 \n"
-  ;
+    "(                                 \n"
+    "  ( mu A. [!a]A)                  \n"
+    "||                                \n"
+    "  ( mu B. exists t3:Pos . [!a]B ) \n"
+    ")                                 \n"
+    ;
   spec    = linearise(SPECIFICATION);
   formula = state_formulas::parse_state_formula(FORMULA, spec);
   p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
-  
+
   SPECIFICATION =
     "sort Closure = List(Bool);                                                   \n"
     "sort State = struct state(closure: Closure, copy: Nat);                      \n"
@@ -238,18 +238,18 @@ void test_lps2pbes3()
     "(mu X(n:Nat = 0) . true) \n"
     "&&                       \n"
     "(mu X(n:Nat = 0) . true) \n"
-    ;   
+    ;
 
   // Expected result:
   //
-  // pbes nu X1 =        
+  // pbes nu X1 =
   //        Y(0) && X(0);
-  //      mu Y(n: Nat) = 
-  //        true;        
-  //      mu X(n: Nat) = 
-  //        true;        
-  //                     
-  // init X1;            
+  //      mu Y(n: Nat) =
+  //        true;
+  //      mu X(n: Nat) =
+  //        true;
+  //
+  // init X1;
 
   pbes<> p;
   bool timed = false;
@@ -265,14 +265,14 @@ void test_directory(int argc, char** argv)
   BOOST_CHECK(argc > 1);
 
   // The dummy file test.test is used to extract the full path of the test directory.
-  fs::path dummy_path = fs::system_complete( fs::path( argv[1], fs::native ) );
+  fs::path dummy_path = fs::system_complete(fs::path(argv[1], fs::native));
   fs::path dir = dummy_path.branch_path();
   BOOST_CHECK(fs::is_directory(dir));
 
   fs::directory_iterator end_iter;
-  for ( fs::directory_iterator dir_itr(dir); dir_itr != end_iter; ++dir_itr )
+  for (fs::directory_iterator dir_itr(dir); dir_itr != end_iter; ++dir_itr)
   {
-    if ( fs::is_regular( dir_itr->status() ) )
+    if (fs::is_regular(dir_itr->status()))
     {
       std::string filename = dir_itr->path().file_string();
       if (boost::ends_with(filename, std::string(".form")))
@@ -282,13 +282,16 @@ void test_directory(int argc, char** argv)
         std::string formula = mcrl2::core::read_text(filename);
         if (fs::exists(timed_result_file))
         {
-          try {
+          try
+          {
             pbes<> result = lps2pbes(SPEC1, formula, true);
             pbes<> expected_result;
             expected_result.load(timed_result_file);
             bool cmp = (result == expected_result);
             if (!cmp)
+            {
               cerr << "ERROR: test " << timed_result_file << " failed!" << endl;
+            }
             BOOST_CHECK(cmp);
           }
           catch (mcrl2::runtime_error e)
@@ -298,14 +301,17 @@ void test_directory(int argc, char** argv)
         }
         if (fs::exists(untimed_result_file))
         {
-          try {
+          try
+          {
             pbes<> result = lps2pbes(SPEC1, formula, false);
             BOOST_CHECK(result.is_well_typed());
             pbes<> expected_result;
             expected_result.load(untimed_result_file);
             bool cmp = (result == expected_result);
             if (!cmp)
+            {
               cerr << "ERROR: test " << untimed_result_file << " failed!" << endl;
+            }
             BOOST_CHECK(cmp);
           }
           catch (mcrl2::runtime_error e)
@@ -323,13 +329,13 @@ void test_directory(int argc, char** argv)
 void test_formulas()
 {
   std::string SPEC =
-  "act a:Nat;                             \n"
-  "map smaller: Nat#Nat -> Bool;          \n"
-  "var x,y : Nat;                         \n"
-  "eqn smaller(x,y) = x < y;              \n"
-  "proc P(n:Nat) = sum m: Nat. a(m). P(m);\n"
-  "init P(0);                             \n"
-  ;
+    "act a:Nat;                             \n"
+    "map smaller: Nat#Nat -> Bool;          \n"
+    "var x,y : Nat;                         \n"
+    "eqn smaller(x,y) = x < y;              \n"
+    "proc P(n:Nat) = sum m: Nat. a(m). P(m);\n"
+    "init P(0);                             \n"
+    ;
 
   std::vector<string> formulas;
   formulas.push_back("delay@11");
@@ -435,7 +441,7 @@ void test_example()
     "init S;                                          \n"
     ;
 
-  std::string FORMULA = "<a>([a]false)";   
+  std::string FORMULA = "<a>([a]false)";
 
   pbes<> p;
   bool timed = false;
@@ -508,7 +514,7 @@ void test_elevator()
   std::string formula5 = "!(nu V . mu W. V)";
 
   pbes<> p;
-  bool timed = false; 
+  bool timed = false;
   p = lps2pbes(SPEC, formula1, timed);
   p = lps2pbes(SPEC, formula2, timed);
   p = lps2pbes(SPEC, formula3, timed);

@@ -8,6 +8,6 @@
 #include <sstream>
 #include "mcrl2/lts/lts_fsm.h"
 
-bool parse_fsm( std::istream &stream, mcrl2::lts::lts_fsm_t &lts );
+bool parse_fsm(std::istream& stream, mcrl2::lts::lts_fsm_t& lts);
 
 #endif

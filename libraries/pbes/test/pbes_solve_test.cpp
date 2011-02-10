@@ -20,96 +20,96 @@ using namespace mcrl2;
 using namespace mcrl2::pbes_system;
 
 std::string test01 =
-    "pbes mu X = X;                                           \n"
-    "                                                         \n"
-    "init X;                                                  \n"
-    ;
+  "pbes mu X = X;                                           \n"
+  "                                                         \n"
+  "init X;                                                  \n"
+  ;
 
 std::string test02 =
-    "pbes nu X = X;                                           \n"
-    "                                                         \n"
-    "init X;                                                  \n"
-    ;
+  "pbes nu X = X;                                           \n"
+  "                                                         \n"
+  "init X;                                                  \n"
+  ;
 
 std::string test03 =
-    "pbes mu X = Y;                                           \n"
-    "     nu Y = X;                                           \n"
-    "                                                         \n"
-    "init X;                                                  \n"
-    ;
+  "pbes mu X = Y;                                           \n"
+  "     nu Y = X;                                           \n"
+  "                                                         \n"
+  "init X;                                                  \n"
+  ;
 
 std::string test04 =
-    "pbes nu Y = X;                                           \n"
-    "     mu X = Y;                                           \n"
-    "                                                         \n"
-    "init X;                                                  \n"
-    ;
+  "pbes nu Y = X;                                           \n"
+  "     mu X = Y;                                           \n"
+  "                                                         \n"
+  "init X;                                                  \n"
+  ;
 
 std::string test05 =
-    "pbes mu X1 = X2;                                         \n"
-    "     nu X2 = X1 || X3;                                   \n"
-    "     mu X3 = X4 && X5;                                   \n"
-    "     nu X4 = X1;                                         \n"
-    "     nu X5 = X1 || X3;                                   \n"
-    "                                                         \n"
-    "init X1;                                                 \n"
-    ;
+  "pbes mu X1 = X2;                                         \n"
+  "     nu X2 = X1 || X3;                                   \n"
+  "     mu X3 = X4 && X5;                                   \n"
+  "     nu X4 = X1;                                         \n"
+  "     nu X5 = X1 || X3;                                   \n"
+  "                                                         \n"
+  "init X1;                                                 \n"
+  ;
 
 std::string test06 =
-    "pbes nu X1 = X2 && X1;                                   \n"
-    "     mu X2 = X1 || X3;                                   \n"
-    "     nu X3 = X3;                                         \n"
-    "                                                         \n"
-    "init X1;                                                 \n"
-    ;
+  "pbes nu X1 = X2 && X1;                                   \n"
+  "     mu X2 = X1 || X3;                                   \n"
+  "     nu X3 = X3;                                         \n"
+  "                                                         \n"
+  "init X1;                                                 \n"
+  ;
 
 std::string test07 =
-    "pbes nu X1 = X2 && X3;                                   \n"
-    "     nu X2 = X4 && X5;                                   \n"
-    "     nu X3 = true;                                       \n"
-    "     nu X4 = false;                                      \n"
-    "     nu X5 = X6;                                         \n"
-    "     nu X6 = X5;                                         \n"
-    "                                                         \n"
-    "init X1;                                                 \n"
-    ;
+  "pbes nu X1 = X2 && X3;                                   \n"
+  "     nu X2 = X4 && X5;                                   \n"
+  "     nu X3 = true;                                       \n"
+  "     nu X4 = false;                                      \n"
+  "     nu X5 = X6;                                         \n"
+  "     nu X6 = X5;                                         \n"
+  "                                                         \n"
+  "init X1;                                                 \n"
+  ;
 
 std::string test08 =
-    "pbes nu X1 = X2 && X1;                                   \n"
-    "     mu X2 = X1;                                         \n"
-    "                                                         \n"
-    "init X1;                                                 \n"
-    ;
+  "pbes nu X1 = X2 && X1;                                   \n"
+  "     mu X2 = X1;                                         \n"
+  "                                                         \n"
+  "init X1;                                                 \n"
+  ;
 
 std::string test09 =
-    "pbes                         \n"
-    "                             \n"
-    "nu X(b:Bool, n:Nat) = true;  \n"
-    "                             \n"
-    "init X(true,0);              \n"
-    ;
+  "pbes                         \n"
+  "                             \n"
+  "nu X(b:Bool, n:Nat) = true;  \n"
+  "                             \n"
+  "init X(true,0);              \n"
+  ;
 
 // Test case to check a simple forall quantifier elimination.
 std::string test10 =
-    "sort E=struct e1 | e2 | e3;"
-    "pbes mu X=forall x:E.val(x==e1);"
-    "init X;";
+  "sort E=struct e1 | e2 | e3;"
+  "pbes mu X=forall x:E.val(x==e1);"
+  "init X;";
 
 // Test case to check a simple exists quantifier elimination.
 std::string test11 =
-    "sort E=struct e1 | e2 | e3;"
-    "pbes mu X=exists x:E.val(x==e1);"
-    "init X;";
+  "sort E=struct e1 | e2 | e3;"
+  "pbes mu X=exists x:E.val(x==e1);"
+  "init X;";
 
 // Test case to check a more complex forall quantifier elimination.
 std::string test12 =
-    "pbes mu X=forall x:Nat.val(x<3 => x==1);"
-    "init X;";
+  "pbes mu X=forall x:Nat.val(x<3 => x==1);"
+  "init X;";
 
 // Test case to check a more complex exists quantifier elimination.
 std::string test13 =
-    "pbes mu X=exists x:Nat.val(x<3 => x==1);"
-    "init X;";
+  "pbes mu X=exists x:Nat.val(x<3 => x==1);"
+  "init X;";
 
 // Problematic case found by random pbes tests
 std::string test14 =

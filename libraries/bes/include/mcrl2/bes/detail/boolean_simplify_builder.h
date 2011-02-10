@@ -18,11 +18,14 @@
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/exception.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace bes {
+namespace bes
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Visitor class for visiting the nodes of a boolean expression. During traversal
 /// of the nodes, the expression is rebuilt from scratch.
@@ -135,63 +138,85 @@ struct boolean_expr_builder
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit>" << tr::pp(e) << std::endl;
+    std::cerr << "<visit>" << tr::pp(e) << std::endl;
 #endif
 
     term_type result;
 
-    if (tr::is_true(e)) {
+    if (tr::is_true(e))
+    {
       result = visit_true(e, arg1);
-      if (!is_finished(result)) {
-        result = e;
-      }
-    } else if (tr::is_false(e)) {
-      result = visit_false(e, arg1);
-      if (!is_finished(result)) {
-        result = e;
-      }
-    } else if (tr::is_not(e)) {
-      term_type n = tr::arg(e);
-      result = visit_not(e, n, arg1);
-      if (!is_finished(result)) {
-        result = core::optimized_not(visit(n, arg1));
-      }
-    } else if (tr::is_and(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
-      result = visit_and(e, l, r, arg1);
-      if (!is_finished(result)) {
-        result = core::optimized_and(visit(l, arg1), visit(r, arg1));
-      }
-    } else if (tr::is_or(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
-      result = visit_or(e, l, r, arg1);
-      if (!is_finished(result)) {
-        result = core::optimized_or(visit(l, arg1), visit(r, arg1));
-      }
-    } else if (tr::is_imp(e)) {
-      term_type l = tr::left(e);
-      term_type r = tr::right(e);
-      result = visit_imp(e, l, r, arg1);
-      if (!is_finished(result)) {
-        result = core::optimized_imp(visit(l, arg1), visit(r, arg1));
-      }
-    } else if (tr::is_variable(e)) {
-      result = visit_var(e, e, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
     }
-    else {
+    else if (tr::is_false(e))
+    {
+      result = visit_false(e, arg1);
+      if (!is_finished(result))
+      {
+        result = e;
+      }
+    }
+    else if (tr::is_not(e))
+    {
+      term_type n = tr::arg(e);
+      result = visit_not(e, n, arg1);
+      if (!is_finished(result))
+      {
+        result = core::optimized_not(visit(n, arg1));
+      }
+    }
+    else if (tr::is_and(e))
+    {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
+      result = visit_and(e, l, r, arg1);
+      if (!is_finished(result))
+      {
+        result = core::optimized_and(visit(l, arg1), visit(r, arg1));
+      }
+    }
+    else if (tr::is_or(e))
+    {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
+      result = visit_or(e, l, r, arg1);
+      if (!is_finished(result))
+      {
+        result = core::optimized_or(visit(l, arg1), visit(r, arg1));
+      }
+    }
+    else if (tr::is_imp(e))
+    {
+      term_type l = tr::left(e);
+      term_type r = tr::right(e);
+      result = visit_imp(e, l, r, arg1);
+      if (!is_finished(result))
+      {
+        result = core::optimized_imp(visit(l, arg1), visit(r, arg1));
+      }
+    }
+    else if (tr::is_variable(e))
+    {
+      result = visit_var(e, e, arg1);
+      if (!is_finished(result))
+      {
+        result = e;
+      }
+    }
+    else
+    {
       result = visit_unknown(e, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
     }
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit result>" << tr::pp(result) << std::endl;
+    std::cerr << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
@@ -290,228 +315,247 @@ struct boolean_expr_builder<Term, void>
   /// \return The visit result
   term_type visit(term_type e)
   {
-  /// \brief The term traits type
+    /// \brief The term traits type
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
+    std::cerr << "<visit>" << tr::pp(e) << " " << e << std::endl;
 #endif
 
     term_type result;
 
-    if (tr::is_true(e)) {
+    if (tr::is_true(e))
+    {
       result = visit_true(e);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
-    } else if (tr::is_false(e)) {
+    }
+    else if (tr::is_false(e))
+    {
       result = visit_false(e);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
-    } else if (tr::is_not(e)) {
+    }
+    else if (tr::is_not(e))
+    {
       term_type n = tr::arg(e);
       result = visit_not(e, n);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_not(visit(n));
       }
-    } else if (tr::is_and(e)) {
+    }
+    else if (tr::is_and(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_and(e, l, r);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_and(visit(l), visit(r));
       }
-    } else if (tr::is_or(e)) {
+    }
+    else if (tr::is_or(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_or(e, l, r);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_or(visit(l), visit(r));
       }
-    } else if (tr::is_imp(e)) {
+    }
+    else if (tr::is_imp(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_imp(e, l, r);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_imp(visit(l), visit(r));
       }
     }
-    else {
+    else
+    {
       result = visit_unknown(e);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
     }
 
 #ifdef MCRL2_BOOLEAN_EXPRESSION_BUILDER_DEBUG
-std::cerr << "<visit result>" << tr::pp(result) << " " << result << std::endl;
+    std::cerr << "<visit result>" << tr::pp(result) << " " << result << std::endl;
 #endif
 
     return result;
   }
 };
 
-  struct no_substitution
+struct no_substitution
+{
+};
+
+// Simplifying rewriter.
+template <typename Term, typename Arg = no_substitution>
+struct boolean_simplify_builder: public boolean_expr_builder<Term, Arg>
+{
+  typedef boolean_expr_builder<Term, Arg> super;
+  typedef Arg                                argument_type;
+  typedef typename super::term_type          term_type;
+  typedef core::term_traits<Term> tr;
+
+  /// \brief Visit true node
+  /// \param x A term
+  /// \param arg An additional argument for the recursion
+  /// \return The result of visiting the node
+  term_type visit_true(const term_type& /* x */, Arg& /* arg */)
   {
-  };
+    return tr::true_();
+  }
 
-  // Simplifying rewriter.
-  template <typename Term, typename Arg = no_substitution>
-  struct boolean_simplify_builder: public boolean_expr_builder<Term, Arg>
+  /// \brief Visit false node
+  /// \param x A term
+  /// \param arg An additional argument for the recursion
+  /// \return The result of visiting the node
+  term_type visit_false(const term_type& /* x */, Arg& /* arg */)
   {
-    typedef boolean_expr_builder<Term, Arg> super;
-    typedef Arg                                argument_type;
-    typedef typename super::term_type          term_type;
-    typedef core::term_traits<Term> tr;
+    return tr::false_();
+  }
 
-    /// \brief Visit true node
-    /// \param x A term
-    /// \param arg An additional argument for the recursion
-    /// \return The result of visiting the node
-    term_type visit_true(const term_type& /* x */, Arg& /* arg */)
-    {
-      return tr::true_();
-    }
-
-    /// \brief Visit false node
-    /// \param x A term
-    /// \param arg An additional argument for the recursion
-    /// \return The result of visiting the node
-    term_type visit_false(const term_type& /* x */, Arg& /* arg */)
+  /// \brief Visit not node
+  /// \param x A term
+  /// \param n A term
+  /// \param arg An additional argument for the recursion
+  /// \return The result of visiting the node
+  term_type visit_not(const term_type& /* x */, const term_type& n, Arg& /* arg */)
+  {
+    if (tr::is_true(n))
     {
       return tr::false_();
     }
-
-    /// \brief Visit not node
-    /// \param x A term
-    /// \param n A term
-    /// \param arg An additional argument for the recursion
-    /// \return The result of visiting the node
-    term_type visit_not(const term_type& /* x */, const term_type& n, Arg& /* arg */)
+    if (tr::is_false(n))
     {
-      if (tr::is_true(n))
-      {
-        return tr::false_();
-      }
-      if (tr::is_false(n))
-      {
-        return tr::true_();
-      }
-      return term_type(); // continue recursion
+      return tr::true_();
     }
+    return term_type(); // continue recursion
+  }
 
-    /// \brief Visit and node
-    /// \param x A term
-    /// \param left A term
-    /// \param right A term
-    /// \param arg An additional argument for the recursion
-    /// \return The result of visiting the node
-    term_type visit_and(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
+  /// \brief Visit and node
+  /// \param x A term
+  /// \param left A term
+  /// \param right A term
+  /// \param arg An additional argument for the recursion
+  /// \return The result of visiting the node
+  term_type visit_and(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
+  {
+    if (tr::is_true(left))
     {
-      if (tr::is_true(left))
-      {
-        return super::visit(right, arg);
-      }
-      if (tr::is_true(right))
-      {
-        return super::visit(left, arg);
-      }
-      if (tr::is_false(left))
-      {
-        return tr::false_();
-      }
-      if (tr::is_false(right))
-      {
-        return tr::false_();
-      }
-      if (left == right)
-      {
-        return super::visit(left, arg);
-      }
-      return term_type(); // continue recursion
+      return super::visit(right, arg);
     }
+    if (tr::is_true(right))
+    {
+      return super::visit(left, arg);
+    }
+    if (tr::is_false(left))
+    {
+      return tr::false_();
+    }
+    if (tr::is_false(right))
+    {
+      return tr::false_();
+    }
+    if (left == right)
+    {
+      return super::visit(left, arg);
+    }
+    return term_type(); // continue recursion
+  }
 
-    /// \brief Visit or node
-    /// \param x A term
-    /// \param left A term
-    /// \param right A term
-    /// \param arg An additional argument for the recursion
-    /// \return The result of visiting the node
-    term_type visit_or(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
+  /// \brief Visit or node
+  /// \param x A term
+  /// \param left A term
+  /// \param right A term
+  /// \param arg An additional argument for the recursion
+  /// \return The result of visiting the node
+  term_type visit_or(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
+  {
+    if (tr::is_true(left))
     {
-      if (tr::is_true(left))
-      {
-        return tr::true_();
-      }
-      if (tr::is_true(right))
-      {
-        return tr::true_();
-      }
-      if (tr::is_false(left))
-      {
-        return super::visit(right, arg);
-      }
-      if (tr::is_false(right))
-      {
-        return super::visit(left, arg);
-      }
-      if (left == right)
-      {
-        return super::visit(left, arg);
-      }
-      return term_type(); // continue recursion
+      return tr::true_();
     }
+    if (tr::is_true(right))
+    {
+      return tr::true_();
+    }
+    if (tr::is_false(left))
+    {
+      return super::visit(right, arg);
+    }
+    if (tr::is_false(right))
+    {
+      return super::visit(left, arg);
+    }
+    if (left == right)
+    {
+      return super::visit(left, arg);
+    }
+    return term_type(); // continue recursion
+  }
 
-    /// \brief Visit imp node
-    /// \param x A term
-    /// \param left A term
-    /// \param right A term
-    /// \param arg An additional argument for the recursion
-    /// \return The result of visiting the node
-    term_type visit_imp(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
+  /// \brief Visit imp node
+  /// \param x A term
+  /// \param left A term
+  /// \param right A term
+  /// \param arg An additional argument for the recursion
+  /// \return The result of visiting the node
+  term_type visit_imp(const term_type& /* x */, const term_type& left, const term_type& right, Arg& arg)
+  {
+    if (tr::is_true(left))
     {
-      if (tr::is_true(left))
-      {
-        return super::visit(right, arg);
-      }
-      if (tr::is_false(left))
-      {
-        return tr::true_();
-      }
-      if (tr::is_true(right))
-      {
-        return tr::true_();
-      }
-      if (left == right)
-      {
-        return tr::true_();
-      }
-      if (tr::is_false(right))
-      {
-        return super::visit(tr::not_(left), arg);
-      }
-      return term_type(); // continue recursion
+      return super::visit(right, arg);
     }
+    if (tr::is_false(left))
+    {
+      return tr::true_();
+    }
+    if (tr::is_true(right))
+    {
+      return tr::true_();
+    }
+    if (left == right)
+    {
+      return tr::true_();
+    }
+    if (tr::is_false(right))
+    {
+      return super::visit(tr::not_(left), arg);
+    }
+    return term_type(); // continue recursion
+  }
 
-    /// \brief Applies this builder to the term x.
-    /// \param x A term
-    /// \return The function result
-    term_type operator()(const term_type& x)
-    {
-      Arg tmp;
-      return super::visit(x, tmp);
-    }
+  /// \brief Applies this builder to the term x.
+  /// \param x A term
+  /// \return The function result
+  term_type operator()(const term_type& x)
+  {
+    Arg tmp;
+    return super::visit(x, tmp);
+  }
 
-    /// \brief Applies this builder to the term x, with argument arg.
-    /// \param x A term
-    /// \param arg An additional argument for the recursion
-    /// \return The result of simplifying the term x
-    term_type operator()(const term_type& x, Arg& arg)
-    {
-      return super::visit(x, arg);
-    }
-  };
+  /// \brief Applies this builder to the term x, with argument arg.
+  /// \param x A term
+  /// \param arg An additional argument for the recursion
+  /// \return The result of simplifying the term x
+  term_type operator()(const term_type& x, Arg& arg)
+  {
+    return super::visit(x, arg);
+  }
+};
 
 } // namespace detail
 

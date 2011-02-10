@@ -17,7 +17,7 @@ T operator()(const T& x,
 {
   core::msg("aterm traversal");
   return x;
-}  
+}
 
 // ATerm list traversal
 template <typename T>

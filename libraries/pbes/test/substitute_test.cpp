@@ -24,7 +24,7 @@ using namespace mcrl2::pbes_system;
 inline
 pbes_expression parse(const std::string& expr)
 {
-  std::string var_decl = 
+  std::string var_decl =
     "datavar    \n"
     "  d: Nat;  \n"
     "  b: Bool; \n"
@@ -42,7 +42,7 @@ pbes_expression parse(const std::string& expr)
 inline
 std::string print(const pbes_expression& x)
 {
-	return core::pp(x) + " " + x.to_string();
+  return core::pp(x) + " " + x.to_string();
 }
 
 inline
@@ -65,7 +65,7 @@ data::variable bool_(std::string name)
 
 inline
 propositional_variable make_X()
-{ 
+{
   atermpp::vector<data::variable> v;
   v.push_back(nat("d"));
   data::variable_list d = atermpp::convert<data::variable_list>(v);
@@ -74,7 +74,7 @@ propositional_variable make_X()
 
 inline
 propositional_variable make_Y()
-{ 
+{
   atermpp::vector<data::variable> v;
   v.push_back(bool_("b"));
   data::variable_list d = atermpp::convert<data::variable_list>(v);
@@ -83,7 +83,7 @@ propositional_variable make_Y()
 
 inline
 propositional_variable make_Z()
-{ 
+{
   atermpp::vector<data::variable> v;
   data::variable_list d = atermpp::convert<data::variable_list>(v);
   return propositional_variable(core::identifier_string("Z"), d);
@@ -92,13 +92,13 @@ propositional_variable make_Z()
 void test_substitution()
 {
   typedef core::term_traits<pbes_expression> tr;
-  
+
   propositional_variable_substitution sigma;
-  
+
   propositional_variable X = make_X();
   propositional_variable Y = make_Y();
   propositional_variable Z = make_Z();
-  
+
   sigma[X] = parse("val(d>1) && Y(true)");
   pbes_expression t = parse("X(2)");
   // propositional_variable_substitute(t, sigma);
@@ -108,7 +108,7 @@ void test_substitution()
 
   // TODO We do a string comparison, because we bump into undocumented type check issues here
   //BOOST_CHECK(core::pp(t) == core::pp(expected_result));
-  
+
   core::garbage_collect();
 }
 

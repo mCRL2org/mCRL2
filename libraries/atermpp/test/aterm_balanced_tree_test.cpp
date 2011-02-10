@@ -79,7 +79,7 @@ void test_aterm_balanced_tree()
   {
     ATfprintf(stderr,"QTREE %t %t %d\n%p  %p\n",(ATerm)*j,(ATerm)*k,*j ==*k,(void *)*j,(void *)*k);
   } */
- 
+
 
   BOOST_CHECK(std::equal(qtree.begin(), qtree.end(), q.begin()));
   BOOST_CHECK(std::equal(q.begin(), q.end(), qtree.begin()));

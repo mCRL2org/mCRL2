@@ -15,9 +15,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 class renaming_expression;
 typedef atermpp::term_list<renaming_expression> renaming_expression_list;

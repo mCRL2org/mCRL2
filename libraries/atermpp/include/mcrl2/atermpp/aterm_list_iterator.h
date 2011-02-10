@@ -15,31 +15,32 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm.h"
 
-namespace atermpp {
+namespace atermpp
+{
 
-  /// \cond INTERNAL_DOCS
-  // needed for conversion of the return type of ATgetFirst
-  template <class T>
-  struct term_list_iterator_traits
-  {
-    typedef ATerm value_type;
-  };
-  /// \endcond
+/// \cond INTERNAL_DOCS
+// needed for conversion of the return type of ATgetFirst
+template <class T>
+struct term_list_iterator_traits
+{
+  typedef ATerm value_type;
+};
+/// \endcond
 
 /// \brief Iterator for term_list.
 template <typename Value>
 class term_list_iterator: public boost::iterator_facade<
-        term_list_iterator<Value>,         // Derived
-        const Value,                       // Value
-        boost::forward_traversal_tag,      // CategoryOrTraversal
-        const Value                        // Reference
-    >
+  term_list_iterator<Value>,         // Derived
+  const Value,                       // Value
+  boost::forward_traversal_tag,      // CategoryOrTraversal
+  const Value                        // Reference
+  >
 {
- public:
+  public:
     typedef typename boost::iterator_facade<term_list_iterator<Value>,
-                                            const Value,
-                                            boost::forward_traversal_tag,
-                                            const Value>::difference_type iterator_type;
+            const Value,
+            boost::forward_traversal_tag,
+            const Value>::difference_type iterator_type;
 
     /// \brief Constructor.
     term_list_iterator()
@@ -58,14 +59,16 @@ class term_list_iterator: public boost::iterator_facade<
       return m_list;
     }
 
- private:
+  private:
     friend class boost::iterator_core_access;
 
     /// \brief Equality operator
     /// \param other An iterator
     /// \return True if the iterators are equal
     bool equal(term_list_iterator const& other) const
-    { return this->m_list == other.m_list; }
+    {
+      return this->m_list == other.m_list;
+    }
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
@@ -76,7 +79,9 @@ class term_list_iterator: public boost::iterator_facade<
 
     /// \brief Increments the iterator
     void increment()
-    { m_list = ATgetNext(m_list); }
+    {
+      m_list = ATgetNext(m_list);
+    }
 
     ATermList m_list;
 };

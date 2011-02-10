@@ -17,11 +17,14 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/pbes/pbes_equation.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Function object that determines if a term is equal to a given propositional variable instantiation.
 struct compare_propositional_variable_instantiation: public std::unary_function<atermpp::aterm, bool>
@@ -29,7 +32,7 @@ struct compare_propositional_variable_instantiation: public std::unary_function<
   const propositional_variable_instantiation& v_;
 
   compare_propositional_variable_instantiation(const propositional_variable_instantiation& v)
-   : v_(v)
+    : v_(v)
   {}
 
   /// \brief Function call operator

@@ -16,9 +16,11 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief Renames quantifier variables in the expression p, such that within the scope
 /// of a quantifier variable, no other quantifier variables or free variables

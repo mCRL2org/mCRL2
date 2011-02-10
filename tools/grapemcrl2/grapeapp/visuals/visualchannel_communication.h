@@ -17,63 +17,63 @@ using namespace grape::libgrape;
 
 namespace grape
 {
-  using libgrape::channel_communication;
+using libgrape::channel_communication;
 
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+/**
+ * \short Represents a visualchannel_communication.
+ */
+class visualchannel_communication : public visual_object
+{
+  private:
+  protected:
+    int              m_communication_selected; /**< The selected communication -1 of there is no selection. */
+  public:
+
     /**
-     * \short Represents a visualchannel_communication.
+     * Default constructor.
+     * Initializes visual_channel_communication.
+     * @pre: p_channel_communication should be pointed to an existing channel communication
      */
-    class visualchannel_communication : public visual_object
-    {
-      private:
-      protected:
-        int              m_communication_selected; /**< The selected communication -1 of there is no selection. */
-      public:
-        
-        /**
-         * Default constructor.
-         * Initializes visual_channel_communication.
-         * @pre: p_channel_communication should be pointed to an existing channel communication
-         */
-        visualchannel_communication( channel_communication* p_channel_communication = 0 );
+    visualchannel_communication(channel_communication* p_channel_communication = 0);
 
-        /**
-         * Copy constructor.
-         * Creates a new visual_channel_communication based on an existing visual_channel_communication
-         * @param p_channel_communication The visual_channel_communication to be copied.
-         */
-        visualchannel_communication( const visualchannel_communication &p_channel_communication );
+    /**
+     * Copy constructor.
+     * Creates a new visual_channel_communication based on an existing visual_channel_communication
+     * @param p_channel_communication The visual_channel_communication to be copied.
+     */
+    visualchannel_communication(const visualchannel_communication& p_channel_communication);
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~visualchannel_communication( void );
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~visualchannel_communication(void);
 
-        /**
-         * Draw channel communication
-         */
-        void draw( void );
+    /**
+     * Draw channel communication
+     */
+    void draw(void);
 
-        /**
-         * Test if coordinate is inside the object
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate is inside the drawn object.
-         */
-        bool is_inside( libgrape::coordinate &p_coord );
+    /**
+     * Test if coordinate is inside the object
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate is inside the drawn object.
+     */
+    bool is_inside(libgrape::coordinate& p_coord);
 
-        /**
-         * Test if coordinate is on the border of the object
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate on the border of a drawn object.
-         */
-        grape_direction is_on_border( libgrape::coordinate &p_coord );
-        
-        /** @return The selected communication. */
-        int get_communication_selected();
-    };
-  } // namespace grapeapp
+    /**
+     * Test if coordinate is on the border of the object
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate on the border of a drawn object.
+     */
+    grape_direction is_on_border(libgrape::coordinate& p_coord);
+
+    /** @return The selected communication. */
+    int get_communication_selected();
+};
+} // namespace grapeapp
 } // namespace grape
 
 #endif // VISUALS_VISUALCHANNEL_COMMUNICATION_H

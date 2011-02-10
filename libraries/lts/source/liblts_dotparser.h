@@ -7,6 +7,6 @@
 #include <sstream>
 #include "mcrl2/lts/lts_dot.h"
 
-bool parse_dot( std::istream &stream, mcrl2::lts::lts_dot_t &lts );
+bool parse_dot(std::istream& stream, mcrl2::lts::lts_dot_t& lts);
 
 #endif

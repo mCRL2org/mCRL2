@@ -20,7 +20,7 @@ class State;
 class FSMStatePositioner: public StatePositioner
 {
   public:
-    FSMStatePositioner(LTS *l);
+    FSMStatePositioner(LTS* l);
     ~FSMStatePositioner();
     void positionStates();
 
@@ -33,9 +33,9 @@ class FSMStatePositioner: public StatePositioner
     void bottomUpPass();
     void getPredecessors(State* state, std::vector< State* >& predecessors);
     void getSuccessors(State* state, std::vector< State* >& successors);
-    void requestStatePosition(State* state, Vector2D &position);
+    void requestStatePosition(State* state, Vector2D& position);
     void resolveUnpositioned();
-    Vector2D sumStateVectorsInMultipleClusters( std::vector< State* > &states,
+    Vector2D sumStateVectorsInMultipleClusters(std::vector< State* > &states,
         float rim_radius);
     Vector2D sumStateVectorsInSingleCluster(std::vector< State* > &states);
     void topDownPass();
@@ -46,12 +46,12 @@ class ClusterSlotInfo
   public:
     ClusterSlotInfo(Cluster* cluster);
     ~ClusterSlotInfo() {}
-    void findFarthestFreeSlot(int &ring, int &slot);
-    void findNearestSlot(Vector2D &position, int &ring, int &slot);
-    void findNearestFreeSlot(int &ring, int &slot);
+    void findFarthestFreeSlot(int& ring, int& slot);
+    void findNearestSlot(Vector2D& position, int& ring, int& slot);
+    void findNearestFreeSlot(int& ring, int& slot);
     int getNumRings();
     int getNumSlots(int ring);
-    void getPolarCoordinates(int ring, int slot, float &angle, float &radius);
+    void getPolarCoordinates(int ring, int slot, float& angle, float& radius);
     void occupySlot(int ring, int slot);
 
   private:
@@ -63,7 +63,7 @@ class ClusterSlotInfo
 
     struct Slot_less
     {
-      bool operator()(const Slot &c1, const Slot &c2) const
+      bool operator()(const Slot& c1, const Slot& c2) const
       {
         return (c1.ring == c2.ring) ? c1.slot < c2.slot : c1.ring < c2.ring;
       }

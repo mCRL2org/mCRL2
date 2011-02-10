@@ -17,53 +17,55 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_expression2boolean_expression_visitor.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-  /// \brief Converts a propositional variable into a boolean variable
-  /// \param v A propositional variable
-  inline
-  bes::boolean_variable pbesinstconversion(const propositional_variable_instantiation& v)
+/// \brief Converts a propositional variable into a boolean variable
+/// \param v A propositional variable
+inline
+bes::boolean_variable pbesinstconversion(const propositional_variable_instantiation& v)
+{
+  return bes::boolean_variable(v.name());
+}
+
+/// \brief Converts a PBES expression into a boolean expression
+/// \param x A PBES expression
+inline
+bes::boolean_expression pbesinstconversion(const pbes_expression& x)
+{
+  pbes_system::detail::pbes_expression2boolean_expression_visitor<pbes_system::pbes_expression> visitor;
+  visitor.visit(x);
+  return visitor.result();
+}
+
+/// \brief Converts a PBES equation into a boolean equation
+/// \param x A PBES equation
+inline
+bes::boolean_equation pbesinstconversion(const pbes_equation& eq)
+{
+  return bes::boolean_equation(eq.symbol(), bes::boolean_variable(eq.variable().name()), pbesinstconversion(eq.formula()));
+}
+
+/// \brief Converts a PBES into a BES
+/// \param p A PBES
+/// \pre The PBES must be a BES
+inline
+bes::boolean_equation_system<> pbesinstconversion(const pbes<>& p)
+{
+  assert(p.is_bes());
+
+  atermpp::vector<bes::boolean_equation> equations;
+  for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
   {
-    return bes::boolean_variable(v.name());
+    equations.push_back(pbesinstconversion(*i));
   }
+  bes::boolean_expression initial_state = pbesinstconversion(p.initial_state());
 
-  /// \brief Converts a PBES expression into a boolean expression
-  /// \param x A PBES expression
-  inline
-  bes::boolean_expression pbesinstconversion(const pbes_expression& x)
-  {
-    pbes_system::detail::pbes_expression2boolean_expression_visitor<pbes_system::pbes_expression> visitor;
-    visitor.visit(x);
-    return visitor.result();
-  }
-
-  /// \brief Converts a PBES equation into a boolean equation
-  /// \param x A PBES equation
-  inline
-  bes::boolean_equation pbesinstconversion(const pbes_equation& eq)
-  {
-    return bes::boolean_equation(eq.symbol(), bes::boolean_variable(eq.variable().name()), pbesinstconversion(eq.formula()));
-  }
-
-  /// \brief Converts a PBES into a BES
-  /// \param p A PBES
-  /// \pre The PBES must be a BES
-  inline
-  bes::boolean_equation_system<> pbesinstconversion(const pbes<>& p)
-  {
-    assert(p.is_bes());
-
-    atermpp::vector<bes::boolean_equation> equations;
-    for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
-    {
-      equations.push_back(pbesinstconversion(*i));
-    }
-    bes::boolean_expression initial_state = pbesinstconversion(p.initial_state());
-
-    return bes::boolean_equation_system<>(equations, initial_state);
-  }
+  return bes::boolean_equation_system<>(equations, initial_state);
+}
 
 } // namespace pbes_system
 

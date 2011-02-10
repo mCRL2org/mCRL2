@@ -34,15 +34,15 @@ using namespace mcrl2::pbes_system::detail;
 using mcrl2::core::pp;
 
 std::string EXPRESSIONS =
-"datavar                                  \n"
-"  n: Nat;                                \n"
-"                                         \n"
-"predvar                                  \n"
-"                                         \n"
-"expressions                              \n"
-"  val(n > 2);                            \n"
-"  val(n > 3)                             \n"
-;
+  "datavar                                  \n"
+  "  n: Nat;                                \n"
+  "                                         \n"
+  "predvar                                  \n"
+  "                                         \n"
+  "expressions                              \n"
+  "  val(n > 2);                            \n"
+  "  val(n > 3)                             \n"
+  ;
 
 void print(atermpp::set<pbes_expression> q)
 {
@@ -228,7 +228,7 @@ void test_pbes_expression_with_propositional_variables()
 void test_term_traits()
 {
   typedef core::term_traits<pbes_expression> tr;
-  
+
   const std::string VARSPEC =
     "datavar         \n"
     "  m: Nat;       \n"
@@ -258,12 +258,12 @@ void test_term_traits()
     z = tr::left(x);
     z = tr::right(x);
   }
-  
+
   // or 1
   x = parse_pbes_expression("Y(1) || Y(2)", VARSPEC);
   z = tr::left(x);
   z = tr::right(x);
-  
+
   // or 2
   x = parse_pbes_expression("val(b || c)", VARSPEC);
   if (tr::is_or(x))

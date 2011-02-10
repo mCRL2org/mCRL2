@@ -14,9 +14,11 @@
 
 #include "mcrl2/core/print.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 
 } // namespace lps

@@ -26,7 +26,8 @@ using namespace ::mcrl2::utilities;
 using namespace ::mcrl2::utilities::tools;
 
 template < typename TypeName, bool b >
-void string_to_type_test(std::string const& value) {
+void string_to_type_test(std::string const& value)
+{
   std::istringstream is(value);
   TypeName           s;
 
@@ -34,16 +35,19 @@ void string_to_type_test(std::string const& value) {
 }
 
 template < bool b >
-inline void string_to_strategy_test(std::string const& strategy) {
+inline void string_to_strategy_test(std::string const& strategy)
+{
   string_to_type_test< mcrl2::data::rewriter::strategy, b >(strategy);
 }
 
 template < bool b >
-inline void string_to_prover_type_test(std::string const& prover_type) {
+inline void string_to_prover_type_test(std::string const& prover_type)
+{
   string_to_type_test< mcrl2::data::detail::SMT_Solver_Type, b >(prover_type);
 }
 
-BOOST_AUTO_TEST_CASE(border_invalid) {
+BOOST_AUTO_TEST_CASE(border_invalid)
+{
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // Empty command line
@@ -56,7 +60,8 @@ BOOST_AUTO_TEST_CASE(border_invalid) {
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, 0, &pw));
 }
 
-BOOST_AUTO_TEST_CASE(parsing) {
+BOOST_AUTO_TEST_CASE(parsing)
+{
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // Valid option -h
@@ -100,7 +105,8 @@ BOOST_AUTO_TEST_CASE(parsing) {
   BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -vmtest"));
 }
 
-BOOST_AUTO_TEST_CASE(conformance) {
+BOOST_AUTO_TEST_CASE(conformance)
+{
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // Valid options -v, --verbose
@@ -120,10 +126,12 @@ BOOST_AUTO_TEST_CASE(conformance) {
   BOOST_CHECK_THROW(command_line_parser(test_interface, 3, arguments), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(rewriting_options) {
+BOOST_AUTO_TEST_CASE(rewriting_options)
+{
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
-  struct tool : public rewriter_tool< input_tool > {
+  struct tool : public rewriter_tool< input_tool >
+  {
     void add_options(interface_description& desc)
     {
       rewriter_tool< input_tool >::add_options(desc);
@@ -169,10 +177,12 @@ BOOST_AUTO_TEST_CASE(rewriting_options) {
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter=invalid"), std::runtime_error);
 }
 
-BOOST_AUTO_TEST_CASE(prover_options) {
+BOOST_AUTO_TEST_CASE(prover_options)
+{
   interface_description test_interface("test", "TEST", "Rincewind", "[OPTIONS]... [PATH]", "whatis", "description");
 
-  struct tool : public prover_tool< input_tool > {
+  struct tool : public prover_tool< input_tool >
+  {
     void add_options(interface_description& desc)
     {
       prover_tool< input_tool >::add_options(desc);
@@ -206,17 +216,20 @@ BOOST_AUTO_TEST_CASE(prover_options) {
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test --smt-solver=invalid"), std::runtime_error);
 }
 
-inline std::string const& first_of(command_line_parser const& p, std::string const& option) {
+inline std::string const& first_of(command_line_parser const& p, std::string const& option)
+{
   return p.options.equal_range(option).first->second;
 }
 
-inline std::string const& last_of(command_line_parser const& p, std::string const& option) {
+inline std::string const& last_of(command_line_parser const& p, std::string const& option)
+{
   command_line_parser::option_map::const_iterator i(p.options.equal_range(option).second);
 
   return (--i)->second;
 }
 
-BOOST_AUTO_TEST_CASE(result_browsing) {
+BOOST_AUTO_TEST_CASE(result_browsing)
+{
   interface_description test_interface("test", "TEST", "Kilroy", "[OPTIONS]... [PATH]", "whatis", "description");
 
   // disable check for duplicate options

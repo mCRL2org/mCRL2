@@ -33,9 +33,11 @@
 #include "mcrl2/lps/deadlock.h"
 #include "mcrl2/lps/multi_action.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 /// \brief LPS summand.
 // <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
@@ -91,7 +93,7 @@ class summand: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param t A term
     summand(atermpp::aterm_appl t)
-     : atermpp::aterm_appl(t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_LinearProcessSummand(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
@@ -119,18 +121,18 @@ class summand: public atermpp::aterm_appl
             data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
-               summation_variables,
-               condition,
-               (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
-               core::detail::gsMakeNil(),
-               assignments)
-        ),
-        m_summation_variables(summation_variables),
-        m_condition          (condition),
-        m_delta              (delta),
-        m_actions            (actions),
-        m_time               (data::data_expression(core::detail::gsMakeNil())),
-        m_assignments        (assignments)
+                              summation_variables,
+                              condition,
+                              (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
+                              core::detail::gsMakeNil(),
+                              assignments)
+                           ),
+      m_summation_variables(summation_variables),
+      m_condition(condition),
+      m_delta(delta),
+      m_actions(actions),
+      m_time(data::data_expression(core::detail::gsMakeNil())),
+      m_assignments(assignments)
     {}
 
     /// \brief Constructor.
@@ -144,18 +146,18 @@ class summand: public atermpp::aterm_appl
             data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
-               summation_variables,
-               condition,
-               (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
-               time,
-               assignments)
-        ),
-        m_summation_variables(summation_variables),
-        m_condition          (condition),
-        m_delta              (delta),
-        m_actions            (actions),
-        m_time               (time),
-        m_assignments        (assignments)
+                              summation_variables,
+                              condition,
+                              (delta ? core::detail::gsMakeDelta() : core::detail::gsMakeMultAct(actions)),
+                              time,
+                              assignments)
+                           ),
+      m_summation_variables(summation_variables),
+      m_condition(condition),
+      m_delta(delta),
+      m_actions(actions),
+      m_time(time),
+      m_assignments(assignments)
     {}
 
     /// \brief Constructor.
@@ -166,18 +168,18 @@ class summand: public atermpp::aterm_appl
             data::assignment_list assignments
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
-               summation_variables,
-               condition,
-               core::detail::gsMakeMultAct(a.actions()),
-               a.time(),
-               assignments)
-        ),
-        m_summation_variables(summation_variables),
-        m_condition          (condition),
-        m_delta              (false),
-        m_actions            (a.actions()),
-        m_time               (a.time()),
-        m_assignments        (assignments)
+                              summation_variables,
+                              condition,
+                              core::detail::gsMakeMultAct(a.actions()),
+                              a.time(),
+                              assignments)
+                           ),
+      m_summation_variables(summation_variables),
+      m_condition(condition),
+      m_delta(false),
+      m_actions(a.actions()),
+      m_time(a.time()),
+      m_assignments(assignments)
     {}
 
     /// \brief Constructor.
@@ -187,16 +189,16 @@ class summand: public atermpp::aterm_appl
             const lps::deadlock&       d
            )
       : atermpp::aterm_appl(core::detail::gsMakeLinearProcessSummand(
-               summation_variables,
-               condition,
-               core::detail::gsMakeDelta(),
-               d.time(),
-               atermpp::term_list< data::assignment >())
-        ),
-        m_summation_variables(summation_variables),
-        m_condition          (condition),
-        m_delta              (true),
-        m_time               (d.time())
+                              summation_variables,
+                              condition,
+                              core::detail::gsMakeDelta(),
+                              d.time(),
+                              atermpp::term_list< data::assignment >())
+                           ),
+      m_summation_variables(summation_variables),
+      m_condition(condition),
+      m_delta(true),
+      m_time(d.time())
     {}
 
     /// \brief Returns the sequence of summation variables.
@@ -278,12 +280,12 @@ inline
 summand set_summation_variables(summand s, data::variable_list summation_variables)
 {
   return summand(summation_variables,
-                     s.condition          (),
-                     s.is_delta           (),
-                     s.actions            (),
-                     s.time               (),
-                     s.assignments        ()
-                    );
+                 s.condition(),
+                 s.is_delta(),
+                 s.actions(),
+                 s.time(),
+                 s.assignments()
+                );
 }
 
 /// \brief Sets the condition of s and returns the result
@@ -295,10 +297,10 @@ summand set_condition(summand s, data::data_expression condition)
 {
   return summand(s.summation_variables(),
                  condition,
-                 s.is_delta           (),
-                 s.actions            (),
-                 s.time               (),
-                 s.assignments        ()
+                 s.is_delta(),
+                 s.actions(),
+                 s.time(),
+                 s.assignments()
                 );
 }
 
@@ -309,11 +311,11 @@ inline
 summand set_delta(summand s)
 {
   return summand(s.summation_variables(),
-                 s.condition          (),
+                 s.condition(),
                  false,
-                 s.actions            (),
-                 s.time               (),
-                 s.assignments        ()
+                 s.actions(),
+                 s.time(),
+                 s.assignments()
                 );
 }
 
@@ -325,11 +327,11 @@ inline
 summand set_actions(summand s, action_list actions)
 {
   return summand(s.summation_variables(),
-                 s.condition          (),
-                 s.is_delta           (),
+                 s.condition(),
+                 s.is_delta(),
                  actions,
-                 s.time               (),
-                 s.assignments        ()
+                 s.time(),
+                 s.assignments()
                 );
 }
 
@@ -341,12 +343,12 @@ inline
 summand set_time(summand s, data::data_expression time)
 {
   return summand(s.summation_variables(),
-                     s.condition          (),
-                     s.is_delta           (),
-                     s.actions            (),
-                     time,
-                     s.assignments        ()
-                    );
+                 s.condition(),
+                 s.is_delta(),
+                 s.actions(),
+                 time,
+                 s.assignments()
+                );
 }
 
 /// \brief Sets the assignments of s and returns the result
@@ -357,10 +359,10 @@ inline
 summand set_assignments(summand s, data::assignment_list assignments)
 {
   return summand(s.summation_variables(),
-                 s.condition          (),
-                 s.is_delta           (),
-                 s.actions            (),
-                 s.time               (),
+                 s.condition(),
+                 s.is_delta(),
+                 s.actions(),
+                 s.time(),
                  assignments
                 );
 }
@@ -378,7 +380,7 @@ typedef atermpp::term_list<summand> summand_list;
 //                  | MultAct(<Action>*)                                    (+ tc)
 class summand_base
 {
-  friend struct atermpp::aterm_traits<summand_base>;
+    friend struct atermpp::aterm_traits<summand_base>;
 
   protected:
     /// \brief The summation variables of the summand
@@ -453,7 +455,7 @@ class summand_base
 /// \brief LPS summand containing a deadlock.
 class deadlock_summand: public summand_base
 {
-  friend struct atermpp::aterm_traits<deadlock_summand>;
+    friend struct atermpp::aterm_traits<deadlock_summand>;
 
   protected:
     /// \brief The super class
@@ -526,12 +528,12 @@ inline
 summand deadlock_summand_to_aterm(const deadlock_summand& s)
 {
   ATermAppl result = core::detail::gsMakeLinearProcessSummand(
-         s.summation_variables(),
-         s.condition(),
-         core::detail::gsMakeDelta(),
-         s.deadlock().time(),
-         data::assignment_list()
-        );
+                       s.summation_variables(),
+                       s.condition(),
+                       core::detail::gsMakeDelta(),
+                       s.deadlock().time(),
+                       data::assignment_list()
+                     );
   return atermpp::aterm_appl(result);
 }
 
@@ -547,7 +549,7 @@ deadlock_summand summand_to_deadlock_summand(const summand& s)
 /// \brief LPS summand containing a multi-action.
 class action_summand: public summand_base
 {
-  friend struct atermpp::aterm_traits<action_summand>;
+    friend struct atermpp::aterm_traits<action_summand>;
 
   protected:
     /// \brief The super class
@@ -668,12 +670,12 @@ inline
 summand action_summand_to_aterm(const action_summand& s)
 {
   ATermAppl result = core::detail::gsMakeLinearProcessSummand(
-         s.summation_variables(),
-         s.condition(),
-         core::detail::gsMakeMultAct(s.multi_action().actions()),
-         s.multi_action().time(),
-         s.assignments()
-        );
+                       s.summation_variables(),
+                       s.condition(),
+                       core::detail::gsMakeMultAct(s.multi_action().actions()),
+                       s.multi_action().time(),
+                       s.assignments()
+                     );
   return atermpp::aterm_appl(result);
 }
 
@@ -691,15 +693,25 @@ action_summand summand_to_action_summand(const summand& s)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp {
+namespace atermpp
+{
 
 template<>
 struct aterm_traits<mcrl2::lps::summand_base>
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::summand_base t)   { t.protect(); }
-  static void unprotect(mcrl2::lps::summand_base t) { t.unprotect(); }
-  static void mark(mcrl2::lps::summand_base t)      { t.mark(); }
+  static void protect(mcrl2::lps::summand_base t)
+  {
+    t.protect();
+  }
+  static void unprotect(mcrl2::lps::summand_base t)
+  {
+    t.unprotect();
+  }
+  static void mark(mcrl2::lps::summand_base t)
+  {
+    t.mark();
+  }
   //static ATerm term(mcrl2::lps::summand_base t)     { return t.term(); }
   //static ATerm* ptr(mcrl2::lps::summand_base& t)    { return &t.term(); }
 };
@@ -708,9 +720,18 @@ template<>
 struct aterm_traits<mcrl2::lps::deadlock_summand>
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::deadlock_summand t)   { t.protect(); }
-  static void unprotect(mcrl2::lps::deadlock_summand t) { t.unprotect(); }
-  static void mark(mcrl2::lps::deadlock_summand t)      { t.mark(); }
+  static void protect(mcrl2::lps::deadlock_summand t)
+  {
+    t.protect();
+  }
+  static void unprotect(mcrl2::lps::deadlock_summand t)
+  {
+    t.unprotect();
+  }
+  static void mark(mcrl2::lps::deadlock_summand t)
+  {
+    t.mark();
+  }
   //static ATerm term(mcrl2::lps::deadlock_summand t)     { return t.term(); }
   //static ATerm* ptr(mcrl2::lps::deadlock_summand& t)    { return &t.term(); }
 };
@@ -719,9 +740,18 @@ template<>
 struct aterm_traits<mcrl2::lps::action_summand>
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::action_summand t)   { t.protect(); }
-  static void unprotect(mcrl2::lps::action_summand t) { t.unprotect(); }
-  static void mark(mcrl2::lps::action_summand t)      { t.mark(); }
+  static void protect(mcrl2::lps::action_summand t)
+  {
+    t.protect();
+  }
+  static void unprotect(mcrl2::lps::action_summand t)
+  {
+    t.unprotect();
+  }
+  static void mark(mcrl2::lps::action_summand t)
+  {
+    t.mark();
+  }
   //static ATerm term(mcrl2::lps::action_summand t)     { return t.term(); }
   //static ATerm* ptr(mcrl2::lps::action_summand& t)    { return &t.term(); }
 };

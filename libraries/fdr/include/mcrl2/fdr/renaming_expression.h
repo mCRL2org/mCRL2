@@ -16,9 +16,11 @@
 #include "mcrl2/fdr/comprehension_expression_fwd.h"
 #include "mcrl2/fdr/map.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated renaming expression class declarations ---//
 /// \brief class renaming_expression
@@ -84,23 +86,23 @@ class mapsgens: public renaming_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a maps expression
-    /// \param t A term
-    /// \return True if it is a maps expression
-    inline
-    bool is_maps(const renaming_expression& t)
-    {
-      return fdr::detail::gsIsMaps(t);
-    }
+/// \brief Test for a maps expression
+/// \param t A term
+/// \return True if it is a maps expression
+inline
+bool is_maps(const renaming_expression& t)
+{
+  return fdr::detail::gsIsMaps(t);
+}
 
-    /// \brief Test for a mapsgens expression
-    /// \param t A term
-    /// \return True if it is a mapsgens expression
-    inline
-    bool is_mapsgens(const renaming_expression& t)
-    {
-      return fdr::detail::gsIsMapsGens(t);
-    }
+/// \brief Test for a mapsgens expression
+/// \param t A term
+/// \return True if it is a mapsgens expression
+inline
+bool is_mapsgens(const renaming_expression& t)
+{
+  return fdr::detail::gsIsMapsGens(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

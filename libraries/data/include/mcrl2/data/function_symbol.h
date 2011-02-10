@@ -19,9 +19,11 @@
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class function_symbol ---//
 /// \brief A function symbol
@@ -63,13 +65,13 @@ class function_symbol: public data_expression
 };
 //--- end generated class function_symbol ---//
 
-    /// \brief list of function symbols
-    typedef atermpp::term_list< function_symbol > function_symbol_list;
+/// \brief list of function symbols
+typedef atermpp::term_list< function_symbol > function_symbol_list;
 
-    /// \brief vector of function symbols
-    typedef atermpp::vector< function_symbol >    function_symbol_vector;
+/// \brief vector of function symbols
+typedef atermpp::vector< function_symbol >    function_symbol_vector;
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

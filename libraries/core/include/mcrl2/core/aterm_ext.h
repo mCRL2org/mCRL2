@@ -16,8 +16,10 @@
 #include <cassert>
 #include <aterm2.h>
 
-namespace mcrl2 {
-  namespace core {
+namespace mcrl2
+{
+namespace core
+{
 
 //Workarounds for the initialisation of the ATerm library
 //-------------------------------------------------------
@@ -62,7 +64,7 @@ namespace mcrl2 {
 #define MCRL2_ATERM_INIT_VERBOSE(argc, argv)\
   char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" }; \
   MCRL2_ATERM_INIT_(3, debug_args, argv)\
-
+   
 //-------------------------------------------------------------------------
 //For all function below we use the precondition the ATerm library has been
 //initialised.
@@ -83,7 +85,10 @@ namespace mcrl2 {
  **/
 inline ATermList ATinsertUnique(ATermList list, ATerm el)
 {
-  if (ATindexOf(list, el, 0) == (size_t)(-1)) return ATinsert(list, el);
+  if (ATindexOf(list, el, 0) == (size_t)(-1))
+  {
+    return ATinsert(list, el);
+  }
   return list;
 }
 
@@ -110,7 +115,8 @@ inline bool ATisListOrNull(ATerm t)
 /**
  * \brief Gets an ATermAppl at a specified position in a list
  **/
-inline ATermAppl ATAelementAt(ATermList List, size_t Index) {
+inline ATermAppl ATAelementAt(ATermList List, size_t Index)
+{
   ATerm Result = ATelementAt(List, Index);
   assert(ATisApplOrNull(Result));
   return (ATermAppl) Result;
@@ -190,9 +196,9 @@ inline ATermList ATLtableGet(ATermTable Table, ATerm Key)
 /**
  * \brief Convenience function for protection of AtermAppl objects
  **/
-inline void ATprotectAppl(ATermAppl *PAppl)
+inline void ATprotectAppl(ATermAppl* PAppl)
 {
-  ATprotect((ATerm *) PAppl);
+  ATprotect((ATerm*) PAppl);
 }
 #endif
 
@@ -200,9 +206,9 @@ inline void ATprotectAppl(ATermAppl *PAppl)
 /**
  * \brief Convenience function for protection of AtermList objects
  **/
-inline void ATprotectList(ATermList *PList)
+inline void ATprotectList(ATermList* PList)
 {
-  ATprotect((ATerm *) PList);
+  ATprotect((ATerm*) PList);
 }
 #endif
 
@@ -210,9 +216,9 @@ inline void ATprotectList(ATermList *PList)
 /**
  * \brief Convenience function for protection of AtermInt objects
  **/
-inline void ATprotectInt(ATermInt *PInt)
+inline void ATprotectInt(ATermInt* PInt)
 {
-  ATprotect((ATerm *) PInt);
+  ATprotect((ATerm*) PInt);
 }
 #endif
 
@@ -220,9 +226,9 @@ inline void ATprotectInt(ATermInt *PInt)
 /**
  * \brief Convenience function for unprotection of AtermAppl objects
  **/
-inline void ATunprotectAppl(ATermAppl *PAppl)
+inline void ATunprotectAppl(ATermAppl* PAppl)
 {
-  ATunprotect((ATerm *) PAppl);
+  ATunprotect((ATerm*) PAppl);
 }
 #endif
 
@@ -230,9 +236,9 @@ inline void ATunprotectAppl(ATermAppl *PAppl)
 /**
  * \brief Convenience function for unprotection of AtermList objects
  **/
-inline void ATunprotectList(ATermList *PList)
+inline void ATunprotectList(ATermList* PList)
 {
-  ATunprotect((ATerm *) PList);
+  ATunprotect((ATerm*) PList);
 }
 #endif
 
@@ -240,9 +246,9 @@ inline void ATunprotectList(ATermList *PList)
 /**
  * \brief Convenience function for unprotection of AtermInt objects
  **/
-inline void ATunprotectInt(ATermInt *PInt)
+inline void ATunprotectInt(ATermInt* PInt)
 {
-  ATunprotect((ATerm *) PInt);
+  ATunprotect((ATerm*) PInt);
 }
 #endif
 
@@ -268,7 +274,8 @@ ATermAppl gsMakeSubst(ATerm old_value, ATerm new_value);
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  * \note ATermAppl variant of gsMakeSubst
  **/
-inline ATermAppl gsMakeSubst_Appl(ATermAppl old_value, ATermAppl new_value) {
+inline ATermAppl gsMakeSubst_Appl(ATermAppl old_value, ATermAppl new_value)
+{
   return gsMakeSubst((ATerm) old_value, (ATerm) new_value);
 }
 
@@ -281,7 +288,8 @@ inline ATermAppl gsMakeSubst_Appl(ATermAppl old_value, ATermAppl new_value) {
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  * \note ATermList variant of gsMakeSubst
  **/
-inline ATermAppl gsMakeSubst_List(ATermList old_value, ATermList new_value) {
+inline ATermAppl gsMakeSubst_List(ATermList old_value, ATermList new_value)
+{
   return gsMakeSubst((ATerm) old_value, (ATerm) new_value);
 }
 
@@ -314,7 +322,8 @@ ATerm gsSubstValues(ATermList substs, ATerm term, bool recursive);
  *     substitutions are distributed over the arguments/elements of term
  * \note This is the ATermAppl variant of gsSubstValues
  **/
-inline ATermAppl gsSubstValues_Appl(ATermList substs, ATermAppl appl, bool recursive) {
+inline ATermAppl gsSubstValues_Appl(ATermList substs, ATermAppl appl, bool recursive)
+{
   return (ATermAppl) gsSubstValues(substs, (ATerm) appl, recursive);
 }
 
@@ -332,7 +341,8 @@ inline ATermAppl gsSubstValues_Appl(ATermList substs, ATermAppl appl, bool recur
  *     substitutions are distributed over the arguments/elements of term
  * \note This is the ATermList variant of gsSubstValues
  **/
-inline ATermList gsSubstValues_List(ATermList substs, ATermList list, bool recursive) {
+inline ATermList gsSubstValues_List(ATermList substs, ATermList list, bool recursive)
+{
   return (ATermList) gsSubstValues(substs, (ATerm) list, recursive);
 }
 
@@ -391,7 +401,7 @@ int gsCount(ATerm elt, ATerm term);
  * \return the number of fun occurs in term (as an AFun)
  **/
 int gsCountAFun(AFun fun, ATerm term);
-  }
+}
 }
 
 #endif

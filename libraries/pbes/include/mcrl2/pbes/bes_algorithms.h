@@ -20,9 +20,11 @@
 #include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief Instantiates a pbes.
 /// \param p A PBES

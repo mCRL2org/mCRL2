@@ -46,8 +46,8 @@ class VisObject
     void setColor(RGB_Color c);
     void setTextureColours(std::vector<RGB_Color>& colours);
     void setPrimitive(int p);
-    void draw(PrimitiveFactory *pf,unsigned char alpha);
-    void drawWithTexture(PrimitiveFactory *pf, unsigned char alpha);
+    void draw(PrimitiveFactory* pf,unsigned char alpha);
+    void drawWithTexture(PrimitiveFactory* pf, unsigned char alpha);
     void addIdentifier(int id);
   private:
     float* matrix;
@@ -92,7 +92,7 @@ int VisObject::getPrimitive() const
 
 Vector3D VisObject::getCoordinates() const
 {
-  return Vector3D( matrix[12], matrix[13], matrix[14] );
+  return Vector3D(matrix[12], matrix[13], matrix[14]);
 }
 
 void VisObject::setColor(RGB_Color c)
@@ -107,14 +107,14 @@ void VisObject::setTextureColours(vector<RGB_Color>& colours)
     numColours = 1;
     // numColours := smallest power of 2 s.t. colours.size <= numColours,
     // since taking an NP2 greatly reduces performance greatly.
-    while ( static_cast<unsigned int>(numColours) < colours.size())
+    while (static_cast<unsigned int>(numColours) < colours.size())
     {
       numColours = numColours << 1;
     }
 
     GLubyte* texture = (GLubyte*)malloc(4*numColours*sizeof(GLubyte));
 
-    for(int i = 0; i < numColours; ++i)
+    for (int i = 0; i < numColours; ++i)
     {
       int j = i % colours.size();
       texture[4*i]   = colours[j].red();
@@ -144,24 +144,24 @@ void VisObject::setPrimitive(int p)
   primitive = p;
 }
 
-void VisObject::draw(PrimitiveFactory *pf,unsigned char alpha)
+void VisObject::draw(PrimitiveFactory* pf,unsigned char alpha)
 {
   glColor4ub(color.red(), color.green(), color.blue(), alpha);
   glPushMatrix();
   glMultMatrixf(matrix);
-  for(size_t i = 0; i < identifiers.size(); ++i)
+  for (size_t i = 0; i < identifiers.size(); ++i)
   {
     glPushName(identifiers[i]);
   }
   pf->drawPrimitive(primitive);
-  for(size_t i = 0; i < identifiers.size(); ++i)
+  for (size_t i = 0; i < identifiers.size(); ++i)
   {
     glPopName();
   }
   glPopMatrix();
 }
 
-void VisObject::drawWithTexture(PrimitiveFactory *pf, unsigned char alpha)
+void VisObject::drawWithTexture(PrimitiveFactory* pf, unsigned char alpha)
 {
   if (numColours > 0)
   {
@@ -193,7 +193,7 @@ class Distance
     bool operator()(const VisObject* o1,const VisObject* o2) const;
 };
 
-bool Distance::operator()(const VisObject *o1, const VisObject *o2) const
+bool Distance::operator()(const VisObject* o1, const VisObject* o2) const
 {
   Vector3D d1 = o1->getCoordinates() - viewpoint;
   Vector3D d2 = o2->getCoordinates() - viewpoint;
@@ -215,8 +215,8 @@ void VisObjectFactory::sortObjects(Vector3D viewpoint)
   stable_sort(objects_sorted.begin(),objects_sorted.end(),Distance(viewpoint));
 }
 
-void VisObjectFactory::drawObjects(PrimitiveFactory *pf,unsigned char alpha,
-    bool texture)
+void VisObjectFactory::drawObjects(PrimitiveFactory* pf,unsigned char alpha,
+                                   bool texture)
 {
   if (texture)
   {
@@ -251,11 +251,11 @@ void VisObjectFactory::clear()
 
 int VisObjectFactory::makeObject(int primitive, vector<int> &ids)
 {
-  VisObject *vo = new VisObject();
+  VisObject* vo = new VisObject();
   glGetFloatv(GL_MODELVIEW_MATRIX,(GLfloat*)vo->getMatrixP());
   vo->setPrimitive(primitive);
 
-  for(size_t i = 0; i < ids.size(); ++i)
+  for (size_t i = 0; i < ids.size(); ++i)
   {
     vo->addIdentifier(ids[i]);
   }

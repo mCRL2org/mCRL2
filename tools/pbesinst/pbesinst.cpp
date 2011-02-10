@@ -43,13 +43,14 @@ using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
 
 /// The pbesinst tool.
-class pbesinst_tool: public rewriter_tool<input_output_tool> 
+class pbesinst_tool: public rewriter_tool<input_output_tool>
 {
   protected:
     typedef rewriter_tool<input_output_tool> super;
 
     /// The transformation strategies of the tool.
-    enum transformation_strategy {
+    enum transformation_strategy
+    {
       ts_lazy,
       ts_finite
     };
@@ -142,14 +143,14 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
 
       if (parser.options.count("select") > 0)
       {
-      	m_finite_parameter_selection = parser.option_argument("select");
-      	boost::trim(m_finite_parameter_selection);
+        m_finite_parameter_selection = parser.option_argument("select");
+        boost::trim(m_finite_parameter_selection);
       }
 
       if (parser.options.count("equation_limit") > 0)
       {
-      	int limit = parser.option_argument_as<int>("equation_limit");
-      	pbes_system::detail::set_bes_equation_limit(limit);
+        int limit = parser.option_argument_as<int>("equation_limit");
+        pbes_system::detail::set_bes_equation_limit(limit);
       }
       m_aterm_ascii = parser.options.count("aterm-ascii") > 0;
     }
@@ -158,30 +159,30 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
     {
       super::add_options(desc);
       desc.
-        add_option("strategy",
-          make_optional_argument("NAME", "lazy"),
-          "compute the BES using strategy NAME:\n"
-          "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
-          "  'finite' for computing all possible boolean equations.",
-          's').
-        add_option("output",
-          make_optional_argument("NAME", "pbes"),
-          "store the BES in output format NAME:\n"
-          "  'pbes' for the mCRL2 PBES format (default),\n"
-          "  'bes'  for the mCRL2 BES format\n"
-          "  'cwi'  for the CWI BES format",
-          'o').
-        add_option("select",
-          make_optional_argument("NAME", ""),
-          "select finite parameters that need to be expanded\n"
-          "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
-          "            *(*:Bool)\n",
-          'f');
+      add_option("strategy",
+                 make_optional_argument("NAME", "lazy"),
+                 "compute the BES using strategy NAME:\n"
+                 "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
+                 "  'finite' for computing all possible boolean equations.",
+                 's').
+      add_option("output",
+                 make_optional_argument("NAME", "pbes"),
+                 "store the BES in output format NAME:\n"
+                 "  'pbes' for the mCRL2 PBES format (default),\n"
+                 "  'bes'  for the mCRL2 BES format\n"
+                 "  'cwi'  for the CWI BES format",
+                 'o').
+      add_option("select",
+                 make_optional_argument("NAME", ""),
+                 "select finite parameters that need to be expanded\n"
+                 "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
+                 "            *(*:Bool)\n",
+                 'f');
       desc.add_option("aterm-ascii", "store ATerms in ascii format (default: false)", 'a');
       desc.add_hidden_option("equation_limit",
-         make_optional_argument("NAME", "-1"),
-         "Set a limit to the number of generated BES equations",
-         'l');
+                             make_optional_argument("NAME", "-1"),
+                             "Set a limit to the number of generated BES equations",
+                             'l');
     }
 
     /// \return A string representation of the transformation strategy.
@@ -220,21 +221,21 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
     /// Constructor.
     pbesinst_tool()
       : super(
-          "pbesinst",
-          "Wieger Wesselink; Alexander van Dam and Tim Willemse",
-          "compute a BES out of a PBES",
-          "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
-          "If INFILE is not present, standard input is used. If OUTFILE is not present,   "
-          "standard output is used."
-          "The format of OUTFILE is determined by its extension (unless it is specified "
-          "by an option). The supported formats are:\n"
-          "  'pbes' for the mCRL2 PBES format,\n"
-          "  'bes'  for the mCRL2 BES format,\n"
-          "  'cwi'  for the CWI BES format\n"
-        ),
-        m_strategy(ts_lazy),
-        m_output_format(pbes_output_pbes),
-        m_aterm_ascii(false)
+        "pbesinst",
+        "Wieger Wesselink; Alexander van Dam and Tim Willemse",
+        "compute a BES out of a PBES",
+        "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
+        "If INFILE is not present, standard input is used. If OUTFILE is not present,   "
+        "standard output is used."
+        "The format of OUTFILE is determined by its extension (unless it is specified "
+        "by an option). The supported formats are:\n"
+        "  'pbes' for the mCRL2 PBES format,\n"
+        "  'bes'  for the mCRL2 BES format,\n"
+        "  'cwi'  for the CWI BES format\n"
+      ),
+      m_strategy(ts_lazy),
+      m_output_format(pbes_output_pbes),
+      m_aterm_ascii(false)
     {}
 
     /// Runs the algorithm.
@@ -269,7 +270,7 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
       if (mcrl2::core::gsDebug)
       {
         log_level = 2;
-      }     	
+      }
 
       if (m_strategy == ts_lazy)
       {
@@ -294,7 +295,7 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
         {
           core::gsVerboseMsg("The result is a PBES.\n");
         }
-      }   
+      }
 
       // save the result
       save_pbes(p, m_output_filename, m_output_format, m_aterm_ascii);

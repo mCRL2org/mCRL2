@@ -26,11 +26,11 @@ int Graph::PROGRESS_INTERV_HINT = 100;
 
 
 // ------------------------
-Graph::Graph( Mediator* m )
-     : Colleague( m )
+Graph::Graph(Mediator* m)
+  : Colleague(m)
 // ------------------------
 {
-    initRoot();
+  initRoot();
 }
 
 
@@ -38,11 +38,11 @@ Graph::Graph( Mediator* m )
 Graph::~Graph()
 // ------------
 {
-    deleteClusters();
-    deleteBundles();
-    deleteAttributes();
-    deleteNodes();
-    deleteEdges();
+  deleteClusters();
+  deleteBundles();
+  deleteAttributes();
+  deleteNodes();
+  deleteEdges();
 }
 
 
@@ -50,10 +50,10 @@ Graph::~Graph()
 
 
 // ----------------------------------------
-void Graph::setFileName( const string &fn )
+void Graph::setFileName(const string& fn)
 // ----------------------------------------
 {
-    fileName = fn;
+  fileName = fn;
 }
 
 /*
@@ -97,322 +97,348 @@ void Graph::addAttribute(
 
 // -------------------------------
 void Graph::addAttrDiscr(
-    const string &name,
-    const string &type,
-    const size_t &idx,
-    const vector< string > &vals )
+  const string& name,
+  const string& type,
+  const size_t& idx,
+  const vector< string > &vals)
 // -------------------------------
 {
-    AttrDiscr* attr = new AttrDiscr(
-        mediator,
-        name,
-        type,
-        idx,
-        vals );
-    attributes.push_back( attr );
-    attr = NULL;
+  AttrDiscr* attr = new AttrDiscr(
+    mediator,
+    name,
+    type,
+    idx,
+    vals);
+  attributes.push_back(attr);
+  attr = NULL;
 }
 
 
 // ----------------------
 void Graph::addAttrConti(
-    const string &name,
-    const string &type,
-    const size_t &idx,
-    const double &lwrBnd,
-    const double &uprBnd )
+  const string& name,
+  const string& type,
+  const size_t& idx,
+  const double& lwrBnd,
+  const double& uprBnd)
 // ----------------------
 {
-    AttrConti* attr = new AttrConti(
-        mediator,
-        name,
-        type,
-        idx,
-        lwrBnd,
-        uprBnd );
-    attributes.push_back( attr );
-    attr = NULL;
+  AttrConti* attr = new AttrConti(
+    mediator,
+    name,
+    type,
+    idx,
+    lwrBnd,
+    uprBnd);
+  attributes.push_back(attr);
+  attr = NULL;
 }
 
 
 // ------------------------
 void Graph::swapAttributes(
-    const size_t &idx1,
-    const size_t &idx2 )
+  const size_t& idx1,
+  const size_t& idx2)
 // ------------------------
 {
-    if ( ( idx1 < attributes.size() ) &&
-         ( idx2 < attributes.size() ) )
-    {
-        // swap attributes
-        Attribute* temp  = attributes[idx1];
-        attributes[idx1] = attributes[idx2];
-        attributes[idx2] = temp;
-        temp = NULL;
-        // update index
-        attributes[idx1]->setIndex( idx1 );
-        attributes[idx2]->setIndex( idx2 );
+  if ((idx1 < attributes.size()) &&
+      (idx2 < attributes.size()))
+  {
+    // swap attributes
+    Attribute* temp  = attributes[idx1];
+    attributes[idx1] = attributes[idx2];
+    attributes[idx2] = temp;
+    temp = NULL;
+    // update index
+    attributes[idx1]->setIndex(idx1);
+    attributes[idx2]->setIndex(idx2);
 
-        // swap node tuple values
-        for ( size_t i = 0; i < nodes.size(); ++i )
-            nodes[i]->swapTupleVal( idx1, idx2 );
+    // swap node tuple values
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+      nodes[i]->swapTupleVal(idx1, idx2);
     }
-    else
-        throw mcrl2::runtime_error( "Error swapping attributes." );
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error swapping attributes.");
+  }
 }
 
 
 // -----------------------
 void Graph::moveAttribute(
-    const size_t &idxFr,
-    const size_t &idxTo )
+  const size_t& idxFr,
+  const size_t& idxTo)
 // -----------------------
 {
-    if ( idxFr < attributes.size() &&
-         idxTo < attributes.size() )
+  if (idxFr < attributes.size() &&
+      idxTo < attributes.size())
+  {
+    // move attributes
+    Attribute* temp = attributes[idxFr];
+
+    // 2 cases to consider
+    if (idxFr < idxTo)
     {
-        // move attributes
-        Attribute* temp = attributes[idxFr];
-
-        // 2 cases to consider
-        if ( idxFr < idxTo )
-        {
-            // move all values after idxFr 1 pos up
-            for ( size_t i = idxFr; i < idxTo; ++i )
-            {
-                attributes[i] = attributes[i+1];
-                attributes[i]->setIndex( i );
-            }
-            // update idxTo
-            attributes[idxTo] = temp;
-            attributes[idxTo]->setIndex( idxTo );
-        }
-        else if ( idxTo < idxFr )
-        {
-            // move all values before idxFr 1 pos down
-            for ( size_t i = idxFr; i > idxTo; --i )
-            {
-                attributes[i] = attributes[i-1];
-                attributes[i]->setIndex( i );
-            }
-            // update idxTo
-            attributes[idxTo] = temp;
-            attributes[idxTo]->setIndex( idxTo );
-        }
-
-        temp = NULL;
-
-        // move node tuple values
-        for ( size_t i = 0; i < nodes.size(); ++i )
-            nodes[i]->moveTupleVal( idxFr, idxTo );
+      // move all values after idxFr 1 pos up
+      for (size_t i = idxFr; i < idxTo; ++i)
+      {
+        attributes[i] = attributes[i+1];
+        attributes[i]->setIndex(i);
+      }
+      // update idxTo
+      attributes[idxTo] = temp;
+      attributes[idxTo]->setIndex(idxTo);
     }
-    else
-        throw mcrl2::runtime_error( "Error moving attribute." );
+    else if (idxTo < idxFr)
+    {
+      // move all values before idxFr 1 pos down
+      for (size_t i = idxFr; i > idxTo; --i)
+      {
+        attributes[i] = attributes[i-1];
+        attributes[i]->setIndex(i);
+      }
+      // update idxTo
+      attributes[idxTo] = temp;
+      attributes[idxTo]->setIndex(idxTo);
+    }
+
+    temp = NULL;
+
+    // move node tuple values
+    for (size_t i = 0; i < nodes.size(); ++i)
+    {
+      nodes[i]->moveTupleVal(idxFr, idxTo);
+    }
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error moving attribute.");
+  }
 }
 
 
 // -----------------------------------------------------
 void Graph::configAttributes(
-    map< size_t, size_t > &idcsFrTo,
-    map< size_t, vector< string > > &attrCurDomains,
-    map< size_t, map< size_t , size_t  > > &attrOrigToCurDomains )
+  map< size_t, size_t > &idcsFrTo,
+  map< size_t, vector< string > > &attrCurDomains,
+  map< size_t, map< size_t , size_t  > > &attrOrigToCurDomains)
 // -----------------------------------------------------
 {
-    size_t sizeAttrs = attributes.size();
+  size_t sizeAttrs = attributes.size();
 
-    if ( idcsFrTo.size()             == sizeAttrs &&
-         attrCurDomains.size()       == sizeAttrs &&
-         attrOrigToCurDomains.size() == sizeAttrs )
+  if (idcsFrTo.size()             == sizeAttrs &&
+      attrCurDomains.size()       == sizeAttrs &&
+      attrOrigToCurDomains.size() == sizeAttrs)
+  {
+    try
     {
-        try
+      vector< Attribute* > attrsNew;
+
+      // init new list of attributes
+      {
+        for (size_t i = 0; i < idcsFrTo.size(); ++i)
         {
-            vector< Attribute* > attrsNew;
-
-            // init new list of attributes
-            {
-            for ( size_t i = 0; i < idcsFrTo.size(); ++i )
-                attrsNew.push_back( NULL );
-            }
-
-            // update new list of attributes
-            {
-            for( size_t i = 0; i < idcsFrTo.size(); ++i )
-            {
-                attrsNew[ idcsFrTo[i] ] = attributes[i];
-                attrsNew[ idcsFrTo[i] ]->setIndex( idcsFrTo[i] );
-            }
-            }
-
-            // update attribute domains
-            {
-            for ( size_t i = 0; i < idcsFrTo.size(); ++i )
-                attrsNew[ idcsFrTo[i] ]->configValues(
-                    attrCurDomains[i],
-                    attrOrigToCurDomains[i] );
-            }
-
-            // set attributes to new list of attributes
-            attributes.clear();
-            attributes = attrsNew;
-            attrsNew.clear();
-
-            // update nodes
-            {
-            for ( size_t i = 0; i < nodes.size(); ++i )
-                nodes[i]->moveTupleVals( idcsFrTo );
-            }
+          attrsNew.push_back(NULL);
         }
-        catch ( const mcrl2::runtime_error& e)
+      }
+
+      // update new list of attributes
+      {
+        for (size_t i = 0; i < idcsFrTo.size(); ++i)
         {
-          throw mcrl2::runtime_error(string("Error moving attributes.\n") + string(e.what()));
+          attrsNew[ idcsFrTo[i] ] = attributes[i];
+          attrsNew[ idcsFrTo[i] ]->setIndex(idcsFrTo[i]);
         }
-        
+      }
+
+      // update attribute domains
+      {
+        for (size_t i = 0; i < idcsFrTo.size(); ++i)
+          attrsNew[ idcsFrTo[i] ]->configValues(
+            attrCurDomains[i],
+            attrOrigToCurDomains[i]);
+      }
+
+      // set attributes to new list of attributes
+      attributes.clear();
+      attributes = attrsNew;
+      attrsNew.clear();
+
+      // update nodes
+      {
+        for (size_t i = 0; i < nodes.size(); ++i)
+        {
+          nodes[i]->moveTupleVals(idcsFrTo);
+        }
+      }
     }
-    else
-        throw mcrl2::runtime_error("Error configuring attributes.");
+    catch (const mcrl2::runtime_error& e)
+    {
+      throw mcrl2::runtime_error(string("Error moving attributes.\n") + string(e.what()));
+    }
+
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error configuring attributes.");
+  }
 
 }
 
 
 // ----------------------------------------------------
-void Graph::duplAttributes( const vector< size_t > &idcs )
+void Graph::duplAttributes(const vector< size_t > &idcs)
 // ----------------------------------------------------
 {
-    size_t insIdx = 0;
-    vector< Attribute* > newAttrs;
+  size_t insIdx = 0;
+  vector< Attribute* > newAttrs;
 
-    // get insertion index
+  // get insertion index
+  {
+    for (size_t i = 0; i < idcs.size(); ++i)
     {
-    for( size_t i = 0; i < idcs.size(); ++i )
-    {
-        if ( idcs[i] > insIdx )
-            insIdx = idcs[i];
+      if (idcs[i] > insIdx)
+      {
+        insIdx = idcs[i];
+      }
     }
-    }
-    ++insIdx;
+  }
+  ++insIdx;
 
-    // add attributes at insertion index
+  // add attributes at insertion index
+  {
+    for (size_t i = 0; i < idcs.size(); ++i)
     {
-    for( size_t i = 0; i < idcs.size(); ++i )
-    {
-        // add new attribute
-        // -*-
-        if ( attributes[idcs[i]]->getAttrType() == Attribute::ATTR_TYPE_DISCR )
-        {
-            attributes.insert(
-                attributes.begin() + insIdx + i,
-                new AttrDiscr( *((AttrDiscr*)attributes[ idcs[i] ]) ) );
-        }
-        else if ( attributes[idcs[i]]->getAttrType() == Attribute::ATTR_TYPE_CONTI )
-        {
-            attributes.insert(
-                attributes.begin() + insIdx + i,
-                new AttrConti( *((AttrConti*)attributes[ idcs[i] ]) ) );
-        }
+      // add new attribute
+      // -*-
+      if (attributes[idcs[i]]->getAttrType() == Attribute::ATTR_TYPE_DISCR)
+      {
+        attributes.insert(
+          attributes.begin() + insIdx + i,
+          new AttrDiscr(*((AttrDiscr*)attributes[ idcs[i] ])));
+      }
+      else if (attributes[idcs[i]]->getAttrType() == Attribute::ATTR_TYPE_CONTI)
+      {
+        attributes.insert(
+          attributes.begin() + insIdx + i,
+          new AttrConti(*((AttrConti*)attributes[ idcs[i] ])));
+      }
 
-        attributes[ insIdx + i ]->setIndex( insIdx + i );
-        attributes[ insIdx + i ]->setName(
-            "Copy_of_" + attributes[ idcs[i] ]->getName() );
+      attributes[ insIdx + i ]->setIndex(insIdx + i);
+      attributes[ insIdx + i ]->setName(
+        "Copy_of_" + attributes[ idcs[i] ]->getName());
+      {
+        for (size_t j = insIdx + i + 1; j < attributes.size(); ++j)
         {
-        for ( size_t j = insIdx + i + 1; j < attributes.size(); ++j )
-            attributes[j]->setIndex( j );
+          attributes[j]->setIndex(j);
         }
+      }
 
-        // update nodes
-        {
-        for ( size_t j = 0; j < nodes.size(); ++j )
-            nodes[j]->addTupleVal(
-                insIdx + i,
-                nodes[j]->getTupleVal( idcs[i] ) );
-        }
+      // update nodes
+      {
+        for (size_t j = 0; j < nodes.size(); ++j)
+          nodes[j]->addTupleVal(
+            insIdx + i,
+            nodes[j]->getTupleVal(idcs[i]));
+      }
     }
-    }
+  }
 }
 
 
 // ------------------------------------------
-void Graph::deleteAttribute( const size_t &idx )
+void Graph::deleteAttribute(const size_t& idx)
 // ------------------------------------------
 {
-    Cluster* clst;
-    vector< size_t > idcsCurClust;
-    vector< size_t > idcsNewClust;
+  Cluster* clst;
+  vector< size_t > idcsCurClust;
+  vector< size_t > idcsNewClust;
 
-    // get indcs of attributes used in current clustering
-    clst = root;
-    while( clst->getSizeChildren() > 0 )
-    {
-        clst = clst->getChild( 0 );
-        idcsCurClust.push_back( clst->getAttribute()->getIndex() );
-    }
-    clst = NULL;
+  // get indcs of attributes used in current clustering
+  clst = root;
+  while (clst->getSizeChildren() > 0)
+  {
+    clst = clst->getChild(0);
+    idcsCurClust.push_back(clst->getAttribute()->getIndex());
+  }
+  clst = NULL;
 
-    // get intersection of idcsToDelete & idcsCurClust
+  // get intersection of idcsToDelete & idcsCurClust
+  {
+    for (size_t i = 0; i < idcsCurClust.size(); ++i)
     {
-    for ( size_t i = 0; i < idcsCurClust.size(); ++i )
-    {
-        // if not found, insert into new clustering
-        if ( idx != idcsCurClust[i] )
-            idcsNewClust.push_back( idcsCurClust[i] );
+      // if not found, insert into new clustering
+      if (idx != idcsCurClust[i])
+      {
+        idcsNewClust.push_back(idcsCurClust[i]);
+      }
     }
-    }
+  }
 
-    // init new clustering
-    if ( idcsNewClust.size() < idcsCurClust.size() )
-        mediator->handleAttributeCluster( idcsNewClust );
+  // init new clustering
+  if (idcsNewClust.size() < idcsCurClust.size())
+  {
+    mediator->handleAttributeCluster(idcsNewClust);
+  }
 
-    // update attributes & nodes
-    delete attributes[idx];
-    attributes[idx] = NULL;
-    attributes.erase( attributes.begin() + idx );
+  // update attributes & nodes
+  delete attributes[idx];
+  attributes[idx] = NULL;
+  attributes.erase(attributes.begin() + idx);
+  {
+    for (size_t i = idx; i < attributes.size(); ++i)
     {
-    for ( size_t i = idx; i < attributes.size(); ++i )
-        attributes[i]->setIndex(i);
+      attributes[i]->setIndex(i);
     }
+  }
 
-    // update nodes
+  // update nodes
+  {
+    for (size_t i = 0; i < nodes.size(); ++i)
     {
-    for ( size_t i = 0; i < nodes.size(); ++i )
-        nodes[i]->delTupleVal( idx );
+      nodes[i]->delTupleVal(idx);
     }
+  }
 }
 
 
 // --------------------------------------------
-void Graph::addNode( const vector< double > &tpl )
+void Graph::addNode(const vector< double > &tpl)
 // --------------------------------------------
 {
-    Node* n = new Node(
-        nodes.size(),
-        tpl );
-    addNode( n );
-    n = NULL;
+  Node* n = new Node(
+    nodes.size(),
+    tpl);
+  addNode(n);
+  n = NULL;
 }
 
 
 // ------------------------
 void Graph::addEdge(
-    const string &lbl,
-    const size_t &inNodeIdx,
-    const size_t &outNodeIdx )
+  const string& lbl,
+  const size_t& inNodeIdx,
+  const size_t& outNodeIdx)
 // ------------------------
 {
-    Edge* e = new Edge(
-        edges.size(),
-        lbl );
+  Edge* e = new Edge(
+    edges.size(),
+    lbl);
 
-    e->setInNode(  nodes[inNodeIdx] );
-    e->setOutNode( nodes[outNodeIdx] );
-    nodes[inNodeIdx]->addOutEdge( e );
-    nodes[outNodeIdx]->addInEdge( e );
+  e->setInNode(nodes[inNodeIdx]);
+  e->setOutNode(nodes[outNodeIdx]);
+  nodes[inNodeIdx]->addOutEdge(e);
+  nodes[outNodeIdx]->addInEdge(e);
 
-    Bundle* b = getBundle( 0 );
-    b->addEdge( e );
-    e->setBundle( b );
-    b = NULL;
+  Bundle* b = getBundle(0);
+  b->addEdge(e);
+  e->setBundle(b);
+  b = NULL;
 
-    addEdge( e );
-    e = NULL;
+  addEdge(e);
+  e = NULL;
 }
 
 
@@ -424,9 +450,9 @@ void Graph::initGraph()
 // nodes and edges have been added.
 // ------------------------------------------------------------------
 {
-    //initRoot();
-    updateLeaves();
-    updateBundles();
+  //initRoot();
+  updateLeaves();
+  updateBundles();
 }
 
 
@@ -437,7 +463,7 @@ void Graph::initGraph()
 string Graph::getFileName()
 // ------------------------
 {
-    return fileName;
+  return fileName;
 }
 
 
@@ -445,34 +471,40 @@ string Graph::getFileName()
 size_t Graph::getSizeAttributes()
 // ---------------------------
 {
-    return attributes.size();
+  return attributes.size();
 }
 
 
 // ---------------------------------------------
-Attribute* Graph::getAttribute( const size_t &idx )
+Attribute* Graph::getAttribute(const size_t& idx)
 // ---------------------------------------------
 {
-    if ( idx < attributes.size() )
-        return attributes[idx];
-    else
-        throw mcrl2::runtime_error( "Error retrieving attribute." );
+  if (idx < attributes.size())
+  {
+    return attributes[idx];
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error retrieving attribute.");
+  }
 }
 
 
 // -------------------------------------------------
-Attribute* Graph::getAttribute( const string &name )
+Attribute* Graph::getAttribute(const string& name)
 // -------------------------------------------------
 {
-    Attribute* result = NULL;
+  Attribute* result = NULL;
 
-    for ( size_t i = 0; i < attributes.size() && result == NULL; ++i )
+  for (size_t i = 0; i < attributes.size() && result == NULL; ++i)
+  {
+    if (attributes[i]->getName() == name)
     {
-        if ( attributes[i]->getName() == name )
-            result = attributes[i];
+      result = attributes[i];
     }
+  }
 
-    return result;
+  return result;
 }
 
 
@@ -480,18 +512,22 @@ Attribute* Graph::getAttribute( const string &name )
 size_t Graph::getSizeNodes()
 // ----------------------
 {
-    return nodes.size();
+  return nodes.size();
 }
 
 
 // -----------------------------------
-Node* Graph::getNode( const size_t &idx )
+Node* Graph::getNode(const size_t& idx)
 // -----------------------------------
 {
-    if ( idx < nodes.size() )
-        return nodes[idx];
-    else
-        throw mcrl2::runtime_error( "Error retrieving node." );
+  if (idx < nodes.size())
+  {
+    return nodes[idx];
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error retrieving node.");
+  }
 }
 
 
@@ -499,18 +535,22 @@ Node* Graph::getNode( const size_t &idx )
 size_t Graph::getSizeEdges()
 // ----------------------
 {
-    return edges.size();
+  return edges.size();
 }
 
 
 // -----------------------------------
-Edge* Graph::getEdge( const size_t &idx )
+Edge* Graph::getEdge(const size_t& idx)
 // -----------------------------------
 {
-    if ( idx < edges.size() )
-        return edges[idx];
-	else
-        throw mcrl2::runtime_error( "Error retrieving edge." );
+  if (idx < edges.size())
+  {
+    return edges[idx];
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error retrieving edge.");
+  }
 }
 
 
@@ -518,49 +558,55 @@ Edge* Graph::getEdge( const size_t &idx )
 Cluster* Graph::getRoot()
 // ----------------------
 {
-    return root;
+  return root;
 }
 
 
 // ----------------------------------------------------
-Cluster* Graph::getCluster( const vector< size_t > coord )
+Cluster* Graph::getCluster(const vector< size_t > coord)
 // ----------------------------------------------------
 {
-    Cluster* result = NULL;
+  Cluster* result = NULL;
 
-    if ( coord.size() > 1 )
+  if (coord.size() > 1)
+  {
+    Cluster* temp = root;
+
+    for (size_t i = 1; i < coord.size(); ++i)
     {
-        Cluster* temp = root;
-
-        for ( size_t i = 1; i < coord.size(); ++i )
-        {
-            if ( coord[i] != NON_EXISTING  && coord[i] < temp->getSizeChildren() )
-                temp = temp->getChild( coord[i] );
-            else
-            {
-                temp = NULL;
-                break;
-            }
-        }
-
-        result = temp;
-        temp   = NULL;
+      if (coord[i] != NON_EXISTING  && coord[i] < temp->getSizeChildren())
+      {
+        temp = temp->getChild(coord[i]);
+      }
+      else
+      {
+        temp = NULL;
+        break;
+      }
     }
-    else if ( coord.size() == 1 && coord[0] == 0 )
-        result = root;
 
-    return result;
+    result = temp;
+    temp   = NULL;
+  }
+  else if (coord.size() == 1 && coord[0] == 0)
+  {
+    result = root;
+  }
+
+  return result;
 }
 
 
 // --------------------------------------
-Cluster* Graph::getLeaf( const size_t &idx )
+Cluster* Graph::getLeaf(const size_t& idx)
 // --------------------------------------
 {
-    Cluster* result = NULL;
-    if ( idx < leaves.size() )
-        result = leaves[idx];
-    return result;
+  Cluster* result = NULL;
+  if (idx < leaves.size())
+  {
+    result = leaves[idx];
+  }
+  return result;
 }
 
 
@@ -568,18 +614,20 @@ Cluster* Graph::getLeaf( const size_t &idx )
 size_t Graph::getSizeLeaves()
 // -----------------------
 {
-    return leaves.size();
+  return leaves.size();
 }
 
 
 // ---------------------------------------
-Bundle* Graph::getBundle( const size_t &idx )
+Bundle* Graph::getBundle(const size_t& idx)
 // ---------------------------------------
 {
-    Bundle* result = NULL;
-    if ( idx < bundles.size() )
-        result = bundles[idx];
-    return result;
+  Bundle* result = NULL;
+  if (idx < bundles.size())
+  {
+    result = bundles[idx];
+  }
+  return result;
 }
 
 
@@ -587,7 +635,7 @@ Bundle* Graph::getBundle( const size_t &idx )
 size_t Graph::getSizeBundles()
 // ------------------------
 {
-    return bundles.size();
+  return bundles.size();
 }
 
 
@@ -596,756 +644,814 @@ size_t Graph::getSizeBundles()
 
 // ------------------------
 void Graph::calcAttrDistr(
-    const size_t &attrIdx,
-    vector< size_t > &distr )
+  const size_t& attrIdx,
+  vector< size_t > &distr)
 // ------------------------
 {
-    // vars
-    Attribute* attribute = NULL;
-    size_t sizeDomain       = 0;
-    size_t sizeNodes        = 0;
+  // vars
+  Attribute* attribute = NULL;
+  size_t sizeDomain       = 0;
+  size_t sizeNodes        = 0;
 
-    // init vars
-    attribute  = getAttribute( attrIdx );
-    sizeDomain = attribute->getSizeCurValues();
-    sizeNodes  = nodes.size();
+  // init vars
+  attribute  = getAttribute(attrIdx);
+  sizeDomain = attribute->getSizeCurValues();
+  sizeNodes  = nodes.size();
 
-    // init results
-    distr.clear();
-    if ( sizeDomain > 0  )
+  // init results
+  distr.clear();
+  if (sizeDomain > 0)
+  {
+    for (size_t i = 0; i < sizeDomain; ++i)
     {
-        for ( size_t i = 0; i < sizeDomain; ++i )
-            distr.push_back( 0 );
+      distr.push_back(0);
     }
+  }
 
-    // calc results
-    if ( sizeDomain > 0  )
+  // calc results
+  if (sizeDomain > 0)
+  {
+    for (size_t i = 0; i < sizeNodes; ++i)
     {
-        for ( size_t i = 0; i < sizeNodes; ++i )
-            distr[ attribute->mapToValue( nodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;
+      distr[ attribute->mapToValue(nodes[i]->getTupleVal(attrIdx))->getIndex() ] += 1;
     }
+  }
 
-    // reset ptr
-    attribute = NULL;
+  // reset ptr
+  attribute = NULL;
 }
 
 
 // -----------------------
 void Graph::calcAttrDistr(
-    Cluster* clust,
-    const size_t &attrIdx,
-    vector< size_t > &distr )
+  Cluster* clust,
+  const size_t& attrIdx,
+  vector< size_t > &distr)
 // -----------------------
 {
-    // vars
-    Attribute* attribute = NULL;
-    size_t sizeDomain       = 0;
-    vector< Node* > clustNodes;
-    size_t sizeNodes        = 0;
+  // vars
+  Attribute* attribute = NULL;
+  size_t sizeDomain       = 0;
+  vector< Node* > clustNodes;
+  size_t sizeNodes        = 0;
 
-    // init vars
-    attribute  = getAttribute( attrIdx );
-    sizeDomain = attribute->getSizeCurValues();
+  // init vars
+  attribute  = getAttribute(attrIdx);
+  sizeDomain = attribute->getSizeCurValues();
 
-    getDescNodesInCluster( clust, clustNodes );
-    sizeNodes  = clustNodes.size();
+  getDescNodesInCluster(clust, clustNodes);
+  sizeNodes  = clustNodes.size();
 
-    // init results
-    distr.clear();
-    if ( sizeDomain > 0  )
+  // init results
+  distr.clear();
+  if (sizeDomain > 0)
+  {
+    for (size_t i = 0; i < sizeDomain; ++i)
     {
-        for ( size_t i = 0; i < sizeDomain; ++i )
-            distr.push_back( 0 );
+      distr.push_back(0);
     }
+  }
 
-    // calc results
-    if ( sizeDomain > 0  )
+  // calc results
+  if (sizeDomain > 0)
+  {
+    for (size_t i = 0; i < sizeNodes; ++i)
+      /*distr[ attribute->mapToValue( (int)clustNodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;*/
     {
-        for ( size_t i = 0; i < sizeNodes; ++i )
-            /*distr[ attribute->mapToValue( (int)clustNodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;*/
-            distr[ attribute->mapToValue( clustNodes[i]->getTupleVal( attrIdx ) )->getIndex() ] += 1;
+      distr[ attribute->mapToValue(clustNodes[i]->getTupleVal(attrIdx))->getIndex() ] += 1;
     }
+  }
 
-    // reset ptrs
-    clustNodes.clear();
-    attribute = NULL;
+  // reset ptrs
+  clustNodes.clear();
+  attribute = NULL;
 }
 
 
 // -----------------------------------
 void Graph::calcAttrCorrl(
-    const size_t &attrIdx1,
-    const size_t &attrIdx2,
-    vector< vector< size_t > > &corrlMap,
-    vector< vector< int > > &number )
+  const size_t& attrIdx1,
+  const size_t& attrIdx2,
+  vector< vector< size_t > > &corrlMap,
+  vector< vector< int > > &number)
 // -----------------------------------
 {
-    // vars
-    Attribute* attr1 = NULL;
-    Attribute* attr2 = NULL;
-    Node*      node  = NULL;
-    size_t sizeDomain1  = 0;
-    size_t sizeDomain2  = 0;
-    size_t numCombns    = 0;
-    size_t sizeNodes    = 0;
-    size_t domIdx1      = 0;
-    size_t domIdx2      = 0;
-    vector< int >::iterator it;
-    vector< size_t > toErase;
+  // vars
+  Attribute* attr1 = NULL;
+  Attribute* attr2 = NULL;
+  Node*      node  = NULL;
+  size_t sizeDomain1  = 0;
+  size_t sizeDomain2  = 0;
+  size_t numCombns    = 0;
+  size_t sizeNodes    = 0;
+  size_t domIdx1      = 0;
+  size_t domIdx2      = 0;
+  vector< int >::iterator it;
+  vector< size_t > toErase;
 
-    // init vars
-    attr1       = getAttribute( attrIdx1 );
-    attr2       = getAttribute( attrIdx2 );
-    sizeDomain1 = attr1->getSizeCurValues();
-    sizeDomain2 = attr2->getSizeCurValues();
-    numCombns   = sizeDomain1*sizeDomain2;
-    sizeNodes   = nodes.size();
+  // init vars
+  attr1       = getAttribute(attrIdx1);
+  attr2       = getAttribute(attrIdx2);
+  sizeDomain1 = attr1->getSizeCurValues();
+  sizeDomain2 = attr2->getSizeCurValues();
+  numCombns   = sizeDomain1*sizeDomain2;
+  sizeNodes   = nodes.size();
 
-    // init results;
-    corrlMap.clear();
-    number.clear();
-    if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
+  // init results;
+  corrlMap.clear();
+  number.clear();
+  if (sizeDomain1 > 0 && sizeDomain2 > 0)
+  {
+    for (size_t i = 0; i < sizeDomain1; ++i)
     {
-        for ( size_t i = 0; i < sizeDomain1; ++i )
-        {
-            vector< int > tempNumVec;
-            for ( size_t j = 0; j < sizeDomain2; ++j )
-                tempNumVec.push_back( 0 );
-            number.push_back( tempNumVec );
+      vector< int > tempNumVec;
+      for (size_t j = 0; j < sizeDomain2; ++j)
+      {
+        tempNumVec.push_back(0);
+      }
+      number.push_back(tempNumVec);
 
-            vector< size_t > tempMapVec;
-            corrlMap.push_back( tempMapVec );
-        }
+      vector< size_t > tempMapVec;
+      corrlMap.push_back(tempMapVec);
     }
+  }
 
-    // calc prelim results
-    if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
+  // calc prelim results
+  if (sizeDomain1 > 0 && sizeDomain2 > 0)
+  {
+    for (size_t i = 0; i < sizeNodes; ++i)
     {
-        for ( size_t i = 0; i < sizeNodes; ++i )
-        {
-            node    = nodes[i];
-            /*
-            domIdx1 = attr1->mapToValue(
-                (int)node->getTupleVal(
-                    attrIdx1 ) )->getIndex();
-            domIdx2 = attr2->mapToValue(
-                (int)node->getTupleVal(
-                    attrIdx2 ) )->getIndex();
-            */
-            domIdx1 = attr1->mapToValue(
-                node->getTupleVal(
-                    attrIdx1 ) )->getIndex();
-            domIdx2 = attr2->mapToValue(
-                node->getTupleVal(
-                    attrIdx2 ) )->getIndex();
+      node    = nodes[i];
+      /*
+      domIdx1 = attr1->mapToValue(
+          (int)node->getTupleVal(
+              attrIdx1 ) )->getIndex();
+      domIdx2 = attr2->mapToValue(
+          (int)node->getTupleVal(
+              attrIdx2 ) )->getIndex();
+      */
+      domIdx1 = attr1->mapToValue(
+                  node->getTupleVal(
+                    attrIdx1))->getIndex();
+      domIdx2 = attr2->mapToValue(
+                  node->getTupleVal(
+                    attrIdx2))->getIndex();
 
-            number[domIdx1][domIdx2] += 1;
-        }
+      number[domIdx1][domIdx2] += 1;
     }
+  }
 
-    // update correlation map
-    if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
+  // update correlation map
+  if (sizeDomain1 > 0 && sizeDomain2 > 0)
+  {
+    for (size_t i = 0; i < sizeDomain1; ++i)
     {
-        for ( size_t i = 0; i < sizeDomain1; ++i )
+      for (size_t j = 0; j < sizeDomain2; ++j)
+      {
+        if (number[i][j] > 0)
         {
-            for ( size_t j = 0; j < sizeDomain2; ++j )
-            {
-                if ( number[i][j] > 0 )
-                    corrlMap[i].push_back( j );
-            }
+          corrlMap[i].push_back(j);
         }
+      }
     }
+  }
 
-    // remove zero entries from number
-	if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
+  // remove zero entries from number
+  if (sizeDomain1 > 0 && sizeDomain2 > 0)
+  {
+    for (size_t i = 0; i < sizeDomain1; ++i)
     {
-        for ( size_t i = 0; i < sizeDomain1; ++i )
+      toErase.clear();
+      {
+        for (size_t j = 0; j < sizeDomain2; ++j)
         {
-            toErase.clear();
-            {
-            for ( size_t j = 0; j < sizeDomain2; ++j )
-            {
-                if ( number[i][j] < 1 )
-                    toErase.push_back( j );
-            }
-            }
-
-            {
-            for ( size_t j = 0; j < toErase.size(); ++j )
-			{
-				// brackets around (toErase[j] - j) REALLY important
-                number[i].erase( number[i].begin() + (toErase[j] - j) );
-			}
-            }
+          if (number[i][j] < 1)
+          {
+            toErase.push_back(j);
+          }
         }
-    }
+      }
 
-    // reset ptrs
-    attr1 = NULL;
-    attr2 = NULL;
-    node  = NULL;
+      {
+        for (size_t j = 0; j < toErase.size(); ++j)
+        {
+          // brackets around (toErase[j] - j) REALLY important
+          number[i].erase(number[i].begin() + (toErase[j] - j));
+        }
+      }
+    }
+  }
+
+  // reset ptrs
+  attr1 = NULL;
+  attr2 = NULL;
+  node  = NULL;
 }
 
 
 // -----------------------------------
 void Graph::calcAttrCorrl(
-    Cluster* clust,
-    const size_t &attrIdx1,
-    const size_t &attrIdx2,
-    vector< vector< size_t > > &corrlMap,
-    vector< vector< int > > &number )
+  Cluster* clust,
+  const size_t& attrIdx1,
+  const size_t& attrIdx2,
+  vector< vector< size_t > > &corrlMap,
+  vector< vector< int > > &number)
 // -----------------------------------
 {
-    // vars
-    Attribute* attr1 = NULL;
-    Attribute* attr2 = NULL;
-    Node*      node  = NULL;
-    size_t sizeDomain1  = 0;
-    size_t sizeDomain2  = 0;
-    size_t numCombns    = 0;
-    vector< Node* > clustNodes;
-    size_t sizeNodes    = 0;
-    size_t domIdx1      = 0;
-    size_t domIdx2      = 0;
-    int count        = 0;
-    vector< int >::iterator it;
-    vector< int > toErase;
+  // vars
+  Attribute* attr1 = NULL;
+  Attribute* attr2 = NULL;
+  Node*      node  = NULL;
+  size_t sizeDomain1  = 0;
+  size_t sizeDomain2  = 0;
+  size_t numCombns    = 0;
+  vector< Node* > clustNodes;
+  size_t sizeNodes    = 0;
+  size_t domIdx1      = 0;
+  size_t domIdx2      = 0;
+  int count        = 0;
+  vector< int >::iterator it;
+  vector< int > toErase;
 
-    // init vars
-    attr1       = getAttribute( attrIdx1 );
-    attr2       = getAttribute( attrIdx2 );
-    sizeDomain1 = attr1->getSizeCurValues();
-    sizeDomain2 = attr2->getSizeCurValues();
-    numCombns   = sizeDomain1*sizeDomain2;
-    getDescNodesInCluster( clust, clustNodes );
-    sizeNodes   = clustNodes.size();
+  // init vars
+  attr1       = getAttribute(attrIdx1);
+  attr2       = getAttribute(attrIdx2);
+  sizeDomain1 = attr1->getSizeCurValues();
+  sizeDomain2 = attr2->getSizeCurValues();
+  numCombns   = sizeDomain1*sizeDomain2;
+  getDescNodesInCluster(clust, clustNodes);
+  sizeNodes   = clustNodes.size();
 
-    // init results;
-    corrlMap.clear();
-    number.clear();
-    if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
+  // init results;
+  corrlMap.clear();
+  number.clear();
+  if (sizeDomain1 > 0 && sizeDomain2 > 0)
+  {
+    for (size_t i = 0; i < sizeDomain1; ++i)
     {
-        for ( size_t i = 0; i < sizeDomain1; ++i )
-        {
-            vector< int > tempNumVec;
-            for ( size_t j = 0; j < sizeDomain2; ++j )
-                tempNumVec.push_back( 0 );
-            number.push_back( tempNumVec );
+      vector< int > tempNumVec;
+      for (size_t j = 0; j < sizeDomain2; ++j)
+      {
+        tempNumVec.push_back(0);
+      }
+      number.push_back(tempNumVec);
 
-            vector< size_t > tempMapVec;
-            corrlMap.push_back( tempMapVec );
-        }
+      vector< size_t > tempMapVec;
+      corrlMap.push_back(tempMapVec);
     }
+  }
 
-    // calc prelim results
-    if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
+  // calc prelim results
+  if (sizeDomain1 > 0 && sizeDomain2 > 0)
+  {
+    for (size_t i = 0; i < sizeNodes; ++i)
     {
-        for ( size_t i = 0; i < sizeNodes; ++i )
-        {
-            node    = clustNodes[i];
-            /*
-            domIdx1 = attr1->mapToValue(
-                (int)node->getTupleVal(
-                    attrIdx1 ) )->getIndex();
-            domIdx2 = attr2->mapToValue(
-                (int)node->getTupleVal(
-                    attrIdx2 ) )->getIndex();
-            */
-            domIdx1 = attr1->mapToValue(
-                node->getTupleVal(
-                    attrIdx1 ) )->getIndex();
-            domIdx2 = attr2->mapToValue(
-                node->getTupleVal(
-                    attrIdx2 ) )->getIndex();
+      node    = clustNodes[i];
+      /*
+      domIdx1 = attr1->mapToValue(
+          (int)node->getTupleVal(
+              attrIdx1 ) )->getIndex();
+      domIdx2 = attr2->mapToValue(
+          (int)node->getTupleVal(
+              attrIdx2 ) )->getIndex();
+      */
+      domIdx1 = attr1->mapToValue(
+                  node->getTupleVal(
+                    attrIdx1))->getIndex();
+      domIdx2 = attr2->mapToValue(
+                  node->getTupleVal(
+                    attrIdx2))->getIndex();
 
 
-            number[domIdx1][domIdx2] += 1;
-        }
+      number[domIdx1][domIdx2] += 1;
     }
+  }
 
-    // update correlation map
-    if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
+  // update correlation map
+  if (sizeDomain1 > 0 && sizeDomain2 > 0)
+  {
+    for (size_t i = 0; i < sizeDomain1; ++i)
     {
-        for ( size_t i = 0; i < sizeDomain1; ++i )
+      for (size_t j = 0; j < sizeDomain2; ++j)
+      {
+        if (number[i][j] > 0)
         {
-            for ( size_t j = 0; j < sizeDomain2; ++j )
-            {
-                if ( number[i][j] > 0 )
-                    corrlMap[i].push_back( j );
-            }
+          corrlMap[i].push_back(j);
         }
+      }
     }
+  }
 
-    // remove zero entries from number
-    if ( sizeDomain1 > 0 && sizeDomain2 > 0 )
+  // remove zero entries from number
+  if (sizeDomain1 > 0 && sizeDomain2 > 0)
+  {
+    for (size_t i = 0; i < sizeDomain1; ++i)
     {
-        for ( size_t i = 0; i < sizeDomain1; ++i )
+      toErase.clear();
+      count = 0;
+      for (it = number[i].begin(); it != number[i].end(); ++it)
+      {
+        if (*it < 1)
         {
-            toErase.clear();
-            count = 0;
-            for ( it = number[i].begin(); it != number[i].end(); ++it )
-            {
-                if ( *it < 1 )
-                    toErase.push_back( count );
-                ++count;
-            }
-
-            for ( size_t j = 0; j < toErase.size(); ++j )
-                number[i].erase( number[i].begin() + toErase[j] - j );
+          toErase.push_back(count);
         }
-    }
+        ++count;
+      }
 
-    // reset ptrs
-    attr1 = NULL;
-    attr2 = NULL;
-    clustNodes.clear();
-    node  = NULL;
+      for (size_t j = 0; j < toErase.size(); ++j)
+      {
+        number[i].erase(number[i].begin() + toErase[j] - j);
+      }
+    }
+  }
+
+  // reset ptrs
+  attr1 = NULL;
+  attr2 = NULL;
+  clustNodes.clear();
+  node  = NULL;
 }
 
 
 // --------------------------------
 void Graph::calcAttrCombn(
-    const vector< size_t > &attrIndcs,
-    vector< vector< size_t > > &combs,
-    vector< size_t > &number )
+  const vector< size_t > &attrIndcs,
+  vector< vector< size_t > > &combs,
+  vector< size_t > &number)
 // --------------------------------
 {
-    if ( root != NULL )
-        calcAttrCombn( root, attrIndcs, combs, number );
+  if (root != NULL)
+  {
+    calcAttrCombn(root, attrIndcs, combs, number);
+  }
 }
 
 
 // --------------------------------
 void Graph::calcAttrCombn(
-    Cluster* clust,
-    const vector< size_t > &attrIndcs,
-    vector< vector< size_t > > &combs,
-    vector< size_t > &number )
+  Cluster* clust,
+  const vector< size_t > &attrIndcs,
+  vector< vector< size_t > > &combs,
+  vector< size_t > &number)
 // --------------------------------
 {
-    size_t summand     = 0;
-    size_t key         = 0;
-    size_t card        = 0;
-    Node*      node = NULL;
-    Attribute* attr = NULL;
-    vector< Node* >           nodesInClst;
-    map< size_t , vector< size_t > > keyToCombn;
-    map< size_t , size_t >           keyToNumber;
+  size_t summand     = 0;
+  size_t key         = 0;
+  size_t card        = 0;
+  Node*      node = NULL;
+  Attribute* attr = NULL;
+  vector< Node* >           nodesInClst;
+  map< size_t , vector< size_t > > keyToCombn;
+  map< size_t , size_t >           keyToNumber;
 
-    // do initialization
-    getDescNodesInCluster( clust, nodesInClst );
+  // do initialization
+  getDescNodesInCluster(clust, nodesInClst);
 
-    // calc results
-    for ( size_t i = 0; i < nodesInClst.size(); ++i )
+  // calc results
+  for (size_t i = 0; i < nodesInClst.size(); ++i)
+  {
+    key  = 0;
+    node = nodesInClst[i];
+
+    // calc key
+    for (size_t j = 0; j < attrIndcs.size(); ++j)
     {
-        key  = 0;
-        node = nodesInClst[i];
+      attr = getAttribute(attrIndcs[j]);
+      card = attr->getSizeCurValues();
+      if (card > 0)
+        /*
+        summand = attr->mapToValue(
+            (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
+        */
+        summand = attr->mapToValue(
+                    node->getTupleVal(attrIndcs[j]))->getIndex();
+      else
+      {
+        summand = 0;
+      }
 
-        // calc key
-        for ( size_t j = 0; j < attrIndcs.size(); ++j )
+      for (size_t k = j+1; k < attrIndcs.size(); ++k)
+      {
+        attr = getAttribute(attrIndcs[k]);
+        card = attr->getSizeCurValues();
+
+        if (card > 0)
         {
-            attr = getAttribute( attrIndcs[j] );
-            card = attr->getSizeCurValues();
-            if ( card > 0 )
-                /*
-                summand = attr->mapToValue(
-                    (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
-                */
-                summand = attr->mapToValue(
-                    node->getTupleVal( attrIndcs[j] ) )->getIndex();
-            else
-                summand = 0;
-
-            for ( size_t k = j+1; k < attrIndcs.size(); ++k )
-            {
-                attr = getAttribute( attrIndcs[k] );
-                card = attr->getSizeCurValues();
-
-                if ( card > 0 )
-                    summand *= card;
-            }
-
-            key += summand;
-        } // for j
-
-        // insert combn 1st time it occurs
-        if ( keyToCombn.find( key ) == keyToCombn.end() )
-        {
-            vector< size_t > v;
-            for ( size_t j = 0; j < attrIndcs.size(); ++j )
-            {
-                attr = getAttribute( attrIndcs[j] );
-                card = attr->getSizeCurValues();
-
-                if ( card > 0 )
-                    /*
-                    v.push_back( attr->mapToValue(
-                        (int)node->getTupleVal( attrIndcs[j] ) )->getIndex() );
-                    */
-                    v.push_back( attr->mapToValue(
-                        node->getTupleVal( attrIndcs[j] ) )->getIndex() );
-            }
-
-            keyToCombn.insert( pair< size_t, vector< size_t > >( key, v ) );
-            keyToNumber.insert( pair< size_t, size_t >( key, 1 ) );
+          summand *= card;
         }
-        // increment number if combn exists
-        else
-            keyToNumber[key] += 1;
+      }
 
-    } // for i
+      key += summand;
+    } // for j
 
-    // update combs
-    combs.clear();
-
-    map< size_t , vector< size_t > >::iterator it;
-    for ( it = keyToCombn.begin(); it != keyToCombn.end(); ++it )
+    // insert combn 1st time it occurs
+    if (keyToCombn.find(key) == keyToCombn.end())
     {
-        combs.push_back( (*it).second );
-        number.push_back( keyToNumber[(*it).first] );
+      vector< size_t > v;
+      for (size_t j = 0; j < attrIndcs.size(); ++j)
+      {
+        attr = getAttribute(attrIndcs[j]);
+        card = attr->getSizeCurValues();
+
+        if (card > 0)
+          /*
+          v.push_back( attr->mapToValue(
+              (int)node->getTupleVal( attrIndcs[j] ) )->getIndex() );
+          */
+          v.push_back(attr->mapToValue(
+                        node->getTupleVal(attrIndcs[j]))->getIndex());
+      }
+
+      keyToCombn.insert(pair< size_t, vector< size_t > >(key, v));
+      keyToNumber.insert(pair< size_t, size_t >(key, 1));
+    }
+    // increment number if combn exists
+    else
+    {
+      keyToNumber[key] += 1;
     }
 
-    // clear memory
-    node = NULL;
-    attr = NULL;
-    nodesInClst.clear();
+  } // for i
+
+  // update combs
+  combs.clear();
+
+  map< size_t , vector< size_t > >::iterator it;
+  for (it = keyToCombn.begin(); it != keyToCombn.end(); ++it)
+  {
+    combs.push_back((*it).second);
+    number.push_back(keyToNumber[(*it).first]);
+  }
+
+  // clear memory
+  node = NULL;
+  attr = NULL;
+  nodesInClst.clear();
 }
 
 
 // ---------------------------------
 void Graph::calcAttrCombn(
-    const vector< size_t > &attrIndcs,
-    vector< vector< size_t > > &combs )
+  const vector< size_t > &attrIndcs,
+  vector< vector< size_t > > &combs)
 // ---------------------------------
 {
-    if ( root != NULL )
-        calcAttrCombn( root, attrIndcs, combs );
+  if (root != NULL)
+  {
+    calcAttrCombn(root, attrIndcs, combs);
+  }
 }
 
 
 
 // ---------------------------------
 void Graph::calcAttrCombn(
-    Cluster* clust,
-    const vector< size_t > &attrIndcs,
-    vector< vector< size_t > > &combs )
+  Cluster* clust,
+  const vector< size_t > &attrIndcs,
+  vector< vector< size_t > > &combs)
 // ---------------------------------
 {
-    size_t summand     = 0;
-    size_t key         = 0;
-    size_t card        = 0;
-    Node*      node = NULL;
-    Attribute* attr = NULL;
-    vector< Node* >           nodesInClst;
-    map< size_t , vector< size_t > > keyToCombn;
+  size_t summand     = 0;
+  size_t key         = 0;
+  size_t card        = 0;
+  Node*      node = NULL;
+  Attribute* attr = NULL;
+  vector< Node* >           nodesInClst;
+  map< size_t , vector< size_t > > keyToCombn;
 
-    // do initialization
-    getDescNodesInCluster( clust, nodesInClst );
+  // do initialization
+  getDescNodesInCluster(clust, nodesInClst);
 
-    // calc results
-    for ( size_t i = 0; i < nodesInClst.size(); ++i )
+  // calc results
+  for (size_t i = 0; i < nodesInClst.size(); ++i)
+  {
+    key  = 0;
+    node = nodesInClst[i];
+
+    // calc key
+    for (size_t j = 0; j < attrIndcs.size(); ++j)
     {
-        key  = 0;
-        node = nodesInClst[i];
+      attr = getAttribute(attrIndcs[j]);
+      card = attr->getSizeCurValues();
+      if (card > 0)
+        /*
+        summand = attr->mapToValue(
+            (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
+        */
+        summand = attr->mapToValue(
+                    node->getTupleVal(attrIndcs[j]))->getIndex();
+      else
+      {
+        summand = 0;
+      }
 
-        // calc key
-        for ( size_t j = 0; j < attrIndcs.size(); ++j )
+      for (size_t k = j+1; k < attrIndcs.size(); ++k)
+      {
+        attr = getAttribute(attrIndcs[k]);
+        card = attr->getSizeCurValues();
+
+        if (card > 0)
         {
-            attr = getAttribute( attrIndcs[j] );
-            card = attr->getSizeCurValues();
-            if ( card > 0 )
-                /*
-                summand = attr->mapToValue(
-                    (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
-                */
-                summand = attr->mapToValue(
-                    node->getTupleVal( attrIndcs[j] ) )->getIndex();
-            else
-                summand = 0;
-
-            for ( size_t k = j+1; k < attrIndcs.size(); ++k )
-            {
-                attr = getAttribute( attrIndcs[k] );
-                card = attr->getSizeCurValues();
-
-                if ( card > 0 )
-                    summand *= card;
-            }
-
-            key += summand;
-        } // for j
-
-        // insert combn 1st time it occurs
-        if ( keyToCombn.find( key ) == keyToCombn.end() )
-        {
-            vector< size_t > v;
-            for ( size_t j = 0; j < attrIndcs.size(); ++j )
-            {
-                attr = getAttribute( attrIndcs[j] );
-                card = attr->getSizeCurValues();
-
-                if ( card > 0 )
-                    /*
-                    v.push_back( attr->mapToValue(
-                        (int)node->getTupleVal( attrIndcs[j] ) )->getIndex() );
-                    */
-                    v.push_back( attr->mapToValue(
-                        node->getTupleVal( attrIndcs[j] ) )->getIndex() );
-            }
-
-            keyToCombn.insert( pair< size_t, vector< size_t > >(
-                key,
-                v ) );
+          summand *= card;
         }
-    } // for i
+      }
 
-    // update combs
-    combs.clear();
+      key += summand;
+    } // for j
 
-    map< size_t, vector< size_t > >::iterator it;
-    for ( it = keyToCombn.begin(); it != keyToCombn.end(); ++it )
-        combs.push_back( (*it).second );
+    // insert combn 1st time it occurs
+    if (keyToCombn.find(key) == keyToCombn.end())
+    {
+      vector< size_t > v;
+      for (size_t j = 0; j < attrIndcs.size(); ++j)
+      {
+        attr = getAttribute(attrIndcs[j]);
+        card = attr->getSizeCurValues();
 
-    // clear memory
-    node = NULL;
-    attr = NULL;
-    nodesInClst.clear();
+        if (card > 0)
+          /*
+          v.push_back( attr->mapToValue(
+              (int)node->getTupleVal( attrIndcs[j] ) )->getIndex() );
+          */
+          v.push_back(attr->mapToValue(
+                        node->getTupleVal(attrIndcs[j]))->getIndex());
+      }
+
+      keyToCombn.insert(pair< size_t, vector< size_t > >(
+                          key,
+                          v));
+    }
+  } // for i
+
+  // update combs
+  combs.clear();
+
+  map< size_t, vector< size_t > >::iterator it;
+  for (it = keyToCombn.begin(); it != keyToCombn.end(); ++it)
+  {
+    combs.push_back((*it).second);
+  }
+
+  // clear memory
+  node = NULL;
+  attr = NULL;
+  nodesInClst.clear();
 }
 
 
 // -----------------------------------
 void Graph::calcAttrCombn(
-    Cluster* clust,
-    const vector< size_t > &attrIndcs,
-    vector< vector< Node* > > &combs )
+  Cluster* clust,
+  const vector< size_t > &attrIndcs,
+  vector< vector< Node* > > &combs)
 // -----------------------------------
 {
-    size_t summand     = 0;
-    size_t key         = 0;
-    size_t card        = 0;
-    Node*      node = NULL;
-    Attribute* attr = NULL;
-    vector< Node* >           nodesInClst;
-    map< size_t , vector< Node* > > keyToCombn;
+  size_t summand     = 0;
+  size_t key         = 0;
+  size_t card        = 0;
+  Node*      node = NULL;
+  Attribute* attr = NULL;
+  vector< Node* >           nodesInClst;
+  map< size_t , vector< Node* > > keyToCombn;
 
-    // do initialization
-    getDescNodesInCluster( clust, nodesInClst );
+  // do initialization
+  getDescNodesInCluster(clust, nodesInClst);
 
-    // calc results
-    for ( size_t i = 0; i < nodesInClst.size(); ++i )
+  // calc results
+  for (size_t i = 0; i < nodesInClst.size(); ++i)
+  {
+    key  = 0;
+    node = nodesInClst[i];
+
+    // calc key
+    for (size_t j = 0; j < attrIndcs.size(); ++j)
     {
-        key  = 0;
-        node = nodesInClst[i];
+      attr = getAttribute(attrIndcs[j]);
+      card = attr->getSizeCurValues();
+      if (card > 0)
+        /*
+        summand = attr->mapToValue(
+            (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
+        */
+        summand = attr->mapToValue(
+                    node->getTupleVal(attrIndcs[j]))->getIndex();
+      else
+      {
+        summand = 0;
+      }
 
-        // calc key
-        for ( size_t j = 0; j < attrIndcs.size(); ++j )
+      for (size_t k = j+1; k < attrIndcs.size(); ++k)
+      {
+        attr = getAttribute(attrIndcs[k]);
+        card = attr->getSizeCurValues();
+
+        if (card > 0)
         {
-            attr = getAttribute( attrIndcs[j] );
-            card = attr->getSizeCurValues();
-            if ( card > 0 )
-                /*
-                summand = attr->mapToValue(
-                    (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
-                */
-                summand = attr->mapToValue(
-                    node->getTupleVal( attrIndcs[j] ) )->getIndex();
-            else
-                summand = 0;
-
-            for ( size_t k = j+1; k < attrIndcs.size(); ++k )
-            {
-                attr = getAttribute( attrIndcs[k] );
-                card = attr->getSizeCurValues();
-
-                if ( card > 0 )
-                    summand *= card;
-            }
-
-            key += summand;
-        } // for j
-
-        map< size_t, vector< Node* > >::iterator pos;
-        pos = keyToCombn.find( key );
-        // insert combn 1st time it occurs
-        if ( pos == keyToCombn.end() )
-        {
-            vector< Node* > v;
-            v.push_back( node );
-            keyToCombn.insert( pair< size_t , vector< Node* > >( key, v ) );
+          summand *= card;
         }
-        // insert state if it occurs again
-        else
-        {
-            pos->second.push_back( node );
-        }
-    } // for i
+      }
 
-    // update combs
-    combs.clear();
-    map< size_t, vector< Node* > >::iterator it;
-    for ( it = keyToCombn.begin(); it != keyToCombn.end(); ++it )
-        combs.push_back( (*it).second );
+      key += summand;
+    } // for j
 
-    // clear memory
-    node = NULL;
-    attr = NULL;
-    nodesInClst.clear();
+    map< size_t, vector< Node* > >::iterator pos;
+    pos = keyToCombn.find(key);
+    // insert combn 1st time it occurs
+    if (pos == keyToCombn.end())
+    {
+      vector< Node* > v;
+      v.push_back(node);
+      keyToCombn.insert(pair< size_t , vector< Node* > >(key, v));
+    }
+    // insert state if it occurs again
+    else
+    {
+      pos->second.push_back(node);
+    }
+  } // for i
+
+  // update combs
+  combs.clear();
+  map< size_t, vector< Node* > >::iterator it;
+  for (it = keyToCombn.begin(); it != keyToCombn.end(); ++it)
+  {
+    combs.push_back((*it).second);
+  }
+
+  // clear memory
+  node = NULL;
+  attr = NULL;
+  nodesInClst.clear();
 }
 
 
 // -----------------------------------
 void Graph::calcAttrCombn(
-    Cluster* clust,
-    const vector< Attribute* > &attrs,
-    vector< Cluster* > &combs )
+  Cluster* clust,
+  const vector< Attribute* > &attrs,
+  vector< Cluster* > &combs)
 // -----------------------------------
 {
-    size_t summand     = 0;
-    size_t key         = 0;
-    size_t card        = 0;
-    Node*      node = NULL;
-    Attribute* attr = NULL;
-    vector< Node* >      nodesInClst;
-    map< size_t, Cluster* > keyToCombn;
+  size_t summand     = 0;
+  size_t key         = 0;
+  size_t card        = 0;
+  Node*      node = NULL;
+  Attribute* attr = NULL;
+  vector< Node* >      nodesInClst;
+  map< size_t, Cluster* > keyToCombn;
 
-    // do initialization
-    getDescNodesInCluster( clust, nodesInClst );
+  // do initialization
+  getDescNodesInCluster(clust, nodesInClst);
 
-    // calc results
-    for ( size_t i = 0; i < nodesInClst.size(); ++i )
+  // calc results
+  for (size_t i = 0; i < nodesInClst.size(); ++i)
+  {
+    key  = 0;
+    node = nodesInClst[i];
+
+    // calc key
+    for (size_t j = 0; j < attrs.size(); ++j)
     {
-        key  = 0;
-        node = nodesInClst[i];
+      attr = attrs[j];
+      card = attr->getSizeCurValues();
+      if (card > 0)
+        /*
+        summand = attr->mapToValue(
+            (int)node->getTupleVal( attr->getIndex() ) )->getIndex();
+        */
+        summand = attr->mapToValue(
+                    node->getTupleVal(attr->getIndex()))->getIndex();
+      else
+      {
+        summand = 0;
+      }
 
-        // calc key
-        for ( size_t j = 0; j < attrs.size(); ++j )
+      for (size_t k = j+1; k < attrs.size(); ++k)
+      {
+        attr = attrs[k];
+        card = attr->getSizeCurValues();
+
+        if (card > 0)
         {
-            attr = attrs[j];
-            card = attr->getSizeCurValues();
-            if ( card > 0 )
-                /*
-                summand = attr->mapToValue(
-                    (int)node->getTupleVal( attr->getIndex() ) )->getIndex();
-                */
-                summand = attr->mapToValue(
-                    node->getTupleVal( attr->getIndex() ) )->getIndex();
-            else
-                summand = 0;
-
-            for ( size_t k = j+1; k < attrs.size(); ++k )
-            {
-                attr = attrs[k];
-                card = attr->getSizeCurValues();
-
-                if ( card > 0 )
-                    summand *= card;
-            }
-
-            key += summand;
-        } // for j
-
-        map< size_t, Cluster* >::iterator pos;
-        pos = keyToCombn.find( key );
-        // insert combn 1st time it occurs
-        if ( pos == keyToCombn.end() )
-        {
-            Cluster* clst = new Cluster();
-            clst->addNode( node );
-            keyToCombn.insert( pair< size_t, Cluster* >( key, clst ) );
-            clst = NULL;
+          summand *= card;
         }
-        // insert state if it occurs again
-        else
-        {
-            pos->second->addNode( node );
-        }
-    } // for i
+      }
 
-    // update combs
-    combs.clear();
-    map< size_t, Cluster* >::iterator it;
-    for ( it = keyToCombn.begin(); it != keyToCombn.end(); ++it )
-        combs.push_back( it->second );
+      key += summand;
+    } // for j
 
-    // clear memory
-    node = NULL;
-    attr = NULL;
-    nodesInClst.clear();
+    map< size_t, Cluster* >::iterator pos;
+    pos = keyToCombn.find(key);
+    // insert combn 1st time it occurs
+    if (pos == keyToCombn.end())
+    {
+      Cluster* clst = new Cluster();
+      clst->addNode(node);
+      keyToCombn.insert(pair< size_t, Cluster* >(key, clst));
+      clst = NULL;
+    }
+    // insert state if it occurs again
+    else
+    {
+      pos->second->addNode(node);
+    }
+  } // for i
+
+  // update combs
+  combs.clear();
+  map< size_t, Cluster* >::iterator it;
+  for (it = keyToCombn.begin(); it != keyToCombn.end(); ++it)
+  {
+    combs.push_back(it->second);
+  }
+
+  // clear memory
+  node = NULL;
+  attr = NULL;
+  nodesInClst.clear();
 }
 
 
 // ---------------------------------
 bool Graph::hasMultAttrCombns(
-    Cluster* clust,
-    const vector< int > &attrIndcs )
+  Cluster* clust,
+  const vector< int > &attrIndcs)
 // ---------------------------------
 // ------------------------------------------------------------------
 // This function returns true as soon as more than 1 state is found
 // with different combinations of values for the attributes specified.
 // ------------------------------------------------------------------
 {
-    bool result = false;
-    size_t  numAttrs  = 0;
-    size_t  cardAttr  = 0;
-    size_t  sizeNodes = 0;
-    size_t  mapFirst  = 0;
-    size_t  map       = 0;
-    size_t  summand   = 0;
-    Node*      node      = NULL;
-    Attribute* attribute = NULL;
-    vector< Node* > clustNodes;
+  bool result = false;
+  size_t  numAttrs  = 0;
+  size_t  cardAttr  = 0;
+  size_t  sizeNodes = 0;
+  size_t  mapFirst  = 0;
+  size_t  map       = 0;
+  size_t  summand   = 0;
+  Node*      node      = NULL;
+  Attribute* attribute = NULL;
+  vector< Node* > clustNodes;
 
-    getDescNodesInCluster( clust, clustNodes );
-    numAttrs  = attrIndcs.size();
-    sizeNodes = clustNodes.size();
+  getDescNodesInCluster(clust, clustNodes);
+  numAttrs  = attrIndcs.size();
+  sizeNodes = clustNodes.size();
 
-    // calc results
+  // calc results
+  {
+    for (size_t i = 0; i < sizeNodes && result == false; ++i)
     {
-    for ( size_t i = 0; i < sizeNodes && result == false; ++i )
-    {
-        map  = 0;
-        node = clustNodes[i];
+      map  = 0;
+      node = clustNodes[i];
 
-        // calc map
-        for ( size_t j = 0; j < numAttrs && result == false; ++j )
+      // calc map
+      for (size_t j = 0; j < numAttrs && result == false; ++j)
+      {
+        attribute = getAttribute(attrIndcs[j]);
+        cardAttr  = attribute->getSizeCurValues();
+        if (cardAttr > 0)
         {
-            attribute = getAttribute( attrIndcs[j] );
-            cardAttr  = attribute->getSizeCurValues();
-            if ( cardAttr > 0 )
-            {
-                /*
-                summand = attribute->mapToValue(
-                    (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
-                */
-                summand = attribute->mapToValue(
-                    node->getTupleVal( attrIndcs[j] ) )->getIndex();
-            }
-            else
-                summand = 0;
-
-            for ( size_t k = j+1; k < numAttrs; ++k )
-            {
-                attribute = getAttribute( attrIndcs[k] );
-                cardAttr  = attribute->getSizeCurValues();
-
-                if ( cardAttr > 0 )
-                    summand *= cardAttr;
-            }
-
-            map += summand;
+          /*
+          summand = attribute->mapToValue(
+              (int)node->getTupleVal( attrIndcs[j] ) )->getIndex();
+          */
+          summand = attribute->mapToValue(
+                      node->getTupleVal(attrIndcs[j]))->getIndex();
+        }
+        else
+        {
+          summand = 0;
         }
 
-        if ( i == 0 )
-            mapFirst = map;
-        else if ( mapFirst != map )
-            result = true;
-    }
-    }
+        for (size_t k = j+1; k < numAttrs; ++k)
+        {
+          attribute = getAttribute(attrIndcs[k]);
+          cardAttr  = attribute->getSizeCurValues();
 
-    node = NULL;
-    clustNodes.clear();
+          if (cardAttr > 0)
+          {
+            summand *= cardAttr;
+          }
+        }
 
-    return result;
+        map += summand;
+      }
+
+      if (i == 0)
+      {
+        mapFirst = map;
+      }
+      else if (mapFirst != map)
+      {
+        result = true;
+      }
+    }
+  }
+
+  node = NULL;
+  clustNodes.clear();
+
+  return result;
 }
 
 
@@ -1353,154 +1459,162 @@ bool Graph::hasMultAttrCombns(
 
 
 // ----------------------------------------------------------
-void Graph::clustNodesOnAttr( const vector< size_t > &attrIdcs )
+void Graph::clustNodesOnAttr(const vector< size_t > &attrIdcs)
 // ----------------------------------------------------------
 {
-    size_t combinations   = 0;
-    size_t progress       = 0;
-    vector< size_t > idcs = attrIdcs;
+  size_t combinations   = 0;
+  size_t progress       = 0;
+  vector< size_t > idcs = attrIdcs;
 
-    // cluster nodes
-    combinations = calcMaxNumCombns( attrIdcs );
-    mediator->initProgress(
-        "Clustering",
-        "Clustering nodes",
-        combinations );
-    clustNodesOnAttr( root, idcs, progress );
-    mediator->closeProgress();
+  // cluster nodes
+  combinations = calcMaxNumCombns(attrIdcs);
+  mediator->initProgress(
+    "Clustering",
+    "Clustering nodes",
+    combinations);
+  clustNodesOnAttr(root, idcs, progress);
+  mediator->closeProgress();
 
-    // update leaves
-    updateLeaves();
+  // update leaves
+  updateLeaves();
 
-    // update bundles
-    progress     = 0;
-    combinations = edges.size();
-    mediator->initProgress(
-        "Clustering",
-        "Bundling edges  ",
-        combinations );
-    updateBundles( progress );
-    mediator->closeProgress();
+  // update bundles
+  progress     = 0;
+  combinations = edges.size();
+  mediator->initProgress(
+    "Clustering",
+    "Bundling edges  ",
+    combinations);
+  updateBundles(progress);
+  mediator->closeProgress();
 
-    idcs.clear();
+  idcs.clear();
 }
 
 
 // -------------------------------------------------------
-void Graph::clearSubClusters( const vector< size_t > &coord )
+void Graph::clearSubClusters(const vector< size_t > &coord)
 // -------------------------------------------------------
 {
-    Cluster* clst = NULL;
+  Cluster* clst = NULL;
 
-    // get cluster
-    clst = getCluster( coord );
-    // clear subclusters
-    clearSubClusters( clst );
-    // update leaves
-    updateLeaves();
-    // update bundles
-    updateBundles();
+  // get cluster
+  clst = getCluster(coord);
+  // clear subclusters
+  clearSubClusters(clst);
+  // update leaves
+  updateLeaves();
+  // update bundles
+  updateBundles();
 
-    clst = NULL;
+  clst = NULL;
 }
 
 
 // -------------------------------------------------------
-size_t Graph::sumNodesInCluster( const vector< size_t > &coord )
+size_t Graph::sumNodesInCluster(const vector< size_t > &coord)
 // -------------------------------------------------------
 {
-    size_t      sum  = 0;
-    Cluster* clst = NULL;
+  size_t      sum  = 0;
+  Cluster* clst = NULL;
 
-    // get cluster
-    clst = getCluster( coord );
-    // get sum
-    if ( clst != NULL )
-        sumNodesInCluster( clst, sum );
+  // get cluster
+  clst = getCluster(coord);
+  // get sum
+  if (clst != NULL)
+  {
+    sumNodesInCluster(clst, sum);
+  }
 
-    clst = NULL;
-    return sum;
+  clst = NULL;
+  return sum;
 }
 
 
 // ---------------------------
 void Graph::sumNodesInCluster(
-    Cluster* clust,
-    size_t &total )
+  Cluster* clust,
+  size_t& total)
 // ---------------------------
 {
-    for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
-    {
-        sumNodesInCluster(
-            clust->getChild(i),
-            total );
-    }
-    total += clust->getSizeNodes();
+  for (size_t i = 0; i < clust->getSizeChildren(); ++i)
+  {
+    sumNodesInCluster(
+      clust->getChild(i),
+      total);
+  }
+  total += clust->getSizeNodes();
 }
 
 
 // -------------------------------
 void Graph::getDescNodesInCluster(
-    const vector< size_t > &coord,
-    vector< Node* > &nodes )
+  const vector< size_t > &coord,
+  vector< Node* > &nodes)
 // -------------------------------
 {
-    Cluster* clst = NULL;
+  Cluster* clst = NULL;
 
-    // get cluster
-    clst = getCluster( coord );
+  // get cluster
+  clst = getCluster(coord);
 
-    // get descendant nodes
-    nodes.clear();
-    if ( clst != NULL )
-        getDescNodesInCluster( clst, nodes );
+  // get descendant nodes
+  nodes.clear();
+  if (clst != NULL)
+  {
+    getDescNodesInCluster(clst, nodes);
+  }
 
-    clst = NULL;
+  clst = NULL;
 }
 
 
 // -------------------------------
 void Graph::getDescNodesInCluster(
-    Cluster* clust,
-    vector< Node* > &nodes )
+  Cluster* clust,
+  vector< Node* > &nodes)
 // -------------------------------
 {
-    // call recursively on all child clusters
+  // call recursively on all child clusters
+  {
+    for (size_t i = 0; i < clust->getSizeChildren(); ++i)
     {
-    for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
-    {
-        getDescNodesInCluster(
-            clust->getChild(i),
-            nodes );
+      getDescNodesInCluster(
+        clust->getChild(i),
+        nodes);
     }
-    }
+  }
 
-    // add nodes
+  // add nodes
+  {
+    for (size_t i = 0; i < clust->getSizeNodes(); ++i)
     {
-    for ( size_t i = 0; i < clust->getSizeNodes(); ++i )
-        nodes.push_back( clust->getNode( i ) );
+      nodes.push_back(clust->getNode(i));
     }
+  }
 }
 
 
 // ---------------------------------------------------------
-size_t Graph::calcMaxNumCombns( const vector< size_t > &attrIdcs )
+size_t Graph::calcMaxNumCombns(const vector< size_t > &attrIdcs)
 // ---------------------------------------------------------
 {
-    size_t combinations     = 1;
-    Attribute* attribute = NULL;
-    size_t cardinality      = 0;
+  size_t combinations     = 1;
+  Attribute* attribute = NULL;
+  size_t cardinality      = 0;
 
-    for ( size_t i = 0; i < attrIdcs.size(); ++i )
+  for (size_t i = 0; i < attrIdcs.size(); ++i)
+  {
+    attribute   = getAttribute(attrIdcs[i]);
+    cardinality = attribute->getSizeCurValues();
+    if (cardinality > 0)
     {
-        attribute   = getAttribute( attrIdcs[i] );
-        cardinality = attribute->getSizeCurValues();
-        if ( cardinality > 0 )
-            combinations *= cardinality;
+      combinations *= cardinality;
     }
+  }
 
-    attribute = NULL;
-    return combinations;
+  attribute = NULL;
+  return combinations;
 }
 
 
@@ -1511,23 +1625,23 @@ size_t Graph::calcMaxNumCombns( const vector< size_t > &attrIdcs )
 void Graph::deleteAttributes()
 // ---------------------------
 {
-    for ( size_t i = 0; i < attributes.size(); ++i )
-    {
-        delete attributes[i];
-        attributes[i] = NULL;
-    }
-    attributes.clear();
+  for (size_t i = 0; i < attributes.size(); ++i)
+  {
+    delete attributes[i];
+    attributes[i] = NULL;
+  }
+  attributes.clear();
 }
 
 
 // ---------------------------
-void Graph::addNode( Node* n )
+void Graph::addNode(Node* n)
 // ---------------------------
 {
-    nodes.push_back( n );
+  nodes.push_back(n);
 
-    root->addNode( n );
-    n->setCluster( root );
+  root->addNode(n);
+  n->setCluster(root);
 }
 
 
@@ -1535,20 +1649,20 @@ void Graph::addNode( Node* n )
 void Graph::deleteNodes()
 // ----------------------
 {
-	for ( size_t i = 0; i < nodes.size(); ++i )
-    {
-		delete nodes[i];
-        nodes[i] = NULL;
-    }
-    nodes.clear();
+  for (size_t i = 0; i < nodes.size(); ++i)
+  {
+    delete nodes[i];
+    nodes[i] = NULL;
+  }
+  nodes.clear();
 }
 
 
 // ---------------------------
-void Graph::addEdge( Edge* e )
+void Graph::addEdge(Edge* e)
 // ---------------------------
 {
-    edges.push_back( e );
+  edges.push_back(e);
 }
 
 
@@ -1556,12 +1670,12 @@ void Graph::addEdge( Edge* e )
 void Graph::deleteEdges()
 // ----------------------
 {
-	for ( size_t i = 0; i < edges.size(); ++i )
-    {
-		delete edges[i];
-        edges[i] = NULL;
-    }
-    edges.clear();
+  for (size_t i = 0; i < edges.size(); ++i)
+  {
+    delete edges[i];
+    edges[i] = NULL;
+  }
+  edges.clear();
 }
 
 
@@ -1569,175 +1683,177 @@ void Graph::deleteEdges()
 void Graph::initRoot()
 // -------------------
 {
-    vector< size_t > rootCoord;
-    rootCoord.push_back( 0 );
+  vector< size_t > rootCoord;
+  rootCoord.push_back(0);
 
-    root = new Cluster( rootCoord );
+  root = new Cluster(rootCoord);
 
-    Bundle* bndl = new Bundle( 0 );
-    bundles.push_back( bndl );
-    bndl = NULL;
+  Bundle* bndl = new Bundle(0);
+  bundles.push_back(bndl);
+  bndl = NULL;
 }
 
 
 // --------------------------
 void Graph::clustNodesOnAttr(
-    Cluster* clust,
-    vector< size_t > attrIdcs,
-    size_t &progress )
+  Cluster* clust,
+  vector< size_t > attrIdcs,
+  size_t& progress)
 // --------------------------
 {
-    if ( attrIdcs.size() > 0 )
-    {
-        // cluster
-        clustClusterOnAttr(
-            clust,
-            attrIdcs[0] );
-
-        // update progress
-        if ( attrIdcs.size() == 1 )
-        {
-            progress += getAttribute( attrIdcs[0] )->getSizeCurValues();
-            mediator ->updateProgress( progress );
-        }
-
-        // remove first attribute
-        attrIdcs.erase( attrIdcs.begin() );
-
-        // repeat recursively on children
-        for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
-        {
-            clustNodesOnAttr(
-                clust->getChild( i ),
-                attrIdcs,
-                progress );
-        }
-    }
-}
-
-
-// ----------------------------
-void Graph::clustClusterOnAttr(
-    const vector< size_t > coord,
-    const size_t &attrIdx )
-// ----------------------------
-{
-    Cluster* clst = NULL;
-
-    // get cluster
-    clst = getCluster( coord );
-    // do clustering
+  if (attrIdcs.size() > 0)
+  {
+    // cluster
     clustClusterOnAttr(
-        clst,
-        attrIdx );
-    // update leaves
-    updateLeaves();
-    // update bundles
-    updateBundles();
+      clust,
+      attrIdcs[0]);
 
-    clst = NULL;
+    // update progress
+    if (attrIdcs.size() == 1)
+    {
+      progress += getAttribute(attrIdcs[0])->getSizeCurValues();
+      mediator ->updateProgress(progress);
+    }
+
+    // remove first attribute
+    attrIdcs.erase(attrIdcs.begin());
+
+    // repeat recursively on children
+    for (size_t i = 0; i < clust->getSizeChildren(); ++i)
+    {
+      clustNodesOnAttr(
+        clust->getChild(i),
+        attrIdcs,
+        progress);
+    }
+  }
 }
 
 
 // ----------------------------
 void Graph::clustClusterOnAttr(
-    Cluster* clust,
-    const size_t &attrIdx )
+  const vector< size_t > coord,
+  const size_t& attrIdx)
 // ----------------------------
 {
-    Attribute*         attr;
-    Node*              node;
-    vector< Cluster* > clstTmp;
-    vector< size_t >      clstCoordNew;
+  Cluster* clst = NULL;
 
-    // delete descendants & move up nodes
-    clearSubClusters( clust );
+  // get cluster
+  clst = getCluster(coord);
+  // do clustering
+  clustClusterOnAttr(
+    clst,
+    attrIdx);
+  // update leaves
+  updateLeaves();
+  // update bundles
+  updateBundles();
 
-    // get attribute
-    attr = getAttribute( attrIdx );
+  clst = NULL;
+}
 
-    // init temporary clusters
+
+// ----------------------------
+void Graph::clustClusterOnAttr(
+  Cluster* clust,
+  const size_t& attrIdx)
+// ----------------------------
+{
+  Attribute*         attr;
+  Node*              node;
+  vector< Cluster* > clstTmp;
+  vector< size_t >      clstCoordNew;
+
+  // delete descendants & move up nodes
+  clearSubClusters(clust);
+
+  // get attribute
+  attr = getAttribute(attrIdx);
+
+  // init temporary clusters
+  {
+    for (size_t i = 0; i < attr->getSizeCurValues(); ++i)
     {
-    for ( size_t i = 0; i < attr->getSizeCurValues(); ++i )
-        clstTmp.push_back( new Cluster() );
+      clstTmp.push_back(new Cluster());
     }
+  }
 
-    // do clustering & move nodes to new cluster
+  // do clustering & move nodes to new cluster
+  {
+    for (size_t i = 0; i < clust->getSizeNodes(); ++i)
     {
-    for ( size_t i = 0; i < clust->getSizeNodes(); ++i )
+      node = clust->getNode(i);
+
+      /*
+      clstIdxTmp = attr->mapToValue(
+          (int)node->getTupleVal(attrIdx) )->getIndex();
+      */
+      size_t clstIdxTmp = attr->mapToValue(
+                            node->getTupleVal(attrIdx))->getIndex();
+
+      clstTmp[clstIdxTmp]->addNode(node);
+      node->setCluster(clstTmp[clstIdxTmp]);
+    }
+  }
+  clust->clearNodes();
+
+  // update clust
+  {
+    for (size_t i = 0; i < clstTmp.size(); ++i)
     {
-        node = clust->getNode( i );
+      if (clstTmp[i]->getSizeNodes() > 0)
+      {
+        clust->getCoord(clstCoordNew);
+        clstCoordNew.push_back(clust->getSizeChildren());
 
-        /*
-        clstIdxTmp = attr->mapToValue(
-            (int)node->getTupleVal(attrIdx) )->getIndex();
-        */
-        size_t clstIdxTmp = attr->mapToValue(
-            node->getTupleVal(attrIdx) )->getIndex();
+        clstTmp[i]->setCoord(clstCoordNew);
+        clust->addChild(clstTmp[i]);
+        clstTmp[i]->setParent(clust);
 
-        clstTmp[clstIdxTmp]->addNode( node );
-        node->setCluster( clstTmp[clstIdxTmp] );
+        clstTmp[i]->setAttribute(attr);
+        clstTmp[i]->setAttrValIdx(i);
+      }
+      else
+      {
+        delete clstTmp[i];
+        clstTmp[i] = NULL;
+      }
     }
-    }
-    clust->clearNodes();
+  }
 
-    // update clust
-    {
-    for ( size_t i = 0; i < clstTmp.size(); ++i )
-    {
-        if ( clstTmp[i]->getSizeNodes() > 0 )
-        {
-            clust->getCoord( clstCoordNew );
-            clstCoordNew.push_back( clust->getSizeChildren() );
-
-            clstTmp[i]->setCoord( clstCoordNew );
-            clust->addChild( clstTmp[i] );
-            clstTmp[i]->setParent( clust );
-
-            clstTmp[i]->setAttribute( attr );
-            clstTmp[i]->setAttrValIdx( i );
-        }
-        else
-        {
-            delete clstTmp[i];
-            clstTmp[i] = NULL;
-        }
-    }
-    }
-
-    // free memory
-    attr = NULL;
-    node = NULL;
-    clstTmp.clear();
+  // free memory
+  attr = NULL;
+  node = NULL;
+  clstTmp.clear();
 }
 
 
 // -------------------------------------------
-void Graph::clearSubClusters( Cluster* clust )
+void Graph::clearSubClusters(Cluster* clust)
 // -------------------------------------------
 {
-    if ( clust != NULL )
+  if (clust != NULL)
+  {
+    for (size_t i = 0; i < clust->getSizeChildren(); ++i)
     {
-        for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
-        {
-            Cluster* child = clust->getChild(i);
+      Cluster* child = clust->getChild(i);
 
-            // clear child
-            clearSubClusters( child );
+      // clear child
+      clearSubClusters(child);
 
-            // move up nodes
-            for ( size_t j = 0; j < child->getSizeNodes(); ++j )
-            {
-                clust->addNode( child->getNode(j) );
-                child->getNode(j)->setCluster( clust );
-            }
+      // move up nodes
+      for (size_t j = 0; j < child->getSizeNodes(); ++j)
+      {
+        clust->addNode(child->getNode(j));
+        child->getNode(j)->setCluster(clust);
+      }
 
-            delete child;
-            child = NULL;
-        }
-
-        clust->clearChildren();
+      delete child;
+      child = NULL;
     }
+
+    clust->clearChildren();
+  }
 }
 
 
@@ -1745,40 +1861,42 @@ void Graph::clearSubClusters( Cluster* clust )
 void Graph::updateLeaves()
 // -----------------------
 {
-    // clear existing leaves
-    clearLeaves();
+  // clear existing leaves
+  clearLeaves();
 
-    // init new leaves
-    /*
-    vector< Cluster* > v;
-    v.push_back( root );
-    updateLeaves( v );
-    */
-    updateLeaves( root );
+  // init new leaves
+  /*
+  vector< Cluster* > v;
+  v.push_back( root );
+  updateLeaves( v );
+  */
+  updateLeaves(root);
 }
 
 
 // ---------------------------------------
-void Graph::updateLeaves( Cluster* clust )
+void Graph::updateLeaves(Cluster* clust)
 // ---------------------------------------
 {
-    if ( clust->getSizeChildren() == 0 )
-    {
-        // set index
-        clust->setIndex( leaves.size() );
+  if (clust->getSizeChildren() == 0)
+  {
+    // set index
+    clust->setIndex(leaves.size());
 
-        // update leaves
-        leaves.push_back( clust );
-    }
-    else
-    {
-        // reset index
-        clust->setIndex( NON_EXISTING );
+    // update leaves
+    leaves.push_back(clust);
+  }
+  else
+  {
+    // reset index
+    clust->setIndex(NON_EXISTING);
 
-        // update clusts
-        for ( size_t i = 0; i < clust->getSizeChildren(); ++i )
-            updateLeaves( clust->getChild( i ) );
+    // update clusts
+    for (size_t i = 0; i < clust->getSizeChildren(); ++i)
+    {
+      updateLeaves(clust->getChild(i));
     }
+  }
 }
 
 /*
@@ -1823,9 +1941,11 @@ void Graph::updateLeaves( vector< Cluster* > &clusts )
 void Graph::clearLeaves()
 // ----------------------
 {
-    for ( size_t i = 0; i < leaves.size(); ++i )
-        leaves[i] = NULL;
-    leaves.clear();
+  for (size_t i = 0; i < leaves.size(); ++i)
+  {
+    leaves[i] = NULL;
+  }
+  leaves.clear();
 }
 
 
@@ -1833,15 +1953,15 @@ void Graph::clearLeaves()
 void Graph::deleteClusters()
 // -------------------------
 {
-    // delete all descendants
-    clearSubClusters( root );
+  // delete all descendants
+  clearSubClusters(root);
 
-    // delete root
-    delete root;
-    root = NULL;
+  // delete root
+  delete root;
+  root = NULL;
 
-    // clean up leaves
-    clearLeaves();
+  // clean up leaves
+  clearLeaves();
 }
 
 
@@ -1849,218 +1969,234 @@ void Graph::deleteClusters()
 void Graph::printClusters()
 // ------------------------
 {
-    // clusters
-    vector< Cluster* > c;
-    c.push_back( root );
-    *mediator << "Clusters:\n";
-    printClusters( c );
+  // clusters
+  vector< Cluster* > c;
+  c.push_back(root);
+  *mediator << "Clusters:\n";
+  printClusters(c);
 
-    // leaves
-    Cluster* clst = NULL;
-    *mediator << "Leaves:\n";
+  // leaves
+  Cluster* clst = NULL;
+  *mediator << "Leaves:\n";
+  vector< size_t > coord;
+  {
+    for (size_t i = 0; i < leaves.size(); ++i)
+    {
+      clst = leaves[i];
+      coord.clear();
+      clst->getCoord(coord);
+
+      *mediator << "[";
+      {
+        for (size_t j = 0; j < coord.size(); ++j)
+        {
+          *mediator << coord[j];
+          *mediator << " ";
+        }
+      }
+      *mediator << "]";
+    }
+  }
+  *mediator << "\n";
+  clst = NULL;
+}
+
+
+// ----------------------------------------------------
+void Graph::printClusters(vector< Cluster* > &clusts)
+// ----------------------------------------------------
+{
+  if (clusts.size() > 0)
+  {
+    Cluster* c = clusts[0];
+    // update clusts
+    clusts.erase(clusts.begin());
+    {
+      for (size_t i = 0; i < c->getSizeChildren(); ++i)
+      {
+        clusts.push_back(c->getChild(i));
+      }
+    }
+
+    // print index
+    *mediator << c->getIndex();
+    *mediator << ") ";
+
+    // print coords
     vector< size_t > coord;
+    c->getCoord(coord);
+    *mediator << "[";
     {
-    for ( size_t i = 0; i < leaves.size(); ++i )
-    {
-        clst = leaves[i];
-        coord.clear();
-        clst->getCoord( coord );
+      for (size_t i = 0; i < coord.size(); ++i)
+      {
+        *mediator << coord[i];
+        *mediator << " ";
+      }
+    }
+    *mediator << "]";
 
-        *mediator << "[";
-        {
-        for ( size_t j = 0; j < coord.size(); ++j )
-        {
-            *mediator << coord[j];
-            *mediator << " ";
-        }
-        }
-        *mediator << "]";
+    // print number nodes
+    size_t sum = 0;
+    sumNodesInCluster(
+      c,
+      sum);
+    *mediator << " (";
+    *mediator << sum;
+    *mediator << ")";
+
+    // print attr info
+    *mediator << "AttrIdx(";
+    if (c->getAttribute() != NULL)
+    {
+      *mediator << c->getAttribute()->getIndex();
     }
+    else
+    {
+      *mediator << "NULL";
     }
+    *mediator << ") ";
+
+    *mediator << "AttrValIdx(";
+    *mediator << c->getAttrValIdx();
+    *mediator << ") ";
+
+    // line break
     *mediator << "\n";
-    clst = NULL;
+
+    c = NULL;
+
+    // print others recursively
+    printClusters(clusts);
+  }
 }
 
 
-// ----------------------------------------------------
-void Graph::printClusters( vector< Cluster* > &clusts )
-// ----------------------------------------------------
+// ---------------------------------------
+void Graph::updateBundles(size_t& progress)
+// ---------------------------------------
 {
-    if ( clusts.size() > 0 )
+  vector< vector< Bundle* > > temp;
+
+  // clear bundles
+  deleteBundles();
+
+  // init temp data struct
+  {
+    for (size_t i = 0; i < leaves.size(); ++i)
     {
-        Cluster* c = clusts[0];
-        // update clusts
-        clusts.erase( clusts.begin() );
+      vector< Bundle* > v;
+      temp.push_back(v);
+
+      for (size_t j = 0; j < leaves.size(); ++j)
+      {
+        temp[i].push_back(NULL);
+      }
+    }
+  }
+
+  // iterate over edges & update temp data struct
+  {
+    for (size_t i = 0; i < edges.size(); ++i)
+    {
+      size_t idxFr = edges[i]->getInNode()->getCluster()->getIndex();
+      size_t idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
+
+      if (temp[idxFr][idxTo] == NULL)
+      {
+        temp[idxFr][idxTo] = new Bundle();
+
+        // update bundle
+        temp[idxFr][idxTo]->setInCluster(edges[i]->getInNode()->getCluster());
+        temp[idxFr][idxTo]->setOutCluster(edges[i]->getOutNode()->getCluster());
+
+        // update clusters
+        edges[i]->getInNode()->getCluster()->addOutBundle(temp[idxFr][idxTo]);
+        edges[i]->getOutNode()->getCluster()->addInBundle(temp[idxFr][idxTo]);
+      }
+
+      temp[idxFr][idxTo]->addEdge(edges[i]);
+      edges[i]->setBundle(temp[idxFr][idxTo]);
+
+      // update progress
+      ++progress;
+      if (progress%PROGRESS_INTERV_HINT == 0)
+      {
+        mediator->updateProgress(progress);
+      }
+    }
+  }
+
+  // iterate over temp data struct & update bundles
+  int idxBdl = 0;
+  {
+    for (size_t i = 0; i < leaves.size(); ++i)
+    {
+      for (size_t j = 0; j < leaves.size(); ++j)
+      {
+        if (temp[i][j] != NULL)
         {
-        for ( size_t i = 0; i < c->getSizeChildren(); ++i )
-            clusts.push_back( c->getChild(i) );
+          temp[i][j]->setIndex(idxBdl);
+          bundles.push_back(temp[i][j]);
+
+          ++idxBdl;
+        }
+      }
+    }
+  }
+  temp.clear();
+
+  // iterate over bundles & update may or must
+  vector< string > labels;
+  Cluster* inClust;
+  Cluster* outClust;
+  Node*    node;
+  {
+    for (size_t i = 0; i < bundles.size(); ++i)
+    {
+      labels.clear();
+      bundles[i]->getLabels(labels);
+      inClust  = bundles[i]->getInCluster();
+      outClust = bundles[i]->getOutCluster();
+
+      for (size_t j = 0; j < labels.size(); ++j)
+      {
+        bool must = true;
+        for (size_t k = 0; k < inClust->getSizeNodes() && must == true; ++k)
+        {
+          node = inClust->getNode(k);
+          bool hasLbl = false;
+
+          for (size_t m = 0; m < node->getSizeOutEdges() && hasLbl != true; ++m)
+          {
+            if (node->getOutEdge(m)->getLabel() == labels[j] &&
+                node->getOutEdge(m)->getOutNode()->getCluster() == outClust)
+            {
+              hasLbl = true;
+            }
+          }
+
+          if (hasLbl == false)
+          {
+            must = false;
+          }
         }
 
-        // print index
-        *mediator << c->getIndex();
-        *mediator << ") ";
-
-        // print coords
-        vector< size_t > coord;
-        c->getCoord( coord );
-        *mediator << "[";
+        if (must == true)
         {
-        for ( size_t i = 0; i < coord.size(); ++i )
-        {
-            *mediator << coord[i];
-            *mediator << " ";
+          bundles[i]->updateLabel(labels[j], "MUST");
         }
-        }
-        *mediator << "]";
-
-        // print number nodes
-        size_t sum = 0;
-        sumNodesInCluster(
-            c,
-            sum );
-        *mediator << " (";
-        *mediator << sum;
-        *mediator << ")";
-
-        // print attr info
-        *mediator << "AttrIdx(";
-        if ( c->getAttribute() != NULL )
-            *mediator << c->getAttribute()->getIndex();
+        /*
+        // by default labels are may
         else
-            *mediator << "NULL";
-        *mediator << ") ";
-
-        *mediator << "AttrValIdx(";
-        *mediator << c->getAttrValIdx();
-        *mediator << ") ";
-
-        // line break
-        *mediator << "\n";
-
-        c = NULL;
-
-        // print others recursively
-        printClusters( clusts );
+            bundles[i]->updateLabel( labels[j], "MAY" );
+        */
+      }
     }
-}
+  }
 
-
-// ---------------------------------------
-void Graph::updateBundles( size_t &progress )
-// ---------------------------------------
-{
-    vector< vector< Bundle* > > temp;
-
-    // clear bundles
-    deleteBundles();
-
-    // init temp data struct
-    {
-    for ( size_t i = 0; i < leaves.size(); ++i )
-    {
-        vector< Bundle* > v;
-        temp.push_back( v );
-
-        for ( size_t j = 0; j < leaves.size(); ++j )
-            temp[i].push_back( NULL );
-    }
-    }
-
-    // iterate over edges & update temp data struct
-    {
-    for ( size_t i = 0; i < edges.size(); ++i )
-    {
-        size_t idxFr = edges[i]->getInNode()->getCluster()->getIndex();
-        size_t idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
-
-        if ( temp[idxFr][idxTo] == NULL )
-        {
-            temp[idxFr][idxTo] = new Bundle();
-
-            // update bundle
-            temp[idxFr][idxTo]->setInCluster( edges[i]->getInNode()->getCluster() );
-            temp[idxFr][idxTo]->setOutCluster( edges[i]->getOutNode()->getCluster() );
-
-            // update clusters
-            edges[i]->getInNode()->getCluster()->addOutBundle( temp[idxFr][idxTo] );
-            edges[i]->getOutNode()->getCluster()->addInBundle( temp[idxFr][idxTo] );
-        }
-
-        temp[idxFr][idxTo]->addEdge( edges[i] );
-        edges[i]->setBundle( temp[idxFr][idxTo] );
-
-        // update progress
-        ++progress;
-        if ( progress%PROGRESS_INTERV_HINT == 0 )
-            mediator->updateProgress( progress );
-    }
-    }
-
-    // iterate over temp data struct & update bundles
-    int idxBdl = 0;
-    {
-    for ( size_t i = 0; i < leaves.size(); ++i )
-    {
-        for ( size_t j = 0; j < leaves.size(); ++j )
-        {
-            if ( temp[i][j] != NULL )
-            {
-                temp[i][j]->setIndex( idxBdl );
-                bundles.push_back( temp[i][j] );
-
-                ++idxBdl;
-            }
-        }
-    }
-    }
-    temp.clear();
-
-    // iterate over bundles & update may or must
-    vector< string > labels;
-    Cluster* inClust;
-    Cluster* outClust;
-    Node*    node;
-    {
-    for ( size_t i = 0; i < bundles.size(); ++i )
-    {
-        labels.clear();
-        bundles[i]->getLabels( labels );
-        inClust  = bundles[i]->getInCluster();
-        outClust = bundles[i]->getOutCluster();
-
-        for ( size_t j = 0; j < labels.size(); ++j )
-        {
-            bool must = true;
-            for ( size_t k = 0; k < inClust->getSizeNodes() && must == true; ++k )
-            {
-                node = inClust->getNode( k );
-                bool hasLbl = false;
-
-                for ( size_t m = 0; m < node->getSizeOutEdges() && hasLbl != true; ++m )
-                {
-                    if ( node->getOutEdge( m )->getLabel() == labels[j] &&
-                         node->getOutEdge( m )->getOutNode()->getCluster() == outClust )
-                        hasLbl = true;
-                }
-
-                if ( hasLbl == false )
-                    must = false;
-            }
-
-            if ( must == true )
-                bundles[i]->updateLabel( labels[j], "MUST" );
-            /*
-            // by default labels are may
-            else
-                bundles[i]->updateLabel( labels[j], "MAY" );
-            */
-        }
-    }
-    }
-
-    inClust  = NULL;
-    outClust = NULL;
-    node     = NULL;
+  inClust  = NULL;
+  outClust = NULL;
+  node     = NULL;
 }
 
 
@@ -2068,66 +2204,68 @@ void Graph::updateBundles( size_t &progress )
 void Graph::updateBundles()
 // ------------------------
 {
-    vector< vector< Bundle* > > temp;
+  vector< vector< Bundle* > > temp;
 
-    // clear bundles
-    deleteBundles();
+  // clear bundles
+  deleteBundles();
 
-    // init temp data struct
+  // init temp data struct
+  {
+    for (size_t i = 0; i < leaves.size(); ++i)
     {
-    for ( size_t i = 0; i < leaves.size(); ++i )
-    {
-        vector< Bundle* > v;
-        temp.push_back( v );
+      vector< Bundle* > v;
+      temp.push_back(v);
 
-        for ( size_t j = 0; j < leaves.size(); ++j )
-            temp[i].push_back( NULL );
+      for (size_t j = 0; j < leaves.size(); ++j)
+      {
+        temp[i].push_back(NULL);
+      }
     }
+  }
+
+  // iterate over edges & update temp data struct
+  {
+    for (size_t i = 0; i < edges.size(); ++i)
+    {
+      size_t idxFr = edges[i]->getInNode()->getCluster()->getIndex();
+      size_t idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
+
+      if (temp[idxFr][idxTo] == NULL)
+      {
+        temp[idxFr][idxTo] = new Bundle();
+
+        // update bundle
+        temp[idxFr][idxTo]->setInCluster(edges[i]->getInNode()->getCluster());
+        temp[idxFr][idxTo]->setOutCluster(edges[i]->getOutNode()->getCluster());
+
+        // update clusters
+        edges[i]->getInNode()->getCluster()->addOutBundle(temp[idxFr][idxTo]);
+        edges[i]->getOutNode()->getCluster()->addInBundle(temp[idxFr][idxTo]);
+      }
+
+      temp[idxFr][idxTo]->addEdge(edges[i]);
     }
+  }
 
-    // iterate over edges & update temp data struct
+  // iterate over temp data struct & update bundles
+  int idxBdl = 0;
+  {
+    for (size_t i = 0; i < leaves.size(); ++i)
     {
-    for ( size_t i = 0; i < edges.size(); ++i )
-    {
-        size_t idxFr = edges[i]->getInNode()->getCluster()->getIndex();
-        size_t idxTo = edges[i]->getOutNode()->getCluster()->getIndex();
-
-        if ( temp[idxFr][idxTo] == NULL )
+      for (size_t j = 0; j < leaves.size(); ++j)
+      {
+        if (temp[i][j] != NULL)
         {
-            temp[idxFr][idxTo] = new Bundle();
+          temp[i][j]->setIndex(idxBdl);
+          bundles.push_back(temp[i][j]);
 
-            // update bundle
-            temp[idxFr][idxTo]->setInCluster( edges[i]->getInNode()->getCluster() );
-            temp[idxFr][idxTo]->setOutCluster( edges[i]->getOutNode()->getCluster() );
-
-            // update clusters
-            edges[i]->getInNode()->getCluster()->addOutBundle( temp[idxFr][idxTo] );
-            edges[i]->getOutNode()->getCluster()->addInBundle( temp[idxFr][idxTo] );
+          ++idxBdl;
         }
-
-        temp[idxFr][idxTo]->addEdge( edges[i] );
+      }
     }
-    }
+  }
 
-    // iterate over temp data struct & update bundles
-    int idxBdl = 0;
-    {
-    for ( size_t i = 0; i < leaves.size(); ++i )
-    {
-        for ( size_t j = 0; j < leaves.size(); ++j )
-        {
-            if ( temp[i][j] != NULL )
-            {
-                temp[i][j]->setIndex( idxBdl );
-                bundles.push_back( temp[i][j] );
-
-                ++idxBdl;
-            }
-        }
-    }
-    }
-
-    temp.clear();
+  temp.clear();
 }
 
 
@@ -2135,12 +2273,12 @@ void Graph::updateBundles()
 void Graph::deleteBundles()
 // ------------------------
 {
-	for ( size_t i = 0; i < bundles.size(); ++i )
-    {
-		delete bundles[i];
-        bundles[i] = NULL;
-    }
-    bundles.clear();
+  for (size_t i = 0; i < bundles.size(); ++i)
+  {
+    delete bundles[i];
+    bundles[i] = NULL;
+  }
+  bundles.clear();
 }
 
 
@@ -2148,18 +2286,18 @@ void Graph::deleteBundles()
 void Graph::printBundles()
 // -----------------------
 {
-    *mediator << "Bundles:\n";
-    for ( size_t i = 0; i < bundles.size(); ++i )
-    {
-        *mediator << bundles[i]->getIndex();
-        *mediator << ") ";
-        *mediator << bundles[i]->getInCluster()->getIndex();
-        *mediator << " -> ";
-        *mediator << bundles[i]->getOutCluster()->getIndex();
-        *mediator << " (";
-        *mediator << bundles[i]->getSizeEdges();
-        *mediator << ")\n";
-    }
+  *mediator << "Bundles:\n";
+  for (size_t i = 0; i < bundles.size(); ++i)
+  {
+    *mediator << bundles[i]->getIndex();
+    *mediator << ") ";
+    *mediator << bundles[i]->getInCluster()->getIndex();
+    *mediator << " -> ";
+    *mediator << bundles[i]->getOutCluster()->getIndex();
+    *mediator << " (";
+    *mediator << bundles[i]->getSizeEdges();
+    *mediator << ")\n";
+  }
 }
 
 

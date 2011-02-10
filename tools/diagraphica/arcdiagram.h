@@ -29,12 +29,12 @@
 
 class ArcDiagram : public wxEvtHandler, public Visualizer
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     ArcDiagram(
-        Mediator* m,
-        Graph* g,
-        GLCanvas* c );
+      Mediator* m,
+      Graph* g,
+      GLCanvas* c);
     virtual ~ArcDiagram();
 
     // -- get functions ---------------------------------------------
@@ -52,33 +52,33 @@ public:
     static ColorRGB getColorBundles();
     static double getTrspBundles();
 
-    void getAttrsTree( std::vector< size_t > &idcs );
+    void getAttrsTree(std::vector< size_t > &idcs);
 
     // -- set functions ---------------------------------------------
-    static void setColorClr( const ColorRGB &col );
-    static void setColorTxt( const ColorRGB &col );
-    static void setSizeTxt( const int &sze );
-    static void setIntervAnim( const int &itv );
-    static void setShowTree( const bool &shw );
-    static void setAnnotateTree( const bool &shw );
-    static void setColorMap( const int &colMap );
-    static void setShowBarTree( const bool &shw );
-    static void setMagnBarTree( const double &val );
-    static void setShowLeaves( const bool &shw );
-    static void setShowBundles( const bool &shw );
-    static void setColorBundles( const ColorRGB &col );
-    static void setTrspBundles( const double &trsp );
+    static void setColorClr(const ColorRGB& col);
+    static void setColorTxt(const ColorRGB& col);
+    static void setSizeTxt(const int& sze);
+    static void setIntervAnim(const int& itv);
+    static void setShowTree(const bool& shw);
+    static void setAnnotateTree(const bool& shw);
+    static void setColorMap(const int& colMap);
+    static void setShowBarTree(const bool& shw);
+    static void setMagnBarTree(const double& val);
+    static void setShowLeaves(const bool& shw);
+    static void setShowBundles(const bool& shw);
+    static void setColorBundles(const ColorRGB& col);
+    static void setTrspBundles(const double& trsp);
 
-    void setAttrsTree( const std::vector< size_t > idcs );
+    void setAttrsTree(const std::vector< size_t > idcs);
 
-    void setDiagram( Diagram *dgrm );
+    void setDiagram(Diagram* dgrm);
     void hideAllDiagrams();
 
     void markLeaf(
-        const size_t &leafIdx,
-        ColorRGB &col );
+      const size_t& leafIdx,
+      ColorRGB& col);
     void unmarkLeaves();
-    void markBundle( const size_t &idx );
+    void markBundle(const size_t& idx);
     void unmarkBundles();
 
     void handleSendDgrmSglToSiml();
@@ -88,44 +88,44 @@ public:
     void handleSendDgrmSetToExnr();
 
     // -- visualization functions  ----------------------------------
-    void visualize( const bool &inSelectMode );
-    void drawBundles( const bool &inSelectMode );
-    void drawLeaves( const bool &inSelectMode );
-    void drawTree( const bool &inSelectMode );
-    void drawTreeLvls( const bool &inSelectMode );
-    void drawBarTree( const bool &inSelectMode );
-    void drawMarkedLeaves( const bool &inSelectMode );
-    void drawDiagrams( const bool &inSelectMode );
+    void visualize(const bool& inSelectMode);
+    void drawBundles(const bool& inSelectMode);
+    void drawLeaves(const bool& inSelectMode);
+    void drawTree(const bool& inSelectMode);
+    void drawTreeLvls(const bool& inSelectMode);
+    void drawBarTree(const bool& inSelectMode);
+    void drawMarkedLeaves(const bool& inSelectMode);
+    void drawDiagrams(const bool& inSelectMode);
 
     // -- input event handlers --------------------------------------
     void handleMouseLftDownEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseLftUpEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseLftDClickEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseRgtDownEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseRgtUpEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
     void handleMouseMotionEvent(
-        const int &x,
-        const int &y );
+      const int& x,
+      const int& y);
 
     void updateDiagramData();
 
-protected:
+  protected:
     // -- utility drawing functions ---------------------------------
     void clear();
     void calcColor(
-        const size_t &iter,
-        const size_t &numr,
-        ColorRGB &col );
+      const size_t& iter,
+      const size_t& numr,
+      ColorRGB& col);
     void calcSettingsGeomBased();
     void calcSettingsDataBased();
 
@@ -133,14 +133,14 @@ protected:
     void calcSettingsBundles();
     void calcSettingsTree();
     void calcPositionsTree(
-        Cluster* c,
-        const size_t &maxLvl,
-        const double &itvHgt );
+      Cluster* c,
+      const size_t& maxLvl,
+      const double& itvHgt);
     void calcSettingsBarTree();
     void calcPositionsBarTree(
-        Cluster* c,
-        const double &yBot,
-        const double &height );
+      Cluster* c,
+      const double& yBot,
+      const double& height);
     void calcSettingsDiagram();
     void updateMarkBundles();
 
@@ -152,33 +152,33 @@ protected:
     void clearSettingsDiagram();
 
     // -- utility event handlers ------------------------------------
-    void onTimer( wxTimerEvent &e );
+    void onTimer(wxTimerEvent& e);
 
-    void handleHits( const std::vector< int > &ids );
+    void handleHits(const std::vector< int > &ids);
 
     void handleHoverCluster(
-        const size_t &i,
-        const size_t &j );
-    void handleHoverBundle( const size_t &bndlIdx );
+      const size_t& i,
+      const size_t& j);
+    void handleHoverBundle(const size_t& bndlIdx);
     void handleHoverBarTree(
-        const int &i,
-        const int &j );
+      const int& i,
+      const int& j);
 
-    void handleShowDiagram( const size_t &dgrmIdx );
+    void handleShowDiagram(const size_t& dgrmIdx);
     void handleDragDiagram();
-    void handleDragDiagram( const int &dgrmIdx );
-    void handleRwndDiagram( const size_t &dgrmIdx );
-    void handlePrevDiagram( const size_t &dgrmIdx );
-    void handlePlayDiagram( const size_t &dgrmIdx );
-    void handleNextDiagram( const size_t &dgrmIdx );
+    void handleDragDiagram(const int& dgrmIdx);
+    void handleRwndDiagram(const size_t& dgrmIdx);
+    void handlePrevDiagram(const size_t& dgrmIdx);
+    void handlePlayDiagram(const size_t& dgrmIdx);
+    void handleNextDiagram(const size_t& dgrmIdx);
 
-    void showDiagram( const size_t &dgrmIdx );
-    void hideDiagram( const size_t &dgrmIdx );
+    void showDiagram(const size_t& dgrmIdx);
+    void hideDiagram(const size_t& dgrmIdx);
 
     // -- hit detection ---------------------------------------------
     void processHits(
-        GLint hits,
-        GLuint buffer[] );
+      GLint hits,
+      GLuint buffer[]);
 
     // -- static variables ------------------------------------------
 
@@ -246,19 +246,19 @@ protected:
     // -- constants -------------------------------------------------
     enum
     {
-        ID_TIMER,
-        ID_CANVAS,
-        ID_TREE_NODE,
-        ID_LEAF_NODE,
-        ID_BAR_TREE,
-        ID_BUNDLES,
-        ID_DIAGRAM,
-        ID_DIAGRAM_CLSE,
-        ID_DIAGRAM_MORE,
-        ID_DIAGRAM_RWND,
-        ID_DIAGRAM_PREV,
-        ID_DIAGRAM_PLAY,
-        ID_DIAGRAM_NEXT
+      ID_TIMER,
+      ID_CANVAS,
+      ID_TREE_NODE,
+      ID_LEAF_NODE,
+      ID_BAR_TREE,
+      ID_BUNDLES,
+      ID_DIAGRAM,
+      ID_DIAGRAM_CLSE,
+      ID_DIAGRAM_MORE,
+      ID_DIAGRAM_RWND,
+      ID_DIAGRAM_PREV,
+      ID_DIAGRAM_PLAY,
+      ID_DIAGRAM_NEXT
     };
 
     static int MIN_RAD_HINT_PX; // radius cannot be smaller than this

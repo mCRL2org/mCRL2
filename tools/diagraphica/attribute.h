@@ -21,37 +21,37 @@
 
 class Attribute : public Colleague
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     Attribute(
-        Mediator* m,
-        const std::string &nam,
-        const std::string &typ,
-        const size_t &idx );
-    Attribute( const Attribute &attr );
+      Mediator* m,
+      const std::string& nam,
+      const std::string& typ,
+      const size_t& idx);
+    Attribute(const Attribute& attr);
     virtual ~Attribute();
 
     // -- set functions ---------------------------------------------
-    void setIndex( const size_t &idx );
-    void setName( const std::string &nme );
-    void setType( const std::string &typ );
+    void setIndex(const size_t& idx);
+    void setName(const std::string& nme);
+    void setType(const std::string& typ);
 
     virtual void clusterValues(
-        const std::vector< int > &indices,
-        const std::string &newValue );
+      const std::vector< int > &indices,
+      const std::string& newValue);
     virtual void moveValue(
-        const size_t &idxFr,
-        const size_t &idxTo );
+      const size_t& idxFr,
+      const size_t& idxTo);
 
     // functions overridden by AttrDiscr
     virtual void configValues(
-        const std::vector< std::string > &curDomain,
-        std::map< size_t, size_t  > &origToCurDomain );
+      const std::vector< std::string > &curDomain,
+      std::map< size_t, size_t  > &origToCurDomain);
 
     // functions overridden by AttrConti
-    virtual void classifyEqualIntervals( const size_t &number );
-    virtual void classifyQuantiles( const size_t &number );
-    virtual void classifyMeanStandardDeviation( const size_t &number );
+    virtual void classifyEqualIntervals(const size_t& number);
+    virtual void classifyQuantiles(const size_t& number);
+    virtual void classifyMeanStandardDeviation(const size_t& number);
     virtual void removeClassification();
 
     // -- get functions ---------------------------------------------
@@ -62,18 +62,18 @@ public:
 
     // functions overridden by AttrDiscr
     virtual size_t getSizeOrigValues();
-    virtual Value* getOrigValue( size_t idx );
-    virtual Value* getCurValue( size_t idx );
+    virtual Value* getOrigValue(size_t idx);
+    virtual Value* getCurValue(size_t idx);
 
     // functions overridden by AttrConti
     virtual double getLowerBound();
     virtual double getUpperBound();
     virtual void getRangeOrigValues(
-        double &lwrBnd,
-        double &uprBnd );
+      double& lwrBnd,
+      double& uprBnd);
 
     virtual size_t getSizeCurValues() = 0;
-    virtual Value* mapToValue( double key ) = 0;
+    virtual Value* mapToValue(double key) = 0;
 
     // -- clear functions -------------------------------------------
     virtual void clearClusters() = 0;
@@ -81,14 +81,14 @@ public:
 // -- public constants ------------------------------------------
     enum
     {
-        ATTR_TYPE_CONTI,
-        ATTR_TYPE_DISCR,
-        PART_METH_EQUAL_INTERVALS,
-        PART_METH_QUANTILES,
-        PART_METH_MEAN_STANDARD_DEVIATION
+      ATTR_TYPE_CONTI,
+      ATTR_TYPE_DISCR,
+      PART_METH_EQUAL_INTERVALS,
+      PART_METH_QUANTILES,
+      PART_METH_MEAN_STANDARD_DEVIATION
     };
 
-protected:
+  protected:
     // -- private utility functions ---------------------------------
     virtual void deleteCurValues() = 0;
     virtual void deleteCurMap() = 0;

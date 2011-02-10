@@ -12,18 +12,21 @@
 #ifndef MCRL2_CORE_DETAIL_LEXER_H
 #define MCRL2_CORE_DETAIL_LEXER_H
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace core {
+namespace core
+{
 
-namespace detail {
+namespace detail
+{
 
 // ATermAppl gsDataSpecEltsToSpec(ATermList SpecElts);
 // //Pre: SpecElts contains zero or more occurrences of sort, constructor,
 // //     operation and data equation specifications.
 // //Ret: data specification containing one sort, constructor, operation,
 // //     and data equation specification, in that order.
-// 
+//
 // ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts);
 // //Pre: SpecElts contains one process initialisation and zero or more
 // //     occurrences of sort, constructor, operation, data equation, action and
@@ -31,14 +34,14 @@ namespace detail {
 // //Ret: process specification containing one sort, constructor, operation,
 // //     data equation, action and process equation specification, and one
 // //     process initialisation, in that order.
-// 
+//
 // ATermAppl gsActionRenameEltsToActionRename(ATermList SpecElts);
 // //Pre: ActionRenameElts contains zero or more occurrences of
 // //     sort, constructor, operation, equation, action and action rename
 // //     rules.
 // //Ret: specification containing one sort, constructor, operation, equation,
 // //     action and action rename rules in that order.
-// 
+//
 // ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts);
 // //Pre: SpecElts contains one parameterised boolean initialisation and zero or
 // //     more occurrences of sort, constructor, operation, data equation, action
@@ -56,25 +59,33 @@ ATermAppl gsDataSpecEltsToSpec(ATermList SpecElts)
   ATermList MapDecls = ATmakeList0();
   ATermList DataEqnDecls = ATmakeList0();
   size_t n = ATgetLength(SpecElts);
-  for (size_t i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++)
+  {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
     ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
-    if (gsIsSortSpec(SpecElt)) {
+    if (gsIsSortSpec(SpecElt))
+    {
       SortDecls = ATconcat(SortDecls, SpecEltArg0);
-    } else if (gsIsConsSpec(SpecElt)) {
+    }
+    else if (gsIsConsSpec(SpecElt))
+    {
       ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
-    } else if (gsIsMapSpec(SpecElt)) {
+    }
+    else if (gsIsMapSpec(SpecElt))
+    {
       MapDecls = ATconcat(MapDecls, SpecEltArg0);
-    } else if (gsIsDataEqnSpec(SpecElt)) {
+    }
+    else if (gsIsDataEqnSpec(SpecElt))
+    {
       DataEqnDecls = ATconcat(DataEqnDecls, SpecEltArg0);
     }
   }
   Result = gsMakeDataSpec(
-    gsMakeSortSpec(SortDecls),
-    gsMakeConsSpec(ConsDecls),
-    gsMakeMapSpec(MapDecls),
-    gsMakeDataEqnSpec(DataEqnDecls)
-  );
+             gsMakeSortSpec(SortDecls),
+             gsMakeConsSpec(ConsDecls),
+             gsMakeMapSpec(MapDecls),
+             gsMakeDataEqnSpec(DataEqnDecls)
+           );
   //Uncomment the lines below to check if the parser stack size isn't too big
   //std::cerr << "SIZE_MAX:              " << SIZE_MAX << std::endl;
   //std::cerr << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
@@ -96,52 +107,73 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
   ATermList ProcEqnDecls = ATmakeList0();
   ATermAppl ProcInit = NULL;
   size_t n = ATgetLength(SpecElts);
-  for (size_t i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++)
+  {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
-    if (gsIsProcessInit(SpecElt)) {
-      if (ProcInit == NULL) {
+    if (gsIsProcessInit(SpecElt))
+    {
+      if (ProcInit == NULL)
+      {
         ProcInit = SpecElt;
-      } else {
+      }
+      else
+      {
         //ProcInit != NULL
         gsErrorMsg("parse error: multiple initialisations\n");
         return NULL;
       }
-    } else {
+    }
+    else
+    {
       ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
-      if (gsIsGlobVarSpec(SpecElt)) {
+      if (gsIsGlobVarSpec(SpecElt))
+      {
         GlobVars = ATconcat(GlobVars, SpecEltArg0);
-      } else if (gsIsSortSpec(SpecElt)) {
+      }
+      else if (gsIsSortSpec(SpecElt))
+      {
         SortDecls = ATconcat(SortDecls, SpecEltArg0);
-      } else if (gsIsConsSpec(SpecElt)) {
+      }
+      else if (gsIsConsSpec(SpecElt))
+      {
         ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
-      } else if (gsIsMapSpec(SpecElt)) {
+      }
+      else if (gsIsMapSpec(SpecElt))
+      {
         MapDecls = ATconcat(MapDecls, SpecEltArg0);
-      } else if (gsIsDataEqnSpec(SpecElt)) {
+      }
+      else if (gsIsDataEqnSpec(SpecElt))
+      {
         DataEqnDecls = ATconcat(DataEqnDecls, SpecEltArg0);
-      } else if (gsIsActSpec(SpecElt)) {
+      }
+      else if (gsIsActSpec(SpecElt))
+      {
         ActDecls = ATconcat(ActDecls, SpecEltArg0);
-      } else if (gsIsProcEqnSpec(SpecElt)) {
+      }
+      else if (gsIsProcEqnSpec(SpecElt))
+      {
         ProcEqnDecls = ATconcat(ProcEqnDecls, SpecEltArg0);
       }
     }
   }
   //check whether an initialisation is present
-  if (ProcInit == NULL) {
+  if (ProcInit == NULL)
+  {
     gsErrorMsg("parse error: missing initialisation\n");
     return NULL;
   }
   Result = gsMakeProcSpec(
-    gsMakeDataSpec(
-      gsMakeSortSpec(SortDecls),
-      gsMakeConsSpec(ConsDecls),
-      gsMakeMapSpec(MapDecls),
-      gsMakeDataEqnSpec(DataEqnDecls)
-    ),
-    gsMakeActSpec(ActDecls),
-    gsMakeGlobVarSpec(GlobVars),
-    gsMakeProcEqnSpec(ProcEqnDecls),
-    ProcInit
-  );
+             gsMakeDataSpec(
+               gsMakeSortSpec(SortDecls),
+               gsMakeConsSpec(ConsDecls),
+               gsMakeMapSpec(MapDecls),
+               gsMakeDataEqnSpec(DataEqnDecls)
+             ),
+             gsMakeActSpec(ActDecls),
+             gsMakeGlobVarSpec(GlobVars),
+             gsMakeProcEqnSpec(ProcEqnDecls),
+             ProcInit
+           );
   //Uncomment the lines below to check if the parser stack size isn't too big
   //std::cerr << "SIZE_MAX:              " << SIZE_MAX << std::endl;
   //std::cerr << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
@@ -162,60 +194,83 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
   ATermAppl PBEqnSpec = NULL;
   ATermAppl PBInit = NULL;
   size_t n = ATgetLength(SpecElts);
-  for (size_t i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++)
+  {
     ATermAppl SpecElt = ATAelementAt(SpecElts, i);
-    if (gsIsPBEqnSpec(SpecElt)) {
-      if (PBEqnSpec == NULL) {
+    if (gsIsPBEqnSpec(SpecElt))
+    {
+      if (PBEqnSpec == NULL)
+      {
         PBEqnSpec = SpecElt;
-      } else {
+      }
+      else
+      {
         //PBEqnSpec != NULL
         gsErrorMsg("parse error: multiple parameterised boolean equation specifications\n");
         return NULL;
       }
-    } else if (gsIsPBInit(SpecElt)) {
-      if (PBInit == NULL) {
+    }
+    else if (gsIsPBInit(SpecElt))
+    {
+      if (PBInit == NULL)
+      {
         PBInit = SpecElt;
-      } else {
+      }
+      else
+      {
         //PBInit != NULL
         gsErrorMsg("parse error: multiple initialisations\n");
         return NULL;
       }
-    } else {
+    }
+    else
+    {
       ATermList SpecEltArg0 = ATLgetArgument(SpecElt, 0);
-      if (gsIsGlobVarSpec(SpecElt)) {
+      if (gsIsGlobVarSpec(SpecElt))
+      {
         GlobVars = ATconcat(GlobVars, SpecEltArg0);
-      } else if (gsIsSortSpec(SpecElt)) {
+      }
+      else if (gsIsSortSpec(SpecElt))
+      {
         SortDecls = ATconcat(SortDecls, SpecEltArg0);
-      } else if (gsIsConsSpec(SpecElt)) {
+      }
+      else if (gsIsConsSpec(SpecElt))
+      {
         ConsDecls = ATconcat(ConsDecls, SpecEltArg0);
-      } else if (gsIsMapSpec(SpecElt)) {
+      }
+      else if (gsIsMapSpec(SpecElt))
+      {
         MapDecls = ATconcat(MapDecls, SpecEltArg0);
-      } else if (gsIsDataEqnSpec(SpecElt)) {
+      }
+      else if (gsIsDataEqnSpec(SpecElt))
+      {
         DataEqnDecls = ATconcat(DataEqnDecls, SpecEltArg0);
       }
     }
   }
   //check whether a parameterised boolean equation specification is present
-  if (PBEqnSpec == NULL) {
+  if (PBEqnSpec == NULL)
+  {
     gsErrorMsg("parse error: missing parameterised boolean equation specification\n");
     return NULL;
   }
   //check whether an initialisation is present
-  if (PBInit == NULL) {
+  if (PBInit == NULL)
+  {
     gsErrorMsg("parse error: missing initialisation\n");
     return NULL;
   }
   Result = gsMakePBES(
-    gsMakeDataSpec(
-      gsMakeSortSpec(SortDecls),
-      gsMakeConsSpec(ConsDecls),
-      gsMakeMapSpec(MapDecls),
-      gsMakeDataEqnSpec(DataEqnDecls)
-    ),
-    gsMakeGlobVarSpec(GlobVars),
-    PBEqnSpec,
-    PBInit
-  );
+             gsMakeDataSpec(
+               gsMakeSortSpec(SortDecls),
+               gsMakeConsSpec(ConsDecls),
+               gsMakeMapSpec(MapDecls),
+               gsMakeDataEqnSpec(DataEqnDecls)
+             ),
+             gsMakeGlobVarSpec(GlobVars),
+             PBEqnSpec,
+             PBInit
+           );
   return Result;
 }
 
@@ -230,36 +285,50 @@ ATermAppl gsActionRenameEltsToActionRename(ATermList ActionRenameElts)
   ATermList ActDecls = ATmakeList0();
   ATermList ActionRenameRules = ATmakeList0();
   size_t n = ATgetLength(ActionRenameElts);
-  for (size_t i = 0; i < n; i++) {
+  for (size_t i = 0; i < n; i++)
+  {
     ATermAppl ActionRenameElt = ATAelementAt(ActionRenameElts, i);
     ATermList ActionRenameEltArg0 = ATLgetArgument(ActionRenameElt, 0);
-    if (gsIsSortSpec(ActionRenameElt)) {
+    if (gsIsSortSpec(ActionRenameElt))
+    {
       SortDecls = ATconcat(SortDecls, ActionRenameEltArg0);
-    } else if (gsIsConsSpec(ActionRenameElt)) {
+    }
+    else if (gsIsConsSpec(ActionRenameElt))
+    {
       ConsDecls = ATconcat(ConsDecls, ActionRenameEltArg0);
-    } else if (gsIsMapSpec(ActionRenameElt)) {
+    }
+    else if (gsIsMapSpec(ActionRenameElt))
+    {
       MapDecls = ATconcat(MapDecls, ActionRenameEltArg0);
-    } else if (gsIsDataEqnSpec(ActionRenameElt)) {
+    }
+    else if (gsIsDataEqnSpec(ActionRenameElt))
+    {
       DataEqnDecls = ATconcat(DataEqnDecls, ActionRenameEltArg0);
-    } else if (gsIsActSpec(ActionRenameElt)) {
+    }
+    else if (gsIsActSpec(ActionRenameElt))
+    {
       ActDecls = ATconcat(ActDecls, ActionRenameEltArg0);
-    } else if (gsIsActionRenameRules(ActionRenameElt)) {
+    }
+    else if (gsIsActionRenameRules(ActionRenameElt))
+    {
       ActionRenameRules = ATconcat(ActionRenameRules, ActionRenameEltArg0);
-    } else {
+    }
+    else
+    {
       assert(false);
     }
   }
 
   Result = gsMakeActionRenameSpec(
-    gsMakeDataSpec(
-      gsMakeSortSpec(SortDecls),
-      gsMakeConsSpec(ConsDecls),
-      gsMakeMapSpec(MapDecls),
-      gsMakeDataEqnSpec(DataEqnDecls)
-    ),
-    gsMakeActSpec(ActDecls),
-    gsMakeActionRenameRules(ActionRenameRules)
-  );
+             gsMakeDataSpec(
+               gsMakeSortSpec(SortDecls),
+               gsMakeConsSpec(ConsDecls),
+               gsMakeMapSpec(MapDecls),
+               gsMakeDataEqnSpec(DataEqnDecls)
+             ),
+             gsMakeActSpec(ActDecls),
+             gsMakeActionRenameRules(ActionRenameRules)
+           );
   return Result;
 }
 

@@ -25,42 +25,43 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #include "huffman.h"
 
 
-typedef struct {
-   BitStream *bs;
-   HFtree tree;
-   HTable *indices, deltas;
-   long last, preLast;
-} CompressedStream;
+  typedef struct
+  {
+    BitStream* bs;
+    HFtree tree;
+    HTable* indices, deltas;
+    long last, preLast;
+  } CompressedStream;
 
 
 
-CompressedStream *CSinit(HTable *, BitStream *, int);
-void CSfree(CompressedStream *);
-int   CSreadATerm(CompressedStream *, ATerm *);
-int   CSreadIndex(CompressedStream *, ATerm *);
-int   CSureadATerm(CompressedStream *, ATerm *);
-int   CSreadString(CompressedStream *, char **);
-int   CSureadString(CompressedStream *, char **);
-int CSreadInt(CompressedStream *, long *);
-int CSureadInt(CompressedStream *, long *);
-int   CSwriteATerm(CompressedStream *, ATerm);
-int   CSwriteIndex(CompressedStream *, ATerm);
-int   CSuwriteATerm(CompressedStream *, ATerm);
-int   CSwriteString(CompressedStream *, char *);
-int   CSuwriteString(CompressedStream *, char *);
-int   CSwriteInt(CompressedStream *, long);
-int   CSuwriteInt(CompressedStream *, long);
-void  CSflush(CompressedStream *);
-int  CSseek(CompressedStream *, long, int);
-long CStell(CompressedStream *);
+  CompressedStream* CSinit(HTable*, BitStream*, int);
+  void CSfree(CompressedStream*);
+  int   CSreadATerm(CompressedStream*, ATerm*);
+  int   CSreadIndex(CompressedStream*, ATerm*);
+  int   CSureadATerm(CompressedStream*, ATerm*);
+  int   CSreadString(CompressedStream*, char**);
+  int   CSureadString(CompressedStream*, char**);
+  int CSreadInt(CompressedStream*, long*);
+  int CSureadInt(CompressedStream*, long*);
+  int   CSwriteATerm(CompressedStream*, ATerm);
+  int   CSwriteIndex(CompressedStream*, ATerm);
+  int   CSuwriteATerm(CompressedStream*, ATerm);
+  int   CSwriteString(CompressedStream*, char*);
+  int   CSuwriteString(CompressedStream*, char*);
+  int   CSwriteInt(CompressedStream*, long);
+  int   CSuwriteInt(CompressedStream*, long);
+  void  CSflush(CompressedStream*);
+  int  CSseek(CompressedStream*, long, int);
+  long CStell(CompressedStream*);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif

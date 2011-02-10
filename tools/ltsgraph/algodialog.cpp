@@ -27,9 +27,9 @@ END_EVENT_TABLE()
 
 AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
   : wxPanel(parent, wxID_ANY, wxDefaultPosition,
-             wxDefaultSize
-             //,wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER
-             )
+            wxDefaultSize
+            //,wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER
+           )
 
 {
   app = owner;
@@ -45,8 +45,8 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
   if (nrAlgos > 1)
   {
     wxNotebook* nb = new wxNotebook(
-                          panel_optimize, wxID_ANY, wxDefaultPosition,
-                          wxDefaultSize, wxNB_TOP);
+      panel_optimize, wxID_ANY, wxDefaultPosition,
+      wxDefaultSize, wxNB_TOP);
 
     for (size_t i = 0; i < nrAlgos; ++i)
     {
@@ -72,7 +72,7 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
     innerSizer1->Add(algoWindow, 0, wxEXPAND|wxALL, 5);
   }
 
-  sizer->Add( panel_optimize, 0, wxEXPAND|wxALL, 5);
+  sizer->Add(panel_optimize, 0, wxEXPAND|wxALL, 5);
 
   /* Curves */
 
@@ -86,10 +86,10 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
   radiusSizer->AddGrowableCol(0);
 
   wxSpinCtrl* radiusControl = new wxSpinCtrl(this, myID_RADIUS_SPIN,
-    wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 20, 10);
+      wxEmptyString, wxDefaultPosition, wxDefaultSize, wxSP_ARROW_KEYS, 1, 20, 10);
 
   radiusSizer->Add(new wxStaticText(this, wxID_ANY, wxT("State radius")), 0,
-             lflags, 4);
+                   lflags, 4);
 
   radiusSizer->Add(radiusControl, 0, rflags, 3);
 
@@ -99,25 +99,25 @@ AlgoDialog::AlgoDialog(LTSGraph* owner, wxWindow* parent)
 
   wxFlexGridSizer* colourSizer = new wxFlexGridSizer(0, 2, 0, 0);
   colourSizer->Add(new wxStaticText(this, wxID_ANY, wxT("Brush colour")), 0,
-              lflags, 4);
+                   lflags, 4);
 
   wxColourPickerCtrl* colourControl = new wxColourPickerCtrl(this, myID_COLOUR,
-  *wxRED);
+      *wxRED);
   colourSizer->Add(colourControl, 0, rflags, 3);
 
   settingsSizer->Add(colourSizer);
   wxCheckBox* showTransLabels = new wxCheckBox(this, myID_TRANS_CHECK,
-    wxT("Show transition labels"));
+      wxT("Show transition labels"));
   showTransLabels->SetValue(true);
   wxCheckBox* showStateLabels = new wxCheckBox(this, myID_STATE_CHECK,
-    wxT("Show state labels"));
+      wxT("Show state labels"));
   showStateLabels->SetValue(true);
 
   settingsSizer->Add(showTransLabels);
   settingsSizer->Add(showStateLabels);
 
   wxCheckBox* allowCurves = new wxCheckBox(this, myID_CURVES_CHECK,
-    wxT("Edit transition curves"));
+      wxT("Edit transition curves"));
 
   settingsSizer->Add(allowCurves);
 
@@ -138,11 +138,13 @@ void AlgoDialog::onCurves(wxCommandEvent& evt)
   app->setCurves(evt.IsChecked());
 }
 
-void AlgoDialog::onTransLabels(wxCommandEvent& evt) {
+void AlgoDialog::onTransLabels(wxCommandEvent& evt)
+{
   app->setTransLabels(evt.IsChecked());
 }
 
-void AlgoDialog::onStateLabels(wxCommandEvent& evt) {
+void AlgoDialog::onStateLabels(wxCommandEvent& evt)
+{
   app->setStateLabels(evt.IsChecked());
 }
 

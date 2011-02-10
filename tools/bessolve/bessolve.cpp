@@ -35,7 +35,7 @@ typedef enum { gauss, spm } solution_strategy_t;
 
 std::string solution_strategy_to_string(const solution_strategy_t s)
 {
-  switch(s)
+  switch (s)
   {
     case gauss:
       return "gauss";
@@ -59,10 +59,10 @@ class bessolve_tool: public input_output_tool
   public:
     bessolve_tool()
       : super(NAME, AUTHOR,
-          "solve a BES",
-          "Solve the BES in INFILE. If INFILE is not present, stdin is used."
-        ),
-        strategy(gauss)
+              "solve a BES",
+              "Solve the BES in INFILE. If INFILE is not present, stdin is used."
+             ),
+      strategy(gauss)
     {}
 
     bool run()
@@ -71,15 +71,15 @@ class bessolve_tool: public input_output_tool
       bes.load(input_filename());
 
       gsVerboseMsg("solving BES in %s using %s\n",
-        input_filename().empty()?"standard input":input_filename().c_str(),
-        solution_strategy_to_string(strategy).c_str());
+                   input_filename().empty()?"standard input":input_filename().c_str(),
+                   solution_strategy_to_string(strategy).c_str());
 
       unsigned int log_level = 0;
-      if(core::gsVerbose)
+      if (core::gsVerbose)
       {
         log_level = 1;
       }
-      if(core::gsDebug)
+      if (core::gsDebug)
       {
         log_level = 2;
       }
@@ -87,7 +87,7 @@ class bessolve_tool: public input_output_tool
       bool result = false;
 
       timer().start("solving");
-      switch(strategy)
+      switch (strategy)
       {
         case gauss:
           result = gauss_elimination(bes, log_level);
@@ -113,20 +113,23 @@ class bessolve_tool: public input_output_tool
     {
       input_output_tool::add_options(desc);
       desc.add_option("strategy", make_mandatory_argument("STRATEGY"),
-        "solve the BES using the specified STRATEGY:\n"
-        "  'gauss' for Gauss elimination (default),\n"
-        "  'spm' for Small Progress Measures,\n", 's');
+                      "solve the BES using the specified STRATEGY:\n"
+                      "  'gauss' for Gauss elimination (default),\n"
+                      "  'spm' for Small Progress Measures,\n", 's');
     }
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      if (parser.options.count("strategy")) {
+      if (parser.options.count("strategy"))
+      {
         std::string str_strategy(parser.option_argument("strategy"));
-        if (str_strategy == "gauss") {
+        if (str_strategy == "gauss")
+        {
           strategy = gauss;
         }
-        else if (str_strategy == "spm") {
+        else if (str_strategy == "spm")
+        {
           strategy = spm;
         }
         else
@@ -137,17 +140,19 @@ class bessolve_tool: public input_output_tool
     }
 };
 
-class bessolve_gui_tool: public mcrl2_gui_tool<bessolve_tool> {
-public:
-	bessolve_gui_tool() {
+class bessolve_gui_tool: public mcrl2_gui_tool<bessolve_tool>
+{
+  public:
+    bessolve_gui_tool()
+    {
 
-		std::vector<std::string> values;
+      std::vector<std::string> values;
 
-		values.clear();
-		values.push_back("gauss");
-		values.push_back("spm");
-		m_gui_options["strategy"] = create_radiobox_widget(values);
-	}
+      values.clear();
+      values.push_back("gauss");
+      values.push_back("spm");
+      m_gui_options["strategy"] = create_radiobox_widget(values);
+    }
 };
 
 int main(int argc, char* argv[])

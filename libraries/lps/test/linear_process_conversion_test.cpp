@@ -41,7 +41,7 @@ const std::string SPEC3 =
   "init X;                            \n"
   ;
 
-const std::string ABS_SPEC_LINEARIZED = 
+const std::string ABS_SPEC_LINEARIZED =
 //  "sort D = struct d1 | d2;                                                                                                     \n"
 //  "     Error = struct e;                                                                                                       \n"
 //  "                                                                                                                             \n"
@@ -168,7 +168,7 @@ void test_process(std::string text)
       specification spec = visitor.convert(pspec);
       BOOST_CHECK(false); // not supposed to arrive here
     }
-    catch(...)
+    catch (...)
     {
       // skip
     }

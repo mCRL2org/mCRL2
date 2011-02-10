@@ -44,7 +44,7 @@ const float ClusterStatePositioner::MIN_DELTA_SLOT = 0.22f;
 class NodeClusterStatePositioner: public ClusterStatePositioner
 {
   public:
-    NodeClusterStatePositioner(Cluster *c):
+    NodeClusterStatePositioner(Cluster* c):
       ClusterStatePositioner(c), slot_rtree(NULL)
     { }
 
@@ -63,7 +63,7 @@ class NodeClusterStatePositioner: public ClusterStatePositioner
 class LeafClusterStatePositioner: public ClusterStatePositioner
 {
   public:
-    LeafClusterStatePositioner(Cluster *c):
+    LeafClusterStatePositioner(Cluster* c):
       ClusterStatePositioner(c)
     { }
 
@@ -94,7 +94,7 @@ ClusterStatePositioner::ClusterStatePositioner(Cluster* c):
   for (int ring = 0; ring < num_rings; ++ring)
   {
     int num_slots = static_cast<int>(std::floor(2.0f * MathUtils::PI * ring * delta_ring /
-        MIN_DELTA_SLOT));
+                                     MIN_DELTA_SLOT));
     num_ring_slots[ring] = (num_slots > 1) ? num_slots : 1;
   }
 }
@@ -148,18 +148,18 @@ Vector2D NodeClusterStatePositioner::sumSuccessorStateVectors(State* state)
         if (!successor->isCentered())
         {
           sum_vector += Vector2D::fromPolar(successor->getPositionAngle(),
-              successor->getPositionRadius());
+                                            successor->getPositionRadius());
         }
       }
       else
       {
         sum_vector += Vector2D::fromPolar(
-            successor->getCluster()->getPosition(), cluster->getBaseRadius());
+                        successor->getCluster()->getPosition(), cluster->getBaseRadius());
         if (!successor->isCentered())
         {
           sum_vector += Vector2D::fromPolar(successor->getPositionAngle() +
-              successor->getCluster()->getPosition(),
-              successor->getPositionRadius());
+                                            successor->getCluster()->getPosition(),
+                                            successor->getPositionRadius());
         }
       }
     }
@@ -233,9 +233,9 @@ void LeafClusterStatePositioner::computeNumRingStates()
     else
     {
       float rel_slots = static_cast<float>(num_ring_slots[ring]) /
-        static_cast<float>(total_slots);
+                        static_cast<float>(total_slots);
       int num_states = MathUtils::round_to_int(cluster->getNumStates() *
-          rel_slots);
+                       rel_slots);
       num_ring_states[ring] = num_states;
       todo_states -= num_states;
     }
@@ -243,7 +243,7 @@ void LeafClusterStatePositioner::computeNumRingStates()
 }
 
 
-SinglePassStatePositioner::SinglePassStatePositioner(LTS *l)
+SinglePassStatePositioner::SinglePassStatePositioner(LTS* l)
   : StatePositioner(l)
 {
 }
@@ -255,12 +255,12 @@ SinglePassStatePositioner::~SinglePassStatePositioner()
 void SinglePassStatePositioner::positionStates()
 {
   for (Reverse_cluster_iterator ci = lts->getReverseClusterIterator();
-      !ci.is_end(); ++ci)
+       !ci.is_end(); ++ci)
   {
     Cluster* cluster = *ci;
     ClusterStatePositioner* cs_positioner;
     if (cluster->getNumDescendants() == 0 || (cluster->getNumDescendants() == 1
-          && cluster->getDescendant(0)->getNumStates() == 1))
+        && cluster->getDescendant(0)->getNumStates() == 1))
     {
       cs_positioner = new LeafClusterStatePositioner(cluster);
     }

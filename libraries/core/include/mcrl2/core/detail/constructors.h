@@ -14,11 +14,14 @@
 
 #include "mcrl2/core/detail/struct_core.h" // gsString2ATermAppl
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace core {
+namespace core
+{
 
-namespace detail {
+namespace detail
+{
 
 // String
 inline

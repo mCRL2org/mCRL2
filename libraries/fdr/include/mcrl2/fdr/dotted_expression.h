@@ -13,10 +13,12 @@
 #define MCRL2_FDR_DOTTED_EXPRESSION_H
 
 #include "mcrl2/fdr/term_include_files.h"
-                                      
-namespace mcrl2 {
 
-namespace fdr {
+namespace mcrl2
+{
+
+namespace fdr
+{
 
 class expression;
 
@@ -67,14 +69,14 @@ class dot: public dotted_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a dot expression
-    /// \param t A term
-    /// \return True if it is a dot expression
-    inline
-    bool is_dot(const dotted_expression& t)
-    {
-      return fdr::detail::gsIsDot(t);
-    }
+/// \brief Test for a dot expression
+/// \param t A term
+/// \return True if it is a dot expression
+inline
+bool is_dot(const dotted_expression& t)
+{
+  return fdr::detail::gsIsDot(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

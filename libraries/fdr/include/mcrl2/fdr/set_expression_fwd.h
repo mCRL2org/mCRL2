@@ -15,9 +15,11 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 class set_expression;
 typedef atermpp::term_list<set_expression> set_expression_list;

@@ -47,8 +47,8 @@ int test_main(int argc, char* argv[])
       "                                                                                 \n"
       "init P(1);                                                                       \n"
       ;
-    
- 
+
+
     specification s0 = parse_linear_process_specification(case_1);
     variable_list p0 = s0.process().process_parameters();
 
@@ -60,21 +60,21 @@ int test_main(int argc, char* argv[])
       std::clog << "expected 1 process parameter" << std::endl;
       std::clog << "encountered " << p0.size() << "process parameters" << std::endl;
     }
-    BOOST_CHECK( p0.size() == 1 );
- 
+    BOOST_CHECK(p0.size() == 1);
+
     std::string t0 = pp(p0.front().sort());
-    if (t0.compare("Pos") != 0 )
+    if (t0.compare("Pos") != 0)
     {
       std::clog << "--- failed test ---" << std::endl;
       std::clog << case_1 << std::endl;
       std::clog << "expected process parameter to be of type Pos" << std::endl;
       std::clog << "encountered process parameter of type " << p0.front().sort().to_string() << std::endl;
     }
-    BOOST_CHECK( t0.compare("Pos") == 0 );
+    BOOST_CHECK(t0.compare("Pos") == 0);
 
     /* Return */
-    lpsparunfold lpsparunfold( s0 );
-    specification s1 = lpsparunfold.algorithm( 0 );
+    lpsparunfold lpsparunfold(s0);
+    specification s1 = lpsparunfold.algorithm(0);
     variable_list p1 = s1.process().process_parameters();
     if (p1.size() != 3)
     {
@@ -84,28 +84,28 @@ int test_main(int argc, char* argv[])
       std::clog << "computed " << p1.size() << " process parameters" << std::endl;
     }
 
-    for(variable_list::iterator i = p1.begin(); i != p1.end(); ++i )
+    for (variable_list::iterator i = p1.begin(); i != p1.end(); ++i)
     {
-      if( std::distance( p1.begin(), i ) == 1 && pp(i->sort()).compare("Bool") != 0 )
+      if (std::distance(p1.begin(), i) == 1 && pp(i->sort()).compare("Bool") != 0)
       {
         std::clog << "--- failed test ---" << std::endl;
         std::clog << pp(s1) << std::endl;
         std::clog << "expected 2nd process parameter to be of type Bool" << std::endl;
         std::clog << "computed process parameter of type "  << pp(i->sort()) << std::endl;
       }
-      BOOST_CHECK( !( std::distance( p1.begin(), i ) == 1 && pp(i->sort()).compare("Bool") != 0 ) );
+      BOOST_CHECK(!(std::distance(p1.begin(), i) == 1 && pp(i->sort()).compare("Bool") != 0));
 
-      if( std::distance( p1.begin(), i ) == 2 && pp(i->sort()).compare("Pos") != 0 )
+      if (std::distance(p1.begin(), i) == 2 && pp(i->sort()).compare("Pos") != 0)
       {
         std::clog << "--- failed test ---" << std::endl;
         std::clog << pp(s1) << std::endl;
         std::clog << "expected 3th process parameter to be of type Pos " << std::endl;
         std::clog << "computed process parameter of type "  << pp(i->sort()) << std::endl;
       }
-      BOOST_CHECK( !( std::distance( p1.begin(), i ) == 2 && pp(i->sort()).compare("Pos") != 0 ) );
+      BOOST_CHECK(!(std::distance(p1.begin(), i) == 2 && pp(i->sort()).compare("Pos") != 0));
     }
   }
-  
+
   return 0;
 }
 

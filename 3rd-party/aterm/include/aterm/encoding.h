@@ -11,26 +11,26 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-/*
- 32-bit:
-  
- |---------------------------------|
- | info|arity| type|quoted|mark|age|
- |---------------------------------|
-  31 10 9 8 7 6 5 4   3     2   1 0
-  
- 64-bit:
+  /*
+   32-bit:
 
- |------------------------------------|
- | info|  |arity| type|quoted|mark|age|
- |------------------------------------|
-  63 34 15 14  7 6 5 4   3     2   1 0
-  
-*/
+   |---------------------------------|
+   | info|arity| type|quoted|mark|age|
+   |---------------------------------|
+    31 10 9 8 7 6 5 4   3     2   1 0
 
-/* Although atypes.h defines MachineWord, it wasn't used here:
-   typedef unsigned long header_type; */
-typedef MachineWord header_type;
+   64-bit:
+
+   |------------------------------------|
+   | info|  |arity| type|quoted|mark|age|
+   |------------------------------------|
+    63 34 15 14  7 6 5 4   3     2   1 0
+
+  */
+
+  /* Although atypes.h defines MachineWord, it wasn't used here:
+     typedef unsigned long header_type; */
+  typedef MachineWord header_type;
 
 #define HEADER_BITS      (sizeof(size_t)*8)
 
@@ -53,7 +53,7 @@ typedef MachineWord header_type;
 
 #define MASK_AGE         ((1<<0) | (1<<1))
 #define MASK_MARK        (1<<2)
-#define	MASK_QUOTED      (1<<3)
+#define MASK_QUOTED      (1<<3)
 #define MASK_TYPE        (((1 << TYPE_BITS)-1) << SHIFT_TYPE)
 #define MASK_ARITY       (((1 << ARITY_BITS)-1) << SHIFT_ARITY)
 
@@ -70,15 +70,15 @@ typedef MachineWord header_type;
 #define IS_OLD(h)        (GET_AGE(h) == OLD_AGE)
 #define IS_YOUNG(h)      (!(IS_OLD(h)))
 
-/* TODO: Optimize */
+  /* TODO: Optimize */
 #define INCREMENT_AGE(h) do { size_t age = GET_AGE(h); \
-	                      if (age<OLD_AGE) { \
-	                        SET_AGE((h), age+1); \
-                              } \
-                         } while (0)
+    if (age<OLD_AGE) { \
+      SET_AGE((h), age+1); \
+    } \
+  } while (0)
 
 #define HIDE_AGE_MARK(h)    ((h) & ~MASK_AGE_MARK)
-/* #define EQUAL_HEADER(h1,h2) (HIDE_AGE_MARK(h1)==HIDE_AGE_MARK(h2)) */
+  /* #define EQUAL_HEADER(h1,h2) (HIDE_AGE_MARK(h1)==HIDE_AGE_MARK(h2)) */
 #define EQUAL_HEADER(h1,h2) (HIDE_AGE_MARK(h1^h2) == 0)
 
 #define SHIFT_SYMBOL  SHIFT_LENGTH
@@ -91,37 +91,37 @@ typedef MachineWord header_type;
 
 #define IS_MARKED(h)          ((h) & MASK_MARK)
 #define GET_TYPE(h)           ((size_t)(((h) & MASK_TYPE) >> SHIFT_TYPE))
-#define GET_ARITY(h)	      ((size_t)(((h) & MASK_ARITY) >> SHIFT_ARITY))
-#define GET_SYMBOL(h)	      ((AFun)((h) >> SHIFT_SYMBOL))
+#define GET_ARITY(h)        ((size_t)(((h) & MASK_ARITY) >> SHIFT_ARITY))
+#define GET_SYMBOL(h)       ((AFun)((h) >> SHIFT_SYMBOL))
 #define GET_LENGTH(h)         ((size_t)((h) >> SHIFT_LENGTH))
 #define IS_QUOTED(h)          (((h) & MASK_QUOTED) ? ATtrue : ATfalse)
 
 #define SET_MARK(h)           do { (h) |= MASK_MARK; } while (0)
 
 #define SET_SYMBOL(h, sym)    do { (h) = ((h) & ~MASK_SYMBOL) \
-                                     | (((header_type)(sym)) << SHIFT_SYMBOL); \
-                              } while (0)
+      | (((header_type)(sym)) << SHIFT_SYMBOL); \
+} while (0)
 #define SET_LENGTH(h, len)    do { (h) = ((h) & ~MASK_LENGTH) | \
-                                     | (((header_type)(len)) << SHIFT_LENGTH); \
-                              } while (0) 
+      | (((header_type)(len)) << SHIFT_LENGTH); \
+} while (0)
 #define SET_QUOTED(h)         do { (h) |= MASK_QUOTED; } while (0)
 
 #define CLR_MARK(h)           do { (h) &= ~MASK_MARK; } while (0)
 #define CLR_QUOTED(h)         do { (h) &= ~MASK_QUOTED; } while (0)
 
 #define APPL_HEADER(anno,ari,sym) ((anno) | ((ari) << SHIFT_ARITY) | \
-				   (AT_APPL << SHIFT_TYPE) | \
-				   ((header_type)(sym) << SHIFT_SYMBOL))
+                                   (AT_APPL << SHIFT_TYPE) | \
+                                   ((header_type)(sym) << SHIFT_SYMBOL))
 #define INT_HEADER(anno)          ((anno) | AT_INT << SHIFT_TYPE)
 #define EMPTY_HEADER(anno)        ((anno) | AT_LIST << SHIFT_TYPE)
 
 #define LIST_HEADER(anno,len)     ((anno) | (AT_LIST << SHIFT_TYPE) | \
-				   ((MachineWord)(len) << SHIFT_LENGTH) | (2 << SHIFT_ARITY))
+                                   ((MachineWord)(len) << SHIFT_LENGTH) | (2 << SHIFT_ARITY))
 
 #define SYMBOL_HEADER(arity,quoted) \
-	(((header_type)(arity) << SHIFT_SYM_ARITY) | \
-	 ((quoted) ? MASK_QUOTED : 0) | \
-	 (AT_SYMBOL << SHIFT_TYPE))
+  (((header_type)(arity) << SHIFT_SYM_ARITY) | \
+   ((quoted) ? MASK_QUOTED : 0) | \
+   (AT_SYMBOL << SHIFT_TYPE))
 
 #define FREE_HEADER               (AT_FREE << SHIFT_TYPE)
 
@@ -134,8 +134,8 @@ typedef MachineWord header_type;
 #define AT_TABLE_SIZE(table_class)  ((size_t)1<<(table_class))
 #define AT_TABLE_MASK(table_class)  (AT_TABLE_SIZE(table_class)-1)
 
-/* Integers in BAF are always exactly 32 bits.  The size must be fixed so that
- * BAF terms can be exchanged between platforms. */
+  /* Integers in BAF are always exactly 32 bits.  The size must be fixed so that
+   * BAF terms can be exchanged between platforms. */
 #define INT_SIZE_IN_BAF 32
 
 #define MAX_ARITY             MAX_LENGTH
@@ -144,24 +144,24 @@ typedef MachineWord header_type;
 #define INITIAL_MAX_TERM_SIZE 256
 
 
-struct __ATerm
-{
-  header_type   header;
-  union _ATerm *next;
-};
+  struct __ATerm
+  {
+    header_type   header;
+    union _ATerm* next;
+  };
 
-typedef union _ATerm
-{
-  header_type     header;
-  struct __ATerm  aterm;
-  union _ATerm*   subaterm[1];
-  MachineWord     word[1];
-} *ATerm;
+  typedef union _ATerm
+  {
+    header_type     header;
+    struct __ATerm  aterm;
+    union _ATerm*   subaterm[1];
+    MachineWord     word[1];
+  }* ATerm;
 
-typedef void (*ATermProtFunc)();
+  typedef void (*ATermProtFunc)();
 
 #ifdef __cplusplus
 }
-#endif/* __cplusplus */ 
+#endif/* __cplusplus */
 
 #endif

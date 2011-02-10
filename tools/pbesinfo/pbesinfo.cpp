@@ -68,13 +68,13 @@ class pbesinfo_tool: public input_tool
   public:
     pbesinfo_tool()
       : super(
-          "pbesinfo",
-          "Wieger Wesselink; Alexander van Dam",
-          "display basic information about a PBES",
-          super::make_tool_description("Print basic information about the PBES in INFILE.")
-        ),
-        opt_full(false)
-     {}
+        "pbesinfo",
+        "Wieger Wesselink; Alexander van Dam",
+        "display basic information about a PBES",
+        super::make_tool_description("Print basic information about the PBES in INFILE.")
+      ),
+      opt_full(false)
+    {}
 
     /// If PBES can be loaded from file_name, then
     /// - Show if PBES is closed and if it is well formed

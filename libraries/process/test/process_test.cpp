@@ -34,7 +34,7 @@ const std::string SPEC2 =
   "init X(2);              \n"
   ;
 
-const std::string ABS_SPEC_LINEARIZED = 
+const std::string ABS_SPEC_LINEARIZED =
   "sort D = struct d1 | d2;                                                                                                     \n"
   "     Error = struct e;                                                                                                       \n"
   "                                                                                                                             \n"
@@ -89,65 +89,65 @@ const std::string ABS_SPEC_LINEARIZED =
   ;
 
 // CASE?? specifications were borrowed from sumelm_test.
-  
+
 std::string CASE1 =
-    "sort S = struct s1 | s2;\n"
-    "map f : S -> Bool;\n"
-    "act a : S # Bool;\n"
-    "proc P = sum c : S, b : Bool . (b == f(c) && c == s2) -> a(c, b) . P;\n"
-    "init P;\n"
-    ;
+  "sort S = struct s1 | s2;\n"
+  "map f : S -> Bool;\n"
+  "act a : S # Bool;\n"
+  "proc P = sum c : S, b : Bool . (b == f(c) && c == s2) -> a(c, b) . P;\n"
+  "init P;\n"
+  ;
 
 std::string CASE2 =
-    "act a,b;\n"
-    "proc P(s3_P: Pos) = sum y_P: Int. (s3_P == 1) -> a . P(2)\n"
-    "                  + (s3_P == 2) -> b . P(1);\n"
-    "init P(1);\n"
-    ;
+  "act a,b;\n"
+  "proc P(s3_P: Pos) = sum y_P: Int. (s3_P == 1) -> a . P(2)\n"
+  "                  + (s3_P == 2) -> b . P(1);\n"
+  "init P(1);\n"
+  ;
 
 std::string CASE3 =
-    "act a;\n"
-    "proc P = sum y:Int . (4 == y) -> a . P;\n"
-    "init P;\n"
-    ;
-  
+  "act a;\n"
+  "proc P = sum y:Int . (4 == y) -> a . P;\n"
+  "init P;\n"
+  ;
+
 std::string CASE4 =
-    "act a;\n"
-    "proc P = sum y:Int . (y == 4) -> a . P;\n"
-    "init P;\n"
-    ;
+  "act a;\n"
+  "proc P = sum y:Int . (y == 4) -> a . P;\n"
+  "init P;\n"
+  ;
 
 std::string CASE5 =
-    "act a,b:Int;\n"
-    "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
-    "init P;\n"
-    ;
+  "act a,b:Int;\n"
+  "proc P = sum y:Int . (y == 4) -> a(y)@y . b(y*2)@(y+1) . P;\n"
+  "init P;\n"
+  ;
 
 std::string CASE6 =
-    "act a;\n"
-    "proc P = sum y:Int . (y == y + 1) -> a . P;\n"
-    "init P;\n"
-    ;
+  "act a;\n"
+  "proc P = sum y:Int . (y == y + 1) -> a . P;\n"
+  "init P;\n"
+  ;
 
 std::string CASE7 =
-    "sort D = struct d1 | d2 | d3;\n"
-    "map g : D -> D;\n"
-    "act a;\n"
-    "proc P(c:D) = sum d:D . sum e:D . sum f:D . (d == e && e == g(e) && e == f) -> a . P(d);\n"
-    "init P(d1);\n"
-    ;
+  "sort D = struct d1 | d2 | d3;\n"
+  "map g : D -> D;\n"
+  "act a;\n"
+  "proc P(c:D) = sum d:D . sum e:D . sum f:D . (d == e && e == g(e) && e == f) -> a . P(d);\n"
+  "init P(d1);\n"
+  ;
 
 std::string CASE8 =
-    "sort D = struct d1 | d2 | d3;\n"
-    "act a;\n"
-    "proc P(c:D) = sum d:D . sum e:D . sum f:D . (d == e && d == f) -> a . P(d);\n"
-    "init P(d1);\n"
-    ;        
+  "sort D = struct d1 | d2 | d3;\n"
+  "act a;\n"
+  "proc P(c:D) = sum d:D . sum e:D . sum f:D . (d == e && d == f) -> a . P(d);\n"
+  "init P(d1);\n"
+  ;
 
 std::string CASE9 =
-    "proc P = sum y:Bool . y -> delta;\n"
-    "init P;\n"
-    ;   
+  "proc P = sum y:Bool . y -> delta;\n"
+  "init P;\n"
+  ;
 
 std::string CASE10 =
   "act a:Nat;\n"
@@ -208,8 +208,8 @@ void test_linear(const std::string& text, bool result = true)
 {
   process_specification p = parse_process_specification(text);
   if (is_linear(p) != result)
-  {  
-    std::cerr << "--- Failed linearity test ---" << std::endl;  
+  {
+    std::cerr << "--- Failed linearity test ---" << std::endl;
     std::cerr << text << std::endl;
   }
   bool verbose = true;
@@ -246,6 +246,6 @@ int test_main(int argc, char* argv[])
   test_linear(CASE14, false);
 
   test_data_spec();
-  
+
   return 0;
 }

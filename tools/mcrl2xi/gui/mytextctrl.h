@@ -13,27 +13,28 @@
 
 #include "wx/wx.h"
 
-class myTextControl : public wxTextCtrl {
+class myTextControl : public wxTextCtrl
+{
   public:
-    myTextControl(wxWindow *parent,
-               wxWindowID id,
-               const wxString &value = wxEmptyString,
-               const wxPoint &pos = wxDefaultPosition,
-               const wxSize &size = wxDefaultSize,
-               long style = 0,
-               const wxValidator& validator = wxDefaultValidator,
-               const wxString &name = wxTextCtrlNameStr);
+    myTextControl(wxWindow* parent,
+                  wxWindowID id,
+                  const wxString& value = wxEmptyString,
+                  const wxPoint& pos = wxDefaultPosition,
+                  const wxSize& size = wxDefaultSize,
+                  long style = 0,
+                  const wxValidator& validator = wxDefaultValidator,
+                  const wxString& name = wxTextCtrlNameStr);
   private:
     void OnSetFocus(wxFocusEvent& /*evt*/);
     void OnKillFocus(wxFocusEvent& /*evt*/);
 
-    void OnCopy (wxCommandEvent &/*event*/);
-    void OnPaste (wxCommandEvent &/*event*/);
-    void OnSelectAll (wxCommandEvent &/*event*/);
-    void OnRedo (wxCommandEvent &/*event*/);
-    void OnUndo (wxCommandEvent &/*event*/);
-    void OnCut (wxCommandEvent &/*event*/);
-    void OnDelete(wxCommandEvent &/*event*/);
+    void OnCopy(wxCommandEvent& /*event*/);
+    void OnPaste(wxCommandEvent& /*event*/);
+    void OnSelectAll(wxCommandEvent& /*event*/);
+    void OnRedo(wxCommandEvent& /*event*/);
+    void OnUndo(wxCommandEvent& /*event*/);
+    void OnCut(wxCommandEvent& /*event*/);
+    void OnDelete(wxCommandEvent& /*event*/);
 
     DECLARE_EVENT_TABLE()
 };
@@ -42,10 +43,10 @@ class myTextControl : public wxTextCtrl {
 DECLARE_EVENT_TYPE(wxEVT_MYTXTCTRL_FOCUS, 7777)
 
 #define EVT_MYTXTCTRL_FOCUS(id, fn) \
-    DECLARE_EVENT_TABLE_ENTRY( \
-        wxEVT_MYTXTCTRL_FOCUS, id, wxID_ANY, \
-        (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
-        (wxObject *) NULL \
-    ),
+  DECLARE_EVENT_TABLE_ENTRY( \
+                             wxEVT_MYTXTCTRL_FOCUS, id, wxID_ANY, \
+                             (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+                             (wxObject *) NULL \
+                           ),
 
 #endif

@@ -18,20 +18,20 @@ extern "C"
 #define AS_EMPTY_LIST   5
 
 
-typedef size_t AFun; 
+  typedef size_t AFun;
 
-/* The AFun type */
-typedef struct _SymEntry
-{
-  header_type header;
-  struct _SymEntry *next;
-  AFun  id;
-  char   *name;
-  size_t count;  /* used in bafio.c */
-  size_t index;  /* used in bafio.c */
-} *SymEntry;
+  /* The AFun type */
+  typedef struct _SymEntry
+  {
+    header_type header;
+    struct _SymEntry* next;
+    AFun  id;
+    char*   name;
+    size_t count;  /* used in bafio.c */
+    size_t index;  /* used in bafio.c */
+  }* SymEntry;
 
-/* defined on SymEntry */
+  /* defined on SymEntry */
 #define SYM_IS_FREE(sym)          (((MachineWord)(sym) & 1) == 1)
 
 #define AT_markAFun(s)       (at_lookup_table[(s)]->header |= MASK_AGE_MARK)
@@ -40,30 +40,30 @@ typedef struct _SymEntry
 
 #define AT_unmarkAFun(s) (at_lookup_table[(s)]->header &= ~MASK_MARK)
 
-union _ATerm;
-extern union _ATerm **at_lookup_table_alias;
-extern SymEntry *at_lookup_table;
+  union _ATerm;
+  extern union _ATerm** at_lookup_table_alias;
+  extern SymEntry* at_lookup_table;
 
-MachineWord AT_symbolTableSize();
-void AT_initAFun(int argc, char *argv[]);
-size_t AT_printAFun(AFun sym, FILE *f);
+  MachineWord AT_symbolTableSize();
+  void AT_initAFun(int argc, char* argv[]);
+  size_t AT_printAFun(AFun sym, FILE* f);
 
 #define AT_isValidAFun(sym) (((AFun)sym != (AFun)(-1) && (MachineWord)(AFun)sym < AT_symbolTableSize() \
-                                 && !SYM_IS_FREE(at_lookup_table[(AFun)sym])) ?  ATtrue : ATfalse)
+                              && !SYM_IS_FREE(at_lookup_table[(AFun)sym])) ?  ATtrue : ATfalse)
 
 
 #define AT_isMarkedAFun(sym) IS_MARKED(at_lookup_table[(AFun)sym]->header)
 
-void  AT_freeAFun(SymEntry sym);
-void AT_markProtectedAFuns();
-void AT_markProtectedAFuns_young();
+  void  AT_freeAFun(SymEntry sym);
+  void AT_markProtectedAFuns();
+  void AT_markProtectedAFuns_young();
 
-size_t AT_hashAFun(const char *name, size_t arity);
-ATbool AT_findAFun(char *name, size_t arity, ATbool quoted);
-void AT_unmarkAllAFuns();
+  size_t AT_hashAFun(const char* name, size_t arity);
+  ATbool AT_findAFun(char* name, size_t arity, ATbool quoted);
+  void AT_unmarkAllAFuns();
 
 #ifdef __cplusplus
 }
-#endif/* __cplusplus */ 
+#endif/* __cplusplus */
 
 #endif

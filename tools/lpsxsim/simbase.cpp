@@ -9,7 +9,7 @@
 /// \file simbase.cpp
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "simbase.h"
+#pragma implementation "simbase.h"
 #endif
 
 #include <list>
@@ -19,94 +19,94 @@ using namespace std;
 
 SimulatorViewDLLInterface::~SimulatorViewDLLInterface()
 {
-	if ( simdll != NULL )
-	{
-		simdll->Remove(this);
-	}
+  if (simdll != NULL)
+  {
+    simdll->Remove(this);
+  }
 }
 
-void SimulatorViewDLLInterface::Registered(SimulatorInterface *Simulator)
+void SimulatorViewDLLInterface::Registered(SimulatorInterface* Simulator)
 {
-	if ( simdll != NULL )
-	{
-		simdll->SetSimulator(this,Simulator);
-	}
+  if (simdll != NULL)
+  {
+    simdll->SetSimulator(this,Simulator);
+  }
 }
 
 void SimulatorViewDLLInterface::Unregistered()
 {
-	if ( simdll != NULL )
-	{
-		simdll->ClearSimulator(this);
-	}
+  if (simdll != NULL)
+  {
+    simdll->ClearSimulator(this);
+  }
 }
 
-void SimulatorViewDLLInterface::SetSimViewsDLL(SimViewsDLL *dll)
+void SimulatorViewDLLInterface::SetSimViewsDLL(SimViewsDLL* dll)
 {
-	simdll = dll;
+  simdll = dll;
 }
 
 SimViewsDLL::~SimViewsDLL()
 {
-	list<SimulatorInterface *>::iterator j = sims.begin();
-	list<SimulatorViewDLLInterface *>::iterator i = views.begin();
-	for (; i != views.end(); i++, j++)
-	{
-		(*i)->SetSimViewsDLL(NULL);
-		if ( (*j) != NULL )
-		{
-			(*j)->Unregister(*i);
-		}
-		delete *i;
-	}
+  list<SimulatorInterface*>::iterator j = sims.begin();
+  list<SimulatorViewDLLInterface*>::iterator i = views.begin();
+  for (; i != views.end(); i++, j++)
+  {
+    (*i)->SetSimViewsDLL(NULL);
+    if ((*j) != NULL)
+    {
+      (*j)->Unregister(*i);
+    }
+    delete *i;
+  }
 }
 
-void SimViewsDLL::Add(SimulatorViewDLLInterface *View, SimulatorInterface *Simulator, bool Register)
+void SimViewsDLL::Add(SimulatorViewDLLInterface* View, SimulatorInterface* Simulator, bool Register)
 {
-	views.push_back(View);
-	sims.push_back(Simulator);
-	if ( Register )
-	{
-		Simulator->Register(View);
-	}
+  views.push_back(View);
+  sims.push_back(Simulator);
+  if (Register)
+  {
+    Simulator->Register(View);
+  }
 }
 
-void SimViewsDLL::Remove(SimulatorViewDLLInterface *View, bool Unregister)
+void SimViewsDLL::Remove(SimulatorViewDLLInterface* View, bool Unregister)
 {
-	list<SimulatorInterface *>::iterator j = sims.begin();
-	list<SimulatorViewDLLInterface *>::iterator i = views.begin();
-	for (; i != views.end(); i++, j++)
-	{
-		*i;
-		if ( (*i) == View )
-		{
-			if ( Unregister && ((*j) != NULL) )
-			{
-				(*i)->SetSimViewsDLL(NULL);
-				(*j)->Unregister(*i);
-			}
-			views.erase(i);
-			sims.erase(j);
-			break;
-		}
-	}
+  list<SimulatorInterface*>::iterator j = sims.begin();
+  list<SimulatorViewDLLInterface*>::iterator i = views.begin();
+  for (; i != views.end(); i++, j++)
+  {
+    *i;
+    if ((*i) == View)
+    {
+      if (Unregister && ((*j) != NULL))
+      {
+        (*i)->SetSimViewsDLL(NULL);
+        (*j)->Unregister(*i);
+      }
+      views.erase(i);
+      sims.erase(j);
+      break;
+    }
+  }
 }
 
-void SimViewsDLL::SetSimulator(SimulatorViewDLLInterface *View, SimulatorInterface *Simulator)
+void SimViewsDLL::SetSimulator(SimulatorViewDLLInterface* View, SimulatorInterface* Simulator)
 {
-	list<SimulatorInterface *>::iterator j = sims.begin();
-	list<SimulatorViewDLLInterface *>::iterator i = views.begin();
-	for (; i != views.end(); i++, j++)
-	{
-		if ( (*i) == View )
-		{
-			*j = Simulator;
-			break;
-		}
-	}
+  list<SimulatorInterface*>::iterator j = sims.begin();
+  list<SimulatorViewDLLInterface*>::iterator i = views.begin();
+  for (; i != views.end(); i++, j++)
+  {
+    if ((*i) == View)
+    {
+      *j = Simulator;
+      break;
+    }
+  }
 }
 
-void SimViewsDLL::ClearSimulator(SimulatorViewDLLInterface *View)
+void SimViewsDLL::ClearSimulator(SimulatorViewDLLInterface* View)
 {
-	SetSimulator(View,NULL);
+  SetSimulator(View,NULL);
 }

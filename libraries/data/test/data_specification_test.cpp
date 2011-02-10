@@ -31,26 +31,31 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 
 bool compare_for_equality(data_specification const& left, data_specification const& right)
-{ 
-  if (!(left == right)) 
-  { BOOST_CHECK(left == right);
+{
+  if (!(left == right))
+  {
+    BOOST_CHECK(left == right);
 
     std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
               << "Specification detailed comparison:" << std::endl;
 
-    if (left.sorts() != right.sorts()) {
+    if (left.sorts() != right.sorts())
+    {
       std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
       std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
     }
-    if (left.constructors() != right.constructors()) {
+    if (left.constructors() != right.constructors())
+    {
       std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
       std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
     }
-    if (left.mappings() != right.mappings()) 
-    { std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
+    if (left.mappings() != right.mappings())
+    {
+      std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
       std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
     }
-    if (left.equations() != right.equations()) {
+    if (left.equations() != right.equations())
+    {
       std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
       std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
     }
@@ -355,11 +360,11 @@ void test_is_certainly_finite()
 
   atermpp::vector< data::structured_sort_constructor > constructors;
   constructors.push_back(data::structured_sort_constructor("a",
-     boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+                         boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   constructors.push_back(data::structured_sort_constructor("b",
-     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
+                         boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2)));
   constructors.push_back(data::structured_sort_constructor("b",
-     boost::make_iterator_range(arguments.begin() + 2, arguments.begin() + 3)));
+                         boost::make_iterator_range(arguments.begin() + 2, arguments.begin() + 3)));
 
   BOOST_CHECK(spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
   BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
@@ -396,36 +401,36 @@ void test_system_defined()
   BOOST_CHECK(!specification.constructors(sort_bool::bool_()).empty());
 
   specification = parse_data_specification(
-    "sort S;"
-    "map f: Set(S);");
+                    "sort S;"
+                    "map f: Set(S);");
 
   BOOST_CHECK(search(specification.sorts(), sort_set::set_(basic_sort("S"))));
   // BOOST_CHECK(search(specification.sorts(), sort_fset::fset(basic_sort("S")))); MUST BE CHECKED ALSO?
 
   specification = parse_data_specification(
-    "sort D = Set(Nat);"
-    "sort E = D;"
-    "sort F = E;");
+                    "sort D = Set(Nat);"
+                    "sort E = D;"
+                    "sort F = E;");
   BOOST_CHECK(specification.constructors(::sort_set::set_(sort_nat::nat())) == specification.constructors(basic_sort("D")));
-  BOOST_CHECK(specification.constructors(normalize_sorts(basic_sort("D"),specification)) == 
-                     specification.constructors(normalize_sorts(basic_sort("E"),specification)));
-  BOOST_CHECK(specification.mappings(normalize_sorts(basic_sort("D"),specification)) == 
+  BOOST_CHECK(specification.constructors(normalize_sorts(basic_sort("D"),specification)) ==
+              specification.constructors(normalize_sorts(basic_sort("E"),specification)));
+  BOOST_CHECK(specification.mappings(normalize_sorts(basic_sort("D"),specification)) ==
               specification.mappings(normalize_sorts(basic_sort("E"),specification)));
-  BOOST_CHECK(specification.constructors(normalize_sorts(basic_sort("D"),specification)) == 
-                     specification.constructors(normalize_sorts(basic_sort("F"),specification)));
+  BOOST_CHECK(specification.constructors(normalize_sorts(basic_sort("D"),specification)) ==
+              specification.constructors(normalize_sorts(basic_sort("F"),specification)));
 
   data_specification copy = specification;
 
   // A data specification that is constructed using data_specification_to_aterm_data_spec is assumed not
   // not be type checked. This must be indicated explicitly.
-  data_specification specification1=data_specification(detail::data_specification_to_aterm_data_spec(copy)); 
+  data_specification specification1=data_specification(detail::data_specification_to_aterm_data_spec(copy));
   specification1.declare_data_specification_to_be_type_checked();
   BOOST_CHECK(compare_for_equality(specification1,specification));
 
   specification = parse_data_specification(
-    "sort D = struct d(getBool : Bool)?is_d;"
-    "sort E = D;"
-    "sort F = E;");
+                    "sort D = struct d(getBool : Bool)?is_d;"
+                    "sort E = D;"
+                    "sort F = E;");
 
   atermpp::multimap< basic_sort, sort_expression > aliases(specification.user_defined_aliases());
   BOOST_CHECK(aliases.find(basic_sort("D")) != aliases.end());
@@ -457,7 +462,7 @@ void test_system_defined()
 
   atermpp::vector< data::structured_sort_constructor > constructors;
   constructors.push_back(data::structured_sort_constructor("q",
-     boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+                         boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
 
   specification.add_alias(alias(basic_sort("Q"), data::structured_sort(constructors)));
 }
@@ -506,7 +511,7 @@ void test_utility_functionality()
   spec.add_sort(s);
   spec.add_alias(alias(basic_sort("a"),s));
 
-  data_specification::sorts_const_range sorts (spec.sorts());
+  data_specification::sorts_const_range sorts(spec.sorts());
   data_specification::constructors_const_range constructors(spec.constructors());
   data_specification::mappings_const_range mappings(spec.mappings());
 
@@ -555,8 +560,8 @@ void test_normalisation()
   BOOST_CHECK(normalize_sorts(list(B),specification) == normalize_sorts(list(bag(A)),specification));
 
   specification = parse_data_specification(
-    "sort A = struct a(B);"
-    "sort B = struct b(A)|c;");
+                    "sort A = struct a(B);"
+                    "sort B = struct b(A)|c;");
 
   atermpp::vector< structured_sort_constructor_argument > arguments;
 
@@ -585,10 +590,10 @@ void test_copy()
   std::clog << "test_copy" << std::endl;
 
   data_specification specification = parse_data_specification(
-    "sort D = struct d(bla : Bool)?is_d;"
-    "sort A = S;"
-    "sort S;"
-    "map f: Set(S);");
+                                       "sort D = struct d(bla : Bool)?is_d;"
+                                       "sort A = S;"
+                                       "sort S;"
+                                       "map f: Set(S);");
 
   data_specification::constructors_const_range constructors(specification.constructors());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), sort_bool::true_()) != constructors.end());

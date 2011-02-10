@@ -43,7 +43,7 @@ action act(std::string name, data_expression_list parameters)
 
 void test_multi_actions(action_list a, action_list b, data_expression expected_result = data_expression())
 {
-	std::cout << "--- test_multi_actions ---" << std::endl;
+  std::cout << "--- test_multi_actions ---" << std::endl;
   data_expression result = equal_multi_actions(a, b);
   std::cout << "a               = " << core::pp(a) << std::endl;
   std::cout << "b               = " << core::pp(b) << std::endl;
@@ -73,8 +73,8 @@ void test_equal_multi_actions()
   action_list a12b1 = make_list(act("a", make_list(d1)), act("a", make_list(d2)), act("b", make_list(d1)));
   action_list a34b2 = make_list(act("a", make_list(d3)), act("a", make_list(d4)), act("b", make_list(d2)));
 
-  test_multi_actions( a1,  a1, d::sort_bool::true_());
-  test_multi_actions( a1,  a2, d::equal_to(d1, d2));
+  test_multi_actions(a1,  a1, d::sort_bool::true_());
+  test_multi_actions(a1,  a2, d::equal_to(d1, d2));
   test_multi_actions(a11, a11, d::sort_bool::true_());
   test_multi_actions(a12, a21, d::sort_bool::true_());
   test_multi_actions(a11, a22, d::equal_to(d1, d2));

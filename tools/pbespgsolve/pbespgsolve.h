@@ -24,144 +24,146 @@
 #include "RecursiveSolver.h"
 #include "ComponentSolver.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace pbes_system {
+namespace pbes_system
+{
 
-    enum pbespg_solver_type
-    {
-      spm_solver,
-      recursive_solver
-    };
+enum pbespg_solver_type
+{
+  spm_solver,
+  recursive_solver
+};
 
-    /// \return A string representation of the edge direction.
+/// \return A string representation of the edge direction.
 
-    inline
-    std::string print(StaticGraph::EdgeDirection edge_direction)
-    {
-      if (edge_direction == StaticGraph::EDGE_SUCCESSOR)
-      {
-        return "successor";
-      }
-      else if (edge_direction == StaticGraph::EDGE_PREDECESSOR)
-      {
-        return "predecessor";
-      }
-      else if (edge_direction == StaticGraph::EDGE_BIDIRECTIONAL)
-      {
-        return "bidirectional";
-      }
-      return "unknown edge direction";
-    }
+inline
+std::string print(StaticGraph::EdgeDirection edge_direction)
+{
+  if (edge_direction == StaticGraph::EDGE_SUCCESSOR)
+  {
+    return "successor";
+  }
+  else if (edge_direction == StaticGraph::EDGE_PREDECESSOR)
+  {
+    return "predecessor";
+  }
+  else if (edge_direction == StaticGraph::EDGE_BIDIRECTIONAL)
+  {
+    return "bidirectional";
+  }
+  return "unknown edge direction";
+}
 
-    /// \return A string representation of the solver type.
+/// \return A string representation of the solver type.
 
-    inline
-    std::string print(pbespg_solver_type solver_type)
-    {
-      if (solver_type == spm_solver)
-      {
-        return "spm_solver";
-      }
-      else if (solver_type == recursive_solver)
-      {
-        return "recursive_solver";
-      }
-      return "unknown solver";
-    }
+inline
+std::string print(pbespg_solver_type solver_type)
+{
+  if (solver_type == spm_solver)
+  {
+    return "spm_solver";
+  }
+  else if (solver_type == recursive_solver)
+  {
+    return "recursive_solver";
+  }
+  return "unknown solver";
+}
 
-    struct pbespgsolve_options
-    {
-      pbespg_solver_type solver_type;
-      bool use_scc_decomposition;
-      bool verify_solution;
+struct pbespgsolve_options
+{
+  pbespg_solver_type solver_type;
+  bool use_scc_decomposition;
+  bool verify_solution;
 
-      pbespgsolve_options()
-      : solver_type(spm_solver),
+  pbespgsolve_options()
+    : solver_type(spm_solver),
       use_scc_decomposition(true),
       verify_solution(true)
-      {
-      }
-    };
+  {
+  }
+};
 
-    class pbespgsolve_algorithm
-    {
-    protected:
-      std::auto_ptr<LiftingStrategyFactory> lift_strat_factory;
-      std::auto_ptr<ParityGameSolverFactory> subsolver_factory;
-      std::auto_ptr<ParityGameSolverFactory> solver_factory;
-      mcrl2::utilities::execution_timer& m_timer;
-      pbespgsolve_options m_options;
+class pbespgsolve_algorithm
+{
+  protected:
+    std::auto_ptr<LiftingStrategyFactory> lift_strat_factory;
+    std::auto_ptr<ParityGameSolverFactory> subsolver_factory;
+    std::auto_ptr<ParityGameSolverFactory> solver_factory;
+    mcrl2::utilities::execution_timer& m_timer;
+    pbespgsolve_options m_options;
 
-    public:
+  public:
 
-      pbespgsolve_algorithm(mcrl2::utilities::execution_timer& timing, pbespgsolve_options options = pbespgsolve_options())
+    pbespgsolve_algorithm(mcrl2::utilities::execution_timer& timing, pbespgsolve_options options = pbespgsolve_options())
       : m_timer(timing),
         m_options(options)
+    {
+      if (options.solver_type == spm_solver)
       {
-        if (options.solver_type == spm_solver)
-        {
-          // Create a lifting strategy factory:
-          lift_strat_factory.reset(
-              new PredecessorLiftingStrategyFactory);
+        // Create a lifting strategy factory:
+        lift_strat_factory.reset(
+          new PredecessorLiftingStrategyFactory);
 
-          // Create a SPM solver factory:
-          solver_factory.reset(
-              new SmallProgressMeasuresFactory(*lift_strat_factory));
-        }
-        else if (options.solver_type == recursive_solver)
-        {
-          // Create a recursive solver factory:
-          solver_factory.reset(new RecursiveSolverFactory);
-        }
-        else
-        {
-          throw mcrl2::runtime_error("pbespgsolve: unknown solver type");
-        }
-
-        if (options.use_scc_decomposition)
-        {
-          // Wrap solver factory into a component solver factory:
-          subsolver_factory = solver_factory;
-          solver_factory.reset(
-              new ComponentSolverFactory(*subsolver_factory));
-        }
+        // Create a SPM solver factory:
+        solver_factory.reset(
+          new SmallProgressMeasuresFactory(*lift_strat_factory));
+      }
+      else if (options.solver_type == recursive_solver)
+      {
+        // Create a recursive solver factory:
+        solver_factory.reset(new RecursiveSolverFactory);
+      }
+      else
+      {
+        throw mcrl2::runtime_error("pbespgsolve: unknown solver type");
       }
 
-      template <typename Container>
-      bool run(pbes<Container>& p)
+      if (options.use_scc_decomposition)
       {
-        m_timer.start("initialization");
-        // Generate the game from a PBES:
-        verti goal_v;
-        ParityGame pg;
-        pg.assign_pbes(p, &goal_v); // N.B. mCRL2 could raise an exception here
-
-        // Create a solver:
-        std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
-        m_timer.finish("initialization");
-        
-        // Solve the game:
-        m_timer.start("solving");
-        ParityGame::Strategy solution = solver->solve();
-        m_timer.finish("solving");
-
-        if (solution.empty())
-        {
-          throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
-        }
-
-        // Optional: verify the solution
-        if (m_options.verify_solution && !pg.verify(solution))
-        {
-          throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
-        }
-
-        return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
+        // Wrap solver factory into a component solver factory:
+        subsolver_factory = solver_factory;
+        solver_factory.reset(
+          new ComponentSolverFactory(*subsolver_factory));
       }
-    };
+    }
 
-  } // namespace pbes_system
+    template <typename Container>
+    bool run(pbes<Container>& p)
+    {
+      m_timer.start("initialization");
+      // Generate the game from a PBES:
+      verti goal_v;
+      ParityGame pg;
+      pg.assign_pbes(p, &goal_v); // N.B. mCRL2 could raise an exception here
+
+      // Create a solver:
+      std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
+      m_timer.finish("initialization");
+
+      // Solve the game:
+      m_timer.start("solving");
+      ParityGame::Strategy solution = solver->solve();
+      m_timer.finish("solving");
+
+      if (solution.empty())
+      {
+        throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
+      }
+
+      // Optional: verify the solution
+      if (m_options.verify_solution && !pg.verify(solution))
+      {
+        throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
+      }
+
+      return pg.winner(solution, goal_v) == ParityGame::PLAYER_EVEN;
+    }
+};
+
+} // namespace pbes_system
 
 } // namespace mcrl2
 

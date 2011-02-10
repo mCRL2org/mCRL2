@@ -16,42 +16,45 @@
 #include <wx/aui/auibook.h>
 #include "mytextctrl.h"
 
-class typeCheckSpec: public wxPanel {
-public:
-    typeCheckSpec(wxWindow *parent, wxWindowID id);
-private:
+class typeCheckSpec: public wxPanel
+{
+  public:
+    typeCheckSpec(wxWindow* parent, wxWindowID id);
+  private:
     void OnTypeCheck(wxCommandEvent& e);
-    wxWindow *p_parent;
+    wxWindow* p_parent;
 
     DECLARE_EVENT_TABLE()
 };
 
-class evalDataExpr: public wxPanel {
-public:
-    evalDataExpr(wxWindow *parent, wxWindowID id);
+class evalDataExpr: public wxPanel
+{
+  public:
+    evalDataExpr(wxWindow* parent, wxWindowID id);
     wxString getDataExprVal();
-private:
+  private:
     void OnEval(wxCommandEvent& e);
-    wxWindow *p_parent;
-    myTextControl *EvalExpr;
+    wxWindow* p_parent;
+    myTextControl* EvalExpr;
 
     DECLARE_EVENT_TABLE()
 };
 
-class solveDataExpr: public wxPanel {
-public:
-    solveDataExpr(wxWindow *parent, wxWindowID id);
+class solveDataExpr: public wxPanel
+{
+  public:
+    solveDataExpr(wxWindow* parent, wxWindowID id);
     myTextControl* getSolutionWindow();
     wxString getDataExprSolve();
     bool getStopSolving();
-private:
+  private:
     void OnStopSolve(wxCommandEvent& /*e*/);
     void OnSolve(wxCommandEvent& e);
-    wxWindow *p_parent;
-    myTextControl *p_solutions;
-    myTextControl *SolveExpr;
-    wxButton *solveBtn;
-    wxButton *solveStopBtn;
+    wxWindow* p_parent;
+    myTextControl* p_solutions;
+    myTextControl* SolveExpr;
+    wxButton* solveBtn;
+    wxButton* solveStopBtn;
     bool StopSolving;
 
     DECLARE_EVENT_TABLE()

@@ -28,11 +28,14 @@
 /// checked for disjointness. The function Disjointness_Checker::disjoint indicates whether the two summands with numbers
 /// a_summand_number_1 and a_summand_number_2 are syntactically disjoint.
 
-namespace mcrl2 {
-namespace lps {
-namespace detail {
+namespace mcrl2
+{
+namespace lps
+{
+namespace detail
+{
 
-class Disjointness_Checker 
+class Disjointness_Checker
 {
   private:
     /// \brief The number of summands of the LPS passed as argument of the constructor.
@@ -63,7 +66,7 @@ class Disjointness_Checker
     /// precondition: the arguments passed as parameters a_summand_number_1 and a_summand_number_2 correspond to summands in
     /// the proces equations passed as parameter a_process_equations. They lie in the interval from and including 1 upto and
     /// including the highest summand number
-    Disjointness_Checker(const linear_process &a_process_equation);
+    Disjointness_Checker(const linear_process& a_process_equation);
 
     /// \brief Destructor that frees the memory used by Disjointness_Checker::f_used_parameters_per_summand,
     /// \brief Disjointness_Checker::f_changed_parameters_per_summand and Disjointness_Checker::f_parameter_set.

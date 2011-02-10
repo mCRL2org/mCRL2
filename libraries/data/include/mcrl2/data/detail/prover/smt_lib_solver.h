@@ -33,18 +33,22 @@
 #undef ATAgetFirst
 #undef ATAgetArgument
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
-  /// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format
-  /// [Silvio Ranise and Cesare Tinelli. The SMT-LIB Standard: Version 1.1. Technical Report, Department of Computer
-  /// Science, The University of Iowa, 2005. (Available at http://goedel.cs.uiowa.edu/smtlib)]. It inherits from the class
-  /// SMT_Solver.
-  ///
-  /// The method SMT_LIB_Solver::translate receives an expression of sort Bool in conjunctive normal form as parameter
-  /// a_formula and translates it to a benchmark in SMT-LIB format. The result is saved as field std::string f_benchmark.
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
+/// The class SMT_LIB_Solver is a base class for SMT solvers that read the SMT-LIB format
+/// [Silvio Ranise and Cesare Tinelli. The SMT-LIB Standard: Version 1.1. Technical Report, Department of Computer
+/// Science, The University of Iowa, 2005. (Available at http://goedel.cs.uiowa.edu/smtlib)]. It inherits from the class
+/// SMT_Solver.
+///
+/// The method SMT_LIB_Solver::translate receives an expression of sort Bool in conjunctive normal form as parameter
+/// a_formula and translates it to a benchmark in SMT-LIB format. The result is saved as field std::string f_benchmark.
 
-class SMT_LIB_Solver: public SMT_Solver {
+class SMT_LIB_Solver: public SMT_Solver
+{
   private:
     Expression_Info f_expression_info;
     std::string f_sorts_notes;
@@ -62,14 +66,18 @@ class SMT_LIB_Solver: public SMT_Solver {
     ATermIndexedSet f_pos_variables;
     bool f_bool2pred;
 
-    void declare_sorts(){
+    void declare_sorts()
+    {
       f_extrasorts = "";
       ATermList v_sorts = ATindexedSetElements(f_sorts);
-      if (!ATisEmpty(v_sorts)) {
+      if (!ATisEmpty(v_sorts))
+      {
         f_extrasorts = "  :extrasorts (";
         ATermAppl v_sort = 0;
-        while (!ATisEmpty(v_sorts)) {
-          if (v_sort != 0) {
+        while (!ATisEmpty(v_sorts))
+        {
+          if (v_sort != 0)
+          {
             f_extrasorts = f_extrasorts + " ";
           }
           v_sort = core::ATAgetFirst(v_sorts);
@@ -86,12 +94,15 @@ class SMT_LIB_Solver: public SMT_Solver {
       }
     }
 
-    void declare_operators(){
+    void declare_operators()
+    {
       f_operators_extrafuns = "";
       ATermList v_operators = ATindexedSetElements(f_operators);
-      if (!ATisEmpty(v_operators)) {
+      if (!ATisEmpty(v_operators))
+      {
         f_operators_extrafuns = "  :extrafuns (";
-        while (!ATisEmpty(v_operators)) {
+        while (!ATisEmpty(v_operators))
+        {
           ATermAppl v_operator = core::ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
           size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
@@ -102,31 +113,45 @@ class SMT_LIB_Solver: public SMT_Solver {
           free(v_operator_string);
           v_operator_string = 0;
           sort_expression v_sort = data_expression(v_operator).sort();
-          do {
+          do
+          {
             ATermList v_sort_domain_list;
-            if (is_function_sort(v_sort)) {
+            if (is_function_sort(v_sort))
+            {
               v_sort_domain_list = function_sort(v_sort).domain();
               v_sort = function_sort(v_sort).codomain();
-            } else {
+            }
+            else
+            {
               v_sort_domain_list = ATmakeList1((ATerm) static_cast<ATermAppl>(v_sort));
               v_sort = sort_expression();
             }
-            for(ATermList l = v_sort_domain_list; !ATisEmpty(l) ; l = ATgetNext(l))
+            for (ATermList l = v_sort_domain_list; !ATisEmpty(l) ; l = ATgetNext(l))
             {
               sort_expression v_sort_domain_elt(core::ATAgetFirst(l));
-              if (is_function_sort(v_sort_domain_elt)) {
+              if (is_function_sort(v_sort_domain_elt))
+              {
                 throw mcrl2::runtime_error("Function " + pp(v_operator) +
-                        " cannot be translated to the SMT-LIB format.");
+                                           " cannot be translated to the SMT-LIB format.");
               }
-              if (sort_int::is_int(v_sort_domain_elt)) {
+              if (sort_int::is_int(v_sort_domain_elt))
+              {
                 f_operators_extrafuns = f_operators_extrafuns + " Int";
-              } else if (sort_nat::is_nat(v_sort_domain_elt)) {
+              }
+              else if (sort_nat::is_nat(v_sort_domain_elt))
+              {
                 f_operators_extrafuns = f_operators_extrafuns + " Int";
-              } else if (sort_pos::is_pos(v_sort_domain_elt)) {
+              }
+              else if (sort_pos::is_pos(v_sort_domain_elt))
+              {
                 f_operators_extrafuns = f_operators_extrafuns + " Int";
-              } else if (sort_real::is_real(v_sort_domain_elt)) {
+              }
+              else if (sort_real::is_real(v_sort_domain_elt))
+              {
                 f_operators_extrafuns = f_operators_extrafuns + " Real";
-              } else {
+              }
+              else
+              {
                 size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort_domain_elt), 0);
                 char* v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
                 sprintf(v_sort_string, "sort%lu", v_sort_number);
@@ -135,7 +160,8 @@ class SMT_LIB_Solver: public SMT_Solver {
                 v_sort_string = 0;
               }
             }
-          } while (v_sort != sort_expression());
+          }
+          while (v_sort != sort_expression());
           f_operators_extrafuns = f_operators_extrafuns + ")";
         }
         f_operators_extrafuns = f_operators_extrafuns + ")\n";
@@ -146,23 +172,34 @@ class SMT_LIB_Solver: public SMT_Solver {
     {
       f_variables_extrafuns = "";
       ATermList v_variables = ATindexedSetElements(f_variables);
-      if (!ATisEmpty(v_variables)) {
+      if (!ATisEmpty(v_variables))
+      {
         f_variables_extrafuns = "  :extrafuns (";
-        while (!ATisEmpty(v_variables)) {
+        while (!ATisEmpty(v_variables))
+        {
           ATermAppl v_variable = core::ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
           char* v_variable_string;
           v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
           sort_expression v_sort = data_expression(v_variable).sort();
-          if (sort_real::is_real(v_sort)) {
+          if (sort_real::is_real(v_sort))
+          {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
-          } else if (sort_int::is_int(v_sort)) {
+          }
+          else if (sort_int::is_int(v_sort))
+          {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          } else if (sort_nat::is_nat(v_sort)) {
+          }
+          else if (sort_nat::is_nat(v_sort))
+          {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          } else if (sort_pos::is_pos(v_sort)) {
+          }
+          else if (sort_pos::is_pos(v_sort))
+          {
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          } else {
+          }
+          else
+          {
             size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort), 0);
             char* v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
             sprintf(v_sort_string, "sort%lu", v_sort_number);
@@ -175,9 +212,11 @@ class SMT_LIB_Solver: public SMT_Solver {
       }
     }
 
-    void declare_predicates(){
+    void declare_predicates()
+    {
       f_extrapreds = "";
-      if (f_bool2pred) {
+      if (f_bool2pred)
+      {
         char* v_sort_string;
 
         size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
@@ -192,12 +231,15 @@ class SMT_LIB_Solver: public SMT_Solver {
       }
     }
 
-    void produce_notes_for_sorts(){
+    void produce_notes_for_sorts()
+    {
       f_sorts_notes = "";
       ATermList v_sorts = ATindexedSetElements(f_sorts);
-      if (!ATisEmpty(v_sorts)) {
+      if (!ATisEmpty(v_sorts))
+      {
         f_sorts_notes = "  :notes \"";
-        while (!ATisEmpty(v_sorts)) {
+        while (!ATisEmpty(v_sorts))
+        {
           sort_expression v_sort(core::ATAgetFirst(v_sorts));
           v_sorts = ATgetNext(v_sorts);
           size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort));
@@ -213,12 +255,15 @@ class SMT_LIB_Solver: public SMT_Solver {
       }
     }
 
-    void produce_notes_for_operators(){
+    void produce_notes_for_operators()
+    {
       f_operators_notes = "";
       ATermList v_operators = ATindexedSetElements(f_operators);
-      if (!ATisEmpty(v_operators)) {
+      if (!ATisEmpty(v_operators))
+      {
         f_operators_notes = "  :notes \"";
-        while (!ATisEmpty(v_operators)) {
+        while (!ATisEmpty(v_operators))
+        {
           ATermAppl v_operator = core::ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
           size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
@@ -234,98 +279,168 @@ class SMT_LIB_Solver: public SMT_Solver {
       }
     }
 
-    void produce_notes_for_predicates(){
+    void produce_notes_for_predicates()
+    {
       f_predicates_notes = "";
-      if (f_bool2pred) {
+      if (f_bool2pred)
+      {
         f_predicates_notes =
           "  :notes \"bool2pred was introduced, because the smt-lib format cannot deal\"\n"
           "  :notes \"with boolean variables or functions returning boolean values.\"\n";
       }
     }
 
-    void translate_clause(ATermAppl a_clause, bool a_expecting_predicate){
-      if (sort_bool::is_not_application(data_expression(a_clause))) {
+    void translate_clause(ATermAppl a_clause, bool a_expecting_predicate)
+    {
+      if (sort_bool::is_not_application(data_expression(a_clause)))
+      {
         translate_not(a_clause);
-      } else if (is_equal_to_application(data_expression(a_clause))) {
+      }
+      else if (is_equal_to_application(data_expression(a_clause)))
+      {
         translate_equality(a_clause);
-      } else if (is_not_equal_to_application(data_expression(a_clause))) {
+      }
+      else if (is_not_equal_to_application(data_expression(a_clause)))
+      {
         translate_inequality(a_clause);
-      } else if (is_greater_application(data_expression(a_clause))) {
+      }
+      else if (is_greater_application(data_expression(a_clause)))
+      {
         translate_greater_than(a_clause);
-      } else if (is_greater_equal_application(data_expression(a_clause))) {
+      }
+      else if (is_greater_equal_application(data_expression(a_clause)))
+      {
         translate_greater_than_or_equal(a_clause);
-      } else if (is_less_application(data_expression(a_clause))) {
+      }
+      else if (is_less_application(data_expression(a_clause)))
+      {
         translate_less_than(a_clause);
-      } else if (is_less_equal_application(data_expression(a_clause))) {
+      }
+      else if (is_less_equal_application(data_expression(a_clause)))
+      {
         translate_less_than_or_equal(a_clause);
-      } else if (sort_real::is_plus_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_plus_application(data_expression(a_clause)))
+      {
         translate_plus(a_clause);
-      } else if (sort_real::is_negate_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_negate_application(data_expression(a_clause)))
+      {
         translate_unary_minus(a_clause);
-      } else if (sort_real::is_minus_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_minus_application(data_expression(a_clause)))
+      {
         translate_binary_minus(a_clause);
-      } else if (sort_real::is_times_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_times_application(data_expression(a_clause)))
+      {
         translate_multiplication(a_clause);
-      } else if (sort_real::is_maximum_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_maximum_application(data_expression(a_clause)))
+      {
         translate_max(a_clause);
-      } else if (sort_real::is_minimum_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_minimum_application(data_expression(a_clause)))
+      {
         translate_min(a_clause);
-      } else if (sort_real::is_abs_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_abs_application(data_expression(a_clause)))
+      {
         translate_abs(a_clause);
-      } else if (sort_real::is_succ_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_succ_application(data_expression(a_clause)))
+      {
         translate_succ(a_clause);
-      } else if (sort_real::is_pred_application(data_expression(a_clause))) {
+      }
+      else if (sort_real::is_pred_application(data_expression(a_clause)))
+      {
         translate_pred(a_clause);
-      } else if (sort_pos::is_add_with_carry_application(data_expression(a_clause))) {
+      }
+      else if (sort_pos::is_add_with_carry_application(data_expression(a_clause)))
+      {
         translate_add_c(a_clause);
-      } else if (sort_nat::is_cnat_application(data_expression(a_clause))) {
+      }
+      else if (sort_nat::is_cnat_application(data_expression(a_clause)))
+      {
         translate_c_nat(a_clause);
-      } else if (sort_int::is_cint_application(data_expression(a_clause))) {
+      }
+      else if (sort_int::is_cint_application(data_expression(a_clause)))
+      {
         translate_c_int(a_clause);
-      //} else if (gsIsDataExprCReal(data_expression(a_clause))) {
-      //  translate_c_real(a_clause);
-      } else if (sort_int::is_integer_constant(data_expression(a_clause))) {
+        //} else if (gsIsDataExprCReal(data_expression(a_clause))) {
+        //  translate_c_real(a_clause);
+      }
+      else if (sort_int::is_integer_constant(data_expression(a_clause)))
+      {
         translate_int_constant(a_clause);
-      } else if (sort_nat::is_natural_constant(data_expression(a_clause))) {
+      }
+      else if (sort_nat::is_natural_constant(data_expression(a_clause)))
+      {
         translate_nat_constant(a_clause);
-      } else if (sort_pos::is_positive_constant(data_expression(a_clause))) {
+      }
+      else if (sort_pos::is_positive_constant(data_expression(a_clause)))
+      {
         translate_pos_constant(a_clause);
-      } else if (sort_bool::is_true_function_symbol(data_expression(a_clause)) && a_expecting_predicate) {
+      }
+      else if (sort_bool::is_true_function_symbol(data_expression(a_clause)) && a_expecting_predicate)
+      {
         translate_true();
-      } else if (sort_bool::is_false_function_symbol(data_expression(a_clause)) && a_expecting_predicate) {
+      }
+      else if (sort_bool::is_false_function_symbol(data_expression(a_clause)) && a_expecting_predicate)
+      {
         translate_false();
-      } else if (core::detail::gsIsDataVarId(a_clause)) {
-        if (a_expecting_predicate) {
+      }
+      else if (core::detail::gsIsDataVarId(a_clause))
+      {
+        if (a_expecting_predicate)
+        {
           add_bool2pred_and_translate_clause(a_clause);
-        } else if (sort_nat::is_nat(data_expression(a_clause).sort())) {
+        }
+        else if (sort_nat::is_nat(data_expression(a_clause).sort()))
+        {
           translate_nat_variable(a_clause);
-        } else if (sort_pos::is_pos(data_expression(a_clause).sort())) {
+        }
+        else if (sort_pos::is_pos(data_expression(a_clause).sort()))
+        {
           translate_pos_variable(a_clause);
-        } else {
+        }
+        else
+        {
           translate_variable(a_clause);
         }
-      } else if (f_expression_info.is_operator(a_clause)) {
-        if (a_expecting_predicate) {
+      }
+      else if (f_expression_info.is_operator(a_clause))
+      {
+        if (a_expecting_predicate)
+        {
           add_bool2pred_and_translate_clause(a_clause);
-        } else {
+        }
+        else
+        {
           translate_unknown_operator(a_clause);
         }
-      } else if (core::detail::gsIsOpId(a_clause)) {
+      }
+      else if (core::detail::gsIsOpId(a_clause))
+      {
         translate_constant(a_clause);
-      } else {
+      }
+      else
+      {
         throw mcrl2::runtime_error("Unable to handle the current clause (" +
-                pp(a_clause) + ").");
+                                   pp(a_clause) + ").");
       }
     }
 
-    void add_bool2pred_and_translate_clause(ATermAppl a_clause){
+    void add_bool2pred_and_translate_clause(ATermAppl a_clause)
+    {
       f_bool2pred = true;
       f_formula = f_formula + "(bool2pred ";
       translate_clause(a_clause, false);
       f_formula = f_formula + ")";
     }
 
-    void translate_not(ATermAppl a_clause){
+    void translate_not(ATermAppl a_clause)
+    {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -334,7 +449,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_equality(ATermAppl a_clause){
+    void translate_equality(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -346,7 +462,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_inequality(ATermAppl a_clause){
+    void translate_inequality(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -358,7 +475,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_greater_than(ATermAppl a_clause){
+    void translate_greater_than(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -370,7 +488,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_greater_than_or_equal(ATermAppl a_clause){
+    void translate_greater_than_or_equal(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -382,7 +501,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_less_than(ATermAppl a_clause){
+    void translate_less_than(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -394,7 +514,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_less_than_or_equal(ATermAppl a_clause){
+    void translate_less_than_or_equal(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -406,7 +527,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_plus(ATermAppl a_clause){
+    void translate_plus(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -418,7 +540,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_unary_minus(ATermAppl a_clause){
+    void translate_unary_minus(ATermAppl a_clause)
+    {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -427,7 +550,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_binary_minus(ATermAppl a_clause) {
+    void translate_binary_minus(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -439,7 +563,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_multiplication(ATermAppl a_clause) {
+    void translate_multiplication(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -451,7 +576,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_max(ATermAppl a_clause) {
+    void translate_max(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -467,7 +593,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_min(ATermAppl a_clause){
+    void translate_min(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -483,7 +610,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_abs(ATermAppl a_clause) {
+    void translate_abs(ATermAppl a_clause)
+    {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -496,7 +624,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_succ(ATermAppl a_clause) {
+    void translate_succ(ATermAppl a_clause)
+    {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -505,7 +634,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + " 1)";
     }
 
-    void translate_pred(ATermAppl a_clause){
+    void translate_pred(ATermAppl a_clause)
+    {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -514,7 +644,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + " 1)";
     }
 
-    void translate_add_c(ATermAppl a_clause) {
+    void translate_add_c(ATermAppl a_clause)
+    {
       ATermAppl v_clause_1, v_clause_2, v_clause_3;
 
       v_clause_1 = f_expression_info.get_argument(a_clause, 0);
@@ -533,14 +664,16 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + "))";
     }
 
-    void translate_c_nat(ATermAppl a_clause) {
+    void translate_c_nat(ATermAppl a_clause)
+    {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
       translate_clause(v_clause, false);
     }
 
-    void translate_c_int(ATermAppl a_clause) {
+    void translate_c_int(ATermAppl a_clause)
+    {
       ATermAppl v_clause;
 
       v_clause = f_expression_info.get_argument(a_clause, 0);
@@ -549,7 +682,8 @@ class SMT_LIB_Solver: public SMT_Solver {
 
     //void translate_c_real(ATermAppl a_clause);
 
-    void translate_unknown_operator(ATermAppl a_clause) {
+    void translate_unknown_operator(ATermAppl a_clause)
+    {
       size_t v_operator_number;
       ATermAppl v_operator;
       char* v_operator_string;
@@ -562,10 +696,10 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + "(" + v_operator_string;
       free(v_operator_string);
       v_operator_string = 0;
-      if(data::is_application(a_clause))
+      if (data::is_application(a_clause))
       {
         data::application a = data::application(data::data_expression(a_clause));
-        for(data_expression_list::iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
+        for (data_expression_list::iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
         {
           f_formula = f_formula + " ";
           translate_clause(*i, false);
@@ -574,7 +708,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_formula = f_formula + ")";
     }
 
-    void translate_variable(ATermAppl a_clause) {
+    void translate_variable(ATermAppl a_clause)
+    {
       char* v_string;
 
       v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
@@ -583,7 +718,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
     }
 
-    void translate_nat_variable(ATermAppl a_clause) {
+    void translate_nat_variable(ATermAppl a_clause)
+    {
       char* v_string;
 
       v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
@@ -593,7 +729,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       ATindexedSetPut(f_nat_variables, (ATerm) a_clause, 0);
     }
 
-    void translate_pos_variable(ATermAppl a_clause){
+    void translate_pos_variable(ATermAppl a_clause)
+    {
       char* v_string;
 
       v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
@@ -603,35 +740,44 @@ class SMT_LIB_Solver: public SMT_Solver {
       ATindexedSetPut(f_pos_variables, (ATerm) a_clause, 0);
     }
 
-    void translate_int_constant(ATermAppl a_clause) {
+    void translate_int_constant(ATermAppl a_clause)
+    {
       std::string v_value(data::sort_int::integer_constant_as_string(data::data_expression(a_clause)));
-      if (v_value[0] == '-') {
+      if (v_value[0] == '-')
+      {
         v_value[0] = '~';
         f_formula = f_formula + "(" + v_value + ")";
-      } else {
+      }
+      else
+      {
         f_formula = f_formula + v_value;
       }
     }
 
-    void translate_nat_constant(ATermAppl a_clause) {
+    void translate_nat_constant(ATermAppl a_clause)
+    {
       std::string v_value(data::sort_nat::natural_constant_as_string(data::data_expression(a_clause)));
       f_formula = f_formula + v_value;
     }
 
-    void translate_pos_constant(ATermAppl a_clause) {
+    void translate_pos_constant(ATermAppl a_clause)
+    {
       std::string v_value(data::sort_pos::positive_constant_as_string(data::data_expression(a_clause)));
       f_formula = f_formula + v_value;
     }
 
-    void translate_true(){
+    void translate_true()
+    {
       f_formula = f_formula + "true";
     }
 
-    void translate_false() {
+    void translate_false()
+    {
       f_formula = f_formula + "false";
     }
 
-    void translate_constant(ATermAppl a_clause) {
+    void translate_constant(ATermAppl a_clause)
+    {
       size_t v_operator_number;
       ATermAppl v_operator;
       char* v_operator_string;
@@ -646,10 +792,13 @@ class SMT_LIB_Solver: public SMT_Solver {
       v_operator_string = 0;
     }
 
-    void add_nat_clauses(){
+    void add_nat_clauses()
+    {
       ATermList v_variables = ATindexedSetElements(f_nat_variables);
-      if (!ATisEmpty(v_variables)) {
-        while (!ATisEmpty(v_variables)) {
+      if (!ATisEmpty(v_variables))
+      {
+        while (!ATisEmpty(v_variables))
+        {
           ATermAppl v_variable = core::ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
           char* v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
@@ -658,10 +807,13 @@ class SMT_LIB_Solver: public SMT_Solver {
       }
     }
 
-    void add_pos_clauses() {
+    void add_pos_clauses()
+    {
       ATermList v_variables = ATindexedSetElements(f_pos_variables);
-      if (!ATisEmpty(v_variables)) {
-        while (!ATisEmpty(v_variables)) {
+      if (!ATisEmpty(v_variables))
+      {
+        while (!ATisEmpty(v_variables))
+        {
           ATermAppl v_variable = core::ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
           char* v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
@@ -676,7 +828,8 @@ class SMT_LIB_Solver: public SMT_Solver {
     /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
     /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
     /// clauses
-    void translate(ATermList a_formula) {
+    void translate(ATermList a_formula)
+    {
       ATermAppl v_clause;
 
       ATindexedSetReset(f_sorts);
@@ -688,7 +841,8 @@ class SMT_LIB_Solver: public SMT_Solver {
 
       f_formula = "  :formula (and";
       core::gsVerboseMsg("Formula to be solved: %P\n", a_formula);
-      while (!ATisEmpty(a_formula)) {
+      while (!ATisEmpty(a_formula))
+      {
         v_clause = core::ATAgetFirst(a_formula);
         a_formula = ATgetNext(a_formula);
         f_formula = f_formula + " ";
@@ -713,7 +867,8 @@ class SMT_LIB_Solver: public SMT_Solver {
 
 
   public:
-    SMT_LIB_Solver() {
+    SMT_LIB_Solver()
+    {
       f_sorts = ATindexedSetCreate(100, 75);
       f_operators = ATindexedSetCreate(100, 75);
       f_variables = ATindexedSetCreate(100, 75);
@@ -721,7 +876,8 @@ class SMT_LIB_Solver: public SMT_Solver {
       f_pos_variables = ATindexedSetCreate(100, 75);
     }
 
-    virtual ~SMT_LIB_Solver(){
+    virtual ~SMT_LIB_Solver()
+    {
       ATindexedSetDestroy(f_sorts);
       ATindexedSetDestroy(f_operators);
       ATindexedSetDestroy(f_variables);
@@ -730,116 +886,126 @@ class SMT_LIB_Solver: public SMT_Solver {
     }
 };
 
-      namespace prover {
+namespace prover
+{
 
-        /**
-         * Template class for SMT provers that come as an external binary and use the
-         * SMT-lib format. Input to the tool is specified on standard input,
-         * output is read from standard output and matches one of the strings:
-         * "sat", "unsat", "unknown".
-         *
-         * Parameter T follows the curiously recurring template pattern (CRTP). Type T
-         * is required to have the name and exec methods as in the example below.
-         *
-         *  \code
-         *  class cvc_smt_solver : public binary_smt_solver< cvc_smt_solver > {
-         *    inline static char* name() {
-         *      return "CVC3";
-         *    }
-         *
-         *    inline static void exec() {
-         *      ::execlp("cvc", "cvc3", "-lang smt-lib", 0);
-         *    }
-         *  };
-         *  \endcode
-         **/
-        template < typename T >
-        class binary_smt_solver {
+/**
+ * Template class for SMT provers that come as an external binary and use the
+ * SMT-lib format. Input to the tool is specified on standard input,
+ * output is read from standard output and matches one of the strings:
+ * "sat", "unsat", "unknown".
+ *
+ * Parameter T follows the curiously recurring template pattern (CRTP). Type T
+ * is required to have the name and exec methods as in the example below.
+ *
+ *  \code
+ *  class cvc_smt_solver : public binary_smt_solver< cvc_smt_solver > {
+ *    inline static char* name() {
+ *      return "CVC3";
+ *    }
+ *
+ *    inline static void exec() {
+ *      ::execlp("cvc", "cvc3", "-lang smt-lib", 0);
+ *    }
+ *  };
+ *  \endcode
+ **/
+template < typename T >
+class binary_smt_solver
+{
 
-          protected:
+  protected:
 
-            // \brief Calls one of the exec functions
-            static bool execute(std::string const& benchmark);
+    // \brief Calls one of the exec functions
+    static bool execute(std::string const& benchmark);
 
-          public:
+  public:
 
-            // \brief Checks the availability/usability of the prover
-            static bool usable();
-        };
+    // \brief Checks the availability/usability of the prover
+    static bool usable();
+};
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
 # include "mcrl2/core/messaging.h"
 # include <unistd.h>
-      /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
-      /// CVC / (http://www.cs.nyu.edu/acsys/cvcl/) to determine the satisfiability
-      /// of propositional formulas. To use the solver CVC / the directory containing
-      /// the corresponding executable must be in the path.
-      ///
-      /// The static method usable can be used to check checks if CVC's executable is indeed available.
-      ///
-      /// The method SMT_Solver_CVC::is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
-      /// indicates whether or not this formula is satisfiable.
-      class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_solver > {
-        friend class binary_smt_solver< cvc_smt_solver >;
+/// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
+/// CVC / (http://www.cs.nyu.edu/acsys/cvcl/) to determine the satisfiability
+/// of propositional formulas. To use the solver CVC / the directory containing
+/// the corresponding executable must be in the path.
+///
+/// The static method usable can be used to check checks if CVC's executable is indeed available.
+///
+/// The method SMT_Solver_CVC::is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
+/// indicates whether or not this formula is satisfiable.
+class cvc_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< cvc_smt_solver >
+{
+    friend class binary_smt_solver< cvc_smt_solver >;
 
-        private:
+  private:
 
-          inline static char const* name() {
-            return "CVC3";
-          }
+    inline static char const* name()
+    {
+      return "CVC3";
+    }
 
-          inline static void exec() {
-            ::execlp("cvc3", "cvc3", "-lang", "smt-lib", (char*)0);
-          }
+    inline static void exec()
+    {
+      ::execlp("cvc3", "cvc3", "-lang", "smt-lib", (char*)0);
+    }
 
-        public:
+  public:
 
-          /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
-          /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
-          /// clauses
-          bool is_satisfiable(ATermList a_formula) {
-            translate(a_formula);
+    /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
+    /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
+    /// clauses
+    bool is_satisfiable(ATermList a_formula)
+    {
+      translate(a_formula);
 
-            return execute(f_benchmark);
-          }
-      };
+      return execute(f_benchmark);
+    }
+};
 
-      /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver Ario 1.1
-      /// (http://www.eecs.umich.edu/~ario/) to determine the satisfiability of propositional formulas. To use the solver Ario
-      /// 1.1, the directory containing the corresponding executable must be in the path.
-      ///
-      /// The static method usable can be used to check checks if CVC's executable is indeed available.
-      ///
-      /// The method is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
-      /// indicates whether or not this formula is satisfiable.
-      class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_smt_solver > {
-        friend class binary_smt_solver< ario_smt_solver >;
+/// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver Ario 1.1
+/// (http://www.eecs.umich.edu/~ario/) to determine the satisfiability of propositional formulas. To use the solver Ario
+/// 1.1, the directory containing the corresponding executable must be in the path.
+///
+/// The static method usable can be used to check checks if CVC's executable is indeed available.
+///
+/// The method is_satisfiable receives a formula in conjunctive normal form as parameter a_formula and
+/// indicates whether or not this formula is satisfiable.
+class ario_smt_solver : public SMT_LIB_Solver, public binary_smt_solver< ario_smt_solver >
+{
+    friend class binary_smt_solver< ario_smt_solver >;
 
-        private:
+  private:
 
-          inline static char const* name() {
-            return "Ario";
-          }
+    inline static char const* name()
+    {
+      return "Ario";
+    }
 
-          inline static void exec() {
-            ::execlp("ario", "ario", (char*)0);
-          }
+    inline static void exec()
+    {
+      ::execlp("ario", "ario", (char*)0);
+    }
 
-        public:
+  public:
 
-          /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
-          /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
-          /// clauses
-          bool is_satisfiable(ATermList a_formula) {
-            translate(a_formula);
+    /// precondition: The argument passed as parameter a_formula is a list of expressions of sort Bool in internal mCRL2
+    /// format. The argument represents a formula in conjunctive normal form, where the elements of the list represent the
+    /// clauses
+    bool is_satisfiable(ATermList a_formula)
+    {
+      translate(a_formula);
 
-            return execute(f_benchmark);
-          }
-      };
+      return execute(f_benchmark);
+    }
+};
 #endif
-     } // prover
+} // prover
 
-    } // detail
-  } // data
+} // detail
+} // data
 } // mcrl2
 
 #endif

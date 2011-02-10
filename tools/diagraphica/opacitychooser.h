@@ -21,63 +21,63 @@
 
 class OpacityChooser : public Visualizer
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     OpacityChooser(
-        Mediator* m,
-        Graph* g,
-        GLCanvas* c );
+      Mediator* m,
+      Graph* g,
+      GLCanvas* c);
     virtual ~OpacityChooser();
 
     // -- set functions ---------------------------------------------
-    void setActive( const bool &flag );
+    void setActive(const bool& flag);
     void setPoints(
-        const std::vector< double > &opa,
-        const std::vector< double > &y );
-    
+      const std::vector< double > &opa,
+      const std::vector< double > &y);
+
     // -- visualization functions  ----------------------------------
-    void visualize( const bool &inSelectMode );
-    
+    void visualize(const bool& inSelectMode);
+
     // -- event handlers --------------------------------------------
-    void handleMouseLftDownEvent( 
-        const int &x, 
-        const int &y );
-    void handleMouseLftUpEvent( 
-        const int &x, 
-        const int &y );
-    void handleMouseRgtDownEvent( 
-        const int &x, 
-        const int &y );
-    void handleMouseRgtUpEvent( 
-        const int &x, 
-        const int &y );
-	void handleMouseMotionEvent( 
-        const int &x, 
-        const int &y );
+    void handleMouseLftDownEvent(
+      const int& x,
+      const int& y);
+    void handleMouseLftUpEvent(
+      const int& x,
+      const int& y);
+    void handleMouseRgtDownEvent(
+      const int& x,
+      const int& y);
+    void handleMouseRgtUpEvent(
+      const int& x,
+      const int& y);
+    void handleMouseMotionEvent(
+      const int& x,
+      const int& y);
 
     // -- public constants ------------------------------------------
     static double hdlSzeHnt;
-    
-protected:
+
+  protected:
     // -- utility drawing functions ---------------------------------
     // ***
     //void clear();
     void drawGrayScale();
-    void drawPath( const bool &inSelectMode );
-    void drawPoints( const bool &inSelectMode );
+    void drawPath(const bool& inSelectMode);
+    void drawPoints(const bool& inSelectMode);
 
     // -- utility event handlers ------------------------------------
-    void handleHits( const std::vector< int > &ids );
+    void handleHits(const std::vector< int > &ids);
     void handleDrag();
 
     // -- hit detection ---------------------------------------------
-    void processHits( 
-        GLint hits, 
-        GLuint buffer[] );
+    void processHits(
+      GLint hits,
+      GLuint buffer[]);
 
     // -- data members ----------------------------------------------
     bool active;
-    
+
     std::vector< double > positionsX;
     std::vector< double > positionsY;
     int dragIdx;

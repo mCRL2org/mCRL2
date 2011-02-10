@@ -39,7 +39,7 @@ class sim_partitioner
   public:
     /** Creates a partitioner for an LTS.
      * \param[in] l Pointer to the LTS. */
-    sim_partitioner(LTS_TYPE &l);
+    sim_partitioner(LTS_TYPE& l);
 
     /** Destroys this partitioner. */
     ~sim_partitioner();
@@ -100,7 +100,7 @@ class sim_partitioner
       ptrdiff_t prev;
     };
 
-    LTS_TYPE &aut;
+    LTS_TYPE& aut;
     mcrl2::lts::outgoing_transitions_per_state_action_t trans_index;
     size_t s_Sigma;
     size_t s_Pi;
@@ -113,11 +113,11 @@ class sim_partitioner
     std::vector<ptrdiff_t> contents_t;
     std::vector<ptrdiff_t> contents_u;
     std::vector< std::vector<bool> > stable;
-    hash_table3 *exists;
-    hash_table3 *forall;
+    hash_table3* exists;
+    hash_table3* forall;
     std::vector< std::vector<size_t> > pre_exists;
     std::vector< std::vector<size_t> > pre_forall;
-    hash_table3 *match;
+    hash_table3* match;
     std::vector< std::vector<bool> > P;
     std::vector< std::vector<bool> > Q;
 
@@ -128,7 +128,7 @@ class sim_partitioner
     void initialise_datastructures();
     //void read_partition_from_file(char *parfile);
 
-    void refine(bool &change);
+    void refine(bool& change);
     void update();
     //void update_lts();
 
@@ -137,7 +137,7 @@ class sim_partitioner
 
     void reverse_topological_sort(std::vector<size_t> &result);
     void dfs_visit(size_t u,std::vector<bool> &visited,
-        std::vector<size_t> &result);
+                   std::vector<size_t> &result);
 
     void initialise_Sigma(size_t gamma,size_t l);
     void initialise_Pi(size_t gamma,size_t l);
@@ -152,14 +152,14 @@ class sim_partitioner
     void print_Pi();
     void print_relation(size_t s,std::vector< std::vector<bool> > &R);
     void print_block(size_t b);
-    void print_structure(hash_table3 *struc);
+    void print_structure(hash_table3* struc);
 };
 
 
 #define LIST_END (-1)
 
 template <class LTS_TYPE>
-sim_partitioner<LTS_TYPE>::sim_partitioner(LTS_TYPE &l)
+sim_partitioner<LTS_TYPE>::sim_partitioner(LTS_TYPE& l)
   : aut(l)
 { }
 
@@ -302,12 +302,12 @@ void sim_partitioner<LTS_TYPE>::initialise_Pi(size_t gamma,size_t l)
 
   contents.clear();
   for (ptrdiff_t i = contents_u[gamma]; i != LIST_END;
-      i = state_buckets[i].next)
+       i = state_buckets[i].next)
   {
     contents.push_back(size_t(i));
   }
   for (ptrdiff_t i = contents_t[gamma]; i != LIST_END;
-      i = state_buckets[i].next)
+       i = state_buckets[i].next)
   {
     contents.push_back(size_t(i));
   }
@@ -317,10 +317,10 @@ void sim_partitioner<LTS_TYPE>::initialise_Pi(size_t gamma,size_t l)
     c = *ci;
     /* iterate over the incoming l-transitions of c */
     using namespace mcrl2::lts;
-    for(outgoing_transitions_per_state_action_t::iterator
-          t=trans_index.lower_bound(std::pair < transition::size_type, transition::size_type >(c,l));
-          t!=trans_index.upper_bound(std::pair < transition::size_type, transition::size_type >(c,l)); ++t)
-    { 
+    for (outgoing_transitions_per_state_action_t::iterator
+         t=trans_index.lower_bound(std::pair < transition::size_type, transition::size_type >(c,l));
+         t!=trans_index.upper_bound(std::pair < transition::size_type, transition::size_type >(c,l)); ++t)
+    {
       a = to(t); // As trans_index is reversed, this is actually the state from which the transition t goes.
       if (!state_touched[a])
       {
@@ -351,7 +351,7 @@ void sim_partitioner<LTS_TYPE>::initialise_Sigma(size_t gamma,size_t l)
 
 /* PRE: s_Sigma = s_Pi */
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::refine(bool &change)
+void sim_partitioner<LTS_TYPE>::refine(bool& change)
 {
   using namespace mcrl2::core;
   /* Initialise the parent and children functions */
@@ -455,7 +455,7 @@ void sim_partitioner<LTS_TYPE>::refine(bool &change)
 
             /* update the block information for the moved states */
             for (ptrdiff_t i = contents_u[s_Pi]; i != LIST_END;
-                i = state_buckets[i].next)
+                 i = state_buckets[i].next)
             {
               block_Pi[i] = s_Pi;
             }
@@ -687,7 +687,7 @@ void sim_partitioner<LTS_TYPE>::induce_P_on_Pi()
 
 template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::filter(size_t S,std::vector< std::vector<bool> > &R,
-    bool B)
+                                       bool B)
 {
   /* Initialise the match function */
   match->clear();
@@ -767,7 +767,7 @@ void sim_partitioner<LTS_TYPE>::cleanup(size_t alpha,size_t beta)
       {
         match->remove(l,beta1,alpha);
         for (alpha1i.set(pre_forall[l][alpha]); !alpha1i.is_end();
-            ++alpha1i)
+             ++alpha1i)
         {
           alpha1 = alpha1i.get_x();
           if (Q[alpha1][beta1])
@@ -812,7 +812,7 @@ std::vector < mcrl2::lts::transition> sim_partitioner<LTS_TYPE>::get_transitions
         {
           alphai.set_end(pre_exists[l][gamma+1]);
           for (alphai.set(pre_exists[l][gamma]); !alphai.is_end();
-              ++alphai)
+               ++alphai)
           {
             pre_sim[alphai.get_x()] = true;
           }
@@ -993,7 +993,7 @@ void sim_partitioner<LTS_TYPE>::print_Sigma_P()
 {
   using namespace mcrl2::core;
   print_Sigma();
-  gsMessage( "Simulation relation: ");
+  gsMessage("Simulation relation: ");
   print_relation(s_Sigma,P);
 }
 
@@ -1070,16 +1070,16 @@ void sim_partitioner<LTS_TYPE>::print_relation(size_t s,
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_structure(hash_table3 *struc)
+void sim_partitioner<LTS_TYPE>::print_structure(hash_table3* struc)
 {
   using namespace mcrl2::core;
   gsMessage("{");
   hash_table3_iterator i(struc);
-  for ( ; !i.is_end(); ++i)
+  for (; !i.is_end(); ++i)
   {
     gsMessage("(%u,%s,%u),", i.get_x(),
-        mcrl2::lts::detail::pp(aut.action_label(i.get_y())).c_str(), 
-        i.get_z());
+              mcrl2::lts::detail::pp(aut.action_label(i.get_y())).c_str(),
+              i.get_z());
   }
   gsMessage("}");
 }

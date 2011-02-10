@@ -15,80 +15,83 @@
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/command_line_interface.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace utilities {
+namespace utilities
+{
 
-namespace tools {
+namespace tools
+{
 
-  /// \brief Base class for tools that use a rewriter.
-  template <typename Tool>
-  class rewriter_tool: public Tool
-  {
-    protected:
-      /// The data rewriter strategy
-      mcrl2::data::rewriter::strategy m_rewrite_strategy;
+/// \brief Base class for tools that use a rewriter.
+template <typename Tool>
+class rewriter_tool: public Tool
+{
+  protected:
+    /// The data rewriter strategy
+    mcrl2::data::rewriter::strategy m_rewrite_strategy;
 
-      /// \brief Add options to an interface description. Also includes
-      /// rewriter options.
-      /// \param desc An interface description
-      void add_options(interface_description& desc)
-      {
-        Tool::add_options(desc);
+    /// \brief Add options to an interface description. Also includes
+    /// rewriter options.
+    /// \param desc An interface description
+    void add_options(interface_description& desc)
+    {
+      Tool::add_options(desc);
 
-        desc.add_option(
-          "rewriter", make_mandatory_argument<data::rewriter::strategy>("NAME", "jitty"),
-          "use rewrite strategy NAME:\n"
-          "  'jitty' for jitty rewriting (default),\n"
-          "  'jittyp' for jitty rewriting with prover,\n"
+      desc.add_option(
+        "rewriter", make_mandatory_argument<data::rewriter::strategy>("NAME", "jitty"),
+        "use rewrite strategy NAME:\n"
+        "  'jitty' for jitty rewriting (default),\n"
+        "  'jittyp' for jitty rewriting with prover,\n"
 #ifdef MCRL2_JITTYC_AVAILABLE
-          "  'jittyc' for compiled jitty rewriting,\n"
+        "  'jittyc' for compiled jitty rewriting,\n"
 #endif
-          "  'inner' for innermost rewriting,\n"
-          "  'innerp' for innermost rewriting with prover, or\n"
+        "  'inner' for innermost rewriting,\n"
+        "  'innerp' for innermost rewriting with prover, or\n"
 #ifdef MCRL2_INNERC_AVAILABLE
-          "  'innerc' for compiled innermost rewriting"
+        "  'innerc' for compiled innermost rewriting"
 #endif
-          ,'r'
-        );
-      }
+        ,'r'
+      );
+    }
 
-      /// \brief Parse non-standard options
-      /// \param parser A command line parser
-      void parse_options(const command_line_parser& parser)
-      {
-        Tool::parse_options(parser);
-        m_rewrite_strategy = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
-      }
+    /// \brief Parse non-standard options
+    /// \param parser A command line parser
+    void parse_options(const command_line_parser& parser)
+    {
+      Tool::parse_options(parser);
+      m_rewrite_strategy = parser.option_argument_as< mcrl2::data::rewriter::strategy >("rewriter");
+    }
 
-    public:
+  public:
 
-      /// \brief Constructor.
-      rewriter_tool(const std::string& name,
-                    const std::string& author,
-                    const std::string& what_is,
-                    const std::string& tool_description,
-                    std::string known_issues = ""
-                   )
-        : Tool(name, author, what_is, tool_description, known_issues),
-          m_rewrite_strategy(mcrl2::data::rewriter::jitty)
-      {}
+    /// \brief Constructor.
+    rewriter_tool(const std::string& name,
+                  const std::string& author,
+                  const std::string& what_is,
+                  const std::string& tool_description,
+                  std::string known_issues = ""
+                 )
+      : Tool(name, author, what_is, tool_description, known_issues),
+        m_rewrite_strategy(mcrl2::data::rewriter::jitty)
+    {}
 
-      /// \brief Returns the rewrite strategy
-      /// \return The rewrite strategy
-      data::rewriter::strategy rewrite_strategy() const
-      {
-        return static_cast<data::rewriter::strategy>(m_rewrite_strategy);
-      }
+    /// \brief Returns the rewrite strategy
+    /// \return The rewrite strategy
+    data::rewriter::strategy rewrite_strategy() const
+    {
+      return static_cast<data::rewriter::strategy>(m_rewrite_strategy);
+    }
 
-      /// \brief Creates a data rewriter as specified on the command line.
-      /// \param data_spec A data specification
-      /// \return A data rewriter
-      data::rewriter create_rewriter(data::data_specification const& data_spec = data::data_specification())
-      {
-        return data::rewriter(data_spec, rewrite_strategy());
-      }
-  };
+    /// \brief Creates a data rewriter as specified on the command line.
+    /// \param data_spec A data specification
+    /// \return A data rewriter
+    data::rewriter create_rewriter(data::data_specification const& data_spec = data::data_specification())
+    {
+      return data::rewriter(data_spec, rewrite_strategy());
+    }
+};
 
 } // namespace tools
 

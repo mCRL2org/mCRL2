@@ -11,7 +11,7 @@
 /*}}}  */
 /*{{{  defines */
 
-#define MAGIC_K	1999
+#define MAGIC_K 1999
 
 /* Declare a local array NAME of type TYPE and SIZE elements (where SIZE
    is not a constant value) */
@@ -35,7 +35,7 @@ char list_id[] = "$Id: list.c 23071 2007-07-02 10:06:17Z eriks $";
  * Initialize list operations
  */
 
-void AT_initList(int argc, char *argv[])
+void AT_initList(int argc, char* argv[])
 {
   /* Suppress unused arguments warning */
   (void) argc;
@@ -48,7 +48,7 @@ void AT_initList(int argc, char *argv[])
 ATermList ATgetTail(ATermList list, int start0)
 {
   size_t start;
-  if (start0 < 0) 
+  if (start0 < 0)
   {
     start = ATgetLength(list) + start0;
   }
@@ -57,7 +57,8 @@ ATermList ATgetTail(ATermList list, int start0)
     start=start0;
   }
 
-  while (start > 0) {
+  while (start > 0)
+  {
     assert(!ATisEmpty(list));
     list = ATgetNext(list);
     start--;
@@ -79,26 +80,31 @@ ATermList ATgetSlice(ATermList list, size_t start, size_t end)
 {
   size_t i, size;
   ATermList result = ATmakeList0();
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,(end<=start?0:end-start)); 
- 
-  if (end<=start)
-    return result;
-  
-  size = end-start;
-  
-  for(i=0; i<start; i++)
-    list = ATgetNext(list);
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,(end<=start?0:end-start));
 
-  for(i=0; i<size; i++) 
+  if (end<=start)
+  {
+    return result;
+  }
+
+  size = end-start;
+
+  for (i=0; i<start; i++)
+  {
+    list = ATgetNext(list);
+  }
+
+  for (i=0; i<size; i++)
   {
     buffer[i] = ATgetFirst(list);
     list = ATgetNext(list);
   }
 
-  for(i=size; i>0; i--) {
+  for (i=size; i>0; i--)
+  {
     result = ATinsert(result, buffer[i-1]);
   }
-  
+
   return result;
 }
 
@@ -113,10 +119,11 @@ ATermList ATappend(ATermList list, ATerm el)
 {
   size_t i, len = ATgetLength(list);
   ATermList result;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
-  
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+
   /* Collect all elements of list in buffer */
-  for(i=0; i<len; i++) {
+  for (i=0; i<len; i++)
+  {
     buffer[i] = ATgetFirst(list);
     list = ATgetNext(list);
   }
@@ -124,10 +131,11 @@ ATermList ATappend(ATermList list, ATerm el)
   result = ATmakeList1(el);
 
   /* Insert elements at the front of the list */
-  for(i=len; i>0; i--) {
+  for (i=len; i>0; i--)
+  {
     result = ATinsert(result, buffer[i-1]);
   }
-  
+
   return result;
 }
 
@@ -141,32 +149,32 @@ ATermList ATappend(ATermList list, ATerm el)
 ATermList ATconcat(ATermList list1, ATermList list2)
 {
   size_t i, len = ATgetLength(list1);
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
   ATermList result = list2;
 
-  if(ATisEqual(list2, ATempty))
-  { 
+  if (ATisEqual(list2, ATempty))
+  {
     return list1;
   }
 
-  if(len == 0)
-  { 
+  if (len == 0)
+  {
     return list2;
   }
 
   /* Collect the elements of list1 in buffer */
-  for(i=0; i<len; i++) 
+  for (i=0; i<len; i++)
   {
     buffer[i] = ATgetFirst(list1);
     list1 = ATgetNext(list1);
   }
 
   /* Insert elements at the front of the list */
-  for(i=len; i>0; i--) 
+  for (i=len; i>0; i--)
   {
     result = ATinsert(result, buffer[i-1]);
   }
-  
+
   return result;
 }
 
@@ -184,15 +192,22 @@ size_t ATindexOf(ATermList list, ATerm el, int startpos)
 {
   size_t i, start;
 
-  if(startpos < 0)
+  if (startpos < 0)
+  {
     start = startpos + ATgetLength(list) + 1;
+  }
   else
+  {
     start = startpos;
+  }
 
-  for(i=0; i<start; i++)
+  for (i=0; i<start; i++)
+  {
     list = ATgetNext(list);
+  }
 
-  while(!ATisEmpty(list) && !ATisEqual(ATgetFirst(list), el)) {
+  while (!ATisEmpty(list) && !ATisEqual(ATgetFirst(list), el))
+  {
     list = ATgetNext(list);
     ++i;
   }
@@ -210,13 +225,15 @@ size_t ATindexOf(ATermList list, ATerm el, int startpos)
 
 ATerm ATelementAt(ATermList list, size_t index)
 {
-  for(; index > 0 && !ATisEmpty(list); index--)
-  { 
+  for (; index > 0 && !ATisEmpty(list); index--)
+  {
     list = ATgetNext(list);
   }
 
   if (ATisEmpty(list))
+  {
     return NULL;
+  }
 
   return ATgetFirst(list);
 }
@@ -233,30 +250,33 @@ ATermList ATremoveElement(ATermList list, ATerm t)
   size_t i = 0;
   ATerm el = NULL;
   ATermList l = list;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list)); 
-  
-  while(!ATisEmpty(l)) 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list));
+
+  while (!ATisEmpty(l))
   {
     el = ATgetFirst(l);
     l = ATgetNext(l);
     buffer[i++] = el;
-    if(ATisEqual(el, t))
+    if (ATisEqual(el, t))
+    {
       break;
+    }
   }
 
-  if(!ATisEqual(el, t)) 
+  if (!ATisEqual(el, t))
   {
     return list;
   }
 
   list = l; /* Skip element to be removed */
 
-  /* We found the element. Add all elements prior to this 
+  /* We found the element. Add all elements prior to this
      one to the tail of the list. */
-  for(i-=1; i>0; i--) {
+  for (i-=1; i>0; i--)
+  {
     list = ATinsert(list, buffer[i-1]);
   }
-  
+
   return list;
 }
 
@@ -270,18 +290,20 @@ ATermList ATremoveElement(ATermList list, ATerm t)
 ATermList ATremoveElementAt(ATermList list, size_t idx)
 {
   size_t i;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx); 
-  
-  for(i=0; i<idx; i++) {
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
+
+  for (i=0; i<idx; i++)
+  {
     buffer[i] = ATgetFirst(list);
     list = ATgetNext(list);
   }
 
   list = ATgetNext(list);
-  for(i=idx; i>0; i--) {
+  for (i=idx; i>0; i--)
+  {
     list = ATinsert(list, buffer[i-1]);
   }
-  
+
   return list;
 }
 
@@ -295,9 +317,10 @@ ATermList ATremoveElementAt(ATermList list, size_t idx)
 ATermList ATreplace(ATermList list, ATerm el, size_t idx)
 {
   size_t i;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx); 
-  
-  for(i=0; i<idx; i++) {
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
+
+  for (i=0; i<idx; i++)
+  {
     buffer[i] = ATgetFirst(list);
     list = ATgetNext(list);
   }
@@ -306,10 +329,11 @@ ATermList ATreplace(ATermList list, ATerm el, size_t idx)
   /* Add the new element */
   list = ATinsert(list, el);
   /* Add the prefix */
-  for(i=idx; i>0; i--) {
+  for (i=idx; i>0; i--)
+  {
     list = ATinsert(list, buffer[i-1]);
   }
-  
+
   return list;
 }
 
@@ -324,7 +348,7 @@ ATermList ATreverse(ATermList list)
 {
   ATermList result = ATempty;
 
-  while(!ATisEmpty(list)) 
+  while (!ATisEmpty(list))
   {
     result = ATinsert(result, ATgetFirst(list));
     list = ATgetNext(list);
@@ -339,7 +363,7 @@ ATermList ATreverse(ATermList list)
 
 static int (*compare_func)(const ATerm t1, const ATerm t2);
 
-static int compare_terms(const ATerm *t1, const ATerm *t2)
+static int compare_terms(const ATerm* t1, const ATerm* t2)
 {
   return compare_func(*t1, *t2);
 }
@@ -347,23 +371,25 @@ static int compare_terms(const ATerm *t1, const ATerm *t2)
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 {
   size_t idx, len = ATgetLength(list);
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
 
   idx = 0;
-  while (!ATisEmpty(list)) {
+  while (!ATisEmpty(list))
+  {
     buffer[idx++] = ATgetFirst(list);
     list = ATgetNext(list);
   }
 
   compare_func = compare;
   qsort(buffer, len, sizeof(ATerm),
-	(int (*)(const void *, const void *))compare_terms);
+        (int (*)(const void*, const void*))compare_terms);
 
   list = ATempty;
-  for (idx=len; idx>0; idx--) {
+  for (idx=len; idx>0; idx--)
+  {
     list = ATinsert(list, buffer[idx-1]);
   }
-  
+
   return list;
 }
 
@@ -381,15 +407,18 @@ ATermList ATgetArguments(ATermAppl appl)
   AFun s = ATgetAFun(appl);
   size_t i, len = ATgetArity(s);
   ATermList result = ATempty;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len); 
+  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
 
-  for(i=0; i<len; i++)
+  for (i=0; i<len; i++)
+  {
     buffer[i] = ATgetArgument(appl, i);
+  }
 
-  for(i=len; i>0; i--) {
+  for (i=len; i>0; i--)
+  {
     result = ATinsert(result, buffer[i-1]);
   }
-  
+
   return result;
 }
 
@@ -397,23 +426,29 @@ ATermList ATgetArguments(ATermAppl appl)
 
 /*{{{  size_t ATgetLength(ATermList list) */
 
-size_t ATgetLength(ATermList list) 
+size_t ATgetLength(ATermList list)
 {
   size_t length = ((size_t)GET_LENGTH((list)->header));
-  
+
   if (length < MAX_LENGTH-1)
+  {
     return length;
-    
+  }
+
   /* Length of the list exceeds the size that can be stored in the header
      Count the length of the list.
   */
-  
-  while (1) {
+
+  while (1)
+  {
     list = ATgetNext(list);
-    if ((size_t)GET_LENGTH((list)->header) < (MAX_LENGTH-1)) break;
+    if ((size_t)GET_LENGTH((list)->header) < (MAX_LENGTH-1))
+    {
+      break;
+    }
     length += 1;
   };
-  
+
   return length;
 }
 

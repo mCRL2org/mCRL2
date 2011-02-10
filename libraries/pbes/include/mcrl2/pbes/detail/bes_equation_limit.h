@@ -18,35 +18,38 @@
 #include <limits>
 #include <stdexcept>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
-  template <class T> // note, T is only a dummy
-  struct bes_equation_limit
+template <class T> // note, T is only a dummy
+struct bes_equation_limit
+{
+  static size_t max_bes_equations;
+};
+
+template <class T>
+size_t bes_equation_limit<T>::max_bes_equations = (std::numeric_limits<size_t>::max)();
+
+inline
+void set_bes_equation_limit(size_t size)
+{
+  bes_equation_limit<size_t>::max_bes_equations = size;
+}
+
+inline
+void check_bes_equation_limit(size_t size)
+{
+  if (size >= bes_equation_limit<size_t>::max_bes_equations)
   {
-    static size_t max_bes_equations;
-  };
-
-  template <class T>
-  size_t bes_equation_limit<T>::max_bes_equations = (std::numeric_limits<size_t>::max)(); 
-
-  inline
-  void set_bes_equation_limit(size_t size)
-  {
-    bes_equation_limit<size_t>::max_bes_equations = size;
+    throw std::out_of_range("Error: number of BES equations has exceeded the limit");
   }
-
-  inline
-  void check_bes_equation_limit(size_t size)
-  {
-  	if (size >= bes_equation_limit<size_t>::max_bes_equations)
-    {
-    	throw std::out_of_range("Error: number of BES equations has exceeded the limit");
-    }
-  }
+}
 
 } // namespace detail
 

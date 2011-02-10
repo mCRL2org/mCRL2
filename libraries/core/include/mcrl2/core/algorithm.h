@@ -15,55 +15,57 @@
 #include <iostream>
 #include <string>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace core {
+namespace core
+{
 
-    /// \brief Base class for algorithms.
-    class algorithm
+/// \brief Base class for algorithms.
+class algorithm
+{
+  protected:
+    size_t m_verbose_level;
+
+    /// \brief Returns a reference to the verbosity level.
+    /// The higher this number, the more output that will be written to clog.
+    /// Verbosity level 0 means no output.
+    size_t& verbose_level()
     {
-    protected:
-      size_t m_verbose_level;
+      return m_verbose_level;
+    }
 
-      /// \brief Returns a reference to the verbosity level.
-      /// The higher this number, the more output that will be written to clog.
-      /// Verbosity level 0 means no output.
-      size_t& verbose_level()
-      {
-        return m_verbose_level;
-      }
+    /// \brief Returns the verbosity level.
+    size_t verbose_level() const
+    {
+      return m_verbose_level;
+    }
 
-      /// \brief Returns the verbosity level.
-      size_t verbose_level() const
-      {
-        return m_verbose_level;
-      }
-      
-      /// \brief Returns true if a message with the given level should be printed.
-      bool check_log_level(size_t level) const
-      {
-        return m_verbose_level >= level;
-      }
-      
-      /// \brief Very simplistic log function
-      void LOG(size_t level, const std::string& s) const
-      {
-        if (check_log_level(level))
-        {
-          std::clog << s << std::flush;
-        }
-      }
+    /// \brief Returns true if a message with the given level should be printed.
+    bool check_log_level(size_t level) const
+    {
+      return m_verbose_level >= level;
+    }
 
-    public:
-      /// \brief Constructor
-      algorithm(size_t verbose_level = 0)
+    /// \brief Very simplistic log function
+    void LOG(size_t level, const std::string& s) const
+    {
+      if (check_log_level(level))
+      {
+        std::clog << s << std::flush;
+      }
+    }
+
+  public:
+    /// \brief Constructor
+    algorithm(size_t verbose_level = 0)
       : m_verbose_level(verbose_level)
-      {
-      }
+    {
+    }
 
-    };
+};
 
-  } // namespace core
+} // namespace core
 
 } // namespace mcrl2
 

@@ -18,93 +18,97 @@
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/lps/add_binding.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace action_formulas {
+namespace action_formulas
+{
 
-  /// \brief Maintains a multiset of bound data variables during traversal
-  template <template <class> class Builder, class Derived>
-  struct add_data_variable_binding: public lps::add_data_variable_binding<Builder, Derived>
+/// \brief Maintains a multiset of bound data variables during traversal
+template <template <class> class Builder, class Derived>
+struct add_data_variable_binding: public lps::add_data_variable_binding<Builder, Derived>
+{
+  typedef lps::add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void enter(exists const& x)
   {
-    typedef lps::add_data_variable_binding<Builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
+    increase_bind_count(x.variables());
+  }
 
-    void enter(exists const& x)
-    {
-      increase_bind_count(x.variables());
-    }
-    
-    void leave(exists const& x)
-    {
-      decrease_bind_count(x.variables());
-    }
-    
-    void enter(forall const& x)
-    {
-      increase_bind_count(x.variables());
-    }
+  void leave(exists const& x)
+  {
+    decrease_bind_count(x.variables());
+  }
 
-    void leave(forall const& x)
-    {
-      decrease_bind_count(x.variables());
-    }
-  };
+  void enter(forall const& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(forall const& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+};
 
 } // namespace action_formulas
 
-namespace regular_formulas {
+namespace regular_formulas
+{
 
-  /// \brief Maintains a multiset of bound data variables during traversal
-  template <template <class> class Builder, class Derived>
-  struct add_data_variable_binding: public action_formulas::add_data_variable_binding<Builder, Derived>
-  {
-    typedef action_formulas::add_data_variable_binding<Builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
-  };
+/// \brief Maintains a multiset of bound data variables during traversal
+template <template <class> class Builder, class Derived>
+struct add_data_variable_binding: public action_formulas::add_data_variable_binding<Builder, Derived>
+{
+  typedef action_formulas::add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+};
 
 } // namespace regular_formulas
 
-namespace state_formulas {
+namespace state_formulas
+{
 
-  /// \brief Maintains a multiset of bound data variables during traversal
-  template <template <class> class Builder, class Derived>
-  struct add_data_variable_binding: public regular_formulas::add_data_variable_binding<Builder, Derived>
+/// \brief Maintains a multiset of bound data variables during traversal
+template <template <class> class Builder, class Derived>
+struct add_data_variable_binding: public regular_formulas::add_data_variable_binding<Builder, Derived>
+{
+  typedef regular_formulas::add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void enter(exists const& x)
   {
-    typedef regular_formulas::add_data_variable_binding<Builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
+    increase_bind_count(x.variables());
+  }
 
-    void enter(exists const& x)
-    {
-      increase_bind_count(x.variables());
-    }
-    
-    void leave(exists const& x)
-    {
-      decrease_bind_count(x.variables());
-    }
-    
-    void enter(forall const& x)
-    {
-      increase_bind_count(x.variables());
-    }
+  void leave(exists const& x)
+  {
+    decrease_bind_count(x.variables());
+  }
 
-    void leave(forall const& x)
-    {
-      decrease_bind_count(x.variables());
-    }
-  };
+  void enter(forall const& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(forall const& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+};
 
 } // namespace state_formulas
 

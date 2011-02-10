@@ -20,7 +20,7 @@ class XMLImporter: public Importer
     XMLImporter() {};
     ~XMLImporter() {};
 
-    Graph* importFile(const std::string &file);
+    Graph* importFile(const std::string& file);
 };
 
 #endif // XML_IMPORTER_H

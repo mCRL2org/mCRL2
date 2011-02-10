@@ -8,7 +8,7 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
-void enumerate(const std::set<variable>& variables, const data_expression& condition) 
+void enumerate(const std::set<variable>& variables, const data_expression& condition)
 {
   data_specification data_spec;
   data_spec.add_context_sort(sort_nat::nat());
@@ -32,7 +32,7 @@ void test1()
 
   std::set<variable> variables;
   variables.insert(b);
-  
+
   enumerate(variables, condition);
 }
 

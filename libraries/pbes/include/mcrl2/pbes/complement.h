@@ -29,9 +29,11 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/pbes/builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \cond INTERNAL_DOCS
 // \brief Visitor that pushes a negation in a PBES expression as far as possible

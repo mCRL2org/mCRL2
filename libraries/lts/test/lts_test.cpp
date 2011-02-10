@@ -19,25 +19,28 @@
 
 using namespace mcrl2;
 
-void test_lts(const std::string& test_description, 
-              const lts::lts_aut_t &l,
+void test_lts(const std::string& test_description,
+              const lts::lts_aut_t& l,
               size_t expected_label_count,
               size_t expected_state_count,
               size_t expected_transition_count
              )
 {
   std::cout << "LPS test: " << test_description << " -----------------------------------------------\n";
-  BOOST_CHECK(l.num_action_labels() == expected_label_count );
+  BOOST_CHECK(l.num_action_labels() == expected_label_count);
   if (l.num_action_labels() != expected_label_count)
-  { std::cout << "Expected # of labels " << expected_label_count << " Actual # " << l.num_action_labels() << "\n";
+  {
+    std::cout << "Expected # of labels " << expected_label_count << " Actual # " << l.num_action_labels() << "\n";
   }
-  BOOST_CHECK(l.num_states() == expected_state_count );
+  BOOST_CHECK(l.num_states() == expected_state_count);
   if (l.num_states() != expected_state_count)
-  { std::cout << "Expected # of states " << expected_state_count << " Actual # " << l.num_states() << "\n";
+  {
+    std::cout << "Expected # of states " << expected_state_count << " Actual # " << l.num_states() << "\n";
   }
   BOOST_CHECK(l.num_transitions() == expected_transition_count);
   if (l.num_transitions() != expected_transition_count)
-  { std::cout << "Expected # of transitions " << expected_transition_count << " Actual # " << l.num_transitions() << "\n";
+  {
+    std::cout << "Expected # of transitions " << expected_transition_count << " Actual # " << l.num_transitions() << "\n";
   }
   core::garbage_collect();
 }
@@ -45,100 +48,100 @@ void test_lts(const std::string& test_description,
 void test_abp()
 {
   std::string ABP_AUT =
-  "des (0,92,74)            \n"
-  "(0,\"r1(d1)\",1)         \n"
-  "(0,\"r1(d2)\",2)         \n"
-  "(1,\"tau\",3)   \n"
-  "(2,\"tau\",4)   \n"
-  "(3,\"tau\",5)              \n"
-  "(3,\"tau\",6)              \n"
-  "(4,\"tau\",7)              \n"
-  "(4,\"tau\",8)              \n"
-  "(5,\"tau\",9)          \n"
-  "(6,\"tau\",10)  \n"
-  "(7,\"tau\",11)         \n"
-  "(8,\"tau\",12)  \n"
-  "(9,\"tau\",13)     \n"
-  "(10,\"s4(d1)\",14)       \n"
-  "(11,\"tau\",15)    \n"
-  "(12,\"s4(d2)\",16)       \n"
-  "(13,\"tau\",17)            \n"
-  "(13,\"tau\",18)            \n"
-  "(14,\"tau\",19)     \n"
-  "(15,\"tau\",20)            \n"
-  "(15,\"tau\",21)            \n"
-  "(16,\"tau\",22)     \n"
-  "(17,\"tau\",1)         \n"
-  "(18,\"tau\",1)     \n"
-  "(19,\"tau\",23)            \n"
-  "(19,\"tau\",24)            \n"
-  "(20,\"tau\",2)         \n"
-  "(21,\"tau\",2)     \n"
-  "(22,\"tau\",25)            \n"
-  "(22,\"tau\",26)            \n"
-  "(23,\"tau\",27)        \n"
-  "(24,\"tau\",28)     \n"
-  "(25,\"tau\",29)        \n"
-  "(26,\"tau\",28)     \n"
-  "(27,\"tau\",30) \n"
-  "(28,\"r1(d1)\",31)       \n"
-  "(28,\"r1(d2)\",32)       \n"
-  "(29,\"tau\",33)\n"
-  "(30,\"tau\",34)\n"
-  "(30,\"tau\",35)\n"
-  "(31,\"tau\",36)\n"
-  "(32,\"tau\",37)\n"
-  "(33,\"tau\",38)\n"
-  "(33,\"tau\",39)\n"
-  "(34,\"tau\",40)\n"
-  "(35,\"tau\",40)\n"
-  "(36,\"tau\",41)\n"
-  "(36,\"tau\",42)\n"
-  "(37,\"tau\",43)\n"
-  "(37,\"tau\",44)\n"
-  "(38,\"tau\",45)\n"
-  "(39,\"tau\",45)\n"
-  "(40,\"tau\",19)\n"
-  "(41,\"tau\",46)\n"
-  "(42,\"tau\",47)\n"
-  "(43,\"tau\",48)\n"
-  "(44,\"tau\",49)\n"
-  "(45,\"tau\",22)\n"
-  "(46,\"tau\",50)\n"
-  "(47,\"s4(d1)\",51)\n"
-  "(48,\"tau\",52)\n"
-  "(49,\"s4(d2)\",53)\n"
-  "(50,\"tau\",54)\n"
-  "(50,\"tau\",55)\n"
-  "(51,\"tau\",56)\n"
-  "(52,\"tau\",57)\n"
-  "(52,\"tau\",58)\n"
-  "(53,\"tau\",59)    \n"
-  "(54,\"tau\",31)        \n"
-  "(55,\"tau\",31)     \n"
-  "(56,\"tau\",60)            \n"
-  "(56,\"tau\",61)            \n"
-  "(57,\"tau\",32)        \n"
-  "(58,\"tau\",32)     \n"
-  "(59,\"tau\",62)            \n"
-  "(59,\"tau\",63)            \n"
-  "(60,\"tau\",64)        \n"
-  "(61,\"tau\",0)     \n"
-  "(62,\"tau\",65)        \n"
-  "(63,\"tau\",0)     \n"
-  "(64,\"tau\",66)\n"
-  "(65,\"tau\",67)\n"
-  "(66,\"tau\",68)            \n"
-  "(66,\"tau\",69)            \n"
-  "(67,\"tau\",70)            \n"
-  "(67,\"tau\",71)            \n"
-  "(68,\"tau\",72)        \n"
-  "(69,\"tau\",72)\n"
-  "(70,\"tau\",73)        \n"
-  "(71,\"tau\",73)\n"
-  "(72,\"tau\",56)    \n"
-  "(73,\"tau\",59)    \n"
-  ;
+    "des (0,92,74)            \n"
+    "(0,\"r1(d1)\",1)         \n"
+    "(0,\"r1(d2)\",2)         \n"
+    "(1,\"tau\",3)   \n"
+    "(2,\"tau\",4)   \n"
+    "(3,\"tau\",5)              \n"
+    "(3,\"tau\",6)              \n"
+    "(4,\"tau\",7)              \n"
+    "(4,\"tau\",8)              \n"
+    "(5,\"tau\",9)          \n"
+    "(6,\"tau\",10)  \n"
+    "(7,\"tau\",11)         \n"
+    "(8,\"tau\",12)  \n"
+    "(9,\"tau\",13)     \n"
+    "(10,\"s4(d1)\",14)       \n"
+    "(11,\"tau\",15)    \n"
+    "(12,\"s4(d2)\",16)       \n"
+    "(13,\"tau\",17)            \n"
+    "(13,\"tau\",18)            \n"
+    "(14,\"tau\",19)     \n"
+    "(15,\"tau\",20)            \n"
+    "(15,\"tau\",21)            \n"
+    "(16,\"tau\",22)     \n"
+    "(17,\"tau\",1)         \n"
+    "(18,\"tau\",1)     \n"
+    "(19,\"tau\",23)            \n"
+    "(19,\"tau\",24)            \n"
+    "(20,\"tau\",2)         \n"
+    "(21,\"tau\",2)     \n"
+    "(22,\"tau\",25)            \n"
+    "(22,\"tau\",26)            \n"
+    "(23,\"tau\",27)        \n"
+    "(24,\"tau\",28)     \n"
+    "(25,\"tau\",29)        \n"
+    "(26,\"tau\",28)     \n"
+    "(27,\"tau\",30) \n"
+    "(28,\"r1(d1)\",31)       \n"
+    "(28,\"r1(d2)\",32)       \n"
+    "(29,\"tau\",33)\n"
+    "(30,\"tau\",34)\n"
+    "(30,\"tau\",35)\n"
+    "(31,\"tau\",36)\n"
+    "(32,\"tau\",37)\n"
+    "(33,\"tau\",38)\n"
+    "(33,\"tau\",39)\n"
+    "(34,\"tau\",40)\n"
+    "(35,\"tau\",40)\n"
+    "(36,\"tau\",41)\n"
+    "(36,\"tau\",42)\n"
+    "(37,\"tau\",43)\n"
+    "(37,\"tau\",44)\n"
+    "(38,\"tau\",45)\n"
+    "(39,\"tau\",45)\n"
+    "(40,\"tau\",19)\n"
+    "(41,\"tau\",46)\n"
+    "(42,\"tau\",47)\n"
+    "(43,\"tau\",48)\n"
+    "(44,\"tau\",49)\n"
+    "(45,\"tau\",22)\n"
+    "(46,\"tau\",50)\n"
+    "(47,\"s4(d1)\",51)\n"
+    "(48,\"tau\",52)\n"
+    "(49,\"s4(d2)\",53)\n"
+    "(50,\"tau\",54)\n"
+    "(50,\"tau\",55)\n"
+    "(51,\"tau\",56)\n"
+    "(52,\"tau\",57)\n"
+    "(52,\"tau\",58)\n"
+    "(53,\"tau\",59)    \n"
+    "(54,\"tau\",31)        \n"
+    "(55,\"tau\",31)     \n"
+    "(56,\"tau\",60)            \n"
+    "(56,\"tau\",61)            \n"
+    "(57,\"tau\",32)        \n"
+    "(58,\"tau\",32)     \n"
+    "(59,\"tau\",62)            \n"
+    "(59,\"tau\",63)            \n"
+    "(60,\"tau\",64)        \n"
+    "(61,\"tau\",0)     \n"
+    "(62,\"tau\",65)        \n"
+    "(63,\"tau\",0)     \n"
+    "(64,\"tau\",66)\n"
+    "(65,\"tau\",67)\n"
+    "(66,\"tau\",68)            \n"
+    "(66,\"tau\",69)            \n"
+    "(67,\"tau\",70)            \n"
+    "(67,\"tau\",71)            \n"
+    "(68,\"tau\",72)        \n"
+    "(69,\"tau\",72)\n"
+    "(70,\"tau\",73)        \n"
+    "(71,\"tau\",73)\n"
+    "(72,\"tau\",56)    \n"
+    "(73,\"tau\",59)    \n"
+    ;
 
   size_t expected_label_count = 5;
   size_t expected_state_count = 74;
@@ -179,12 +182,12 @@ void test_abp()
 void test_reachability()
 {
   std::string REACH =
-  "des (0,4,5)       \n"
-  "(0,\"reachable\",1)\n"
-  "(1,\"reachable1\",2)\n"
-  "(1,\"reachable2\",3)\n"
-  "(4,\"unreachable\",0)\n"
-  ;
+    "des (0,4,5)       \n"
+    "(0,\"reachable\",1)\n"
+    "(1,\"reachable1\",2)\n"
+    "(1,\"reachable2\",3)\n"
+    "(4,\"unreachable\",0)\n"
+    ;
 
   size_t expected_label_count = 4;
   size_t expected_state_count = 5;
@@ -203,7 +206,7 @@ void test_reachability()
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  
+
   test_abp();
   test_reachability();
 

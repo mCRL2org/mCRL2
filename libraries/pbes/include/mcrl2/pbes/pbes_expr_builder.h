@@ -22,15 +22,18 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/bool.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
-  struct no_substitution
-  {
-  };
+struct no_substitution
+{
+};
 
 }
 
@@ -175,78 +178,108 @@ struct pbes_expr_builder
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPR_BUILDER_DEBUG
-  std::cerr << pbes_expr_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
-  pbes_expr_builder_increase_indent();
+    std::cerr << pbes_expr_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
+    pbes_expr_builder_increase_indent();
 #endif
 
     term_type result;
 
-    if (tr::is_data(e)) {
+    if (tr::is_data(e))
+    {
       result = visit_data_expression(e, tr::term2dataterm(e), arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
-    } else if (tr::is_true(e)) {
+    }
+    else if (tr::is_true(e))
+    {
       result = visit_true(e, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
-    } else if (tr::is_false(e)) {
+    }
+    else if (tr::is_false(e))
+    {
       result = visit_false(e, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
-    } else if (tr::is_not(e)) {
+    }
+    else if (tr::is_not(e))
+    {
       term_type n = tr::arg(e);
       result = visit_not(e, n, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_not(visit(n, arg1));
       }
-    } else if (tr::is_and(e)) {
+    }
+    else if (tr::is_and(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_and(e, l, r, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_and(visit(l, arg1), visit(r, arg1));
       }
-    } else if (tr::is_or(e)) {
+    }
+    else if (tr::is_or(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_or(e, l, r, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_or(visit(l, arg1), visit(r, arg1));
       }
-    } else if (tr::is_imp(e)) {
+    }
+    else if (tr::is_imp(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_imp(e, l, r, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_imp(visit(l, arg1), visit(r, arg1));
       }
-    } else if (tr::is_forall(e)) {
+    }
+    else if (tr::is_forall(e))
+    {
       variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       result = visit_forall(e, qvars, qexpr, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_forall(qvars, visit(qexpr, arg1));
       }
-    } else if (tr::is_exists(e)) {
+    }
+    else if (tr::is_exists(e))
+    {
       variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       result = visit_exists(e, qvars, qexpr, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_exists(qvars, visit(qexpr, arg1));
       }
     }
-    else if(tr::is_prop_var(e)) {
+    else if (tr::is_prop_var(e))
+    {
       result = visit_propositional_variable(e, e, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
     }
-    else {
+    else
+    {
       result = visit_unknown(e, arg1);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
     }
@@ -262,8 +295,8 @@ struct pbes_expr_builder
     }
 
 #ifdef MCRL2_PBES_EXPR_BUILDER_DEBUG
-  pbes_expr_builder_decrease_indent();
-  std::cerr << pbes_expr_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
+    pbes_expr_builder_decrease_indent();
+    std::cerr << pbes_expr_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;
@@ -406,78 +439,108 @@ struct pbes_expr_builder<Term, void>
     typedef core::term_traits<term_type> tr;
 
 #ifdef MCRL2_PBES_EXPR_BUILDER_DEBUG
-  std::cerr << pbes_expr_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
-  pbes_expr_builder_increase_indent();
+    std::cerr << pbes_expr_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
+    pbes_expr_builder_increase_indent();
 #endif
 
     term_type result;
 
-    if (tr::is_data(e)) {
+    if (tr::is_data(e))
+    {
       result = visit_data_expression(e, tr::term2dataterm(e));
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
-    } else if (tr::is_true(e)) {
+    }
+    else if (tr::is_true(e))
+    {
       result = visit_true(e);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
-    } else if (tr::is_false(e)) {
+    }
+    else if (tr::is_false(e))
+    {
       result = visit_false(e);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
-    } else if (tr::is_not(e)) {
+    }
+    else if (tr::is_not(e))
+    {
       term_type n = tr::arg(e);
       result = visit_not(e, n);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_not(visit(n));
       }
-    } else if (tr::is_and(e)) {
+    }
+    else if (tr::is_and(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_and(e, l, r);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_and(visit(l), visit(r));
       }
-    } else if (tr::is_or(e)) {
+    }
+    else if (tr::is_or(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_or(e, l, r);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_or(visit(l), visit(r));
       }
-    } else if (tr::is_imp(e)) {
+    }
+    else if (tr::is_imp(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       result = visit_imp(e, l, r);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_imp(visit(l), visit(r));
       }
-    } else if (tr::is_forall(e)) {
+    }
+    else if (tr::is_forall(e))
+    {
       variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       result = visit_forall(e, qvars, qexpr);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_forall(qvars, visit(qexpr));
       }
-    } else if (tr::is_exists(e)) {
+    }
+    else if (tr::is_exists(e))
+    {
       variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       result = visit_exists(e, qvars, qexpr);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = core::optimized_exists(qvars, visit(qexpr));
       }
     }
-    else if(tr::is_prop_var(e)) {
+    else if (tr::is_prop_var(e))
+    {
       result = visit_propositional_variable(e, e);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
     }
-    else {
+    else
+    {
       result = visit_unknown(e);
-      if (!is_finished(result)) {
+      if (!is_finished(result))
+      {
         result = e;
       }
     }
@@ -493,8 +556,8 @@ struct pbes_expr_builder<Term, void>
     }
 
 #ifdef MCRL2_PBES_EXPR_BUILDER_DEBUG
-  pbes_expr_builder_decrease_indent();
-  std::cerr << pbes_expr_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
+    pbes_expr_builder_decrease_indent();
+    std::cerr << pbes_expr_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
     return result;

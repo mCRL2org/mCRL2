@@ -19,7 +19,7 @@
 using namespace std;
 using namespace MathUtils;
 
-void ColorInterpolator::RGBToHSV(RGB_Color &c, int &h, int &s, int &v)
+void ColorInterpolator::RGBToHSV(RGB_Color& c, int& h, int& s, int& v)
 {
   unsigned char rgb_min = min(c.red(), min(c.green(), c.blue()));
   unsigned char rgb_max = max(c.red(), max(c.green(), c.blue()));
@@ -64,7 +64,8 @@ RGB_Color ColorInterpolator::HSVToRGB(int h, int s, int v)
   int hi = (h / 60) % 6;
   float f = static_cast<float>(h) / 60.0f - hi;
   float r, g, b;
-  switch (hi) {
+  switch (hi)
+  {
     case 0:
       r = vd;
       g = vd*(1-(1-f)*sd);
@@ -102,15 +103,15 @@ RGB_Color ColorInterpolator::HSVToRGB(int h, int s, int v)
       break;
   }
   return RGB_Color(
-    static_cast<unsigned char>(r * 255),
-    static_cast<unsigned char>(g * 255),
-    static_cast<unsigned char>(b * 255) );
+           static_cast<unsigned char>(r * 255),
+           static_cast<unsigned char>(g * 255),
+           static_cast<unsigned char>(b * 255));
 }
 
 /* Precompute color interpolations between c1 and c2. After calling this
  * function, we have:
- * - getColor(0) == c1 
- * - getColor(n+1) == c2 
+ * - getColor(0) == c1
+ * - getColor(n+1) == c2
  * - and for all i, 1 <= i <= n, getColor(i) is the i'th interpolated
  *   color between c1 and c2.
  * Interpolation is done over the Hue dimension of the HSV color space.
@@ -136,7 +137,7 @@ void ColorInterpolator::computeColors(RGB_Color c1, RGB_Color c2, int n, bool is
     {
       h2 = h1;
     }
-    
+
     int delta = h2 - h1;
     if ((is_long && abs(delta) < 180) || (!is_long && abs(delta) >= 180))
     {
@@ -155,9 +156,9 @@ void ColorInterpolator::computeColors(RGB_Color c1, RGB_Color c2, int n, bool is
     float v_i = static_cast<float>(v1);
     float delta_h = static_cast<float>(delta) / static_cast<float>(n + 1);
     float delta_s = static_cast<float>(s2 - s1) /
-      static_cast<float>(n + 1);
+                    static_cast<float>(n + 1);
     float delta_v = static_cast<float>(v2 - v1) /
-      static_cast<float>(n + 1);
+                    static_cast<float>(n + 1);
 
     for (int i = 0; i < n; ++i)
     {
@@ -173,7 +174,7 @@ void ColorInterpolator::computeColors(RGB_Color c1, RGB_Color c2, int n, bool is
         h_i -= 360.0f;
       }
       colors.push_back(HSVToRGB(round_to_int(h_i), round_to_int(s_i),
-            round_to_int(v_i)));
+                                round_to_int(v_i)));
     }
   }
   colors.push_back(c2);

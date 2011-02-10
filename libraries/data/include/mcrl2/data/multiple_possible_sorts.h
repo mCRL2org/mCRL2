@@ -15,9 +15,11 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class multiple_possible_sorts ---//
 /// \brief Multiple possible sorts
@@ -55,7 +57,7 @@ class multiple_possible_sorts: public sort_expression
 };
 //--- end generated class multiple_possible_sorts ---//
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

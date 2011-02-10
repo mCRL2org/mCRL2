@@ -18,71 +18,75 @@
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace action_formulas {
+namespace action_formulas
+{
 
-  template <typename T>
-  void normalize_sorts(T& x,
-                       const data::data_specification& data_spec,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                      )
-  {
-    core::make_update_apply_builder<action_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
-  }
+template <typename T>
+void normalize_sorts(T& x,
+                     const data::data_specification& data_spec,
+                     typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                    )
+{
+  core::make_update_apply_builder<action_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+}
 
-  template <typename T>
-  T normalize_sorts(const T& x,
-                    const data::data_specification& data_spec,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                   )
-  {
-    return core::make_update_apply_builder<action_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
-  }
+template <typename T>
+T normalize_sorts(const T& x,
+                  const data::data_specification& data_spec,
+                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                 )
+{
+  return core::make_update_apply_builder<action_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+}
 
 } // namespace action_formulas
 
-namespace regular_formulas {
+namespace regular_formulas
+{
 
-  template <typename T>
-  void normalize_sorts(T& x,
-                       const data::data_specification& data_spec,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                      )
-  {
-    core::make_update_apply_builder<regular_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
-  }
+template <typename T>
+void normalize_sorts(T& x,
+                     const data::data_specification& data_spec,
+                     typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                    )
+{
+  core::make_update_apply_builder<regular_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+}
 
-  template <typename T>
-  T normalize_sorts(const T& x,
-                    const data::data_specification& data_spec,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                   )
-  {
-    return core::make_update_apply_builder<regular_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
-  }
+template <typename T>
+T normalize_sorts(const T& x,
+                  const data::data_specification& data_spec,
+                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                 )
+{
+  return core::make_update_apply_builder<regular_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+}
 
 } // namespace regular_formulas
 
-namespace state_formulas {
+namespace state_formulas
+{
 
-  template <typename T>
-  void normalize_sorts(T& x,
-                       const data::data_specification& data_spec,
-                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                      )
-  {
-    core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
-  }
+template <typename T>
+void normalize_sorts(T& x,
+                     const data::data_specification& data_spec,
+                     typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                    )
+{
+  core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+}
 
-  template <typename T>
-  T normalize_sorts(const T& x,
-                    const data::data_specification& data_spec,
-                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                   )
-  {
-    return core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
-  }
+template <typename T>
+T normalize_sorts(const T& x,
+                  const data::data_specification& data_spec,
+                  typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                 )
+{
+  return core::make_update_apply_builder<state_formulas::sort_expression_builder>(data::detail::normalize_sorts_function(data_spec))(x);
+}
 
 } // namespace state_formulas
 

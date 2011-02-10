@@ -17,11 +17,12 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 
-  /// \brief The class BDD2Dot offers the ability to write binary decision diagrams to dot files.
-  /// The method BDD2Dot::output_bdd receives a binary decision diagram as parameter a_bdd and writes it to a file in dot
-  /// format with the name passed as parameter a_file_name.
+/// \brief The class BDD2Dot offers the ability to write binary decision diagrams to dot files.
+/// The method BDD2Dot::output_bdd receives a binary decision diagram as parameter a_bdd and writes it to a file in dot
+/// format with the name passed as parameter a_file_name.
 
-class BDD2Dot {
+class BDD2Dot
+{
   private:
     /// \brief The smallest unused node number.
     int f_node_number;
@@ -43,15 +44,21 @@ class BDD2Dot {
     /// restrictions
     void aux_output_bdd(ATermAppl a_bdd)
     {
-      if (ATtableGet(f_visited, (ATerm) a_bdd)) {
+      if (ATtableGet(f_visited, (ATerm) a_bdd))
+      {
         return;
       }
 
-      if (f_bdd_info.is_true(a_bdd)) {
+      if (f_bdd_info.is_true(a_bdd))
+      {
         fprintf(f_dot_file, "  %d [shape=box, label=\"T\"];\n", f_node_number);
-      } else if (f_bdd_info.is_false(a_bdd)) {
+      }
+      else if (f_bdd_info.is_false(a_bdd))
+      {
         fprintf(f_dot_file, "  %d [shape=box, label=\"F\"];\n", f_node_number);
-      } else if (f_bdd_info.is_if_then_else(a_bdd)) {
+      }
+      else if (f_bdd_info.is_if_then_else(a_bdd))
+      {
         ATermAppl v_true_branch = f_bdd_info.get_true_branch(a_bdd);
         ATermAppl v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         aux_output_bdd(v_true_branch);
@@ -62,7 +69,9 @@ class BDD2Dot {
         mcrl2::core::gsfprintf(f_dot_file, "  %d [label=\"%P\"];\n", f_node_number, v_guard);
         fprintf(f_dot_file, "  %d -> %d;\n", f_node_number, v_true_number);
         fprintf(f_dot_file, "  %d -> %d [style=dashed];\n", f_node_number, v_false_number);
-      } else {
+      }
+      else
+      {
         mcrl2::core::gsfprintf(f_dot_file, "  %d [shape=box, label=\"%P\"];\n", f_node_number, a_bdd);
       }
       ATtablePut(f_visited, (ATerm) a_bdd, (ATerm) ATmakeInt(f_node_number++));

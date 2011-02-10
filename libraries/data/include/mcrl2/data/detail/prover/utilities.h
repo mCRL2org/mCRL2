@@ -17,22 +17,25 @@
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
 
-namespace mcrl2 {
-namespace data {
-namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
 /**
  * \brief Converts to textual representation for a boolean
  * \param[in] b the boolean to convert
  * \note for writing to stream consider using std::boolalpha
  **/
-inline const char* bool_to_char_string(bool b) 
+inline const char* bool_to_char_string(bool b)
 {
   return (b) ? "true" : "false";
 }
 
-    }
-  }
+}
+}
 }
 
 #endif

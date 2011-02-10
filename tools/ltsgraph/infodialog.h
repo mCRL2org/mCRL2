@@ -16,14 +16,15 @@
 #include <wx/wx.h>
 #include <wx/listctrl.h>
 
-class InfoDialog: public wxDialog {
+class InfoDialog: public wxDialog
+{
   public:
     InfoDialog(wxWindow* parent);
     void setLTSInfo(size_t is, // Initial state
                     size_t ns, // Number of states
                     size_t nt, // Number of transitions
                     size_t nl // Number of labels/actions
-                    );
+                   );
 
   private:
     wxListCtrl* lts_info;

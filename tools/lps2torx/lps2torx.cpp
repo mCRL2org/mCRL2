@@ -42,12 +42,14 @@ using namespace std;
 
 #define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))
 
-void print_torx_action(ostream &os, ATermAppl mact)
+void print_torx_action(ostream& os, ATermAppl mact)
 {
-  if ( is_tau(mact) )
+  if (is_tau(mact))
   {
     os << "tau";
-  } else {
+  }
+  else
+  {
     ATermAppl act = (ATermAppl) ATgetFirst((ATermList) ATgetArgument(mact,0));
     PrintPart_CXX(cout,ATgetArgument(act,0), ppDefault);
     ATermList dl = (ATermList) ATgetArgument(act,1);
@@ -59,7 +61,8 @@ void print_torx_action(ostream &os, ATermAppl mact)
   }
 }
 
-typedef struct {
+typedef struct
+{
   size_t action;
   size_t state;
 } index_pair;
@@ -105,18 +108,20 @@ class torx_data
       index_pair p;
 
       p.action = ATindexedSetPut(stateactions,triple(from,action,to),&is_new);
-      if ( is_new == ATtrue )
+      if (is_new == ATtrue)
       {
         num_indices = num_indices + 1;
       }
 
       ATerm i;
-      if ( (i = ATtableGet(state_indices,to)) == NULL )
+      if ((i = ATtableGet(state_indices,to)) == NULL)
       {
         assert(p.action<(size_t)1<<(sizeof(int)*8-1));
         ATtablePut(state_indices,to,(ATerm) ATmakeInt(static_cast<int>(p.action)));
         p.state = p.action;
-      } else {
+      }
+      else
+      {
         p.state = ATgetInt((ATermInt) i);
       }
 
@@ -125,10 +130,12 @@ class torx_data
 
     ATerm get_state(size_t index)
     {
-      if ( index < num_indices )
+      if (index < num_indices)
       {
         return third(ATindexedSetGetElem(stateactions,index));
-      } else {
+      }
+      else
+      {
         return NULL;
       }
     }
@@ -147,11 +154,11 @@ class lps2torx_tool : public lps2torx_base
   public:
     lps2torx_tool() :
       lps2torx_base(NAME,AUTHOR,
-        "provide TorX explorer interface to an LPS",
-        "Provide a TorX explorer interface to the LPS in INFILE. "
-        "\n\n"
-        "The LPS can be explored using TorX as described in torx_explorer(5)."
-      )
+                    "provide TorX explorer interface to an LPS",
+                    "Provide a TorX explorer interface to the LPS in INFILE. "
+                    "\n\n"
+                    "The LPS can be explored using TorX as described in torx_explorer(5)."
+                   )
     {
     }
 
@@ -160,99 +167,99 @@ class lps2torx_tool : public lps2torx_base
       std::string str_in = (name_for_input.empty())?"stdin":("'" + name_for_input + "'");
       gsVerboseMsg("reading LPS from %s\n", str_in.c_str());
       lps::specification lps_specification;
-  
+
       lps_specification.load(name_for_input);
-  
-      if ( removeunused )
+
+      if (removeunused)
       {
         gsVerboseMsg("removing unused parts of the data specification.\n");
       }
-  
+
       gsVerboseMsg("initialising...\n");
       torx_data td(10000);
-  
-      data::rewriter rewriter = ( removeunused ) ?
-            data::rewriter(lps_specification.data(),
-		mcrl2::data::used_data_equation_selector(lps_specification.data(), mcrl2::lps::find_function_symbols(lps_specification), lps_specification.global_variables()), strategy) :
-            data::rewriter(lps_specification.data(), strategy);
+
+      data::rewriter rewriter = (removeunused) ?
+                                data::rewriter(lps_specification.data(),
+                                    mcrl2::data::used_data_equation_selector(lps_specification.data(), mcrl2::lps::find_function_symbols(lps_specification), lps_specification.global_variables()), strategy) :
+                                data::rewriter(lps_specification.data(), strategy);
       mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), rewriter);
-  
-      NextState *nstate = createNextState(
-        lps_specification,
-        enumerator_factory,
-        !usedummies,
-        stateformat
-      );
-  
+
+      NextState* nstate = createNextState(
+                            lps_specification,
+                            enumerator_factory,
+                            !usedummies,
+                            stateformat
+                          );
+
       ATerm initial_state = nstate->getInitialState();
-  
+
       ATerm dummy_action = (ATerm) ATmakeAppl0(ATmakeAFun("@dummy_action@",0,ATfalse));
       td.add_action_state(initial_state,dummy_action,initial_state);
-  
+
       gsVerboseMsg("generating state space...\n");
-  
-      NextStateGenerator *nsgen = NULL;
+
+      NextStateGenerator* nsgen = NULL;
       // bool err = false;
       bool notdone = true;
-      while ( notdone && !cin.eof() )
+      while (notdone && !cin.eof())
       {
         string s;
-  
+
         cin >> s;
-        if ( s.size() != 1 )
+        if (s.size() != 1)
         {
-                cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
-                continue;
+          cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
+          continue;
         }
-  
-        switch ( s[0] )
+
+        switch (s[0])
         {
           case 'r': // Reset
             // R event TAB solved TAB preds TAB freevars TAB identical
             cout << "R 0\t1\t\t\t" << endl;
             break;
           case 'e': // Expand
-            {
+          {
             int index;
             ATerm state;
-  
+
             cin >> index;
-            state = td.get_state( index );
-            if ( state == NULL )
+            state = td.get_state(index);
+            if (state == NULL)
             {
-            	cout << "E0 value " << index << " not valid" << endl;
-            	break;
+              cout << "E0 value " << index << " not valid" << endl;
+              break;
             }
-  
+
             cout << "EB" << endl;
             nsgen = nstate->getNextStates(state,nsgen);
             ATermAppl Transition;
             ATerm NewState;
-            while ( nsgen->next(&Transition,&NewState) )
+            while (nsgen->next(&Transition,&NewState))
             {
               index_pair p;
-  
+
               p = td.add_action_state(state,(ATerm) Transition,NewState);
-  
+
               // Ee event TAB visible TAB solved TAB label TAB preds TAB freevars TAB identical
               cout << "Ee " << p.action << "\t" << (is_tau(Transition)?0:1) << "\t1\t";
               print_torx_action(cout,Transition);
               cout << "\t\t\t";
-              if ( p.action != p.state )
+              if (p.action != p.state)
               {
                 cout << p.state;
               }
               cout << endl;
             }
             cout << "EE" << endl;
-  
+
             /* if ( nsgen->errorOccurred() )
             {
               err = true;
               notdone = false;
             } */
             break;
-            }
+          }
           case 'q': // Quit
             cout << "Q" << endl;
             notdone = false;
@@ -273,23 +280,23 @@ class lps2torx_tool : public lps2torx_base
       return "[OPTION]... INFILE";
     }
 
-    void add_options(interface_description &desc)
+    void add_options(interface_description& desc)
     {
       lps2torx_base::add_options(desc);
 
       desc.
-        add_option("dummy", make_mandatory_argument("BOOL"),
-          "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
-        add_option("unused-data",
-          "do not remove unused parts of the data specification", 'u').
-        add_option("state-format", make_mandatory_argument("NAME"),
-          "store state internally in format NAME:\n"
-          "  'vector' for a vector (fastest, default), or\n"
-          "  'tree' for a tree (for memory efficiency)"
-          , 'f');
+      add_option("dummy", make_mandatory_argument("BOOL"),
+                 "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
+      add_option("unused-data",
+                 "do not remove unused parts of the data specification", 'u').
+      add_option("state-format", make_mandatory_argument("NAME"),
+                 "store state internally in format NAME:\n"
+                 "  'vector' for a vector (fastest, default), or\n"
+                 "  'tree' for a tree (for memory efficiency)"
+                 , 'f');
     }
 
-    void parse_options(const command_line_parser &parser)
+    void parse_options(const command_line_parser& parser)
     {
       lps2torx_base::parse_options(parser);
 
@@ -298,30 +305,44 @@ class lps2torx_tool : public lps2torx_base
       strategy     = parser.option_argument_as< rewriter::strategy >("rewriter");
       stateformat  = GS_STATE_VECTOR;
 
-      if (parser.options.count("dummy")) {
-        if (parser.options.count("dummy") > 1) {
+      if (parser.options.count("dummy"))
+      {
+        if (parser.options.count("dummy") > 1)
+        {
           parser.error("multiple use of option -y/--dummy; only one occurrence is allowed");
         }
         std::string dummy_str(parser.option_argument("dummy"));
-        if (dummy_str == "yes") {
+        if (dummy_str == "yes")
+        {
           usedummies = true;
-        } else if (dummy_str == "no") {
+        }
+        else if (dummy_str == "no")
+        {
           usedummies = false;
-        } else {
+        }
+        else
+        {
           parser.error("option -y/--dummy has illegal argument '" + dummy_str + "'");
         }
       }
 
-      if (parser.options.count("state-format")) {
-        if (parser.options.count("state-format") > 1) {
+      if (parser.options.count("state-format"))
+      {
+        if (parser.options.count("state-format") > 1)
+        {
           parser.error("multiple use of option -f/--state-format; only one occurrence is allowed");
         }
         std::string state_format_str(parser.option_argument("state-format"));
-        if (state_format_str == "vector") {
+        if (state_format_str == "vector")
+        {
           stateformat = GS_STATE_VECTOR;
-        } else if (state_format_str == "tree") {
+        }
+        else if (state_format_str == "tree")
+        {
           stateformat = GS_STATE_TREE;
-        } else {
+        }
+        else
+        {
           parser.error("option -f/--state-format has illegal argument '" + state_format_str + "'");
         }
       }
@@ -340,7 +361,7 @@ class lps2torx_tool : public lps2torx_base
 class lps2torx_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lps2torx_tool>
 {
   public:
-	lps2torx_gui_tool()
+    lps2torx_gui_tool()
     {
       m_gui_options["state-format"] = create_textctrl_widget();
       add_rewriter_widget();
@@ -354,7 +375,7 @@ class lps2torx_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lps2torx_tool>
     }
 };
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 

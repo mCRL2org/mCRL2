@@ -23,7 +23,7 @@ grape_toolbar::grape_toolbar(void) : wxToolBar()
   init_icons();
 }
 
-grape_toolbar::grape_toolbar(wxWindow *p_parent) : wxToolBar(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_VERTICAL)
+grape_toolbar::grape_toolbar(wxWindow* p_parent) : wxToolBar(p_parent, wxID_ANY, wxDefaultPosition, wxDefaultSize, wxTB_VERTICAL)
 {
   init_icons();
   AddTool(wxID_NEW, _T("New specification"), g_icons[ _T("new") ], wxNullBitmap, wxITEM_NORMAL, _T("New specification"), _T("New specification"));
@@ -47,7 +47,7 @@ grape_toolbar::~grape_toolbar(void)
 {
 }
 
-void grape_toolbar::set_mode( int p_mode )
+void grape_toolbar::set_mode(int p_mode)
 {
   // update toolbar
   EnableTool(wxID_SAVE, p_mode & GRAPE_TOOLMODE_SPEC);
@@ -59,23 +59,23 @@ void grape_toolbar::set_mode( int p_mode )
 // Needed for cut, copy paste. Low priority, cut copy paste not implemented; outcommented.
 
 // Low priority, not implemented; disabled.
-  EnableTool(wxID_CUT, false );
+  EnableTool(wxID_CUT, false);
 // Low priority, not implemented; disabled.
-  EnableTool(wxID_COPY, false );
+  EnableTool(wxID_COPY, false);
 // Low priority, not implemented; disabled.
-  EnableTool(wxID_PASTE, false );
+  EnableTool(wxID_PASTE, false);
   Refresh();
 }
 
-grape_arch_toolbar::grape_arch_toolbar( void ) : grape_toolbar()
+grape_arch_toolbar::grape_arch_toolbar(void) : grape_toolbar()
 {
 }
 
-grape_arch_toolbar::~grape_arch_toolbar( void )
+grape_arch_toolbar::~grape_arch_toolbar(void)
 {
 }
 
-grape_arch_toolbar::grape_arch_toolbar(wxWindow *p_parent) : grape_toolbar(p_parent)
+grape_arch_toolbar::grape_arch_toolbar(wxWindow* p_parent) : grape_toolbar(p_parent)
 {
   AddSeparator();
   AddRadioTool(GRAPE_TOOL_SELECT, _T("Select objects in current diagram"), g_icons[ _T("toolselect") ], wxNullBitmap, _T("Select objects in current diagram"), _T("Select objects in current diagram"));
@@ -86,16 +86,16 @@ grape_arch_toolbar::grape_arch_toolbar(wxWindow *p_parent) : grape_toolbar(p_par
   AddRadioTool(GRAPE_TOOL_ADD_COMMENT, _T("Add Comment"), g_icons[ _T("comment") ], wxNullBitmap, _T("Add Comment"), _T("Add Comment"));
 }
 
-grape_proc_toolbar::grape_proc_toolbar( void ) : grape_toolbar()
+grape_proc_toolbar::grape_proc_toolbar(void) : grape_toolbar()
 {
   init_icons();
 }
 
-grape_proc_toolbar::~grape_proc_toolbar( void )
+grape_proc_toolbar::~grape_proc_toolbar(void)
 {
 }
 
-grape_proc_toolbar::grape_proc_toolbar(wxWindow *p_parent) : grape_toolbar(p_parent)
+grape_proc_toolbar::grape_proc_toolbar(wxWindow* p_parent) : grape_toolbar(p_parent)
 {
   AddSeparator();
   AddRadioTool(GRAPE_TOOL_SELECT, _T("Select"), g_icons[ _T("toolselect") ], wxNullBitmap, _T("Select items"), _T("Select items"));

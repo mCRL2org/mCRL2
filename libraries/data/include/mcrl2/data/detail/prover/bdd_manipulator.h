@@ -16,7 +16,8 @@
 #include "mcrl2/data/standard.h"
 
 /// The class BDD_Manipulator provides functionality for constructing binary decision diagrams.
-class BDD_Manipulator {
+class BDD_Manipulator
+{
 
   private:
 
@@ -27,7 +28,8 @@ class BDD_Manipulator {
     /// \param[in] a_true_branch A BDD.
     /// \param[in] a_false_branch A BDD.
     /// \return A BDD.
-    inline ATermAppl make_if_then_else(ATermAppl a_guard, ATermAppl a_true_branch, ATermAppl a_false_branch) {
+    inline ATermAppl make_if_then_else(ATermAppl a_guard, ATermAppl a_true_branch, ATermAppl a_false_branch)
+    {
       return (a_true_branch == a_false_branch) ? a_true_branch : make_if_then_else(a_guard, a_true_branch, a_false_branch);
     }
 
@@ -41,7 +43,8 @@ class BDD_Manipulator {
     /// \param[in] a_true_branch A BDD.
     /// \param[in] a_false_branch A BDD.
     /// \return A reduced BDD.
-    inline ATermAppl make_reduced_if_then_else(ATermAppl a_guard, ATermAppl a_true_branch, ATermAppl a_false_branch) {
+    inline ATermAppl make_reduced_if_then_else(ATermAppl a_guard, ATermAppl a_true_branch, ATermAppl a_false_branch)
+    {
       return mcrl2::data::if_(mcrl2::data::data_expression(a_guard), mcrl2::data::data_expression(a_true_branch), mcrl2::data::data_expression(a_false_branch));
     }
 };

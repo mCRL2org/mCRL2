@@ -19,50 +19,54 @@ using namespace std;
 
 // -------------------------------
 AttrDiscr::AttrDiscr(
-    Mediator* m,
-    const string &nam,
-    const string &typ,
-    const size_t &idx,
-    const vector< string > &vals )
-    : Attribute(
-        m,
-        nam,
-        typ,
-        idx )
+  Mediator* m,
+  const string& nam,
+  const string& typ,
+  const size_t& idx,
+  const vector< string > &vals)
+  : Attribute(
+    m,
+    nam,
+    typ,
+    idx)
 // -------------------------------
 {
-    name   = nam;
-    type   = typ;
-    index  = idx;
-    initValues( vals );
+  name   = nam;
+  type   = typ;
+  index  = idx;
+  initValues(vals);
 }
 
 
 // ------------------------------------------
-AttrDiscr::AttrDiscr( const AttrDiscr &attr )
-    :Attribute( attr )
+AttrDiscr::AttrDiscr(const AttrDiscr& attr)
+  :Attribute(attr)
 // ------------------------------------------
 {
+  {
+    for (size_t i = 0; i < attr.origValues.size(); ++i)
     {
-    for ( size_t i = 0; i < attr.origValues.size(); ++i )
-        origValues.push_back( new Value( *(attr.origValues[i]) ) );
+      origValues.push_back(new Value(*(attr.origValues[i])));
     }
+  }
 
+  {
+    for (size_t i = 0; i < attr.curValues.size(); ++i)
     {
-    for ( size_t i = 0; i < attr.curValues.size(); ++i )
-        curValues.push_back( new Value( *(attr.curValues[i]) ) );
+      curValues.push_back(new Value(*(attr.curValues[i])));
     }
+  }
 
-    Value** mapping;
+  Value** mapping;
+  {
+    for (size_t i = 0; i < attr.curMap.size(); ++i)
     {
-    for ( size_t i = 0; i < attr.curMap.size(); ++i )
-    {
-        mapping  = new Value*;
-        *mapping = curValues[ ( *attr.curMap[i] )->getIndex() ];
-        curMap.push_back( mapping );
+      mapping  = new Value*;
+      *mapping = curValues[(*attr.curMap[i])->getIndex() ];
+      curMap.push_back(mapping);
     }
-    }
-    mapping = NULL;
+  }
+  mapping = NULL;
 }
 
 
@@ -70,9 +74,9 @@ AttrDiscr::AttrDiscr( const AttrDiscr &attr )
 AttrDiscr::~AttrDiscr()
 // --------------------
 {
-    deleteOrigValues();
-    deleteCurValues();
-    deleteCurMap();
+  deleteOrigValues();
+  deleteCurValues();
+  deleteCurMap();
 }
 
 
@@ -81,170 +85,176 @@ AttrDiscr::~AttrDiscr()
 
 // ------------------------------
 void AttrDiscr::clusterValues(
-    const vector< int > &indices,
-    const string &newValue )
+  const vector< int > &indices,
+  const string& newValue)
 // ------------------------------
 {
-    try
+  try
+  {
+    // variables
+    vector< int > sorted;
+    Value*        value;
+    vector< vector< Value* >::iterator > toRemove;
+
+    // sort indices in ascending order
+    sorted = indices;
+    sort(sorted.begin(), sorted.end());
+
+    // ptr to new value
+    value = new Value(NON_EXISTING , newValue);
+
+    // update current map
     {
-        // variables
-        vector< int > sorted;
-        Value*        value;
-        vector< vector< Value* >::iterator > toRemove;
-
-        // sort indices in ascending order
-        sorted = indices;
-        sort( sorted.begin(), sorted.end() );
-
-        // ptr to new value
-        value = new Value( NON_EXISTING , newValue );
-
-        // update current map
+      for (size_t i = 0; i < curMap.size(); ++i)
+      {
+        for (size_t j = 0; j < sorted.size(); ++j)
         {
-        for ( size_t i = 0; i < curMap.size(); ++i )
-        {
-            for ( size_t j = 0; j < sorted.size(); ++j )
-            {
-                if ( *curMap[i] == curValues[sorted[j]] )
-                    *curMap[i] = value;
-            }
+          if (*curMap[i] == curValues[sorted[j]])
+          {
+            *curMap[i] = value;
+          }
         }
-        }
-
-        // update current domain
-        // get iterators to values to delete
-        {
-        for ( size_t i = 0; i < sorted.size(); ++i )
-        {
-            toRemove.push_back( curValues.begin() + sorted[i] );
-        }
-        }
-
-        // delete these values
-        {
-        for ( size_t i = 0; i < toRemove.size(); ++i )
-        {
-            // delete object
-            delete *(toRemove[i]);
-        }
-        }
-        {
-        for ( size_t i = toRemove.size(); i > 0; --i )
-        {
-            // remove ptr from current domain
-            curValues.erase( toRemove[i-1] );
-        }
-        }
-
-        // update index
-        value->setIndex( sorted[0] );
-        // insert new value
-        curValues.insert( curValues.begin() + sorted[0], value );
-
-        // update value indices after new one
-        {
-        for ( size_t i = sorted[0]; i < curValues.size(); ++i )
-            curValues[i]->setIndex( i );
-        }
-
-        // -*-
-        value = NULL;
+      }
     }
-    catch( ... )
+
+    // update current domain
+    // get iterators to values to delete
     {
-        throw mcrl2::runtime_error( "Error clustering attribute domain." );
+      for (size_t i = 0; i < sorted.size(); ++i)
+      {
+        toRemove.push_back(curValues.begin() + sorted[i]);
+      }
     }
+
+    // delete these values
+    {
+      for (size_t i = 0; i < toRemove.size(); ++i)
+      {
+        // delete object
+        delete *(toRemove[i]);
+      }
+    }
+    {
+      for (size_t i = toRemove.size(); i > 0; --i)
+      {
+        // remove ptr from current domain
+        curValues.erase(toRemove[i-1]);
+      }
+    }
+
+    // update index
+    value->setIndex(sorted[0]);
+    // insert new value
+    curValues.insert(curValues.begin() + sorted[0], value);
+
+    // update value indices after new one
+    {
+      for (size_t i = sorted[0]; i < curValues.size(); ++i)
+      {
+        curValues[i]->setIndex(i);
+      }
+    }
+
+    // -*-
+    value = NULL;
+  }
+  catch (...)
+  {
+    throw mcrl2::runtime_error("Error clustering attribute domain.");
+  }
 }
 
 
 // -----------------------
 void AttrDiscr::moveValue(
-    const size_t &idxFr,
-    const size_t &idxTo )
+  const size_t& idxFr,
+  const size_t& idxTo)
 // -----------------------
 {
-    try
-    {
-        Value* temp = curValues[idxFr];
+  try
+  {
+    Value* temp = curValues[idxFr];
 
-        // 2 cases to consider
-        if ( idxFr < idxTo )
-        {
-            // move all values after idxFr 1 pos up
-            for ( size_t i = idxFr; i < idxTo; ++i )
-            {
-                curValues[i] = curValues[i+1];
-                curValues[i]->setIndex( i );
-            }
-            // update idxTo
-            curValues[idxTo] = temp;
-            curValues[idxTo]->setIndex( idxTo );
-        }
-        else if ( idxTo < idxFr )
-        {
-            // move all values before idxFr 1 pos down
-            for ( size_t i = idxFr; i > idxTo; --i )
-            {
-                curValues[i] = curValues[i-1];
-                curValues[i]->setIndex( i );
-            }
-            // update idxTo
-            curValues[idxTo] = temp;
-            curValues[idxTo]->setIndex( idxTo );
-        }
-
-        temp = NULL;
-    }
-    catch ( ... )
+    // 2 cases to consider
+    if (idxFr < idxTo)
     {
-        throw mcrl2::runtime_error( "Error moving attribute domain value." );
+      // move all values after idxFr 1 pos up
+      for (size_t i = idxFr; i < idxTo; ++i)
+      {
+        curValues[i] = curValues[i+1];
+        curValues[i]->setIndex(i);
+      }
+      // update idxTo
+      curValues[idxTo] = temp;
+      curValues[idxTo]->setIndex(idxTo);
     }
+    else if (idxTo < idxFr)
+    {
+      // move all values before idxFr 1 pos down
+      for (size_t i = idxFr; i > idxTo; --i)
+      {
+        curValues[i] = curValues[i-1];
+        curValues[i]->setIndex(i);
+      }
+      // update idxTo
+      curValues[idxTo] = temp;
+      curValues[idxTo]->setIndex(idxTo);
+    }
+
+    temp = NULL;
+  }
+  catch (...)
+  {
+    throw mcrl2::runtime_error("Error moving attribute domain value.");
+  }
 }
 
 
 // ------------------------------------
 void AttrDiscr::configValues(
-    const vector< string > &curDomain,
-    map< size_t , size_t  > &origToCurDomain )
+  const vector< string > &curDomain,
+  map< size_t , size_t  > &origToCurDomain)
 // ------------------------------------
 {
-    try
+  try
+  {
+    // clear current values
     {
-        // clear current values
-        {
-        for ( size_t i = 0; i < curValues.size(); ++i )
-        {
-            delete curValues[i];
-            curValues[i] = NULL;
-        }
-        }
-        curValues.clear();
-
-        // clear current map
-        curMap.clear();
-
-        // re-init current values
-        {
-        for ( size_t i = 0; i < curDomain.size(); ++i )
-            curValues.push_back( new Value( i, curDomain[i] ) );
-        }
-
-        // re-init mapping to current values
-        Value** mapping;
-        {
-        for ( size_t i = 0; i < origToCurDomain.size(); ++i )
-        {
-            mapping  = new Value*;
-            *mapping = curValues[ origToCurDomain[i] ];
-            curMap.push_back( mapping );
-        }
-        }
-        mapping = NULL;
+      for (size_t i = 0; i < curValues.size(); ++i)
+      {
+        delete curValues[i];
+        curValues[i] = NULL;
+      }
     }
-    catch( const mcrl2::runtime_error& e )
+    curValues.clear();
+
+    // clear current map
+    curMap.clear();
+
+    // re-init current values
     {
-        throw mcrl2::runtime_error(string("Error configuring attribute domain values.\n") + string(e.what()));
+      for (size_t i = 0; i < curDomain.size(); ++i)
+      {
+        curValues.push_back(new Value(i, curDomain[i]));
+      }
     }
+
+    // re-init mapping to current values
+    Value** mapping;
+    {
+      for (size_t i = 0; i < origToCurDomain.size(); ++i)
+      {
+        mapping  = new Value*;
+        *mapping = curValues[ origToCurDomain[i] ];
+        curMap.push_back(mapping);
+      }
+    }
+    mapping = NULL;
+  }
+  catch (const mcrl2::runtime_error& e)
+  {
+    throw mcrl2::runtime_error(string("Error configuring attribute domain values.\n") + string(e.what()));
+  }
 }
 
 
@@ -255,7 +265,7 @@ void AttrDiscr::configValues(
 int AttrDiscr::getAttrType()
 // -------------------------
 {
-    return ATTR_TYPE_DISCR;
+  return ATTR_TYPE_DISCR;
 }
 
 
@@ -263,19 +273,21 @@ int AttrDiscr::getAttrType()
 size_t AttrDiscr::getSizeOrigValues()
 // -------------------------------
 {
-    return origValues.size();
+  return origValues.size();
 }
 
 
 // --------------------------------------
-Value* AttrDiscr::getOrigValue( size_t idx )
+Value* AttrDiscr::getOrigValue(size_t idx)
 // --------------------------------------
 {
-    if ( idx != NON_EXISTING && idx < origValues.size() )
-        return origValues[idx];
-    else
-        throw mcrl2::runtime_error(
-            "Error retrieving attribute value from original domain." );
+  if (idx != NON_EXISTING && idx < origValues.size())
+  {
+    return origValues[idx];
+  }
+  else
+    throw mcrl2::runtime_error(
+      "Error retrieving attribute value from original domain.");
 }
 
 
@@ -283,19 +295,21 @@ Value* AttrDiscr::getOrigValue( size_t idx )
 size_t AttrDiscr::getSizeCurValues()
 // ------------------------------
 {
-    return curValues.size();
+  return curValues.size();
 }
 
 
 // -------------------------------------
-Value* AttrDiscr::getCurValue( size_t idx )
+Value* AttrDiscr::getCurValue(size_t idx)
 // -------------------------------------
 {
-    if (idx != NON_EXISTING && idx < curValues.size() )
-        return curValues[idx];
-    else
-        throw mcrl2::runtime_error(
-            "Error retrieving attribute value from current domain." );
+  if (idx != NON_EXISTING && idx < curValues.size())
+  {
+    return curValues[idx];
+  }
+  else
+    throw mcrl2::runtime_error(
+      "Error retrieving attribute value from current domain.");
 }
 
 
@@ -303,20 +317,22 @@ Value* AttrDiscr::getCurValue( size_t idx )
 size_t AttrDiscr::getSizeMap()
 // ------------------------
 {
-    return curMap.size();
+  return curMap.size();
 }
 
 
 // ---------------------------------------
-Value* AttrDiscr::mapToValue( double key )
+Value* AttrDiscr::mapToValue(double key)
 // ---------------------------------------
 {
-    size_t idx = static_cast <size_t> (key);
-    if ( idx < curMap.size() )
-        return *curMap[idx];
-    else
-        throw mcrl2::runtime_error(
-            "Error mapping index to current attribute value." );
+  size_t idx = static_cast <size_t>(key);
+  if (idx < curMap.size())
+  {
+    return *curMap[idx];
+  }
+  else
+    throw mcrl2::runtime_error(
+      "Error mapping index to current attribute value.");
 }
 
 
@@ -327,7 +343,7 @@ Value* AttrDiscr::mapToValue( double key )
 void AttrDiscr::clearClusters()
 // ----------------------------
 {
-    resetCurValues();
+  resetCurValues();
 }
 
 
@@ -335,33 +351,33 @@ void AttrDiscr::clearClusters()
 
 
 // -------------------------------------------------------
-void AttrDiscr::initValues( const vector< string > &vals )
+void AttrDiscr::initValues(const vector< string > &vals)
 // -------------------------------------------------------
 {
-    Value*  value0  = NULL;
-    Value*  value1  = NULL;
-    Value** mapping = NULL;
+  Value*  value0  = NULL;
+  Value*  value1  = NULL;
+  Value** mapping = NULL;
 
-    // init orig & current domain, current map
-    for ( size_t i = 0; i < vals.size(); ++i )
-    {
-        // init new values
-        value0 = new Value( i, vals[i] );
-        value1 = new Value( i, vals[i] );
+  // init orig & current domain, current map
+  for (size_t i = 0; i < vals.size(); ++i)
+  {
+    // init new values
+    value0 = new Value(i, vals[i]);
+    value1 = new Value(i, vals[i]);
 
-        // init domains
-        origValues.push_back( value0 );
-        curValues.push_back( value1 );
+    // init domains
+    origValues.push_back(value0);
+    curValues.push_back(value1);
 
-        // init mapping: pointer to pointer
-        mapping  = new Value*;
-        *mapping = value1;
-        curMap.push_back( mapping );
-    }
+    // init mapping: pointer to pointer
+    mapping  = new Value*;
+    *mapping = value1;
+    curMap.push_back(mapping);
+  }
 
-    value0  = NULL;
-    value1  = NULL;
-    mapping = NULL;
+  value0  = NULL;
+  value1  = NULL;
+  mapping = NULL;
 }
 
 
@@ -369,32 +385,32 @@ void AttrDiscr::initValues( const vector< string > &vals )
 void AttrDiscr::resetCurValues()
 // -----------------------------
 {
-    Value* value    = NULL;
-    Value** mapping = NULL;
+  Value* value    = NULL;
+  Value** mapping = NULL;
 
-    // clear current domain & mapping
-    deleteCurValues();
-    deleteCurMap();
+  // clear current domain & mapping
+  deleteCurValues();
+  deleteCurMap();
 
-    // reset current domain to original & update mapping
-    for ( size_t i = 0; i < origValues.size(); ++i )
-    {
-        // call copy constructor
-        value = new Value(
-            origValues[i]->getIndex(),
-            origValues[i]->getValue() );
+  // reset current domain to original & update mapping
+  for (size_t i = 0; i < origValues.size(); ++i)
+  {
+    // call copy constructor
+    value = new Value(
+      origValues[i]->getIndex(),
+      origValues[i]->getValue());
 
-        // init domain
-        curValues.push_back( value );
+    // init domain
+    curValues.push_back(value);
 
-        // init mapping: pointer to pointer
-        mapping  = new Value*;
-        *mapping = value;
-        curMap.push_back( mapping );
-    }
+    // init mapping: pointer to pointer
+    mapping  = new Value*;
+    *mapping = value;
+    curMap.push_back(mapping);
+  }
 
-    value   = NULL;
-    mapping = NULL;
+  value   = NULL;
+  mapping = NULL;
 }
 
 
@@ -402,12 +418,12 @@ void AttrDiscr::resetCurValues()
 void AttrDiscr::deleteOrigValues()
 // -------------------------------
 {
-    for ( size_t i = 0; i < origValues.size(); ++i )
-    {
-        delete origValues[i];
-        origValues[i] = NULL;
-    }
-    origValues.clear();
+  for (size_t i = 0; i < origValues.size(); ++i)
+  {
+    delete origValues[i];
+    origValues[i] = NULL;
+  }
+  origValues.clear();
 }
 
 
@@ -415,12 +431,12 @@ void AttrDiscr::deleteOrigValues()
 void AttrDiscr::deleteCurValues()
 // ------------------------------
 {
-    for ( size_t i = 0; i < curValues.size(); ++i )
-    {
-        delete curValues[i];
-        curValues[i] = NULL;
-    }
-    curValues.clear();
+  for (size_t i = 0; i < curValues.size(); ++i)
+  {
+    delete curValues[i];
+    curValues[i] = NULL;
+  }
+  curValues.clear();
 }
 
 
@@ -428,12 +444,12 @@ void AttrDiscr::deleteCurValues()
 void AttrDiscr::deleteCurMap()
 // ---------------------------
 {
-    for ( size_t i = 0; i < curMap.size(); ++i )
-    {
-        delete curMap[i];
-        curMap[i] = NULL;
-    }
-    curMap.clear();
+  for (size_t i = 0; i < curMap.size(); ++i)
+  {
+    delete curMap[i];
+    curMap[i] = NULL;
+  }
+  curMap.clear();
 }
 
 

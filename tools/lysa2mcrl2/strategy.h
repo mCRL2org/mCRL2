@@ -15,8 +15,8 @@
 
 namespace lysa
 {
-  class Strategy
-  {
+class Strategy
+{
   protected:
     std::string name;
   public:
@@ -26,7 +26,7 @@ namespace lysa
     static Strategy* get(std::string name);
     virtual ~Strategy()
     {}
-  };
+};
 }
 
 #endif // MCRL2_LYSA_STRATEGY_H

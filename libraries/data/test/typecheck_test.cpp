@@ -30,11 +30,11 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 // Expected failures, these are not going to be fixed in the current
 // implementation of the type checker
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_list_pos_nat, 2 )
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_multiple_variables, 2 )
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_multiple_variables_reversed, 2 )
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_list_pos_nat, 2)
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables, 2)
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables_reversed, 2)
 //BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_matching_ambiguous, 1 ) //succeeds
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_ambiguous_function_application4a, 1 ) // Fails because of silly reordering in type checker
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1)   // Fails because of silly reordering in type checker
 
 // Parse functions that do not change any context (i.e. do not typecheck and
 // normalise sorts).
@@ -85,7 +85,7 @@ data::data_specification parse_data_specification(const std::string& ds_in, bool
     BOOST_CHECK(test);
   }
 
-  if(test) // If term is successfully parsed, always check that the printed result is equal!
+  if (test) // If term is successfully parsed, always check that the printed result is equal!
   {
     std::string ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
     // std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
@@ -98,7 +98,7 @@ data::data_specification parse_data_specification(const std::string& ds_in, bool
 }
 
 template <typename VariableIterator>
-void test_data_expression(const std::string &de_in,
+void test_data_expression(const std::string& de_in,
                           const VariableIterator begin,
                           const VariableIterator end,
                           bool expect_success = true,
@@ -114,22 +114,23 @@ void test_data_expression(const std::string &de_in,
 
   data::data_expression x(parse_data_expression(de_in));
 
-  if (test_type_checker) {
-    if(expect_success)
+  if (test_type_checker)
+  {
+    if (expect_success)
     {
       BOOST_CHECK_NO_THROW(data::type_check(x, begin, end));
       BOOST_CHECK_NE(x, data::data_expression());
 
       atermpp::aterm de_aterm = x;
       // If exception was thrown, x is data_expression()
-      if(x != data::data_expression())
+      if (x != data::data_expression())
       {
         std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
         //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
         BOOST_CHECK_EQUAL(de_in, de_out);
         // TODO: this check should be uncommented
         //BOOST_CHECK(!search_sort_expression(x.sort(), data::unknown_sort()));
-        if(expected_sort != "")
+        if (expected_sort != "")
         {
           BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
           std::clog << "x: " << x << std::endl;
@@ -143,7 +144,7 @@ void test_data_expression(const std::string &de_in,
   }
 }
 
-void test_data_expression(const std::string &de_in,
+void test_data_expression(const std::string& de_in,
                           bool expect_success = true,
                           const std::string& expected_sort = "",
                           bool test_type_checker = true)
@@ -152,166 +153,203 @@ void test_data_expression(const std::string &de_in,
   test_data_expression(de_in, v.begin(), v.end(), expect_success, expected_sort, test_type_checker);
 }
 
-BOOST_AUTO_TEST_CASE(test_true) {
+BOOST_AUTO_TEST_CASE(test_true)
+{
   //test boolean data expressions
-   test_data_expression("true", true, "Bool");
+  test_data_expression("true", true, "Bool");
 }
 
-BOOST_AUTO_TEST_CASE(test_if) {
+BOOST_AUTO_TEST_CASE(test_if)
+{
   test_data_expression("if(true, true, false)", true, "Bool");
 }
 
-BOOST_AUTO_TEST_CASE(test_not) {
+BOOST_AUTO_TEST_CASE(test_not)
+{
   test_data_expression("!true", true, "Bool");
 }
 
-BOOST_AUTO_TEST_CASE(test_and) {
+BOOST_AUTO_TEST_CASE(test_and)
+{
   test_data_expression("true && false", true, "Bool");
 }
 
-BOOST_AUTO_TEST_CASE(test_zero) {
+BOOST_AUTO_TEST_CASE(test_zero)
+{
   test_data_expression("0", true, "Nat");
 }
 
-BOOST_AUTO_TEST_CASE(test_minus_one) {
+BOOST_AUTO_TEST_CASE(test_minus_one)
+{
   test_data_expression("-1", true, "Int");
 }
 
-BOOST_AUTO_TEST_CASE(test_zero_plus_one) {
+BOOST_AUTO_TEST_CASE(test_zero_plus_one)
+{
   test_data_expression("0 + 1", true, "Pos");
 }
 
-BOOST_AUTO_TEST_CASE(test_one_plus_zero) {
+BOOST_AUTO_TEST_CASE(test_one_plus_zero)
+{
   test_data_expression("1 + 0", true, "Pos");
 }
 
-BOOST_AUTO_TEST_CASE(test_zero_plus_zero) {
+BOOST_AUTO_TEST_CASE(test_zero_plus_zero)
+{
   test_data_expression("0 + 0", true, "Nat");
 }
 
-BOOST_AUTO_TEST_CASE(test_one_plus_one) {
+BOOST_AUTO_TEST_CASE(test_one_plus_one)
+{
   test_data_expression("1 + 1", true, "Pos");
 }
 
-BOOST_AUTO_TEST_CASE(test_one_times_two_plus_three) {
+BOOST_AUTO_TEST_CASE(test_one_times_two_plus_three)
+{
   test_data_expression("1 * 2 + 3", true, "Pos");
 }
 
-BOOST_AUTO_TEST_CASE(test_empty_list) {
+BOOST_AUTO_TEST_CASE(test_empty_list)
+{
   test_data_expression("[]", true); // List unknown
 }
 
-BOOST_AUTO_TEST_CASE(test_empty_list_concat) {
+BOOST_AUTO_TEST_CASE(test_empty_list_concat)
+{
   test_data_expression("[] ++ []", true); // List unknown
 }
 
-BOOST_AUTO_TEST_CASE(test_empty_list_size) {
+BOOST_AUTO_TEST_CASE(test_empty_list_size)
+{
   test_data_expression("#[]", true, "Nat");
 }
 
-BOOST_AUTO_TEST_CASE(test_empty_list_in) {
+BOOST_AUTO_TEST_CASE(test_empty_list_in)
+{
   test_data_expression("true in []", true, "Bool");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_true_false) {
+BOOST_AUTO_TEST_CASE(test_list_true_false)
+{
   test_data_expression("[true, false]", true, "List(Bool)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_zero) {
+BOOST_AUTO_TEST_CASE(test_list_zero)
+{
   test_data_expression("[0]", true, "List(Nat)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_one_two) {
+BOOST_AUTO_TEST_CASE(test_list_one_two)
+{
   test_data_expression("[1, 2]", true, "List(Pos)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_zero_concat_one_two) {
+BOOST_AUTO_TEST_CASE(test_list_zero_concat_one_two)
+{
   test_data_expression("[0] ++ [1, 2]", true, "List(Nat)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_nat_pos) {
+BOOST_AUTO_TEST_CASE(test_list_nat_pos)
+{
   test_data_expression("[0, 1, 2]", true, "List(Nat)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_pos_nat) {
+BOOST_AUTO_TEST_CASE(test_list_pos_nat)
+{
   test_data_expression("[1, 0, 2]", true, "List(Nat)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_nat_concat_one_two) {
+BOOST_AUTO_TEST_CASE(test_list_nat_concat_one_two)
+{
   data::variable_vector v;
   v.push_back(data::parse_variable("l: List(Nat)"));
   test_data_expression("l ++ [1, 2]", v.begin(), v.end(), true, "List(Nat)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_pos_concat_one_two) {
+BOOST_AUTO_TEST_CASE(test_list_pos_concat_one_two)
+{
   data::variable_vector v;
   v.push_back(data::parse_variable("l: List(Pos)"));
   test_data_expression("l ++ [1, 2]", v.begin(), v.end(), true, "List(Pos)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_pos) {
+BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_pos)
+{
   data::variable_vector v;
   v.push_back(data::parse_variable("l: List(Pos)"));
   test_data_expression("[0] ++ l", v.begin(), v.end(), false);
 }
 
-BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_nat) {
+BOOST_AUTO_TEST_CASE(test_list_zero_concat_list_nat)
+{
   data::variable_vector v;
   v.push_back(data::parse_variable("l: List(Nat)"));
   test_data_expression("[0] ++ l", v.begin(), v.end(), true, "List(Nat)");
 }
 
-BOOST_AUTO_TEST_CASE(test_list_pos_concat_list_nat) {
+BOOST_AUTO_TEST_CASE(test_list_pos_concat_list_nat)
+{
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_list::list(data::sort_pos::pos())));
   v.push_back(data::variable("y", data::sort_list::list(data::sort_nat::nat())));
   test_data_expression("x ++ y", v.begin(), v.end(), false);
 }
 
-BOOST_AUTO_TEST_CASE(test_list_is_list_nat) {
+BOOST_AUTO_TEST_CASE(test_list_is_list_nat)
+{
   data::variable_vector v;
   v.push_back(data::variable("x", data::sort_list::list(data::sort_pos::pos())));
   v.push_back(data::variable("y", data::sort_list::list(data::sort_nat::nat())));
   test_data_expression("x == y", v.begin(), v.end(), false);
 }
 
-BOOST_AUTO_TEST_CASE(test_emptyset) {
+BOOST_AUTO_TEST_CASE(test_emptyset)
+{
   test_data_expression("{}", false);
 }
 
-BOOST_AUTO_TEST_CASE(test_emptyset_complement) {
+BOOST_AUTO_TEST_CASE(test_emptyset_complement)
+{
   test_data_expression("!{}", false);
 }
 
-BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset) {
+BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset)
+{
   test_data_expression("!{} <= {}", false);
 }
 
-BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset_reverse) {
+BOOST_AUTO_TEST_CASE(test_emptyset_complement_subset_reverse)
+{
   test_data_expression("{} <= !{}", false);
 }
 
-BOOST_AUTO_TEST_CASE(test_set_true_false) {
+BOOST_AUTO_TEST_CASE(test_set_true_false)
+{
   test_data_expression("{true, false}", true, "Set(Bool)");
 }
 
-BOOST_AUTO_TEST_CASE(test_set_numbers) {
+BOOST_AUTO_TEST_CASE(test_set_numbers)
+{
   test_data_expression("{1, 2, -7}", true, "Set(Int)");
 }
 
-BOOST_AUTO_TEST_CASE(test_set_comprehension) {
+BOOST_AUTO_TEST_CASE(test_set_comprehension)
+{
   test_data_expression("{ x: Nat | x mod 2 == 0 }", true, "Set(Nat)");
 }
 
-BOOST_AUTO_TEST_CASE(test_bag_true_false) {
+BOOST_AUTO_TEST_CASE(test_bag_true_false)
+{
   test_data_expression("{true: 1, false: 2}", true, "Bag(Bool)");
 }
 
-BOOST_AUTO_TEST_CASE(test_bag_numbers) {
+BOOST_AUTO_TEST_CASE(test_bag_numbers)
+{
   test_data_expression("{1: 1, 2: 2, -8: 8}", true, "Bag(Int)");
 }
 
-BOOST_AUTO_TEST_CASE(test_bag_comprehension) {
+BOOST_AUTO_TEST_CASE(test_bag_comprehension)
+{
   test_data_expression("{ x: Nat | (lambda y: Nat. y * y)(x) }", true, "Bag(Nat)");
 }
 
@@ -480,15 +518,16 @@ BOOST_AUTO_TEST_CASE(test_upcast_pos2nat)
   test_data_expression("x == y", v.begin(), v.end(), true, "Bool");
 }
 
-void test_data_specification(const std::string &ds_in,
+void test_data_specification(const std::string& ds_in,
                              bool expect_success = true,
                              bool test_type_checker = true)
 {
   data::data_specification ds(parse_data_specification(ds_in, expect_success));
 
-  if (test_type_checker) {
+  if (test_type_checker)
+  {
 
-    if (expect_success) 
+    if (expect_success)
     {
       data::type_check(ds);
       //Cannot pretty print a data specification anymore.
@@ -702,12 +741,12 @@ BOOST_AUTO_TEST_CASE(test_matching_ambiguous_rhs)
 BOOST_AUTO_TEST_CASE(test_function_alias)
 {
   test_data_specification(
-  "sort Array = Nat -> Nat;\n\n"
-  "map  update: Nat # Nat # Array -> Array;\n\n"
-  "var  i,n: Nat;\n"
-  "     f: Array;\n"
-  "eqn  update(i, n, f)  =  lambda j: Nat. if(i == j, n, f(j));\n",
-  true
+    "sort Array = Nat -> Nat;\n\n"
+    "map  update: Nat # Nat # Array -> Array;\n\n"
+    "var  i,n: Nat;\n"
+    "     f: Array;\n"
+    "eqn  update(i, n, f)  =  lambda j: Nat. if(i == j, n, f(j));\n",
+    true
   );
 }
 
@@ -715,75 +754,75 @@ BOOST_AUTO_TEST_CASE(test_function_alias)
 BOOST_AUTO_TEST_CASE(test_eqn_set_where)
 {
   test_data_specification(
-  "map  f_dot: Set(Bool);\n\n"
-  "eqn  f_dot  =  if(true, {}, { o: Bool | true whr z = true end });\n",
-  true
+    "map  f_dot: Set(Bool);\n\n"
+    "eqn  f_dot  =  if(true, {}, { o: Bool | true whr z = true end });\n",
+    true
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_recursive_function_sort)
 {
   test_data_specification(
-  "sort G;\n"
-  "     F = F -> G;\n",
-  false
+    "sort G;\n"
+    "     F = F -> G;\n",
+    false
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_recursive_function_sort_reverse)
 {
   test_data_specification(
-  "sort G;\n"
-  "     F = G -> F;\n",
-  false
+    "sort G;\n"
+    "     F = G -> F;\n",
+    false
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_recursive_struct_no_base)
 {
   test_data_specification(
-  "sort D = struct f(D);\n",
-  false
+    "sort D = struct f(D);\n",
+    false
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_recursive_struct_via_function)
 {
   test_data_specification(
-  "sort G = struct f(Nat -> G);\n",
-  false
+    "sort G = struct f(Nat -> G);\n",
+    false
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_recursive_struct_list)
 {
   test_data_specification(
-  "sort P = struct b(x: List(P));\n",
-  true
+    "sort P = struct b(x: List(P));\n",
+    true
   );
 }
 
 BOOST_AUTO_TEST_CASE(test_recursive_struct_list_indirect)
 {
   test_data_specification(
-  "sort LP = List(P);\n"
-  "     P = struct b(x: LP);\n",
-  true
+    "sort LP = List(P);\n"
+    "     P = struct b(x: LP);\n",
+    true
   );
 }
 
 template <typename VariableIterator>
-void test_data_expression_in_specification_context(const std::string &de_in,
-                          const std::string& ds_in,
-                          const VariableIterator begin,
-                          const VariableIterator end,
-                          bool expect_success = true,
-                          const std::string& expected_sort = "",
-                          bool test_type_checker = true)
+void test_data_expression_in_specification_context(const std::string& de_in,
+    const std::string& ds_in,
+    const VariableIterator begin,
+    const VariableIterator end,
+    bool expect_success = true,
+    const std::string& expected_sort = "",
+    bool test_type_checker = true)
 {
   data::data_specification ds(parse_data_specification(ds_in));
 
-  if(test_type_checker)
+  if (test_type_checker)
   {
     data::type_check(ds);
 
@@ -802,9 +841,9 @@ void test_data_expression_in_specification_context(const std::string &de_in,
 
   data::data_expression de(parse_data_expression(de_in));
 
-  if(test_type_checker)
+  if (test_type_checker)
   {
-    if(expect_success)
+    if (expect_success)
     {
       data::type_check(de, begin, end, ds);
       atermpp::aterm de_aterm = de;
@@ -812,7 +851,7 @@ void test_data_expression_in_specification_context(const std::string &de_in,
       std::string de_out = core::PrintPart_CXX((ATerm) de_aterm);
 
       BOOST_CHECK_EQUAL(de_in, de_out);
-      if(expected_sort != "")
+      if (expected_sort != "")
       {
         BOOST_CHECK_EQUAL(de.sort(), parse_sort_expression(expected_sort));
       }
@@ -824,11 +863,11 @@ void test_data_expression_in_specification_context(const std::string &de_in,
   }
 }
 
-void test_data_expression_in_specification_context(const std::string &de_in,
-                          const std::string& ds_in,
-                          bool expect_success = true,
-                          const std::string& expected_sort = "",
-                          bool test_type_checker = true)
+void test_data_expression_in_specification_context(const std::string& de_in,
+    const std::string& ds_in,
+    bool expect_success = true,
+    const std::string& expected_sort = "",
+    bool test_type_checker = true)
 {
   data::variable_vector v;
   test_data_expression_in_specification_context(de_in, ds_in, v.begin(), v.end(), expect_success, expected_sort, test_type_checker);
@@ -894,7 +933,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_application)
     "     f: Nat;\n",
     true,
     "Bool"
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity)
@@ -905,7 +944,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity)
     "     f: Nat;\n",
     true,
     "Nat"
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_reverse)
@@ -916,7 +955,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_reverse)
     "     f: Nat -> Bool;\n",
     true,
     "Nat"
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_larger)
@@ -926,7 +965,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_larger)
     "map  f: Nat -> Bool;\n"
     "     f: Nat # Nat -> Bool;\n",
     false
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_horrible)
@@ -938,7 +977,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_horrible)
     "     f: Nat;\n",
     true,
     "Nat"
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_horrible_app1)
@@ -950,7 +989,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_horrible_app1)
     "     f: Nat;\n",
     true,
     "Bool"
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_horrible_app2)
@@ -962,7 +1001,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_horrible_app2)
     "     f: Nat;\n",
     true,
     "Bool"
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_horrible_abs)
@@ -974,7 +1013,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_horrible_abs)
     "     f: Nat;\n",
     true,
     "Bool"
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_functional)
@@ -984,7 +1023,7 @@ BOOST_AUTO_TEST_CASE(test_duplicate_function_different_arity_functional)
     "map  f: Nat -> Nat -> Bool;\n"
     "     f: Nat -> Bool;\n",
     false
-   );
+  );
 }
 
 BOOST_AUTO_TEST_CASE(test_duplicate_function_same_arity)

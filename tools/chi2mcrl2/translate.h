@@ -32,92 +32,93 @@
 #define RPC RecProcessChannels
 #define RC  RecChannel
 
-struct t_options {
+struct t_options
+{
   std::string infilename;
   std::string outfilename;
   bool no_statepar;
 };
 
 typedef struct
-  {
-    std::string Name;
-    std::string Type;
-    std::string InitValue;
-  } RecProcessVariable;
+{
+  std::string Name;
+  std::string Type;
+  std::string InitValue;
+} RecProcessVariable;
 
 typedef struct
-  {
-    std::string Name;
-    std::string Type;
-    std::string HashCount;
-  } RecProcessChannels;
+{
+  std::string Name;
+  std::string Type;
+  std::string HashCount;
+} RecProcessChannels;
 
 typedef struct
-   {
-     std::string Name;
-     std::string Type;
-   } RecVariableType;
+{
+  std::string Name;
+  std::string Type;
+} RecVariableType;
 
 typedef struct
-   {
-     size_t state;
-     int holdsForState;
-   } RecStreams;
+{
+  size_t state;
+  int holdsForState;
+} RecStreams;
 
 typedef struct
-   {
-     int stream;
-     size_t position;
-   } RecStreamPos;
+{
+  int stream;
+  size_t position;
+} RecStreamPos;
 
 //Information per parenthesis
 typedef struct
-   {
-     std::set<size_t> endstates;
-     bool looped;
-     bool guardedloop;
-     size_t  begin_state;
-     size_t  end_state;
-     std::set<int>  streams;
-     bool parallel;
-     bool alternative;
+{
+  std::set<size_t> endstates;
+  bool looped;
+  bool guardedloop;
+  size_t  begin_state;
+  size_t  end_state;
+  std::set<int>  streams;
+  bool parallel;
+  bool alternative;
 
-   } RecParenthesisInfo;
+} RecParenthesisInfo;
 
 //Information per transition
 typedef struct
-  {
-    size_t state;
-    int stream;
-    int originates_from_stream;
-    bool terminate;
-    size_t parenthesis_level;
-    bool looped_state;
-    bool guardedloop;
-    std::string guard;
-    std::string action;
-    std::map<std::string, std::string> vectorUpdate; // First:  Identifier Variable
-                                                     // Second: Expression
-    size_t nextstate;
-  } RecActionTransition;
+{
+  size_t state;
+  int stream;
+  int originates_from_stream;
+  bool terminate;
+  size_t parenthesis_level;
+  bool looped_state;
+  bool guardedloop;
+  std::string guard;
+  std::string action;
+  std::map<std::string, std::string> vectorUpdate; // First:  Identifier Variable
+  // Second: Expression
+  size_t nextstate;
+} RecActionTransition;
 
 typedef struct
-  {
-    std::vector<RPV> DeclarationVariables;
-    std::vector<RPV> SpecificationVariables;
-    std::vector<RPC> DeclarationChannels;
-    size_t NumberOfStreams;
-  } RecProcessVectors;
+{
+  std::vector<RPV> DeclarationVariables;
+  std::vector<RPV> SpecificationVariables;
+  std::vector<RPC> DeclarationChannels;
+  size_t NumberOfStreams;
+} RecProcessVectors;
 
 typedef struct
-  {
-     std::string send_end;
-     std::string recv_end;
-     std::string Type;
-  } RecChannel;
+{
+  std::string send_end;
+  std::string recv_end;
+  std::string Type;
+} RecChannel;
 
 template <class T>
-inline std::string to_string (const T& t)
+inline std::string to_string(const T& t)
 {
   std::stringstream ss;
   ss << t;
@@ -125,7 +126,7 @@ inline std::string to_string (const T& t)
 }
 
 template < >
-inline std::string to_string (const std::string& t)
+inline std::string to_string(const std::string& t)
 {
   return t;
 }
@@ -146,7 +147,7 @@ class CAsttransform
         alternative(false),
         parallel(false),
         no_statepar(false)
-      {}
+    {}
 
     bool translator(ATermAppl ast);
     bool set_options(t_options options);
@@ -170,7 +171,7 @@ class CAsttransform
     void manipulateStatements(ATermAppl input);
     std::map<std::string, std::string> manipulateAssignmentStat(ATermList input_id, ATermList input_exp);
     std::vector<std::string> getExpressionsFromList(ATermList input);
-    bool onlyIdentifiersInExpression(ATermList input );
+    bool onlyIdentifiersInExpression(ATermList input);
     std::map<int, std::set<int> > affectedStreamMap;
 
     std::string manipulateExplicitTemplates(ATermList input);
@@ -187,9 +188,9 @@ class CAsttransform
 
     //Begin_state: used to deterime the beginstates per parenthesis level
     std::map<size_t, size_t> begin_state; //first:  parenthesis level
-                                          //second: begin state
+    //second: begin state
     std::map<size_t, size_t> end_state;   //first:  parenthesis level
-                                          //second: end state
+    //second: end state
 
     std::map<size_t, std::set<size_t> > endstates_per_parenthesis_level;
     std::map<size_t, std::vector<RPI>  > info_per_parenthesis_level_per_parenthesis;

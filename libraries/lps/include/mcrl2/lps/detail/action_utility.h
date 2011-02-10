@@ -16,11 +16,14 @@
 #include "mcrl2/lps/action.h"
 #include "mcrl2/data/detail/data_utility.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Returns true if the sorts of the given actions are contained in sorts.
 /// \param actions A sequence of actions
@@ -35,7 +38,9 @@ bool check_action_sorts(action_list actions, const std::set<data::sort_expressio
     for (data::sort_expression_list::const_iterator j = s.begin(); j != s.end(); ++j)
     {
       if (!data::detail::check_sort(*j, sorts))
+      {
         return false;
+      }
     }
   }
   return true;
@@ -51,7 +56,9 @@ bool check_action_labels(action_list actions, const std::set<action_label>& labe
   for (action_list::iterator i = actions.begin(); i != actions.end(); ++i)
   {
     if (labels.find(i->label()) == labels.end())
+    {
       return false;
+    }
   }
   return true;
 }
@@ -70,7 +77,9 @@ bool check_action_label_sorts(action_label_list action_labels, const std::set<da
     for (data::sort_expression_list::const_iterator j = i_sorts.begin(); j != i_sorts.end(); ++j)
     {
       if (!data::detail::check_sort(*j, sorts))
+      {
         return false;
+      }
     }
   }
   return true;

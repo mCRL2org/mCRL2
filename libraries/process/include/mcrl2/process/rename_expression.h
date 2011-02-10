@@ -19,53 +19,55 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace process {
+namespace process
+{
 
-  /// \brief Rename expression
-  //<RenameExpr>   ::= RenameExpr(<String>, <String>)
-  class rename_expression: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      /// \param term A term
-      rename_expression()
-        : atermpp::aterm_appl(core::detail::constructRenameExpr())
-      {}
+/// \brief Rename expression
+//<RenameExpr>   ::= RenameExpr(<String>, <String>)
+class rename_expression: public atermpp::aterm_appl
+{
+  public:
+    /// \brief Constructor.
+    /// \param term A term
+    rename_expression()
+      : atermpp::aterm_appl(core::detail::constructRenameExpr())
+    {}
 
-      /// \brief Constructor.
-      /// \param term A term
-      rename_expression(atermpp::aterm_appl term)
-        : atermpp::aterm_appl(term)
-      {
-        assert(core::detail::check_term_RenameExpr(m_term));
-      }
+    /// \brief Constructor.
+    /// \param term A term
+    rename_expression(atermpp::aterm_appl term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_term_RenameExpr(m_term));
+    }
 
-      /// \brief Constructor.
-      rename_expression(core::identifier_string source, core::identifier_string target)
-        : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
-      {}
+    /// \brief Constructor.
+    rename_expression(core::identifier_string source, core::identifier_string target)
+      : atermpp::aterm_appl(core::detail::gsMakeRenameExpr(source, target))
+    {}
 
-      /// \brief Returns the source of the rename rule
-      /// \return The source of the rename rule
-      core::identifier_string source() const
-      {
-        using namespace atermpp;
-        return arg1(*this);
-      }
+    /// \brief Returns the source of the rename rule
+    /// \return The source of the rename rule
+    core::identifier_string source() const
+    {
+      using namespace atermpp;
+      return arg1(*this);
+    }
 
-      /// \brief Returns the target of the rename rule
-      /// \return The target of the rename rule
-      core::identifier_string target() const
-      {
-        using namespace atermpp;
-        return arg2(*this);
-      }
-  };
+    /// \brief Returns the target of the rename rule
+    /// \return The target of the rename rule
+    core::identifier_string target() const
+    {
+      using namespace atermpp;
+      return arg2(*this);
+    }
+};
 
-  /// \brief Read-only singly linked list of rename expressions
-  typedef atermpp::term_list<rename_expression> rename_expression_list;
+/// \brief Read-only singly linked list of rename expressions
+typedef atermpp::term_list<rename_expression> rename_expression_list;
 
 } // namespace process
 

@@ -15,110 +15,110 @@
 
 namespace grape
 {
-  namespace grapeapp
-  {
-    /**
-     * \short Represents the cut event.
-     */
-    class grape_event_cut : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_cut( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_cut( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+namespace grapeapp
+{
+/**
+ * \short Represents the cut event.
+ */
+class grape_event_cut : public grape_event_base
+{
+  private:
+  public:
 
     /**
-     * \short Represents the copy event.
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
      */
-    class grape_event_copy : public grape_event_base
-    {
-      private:
-      public:
-
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_copy( grape_frame *p_main_frame );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_copy( void );
-
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
+    grape_event_cut(grape_frame* p_main_frame);
 
     /**
-     * \short Represents the paste event.
+     * Default destructor.
+     * Frees allocated memory.
      */
-    class grape_event_paste : public grape_event_base
-    {
-      private:
-      public:
+    ~grape_event_cut(void);
 
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_paste( grape_frame *p_main_frame );
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_paste( void );
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
 
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
+/**
+ * \short Represents the copy event.
+ */
+class grape_event_copy : public grape_event_base
+{
+  private:
+  public:
 
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
-  }
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_copy(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_copy(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+
+/**
+ * \short Represents the paste event.
+ */
+class grape_event_paste : public grape_event_base
+{
+  private:
+  public:
+
+    /**
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
+     */
+    grape_event_paste(grape_frame* p_main_frame);
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_paste(void);
+
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
+
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+}
 }
 
 #endif // GRAPE_EVENT_EDIT_H

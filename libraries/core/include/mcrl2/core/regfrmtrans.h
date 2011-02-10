@@ -14,8 +14,10 @@
 
 #include <aterm2.h>
 
-namespace mcrl2 {
-  namespace core {
+namespace mcrl2
+{
+namespace core
+{
 
 /** \brief     Translate regular formulas in terms of state and action formulas.
  *  \param[in] state_frm An ATerm representation of a state formula according
@@ -26,7 +28,7 @@ namespace mcrl2 {
  **/
 ATermAppl translate_reg_frms(ATermAppl state_frm);
 
-  }   // namespace core
+}   // namespace core
 }     // namespace mcrl2
 
 #endif // MCRL2_REGFRMTRANS_H

@@ -21,34 +21,34 @@
 
 class AttrConti : public Attribute
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     AttrConti(
-        Mediator* m,
-        const std::string &nam,
-        const std::string &typ,
-        const size_t &idx,
-        const double &lwrBnd,
-        const double &uprBnd );
-    AttrConti( const AttrConti &attr );
+      Mediator* m,
+      const std::string& nam,
+      const std::string& typ,
+      const size_t& idx,
+      const double& lwrBnd,
+      const double& uprBnd);
+    AttrConti(const AttrConti& attr);
     virtual ~AttrConti();
 
     // -- set functions ---------------------------------------------
 
     void clusterValues(
-        const std::vector< int > &indices,
-        const std::string &newValue );
+      const std::vector< int > &indices,
+      const std::string& newValue);
     void moveValue(
-        const size_t &idxFr,
-        const size_t &idxTo );
+      const size_t& idxFr,
+      const size_t& idxTo);
 
-    void classifyEqualIntervals( const size_t &number );
-    void classifyQuantiles( const size_t &number );
-    void classifyMeanStandardDeviation( const size_t &number );
+    void classifyEqualIntervals(const size_t& number);
+    void classifyQuantiles(const size_t& number);
+    void classifyMeanStandardDeviation(const size_t& number);
     void removeClassification();
 
-    void setLowerBound( const double &lwrBnd );
-    void setUpperBound( const double &uprBnd );
+    void setLowerBound(const double& lwrBnd);
+    void setUpperBound(const double& uprBnd);
 
     // -- get functions ---------------------------------------------
     int getAttrType();
@@ -56,18 +56,18 @@ public:
     double getLowerBound();
     double getUpperBound();
     void getRangeOrigValues(
-        double &lwrBnd,
-        double &uprBnd );
+      double& lwrBnd,
+      double& uprBnd);
 
     size_t getSizeCurValues();
-    Value* getCurValue( size_t idx );
+    Value* getCurValue(size_t idx);
     size_t getSizeMap();
-    Value* mapToValue( double key );
+    Value* mapToValue(double key);
 
     // -- clear functions -------------------------------------------
     void clearClusters();
 
-protected:
+  protected:
     // -- private utility functions ---------------------------------
     void deleteCurValues();
     void deleteCurMap();

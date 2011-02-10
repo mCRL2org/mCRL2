@@ -19,15 +19,15 @@ using namespace std;
 
 // --------------------
 Edge::Edge(
-    const size_t &idx,
-    const string &lbl )
+  const size_t& idx,
+  const string& lbl)
 // --------------------
 {
-    index   = idx;
-    label   = lbl;
-	inNode  = NULL;
-	outNode = NULL;
-    bundle  = NULL;
+  index   = idx;
+  label   = lbl;
+  inNode  = NULL;
+  outNode = NULL;
+  bundle  = NULL;
 }
 
 
@@ -35,9 +35,9 @@ Edge::Edge(
 Edge::~Edge()
 // ----------
 {
-	clearInNode();
-    clearOutNode();
-    clearBundle();
+  clearInNode();
+  clearOutNode();
+  clearBundle();
 }
 
 
@@ -45,26 +45,26 @@ Edge::~Edge()
 
 
 // -----------------------------
-void Edge::setInNode( Node* in )
+void Edge::setInNode(Node* in)
 // -----------------------------
 {
-	inNode = in;
+  inNode = in;
 }
 
 
 // -------------------------------
-void Edge::setOutNode( Node* out )
+void Edge::setOutNode(Node* out)
 // -------------------------------
 {
-	outNode = out;
+  outNode = out;
 }
 
 
 // ------------------------------
-void Edge::setBundle( Bundle* b )
+void Edge::setBundle(Bundle* b)
 // ------------------------------
 {
-    bundle = b;
+  bundle = b;
 }
 
 
@@ -75,7 +75,7 @@ void Edge::setBundle( Bundle* b )
 size_t Edge::getIndex()
 // -----------------
 {
-    return index;
+  return index;
 }
 
 
@@ -83,7 +83,7 @@ size_t Edge::getIndex()
 string Edge::getLabel()
 // --------------------
 {
-    return label;
+  return label;
 }
 
 
@@ -91,7 +91,7 @@ string Edge::getLabel()
 Node* Edge::getInNode()
 // --------------------
 {
-	return inNode;
+  return inNode;
 }
 
 
@@ -99,7 +99,7 @@ Node* Edge::getInNode()
 Node* Edge::getOutNode()
 // ---------------------
 {
-	return outNode;
+  return outNode;
 }
 
 
@@ -107,7 +107,7 @@ Node* Edge::getOutNode()
 Bundle* Edge::getBundle()
 // ----------------------
 {
-    return bundle;
+  return bundle;
 }
 
 
@@ -118,7 +118,7 @@ Bundle* Edge::getBundle()
 void Edge::clearInNode()
 // ---------------------
 {
-    inNode = NULL;
+  inNode = NULL;
 }
 
 
@@ -126,7 +126,7 @@ void Edge::clearInNode()
 void Edge::clearOutNode()
 // ----------------------
 {
-    outNode = NULL;
+  outNode = NULL;
 }
 
 
@@ -134,7 +134,7 @@ void Edge::clearOutNode()
 void Edge::clearBundle()
 // ---------------------
 {
-    bundle = NULL;
+  bundle = NULL;
 }
 
 

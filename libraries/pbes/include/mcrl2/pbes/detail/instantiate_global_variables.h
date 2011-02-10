@@ -18,36 +18,39 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/substitute.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
-    /// \brief Attempts to eliminate the free variables of a PBES, by substituting
-    /// a constant value for them. If no constant value is found for one of the variables,
-    /// an exception is thrown.
-    template <typename Container>
-    void instantiate_global_variables(pbes<Container>& p)
+/// \brief Attempts to eliminate the free variables of a PBES, by substituting
+/// a constant value for them. If no constant value is found for one of the variables,
+/// an exception is thrown.
+template <typename Container>
+void instantiate_global_variables(pbes<Container>& p)
+{
+  data::mutable_associative_container_substitution<> sigma;
+  data::representative_generator default_expression_generator(p.data());
+  std::set<data::variable> to_be_removed;
+  const atermpp::set<data::variable>& v = p.global_variables();
+  for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    data::data_expression d = default_expression_generator(i->sort());
+    if (d == data::data_expression())
     {
-      data::mutable_associative_container_substitution<> sigma;
-      data::representative_generator default_expression_generator(p.data());
-      std::set<data::variable> to_be_removed;
-      const atermpp::set<data::variable>& v = p.global_variables();
-      for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
-      {
-        data::data_expression d = default_expression_generator(i->sort());
-        if (d == data::data_expression())
-        {
-          throw mcrl2::runtime_error("Error in pbes::instantiate_global_variables: could not instantiate " + pp(*i));
-        }
-        sigma[*i] = d;
-        to_be_removed.insert(*i);
-      }
-      pbes_system::substitute_free_variables(p.equations(), sigma);
-      p.initial_state() = pbes_system::substitute_free_variables(p.initial_state(), sigma);
-      p.global_variables().clear();
+      throw mcrl2::runtime_error("Error in pbes::instantiate_global_variables: could not instantiate " + pp(*i));
     }
+    sigma[*i] = d;
+    to_be_removed.insert(*i);
+  }
+  pbes_system::substitute_free_variables(p.equations(), sigma);
+  p.initial_state() = pbes_system::substitute_free_variables(p.initial_state(), sigma);
+  p.global_variables().clear();
+}
 
 } // namespace detail
 

@@ -33,7 +33,7 @@ struct my_compare_variable
   const boolean_variable& m_variable;
 
   my_compare_variable(const boolean_variable& t)
-   : m_variable(t)
+    : m_variable(t)
   {}
 
   /// \brief Function call operator
@@ -140,20 +140,20 @@ void test_my_find()
   //--- find_boolean_variables ---//
   v = my_find_variables(b);
   BOOST_CHECK(v.size() == 2);
-  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
-  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());
 
   boolean_equation eq = b.equations().front();
   v = my_find_variables(eq);
   BOOST_CHECK(v.size() == 2);
-  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
-  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());
 
   boolean_expression x = eq.formula();
   v = my_find_variables(x);
   BOOST_CHECK(v.size() == 2);
-  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
-  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());
 
   core::garbage_collect();
 }
@@ -177,20 +177,20 @@ void test_find()
   //--- find_boolean_variables ---//
   v = find_boolean_variables(b);
   BOOST_CHECK(v.size() == 2);
-  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
-  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());
 
   boolean_equation eq = b.equations().front();
   v = find_boolean_variables(eq);
   BOOST_CHECK(v.size() == 2);
-  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
-  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());
 
   boolean_expression x = eq.formula();
   v = find_boolean_variables(x);
   BOOST_CHECK(v.size() == 2);
-  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());   
-  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());   
+  BOOST_CHECK(v.find(boolean_variable("X1")) != v.end());
+  BOOST_CHECK(v.find(boolean_variable("X2")) != v.end());
 
   core::garbage_collect();
 }
@@ -211,13 +211,13 @@ void test_bnd_occ()
 
   std::set<boolean_variable> bnd = b.binding_variables();
   BOOST_CHECK(bnd.size() == 2);
-  BOOST_CHECK(bnd.find(boolean_variable("X1")) != bnd.end());   
-  BOOST_CHECK(bnd.find(boolean_variable("X2")) != bnd.end());   
+  BOOST_CHECK(bnd.find(boolean_variable("X1")) != bnd.end());
+  BOOST_CHECK(bnd.find(boolean_variable("X2")) != bnd.end());
 
   std::set<boolean_variable> occ = b.occurring_variables();
   BOOST_CHECK(occ.size() == 2);
-  BOOST_CHECK(occ.find(boolean_variable("X1")) != occ.end());   
-  BOOST_CHECK(occ.find(boolean_variable("X2")) != occ.end());   
+  BOOST_CHECK(occ.find(boolean_variable("X1")) != occ.end());
+  BOOST_CHECK(occ.find(boolean_variable("X2")) != occ.end());
 
   core::garbage_collect();
 }

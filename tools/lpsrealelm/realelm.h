@@ -25,12 +25,12 @@
 
 mcrl2::lps::specification realelm(mcrl2::lps::specification s,
                                   int max_iterations = 5,
-                                  const rewriter &r = rewriter());
+                                  const rewriter& r = rewriter());
 
 template <typename Term, typename MapContainer>
 Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements);
 
-void normalize_pair(data_expression &,data_expression &,const rewriter &, const bool);
+void normalize_pair(data_expression&,data_expression&,const rewriter&, const bool);
 
 class real_representing_variable
 {
@@ -41,9 +41,9 @@ class real_representing_variable
 
   public:
     real_representing_variable
-          ( mcrl2::data::variable v,
-            mcrl2::data::data_expression lb,
-            mcrl2::data::data_expression ub)
+    (mcrl2::data::variable v,
+     mcrl2::data::data_expression lb,
+     mcrl2::data::data_expression ub)
     {
       variable.protect();
       lowerbound.protect();
@@ -54,7 +54,7 @@ class real_representing_variable
     }
 
 
-/*  The code below gives rise to garbage collection problems. */
+    /*  The code below gives rise to garbage collection problems. */
     ~real_representing_variable()
     {
       variable.unprotect();
@@ -62,7 +62,7 @@ class real_representing_variable
       upperbound.unprotect();
     }
 
-    real_representing_variable & operator = (const real_representing_variable & other)
+    real_representing_variable& operator = (const real_representing_variable& other)
     {
       variable=other.variable;
       lowerbound=other.lowerbound;
@@ -70,7 +70,7 @@ class real_representing_variable
       return *this;
     }
 
-    real_representing_variable(const real_representing_variable &other)
+    real_representing_variable(const real_representing_variable& other)
     {
       variable.protect();
       lowerbound.protect();
@@ -82,15 +82,18 @@ class real_representing_variable
     }
 
     mcrl2::data::variable get_variable() const
-    { return variable;
+    {
+      return variable;
     }
 
     mcrl2::data::data_expression get_lowerbound() const
-    { return lowerbound;
+    {
+      return lowerbound;
     }
 
     mcrl2::data::data_expression get_upperbound() const
-    { return upperbound;
+    {
+      return upperbound;
     }
 };
 
@@ -109,20 +112,20 @@ class summand_information
     // feasible solution, regarding the context variables that are relevant for this summand.
     std::vector < std::vector < linear_inequality > > nextstate_context_combinations;
     // vector < vector < linear_inequality > > residual_inequalities; // These are inequalities equal to
-                                                                   // xi conditions which are used in the current
-                                                                   // summand to be generated, but not added
-                                                                   // to the context combinations. Adding them
-                                                                   // is only necessary, if variables overlap.
+    // xi conditions which are used in the current
+    // summand to be generated, but not added
+    // to the context combinations. Adding them
+    // is only necessary, if variables overlap.
     // context_type local_context;
 
   public:
     summand_information(
-             const mcrl2::lps::summand s,
-             variable_list rsv,
-             variable_list nrsv,
-             std::vector < linear_inequality > src,
-             atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  srnm
-             ):
+      const mcrl2::lps::summand s,
+      variable_list rsv,
+      variable_list nrsv,
+      std::vector < linear_inequality > src,
+      atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  srnm
+    ):
       smd(s),
       real_summation_variables(rsv),
       non_real_summation_variables(nrsv),
@@ -133,16 +136,18 @@ class summand_information
       // vector < linear_inequality >() reduced_src;
       // fourier_motzkin(src,vars.begin(),vars().end(),reduced_src);
       // nextstate_context_combinations(1,reduced_src),
-      nextstate_context_combinations(1,src) 
+      nextstate_context_combinations(1,src)
       // residual_inequalities(1,vector < linear_inequality >()),
-    { smd.protect();
+    {
+      smd.protect();
       real_summation_variables.protect();
       non_real_summation_variables.protect();
       // std::cerr << "NEW REAL SUMMATION VARIABLES " << pp(rsv) << "\n";
     }
 
-    summand_information(const summand_information &s)
-    { smd.protect();
+    summand_information(const summand_information& s)
+    {
+      smd.protect();
       real_summation_variables.protect();
       non_real_summation_variables.protect();
       smd=s.smd;
@@ -155,50 +160,61 @@ class summand_information
     }
 
     ~summand_information()
-    { smd.unprotect();
+    {
+      smd.unprotect();
       real_summation_variables.unprotect();
       non_real_summation_variables.unprotect();
 
     }
 
     mcrl2::lps::summand get_summand() const
-    { return smd;
+    {
+      return smd;
     }
 
     variable_list get_real_summation_variables() const
-    { return real_summation_variables;
+    {
+      return real_summation_variables;
     }
 
     variable_list get_non_real_summation_variables() const
-    { return non_real_summation_variables;
+    {
+      return non_real_summation_variables;
     }
 
     std::vector < linear_inequality >::const_iterator get_summand_real_conditions_begin() const
-    { return summand_real_conditions.begin();
+    {
+      return summand_real_conditions.begin();
     }
 
     std::vector < linear_inequality >::const_iterator get_summand_real_conditions_end() const
-    { return summand_real_conditions.end();
+    {
+      return summand_real_conditions.end();
     }
 
-    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> &get_summand_real_nextstate_map() 
-    { return summand_real_nextstate_map;
+    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> &get_summand_real_nextstate_map()
+    {
+      return summand_real_nextstate_map;
     }
 
     std::vector < std::vector < linear_inequality > > :: const_iterator cnextstate_context_combinations_begin() const
-    { return nextstate_context_combinations.begin();
+    {
+      return nextstate_context_combinations.begin();
     }
 
     std::vector < std::vector < linear_inequality > > :: const_iterator cnextstate_context_combinations_end() const
-    { return nextstate_context_combinations.end();
+    {
+      return nextstate_context_combinations.end();
     }
 
-    std::vector < std::vector < linear_inequality > > :: iterator nextstate_context_combinations_begin() 
-    { return nextstate_context_combinations.begin();
+    std::vector < std::vector < linear_inequality > > :: iterator nextstate_context_combinations_begin()
+    {
+      return nextstate_context_combinations.begin();
     }
 
-    std::vector < std::vector < linear_inequality > > :: iterator nextstate_context_combinations_end() 
-    { return nextstate_context_combinations.end();
+    std::vector < std::vector < linear_inequality > > :: iterator nextstate_context_combinations_end()
+    {
+      return nextstate_context_combinations.end();
     }
 
     /* vector < vector < linear_inequality > > :: const_iterator residual_inequalities_begin() const
@@ -210,13 +226,14 @@ class summand_information
     } */
 
     static bool power_of_2(const size_t i)
-    { size_t k=2;
-      for( ; k<i ; k=k<<1)
-      {}
+    {
+      size_t k=2;
+      for (; k<i ; k=k<<1)
+        {}
       return k==i;
     }
 
-    /// \brief Update the conditions for new summands, given that a new variable 
+    /// \brief Update the conditions for new summands, given that a new variable
     ///        has been added to context.
     /// \details Assume the new variable in the context is xi, with as bounds t and u.
     ///          First check whether 1) t[x:=g(x)] and u[x:=g(x)] are smaller, equal or greater and
@@ -228,25 +245,26 @@ class summand_information
     ///          Secondly, check whether the bounds for xi imply the substituted bounds for
     ///          the other variables xi' and substitute xi for xi'.
     void add_a_new_next_state_argument(
-                         const context_type &context,
-                         const rewriter &r)
+      const context_type& context,
+      const rewriter& r)
     {
       real_representing_variable new_xi_variable=context.back();
       data_expression xi_t=new_xi_variable.get_lowerbound();
       data_expression xi_u=new_xi_variable.get_upperbound();
       data_expression substituted_lowerbound=
-                 realelm_data_expression_map_replace(xi_t,summand_real_nextstate_map);
+        realelm_data_expression_map_replace(xi_t,summand_real_nextstate_map);
       data_expression substituted_upperbound=
-                 realelm_data_expression_map_replace(xi_u,summand_real_nextstate_map);
+        realelm_data_expression_map_replace(xi_u,summand_real_nextstate_map);
       // std::cerr << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
 
       // First check whether the new value for the new xi variable is equal to itself.
       // I do not know whether optimisation below is correct.
       if ((linear_inequality(substituted_lowerbound,xi_t,linear_inequality::equal,r).is_true(r)) &&
-         (linear_inequality(substituted_upperbound,xi_u,linear_inequality::equal,r).is_true(r)))
-      { return;
+          (linear_inequality(substituted_upperbound,xi_u,linear_inequality::equal,r).is_true(r)))
+      {
+        return;
       }
-      
+
       linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
       data_expression normalized_substituted_lowerbound;
       data_expression normalized_substituted_upperbound;
@@ -254,21 +272,27 @@ class summand_information
 
       // First check whether this new next state argument follows from an existing argument
       if (r(data::less(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool::true_())
-      { return;
+      {
+        return;
       }
       else if (r(data::equal_to(normalized_substituted_lowerbound,normalized_substituted_upperbound))==sort_bool::true_())
-      { return;
+      {
+        return;
       }
       else if (r(data::less(normalized_substituted_upperbound,normalized_substituted_lowerbound))==sort_bool::true_())
-      { return;
+      {
+        return;
       }
       else
-      { // Second check whether this new next state argument is equal to an existing argument
-        for(context_type::const_reverse_iterator c=context.rbegin();
-                     c!=context.rend(); ++c)
-        { if ((normalized_substituted_lowerbound==c->get_lowerbound()) &&
+      {
+        // Second check whether this new next state argument is equal to an existing argument
+        for (context_type::const_reverse_iterator c=context.rbegin();
+             c!=context.rend(); ++c)
+        {
+          if ((normalized_substituted_lowerbound==c->get_lowerbound()) &&
               (normalized_substituted_upperbound==c->get_upperbound()))
-          { return;
+          {
+            return;
           }
         }
       }
@@ -276,9 +300,10 @@ class summand_information
       data_expression t=substituted_lowerbound;
       data_expression u=substituted_upperbound;
       std::vector < std::vector < linear_inequality > > new_nextstate_context_combinations;
-      for(std::vector < std::vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin();
-                  i!=nextstate_context_combinations.end(); ++i)
-      { std::vector < linear_inequality > vec_lin_eq;
+      for (std::vector < std::vector < linear_inequality > >::iterator i=nextstate_context_combinations.begin();
+           i!=nextstate_context_combinations.end(); ++i)
+      {
+        std::vector < linear_inequality > vec_lin_eq;
         /* if (power_of_2(i->size()))
         { remove_redundant_inequalities(*i, vec_lin_eq, r);
         }
@@ -286,7 +311,7 @@ class summand_information
 
         vec_lin_eq.swap(*i);
         size_t old_size=vec_lin_eq.size();
-        
+
         // Note that at this point, vec_lin_eq is consistent.
         assert(!is_inconsistent(vec_lin_eq,r));
         // If adding an equality t=u yields an inconsistency, then either adding t<u or t>u is
@@ -294,34 +319,38 @@ class summand_information
         // t<u and t>u are inconsistent (because then vec_lin_eq need to be inconsistent) and
         // it is also not possible that both t<u and t>u are consistent (because the solution
         // space for vec_lin_eq is a convex hull). So, if adding t=u is inconsistent, either
-        // t<u or t>u can be added consistently, but in that case they are redundant. So, 
+        // t<u or t>u can be added consistently, but in that case they are redundant. So,
         // we can simply take vec_lin_eq to remain untouched and we do not have to consider
         // t<u and t>u.
 
         vec_lin_eq.push_back(linear_inequality(t,u,linear_inequality::equal,r));
         if (is_inconsistent(vec_lin_eq,r))
-        { // Add the original vec_lin_eq, as any extension is redundant.
+        {
+          // Add the original vec_lin_eq, as any extension is redundant.
           vec_lin_eq.pop_back();
           new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
           vec_lin_eq.swap(new_nextstate_context_combinations.back());
         }
         else
-        { // Adding equality is consistent. Check whether adding a t<u and/or t>u is
+        {
+          // Adding equality is consistent. Check whether adding a t<u and/or t>u is
           // also consistent, and if so, add new context combinations with t=u, and t<u and/or t>u.
           // If neither t<u and u>t are consistent, t=u is redundant, and vec_lin_eq can be
           // added to the new context combinations.
 
-          vec_lin_eq[old_size].set_comparison(linear_inequality::less); 
+          vec_lin_eq[old_size].set_comparison(linear_inequality::less);
           if (!is_inconsistent(vec_lin_eq,r))
-          { // Add a vector with t<u at the end.
+          {
+            // Add a vector with t<u at the end.
             new_nextstate_context_combinations.push_back(vec_lin_eq);
             // Add a vector with t==u at the end.
-            vec_lin_eq[old_size].set_comparison(linear_inequality::equal); 
+            vec_lin_eq[old_size].set_comparison(linear_inequality::equal);
             new_nextstate_context_combinations.push_back(vec_lin_eq);
 
             vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
             if (!is_inconsistent(vec_lin_eq,r))
-            { // add a vector with u<t at the end 
+            {
+              // add a vector with u<t at the end
               new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
               vec_lin_eq.swap(new_nextstate_context_combinations.back());
             }
@@ -330,15 +359,17 @@ class summand_information
           {
             vec_lin_eq[old_size]=linear_inequality(u,t,linear_inequality::less,r);
             if (!is_inconsistent(vec_lin_eq,r))
-            { // add a vector with u<t at the end
+            {
+              // add a vector with u<t at the end
               new_nextstate_context_combinations.push_back(vec_lin_eq);
               // add a vector with t==u at the end
-              vec_lin_eq[old_size].set_comparison(linear_inequality::equal); 
+              vec_lin_eq[old_size].set_comparison(linear_inequality::equal);
               new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
               vec_lin_eq.swap(new_nextstate_context_combinations.back());
             }
             else
-            { // neither t<u, t>u hold. Only t==u, and it is redundant, so add the original vector.
+            {
+              // neither t<u, t>u hold. Only t==u, and it is redundant, so add the original vector.
               vec_lin_eq.pop_back();
               new_nextstate_context_combinations.push_back(std::vector < linear_inequality >());
               vec_lin_eq.swap(new_nextstate_context_combinations.back());

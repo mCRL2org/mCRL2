@@ -32,17 +32,21 @@ using namespace atermpp;
 // user defined class containing ATerms
 class A
 {
-  template <typename T>
-  friend struct atermpp::aterm_traits;
+    template <typename T>
+    friend struct atermpp::aterm_traits;
 
   protected:
     ATerm x;
 
     const ATerm& term() const
-    { return x; }
+    {
+      return x;
+    }
 
     ATerm& term()
-    { return x; }
+    {
+      return x;
+    }
 
   public:
     A()
@@ -87,17 +91,36 @@ std::ostream& operator<<(std::ostream& out, const A& t)
 }
 
 // specify how the ATerms in A need to be protected using a traits class
-namespace atermpp {
-  template<>
-  struct aterm_traits<A>
+namespace atermpp
+{
+template<>
+struct aterm_traits<A>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(A t)
   {
-    typedef ATermAppl aterm_type;
-    static void protect(A t)   { t.protect(); std::cout << "aterm_protect_traits<A>::protect() " << t << std::endl; }
-    static void unprotect(A t) { t.unprotect(); std::cout << "aterm_protect_traits<A>::unprotect() " << t << std::endl; }
-    static void mark(A t)      { t.mark(); std::cout << "aterm_protect_traits<A>::mark() " << t << std::endl; }
-    static ATerm term(A t)     { return t.term(); }
-    static ATerm* ptr(A& t)    { return &t.term(); }
-  };
+    t.protect();
+    std::cout << "aterm_protect_traits<A>::protect() " << t << std::endl;
+  }
+  static void unprotect(A t)
+  {
+    t.unprotect();
+    std::cout << "aterm_protect_traits<A>::unprotect() " << t << std::endl;
+  }
+  static void mark(A t)
+  {
+    t.mark();
+    std::cout << "aterm_protect_traits<A>::mark() " << t << std::endl;
+  }
+  static ATerm term(A t)
+  {
+    return t.term();
+  }
+  static ATerm* ptr(A& t)
+  {
+    return &t.term();
+  }
+};
 } // namespace atermpp
 
 int main(int argc, char* argv[])
@@ -130,24 +153,32 @@ int main(int argc, char* argv[])
   // set
   atermpp::set<A> s;
   for (int i = 0; i < 5; i++)
+  {
     s.insert(A(5-i));
+  }
   s.insert(A(1));
 
   // multiset
   atermpp::multiset<A> s1;
   for (int i = 0; i < 5; i++)
+  {
     s1.insert(A(5-i));
+  }
   s1.insert(A(1));
 
   // map
   atermpp::map<int, aterm_int> m;
   for (int i = 0; i < 5; i++)
+  {
     m[i] = aterm_int(i);
+  }
 
   // multimap
   atermpp::multimap<int, aterm_int> m1;
   for (int i = 0; i < 5; i++)
+  {
     m1.insert(make_pair(i, aterm_int(i)));
+  }
   m1.insert(make_pair(1, aterm_int(2)));
 
   AT_collect(); // force garbage collection

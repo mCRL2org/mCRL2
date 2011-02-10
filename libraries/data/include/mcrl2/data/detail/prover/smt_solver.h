@@ -14,17 +14,21 @@
 
 #include "aterm2.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
-      class SMT_Solver {
-        public:
-          virtual ~SMT_Solver() {};
-          virtual bool is_satisfiable(ATermList a_formula) = 0;
-      };
-    }
-  }
+class SMT_Solver
+{
+  public:
+    virtual ~SMT_Solver() {};
+    virtual bool is_satisfiable(ATermList a_formula) = 0;
+};
+}
+}
 }
 
 #endif

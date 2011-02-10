@@ -18,16 +18,18 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
-                     
+namespace lps
+{
+
 /// \brief The available linearisation methods
 typedef enum { lmStack, lmRegular, lmRegular2 } t_lin_method;
 
 /// \brief String representation of a linearisation method
 /// \param[in] lin_method A linerisation method
-/// \return 
+/// \return
 inline
 std::string lin_method_to_string(t_lin_method lin_method)
 {
@@ -36,7 +38,8 @@ std::string lin_method_to_string(t_lin_method lin_method)
 }
 
 /// \brief Options for linearisation
-struct t_lin_options {
+struct t_lin_options
+{
   t_lin_method lin_method;
   bool no_intermediate_cluster;
   bool final_cluster;
@@ -76,7 +79,7 @@ struct t_lin_options {
 /// \return An LPS equivalent to spec, which is linearised using lin_options
 /// \exception mcrl2::runtime_error Linearisation failed
 mcrl2::lps::specification linearise(
-  const mcrl2::process::process_specification& spec, 
+  const mcrl2::process::process_specification& spec,
   mcrl2::lps::t_lin_options lin_options = t_lin_options());
 
 /// \brief Linearises a process specification from a textual specification
@@ -85,7 +88,7 @@ mcrl2::lps::specification linearise(
 /// \return An LPS equivalent to the specification representing text, which is linearised using lin_options
 /// \exception mcrl2::runtime_error Linearisation failed
 inline mcrl2::lps::specification linearise(
-  const std::string& text, 
+  const std::string& text,
   mcrl2::lps::t_lin_options lin_options = t_lin_options())
 {
   mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(text,true);

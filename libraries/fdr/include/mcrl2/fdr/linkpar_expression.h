@@ -16,9 +16,11 @@
 #include "mcrl2/fdr/comprehension_expression_fwd.h"
 #include "mcrl2/fdr/link.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated linkpar expression class declarations ---//
 /// \brief class linkpar_expression
@@ -84,23 +86,23 @@ class linksgens: public linkpar_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a links expression
-    /// \param t A term
-    /// \return True if it is a links expression
-    inline
-    bool is_links(const linkpar_expression& t)
-    {
-      return fdr::detail::gsIsLinks(t);
-    }
+/// \brief Test for a links expression
+/// \param t A term
+/// \return True if it is a links expression
+inline
+bool is_links(const linkpar_expression& t)
+{
+  return fdr::detail::gsIsLinks(t);
+}
 
-    /// \brief Test for a linksgens expression
-    /// \param t A term
-    /// \return True if it is a linksgens expression
-    inline
-    bool is_linksgens(const linkpar_expression& t)
-    {
-      return fdr::detail::gsIsLinksGens(t);
-    }
+/// \brief Test for a linksgens expression
+/// \param t A term
+/// \return True if it is a linksgens expression
+inline
+bool is_linksgens(const linkpar_expression& t)
+{
+  return fdr::detail::gsIsLinksGens(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

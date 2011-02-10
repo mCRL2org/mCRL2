@@ -25,7 +25,7 @@
 #include "utils.h"
 
 template <class T>
-inline std::string to_string (const T& t)
+inline std::string to_string(const T& t)
 {
   std::stringstream ss;
   ss << t;
@@ -36,82 +36,82 @@ class Mediator;
 
 class Parser : public Colleague
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
-    Parser( Mediator* m );
+    Parser(Mediator* m);
     virtual ~Parser();
 
     // -- parsing functions -----------------------------------------
-    int getFileSize( const std::string &path );
+    int getFileSize(const std::string& path);
 
     // fsm files
     void parseFile(
-        const std::string &path,
-        Graph* graph );
+      const std::string& path,
+      Graph* graph);
     void writeFSMFile(
-        const std::string &path,
-        Graph* graph );
+      const std::string& path,
+      Graph* graph);
 
     // dgc files
     void parseAttrConfig(
-        const std::string &path,
-        Graph* graph,
-        std::map< size_t, size_t > &attrIdxFrTo,
-        std::map< size_t, std::vector< std::string > > &attrCurDomains,
-        std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains );
+      const std::string& path,
+      Graph* graph,
+      std::map< size_t, size_t > &attrIdxFrTo,
+      std::map< size_t, std::vector< std::string > > &attrCurDomains,
+      std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains);
     void writeAttrConfig(
-        const std::string &path,
-        Graph* graph );
+      const std::string& path,
+      Graph* graph);
 
     // dgd files
     void parseDiagram(
-        const std::string &path,
-        Graph* graph,
-        Diagram* dgrmOld,
-        Diagram* dgrmNew );
+      const std::string& path,
+      Graph* graph,
+      Diagram* dgrmOld,
+      Diagram* dgrmNew);
     void writeDiagram(
-        const std::string &path,
-        Graph* graph,
-        Diagram* diagram );
+      const std::string& path,
+      Graph* graph,
+      Diagram* diagram);
 
-private:
+  private:
     // -- private utility functions ---------------------------------
     // fsm files
     void parseStateVarDescr(
-        const std::string &nextLine,
-        Graph* graph );
+      const std::string& nextLine,
+      Graph* graph);
     void parseStates(
-        const std::string &nextLine,
-        Graph* graph );
+      const std::string& nextLine,
+      Graph* graph);
     void parseTransitions(
-        const std::string &nextLine,
-        Graph* graph );
+      const std::string& nextLine,
+      Graph* graph);
 
     // dgc files
     void parseAttrConfig(
-        Graph* graph,
-        std::map< size_t, size_t > &attrIdxFrTo,
-        std::map< size_t, std::vector< std::string > > &attrCurDomains,
-        std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains,
-        wxXmlNode* curNode );
+      Graph* graph,
+      std::map< size_t, size_t > &attrIdxFrTo,
+      std::map< size_t, std::vector< std::string > > &attrCurDomains,
+      std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains,
+      wxXmlNode* curNode);
     void parseAttr(
-        Graph* graph,
-        std::map< size_t, size_t > &attrIdxFrTo,
-        std::map< size_t , std::vector< std::string > > &attrCurDomains,
-        std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains,
-        wxXmlNode* curNode );
+      Graph* graph,
+      std::map< size_t, size_t > &attrIdxFrTo,
+      std::map< size_t , std::vector< std::string > > &attrCurDomains,
+      std::map< size_t, std::map< size_t, size_t  > > &attrOrigToCurDomains,
+      wxXmlNode* curNode);
 
     // dgd files
     void parseDiagram(
-        Graph* graph,
-        Diagram* dgrmOld,
-        Diagram* dgrmNew,
-        wxXmlNode* curNode );
+      Graph* graph,
+      Diagram* dgrmOld,
+      Diagram* dgrmNew,
+      wxXmlNode* curNode);
     void parseShape(
-        Graph* graph,
-        Diagram* dgrmOld,
-        Diagram* dgrmNew,
-        wxXmlNode* curNode );
+      Graph* graph,
+      Diagram* dgrmOld,
+      Diagram* dgrmNew,
+      wxXmlNode* curNode);
 
     // -- data members ----------------------------------------------
     std::string delims;

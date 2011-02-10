@@ -25,74 +25,74 @@ const double E  = 2.71828183;
 
 class Utils
 {
-public:
+  public:
     // -- std::string conversion functions -------------------------------
-    static std::string dblToStr( const double &d );
-    static std::string intToStr( const int &i );
-	static std::string size_tToStr( const size_t &i );
-    static double strToDbl( const std::string &s );
-    static int strToInt( const std::string &s );
+    static std::string dblToStr(const double& d);
+    static std::string intToStr(const int& i);
+    static std::string size_tToStr(const size_t& i);
+    static double strToDbl(const std::string& s);
+    static int strToInt(const std::string& s);
 
     // -- trig functions --------------------------------------------
-    static double radToDegr( const double &r );
-    static double degrToRad( const double &d );
+    static double radToDegr(const double& r);
+    static double degrToRad(const double& d);
 
     static double calcAngleDg(
-        const double &x,
-        const double &y );
+      const double& x,
+      const double& y);
     static double calcAngleRd(
-        const double &x,
-        const double &y );
+      const double& x,
+      const double& y);
 
     // -- math functions --------------------------------------------
-    static int rndToInt( const double &f );
+    static int rndToInt(const double& f);
     static double rndToNearestMult(
-        const double &value,
-        const double &factor );
+      const double& value,
+      const double& factor);
 
     static double dist(
-        const double &x1, const double &y1,
-        const double &x2, const double &y2 );
-    static double abs( const double &val );
-	static double maxx(
-        const double &d0,
-        const double &d1 );
+      const double& x1, const double& y1,
+      const double& x2, const double& y2);
+    static double abs(const double& val);
+    static double maxx(
+      const double& d0,
+      const double& d1);
     static double minn(
-        const double &d0,
-        const double &d1 );
+      const double& d0,
+      const double& d1);
 
     static double perc(
-        const int &numr,
-        const int &denm );
+      const int& numr,
+      const int& denm);
     static double perc(
-        const double &numr,
-        const double &denm );
+      const double& numr,
+      const double& denm);
 
     static double fishEye(
-        const double &distortion,
-        const double &value );
+      const double& distortion,
+      const double& value);
 
     // -- statistics functions --------------------------------------
-    static double mean( const std::vector< double > vals );
-    static double variance( const std::vector< double > vals );
-    static double stdDev( const std::vector< double > vals );
+    static double mean(const std::vector< double > vals);
+    static double variance(const std::vector< double > vals);
+    static double stdDev(const std::vector< double > vals);
 
     // -- classification (binning ) ---------------------------------
     static void classEqualIntervals(
-        const size_t &numClasses,
-        const std::vector< double > &values,
-        std::vector< std::string > &legendClasses,
-        std::map< double, size_t > &valuesToClasses );
+      const size_t& numClasses,
+      const std::vector< double > &values,
+      std::vector< std::string > &legendClasses,
+      std::map< double, size_t > &valuesToClasses);
     static void classifyQuantiles(
-        const size_t &numClasses,
-        std::set< double > &values,
-        std::vector< std::string > &legendClasses,
-        std::map< double, size_t > &valuesToClasses );
+      const size_t& numClasses,
+      std::set< double > &values,
+      std::vector< std::string > &legendClasses,
+      std::map< double, size_t > &valuesToClasses);
     static void classifyMeanStandardDeviation(
-        const size_t &numClasses,
-        const std::vector< double > &values,
-        std::vector< std::string > &legendClasses,
-        std::map< double, size_t > &valuesToClasses );
+      const size_t& numClasses,
+      const std::vector< double > &values,
+      std::vector< std::string > &legendClasses,
+      std::map< double, size_t > &valuesToClasses);
     /*
     static void classifyOptimal(
         const int &numClasses,

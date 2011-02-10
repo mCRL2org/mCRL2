@@ -16,16 +16,16 @@
 
 using namespace grape::libgrape;
 
-compound_state::compound_state( void )
-: object( NONE )
+compound_state::compound_state(void)
+  : object(NONE)
 {
   // shouldn't be called
 }
 
-compound_state::compound_state( object_type p_type )
-: object( p_type )
+compound_state::compound_state(object_type p_type)
+  : object(p_type)
 {
-  assert( p_type == STATE || p_type == REFERENCE_STATE );
+  assert(p_type == STATE || p_type == REFERENCE_STATE);
   m_name = wxEmptyString;
   m_current_state = false;
   m_designates.Empty();
@@ -33,8 +33,8 @@ compound_state::compound_state( object_type p_type )
   m_endstate.Empty();
 }
 
-compound_state::compound_state( const compound_state &p_compound_state )
-: object( p_compound_state )
+compound_state::compound_state(const compound_state& p_compound_state)
+  : object(p_compound_state)
 {
   m_name = p_compound_state.m_name;
   m_current_state = p_compound_state.m_current_state;
@@ -51,7 +51,7 @@ compound_state::~compound_state(void)
   size_t count = m_designates.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    initial_designator* init_ptr = m_designates.Item( i );
+    initial_designator* init_ptr = m_designates.Item(i);
     init_ptr->detach();
   }
 
@@ -61,7 +61,7 @@ compound_state::~compound_state(void)
   count = m_beginstate.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    transition* trans_ptr = m_beginstate.Item( i );
+    transition* trans_ptr = m_beginstate.Item(i);
     trans_ptr->detach_beginstate();
   }
 
@@ -71,7 +71,7 @@ compound_state::~compound_state(void)
   count = m_endstate.GetCount();
   for (size_t i = 0; i < count; ++i)
   {
-    nonterminating_transition* trans_ptr = m_endstate.Item( i );
+    nonterminating_transition* trans_ptr = m_endstate.Item(i);
     trans_ptr->detach_endstate();
   }
 
@@ -81,99 +81,99 @@ compound_state::~compound_state(void)
   m_endstate.Clear();
 }
 
-wxString compound_state::get_name( void )
+wxString compound_state::get_name(void)
 {
   return m_name;
 }
 
-void compound_state::set_name( const wxString &p_name )
+void compound_state::set_name(const wxString& p_name)
 {
   m_name = p_name;
   m_name.Trim(true);
   m_name.Trim(false);
 }
 
-void compound_state::attach_transition_beginstate( transition* p_transition )
+void compound_state::attach_transition_beginstate(transition* p_transition)
 {
-  m_beginstate.Add( p_transition );
+  m_beginstate.Add(p_transition);
 }
 
-transition* compound_state::get_transition_beginstate( size_t p_index )
+transition* compound_state::get_transition_beginstate(size_t p_index)
 {
-  return m_beginstate.Item( p_index );
+  return m_beginstate.Item(p_index);
 }
 
-size_t compound_state::count_transition_beginstate( void )
+size_t compound_state::count_transition_beginstate(void)
 {
   return m_beginstate.GetCount();
 }
 
-void compound_state::detach_transition_beginstate( transition* p_transition )
+void compound_state::detach_transition_beginstate(transition* p_transition)
 {
   int i = m_beginstate.Index(p_transition,false);
-  if ( i != wxNOT_FOUND )
+  if (i != wxNOT_FOUND)
   {
     // Remove because it is an array of pointers.
-    m_beginstate.Remove( m_beginstate.Item( i ) );
+    m_beginstate.Remove(m_beginstate.Item(i));
   }
 }
 
-void compound_state::attach_transition_endstate( nonterminating_transition* p_nonterminating_transition )
+void compound_state::attach_transition_endstate(nonterminating_transition* p_nonterminating_transition)
 {
-  m_endstate.Add( p_nonterminating_transition );
+  m_endstate.Add(p_nonterminating_transition);
 }
 
-nonterminating_transition* compound_state::get_transition_endstate( size_t p_index )
+nonterminating_transition* compound_state::get_transition_endstate(size_t p_index)
 {
-  return m_endstate.Item( p_index );
+  return m_endstate.Item(p_index);
 }
 
-size_t compound_state::count_transition_endstate( void )
+size_t compound_state::count_transition_endstate(void)
 {
   return m_endstate.GetCount();
 }
 
-void compound_state::detach_transition_endstate( nonterminating_transition* p_nonterminating_transition )
+void compound_state::detach_transition_endstate(nonterminating_transition* p_nonterminating_transition)
 {
-  int i = m_endstate.Index( p_nonterminating_transition, false );
-  if ( i != wxNOT_FOUND )
+  int i = m_endstate.Index(p_nonterminating_transition, false);
+  if (i != wxNOT_FOUND)
   {
     // Note: Remove because it is an array of pointers.
-    m_endstate.Remove( m_endstate.Item( i ) );
+    m_endstate.Remove(m_endstate.Item(i));
   }
 }
 
-void compound_state::attach_initial_designator( initial_designator* p_init )
+void compound_state::attach_initial_designator(initial_designator* p_init)
 {
-  m_designates.Add( p_init );
+  m_designates.Add(p_init);
 }
 
-void compound_state::detach_initial_designator( initial_designator* p_init )
+void compound_state::detach_initial_designator(initial_designator* p_init)
 {
-  int i = m_designates.Index( p_init, false );
-  if ( i != wxNOT_FOUND )
+  int i = m_designates.Index(p_init, false);
+  if (i != wxNOT_FOUND)
   {
     // Note: Remove because it is an array of pointers.
-    m_designates.Remove( m_designates.Item( i ) );
+    m_designates.Remove(m_designates.Item(i));
   }
 }
 
-initial_designator* compound_state::get_initial_designator( size_t p_index )
+initial_designator* compound_state::get_initial_designator(size_t p_index)
 {
-  return m_designates.Item( p_index );
+  return m_designates.Item(p_index);
 }
 
-size_t compound_state::count_initial_designator( void )
+size_t compound_state::count_initial_designator(void)
 {
   return m_designates.GetCount();
 }
 
-bool compound_state::get_current_state( void ) const
+bool compound_state::get_current_state(void) const
 {
   return m_current_state;
 }
 
-void compound_state::set_current_state( bool p_current_state )
+void compound_state::set_current_state(bool p_current_state)
 {
   m_current_state = p_current_state;
 }

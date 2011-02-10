@@ -23,7 +23,7 @@
 using namespace mcrl2;
 using namespace mcrl2::lps;
 
-std::string SPEC = 
+std::string SPEC =
   "glob                      \n"
   "  m: Nat;                 \n"
   "                          \n"
@@ -35,7 +35,7 @@ std::string SPEC =
   "                          \n"
   "init P(0);                \n"
   ;
-  
+
 inline
 data::variable nat(std::string name)
 {
@@ -62,10 +62,10 @@ void test_find()
   action a = s.multi_action().actions().front();
 
   //--- find_variables ---//
-  data::variable m = nat("m"); 
+  data::variable m = nat("m");
   std::set<data::variable> v = lps::find_variables(a);
   v = lps::find_variables(s);
-  BOOST_CHECK(v.find(m) != v.end());   
+  BOOST_CHECK(v.find(m) != v.end());
 
   //--- find_sort_expressions ---//
   std::set<data::sort_expression> e = lps::find_sort_expressions(a);
@@ -77,24 +77,24 @@ void test_find()
 void test_free_variables()
 {
   lps::specification specification(parse_linear_process_specification(
-    "act a : Bool;\n"
-    "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
-    "init X;\n"
-  ));
+                                     "act a : Bool;\n"
+                                     "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
+                                     "init X;\n"
+                                   ));
 
   std::set<data::variable> free_variables = find_free_variables(specification.process());
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
   specification = parse_linear_process_specification(
-    "act a;\n"
-    "proc X(z : Bool) = (z && forall x : Nat. exists y : Nat. x < y) -> a.X(!z);\n"
-    "init X(true);\n"
-  );
+                    "act a;\n"
+                    "proc X(z : Bool) = (z && forall x : Nat. exists y : Nat. x < y) -> a.X(!z);\n"
+                    "init X(true);\n"
+                  );
   free_variables = find_free_variables(specification.process());
   std::cerr << "--- lps ---\n" << pp(specification) << std::endl;
   std::cerr << core::detail::print_pp_set(free_variables, "free variables") << std::endl;
-  
+
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());
   BOOST_CHECK(free_variables.find(data::variable("y", data::sort_nat::nat())) == free_variables.end());
 
@@ -105,10 +105,10 @@ void test_free_variables()
 void test_search()
 {
   lps::specification spec(parse_linear_process_specification(
-    "act a : Bool;\n"
-    "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
-    "init X;\n"
-  ));
+                            "act a : Bool;\n"
+                            "proc X = a((forall x : Nat. exists y : Nat. x < y)).X;\n"
+                            "init X;\n"
+                          ));
   data::variable d("x", data::sort_nat::nat());
   lps::search_free_variable(spec.process().action_summands(), d);
 }

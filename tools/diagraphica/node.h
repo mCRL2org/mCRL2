@@ -20,53 +20,53 @@ class Edge;
 
 class Node
 {
-public:
-	// -- constructors and destructors ------------------------------
-    Node( const size_t &idx );
+  public:
+    // -- constructors and destructors ------------------------------
+    Node(const size_t& idx);
     Node(
-        const size_t &idx,
-        const std::vector< double > &tpl );
-	virtual ~Node();
+      const size_t& idx,
+      const std::vector< double > &tpl);
+    virtual ~Node();
 
     // -- set functions ---------------------------------------------
     void swapTupleVal(
-        const size_t &idx1,
-        const size_t &idx2 );
+      const size_t& idx1,
+      const size_t& idx2);
     void moveTupleVal(
-        const size_t &idxFr,
-        const size_t &idxTo );
-    void moveTupleVals( std::map< size_t , size_t > &idcsFrTo );
+      const size_t& idxFr,
+      const size_t& idxTo);
+    void moveTupleVals(std::map< size_t , size_t > &idcsFrTo);
     void addTupleVal(
-        const size_t &idx,
-        const double &val );
-    void delTupleVal( const size_t &idx );
-    void addInEdge( Edge* e );
-    void setInEdges( const std::vector< Edge* > e );
-    void addOutEdge( Edge* e );
-    void setOutEdges( const std::vector< Edge* > e );
-    void setCluster( Cluster* c );
+      const size_t& idx,
+      const double& val);
+    void delTupleVal(const size_t& idx);
+    void addInEdge(Edge* e);
+    void setInEdges(const std::vector< Edge* > e);
+    void addOutEdge(Edge* e);
+    void setOutEdges(const std::vector< Edge* > e);
+    void setCluster(Cluster* c);
 
     // -- get functions ---------------------------------------------
     size_t getIndex();
     size_t getSizeTuple();
-    double getTupleVal( const size_t &idx );
+    double getTupleVal(const size_t& idx);
     size_t getSizeInEdges();
-    Edge* getInEdge( const size_t &idx );
+    Edge* getInEdge(const size_t& idx);
     size_t getSizeOutEdges();
-    Edge* getOutEdge( const size_t &idx );
-	Cluster* getCluster();
+    Edge* getOutEdge(const size_t& idx);
+    Cluster* getCluster();
 
     // -- clear functions -------------------------------------------
     void clearInEdges();
     void clearOutEdges();
     void clearCluster();
 
-protected:
+  protected:
     // -- data members ----------------------------------------------
     size_t index; // index in list of graph nodes
     std::vector< double >   tuple;
     std::vector< Edge* > inEdges;  // association
-	std::vector< Edge* > outEdges; // association
+    std::vector< Edge* > outEdges; // association
     Cluster* cluster;
 };
 

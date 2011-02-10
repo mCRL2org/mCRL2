@@ -24,9 +24,11 @@
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/substitute.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 /// \brief Initial state of a linear process.
 // LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
@@ -44,8 +46,8 @@ class process_initializer: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_initializer(const data::assignment_list& assignments)
-     : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments)),
-       m_assignments(assignments)
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments)),
+        m_assignments(assignments)
     {
     }
 

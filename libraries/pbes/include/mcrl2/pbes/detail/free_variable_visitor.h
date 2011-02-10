@@ -16,11 +16,14 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
 template <typename Term>
 struct free_variable_visitor: public pbes_expression_visitor<Term>

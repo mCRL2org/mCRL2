@@ -28,7 +28,7 @@ void test_standard_recursive_form(const std::string& bes_spec, bool recursive_fo
   from >> b;
   std::cout << "before\n" << pp(b) << std::endl;
 
-  make_standard_form(b, recursive_form);  
+  make_standard_form(b, recursive_form);
   std::cout << "after\n" << pp(b) << std::endl;
 }
 

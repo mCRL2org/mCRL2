@@ -19,61 +19,63 @@
 
 #include "mcrl2/data/add_binding.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-  /// \brief Maintains a multiset of bound data variables during traversal
-  template <template <class> class Builder, class Derived>
-  struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
+/// \brief Maintains a multiset of bound data variables during traversal
+template <template <class> class Builder, class Derived>
+struct add_data_variable_binding: public data::add_data_variable_binding<Builder, Derived>
+{
+  typedef data::add_data_variable_binding<Builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void enter(const action_summand& x)
   {
-    typedef data::add_data_variable_binding<Builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
+    increase_bind_count(x.summation_variables());
+  }
 
-    void enter(const action_summand& x)
-    {
-      increase_bind_count(x.summation_variables());
-    }
+  void leave(const action_summand& x)
+  {
+    decrease_bind_count(x.summation_variables());
+  }
 
-    void leave(const action_summand& x)
-    {
-      decrease_bind_count(x.summation_variables());
-    }
+  void enter(const deadlock_summand& x)
+  {
+    increase_bind_count(x.summation_variables());
+  }
 
-    void enter(const deadlock_summand& x)
-    {
-      increase_bind_count(x.summation_variables());
-    }
+  void leave(const deadlock_summand& x)
+  {
+    decrease_bind_count(x.summation_variables());
+  }
 
-    void leave(const deadlock_summand& x)
-    {
-      decrease_bind_count(x.summation_variables());
-    }
+  void enter(const linear_process& x)
+  {
+    increase_bind_count(x.process_parameters());
+  }
 
-    void enter(const linear_process& x)
-    {
-      increase_bind_count(x.process_parameters());
-    }
+  void leave(const linear_process& x)
+  {
+    decrease_bind_count(x.process_parameters());
+  }
 
-    void leave(const linear_process& x)
-    {
-      decrease_bind_count(x.process_parameters());
-    }
+  void enter(const specification& x)
+  {
+    increase_bind_count(x.global_variables());
+  }
 
-    void enter(const specification& x)
-    {
-      increase_bind_count(x.global_variables());
-    }
-
-    void leave(const specification& x)
-    {
-      increase_bind_count(x.global_variables());
-    }
-  };
+  void leave(const specification& x)
+  {
+    increase_bind_count(x.global_variables());
+  }
+};
 
 } // namespace lps
 

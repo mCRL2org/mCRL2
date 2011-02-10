@@ -16,25 +16,27 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace process {
+namespace process
+{
 
-  template <typename T>
-  void translate_user_notation(T& x,
-                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                              )
-  {
-    core::make_update_apply_builder<process::data_expression_builder>(data::detail::translate_user_notation_function())(x);
-  }
+template <typename T>
+void translate_user_notation(T& x,
+                             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                            )
+{
+  core::make_update_apply_builder<process::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+}
 
-  template <typename T>
-  T translate_user_notation(const T& x,
-                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                           )
-  {
-    return core::make_update_apply_builder<process::data_expression_builder>(data::detail::translate_user_notation_function())(x);
-  }
+template <typename T>
+T translate_user_notation(const T& x,
+                          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                         )
+{
+  return core::make_update_apply_builder<process::data_expression_builder>(data::detail::translate_user_notation_function())(x);
+}
 
 } // namespace process
 

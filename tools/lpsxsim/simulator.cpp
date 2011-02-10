@@ -9,11 +9,11 @@
 /// \file simulator.cpp
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "simulator.h"
+#pragma implementation "simulator.h"
 #endif
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #include <sstream>
@@ -34,29 +34,29 @@ using namespace mcrl2::trace;
 
 StandardSimulator::StandardSimulator()
 {
-    use_dummies = false;
-    rewr_strat = mcrl2::data::rewriter::jitty;
+  use_dummies = false;
+  rewr_strat = mcrl2::data::rewriter::jitty;
 
-    state_vars = ATmakeList0();
-    ATprotectList(&state_vars);
-    initial_state = NULL;;
-    ATprotect(&initial_state);
-    current_state = NULL;
-    ATprotect(&current_state);
-    next_states = ATmakeList0();
-    ATprotectList(&next_states);
-    trace = ATmakeList0();
-    ATprotectList(&trace);
-    ecart = ATmakeList0();
-    ATprotectList(&ecart);
+  state_vars = ATmakeList0();
+  ATprotectList(&state_vars);
+  initial_state = NULL;;
+  ATprotect(&initial_state);
+  current_state = NULL;
+  ATprotect(&current_state);
+  next_states = ATmakeList0();
+  ATprotectList(&next_states);
+  trace = ATmakeList0();
+  ATprotectList(&trace);
+  ecart = ATmakeList0();
+  ATprotectList(&ecart);
 
-    seen_states = ATindexedSetCreate(100,80);
+  seen_states = ATindexedSetCreate(100,80);
 
-    tau_prior = false;
-    // error = false;
+  tau_prior = false;
+  // error = false;
 
-    nextstate = NULL;
-    nextstategen = NULL;
+  nextstate = NULL;
+  nextstategen = NULL;
 }
 
 StandardSimulator::~StandardSimulator()
@@ -66,7 +66,7 @@ StandardSimulator::~StandardSimulator()
     (*i)->Unregistered();
   }
 
-  if ( initial_state != NULL )
+  if (initial_state != NULL)
   {
     delete nextstategen;
     delete nextstate;
@@ -82,19 +82,19 @@ StandardSimulator::~StandardSimulator()
 
 void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
 {
-    state_vars = spec.process().process_parameters();
+  state_vars = spec.process().process_parameters();
 
-    delete nextstategen;
-    delete nextstate;
-    m_rewriter.reset(new mcrl2::data::rewriter(spec.data(), rewr_strat));
-    m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(spec.data(), *m_rewriter));
-    nextstate = createNextState(spec, *m_enumerator_factory, !use_dummies,GS_STATE_VECTOR);
-    nextstategen = NULL;
-    initial_state = nextstate->getInitialState();
+  delete nextstategen;
+  delete nextstate;
+  m_rewriter.reset(new mcrl2::data::rewriter(spec.data(), rewr_strat));
+  m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(spec.data(), *m_rewriter));
+  nextstate = createNextState(spec, *m_enumerator_factory, !use_dummies,GS_STATE_VECTOR);
+  nextstategen = NULL;
+  initial_state = nextstate->getInitialState();
 
-    current_state = NULL;
-    InitialiseViews();
-    Reset(initial_state);
+  current_state = NULL;
+  InitialiseViews();
+  Reset(initial_state);
 }
 
 void StandardSimulator::LoadView(const std::string& /*filename*/)
@@ -113,20 +113,20 @@ bool StandardSimulator::IsActive()
 }
 
 
-void StandardSimulator::Register(SimulatorViewInterface *View)
+void StandardSimulator::Register(SimulatorViewInterface* View)
 {
   views.push_back(View);
   View->Registered(this);
-  if ( !ATisEmpty(trace) )
+  if (!ATisEmpty(trace))
   {
-          View->Initialise(state_vars);
-                View->StateChanged(NULL, current_state, next_states);
+    View->Initialise(state_vars);
+    View->StateChanged(NULL, current_state, next_states);
     View->TraceChanged(GetTrace(),0);
     View->TracePosChanged(ATAgetFirst(ATLgetFirst(trace)),current_state,ATgetLength(trace)-1);
   }
 }
 
-void StandardSimulator::Unregister(SimulatorViewInterface *View)
+void StandardSimulator::Unregister(SimulatorViewInterface* View)
 {
   views.remove(View);
   View->Unregistered();
@@ -139,13 +139,13 @@ ATermList StandardSimulator::GetParameters()
 
 void StandardSimulator::Reset()
 {
-        Reset(nextstate->getInitialState());
+  Reset(nextstate->getInitialState());
 }
 
 void StandardSimulator::Reset(ATerm State)
 {
   initial_state = State;
-  if ( initial_state != NULL )
+  if (initial_state != NULL)
   {
     traceReset(initial_state);
     SetCurrentState(initial_state);
@@ -161,7 +161,7 @@ void StandardSimulator::Reset(ATerm State)
 
 bool StandardSimulator::Undo()
 {
-  if ( ATgetLength(trace) > 1 )
+  if (ATgetLength(trace) > 1)
   {
     ATermList l = traceUndo();
     ATerm state = ATgetFirst(ATgetNext(l));
@@ -176,14 +176,16 @@ bool StandardSimulator::Undo()
     }
 
     return true;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
 
 bool StandardSimulator::Redo()
 {
-  if ( !ATisEmpty(ecart) )
+  if (!ATisEmpty(ecart))
   {
     ATermList trans = traceRedo();
     ATerm state = ATgetFirst(ATgetNext(trans));
@@ -198,7 +200,9 @@ bool StandardSimulator::Redo()
     }
 
     return true;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
@@ -213,14 +217,14 @@ ATermList StandardSimulator::GetNextStates()
   return next_states;
 }
 
-NextState *StandardSimulator::GetNextState()
+NextState* StandardSimulator::GetNextState()
 {
   return nextstate;
 }
 
 bool StandardSimulator::ChooseTransition(size_t index)
 {
-  if ( !ATisEmpty(next_states) && (index < ATgetLength(next_states)) )
+  if (!ATisEmpty(next_states) && (index < ATgetLength(next_states)))
   {
     ATermList l = ATLelementAt(next_states,index);
     ATermAppl trans = ATAgetFirst(l);
@@ -236,7 +240,7 @@ bool StandardSimulator::ChooseTransition(size_t index)
       (*i)->StateChanged(trans,state,next_states);
     }
 
-    if ( tau_prior )
+    if (tau_prior)
     {
       ATbool b;
       ATindexedSetPut(seen_states,current_state,&b);
@@ -246,16 +250,16 @@ bool StandardSimulator::ChooseTransition(size_t index)
       for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l),i++)
       {
         ATermList trans = ATLgetFirst(l);
-        if ( ATisEmpty(ATLgetArgument(ATAgetFirst(trans),0)) )
+        if (ATisEmpty(ATLgetArgument(ATAgetFirst(trans),0)))
         {
-          if ( ATindexedSetGetIndex(seen_states,ATgetFirst(ATgetNext(trans))) <0 /* == ATERM_NON_EXISTING_POSITION */ )
+          if (ATindexedSetGetIndex(seen_states,ATgetFirst(ATgetNext(trans))) <0 /* == ATERM_NON_EXISTING_POSITION */)
           {
             found = true;
             break;
           }
         }
       }
-      if ( found )
+      if (found)
       {
         return ChooseTransition(i);
       } // else
@@ -263,7 +267,9 @@ bool StandardSimulator::ChooseTransition(size_t index)
     }
 
     return true;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
@@ -280,22 +286,22 @@ size_t StandardSimulator::GetTracePos()
 
 bool StandardSimulator::SetTracePos(size_t pos)
 {
-  if ( ATgetLength(trace) == 0 )
+  if (ATgetLength(trace) == 0)
   {
     return false;
   }
 
   size_t l = ATgetLength(trace)-1;
 
-  if ( pos <= l+ATgetLength(ecart) )
+  if (pos <= l+ATgetLength(ecart))
   {
-    while ( l < pos )
+    while (l < pos)
     {
       trace = ATinsert(trace,ATgetFirst(ecart));
       ecart = ATgetNext(ecart);
       l++;
     }
-    while ( l > pos )
+    while (l > pos)
     {
       ecart = ATinsert(ecart,ATgetFirst(trace));
       trace = ATgetNext(trace);
@@ -315,7 +321,9 @@ bool StandardSimulator::SetTracePos(size_t pos)
     }
 
     return true;
-  } else {
+  }
+  else
+  {
     return false;
   }
 }
@@ -335,7 +343,7 @@ ATermList StandardSimulator::GetTrace()
 
 ATerm StandardSimulator::GetNextStateFromTrace()
 {
-  if ( ATisEmpty(ecart) )
+  if (ATisEmpty(ecart))
   {
     return NULL;
   }
@@ -345,7 +353,7 @@ ATerm StandardSimulator::GetNextStateFromTrace()
 
 ATermAppl StandardSimulator::GetNextTransitionFromTrace()
 {
-  if ( ATisEmpty(ecart) )
+  if (ATisEmpty(ecart))
   {
     return NULL;
   }
@@ -397,42 +405,44 @@ ATermList StandardSimulator::traceRedo()
   return ATLgetFirst(trace);
 }
 
-void StandardSimulator::LoadTrace(const std::string &filename)
+void StandardSimulator::LoadTrace(const std::string& filename)
 {
   Trace tr(filename);
 
   ATerm state = (ATerm) tr.currentState();
   ATermList newtrace = ATmakeList0();
 
-  if ( (state != NULL) && ((state = nextstate->parseStateVector((ATermAppl) state)) == NULL) )
+  if ((state != NULL) && ((state = nextstate->parseStateVector((ATermAppl) state)) == NULL))
   {
     throw mcrl2::runtime_error("initial state of trace is not a valid state for this specification");
   }
 
-  if ( state == NULL )
+  if (state == NULL)
   {
-      Reset();
-                state = current_state;
-  } else {
-      Reset(state);
+    Reset();
+    state = current_state;
+  }
+  else
+  {
+    Reset(state);
   }
 
   ATermAppl act;
   size_t idx = 0;
-  while ( (act = tr.nextAction()) != NULL )
+  while ((act = tr.nextAction()) != NULL)
   {
     idx++;
     nextstategen = nextstate->getNextStates(state,nextstategen);
-    if ( gsIsMultAct(act) )
+    if (gsIsMultAct(act))
     {
       ATermAppl Transition;
       ATerm NewState;
       bool found = false;
-      while ( nextstategen->next(&Transition,&NewState) )
+      while (nextstategen->next(&Transition,&NewState))
       {
-        if ( ATisEqual(Transition,act) )
+        if (ATisEqual(Transition,act))
         {
-          if ( (tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL) )
+          if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
           {
             newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
             state = NewState;
@@ -441,29 +451,29 @@ void StandardSimulator::LoadTrace(const std::string &filename)
           }
         }
       }
-      if ( !found )
+      if (!found)
       {
-                    std::stringstream ss;
-                    ss << "could not perform action " << idx << " (";
-                    PrintPart_CXX(ss,(ATerm) act,ppDefault);
-                    ss << ") from trace";
-                    throw mcrl2::runtime_error(ss.str());
+        std::stringstream ss;
+        ss << "could not perform action " << idx << " (";
+        PrintPart_CXX(ss,(ATerm) act,ppDefault);
+        ss << ") from trace";
+        throw mcrl2::runtime_error(ss.str());
       }
-    } 
-    else 
+    }
+    else
     {
       // Perhaps trace was in plain text format; try pp-ing actions
       // XXX Only because libtrace cannot parse text (yet)
       ATermAppl Transition;
       ATerm NewState;
-                  std::string s(ATgetName(ATgetAFun(act)));
+      std::string s(ATgetName(ATgetAFun(act)));
       bool found = false;
-      while ( nextstategen->next(&Transition,&NewState) )
+      while (nextstategen->next(&Transition,&NewState))
       {
-                    std::string t = PrintPart_CXX((ATerm) Transition, ppDefault);
-        if ( s == t )
+        std::string t = PrintPart_CXX((ATerm) Transition, ppDefault);
+        if (s == t)
         {
-          if ( (tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL) )
+          if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
           {
             newtrace = ATinsert(newtrace,(ATerm) ATmakeList2((ATerm) Transition,NewState));
             state = NewState;
@@ -472,7 +482,7 @@ void StandardSimulator::LoadTrace(const std::string &filename)
           }
         }
       }
-      if ( !found )
+      if (!found)
       {
         std::stringstream ss;
         ss << "could not perform action " << idx << " (" << ATwriteToString((ATerm) act) << ") from trace";
@@ -481,29 +491,29 @@ void StandardSimulator::LoadTrace(const std::string &filename)
     }
   }
 
-  for (ATermList l=newtrace; !ATisEmpty(l); l=ATgetNext(l) )
+  for (ATermList l=newtrace; !ATisEmpty(l); l=ATgetNext(l))
   {
-          ecart = ATinsert(ecart,ATgetFirst(l));
+    ecart = ATinsert(ecart,ATgetFirst(l));
   }
   newtrace = ATinsert(ecart,ATgetFirst(trace));
   for (viewlist::iterator i = views.begin(); i != views.end(); i++)
   {
-          (*i)->TraceChanged(newtrace,0);
+    (*i)->TraceChanged(newtrace,0);
   }
 }
 
-void StandardSimulator::SaveTrace(const std::string &filename)
+void StandardSimulator::SaveTrace(const std::string& filename)
 {
   Trace tr;
-  if ( !ATisEmpty(trace) )
+  if (!ATisEmpty(trace))
   {
-          ATermList m = ATreverse(trace);
-          tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
-          for (ATermList l=ATconcat(ATgetNext(m),ecart); !ATisEmpty(l); l=ATgetNext(l))
-          {
-            tr.addAction(ATAgetFirst(ATLgetFirst(l)));
-            tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
-          }
+    ATermList m = ATreverse(trace);
+    tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(m)))));
+    for (ATermList l=ATconcat(ATgetNext(m),ecart); !ATisEmpty(l); l=ATgetNext(l))
+    {
+      tr.addAction(ATAgetFirst(ATLgetFirst(l)));
+      tr.setState(nextstate->makeStateVector(ATgetFirst(ATgetNext(ATLgetFirst(l)))));
+    }
   }
 
   tr.save(filename);
@@ -520,7 +530,7 @@ void StandardSimulator::UpdateTransitions()
   next_states = ATmakeList0();
   ATermAppl transition;
   ATerm newstate;
-  while ( nextstategen->next(&transition,&newstate) )
+  while (nextstategen->next(&transition,&newstate))
   {
     next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm) transition,newstate));
   }

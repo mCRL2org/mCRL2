@@ -37,8 +37,8 @@ class pbes_abstract_tool: public input_output_tool
       super::parse_options(parser);
       if (parser.options.count("select") > 0)
       {
-      	m_parameter_selection = parser.option_argument("select");
-      	boost::trim(m_parameter_selection);
+        m_parameter_selection = parser.option_argument("select");
+        boost::trim(m_parameter_selection);
       }
       m_value_true = parser.option_argument_as<bool>("abstraction-value");
     }
@@ -47,40 +47,40 @@ class pbes_abstract_tool: public input_output_tool
     {
       super::add_options(desc);
       desc.add_option("select",
-          make_optional_argument("NUM", ""),
-          "select the PBES parameters that are allowed to be abstracted. Wild cards are allowed\n"
-          "\n"
-          "Examples:\n\n"
-          "          X1(b:Bool,c:Bool);X2(b:Bool)\n"
-          "          X1(*:Bool);X2(*:Bool)\n"
-          "          *(*:Bool)",
-          'f');
-        desc.add_option("abstraction-value",
-          make_optional_argument("NUM", "1"),
-          "the abstraction value 0 (false) or 1 (true)",
-          'a');
+                      make_optional_argument("NUM", ""),
+                      "select the PBES parameters that are allowed to be abstracted. Wild cards are allowed\n"
+                      "\n"
+                      "Examples:\n\n"
+                      "          X1(b:Bool,c:Bool);X2(b:Bool)\n"
+                      "          X1(*:Bool);X2(*:Bool)\n"
+                      "          *(*:Bool)",
+                      'f');
+      desc.add_option("abstraction-value",
+                      make_optional_argument("NUM", "1"),
+                      "the abstraction value 0 (false) or 1 (true)",
+                      'a');
     }
 
   public:
     pbes_abstract_tool()
       : super(
-          "pbesabstract",
-          "Wieger Wesselink; Tom Haenen and Tim Willemse",
-          "Tool for abstracting parameters of a PBES",
-          "Reads a file containing a PBES. For the variables that are indicated to be"
-          "abstracted, the smallest boolean subexpression is found which is then replaced"
-          "by false (default) or true.\n"
-          "  If the solution of a PBES after application of pbesabstract with"
-          "the value false is true, then the original PBES has solution true. Similarly"
-          "if the solution of a PBES after application of pbesabstract with the value\n"
-          "true is false, then the original PBES has solution false. After abstracting from certain"
-          "variables, pbesparelm can be used to remove these variables from the PBES hopefully, "
-          "but not necessarily, reducing the number of BES variables required to solve the PBES.\n\n"
-          "If OUTFILE is not present, standard output is used."
-          "If INFILE is not present, standard input is used."
-          "\n\n"
-        ),
-        m_value_true(true)
+        "pbesabstract",
+        "Wieger Wesselink; Tom Haenen and Tim Willemse",
+        "Tool for abstracting parameters of a PBES",
+        "Reads a file containing a PBES. For the variables that are indicated to be"
+        "abstracted, the smallest boolean subexpression is found which is then replaced"
+        "by false (default) or true.\n"
+        "  If the solution of a PBES after application of pbesabstract with"
+        "the value false is true, then the original PBES has solution true. Similarly"
+        "if the solution of a PBES after application of pbesabstract with the value\n"
+        "true is false, then the original PBES has solution false. After abstracting from certain"
+        "variables, pbesparelm can be used to remove these variables from the PBES hopefully, "
+        "but not necessarily, reducing the number of BES variables required to solve the PBES.\n\n"
+        "If OUTFILE is not present, standard output is used."
+        "If INFILE is not present, standard input is used."
+        "\n\n"
+      ),
+      m_value_true(true)
     {}
 
     bool run()
@@ -101,7 +101,7 @@ class pbes_abstract_tool: public input_output_tool
       if (mcrl2::core::gsDebug)
       {
         log_level = 2;
-      }     	
+      }
 
       // load the pbes
       pbes<> p;

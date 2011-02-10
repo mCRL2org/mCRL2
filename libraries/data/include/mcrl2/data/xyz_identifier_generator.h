@@ -15,9 +15,11 @@
 #include "boost/format.hpp"
 #include "mcrl2/data/set_identifier_generator.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
 /// \brief Identifier generator that generates names from the range X, Y, Z, X0, Y0, Z0, X1, ...
 class xyz_identifier_generator: public multiset_identifier_generator
@@ -33,16 +35,20 @@ class xyz_identifier_generator: public multiset_identifier_generator
     /// \return The next name in the range X, Y, Z, X0, Y0, Z0, X1, ...
     std::string next()
     {
-      switch (m_char) {
-        case 'X' : {
+      switch (m_char)
+      {
+        case 'X' :
+        {
           m_char = 'Y';
           break;
         }
-        case 'Y' : {
+        case 'Y' :
+        {
           m_char = 'Z';
           break;
         }
-        case 'Z' : {
+        case 'Z' :
+        {
           m_char = 'X';
           m_index++;
           break;
@@ -54,18 +60,18 @@ class xyz_identifier_generator: public multiset_identifier_generator
   public:
     /// \brief Constructor.
     xyz_identifier_generator()
-     : m_index(-2), m_char('Z')
+      : m_index(-2), m_char('Z')
     {}
 
     /// \brief Constructor.
     /// \param t A term.
     template <typename Term>
     xyz_identifier_generator(Term t)
-     : m_index(-2), m_char('Z')
+      : m_index(-2), m_char('Z')
     {
       add_to_context(t);
     }
-    
+
     /// \brief Returns hint if it isn't in the context yet. Else the next available
     /// identifier in the range X, Y, Z, X0, Y0, Z0, X1, ... is returned.
     /// The returned variable is added to the context.
@@ -79,9 +85,11 @@ class xyz_identifier_generator: public multiset_identifier_generator
       {
         m_index = -2;
         m_char = 'Z';
-        do {
+        do
+        {
           result = core::identifier_string(next());
-        } while (m_identifiers.find(result) != m_identifiers.end());
+        }
+        while (m_identifiers.find(result) != m_identifiers.end());
       }
 
       add_identifier(result);

@@ -15,44 +15,47 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
-      /// Function for initialisation of static variables, takes care of protection
-      /// \param[in,out] target a reference to the static variable
-      /// \param[in] original the expression that is used to initialise the variable
-      /// \ return a reference to original
-      template < typename Expression >
-      Expression const& initialise_static_expression(Expression& target, Expression const& original)
-      {
-        target = original;
-        target.protect();
+/// Function for initialisation of static variables, takes care of protection
+/// \param[in,out] target a reference to the static variable
+/// \param[in] original the expression that is used to initialise the variable
+/// \ return a reference to original
+template < typename Expression >
+Expression const& initialise_static_expression(Expression& target, Expression const& original)
+{
+  target = original;
+  target.protect();
 
-        return original;
-      }
+  return original;
+}
 
-      // Component that helps applying the Singleton design pattern
-      template < typename Derived, typename Expression = atermpp::aterm_appl >
-      struct singleton_expression : public Expression
-      {
-        static Expression const& instance()
-        {
-          static Expression single_instance = initialise_static_expression(single_instance, Expression(Derived::initialise()));
-  
-          return single_instance;
-        }
+// Component that helps applying the Singleton design pattern
+template < typename Derived, typename Expression = atermpp::aterm_appl >
+struct singleton_expression : public Expression
+{
+  static Expression const& instance()
+  {
+    static Expression single_instance = initialise_static_expression(single_instance, Expression(Derived::initialise()));
 
-        singleton_expression() : Expression(instance())
-        { }
-      };
+    return single_instance;
+  }
 
-      template < typename Derived >
-      struct singleton_identifier : public singleton_expression< Derived, core::identifier_string >
-      {};
+  singleton_expression() : Expression(instance())
+  { }
+};
 
-    } // namespace detail
-  } // namespace data
+template < typename Derived >
+struct singleton_identifier : public singleton_expression< Derived, core::identifier_string >
+  {};
+
+} // namespace detail
+} // namespace data
 } // namespace mcrl2
 
 

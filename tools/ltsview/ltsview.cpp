@@ -44,30 +44,30 @@ std::vector< std::string > developers()
 
 
 LTSView::LTSView() : super("LTSView",
-    "3D interactive visualization of a labelled transition system", // what-is
-    "Tool for interactive visualization of state transition systems.\n" // gui-specific description
-    "\n"
-    "LTSView is based on visualization techniques by Frank van Ham and Jack van Wijk.\n"
-    "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
-    "\"Visualization of State Transition Graphs\". "
-    "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
-    "\n"
-    "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
-    "Start the LTSView application. If INFILE is supplied then the " // command-line description
-    "LTS in INFILE is loaded into the application.\n"
-    "\n"
-    "The input format is determined by the contents of INFILE. If that fails, "
-    "an attempt is made to force the input format based on the file extension. "
-    "The supported formats with file extensions are:\n"
-    "  Aldebaran format (CADP; *.aut);\n"
+                             "3D interactive visualization of a labelled transition system", // what-is
+                             "Tool for interactive visualization of state transition systems.\n" // gui-specific description
+                             "\n"
+                             "LTSView is based on visualization techniques by Frank van Ham and Jack van Wijk.\n"
+                             "See: F. van Ham, H. van de Wetering and J.J. van Wijk,\n"
+                             "\"Visualization of State Transition Graphs\". "
+                             "Proceedings of the IEEE Symposium on Information Visualization 2001. IEEE CS Press, pp. 59-66, 2001.\n"
+                             "\n"
+                             "The default colour scheme for state marking was obtained from http://www.colorbrewer.org",
+                             "Start the LTSView application. If INFILE is supplied then the " // command-line description
+                             "LTS in INFILE is loaded into the application.\n"
+                             "\n"
+                             "The input format is determined by the contents of INFILE. If that fails, "
+                             "an attempt is made to force the input format based on the file extension. "
+                             "The supported formats with file extensions are:\n"
+                             "  Aldebaran format (CADP; *.aut);\n"
 #ifdef USE_BCG
-    "  Binary Coded Graph format (CADP; *.bcg);\n"
+                             "  Binary Coded Graph format (CADP; *.bcg);\n"
 #endif
-    "  GraphViz format (*.dot);\n"
-    "  Finite State Machine format (*.fsm);\n"
-    "  mCRL SVC format (*.svc);\n"
-    "  mCRL2 format (*.lts).",
-    developers()), lts(0)
+                             "  GraphViz format (*.dot);\n"
+                             "  Finite State Machine format (*.fsm);\n"
+                             "  mCRL SVC format (*.svc);\n"
+                             "  mCRL2 format (*.lts).",
+                             developers()), lts(0)
 { }
 
 IMPLEMENT_APP_NO_MAIN(LTSView_gui_tool)
@@ -77,16 +77,17 @@ END_EVENT_TABLE()
 
 #ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,
-                                  HINSTANCE hPrevInstance,
-                                  wxCmdLineArgType lpCmdLine,
-                                  int nCmdShow) {
+                              HINSTANCE hPrevInstance,
+                              wxCmdLineArgType lpCmdLine,
+                              int nCmdShow)
+{
 
   MCRL2_ATERMPP_INIT(0, lpCmdLine)
 
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
@@ -140,12 +141,13 @@ LTSView::~LTSView()
 std::string LTSView::getVersionString()
 {
   return mcrl2::utilities::interface_description("", NAME, AUTHOR, "",
-      "", "").version_information();
+         "", "").version_information();
 }
 
 void LTSView::openFile(string fileName)
 {
-  try{
+  try
+  {
     glCanvas->disableDisplay();
 
     mainFrame->createProgressDialog("Opening file","Loading file");
@@ -156,15 +158,15 @@ void LTSView::openFile(string fileName)
       delete newlts;
       mainFrame->updateProgressDialog(100,"Error loading file");
       mainFrame->showMessage(
-          "Error loading file",
-          "Could not load file " + fileName);
+        "Error loading file",
+        "Could not load file " + fileName);
       return;
     }
     delete lts;
     lts = newlts;
 
     RankStyle rankStyle = static_cast<RankStyle>(settings->getInt(
-          StateRankStyle));
+                            StateRankStyle));
 
     mainFrame->updateProgressDialog(17,"Ranking states");
     lts->rankStates(rankStyle);
@@ -183,7 +185,7 @@ void LTSView::openFile(string fileName)
 
     mainFrame->updateProgressDialog(83,"Positioning states");
     StatePositioningStyle pos_style = static_cast<StatePositioningStyle>(
-        settings->getInt(StatePosStyle));
+                                        settings->getInt(StatePosStyle));
     lts->positionStates(pos_style);
 
     mainFrame->updateProgressDialog(100,"Done");
@@ -194,10 +196,11 @@ void LTSView::openFile(string fileName)
 
     mainFrame->loadTitle();
     mainFrame->setNumberInfo(lts->getNumStates(),
-        lts->getNumTransitions(),lts->getNumClusters(),
-        lts->getNumRanks());
+                             lts->getNumTransitions(),lts->getNumClusters(),
+                             lts->getNumRanks());
     mainFrame->resetParameters();
-    for (unsigned int i = 0; i < lts->getNumParameters(); ++i) {
+    for (unsigned int i = 0; i < lts->getNumParameters(); ++i)
+    {
       mainFrame->addParameter(i,lts->getParameterName(i));
     }
     mainFrame->resetMarkRules();
@@ -212,12 +215,14 @@ void LTSView::openFile(string fileName)
 
     mainFrame->setMarkedStatesInfo(0);
     mainFrame->setMarkedTransitionsInfo(0);
-  } catch ( mcrl2::runtime_error e ) {
+  }
+  catch (mcrl2::runtime_error e)
+  {
 
     ostringstream s; //(captureOutput);
 
     wxString output;//(s.str(), wxConvUTF8);
-    wxMessageDialog *dial = new wxMessageDialog(NULL,
+    wxMessageDialog* dial = new wxMessageDialog(NULL,
         output + wxT("\n") +
         wxString(e.what(), wxConvUTF8), wxT("Error"),  wxOK | wxICON_ERROR);
     dial->ShowModal();
@@ -256,7 +261,7 @@ void LTSView::setRankStyle()
     mainFrame->createProgressDialog("Structuring LTS","Applying ranking");
 
     RankStyle rankStyle = static_cast<RankStyle>(settings->getInt(
-          StateRankStyle));
+                            StateRankStyle));
 
     mainFrame->updateProgressDialog(17,"Ranking states");
     lts->rankStates(rankStyle);
@@ -274,7 +279,7 @@ void LTSView::setRankStyle()
     visualizer->setLTS(lts,true);
 
     StatePositioningStyle pos_style = static_cast<StatePositioningStyle>(
-        settings->getInt(StatePosStyle));
+                                        settings->getInt(StatePosStyle));
     mainFrame->updateProgressDialog(80,"Positioning states");
     lts->positionStates(pos_style);
 
@@ -284,8 +289,8 @@ void LTSView::setRankStyle()
     glCanvas->resetView();
 
     mainFrame->setNumberInfo(lts->getNumStates(),
-      lts->getNumTransitions(),lts->getNumClusters(),
-      lts->getNumRanks());
+                             lts->getNumTransitions(),lts->getNumClusters(),
+                             lts->getNumRanks());
   }
 }
 
@@ -294,7 +299,7 @@ void LTSView::setStatePosStyle()
   if (lts != NULL)
   {
     StatePositioningStyle pos_style = static_cast<StatePositioningStyle>(
-        settings->getInt(StatePosStyle));
+                                        settings->getInt(StatePosStyle));
     lts->positionStates(pos_style);
     visualizer->notifyStatePositionsChanged();
     glCanvas->display();
@@ -331,8 +336,8 @@ void LTSView::addMarkRule()
       {
 
         int mr = markManager->createMarkRule(msrdlg->getParamIndex(),
-            msrdlg->getNegated(),msrdlg->getColor(),
-            msrdlg->getValues());
+                                             msrdlg->getNegated(),msrdlg->getColor(),
+                                             msrdlg->getValues());
         mainFrame->addMarkRule(msrdlg->getMarkRuleString(),mr);
 
         if (markManager->getMarkStyle() != MARK_STATES)
@@ -370,17 +375,17 @@ void LTSView::editMarkRule(int mr)
     MarkStateRuleDialog* msrdlg = new MarkStateRuleDialog(mainFrame,
         this,lts);
     msrdlg->setData(markManager->getMarkRuleParam(mr),
-        markManager->getMarkRuleColor(mr),
-        markManager->getMarkRuleNegated(mr),
-        markManager->getMarkRuleValues(mr));
+                    markManager->getMarkRuleColor(mr),
+                    markManager->getMarkRuleNegated(mr),
+                    markManager->getMarkRuleValues(mr));
     msrdlg->CentreOnParent();
     if (msrdlg->ShowModal() == wxID_OK)
     {
       if (msrdlg->getParamIndex() != -1)
       {
         markManager->setMarkRuleData(mr,msrdlg->getParamIndex(),
-            msrdlg->getNegated(),msrdlg->getColor(),
-            msrdlg->getValues());
+                                     msrdlg->getNegated(),msrdlg->getColor(),
+                                     msrdlg->getValues());
         mainFrame->replaceMarkRule(msrdlg->getMarkRuleString(),mr);
         if (markManager->getMarkStyle() != MARK_STATES)
         {
@@ -430,7 +435,7 @@ RGB_Color LTSView::getMarkRuleColor(int mr)
 RGB_Color LTSView::getNewRuleColour()
 {
   colourCounter = (colourCounter + 1) % 9;
-  switch(colourCounter)
+  switch (colourCounter)
   {
     case 0:
       return RGB_Color(228, 26, 28);
@@ -473,7 +478,10 @@ void LTSView::activateMarkRule(int mr,bool activate)
 
 void LTSView::setMatchStyle(MatchStyle ms)
 {
-  if (lts == NULL) return;
+  if (lts == NULL)
+  {
+    return;
+  }
   markManager->setMatchStyle(ms);
   if (markManager->getMarkStyle() != MARK_STATES)
   {
@@ -487,7 +495,10 @@ void LTSView::setMatchStyle(MatchStyle ms)
 
 void LTSView::setMatchStyleClusters(MatchStyle ms)
 {
-  if (lts == NULL) return;
+  if (lts == NULL)
+  {
+    return;
+  }
   markManager->setMatchStyleClusters(ms);
   applyMarkStyle();
 }
@@ -506,7 +517,10 @@ void LTSView::setMarkStyle(MarkStyle ms)
 
 void LTSView::applyMarkStyle()
 {
-  if (lts == NULL) return;
+  if (lts == NULL)
+  {
+    return;
+  }
 
   switch (markManager->getMarkStyle())
   {
@@ -521,7 +535,7 @@ void LTSView::applyMarkStyle()
     case MARK_TRANSITIONS:
       mainFrame->setMarkedStatesInfo(0);
       mainFrame->setMarkedTransitionsInfo(
-          markManager->getNumMarkedTransitions());
+        markManager->getNumMarkedTransitions());
       break;
     case NO_MARKS:
     default:
@@ -588,7 +602,7 @@ string LTSView::getParName(const int i) const
   }
 }
 
-string LTSView::getParValue(State *s, const int j) const
+string LTSView::getParValue(State* s, const int j) const
 {
   if (lts != NULL)
   {
@@ -610,7 +624,7 @@ void LTSView::selectStateByID(const int id)
     for (unsigned int i = 0; i < lts->getNumParameters(); ++i)
     {
       mainFrame->setParameterValue(i,
-          lts->getStateParameterValueStr(s,i));
+                                   lts->getStateParameterValueStr(s,i));
     }
   }
 }
@@ -667,8 +681,8 @@ void LTSView::zoomInBelow()
   markManager->setLTS(lts,false);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
-      lts->getNumTransitions(),lts->getNumClusters(),
-      lts->getNumRanks());
+                           lts->getNumTransitions(),lts->getNumClusters(),
+                           lts->getNumRanks());
   applyMarkStyle();
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
@@ -682,8 +696,8 @@ void LTSView::zoomInAbove()
   markManager->setLTS(lts,false);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
-     lts->getNumTransitions(),lts->getNumClusters(),
-     lts->getNumRanks());
+                           lts->getNumTransitions(),lts->getNumClusters(),
+                           lts->getNumRanks());
   applyMarkStyle();
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());
@@ -696,7 +710,8 @@ void LTSView::zoomOutTillTop()
   {
     zoomOut();
     oldLTS = lts;
-  }  while (lts != oldLTS);
+  }
+  while (lts != oldLTS);
 }
 
 void LTSView::zoomOut()
@@ -707,8 +722,8 @@ void LTSView::zoomOut()
   markManager->setLTS(lts,false);
   visualizer->setLTS(lts,false);
   mainFrame->setNumberInfo(lts->getNumStates(),
-    lts->getNumTransitions(),lts->getNumClusters(),
-    lts->getNumRanks());
+                           lts->getNumTransitions(),lts->getNumClusters(),
+                           lts->getNumRanks());
   applyMarkStyle();
   glCanvas->setSim(lts->getSimulation());
   mainFrame->setSim(lts->getSimulation());

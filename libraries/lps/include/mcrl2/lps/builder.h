@@ -16,195 +16,209 @@
 #include "mcrl2/data/builder.h"
 #include "mcrl2/lps/specification.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 // Adds sort expression traversal to a builder
 //--- start generated add_sort_expressions code ---//
-  template <template <class> class Builder, class Derived>
-  struct add_sort_expressions: public Builder<Derived>
-  {
-    typedef Builder<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
+template <template <class> class Builder, class Derived>
+struct add_sort_expressions: public Builder<Derived>
+{
+  typedef Builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
 
-    lps::action_label operator()(const lps::action_label& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      lps::action_label result = lps::action_label(x.name(), static_cast<Derived&>(*this)(x.sorts()));
-      static_cast<Derived&>(*this).leave(x);
-      return result;
-    }
-    
-    lps::action operator()(const lps::action& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      lps::action result = lps::action(static_cast<Derived&>(*this)(x.label()), static_cast<Derived&>(*this)(x.arguments()));
-      static_cast<Derived&>(*this).leave(x);
-      return result;
-    }
-    
-    void operator()(lps::deadlock& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    void operator()(lps::multi_action& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      x.actions() = static_cast<Derived&>(*this)(x.actions());
-      if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    void operator()(lps::deadlock_summand& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      x.summation_variables() = static_cast<Derived&>(*this)(x.summation_variables());
-      x.condition() = static_cast<Derived&>(*this)(x.condition());
-      static_cast<Derived&>(*this)(x.deadlock());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    void operator()(lps::action_summand& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      x.summation_variables() = static_cast<Derived&>(*this)(x.summation_variables());
-      x.condition() = static_cast<Derived&>(*this)(x.condition());
-      static_cast<Derived&>(*this)(x.multi_action());
-      x.assignments() = static_cast<Derived&>(*this)(x.assignments());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    lps::process_initializer operator()(const lps::process_initializer& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this)(x.assignments()));
-      static_cast<Derived&>(*this).leave(x);
-      return result;
-    }
-    
-    void operator()(lps::linear_process& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      x.process_parameters() = static_cast<Derived&>(*this)(x.process_parameters());
-      static_cast<Derived&>(*this)(x.deadlock_summands());
-      static_cast<Derived&>(*this)(x.action_summands());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    void operator()(lps::specification& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      x.action_labels() = static_cast<Derived&>(*this)(x.action_labels());
-      static_cast<Derived&>(*this)(x.global_variables());
-      static_cast<Derived&>(*this)(x.process());
-      x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-  };
-
-  /// \brief Builder class
-  template <typename Derived>
-  struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
+  lps::action_label operator()(const lps::action_label& x)
   {
-    typedef add_sort_expressions<data::sort_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
+    static_cast<Derived&>(*this).enter(x);
+    lps::action_label result = lps::action_label(x.name(), static_cast<Derived&>(*this)(x.sorts()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  lps::action operator()(const lps::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::action result = lps::action(static_cast<Derived&>(*this)(x.label()), static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  void operator()(lps::deadlock& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    if (x.has_time())
+    {
+      x.time() = static_cast<Derived&>(*this)(x.time());
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.actions() = static_cast<Derived&>(*this)(x.actions());
+    if (x.has_time())
+    {
+      x.time() = static_cast<Derived&>(*this)(x.time());
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::deadlock_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.summation_variables() = static_cast<Derived&>(*this)(x.summation_variables());
+    x.condition() = static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.deadlock());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.summation_variables() = static_cast<Derived&>(*this)(x.summation_variables());
+    x.condition() = static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    x.assignments() = static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  lps::process_initializer operator()(const lps::process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this)(x.assignments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  void operator()(lps::linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.process_parameters() = static_cast<Derived&>(*this)(x.process_parameters());
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.action_labels() = static_cast<Derived&>(*this)(x.action_labels());
+    static_cast<Derived&>(*this)(x.global_variables());
+    static_cast<Derived&>(*this)(x.process());
+    x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Builder class
+template <typename Derived>
+struct sort_expression_builder: public add_sort_expressions<data::sort_expression_builder, Derived>
+{
+  typedef add_sort_expressions<data::sort_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+};
 //--- end generated add_sort_expressions code ---//
 
 // Adds data expression traversal to a builder
 //--- start generated add_data_expressions code ---//
-  template <template <class> class Builder, class Derived>
-  struct add_data_expressions: public Builder<Derived>
-  {
-    typedef Builder<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
+template <template <class> class Builder, class Derived>
+struct add_data_expressions: public Builder<Derived>
+{
+  typedef Builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
 
-    lps::action operator()(const lps::action& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      lps::action result = lps::action(x.label(), static_cast<Derived&>(*this)(x.arguments()));
-      static_cast<Derived&>(*this).leave(x);
-      return result;
-    }
-    
-    void operator()(lps::deadlock& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    void operator()(lps::multi_action& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      x.actions() = static_cast<Derived&>(*this)(x.actions());
-      if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    void operator()(lps::deadlock_summand& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      x.condition() = static_cast<Derived&>(*this)(x.condition());
-      static_cast<Derived&>(*this)(x.deadlock());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    void operator()(lps::action_summand& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      x.condition() = static_cast<Derived&>(*this)(x.condition());
-      static_cast<Derived&>(*this)(x.multi_action());
-      x.assignments() = static_cast<Derived&>(*this)(x.assignments());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    lps::process_initializer operator()(const lps::process_initializer& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this)(x.assignments()));
-      static_cast<Derived&>(*this).leave(x);
-      return result;
-    }
-    
-    void operator()(lps::linear_process& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      static_cast<Derived&>(*this)(x.deadlock_summands());
-      static_cast<Derived&>(*this)(x.action_summands());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-    void operator()(lps::specification& x)
-    {
-      static_cast<Derived&>(*this).enter(x);  
-      static_cast<Derived&>(*this)(x.process());
-      x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
-      static_cast<Derived&>(*this).leave(x);
-    }
-    
-  };
-
-  /// \brief Builder class
-  template <typename Derived>
-  struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
+  lps::action operator()(const lps::action& x)
   {
-    typedef add_data_expressions<data::data_expression_builder, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
+    static_cast<Derived&>(*this).enter(x);
+    lps::action result = lps::action(x.label(), static_cast<Derived&>(*this)(x.arguments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  void operator()(lps::deadlock& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    if (x.has_time())
+    {
+      x.time() = static_cast<Derived&>(*this)(x.time());
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.actions() = static_cast<Derived&>(*this)(x.actions());
+    if (x.has_time())
+    {
+      x.time() = static_cast<Derived&>(*this)(x.time());
+    }
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::deadlock_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.condition() = static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.deadlock());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::action_summand& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    x.condition() = static_cast<Derived&>(*this)(x.condition());
+    static_cast<Derived&>(*this)(x.multi_action());
+    x.assignments() = static_cast<Derived&>(*this)(x.assignments());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  lps::process_initializer operator()(const lps::process_initializer& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    lps::process_initializer result = lps::process_initializer(static_cast<Derived&>(*this)(x.assignments()));
+    static_cast<Derived&>(*this).leave(x);
+    return result;
+  }
+
+  void operator()(lps::linear_process& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.deadlock_summands());
+    static_cast<Derived&>(*this)(x.action_summands());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(lps::specification& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.process());
+    x.initial_process() = static_cast<Derived&>(*this)(x.initial_process());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+};
+
+/// \brief Builder class
+template <typename Derived>
+struct data_expression_builder: public add_data_expressions<data::data_expression_builder, Derived>
+{
+  typedef add_data_expressions<data::data_expression_builder, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+};
 //--- end generated add_data_expressions code ---//
 
 } // namespace lps

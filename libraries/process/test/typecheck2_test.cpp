@@ -23,7 +23,7 @@ using namespace mcrl2;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-void test_process_specification(const std::string &ps_in, bool const expected_result = true, bool const test_type_checker = true)
+void test_process_specification(const std::string& ps_in, bool const expected_result = true, bool const test_type_checker = true)
 {
   std::istringstream ps_in_stream(ps_in);
   ATermAppl ps_aterm = core::parse_proc_spec(ps_in_stream);
@@ -33,9 +33,10 @@ void test_process_specification(const std::string &ps_in, bool const expected_re
   //std::cerr << "The following process specifications should be the same:" << std::endl << ps_in << std::endl << "and" << std::endl << ps_out << std::endl;
   BOOST_CHECK_EQUAL(ps_in, ps_out);
 
-  if (test_type_checker) {
+  if (test_type_checker)
+  {
     process::process_specification ps(ps_aterm);
-    if(expected_result)
+    if (expected_result)
     {
       process::type_check(ps);
 

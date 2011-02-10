@@ -1398,13 +1398,16 @@ ATermAppl gsMakeVarSpec(ATermList VarExpID_0)
 //-------------------------------------------------
 
 inline
-ATermAppl gsString2ATermAppl(const char *s)
+ATermAppl gsString2ATermAppl(const char* s)
 //Ret: quoted constant s, if s != NULL
 //     unquoted constant Nil, if s == NULL
 {
-  if (s != NULL) {
+  if (s != NULL)
+  {
     return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
-  } else {
+  }
+  else
+  {
     return gsMakeNil();
   }
 }
@@ -1418,13 +1421,16 @@ bool gsIsString(ATermAppl term)
 }
 
 inline
-char *gsATermAppl2String(ATermAppl term)
+char* gsATermAppl2String(ATermAppl term)
 //Ret: string s, if term is a quoted constant s
 //     NULL, otherwise
 {
-  if (gsIsString(term)) {
+  if (gsIsString(term))
+  {
     return ATgetName(ATgetAFun(term));
-  } else {
+  }
+  else
+  {
     return NULL;
   }
 }
@@ -1433,21 +1439,43 @@ inline
 bool gsIsNumericString(const char* s)
 //Ret: true if s is of form "0 | -? [1-9][0-9]*", false otherwise
 {
-  if (s == NULL) return false;
-  if (s[0] == '\0') return false;
-  if (s[0] == '-') ++s;
-  if (s[0] == '\0') return false;
-  if (s[0] == '0') {
+  if (s == NULL)
+  {
+    return false;
+  }
+  if (s[0] == '\0')
+  {
+    return false;
+  }
+  if (s[0] == '-')
+  {
     ++s;
-    if (s[0] == '\0') return true;
-    else return false;
+  }
+  if (s[0] == '\0')
+  {
+    return false;
+  }
+  if (s[0] == '0')
+  {
+    ++s;
+    if (s[0] == '\0')
+    {
+      return true;
+    }
+    else
+    {
+      return false;
+    }
   }
   for (; s[0] != '\0'; ++s)
-    if(!isdigit(s[0])) return false;
+    if (!isdigit(s[0]))
+    {
+      return false;
+    }
   return true;
 }
 
-ATermAppl gsFreshString2ATermAppl(const char *s, ATerm Term, bool TryNoSuffix);
+ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix);
 //Pre: Term is an ATerm containing ATermAppl's and ATermList's only
 //     s is not NULL
 //Ret: "s", if it does not occur in Term, and TryNoSuffix holds

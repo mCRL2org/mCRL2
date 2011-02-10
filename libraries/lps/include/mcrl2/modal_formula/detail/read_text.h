@@ -18,11 +18,14 @@
 #include <algorithm>
 #include <iterator>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace modal_formula {
+namespace modal_formula
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Reads text from a file
 /// \param filename A string
@@ -35,7 +38,9 @@ std::string read_text(const std::string& filename, bool warn=false)
   if (!in)
   {
     if (warn)
+    {
       std::cerr << "Could not open input file: " << filename << std::endl;
+    }
     return "";
   }
   in.unsetf(std::ios::skipws); //  Turn of white space skipping on the stream

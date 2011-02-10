@@ -16,16 +16,16 @@
 
 namespace atermpp
 {
-  /// \brief Initialize the ATerm++ Library. The specified argument t is used to mark the
-  /// the bottom of the program stack.
-  /// \param bottom_of_stack The bottom of stack (or a good approximation of it).
-  /// All aterms in the range [bottom_of_stack,...[ will not be garbage collected.
-  inline
-  void aterm_init(const aterm& bottom_of_stack)
-  {
-    ATerm a = bottom_of_stack;
-    ATinit(0, 0, &a);
-  }
+/// \brief Initialize the ATerm++ Library. The specified argument t is used to mark the
+/// the bottom of the program stack.
+/// \param bottom_of_stack The bottom of stack (or a good approximation of it).
+/// All aterms in the range [bottom_of_stack,...[ will not be garbage collected.
+inline
+void aterm_init(const aterm& bottom_of_stack)
+{
+  ATerm a = bottom_of_stack;
+  ATinit(0, 0, &a);
+}
 
 } // namespace atermpp
 
@@ -49,7 +49,7 @@ namespace atermpp
 
 /// MCRL2_ATERMPP_INIT_DEBUG(argc, argv) initialises the ATerm library with
 ///  MCRL2_ATERMPP_INIT(argc,argv). If NDEBUG is not defined, the aterm library
-///  performs now all debug checking by default. So, MCRL2_ATERMPP_INIT_DEBUG 
+///  performs now all debug checking by default. So, MCRL2_ATERMPP_INIT_DEBUG
 ///  equals MCRL2_ATERMPP_INIT.
 # define MCRL2_ATERMPP_INIT_DEBUG(argc, argv)\
   MCRL2_ATERMPP_INIT_(argc, argv, argv)

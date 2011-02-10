@@ -16,35 +16,38 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
 /// Visitor that applies a data substitution to a pbes expression.
 template <typename Substitution>
 struct substitute_builder: public pbes_expr_builder<pbes_expression>
 {
   const Substitution& sigma;
-  
+
   substitute_builder(const Substitution& sigma_)
     : sigma(sigma_)
   {}
 
   /// \brief Applies the substitution to a data expression
   /// \param d A data expression
-  data::data_expression substitute_copy(const data::data_expression& d) const    
-  {                                         
+  data::data_expression substitute_copy(const data::data_expression& d) const
+  {
     return data::substitute_free_variables(d, sigma);
-  } 
+  }
 
   /// \brief Applies the substitution to a data expression
   /// \param d A data expression
-  void substitute(data::data_expression& d) const    
-  {                                         
+  void substitute(data::data_expression& d) const
+  {
     d = substitute_copy(d);
-  } 
+  }
 
   /// \brief Applies the substitution to the elements of a term list
   template <typename TermList>
@@ -58,7 +61,7 @@ struct substitute_builder: public pbes_expr_builder<pbes_expression>
       substitute(*i);
     }
     return TermList(v.begin(), v.end());
-  }   
+  }
 
   /// \brief Visit data_expression node
   /// \param e A PBES expression

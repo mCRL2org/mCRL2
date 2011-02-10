@@ -59,14 +59,14 @@ void test_assignment_list()
   BOOST_CHECK(t0 == t2);
 
   assignment_list m1 = atermpp::make_list(
-    assignment(d1, d2),
-    assignment(e1, d1)
-  );
+                         assignment(d1, d2),
+                         assignment(e1, d1)
+                       );
   assignment_list m2 = data::substitute_variables(m1, assignment(d2, d1));
   assignment_list m3 = atermpp::make_list(
-    assignment(d1, d1),
-    assignment(e1, d1)
-  );
+                         assignment(d1, d1),
+                         assignment(e1, d1)
+                       );
   BOOST_CHECK(m2 == m3);
   std::cout << "<m2>" << mcrl2::core::pp(m2) << std::endl;
   std::cout << "<m3>" << mcrl2::core::pp(m3) << std::endl;

@@ -11,13 +11,13 @@
 #include "wx.hpp" // precompiled headers
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "xsimtracedll.h"
+#pragma implementation "xsimtracedll.h"
 #endif
 
 #include <wx/wx.h>
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #include <sstream>
@@ -40,27 +40,29 @@ using namespace mcrl2::core::detail;
 const int ID_LISTVIEW = 10101;
 
 BEGIN_EVENT_TABLE(XSimTraceDLL,wxFrame)
-    EVT_CLOSE(XSimTraceDLL::OnCloseWindow)
-    EVT_LIST_ITEM_ACTIVATED(ID_LISTVIEW,XSimTraceDLL::OnListItemActivated)
+  EVT_CLOSE(XSimTraceDLL::OnCloseWindow)
+  EVT_LIST_ITEM_ACTIVATED(ID_LISTVIEW,XSimTraceDLL::OnListItemActivated)
 END_EVENT_TABLE()
 
-static void PrintState(stringstream &ss, ATerm state, NextState *ns)
+static void PrintState(stringstream& ss, ATerm state, NextState* ns)
 {
-        for (size_t i=0; i<ns->getStateLength(); i++)
-        {
-                if ( i > 0 )
-                {
+  for (size_t i=0; i<ns->getStateLength(); i++)
+  {
+    if (i > 0)
+    {
       ss << ", ";
     }
 
-                ATermAppl a = ns->getStateArgument(state,i);
-                if ( mcrl2::data::is_variable(a) )
-                {
+    ATermAppl a = ns->getStateArgument(state,i);
+    if (mcrl2::data::is_variable(a))
+    {
       ss << "_";
-                } else {
-                        PrintPart_CXX(ss, (ATerm) a, ppDefault);
-                }
-        }
+    }
+    else
+    {
+      PrintPart_CXX(ss, (ATerm) a, ppDefault);
+    }
+  }
 }
 
 static int wxCALLBACK compare_items(long a, long b, long /*d*/)
@@ -85,24 +87,26 @@ void XSimTraceDLL::_reset(ATerm State)
 
 void XSimTraceDLL::_add_state(ATermAppl Transition, ATerm State, bool enabled)
 {
-  if ( Transition != NULL )
+  if (Transition != NULL)
   {
     stringstream ss;
     long l = traceview->GetItemCount();
-                long real_l;
+    long real_l;
 
     real_l = traceview->InsertItem(l,wxString::Format(wxT("%li"),l));
-                traceview->SetItemData(real_l,l);
-          real_l = traceview->FindItem(-1,l);
+    traceview->SetItemData(real_l,l);
+    real_l = traceview->FindItem(-1,l);
     traceview->SetItem(real_l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str()));
     PrintState(ss,State,simulator->GetNextState());
     traceview->SetItem(real_l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
     traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
-    if ( enabled )
+    if (enabled)
     {
       wxColor col(255,255,255);
       traceview->SetItemBackgroundColour(real_l,col);
-    } else {
+    }
+    else
+    {
       wxColor col(245,245,245);
       traceview->SetItemBackgroundColour(real_l,col);
     }
@@ -115,27 +119,27 @@ void XSimTraceDLL::_update()
 }
 
 
-XSimTraceDLL::XSimTraceDLL( wxWindow *parent ) :
-    wxFrame( parent, -1, wxT("XSim Trace (DLL)"), wxDefaultPosition, wxSize(300,400), wxDEFAULT_FRAME_STYLE )
+XSimTraceDLL::XSimTraceDLL(wxWindow* parent) :
+  wxFrame(parent, -1, wxT("XSim Trace (DLL)"), wxDefaultPosition, wxSize(300,400), wxDEFAULT_FRAME_STYLE)
 {
-    wxPanel *panel = new wxPanel(this,-1);
-    wxBoxSizer *sizer = new wxBoxSizer(wxVERTICAL);
-    wxStaticBox *box = new wxStaticBox(panel,-1,wxT("Transitions"));
-    wxStaticBoxSizer *boxsizer = new wxStaticBoxSizer(box,wxVERTICAL);
-    traceview = new wxListView(panel,ID_LISTVIEW,wxDefaultPosition,wxSize(0,0),wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
-    traceview->InsertColumn(0,wxT("#"));
-    traceview->InsertColumn(1,wxT("Action"));
-    traceview->InsertColumn(2,wxT("State"));
-    traceview->SetColumnWidth(0,30);
-    traceview->SetColumnWidth(1,120);
-    boxsizer->Add(traceview,1,wxGROW|wxALIGN_CENTER|wxALL,5);
-    sizer->Add(boxsizer,1,wxGROW|wxALIGN_CENTER|wxALL,5);
-    panel->SetSizer(sizer);
+  wxPanel* panel = new wxPanel(this,-1);
+  wxBoxSizer* sizer = new wxBoxSizer(wxVERTICAL);
+  wxStaticBox* box = new wxStaticBox(panel,-1,wxT("Transitions"));
+  wxStaticBoxSizer* boxsizer = new wxStaticBoxSizer(box,wxVERTICAL);
+  traceview = new wxListView(panel,ID_LISTVIEW,wxDefaultPosition,wxSize(0,0),wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
+  traceview->InsertColumn(0,wxT("#"));
+  traceview->InsertColumn(1,wxT("Action"));
+  traceview->InsertColumn(2,wxT("State"));
+  traceview->SetColumnWidth(0,30);
+  traceview->SetColumnWidth(1,120);
+  boxsizer->Add(traceview,1,wxGROW|wxALIGN_CENTER|wxALL,5);
+  sizer->Add(boxsizer,1,wxGROW|wxALIGN_CENTER|wxALL,5);
+  panel->SetSizer(sizer);
 
-    simulator = NULL;
+  simulator = NULL;
 }
 
-void XSimTraceDLL::Registered(SimulatorInterface *Simulator)
+void XSimTraceDLL::Registered(SimulatorInterface* Simulator)
 {
   SimulatorViewDLLInterface::Registered(Simulator);
 
@@ -162,11 +166,11 @@ void XSimTraceDLL::AddState(ATermAppl Transition, ATerm State, bool enabled)
 
 void XSimTraceDLL::StateChanged(ATermAppl Transition, ATerm State, ATermList /* NextStates */)
 {
-  if ( Transition != NULL )
+  if (Transition != NULL)
   {
     size_t l = traceview->GetItemCount()-1;
 
-    while ( l > current_pos )
+    while (l > current_pos)
     {
       traceview->DeleteItem(traceview->FindItem(-1,l));
       l--;
@@ -184,7 +188,7 @@ void XSimTraceDLL::Reset(ATerm State)
 
 void XSimTraceDLL::Undo(size_t Count)
 {
-  while ( Count > 0 )
+  while (Count > 0)
   {
     wxColor col(245,245,245);
     traceview->SetItemBackgroundColour(traceview->FindItem(-1,current_pos),col);
@@ -196,7 +200,7 @@ void XSimTraceDLL::Undo(size_t Count)
 
 void XSimTraceDLL::Redo(size_t Count)
 {
-  while ( Count > 0 )
+  while (Count > 0)
   {
     wxColor col(255,255,255);
     current_pos++;
@@ -210,7 +214,7 @@ void XSimTraceDLL::TraceChanged(ATermList Trace, size_t From)
 {
   size_t l = traceview->GetItemCount();
 
-  while ( l > From )
+  while (l > From)
   {
     l--;
     traceview->DeleteItem(traceview->FindItem(-1,l));
@@ -218,10 +222,12 @@ void XSimTraceDLL::TraceChanged(ATermList Trace, size_t From)
 
   for (; !ATisEmpty(Trace); Trace=ATgetNext(Trace))
   {
-    if ( From == 0 )
+    if (From == 0)
     {
       _reset(ATgetFirst(ATgetNext(ATLgetFirst(Trace))));
-    } else {
+    }
+    else
+    {
       _add_state(ATAgetFirst(ATLgetFirst(Trace)),ATgetFirst(ATgetNext(ATLgetFirst(Trace))),current_pos >= From);
     }
     From++;
@@ -231,39 +237,40 @@ void XSimTraceDLL::TraceChanged(ATermList Trace, size_t From)
 
 void XSimTraceDLL::TracePosChanged(ATermAppl /* Transition */, ATerm /* State */, size_t Index)
 {
-  if ( current_pos > Index )
+  if (current_pos > Index)
   {
     Undo(current_pos-Index);
-  } else if ( current_pos < Index )
+  }
+  else if (current_pos < Index)
   {
     Redo(Index-current_pos);
   }
 }
 
 
-void XSimTraceDLL::OnCloseWindow( wxCloseEvent& /* event */)
+void XSimTraceDLL::OnCloseWindow(wxCloseEvent& /* event */)
 {
-  if ( simdll != NULL )
+  if (simdll != NULL)
   {
     simdll->Remove(this,true);
   }
   Destroy();
 }
 
-void XSimTraceDLL::OnListItemActivated( wxListEvent &event )
+void XSimTraceDLL::OnListItemActivated(wxListEvent& event)
 {
-  if ( simulator != NULL )
+  if (simulator != NULL)
   {
     simulator->SetTracePos(event.GetData());
   }
 }
 
 
-static SimViewsDLL *simdll;
+static SimViewsDLL* simdll;
 
-extern "C" void SimulatorViewDLLAddView(SimulatorInterface *Simulator)
+extern "C" void SimulatorViewDLLAddView(SimulatorInterface* Simulator)
 {
-  XSimTraceDLL *v;
+  XSimTraceDLL* v;
   v = new XSimTraceDLL(GetMainWindow(Simulator));
   v->Show();
   v->SetSimViewsDLL(simdll);

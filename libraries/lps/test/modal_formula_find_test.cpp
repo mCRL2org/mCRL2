@@ -25,7 +25,7 @@
 using namespace mcrl2;
 using namespace mcrl2::state_formulas;
 
-std::string SPEC = 
+std::string SPEC =
   "glob                      \n"
   "  m: Nat;                 \n"
   "                          \n"
@@ -64,7 +64,7 @@ void test_find()
   //--- find_variables ---//
   data::variable b = bool_("b");
   std::set<data::variable> v = state_formulas::find_variables(f);
-  BOOST_CHECK(v.find(b) != v.end());   
+  BOOST_CHECK(v.find(b) != v.end());
 
   //--- find_sort_expressions ---//
   std::set<data::sort_expression> e = state_formulas::find_sort_expressions(f);

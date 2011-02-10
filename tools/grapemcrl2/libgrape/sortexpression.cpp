@@ -16,31 +16,31 @@
 
 using namespace grape::libgrape;
 
-sortexpression::sortexpression( void )
+sortexpression::sortexpression(void)
 {
   m_expression = wxEmptyString;
 }
 
-sortexpression::sortexpression( const sortexpression &p_sortexpression )
+sortexpression::sortexpression(const sortexpression& p_sortexpression)
 {
   m_expression = p_sortexpression.m_expression;
 }
 
-sortexpression::~sortexpression( void )
+sortexpression::~sortexpression(void)
 {
 }
 
-void sortexpression::set_expression( const wxString &p_expression )
+void sortexpression::set_expression(const wxString& p_expression)
 {
   m_expression = p_expression;
 }
 
-wxString sortexpression::get_expression( void ) const
+wxString sortexpression::get_expression(void) const
 {
   return m_expression;
 }
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_sortexpression )
+WX_DEFINE_OBJARRAY(list_of_sortexpression)
 

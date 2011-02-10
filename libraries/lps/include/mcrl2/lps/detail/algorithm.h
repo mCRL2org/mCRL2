@@ -25,11 +25,14 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/linear_process.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Adds a time parameter t to s if needed and returns the result. The time t
 /// is chosen such that it doesn't appear in context.

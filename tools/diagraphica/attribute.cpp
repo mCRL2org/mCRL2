@@ -18,27 +18,27 @@ using namespace std;
 
 // ------------------
 Attribute::Attribute(
-    Mediator* m,
-    const string &nam,
-    const string &typ,
-    const size_t &idx )
-    : Colleague( m )
+  Mediator* m,
+  const string& nam,
+  const string& typ,
+  const size_t& idx)
+  : Colleague(m)
 // ------------------
 {
-    name  = nam;
-    type  = typ;
-    index = idx;
+  name  = nam;
+  type  = typ;
+  index = idx;
 }
 
 
 // ------------------------------------------
-Attribute::Attribute( const Attribute &attr )
-    :Colleague( attr )
+Attribute::Attribute(const Attribute& attr)
+  :Colleague(attr)
 // ------------------------------------------
 {
-    index = attr.index;
-    name  = attr.name;
-    type  = attr.type;
+  index = attr.index;
+  name  = attr.name;
+  type  = attr.type;
 }
 
 
@@ -52,67 +52,67 @@ Attribute::~Attribute()
 
 
 // ---------------------------------------
-void Attribute::setIndex( const size_t &idx )
+void Attribute::setIndex(const size_t& idx)
 // ---------------------------------------
 {
-    index = idx;
+  index = idx;
 }
 
 
 // -----------------------------------------
-void Attribute::setName( const string &nme )
+void Attribute::setName(const string& nme)
 // -----------------------------------------
 {
-    name = nme;
+  name = nme;
 }
 
 
 // -----------------------------------------
-void Attribute::setType( const string &typ )
+void Attribute::setType(const string& typ)
 // -----------------------------------------
 {
-    type = typ;
+  type = typ;
 }
 
 
 // ------------------------------
 void Attribute::clusterValues(
-    const vector< int > & /*indices*/,
-    const string & /*newValue*/ )
+  const vector< int > & /*indices*/,
+  const string& /*newValue*/)
 // ------------------------------
 {}
 
 
 // -----------------------
 void Attribute::moveValue(
-    const size_t &/*idxFr*/,
-    const size_t &/*idxTo*/ )
+  const size_t& /*idxFr*/,
+  const size_t& /*idxTo*/)
 // ------------------------
 {}
 
 
 // ------------------------------------
 void Attribute::configValues(
-    const vector< string > &/*curDomain*/,
-    map< size_t, size_t  > &/*origToCurDomain*/ )
+  const vector< string > &/*curDomain*/,
+  map< size_t, size_t  > &/*origToCurDomain*/)
 // ------------------------------------
 {}
 
 
 // --------------------------------------------------------
-void Attribute::classifyEqualIntervals( const size_t &/*number*/ )
+void Attribute::classifyEqualIntervals(const size_t& /*number*/)
 // --------------------------------------------------------
 {}
 
 
 // ---------------------------------------------------
-void Attribute::classifyQuantiles( const size_t &/*number*/ )
+void Attribute::classifyQuantiles(const size_t& /*number*/)
 // ---------------------------------------------------
 {}
 
 
 // ---------------------------------------------------------------
-void Attribute::classifyMeanStandardDeviation( const size_t &/*number*/ )
+void Attribute::classifyMeanStandardDeviation(const size_t& /*number*/)
 // ---------------------------------------------------------------
 {}
 
@@ -130,7 +130,7 @@ void Attribute::removeClassification()
 size_t Attribute::getIndex()
 // ----------------------
 {
-    return index;
+  return index;
 }
 
 
@@ -138,7 +138,7 @@ size_t Attribute::getIndex()
 string Attribute::getName()
 // ------------------------
 {
-    return name;
+  return name;
 }
 
 
@@ -146,7 +146,7 @@ string Attribute::getName()
 string Attribute::getType()
 // ------------------------
 {
-    return type;
+  return type;
 }
 
 
@@ -154,23 +154,23 @@ string Attribute::getType()
 size_t Attribute::getSizeOrigValues()
 // -------------------------------
 {
-    return 0;
+  return 0;
 }
 
 
 // --------------------------------------
-Value* Attribute::getOrigValue( size_t /*idx*/ )
+Value* Attribute::getOrigValue(size_t /*idx*/)
 // --------------------------------------
 {
-    return NULL;
+  return NULL;
 }
 
 
 // -------------------------------------
-Value* Attribute::getCurValue( size_t /*idx*/ )
+Value* Attribute::getCurValue(size_t /*idx*/)
 // -------------------------------------
 {
-    return NULL;
+  return NULL;
 }
 
 
@@ -178,7 +178,7 @@ Value* Attribute::getCurValue( size_t /*idx*/ )
 double Attribute::getLowerBound()
 // ------------------------------
 {
-    return 0.0;
+  return 0.0;
 }
 
 
@@ -186,17 +186,17 @@ double Attribute::getLowerBound()
 double Attribute::getUpperBound()
 // ------------------------------
 {
-    return 0.0;
+  return 0.0;
 }
 
 
 // -------------------------------
 void Attribute::getRangeOrigValues(
-    double &lwrBnd,
-    double &uprBnd )
+  double& lwrBnd,
+  double& uprBnd)
 // ------------------------------
 {
-    lwrBnd = uprBnd = 0.0;
+  lwrBnd = uprBnd = 0.0;
 }
 
 

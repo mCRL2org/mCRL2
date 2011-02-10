@@ -45,121 +45,121 @@ using utilities::tools::input_tool;
 
 class pg_solver_tool : public input_tool
 {
-protected:
-  typedef input_tool super;
+  protected:
+    typedef input_tool super;
 
-  pbespgsolve_options m_options;
+    pbespgsolve_options m_options;
 
-  pbespg_solver_type parse_solver_type(const std::string& s) const
-  {
-    if (s == "spm")
+    pbespg_solver_type parse_solver_type(const std::string& s) const
     {
-      return spm_solver;
-    }
-    else if (s == "recursive")
-    {
-      return recursive_solver;
-    }
-    throw mcrl2::runtime_error("pbespgsolve: unknown solver " + s);
-  }
-
-  void add_options(interface_description& desc)
-  {
-    super::add_options(desc);
-    desc.add_option("solver-type",
-        make_optional_argument("NAME", "spm"),
-        "Use the solver type NAME:\n"
-        "  'spm' (default), or\n"
-        "  'recursive'",
-        's');
-    desc.add_option("scc", "Use scc decomposition", 'c');
-    desc.add_option("verify", "Verify the solution", 'e');
-    desc.add_hidden_option("equation_limit",
-         make_optional_argument("NAME", "-1"),
-         "Set a limit to the number of generated BES equations",
-         'l');
-  }
-
-  void parse_options(const command_line_parser& parser)
-  {
-    super::parse_options(parser);
-    m_options.solver_type = parse_solver_type(parser.option_argument("solver-type"));
-    m_options.use_scc_decomposition = (parser.options.count("scc") > 0);
-    m_options.verify_solution = (parser.options.count("verify") > 0);
-    if (parser.options.count("equation_limit") > 0)
-    {
-    	int limit = parser.option_argument_as<int>("equation_limit");
-    	pbes_system::detail::set_bes_equation_limit(limit);
-    }
-  }
-
-public:
-
-  pg_solver_tool()
-  : super(
-  "pbespgsolve",
-  "Maks Verver and Wieger Wesselink; Michael Weber",
-  "Solve a PBES using a parity game solver",
-  "Reads a file containing a PBES, instantiates it into a BES, and applies a\n"
-  "parity game solver to it. If INFILE is not present, standard input is used."
-  )
-  {
-  }
-
-  bool run()
-  {
-    if (mcrl2::core::gsVerbose)
-    {
-      std::clog << "pbespgsolve parameters:" << std::endl;
-      std::clog << "  input file:        " << input_filename() << std::endl;
-      std::clog << "  solver type:       " << print(m_options.solver_type) << std::endl;
-      std::clog << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
-      std::clog << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
+      if (s == "spm")
+      {
+        return spm_solver;
+      }
+      else if (s == "recursive")
+      {
+        return recursive_solver;
+      }
+      throw mcrl2::runtime_error("pbespgsolve: unknown solver " + s);
     }
 
-    pbes<> p;
-    try
+    void add_options(interface_description& desc)
     {
-      p.load(input_filename());
+      super::add_options(desc);
+      desc.add_option("solver-type",
+                      make_optional_argument("NAME", "spm"),
+                      "Use the solver type NAME:\n"
+                      "  'spm' (default), or\n"
+                      "  'recursive'",
+                      's');
+      desc.add_option("scc", "Use scc decomposition", 'c');
+      desc.add_option("verify", "Verify the solution", 'e');
+      desc.add_hidden_option("equation_limit",
+                             make_optional_argument("NAME", "-1"),
+                             "Set a limit to the number of generated BES equations",
+                             'l');
     }
-    catch(mcrl2::runtime_error& e)
+
+    void parse_options(const command_line_parser& parser)
     {
+      super::parse_options(parser);
+      m_options.solver_type = parse_solver_type(parser.option_argument("solver-type"));
+      m_options.use_scc_decomposition = (parser.options.count("scc") > 0);
+      m_options.verify_solution = (parser.options.count("verify") > 0);
+      if (parser.options.count("equation_limit") > 0)
+      {
+        int limit = parser.option_argument_as<int>("equation_limit");
+        pbes_system::detail::set_bes_equation_limit(limit);
+      }
+    }
+
+  public:
+
+    pg_solver_tool()
+      : super(
+        "pbespgsolve",
+        "Maks Verver and Wieger Wesselink; Michael Weber",
+        "Solve a PBES using a parity game solver",
+        "Reads a file containing a PBES, instantiates it into a BES, and applies a\n"
+        "parity game solver to it. If INFILE is not present, standard input is used."
+      )
+    {
+    }
+
+    bool run()
+    {
+      if (mcrl2::core::gsVerbose)
+      {
+        std::clog << "pbespgsolve parameters:" << std::endl;
+        std::clog << "  input file:        " << input_filename() << std::endl;
+        std::clog << "  solver type:       " << print(m_options.solver_type) << std::endl;
+        std::clog << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
+        std::clog << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
+      }
+
+      pbes<> p;
       try
       {
-        mcrl2::bes::boolean_equation_system<> b;
-        b.load(input_filename());
-        p = mcrl2::bes::bes2pbes(b);
+        p.load(input_filename());
       }
-      catch(mcrl2::runtime_error&)
+      catch (mcrl2::runtime_error& e)
       {
-        throw(e);
+        try
+        {
+          mcrl2::bes::boolean_equation_system<> b;
+          b.load(input_filename());
+          p = mcrl2::bes::bes2pbes(b);
+        }
+        catch (mcrl2::runtime_error&)
+        {
+          throw(e);
+        }
       }
-    }
 
-    size_t log_level = 0;
-    if (mcrl2::core::gsVerbose)
-    {
-      log_level = 1;
-    }
-    if (mcrl2::core::gsDebug)
-    {
-      log_level = 2;
-    }
-    set_parity_game_generator_log_level(log_level); 
-    pbespgsolve_algorithm algorithm(timer(), m_options);
-    std::string result = "unknown";
-    try
-    {
-      result = algorithm.run(p) ? "true" : "false";
-    }
-    catch (std::out_of_range)
-    {
-    	// value unknown is already set
-    }
-    std::clog << "The solution for the initial variable of the pbes is " << result << "\n";
+      size_t log_level = 0;
+      if (mcrl2::core::gsVerbose)
+      {
+        log_level = 1;
+      }
+      if (mcrl2::core::gsDebug)
+      {
+        log_level = 2;
+      }
+      set_parity_game_generator_log_level(log_level);
+      pbespgsolve_algorithm algorithm(timer(), m_options);
+      std::string result = "unknown";
+      try
+      {
+        result = algorithm.run(p) ? "true" : "false";
+      }
+      catch (std::out_of_range)
+      {
+        // value unknown is already set
+      }
+      std::clog << "The solution for the initial variable of the pbes is " << result << "\n";
 
-    return true;
-  }
+      return true;
+    }
 };
 
 int main(int argc, char* argv[])

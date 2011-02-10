@@ -14,9 +14,11 @@
 
 #include "mcrl2/fdr/term_include_files.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated failuremodel expression class declarations ---//
 /// \brief class failuremodel_expression
@@ -70,23 +72,23 @@ class fd: public failuremodel_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a f expression
-    /// \param t A term
-    /// \return True if it is a f expression
-    inline
-    bool is_f(const failuremodel_expression& t)
-    {
-      return fdr::detail::gsIsF(t);
-    }
+/// \brief Test for a f expression
+/// \param t A term
+/// \return True if it is a f expression
+inline
+bool is_f(const failuremodel_expression& t)
+{
+  return fdr::detail::gsIsF(t);
+}
 
-    /// \brief Test for a fd expression
-    /// \param t A term
-    /// \return True if it is a fd expression
-    inline
-    bool is_fd(const failuremodel_expression& t)
-    {
-      return fdr::detail::gsIsFD(t);
-    }
+/// \brief Test for a fd expression
+/// \param t A term
+/// \return True if it is a fd expression
+inline
+bool is_fd(const failuremodel_expression& t)
+{
+  return fdr::detail::gsIsFD(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

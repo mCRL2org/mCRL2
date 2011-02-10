@@ -29,7 +29,10 @@ class AbsSetting
   public:
     AbsSetting(SettingID i): id(i) {}
     virtual ~AbsSetting() {}
-    void subscribe(Subscriber* ss) { subscribers.push_back(ss); }
+    void subscribe(Subscriber* ss)
+    {
+      subscribers.push_back(ss);
+    }
     virtual void reset() {}
 };
 
@@ -54,7 +57,10 @@ template< class T > class Setting: public AbsSetting
 
     ~Setting() {}
 
-    T getValue() { return value; }
+    T getValue()
+    {
+      return value;
+    }
 
     void setValue(T v)
     {
@@ -65,7 +71,10 @@ template< class T > class Setting: public AbsSetting
       }
     }
 
-    void reset() { setValue(def_value); }
+    void reset()
+    {
+      setValue(def_value);
+    }
 };
 
 /* -------------------------------------------------------------------------- */
@@ -97,7 +106,7 @@ void Settings::loadDefaults()
   settings[NavLighting] = new Setting<bool>(NavLighting, true);
   settings[NavTransparency] = new Setting<bool>(NavTransparency, true);
   settings[DownEdgeColor] = new Setting<RGB_Color>(DownEdgeColor, RGB_Color(255,
-        255, 255));
+      255, 255));
   settings[UpEdgeColor] = new Setting<RGB_Color>(UpEdgeColor, RGB_Color(0, 0, 255));
   settings[InterpolateColor1] = new Setting<RGB_Color>(InterpolateColor1, RGB_Color(255, 255, 255));
   settings[InterpolateColor2] = new Setting<RGB_Color>(InterpolateColor2, RGB_Color(0, 0, 255));
@@ -113,7 +122,7 @@ void Settings::loadDefaults()
 Settings::~Settings()
 {
   for (map<SettingID, AbsSetting*>::iterator i = settings.begin();
-      i != settings.end(); ++i)
+       i != settings.end(); ++i)
   {
     delete i->second;
   }
@@ -139,7 +148,8 @@ float Settings::getFloat(SettingID s)
   return static_cast<Setting<float>*>(settings[s])->getValue();
 }
 
-RGB_Color Settings::getRGB(SettingID s) {
+RGB_Color Settings::getRGB(SettingID s)
+{
   return static_cast<Setting<RGB_Color>*>(settings[s])->getValue();
 }
 

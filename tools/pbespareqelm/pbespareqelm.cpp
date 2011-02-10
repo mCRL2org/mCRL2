@@ -57,13 +57,13 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
   public:
     pbes_eqelm_tool()
       : super(
-          "pbeseqelm",
-          "Wieger Wesselink; Simona Orzan and Tim Willemse",
-          "Compute equivalence relations on parameters of a PBES",
-          "Reads a file containing a PBES, and applies the eqelm algorithm to detect equivalence "
-          "relations between the parameters. If OUTFILE is not present, standard output is used. "
-          "If INFILE is not present, standard input is used."
-        )
+        "pbeseqelm",
+        "Wieger Wesselink; Simona Orzan and Tim Willemse",
+        "Compute equivalence relations on parameters of a PBES",
+        "Reads a file containing a PBES, and applies the eqelm algorithm to detect equivalence "
+        "relations between the parameters. If OUTFILE is not present, standard output is used. "
+        "If INFILE is not present, standard input is used."
+      )
     {}
 
     bool run()
@@ -83,7 +83,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
       if (mcrl2::core::gsDebug)
       {
         log_level = 2;
-      }     	
+      }
 
       // load the pbes
       pbes<> p;

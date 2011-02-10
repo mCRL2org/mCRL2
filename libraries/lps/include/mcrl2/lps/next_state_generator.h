@@ -25,214 +25,219 @@
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/specification.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-  /// \brief Class for generating a state space corresponding to a linear process specification.
-  class next_state_generator
-  {
-    protected:
-      const specification& m_specification;
-      legacy_rewriter m_rewriter;
-      data::enumerator_factory<mcrl2::data::classic_enumerator<> > m_enumerator;
+/// \brief Class for generating a state space corresponding to a linear process specification.
+class next_state_generator
+{
+  protected:
+    const specification& m_specification;
+    legacy_rewriter m_rewriter;
+    data::enumerator_factory<mcrl2::data::classic_enumerator<> > m_enumerator;
 
-    public:
-      /// \brief A type that represents a transition to a 'next' state.
-      struct state_type
-      {
-        ATermAppl transition;
-        ATerm state;
+  public:
+    /// \brief A type that represents a transition to a 'next' state.
+    struct state_type
+    {
+      ATermAppl transition;
+      ATerm state;
 
-        state_type()
-          : transition(0),
-            state(0)
+      state_type()
+        : transition(0),
+          state(0)
+      {}
+
+      state_type(const state_type& other)
+        : transition(other.transition),
+          state(other.state)
+      {}
+
+      state_type(ATermAppl transition_, ATerm state_)
+        : transition(transition_),
+          state(state_)
+      {}
+    };
+
+    /// \brief Iterator that generates all successor states of a given state.
+    // TODO: Note that the NextState and NextStateGenerator classes have a clumsy interface.
+    // This has a negative effect on the performance.
+    class iterator: public boost::iterator_facade<
+      iterator,                               // Derived
+      const state_type,                       // Value
+      boost::forward_traversal_tag            // CategoryOrTraversal
+      >
+    {
+      protected:
+        boost::shared_ptr<NextState> m_next_state;
+        boost::shared_ptr<NextStateGenerator> m_generator;
+        state_type m_state;
+
+      public:
+        /// \brief Default constructor.
+        iterator()
         {}
 
-        state_type(const state_type& other)
-          : transition(other.transition),
-            state(other.state)
-        {}
-
-        state_type(ATermAppl transition_, ATerm state_)
-          : transition(transition_),
-            state(state_)
-        {}
-      };
-
-      /// \brief Iterator that generates all successor states of a given state.
-      // TODO: Note that the NextState and NextStateGenerator classes have a clumsy interface.
-      // This has a negative effect on the performance.
-      class iterator: public boost::iterator_facade<
-              iterator,                               // Derived
-              const state_type,                       // Value
-              boost::forward_traversal_tag            // CategoryOrTraversal
-          >
-      {
-       protected:
-         boost::shared_ptr<NextState> m_next_state;
-         boost::shared_ptr<NextStateGenerator> m_generator;
-         state_type m_state;
-
-       public:
-          /// \brief Default constructor.
-          iterator()
-          {}
-
-          /// \brief Constructor.
-          iterator(const specification& lps_spec,
-                   mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator
-                  )
-            : m_next_state(createNextState(lps_spec, enumerator, false)),
-              m_generator(m_next_state->getNextStates(m_next_state->getInitialState())),
-              m_state(0, m_next_state->getInitialState())
-          {
-            if (!lps_spec.process().deadlock_summands().empty())
-            {
-              throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
-            }
-         }
-
-          /// \brief Constructor.
-          iterator(const specification& lps_spec,
-                   mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
-                   const atermpp::aterm& state
-                  )
-            : m_next_state(createNextState(lps_spec, enumerator, false)),
-              m_generator(m_next_state->getNextStates(state))
-          {
-            m_state.state = state;
-          }
-
-          /// \brief Constructor.
-          iterator(const specification& lps_spec,
-                   mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
-                   size_t summand_index
-                  )
-            : m_next_state(createNextState(lps_spec, enumerator, false)),
-              m_generator(m_next_state->getNextStates(m_next_state->getInitialState(), summand_index)),
-              m_state(0, m_next_state->getInitialState())
-          {
-            if (!lps_spec.process().deadlock_summands().empty())
-            {
-              throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
-            }
-         }
-
-          /// \brief Constructor.
-          iterator(const specification& lps_spec,
-                   mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
-                   const atermpp::aterm& state,
-                   size_t summand_index
-                  )
-            : m_next_state(createNextState(lps_spec, enumerator, false)),
-              m_generator(m_next_state->getNextStates(state, summand_index))
-          {
-            m_state.state = state;
-          }
-
-          operator bool() const
-          {
-            return m_next_state.get() != 0;
-          }
-
-       private:
-          friend class boost::iterator_core_access;
-
-          /// \brief Equality operator
-          /// \param other An iterator
-          /// \return True if the iterators are equal
-          bool equal(iterator const& other) const
-          {
-            return m_next_state == other.m_next_state;
-          }
-
-          /// \brief Dereference operator
-          /// \return The value that the iterator references
-          const state_type& dereference() const
-          {
-            return m_state;
-          }
-
-          /// \brief Increments the iterator
-          void increment()
-          {
-            if (!m_generator->next(&m_state.transition, &m_state.state))
-            {
-              // empty m_next_state, to signal that there is no next state
-              m_next_state.reset();
-            }
-          }
-      };
-
-      /// \brief Constructor.
-      /// The underlying NextStateGenerator can not handle deadlock summands, therefore an exception
-      /// is thrown if the specification contains deadlock summands.
-      next_state_generator(const specification& lps_spec)
-        : m_specification(lps_spec),
-          m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables())),
-          m_enumerator(lps_spec.data(), m_rewriter)
-      {
-        if (!lps_spec.process().deadlock_summands().empty())
+        /// \brief Constructor.
+        iterator(const specification& lps_spec,
+                 mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator
+                )
+          : m_next_state(createNextState(lps_spec, enumerator, false)),
+            m_generator(m_next_state->getNextStates(m_next_state->getInitialState())),
+            m_state(0, m_next_state->getInitialState())
         {
-          throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
+          if (!lps_spec.process().deadlock_summands().empty())
+          {
+            throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
+          }
         }
-      }
 
-      /// \brief Returns an iterator for generating the successors of the initial state.
-      iterator begin()
-      {
-        return iterator(m_specification, m_enumerator);
-      }
-
-      /// \brief Returns an iterator for generating the successors of the given state.
-      iterator begin(const atermpp::aterm& state)
-      {
-        return iterator(m_specification, m_enumerator, state);
-      }
-
-      /// \brief Returns an iterator for generating the successors of the initial state.
-      /// Only the successors with respect to the summand with the given index are
-      /// generated.
-      iterator begin(size_t summand_index)
-      {
-        return iterator(m_specification, m_enumerator, summand_index);
-      }
-
-      /// \brief Returns an iterator for generating the successors of the given state.
-      /// Only the successors with respect to the summand with the given index are
-      /// generated.
-      iterator begin(const atermpp::aterm& state, size_t summand_index)
-      {
-        return iterator(m_specification, m_enumerator, state, summand_index);
-      }
-
-      /// \brief Returns the initial state of the specification.
-      // TODO: this function should be const, but cannot because of the createNextState interface
-      atermpp::aterm initial_state()
-      {
-        NextState* nstate = createNextState(m_specification, m_enumerator, false);
-        atermpp::aterm result = nstate->getInitialState();
-        delete nstate;
-        return result;
-      }
-
-      /// \brief Returns a string representation of the given state.
-      std::string print_state(const state_type& state) const
-      {
-        atermpp::aterm_appl s(reinterpret_cast<ATermAppl>(state.state));
-        std::string result("state(");
-        int index = 0;
-        for(atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
+        /// \brief Constructor.
+        iterator(const specification& lps_spec,
+                 mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
+                 const atermpp::aterm& state
+                )
+          : m_next_state(createNextState(lps_spec, enumerator, false)),
+            m_generator(m_next_state->getNextStates(state))
         {
-          if(index++ != 0) { result.append(", "); }
-      
-          result.append(core::pp(atermpp::aterm(m_rewriter.translate(static_cast<ATerm>(*i)))));
+          m_state.state = state;
         }
-        result.append(")");
-        return result;
+
+        /// \brief Constructor.
+        iterator(const specification& lps_spec,
+                 mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
+                 size_t summand_index
+                )
+          : m_next_state(createNextState(lps_spec, enumerator, false)),
+            m_generator(m_next_state->getNextStates(m_next_state->getInitialState(), summand_index)),
+            m_state(0, m_next_state->getInitialState())
+        {
+          if (!lps_spec.process().deadlock_summands().empty())
+          {
+            throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
+          }
+        }
+
+        /// \brief Constructor.
+        iterator(const specification& lps_spec,
+                 mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
+                 const atermpp::aterm& state,
+                 size_t summand_index
+                )
+          : m_next_state(createNextState(lps_spec, enumerator, false)),
+            m_generator(m_next_state->getNextStates(state, summand_index))
+        {
+          m_state.state = state;
+        }
+
+        operator bool() const
+        {
+          return m_next_state.get() != 0;
+        }
+
+      private:
+        friend class boost::iterator_core_access;
+
+        /// \brief Equality operator
+        /// \param other An iterator
+        /// \return True if the iterators are equal
+        bool equal(iterator const& other) const
+        {
+          return m_next_state == other.m_next_state;
+        }
+
+        /// \brief Dereference operator
+        /// \return The value that the iterator references
+        const state_type& dereference() const
+        {
+          return m_state;
+        }
+
+        /// \brief Increments the iterator
+        void increment()
+        {
+          if (!m_generator->next(&m_state.transition, &m_state.state))
+          {
+            // empty m_next_state, to signal that there is no next state
+            m_next_state.reset();
+          }
+        }
+    };
+
+    /// \brief Constructor.
+    /// The underlying NextStateGenerator can not handle deadlock summands, therefore an exception
+    /// is thrown if the specification contains deadlock summands.
+    next_state_generator(const specification& lps_spec)
+      : m_specification(lps_spec),
+        m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables())),
+        m_enumerator(lps_spec.data(), m_rewriter)
+    {
+      if (!lps_spec.process().deadlock_summands().empty())
+      {
+        throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
       }
-  };
+    }
+
+    /// \brief Returns an iterator for generating the successors of the initial state.
+    iterator begin()
+    {
+      return iterator(m_specification, m_enumerator);
+    }
+
+    /// \brief Returns an iterator for generating the successors of the given state.
+    iterator begin(const atermpp::aterm& state)
+    {
+      return iterator(m_specification, m_enumerator, state);
+    }
+
+    /// \brief Returns an iterator for generating the successors of the initial state.
+    /// Only the successors with respect to the summand with the given index are
+    /// generated.
+    iterator begin(size_t summand_index)
+    {
+      return iterator(m_specification, m_enumerator, summand_index);
+    }
+
+    /// \brief Returns an iterator for generating the successors of the given state.
+    /// Only the successors with respect to the summand with the given index are
+    /// generated.
+    iterator begin(const atermpp::aterm& state, size_t summand_index)
+    {
+      return iterator(m_specification, m_enumerator, state, summand_index);
+    }
+
+    /// \brief Returns the initial state of the specification.
+    // TODO: this function should be const, but cannot because of the createNextState interface
+    atermpp::aterm initial_state()
+    {
+      NextState* nstate = createNextState(m_specification, m_enumerator, false);
+      atermpp::aterm result = nstate->getInitialState();
+      delete nstate;
+      return result;
+    }
+
+    /// \brief Returns a string representation of the given state.
+    std::string print_state(const state_type& state) const
+    {
+      atermpp::aterm_appl s(reinterpret_cast<ATermAppl>(state.state));
+      std::string result("state(");
+      int index = 0;
+      for (atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
+      {
+        if (index++ != 0)
+        {
+          result.append(", ");
+        }
+
+        result.append(core::pp(atermpp::aterm(m_rewriter.translate(static_cast<ATerm>(*i)))));
+      }
+      result.append(")");
+      return result;
+    }
+};
 
 } // namespace lps
 

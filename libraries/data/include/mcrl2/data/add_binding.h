@@ -21,81 +21,83 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/data_equation.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-  /// \brief Maintains a multiset of bound data variables during traversal
-  template <template <class> class Builder, class Derived>
-  struct add_data_variable_binding: public core::add_binding<Builder, Derived, variable>
+/// \brief Maintains a multiset of bound data variables during traversal
+template <template <class> class Builder, class Derived>
+struct add_data_variable_binding: public core::add_binding<Builder, Derived, variable>
+{
+  typedef core::add_binding<Builder, Derived, variable> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::increase_bind_count;
+  using super::decrease_bind_count;
+
+  void enter(const data::where_clause& x)
   {
-    typedef core::add_binding<Builder, Derived, variable> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-    using super::increase_bind_count;
-    using super::decrease_bind_count;
+    increase_bind_count(make_assignment_left_hand_side_range(x.declarations()));
+  }
 
-    void enter(const data::where_clause& x)
-    {
-      increase_bind_count(make_assignment_left_hand_side_range(x.declarations()));
-    }
-    
-    void leave(const data::where_clause& x)
-    {
-      decrease_bind_count(make_assignment_left_hand_side_range(x.declarations()));
-    }
-    
-    void enter(const data::assignment& x)
-    {
-      increase_bind_count(x.lhs());
-    }
-    
-    void leave(const data::assignment& x)
-    {
-      decrease_bind_count(x.lhs());
-    }
-    
-    void enter(const data::forall& x)
-    {
-      increase_bind_count(x.variables());
-    }
-    
-    void leave(const data::forall& x)
-    {
-      decrease_bind_count(x.variables());
-    }
-    
-    void enter(const data::exists& x)
-    {
-      increase_bind_count(x.variables());
-    }
-    
-    void leave(const data::exists& x)
-    {
-      decrease_bind_count(x.variables());
-    }
-    
-    void enter(const data::lambda& x)
-    {
-      increase_bind_count(x.variables());
-    }
-    
-    void leave(const data::lambda& x)
-    {
-      decrease_bind_count(x.variables());
-    }
-    
-    void enter(const data::data_equation& x)
-    {
-      increase_bind_count(x.variables());
-    }    
+  void leave(const data::where_clause& x)
+  {
+    decrease_bind_count(make_assignment_left_hand_side_range(x.declarations()));
+  }
 
-    void leave(const data::data_equation& x)
-    {
-      decrease_bind_count(x.variables());
-    }    
-  };
+  void enter(const data::assignment& x)
+  {
+    increase_bind_count(x.lhs());
+  }
+
+  void leave(const data::assignment& x)
+  {
+    decrease_bind_count(x.lhs());
+  }
+
+  void enter(const data::forall& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(const data::forall& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+
+  void enter(const data::exists& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(const data::exists& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+
+  void enter(const data::lambda& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(const data::lambda& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+
+  void enter(const data::data_equation& x)
+  {
+    increase_bind_count(x.variables());
+  }
+
+  void leave(const data::data_equation& x)
+  {
+    decrease_bind_count(x.variables());
+  }
+};
 
 } // namespace data
 

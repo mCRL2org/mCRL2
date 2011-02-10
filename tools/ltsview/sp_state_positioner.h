@@ -16,7 +16,7 @@ class LTS;
 class SinglePassStatePositioner: public StatePositioner
 {
   public:
-    SinglePassStatePositioner(LTS *l);
+    SinglePassStatePositioner(LTS* l);
     ~SinglePassStatePositioner();
     void positionStates();
 };

@@ -24,48 +24,50 @@
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace state_formulas {
+namespace state_formulas
+{
 
-    /// \brief Renames data variables and predicate variables in the formula \p f, and
-    /// wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
-    /// step for the algorithm.
-    /// \param formula A modal formula
-    /// \param spec A linear process specification
-    /// \return The preprocessed formula
-    state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
-    {
-      using namespace state_formulas::detail::accessors;
-      namespace s = state_formulas;
+/// \brief Renames data variables and predicate variables in the formula \p f, and
+/// wraps the formula inside a 'nu' if needed. This is needed as a preprocessing
+/// step for the algorithm.
+/// \param formula A modal formula
+/// \param spec A linear process specification
+/// \return The preprocessed formula
+state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
+{
+  using namespace state_formulas::detail::accessors;
+  namespace s = state_formulas;
 
-      state_formulas::state_formula f = formula;
-      std::set<core::identifier_string> formula_variable_names = data::variable_names(state_formulas::find_variables(formula));
-      const atermpp::aterm_appl temporary_spec=specification_to_aterm(spec);
-      std::set<core::identifier_string> spec_variable_names = data::variable_names(lps::find_variables(spec));
-      std::set<core::identifier_string> spec_names = lps::find_identifiers(spec);
+  state_formulas::state_formula f = formula;
+  std::set<core::identifier_string> formula_variable_names = data::variable_names(state_formulas::find_variables(formula));
+  const atermpp::aterm_appl temporary_spec=specification_to_aterm(spec);
+  std::set<core::identifier_string> spec_variable_names = data::variable_names(lps::find_variables(spec));
+  std::set<core::identifier_string> spec_names = lps::find_identifiers(spec);
 
-      // rename data variables in f, to prevent name clashes with data variables in spec
-      data::set_identifier_generator generator;
-      generator.add_identifiers(spec_variable_names);
-      f = state_formulas::rename_variables(f, generator);
+  // rename data variables in f, to prevent name clashes with data variables in spec
+  data::set_identifier_generator generator;
+  generator.add_identifiers(spec_variable_names);
+  f = state_formulas::rename_variables(f, generator);
 
-      // rename predicate variables in f, to prevent name clashes
-      data::xyz_identifier_generator xyz_generator;
-      xyz_generator.add_identifiers(spec_names);
-      xyz_generator.add_identifiers(formula_variable_names);
-      f = rename_predicate_variables(f, xyz_generator);
+  // rename predicate variables in f, to prevent name clashes
+  data::xyz_identifier_generator xyz_generator;
+  xyz_generator.add_identifiers(spec_names);
+  xyz_generator.add_identifiers(formula_variable_names);
+  f = rename_predicate_variables(f, xyz_generator);
 
-      // wrap the formula inside a 'nu' if needed
-      if (!s::is_mu(f) && !s::is_nu(f))
-      {
-        atermpp::aterm_list context = atermpp::make_list(f, temporary_spec);
-        core::identifier_string X = data::fresh_identifier(context, std::string("X"));
-        f = s::nu(X, data::assignment_list(), f);
-      }
+  // wrap the formula inside a 'nu' if needed
+  if (!s::is_mu(f) && !s::is_nu(f))
+  {
+    atermpp::aterm_list context = atermpp::make_list(f, temporary_spec);
+    core::identifier_string X = data::fresh_identifier(context, std::string("X"));
+    f = s::nu(X, data::assignment_list(), f);
+  }
 
-      return f;
-    }
+  return f;
+}
 
 } // namespace state_formulas
 

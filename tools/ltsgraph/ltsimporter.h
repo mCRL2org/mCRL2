@@ -18,7 +18,7 @@
 class LTSImporter: public Importer
 {
   public:
-    Graph* importFile(const std::string &fn);
+    Graph* importFile(const std::string& fn);
 
 };
 

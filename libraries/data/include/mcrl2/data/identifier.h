@@ -3,9 +3,11 @@
 
 #include "mcrl2/data/data_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class identifier ---//
 /// \brief An identifier
@@ -42,13 +44,13 @@ class identifier: public data_expression
 };
 //--- end generated class identifier ---//
 
-    /// \brief list of identifiers
-    typedef atermpp::term_list< identifier > identifier_list;
-    /// \brief vector of identifiers
-    typedef atermpp::vector< identifier > identifier_vector;
+/// \brief list of identifiers
+typedef atermpp::term_list< identifier > identifier_list;
+/// \brief vector of identifiers
+typedef atermpp::vector< identifier > identifier_vector;
 
 
-  } // namespace data
+} // namespace data
 } // namespace mcrl2
 
 #endif

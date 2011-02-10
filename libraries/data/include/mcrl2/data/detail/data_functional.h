@@ -28,11 +28,14 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/function_symbol.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-namespace detail {
+namespace detail
+{
 
 template <typename Term>
 struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
@@ -40,7 +43,7 @@ struct compare_term: public std::unary_function<atermpp::aterm_appl, bool>
   const Term& term;
 
   compare_term(const Term& t)
-   : term(t)
+    : term(t)
   {}
 
   /// \brief Function call operator
@@ -72,7 +75,7 @@ struct compare_sort : public std::unary_function< bool, atermpp::aterm_appl >
 struct compare_variable: public compare_term<variable>
 {
   compare_variable(const variable& v)
-   : compare_term<variable>(v)
+    : compare_term<variable>(v)
   {}
 };
 

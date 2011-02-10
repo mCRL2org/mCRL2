@@ -13,7 +13,8 @@
 #define SIMREADER_H
 #include "simulation.h"
 
-class simReader {
+class simReader
+{
   public:
     simReader(Simulation* s);
     virtual ~simReader();

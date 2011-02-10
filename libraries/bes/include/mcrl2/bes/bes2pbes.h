@@ -16,51 +16,53 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/bes/detail/boolean_expression2pbes_expression_traverser.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace bes {
+namespace bes
+{
 
-  /// \brief Converts a boolean variable into a propositional variable
-  /// \param v A boolean variable
-  inline
-  pbes_system::propositional_variable_instantiation bes2pbes(const boolean_variable& v)
+/// \brief Converts a boolean variable into a propositional variable
+/// \param v A boolean variable
+inline
+pbes_system::propositional_variable_instantiation bes2pbes(const boolean_variable& v)
+{
+  return pbes_system::propositional_variable_instantiation(v.name(), data::data_expression_list());
+}
+
+/// \brief Converts a boolean expression into a PBES expression
+/// \param x A boolean expression
+inline
+pbes_system::pbes_expression bes2pbes(const boolean_expression& x)
+{
+  bes::detail::boolean_expression2pbes_expression_traverser t;
+  t(x);
+  return t.result();
+}
+
+/// \brief Converts a boolean equation into a PBES equation
+/// \param x A boolean equation
+inline
+pbes_system::pbes_equation bes2pbes(const boolean_equation& eq)
+{
+  return pbes_system::pbes_equation(eq.symbol(), pbes_system::propositional_variable(eq.variable().name(), data::variable_list()), bes2pbes(eq.formula()));
+}
+
+/// \brief Converts a BES into a PBES
+/// \param x A boolean expression
+inline
+pbes_system::pbes<> bes2pbes(const boolean_equation_system<>& x)
+{
+  data::data_specification data_spec;
+  atermpp::vector<pbes_system::pbes_equation> equations;
+  for (atermpp::vector<boolean_equation>::const_iterator i = x.equations().begin(); i != x.equations().end(); ++i)
   {
-    return pbes_system::propositional_variable_instantiation(v.name(), data::data_expression_list());
+    equations.push_back(bes2pbes(*i));
   }
+  pbes_system::propositional_variable_instantiation initial_state = bes2pbes(x.initial_state());
 
-  /// \brief Converts a boolean expression into a PBES expression
-  /// \param x A boolean expression
-  inline
-  pbes_system::pbes_expression bes2pbes(const boolean_expression& x)
-  {
-    bes::detail::boolean_expression2pbes_expression_traverser t;
-    t(x);
-    return t.result();
-  }
-
-  /// \brief Converts a boolean equation into a PBES equation
-  /// \param x A boolean equation
-  inline
-  pbes_system::pbes_equation bes2pbes(const boolean_equation& eq)
-  {
-    return pbes_system::pbes_equation(eq.symbol(), pbes_system::propositional_variable(eq.variable().name(), data::variable_list()), bes2pbes(eq.formula()));
-  }
-
-  /// \brief Converts a BES into a PBES
-  /// \param x A boolean expression
-  inline
-  pbes_system::pbes<> bes2pbes(const boolean_equation_system<>& x)
-  {
-    data::data_specification data_spec;
-    atermpp::vector<pbes_system::pbes_equation> equations;
-    for (atermpp::vector<boolean_equation>::const_iterator i = x.equations().begin(); i != x.equations().end(); ++i)
-    {
-      equations.push_back(bes2pbes(*i));
-    }
-    pbes_system::propositional_variable_instantiation initial_state = bes2pbes(x.initial_state());
-
-    return pbes_system::pbes<>(data_spec, equations, initial_state);
-  }
+  return pbes_system::pbes<>(data_spec, equations, initial_state);
+}
 
 } // namespace bes
 
