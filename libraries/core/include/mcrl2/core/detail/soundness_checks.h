@@ -298,12 +298,12 @@ template <typename Term>
 bool check_rule_SortExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_SortId(t)
-            || check_term_SortCons(t)
-            || check_term_SortStruct(t)
-            || check_term_SortArrow(t)
-            || check_term_SortUnknown(t)
-            || check_term_SortsPossible(t);
+  return check_rule_SortId(t)
+         || check_term_SortCons(t)
+         || check_term_SortStruct(t)
+         || check_term_SortArrow(t)
+         || check_term_SortUnknown(t)
+         || check_term_SortsPossible(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -313,7 +313,7 @@ template <typename Term>
 bool check_rule_SortId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_SortId(t);
+  return check_term_SortId(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -323,11 +323,11 @@ template <typename Term>
 bool check_rule_SortConsType(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_SortList(t)
-            || check_term_SortSet(t)
-            || check_term_SortBag(t)
-            || check_term_SortFSet(t)
-            || check_term_SortFBag(t);
+  return check_term_SortList(t)
+         || check_term_SortSet(t)
+         || check_term_SortBag(t)
+         || check_term_SortFSet(t)
+         || check_term_SortFBag(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -337,7 +337,7 @@ template <typename Term>
 bool check_rule_StructCons(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_StructCons(t);
+  return check_term_StructCons(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -347,7 +347,7 @@ template <typename Term>
 bool check_rule_StructProj(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_StructProj(t);
+  return check_term_StructProj(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -357,8 +357,8 @@ template <typename Term>
 bool check_rule_StringOrNil(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_String(t)
-            || check_term_Nil(t);
+  return check_rule_String(t)
+         || check_term_Nil(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -368,12 +368,12 @@ template <typename Term>
 bool check_rule_DataExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Id(t)
-            || check_rule_DataVarId(t)
-            || check_rule_OpId(t)
-            || check_term_DataAppl(t)
-            || check_term_Binder(t)
-            || check_term_Whr(t);
+  return check_term_Id(t)
+         || check_rule_DataVarId(t)
+         || check_rule_OpId(t)
+         || check_term_DataAppl(t)
+         || check_term_Binder(t)
+         || check_term_Whr(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -383,7 +383,7 @@ template <typename Term>
 bool check_rule_DataVarId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_DataVarId(t);
+  return check_term_DataVarId(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -393,7 +393,7 @@ template <typename Term>
 bool check_rule_OpId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_OpId(t);
+  return check_term_OpId(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -403,12 +403,12 @@ template <typename Term>
 bool check_rule_BindingOperator(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_SetBagComp(t)
-            || check_term_SetComp(t)
-            || check_term_BagComp(t)
-            || check_term_Forall(t)
-            || check_term_Exists(t)
-            || check_term_Lambda(t);
+  return check_term_SetBagComp(t)
+         || check_term_SetComp(t)
+         || check_term_BagComp(t)
+         || check_term_Forall(t)
+         || check_term_Exists(t)
+         || check_term_Lambda(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -418,8 +418,8 @@ template <typename Term>
 bool check_rule_WhrDecl(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_IdInit(t)
-            || check_rule_DataVarIdInit(t);
+  return check_rule_IdInit(t)
+         || check_rule_DataVarIdInit(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -429,7 +429,7 @@ template <typename Term>
 bool check_rule_DataVarIdInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_DataVarIdInit(t);
+  return check_term_DataVarIdInit(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -439,7 +439,7 @@ template <typename Term>
 bool check_rule_IdInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_IdInit(t);
+  return check_term_IdInit(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -449,7 +449,7 @@ template <typename Term>
 bool check_rule_DataSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_DataSpec(t);
+  return check_term_DataSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -459,7 +459,7 @@ template <typename Term>
 bool check_rule_SortSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_SortSpec(t);
+  return check_term_SortSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -469,7 +469,7 @@ template <typename Term>
 bool check_rule_ConsSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ConsSpec(t);
+  return check_term_ConsSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -479,7 +479,7 @@ template <typename Term>
 bool check_rule_MapSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_MapSpec(t);
+  return check_term_MapSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -489,7 +489,7 @@ template <typename Term>
 bool check_rule_DataEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_DataEqnSpec(t);
+  return check_term_DataEqnSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -499,8 +499,8 @@ template <typename Term>
 bool check_rule_SortDecl(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_SortId(t)
-            || check_term_SortRef(t);
+  return check_rule_SortId(t)
+         || check_term_SortRef(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -510,7 +510,7 @@ template <typename Term>
 bool check_rule_DataEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_DataEqn(t);
+  return check_term_DataEqn(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -520,8 +520,8 @@ template <typename Term>
 bool check_rule_DataExprOrNil(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_DataExpr(t)
-            || check_term_Nil(t);
+  return check_rule_DataExpr(t)
+         || check_term_Nil(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -531,7 +531,7 @@ template <typename Term>
 bool check_rule_MultAct(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_MultAct(t);
+  return check_term_MultAct(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -541,8 +541,8 @@ template <typename Term>
 bool check_rule_ParamIdOrAction(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_ParamId(t)
-            || check_rule_Action(t);
+  return check_rule_ParamId(t)
+         || check_rule_Action(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -552,7 +552,7 @@ template <typename Term>
 bool check_rule_ParamId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ParamId(t);
+  return check_term_ParamId(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -562,7 +562,7 @@ template <typename Term>
 bool check_rule_Action(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Action(t);
+  return check_term_Action(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -572,7 +572,7 @@ template <typename Term>
 bool check_rule_ActId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ActId(t);
+  return check_term_ActId(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -582,28 +582,28 @@ template <typename Term>
 bool check_rule_ProcExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_ParamId(t)
-            || check_term_IdAssignment(t)
-            || check_rule_Action(t)
-            || check_term_Process(t)
-            || check_term_ProcessAssignment(t)
-            || check_term_Delta(t)
-            || check_term_Tau(t)
-            || check_term_Sum(t)
-            || check_term_Block(t)
-            || check_term_Hide(t)
-            || check_term_Rename(t)
-            || check_term_Comm(t)
-            || check_term_Allow(t)
-            || check_term_Sync(t)
-            || check_term_AtTime(t)
-            || check_term_Seq(t)
-            || check_term_IfThen(t)
-            || check_term_IfThenElse(t)
-            || check_term_BInit(t)
-            || check_term_Merge(t)
-            || check_term_LMerge(t)
-            || check_term_Choice(t);
+  return check_rule_ParamId(t)
+         || check_term_IdAssignment(t)
+         || check_rule_Action(t)
+         || check_term_Process(t)
+         || check_term_ProcessAssignment(t)
+         || check_term_Delta(t)
+         || check_term_Tau(t)
+         || check_term_Sum(t)
+         || check_term_Block(t)
+         || check_term_Hide(t)
+         || check_term_Rename(t)
+         || check_term_Comm(t)
+         || check_term_Allow(t)
+         || check_term_Sync(t)
+         || check_term_AtTime(t)
+         || check_term_Seq(t)
+         || check_term_IfThen(t)
+         || check_term_IfThenElse(t)
+         || check_term_BInit(t)
+         || check_term_Merge(t)
+         || check_term_LMerge(t)
+         || check_term_Choice(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -613,7 +613,7 @@ template <typename Term>
 bool check_rule_ProcVarId(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ProcVarId(t);
+  return check_term_ProcVarId(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -623,7 +623,7 @@ template <typename Term>
 bool check_rule_MultActName(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_MultActName(t);
+  return check_term_MultActName(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -633,7 +633,7 @@ template <typename Term>
 bool check_rule_RenameExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_RenameExpr(t);
+  return check_term_RenameExpr(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -643,7 +643,7 @@ template <typename Term>
 bool check_rule_CommExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_CommExpr(t);
+  return check_term_CommExpr(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -653,7 +653,7 @@ template <typename Term>
 bool check_rule_ProcSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ProcSpec(t);
+  return check_term_ProcSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -663,7 +663,7 @@ template <typename Term>
 bool check_rule_ActSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ActSpec(t);
+  return check_term_ActSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -673,7 +673,7 @@ template <typename Term>
 bool check_rule_GlobVarSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_GlobVarSpec(t);
+  return check_term_GlobVarSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -683,7 +683,7 @@ template <typename Term>
 bool check_rule_ProcEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ProcEqnSpec(t);
+  return check_term_ProcEqnSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -693,7 +693,7 @@ template <typename Term>
 bool check_rule_ProcEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ProcEqn(t);
+  return check_term_ProcEqn(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -703,8 +703,8 @@ template <typename Term>
 bool check_rule_MultActOrDelta(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_MultAct(t)
-            || check_term_Delta(t);
+  return check_rule_MultAct(t)
+         || check_term_Delta(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -714,7 +714,7 @@ template <typename Term>
 bool check_rule_ProcInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ProcessInit(t);
+  return check_term_ProcessInit(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -724,7 +724,7 @@ template <typename Term>
 bool check_rule_LinProcSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_LinProcSpec(t);
+  return check_term_LinProcSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -734,7 +734,7 @@ template <typename Term>
 bool check_rule_LinearProcess(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_LinearProcess(t);
+  return check_term_LinearProcess(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -744,7 +744,7 @@ template <typename Term>
 bool check_rule_LinearProcessSummand(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_LinearProcessSummand(t);
+  return check_term_LinearProcessSummand(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -754,7 +754,7 @@ template <typename Term>
 bool check_rule_LinearProcessInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_LinearProcessInit(t);
+  return check_term_LinearProcessInit(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -764,24 +764,24 @@ template <typename Term>
 bool check_rule_StateFrm(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_DataExpr(t)
-            || check_term_StateTrue(t)
-            || check_term_StateFalse(t)
-            || check_term_StateNot(t)
-            || check_term_StateAnd(t)
-            || check_term_StateOr(t)
-            || check_term_StateImp(t)
-            || check_term_StateForall(t)
-            || check_term_StateExists(t)
-            || check_term_StateMust(t)
-            || check_term_StateMay(t)
-            || check_term_StateYaled(t)
-            || check_term_StateYaledTimed(t)
-            || check_term_StateDelay(t)
-            || check_term_StateDelayTimed(t)
-            || check_term_StateVar(t)
-            || check_term_StateNu(t)
-            || check_term_StateMu(t);
+  return check_rule_DataExpr(t)
+         || check_term_StateTrue(t)
+         || check_term_StateFalse(t)
+         || check_term_StateNot(t)
+         || check_term_StateAnd(t)
+         || check_term_StateOr(t)
+         || check_term_StateImp(t)
+         || check_term_StateForall(t)
+         || check_term_StateExists(t)
+         || check_term_StateMust(t)
+         || check_term_StateMay(t)
+         || check_term_StateYaled(t)
+         || check_term_StateYaledTimed(t)
+         || check_term_StateDelay(t)
+         || check_term_StateDelayTimed(t)
+         || check_term_StateVar(t)
+         || check_term_StateNu(t)
+         || check_term_StateMu(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -791,12 +791,12 @@ template <typename Term>
 bool check_rule_RegFrm(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_ActFrm(t)
-            || check_term_RegNil(t)
-            || check_term_RegSeq(t)
-            || check_term_RegAlt(t)
-            || check_term_RegTrans(t)
-            || check_term_RegTransOrNil(t);
+  return check_rule_ActFrm(t)
+         || check_term_RegNil(t)
+         || check_term_RegSeq(t)
+         || check_term_RegAlt(t)
+         || check_term_RegTrans(t)
+         || check_term_RegTransOrNil(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -806,17 +806,17 @@ template <typename Term>
 bool check_rule_ActFrm(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_MultAct(t)
-            || check_rule_DataExpr(t)
-            || check_term_ActTrue(t)
-            || check_term_ActFalse(t)
-            || check_term_ActNot(t)
-            || check_term_ActAnd(t)
-            || check_term_ActOr(t)
-            || check_term_ActImp(t)
-            || check_term_ActForall(t)
-            || check_term_ActExists(t)
-            || check_term_ActAt(t);
+  return check_rule_MultAct(t)
+         || check_rule_DataExpr(t)
+         || check_term_ActTrue(t)
+         || check_term_ActFalse(t)
+         || check_term_ActNot(t)
+         || check_term_ActAnd(t)
+         || check_term_ActOr(t)
+         || check_term_ActImp(t)
+         || check_term_ActForall(t)
+         || check_term_ActExists(t)
+         || check_term_ActAt(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -826,7 +826,7 @@ template <typename Term>
 bool check_rule_ActionRenameRules(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ActionRenameRules(t);
+  return check_term_ActionRenameRules(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -836,7 +836,7 @@ template <typename Term>
 bool check_rule_ActionRenameRule(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ActionRenameRule(t);
+  return check_term_ActionRenameRule(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -846,10 +846,10 @@ template <typename Term>
 bool check_rule_ActionRenameRuleRHS(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_ParamId(t)
-            || check_rule_Action(t)
-            || check_term_Delta(t)
-            || check_term_Tau(t);
+  return check_rule_ParamId(t)
+         || check_rule_Action(t)
+         || check_term_Delta(t)
+         || check_term_Tau(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -859,7 +859,7 @@ template <typename Term>
 bool check_rule_ActionRenameSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_ActionRenameSpec(t);
+  return check_term_ActionRenameSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -869,7 +869,7 @@ template <typename Term>
 bool check_rule_PBES(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_PBES(t);
+  return check_term_PBES(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -879,7 +879,7 @@ template <typename Term>
 bool check_rule_PBEqnSpec(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_PBEqnSpec(t);
+  return check_term_PBEqnSpec(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -889,7 +889,7 @@ template <typename Term>
 bool check_rule_PBInit(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_PBInit(t);
+  return check_term_PBInit(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -899,7 +899,7 @@ template <typename Term>
 bool check_rule_PBEqn(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_PBEqn(t);
+  return check_term_PBEqn(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -909,8 +909,8 @@ template <typename Term>
 bool check_rule_FixPoint(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_Mu(t)
-            || check_term_Nu(t);
+  return check_term_Mu(t)
+         || check_term_Nu(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -920,7 +920,7 @@ template <typename Term>
 bool check_rule_PropVarDecl(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_PropVarDecl(t);
+  return check_term_PropVarDecl(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -930,16 +930,16 @@ template <typename Term>
 bool check_rule_PBExpr(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_rule_DataExpr(t)
-            || check_term_PBESTrue(t)
-            || check_term_PBESFalse(t)
-            || check_term_PBESNot(t)
-            || check_term_PBESAnd(t)
-            || check_term_PBESOr(t)
-            || check_term_PBESImp(t)
-            || check_term_PBESForall(t)
-            || check_term_PBESExists(t)
-            || check_rule_PropVarInst(t);
+  return check_rule_DataExpr(t)
+         || check_term_PBESTrue(t)
+         || check_term_PBESFalse(t)
+         || check_term_PBESNot(t)
+         || check_term_PBESAnd(t)
+         || check_term_PBESOr(t)
+         || check_term_PBESImp(t)
+         || check_term_PBESForall(t)
+         || check_term_PBESExists(t)
+         || check_rule_PropVarInst(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -949,7 +949,7 @@ template <typename Term>
 bool check_rule_PropVarInst(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_PropVarInst(t);
+  return check_term_PropVarInst(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -959,7 +959,7 @@ template <typename Term>
 bool check_rule_BES(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_BES(t);
+  return check_term_BES(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -969,7 +969,7 @@ template <typename Term>
 bool check_rule_BooleanEquation(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_BooleanEquation(t);
+  return check_term_BooleanEquation(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -979,7 +979,7 @@ template <typename Term>
 bool check_rule_BooleanVariable(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_BooleanVariable(t);
+  return check_term_BooleanVariable(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
@@ -989,13 +989,13 @@ template <typename Term>
 bool check_rule_BooleanExpression(Term t)
 {
 #ifndef MCRL2_NO_SOUNDNESS_CHECKS
-  return    check_term_BooleanTrue(t)
-            || check_term_BooleanFalse(t)
-            || check_rule_BooleanVariable(t)
-            || check_term_BooleanNot(t)
-            || check_term_BooleanAnd(t)
-            || check_term_BooleanOr(t)
-            || check_term_BooleanImp(t);
+  return check_term_BooleanTrue(t)
+         || check_term_BooleanFalse(t)
+         || check_rule_BooleanVariable(t)
+         || check_term_BooleanNot(t)
+         || check_term_BooleanAnd(t)
+         || check_term_BooleanOr(t)
+         || check_term_BooleanImp(t);
 #else
   return true;
 #endif // MCRL2_NO_SOUNDNESS_CHECKS
