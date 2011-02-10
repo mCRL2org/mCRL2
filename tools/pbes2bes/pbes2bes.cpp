@@ -80,10 +80,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
     std::string opt_outputformat;              // The output format
     ::bes::transformation_strategy opt_strategy; // The strategy
     bool opt_use_hashtables;                   // The hashtable option
-    bool opt_construct_counter_example;        // The counter example option
     bool opt_store_as_tree;                    // The tree storage option
     bool opt_data_elm;                         // The data elimination option
-    std::string opt_counter_example_file;      // The counter example file name
 
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
@@ -103,10 +101,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       opt_outputformat("bes"),
       opt_strategy(::bes::lazy),
       opt_use_hashtables(false),
-      opt_construct_counter_example(false),
       opt_store_as_tree(false),
-      opt_data_elm(true),
-      opt_counter_example_file("")
+      opt_data_elm(true)
     {}
 
 
@@ -189,6 +185,12 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
                  " fixed point symbol. This can increase the time"
                  " needed to generate an equation substantially",
                  's').
+      add_option("hashtables",
+                 "use hashtables when substituting in bes equations, "
+                 "and translate internal expressions to binary decision "
+                 "diagrams (discouraged, due to performance)",
+                 'H').
+
       add_option("output",
                  make_mandatory_argument("FORMAT"),
                  "use output format FORMAT:\n"
@@ -254,7 +256,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
           datar,
           opt_strategy,
           opt_store_as_tree,
-          opt_construct_counter_example,
+          false,  // No counter example
           opt_use_hashtables);
       timer().finish("instantiation");
 
@@ -274,7 +276,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
                             pbesr,
                             opt_strategy,
                             opt_store_as_tree,
-                            opt_construct_counter_example,
+                            false,    // No counter example
                             opt_use_hashtables);
           break;
         }
@@ -294,7 +296,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
                             pbesr,
                             opt_strategy,
                             opt_store_as_tree,
-                            opt_construct_counter_example,
+                            false,    // No counter example
                             opt_use_hashtables);
           break;
         }
@@ -319,7 +321,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
                             pbesr2,
                             opt_strategy,
                             opt_store_as_tree,
-                            opt_construct_counter_example,
+                            false,  // No counter example
                             opt_use_hashtables);
           break;
         }
@@ -372,7 +374,6 @@ class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool>
 
       std::vector<std::string> values;
 
-      m_gui_options["counter"] = create_checkbox_widget();
       m_gui_options["hashtables"] = create_checkbox_widget();
 
       values.clear();
