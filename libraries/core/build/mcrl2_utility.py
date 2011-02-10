@@ -63,7 +63,10 @@ def insert_text_in_file(filename, text, label, handle_user_sections = False):
 def indent_text(text, indent):
     lines = []
     for line in text.split('\n'):
-        lines.append(indent + line)
+        if len(line) == 0:
+            lines.append(line)
+        else:
+            lines.append(indent + line)
     return '\n'.join(lines)
 
 if __name__ == "__main__":

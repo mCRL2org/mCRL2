@@ -425,13 +425,13 @@ class MemberFunction:
 # Represents a class constructor
 class Constructor:
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
-        self.classname           = classname          
-        self.arguments           = arguments          
-        self.superclass          = superclass         
-        self.namespace           = namespace          
-        self.aterm               = aterm              
+        self.classname           = classname
+        self.arguments           = arguments
+        self.superclass          = superclass
+        self.namespace           = namespace
+        self.aterm               = aterm
         self.aterm_namespace     = 'core'
-        self.parameters          = parameters         
+        self.parameters          = parameters
         self.template_parameters = template_parameters
 
     def expand_text(self, text):
@@ -470,13 +470,13 @@ class Constructor:
 # Represents a default class constructor
 class DefaultConstructor(Constructor):
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
-        self.classname           = classname          
-        self.arguments           = arguments          
-        self.superclass          = superclass         
-        self.namespace           = namespace          
-        self.aterm               = aterm              
+        self.classname           = classname
+        self.arguments           = arguments
+        self.superclass          = superclass
+        self.namespace           = namespace
+        self.aterm               = aterm
         self.aterm_namespace     = 'core'
-        self.parameters          = parameters         
+        self.parameters          = parameters
         self.template_parameters = template_parameters
 
     def inline_definition(self):
@@ -505,13 +505,13 @@ class DefaultConstructor(Constructor):
 # Represents an overloaded class constructor
 class OverloadedConstructor(Constructor):
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
-        self.classname           = classname          
-        self.arguments           = arguments          
-        self.superclass          = superclass         
-        self.namespace           = namespace          
-        self.aterm               = aterm              
+        self.classname           = classname
+        self.arguments           = arguments
+        self.superclass          = superclass
+        self.namespace           = namespace
+        self.aterm               = aterm
         self.aterm_namespace     = 'core'
-        self.parameters          = parameters         
+        self.parameters          = parameters
         self.template_parameters = template_parameters
 
     def inline_definition(self):
@@ -540,13 +540,13 @@ class OverloadedConstructor(Constructor):
 # Represents a class constructor taking an ATerm as argument
 class ATermConstructor(Constructor):
     def __init__(self, classname, arguments, superclass, namespace, aterm, parameters, template_parameters):
-        self.classname           = classname          
-        self.arguments           = arguments          
-        self.superclass          = superclass         
-        self.namespace           = namespace          
-        self.aterm               = aterm              
+        self.classname           = classname
+        self.arguments           = arguments
+        self.superclass          = superclass
+        self.namespace           = namespace
+        self.aterm               = aterm
         self.aterm_namespace     = 'core'
-        self.parameters          = parameters         
+        self.parameters          = parameters
         self.template_parameters = template_parameters
 
     def inline_definition(self):
@@ -662,7 +662,7 @@ class Class:
 
     # Returns the constructors of the class
     def constructors(self):
-        add_constructor_overloads = 'O' in self.modifiers()        
+        add_constructor_overloads = 'O' in self.modifiers()
         add_string_overload_constructor = add_constructor_overloads,
         add_container_overload_constructor = add_constructor_overloads
         classname = self.classname()
@@ -890,7 +890,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             return text
         else:
             f = self.constructor
-            visit_functions = []       
+            visit_functions = []
             for p in f.parameters():
                 visit_functions.append('\n  static_cast<Derived&>(*this)(x.%s());' % p.name())
             vtext = ''.join(visit_functions)
@@ -899,7 +899,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = re.sub('VISIT_FUNCTIONS', vtext, text)
             if f.is_template():
                 text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
-            return text           
+            return text
 
     def traverser_function(self, all_classes, dependencies):
         text = r'''void operator()(const <CLASS_NAME>& x)
@@ -912,14 +912,17 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         visit_text = ''
         dependent = False
         if 'X' in self.modifiers():
-            classes = [all_classes[name] for name in self.expression_classes()]          
+            classes = [all_classes[name] for name in self.expression_classes()]
             classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
             classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
 
-            updates = []          
+            updates = []
             for c in classes:
                 is_function = c.is_function_name(True)
-                updates.append('if (%s(x)) { static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, c.classname(True)))
+                updates.append('''if (%s(x))
+{
+  static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x)));
+}''' % (is_function, c.classname(True)))
             if len(updates) == 0:
                 visit_text = '// skip'
             else:
@@ -930,7 +933,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             else:
                 return_type = classname
 
-            updates = []          
+            updates = []
             f = self.constructor
             for p in f.parameters():
                 ptype = p.type(include_modifiers = False, include_namespace = True)
@@ -941,10 +944,10 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 visit_text = '\n'.join(updates)
             else:
                 visit_text = '// skip'
-   
+
         # fix the layout
         if visit_text != '':
-            visit_text = indent_text('\n' + visit_text, '  ')       
+            visit_text = '\n' + indent_text(visit_text, '  ')
 
         text = re.sub('<CLASS_NAME>', classname, text)
         text = re.sub('<VISIT_TEXT>', visit_text, text)
@@ -965,7 +968,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         if is_modifiable_type(classname, modifiability_map):
             return_type = 'void'
             return_statement = ''
-    
+
             updates = []
             f = self.constructor
             for p in f.parameters():
@@ -990,16 +993,24 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
                 classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
 
-                updates = []          
+                updates = []
                 for c in classes:
                     #if not is_dependent_type(dependencies, c.classname(True)):
                     #    continue
                     is_function = c.is_function_name(True)
                     if is_modifiable_type(c.classname(True), modifiability_map):
                       # this one applies to action_formula <-> multi_action, for which the conversion is problematic
-                      updates.append('if (%s(x)) { %s y = x; static_cast<Derived&>(*this)(y); result = y; }' % (is_function, c.classname(True)))
+                      updates.append('''if (%s(x))
+{
+  %s y = x;
+  static_cast<Derived&>(*this)(y);
+  result = y;
+}''' % (is_function, c.classname(True)))
                     else:
-                      updates.append('if (%s(x)) { result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x))); }' % (is_function, c.classname(True)))
+                      updates.append('''if (%s(x))
+{
+  result = static_cast<Derived&>(*this)(%s(atermpp::aterm_appl(x)));
+}''' % (is_function, c.classname(True)))
                 if len(updates) == 0:
                     visit_text = '// skip'
                     return_statement = 'return x;'
@@ -1012,7 +1023,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 else:
                     return_type = classname
 
-                updates = []          
+                updates = []
                 f = self.constructor
                 for p in f.parameters():
                     ptype = p.type(include_modifiers = False, include_namespace = True)
@@ -1027,7 +1038,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 else:
                     visit_text = '// skip'
                     return_statement = 'return x;'
-    
+
         if return_type == 'void':
             const = ''
         else:
@@ -1037,7 +1048,7 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         if return_statement != '':
             return_statement = '\n  ' + return_statement
         if visit_text != '':
-            visit_text = indent_text('\n' + visit_text, '  ')       
+            visit_text = '\n' + indent_text(visit_text, '  ')
 
         text = re.sub('<RETURN_TYPE>', return_type, text)
         text = re.sub('<CONST>', const, text)
@@ -1229,7 +1240,7 @@ def parse_classnames(text, namespace):
         constructor, modifiers, aterm, description = words
         classname = re.sub(r'\(.*', '', constructor)
         classname = '%s::%s' % (namespace, classname)
-        
+
         # duplicates are not allowed
         if not classname in result:
             result.append(classname)

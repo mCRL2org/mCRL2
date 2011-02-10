@@ -14,31 +14,31 @@ def compare_classes(x, y):
     return cmp('X' in x.modifiers(), 'X' in y.modifiers())
 
 def make_traverser(filename, traverser, add_traverser, parent_traverser, class_map, all_classes, namespace, expression, dependencies):
-    TRAVERSER = '''  template <template <class> class Traverser, class Derived>
-  struct <ADD_TRAVERSER>: public Traverser<Derived>
-  {
-    typedef Traverser<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
+    TRAVERSER = '''template <template <class> class Traverser, class Derived>
+struct <ADD_TRAVERSER>: public Traverser<Derived>
+{
+  typedef Traverser<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
 
 <VISIT_TEXT>
-  };
+};
 
-  /// \\\\brief Traverser class
-  template <typename Derived>
-  struct <TRAVERSER>: public <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived>
-  {
-    typedef <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
+/// \\\\brief Traverser class
+template <typename Derived>
+struct <TRAVERSER>: public <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived>
+{
+  typedef <ADD_TRAVERSER><<PARENT_TRAVERSER>, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+};
 '''
     classnames = parse_classnames(class_map[namespace], namespace)
 
     result = []
-    classes = [all_classes[name] for name in classnames]   
+    classes = [all_classes[name] for name in classnames]
 
     # preserve the same order as old generation
     classes.sort(compare_classes)
@@ -46,7 +46,7 @@ def make_traverser(filename, traverser, add_traverser, parent_traverser, class_m
     for c in classes:
         if is_dependent_type(dependencies, c.classname(True)) or ('E' in c.modifiers() and is_dependent_type(dependencies, c.superclass(True))):
             result.append(c.traverser_function(all_classes, dependencies))
-    visit_text = indent_text('\n'.join(result), '    ')
+    visit_text = indent_text('\n'.join(result), '  ')
     text = TRAVERSER
     text = re.sub('<PARENT_TRAVERSER>', parent_traverser, text)
     text = re.sub('<TRAVERSER>', traverser, text)
@@ -56,7 +56,10 @@ def make_traverser(filename, traverser, add_traverser, parent_traverser, class_m
     #----------------------------------------------------------------------------------------#
     # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
     # TODO: investigate if the time interface can be improved
-    text = re.sub(r'static_cast<Derived&>\(\*this\)\(x.time\(\)\);', 'if (x.has_time()) static_cast<Derived&>(*this)(x.time());', text)
+    text = re.sub(r'static_cast<Derived&>\(\*this\)\(x.time\(\)\);', '''if (x.has_time())
+    {
+      static_cast<Derived&>(*this)(x.time());
+    }''', text)
     #----------------------------------------------------------------------------------------#
 
     label = add_traverser
@@ -65,32 +68,32 @@ def make_traverser(filename, traverser, add_traverser, parent_traverser, class_m
     insert_text_in_file(filename, text, 'generated %s code' % label)
 
 def make_builder(filename, builder, add_builder, parent_builder, class_map, all_classes, namespace, expression, dependencies, modifiability_map):
-    BUILDER = '''  template <template <class> class Builder, class Derived>
-  struct <ADD_BUILDER>: public Builder<Derived>
-  {
-    typedef Builder<Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
+    BUILDER = '''template <template <class> class Builder, class Derived>
+struct <ADD_BUILDER>: public Builder<Derived>
+{
+  typedef Builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
 
 <VISIT_TEXT>
-  };
+};
 
-  /// \\\\brief Builder class
-  template <typename Derived>
-  struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
-  {
-    typedef <ADD_BUILDER><<PARENT_BUILDER>, Derived> super;
-    using super::enter;
-    using super::leave;
-    using super::operator();
-  };
+/// \\\\brief Builder class
+template <typename Derived>
+struct <BUILDER>: public <ADD_BUILDER><<PARENT_BUILDER>, Derived>
+{
+  typedef <ADD_BUILDER><<PARENT_BUILDER>, Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+};
 '''
 
     classnames = parse_classnames(class_map[namespace], namespace)
 
     result = []
-    classes = [all_classes[name] for name in classnames]   
+    classes = [all_classes[name] for name in classnames]
 
     # preserve the same order as old generation
     classes.sort(compare_classes)
@@ -98,7 +101,7 @@ def make_builder(filename, builder, add_builder, parent_builder, class_map, all_
     for c in classes:
         if is_dependent_type(dependencies, c.classname(True)) or ('E' in c.modifiers() and is_dependent_type(dependencies, c.superclass(True))):
             result.append(c.builder_function(all_classes, dependencies, modifiability_map))
-    visit_text = indent_text('\n'.join(result), '    ')
+    visit_text = indent_text('\n'.join(result), '  ')
     text = BUILDER
     text = re.sub('<PARENT_BUILDER>', parent_builder, text)
     text = re.sub('<BUILDER>', builder, text)
@@ -108,7 +111,10 @@ def make_builder(filename, builder, add_builder, parent_builder, class_map, all_
     #----------------------------------------------------------------------------------------#
     # N.B. THIS IS AN UGLY HACK to deal with the optional time function in some LPS classes
     # TODO: investigate if the time interface can be improved
-    text = re.sub(r'x.time\(\) = static_cast<Derived&>\(\*this\)\(x.time\(\)\);', 'if (x.has_time()) x.time() = static_cast<Derived&>(*this)(x.time());', text)
+    text = re.sub(r'x.time\(\) = static_cast<Derived&>\(\*this\)\(x.time\(\)\);', '''if (x.has_time())
+    {
+      x.time() = static_cast<Derived&>(*this)(x.time());
+    }''', text)
     #----------------------------------------------------------------------------------------#
 
     label = add_builder
@@ -156,8 +162,8 @@ if __name__ == "__main__":
     make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'sort_expression_builder', 'add_sort_expressions', 'lps::sort_expression_builder'             , class_map, all_classes, 'action_formulas' , 'data::sort_expression', sort_expression_dependencies, modifiability_map)
     make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'sort_expression_builder', 'add_sort_expressions', 'action_formulas::sort_expression_builder' , class_map, all_classes, 'regular_formulas', 'data::sort_expression', sort_expression_dependencies, modifiability_map)
     make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'sort_expression_builder', 'add_sort_expressions', 'regular_formulas::sort_expression_builder', class_map, all_classes, 'state_formulas'  , 'data::sort_expression', sort_expression_dependencies, modifiability_map)
-                                                                                                                       
-    # data_expression_builder                                                                                          
+
+    # data_expression_builder
     make_builder('../../data/include/mcrl2/data/builder.h'        , 'data_expression_builder', 'add_data_expressions', 'core::builder'                            , class_map, all_classes, 'data'            , 'data::data_expression', data_expression_dependencies, modifiability_map)
     make_builder('../../lps/include/mcrl2/lps/builder.h'          , 'data_expression_builder', 'add_data_expressions', 'data::data_expression_builder'            , class_map, all_classes, 'lps'             , 'data::data_expression', data_expression_dependencies, modifiability_map)
     make_builder('../../process/include/mcrl2/process/builder.h'  , 'data_expression_builder', 'add_data_expressions', 'lps::data_expression_builder'             , class_map, all_classes, 'process'         , 'data::data_expression', data_expression_dependencies, modifiability_map)
