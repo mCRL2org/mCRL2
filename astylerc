@@ -3,7 +3,6 @@
 --indent-classes
 --indent-switches
 --indent-preprocessor
---indent-col1-comments
 --min-conditional-indent=0
 --pad-header
 --unpad-paren
