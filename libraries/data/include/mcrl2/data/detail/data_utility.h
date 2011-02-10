@@ -29,6 +29,7 @@
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/alias.h"
+#include "mcrl2/data/find.h"
 
 namespace mcrl2 {
 
@@ -71,6 +72,23 @@ bool check_assignment_variables(assignment_list const& assignments, variable_lis
   return true;
 }
 
+/// \brief Removes elements from the set s that satisfy predicate f.
+template <typename T, typename UnaryPredicate>
+void set_remove_if(std::set<T>& s, UnaryPredicate f)
+{
+  for (typename std::set<T>::iterator i = s.begin(); i != s.end(); )
+  {
+    if (f(*i))
+    {
+      s.erase(i++);
+    }
+    else
+    {
+      ++i;
+    }
+  }
+}
+
 /// \brief Returns true if the domain sorts and the codomain sort of the given sort s are contained in sorts.
 /// \param s A sort expression
 /// \param sorts A set of sort expressions
@@ -83,8 +101,8 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
     }
   };
 
-  std::set<sort_expression> s_sorts;
-  atermpp::find_all_if(s, boost::bind(&local::is_not_function_sort, _1), std::inserter(s_sorts, s_sorts.begin()));
+  std::set<sort_expression> s_sorts = data::find_sort_expressions(s);
+  set_remove_if(s_sorts, boost::bind(&local::is_not_function_sort, _1));
   for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
   {
     if (sorts.find(*i) == sorts.end()) {

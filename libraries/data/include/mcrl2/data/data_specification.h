@@ -28,7 +28,7 @@
 // utilities
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/data_utility.h"
+//#include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/translate_user_notation.h"
 
 // data expressions

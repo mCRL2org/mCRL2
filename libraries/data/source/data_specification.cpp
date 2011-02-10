@@ -11,6 +11,7 @@
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/detail/data_utility.h"
 
 namespace mcrl2 {
 

@@ -90,25 +90,6 @@ bool occurs_in(data_expression d, variable v)
   return find_if(aterm_appl(d), compare_variable(v)) != aterm_appl();
 }
 
-/// Search for a data variable in the term t. Precondition: t must contain
-/// at least one variable.
-template <typename Term>
-variable find_variable(Term t)
-{
-  aterm_appl result = atermpp::find_if(t, data::is_variable);
-  assert((result)); // check if a variable has been found
-  return result;
-}
-
-void test_find_variable()
-{
-  variable d("d", basic_sort("D"));
-  variable e("e", basic_sort("E"));
-  data_expression d_e = sort_bool::and_(d, e);
-  variable v = find_variable(d_e);
-  BOOST_CHECK(v == d);
-}
-
 // insert elements of a container of type D into a container of type C
 template < typename C, typename D >
 void insert(C& c, D const& d) {
@@ -124,9 +105,6 @@ int test_main(int argc, char** argv)
   };
 
   MCRL2_ATERMPP_INIT(argc, argv)
-
-  test_find_variable();
-  core::garbage_collect();
 
   specification spec = linearise(SPECIFICATION);
   linear_process lps = spec.process();
