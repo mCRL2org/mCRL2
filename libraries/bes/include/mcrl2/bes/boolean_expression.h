@@ -516,15 +516,6 @@ namespace core {
     static inline
     variable_type term2variable(term_type t) { return t; }
 
-    /// \brief Test if a term is constant
-    /// \param t A term
-    /// \return True if the term is constant
-    static inline
-    bool is_constant(term_type t)
-    {
-      return atermpp::find_if(t, is_variable) != atermpp::aterm_appl();
-    }
-
     /// \brief Pretty print function
     /// \param t A term
     /// \return Returns a pretty print representation of the term
