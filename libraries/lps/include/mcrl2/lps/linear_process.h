@@ -195,17 +195,6 @@ std::string pp(const linear_process& p)
   return core::pp(linear_process_to_aterm(p));
 }
 
-/// \brief Returns the action labels that occur in the process
-/// \param process A linear process
-/// \return The action labels that occur in the process
-inline
-std::set<action_label> compute_action_labels(const linear_process& process)
-{
-  std::set<action_label> result;
-  atermpp::find_all_if(linear_process_to_aterm(process), is_action_label, std::inserter(result, result.end()));
-  return result;
-}
-
 } // namespace lps
 
 } // namespace mcrl2
