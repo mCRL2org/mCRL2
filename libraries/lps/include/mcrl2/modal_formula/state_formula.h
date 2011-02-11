@@ -799,17 +799,17 @@ struct is_timed_traverser: public state_formula_traverser<is_timed_traverser>
 
   void enter(const delay_timed& /* x */)
   {
-    result = false;
+    result = true;
   }
 
   void enter(const yaled_timed& /* x */)
   {
-    result = false;
+    result = true;
   }
 
   void enter(const action_formulas::at& /* x */)
   {
-    result = false;
+    result = true;
   }
 };
 /// \endcond
