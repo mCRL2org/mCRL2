@@ -20,7 +20,6 @@
 #include <utility>
 #include <vector>
 
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"

@@ -12,7 +12,6 @@
 
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/substitute.h"

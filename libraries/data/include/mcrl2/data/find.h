@@ -16,7 +16,6 @@
 #include <iterator>
 #include <functional>
 #include <set>
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/variable.h"

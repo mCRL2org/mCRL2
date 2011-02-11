@@ -20,6 +20,7 @@
 #include "boost/iterator/transform_iterator.hpp"
 #include "boost/range/iterator_range.hpp"
 
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/table.h"
@@ -331,7 +332,7 @@ class data_specification
              i=resulting_normalized_sort_aliases.begin();
              i!=resulting_normalized_sort_aliases.end(); ++i)
         {
-          const sort_expression s1=replace(lhs,i->first,i->second);
+          const sort_expression s1=atermpp::replace(lhs,i->first,i->second);
           if (s1!=lhs)
           {
             // There is a conflict between the two sort rewrite rules.
@@ -351,7 +352,7 @@ class data_specification
           else
           {
             // There is a conflict between the two rewrite rules.
-            const sort_expression s2=replace(i->first,lhs,rhs);
+            const sort_expression s2 = atermpp::replace(i->first,lhs,rhs);
             if (s2!=i->first)
             {
               assert(is_basic_sort(i->second));

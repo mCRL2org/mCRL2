@@ -19,7 +19,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_list.h"
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"

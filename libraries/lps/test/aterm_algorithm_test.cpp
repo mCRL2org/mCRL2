@@ -15,7 +15,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/utility.h"

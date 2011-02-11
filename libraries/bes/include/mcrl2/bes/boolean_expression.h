@@ -16,7 +16,6 @@
 #include <string>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/algorithm.h" // find_if
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/join.h"
