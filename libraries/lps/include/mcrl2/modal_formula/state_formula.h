@@ -756,34 +756,81 @@ bool is_mu(const state_formula& t)
 
 //--- end generated classes ---//
 
+/// \brief Returns a pretty print representation of f.
+inline std::string pp(const state_formula& f)
+{
+  return core::pp(f);
+}
+
+} // namespace state_formulas
+
+} // namespace mcrl2
+
+#ifndef MCRL2_MODAL_FORMULA_TRAVERSER_H
+#include "mcrl2/modal_formula/traverser.h"
+#endif
+
+namespace mcrl2
+{
+
+namespace state_formulas
+{
+
 /// \cond INTERNAL_DOCS
 //
 /// \brief Function that determines if a state formula is time dependent
-struct is_timed_subterm
+// \brief Visitor for checking if a state formula is timed.
+struct is_timed_traverser: public state_formula_traverser<is_timed_traverser>
 {
-  /// \brief Function call operator
-  /// \param t A term
-  /// \return The function result
-  bool operator()(const atermpp::aterm_appl& t) const
+  typedef state_formula_traverser<is_timed_traverser> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
+
+  bool result;
+
+  is_timed_traverser()
+    : result(false)
+  {}
+
+  void enter(const delay_timed& /* x */)
   {
-    return (is_state_formula(t) && (is_delay_timed(t) || is_yaled_timed(t)))
-           || (action_formulas::is_action_formula(t) && action_formulas::is_at(t));
+    result = false;
+  }
+
+  void enter(const yaled_timed& /* x */)
+  {
+    result = false;
+  }
+
+  void enter(const action_formulas::at& /* x */)
+  {
+    result = false;
   }
 };
 /// \endcond
+
+/// \brief Checks if a state formula is timed
+/// \param x A state formula
+/// \return True if a state formula is timed
+inline
+bool is_timed(const state_formula& x)
+{
+  is_timed_traverser f;
+  f(x);
+  return f.result;
+}
 
 /// \brief Returns true if the formula is timed.
 /// \return True if the formula is timed.
 inline
 bool state_formula::has_time() const
 {
-  return atermpp::find_if(*this, is_timed_subterm()) != atermpp::aterm();
-}
-
-/// \brief Returns a pretty print representation of f.
-inline std::string pp(const state_formula& f)
-{
-  return core::pp(f);
+  return is_timed(*this);
 }
 
 } // namespace state_formulas

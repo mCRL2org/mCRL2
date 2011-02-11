@@ -9,6 +9,11 @@
 /// \file mcrl2/modal_formula/traverser.h
 /// \brief add your file description here.
 
+// To avoid circular header dependencies
+#ifndef MCRL2_MODAL_STATE_FORMULA_H
+#include "mcrl2/modal_formula/state_formula.h"
+#endif
+
 #ifndef MCRL2_MODAL_FORMULA_TRAVERSER_H
 #define MCRL2_MODAL_FORMULA_TRAVERSER_H
 
