@@ -735,6 +735,9 @@ endmacro( add_pbespp_release_test ARGS SAVE)
 
 macro( gen_pbespp_release_tests )
 					add_pbespp_release_test(  "-fdefault" "SAVE")
+					add_pbespp_release_test(  "-fdebug" "")
+					add_pbespp_release_test(  "-finternal" "")
+					add_pbespp_release_test(  "-finternal-debug" "")
 endmacro( gen_pbespp_release_tests )
 
 #########################
@@ -1063,9 +1066,6 @@ endmacro( add_bespp_release_test ARGS SAVE)
 
 macro( gen_bespp_release_tests )
 					add_bespp_release_test(  "-fdefault" "SAVE")
-					add_bespp_release_test(  "-fdebug" "")
-					add_bespp_release_test(  "-finternal" "")
-					add_bespp_release_test(  "-finternal-debug" "")
 endmacro( gen_bespp_release_tests )
 
 ###################
@@ -1282,10 +1282,10 @@ endmacro( add_lpsbisim2pbes_release_test ARGS )
 
 macro( gen_lpsbisim2pbes_release_tests )
 					add_lpsbisim2pbes_release_test(  "" )
-					add_lpsbisim2pbes_release_test(  "-b0" )
-					add_lpsbisim2pbes_release_test(  "-b1" )
-					add_lpsbisim2pbes_release_test(  "-b2" )
-					add_lpsbisim2pbes_release_test(  "-b3" )
+					add_lpsbisim2pbes_release_test(  "-bstrong-bisim" )
+					add_lpsbisim2pbes_release_test(  "-bweak-bisim" )
+					add_lpsbisim2pbes_release_test(  "-bbranching-bisim" )
+					add_lpsbisim2pbes_release_test(  "-bbranching-sim" )
 					add_lpsbisim2pbes_release_test(  "-n" )
 endmacro( gen_lpsbisim2pbes_release_tests )
 
