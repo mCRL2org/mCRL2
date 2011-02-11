@@ -13,7 +13,6 @@
 #define MCRL2_MODAL_FORMULA_PREPROCESS_STATE_FORMULA_H
 
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
@@ -43,7 +42,6 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
 
   state_formulas::state_formula f = formula;
   std::set<core::identifier_string> formula_variable_names = data::variable_names(state_formulas::find_variables(formula));
-  const atermpp::aterm_appl temporary_spec=specification_to_aterm(spec);
   std::set<core::identifier_string> spec_variable_names = data::variable_names(lps::find_variables(spec));
   std::set<core::identifier_string> spec_names = lps::find_identifiers(spec);
 
@@ -61,8 +59,10 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   // wrap the formula inside a 'nu' if needed
   if (!s::is_mu(f) && !s::is_nu(f))
   {
-    atermpp::aterm_list context = atermpp::make_list(f, temporary_spec);
-    core::identifier_string X = data::fresh_identifier(context, std::string("X"));
+    data::set_identifier_generator generator;
+    generator.add_identifiers(state_formulas::find_identifiers(f));
+    generator.add_identifiers(lps::find_identifiers(spec));
+    core::identifier_string X = generator("X");
     f = s::nu(X, data::assignment_list(), f);
   }
 

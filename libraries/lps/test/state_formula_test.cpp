@@ -336,13 +336,13 @@ void test_rename()
 
   state_formula formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
   data::set_identifier_generator generator;
-  generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
+  generator.add_identifiers(lps::find_identifiers(spec));
   formula = rename_predicate_variables(formula, generator);
   BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X0. X0)");
   std::cout << "formula: " << pp(formula) << std::endl;
 
   generator = data::set_identifier_generator();
-  generator.add_identifiers(core::find_identifiers(specification_to_aterm(spec)));
+  generator.add_identifiers(lps::find_identifiers(spec));
   formula = parse_state_formula("mu X. mu X. X", spec);
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
@@ -444,7 +444,7 @@ void test_parse()
   lps::specification spec = lps::linearise(spec_text);
   state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
   std::cerr << "--- f ---\n" << core::pp(f) << "\n\n" << f << std::endl;
-  std::set<core::identifier_string> ids = core::find_identifiers(f);
+  std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
   BOOST_CHECK(ids.find(core::identifier_string("1")) == ids.end());
   BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());
 }

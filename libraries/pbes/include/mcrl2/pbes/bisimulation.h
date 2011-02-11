@@ -688,7 +688,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         {
           used_names.insert(std::string(k->name()));
         }
-        variable_list e1_new = atermpp::convert<variable_list>(fresh_variables(e1, used_names));
+        variable_list e1_new = fresh_variables(e1, used_names);
         data_expression    cj_new   = data::substitute_free_variables(cj, mcrl2::data::make_sequence_sequence_substitution(e1, e1_new));
         data_expression_list gj_new = data::substitute_free_variables(gj, mcrl2::data::make_sequence_sequence_substitution(e1, e1_new));
 

@@ -65,11 +65,10 @@ class xyz_identifier_generator: public multiset_identifier_generator
 
     /// \brief Constructor.
     /// \param t A term.
-    template <typename Term>
-    xyz_identifier_generator(Term t)
+   xyz_identifier_generator(const std::set<core::identifier_string>& ids)
       : m_index(-2), m_char('Z')
     {
-      add_to_context(t);
+      add_identifiers(ids);
     }
 
     /// \brief Returns hint if it isn't in the context yet. Else the next available

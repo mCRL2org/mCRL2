@@ -18,7 +18,6 @@
 #include <string>
 #include <sstream>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/core/find.h"
 #include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2
@@ -47,7 +46,7 @@ class number_postfix_generator
 
     /// \brief Adds the strings in the range [first, last) to the context.
     /// \param id A string
-    void add_to_context(const std::string& id)
+    void add_identifiers(const std::string& id)
     {
       std::string::size_type i = id.find_last_not_of("0123456789");
       if (i == std::string::npos || id.size() == i + 1) // string does not end with a number
@@ -68,11 +67,11 @@ class number_postfix_generator
     /// \param last
     /// [first, last) is a sequence of strings that is used as context.
     template <typename Iter>
-    void add_to_context(Iter first, Iter last)
+    void add_identifiers(Iter first, Iter last)
     {
       for (Iter i = first; i != last; ++i)
       {
-        add_to_context(*i);
+        add_identifiers(*i);
       }
     }
 
@@ -84,7 +83,7 @@ class number_postfix_generator
     number_postfix_generator(Iter first, Iter last, std::string hint = "FRESH_VAR")
       : m_hint(hint)
     {
-      add_to_context(first, last);
+      add_identifiers(first, last);
     }
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.

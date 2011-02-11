@@ -16,7 +16,6 @@
 #include <boost/bind.hpp>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/find.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/data_expression.h"
@@ -41,13 +40,14 @@ void test_fresh_variable_generator()
   variable d00("d00", basic_sort("D"));
   data_expression e = and_(equal_to(d, d0), not_equal_to(d0, d00));
 
-  fresh_variable_generator< > generator(e, "d");
+  fresh_variable_generator<> generator("d");
+  generator.add_identifiers(data::find_identifiers(e));
   variable x = generator(d.sort());
   BOOST_CHECK(x == variable("d1", basic_sort("D")));
   x = generator(d.sort());
   BOOST_CHECK(x == variable("d2", basic_sort("D")));
 
-  variable a = fresh_variable(e, basic_sort("D"), "d");
+  variable a = fresh_variable(data::find_identifiers(e), basic_sort("D"), "d");
   BOOST_CHECK(a == variable("d1", basic_sort("D")));
 
   std::set<identifier_string> ids = data::find_identifiers(e);
@@ -73,7 +73,7 @@ void test_fresh_variable_generator()
   variable q("q", basic_sort("P"));
   v.push_back(p);
   v.push_back(q);
-  generator.add_to_context(boost::make_iterator_range(v));
+  generator.add_identifiers(data::find_identifiers(v));
   x = generator(p);
   // BOOST_CHECK(x == variable("p1", basic_sort("P")));
   x = generator(q);
@@ -82,15 +82,12 @@ void test_fresh_variable_generator()
 
 void test_fresh_variables()
 {
-  variable_vector w = atermpp::make_vector(variable("d", basic_sort("D")), variable("e", basic_sort("E")), variable("f", basic_sort("F")));
+  variable_list w = atermpp::make_list(variable("d", basic_sort("D")), variable("e", basic_sort("E")), variable("f", basic_sort("F")));
   std::set<std::string> context;
   context.insert("e");
   context.insert("f_00");
-  variable_vector w1 = atermpp::convert< variable_vector >(fresh_variables(w, context));
+  variable_list w1 = fresh_variables(w, context);
   std::cout << "w1 = " << mcrl2::data::pp(w1) << std::endl;
-  //BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("d1", basic_sort("D"))) != w1.end());
-  //BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("e1", basic_sort("E"))) != w1.end());
-  //BOOST_CHECK(std::find(w1.begin(), w1.end(), variable("f1", basic_sort("F"))) != w1.end());
 
   context.clear();
   context.insert("e3_Sx0");
@@ -99,10 +96,9 @@ void test_fresh_variables()
   context.insert("n_S");
   context.insert("s3_S");
   std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
-  variable_vector yi;
-  yi.push_back(variable("e3_S", basic_sort("A")));
+  variable_list yi = atermpp::make_list(variable("e3_S", basic_sort("A")));
   std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
-  variable_vector y = atermpp::convert<variable_vector>(fresh_variables(yi, context));
+  variable_list y = fresh_variables(yi, context);
   std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
   BOOST_CHECK(y.size() == 1);
   BOOST_CHECK(std::string(y.front().name()) != " e3_Sx0");

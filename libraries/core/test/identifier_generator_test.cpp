@@ -22,7 +22,7 @@ using namespace mcrl2::core;
 void identifier_generator_test()
 {
   number_postfix_generator generator;
-  generator.add_to_context("c6");
+  generator.add_identifiers("c6");
   std::string s;
 
   s = generator("c");
@@ -31,7 +31,7 @@ void identifier_generator_test()
   std::vector<std::string> v;
   v.push_back("a1");
   v.push_back("c012");
-  generator.add_to_context(v.begin(), v.end());
+  generator.add_identifiers(v.begin(), v.end());
 
   s = generator("c");
   BOOST_CHECK(s == "c13");

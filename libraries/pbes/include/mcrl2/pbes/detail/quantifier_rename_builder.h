@@ -19,6 +19,7 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/find.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/data/set_identifier_generator.h"
@@ -111,7 +112,7 @@ struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
       }
     }
     quantifier_stack.push_back(variables);
-    generator.add_to_context(variables);
+    generator.add_identifiers(data::find_identifiers(variables));
 
     return replacement_count;
   }
@@ -121,7 +122,7 @@ struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
   /// \param replacement_count A positive integer
   void pop(size_t replacement_count)
   {
-    generator.remove_from_context(quantifier_stack.back());
+    generator.remove_identifiers(data::find_identifiers(quantifier_stack.back()));
     for (size_t i = 0; i < replacement_count; i++)
     {
       generator.remove_identifier(replacements.front().second.name());

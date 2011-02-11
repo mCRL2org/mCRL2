@@ -29,6 +29,7 @@
 #include "mcrl2/data/translate_user_notation.h"
 #include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/find.h"
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -556,7 +557,7 @@ lps::specification action_rename(
   action_list lps_new_actions;
 
   data::postfix_identifier_generator generator("");
-  generator.add_to_context(specification_to_aterm(lps_old_spec));
+  generator.add_identifiers(lps::find_identifiers(lps_old_spec));
 
   //go through the rename rules of the rename file
   if (gsDebug)

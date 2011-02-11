@@ -178,7 +178,7 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
         core::number_postfix_generator generator;
         for (std::set<data::variable>::const_iterator i = left_variables.begin(); i != left_variables.end(); ++i)
         {
-          generator.add_to_context(std::string(i->name()));
+          generator.add_identifiers(std::string(i->name()));
         }
         variable_variable_substitution sigma;
         for (std::set<data::variable>::iterator i = name_clashes.begin(); i != name_clashes.end(); ++i)

@@ -68,9 +68,10 @@ struct make_timed_lps_summand
 /// \param context A term
 /// \return A timed linear process
 inline
-linear_process make_timed_lps(const linear_process& lps, atermpp::aterm context)
+linear_process make_timed_lps(const linear_process& lps, const std::set<core::identifier_string>& context)
 {
-  data::set_identifier_generator generator(context);
+  data::set_identifier_generator generator;
+  generator.add_identifiers(context);
   summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand<data::set_identifier_generator>(generator));
   linear_process result = lps;
   result.set_summands(new_summands);

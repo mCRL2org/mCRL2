@@ -13,6 +13,7 @@
 #define MCRL2_LPS_UNTIME_H
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2
@@ -146,9 +147,10 @@ class untime_algorithm: public lps::detail::lps_algorithm
 
   public:
     untime_algorithm(specification& spec, bool verbose = false)
-      : lps::detail::lps_algorithm(spec, verbose),
-        m_identifier_generator(specification_to_aterm(spec))
-    {}
+      : lps::detail::lps_algorithm(spec, verbose)
+    {
+      m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
+    }
 
     void run()
     {

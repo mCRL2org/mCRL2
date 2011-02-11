@@ -46,7 +46,7 @@ class postfix_identifier_generator: public set_identifier_generator
         }
       }
 
-      add_to_context(id);
+      add_identifier(id);
       return id;
     }
 };

@@ -25,6 +25,7 @@
 #include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/find.h"
 
 namespace mcrl2
 {
@@ -118,7 +119,8 @@ class binary_algorithm: public lps::detail::lps_algorithm
         std::cerr << "Original process parameters: " << pp(process_parameters) << std::endl;
       }
 
-      data::fresh_variable_generator<> generator(specification_to_aterm(m_spec));
+      data::fresh_variable_generator<> generator;
+      generator.add_identifiers(lps::find_identifiers(m_spec));
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {

@@ -16,8 +16,8 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
-// #include "mcrl2/data/replace.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/lps/find.h"
 
 #include "realelm.h"
 #include "linear_inequalities.h"
@@ -1031,7 +1031,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
 
   s.data() = ds;
   postfix_identifier_generator variable_generator("");
-  variable_generator.add_to_context(specification_to_aterm(s));
+  variable_generator.add_identifiers(lps::find_identifiers((s)));
   linear_process lps=s.process();
   const variable_list real_parameters = get_real_variables(lps.process_parameters());
   const variable_list nonreal_parameters = get_nonreal_variables(lps.process_parameters());

@@ -1328,7 +1328,7 @@ inline bool is_inconsistent(
     for (linear_inequality::lhs_t::const_iterator j=i->lhs_begin();
          j!=i->lhs_end(); ++j)
     {
-      fresh_variable.add_to_context(j->first);
+      fresh_variable.add_identifiers(j->first.name());
     }
   }
 

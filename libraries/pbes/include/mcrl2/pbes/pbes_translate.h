@@ -15,10 +15,10 @@
 #ifndef MCRL2_PBES_PBES_TRANSLATE_H
 #define MCRL2_PBES_PBES_TRANSLATE_H
 
+#include <iterator>
 #include <sstream>
 #include <algorithm>
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
-#include "mcrl2/core/find.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/standard_utility.h"
@@ -26,6 +26,7 @@
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/substitute.h"
@@ -278,7 +279,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
         std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
-        data::variable_list b = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
+        data::variable_list b = fresh_variables(v, names, false);
         result = z::forall(b, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       }
       else if (a::is_exists(b))
@@ -287,7 +288,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
         std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
-        data::variable_list b = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
+        data::variable_list b = fresh_variables(v, names, false);
         result = z::exists(b, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       }
       else
@@ -385,7 +386,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
 //std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
-            data::variable_list y = atermpp::convert<data::variable_list>(fresh_variables(yi, context));
+            data::variable_list y = fresh_variables(yi, context);
 //std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
 //std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
             ci = data::substitute_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
@@ -421,7 +422,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
-            data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
+            data::variable_list y = fresh_variables(yi, context);
             ci = data::substitute_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
             lps::substitute_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
             gi = data::substitute_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
@@ -800,8 +801,11 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
 
       // make sure the lps is timed
-      data::variable T = fresh_variable(make_list(f, lps::linear_process_to_aterm(lps)), data::sort_real::real_(), "T");
-      atermpp::aterm_list context = make_list(T, spec.initial_process(), lps::linear_process_to_aterm(lps), f);
+      data::variable T = fresh_variable(lps::find_identifiers(lps), data::sort_real::real_(), "T");
+      std::set<core::identifier_string> context;
+      context.insert(T.name());
+      lps::find_identifiers(spec, std::inserter(context, context.end()));
+      state_formulas::find_identifiers(f, std::inserter(context, context.end()));
       lps = lps::detail::make_timed_lps(lps, context);
 
       // compute the equations
@@ -890,7 +894,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
         if (v.size() > 0)
         {
           std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
-          data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
+          data::variable_list y = fresh_variables(v, names, false);
           result = p::forall(y, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
         else
@@ -905,7 +909,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
         if (v.size() > 0)
         {
           std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
-          data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(v, names, false));
+          data::variable_list y = fresh_variables(v, names, false);
           result = p::exists(y, sat_top(x, action_formulas::substitute_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
         else
@@ -1003,7 +1007,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, context);
-            data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
+            data::variable_list y = fresh_variables(yi, context);
             ci = data::substitute_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
             ai = lps::substitute_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
             gi = data::substitute_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
@@ -1031,7 +1035,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
             data::variable_list yi(i->summation_variables());
 
             pbes_expression rhs = RHS(f0, phi, lps, context);
-            data::variable_list y = atermpp::convert< data::variable_list >(fresh_variables(yi, context));
+            data::variable_list y = fresh_variables(yi, context);
             ci = data::substitute_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
             ai = lps::substitute_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
             gi = data::substitute_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));

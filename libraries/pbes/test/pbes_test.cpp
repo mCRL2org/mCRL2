@@ -32,7 +32,6 @@
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/detail/quantifier_rename_builder.h"
 #include "mcrl2/pbes/rename.h"
 #include "mcrl2/pbes/complement.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
@@ -244,7 +243,9 @@ void test_quantifier_rename_builder()
   pbes_expression f = data::equal_to(mN, nN);
   pbes_expression g = data::not_equal_to(mN, nN);
 
-  multiset_identifier_generator generator(make_list(identifier_string("n00"), identifier_string("n01")));
+  multiset_identifier_generator generator;
+  generator.add_identifier(identifier_string("n00"));
+  generator.add_identifier(identifier_string("n01"));
 
   pbes_expression p1 =
     z::and_(

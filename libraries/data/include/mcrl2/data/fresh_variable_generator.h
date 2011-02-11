@@ -18,8 +18,6 @@
 
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/utility.h"
-#include "mcrl2/core/find.h"
-
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/variable.h"
@@ -33,7 +31,7 @@ namespace data
 class number_postfix_generator;
 
 /// \brief Variable generator that generates data variables with names that do not appear in a given context.
-template < typename IdentifierGenerator = number_postfix_generator >
+template <typename IdentifierGenerator = number_postfix_generator>
 class fresh_variable_generator
 {
   protected:
@@ -85,36 +83,6 @@ class fresh_variable_generator
     fresh_variable_generator(std::string const& hint = "") : m_generator(hint)
     { }
 
-    /// \brief Constructor.
-    /// \param context data specification that serves as context
-    /// \param hint A string
-    fresh_variable_generator(data_specification const& context, std::string const& hint = "") :
-      m_identifiers(atermpp::convert< atermpp::set< core::identifier_string > >(
-                      core::find_identifiers(atermpp::convert< atermpp::aterm_list >(context.equations())))),
-      m_generator(hint)
-    {
-    }
-
-    /// \brief Constructor.
-    /// \param context container of expressions from which to extract the context
-    /// \param hint A string
-    template < typename ForwardTraversalIterator >
-    fresh_variable_generator(boost::iterator_range< ForwardTraversalIterator > const& context, std::string const& hint = "") :
-      m_generator(hint)
-    {
-      set_context(context);
-    }
-
-    /// \brief Constructor.
-    /// \param context container of expressions from which to extract the context
-    /// \param hint A string
-    fresh_variable_generator(atermpp::aterm_appl const& context, std::string const& hint = "") :
-      m_generator(hint)
-    {
-      set_context(context);
-    }
-
-
     /// \brief Set a new hint.
     /// \param hint A string
     void set_hint(std::string const& hint)
@@ -122,42 +90,15 @@ class fresh_variable_generator
       m_generator = IdentifierGenerator(hint);
     }
 
-    /// \brief Set a new context.
-    /// \param context a range of expressions that will be traversed to find identifiers
-    template < typename ForwardTraversalIterator >
-    void set_context(boost::iterator_range< ForwardTraversalIterator > const& context)
+    /// \brief Add an identifier to the context.
+    void add_identifiers(const core::identifier_string& id)
     {
-      m_identifiers = core::find_identifiers(atermpp::convert< atermpp::aterm_list >(context));
+      m_identifiers.insert(id);
     }
 
-    /// \brief Set a new context.
-    /// \param context a range of expressions that will be traversed to find identifiers
-    template < typename Expression >
-    void set_context(Expression const& expression)
+    /// \brief Add a set of identifiers to the context.
+    void add_identifiers(const std::set<core::identifier_string>& ids)
     {
-      m_identifiers = core::find_identifiers(expression);
-    }
-
-    /// \brief Add term t to the context.
-    /// \param context a range of expressions that will be traversed to find identifiers
-    template < typename ForwardTraversalIterator >
-    void add_to_context(boost::iterator_range< ForwardTraversalIterator > const& context)
-    {
-      for (ForwardTraversalIterator i = context.begin(); i != context.end(); ++i)
-      {
-        std::set<core::identifier_string> ids = core::find_identifiers(*i);
-
-        m_identifiers.insert(ids.begin(), ids.end());
-      }
-    }
-
-    /// \brief Add term t to the context.
-    /// \param context a range of expressions that will be traversed to find identifiers
-    template < typename Expression >
-    void add_to_context(Expression const& expression)
-    {
-      std::set<core::identifier_string> ids = core::find_identifiers(expression);
-
       m_identifiers.insert(ids.begin(), ids.end());
     }
 

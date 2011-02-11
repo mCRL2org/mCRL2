@@ -18,6 +18,7 @@
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/pbes/find.h"
 
 // JFG:
 #include "mcrl2/data/rewriter.h"
@@ -453,7 +454,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
 
 
-      data::fresh_variable_generator<> variable_generator(expr, "internally_generated_variable_for_forall");
+      data::fresh_variable_generator<> variable_generator("internally_generated_variable_for_forall");
+      variable_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
       atermpp::set < pbes_expression > conjunction_set;
@@ -600,7 +602,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
       pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
 
-      data::fresh_variable_generator<> variable_generator(expr, "internally_generated_variable_for_exists");
+      data::fresh_variable_generator<> variable_generator("internally_generated_variable_for_exists");
+      variable_generator.add_identifiers(pbes_system::find_identifiers(expr));
       size_t no_variables=0;
       data::variable_list new_data_vars;
       atermpp::set < pbes_expression > disjunction_set;

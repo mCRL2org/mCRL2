@@ -37,14 +37,6 @@ class set_identifier_generator: public identifier_generator<>
     set_identifier_generator()
     {}
 
-    /// \brief Constructor.
-    /// \param t A term
-    template <typename Term>
-    set_identifier_generator(Term t)
-    {
-      add_to_context(t);
-    }
-
     /// \brief Clears the context.
     void clear_context()
     {
@@ -99,14 +91,6 @@ class multiset_identifier_generator: public identifier_generator<>
     /// \brief Constructor.
     multiset_identifier_generator()
     {}
-
-    /// \brief Constructor.
-    /// \param t A term
-    template <typename Term>
-    multiset_identifier_generator(Term t)
-    {
-      add_to_context(t);
-    }
 
     /// \brief Clears the context.
     void clear_context()

@@ -43,43 +43,6 @@ struct sort_range
   detail::sort_of_expression< typename Container::value_type >, typename Container::const_iterator > > type;
 };
 
-class rename_with_unique_common_suffix : public std::unary_function< variable, variable >
-{
-
-  private:
-
-    std::string m_suffix;
-
-  public:
-
-    variable operator()(variable const& v) const
-    {
-      return variable(core::identifier_string(std::string(v.name()) + m_suffix), v.sort());
-    }
-
-    rename_with_unique_common_suffix()
-    { }
-
-    template < typename Container, typename Context >
-    rename_with_unique_common_suffix(Container const& c, const Context& context)
-    {
-      number_postfix_generator generator;
-
-      m_suffix = generator();
-
-      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
-      {
-        context.find(core::identifier_string(std::string(i->name()) + m_suffix)) != context.end();
-      }
-    }
-};
-
-template < typename Container, typename AdaptableUnaryFunction >
-struct fresh_variable_range
-{
-  typedef boost::iterator_range< boost::transform_iterator<
-  AdaptableUnaryFunction, typename Container::const_iterator > > type;
-};
 } // namespace detail
 /// \endcond
 
@@ -99,25 +62,14 @@ make_sort_range(Container const& container, typename boost::enable_if< typename 
   return typename detail::sort_range< Container >::type(container);
 }
 
-// TODO: Clean this up, either by repairing fresh_variables_corrupt, or by making a
-// new implementation. The return type has temporarily been fixed to variable_vector.
-// This implementation is very inefficient, since it does not maintain any state.
-/// \brief Returns a copy of t, but with a common postfix added to each variable name,
-/// and such that the new names do not appear in context.
-/// \param container A sequence of data variables
-/// \param context A set of strings
-/// \param update_context A boolean that indicates if the context should be updated
-/// with the generated names.
-/// \return A sequence of variables with names that do not appear in \p context. The
-/// string \p postfix_format is used to generate new names. It should contain one
-/// occurrence of "%d", that will be replaced with an integer.
-template <typename Container, typename Context>
+/// \brief Generates fresh variables with names that do not appear in the given context.
+/// Caveat: the implementation is very inefficient.
+/// \param update_context If true, then generated names are added to the context
 inline
-variable_vector
-fresh_variables(Container const& container, Context& context, bool update_context = true)
+variable_list fresh_variables(const variable_list& variables, std::set<std::string>& context, bool update_context = true)
 {
   variable_vector result;
-  for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+  for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     number_postfix_generator generator(std::string(i->name()));
     std::string name;
@@ -132,41 +84,7 @@ fresh_variables(Container const& container, Context& context, bool update_contex
     }
     result.push_back(variable(name, i->sort()));
   }
-  return result;
-}
-
-/// \brief Returns a copy of t, but with a common postfix added to each variable name,
-/// and such that the new names do not appear in context.
-/// \param t A sequence of data variables
-/// \param context A set of strings
-/// \param postfix_format A string
-/// \return A sequence of variables with names that do not appear in \p context. The
-/// string \p postfix_format is used to generate new names. It should contain one
-/// occurrence of "%d", that will be replaced with an integer.
-template < typename Container, typename Context >
-inline
-typename detail::fresh_variable_range< Container, detail::rename_with_unique_common_suffix >::type
-fresh_variables_corrupt(Container const& container, const Context& context, typename boost::enable_if< typename atermpp::detail::is_container< Container, variable >::type >::type* = 0)
-{
-  typedef boost::transform_iterator< detail::rename_with_unique_common_suffix, typename Container::const_iterator > iterator_type;
-
-  return typename detail::fresh_variable_range< Container, detail::rename_with_unique_common_suffix >::type(
-           iterator_type(container.begin(), detail::rename_with_unique_common_suffix(container, context)),
-           iterator_type(container.end()));
-}
-
-/// \brief Returns an identifier that doesn't appear in the set <tt>context</tt>
-/// \param context A set of strings
-/// \param hint A string
-/// \param id_creator A function that generates identifiers
-/// \return An identifier that doesn't appear in the set <tt>context</tt>
-/// \warning reorganising the identifier context is expensive, consider using an identifier generator
-template < typename Context >
-inline core::identifier_string fresh_identifier(const Context& context, const std::string& hint)
-{
-  set_identifier_generator generator(context);
-
-  return generator(hint);
+  return atermpp::convert<variable_list>(result);
 }
 
 /// \brief Returns a variable that doesn't appear in context
@@ -175,10 +93,12 @@ inline core::identifier_string fresh_identifier(const Context& context, const st
 /// \param hint A string
 /// \return A variable that doesn't appear in context
 /// \warning reorganising the identifier context is expensive, consider using an identifier generator
-template < typename Context >
-variable fresh_variable(Context const& context, sort_expression const& s, std::string const& hint)
+inline
+variable fresh_variable(const std::set<core::identifier_string>& ids, sort_expression const& s, std::string const& hint)
 {
-  return variable(fresh_identifier(context, hint), s);
+  set_identifier_generator generator;
+  generator.add_identifiers(ids);
+  return variable(generator(hint), s);
 }
 
 } // namespace data
