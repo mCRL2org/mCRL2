@@ -267,6 +267,29 @@ void test_mutable_substitution()
   core::garbage_collect();
 }
 
+struct my_sort_substitution: public std::unary_function<data::basic_sort, data::sort_expression>
+{
+  data::sort_expression operator()(const data::basic_sort& s)
+  {
+    if (s == sort_nat::nat()) {
+      return sort_pos::pos();
+    }
+    return s;
+  }
+};
+
+void test_sort_substitution()
+{
+  my_sort_substitution sigma;
+  data_expression x = variable("v", sort_nat::nat());
+  data_expression y = variable("v", sort_pos::pos());
+  x = data::substitute_sorts(x, sigma);
+  BOOST_CHECK(x == y);
+  std::cout << "x = " << x.to_string() << std::endl;
+  std::cout << "y = " << y.to_string() << std::endl;
+  core::garbage_collect();
+}
+
 int test_main(int a, char** aa)
 {
   MCRL2_ATERMPP_INIT(a, aa);
@@ -278,6 +301,7 @@ int test_main(int a, char** aa)
   test_assignment_sequence_substitution();
   test_list_substitution();
   test_mutable_substitution();
+  test_sort_substitution();
 
   return EXIT_SUCCESS;
 }

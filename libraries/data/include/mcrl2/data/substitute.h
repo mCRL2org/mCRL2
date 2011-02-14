@@ -80,6 +80,24 @@ make_substitute_free_variables_builder(Substitution sigma, const VariableContain
 } // namespace detail
 
 template <typename T, typename Substitution>
+void substitute_sorts(T& x,
+                      Substitution sigma,
+                      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                     )
+{
+  core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T substitute_sorts(const T& x,
+                   Substitution sigma,
+                   typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                  )
+{
+  return core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
 void substitute_variables(T& x,
                           Substitution sigma,
                           typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
