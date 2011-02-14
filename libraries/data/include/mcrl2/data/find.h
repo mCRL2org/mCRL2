@@ -446,7 +446,7 @@ inline
 std::set<core::identifier_string> variable_names(const std::set<data::variable>& variables)
 {
   std::set<core::identifier_string> result;
-  for (std::set<variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+  for (std::set<variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     result.insert(i->name());
   }
@@ -459,7 +459,7 @@ inline
 std::set<std::string> variable_name_strings(const std::set<data::variable>& variables)
 {
   std::set<std::string> result;
-  for (std::set<variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+  for (std::set<variable>::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
     result.insert(std::string(i->name()));
   }
@@ -472,11 +472,11 @@ inline
 std::set<std::string> variable_name_strings(const std::set<data::variable>& variables1, const std::set<data::variable>& variables2)
 {
   std::set<std::string> result;
-  for (std::set<variable>::iterator i = variables1.begin(); i != variables1.end(); ++i)
+  for (std::set<variable>::const_iterator i = variables1.begin(); i != variables1.end(); ++i)
   {
     result.insert(std::string(i->name()));
   }
-  for (std::set<variable>::iterator i = variables2.begin(); i != variables2.end(); ++i)
+  for (std::set<variable>::const_iterator i = variables2.begin(); i != variables2.end(); ++i)
   {
     result.insert(std::string(i->name()));
   }
