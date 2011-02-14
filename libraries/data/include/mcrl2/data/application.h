@@ -135,6 +135,16 @@ class application: public detail::application_base
     }
 }; // class application
 
+/// \brief Returns the outermost function of a data expression.
+inline data_expression head_symbol(const data_expression& x)
+{
+  if (is_application(x))
+  {
+    return head_symbol(application(x).head());
+  }
+  return x;
+}
+
 /// \brief get first argument
 /// \pre  is_application(e) && !application(e).arguments().empty()
 inline data_expression first_argument(data_expression const& e)
