@@ -153,6 +153,28 @@ T substitute_free_variables(const T& x,
   return data::detail::make_substitute_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
+struct sort_assignment: public std::unary_function<basic_sort, sort_expression>
+{
+  typedef basic_sort variable_type;
+  typedef sort_expression expression_type;
+  
+  basic_sort lhs;
+  sort_expression rhs;
+
+  sort_assignment(const basic_sort& lhs_, const sort_expression& rhs_)
+  : lhs(lhs_),
+    rhs(rhs_)
+  {}
+
+  sort_expression operator()(const basic_sort& x)
+  {
+    if (x == lhs) {
+      return rhs;
+    }
+    return x;
+  }
+};
+
 struct assignment_sequence_substitution : public std::unary_function<variable, data_expression>
 {
   typedef variable variable_type;

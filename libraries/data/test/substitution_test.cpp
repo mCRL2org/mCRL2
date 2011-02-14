@@ -283,10 +283,13 @@ void test_sort_substitution()
   my_sort_substitution sigma;
   data_expression x = variable("v", sort_nat::nat());
   data_expression y = variable("v", sort_pos::pos());
-  x = data::substitute_sorts(x, sigma);
-  BOOST_CHECK(x == y);
-  std::cout << "x = " << x.to_string() << std::endl;
-  std::cout << "y = " << y.to_string() << std::endl;
+  data_expression z = data::substitute_sorts(x, sigma);
+  BOOST_CHECK(z == y);
+
+  sort_assignment a(sort_nat::nat(), sort_pos::pos());
+  z = data::substitute_sorts(x, a);
+  BOOST_CHECK(z == y);
+
   core::garbage_collect();
 }
 
