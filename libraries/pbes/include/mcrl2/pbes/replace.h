@@ -42,6 +42,22 @@ struct prop_var_substitution: public std::unary_function<propositional_variable_
   }
 };
 
+struct prop_var_map_substitution: public data::mutable_associative_container_substitution<atermpp::map<propositional_variable_instantiation, pbes_expression> >
+{
+  // override the substitution
+  pbes_expression operator()(const propositional_variable_instantiation& x) const
+  {
+    for (atermpp::map<propositional_variable_instantiation, pbes_expression>::const_iterator i = m_map.begin(); i != m_map.end(); ++i)
+    {
+      if (i->first.name() == x.name())
+      {
+        return pbes_system::substitute_free_variables(i->second, data::make_sequence_sequence_substitution(x.parameters(), i->first.parameters()));        
+      }
+    }
+    return x;
+  }
+};
+
 /// \brief Applies the substitution \p X := \p phi to the pbes expression \p t.
 /// \param t A pbes expression
 /// \param X A propositional variable
@@ -53,6 +69,26 @@ pbes_expression substitute_propositional_variable(const pbes_expression& x,
     const pbes_expression& phi)
 {
   return core::make_update_apply_builder<pbes_expression_builder>(prop_var_substitution(X, phi))(x);
+}
+
+/// \brief Applies a propositional variable substitution.
+template <typename T, typename Substitution>
+void substitute_propositional_variables(T& x,
+                                        Substitution sigma,
+                                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                       )
+{
+  core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
+}
+
+/// \brief Applies a propositional variable substitution.
+template <typename T, typename Substitution>
+T substitute_propositional_variables(const T& x,
+                                     Substitution sigma,
+                                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                    )
+{
+  return core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
 }
 
 } // namespace pbes_system
