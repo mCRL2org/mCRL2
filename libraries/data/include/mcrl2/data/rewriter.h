@@ -221,7 +221,16 @@ class rewriter: public basic_rewriter<data_expression>
     template < typename EquationSelector >
     rewriter(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
       basic_rewriter<data_expression>(d, selector, s)
-    { }
+    {
+#ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
+std::clog << "\n--- rewrite rule selection ---\n";
+const data_specification::equations_const_range eqn = d.equations();
+for (atermpp::set<data_equation>::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
+{
+  std::clog << selector(*i) << " " << core::pp(*i) << std::endl;
+}
+#endif
+    }
 
     /// \brief Default specification used if no specification is specified at construction
     /// \param[in] d A data specification

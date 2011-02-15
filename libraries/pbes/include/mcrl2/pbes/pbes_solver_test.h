@@ -13,6 +13,8 @@
 #ifndef MCRL2_PBES_PBES_SOLVER_TEST_H
 #define MCRL2_PBES_PBES_SOLVER_TEST_H
 
+#include "mcrl2/core/detail/print_utility.h"
+
 //Rewriters
 // #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/data/rewriter.h"
@@ -52,6 +54,14 @@ bool pbes2_bool_test(pbes< Container > &pbes_spec)
   data::rewriter datar(pbes_spec.data(),
                        mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_system::find_function_symbols(pbes_spec), pbes_spec.global_variables()),
                        mcrl2::data::rewriter::jitty);
+
+#ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
+std::clog << "--- rewrite rule selection specification ---\n";
+std::clog << pbes_system::pp(pbes_spec) << std::endl;
+std::clog << "--- rewrite rule selection function symbols ---\n";
+std::clog << core::detail::print_pp_set(pbes_system::find_function_symbols(pbes_spec)) << std::endl;
+#endif
+
   // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
   data::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter_with_variables datarv(datar);

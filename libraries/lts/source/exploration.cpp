@@ -13,6 +13,7 @@
 #include <sstream>
 #include <set>
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/nat.h"
@@ -130,6 +131,12 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
                                 )
                                )
     );
+#ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
+std::clog << "--- rewrite rule selection specification ---\n";
+std::clog << lps::pp(lgopts->specification) << std::endl;
+std::clog << "--- rewrite rule selection function symbols ---\n";
+std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->specification)) << std::endl;
+#endif
   }
   else
   {

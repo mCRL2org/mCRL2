@@ -17,6 +17,7 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include <boost/shared_ptr.hpp>
 
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/traverser.h"
@@ -175,6 +176,12 @@ class next_state_generator
         m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables())),
         m_enumerator(lps_spec.data(), m_rewriter)
     {
+#ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
+std::clog << "--- rewrite rule selection specification ---\n";
+std::clog << lps::pp(lps_spec) << std::endl;
+std::clog << "--- rewrite rule selection function symbols ---\n";
+std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) << std::endl;
+#endif
       if (!lps_spec.process().deadlock_summands().empty())
       {
         throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");

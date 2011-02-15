@@ -13,6 +13,7 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/deque.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/nextstate/standard.h"
@@ -48,6 +49,13 @@ void test_nextstate(specification s, size_t expected_states, size_t expected_tra
 
   legacy_rewriter R(s.data(),
                     mcrl2::data::used_data_equation_selector(s.data(), lps::find_function_symbols(s), s.global_variables()));
+
+#ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
+std::clog << "--- rewrite rule selection specification ---\n";
+std::clog << lps::pp(s) << std::endl;
+std::clog << "--- rewrite rule selection function symbols ---\n";
+std::clog << core::detail::print_pp_set(lps::find_function_symbols(s)) << std::endl;
+#endif
 
   mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > E(s.data(), R);
 
