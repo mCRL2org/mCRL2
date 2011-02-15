@@ -23,8 +23,8 @@
 #include <functional>
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/core/identifier_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
@@ -82,6 +82,22 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
           result.push_back((*this)(*i));
         }
         return atermpp::convert<data::variable_list>(result);
+      }
+      
+      std::string to_string() const
+      {
+        std::ostringstream out;
+        out << "[";
+        for (atermpp::map<data::variable, data::variable>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+        {
+          if (i != sigma.begin())
+          {
+            out << ", ";
+          }
+          out << core::pp(i->first) << " := " << core::pp(i->second);
+        }
+        out << "]";
+        return out.str();
       }
     };
 
@@ -173,28 +189,30 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
       {
         std::set_intersection(left_variables.begin(), left_variables.end(), j->second.begin(), j->second.end(), std::inserter(name_clashes, name_clashes.end()));
       }
-std::cout << "NAME CLASHES ";
-for (std::set<data::variable>::const_iterator k = name_clashes.begin(); k != name_clashes.end(); ++k)
-{
-  std::cout << " " << pp(*k);
-}
-std::cout << std::endl;
+#ifdef MCRL2_PFNF_VISITOR_DEBUG
+std::cout << "NAME CLASHES: " << core::detail::print_pp_set(name_clashes) << std::endl;
+#endif
       if (!name_clashes.empty())
       {
-        core::number_postfix_generator generator;
+        data::set_identifier_generator generator;
         for (std::set<data::variable>::const_iterator i = left_variables.begin(); i != left_variables.end(); ++i)
         {
-          generator.add_identifiers(std::string(i->name()));
+          generator.add_identifier(i->name());
         }
         variable_variable_substitution sigma;
         for (std::set<data::variable>::iterator i = name_clashes.begin(); i != name_clashes.end(); ++i)
         {
-          sigma.sigma[*i] = data::variable(core::identifier_string(generator(std::string(i->name()))), i->sort());
+          sigma.sigma[*i] = data::variable(generator(std::string(i->name())), i->sort());
         }
+#ifdef MCRL2_PFNF_VISITOR_DEBUG
 std::cout << "LEFT\n"; print_expression(left);
 std::cout << "RIGHT BEFORE\n"; print_expression(right);
+std::cout << "SIGMA = " << sigma.to_string() << std::endl;
+#endif
         right.substitute(sigma);
+#ifdef MCRL2_PFNF_VISITOR_DEBUG
 std::cout << "RIGHT AFTER\n"; print_expression(right);
+#endif
       }
     }
 
