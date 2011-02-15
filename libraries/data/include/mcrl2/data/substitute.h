@@ -153,6 +153,37 @@ T substitute_free_variables(const T& x,
   return data::detail::make_substitute_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
+template <template <class> class Builder>
+struct substitute_sort_expressions_builder: public Builder<substitute_sort_expressions_builder<Builder> >
+{
+  typedef Builder<substitute_sort_expressions_builder<Builder> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  sort_expression lhs;
+  sort_expression rhs;
+
+  substitute_sort_expressions_builder(const sort_expression& lhs_, const sort_expression& rhs_)
+    : lhs(lhs_),
+      rhs(rhs_)
+  {}
+
+  void operator()(const data::sort_expression& x)
+  {
+    x = super::operator()(x);
+    if (x == lhs)
+    {
+      return rhs;
+    }
+    return x;
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
 struct sort_assignment: public std::unary_function<basic_sort, sort_expression>
 {
   typedef basic_sort variable_type;
