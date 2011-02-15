@@ -2,6 +2,7 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+from optparse import OptionParser
 from path import *
 from random_pbes_generator import *
 from mcrl2_tools import *

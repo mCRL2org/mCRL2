@@ -2,6 +2,7 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
+from optparse import OptionParser
 from path import *
 from random_pbes_generator import *
 from mcrl2_tools import *
@@ -21,15 +22,30 @@ def test_pbes2bes_finite(p, filename):
         return answer1 == answer2
     return True
 
-equation_count = 2
-atom_count = 2
-propvar_count = 2
-use_quantifiers = True
+def main():
+    usage = "usage: %prog [options]"
+    parser = OptionParser(usage)
+    parser.add_option("-t", "--tooldir", dest="tooldir", help="the mCRL2 tools directory")
+    parser.add_option("-c", "--count", type="int", dest="count", default="100", help="the number of tests that is performed")
+    (options, args) = parser.parse_args()
+    set_mcrl2_tooldir(options.tooldir)
 
-for i in range(10000):
-    filename = 'pbes2bes_finite'
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    if not test_pbes2bes_finite(p, filename):
-        m = CounterExampleMinimizer(p, lambda x: test_pbes2bes(x, filename + '_minimize'), 'pbes2bes_finite')
-        m.minimize()
-        raise Exception('Test %s.txt failed' % filename)
+    try:
+        equation_count = 2
+        atom_count = 2
+        propvar_count = 2
+        use_quantifiers = True
+        
+        for i in range(options.count):
+            filename = 'pbes2bes_finite'
+            p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
+            if not test_pbes2bes_finite(p, filename):
+                m = CounterExampleMinimizer(p, lambda x: test_pbes2bes(x, filename + '_minimize'), 'pbes2bes_finite')
+                m.minimize()
+                print 'Test %s.txt failed' % filename
+                exit(1)
+    finally:
+        remove_temporary_files()
+
+if __name__ == '__main__':
+    main()
