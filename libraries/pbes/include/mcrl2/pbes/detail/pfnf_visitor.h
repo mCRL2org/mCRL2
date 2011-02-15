@@ -173,6 +173,12 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
       {
         std::set_intersection(left_variables.begin(), left_variables.end(), j->second.begin(), j->second.end(), std::inserter(name_clashes, name_clashes.end()));
       }
+std::cout << "NAME CLASHES ";
+for (std::set<data::variable>::const_iterator k = name_clashes.begin(); k != name_clashes.end(); ++k)
+{
+  std::cout << " " << pp(*k);
+}
+std::cout << std::endl;
       if (!name_clashes.empty())
       {
         core::number_postfix_generator generator;
@@ -185,10 +191,10 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
         {
           sigma.sigma[*i] = data::variable(core::identifier_string(generator(std::string(i->name()))), i->sort());
         }
-//std::cout << "LEFT\n"; print_expression(left);
-//std::cout << "RIGHT\n"; print_expression(right);
+std::cout << "LEFT\n"; print_expression(left);
+std::cout << "RIGHT BEFORE\n"; print_expression(right);
         right.substitute(sigma);
-//std::cout << "RIGHT\n"; print_expression(right);
+std::cout << "RIGHT AFTER\n"; print_expression(right);
       }
     }
 
