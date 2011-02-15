@@ -80,17 +80,6 @@ struct prop_var_visitor
   }
 };
 
-/// \brief Returns the names of all propositional variables that occur in the term t
-/// \param t A term
-/// \return The names of all propositional variables that occur in the term t
-template <typename Term>
-std::set<core::identifier_string> propositional_variable_names(Term t)
-{
-  std::set<core::identifier_string> result;
-  atermpp::for_each(t, prop_var_visitor(result));
-  return result;
-}
-
 /// \brief Returns the variables corresponding to ass(f)
 /// \param f A modal formula
 /// \return The variables corresponding to ass(f)
