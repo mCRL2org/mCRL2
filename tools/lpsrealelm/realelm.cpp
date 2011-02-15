@@ -105,7 +105,7 @@ template <typename Term, typename MapContainer>
 Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements)
 {
   return realelm_replace_data_expressions(t, realelm_map_replace_helper<MapContainer>(replacements));
-}
+} 
 // End of replace substitute
 
 
@@ -567,7 +567,7 @@ static void normalize_specification(
           }
 
           // Construct replacements to contain the nextstate values for real variables in a map
-          atermpp::map<data_expression, data_expression> replacements;
+          atermpp::map<variable, data_expression> replacements;
           for (assignment_list::const_iterator j = i->assignments().begin(); j != i->assignments().end(); ++j)
           {
             if (j->lhs().sort() == sort_real::real_())
@@ -794,7 +794,7 @@ data_expression remove_variable(const variable& variable, const data_expression&
 /// \param replacements A map of replacements
 /// \ret inequalities to which the substitutions in replacements have been
 ///      applied
-data_expression_list data_expression_map_replace_list(const data_expression_list& inequalities, const atermpp::map<data_expression, data_expression>& replacements)
+data_expression_list data_expression_map_replace_list(const data_expression_list& inequalities, const atermpp::map<variable, data_expression>& replacements)
 {
   data_expression_list result;
   for (data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
@@ -957,7 +957,7 @@ assignment_list determine_process_initialization(
 {
   assignment_list init = reverse(get_nonreal_assignments(initialization));
   assignment_list real_assignments = get_real_assignments(initialization);
-  atermpp::map<data_expression, data_expression> replacements;
+  atermpp::map<variable, data_expression> replacements;
   for (assignment_list::const_iterator i = real_assignments.begin(); i != real_assignments.end(); ++i)
   {
     replacements[i->lhs()] = i->rhs();

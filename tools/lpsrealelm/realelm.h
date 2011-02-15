@@ -107,7 +107,7 @@ class summand_information
     variable_list real_summation_variables;
     variable_list non_real_summation_variables;
     std::vector < linear_inequality > summand_real_conditions;
-    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  summand_real_nextstate_map;
+    atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression>  summand_real_nextstate_map;
     // Variable below contains all combinations of nextstate_context_combinations that allow a
     // feasible solution, regarding the context variables that are relevant for this summand.
     std::vector < std::vector < linear_inequality > > nextstate_context_combinations;
@@ -124,7 +124,7 @@ class summand_information
       variable_list rsv,
       variable_list nrsv,
       std::vector < linear_inequality > src,
-      atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>  srnm
+      atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression>  srnm
     ):
       smd(s),
       real_summation_variables(rsv),
@@ -192,7 +192,7 @@ class summand_information
       return summand_real_conditions.end();
     }
 
-    atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> &get_summand_real_nextstate_map()
+    atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression> &get_summand_real_nextstate_map()
     {
       return summand_real_nextstate_map;
     }
