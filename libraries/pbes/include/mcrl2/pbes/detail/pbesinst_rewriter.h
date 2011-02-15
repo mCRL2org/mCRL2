@@ -137,7 +137,7 @@ class pbesinst_rewriter
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << core::pp(x) << " -> " << core::pp(result) << std::endl;
+        std::cerr << core::pp(x) << " [default]-> " << core::pp(result) << std::endl;
       }
       return result;
     }
@@ -152,7 +152,7 @@ class pbesinst_rewriter
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << core::pp(x) << "   " << to_string(sigma) << " -> " << core::pp(result) << std::endl;
+        std::cerr << core::pp(x) << "   " << to_string(sigma) << " [subst]-> " << core::pp(result) << std::endl;
       }
       return result;
     }
