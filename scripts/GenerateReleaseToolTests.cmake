@@ -1281,12 +1281,11 @@ macro( add_lpsbisim2pbes_release_test ARGS )
 endmacro( add_lpsbisim2pbes_release_test ARGS )
 
 macro( gen_lpsbisim2pbes_release_tests )
-					add_lpsbisim2pbes_release_test(  "" )
 					add_lpsbisim2pbes_release_test(  "-bstrong-bisim" )
 					add_lpsbisim2pbes_release_test(  "-bweak-bisim" )
 					add_lpsbisim2pbes_release_test(  "-bbranching-bisim" )
 					add_lpsbisim2pbes_release_test(  "-bbranching-sim" )
-					add_lpsbisim2pbes_release_test(  "-n" )
+					add_lpsbisim2pbes_release_test(  "-n -bstrong-bisim" )
 endmacro( gen_lpsbisim2pbes_release_tests )
 
 ######################
