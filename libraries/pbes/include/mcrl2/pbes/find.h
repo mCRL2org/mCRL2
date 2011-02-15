@@ -222,6 +222,18 @@ std::set<propositional_variable_instantiation> find_propositional_variable_insta
   return result;
 }
 
+/// \brief Returns true if the term has a given variable as subterm.
+/// \param[in] container an expression or container with expressions
+/// \param[in] v an expression or container with expressions
+/// \param d A variable
+/// \return True if the term has a given variable as subterm.
+template <typename T>
+bool search_variable(const T& x, const data::variable& v)
+{
+  std::set<data::variable> variables = pbes_system::find_variables(x);
+  return variables.find(v) != variables.end();
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2

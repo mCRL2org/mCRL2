@@ -153,9 +153,9 @@ static bool is_false_in_internal_rewrite_format(mcrl2::data::data_expression d, 
 
 //  variable v occurs in l.
 //
-static bool occurs_in_varL(atermpp::aterm_appl l, data::variable v)
+static bool occurs_in_varL(const pbes_system::pbes_expression& l, data::variable v)
 {
-  return find_if(l, compare_variableL(v)) != atermpp::aterm();
+  return pbes_system::search_variable(l, v);
 }
 
 /// \brief gives the rank of a propositional_variable_instantiation. It is assumed that the variable
