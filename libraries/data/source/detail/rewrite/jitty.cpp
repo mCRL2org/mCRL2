@@ -11,7 +11,6 @@
 #include "boost.hpp" // precompiled headers
 
 #include "mcrl2/data/detail/rewrite/jitty.h"
-// #include "mcrl2/data/data_equation.h"
 
 #define NAME std::string("rewr_jitty")
 
@@ -21,6 +20,7 @@
 #include <cassert>
 #include <stdexcept>
 #include "aterm2.h"
+#include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct_core.h"

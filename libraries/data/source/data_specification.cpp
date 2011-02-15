@@ -12,6 +12,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/substitute.h"
+#include "mcrl2/atermpp/algorithm.h"
 
 namespace mcrl2
 {
@@ -63,7 +65,6 @@ class finiteness_helper
     {
       for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
       {
-// ATfprintf(stderr,"Constructor %t\n",(ATermAppl)r.front());
         if (is_function_sort(r.front().sort()))
         {
           const function_sort f_sort(r.front().sort());
@@ -88,7 +89,6 @@ class finiteness_helper
 
     bool is_finite(const sort_expression& s)
     {
-// ATfprintf(stderr,"Is finite %t\n",(ATermAppl)s);
       assert(s==normalize_sorts(s,m_specification));
       if (m_visiting.count(s)>0)
       {
@@ -116,7 +116,6 @@ class finiteness_helper
       }
 
       m_visiting.erase(s);
-// ATfprintf(stderr,"IS finite result %d\n",result);
       return result;
     }
 
@@ -162,10 +161,126 @@ class finiteness_helper
 ///      false otherwise.
 bool data_specification::is_certainly_finite(const sort_expression& s) const
 {
-// ATfprintf(stderr,"Is certainly finite %t\n",(ATermAppl)s);
   const bool result=finiteness_helper(*this).is_finite(s);
-// if (result) ATfprintf(stderr,"Yes\n"); else ATfprintf(stderr,"No\n");
   return result;
+}
+
+
+// The function below recalculates m_normalised_aliases, such that
+// it forms a confluent terminating rewriting system using which
+// sorts can be normalised.
+void data_specification::reconstruct_m_normalised_aliases() const
+{
+  // First reset the normalised aliases and the mappings and constructors that have been
+  // inherited to basic sort aliases during a previous round of sort normalisation.
+  m_normalised_aliases.clear();
+
+  // Check for loops in the aliases. The type checker should already have done this,
+  // but we check it again here.
+  for (ltr_aliases_map::const_iterator i=m_aliases.begin();
+       i!=m_aliases.end(); ++i)
+  {
+    std::set < sort_expression > sorts_already_seen; // Empty set.
+    check_for_alias_loop(i->first,sorts_already_seen);
+  }
+
+  // Copy m_normalised_aliases. All aliases are stored from left to right,
+  // except structured sorts, which are stored from right to left. The reason is
+  // that structured sorts can be recursive, and therefore, they cannot be
+  // rewritten from left to right, as this can cause sorts to be infinitely rewritten.
+
+  atermpp::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
+  for (ltr_aliases_map::const_iterator i=m_aliases.begin();
+       i!=m_aliases.end(); ++i)
+  {
+    if (is_structured_sort(i->second))
+    {
+      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->second,i->first));
+    }
+    else
+    {
+      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->first,i->second));
+    }
+  }
+
+  // Apply Knuth-Bendix completion to the rules in m_normalised_aliases.
+
+  atermpp::multimap< sort_expression, sort_expression > resulting_normalized_sort_aliases;
+
+  for (; !sort_aliases_to_be_investigated.empty() ;)
+  {
+    const atermpp::multimap< sort_expression, sort_expression >::iterator p=sort_aliases_to_be_investigated.begin();
+    const sort_expression lhs=p->first;
+    const sort_expression rhs=p->second;
+    sort_aliases_to_be_investigated.erase(p);
+
+    for (atermpp::multimap< sort_expression, sort_expression >::const_iterator
+         i=resulting_normalized_sort_aliases.begin();
+         i!=resulting_normalized_sort_aliases.end(); ++i)
+    {
+      const sort_expression s1=atermpp::replace(lhs,i->first,i->second);
+      /* const sort_expression s1=data::substitute_sorts(
+                                 lhs,
+                                 sort_assignment(basic_sort(i->first),i->second)); */
+
+ ATfprintf(stderr,"SUBST %t = %t[ %t  := %t]\n", (ATermAppl)s1,(ATermAppl)lhs,(ATermAppl)i->first,(ATermAppl)i->second);
+      if (s1!=lhs)
+      {
+        // There is a conflict between the two sort rewrite rules.
+        assert(is_basic_sort(rhs));
+        // Choose the normal form on the basis of a lexicographical ordering. This guarantees
+        // uniqueness of normal forms over different tools. Ordering on addresses (as used previously)
+        // proved to be unstable over different tools.
+        const bool rhs_to_s1 = is_basic_sort(s1) && basic_sort(s1).to_string()<=rhs.to_string();
+        const sort_expression left_hand_side=(rhs_to_s1?rhs:s1);
+        const sort_expression pre_normal_form=(rhs_to_s1?s1:rhs);
+        const sort_expression e1=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
+        if (e1!=left_hand_side)
+        {
+          sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e1));
+        }
+      }
+      else
+      {
+        // There is a conflict between the two rewrite rules.
+        const sort_expression s2 = atermpp::replace(i->first,lhs,rhs);
+        /* const sort_expression s2 = data::substitute_sorts(
+                                      i->first,
+                                      sort_assignment(basic_sort(lhs),rhs)); */
+        if (s2!=i->first)
+        {
+          assert(is_basic_sort(i->second));
+          // Choose the normal form on the basis of a lexicographical ordering. This guarantees
+          // uniqueness of normal forms over different tools.
+          const bool i_second_to_s2 = is_basic_sort(s2) && basic_sort(s2).to_string()<=i->second.to_string();
+          const sort_expression left_hand_side=(i_second_to_s2?i->second:s2);
+          const sort_expression pre_normal_form=(i_second_to_s2?s2:i->second);
+          const sort_expression e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,
+                                   sort_aliases_to_be_investigated);
+          if (e2!=left_hand_side)
+          {
+            sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e2));
+          }
+        }
+      }
+    }
+    assert(lhs!=rhs);
+    resulting_normalized_sort_aliases.insert(std::pair<sort_expression,sort_expression >(lhs,rhs));
+
+  }
+  // Copy resulting_normalized_sort_aliases into m_normalised_aliases, i.e. from multimap to map.
+  // If there are rules with equal left hand side, only one is arbitrarily chosen. Rewrite the
+  // right hand side to normal form.
+
+  const atermpp::multimap< sort_expression, sort_expression > empty_multimap;
+  for (atermpp::multimap< sort_expression, sort_expression >::const_iterator
+       i=resulting_normalized_sort_aliases.begin();
+       i!=resulting_normalized_sort_aliases.end(); ++i)
+  {
+    m_normalised_aliases.insert(std::pair< sort_expression,sort_expression>(i->first,
+                                find_normal_form(i->second,resulting_normalized_sort_aliases,empty_multimap)));
+    assert(i->first!=i->second);
+  }
 }
 
 bool data_specification::is_well_typed() const

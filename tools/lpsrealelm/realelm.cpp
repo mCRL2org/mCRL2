@@ -13,6 +13,7 @@
 #include <stdlib.h>
 
 #include "mcrl2/atermpp/set_operations.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/postfix_identifier_generator.h"

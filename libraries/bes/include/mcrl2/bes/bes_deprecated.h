@@ -3108,7 +3108,7 @@ static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expressio
 /// \param string The name of the output file
 /// \param bes_equations The bes equations to bes saved.
 
-static void save_bes_in_bes_format(
+void save_bes_in_bes_format(
   const std::string& outfilename,
   boolean_equation_system& bes_equations)
 {

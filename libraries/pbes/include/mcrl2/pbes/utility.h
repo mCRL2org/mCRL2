@@ -12,16 +12,18 @@
 #ifndef MCRL2_PBES_UTILITY_H
 #define MCRL2_PBES_UTILITY_H
 
-#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/atermpp/algorithm.h"
+
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/sort_expression.h"
-#include "mcrl2/pbes/find.h"
 
 // JFG:
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/rewrite.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/find.h"
 
 namespace mcrl2
 {

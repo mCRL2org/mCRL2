@@ -8,11 +8,14 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
 #include <iterator>
-#include <mcrl2/lps/linear_process.h>
+
+#include "mcrl2/atermpp/algorithm.h"
 
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/data_specification.h"
+
+#include <mcrl2/lps/linear_process.h>
 
 using namespace std;
 using namespace mcrl2;
