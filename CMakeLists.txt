@@ -1075,6 +1075,13 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
   
 endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 
+# Random test generation
+option(MCRL2_ENABLE_RANDOM_TEST_TARGETS "Enable/disable random test generation" OFF)
+message(STATUS "MCRL2_ENABLE_RANDOM_TEST_TARGETS: ${MCRL2_ENABLE_RANDOM_TEST_TARGETS}" )
+
+if( MCRL2_ENABLE_RANDOM_TEST_TARGETS )
+  include(${CMAKE_SOURCE_DIR}/scripts/GenerateRandomTests.cmake)
+endif( MCRL2_ENABLE_RANDOM_TEST_TARGETS )
 
 include(CTest)
 
@@ -1339,7 +1346,7 @@ set(MCRL2_WX_VER    "2.8" )
 # OpenSuSE RPM dependencies
 if(EXISTS /etc/SuSE-release )
 	message(STATUS "Distribution: OpenSuSE" )
-  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxWidgets >= ${MCRL2_WX_VER}, wxWidgets-gl >= ${MCRL2_WX_VER}, boost-devel >= ${MCRL2_BOOST_VER}")
+  set(CPACK_RPM_PACKAGE_REQUIRES "gcc, Mesa, wxGTK >= ${MCRL2_WX_VER}, wxGTK-gl >= ${MCRL2_WX_VER}, boost-devel >= ${MCRL2_BOOST_VER}")
 endif(EXISTS /etc/SuSE-release )
 
 # Fedora/RedHat RPM dependencies
