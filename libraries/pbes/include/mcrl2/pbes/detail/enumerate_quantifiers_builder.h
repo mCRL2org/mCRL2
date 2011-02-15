@@ -101,8 +101,8 @@ template <typename PbesRewriter, typename DataEnumerator>
 class quantifier_enumerator
 {
   protected:
-    PbesRewriter pbesr;
-    DataEnumerator datae;
+    PbesRewriter& pbesr;
+    const DataEnumerator& datae;
 
     typedef typename PbesRewriter::term_type term_type;
     typedef typename core::term_traits<term_type> tr;
@@ -474,7 +474,7 @@ class quantifier_enumerator
     }
 
   public:
-    quantifier_enumerator(PbesRewriter r, DataEnumerator e)
+    quantifier_enumerator(PbesRewriter& r, const DataEnumerator& e)
       : pbesr(r), datae(e)
     {}
 
@@ -568,9 +568,13 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
   /// \return The result of visiting the node
   term_type visit_exists(const term_type& x, const variable_sequence_type& variables, const term_type& phi, SubstitutionFunction& sigma)
   {
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+    std::cerr << "<visit_exists>" << tr::pp(x) << std::endl;
+#endif
+    term_type result;
     if (m_enumerate_infinite_sorts)
     {
-      return quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(variables, phi, sigma);
+      result = quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(variables, phi, sigma);
     }
     else
     {
@@ -579,13 +583,17 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       split_finite_variables(variables, m_data_enumerator.data(), finite, infinite);
       if (finite.empty())
       {
-        return x;
+        result = x;
       }
       else
       {
-        return core::optimized_exists(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite, phi, sigma));
+        result = core::optimized_exists(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite, phi, sigma));
       }
     }
+#ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
+    std::cerr << "<visit_exists_result>" << tr::pp(result) << std::endl;
+#endif
+    return result;
   }
 };
 

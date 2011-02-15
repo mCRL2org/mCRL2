@@ -88,12 +88,12 @@ class data_enumerator
     IdentifierGenerator* m_generator;
 
     /// \brief A mapping with constructors.
-    constructor_map m_constructors;
+    mutable constructor_map m_constructors;
 
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const std::vector<function_symbol>& constructors(sort_expression s)
+    const std::vector<function_symbol>& constructors(sort_expression s) const
     {
       constructor_map::const_iterator i = m_constructors.find(s);
       if (i != m_constructors.end())
@@ -132,7 +132,7 @@ class data_enumerator
     /// \brief Enumerates a data variable.
     /// \param v A data variable
     /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
-    atermpp::vector<data_expression_with_variables> enumerate(const variable& v)
+    atermpp::vector<data_expression_with_variables> enumerate(const variable& v) const
     {
       // std::cerr << "Enumerate " << v << "\n";
       atermpp::vector<data_expression_with_variables> result;
@@ -174,7 +174,7 @@ class data_enumerator
     /// identifier generator that was passed in the constructor.
     /// \param e A data expression.
     /// \return A sequence of expressions that is the result of applying the enumerator to the expression once.
-    atermpp::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e)
+    atermpp::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e) const
     {
       atermpp::vector<data_expression_with_variables> result;
 

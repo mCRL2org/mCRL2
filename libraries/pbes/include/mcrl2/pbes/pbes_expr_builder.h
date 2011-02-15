@@ -177,9 +177,9 @@ struct pbes_expr_builder
   {
     typedef core::term_traits<term_type> tr;
 
-#ifdef MCRL2_PBES_EXPR_BUILDER_DEBUG
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
     std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << std::endl;
-    pbes_expr_builder_increase_indent();
+    pbes_expression_builder_increase_indent();
 #endif
 
     term_type result;
@@ -294,8 +294,8 @@ struct pbes_expr_builder
       result = data::sort_bool::false_();
     }
 
-#ifdef MCRL2_PBES_EXPR_BUILDER_DEBUG
-    pbes_expr_builder_decrease_indent();
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+    pbes_expression_builder_decrease_indent();
     std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
@@ -438,9 +438,9 @@ struct pbes_expr_builder<Term, void>
   {
     typedef core::term_traits<term_type> tr;
 
-#ifdef MCRL2_PBES_EXPR_BUILDER_DEBUG
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
     std::cerr << pbes_expression_builder_indent() << "<visit>" << tr::pp(e) << " " << e << std::endl;
-    pbes_expr_builder_increase_indent();
+    pbes_expression_builder_increase_indent();
 #endif
 
     term_type result;
@@ -555,8 +555,8 @@ struct pbes_expr_builder<Term, void>
       result = data::sort_bool::false_();
     }
 
-#ifdef MCRL2_PBES_EXPR_BUILDER_DEBUG
-    pbes_expr_builder_decrease_indent();
+#ifdef MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
+    pbes_expression_builder_decrease_indent();
     std::cerr << pbes_expression_builder_indent() << "<visit result>" << tr::pp(result) << std::endl;
 #endif
 
