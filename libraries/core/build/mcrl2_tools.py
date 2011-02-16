@@ -9,6 +9,7 @@ from path import *
 class mcrl2_tool_options:
     tooldir = ''                # optional location of mCRL2 tools
     files_to_be_removed = {}    # files that need to be removed after testing
+    verbose = False
 
 def add_temporary_files(filename1, filename2 = None):
     mcrl2_tool_options.files_to_be_removed[filename1] = 1
@@ -18,7 +19,8 @@ def add_temporary_files(filename1, filename2 = None):
 def remove_temporary_files():
     for filename in mcrl2_tool_options.files_to_be_removed.keys():
         if path(filename).exists():
-            print 'removing', filename
+            if mcrl2_tool_options.verbose:
+                print 'removing', filename
             path(filename).remove()
     mcrl2_tool_options.files_to_be_removed.clear()
 
@@ -26,22 +28,33 @@ def set_mcrl2_tooldir(tooldir):
     if tooldir != None:
         mcrl2_tool_options.tooldir = tooldir
 
-def run_program(program, options, redirect = None):
+def add_tool_dir(toolname):
     if mcrl2_tool_options.tooldir != '':
-        program = path(mcrl2_tool_options.tooldir) / program / program
+        return path(mcrl2_tool_options.tooldir) / toolname / toolname
+    return toolname
+
+def run_program(program, options, redirect = None):
+    program = add_tool_dir(program)
     arg = '%s %s' % (program, options)
     if redirect != None:
         if os.name == 'nt':
             arg = arg + ' 2> %s 1>&2' % redirect
         else:
             arg = arg + ' >& %s' % redirect
-    #print arg
+    if mcrl2_tool_options.verbose:
+        print 'executing', arg
     os.system(arg)
 
-def timeout_command(command, timeout = -1):
+def timeout_command(program, options, timeout = -1):
     """call shell-command and either return its output or kill it
     if it doesn't normally exit within timeout seconds and return None"""
     import subprocess, datetime, os, time, signal, platform
+
+    program = add_tool_dir(program)
+    command = program + ' ' + options
+
+    if mcrl2_tool_options.verbose:
+        print 'executing', command
 
     cmd = command.split(" ")
     start = datetime.datetime.now()
@@ -69,7 +82,7 @@ def last_word(line):
 # returns True, False or None if a timeout occurs
 def run_pbes2bool(filename, timeout = 3):
     add_temporary_files(filename)
-    dummy, text = timeout_command('pbes2bool %s' % filename, timeout)
+    dummy, text = timeout_command('pbes2bool', filename, timeout)
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
@@ -78,7 +91,7 @@ def run_pbes2bool(filename, timeout = 3):
 # returns True, False or None if a timeout occurs
 def run_pbespgsolve(filename, timeout = 3):
     add_temporary_files(filename)
-    dummy, text = timeout_command('pbespgsolve %s' % filename, timeout)
+    dummy, text = timeout_command('pbespgsolve', filename, timeout)
     if text == None:
         print 'WARNING: timeout on %s' % filename
         return None
@@ -94,20 +107,20 @@ def run_pbesabstract(pbesfile1, pbesfile2, abstraction_value, selection = '*(*:*
 
 def run_pbesconstelm(pbesfile1, pbesfile2, rewriter = 'quantifier-all', timeout = 10):
     add_temporary_files(pbesfile1, pbesfile2)
-    timeout_command('pbesconstelm -p%s %s %s' % (rewriter, pbesfile1, pbesfile2), timeout)
+    timeout_command('pbesconstelm',  '-p%s %s %s' % (rewriter, pbesfile1, pbesfile2), timeout)
 
 def run_pbesparelm(pbesfile1, pbesfile2, timeout = 10):
     add_temporary_files(pbesfile1, pbesfile2)
-    timeout_command('pbesparelm %s %s' % (pbesfile1, pbesfile2), timeout)
+    timeout_command('pbesparelm',  '%s %s' % (pbesfile1, pbesfile2), timeout)
 
 def run_pbespareqelm(pbesfile1, pbesfile2, timeout = 10):
     add_temporary_files(pbesfile1, pbesfile2)
-    timeout_command('pbespareqelm %s %s' % (pbesfile1, pbesfile2), timeout)
+    timeout_command('pbespareqelm', '%s %s' % (pbesfile1, pbesfile2), timeout)
 
 # returns the output of pbespp
 def run_pbespp(pbesfile, timeout = 10):
     add_temporary_files(pbesfile)
-    text, dummy = timeout_command('pbespp %s' % pbesfile, timeout)
+    text, dummy = timeout_command('pbespp', pbesfile, timeout)
     return text
 
 # returns True if the operation succeeded within the given amount of time
@@ -116,7 +129,7 @@ def run_pbes2bes(pbesfile, besfile, strategy = 'lazy', selection = '', timeout =
     options = '-s%s' % (strategy)
     if selection != '':
         options = options + ' -f%s' % selection
-    dummy, text = timeout_command('pbes2bes %s %s %s' % (options, pbesfile, besfile), timeout)
+    dummy, text = timeout_command('pbes2bes',  '%s %s %s' % (options, pbesfile, besfile), timeout)
     if text == None:
         print 'WARNING: timeout on %s' % pbesfile     
         return False
@@ -128,8 +141,8 @@ def run_pbes2bes(pbesfile, besfile, strategy = 'lazy', selection = '', timeout =
 # returns True, False or None if a timeout occurs
 def run_bessolve(filename, strategy = 'spm', timeout = 10):
     add_temporary_files(filename)
-    command = 'bessolve -s%s %s' % (strategy, filename)
-    text, dummy = timeout_command(command, timeout)
+    command = 'bessolve ' + '-s%s %s' % (strategy, filename)
+    text, dummy = timeout_command('bessolve', '-s%s %s' % (strategy, filename), timeout)
     if text == None:
         print 'WARNING: timeout on "%s"' % command
         return None
