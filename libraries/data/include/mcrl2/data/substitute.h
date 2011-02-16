@@ -169,7 +169,7 @@ struct substitute_sort_expressions_builder: public Builder<substitute_sort_expre
       rhs(rhs_)
   {}
 
-  void operator()(const data::sort_expression& x)
+  sort_expression operator()(const sort_expression& x)
   {
     x = super::operator()(x);
     if (x == lhs)
