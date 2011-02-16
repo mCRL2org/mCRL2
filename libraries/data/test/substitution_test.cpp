@@ -12,15 +12,16 @@
 
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/data/substitute.h"
 
 using namespace mcrl2;
@@ -293,6 +294,47 @@ void test_sort_substitution()
   core::garbage_collect();
 }
 
+void test_recursive_sort_substitution()
+{
+  using namespace mcrl2::data;
+  using namespace mcrl2::data::sort_list;
+  using namespace mcrl2::data::sort_set;
+  using namespace mcrl2::data::sort_bag;
+
+  data_specification specification = parse_data_specification("sort A = struct f(A) | g;");
+
+  // s0 = A
+  sort_expression s0 = basic_sort("A");
+
+  // s1 = f(A)|g
+  atermpp::vector< structured_sort_constructor_argument > arguments1;
+  arguments1.push_back(structured_sort_constructor_argument(basic_sort("A")));
+  atermpp::vector< structured_sort_constructor > constructors1;
+  constructors1.push_back(structured_sort_constructor("f", arguments1));
+  constructors1.push_back(structured_sort_constructor("g"));
+  sort_expression s1=structured_sort(constructors1);
+
+  // s2 = f(struct f(A)|g) |g
+  atermpp::vector< structured_sort_constructor_argument > arguments2;
+  arguments2.push_back(structured_sort_constructor_argument(s1));
+  atermpp::vector< structured_sort_constructor > constructors2;
+  constructors2.push_back(structured_sort_constructor("f", arguments2));
+  constructors2.push_back(structured_sort_constructor("g"));
+  sort_expression s2=structured_sort(constructors2);
+
+  std::cout << "s0 = " << core::pp(s0) << std::endl;
+  std::cout << "s1 = " << core::pp(s1) << std::endl;
+  std::cout << "s2 = " << core::pp(s2) << std::endl;
+
+  // apply the substitution s1 := s0 recursively to s2
+  sort_expression s3 = data::substitute_sort_expressions(s2, sort_expression_assignment(s1, s0));
+  BOOST_CHECK(s3 == s0);
+
+  std::cout << "s3 = " << core::pp(s3) << std::endl;
+
+  core::garbage_collect();
+}
+
 int test_main(int a, char** aa)
 {
   MCRL2_ATERMPP_INIT(a, aa);
@@ -305,6 +347,7 @@ int test_main(int a, char** aa)
   test_list_substitution();
   test_mutable_substitution();
   test_sort_substitution();
+  test_recursive_sort_substitution();
 
   return EXIT_SUCCESS;
 }

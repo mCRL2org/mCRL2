@@ -77,6 +77,38 @@ make_substitute_free_variables_builder(Substitution sigma, const VariableContain
   return substitute_free_variables_builder<Builder, Binder, Substitution>(sigma, bound_variables);
 }
 
+template <template <class> class Builder, class Substitution>
+struct substitute_sort_expressions_builder: public Builder<substitute_sort_expressions_builder<Builder, Substitution> >
+{
+  typedef Builder<substitute_sort_expressions_builder<Builder, Substitution> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  Substitution sigma;
+
+  substitute_sort_expressions_builder(Substitution sigma_)
+    : sigma(sigma_)
+  {}
+
+  sort_expression operator()(const sort_expression& x)
+  {
+    sort_expression y = super::operator()(x);
+    return sigma(y);
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, class Substitution>
+substitute_sort_expressions_builder<Builder, Substitution>
+make_substitute_sort_expressions_builder(Substitution sigma)
+{
+  return substitute_sort_expressions_builder<Builder, Substitution>(sigma);
+}
+
 } // namespace detail
 
 template <typename T, typename Substitution>
@@ -95,6 +127,24 @@ T substitute_sorts(const T& x,
                   )
 {
   return core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+void substitute_sort_expressions(T& x,
+                                 Substitution sigma,
+                                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                )
+{
+  data::detail::make_substitute_sort_expressions_builder<data::sort_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T substitute_sort_expressions(const T& x,
+                              Substitution sigma,
+                              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+{
+  return data::detail::make_substitute_sort_expressions_builder<data::sort_expression_builder>(sigma)(x);
 }
 
 template <typename T, typename Substitution>
@@ -153,37 +203,6 @@ T substitute_free_variables(const T& x,
   return data::detail::make_substitute_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 
-template <template <class> class Builder>
-struct substitute_sort_expressions_builder: public Builder<substitute_sort_expressions_builder<Builder> >
-{
-  typedef Builder<substitute_sort_expressions_builder<Builder> > super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  sort_expression lhs;
-  sort_expression rhs;
-
-  substitute_sort_expressions_builder(const sort_expression& lhs_, const sort_expression& rhs_)
-    : lhs(lhs_),
-      rhs(rhs_)
-  {}
-
-  sort_expression operator()(const sort_expression& x)
-  {
-    x = super::operator()(x);
-    if (x == lhs)
-    {
-      return rhs;
-    }
-    return x;
-  }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
-};
-
 struct sort_assignment: public std::unary_function<basic_sort, sort_expression>
 {
   typedef basic_sort variable_type;
@@ -198,6 +217,28 @@ struct sort_assignment: public std::unary_function<basic_sort, sort_expression>
   {}
 
   sort_expression operator()(const basic_sort& x)
+  {
+    if (x == lhs) {
+      return rhs;
+    }
+    return x;
+  }
+};
+
+struct sort_expression_assignment: public std::unary_function<sort_expression, sort_expression>
+{
+  typedef sort_expression variable_type;
+  typedef sort_expression expression_type;
+  
+  sort_expression lhs;
+  sort_expression rhs;
+
+  sort_expression_assignment(const sort_expression& lhs_, const sort_expression& rhs_)
+  : lhs(lhs_),
+    rhs(rhs_)
+  {}
+
+  sort_expression operator()(const sort_expression& x)
   {
     if (x == lhs) {
       return rhs;
