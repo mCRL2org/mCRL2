@@ -777,6 +777,10 @@ ENDIF( UNIX )
 ## Install headers
 ## --------------------------------------------------
 
+option(MCRL2_INSTALL_HEADERS "Enable/disable install headers" ON)
+message(STATUS "MCRL2_INSTALL_HEADERS: ${MCRL2_INSTALL_HEADERS}" )
+
+if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
     3rd-party/aterm/include/
@@ -793,16 +797,22 @@ install(
   DESTINATION include
   PATTERN ".svn" EXCLUDE
 )
+endif( MCRL2_INSTALL_HEADERS )
 
 ##---------------------------------------------------
 ## Install examples
 ## --------------------------------------------------
 
+option(MCRL2_INSTALL_EXAMPLES "Enable/disable examples headers" ON)
+message(STATUS "MCRL2_INSTALL_EXAMPLES: ${MCRL2_INSTALL_EXAMPLES}" )
+
+if ( MCRL2_INSTALL_EXAMPLES )
 install(
   DIRECTORY examples/
   DESTINATION share/doc/mcrl2/examples
   PATTERN ".svn" EXCLUDE
 )
+endif ( MCRL2_INSTALL_EXAMPLES )
 
 ##---------------------------------------------------
 ## Make tests
