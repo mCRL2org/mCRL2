@@ -583,6 +583,29 @@ void test_normalisation()
 
   BOOST_CHECK(normalize_sorts(sA,specification) == normalize_sorts(normalize_sorts(sA,specification),specification));
   BOOST_CHECK(normalize_sorts(sB,specification) == normalize_sorts(normalize_sorts(sB,specification),specification));
+
+  // Check whether the sort expression struct f(struct f(A)|g) |g normalises to A
+  // in the context of the specification sort A = struct f(A) | g;
+  specification = parse_data_specification(
+                    "sort A = struct f(A) | g;");
+
+  atermpp::vector< structured_sort_constructor_argument > arguments1;
+  arguments1.push_back(structured_sort_constructor_argument(basic_sort("A")));
+
+  atermpp::vector< structured_sort_constructor > constructors1;
+  constructors1.push_back(structured_sort_constructor("f", arguments1));
+  constructors1.push_back(structured_sort_constructor("g"));
+
+  sort_expression s1=structured_sort(constructors1); // s1 has the shape struct f(A)|g
+  atermpp::vector< structured_sort_constructor_argument > arguments2;
+  arguments2.push_back(structured_sort_constructor_argument(s1));
+
+  atermpp::vector< structured_sort_constructor > constructors2;
+  constructors2.push_back(structured_sort_constructor("f", arguments2));
+  constructors2.push_back(structured_sort_constructor("g"));
+
+  sort_expression s2=structured_sort(constructors2); // s2 has the shape f(struct f(A)|g) |g
+  BOOST_CHECK(normalize_sorts(s2,specification)==basic_sort("A"));
 }
 
 void test_copy()
