@@ -183,8 +183,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
 static ATermList get_lps_acts(ATermAppl lps, ATermList* ids)
 {
   ATermList acts = ATmakeList0();
-  ATermList sums = ATLgetArgument(lps,2);
-
+  ATermList sums = ATLgetArgument(lps,1);
   for (; !ATisEmpty(sums); sums=ATgetNext(sums))
   {
     if (!ATisEmpty(ATLgetArgument(ATAgetArgument(ATAgetFirst(sums),2),0)))
