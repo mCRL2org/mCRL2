@@ -126,9 +126,9 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
                                 mcrl2::data::used_data_equation_selector(
                                   lgopts->specification.data(),
                                   lps::find_function_symbols(lgopts->specification),
-                                  lgopts->specification.global_variables(),
-                                  lgopts->strat
-                                )
+                                  lgopts->specification.global_variables()
+                                  ),
+                                lgopts->strat
                                )
     );
 #ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
