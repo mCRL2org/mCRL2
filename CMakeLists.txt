@@ -803,7 +803,7 @@ endif( MCRL2_INSTALL_HEADERS )
 ## Install examples
 ## --------------------------------------------------
 
-option(MCRL2_INSTALL_EXAMPLES "Enable/disable examples headers" ON)
+option(MCRL2_INSTALL_EXAMPLES "Enable/disable install examples" ON)
 message(STATUS "MCRL2_INSTALL_EXAMPLES: ${MCRL2_INSTALL_EXAMPLES}" )
 
 if ( MCRL2_INSTALL_EXAMPLES )
@@ -1276,12 +1276,18 @@ else(MCRL2_SVN_LABEL STREQUAL "")
   set(CPACK_PACKAGE_VERSION "${MCRL2_SVN_LABEL}")
 endif(MCRL2_SVN_LABEL STREQUAL "")
 
-set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Toolset for modelling, validation and verification of concurrent systems and protocols.")
+set(CPACK_PACKAGE_DESCRIPTION_SUMMARY "Tools for modelling, validation and verification of concurrent systems")
 set(CPACK_PACKAGE_CONTACT "info@mcrl2.org")
 set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will overwrite standard path, which is: mcrl2-${CMAKE_BUILD_TYPE}svn{SVN_REV}
 
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 SET(CPACK_PACKAGE_VENDOR "TUe")
+
+string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+if(CMAKE_BUILD_TYPE MATCHES "release")
+  #Strip files for Release packages
+  SET( CPACK_STRIP_FILES true )
+endif(CMAKE_BUILD_TYPE MATCHES "release")
 
 # Create Desktop link to mcrl2-gui
 set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
@@ -1321,7 +1327,8 @@ set(CPACK_RESOURCE_FILE_README  ${CMAKE_CURRENT_BINARY_DIR}/README.txt )
 
 #Variables for RPM packaging
 set(CPACK_RPM_PACKAGE_LICENSE "Boost Software License, Version 1.0")
-set(CPACK_RPM_PACKAGE_GROUP "Devel")
+set(CPACK_RPM_PACKAGE_GROUP "Productivity/Scientific/Other")
+# Following should not exceed 77 chars
 set(CPACK_RPM_PACKAGE_DESCRIPTION "the mCRL2 formal specification language toolset 
  mCRL2 stands for micro Common Representation Language 2.  It is a
  specification language that can be used to specify and analyse the
