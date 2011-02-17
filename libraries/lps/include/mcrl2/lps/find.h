@@ -155,28 +155,6 @@ std::set<data::function_symbol> find_function_symbols(const T& x)
 }
 //--- end generated lps find code ---//
 
-inline
-std::string pp(const action_summand_vector& v)
-{
-  std::ostringstream out;
-  for (action_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
-  {
-    out << core::pp(action_summand_to_aterm(*i)) << std::endl;
-  }
-  return out.str();
-}
-
-inline
-std::string pp(const deadlock_summand_vector& v)
-{
-  std::ostringstream out;
-  for (deadlock_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
-  {
-    out << core::pp(deadlock_summand_to_aterm(*i)) << std::endl;
-  }
-  return out.str();
-}
-
 /// \brief Returns true if the term has a given variable as subterm.
 /// \param[in] container an expression or container with expressions
 /// \param d A data variable

@@ -13,6 +13,7 @@
 #define MCRL2_LPS_PRINT_H
 
 #include "mcrl2/core/print.h"
+#include "mcrl2/lps/summand.h"
 
 namespace mcrl2
 {
@@ -20,6 +21,27 @@ namespace mcrl2
 namespace lps
 {
 
+inline
+std::string pp(const action_summand_vector& v)
+{
+  std::ostringstream out;
+  for (action_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    out << core::pp(action_summand_to_aterm(*i)) << std::endl;
+  }
+  return out.str();
+}
+
+inline
+std::string pp(const deadlock_summand_vector& v)
+{
+  std::ostringstream out;
+  for (deadlock_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    out << core::pp(deadlock_summand_to_aterm(*i)) << std::endl;
+  }
+  return out.str();
+}
 
 } // namespace lps
 
