@@ -1,9 +1,10 @@
-#!/usr/bin/env xdg-open
 [Desktop Entry]
 Name=mCRL2
-Exec=mcrl2-gui
+GenericName=mcrl2-gui
 Terminal=false
-Icon=mcrl2-gui
-Encoding=UTF-8
+Comment=A graphical front-end for the mcrl2 toolset
 Type=Application
-Categories=Office;Math;
+Exec=mcrl2-gui
+Icon=mcrl2-gui
+Categories=Development;Science; 
+X-SuSE-translate=true
