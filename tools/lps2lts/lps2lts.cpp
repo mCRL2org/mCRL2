@@ -17,17 +17,21 @@
 #include <cassert>
 #include <signal.h>
 #include "aterm2.h"
-// #include "boost/cstdint.hpp"
+
 #include "boost/lexical_cast.hpp"
-// #include "lps2lts.h"
-#include "mcrl2/lts/detail/exploration.h"
-#include "mcrl2/lts/lts_io.h"
+
+#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/atermpp/aterm_init.h"
+
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+
+#include "mcrl2/lps/action_label.h"
+
+#include "mcrl2/lts/lts_io.h"
+#include "mcrl2/lts/detail/exploration.h"
 
 #define __STRINGIFY(x) #x
 #define STRINGIFY(x) __STRINGIFY(x)
@@ -37,6 +41,7 @@ using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
+using namespace mcrl2::lps;
 
 lps2lts_algorithm lps2lts;
 
@@ -50,9 +55,9 @@ void premature_termination_handler(int)
   exit(1);
 }
 
-atermpp::set < mcrl2::core::identifier_string > parse_action_list(const std::string& s)
+static atermpp::set < identifier_string > parse_action_list(const std::string& s)
 {
-  atermpp::set < mcrl2::core::identifier_string > result;
+  atermpp::set < identifier_string > result;
 
   for (std::string::size_type p = 0, q(s.find_first_of(",")); true; p = q + 1, q = s.find_first_of(",", q + 1))
   {
@@ -69,7 +74,7 @@ atermpp::set < mcrl2::core::identifier_string > parse_action_list(const std::str
         throw mcrl2::runtime_error("The string " + a + " is not a proper action label.");
       }
     }
-    result.insert(mcrl2::core::identifier_string(a));
+    result.insert(identifier_string(a));
 
     if (q == std::string::npos)
     {
@@ -77,6 +82,32 @@ atermpp::set < mcrl2::core::identifier_string > parse_action_list(const std::str
     }
   }
   return result;
+}
+
+static void check_whether_actions_on_commandline_exist(
+             const atermpp::set < identifier_string > &actions, 
+             const action_label_list action_labels)
+{
+  for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
+               i!=actions.end(); ++i)
+  {
+    if (gsVerbose)
+    {
+      std::cerr << "checking for occurrences of action '" << string(*i) << "'.\n";
+    }
+
+    bool found=(*i=="tau"); // If i equals tau, it does not need to be declared.
+    for(action_label_list::const_iterator j=action_labels.begin(); 
+              !found && j!=action_labels.end(); ++j)
+    {
+      found=(*i == j->name());  // The action in the set occurs in the action label.
+    }
+    if (!found)
+    { 
+      throw mcrl2::runtime_error("'" + string(*i) + "' is not declared as an action in this LPS.");
+    }
+  }
+
 }
 
 typedef  rewriter_tool< input_output_tool > lps2lts_base;
@@ -105,7 +136,6 @@ class lps2lts_tool : public lps2lts_base
     {
       options.specification.load(m_filename);
       options.trace_prefix = m_filename.substr(0, options.trace_prefix.find_last_of('.'));
-      
 
       if (!lps2lts.initialise_lts_generation(&options))
       {
@@ -116,6 +146,7 @@ class lps2lts_tool : public lps2lts_base
       signal(SIGINT,premature_termination_handler);
       signal(SIGTERM,premature_termination_handler); // At ^C print a message.
 
+      check_whether_actions_on_commandline_exist(options.trace_actions, options.specification.action_labels()); 
       try
       {
         lps2lts.generate_lts();
