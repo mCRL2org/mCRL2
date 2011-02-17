@@ -118,18 +118,14 @@ class used_data_equation_selector
 
     used_data_equation_selector(const data_specification& specification,
                                 const std::set<function_symbol>& function_symbols,
-                                const atermpp::set<data::variable>& global_variables,
-                                bool add_symbols_for_global_variables = true
+                                const atermpp::set<data::variable>& global_variables
                                )
     {
-      if (add_symbols_for_global_variables)
+      // Compensate for symbols that could be used as part of an instantiation of free variables
+      for (atermpp::set<data::variable>::const_iterator j = global_variables.begin(); j != global_variables.end(); ++j)
       {
-        // Compensate for symbols that could be used as part of an instantiation of free variables
-        for (atermpp::set<data::variable>::const_iterator j = global_variables.begin(); j != global_variables.end(); ++j)
-        {
-          add_symbols(specification.constructors(j->sort()));
-          add_symbols(specification.mappings(j->sort()));
-        }
+        add_symbols(specification.constructors(j->sort()));
+        add_symbols(specification.mappings(j->sort()));
       }
       m_used_symbols.insert(function_symbols.begin(), function_symbols.end());
       add_data_specification_symbols(specification);
