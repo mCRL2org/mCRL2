@@ -315,6 +315,28 @@ struct sort_expression_assignment: public std::unary_function<sort_expression, s
   }
 };
 
+struct data_expression_assignment: public std::unary_function<data_expression, data_expression>
+{
+  typedef data_expression variable_type;
+  typedef data_expression expression_type;
+  
+  data_expression lhs;
+  data_expression rhs;
+
+  data_expression_assignment(const data_expression& lhs_, const data_expression& rhs_)
+  : lhs(lhs_),
+    rhs(rhs_)
+  {}
+
+  data_expression operator()(const data_expression& x)
+  {
+    if (x == lhs) {
+      return rhs;
+    }
+    return x;
+  }
+};
+
 struct assignment_sequence_substitution : public std::unary_function<variable, data_expression>
 {
   typedef variable variable_type;
