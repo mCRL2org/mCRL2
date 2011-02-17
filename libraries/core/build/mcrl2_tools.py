@@ -4,12 +4,25 @@
 
 import os
 import random
+from optparse import OptionParser
 from path import *
 
 class mcrl2_tool_options:
     tooldir = ''                # optional location of mCRL2 tools
     files_to_be_removed = {}    # files that need to be removed after testing
     verbose = False
+
+def parse_command_line():
+    usage = "usage: %prog [options]"
+    parser = OptionParser(usage)
+    parser.add_option("-t", "--tooldir", dest="tooldir", help="the mCRL2 tools directory")
+    parser.add_option("-i", "--iterations", type="int", dest="iterations", default="100", help="the number of tests that is performed")
+    parser.add_option("-v", "--verbose", action="store_true", dest="verbose", help="print verbose output")
+    parser.add_option("-k", "--keep-files", action="store_true", dest="keep_files", help="keep temporary files")
+    (options, args) = parser.parse_args()
+    set_mcrl2_tooldir(options.tooldir)
+    mcrl2_tool_options.verbose = options.verbose
+    return options
 
 def add_temporary_files(filename1, filename2 = None):
     mcrl2_tool_options.files_to_be_removed[filename1] = 1
@@ -124,17 +137,17 @@ def run_pbespp(pbesfile, timeout = 10):
     return text
 
 # returns True if the operation succeeded within the given amount of time
-def run_pbes2bes(pbesfile, besfile, strategy = 'lazy', selection = '', timeout = 10):
+def run_pbesinst(pbesfile, besfile, strategy = 'lazy', selection = '', timeout = 10):
     add_temporary_files(pbesfile, besfile)
     options = '-s%s' % (strategy)
     if selection != '':
         options = options + ' -f%s' % selection
-    dummy, text = timeout_command('pbes2bes',  '%s %s %s' % (options, pbesfile, besfile), timeout)
+    dummy, text = timeout_command('pbesinst',  '%s %s %s' % (options, pbesfile, besfile), timeout)
     if text == None:
         print 'WARNING: timeout on %s' % pbesfile     
         return False
     if text.startswith('error'):
-        print 'WARNING: pbes2bes failed on %s (%s)' % (pbesfile, text)
+        print 'WARNING: pbesinst failed on %s (%s)' % (pbesfile, text)
         return False
     return True
 

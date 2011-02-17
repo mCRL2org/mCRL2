@@ -2,7 +2,6 @@
 #~ Distributed under the Boost Software License, Version 1.0.
 #~ (See accompanying file LICENSE_1_0.txt or http://www.boost.org/LICENSE_1_0.txt)
 
-from optparse import OptionParser
 from path import *
 from random_pbes_generator import *
 from mcrl2_tools import *
@@ -23,16 +22,25 @@ def test_pbesabstract(p, filename, abstraction_value):
       return answer1 == answer2
     return True
 
-equation_count = 2
-atom_count = 2
-propvar_count = 2
-use_quantifiers = True
+def main():
+    options = parse_command_line()
+    try:
+        equation_count = 2
+        atom_count = 2
+        propvar_count = 2
+        use_quantifiers = True
+        
+        for i in range(10000):
+            filename = 'pbes_abstract'
+            p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
+            abstraction_value = i % 2 == 0
+            if not test_pbesabstract(p, filename, abstraction_value):
+                m = CounterExampleMinimizer(p, lambda x: test_pbesabstract(x, filename + '_minimize', abstraction_value), 'pbesabstract')
+                m.minimize()
+                raise Exception('Test %s.txt failed' % filename)
+    finally:
+        if not options.keep_files:
+            remove_temporary_files()
 
-for i in range(10000):
-    filename = 'pbes_abstract'
-    p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
-    abstraction_value = i % 2 == 0
-    if not test_pbesabstract(p, filename, abstraction_value):
-        m = CounterExampleMinimizer(p, lambda x: test_pbesabstract(x, filename + '_minimize', abstraction_value), 'pbesabstract')
-        m.minimize()
-        raise Exception('Test %s.txt failed' % filename)
+if __name__ == '__main__':
+    main()
