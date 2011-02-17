@@ -22,7 +22,47 @@ namespace mcrl2
 namespace lps
 {
 
-//--- start generated lps replace code ---//
+//--- start generated lps substitute code ---//
+template <typename T, typename Substitution>
+void substitute_sort_expressions(T& x,
+                                 Substitution sigma,
+                                 bool innermost,
+                                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                )
+{
+  data::detail::make_substitute_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+T substitute_sort_expressions(const T& x,
+                              Substitution sigma,
+                              bool innermost,
+                              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+{
+  return data::detail::make_substitute_sort_expressions_builder<lps::sort_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+void substitute_data_expressions(T& x,
+                                 Substitution sigma,
+                                 bool innermost,
+                                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                )
+{
+  data::detail::make_substitute_data_expressions_builder<lps::data_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+T substitute_data_expressions(const T& x,
+                              Substitution sigma,
+                              bool innermost,
+                              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+{
+  return data::detail::make_substitute_data_expressions_builder<lps::data_expression_builder>(sigma, innermost)(x);
+}
+
 template <typename T, typename Substitution>
 void substitute_variables(T& x,
                           Substitution sigma,
@@ -37,7 +77,7 @@ T substitute_variables(const T& x,
                        Substitution sigma,
                        typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
-{
+{   
   return core::make_update_apply_builder<lps::data_expression_builder>(sigma)(x);
 }
 
@@ -78,7 +118,7 @@ T substitute_free_variables(const T& x,
 {
   return data::detail::make_substitute_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
 }
-//--- end generated lps replace code ---//
+//--- end generated lps substitute code ---//
 
 } // namespace lps
 

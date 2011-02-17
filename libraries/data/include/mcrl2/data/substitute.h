@@ -26,6 +26,82 @@ namespace data
 namespace detail
 {
 
+template <template <class> class Builder, class Substitution>
+struct substitute_sort_expressions_builder: public Builder<substitute_sort_expressions_builder<Builder, Substitution> >
+{
+  typedef Builder<substitute_sort_expressions_builder<Builder, Substitution> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  Substitution sigma;
+  bool innermost;
+
+  substitute_sort_expressions_builder(Substitution sigma_, bool innermost_)
+    : sigma(sigma_),
+      innermost(innermost_)
+  {}
+
+  sort_expression operator()(const sort_expression& x)
+  {
+    if (innermost)
+    {
+      sort_expression y = super::operator()(x);
+      return sigma(y);
+    }
+    return sigma(x);
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, class Substitution>
+substitute_sort_expressions_builder<Builder, Substitution>
+make_substitute_sort_expressions_builder(Substitution sigma, bool innermost)
+{
+  return substitute_sort_expressions_builder<Builder, Substitution>(sigma, innermost);
+}
+
+template <template <class> class Builder, class Substitution>
+struct substitute_data_expressions_builder: public Builder<substitute_data_expressions_builder<Builder, Substitution> >
+{
+  typedef Builder<substitute_data_expressions_builder<Builder, Substitution> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  Substitution sigma;
+  bool innermost;
+
+  substitute_data_expressions_builder(Substitution sigma_, bool innermost_)
+    : sigma(sigma_),
+      innermost(innermost_)
+  {}
+
+  data_expression operator()(const data_expression& x)
+  {
+    if (innermost)
+    {
+      data_expression y = super::operator()(x);
+      return sigma(y);
+    }
+    return sigma(x);
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, class Substitution>
+substitute_data_expressions_builder<Builder, Substitution>
+make_substitute_data_expressions_builder(Substitution sigma, bool innermost)
+{
+  return substitute_data_expressions_builder<Builder, Substitution>(sigma, innermost);
+}
+
 template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
 struct substitute_free_variables_builder: public Binder<Builder, substitute_free_variables_builder<Builder, Binder, Substitution> >
 {
@@ -77,74 +153,47 @@ make_substitute_free_variables_builder(Substitution sigma, const VariableContain
   return substitute_free_variables_builder<Builder, Binder, Substitution>(sigma, bound_variables);
 }
 
-template <template <class> class Builder, class Substitution>
-struct substitute_sort_expressions_builder: public Builder<substitute_sort_expressions_builder<Builder, Substitution> >
-{
-  typedef Builder<substitute_sort_expressions_builder<Builder, Substitution> > super;
-  using super::enter;
-  using super::leave;
-  using super::operator();
-
-  Substitution sigma;
-
-  substitute_sort_expressions_builder(Substitution sigma_)
-    : sigma(sigma_)
-  {}
-
-  sort_expression operator()(const sort_expression& x)
-  {
-    sort_expression y = super::operator()(x);
-    return sigma(y);
-  }
-
-#if BOOST_MSVC
-#include "mcrl2/core/detail/builder_msvc.inc.h"
-#endif
-};
-
-template <template <class> class Builder, class Substitution>
-substitute_sort_expressions_builder<Builder, Substitution>
-make_substitute_sort_expressions_builder(Substitution sigma)
-{
-  return substitute_sort_expressions_builder<Builder, Substitution>(sigma);
-}
-
 } // namespace detail
 
-template <typename T, typename Substitution>
-void substitute_sorts(T& x,
-                      Substitution sigma,
-                      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                     )
-{
-  core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
-}
-
-template <typename T, typename Substitution>
-T substitute_sorts(const T& x,
-                   Substitution sigma,
-                   typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                  )
-{
-  return core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
-}
-
+//--- start generated data substitute code ---//
 template <typename T, typename Substitution>
 void substitute_sort_expressions(T& x,
                                  Substitution sigma,
+                                 bool innermost,
                                  typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                                 )
 {
-  data::detail::make_substitute_sort_expressions_builder<data::sort_expression_builder>(sigma)(x);
+  data::detail::make_substitute_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
 T substitute_sort_expressions(const T& x,
                               Substitution sigma,
+                              bool innermost,
                               typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                              )
 {
-  return data::detail::make_substitute_sort_expressions_builder<data::sort_expression_builder>(sigma)(x);
+  return data::detail::make_substitute_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+void substitute_data_expressions(T& x,
+                                 Substitution sigma,
+                                 bool innermost,
+                                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                )
+{
+  data::detail::make_substitute_data_expressions_builder<data::data_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+T substitute_data_expressions(const T& x,
+                              Substitution sigma,
+                              bool innermost,
+                              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+{
+  return data::detail::make_substitute_data_expressions_builder<data::data_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
@@ -161,7 +210,7 @@ T substitute_variables(const T& x,
                        Substitution sigma,
                        typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                       )
-{
+{   
   return core::make_update_apply_builder<data::data_expression_builder>(sigma)(x);
 }
 
@@ -201,6 +250,25 @@ T substitute_free_variables(const T& x,
                            )
 {
   return data::detail::make_substitute_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+//--- end generated data substitute code ---//
+
+template <typename T, typename Substitution>
+void substitute_sorts(T& x,
+                      Substitution sigma,
+                      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                     )
+{
+  core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T substitute_sorts(const T& x,
+                   Substitution sigma,
+                   typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                  )
+{
+  return core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
 }
 
 struct sort_assignment: public std::unary_function<basic_sort, sort_expression>

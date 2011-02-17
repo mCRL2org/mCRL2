@@ -217,7 +217,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
          i=resulting_normalized_sort_aliases.begin();
          i!=resulting_normalized_sort_aliases.end(); ++i)
     {
-      const sort_expression s1=data::substitute_sort_expressions(lhs,sort_expression_assignment(i->first,i->second));
+      const sort_expression s1=data::substitute_sort_expressions(lhs,sort_expression_assignment(i->first,i->second), true);
 
       if (s1!=lhs)
       {
@@ -237,7 +237,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
       }
       else
       {
-        const sort_expression s2 = data::substitute_sort_expressions(i->first,sort_expression_assignment(lhs,rhs));
+        const sort_expression s2 = data::substitute_sort_expressions(i->first,sort_expression_assignment(lhs,rhs), true);
         if (s2!=i->first)
         {
           assert(is_basic_sort(i->second));

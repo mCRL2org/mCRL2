@@ -327,7 +327,7 @@ void test_recursive_sort_substitution()
   std::cout << "s2 = " << core::pp(s2) << std::endl;
 
   // apply the substitution s1 := s0 recursively to s2
-  sort_expression s3 = data::substitute_sort_expressions(s2, sort_expression_assignment(s1, s0));
+  sort_expression s3 = data::substitute_sort_expressions(s2, sort_expression_assignment(s1, s0), true);
   BOOST_CHECK(s3 == s0);
 
   std::cout << "s3 = " << core::pp(s3) << std::endl;
