@@ -12,12 +12,13 @@
 #ifndef MCRL2_LPSREALELM_REALELM_H
 #define MCRL2_LPSREALELM_REALELM_H
 
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/lps/linear_process.h"
-// #include "mcrl2/data/rewrite.h"
+
 #include "mcrl2/data/rewriter.h"
+
+#include "mcrl2/lps/specification.h"
+
 #include "comp.h"
 #include "linear_inequalities.h"
 
@@ -107,7 +108,7 @@ class summand_information
     variable_list real_summation_variables;
     variable_list non_real_summation_variables;
     std::vector < linear_inequality > summand_real_conditions;
-    atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression>  summand_real_nextstate_map;
+    mutable_associative_container_substitution< atermpp::map<variable, data_expression> > summand_real_nextstate_map;
     // Variable below contains all combinations of nextstate_context_combinations that allow a
     // feasible solution, regarding the context variables that are relevant for this summand.
     std::vector < std::vector < linear_inequality > > nextstate_context_combinations;
@@ -124,7 +125,7 @@ class summand_information
       variable_list rsv,
       variable_list nrsv,
       std::vector < linear_inequality > src,
-      atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression>  srnm
+      mutable_associative_container_substitution< atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression> > srnm
     ):
       smd(s),
       real_summation_variables(rsv),
@@ -192,7 +193,8 @@ class summand_information
       return summand_real_conditions.end();
     }
 
-    atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression> &get_summand_real_nextstate_map()
+    mutable_associative_container_substitution< atermpp::map<mcrl2::data::variable, mcrl2::data::data_expression> >
+                          &get_summand_real_nextstate_map()
     {
       return summand_real_nextstate_map;
     }
@@ -251,10 +253,8 @@ class summand_information
       real_representing_variable new_xi_variable=context.back();
       data_expression xi_t=new_xi_variable.get_lowerbound();
       data_expression xi_u=new_xi_variable.get_upperbound();
-      data_expression substituted_lowerbound=
-        realelm_data_expression_map_replace(xi_t,summand_real_nextstate_map);
-      data_expression substituted_upperbound=
-        realelm_data_expression_map_replace(xi_u,summand_real_nextstate_map);
+      data_expression substituted_lowerbound = substitute_free_variables(xi_t,summand_real_nextstate_map);
+      data_expression substituted_upperbound = substitute_free_variables(xi_u,summand_real_nextstate_map);
       // std::cerr << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
 
       // First check whether the new value for the new xi variable is equal to itself.

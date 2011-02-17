@@ -13,7 +13,6 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/substitute.h"
-#include "mcrl2/atermpp/algorithm.h"
 
 namespace mcrl2
 {
@@ -218,13 +217,8 @@ void data_specification::reconstruct_m_normalised_aliases() const
          i=resulting_normalized_sort_aliases.begin();
          i!=resulting_normalized_sort_aliases.end(); ++i)
     {
-      // const sort_expression s1=substitute_sort_expressions_builder(i->first,i->second)(lhs);
-      const sort_expression s1=atermpp::replace(lhs,i->first,i->second);
-      /* const sort_expression s1=data::substitute_sorts(
-                                 lhs,
-                                 sort_assignment(basic_sort(i->first),i->second)); */
+      const sort_expression s1=data::substitute_sort_expressions(lhs,sort_expression_assignment(i->first,i->second));
 
- // ATfprintf(stderr,"SUBST %t = %t[ %t  := %t]\n", (ATermAppl)s1,(ATermAppl)lhs,(ATermAppl)i->first,(ATermAppl)i->second);
       if (s1!=lhs)
       {
         // There is a conflict between the two sort rewrite rules.
@@ -243,11 +237,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
       }
       else
       {
-        // There is a conflict between the two rewrite rules.
-        const sort_expression s2 = atermpp::replace(i->first,lhs,rhs);
-        /* const sort_expression s2 = data::substitute_sorts(
-                                      i->first,
-                                      sort_assignment(basic_sort(lhs),rhs)); */
+        const sort_expression s2 = data::substitute_sort_expressions(i->first,sort_expression_assignment(lhs,rhs));
         if (s2!=i->first)
         {
           assert(is_basic_sort(i->second));

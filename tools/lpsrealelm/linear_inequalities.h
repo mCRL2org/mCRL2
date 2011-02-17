@@ -16,14 +16,13 @@
 #ifndef MCRL2_LPSREALELM_LINEAR_INEQUALITY_H
 #define MCRL2_LPSREALELM_LINEAR_INEQUALITY_H
 
+#include <algorithm>
 
-#include "mcrl2/atermpp/set_operations.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/fresh_variable_generator.h"
-#include <algorithm>
 
 namespace mcrl2
 {
@@ -35,10 +34,6 @@ namespace data
 data_expression real_zero();
 data_expression real_one();
 data_expression real_minus_one();
-// data_expression lhs_(const data_expression e);
-// data_expression rhs_(const data_expression e);
-// data_expression divide(const data_expression e1,const data_expression e2);
-// data_expression multiply(const data_expression e1,const data_expression e2);
 data_expression min(const data_expression e1,const data_expression e2,const rewriter&);
 data_expression max(const data_expression e1,const data_expression e2,const rewriter&);
 bool is_closed_real_number(const data_expression e);

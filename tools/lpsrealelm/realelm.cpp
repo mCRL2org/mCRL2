@@ -12,12 +12,12 @@
 #include <algorithm>
 #include <stdlib.h>
 
-#include "mcrl2/atermpp/set_operations.h"
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/substitute.h"
+
 #include "mcrl2/lps/find.h"
 
 #include "realelm.h"
@@ -28,85 +28,6 @@ using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
-
-// Custom replace functions
-// Needed as the replace functions of the data library do not
-// recurse into data expressions
-template <typename ReplaceFunction>
-struct realelm_replace_data_expressions_helper
-{
-  const ReplaceFunction& r_;
-
-  realelm_replace_data_expressions_helper(const ReplaceFunction& r)
-    : r_(r)
-  {}
-
-  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
-  {
-    if (is_sort_expression(t))
-    {
-      return std::pair<atermpp::aterm_appl, bool>(t, false); // do not continue the recursion
-    }
-    else if (is_data_expression(t))
-    {
-      data_expression new_t = r_(t);
-      if (t == new_t)
-      {
-        return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
-      }
-      else
-      {
-        return std::pair<atermpp::aterm_appl, bool>(new_t, false); // do not continue the recursion
-      }
-    }
-    else
-    {
-      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
-    }
-  }
-};
-
-/// \cond INTERNAL_DOCS
-template <typename MapContainer>
-struct realelm_map_replace_helper
-{
-  const MapContainer& replacements_;
-
-  /// \brief Constructor.
-  ///
-  realelm_map_replace_helper(const MapContainer& replacements)
-    : replacements_(replacements)
-  {}
-
-  /// \brief Returns s if a substitution of the form t := s is present in the replacement map,
-  /// otherwise t.
-  ///
-  data_expression operator()(const data_expression& t) const
-  {
-    typename MapContainer::const_iterator i = replacements_.find(t);
-    if (i == replacements_.end())
-    {
-      return atermpp::aterm_appl(t);
-    }
-    else
-    {
-      return i->second;
-    }
-  }
-};
-
-template <typename Term, typename ReplaceFunction>
-Term realelm_replace_data_expressions(Term t, ReplaceFunction r)
-{
-  return atermpp::partial_replace(t, realelm_replace_data_expressions_helper<ReplaceFunction>(r));
-}
-
-template <typename Term, typename MapContainer>
-Term realelm_data_expression_map_replace(Term t, const MapContainer& replacements)
-{
-  return realelm_replace_data_expressions(t, realelm_map_replace_helper<MapContainer>(replacements));
-} 
-// End of replace substitute
 
 
 static data_expression negate_inequality(const data_expression e)
@@ -733,77 +654,6 @@ static void add_inequalities_to_context_postponed(
   }
 }
 
-/// \brief Remove a variable from an inequality
-/// \param variable A variable
-/// \param inequality An inequality over real numbers
-/// \pre inequality is an inequality
-/// \ret The inequality from which variable has been removed
-/* static
-data_expression remove_variable(const variable& variable, const data_expression& inequality)
-{
-  assert(is_inequality(inequality));
-
-  // gsDebugMsg("Removing variable %P from inequality %P\n", (ATermAppl)variable, (ATermAppl)inequality);
-
-  data_expression left = application(inequality).left;
-  data_expression new_left = real_zero();
-  while(sort_real::is_plus_application(left))
-  {
-    // gsDebugMsg("left = %P is a plus expression\n", (ATermAppl)left);
-    if(is_multiplies(application(left).right()))
-    {
-      data_expression factor = application(application(left()).right).left();
-      new_left = sort_real::divides(sort_real::plus(new_left, application(left).left()), factor);
-      return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, sort_real::divides(application(inequality).right(), factor)));
-    }
-    else if (application(left).right() == variable || application(left).right() == sort_real::is_negate_application(static_cast<const data_expression&>(variable)))
-    {
-      return data_application(static_cast<const data_application&>(inequality).head(), make_list(sort_real::plus(new_left, application(left).left()), application(inequality).right()));
-    }
-    else
-    {
-      new_left = sort_real::plus(new_left, application(left).right());
-      left = application(left).left();
-    }
-  }
-
-  // gsDebugMsg("left = %P\n", (ATermAppl)left);
-
-  if(is_negate_application(left))
-  {
-    data_expression argument = *static_cast<const data_application&>(left).arguments().begin();
-    if(sort_real::is_plus_application(argument))
-    {
-      data_expression p = sort_real::plus(sort_real::is_negate_application(application(argument).left), sort_real::is_negate_application(application(argument).right()));
-      return remove_variable(variable, data_application(static_cast<const data_application&>(inequality).head(), make_list(p, application(inequality).right())));
-    }
-  }
-  if (left == variable || left == sort_real::is_negate_application(static_cast<const data_expression&>(variable)))
-  {
-    return data_application(static_cast<const data_application&>(inequality).head(), make_list(new_left, application(inequality).right()));
-  }
-
-  gsErrorMsg("cannot remove variable %P from %P\n", (ATermAppl)variable, (ATermAppl)inequality);
-
-  assert(false);
-  return data_expression(); // Never reached, silence gcc 4.1.2
-} */
-
-/// \brief Apply replacements to a list of inequalities
-/// \param inequalities A list of data expressions
-/// \param replacements A map of replacements
-/// \ret inequalities to which the substitutions in replacements have been
-///      applied
-data_expression_list data_expression_map_replace_list(const data_expression_list& inequalities, const atermpp::map<variable, data_expression>& replacements)
-{
-  data_expression_list result;
-  for (data_expression_list::const_iterator i = inequalities.begin(); i != inequalities.end(); ++i)
-  {
-    result = push_front(result, realelm_data_expression_map_replace(*i, replacements));
-  }
-  return result;
-}
-
 /// \brief Generate a summand
 /// \param s A summand
 /// \param i A number, denoting the next state
@@ -837,9 +687,9 @@ summand generate_summand(summand_information& summand_info,
        c_complete != complete_context.end(); ++c_complete)
   {
     data_expression substituted_lowerbound=
-      realelm_data_expression_map_replace(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
+       data::substitute_free_variables(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
     data_expression substituted_upperbound=
-      realelm_data_expression_map_replace(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map());
+       data::substitute_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map()); 
     // std::cerr << "Lower Upper " << pp(substituted_lowerbound) << "  " << pp(substituted_upperbound) << "\n";
     linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
     // std::cerr << "INequality: " << string(e) << "\n";
@@ -957,7 +807,7 @@ assignment_list determine_process_initialization(
 {
   assignment_list init = reverse(get_nonreal_assignments(initialization));
   assignment_list real_assignments = get_real_assignments(initialization);
-  atermpp::map<variable, data_expression> replacements;
+  mutable_associative_container_substitution< atermpp::map<variable, data_expression> > replacements;
   for (assignment_list::const_iterator i = real_assignments.begin(); i != real_assignments.end(); ++i)
   {
     replacements[i->lhs()] = i->rhs();
@@ -965,8 +815,10 @@ assignment_list determine_process_initialization(
 
   for (context_type::const_iterator i = context.begin(); i != context.end(); ++i)
   {
-    data_expression left = realelm_data_expression_map_replace(i->get_lowerbound(), replacements);
-    data_expression right = realelm_data_expression_map_replace(i->get_upperbound(), replacements);
+    /* data_expression left = realelm_data_expression_map_replace(i->get_lowerbound(), replacements);
+    data_expression right = realelm_data_expression_map_replace(i->get_upperbound(), replacements); */
+    const data_expression left = substitute_free_variables(i->get_lowerbound(), replacements);
+    const data_expression right = substitute_free_variables(i->get_upperbound(), replacements);
     assignment ass;
     if (r(less(left, right)) == sort_bool::true_())
     {

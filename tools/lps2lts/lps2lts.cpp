@@ -19,7 +19,7 @@
 #include "aterm2.h"
 // #include "boost/cstdint.hpp"
 #include "boost/lexical_cast.hpp"
-#include "lps2lts.h"
+// #include "lps2lts.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/lts_io.h"
 
@@ -88,7 +88,7 @@ class lps2lts_tool : public lps2lts_base
 
   public:
     lps2lts_tool() :
-      lps2lts_base(NAME,AUTHOR,
+      lps2lts_base("lps2lts",AUTHOR,
                    "generate an LTS from an LPS",
                    "Generate an LTS from the LPS in INFILE and save the result to OUTFILE. "
                    "If INFILE is not supplied, stdin is used. "
@@ -105,6 +105,7 @@ class lps2lts_tool : public lps2lts_base
     {
       options.specification.load(m_filename);
       options.trace_prefix = m_filename.substr(0, options.trace_prefix.find_last_of('.'));
+      
 
       if (!lps2lts.initialise_lts_generation(&options))
       {
