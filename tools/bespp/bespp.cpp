@@ -59,10 +59,7 @@ class bespp_tool: public input_output_tool
       input_output_tool::add_options(desc);
       desc.add_option("format", make_mandatory_argument("FORMAT"),
                       "print the PBES in the specified FORMAT:\n"
-                      "  'default' for a PBES specification (default),\n"
-                      "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, and each data equation is put in a separate data equation section,\n"
-                      "  'internal' for a textual ATerm representation of the internal format, or\n"
-                      "  'internal-debug' for 'internal' with an indented layout", 'f');
+                      "  'default' for a PBES specification (default)", 'f');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -71,19 +68,7 @@ class bespp_tool: public input_output_tool
       if (parser.options.count("format"))
       {
         std::string str_format(parser.option_argument("format"));
-        if (str_format == "internal")
-        {
-          format = ppInternal;
-        }
-        else if (str_format == "internal-debug")
-        {
-          format = ppInternalDebug;
-        }
-        else if (str_format == "debug")
-        {
-          format = ppDebug;
-        }
-        else if (str_format != "default")
+        if (str_format != "default")
         {
           parser.error("option -f/--format has illegal argument '" + str_format + "'");
         }
