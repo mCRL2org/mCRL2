@@ -28,7 +28,7 @@
 //#include "mcrl2/utilities/rewriter_tool.h"
 //#include "mcrl2/utilities/pbes_rewriter_tool.h"
 
-#include "pbespgsolve.h"
+#include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 
@@ -146,15 +146,13 @@ class pg_solver_tool : public input_tool
         log_level = 2;
       }
       set_parity_game_generator_log_level(log_level);
-      pbespgsolve_algorithm algorithm(timer(), m_options);
-      std::string result = "unknown";
-      try
+      int value = pbespgsolve(p, m_options);
+      std::string result;
+      switch (value)
       {
-        result = algorithm.run(p) ? "true" : "false";
-      }
-      catch (std::out_of_range)
-      {
-        // value unknown is already set
+        case 0: result = "false"; break;
+        case 1: result = "true"; break;
+        default: result = "unknown"; break;
       }
       std::clog << "The solution for the initial variable of the pbes is " << result << "\n";
 

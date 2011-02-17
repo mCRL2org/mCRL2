@@ -9,8 +9,8 @@
 /// \file tools/pbespgsolve/pbespgsolve.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_PBESPGSOLVE_H
-#define MCRL2_PBES_PBESPGSOLVE_H
+#ifndef MCRL2_TOOLS_PBESPGSOLVE_H
+#define MCRL2_TOOLS_PBESPGSOLVE_H
 
 #ifndef WITH_MCRL2
 #define WITH_MCRL2
@@ -167,4 +167,4 @@ class pbespgsolve_algorithm
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_PBESPGSOLVE_H
+#endif // MCRL2_TOOLS_PBESPGSOLVE_H
