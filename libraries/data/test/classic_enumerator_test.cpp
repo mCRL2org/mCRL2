@@ -60,7 +60,7 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
                                         data_expression const& c, size_t t)
 {
 
-  typedef classic_enumerator< mutable_associative_container_substitution<>, rewriter, selectors::select_not< false > > enumerator_type;
+  typedef classic_enumerator< mutable_map_substitution<>, rewriter, selectors::select_not< false > > enumerator_type;
 
   rewriter evaluator(d);
 
@@ -184,7 +184,7 @@ void empty_test()
 {
   using namespace mcrl2::data::selectors;
 
-  typedef classic_enumerator< mutable_associative_container_substitution< >, data::rewriter, select_not< false > >  enumerator_type;
+  typedef classic_enumerator< mutable_map_substitution< >, data::rewriter, select_not< false > >  enumerator_type;
 
   // test manual construction of evaluator with rewriter
   data::data_specification specification;
@@ -294,7 +294,7 @@ void check_concepts()
 {
   using namespace mcrl2::data::concepts;
 
-  BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_associative_container_substitution< > >));
+  BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_map_substitution< > >));
 
   BOOST_CONCEPT_ASSERT((Enumerator< classic_enumerator< > >));
 }

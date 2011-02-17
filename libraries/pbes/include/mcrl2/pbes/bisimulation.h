@@ -275,13 +275,13 @@ class bisimulation_algorithm
       }
 
       // rename unbound data variables
-      data::detail::make_substitute_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(data::make_associative_container_substitution(sigma))(spec);
+      data::detail::make_substitute_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(data::make_map_substitution(sigma))(spec);
 
       // rename process parameters
-      spec.process().process_parameters() = data::substitute_variables(spec.process().process_parameters(), data::make_associative_container_substitution(sigma));
+      spec.process().process_parameters() = data::substitute_variables(spec.process().process_parameters(), data::make_map_substitution(sigma));
 
       // rename global variable declaration
-      data::substitute_variables(spec.global_variables(), data::make_associative_container_substitution(sigma));
+      data::substitute_variables(spec.global_variables(), data::make_map_substitution(sigma));
     }
 
     /// \brief Initializes the name lookup table.

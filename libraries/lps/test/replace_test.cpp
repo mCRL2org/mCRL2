@@ -87,7 +87,7 @@ void test_lps_substituter()
 {
   specification spec1 = parse_linear_process_specification(SPEC1a);
   specification spec2 = parse_linear_process_specification(SPEC1b);
-  data::mutable_associative_container_substitution<> sigma;
+  data::mutable_map_substitution<> sigma;
   sigma[variable("s", sort_pos::pos())] = sort_pos::pos(3);
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
 
@@ -103,7 +103,7 @@ void test_lps_substitute()
 {
   data::variable v("v", sort_pos::pos());
   data::variable w("w", sort_pos::pos());
-  data::mutable_associative_container_substitution<> sigma;
+  data::mutable_map_substitution<> sigma;
   sigma[v] = w;
   lps::substitute_free_variables(v, sigma);
   core::garbage_collect();

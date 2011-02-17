@@ -332,7 +332,7 @@ static void restore_saved_substitution(const atermpp::map<data::variable,data::d
                    const data::data_specification &data,
                    const data::rewriter& r,
                    const bool use_internal_rewrite_format,
-                   data::mutable_associative_container_substitution< > &sigma) */
+                   data::mutable_map_substitution< > &sigma) */
 
 inline pbes_expression pbes_expression_substitute_and_rewrite(
   const pbes_expression& p,

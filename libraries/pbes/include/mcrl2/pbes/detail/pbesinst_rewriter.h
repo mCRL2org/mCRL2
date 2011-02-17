@@ -31,7 +31,7 @@ namespace detail
 {
 
 /// \brief The substitution function used by the pbesinst rewriter.
-typedef data::mutable_associative_container_substitution<atermpp::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
+typedef data::mutable_map_substitution<atermpp::map<data::variable, data::data_expression_with_variables> > pbesinst_substitution_function;
 
 /// \brief Simplifying PBES rewriter that eliminates quantifiers using enumeration.
 /// As a side effect propositional variable instantiations are being renamed

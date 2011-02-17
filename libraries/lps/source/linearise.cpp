@@ -1488,7 +1488,7 @@ class specification_basic_type:public boost::noncopyable
           sigma[*i]=*j;
         }
       }
-      return data::substitute_free_variables(atermpp::convert<data::data_expression_list>(tl), data::make_associative_container_substitution(sigma));
+      return data::substitute_free_variables(atermpp::convert<data::data_expression_list>(tl), data::make_map_substitution(sigma));
     }
 
     data_expression substitute_data(
@@ -1511,7 +1511,7 @@ class specification_basic_type:public boost::noncopyable
           sigma[*i]=*j;
         }
       }
-      const data_expression result=data::substitute_free_variables(t, make_associative_container_substitution(sigma));
+      const data_expression result=data::substitute_free_variables(t, make_map_substitution(sigma));
       return result;
     }
 

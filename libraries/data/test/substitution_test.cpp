@@ -47,10 +47,10 @@ void test_basic()
 
   using mcrl2::data::concepts::MutableSubstitution;
 
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_associative_container_substitution< atermpp::map< variable, data_expression > > >));
-  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_associative_container_substitution< atermpp::map< variable, variable > > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< atermpp::map< variable, data_expression > > >));
+  BOOST_CONCEPT_ASSERT((MutableSubstitution< mutable_map_substitution< atermpp::map< variable, variable > > >));
 
-  mutable_associative_container_substitution< atermpp::map< variable, data_expression > > s;
+  mutable_map_substitution< atermpp::map< variable, data_expression > > s;
 
   BOOST_CHECK(static_cast< variable >(s(x)) == x);
   BOOST_CHECK(static_cast< variable >(s(y)) != x);
@@ -73,7 +73,7 @@ void test_basic()
   BOOST_CHECK(data::substitute_free_variables(lambda(x,y), s) == lambda(x,c));
 
   // Replacing free variables only
-  mutable_associative_container_substitution< atermpp::map< variable, data_expression > > sb;
+  mutable_map_substitution< atermpp::map< variable, data_expression > > sb;
 
   sb[y] = c;
 
@@ -223,13 +223,13 @@ void test_list_substitution()
 
 void test_mutable_substitution_composer()
 {
-  mutable_associative_container_substitution< > f;
+  mutable_map_substitution< > f;
   variable x("x", sort_nat::nat());
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());
   f[x] = y;
 
-  mutable_substitution_composer<mutable_associative_container_substitution< > > g(f);
+  mutable_substitution_composer<mutable_map_substitution< > > g(f);
   BOOST_CHECK(g(x) == y);
 
   assignment a(y, z);
@@ -252,7 +252,7 @@ void test_mutable_substitution()
 {
   using namespace mcrl2::data::detail;
 
-  mutable_associative_container_substitution< atermpp::map< variable, data_expression_with_variables > > sigma;
+  mutable_map_substitution< atermpp::map< variable, data_expression_with_variables > > sigma;
   variable v("v", sort_nat::nat());
   data_expression e = v;
 
@@ -262,7 +262,7 @@ void test_mutable_substitution()
   sigma[v] = e;
 
   // Compile test
-  mutable_associative_container_substitution< atermpp::map< variable, variable > > sigmaprime;
+  mutable_map_substitution< atermpp::map< variable, variable > > sigmaprime;
 
   sigma[v] = v;
   core::garbage_collect();

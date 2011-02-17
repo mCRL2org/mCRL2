@@ -131,7 +131,7 @@ class linear_inequality
             const data_expression d=i->first;
             result=sort_real::plus(result,sort_real::times(d,i->second));
           }
-          return r(result,make_associative_container_substitution(beta));
+          return r(result,make_map_substitution(beta));
         }
 
         std::string string() const

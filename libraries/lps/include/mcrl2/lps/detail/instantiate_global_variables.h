@@ -29,7 +29,7 @@ namespace detail
 inline
 void instantiate_global_variables(specification& spec)
 {
-  data::mutable_associative_container_substitution<> sigma;
+  data::mutable_map_substitution<> sigma;
   data::representative_generator default_expression_generator(spec.data());
   std::set<data::variable> to_be_removed;
   const atermpp::set<data::variable>& v = spec.global_variables();

@@ -84,7 +84,7 @@ void remove_trivial_summands(specification& spec)
 inline
 void remove_singleton_sorts(specification& spec)
 {
-  data::mutable_associative_container_substitution<> sigma;
+  data::mutable_map_substitution<> sigma;
   std::set<data::variable> to_be_removed;
   const data::variable_list& p = spec.process().process_parameters();
   for (data::variable_list::const_iterator i = p.begin(); i != p.end(); ++i)

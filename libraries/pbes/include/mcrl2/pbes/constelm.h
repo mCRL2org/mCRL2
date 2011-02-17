@@ -637,7 +637,7 @@ class pbes_constelm_algorithm: public core::algorithm
             for (i = e.begin(), j = params.begin(); i != e.end(); ++i, ++j)
             {
               // TODO: why not use R(t, sigma) interface here?
-              data_term_type e1 = datar(*i, data::make_associative_container_substitution(e_constraints));
+              data_term_type e1 = datar(*i, data::make_map_substitution(e_constraints));
               if (core::term_traits<data_term_type>::is_constant(e1))
               {
                 m_constraints[*j] = e1;
@@ -661,7 +661,7 @@ class pbes_constelm_algorithm: public core::algorithm
                 continue;
               }
               // TODO: why not use R(t, sigma) interface here?
-              data_term_type ei = datar(*i, data::make_associative_container_substitution(e_constraints));
+              data_term_type ei = datar(*i, data::make_map_substitution(e_constraints));
               if (ci != ei)
               {
                 ci = *j;
@@ -763,7 +763,7 @@ class pbes_constelm_algorithm: public core::algorithm
     {
       if (check_log_level(level))
       {
-        std::clog << "\nEvaluated condition " << core::pp(data::substitute_free_variables(e.condition(), data::make_associative_container_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
+        std::clog << "\nEvaluated condition " << core::pp(data::substitute_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
       }
     }
 
@@ -771,7 +771,7 @@ class pbes_constelm_algorithm: public core::algorithm
     {
       if (check_log_level(level))
       {
-        std::clog << "\nCould not evaluate condition " << core::pp(data::substitute_free_variables(e.condition(), data::make_associative_container_substitution(u.constraints()))) << " to true or false";
+        std::clog << "\nCould not evaluate condition " << core::pp(data::substitute_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
       }
     }
 
@@ -905,7 +905,7 @@ class pbes_constelm_algorithm: public core::algorithm
           LOG_EDGE_UPDATE(2, e, u, v);
 
           // TODO: why not use R(t, sigma) interface here?
-          term_type value = m_pbes_rewriter(e.condition(), data::make_associative_container_substitution(u.constraints()));
+          term_type value = m_pbes_rewriter(e.condition(), data::make_map_substitution(u.constraints()));
           LOG_CONDITION(2, e, u, value);
 
           if (!tr::is_false(value) && !tr::is_true(value))
@@ -960,7 +960,7 @@ class pbes_constelm_algorithm: public core::algorithm
           *i = pbes_equation(
                  i->symbol(),
                  i->variable(),
-                 pbes_system::substitute_free_variables(i->formula(), data::make_associative_container_substitution(v.constraints()))
+                 pbes_system::substitute_free_variables(i->formula(), data::make_map_substitution(v.constraints()))
                );
         }
       }

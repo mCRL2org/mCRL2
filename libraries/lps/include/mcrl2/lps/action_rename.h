@@ -463,9 +463,9 @@ void rename_renamerule_variables(data::data_expression& rcond, lps::action& rlef
     }
   }
 
-  rcond = data::substitute_free_variables(rcond, mcrl2::data::make_associative_container_substitution(renamings));
-  rleft = lps::substitute_free_variables(rleft, mcrl2::data::make_associative_container_substitution(renamings));
-  rright = lps::substitute_free_variables(rright, mcrl2::data::make_associative_container_substitution(renamings));
+  rcond = data::substitute_free_variables(rcond, mcrl2::data::make_map_substitution(renamings));
+  rleft = lps::substitute_free_variables(rleft, mcrl2::data::make_map_substitution(renamings));
+  rright = lps::substitute_free_variables(rright, mcrl2::data::make_map_substitution(renamings));
 }
 
 action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(

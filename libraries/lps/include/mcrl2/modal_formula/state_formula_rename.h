@@ -149,7 +149,7 @@ state_formula rename_variables(const state_formula& f, IdentifierGenerator& gene
   std::set<data::variable> src = state_formulas::find_free_variables(f);
 
   // create a mapping of replacements
-  data::mutable_associative_container_substitution<> replacements;
+  data::mutable_map_substitution<> replacements;
 
   for (std::set<data::variable>::const_iterator i = src.begin(); i != src.end(); ++i)
   {

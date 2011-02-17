@@ -77,7 +77,7 @@ bool Invariant_Checker::check_init(const data_expression a_invariant)
   }
 
   data_expression b_invariant = data::substitute_free_variables(a_invariant,
-                                data::make_associative_container_substitution(v_substitutions));
+                                data::make_map_substitution(v_substitutions));
   f_bdd_prover.set_formula(b_invariant);
   if (f_bdd_prover.is_tautology() == answer_yes)
   {
@@ -113,7 +113,7 @@ bool Invariant_Checker::check_summand(
   }
 
   const data_expression v_subst_invariant = data::substitute_free_variables(a_invariant,
-      data::make_associative_container_substitution(v_substitutions));
+      data::make_map_substitution(v_substitutions));
 
   const data_expression v_formula = implies(and_(a_invariant, v_condition), v_subst_invariant);
   f_bdd_prover.set_formula(v_formula);

@@ -453,14 +453,14 @@ make_pair_sequence_substitution(const Container& c)
 }
 
 template <typename AssociativeContainer>
-struct associative_container_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
+struct map_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
 {
   typedef typename AssociativeContainer::key_type variable_type;
   typedef typename AssociativeContainer::mapped_type expression_type;
 
   const AssociativeContainer& m_map;
 
-  associative_container_substitution(const AssociativeContainer& m)
+  map_substitution(const AssociativeContainer& m)
     : m_map(m)
   {}
 
@@ -482,20 +482,20 @@ struct associative_container_substitution : public std::unary_function<typename 
   template <typename Expression>
   expression_type operator()(const Expression& x) const
   {
-    throw std::runtime_error("data::associative_container_substitution::operator(const Expression&) is a deprecated interface!");
+    throw std::runtime_error("data::map_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
   }
 };
 
 template <typename AssociativeContainer>
-associative_container_substitution<AssociativeContainer>
-make_associative_container_substitution(const AssociativeContainer& m)
+map_substitution<AssociativeContainer>
+make_map_substitution(const AssociativeContainer& m)
 {
-  return associative_container_substitution<AssociativeContainer>(m);
+  return map_substitution<AssociativeContainer>(m);
 }
 
 template <typename AssociativeContainer = atermpp::map<variable,data_expression> >
-struct mutable_associative_container_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
+struct mutable_map_substitution : public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
 {
   typedef typename AssociativeContainer::key_type variable_type;
   typedef typename AssociativeContainer::mapped_type expression_type;
@@ -532,15 +532,15 @@ struct mutable_associative_container_substitution : public std::unary_function<t
     }
   };
 
-  mutable_associative_container_substitution()
+  mutable_map_substitution()
   {}
 
-  mutable_associative_container_substitution(const AssociativeContainer& m)
+  mutable_map_substitution(const AssociativeContainer& m)
     : m_map(m)
   {}
 
   template <typename VariableContainer, typename ExpressionContainer>
-  mutable_associative_container_substitution(VariableContainer const& vc, ExpressionContainer const& ec)
+  mutable_map_substitution(VariableContainer const& vc, ExpressionContainer const& ec)
   {
     BOOST_ASSERT(vc.size() == ec.size());
 
@@ -569,7 +569,7 @@ struct mutable_associative_container_substitution : public std::unary_function<t
   template <typename Expression>
   expression_type operator()(const Expression& x) const
   {
-    throw std::runtime_error("data::mutable_associative_container_substitution::operator(const Expression&) is a deprecated interface!");
+    throw std::runtime_error("data::mutable_map_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
   }
 
@@ -627,25 +627,25 @@ struct mutable_associative_container_substitution : public std::unary_function<t
   }
 
   // Needed by classic_enumerator
-  bool operator==(const mutable_associative_container_substitution<AssociativeContainer>& other) const
+  bool operator==(const mutable_map_substitution<AssociativeContainer>& other) const
   {
     return m_map == other.m_map;
   }
 };
 
-/// \brief Utility function for creating a associative_container_substitution_adapter.
+/// \brief Utility function for creating a map_substitution_adapter.
 template <typename VariableContainer, typename ExpressionContainer, typename MapContainer>
-mutable_associative_container_substitution<MapContainer>
-make_mutable_associative_container_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
+mutable_map_substitution<MapContainer>
+make_mutable_map_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
 {
-  return mutable_associative_container_substitution<MapContainer>(vc, ec);
+  return mutable_map_substitution<MapContainer>(vc, ec);
 }
 
 template <typename VariableContainer, typename ExpressionContainer>
-mutable_associative_container_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >
-make_mutable_associative_container_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
+mutable_map_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >
+make_mutable_map_substitution(const VariableContainer& vc, const ExpressionContainer& ec)
 {
-  return mutable_associative_container_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
+  return mutable_map_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
 }
 
 /// \brief An adapter that makes an arbitrary substitution function mutable.
@@ -660,7 +660,7 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     typedef typename Substitution::expression_type expression_type;
 
     /// \brief Wrapper class for internal storage and substitution updates using operator()
-    typedef typename mutable_associative_container_substitution<atermpp::map<variable_type, expression_type> >::assignment assignment;
+    typedef typename mutable_map_substitution<atermpp::map<variable_type, expression_type> >::assignment assignment;
 
     /// \brief The type of the wrapped substitution
     typedef Substitution substitution_type;
@@ -670,7 +670,7 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     const Substitution& f_;
 
     /// \brief An additional mutable substitution
-    mutable_associative_container_substitution<atermpp::map<variable_type, expression_type> > g_;
+    mutable_map_substitution<atermpp::map<variable_type, expression_type> > g_;
 
   public:
     /// \brief Constructor
@@ -706,13 +706,13 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     }
 };
 
-/// \brief Specialization for mutable_associative_container_substitution.
+/// \brief Specialization for mutable_map_substitution.
 template <typename AssociativeContainer>
-class mutable_substitution_composer<mutable_associative_container_substitution<AssociativeContainer> >: public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
+class mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >: public std::unary_function<typename AssociativeContainer::key_type, typename AssociativeContainer::mapped_type>
 {
   public:
     /// \brief The type of the wrapped substitution
-    typedef mutable_associative_container_substitution<AssociativeContainer> substitution_type;
+    typedef mutable_map_substitution<AssociativeContainer> substitution_type;
 
     /// \brief type used to represent variables
     typedef typename substitution_type::variable_type variable_type;
@@ -725,13 +725,13 @@ class mutable_substitution_composer<mutable_associative_container_substitution<A
 
   protected:
     /// \brief object on which substitution manipulations are performed
-    mutable_associative_container_substitution<AssociativeContainer>& g_;
+    mutable_map_substitution<AssociativeContainer>& g_;
 
   public:
 
     /// \brief Constructor with mutable substitution object
     /// \param[in,out] g underlying substitution object
-    mutable_substitution_composer(mutable_associative_container_substitution<AssociativeContainer>& g)
+    mutable_substitution_composer(mutable_map_substitution<AssociativeContainer>& g)
       : g_(g)
     {}
 
@@ -746,7 +746,7 @@ class mutable_substitution_composer<mutable_associative_container_substitution<A
     template <typename Expression>
     expression_type operator()(const Expression& x) const
     {
-      throw std::runtime_error("data::mutable_substitution_composer<mutable_associative_container_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
+      throw std::runtime_error("data::mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
       return data_expression();
     }
 

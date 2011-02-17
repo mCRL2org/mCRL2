@@ -98,7 +98,7 @@ class rewriter_with_substitution
 {
   protected:
     Rewriter& R;
-    data::mutable_associative_container_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
+    data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
 
   public:
     /// \brief The term type
@@ -411,7 +411,7 @@ void test_substitutions1()
   data::rewriter  datar(specification);
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
 
-  data::mutable_associative_container_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
+  data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
   sigma[data::parse_variable("m: Pos")] = r(data::parse_data_expression("3"));
   sigma[data::parse_variable("n: Pos")] = r(data::parse_data_expression("4"));
 
@@ -434,7 +434,7 @@ void test_map_substitution_adapter(PbesRewriter r)
 {
   atermpp::map<data::variable, data::data_expression_with_variables> sigma;
   pbes_system::pbes_expression x = data::sort_bool::true_();
-  pbes_system::pbes_expression y = r(x, data::make_associative_container_substitution(sigma));
+  pbes_system::pbes_expression y = r(x, data::make_map_substitution(sigma));
   core::garbage_collect();
 }
 
@@ -559,7 +559,7 @@ void test_substitutions3()
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > r(datarv, datae);
 
-  data::mutable_associative_container_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
+  data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > sigma;
   sigma[data::parse_variable("l_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("m_S:Nat")]             = data::parse_data_expression("0");
   sigma[data::parse_variable("bst_K:Bool")]          = data::parse_data_expression("false");

@@ -94,7 +94,7 @@ void Options::OnEval(wxCommandEvent& /*event*/)
 
     p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
                          + wxT("Result: \"")
-                         + wxString(pp(rewr(term,make_associative_container_substitution(assignments))).c_str(), wxConvUTF8)
+                         + wxString(pp(rewr(term,make_map_substitution(assignments))).c_str(), wxConvUTF8)
                          + wxT("\"")
                          + wxTextFile::GetEOL());
 

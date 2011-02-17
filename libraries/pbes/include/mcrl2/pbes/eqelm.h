@@ -224,9 +224,9 @@ class pbes_eqelm_algorithm: public core::algorithm
     }
 
     /// \brief Computes a substitution that corresponds to the equivalence relations in X
-    data::mutable_associative_container_substitution<> compute_substitution(const string_type& X)
+    data::mutable_map_substitution<> compute_substitution(const string_type& X)
     {
-      data::mutable_associative_container_substitution<> result;
+      data::mutable_map_substitution<> result;
       const std::vector<equivalence_class>& cX = m_vertices[X];
       for (typename std::vector<equivalence_class>::const_iterator i = cX.begin(); i != cX.end(); ++i)
       {
@@ -249,7 +249,7 @@ class pbes_eqelm_algorithm: public core::algorithm
       for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type X = i->variable().name();
-        data::mutable_associative_container_substitution<> sigma = compute_substitution(X);
+        data::mutable_map_substitution<> sigma = compute_substitution(X);
         if (!sigma.empty())
         {
           i->formula() = pbes_system::substitute_free_variables(i->formula(), sigma);
@@ -309,7 +309,7 @@ class pbes_eqelm_algorithm: public core::algorithm
         todo.clear();
         propositional_variable_type kappa = p.initial_state();
         string_type X = kappa.name();
-        data::mutable_associative_container_substitution<> vX = compute_substitution(X);
+        data::mutable_map_substitution<> vX = compute_substitution(X);
         std::set<propositional_variable_type> edges = find_propositional_variable_instantiations(kappa);
         for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
         {
@@ -340,7 +340,7 @@ class pbes_eqelm_algorithm: public core::algorithm
         LOG_VERTICES(1, "--- vertices ---\n");
 
         // create a substitution function that corresponds to cX
-        data::mutable_associative_container_substitution<> vX = compute_substitution(X);
+        data::mutable_map_substitution<> vX = compute_substitution(X);
         const atermpp::set<propositional_variable_type>& edges = m_edges[X];
         for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
         {

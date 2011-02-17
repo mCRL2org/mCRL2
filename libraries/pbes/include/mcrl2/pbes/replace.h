@@ -42,7 +42,7 @@ struct prop_var_substitution: public std::unary_function<propositional_variable_
   }
 };
 
-struct prop_var_map_substitution: public data::mutable_associative_container_substitution<atermpp::map<propositional_variable_instantiation, pbes_expression> >
+struct prop_var_map_substitution: public data::mutable_map_substitution<atermpp::map<propositional_variable_instantiation, pbes_expression> >
 {
   // override the substitution
   pbes_expression operator()(const propositional_variable_instantiation& x) const

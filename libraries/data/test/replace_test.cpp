@@ -118,18 +118,18 @@ void test_variable_replace()
   BOOST_CHECK(t1 == substitute_variables(t, make_sequence_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == substitute_variables(t, make_sequence_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == substitute_variables(t, make_sequence_sequence_substitution(v, l)));
-  BOOST_CHECK(t1 == substitute_variables(t, make_mutable_associative_container_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == substitute_variables(t, make_mutable_map_substitution(variables, replacements)));
   BOOST_CHECK(t1 == substitute_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == substitute_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
   BOOST_CHECK(t1 == substitute_free_variables(t, make_sequence_sequence_substitution(v, l)));
-  BOOST_CHECK(t1 == substitute_free_variables(t, make_mutable_associative_container_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == substitute_free_variables(t, make_mutable_map_substitution(variables, replacements)));
   core::garbage_collect();
 }
 
 void test_replace_with_binders()
 {
   std::cerr << "replace with binders" << std::endl;
-  mutable_associative_container_substitution< > sigma;
+  mutable_map_substitution< > sigma;
   data_expression input1(variable("c", sort_bool::bool_()));
   data_expression input2(parse_data_expression("exists b: Bool, c: Bool. if(b, c, b)"));
 

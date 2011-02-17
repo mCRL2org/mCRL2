@@ -76,7 +76,7 @@ data_expression get_subst_equation_from_assignments(
       v_variable_1 = v_assignment_1.lhs();
       v_expression_1 = v_assignment_1.rhs();
       v_expression_1 = data::substitute_free_variables(v_expression_1,
-                       data::make_associative_container_substitution(a_substitutions_2));
+                       data::make_map_substitution(a_substitutions_2));
     }
     if (!a_assignments_2.empty() && v_next_2)
     {
@@ -85,7 +85,7 @@ data_expression get_subst_equation_from_assignments(
       v_variable_2 = v_assignment_2.lhs();
       v_expression_2 = v_assignment_2.rhs();
       v_expression_2 = data::substitute_free_variables(v_expression_2,
-                       data::make_associative_container_substitution(a_substitutions_1));
+                       data::make_map_substitution(a_substitutions_1));
     }
     while (v_variable != v_variable_1 && v_variable != v_variable_2 && i!=a_variables.end())
     {
@@ -101,7 +101,7 @@ data_expression get_subst_equation_from_assignments(
     else if (v_variable == v_variable_1)
     {
       v_variable_1 = data::substitute_free_variables(v_variable_1,
-                     data::make_associative_container_substitution(a_substitutions_1));
+                     data::make_map_substitution(a_substitutions_1));
       v_result = sort_bool::and_(data_expression(v_result), equal_to(v_expression_1, data_expression(v_variable_1)));
       v_next_1 = true;
       v_next_2 = false;
@@ -109,7 +109,7 @@ data_expression get_subst_equation_from_assignments(
     else if (v_variable == v_variable_2)
     {
       v_variable_2 = data::substitute_free_variables(v_variable_2,
-                     data::make_associative_container_substitution(a_substitutions_2));
+                     data::make_map_substitution(a_substitutions_2));
       v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_2), data_expression(v_variable_2)));
       v_next_1 = false;
       v_next_2 = true;
@@ -194,7 +194,7 @@ data_expression get_subst_equation_from_actions(
       for (data_expression_list::const_iterator j=v_expressions.begin(); j!=v_expressions.end(); ++j)
       {
         const data_expression v_subst_expression = data::substitute_free_variables(*j,
-            data::make_associative_container_substitution(a_substitutions));
+            data::make_map_substitution(a_substitutions));
         v_result = sort_bool::and_(data_expression(v_result), equal_to(*j, v_subst_expression));
       }
   }
@@ -221,9 +221,9 @@ data_expression get_confluence_condition(
 
   atermpp::map < variable,data_expression> v_substitutions_2 = get_substitutions_from_assignments(v_assignments_2);
   const data_expression v_subst_condition_1 = data::substitute_free_variables(v_condition_1,
-      data::make_associative_container_substitution(v_substitutions_2));
+      data::make_map_substitution(v_substitutions_2));
   const data_expression v_subst_condition_2 = data::substitute_free_variables(v_condition_2,
-      data::make_associative_container_substitution(v_substitutions_1));
+      data::make_map_substitution(v_substitutions_1));
   const data_expression v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
 
   const action_list v_actions =a_summand_2.multi_action().actions();

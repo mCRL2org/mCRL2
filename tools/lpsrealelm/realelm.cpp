@@ -807,7 +807,7 @@ assignment_list determine_process_initialization(
 {
   assignment_list init = reverse(get_nonreal_assignments(initialization));
   assignment_list real_assignments = get_real_assignments(initialization);
-  mutable_associative_container_substitution< atermpp::map<variable, data_expression> > replacements;
+  mutable_map_substitution< atermpp::map<variable, data_expression> > replacements;
   for (assignment_list::const_iterator i = real_assignments.begin(); i != real_assignments.end(); ++i)
   {
     replacements[i->lhs()] = i->rhs();
