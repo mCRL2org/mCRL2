@@ -395,6 +395,35 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
   }
 }
 
+BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
+{
+  using namespace mcrl2::data::sort_bool;
+  using namespace mcrl2::data::sort_list;
+  std::cerr << "struct_list_rewrite_test\n";
+  data_specification specification=parse_data_specification("sort L = struct l( R: List(Bool) );"
+                                                            "map  f:Set(L);");   // Map is added to guarantee that rewrite rules for sets 
+                                                                                  // are present.
+
+
+  rewrite_strategy_vector strategies(rewrite_strategies());
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    const data_expression e1=parse_data_expression("l( [true]) in {l( [])}",specification);
+    const data_expression e2=parse_data_expression("l( [true]) in {l( [true])}",specification);
+    const data_expression e3=parse_data_expression("l( [true]) in {l( [true]),l([false])}",specification);
+    const data_expression e4=parse_data_expression("l( [true]) in {l([false])}",specification);
+
+    data_rewrite_test(R, e1, false_());
+    data_rewrite_test(R, e2, true_());
+    data_rewrite_test(R, e3, true_());
+    data_rewrite_test(R, e4, false_());
+  }
+}
+
+
 BOOST_AUTO_TEST_CASE(set_rewrite_test)
 {
   using namespace mcrl2::data::sort_set;

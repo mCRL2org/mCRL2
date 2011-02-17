@@ -137,6 +137,7 @@ class lps2lts_tool : public lps2lts_base
       options.specification.load(m_filename);
       options.trace_prefix = m_filename.substr(0, options.trace_prefix.find_last_of('.'));
 
+      check_whether_actions_on_commandline_exist(options.trace_actions, options.specification.action_labels()); 
       if (!lps2lts.initialise_lts_generation(&options))
       {
         return false;
@@ -146,7 +147,6 @@ class lps2lts_tool : public lps2lts_base
       signal(SIGINT,premature_termination_handler);
       signal(SIGTERM,premature_termination_handler); // At ^C print a message.
 
-      check_whether_actions_on_commandline_exist(options.trace_actions, options.specification.action_labels()); 
       try
       {
         lps2lts.generate_lts();

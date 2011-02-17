@@ -92,17 +92,11 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
     throw mcrl2::runtime_error("lps2lts algorithm class may be instantiated only once.");
   }
 
-  gsVerboseMsg("initialising...\n");
   srand((unsigned)time(NULL)+getpid());
 
   lgopts = opts;
 
   lg_error = false;
-
-  /* if(lgopts->specification == lps::specification())
-  {
-    throw mcrl2::runtime_error("lps2lts algorithm class instantiated without linear process.");
-  } */
 
   lps::detail::instantiate_global_variables(lgopts->specification);
 
