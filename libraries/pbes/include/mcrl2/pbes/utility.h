@@ -12,8 +12,6 @@
 #ifndef MCRL2_PBES_UTILITY_H
 #define MCRL2_PBES_UTILITY_H
 
-#include "mcrl2/atermpp/algorithm.h"
-
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/fresh_variable_generator.h"
