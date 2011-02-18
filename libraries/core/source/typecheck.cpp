@@ -314,8 +314,6 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
 
 ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 {
-  ATfprintf(stderr,"type_check_proc_spec %t\n",proc_spec);
-  gsDebug=true; gsVerbose=true;
   if (gsVerbose)
   {
     std::cerr << "type checking process specification...\n";
