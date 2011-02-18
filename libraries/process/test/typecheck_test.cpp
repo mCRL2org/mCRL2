@@ -335,6 +335,17 @@ BOOST_AUTO_TEST_CASE(test_real_zero)
   );
 }
 
+// The following example tests whether a double assignment in a
+// process is properly caught by the typechecker.
+BOOST_AUTO_TEST_CASE(test_double_variable_assignment_in_process)
+{
+  test_typechecker_case(
+    "proc X( v :Bool  ) = tau.  X( v = true, v = false );\n"
+    "init X(true);",
+    false);
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

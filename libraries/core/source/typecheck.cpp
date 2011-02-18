@@ -314,6 +314,8 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
 
 ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 {
+  ATfprintf(stderr,"type_check_proc_spec %t\n",proc_spec);
+  gsDebug=true; gsVerbose=true;
   if (gsVerbose)
   {
     std::cerr << "type checking process specification...\n";
@@ -3129,7 +3131,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
   //Here the code for short-hand assignments begins.
   if (gsIsIdAssignment(ProcTerm))
   {
-    // if (gsDebug) { std::cerr << "typechecking a process call with short-hand assignments %T\n\n", ProcTerm);
+    if (gsDebug) { std::cerr << "typechecking a process call with short-hand assignments " << ProcTerm << "\n"; }
     ATermAppl Name=ATAgetArgument(ProcTerm,0);
     ATermList ParList=ATLtableGet(context.processes,(ATerm)Name);
     if (!ParList)
@@ -3143,7 +3145,17 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     for (ATermList l=ATLgetArgument(ProcTerm,1); !ATisEmpty(l); l=ATgetNext(l))
     {
       ATermAppl a=ATAgetFirst(l);
-      ATtablePut(As,(ATerm)ATAgetArgument(a,0),(ATerm)ATAgetArgument(a,1));
+      ATerm existing_rhs = ATtableGet(As,(ATerm)ATAgetArgument(a,0));
+      if (existing_rhs == NULL) // An assignment of the shape x:=t does not yet exist, this is OK.
+      { 
+        ATtablePut(As,(ATerm)ATAgetArgument(a,0),(ATerm)ATAgetArgument(a,1));
+      }
+      else
+      {
+        gsErrorMsg("Double assignment to variable %P (detected assigned values are %P and %P)\n",
+                          ATAgetArgument(a,0),existing_rhs,ATAgetArgument(a,1));
+        return NULL;
+      }
     }
 
     {

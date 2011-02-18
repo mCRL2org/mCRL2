@@ -204,6 +204,8 @@ std::string CASE14 =
   "init a;       \n"
   ;
 
+
+
 void test_linear(const std::string& text, bool result = true)
 {
   process_specification p = parse_process_specification(text);
