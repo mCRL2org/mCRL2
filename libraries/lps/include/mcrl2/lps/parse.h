@@ -12,7 +12,9 @@
 #ifndef MCRL2_LPS_PARSE_H
 #define MCRL2_LPS_PARSE_H
 
+#include <sstream>
 #include "mcrl2/atermpp/convert.h"
+#include "mcrl2/exception.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/process/is_linear.h"
@@ -37,7 +39,10 @@ inline
 specification parse_linear_process_specification(std::istream& spec_stream)
 {
   process::process_specification pspec = mcrl2::process::parse_process_specification(spec_stream);
-  assert(process::is_linear(pspec, true));
+  if (!process::is_linear(pspec, true))
+  {
+    throw mcrl2::runtime_error("the process specification is not linear!");
+  }
   process::detail::linear_process_conversion_traverser visitor;
   specification result = visitor.convert(pspec);
   return result;
@@ -54,13 +59,9 @@ specification parse_linear_process_specification(std::istream& spec_stream)
 inline
 specification parse_linear_process_specification(const std::string& text)
 {
-  process::process_specification pspec = mcrl2::process::parse_process_specification(text);
-  assert(process::is_linear(pspec, true));
-  process::detail::linear_process_conversion_traverser visitor;
-  specification result = visitor.convert(pspec);
-  return result;
+  std::istringstream stream(text);
+  return parse_linear_process_specification(stream);
 }
-
 
 /// \brief Parses a multi_action from an input stream
 /// \param text An input stream containing a multi_action

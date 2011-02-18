@@ -30,7 +30,7 @@ bool is_linear(const process_specification& p, bool verbose = false)
   {
     if (verbose)
     {
-      std::clog << "The number of equations is not equal to 1" << std::endl;
+      std::clog << "warning: the number of equations is not equal to 1" << std::endl;
     }
     return false;
   }
@@ -38,13 +38,17 @@ bool is_linear(const process_specification& p, bool verbose = false)
   {
     if (!visitor.is_linear(*p.equations().begin(), verbose))
     {
+      if (verbose)
+      {
+        std::clog << "warning: the first equation is not linear" << std::endl;
+      }
       return false;
     }
     if (!is_process_instance(p.init()) && !(is_process_instance_assignment(p.init())))
     {
       if (verbose)
       {
-        std::clog << "The initial process " << core::pp(p.init()) << " is not a process instance or a process instance assignment" << std::endl;
+        std::clog << "warning: the initial process " << core::pp(p.init()) << " is not a process instance or a process instance assignment" << std::endl;
       }
       return false;
     }
