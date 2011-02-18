@@ -9,11 +9,12 @@
 #include "mcrl2/core/print.h"
 #include <iterator>
 
+#include "mcrl2/atermpp/algorithm.h"
+
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/data_specification.h"
 
-#include "mcrl2/lps/substitute.h"
 #include <mcrl2/lps/linear_process.h>
 
 using namespace std;
@@ -540,7 +541,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
          ; i != parsub.end()
          ; ++i)
     {
-      lps::substitute_data_expressions(new_summand, data::data_expression_assignment(i->first , i->second), false);
+      new_summand = atermpp::replace(new_summand, i->first , i->second);
     }
 
     new_summands.push_back(new_summand);
