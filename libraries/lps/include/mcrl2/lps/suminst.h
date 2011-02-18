@@ -60,7 +60,11 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     void apply_substitution(deadlock_summand& s, Substitution& sigma)
     {
       s.condition() = m_rewriter(s.condition(), sigma);
-      s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), sigma);
+      if(s.deadlock().has_time())
+      {
+        s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), sigma);
+      }
+      assert(s.deadlock().time() != data::data_expression());
     }
 
     template <typename SummandType, typename Container>
