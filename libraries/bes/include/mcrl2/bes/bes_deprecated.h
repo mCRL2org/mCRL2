@@ -1795,7 +1795,7 @@ class boolean_equation_system
         data::variable_list occurred_data_vars;
         for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
         {
-          if (detail::occurs_in_varL(expr, *i)) // The var occurs in expr
+          if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
           {
             occurred_data_vars = push_front(occurred_data_vars, *i);
           }
@@ -1820,7 +1820,7 @@ class boolean_equation_system
         data::variable_list occurred_data_vars;
         for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
         {
-          if (detail::occurs_in_varL(expr, *i)) // The var occurs in expr
+          if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
           {
             occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
           }

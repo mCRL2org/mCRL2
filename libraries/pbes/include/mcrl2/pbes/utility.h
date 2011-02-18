@@ -12,12 +12,13 @@
 #ifndef MCRL2_PBES_UTILITY_H
 #define MCRL2_PBES_UTILITY_H
 
+#include "mcrl2/atermpp/algorithm.h" 
+
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/sort_expression.h"
 
-// JFG:
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/pbes/pbes.h"
@@ -150,10 +151,25 @@ static bool is_false_in_internal_rewrite_format(mcrl2::data::data_expression d, 
 }
 
 //  variable v occurs in l.
-//
-static bool occurs_in_varL(const pbes_system::pbes_expression& l, data::variable v)
-{
-  return pbes_system::search_variable(l, v);
+
+static bool occurs_in_varL(
+                  const pbes_system::pbes_expression& l, 
+                  const data::variable &v,
+                  const bool use_internal_rewrite_format)
+{ 
+  // In the internal format, the pbes_expression l contains data expressions
+  // in internal rewrite format. Therefore the function find_if defined on
+  // aterms must be used, instead of the function search variable which works
+  // on a pbes_expression, and which will not recognize (and therefore skip)
+  // expressions in internal format. So, it will not search the whole expression.
+  if (use_internal_rewrite_format)
+  { 
+    return find_if(l, compare_variableL(v)) != atermpp::aterm();
+  }
+  else
+  {
+    return pbes_system::search_variable(l, v);
+  }
 }
 
 /// \brief gives the rank of a propositional_variable_instantiation. It is assumed that the variable
@@ -477,7 +493,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
             for (atermpp::set <pbes_expression >::iterator t=conjunction_set.begin() ;
                  t!=conjunction_set.end() ; t++)
             {
-              if (!occurs_in_varL(*t,*i))
+              if (!occurs_in_varL(*t,*i,use_internal_rewrite_format)) 
               {
                 new_conjunction_set.insert(*t);
               }
@@ -624,7 +640,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
             for (atermpp::set <pbes_expression >::iterator t=disjunction_set.begin() ;
                  t!=disjunction_set.end() ; t++)
             {
-              if (!occurs_in_varL(*t,*i))
+              if (!occurs_in_varL(*t,*i,use_internal_rewrite_format))
               {
                 new_disjunction_set.insert(*t);
               }
