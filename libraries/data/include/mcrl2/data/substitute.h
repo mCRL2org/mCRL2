@@ -26,6 +26,7 @@ namespace data
 namespace detail
 {
 
+/// \cond INTERNAL_DOCS
 template <template <class> class Builder, class Substitution>
 struct substitute_sort_expressions_builder: public Builder<substitute_sort_expressions_builder<Builder, Substitution> >
 {
@@ -152,6 +153,7 @@ make_substitute_free_variables_builder(Substitution sigma, const VariableContain
 {
   return substitute_free_variables_builder<Builder, Binder, Substitution>(sigma, bound_variables);
 }
+/// \endcond
 
 } // namespace detail
 

@@ -30,7 +30,7 @@ namespace data
 
 namespace detail
 {
-
+/// \cond INTERNAL_DOCS
 template <template <class> class Traverser, class OutputIterator>
 struct find_identifiers_traverser: public Traverser<find_identifiers_traverser<Traverser, OutputIterator> >
 {
@@ -241,6 +241,7 @@ make_find_free_variables_traverser(OutputIterator out, const VariableContainer& 
 {
   return find_free_variables_traverser<Traverser, Binder, OutputIterator>(out, v);
 }
+/// \endcond
 
 } // namespace detail
 
