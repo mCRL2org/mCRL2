@@ -1,10 +1,8 @@
 [Desktop Entry]
 Name=mCRL2
-GenericName=mcrl2-gui
-Terminal=false
-Comment=A graphical front-end for the mcrl2 toolset
+Comment=Graphical front end for mCRL2 toolset
 Type=Application
 Exec=mcrl2-gui
-Icon=mcrl2-gui
-Categories=Development;Science; 
+Categories=Education;Science;
 X-SuSE-translate=true
+
