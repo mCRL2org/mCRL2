@@ -41,32 +41,32 @@ Graph* XMLImporter::importFile(const std::string& filename)
         wxString ret_value;
 
         unsigned long value;
-        graph_child->GetAttribute(wxT("value"), &ret_value);
+        graph_child->GetPropVal(wxT("value"), &ret_value);
         ret_value.ToULong(&value);
 
         bool isInitial;
-        graph_child->GetAttribute(wxT("isInitial"), &ret_value);
+        graph_child->GetPropVal(wxT("isInitial"), &ret_value);
         isInitial = (ret_value == wxT("1"));
 
         double x;
-        graph_child->GetAttribute(wxT("x"), &ret_value);
+        graph_child->GetPropVal(wxT("x"), &ret_value);
         ret_value.ToDouble(&x);
 
         double y;
-        graph_child->GetAttribute(wxT("y"), &ret_value);
+        graph_child->GetPropVal(wxT("y"), &ret_value);
         ret_value.ToDouble(&y);
 
         double z;
-        graph_child->GetAttribute(wxT("z"), &ret_value);
+        graph_child->GetPropVal(wxT("z"), &ret_value);
         ret_value.ToDouble(&z);
 
-        graph_child->GetAttribute(wxT("red"), &ret_value);
+        graph_child->GetPropVal(wxT("red"), &ret_value);
         int red = wxAtoi(ret_value);
 
-        graph_child->GetAttribute(wxT("green"), &ret_value);
+        graph_child->GetPropVal(wxT("green"), &ret_value);
         int green = wxAtoi(ret_value);
 
-        graph_child->GetAttribute(wxT("blue"), &ret_value);
+        graph_child->GetPropVal(wxT("blue"), &ret_value);
         int blue = wxAtoi(ret_value);
 
         wxColour colour(red, green, blue);
@@ -83,7 +83,7 @@ Graph* XMLImporter::importFile(const std::string& filename)
             while (parameter_child)
             {
               wxString name;
-              parameter_child->GetAttribute(wxT("name"), &name);
+              parameter_child->GetPropVal(wxT("name"), &name);
               wxString content = parameter_child->GetContent();
 
 
@@ -120,26 +120,26 @@ Graph* XMLImporter::importFile(const std::string& filename)
         wxString ret_value;
 
         unsigned long from;
-        graph_child->GetAttribute(wxT("from"), &ret_value);
+        graph_child->GetPropVal(wxT("from"), &ret_value);
         ret_value.ToULong(&from);
 
         unsigned long to;
-        graph_child->GetAttribute(wxT("to"), &ret_value);
+        graph_child->GetPropVal(wxT("to"), &ret_value);
         ret_value.ToULong(&to);
 
-        graph_child->GetAttribute(wxT("label"), &ret_value);
+        graph_child->GetPropVal(wxT("label"), &ret_value);
         std::string label = std::string(ret_value.mb_str()) ;
 
         double x;
-        graph_child->GetAttribute(wxT("x"), &ret_value);
+        graph_child->GetPropVal(wxT("x"), &ret_value);
         ret_value.ToDouble(&x);
 
         double y;
-        graph_child->GetAttribute(wxT("y"), &ret_value);
+        graph_child->GetPropVal(wxT("y"), &ret_value);
         ret_value.ToDouble(&y);
 
         double z;
-        graph_child->GetAttribute(wxT("z"), &ret_value);
+        graph_child->GetPropVal(wxT("z"), &ret_value);
         ret_value.ToDouble(&z);
 
         if (from == to)

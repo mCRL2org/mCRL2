@@ -36,14 +36,14 @@ bool ExporterXML::export_to(wxString _filename)
       wxColour c = s->getColour();
 
       size_t fromVal = s->getValue();
-      state->AddAttribute(wxT("value"), wxString::Format(wxT("%lu"), fromVal));
-      state->AddAttribute(wxT("isInitial"), wxString::Format(wxT("%i"), s->isInitialState()));
-      state->AddAttribute(wxT("x"), wxString::Format(wxT("%f"), s->getX()));
-      state->AddAttribute(wxT("y"), wxString::Format(wxT("%f"), s->getY()));
-      state->AddAttribute(wxT("z"), wxString::Format(wxT("%f"), s->getZ()));
-      state->AddAttribute(wxT("red"), wxString::Format(wxT("%i"), (int)c.Red()));
-      state->AddAttribute(wxT("green"), wxString::Format(wxT("%i"), (int)c.Green()));
-      state->AddAttribute(wxT("blue"), wxString::Format(wxT("%i"), (int)c.Blue()));
+      state->AddProperty(wxT("value"), wxString::Format(wxT("%lu"), fromVal));
+      state->AddProperty(wxT("isInitial"), wxString::Format(wxT("%i"), s->isInitialState()));
+      state->AddProperty(wxT("x"), wxString::Format(wxT("%f"), s->getX()));
+      state->AddProperty(wxT("y"), wxString::Format(wxT("%f"), s->getY()));
+      state->AddProperty(wxT("z"), wxString::Format(wxT("%f"), s->getZ()));
+      state->AddProperty(wxT("red"), wxString::Format(wxT("%i"), (int)c.Red()));
+      state->AddProperty(wxT("green"), wxString::Format(wxT("%i"), (int)c.Green()));
+      state->AddProperty(wxT("blue"), wxString::Format(wxT("%i"), (int)c.Blue()));
 
       std::map<std::string, std::string> params = s->getParameters();
       std::map<std::string, std::string>::iterator it;
@@ -51,7 +51,7 @@ bool ExporterXML::export_to(wxString _filename)
       for (it = params.begin(); it != params.end(); ++it)
       {
         wxXmlNode* parameter = new wxXmlNode(state, wxXML_ELEMENT_NODE , wxT("Parameter"));
-        parameter->AddAttribute(wxT("name"), wxString(it->first.c_str(), wxConvUTF8));
+        parameter->AddProperty(wxT("name"), wxString(it->first.c_str(), wxConvUTF8));
         new wxXmlNode(parameter , wxXML_TEXT_NODE , wxEmptyString, wxString(it->second.c_str(), wxConvUTF8));
       }
 
@@ -61,15 +61,15 @@ bool ExporterXML::export_to(wxString _filename)
         wxXmlNode* transition = new wxXmlNode(root, wxXML_ELEMENT_NODE , wxT("Transition"));
 
         size_t toVal = t->getTo()->getValue();
-        transition->AddAttribute(wxT("from"), wxString::Format(wxT("%lu"), fromVal));
-        transition->AddAttribute(wxT("to"), wxString::Format(wxT("%lu"), toVal));
-        transition->AddAttribute(wxT("label"), wxString(t->getLabel().c_str(), wxConvUTF8));
+        transition->AddProperty(wxT("from"), wxString::Format(wxT("%lu"), fromVal));
+        transition->AddProperty(wxT("to"), wxString::Format(wxT("%lu"), toVal));
+        transition->AddProperty(wxT("label"), wxString(t->getLabel().c_str(), wxConvUTF8));
 
         double x, y, z;
         t->getControl(x, y, z);
-        transition->AddAttribute(wxT("x"), wxString::Format(wxT("%f"), x));
-        transition->AddAttribute(wxT("y"), wxString::Format(wxT("%f"), y));
-        transition->AddAttribute(wxT("z"), wxString::Format(wxT("%f"), z));
+        transition->AddProperty(wxT("x"), wxString::Format(wxT("%f"), x));
+        transition->AddProperty(wxT("y"), wxString::Format(wxT("%f"), y));
+        transition->AddProperty(wxT("z"), wxString::Format(wxT("%f"), z));
 
       }
 
@@ -78,15 +78,15 @@ bool ExporterXML::export_to(wxString _filename)
         Transition* t = s->getSelfLoop(j);
         wxXmlNode* transition = new wxXmlNode(root, wxXML_ELEMENT_NODE , wxT("Transition"));
 
-        transition->AddAttribute(wxT("from"), wxString::Format(wxT("%lu"), fromVal));
-        transition->AddAttribute(wxT("to"), wxString::Format(wxT("%lu"), fromVal));
-        transition->AddAttribute(wxT("label"), wxString(t->getLabel().c_str(), wxConvUTF8));
+        transition->AddProperty(wxT("from"), wxString::Format(wxT("%lu"), fromVal));
+        transition->AddProperty(wxT("to"), wxString::Format(wxT("%lu"), fromVal));
+        transition->AddProperty(wxT("label"), wxString(t->getLabel().c_str(), wxConvUTF8));
 
         double x, y, z;
         t->getControl(x, y, z);
-        transition->AddAttribute(wxT("x"), wxString::Format(wxT("%f"), x));
-        transition->AddAttribute(wxT("y"), wxString::Format(wxT("%f"), y));
-        transition->AddAttribute(wxT("z"), wxString::Format(wxT("%f"), z));
+        transition->AddProperty(wxT("x"), wxString::Format(wxT("%f"), x));
+        transition->AddProperty(wxT("y"), wxString::Format(wxT("%f"), y));
+        transition->AddProperty(wxT("z"), wxString::Format(wxT("%f"), z));
       }
     }
     wx_doc.Save(_filename);

@@ -140,8 +140,8 @@ endmacro( add_lps2lts_release_test ARGS SAVE)
 
 macro( gen_lps2lts_release_tests )
 
-		UNSET( act )
-		UNSET( fst_act )
+		SET( act "")
+		SET( fst_act "")
 		if( EXISTS ${testdir}/${BASENAME_TEST}_hide_action.txt )
 		  file(STRINGS ${testdir}/${BASENAME_TEST}_hide_action.txt act)
 		  set( fst_act "" )

@@ -8,8 +8,8 @@
 
 # Set Warning
 
-cmake_minimum_required (VERSION 2.8)
-message(STATUS "CMAKE VERSION: ${CMAKE_VERSION}")
+cmake_minimum_required (VERSION 2.6)
+message(STATUS "CMAKE VERSION: ${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}.${CMAKE_PATCH_VERSION}")
 project (MCRL2)
 # Commonly used options
 # ---------------------
@@ -72,6 +72,22 @@ project (MCRL2)
 #
 #   http://www.cmake.org/cmake/help/cmake2.6docs.html#prop_dir:COMPILE_DEFINITIONS
 #
+
+set( MCRL2_ENABLE_SVN false )
+set( MCRL2_ENABLE_PARSERS false )
+
+IF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" STRLESS "2.8" )
+  message(STATUS "=========================================" )
+  message(STATUS "CMake version 2.8+ is required for:" )
+  message(STATUS "  svn revision in tools" )
+  message(STATUS "  generating parsers" )
+  message(STATUS "Current version of CMake is NOT suitable" )
+  message(STATUS "for development purposes." )
+  message(STATUS "=========================================" )
+
+	set( MCRL2_ENABLE_SVN false )
+	set( MCRL2_ENABLE_PARSERS false )
+ENDIF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" STRLESS "2.8" )
 
 # Set path where additional modules can be found
 set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" ) 
@@ -348,13 +364,17 @@ set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
 set(MCRL2_SVN_LABEL "" CACHE STRING "Overwrite SVN revision with a custom string" )
 if( MCRL2_SVN_LABEL STREQUAL "" )
-FIND_PACKAGE(Subversion)
-  IF(SUBVERSION_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
-    Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
-	  set(SVN_REV ${Project_WC_REVISION})
-  ELSE(SUBVERSION_FOUND)
-    set(SVN_REV "Unknown")
-  ENDIF(SUBVERSION_FOUND  AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
+  if( MCRL2_ENABLE_SVN )
+  FIND_PACKAGE(Subversion)
+    IF(SUBVERSION_FOUND AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
+      Subversion_WC_INFO(${PROJECT_SOURCE_DIR} Project)
+  	  set(SVN_REV ${Project_WC_REVISION})
+    ELSE(SUBVERSION_FOUND)
+      set(SVN_REV "Unknown")
+    ENDIF(SUBVERSION_FOUND  AND EXISTS "${CMAKE_SOURCE_DIR}/.svn")
+  else( MCRL2_ENABLE_SVN )
+    set( SVN_REV "Unknown" )	
+  endif( MCRL2_ENABLE_SVN )
 else( MCRL2_SVN_LABEL STREQUAL "" )
   set( SVN_REV ${MCRL2_SVN_LABEL} )	
 endif( MCRL2_SVN_LABEL STREQUAL "" )
@@ -969,10 +989,10 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
     LABELS "${MCRL2_TEST_LABEL}"
   )
 
+
 ##---------------------------------------
 ## Tool release tests
 ##---------------------------------------
-
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateReleaseToolTests.cmake)
 
 # Usage run_release_tests( "/path/to/mcrl2file" "list of tests to disable" )
@@ -998,92 +1018,8 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2"			 "lpsparunfold")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "")
 
-#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/bke/bke.mcrl2" "" )
-#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/mpsu/mpsu.mcrl2" "")
-#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp_bw/abp_bw.mcrl2" "")
-#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/bakery/bakery.mcrl2" "")
-#run_release_tests( "${CMAKE_SOURCE_DIR}/examples/industrial/chatbox/chatbox.mcrl2" "")
-
-				# ;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-r2.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-r3.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-r1.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-r2-error.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/garage/garage-ver.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/lift/lift3-final.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/lift/lift3-init.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/brp/brp.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/alma/alma.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/1394/1394-fin.mcrl2
-				#	;${CMAKE_SOURCE_DIR}/examples/industrial/chatbox/chatbox.mcrl2
-				# ;${CMAKE_SOURCE_DIR}/examples/academic/par/par.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/cabp/cabp.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/goback/goback.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining3.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining3_schedule_seq.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining3_seq.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining8.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining_10000.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining3_cs_seq.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining3_cs.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining_1000.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining3_ns.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining_100.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining3_ns_seq.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining_10.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/dining/dining3_schedule.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/commprot/commprot.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/bke/bke.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/mpsu/mpsu.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/abp_bw/abp_bw.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/bakery/bakery.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/parallel/parallel.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/producer_consumer/producer_consumer.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/scheduler/scheduler.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/tree/tree.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/onebit/onebit.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/block/block.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/cellular_automata/cellular_automata.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/allow/allow.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/swp/swp_with_tanenbaums_bug.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/swp/swp_fgpbp.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/swp/swp_lists.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/swp/swp_func.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/trains/trains.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/academic/leader/leader.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/generated/nat_test_dag/nat_test_dag.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/fischer/fischer_10.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/fischer/fischer_10000.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/fischer/fischer_100.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/fischer/fischer_1000.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/fischer/fischer.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/simple/simple.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/ball_game/ball_game.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/clock/clock_exact.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/clock/clock_hasty.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/clock/clock_drift.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/timed/light/light.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/clobber/clobber.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/rubiks_cube/rubiks_cube.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/magic_square/magic_square.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/peg_solitaire/peg_solitaire.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/othello/othello.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/knights/knights.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/hex/hex.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/domineering/domineering.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/four_in_a_row/four_in_a_row.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/snake/snake.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/games/wolf_goat_cabbage/wolf_goat_cabbage.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/project/abp/abp.mcrl2
-		    # ;${CMAKE_SOURCE_DIR}/examples/project/wafer_stepper/wafer_stepper.mcrl2
-				# Following test produces an infinite state-space
-   			#	;${CMAKE_SOURCE_DIR}/examples/language/small1.mcrl2
-				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_1.mcrl2
-				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_2.mcrl2
-				# ;${CMAKE_SOURCE_DIR}/examples/language/gpa_10_3.mcrl2
-  
 endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
+
 
 # Random test generation
 option(MCRL2_ENABLE_RANDOM_TEST_TARGETS "Enable/disable random test generation" OFF)
@@ -1180,6 +1116,8 @@ endif(Boost_FOUND)
 ## Target parsers
 ##---------------------------------------------------
 
+if( MCRL2_ENABLE_PARSERS  )
+
 find_package(BISON)
 find_package(FLEX)
 
@@ -1233,6 +1171,7 @@ if(FLEX_FOUND AND BISON_FOUND)
 
 endif(FLEX_FOUND AND BISON_FOUND)
 
+endif( MCRL2_ENABLE_PARSERS  )
 
 ##---------------------------------------------------
 ## mCRL2 Sigle Bundle for MacOSX

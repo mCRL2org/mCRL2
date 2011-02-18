@@ -337,19 +337,19 @@ vector<Tool> Initialization::Read_tools()
     }
 
     wxString value;
-    value = child->GetAttribute(wxT("name"), wxEmptyString);
+    value = child->GetPropVal(wxT("name"), wxEmptyString);
     tool.m_name = value.mb_str();
 
-    value = child->GetAttribute(wxT("shell"), wxEmptyString);
+    value = child->GetPropVal(wxT("shell"), wxEmptyString);
     if (!(value.IsEmpty() || value == wxT("false")))
     {
       tool.m_tool_type = ishell;
     }
 
-    value = child->GetAttribute(wxT("input_format"), wxEmptyString);
+    value = child->GetPropVal(wxT("input_format"), wxEmptyString);
     tool.m_input_type = value.mb_str();
 
-    value = child->GetAttribute(wxT("output_format"), wxEmptyString);
+    value = child->GetPropVal(wxT("output_format"), wxEmptyString);
     tool.m_output_type = value.mb_str();
 
     for (multimap<std::string,std::string>::iterator it = m_extention_tool_mapping.begin();
@@ -363,7 +363,7 @@ vector<Tool> Initialization::Read_tools()
       }
     };
 
-    value = child->GetAttribute(wxT("location"), wxEmptyString);
+    value = child->GetPropVal(wxT("location"), wxEmptyString);
     std::string location = std::string(value.mb_str());
     if (location.empty())
     {
@@ -395,7 +395,7 @@ vector<Tool> Initialization::Read_tools()
       cout << "File \"" << location << "\" does not exist" << endl;
     }
 
-    value = child->GetAttribute(wxT("category"), wxEmptyString);
+    value = child->GetPropVal(wxT("category"), wxEmptyString);
     tool.m_category = value.mb_str();
 
     tools.push_back(tool);
