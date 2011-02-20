@@ -281,21 +281,6 @@ struct my_sort_substitution: public std::unary_function<data::basic_sort, data::
 
 void test_sort_substitution()
 {
-  my_sort_substitution sigma;
-  data_expression x = variable("v", sort_nat::nat());
-  data_expression y = variable("v", sort_pos::pos());
-  data_expression z = data::substitute_sorts(x, sigma);
-  BOOST_CHECK(z == y);
-
-  sort_assignment a(sort_nat::nat(), sort_pos::pos());
-  z = data::substitute_sorts(x, a);
-  BOOST_CHECK(z == y);
-
-  core::garbage_collect();
-}
-
-void test_recursive_sort_substitution()
-{
   using namespace mcrl2::data;
   using namespace mcrl2::data::sort_list;
   using namespace mcrl2::data::sort_set;
@@ -326,11 +311,15 @@ void test_recursive_sort_substitution()
   std::cout << "s1 = " << core::pp(s1) << std::endl;
   std::cout << "s2 = " << core::pp(s2) << std::endl;
 
-  // apply the substitution s1 := s0 recursively to s2
+  // apply the substitution s1 := s0 innermost to s2
   sort_expression s3 = data::substitute_sort_expressions(s2, sort_expression_assignment(s1, s0), true);
+  std::cout << "s3 = " << core::pp(s3) << std::endl;
   BOOST_CHECK(s3 == s0);
 
-  std::cout << "s3 = " << core::pp(s3) << std::endl;
+  // apply the substitution s1 := s0 to s2
+  sort_expression s4 = data::substitute_sort_expressions(s2, sort_expression_assignment(s1, s0), false);
+  std::cout << "s4 = " << core::pp(s4) << std::endl;
+  BOOST_CHECK(s4 == s2);
 
   core::garbage_collect();
 }
@@ -347,7 +336,6 @@ int test_main(int a, char** aa)
   test_list_substitution();
   test_mutable_substitution();
   test_sort_substitution();
-  test_recursive_sort_substitution();
 
   return EXIT_SUCCESS;
 }
