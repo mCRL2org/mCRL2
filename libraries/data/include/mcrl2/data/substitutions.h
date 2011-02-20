@@ -12,7 +12,9 @@
 #ifndef MCRL2_DATA_SUBSTITUTIONS_H
 #define MCRL2_DATA_SUBSTITUTIONS_H
 
+#include <functional>
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {

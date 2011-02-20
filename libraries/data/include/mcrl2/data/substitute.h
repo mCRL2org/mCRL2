@@ -15,7 +15,6 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/add_binding.h"
 #include "mcrl2/data/builder.h"
-#include "mcrl2/data/substitutions.h"
 
 namespace mcrl2
 {
@@ -276,5 +275,9 @@ T substitute_sorts(const T& x,
 } // namespace data
 
 } // namespace mcrl2
+
+#ifndef MCRL2_DATA_SUBSTITUTIONS_H
+#include "mcrl2/data/substitutions.h"
+#endif
 
 #endif // MCRL2_DATA_SUBSTITUTE_H
