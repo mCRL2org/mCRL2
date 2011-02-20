@@ -37,6 +37,7 @@ class linear_process; // prototype declaration
 // <LinearProcess> ::= LinearProcess(<DataVarId>*, <LinearProcessSummand>*)
 class linear_process
 {
+  friend atermpp::aterm_appl linear_process_to_aterm(const linear_process& p);
   protected:
     /// \brief The process parameters of the process
     data::variable_list m_process_parameters;
@@ -47,6 +48,44 @@ class linear_process
     /// \brief The action summands of the process
     action_summand_vector m_action_summands;
 
+    /// \brief Set the summands of the linear process
+    /// \deprecated
+    void set_summands(const deprecated::summand_list& summands)
+    {
+      m_deadlock_summands.clear();
+      m_action_summands  .clear();
+      for (deprecated::summand_list::iterator j = summands.begin(); j != summands.end(); ++j)
+      {
+        if (j->is_delta())
+        {
+          m_deadlock_summands.push_back(deadlock_summand(j->summation_variables(), j->condition(), j->deadlock()));
+        }
+        else
+        {
+          m_action_summands.push_back(action_summand(j->summation_variables(), j->condition(), j->multi_action(), j->assignments()));
+        }
+      }
+    }
+
+    /// \brief Returns the sequence of LPS summands.
+    /// \return The sequence of LPS summands.
+    /// \deprecated
+    deprecated::summand_list summands() const
+    {
+      deprecated::summand_list result;
+      for (deadlock_summand_vector::const_reverse_iterator i = m_deadlock_summands.rbegin(); i != m_deadlock_summands.rend(); ++i)
+      {
+        deprecated::summand s = atermpp::aterm_appl(deadlock_summand_to_aterm(*i));
+        result = atermpp::push_front(result, s);
+      }
+      for (action_summand_vector::const_reverse_iterator i = m_action_summands.rbegin(); i != m_action_summands.rend(); ++i)
+      {
+        deprecated::summand s = atermpp::aterm_appl(action_summand_to_aterm(*i));
+        result = atermpp::push_front(result, s);
+      }
+      return result;
+    }
+    
   public:
     /// \brief Constructor.
     linear_process()
@@ -62,25 +101,6 @@ class linear_process
       m_deadlock_summands(deadlock_summands),
       m_action_summands(action_summands)
     { }
-
-    /// \brief Set the summands of the linear process
-    /// \deprecated
-    void set_summands(const summand_list& summands)
-    {
-      m_deadlock_summands.clear();
-      m_action_summands  .clear();
-      for (summand_list::iterator j = summands.begin(); j != summands.end(); ++j)
-      {
-        if (j->is_delta())
-        {
-          m_deadlock_summands.push_back(deadlock_summand(j->summation_variables(), j->condition(), j->deadlock()));
-        }
-        else
-        {
-          m_action_summands.push_back(action_summand(j->summation_variables(), j->condition(), j->multi_action(), j->assignments()));
-        }
-      }
-    }
 
     /// \brief Constructor.
     /// \param lps A term
@@ -99,25 +119,6 @@ class linear_process
     size_t summand_count() const
     {
       return m_deadlock_summands.size() + m_action_summands.size();
-    }
-
-    /// \brief Returns the sequence of LPS summands.
-    /// \return The sequence of LPS summands.
-    /// \deprecated
-    summand_list summands() const
-    {
-      summand_list result;
-      for (deadlock_summand_vector::const_reverse_iterator i = m_deadlock_summands.rbegin(); i != m_deadlock_summands.rend(); ++i)
-      {
-        summand s = atermpp::aterm_appl(deadlock_summand_to_aterm(*i));
-        result = atermpp::push_front(result, s);
-      }
-      for (action_summand_vector::const_reverse_iterator i = m_action_summands.rbegin(); i != m_action_summands.rend(); ++i)
-      {
-        summand s = atermpp::aterm_appl(action_summand_to_aterm(*i));
-        result = atermpp::push_front(result, s);
-      }
-      return result;
     }
 
     /// \brief Returns the sequence of action summands.
@@ -201,6 +202,50 @@ std::string pp(const linear_process& p)
 {
   return core::pp(linear_process_to_aterm(p));
 }
+
+namespace deprecated
+{
+/// \brief Set the summands of the linear process
+/// \deprecated
+inline
+void set_linear_process_summands(linear_process& p, const summand_list& summands)
+{
+  p.deadlock_summands().clear();
+  p.action_summands().clear();
+  for (summand_list::iterator j = summands.begin(); j != summands.end(); ++j)
+  {
+    if (j->is_delta())
+    {
+      p.deadlock_summands().push_back(deadlock_summand(j->summation_variables(), j->condition(), j->deadlock()));
+    }
+    else
+    {
+      p.action_summands().push_back(action_summand(j->summation_variables(), j->condition(), j->multi_action(), j->assignments()));
+    }
+  }
+}
+
+/// \brief Returns the sequence of LPS summands.
+/// \return The sequence of LPS summands.
+/// \deprecated
+inline
+summand_list linear_process_summands(const linear_process& p)
+{
+  summand_list result;
+  for (deadlock_summand_vector::const_reverse_iterator i = p.deadlock_summands().rbegin(); i != p.deadlock_summands().rend(); ++i)
+  {
+    summand s = atermpp::aterm_appl(deadlock_summand_to_aterm(*i));
+    result = atermpp::push_front(result, s);
+  }
+  for (action_summand_vector::const_reverse_iterator i = p.action_summands().rbegin(); i != p.action_summands().rend(); ++i)
+  {
+    summand s = atermpp::aterm_appl(action_summand_to_aterm(*i));
+    result = atermpp::push_front(result, s);
+  }
+  return result;
+}
+
+} // namespace deprecated
 
 } // namespace lps
 

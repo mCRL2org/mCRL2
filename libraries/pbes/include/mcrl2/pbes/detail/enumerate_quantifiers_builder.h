@@ -218,7 +218,7 @@ class quantifier_enumerator
       {
         PbesTerm c = r_(phi_, sigma_);
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-        std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << to_string(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
+        std::cerr << "        Z = Z + " << core::pp(c) << (empty_intersection(c.variables(), v_) ? " (constant)" : "") << " sigma = " << data::print_substitution(sigma_) << " dependencies = " << print_term_container(v_) << std::endl;
 #endif
         if (stop_(c))
         {
@@ -270,7 +270,7 @@ class quantifier_enumerator
                 << (tr::is_false(stop_value) ? "forall " : "exists ")
                 << core::pp(x) << ". "
                 << core::pp(phi)
-                << to_string(sigma) << std::endl;
+                << data::print_substitution(sigma) << std::endl;
     }
 
     /// \brief Returns a string representation of D[i]

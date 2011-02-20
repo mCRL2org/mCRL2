@@ -104,7 +104,7 @@ class summand_information
 {
 
   private:
-    mcrl2::lps::summand smd;
+    mcrl2::lps::deprecated::summand smd;
     variable_list real_summation_variables;
     variable_list non_real_summation_variables;
     std::vector < linear_inequality > summand_real_conditions;
@@ -121,7 +121,7 @@ class summand_information
 
   public:
     summand_information(
-      const mcrl2::lps::summand s,
+      const mcrl2::lps::deprecated::summand s,
       variable_list rsv,
       variable_list nrsv,
       std::vector < linear_inequality > src,
@@ -168,7 +168,7 @@ class summand_information
 
     }
 
-    mcrl2::lps::summand get_summand() const
+    mcrl2::lps::deprecated::summand get_summand() const
     {
       return smd;
     }

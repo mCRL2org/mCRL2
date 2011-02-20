@@ -77,8 +77,8 @@ inline
 std::set<core::identifier_string> summand_variable_names(const linear_process& p)
 {
   std::set<core::identifier_string> result;
-  summand_list summands = p.summands();
-  for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
+  deprecated::summand_list summands = deprecated::linear_process_summands(p);
+  for (deprecated::summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
   {
     data::variable_list summation_variables(i->summation_variables());
     result.insert(

@@ -107,7 +107,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                   << pp(d_j) << "\n"
                   << "      value before: " << pp(Rd_j) << "\n"
                   << "      value after:  " << pp(Rg_ij) << "\n"
-                  << "      replacements: " << data::to_string(sigma) << std::endl;
+                  << "      replacements: " << data::print_substitution(sigma) << std::endl;
       }
     }
 
@@ -123,7 +123,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       {
         std::clog << msg
                   << pp(cond)
-                  << data::to_string(sigma)
+                  << data::print_substitution(sigma)
                   << " -> "
                   << pp(c_i) << std::endl;
       }

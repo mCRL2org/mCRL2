@@ -387,7 +387,7 @@ struct lps_well_typed_checker
   /// <li>the condition has sort Bool</li>
   /// <li>the summation variables have unique names</li>
   /// </ul>
-  bool is_well_typed(const summand& s) const
+  bool is_well_typed(const deprecated::summand& s) const
   {
     // check 1)
     if (!check_assignments(s.assignments(), "summand"))

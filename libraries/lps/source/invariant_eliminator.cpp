@@ -31,8 +31,8 @@ using namespace mcrl2::lps;
 // Class Invariant_Eliminator ---------------------------------------------------------------------
 // Class Invariant_Eliminator - Functions declared private --------------------------------------
 
-mcrl2::lps::summand Invariant_Eliminator::simplify_summand(
-  const summand a_summand,
+mcrl2::lps::deprecated::summand Invariant_Eliminator::simplify_summand(
+  const deprecated::summand a_summand,
   const data_expression a_invariant,
   const bool a_no_elimination,
   const size_t a_summand_number)
@@ -42,7 +42,7 @@ mcrl2::lps::summand Invariant_Eliminator::simplify_summand(
 
   if (a_no_elimination)
   {
-    return summand(a_summand.summation_variables(),
+    return deprecated::summand(a_summand.summation_variables(),
                    v_formula,
                    a_summand.is_delta(),
                    a_summand.actions(),
@@ -53,14 +53,14 @@ mcrl2::lps::summand Invariant_Eliminator::simplify_summand(
   f_bdd_prover.set_formula(v_formula);
   if (f_bdd_prover.is_contradiction() == answer_yes)
   {
-    return summand(variable_list(),sort_bool::false_(),deadlock(sort_real::real_(0)));
+    return deprecated::summand(variable_list(),sort_bool::false_(),deadlock(sort_real::real_(0)));
   }
   else
   {
     if (f_simplify_all)
     {
       gsMessage("Summand number %d is simplified.\n", a_summand_number);
-      return summand(a_summand.summation_variables(),
+      return deprecated::summand(a_summand.summation_variables(),
                      data_expression(f_bdd_prover.get_bdd()),
                      a_summand.is_delta(),
                      a_summand.actions(),
@@ -99,14 +99,14 @@ specification Invariant_Eliminator::simplify(
   const bool a_no_elimination,
   const size_t a_summand_number)
 {
-  const summand_list v_summands = f_lps.process().summands();
-  summand_list v_simplified_summands;
+  const deprecated::summand_list v_summands = deprecated::linear_process_summands(f_lps.process());
+  lps::deprecated::summand_list v_simplified_summands;
   size_t v_summand_number = 1;
 
-  for (summand_list::const_iterator i=v_summands.begin();
+  for (deprecated::summand_list::const_iterator i=v_summands.begin();
        i!=v_summands.end(); ++i)
   {
-    summand v_summand = *i;
+    lps::deprecated::summand v_summand = *i;
     if ((a_summand_number == v_summand_number) || (a_summand_number == 0))
     {
       v_summand = simplify_summand(v_summand, a_invariant, a_no_elimination, v_summand_number);
@@ -127,7 +127,7 @@ specification Invariant_Eliminator::simplify(
   }
   v_simplified_summands = reverse(v_simplified_summands);
   linear_process v_process = f_lps.process();
-  v_process.set_summands(v_simplified_summands);
+  lps::deprecated::set_linear_process_summands(v_process, v_simplified_summands);
   return specification(f_lps.data(),f_lps.action_labels(),f_lps.global_variables(),v_process, f_lps.initial_process());
 }
 

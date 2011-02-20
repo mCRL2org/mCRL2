@@ -105,7 +105,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
           for (enumerator_type i(m_enumerator_factory.make(boost::make_iterator_range(variables), s.condition())); i != enumerator_type(); ++i)
           {
-            core::gsDebugMsg("substitutions: %s\n", to_string(*i).c_str());
+            core::gsDebugMsg("substitutions: %s\n", data::print_substitution(*i).c_str());
 
             SummandType t(s);
             t.summation_variables() = new_summation_variables;

@@ -218,8 +218,8 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
     size_t compute_tau_summand_count(const specification& spec) const
     {
       size_t result = 0;
-      summand_list summands = spec.process().summands();
-      for (summand_list::iterator i = summands.begin(); i != summands.end(); ++i)
+      const action_summand_vector& summands = spec.process().action_summands();
+      for (action_summand_vector::const_iterator i = summands.begin(); i != summands.end(); ++i)
       {
         if (i->is_tau())
         {

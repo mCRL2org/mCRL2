@@ -67,8 +67,8 @@ class untime_algorithm: public lps::detail::lps_algorithm
 
       assert(j == time_variable_candidates.end());
 
-      const lps::summand_list summands = m_spec.process().summands();
-      for (lps::summand_list::const_iterator i = summands.begin(); i != summands.end(); ++i)
+      const lps::deprecated::summand_list summands = deprecated::linear_process_summands(m_spec.process());
+      for (lps::deprecated::summand_list::const_iterator i = summands.begin(); i != summands.end(); ++i)
       {
         if (!(i->is_delta()))
         {

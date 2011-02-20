@@ -47,7 +47,7 @@ struct make_timed_lps_summand
   /// \brief Function call operator
   /// \param summand_ A linear process summand
   /// \return The result of the function
-  summand operator()(summand summand_) const
+  deprecated::summand operator()(deprecated::summand summand_) const
   {
     if (!summand_.has_time())
     {
@@ -71,103 +71,10 @@ linear_process make_timed_lps(const linear_process& lps, const std::set<core::id
 {
   data::set_identifier_generator generator;
   generator.add_identifiers(context);
-  summand_list new_summands = atermpp::apply(lps.summands(), make_timed_lps_summand<data::set_identifier_generator>(generator));
+  deprecated::summand_list new_summands = atermpp::apply(deprecated::linear_process_summands(lps), make_timed_lps_summand<data::set_identifier_generator>(generator));
   linear_process result = lps;
-  result.set_summands(new_summands);
+  deprecated::set_linear_process_summands(result, new_summands);
   return result;
-}
-
-/// \brief Function object that can be used by the partial_replace algorithm
-/// to replace data variables in an arbitrary term.
-template <typename SrcList, typename DestList>
-struct variable_replacer
-{
-  const SrcList& src_;
-  const DestList& dest_;
-
-  variable_replacer(const SrcList& src, const DestList& dest)
-    : src_(src), dest_(dest)
-  {
-    assert(src_.size() == dest_.size());
-  }
-
-  /// \brief Function call operator
-  /// \param t A term
-  /// \return The function result
-  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
-  {
-    if (!data::is_variable(t))
-    {
-      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
-    }
-    typename SrcList::const_iterator i = src_.begin();
-    typename DestList::const_iterator j = dest_.begin();
-    for (; i != src_.end(); ++i, ++j)
-    {
-      if (t == *i)
-      {
-        return std::pair<atermpp::aterm_appl, bool>(*j, false); // don't continue the recursion
-      }
-    }
-    return std::pair<atermpp::aterm_appl, bool>(t, false); // don't continue the recursion
-  }
-};
-
-/// \brief Utility function for creating a variable_replacer.
-/// \param t1 A term
-/// \param t2 A term
-/// \return A variable_replacer
-template <typename T1, typename T2>
-variable_replacer<T1, T2> make_variable_replacer(const T1& t1, const T2& t2)
-{
-  return variable_replacer<T1, T2>(t1, t2);
-}
-
-/// \brief Function object that can be used by the partial_replace algorithm
-/// to replace the names of data variables in an arbitrary term.
-template <typename SrcList, typename DestList>
-struct variable_name_replacer
-{
-  const SrcList& src_;
-  const DestList& dest_;
-
-  variable_name_replacer(const SrcList& src, const DestList& dest)
-    : src_(src), dest_(dest)
-  {
-    assert(src_.size() == dest_.size());
-  }
-
-  /// \brief Function call operator
-  /// \param t A term
-  /// \return The function result
-  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
-  {
-    if (!data::is_variable(t))
-    {
-      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
-    }
-    data::variable v(t);
-    typename SrcList::const_iterator i = src_.begin();
-    typename DestList::const_iterator j = dest_.begin();
-    for (; i != src_.end(); ++i, ++j)
-    {
-      if (v.name() == *i)
-      {
-        return std::pair<atermpp::aterm_appl, bool>(data::variable(*j, v.sort()), false); // don't continue the recursion
-      }
-    }
-    return std::pair<atermpp::aterm_appl, bool>(t, false); // don't continue the recursion
-  }
-};
-
-/// \brief Utility function for creating a variable_name_replacer.
-/// \param t1 A term
-/// \param t2 A term
-/// \return A variable_replacer
-template <typename T1, typename T2>
-variable_name_replacer<T1, T2> make_variable_name_replacer(const T1& t1, const T2& t2)
-{
-  return variable_name_replacer<T1, T2>(t1, t2);
 }
 
 } // namespace detail

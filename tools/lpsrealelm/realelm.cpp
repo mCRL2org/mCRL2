@@ -400,9 +400,9 @@ static void normalize_specification(
   const rewriter& r,
   std::vector < summand_information > &summand_info)
 {
-  summand_list smds = s.process().summands();
+  lps::deprecated::summand_list smds = lps::deprecated::linear_process_summands(s.process());
   // summand_list sl;
-  for (summand_list::const_iterator i = smds.begin(); i != smds.end(); ++i)
+  for (lps::deprecated::summand_list::const_iterator i = smds.begin(); i != smds.end(); ++i)
   {
     atermpp::vector <data_expression_list> real_conditions, non_real_conditions;
     // std::cerr << "SUMMANDNORM: " << pp(*i) << "\n";
@@ -413,7 +413,7 @@ static void normalize_specification(
          j_r=real_conditions.begin(), j_n=non_real_conditions.begin();
          j_r!=real_conditions.end(); ++j_r, ++j_n)
     {
-      summand t(*i);
+      lps::deprecated::summand t(*i);
       const data_expression c=r(lazy::join_and(j_n->begin(), j_n->end()));
       if (!sort_bool::is_false_function_symbol(c))
       {
@@ -663,7 +663,7 @@ static void add_inequalities_to_context_postponed(
 /// \ret The summand corresponding to s with real part of condition cond, and
 ///      nextstate determined by i.
 static
-summand generate_summand(summand_information& summand_info,
+lps::deprecated::summand generate_summand(summand_information& summand_info,
                          const data_expression& new_condition,
                          std::vector <linear_inequality> &nextstate_condition,
                          const context_type& complete_context,
@@ -678,7 +678,7 @@ summand generate_summand(summand_information& summand_info,
   static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map;
   // Used to recall which may actions labels have been
   // introduced, in order to re-use them.
-  const summand s=summand_info.get_summand();
+  const lps::deprecated::summand s=summand_info.get_summand();
 
   assignment_list nextstate = get_nonreal_assignments(s.assignments());
   nextstate = reverse(nextstate);
@@ -784,7 +784,7 @@ summand generate_summand(summand_information& summand_info,
     new_actions=reverse(resulting_actions);
   }
 
-  summand result = summand(get_nonreal_variables(s.summation_variables()),
+  lps::deprecated::summand result = lps::deprecated::summand(get_nonreal_variables(s.summation_variables()),
                            new_condition, s.is_delta(), new_actions, nextstate);
 
   // gsDebugMsg("Generated summand %P\n", (ATermAppl)result);
@@ -990,7 +990,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
 
   /* Generate the new summand list */
   // atermpp::vector < data_expression_list > nextstate_context_combinations;
-  summand_list summands;
+  lps::deprecated::summand_list summands;
   action_label_list new_act_declarations;
   for (std::vector < summand_information >::iterator i = summand_info.begin();
        i != summand_info.end(); ++i)
@@ -1076,7 +1076,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
       if (!all_conditions_found)
       {
         // add a may transition.
-        summand s = generate_summand(*i,
+        lps::deprecated::summand s = generate_summand(*i,
                                      new_condition,
                                      *nextstate_combination,
                                      context,
@@ -1091,7 +1091,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
       else
       {
         // add a must transition.
-        summand s = generate_summand(*i,
+        lps::deprecated::summand s = generate_summand(*i,
                                      new_condition,
                                      *nextstate_combination,
                                      context,
@@ -1119,7 +1119,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
 
   // New lps
   lps.process_parameters() = process_parameters;
-  lps.set_summands(summands);
+  lps::deprecated::set_linear_process_summands(lps, summands);
   assignment_list initialization(determine_process_initialization(s.initial_process().assignments(), context, r,c));
   process_initializer init(initialization);
 

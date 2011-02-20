@@ -31,7 +31,7 @@ namespace mcrl2
 {
 namespace lps
 {
-typedef atermpp::vector< mcrl2::lps::summand >     summand_vector;
+typedef atermpp::vector< mcrl2::lps::deprecated::summand >     summand_vector;
 }
 }
 

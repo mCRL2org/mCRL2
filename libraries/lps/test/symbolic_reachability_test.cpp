@@ -126,11 +126,11 @@ void group_information::gather(mcrl2::lps::specification const& l)
   std::set< variable > parameters = find_variables(specification.process_parameters());
 
   // the list of summands
-  std::vector< lps::summand > summands = atermpp::convert<std::vector<lps::summand> >(specification.summands());
+  std::vector< lps::deprecated::summand > summands = atermpp::convert<std::vector<lps::deprecated::summand> >(lps::deprecated::linear_process_summands(specification));
 
   m_group_indices.resize(summands.size());
 
-  for (std::vector< lps::summand >::const_iterator i = summands.begin(); i != summands.end(); ++i)
+  for (std::vector< lps::deprecated::summand >::const_iterator i = summands.begin(); i != summands.end(); ++i)
   {
     std::set< variable > used_variables;
 

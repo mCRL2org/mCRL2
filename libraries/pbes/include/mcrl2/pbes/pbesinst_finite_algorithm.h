@@ -192,7 +192,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
     atermpp::set<pbes_expression> result;
     for (data::classic_enumerator<> i(m_data_spec, di, super::m_data_rewriter); i != data::classic_enumerator<>(); ++i)
     {
-//std::clog << "sigma = " << data::to_string(sigma) << std::endl;
+//std::clog << "sigma = " << data::print_substitution(sigma) << std::endl;
 //std::clog << "*i    = " << data::to_string(*i) << std::endl;
       data::data_expression_list d_copy = d;
       data::detail::rewrite_container(d_copy, super::m_data_rewriter, sigma);

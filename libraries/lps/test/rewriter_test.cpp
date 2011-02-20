@@ -176,10 +176,10 @@ void test_lps_rewriter(std::string src_text, std::string dest_text, std::string 
   if (src != dest)
   {
     std::cerr << "--- test failed ---" << std::endl;
-    std::cerr << pp(src.process().summands()) << std::endl;
+    std::cerr << pp(src.process().action_summands()) << std::endl;
     std::cerr << pp(src.initial_process()) << std::endl;
     std::cerr << "-------------------" << std::endl;
-    std::cerr << pp(dest.process().summands()) << std::endl;
+    std::cerr << pp(dest.process().action_summands()) << std::endl;
     std::cerr << pp(dest.initial_process()) << std::endl;
   }
   BOOST_CHECK(src == dest);

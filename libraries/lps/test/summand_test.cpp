@@ -34,7 +34,7 @@ void test_assignments()
 
   multi_action a(action(action_label(core::identifier_string("a"), sort_expression_list()), data_expression_list()));
 
-  summand s(variable_list(), data_expression(sort_bool::true_()), a, l);
+  deprecated::summand s(variable_list(), data_expression(sort_bool::true_()), a, l);
 
   multi_action s_a = s.multi_action();
   assignment_list s_l = s.assignments();

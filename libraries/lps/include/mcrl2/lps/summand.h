@@ -38,6 +38,9 @@ namespace mcrl2
 namespace lps
 {
 
+namespace deprecated
+{
+
 /// \brief LPS summand.
 // <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
 //                    <DataExprOrNil>, <Assignment>*)
@@ -369,6 +372,8 @@ summand set_assignments(summand s, data::assignment_list assignments)
 /// \brief Read-only singly linked list of summands
 typedef atermpp::term_list<summand> summand_list;
 
+} // namespace deprecated
+
 /// \brief Base class for LPS summands.
 // <LinearProcessSummand>   ::= LinearProcessSummand(<DataVarId>*, <DataExpr>, <MultActOrDelta>,
 //                    <DataExprOrNil>, <Assignment>*)
@@ -524,7 +529,7 @@ typedef atermpp::vector<deadlock_summand> deadlock_summand_vector;
 /// \brief Conversion to ATermAppl.
 /// \return The deadlock summand converted to ATerm format.
 inline
-summand deadlock_summand_to_aterm(const deadlock_summand& s)
+atermpp::aterm_appl deadlock_summand_to_aterm(const deadlock_summand& s)
 {
   ATermAppl result = core::detail::gsMakeLinearProcessSummand(
                        s.summation_variables(),
@@ -539,7 +544,7 @@ summand deadlock_summand_to_aterm(const deadlock_summand& s)
 /// \brief Conversion to action summand.
 /// \deprecated
 inline
-deadlock_summand summand_to_deadlock_summand(const summand& s)
+deadlock_summand summand_to_deadlock_summand(const deprecated::summand& s)
 {
   assert(s.is_delta());
   return deadlock_summand(s.summation_variables(), s.condition(), s.deadlock());
@@ -666,7 +671,7 @@ bool operator==(const action_summand& x, const action_summand& y)
 /// \brief Conversion to ATermAppl.
 /// \return The action summand converted to ATerm format.
 inline
-summand action_summand_to_aterm(const action_summand& s)
+atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
 {
   ATermAppl result = core::detail::gsMakeLinearProcessSummand(
                        s.summation_variables(),
@@ -681,7 +686,7 @@ summand action_summand_to_aterm(const action_summand& s)
 /// \brief Conversion to action summand.
 /// \deprecated
 inline
-action_summand summand_to_action_summand(const summand& s)
+action_summand summand_to_action_summand(const deprecated::summand& s)
 {
   assert(!s.is_delta());
   return action_summand(s.summation_variables(), s.condition(), s.multi_action(), s.assignments());

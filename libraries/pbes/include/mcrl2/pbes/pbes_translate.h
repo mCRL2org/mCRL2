@@ -322,7 +322,6 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 #endif
       namespace z = pbes_expr_optimized;
       using namespace pbes_system::accessors;
-      using lps::summand_list;
       namespace s = state_formulas;
       namespace a = state_formulas::detail::accessors;
       namespace d = data;
@@ -946,7 +945,6 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
       namespace z = pbes_expr_optimized;
       using namespace data::detail;
       using namespace accessors;
-      using lps::summand_list;
       using atermpp::detail::operator+;
       namespace s = state_formulas;
       namespace a = state_formulas::detail::accessors;

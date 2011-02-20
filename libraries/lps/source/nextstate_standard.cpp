@@ -546,7 +546,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
 
   smndAFun = ATmakeAFun("@SMND@",4,ATfalse);
   ATprotectAFun(smndAFun);
-  ATermList sums = spec.process().summands();
+  ATermList sums = lps::deprecated::linear_process_summands(spec.process());
   l = ATmakeList0();
   for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
   {

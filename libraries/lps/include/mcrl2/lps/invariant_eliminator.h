@@ -85,8 +85,8 @@ class Invariant_Eliminator
     mcrl2::data::detail::BDD_Prover f_bdd_prover;
     const mcrl2::lps::specification f_lps;
     bool f_simplify_all;
-    mcrl2::lps::summand simplify_summand(
-      const mcrl2::lps::summand a_summand,
+    mcrl2::lps::deprecated::summand simplify_summand(
+      const mcrl2::lps::deprecated::summand a_summand,
       const mcrl2::data::data_expression a_invariant,
       const bool a_no_elimination,
       const size_t a_summand_number);

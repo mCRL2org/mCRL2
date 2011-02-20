@@ -485,8 +485,8 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   //Prepare parameter substitution
   atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> parsub = parameter_substitution(proc_par_to_proc_par_inj, affected_constructors, case_function);
 
-  mcrl2::lps::summand_list s = m_lps.summands();
-  for (mcrl2::lps::summand_list::iterator j = s.begin()
+  mcrl2::lps::deprecated::summand_list s = mcrl2::lps::deprecated::linear_process_summands(m_lps);
+  for (mcrl2::lps::deprecated::summand_list::iterator j = s.begin()
        ; j != s.end()
        ; ++j)
 
@@ -536,7 +536,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
       new_ass_right.erase(new_ass_right.begin());
     }
 
-    mcrl2::lps::summand new_summand = set_assignments(*j, mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()));
+    mcrl2::lps::deprecated::summand new_summand = set_assignments(*j, mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()));
     for (atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
          ; i != parsub.end()
          ; ++i)
@@ -549,7 +549,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
 
   mcrl2::lps::linear_process new_lps;
   new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
-  new_lps.set_summands(mcrl2::lps::summand_list(new_summands.begin(), new_summands.end()));
+  mcrl2::lps::deprecated::set_linear_process_summands(new_lps, mcrl2::lps::deprecated::summand_list(new_summands.begin(), new_summands.end()));
 
   gsDebugMsg("\nNew LPS:\n%s\n", pp(lps::linear_process_to_aterm(new_lps)).c_str());
 

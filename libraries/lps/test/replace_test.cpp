@@ -16,6 +16,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -40,14 +41,13 @@ const std::string SPEC =
 void test_replace()
 {
   specification spec = parse_linear_process_specification(SPEC);
-  summand s = spec.process().summands().front();
+  action_summand s = spec.process().action_summands().front();
   variable b("b", sort_bool::bool_());
   variable c("c", sort_bool::bool_());
   variable d("d", sort_bool::bool_());
   assignment a(c, d);
-  summand t = lps::substitute_variables(s, a);
-  std::cout << "<s>" << pp(s) << std::endl;
-  std::cout << "<t>" << pp(t) << std::endl;
+  action_summand t = s;
+  lps::substitute_variables(t, a);
   core::garbage_collect();
 }
 

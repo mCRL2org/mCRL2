@@ -42,8 +42,8 @@ void test_case_1()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
     BOOST_CHECK(data::find_variables(i->condition()).empty());
@@ -65,8 +65,8 @@ void test_case_2()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -90,8 +90,8 @@ void test_case_3()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
     BOOST_CHECK(data::find_variables(i->condition()).empty());
@@ -113,8 +113,8 @@ void test_case_4()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
     BOOST_CHECK(data::find_variables(i->condition()).empty());
@@ -138,9 +138,9 @@ void test_case_5()
   specification s0 = linearise(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   std::set<variable> parameters = mcrl2::data::find_variables(s1.process().process_parameters());
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
 
@@ -184,9 +184,9 @@ void test_case_6()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -232,9 +232,9 @@ void test_case_7()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -263,9 +263,9 @@ void test_case_8()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -291,9 +291,9 @@ void test_case_9()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (!i->summation_variables().empty())
     {
@@ -316,9 +316,9 @@ void test_case_10()
   specification s0 = parse_linear_process_specification(text);
   specification s1 = s0;
   sumelm_algorithm(s1).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sumvar_count = 0;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->condition() != sort_bool::true_());
     if (!i->summation_variables().empty())

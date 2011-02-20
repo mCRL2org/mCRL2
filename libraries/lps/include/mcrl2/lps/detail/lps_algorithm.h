@@ -97,7 +97,7 @@ class lps_algorithm: public core::algorithm
     }
 
     /// \brief Applies the next state substitution to the variable v.
-    data::data_expression next_state(const summand& s, const data::variable& v) const
+    data::data_expression next_state(const deprecated::summand& s, const data::variable& v) const
     {
       assert(!s.is_delta());
       const data::assignment_list& a = s.assignments();

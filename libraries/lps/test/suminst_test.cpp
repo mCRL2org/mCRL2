@@ -38,8 +38,8 @@ void test_case_1()
   suminst_algorithm<rewriter>(s1,r).run();
   std::clog << pp(s0) << std::endl;
   std::clog << pp(s1) << std::endl;
-  summand_list summands1 = s1.process().summands();
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -62,9 +62,9 @@ void test_case_2()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   std::cerr << "SUMMANDS " << summands1 << "\n";
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     std::cerr << "LEEG " << i->summation_variables() << "\n";
     BOOST_CHECK(i->summation_variables().empty());
@@ -88,9 +88,9 @@ void test_case_3()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool sum_occurs = false;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     sum_occurs = sum_occurs || !i->summation_variables().empty();
   }
@@ -115,10 +115,10 @@ void test_case_4()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, true, true).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (i->is_tau())
     {
@@ -153,10 +153,10 @@ void test_case_5()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     if (i->is_tau())
     {
@@ -182,8 +182,8 @@ void test_case_6()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, false).run();
-  summand_list summands1 = s1.process().summands();
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
@@ -202,9 +202,9 @@ void test_case_7()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1, r, false).run();
-  summand_list summands1 = s1.process().summands();
+  deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sum_count = 0;
-  for (summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
+  for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
     sum_count += i->summation_variables().size();
   }

@@ -285,7 +285,7 @@ class specification_basic_type:public boost::noncopyable
 
   private:
     // TODO. This summand constructor should become part of the lps library.
-    summand summand_(const variable_list summation_variables,
+    deprecated::summand summand_(const variable_list summation_variables,
                      const data_expression condition,
                      const bool is_delta,
                      const action_list actions,
@@ -295,8 +295,8 @@ class specification_basic_type:public boost::noncopyable
     {
       return
         (has_time?
-         summand(summation_variables,condition,is_delta,actions,time,assignments):
-         summand(summation_variables,condition,is_delta,actions,assignments));
+         deprecated::summand(summation_variables,condition,is_delta,actions,time,assignments):
+         deprecated::summand(summation_variables,condition,is_delta,actions,assignments));
     }
 
     process_expression delta_at_zero(void)
@@ -4040,8 +4040,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    summand_list insert_summand(
-      const summand_list sumlist,
+    deprecated::summand_list insert_summand(
+      const deprecated::summand_list sumlist,
       const variable_list parameters,
       const variable_list sumvars,
       const data_expression condition,
@@ -4075,7 +4075,7 @@ class specification_basic_type:public boost::noncopyable
 
     void add_summands(
       const process_identifier procId,
-      summand_list& sumlist,
+      deprecated::summand_list& sumlist,
       process_expression summandterm,
       const atermpp::vector < process_identifier> &pCRLprocs,
       const variable_list parameters,
@@ -4291,7 +4291,7 @@ class specification_basic_type:public boost::noncopyable
 
     void collectsumlistterm(
       const process_identifier procId,
-      summand_list& sumlist,
+      deprecated::summand_list& sumlist,
       const process_expression body,
       const variable_list pars,
       const stacklisttype& stack,
@@ -4318,7 +4318,7 @@ class specification_basic_type:public boost::noncopyable
       }
     }
 
-    summand_list collectsumlist(
+    deprecated::summand_list collectsumlist(
       const atermpp::vector < process_identifier> &pCRLprocs,
       const variable_list pars,
       const stacklisttype& stack,
@@ -4326,7 +4326,7 @@ class specification_basic_type:public boost::noncopyable
       bool regular,
       bool singlestate)
     {
-      summand_list sumlist;
+      deprecated::summand_list sumlist;
       for (atermpp::vector < process_identifier>::const_iterator walker=pCRLprocs.begin();
            walker!=pCRLprocs.end(); ++walker)
       {
@@ -4869,8 +4869,8 @@ class specification_basic_type:public boost::noncopyable
     }
 
     bool summandsCanBeClustered(
-      const summand summand1,
-      const summand summand2)
+      const deprecated::summand summand1,
+      const deprecated::summand summand2)
     {
       if (summand1.has_time()!= summand2.has_time())
       {
@@ -4936,10 +4936,10 @@ class specification_basic_type:public boost::noncopyable
       return data_expression(var);
     }
 
-    summand collect_sum_arg_arg_cond(
+    deprecated::summand collect_sum_arg_arg_cond(
       const enumtype& e,
       size_t n,
-      const summand_list sumlist,
+      const deprecated::summand_list sumlist,
       const variable_list gsorts)
     {
       /* This function gets a list of summands, with
@@ -4961,7 +4961,7 @@ class specification_basic_type:public boost::noncopyable
       data_expression binarysumcondition;
       int equaluptillnow=1;
 
-      for (summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end() ; ++walker)
+      for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end() ; ++walker)
       {
         const variable_list sumvars=walker->summation_variables();
         resultsum=merge_var(sumvars,resultsum,rename_list_pars,rename_list_args,conditionlist);
@@ -4987,9 +4987,9 @@ class specification_basic_type:public boost::noncopyable
 
       data_expression equalterm;
       equaluptillnow=1;
-      for (summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
+      for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
       {
-        const summand smmnd=*walker;
+        const deprecated::summand smmnd=*walker;
         const data_expression condition=smmnd.condition();
         assert(auxrename_list_pars!=rename_list_pars.end());
         assert(auxrename_list_args!=rename_list_args.end());
@@ -5050,7 +5050,7 @@ class specification_basic_type:public boost::noncopyable
       atermpp::vector < action_list > multiActionList;
       bool multiActionIsDelta=false;
 
-      for (summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end() ; ++walker)
+      for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end() ; ++walker)
       {
         if (walker->is_delta())
         {
@@ -5083,7 +5083,7 @@ class specification_basic_type:public boost::noncopyable
             atermpp::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
             atermpp::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
             atermpp::vector<action_list>::const_iterator  multiactionwalker=multiActionList.begin();
-            for (summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end();
+            for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end();
                  ++walker,++multiactionwalker)
             {
               assert(auxrename_list_pars!=rename_list_pars.end());
@@ -5155,7 +5155,7 @@ class specification_basic_type:public boost::noncopyable
       bool all_summands_have_time=true;
 
       // first find out whether there is a summand with explicit time.
-      for (summand_list::const_iterator walker=sumlist.begin() ; walker!=sumlist.end(); ++walker)
+      for (deprecated::summand_list::const_iterator walker=sumlist.begin() ; walker!=sumlist.end(); ++walker)
       {
         if (walker->has_time())
         {
@@ -5179,7 +5179,7 @@ class specification_basic_type:public boost::noncopyable
         auxrename_list_pars=rename_list_pars.begin();
         auxrename_list_args=rename_list_args.begin();
         auxresult=data_expression_list();
-        for (summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
+        for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
         {
           if (walker->has_time())
           {
@@ -5245,7 +5245,7 @@ class specification_basic_type:public boost::noncopyable
         auxrename_list_pars=rename_list_pars.begin();
         auxrename_list_args=rename_list_args.begin();
         data_expression_list auxresult;
-        for (summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
+        for (deprecated::summand_list::const_iterator walker=sumlist.begin(); walker!=sumlist.end(); ++walker)
         {
           const assignment_list nextstate=walker->assignments();
 
@@ -5320,26 +5320,26 @@ class specification_basic_type:public boost::noncopyable
       return resultsorts;
     }
 
-    summand_list cluster_actions(
-      const summand_list sums,
+    deprecated::summand_list cluster_actions(
+      const deprecated::summand_list sums,
       const variable_list pars)
     {
       /* We cluster first the summands with the action
           occurring in the first summand of sums.
           These summands are first stored in w1. */
 
-      summand_list result;
-      summand_list reducible_sumlist=sums;
+      deprecated::summand_list result;
+      deprecated::summand_list reducible_sumlist=sums;
 
-      for (summand_list::const_iterator i=sums.begin() ; i!=sums.end() ; ++i)
+      for (deprecated::summand_list::const_iterator i=sums.begin() ; i!=sums.end() ; ++i)
       {
-        const summand summand1=*i;
+        const deprecated::summand summand1=*i;
 
-        summand_list w1;
-        summand_list w2;
-        for (summand_list::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
+        deprecated::summand_list w1;
+        deprecated::summand_list w2;
+        for (deprecated::summand_list::const_iterator w3=reducible_sumlist.begin(); w3!=reducible_sumlist.end(); ++w3)
         {
-          const summand summand2=*w3;
+          const deprecated::summand summand2=*w3;
           if (summandsCanBeClustered(summand1,summand2))
           {
             w1=push_front(w1,summand2);
@@ -5388,7 +5388,7 @@ class specification_basic_type:public boost::noncopyable
     /* The variable regular indicates that we are interested in generating
        a LPE assuming the pCRL term under consideration is regular */
 
-    summand_list generateLPEpCRL(const process_identifier procId,
+    deprecated::summand_list generateLPEpCRL(const process_identifier procId,
                                  /*const bool canterminate,*/
                                  const bool containstime,
                                  const bool regular,
@@ -5451,7 +5451,7 @@ class specification_basic_type:public boost::noncopyable
       init=make_initialstate(procId,stack,pCRLprocs,
                              regular,singlecontrolstate,parameters);
 
-      summand_list sums=collectsumlist(pCRLprocs,parameters,stack,
+      deprecated::summand_list sums=collectsumlist(pCRLprocs,parameters,stack,
                                        /*(canterminate&&objectdata[n].canterminate),*/regular,
                                        singlecontrolstate);
 
@@ -5499,11 +5499,11 @@ class specification_basic_type:public boost::noncopyable
       return reverse(resultactionlist);
     }
 
-    summand_list hidecomposition(const identifier_string_list hidelist, const summand_list summands)
+    deprecated::summand_list hidecomposition(const identifier_string_list hidelist, const deprecated::summand_list summands)
     {
-      summand_list resultsumlist;
+      deprecated::summand_list resultsumlist;
 
-      for (summand_list::const_iterator i=summands.begin(); i!=summands.end() ; ++i)
+      for (deprecated::summand_list::const_iterator i=summands.begin(); i!=summands.end() ; ++i)
       {
         const variable_list sumvars=i->summation_variables();
         const action_list multiaction=i->actions();
@@ -5585,25 +5585,25 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    summand_list insert_timed_delta_summand(
-      const summand_list l,
-      const summand s)
+    deprecated::summand_list insert_timed_delta_summand(
+      const deprecated::summand_list l,
+      const deprecated::summand s)
     {
       /* The delta summands are put in front.
          The sequence of summands is maintained as
          good as possible, to eliminate summands as
          quickly as possible */
       assert(s.is_delta());
-      summand_list result;
+      deprecated::summand_list result;
 
       const variable_list sumvars=s.summation_variables();
       const data_expression cond=s.condition();
       const data_expression actiontime=s.time();
 
-      summand_list tail=l;
-      for (summand_list::const_iterator i=l.begin(); i!=l.end(); ++i)
+      deprecated::summand_list tail=l;
+      for (deprecated::summand_list::const_iterator i=l.begin(); i!=l.end(); ++i)
       {
-        const summand smmnd=*i;
+        const deprecated::summand smmnd=*i;
         const data_expression cond1=i->condition();
         tail=pop_front(tail);
         if ((!options.add_delta) &&
@@ -5719,17 +5719,17 @@ class specification_basic_type:public boost::noncopyable
       return false;
     }
 
-    summand_list allowblockcomposition(
+    deprecated::summand_list allowblockcomposition(
       const action_name_multiset_list allowlist1,  // This is a list of list of identifierstring.
-      const summand_list sourcesumlist,
+      const deprecated::summand_list sourcesumlist,
       const bool is_allow)
     {
       /* This function calculates the allow or the block operator,
          depending on whether is_allow is true */
 
-      summand_list resultdeltasumlist;
-      summand_list resultsimpledeltasumlist;
-      summand_list resultactionsumlist;
+      deprecated::summand_list resultdeltasumlist;
+      deprecated::summand_list resultsimpledeltasumlist;
+      deprecated::summand_list resultactionsumlist;
       action_name_multiset_list allowlist((is_allow)?sortMultiActionLabels(allowlist1):allowlist1);
 
       size_t sourcesumlist_length=sourcesumlist.size();
@@ -5754,9 +5754,9 @@ class specification_basic_type:public boost::noncopyable
          each delta summand it is determined whether it ought
          to be added, or is superseded by an action or another
          delta summand */
-      for (summand_list::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
+      for (deprecated::summand_list::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
       {
-        const summand smmnd= *i;
+        const deprecated::summand smmnd= *i;
         const variable_list sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.actions();
         const data_expression actiontime=smmnd.time();
@@ -5777,7 +5777,7 @@ class specification_basic_type:public boost::noncopyable
           {
             resultdeltasumlist=push_front(
                                  resultdeltasumlist,
-                                 summand(sumvars,
+                                 deprecated::summand(sumvars,
                                          condition,
                                          true,
                                          action_list(),
@@ -5791,7 +5791,7 @@ class specification_basic_type:public boost::noncopyable
             {
               resultsimpledeltasumlist=push_front(
                                          resultsimpledeltasumlist,
-                                         summand(
+                                         deprecated::summand(
                                            sumvars,
                                            condition,
                                            true,
@@ -5802,7 +5802,7 @@ class specification_basic_type:public boost::noncopyable
             {
               resultdeltasumlist=push_front(
                                    resultdeltasumlist,
-                                   summand(
+                                   deprecated::summand(
                                      sumvars,
                                      condition,
                                      true,
@@ -5813,7 +5813,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      summand_list resultsumlist=resultactionsumlist;
+      deprecated::summand_list resultsumlist=resultactionsumlist;
 
       if (options.nodeltaelimination)
       {
@@ -5824,12 +5824,12 @@ class specification_basic_type:public boost::noncopyable
         if (!options.add_delta) /* if a delta summand is added, conditional, timed
                                    delta's are subsumed and do not need to be added */
         {
-          for (summand_list::const_iterator j=resultsimpledeltasumlist.begin();
+          for (deprecated::summand_list::const_iterator j=resultsimpledeltasumlist.begin();
                j!=resultsimpledeltasumlist.end(); ++j)
           {
             resultsumlist=insert_timed_delta_summand(resultsumlist,*j);
           }
-          for (summand_list::const_iterator j=resultdeltasumlist.begin();
+          for (deprecated::summand_list::const_iterator j=resultdeltasumlist.begin();
                j!=resultdeltasumlist.end(); ++j)
           {
             resultsumlist=insert_timed_delta_summand(resultsumlist,*j);
@@ -5839,7 +5839,7 @@ class specification_basic_type:public boost::noncopyable
         {
           // Add a true -> delta
           resultsumlist=push_front(resultsumlist,
-                                   summand(variable_list(),sort_bool::true_(),true,action_list(),assignment_list()));
+                                   deprecated::summand(variable_list(),sort_bool::true_(),true,action_list(),assignment_list()));
         }
       }
       if ((core::gsVerbose) && (sourcesumlist_length>2 || is_allow))
@@ -5884,12 +5884,12 @@ class specification_basic_type:public boost::noncopyable
       return resultactionlist;
     }
 
-    summand_list renamecomposition(const rename_expression_list renamings,
-                                   const summand_list sourcesumlist)
+    deprecated::summand_list renamecomposition(const rename_expression_list renamings,
+                                   const deprecated::summand_list sourcesumlist)
     {
-      summand_list resultsumlist;
+      deprecated::summand_list resultsumlist;
 
-      for (summand_list::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
+      for (deprecated::summand_list::const_iterator i=sourcesumlist.begin(); i!=sourcesumlist.end(); ++i)
       {
         if (i->is_delta())
         {
@@ -5897,7 +5897,7 @@ class specification_basic_type:public boost::noncopyable
         }
         else
         {
-          const summand smmnd=*i;
+          const deprecated::summand smmnd=*i;
           const variable_list sumvars=smmnd.summation_variables();
           const action_list multiaction=smmnd.actions();
           const data_expression actiontime=smmnd.time();
@@ -6496,9 +6496,9 @@ class specification_basic_type:public boost::noncopyable
       return makeMultiActionConditionList_aux(multiaction,comm_table,action_list(),true);
     }
 
-    summand_list communicationcomposition(
+    deprecated::summand_list communicationcomposition(
       const communication_expression_list communications,
-      const summand_list summands)
+      const deprecated::summand_list summands)
     {
       /* We follow the implementation of Muck van Weerdenburg, described in
          a note: Calculation of communication with open terms. */
@@ -6527,13 +6527,13 @@ class specification_basic_type:public boost::noncopyable
       }
       communication_expression_list communications1=resultingCommunications;
 
-      summand_list resultsumlist;
-      summand_list resultingDeltaSummands;
+      deprecated::summand_list resultsumlist;
+      deprecated::summand_list resultingDeltaSummands;
 
-      for (summand_list::const_iterator sourcesumlist=summands.begin();
+      for (deprecated::summand_list::const_iterator sourcesumlist=summands.begin();
            sourcesumlist!=summands.end(); ++sourcesumlist)
       {
-        const summand smmnd=*sourcesumlist;
+        const deprecated::summand smmnd=*sourcesumlist;
         const variable_list sumvars=smmnd.summation_variables();
         const action_list multiaction=smmnd.actions();
         if (smmnd.is_delta())
@@ -6598,7 +6598,7 @@ class specification_basic_type:public boost::noncopyable
             const action_list multiaction=multiactionconditionlist.actions[i];
             const data_expression newcondition=RewriteTerm(
                                                  lazy::and_(condition,communicationcondition));
-            summand new_summand=
+            deprecated::summand new_summand=
               summand_(sumvars,newcondition,false,multiaction,
                        smmnd.has_time(),smmnd.time(),nextstate);
             if (!options.nosumelm)
@@ -6624,7 +6624,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        for (summand_list::const_iterator w=resultingDeltaSummands.begin();
+        for (deprecated::summand_list::const_iterator w=resultingDeltaSummands.begin();
              w!=resultingDeltaSummands.end(); ++w)
         {
           resultsumlist=insert_timed_delta_summand(resultsumlist,*w);
@@ -6747,14 +6747,14 @@ class specification_basic_type:public boost::noncopyable
     }
 
     data_expression getUltimateDelayCondition(
-      const summand_list sumlist,
+      const deprecated::summand_list sumlist,
       const variable_list freevars,
       const data_expression timevariable,
       variable_list& existentially_quantified_variables)
     {
       assert(existentially_quantified_variables.empty());
 
-      for (summand_list::const_iterator walker=sumlist.begin();
+      for (deprecated::summand_list::const_iterator walker=sumlist.begin();
            walker!=sumlist.end(); ++walker)
       {
         /* First walk through the summands to see whether
@@ -6762,7 +6762,7 @@ class specification_basic_type:public boost::noncopyable
            to time exists. In that case the ultimate delay
            condition is true */
 
-        const summand smmnd=*walker;
+        const deprecated::summand smmnd=*walker;
         const data_expression condition=smmnd.condition();
 
         if ((!walker->has_time()) && (condition==sort_bool::true_()))
@@ -6777,10 +6777,10 @@ class specification_basic_type:public boost::noncopyable
          to generate a non trivial ultimate delay condition */
 
       data_expression  result=sort_bool::false_();
-      for (summand_list::const_iterator walker=sumlist.begin();
+      for (deprecated::summand_list::const_iterator walker=sumlist.begin();
            walker!=sumlist.end(); ++walker)
       {
-        const summand smmnd=*walker;
+        const deprecated::summand smmnd=*walker;
         const variable_list sumvars=smmnd.summation_variables();
         const data_expression actiontime=smmnd.time();
         const data_expression condition=smmnd.condition();
@@ -6829,21 +6829,21 @@ class specification_basic_type:public boost::noncopyable
 
     /******** make_parameters_and_variables_unique **********************/
 
-    summand_list make_parameters_and_sum_variables_unique(
-      const summand_list summands,
+    deprecated::summand_list make_parameters_and_sum_variables_unique(
+      const deprecated::summand_list summands,
       variable_list& pars,
       assignment_list& init,
       const std::string hint="")
     {
-      summand_list result_summands;
+      deprecated::summand_list result_summands;
 
       const variable_list unique_pars=make_unique_variables(pars,hint);
       assert(unique_pars.size()==pars.size());
       init=substitute_assignmentlist(unique_pars,pars,init,pars,1,0);  // Only substitute the variables
       // the variables at the lhs.
-      for (summand_list::const_iterator s=summands.begin(); s!=summands.end(); ++s)
+      for (deprecated::summand_list::const_iterator s=summands.begin(); s!=summands.end(); ++s)
       {
-        const summand smmnd= *s;
+        const deprecated::summand smmnd= *s;
         const variable_list sumvars=smmnd.summation_variables();
         variable_list unique_sumvars=make_unique_variables(sumvars,hint);
         assert(unique_sumvars.size()==sumvars.size());
@@ -6877,15 +6877,15 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** parallel composition ******************************/
 
-    summand_list combine_summand_lists(
-      const summand_list sumlist1,
-      const summand_list sumlist2,
+    deprecated::summand_list combine_summand_lists(
+      const deprecated::summand_list sumlist1,
+      const deprecated::summand_list sumlist2,
       const variable_list par1,
       const variable_list par3,
       const variable_list parametersOfsumlist2)
 
     {
-      summand_list resultsumlist;
+      deprecated::summand_list resultsumlist;
       variable_list allpars;
 
       allpars=par1 + par3;
@@ -6899,10 +6899,10 @@ class specification_basic_type:public boost::noncopyable
          static_cast< data_expression const& >(getUltimateDelayCondition(sumlist2,parametersOfsumlist2,
              timevar,ultimate_delay_sumvars1)));
 
-      for (summand_list::const_iterator walker1=sumlist1.begin();
+      for (deprecated::summand_list::const_iterator walker1=sumlist1.begin();
            walker1!=sumlist1.end(); ++walker1)
       {
-        const summand summand1= *walker1;
+        const deprecated::summand summand1= *walker1;
         variable_list sumvars1=summand1.summation_variables() + ultimate_delay_sumvars1;
         action_list multiaction1=summand1.actions();
         data_expression actiontime1=summand1.time();
@@ -6958,10 +6958,10 @@ class specification_basic_type:public boost::noncopyable
                               static_cast< data_expression const& >(getUltimateDelayCondition(sumlist1,par1,
                                   timevar,ultimate_delay_sumvars2)));
 
-      for (summand_list::const_iterator walker2=sumlist2.begin();
+      for (deprecated::summand_list::const_iterator walker2=sumlist2.begin();
            walker2!=sumlist2.end(); ++walker2)
       {
-        const summand summand2= *walker2;
+        const deprecated::summand summand2= *walker2;
         variable_list sumvars2=summand2.summation_variables() + ultimate_delay_sumvars2;
         action_list multiaction2=summand2.actions();
         data_expression actiontime2=summand2.time();
@@ -7013,10 +7013,10 @@ class specification_basic_type:public boost::noncopyable
 
       /* thirdly we enumerate all communications */
 
-      for (summand_list::const_iterator walker1=sumlist1.begin();
+      for (deprecated::summand_list::const_iterator walker1=sumlist1.begin();
            walker1!=sumlist1.end(); ++walker1)
       {
-        const summand summand1= *walker1;
+        const deprecated::summand summand1= *walker1;
 
         const variable_list sumvars1=summand1.summation_variables();
         const action_list multiaction1=summand1.actions();
@@ -7024,10 +7024,10 @@ class specification_basic_type:public boost::noncopyable
         const data_expression condition1=summand1.condition();
         const assignment_list nextstate1=summand1.assignments();
 
-        for (summand_list::const_iterator walker2=sumlist2.begin();
+        for (deprecated::summand_list::const_iterator walker2=sumlist2.begin();
              walker2!=sumlist2.end(); ++walker2)
         {
-          const summand summand2= *walker2;
+          const deprecated::summand summand2= *walker2;
           const variable_list sumvars2=summand2.summation_variables();
           const action_list multiaction2=summand2.actions();
           const data_expression actiontime2=summand2.time();
@@ -7113,11 +7113,11 @@ class specification_basic_type:public boost::noncopyable
     }
 
 
-    summand_list parallelcomposition(
-      const summand_list summands1,
+    deprecated::summand_list parallelcomposition(
+      const deprecated::summand_list summands1,
       const variable_list pars1,
       const assignment_list init1,
-      const summand_list summands2,
+      const deprecated::summand_list summands2,
       const variable_list pars2,
       const assignment_list init2,
       variable_list& pars_result,
@@ -7145,7 +7145,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       pars3=reverse(pars3);
-      summand_list result=combine_summand_lists(summands1,summands2,pars1,pars3,pars2);
+      deprecated::summand_list result=combine_summand_lists(summands1,summands2,pars1,pars3,pars2);
 
       if (core::gsVerbose)
       {
@@ -7162,10 +7162,10 @@ class specification_basic_type:public boost::noncopyable
 
 
     /// \brief Linearise a process indicated by procIdDecl.
-    /// \details Returns a summand_list, the process parameters
+    /// \details Returns a deprecated::summand_list, the process parameters
     ///              and the initial assignment list.
 
-    summand_list generateLPEmCRLterm(
+    deprecated::summand_list generateLPEmCRLterm(
       const process_expression t,
       /*const bool canterminate,*/
       const bool regular,
@@ -7175,7 +7175,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_process_instance(t))
       {
-        summand_list t3=generateLPEmCRL(process_instance(t).identifier(),/*canterminate,*/regular,pars,init);
+        deprecated::summand_list t3=generateLPEmCRL(process_instance(t).identifier(),/*canterminate,*/regular,pars,init);
         size_t n=objectIndex(process_instance(t).identifier());
         data_expression_list args=process_instance(t).actual_parameters();
         init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
@@ -7206,7 +7206,7 @@ class specification_basic_type:public boost::noncopyable
           // stacks are being used.
 
           linear_process lps(pars,deadlock_summand_vector(),action_summand_vector());
-          lps.set_summands(t3);
+          lps::deprecated::set_linear_process_summands(lps, t3);
           process_initializer initializer(init);
 
           specification temporary_spec(data,acts,global_variables,lps,initializer);
@@ -7238,7 +7238,7 @@ class specification_basic_type:public boost::noncopyable
             }
           }
 
-          t3=summand_list();
+          t3=deprecated::summand_list();
           for (atermpp::vector < action_summand >::const_iterator i=temporary_spec.process().action_summands().begin();
                i!=temporary_spec.process().action_summands().end(); ++i)
           {
@@ -7277,56 +7277,56 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list pars1,pars2;
         assignment_list init1,init2;
-        const summand_list t1=generateLPEmCRLterm(process::merge(t).left(),/*canterminate,*/
+        const deprecated::summand_list t1=generateLPEmCRLterm(process::merge(t).left(),/*canterminate,*/
                               regular,rename_variables,pars1,init1);
-        const summand_list t2=generateLPEmCRLterm(process::merge(t).right(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(process::merge(t).right(),/*canterminate,*/
                               regular,true,pars2,init2);
-        summand_list t3=parallelcomposition(t1,pars1,init1,t2,pars2,init2,pars,init);
+        deprecated::summand_list t3=parallelcomposition(t1,pars1,init1,t2,pars2,init2,pars,init);
         return t3;
       }
 
       if (is_hide(t))
       {
-        const summand_list t2=generateLPEmCRLterm(hide(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(hide(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return hidecomposition(hide(t).hide_set(),t2);
       }
 
       if (is_allow(t))
       {
-        const summand_list t2=generateLPEmCRLterm(allow(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(allow(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return allowblockcomposition(allow(t).allow_set(),t2,true);
       }
 
       if (is_block(t))
       {
-        const summand_list t2=generateLPEmCRLterm(block(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(block(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return allowblockcomposition(block(t).block_set(),t2,false);
       }
 
       if (is_rename(t))
       {
-        const summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return renamecomposition(process::rename(t).rename_set(),t2);
       }
 
       if (is_comm(t))
       {
-        const summand_list t1=generateLPEmCRLterm(comm(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t1=generateLPEmCRLterm(comm(t).operand(),/*canterminate,*/
                               regular,rename_variables,pars,init);
         return communicationcomposition(comm(t).comm_set(),t1);
       }
 
       throw mcrl2::runtime_error("Internal error. Expect mCRL term " + pp(t) +".");
-      return summand_list();
+      return deprecated::summand_list();
     }
 
     /**************** GENERaTE LPEmCRL **********************************/
 
-    summand_list generateLPEmCRL(
+    deprecated::summand_list generateLPEmCRL(
       const process_identifier procIdDecl,
       /*const bool canterminate,*/
       const bool regular,
@@ -7358,7 +7358,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       throw mcrl2::runtime_error("laststatus: " + str(boost::format("%d") % objectdata[n].processstatus));
-      return summand_list();
+      return deprecated::summand_list();
     }
 
     /**************** alphaconversion ********************************/
@@ -8031,11 +8031,11 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** AddTerminationActionIfNecessary ****************/
 
-    void AddTerminationActionIfNecessary(const summand_list summands)
+    void AddTerminationActionIfNecessary(const deprecated::summand_list summands)
     {
-      for (summand_list::const_iterator i=summands.begin(); i!=summands.end(); ++i)
+      for (deprecated::summand_list::const_iterator i=summands.begin(); i!=summands.end(); ++i)
       {
-        const summand smd=*i;
+        const deprecated::summand smd=*i;
         const action_list multiaction=smd.actions();
         if (multiaction==push_front(action_list(),terminationAction))
         {
@@ -8054,7 +8054,7 @@ class specification_basic_type:public boost::noncopyable
   public:
     variable_list SieveProcDataVarsSummands(
       const atermpp::set <variable> &vars,
-      const summand_list summands,
+      const deprecated::summand_list summands,
       const variable_list parameters)
     {
       /* In this routine it is checked which free variables
@@ -8066,10 +8066,10 @@ class specification_basic_type:public boost::noncopyable
       atermpp::set < variable > vars_set(vars.begin(),vars.end());
       atermpp::set < variable > vars_result_set;
 
-      for (summand_list::const_iterator smds=summands.begin();
+      for (deprecated::summand_list::const_iterator smds=summands.begin();
            smds!=summands.end(); ++smds)
       {
-        const summand smd= *smds;
+        const deprecated::summand smd= *smds;
 
         if (!smd.is_delta())
         {
@@ -8116,7 +8116,7 @@ class specification_basic_type:public boost::noncopyable
 
     /**************** transform **************************************/
   public:
-    summand_list transform(
+    deprecated::summand_list transform(
       const process_identifier init,
       variable_list& parameters,
       assignment_list& initial_state)
@@ -8149,7 +8149,7 @@ class specification_basic_type:public boost::noncopyable
          first variable in a sequence is always an actionvariable */
       procstorealGNF(init1,options.lin_method!=lmStack);
 
-      summand_list t3=generateLPEmCRL(init1,/*objectdata[objectIndex(init1)].canterminate,*/
+      deprecated::summand_list t3=generateLPEmCRL(init1,/*objectdata[objectIndex(init1)].canterminate,*/
                                       options.lin_method!=lmStack,parameters,initial_state);
       t3=allowblockcomposition(action_name_multiset_list(),t3,false); // This removes superfluous delta summands.
       if (options.final_cluster)
@@ -8194,7 +8194,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   //linearise spec
   variable_list parameters;
   assignment_list initial_state;
-  const summand_list result = spec.transform(init,parameters,initial_state);
+  const deprecated::summand_list result = spec.transform(init,parameters,initial_state);
 
   // compute global variables
   data::variable_list globals1 = spec.SieveProcDataVarsSummands(spec.global_variables,result,parameters);
@@ -8206,7 +8206,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   linear_process lps(parameters,
                      deadlock_summand_vector(),
                      action_summand_vector());
-  lps.set_summands(result);
+  deprecated::set_linear_process_summands(lps, result);
 
   lps::specification spec1(
     spec.data,
