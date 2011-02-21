@@ -1,0 +1,47 @@
+mcrl2 (2011.1-1) unstable; urgency=low
+
+  * Put changes here
+ 
+ -- Frank Stappers <fstapper@win.tue.nl>  Sat, 19 Feb 2011 15:22:27 +0200
+
+mcrl2 (201007~rc1-1) unstable; urgency=low
+
+  * New upstream release; using this release candidate for Squeeze
+    as recommended by upstream.
+  * debian/control: 
+    - Bumped standards version to 3.9.1; no changes required.
+  * debian/copyright:
+    - Inserted the BSD license verbatim instead of pointing to
+      /usr/share/common-licenses/BSD which is soon to be removed.
+  * debian/menu:
+    - Replaced menu item for SQuADT by one for mCRL2 GUI.
+  * debian/rules:
+    - Added MCRL2_ suffixes to the build flags because this has been
+      changed upstream.
+
+ -- Paul van Tilburg <paulvt@debian.org>  Tue, 03 Aug 2010 12:49:57 +0200
+
+mcrl2 (201001+svn7611-1) unstable; urgency=low
+
+  * New SVN snapshot upload:
+    - Features renaming of sim and xsim to lpssim and lpsxsim 
+      (closes: #573944).
+    - Features renaming of grape to grapemcrl2 (closes: #573943).
+    - Fixes documentation/examples install issue.
+  * debian/control:
+    - Changed build-depends to build against Boost 1.42.
+      Closes: #573844, #577289.
+  * debian/rules:
+    - Removed documentation directory mkdir/mv/rmdir commands from the
+      install target now that this is fixed upstream.
+  * debian/source/format: Switched to source format 3.0 (quilt). 
+
+ -- Paul van Tilburg <paulvt@debian.org>  Sun, 11 Apr 2010 17:18:35 +0200
+
+mcrl2 (201001-1) unstable; urgency=low
+
+  * Initial release (Closes: #460885).
+  * Use a pruned upstream tarball to avoid (a lot of) source duplication by
+    removing 3rd-party/boost.
+
+ -- Paul van Tilburg <paulvt@debian.org>  Tue, 16 Feb 2010 12:50:42 +0200

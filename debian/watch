@@ -1,0 +1,4 @@
+# mCRL2 watch file
+
+version=3
+http://mcrl2.org/mcrl2/wiki/index.php/Download .*mcrl2-(\d+)-src\.tar\.bz2.*

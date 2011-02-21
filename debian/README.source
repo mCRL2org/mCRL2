@@ -1,0 +1,12 @@
+mCRL2 source in Debian
+======================
+
+The released source tarballs available from
+http://mcrl2.org/mcrl2/wiki/index.php/Download are rather large.  This is
+mainly due to the existance of 3rd-party source code that is already in
+Debian.  I have removed the following from the source tree:
+
+ * 3rd-party/boost/:  It is already available in Debian as libboost-*1.41
+   (apt-get source boost1.41). 
+
+ -- Paul van Tilburg <paulvt@debian.org>  Fri, 16 Feb 2010 11:28:19 +0100
