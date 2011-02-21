@@ -97,21 +97,6 @@ class lps_algorithm: public core::algorithm
     }
 
     /// \brief Applies the next state substitution to the variable v.
-    data::data_expression next_state(const deprecated::summand& s, const data::variable& v) const
-    {
-      assert(!s.is_delta());
-      const data::assignment_list& a = s.assignments();
-      for (data::assignment_list::const_iterator i = a.begin(); i != a.end(); ++i)
-      {
-        if (i->lhs() == v)
-        {
-          return i->rhs();
-        }
-      }
-      return v; // no assignment to v found, so return v itself
-    }
-
-    /// \brief Applies the next state substitution to the variable v.
     data::data_expression next_state(const action_summand& s, const data::variable& v) const
     {
       const data::assignment_list& a = s.assignments();

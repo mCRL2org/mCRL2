@@ -377,39 +377,6 @@ struct lps_well_typed_checker
     return true;
   }
 
-
-  /// \brief Checks well typedness of a summand
-  /// \deprecated
-  /// \return Returns true if
-  /// <ul>
-  /// <li>the data assignments are well typed</li>
-  /// <li>the (optional) time has sort Real</li>
-  /// <li>the condition has sort Bool</li>
-  /// <li>the summation variables have unique names</li>
-  /// </ul>
-  bool is_well_typed(const deprecated::summand& s) const
-  {
-    // check 1)
-    if (!check_assignments(s.assignments(), "summand"))
-    {
-      return false;
-    }
-    if (!check_time(s.time(), "summand"))
-    {
-      return false;
-    }
-    if (!check_condition(s.condition(), "summand"))
-    {
-      return false;
-    }
-    if (!data::detail::unique_names(s.summation_variables()))
-    {
-      std::cerr << "is_well_typed(summand) failed: summation variables " << pp(s.summation_variables()) << " don't have unique names." << std::endl;
-      return false;
-    }
-    return true;
-  }
-
   template <typename Term>
   bool operator()(const Term& t) const
   {
