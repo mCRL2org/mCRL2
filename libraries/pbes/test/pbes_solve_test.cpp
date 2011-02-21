@@ -182,7 +182,7 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
     std::cout << "result: " << (result == 0 ? "false" : "true") << std::endl;
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }
-  BOOST_CHECK(result == 2 || result == expected);
+  BOOST_CHECK(result == expected);
   core::garbage_collect();
 }
 
@@ -193,8 +193,9 @@ void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
   // test with and without scc decomposition
   pbespgsolve_options options;
   test_pbespgsolve(pbes_spec, options, expected_result);
-//  options.use_scc_decomposition = false;
-//  test_pbespgsolve(pbes_spec, options, expected_result);
+
+  options.use_scc_decomposition = false;
+  test_pbespgsolve(pbes_spec, options, expected_result);
 }
 
 
@@ -258,17 +259,24 @@ const std::string ABP_SPECIFICATION =
   "  );                                                                       \n"
   ;
 
-void test_abp()
+std::string frm_nodeadlock = "[true*]<true*>true";
+std::string frm_nolivelock = "[true*]mu X.[tau]X";
+
+void test_abp_frm(const std::string& FORMULA, bool expected_result)
 {
   bool timed = false;
-  std::string FORMULA = "[true*]<true*>true";
   lps::specification spec = lps::linearise(ABP_SPECIFICATION);
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   std::string abp_text = pbes_system::pp(p);
-  test_pbes_solve(abp_text, true);  
-  test_pbes2bool(abp_text, true);
+  test_pbes_solve(abp_text, expected_result);
   core::garbage_collect();
+}
+
+void test_abp()
+{
+  test_abp_frm(frm_nodeadlock, true);
+  test_abp_frm(frm_nolivelock, false);
 }
 
 int test_main(int argc, char** argv)
@@ -276,6 +284,7 @@ int test_main(int argc, char** argv)
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   set_parity_game_generator_log_level(2);
+
   test_all();
   
   test_abp();
