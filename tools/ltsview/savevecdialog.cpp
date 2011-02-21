@@ -165,6 +165,14 @@ void SaveVecDialog::onChoice(wxCommandEvent& event)
 
 void SaveVecDialog::OnOK(wxCommandEvent& /*event*/)
 {
+  wxMessageDialog msgQuestion(GetParent(),
+                            wxT("Saving an vector image may create very large files.\nAre you sure you want to continue?"),
+                            wxT("Question"), wxYES_NO | wxYES_DEFAULT | wxICON_QUESTION);
+  if (msgQuestion.ShowModal() == wxID_NO )
+  {
+    return;
+  }
+
   FILE* fp = fopen(f_name.GetFullPath().mb_str(wxConvUTF8), "wb");
   if (fp == NULL)
   {
