@@ -87,7 +87,7 @@ class mCRL2xi_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<mCRL2xi>
     }
 };
 
-IMPLEMENT_APP_NO_MAIN(mCRL2xi)
+IMPLEMENT_APP_NO_MAIN(mCRL2xi_gui_tool)
 IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__

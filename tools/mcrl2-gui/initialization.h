@@ -47,7 +47,7 @@ struct Tool
 {
   string m_name;
   string m_location;
-  string m_input_type;
+  vector<string> m_input_types;
   string m_output_type;
   vector<Tool_option> m_tool_options;
   tool_type m_tool_type;

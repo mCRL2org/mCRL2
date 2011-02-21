@@ -61,6 +61,7 @@ class ConfigPanel: public wxNotebookPage
       m_fileIO = fileIO;
       m_pid = 0;
       m_switchOnOutput = false;
+      m_additional_input_files.clear();
 
       int row = 0;
 
@@ -82,13 +83,33 @@ class ConfigPanel: public wxNotebookPage
 
       wxGridBagSizer* fgs = new wxGridBagSizer(5, 5);
 
-      fgs->Add(new wxStaticText(top, wxID_ANY, wxT("input file:")) , wxGBPosition(row,0));
-      fgs->Add(new wxStaticText(top, wxID_ANY, wxString(m_fileIO.input_file.c_str(), wxConvUTF8)), wxGBPosition(row,1),
-               wxGBSpan(1,2));
+      for( vector< string >::iterator s = m_tool.m_input_types.begin() ; s != m_tool.m_input_types.end(); s++  )
+      {
+        if ( s == m_tool.m_input_types.begin() )
+        {
+
+          fgs->Add(new wxStaticText(top, wxID_ANY, wxT("input file:") ) , wxGBPosition(row,0));
+          fgs->Add(new wxStaticText(top, wxID_ANY, wxString(m_fileIO.input_file.c_str(), wxConvUTF8)), wxGBPosition(row,1),
+              wxGBSpan(1,2));
+
+        } else {
+
+          string t = "input " + *s + " file:";
+
+          fgs->Add(new wxStaticText(top, wxID_ANY, wxString(t.c_str() , wxConvUTF8) ) , wxGBPosition(row,0));
+
+          m_additional_input_files.push_back( new wxFilePickerCtrl(top, wxID_ANY,
+              wxT(""), wxT("Select a file"), wxT("*.*"), wxDefaultPosition, wxDefaultSize,
+              wxFLP_USE_TEXTCTRL | wxFLP_OPEN )
+          );
+
+          fgs->Add( m_additional_input_files.back() , wxGBPosition(row,1) );
+
+        }
+        ++row;
+      }
 
       suggested_output_file = NULL;
-
-      ++row;
 
       wxString filesuggestion =wxEmptyString;
 
@@ -343,6 +364,7 @@ class ConfigPanel: public wxNotebookPage
 
       m_parent->SetPageText(m_parent->GetPageIndex(this), toolTipText);
 
+
     }
 
     void Run()
@@ -400,28 +422,28 @@ class ConfigPanel: public wxNotebookPage
         }
       }
 
-      wxString input_file = wxString(m_fileIO.input_file.c_str(), wxConvUTF8);
+      // Append input file
+      run.Append( wxT(" ") );
+      run.Append( StringSpaceEscape( wxString(m_fileIO.input_file.c_str(), wxConvUTF8) ) );
 
+      // Append additional input files (if any)
+      if (!m_additional_input_files.empty())
+      {
+        for(vector<wxFilePickerCtrl*>::iterator i = m_additional_input_files.begin()
+            ; i != m_additional_input_files.end()
+            ; ++i ){
+          run.Append(wxT(" "));
+          run.Append( StringSpaceEscape( (*i)->GetPath() ) );
+        }
+      }
+
+      // Append output file (if any)
       wxString output_file = wxString(m_fileIO.output_file.c_str(),
                                       wxConvUTF8);
-
-#ifdef __linux__
-      input_file.Replace(wxT(" "),wxT("\\ "));
-      output_file.Replace(wxT(" "),wxT("\\ "));
-#endif
-
-#ifdef _WIN32
-      input_file.Prepend(wxT("\""));
-      input_file.Append(wxT("\""));
-
-      if (!output_file.empty())
+      if ( !output_file.IsEmpty() )
       {
-        output_file.Prepend(wxT("\""));
-        output_file.Append(wxT("\""));
+        run.Append( StringSpaceEscape ( output_file ) );
       }
-#endif
-
-      run = run + wxT(" ") + input_file + wxT(" ") + output_file;
 
       m_listbox_output->AppendText(run + wxTextFile::GetEOL());
 
@@ -470,6 +492,20 @@ class ConfigPanel: public wxNotebookPage
 
     };
 
+    wxString StringSpaceEscape( wxString s )
+    {
+#ifdef __linux__
+      s.Replace(wxT(" "),wxT("\\ "));
+#endif
+
+#ifdef _WIN32
+      s.Prepend(wxT("\""));
+      s.Append(wxT("\""));
+
+#endif
+      return s;
+    }
+
     void SwitchToToolOutputNotebook()
     {
 
@@ -483,6 +519,7 @@ class ConfigPanel: public wxNotebookPage
 
     void OnRunClick(wxCommandEvent& /*event*/)
     {
+      m_tool_output->SetBackgroundColour( wxT("MEDIUM GOLDENROD") ) ;
       Run();
     }
     ;
@@ -495,6 +532,7 @@ class ConfigPanel: public wxNotebookPage
       }
       m_abortbutton->Show(false);
       m_runbutton->Enable();
+      m_tool_output->ResetColor();
     };
 
     void OnOutputFileChange(wxFileDirPickerEvent& event)
@@ -530,6 +568,7 @@ class ConfigPanel: public wxNotebookPage
 
     FileIO m_fileIO;
 
+    vector<wxFilePickerCtrl*> m_additional_input_files;
     vector<wxRadioBox*> m_radiobox_ptrs;
     vector<wxCheckBox*> m_checkbox_ptrs;
     vector<wxTextCtrl*> m_textctrl_ptrs;
@@ -595,10 +634,19 @@ class ConfigPanel: public wxNotebookPage
     }
 
     void
-    OnProcessEnd(wxCommandEvent& /*evt*/)
+    OnProcessEnd(wxCommandEvent& evt)
     {
       m_abortbutton->Show(false);
       m_runbutton->Enable();
+
+      int status = evt.GetInt();
+
+      if (status)
+      {
+        m_tool_output->SetBackgroundColour( wxT("SALMON") ) ;
+      } else {
+        m_tool_output->SetBackgroundColour( wxT("PALE GREEN") ) ;
+      }
 
       wxCommandEvent eventCustom(wxEVT_UPDATE_PROJECT_TREE);
       /* Notify parents to expand to the created file*/

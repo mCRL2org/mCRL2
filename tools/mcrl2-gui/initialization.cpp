@@ -347,7 +347,14 @@ vector<Tool> Initialization::Read_tools()
     }
 
     value = child->GetPropVal(wxT("input_format"), wxEmptyString);
-    tool.m_input_type = value.mb_str();
+    if( value != wxEmptyString ){
+      tool.m_input_types.push_back( string( value.mb_str() ) );
+    }
+
+    value = child->GetPropVal(wxT("input_format1"), wxEmptyString);
+    if( value != wxEmptyString ){
+      tool.m_input_types.push_back( string( value.mb_str() ) );
+    }
 
     value = child->GetPropVal(wxT("output_format"), wxEmptyString);
     tool.m_output_type = value.mb_str();

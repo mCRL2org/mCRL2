@@ -83,6 +83,7 @@ static const std::set<lts_equivalence> &initialise_allowed_eqs()
   s.insert(lts_eq_sim);
   s.insert(lts_eq_trace);
   s.insert(lts_eq_weak_trace);
+  s.insert(lts_eq_none);
   return s;
 }
 static const std::set<lts_equivalence> &allowed_eqs()
@@ -339,7 +340,7 @@ class ltscompare_tool : public ltscompare_base
         }
       }
 
-      tool_options.preorder = lts_pre_none;
+      tool_options.preorder = lts_pre_unknown;
 
       if (parser.options.count("preorder"))
       {
@@ -347,7 +348,7 @@ class ltscompare_tool : public ltscompare_base
         tool_options.preorder = parse_preorder(
                                   parser.option_argument("preorder"));
 
-        if (tool_options.preorder == lts_pre_none)
+        if (tool_options.preorder == lts_pre_unknown)
         {
           parser.error("option -p/--preorder has illegal argument '" +
                        parser.option_argument("preorder") + "'");
@@ -429,6 +430,7 @@ class ltscompare_gui_tool: public mcrl2_gui_tool<ltscompare_tool>
       m_gui_options["counter-example"] = create_checkbox_widget();
 
       values.clear();
+      values.push_back("none");
       values.push_back("bisim");
       values.push_back("branching-bisim");
       values.push_back("dpbranching-bisim");
@@ -438,6 +440,7 @@ class ltscompare_gui_tool: public mcrl2_gui_tool<ltscompare_tool>
       m_gui_options["equivalence"] = create_radiobox_widget(values);
 
       values.clear();
+      values.push_back("none");
       values.push_back("sim");
       values.push_back("trace");
       values.push_back("weak-trace");

@@ -536,7 +536,7 @@ class GenericDirCtrl: public wxGenericDirCtrl
                   sext);
 
             /* Only add tool if extension matches */
-            if (fnd != m_extention_tool_mapping.end() && (i->m_input_type.compare(fnd->second) == 0))
+            if (fnd != m_extention_tool_mapping.end() && (i->m_input_types[0].compare(fnd->second) == 0))
             {
               (menus.find(i->m_category)->second)->Append(distance(m_tool_catalog.begin(), i), wxString(
                     (*i).m_name.c_str(), wxConvUTF8));

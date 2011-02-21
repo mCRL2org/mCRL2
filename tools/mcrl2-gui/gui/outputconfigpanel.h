@@ -28,6 +28,7 @@ class OutputConfigPanel: public wxPanel
       wxPanel(parent, id, pos, size)
     {
       m_parent = parent;
+      m_default_background_colour = this->GetBackgroundColour();
 
       wxBoxSizer* vbox = new wxBoxSizer(wxVERTICAL);
 
@@ -86,9 +87,15 @@ class OutputConfigPanel: public wxPanel
       m_parent->GetEventHandler()->ProcessEvent(event);
     }
 
+    void ResetColor()
+    {
+      this->SetBackgroundColour( m_default_background_colour );
+    }
+
   private:
     ToolOutPutTextCtrl* p_output;
     wxWindow* m_parent;
+    wxColour m_default_background_colour;
 
     DECLARE_EVENT_TABLE()
 };
