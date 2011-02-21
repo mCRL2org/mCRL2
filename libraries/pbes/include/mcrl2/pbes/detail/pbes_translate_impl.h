@@ -28,7 +28,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 
 namespace mcrl2

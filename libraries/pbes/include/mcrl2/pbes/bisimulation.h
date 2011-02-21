@@ -27,7 +27,6 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/substitute.h"
-#include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 

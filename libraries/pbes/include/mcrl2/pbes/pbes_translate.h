@@ -25,7 +25,7 @@
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/substitute.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/lps/detail/make_timed_lps.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/modal_formula/find.h"
@@ -800,12 +800,12 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
 
       // make sure the lps is timed
-      data::variable T = fresh_variable(lps::find_identifiers(lps), data::sort_real::real_(), "T");
       std::set<core::identifier_string> context;
-      context.insert(T.name());
       lps::find_identifiers(spec, std::inserter(context, context.end()));
       state_formulas::find_identifiers(f, std::inserter(context, context.end()));
-      lps = lps::detail::make_timed_lps(lps, context);
+      data::variable T = fresh_variable(context, data::sort_real::real_(), "T");
+      context.insert(T.name());
+      lps::detail::make_timed_lps(lps, context);
 
       // compute the equations
       atermpp::vector<pbes_equation> e = E(f, f, lps, T);
