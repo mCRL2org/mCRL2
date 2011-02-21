@@ -73,8 +73,8 @@ project (MCRL2)
 #   http://www.cmake.org/cmake/help/cmake2.6docs.html#prop_dir:COMPILE_DEFINITIONS
 #
 
-set( MCRL2_ENABLE_SVN false )
-set( MCRL2_ENABLE_PARSERS false )
+set( MCRL2_ENABLE_SVN true )
+set( MCRL2_ENABLE_PARSERS true )
 
 IF( "${CMAKE_MAJOR_VERSION}.${CMAKE_MINOR_VERSION}" STRLESS "2.8" )
   message(STATUS "=========================================" )
