@@ -27,7 +27,6 @@
 #include "mcrl2/data/postfix_identifier_generator.h"
 // #include "mcrl2/data/detail/internal_format_conversion.h"
 #include "mcrl2/data/translate_user_notation.h"
-#include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/find.h"
 
