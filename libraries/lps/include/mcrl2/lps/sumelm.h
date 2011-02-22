@@ -198,7 +198,10 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
       data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
 
       s.condition() = data::substitute_free_variables(new_condition, data::make_map_substitution(substitutions));
-      s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), data::make_map_substitution(substitutions));
+      if (s.deadlock().has_time())
+      {
+        s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), data::make_map_substitution(substitutions));
+      }
 
       const size_t var_count = s.summation_variables().size();
       remove_unused_summand_variables(s);
