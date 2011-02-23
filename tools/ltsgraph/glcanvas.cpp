@@ -31,8 +31,6 @@
 using namespace IDS;
 BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_PAINT(GLCanvas::onPaint)
-  EVT_SIZE(GLCanvas::onSize)
-  EVT_ERASE_BACKGROUND(GLCanvas::onEraseBackground)
 
   EVT_ENTER_WINDOW(GLCanvas::onMouseEnter)
   EVT_KILL_FOCUS(GLCanvas::onMouseLeave)
@@ -45,10 +43,6 @@ BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
   EVT_MIDDLE_UP(GLCanvas::onMouseMidUp)
   EVT_MOUSEWHEEL(GLCanvas::onMouseWhl)
   EVT_LEFT_DCLICK(GLCanvas::onMouseDblClck)
-
-
-
-
 END_EVENT_TABLE()
 
 GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
@@ -57,7 +51,7 @@ GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
                wxEmptyString, attribList)
 {
   owner = app;
-  displayAllowed = false;
+//  displayAllowed = false;
   dispSystem = false;
   currentTool = myID_ZOOM;
   usingTool = false;
@@ -74,19 +68,11 @@ GLCanvas::GLCanvas(LTSGraph* app, wxWindow* parent,
   {
     currentModelviewMatrix[i] = someMatrix[i];
   }
+
 }
 
 GLCanvas::~GLCanvas()
 {
-}
-
-void GLCanvas::initialize()
-{
-  SetCurrent();
-  glLoadIdentity();
-  displayAllowed = true;
-  /* Following line really needed?*/
-  //visualizer->initFontRenderer();
 }
 
 void GLCanvas::setVisualizer(Visualizer* vis)
@@ -96,181 +82,185 @@ void GLCanvas::setVisualizer(Visualizer* vis)
 
 void GLCanvas::display()
 {
-  if (GetContext())
+  if (!drawIn3D)
   {
-    int width, height;
-
-    GetClientSize(&width, &height);
-    // This is current context
-    SetCurrent();
-
-    // Cast to GLdouble for smooth transitions
-    GLdouble aspect = (GLdouble)width / (GLdouble)height;
-
-    double wwidth, wheight, wdepth;
-
-    getSize(wwidth, wheight, wdepth);
-
-    // Set up viewing volume
-    glMatrixMode(GL_PROJECTION);
-    glLoadIdentity();
-
-    if (drawIn3D)
-    {
-      double rad = visualizer->getRadius() * getPixelSize() ;
-
-      maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
-
-      gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
-    }
-    else
-    {
-      if (aspect > 1)
-      {
-        // width > height
-        gluOrtho2D(aspect*(-1), aspect, -1.0, 1.0);
-      }
-      else
-      {
-        // height >= width
-        gluOrtho2D(-1.0, 1.0, (1/aspect)*(-1), (1/aspect));
-      }
-    }
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glViewport(0, 0, width, height);
-    if (drawIn3D)
-    {
-      if (calcRot)
-      {
-        double dumtrx[16];
-        double rotAngle = sqrt(rotX * rotX + rotY * rotY);
-
-        Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
-        double dumtrx2[16];
-        Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
-        for (int i = 0; i < 12; i++)
-        {
-          currentModelviewMatrix[i] = dumtrx2[i];
-        }
-        calcRot = false;
-        normalizeMatrix();
-        rotX = 0;
-        rotY = 0;
-      }
-      currentModelviewMatrix[12] = -lookX;
-      currentModelviewMatrix[13] = -lookY;
-      currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
-      currentModelviewMatrix[15] = 1;
-      double xl, yl, zl;
-      xl = 0;
-      yl = 0;
-      zl = lookZ + 100;
-      GLfloat LightAmbient[]=   { 0.2f, 0.2f, 0.2f, 0.2f };
-      GLfloat LightDiffuse[]=   { 1.0f, 1.0f, 1.0f, 1.0f };
-      GLfloat LightPosition[]=  { xl, yl, zl, 0.0f};
-      glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
-      glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
-      glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
-
-      glColorMaterial(GL_FRONT,GL_AMBIENT);
-      glEnable(GL_COLOR_MATERIAL);
-
-      glLoadMatrixd(currentModelviewMatrix);
-      glFinish();
-      double pS = getPixelSize();
-
-      if (visualizer)
-      {
-        // Draw
-        visualizer->visualize(wwidth, wheight, pS, false, true);
-      }
-
-      if (visualizer && dispSystem)
-      {
-        glMatrixMode(GL_PROJECTION);
-        glPushMatrix();
-        glLoadIdentity();
-        gluPerspective(45.0f, 1, 0.1f, 10.0f);
-        glMatrixMode(GL_MODELVIEW);
-        glPushMatrix();
-        glLoadIdentity();
-        glViewport(0, 0, std::max(height, width) / 6, std::max(height, width) / 6);
-        visualizer->drawCoorSystem();
-        glPopMatrix();
-        glViewport(0, 0, width, height);
-        glMatrixMode(GL_PROJECTION);
-        glPopMatrix();
-        glMatrixMode(GL_MODELVIEW);
-      }
-    }
-    else
-    {
-      double pS = getPixelSize();
-
-      if (visualizer)
-      {
-        // Draw
-        visualizer->visualize(wwidth, wheight, pS, false, false);
-      }
-    }
-
-    glFinish();
-
-    GLenum error = glGetError();
-    if (error != GL_NO_ERROR)
-    {
-      std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
-    }
+	render2D();
   }
-  SwapBuffers();
+  else
+  {
+	render3D();
+  }
 }
 
 void GLCanvas::onPaint(wxPaintEvent& /*event*/)
 {
-  wxPaintDC dc(this);
-  if (drawIn3D)
-  {
-    glShadeModel(GL_SMOOTH);
-    glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
-    glClearDepth(1.0);
-    glDepthFunc(GL_LESS);
-    glEnable(GL_DEPTH_TEST);
-    glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-  }
-  else
-  {
-    glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
-    glDisable(GL_DEPTH_TEST);
-  }
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   display();
 }
 
-void GLCanvas::onSize(wxSizeEvent& /*event*/)
+void GLCanvas::render2D()
 {
-  reshape();
-}
-
-void GLCanvas::reshape()
-{
-  if (GetContext())
-  {
-    int width, height;
     SetCurrent();
+    wxPaintDC(this);
 
-    GetClientSize(&width, &height);
+	glClearColor(1.0f, 1.0f, 1.0f, 1.0f);
+	glDisable(GL_DEPTH_TEST);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
 
-    glMatrixMode(GL_MODELVIEW);
-    glLoadIdentity();
-    glViewport(0,0, width, height);
-  }
+	// Cast to GLdouble for smooth transitions
+	GLdouble aspect = (GLdouble)GetSize().x / (GLdouble)GetSize().y;
+
+	double wwidth, wheight, wdepth;
+	getSize(wwidth, wheight, wdepth);
+
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+	if (aspect > 1)
+	{
+	  // width > height
+	  gluOrtho2D(aspect*(-1), aspect, -1.0, 1.0);
+	}
+	else
+	{
+	  // height >= width
+	  gluOrtho2D(-1.0, 1.0, (1/aspect)*(-1), (1/aspect));
+	}
+
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
+
+	double pS = getPixelSize();
+
+	if (visualizer)
+	{
+	  // Draw
+	  visualizer->visualize(wwidth, wheight, pS, false, false);
+	}
+
+    glFlush();
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+	  std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
+	}
+
+    SwapBuffers();
 }
 
-void GLCanvas::onEraseBackground(wxEraseEvent& /*event*/)
+void GLCanvas::render3D()
 {
-}
+	std::cout << "To implement" << std::endl;
 
+	SetCurrent();
+    wxPaintDC(this);
+
+	glShadeModel(GL_SMOOTH);
+	glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
+	glClearDepth(1.0);
+	glDepthFunc(GL_LESS);
+	glEnable(GL_DEPTH_TEST);
+	glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+	glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
+
+	// Cast to GLdouble for smooth transitions
+	GLdouble aspect = (GLdouble)GetSize().x / (GLdouble)GetSize().y;
+
+	double wwidth, wheight, wdepth;
+	getSize(wwidth, wheight, wdepth);
+
+	// Set up viewing volume
+	glMatrixMode(GL_PROJECTION);
+	glLoadIdentity();
+
+    double rad = visualizer->getRadius() * getPixelSize() ;
+    maxDepth = std::max(std::max((wdepth - 2 * rad), (wheight - 2 * rad)), (wwidth - 2 * rad));
+    gluPerspective(45.0f, aspect, 0.1f, 2 * (lookZ + maxDepth + 0.1f));
+
+	glMatrixMode(GL_MODELVIEW);
+	glLoadIdentity();
+	glViewport(0, 0, (GLint)GetSize().x, (GLint)GetSize().y);
+
+	  if (calcRot)
+	  {
+		double dumtrx[16];
+		double rotAngle = sqrt(rotX * rotX + rotY * rotY);
+
+		Utils::genRotArbAxs(rotAngle, rotX, rotY, 0, dumtrx);
+		double dumtrx2[16];
+		Utils::MultGLMatrices(dumtrx, currentModelviewMatrix, dumtrx2);
+		for (int i = 0; i < 12; i++)
+		{
+		  currentModelviewMatrix[i] = dumtrx2[i];
+		}
+		calcRot = false;
+		normalizeMatrix();
+		rotX = 0;
+		rotY = 0;
+	  }
+	  currentModelviewMatrix[12] = -lookX;
+	  currentModelviewMatrix[13] = -lookY;
+	  currentModelviewMatrix[14] = -lookZ - 0.1f - maxDepth / 2;
+	  currentModelviewMatrix[15] = 1;
+	  double xl, yl, zl;
+	  xl = 0;
+	  yl = 0;
+	  zl = lookZ + 100;
+	  GLfloat LightAmbient[]=   { 0.2f, 0.2f, 0.2f, 0.2f };
+	  GLfloat LightDiffuse[]=   { 1.0f, 1.0f, 1.0f, 1.0f };
+	  GLfloat LightPosition[]=  { xl, yl, zl, 0.0f};
+	  glLightfv(GL_LIGHT0, GL_AMBIENT, LightAmbient);
+	  glLightfv(GL_LIGHT0, GL_DIFFUSE, LightDiffuse);
+	  glLightfv(GL_LIGHT0, GL_POSITION,LightPosition);
+
+	  glColorMaterial(GL_FRONT,GL_AMBIENT);
+	  glEnable(GL_COLOR_MATERIAL);
+
+	  glLoadMatrixd(currentModelviewMatrix);
+	  glFinish();
+	  double pS = getPixelSize();
+
+	  if (visualizer)
+	  {
+		// Draw
+		visualizer->visualize(wwidth, wheight, pS, false, true);
+	  }
+
+	  if (visualizer && dispSystem)
+	  {
+		glMatrixMode(GL_PROJECTION);
+		glPushMatrix();
+		glLoadIdentity();
+		gluPerspective(45.0f, 1, 0.1f, 10.0f);
+		glMatrixMode(GL_MODELVIEW);
+		glPushMatrix();
+		glLoadIdentity();
+		glViewport(0, 0, std::max(GetSize().y, GetSize().x) / 6, std::max(GetSize().y, GetSize().x) / 6);
+		visualizer->drawCoorSystem();
+		glPopMatrix();
+		glViewport(0, 0, GetSize().x, GetSize().y);
+		glMatrixMode(GL_PROJECTION);
+		glPopMatrix();
+		glMatrixMode(GL_MODELVIEW);
+	  }
+
+
+    ////////////
+    glFlush();
+
+	GLenum error = glGetError();
+	if (error != GL_NO_ERROR)
+	{
+	  std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
+	}
+
+    SwapBuffers();
+}
 
 void GLCanvas::getSize(
   double& width,
@@ -606,7 +596,6 @@ bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
     hits = glRenderMode(GL_RENDER);
 
     processHits(hits, selectBuf, e);
-    reshape();
     display();
     return hits > 0;
   }
@@ -676,7 +665,6 @@ void GLCanvas::pickObjects(int x, int y, wxMouseEvent const& e)
     hits = glRenderMode(GL_RENDER);
 
     processHits(hits, selectBuf, e);
-    reshape();
     display();
   }
 }
@@ -916,8 +904,6 @@ void GLCanvas::setMouseCursor(int theTool)
 void GLCanvas::changeDrawMode()
 {
   drawIn3D = !drawIn3D;
-  initialize();
-  display();
 }
 
 bool GLCanvas::get3D()

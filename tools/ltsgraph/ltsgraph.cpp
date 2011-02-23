@@ -51,7 +51,6 @@ bool LTSGraph::run()
 
   SetTopWindow(mainFrame);
   mainFrame->Show();
-  glCanvas->initialize();
   mainFrame->Layout();
 
 
@@ -120,9 +119,6 @@ void LTSGraph::openFile(std::string const& path)
 
     mainFrame->setLTSInfo(is, ns, nt, nl);
 
-    // Call the display routines. This is necessary to make sure the graph is
-    // rendered on the Mac
-    display();
   }
   catch (const std::exception& e)
   {

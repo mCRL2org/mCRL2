@@ -74,9 +74,6 @@ MainFrame::MainFrame(LTSGraph* owner)
   setupMainArea();
   setupMenuBar();
 
-  //algoDlg->CentreOnParent();
-  //infoDlg->CentreOnParent();
-
   m_mgr.AddPane(algoDlg, wxRIGHT, wxT("Optimization panel"));
   m_mgr.Update();
 
@@ -173,6 +170,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
     app->openFile(stPath);
   }
 }
+
 void MainFrame::onSelect(wxCommandEvent& /*event*/)
 {
   app->setTool(false);

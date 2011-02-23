@@ -38,13 +38,9 @@ class GLCanvas : public wxGLCanvas
     ~GLCanvas();
 
     void display();
-    void initialize();
     void setVisualizer(Visualizer* vis);
 
     void onPaint(wxPaintEvent& event);
-    void onSize(wxSizeEvent& event);
-    void onEraseBackground(wxEraseEvent& event);
-    void reshape();
 
     // Mouse event handlers
     void onMouseEnter(wxMouseEvent& event);
@@ -87,6 +83,9 @@ class GLCanvas : public wxGLCanvas
     int currentTool;
     bool calcRot;
     bool drawIn3D;
+
+    void render2D();
+    void render3D();
 
     void normalizeMatrix();
     bool pickObjects3d(int x, int y, wxMouseEvent const&);
