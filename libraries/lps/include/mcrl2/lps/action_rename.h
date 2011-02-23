@@ -25,8 +25,8 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
-// #include "mcrl2/data/detail/internal_format_conversion.h"
-#include "mcrl2/data/translate_user_notation.h"
+#include "mcrl2/lps/normalize_sorts.h"
+#include "mcrl2/lps/translate_user_notation.h"
 #include "mcrl2/lps/substitute.h"
 #include "mcrl2/lps/find.h"
 
@@ -471,8 +471,7 @@ action translate_user_notation_and_normalise_sorts_action(
   const action &a,
   data::data_specification& data_spec)
 {
-  return action(action_label(a.label().name(),normalize_sorts(a.label().sorts(),data_spec)),
-                                         data::translate_user_notation(normalize_sorts(a.arguments(),data_spec)));
+  return lps::translate_user_notation(lps::normalize_sorts(a,data_spec));
 }
 
 action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(
@@ -492,14 +491,14 @@ action_rename_specification translate_user_notation_and_normalise_sorts_action_r
 {
   data::data_specification data_spec=ars.data();
   data_spec.declare_data_specification_to_be_type_checked();
-  const action_label_list al=data::translate_user_notation(normalize_sorts(ars.action_labels(),data_spec));
+  const action_label_list al=lps::translate_user_notation(lps::normalize_sorts(ars.action_labels(),data_spec));
 
   atermpp::vector<action_rename_rule> l(ars.rules());
   for (atermpp::vector<action_rename_rule>::iterator i=l.begin();
        i!=l.end(); ++i)
   {
-    *i = action_rename_rule(normalize_sorts(i->variables(),data_spec),
-                            data::translate_user_notation(normalize_sorts(i->condition(),data_spec)),
+    *i = action_rename_rule(data::normalize_sorts(i->variables(),data_spec),
+                            data::translate_user_notation(data::normalize_sorts(i->condition(),data_spec)),
                             translate_user_notation_and_normalise_sorts_action(i->lhs(),data_spec),
                             translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(i->rhs(),data_spec));
   }
