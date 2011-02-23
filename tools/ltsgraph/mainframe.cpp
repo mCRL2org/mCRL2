@@ -168,6 +168,7 @@ void MainFrame::onOpen(wxCommandEvent& /*event*/)
 
     app->getAlgorithm(0)->stop();
     app->openFile(stPath);
+    app->display();
   }
 }
 
