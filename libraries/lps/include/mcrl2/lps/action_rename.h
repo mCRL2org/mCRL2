@@ -467,6 +467,14 @@ void rename_renamerule_variables(data::data_expression& rcond, lps::action& rlef
   rright = lps::substitute_free_variables(rright, mcrl2::data::make_map_substitution(renamings));
 }
 
+action translate_user_notation_and_normalise_sorts_action(
+  const action &a,
+  data::data_specification& data_spec)
+{
+  return action(action_label(a.label().name(),normalize_sorts(a.label().sorts(),data_spec)),
+                                         data::translate_user_notation(normalize_sorts(a.arguments(),data_spec)));
+}
+
 action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(
   const action_rename_rule_rhs& arr,
   data::data_specification& data_spec)
@@ -476,7 +484,7 @@ action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename
     return arr;
   }
 
-  return data::translate_user_notation(normalize_sorts(arr.act(),data_spec));
+  return translate_user_notation_and_normalise_sorts_action(arr.act(),data_spec);
 }
 
 
@@ -492,7 +500,7 @@ action_rename_specification translate_user_notation_and_normalise_sorts_action_r
   {
     *i = action_rename_rule(normalize_sorts(i->variables(),data_spec),
                             data::translate_user_notation(normalize_sorts(i->condition(),data_spec)),
-                            data::translate_user_notation(normalize_sorts(i->lhs(),data_spec)),
+                            translate_user_notation_and_normalise_sorts_action(i->lhs(),data_spec),
                             translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(i->rhs(),data_spec));
   }
 
@@ -515,16 +523,13 @@ action_rename_specification parse_action_rename_specification(
   std::istream& in,
   lps::specification const& spec)
 {
-  //std::istringstream in(text);
   ATermAppl result = detail::parse_action_rename_specification(in);
-  lps::specification copy_specification(spec);
+  // lps::specification copy_specification(spec);
   /* copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data()); */
-  ATermAppl lps_spec = specification_to_aterm(copy_specification);
+  ATermAppl lps_spec = specification_to_aterm(spec);
   result           = detail::type_check_action_rename_specification(result, lps_spec);
   action_rename_specification result_act(result);
   return detail::translate_user_notation_and_normalise_sorts_action_rename_spec(result_act);
-  /* result           = data::detail::internal_format_conversion_term(result,spec.data());
-  return action_rename_specification(result); */
 }
 
 
