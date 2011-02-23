@@ -14,6 +14,9 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/remove.h"
+
 
 using namespace mcrl2;
 using lps::specification;
@@ -69,6 +72,28 @@ void test2()
   BOOST_CHECK(new_spec.process().summand_count()==2);
 }
 
+void test3()
+{
+  // Check whether constants in an action_rename file are properly translated.
+  const std::string SPEC =
+    "act a,b:Nat;                             \n"
+    "proc P(n:Nat) = a(1). P(n)+b(1).P(1);  \n"
+    "init P(0);                               \n";
+
+  const std::string AR_SPEC =
+    "rename \n"
+    "  a(1) => delta; \n";
+
+  specification spec = lps::linearise(SPEC);
+  std::istringstream ar_spec_stream(AR_SPEC);
+  action_rename_specification ar_spec = parse_action_rename_specification(ar_spec_stream, spec);
+  data::rewriter R (spec.data(), mcrl2::data::rewriter::strategy());
+  specification new_spec = action_rename(ar_spec,spec);
+  lps::rewrite(new_spec, R);
+  lps::remove_trivial_summands(new_spec);
+  BOOST_CHECK(new_spec.process().summand_count()==2);
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -76,6 +101,7 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
   test2();
   core::garbage_collect();
-
+  test3();
+  
   return 0;
 }
