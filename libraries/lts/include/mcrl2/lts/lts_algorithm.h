@@ -79,8 +79,7 @@ enum lts_equivalence
  * contained in another LTS. */
 enum lts_preorder
 {
-  lts_pre_unknown,/**< Unknown preorder */
-  lts_pre_none,   /**< no preorder */
+  lts_pre_none,   /**< Unknown or no preorder */
   lts_pre_sim,    /**< Strong simulation preorder */
   lts_pre_trace,  /**< Strong trace preorder */
   lts_pre_weak_trace,   /**< Weak trace preorder */
@@ -135,7 +134,6 @@ inline const std::set<lts_preorder> &supported_lts_preorders()
 static std::string equivalence_desc_strings[] =
 {
   "unknown equivalence",
-  "no equivalence",
   "strong bisimilarity",
   "branching bisimilarity",
   "divergence preserving branching bisimilarity",
@@ -156,7 +154,6 @@ inline std::string name_of_equivalence(const lts_equivalence eq)
 static std::string preorder_desc_strings[] =
 {
   "unknown preorder",
-  "no preorder",
   "strong simulation preorder",
   "strong trace preorder",
   "weak trace preorder"
@@ -212,11 +209,6 @@ inline lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_red_determinisation;
   }
-  else if (s == "none")
-  {
-    return lts_eq_none;
-  }
-
   else
   {
     return lts_eq_none;
@@ -226,7 +218,6 @@ inline lts_equivalence parse_equivalence(std::string const& s)
 static std::string equivalence_strings[] =
 {
   "unknown",
-  "none",
   "bisim",
   "branching-bisim",
   "dpbranching-bisim",
@@ -269,11 +260,6 @@ inline lts_preorder parse_preorder(std::string const& s)
   {
     return lts_pre_weak_trace;
   }
-  else if (s == "none")
-  {
-    return lts_pre_none;
-  }
-
   else
   {
     return lts_pre_none;
@@ -284,7 +270,6 @@ inline lts_preorder parse_preorder(std::string const& s)
 static std::string preorder_strings[] =
 {
   "unknown",
-  "none",
   "sim",
   "trace",
   "weak-trace"

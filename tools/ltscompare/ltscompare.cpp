@@ -333,14 +333,14 @@ class ltscompare_tool : public ltscompare_base
         tool_options.equivalence = parse_equivalence(
                                      parser.option_argument("equivalence"));
 
-        if (allowed_eqs().count(tool_options.equivalence) == 0)
+        if (allowed_eqs().count(tool_options.equivalence) == 0 && parser.option_argument("equivalence").compare("none") != 0 )
         {
-          parser.error("option -e/--equivalence has illegal argument '" +
+          parser.error("option -e/--equivalence has illegal argument '" + 
                        parser.option_argument("equivalence") + "'");
         }
       }
 
-      tool_options.preorder = lts_pre_unknown;
+      tool_options.preorder = lts_pre_none;
 
       if (parser.options.count("preorder"))
       {
@@ -348,7 +348,7 @@ class ltscompare_tool : public ltscompare_base
         tool_options.preorder = parse_preorder(
                                   parser.option_argument("preorder"));
 
-        if (tool_options.preorder == lts_pre_unknown)
+        if (tool_options.preorder == lts_pre_none && parser.option_argument("preorder").compare("none") != 0 ) 
         {
           parser.error("option -p/--preorder has illegal argument '" +
                        parser.option_argument("preorder") + "'");
