@@ -16,6 +16,7 @@ T operator()(const T& x,
             )
 {
   core::msg("aterm traversal");
+  throw mcrl2::runtime_error("unknown type encountered in builder function!");
   return x;
 }
 

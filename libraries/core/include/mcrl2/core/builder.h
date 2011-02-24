@@ -13,14 +13,13 @@
 #define MCRL2_CORE_BUILDER_H
 
 #include <stdexcept>
-
-#include "boost/utility/enable_if.hpp"
-#include "boost/type_traits/is_base_of.hpp"
-
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_base_of.hpp>
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2
 {
@@ -106,6 +105,7 @@ struct builder
             )
   {
     msg("non-container visit");
+    throw mcrl2::runtime_error("unknown type encountered in builder function!");
   }
 
   // container visit
@@ -139,6 +139,7 @@ struct builder
   T visit_copy(const T& x)
   {
     msg("non-container visit_copy");
+    throw mcrl2::runtime_error("unknown type encountered in builder function!");
     return x;
   }
 
