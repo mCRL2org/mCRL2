@@ -24,7 +24,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 namespace mcrl2

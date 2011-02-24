@@ -13,7 +13,7 @@
 #define MCRL2_PBES_GAUSS_ELIMINATION_H
 
 #include "mcrl2/core/algorithm.h"
-#include "mcrl2/pbes/replace.h"
+#include "mcrl2/pbes/substitute.h"
 #include "mcrl2/pbes/pbes.h"
 
 namespace mcrl2

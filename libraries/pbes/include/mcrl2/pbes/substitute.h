@@ -120,8 +120,32 @@ T substitute_free_variables(const T& x,
 }
 //--- end generated pbes_system substitute code ---//
 
+/// \brief Applies a propositional variable substitution.
+template <typename T, typename Substitution>
+void substitute_propositional_variables(T& x,
+                                        Substitution sigma,
+                                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                       )
+{
+  core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
+}
+
+/// \brief Applies a propositional variable substitution.
+template <typename T, typename Substitution>
+T substitute_propositional_variables(const T& x,
+                                     Substitution sigma,
+                                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                    )
+{
+  return core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
+}
+
 } // namespace pbes_system
 
 } // namespace mcrl2
+
+#ifndef MCRL2_PBES_SUBSTITUTIONS_H
+#include "mcrl2/pbes/substitutions.h"
+#endif
 
 #endif // MCRL2_PBES_SUBSTITUTE_H

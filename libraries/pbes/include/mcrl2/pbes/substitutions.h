@@ -6,19 +6,19 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/substitution.h
+/// \file mcrl2/pbes/substitutions.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_SUBSTITUTION_H
-#define MCRL2_PBES_SUBSTITUTION_H
+#ifndef MCRL2_PBES_SUBSTITUTIONS_H
+#define MCRL2_PBES_SUBSTITUTIONS_H
 
+#include <utility>
+#include "mcrl2/data/substitute.h"
 #include "mcrl2/pbes/substitute.h"
 
-namespace mcrl2
-{
+namespace mcrl2 {
 
-namespace pbes_system
-{
+namespace pbes_system {
 
 /** \brief Substitution function for propositional variables
  *
@@ -130,6 +130,12 @@ class propositional_variable_substitution: public std::unary_function<propositio
       return assignment(v, this->m_map);
     }
 
+    /// \brief Constructor. Initializes the substitution with the assignment X := phi.
+    propositional_variable_substitution(const propositional_variable& X, const pbes_expression& phi)
+    {
+      (*this)[X] = phi;
+    }
+
     /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
     const_iterator begin() const
     {
@@ -183,4 +189,4 @@ class propositional_variable_substitution: public std::unary_function<propositio
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_SUBSTITUTION_H
+#endif // MCRL2_PBES_SUBSTITUTIONS_H

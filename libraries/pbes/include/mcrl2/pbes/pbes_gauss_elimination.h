@@ -42,30 +42,8 @@ struct pbes_traits
     static inline
     expression_type substitute(const expression_type& t, const variable_type& X, const expression_type& phi)
     {
-      return substitute_propositional_variable(t, X, phi);
+      return substitute_propositional_variables(t, propositional_variable_substitution(X, phi));
     }
-
-    /*
-        /// \brief Applies the substitution X := phi to the pbes equation eq.
-        /// \param eq A PBES equation
-        /// \param X A propositional variable
-        /// \param phi A PBES expression
-        /// \return The substition result
-        static inline
-        void substitute(equation_type& eq, const variable_type& X, const expression_type& phi)
-        {
-          eq.formula() = pbes_traits::substitute(eq.formula(), X, phi);
-        }
-
-        /// \brief Applies the substitution from a solved pbes equation e2 to the pbes equation e1.
-        /// \param e1 A PBES equation
-        /// \param e2 A PBES equation
-        static inline
-        void substitute(equation_type& e1, const equation_type& e2)
-        {
-          pbes_traits::substitute(e1, e2.variable(), e2.formula());
-        }
-    */
 
     /// \brief Returns the value true
     static inline

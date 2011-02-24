@@ -12,7 +12,6 @@
 #ifndef MCRL2_PBES_TRANSFORM_H
 #define MCRL2_PBES_TRANSFORM_H
 
-#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/substitute.h"
 
 namespace mcrl2 {
@@ -22,8 +21,8 @@ namespace pbes_system {
 template <typename Container>
 void pbes_transform(pbes<Container>& x, unsigned int iterations, bool mu_value = false, bool nu_value = false)
 {
-  prop_var_map_substitution sigma;
-  prop_var_map_substitution sigma_final;
+  propositional_variable_substitution sigma;
+  propositional_variable_substitution sigma_final;
   typedef typename core::term_traits<pbes_expression> tr;
 
   for (typename Container::iterator i = x.equations().begin(); i != x.equations().end(); ++i)

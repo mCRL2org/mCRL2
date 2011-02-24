@@ -16,18 +16,19 @@
 #include <utility>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/bes/bes_gauss_elimination.h"
+#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/pbes/txt2pbes.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/bes/bes_gauss_elimination.h"
-#include "mcrl2/pbes/pbes_gauss_elimination.h"
-#include "mcrl2/pbes/bes_algorithms.h"
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/bes_algorithms.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbes_gauss_elimination.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -307,7 +308,7 @@ struct fixpoint_equation_solver
   void operator()(pbes_equation& e) const
   {
     pbes_expression phi = e.symbol().is_mu() ? pbes_expr::false_() : pbes_expr::true_();
-    e.formula() = substitute_propositional_variable(e.formula(), e.variable(), phi);
+    e.formula() = substitute_propositional_variables(e.formula(), propositional_variable_substitution(e.variable(), phi));
   }
 };
 //]
