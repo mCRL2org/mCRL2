@@ -45,7 +45,6 @@ void instantiate_global_variables(specification& spec)
   }
   lps::substitute_free_variables(spec.process(), sigma);
   spec.initial_process() = lps::substitute_free_variables(spec.initial_process(), sigma);
-  spec.action_labels() = lps::substitute_free_variables(spec.action_labels(), sigma);
   spec.global_variables().clear();
 }
 
