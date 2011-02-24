@@ -153,10 +153,8 @@ void GLCanvas::render2D()
 
 void GLCanvas::render3D()
 {
-	std::cout << "To implement" << std::endl;
-
 	SetCurrent();
-    wxPaintDC(this);
+  wxPaintDC(this);
 
 	glShadeModel(GL_SMOOTH);
 	glClearColor(0.9f, 0.9f, 0.9f, 1.0f);
