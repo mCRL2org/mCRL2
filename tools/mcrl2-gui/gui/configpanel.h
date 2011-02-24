@@ -442,6 +442,7 @@ class ConfigPanel: public wxNotebookPage
                                       wxConvUTF8);
       if ( !output_file.IsEmpty() )
       {
+        run.Append(wxT(" "));
         run.Append( StringSpaceEscape ( output_file ) );
       }
 
