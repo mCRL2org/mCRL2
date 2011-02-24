@@ -763,7 +763,7 @@ class pbes_constelm_algorithm: public core::algorithm
     {
       if (check_log_level(level))
       {
-        std::clog << "\nEvaluated condition " << core::pp(data::substitute_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
+        std::clog << "\nEvaluated condition " << core::pp(pbes_system::substitute_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
       }
     }
 
@@ -771,7 +771,7 @@ class pbes_constelm_algorithm: public core::algorithm
     {
       if (check_log_level(level))
       {
-        std::clog << "\nCould not evaluate condition " << core::pp(data::substitute_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
+        std::clog << "\nCould not evaluate condition " << core::pp(pbes_system::substitute_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
       }
     }
 

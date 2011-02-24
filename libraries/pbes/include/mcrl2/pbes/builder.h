@@ -35,7 +35,7 @@ struct pbes_expression_builder_base: public core::builder<Derived>
   using super::leave;
   using super::operator();
   	
-  data::data_expression operator()(data::data_expression& x)
+  data::data_expression operator()(const data::data_expression& x)
   {
   	return x;
   }
