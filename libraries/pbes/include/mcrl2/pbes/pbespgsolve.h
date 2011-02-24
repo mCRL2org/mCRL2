@@ -20,22 +20,13 @@ namespace mcrl2 {
 namespace pbes_system {
 
 /// \brief Solves a pbes using a parity game solver
-/// \return 0 if the solution is false, 1 if the solution is true and 2 if the solution is unknown
+/// \return The solution of the pbes
 inline
-int pbespgsolve(pbes<>& p, const pbespgsolve_options& options = pbespgsolve_options())
+bool pbespgsolve(pbes<>& p, const pbespgsolve_options& options = pbespgsolve_options())
 {
   utilities::execution_timer timer("pbes_solve_test");
   pbespgsolve_algorithm algorithm(timer, options);
-  bool result;
-  try
-  {
-    result = algorithm.run(p);
-  }
-  catch (mcrl2::runtime_error e)
-  {
-    return 2;
-  }
-  return result;
+  return algorithm.run(p);
 }
 
 } // namespace pbes_system

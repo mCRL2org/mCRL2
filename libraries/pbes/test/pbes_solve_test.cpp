@@ -174,12 +174,12 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
   int expected = expected_result ? 1 : 0;
 
   pbes<> p = txt2pbes(pbes_spec);
-  int result = pbespgsolve(p, options);
-  if (result != 2 && result != expected)
+  bool result = pbespgsolve(p, options);
+  if (result != expected)
   {
     std::cout << "--- pbespgsolve failed ---\n";
     std::cout << pbes_system::pp(p) << std::endl;
-    std::cout << "result: " << (result == 0 ? "false" : "true") << std::endl;
+    std::cout << "result:          " << std::boolalpha << result << std::endl;
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }
   BOOST_CHECK(result == expected);

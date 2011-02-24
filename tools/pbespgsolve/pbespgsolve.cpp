@@ -146,14 +146,8 @@ class pg_solver_tool : public input_tool
         log_level = 2;
       }
       set_parity_game_generator_log_level(log_level);
-      int value = pbespgsolve(p, m_options);
-      std::string result;
-      switch (value)
-      {
-        case 0: result = "false"; break;
-        case 1: result = "true"; break;
-        default: result = "unknown"; break;
-      }
+      bool value = pbespgsolve(p, m_options);
+      std::string result = (value ? "true" : "false");
       std::clog << "The solution for the initial variable of the pbes is " << result << "\n";
 
       return true;

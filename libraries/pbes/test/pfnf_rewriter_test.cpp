@@ -17,7 +17,7 @@
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
-#include "../../../tools/pbespgsolve/pbespgsolve.h"
+#include "mcrl2/pbes/pbespgsolve.h"
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -127,13 +127,10 @@ void test_pfnf_rewriter()
   core::garbage_collect();
 }
 
-bool pbespgsolve(const pbes<>& p)
+bool pbespgsolve_const(const pbes<>& p)
 {
   pbes<> q = p;
-  utilities::execution_timer timer("pbes_solve_test");
-  pbespgsolve_options options;
-  pbespgsolve_algorithm algorithm(timer, options);
-  return algorithm.run(q);
+  return pbespgsolve(q);
 }
 
 void test_pfnf_rewriter2(const std::string& text)
