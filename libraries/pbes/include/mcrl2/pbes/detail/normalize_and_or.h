@@ -79,6 +79,12 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
     return x;
   }
 
+  // to prevent default operator() being called
+  data::data_expression operator()(const data::data_expression& x)
+  {
+  	return x;
+  }
+
   pbes_expression operator()(const pbes_expression& x)
   {
     return normalize(super::operator()(x));

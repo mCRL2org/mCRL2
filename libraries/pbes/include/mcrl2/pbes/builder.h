@@ -26,6 +26,21 @@ namespace mcrl2
 namespace pbes_system
 {
 
+/// \brief Builder class
+template <typename Derived>
+struct pbes_expression_builder_base: public core::builder<Derived>
+{
+  typedef core::builder<Derived> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  	
+  data::data_expression operator()(data::data_expression& x)
+  {
+  	return x;
+  }
+};
+
 // Adds sort expression traversal to a builder
 //--- start generated add_sort_expressions code ---//
 template <template <class> class Builder, class Derived>
@@ -503,9 +518,9 @@ struct add_pbes_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct pbes_expression_builder: public add_pbes_expressions<core::builder, Derived>
+struct pbes_expression_builder: public add_pbes_expressions<pbes_system::pbes_expression_builder_base, Derived>
 {
-  typedef add_pbes_expressions<core::builder, Derived> super;
+  typedef add_pbes_expressions<pbes_system::pbes_expression_builder_base, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();

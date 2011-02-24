@@ -22,6 +22,24 @@ namespace mcrl2
 namespace process
 {
 
+/// \brief Traversal class for actions. Used as a base class for process_expression_traverser.
+template <typename Derived>
+struct process_expression_builder_base: public core::builder<Derived>
+{
+  typedef core::builder<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  process_expression operator()(const lps::action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
+
 // Adds sort expression traversal to a builder
 //--- start generated add_sort_expressions code ---//
 template <template <class> class Builder, class Derived>
@@ -860,9 +878,9 @@ struct add_process_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct process_expression_builder: public add_process_expressions<core::builder, Derived>
+struct process_expression_builder: public add_process_expressions<process::process_expression_builder_base, Derived>
 {
-  typedef add_process_expressions<core::builder, Derived> super;
+  typedef add_process_expressions<process::process_expression_builder_base, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();

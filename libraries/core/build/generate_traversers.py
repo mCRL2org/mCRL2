@@ -173,22 +173,22 @@ if __name__ == "__main__":
     make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'data_expression_builder', 'add_data_expressions', 'regular_formulas::data_expression_builder', class_map, all_classes, 'state_formulas'  , 'data::data_expression', data_expression_dependencies, modifiability_map)
 
     # pbes_expression_builder
-    make_builder('../../pbes/include/mcrl2/pbes/builder.h', 'pbes_expression_builder', 'add_pbes_expressions', 'core::builder', class_map, all_classes, 'pbes_system', 'pbes_system::pbes_expression', pbes_expression_dependencies, modifiability_map)
+    make_builder('../../pbes/include/mcrl2/pbes/builder.h', 'pbes_expression_builder', 'add_pbes_expressions', 'pbes_system::pbes_expression_builder_base', class_map, all_classes, 'pbes_system', 'pbes_system::pbes_expression', pbes_expression_dependencies, modifiability_map)
 
     # boolean_expression_builder
     make_builder('../../bes/include/mcrl2/bes/builder.h', 'boolean_expression_builder', 'add_boolean_expressions', 'core::builder', class_map, all_classes, 'bes', 'bes::boolean_expression', boolean_expression_dependencies, modifiability_map)
 
     # process_expression_builder
-    make_builder('../../process/include/mcrl2/process/builder.h', 'process_expression_builder', 'add_process_expressions', 'core::builder', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies, modifiability_map)
+    make_builder('../../process/include/mcrl2/process/builder.h', 'process_expression_builder', 'add_process_expressions', 'process::process_expression_builder_base', class_map, all_classes, 'process', 'process::process_expression', process_expression_dependencies, modifiability_map)
 
     # state_formula_builder
-    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'state_formula_builder', 'add_state_formula_expressions', 'core::builder', class_map, all_classes, 'state_formulas', 'state_formulas::state_formula', state_formula_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'state_formula_builder', 'add_state_formula_expressions', 'state_formulas::state_formula_builder_base', class_map, all_classes, 'state_formulas', 'state_formulas::state_formula', state_formula_dependencies, modifiability_map)
 
     # action_formula_builder
-    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'action_formula_builder', 'add_action_formula_expressions', 'core::builder', class_map, all_classes, 'action_formulas', 'action_formulas::action_formula', action_formula_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'action_formula_builder', 'add_action_formula_expressions', 'action_formulas::action_formula_builder_base', class_map, all_classes, 'action_formulas', 'action_formulas::action_formula', action_formula_dependencies, modifiability_map)
 
     # regular_formula_builder
-    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'regular_formula_builder', 'add_regular_formula_expressions', 'core::builder', class_map, all_classes, 'regular_formulas', 'regular_formulas::regular_formula', regular_formula_dependencies, modifiability_map)
+    make_builder('../../lps/include/mcrl2/modal_formula/builder.h', 'regular_formula_builder', 'add_regular_formula_expressions', 'regular_formulas::regular_formula_builder_base', class_map, all_classes, 'regular_formulas', 'regular_formulas::regular_formula', regular_formula_dependencies, modifiability_map)
 
     # sort_expression_traverser
     make_traverser('../../data/include/mcrl2/data/traverser.h'        , 'sort_expression_traverser', 'add_traverser_sort_expressions', 'core::traverser'                            , class_map, all_classes, 'data'            , 'data::sort_expression', sort_expression_dependencies)

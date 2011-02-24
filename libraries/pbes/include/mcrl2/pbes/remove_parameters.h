@@ -145,6 +145,12 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
     : to_be_removed(to_be_removed_)
   {}
 
+  // to prevent default operator() being called
+  data::data_expression operator()(const data::data_expression& x)
+  {
+  	return x;
+  }
+
   propositional_variable operator()(const propositional_variable& x)
   {
     std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = to_be_removed.find(x.name());
@@ -179,7 +185,6 @@ struct map_based_remove_parameters_builder: public pbes_expression_builder<Deriv
   {
     static_cast<Derived&>(*this)(x.equations());
     x.initial_state() = static_cast<Derived&>(*this)(x.initial_state());
-    static_cast<Derived&>(*this)(x.global_variables());
   }
 };
 } // namespace detail

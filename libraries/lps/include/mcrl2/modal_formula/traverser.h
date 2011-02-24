@@ -37,20 +37,18 @@ struct action_formula_traverser_base: public core::traverser<Derived>
   using super::enter;
   using super::leave;
 
-  action_formula operator()(const data::data_expression& x)
+  void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
   }
 
-  action_formula operator()(const lps::multi_action& x)
+  void operator()(const lps::multi_action& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
   }
 };
 
@@ -773,12 +771,11 @@ struct regular_formula_traverser_base: public core::traverser<Derived>
   using super::enter;
   using super::leave;
 
-  regular_formula operator()(const data::data_expression& x)
+  void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
   }
 };
 
@@ -1246,12 +1243,11 @@ struct state_formula_traverser_base: public core::traverser<Derived>
   using super::enter;
   using super::leave;
 
-  state_formula operator()(const data::data_expression& x)
+  void operator()(const data::data_expression& x)
   {
     static_cast<Derived&>(*this).enter(x);
     // skip
     static_cast<Derived&>(*this).leave(x);
-    return x;
   }
 };
 

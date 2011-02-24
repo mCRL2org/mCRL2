@@ -24,6 +24,32 @@ namespace mcrl2
 namespace action_formulas
 {
 
+/// \brief Base class for action_formula_builder.
+template <typename Derived>
+struct action_formula_builder_base: public core::builder<Derived>
+{
+  typedef core::builder<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  action_formula operator()(const data::data_expression& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+
+  action_formula operator()(const lps::multi_action& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
+
 //--- start generated action_formulas::add_sort_expressions code ---//
 template <template <class> class Builder, class Derived>
 struct add_sort_expressions: public Builder<Derived>
@@ -459,9 +485,9 @@ struct add_action_formula_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct action_formula_builder: public add_action_formula_expressions<core::builder, Derived>
+struct action_formula_builder: public add_action_formula_expressions<action_formulas::action_formula_builder_base, Derived>
 {
-  typedef add_action_formula_expressions<core::builder, Derived> super;
+  typedef add_action_formula_expressions<action_formulas::action_formula_builder_base, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -472,6 +498,24 @@ struct action_formula_builder: public add_action_formula_expressions<core::build
 
 namespace regular_formulas
 {
+
+/// \brief Builder class for regular_formula_builder. Used as a base class for pbes_expression_builder.
+template <typename Derived>
+struct regular_formula_builder_base: public core::builder<Derived>
+{
+  typedef core::builder<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  regular_formula operator()(const data::data_expression& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
 
 //--- start generated regular_formulas::add_sort_expressions code ---//
 template <template <class> class Builder, class Derived>
@@ -746,9 +790,9 @@ struct add_regular_formula_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct regular_formula_builder: public add_regular_formula_expressions<core::builder, Derived>
+struct regular_formula_builder: public add_regular_formula_expressions<regular_formulas::regular_formula_builder_base, Derived>
 {
-  typedef add_regular_formula_expressions<core::builder, Derived> super;
+  typedef add_regular_formula_expressions<regular_formulas::regular_formula_builder_base, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
@@ -759,6 +803,24 @@ struct regular_formula_builder: public add_regular_formula_expressions<core::bui
 
 namespace state_formulas
 {
+
+/// \brief Builder class for pbes_expressions. Used as a base class for pbes_expression_builder.
+template <typename Derived>
+struct state_formula_builder_base: public core::builder<Derived>
+{
+  typedef core::builder<Derived> super;
+  using super::operator();
+  using super::enter;
+  using super::leave;
+
+  state_formula operator()(const data::data_expression& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    // skip
+    static_cast<Derived&>(*this).leave(x);
+    return x;
+  }
+};
 
 //--- start generated state_formulas::add_sort_expressions code ---//
 template <template <class> class Builder, class Derived>
@@ -1465,9 +1527,9 @@ struct add_state_formula_expressions: public Builder<Derived>
 
 /// \brief Builder class
 template <typename Derived>
-struct state_formula_builder: public add_state_formula_expressions<core::builder, Derived>
+struct state_formula_builder: public add_state_formula_expressions<state_formulas::state_formula_builder_base, Derived>
 {
-  typedef add_state_formula_expressions<core::builder, Derived> super;
+  typedef add_state_formula_expressions<state_formulas::state_formula_builder_base, Derived> super;
   using super::enter;
   using super::leave;
   using super::operator();
