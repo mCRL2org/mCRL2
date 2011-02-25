@@ -53,11 +53,11 @@ exploration_strategy str_to_expl_strat(const string s)
   {
     return es_random;
   }
-  if (s=="p" || s=="priority")
+  if (s=="p" || s=="prioritized")
   {
     return es_value_prioritized;
   }
-  if (s=="q" || s=="rpriority")
+  if (s=="q" || s=="rprioritized")
   {
     return es_value_random_prioritized;
   }
@@ -75,9 +75,9 @@ const string expl_strat_to_str(exploration_strategy es)
     case es_random:
       return "random";
     case es_value_prioritized:
-      return "priority";
+      return "prioritized";
     case es_value_random_prioritized:
-      return "rpriority";
+      return "rprioritized";
     default:
       return "unknown";
   }
