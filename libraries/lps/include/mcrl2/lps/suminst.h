@@ -52,7 +52,8 @@ class suminst_algorithm: public lps::detail::lps_algorithm
     {
       s.condition() = m_rewriter(s.condition(), sigma);
       lps::substitute_free_variables(s.multi_action(), sigma);
-      s.assignments() = data::substitute_variables(s.assignments(), sigma);
+      detail::lps_rewriter<DataRewriter> r(m_rewriter);
+      s.assignments() = r.rewrite_list_copy(data::substitute_variables(s.assignments(), sigma));
     }
 
     // Temporary solution, should be replace with lps substitution

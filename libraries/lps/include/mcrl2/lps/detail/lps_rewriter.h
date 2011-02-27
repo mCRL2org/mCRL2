@@ -13,6 +13,7 @@
 #define MCRL2_LPS_DETAIL_LPS_REWRITER_H
 
 #include <vector>
+// #include "mcrl2/data/assignment.h"
 #include "mcrl2/lps/specification.h"
 
 namespace mcrl2
@@ -48,6 +49,27 @@ struct lps_rewriter
     return TermList(v.begin(), v.end());
   }
 
+  /// \brief Applies the rewriter to the elements of an assignment list, 
+  ///           where the element is removed if the rewritten rhs equals the lhs.
+  
+  data::assignment_list rewrite_list_copy(const data::assignment_list& l) const
+  {
+    using namespace data;
+    // TODO: how to make this function efficient?
+    atermpp::vector<assignment> v;
+    for (assignment_list::const_iterator i = l.begin(); i != l.end(); ++i)
+    {
+      assignment a=*i;
+      rewrite(a);
+      if (a.lhs()!=a.rhs())
+      { 
+        v.push_back(a);
+      }
+    }
+    return assignment_list(v.begin(), v.end());
+  }
+  
+  /// \brief Applies the rewriter to the elements of a container
   /// \brief Applies the rewriter to the elements of a term list
   template <typename TermList>
   void rewrite_list(TermList& l) const
@@ -55,7 +77,6 @@ struct lps_rewriter
     l = rewrite_list_copy(l);
   }
 
-  /// \brief Applies the rewriter to the elements of a container
   template <typename Container>
   void rewrite_container(Container& c) const
   {
