@@ -19,8 +19,9 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
 
-#include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2
 {
@@ -45,28 +46,6 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
     /// Enumerator factory
     data::enumerator_factory< enumerator_type > m_enumerator_factory;
-
-    // Temporary solution, should be replace with lps substitution
-    template <typename Substitution>
-    void apply_substitution(action_summand& s, Substitution& sigma)
-    {
-      s.condition() = m_rewriter(s.condition(), sigma);
-      lps::substitute_free_variables(s.multi_action(), sigma);
-      detail::lps_rewriter<DataRewriter> r(m_rewriter);
-      s.assignments() = r.rewrite_list_copy(data::substitute_variables(s.assignments(), sigma));
-    }
-
-    // Temporary solution, should be replace with lps substitution
-    template <typename Substitution>
-    void apply_substitution(deadlock_summand& s, Substitution& sigma)
-    {
-      s.condition() = m_rewriter(s.condition(), sigma);
-      if(s.deadlock().has_time())
-      {
-        s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), sigma);
-      }
-      assert(s.deadlock().time() != data::data_expression());
-    }
 
     template <typename SummandType, typename Container>
     void instantiate_summand(const SummandType& s, Container& result)
@@ -110,7 +89,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
             SummandType t(s);
             t.summation_variables() = new_summation_variables;
-            apply_substitution(t, *i);
+            lps::rewrite(t, m_rewriter, *i);
             result.push_back(t);
             ++nr_summands;
           }
