@@ -171,18 +171,16 @@ void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
 
 void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& options, bool expected_result)
 {
-  int expected = expected_result ? 1 : 0;
-
   pbes<> p = txt2pbes(pbes_spec);
   bool result = pbespgsolve(p, options);
-  if (result != expected)
+  if (result != expected_result)
   {
     std::cout << "--- pbespgsolve failed ---\n";
     std::cout << pbes_system::pp(p) << std::endl;
     std::cout << "result:          " << std::boolalpha << result << std::endl;
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }
-  BOOST_CHECK(result == expected);
+  BOOST_CHECK(result == expected_result);
   core::garbage_collect();
 }
 
