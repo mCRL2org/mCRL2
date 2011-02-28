@@ -68,6 +68,7 @@ enum lts_equivalence
   lts_eq_sim,              /**< Strong simulation equivalence */
   lts_eq_trace,            /**< Strong trace equivalence*/
   lts_eq_weak_trace,       /**< Weak trace equivalence */
+  lts_red_tau_star,        /**< Tau star reduction */
   lts_red_determinisation, /**< Used for a determinisation reduction */
   lts_equivalence_min = lts_eq_none,
   lts_equivalence_max = lts_red_determinisation
@@ -140,6 +141,7 @@ static std::string equivalence_desc_strings[] =
   "strong simulation equivalence",
   "strong trace equivalence",
   "weak trace equivalence",
+  "tau star reduction",
   "determinisation reduction"
 };
 
@@ -205,6 +207,10 @@ inline lts_equivalence parse_equivalence(std::string const& s)
   {
     return lts_eq_weak_trace;
   }
+  else if (s == "tau-star")
+  {
+    return lts_red_tau_star;
+  }
   else if (s == "determinisation")
   {
     return lts_red_determinisation;
@@ -224,6 +230,7 @@ static std::string equivalence_strings[] =
   "sim",
   "trace",
   "weak-trace",
+  "tau-star",
   "determinisation"
 };
 
@@ -757,6 +764,12 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
       detail::bisimulation_reduce(l,false);
       determinise(l);
       detail::bisimulation_reduce(l,false);
+      return;
+    }
+    case lts_red_tau_star:
+    {
+      detail::bisimulation_reduce(l,true,false);
+      detail::tau_star_reduce(l);
       return;
     }
     case lts_red_determinisation:

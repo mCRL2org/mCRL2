@@ -38,13 +38,14 @@ static const std::set<lts_equivalence> &initialise_allowed_eqs()
   s.insert(lts_eq_sim);
   s.insert(lts_eq_trace);
   s.insert(lts_eq_weak_trace);
+  s.insert(lts_red_tau_star);
   return s;
 }
 static const std::set<lts_equivalence> &allowed_eqs()
 {
   static const std::set<lts_equivalence> &s = initialise_allowed_eqs();
   return s;
-}
+} 
 
 static inline std::string get_base(std::string const& s)
 {
@@ -440,6 +441,7 @@ class ltsconvert_gui_tool: public mcrl2_gui_tool<ltsconvert_tool>
       values.push_back("sim");
       values.push_back("trace");
       values.push_back("weak-trace");
+      values.push_back("tau-star");
       m_gui_options["equivalence"] = create_radiobox_widget(values);
       m_gui_options["lps"] = create_filepicker_widget("LPS files (*.lps)|*.lps|All Files (*.*)|*.*");
       m_gui_options["no-state"] = create_checkbox_widget();
