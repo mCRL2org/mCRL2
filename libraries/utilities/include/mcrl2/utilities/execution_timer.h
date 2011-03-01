@@ -14,6 +14,7 @@
 
 #include <ctime>
 #include <fstream>
+#include <map>
 #include <sstream>
 #include <string>
 #include "mcrl2/exception.h"
