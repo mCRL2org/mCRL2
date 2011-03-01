@@ -48,11 +48,11 @@ bool ExporterLatex::export_to(wxString filename)
     if (s->isInitialState())
     {
       node =
-        boost::format("\\definecolor{currentcolor}{rgb}{%4%,%5%,%6%}\n\\node at (%1%pt, %2%pt) [initstate, fill=currentcolor] (state%3%) {%3%};\n");
+        boost::format("\\definecolor{currentcolor}{rgb}{%4%,%5%,%6%}\n\\node at (%1$fpt, %2$fpt) [initstate, fill=currentcolor] (state%3%) {%3%};\n");
     }
     else
     {
-      node = boost::format("\\definecolor{currentcolor}{rgb}{%4%, %5%, %6%}\n\\node at (%1%pt, %2%pt) [state, fill=currentcolor] (state%3%) {%3%};\n");
+      node = boost::format("\\definecolor{currentcolor}{rgb}{%4%, %5%, %6%}\n\\node at (%1$fpt, %2$fpt) [state, fill=currentcolor] (state%3%) {%3%};\n");
     }
 
     double aspect = owner->getAspectRatio();
@@ -128,7 +128,7 @@ bool ExporterLatex::export_to(wxString filename)
 
 void ExporterLatex::drawBezier(Transition* tr)
 {
-  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%5%} controls (%3%pt, %4%pt) .. (state%2%);\n");
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%5%} controls (%3$fpt, %4$fpt) .. (state%2%);\n");
 
   State* from = tr->getFrom();
   State* to = tr->getTo();
@@ -152,7 +152,7 @@ void ExporterLatex::drawBezier(Transition* tr)
 
 void ExporterLatex::drawSelfLoop(Transition* tr)
 {
-  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%2%} controls (%3%pt, %4%pt) and (%5%pt, %6%pt) .. (state%1%);\n");
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%2%} controls (%3$fpt, %4$fpt) and (%5$fpt, %6$fpt) .. (state%1%);\n");
 
   State* s = tr->getFrom();
 
