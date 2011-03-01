@@ -21,8 +21,10 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
+#include "mcrl2/pbes/lts2pbes.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -45,6 +47,7 @@ class lts2pbes_tool : public input_output_tool
 
     std::string infilename;
     std::string outfilename;
+    std::string formfilename;
     lts_type input_type;
     data_file_type_t data_file_type;
     std::string datafile;
@@ -52,6 +55,9 @@ class lts2pbes_tool : public input_output_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
+
+      desc.add_option("formula", make_mandatory_argument("FILE"),
+                      "use the state formula from FILE", 'f');
 
       desc.add_option("data", make_mandatory_argument("FILE"),
                       "use FILE as the data and action specification. "
@@ -116,6 +122,11 @@ class lts2pbes_tool : public input_output_tool
           parser.error("option -i/--in has illegal argument '" +
                        parser.option_argument("in") + "'");
         }
+      }
+
+      if (parser.options.count("formula"))
+      {
+        formfilename = parser.option_argument("formula");
       }
 
       infilename  = input_filename();
@@ -257,6 +268,20 @@ class lts2pbes_tool : public input_output_tool
       }
     }
 
+    // extracts a specification from an LTS
+    lps::specification extract_specification(const lts_lts_t& l)
+    {
+      action_summand_vector action_summands;
+      const variable process_parameter("x", mcrl2::data::sort_pos::pos());
+      const variable_list process_parameters = push_back(variable_list(), process_parameter);
+      const atermpp::set<data::variable> global_variables;
+      // Add a single delta.
+      const deadlock_summand_vector deadlock_summands(1, deadlock_summand(variable_list(), sort_bool::true_(), deadlock()));
+      const linear_process lps(process_parameters,deadlock_summands,action_summand_vector());
+      const process_initializer initial_process(push_back(assignment_list(), assignment(process_parameter,sort_pos::pos(l.initial_state()+1))));
+      return lps::specification(l.data(),l.action_labels(),global_variables,lps,initial_process);
+    }  
+
   public:
     bool run()
     {
@@ -267,6 +292,28 @@ class lts2pbes_tool : public input_output_tool
       
       lts_lts_t l;
       load_lts(l, input_type);
+
+      //load formula file
+      lps::specification spec = extract_specification(l);
+      std::ifstream from(formfilename.c_str());
+      if (!from)
+      {
+        throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
+      }
+      state_formulas::state_formula formula = state_formulas::parse_state_formula(from, spec);
+      from.close();
+      
+      pbes_system::pbes<> result = pbes_system::lts2pbes(l, formula);
+      //save the result
+      if (output_filename().empty())
+      {
+        gsVerboseMsg("writing PBES to stdout...\n");
+      }
+      else
+      {
+        gsVerboseMsg("writing PBES to file '%s'...\n", output_filename().c_str());
+      }
+      result.save(output_filename());
       return true;
     }
 };
@@ -279,6 +326,7 @@ class lts2pbes_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lts2pbes_tool>
       m_gui_options["data"] = create_filepicker_widget("Text Files (*.txt)|*.txt|mCRL2 files (*.mcrl2)|*.mcrl2|All Files (*.*)|*.*");
       m_gui_options["lps"]  = create_filepicker_widget("LPS File (*.lps)|*.lps|All Files (*.*)|*.*");
       m_gui_options["mcrl2"] = create_filepicker_widget("mCRL2 files (*.mcrl2)|*.mcrl2|Text Files (*.txt)|*.txt|All Files (*.*)|*.*");
+      m_gui_options["formula"] = create_filepicker_widget("modal mu-calculus files (*.mcf)|*.mcf|Text files(*.txt)|*.txt|All Files (*.*)|*.*");
     }
 };
 

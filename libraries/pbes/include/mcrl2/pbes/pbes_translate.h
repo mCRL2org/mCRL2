@@ -200,16 +200,6 @@ class pbes_translate_algorithm
     /// \brief Constructor.
     pbes_translate_algorithm()
     {}
-
-    /// \brief Destructor.
-    virtual ~pbes_translate_algorithm()
-    {}
-
-    /// \brief Runs the algorithm
-    /// \param formula A state formula
-    /// \param spec A specification
-    /// \return The result of the translation
-    virtual pbes<> run(const state_formulas::state_formula& formula, const lps::specification& spec) = 0;
 };
 
 /// \brief Algorithm for translating a state formula and a timed specification to a pbes.
@@ -834,7 +824,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
 };
 
 /// \brief Algorithm for translating a state formula and an untimed specification to a pbes.
-class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
+class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
 {
   protected:
 
@@ -926,7 +916,12 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm
 #endif
       return result;
     }
+};
 
+/// \brief Algorithm for translating a state formula and an untimed specification to a pbes.
+class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_base
+{
+  protected:
     /// \brief The \p RHS function of the translation
     /// \param f0 A modal formula
     /// \param f A modal formula
