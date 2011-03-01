@@ -1,0 +1,36 @@
+# Authors: Frank Stappers 
+# Copyright: see the accompanying file COPYING or copy at
+# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+# This configures, and installs the LTSmin toolset if the root to source is provided.
+
+if( UNIX )
+
+ # Set additional configure flags
+ # SHARED LIBS vs STATIC LIBS
+ if( BUILD_SHARED_LIBS )
+   set(LTSMIN_FLAGS "--enable-shared ${LTSMIN_FLAGS}")
+ else( BUILD_SHARED_LIBS )
+   set(LTSMIN_FLAGS "--enable-static ${LTSMIN_FLAGS}")
+ endif( BUILD_SHARED_LIBS )
+
+ #Configure ltsmin
+ execute_process(COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} --with-mcrl2=${CMAKE_INSTALL_PREFIX} ${LTSMIN_FLAGS} 
+   WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
+	 )
+
+ #Make ltsmin 
+ execute_process(COMMAND make 
+   WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@" 
+	 )
+
+ #Make install 
+ execute_process(COMMAND make install 
+   WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
+	 )
+
+endif( UNIX )
