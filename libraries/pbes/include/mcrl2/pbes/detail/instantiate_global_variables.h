@@ -13,10 +13,10 @@
 #define MCRL2_PBES_DETAIL_INSTANTIATE_GLOBAL_VARIABLES_H
 
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/replace.h"
 
 namespace mcrl2
 {
@@ -47,8 +47,8 @@ void instantiate_global_variables(pbes<Container>& p)
     sigma[*i] = d;
     to_be_removed.insert(*i);
   }
-  pbes_system::substitute_free_variables(p.equations(), sigma);
-  p.initial_state() = pbes_system::substitute_free_variables(p.initial_state(), sigma);
+  pbes_system::replace_free_variables(p.equations(), sigma);
+  p.initial_state() = pbes_system::replace_free_variables(p.initial_state(), sigma);
   p.global_variables().clear();
 }
 

@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/bes/substitute.h
+/// \file mcrl2/bes/replace.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_BES_SUBSTITUTE_H
-#define MCRL2_BES_SUBSTITUTE_H
+#ifndef MCRL2_BES_REPLACE_H
+#define MCRL2_BES_REPLACE_H
 
 #include <functional>
 #include "mcrl2/bes/boolean_expression.h"
@@ -45,7 +45,7 @@ struct boolean_variable_substitution: public std::unary_function<boolean_variabl
 /// \param phi A boolean expression
 /// \return The result of the substitution.
 template <typename Substitution>
-boolean_expression substitute_boolean_variables(const boolean_expression& x, Substitution sigma)
+boolean_expression replace_boolean_variables(const boolean_expression& x, Substitution sigma)
 {
   return core::make_update_apply_builder<boolean_expression_builder>(sigma)(x);
 }
@@ -54,4 +54,4 @@ boolean_expression substitute_boolean_variables(const boolean_expression& x, Sub
 
 } // namespace mcrl2
 
-#endif // MCRL2_BES_SUBSTITUTE_H
+#endif // MCRL2_BES_REPLACE_H

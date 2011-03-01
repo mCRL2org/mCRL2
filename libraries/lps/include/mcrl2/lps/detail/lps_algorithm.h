@@ -24,7 +24,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 

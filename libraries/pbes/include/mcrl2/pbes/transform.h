@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_TRANSFORM_H
 #define MCRL2_PBES_TRANSFORM_H
 
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/replace.h"
 
 namespace mcrl2 {
 
@@ -40,10 +40,10 @@ void pbes_transform(pbes<Container>& x, unsigned int iterations, bool mu_value =
   
   for (unsigned int i = 0; i < iterations; i++)
   {
-    pbes_system::substitute_propositional_variables(x, sigma);
+    pbes_system::replace_propositional_variables(x, sigma);
   }
 
-  pbes_system::substitute_propositional_variables(x, sigma_final);
+  pbes_system::replace_propositional_variables(x, sigma_final);
 }
 
 } // namespace pbes_system

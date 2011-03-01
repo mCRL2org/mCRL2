@@ -23,7 +23,7 @@
 #include "mcrl2/pbes/pbes_expr_builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 
 namespace atermpp
 {
@@ -137,7 +137,7 @@ struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
   /// \return The result of visiting the node
   pbes_expression visit_data_expression(const pbes_expression& /* e */, const data::data_expression& d)
   {
-    return data::substitute_free_variables(d, data::make_pair_sequence_substitution(replacements));
+    return data::replace_free_variables(d, data::make_pair_sequence_substitution(replacements));
   }
 
   /// \brief Visit forall node
@@ -149,7 +149,7 @@ struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
   {
     size_t replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
-    data::variable_list new_variables = replacement_count > 0 ? data::substitute_variables(variables, data::make_pair_sequence_substitution(replacements)) : variables;
+    data::variable_list new_variables = replacement_count > 0 ? data::replace_variables(variables, data::make_pair_sequence_substitution(replacements)) : variables;
     pop(replacement_count);
     return pbes_expr::forall(new_variables, new_expression);
   }
@@ -163,7 +163,7 @@ struct quantifier_rename_builder: public pbes_expr_builder<pbes_expression>
   {
     size_t replacement_count = push(variables);
     pbes_expression new_expression = visit(expression);
-    data::variable_list new_variables = replacement_count > 0 ? data::substitute_variables(variables, data::make_pair_sequence_substitution(replacements)) : variables;
+    data::variable_list new_variables = replacement_count > 0 ? data::replace_variables(variables, data::make_pair_sequence_substitution(replacements)) : variables;
     pop(replacement_count);
     return pbes_expr::exists(new_variables, new_expression);
   }

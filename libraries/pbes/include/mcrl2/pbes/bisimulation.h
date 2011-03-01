@@ -26,7 +26,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
 
@@ -274,13 +274,13 @@ class bisimulation_algorithm
       }
 
       // rename unbound data variables
-      data::detail::make_substitute_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(data::make_map_substitution(sigma))(spec);
+      data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(data::make_map_substitution(sigma))(spec);
 
       // rename process parameters
-      spec.process().process_parameters() = data::substitute_variables(spec.process().process_parameters(), data::make_map_substitution(sigma));
+      spec.process().process_parameters() = data::replace_variables(spec.process().process_parameters(), data::make_map_substitution(sigma));
 
       // rename global variable declaration
-      data::substitute_variables(spec.global_variables(), data::make_map_substitution(sigma));
+      data::replace_variables(spec.global_variables(), data::make_map_substitution(sigma));
     }
 
     /// \brief Initializes the name lookup table.
@@ -674,8 +674,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         // replace d' by d1 (if needed)
         if (d1 != data_expression_list(parameters.begin(), parameters.end()))
         {
-          cj = data::substitute_free_variables(cj, mcrl2::data::make_sequence_sequence_substitution(q.process_parameters(), d1));
-          gj = data::substitute_free_variables(gj, mcrl2::data::make_sequence_sequence_substitution(q.process_parameters(), d1));
+          cj = data::replace_free_variables(cj, mcrl2::data::make_sequence_sequence_substitution(q.process_parameters(), d1));
+          gj = data::replace_free_variables(gj, mcrl2::data::make_sequence_sequence_substitution(q.process_parameters(), d1));
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
@@ -688,8 +688,8 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
           used_names.insert(std::string(k->name()));
         }
         variable_list e1_new = fresh_variables(e1, used_names);
-        data_expression    cj_new   = data::substitute_free_variables(cj, mcrl2::data::make_sequence_sequence_substitution(e1, e1_new));
-        data_expression_list gj_new = data::substitute_free_variables(gj, mcrl2::data::make_sequence_sequence_substitution(e1, e1_new));
+        data_expression    cj_new   = data::replace_free_variables(cj, mcrl2::data::make_sequence_sequence_substitution(e1, e1_new));
+        data_expression_list gj_new = data::replace_free_variables(gj, mcrl2::data::make_sequence_sequence_substitution(e1, e1_new));
 
         pbes_expression expr = pbes_expr::exists(e1_new, z::and_(cj_new, var(Y2(p, q, i), d + gj_new)));
         v.push_back(expr);

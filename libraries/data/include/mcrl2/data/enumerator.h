@@ -22,7 +22,7 @@
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/exception.h"
 
@@ -52,7 +52,7 @@ struct data_enumerator_helper
   /// \brief Function call operator
   void operator()()
   {
-    data_expression d = data::substitute_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
+    data_expression d = data::replace_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
 
     // 9/8/2009. Changed line below from std::vector<variable> to atermpp::vector<variable> because it appears that
     // at times variables can occur only in this vector of variables, causing problems when garbage collected.

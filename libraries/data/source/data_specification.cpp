@@ -12,7 +12,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/data_utility.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 
 namespace mcrl2
 {
@@ -217,7 +217,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
          i=resulting_normalized_sort_aliases.begin();
          i!=resulting_normalized_sort_aliases.end(); ++i)
     {
-      const sort_expression s1=data::substitute_sort_expressions(lhs,sort_expression_assignment(i->first,i->second), true);
+      const sort_expression s1=data::replace_sort_expressions(lhs,sort_expression_assignment(i->first,i->second), true);
 
       if (s1!=lhs)
       {
@@ -237,7 +237,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
       }
       else
       {
-        const sort_expression s2 = data::substitute_sort_expressions(i->first,sort_expression_assignment(lhs,rhs), true);
+        const sort_expression s2 = data::replace_sort_expressions(i->first,sort_expression_assignment(lhs,rhs), true);
         if (s2!=i->first)
         {
           assert(is_basic_sort(i->second));

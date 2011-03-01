@@ -18,7 +18,7 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"
@@ -27,7 +27,7 @@
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/translate_user_notation.h"
-#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/find.h"
 
 // //Action rename rules
@@ -462,9 +462,9 @@ void rename_renamerule_variables(data::data_expression& rcond, lps::action& rlef
     }
   }
 
-  rcond = data::substitute_free_variables(rcond, mcrl2::data::make_map_substitution(renamings));
-  rleft = lps::substitute_free_variables(rleft, mcrl2::data::make_map_substitution(renamings));
-  rright = lps::substitute_free_variables(rright, mcrl2::data::make_map_substitution(renamings));
+  rcond = data::replace_free_variables(rcond, mcrl2::data::make_map_substitution(renamings));
+  rleft = lps::replace_free_variables(rleft, mcrl2::data::make_map_substitution(renamings));
+  rright = lps::replace_free_variables(rright, mcrl2::data::make_map_substitution(renamings));
 }
 
 action translate_user_notation_and_normalise_sorts_action(

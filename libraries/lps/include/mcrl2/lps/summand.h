@@ -25,7 +25,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/bool.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/action.h"
@@ -270,7 +270,7 @@ class summand: public atermpp::aterm_appl
     /// \return A symbolic representation of the next states
     data::data_expression_list next_state(const data::variable_list& process_parameters) const
     {
-      return data::substitute_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
+      return data::replace_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
 };
 
@@ -654,7 +654,7 @@ class action_summand: public summand_base
     /// \return A symbolic representation of the next states
     data::data_expression_list next_state(const data::variable_list& process_parameters) const
     {
-      return data::substitute_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
+      return data::replace_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(assignments()));
     }
 };
 

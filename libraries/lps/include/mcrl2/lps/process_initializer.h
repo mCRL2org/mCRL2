@@ -21,7 +21,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 
 namespace mcrl2
 {
@@ -71,7 +71,7 @@ class process_initializer: public atermpp::aterm_appl
     /// \return The initial state of the LPS.
     data::data_expression_list state(const data::variable_list& process_parameters) const
     {
-      return data::substitute_free_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(m_assignments));
+      return data::replace_free_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(m_assignments));
     }
 };
 

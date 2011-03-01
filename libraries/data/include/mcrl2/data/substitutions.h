@@ -14,7 +14,7 @@
 
 #include <functional>
 #include "mcrl2/data/print.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_expression.h"
 
 namespace mcrl2 {
@@ -434,7 +434,7 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     /// \return expression equivalent to <|s|>(<|e|>), or a reference to such an expression
     expression_type operator()(variable_type const& v) const
     {
-      return data::substitute_free_variables(f_(v), g_);
+      return data::replace_free_variables(f_(v), g_);
     }
 
     template <typename Expression>

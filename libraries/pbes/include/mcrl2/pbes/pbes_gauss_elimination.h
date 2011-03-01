@@ -42,7 +42,7 @@ struct pbes_traits
     static inline
     expression_type substitute(const expression_type& t, const variable_type& X, const expression_type& phi)
     {
-      return substitute_propositional_variables(t, propositional_variable_substitution(X, phi));
+      return replace_propositional_variables(t, propositional_variable_substitution(X, phi));
     }
 
     /// \brief Returns the value true

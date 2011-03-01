@@ -20,11 +20,11 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/fresh_variable_generator.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/find.h"
 
 namespace mcrl2
@@ -184,10 +184,10 @@ class binary_algorithm: public lps::detail::lps_algorithm
     ///        vector of assignments to Boolean variables.
     data::assignment_list replace_enumerated_parameters_in_assignments(data::assignment_list v)
     {
-      // We use substitute_variables, to make sure that the binding variables of assignments are ignored.
+      // We use replace_variables, to make sure that the binding variables of assignments are ignored.
       // Note that this operation is safe because the generated fresh variables can not clash with other
       // binding variables.
-      v = data::substitute_variables(v, m_if_trees);
+      v = data::replace_variables(v, m_if_trees);
 
       data::assignment_vector result;
       for (data::assignment_list::const_iterator i = v.begin(); i != v.end(); ++i)
@@ -250,11 +250,11 @@ class binary_algorithm: public lps::detail::lps_algorithm
     /// \brief Update an action summand with the new Boolean parameters
     void update_action_summand(action_summand& s)
     {
-      s.condition() = data::substitute_free_variables(s.condition(), m_if_trees);
-      s.multi_action().actions() = lps::substitute_free_variables(s.multi_action().actions(), m_if_trees);
+      s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
+      s.multi_action().actions() = lps::replace_free_variables(s.multi_action().actions(), m_if_trees);
       if (s.multi_action().has_time())
       {
-        s.multi_action().time() = data::substitute_free_variables(s.multi_action().time(), m_if_trees);
+        s.multi_action().time() = data::replace_free_variables(s.multi_action().time(), m_if_trees);
       }
       s.assignments() = replace_enumerated_parameters_in_assignments(s.assignments());
     }
@@ -262,10 +262,10 @@ class binary_algorithm: public lps::detail::lps_algorithm
     /// \brief Update a deadlock summand with the new Boolean parameters
     void update_deadlock_summand(deadlock_summand& s)
     {
-      s.condition() = data::substitute_free_variables(s.condition(), m_if_trees);
+      s.condition() = data::replace_free_variables(s.condition(), m_if_trees);
       if (s.deadlock().has_time())
       {
-        s.deadlock().time() = data::substitute_free_variables(s.deadlock().time(), m_if_trees);
+        s.deadlock().time() = data::replace_free_variables(s.deadlock().time(), m_if_trees);
       }
     }
 

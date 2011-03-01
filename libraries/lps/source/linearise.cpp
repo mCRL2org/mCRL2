@@ -54,7 +54,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/normalize_sorts.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 
 //mCRL2 processes
 #include "mcrl2/process/process_expression.h"
@@ -1488,7 +1488,7 @@ class specification_basic_type:public boost::noncopyable
           sigma[*i]=*j;
         }
       }
-      return data::substitute_free_variables(atermpp::convert<data::data_expression_list>(tl), data::make_map_substitution(sigma));
+      return data::replace_free_variables(atermpp::convert<data::data_expression_list>(tl), data::make_map_substitution(sigma));
     }
 
     data_expression substitute_data(
@@ -1511,7 +1511,7 @@ class specification_basic_type:public boost::noncopyable
           sigma[*i]=*j;
         }
       }
-      const data_expression result=data::substitute_free_variables(t, make_map_substitution(sigma));
+      const data_expression result=data::replace_free_variables(t, make_map_substitution(sigma));
       return result;
     }
 

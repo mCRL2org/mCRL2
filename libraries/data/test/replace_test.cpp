@@ -23,7 +23,7 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 
@@ -52,7 +52,7 @@ void test_assignment_list()
 
   data_expression t  = and_(equal_to(d1, e1), not_equal_to(e2, d3));
   data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));
-  data_expression t2 = data::substitute_free_variables(t, assignment_sequence_substitution(assignment_list(l.begin(), l.end())));
+  data_expression t2 = data::replace_free_variables(t, assignment_sequence_substitution(assignment_list(l.begin(), l.end())));
   std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
   BOOST_CHECK(t0 == t2);
@@ -61,7 +61,7 @@ void test_assignment_list()
                          assignment(d1, d2),
                          assignment(e1, d1)
                        );
-  assignment_list m2 = data::substitute_variables(m1, assignment(d2, d1));
+  assignment_list m2 = data::replace_variables(m1, assignment(d2, d1));
   assignment_list m3 = atermpp::make_list(
                          assignment(d1, d1),
                          assignment(e1, d1)
@@ -107,22 +107,22 @@ void test_variable_replace()
   l.push_back(e3);
 
   data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  data_expression t1 = data::substitute_free_variables(t, make_sequence_sequence_substitution(variables, replacements));
-  data_expression t2 = data::substitute_free_variables(t, make_sequence_sequence_substitution(v, l));
+  data_expression t1 = data::replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements));
+  data_expression t2 = data::replace_free_variables(t, make_sequence_sequence_substitution(v, l));
   std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
   std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
   std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
   BOOST_CHECK(t1 == t2);
 
   t = and_(equal_to(d1, d2), not_equal_to(d2, d3));
-  BOOST_CHECK(t1 == substitute_variables(t, make_sequence_sequence_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == substitute_variables(t, make_sequence_sequence_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == substitute_variables(t, make_sequence_sequence_substitution(v, l)));
-  BOOST_CHECK(t1 == substitute_variables(t, make_mutable_map_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == substitute_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == substitute_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
-  BOOST_CHECK(t1 == substitute_free_variables(t, make_sequence_sequence_substitution(v, l)));
-  BOOST_CHECK(t1 == substitute_free_variables(t, make_mutable_map_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == replace_variables(t, make_sequence_sequence_substitution(v, l)));
+  BOOST_CHECK(t1 == replace_variables(t, make_mutable_map_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements)));
+  BOOST_CHECK(t1 == replace_free_variables(t, make_sequence_sequence_substitution(v, l)));
+  BOOST_CHECK(t1 == replace_free_variables(t, make_mutable_map_substitution(variables, replacements)));
   core::garbage_collect();
 }
 
@@ -135,10 +135,10 @@ void test_replace_with_binders()
 
   sigma[variable("c", sort_bool::bool_())] = sort_bool::false_();
 
-  BOOST_CHECK(substitute_free_variables(input1, sigma) == sort_bool::false_());
+  BOOST_CHECK(replace_free_variables(input1, sigma) == sort_bool::false_());
 
   // variable c is bound and should not be replaced
-  BOOST_CHECK(substitute_free_variables(input2, sigma) == input2);
+  BOOST_CHECK(replace_free_variables(input2, sigma) == input2);
   core::garbage_collect();
 }
 

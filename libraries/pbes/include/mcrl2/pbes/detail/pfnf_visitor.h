@@ -26,7 +26,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
@@ -138,9 +138,9 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
       {
         for (std::vector<propositional_variable_instantiation>::iterator i = rhs.begin(); i != rhs.end(); ++i)
         {
-          *i = pbes_system::substitute_free_variables(*i, variable_data_expression_substitution(sigma));
+          *i = pbes_system::replace_free_variables(*i, variable_data_expression_substitution(sigma));
         }
-        static_cast<pbes_expression&>(*this) = pbes_system::substitute_free_variables(static_cast<pbes_expression&>(*this), variable_data_expression_substitution(sigma));
+        static_cast<pbes_expression&>(*this) = pbes_system::replace_free_variables(static_cast<pbes_expression&>(*this), variable_data_expression_substitution(sigma));
       }
     };
 
@@ -171,7 +171,7 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
         {
           i->substitute(sigma);
         }
-        static_cast<pbes_expression&>(*this) = pbes_system::substitute_free_variables(static_cast<pbes_expression&>(*this), variable_data_expression_substitution(sigma));
+        static_cast<pbes_expression&>(*this) = pbes_system::replace_free_variables(static_cast<pbes_expression&>(*this), variable_data_expression_substitution(sigma));
       }
     };
 

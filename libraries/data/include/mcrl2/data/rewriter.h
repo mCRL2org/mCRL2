@@ -26,7 +26,7 @@
 #include "mcrl2/data/detail/data_expression_with_variables_traits.h"
 #include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/exception.h"
 
@@ -265,11 +265,11 @@ for (atermpp::set<data_equation>::const_iterator i = eqn.begin(); i != eqn.end()
     {
 # ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d;
-      data_expression result(reconstruct(m_rewriter->rewrite(implement(substitute_free_variables(d, sigma)))));
+      data_expression result(reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma)))));
       std::cerr << " ------------> " << result << std::endl;
       return result;
 # else
-      return reconstruct(m_rewriter->rewrite(implement(data::substitute_free_variables(d, sigma))));
+      return reconstruct(m_rewriter->rewrite(implement(data::replace_free_variables(d, sigma))));
 #endif
     }
 };
@@ -329,7 +329,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     template <typename SubstitutionFunction>
     data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction const& sigma) const
     {
-      data_expression t = this->operator()(substitute_free_variables(static_cast< data_expression const& >(d), sigma));
+      data_expression t = this->operator()(replace_free_variables(static_cast< data_expression const& >(d), sigma));
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;

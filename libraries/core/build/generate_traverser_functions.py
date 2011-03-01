@@ -8,99 +8,99 @@ from path import *
 from mcrl2_utility import *
 
 SUBSTITUTE_FUNCTION_TEXT = '''template <typename T, typename Substitution>
-void substitute_sort_expressions(T& x,
-                                 Substitution sigma,
-                                 bool innermost,
-                                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                                )
-{
-  data::detail::make_substitute_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost)(x);
-}
-
-template <typename T, typename Substitution>
-T substitute_sort_expressions(const T& x,
+void replace_sort_expressions(T& x,
                               Substitution sigma,
                               bool innermost,
-                              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                              )
 {
-  return data::detail::make_substitute_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost)(x);
+  data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
-void substitute_data_expressions(T& x,
-                                 Substitution sigma,
-                                 bool innermost,
-                                 typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                                )
+T replace_sort_expressions(const T& x,
+                           Substitution sigma,
+                           bool innermost,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          )
 {
-  data::detail::make_substitute_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost)(x);
+  return data::detail::make_replace_sort_expressions_builder<NAMESPACE::sort_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
-T substitute_data_expressions(const T& x,
+void replace_data_expressions(T& x,
                               Substitution sigma,
                               bool innermost,
-                              typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                              )
 {
-  return data::detail::make_substitute_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost)(x);
+  data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost)(x);
 }
 
 template <typename T, typename Substitution>
-void substitute_variables(T& x,
-                          Substitution sigma,
-                          typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                         )
+T replace_data_expressions(const T& x,
+                           Substitution sigma,
+                           bool innermost,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          )
+{
+  return data::detail::make_replace_data_expressions_builder<NAMESPACE::data_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_variables(T& x,
+                       Substitution sigma,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                      )
 {
   core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma)(x);
 }
 
 template <typename T, typename Substitution>
-T substitute_variables(const T& x,
-                       Substitution sigma,
-                       typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                      )
+T replace_variables(const T& x,
+                    Substitution sigma,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                   )
 {   
   return core::make_update_apply_builder<NAMESPACE::data_expression_builder>(sigma)(x);
 }
 
 template <typename T, typename Substitution>
-void substitute_free_variables(T& x,
-                               Substitution sigma,
-                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                              )
+void replace_free_variables(T& x,
+                            Substitution sigma,
+                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                           )
 {
-  data::detail::make_substitute_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x);
+  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x);
 }
 
 template <typename T, typename Substitution>
-T substitute_free_variables(const T& x,
-                            Substitution sigma,
-                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                           )
+T replace_free_variables(const T& x,
+                         Substitution sigma,
+                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                        )
 {
-  return data::detail::make_substitute_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x);
+  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x);
 }
 
 template <typename T, typename Substitution, typename VariableContainer>
-void substitute_free_variables(T& x,
-                               Substitution sigma,
-                               const VariableContainer& bound_variables,
-                               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
-                              )
-{
-  data::detail::make_substitute_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
-}
-
-template <typename T, typename Substitution, typename VariableContainer>
-T substitute_free_variables(const T& x,
+void replace_free_variables(T& x,
                             Substitution sigma,
                             const VariableContainer& bound_variables,
-                            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                            )
 {
-  return data::detail::make_substitute_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
+  data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+
+template <typename T, typename Substitution, typename VariableContainer>
+T replace_free_variables(const T& x,
+                         Substitution sigma,
+                         const VariableContainer& bound_variables,
+                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                        )
+{
+  return data::detail::make_replace_free_variables_builder<NAMESPACE::data_expression_builder, NAMESPACE::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 '''
 
@@ -242,16 +242,16 @@ def print_labels(namespace, label):
     print '//--- start generated %s %s code ---//' % (namespace, label)
     print '//--- end generated %s %s code ---//' % (namespace, label)
 
-def generate_substitute_functions():
-    generate_code('../../data/include/mcrl2/data/substitute.h'        , 'data'            , 'substitute', SUBSTITUTE_FUNCTION_TEXT)
-    generate_code('../../lps/include/mcrl2/lps/substitute.h'          , 'lps'             , 'substitute', SUBSTITUTE_FUNCTION_TEXT)
-    generate_code('../../lps/include/mcrl2/modal_formula/substitute.h', 'action_formulas' , 'substitute', SUBSTITUTE_FUNCTION_TEXT)
-    generate_code('../../lps/include/mcrl2/modal_formula/substitute.h', 'regular_formulas', 'substitute', SUBSTITUTE_FUNCTION_TEXT)
-    generate_code('../../lps/include/mcrl2/modal_formula/substitute.h', 'state_formulas'  , 'substitute', SUBSTITUTE_FUNCTION_TEXT)
-    generate_code('../../pbes/include/mcrl2/pbes/substitute.h'        , 'pbes_system'     , 'substitute', SUBSTITUTE_FUNCTION_TEXT)
-    generate_code('../../process/include/mcrl2/process/substitute.h'  , 'process'         , 'substitute', SUBSTITUTE_FUNCTION_TEXT)
+def generate_replace_functions():
+    generate_code('../../data/include/mcrl2/data/replace.h'        , 'data'            , 'replace', SUBSTITUTE_FUNCTION_TEXT)
+    generate_code('../../lps/include/mcrl2/lps/replace.h'          , 'lps'             , 'replace', SUBSTITUTE_FUNCTION_TEXT)
+    generate_code('../../lps/include/mcrl2/modal_formula/replace.h', 'action_formulas' , 'replace', SUBSTITUTE_FUNCTION_TEXT)
+    generate_code('../../lps/include/mcrl2/modal_formula/replace.h', 'regular_formulas', 'replace', SUBSTITUTE_FUNCTION_TEXT)
+    generate_code('../../lps/include/mcrl2/modal_formula/replace.h', 'state_formulas'  , 'replace', SUBSTITUTE_FUNCTION_TEXT)
+    generate_code('../../pbes/include/mcrl2/pbes/replace.h'        , 'pbes_system'     , 'replace', SUBSTITUTE_FUNCTION_TEXT)
+    generate_code('../../process/include/mcrl2/process/replace.h'  , 'process'         , 'replace', SUBSTITUTE_FUNCTION_TEXT)
 
-def generate_find_variable_functions():
+def generate_find_functions():
     generate_code('../../data/include/mcrl2/data/find.h'        , 'data'            , 'find', FIND_VARIABLES_FUNCTION_TEXT)
     generate_code('../../lps/include/mcrl2/lps/find.h'          , 'lps'             , 'find', FIND_VARIABLES_FUNCTION_TEXT)
     generate_code('../../lps/include/mcrl2/modal_formula/find.h', 'action_formulas' , 'find', FIND_VARIABLES_FUNCTION_TEXT)
@@ -261,5 +261,5 @@ def generate_find_variable_functions():
     generate_code('../../process/include/mcrl2/process/find.h'  , 'process'         , 'find', FIND_VARIABLES_FUNCTION_TEXT)
 
 if __name__ == "__main__":
-    generate_substitute_functions()
-    generate_find_variable_functions()
+    generate_replace_functions()
+    generate_find_functions()

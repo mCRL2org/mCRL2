@@ -25,7 +25,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/core/algorithm.h"
@@ -252,7 +252,7 @@ class pbes_eqelm_algorithm: public core::algorithm
         data::mutable_map_substitution<> sigma = compute_substitution(X);
         if (!sigma.empty())
         {
-          i->formula() = pbes_system::substitute_free_variables(i->formula(), sigma);
+          i->formula() = pbes_system::replace_free_variables(i->formula(), sigma);
         }
       }
 

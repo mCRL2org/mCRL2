@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_SUBSTITUTE_BUILDER_H
 #define MCRL2_PBES_DETAIL_SUBSTITUTE_BUILDER_H
 
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 
@@ -39,7 +39,7 @@ struct substitute_builder: public pbes_expr_builder<pbes_expression>
   /// \param d A data expression
   data::data_expression substitute_copy(const data::data_expression& d) const
   {
-    return data::substitute_free_variables(d, sigma);
+    return data::replace_free_variables(d, sigma);
   }
 
   /// \brief Applies the substitution to a data expression
@@ -82,7 +82,7 @@ struct substitute_builder: public pbes_expr_builder<pbes_expression>
 };
 
 template <typename Substitution>
-substitute_builder<Substitution> make_substitute_builder(const Substitution& sigma)
+substitute_builder<Substitution> make_replace_builder(const Substitution& sigma)
 {
   return substitute_builder<Substitution>(sigma);
 }

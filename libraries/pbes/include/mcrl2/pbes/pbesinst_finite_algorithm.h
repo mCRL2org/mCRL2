@@ -19,10 +19,10 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/pbes/pbes_expression.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
@@ -200,7 +200,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
       data::detail::rewrite_container(e_copy, super::m_data_rewriter, sigma);
 
       data::data_expression_list di_copy = atermpp::convert<data::data_expression_list>(di);
-      di_copy = data::substitute_free_variables(di_copy, *i);
+      di_copy = data::replace_free_variables(di_copy, *i);
 
       data::data_expression c = make_condition(di_copy, d_copy);
 //std::clog << "c = " << core::pp(c) << std::endl;

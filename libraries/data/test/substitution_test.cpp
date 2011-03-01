@@ -17,12 +17,12 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/lambda.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -58,27 +58,27 @@ void test_basic()
   function_symbol c("c", sort_nat::nat());
 
   BOOST_CHECK(c + x == c + x);
-  BOOST_CHECK(data::substitute_free_variables(data_expression(c + x), s) == c + x);
-  BOOST_CHECK(data::substitute_free_variables(data_expression(c + x * y), s) == c + x * y);
+  BOOST_CHECK(data::replace_free_variables(data_expression(c + x), s) == c + x);
+  BOOST_CHECK(data::replace_free_variables(data_expression(c + x * y), s) == c + x * y);
 
   s[y] = c;
 
-  BOOST_CHECK(data::substitute_free_variables(x, s) == x);
+  BOOST_CHECK(data::replace_free_variables(x, s) == x);
 #ifdef MCRL2_NEW_REPLACE_VARIABLES
-// in the old version this fails due to the unfortunate interface of substitute_free_variables
-  BOOST_CHECK(data::substitute_free_variables(y, s) == c);
+// in the old version this fails due to the unfortunate interface of replace_free_variables
+  BOOST_CHECK(data::replace_free_variables(y, s) == c);
 #endif
-  BOOST_CHECK(data::substitute_free_variables(c + x * y, s) == c + x * c);
-  BOOST_CHECK(data::substitute_free_variables(lambda(x,x), s) == lambda(x,x));
-  BOOST_CHECK(data::substitute_free_variables(lambda(x,y), s) == lambda(x,c));
+  BOOST_CHECK(data::replace_free_variables(c + x * y, s) == c + x * c);
+  BOOST_CHECK(data::replace_free_variables(lambda(x,x), s) == lambda(x,x));
+  BOOST_CHECK(data::replace_free_variables(lambda(x,y), s) == lambda(x,c));
 
   // Replacing free variables only
   mutable_map_substitution< atermpp::map< variable, data_expression > > sb;
 
   sb[y] = c;
 
-  BOOST_CHECK(data::substitute_free_variables(lambda(y,y), sb) == lambda(y,y));
-  BOOST_CHECK(data::substitute_free_variables(lambda(y,y)(x) + y, sb) == lambda(y,y)(x) + c);
+  BOOST_CHECK(data::replace_free_variables(lambda(y,y), sb) == lambda(y,y));
+  BOOST_CHECK(data::replace_free_variables(lambda(y,y)(x) + y, sb) == lambda(y,y)(x) + c);
   core::garbage_collect();
 }
 
@@ -151,15 +151,15 @@ void test_my_list_substitution()
   assignment_list l(make_list(xy, uz));
   assignment_list r = make_list(assignment(x, y1));
 
-  BOOST_CHECK(substitute_variables(x,  my_assignment_sequence_substitution(r)) == y1);
-  BOOST_CHECK(substitute_variables(y,  my_assignment_sequence_substitution(r)) == y);
-  BOOST_CHECK(substitute_variables(z,  my_assignment_sequence_substitution(r)) == z);
-  BOOST_CHECK(substitute_variables(u,  my_assignment_sequence_substitution(r)) == u);
-  std::cerr << substitute_variables(xy,  my_assignment_sequence_substitution(r)) << std::endl;
-//  BOOST_CHECK(substitute_variables(xy, my_assignment_sequence_substitution(r)) == assignment(y1,y));
-  BOOST_CHECK(substitute_variables(uz, my_assignment_sequence_substitution(r)) == uz);
-  std::cerr << substitute_variables(l,   my_assignment_sequence_substitution(r)) << std::endl;
-//  BOOST_CHECK(substitute_variables(l,  my_assignment_sequence_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
+  BOOST_CHECK(replace_variables(x,  my_assignment_sequence_substitution(r)) == y1);
+  BOOST_CHECK(replace_variables(y,  my_assignment_sequence_substitution(r)) == y);
+  BOOST_CHECK(replace_variables(z,  my_assignment_sequence_substitution(r)) == z);
+  BOOST_CHECK(replace_variables(u,  my_assignment_sequence_substitution(r)) == u);
+  std::cerr << replace_variables(xy,  my_assignment_sequence_substitution(r)) << std::endl;
+//  BOOST_CHECK(replace_variables(xy, my_assignment_sequence_substitution(r)) == assignment(y1,y));
+  BOOST_CHECK(replace_variables(uz, my_assignment_sequence_substitution(r)) == uz);
+  std::cerr << replace_variables(l,   my_assignment_sequence_substitution(r)) << std::endl;
+//  BOOST_CHECK(replace_variables(l,  my_assignment_sequence_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
   core::garbage_collect();
 }
 
@@ -208,16 +208,16 @@ void test_list_substitution()
   assignment_list l(make_list(xy, uz));
   assignment_list r = make_list(assignment(x, y1));
 
-  BOOST_CHECK(substitute_variables(x, assignment_sequence_substitution(r)) == y1);
-  BOOST_CHECK(substitute_variables(y, assignment_sequence_substitution(r)) == y);
-  BOOST_CHECK(substitute_variables(z, assignment_sequence_substitution(r)) == z);
-  BOOST_CHECK(substitute_variables(u, assignment_sequence_substitution(r)) == u);
-  std::cerr << substitute_variables(xy, assignment_sequence_substitution(r)) << std::endl;
-//  BOOST_CHECK(substitute_variables(xy, assignment_sequence_substitution(r)) == assignment(y1,y));
-  BOOST_CHECK(substitute_variables(uz, assignment_sequence_substitution(r)) == uz);
+  BOOST_CHECK(replace_variables(x, assignment_sequence_substitution(r)) == y1);
+  BOOST_CHECK(replace_variables(y, assignment_sequence_substitution(r)) == y);
+  BOOST_CHECK(replace_variables(z, assignment_sequence_substitution(r)) == z);
+  BOOST_CHECK(replace_variables(u, assignment_sequence_substitution(r)) == u);
+  std::cerr << replace_variables(xy, assignment_sequence_substitution(r)) << std::endl;
+//  BOOST_CHECK(replace_variables(xy, assignment_sequence_substitution(r)) == assignment(y1,y));
+  BOOST_CHECK(replace_variables(uz, assignment_sequence_substitution(r)) == uz);
 
-  std::cerr << substitute_variables(l, assignment_sequence_substitution(r)) << std::endl;
-//  BOOST_CHECK(substitute_variables(l, assignment_sequence_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
+  std::cerr << replace_variables(l, assignment_sequence_substitution(r)) << std::endl;
+//  BOOST_CHECK(replace_variables(l, assignment_sequence_substitution(r)) == assignment_list(make_list(assignment(y1,y), uz)));
   core::garbage_collect();
 }
 
@@ -236,14 +236,14 @@ void test_mutable_substitution_composer()
   mutable_substitution_composer<assignment> h(a);
 #ifdef MCRL2_DECLTYPE
   // This will not work until decltype can be used in mCRL2 to determine the appropriate return type.
-  BOOST_CHECK(substitute_free_variables(x, h) == x);
-  BOOST_CHECK(substitute_free_variables(y, h) == z);
+  BOOST_CHECK(replace_free_variables(x, h) == x);
+  BOOST_CHECK(replace_free_variables(y, h) == z);
   h[x] = y;
-  BOOST_CHECK(substitute_free_variables(x, h) == y);
+  BOOST_CHECK(replace_free_variables(x, h) == y);
   h[y] = y;
-  BOOST_CHECK(substitute_free_variables(y, h) == z);
+  BOOST_CHECK(replace_free_variables(y, h) == z);
   h[z] = x;
-  BOOST_CHECK(substitute_free_variables(y, h) == x);
+  BOOST_CHECK(replace_free_variables(y, h) == x);
 #endif
   core::garbage_collect();
 }
@@ -312,12 +312,12 @@ void test_sort_substitution()
   std::cout << "s2 = " << core::pp(s2) << std::endl;
 
   // apply the substitution s1 := s0 innermost to s2
-  sort_expression s3 = data::substitute_sort_expressions(s2, sort_expression_assignment(s1, s0), true);
+  sort_expression s3 = data::replace_sort_expressions(s2, sort_expression_assignment(s1, s0), true);
   std::cout << "s3 = " << core::pp(s3) << std::endl;
   BOOST_CHECK(s3 == s0);
 
   // apply the substitution s1 := s0 to s2
-  sort_expression s4 = data::substitute_sort_expressions(s2, sort_expression_assignment(s1, s0), false);
+  sort_expression s4 = data::replace_sort_expressions(s2, sort_expression_assignment(s1, s0), false);
   std::cout << "s4 = " << core::pp(s4) << std::endl;
   BOOST_CHECK(s4 == s2);
 

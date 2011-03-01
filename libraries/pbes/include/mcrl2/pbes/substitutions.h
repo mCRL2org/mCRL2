@@ -13,8 +13,8 @@
 #define MCRL2_PBES_SUBSTITUTIONS_H
 
 #include <utility>
-#include "mcrl2/data/substitute.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/pbes/replace.h"
 
 namespace mcrl2 {
 
@@ -59,7 +59,7 @@ class propositional_variable_substitution: public std::unary_function<propositio
       const data::data_expression_list& e = v.parameters();
 
       // return phi[d := e]
-      phi = pbes_system::substitute_free_variables(phi, data::make_sequence_sequence_substitution(d, e));
+      phi = pbes_system::replace_free_variables(phi, data::make_sequence_sequence_substitution(d, e));
       return phi;
     }
 

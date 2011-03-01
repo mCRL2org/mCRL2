@@ -24,7 +24,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 namespace mcrl2
@@ -257,7 +257,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
     // Replace the propvarinsts with the new ones
     // new_pbes_expression = propositional_variable_sequence_replace(new_pbes_expression,  oldpropvarinst_list, newpropvarinst_list);
-    new_pbes_expression = data::substitute_variables(new_pbes_expression,  data::make_sequence_sequence_substitution(oldpropvarinst_list, newpropvarinst_list));
+    new_pbes_expression = data::replace_variables(new_pbes_expression,  data::make_sequence_sequence_substitution(oldpropvarinst_list, newpropvarinst_list));
 
     // Create resulting pbes_equation and add it to equation system
     new_equation_system.push_back(pbes_equation(current_pbeq.symbol(), new_variable, new_pbes_expression));
@@ -400,7 +400,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
       }
 
       //current_expression = propositional_variable_sequence_replace(current_expression, oldpropvarinst_list, newpropvarinst_list);
-      current_expression = data::substitute_variables(current_expression,  data::make_sequence_sequence_substitution(oldpropvarinst_list, newpropvarinst_list));
+      current_expression = data::replace_variables(current_expression,  data::make_sequence_sequence_substitution(oldpropvarinst_list, newpropvarinst_list));
       result_eqsys.push_back(pbes_equation(eq_i->symbol(), propvar_current, current_expression));
 
       if (++nr_of_equations % 1000 == 0)

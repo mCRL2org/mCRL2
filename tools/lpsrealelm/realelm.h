@@ -253,8 +253,8 @@ class summand_information
       real_representing_variable new_xi_variable=context.back();
       data_expression xi_t=new_xi_variable.get_lowerbound();
       data_expression xi_u=new_xi_variable.get_upperbound();
-      data_expression substituted_lowerbound = substitute_free_variables(xi_t,summand_real_nextstate_map);
-      data_expression substituted_upperbound = substitute_free_variables(xi_u,summand_real_nextstate_map);
+      data_expression substituted_lowerbound = replace_free_variables(xi_t,summand_real_nextstate_map);
+      data_expression substituted_upperbound = replace_free_variables(xi_u,summand_real_nextstate_map);
       // std::cerr << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
 
       // First check whether the new value for the new xi variable is equal to itself.

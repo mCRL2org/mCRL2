@@ -20,7 +20,7 @@
 #include "mcrl2/data/enumerator_factory.h"
 
 #include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 
 namespace mcrl2

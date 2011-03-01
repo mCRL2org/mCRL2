@@ -12,9 +12,9 @@
 #ifndef MCRL2_LPS_REMOVE_H
 #define MCRL2_LPS_REMOVE_H
 
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/lps/detail/lps_parameter_remover.h"
-#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/replace.h"
 
 namespace mcrl2
 {
@@ -95,7 +95,7 @@ void remove_singleton_sorts(specification& spec)
       to_be_removed.insert(*i);
     }
   }
-  lps::substitute_variables(spec, sigma);
+  lps::replace_variables(spec, sigma);
   lps::remove_parameters(spec, to_be_removed);
 }
 

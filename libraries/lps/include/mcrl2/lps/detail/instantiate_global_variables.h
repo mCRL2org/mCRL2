@@ -14,7 +14,7 @@
 
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/remove.h"
 
 namespace mcrl2
@@ -43,8 +43,8 @@ void instantiate_global_variables(specification& spec)
     sigma[*i] = d;
     to_be_removed.insert(*i);
   }
-  lps::substitute_free_variables(spec.process(), sigma);
-  spec.initial_process() = lps::substitute_free_variables(spec.initial_process(), sigma);
+  lps::replace_free_variables(spec.process(), sigma);
+  spec.initial_process() = lps::replace_free_variables(spec.initial_process(), sigma);
   spec.global_variables().clear();
 }
 

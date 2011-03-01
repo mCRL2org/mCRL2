@@ -23,8 +23,8 @@
 #include "mcrl2/core/algorithm.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/data/substitute.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/data/replace.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
@@ -763,7 +763,7 @@ class pbes_constelm_algorithm: public core::algorithm
     {
       if (check_log_level(level))
       {
-        std::clog << "\nEvaluated condition " << core::pp(pbes_system::substitute_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
+        std::clog << "\nEvaluated condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
       }
     }
 
@@ -771,7 +771,7 @@ class pbes_constelm_algorithm: public core::algorithm
     {
       if (check_log_level(level))
       {
-        std::clog << "\nCould not evaluate condition " << core::pp(pbes_system::substitute_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
+        std::clog << "\nCould not evaluate condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
       }
     }
 
@@ -960,7 +960,7 @@ class pbes_constelm_algorithm: public core::algorithm
           *i = pbes_equation(
                  i->symbol(),
                  i->variable(),
-                 pbes_system::substitute_free_variables(i->formula(), data::make_map_substitution(v.constraints()))
+                 pbes_system::replace_free_variables(i->formula(), data::make_map_substitution(v.constraints()))
                );
         }
       }

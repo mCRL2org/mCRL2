@@ -15,7 +15,7 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/substitute.h"
+#include "mcrl2/bes/replace.h"
 
 namespace mcrl2
 {
@@ -40,7 +40,7 @@ struct bes_traits
     static inline
     expression_type substitute(const expression_type& t, const variable_type& X, const expression_type& phi)
     {
-      return bes::substitute_boolean_variables(t, boolean_variable_substitution(X, phi));
+      return bes::replace_boolean_variables(t, boolean_variable_substitution(X, phi));
     }
 
     /// \brief Returns the value true

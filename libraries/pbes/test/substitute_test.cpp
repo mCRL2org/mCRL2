@@ -17,7 +17,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/substitutions.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
@@ -42,11 +42,11 @@ void test_substitution()
   sigma[n] = data::parse_data_expression("4");
 
   pbes<> p = p1;
-  pbes_system::substitute_free_variables(p, sigma);
+  pbes_system::replace_free_variables(p, sigma);
   std::cout << pp(p) << std::endl;
   BOOST_CHECK(p == p1);
   
-  pbes_system::substitute_variables(p, sigma);
+  pbes_system::replace_variables(p, sigma);
   std::cout << pp(p) << std::endl;
     
   // compare textual representations, to avoid conflicts between types
@@ -75,7 +75,7 @@ void test_propositional_variable_substitution()
   propositional_variable X = p.equations().front().variable();  
   pbes_expression phi = parse_pbes_expression("X(m + 1) && Y(m)", "datavar m: Nat; \npredvar X: Nat; Y: Nat");
   propositional_variable_substitution sigma(X, phi);
-  pbes_system::substitute_propositional_variables(p, sigma);
+  pbes_system::replace_propositional_variables(p, sigma);
   std::cout << pp(p) << std::endl;
 
   // compare textual representations, to avoid conflicts between types

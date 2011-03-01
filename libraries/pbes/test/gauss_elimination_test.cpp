@@ -27,7 +27,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_gauss_elimination.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/substitute.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;
@@ -308,7 +308,7 @@ struct fixpoint_equation_solver
   void operator()(pbes_equation& e) const
   {
     pbes_expression phi = e.symbol().is_mu() ? pbes_expr::false_() : pbes_expr::true_();
-    e.formula() = substitute_propositional_variables(e.formula(), propositional_variable_substitution(e.variable(), phi));
+    e.formula() = replace_propositional_variables(e.formula(), propositional_variable_substitution(e.variable(), phi));
   }
 };
 //]

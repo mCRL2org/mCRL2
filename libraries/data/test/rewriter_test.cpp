@@ -142,7 +142,7 @@ void test3()
   sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
   sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
 
-  data_expression_with_variables sigma_m = data::substitute_variables(static_cast<const data_expression&>(m), sigma);
+  data_expression_with_variables sigma_m = data::replace_variables(static_cast<const data_expression&>(m), sigma);
 
   data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
   data_expression_with_variables d2(parse_data_expression("7"));

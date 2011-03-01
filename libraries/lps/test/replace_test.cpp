@@ -17,7 +17,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/print.h"
-#include "mcrl2/lps/substitute.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -47,7 +47,7 @@ void test_replace()
   variable d("d", sort_bool::bool_());
   assignment a(c, d);
   action_summand t = s;
-  lps::substitute_variables(t, a);
+  lps::replace_variables(t, a);
   core::garbage_collect();
 }
 
@@ -91,7 +91,7 @@ void test_lps_substituter()
   sigma[variable("s", sort_pos::pos())] = sort_pos::pos(3);
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
 
-  lps::substitute_variables(spec1, sigma);
+  lps::replace_variables(spec1, sigma);
   std::cerr << pp(spec1.process()) << std::endl;
   std::cerr << "-------------------------------------" << std::endl;
   std::cerr << pp(spec2.process()) << std::endl;
@@ -105,7 +105,7 @@ void test_lps_substitute()
   data::variable w("w", sort_pos::pos());
   data::mutable_map_substitution<> sigma;
   sigma[v] = w;
-  lps::substitute_free_variables(v, sigma);
+  lps::replace_free_variables(v, sigma);
   core::garbage_collect();
 }
 

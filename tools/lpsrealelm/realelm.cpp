@@ -16,7 +16,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/substitute.h"
+#include "mcrl2/data/replace.h"
 
 #include "mcrl2/lps/find.h"
 
@@ -687,9 +687,9 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
        c_complete != complete_context.end(); ++c_complete)
   {
     data_expression substituted_lowerbound=
-       data::substitute_free_variables(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
+       data::replace_free_variables(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
     data_expression substituted_upperbound=
-       data::substitute_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map()); 
+       data::replace_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map()); 
     // std::cerr << "Lower Upper " << pp(substituted_lowerbound) << "  " << pp(substituted_upperbound) << "\n";
     linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
     // std::cerr << "INequality: " << string(e) << "\n";
@@ -817,8 +817,8 @@ assignment_list determine_process_initialization(
   {
     /* data_expression left = realelm_data_expression_map_replace(i->get_lowerbound(), replacements);
     data_expression right = realelm_data_expression_map_replace(i->get_upperbound(), replacements); */
-    const data_expression left = substitute_free_variables(i->get_lowerbound(), replacements);
-    const data_expression right = substitute_free_variables(i->get_upperbound(), replacements);
+    const data_expression left = replace_free_variables(i->get_lowerbound(), replacements);
+    const data_expression right = replace_free_variables(i->get_upperbound(), replacements);
     assignment ass;
     if (r(less(left, right)) == sort_bool::true_())
     {
