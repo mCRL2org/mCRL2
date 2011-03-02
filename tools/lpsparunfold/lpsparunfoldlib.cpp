@@ -16,6 +16,7 @@
 #include "mcrl2/data/data_specification.h"
 
 #include <mcrl2/lps/linear_process.h>
+#include "mcrl2/lps/replace.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -537,19 +538,21 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
     }
 
     mcrl2::lps::deprecated::summand new_summand = set_assignments(*j, mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()));
-    for (atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
-         ; i != parsub.end()
-         ; ++i)
-    {
-      new_summand = atermpp::replace(new_summand, i->first , i->second);
-    }
-
     new_summands.push_back(new_summand);
   }
 
   mcrl2::lps::linear_process new_lps;
   new_lps.process_parameters() = mcrl2::data::variable_list(new_process_parameters.begin(), new_process_parameters.end());
   mcrl2::lps::deprecated::set_linear_process_summands(new_lps, mcrl2::lps::deprecated::summand_list(new_summands.begin(), new_summands.end()));
+
+  for (atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression>::iterator i = parsub.begin()
+       ; i != parsub.end()
+       ; ++i)
+  {
+    mutable_map_substitution< atermpp::map< mcrl2::data::variable , mcrl2::data::data_expression > > s;
+    s[ i->first ] = i->second;
+    mcrl2::lps::replace_variables( new_lps, s );
+  }
 
   gsDebugMsg("\nNew LPS:\n%s\n", pp(lps::linear_process_to_aterm(new_lps)).c_str());
 
