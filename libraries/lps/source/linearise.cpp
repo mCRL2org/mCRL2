@@ -5266,7 +5266,14 @@ class specification_basic_type:public boost::noncopyable
           }
           else if (equaluptillnow)
           {
-            equaluptillnow=((equalterm==auxresult1)||is_global_variable(auxresult1));
+            // set equaluptillnow if the arguments of this case function are all equal,
+            // or are all equal to global variables. Setting a case function
+            // C(e,v,dc1) to the value v, where dc1 is a global variable can result in 
+            // the growth of the state space, as dc1 is not set to a default value, but
+            // keeps the value v. 
+            equaluptillnow=((equalterm==auxresult1)||
+                               ((equalterm==data_expression()||is_global_variable(equalterm))&&
+                                                    is_global_variable(auxresult1)));
           }
 
           auxresult=push_front(auxresult,auxresult1);
