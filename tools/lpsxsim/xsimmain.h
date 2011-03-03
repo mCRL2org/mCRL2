@@ -149,6 +149,8 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     void OnCloseWindow(wxCloseEvent& event);
     void stateOnListItemSelected(wxListEvent& event);
     void transOnListItemActivated(wxListEvent& event);
+    void transOnListItemSelected(wxListEvent& event);
+    void transOnListItemDeSelected(wxListEvent& event);
     void OnResize(wxSizeEvent& event);
     void OnMaximize(wxMaximizeEvent& event);
     void UpdateSizes();

@@ -22,6 +22,7 @@
 #include <wx/config.h>
 #include <wx/textfile.h>
 #include <wx/dynarray.h>
+#include <wx/textfile.h>
 #include <sstream>
 #include <cstdlib>
 #include <aterm2.h>
@@ -40,6 +41,18 @@
 using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+
+int wxCALLBACK MyCompareFunction(long item1, long item2, long WXUNUSED(sortData))
+{
+    // inverse the order
+    if (item1 < item2)
+        return -1;
+    if (item1 > item2)
+        return 1;
+
+    return 0;
+}
+
 
 //------------------------------------------------------------------------------
 // XSimMain
@@ -67,6 +80,8 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
   EVT_TIMER(-1, XSimMain::OnTimer)
   EVT_CLOSE(XSimMain::OnCloseWindow)
   EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1, XSimMain::stateOnListItemSelected)
+  EVT_LIST_ITEM_SELECTED(ID_LISTCTRL2, XSimMain::transOnListItemSelected)
+  EVT_LIST_ITEM_DESELECTED(ID_LISTCTRL2, XSimMain::transOnListItemDeSelected)
   EVT_LIST_ITEM_ACTIVATED(ID_LISTCTRL2, XSimMain::transOnListItemActivated)
 END_EVENT_TABLE()
 
@@ -764,6 +779,44 @@ void XSimMain::stateOnListItemSelected(wxListEvent& event)
   stateview->Select(event.GetIndex(),FALSE);
 }
 
+void XSimMain::transOnListItemDeSelected(wxListEvent& event)
+{
+  transview->SetToolTip( wxT("No transition selected.") );
+}
+
+void XSimMain::transOnListItemSelected(wxListEvent& event)
+{
+  wxString TransTooltip = wxT("Selected transition:\n");
+  TransTooltip.Append( wxT("- Action:\n") );
+
+  wxListItem     info;
+
+  //Prepare Cell: (x,0)
+  info.m_itemId = event.GetIndex();
+  info.m_col = 0;
+  info.m_mask = wxLIST_MASK_TEXT;
+  transview->GetItem( info );
+
+  // Extract the text from cell
+  TransTooltip.Append( wxT("\t") + info.m_text + wxT("\n") );
+
+  TransTooltip.Append( wxT("- State Change:\n") );
+
+  //Prepare Cell: (x,1)
+  info.m_col = 1;
+  transview->GetItem( info );
+  wxString tmp = info.m_text;
+  if( !tmp.IsEmpty() )
+  {
+    tmp.Replace(wxT(","), wxT("\n\t"));
+    TransTooltip.Append( wxT("\t ") + tmp ) ;
+  } else {
+    TransTooltip.Append( wxT("\t -")) ;
+  }
+  transview->SetToolTip( TransTooltip );
+}
+
+
 void XSimMain::transOnListItemActivated(wxListEvent& event)
 {
   try
@@ -792,6 +845,8 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
   }
   current_state = state;
 
+
+  wxString tooltip_string;
   NextState* nextstate = simulator->GetNextState();
   for (long i=0; static_cast<size_t>(i)<ATgetLength(state_varnames); i++)
   {
@@ -806,6 +861,9 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
     {
       stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppDefault).c_str()));
     }
+
+    tooltip_string.Append(wxT(" ")+stateview->GetItemText(i) + wxT(" = ")+ wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppDefault).c_str()) + wxTextFile::GetEOL());
+
     if (showchange && !(ATisEqual(oldval,newval) || (mcrl2::data::is_variable(oldval) && mcrl2::data::is_variable(newval))))
     {
       wxColour col(255,255,210);
@@ -819,6 +877,9 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
   }
 
   stateview->SetColumnWidth(1,stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0));
+
+  tooltip_string.Prepend(wxT("Current state:\n"));
+  stateview->SetToolTip(tooltip_string);
 }
 
 static void sort_transitions(wxArrayString& actions, wxArrayString& statechanges, wxArrayInt& indices)
