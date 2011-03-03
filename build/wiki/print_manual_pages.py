@@ -67,7 +67,8 @@ def main():
             filename.write_text(text)
 
     if options.upload_pages:
-        os.system('scp -r output mcrl2@www.win.tue.nl:~/update_wiki/uploads')
+        os.chdir('output')
+        os.system('scp -r . mcrl2@www.win.tue.nl:~/update_wiki/uploads')
 
 if __name__ == '__main__':
     main()
