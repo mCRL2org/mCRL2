@@ -29,6 +29,7 @@ def main():
     parser.add_option("-m", "--mcrl2dir", dest="mcrl2dir", help="the location of the mcrl2 distribution")
     parser.add_option("-t", "--tooldir", dest="tooldir", help="the tools directory")
     parser.add_option("-g", "--generate-pages", action="store_true", help="generate manual pages for selected tools")
+    parser.add_option("-u", "--upload-pages", action="store_false", help="upload generated manual pages to the web server")
     (options, args) = parser.parse_args()
 
     # create subdirectory output/User_manual if it doesn't exist
@@ -64,6 +65,9 @@ def main():
             if len(mtext.strip()) > 0:
                 text = re.compile(r'(== Short Description ==.*)(== Options ==)', re.S).sub(r'\1' + mtext + r'\2', text)
             filename.write_text(text)
+
+    if options.upload_pages:
+        os.system('scp -r output mcrl2@www.win.tue.nl:~/update_wiki/uploads')
 
 if __name__ == '__main__':
     main()
