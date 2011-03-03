@@ -29,7 +29,7 @@ def main():
     parser.add_option("-m", "--mcrl2dir", dest="mcrl2dir", help="the location of the mcrl2 distribution")
     parser.add_option("-t", "--tooldir", dest="tooldir", help="the tools directory")
     parser.add_option("-g", "--generate-pages", action="store_true", help="generate manual pages for selected tools")
-    parser.add_option("-u", "--upload-pages", action="store_false", help="upload generated manual pages to the web server")
+    parser.add_option("-u", "--upload-pages", action="store_true", help="upload generated manual pages to the web server")
     (options, args) = parser.parse_args()
 
     # create subdirectory output/User_manual if it doesn't exist
