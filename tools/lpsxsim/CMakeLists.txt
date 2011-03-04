@@ -128,6 +128,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   xsim.cpp
   xsimmain.cpp
   xsimtrace.cpp
+  tooltipListView.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
   ${SRCS}

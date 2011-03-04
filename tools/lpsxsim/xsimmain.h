@@ -13,7 +13,7 @@
 
 #include <wx/wx.h>
 #include <wx/splitter.h>
-#include <wx/listctrl.h>
+#include <tooltipListView.h>
 #include <aterm2.h>
 
 #include "simbase.h"
@@ -104,19 +104,19 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     wxMenuItem* playriitem;
     wxMenuItem* playrcitem;
     wxMenuItem* stopitem;
-    wxMenuItem* no_tooltip;
+    wxMenuItem* tooltip;
     wxBoxSizer* mainsizer;
     wxSplitterWindow* split;
     wxPanel* toppanel;
     wxBoxSizer* topsizer;
     wxBoxSizer* topboxsizer;
-    wxListView* stateview;
+    tooltipListView* stateview;
     int stateview_header_height;
     int stateview_item_height;
     wxPanel* bottompanel;
     wxBoxSizer* bottomsizer;
     wxBoxSizer* bottomboxsizer;
-    wxListView* transview;
+    tooltipListView* transview;
     XSimTrace* tracewin;
     bool stopped;
     int stopper_cnt;
@@ -147,13 +147,10 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     void OnPlayRandom(wxCommandEvent& event);
     void OnTimer(wxTimerEvent& event);
     void OnStop(wxCommandEvent& event);
-    void OnTooltip(wxCommandEvent& event);
     void OnTraceClose(wxCloseEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
     void stateOnListItemSelected(wxListEvent& event);
     void transOnListItemActivated(wxListEvent& event);
-    void transOnListItemSelected(wxListEvent& event);
-    void transOnListItemDeSelected(wxListEvent& event);
     void OnResize(wxSizeEvent& event);
     void OnMaximize(wxMaximizeEvent& event);
     void UpdateSizes();

@@ -65,12 +65,9 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
   EVT_MENU(ID_PLAYRI, XSimMain::OnResetAndPlayRandom)
   EVT_MENU(ID_PLAYRC, XSimMain::OnPlayRandom)
   EVT_MENU(ID_STOP, XSimMain::OnStop)
-  EVT_MENU(ID_TOOLTIP, XSimMain::OnTooltip)
   EVT_TIMER(-1, XSimMain::OnTimer)
   EVT_CLOSE(XSimMain::OnCloseWindow)
   EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1, XSimMain::stateOnListItemSelected)
-  EVT_LIST_ITEM_SELECTED(ID_LISTCTRL2, XSimMain::transOnListItemSelected)
-  EVT_LIST_ITEM_DESELECTED(ID_LISTCTRL2, XSimMain::transOnListItemDeSelected)
   EVT_LIST_ITEM_ACTIVATED(ID_LISTCTRL2, XSimMain::transOnListItemActivated)
 END_EVENT_TABLE()
 
@@ -176,7 +173,8 @@ void XSimMain::CreateMenu()
   showdc = opts->Append(ID_SHOWDC, wxT("Show Don't Cares in State Changes"), wxT(""), wxITEM_CHECK);
   opts->Append(ID_DELAY, wxT("Set Play Delay"), wxT(""));
   opts->Append(ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT(""));
-  no_tooltip = opts->Append(ID_TOOLTIP, wxT("Disable tooltips"), wxT(""), wxITEM_CHECK);
+  tooltip = opts->Append(ID_TOOLTIP, wxT("Show tooltips"), wxT(""), wxITEM_CHECK);
+	tooltip->Check( true );
   menu->Append(opts, wxT("&Options"));
 
   wxMenu* views = new wxMenu;
@@ -208,7 +206,7 @@ void XSimMain::CreateContent()
   toppanel    = new wxPanel(split,-1);
   topsizer    = new wxBoxSizer(wxVERTICAL);
   topboxsizer = new wxStaticBoxSizer(wxVERTICAL,toppanel,wxT("Current State"));
-  stateview   = new wxListView(toppanel,ID_LISTCTRL1,wxDefaultPosition,wxDefaultSize,wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
+  stateview   = new tooltipListView(toppanel,ID_LISTCTRL1,wxDefaultPosition,wxDefaultSize,wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
 
   topboxsizer->Add(stateview,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
   topsizer->Add(topboxsizer,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
@@ -217,7 +215,7 @@ void XSimMain::CreateContent()
   bottompanel    = new wxPanel(split,-1);
   bottomsizer    = new wxBoxSizer(wxVERTICAL);
   bottomboxsizer = new wxStaticBoxSizer(wxVERTICAL,bottompanel,wxT("Transitions"));
-  transview      = new wxListView(bottompanel,ID_LISTCTRL2,wxDefaultPosition,wxDefaultSize,wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
+  transview      = new tooltipListView(bottompanel,ID_LISTCTRL2,wxDefaultPosition,wxDefaultSize,wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_SINGLE_SEL);
 
   bottomboxsizer->Add(transview,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
   bottomsizer->Add(bottomboxsizer,1,wxEXPAND|wxALIGN_CENTER|wxALL,5);
@@ -233,10 +231,12 @@ void XSimMain::CreateContent()
   stateview->InsertColumn(0, wxT("Parameter"), wxLIST_FORMAT_LEFT, 120);
   stateview->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
   stateview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
+	stateview->SetControl( tooltip, DISPLAY_CURRENT_STATE );
 
   transview->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120 );
   transview->InsertColumn(1, wxT("State Change"), wxLIST_FORMAT_LEFT);
   transview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
+	transview->SetControl( tooltip, DISPLAY_TRANSITION );
   transview->SetFocus();
 
   /* Show in order to be able to query client width */
@@ -761,16 +761,6 @@ void XSimMain::OnStop(wxCommandEvent& /* event */)
   StopAutomation();
 }
 
-void XSimMain::OnTooltip(wxCommandEvent& /* event */)
-{
-  if(no_tooltip->IsChecked())
-  {
-	transview->SetToolTip(wxEmptyString);
-	stateview->SetToolTip(wxEmptyString);
-  }
-}
-
-
 void XSimMain::OnCloseWindow(wxCloseEvent& /* event */)
 {
   Destroy();
@@ -780,55 +770,6 @@ void XSimMain::stateOnListItemSelected(wxListEvent& event)
 {
   stateview->Select(event.GetIndex(),FALSE);
 }
-
-void XSimMain::transOnListItemDeSelected(wxListEvent& event)
-{
-  if (transview->GetSelectedItemCount() == 0 )
-  {
-    transview->SetToolTip( wxEmptyString );
-  } 
-}
-
-void XSimMain::transOnListItemSelected(wxListEvent& event)
-{
-
-  if( !(no_tooltip->IsChecked()) )
-  {
-	  wxString TransTooltip = wxT("Selected transition:\n");
-	  TransTooltip.Append( wxT("- Action:\n") );
-
-	  wxListItem     info;
-
-	  //Prepare Cell: (x,0)
-	  info.m_itemId = event.GetIndex();
-	  info.m_col = 0;
-	  info.m_mask = wxLIST_MASK_TEXT;
-	  transview->GetItem( info );
-
-	  // Extract the text from cell
-	  TransTooltip.Append( wxT("\t") + info.m_text + wxT("\n") );
-
-	  TransTooltip.Append( wxT("- State Change:\n") );
-
-	  //Prepare Cell: (x,1)
-	  info.m_col = 1;
-	  transview->GetItem( info );
-	  wxString tmp = info.m_text;
-	  if( !tmp.IsEmpty() )
-	  {
-		tmp.Replace(wxT(","), wxT("\n\t"));
-		TransTooltip.Append( wxT("\t ") + tmp ) ;
-	  } else {
-		TransTooltip.Append( wxT("\t -")) ;
-	  }
-	  transview->SetToolTip( TransTooltip );
-  }  
-  else 
-  {
-    transview->SetToolTip( wxEmptyString );
-  } 
-}
-
 
 void XSimMain::transOnListItemActivated(wxListEvent& event)
 {
@@ -859,7 +800,6 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
   current_state = state;
 
 
-  wxString tooltip_string;
   NextState* nextstate = simulator->GetNextState();
   for (long i=0; static_cast<size_t>(i)<ATgetLength(state_varnames); i++)
   {
@@ -875,8 +815,6 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
       stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppDefault).c_str()));
     }
 
-    tooltip_string.Append(wxT(" ")+stateview->GetItemText(i) + wxT(" = ")+ wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppDefault).c_str()) + wxTextFile::GetEOL());
-
     if (showchange && !(ATisEqual(oldval,newval) || (mcrl2::data::is_variable(oldval) && mcrl2::data::is_variable(newval))))
     {
       wxColour col(255,255,210);
@@ -890,9 +828,6 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
   }
 
   stateview->SetColumnWidth(1,stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0));
-
-  tooltip_string.Prepend(wxT("Current state:\n"));
-  stateview->SetToolTip(tooltip_string);
 }
 
 static void sort_transitions(wxArrayString& actions, wxArrayString& statechanges, wxArrayInt& indices)
