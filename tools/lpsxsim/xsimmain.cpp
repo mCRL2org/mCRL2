@@ -42,18 +42,6 @@ using namespace std;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-int wxCALLBACK MyCompareFunction(long item1, long item2, long WXUNUSED(sortData))
-{
-    // inverse the order
-    if (item1 < item2)
-        return -1;
-    if (item1 > item2)
-        return 1;
-
-    return 0;
-}
-
-
 //------------------------------------------------------------------------------
 // XSimMain
 //------------------------------------------------------------------------------
@@ -77,6 +65,7 @@ BEGIN_EVENT_TABLE(XSimMain,wxFrame)
   EVT_MENU(ID_PLAYRI, XSimMain::OnResetAndPlayRandom)
   EVT_MENU(ID_PLAYRC, XSimMain::OnPlayRandom)
   EVT_MENU(ID_STOP, XSimMain::OnStop)
+  EVT_MENU(ID_TOOLTIP, XSimMain::OnTooltip)
   EVT_TIMER(-1, XSimMain::OnTimer)
   EVT_CLOSE(XSimMain::OnCloseWindow)
   EVT_LIST_ITEM_SELECTED(ID_LISTCTRL1, XSimMain::stateOnListItemSelected)
@@ -187,6 +176,7 @@ void XSimMain::CreateMenu()
   showdc = opts->Append(ID_SHOWDC, wxT("Show Don't Cares in State Changes"), wxT(""), wxITEM_CHECK);
   opts->Append(ID_DELAY, wxT("Set Play Delay"), wxT(""));
   opts->Append(ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT(""));
+  no_tooltip = opts->Append(ID_TOOLTIP, wxT("Disable tooltips"), wxT(""), wxITEM_CHECK);
   menu->Append(opts, wxT("&Options"));
 
   wxMenu* views = new wxMenu;
@@ -244,7 +234,7 @@ void XSimMain::CreateContent()
   stateview->InsertColumn(1, wxT("Value"), wxLIST_FORMAT_LEFT);
   stateview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
 
-  transview->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120);
+  transview->InsertColumn(0, wxT("Action"), wxLIST_FORMAT_LEFT, 120 );
   transview->InsertColumn(1, wxT("State Change"), wxLIST_FORMAT_LEFT);
   transview->SetColumnWidth(1, wxLIST_AUTOSIZE_USEHEADER|wxLIST_AUTOSIZE);
   transview->SetFocus();
@@ -266,41 +256,43 @@ void XSimMain::CreateContent()
 
 void XSimMain::UpdateSizes()
 {
-  int s  = stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0);
+#if !defined(__APPLE__)
+    int s  = stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0);
+  
+    if (s <= 80)
+    {
+      s = wxLIST_AUTOSIZE;
+    }
+  
+    /* Set column width of stateview, if necessary */
+    if (stateview->GetColumnWidth(1) != s)
+    {
+      stateview->SetColumnWidth(1, s);
+    }
+  
+    s  = transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0);
+  
+    if (s <= 80)
+    {
+      s = wxLIST_AUTOSIZE;
+    }
+  
+    /* Set column width of transview, if necessary */
+    if (transview->GetColumnWidth(1) != s)
+    {
+      transview->SetColumnWidth(1, s);
+    }
 
-  if (s <= 80)
-  {
-    s = wxLIST_AUTOSIZE;
-  }
-
-  /* Set column width of stateview, if necessary */
-  if (stateview->GetColumnWidth(1) != s)
-  {
-    stateview->SetColumnWidth(1, s);
-  }
-
-  s  = transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0);
-
-  if (s <= 80)
-  {
-    s = wxLIST_AUTOSIZE;
-  }
-
-  /* Set column width of transview, if necessary */
-  if (transview->GetColumnWidth(1) != s)
-  {
-    transview->SetColumnWidth(1, s);
-  }
-
-  /* hack to avoid unnecessary scrollbars */
-#if defined(__WXGTK__)
-  int w,h;
-  transview->GetClientSize(&w,&h);
-  transview->SetClientSize(0,0);
-  transview->SetClientSize(w,h);
-  stateview->GetClientSize(&w,&h);
-  stateview->SetClientSize(0,0);
-  stateview->SetClientSize(w,h);
+    /* hack to avoid unnecessary scrollbars */
+  #if defined(__WXGTK__)
+    int w,h;
+    transview->GetClientSize(&w,&h);
+    transview->SetClientSize(0,0);
+    transview->SetClientSize(w,h);
+    stateview->GetClientSize(&w,&h);
+    stateview->SetClientSize(0,0);
+    stateview->SetClientSize(w,h);
+  #endif
 #endif
 }
 
@@ -769,6 +761,16 @@ void XSimMain::OnStop(wxCommandEvent& /* event */)
   StopAutomation();
 }
 
+void XSimMain::OnTooltip(wxCommandEvent& /* event */)
+{
+  if(no_tooltip->IsChecked())
+  {
+	transview->SetToolTip(wxEmptyString);
+	stateview->SetToolTip(wxEmptyString);
+  }
+}
+
+
 void XSimMain::OnCloseWindow(wxCloseEvent& /* event */)
 {
   Destroy();
@@ -781,39 +783,50 @@ void XSimMain::stateOnListItemSelected(wxListEvent& event)
 
 void XSimMain::transOnListItemDeSelected(wxListEvent& event)
 {
-  transview->SetToolTip( wxT("No transition selected.") );
+  if (transview->GetSelectedItemCount() == 0 )
+  {
+    transview->SetToolTip( wxEmptyString );
+  } 
 }
 
 void XSimMain::transOnListItemSelected(wxListEvent& event)
 {
-  wxString TransTooltip = wxT("Selected transition:\n");
-  TransTooltip.Append( wxT("- Action:\n") );
 
-  wxListItem     info;
-
-  //Prepare Cell: (x,0)
-  info.m_itemId = event.GetIndex();
-  info.m_col = 0;
-  info.m_mask = wxLIST_MASK_TEXT;
-  transview->GetItem( info );
-
-  // Extract the text from cell
-  TransTooltip.Append( wxT("\t") + info.m_text + wxT("\n") );
-
-  TransTooltip.Append( wxT("- State Change:\n") );
-
-  //Prepare Cell: (x,1)
-  info.m_col = 1;
-  transview->GetItem( info );
-  wxString tmp = info.m_text;
-  if( !tmp.IsEmpty() )
+  if( !(no_tooltip->IsChecked()) )
   {
-    tmp.Replace(wxT(","), wxT("\n\t"));
-    TransTooltip.Append( wxT("\t ") + tmp ) ;
-  } else {
-    TransTooltip.Append( wxT("\t -")) ;
-  }
-  transview->SetToolTip( TransTooltip );
+	  wxString TransTooltip = wxT("Selected transition:\n");
+	  TransTooltip.Append( wxT("- Action:\n") );
+
+	  wxListItem     info;
+
+	  //Prepare Cell: (x,0)
+	  info.m_itemId = event.GetIndex();
+	  info.m_col = 0;
+	  info.m_mask = wxLIST_MASK_TEXT;
+	  transview->GetItem( info );
+
+	  // Extract the text from cell
+	  TransTooltip.Append( wxT("\t") + info.m_text + wxT("\n") );
+
+	  TransTooltip.Append( wxT("- State Change:\n") );
+
+	  //Prepare Cell: (x,1)
+	  info.m_col = 1;
+	  transview->GetItem( info );
+	  wxString tmp = info.m_text;
+	  if( !tmp.IsEmpty() )
+	  {
+		tmp.Replace(wxT(","), wxT("\n\t"));
+		TransTooltip.Append( wxT("\t ") + tmp ) ;
+	  } else {
+		TransTooltip.Append( wxT("\t -")) ;
+	  }
+	  transview->SetToolTip( TransTooltip );
+  }  
+  else 
+  {
+    transview->SetToolTip( wxEmptyString );
+  } 
 }
 
 
@@ -1055,6 +1068,8 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
   }
 
   /* Adapt column width */
+#if !defined(__APPLE__)
   transview->SetColumnWidth(1,wxLIST_AUTOSIZE);
   transview->SetColumnWidth(1,transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0));
+#endif
 }

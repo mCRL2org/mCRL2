@@ -44,6 +44,7 @@ const int ID_PLAYC = 10016;
 const int ID_PLAYRI = 10017;
 const int ID_PLAYRC = 10018;
 const int ID_STOP = 10019;
+const int ID_TOOLTIP = 10020;
 
 enum play_func_enum { FUNC_NONE, FUNC_PLAY, FUNC_RANDOM };
 
@@ -103,6 +104,7 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     wxMenuItem* playriitem;
     wxMenuItem* playrcitem;
     wxMenuItem* stopitem;
+    wxMenuItem* no_tooltip;
     wxBoxSizer* mainsizer;
     wxSplitterWindow* split;
     wxPanel* toppanel;
@@ -145,6 +147,7 @@ class XSimMain: public wxFrame, public SimulatorViewInterface
     void OnPlayRandom(wxCommandEvent& event);
     void OnTimer(wxTimerEvent& event);
     void OnStop(wxCommandEvent& event);
+    void OnTooltip(wxCommandEvent& event);
     void OnTraceClose(wxCloseEvent& event);
     void OnCloseWindow(wxCloseEvent& event);
     void stateOnListItemSelected(wxListEvent& event);
