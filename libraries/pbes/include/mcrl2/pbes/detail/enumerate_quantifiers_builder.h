@@ -28,6 +28,7 @@
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
+#include "mcrl2/pbes/replace.h"
 
 namespace mcrl2
 {
