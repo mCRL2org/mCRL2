@@ -1,4 +1,4 @@
-[section: Concepts]
+[section Concepts]
 
 In the tables below, X is an substitution type, a and b are constant objects of
 type X, s are mutable objects of type X, V is X::variable_type, and v is a

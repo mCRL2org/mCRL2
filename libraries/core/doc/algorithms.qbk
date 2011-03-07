@@ -1,4 +1,4 @@
-[section: Traversal functions]
+[section Traversal functions]
 
 The mCRL2 Library contains a range of generic traversal functions. There are
 different types of travelsals possible:
@@ -39,7 +39,7 @@ complain about ambiguities of `operator()`.
 functions. How that works exactly needs be figured out.
 ]
 
-[section: Implementation details]
+[section Implementation details]
                                          
 The traverser classes in the Data Library have the following structure:
 
@@ -100,7 +100,7 @@ and not yet for the Process and PBES Library.]
     
 [endsect]
 
-[section: Find functions]
+[section Find functions]
 
 The mCRL2 Library contains a range of generic find functions. These are:
 
@@ -125,7 +125,7 @@ ranging from `data_expression` to `action_summand`.
     [ [`find_sort`        ] [Finds a sort       ] ]
 ]
 
-[section: Implementation details]
+[section Implementation details]
 
 The implementation of find functions is not finished yet. It has to be figured out
 how to extend the functionality of the Data Library to other libraries.
@@ -151,6 +151,3 @@ The file =mcrl2/lps/find.h= currently contains this:
 [endsect]
 
 [endsect]
-
-
-

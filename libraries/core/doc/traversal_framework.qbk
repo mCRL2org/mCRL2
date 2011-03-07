@@ -1,0 +1,67 @@
+[chapter Traversal Framework
+    [quickbook 1.4]
+    [authors [Wesselink, Wieger]]
+    [copyright 2005-2011 Technische Universiteit Eindhoven]
+]
+
+[section Traversal Library]
+
+The Traversal Library is a collection of classes that support traversal over hierarchical
+mCRL2 data structures. Many algorithms are built on top of this library. The most important
+examples are the find and replace functions. The goal of this library is to provide algorithms
+with a uniform interface, and to prevent repetitive code for traversing mCRL2 data structures.
+
+[section Traversal explained]
+
+  void operator()(const data::forall& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this)(x.variables());
+    static_cast<Derived&>(*this)(x.body());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+[endsect]
+
+[section Generic traversal functions]
+
+The mCRL2 Library contains a wide range of algorithms built on top of the traversers and builders.
+An overview is given below.
+
+[table Generic find functions
+    [ [Function]                  [Meaning]          ]
+    [ [`find_identifiers`       ] [Finds identifiers that occur in an object] ]
+    [ [`find_function_symbols`  ] [Finds function symbols that occur in an object within the context of a data expression] ]
+    [ [`find_sort_expressions`  ] [Finds sort expressions that occur in an object. Also nested sorts are found. ] ]
+    [ [`find_variables`         ] [Finds variables that occur in an object] ]
+    [ [`find_free_variables`    ] [Finds free variables that occur in an object] ]
+    [ [`find_data_expressions`  ] [Finds data expressions that occur in an object. Also nested expressions are found.] ]
+]
+
+[table Generic replace functions
+    [ [Function]                  [Meaning]          ]
+    [ [`substitute_sort_expressions`        ] [Applies a substitution to sort expressions that occur in an object. Optionally it can be applied to nested expressions. ] ]
+    [ [`substitute_variables`               ] [Applies a substitution to variables that occur in an object within the context of a data expression. ] ]
+    [ [`substitute_free_variables`          ] [Applies a substitution to free variables that occur in an object within the context of a data expression. ] ]
+    [ [`substitute_data_expressions`        ] [Applies a substitution to data expressions that occur in an object. Optionally it can be applied to nested expressions. ] ]
+    [ [`substitute_propositional_variables` ] [Applies a substitution to propositional variable instantiations that occur in an object within the context of a pbes expression. ] ]   
+]
+
+[table Other generic traverser functions
+    [ [Function]                  [Meaning]          ]
+    [ [`translate_user_notation`        ] [Applies a transformation to numbers, sets and bags that is needed after parsing. ] ]
+    [ [`normalize_sorts`                ] [Brings embedded sorts into normal form. ] ]
+    [ [`rewrite`                        ] [Applies a rewriter, optionally in combination with a substitution. ] ]
+]
+
+These functions can be applied to a wide range of objects in the mCRL2 Library, ranging from `data::data_expression` to
+`lps::action_summand`. Each library has it's own overloads of these functions. For example to find data variables in an
+object of the LPS library, the function `lps::find_variables` must be used.
+
+[warning It is important to choose the right overload of generic traverser functions. Failing to do so may
+result in compilation errors, or runtime exceptions.
+]
+
+[endsect]
+
+[endsect]

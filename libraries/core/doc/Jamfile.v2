@@ -11,9 +11,9 @@ xml library_structure
         library_structure.qbk
     ;
 
-xml common_functionality
+xml traversal_framework
     :
-        common_functionality.qbk
+        traversal_framework.qbk
     ;
 
 xml terms
@@ -26,7 +26,7 @@ boostbook standalone
     :
         core_library
         library_structure
-        common_functionality
+        traversal_framework
         terms
     :
         <xsl:param>nav.layout=none
