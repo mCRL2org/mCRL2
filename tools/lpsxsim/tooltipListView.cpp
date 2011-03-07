@@ -17,15 +17,15 @@ END_EVENT_TABLE()
  
 void tooltipListView::OnMouseMotion(wxMouseEvent& event)
 {
+  if( !control->IsChecked() )
+  {
+    this->SetToolTip( wxEmptyString );
+    return;
+  }
+
   // Display state transitions
   if( display_type == DISPLAY_TRANSITION )
   {
-    if( !control->IsChecked() )
-    {
-      this->UnsetToolTip();
-      return;
-    }
-
     long row=-1;
     int flags=0;
     wxPoint pt;

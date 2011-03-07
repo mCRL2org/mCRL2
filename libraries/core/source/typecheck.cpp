@@ -3189,7 +3189,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       if (ATisEmpty(ParList))
       {
         ATtableDestroy(As);
-        gsErrorMsg("no process %P containing all assignments in %P.\nProblematic variable is %P.", Name, ProcTerm,Culprit);
+        gsErrorMsg("no process %P containing all assignments in %P.\nProblematic variable is %P.\n", Name, ProcTerm,Culprit);
         return NULL;
       }
       if (!ATisEmpty(ATgetNext(ParList)))
