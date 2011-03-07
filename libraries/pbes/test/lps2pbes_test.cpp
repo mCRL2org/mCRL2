@@ -85,6 +85,12 @@ const std::string ABP_SPECIFICATION =
   "  );                                                                       \n"
   ;
 
+const std::string TIMED_SPECIFICATION =
+  "act a;\n"
+  "proc P = a@1 . P;\n"
+  "init P;\n"
+;
+
 const std::string TRIVIAL_FORMULA  = "[true*]<true*>true";
 
 void test_trivial()
@@ -94,6 +100,21 @@ void test_trivial()
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
+  core::garbage_collect();
+}
+
+void test_timed()
+{
+  specification spec = linearise(TIMED_SPECIFICATION);
+  state_formula formula = state_formulas::parse_state_formula(TRIVIAL_FORMULA, spec);
+  bool timed = true;
+  pbes<> p = lps2pbes(spec, formula, timed);
+  BOOST_CHECK(p.is_well_typed());
+  data::data_specification::sorts_const_range user_def_sorts(p.data().user_defined_sorts());
+  BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), sort_real::real_()) == user_def_sorts.end());
+
+  data::data_specification::sorts_const_range sorts(p.data().sorts());
+  BOOST_CHECK(std::find(sorts.begin(), sorts.end(), sort_real::real_()) != sorts.end());
   core::garbage_collect();
 }
 
@@ -534,6 +555,7 @@ int test_main(int argc, char* argv[])
   test_lps2pbes3();
   test_trivial();
   test_formulas();
+  test_timed();
 
 #ifdef MCRL2_EXTENDED_TESTS
   test_lps2pbes(MACHINE_SPECIFICATION, MACHINE_FORMULA1);

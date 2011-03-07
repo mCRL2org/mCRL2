@@ -810,11 +810,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       data::data_expression_list pi = spec.initial_process().state(spec.process().process_parameters());
       propositional_variable_instantiation init(Xe, data::sort_real::real_(0) + fi + pi + Par(Xf, data::variable_list(), f));
 
-      // add sort real to data_spec (if needed)
-      data::data_specification data_spec(spec.data());
-      data_spec.add_sort(data::sort_real::real_());
-
-      pbes<> result(data_spec, e, spec.global_variables(), init);
+      pbes<> result(spec.data(), e, spec.global_variables(), init);
       result.normalize();
       assert(result.is_normalized());
       assert(result.is_closed());
