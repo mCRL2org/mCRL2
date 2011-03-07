@@ -153,7 +153,6 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 #endif
       namespace sf = state_formulas;
       namespace af = state_formulas::detail::accessors;
-      using atermpp::detail::operator+;
 
       atermpp::vector<pbes_equation> result;
 
@@ -237,7 +236,6 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
     {
       namespace sf = state_formulas;
       namespace af = state_formulas::detail::accessors;
-      using atermpp::detail::operator+;
 
       if (!state_formulas::is_monotonous(formula))
       {

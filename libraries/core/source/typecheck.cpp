@@ -3159,6 +3159,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     {
       // Now filter the ParList to contain only the processes with parameters in this process call with assignments
       ATermList NewParList=ATmakeList0();
+      assert(!ATisEmpty(ParList));
+      ATermAppl Culprit=NULL; // Variable used for more intelligible error messages.
       for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
       {
         ATermList Par=ATLgetFirst(ParList);
@@ -3172,25 +3174,30 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
           FormalParNames=ATinsert(FormalParNames,(ATerm)ATAgetArgument(ATAgetFirst(FormalPars),0));
         }
 
-        if (ATisEmpty(list_minus(ATtableKeys(As),FormalParNames)))
+        ATermList l=list_minus(ATtableKeys(As),FormalParNames);
+        if (ATisEmpty(l))
         {
           NewParList=ATinsert(NewParList,(ATerm)Par);
         }
+        else 
+        { 
+          Culprit=ATAgetFirst(l);
+        }
       }
       ParList=ATreverse(NewParList);
-    }
-
-    if (ATisEmpty(ParList))
-    {
-      ATtableDestroy(As);
-      gsErrorMsg("no process %P containing all assignments in %P\n", Name, ProcTerm);
-      return NULL;
-    }
-    if (!ATisEmpty(ATgetNext(ParList)))
-    {
-      ATtableDestroy(As);
-      gsErrorMsg("ambiguous process %P containing all assignments in %P\n", Name, ProcTerm);
-      return NULL;
+  
+      if (ATisEmpty(ParList))
+      {
+        ATtableDestroy(As);
+        gsErrorMsg("no process %P containing all assignments in %P.\nProblematic variable is %P.", Name, ProcTerm,Culprit);
+        return NULL;
+      }
+      if (!ATisEmpty(ATgetNext(ParList)))
+      {
+        ATtableDestroy(As);
+        gsErrorMsg("ambiguous process %P containing all assignments in %P.\n", Name, ProcTerm);
+        return NULL;
+      }
     }
 
     // get the formal parameter names
