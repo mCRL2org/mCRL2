@@ -1256,7 +1256,9 @@ endmacro( add_pbespgsolve_release_test ARGS )
 
 macro( gen_pbespgsolve_release_tests )
 					add_pbespgsolve_release_test(  "" )
-					add_pbespgsolve_release_test(  "-c" )
+# Disabled because the option now depends on a compiler flag, that is disabled
+# by default (JK 7/3/2011)                                        
+#					add_pbespgsolve_release_test(  "-c" )
 					add_pbespgsolve_release_test(  "-e" )
 					add_pbespgsolve_release_test(  "-sspm" )
 					add_pbespgsolve_release_test(  "-srecursive" )
