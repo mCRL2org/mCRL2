@@ -773,6 +773,10 @@ inline bes_expression substitute_true_false_rec(
       {
         result=b1;
       }
+      else if (b1==b2)
+      {
+        result=b1;
+      }
       else
       {
         result=and_(b1,b2);
@@ -798,6 +802,10 @@ inline bes_expression substitute_true_false_rec(
         result=b2;
       }
       else if (is_false(b2))
+      {
+        result=b1;
+      }
+      else if (b1==b2)
       {
         result=b1;
       }
@@ -1272,9 +1280,7 @@ class boolean_equation_system
 
     void add_variables_to_occurrence_sets(
       variable_type v,
-      bes_expression b,
-      const bool use_indexed_set,
-      atermpp::indexed_set& indexed_set)
+      bes_expression b)
     {
       assert(v>0);
       assert(variable_occurrences_are_stored);
@@ -1284,13 +1290,6 @@ class boolean_equation_system
         return;
       }
 
-      if (use_indexed_set)
-      {
-        if (!(indexed_set.put(b)).second)  // b is already in the set.
-        {
-          return;
-        }
-      }
       if (is_if(b))
       {
         assert(get_variable(condition(b))>0);
@@ -1298,8 +1297,8 @@ class boolean_equation_system
         check_vector_sizes(w);
         variable_occurrence_sets[w].insert(v);
 
-        add_variables_to_occurrence_sets(v,then_branch(b),use_indexed_set,indexed_set);
-        add_variables_to_occurrence_sets(v,else_branch(b),use_indexed_set,indexed_set);
+        add_variables_to_occurrence_sets(v,then_branch(b));
+        add_variables_to_occurrence_sets(v,else_branch(b));
         return;
       }
 
@@ -1313,34 +1312,18 @@ class boolean_equation_system
 
       if (is_and(b)||is_or(b))
       {
-        add_variables_to_occurrence_sets(v,lhs(b),use_indexed_set,indexed_set);
-        add_variables_to_occurrence_sets(v,rhs(b),use_indexed_set,indexed_set);
+        add_variables_to_occurrence_sets(v,lhs(b));
+        add_variables_to_occurrence_sets(v,rhs(b));
         return;
       }
       assert(0); // do not expect other term formats.
 
     }
 
-    void add_variables_to_occurrence_sets(
-      variable_type v,
-      bes_expression b)
-    {
-      static atermpp::indexed_set indexed_set1(10,50);
-
-      add_variables_to_occurrence_sets(v,b,true,indexed_set1);
-      // add_variables_to_occurrence_sets(v,b,bes_global_variables<size_t>::opt_use_hashtables,indexed_set1);
-      // if (bes_global_variables<size_t>::opt_use_hashtables)
-      {
-        indexed_set1.reset();
-      }
-    }
-
     void remove_variables_from_occurrence_sets(
       const variable_type v,
       bes_expression b,
-      const variable_type v_except,
-      const bool use_indexed_set,
-      atermpp::indexed_set& indexed_set)
+      const variable_type v_except)
     {
       assert(v>0);
       assert(variable_occurrences_are_stored);
@@ -1348,14 +1331,6 @@ class boolean_equation_system
       if (is_true(b)||is_false(b)||is_dummy(b))
       {
         return;
-      }
-
-      if (use_indexed_set)
-      {
-        if (!(indexed_set.put(b)).second)  // b is already in the set.
-        {
-          return;
-        }
       }
 
       if (is_if(b))
@@ -1368,8 +1343,8 @@ class boolean_equation_system
         }
         // Using hash tables this can be made more efficient, by employing
         // sharing of the atermpp::aterm representing b.
-        remove_variables_from_occurrence_sets(v,then_branch(b),v_except,use_indexed_set,indexed_set);
-        remove_variables_from_occurrence_sets(v,else_branch(b),v_except,use_indexed_set,indexed_set);
+        remove_variables_from_occurrence_sets(v,then_branch(b),v_except);
+        remove_variables_from_occurrence_sets(v,else_branch(b),v_except);
         return;
       }
       else if (is_variable(b))
@@ -1384,27 +1359,11 @@ class boolean_equation_system
       }
       else if (is_or(b)||is_and(b))
       {
-        remove_variables_from_occurrence_sets(v,lhs(b),v_except,use_indexed_set,indexed_set);
-        remove_variables_from_occurrence_sets(v,rhs(b),v_except,use_indexed_set,indexed_set);
+        remove_variables_from_occurrence_sets(v,lhs(b),v_except);
+        remove_variables_from_occurrence_sets(v,rhs(b),v_except);
         return;
       }
     }
-
-    void remove_variables_from_occurrence_sets(
-      const variable_type v,
-      bes_expression b,
-      const variable_type v_except)
-    {
-      static atermpp::indexed_set indexed_set2(10,50);
-
-      remove_variables_from_occurrence_sets(v,b,v_except,true,indexed_set2);
-      // remove_variables_from_occurrence_sets(v,b,v_except,bes_global_variables<size_t>::opt_use_hashtables,indexed_set2);
-      // if (bes_global_variables<size_t>::opt_use_hashtables)
-      {
-        indexed_set2.reset();
-      }
-    }
-
 
     void store_variable_occurrences(void)
     {
@@ -1540,8 +1499,13 @@ class boolean_equation_system
     {
       assert(0<v);
       check_vector_sizes(v);
+      if (count_variable_relevance)
+      { 
+        return control_info[v] & RELEVANCE_MASK;
+      }
+
       /* all variables are relevant if relevancy is not maintained */
-      return (!count_variable_relevance || (control_info[v] & RELEVANCE_MASK));
+      return true;
     }
 
     void construct_counter_example_on(void)
@@ -1750,6 +1714,10 @@ class boolean_equation_system
           {
             result = l;
           }
+          else if (l==rt)
+          {
+            result = l;
+          }
           else
           {
             result = pbes_expr::and_(l,rt);
@@ -1777,6 +1745,10 @@ class boolean_equation_system
             result = rt;
           }
           else if (is_pbes_false(rt))
+          {
+            result = l;
+          }
+          else if (l==rt)
           {
             result = l;
           }
@@ -1988,6 +1960,10 @@ class boolean_equation_system
         {
           return b1;
         }
+        if (b1==b2)
+        {
+          return b1;
+        }
         if (to_bdd)
         {
           return BDDif(b1,b2,false_());
@@ -2019,6 +1995,10 @@ class boolean_equation_system
           return b2;
         }
         if (is_false(b2))
+        {
+          return b1;
+        }
+        if (b1==b2)
         {
           return b1;
         }
@@ -3230,6 +3210,10 @@ static bes_expression substitute_rank(
       {
         result=b1;
       }
+      else if (b1==b2)
+      {
+        result=b1;
+      }
       else
       {
         result=and_(b1,b2);
@@ -3256,6 +3240,10 @@ static bes_expression substitute_rank(
         result=b2;
       }
       else if (is_false(b2))
+      {
+        result=b1;
+      }
+      else if (b1==b2)
       {
         result=b1;
       }
@@ -3413,6 +3401,10 @@ static bes_expression evaluate_bex(
       {
         result=b1;
       }
+      else if (b1==b2)
+      {
+        result=b1;
+      }
       else
       {
         result=and_(b1,b2);
@@ -3438,6 +3430,10 @@ static bes_expression evaluate_bex(
         result=b2;
       }
       else if (is_false(b2))
+      {
+        result=b1;
+      }
+      else if (b1==b2)
       {
         result=b1;
       }
