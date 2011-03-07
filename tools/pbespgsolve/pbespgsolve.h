@@ -75,12 +75,16 @@ std::string print(pbespg_solver_type solver_type)
 struct pbespgsolve_options
 {
   pbespg_solver_type solver_type;
+#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
   bool use_scc_decomposition;
+#endif
   bool verify_solution;
 
   pbespgsolve_options()
     : solver_type(spm_solver),
+#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       use_scc_decomposition(true),
+#endif
       verify_solution(true)
   {
   }
@@ -121,6 +125,7 @@ class pbespgsolve_algorithm
         throw mcrl2::runtime_error("pbespgsolve: unknown solver type");
       }
 
+#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       if (options.use_scc_decomposition)
       {
         // Wrap solver factory into a component solver factory:
@@ -128,6 +133,7 @@ class pbespgsolve_algorithm
         solver_factory.reset(
           new ComponentSolverFactory(*subsolver_factory));
       }
+#endif
     }
 
     template <typename Container>
