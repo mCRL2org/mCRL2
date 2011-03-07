@@ -115,11 +115,23 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
   {
     gsVerboseMsg("removing unused parts of the data specification.\n");
 
+    std::set<data::function_symbol> used_function_symbols=
+                                  lps::find_function_symbols(lgopts->specification);
+
+    // In the cases below the function > is used when generating the state space,
+    // so it must be added separately, before removing the unused symbols. Otherwise,
+    // the rewrite rules for > will not be removed.
+    if ((lgopts->expl_strat == es_value_random_prioritized) ||
+        (lgopts->expl_strat == es_value_prioritized))
+    { 
+      used_function_symbols.insert(mcrl2::data::greater(mcrl2::data::sort_nat::nat()));
+    }
+
     lgopts->m_rewriter.reset(
       new mcrl2::data::rewriter(lgopts->specification.data(),
                                 mcrl2::data::used_data_equation_selector(
                                   lgopts->specification.data(),
-                                  lps::find_function_symbols(lgopts->specification),
+                                  used_function_symbols,
                                   lgopts->specification.global_variables()
                                   ),
                                 lgopts->strat
@@ -810,7 +822,8 @@ bool lps2lts_algorithm::generate_lts()
     {
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator* nsgen = NULL;
-      while ((current_state < num_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
+      while ((current_state < lgopts->max_states) && (current_state < num_states) && 
+                             (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermList tmp_trans = ATmakeList0();
         ATermList tmp_states = ATmakeList0();
@@ -861,15 +874,19 @@ bool lps2lts_algorithm::generate_lts()
                     lowest_first_action_parameter=first_argument;
                   }
                   else
-                  {
-                    ATermAppl result=rewriter(mcrl2::data::greater(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
-                    if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
+                  { 
+                    using namespace mcrl2::data;
+                    ATermAppl result=rewriter(greater(
+                                                data_expression(lowest_first_action_parameter),
+                                                data_expression(first_argument)));
+                    if (sort_bool::is_true_function_symbol(data_expression(result)))
                     {
                       lowest_first_action_parameter=first_argument;
                     }
-                    else if (!mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)))
+                    else if (!sort_bool::is_false_function_symbol(data_expression(result)))
                     {
-                      assert(0);
+                      throw mcrl2::runtime_error("Fail to rewrite term " + pp(data_expression(result)) +
+                                                 " to true or false.");
                     }
                   }
                 }
@@ -1042,14 +1059,19 @@ bool lps2lts_algorithm::generate_lts()
                   }
                   else
                   {
-                    ATermAppl result=rewriter(mcrl2::data::greater(mcrl2::data::data_expression(lowest_first_action_parameter),mcrl2::data::data_expression(first_argument)));
-                    if (mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(result)))
+                    using namespace mcrl2::data;
+                    ATermAppl result=rewriter(greater(
+                                                data_expression(lowest_first_action_parameter),
+                                                data_expression(first_argument)));
+                    if (sort_bool::is_true_function_symbol(data_expression(result)))
                     {
                       lowest_first_action_parameter=first_argument;
                     }
-                    else if (!mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(result)))
+                    else if (!sort_bool::is_false_function_symbol(data_expression(result)))
                     {
-                      assert(0);
+                      throw mcrl2::runtime_error("Fail to rewrite term " + pp(data_expression(result)) +
+                                                 " to true or false.");
+                      
                     }
                   }
                 }
