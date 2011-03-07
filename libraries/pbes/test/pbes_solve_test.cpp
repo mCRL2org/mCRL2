@@ -276,7 +276,7 @@ void test_abp_frm(const std::string& FORMULA, bool expected_result)
 void test_abp()
 {
   test_abp_frm(frm_nodeadlock, true);
-  test_abp_frm(frm_nolivelock, false);
+  test_abp_frm(frm_nolivelock, true);
 }
 
 int test_main(int argc, char** argv)
