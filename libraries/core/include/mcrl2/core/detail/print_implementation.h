@@ -1619,7 +1619,13 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
       }
     }
   }
-
+  else if (data::sort_real::is_redfracwhr_application(data::data_expression(Part)))
+  {
+    data::data_expression e(Part);
+    Part = data::sort_real::plus(data::sort_real::int2real(data::sort_real::arg2(e)),
+                                 data::sort_real::divides(data::sort_real::arg3(e),
+                                                          data::sort_real::arg1(e)));
+  }
   return Part;
 }
 
