@@ -447,7 +447,7 @@ class quantifier_enumerator
           D[k] = Dk;
         }
       }
-      catch (stop_early /* a */)
+      catch (stop_early&)
       {
         // remove the added substitutions from sigma
         for (typename variable_sequence_type::const_iterator j = x.begin(); j != x.end(); ++j)
