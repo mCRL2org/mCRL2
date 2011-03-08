@@ -17,7 +17,13 @@
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
+
+#define MCRL2_USE_PBESPGSOLVE
+// N.B. The test fails if this flag is not set, due to a problem in pbes2bool.
+
+#ifdef MCRL2_USE_PBESPGSOLVE
 #include "mcrl2/pbes/pbespgsolve.h"
+#endif
 
 using namespace mcrl2;
 using namespace mcrl2::pbes_system;
@@ -127,12 +133,6 @@ void test_pfnf_rewriter()
   core::garbage_collect();
 }
 
-bool pbespgsolve_const(const pbes<>& p)
-{
-  pbes<> q = p;
-  return pbespgsolve(q);
-}
-
 void test_pfnf_rewriter2(const std::string& text)
 {
   pbes<> p = txt2pbes(text);
@@ -140,8 +140,11 @@ void test_pfnf_rewriter2(const std::string& text)
   std::cout << "--- before ---\n";
   std::cout << pp(p) << std::endl;
 
-  // N.B. Using pbes2_bool_test instead of pbespgsolve fails!
+#ifdef MCRL2_USE_PBESPGSOLVE
   bool result1 = pbespgsolve(p);
+#else
+  bool result1 = pbes2_bool_test(p);
+#endif
   pfnf_rewriter R;
   pbesrewr(p, R);
 
@@ -149,7 +152,11 @@ void test_pfnf_rewriter2(const std::string& text)
   std::cout << pp(p) << std::endl;
 
   BOOST_CHECK(p.is_well_typed());
+#ifdef MCRL2_USE_PBESPGSOLVE
   bool result2 = pbespgsolve(p);
+#else
+  bool result2 = pbes2_bool_test(p);
+#endif
   BOOST_CHECK(result1 == result2);
   core::garbage_collect();
 }
