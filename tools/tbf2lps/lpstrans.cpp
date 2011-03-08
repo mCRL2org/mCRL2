@@ -354,9 +354,14 @@ static ATermList convert_datas(ATermAppl spec, ATermList* ids)
       args = ATappend(args,(ATerm) static_cast<ATermAppl>(mcrl2::data::variable(ATAgetArgument(ATAgetFirst(l),0),mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(ATAgetFirst(l),1))))));
       add_id(ids,ATAgetArgument(ATAgetFirst(l),0));
     }
-    lhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),1),args);
-    rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args);
-    r = ATappend(r,(ATerm) gsMakeDataEqn(args,sort_bool::true_(),lhs,rhs));
+    ATermAppl lhs_before_translation=ATAgetArgument(ATAgetFirst(eqns),1);
+    if (strcmp(ATgetName(ATgetAFun(lhs_before_translation)),"eq#Bool#Bool"))
+    { 
+      // No match.
+      lhs = dataterm2ATermAppl(lhs_before_translation,args);
+      rhs = dataterm2ATermAppl(ATAgetArgument(ATAgetFirst(eqns),2),args);
+      r = ATappend(r,(ATerm) gsMakeDataEqn(args,sort_bool::true_(),lhs,rhs));
+    }
   }
 
   return r;

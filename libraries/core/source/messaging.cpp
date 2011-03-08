@@ -21,6 +21,7 @@ namespace core
 //Message printing options
 //------------------------
 bool gsQuiet   = false;//indicates if quiet mode is enabled
+bool gsError = true;   //indicates if error messages should be printed
 bool gsWarning = true; //indicates if warning messages should be printed
 bool gsVerbose = false;//indicates if verbose messages should be printed
 bool gsDebug   = false;//indicates if debug messages should be printed
@@ -28,6 +29,7 @@ bool gsDebug   = false;//indicates if debug messages should be printed
 void gsSetQuietMsg(void)
 {
   gsQuiet   = true;
+  gsError = true;   
   gsWarning = false;
   gsVerbose = false;
   gsDebug   = false;
@@ -36,6 +38,7 @@ void gsSetQuietMsg(void)
 void gsSetNormalMsg(void)
 {
   gsQuiet   = false;
+  gsError = true;   
   gsWarning = true;
   gsVerbose = false;
   gsDebug   = false;
@@ -44,6 +47,7 @@ void gsSetNormalMsg(void)
 void gsSetVerboseMsg(void)
 {
   gsQuiet   = false;
+  gsError = true;   
   gsWarning = true;
   gsVerbose = true;
   gsDebug   = false;
@@ -52,6 +56,7 @@ void gsSetVerboseMsg(void)
 void gsSetDebugMsg(void)
 {
   gsQuiet   = false;
+  gsError = true;   
   gsWarning = true;
   gsVerbose = true;
   gsDebug   = true;
@@ -133,20 +138,23 @@ void gsErrorMsg(const char* Format, ...)
 //Post: "error: " is printed to stderr followed by Format, where the remaining
 //      parameters are used as gsprintf arguments to Format.
 {
-  va_list Args;
-  va_start(Args, Format);
-
-  if (custom_message_handler)
+  if (gsError)
   {
-    handler_wrapper(gs_error, Format, Args);
-  }
-  else
-  {
-    fprintf(stderr, "error: ");
-    gsvfprintf(stderr, Format, Args);
-  }
+    va_list Args;
+    va_start(Args, Format);
 
-  va_end(Args);
+    if (custom_message_handler)
+    {
+      handler_wrapper(gs_error, Format, Args);
+    }
+    else
+    {
+      fprintf(stderr, "error: ");
+      gsvfprintf(stderr, Format, Args);
+    }
+
+    va_end(Args);
+  }
 }
 
 void gsWarningMsg(const char* Format, ...)

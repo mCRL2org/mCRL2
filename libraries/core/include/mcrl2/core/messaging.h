@@ -45,6 +45,9 @@ void gsSetDebugMsg();
 /// information during program execution is disabled.
 extern bool gsQuiet;
 
+/// \brief If gsError is set, printing of errors during program execution is enabled. 
+extern bool gsError;
+
 /// \brief If gsWarning is set, printing of warnings during program execution is enabled. Printing of
 /// verbose information and extended debugging information is disabled.
 extern bool gsWarning;

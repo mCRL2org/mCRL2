@@ -142,7 +142,16 @@ ATerm parse_tagged_stream(const string& tag, istream& stream)
 bool is_user_identifier(std::string const& s)
 {
   std::istringstream stream(s);
-  return parse_identifier(stream) != NULL;
+  // When parsing an identifier, we do not want to
+  // see error messages being printed on the console, if
+  // the identifier is not proper. This should be replaced
+  // by a try/catch block, after the parser has been adapted
+  // to throw an exception, instead of printing an error.
+  const bool old_gsError=core::gsError;
+  core::gsError=false;
+  const bool result=parse_identifier(stream) != NULL;
+  core::gsError=old_gsError;
+  return result;
 }
 
 }
