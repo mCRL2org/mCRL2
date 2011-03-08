@@ -46,20 +46,23 @@ class number_postfix_generator
 
     /// \brief Adds the strings in the range [first, last) to the context.
     /// \param id A string
-    void add_identifiers(const std::string& id)
+    void add_identifier(const std::string& id)
     {
       std::string::size_type i = id.find_last_not_of("0123456789");
+      int new_index = -1;
+      std::string name;
       if (i == std::string::npos || id.size() == i + 1) // string does not end with a number
       {
-        m_index[id] = -1;
+        name = id;
       }
       else
       {
-        std::string s = id.substr(0, i + 1);
+        name = id.substr(0, i + 1);
         std::string num = id.substr(i + 1);
-        int index = boost::lexical_cast<int>(num);
-        m_index[s] = index;
+        new_index = boost::lexical_cast<int>(num);
       }
+      int old_index = m_index.find(name) == m_index.end() ? -1 : m_index[name];
+    	m_index[name] = (std::max)(old_index, new_index);
     }
 
     /// \brief Adds the strings in the range [first, last) to the context.
@@ -71,7 +74,7 @@ class number_postfix_generator
     {
       for (Iter i = first; i != last; ++i)
       {
-        add_identifiers(*i);
+        add_identifier(*i);
       }
     }
 

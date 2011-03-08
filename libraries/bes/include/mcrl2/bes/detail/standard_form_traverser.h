@@ -247,7 +247,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
       assert(!eqn.equations().empty());
       for (atermpp::vector<boolean_equation>::const_iterator i = eqn.equations().begin(); i != eqn.equations().end(); ++i)
       {
-        m_generator.add_identifiers(std::string(i->variable().name()));
+        m_generator.add_identifier(std::string(i->variable().name()));
       }
     }
 
