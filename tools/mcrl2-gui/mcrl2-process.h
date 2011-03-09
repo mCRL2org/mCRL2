@@ -16,7 +16,11 @@
 
 BEGIN_DECLARE_EVENT_TYPES()
 DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_END, 7777)
+DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN, 7777)
+DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_CERR_OUTPUT, 7777)
+DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_STD_OUTPUT, 7777)
 END_DECLARE_EVENT_TYPES()
+
 
 DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_END)
 
@@ -28,10 +32,6 @@ DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_END)
                              (wxObject *) NULL \
                            ),
 
-BEGIN_DECLARE_EVENT_TYPES()
-DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN, 7777)
-END_DECLARE_EVENT_TYPES()
-
 DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN)
 
 #define EVT_MY_PROCESS_RUN(id, fn) \
@@ -41,19 +41,23 @@ DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_RUN)
                              (wxObject *) NULL \
                            ),
 
-BEGIN_DECLARE_EVENT_TYPES()
-DECLARE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_OUTPUT, 7777)
-END_DECLARE_EVENT_TYPES()
+DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_CERR_OUTPUT)
 
-DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_OUTPUT)
-
-#define EVT_MY_PROCESS_PRODUCES_OUTPUT(id, fn) \
+#define EVT_MY_PROCESS_PRODUCES_CERR_OUTPUT(id, fn) \
   DECLARE_EVENT_TABLE_ENTRY( \
-                             wxEVT_MY_PROCESS_PRODUCES_OUTPUT, id, wxID_ANY, \
+                             wxEVT_MY_PROCESS_PRODUCES_CERR_OUTPUT, id, wxID_ANY, \
                              (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
                              (wxObject *) NULL \
                            ),
 
+DEFINE_EVENT_TYPE(wxEVT_MY_PROCESS_PRODUCES_STD_OUTPUT)
+
+#define EVT_MY_PROCESS_PRODUCES_STD_OUTPUT(id, fn) \
+  DECLARE_EVENT_TABLE_ENTRY( \
+                             wxEVT_MY_PROCESS_PRODUCES_STD_OUTPUT, id, wxID_ANY, \
+                             (wxObjectEventFunction)(wxEventFunction) wxStaticCastEvent( wxCommandEventFunction, &fn ), \
+                             (wxObject *) NULL \
+                           ),
 
 
 
@@ -95,9 +99,20 @@ class MyPipedProcess: public MyProcess
       m_parent = parent;
     }
 
-    void AddAsyncProcess(wxTextCtrl* output)
+    void AddAsyncProcessWithOutput(wxTextCtrl* cerr, wxTextCtrl* cout = NULL)
     {
-      m_listbox_output = output;
+      // Set cerr- and cout-TextCtrl to which process needs to report
+      m_cerr_output = cerr;
+
+      if( cout == NULL )
+      {
+        m_cout_output = cerr;
+      }
+      else
+      {
+        m_cout_output = cout;
+      }
+
       running_processes.Add(this);
     }
 
@@ -132,22 +147,22 @@ class MyPipedProcess: public MyProcess
         // assumption output is line buffered
         // m_msg << m_cmd << wxT(" (stdout): ") << tis.ReadLine();
         m_msg << tis.ReadLine();
-        if (m_listbox_output != NULL)
+        if (m_cout_output != NULL)
         {
-          int old = m_listbox_output->GetNumberOfLines();
+          int old = m_cout_output->GetNumberOfLines();
 
-          m_listbox_output->AppendText(m_msg + wxT("\n"));
+          m_cout_output->AppendText(m_msg + wxT("\n"));
 
-          if (m_listbox_output == wxWindow::FindFocus())
+          if (m_cout_output == wxWindow::FindFocus())
           {
             // AutoScroll
             //m_listbox_output->Select(m_listbox_output->GetCount() - 1);
             //m_listbox_output->SetSelection(wxNOT_FOUND);
           }
 
-          if (old <  m_listbox_output->GetNumberOfLines() && (!m_msg.empty()))
+          if (old <  m_cout_output->GetNumberOfLines() && (!m_msg.empty()))
           {
-            wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
+            wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_STD_OUTPUT);
             wxPostEvent(m_parent, eventCustom);
           }
 
@@ -162,22 +177,22 @@ class MyPipedProcess: public MyProcess
         wxString m_msg;
         // assumption output is line buffered
         m_msg << tis.ReadLine();
-        if (m_listbox_output != NULL)
+        if (m_cerr_output != NULL)
         {
 
-          int old = m_listbox_output->GetNumberOfLines();
+          int old = m_cerr_output->GetNumberOfLines();
 
-          m_listbox_output->AppendText(m_msg + wxT("\n"));
-          if (m_listbox_output == wxWindow::FindFocus())
+          m_cerr_output->AppendText(m_msg + wxT("\n"));
+          if (m_cerr_output == wxWindow::FindFocus())
           {
             // AutoScroll
             //        m_listbox_output->Select(m_listbox_output->GetCount() - 1);
             //        m_listbox_output->SetSelection(wxNOT_FOUND);
           }
 
-          if (old <  m_listbox_output->GetNumberOfLines() && (!m_msg.empty()))
+          if (old <  m_cerr_output->GetNumberOfLines() && (!m_msg.empty()))
           {
-            wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_OUTPUT);
+            wxCommandEvent eventCustom(wxEVT_MY_PROCESS_PRODUCES_CERR_OUTPUT);
             wxPostEvent(m_parent, eventCustom);
           }
         }
@@ -191,7 +206,10 @@ class MyPipedProcess: public MyProcess
     }
     ;
   protected:
-    wxTextCtrl* m_listbox_output;
+    wxTextCtrl* m_cerr_output;
+    wxTextCtrl* m_cout_output;
+
 };
+
 
 #endif /* MCRL2_GUI_PROCESS_H_ */

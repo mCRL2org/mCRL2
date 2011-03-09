@@ -66,8 +66,6 @@ enum
   Exec_Btn_Close
 };
 
-static const wxChar* DIALOG_TITLE = wxT("mCRL2-gui");
-
 // Define main frame
 class MainFrame: public wxFrame
 {
@@ -460,34 +458,6 @@ class MainFrame: public wxFrame
     }
     ;
 
-    void OnExecWithRedirect(wxCommandEvent& /*event*/)
-    {
-      wxString cmd = wxGetTextFromUser(wxT("Enter the command: "),
-                                       DIALOG_TITLE, m_cmdLast);
-
-      if (!cmd)
-      {
-        return;
-      }
-
-      {
-        MyPipedProcess* process = new MyPipedProcess(NULL);
-        if (!wxExecute(cmd, wxEXEC_ASYNC, process))
-        {
-          wxLogError(wxT("Execution of '%s' failed."), cmd.c_str());
-
-          delete process;
-        }
-        else
-        {
-          process->AddAsyncProcess(this->GetLogListBox());
-        }
-      }
-
-      m_cmdLast = cmd;
-    }
-    ;
-
     void OnExecPreferences(wxCommandEvent& /*event*/)
     {
       Preferences* p = new Preferences();
@@ -598,7 +568,6 @@ BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(Exec_ToggleFileBrowserPanel, MainFrame::OnToggleFileBrowserPanel)
   EVT_MENU(Exec_ToggleExecutedCommandsPanel, MainFrame::OnToggleExecutedCommandsPanel)
   EVT_MENU(wxID_CLEAR, MainFrame::OnClear)
-  EVT_MENU(Exec_Redirect, MainFrame::OnExecWithRedirect)
   EVT_MENU(Exec_PerspectiveReset, MainFrame::OnResetLayout)
   EVT_MENU(wxID_COPY, MainFrame::OnCopy2Clipboard)
   EVT_MENU(wxID_SAVE, MainFrame::OnSave)

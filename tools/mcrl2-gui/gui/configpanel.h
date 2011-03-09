@@ -60,8 +60,10 @@ class ConfigPanel: public wxNotebookPage
       m_listbox_output = listbox_output;
       m_fileIO = fileIO;
       m_pid = 0;
-      m_switchOnOutput = false;
+      m_switchOnCerrOutput = false;
+      m_switchOnStdOutput = false;
       m_additional_input_files.clear();
+      m_tool_std_output = NULL;
 
       int row = 0;
 
@@ -70,9 +72,9 @@ class ConfigPanel: public wxNotebookPage
                                         wxAUI_NB_BOTTOM
                                        );
 
-      m_tool_output = new OutputConfigPanel(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+      m_tool_cerr_output = new OutputConfigPanel(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
-      m_tool_output->SetRunCognizance(this);
+      m_tool_cerr_output->SetRunCognizance(this);
 
       m_wsw = new wxScrolledWindow(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
 
@@ -329,8 +331,16 @@ class ConfigPanel: public wxNotebookPage
       m_wsw->SetScrollbars(20, 20, w/20 , h/20);
 
       m_configpanel->AddPage(m_wsw , wxT("Configuration"), true);
-      m_configpanel->AddPage(m_tool_output , wxT("Output"), false);
+      m_configpanel->AddPage(m_tool_cerr_output  , wxT("Logging"), false);
 
+
+      if (m_tool.m_output_type.compare("txt") == 0)
+      {
+        m_tool_std_output = new OutputConfigPanel(m_configpanel, wxID_ANY, wxDefaultPosition, wxDefaultSize);
+        m_tool_std_output->SetRunCognizance(this);
+
+        m_configpanel->AddPage( m_tool_std_output , wxT("Output"), false);
+      }
     }
     ;
 
@@ -371,7 +381,11 @@ class ConfigPanel: public wxNotebookPage
     {
       UpdateToolTipStatus(STATUS_RUNNING);
 
-      m_tool_output->GetOutput()->Clear();
+      m_tool_cerr_output->GetOutput()->Clear();
+      if( m_tool_std_output )
+      {
+        m_tool_std_output->GetOutput()->Clear();
+      }
 
       wxString cmd = wxString(m_tool.m_location.c_str(), wxConvUTF8);
 
@@ -480,13 +494,22 @@ class ConfigPanel: public wxNotebookPage
         }
         else
         {
-          m_process->AddAsyncProcess(m_tool_output->GetOutput());
+
+          if( m_tool_std_output )
+          {
+            m_process->AddAsyncProcessWithOutput(m_tool_cerr_output->GetOutput(), m_tool_std_output->GetOutput());
+          }
+          else
+          {
+            m_process->AddAsyncProcessWithOutput(m_tool_cerr_output->GetOutput());
+          }
           m_runbutton->Disable();
           m_abortbutton->Show(true);
 
           m_process->m_ext_pid = m_pid;
 
-          m_switchOnOutput = true;
+          m_switchOnCerrOutput = true;
+          m_switchOnStdOutput = true;
 
         };
       }
@@ -507,20 +530,42 @@ class ConfigPanel: public wxNotebookPage
       return s;
     }
 
-    void SwitchToToolOutputNotebook()
+    void SwitchToToolCerrOutputNotebook()
     {
 
-      if (m_switchOnOutput)
+      if (m_switchOnCerrOutput)
       {
         m_configpanel->SetSelection(1);
-        m_switchOnOutput = false;
+        m_switchOnCerrOutput = false;
       }
     }
 
+    void SwitchToToolStdOutputNotebook()
+    {
+
+      if (m_switchOnStdOutput)
+      {
+        if( m_tool_std_output )
+        {
+          m_configpanel->SetSelection(2);
+        }
+        else
+        {
+          m_configpanel->SetSelection(1);
+        }
+        m_switchOnStdOutput = false;
+        m_switchOnCerrOutput = false;
+      }
+    }
 
     void OnRunClick(wxCommandEvent& /*event*/)
     {
-      m_tool_output->SetBackgroundColour( wxT("MEDIUM GOLDENROD") ) ;
+      m_tool_cerr_output->SetBackgroundColour( wxT("MEDIUM GOLDENROD") ) ;
+      if( m_tool_std_output )
+      {
+        m_tool_std_output->SetBackgroundColour( wxT("MEDIUM GOLDENROD") ) ;
+      }
+
       Run();
     }
     ;
@@ -533,7 +578,11 @@ class ConfigPanel: public wxNotebookPage
       }
       m_abortbutton->Show(false);
       m_runbutton->Enable();
-      m_tool_output->ResetColor();
+      m_tool_cerr_output->ResetColor();
+      if( m_tool_std_output )
+      {
+        m_tool_std_output->ResetColor();
+      }
     };
 
     void OnOutputFileChange(wxFileDirPickerEvent& event)
@@ -562,7 +611,8 @@ class ConfigPanel: public wxNotebookPage
     wxAuiNotebook* m_parent;
     wxAuiNotebook* m_configpanel;
     OutPutTextCtrlBase* m_listbox_output;
-    OutputConfigPanel* m_tool_output;
+    OutputConfigPanel *m_tool_std_output;
+    OutputConfigPanel* m_tool_cerr_output;
     wxScrolledWindow* m_wsw;
     wxString m_input_file;
     Tool m_tool;
@@ -588,7 +638,8 @@ class ConfigPanel: public wxNotebookPage
 
   private:
 
-    bool m_switchOnOutput;
+    bool m_switchOnCerrOutput;
+    bool m_switchOnStdOutput;
 
     wxString
     GenerateOutputFileSuggestion()
@@ -644,9 +695,17 @@ class ConfigPanel: public wxNotebookPage
 
       if (status)
       {
-        m_tool_output->SetBackgroundColour( wxT("SALMON") ) ;
+        m_tool_cerr_output->SetBackgroundColour( wxT("SALMON") );
+        if( m_tool_std_output )
+        {
+          m_tool_std_output->SetBackgroundColour( wxT("SALMON") );
+        }
       } else {
-        m_tool_output->SetBackgroundColour( wxT("PALE GREEN") ) ;
+        m_tool_cerr_output->SetBackgroundColour( wxT("PALE GREEN") ) ;
+        if( m_tool_std_output )
+        {
+          m_tool_std_output->SetBackgroundColour( wxT("PALE GREEN") ) ;
+        }
       }
 
       wxCommandEvent eventCustom(wxEVT_UPDATE_PROJECT_TREE);
@@ -668,10 +727,16 @@ class ConfigPanel: public wxNotebookPage
       UpdateToolTipStatus(STATUS_COMPLETE);
     }
 
-    void OnToolHasOutput(wxCommandEvent& /* evt */)
+    void OnToolHasCerrOutput(wxCommandEvent& /* evt */)
     {
-      SwitchToToolOutputNotebook();
+      SwitchToToolCerrOutputNotebook();
     }
+
+    void OnToolHasStdOutput(wxCommandEvent& /* evt */)
+    {
+      SwitchToToolStdOutputNotebook();
+    }
+
 
     void OnChangeExtension(wxCommandEvent&)
     {
@@ -692,7 +757,8 @@ BEGIN_EVENT_TABLE(ConfigPanel, wxNotebookPage)
   EVT_SIZE(ConfigPanel::OnResize)
   EVT_MY_PROCESS_END(wxID_ANY, ConfigPanel::OnProcessEnd)
   EVT_MY_PROCESS_RUN(wxID_ANY, ConfigPanel::OnRunClick)
-  EVT_MY_PROCESS_PRODUCES_OUTPUT(wxID_ANY, ConfigPanel::OnToolHasOutput)
+  EVT_MY_PROCESS_PRODUCES_CERR_OUTPUT(wxID_ANY, ConfigPanel::OnToolHasCerrOutput)
+  EVT_MY_PROCESS_PRODUCES_STD_OUTPUT(wxID_ANY, ConfigPanel::OnToolHasStdOutput)
   EVT_RADIOBOX(ID_OUTPUT_EXT, ConfigPanel::OnChangeExtension)
 END_EVENT_TABLE()
 
