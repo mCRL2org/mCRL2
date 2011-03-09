@@ -174,7 +174,12 @@ void XSimMain::CreateMenu()
   opts->Append(ID_DELAY, wxT("Set Play Delay"), wxT(""));
   opts->Append(ID_FITCS, wxT("F&it to Current State	CTRL-f"), wxT(""));
   tooltip = opts->Append(ID_TOOLTIP, wxT("Show tooltips"), wxT(""), wxITEM_CHECK);
-	tooltip->Check( true );
+  tooltip->Check( true );
+  //Enable tooltips check for wxWidgets 2.9+
+#if !wxCHECK_VERSION(2, 9, 0)
+  tooltip->Enable( false );
+#endif
+
   menu->Append(opts, wxT("&Options"));
 
   wxMenu* views = new wxMenu;
