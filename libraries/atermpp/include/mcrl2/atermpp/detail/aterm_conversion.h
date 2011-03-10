@@ -14,7 +14,9 @@
 
 #include "aterm2.h"
 
-namespace   // unnamed namespace
+namespace atermpp
+{
+namespace detail
 {
 
 // --- term ---
@@ -174,14 +176,8 @@ void* int2void(ATermInt l)
   return reinterpret_cast<void*>(l);
 }
 
-// --- place_holder  ---
-/// \brief Conversion function
-/// \param t A pointer
-/// \return The pointer converted to an ATermPlaceholder
-/* inline
-ATermPlaceholder void2place_holder(void* t)
-{ return reinterpret_cast<ATermPlaceholder>(t); } */
+} // namespace detail
 
-} // unnamed namespace
+} // namespace atermpp
 
 #endif // MCRL2_ATERMPP_DETAIL_ATERM_CONVERSION_H

@@ -21,8 +21,11 @@
 #include "mcrl2/atermpp/detail/aterm_conversion.h"
 #include "mcrl2/atermpp/aterm_list_iterator.h"
 
+namespace atermpp
+{
+
 /// \cond INTERNAL_DOCS
-namespace
+namespace detail
 {
 // In the ATerm library the following functions are #define's:
 //
@@ -55,11 +58,9 @@ size_t aterm_get_length(ATermList l)
 {
   return ATgetLength(l);
 }
-}
-/// \endcond
 
-namespace atermpp
-{
+} // namespace detail
+/// \endcond
 
 /// \brief Read-only singly linked list of terms.
 template <typename Term>
@@ -142,7 +143,7 @@ class term_list: public aterm_base
     {
       while (first != last)
       {
-        m_term = void2term(list2void(ATinsert(list(), aterm(*(--last)))));
+        m_term = detail::void2term(detail::list2void(ATinsert(list(), aterm(*(--last)))));
       }
     }
 
@@ -157,9 +158,9 @@ class term_list: public aterm_base
     {
       while (first != last)
       {
-        m_term = void2term(list2void(ATinsert(list(), aterm(*(first++)))));
+        m_term = detail::void2term(detail::list2void(ATinsert(list(), aterm(*(first++)))));
       }
-      m_term = void2term(list2void(ATreverse(list())));
+      m_term = detail::void2term(detail::list2void(ATreverse(list())));
     }
 
 
@@ -199,7 +200,7 @@ class term_list: public aterm_base
     /// \return The size of the list.
     size_type size() const
     {
-      return aterm_get_length(list());
+      return detail::aterm_get_length(list());
     }
 
     /// \brief Returns the largest possible size of the term_list.
@@ -220,7 +221,7 @@ class term_list: public aterm_base
     /// \return The first element of the list.
     Term front() const
     {
-      return Term(void2appl(term2void(aterm_get_first(list()))));
+      return Term(detail::void2appl(detail::term2void(detail::aterm_get_first(list()))));
     }
 
     /// \brief Returns an iterator prev such that ++prev == pos. Complexity: linear in the number of iterators in the range [begin(), pos).
@@ -244,7 +245,7 @@ class term_list: public aterm_base
     /// \return The wrapped ATermList pointer.
     operator ATermList() const
     {
-      return void2list(m_term);
+      return detail::void2list(m_term);
     }
 
     /// \brief Applies a low level substitution function to this term and returns the result.
@@ -304,7 +305,7 @@ template <typename Term>
 inline
 term_list<Term> pop_front(term_list<Term> l)
 {
-  return term_list<Term>(aterm_get_next(l));
+  return term_list<Term>(detail::aterm_get_next(l));
 }
 
 /// \brief Returns the list with the elements in reversed order.
