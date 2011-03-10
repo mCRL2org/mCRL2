@@ -45,24 +45,11 @@ extern "C"
     struct __ATermInt  aterm;
   }* ATermInt;
 
-  /* struct __ATermReal
-  {
-    header_type header;
-    ATerm       next;
-    double      value;
-  };
-
-  typedef union _ATermReal
-  {
-    header_type         header;
-    struct __ATermReal  aterm;
-  } *ATermReal; */
-
   struct __ATermAppl
   {
     header_type header;
     ATerm       next;
-    ATerm       arg[1];
+    ATerm       arg[]; 
   };
 
   typedef union _ATermAppl
@@ -84,34 +71,6 @@ extern "C"
     header_type         header;
     struct __ATermList  aterm;
   }* ATermList;
-
-  /* struct __ATermPlaceholder
-  {
-    header_type header;
-    ATerm       next;
-    ATerm       ph_type;
-  };
-
-  typedef union _ATermPlaceholder
-  {
-    header_type                header;
-    struct __ATermPlaceholder  aterm;
-  } *ATermPlaceholder;
-
-  struct __ATermBlob
-  {
-    header_type   header;
-    ATerm         next;
-    size_t size;
-    void         *data;
-  };
-
-  typedef union _ATermBlob
-  {
-    header_type         header;
-    struct __ATermBlob  aterm;
-  } *ATermBlob;  */
-
 
   struct _ATermTable;
 
