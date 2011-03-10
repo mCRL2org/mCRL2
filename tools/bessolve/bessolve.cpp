@@ -62,7 +62,7 @@ class bessolve_tool: public input_output_tool
               "solve a BES",
               "Solve the BES in INFILE. If INFILE is not present, stdin is used."
              ),
-      strategy(gauss)
+      strategy(spm)
     {}
 
     bool run()
@@ -114,8 +114,8 @@ class bessolve_tool: public input_output_tool
       input_output_tool::add_options(desc);
       desc.add_option("strategy", make_mandatory_argument("STRATEGY"),
                       "solve the BES using the specified STRATEGY:\n"
-                      "  'gauss' for Gauss elimination (default),\n"
-                      "  'spm' for Small Progress Measures,\n", 's');
+                      "  'spm' for Small Progress Measures (default),\n"
+                      "  'gauss' for Gauss elimination\n", 's');
     }
 
     void parse_options(const command_line_parser& parser)
