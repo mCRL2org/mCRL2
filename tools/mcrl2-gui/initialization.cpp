@@ -53,6 +53,7 @@ Initialization::Initialization()
   m_extention_tool_mapping.insert(pair<string, string> ("lysa", "lysa"));
   m_extention_tool_mapping.insert(pair<string, string> ("tbf", "tbf"));
   m_extention_tool_mapping.insert(pair<string, string> ("gra", "gra"));
+  m_extention_tool_mapping.insert(pair<string, string> ("bes", "bes"));
 
   m_extention_tool_mapping.insert(pair<string, string> ("mcf", "mcf"));
   m_extention_tool_mapping.insert(pair<string, string> ("trc", "trc"));

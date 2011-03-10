@@ -381,7 +381,7 @@ class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool>
       values.push_back("pbes");
       values.push_back("cwi");
       values.push_back("bes");
-      m_gui_options["output"] = create_radiobox_widget(values);
+      m_gui_options["output"] = create_radiobox_widget(values, 3);
 
       values.clear();
       values.push_back("simplify");
