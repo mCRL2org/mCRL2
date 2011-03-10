@@ -11,4 +11,4 @@ Now, an application of pbesparelm can detect the redundancy of variable <tt>n</t
 
   nu X = false || X
 
-The latter is readily seen to have solution <tt>true</tt>. As a result, also the original equation systems have result </tt>true</tt>.
+The latter is readily seen to have solution <tt>true</tt>. As a result, also the original equation systems have result <tt>true</tt>.
