@@ -130,7 +130,7 @@ struct sequence_sequence_substitution: public std::unary_function<typename Varia
   }
 
   template <typename Expression>
-  expression_type operator()(const Expression& x) const
+  expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::sequence_sequence_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
@@ -175,7 +175,7 @@ struct pair_sequence_substitution: public std::unary_function<typename Container
   }
 
   template <typename Expression>
-  expression_type operator()(const Expression& x) const
+  expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::pair_sequence_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
@@ -220,7 +220,7 @@ struct map_substitution : public std::unary_function<typename AssociativeContain
   }
 
   template <typename Expression>
-  expression_type operator()(const Expression& x) const
+  expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::map_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
@@ -318,7 +318,7 @@ struct mutable_map_substitution : public std::unary_function<typename Associativ
   }
 
   template <typename Expression>
-  expression_type operator()(const Expression& x) const
+  expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::mutable_map_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
@@ -372,7 +372,7 @@ struct mutable_map_substitution : public std::unary_function<typename Associativ
   }
 
   template <typename Substitution>
-  bool operator==(const Substitution& other) const
+  bool operator==(const Substitution&) const
   {
     return false;
   }
@@ -438,7 +438,7 @@ class mutable_substitution_composer: public std::unary_function<typename Substit
     }
 
     template <typename Expression>
-    expression_type operator()(const Expression& x) const
+    expression_type operator()(const Expression&) const
     {
       throw std::runtime_error("data::mutable_substitution_composer::operator(const Expression&) is a deprecated interface!");
       return data_expression();
@@ -495,7 +495,7 @@ class mutable_substitution_composer<mutable_map_substitution<AssociativeContaine
     }
 
     template <typename Expression>
-    expression_type operator()(const Expression& x) const
+    expression_type operator()(const Expression&) const
     {
       throw std::runtime_error("data::mutable_substitution_composer<mutable_map_substitution<AssociativeContainer> >::operator(const Expression&) is a deprecated interface!");
       return data_expression();
