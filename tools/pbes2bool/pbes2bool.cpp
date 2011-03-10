@@ -101,7 +101,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
         NAME,
         AUTHOR,
         "Generate a BES from a PBES and solve it. ",
-        "Solves PBES from INFILE. "
+        "Solves (P)BES from INFILE. "
         "If INFILE is not present, stdin is used. "),
       opt_strategy(::bes::lazy),
       opt_use_hashtables(false),
