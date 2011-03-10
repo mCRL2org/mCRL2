@@ -37,17 +37,10 @@ foreach( OBJ ${TERM_OBJS} )
 
     add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
     target_link_libraries("${PREFIX}_${result}"
-     mcrl2_lps
-    )
-    target_link_libraries(${PROJECT_NAME}
+      mcrl2_lps
+      mcrl2_pbespgsolve
       ${Boost_LIBRARIES}     
-    ) 
-  
-    if(MCRL2_ENABLE_EXPERIMENTAL )
-      target_link_libraries(${PROJECT_NAME}
-        mcrl2_pbespgsolve
-      )
-    endif(MCRL2_ENABLE_EXPERIMENTAL)
+    )
 
     # MACRO is defined in CMakeLists.txt in root of source tree
     build_and_run_test_target( ${PREFIX}_${result} )
