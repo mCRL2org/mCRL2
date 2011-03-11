@@ -196,6 +196,7 @@ endif(MSVC)
 ## Detect architecture
 ## --------------------------------------------------
 
+if( NOT MCRL2_ARCH )
 if (UNIX AND NOT WIN32)
   if (CMAKE_SIZEOF_VOID_P MATCHES "8")
     message (STATUS "Architecture: 64bit Unix" )
@@ -218,6 +219,16 @@ if(MSVC)
     message( STATUS "Architecture: 32bit Windows" )
   endif(CMAKE_CL_64)
 endif(MSVC)
+endif( NOT MCRL2_ARCH ) 
+
+if( MCRL2_ARCH STREQUAL "i386" )
+  if( UNIX )
+    message( STATUS "Architecture: 32bit Unix" )
+#    set(ATERM_FLAGS "-m32")
+#    add_definitions( "-m32" )
+#    set( CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}"  )
+  endif( UNIX )
+endif( MCRL2_ARCH STREQUAL "i386" )
 
 ##---------------------------------------------------
 ## Remove "install_tools"
@@ -610,6 +621,38 @@ endif( UNIX )
 set(MCRL2_TEST_LABEL "rev.${SVN_REV}-${CMAKE_BUILD_TYPE}")
 
 ##---------------------------------------------------
+## Setup dependency to CADP
+##---------------------------------------------------
+
+option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable CADP support" OFF)
+message(STATUS "MCRL2_ENABLE_CADP_SUPPORT: ${MCRL2_ENABLE_CADP_SUPPORT}" )
+if(MCRL2_ENABLE_CADP_SUPPORT )
+  set(USE_BCG "")
+  add_definitions( "-DUSE_BCG" )
+  # Set location to root of CADP install path
+  set(MCRL2_CADP_INSTALL_PATH ""
+      CACHE PATH "Path to CADP install path." )
+  # Override CADP include directory 
+  set(MCRL2_CADP_INCLUDE_PATH ""
+      CACHE PATH "Override path if \"incl\" directory is other than ${MCRL2_CADP_INSTALL_PATH}/incl " )
+  message( STATUS "MCRL2_CADP_INSTALL_PATH: ${MCRL2_CADP_INSTALL_PATH}" )
+ if(MCRL2_CADP_INCLUDE_PATH)
+   include_directories( "${MCRL2_CADP_INCLUDE_PATH}" )
+ else( MCRL2_CADP_INCLUDE_PATH )
+   include_directories( "${MCRL2_CADP_INSTALL_PATH}/incl" )
+ endif( MCRL2_CADP_INCLUDE_PATH )
+
+ link_directories("${MCRL2_CADP_INSTALL_PATH}" )
+
+ add_library(imp_bcg STATIC IMPORTED)
+ set_property(TARGET imp_bcg PROPERTY
+                IMPORTED_LOCATION ${MCRL2_CADP_INSTALL_PATH}/libBCG.a)
+
+else(MCRL2_ENABLE_CADP_SUPPORT)
+  set( USE_BCG "//" )
+endif(MCRL2_ENABLE_CADP_SUPPORT)
+
+##---------------------------------------------------
 ## 3rd party dependencies
 ##---------------------------------------------------
 
@@ -705,7 +748,7 @@ endif(MCRL2_ENABLE_EXPERIMENTAL)
 ##---------------------------------------------------
 ## Deprecated tool dependencies
 ##---------------------------------------------------
-
+ 
 option(MCRL2_ENABLE_DEPRECATED "Enable/disable creation of deprecated tools" OFF)
 message(STATUS "MCRL2_ENABLE_DEPRECATED: ${MCRL2_ENABLE_DEPRECATED}" )
 
@@ -781,14 +824,6 @@ endif( NOT APPLE )
 
 set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/include/aterm\\\"")
 set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lATerm")
-
-option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable CADP support" OFF)
-message(STATUS "MCRL2_ENABLE_CADP_SUPPORT: ${MCRL2_ENABLE_CADP_SUPPORT}" )
-if(MCRL2_ENABLE_CADP_SUPPORT )
-  set(USE_BCG "")
-else(MCRL2_ENABLE_CADP_SUPPORT)
-  set( USE_BCG "//" )
-endif(MCRL2_ENABLE_CADP_SUPPORT)
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/setup.h.in" "${CMAKE_CURRENT_BINARY_DIR}/libraries/utilities/include/mcrl2/setup.h" @ONLY  )
 

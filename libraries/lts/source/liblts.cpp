@@ -35,7 +35,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
 #ifdef USE_BCG
-#include <bcg_user.h>
+// #include <bcg_user.h>
 #endif
 
 #define ATisAppl(x) (ATgetType(x) == AT_APPL)

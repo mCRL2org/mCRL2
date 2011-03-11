@@ -24,6 +24,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 
+
 set(mcrl2_lts_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.cpp
 #  ${CMAKE_CURRENT_SOURCE_DIR}/source/liblts_fsmlexer.h
@@ -60,6 +61,12 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   svc
 )
+
+if( MCRL2_ENABLE_CADP_SUPPORT )
+  target_link_libraries(${PROJECT_NAME}
+    imp_bcg
+  )
+endif( MCRL2_ENABLE_CADP_SUPPORT )
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})

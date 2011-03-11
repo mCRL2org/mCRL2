@@ -68,7 +68,7 @@ static void read_from_bcg(lts_bcg_t& l, const string& filename)
   for (size_t i=0; i<n; i++)
   {
     const std::string s=BCG_OT_LABEL_STRING(bcg_graph,i);
-    l.add_label(s,s=="i");
+    l.add_action(s,s=="i");
   }
 
   size_t from,label,to;
@@ -105,7 +105,7 @@ static void write_to_bcg(const lts_bcg_t& l, const string& filename)
   for (transition_const_range r=l.get_transitions(); !r.empty(); r.advance_begin(1))
   {
     transition t=r.front();
-    string label_str = l.label_value(t.label());
+    string label_str = l.action_label(t.label());
     if (l.is_tau(t.label()))
     {
       if (warn_non_i && (label_str != "i"))
