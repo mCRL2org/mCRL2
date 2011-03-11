@@ -1,19 +1,43 @@
 ===============================================================================
-Changes between toolset releases July 2010 and January 2011:
+Changes between toolset releases July 2010 and March 2011:
 ===============================================================================
 
  General:
-
- Tool renamings:
+   - Removed 3rd-party/boost, mCRL2 depends on Boost >= 1.37
+   - Removed bjam build system. Use of the CMake build system is now required.
+   - Developed a BES library as the basis for further solving/reduction
+     algorithms.
+   - The basic code for all data structures is now generated from a concise set
+     of specifications. Standard traversal and find/replace functionality is
+     available for all these data types.
+   - Stabilise ATerm library for 64-bit Windows platforms.
+   - Overal stabilisation of the code, including fixing compiler warnings/errors
+     on various supported platforms.
+   - The implementation of the LTS library has been cleaned up.
 
  New functionality:
+   - pbes2bool and pbespgsolve accept BESs and PBESs as input.
+   - pbes2bes should be used to generate a BES from a PBES; this functionality
+     has been removed from pbes2bool. Use pbes2bool directly on the PBES if
+     you want proper counterexamples.
+   - The tool previously called pbes2bes is now named pbesinst.
+   - New tool besinfo that prints information on a BES.
+   - New tool bespp that prints a BES in human readable format.
+     PBESs
+   - tau*a reduction is available from ltsconvert.
 
- Deprecated tools:
+ New experimental tools:
+   - besconvert can be used to reduce BESs modulo strong bisimulation and
+     stuttering equivalence.
+   - lts2pbes can be used to generate a PBES form an LTS and a modal formula.
+   - bessolve can be used to solve a BES using small progress measures or the
+     recursive algorith due to Zielonka. For efficient solving the use of
+     pbespgsolve is recommended.
+   - pbesabstract provides a form of abstract interpretation for
 
  Removed tools:
    - squadt
-
- Known issues:
+   - pnml2mcrl2
 
 ===============================================================================
 Changes between toolset releases January 2010 and July 2010:
