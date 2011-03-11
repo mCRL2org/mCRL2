@@ -49,7 +49,12 @@ extern "C"
   {
     header_type header;
     ATerm       next;
-    ATerm       arg[]; 
+    ATerm       arg[1000];   /* This value 1000 is completely arbitrary, and should not be used
+                                (therefore it is excessive). Using mallocs an array of the
+                                appropriate length is declared, where it is possible that
+                                the array has size 0, i.e. is absent. If the value is small
+                                (it was 1), the clang compiler provides warnings. */
+
   };
 
   typedef union _ATermAppl
