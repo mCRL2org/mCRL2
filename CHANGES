@@ -33,7 +33,10 @@ Changes between toolset releases July 2010 and March 2011:
    - bessolve can be used to solve a BES using small progress measures or the
      recursive algorith due to Zielonka. For efficient solving the use of
      pbespgsolve is recommended.
-   - pbesabstract provides a form of abstract interpretation for
+   - pbesabstract provides a form of abstract interpretation for pbesses. 
+     Parameters of pbes equations can be removed underapproximating or 
+     overapproximating the solution of the PBES. This can dramatically reduce
+     the number of BES variables generated from a PBES.
 
  Removed tools:
    - squadt
