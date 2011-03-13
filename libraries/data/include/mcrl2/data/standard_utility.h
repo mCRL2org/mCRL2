@@ -496,9 +496,9 @@ application list(const sort_expression& s,
                  typename atermpp::detail::enable_if_container< Sequence, data_expression >::type* = 0)
 {
   data_expression                list_expression(nil(s));
-  std::vector< data_expression > elements(range.begin(), range.end());
+  atermpp::vector< data_expression > elements(range.begin(), range.end());
 
-  for (std::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
+  for (atermpp::vector< data_expression >::reverse_iterator i = elements.rbegin(); i != elements.rend(); ++i)
   {
     // BOOST_ASSERT(is_convertible(i->sort(), s)); This is not always true, due to type conversion.
 
