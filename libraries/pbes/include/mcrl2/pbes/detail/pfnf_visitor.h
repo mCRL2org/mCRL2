@@ -21,6 +21,7 @@
 #include <set>
 #include <sstream>
 #include <functional>
+#include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/optimized_boolean_operators.h"
 #include "mcrl2/core/detail/print_utility.h"
@@ -29,6 +30,237 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/pbes_expression.h"
+
+namespace mcrl2
+{
+
+namespace pbes_system
+{
+
+namespace detail
+{
+
+/// \brief Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
+typedef std::pair<bool, data::variable_list> pfnf_visitor_quantifier;
+
+struct variable_variable_substitution: public std::unary_function<data::variable, data::variable>
+{
+  atermpp::map<data::variable, data::variable> sigma;
+
+  data::variable operator()(const data::variable& v) const
+  {
+    atermpp::map<data::variable, data::variable>::const_iterator i = sigma.find(v);
+    if (i == sigma.end())
+    {
+      return v;
+    }
+    return i->second;
+  }
+
+  data::variable_list operator()(const data::variable_list& v) const
+  {
+    atermpp::vector<data::variable> result;
+    for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+      result.push_back((*this)(*i));
+    }
+    return atermpp::convert<data::variable_list>(result);
+  }
+  
+  std::string to_string() const
+  {
+    std::ostringstream out;
+    out << "[";
+    for (atermpp::map<data::variable, data::variable>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+    {
+      if (i != sigma.begin())
+      {
+        out << ", ";
+      }
+      out << core::pp(i->first) << " := " << core::pp(i->second);
+    }
+    out << "]";
+    return out.str();
+  }
+};
+
+struct variable_data_expression_substitution: public std::unary_function<data::variable, data::data_expression>
+{
+  typedef data::variable variable_type;
+  typedef data::data_expression expression_type;
+
+  const variable_variable_substitution& sigma;
+
+  variable_data_expression_substitution(const variable_variable_substitution& sigma_)
+    : sigma(sigma_)
+  {}
+
+  data::data_expression operator()(const data::variable& v) const
+  {
+    return sigma(v);
+  }
+};
+
+/// \brief Represents the implication g => ( X0(e0) \/ ... \/ Xk(ek) )
+struct pfnf_visitor_implication
+{
+  pbes_expression g;
+  atermpp::vector<propositional_variable_instantiation> rhs;
+
+  pfnf_visitor_implication(const atermpp::aterm_appl& g_, const atermpp::vector<propositional_variable_instantiation>& rhs_)
+    : g(g_),
+      rhs(rhs_)
+  {}
+
+  pfnf_visitor_implication(const atermpp::aterm_appl& x)
+    : g(x)
+  {}
+
+  // applies a substitution to variables
+  void substitute(const variable_variable_substitution& sigma)
+  {
+    for (atermpp::vector<propositional_variable_instantiation>::iterator i = rhs.begin(); i != rhs.end(); ++i)
+    {
+      *i = pbes_system::replace_free_variables(*i, variable_data_expression_substitution(sigma));
+    }
+    g = pbes_system::replace_free_variables(g, variable_data_expression_substitution(sigma));
+  }
+  
+  void mark()
+  {
+  	g.mark();
+  }
+  
+  void protect()
+  {
+  	g.protect();
+  }
+  
+  void unprotect()
+  {
+  	g.unprotect();
+  }
+};
+
+struct pfnf_visitor_expression
+{ 
+	pbes_expression expr;
+  atermpp::vector<pfnf_visitor_quantifier> quantifiers;
+  atermpp::vector<pfnf_visitor_implication> implications;
+
+  pfnf_visitor_expression(const atermpp::aterm_appl& x, const atermpp::vector<pfnf_visitor_quantifier>& quantifiers_, const atermpp::vector<pfnf_visitor_implication>& implications_)
+    : expr(x),
+      quantifiers(quantifiers_),
+      implications(implications_)
+  {}
+
+  pfnf_visitor_expression(const atermpp::aterm_appl& x)
+    : expr(x)
+  {}
+
+  // applies a substitution to variables
+  void substitute(const variable_variable_substitution& sigma)
+  {
+    for (atermpp::vector<pfnf_visitor_quantifier>::iterator i = quantifiers.begin(); i != quantifiers.end(); ++i)
+    {
+      i->second = sigma(i->second);
+    }
+    for (atermpp::vector<pfnf_visitor_implication>::iterator i = implications.begin(); i != implications.end(); ++i)
+    {
+      i->substitute(sigma);
+    }
+    expr = pbes_system::replace_free_variables(expr, variable_data_expression_substitution(sigma));
+  }
+
+  void mark()
+  {
+  	expr.mark();
+  }
+  
+  void protect()
+  {
+  	expr.protect();
+  }
+  
+  void unprotect()
+  {
+  	expr.unprotect();
+  }
+};
+
+} // namespace detail
+
+} // namespace pbes_system
+
+} // namespace mcrl2
+
+namespace atermpp
+{
+
+template<>
+struct aterm_traits<mcrl2::pbes_system::detail::pfnf_visitor_quantifier>
+{
+  typedef ATermAppl aterm_type;
+
+  static void protect(mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
+  {
+    t.second.protect();
+  }
+
+  static void unprotect(mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
+  {
+    t.second.unprotect();
+  }
+
+  static void mark(mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
+  {
+    t.second.mark();
+  }
+};
+
+template<>
+struct aterm_traits<mcrl2::pbes_system::detail::pfnf_visitor_implication>
+{
+  typedef ATermAppl aterm_type;
+
+  static void protect(mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
+  {
+    t.protect();
+  }
+
+  static void unprotect(mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
+  {
+    t.unprotect();
+  }
+
+  static void mark(mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
+  {
+    t.mark();
+  }
+};
+
+template<>
+struct aterm_traits<mcrl2::pbes_system::detail::pfnf_visitor_expression>
+{
+  typedef ATermAppl aterm_type;
+
+  static void protect(mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
+  {
+    t.protect();
+  }
+
+  static void unprotect(mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
+  {
+    t.unprotect();
+  }
+
+  static void mark(mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
+  {
+    t.mark();
+  }
+};
+
+} // namespace atermpp
 
 namespace mcrl2
 {
@@ -57,135 +289,17 @@ struct pfnf_visitor: public pbes_expression_visitor<pbes_expression>
     typedef pbes_expression_visitor<pbes_expression> super;
     typedef core::term_traits<pbes_expression> tr;
 
-    /// \brief Represents a quantifier Qv:V. If the bool is true it is a forall, otherwise an exists.
-    typedef std::pair<bool, data::variable_list> quantifier;
-
-    struct variable_variable_substitution: public std::unary_function<data::variable, data::variable>
-    {
-      atermpp::map<data::variable, data::variable> sigma;
-
-      data::variable operator()(const data::variable& v) const
-      {
-        atermpp::map<data::variable, data::variable>::const_iterator i = sigma.find(v);
-        if (i == sigma.end())
-        {
-          return v;
-        }
-        return i->second;
-      }
-
-      data::variable_list operator()(const data::variable_list& v) const
-      {
-        atermpp::vector<data::variable> result;
-        for (data::variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
-        {
-          result.push_back((*this)(*i));
-        }
-        return atermpp::convert<data::variable_list>(result);
-      }
-      
-      std::string to_string() const
-      {
-        std::ostringstream out;
-        out << "[";
-        for (atermpp::map<data::variable, data::variable>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
-        {
-          if (i != sigma.begin())
-          {
-            out << ", ";
-          }
-          out << core::pp(i->first) << " := " << core::pp(i->second);
-        }
-        out << "]";
-        return out.str();
-      }
-    };
-
-    struct variable_data_expression_substitution: public std::unary_function<data::variable, data::data_expression>
-    {
-      typedef data::variable variable_type;
-      typedef data::data_expression expression_type;
-
-      const variable_variable_substitution& sigma;
-
-      variable_data_expression_substitution(const variable_variable_substitution& sigma_)
-        : sigma(sigma_)
-      {}
-
-      data::data_expression operator()(const data::variable& v) const
-      {
-        return sigma(v);
-      }
-    };
-
-    /// \brief Represents the implication g => ( X0(e0) \/ ... \/ Xk(ek) )
-    // N.B. implication derives from pbes_expression to prevent garbage collection issues; of course this is very ugly
-    struct implication: public pbes_expression
-    {
-      std::vector<propositional_variable_instantiation> rhs;
-
-      implication(const atermpp::aterm_appl& x, const std::vector<propositional_variable_instantiation>& rhs_)
-        : pbes_expression(x),
-          rhs(rhs_)
-      {}
-
-      implication(const atermpp::aterm_appl& x)
-        : pbes_expression(x)
-      {}
-
-      // applies a substitution to variables
-      void substitute(const variable_variable_substitution& sigma)
-      {
-        for (std::vector<propositional_variable_instantiation>::iterator i = rhs.begin(); i != rhs.end(); ++i)
-        {
-          *i = pbes_system::replace_free_variables(*i, variable_data_expression_substitution(sigma));
-        }
-        static_cast<pbes_expression&>(*this) = pbes_system::replace_free_variables(static_cast<pbes_expression&>(*this), variable_data_expression_substitution(sigma));
-      }
-    };
-
-    // N.B. implication derives from pbes_expression to prevent garbage collection issues; of course this is very ugly
-    struct expression: public pbes_expression
-    {
-      std::vector<quantifier> quantifiers;
-      atermpp::vector<implication> implications;
-
-      expression(const atermpp::aterm_appl& x, const std::vector<quantifier>& quantifiers_, const atermpp::vector<implication>& implications_)
-        : pbes_expression(x),
-          quantifiers(quantifiers_),
-          implications(implications_)
-      {}
-
-      expression(const atermpp::aterm_appl& x)
-        : pbes_expression(x)
-      {}
-
-      // applies a substitution to variables
-      void substitute(const variable_variable_substitution& sigma)
-      {
-        for (std::vector<quantifier>::iterator i = quantifiers.begin(); i != quantifiers.end(); ++i)
-        {
-          i->second = sigma(i->second);
-        }
-        for (atermpp::vector<implication>::iterator i = implications.begin(); i != implications.end(); ++i)
-        {
-          i->substitute(sigma);
-        }
-        static_cast<pbes_expression&>(*this) = pbes_system::replace_free_variables(static_cast<pbes_expression&>(*this), variable_data_expression_substitution(sigma));
-      }
-    };
-
     // makes sure there are no name clashes between quantifier variables in left and right
     // TODO: the efficiency can be increased by maintaining some additional data structures
-    void resolve_name_clashes(expression& left, expression& right)
+    void resolve_name_clashes(pfnf_visitor_expression& left, pfnf_visitor_expression& right)
     {
       std::set<data::variable> left_variables;
       std::set<data::variable> name_clashes;
-      for (std::vector<quantifier>::const_iterator i = left.quantifiers.begin(); i != left.quantifiers.end(); ++i)
+      for (atermpp::vector<pfnf_visitor_quantifier>::const_iterator i = left.quantifiers.begin(); i != left.quantifiers.end(); ++i)
       {
         left_variables.insert(i->second.begin(), i->second.end());
       }
-      for (std::vector<quantifier>::const_iterator j = right.quantifiers.begin(); j != right.quantifiers.end(); ++j)
+      for (atermpp::vector<pfnf_visitor_quantifier>::const_iterator j = right.quantifiers.begin(); j != right.quantifiers.end(); ++j)
       {
         std::set_intersection(left_variables.begin(), left_variables.end(), j->second.begin(), j->second.end(), std::inserter(name_clashes, name_clashes.end()));
       }
@@ -216,23 +330,23 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
       }
     }
 
-    pbes_expression and_(const expression& left, const expression& right) const
+    pbes_expression and_(const pfnf_visitor_expression& left, const pfnf_visitor_expression& right) const
     {
-      return core::optimized_and(static_cast<const pbes_expression&>(left), static_cast<const pbes_expression&>(right));
+      return core::optimized_and(left.expr, right.expr);
     }
 
-    pbes_expression or_(const expression& left, const expression& right) const
+    pbes_expression or_(const pfnf_visitor_expression& left, const pfnf_visitor_expression& right) const
     {
-      return core::optimized_or(static_cast<const pbes_expression&>(left), static_cast<const pbes_expression&>(right));
+      return core::optimized_or(left.expr, right.expr);
     }
 
-    pbes_expression not_(const expression& x) const
+    pbes_expression not_(const pfnf_visitor_expression& x) const
     {
-      return core::optimized_not(static_cast<const pbes_expression&>(x));
+      return core::optimized_not(x.expr);
     }
 
     /// \brief A stack containing expressions in PFNF format.
-    atermpp::vector<expression> expression_stack;
+    atermpp::vector<pfnf_visitor_expression> expression_stack;
 
     /// \brief A stack containing quantifier variables.
     std::vector<data::variable_list> quantifier_stack;
@@ -242,18 +356,17 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     pbes_expression evaluate() const
     {
       assert(!expression_stack.empty());
-      const expression& expr = expression_stack.back();
-      const std::vector<quantifier>& q = expr.quantifiers;
-      pbes_expression h = expr;
-      const atermpp::vector<implication>& g = expr.implications;
+      const pfnf_visitor_expression& expr = expression_stack.back();
+      const atermpp::vector<pfnf_visitor_quantifier>& q = expr.quantifiers;
+      pbes_expression h = expr.expr;
+      const atermpp::vector<pfnf_visitor_implication>& g = expr.implications;
       pbes_expression result = h;
-      for (atermpp::vector<implication>::const_iterator i = g.begin(); i != g.end(); ++i)
+      for (atermpp::vector<pfnf_visitor_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
         pbes_expression x = std::accumulate(i->rhs.begin(), i->rhs.end(), tr::false_(), &core::optimized_or<pbes_expression>);
-        pbes_expression y = *i;
-        result = core::optimized_and(result, core::optimized_imp(y, x));
+        result = core::optimized_and(result, core::optimized_imp(i->g, x));
       }
-      for (std::vector<quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
+      for (atermpp::vector<pfnf_visitor_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
       {
         result = i->first ? tr::forall(i->second, result) : tr::exists(i->second, result);
       }
@@ -262,19 +375,19 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
 
     /// \brief Prints an expression
     /// \param expr An expression
-    void print_expression(const expression& expr) const
+    void print_expression(const pfnf_visitor_expression& expr) const
     {
-      const std::vector<quantifier>& q = expr.quantifiers;
-      pbes_expression h = expr;
-      const atermpp::vector<implication>& g = expr.implications;
-      for (std::vector<quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
+      const atermpp::vector<pfnf_visitor_quantifier>& q = expr.quantifiers;
+      pbes_expression h = expr.expr;
+      const atermpp::vector<pfnf_visitor_implication>& g = expr.implications;
+      for (atermpp::vector<pfnf_visitor_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
       {
         std::cout << (i->first ? "forall " : "exists ") << core::pp(i->second) << " ";
       }
       std::cout << (q.empty() ? "" : " . ") << core::pp(h) << "\n";
-      for (atermpp::vector<implication>::const_iterator i = g.begin(); i != g.end(); ++i)
+      for (atermpp::vector<pfnf_visitor_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
-        std::cout << " /\\ " << core::pp(*i) << " => ";
+        std::cout << " /\\ " << core::pp(i->g) << " => ";
         if (i->rhs.empty())
         {
           std::cout << "true";
@@ -282,7 +395,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
         else
         {
           std::cout << "( ";
-          for (std::vector<propositional_variable_instantiation>::const_iterator j = i->rhs.begin(); j != i->rhs.end(); ++j)
+          for (atermpp::vector<propositional_variable_instantiation>::const_iterator j = i->rhs.begin(); j != i->rhs.end(); ++j)
           {
             if (j != i->rhs.begin())
             {
@@ -302,7 +415,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     void print(std::string msg = "") const
     {
       std::cout << "--- " << msg << std::endl;
-      for (atermpp::vector<expression>::const_iterator i = expression_stack.begin(); i != expression_stack.end(); ++i)
+      for (atermpp::vector<pfnf_visitor_expression>::const_iterator i = expression_stack.begin(); i != expression_stack.end(); ++i)
       {
         print_expression(*i);
       }
@@ -314,7 +427,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     /// \return The result of visiting the node
     bool visit_data_expression(const pbes_expression& e, const data::data_expression& /* d */)
     {
-      expression_stack.push_back(expression(e));
+      expression_stack.push_back(pfnf_visitor_expression(e));
       return super::continue_recursion;
     }
 
@@ -323,7 +436,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     /// \return The result of visiting the node
     bool visit_true(const pbes_expression& e)
     {
-      expression_stack.push_back(expression(e));
+      expression_stack.push_back(pfnf_visitor_expression(e));
       return super::continue_recursion;
     }
 
@@ -332,7 +445,7 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     /// \return The result of visiting the node
     bool visit_false(const pbes_expression& e)
     {
-      expression_stack.push_back(expression(e));
+      expression_stack.push_back(pfnf_visitor_expression(e));
       return super::continue_recursion;
     }
 
@@ -349,64 +462,64 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     void leave_and()
     {
       // join the two expressions on top of the stack
-      expression right = expression_stack.back();
+      pfnf_visitor_expression right = expression_stack.back();
       expression_stack.pop_back();
-      expression left  = expression_stack.back();
+      pfnf_visitor_expression left  = expression_stack.back();
       expression_stack.pop_back();
       resolve_name_clashes(left, right);
-      std::vector<quantifier> q = concat(left.quantifiers, right.quantifiers);
+      atermpp::vector<pfnf_visitor_quantifier> q = concat(left.quantifiers, right.quantifiers);
       pbes_expression h = and_(left, right);
-      atermpp::vector<implication> g = concat(left.implications, right.implications);
-//std::cout << "AND RESULT\n"; print_expression(expression(h, q, g));
-      expression_stack.push_back(expression(h, q, g));
+      atermpp::vector<pfnf_visitor_implication> g = concat(left.implications, right.implications);
+//std::cout << "AND RESULT\n"; print_expression(pfnf_visitor_expression(h, q, g));
+      expression_stack.push_back(pfnf_visitor_expression(h, q, g));
     }
 
     /// \brief Leave or node
     void leave_or()
     {
       // join the two expressions on top of the stack
-      expression right = expression_stack.back();
+      pfnf_visitor_expression right = expression_stack.back();
       expression_stack.pop_back();
-      expression left  = expression_stack.back();
+      pfnf_visitor_expression left  = expression_stack.back();
       expression_stack.pop_back();
       resolve_name_clashes(left, right);
 
-      std::vector<quantifier> q = concat(left.quantifiers, right.quantifiers);
+      atermpp::vector<pfnf_visitor_quantifier> q = concat(left.quantifiers, right.quantifiers);
 
-      pbes_expression h_phi = left;
-      pbes_expression h_psi = right;
+      pbes_expression h_phi = left.expr;
+      pbes_expression h_psi = right.expr;
       pbes_expression h = or_(h_phi, h_psi);
 
-      pbes_expression not_h_phi = not_(left);
-      pbes_expression not_h_psi = not_(right);
+      pbes_expression not_h_phi = not_(left.expr);
+      pbes_expression not_h_psi = not_(right.expr);
 
-      const atermpp::vector<implication>& q_phi = left.implications;
-      const atermpp::vector<implication>& q_psi = right.implications;
+      const atermpp::vector<pfnf_visitor_implication>& q_phi = left.implications;
+      const atermpp::vector<pfnf_visitor_implication>& q_psi = right.implications;
 
-      atermpp::vector<implication> g;
+      atermpp::vector<pfnf_visitor_implication> g;
 
       // first conjunction
-      for (atermpp::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
+      for (atermpp::vector<pfnf_visitor_implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
       {
-        g.push_back(implication(and_(not_h_psi, *i), i->rhs));
+        g.push_back(pfnf_visitor_implication(and_(not_h_psi, i->g), i->rhs));
       }
 
       // second conjunction
-      for (atermpp::vector<implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
+      for (atermpp::vector<pfnf_visitor_implication>::const_iterator i = q_psi.begin(); i != q_psi.end(); ++i)
       {
-        g.push_back(implication(and_(not_h_phi, *i), i->rhs));
+        g.push_back(pfnf_visitor_implication(and_(not_h_phi, i->g), i->rhs));
       }
 
       // third conjunction
-      for (atermpp::vector<implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
+      for (atermpp::vector<pfnf_visitor_implication>::const_iterator i = q_phi.begin(); i != q_phi.end(); ++i)
       {
-        for (atermpp::vector<implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
+        for (atermpp::vector<pfnf_visitor_implication>::const_iterator k = q_psi.begin(); k != q_psi.end(); ++k)
         {
-          g.push_back(implication(and_(*i, *k), concat(i->rhs, k->rhs)));
+          g.push_back(pfnf_visitor_implication(and_(i->g, k->g), concat(i->rhs, k->rhs)));
         }
       }
-//std::cout << "OR RESULT\n"; print_expression(expression(h, q, g));
-      expression_stack.push_back(expression(h, q, g));
+//std::cout << "OR RESULT\n"; print_expression(pfnf_visitor_expression(h, q, g));
+      expression_stack.push_back(pfnf_visitor_expression(h, q, g));
     }
 
     /// \brief Visit imp node
@@ -461,10 +574,10 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
     bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& X)
     {
       // push the propositional variable on the expression stack
-      std::vector<quantifier> q;
+      atermpp::vector<pfnf_visitor_quantifier> q;
       pbes_expression h = tr::true_();
-      atermpp::vector<implication> g(1, implication(tr::true_(), std::vector<propositional_variable_instantiation>(1, X)));
-      expression_stack.push_back(expression(h, q, g));
+      atermpp::vector<pfnf_visitor_implication> g(1, pfnf_visitor_implication(tr::true_(), atermpp::vector<propositional_variable_instantiation>(1, X)));
+      expression_stack.push_back(pfnf_visitor_expression(h, q, g));
       return super::continue_recursion;
     }
 };
