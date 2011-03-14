@@ -133,6 +133,7 @@ void Options::OnTypeCheck(wxCommandEvent& /*event*/)
 
 void Options::SolveExpr(wxCommandEvent& /*e*/)
 {
+  using namespace mcrl2::data;
   p_output->Clear();
 
   wxString dataexpr = sd->getDataExprSolve();
@@ -166,15 +167,20 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
       throw mcrl2::runtime_error(p_output->PrintTime()+"Expression is not of sort Bool.");
     }
 
-    mcrl2::data::rewriter rewr(spec.data(),m_rewrite_strategy);
+    rewriter rewr(spec.data(),m_rewrite_strategy);
     term=rewr(term);
 
-    mcrl2::data::enumerator_factory < mcrl2::data::classic_enumerator<> > e(spec.data(),rewr);
-    for (mcrl2::data::classic_enumerator< > i =
+    enumerator_factory < classic_enumerator< mutable_map_substitution< >,
+                                             rewriter,
+                                             selectors::select_not< false > > > e(spec.data(),rewr);
+    for (classic_enumerator< mutable_map_substitution< >,
+                             rewriter,
+                             selectors::select_not< false > > i =
            e.make(atermpp::convert < std::set <mcrl2::data::variable > >(vars),rewr,term);
-         i != mcrl2::data::classic_enumerator<>() ; ++i)
+         i != classic_enumerator< mutable_map_substitution< >,
+                                  rewriter,
+                                  selectors::select_not< false > >() ; ++i)
     {
-
       p_solutions->AppendText(wxT("["));
       for (atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
       {

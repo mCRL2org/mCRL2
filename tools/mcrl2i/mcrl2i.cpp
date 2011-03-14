@@ -193,7 +193,9 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
       rewriter rewr(spec,m_rewrite_strategy);
-      enumerator_factory < classic_enumerator<> > e(spec,rewr);
+      enumerator_factory < classic_enumerator< mutable_map_substitution< >,
+                                     rewriter,
+                                     selectors::select_not< false > > > e(spec,rewr);
       atermpp::set < variable > context_variables;
       atermpp::map < variable, data_expression > assignments;
 
@@ -273,10 +275,15 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             {
               throw mcrl2::runtime_error("expression is not of sort Bool.");
             }
+
             term=rewr(term);
-            for (classic_enumerator< > i =
-                   e.make(atermpp::convert < std::set <variable > >(vars),rewr,term);
-                 i != classic_enumerator<>() ; ++i)
+            for (classic_enumerator< mutable_map_substitution< >,
+                                     rewriter,
+                                     selectors::select_not< false > > 
+                 i=e.make(atermpp::convert < std::set <variable > >(vars),rewr,term);
+                 i != classic_enumerator< mutable_map_substitution< >,
+                                          rewriter,
+                                          selectors::select_not< false > >() ; ++i)
             {
               cout << "[";
               for (atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)

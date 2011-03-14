@@ -160,7 +160,8 @@ class classic_enumerator_impl
       m_shared_context(context),
       m_generator(m_shared_context->m_enumerator.getInfo()),
       m_evaluator(context->m_evaluator),
-      m_condition(c), m_substitution(s)
+      m_condition(c), 
+      m_substitution(s)
     {
       m_condition.protect();
     }
@@ -169,7 +170,6 @@ class classic_enumerator_impl
     template < typename Container >
     bool initialise(Container const& v, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
     {
-      m_condition=(data_expression)(m_evaluator.get_rewriter()).rewrite((ATermAppl)m_condition);
       // Changed one but last argument into true JFG 7/12/2009. And changed it back to false on 8/12/2009.
       // Tools like lpssuminst require that an enumeration is made for all elements satisfying the condition,
       // except for those where the condition is false.
@@ -221,9 +221,10 @@ class classic_enumerator_impl
             m_evaluator.convert_from((*i)(1));
         }
         // Only do filtering, termination detection is taken care of by underlying implementation
+        
         if (Selector::test(m_evaluator(m_condition, m_substitution)))
         {
-          return true;
+           return true;
         }
       }
 
