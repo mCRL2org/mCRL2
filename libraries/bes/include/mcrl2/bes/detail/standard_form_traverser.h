@@ -37,6 +37,47 @@ enum standard_form_type
 
 typedef std::pair<boolean_expression, standard_form_type> standard_form_pair;
 
+} // namespace detail
+
+} // namespace bes
+
+} // namespace mcrl2
+
+namespace atermpp
+{
+
+template<>
+struct aterm_traits<mcrl2::bes::detail::standard_form_pair>
+{
+  typedef ATermAppl aterm_type;
+
+  static void protect(mcrl2::bes::detail::standard_form_pair& t)
+  {
+    t.first.protect();
+  }
+
+  static void unprotect(mcrl2::bes::detail::standard_form_pair& t)
+  {
+    t.first.unprotect();
+  }
+
+  static void mark(mcrl2::bes::detail::standard_form_pair& t)
+  {
+    t.first.mark();
+  }
+};
+
+} // namespace atermpp
+
+namespace mcrl2
+{
+
+namespace bes
+{
+
+namespace detail
+{
+
 /// \brief Traverser that implements the standard form normalization.
 class standard_form_traverser: public bes::boolean_expression_traverser<standard_form_traverser>
 {
@@ -67,7 +108,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     core::number_postfix_generator m_generator;
 
     /// \brief A stack containing sub-terms.
-    std::vector<standard_form_pair> m_expression_stack;
+    atermpp::vector<standard_form_pair> m_expression_stack;
 
     /// \brief A vector containing generated equations.
     atermpp::vector<boolean_equation> m_equations;
