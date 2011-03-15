@@ -237,9 +237,9 @@ endif( NOT MCRL2_ARCH )
 if( MCRL2_ARCH STREQUAL "i386" )
   if( UNIX )
     message( STATUS "Architecture: 32bit Unix" )
-#    set(ATERM_FLAGS "-m32")
-#    add_definitions( "-m32" )
-#    set( CMAKE_LINKER_FLAGS "${CMAKE_LINKER_FLAGS}"  )
+    set(ATERM_FLAGS "-m32")
+		set(CMAKE_C_FLAGS "-m32 -march=i386") 
+		set(CMAKE_CXX_FLAGS "-m32 -march=i386") 
   endif( UNIX )
 endif( MCRL2_ARCH STREQUAL "i386" )
 
@@ -640,26 +640,43 @@ set(MCRL2_TEST_LABEL "rev.${SVN_REV}-${CMAKE_BUILD_TYPE}")
 option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable CADP support" OFF)
 message(STATUS "MCRL2_ENABLE_CADP_SUPPORT: ${MCRL2_ENABLE_CADP_SUPPORT}" )
 if(MCRL2_ENABLE_CADP_SUPPORT )
-  set(USE_BCG "")
-  add_definitions( "-DUSE_BCG" )
   # Set location to root of CADP install path
   set(MCRL2_CADP_INSTALL_PATH ""
       CACHE PATH "Path to CADP install path." )
-  # Override CADP include directory 
-  set(MCRL2_CADP_INCLUDE_PATH ""
-      CACHE PATH "Override path if \"incl\" directory is other than ${MCRL2_CADP_INSTALL_PATH}/incl " )
   message( STATUS "MCRL2_CADP_INSTALL_PATH: ${MCRL2_CADP_INSTALL_PATH}" )
- if(MCRL2_CADP_INCLUDE_PATH)
-   include_directories( "${MCRL2_CADP_INCLUDE_PATH}" )
- else( MCRL2_CADP_INCLUDE_PATH )
-   include_directories( "${MCRL2_CADP_INSTALL_PATH}/incl" )
- endif( MCRL2_CADP_INCLUDE_PATH )
 
- link_directories("${MCRL2_CADP_INSTALL_PATH}" )
+  # Set location to root of CADP install path
 
- add_library(imp_bcg STATIC IMPORTED)
- set_property(TARGET imp_bcg PROPERTY
-                IMPORTED_LOCATION ${MCRL2_CADP_INSTALL_PATH}/libBCG.a)
+	if( MCRL2_CADP_INSTALL_PATH )
+  execute_process(COMMAND ${MCRL2_CADP_INSTALL_PATH}/com/arch
+		OUTPUT_VARIABLE MCRL2_CADP_ARCHICTECTURE
+    OUTPUT_STRIP_TRAILING_WHITESPACE 
+  )
+	endif( MCRL2_CADP_INSTALL_PATH )
+
+	if( MCRL2_CADP_ARCHICTECTURE )
+
+		set(USE_BCG "")
+    add_definitions( "-DUSE_BCG" )
+
+	  set(MCRL2_CADP_BINARY_DIR  "${MCRL2_CADP_INSTALL_PATH}/bin.${MCRL2_CADP_ARCHICTECTURE}" )
+	  set(MCRL2_CADP_INCLUDE_DIR "${MCRL2_CADP_INSTALL_PATH}/incl" )
+
+	  include_directories( ${MCRL2_CADP_INCLUDE_DIR} )	
+		link_directories(${MCRL2_CADP_BINARY_DIR})
+
+		add_library(imp_bcg STATIC IMPORTED)
+		set_property(TARGET imp_bcg PROPERTY
+		            IMPORTED_LOCATION ${MCRL2_CADP_BINARY_DIR}/libBCG.a)
+		add_library(imp_bcg_io STATIC IMPORTED)
+		set_property(TARGET imp_bcg_io PROPERTY
+						    IMPORTED_LOCATION ${MCRL2_CADP_BINARY_DIR}/libBCG_IO.a)
+		message( STATUS "CADP found: ${MCRL2_CADP_BINARY_DIR}")
+ 
+  else( MCRL2_CADP_ARCHICTECTURE  )
+		message( STATUS "CADP not found")
+    set( USE_BCG "//" )
+	endif( MCRL2_CADP_ARCHICTECTURE )
 
 else(MCRL2_ENABLE_CADP_SUPPORT)
   set( USE_BCG "//" )

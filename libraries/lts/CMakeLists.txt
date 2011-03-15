@@ -62,11 +62,13 @@ target_link_libraries(${PROJECT_NAME}
   svc
 )
 
-if( MCRL2_ENABLE_CADP_SUPPORT )
+if( USE_BCG STREQUAL "" )
+  include_directories( ${MCRL2_CADP_INCLUDE_DIR} )	
   target_link_libraries(${PROJECT_NAME}
+		imp_bcg_io
     imp_bcg
   )
-endif( MCRL2_ENABLE_CADP_SUPPORT )
+endif( USE_BCG STREQUAL "" )
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
