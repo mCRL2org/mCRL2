@@ -471,7 +471,7 @@ action translate_user_notation_and_normalise_sorts_action(
   const action &a,
   data::data_specification& data_spec)
 {
-  return lps::translate_user_notation(lps::normalize_sorts(a,data_spec));
+  return lps::normalize_sorts(lps::translate_user_notation(a),data_spec);
 }
 
 action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(
@@ -498,7 +498,7 @@ action_rename_specification translate_user_notation_and_normalise_sorts_action_r
        i!=l.end(); ++i)
   {
     *i = action_rename_rule(data::normalize_sorts(i->variables(),data_spec),
-                            data::translate_user_notation(data::normalize_sorts(i->condition(),data_spec)),
+                            data::normalize_sorts(data::translate_user_notation(i->condition()),data_spec),
                             translate_user_notation_and_normalise_sorts_action(i->lhs(),data_spec),
                             translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(i->rhs(),data_spec));
   }

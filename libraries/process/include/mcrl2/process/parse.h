@@ -50,8 +50,8 @@ process_specification parse_process_specification(
   {
     apply_alphabet_reduction(result);
   }
-  process::normalize_sorts(result, result.data());
   process::translate_user_notation(result);
+  process::normalize_sorts(result, result.data());
 
   return result;
 }

@@ -308,8 +308,8 @@ data_expression parse_data_expression(std::istream& text,
   // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
   data_expression t(data_expr);
   type_check(t, begin, end, data_spec);
-  t = data::normalize_sorts(t, data_spec);
   t = data::translate_user_notation(t);
+  t = data::normalize_sorts(t, data_spec);
   return t;
 }
 
