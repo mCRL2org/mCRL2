@@ -94,8 +94,22 @@ set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" )
 
 # Variables required for an additional build type "Maintainer"
 
-set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Woverloaded-virtual -Wwrite-strings -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the C++ compiler during maintainer builds." FORCE)
-set(CMAKE_C_FLAGS_MAINTAINER "-g -O0 -Wall -pedantic -W -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the C compiler during maintainer builds." FORCE)
+include(CheckCXXCompilerFlag)
+
+check_cxx_compiler_flag(-fprofile-arcs CXX_ACCEPTS_PROFILE_ARCS )
+check_cxx_compiler_flag(-ftest-coverage CXX_ACCEPTS_TEST_COVERAGE )
+
+set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Woverloaded-virtual -Wwrite-strings" CACHE STRING "Flags used by the C++ compiler during maintainer builds." FORCE)
+set(CMAKE_C_FLAGS_MAINTAINER "-g -O0 -Wall -pedantic -W" CACHE STRING "Flags used by the C compiler during maintainer builds." FORCE)
+if(CXX_ACCEPTS_PROFILE_ARCS)
+  set(CMAKE_CXX_FLAGS_MAINTAINER "${CMAKE_CXX_FLAGS_MAINTAINER} -fprofile-arcs")
+  set(CMAKE_C_FLAGS_MAINTAINER "${CMAKE_C_FLAGS_MAINTAINER} -fprofile-arcs")
+endif(CXX_ACCEPTS_PROFILE_ARCS)
+if(CXX_ACCEPTS_TEST_COVERAGE)
+  set(CMAKE_CXX_FLAGS_MAINTAINER "${CMAKE_CXX_FLAGS_MAINTAINER} -ftest-coverage")
+  set(CMAKE_C_FLAGS_MAINTAINER "${CMAKE_C_FLAGS_MAINTAINER} -ftest-coverage")
+endif(CXX_ACCEPTS_TEST_COVERAGE)
+
 set(CMAKE_EXE_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used for linking binaries during maintainer builds." FORCE)
 set(CMAKE_SHARED_LINKER_FLAGS_MAINTAINER "-Wl,--warn-unresolved-symbols,--warn-once -fprofile-arcs -ftest-coverage" CACHE STRING "Flags used by the shared libraries linker during maintainer builds." FORCE)
 mark_as_advanced(
@@ -132,7 +146,6 @@ endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE} " )
 
-include(CheckCXXCompilerFlag)
 if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
   ##---------------------------------------------------
