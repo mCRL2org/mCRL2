@@ -93,8 +93,8 @@ class gauss_elimination_algorithm : public core::algorithm
         for (Iter j = first; j != i; ++j)
         {
           j->formula() = ExpressionTraits::substitute(j->formula(), i->variable(), i->formula());
-          LOG_EQUATIONS(3, "equations after substitution\n", first, last);
         }
+        LOG_EQUATIONS(3, "equations after substitution\n", first, last);
       }
       LOG_EQUATIONS(2, "equations after solving\n", first, last);
     }
