@@ -34,12 +34,6 @@ static bool initialised = initialise();
 
 static void read_from_bcg(lts_bcg_t& l, const string& filename)
 {
-  string::size_type pos = filename.rfind('.');
-  if ((pos == string::npos) || (filename.substr(pos+1) != "bcg"))
-  {
-    throw mcrl2::runtime_error("cannot open BCG file without '.bcg' extension");
-  }
-
   BCG_TYPE_OBJECT_TRANSITION bcg_graph;
 
   BCG_OT_READ_BCG_SURVIVE(BCG_TRUE);
