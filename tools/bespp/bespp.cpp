@@ -99,8 +99,8 @@ class bespp_tool: public input_output_tool
         }
         else
         {
-          atermpp::aterm_appl b(bes);
-          std::cout << core::pp(bes, format);
+          atermpp::aterm_appl b = boolean_equation_system_to_aterm(bes);
+          std::cout << core::pp(b, format);
         }
       }
       else
@@ -114,8 +114,8 @@ class bespp_tool: public input_output_tool
           }
           else
           {
-            atermpp::aterm_appl b(bes);
-            output_stream << core::pp(bes, format);
+            atermpp::aterm_appl b = boolean_equation_system_to_aterm(bes);
+            output_stream << core::pp(b, format);
           }
           output_stream.close();
         }
