@@ -1,1 +1,0 @@
-mu X . <WhiteWins>true || (!WhiteMoves || exists x,y:Pos. <WhiteMoves(x,y)>X)

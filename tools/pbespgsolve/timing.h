@@ -14,10 +14,10 @@
 extern "C" {
 #endif
 
-void time_initialize();     /* initialize the timer */
-void time_pause();          /* pause the timer */
-double time_resume();       /* resume the timer; reports time waited */
-double time_used();         /* number of seconds used */
+  void time_initialize();     /* initialize the timer */
+  void time_pause();          /* pause the timer */
+  double time_resume();       /* resume the timer; reports time waited */
+  double time_used();         /* number of seconds used */
 
 #ifdef __cplusplus
 }

@@ -14,6 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 set(PREFIX "example_atermpp")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
 
 ##---------------------------------------------------
@@ -27,15 +28,9 @@ add_executable("${PROJECT_NAME}"
       std_container.cpp
 )
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    aterm 
 )
-endif( MCRL2_MONO_LIB )
 
 ##---------------------------------------------------
 ## Example algorithm 
@@ -48,12 +43,6 @@ add_executable("${PROJECT_NAME}"
       algorithm.cpp 
 )
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    aterm 
 )
-endif( MCRL2_MONO_LIB )

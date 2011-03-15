@@ -13,18 +13,18 @@
 #define VISUALIZER_H
 
 #ifndef LTSGRAPH_H
-  #include "ltsgraph.h"
+#include "ltsgraph.h"
 #else
-  class LTSGraph;
+class LTSGraph;
 #endif
 #include "state.h"
 #include "mcrl2/utilities/font_renderer.h"
 
 #ifndef __glu_h__
 #ifdef __APPLE__
-  #include <OpenGL/glu.h>
+#include <OpenGL/glu.h>
 #else
-  #include <GL/glu.h>
+#include <GL/glu.h>
 #endif
 #endif
 
@@ -64,7 +64,7 @@ class Visualizer
     bool showStateVector;
     bool draw3d;
 
-    GLUquadricObj *quadratic;	
+    GLUquadricObj* quadratic;
 
     void drawStates(bool inSelectMode);
     // Draws a single state s
@@ -73,20 +73,20 @@ class Visualizer
     // Draws a single transition, from its in to its out transition
     void drawTransition(Transition* t, size_t trid, bool inSelectMode);
 
-  	// Draws the transition label
-	  void drawTransLabel(Transition* t, size_t trid, bool inSelectMode);
+    // Draws the transition label
+    void drawTransLabel(Transition* t, size_t trid, bool inSelectMode);
 
-	  // Draws the state label and vector
-	  void drawStateText(State* s);
+    // Draws the state label and vector
+    void drawStateText(State* s);
 
     // Draws a self-loop, a transition from a state to itself
     void drawSelfLoop(Transition* t, size_t trid, bool inSelectMode);
 
-	  // Draws an arrow head in 3d
+    // Draws an arrow head in 3d
     void drawArrowHead3d(double baseLength);
 
-	  // Draws an arrow head
-	  void drawArrowHead(double baseLength);
+    // Draws an arrow head
+    void drawArrowHead(double baseLength);
 
     mcrl2::utilities::wx::font_renderer* fr;
 };

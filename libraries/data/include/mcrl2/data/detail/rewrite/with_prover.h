@@ -16,44 +16,47 @@
 #include <mcrl2/data/detail/bdd_prover.h>
 #include "mcrl2/data/rewriter.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
 class RewriterProver: public Rewriter
 {
-	public:
-		RewriterProver(const data_specification &DataSpec, mcrl2::data::rewriter::strategy strat);
-		~RewriterProver();
+  public:
+    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat);
+    ~RewriterProver();
 
-		mcrl2::data::detail::RewriteStrategy getStrategy();
+    mcrl2::data::detail::RewriteStrategy getStrategy();
 
-		ATermAppl rewrite(ATermAppl Term);
+    ATermAppl rewrite(ATermAppl Term);
 
-		ATerm toRewriteFormat(ATermAppl Term);
-		ATermAppl fromRewriteFormat(ATerm Term);
-		ATerm rewriteInternal(ATerm Term);
+    ATerm toRewriteFormat(ATermAppl Term);
+    ATermAppl fromRewriteFormat(ATerm Term);
+    ATerm rewriteInternal(ATerm Term);
 
-		bool addRewriteRule(ATermAppl Rule);
-		bool removeRewriteRule(ATermAppl Rule);
+    bool addRewriteRule(ATermAppl Rule);
+    bool removeRewriteRule(ATermAppl Rule);
 
-		void setSubstitution(ATermAppl Var, ATermAppl Expr);
-		void setSubstitutionList(ATermList Substs);
-		void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
-		void setSubstitutionInternalList(ATermList Substs);
-		ATermAppl getSubstitution(ATermAppl Var);
-		ATerm getSubstitutionInternal(ATermAppl Var);
-		void clearSubstitution(ATermAppl Var);
-		void clearSubstitutions();
-		void clearSubstitutions(ATermList Vars);
+    void setSubstitution(ATermAppl Var, ATermAppl Expr);
+    void setSubstitutionList(ATermList Substs);
+    void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
+    void setSubstitutionInternalList(ATermList Substs);
+    ATermAppl getSubstitution(ATermAppl Var);
+    ATerm getSubstitutionInternal(ATermAppl Var);
+    void clearSubstitution(ATermAppl Var);
+    void clearSubstitutions();
+    void clearSubstitutions(ATermList Vars);
 
-	public:
-		BDD_Prover *prover_obj;
-		Rewriter *rewr_obj;
+  public:
+    BDD_Prover* prover_obj;
+    Rewriter* rewr_obj;
 };
 
-    }
-  }
+}
+}
 }
 
 #endif

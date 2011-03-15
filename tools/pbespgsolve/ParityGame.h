@@ -31,17 +31,17 @@
 */
 struct ParityGameVertex
 {
-    unsigned char player, priority;
+  unsigned char player, priority;
 };
 
-inline bool operator== (const ParityGameVertex &a, const ParityGameVertex &b)
+inline bool operator== (const ParityGameVertex& a, const ParityGameVertex& b)
 {
-    return a.player == b.player && a.priority == b.priority;
+  return a.player == b.player && a.priority == b.priority;
 }
 
-inline bool operator!= (const ParityGameVertex &a, const ParityGameVertex &b)
+inline bool operator!= (const ParityGameVertex& a, const ParityGameVertex& b)
 {
-    return a.player != b.player || a.priority != b.priority;
+  return a.player != b.player || a.priority != b.priority;
 }
 
 
@@ -50,7 +50,7 @@ inline bool operator!= (const ParityGameVertex &a, const ParityGameVertex &b)
     Priorities are between 0 and `d` (exclusive). */
 class ParityGame
 {
-public:
+  public:
     /*! The two players in a parity game (Even and Odd) */
     enum Player { PLAYER_NONE = -1,
                   PLAYER_EVEN =  0,
@@ -77,8 +77,8 @@ public:
         random to players, and priority assigned uniformly between 0 and d-1.
         \sa void StaticGraph::make_random()
     */
-    void make_random( verti V, unsigned out_deg,
-                      StaticGraph::EdgeDirection edge_dir, int d );
+    void make_random(verti V, unsigned out_deg,
+                     StaticGraph::EdgeDirection edge_dir, int d);
 
 #if 0  // FIXME: remove this permanently if I don't need it anymore
 
@@ -92,9 +92,9 @@ public:
         \sa make_subgame(const ParityGame &, const verti *, verti)
 
     */
-    void make_subgame( const ParityGame &game,
-                       const verti *vertices, verti num_vertices,
-                       const Strategy &strategy );
+    void make_subgame(const ParityGame& game,
+                      const verti* vertices, verti num_vertices,
+                      const Strategy& strategy);
 
 #endif
 
@@ -107,8 +107,8 @@ public:
 
         \sa make_subgame(const ParityGame &, const verti *, verti, const Strategy &)
     */
-    void make_subgame( const ParityGame &game,
-                       const verti *vertices, verti num_vertices );
+    void make_subgame(const ParityGame& game,
+                      const verti* vertices, verti num_vertices);
 
     /*! Replaces the current game by its dual game, which uses the same game
         graph, but swaps players and changes priorities, such that the solution
@@ -131,65 +131,80 @@ public:
     void compress_priorities();
 
     /*! Read a game description in PGSolver format. */
-    void read_pgsolver( std::istream &is,
-        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL );
+    void read_pgsolver(std::istream& is,
+                       StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL);
 
     /*! Write a game description in PGSolver format. */
-    void write_pgsolver(std::ostream &os) const;
+    void write_pgsolver(std::ostream& os) const;
 
     /*! Read a game description from an mCRL2 PBES. */
-    void read_pbes( const std::string &file_path, verti *goal_vertex = 0,
-        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL );
+    void read_pbes(const std::string& file_path, verti* goal_vertex = 0,
+                   StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL);
 
     /*! Read raw parity game data from input stream */
-    void read_raw(std::istream &is);
+    void read_raw(std::istream& is);
 
     /*! Write raw parity game data to output stream */
-    void write_raw(std::ostream &os) const;
+    void write_raw(std::ostream& os) const;
 
     /*! Write a game description in Graphviz DOT format */
-    void write_dot(std::ostream &os) const;
+    void write_dot(std::ostream& os) const;
 
     /*! Write human-readable description of game to error stream (intended to
         be used while debugging only) */
-    void write_debug(std::ostream &os = std::cerr) const;
+    void write_debug(std::ostream& os = std::cerr) const;
 
     /*! Returns the memory used to store the parity game.
         This includes memory used by the graph! */
     size_t memory_use() const;
 
     /*! Return the priority limit d; all priorities must be in range [0:d) */
-    int d() const { return d_; }
+    int d() const
+    {
+      return d_;
+    }
 
     /*! Return the game graph */
-    const StaticGraph &graph() const { return graph_; }
+    const StaticGraph& graph() const
+    {
+      return graph_;
+    }
 
     /*! Return the priority associated with vertex v */
-    int priority(verti v) const { return vertex_[v].priority; }
+    int priority(verti v) const
+    {
+      return vertex_[v].priority;
+    }
 
     /*! Return the player associated with vertex v */
-    Player player(verti v) const { return (Player)vertex_[v].player; }
+    Player player(verti v) const
+    {
+      return (Player)vertex_[v].player;
+    }
 
     /*! Return the number of vertices with priority `p`.
         `p` must be between 0 and `d` (exclusive). */
-    verti cardinality(int p) const { return cardinality_[p]; }
+    verti cardinality(int p) const
+    {
+      return cardinality_[p];
+    }
 
     /*! Return the winner for vertex v according to strategy s. */
-    Player winner(const Strategy &s, verti v) const;
+    Player winner(const Strategy& s, verti v) const;
 
     /*! Returns whether the given strategy is valid (and thereby optimal) for
         both players. */
-    bool verify(const Strategy &s) const;
+    bool verify(const Strategy& s) const;
 
 #ifdef WITH_MCRL2
     /*! Generate a parity game from an mCRL2 PBES. */
     template <typename Container>
     void assign_pbes(
-        mcrl2::pbes_system::pbes<Container> &pbes, verti *goal_vertex = 0,
-        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL );
+      mcrl2::pbes_system::pbes<Container> &pbes, verti* goal_vertex = 0,
+      StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL);
 #endif
 
-protected:
+  protected:
     /*! Re-allocate memory to store information on V vertices with priorities
         between 0 and `d` (exclusive). */
     void reset(verti V, int d);
@@ -198,20 +213,20 @@ protected:
         `num_vertices` elements of `vertex_`. */
     void recalculate_cardinalities(verti num_vertices);
 
-private:
-    explicit ParityGame(const ParityGame &game);
-    ParityGame &operator=(const ParityGame &game);
+  private:
+    explicit ParityGame(const ParityGame& game);
+    ParityGame& operator=(const ParityGame& game);
 
-private:
+  private:
     int d_;                 /*!< priority limit (max. priority + 1) */
     StaticGraph graph_;     /*!< game graph */
 
     /*! Assignment of players and priorities to vertices (size graph_.V()) */
-    ParityGameVertex *vertex_;
+    ParityGameVertex* vertex_;
 
     /*! Cardinality counts for priorities.
         cardinality_[p] is equal to the number of vertices with priority p. */
-    verti *cardinality_;
+    verti* cardinality_;
 };
 
 #ifdef WITH_MCRL2

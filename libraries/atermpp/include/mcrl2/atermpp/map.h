@@ -18,7 +18,8 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "protaterm.h"          // IProtectedATerm
 
-namespace atermpp {
+namespace atermpp
+{
 
 /// \brief Protected map container.
 template<class Key, class T, class Compare = std::less<Key>, class Allocator = std::allocator<std::pair<const Key,T> > >
@@ -27,7 +28,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     map()
-     : IProtectedATerm()
+      : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -106,7 +107,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-std::cout << "atermpp::map.ATprotectTerms() : protecting " << std::map<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
+      std::cout << "atermpp::map.ATprotectTerms() : protecting " << std::map<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::map<Key, T, Compare, Allocator>::iterator i = std::map<Key, T, Compare, Allocator>::begin(); i != std::map<Key, T, Compare, Allocator>::end(); ++i)
       {
@@ -123,7 +124,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
   public:
     /// \brief Constructor.
     multimap()
-     : IProtectedATerm()
+      : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -202,7 +203,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-std::cout << "atermpp::multimap.ATprotectTerms() : protecting " << multimap<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
+      std::cout << "atermpp::multimap.ATprotectTerms() : protecting " << multimap<Key, T, Compare, Allocator>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::multimap<Key, T, Compare, Allocator>::iterator i = std::multimap<Key, T, Compare, Allocator>::begin(); i != std::multimap<Key, T, Compare, Allocator>::end(); ++i)
       {

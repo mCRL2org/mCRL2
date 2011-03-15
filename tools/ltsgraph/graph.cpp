@@ -25,7 +25,7 @@ Graph::Graph()
 
 Graph::~Graph()
 {
-  for(size_t i = 0; i < states.size(); ++i)
+  for (size_t i = 0; i < states.size(); ++i)
   {
     delete states[i];
   }
@@ -71,15 +71,16 @@ State* Graph::selectState(size_t s)
   }
 }
 
-void Graph::colourState(size_t s, wxColour colour) {
-  if(s < states.size())
+void Graph::colourState(size_t s, wxColour colour)
+{
+  if (s < states.size())
   {
     states[s]->setColour(colour);
   }
 }
 
 
-void Graph::setInfo(int is, int ns, int nt, int nl)
+void Graph::setInfo(size_t is, size_t ns, size_t nt, size_t nl)
 {
   initial = is;
   numStates = ns;
@@ -88,22 +89,22 @@ void Graph::setInfo(int is, int ns, int nt, int nl)
 }
 
 
-int Graph::getInitial() const
+size_t Graph::getInitial() const
 {
   return initial;
 }
 
-int Graph::getNumStates() const
+size_t Graph::getNumStates() const
 {
   return numStates;
 }
 
-int Graph::getNumTrans() const
+size_t Graph::getNumTrans() const
 {
   return numTrans;
 }
 
-int Graph::getNumLabels() const
+size_t Graph::getNumLabels() const
 {
   return numLabels;
 }

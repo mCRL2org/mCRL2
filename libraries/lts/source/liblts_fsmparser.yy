@@ -7,17 +7,22 @@
 /// \file fsmparser.yy
 
 %{
+#define YYSTYPE std::string
+
 #include <vector>
 #include <sstream>
 #include <cstring>
 #include "mcrl2/lts/lts.h"
+
 #include "liblts_fsmparser.h"
 #include "liblts_fsmlexer.h"
 
+#include "mcrl2/lts/lts_fsm.h"
+
 // Local variables
 std::vector<bool> ignore_par; /* Records which parameters will be ignored */
-unsigned int num_pars;        /* Number of parameters */
-unsigned int par_index;       /* Index of current parameter */
+size_t num_pars;        /* Number of parameters */
+size_t par_index;       /* Index of current parameter */
 
 // Function declarations
 
@@ -25,15 +30,10 @@ unsigned int par_index;       /* Index of current parameter */
 void fsmyyerror(const char *s);
 int fsmyylex(void);
 
-char* intToCString(int i);
+char* intToCString(size_t i);
 
-#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(fsm_lexer_obj->protect_table, (ATerm) rhs, &b); lhs = rhs; }
 %}
 
-%union {
-  ATermAppl aterm;
-  int number;
-}
 
 //more verbose and specific error messages
 %error-verbose
@@ -44,21 +44,18 @@ char* intToCString(int i);
 %start fsm_file
 
 %token EOLN SECSEP LPAR RPAR ARROW HASH QMARK COLON COMMA BAG BAR KWSTRUCT SET LIST
-%token <number> NUMBER
-%token <aterm> ID QUOTED BOOL POS NAT INT REAL
-%type  <aterm> sort_expr sort_expr_arrow domain_no_arrow sort_expr_struct domain_no_arrow_elts_hs struct_constructors_bs struct_constructor recogniser struct_projections_cs struct_projection sort_expr_primary sort_constant sort_constructor domain_no_arrow_elt action
+%token NUMBER
+%token ID QUOTED BOOL POS NAT INT REAL
 
 %%
 
 fsm_file :
     {
       num_pars = 0;
+      fsm_lexer_obj->fsm_lts->clear_process_parameters();
       ignore_par.clear();
     }
   params
-    {
-      fsm_lexer_obj->valueTable = ATreverse( fsm_lexer_obj->valueTable );
-    }
   SECSEP EOLN
   states
   SECSEP EOLN transitions
@@ -87,27 +84,25 @@ param :
 cardinality :
   LPAR NUMBER RPAR
     {
-      ignore_par.push_back($2 == 0);
+      ignore_par.push_back(atoi($2.c_str()) == 0);
     }
   ;
 
 type_def :
+  /* empty; assume type Nat is intended */
+    { 
+      fsm_lexer_obj->fsm_lts->add_process_parameter(fsm_lexer_obj->typeId,"Nat");
+    }
+  |
   sort_expr
     {
       if (!ignore_par[num_pars])
       {
-        fsm_lexer_obj->typeValues = ATempty;
-        fsm_lexer_obj->typeId = ATmakeAppl2(fsm_lexer_obj->const_ATtype,(ATerm) fsm_lexer_obj->typeId,(ATerm) $1);
+        fsm_lexer_obj->fsm_lts->add_process_parameter(fsm_lexer_obj->typeId,$1);
       }
     }
   type_values
     {
-      if (!ignore_par[num_pars])
-      {
-        fsm_lexer_obj->typeValues = ATreverse( fsm_lexer_obj->typeValues );
-        fsm_lexer_obj->valueTable = ATinsert( fsm_lexer_obj->valueTable,
-            (ATerm)fsm_lexer_obj->typeValues );
-      }
     }
   ;
 
@@ -118,7 +113,7 @@ type_def :
 sort_expr:
   sort_expr_arrow
     {
-      safe_assign($$, $1);
+      $$=$1;
     }
   ;
 
@@ -126,13 +121,11 @@ sort_expr:
 sort_expr_arrow:
   sort_expr_struct
     {
-      safe_assign($$, $1);
+      $$=$1;
     }
   | domain_no_arrow ARROW sort_expr_arrow
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-        + "->" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ))
+      $$ = $1 + "->" + $3;
     }
   ;
 
@@ -140,7 +133,7 @@ sort_expr_arrow:
 domain_no_arrow:
   domain_no_arrow_elts_hs
     {
-      safe_assign($$, $1);
+      $$=$1;
     }
   ;
 
@@ -148,13 +141,11 @@ domain_no_arrow:
 domain_no_arrow_elts_hs:
   domain_no_arrow_elt
     {
-      safe_assign($$, $1);
+      $$=$1;
     }
   | domain_no_arrow_elts_hs HASH domain_no_arrow_elt
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-        + "#" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = $1 + "#" + $3;
     }
   ;
 
@@ -162,7 +153,7 @@ domain_no_arrow_elts_hs:
 domain_no_arrow_elt:
   sort_expr_struct
     {
-      safe_assign($$, $1);
+      $$ = $1;
     }
   ;
 
@@ -170,12 +161,11 @@ domain_no_arrow_elt:
 sort_expr_struct:
   sort_expr_primary
     {
-      safe_assign($$, $1);
+      $$ = $1;
     }
   | KWSTRUCT struct_constructors_bs
     {
-      std::string result = "struct " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = "struct " + $2;
     }
   ;
 
@@ -183,13 +173,11 @@ sort_expr_struct:
 struct_constructors_bs:
   struct_constructor
     {
-      safe_assign($$, $1);
+      $$ = $1;
     }
   | struct_constructors_bs BAR struct_constructor
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-        + "|" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = $1 + "|" + $3;
     }
   ;
 
@@ -197,16 +185,11 @@ struct_constructors_bs:
 struct_constructor:
   ID recogniser
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-        + " " + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = $1 + " " + $2;   
     }
   | ID LPAR struct_projections_cs RPAR recogniser
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-        + "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")" +
-              static_cast<std::string> ( ATwriteToString( (ATerm)$5 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = $1 + "(" + $3 + ")" + $5;
     }
   ;
 
@@ -214,13 +197,11 @@ struct_constructor:
 recogniser:
   /* empty */
     {
-      std::string result = static_cast<std::string> ( "");
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = "";
     }
   | QMARK ID
     {
-      std::string result = "?" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = "?" + $2;
     }
   ;
 
@@ -228,14 +209,11 @@ recogniser:
 struct_projections_cs:
   struct_projection
     {
-      safe_assign($$, $1);
+      $$ = $1;
     }
   | struct_projections_cs COMMA struct_projection
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-        + "," + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
-
+      $$ = $1 + "," + $3;
     }
   ;
 
@@ -243,13 +221,11 @@ struct_projections_cs:
 struct_projection:
   sort_expr
     {
-      safe_assign($$, $1);
+      $$ = $1;
     }
   | ID COLON sort_expr
     {
-      std::string result = static_cast<std::string> ( ATwriteToString( (ATerm)$1 ) )
-        + ":" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) );
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = $1 + ":" + $3;
     }
   ;
 
@@ -257,20 +233,19 @@ struct_projection:
 sort_expr_primary:
   ID
     {
-      safe_assign($$, $1);
+      $$ = $1; 
     }
   | sort_constant
     {
-      safe_assign($$, $1);
+      $$ = $1; 
     }
   | sort_constructor
     {
-      safe_assign($$, $1);
+      $$ = $1; 
     }
   | LPAR sort_expr RPAR
     { 
-      std::string result = "(" + static_cast<std::string> ( ATwriteToString( (ATerm)$2 ) ) + ")";
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = "(" + $2 + ")";
     }
   ;
 
@@ -278,23 +253,23 @@ sort_expr_primary:
 sort_constant:
   BOOL
     {
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Bool", 0, ATfalse ) ));
+      $$ = "Bool"; 
     }
   | POS
     {
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Pos", 0, ATfalse ) ));
+      $$ = "Pos";
     }
   | NAT
     {
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Nat", 0, ATfalse ) ));
+      $$ = "Nat";
     }
   | INT
     {
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Int", 0, ATfalse ) ));
+      $$ = "Int";
     }
   | REAL
     {
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( "Real", 0, ATfalse ) ));
+      $$ = "Real";
     }
   ;
 
@@ -302,18 +277,15 @@ sort_constant:
 sort_constructor:
   LIST LPAR sort_expr RPAR
     {
-      std::string result = "List(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = "List(" + $3 + ")";
     }
   | SET LPAR sort_expr RPAR
     {
-      std::string result = "Set(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = "Set(" + $3 + ")";
     }
   | BAG LPAR sort_expr RPAR
     {
-      std::string result = "Bag(" + static_cast<std::string> ( ATwriteToString( (ATerm)$3 ) ) + ")";
-      safe_assign($$, ATmakeAppl0( ATmakeAFun( result.c_str(), 0, ATfalse ) ));
+      $$ = "Bag(" + $3 + ")";
     }
   ;
 
@@ -328,9 +300,7 @@ type_value :
     {
       if (!ignore_par[num_pars])
       {
-        fsm_lexer_obj->typeValues = ATinsert( fsm_lexer_obj->typeValues,
-            (ATerm)ATmakeAppl2(fsm_lexer_obj->const_ATvalue, (ATerm)$1,
-            (ATerm)fsm_lexer_obj->typeId ) );
+        fsm_lexer_obj->fsm_lts->add_state_element_value(num_pars,$1);
       }
     }
   ;
@@ -346,14 +316,12 @@ states :
     }
   state
     {
-      fsm_lexer_obj->stateVector = ATreverse( fsm_lexer_obj->stateVector );
-      unsigned int i = fsm_lexer_obj->fsm_lts->add_state(
-          (ATerm) fsm_lexer_obj->stateVector );
+      size_t i = fsm_lexer_obj->fsm_lts->add_state(fsm_lexer_obj->stateVector);
       if ( i == 0 )
       {
         fsm_lexer_obj->fsm_lts->set_initial_state( i );
       }
-      fsm_lexer_obj->stateVector = ATempty
+      fsm_lexer_obj->stateVector.clear();
     }
   EOLN
   ;
@@ -365,12 +333,7 @@ state :
     {
       if (!ignore_par[par_index])
       {
-        if ( par_index < ATgetLength( fsm_lexer_obj->valueTable ) )
-        {
-          fsm_lexer_obj->stateVector = ATinsert( fsm_lexer_obj->stateVector,
-              ATelementAt( (ATermList)ATelementAt( fsm_lexer_obj->valueTable,
-                  par_index ), $2 ) );
-        }
+        fsm_lexer_obj->stateVector.push_back(atoi($2.c_str()));
       }
       ++par_index;
     }
@@ -388,32 +351,48 @@ transitions:
 transition:
   NUMBER NUMBER action
     {
-      unsigned int frState = $1-1;
-      unsigned int toState = $2-1;
-      ATerm label = ATtableGet(fsm_lexer_obj->labelTable,(ATerm)$3);
-      if ( label == NULL )
-      {
-        unsigned int i = fsm_lexer_obj->fsm_lts->add_label((ATerm)$3,
-            !strcmp("tau",ATgetName(ATgetAFun($3))));
-        label = (ATerm) ATmakeInt(i);
-        ATtablePut(fsm_lexer_obj->labelTable,(ATerm)$3,label);
+      using namespace mcrl2::lts;
+      size_t frState = atoi($1.c_str())-1;
+      size_t toState = atoi($2.c_str())-1;
+
+      // If the fsm has no state labels, the number of states is 0;
+      // It should be increased to contain the actual number of states.
+      size_t no_states=fsm_lexer_obj->fsm_lts->num_states();
+      size_t max=(frState>toState?frState:toState);
+      if (no_states<=max)
+      { 
+        fsm_lexer_obj->fsm_lts->set_num_states(max+1,fsm_lexer_obj->fsm_lts->has_state_info());
       }
-      fsm_lexer_obj->fsm_lts->add_transition(mcrl2::lts::transition(frState,
-          ATgetInt((ATermInt)label), toState ));
+      std::map < std::string, size_t>::const_iterator label_index=fsm_lexer_obj->labelTable.find($3);
+      if (label_index==fsm_lexer_obj->labelTable.end())
+      { 
+        // Not found. This label does not occur in the fsm.
+        const lts_fsm_t::labels_size_type n=fsm_lexer_obj->fsm_lts->add_action($3,$3=="tau");
+        fsm_lexer_obj->labelTable[$3]=n;
+        fsm_lexer_obj->fsm_lts->add_transition(transition(frState,n,toState));
+      }
+      else
+      { // The label is found. It already exists.
+        fsm_lexer_obj->fsm_lts->add_transition(transition(frState,label_index->second,toState));
+      }
+
     }
   ;
 
 action :
   /* empty */
-    { safe_assign($$, ATmakeAppl0( ATmakeAFun( "", 0, ATfalse ) )) }
+    { $$ = ""; 
+    }
   |
   QUOTED
-    { safe_assign($$, $1) }
+    { 
+      $$ = $1;
+    }
   ;
 
 %%
 
-char* intToCString( int i )
+char* intToCString( size_t i )
 {
     std::ostringstream oss;
     oss << i;

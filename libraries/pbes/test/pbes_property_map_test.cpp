@@ -50,7 +50,7 @@ const std::string INFO =
   "used_free_variables          =                                        \n"
   "used_free_variables_names    =                                        \n"
   ;
-  
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

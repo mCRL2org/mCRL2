@@ -19,7 +19,8 @@
 
 class Mediator;
 
-class MarkDialog: public wxDialog {
+class MarkDialog: public wxDialog
+{
   public:
     MarkDialog(wxWindow* parent, Mediator* owner);
 
@@ -53,7 +54,7 @@ class MarkDialog: public wxDialog {
     wxCheckListBox* markStatesListBox;
     wxCheckListBox* markTransitionsListBox;
 
-  DECLARE_EVENT_TABLE()
+    DECLARE_EVENT_TABLE()
 };
 
 #endif //MARKDIALOG_H

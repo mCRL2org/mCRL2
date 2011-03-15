@@ -19,9 +19,11 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 ///////////////////////////////////////////////////////////////////////////////
 // action_label
@@ -45,7 +47,7 @@ class action_label: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param t A term
     action_label(atermpp::aterm_appl t)
-     : atermpp::aterm_appl(t)
+      : atermpp::aterm_appl(t)
     {
       assert(core::detail::check_rule_ActId(m_term));
       atermpp::aterm_appl::iterator i = t.begin();
@@ -56,10 +58,10 @@ class action_label: public atermpp::aterm_appl
     /// \brief Constructor.
     /// \param name A
     /// \param sorts A sequence of sort expressions
-    action_label(const core::identifier_string& name, const data::sort_expression_list &sorts)
-     : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
-       m_name(name),
-       m_sorts(sorts)
+    action_label(const core::identifier_string& name, const data::sort_expression_list& sorts)
+      : atermpp::aterm_appl(core::detail::gsMakeActId(name, sorts)),
+        m_name(name),
+        m_sorts(sorts)
     {}
 
     /// \brief Returns the name of the action label.
@@ -74,18 +76,6 @@ class action_label: public atermpp::aterm_appl
     data::sort_expression_list const& sorts() const
     {
       return m_sorts;
-    }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    action_label substitute(Substitution f)
-    {
-      return action_label(f(*this));
     }
 };
 

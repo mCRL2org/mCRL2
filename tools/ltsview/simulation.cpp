@@ -65,7 +65,7 @@ void Simulation::stop()
   {
     stateHis[i]->setSimulated(false);
   }
-  for(size_t i = 0; i < posTrans.size(); ++i)
+  for (size_t i = 0; i < posTrans.size(); ++i)
   {
     posTrans[i]->getEndState()->setSimulated(false);
   }
@@ -84,12 +84,12 @@ Simulation::~Simulation()
   //Stop simulation
   stop();
   transHis.clear();
-  for(size_t i = 0; i < stateHis.size(); ++i)
+  for (size_t i = 0; i < stateHis.size(); ++i)
   {
     stateHis[i]->setSimulated(false);
   }
   stateHis.clear();
-  for(size_t i = 0; i < posTrans.size(); ++i)
+  for (size_t i = 0; i < posTrans.size(); ++i)
   {
     posTrans[i]->getEndState()->setSimulated(false);
   }
@@ -143,7 +143,7 @@ void Simulation::traceBack(State* initState)
   reverse(stateHis.begin(), stateHis.end());
   reverse(transHis.begin(), transHis.end());
   State* currPos = stateHis.back();
-  while(currPos != initState)
+  while (currPos != initState)
   {
     transHis.push_back(currPos->getInTransition(0));
     currPos = currPos->getInTransition(0)->getBeginState();
@@ -163,11 +163,11 @@ void Simulation::followTrans()
     Transition* toFollow = posTrans[chosenTrans];
     State* nextState = toFollow->getEndState();
     transHis.push_back(posTrans[chosenTrans]);
-    for(size_t i = 0; i < posTrans.size(); ++i)
+    for (size_t i = 0; i < posTrans.size(); ++i)
     {
       posTrans[i]->getEndState()->setSimulated(false);
     }
-    for(size_t i = 0; i < stateHis.size(); ++i)
+    for (size_t i = 0; i < stateHis.size(); ++i)
     {
       stateHis[i]->setSimulated(true);
     }
@@ -211,7 +211,7 @@ void Simulation::undoStep()
   transHis.pop_back();
   stateHis.back()->setSimulated(false);
   stateHis.pop_back();
-  for(size_t i = 0; i < posTrans.size(); ++i)
+  for (size_t i = 0; i < posTrans.size(); ++i)
   {
     posTrans[i]->getEndState()->setSimulated(false);
     posTrans[i]->getEndState()->deselect();
@@ -279,7 +279,7 @@ void Simulation::resetSim()
 }
 
 Simulation::simConnection Simulation::connectSel(
-    simulationSignal::slot_function_type subscriber)
+  simulationSignal::slot_function_type subscriber)
 {
   simConnection result = selChangeSignal.connect(subscriber);
   // Send acknowledgement to subscriber;
@@ -288,7 +288,7 @@ Simulation::simConnection Simulation::connectSel(
 }
 
 Simulation::simConnection Simulation::connect(
-    simulationSignal::slot_function_type subscriber)
+  simulationSignal::slot_function_type subscriber)
 {
   simConnection result = signal.connect(subscriber);
   // Send acknowledge to subscriber

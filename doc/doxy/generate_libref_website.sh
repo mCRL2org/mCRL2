@@ -44,14 +44,14 @@ STYLESHEET=doc/doxy/doxystyle.css
 LIBRARY_LIST="
 ATerm++:atermpp:libraries/atermpp
 Core:core:libraries/core
+BES:bes:libraries/bes
 Data:data:libraries/data
 LPS:lps:libraries/lps
 LTS:lts:libraries/lts
 PBES:pbes:libraries/pbes
 Process:process:libraries/process
 Trace:trace:libraries/trace
-Utilities:utilities:libraries/utilities
-TIPi:tipi:tools/squadt/libraries/tipi"
+Utilities:utilities:libraries/utilities"
 
 # Doxygen will extract documentation from every file/directory within your
 # library's directory that is listed in the INPUT_LIST variable (if and only if
@@ -445,6 +445,11 @@ if [ ! $OFFLINE ] ; then
 
   # Copy the CSS style sheet to the output directory
   cp $STYLESHEET $OUTPUT_DIR
+
+  # Replace all occurrences of class="header" with class="doxyheader" to prevent
+  # conflicts
+  find $OUTPUT_DIR -type f -name "*.php" | xargs sed -i 's/class="header"/class="doxyheader"/g'
+
 fi
 
 # Clean up

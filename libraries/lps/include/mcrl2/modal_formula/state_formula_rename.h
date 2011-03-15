@@ -13,20 +13,30 @@
 #define MCRL2_MODAL_STATE_VARIABLE_RENAME_H
 
 #include <deque>
-#include "mcrl2/modal_formula/state_formula_builder.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/map_substitution.h"
+#include "mcrl2/modal_formula/find.h"
+#include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/builder.h"
+#include "mcrl2/modal_formula/replace.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace state_formulas {
+namespace state_formulas
+{
 
 /// Visitor that renames predicate variables using the specified identifier generator.
 /// \post In the generated formula, all predicate variables have different names.
 template <typename IdentifierGenerator>
-struct state_formula_predicate_variable_rename_builder: public state_formula_builder
+struct state_formula_predicate_variable_rename_builder: public state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> >
 {
+  typedef state_formulas::state_formula_builder<state_formula_predicate_variable_rename_builder<IdentifierGenerator> > super;
+
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
   /// \brief An identifier generator
   IdentifierGenerator& generator;
 
@@ -61,18 +71,18 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param n A
   /// \param l A sequence of data expressions
   /// \return The result of visiting the node
-  state_formula visit_var(const state_formula& /* e */, const core::identifier_string& n, const data::data_expression_list& l)
+  state_formula operator()(const variable& x)
   {
-    core::identifier_string new_name = n;
+    core::identifier_string new_name = x.name();
     for (std::deque<std::pair<core::identifier_string, core::identifier_string> >::iterator i = replacements.begin(); i != replacements.end(); ++i)
     {
-      if (i->first == n)
+      if (i->first == x.name())
       {
         new_name = i->second;
         break;
       }
     }
-    return state_frm::variable(new_name, l);
+    return variable(new_name, x.arguments());
   }
 
   /// \brief Visit mu node
@@ -81,12 +91,12 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula visit_mu(const state_formula& /* e */, const core::identifier_string& n, const data::assignment_list& a, const state_formula& f)
+  state_formula operator()(const mu& x)
   {
-    core::identifier_string new_name = push(n);
-    state_formula new_formula = visit(f);
+    core::identifier_string new_name = push(x.name());
+    state_formula new_formula = (*this)(x.operand());
     pop();
-    return state_frm::mu(new_name, a, new_formula);
+    return mu(new_name, x.assignments(), new_formula);
   }
 
   /// \brief Visit nu node
@@ -95,13 +105,17 @@ struct state_formula_predicate_variable_rename_builder: public state_formula_bui
   /// \param a A sequence of assignments to data variables
   /// \param f A modal formula
   /// \return The result of visiting the node
-  state_formula visit_nu(const state_formula& /* e */, const core::identifier_string& n, const data::assignment_list& a, const state_formula& f)
+  state_formula operator()(const nu& x)
   {
-    core::identifier_string new_name = push(n);
-    state_formula new_formula = visit(f);
+    core::identifier_string new_name = push(x.name());
+    state_formula new_formula = (*this)(x.operand());
     pop();
-    return state_frm::nu(new_name, a, new_formula);
+    return nu(new_name, x.assignments(), new_formula);
   }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
 };
 
 /// \brief Utility function for creating a state_formula_predicate_variable_rename_builder.
@@ -121,7 +135,7 @@ state_formula_predicate_variable_rename_builder<IdentifierGenerator> make_state_
 template <typename IdentifierGenerator>
 state_formula rename_predicate_variables(const state_formula& f, IdentifierGenerator& generator)
 {
-  return make_state_formula_predicate_variable_rename_builder(generator).visit(f);
+  return make_state_formula_predicate_variable_rename_builder(generator)(f);
 }
 
 /// \brief Renames all data variables in the formula f using the supplied identifier generator.
@@ -132,7 +146,7 @@ template <typename IdentifierGenerator>
 state_formula rename_variables(const state_formula& f, IdentifierGenerator& generator)
 {
   // find all data variables in f
-  std::set<data::variable> src = data::find_free_variables(static_cast< atermpp::aterm_appl const& >(f));
+  std::set<data::variable> src = state_formulas::find_free_variables(f);
 
   // create a mapping of replacements
   data::mutable_map_substitution<> replacements;
@@ -142,7 +156,7 @@ state_formula rename_variables(const state_formula& f, IdentifierGenerator& gene
     replacements[*i] = data::variable(generator(i->name()), i->sort());
   }
 
-  return data::replace_variables(f, replacements);
+  return state_formulas::replace_variables(f, replacements);
 }
 
 } // namespace state_formulas

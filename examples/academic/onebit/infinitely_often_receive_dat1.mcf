@@ -1,0 +1,4 @@
+% It is possible to infinitely often start sending a d1 message
+% (through action r1)
+%
+nu X. mu Y. (<ra(dat1)>X || <!ra(dat1)>Y)

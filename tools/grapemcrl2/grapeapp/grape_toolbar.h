@@ -17,114 +17,114 @@
 
 namespace grape
 {
-  namespace grapeapp
-  {
-    class grape_frame;
+namespace grapeapp
+{
+class grape_frame;
+
+/**
+ * \short The toolbar as used by the main frame.
+ */
+class grape_toolbar : public wxToolBar
+{
+  private:
+  public:
+    /**
+     * Default constructor.
+     * Initializes grape_toolbar.
+     */
+    grape_toolbar(void);
 
     /**
-     * \short The toolbar as used by the main frame.
+     * Initialization constructor.
+     * Sets parent and initializes grape_toolbar.
+     * @param p_parent Pointer to parent window.
      */
-    class grape_toolbar : public wxToolBar
+    grape_toolbar(wxWindow* p_parent);
+
+
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_toolbar(void);
+
+    /**
+     * Several tool modes.
+     */
+    enum grape_tool_mode
     {
-      private:
-      public:
-        /**
-         * Default constructor.
-         * Initializes grape_toolbar.
-         */
-        grape_toolbar(void);
-
-        /**
-         * Initialization constructor.
-         * Sets parent and initializes grape_toolbar.
-         * @param p_parent Pointer to parent window.
-         */
-        grape_toolbar(wxWindow *p_parent);
-
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_toolbar(void);
-
-        /**
-         * Several tool modes.
-         */
-        enum grape_tool_mode
-        {
-          GRAPE_TOOLMODE_NOSPEC = 0, /**< No specification loaded. */
-          GRAPE_TOOLMODE_SPEC = 1, /**< Specification loaded, but not necessarily a diagram. */
-          GRAPE_TOOLMODE_ARCH = 2, /**< GraPE is in architecture diagram edit mode. */
-          GRAPE_TOOLMODE_PROC = 4 /**< GraPE is in process diagram edit mode. */
-        };
-
-        /**
-         * Enables tool items based on the specified mode.
-         * Please don't use this function from anywhere than grape_frame::set_toolbar().
-         * @param p_mode The mode, OR'ed with values from the enumeration grape_tool_status.
-        */
-        void set_mode( int p_mode );
+      GRAPE_TOOLMODE_NOSPEC = 0, /**< No specification loaded. */
+      GRAPE_TOOLMODE_SPEC = 1, /**< Specification loaded, but not necessarily a diagram. */
+      GRAPE_TOOLMODE_ARCH = 2, /**< GraPE is in architecture diagram edit mode. */
+      GRAPE_TOOLMODE_PROC = 4 /**< GraPE is in process diagram edit mode. */
     };
 
     /**
-     * \short The toolbar as used by the main frame.
+     * Enables tool items based on the specified mode.
+     * Please don't use this function from anywhere than grape_frame::set_toolbar().
+     * @param p_mode The mode, OR'ed with values from the enumeration grape_tool_status.
+    */
+    void set_mode(int p_mode);
+};
+
+/**
+ * \short The toolbar as used by the main frame.
+ */
+class grape_arch_toolbar : public grape_toolbar
+{
+  private:
+  public:
+    /**
+     * Default constructor.
+     * Initializes grape_toolbar.
      */
-    class grape_arch_toolbar : public grape_toolbar
-    {
-      private:
-      public:
-        /**
-         * Default constructor.
-         * Initializes grape_toolbar.
-         */
-        grape_arch_toolbar(void);
-
-        /**
-         * Initialization constructor.
-         * Sets parent and initializes grape_toolbar.
-         * @param p_parent Pointer to parent window.
-         */
-        grape_arch_toolbar(wxWindow *p_parent);
-
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_arch_toolbar(void);
-    };
+    grape_arch_toolbar(void);
 
     /**
-     * \short The toolbar as used by the main frame when a process diagram is selected
+     * Initialization constructor.
+     * Sets parent and initializes grape_toolbar.
+     * @param p_parent Pointer to parent window.
      */
-    class grape_proc_toolbar : public grape_toolbar
-    {
-      private:
-      public:
-        /**
-         * Default constructor.
-         * Initializes grape_toolbar.
-         */
-        grape_proc_toolbar(void);
-
-        /**
-         * Initialization constructor.
-         * Sets parent and initializes grape_toolbar.
-         * @param p_parent Pointer to parent window.
-         */
-        grape_proc_toolbar(wxWindow *p_parent);
+    grape_arch_toolbar(wxWindow* p_parent);
 
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~grape_proc_toolbar(void);
-    };
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_arch_toolbar(void);
+};
+
+/**
+ * \short The toolbar as used by the main frame when a process diagram is selected
+ */
+class grape_proc_toolbar : public grape_toolbar
+{
+  private:
+  public:
+    /**
+     * Default constructor.
+     * Initializes grape_toolbar.
+     */
+    grape_proc_toolbar(void);
+
+    /**
+     * Initialization constructor.
+     * Sets parent and initializes grape_toolbar.
+     * @param p_parent Pointer to parent window.
+     */
+    grape_proc_toolbar(wxWindow* p_parent);
 
 
-  } // namespace grapeapp
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~grape_proc_toolbar(void);
+};
+
+
+} // namespace grapeapp
 } // namespace grape
 
 #endif // GRAPEAPP_GRAPE_TOOLBAR_H

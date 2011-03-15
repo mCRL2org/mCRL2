@@ -14,7 +14,6 @@
 #include <algorithm>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/lps/specification.h"
@@ -33,56 +32,56 @@ using namespace mcrl2::lps;
 using namespace mcrl2::lps::detail;
 
 const std::string SPECIFICATION1 =
-"sort Natural;                                    \n"
-"                                                 \n"
-"cons _0: Natural;                                \n"
-"    S: Natural -> Natural;                       \n"
-"                                                 \n"
-"map  eq: Natural # Natural -> Bool;              \n"
-"    less: Natural # Natural -> Bool;             \n"
-"    plus: Natural # Natural -> Natural;          \n"
-"    _1, _2, _3, _4, _5, _6, _7, _8, _9: Natural; \n"
-"    P: Natural -> Natural;                       \n"
-"    even: Natural -> Bool;                       \n"
-"                                                 \n"
-"var  n, m: Natural;                              \n"
-"                                                 \n"
-"eqn  eq(n, n) = true;                            \n"
-"    eq(S(n), _0) = false;                        \n"
-"    eq(_0, S(m)) = false;                        \n"
-"    eq(S(n), S(m)) = eq(n, m);                   \n"
-"                                                 \n"
-"    less(n, n) = false;                          \n"
-"    less(n, _0) = false;                         \n"
-"    less(_0, S(m)) = true;                       \n"
-"    less(S(n), S(m)) = less(n, m);               \n"
-"                                                 \n"
-"    plus(_0, n) = n;                             \n"
-"    plus(n, _0) = n;                             \n"
-"    plus(S(n), m) = S(plus(n, m));               \n"
-"    plus(n, S(m)) = S(plus(n, m));               \n"
-"                                                 \n"
-"    even(_0) = true;                             \n"
-"    even(S(n)) = !(even(n));                     \n"
-"                                                 \n"
-"    P(S(n)) = n;                                 \n"
-"                                                 \n"
-"    _1 = S(_0);                                  \n"
-"    _2 = S(_1);                                  \n"
-"    _3 = S(_2);                                  \n"
-"    _4 = S(_3);                                  \n"
-"    _5 = S(_4);                                  \n"
-"    _6 = S(_5);                                  \n"
-"    _7 = S(_6);                                  \n"
-"    _8 = S(_7);                                  \n"
-"    _9 = S(_8);                                  \n"
-"                                                 \n"
-"act a: Natural;                                  \n"
-"                                                 \n"
-"proc P(n: Natural) = sum m: Natural. a(m). P(m); \n"
-"                                                 \n"
-"init P(_0);                                      \n"
-;
+  "sort Natural;                                    \n"
+  "                                                 \n"
+  "cons _0: Natural;                                \n"
+  "    S: Natural -> Natural;                       \n"
+  "                                                 \n"
+  "map  eq: Natural # Natural -> Bool;              \n"
+  "    less: Natural # Natural -> Bool;             \n"
+  "    plus: Natural # Natural -> Natural;          \n"
+  "    _1, _2, _3, _4, _5, _6, _7, _8, _9: Natural; \n"
+  "    P: Natural -> Natural;                       \n"
+  "    even: Natural -> Bool;                       \n"
+  "                                                 \n"
+  "var  n, m: Natural;                              \n"
+  "                                                 \n"
+  "eqn  eq(n, n) = true;                            \n"
+  "    eq(S(n), _0) = false;                        \n"
+  "    eq(_0, S(m)) = false;                        \n"
+  "    eq(S(n), S(m)) = eq(n, m);                   \n"
+  "                                                 \n"
+  "    less(n, n) = false;                          \n"
+  "    less(n, _0) = false;                         \n"
+  "    less(_0, S(m)) = true;                       \n"
+  "    less(S(n), S(m)) = less(n, m);               \n"
+  "                                                 \n"
+  "    plus(_0, n) = n;                             \n"
+  "    plus(n, _0) = n;                             \n"
+  "    plus(S(n), m) = S(plus(n, m));               \n"
+  "    plus(n, S(m)) = S(plus(n, m));               \n"
+  "                                                 \n"
+  "    even(_0) = true;                             \n"
+  "    even(S(n)) = !(even(n));                     \n"
+  "                                                 \n"
+  "    P(S(n)) = n;                                 \n"
+  "                                                 \n"
+  "    _1 = S(_0);                                  \n"
+  "    _2 = S(_1);                                  \n"
+  "    _3 = S(_2);                                  \n"
+  "    _4 = S(_3);                                  \n"
+  "    _5 = S(_4);                                  \n"
+  "    _6 = S(_5);                                  \n"
+  "    _7 = S(_6);                                  \n"
+  "    _8 = S(_7);                                  \n"
+  "    _9 = S(_8);                                  \n"
+  "                                                 \n"
+  "act a: Natural;                                  \n"
+  "                                                 \n"
+  "proc P(n: Natural) = sum m: Natural. a(m). P(m); \n"
+  "                                                 \n"
+  "init P(_0);                                      \n"
+  ;
 
 void test1()
 {
@@ -114,9 +113,9 @@ void test1()
 }
 
 const std::string SPECIFICATION2=
-"act  c:Pos#Nat;                          \n"
-"proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+1+2); \n"
-"init P(1+1,2+2);                         \n";
+  "act  c:Pos#Nat;                          \n"
+  "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+1+2); \n"
+  "init P(1+1,2+2);                         \n";
 
 void test2()
 {
@@ -136,11 +135,11 @@ void test2()
 }
 
 const std::string SPECIFICATION3 =
-"act  c:Pos#Nat;                          \n"
-"proc P(a:Pos,b:Nat)=tau.P(a+1,b+1+2)+    \n"
-"                    tau.P(a+1,pred(a))+  \n"
-"                    c(a,0).P(a,b);       \n"
-"init P(1+1,0);                           \n";
+  "act  c:Pos#Nat;                          \n"
+  "proc P(a:Pos,b:Nat)=tau.P(a+1,b+1+2)+    \n"
+  "                    tau.P(a+1,pred(a))+  \n"
+  "                    c(a,0).P(a,b);       \n"
+  "init P(1+1,0);                           \n";
 void test3()
 {
   specification spec = parse_linear_process_specification(SPECIFICATION3);
@@ -167,26 +166,26 @@ void test_lps_rewriter(std::string src_text, std::string dest_text, std::string 
   lps::specification src  = parse_linear_process_specification(src_text);
   lps::specification dest = parse_linear_process_specification(dest_text);
 
-  // rewrite the specification src                                         
+  // rewrite the specification src
   data::rewriter R(src.data());
   data::mutable_map_substitution< > sigma;
   data::detail::parse_substitutions(sigma_text, src.data(), sigma);
   data::rewriter_adapter<data::rewriter, data::mutable_map_substitution< > > Rsigma(R, sigma);
-  lps::detail::make_lps_rewriter(Rsigma).rewrite(src);                   
+  lps::detail::make_lps_rewriter(Rsigma).rewrite(src);
 
   if (src != dest)
   {
     std::cerr << "--- test failed ---" << std::endl;
-    std::cerr << pp(src.process().summands()) << std::endl;
+    std::cerr << pp(src.process().action_summands()) << std::endl;
     std::cerr << pp(src.initial_process()) << std::endl;
     std::cerr << "-------------------" << std::endl;
-    std::cerr << pp(dest.process().summands()) << std::endl;
+    std::cerr << pp(dest.process().action_summands()) << std::endl;
     std::cerr << pp(dest.initial_process()) << std::endl;
   }
   BOOST_CHECK(src == dest);
   core::garbage_collect();
 }
-                    
+
 void test_lps_rewriter()
 {
   std::string src =
@@ -198,7 +197,7 @@ void test_lps_rewriter()
     "act  c:Pos#Nat;                          \n"
     "proc P(a:Pos,b:Nat)=c(a,0).P(a+1,b+3);   \n"
     "init P(2,4);                             \n";
-    
+
   test_lps_rewriter(src, dest, "");
 }
 

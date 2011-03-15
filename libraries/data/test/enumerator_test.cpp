@@ -42,7 +42,7 @@ const std::string DATA_SPEC1 =
   "                            \n"
   "cons s1: S1;                \n"
   "cons s2: S2;                \n"
-;
+  ;
 
 // This is no longer allowed:
 // sort S3 = A -> (B -> C);
@@ -77,7 +77,7 @@ void test_data_enumerator()
       }
     }
   }
-  catch(mcrl2::runtime_error)
+  catch (mcrl2::runtime_error)
   {
     // this is OK
     return;
@@ -89,9 +89,9 @@ void test_data_enumerator()
 void test_data_enumerator2()
 {
   std::string DATA_SPEC =
-  "sort D;\n"
-  "map f:D -> Bool;\n"
-  ;
+    "sort D;\n"
+    "map f:D -> Bool;\n"
+    ;
 
   data_specification data_spec = parse_data_specification(DATA_SPEC);
   variable x = parse_variable("d:D", data_spec);
@@ -104,7 +104,7 @@ void test_data_enumerator2()
   {
     atermpp::vector<data_expression_with_variables> values = e.enumerate(x);
   }
-  catch(mcrl2::runtime_error)
+  catch (mcrl2::runtime_error)
   {
     // this is OK
     return;

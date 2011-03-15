@@ -15,9 +15,11 @@
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/model_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated refined class declarations ---//
 /// \brief A model

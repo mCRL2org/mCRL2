@@ -17,14 +17,23 @@
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
-    namespace detail {
+namespace detail
+{
 
-//--- start generated class structured_sort_constructor_argument ---//
+//--- start generated class structured_sort_constructor_argument_base ---//
+//--- end generated class structured_sort_constructor_argument_base ---//
+
 /// \brief An argument of a constructor of a structured sort
 class structured_sort_constructor_argument_base: public atermpp::aterm_appl
 {
@@ -36,7 +45,7 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
 
     /// \brief Constructor.
     /// \param term A term
-    structured_sort_constructor_argument_base(atermpp::aterm_appl term)
+    structured_sort_constructor_argument_base(const atermpp::aterm_appl& term)
       : atermpp::aterm_appl(term)
     {
       assert(core::detail::check_term_StructProj(m_term));
@@ -62,102 +71,108 @@ class structured_sort_constructor_argument_base: public atermpp::aterm_appl
       return atermpp::arg2(*this);
     }
 };
-//--- end generated class structured_sort_constructor_argument ---//
 
-    } // namespace detail
+} // namespace detail
 
-    /// \brief Special identifier string that is used to specify the absence of an identifier
-    inline
-    static core::identifier_string const& no_identifier()
+/// \brief Special identifier string that is used to specify the absence of an identifier
+inline
+static core::identifier_string const& no_identifier()
+{
+  static core::identifier_string dummy;
+
+  return dummy;
+}
+
+/// \cond INTERNAL_DOCS
+namespace detail
+{
+/// \brief Convert a string to an identifier, or no_identifier() in case of the empty string
+inline
+static core::identifier_string make_identifier(std::string const& name)
+{
+  return (name.empty()) ? no_identifier() : core::identifier_string(name);
+}
+
+inline
+static core::identifier_string make_identifier(atermpp::aterm_appl const& a)
+{
+  return (a == atermpp::aterm_appl(core::detail::gsMakeNil())) ? no_identifier() : core::identifier_string(a);
+}
+}
+/// \endcond
+
+/// \brief Argument of a structured sort constructor.
+///
+/// This comprises an optional name and a mandatory sort.
+class structured_sort_constructor_argument: public detail::structured_sort_constructor_argument_base
+{
+  protected:
+
+    typedef detail::structured_sort_constructor_argument_base super;
+
+    atermpp::aterm_appl make_argument(const sort_expression& sort, const core::identifier_string& name = no_identifier())
     {
-      static core::identifier_string dummy;
-
-      return dummy;
+      return core::detail::gsMakeStructProj((name == no_identifier()) ?
+                                            atermpp::aterm_appl(core::detail::gsMakeNil()) : atermpp::aterm_appl(name), sort);
     }
 
-    /// \cond INTERNAL_DOCS
-    namespace detail {
-      /// \brief Convert a string to an identifier, or no_identifier() in case of the empty string
-      inline
-      static core::identifier_string make_identifier(std::string const& name)
-      {
-        return (name.empty()) ? no_identifier() : core::identifier_string(name);
-      }
+  public:
+    /// \overload
+    structured_sort_constructor_argument()
+      : detail::structured_sort_constructor_argument_base()
+    {}
 
-      inline
-      static core::identifier_string make_identifier(atermpp::aterm_appl const& a)
-      {
-        return (a == atermpp::aterm_appl(core::detail::gsMakeNil())) ? no_identifier() : core::identifier_string(a);
-      }
-    }
-    /// \endcond
+    /// \overload
+    structured_sort_constructor_argument(atermpp::aterm_appl term)
+      : detail::structured_sort_constructor_argument_base(term)
+    {}
 
-    /// \brief Argument of a structured sort constructor.
+    /// \brief Constructor
     ///
-    /// This comprises an optional name and a mandatory sort.
-    class structured_sort_constructor_argument: public detail::structured_sort_constructor_argument_base
+    /// \param[in] name The name of the argument.
+    /// \param[in] sort The sort of the argument.
+    structured_sort_constructor_argument(const core::identifier_string& name, const sort_expression& sort)
+      : detail::structured_sort_constructor_argument_base(make_argument(sort, name))
+    {}
+
+    /// \brief Constructor
+    ///
+    /// \param[in] sort The sort of the argument.
+    structured_sort_constructor_argument(const sort_expression& sort)
+      : detail::structured_sort_constructor_argument_base(make_argument(sort, no_identifier()))
+    {}
+
+    /// \brief Constructor
+    ///
+    /// \param[in] name The name of the argument.
+    /// \param[in] sort The sort of the argument.
+    /// The default name, the empty string, signifies that there is no name.
+    structured_sort_constructor_argument(const std::string& name, const sort_expression& sort)
+      : detail::structured_sort_constructor_argument_base(make_argument(sort, detail::make_identifier(name)))
+    {}
+
+    /// \brief Constructor
+    ///
+    /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
+    template < size_t S >
+    structured_sort_constructor_argument(const char(&name)[S], const sort_expression& sort)
+      : detail::structured_sort_constructor_argument_base(make_argument(sort, detail::make_identifier(name)))
+    {}
+
+    /// \overload
+    core::identifier_string name() const
     {
-      protected:
+      return detail::make_identifier(super::name());
+    }
 
-        typedef detail::structured_sort_constructor_argument_base super;
+}; // class structured_sort_constructor_argument
 
-        atermpp::aterm_appl make_argument(const sort_expression& sort, const core::identifier_string& name = no_identifier())
-        {
-          return core::detail::gsMakeStructProj((name == no_identifier()) ?
-                   atermpp::aterm_appl(core::detail::gsMakeNil()) : atermpp::aterm_appl(name), sort);
-        }
+/// \brief List of structured_sort_constructor_argument
+typedef atermpp::term_list< structured_sort_constructor_argument > structured_sort_constructor_argument_list;
+/// \brief Vector of structured_sort_constructor_argument
+typedef atermpp::vector< structured_sort_constructor_argument >    structured_sort_constructor_argument_vector;
 
-      public:
-        /// \overload
-        structured_sort_constructor_argument()
-          : detail::structured_sort_constructor_argument_base()
-        {}
-
-        /// \overload
-        structured_sort_constructor_argument(atermpp::aterm_appl term)
-          : detail::structured_sort_constructor_argument_base(term)
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] sort The sort of the argument.
-        /// \param[in] name The name of the argument.
-        /// The default name, the empty string, signifies that there is no name.
-        structured_sort_constructor_argument(const sort_expression& sort, const core::identifier_string& name = no_identifier())
-          : detail::structured_sort_constructor_argument_base(make_argument(sort, name))
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \param[in] sort The sort of the argument.
-        /// \param[in] name The name of the argument.
-        /// The default name, the empty string, signifies that there is no name.
-        structured_sort_constructor_argument(const sort_expression& sort, const std::string& name)
-          : detail::structured_sort_constructor_argument_base(make_argument(sort, detail::make_identifier(name)))
-        {}
-
-        /// \brief Constructor
-        ///
-        /// \overload to work around problem that MSVC reinterprets char* or char[] as core::identifier_string
-        template < size_t S >
-        structured_sort_constructor_argument(const sort_expression& sort, const char (&name)[S])
-          : detail::structured_sort_constructor_argument_base(make_argument(sort, detail::make_identifier(name)))
-        {}
-
-        /// \overload
-        core::identifier_string name() const
-        {
-          return detail::make_identifier(super::name());
-        }
-
-    }; // class structured_sort_constructor_argument
-
-    /// \brief List of structured_sort_constructor_argument
-    typedef atermpp::term_list< structured_sort_constructor_argument > structured_sort_constructor_argument_list;
-    /// \brief Vector of structured_sort_constructor_argument
-    typedef atermpp::vector< structured_sort_constructor_argument >    structured_sort_constructor_argument_vector;
-
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

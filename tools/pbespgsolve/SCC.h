@@ -26,9 +26,9 @@
 */
 
 template<class Callback>
-int decompose_graph(const StaticGraph &graph, Callback &callback)
+int decompose_graph(const StaticGraph& graph, Callback& callback)
 {
-    return SCC<Callback>(graph, callback).run();
+  return SCC<Callback>(graph, callback).run();
 }
 
 #endif /* ndef SCC_H_INCLUDED */

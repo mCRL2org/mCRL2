@@ -13,8 +13,11 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 set(PREFIX "example_pbes")
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include )
@@ -23,7 +26,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/boost/)
 
 ##---------------------------------------------------
 ## Example *.cpp 
@@ -41,22 +43,11 @@ foreach( OBJ ${TERM_OBJS} )
         ${OBJ} 
   )
   
-  if( MCRL2_MONO_LIB )
-    target_link_libraries(${PROJECT_NAME}
-      mcrl2_monolib
-    )
-  else( MCRL2_MONO_LIB )  
   target_link_libraries(${PROJECT_NAME}
      mcrl2_lps
+     mcrl2_lts
      mcrl2_utilities_command_line
   )
 
-  if(MCRL2_USE_BOOST_INTERNAL)
-  target_link_libraries(${PROJECT_NAME}
-     boost
-  )
-  endif(MCRL2_USE_BOOST_INTERNAL)
-  
-  endif( MCRL2_MONO_LIB )
 endforeach( OBJ )
 

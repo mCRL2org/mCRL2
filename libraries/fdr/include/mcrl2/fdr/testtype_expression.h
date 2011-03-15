@@ -14,9 +14,11 @@
 
 #include "mcrl2/fdr/term_include_files.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated testtype expression class declarations ---//
 /// \brief class testtype_expression
@@ -82,32 +84,32 @@ class livelock_free: public testtype_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a deterministic expression
-    /// \param t A term
-    /// \return True if it is a deterministic expression
-    inline
-    bool is_deterministic(const testtype_expression& t)
-    {
-      return fdr::detail::gsIsdeterministic(t);
-    }
+/// \brief Test for a deterministic expression
+/// \param t A term
+/// \return True if it is a deterministic expression
+inline
+bool is_deterministic(const testtype_expression& t)
+{
+  return fdr::detail::gsIsdeterministic(t);
+}
 
-    /// \brief Test for a deadlock_free expression
-    /// \param t A term
-    /// \return True if it is a deadlock_free expression
-    inline
-    bool is_deadlock_free(const testtype_expression& t)
-    {
-      return fdr::detail::gsIsdeadlock_free(t);
-    }
+/// \brief Test for a deadlock_free expression
+/// \param t A term
+/// \return True if it is a deadlock_free expression
+inline
+bool is_deadlock_free(const testtype_expression& t)
+{
+  return fdr::detail::gsIsdeadlock_free(t);
+}
 
-    /// \brief Test for a livelock_free expression
-    /// \param t A term
-    /// \return True if it is a livelock_free expression
-    inline
-    bool is_livelock_free(const testtype_expression& t)
-    {
-      return fdr::detail::gsIslivelock_free(t);
-    }
+/// \brief Test for a livelock_free expression
+/// \param t A term
+/// \return True if it is a livelock_free expression
+inline
+bool is_livelock_free(const testtype_expression& t)
+{
+  return fdr::detail::gsIslivelock_free(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

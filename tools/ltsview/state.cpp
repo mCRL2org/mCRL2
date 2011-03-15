@@ -5,9 +5,6 @@
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
-//
-/// \file state.cpp
-/// \brief Source file for State class
 
 #include "wx.hpp" // precompiled headers
 
@@ -73,7 +70,7 @@ void State::getMatchedRules(std::vector< int > &mrs)
 
 int State::getNumMatchedRules()
 {
-  return matchedRules.size();
+  return static_cast<int>(matchedRules.size());
 }
 
 bool State::isDeadlock() const
@@ -214,7 +211,7 @@ Transition* State::getInTransition(int i) const
 
 int State::getNumInTransitions() const
 {
-  return inTransitions.size();
+  return static_cast<int>(inTransitions.size());
 }
 
 Transition* State::getOutTransition(int i) const
@@ -224,7 +221,7 @@ Transition* State::getOutTransition(int i) const
 
 int State::getNumOutTransitions() const
 {
-  return outTransitions.size();
+  return static_cast<int>(outTransitions.size());
 }
 
 Transition* State::getLoop(int i) const
@@ -234,7 +231,7 @@ Transition* State::getLoop(int i) const
 
 int State::getNumLoops() const
 {
-  return loops.size();
+  return static_cast<int>(loops.size());
 }
 
 void State::setSimulated(bool simulated)
@@ -255,34 +252,4 @@ int State::getZoomLevel() const
 void State::setZoomLevel(const int level)
 {
   zoomLevel = level;
-}
-
-Vector3D State::getForce()
-{
-  return force;
-}
-
-void State::resetForce()
-{
-  force = Vector3D(0.0f, 0.0f, 0.0f);
-}
-
-void State::addForce(Vector3D f)
-{
-  force = force + f;
-}
-
-Vector2D State::getVelocity()
-{
-  return velocity;
-}
-
-void State::resetVelocity()
-{
-  velocity = Vector2D(0.0f, 0.0f);
-}
-
-void State::setVelocity(Vector2D v)
-{
-  velocity = v;
 }

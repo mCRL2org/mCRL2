@@ -13,7 +13,8 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/detail/linear_process_conversion_visitor.h"
+#include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
+#include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -40,7 +41,7 @@ const std::string SPEC3 =
   "init X;                            \n"
   ;
 
-const std::string ABS_SPEC_LINEARIZED = 
+const std::string ABS_SPEC_LINEARIZED =
 //  "sort D = struct d1 | d2;                                                                                                     \n"
 //  "     Error = struct e;                                                                                                       \n"
 //  "                                                                                                                             \n"
@@ -156,18 +157,18 @@ void test_process(std::string text)
   bool linear = is_linear(pspec, true);
   if (linear)
   {
-    process::detail::linear_process_conversion_visitor visitor;
+    process::detail::linear_process_conversion_traverser visitor;
     specification spec = visitor.convert(pspec);
   }
   else
   {
     try
     {
-      process::detail::linear_process_conversion_visitor visitor;
+      process::detail::linear_process_conversion_traverser visitor;
       specification spec = visitor.convert(pspec);
       BOOST_CHECK(false); // not supposed to arrive here
     }
-    catch(...)
+    catch (...)
     {
       // skip
     }

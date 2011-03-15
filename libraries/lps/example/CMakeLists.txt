@@ -22,7 +22,6 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/boost/)
 
 ##---------------------------------------------------
 ## Example lpsparse 
@@ -37,16 +36,10 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/boost/)
 #       mcrl2lexer.cpp
 # )
 
-# if( MCRL2_MONO_LIB )
-#   target_link_libraries(${PROJECT_NAME}
-#     mcrl2_monolib
-#   )
-# else( MCRL2_MONO_LIB )  
 # target_link_libraries(${PROJECT_NAME}
 #    mcrl2_lps
 #    mcrl2_utilities_command_line
 # )
-# endif( MCRL2_MONO_LIB )
 
 ##---------------------------------------------------
 ## Example lpsrewr 
@@ -59,13 +52,7 @@ add_executable("${PROJECT_NAME}"
       lpsrewr.cpp 
 )
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )  
 target_link_libraries(${PROJECT_NAME}
    mcrl2_lps
    mcrl2_utilities_command_line
 )
-endif( MCRL2_MONO_LIB )

@@ -11,7 +11,7 @@
 #include "wx.hpp" // precompiled headers
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #include <wx/wx.h>
@@ -20,7 +20,7 @@
 
 using namespace std;
 
-StandardSimulatorGUI::StandardSimulatorGUI(wxWindow *window)
+StandardSimulatorGUI::StandardSimulatorGUI(wxWindow* window)
 {
   w = window;
 }
@@ -29,30 +29,34 @@ StandardSimulatorGUI::~StandardSimulatorGUI()
 {
 }
 
-void StandardSimulatorGUI::LoadView(const string &filename)
+void StandardSimulatorGUI::LoadView(const string& filename)
 {
-	wxDynamicLibrary lib(wxConvLocal.cMB2WX(filename.c_str()));
+  wxDynamicLibrary lib(wxConvLocal.cMB2WX(filename.c_str()));
 
-	if ( lib.IsLoaded() )
-	{
-		void (*f)(SimulatorInterface *);
+  if (lib.IsLoaded())
+  {
+    void (*f)(SimulatorInterface*);
 
-		f = (void (*)(SimulatorInterface *)) lib.GetSymbol(wxT("SimulatorViewDLLAddView"));
-		if ( f != NULL )
-		{
-			f(this);
-			lib.Detach(); //XXX
-		} else {
-			wxMessageDialog msg(w, wxT("DLL does not appear to contain a View."), wxT("Error"), wxOK|wxICON_ERROR);
-			msg.ShowModal();
-		}
-	} else {
-		/*wxMessageDialog msg(this, wxT("Failed to open DLL."), wxT("Error"), wxOK|wxICON_ERROR);
-		msg.ShowModal();*/
-       }
+    f = (void (*)(SimulatorInterface*)) lib.GetSymbol(wxT("SimulatorViewDLLAddView"));
+    if (f != NULL)
+    {
+      f(this);
+      lib.Detach(); //XXX
+    }
+    else
+    {
+      wxMessageDialog msg(w, wxT("DLL does not appear to contain a View."), wxT("Error"), wxOK|wxICON_ERROR);
+      msg.ShowModal();
+    }
+  }
+  else
+  {
+    /*wxMessageDialog msg(this, wxT("Failed to open DLL."), wxT("Error"), wxOK|wxICON_ERROR);
+    msg.ShowModal();*/
+  }
 }
 
-wxWindow *StandardSimulatorGUI::MainWindow()
+wxWindow* StandardSimulatorGUI::MainWindow()
 {
   return w;
 }

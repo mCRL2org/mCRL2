@@ -19,13 +19,13 @@ class Transition
   public:
     Transition(State* bs,State* es,int label);
     ~Transition();
-    State*	getBeginState() const;
-    State*	getEndState() const;
-    int			getLabel() const;
-    bool		isBackpointer() const;
+    State*  getBeginState() const;
+    State*  getEndState() const;
+    int     getLabel() const;
+    bool    isBackpointer() const;
     bool                isSelfLoop() const;
-    bool		isMarked() const;
-    void		setMarkedPointer(bool* bp);
+    bool    isMarked() const;
+    void    setMarkedPointer(bool* bp);
 
   private:
     State*  beginState;

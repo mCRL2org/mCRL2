@@ -15,45 +15,47 @@
 #include "mcrl2/data/abstraction.h"
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
-    /// \brief universal quantification.
+/// \brief universal quantification.
+///
+class forall: public abstraction
+{
+  public:
+
+    /// Constructor.
     ///
-    class forall: public abstraction
+    /// \param[in] d A data expression.
+    /// \pre d has the interal structure of an abstraction.
+    /// \pre d is a universal quantification.
+    forall(const data_expression& d)
+      : abstraction(d)
     {
-      public:
+      assert(is_abstraction(d));
+      assert(static_cast<abstraction>(d).binding_operator() == forall_binder());
+    }
 
-        /// Constructor.
-        ///
-        /// \param[in] d A data expression.
-        /// \pre d has the interal structure of an abstraction.
-        /// \pre d is a universal quantification.
-        forall(const data_expression& d)
-          : abstraction(d)
-        {
-          assert(is_abstraction(d));
-          assert(static_cast<abstraction>(d).binding_operator() == forall_binder());
-        }
+    /// Constructor.
+    ///
+    /// \param[in] variables A nonempty list of binding variables (objects of type variable).
+    /// \param[in] body The body of the forall abstraction.
+    /// \pre variables is not empty.
+    template < typename Container >
+    forall(const Container& variables,
+           const data_expression& body,
+           typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+      : abstraction(forall_binder(), variables, body)
+    {
+      assert(!variables.empty());
+    }
 
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty list of binding variables (objects of type variable).
-        /// \param[in] body The body of the forall abstraction.
-        /// \pre variables is not empty.
-        template < typename Container >
-        forall(const Container& variables,
-               const data_expression& body,
-               typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(forall_binder(), variables, body)
-        {
-          assert(!variables.empty());
-        }
+}; // class forall
 
-    }; // class forall
-
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

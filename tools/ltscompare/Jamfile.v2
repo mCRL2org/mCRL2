@@ -1,6 +1,0 @@
-project toolset/ltscompare ;
-
-tool ltscompare
-       : ltscompare.cpp
-         /libraries//lts
-       ;

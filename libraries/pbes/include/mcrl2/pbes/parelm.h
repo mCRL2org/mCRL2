@@ -17,7 +17,6 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/core/reachable_nodes.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/iota.h"
@@ -30,9 +29,11 @@
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/find.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief Algorithm class for the parelm algorithm
 class pbes_parelm_algorithm
@@ -142,12 +143,12 @@ class pbes_parelm_algorithm
     /// \param index A positive number
     /// \return The name of the predicate variable that corresponds with \p index
     template <typename Container>
-    core::identifier_string find_predicate_variable(const pbes<Container>& p, int index) const
+    core::identifier_string find_predicate_variable(const pbes<Container>& p, size_t index) const
     {
-      int offset = 0;
+      size_t offset = 0;
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
-        int size = i->variable().parameters().size();
+        size_t size = i->variable().parameters().size();
         if (offset + size > index)
         {
           return i->variable().name();
@@ -168,18 +169,18 @@ class pbes_parelm_algorithm
       std::vector<data::variable> predicate_variables;
 
       // compute a mapping from propositional variable names to offsets
-      int offset = 0;
-      std::map<core::identifier_string, int> propvar_offsets;
+      size_t offset = 0;
+      std::map<core::identifier_string, size_t> propvar_offsets;
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         propvar_offsets[i->variable().name()] = offset;
         offset += i->variable().parameters().size();
         predicate_variables.insert(predicate_variables.end(), i->variable().parameters().begin(), i->variable().parameters().end());
       }
-      int N = offset; // # variables
+      size_t N = offset; // # variables
 
       // compute the initial set v of significant variables
-      std::set<int> v;
+      std::set<size_t> v;
       offset = 0;
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
@@ -207,7 +208,7 @@ class pbes_parelm_algorithm
 
         // right hand side (Y)
         pbes_expression phi = i->formula();
-        std::set<propositional_variable_instantiation> propvars = find_all_propositional_variable_instantiations(phi);
+        std::set<propositional_variable_instantiation> propvars = find_propositional_variable_instantiations(phi);
         for (std::set<propositional_variable_instantiation>::iterator j = propvars.begin(); j != propvars.end(); ++j)
         {
           core::identifier_string Y = j->name();
@@ -232,25 +233,25 @@ class pbes_parelm_algorithm
       }
 
       // compute the indices s of the parameters that need to be removed
-      std::vector<int> r = core::reachable_nodes(G, v.begin(), v.end());
+      std::vector<size_t> r = core::reachable_nodes(G, v.begin(), v.end());
       std::sort(r.begin(), r.end());
-      std::vector<int> q(N);
+      std::vector<size_t> q(N);
       core::detail::iota(q.begin(), q.end(), 0);
-      std::vector<int> s;
+      std::vector<size_t> s;
       std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
 
       // create a map that specifies the parameters that need to be removed
-      std::map<core::identifier_string, std::vector<int> > removals;
-      int index = 0;
-      std::vector<int>::iterator sfirst = s.begin();
+      std::map<core::identifier_string, std::vector<size_t> > removals;
+      size_t index = 0;
+      std::vector<size_t>::iterator sfirst = s.begin();
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
-        int maxindex = index + i->variable().parameters().size();
-        std::vector<int>::iterator slast = std::find_if(sfirst, s.end(), boost::bind(std::greater_equal<int>(), _1, maxindex));
+        size_t maxindex = index + i->variable().parameters().size();
+        std::vector<size_t>::iterator slast = std::find_if(sfirst, s.end(), boost::bind(std::greater_equal<size_t>(), _1, maxindex));
         if (slast > sfirst)
         {
-          std::vector<int> w(sfirst, slast);
-          std::transform(w.begin(), w.end(), w.begin(), boost::bind(std::minus<int>(), _1, index));
+          std::vector<size_t> w(sfirst, slast);
+          std::transform(w.begin(), w.end(), w.begin(), boost::bind(std::minus<size_t>(), _1, index));
           removals[i->variable().name()] = w;
         }
         index = maxindex;
@@ -261,7 +262,7 @@ class pbes_parelm_algorithm
       if (mcrl2::core::gsDebug)
       {
         std::cerr << "\ninfluential parameters:" << std::endl;
-        for(std::set<int>::iterator i = v.begin(); i != v.end(); ++i)
+        for (std::set<size_t>::iterator i = v.begin(); i != v.end(); ++i)
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::variable v1 = predicate_variables[*i];
@@ -272,13 +273,13 @@ class pbes_parelm_algorithm
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
         edge_iterator last  = e.second;
-        for( ; first != last; ++first)
+        for (; first != last; ++first)
         {
           edge_descriptor e = *first;
-          int i1 = boost::source(e, G);
+          size_t i1 = boost::source(e, G);
           core::identifier_string X1 = find_predicate_variable(p, i1);
           data::variable v1 = predicate_variables[i1];
-          int i2 = boost::target(e, G);
+          size_t i2 = boost::target(e, G);
           core::identifier_string X2 = find_predicate_variable(p, i2);
           data::variable v2 = predicate_variables[i2];
           std::string left  = "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")";
@@ -291,11 +292,11 @@ class pbes_parelm_algorithm
       if (mcrl2::core::gsVerbose)
       {
         std::cerr << "\nremoving the following parameters:" << std::endl;
-        for (std::map<core::identifier_string, std::vector<int> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
+        for (std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
         {
           core::identifier_string X1 = i->first;
 
-          for (std::vector<int>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
+          for (std::vector<size_t>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
             data::variable v1 = predicate_variables[*j + propvar_offsets[X1]];
             std::cerr << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";

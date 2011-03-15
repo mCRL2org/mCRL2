@@ -17,7 +17,8 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "protaterm.h"          // IProtectedATerm
 
-namespace atermpp {
+namespace atermpp
+{
 
 /// \brief Protected list container.
 template <class T, class Allocator = std::allocator<T> >
@@ -79,23 +80,23 @@ class list: public std::list<T,Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
-        /// \brief Constructor.
-        /// \param first The start of a range of elements.
-        /// \param last The end of a range of elements.
+    /// \brief Constructor.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
     template<class InIt>
-        list(InIt first, InIt last)
+    list(InIt first, InIt last)
       : std::list<T,Allocator>(first, last),
         IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
 
-        /// \brief Constructor.
-        /// \param first The start of a range of elements.
-        /// \param last The end of a range of elements.
-        /// \param a An allocator.
+    /// \brief Constructor.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param a An allocator.
     template<class InIt>
-        list(InIt first, InIt last, const Allocator& a)
+    list(InIt first, InIt last, const Allocator& a)
       : std::list<T,Allocator>(first, last, a),
         IProtectedATerm()
     {
@@ -112,7 +113,7 @@ class list: public std::list<T,Allocator>, IProtectedATerm
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-std::cout << "atermpp::list.ATprotectTerms() : protecting " << list<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::list.ATprotectTerms() : protecting " << list<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::list<T,Allocator>::iterator i = std::list<T,Allocator>::begin(); i != std::list<T,Allocator>::end(); ++i)
       {

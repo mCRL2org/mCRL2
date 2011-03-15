@@ -17,10 +17,12 @@
 // Constructor and Destructor
 
 Transition::Transition(State* bs,State* es,int lbl)
-: beginState(bs), endState(es), label(lbl), marked(NULL) {
+  : beginState(bs), endState(es), label(lbl), marked(NULL)
+{
 }
 
-Transition::~Transition() {
+Transition::~Transition()
+{
 }
 
 State* Transition::getBeginState() const
@@ -53,7 +55,7 @@ bool Transition::isMarked() const
   return *marked;
 }
 
-void Transition::setMarkedPointer( bool* bp )
+void Transition::setMarkedPointer(bool* bp)
 {
   marked = bp;
 }

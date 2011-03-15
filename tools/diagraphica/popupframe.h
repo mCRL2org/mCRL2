@@ -15,24 +15,24 @@
 #include "colleague.h"
 #include "mediator.h"
 
-class PopupFrame : public wxFrame, public Colleague 
+class PopupFrame : public wxFrame, public Colleague
 {
-public:
+  public:
     // -- constructors and desctructor ------------------------------
     PopupFrame(
-        Mediator* m,
-        wxWindow* parent,
-        wxWindowID id,
-        wxString title,
-        wxPoint position,
-        wxSize size );
+      Mediator* m,
+      wxWindow* parent,
+      wxWindowID id,
+      wxString title,
+      wxPoint position,
+      wxSize size);
     virtual ~PopupFrame();
 
-protected:
+  protected:
     // -- event handlers --------------------------------------------
-    virtual void OnClose( wxCloseEvent& event );
+    virtual void OnClose(wxCloseEvent& event);
 
-private:
+  private:
     // -- declare event table ---------------------------------------
     DECLARE_EVENT_TABLE()
 };

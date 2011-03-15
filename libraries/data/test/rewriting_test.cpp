@@ -25,7 +25,6 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/utility.h"
@@ -72,12 +71,14 @@ rewrite_strategy_vector rewrite_strategies()
 }
 
 template <typename Rewriter>
-void data_rewrite_test(Rewriter& R, data_expression const& input, data_expression const& expected_output) 
-{ data_expression output = R(input);
+void data_rewrite_test(Rewriter& R, data_expression const& input, data_expression const& expected_output)
+{
+  data_expression output = R(input);
 
   BOOST_CHECK(output == expected_output);
 
-  if (output != expected_output) {
+  if (output != expected_output)
+  {
     std::clog << "--- test failed --- " << core::pp(input) << " ->* " << core::pp(expected_output) << std::endl
               << "input    " << core::pp(input) << std::endl
               << "expected " << core::pp(expected_output) << std::endl
@@ -89,7 +90,8 @@ void data_rewrite_test(Rewriter& R, data_expression const& input, data_expressio
   }
 }
 
-BOOST_AUTO_TEST_CASE(bool_rewrite_test) {
+BOOST_AUTO_TEST_CASE(bool_rewrite_test)
+{
   using namespace mcrl2::data::sort_bool;
 
   data_specification specification;
@@ -97,7 +99,7 @@ BOOST_AUTO_TEST_CASE(bool_rewrite_test) {
   specification.add_context_sort(bool_());
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -123,7 +125,8 @@ BOOST_AUTO_TEST_CASE(bool_rewrite_test) {
 
 }
 
-BOOST_AUTO_TEST_CASE(pos_rewrite_test) {
+BOOST_AUTO_TEST_CASE(pos_rewrite_test)
+{
   using namespace mcrl2::data::sort_pos;
   std::cerr << "pos_rewrite_test\n";
 
@@ -132,7 +135,7 @@ BOOST_AUTO_TEST_CASE(pos_rewrite_test) {
   specification.add_context_sort(pos());
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -160,7 +163,8 @@ BOOST_AUTO_TEST_CASE(pos_rewrite_test) {
   }
 }
 
-BOOST_AUTO_TEST_CASE(nat_rewrite_test) {
+BOOST_AUTO_TEST_CASE(nat_rewrite_test)
+{
   using namespace mcrl2::data::sort_nat;
   std::cerr << "nat_rewrite_test\n";
 
@@ -169,7 +173,7 @@ BOOST_AUTO_TEST_CASE(nat_rewrite_test) {
   specification.add_context_sort(nat());
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -239,7 +243,7 @@ BOOST_AUTO_TEST_CASE(int_rewrite_test)
   specification.add_context_sort(int_());
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -295,14 +299,15 @@ BOOST_AUTO_TEST_CASE(int_rewrite_test)
 }
 
 BOOST_AUTO_TEST_CASE(real_rewrite_test)
-{ using namespace mcrl2::data::sort_real;
+{
+  using namespace mcrl2::data::sort_real;
   std::cerr << "real_rewrite_test\n";
 
   data_specification specification;
   specification.add_context_sort(real_());
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -360,7 +365,8 @@ BOOST_AUTO_TEST_CASE(real_rewrite_test)
 }
 
 BOOST_AUTO_TEST_CASE(list_rewrite_test)
-{ using namespace mcrl2::data::sort_bool;
+{
+  using namespace mcrl2::data::sort_bool;
   using namespace mcrl2::data::sort_list;
   std::cerr << "list_rewrite_test\n";
   data_specification specification;
@@ -368,7 +374,7 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
   specification.add_context_sort(list(bool_()));
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -389,6 +395,35 @@ BOOST_AUTO_TEST_CASE(list_rewrite_test)
   }
 }
 
+BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
+{
+  using namespace mcrl2::data::sort_bool;
+  using namespace mcrl2::data::sort_list;
+  std::cerr << "struct_list_rewrite_test\n";
+  data_specification specification=parse_data_specification("sort L = struct l( R: List(Bool) );"
+                                                            "map  f:Set(L);");   // Map is added to guarantee that rewrite rules for sets 
+                                                                                  // are present.
+
+
+  rewrite_strategy_vector strategies(rewrite_strategies());
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    const data_expression e1=parse_data_expression("l( [true]) in {l( [])}",specification);
+    const data_expression e2=parse_data_expression("l( [true]) in {l( [true])}",specification);
+    const data_expression e3=parse_data_expression("l( [true]) in {l( [true]),l([false])}",specification);
+    const data_expression e4=parse_data_expression("l( [true]) in {l([false])}",specification);
+
+    data_rewrite_test(R, e1, false_());
+    data_rewrite_test(R, e2, true_());
+    data_rewrite_test(R, e3, true_());
+    data_rewrite_test(R, e4, false_());
+  }
+}
+
+
 BOOST_AUTO_TEST_CASE(set_rewrite_test)
 {
   using namespace mcrl2::data::sort_set;
@@ -405,51 +440,51 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
   specification.add_context_sort(set_(bool_()));
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
     sort_expression set_nat(set_(nat()));
 
-    data_expression empty(R(specification.normalise_sorts(emptyset(nat()))));
+    data_expression empty(R(normalize_sorts(emptyset(nat()),specification)));
 
     data_expression p0(nat(0));
     data_expression p1(nat(1));
     data_expression p2(nat(2));
 
-    data_rewrite_test(R, specification.normalise_sorts(equal_to(true_function(nat()), true_function(nat()))), true_());
-    data_rewrite_test(R, specification.normalise_sorts(equal_to(false_function(nat()), false_function(nat()))), true_());
-    data_rewrite_test(R, specification.normalise_sorts(equal_to(true_function(nat()), false_function(nat()))), false_());
-    data_rewrite_test(R, specification.normalise_sorts(equal_to(false_function(nat()), true_function(nat()))), false_());
+    data_rewrite_test(R, normalize_sorts(equal_to(true_function(nat()), true_function(nat())),specification), true_());
+    data_rewrite_test(R, normalize_sorts(equal_to(false_function(nat()), false_function(nat())),specification), true_());
+    data_rewrite_test(R, normalize_sorts(equal_to(true_function(nat()), false_function(nat())),specification), false_());
+    data_rewrite_test(R, normalize_sorts(equal_to(false_function(nat()), true_function(nat())),specification), false_());
 
-    data_expression s1(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p1, fset_empty(nat()))))));
-    data_expression s2(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p2, fset_empty(nat()))))));
-    data_expression s(R(specification.normalise_sorts(setfset(nat(), fsetinsert(nat(), p1, fsetinsert(nat(), p2, fset_empty(nat())))))));
+    data_expression s1(R(normalize_sorts(setfset(nat(), fsetinsert(nat(), p1, fset_empty(nat()))),specification)));
+    data_expression s2(R(normalize_sorts(setfset(nat(), fsetinsert(nat(), p2, fset_empty(nat()))),specification)));
+    data_expression s(R(normalize_sorts(setfset(nat(), fsetinsert(nat(), p1, fsetinsert(nat(), p2, fset_empty(nat())))),specification)));
 
-    data_expression empty_complement(specification.normalise_sorts(setcomplement(nat(),emptyset(nat()))));
-    data_expression intersection(specification.normalise_sorts(setintersection(nat(),setcomplement(nat(),emptyset(nat())),emptyset(nat()))));
-    //data_rewrite_test(R, specification.normalise_sorts(less_equal(empty_complement,empty)), false_());
-    data_rewrite_test(R, specification.normalise_sorts(less_equal(empty,empty_complement)), true_());
-    //data_rewrite_test(R, specification.normalise_sorts(equal_to(intersection, empty_complement)), true_());
-    //data_rewrite_test(R, specification.normalise_sorts(equal_to(empty_complement, intersection)), true_());
+    data_expression empty_complement(normalize_sorts(setcomplement(nat(),emptyset(nat())),specification));
+    data_expression intersection(normalize_sorts(setintersection(nat(),setcomplement(nat(),emptyset(nat())),emptyset(nat())),specification));
+    //data_rewrite_test(R, normalize_sorts(less_equal(empty_complement,empty),specification), false_());
+    data_rewrite_test(R, normalize_sorts(less_equal(empty,empty_complement),specification), true_());
+    //data_rewrite_test(R, normalize_sorts(equal_to(intersection, empty_complement),specification), true_());
+    //data_rewrite_test(R, normalize_sorts(equal_to(empty_complement, intersection),specification), true_());
 
-    data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p0, s)), false_());
-    data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p1, s)), true_());
-    data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p2, s)), true_());
+    data_rewrite_test(R, normalize_sorts(setin(nat(), p0, s),specification), false_());
+    data_rewrite_test(R, normalize_sorts(setin(nat(), p1, s),specification), true_());
+    data_rewrite_test(R, normalize_sorts(setin(nat(), p2, s),specification), true_());
 
-    data_rewrite_test(R, specification.normalise_sorts(setunion_(nat(), s, empty)), s);
-    data_rewrite_test(R, specification.normalise_sorts(setunion_(nat(), s1, s2)), s);
+    data_rewrite_test(R, normalize_sorts(setunion_(nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(setunion_(nat(), s1, s2),specification), s);
 
-    data_rewrite_test(R, specification.normalise_sorts(setintersection(nat(), s, empty)), empty);
-    data_rewrite_test(R, specification.normalise_sorts(setintersection(nat(), s, s1)), s1);
-    data_rewrite_test(R, specification.normalise_sorts(setintersection(nat(), s, s2)), s2);
+    data_rewrite_test(R, normalize_sorts(setintersection(nat(), s, empty),specification), empty);
+    data_rewrite_test(R, normalize_sorts(setintersection(nat(), s, s1),specification), s1);
+    data_rewrite_test(R, normalize_sorts(setintersection(nat(), s, s2),specification), s2);
 
-    data_rewrite_test(R, specification.normalise_sorts(setdifference(nat(), s, empty)), s);
-    data_rewrite_test(R, specification.normalise_sorts(setdifference(nat(), s, s1)), s2);
-    data_rewrite_test(R, specification.normalise_sorts(setdifference(nat(), s, s2)), s1);
+    data_rewrite_test(R, normalize_sorts(setdifference(nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(setdifference(nat(), s, s1),specification), s2);
+    data_rewrite_test(R, normalize_sorts(setdifference(nat(), s, s2),specification), s1);
 
-    data_rewrite_test(R, specification.normalise_sorts(setin(nat(), p0, setcomplement(nat(), s))), true_());
+    data_rewrite_test(R, normalize_sorts(setin(nat(), p0, setcomplement(nat(), s)),specification), true_());
     // extra tests by Jan Friso
     data::data_expression x = data::parse_data_expression("1 in {n:Nat|n<5}",specification);
     data_rewrite_test(R, x, true_());
@@ -463,7 +498,7 @@ BOOST_AUTO_TEST_CASE(set_rewrite_test)
     // test for a variation on bug #721,
     // see also set_bool_rewrite_test()
     x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
-    x = specification.normalise_sorts(x);
+    x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
   }
 }
@@ -477,48 +512,49 @@ BOOST_AUTO_TEST_CASE(bag_rewrite_test)
   using namespace mcrl2::data::sort_bool;
 
   data_specification specification = parse_data_specification(
-    "sort A = Bag(Nat);"
-  );
+                                       "sort A = Bag(Nat);"
+                                     );
 
   specification.add_context_sort(bag(nat()));
   specification.add_context_sort(bag(pos()));
 
+  std::cerr << "bag rewrite test\n";
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
     sort_expression bag_nat(sort_bag::bag(nat()));
 
-    data_expression empty(R(specification.normalise_sorts(emptybag(nat()))));
+    data_expression empty(R(normalize_sorts(emptybag(nat()),specification)));
 
     data_expression p0(nat(0));
     data_expression p1(nat(1));
     data_expression p2(nat(2));
 
-    data_expression s1(R(specification.normalise_sorts(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbag_empty(nat()))))));
-    data_expression s2(R(specification.normalise_sorts(bagfbag(nat(), fbaginsert(nat(), p2, pos(2), fbag_empty(nat()))))));
-    data_expression s(R(specification.normalise_sorts(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbaginsert(nat(), p2, pos(2), fbag_empty(nat())))))));
+    data_expression s1(R(normalize_sorts(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbag_empty(nat()))),specification)));
+    data_expression s2(R(normalize_sorts(bagfbag(nat(), fbaginsert(nat(), p2, pos(2), fbag_empty(nat()))),specification)));
+    data_expression s(R(normalize_sorts(bagfbag(nat(), fbaginsert(nat(), p1, pos(1), fbaginsert(nat(), p2, pos(2), fbag_empty(nat())))),specification)));
 
-    data_rewrite_test(R, specification.normalise_sorts(bagin(nat(), p0, s)), false_());
-    data_rewrite_test(R, specification.normalise_sorts(bagin(nat(), p1, s)), true_());
-    data_rewrite_test(R, specification.normalise_sorts(bagin(nat(), p2, s)), true_());
+    data_rewrite_test(R, normalize_sorts(bagin(nat(), p0, s),specification), false_());
+    data_rewrite_test(R, normalize_sorts(bagin(nat(), p1, s),specification), true_());
+    data_rewrite_test(R, normalize_sorts(bagin(nat(), p2, s),specification), true_());
 
-    data_rewrite_test(R, specification.normalise_sorts(bagcount(nat(), p0, s)), p0);
-    data_rewrite_test(R, specification.normalise_sorts(bagcount(nat(), p1, s)), p1);
-    data_rewrite_test(R, specification.normalise_sorts(bagcount(nat(), p2, s)), p2);
+    data_rewrite_test(R, normalize_sorts(bagcount(nat(), p0, s),specification), p0);
+    data_rewrite_test(R, normalize_sorts(bagcount(nat(), p1, s),specification), p1);
+    data_rewrite_test(R, normalize_sorts(bagcount(nat(), p2, s),specification), p2);
 
-    data_rewrite_test(R, specification.normalise_sorts(bagjoin(nat(), s, empty)), s);
-    data_rewrite_test(R, specification.normalise_sorts(bagjoin(nat(), s1, s2)), s);
+    data_rewrite_test(R, normalize_sorts(bagjoin(nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(bagjoin(nat(), s1, s2),specification), s);
 
-    data_rewrite_test(R, specification.normalise_sorts(bagintersect(nat(), s, empty)), empty);
-    data_rewrite_test(R, specification.normalise_sorts(bagintersect(nat(), s, s1)), s1);
-    data_rewrite_test(R, specification.normalise_sorts(bagintersect(nat(), s, s2)), s2);
+    data_rewrite_test(R, normalize_sorts(bagintersect(nat(), s, empty),specification), empty);
+    data_rewrite_test(R, normalize_sorts(bagintersect(nat(), s, s1),specification), s1);
+    data_rewrite_test(R, normalize_sorts(bagintersect(nat(), s, s2),specification), s2);
 
-    data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, empty)), s);
-    data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, s1)), s2);
-    data_rewrite_test(R, specification.normalise_sorts(bagdifference(nat(), s, s2)), s1);
+    data_rewrite_test(R, normalize_sorts(bagdifference(nat(), s, empty),specification), s);
+    data_rewrite_test(R, normalize_sorts(bagdifference(nat(), s, s1),specification), s2);
+    data_rewrite_test(R, normalize_sorts(bagdifference(nat(), s, s2),specification), s1);
 
     // extra tests by Jan Friso
     data::data_expression x = data::parse_data_expression("count(1,{ 1:1,2:2})==1",specification);
@@ -530,7 +566,8 @@ BOOST_AUTO_TEST_CASE(bag_rewrite_test)
   }
 }
 
-BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test) {
+BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test)
+{
   using namespace sort_bool;
   using namespace sort_nat;
 
@@ -538,10 +575,10 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test) {
 
   atermpp::vector< structured_sort_constructor_argument > arguments;
 
-  arguments.push_back(structured_sort_constructor_argument(bool_(), "a0"));
+  arguments.push_back(structured_sort_constructor_argument("a0", bool_()));
   arguments.push_back(structured_sort_constructor_argument(static_cast<sort_expression const&>(bool_())));
-  arguments.push_back(structured_sort_constructor_argument(sort_nat::nat(), "n0"));
-  arguments.push_back(structured_sort_constructor_argument(sort_nat::nat(), "n1"));
+  arguments.push_back(structured_sort_constructor_argument("n0", sort_nat::nat()));
+  arguments.push_back(structured_sort_constructor_argument("n1", sort_nat::nat()));
 
   atermpp::vector< structured_sort_constructor > constructors;
   // without arguments or recogniser
@@ -553,22 +590,22 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test) {
   // with arguments, without recogniser
   //  a(a0 : A)
   constructors.push_back(structured_sort_constructor("a",
-     boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
+                         boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
   // two arguments, with recogniser
   //  b(B)?is_b
   constructors.push_back(structured_sort_constructor("b",
-     boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
+                         boost::make_iterator_range(arguments.begin() + 1, arguments.begin() + 2), "is_b"));
   //  c(n0 : Nat, n1 : Nat)?is_c
   constructors.push_back(structured_sort_constructor("c",
-     boost::make_iterator_range(arguments.begin() + 2, arguments.end()), "is_c"));
+                         boost::make_iterator_range(arguments.begin() + 2, arguments.end()), "is_c"));
 
   data::structured_sort ls(boost::make_iterator_range(constructors));
 
   specification.add_alias(alias(basic_sort("D"), ls));
-  // specification.normalise_sorts();
+  // specification.normalize_sorts();
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -582,26 +619,26 @@ BOOST_AUTO_TEST_CASE(structured_sort_rewrite_test) {
     data_expression c(constructors[4].constructor_function(ls)(n0, n1));
 
     // recogniser tests
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), c0)), false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), c0)), false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), c0)), false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), c1)), true_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), c1)), false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), c1)), false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), a)),  false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), a)),  false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), a)),  false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), b)),  false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), b)),  true_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), b)),  false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[1].recogniser_function(ls), c)),  false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[3].recogniser_function(ls), c)),  false_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].recogniser_function(ls), c)),  true_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[1].recogniser_function(ls), c0),specification), false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[3].recogniser_function(ls), c0),specification), false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[4].recogniser_function(ls), c0),specification), false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[1].recogniser_function(ls), c1),specification), true_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[3].recogniser_function(ls), c1),specification), false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[4].recogniser_function(ls), c1),specification), false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[1].recogniser_function(ls), a),specification),  false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[3].recogniser_function(ls), a),specification),  false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[4].recogniser_function(ls), a),specification),  false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[1].recogniser_function(ls), b),specification),  false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[3].recogniser_function(ls), b),specification),  true_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[4].recogniser_function(ls), b),specification),  false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[1].recogniser_function(ls), c),specification),  false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[3].recogniser_function(ls), c),specification),  false_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[4].recogniser_function(ls), c),specification),  true_());
 
     // projection tests
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[2].projection_functions(ls)[0], a)),  true_());
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].projection_functions(ls)[0], c)),  R(n0));
-    data_rewrite_test(R, specification.normalise_sorts(make_application(constructors[4].projection_functions(ls)[1], c)),  R(n1));
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[2].projection_functions(ls)[0], a),specification),  true_());
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[4].projection_functions(ls)[0], c),specification),  R(n0));
+    data_rewrite_test(R, normalize_sorts(make_application(constructors[4].projection_functions(ls)[1], c),specification),  R(n1));
   }
 }
 
@@ -619,10 +656,11 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
   specification.add_context_sort(set_(bool_()));
   specification.add_context_sort(fset(bool_()));
 
+  std::cerr << "set bool rewrite test\n";
   data_expression e(not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_()))))));
-  e = specification.normalise_sorts(e);
+  e = normalize_sorts(e,specification);
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -634,13 +672,13 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
   specification.add_context_sort(set_(bool_()));
   specification.add_context_sort(fset(bool_()));
 
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
     e = not_(fsetin(bool_(), true_(), fsetinsert(bool_(), false_(), fset_cons(bool_(), true_(), fset_empty(bool_())))));
-    e = specification.normalise_sorts(e);
+    e = normalize_sorts(e,specification);
     data_rewrite_test(R, e, false_());
 
     // Rewrite with parsing
@@ -652,14 +690,14 @@ BOOST_AUTO_TEST_CASE(set_bool_rewrite_test)
   specification = data_specification();
   specification.add_context_sort(set_(nat()));
 
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
     // test for a variation on bug #721
     e = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
-    e = specification.normalise_sorts(e);
+    e = normalize_sorts(e,specification);
     data_rewrite_test(R, e, false_());
   }
 }
@@ -672,20 +710,20 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test)
   using namespace mcrl2::data::sort_bool;
   std::cerr << "finite_set_nat_rewrite_test\n";
   data_specification specification = parse_data_specification(
-    "sort A = Set(Nat);"
-  );
+                                       "sort A = Set(Nat);"
+                                     );
 
   specification.add_context_sort(set_(nat()));
   specification.add_context_sort(set_(bool_()));
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
     data::data_expression x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
-    x = specification.normalise_sorts(x);
+    x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
   }
 }
@@ -702,7 +740,7 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
   specification.add_context_sort(set_(nat()));
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -710,27 +748,27 @@ BOOST_AUTO_TEST_CASE(finite_set_nat_rewrite_test_without_alias)
     data::data_expression x;
 
     x = less(cnat(sort_pos::c1()), c0());
-    x = specification.normalise_sorts(x);
+    x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
 
     x = less(c0(), cnat(sort_pos::c1()));
-    x = specification.normalise_sorts(x);
+    x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
     x = fsetin(nat(), c0(), fset_cons(nat(), c0(), fset_empty(nat())));
-    x = specification.normalise_sorts(x);
+    x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
     x = fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())));
-    x = specification.normalise_sorts(x);
+    x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, fset_cons(nat(), c0(), fset_cons(nat(), cnat(sort_pos::c1()), fset_empty(nat()))));
 
     x = fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat()))));
-    x = specification.normalise_sorts(x);
+    x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, true_());
 
     x = not_(fsetin(nat(), c0(), fsetinsert(nat(), cnat(sort_pos::c1()), fset_cons(nat(), c0(), fset_empty(nat())))));
-    x = specification.normalise_sorts(x);
+    x = normalize_sorts(x,specification);
     data_rewrite_test(R, x, false_());
   }
 }
@@ -754,7 +792,7 @@ BOOST_AUTO_TEST_CASE(regression_test_bug_723)
   data_specification specification(parse_data_specification(s));
 
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -811,8 +849,9 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
 
   data_specification specification(parse_data_specification(s));
 
+  std::cerr << "othello test\n";
   rewrite_strategy_vector strategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
@@ -821,6 +860,82 @@ BOOST_AUTO_TEST_CASE(test_othello_condition)
     data_rewrite_test(R, e, sort_bool::true_());
   }
 }
+
+BOOST_AUTO_TEST_CASE(test_lambda_expression)
+{
+  std::string s(
+    "map  n: Pos;\n"
+    "eqn  n=2;\n"
+    "sort D = struct d1 | d2;\n"
+    "     Buf = Nat -> struct data(getdata:D) | empty;\n"
+    "map  emptyBuf: Buf;\n"
+    "     insert: D#Nat#Buf -> Buf;\n"
+    "     remove: Nat#Buf -> Buf;\n"
+    "     release: Nat#Nat#Buf -> Buf;\n"
+    "     nextempty: Nat#Buf -> Nat;\n"
+    "     nextempty_rec: Nat#Buf#Nat -> Nat;\n"
+    "     inWindow: Nat#Nat#Nat -> Bool;\n"
+    "var  i,j,k: Nat; d: D; q: Buf;\n"
+    "eqn  emptyBuf = lambda j:Nat.empty;\n"
+    "     insert(d,i,q) = lambda j:Nat.if(i==j,data(d),q(j));\n"
+    "     remove(i,q) = lambda j:Nat.if(i==j,empty,q(j));\n"
+    "     i mod 2*n==j mod 2*n -> release(i,j,q) = q;\n"
+    "     i mod 2*n!=j mod 2*n ->\n"
+    "          release(i,j,q) = release((i+1) mod 2*n,j,remove(i,q));\n"
+    "     k<n -> nextempty_rec(i,q,k) =\n"
+    "               if(q(i)==empty,i,nextempty_rec((i+1) mod n,q,k+1));\n"
+    "     k==n -> nextempty_rec(i,q,k)=i;\n"
+    "     nextempty(i,q) = nextempty_rec(i,q,0);\n"
+    "     inWindow(i,j,k) = (i<=j && j<k) || (k<i && i<=j) || (j<k && k<i);\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "lambda rewrite test\n";
+  rewrite_strategy_vector strategies(rewrite_strategies());
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("insert(d2,2,insert(d1,1,emptyBuf))", specification));
+    data_rewrite_test(R, e, R(e));  // Check that the lambda expressions are properly translated to and from internal format.
+    e=parse_data_expression("insert(d1,1,emptyBuf)(1)==data(d1)", specification);
+    data_rewrite_test(R, e, sort_bool::true_());
+    e=parse_data_expression("insert(d1,1,emptyBuf)(1)==empty", specification);
+    data_rewrite_test(R, e, sort_bool::false_());
+    e=parse_data_expression("remove(1,emptyBuf)(1)==data(d1)", specification);
+    data_rewrite_test(R, e, sort_bool::false_());
+    e=parse_data_expression("remove(1,emptyBuf)(1)==empty", specification);
+    data_rewrite_test(R, e, sort_bool::true_());
+    e=parse_data_expression("remove(1,insert(d1,1,emptyBuf))(1)==insert(d1,1,emptyBuf)(1)", specification);
+    data_rewrite_test(R, e, sort_bool::false_());
+  }
+}
+
+BOOST_AUTO_TEST_CASE(test_whether_lists_can_be_put_in_sets)
+{
+  std::string s(
+    "sort T = struct s( List(T) ) | c;\n"
+    "map func: Bool;\n"
+    "eqn func = s( [c] ) in { s( [] ) };\n"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "list in set teste\n";
+  rewrite_strategy_vector strategies(rewrite_strategies());
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("func", specification));
+    data_rewrite_test(R, e, sort_bool::false_());
+  }
+
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

@@ -13,7 +13,7 @@ cmake_minimum_required(VERSION 2.6)
 add_library(${PROJECT_NAME}
   source/version.c
   source/idmappings.c
-  source/make.c
+#  source/make.c
   source/bafio.c
   source/memmgnt.c
   source/memory.c
@@ -25,8 +25,8 @@ add_library(${PROJECT_NAME}
   source/byteencoding.c
   source/byteio.c
   source/gc.c
-  source/md5c.c
-  source/tafio.c
+#  source/md5c.c
+#  source/tafio.c
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)

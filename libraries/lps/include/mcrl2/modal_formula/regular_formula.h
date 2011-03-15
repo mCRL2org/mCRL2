@@ -17,59 +17,244 @@
 #include <string>
 #include <cassert>
 #include "mcrl2/atermpp/aterm_traits.h"
-#include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace regular_formulas {
+namespace regular_formulas
+{
 
-///////////////////////////////////////////////////////////////////////////////
-// regular_formula
-/// \brief regular formula expression.
+//--- start generated classes ---//
+/// \brief A regular formula
 class regular_formula: public atermpp::aterm_appl
 {
   public:
-    /// \brief Constructor
+    /// \brief Default constructor.
     regular_formula()
-      : atermpp::aterm_appl(mcrl2::core::detail::constructRegFrm())
+      : atermpp::aterm_appl(core::detail::constructRegFrm())
     {}
 
-    /// \brief Constructor
-    /// \param t A term
-    regular_formula(ATermAppl t)
-      : atermpp::aterm_appl(atermpp::aterm_appl(t))
+    /// \brief Constructor.
+    /// \param term A term
+    regular_formula(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
-    }
-
-    /// \brief Constructor
-    /// \param t A term
-    regular_formula(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
-    {
-      assert(mcrl2::core::detail::check_rule_RegFrm(m_term));
-    }
-
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    regular_formula substitute(Substitution f) const
-    {
-      return regular_formula(f(atermpp::aterm(*this)));
+      assert(core::detail::check_rule_RegFrm(m_term));
     }
 };
 
-///////////////////////////////////////////////////////////////////////////////
-// regular_formula_list
-/// \brief Read-only singly linked list of regular expressions
+/// \brief list of regular_formulas
 typedef atermpp::term_list<regular_formula> regular_formula_list;
+
+/// \brief vector of regular_formulas
+typedef atermpp::vector<regular_formula>    regular_formula_vector;
+
+
+/// \brief Test for a regular_formula expression
+/// \param t A term
+/// \return True if it is a regular_formula expression
+inline
+bool is_regular_formula(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsRegFrm(t);
+}
+
+
+/// \brief The value nil for regular formulas
+class nil: public regular_formula
+{
+  public:
+    /// \brief Default constructor.
+    nil()
+      : regular_formula(core::detail::constructRegNil())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    nil(const atermpp::aterm_appl& term)
+      : regular_formula(term)
+    {
+      assert(core::detail::check_term_RegNil(m_term));
+    }
+};
+
+/// \brief Test for a nil expression
+/// \param t A term
+/// \return True if it is a nil expression
+inline
+bool is_nil(const regular_formula& t)
+{
+  return core::detail::gsIsRegNil(t);
+}
+
+
+/// \brief The seq operator for regular formulas
+class seq: public regular_formula
+{
+  public:
+    /// \brief Default constructor.
+    seq()
+      : regular_formula(core::detail::constructRegSeq())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    seq(const atermpp::aterm_appl& term)
+      : regular_formula(term)
+    {
+      assert(core::detail::check_term_RegSeq(m_term));
+    }
+
+    /// \brief Constructor.
+    seq(const regular_formula& left, const regular_formula& right)
+      : regular_formula(core::detail::gsMakeRegSeq(left, right))
+    {}
+
+    regular_formula left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    regular_formula right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief Test for a seq expression
+/// \param t A term
+/// \return True if it is a seq expression
+inline
+bool is_seq(const regular_formula& t)
+{
+  return core::detail::gsIsRegSeq(t);
+}
+
+
+/// \brief The alt operator for regular formulas
+class alt: public regular_formula
+{
+  public:
+    /// \brief Default constructor.
+    alt()
+      : regular_formula(core::detail::constructRegAlt())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    alt(const atermpp::aterm_appl& term)
+      : regular_formula(term)
+    {
+      assert(core::detail::check_term_RegAlt(m_term));
+    }
+
+    /// \brief Constructor.
+    alt(const regular_formula& left, const regular_formula& right)
+      : regular_formula(core::detail::gsMakeRegAlt(left, right))
+    {}
+
+    regular_formula left() const
+    {
+      return atermpp::arg1(*this);
+    }
+
+    regular_formula right() const
+    {
+      return atermpp::arg2(*this);
+    }
+};
+
+/// \brief Test for a alt expression
+/// \param t A term
+/// \return True if it is a alt expression
+inline
+bool is_alt(const regular_formula& t)
+{
+  return core::detail::gsIsRegAlt(t);
+}
+
+
+/// \brief The trans operator for regular formulas
+class trans: public regular_formula
+{
+  public:
+    /// \brief Default constructor.
+    trans()
+      : regular_formula(core::detail::constructRegTrans())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    trans(const atermpp::aterm_appl& term)
+      : regular_formula(term)
+    {
+      assert(core::detail::check_term_RegTrans(m_term));
+    }
+
+    /// \brief Constructor.
+    trans(const regular_formula& operand)
+      : regular_formula(core::detail::gsMakeRegTrans(operand))
+    {}
+
+    regular_formula operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+};
+
+/// \brief Test for a trans expression
+/// \param t A term
+/// \return True if it is a trans expression
+inline
+bool is_trans(const regular_formula& t)
+{
+  return core::detail::gsIsRegTrans(t);
+}
+
+
+/// \brief The 'trans or nil' operator for regular formulas
+class trans_or_nil: public regular_formula
+{
+  public:
+    /// \brief Default constructor.
+    trans_or_nil()
+      : regular_formula(core::detail::constructRegTransOrNil())
+    {}
+
+    /// \brief Constructor.
+    /// \param term A term
+    trans_or_nil(const atermpp::aterm_appl& term)
+      : regular_formula(term)
+    {
+      assert(core::detail::check_term_RegTransOrNil(m_term));
+    }
+
+    /// \brief Constructor.
+    trans_or_nil(const regular_formula& operand)
+      : regular_formula(core::detail::gsMakeRegTransOrNil(operand))
+    {}
+
+    regular_formula operand() const
+    {
+      return atermpp::arg1(*this);
+    }
+};
+
+/// \brief Test for a trans_or_nil expression
+/// \param t A term
+/// \return True if it is a trans_or_nil expression
+inline
+bool is_trans_or_nil(const regular_formula& t)
+{
+  return core::detail::gsIsRegTransOrNil(t);
+}
+
+//--- end generated classes ---//
 
 } // namespace regular_formulas
 

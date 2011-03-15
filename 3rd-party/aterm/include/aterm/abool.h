@@ -6,10 +6,13 @@ extern "C"
 {
 #endif/* __cplusplus */
 
-typedef enum { ATfalse=0, ATtrue } ATbool;
+  typedef enum {
+    ATfalse=0, ATtrue
+  }
+          ATbool;
 
 #ifdef __cplusplus
 }
-#endif/* __cplusplus */ 
+#endif/* __cplusplus */
 
 #endif

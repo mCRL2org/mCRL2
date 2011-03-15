@@ -16,9 +16,11 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class where_clause ---//
 /// \brief A where expression
@@ -32,7 +34,7 @@ class where_clause: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    where_clause(atermpp::aterm_appl term)
+    where_clause(const atermpp::aterm_appl& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Whr(m_term));
@@ -61,7 +63,7 @@ class where_clause: public data_expression
 };
 //--- end generated class where_clause ---//
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

@@ -21,22 +21,23 @@
 
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/atermpp/algorithm.h"
-#include "mcrl2/atermpp/substitute.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/modal_formula/mucalculus.h"
+#include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/detail/algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Returns the free variables of a pbes expression
 /// \param e A PBES expression
@@ -78,17 +79,6 @@ struct prop_var_visitor
   }
 };
 
-/// \brief Returns the names of all propositional variables that occur in the term t
-/// \param t A term
-/// \return The names of all propositional variables that occur in the term t
-template <typename Term>
-std::set<core::identifier_string> propositional_variable_names(Term t)
-{
-  std::set<core::identifier_string> result;
-  atermpp::for_each(t, prop_var_visitor(result));
-  return result;
-}
-
 /// \brief Returns the variables corresponding to ass(f)
 /// \param f A modal formula
 /// \return The variables corresponding to ass(f)
@@ -96,9 +86,9 @@ inline
 data::variable_list mu_variables(state_formulas::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::assignment_list l = state_formulas::state_frm::ass(f);
+  data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::variable_list result;
-  for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
     result = atermpp::push_front(result, i->lhs());
   }
@@ -112,9 +102,9 @@ inline
 data::data_expression_list mu_expressions(state_formulas::state_formula f)
 {
   assert(core::detail::gsIsStateMu(f) || core::detail::gsIsStateNu(f));
-  data::assignment_list l = state_formulas::state_frm::ass(f);
+  data::assignment_list l = state_formulas::detail::accessors::ass(f);
   data::data_expression_list result;
-  for(data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
+  for (data::assignment_list::iterator i = l.begin(); i != l.end(); ++i)
   {
     result = atermpp::push_front(result, i->rhs());
   }

@@ -17,15 +17,15 @@
 
 class MaxMeasureLiftingStrategy : public LiftingStrategy
 {
-public:
-    MaxMeasureLiftingStrategy( const ParityGame &game,
-                               const SmallProgressMeasures &spm );
+  public:
+    MaxMeasureLiftingStrategy(const ParityGame& game,
+                              const SmallProgressMeasures& spm);
     ~MaxMeasureLiftingStrategy();
 
     verti next(verti prev_vertex, bool prev_lifted);
     size_t memory_use() const;
 
-protected:
+  protected:
 
     /*! Moves the element at index i up the heap until the heap property
         is restored. */
@@ -50,27 +50,27 @@ protected:
     /*! Checks if the queue satisfies the heap property (used for debugging) */
     bool check();
 
-private:
-    MaxMeasureLiftingStrategy(const MaxMeasureLiftingStrategy &);
-    MaxMeasureLiftingStrategy &operator=(const MaxMeasureLiftingStrategy &);
+  private:
+    MaxMeasureLiftingStrategy(const MaxMeasureLiftingStrategy&);
+    MaxMeasureLiftingStrategy& operator=(const MaxMeasureLiftingStrategy&);
 
-private:
+  private:
     //! the SPM instance using this strategy
-    const SmallProgressMeasures &spm_;
+    const SmallProgressMeasures& spm_;
 
-    bool * const queued_;       //!< for each vertex: is it queued?
+    bool* const queued_;        //!< for each vertex: is it queued?
 
-    verti * const pq_pos_;      //!< for each vertex: position in the p.q. or -1
-    verti * const pq_;          //!< priority queue of lifted vertices
+    verti* const pq_pos_;       //!< for each vertex: position in the p.q. or -1
+    verti* const pq_;           //!< priority queue of lifted vertices
     verti pq_size_;             //!< priority queue size
 };
 
 
 class MaxMeasureLiftingStrategyFactory : public LiftingStrategyFactory
 {
-public:
-    LiftingStrategy *create( const ParityGame &game,
-                             const SmallProgressMeasures &spm );
+  public:
+    LiftingStrategy* create(const ParityGame& game,
+                            const SmallProgressMeasures& spm);
 };
 
 #endif /* ndef PREDECESSOR_LIFTING_STRATEGY_H_INCLUDED */

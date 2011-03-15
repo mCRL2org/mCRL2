@@ -16,9 +16,9 @@
 #include <wx/event.h>
 
 #ifndef GRAPH_H
-  #include "graph.h"
+#include "graph.h"
 #else
-  class Graph;
+class Graph;
 #endif
 
 

@@ -8,7 +8,7 @@
   <part id="chapters">
     <title>Contents</title>
     <xi:include href="library_structure.xml"/>
-    <xi:include href="common_functionality.xml"/>
+    <xi:include href="traversal_framework.xml"/>
     <xi:include href="terms.xml"/>
     <xi:include href="atermpp_library.xml"/>
     <xi:include href="core_library.xml"/>

@@ -1,82 +1,150 @@
-[chapter Library structure
+[chapter mCRL2 structure
     [quickbook 1.4]
     [authors [Wesselink, Wieger]]
-    [copyright 2005-2010 Technische Universiteit Eindhoven]
-    [category string-text]
-    [purpose
-       - 
-    ]
+    [copyright 2005-2011 Technische Universiteit Eindhoven]
 ]
 
-[def __boost__     [@http://www.boost.org/ Boost C++ Libraries ]]
-[def __gl2ps__     [@http://www.geuz.org/gl2ps/ Gl2ps ]]
-[def __ticpp__     [@http://code.google.com/p/ticpp/ TinyXML++ ]]
-[def __tr__        [@http://www.mesa3d.org/brianp/TR.html TR ]]
+[def __boost__      [@http://www.boost.org/ Boost C++ Libraries ]]
+[def __boost_test__ [@http://www.boost.org/doc/libs/release/libs/test/index.html Boost.Test ]]
+[def __quickbook__  [@http://www.boost.org/doc/html/quickbook.html Quickbook ]]
+[def __doxygen__    [@http://www.doxygen.org/index.html Doxygen ]]
+[def __latex__      [@http://www.latex-project.org/ LaTeX ]]
+[def __gl2ps__      [@http://www.geuz.org/gl2ps/ Gl2ps ]]
+[def __tr__         [@http://www.mesa3d.org/brianp/TR.html TR ]]
+[def __mcrl2_library_documentation__ [@http://www.mcrl2.org/mcrl2/wiki/index.php/Library_documentation ]]
+[def __mcrl2_regression_test_results__ [@http://mcrl2devel.win.tue.nl/cdash/index.php?project=mCRL2 ]]
+[def __ctest__      [@http://www.vtk.org/Wiki/CMake_Testing_With_CTest CTest ]]
 
-[section: Introduction]
-The mCRL2 Library consists of header files and source files that need to be linked.
-This section documents the structure of the files. The mCRL2 Library contains
-nine sub-libraries plus a directory with 3rd party software.
+[section:introduction Introduction]
+The mCRL2 Library consists of several libraries and tools. This chapter discusses
+how they are organized.
 
-[table Libraries
-    [ [Name]                     [Contents]          ]
-    [ [ ATerm++ Library ] [ C++ interface for the ATerm Library ] ]
-    [ [ Core Library ] [ Common functionality ] ]
-    [ [ Data Library ] [ The data language and constructs ] ]
-    [ [ LPS Library ] [ Linear Processes ] ]
-    [ [ LTS Library ] [ Labeled Transition Systems ] ]
-    [ [ Process Library ] [ Processes ] ]
-    [ [ PBES Library ] [ Parameterized Boolean Equation Systems ] ]
-    [ [ Trace Library ] [ Action traces ] ]
-    [ [ Utilities Library ] [ Utilities ] ]
+[endsect] [/ introduction]
+
+[section:libraries Libraries]
+
+The libraries of the mCRL2 toolset are located in the directory =<MCRL2ROOT>/libraries=.
+The following libraries are available:
+
+[table Libraries of the mCRL2 toolset
+    [ [Name]                [Folder]        [Contents]          ]
+    [ [ ATerm++ Library ]   [atermpp    ] [ C++ interface for the ATerm Library ] ]
+    [ [ BES Library ]       [bes        ] [ Boolean Equation Systems ] ]
+    [ [ Core Library ]      [core       ] [ Common functionality ] ]
+    [ [ Data Library ]      [data       ] [ The data language and constructs ] ]
+    [ [ LPS Library ]       [lps        ] [ Linear Processes ] ]
+    [ [ LTS Library ]       [lts        ] [ Labeled Transition Systems ] ]
+    [ [ Process Library ]   [process    ] [ Processes ] ]
+    [ [ PBES Library ]      [pbes       ] [ Parameterized Boolean Equation Systems ] ]
+    [ [ Trace Library ]     [trace      ] [ Action traces ] ]
+    [ [ Utilities Library ] [utilities  ] [ Utilities ] ]
 ]
 
-[note It is not clear what the difference is between the  
-Core Library and the Utilities Library. May be they should be merged.
-]
-
-[note It is not clear why the Trace Library exists outside of the LTS Library.
-]
-
-[table 3rd party software
-    [ [Name]                     [Contents]          ]
-    [ [ ATerm Library ] [ Term library ] ]
-    [ [ __boost__ ] [ Peer-reviewed portable C++ source libraries ] ]
-    [ [ __gl2ps__ ] [ OpenGL to PostScript printing ] ]
-    [ [ SVC ] [ File Format for Labeled Transition Systems ] ]
-    [ [ __ticpp__ ] [ XML parser ] ]
-    [ [ __tr__ ] [ OpenGL Tile Rendering Library ] ]
-]
-
-Each library is organized as a set of libraries, located in the directory
-<MCRL2ROOT>/libraries. Each library has the following directory structure:
+Each library has the following directory structure:
 
 [table Directory structure of libraries
     [ [Directory]                     [Content]          ]
     [ [build] [ build scripts, code generation scripts ] ]
     [ [doc] [ documentation ] ]
     [ [doc/html] [ html documentation ] ]
-    [ [doc/tex] [ tex documentation (for the wiki) ] ]
+    [ [doc/tex] [ LaTeX documentation ] ]
     [ [example] [ example programs ] ]
     [ [include] [ include files ] ]
     [ [source] [ source files ] ]
     [ [test] [ test files ] ]
 ]
 
-[endsect]
+[section:documentation Documentation types]
 
-[section: Code generation]
+There are three different types of documentation:
+
+[table Documentation
+    [ [Documentation type]                     [Description]          ]
+    [ [Quickbook] [ Tutorial ] ]
+    [ [LaTeX] [ Algorithm specifications and pseudo code ] ]
+    [ [Doxygen] [ Reference documentation ] ]
+]
+
+All mCRL2 documentation is nightly generated and displayed on the __mcrl2_library_documentation__
+web page. 
+
+__quickbook__ documentation (=.qbk=) is located in =doc= directories. It is a documentation format
+that is also used in the __boost__. Quickbook documentation is configured in the files
+=<MCRL2ROOT>/doc/Jamfile.v2= and =<MCRL2ROOT>/doc/src/mcrl2.xml=.
+
+__latex__ documentation (=.tex=) is located in =doc/tex= directories. All =.tex= files with prefix
+=wiki-= are automatically compiled and put on the wiki.
+
+__doxygen__ documentation is embedded in the source files. It is configured in the file
+=<MCRL2ROOT>/doc/doxy/generate_libref_website.sh=.
+
+[endsect] [/ documentation]
+
+[section:testing Testing]
+
+Each library has regression tests, located in the =test= directory. Regression tests
+are based on __boost_test__, and are run daily using __ctest__. The regression test results are displayed
+on __mcrl2_regression_test_results__.
+
+Writing tests is fairly easy. A minimal example is the following:
+
+  #include <boost/test/minimal.hpp>
+  #include "mcrl2/atermpp/aterm_init.h"
+  
+  int test_main(int argc, char* argv[])
+  {
+    MCRL2_ATERMPP_INIT(argc, argv)
+    BOOST_CHECK(1 + 1 == 2);
+    return 0;
+  }
+
+It is enough to add a =.cpp= file to a test directory. All =.cpp= files in the test directories
+are automatically run using __ctest__.
+
+[endsect] [/ testing]
+
+[endsect] [/ libraries]
+
+[section:tools Tools]
+
+The libraries of the mCRL2 toolset are located in the directory =<MCRL2ROOT>/tools=.
+
+* Discuss tool classes
+* Discuss release <-> experimental tools
+* Discuss tool tests
+* Discuss random tests
+
+[endsect] [/ tools]
+
+[section:dependencies Dependencies]
+
+The mCRL2 toolset has a few dependencies on external libraries. The following libraries
+are shipped with mCRL2 in the =<MCRL2ROOT>/3rd-party= directory:
+
+[table External libraries
+    [ [Name]                     [Contents]          ]
+    [ [ ATerm Library ] [ Term library ] ]
+    [ [ __gl2ps__ ] [ OpenGL to PostScript printing ] ]
+    [ [ SVC ] [ File Format for Labeled Transition Systems ] ]
+    [ [ __tr__ ] [ OpenGL Tile Rendering Library ] ]
+]
+
+The mCRL2 toolset also depends on __boost__, which must be installed on your system to compile the toolset.
+
+[endsect] [/ dependencies]
+
+[section:code_generation Code generation]
 
 A significant part of the code in the mCRL2 toolset is generated using scripts.
 The following table gives an overview of the scripts and what they do.
 
 [table Code generation scripts
     [ [Script]                     [Purpose]          ]
-    [ [libraries/core/build/generate_classes.py            ] [ Generates classes from the tables in libraries/core/build/mcrl2_classes.py ] ]
-    [ [libraries/core/build/generate_expression_visitors.py] [ Generates expression visitors from the tables in libraries/core/build/mcrl2_classes.py ] ]
-    [ [libraries/core/build/generate_traversers.py         ] [ Generates traversal classes from the tables in libraries/core/build/mcrl2_classes.py ] ]
-    [ [libraries/core/build/generate_term_functions.py     ] [ Generates low level term functions from doc/specs/mcrl2.internal.txt ] ]
-    [ [libraries/data/build/generate_data_types.py     ] [ Generates rewrite rules ] ]
+    [ [libraries/core/build/generate_classes.py             ] [ Generates classes from the tables in libraries/core/build/mcrl2_classes.py ] ]
+    [ [libraries/core/build/generate_term_functions.py      ] [ Generates low level term functions from doc/specs/mcrl2.internal.txt ] ]
+    [ [libraries/core/build/generate_traversers.py          ] [ Generates traversal classes from the tables in libraries/core/build/mcrl2_classes.py ] ]
+    [ [libraries/core/build/generate_traverser_functions.py ] [ Generates overloads for functions based on the traverser framework ] ]
+    [ [libraries/data/build/generate_data_types.py          ] [ Generates rewrite rules ] ]
     [ [lts/source/liblts_dotlexer.ll] [ lex file for lts dot grammar ] ]
     [ [lts/source/liblts_dotlexer.yy] [ yacc file for lts dot grammar ] ]
     [ [lts/source/liblts_fsmlexer.ll] [ lex file for lts fsm grammar ] ]
@@ -91,8 +159,9 @@ The following commands can be executed to run these scripts:
 cd libraries/core/build
 python generate_term_functions.py -s -l -c
 python generate_classes.py
+python generate_term_functions.py
 python generate_traversers.py
-python generate_expression_visitors.py
+python generate_traverser_functions.py
 ]
 
 [pre
@@ -109,12 +178,6 @@ bison -p mcrl2 --defines=../include/mcrl2/core/detail/mcrl2parser.h -o mcrl2pars
 sed -i 's+#include "mcrl2parser.h"+#include "mcrl2/core/detail/mcrl2parser.h"+' mcrl2parser.cpp
 sed -i '/isatty/d' mcrl2lexer.cpp
 ]
-
-* The script =generate_expression_visitors.py= needs to be modified such that the visitors
-  are built on top of the traverser framework.
-
-* The script generate_term_functions.py generates functions for construction of term classes and for validity checking of terms.
-  In a future version of the scripts these functions can be integrated in the generated classes.
 
 The file =libraries/core/build/mcrl2_classes.py= contains lines like this:
 
@@ -157,4 +220,4 @@ functions correspond with the names of the arguments of the constructor. This is
       }
   };
 
-[endsect]
+[endsect] [/ code_generation]

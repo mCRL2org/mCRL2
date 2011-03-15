@@ -9,18 +9,18 @@
 /// \file sim_hashtable.cpp
 #include "mcrl2/lts/detail/sim_hashtable.h"
 
-#define NOT_FOUND   (-1)
-#define END_OF_LIST (-1)
-#define REMOVED     (-2)
+#define NOT_FOUND   (size_t)(-1)
+#define END_OF_LIST (size_t)(-1)
+#define REMOVED     (size_t)(-2)
 
 /* ---------------- hash_table_iterator ----------------------------- */
 
-hash_table2_iterator::hash_table2_iterator(hash_table2 *ht)
+hash_table2_iterator::hash_table2_iterator(hash_table2* ht)
   : hash_table(ht)
 {
   bucket_it = hash_table->buckets.begin();
   while (bucket_it != hash_table->buckets.end()
-      && (bucket_it->next == REMOVED))
+         && (bucket_it->next == REMOVED))
   {
     ++bucket_it;
   }
@@ -32,14 +32,14 @@ void hash_table2_iterator::operator ++()
   {
     ++bucket_it;
     while (bucket_it != hash_table->buckets.end()
-        && (bucket_it->next == REMOVED))
+           && (bucket_it->next == REMOVED))
     {
       ++bucket_it;
     }
   }
 }
 
-hash_table3_iterator::hash_table3_iterator(hash_table3 *ht)
+hash_table3_iterator::hash_table3_iterator(hash_table3* ht)
   : hash_table(ht)
 {
   bucket_it = hash_table->buckets.begin();
@@ -64,7 +64,7 @@ void hash_table3_iterator::operator ++()
 
 /* ---------------- hash_table -------------------------------------- */
 
-hash_table2::hash_table2(uint initsize)
+hash_table2::hash_table2(size_t initsize)
 {
   mask = 1;
   while (mask < initsize)
@@ -85,9 +85,9 @@ void hash_table2::clear()
   removed_count = 0;
 }
 
-void hash_table2::add(uint x,uint y)
+void hash_table2::add(size_t x,size_t y)
 {
-  uint h = hash(x,y);
+  size_t h = hash(x,y);
   if (hfind(h,x,y) == NOT_FOUND)
   {
     if (check_table())
@@ -103,16 +103,16 @@ void hash_table2::add(uint x,uint y)
   }
 }
 
-bool hash_table2::find(uint x,uint y)
+bool hash_table2::find(size_t x,size_t y)
 {
   return (hfind(hash(x,y),x,y) != NOT_FOUND);
 }
 
-void hash_table2::remove(uint x,uint y)
+void hash_table2::remove(size_t x,size_t y)
 {
   bucket2 b;
-  int i, prev_i;
-  uint h = hash(x,y);
+  size_t i, prev_i;
+  size_t h = hash(x,y);
   i = table[h];
   if (i != END_OF_LIST)
   {
@@ -142,9 +142,9 @@ void hash_table2::remove(uint x,uint y)
   }
 }
 
-int hash_table2::hfind(uint h,uint x,uint y)
+size_t hash_table2::hfind(size_t h,size_t x,size_t y)
 {
-  int i = table[h];
+  size_t i = table[h];
   bucket2 b;
   while (i != END_OF_LIST)
   {
@@ -165,8 +165,8 @@ bool hash_table2::check_table()
     /* table is filled for at least 75%, so let's rehash! */
     mask = (2*mask) + 1;
     table.assign(mask+1,END_OF_LIST);
-    uint h;
-    for (uint i = 0; i < buckets.size(); ++i)
+    size_t h;
+    for (size_t i = 0; i < buckets.size(); ++i)
     {
       if (buckets[i].next != REMOVED)
       {
@@ -180,12 +180,12 @@ bool hash_table2::check_table()
   return false;
 }
 
-uint hash_table2::hash(uint x, uint y)
+size_t hash_table2::hash(size_t x, size_t y)
 {
   return ((159403*x + 389651*y) & mask);
 }
 
-hash_table3::hash_table3(uint initsize)
+hash_table3::hash_table3(size_t initsize)
 {
   mask = 1;
   while (mask < initsize)
@@ -206,9 +206,9 @@ void hash_table3::clear()
   removed_count = 0;
 }
 
-void hash_table3::add(uint x,uint y,uint z)
+void hash_table3::add(size_t x,size_t y,size_t z)
 {
-  uint h = hash(x,y,z);
+  size_t h = hash(x,y,z);
   if (hfind(h,x,y,z) == NOT_FOUND)
   {
     if (check_table())
@@ -225,16 +225,16 @@ void hash_table3::add(uint x,uint y,uint z)
   }
 }
 
-bool hash_table3::find(uint x,uint y,uint z)
+bool hash_table3::find(size_t x,size_t y,size_t z)
 {
   return (hfind(hash(x,y,z),x,y,z) != NOT_FOUND);
 }
 
-void hash_table3::remove(uint x,uint y,uint z)
+void hash_table3::remove(size_t x,size_t y,size_t z)
 {
   bucket3 b;
-  int i, prev_i;
-  uint h = hash(x,y,z);
+  size_t i, prev_i;
+  size_t h = hash(x,y,z);
   i = table[h];
   if (i != END_OF_LIST)
   {
@@ -264,9 +264,9 @@ void hash_table3::remove(uint x,uint y,uint z)
   }
 }
 
-int hash_table3::hfind(uint h,uint x,uint y,uint z)
+size_t hash_table3::hfind(size_t h,size_t x,size_t y,size_t z)
 {
-  int i = table[h];
+  size_t i = table[h];
   bucket3 b;
   while (i != END_OF_LIST)
   {
@@ -287,8 +287,8 @@ bool hash_table3::check_table()
     /* table is filled for at least 75%, so let's rehash! */
     mask = (2*mask) + 1;
     table.assign(mask+1,END_OF_LIST);
-    uint h;
-    for (uint i = 0; i < buckets.size(); ++i)
+    size_t h;
+    for (size_t i = 0; i < buckets.size(); ++i)
     {
       if (buckets[i].next != REMOVED)
       {
@@ -302,7 +302,7 @@ bool hash_table3::check_table()
   return false;
 }
 
-uint hash_table3::hash(uint x, uint y, uint z)
+size_t hash_table3::hash(size_t x, size_t y, size_t z)
 {
   return ((159403*x + 389651*y + 521503*z) & mask);
 }

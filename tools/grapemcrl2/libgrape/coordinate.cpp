@@ -15,7 +15,7 @@
 
 using namespace grape::libgrape;
 
-bool coordinate::operator==( const coordinate &p_c )
+bool coordinate::operator==(const coordinate& p_c)
 {
   float tx, ty;
   tx = p_c.m_x - m_x;
@@ -25,14 +25,14 @@ bool coordinate::operator==( const coordinate &p_c )
          (ty < 0.001 && ty > -0.001);
 }
 
-coordinate & coordinate::operator=( const coordinate &p_c )
+coordinate& coordinate::operator=(const coordinate& p_c)
 {
   m_x = p_c.m_x;
   m_y = p_c.m_y;
   return *this;
 }
 
-coordinate coordinate::operator-(const coordinate &p_c)
+coordinate coordinate::operator-(const coordinate& p_c)
 {
   coordinate result;
   result.m_x = m_x - p_c.m_x;
@@ -40,7 +40,7 @@ coordinate coordinate::operator-(const coordinate &p_c)
   return result;
 }
 
-coordinate coordinate::operator+(const coordinate &p_c)
+coordinate coordinate::operator+(const coordinate& p_c)
 {
   coordinate result;
   result.m_x = m_x + p_c.m_x;
@@ -50,4 +50,4 @@ coordinate coordinate::operator+(const coordinate &p_c)
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( list_of_coordinate )
+WX_DEFINE_OBJARRAY(list_of_coordinate)

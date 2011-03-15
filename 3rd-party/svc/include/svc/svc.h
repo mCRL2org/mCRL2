@@ -1,4 +1,4 @@
-/* 
+/*
    SVC -- the SVC (Systems Validation Centre) file format library
 
    Copyright (C) 2000  Stichting Mathematisch Centrum, Amsterdam,
@@ -27,83 +27,84 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #include "aterm1.h"
 #include "svc1.h"
 
 
 
-typedef SVCint SVCstateIndex;     
-typedef SVCint SVClabelIndex;   
-typedef SVCint SVCparameterIndex; 
+  typedef SVCint SVCstateIndex;
+  typedef SVCint SVClabelIndex;
+  typedef SVCint SVCparameterIndex;
 
-typedef struct {
-   ltsFile file;
-   struct ltsHeader header;
-   long transitionNumber;
-} SVCfile;
+  typedef struct
+  {
+    ltsFile file;
+    struct ltsHeader header;
+    long transitionNumber;
+  } SVCfile;
 
 
 
 
-/* Datatype 'SVClabel' */
+  /* Datatype 'SVClabel' */
 
-SVClabelIndex SVCnewLabel(SVCfile *, ATerm, SVCbool *);
-SVClabelIndex SVCaterm2Label(SVCfile *, ATerm);
-ATerm SVClabel2ATerm(SVCfile *, SVClabelIndex);
+  SVClabelIndex SVCnewLabel(SVCfile*, ATerm, SVCbool*);
+  SVClabelIndex SVCaterm2Label(SVCfile*, ATerm);
+  ATerm SVClabel2ATerm(SVCfile*, SVClabelIndex);
 
-/* Datatype 'SVCstate' */
+  /* Datatype 'SVCstate' */
 
-SVCstateIndex SVCnewState(SVCfile*, ATerm, SVCbool *);
-SVCstateIndex SVCaterm2State(SVCfile *, ATerm);
-ATerm SVCstate2ATerm(SVCfile *, SVCstateIndex);
+  SVCstateIndex SVCnewState(SVCfile*, ATerm, SVCbool*);
+  SVCstateIndex SVCaterm2State(SVCfile*, ATerm);
+  ATerm SVCstate2ATerm(SVCfile*, SVCstateIndex);
 
-/* Datatype 'SVCparameter' */
+  /* Datatype 'SVCparameter' */
 
-SVCparameterIndex SVCnewParameter(SVCfile *, ATerm, SVCbool*);
-SVCparameterIndex SVCaterm2Parameter(SVCfile *, ATerm);
-ATerm SVCparameter2ATerm(SVCfile *, SVCparameterIndex);
+  SVCparameterIndex SVCnewParameter(SVCfile*, ATerm, SVCbool*);
+  SVCparameterIndex SVCaterm2Parameter(SVCfile*, ATerm);
+  ATerm SVCparameter2ATerm(SVCfile*, SVCparameterIndex);
 
-/* Datatype 'SVCTransition' */
+  /* Datatype 'SVCTransition' */
 
-int SVCputTransition(SVCfile *, SVCstateIndex, 
-         SVClabelIndex, SVCstateIndex, SVCparameterIndex);
+  int SVCputTransition(SVCfile*, SVCstateIndex,
+                       SVClabelIndex, SVCstateIndex, SVCparameterIndex);
 
-int SVCgetNextTransition(SVCfile *, 
-        SVCstateIndex *, SVClabelIndex *, 
-        SVCstateIndex *, SVCparameterIndex *);
+  int SVCgetNextTransition(SVCfile*,
+                           SVCstateIndex*, SVClabelIndex*,
+                           SVCstateIndex*, SVCparameterIndex*);
 
-/* File interface */
+  /* File interface */
 
-int SVCopen(SVCfile *, char *, SVCfileMode, SVCbool *);
-int SVCclose(SVCfile *);
+  int SVCopen(SVCfile*, char*, SVCfileMode, SVCbool*);
+  int SVCclose(SVCfile*);
 
-/* Functions to put and get header information */
+  /* Functions to put and get header information */
 
-char *SVCgetFormatVersion(SVCfile *);
-SVCbool SVCgetIndexFlag(SVCfile *);
-SVCstateIndex SVCgetInitialState(SVCfile *);
-int SVCsetInitialState(SVCfile *, SVCstateIndex);
-char *SVCgetComments(SVCfile *);
-int SVCsetComments(SVCfile *, char *);
-char *SVCgetCreator(SVCfile *);
-int SVCsetCreator(SVCfile *, char *);
-char *SVCgetType(SVCfile *);
-int SVCsetType(SVCfile *, char *);
-char *SVCgetVersion(SVCfile *);
-int SVCsetVersion(SVCfile *, char *);
-char *SVCgetDate(SVCfile *);
-char *SVCgetFilename(SVCfile *);
-SVCint SVCnumStates(SVCfile *);
-SVCint SVCnumLabels(SVCfile *);
-SVCint SVCnumParameters(SVCfile *);
-SVCint SVCnumTransitions(SVCfile *);
- 
-char *SVCerror(int);
+  char* SVCgetFormatVersion(SVCfile*);
+  SVCbool SVCgetIndexFlag(SVCfile*);
+  SVCstateIndex SVCgetInitialState(SVCfile*);
+  int SVCsetInitialState(SVCfile*, SVCstateIndex);
+  char* SVCgetComments(SVCfile*);
+  int SVCsetComments(SVCfile*, char*);
+  char* SVCgetCreator(SVCfile*);
+  int SVCsetCreator(SVCfile*, char*);
+  char* SVCgetType(SVCfile*);
+  int SVCsetType(SVCfile*, char*);
+  char* SVCgetVersion(SVCfile*);
+  int SVCsetVersion(SVCfile*, char*);
+  char* SVCgetDate(SVCfile*);
+  char* SVCgetFilename(SVCfile*);
+  SVCint SVCnumStates(SVCfile*);
+  SVCint SVCnumLabels(SVCfile*);
+  SVCint SVCnumParameters(SVCfile*);
+  SVCint SVCnumTransitions(SVCfile*);
+
+  char* SVCerror(int);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif

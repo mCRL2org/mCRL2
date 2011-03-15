@@ -26,7 +26,8 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
   // unquoted function symbol s == "f"
   function_symbol s("\"f\"", 1, false);
-  aterm_appl f(s, aterm("x"));
+  aterm x=aterm_appl(function_symbol("x",0));
+  aterm_appl f(s, x);
 
   // convert to string and back
   aterm_appl g = make_term(f.to_string());

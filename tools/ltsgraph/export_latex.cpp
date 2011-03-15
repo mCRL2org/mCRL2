@@ -39,20 +39,20 @@ bool ExporterLatex::export_to(wxString filename)
   tikz_code += "   \\tikzstyle{transition}=[->,>=stealth']\n";
 
 
-  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  for (size_t i = 0; i < graph->getNumberOfStates(); ++i)
   {
     State* s = graph->getState(i);
 
     boost::format node;
 
-    if(s->isInitialState())
+    if (s->isInitialState())
     {
       node =
-        boost::format("\\definecolor{currentcolor}{rgb}{%4%,%5%,%6%}\n\\node at (%1%pt, %2%pt) [initstate, fill=currentcolor] (state%3%) {%3%};\n");
+        boost::format("\\definecolor{currentcolor}{rgb}{%4%,%5%,%6%}\n\\node at (%1$fpt, %2$fpt) [initstate, fill=currentcolor] (state%3%) {%3%};\n");
     }
     else
     {
-      node = boost::format("\\definecolor{currentcolor}{rgb}{%4%, %5%, %6%}\n\\node at (%1%pt, %2%pt) [state, fill=currentcolor] (state%3%) {%3%};\n");
+      node = boost::format("\\definecolor{currentcolor}{rgb}{%4%, %5%, %6%}\n\\node at (%1$fpt, %2$fpt) [state, fill=currentcolor] (state%3%) {%3%};\n");
     }
 
     double aspect = owner->getAspectRatio();
@@ -70,16 +70,16 @@ bool ExporterLatex::export_to(wxString filename)
   }
   tikz_code += "\n";
 
-  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  for (size_t i = 0; i < graph->getNumberOfStates(); ++i)
   {
     State* s = graph->getState(i);
-    for(size_t j = 0; j < s->getNumberOfTransitions(); ++j)
+    for (size_t j = 0; j < s->getNumberOfTransitions(); ++j)
     {
       Transition* tr = s->getTransition(j);
       drawBezier(tr);
     }
 
-    for(size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
+    for (size_t j = 0; j < s->getNumberOfSelfLoops(); ++j)
     {
       Transition* sl = s->getSelfLoop(j);
       drawSelfLoop(sl);
@@ -92,9 +92,9 @@ bool ExporterLatex::export_to(wxString filename)
   wxTextFile tikzFile(filename);
 
   // Open file if it exists.
-  if(tikzFile.Exists())
+  if (tikzFile.Exists())
   {
-    if(!tikzFile.Open(filename))
+    if (!tikzFile.Open(filename))
     {
       return false;
     }
@@ -110,13 +110,13 @@ bool ExporterLatex::export_to(wxString filename)
   tikzFile.AddLine(wxEmptyString);
 
   // Write to file
-  if(!tikzFile.Write())
+  if (!tikzFile.Write())
   {
     return false;
   }
 
   // Close file
-  if(!tikzFile.Close())
+  if (!tikzFile.Close())
   {
     return false;
   }
@@ -128,7 +128,7 @@ bool ExporterLatex::export_to(wxString filename)
 
 void ExporterLatex::drawBezier(Transition* tr)
 {
-  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%5%} controls (%3%pt, %4%pt) .. (state%2%);\n");
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%5%} controls (%3$fpt, %4$fpt) .. (state%2%);\n");
 
   State* from = tr->getFrom();
   State* to = tr->getTo();
@@ -144,15 +144,15 @@ void ExporterLatex::drawBezier(Transition* tr)
   controlY /= 10.0;
 
   draw%fromState%toState
-      %controlX%controlY
-      %tr->getLabel();
+  %controlX%controlY
+  %tr->getLabel();
   tikz_code += boost::str(draw);
 
 }
 
 void ExporterLatex::drawSelfLoop(Transition* tr)
 {
-  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%2%} controls (%3%pt, %4%pt) and (%5%pt, %6%pt) .. (state%1%);\n");
+  boost::format draw("\\draw [transition] (state%1%) .. node[auto] {%2%} controls (%3$fpt, %4$fpt) and (%5$fpt, %6$fpt) .. (state%1%);\n");
 
   State* s = tr->getFrom();
 
@@ -182,14 +182,14 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   double cosDelta = cos(delta);
   double sinDelta = sin(delta);
 
-  if(fabs(cosGamma + cosDelta) > 0.01)
+  if (fabs(cosGamma + cosDelta) > 0.01)
   {
     double xFactor = (8 * (xVirtual - xState)) / (3 * (cosGamma + cosDelta));
     xControl1 = xState + xFactor * cosGamma;
     xControl2 = xState + xFactor * cosDelta;
   }
 
-  if(fabs(sinGamma + sinDelta) <= .01)
+  if (fabs(sinGamma + sinDelta) <= .01)
   {
     float additive = tan(beta) * (xControl1 - xState);
     yControl1 = yState + additive;
@@ -197,11 +197,11 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   }
   else
   {
-    double yFactor = (8 *  (yVirtual - yState)) / (3  * sinGamma + sinDelta);
+    double yFactor = (8 * (yVirtual - yState)) / (3  * sinGamma + sinDelta);
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
 
-    if(fabs(cosGamma + cosDelta) <= .01)
+    if (fabs(cosGamma + cosDelta) <= .01)
     {
       float additive = tan(beta) * (yControl1 - yState);
       xControl1 = xState - additive;
@@ -210,8 +210,8 @@ void ExporterLatex::drawSelfLoop(Transition* tr)
   }
 
   draw%stateNo%tr->getLabel()
-      %xControl1%yControl1
-      %xControl2%yControl2;
+  %xControl1%yControl1
+  %xControl2%yControl2;
 
   tikz_code += boost::str(draw);
 }

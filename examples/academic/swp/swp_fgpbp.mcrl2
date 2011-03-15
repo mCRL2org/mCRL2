@@ -2,21 +2,15 @@
 % as used in Fokkink, Groote, Pang, Badban and van de Pol,
 % Verifying a sliding window protocol in mCRL, Report SENR0308, CWI,
 % Amsterdam, 2003.
-% The `constant' n is the size of the buffers in the protocol. The purpose
-% of this specification is to exercise with the syntax. At the time it
-% was written type checkers and other tools were not yet ready. So,
-% typing problems may still exist.
+% The `constant' n is the size of the buffers in the protocol. 
+% This specification differs from older specifications in the sense that
+% it uses functions to update the buffers. The internal lambda expressions
+% representing the buffers will grow with every insertion and removal, 
+% meaning that in this form the state space generation will not terminate.
+% For a terminating state space, the function update mechanism must be
+% used: f[v->w], representing lambda x.if(x==v,w,f(x));
 %
-% The major difference with the mCRL specification is that standard
-% datatypes did not have to be formulated, and the sort Buf containing
-% the buffers in the sender and the receiver has now become a function
-% instead of a list. This seems to make the specification more
-% compact and insightful.
-%
-% This specification contains a NON TERMINATING rewrite rule.
-% That means it can only be linearised with the flag
-% --no-rewrite. Also the generation of a state space will not
-% work for this reason.
+% The system has states.
 
 map  n: Pos;
 eqn  n=2;
@@ -34,10 +28,6 @@ var  i,j,k: Nat; d: D; q: Buf;
 eqn  emptyBuf = lambda j:Nat.empty;
      insert(d,i,q) = lambda j:Nat.if(i==j,data(d),q(j));
      remove(i,q) = lambda j:Nat.if(i==j,empty,q(j));
-%     release(i,j,q) =
-%        if((i mod 2*n)==(j mod 2*n),
-%           q,
-%           release((i+1) mod 2*n,j,remove(i,q)));
      i mod 2*n==j mod 2*n -> release(i,j,q) = q;
      i mod 2*n!=j mod 2*n ->
           release(i,j,q) = release((i+1) mod 2*n,j,remove(i,q));

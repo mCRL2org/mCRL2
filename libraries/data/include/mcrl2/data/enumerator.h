@@ -12,13 +12,13 @@
 #ifndef MCRL2_DATA_ENUMERATOR_H
 #define MCRL2_DATA_ENUMERATOR_H
 
+#include <functional>
 #include <utility>
 #include <boost/shared_ptr.hpp>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/sequence.h"
-#include "mcrl2/core/substitution_function.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
@@ -26,73 +26,45 @@
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/exception.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
 /// \cond INTERNAL_DOCS
-namespace detail {
+namespace detail
+{
 
-  template <typename VariableContainer, typename ExpressionContainer>
-  struct data_enumerator_replace_helper: public core::substitution_function<typename VariableContainer::value_type, typename ExpressionContainer::value_type>
+struct data_enumerator_helper
+{
+  const data_expression_with_variables& e_;
+  const atermpp::vector<data_expression_with_variables>& values_;
+  atermpp::vector<data_expression_with_variables>& result_;
+
+  data_enumerator_helper(const data_expression_with_variables& e,
+                         const atermpp::vector<data_expression_with_variables>& values,
+                         atermpp::vector<data_expression_with_variables>& result
+                        )
+    : e_(e), values_(values), result_(result)
+  {}
+
+  /// \brief Function call operator
+  void operator()()
   {
-    const VariableContainer& variables_;
-    const ExpressionContainer& replacements_;
+    data_expression d = data::replace_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
 
-    data_enumerator_replace_helper(const VariableContainer& variables,
-                                   const ExpressionContainer& replacements
-                                  )
-      : variables_(variables), replacements_(replacements)
+    // 9/8/2009. Changed line below from std::vector<variable> to atermpp::vector<variable> because it appears that
+    // at times variables can occur only in this vector of variables, causing problems when garbage collected.
+    // Jan Friso Groote.
+    atermpp::vector<variable> v;
+    for (atermpp::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
     {
-      assert(variables.size() == replacements.size());
+      v.insert(v.end(), i->variables().begin(), i->variables().end());
     }
-
-    /// \brief Function call operator
-    /// \param t A data variable
-    /// \return The function result
-    data_expression operator()(variable const& t) const
-    {
-      typename VariableContainer::const_iterator i = variables_.begin();
-      typename ExpressionContainer::const_iterator j = replacements_.begin();
-      for (; i != variables_.end(); ++i, ++j)
-      {
-        if (*i == t)
-        {
-          return data_expression(ATermAppl(*j));
-        }
-      }
-      return t;
-    }
-  };
-
-  struct data_enumerator_helper
-  {
-    const data_expression_with_variables& e_;
-    const atermpp::vector<data_expression_with_variables>& values_;
-    atermpp::vector<data_expression_with_variables>& result_;
-
-    data_enumerator_helper(const data_expression_with_variables& e,
-                           const atermpp::vector<data_expression_with_variables>& values,
-                           atermpp::vector<data_expression_with_variables>& result
-                          )
-     : e_(e), values_(values), result_(result)
-    {}
-
-    /// \brief Function call operator
-    void operator()()
-    {
-      data_expression d(replace_variables(e_, data_enumerator_replace_helper<variable_list, atermpp::vector<data_expression_with_variables> >(e_.variables(), values_)));
-      // 9/8/2009. Changed line below from std::vector<variable> to atermpp::vector<variable> because it appears that 
-      // at times variables can occur only in this vector of variables, causing problems when garbage collected.
-      // Jan Friso Groote.
-      atermpp::vector<variable> v;
-      for (atermpp::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
-      {
-        v.insert(v.end(), i->variables().begin(), i->variables().end());
-      }
-      result_.push_back(data_expression_with_variables(d, variable_list(v.begin(), v.end())));
-    }
-  };
+    result_.push_back(data_expression_with_variables(d, variable_list(v.begin(), v.end())));
+  }
+};
 
 } // namespace detail
 /// \endcond
@@ -116,12 +88,12 @@ class data_enumerator
     IdentifierGenerator* m_generator;
 
     /// \brief A mapping with constructors.
-    constructor_map m_constructors;
+    mutable constructor_map m_constructors;
 
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const std::vector<function_symbol>& constructors(sort_expression s)
+    const std::vector<function_symbol>& constructors(sort_expression s) const
     {
       constructor_map::const_iterator i = m_constructors.find(s);
       if (i != m_constructors.end())
@@ -147,7 +119,7 @@ class data_enumerator
     data_enumerator(const data_specification& data_spec,
                     const data::rewriter& rewriter,
                     IdentifierGenerator& generator)
-     : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
+      : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
     {}
 
     /// \brief The data specification.
@@ -160,8 +132,9 @@ class data_enumerator
     /// \brief Enumerates a data variable.
     /// \param v A data variable
     /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
-    atermpp::vector<data_expression_with_variables> enumerate(const variable& v)
-    { // std::cerr << "Enumerate " << v << "\n";
+    atermpp::vector<data_expression_with_variables> enumerate(const variable& v) const
+    {
+      // std::cerr << "Enumerate " << v << "\n";
       atermpp::vector<data_expression_with_variables> result;
       const std::vector<function_symbol>& c = constructors(v.sort());
 
@@ -171,7 +144,8 @@ class data_enumerator
       }
       for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
       {
-        if (is_function_sort(i->sort())) {
+        if (is_function_sort(i->sort()))
+        {
           atermpp::vector<variable> variables;
 
           for (boost::iterator_range< sort_expression_list::iterator > j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
@@ -183,7 +157,8 @@ class data_enumerator
 
           result.push_back(data_expression_with_variables(application(*i, atermpp::convert< data_expression_list >(w)), w));
         }
-        else {
+        else
+        {
           result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
         }
       }
@@ -199,7 +174,7 @@ class data_enumerator
     /// identifier generator that was passed in the constructor.
     /// \param e A data expression.
     /// \return A sequence of expressions that is the result of applying the enumerator to the expression once.
-    atermpp::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e)
+    atermpp::vector<data_expression_with_variables> enumerate(const data_expression_with_variables& e) const
     {
       atermpp::vector<data_expression_with_variables> result;
 

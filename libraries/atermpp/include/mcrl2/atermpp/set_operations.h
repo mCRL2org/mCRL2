@@ -15,52 +15,53 @@
 #include <set>
 #include "mcrl2/atermpp/aterm_list.h"
 
-namespace atermpp {
+namespace atermpp
+{
 
-  /// \brief Returns the union of v and w.
-  /// \param v A term list.
-  /// \param w A term list.
-  /// \return The union of the term lists, interpreted as sets.
-  template <typename Term>
-  term_list<Term> term_list_union(term_list<Term> v, term_list<Term> w)
+/// \brief Returns the union of v and w.
+/// \param v A term list.
+/// \param w A term list.
+/// \return The union of the term lists, interpreted as sets.
+template <typename Term>
+term_list<Term> term_list_union(term_list<Term> v, term_list<Term> w)
+{
+  if (v.empty())
   {
-    if (v.empty())
-    {
-      return w;
-    }
-    if (w.empty())
-    {
-      return v;
-    }
-    std::set<Term> result;
-    result.insert(v.begin(), v.end());
-    result.insert(w.begin(), w.end());
-    return term_list<Term>(result.begin(), result.end());
+    return w;
   }
+  if (w.empty())
+  {
+    return v;
+  }
+  std::set<Term> result;
+  result.insert(v.begin(), v.end());
+  result.insert(w.begin(), w.end());
+  return term_list<Term>(result.begin(), result.end());
+}
 
-  /// \brief Returns v minus w.
-  /// \param v A term list.
-  /// \param w A term list.
-  /// \return The difference of the term lists, interpreted as sets.
-  template <typename Term>
-  term_list<Term> term_list_difference(term_list<Term> v, term_list<Term> w)
+/// \brief Returns v minus w.
+/// \param v A term list.
+/// \param w A term list.
+/// \return The difference of the term lists, interpreted as sets.
+template <typename Term>
+term_list<Term> term_list_difference(term_list<Term> v, term_list<Term> w)
+{
+  if (w.empty())
   {
-    if (w.empty())
-    {
-      return v;
-    }
-    if (v.empty())
-    {
-      return v;
-    }
-    std::set<Term> result;
-    result.insert(v.begin(), v.end());
-    for (typename term_list<Term>::iterator i = w.begin(); i != w.end(); ++i)
-    {
-      result.erase(*i);
-    }
-    return term_list<Term>(result.begin(), result.end());
+    return v;
   }
+  if (v.empty())
+  {
+    return v;
+  }
+  std::set<Term> result;
+  result.insert(v.begin(), v.end());
+  for (typename term_list<Term>::iterator i = w.begin(); i != w.end(); ++i)
+  {
+    result.erase(*i);
+  }
+  return term_list<Term>(result.begin(), result.end());
+}
 
 } // namespace atermpp
 

@@ -11,13 +11,13 @@
 
 #include <iostream>
 #include <iterator>
-#include <vector>
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/utility.h"
 
 using namespace std;
@@ -47,11 +47,17 @@ struct fg_replacer
   aterm_appl operator()(aterm_appl t) const
   {
     if (t.function().name() == "f")
+    {
       return aterm_appl(function_symbol("g", t.function().arity()), aterm_list(t.begin(), t.end()));
+    }
     else if (t.function().name() == "g")
+    {
       return aterm_appl(function_symbol("f", t.function().arity()), aterm_list(t.begin(), t.end()));
+    }
     else
+    {
       return t;
+    }
   }
 };
 
@@ -61,11 +67,17 @@ struct fg_partial_replacer
   std::pair<aterm_appl, bool> operator()(aterm_appl t) const
   {
     if (t.function().name() == "f")
+    {
       return std::make_pair(aterm_appl(function_symbol("g", t.function().arity()), aterm_list(t.begin(), t.end())), false);
+    }
     else if (t.function().name() == "g")
+    {
       return std::make_pair(aterm_appl(function_symbol("f", t.function().arity()), aterm_list(t.begin(), t.end())), false);
+    }
     else
+    {
       return std::make_pair(t, true);
+    }
   }
 };
 
@@ -76,7 +88,7 @@ void test_find()
   aterm_appl t = find_if(a, is_f());
   BOOST_CHECK(t == make_term("f(y)"));
 
-  vector<aterm_appl> v;
+  atermpp::vector<aterm_appl> v;
   find_all_if(a, is_f(), back_inserter(v));
   BOOST_CHECK(v.front() == make_term("f(y)"));
   BOOST_CHECK(v.back() == make_term("f(z)"));

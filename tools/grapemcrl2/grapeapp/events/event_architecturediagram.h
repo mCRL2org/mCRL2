@@ -15,42 +15,42 @@
 
 namespace grape
 {
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+/**
+ * \short Represents the add architecture diagram event.
+ */
+class grape_event_add_architecture_diagram : public grape_event_base
+{
+  private:
+    unsigned int    m_arch; /**< Identifier of the created architecture diagram. */
+  public:
+
     /**
-     * \short Represents the add architecture diagram event.
+     * Initialization constructor.
+     * Initializes the event.
+     * @param p_main_frame Pointer to the main frame.
      */
-    class grape_event_add_architecture_diagram : public grape_event_base
-    {
-      private:
-        unsigned int    m_arch; /**< Identifier of the created architecture diagram. */
-      public:
+    grape_event_add_architecture_diagram(grape_frame* p_main_frame);
 
-        /**
-         * Initialization constructor.
-         * Initializes the event.
-         * @param p_main_frame Pointer to the main frame.
-         */
-        grape_event_add_architecture_diagram( grape_frame *p_main_frame );
+    /**
+     * Default desdtructor.
+     * Frees allocated memory.
+     */
+    ~grape_event_add_architecture_diagram(void);
 
-        /**
-         * Default desdtructor.
-         * Frees allocated memory.
-         */
-        ~grape_event_add_architecture_diagram( void );
+    /**
+     * Overloaded Do function.
+     * Performs the event.
+     */
+    bool Do(void);
 
-        /**
-         * Overloaded Do function.
-         * Performs the event.
-         */
-        bool Do( void );
-
-        /**
-         * Overloaded Undo function.
-         * Reverts the event.
-         */
-        bool Undo( void );
-    };
-  }
+    /**
+     * Overloaded Undo function.
+     * Reverts the event.
+     */
+    bool Undo(void);
+};
+}
 }
 #endif // GRAPE_EVENT_ARCHITECTUREDIAGRAM_H

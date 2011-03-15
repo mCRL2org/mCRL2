@@ -34,13 +34,14 @@ extern "C" {
 class GLCanvas;
 class wxStatusBar;
 
-class SaveVecDialog : public wxDialog {
+class SaveVecDialog : public wxDialog
+{
   public:
     static const int myID_F_BUTTON = wxID_HIGHEST + 1;
     static const int myID_FT_CHOICE = myID_F_BUTTON + 1;
 
     SaveVecDialog(wxWindow* parent,wxStatusBar* sb,GLCanvas* glc,
-        wxFileName filename);
+                  wxFileName filename);
     ~SaveVecDialog();
     void onChangeFile(wxCommandEvent& event);
     void onChoice(wxCommandEvent& event);

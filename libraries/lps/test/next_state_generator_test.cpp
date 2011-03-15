@@ -49,13 +49,13 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
   q.push(initial_state);
   seen.insert(initial_state);
 
-  while(!q.empty())
+  while (!q.empty())
   {
     visited.insert(q.front());
 
     if (per_summand)
     {
-      for(size_t i = 0; i < lps_spec.process().summand_count(); ++i)
+      for (size_t i = 0; i < lps_spec.process().summand_count(); ++i)
       {
         next_state_generator::iterator first = generator.begin(q.front(), i);
         while (++first)
@@ -63,7 +63,7 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
           const next_state_generator::state_type& s = *first;
           transition_labels.insert(s.transition);
           ++transitions;
-          if(seen.find(s.state) == seen.end())
+          if (seen.find(s.state) == seen.end())
           {
             q.push(s.state);
             seen.insert(s.state);
@@ -79,7 +79,7 @@ void test_next_state_generator(const specification& lps_spec, size_t expected_st
         const next_state_generator::state_type& s = *first;
         transition_labels.insert(s.transition);
         ++transitions;
-        if(seen.find(s.state) == seen.end())
+        if (seen.find(s.state) == seen.end())
         {
           q.push(s.state);
           seen.insert(s.state);
@@ -151,7 +151,7 @@ BOOST_AUTO_TEST_CASE(test_abp)
   );
 
   specification spec = parse_linear_process_specification(text);
-  
+
   // The current next state generator requires this...
   spec.process().deadlock_summands().clear();
 

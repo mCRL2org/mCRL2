@@ -23,15 +23,15 @@ using mcrl2::utilities::wx::wxSpinCtrlFloat;
 
 class SettingsFrame : public PopupFrame
 {
-public:
+  public:
     // -- constructors and desctructor ------------------------------
     SettingsFrame(
-        Mediator* m,
-        wxWindow* parent,
-        wxWindowID id,
-        wxString title,
-        wxPoint position,
-        wxSize size );
+      Mediator* m,
+      wxWindow* parent,
+      wxWindowID id,
+      wxString title,
+      wxPoint position,
+      wxSize size);
     virtual ~SettingsFrame();
 
     // -- set functions ---------------------------------------------
@@ -43,14 +43,14 @@ public:
     void setTrace();
     void setDgrmEditor();
 
-protected:
+  protected:
     // -- event handlers --------------------------------------------
-    void onButton( wxCommandEvent &e );
-    void onCheckBox( wxCommandEvent &e );
-    void onComboBox( wxCommandEvent &e );
-    void onSpinCtrl( wxSpinEvent &e );
+    void onButton(wxCommandEvent& e);
+    void onCheckBox(wxCommandEvent& e);
+    void onComboBox(wxCommandEvent& e);
+    void onSpinCtrl(wxSpinEvent& e);
 
-private:
+  private:
     // -- utility functions -----------------------------------------
     void updateSettingsGeneral();
     void updateSettingsClustTree();
@@ -74,7 +74,7 @@ private:
     wxScrolledWindow* panelNotebook;
     wxBoxSizer*       sizerNotebook;
     wxNotebook*       notebook;
-    wxButton*	      submitButton;
+    wxButton*       submitButton;
 
     wxScrolledWindow* panelGeneral;
     wxColorButton*    buttonColorBG;
@@ -108,35 +108,35 @@ private:
     // -- ID's ------------------------------------------------------
     enum
     {
-        ID_PANEL_GENERAL,
-	ID_BUTTON_SUBMIT,
-        ID_BUTTON_COL_BG,
-        ID_BUTTON_COL_TXT,
-        ID_COMBO_BOX_SIZE_TXT,
-        ID_SPIN_CTRL_ANIM_SPD,
+      ID_PANEL_GENERAL,
+      ID_BUTTON_SUBMIT,
+      ID_BUTTON_COL_BG,
+      ID_BUTTON_COL_TXT,
+      ID_COMBO_BOX_SIZE_TXT,
+      ID_SPIN_CTRL_ANIM_SPD,
 
-        ID_PANEL_CLUST_TREE,
-        ID_CHECK_BOX_SHOW_CT,
-        ID_CHECK_BOX_ANNOTATE_CT,
-        ID_COMBO_BOX_COL_MAP,
+      ID_PANEL_CLUST_TREE,
+      ID_CHECK_BOX_SHOW_CT,
+      ID_CHECK_BOX_ANNOTATE_CT,
+      ID_COMBO_BOX_COL_MAP,
 
-        ID_PANEL_BAR_TREE,
-        ID_CHECK_BOX_SHOW_BT,
-        ID_SPIN_CTRL_MAGN_BT,
+      ID_PANEL_BAR_TREE,
+      ID_CHECK_BOX_SHOW_BT,
+      ID_SPIN_CTRL_MAGN_BT,
 
-        ID_PANEL_ARC_DIAGRAM,
-        ID_CHECK_BOX_SHOW_NODES,
-        ID_CHECK_BOX_SHOW_ARCS,
-        ID_BUTTON_COL_ARCS,
-        ID_SPIN_CTRL_TRSP_ARCS,
+      ID_PANEL_ARC_DIAGRAM,
+      ID_CHECK_BOX_SHOW_NODES,
+      ID_CHECK_BOX_SHOW_ARCS,
+      ID_BUTTON_COL_ARCS,
+      ID_SPIN_CTRL_TRSP_ARCS,
 
-        ID_PANEL_SIMULATOR,
-        ID_COMBO_BOX_BLEND_TYPE,
+      ID_PANEL_SIMULATOR,
+      ID_COMBO_BOX_BLEND_TYPE,
 
-        ID_PANEL_TRACE,
-        ID_CHECK_BOX_USE_SHADING,
+      ID_PANEL_TRACE,
+      ID_CHECK_BOX_USE_SHADING,
 
-        ID_PANEL_DGRM_EDITOR
+      ID_PANEL_DGRM_EDITOR
     };
 
     // -- declare event table ---------------------------------------

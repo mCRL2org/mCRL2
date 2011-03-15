@@ -27,14 +27,14 @@ void test_typechecker_case(std::string const& spec, bool const expected_result)
   std::clog << std::endl
             << "<---- testing specification: ---->" << std::endl
             << spec << std::endl;
-  if(expected_result)
+  if (expected_result)
   {
     std::clog << "expected result: success" << std::endl;
     try
     {
       process::parse_process_specification(spec);
     }
-    catch(mcrl2::runtime_error& e) // Catch errors and print them, such that all cases are treated.
+    catch (mcrl2::runtime_error& e) // Catch errors and print them, such that all cases are treated.
     {
       std::clog << "type checking failed with error: " << std::endl
                 << e.what() << std::endl;
@@ -109,7 +109,7 @@ BOOST_AUTO_TEST_CASE(test_bug_528c)
     "var  x:S;                           \n"
     "eqn  count(x) = 0;                  \n"
     "init delta;                         \n",
-  true
+    true
   );
 }
 
@@ -275,14 +275,14 @@ BOOST_AUTO_TEST_CASE(test_recursive_a)
 }
 
 
-// Tricky test case that should fail, as recursive sorts are are defined through sort containers
-// but in this case it is not that easy to see.
+// Tricky test case that should succeed, as recursive sorts are are defined through the list containers
+// are allowed.
 BOOST_AUTO_TEST_CASE(test_recursive_b)
 {
   test_typechecker_case(
     "sort MyRecType=struct f | g(List(MyRecType));"
     "init delta;",
-    false
+    true
   );
 }
 
@@ -320,6 +320,31 @@ BOOST_AUTO_TEST_CASE(test_sort_expression_vs_function_symbol)
     true
   );
 }
+
+BOOST_AUTO_TEST_CASE(test_real_zero)
+{
+  test_typechecker_case(
+    "sort T = Real;\n"
+    "map  x: List(T) -> List(T);\n"
+    "var  l: List(T);\n"
+    "     r: T;\n"
+    "eqn  x(r |> l) = (r+0) |> l;\n"
+    "act  a: List(T);\n"
+    "init a(x([0]));\n",
+    true
+  );
+}
+
+// The following example tests whether a double assignment in a
+// process is properly caught by the typechecker.
+BOOST_AUTO_TEST_CASE(test_double_variable_assignment_in_process)
+{
+  test_typechecker_case(
+    "proc X( v :Bool  ) = tau.  X( v = true, v = false );\n"
+    "init X(true);",
+    false);
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

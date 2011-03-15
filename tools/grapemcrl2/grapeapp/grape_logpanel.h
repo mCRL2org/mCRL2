@@ -16,25 +16,25 @@
 
 namespace grape
 {
-  namespace grapeapp
-  {
+namespace grapeapp
+{
 
+/**
+ * \short The logpanel which contains the log.
+ * Due to limitations in mcrl2 core message relaying output is always sent to the first created log panel.
+ */
+class grape_logpanel : public wxTextCtrl
+{
+  public:
     /**
-     * \short The logpanel which contains the log.
-     * Due to limitations in mcrl2 core message relaying output is always sent to the first created log panel.
+     * Parental constructor.
+     * Sets parent and initializes grape_logpanel.
+     * @param p_parent Pointer to parent window.
      */
-    class grape_logpanel : public wxTextCtrl
-    {
-      public:
-        /**
-         * Parental constructor.
-         * Sets parent and initializes grape_logpanel.
-         * @param p_parent Pointer to parent window.
-         */
-        grape_logpanel(wxWindow *p_parent);
-    };
+    grape_logpanel(wxWindow* p_parent);
+};
 
-  } // namespace grapeapp
+} // namespace grapeapp
 } // namespace grape
 
 #endif // GRAPEAPP_GRAPE_LOGPANEL_H

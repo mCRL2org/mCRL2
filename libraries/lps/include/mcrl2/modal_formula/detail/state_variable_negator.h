@@ -12,44 +12,54 @@
 #ifndef MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_NEGATOR_H
 #define MCRL2_MODAL_FORMULA_DETAIL_STATE_VARIABLE_NEGATOR_H
 
+#include "mcrl2/core/builder.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/state_formula_builder.h"
+#include "mcrl2/modal_formula/builder.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace state_formulas {
+namespace state_formulas
+{
 
-namespace detail {
+namespace detail
+{
 
 /// Visitor that negates propositional variable instantiations with a given name.
-struct state_variable_negator: public mcrl2::state_formulas::state_formula_builder
+template <typename Derived>
+struct state_variable_negator: public state_formulas::state_formula_builder<Derived>
 {
+  typedef state_formulas::state_formula_builder<Derived> super;
+
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
   core::identifier_string m_name;
 
   state_variable_negator(const core::identifier_string& name)
     : m_name(name)
   {}
 
-  /// \brief Visit propositional_variable node
+  /// \brief Visit variable node
   /// \param x A term
   /// \return The result of visiting the node
-  state_formula visit_var(const state_formula& e, const core::identifier_string& n, const data::data_expression_list& /* l */)
+  state_formula operator()(const variable& x)
   {
-    if (n == m_name)
+    if (x.name() == m_name)
     {
-      return state_frm::not_(e);
+      return state_formulas::not_(x);
     }
-    return e;
+    return x;
   }
 };
 
 inline
-/// \brief Negates propositional variable instantiations in a pbes expression.
+/// \brief Negates propositional variable instantiations in a state formula.
 /// \param name The name of the variables that should be negated
 state_formula negate_propositional_variable(const core::identifier_string& name, const state_formula& x)
 {
-  state_variable_negator visitor(name);
-  return visitor.visit(x);
+  return core::make_apply_builder_arg1<state_variable_negator>(name)(x);
 }
 
 } // namespace detail

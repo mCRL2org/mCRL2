@@ -6,6 +6,7 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
+
 # ########## Project setup ##########
 project(lps_tests)
 cmake_minimum_required(VERSION 2.6)
@@ -27,17 +28,11 @@ file(GLOB TERM_OBJS "*.cpp")
 
 foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
-  project( "${PREFIX}_${result}" )
-  add_executable("${PREFIX}_${result}" "${OBJ}"  )
-  if( MCRL2_MONO_LIB )
-    target_link_libraries(${PREFIX}_${result}
-      mcrl2_monolib
-    )
-  else( MCRL2_MONO_LIB )  
+  add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_lps
   )
-  endif( MCRL2_MONO_LIB )
-  add_test("${PREFIX}_${result}" "${lps_tests_BINARY_DIR}/${PREFIX}_${result}" )
-  set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
-endforeach( OBJ )  
+
+  # MACRO is defined in CMakeLists.txt in root of source tree
+  build_and_run_test_target( ${PREFIX}_${result} )
+endforeach( OBJ ) 

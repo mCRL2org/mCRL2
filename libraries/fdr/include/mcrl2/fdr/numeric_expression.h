@@ -15,10 +15,12 @@
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/seq_expression.h"
 #include "mcrl2/fdr/set_expression.h"
-                                      
-namespace mcrl2 {
 
-namespace fdr {
+namespace mcrl2
+{
+
+namespace fdr
+{
 
 //--- start generated numeric expression class declarations ---//
 /// \brief class numeric_expression
@@ -211,86 +213,86 @@ class min: public numeric_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a number expression
-    /// \param t A term
-    /// \return True if it is a number expression
-    inline
-    bool is_number(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsNumber(t);
-    }
+/// \brief Test for a number expression
+/// \param t A term
+/// \return True if it is a number expression
+inline
+bool is_number(const numeric_expression& t)
+{
+  return fdr::detail::gsIsNumber(t);
+}
 
-    /// \brief Test for a card expression
-    /// \param t A term
-    /// \return True if it is a card expression
-    inline
-    bool is_card(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsCard(t);
-    }
+/// \brief Test for a card expression
+/// \param t A term
+/// \return True if it is a card expression
+inline
+bool is_card(const numeric_expression& t)
+{
+  return fdr::detail::gsIsCard(t);
+}
 
-    /// \brief Test for a length expression
-    /// \param t A term
-    /// \return True if it is a length expression
-    inline
-    bool is_length(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsLength(t);
-    }
+/// \brief Test for a length expression
+/// \param t A term
+/// \return True if it is a length expression
+inline
+bool is_length(const numeric_expression& t)
+{
+  return fdr::detail::gsIsLength(t);
+}
 
-    /// \brief Test for a plus expression
-    /// \param t A term
-    /// \return True if it is a plus expression
-    inline
-    bool is_plus(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsPlus(t);
-    }
+/// \brief Test for a plus expression
+/// \param t A term
+/// \return True if it is a plus expression
+inline
+bool is_plus(const numeric_expression& t)
+{
+  return fdr::detail::gsIsPlus(t);
+}
 
-    /// \brief Test for a minus expression
-    /// \param t A term
-    /// \return True if it is a minus expression
-    inline
-    bool is_minus(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsMinus(t);
-    }
+/// \brief Test for a minus expression
+/// \param t A term
+/// \return True if it is a minus expression
+inline
+bool is_minus(const numeric_expression& t)
+{
+  return fdr::detail::gsIsMinus(t);
+}
 
-    /// \brief Test for a times expression
-    /// \param t A term
-    /// \return True if it is a times expression
-    inline
-    bool is_times(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsTimes(t);
-    }
+/// \brief Test for a times expression
+/// \param t A term
+/// \return True if it is a times expression
+inline
+bool is_times(const numeric_expression& t)
+{
+  return fdr::detail::gsIsTimes(t);
+}
 
-    /// \brief Test for a div expression
-    /// \param t A term
-    /// \return True if it is a div expression
-    inline
-    bool is_div(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsDiv(t);
-    }
+/// \brief Test for a div expression
+/// \param t A term
+/// \return True if it is a div expression
+inline
+bool is_div(const numeric_expression& t)
+{
+  return fdr::detail::gsIsDiv(t);
+}
 
-    /// \brief Test for a mod expression
-    /// \param t A term
-    /// \return True if it is a mod expression
-    inline
-    bool is_mod(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsMod(t);
-    }
+/// \brief Test for a mod expression
+/// \param t A term
+/// \return True if it is a mod expression
+inline
+bool is_mod(const numeric_expression& t)
+{
+  return fdr::detail::gsIsMod(t);
+}
 
-    /// \brief Test for a min expression
-    /// \param t A term
-    /// \return True if it is a min expression
-    inline
-    bool is_min(const numeric_expression& t)
-    {
-      return fdr::detail::gsIsMin(t);
-    }
+/// \brief Test for a min expression
+/// \param t A term
+/// \return True if it is a min expression
+inline
+bool is_min(const numeric_expression& t)
+{
+  return fdr::detail::gsIsMin(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

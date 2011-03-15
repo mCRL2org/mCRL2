@@ -21,40 +21,40 @@
 using namespace grape::grapeapp;
 using namespace grape::mcrl2gen;
 
-grape_channel_communication_dlg::grape_channel_communication_dlg( channel_communication &p_channel_communication )
-: wxDialog( 0, wxID_ANY, _T("Edit channel communication"), wxDefaultPosition, wxDefaultSize )
-{  
-  wxBoxSizer *wnd_sizer = new wxBoxSizer(wxVERTICAL);
+grape_channel_communication_dlg::grape_channel_communication_dlg(channel_communication& p_channel_communication)
+  : wxDialog(0, wxID_ANY, _T("Edit channel communication"), wxDefaultPosition, wxDefaultSize)
+{
+  wxBoxSizer* wnd_sizer = new wxBoxSizer(wxVERTICAL);
 
   // create name text
-  wxStaticText *text_name = new wxStaticText( this, wxID_ANY, _T("Name:"), wxDefaultPosition, wxSize(100, 25) );
-  
+  wxStaticText* text_name = new wxStaticText(this, wxID_ANY, _T("Name:"), wxDefaultPosition, wxSize(100, 25));
+
   // create name input
-  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_COMMUNICATION_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(200, 25) );            
+  m_name_input = new wxTextCtrl(this, GRAPE_CHANNEL_COMMUNICATION_NAME_INPUT_TEXT, wxEmptyString, wxDefaultPosition, wxSize(200, 25));
   m_name_input->ChangeValue(p_channel_communication.get_name_to());
   // create sizer
-  wxSizer *name_sizer = new wxBoxSizer(wxHORIZONTAL);
-  name_sizer->Add( text_name );
-  name_sizer->Add( m_name_input );
-  wnd_sizer->Add( name_sizer, 0, wxLEFT | wxTOP | wxRIGHT, 5 );
-  
-  wnd_sizer->AddSpacer( 5 );
+  wxSizer* name_sizer = new wxBoxSizer(wxHORIZONTAL);
+  name_sizer->Add(text_name);
+  name_sizer->Add(m_name_input);
+  wnd_sizer->Add(name_sizer, 0, wxLEFT | wxTOP | wxRIGHT, 5);
+
+  wnd_sizer->AddSpacer(5);
 
   // select the correct property of the channel communication
   int index = p_channel_communication.get_channel_communication_type();
   wxString radiobox_list[3] = {_T("visible"), _T("hidden"), _T("blocked")};
-  m_radiobox = new wxRadioBox( this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 3, radiobox_list, 1, wxRA_SPECIFY_ROWS );
+  m_radiobox = new wxRadioBox(this, wxID_ANY, _T("Property:"), wxDefaultPosition, wxSize(300, 45), 3, radiobox_list, 1, wxRA_SPECIFY_ROWS);
   m_radiobox->SetSelection(index);
   // create sizer
-  wxSizer *property_sizer = new wxBoxSizer(wxVERTICAL);
-  property_sizer->Add( m_radiobox );
-  wnd_sizer->Add( property_sizer, 0, wxLEFT | wxRIGHT, 5 );
-  
-  wnd_sizer->AddSpacer( 5 );
+  wxSizer* property_sizer = new wxBoxSizer(wxVERTICAL);
+  property_sizer->Add(m_radiobox);
+  wnd_sizer->Add(property_sizer, 0, wxLEFT | wxRIGHT, 5);
+
+  wnd_sizer->AddSpacer(5);
 
   // create buttons
-  wxSizer *sizer = CreateButtonSizer(wxOK | wxCANCEL);
-  FindWindow(GetAffirmativeId())->Enable( update_validation() );
+  wxSizer* sizer = CreateButtonSizer(wxOK | wxCANCEL);
+  FindWindow(GetAffirmativeId())->Enable(update_validation());
   sizer->Layout();
   wnd_sizer->Add(sizer, 0, wxALIGN_RIGHT | wxLEFT | wxRIGHT | wxBOTTOM, 1);
 
@@ -76,15 +76,24 @@ grape_channel_communication_dlg::~grape_channel_communication_dlg()
 {
 }
 
-bool grape_channel_communication_dlg::show_modal( channel_communication &p_channel_communication )
+bool grape_channel_communication_dlg::show_modal(channel_communication& p_channel_communication)
 {
   if (ShowModal() != wxID_CANCEL)
-  {      
-    p_channel_communication.set_name_to(m_name_input->GetValue());     
-    if (m_radiobox->GetStringSelection() == _T("visible")) p_channel_communication.set_channel_communication_type(VISIBLE_CHANNEL_COMMUNICATION);
-    if (m_radiobox->GetStringSelection() == _T("hidden")) p_channel_communication.set_channel_communication_type(HIDDEN_CHANNEL_COMMUNICATION);
-    if (m_radiobox->GetStringSelection() == _T("blocked")) p_channel_communication.set_channel_communication_type(BLOCKED_CHANNEL_COMMUNICATION);
-  
+  {
+    p_channel_communication.set_name_to(m_name_input->GetValue());
+    if (m_radiobox->GetStringSelection() == _T("visible"))
+    {
+      p_channel_communication.set_channel_communication_type(VISIBLE_CHANNEL_COMMUNICATION);
+    }
+    if (m_radiobox->GetStringSelection() == _T("hidden"))
+    {
+      p_channel_communication.set_channel_communication_type(HIDDEN_CHANNEL_COMMUNICATION);
+    }
+    if (m_radiobox->GetStringSelection() == _T("blocked"))
+    {
+      p_channel_communication.set_channel_communication_type(BLOCKED_CHANNEL_COMMUNICATION);
+    }
+
     return true;
   }
 
@@ -98,12 +107,12 @@ bool grape_channel_communication_dlg::update_validation()
 //  return mcr2::core::is_user_identifier(m_name_input->GetValue().fn_str());
 }
 
-void grape_channel_communication_dlg::event_update_validation( wxCommandEvent &/*p_event*/ )
+void grape_channel_communication_dlg::event_update_validation(wxCommandEvent& /*p_event*/)
 {
-  FindWindow(GetAffirmativeId())->Enable( update_validation() );
+  FindWindow(GetAffirmativeId())->Enable(update_validation());
 }
 
 BEGIN_EVENT_TABLE(grape_channel_communication_dlg, wxDialog)
-  EVT_TEXT(GRAPE_CHANNEL_COMMUNICATION_NAME_INPUT_TEXT, grape_channel_communication_dlg::event_update_validation)   
+  EVT_TEXT(GRAPE_CHANNEL_COMMUNICATION_NAME_INPUT_TEXT, grape_channel_communication_dlg::event_update_validation)
 END_EVENT_TABLE()
 

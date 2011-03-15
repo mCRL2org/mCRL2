@@ -7,25 +7,25 @@
 struct where_clause                        {};
 struct function_symbol                     {};
 struct data_expression                     {};
-struct abstraction: public data_expression {}; 
+struct abstraction: public data_expression {};
 struct variable: public data_expression    {};
-struct application: public data_expression {}; 
-struct identifier_string                   {}; 
-struct lambda                              {}; 
-struct forall                              {}; 
-struct exists                              {}; 
-struct data_expression_with_variables      {}; 
-struct assignment                          {}; 
-struct data_equation                       {}; 
-struct action_label                        {}; 
-struct action                              {}; 
-struct deadlock                            {}; 
-struct multi_action                        {}; 
-struct action_summand                      {}; 
-struct deadlock_summand                    {}; 
-struct process_initializer                 {}; 
-struct linear_process                      {}; 
-struct specification                       {}; 
+struct application: public data_expression {};
+struct identifier_string                   {};
+struct lambda                              {};
+struct forall                              {};
+struct exists                              {};
+struct data_expression_with_variables      {};
+struct assignment                          {};
+struct data_equation                       {};
+struct action_label                        {};
+struct action                              {};
+struct deadlock                            {};
+struct multi_action                        {};
+struct action_summand                      {};
+struct deadlock_summand                    {};
+struct process_initializer                 {};
+struct linear_process                      {};
+struct specification                       {};
 
 template <typename Derived>
 class data_traverser
@@ -289,7 +289,8 @@ class lps_traverser: public data_traverser<Derived>
 
     /// \brief Traverses a linear_process
     /// \param s A linear_process
-    void operator()(const linear_process& p) {
+    void operator()(const linear_process& p)
+    {
       static_cast<Derived&>(*this).enter(p);
       //static_cast<Derived&>(*this)(p.process_parameters());
       //static_cast<Derived&>(*this)(p.action_summands());
@@ -299,7 +300,8 @@ class lps_traverser: public data_traverser<Derived>
 
     /// \brief Traverses a linear process specification
     /// \param spec A linear process specification
-    void operator()(const specification& spec) {
+    void operator()(const specification& spec)
+    {
       static_cast<Derived&>(*this).enter(spec);
       //static_cast<Derived&>(*this)(spec.process());
       //static_cast<Derived&>(*this)(spec.global_variables());
@@ -324,10 +326,10 @@ struct instantiate: public Traverser<instantiate<Traverser> >
   {
     std::cout << "instantiate::operator()(const action_summand&)" << std::endl;
   }
-}; 
+};
 
 int main()
-{ 
+{
   instantiate<lps_traverser> f;
   data_expression e;
   f(e);

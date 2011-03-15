@@ -32,27 +32,23 @@ set(mcrl2_data_src
 
 set(mcrl2_data_src ${mcrl2_data_src} PARENT_SCOPE)
 
-if( NOT MCRL2_MONO_LIB)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
+include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+#The following include directory is required by out-of-source builds for finding setup.h
+include_directories(${CMAKE_BINARY_DIR}/libraries/utilities/include)
 
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
-  include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
-  include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-  #The following include directory is required by out-of-source builds for finding setup.h
-  include_directories(${CMAKE_BINARY_DIR}/libraries/utilities/include)
+add_library(${PROJECT_NAME}
+  ${mcrl2_data_src}
+)
 
-  add_library(${PROJECT_NAME}
-    ${mcrl2_data_src}
-  )
+target_link_libraries(${PROJECT_NAME}
+  mcrl2_core
+)
 
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_core
-  )
-
-  # add install target:
-  install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
-endif(NOT MCRL2_MONO_LIB)
-
+# add install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})

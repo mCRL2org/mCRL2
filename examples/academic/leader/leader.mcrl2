@@ -27,7 +27,7 @@
 %                                        // The flag -o enables induction
 %                                        // on lists, which is necessary
 %                                        // to prove confluence
-% lps2lts -vCctau temp1.lps temp1.svc    // This shows the dramatically
+% lps2lts -vcctau temp1.lps temp1.svc    // This shows the dramatically
 %                                        // reduced statespace, generated
 %                                        // by giving priority to ctau's
 

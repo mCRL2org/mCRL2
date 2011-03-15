@@ -14,17 +14,20 @@
 #include <wx/wx.h>
 #include "simbase.h"
 
-class SimulatorInterfaceGUI : virtual public SimulatorInterface
+class SimulatorInterface;
+
+class SimulatorInterfaceGUI
 {
-public:
-	virtual wxWindow *MainWindow() = 0;
-	/* Returns the main window of the simulator. */
+  public:
+    virtual wxWindow* MainWindow() = 0;
+    /* Returns the main window of the simulator. */
+    virtual ~SimulatorInterfaceGUI() {};
 };
 
-inline wxWindow *GetMainWindow(SimulatorInterface *Simulator)
+inline wxWindow* GetMainWindow(SimulatorInterface* Simulator)
 {
-  SimulatorInterfaceGUI *g = dynamic_cast<SimulatorInterfaceGUI *>(Simulator);
-  if ( g != NULL ) // downcast successful?
+  SimulatorInterfaceGUI* g = dynamic_cast<SimulatorInterfaceGUI*>(Simulator);
+  if (g != NULL)   // downcast successful?
   {
     return g->MainWindow();
   }
@@ -32,7 +35,7 @@ inline wxWindow *GetMainWindow(SimulatorInterface *Simulator)
   return NULL;
 }
 
-wxWindow *GetMainWindow(SimulatorInterface *Simulator);
+wxWindow* GetMainWindow(SimulatorInterface* Simulator);
 /* Returns Simulator->MainWindow() if Simulator is a SimulatorInterfaceGUI
  * and NULL otherwise */
 

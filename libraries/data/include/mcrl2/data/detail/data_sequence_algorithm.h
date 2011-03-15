@@ -16,56 +16,59 @@
 #include <vector>
 #include "mcrl2/data/variable.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-namespace detail {
+namespace detail
+{
 
-  /// \brief Removes elements from a sequence
-  /// \param l A sequence of terms
-  /// \param to_be_removed A set of terms
-  /// \return The removal result
-  template <typename Term>
-  variable_list remove_elements(variable_list l, const std::set<Term>& to_be_removed)
+/// \brief Removes elements from a sequence
+/// \param l A sequence of terms
+/// \param to_be_removed A set of terms
+/// \return The removal result
+template <typename Term>
+variable_list remove_elements(variable_list l, const std::set<Term>& to_be_removed)
+{
+  variable_list result;
+  for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    variable_list result;
-    for (variable_list::const_iterator i = l.begin(); i != l.end(); ++i)
+    if (to_be_removed.find(*i) == to_be_removed.end())
     {
-      if (to_be_removed.find(*i) == to_be_removed.end())
-      {
-        result = push_front(result, *i);
-      }
+      result = push_front(result, *i);
     }
-    return reverse(result);
+  }
+  return reverse(result);
+}
+
+/// \brief Returns the intersection of two unordered sets, that are stored in ATerm lists.
+/// \param x A sequence of data variables
+/// \param y A sequence of data variables
+/// \return The intersection of two sets.
+inline
+variable_list set_intersection(variable_list x, variable_list y)
+{
+  if (x == y)
+  {
+    return x;
   }
 
-  /// \brief Returns the intersection of two unordered sets, that are stored in ATerm lists.
-  /// \param x A sequence of data variables
-  /// \param y A sequence of data variables
-  /// \return The intersection of two sets.
-  inline
-  variable_list set_intersection(variable_list x, variable_list y)
+  std::set<variable> to_be_removed;
+  for (variable_list::iterator i = x.begin(); i != x.end(); ++i)
   {
-    if (x == y)
+    if (std::find(y.begin(), y.end(), *i) == y.end())
     {
-      return x;
+      to_be_removed.insert(*i);
     }
-
-    std::set<variable> to_be_removed;
-    for (variable_list::iterator i = x.begin(); i != x.end(); ++i)
-    {
-      if (std::find(y.begin(), y.end(), *i) == y.end())
-      {
-        to_be_removed.insert(*i);
-      }
-    }
-    if (to_be_removed.empty())
-    {
-      return x;
-    }
-    return remove_elements(x, to_be_removed);
   }
+  if (to_be_removed.empty())
+  {
+    return x;
+  }
+  return remove_elements(x, to_be_removed);
+}
 
 } // namespace detail
 

@@ -16,55 +16,55 @@
 
 namespace grape
 {
-  namespace libgrape
-  {
+namespace libgrape
+{
+
+/**
+ * \short Represents a sort expression.
+ */
+class sortexpression
+{
+  protected:
+    wxString m_expression; /**< The sortexpression's text */
+  public:
+    /**
+     * Default constructor.
+     * Initializes sortexpression.
+     */
+    sortexpression(void);
 
     /**
-     * \short Represents a sort expression.
+     * Copy constructor.
+     * Creates a new sort expression based on an existing one.
+     * @param p_sortexpression The sort expression to copy.
      */
-    class sortexpression
-    {
-      protected:
-        wxString m_expression; /**< The sortexpression's text */
-      public:
-        /**
-         * Default constructor.
-         * Initializes sortexpression.
-         */
-        sortexpression( void );
-
-        /**
-         * Copy constructor.
-         * Creates a new sort expression based on an existing one.
-         * @param p_sortexpression The sort expression to copy.
-         */
-        sortexpression( const sortexpression &p_sortexpression );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~sortexpression( void );
-
-        /**
-         * The sort expression text assignment function
-         * @param p_expression The text of the sort expression
-         */
-        void set_expression( const wxString &p_expression );
-
-        /**
-         * The sort expression text retreival function
-         * @return The text of the sort expression
-         */
-        wxString get_expression( void ) const;
-    };
+    sortexpression(const sortexpression& p_sortexpression);
 
     /**
-     * List of sortexpression. Represents a list of sortexpression datatypes.
+     * Default destructor.
+     * Frees allocated memory.
      */
-    WX_DECLARE_OBJARRAY( sortexpression, list_of_sortexpression );
+    ~sortexpression(void);
 
-  } // namespace libgrape
+    /**
+     * The sort expression text assignment function
+     * @param p_expression The text of the sort expression
+     */
+    void set_expression(const wxString& p_expression);
+
+    /**
+     * The sort expression text retreival function
+     * @return The text of the sort expression
+     */
+    wxString get_expression(void) const;
+};
+
+/**
+ * List of sortexpression. Represents a list of sortexpression datatypes.
+ */
+WX_DECLARE_OBJARRAY(sortexpression, list_of_sortexpression);
+
+} // namespace libgrape
 } // namespace grape
 
 #endif // LIBGRAPE_SORTEXPRESSION_H

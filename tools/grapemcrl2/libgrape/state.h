@@ -15,48 +15,48 @@
 
 namespace grape
 {
-  namespace libgrape
-  {
+namespace libgrape
+{
+
+/**
+ * \short Represents a state.
+ * A situation in which a process can possibly reside. A State has
+ * an optional name.
+ * @see compound_state
+ */
+class state : public compound_state
+{
+  protected:
+    wxString                          m_name;                 /**< (optional) name of this state. */
+  public:
+    /**
+     * Default constructor.
+     * Initializes state.
+     */
+    state(void);
 
     /**
-     * \short Represents a state.
-     * A situation in which a process can possibly reside. A State has
-     * an optional name.
-     * @see compound_state
+     * Copy constructor.
+     * Creates a new state based on an existing one.
+     * @param p_state The state to copy.
      */
-    class state : public compound_state
-    {
-      protected:
-        wxString                          m_name;                 /**< (optional) name of this state. */
-      public:
-        /**
-         * Default constructor.
-         * Initializes state.
-         */
-        state( void  );
-
-        /**
-         * Copy constructor.
-         * Creates a new state based on an existing one.
-         * @param p_state The state to copy.
-         */
-        state( const state &p_state );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory  and removes all references to the object.
-         * Destroys all associated transitions
-         * Destroys all associated initial designators
-         */
-        ~state( void );
-    };
+    state(const state& p_state);
 
     /**
-     * Array of State.
+     * Default destructor.
+     * Frees allocated memory  and removes all references to the object.
+     * Destroys all associated transitions
+     * Destroys all associated initial designators
      */
-    WX_DECLARE_OBJARRAY( state, arr_state );
+    ~state(void);
+};
 
-  } // namespace libgrape
+/**
+ * Array of State.
+ */
+WX_DECLARE_OBJARRAY(state, arr_state);
+
+} // namespace libgrape
 } // namespace grape
 
 #endif // LIBGRAPE_STATE_H

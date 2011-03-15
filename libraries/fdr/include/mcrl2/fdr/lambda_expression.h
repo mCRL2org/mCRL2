@@ -15,10 +15,12 @@
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/any_expression_fwd.h"
 #include "mcrl2/fdr/expression_fwd.h"
-                                      
-namespace mcrl2 {
 
-namespace fdr {
+namespace mcrl2
+{
+
+namespace fdr
+{
 
 //--- start generated lambda expression class declarations ---//
 /// \brief class lambda_expression
@@ -67,14 +69,14 @@ class lambdaexpr: public lambda_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a lambdaexpr expression
-    /// \param t A term
-    /// \return True if it is a lambdaexpr expression
-    inline
-    bool is_lambdaexpr(const lambda_expression& t)
-    {
-      return fdr::detail::gsIsLambdaExpr(t);
-    }
+/// \brief Test for a lambdaexpr expression
+/// \param t A term
+/// \return True if it is a lambdaexpr expression
+inline
+bool is_lambdaexpr(const lambda_expression& t)
+{
+  return fdr::detail::gsIsLambdaExpr(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

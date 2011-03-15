@@ -17,38 +17,41 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/core/messaging.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-  /// \brief Parses a PBES specification from an input stream
-  /// \param spec_stream A stream from which can be read
-  /// \return The parsed PBES
-  inline
-  pbes<> txt2pbes(std::istream& spec_stream)
+/// \brief Parses a PBES specification from an input stream
+/// \param spec_stream A stream from which can be read
+/// \return The parsed PBES
+inline
+pbes<> txt2pbes(std::istream& spec_stream)
+{
+  pbes<> result;
+  spec_stream >> result;
+  try
   {
-    pbes<> result;
-    spec_stream >> result;
-    try {
-      core::gsVerboseMsg("checking monotonicity...\n");
-      result.normalize();
-    }
-    catch (std::exception& /* e */)
-    {
-      throw mcrl2::runtime_error("PBES is not monotonic");
-    }
-    return result;
+    core::gsVerboseMsg("checking monotonicity...\n");
+    result.normalize();
   }
-
-  /// \brief Parses a PBES specification from a string
-  /// \param text A string
-  /// \return The parsed PBES
-  inline
-  pbes<> txt2pbes(const std::string& text)
+  catch (std::exception& /* e */)
   {
-    std::stringstream from(text);
-    return txt2pbes(from);
+    throw mcrl2::runtime_error("PBES is not monotonic");
   }
+  return result;
+}
+
+/// \brief Parses a PBES specification from a string
+/// \param text A string
+/// \return The parsed PBES
+inline
+pbes<> txt2pbes(const std::string& text)
+{
+  std::stringstream from(text);
+  return txt2pbes(from);
+}
 
 } // namespace pbes_system
 

@@ -22,9 +22,11 @@
 #include "mcrl2/fdr/type_expression_fwd.h"
 #include "mcrl2/fdr/vartype_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated definition expression class declarations ---//
 /// \brief class definition_expression
@@ -251,104 +253,104 @@ class include: public definition_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a assign expression
-    /// \param t A term
-    /// \return True if it is a assign expression
-    inline
-    bool is_assign(const definition_expression& t)
-    {
-      return fdr::detail::gsIsAssign(t);
-    }
+/// \brief Test for a assign expression
+/// \param t A term
+/// \return True if it is a assign expression
+inline
+bool is_assign(const definition_expression& t)
+{
+  return fdr::detail::gsIsAssign(t);
+}
 
-    /// \brief Test for a channel expression
-    /// \param t A term
-    /// \return True if it is a channel expression
-    inline
-    bool is_channel(const definition_expression& t)
-    {
-      return fdr::detail::gsIsChannel(t);
-    }
+/// \brief Test for a channel expression
+/// \param t A term
+/// \return True if it is a channel expression
+inline
+bool is_channel(const definition_expression& t)
+{
+  return fdr::detail::gsIsChannel(t);
+}
 
-    /// \brief Test for a simple_channel expression
-    /// \param t A term
-    /// \return True if it is a simple_channel expression
-    inline
-    bool is_simple_channel(const definition_expression& t)
-    {
-      return fdr::detail::gsIsSimpleChannel(t);
-    }
+/// \brief Test for a simple_channel expression
+/// \param t A term
+/// \return True if it is a simple_channel expression
+inline
+bool is_simple_channel(const definition_expression& t)
+{
+  return fdr::detail::gsIsSimpleChannel(t);
+}
 
-    /// \brief Test for a nametype expression
-    /// \param t A term
-    /// \return True if it is a nametype expression
-    inline
-    bool is_nametype(const definition_expression& t)
-    {
-      return fdr::detail::gsIsNameType(t);
-    }
+/// \brief Test for a nametype expression
+/// \param t A term
+/// \return True if it is a nametype expression
+inline
+bool is_nametype(const definition_expression& t)
+{
+  return fdr::detail::gsIsNameType(t);
+}
 
-    /// \brief Test for a datatype expression
-    /// \param t A term
-    /// \return True if it is a datatype expression
-    inline
-    bool is_datatype(const definition_expression& t)
-    {
-      return fdr::detail::gsIsDataType(t);
-    }
+/// \brief Test for a datatype expression
+/// \param t A term
+/// \return True if it is a datatype expression
+inline
+bool is_datatype(const definition_expression& t)
+{
+  return fdr::detail::gsIsDataType(t);
+}
 
-    /// \brief Test for a subtype expression
-    /// \param t A term
-    /// \return True if it is a subtype expression
-    inline
-    bool is_subtype(const definition_expression& t)
-    {
-      return fdr::detail::gsIsSubType(t);
-    }
+/// \brief Test for a subtype expression
+/// \param t A term
+/// \return True if it is a subtype expression
+inline
+bool is_subtype(const definition_expression& t)
+{
+  return fdr::detail::gsIsSubType(t);
+}
 
-    /// \brief Test for a external expression
-    /// \param t A term
-    /// \return True if it is a external expression
-    inline
-    bool is_external(const definition_expression& t)
-    {
-      return fdr::detail::gsIsExternal(t);
-    }
+/// \brief Test for a external expression
+/// \param t A term
+/// \return True if it is a external expression
+inline
+bool is_external(const definition_expression& t)
+{
+  return fdr::detail::gsIsExternal(t);
+}
 
-    /// \brief Test for a transparent expression
-    /// \param t A term
-    /// \return True if it is a transparent expression
-    inline
-    bool is_transparent(const definition_expression& t)
-    {
-      return fdr::detail::gsIsTransparent(t);
-    }
+/// \brief Test for a transparent expression
+/// \param t A term
+/// \return True if it is a transparent expression
+inline
+bool is_transparent(const definition_expression& t)
+{
+  return fdr::detail::gsIsTransparent(t);
+}
 
-    /// \brief Test for a assert expression
-    /// \param t A term
-    /// \return True if it is a assert expression
-    inline
-    bool is_assert(const definition_expression& t)
-    {
-      return fdr::detail::gsIsAssert(t);
-    }
+/// \brief Test for a assert expression
+/// \param t A term
+/// \return True if it is a assert expression
+inline
+bool is_assert(const definition_expression& t)
+{
+  return fdr::detail::gsIsAssert(t);
+}
 
-    /// \brief Test for a print expression
-    /// \param t A term
-    /// \return True if it is a print expression
-    inline
-    bool is_print(const definition_expression& t)
-    {
-      return fdr::detail::gsIsPrint(t);
-    }
+/// \brief Test for a print expression
+/// \param t A term
+/// \return True if it is a print expression
+inline
+bool is_print(const definition_expression& t)
+{
+  return fdr::detail::gsIsPrint(t);
+}
 
-    /// \brief Test for a include expression
-    /// \param t A term
-    /// \return True if it is a include expression
-    inline
-    bool is_include(const definition_expression& t)
-    {
-      return fdr::detail::gsIsInclude(t);
-    }
+/// \brief Test for a include expression
+/// \param t A term
+/// \return True if it is a include expression
+inline
+bool is_include(const definition_expression& t)
+{
+  return fdr::detail::gsIsInclude(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

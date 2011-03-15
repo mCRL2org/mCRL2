@@ -21,7 +21,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/exception.h"
 
@@ -33,14 +32,14 @@ using namespace mcrl2::trace;
 
 enum output_type { otPlain, otMcrl2, otDot, otAut, /*otSvc,*/ otNone, otStates };
 
-static void print_state(ostream &os, ATermAppl state)
+static void print_state(ostream& os, ATermAppl state)
 {
   int arity = ATgetArity(ATgetAFun(state));
 
   os << "(";
   for (int i=0; i<arity; i++)
   {
-    if ( i > 0 )
+    if (i > 0)
     {
       os << ",";
     }
@@ -49,7 +48,7 @@ static void print_state(ostream &os, ATermAppl state)
   os << ")";
 }
 
-static void trace2dot(ostream &os, Trace &trace, char const* name)
+static void trace2dot(ostream& os, Trace& trace, char const* name)
 {
   os << "digraph \"" << name << "\" {" << endl;
   os << "center = TRUE;" << endl;
@@ -58,24 +57,26 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
   ATermAppl act;
   int i = 0;
   os << i << " [label=\"";
-  if ( trace.currentState() != NULL )
+  if (trace.currentState() != NULL)
   {
     print_state(os,trace.currentState());
   }
   os << "\",peripheries=2];" << endl;
-  while ( (act = trace.nextAction()) != NULL )
+  while ((act = trace.nextAction()) != NULL)
   {
     os << i+1 << " [label=\"";
-    if ( trace.currentState() != NULL )
+    if (trace.currentState() != NULL)
     {
       print_state(os,trace.currentState());
     }
     os << "\"];" << endl;
     os << i << " -> " << i+1 << " [label=\"";
-    if ( mcrl2::core::detail::gsIsMultAct(act) )
+    if (mcrl2::core::detail::gsIsMultAct(act))
     {
       PrintPart_CXX(os,(ATerm) act,ppDefault);
-    } else {
+    }
+    else
+    {
       // needed because trace library cannot parse strings
       os << ATgetName(ATgetAFun(act));
     }
@@ -85,9 +86,9 @@ static void trace2dot(ostream &os, Trace &trace, char const* name)
   os << "}" << endl;
 }
 
-static void trace2statevector(ostream &os, Trace&trace)
+static void trace2statevector(ostream& os, Trace& trace)
 {
-  if ( trace.currentState() != NULL )
+  if (trace.currentState() != NULL)
   {
     print_state(os,trace.currentState());
   }
@@ -103,33 +104,31 @@ static void trace2statevector(ostream &os, Trace&trace)
     {
       os << ATgetName(ATgetAFun(act));
     }
-    os << "-> ";
+    os << "-> " << std::endl;
     ATermAppl CurrentState = trace.currentState();
-    if ( CurrentState != NULL )
+    if (CurrentState != NULL)
     {
       print_state(os, trace.currentState());
     }
-    os << std::endl;
     act = trace.nextAction();
-    if (act != NULL && CurrentState != NULL)
-    {
-      print_state(os, trace.currentState());
-    }
   }
+  os << std::endl;
 }
 
-static void trace2aut(ostream &os, Trace &trace)
+static void trace2aut(ostream& os, Trace& trace)
 {
   os << "des (0," << trace.getLength() << "," << trace.getLength()+1 << ")" << endl;
   ATermAppl act;
   int i = 0;
-  while ( (act = trace.nextAction()) != NULL )
+  while ((act = trace.nextAction()) != NULL)
   {
     os << "(" << i << ",\"";
-    if ( mcrl2::core::detail::gsIsMultAct(act) )
+    if (mcrl2::core::detail::gsIsMultAct(act))
     {
       PrintPart_CXX(os,(ATerm) act,ppDefault);
-    } else {
+    }
+    else
+    {
       // needed because trace library cannot parse strings
       os << ATgetName(ATgetAFun(act));
     }
@@ -143,287 +142,193 @@ static void trace2aut(ostream &os, Trace &trace)
   // SVC library does not accept ostreams
 }*/
 
-inline void save_trace(Trace& trace, output_type outtype, std::ostream& out) {
-  switch ( outtype )
+inline void save_trace(Trace& trace, output_type outtype, std::ostream& out)
+{
+  switch (outtype)
   {
-  case otPlain:
-    gsVerboseMsg("writing result in plain text...\n");
-    trace.save(out,tfPlain);
-    break;
-  case otMcrl2:
-    gsVerboseMsg("writing result in mCRL2 trace format...\n");
-    trace.save(out,tfMcrl2);
-    break;
-  case otAut:
-    gsVerboseMsg("writing result in aut format...\n");
-    trace2aut(out,trace);
-    break;
-    /*      gsVerboseMsg("writing result in svc format...\n");
-      case otSvc:
-      trace2svc(*OutStream,trace);
-      break;*/
-  case otStates:
-    gsVerboseMsg("writing result in plain text with state vectors...\n");
-    trace2statevector(out,trace);
-    break;
-  default:
-    break;
+    case otPlain:
+      gsVerboseMsg("writing result in plain text...\n");
+      trace.save(out,tfPlain);
+      break;
+    case otMcrl2:
+      gsVerboseMsg("writing result in mCRL2 trace format...\n");
+      trace.save(out,tfMcrl2);
+      break;
+    case otAut:
+      gsVerboseMsg("writing result in aut format...\n");
+      trace2aut(out,trace);
+      break;
+      /*      gsVerboseMsg("writing result in svc format...\n");
+        case otSvc:
+        trace2svc(*OutStream,trace);
+        break;*/
+    case otStates:
+      gsVerboseMsg("writing result in plain text with state vectors...\n");
+      trace2statevector(out,trace);
+      break;
+    default:
+      break;
   }
 }
 
-class tracepp_tool: public squadt_tool< input_output_tool >
+class tracepp_tool: public input_output_tool
 {
-protected:
-  typedef squadt_tool< input_output_tool > super;
+  protected:
+    typedef input_output_tool super;
 
-public:
-  tracepp_tool()
-    : super(NAME, AUTHOR,
-                        "convert and pretty print traces",
-                        "Convert the trace in INFILE and save it in another format to OUTFILE. If OUTFILE"
-                        "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
-                        "\n"
-                        "Input should be either in plain format, which means a text file with one action on each line, "
-                        "or the mCRL2 trace format (as generated by lps2lts, for example).\n"
-                        ),
-    format_for_output(otPlain)
-  {}
+  public:
+    tracepp_tool()
+      : super(NAME, AUTHOR,
+              "convert and pretty print traces",
+              "Convert the trace in INFILE and save it in another format to OUTFILE. If OUTFILE"
+              "is not present, stdout is used. If INFILE is not present, stdin is used.\n"
+              "\n"
+              "Input should be either in plain format, which means a text file with one action on each line, "
+              "or the mCRL2 trace format (as generated by lps2lts, for example).\n"
+             ),
+      format_for_output(otPlain)
+    {}
 
-  bool run()
-  {
-    Trace trace;
+    bool run()
+    {
+      Trace trace;
 
-    if (input_filename().empty()) {
-      gsVerboseMsg("reading input from stdin...\n");
+      if (input_filename().empty())
+      {
+        gsVerboseMsg("reading input from stdin...\n");
 
-      trace.load(std::cin);
-    }
-    else {
-      gsVerboseMsg("reading input from '%s'...\n", input_filename().c_str());
-
-      std::ifstream in(input_filename().c_str(), std::ios_base::binary|std::ios_base::in);
-
-      if (in.good()) {
-        trace.load(in);
+        trace.load(std::cin);
       }
-      else {
-        throw mcrl2::runtime_error("could not open input file '" +
-                                   input_filename() + "' for reading");
+      else
+      {
+        gsVerboseMsg("reading input from '%s'...\n", input_filename().c_str());
+
+        std::ifstream in(input_filename().c_str(), std::ios_base::binary|std::ios_base::in);
+
+        if (in.good())
+        {
+          trace.load(in);
+        }
+        else
+        {
+          throw mcrl2::runtime_error("could not open input file '" +
+                                     input_filename() + "' for reading");
+        }
       }
-    }
 
 
-    if (output_filename().empty()) {
-      gsVerboseMsg("writing result to stdout...\n");
+      if (output_filename().empty())
+      {
+        gsVerboseMsg("writing result to stdout...\n");
 
-      if (format_for_output == otDot) {
-        gsVerboseMsg("writing result in dot format...\n");
-
-        trace2dot(std::cout,trace,"stdin");
-      }
-      else {
-        save_trace(trace, format_for_output, std::cout);
-      }
-    }
-    else {
-      gsVerboseMsg("writing result to '%s'...\n", output_filename().c_str());
-
-      std::ofstream out(output_filename().c_str(), std::ios_base::binary|std::ios_base::out|std::ios_base::trunc);
-
-      if (out.good()) {
-        if (format_for_output == otDot) {
+        if (format_for_output == otDot)
+        {
           gsVerboseMsg("writing result in dot format...\n");
 
-          trace2dot(out,trace,
-                    input_filename().substr(input_filename().find_last_of('.')).c_str());
+          trace2dot(std::cout,trace,"stdin");
         }
-        else {
-          save_trace(trace, format_for_output, out);
-        }
-      }
-      else {
-        throw mcrl2::runtime_error("could not open output file '" +
-                                   output_filename() +  "' for writing");
-      }
-    }
-    return true;
-  }
-
-protected:
-  output_type     format_for_output;
-
-  void add_options(interface_description& desc)
-  {
-    super::add_options(desc);
-    desc.add_option("format", make_mandatory_argument("FORMAT"),
-                    "print the trace in the specified FORMAT:\n"
-                    "  'plain' for plain text (default),\n"
-                    "  'states' for plain text with state vectors,\n"
-                    "  'mcrl2' for the mCRL2 format,\n"
-                    "  'aut' for the Aldebaran format, or\n"
-                    "  'dot' for the GraphViz format"
-                    , 'f');
-  }
-
-  void parse_options(const command_line_parser& parser)
-  {
-    super::parse_options(parser);
-    if (parser.options.count("format")) {
-      std::string eq_name(parser.option_argument("format"));
-      if (eq_name == "plain") {
-        format_for_output = otPlain;
-      } else if (eq_name == "states") {
-        format_for_output = otStates;
-      } else if (eq_name == "mcrl2") {
-        format_for_output = otMcrl2;
-      } else if (eq_name == "dot") {
-        format_for_output = otDot;
-      } else if (eq_name == "aut") {
-        format_for_output = otAut;
-      } else {
-        parser.error("option -f/--format has illegal argument '" + eq_name + "'");
-      }
-    }
-  }
-
-//Squadt connectivity
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    protected:
-
-# define option_print_format         "print_format"
-
-      static bool initialise_types()
-      {
-        tipi::datatype::enumeration< output_type > pp_format_enumeration;
-
-        pp_format_enumeration.
-          add(otPlain, "plain").
-          add(otMcrl2, "mcrl2").
-          add(otDot, "dot").
-          add(otAut, "aut").
-          add(otNone, "none").
-          add(otStates, "states");
-
-        return true;
-      }
-
-      /** \brief configures tool capabilities */
-      void set_capabilities(tipi::tool::capabilities& capabilities) const
-      {
-        static bool initialised = initialise_types();
-
-        static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-
-        // The tool has only one main input combination
-        capabilities.add_input_configuration("main-input",
-            tipi::mime_type("trc", tipi::mime_type::application), tipi::tool::category::transformation);
-      }
-
-      /** \brief queries the user via SQuADT if needed to obtain configuration information */
-      void user_interactive_configuration(tipi::configuration& configuration)
-      {
-        using namespace tipi;
-        using namespace tipi::layout;
-        using namespace tipi::layout::elements;
-
-        // Let squadt_tool update configuration for rewriter and add output file configuration
-        synchronise_with_configuration(configuration);
-
-        if (!configuration.option_exists(option_print_format)) {
-          configuration.add_option(option_print_format).set_argument_value< 0 >(otPlain);
-        }
-
-        /* Create display */
-        tipi::tool_display d;
-
-        // Helper for format selection
-        mcrl2::utilities::squadt::radio_button_helper < output_type > format_selector(d);
-        tipi::layout::vertical_box& m = d.create< vertical_box >();
-        m.append(d.create< label >().set_text("Output format : ")).
-          append(d.create< horizontal_box >().
-            append(format_selector.associate(otPlain, "plain")).
-            append(format_selector.associate(otMcrl2, "mcrl2")).
-            append(format_selector.associate(otDot, "dot")).
-            append(format_selector.associate(otAut, "aut")).
-            append(format_selector.associate(otStates, "states")));
-
-        format_selector.set_selection(otPlain);
-
-        button& okay_button = d.create< button >().set_label("OK");
-        m.append(d.create< label >().set_text(" ")).
-          append(okay_button, layout::right);
-
-        send_display_layout(d.manager(m));
-
-        okay_button.await_change();
-
-        configuration.get_option(option_print_format).set_argument_value< 0 >(format_selector.get_selection());
-
-        if(!configuration.output_exists("main-output"))
+        else
         {
-          output_type selected_output = configuration.get_option_argument< output_type >(option_print_format);
-          if(selected_output == otPlain)
+          save_trace(trace, format_for_output, std::cout);
+        }
+      }
+      else
+      {
+        gsVerboseMsg("writing result to '%s'...\n", output_filename().c_str());
+
+        std::ofstream out(output_filename().c_str(), std::ios_base::binary|std::ios_base::out|std::ios_base::trunc);
+
+        if (out.good())
+        {
+          if (format_for_output == otDot)
           {
-            configuration.add_output("main-output", tipi::mime_type("txt", tipi::mime_type::text),
-                                   configuration.get_output_name(".txt"));
+            gsVerboseMsg("writing result in dot format...\n");
+
+            trace2dot(out,trace,
+                      input_filename().substr(input_filename().find_last_of('.')).c_str());
           }
-          else if(selected_output == otMcrl2)
+          else
           {
-            configuration.add_output("main-output", tipi::mime_type("lts", tipi::mime_type::application),
-                                               configuration.get_output_name(".lts"));
-          }
-          else if(selected_output == otDot)
-          {
-            configuration.add_output("main-output", tipi::mime_type("dot", tipi::mime_type::text),
-                                                           configuration.get_output_name(".dot"));
-          }
-          else if(selected_output == otAut)
-          {
-            configuration.add_output("main-output", tipi::mime_type("aut", tipi::mime_type::text),
-                                                           configuration.get_output_name(".aut"));
+            save_trace(trace, format_for_output, out);
           }
         }
-
-        // let squadt_tool update configuration for rewriter and input/output files
-        update_configuration(configuration);
-
+        else
+        {
+          throw mcrl2::runtime_error("could not open output file '" +
+                                     output_filename() +  "' for writing");
+        }
       }
+      return true;
+    }
 
-      /** \brief check an existing configuration object to see if it is usable */
-      bool check_configuration(tipi::configuration const& configuration) const
+  protected:
+    output_type     format_for_output;
+
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("format", make_mandatory_argument("FORMAT"),
+                      "print the trace in the specified FORMAT:\n"
+                      "  'plain' for plain text (default),\n"
+                      "  'states' for plain text with state vectors,\n"
+                      "  'mcrl2' for the mCRL2 format,\n"
+                      "  'aut' for the Aldebaran format, or\n"
+                      "  'dot' for the GraphViz format"
+                      , 'f');
+    }
+
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      if (parser.options.count("format"))
       {
-        // Check if everything present
-        return configuration.input_exists("main-input") &&
-               configuration.output_exists("main-output") &&
-               configuration.option_exists(option_print_format);
+        std::string eq_name(parser.option_argument("format"));
+        if (eq_name == "plain")
+        {
+          format_for_output = otPlain;
+        }
+        else if (eq_name == "states")
+        {
+          format_for_output = otStates;
+        }
+        else if (eq_name == "mcrl2")
+        {
+          format_for_output = otMcrl2;
+        }
+        else if (eq_name == "dot")
+        {
+          format_for_output = otDot;
+        }
+        else if (eq_name == "aut")
+        {
+          format_for_output = otAut;
+        }
+        else
+        {
+          parser.error("option -f/--format has illegal argument '" + eq_name + "'");
+        }
       }
+    }
 
-      /** \brief performs the task specified by a configuration */
-      bool perform_task(tipi::configuration& configuration)
-      {
-        // Let squadt_tool update configuration for rewriter and add output file configuration
-        synchronise_with_configuration(configuration);
-
-        return run();
-      }
-#endif //ENABLE_SQUADT_CONNECTIVITY
 };
 
-class tracepp_gui_tool: public mcrl2_gui_tool<tracepp_tool> {
-public:
-	tracepp_gui_tool() {
-		std::vector<std::string> values;
-		values.push_back("plain");
-		values.push_back("states");
-		values.push_back("mcrl2");
-		values.push_back("aut");
-		values.push_back("dot");
-		m_gui_options["format"] = create_radiobox_widget(values);
-	}
+class tracepp_gui_tool: public mcrl2_gui_tool<tracepp_tool>
+{
+  public:
+    tracepp_gui_tool()
+    {
+      std::vector<std::string> values;
+      values.push_back("plain");
+      values.push_back("states");
+      values.push_back("mcrl2");
+      values.push_back("aut");
+      values.push_back("dot");
+      m_gui_options["format"] = create_radiobox_widget(values);
+    }
 };
 
 
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   return tracepp_gui_tool().execute(argc, argv);

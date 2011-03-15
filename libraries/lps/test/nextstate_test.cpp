@@ -13,10 +13,12 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/deque.h"
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/find.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -28,9 +30,12 @@ std::string print_state(atermpp::aterm_appl s, legacy_rewriter& R)
 {
   std::string result("state(");
   int index = 0;
-  for(atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
+  for (atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
   {
-    if(index++ != 0) { result.append(", "); }
+    if (index++ != 0)
+    {
+      result.append(", ");
+    }
 
     result.append(core::pp(atermpp::aterm(R.translate(static_cast<ATerm>(*i)))));
   }
@@ -43,7 +48,14 @@ void test_nextstate(specification s, size_t expected_states, size_t expected_tra
   s.process().deadlock_summands().clear(); // It is important to clear the deadlock summands if per_summand = false
 
   legacy_rewriter R(s.data(),
-           mcrl2::data::used_data_equation_selector(s.data(), lps::specification_to_aterm(s)));
+                    mcrl2::data::used_data_equation_selector(s.data(), lps::find_function_symbols(s), s.global_variables()));
+
+#ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
+std::clog << "--- rewrite rule selection specification ---\n";
+std::clog << lps::pp(s) << std::endl;
+std::clog << "--- rewrite rule selection function symbols ---\n";
+std::clog << core::detail::print_pp_set(lps::find_function_symbols(s)) << std::endl;
+#endif
 
   mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > E(s.data(), R);
 
@@ -60,25 +72,25 @@ void test_nextstate(specification s, size_t expected_states, size_t expected_tra
   q.push(initial_state);
   seen.insert(initial_state);
 
-  while(!q.empty())
+  while (!q.empty())
   {
     visited.insert(q.front());
 
-    if(per_summand)
+    if (per_summand)
     {
-      for(size_t i = 0; i < s.process().summand_count(); ++i)
+      for (size_t i = 0; i < s.process().summand_count(); ++i)
       {
         std::auto_ptr< NextStateGenerator > generator(nstate->getNextStates(q.front(), i));
 
         ATerm     state;
         ATermAppl transition;
-        while(generator->next(&transition, &state))
+        while (generator->next(&transition, &state))
         {
           atermpp::aterm s(state);
           atermpp::aterm_appl t(transition);
           transition_labels.insert(t);
           ++transitions;
-          if(seen.find(s) == seen.end())
+          if (seen.find(s) == seen.end())
           {
             q.push(s);
             seen.insert(s);
@@ -92,13 +104,13 @@ void test_nextstate(specification s, size_t expected_states, size_t expected_tra
 
       ATerm     state;
       ATermAppl transition;
-      while(generator->next(&transition, &state))
+      while (generator->next(&transition, &state))
       {
         atermpp::aterm s(state);
         atermpp::aterm_appl t(transition);
         transition_labels.insert(t);
         ++transitions;
-        if(seen.find(s) == seen.end())
+        if (seen.find(s) == seen.end())
         {
           q.push(s);
           seen.insert(s);

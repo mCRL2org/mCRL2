@@ -1,0 +1,9 @@
+% Formula that expresses that if a message is read through r1, then it is
+% eventually send through s4.
+
+% This property does not hold for abp_bw, as it does not
+% assume fairness. This can be shown by the formula "infinitely_often_lost.mcf"
+%
+% The file "read_then_eventually_send_if_fair.mcf" contains a formula that
+% shows that the property holds if fairness is assumed.
+[true*](forall d:D .([r1(d)](nu X. mu Y. ([s4(d)]X && [!s4(d)]Y))))

@@ -15,18 +15,19 @@
 #include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/aterm.h"
 
-namespace atermpp {
+namespace atermpp
+{
 
 /// \brief Iterator for term_appl.
 template <typename Value>
 class term_appl_iterator: public boost::iterator_facade<
-        term_appl_iterator<Value>,         // Derived
-        const Value,                       // Value
-        boost::forward_traversal_tag,      // CategoryOrTraversal
-        const Value                        // Reference
-    >
+  term_appl_iterator<Value>,         // Derived
+  const Value,                       // Value
+  boost::forward_traversal_tag,      // CategoryOrTraversal
+  const Value                        // Reference
+  >
 {
- public:
+  public:
     /// \brief Constructor.
     term_appl_iterator()
     {}
@@ -37,14 +38,16 @@ class term_appl_iterator: public boost::iterator_facade<
       : m_term(t)
     {}
 
- private:
+  private:
     friend class boost::iterator_core_access;
 
     /// \brief Equality check
     /// \param other An iterator
     /// \return True if the iterators are equal
     bool equal(term_appl_iterator const& other) const
-    { return this->m_term == other.m_term; }
+    {
+      return this->m_term == other.m_term;
+    }
 
     /// \brief Dereference operator
     /// \return The value that the iterator references
@@ -55,11 +58,15 @@ class term_appl_iterator: public boost::iterator_facade<
 
     /// \brief Increments the iterator
     void increment()
-    { m_term++; }
+    {
+      m_term++;
+    }
 
     /// \brief Decrements the iterator
     void decrement()
-    { m_term--; }
+    {
+      m_term--;
+    }
 
     ATerm* m_term;
 };

@@ -13,9 +13,9 @@
 #define TRANSITION_H
 
 #ifndef STATE_H
-  #include "state.h"
+#include "state.h"
 #else
-  class State;
+class State;
 #endif
 
 #include <string>
@@ -29,8 +29,8 @@ class Transition
     // Setters
     void setControl(const double x, const double y, const double z);
     void setControlAlpha(const double alpha);
-	void setcontrolBeta(const double beta);
-	void setcontrolGamma(const double gamma);
+    void setcontrolBeta(const double beta);
+    void setcontrolGamma(const double gamma);
 
     void setLabelPos(const double x, const double y, const double z);
 
@@ -39,12 +39,12 @@ class Transition
     State* getTo() const;
     std::string getLabel() const;
 
-    void getControl(double &x, double &y, double &z);
+    void getControl(double& x, double& y, double& z);
     double getControlAlpha() const;
-	double getControlBeta() const;
-	double getControlGamma() const;
+    double getControlBeta() const;
+    double getControlGamma() const;
     double getControlDist() const;
-    void getLabelPos(double &x, double &y, double &z);
+    void getLabelPos(double& x, double& y, double& z);
 
     void select();
     void deselect();
@@ -57,12 +57,12 @@ class Transition
 
     // The position of the control point relative to fromState
     double controlAlpha;
-	double controlBeta;
-	double controlGamma;
-	double controlDist;
+    double controlBeta;
+    double controlGamma;
+    double controlDist;
     double labelX;
     double labelY;
-	double labelZ;
+    double labelZ;
 
     bool selected;
 

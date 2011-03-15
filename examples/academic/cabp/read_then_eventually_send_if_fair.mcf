@@ -1,0 +1,16 @@
+% All messages d are (once they have been read through action r1)
+% inevitably sent through action s2, if not permanently lost. 
+%
+% Essentially this is the same property as the one in
+% "read_then_eventually_send.mcf", but it adds a fairness assumption
+% (a message is not lost infinitely often).
+
+nu X.
+(
+[true]X
+
+&&
+
+forall d:DATA.
+             ([r1(d)]( nu Y. mu Z. ([(!s2(d)) && (!(c4(ce)||c7(ae)))]Z && [c4(ce)||c7(ae)]Y) ) )
+)

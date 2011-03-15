@@ -1,0 +1,4 @@
+% The protocol does not duplicate messages
+% Obtained from: "Tools for parameterized Boolean Equation Systems",
+% S. Janssen, MSc. thesis
+[true*] forall d:DATA. [r1(d).(!r1(d) && !s2(d))*.s2(d).(!r1(d))*.s2(d)]false

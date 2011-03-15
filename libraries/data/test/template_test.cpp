@@ -60,7 +60,7 @@ int test_main(int /*argc*/, char** /*argv[]*/)
   //--- The intended usage pattern does not compile ---//
   // make_find_helper<lps_traverser>().print();
   //f1<lps_traverser>();
-  
+
   //--- This also doesn't compile ---//
   //f2<lps_traverser>();
 

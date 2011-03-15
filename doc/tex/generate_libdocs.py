@@ -32,8 +32,7 @@ library_list = [
     [ 'pbes', 'libraries/pbes' ],
     [ 'process', 'libraries/process' ],
     [ 'trace', 'libraries/trace' ],
-    [ 'utilities', 'libraries/utilities' ],
-    [ 'tipi', 'tools/squadt/libraries/tipi' ]
+    [ 'utilities', 'libraries/utilities' ] 
     ]
 
 # Subdirectory of every library's directory that will be checked for

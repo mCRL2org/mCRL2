@@ -24,11 +24,14 @@
 using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
-RewriterProver::RewriterProver(const data_specification &DataSpec, mcrl2::data::rewriter::strategy strat)
+RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat)
 {
   prover_obj = new BDD_Prover(DataSpec,strat);
   rewr_obj = prover_obj->get_rewriter();
@@ -52,19 +55,21 @@ bool RewriterProver::removeRewriteRule(ATermAppl Rule)
 ATerm RewriterProver::rewriteInternal(ATerm Term)
 {
   return rewr_obj->toRewriteFormat(
-                rewrite(
-                  rewr_obj->fromRewriteFormat(Term)
-                  )
-                );
+           rewrite(
+             rewr_obj->fromRewriteFormat(Term)
+           )
+         );
 }
 
 ATermAppl RewriterProver::rewrite(ATermAppl Term)
 {
-  if ( mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_() )
+  if (mcrl2::data::data_expression(Term).sort() == mcrl2::data::sort_bool::bool_())
   {
     prover_obj->set_formula(Term);
     return prover_obj->get_bdd();
-  } else {
+  }
+  else
+  {
     return rewr_obj->rewrite(Term);
   }
 }
@@ -126,7 +131,7 @@ void RewriterProver::clearSubstitutions(ATermList Vars)
 
 RewriteStrategy RewriterProver::getStrategy()
 {
-  switch ( rewr_obj->getStrategy() )
+  switch (rewr_obj->getStrategy())
   {
     case GS_REWR_INNER:
       return GS_REWR_INNER_P;
@@ -145,7 +150,7 @@ RewriteStrategy RewriterProver::getStrategy()
   }
 }
 
-    }
-  }
+}
+}
 }
 

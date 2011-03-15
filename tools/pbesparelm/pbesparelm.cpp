@@ -14,7 +14,6 @@
 // #define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -24,19 +23,19 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
 //[pbes_parelm_tool
-class pbes_parelm_tool: public squadt_tool<input_output_tool>
+class pbes_parelm_tool: public input_output_tool
 {
-  typedef squadt_tool<input_output_tool> super;
+    typedef input_output_tool super;
 
   public:
     pbes_parelm_tool()
       : super(
-          "pbesparelm",
-          "Wieger Wesselink; Simon Janssen and Tim Willemse",
-          "remove unused parameters from a PBES",
-          "Reads a file containing a PBES, and applies parameter elimination to it. If OUTFILE "
-          "is not present, standard output is used. If INFILE is not present, standard input is used."
-        )
+        "pbesparelm",
+        "Wieger Wesselink; Simon Janssen and Tim Willemse",
+        "remove unused parameters from a PBES",
+        "Reads a file containing a PBES, and applies parameter elimination to it. If OUTFILE "
+        "is not present, standard output is used. If INFILE is not present, standard input is used."
+      )
     {}
 
     bool run() /*< The virtual function `run` executes the tool.
@@ -66,69 +65,12 @@ class pbes_parelm_tool: public squadt_tool<input_output_tool>
       return true;
     }
 
-// Squadt protocol interface
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      c.add_input_configuration("main-input",
-                 tipi::mime_type("pbes", tipi::mime_type::application),
-                                         tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c) {
-
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      synchronise_with_configuration(c);
-
-      if (!c.output_exists("main-output")) {
-        c.add_output("main-output",
-                 tipi::mime_type("pbes", tipi::mime_type::application),
-                                                 c.get_output_name(".pbes"));
-      }
-
-      update_configuration(c);
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const {
-      return c.input_exists("main-input") && c.output_exists("main-output");
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c) {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      // Create display
-      tipi::tool_display d;
-
-      send_display_layout(d.manager(d.create< vertical_box >().
-        append(d.create< label >().set_text("Parameter elimination in progress"), layout::left)));
-
-      // Run
-      bool result = run();
-
-      send_display_layout(d.manager(d.create<vertical_box>().
-                                    append(d.create< label >().set_text(std::string("Parameter elimination ") + ((result) ? "succeeded" : "failed")), layout::left)));
-
-      return result;
-    }
-#endif
-
 };
 
-class pbes_parelm_gui_tool: public mcrl2_gui_tool<pbes_parelm_tool> {
-public:
-	pbes_parelm_gui_tool() {}
+class pbes_parelm_gui_tool: public mcrl2_gui_tool<pbes_parelm_tool>
+{
+  public:
+    pbes_parelm_gui_tool() {}
 };
 int main(int argc, char** argv)
 {

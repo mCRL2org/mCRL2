@@ -32,7 +32,7 @@ Utils::Vect operator-(Vect v1, Vect v2)
 
 Utils::Vect operator*(double s, Vect v)
 {
-  Vect result = {s * v.x, s * v.y, s * v.z};
+  Vect result = {s* v.x, s* v.y, s* v.z};
   return result;
 }
 
@@ -52,15 +52,19 @@ double angDiff(Vect v1, Vect v2)
   double lenP = vecLength(v1) * vecLength(v2);
   double dotP = dotProd(v1, v2);
   if (dotP / lenP < -1)
-	  return acos(-1.0);
+  {
+    return acos(-1.0);
+  }
   else if (dotP / lenP > 1)
-	  return acos(1.0);
+  {
+    return acos(1.0);
+  }
   return acos(dotP / lenP);
 }
 
 double dotProd(Vect v1, Vect v2)
 {
-	return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
+  return v1.x * v2.x + v1.y * v2.y + v1.z * v2.z;
 }
 float signum(float v)
 {
@@ -76,68 +80,68 @@ float signum(float v)
 
 //preq: ans is an array of size 16
 
-void MultGLMatrices (const double lhs[16], const double rhs[16], double* ans)
+void MultGLMatrices(const double lhs[16], const double rhs[16], double* ans)
 {
-	ans[0] = lhs[0] * rhs [0] + lhs[4] * rhs [1] + lhs[8] * rhs [2] + lhs[12] * rhs [3];
-	ans[1] = lhs[1] * rhs [0] + lhs[5] * rhs [1] + lhs[9] * rhs [2] + lhs[13] * rhs [3];
-	ans[2] = lhs[2] * rhs [0] + lhs[6] * rhs [1] + lhs[10] * rhs [2] + lhs[14] * rhs [3];
-	ans[3] = lhs[3] * rhs [0] + lhs[7] * rhs [1] + lhs[11] * rhs [2] + lhs[15] * rhs [3];
-	ans[4] = lhs[0] * rhs [4] + lhs[4] * rhs [5] + lhs[8] * rhs [6] + lhs[12] * rhs [7];
-	ans[5] = lhs[1] * rhs [4] + lhs[5] * rhs [5] + lhs[9] * rhs [6] + lhs[13] * rhs [7];
-	ans[6] = lhs[2] * rhs [4] + lhs[6] * rhs [5] + lhs[10] * rhs [6] + lhs[14] * rhs [7];
-	ans[7] = lhs[3] * rhs [4] + lhs[7] * rhs [5] + lhs[11] * rhs [6] + lhs[15] * rhs [7];
-	ans[8] = lhs[0] * rhs [8] + lhs[4] * rhs [9] + lhs[8] * rhs [10] + lhs[12] * rhs [11];
-	ans[9] = lhs[1] * rhs [8] + lhs[5] * rhs [9] + lhs[9] * rhs [10] + lhs[13] * rhs [11];
-	ans[10] = lhs[2] * rhs [8] + lhs[6] * rhs [9] + lhs[10] * rhs [10] + lhs[14] * rhs [11];
-	ans[11] = lhs[3] * rhs [8] + lhs[7] * rhs [9] + lhs[11] * rhs [10] + lhs[15] * rhs [11];
-	ans[12] = lhs[0] * rhs [12] + lhs[4] * rhs [13] + lhs[8] * rhs [14] + lhs[12] * rhs [15];
-	ans[13] = lhs[1] * rhs [12] + lhs[5] * rhs [13] + lhs[9] * rhs [14] + lhs[13] * rhs [15];
-	ans[14] = lhs[2] * rhs [12] + lhs[6] * rhs [13] + lhs[10] * rhs [14] + lhs[14] * rhs [15];
-	ans[15] = lhs[3] * rhs [12] + lhs[7] * rhs [13] + lhs[11] * rhs [14] + lhs[15] * rhs [15];
+  ans[0] = lhs[0] * rhs [0] + lhs[4] * rhs [1] + lhs[8] * rhs [2] + lhs[12] * rhs [3];
+  ans[1] = lhs[1] * rhs [0] + lhs[5] * rhs [1] + lhs[9] * rhs [2] + lhs[13] * rhs [3];
+  ans[2] = lhs[2] * rhs [0] + lhs[6] * rhs [1] + lhs[10] * rhs [2] + lhs[14] * rhs [3];
+  ans[3] = lhs[3] * rhs [0] + lhs[7] * rhs [1] + lhs[11] * rhs [2] + lhs[15] * rhs [3];
+  ans[4] = lhs[0] * rhs [4] + lhs[4] * rhs [5] + lhs[8] * rhs [6] + lhs[12] * rhs [7];
+  ans[5] = lhs[1] * rhs [4] + lhs[5] * rhs [5] + lhs[9] * rhs [6] + lhs[13] * rhs [7];
+  ans[6] = lhs[2] * rhs [4] + lhs[6] * rhs [5] + lhs[10] * rhs [6] + lhs[14] * rhs [7];
+  ans[7] = lhs[3] * rhs [4] + lhs[7] * rhs [5] + lhs[11] * rhs [6] + lhs[15] * rhs [7];
+  ans[8] = lhs[0] * rhs [8] + lhs[4] * rhs [9] + lhs[8] * rhs [10] + lhs[12] * rhs [11];
+  ans[9] = lhs[1] * rhs [8] + lhs[5] * rhs [9] + lhs[9] * rhs [10] + lhs[13] * rhs [11];
+  ans[10] = lhs[2] * rhs [8] + lhs[6] * rhs [9] + lhs[10] * rhs [10] + lhs[14] * rhs [11];
+  ans[11] = lhs[3] * rhs [8] + lhs[7] * rhs [9] + lhs[11] * rhs [10] + lhs[15] * rhs [11];
+  ans[12] = lhs[0] * rhs [12] + lhs[4] * rhs [13] + lhs[8] * rhs [14] + lhs[12] * rhs [15];
+  ans[13] = lhs[1] * rhs [12] + lhs[5] * rhs [13] + lhs[9] * rhs [14] + lhs[13] * rhs [15];
+  ans[14] = lhs[2] * rhs [12] + lhs[6] * rhs [13] + lhs[10] * rhs [14] + lhs[14] * rhs [15];
+  ans[15] = lhs[3] * rhs [12] + lhs[7] * rhs [13] + lhs[11] * rhs [14] + lhs[15] * rhs [15];
 }
 
 //preq: the axis is on the z = 0 plane.
-//		rotmtrx is an array of size 16
+//    rotmtrx is an array of size 16
 
-void genRotArbAxs (const double angle, const double x1, const double y1, const double /*z1*/, double* rotmtrx)
+void genRotArbAxs(const double angle, const double x1, const double y1, const double /*z1*/, double* rotmtrx)
 {
-	//TODO: make rotation available around the z-axis
-	double angleRad = angle * double(3.1415926535897932384626433832795) / 180.0f;
-	double c = cos(angleRad);
-	double s = sin(angleRad);
-	double t = 1 - cos(angleRad);
-	double angleUnitVect = atan2(y1, x1);
-	double ax, ay, az;
-	ax = -1.0f * sin(angleUnitVect);
-	ay = cos(angleUnitVect);
-	az = 0;
-	rotmtrx[0] = t * ax * ax + c;
-	rotmtrx[1] = t * ax * ay - s * az;
-	rotmtrx[2] = t * ax * ay + s * ay;
-	rotmtrx[3] = 0;
-	rotmtrx[4] = t * ax * ay + s * az;
-	rotmtrx[5] = t * ay * ay + c;
-	rotmtrx[6] = t * ay * az - s * ax;
-	rotmtrx[7] = 0;
-	rotmtrx[8] = t * ax * az - s * ay;
-	rotmtrx[9] = t * ay * az + s * ax;
-	rotmtrx[10] = t * az * az + c;
-	rotmtrx[11] = 0;
-	rotmtrx[12] = 0;
-	rotmtrx[13] = 0;
-	rotmtrx[14] = 0;
-	rotmtrx[15] = 1;
+  //TODO: make rotation available around the z-axis
+  double angleRad = angle * double(3.1415926535897932384626433832795) / 180.0f;
+  double c = cos(angleRad);
+  double s = sin(angleRad);
+  double t = 1 - cos(angleRad);
+  double angleUnitVect = atan2(y1, x1);
+  double ax, ay, az;
+  ax = -1.0f * sin(angleUnitVect);
+  ay = cos(angleUnitVect);
+  az = 0;
+  rotmtrx[0] = t * ax * ax + c;
+  rotmtrx[1] = t * ax * ay - s * az;
+  rotmtrx[2] = t * ax * ay + s * ay;
+  rotmtrx[3] = 0;
+  rotmtrx[4] = t * ax * ay + s * az;
+  rotmtrx[5] = t * ay * ay + c;
+  rotmtrx[6] = t * ay * az - s * ax;
+  rotmtrx[7] = 0;
+  rotmtrx[8] = t * ax * az - s * ay;
+  rotmtrx[9] = t * ay * az + s * ax;
+  rotmtrx[10] = t * az * az + c;
+  rotmtrx[11] = 0;
+  rotmtrx[12] = 0;
+  rotmtrx[13] = 0;
+  rotmtrx[14] = 0;
+  rotmtrx[15] = 1;
 }
 
 //preq: ans is an array of size 4
-//		lhs is an only rotation matrix
+//    lhs is an only rotation matrix
 
-void GLUnTransform (const double lhs[16], const double rhs[4], double* ans)
+void GLUnTransform(const double lhs[16], const double rhs[4], double* ans)
 {
-	ans[0] = lhs[0] * rhs [0] + lhs[1] * rhs [1] + lhs[2] * rhs [2] + lhs[3] * rhs [3];
-	ans[1] = lhs[4] * rhs [0] + lhs[5] * rhs [1] + lhs[6] * rhs [2] + lhs[7] * rhs [3];
-	ans[2] = lhs[8] * rhs [0] + lhs[9] * rhs [1] + lhs[10] * rhs [2] + lhs[11] * rhs [3];
-	ans[3] = 1;
+  ans[0] = lhs[0] * rhs [0] + lhs[1] * rhs [1] + lhs[2] * rhs [2] + lhs[3] * rhs [3];
+  ans[1] = lhs[4] * rhs [0] + lhs[5] * rhs [1] + lhs[6] * rhs [2] + lhs[7] * rhs [3];
+  ans[2] = lhs[8] * rhs [0] + lhs[9] * rhs [1] + lhs[10] * rhs [2] + lhs[11] * rhs [3];
+  ans[3] = 1;
 }
 
 

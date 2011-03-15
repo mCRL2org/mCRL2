@@ -17,7 +17,8 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "protaterm.h"          // IProtectedATerm
 
-namespace atermpp {
+namespace atermpp
+{
 
 /// \brief Protected vector container.
 template <class T, class Allocator = std::allocator<T> >
@@ -79,23 +80,23 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
       ATprotectProtectedATerm(this);
     }
 
-        /// \brief Constructor.
-        /// \param first The start of a range of elements.
-        /// \param last The end of a range of elements.
+    /// \brief Constructor.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
     template<class InIt>
-        vector(InIt first, InIt last)
+    vector(InIt first, InIt last)
       : std::vector<T,Allocator>(first, last),
         IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
 
-        /// \brief Constructor.
-        /// \param first The start of a range of elements.
-        /// \param last The end of a range of elements.
-        /// \param a An allocator.
+    /// \brief Constructor.
+    /// \param first The start of a range of elements.
+    /// \param last The end of a range of elements.
+    /// \param a An allocator.
     template<class InIt>
-        vector(InIt first, InIt last, const Allocator& a)
+    vector(InIt first, InIt last, const Allocator& a)
       : std::vector<T,Allocator>(first, last, a),
         IProtectedATerm()
     {
@@ -112,7 +113,7 @@ class vector: public std::vector<T,Allocator>, IProtectedATerm
     void ATprotectTerms()
     {
 #ifdef ATERM_DEBUG_PROTECTION
-std::cout << "atermpp::vector.ATprotectTerms() : protecting " << vector<T>::size() << " elements" << std::endl;
+      std::cout << "atermpp::vector.ATprotectTerms() : protecting " << vector<T>::size() << " elements" << std::endl;
 #endif // ATERM_DEBUG_PROTECTION
       for (typename std::vector<T,Allocator>::iterator i = std::vector<T,Allocator>::begin(); i != std::vector<T,Allocator>::end(); ++i)
       {

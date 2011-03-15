@@ -7,194 +7,145 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/replace.h
-/// \brief Contains a function for replacing data variables in a term.
+/// \brief add your file description here.
 
 #ifndef MCRL2_PBES_REPLACE_H
 #define MCRL2_PBES_REPLACE_H
 
-#include <utility>
-#include "mcrl2/atermpp/algorithm.h"
+#include "mcrl2/pbes/add_binding.h"
+#include "mcrl2/pbes/builder.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/sequence_substitution.h"
-#include "mcrl2/pbes/pbes_expression.h"
 
-namespace mcrl2 {
-
-namespace pbes_system {
-
-/// \cond INTERNAL_DOCS
-template <typename ReplaceFunction>
-struct replace_propositional_variables_helper
+namespace mcrl2
 {
-  const ReplaceFunction& r_;
 
-  replace_propositional_variables_helper(const ReplaceFunction& r)
-    : r_(r)
-  {}
-
-  /// \brief Function call operator
-  /// \param t A term
-  /// \return The function result
-  std::pair<atermpp::aterm_appl, bool> operator()(atermpp::aterm_appl t) const
-  {
-    if (is_propositional_variable_instantiation(t))
-    {
-      return std::pair<atermpp::aterm_appl, bool>(r_(t), false); // do not continue the recursion
-    }
-    else
-    {
-      return std::pair<atermpp::aterm_appl, bool>(t, true); // continue the recursion
-    }
-  }
-};
-/// \endcond
-
-/// \brief Recursively traverses the given term, and applies the replace function to
-/// each propositional variable instantiation that is encountered during the traversal.
-/// \param t A term
-/// \param r A replace function
-/// \return The replacement result
-template <typename Term, typename ReplaceFunction>
-Term replace_propositional_variables(Term t, ReplaceFunction r)
+namespace pbes_system
 {
-  return atermpp::partial_replace(t, replace_propositional_variables_helper<ReplaceFunction>(r));
+
+//--- start generated pbes_system replace code ---//
+template <typename T, typename Substitution>
+void replace_sort_expressions(T& x,
+                              Substitution sigma,
+                              bool innermost,
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+{
+  data::detail::make_replace_sort_expressions_builder<pbes_system::sort_expression_builder>(sigma, innermost)(x);
 }
 
-/// \cond INTERNAL_DOCS
-template <typename VariableContainer, typename ExpressionContainer>
-struct propositional_variable_sequence_replace_helper
+template <typename T, typename Substitution>
+T replace_sort_expressions(const T& x,
+                           Substitution sigma,
+                           bool innermost,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          )
 {
-  const VariableContainer& variables_;
-  const ExpressionContainer& replacements_;
+  return data::detail::make_replace_sort_expressions_builder<pbes_system::sort_expression_builder>(sigma, innermost)(x);
+}
 
-  propositional_variable_sequence_replace_helper(const VariableContainer& variables,
-                                        const ExpressionContainer& replacements
+template <typename T, typename Substitution>
+void replace_data_expressions(T& x,
+                              Substitution sigma,
+                              bool innermost,
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+{
+  data::detail::make_replace_data_expressions_builder<pbes_system::data_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_data_expressions(const T& x,
+                           Substitution sigma,
+                           bool innermost,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          )
+{
+  return data::detail::make_replace_data_expressions_builder<pbes_system::data_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_variables(T& x,
+                       Substitution sigma,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                      )
+{
+  core::make_update_apply_builder<pbes_system::data_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_variables(const T& x,
+                    Substitution sigma,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                   )
+{   
+  return core::make_update_apply_builder<pbes_system::data_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_free_variables(T& x,
+                            Substitution sigma,
+                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                           )
+{
+  data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_free_variables(const T& x,
+                         Substitution sigma,
+                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                        )
+{
+  return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x);
+}
+
+template <typename T, typename Substitution, typename VariableContainer>
+void replace_free_variables(T& x,
+                            Substitution sigma,
+                            const VariableContainer& bound_variables,
+                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                           )
+{
+  data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+
+template <typename T, typename Substitution, typename VariableContainer>
+T replace_free_variables(const T& x,
+                         Substitution sigma,
+                         const VariableContainer& bound_variables,
+                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                        )
+{
+  return data::detail::make_replace_free_variables_builder<pbes_system::data_expression_builder, pbes_system::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+//--- end generated pbes_system replace code ---//
+
+/// \brief Applies a propositional variable substitution.
+template <typename T, typename Substitution>
+void replace_propositional_variables(T& x,
+                                        Substitution sigma,
+                                        typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                                        )
-    : variables_(variables), replacements_(replacements)
-  {
-    assert(variables.size() == replacements.size());
-  }
-
-  /// \brief Function call operator
-  /// \param t A propositional variable instantiation
-  /// \return The function result
-  pbes_expression operator()(propositional_variable_instantiation t) const
-  {
-    typename VariableContainer::const_iterator i = variables_.begin();
-    typename ExpressionContainer::const_iterator j = replacements_.begin();
-    for (; i != variables_.end(); ++i, ++j)
-    {
-      if (*i == t)
-      {
-        return *j;
-      }
-    }
-    return t;
-  }
-};
-/// \endcond
-
-/// \brief Replaces propositional variable instantiations in the term \p t using the specified sequence of replacements.
-/// \param t A term
-/// \param variables A sequence of propositional variable instantiations
-/// \param replacements A sequence of expressions
-/// \return The replacement result. Each propositional variable in \p t that occurs as the i-th element
-/// of \p variables is replaced by the i-th element of \p expressions. If the sequence
-/// \p variables contains duplicates, the first match is selected.
-template <typename Term, typename VariableContainer, typename ExpressionContainer>
-Term propositional_variable_sequence_replace(Term t,
-                                    const VariableContainer& variables,
-                                    const ExpressionContainer& replacements
-                                   )
 {
-  return replace_propositional_variables(t, propositional_variable_sequence_replace_helper<VariableContainer, ExpressionContainer>(variables, replacements));
+  core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
 }
 
-/// \cond INTERNAL_DOCS
-template <typename MapContainer>
-struct propositional_variable_map_replace_helper
+/// \brief Applies a propositional variable substitution.
+template <typename T, typename Substitution>
+T replace_propositional_variables(const T& x,
+                                     Substitution sigma,
+                                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                                    )
 {
-  const MapContainer& replacements_;
-
-  /// \brief Constructor.
-  /// \param replacements A mapping of replacements
-  propositional_variable_map_replace_helper(const MapContainer& replacements)
-    : replacements_(replacements)
-  {}
-
-  /// \brief Returns s if a substitution of the form t := s is present in the replacement map, otherwise t.
-  /// \param t A propositional variable instantiation
-  /// \return S if a substitution of the form t := s is present in the replacement map, otherwise t.
-  pbes_expression operator()(const propositional_variable_instantiation& t) const
-  {
-    typename MapContainer::const_iterator i = replacements_.find(t);
-    if (i == replacements_.end())
-    {
-      return atermpp::aterm_appl(t);
-    }
-    else
-    {
-      return i->second;
-    }
-  }
-};
-/// \endcond
-
-/// \brief Replaces all propositional variable instantiations in the term \p t using the specified map of replacements.
-/// \param t A term
-/// \param replacements A map of replacements
-/// \return The replacement result. Each propositional variable \p v in t that occurs as key in the map
-/// \p replacements is replaced by \p replacements[\p v].
-template <typename Term, typename MapContainer>
-Term propositional_variable_map_replace(Term t, const MapContainer& replacements)
-{
-  return replace_propositional_variable_instantiations(t, propositional_variable_map_replace_helper<MapContainer>(replacements));
-}
-
-/// \cond INTERNAL_DOCS
-struct substitute_propositional_variable_helper
-{
-  const propositional_variable& variable_;
-  const pbes_expression& replacement_;
-
-  substitute_propositional_variable_helper(const propositional_variable& variable,
-                                           const pbes_expression& replacement
-                                          )
-    : variable_(variable), replacement_(replacement)
-  { }
-
-  /// \brief Function call operator
-  /// \param t A propositional variable instantiation
-  /// \return The function result
-  pbes_expression operator()(propositional_variable_instantiation t) const
-  {
-    if (variable_.name() != t.name())
-    {
-      return t;
-    }
-    else
-    {
-      return data::replace_variables(replacement_, data::make_double_sequence_substitution_adaptor(variable_.parameters(), t.parameters()));
-    }
-  }
-};
-/// \endcond
-
-/// \brief Applies the substitution \p X := \p phi to the pbes expression \p t.
-/// \param t A pbes expression
-/// \param X A propositional variable
-/// \param phi A pbes expression
-/// \return The result of the substitution.
-inline
-pbes_expression substitute_propositional_variable(pbes_expression t,
-                                                  const propositional_variable& X,
-                                                  const pbes_expression& phi)
-{
-  return replace_propositional_variables(t, substitute_propositional_variable_helper(X, phi));
+  return core::make_update_apply_builder<pbes_expression_builder>(sigma)(x);
 }
 
 } // namespace pbes_system
 
 } // namespace mcrl2
+
+#ifndef MCRL2_PBES_SUBSTITUTIONS_H
+#include "mcrl2/pbes/substitutions.h"
+#endif
 
 #endif // MCRL2_PBES_REPLACE_H

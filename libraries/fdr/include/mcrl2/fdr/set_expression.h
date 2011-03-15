@@ -16,10 +16,12 @@
 #include "mcrl2/fdr/expression_fwd.h"
 #include "mcrl2/fdr/seq_expression_fwd.h"
 #include "mcrl2/fdr/targ_expression_fwd.h"
-                                      
-namespace mcrl2 {
 
-namespace fdr {
+namespace mcrl2
+{
+
+namespace fdr
+{
 
 //--- start generated set expression class declarations ---//
 /// \brief class set_expression
@@ -208,86 +210,86 @@ class productions: public set_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a chanset expression
-    /// \param t A term
-    /// \return True if it is a chanset expression
-    inline
-    bool is_chanset(const set_expression& t)
-    {
-      return fdr::detail::gsIsChanSet(t);
-    }
+/// \brief Test for a chanset expression
+/// \param t A term
+/// \return True if it is a chanset expression
+inline
+bool is_chanset(const set_expression& t)
+{
+  return fdr::detail::gsIsChanSet(t);
+}
 
-    /// \brief Test for a union expression
-    /// \param t A term
-    /// \return True if it is a union expression
-    inline
-    bool is_union(const set_expression& t)
-    {
-      return fdr::detail::gsIsunion(t);
-    }
+/// \brief Test for a union expression
+/// \param t A term
+/// \return True if it is a union expression
+inline
+bool is_union(const set_expression& t)
+{
+  return fdr::detail::gsIsunion(t);
+}
 
-    /// \brief Test for a inter expression
-    /// \param t A term
-    /// \return True if it is a inter expression
-    inline
-    bool is_inter(const set_expression& t)
-    {
-      return fdr::detail::gsIsinter(t);
-    }
+/// \brief Test for a inter expression
+/// \param t A term
+/// \return True if it is a inter expression
+inline
+bool is_inter(const set_expression& t)
+{
+  return fdr::detail::gsIsinter(t);
+}
 
-    /// \brief Test for a diff expression
-    /// \param t A term
-    /// \return True if it is a diff expression
-    inline
-    bool is_diff(const set_expression& t)
-    {
-      return fdr::detail::gsIsdiff(t);
-    }
+/// \brief Test for a diff expression
+/// \param t A term
+/// \return True if it is a diff expression
+inline
+bool is_diff(const set_expression& t)
+{
+  return fdr::detail::gsIsdiff(t);
+}
 
-    /// \brief Test for a Union expression
-    /// \param t A term
-    /// \return True if it is a Union expression
-    inline
-    bool is_Union(const set_expression& t)
-    {
-      return fdr::detail::gsIsUnion(t);
-    }
+/// \brief Test for a Union expression
+/// \param t A term
+/// \return True if it is a Union expression
+inline
+bool is_Union(const set_expression& t)
+{
+  return fdr::detail::gsIsUnion(t);
+}
 
-    /// \brief Test for a Inter expression
-    /// \param t A term
-    /// \return True if it is a Inter expression
-    inline
-    bool is_Inter(const set_expression& t)
-    {
-      return fdr::detail::gsIsInter(t);
-    }
+/// \brief Test for a Inter expression
+/// \param t A term
+/// \return True if it is a Inter expression
+inline
+bool is_Inter(const set_expression& t)
+{
+  return fdr::detail::gsIsInter(t);
+}
 
-    /// \brief Test for a set expression
-    /// \param t A term
-    /// \return True if it is a set expression
-    inline
-    bool is_set(const set_expression& t)
-    {
-      return fdr::detail::gsIsset(t);
-    }
+/// \brief Test for a set expression
+/// \param t A term
+/// \return True if it is a set expression
+inline
+bool is_set(const set_expression& t)
+{
+  return fdr::detail::gsIsset(t);
+}
 
-    /// \brief Test for a extensions expression
-    /// \param t A term
-    /// \return True if it is a extensions expression
-    inline
-    bool is_extensions(const set_expression& t)
-    {
-      return fdr::detail::gsIsextensions(t);
-    }
+/// \brief Test for a extensions expression
+/// \param t A term
+/// \return True if it is a extensions expression
+inline
+bool is_extensions(const set_expression& t)
+{
+  return fdr::detail::gsIsextensions(t);
+}
 
-    /// \brief Test for a productions expression
-    /// \param t A term
-    /// \return True if it is a productions expression
-    inline
-    bool is_productions(const set_expression& t)
-    {
-      return fdr::detail::gsIsproductions(t);
-    }
+/// \brief Test for a productions expression
+/// \param t A term
+/// \return True if it is a productions expression
+inline
+bool is_productions(const set_expression& t)
+{
+  return fdr::detail::gsIsproductions(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

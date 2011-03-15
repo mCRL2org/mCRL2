@@ -16,9 +16,7 @@
 #include <vector>
 #include <map>
 
-#include "mcrl2/atermpp/set.h"
-#include "mcrl2/lts/lts.h"
-
+#include "mcrl2/lts/lts_fsm.h"
 #include "enums.h"
 
 class LTS;
@@ -30,15 +28,15 @@ class Simulation;
 class Cluster_iterator
 {
   public:
-    Cluster_iterator(LTS *l);
+    Cluster_iterator(LTS* l);
     virtual ~Cluster_iterator() {}
     void operator++();
     Cluster* operator*();
     virtual bool is_end();
   protected:
     int rank;
-    unsigned int cluster;
-    LTS *lts;
+    size_t cluster;
+    LTS* lts;
     bool is_valid();
     virtual void next();
 };
@@ -46,7 +44,7 @@ class Cluster_iterator
 class Reverse_cluster_iterator: public Cluster_iterator
 {
   public:
-    Reverse_cluster_iterator(LTS *l);
+    Reverse_cluster_iterator(LTS* l);
     ~Reverse_cluster_iterator() {}
     bool is_end();
   protected:
@@ -56,14 +54,14 @@ class Reverse_cluster_iterator: public Cluster_iterator
 class State_iterator
 {
   public:
-    State_iterator(LTS *l);
+    State_iterator(LTS* l);
     ~State_iterator();
     void operator++();
     State* operator*();
     bool is_end();
   private:
     std::vector<State*>::iterator state_it;
-    LTS *lts;
+    LTS* lts;
 };
 
 class LTS
@@ -79,7 +77,6 @@ class LTS
     void computeClusterInfo();
     void getActionLabels(std::vector<std::string> &ls) const;
     State* getInitialState() const;
-    mcrl2::lts::lts* getmCRL2LTS();
     std::string getLabel(int labindex);
     Cluster_iterator getClusterIterator();
     Reverse_cluster_iterator getReverseClusterIterator();
@@ -91,24 +88,26 @@ class LTS
     int getNumStates() const;
     int getNumTransitions() const;
 
-    unsigned int getNumParameters() const;
-    atermpp::set<ATerm> getParameterDomain(int parindex);
-    std::string getParameterName(int parindex) ;
-    ATerm getStateParameterValue(State* state,unsigned int param);
+    size_t getNumParameters() const;
+    // atermpp::set<ATermAppl> getParameterDomain(size_t parindex);
+    std::vector<std::string> getParameterDomain(size_t parindex);
+    std::string getParameterName(size_t parindex) ;
+    // ATerm getStateParameterValue(State* state,size_t param);
+    size_t getStateParameterValue(State* state,size_t param);
     std::string getStateParameterValueStr(State* state,
-        unsigned int param);
-    atermpp::set<ATerm> getClusterParameterValues(Cluster* c,
-        unsigned int param);
-    std::string prettyPrintParameterValue(ATerm parvalue);
+                                          size_t param);
+    // atermpp::set<ATerm> getClusterParameterValues(Cluster* c, size_t param);
+    std::set<std::string> getClusterParameterValues(Cluster* c, size_t param);
+    // std::string prettyPrintParameterValue(ATerm parvalue);
 
     State* selectStateByID(int id);
     Cluster* selectCluster(const int rank, const int pos);
     void deselect();
     void positionClusters(bool fsmstyle);
-    void positionStates();
+    void positionStates(StatePositioningStyle s);
     void rankStates(RankStyle rs);
 
-    bool readFromFile(std::string filename);
+    bool readFromFile(const std::string& filename);
 
     int getZoomLevel() const;
     void setZoomLevel(const int level);
@@ -143,7 +142,7 @@ class LTS
   private:
     Mediator* mediator;
     Simulation* simulation;
-    mcrl2::lts::lts* mcrl2_lts;
+    mcrl2::lts::lts_fsm_t mcrl2_lts;
 
     bool lastWasAbove;
     int zoomLevel;
@@ -164,7 +163,7 @@ class LTS
     LTS(Mediator* owner, LTS* parent, bool fromAbove);
 
     void clearRanksAndClusters();
-    void clusterTree(State* s,Cluster *c,bool cyclic);
+    void clusterTree(State* s,Cluster* c,bool cyclic);
 
     void visit(State* s);
 

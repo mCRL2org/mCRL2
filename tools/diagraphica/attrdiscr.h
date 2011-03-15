@@ -21,44 +21,44 @@
 
 class AttrDiscr : public Attribute
 {
-public:
+  public:
     // -- constructors and destructor -------------------------------
     AttrDiscr(
-        Mediator* m,
-        const std::string &nam,
-        const std::string &typ,
-        const int &idx,
-        const std::vector< std::string > &vals );
-    AttrDiscr( const AttrDiscr &attr );
+      Mediator* m,
+      const std::string& nam,
+      const std::string& typ,
+      const size_t& idx,
+      const std::vector< std::string > &vals);
+    AttrDiscr(const AttrDiscr& attr);
     virtual ~AttrDiscr();
 
     // -- set functions ---------------------------------------------
     void clusterValues(
-        const std::vector< int > &indices,
-        const std::string &newValue );
+      const std::vector< int > &indices,
+      const std::string& newValue);
     void moveValue(
-        const size_t &idxFr,
-        const size_t &idxTo );
+      const size_t& idxFr,
+      const size_t& idxTo);
     void configValues(
-        const std::vector< std::string > &curDomain,
-        std::map< int, int  > &origToCurDomain );
+      const std::vector< std::string > &curDomain,
+      std::map< size_t, size_t  > &origToCurDomain);
 
     // -- get functions ---------------------------------------------
     int getAttrType();
 
-    int getSizeOrigValues();
-    Value* getOrigValue( int idx );
-    int getSizeCurValues();
-    Value* getCurValue( int idx );
-    int getSizeMap();
-    Value* mapToValue( double key );
+    size_t getSizeOrigValues();
+    Value* getOrigValue(size_t idx);
+    size_t getSizeCurValues();
+    Value* getCurValue(size_t idx);
+    size_t getSizeMap();
+    Value* mapToValue(double key);
 
     // -- clear functions -------------------------------------------
     void clearClusters();
 
-protected:
+  protected:
     // -- private utility functions ---------------------------------
-    void initValues( const std::vector< std::string > &vals );
+    void initValues(const std::vector< std::string > &vals);
     void resetCurValues();
     void deleteOrigValues();
     void deleteCurValues();

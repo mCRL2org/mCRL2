@@ -53,79 +53,94 @@ Cluster::Cluster(int r)
   bc_height = 0.0f;
   positionInRank = 0;
 
-  for(size_t i = 0; i < descendants.size(); ++i)
+  for (size_t i = 0; i < descendants.size(); ++i)
   {
     std::vector<bool> dummy;
     severedDescendants.push_back(dummy);
   }
 }
 
-Cluster::~Cluster() {
+Cluster::~Cluster()
+{
   actionLabelCounts.clear();
   descendants.clear();
   severedDescendants.clear();
   states.clear();
-  slots.clear();
 }
 
-void Cluster::addState(State* s) {
+void Cluster::addState(State* s)
+{
   states.push_back(s);
 }
 
-void Cluster::addActionLabel(int l) {
-  if (actionLabelCounts.find(l) == actionLabelCounts.end()) {
+void Cluster::addActionLabel(int l)
+{
+  if (actionLabelCounts.find(l) == actionLabelCounts.end())
+  {
     actionLabelCounts[l] = 1;
-  } else {
+  }
+  else
+  {
     ++actionLabelCounts[l];
   }
 }
 
-void Cluster::setAncestor(Cluster* c) {
+void Cluster::setAncestor(Cluster* c)
+{
   ancestor = c;
 }
 
-void Cluster::setPosition(float p) {
+void Cluster::setPosition(float p)
+{
   position = p;
 }
 
-void Cluster::addDescendant(Cluster* c) {
+void Cluster::addDescendant(Cluster* c)
+{
   descendants.push_back(c);
   std::vector<bool> dummy;
   severedDescendants.push_back(dummy);
 }
 
-State* Cluster::getState(int i) const {
+State* Cluster::getState(int i) const
+{
   return states[i];
 }
 
-int Cluster::getNumStates() const {
-  return states.size();
+int Cluster::getNumStates() const
+{
+  return static_cast<int>(states.size());
 }
 
-Cluster* Cluster::getAncestor() const {
+Cluster* Cluster::getAncestor() const
+{
   return ancestor;
 }
 
-int Cluster::getNumDescendants() const {
-  return descendants.size();
+int Cluster::getNumDescendants() const
+{
+  return static_cast<int>(descendants.size());
 }
 
-Cluster* Cluster::getDescendant(int i) const {
+Cluster* Cluster::getDescendant(int i) const
+{
   if (severedDescendants[i].size() > 0)
   {
     return NULL;
   }
-  else {
+  else
+  {
     return descendants[i];
   }
 }
 
-bool Cluster::hasDescendants() const {
+bool Cluster::hasDescendants() const
+{
   return descendants.size() != 0;
 }
 
 
-void Cluster::severDescendant( int i )
+void Cluster::severDescendant(int i)
 {
   severedDescendants[i].push_back(true);
   ++severedDescendantsC;
@@ -147,31 +162,38 @@ bool Cluster::hasSeveredDescendants()
 }
 
 
-float Cluster::getBCRadius() const {
+float Cluster::getBCRadius() const
+{
   return bc_radius;
 }
 
-float Cluster::getBCHeight() const {
+float Cluster::getBCHeight() const
+{
   return bc_height;
 }
 
-float Cluster::getBCVolume() const {
-  return bc_radius * bc_radius * PI * bc_height;
+float Cluster::getBCVolume() const
+{
+  return bc_radius * bc_radius * static_cast<float>(PI) * bc_height;
 }
 
-float Cluster::getPosition() const {
+float Cluster::getPosition() const
+{
   return position;
 }
 
-void Cluster::center() {
+void Cluster::center()
+{
   position = -1.0f;
 }
 
-bool Cluster::isCentered() const {
+bool Cluster::isCentered() const
+{
   return position < -0.9f;
 }
 
-int Cluster::getRank() const {
+int Cluster::getRank() const
+{
   return rank;
 }
 
@@ -185,217 +207,19 @@ void Cluster::setPositionInRank(int p)
   positionInRank = p;
 }
 
-unsigned int Cluster::getNumSlots(unsigned int ring) const {
-  return slots[ring].size();
-}
-
-unsigned int Cluster::getTotalNumSlots() const {
-  unsigned int result = 0;
-  for (unsigned int r = 0; r < NUM_RINGS; ++r) {
-    result += getNumSlots(r);
-  }
-  return result;
-}
-
-void Cluster::occupySlot(unsigned int ring,float pos,State* s) {
-  unsigned int slot = round_to_int(double(pos) * double(getNumSlots(ring)) /
-      360.0);
-  if (slot == getNumSlots(ring)) {
-    slot = 0;
-  }
-  slots[ring][slot].push_back(s);
-}
-
-void Cluster::occupyCenterSlot(State* s) {
-  slots[0][0].push_back(s);
-}
-
-void Cluster::addUndecidedState(State *s) {
-  undecidedStates.push_back(s);
-}
-
-void Cluster::resolveSlots() {
-  unsigned int from = 0;
-  unsigned int to = 0;
-  for (unsigned int r = 0; r < NUM_RINGS; ++r) {
-    to = from + round_to_int(undecidedStates.size() * float(r) /
-        float(NUM_RINGS));
-    if (to > undecidedStates.size() || r == NUM_RINGS-1) {
-      to = undecidedStates.size();
-    }
-    slotUndecided(r,from,to);
-    spreadSlots(r);
-    from = to;
-  }
-  undecidedStates.clear();
-}
-
-void Cluster::slotUndecided(unsigned int ring,unsigned int from,unsigned int to) {
-  unsigned int remainingStates = to - from;
-  const int numSlots = getNumSlots(ring);
-  const float radius = getTopRadius() * float(ring) / float(NUM_RINGS-1);
-  int start = 0;
-  while (start < numSlots && slots[ring][start].size() == 0) {
-    ++start;
-  }
-  float sp,diff;
-  unsigned int i;
-  if (start == numSlots) {
-    // divide all undecided states over the complete ring
-    sp = 0.0f;
-    diff = 360.0f / remainingStates;
-    for (i = from; i < to; ++i) {
-      undecidedStates[i]->setPositionRadius(radius);
-      undecidedStates[i]->setPositionAngle(sp);
-      occupySlot(ring,sp,undecidedStates[i]);
-      sp += diff;
-    }
-  }
-  else {
-    int gapBegin,gapEnd,gapSize,space,lGapBegin,lGapEnd,lGapSize;
-    unsigned int M,s;
-    float slotDiff = 360.0f / numSlots;
-    s = from;
-    while (remainingStates > 0) {
-      // compute the total space and largest gap size
-      space = 0;
-      lGapBegin = start;
-      lGapEnd = start;
-      lGapSize = 0;
-      gapBegin = start;
-      gapEnd = (gapBegin+1) % numSlots;
-      while (gapEnd != start) {
-        gapSize = 1;
-        gapEnd = (gapBegin+1) % numSlots;
-        while (slots[ring][gapEnd].size() == 0) {
-          ++gapSize;
-          gapEnd = (gapEnd+1) % numSlots;
-        }
-        if (gapSize > 1) {
-          space += gapSize;
-          if (gapSize > lGapSize) {
-            lGapBegin = gapBegin;
-            lGapEnd = gapEnd;
-            lGapSize = gapSize;
-          }
-        }
-        gapBegin = gapEnd;
-      }
-
-      M = int(1.0f + float(remainingStates) * float(lGapSize) / float(space));
-      M = min(M,remainingStates);
-      // divide M states over the largest gap found
-      sp = lGapBegin * slotDiff;
-      diff = lGapSize * slotDiff / M;
-      for (i = s; i < s+M; ++i) {
-        undecidedStates[i]->setPositionRadius(radius);
-        undecidedStates[i]->setPositionAngle(sp);
-        occupySlot(ring,sp,undecidedStates[i]);
-        sp += diff;
-        if (sp >= 360.0f) {
-          sp -= 360.0f;
-        }
-      }
-      s += M;
-      remainingStates -= M;
-    }
-  }
-}
-
-void Cluster::spreadSlots(unsigned int ring) {
-  if (ring == 0) {
-    // TODO: spread the states in the center of the cluster
-    return;
-  }
-  const unsigned int numSlots = getNumSlots(ring);
-  const float radius = getTopRadius() * float(ring) / float(NUM_RINGS-1);
-  const float slot_diff = 360.0f / numSlots;
-
-  vector< float > slot_space_cw(numSlots,0.0f);
-  vector< float > slot_space_ccw(numSlots,0.0f);
-  unsigned int s,i;
-  // compute the amount of space available for each slot
-  for (s = 0; s < numSlots; ++s) {
-    if (slots[ring][s].size() > 1) {
-      // space in counter-clockwise direction
-      i = 1;
-      while (slots[ring][(s+i)%numSlots].size() == 0) {
-        ++i;
-      }
-      slot_space_ccw[s] = i * slot_diff;
-      if (slots[ring][(s+i)%numSlots].size() > 1) {
-        slot_space_ccw[s] *= 0.5f;
-      }
-      slot_space_ccw[s] -= rad_to_deg(0.25f/getTopRadius());
-
-      // space in clockwise direction
-      i = 1;
-      while (slots[ring][(s-i)%numSlots].size() == 0) {
-        ++i;
-      }
-      slot_space_cw[s] = i * slot_diff;
-      if (slots[ring][(s-i)%numSlots].size() == 1) {
-        slot_space_cw[s] -= rad_to_deg(0.25f/getTopRadius());
-      } else {
-        slot_space_cw[s] *= 0.5f;
-      }
-    }
-  }
-
-  float r,a,slot_angle;
-  unsigned int numStates;
-  for (s = 0; s < numSlots; ++s) {
-    slot_angle = s*slot_diff;
-    numStates = slots[ring][s].size();
-    if (numStates == 1) {
-      slots[ring][s][0]->setPositionAngle(slot_angle);
-      slots[ring][s][0]->setPositionRadius(radius);
-    }
-    if (numStates > 1) {
-      i = 0;
-      r = radius;
-      while (r > 0.15f && i < numStates) {
-        a = slot_angle - slot_space_cw[s];
-        while ((a < slot_angle + slot_space_ccw[s]) && i < numStates) {
-          slots[ring][s][i]->setPositionAngle(a);
-          slots[ring][s][i]->setPositionRadius(r);
-          ++i;
-          a += rad_to_deg(0.25f/r);
-        }
-        r -= 0.25f;
-      }
-      // if i < numStates, then there was not enough room for positioning all
-      // states in this slot, so put all of the remaining states in the slot
-      // position (this is a panic situation, that should occur very rarely)
-      while (i < numStates) {
-        slots[ring][s][i]->setPositionAngle(slot_angle);
-        slots[ring][s][i]->setPositionRadius(radius);
-        ++i;
-      }
-    }
-  }
-}
-
-void Cluster::clearSlots() {
-  unsigned int i,j;
-  for (i = 0; i < slots.size(); ++i) {
-    for (j = 0; j < slots[i].size(); ++j) {
-      slots[i][j].clear();
-    }
-  }
-  undecidedStates.clear();
-}
-
-void Cluster::positionStatesSpiral() {
+void Cluster::positionStatesSpiral()
+{
   states[0]->center();
   float d = 0.25f;
   float r = d;
   unsigned int i = 1;
   float a,da;
-  while (i < states.size()) {
+  while (i < states.size())
+  {
     a = 0.0f;
     da = rad_to_deg(d/r);
-    while (i < states.size() && a < 360.0f - da) {
+    while (i < states.size() && a < 360.0f - da)
+    {
       states[i]->setPositionRadius(r);
       states[i]->setPositionAngle(a);
       ++i;
@@ -405,12 +229,12 @@ void Cluster::positionStatesSpiral() {
   }
 }
 
-void Cluster::computeSizeAndPositions_FSM() {
-  /* We also use this function to calculate the number of slots.
-   * This process is described in Frank van Ham's Master's thesis, p. 24
-   */
+void Cluster::computeSizeAndPositions_FSM()
+{
+  // This process is described in Frank van Ham's Master's thesis, p. 24
   // Recurse into the tree (depth first)
-  for (unsigned int i = 0; i < descendants.size(); ++i) {
+  for (unsigned int i = 0; i < descendants.size(); ++i)
+  {
     descendants[i]->computeSizeAndPositions_FSM();
   }
 
@@ -423,30 +247,25 @@ void Cluster::computeSizeAndPositions_FSM() {
    * So: N * pi * 0.1^2 = 0.25 * pi * r^2
    * Hence: r = sqrt( N * 0.04 )
    */
-  topRadius = states.size()/(2*PI);
-  int numSlots;
+  topRadius = states.size()/(2*static_cast<float>(PI));
 
-  if (descendants.size() == 0) {
+  if (descendants.size() == 0)
+  {
     baseRadius = topRadius;
     bc_radius = topRadius;
     bc_height = 1.0f;
-    // Assign as much slots as there are nodes, to provide the best
-    // possible spacing
-    // The position of the nodes is by the index as follows:
-    // 0 -- getNumStates + 1: The rim slots.
-    numSlots = getNumStates();
-  } else if (descendants.size() == 1) {
+  }
+  else if (descendants.size() == 1)
+  {
     Cluster* desc = *descendants.begin();
     baseRadius = desc->getTopRadius();
     bc_radius = max(topRadius,desc->getBCRadius());
     bc_height = desc->getBCHeight() + 1.0f;
     desc->center();
 
-    // The number of slots is double that of the descendant's slots, capped to
-    // 32.
-    numSlots = desc->getTotalNumSlots() * 2;
-    numSlots = min(32,numSlots);
-  } else { // descendants.size() > 1
+  }
+  else     // descendants.size() > 1
+  {
     // sort descendants by size in ascending order
     sort(descendants.begin(),descendants.end(),Comp_BCRadius());
 
@@ -454,60 +273,70 @@ void Cluster::computeSizeAndPositions_FSM() {
     Cluster* smallest = descendants[0];
     Cluster* nextSmallest = descendants[1];
     bool uniqueSmallest = ((nextSmallest->getBCRadius()-smallest->getBCRadius()) /
-        smallest->getBCRadius()) > 0.01f;
+                           smallest->getBCRadius()) > 0.01f;
 
     // determine whether a unique largest descendant exists
     Cluster* largest = descendants[descendants.size()-1];
     Cluster* nextLargest = descendants[descendants.size()-2];
     bool uniqueLargest = ((nextLargest->getBCRadius()-largest->getBCRadius()) /
-        largest->getBCRadius()) < -0.01f;
+                          largest->getBCRadius()) < -0.01f;
 
     // invariant: descendants in range [x,y) have not been assigned a position
     int x = 0;
-    int y = descendants.size();
+    int y = static_cast<int>(descendants.size());
     float bcr_center = 0.0f;  // BC radius of largest descendant in center
     float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
-    if (uniqueLargest) {
+    if (uniqueLargest)
+    {
       // center the largest descendant
       largest->center();
       --y;
       bcr_center = largest->getBCRadius();
       bcr_rim = nextLargest->getBCRadius();
     }
-    if (uniqueSmallest && (!uniqueLargest || !smallest->hasDescendants())) {
+    if (uniqueSmallest && (!uniqueLargest || !smallest->hasDescendants()))
+    {
       // center the smallest descendant
       smallest->center();
       ++x;
-      if (!uniqueLargest) {
+      if (!uniqueLargest)
+      {
         bcr_center = smallest->getBCRadius();
       }
-      if (y-x == 0) {
+      if (y-x == 0)
+      {
         bcr_rim = 0.0f;
       }
     }
-    if (y-x == 1) {
+    if (y-x == 1)
+    {
       ++y;
       bcr_rim = largest->getBCRadius();
-      if (smallest->isCentered()) {
+      if (smallest->isCentered())
+      {
         bcr_center = smallest->getBCRadius();
       }
     }
 
     // compute the radius of the base of the cylinder and the cluster's size
     float min_radius1 = 0.0f;
-    if (y-x > 1) {
+    if (y-x > 1)
+    {
       min_radius1 = (float)(bcr_rim / sin(PI / (y-x)));
     }
     float min_radius2 = bcr_center;
-    if (y-x > 0) {
+    if (y-x > 0)
+    {
       min_radius2 += bcr_rim + 0.01f;
     }
     baseRadius = max(min_radius1,min_radius2);
     bc_radius = max(min_radius1 + bcr_rim,min_radius2);
     bc_radius = max(topRadius,bc_radius);
     bc_height = 0.0f;
-    for (unsigned int i = 0; i < descendants.size(); ++i) {
-      if (descendants[i]->getBCHeight() > bc_height) {
+    for (unsigned int i = 0; i < descendants.size(); ++i)
+    {
+      if (descendants[i]->getBCHeight() > bc_height)
+      {
         bc_height = descendants[i]->getBCHeight();
       }
     }
@@ -516,50 +345,20 @@ void Cluster::computeSizeAndPositions_FSM() {
     // Divide the remaining descendants over the rim of the circle.
     float angle = 360.0f / (y-x);
     int i = 0;
-    while (x+i != y) {
+    while (x+i != y)
+    {
       descendants[x+i]->setPosition(i*angle);
       ++i;
     }
-
-    // Now all the positions of the descendants have been determined, we can
-    // determine the number of slots
-    if (uniqueLargest) {
-      // There is a centered descendant, the largest cluster.
-      numSlots = largest->getTotalNumSlots() * 2;
-    }
-    else if (uniqueSmallest) {
-      // There is a centered descendant, the smallest cluster.
-      numSlots = smallest->getTotalNumSlots() * 2;
-    }
-    else {
-      // There is no centered descendant. All clusters are placed on the rim.
-      numSlots = getNumDescendants() * 2;
-    }
-    numSlots = min(32,numSlots);
-  }
-  // create the slots
-  int S;
-  for (unsigned int r = 0; r < NUM_RINGS; ++r) {
-    if (r == 0) {
-      S = 1;
-    } else {
-      S = round_to_int(numSlots * float(r) / float(NUM_RINGS));
-    }
-    vector< vector< State* > > slots_r;
-    for (int s = 0; s < S; ++s) {
-      vector< State* > slots_rs;
-      slots_r.push_back(slots_rs);
-    }
-    slots.push_back(slots_r);
   }
 }
 
-void Cluster::computeSizeAndPositions() {
-  /* We also use this function to calculate the number of slots.
-   * This process is described in Frank van Ham's Master's thesis, p. 24
-   */
+void Cluster::computeSizeAndPositions()
+{
+  // This process is described in Frank van Ham's Master's thesis, p. 24
   // Recurse into the tree (depth first)
-  for (unsigned int i = 0; i < descendants.size(); ++i) {
+  for (unsigned int i = 0; i < descendants.size(); ++i)
+  {
     descendants[i]->computeSizeAndPositions();
   }
 
@@ -572,30 +371,24 @@ void Cluster::computeSizeAndPositions() {
    * So: N * pi * 0.1^2 = 0.25 * pi * r^2
    * Hence: r = sqrt( N * 0.04 )
    */
-  topRadius = sqrt(states.size()*0.04);
-  int numSlots;
+  topRadius = sqrt(states.size()*0.04f);
 
-  if (descendants.size() == 0) {
+  if (descendants.size() == 0)
+  {
     baseRadius = topRadius;
     bc_radius = topRadius;
     bc_height = 1.0f;
-    // Assign as much slots as there are nodes, to provide the best
-    // possible spacing
-    // The position of the nodes is by the index as follows:
-    // 0 -- getNumStates + 1: The rim slots.
-    numSlots = getNumStates();
-  } else if (descendants.size() == 1) {
+  }
+  else if (descendants.size() == 1)
+  {
     Cluster* desc = *descendants.begin();
     baseRadius = desc->getTopRadius();
     bc_radius = max(topRadius,desc->getBCRadius());
     bc_height = desc->getBCHeight() + 1.0f;
     desc->center();
-
-    // The number of slots is double that of the descendant's slots, capped to
-    // 32.
-    numSlots = desc->getTotalNumSlots() * 2;
-    numSlots = min(32,numSlots);
-  } else { // descendants.size() > 1
+  }
+  else     // descendants.size() > 1
+  {
     // sort descendants by size in ascending order
     sort(descendants.begin(),descendants.end(),Comp_BCVolume());
 
@@ -604,29 +397,33 @@ void Cluster::computeSizeAndPositions() {
     Cluster* nextSmallest = descendants[1];
 
     bool uniqueSmallest = ((nextSmallest->getBCVolume()-smallest->getBCVolume()) /
-        smallest->getBCVolume()) > 0.01f;
+                           smallest->getBCVolume()) > 0.01f;
 
     // determine whether a unique largest descendant exists
     Cluster* largest = descendants[descendants.size()-1];
     Cluster* nextLargest = descendants[descendants.size()-2];
 
     bool uniqueLargest = ((nextLargest->getBCVolume()-largest->getBCVolume()) /
-        largest->getBCVolume()) < -0.01f;
+                          largest->getBCVolume()) < -0.01f;
 
     // invariant: descendants in range [x,y) have not been assigned a position
     int x = 0;
-    int y = descendants.size();
+    int y = static_cast<int>(descendants.size());
 
     float bcr_center = 0.0f;  // BC radius of largest descendant in center
     float bcr_rim = largest->getBCRadius();  // BC radius of largest descendant on rim
-    if (uniqueLargest) {
+    if (uniqueLargest)
+    {
       // center the largest descendant
       largest->center();
       --y;
       bcr_center = largest->getBCRadius();
       bcr_rim = nextLargest->getBCRadius();
-    } else {
-      if (uniqueSmallest) {
+    }
+    else
+    {
+      if (uniqueSmallest)
+      {
         // center the smallest descendant
         smallest->center();
         ++x;
@@ -636,15 +433,18 @@ void Cluster::computeSizeAndPositions() {
 
     // compute the radius of the base of the cylinder and the cluster's size
     float minRimRadius = 0.0f;
-    if (y-x > 1) {
+    if (y-x > 1)
+    {
       minRimRadius = (float)(bcr_rim / sin(PI / (y-x)));
     }
     baseRadius = max(bcr_center + bcr_rim + 0.01f,minRimRadius);
     bc_radius = max(bcr_center + bcr_rim + 0.01f,minRimRadius +bcr_rim);
     bc_radius = max(topRadius,bc_radius);
     bc_height = 0.0f;
-    for (unsigned int i = 0; i < descendants.size(); ++i) {
-      if (descendants[i]->getBCHeight() > bc_height) {
+    for (unsigned int i = 0; i < descendants.size(); ++i)
+    {
+      if (descendants[i]->getBCHeight() > bc_height)
+      {
         bc_height = descendants[i]->getBCHeight();
       }
     }
@@ -661,89 +461,75 @@ void Cluster::computeSizeAndPositions() {
     int i = 0;
     int h = (y-x) / 2 + (y-x) % 2;
     float angle = 360.0f / (y-x);
-    while (x != y) {
-      if (i % 2 == 1) {
+    while (x != y)
+    {
+      if (i % 2 == 1)
+      {
         descendants[x]->setPosition(i*angle);
         ++x;
-        if (x != y) {
+        if (x != y)
+        {
           descendants[x]->setPosition((h+i)*angle);
           ++x;
         }
-      } else {
+      }
+      else
+      {
         descendants[y-1]->setPosition(i*angle);
         --y;
-        if (x != y) {
+        if (x != y)
+        {
           descendants[y-1]->setPosition((h+i)*angle);
           --y;
         }
       }
       ++i;
     }
-
-    // Now all the positions of the descendants have been determined, we can
-    // determine the number of slots
-    if (uniqueLargest) {
-      // There is a centered descendant, the largest cluster.
-      numSlots = largest->getTotalNumSlots() * 2;
-    }
-    else if (uniqueSmallest) {
-      // There is a centered descendant, the smallest cluster.
-      numSlots = smallest->getTotalNumSlots() * 2;
-    }
-    else {
-      // There is no centered descendant. All clusters are placed on the rim.
-      numSlots = getNumDescendants() * 2;
-    }
-    numSlots = min(32,numSlots);
-  }
-  // create the slots
-  int S;
-  for (unsigned int r = 0; r < NUM_RINGS; ++r) {
-    if (r == 0) {
-      S = 1;
-    } else {
-      S = round_to_int(numSlots * float(r) / float(NUM_RINGS));
-    }
-    vector< vector< State* > > slots_r;
-    for (int s = 0; s < S; ++s) {
-      vector< State* > slots_rs;
-      slots_r.push_back(slots_rs);
-    }
-    slots.push_back(slots_r);
   }
 }
 
-float Cluster::getTopRadius() const {
+float Cluster::getTopRadius() const
+{
   return topRadius;
 }
 
-float Cluster::getBaseRadius() const {
+float Cluster::getBaseRadius() const
+{
   return baseRadius;
 }
 
-bool Cluster::hasMarkedTransition() const {
+bool Cluster::hasMarkedTransition() const
+{
   return (numMarkedTransitions > 0);
 }
 
-void Cluster::addMatchedRule(int mr) {
+void Cluster::addMatchedRule(int mr)
+{
   matchedRules.insert(mr);
 }
 
-void Cluster::removeMatchedRule(int mr) {
+void Cluster::removeMatchedRule(int mr)
+{
   matchedRules.erase(mr);
 }
 
 
-void Cluster::getMatchedRules(std::vector< int > &mrs) {
+void Cluster::getMatchedRules(std::vector< int > &mrs)
+{
   mrs.assign(matchedRules.begin(),matchedRules.end());
 }
 
-int Cluster::setActionMark(int l,bool b) {
+int Cluster::setActionMark(int l,bool b)
+{
   map<int,int>::iterator li = actionLabelCounts.find(l);
-  if (li != actionLabelCounts.end()) {
-    if (b) {
+  if (li != actionLabelCounts.end())
+  {
+    if (b)
+    {
       numMarkedTransitions += li->second;
-    } else {
+    }
+    else
+    {
       numMarkedTransitions -= li->second;
     }
   }
@@ -760,27 +546,33 @@ void Cluster::addDeadlock()
   ++numDeadlocks;
 }
 
-int Cluster::getVisObject() const {
+int Cluster::getVisObject() const
+{
   return visObject;
 }
 
-void Cluster::setVisObject(int vo) {
+void Cluster::setVisObject(int vo)
+{
   visObject = vo;
 }
 
-int Cluster::getBranchVisObject(int i) const {
+int Cluster::getBranchVisObject(int i) const
+{
   return branchVisObjects[i];
 }
 
-int Cluster::getNumBranchVisObjects() const {
-  return branchVisObjects.size();
+int Cluster::getNumBranchVisObjects() const
+{
+  return static_cast<int>(branchVisObjects.size());
 }
 
-void Cluster::addBranchVisObject(int vo) {
+void Cluster::addBranchVisObject(int vo)
+{
   branchVisObjects.push_back(vo);
 }
 
-void Cluster::clearBranchVisObjects() {
+void Cluster::clearBranchVisObjects()
+{
   branchVisObjects.clear();
 }
 
@@ -799,22 +591,27 @@ bool Cluster::isSelected() const
   return selected;
 }
 
-int Cluster::getNumMarkedTransitions() {
+int Cluster::getNumMarkedTransitions()
+{
   return numMarkedTransitions;
 }
 
-int Cluster::getNumMarkedStatesAll() {
+int Cluster::getNumMarkedStatesAll()
+{
   return numMarkedStatesAll;
 }
 
-int Cluster::getNumMarkedStatesAny() {
+int Cluster::getNumMarkedStatesAny()
+{
   return numMarkedStatesAny;
 }
 
-void Cluster::setNumMarkedStatesAll(int n) {
+void Cluster::setNumMarkedStatesAll(int n)
+{
   numMarkedStatesAll = n;
 }
 
-void Cluster::setNumMarkedStatesAny(int n) {
+void Cluster::setNumMarkedStatesAny(int n)
+{
   numMarkedStatesAny = n;
 }

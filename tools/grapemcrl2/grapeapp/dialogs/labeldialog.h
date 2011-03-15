@@ -24,87 +24,87 @@ using namespace grape::libgrape;
 
 namespace grape
 {
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+/**
+ * \short A class for editting a label with a dialog.
+ */
+class grape_label_dialog : public wxDialog
+{
+  private:
+    wxTextCtrl*     m_var_decls_input;  /**< Input shown in the dialog, used for variable declarations.*/
+    wxTextCtrl*     m_condition_input;  /**< Input shown in the dialog, used for condition.*/
+    wxTextCtrl*     m_timestamp_input;  /**< Input shown in the dialog, used for timestamp.*/
+    wxTextCtrl*     m_multiaction_input;/**< Input shown in the dialog, used for a multi action.*/
+    wxTextCtrl*     m_var_updates_input;/**< Input shown in the dialog, used for variable updates*/
+
+    wxStatusBar*    m_statusbar;          /**< Statusbar shown in the dialog*/
+
+    wxStaticText*   m_preview_text;     /**< Preview text.*/
+
+    label*          m_label;            /**< label for temporarily storage.*/
+    /** Default constructor. */
+    grape_label_dialog();
+
+    DECLARE_EVENT_TABLE()   /**< The event table of this grid. */
+  public:
     /**
-     * \short A class for editting a label with a dialog.
+    * Constructor.
+    * @param p_label A pointer to the label which is being editted.
+    */
+    grape_label_dialog(const label& p_label);
+
+    /** Destructor. */
+    ~grape_label_dialog();
+
+    /**
+     * Change var decl input event handler.
+     * Appending input rows.
+     * @param p_event The generated event.
      */
-    class grape_label_dialog : public wxDialog
-    {
-      private:
-        wxTextCtrl     *m_var_decls_input;  /**< Input shown in the dialog, used for variable declarations.*/
-        wxTextCtrl     *m_condition_input;  /**< Input shown in the dialog, used for condition.*/
-        wxTextCtrl     *m_timestamp_input;  /**< Input shown in the dialog, used for timestamp.*/
-        wxTextCtrl     *m_multiaction_input;/**< Input shown in the dialog, used for a multi action.*/
-        wxTextCtrl     *m_var_updates_input;/**< Input shown in the dialog, used for variable updates*/
+    void event_change_var_decls_text(wxCommandEvent& p_event);
 
-        wxStatusBar    *m_statusbar;          /**< Statusbar shown in the dialog*/
+    /**
+     * Change var update input event handler.
+     * Appending input rows.
+     * @param p_event The generated event.
+     */
+    void event_change_var_updates_text(wxCommandEvent& p_event);
 
-        wxStaticText   *m_preview_text;     /**< Preview text.*/
+    /**
+     * Change multi action input event handler.
+     * Appending input rows.
+     * @param p_event The generated event.
+     */
+    void event_change_multiaction_text(wxCommandEvent& p_event);
 
-        label          *m_label;            /**< label for temporarily storage.*/
-        /** Default constructor. */
-        grape_label_dialog();
+    /**
+     * Change condition input event handler.
+     * Appending input rows.
+     * @param p_event The generated event.
+     */
+    void event_change_condition_text(wxCommandEvent& p_event);
 
-        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
-      public:
-        /**
-        * Constructor.
-        * @param p_label A pointer to the label which is being editted.
-        */
-        grape_label_dialog( const label &p_label );
+    /**
+     * Change timestamp input event handler.
+     * Appending input rows.
+     * @param p_event The generated event.
+     */
+    void event_change_timestamp_text(wxCommandEvent& p_event);
 
-        /** Destructor. */
-        ~grape_label_dialog();
+    /**
+     * Shows the dialog.
+     * @param p_label Shall contain the value of the label.
+     * @return @c true if the user pressed OK. @c false if the user cancelled the dialog.
+     */
+    bool show_modal(label& p_label);
 
-        /**
-         * Change var decl input event handler.
-         * Appending input rows.
-         * @param p_event The generated event.
-         */
-        void event_change_var_decls_text( wxCommandEvent &p_event );
-
-        /**
-         * Change var update input event handler.
-         * Appending input rows.
-         * @param p_event The generated event.
-         */
-        void event_change_var_updates_text( wxCommandEvent &p_event );
-
-        /**
-         * Change multi action input event handler.
-         * Appending input rows.
-         * @param p_event The generated event.
-         */
-        void event_change_multiaction_text( wxCommandEvent &p_event );
-
-        /**
-         * Change condition input event handler.
-         * Appending input rows.
-         * @param p_event The generated event.
-         */
-        void event_change_condition_text( wxCommandEvent &p_event );
-
-        /**
-         * Change timestamp input event handler.
-         * Appending input rows.
-         * @param p_event The generated event.
-         */
-        void event_change_timestamp_text( wxCommandEvent &p_event );
-
-        /**
-         * Shows the dialog.
-         * @param p_label Shall contain the value of the label.
-         * @return @c true if the user pressed OK. @c false if the user cancelled the dialog.
-         */
-        bool show_modal( label &p_label );
-
-        /**
-         * Update label preview.
-         */
-        void update_preview();
-    };
-  }
+    /**
+     * Update label preview.
+     */
+    void update_preview();
+};
+}
 }
 
 #endif // grape_label_dialog_H

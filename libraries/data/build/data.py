@@ -1303,7 +1303,7 @@ class structured_sort_declaration():
     assert self.arguments <> None
     code = []
     for a in self.arguments.elements:
-      code += ["structured_sort_constructor_argument(%s, \"%s\")" % (a[0].code(spec), a[1].to_string())]
+      code += ["structured_sort_constructor_argument(\"%s\", %s)" % (a[1].to_string(), a[0].code(spec))]
     return "atermpp::make_vector(%s)" % (string.join(code, ", "))
 
   def code(self, spec):

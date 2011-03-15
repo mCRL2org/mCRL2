@@ -32,21 +32,21 @@
 
 class GLCanvas : public wxGLCanvas, Colleague
 {
-public:
+  public:
     // -- constructors and desctructor ------------------------------
     GLCanvas(
-        Mediator* m,
-        wxWindow* parent,
-        wxWindowID id );
+      Mediator* m,
+      wxWindow* parent,
+      wxWindowID id);
     virtual ~GLCanvas();
 
     // -- set functions ---------------------------------------------
-    void setScaleFactor( const double &f );
-    void setXTranslation( const double &x );
-    void setYTranslation( const double &y );
+    void setScaleFactor(const double& f);
+    void setXTranslation(const double& x);
+    void setYTranslation(const double& y);
     void setTranslation(
-        const double &x,
-        const double &y );
+      const double& x,
+      const double& y);
 
     void enableMouseMotion();
 
@@ -55,48 +55,48 @@ public:
     double getXTranslation();
     double getYTranslation();
     void getTranslation(
-        double &x,
-        double &y );
+      double& x,
+      double& y);
 
     void disableMouseMotion();
 
     double getWidth();
     double getHeight();
     void getSize(
-        double &width,
-        double &height );
+      double& width,
+      double& height);
 
     double getPixelSize();
     void getWorldCoords(
-        const double &deviceX,
-        const double &deviceY,
-        double &worldX,
-        double &worldY );
+      const double& deviceX,
+      const double& deviceY,
+      double& worldX,
+      double& worldY);
 
     // -- drawing and interaction functions -------------------------
     void clear();
     void display();
 
-    void showToolTip( const std::string &msg );
+    void showToolTip(const std::string& msg);
     void clearToolTip();
 
-    void onEvtPaint( wxPaintEvent &event );
-    void onEvtSize( wxSizeEvent &event );
-    void OnEraseBackground( wxEraseEvent &event );
+    void onEvtPaint(wxPaintEvent& event);
+    void onEvtSize(wxSizeEvent& event);
+    void OnEraseBackground(wxEraseEvent& event);
 
-    void onLftMouseDown( wxMouseEvent &event );
-    void onLftMouseUp( wxMouseEvent &event );
-	void onLftMouseDClick( wxMouseEvent &event );
-    void onRgtMouseDown( wxMouseEvent &event );
-    void onRgtMouseUp( wxMouseEvent &event );
-    void onRgtMouseDClick( wxMouseEvent &event );
-    void onMouseMotion( wxMouseEvent &event );
-	void onMouseWheel( wxMouseEvent &event );
-    void onEnterMouse( wxMouseEvent &event );
-    void onLeaveMouse( wxMouseEvent &event );
-    void onKeyDown( wxKeyEvent &event );
-    void onKeyUp( wxKeyEvent &event );
-private:
+    void onLftMouseDown(wxMouseEvent& event);
+    void onLftMouseUp(wxMouseEvent& event);
+    void onLftMouseDClick(wxMouseEvent& event);
+    void onRgtMouseDown(wxMouseEvent& event);
+    void onRgtMouseUp(wxMouseEvent& event);
+    void onRgtMouseDClick(wxMouseEvent& event);
+    void onMouseMotion(wxMouseEvent& event);
+    void onMouseWheel(wxMouseEvent& event);
+    void onEnterMouse(wxMouseEvent& event);
+    void onLeaveMouse(wxMouseEvent& event);
+    void onKeyDown(wxKeyEvent& event);
+    void onKeyUp(wxKeyEvent& event);
+  private:
     // -- data members ----------------------------------------------
     double scaleFactor;
     double xTranslation;

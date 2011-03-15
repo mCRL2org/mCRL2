@@ -14,11 +14,14 @@
 
 #include "mcrl2/fdr/detail/utility.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
-namespace detail {
+namespace detail
+{
 
 //--- start generated code ---//
 // AlphaParallel

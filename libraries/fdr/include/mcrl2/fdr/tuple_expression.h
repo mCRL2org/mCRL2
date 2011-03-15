@@ -15,9 +15,11 @@
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated tuple expression class declarations ---//
 /// \brief class tuple_expression
@@ -64,14 +66,14 @@ class exprs: public tuple_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a exprs expression
-    /// \param t A term
-    /// \return True if it is a exprs expression
-    inline
-    bool is_exprs(const tuple_expression& t)
-    {
-      return fdr::detail::gsIsExprs(t);
-    }
+/// \brief Test for a exprs expression
+/// \param t A term
+/// \return True if it is a exprs expression
+inline
+bool is_exprs(const tuple_expression& t)
+{
+  return fdr::detail::gsIsExprs(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

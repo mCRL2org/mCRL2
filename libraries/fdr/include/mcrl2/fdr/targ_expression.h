@@ -17,9 +17,11 @@
 #include "mcrl2/fdr/expression_fwd.h"
 #include "mcrl2/fdr/numeric_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated targ expression class declarations ---//
 /// \brief class targ_expression
@@ -116,41 +118,41 @@ class compr: public targ_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a nil expression
-    /// \param t A term
-    /// \return True if it is a nil expression
-    inline
-    bool is_nil(const targ_expression& t)
-    {
-      return fdr::detail::gsIsNil(t);
-    }
+/// \brief Test for a nil expression
+/// \param t A term
+/// \return True if it is a nil expression
+inline
+bool is_nil(const targ_expression& t)
+{
+  return fdr::detail::gsIsNil(t);
+}
 
-    /// \brief Test for a closedrange expression
-    /// \param t A term
-    /// \return True if it is a closedrange expression
-    inline
-    bool is_closedrange(const targ_expression& t)
-    {
-      return fdr::detail::gsIsClosedRange(t);
-    }
+/// \brief Test for a closedrange expression
+/// \param t A term
+/// \return True if it is a closedrange expression
+inline
+bool is_closedrange(const targ_expression& t)
+{
+  return fdr::detail::gsIsClosedRange(t);
+}
 
-    /// \brief Test for a openrange expression
-    /// \param t A term
-    /// \return True if it is a openrange expression
-    inline
-    bool is_openrange(const targ_expression& t)
-    {
-      return fdr::detail::gsIsOpenRange(t);
-    }
+/// \brief Test for a openrange expression
+/// \param t A term
+/// \return True if it is a openrange expression
+inline
+bool is_openrange(const targ_expression& t)
+{
+  return fdr::detail::gsIsOpenRange(t);
+}
 
-    /// \brief Test for a compr expression
-    /// \param t A term
-    /// \return True if it is a compr expression
-    inline
-    bool is_compr(const targ_expression& t)
-    {
-      return fdr::detail::gsIsCompr(t);
-    }
+/// \brief Test for a compr expression
+/// \param t A term
+/// \return True if it is a compr expression
+inline
+bool is_compr(const targ_expression& t)
+{
+  return fdr::detail::gsIsCompr(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

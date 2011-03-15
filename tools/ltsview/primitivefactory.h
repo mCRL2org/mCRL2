@@ -18,7 +18,8 @@ class ConeDB;
 class Primitive;
 class P_ObliqueCone;
 
-class PrimitiveFactory: public Subscriber {
+class PrimitiveFactory: public Subscriber
+{
   public:
     PrimitiveFactory(Settings* ss);
     ~PrimitiveFactory();
@@ -33,14 +34,14 @@ class PrimitiveFactory: public Subscriber {
   private:
     std::vector<Primitive*> primitives;
     std::vector<P_ObliqueCone*> oblq_cones;
-    ConeDB  *coneDB;
-    Settings *settings;
+    ConeDB*  coneDB;
+    Settings* settings;
     int     disc;
     int     simple_sphere;
     int     sphere;
     int     hemisphere;
-    float   *cos_theta;
-    float   *sin_theta;
+    float*   cos_theta;
+    float*   sin_theta;
 
     int  make_ring(float r);
     void make_disc();

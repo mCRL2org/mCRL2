@@ -12,8 +12,6 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_BUILD_GUI_TOOLS )
 
-add_definitions(-DTIXML_USE_TICPP)
-
 # ######### General setup ##########
 
 set(MACOSX_BUNDLE_ICON_FILE grapemcrl2.icns )
@@ -109,7 +107,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   libgrape/transition.cpp
   libgrape/var.cpp
   libgrape/varupdate.cpp
-  libgrape/xml.cpp
+	libgrape/xml.cpp
   libgrape/xmlopen.cpp
 
   mcrl2gen/mcrl2gen.cpp
@@ -140,11 +138,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_data
@@ -152,8 +145,6 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities_command_line
   mcrl2_utilities_wx
 )
-
-endif( MCRL2_MONO_LIB )
 
 # install grape help file
 install(FILES grapeapp/help/grapehelp.zip DESTINATION share/doc/mcrl2/grape)

@@ -16,41 +16,43 @@ namespace mcrl2
 {
 namespace lts
 {
-  class tree_set_store {
-    private:
-      struct bucket {
-        int child_l;
-        int child_r;
-        int tag;
-        int next;
-      };
-      bucket *buckets;
-      unsigned int buckets_size;
-      unsigned int buckets_next;
+class tree_set_store
+{
+  private:
+    struct bucket
+    {
+      ptrdiff_t child_l;
+      ptrdiff_t child_r;
+      ptrdiff_t tag;
+      ptrdiff_t next;
+    };
+    bucket* buckets;
+    ptrdiff_t buckets_size;
+    ptrdiff_t buckets_next;
 
-      int *tags;
-      unsigned int tags_size;
-      unsigned int tags_next;
+    ptrdiff_t* tags;
+    ptrdiff_t tags_size;
+    ptrdiff_t tags_next;
 
-      int *hashtable;
-      unsigned int hashmask;
+    ptrdiff_t* hashtable;
+    ptrdiff_t hashmask;
 
-      void check_tags();
-      void check_buckets();
-      int find_set(int child_l,int child_r);
-      int build_set(int child_l,int child_r);
-    public:
-      tree_set_store();
-      ~tree_set_store();
-      int create_set(std::vector<unsigned int> &elems);
-      unsigned int get_next_tag();
-      int get_set(int tag);
-      int get_set_child_left(int set);
-      int get_set_child_right(int set);
-      int get_set_size(int set);
-      bool is_set_empty(int set);
-      int set_set_tag(int set);
-  };
+    void check_tags();
+    void check_buckets();
+    ptrdiff_t find_set(ptrdiff_t child_l,ptrdiff_t child_r);
+    ptrdiff_t build_set(ptrdiff_t child_l,ptrdiff_t child_r);
+  public:
+    tree_set_store();
+    ~tree_set_store();
+    ptrdiff_t create_set(std::vector<ptrdiff_t> &elems);
+    ptrdiff_t get_next_tag();
+    ptrdiff_t get_set(ptrdiff_t tag);
+    ptrdiff_t get_set_child_left(ptrdiff_t set);
+    ptrdiff_t get_set_child_right(ptrdiff_t set);
+    ptrdiff_t get_set_size(ptrdiff_t set);
+    bool is_set_empty(ptrdiff_t set);
+    ptrdiff_t set_set_tag(ptrdiff_t set);
+};
 }
 }
 #endif

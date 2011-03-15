@@ -16,48 +16,48 @@
 
 using namespace grape::libgrape;
 
-comment::comment( void )
-: object( COMMENT )
+comment::comment(void)
+  : object(COMMENT)
 {
   m_text = wxEmptyString;
   m_connected_to = 0;
   m_reference_selected = false;
 }
 
-comment::comment( const comment &p_comment )
-: object( p_comment )
+comment::comment(const comment& p_comment)
+  : object(p_comment)
 {
   m_text = p_comment.m_text;
   m_connected_to = p_comment.m_connected_to;
   m_reference_selected = p_comment.m_reference_selected;
 }
 
-comment::~comment( void )
+comment::~comment(void)
 {
 }
 
-wxString comment::get_text( void ) const
+wxString comment::get_text(void) const
 {
   return m_text;
 }
 
-void comment::set_text( wxString &p_text )
+void comment::set_text(wxString& p_text)
 {
   m_text = p_text;
 }
 
-void comment::attach_to_object( object* p_object )
+void comment::attach_to_object(object* p_object)
 {
   m_connected_to = p_object;
-  m_connected_to->attach_comment( this );
+  m_connected_to->attach_comment(this);
 }
 
-void comment::detach_from_object( void )
+void comment::detach_from_object(void)
 {
   m_connected_to = 0;
 }
 
-object* comment::get_attached_object( void )
+object* comment::get_attached_object(void)
 {
   return m_connected_to;
 }
@@ -74,4 +74,4 @@ void comment::set_reference_selected(bool p_is_reference_selected)
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_comment )
+WX_DEFINE_OBJARRAY(arr_comment)

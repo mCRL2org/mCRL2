@@ -28,26 +28,28 @@ BEGIN_EVENT_TABLE(MarkStateRuleDialog,wxDialog)
 END_EVENT_TABLE()
 
 MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
-    Mediator* owner, LTS *alts)
- : wxDialog(parent,wxID_ANY,wxT("Add mark state rule"),
-     wxDefaultPosition,wxDefaultSize,wxDEFAULT_DIALOG_STYLE |
-     wxRESIZE_BORDER)
+    Mediator* owner, LTS* alts)
+  : wxDialog(parent,wxID_ANY,wxT("Add mark state rule"),
+             wxDefaultPosition,wxDefaultSize,wxDEFAULT_DIALOG_STYLE |
+             wxRESIZE_BORDER)
 {
   mediator = owner;
   lts = alts;
 
-  int numParams = lts->getNumParameters();
+  int numParams = static_cast<int>(lts->getNumParameters());
   wxArrayString paramChoices;
   wxString str;
   paramChoices.Alloc(numParams);
-  for (int i = 0; i < numParams; ++i) {
+  for (int i = 0; i < numParams; ++i)
+  {
     str = wxString(lts->getParameterName(i).c_str(),wxConvLocal);
     parameterIndices[str] = i;
     paramChoices.Add(str);
   }
   paramChoices.Sort();
   wxString relChoices[2] = { wxT("is an element of"),
-    wxT("is not an element of") };
+                             wxT("is not an element of")
+                           };
 
   int f = wxALIGN_LEFT | wxALIGN_CENTER_VERTICAL | wxALL;
   int b = 5;
@@ -65,12 +67,12 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
   wxPanel* valPanel = new wxPanel(spRight,wxID_ANY);
   wxSize lbSize(190,-1);
   parameterListBox = new wxListBox(parPanel,myID_PARAMETER_CHOICE,
-      wxDefaultPosition,lbSize,paramChoices,wxLB_SINGLE|wxLB_HSCROLL|
-      wxLB_NEEDED_SB);
+                                   wxDefaultPosition,lbSize,paramChoices,wxLB_SINGLE|wxLB_HSCROLL|
+                                   wxLB_NEEDED_SB);
   relationListBox = new wxListBox(relPanel,wxID_ANY,wxDefaultPosition,lbSize,2,
-      relChoices);
+                                  relChoices);
   valuesListBox = new wxCheckListBox(valPanel,wxID_ANY,wxDefaultPosition,lbSize,0,
-      NULL,wxLB_SINGLE|wxLB_HSCROLL|wxLB_NEEDED_SB|wxLB_SORT);
+                                     NULL,wxLB_SINGLE|wxLB_HSCROLL|wxLB_NEEDED_SB|wxLB_SORT);
   wxBoxSizer* parSizer = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* relSizer = new wxBoxSizer(wxVERTICAL);
   wxBoxSizer* valSizer = new wxBoxSizer(wxVERTICAL);
@@ -94,9 +96,9 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
   spLeft->SplitVertically(parPanel,spRight,200);
 
   ruleClrButton = new mcrl2::utilities::wx::wxColorButton(
-      this,this,wxID_ANY,wxDefaultPosition,wxSize(25,25));
+    this,this,wxID_ANY,wxDefaultPosition,wxSize(25,25));
   ruleClrButton->SetBackgroundColour(
-      mediator->getNewRuleColour().toWxColour());
+    mediator->getNewRuleColour().toWxColour());
 
   wxBoxSizer* colSizer = new wxBoxSizer(wxHORIZONTAL);
   colSizer->Add(new wxStaticText(this,wxID_ANY,wxT("Rule Colour:")),0,f,b);
@@ -113,25 +115,27 @@ MarkStateRuleDialog::MarkStateRuleDialog(wxWindow* parent,
   Layout();
   SetMinSize(GetClientSize());
 
-  if (paramChoices.Count() > 0) {
+  if (paramChoices.Count() > 0)
+  {
     loadValues(paramChoices[0]);
   }
 }
 
-MarkStateRuleDialog::~MarkStateRuleDialog() {
+MarkStateRuleDialog::~MarkStateRuleDialog()
+{
 }
 
 void MarkStateRuleDialog::loadValues(wxString paramName)
 {
-  atermpp::set<ATerm> domain = lts->getParameterDomain(
-      parameterIndices[paramName]);
-  atermpp::set<ATerm>::iterator dom_it;
+  // atermpp::set<ATermAppl> domain = lts->getParameterDomain(parameterIndices[paramName]);
+  // atermpp::set<ATermAppl>::iterator dom_it;
+  std::vector<std::string> domain = lts->getParameterDomain(parameterIndices[paramName]);
+  std::vector<std::string>::iterator dom_it;
   wxArrayString wxvalues;
   values.clear();
   for (dom_it = domain.begin(); dom_it != domain.end(); ++dom_it)
   {
-    wxString str = wxString(
-        lts->prettyPrintParameterValue(*dom_it).c_str(),wxConvLocal);
+    wxString str = wxString(dom_it->c_str(),wxConvLocal);
     wxvalues.Add(str);
     values[str] = *dom_it;
   }
@@ -145,10 +149,10 @@ void MarkStateRuleDialog::onParameterChoice(wxCommandEvent& event)
 }
 
 void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,
-    atermpp::set<ATerm> vals)
+                                  const std::set<std::string> &vals)
 {
   wxString paramName = wxString(lts->getParameterName(p).c_str(),
-      wxConvLocal);
+                                wxConvLocal);
   parameterListBox->SetStringSelection(paramName);
   loadValues(paramName);
 
@@ -156,11 +160,10 @@ void MarkStateRuleDialog::setData(int p,RGB_Color col,bool neg,
 
   relationListBox->SetSelection(neg ? 1 : 0);
 
-  atermpp::set<ATerm>::iterator i;
+  std::set<std::string>::const_iterator i;
   for (i = vals.begin(); i != vals.end(); ++i)
   {
-    valuesListBox->Check(valuesListBox->FindString(wxString(
-      lts->prettyPrintParameterValue(*i).c_str(),wxConvLocal)),true);
+    valuesListBox->Check(valuesListBox->FindString(wxString(i->c_str(),wxConvLocal)),true);
   }
 }
 
@@ -179,9 +182,9 @@ bool MarkStateRuleDialog::getNegated()
   return (relationListBox->GetSelection() == 1);
 }
 
-atermpp::set<ATerm> MarkStateRuleDialog::getValues()
+std::set<std::string> MarkStateRuleDialog::getValues()
 {
-  atermpp::set<ATerm> vals;
+  std::set<std::string> vals;
   for (unsigned int i = 0; i < valuesListBox->GetCount(); ++i)
   {
     if (valuesListBox->IsChecked(i))
@@ -192,29 +195,38 @@ atermpp::set<ATerm> MarkStateRuleDialog::getValues()
   return vals;
 }
 
-RGB_Color MarkStateRuleDialog::getColor() {
+RGB_Color MarkStateRuleDialog::getColor()
+{
   return RGB_Color(ruleClrButton->GetBackgroundColour());
 }
 
-wxString MarkStateRuleDialog::getMarkRuleString() {
+wxString MarkStateRuleDialog::getMarkRuleString()
+{
   int parIndex = parameterListBox->GetSelection();
-  if (parIndex == wxNOT_FOUND) {
+  if (parIndex == wxNOT_FOUND)
+  {
     return wxEmptyString;
   }
 
   wxString result = parameterListBox->GetString(parIndex);
-  if (relationListBox->GetSelection() == 0) {
+  if (relationListBox->GetSelection() == 0)
+  {
     result += wxT(" in { ");
-  } else {
+  }
+  else
+  {
     result += wxT(" not in { ");
   }
   bool isfirst = true;
-  for (unsigned int i = 0 ; i < valuesListBox->GetCount(); ++i) {
-    if (valuesListBox->IsChecked(i)) {
-      if (!isfirst) {
+  for (unsigned int i = 0 ; i < valuesListBox->GetCount(); ++i)
+  {
+    if (valuesListBox->IsChecked(i))
+    {
+      if (!isfirst)
+      {
         result += wxT(", ");
       }
-      result += valuesListBox->GetString( i );
+      result += valuesListBox->GetString(i);
       isfirst = false;
     }
   }

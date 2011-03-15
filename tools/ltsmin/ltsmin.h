@@ -17,9 +17,9 @@
 #include "aterm1.h"
 #include <cassert>
 extern "C" {
-  #include "svc/svcerrno.h"
-  #include "svc/svc.h"
-}	
+#include "svc/svcerrno.h"
+#include "svc/svc.h"
+}
 #define EXIT_OK 0
 #define EXIT_NOTOK 1
 #define EXIT_ERR_ARGS -1
@@ -53,46 +53,47 @@ extern "C" {
 
 /* Pi_u is stack */
 typedef struct
-  {
+{
   SVCstateIndex left, right;
   int mode;
-  } INTERVAL;
+} INTERVAL;
 
 typedef struct
-  {
+{
   int action, parent, splitter;
-  } BLOK;
+} BLOK;
 
-typedef struct {
-   int pt;
-   int *b;
+typedef struct
+{
+  int pt;
+  int* b;
 } BLOCKS;
 /* List of candidate blocks for being splitted */
 
-extern BLOK *blok;
+extern BLOK* blok;
 extern BLOCKS blocks;
 extern unsigned int Pi_pt, n_partitions;
 extern SVCint nstate, nlabel; /* number of states, number of labels */
-extern ATbool *mark;
-extern SVCint *blockref;
-extern SVCstateIndex *s; /* In this resides the partition */
-extern ATerm *label_name;
-extern ATermList  *lab; /* [[key, sources], ... ] */
-extern INTERVAL *Pi;
+extern ATbool* mark;
+extern SVCint* blockref;
+extern SVCstateIndex* s; /* In this resides the partition */
+extern ATerm* label_name;
+extern ATermList*  lab; /* [[key, sources], ... ] */
+extern INTERVAL* Pi;
 /* end extern declarations and data structures */
 
 extern int label_tau;
 extern SVCfile inFile[], outFile[];
 extern SVCbool readIndex[];
 extern int traceLevel, optimal, classes;
-extern ATermTable *lab_src_tgt, *lab_tgt_src;
+extern ATermTable* lab_src_tgt, *lab_tgt_src;
 
 /* MACRO definitions */
 #define RemoveInterval(p) ((p)->mode=REMOVED)
 #define isEmpty(p) ((p)->mode==EMPTY)
 #define isRemoved(p) ((p)->mode==REMOVED)
 #define Push(kind, lft, rgh) ((Pi[Pi_pt].mode=kind),(Pi[Pi_pt].left=lft), \
-(Pi[Pi_pt].right=rgh),Pi_pt+1)
+                              (Pi[Pi_pt].right=rgh),Pi_pt+1)
 
 //int  parseArgs(int argc, char *argv[], int *traceLevel, int *optimal, int *classes);
 //void doHelp(char *);
@@ -103,9 +104,9 @@ extern ATermTable *lab_src_tgt, *lab_tgt_src;
 //int  doBranchCompare(void);
 SVCstateIndex ReadData(void);
 //ATerm Term(Symbol s, int d);
-void ReadCompareData(SVCstateIndex *init1, SVCstateIndex *init2);
+void ReadCompareData(SVCstateIndex* init1, SVCstateIndex* init2);
 int WriteData(SVCstateIndex initState, int tau_toops);
-int WriteDataAddParam(SVCfile *f, SVCstateIndex initState, int tau_toops);
+int WriteDataAddParam(SVCfile* f, SVCstateIndex initState, int tau_toops);
 void add_tau_action(std::string const& s);
 //void GetBlockBoundaries(SVCint b, SVCstateIndex *left, SVCstateIndex *right);
 //void Check(void);

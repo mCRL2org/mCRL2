@@ -19,9 +19,11 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class abstraction ---//
 /// \brief An abstraction expression.
@@ -35,7 +37,7 @@ class abstraction: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    abstraction(atermpp::aterm_appl term)
+    abstraction(const atermpp::aterm_appl& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_Binder(m_term));
@@ -69,7 +71,7 @@ class abstraction: public data_expression
 };
 //--- end generated class abstraction ---//
 
-   } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

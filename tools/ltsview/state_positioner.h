@@ -15,7 +15,7 @@ class State;
 class StatePositioner
 {
   public:
-    StatePositioner(LTS *l): lts(l) {} 
+    StatePositioner(LTS* l): lts(l) {}
     virtual ~StatePositioner() {}
     virtual void positionStates() = 0;
 

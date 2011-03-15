@@ -19,7 +19,6 @@
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/detail/data_functional.h"
@@ -58,8 +57,8 @@ void test1()
   using namespace mcrl2::data::sort_nat;
 
   std::string DATA_SPEC1 =
-  "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
-  ;
+    "sort D = struct d1(Nat)?is_d1 | d2(arg2:Nat)?is_d2;\n"
+    ;
   data_specification data = parse_data_specification(DATA_SPEC1);
   rewriter datar(data);
   variable x("x", sort_nat::nat());
@@ -68,7 +67,7 @@ void test1()
   data_expression t = datar(greater(minimum(x,y), z));
 
   BOOST_CHECK(datar(plus(parse_data_expression("1"),
-    parse_data_expression("2"))) == datar(parse_data_expression("3")));
+                         parse_data_expression("2"))) == datar(parse_data_expression("3")));
 
   // copy a rewriter
   data::rewriter datar1 = datar;
@@ -102,7 +101,7 @@ void test2()
   BOOST_CHECK(r(d1) == r(d2));
 
   std::string var_decl = "m, n: Pos;\n";
-  mutable_map_substitution< > sigma;
+  mutable_map_substitution<> sigma;
   sigma[parse_data_expression("m", var_decl)] = r(parse_data_expression("3"));
   sigma[parse_data_expression("n", var_decl)] = r(parse_data_expression("4"));
 
@@ -117,14 +116,14 @@ void test3()
   typedef mutable_map_substitution< atermpp::map< variable, data_expression_with_variables > > substitution_function;
 
   data_specification data_spec = parse_data_specification(
-    "map dummy1:Pos;  \n"
-    "var dummy2:Bool; \n"
-    "    dummy3:Pos;  \n"
-    "    dummy4:Nat;  \n"
-    "    dummy5:Int;  \n"
-    "    dummy6:Real; \n"
-    "eqn dummy1 = 1;  \n"
-  );
+                                   "map dummy1:Pos;  \n"
+                                   "var dummy2:Bool; \n"
+                                   "    dummy3:Pos;  \n"
+                                   "    dummy4:Nat;  \n"
+                                   "    dummy5:Int;  \n"
+                                   "    dummy6:Real; \n"
+                                   "eqn dummy1 = 1;  \n"
+                                 );
   rewriter_with_variables r(data_spec);
   data_expression x = parse_data_expression("b == b", "b: Bool;\n");
   std::set<variable> v = find_variables(x);
@@ -143,7 +142,7 @@ void test3()
   sigma[m] = r(data_expression_with_variables(parse_data_expression("3")));
   sigma[n] = r(data_expression_with_variables(parse_data_expression("4")));
 
-  data_expression_with_variables sigma_m = sigma(m);
+  data_expression_with_variables sigma_m = data::replace_variables(static_cast<const data_expression&>(m), sigma);
 
   data_expression_with_variables d1(parse_data_expression("m+n", var_decl));
   data_expression_with_variables d2(parse_data_expression("7"));
@@ -155,7 +154,7 @@ void test3()
 }
 
 template <typename Rewriter>
-void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification &data_spec, std::string substitutions)
+void test_expressions(Rewriter R, std::string const& expr1, std::string const& expr2, std::string const& declarations, const data_specification& data_spec, std::string substitutions)
 {
   mutable_map_substitution< atermpp::map< variable, data_expression > > sigma;
   data::detail::parse_substitutions(substitutions, data_spec, sigma);
@@ -167,7 +166,7 @@ void test_expressions(Rewriter R, std::string const& expr1, std::string const& e
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
     std::cout << "d1           " << core::pp(d1) << std::endl;
     std::cout << "d2           " << core::pp(d2) << std::endl;
-    std::cout << "sigma\n      " << to_string(sigma) << std::endl;
+    std::cout << "sigma\n      " << data::print_substitution(sigma) << std::endl;
     std::cout << "R(d1, sigma) " << core::pp(R(d1, sigma)) << std::endl;
     std::cout << "R(d2)        " << core::pp(R(d2)) << std::endl;
   }

@@ -26,19 +26,19 @@ using namespace mcrl2::pbes_system;
 void run1(pbes<>& p, bool min_parity_game)
 {
   parity_game_generator pgg(p, min_parity_game);
-  std::set<unsigned int> todo = pgg.get_initial_values();
-  std::set<unsigned int> done;
+  std::set<size_t> todo = pgg.get_initial_values();
+  std::set<size_t> done;
   while (!todo.empty())
   {
-    unsigned int i = *todo.begin();
+    size_t i = *todo.begin();
     todo.erase(i);
     done.insert(i);
 
     parity_game_generator::operation_type t = pgg.get_operation(i);
-    unsigned int p = pgg.get_priority(i);
-    std::set<unsigned int> v = pgg.get_dependencies(i);
+    size_t p = pgg.get_priority(i);
+    std::set<size_t> v = pgg.get_dependencies(i);
     std::cout << "adding equation " << i << ", dependencies = [";
-    for (std::set<unsigned int>::iterator j = v.begin(); j != v.end(); ++j)
+    for (std::set<size_t>::iterator j = v.begin(); j != v.end(); ++j)
     {
       if (done.find(*j) == done.end())
       {
@@ -87,14 +87,14 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
     }
 
   public:
-     paritygame_tool()
+    paritygame_tool()
       : super(
-          "paritygame",
-          "Wieger Wesselink",
-          "Reads a file containing a pbes, and generates a parity game.",
-          "Convert the PBES in INFILE to parity game and write the result to OUTFILE. If INFILE is not "
-          "present, stdin is used. If OUTFILE is not present, stdout is used. By default a min-parity game is generated."),
-        m_max_pg(false)
+        "paritygame",
+        "Wieger Wesselink",
+        "Reads a file containing a pbes, and generates a parity game.",
+        "Convert the PBES in INFILE to parity game and write the result to OUTFILE. If INFILE is not "
+        "present, stdin is used. If OUTFILE is not present, stdout is used. By default a min-parity game is generated."),
+      m_max_pg(false)
     {}
 
     bool run()
@@ -109,7 +109,7 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
       pbes_system::pbes<> p;
       p.load(m_input_filename);
 
-      if(!m_max_pg)
+      if (!m_max_pg)
       {
         run1(p, true);
       }

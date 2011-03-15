@@ -20,20 +20,12 @@ add_library(${PROJECT_NAME}
 include_directories(${CMAKE_SOURCE_DIR}/tools/lpsxsim)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 
-if (MCRL2_MONO_LIB)
-  target_link_libraries(${PROJECT_NAME}
-    lpsxsim 
-    ${wxWidgets_LIBRARIES}
-    mcrl2_monolib
-  )
-else (MCRL2_MONO_LIB)
-  target_link_libraries(${PROJECT_NAME}
-    lpsxsim 
-    ${wxWidgets_LIBRARIES}
-    mcrl2_core
-    mcrl2_simulator_gui
-  )
-endif (MCRL2_MONO_LIB)
+target_link_libraries(${PROJECT_NAME}
+  lpsxsim 
+  ${wxWidgets_LIBRARIES}
+  mcrl2_core
+  mcrl2_simulator_gui
+)
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION lib/mcrl2/plugins)

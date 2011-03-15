@@ -423,8 +423,8 @@ IdentifierType:
 			*
 			**/
           ATermList list = $1;
-		  int n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i )
+		  size_t n = ATgetLength( list );
+		  for(size_t i = 0; i < n ; ++i )
           {
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetFirst( list )))
 			{
@@ -437,7 +437,7 @@ IdentifierType:
 
 		  list = $1;
 		  n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  for(size_t i = 0; i < n ; ++i ){
 			if (var_type_map.end() != var_type_map.find(ATgetFirst( list )))
 			{
               chigetposition();
@@ -489,8 +489,8 @@ ChannelDeclaration:
 		{
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
 		  ATermList list = $1;
-		  int n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  size_t n = ATgetLength( list );
+		  for(size_t i = 0; i < n ; ++i ){
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
@@ -503,7 +503,7 @@ ChannelDeclaration:
 
           list = $1;
 		  n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  for(size_t i = 0; i < n ; ++i ){
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
@@ -536,8 +536,8 @@ ChannelDeclaration:
           UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
 
 		  ATermList list = $1;
-		  int n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  size_t n = ATgetLength( list );
+		  for(size_t i = 0; i < n ; ++i ){
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
@@ -549,7 +549,7 @@ ChannelDeclaration:
 
           list = $1;
 		  n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  for(size_t i = 0; i < n ; ++i ){
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
@@ -625,8 +625,8 @@ ChannelDefinition:
           gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
           gsDebugMsg("ChannelDefinition\n");
 		  ATermList list = $1;
-		  int n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  size_t n = ATgetLength( list );
+		  for(size_t i = 0; i < n ; ++i ){
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
@@ -638,7 +638,7 @@ ChannelDefinition:
 
           list = $1;
 		  n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  for(size_t i = 0; i < n ; ++i ){
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
@@ -670,8 +670,8 @@ ChannelDefinition:
           UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
 
 		  ATermList list = $1;
-		  int n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  size_t n = ATgetLength( list );
+		  for(size_t i = 0; i < n ; ++i ){
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
@@ -683,7 +683,7 @@ ChannelDefinition:
 
           list = $1;
 		  n = ATgetLength( list );
-		  for(int i = 0; i < n ; ++i ){
+		  for(size_t i = 0; i < n ; ++i ){
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
@@ -2234,7 +2234,7 @@ bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
 
 bool is_number(std::string s)
 {
-   for (int i = 0; i < (int) s.length(); i++) {
+   for (size_t i = 0; i < (size_t) s.length(); i++) {
        if (!std::isdigit(s[i]))
            return false;
    }

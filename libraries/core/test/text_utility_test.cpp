@@ -15,18 +15,18 @@
 using namespace mcrl2;
 
 std::string TEXT1 =
-"abc % afdsd     \n"
-"%               \n"
-"%               \n"
-"ddasdfsd%adsfs%-\n"
-;
+  "abc % afdsd     \n"
+  "%               \n"
+  "%               \n"
+  "ddasdfsd%adsfs%-\n"
+  ;
 
 std::string TEXT2 =
-"abc \n"
-"\n"
-"\n"
-"ddasdfsd\n"
-;
+  "abc \n"
+  "\n"
+  "\n"
+  "ddasdfsd\n"
+  ;
 
 void test_remove_comments()
 {
@@ -35,20 +35,20 @@ void test_remove_comments()
 }
 
 std::string TEXT3 =
-"abcdef gh       \n"
-"c\n"
-"\n"
-"abcde ghi"
-;
+  "abcdef gh       \n"
+  "c\n"
+  "\n"
+  "abcde ghi"
+  ;
 
 std::string TEXT4 =
-"abcde\n"
-"f gh\n"
-"c\n"
-"\n"
-"abcde\n"
-"ghi"
-;
+  "abcde\n"
+  "f gh\n"
+  "c\n"
+  "\n"
+  "abcde\n"
+  "ghi"
+  ;
 
 void test_word_wrap()
 {
@@ -57,7 +57,7 @@ void test_word_wrap()
 }
 
 int test_main(int, char*[])
-{ 
+{
   test_remove_comments();
   test_word_wrap();
 

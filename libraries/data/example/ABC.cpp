@@ -12,7 +12,7 @@
 ATerm parse(const std::string& tag, std::istream& from)
 {
   std::vector<std::istream*>* streams = new std::vector<std::istream*>();
-  std::istringstream *tag_stream = new std::istringstream(tag);
+  std::istringstream* tag_stream = new std::istringstream(tag);
   streams->push_back(tag_stream);
   streams->push_back(&from);
   ATerm result = ABC_parse(*streams, true);

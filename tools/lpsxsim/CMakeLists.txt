@@ -12,8 +12,6 @@ cmake_minimum_required(VERSION 2.6)
 # ########## Project mcrl2_simulator ##########
 # #############################################
 
-if( NOT MCRL2_MONO_LIB )
-
 project(mcrl2_simulator)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
@@ -40,9 +38,6 @@ target_link_libraries(${PROJECT_NAME}
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-endif( NOT MCRL2_MONO_LIB )
-
-
 # ####################################
 # ########## Project lpssim ##########
 # ####################################
@@ -65,17 +60,11 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
-if( MCRL2_MONO_LIB )
-target_link_libraries(${PROJECT_NAME}
-  mcrl2_monolib
-)
-else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   mcrl2_simulator
   mcrl2_utilities_command_line
   ${Boost_LIBRARIES}
 )
-endif( MCRL2_MONO_LIB )
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
@@ -87,7 +76,7 @@ include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 # ######## mcrl2_simulator_gui #########
 # ######################################
 
-if (MCRL2_BUILD_GUI_TOOLS AND NOT MCRL2_MONO_LIB)
+if (MCRL2_BUILD_GUI_TOOLS )
 
 project(mcrl2_simulator_gui)
 
@@ -116,7 +105,7 @@ target_link_libraries(${PROJECT_NAME}
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-endif (MCRL2_BUILD_GUI_TOOLS AND NOT MCRL2_MONO_LIB)
+endif (MCRL2_BUILD_GUI_TOOLS )
 
 
 # #####################################
@@ -139,6 +128,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   xsim.cpp
   xsimmain.cpp
   xsimtrace.cpp
+  tooltipListView.cpp
 
   ${MACOSX_BUNDLE_ICON_FILE}
   ${SRCS}
@@ -169,27 +159,11 @@ set_source_files_properties(xsimmain.cpp
 #Allow xsim plugins to link against the xsim executable
 set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS true)
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-
-  # ######### required for squadt connectivity ##########
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
-  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  # #####################################################
-
-else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_simulator_gui
   mcrl2_utilities_command_line
 )
-
-  #Add Squadt Connectivity when required
-  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
-
-endif( MCRL2_MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
@@ -201,7 +175,6 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
 if( NOT WIN32 )
-  add_subdirectory ( plugins/garage )
   add_subdirectory ( plugins/trace )
 endif( NOT WIN32 )
 

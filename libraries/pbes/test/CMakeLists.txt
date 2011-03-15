@@ -13,6 +13,7 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 set(PREFIX "pbes")
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
@@ -34,33 +35,15 @@ foreach( OBJ ${TERM_OBJS} )
     message(STATUS "skipped pbes_solve_test")
   else(NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test" )
 
-    add_executable("${PREFIX}_${result}" "${OBJ}"  )
-    if( MCRL2_MONO_LIB )
-      target_link_libraries(${PREFIX}_${result}
-        mcrl2_monolib
-      )
-    else( MCRL2_MONO_LIB )  
-      target_link_libraries("${PREFIX}_${result}"
-       mcrl2_lps
-      )
-      if(MCRL2_USE_BOOST_INTERNAL)
-        target_link_libraries(${PROJECT_NAME}
-          boost
-        ) 
-      else(MCRL2_USE_BOOST_INTERNAL)
-        target_link_libraries(${PROJECT_NAME}
-          ${Boost_LIBRARIES}     
-        ) 
-      endif(MCRL2_USE_BOOST_INTERNAL)
-    endif( MCRL2_MONO_LIB )
-  
-    if(MCRL2_ENABLE_EXPERIMENTAL )
-      target_link_libraries(${PROJECT_NAME}
-        mcrl2_pbespgsolve
-      )
-    endif(MCRL2_ENABLE_EXPERIMENTAL)
-    add_test("${PREFIX}_${result}" "${pbes_tests_BINARY_DIR}/${PREFIX}_${result}" )
-    set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+    add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
+    target_link_libraries("${PREFIX}_${result}"
+      mcrl2_lps
+      mcrl2_pbespgsolve
+      ${Boost_LIBRARIES}     
+    )
+
+    # MACRO is defined in CMakeLists.txt in root of source tree
+    build_and_run_test_target( ${PREFIX}_${result} )
 
   endif( NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test")
 

@@ -16,11 +16,14 @@
 #include <iterator>
 #include <set>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-namespace detail {
+namespace detail
+{
 
 /// \brief Returns the union of two sets.
 /// \param x A set

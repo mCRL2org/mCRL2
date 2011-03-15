@@ -1,4 +1,4 @@
-// Author(s): Alexander van Dam, Wieger Wesselink
+// Author(s): Jan Friso Groote
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,131 +7,151 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file pbes2bes.cpp
-/// \brief Add your file description here.
+/// \brief Transform a pbes into a bes
 
 #include "boost.hpp" // precompiled headers
 
-//#define MCRL2_PBES_EXPRESSION_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-//#define MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
+// ======================================================================
+//
+// file          : pbes2bes
+// date          : 15-04-2007
+// version       : 0.1.3
+//
+// author(s)     : Alexander van Dam <avandam@damdonk.nl>
+//                 Jan Friso Groote <J.F.Groote@tue.nl>
+//
+// ======================================================================
 
-#include <stdexcept>
+
+#define NAME "pbes2bes"
+#define AUTHOR "Jan Friso Groote"
+
+//C++
 #include <iostream>
 #include <string>
 #include <utility>
 
-#include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/pbes/detail/pbes2bes_variable_map_parser.h"
-#include "mcrl2/pbes/io.h"
-#include "mcrl2/pbes/pbes2bes.h"
-#include "mcrl2/pbes/pbes2bes_algorithm.h"
-#include "mcrl2/pbes/pbes2bes_finite_algorithm.h"
-#include "mcrl2/pbes/rewriter.h"
+#include <sstream>
+
+//Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
+#include "mcrl2/utilities/pbes_rewriter_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/utilities/execution_timer.h"
+
+//Data Framework
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/selection.h"
+#include "mcrl2/data/data_equation.h" // for debug std::cerr
+
+//Boolean equation systems
+#include "mcrl2/pbes/utility.h"
+#include "mcrl2/bes/bes_deprecated.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
+using namespace std;
+using namespace mcrl2::utilities;
+using namespace mcrl2::core;
+using bes::bes_expression;
+using namespace ::bes;
+
+// using atermpp::make_substitution;
+
+//Function declarations used by main program
+//------------------------------------------
+
 using namespace mcrl2;
-using namespace mcrl2::pbes_system;
-using utilities::command_line_parser;
-using utilities::interface_description;
-using utilities::make_optional_argument;
 using utilities::tools::input_output_tool;
 using utilities::tools::rewriter_tool;
-using utilities::tools::squadt_tool;
+using utilities::tools::pbes_rewriter_tool;
+using namespace mcrl2::utilities::tools;
 
-/// The pbes2bes tool.
-class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
+class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
 {
   protected:
-    typedef squadt_tool< rewriter_tool<input_output_tool> > super;
+    // Tool options.
+    /// The output file name
+    std::string opt_outputformat;              // The output format
+    ::bes::transformation_strategy opt_strategy; // The strategy
+    bool opt_use_hashtables;                   // The hashtable option
+    bool opt_store_as_tree;                    // The tree storage option
+    bool opt_data_elm;                         // The data elimination option
 
-    /// The transformation strategies of the tool.
-    enum transformation_strategy {
-      ts_lazy,
-      ts_finite
-    };
+    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
-    transformation_strategy m_strategy;
-    pbes_output_format m_output_format;
-    std::string m_finite_parameter_selection;
-
-    /// Sets the transformation strategy.
-    /// \param s A transformation strategy.
-    void set_transformation_strategy(const std::string& s)
+    std::string default_rewriter() const
     {
-      if (s == "finite")
-      {
-        m_strategy = ts_finite;
-      }
-      else if (s == "lazy")
-      {
-        m_strategy = ts_lazy;
-      }
-      else
-      {
-        throw std::runtime_error("unknown output strategy specified (got `" + s + "')");
-      }
+      return "quantifier-all";
     }
 
-    /// Sets the output format.
-    /// \param format An output format.
-    void set_output_format(const std::string& format)
-    {
-      if (format == "pbes")
-      {
-        m_output_format = pbes_output_pbes;
-      }
-      else if (format == "internal")
-      {
-        m_output_format = pbes_output_internal;
-      }
-      else if (format == "cwi")
-      {
-        m_output_format = pbes_output_cwi;
-      }
-      else
-      {
-        throw std::runtime_error("unknown output format specified (got `" + format + "')");
-      }
-    }
+  public:
+    pbes2bes_tool()
+      : super(
+        NAME,
+        AUTHOR,
+        "Generate a BES from a PBES. ",
+        "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
+        "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
+      opt_outputformat("bes"),
+      opt_strategy(::bes::lazy),
+      opt_use_hashtables(false),
+      opt_store_as_tree(false),
+      opt_data_elm(true)
+    {}
 
-    /// Parse the non-default options.
+
+  protected:
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      try
+
+      input_output_tool::parse_options(parser);
+
+      opt_use_hashtables            = 0 < parser.options.count("hashtables");
+      opt_store_as_tree             = 0 < parser.options.count("tree");
+      opt_data_elm                  = parser.options.count("unused-data") == 0;
+      opt_outputformat              = "bes";
+      opt_strategy                  = lazy;
+
+      if (parser.options.count("output")) // Output format
       {
-        set_output_format(parser.option_argument("output"));
-      }
-      catch (std::logic_error)
-      {
-        set_output_format("pbes");
+        std::string format = parser.option_argument("output");
+
+        if (!((format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes")))
+        {
+          parser.error("unknown output format specified (got `" + format + "')");
+        }
+
+        opt_outputformat = format;
       }
 
-      try
+      if (parser.options.count("strategy")) // Bes solving strategy (currently only one available)
       {
-        set_transformation_strategy(parser.option_argument("strategy"));
-      }
-      catch (std::logic_error)
-      {
-        set_transformation_strategy("lazy");
-      }
+        int strategy = parser.option_argument_as< int >("strategy");
 
-      if (parser.options.count("select") > 0)
-      {
-      	m_finite_parameter_selection = parser.option_argument("select");
-      	boost::trim(m_finite_parameter_selection);
-      }
-
-      if (parser.options.count("equation_limit") > 0)
-      {
-      	int limit = parser.option_argument_as<int>("equation_limit");
-      	pbes_system::detail::set_bes_equation_limit(limit);
+        switch (strategy)
+        {
+          case 0:
+            opt_strategy = lazy;
+            break;
+          case 1:
+            opt_strategy = optimize;
+            break;
+          case 2:
+            opt_strategy = on_the_fly;
+            break;
+          case 3:
+            opt_strategy = on_the_fly_with_fixed_points;
+            break;
+          default:
+            parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
+        }
       }
     }
 
@@ -139,279 +159,254 @@ class pbes2bes_tool: public squadt_tool< rewriter_tool<input_output_tool> >
     {
       super::add_options(desc);
       desc.
-        add_option("strategy",
-          make_optional_argument("NAME", "lazy"),
-          "compute the BES using strategy NAME:\n"
-          "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
-          "  'finite' for computing all possible boolean equations.",
-          's').
-        add_option("output",
-          make_optional_argument("NAME", "pbes"),
-          "store the BES in output format NAME:\n"
-          "  'pbes' for the internal binary format (default),\n"
-          "  'internal' for the internal textual format, or\n"
-          "  'cwi' for the format used by the CWI to solve a BES.",
-          'o').
-        add_option("select",
-          make_optional_argument("NAME", ""),
-          "select finite parameters that need to be expanded\n"
-          "  Examples: X1(b:Bool,c:Bool);X2(b:Bool)\n"
-          "            *(*:Bool)\n",
-          'f');
-      desc.add_hidden_option("equation_limit",
-         make_optional_argument("NAME", "-1"),
-         "Set a limit to the number of generated BES equations",
-         'l');
-    }
+      add_option("strategy", make_mandatory_argument("STRAT"),
+                 "use strategy STRAT (default '0');\n"
+                 " 0) Compute all boolean equations which can be reached"
+                 " from the initial state, without optimization"
+                 " (default). This is is the most data efficient"
+                 " option per generated equation.\n"
+                 " 1) Optimize by immediately substituting the right"
+                 " hand sides for already investigated variables"
+                 " that are true or false when generating an"
+                 " expression. This is as memory efficient as 0.\n"
+                 " 2) In addition to 1, also substitute variables that"
+                 " are true or false into an already generated right"
+                 " hand side. This can mean that certain variables"
+                 " become unreachable (e.g. X0 in X0 and X1, when X1"
+                 " becomes false, assuming X0 does not occur"
+                 " elsewhere. It will be maintained which variables"
+                 " have become unreachable as these do not have to be"
+                 " investigated. Depending on the PBES, this can"
+                 " reduce the size of the generated BES substantially"
+                 " but requires a larger memory footprint.\n"
+                 " 3) In addition to 2, investigate for generated"
+                 " variables whether they occur on a loop, such that"
+                 " they can be set to true or false, depending on the"
+                 " fixed point symbol. This can increase the time"
+                 " needed to generate an equation substantially",
+                 's').
+      add_option("hashtables",
+                 "use hashtables when substituting in bes equations, "
+                 "and translate internal expressions to binary decision "
+                 "diagrams (discouraged, due to performance)",
+                 'H').
 
-    /// \return A string representation of the transformation strategy.
-    std::string strategy_string() const
-    {
-      if (m_strategy == ts_finite)
-      {
-        return "finite";
-      }
-      else if (m_strategy == ts_lazy)
-      {
-        return "lazy";
-      }
-      return "unknown";
-    }
-
-    /// \return A string representation of the output format.
-    std::string output_format_string() const
-    {
-      if (m_output_format == pbes_output_pbes)
-      {
-        return "pbes";
-      }
-      else if (m_output_format == pbes_output_cwi)
-      {
-        return "cwi";
-      }
-      else if (m_output_format == pbes_output_internal)
-      {
-        return "internal";
-      }
-      return "unknown";
+      add_option("output",
+                 make_mandatory_argument("FORMAT"),
+                 "use output format FORMAT:\n"
+                 " 'vasy',\n"
+                 " 'pbes' (save as a PBES in internal format),\n"
+                 " 'cwi',\n"
+                 " 'bes' (default, save as a BES in internal format)",
+                 'o').
+      add_option("tree",
+                 "store state in a tree (for memory efficiency)",
+                 't').
+      add_option("unused_data",
+                 "do not remove unused parts of the data specification",
+                 'u');
     }
 
   public:
-    /// Constructor.
-    pbes2bes_tool()
-      : super(
-          "pbes2bes",
-          "Wieger Wesselink; Alexander van Dam and Tim Willemse",
-          "compute a BES out of a PBES",
-          "Transforms the PBES from INFILE into an equivalent BES and writes it to OUTFILE. "
-          "If INFILE is not present, standard input is used. If OUTFILE is not present,   "
-          "standard output is used."
-        ),
-        m_strategy(ts_lazy),
-        m_output_format(pbes_output_pbes)
-    {}
-
-    /// Runs the algorithm.
     bool run()
     {
-      using namespace mcrl2::pbes_system;
+      using namespace pbes_system;
+      using namespace utilities;
 
       if (core::gsVerbose)
       {
-        std::cerr << "parameters of pbes2bes:" << std::endl;
+        std::cerr << "pbes2bes parameters:" << std::endl;
         std::cerr << "  input file:         " << m_input_filename << std::endl;
         std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  strategy:           " << strategy_string() << std::endl;
-        std::cerr << "  output format:      " << output_format_string() << std::endl;
+        std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
+        std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
       }
 
       // load the pbes
-      pbes<> p;
-      p.load(m_input_filename);
-
-      if (!p.is_closed())
+      mcrl2::pbes_system::pbes<> p;
+      try
       {
-        core::gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
-        return false;
+        p.load(m_input_filename);
+      }
+      catch (mcrl2::runtime_error& e)
+      {
+        try
+        {
+          mcrl2::bes::boolean_equation_system<> b;
+          b.load(m_input_filename);
+          p = mcrl2::bes::bes2pbes(b);
+        }
+        catch (mcrl2::runtime_error&) // Throw original exception after trying both pbes and bes fails
+        {
+          throw(e);
+        }
+      }
+      p.normalize();
+      pbes_system::detail::instantiate_global_variables(p);
+      // data rewriter
+
+      data::rewriter datar= (opt_data_elm) ?
+                            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy()) :
+                            data::rewriter(p.data(), rewrite_strategy());
+
+      timer().start("instantiation");
+      ::bes::boolean_equation_system bes_equations=
+        ::bes::boolean_equation_system(
+          p,
+          datar,
+          opt_strategy,
+          opt_store_as_tree,
+          false,  // No counter example
+          opt_use_hashtables);
+      timer().finish("instantiation");
+
+      // pbes rewriter
+      /* The code below can be reactivated, once the pbes_rewriters deliver acceptable performance.
+         As it stands their performance is so bad, that they cannot be used.
+
+      switch (rewriter_type())
+      {
+        case simplify:
+        {
+          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
+          pbesrewr(p,pbesr); // Simplify p such that it does not have to be done
+                             // repeatedly.
+          bes_equations=::bes::boolean_equation_system(
+                            p,
+                            pbesr,
+                            opt_strategy,
+                            opt_store_as_tree,
+                            false,    // No counter example
+                            opt_use_hashtables);
+          break;
+        }
+        case quantifier_finite:
+        {
+          data::number_postfix_generator generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, generator);
+          data::rewriter_with_variables datarv(datar);
+          bool enumerate_infinite_sorts = false;
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
+                                                             data::data_enumerator<> >
+                          pbesr(datarv, datae, enumerate_infinite_sorts);
+          pbesrewr(p,pbesr);  // Simplify p such that this does not need to be done
+                              // repeatedly.
+          bes_equations=::bes::boolean_equation_system(
+                            p,
+                            pbesr,
+                            opt_strategy,
+                            opt_store_as_tree,
+                            false,    // No counter example
+                            opt_use_hashtables);
+          break;
+        }
+        case quantifier_all:
+        {
+          data::number_postfix_generator generator("UNIQUE_PREFIX");
+          data::data_enumerator<> datae(p.data(), datar, generator);
+          data::rewriter_with_variables datarv(datar);
+          const bool enumerate_infinite_sorts1 = false;
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
+                                                             data::data_enumerator<> >
+                          pbesr1(datarv, datae, enumerate_infinite_sorts1);
+          pbesrewr(p,pbesr1);  // Simplify p such that this does not need to be done
+                               // repeatedly, without expanding quantifiers over infinite
+                               // domains.
+          const bool enumerate_infinite_sorts2 = true;
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
+                                                             data::data_enumerator<> >
+                          pbesr2(datarv, datae, enumerate_infinite_sorts2);
+          bes_equations=::bes::boolean_equation_system(
+                            p,
+                            pbesr2,
+                            opt_strategy,
+                            opt_store_as_tree,
+                            false,  // No counter example
+                            opt_use_hashtables);
+          break;
+        }
+        case pfnf:
+        {
+          throw mcrl2::runtime_error("The pfnf boolean equation rewriter cannot be used\n");
+        }
+        case prover:
+        {
+          throw mcrl2::runtime_error("The prover based rewriter cannot be used\n");
+        }
+      } */
+
+      if (opt_outputformat == "cwi")
+      {
+        // in CWI format only if the result is a BES, otherwise Binary
+        save_bes_in_cwi_format(m_output_filename,bes_equations);
+        return true;
+      }
+      if (opt_outputformat == "vasy")
+      {
+        //Save resulting bes if necessary.
+        save_bes_in_vasy_format(m_output_filename,bes_equations);
+        return true;
+      }
+      if (opt_outputformat == "pbes")
+      {
+        //Save resulting bes if necessary.
+        save_bes_in_pbes_format(m_output_filename,bes_equations,p);
+        return true;
+      }
+      if (opt_outputformat == "bes")
+      {
+        save_bes_in_bes_format(m_output_filename,bes_equations);
+        return true;
       }
 
-      unsigned int log_level = 0;
-      if (mcrl2::core::gsVerbose)
-      {
-        log_level = 1;
-      }
-      if (mcrl2::core::gsDebug)
-      {
-        log_level = 2;
-      }     	
-
-      if (m_strategy == ts_lazy)
-      {
-        pbes2bes_algorithm algorithm(p.data(), rewrite_strategy(), false, false, log_level);
-        algorithm.run(p);
-        p = algorithm.get_result();
-      }
-      else if (m_strategy == ts_finite)
-      {
-        pbes2bes_finite_algorithm algorithm(rewrite_strategy(), log_level);
-        pbes2bes_variable_map variable_map = detail::parse_variable_map(p, m_finite_parameter_selection);
-        algorithm.run(p, variable_map);
-      }
-
-      // save the result
-      save_pbes(p, m_output_filename, m_output_format);
+      assert(0); // This point cannot be reached. pbes2bes must always write output.
 
       return true;
     }
 
-    /// Sets the output filename.
-    /// \param filename The name of a file.
-    void set_output_filename(const std::string& filename)
-    {
-      m_output_filename = filename;
-    }
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    static bool initialise_types() {
-      tipi::datatype::enumeration< transformation_strategy > transformation_strategy_enumeration;
-
-      transformation_strategy_enumeration.
-        add(ts_lazy, "lazy").
-        add(ts_finite, "finite");
-
-      tipi::datatype::enumeration< pbes_output_format> output_format_enumeration;
-
-      output_format_enumeration.
-        add(pbes_output_pbes, "pbes").
-        add(pbes_output_internal, "internal").
-        add(pbes_output_cwi, "cwi");
-
-      return true;
-    }
-
-// Names for options
-# define option_transformation_strategy "transformation_strategy"
-# define option_selected_output_format  "selected_output_format"
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const
-    {
-      static bool initialised = initialise_types();
-
-      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-
-      c.add_input_configuration("main-input",
-        tipi::mime_type("pbes", tipi::mime_type::application), tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      /* Create display */
-      tipi::tool_display d;
-
-      // Helper for format selection
-      utilities::squadt::radio_button_helper < pbes_output_format > format_selector(d);
-
-      // Helper for strategy selection
-      utilities::squadt::radio_button_helper < transformation_strategy > strategy_selector(d);
-
-      layout::vertical_box& m = d.create< vertical_box >();
-
-      m.append(d.create< label >().set_text("Output format : ")).
-        append(d.create< horizontal_box >().
-                    append(format_selector.associate(pbes_output_pbes, "pbes")).
-                    append(format_selector.associate(pbes_output_internal, "internal")).
-                    append(format_selector.associate(pbes_output_cwi, "cwi")),
-              margins(0,5,0,5)).
-        append(d.create< label >().set_text("Transformation strategy : ")).
-        append(strategy_selector.associate(ts_lazy, "lazy: only boolean equations reachable from the initial state")).
-        append(strategy_selector.associate(ts_finite, "finite: all possible boolean equations"));
-
-      add_rewrite_option(d, m);
-
-      button& okay_button = d.create< button >().set_label("OK");
-
-      m.append(d.create< label >().set_text(" ")).
-        append(okay_button, layout::right);
-
-      /// Copy values from options specified in the configuration
-      if (c.option_exists(option_transformation_strategy)) {
-        strategy_selector.set_selection(
-            c.get_option_argument< transformation_strategy >(option_transformation_strategy, 0));
-      }
-      if (c.option_exists(option_selected_output_format)) {
-        format_selector.set_selection(
-            c.get_option_argument< pbes_output_format >(option_selected_output_format, 0));
-      }
-
-      send_display_layout(d.manager(m));
-
-      /* Wait until the ok button was pressed */
-      okay_button.await_change();
-
-      /* Add output file to the configuration */
-      if (c.output_exists("main-output")) {
-        tipi::configuration::object& output_file = c.get_output("main-output");
-
-        output_file.location(c.get_output_name(".pbes"));
-      }
-      else {
-        c.add_output("main-output", tipi::mime_type("pbes", tipi::mime_type::application), c.get_output_name(".pbes"));
-      }
-
-      c.add_option(option_transformation_strategy).set_argument_value< 0 >(strategy_selector.get_selection());
-      c.add_option(option_selected_output_format).set_argument_value< 0 >(format_selector.get_selection());
-
-      send_clear_display();
-
-      update_configuration(c);
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const
-    {
-      return c.input_exists("main-input") &&
-             c.output_exists("main-output") &&
-             c.option_exists(option_transformation_strategy) &&
-             c.option_exists(option_selected_output_format);
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c)
-    {
-      static std::string strategies[] = { "lazy", "finite" };
-      static std::string formats[]    = { "pbes", "internal", "cwi" };
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      m_input_filename = c.get_input("main-input").location();
-      m_output_filename = c.get_output("main-output").location();
-      set_output_format(formats[c.get_option_argument< size_t >(option_selected_output_format)]);
-      set_transformation_strategy(strategies[c.get_option_argument< size_t >(option_transformation_strategy)]);
-      bool result = run();
-
-      send_clear_display();
-
-      return result;
-    }
-
-#endif // ENABLE_SQUADT_CONNECTIVITY
 };
 
-//Main Program
-//------------
-/// \brief Main program for pbes2bes
+class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool>
+{
+  public:
+    pbes2bes_gui_tool()
+    {
+
+      std::vector<std::string> values;
+
+      m_gui_options["hashtables"] = create_checkbox_widget();
+
+      values.clear();
+      values.push_back("vasy");
+      values.push_back("pbes");
+      values.push_back("cwi");
+      values.push_back("bes");
+      m_gui_options["output"] = create_radiobox_widget(values, 3);
+
+      values.clear();
+      values.push_back("simplify");
+      values.push_back("quantifier-all");
+      values.push_back("quantifier-finite");
+      values.push_back("pfnf");
+      m_gui_options["pbes-rewriter"] = create_radiobox_widget(values);
+
+      add_rewriter_widget();
+
+      values.clear();
+      values.push_back("0");
+      values.push_back("1");
+      values.push_back("2");
+      values.push_back("3");
+      m_gui_options["strategy"] = create_radiobox_widget(values);
+
+      m_gui_options["tree"] = create_checkbox_widget();
+      m_gui_options["unused_data"] = create_checkbox_widget();
+    }
+};
+
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return pbes2bes_tool().execute(argc, argv);
+  return pbes2bes_gui_tool().execute(argc, argv);
 }

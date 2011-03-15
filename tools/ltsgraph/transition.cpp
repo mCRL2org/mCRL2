@@ -21,10 +21,14 @@ Transition::Transition(State* from, State* to, std::string lbl)
   fromState = from;
   toState = to;
   label = lbl;
-  if(fromState == toState)
-	  controlAlpha = 0.5 * M_PI;
+  if (fromState == toState)
+  {
+    controlAlpha = 0.5 * M_PI;
+  }
   else
-	  controlAlpha = 0;
+  {
+    controlAlpha = 0;
+  }
   controlBeta = 0;
   controlGamma = 0;
   controlDist = 0.5;
@@ -45,7 +49,8 @@ State* Transition::getTo() const
   return toState;
 }
 
-void Transition::getLabelPos(double& x, double& y, double& z) {
+void Transition::getLabelPos(double& x, double& y, double& z)
+{
   // Get control point of transition
   getControl(x, y, z);
 
@@ -57,39 +62,39 @@ void Transition::getLabelPos(double& x, double& y, double& z) {
 
 void Transition::getControl(double& x, double& y, double& z)
 {
-  if(fromState == toState)
+  if (fromState == toState)
   {
     x = fromState->getX() + controlDist * 200.0f * sin(controlAlpha);
     y = fromState->getY() + controlDist * 200.0f * sin(controlBeta);
-	z = fromState->getZ() + controlDist * 200.0f * sin(controlGamma);
+    z = fromState->getZ() + controlDist * 200.0f * sin(controlGamma);
   }
   else
   {
     double xFrom = fromState->getX();
     double yFrom = fromState->getY();
-	double zFrom = fromState->getZ();
+    double zFrom = fromState->getZ();
     double xTo = toState->getX();
     double yTo = toState->getY();
-	double zTo = toState->getZ();
+    double zTo = toState->getZ();
 
     double yDiff = yTo - yFrom;
     double xDiff = xTo - xFrom;
-	double zDiff = zTo - zFrom;
+    double zDiff = zTo - zFrom;
 
-    double delta = atan2(xDiff, sqrt (yDiff * yDiff + zDiff * zDiff) );
+    double delta = atan2(xDiff, sqrt(yDiff * yDiff + zDiff * zDiff));
     double epsilon = delta + controlAlpha;
 
-	double zeta = atan2(yDiff, sqrt (xDiff * xDiff + zDiff * zDiff));
-	double theta = zeta + controlBeta;
+    double zeta = atan2(yDiff, sqrt(xDiff * xDiff + zDiff * zDiff));
+    double theta = zeta + controlBeta;
 
-	double iota = atan2(zDiff, sqrt (xDiff * xDiff + yDiff * yDiff)) ;
-	double kappa = iota + controlGamma;
+    double iota = atan2(zDiff, sqrt(xDiff * xDiff + yDiff * yDiff)) ;
+    double kappa = iota + controlGamma;
 
     double dist = sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
 
     x = xFrom + dist * controlDist * sin(epsilon);
     y = yFrom + dist * controlDist * sin(theta);
-	z = zFrom + dist * controlDist * sin(kappa);
+    z = zFrom + dist * controlDist * sin(kappa);
 
   }
 }
@@ -114,7 +119,8 @@ double Transition::getControlDist() const
   return controlDist;
 }
 
-void Transition::setLabelPos(const double x, const double y, const double z) {
+void Transition::setLabelPos(const double x, const double y, const double z)
+{
   // Get transition control points;
   double controlX, controlY, controlZ;
   getControl(controlX, controlY, controlZ);
@@ -129,48 +135,48 @@ void Transition::setControl(const double x, const double y, const double z)
   double newY = y;
   double newZ = z;
 
-  if(fromState == toState)
+  if (fromState == toState)
   {
     double xDiff = newX - fromState->getX();
     double yDiff = newY - fromState->getY();
-	double zDiff = newZ - fromState->getZ();
+    double zDiff = newZ - fromState->getZ();
     controlDist = sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff)  / 200.0f;
-	controlAlpha = atan2(xDiff, sqrt (yDiff * yDiff + zDiff * zDiff));
-	controlBeta = atan2(yDiff, sqrt (xDiff * xDiff + zDiff * zDiff));
-	controlGamma = atan2(zDiff, sqrt (xDiff * xDiff + yDiff * yDiff));
+    controlAlpha = atan2(xDiff, sqrt(yDiff * yDiff + zDiff * zDiff));
+    controlBeta = atan2(yDiff, sqrt(xDiff * xDiff + zDiff * zDiff));
+    controlGamma = atan2(zDiff, sqrt(xDiff * xDiff + yDiff * yDiff));
   }
   else
   {
     double xFrom = fromState->getX();
     double yFrom = fromState->getY();
-	double zFrom = fromState->getZ();
+    double zFrom = fromState->getZ();
 
     double xTo = toState->getX();
     double yTo = toState->getY();
-	double zTo = toState->getZ();
+    double zTo = toState->getZ();
 
     double yDiff = yTo - yFrom;
     double xDiff = xTo - xFrom;
-	double zDiff = zTo - zFrom;
+    double zDiff = zTo - zFrom;
 
     double yDiff1 = newY - yFrom;
     double xDiff1 = newX - xFrom;
     double zDiff1 = newZ - zFrom;
 
     double stateDist = sqrt(xDiff * xDiff + yDiff * yDiff + zDiff * zDiff);
-	
-    double delta = atan2(xDiff, sqrt (yDiff * yDiff + zDiff * zDiff));
-    double epsilon = atan2(xDiff1, sqrt (yDiff1 * yDiff1 + zDiff1 * zDiff1)) ;
 
-	double zeta = atan2(yDiff, sqrt (xDiff * xDiff + zDiff * zDiff));
-	double theta = atan2(yDiff1, sqrt (xDiff1 * xDiff1 + zDiff1 * zDiff1));
+    double delta = atan2(xDiff, sqrt(yDiff * yDiff + zDiff * zDiff));
+    double epsilon = atan2(xDiff1, sqrt(yDiff1 * yDiff1 + zDiff1 * zDiff1)) ;
 
-	double iota = atan2(zDiff, sqrt (xDiff * xDiff + yDiff * yDiff));
-	double kappa = atan2(zDiff1, sqrt (xDiff1 * xDiff1 + yDiff1 * yDiff1));
+    double zeta = atan2(yDiff, sqrt(xDiff * xDiff + zDiff * zDiff));
+    double theta = atan2(yDiff1, sqrt(xDiff1 * xDiff1 + zDiff1 * zDiff1));
+
+    double iota = atan2(zDiff, sqrt(xDiff * xDiff + yDiff * yDiff));
+    double kappa = atan2(zDiff1, sqrt(xDiff1 * xDiff1 + yDiff1 * yDiff1));
 
     controlAlpha = epsilon - delta;
-	controlBeta = theta - zeta;
-	controlGamma = kappa - iota;
+    controlBeta = theta - zeta;
+    controlGamma = kappa - iota;
 
     controlDist = sqrt(xDiff1 * xDiff1 + yDiff1 * yDiff1 + zDiff1 * zDiff1) / stateDist;
   }

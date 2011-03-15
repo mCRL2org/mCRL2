@@ -1,4 +1,4 @@
-
+// Author(s): Bas Ploeger and Carst Tankink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -17,47 +17,45 @@
 #include <string>
 
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #include "enums.h"
 #include "mediator.h"
+#include "settings.h"
 
 class GLCanvas;
 class LTS;
 class MainFrame;
 class MarkManager;
 class RGB_Color;
-class Settings;
 class Visualizer;
 
 class LTSView :
-  public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >,
-  public Mediator
+  public mcrl2::utilities::wx::tool< LTSView, mcrl2::utilities::tools::input_tool >,
+  public Mediator,
+  public Subscriber
 {
     typedef mcrl2::utilities::wx::tool< LTSView,
-       mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
+            mcrl2::utilities::tools::input_tool > super;
 
   private:
-    LTS *lts;
+    LTS* lts;
     unsigned int colourCounter;
-    GLCanvas *glCanvas;
-    MainFrame *mainFrame;
-    Settings *settings;
-    Visualizer *visualizer;
-    MarkManager *markManager;
-    RankStyle rankStyle;
-    bool fsmStyle;
+    GLCanvas* glCanvas;
+    MainFrame* mainFrame;
+    Settings* settings;
+    Visualizer* visualizer;
+    MarkManager* markManager;
+
     void applyMarkStyle();
+    void setFSMStyle();
+    void setRankStyle();
+    void setStatePosStyle();
+    void setVisStyle();
+    void zoomOutTillTop();
 
   public:
-    #ifdef ENABLE_SQUADT_CONNECTIVITY
-      void set_capabilities(tipi::tool::capabilities&) const;
-      void user_interactive_configuration(tipi::configuration&);
-      bool check_configuration(tipi::configuration const&) const;
-      bool perform_task(tipi::configuration&);
-    #endif
 
     LTSView();
     ~LTSView();
@@ -69,28 +67,26 @@ class LTSView :
     void exportToText(std::string filename);
     MarkStyle getMarkStyle();
     MatchStyle getMatchStyle();
-    bool isMarked(State *s);
-    bool isMarked(Cluster *s);
-    bool isMarked(Transition *t);
+    bool isMarked(State* s);
+    bool isMarked(Cluster* s);
+    bool isMarked(Transition* t);
     RGB_Color getMarkRuleColor(int mr);
     RGB_Color getNewRuleColour();
     std::string getVersionString();
     void notifyRenderingFinished();
     void notifyRenderingStarted();
+    void notify(SettingID s);
     void openFile(std::string fileName);
     void removeMarkRule(int mr);
     void setActionMark(int l,bool b);
     void setMarkStyle(MarkStyle ms);
     void setMatchStyle(MatchStyle ms);
     void setMatchStyleClusters(MatchStyle ms);
-    void setRankStyle(RankStyle rs);
-    void setVisStyle(VisStyle vs);
-    void setFSMStyle(bool b);
     void startSim();
     int getNumberOfParams() const;
     std::string getActionLabel(const int i) const;
     std::string getParName(const int i) const;
-    std::string getParValue(State *s, const int j) const;
+    std::string getParValue(State* s, const int j) const;
     void selectStateByID(const int id);
     void selectCluster(const int rank, const int pos);
     void deselect();
@@ -98,7 +94,6 @@ class LTSView :
 
     void zoomInBelow();
     void zoomInAbove();
-    void zoomOutTillTop();
     void zoomOut();
 
     void reportError(std::string const& error);
@@ -112,14 +107,14 @@ class LTSView :
     DECLARE_EVENT_TABLE()
 };
 
-  class LTSView_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<LTSView>
-  {
-    public:
-  	LTSView_gui_tool()
-      {
-        //m_gui_options["no-state"] = create_checkbox_widget();
-      }
-  };
+class LTSView_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<LTSView>
+{
+  public:
+    LTSView_gui_tool()
+    {
+      //m_gui_options["no-state"] = create_checkbox_widget();
+    }
+};
 
 DECLARE_APP(LTSView_gui_tool)
 

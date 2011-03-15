@@ -32,11 +32,12 @@ class MarkStateRuleDialog : public wxDialog
     ~MarkStateRuleDialog();
     int getParamIndex();
     bool getNegated();
-    atermpp::set<ATerm> getValues();
+    // atermpp::set<ATerm> getValues();
+    std::set<std::string> getValues();
     RGB_Color getColor();
     wxString getMarkRuleString();
-    void setData(int p,RGB_Color col,bool neg,
-        atermpp::set<ATerm> vals);
+    // void setData(int p,RGB_Color col,bool neg, atermpp::set<ATerm> vals);
+    void setData(int p,RGB_Color col,bool neg, const std::set<std::string> &vals);
     void onParameterChoice(wxCommandEvent& event);
   private:
     Mediator* mediator;
@@ -44,7 +45,7 @@ class MarkStateRuleDialog : public wxDialog
     wxListBox* parameterListBox;
     wxListBox* relationListBox;
     mcrl2::utilities::wx::wxColorButton* ruleClrButton;
-    atermpp::map< wxString, ATerm > values;
+    std::map< wxString, std::string > values;
     wxCheckListBox* valuesListBox;
     LTS*  lts;
     void loadValues(wxString paramName);

@@ -16,25 +16,25 @@
 
 class Value
 {
-public:
-	// -- constructors and destructor -------------------------------
+  public:
+    // -- constructors and destructor -------------------------------
     Value(
-        const int &idx,
-        const std::string &val );
-    Value( const Value &val );
-	virtual ~Value();
+      const size_t& idx,
+      const std::string& val);
+    Value(const Value& val);
+    virtual ~Value();
 
     // -- set functions ---------------------------------------------
-    void setIndex( const int &idx );
-    void setValue( const std::string &val );
+    void setIndex(const size_t& idx);
+    void setValue(const std::string& val);
 
     // -- get functions ---------------------------------------------
-    int getIndex();
+    size_t getIndex();
     std::string getValue();
 
-protected:
+  protected:
     // -- data members ----------------------------------------------
-	int    index; // index in attribute
+    size_t    index; // index in attribute
     std::string value; // actual value
 };
 

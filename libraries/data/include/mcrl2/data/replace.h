@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink, Jeroen van der Wulp
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -7,63 +7,277 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/replace.h
-/// \brief Contains a function for replacing data variables in a term.
+/// \brief add your file description here.
 
 #ifndef MCRL2_DATA_REPLACE_H
 #define MCRL2_DATA_REPLACE_H
 
-#include "mcrl2/data/detail/replace.h"
+#include "mcrl2/atermpp/map.h"
+#include "mcrl2/data/add_binding.h"
+#include "mcrl2/data/builder.h"
 
-namespace mcrl2 {
-
-  namespace data {
-
-/// \brief Recursively traverses the given term, and applies the replace function to
-/// each data variable that is encountered during the traversal.
-/// \param[in] container a container with expressions (expression, or container of expressions)
-/// \param[in] substitution A replace function
-/// \note Binders are ignored with replacements
-/// \return The replacement result
-template < typename Container, typename Substitution >
-Container replace_variables(Container const& container, Substitution substitution)
+namespace mcrl2
 {
-  return detail::variable_replace_helper< typename boost::add_reference< Substitution >::type >(substitution)(container);
+
+namespace data
+{
+
+namespace detail
+{
+
+/// \cond INTERNAL_DOCS
+template <template <class> class Builder, class Substitution>
+struct substitute_sort_expressions_builder: public Builder<substitute_sort_expressions_builder<Builder, Substitution> >
+{
+  typedef Builder<substitute_sort_expressions_builder<Builder, Substitution> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  Substitution sigma;
+  bool innermost;
+
+  substitute_sort_expressions_builder(Substitution sigma_, bool innermost_)
+    : sigma(sigma_),
+      innermost(innermost_)
+  {}
+
+  sort_expression operator()(const sort_expression& x)
+  {
+    if (innermost)
+    {
+      sort_expression y = super::operator()(x);
+      return sigma(y);
+    }
+    return sigma(x);
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, class Substitution>
+substitute_sort_expressions_builder<Builder, Substitution>
+make_replace_sort_expressions_builder(Substitution sigma, bool innermost)
+{
+  return substitute_sort_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
 
-/// \brief Recursively traverses the given expression or expression container,
-/// and applies the replace function to each data variable that is not bound it
-/// its context.
-/// \param[in] container a container with expressions (expression, or container of expressions)
-/// \param[in] substitution the function used for replacing variables
-/// \pre for all v in find_free_variables(container) for all x in
-/// find_free_variables(substitution(v)) v does not occur in a
-/// context C[v] = container in which x is bound
-/// \return The expression that results after replacement
-template <typename Container, typename Substitution >
-Container replace_free_variables(Container const& container, Substitution substitution)
+template <template <class> class Builder, class Substitution>
+struct substitute_data_expressions_builder: public Builder<substitute_data_expressions_builder<Builder, Substitution> >
 {
-  return detail::free_variable_replace_helper< typename boost::add_reference< Substitution >::type >(substitution)(container);
+  typedef Builder<substitute_data_expressions_builder<Builder, Substitution> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  Substitution sigma;
+  bool innermost;
+
+  substitute_data_expressions_builder(Substitution sigma_, bool innermost_)
+    : sigma(sigma_),
+      innermost(innermost_)
+  {}
+
+  data_expression operator()(const data_expression& x)
+  {
+    if (innermost)
+    {
+      data_expression y = super::operator()(x);
+      return sigma(y);
+    }
+    return sigma(x);
+  }
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, class Substitution>
+substitute_data_expressions_builder<Builder, Substitution>
+make_replace_data_expressions_builder(Substitution sigma, bool innermost)
+{
+  return substitute_data_expressions_builder<Builder, Substitution>(sigma, innermost);
 }
 
-/// \brief Recursively traverses the given expression or expression container,
-/// and applies the replace function to each data variable that is not bound it
-/// its context.
-/// \param[in] container a container with expressions (expression, or container of expressions)
-/// \param[in] substitution the function used for replacing variables
-/// \param[in] bound a set of variables that should be considered as bound
-/// \pre for all v in find_free_variables(container) for all x in
-/// find_free_variables(substitution(v)) v does not occur in a
-/// context C[v] = container in which x is bound
-/// \return The expression that results after replacement
-/// TODO prevent bound from being copied
-template <typename Container, typename Substitution , typename VariableSequence >
-Container replace_free_variables(Container const& container, Substitution substitution, VariableSequence const& bound)
+template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+struct substitute_free_variables_builder: public Binder<Builder, substitute_free_variables_builder<Builder, Binder, Substitution> >
 {
-  return detail::free_variable_replace_helper< typename boost::add_reference< Substitution >::type >(bound, substitution)(container);
+  typedef Binder<Builder, substitute_free_variables_builder<Builder, Binder, Substitution> > super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::is_bound;
+  using super::increase_bind_count;
+
+  Substitution sigma;
+
+  substitute_free_variables_builder(Substitution sigma_)
+    : sigma(sigma_)
+  {}
+
+  template <typename VariableContainer>
+  substitute_free_variables_builder(Substitution sigma_, const VariableContainer& bound_variables)
+    : sigma(sigma_)
+  {
+    increase_bind_count(bound_variables);
+  }
+
+  data_expression operator()(const variable& v)
+  {
+    if (is_bound(v))
+    {
+      return v;
+    }
+    return sigma(v);
+  }
+
+#ifdef BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+};
+
+template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+substitute_free_variables_builder<Builder, Binder, Substitution>
+make_replace_free_variables_builder(Substitution sigma)
+{
+  return substitute_free_variables_builder<Builder, Binder, Substitution>(sigma);
+}
+
+template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution, class VariableContainer>
+substitute_free_variables_builder<Builder, Binder, Substitution>
+make_replace_free_variables_builder(Substitution sigma, const VariableContainer& bound_variables)
+{
+  return substitute_free_variables_builder<Builder, Binder, Substitution>(sigma, bound_variables);
+}
+/// \endcond
+
+} // namespace detail
+
+//--- start generated data replace code ---//
+template <typename T, typename Substitution>
+void replace_sort_expressions(T& x,
+                              Substitution sigma,
+                              bool innermost,
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+{
+  data::detail::make_replace_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_sort_expressions(const T& x,
+                           Substitution sigma,
+                           bool innermost,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          )
+{
+  return data::detail::make_replace_sort_expressions_builder<data::sort_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_data_expressions(T& x,
+                              Substitution sigma,
+                              bool innermost,
+                              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                             )
+{
+  data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_data_expressions(const T& x,
+                           Substitution sigma,
+                           bool innermost,
+                           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                          )
+{
+  return data::detail::make_replace_data_expressions_builder<data::data_expression_builder>(sigma, innermost)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_variables(T& x,
+                       Substitution sigma,
+                       typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                      )
+{
+  core::make_update_apply_builder<data::data_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_variables(const T& x,
+                    Substitution sigma,
+                    typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                   )
+{   
+  return core::make_update_apply_builder<data::data_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+void replace_free_variables(T& x,
+                            Substitution sigma,
+                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                           )
+{
+  data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T replace_free_variables(const T& x,
+                         Substitution sigma,
+                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                        )
+{
+  return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x);
+}
+
+template <typename T, typename Substitution, typename VariableContainer>
+void replace_free_variables(T& x,
+                            Substitution sigma,
+                            const VariableContainer& bound_variables,
+                            typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                           )
+{
+  data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+
+template <typename T, typename Substitution, typename VariableContainer>
+T replace_free_variables(const T& x,
+                         Substitution sigma,
+                         const VariableContainer& bound_variables,
+                         typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                        )
+{
+  return data::detail::make_replace_free_variables_builder<data::data_expression_builder, data::add_data_variable_binding>(sigma)(x, bound_variables);
+}
+//--- end generated data replace code ---//
+
+template <typename T, typename Substitution>
+void substitute_sorts(T& x,
+                      Substitution sigma,
+                      typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                     )
+{
+  core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
+}
+
+template <typename T, typename Substitution>
+T substitute_sorts(const T& x,
+                   Substitution sigma,
+                   typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+                  )
+{
+  return core::make_update_apply_builder<data::sort_expression_builder>(sigma)(x);
 }
 
 } // namespace data
 
 } // namespace mcrl2
+
+#ifndef MCRL2_DATA_SUBSTITUTIONS_H
+#include "mcrl2/data/substitutions.h"
+#endif
 
 #endif // MCRL2_DATA_REPLACE_H

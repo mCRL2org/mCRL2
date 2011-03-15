@@ -14,11 +14,14 @@ extern "C" double time_now();
 
 class Timer
 {
-public:
+  public:
     Timer() : last_(time_now()) { };
-    double elapsed() { return time_now() - last_; }
+    double elapsed()
+    {
+      return time_now() - last_;
+    }
 
-private:
+  private:
     double last_;
 };
 

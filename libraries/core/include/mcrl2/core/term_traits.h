@@ -12,15 +12,17 @@
 #ifndef MCRL2_CORE_TERM_TRAITS_H
 #define MCRL2_CORE_TERM_TRAITS_H
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace core {
+namespace core
+{
 
-  /// \brief Contains type information for terms.
-  template <typename T>
-  struct term_traits
-  {
-  };
+/// \brief Contains type information for terms.
+template <typename T>
+struct term_traits
+{
+};
 
 } // namespace core
 

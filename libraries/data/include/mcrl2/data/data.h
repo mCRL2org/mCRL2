@@ -13,10 +13,12 @@
 #ifndef MCRL2_DATA_DATA_H
 #define MCRL2_DATA_DATA_H
 
-namespace mcrl2 {
-  /// \brief Namespace for all data library functionality
-  namespace data {
-  }
+namespace mcrl2
+{
+/// \brief Namespace for all data library functionality
+namespace data
+{
+}
 }
 
 #include "abstraction.h"

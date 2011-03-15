@@ -25,49 +25,56 @@
 
 
 
-static void PTexpand(PTable *, long);
+static void PTexpand(PTable*, long);
 
 
 
-void PTinit(PTable *table){
+void PTinit(PTable* table)
+{
 
-   table->size=PT_INITIALSIZE;
-   table->nodes=(void **)malloc(PT_INITIALSIZE*sizeof(void *));
-
-}
-
-
-
-void PTput(PTable *table, long index, void *ptr){
-
-   if(table->size<index+1){
-      PTexpand(table, index+1);
-   }
-
-   table->nodes[index]=ptr;
-
-}
-
-void *PTget(PTable *table, long index){
-
-   return table->nodes[index];
-
-}
-
-void PTfree(PTable *table){
-
-   free(table->nodes);
+  table->size=PT_INITIALSIZE;
+  table->nodes=(void**)malloc(PT_INITIALSIZE*sizeof(void*));
 
 }
 
 
-void PTexpand(PTable *table, long size){
 
-   while(table->size<size){
-      table->size=table->size<<2;
-   } 
+void PTput(PTable* table, long index, void* ptr)
+{
 
-   table->nodes=(void **)realloc(table->nodes,table->size*sizeof(void *));
+  if (table->size<index+1)
+  {
+    PTexpand(table, index+1);
+  }
+
+  table->nodes[index]=ptr;
+
+}
+
+void* PTget(PTable* table, long index)
+{
+
+  return table->nodes[index];
+
+}
+
+void PTfree(PTable* table)
+{
+
+  free(table->nodes);
+
+}
+
+
+void PTexpand(PTable* table, long size)
+{
+
+  while (table->size<size)
+  {
+    table->size=table->size<<2;
+  }
+
+  table->nodes=(void**)realloc(table->nodes,table->size*sizeof(void*));
 
 }
 

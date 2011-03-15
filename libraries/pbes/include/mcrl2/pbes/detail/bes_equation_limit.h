@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/pbes/detail/bes_equation_limit.h
-/// \brief A global variable for counting the number of BES equations in pbes2bes
+/// \brief A global variable for counting the number of BES equations in pbesinst
 /// and parity_game_generator. If the number of equations exceeds a limit, an
 /// exception is thrown. A static template class variable is used, that can be
 /// set from everywhere.
@@ -15,38 +15,41 @@
 #ifndef MCRL2_PBES_DETAIL_BES_EQUATION_LIMIT_H
 #define MCRL2_PBES_DETAIL_BES_EQUATION_LIMIT_H
 
+#include <limits>
 #include <stdexcept>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
-  template <class T> // note, T is only a dummy
-  struct bes_equation_limit
+template <class T> // note, T is only a dummy
+struct bes_equation_limit
+{
+  static size_t max_bes_equations;
+};
+
+template <class T>
+size_t bes_equation_limit<T>::max_bes_equations = (std::numeric_limits<size_t>::max)();
+
+inline
+void set_bes_equation_limit(size_t size)
+{
+  bes_equation_limit<size_t>::max_bes_equations = size;
+}
+
+inline
+void check_bes_equation_limit(size_t size)
+{
+  if (size >= bes_equation_limit<size_t>::max_bes_equations)
   {
-  	// -1 means unlimited
-    static int max_bes_equations;
-  };
-
-  template <class T>
-  int bes_equation_limit<T>::max_bes_equations = -1;
-
-  inline
-  void set_bes_equation_limit(int size)
-  {
-    bes_equation_limit<int>::max_bes_equations = size;
+    throw std::out_of_range("Error: number of BES equations has exceeded the limit");
   }
-
-  inline
-  void check_bes_equation_limit(int size)
-  {
-  	if (bes_equation_limit<int>::max_bes_equations >= 0 && bes_equation_limit<int>::max_bes_equations <= size)
-    {
-    	throw std::out_of_range("Error: number of BES equations has exceeded the limit");
-    }
-  }
+}
 
 } // namespace detail
 

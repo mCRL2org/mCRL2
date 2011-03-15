@@ -35,49 +35,53 @@ using namespace mcrl2::core;
 using namespace mcrl2::utilities::tools;
 
 class grape_app: public mcrl2::utilities::wx::tool< grape_app, input_tool >
-{  
-  friend class mcrl2::utilities::wx::tool< grape_app, input_tool >;
+{
+    friend class mcrl2::utilities::wx::tool< grape_app, input_tool >;
 
   private:
 
-    std::vector< std::string > developers() {
+    std::vector< std::string > developers()
+    {
       static char const* developer_names[] = {"Remco Blewanus", "Thorstin Crijns",
-           "Diana Koenraadt", "Bas Luksenburg", "Jonathan Nelisse", "Hans Poppelaars", "Bram Schoenmakers"};
+                                              "Diana Koenraadt", "Bas Luksenburg", "Jonathan Nelisse", "Hans Poppelaars", "Bram Schoenmakers"
+                                             };
 
       return std::vector< std::string >(&developer_names[0], &developer_names[7]);
     }
 
-    std::vector< std::string > documenters() {
+    std::vector< std::string > documenters()
+    {
       return std::vector< std::string >(1, "Hans Poppelaars");
     }
 
   public:
-    grape_app() : mcrl2::utilities::wx::tool< grape_app, input_tool >("GraPEmCRL2",    
-                  "graphical editing environment for mCRL2 process specifications",
-                  "Graphical Process Editor for mCRL2.",
-                  "Graphical editing environment for mCRL2 process specifications. "
-                  "If INFILE is supplied, it is loaded as a GraPE specification.",
-                  developers(),
-                  "",
-                  documenters()) { 
+    grape_app() : mcrl2::utilities::wx::tool< grape_app, input_tool >("GraPEmCRL2",
+          "graphical editing environment for mCRL2 process specifications",
+          "Graphical Process Editor for mCRL2.",
+          "Graphical editing environment for mCRL2 process specifications. "
+          "If INFILE is supplied, it is loaded as a GraPE specification.",
+          developers(),
+          "",
+          documenters())
+    {
     }
 
-  bool run()
-  {
-    // create a new frame using the input file
-    grape_frame *frame = new grape_frame( wxString(input_filename().c_str(), wxConvUTF8) );
-    SetTopWindow(frame);
+    bool run()
+    {
+      // create a new frame using the input file
+      grape_frame* frame = new grape_frame(wxString(input_filename().c_str(), wxConvUTF8));
+      SetTopWindow(frame);
 
-    wxInitAllImageHandlers();
+      wxInitAllImageHandlers();
 
-    return true;
-  }
+      return true;
+    }
 };
 
 class grape_app_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<grape_app>
 {
   public:
-	grape_app_gui_tool()
+    grape_app_gui_tool()
     {
       //m_gui_options["no-state"] = create_checkbox_widget();
     }
@@ -85,9 +89,10 @@ class grape_app_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<grape_app>
 
 #ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,
-                                  HINSTANCE hPrevInstance,
-                                  wxCmdLineArgType lpCmdLine,
-                                  int nCmdShow) {
+                              HINSTANCE hPrevInstance,
+                              wxCmdLineArgType lpCmdLine,
+                              int nCmdShow)
+{
 
   MCRL2_ATERMPP_INIT(0, lpCmdLine);
   gsSetVerboseMsg();

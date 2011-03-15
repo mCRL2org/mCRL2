@@ -15,49 +15,49 @@
 
 namespace grape
 {
-  namespace libgrape
-  {
+namespace libgrape
+{
+
+/**
+ * \short Represents a terminating transition.
+ * The termination of a Process due to an Action. A Terminating
+ * Transition has a Transition Label and does not lead to another
+ * State or Process Reference.
+ * @see action
+ * @see label
+ * @see transition
+ */
+class terminating_transition : public transition
+{
+  protected:
+  public:
+    /**
+     * Default constructor.
+     * Initializes terminating_transition.
+     * @param p_beginstate The state in which the transition begins.
+     */
+    terminating_transition(compound_state* p_beginstate = 0);
 
     /**
-     * \short Represents a terminating transition.
-     * The termination of a Process due to an Action. A Terminating
-     * Transition has a Transition Label and does not lead to another
-     * State or Process Reference.
-     * @see action
-     * @see label
-     * @see transition
+     * Copy constructor.
+     * Creates a new terminating transition based on an existing one.
+     * @param p_tt The terminating transition to copy.
      */
-    class terminating_transition : public transition
-    {
-      protected:
-      public:
-        /**
-         * Default constructor.
-         * Initializes terminating_transition.
-         * @param p_beginstate The state in which the transition begins.
-         */
-        terminating_transition( compound_state* p_beginstate = 0 );
-
-        /**
-         * Copy constructor.
-         * Creates a new terminating transition based on an existing one.
-         * @param p_tt The terminating transition to copy.
-         */
-        terminating_transition( const terminating_transition &p_tt );
-
-        /**
-         * Default destructor.
-         * Frees allocated memory and removes all references to the object.
-         */
-        ~terminating_transition( void );
-    };
+    terminating_transition(const terminating_transition& p_tt);
 
     /**
-     * Array of TerminatingTransition.
+     * Default destructor.
+     * Frees allocated memory and removes all references to the object.
      */
-    WX_DECLARE_OBJARRAY( terminating_transition, arr_terminating_transition );
+    ~terminating_transition(void);
+};
 
-  } // namespace libgrape
+/**
+ * Array of TerminatingTransition.
+ */
+WX_DECLARE_OBJARRAY(terminating_transition, arr_terminating_transition);
+
+} // namespace libgrape
 } // namespace grape
 
 #endif // LIBGRAPE_TERMINATINGTRANSITION_H

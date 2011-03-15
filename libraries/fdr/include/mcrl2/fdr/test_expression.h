@@ -16,9 +16,11 @@
 #include "mcrl2/fdr/failuremodel_expression_fwd.h"
 #include "mcrl2/fdr/testtype_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated test expression class declarations ---//
 /// \brief class test_expression
@@ -79,23 +81,23 @@ class test: public test_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a divergence_free expression
-    /// \param t A term
-    /// \return True if it is a divergence_free expression
-    inline
-    bool is_divergence_free(const test_expression& t)
-    {
-      return fdr::detail::gsIsdivergence_free(t);
-    }
+/// \brief Test for a divergence_free expression
+/// \param t A term
+/// \return True if it is a divergence_free expression
+inline
+bool is_divergence_free(const test_expression& t)
+{
+  return fdr::detail::gsIsdivergence_free(t);
+}
 
-    /// \brief Test for a test expression
-    /// \param t A term
-    /// \return True if it is a test expression
-    inline
-    bool is_test(const test_expression& t)
-    {
-      return fdr::detail::gsIsTest(t);
-    }
+/// \brief Test for a test expression
+/// \param t A term
+/// \return True if it is a test expression
+inline
+bool is_test(const test_expression& t)
+{
+  return fdr::detail::gsIsTest(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

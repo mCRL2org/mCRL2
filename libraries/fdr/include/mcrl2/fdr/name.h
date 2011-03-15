@@ -14,25 +14,27 @@
 
 #include "mcrl2/atermpp/aterm_string.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
-  /// \brief String type of the LPS library.
-  /// Identifier strings are represented internally as ATerms.
-  typedef atermpp::aterm_string name;
+/// \brief String type of the LPS library.
+/// Identifier strings are represented internally as ATerms.
+typedef atermpp::aterm_string name;
 
-  /// \brief Tests if a term is an identifier string.
-  /// \param t A term
-  /// \return Whether t is an identifier string.
-  inline
-  bool is_name(atermpp::aterm t)
-  {
-    return t.type() == AT_APPL && atermpp::aterm_appl(t).size() == 0;
-  }
+/// \brief Tests if a term is an identifier string.
+/// \param t A term
+/// \return Whether t is an identifier string.
+inline
+bool is_name(atermpp::aterm t)
+{
+  return t.type() == AT_APPL && atermpp::aterm_appl(t).size() == 0;
+}
 
-  /// \brief Read-only singly linked list of identifier strings
-  typedef atermpp::term_list<name> name_list;
+/// \brief Read-only singly linked list of identifier strings
+typedef atermpp::term_list<name> name_list;
 
 } // namespace fdr
 

@@ -14,9 +14,11 @@
 
 #include "libstruct_core.h" // gsString2ATermAppl
 
-namespace lps {
+namespace lps
+{
 
-namespace detail {
+namespace detail
+{
 
 // String
 inline

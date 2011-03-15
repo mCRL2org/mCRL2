@@ -19,21 +19,21 @@ using namespace std;
 
 // --------------------
 Value::Value(
-    const int &idx,
-    const string &val )
+  const size_t& idx,
+  const string& val)
 // --------------------
 {
-    index = idx;
-    value = val;
+  index = idx;
+  value = val;
 }
 
 
 // -----------------------------
-Value::Value( const Value &val )
+Value::Value(const Value& val)
 // -----------------------------
 {
-    index = val.index;
-    value = val.value;
+  index = val.index;
+  value = val.value;
 }
 
 
@@ -47,18 +47,18 @@ Value::~Value()
 
 
 // -----------------------------------
-void Value::setIndex( const int &idx )
+void Value::setIndex(const size_t& idx)
 // -----------------------------------
 {
-    index = idx;
+  index = idx;
 }
 
 
 // --------------------------------------
-void Value::setValue( const string &val )
+void Value::setValue(const string& val)
 // --------------------------------------
 {
-    value = val;
+  value = val;
 }
 
 
@@ -66,10 +66,10 @@ void Value::setValue( const string &val )
 
 
 // ------------------
-int Value::getIndex()
+size_t Value::getIndex()
 // ------------------
 {
-    return index;
+  return index;
 }
 
 
@@ -77,7 +77,7 @@ int Value::getIndex()
 string Value::getValue()
 // ---------------------
 {
-    return value;
+  return value;
 }
 
 

@@ -27,12 +27,12 @@ void RGB_Color::blendWith(RGB_Color c, float factor)
   _blue = blend(_blue, c.blue(), factor);
 }
 
-bool RGB_Color::operator==(RGB_Color &c)
+bool RGB_Color::operator==(RGB_Color& c)
 {
   return _red == c.red() && _green == c.green() && _blue == c.blue();
 }
 
-bool RGB_Color::operator!=(RGB_Color &c)
+bool RGB_Color::operator!=(RGB_Color& c)
 {
   return _red != c.red() || _green != c.green() || _blue != c.blue();
 }

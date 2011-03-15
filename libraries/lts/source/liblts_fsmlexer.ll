@@ -7,9 +7,10 @@
 //
 /// \file fsmlexer.ll
 
+#define YYSTYPE std::string
 #include <string>
 #include <cstdio>
-#include <aterm2.h>
+// #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/lts.h"
 #include "liblts_fsmlexer.h"
@@ -45,7 +46,7 @@ public:
   concrete_fsm_lexer(void);               /* constructor */
   int yylex(void);               /* the generated lexer function */
   void yyerror(const char *s);   /* error function */
-  bool parse_stream(std::istream &stream, lts &l);
+  bool parse_stream(std::istream &stream, lts_fsm_t &l);
 
 protected:
   void processId();
@@ -106,7 +107,9 @@ Number     [0]|([1-9][0-9]*)
 void concrete_fsm_lexer::processId()
 {
   posNo += YYLeng();
-  fsmyylval.aterm = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) );
+  // fsmyylval.result_string = ATmakeAppl0( ATmakeAFun( YYText(), 0, ATtrue ) );
+  // fsmyylval.result_string = YYText();
+  fsmyylval = static_cast<std::string>(YYText());
 }
 
 void concrete_fsm_lexer::processQuoted()
@@ -114,18 +117,22 @@ void concrete_fsm_lexer::processQuoted()
   posNo += YYLeng();
   std::string value = static_cast<std::string>( YYText() );
   value = value.substr( 1, value.length() - 2 );
-  fsmyylval.aterm = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
+  fsmyylval = value;
+  // fsmyylval.result_string = value;
+  // fsmyylval.result_string = ATmakeAppl0( ATmakeAFun( value.c_str(), 0, ATtrue ) );
 }
 
 void concrete_fsm_lexer::processNumber()
 {
   posNo += YYLeng();
-  fsmyylval.number = atoi( YYText() );
+  // fsmyylval.number = atoi( YYText() );
+  fsmyylval=static_cast<std::string>(YYText());
 }
 
 //Implementation of parse_fsm
 
-bool parse_fsm(std::istream &stream, lts &l) {
+bool parse_fsm(std::istream &stream, lts_fsm_t &l) 
+{
   clexer = new concrete_fsm_lexer();
   fsm_lexer_obj = clexer;
   bool result = clexer->parse_stream(stream,l);
@@ -164,7 +171,7 @@ void concrete_fsm_lexer::yyerror(const char *s) {
   );
 }
 
-bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
+bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts_fsm_t &l)
 {
   switch_streams(&stream, NULL);
 
@@ -174,14 +181,14 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   // INITIALISE
   fsm_lts = &l;
 
-  protect_table = ATindexedSetCreate(10000,50);
+  /* protect_table = ATindexedSetCreate(10000,50);
 
   const_ATtype = ATmakeAFun( "Type", 2, ATfalse );
   ATprotectAFun( const_ATtype );
   const_ATvalue = ATmakeAFun( "Value", 2, ATfalse );
   ATprotectAFun( const_ATvalue );
-  stateVector = ATempty;
-  ATprotectList( &stateVector );
+  // stateVector = ATempty;
+  // ATprotectList( &stateVector );
   valueTable = ATempty;
   ATprotectList( &valueTable );
   stateId = ATempty;
@@ -190,28 +197,31 @@ bool concrete_fsm_lexer::parse_stream(std::istream &stream, lts &l)
   ATprotectList( &typeValues );
   typeId = NULL;
   ATprotectAppl( &typeId );
-  labelTable = ATtableCreate(100,50);
+  labelTable = ATtableCreate(100,50); */
 
 
   // PARSE
   bool result;
-  if (fsmyyparse() != 0) {
+  if (fsmyyparse() != 0) 
+  {
     result = false;
-  } else {
+  } 
+  else 
+  {
     result = true;
   }
 
   // CLEAN UP
-  ATunprotectAFun( const_ATtype );
+  /* ATunprotectAFun( const_ATtype );
   ATunprotectAFun( const_ATvalue );
-  ATunprotectList( &stateVector );
+  // ATunprotectList( &stateVector );
   ATunprotectList( &valueTable );
   ATunprotectList( &stateId );
   ATunprotectList( &typeValues );
   ATunprotectAppl( &typeId );
   ATtableDestroy( labelTable );
 
-  ATindexedSetDestroy( protect_table );
+  ATindexedSetDestroy( protect_table ); */
 
   fsm_lts = NULL;
 

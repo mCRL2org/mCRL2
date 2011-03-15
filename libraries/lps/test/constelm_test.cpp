@@ -195,20 +195,20 @@ std::string case_7 =
   ;
 const std::string expected_7 = "process_parameter_names = j";
 
-// % Test Case 8 -- Free Variables                                                 
-// %                                                                               
-// % No constant parameters are found                                              
-// %                                                                               
-// % lpsconstelm cannot detect (i==5)                                              
-//                                                                                 
-// act action: Nat;                                                                
-//                                                                                 
-// proc X(i: Nat)   = (i <  5) -> action(i).X(i+1) +                               
-//                    (i == 5) -> action(i).Y(i, i);                               
-//      Y(i,j: Nat) = action(j).Y(i,j);                                            
-//                                                                                 
-// init X(0);                                                                      
-//                                                                                 
+// % Test Case 8 -- Free Variables
+// %
+// % No constant parameters are found
+// %
+// % lpsconstelm cannot detect (i==5)
+//
+// act action: Nat;
+//
+// proc X(i: Nat)   = (i <  5) -> action(i).X(i+1) +
+//                    (i == 5) -> action(i).Y(i, i);
+//      Y(i,j: Nat) = action(j).Y(i,j);
+//
+// init X(0);
+//
 // %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 // %% NOTE:                                                  %%
 // %% =====                                                  %%
@@ -325,18 +325,18 @@ const std::string expected_9 = "process_parameter_names = b, c";
 //
 // The list has always length one. After application of lpsconstelm, only one of the
 // three parameters should remain.
-// 
+//
 // Before linearization:
 //
 // sort S11;
-// 
+//
 // cons c_1,c_2: S11;
-// 
+//
 // map  C_S11_1: S11 # List(Bool) # List(Bool) -> List(Bool);
 //      pi_S11_2: List(Bool) -> List(Bool);
 //      pi_S11_1: List(Bool) -> Bool;
 //      Det_S11_1: List(Bool) -> S11;
-// 
+//
 // var  y3,y4,d3: List(Bool);
 //      y2: S11;
 //      d2: Bool;
@@ -347,16 +347,16 @@ const std::string expected_9 = "process_parameter_names = b, c";
 //      Det_S11_1(d2 |> d3)  =  c_2;
 //      pi_S11_1(d2 |> d3)  =  d2;
 //      pi_S11_2(d2 |> d3)  =  d3;
-// 
+//
 // act  a: Bool;
-// 
+//
 // proc P(S1_pp1: S11, S1_pp2: Bool, S1_pp3: List(Bool)) =
-//        sum b_X: Bool.  
+//        sum b_X: Bool.
 //          a(head(C_S11_1(S1_pp1, [], S1_pp2 |> S1_pp3))) .
 //          P(S1_pp1 = Det_S11_1(b_X |> tail(C_S11_1(S1_pp1, [], S1_pp2 |> S1_pp3))), S1_pp2 = pi_S11_1(b_X |> tail(C_S11_1(S1_pp1, [], S1_pp2 |> S1_pp3))), S1_pp3 = pi_S11_2(b_X |> tail(C_S11_1(S1_pp1, [], S1_pp2 |> S1_pp3))))
 //      + true ->
 //          delta;
-// 
+//
 // init P(Det_S11_1(true |> []), pi_S11_1(true |> []), pi_S11_2(true |> []));
 //
 std::string case_10 =
@@ -400,7 +400,7 @@ void test_constelm(const std::string& message, const std::string& spec_text, con
   bool verbose = false;
   bool instantiate_free_variables = false;
   constelm(spec, R, verbose, instantiate_free_variables);
-  lps::detail::specification_property_map info(spec);  
+  lps::detail::specification_property_map info(spec);
   BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
   core::garbage_collect();
 }
@@ -423,44 +423,44 @@ void test_constelm()
 void test_abp()
 {
   const std::string ABP_SPEC =
-  "% This file contains the alternating bit protocol, as described in W.J.    \n"
-  "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
-  "%                                                                          \n"
-  "% The only exception is that the domain D consists of two data elements to \n"
-  "% facilitate simulation.                                                   \n"
-  "                                                                           \n"
-  "sort                                                                       \n"
-  "  D     = struct d1 | d2;                                                  \n"
-  "  Error = struct e;                                                        \n"
-  "                                                                           \n"
-  "act                                                                        \n"
-  "  r1,s4: D;                                                                \n"
-  "  s2,r2,c2: D # Bool;                                                      \n"
-  "  s3,r3,c3: D # Bool;                                                      \n"
-  "  s3,r3,c3: Error;                                                         \n"
-  "  s5,r5,c5: Bool;                                                          \n"
-  "  s6,r6,c6: Bool;                                                          \n"
-  "  s6,r6,c6: Error;                                                         \n"
-  "  i;                                                                       \n"
-  "                                                                           \n"
-  "proc                                                                       \n"
-  "  S(b:Bool)     = sum d:D. r1(d).T(d,b);                                   \n"
-  "  T(d:D,b:Bool) = s2(d,b).(r6(b).S(!b)+(r6(!b)+r6(e)).T(d,b));             \n"
-  "                                                                           \n"
-  "  R(b:Bool)     = sum d:D. r3(d,b).s4(d).s5(b).R(!b)+                      \n"
-  "                  (sum d:D.r3(d,!b)+r3(e)).s5(!b).R(b);                    \n"
-  "                                                                           \n"
-  "  K             = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;           \n"
-  "                                                                           \n"
-  "  L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;                   \n"
-  "                                                                           \n"
-  "init                                                                       \n"
-  "  allow({r1,s4,c2,c3,c5,c6,i},                                             \n"
-  "    comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},                     \n"
-  "        S(true) || K || L || R(true)                                       \n"
-  "    )                                                                      \n"
-  "  );                                                                       \n"
-  ;
+    "% This file contains the alternating bit protocol, as described in W.J.    \n"
+    "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
+    "%                                                                          \n"
+    "% The only exception is that the domain D consists of two data elements to \n"
+    "% facilitate simulation.                                                   \n"
+    "                                                                           \n"
+    "sort                                                                       \n"
+    "  D     = struct d1 | d2;                                                  \n"
+    "  Error = struct e;                                                        \n"
+    "                                                                           \n"
+    "act                                                                        \n"
+    "  r1,s4: D;                                                                \n"
+    "  s2,r2,c2: D # Bool;                                                      \n"
+    "  s3,r3,c3: D # Bool;                                                      \n"
+    "  s3,r3,c3: Error;                                                         \n"
+    "  s5,r5,c5: Bool;                                                          \n"
+    "  s6,r6,c6: Bool;                                                          \n"
+    "  s6,r6,c6: Error;                                                         \n"
+    "  i;                                                                       \n"
+    "                                                                           \n"
+    "proc                                                                       \n"
+    "  S(b:Bool)     = sum d:D. r1(d).T(d,b);                                   \n"
+    "  T(d:D,b:Bool) = s2(d,b).(r6(b).S(!b)+(r6(!b)+r6(e)).T(d,b));             \n"
+    "                                                                           \n"
+    "  R(b:Bool)     = sum d:D. r3(d,b).s4(d).s5(b).R(!b)+                      \n"
+    "                  (sum d:D.r3(d,!b)+r3(e)).s5(!b).R(b);                    \n"
+    "                                                                           \n"
+    "  K             = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;           \n"
+    "                                                                           \n"
+    "  L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;                   \n"
+    "                                                                           \n"
+    "init                                                                       \n"
+    "  allow({r1,s4,c2,c3,c5,c6,i},                                             \n"
+    "    comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},                     \n"
+    "        S(true) || K || L || R(true)                                       \n"
+    "    )                                                                      \n"
+    "  );                                                                       \n"
+    ;
   specification spec = linearise(ABP_SPEC);
   data::rewriter R(spec.data());
   bool verbose = false;
@@ -473,7 +473,7 @@ void test_abp()
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  
+
   test_constelm();
   test_abp();
 

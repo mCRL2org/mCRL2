@@ -25,7 +25,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
-int test_main(int argc, char** argv )
+int test_main(int argc, char** argv)
 {
   using atermpp::make_vector;
   using mcrl2::core::pp;

@@ -38,6 +38,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   primitivefactory.cpp
   primitives.cpp
   rgb_color.cpp
+  rtree.cpp
   savepicdialog.cpp
   savevecdialog.cpp
   settings.cpp
@@ -45,6 +46,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   simdialog.cpp
   simreader.cpp
   simulation.cpp
+  sp_state_positioner.cpp
   state.cpp
   transition.cpp
   vectors.cpp
@@ -75,19 +77,6 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 # actual target:
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-    tr
-    gl2ps
-  )
-
-  # ######### required for squadt connectivity ##########
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
-  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  # #####################################################
-
-else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_lts
@@ -96,11 +85,6 @@ target_link_libraries(${PROJECT_NAME}
   tr
   gl2ps
 )
-
-  #Add Squadt Connectivity when required
-  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
-
-endif( MCRL2_MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

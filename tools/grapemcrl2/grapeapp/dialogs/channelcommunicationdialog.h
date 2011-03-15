@@ -23,54 +23,54 @@ using namespace grape::libgrape;
 
 namespace grape
 {
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+/**
+ * \short A class showing a dialog with two explaining text and text fields
+ */
+class grape_channel_communication_dlg : public wxDialog
+{
+  private:
+    wxTextCtrl*       m_name_input;       /**< The name input field shown in the dialog. */
+    wxRadioBox*       m_radiobox;           /**< The property radiobox shown in the dialog. */
     /**
-     * \short A class showing a dialog with two explaining text and text fields
+     * Private default constructor.
      */
-    class grape_channel_communication_dlg : public wxDialog
-    {
-      private:
-        wxTextCtrl       *m_name_input;       /**< The name input field shown in the dialog. */
-        wxRadioBox       *m_radiobox;           /**< The property radiobox shown in the dialog. */
-        /**
-         * Private default constructor.
-         */
-        grape_channel_communication_dlg();
+    grape_channel_communication_dlg();
 
-        /**
-         * Update validation event handler.
-         * @param p_event The generated event.
-         */
-        void event_update_validation( wxCommandEvent &p_event );
+    /**
+     * Update validation event handler.
+     * @param p_event The generated event.
+     */
+    void event_update_validation(wxCommandEvent& p_event);
 
-        /**
-         * Update validation function
-         * @return Returns whether the input field is valid
-         */
-        bool update_validation();
-        
-        DECLARE_EVENT_TABLE()		/**< The event table of this grid. */
-      public:
-        /**
-         * Default destructor.
-         */
-        ~grape_channel_communication_dlg();
+    /**
+     * Update validation function
+     * @return Returns whether the input field is valid
+     */
+    bool update_validation();
 
-        /**
-         * Constructor.
-         * @param p_channel A pointer to the label which is being editted.
-         */
-        grape_channel_communication_dlg( channel_communication &p_channel_communication );
+    DECLARE_EVENT_TABLE()   /**< The event table of this grid. */
+  public:
+    /**
+     * Default destructor.
+     */
+    ~grape_channel_communication_dlg();
 
-        /**
-         * Shows the dialog.
-         * @param p_channel Shall contain the value of the input box.
-         * @return @c true if the user pressed OK. @c false if the user cancelled the dialog.
-         */
-        bool show_modal( channel_communication &p_channel_communication );
-    };
-  }
-} 
+    /**
+     * Constructor.
+     * @param p_channel A pointer to the label which is being editted.
+     */
+    grape_channel_communication_dlg(channel_communication& p_channel_communication);
+
+    /**
+     * Shows the dialog.
+     * @param p_channel Shall contain the value of the input box.
+     * @return @c true if the user pressed OK. @c false if the user cancelled the dialog.
+     */
+    bool show_modal(channel_communication& p_channel_communication);
+};
+}
+}
 
 #endif // GRAPE_CHANNEL_COMMUNICATION_DIALOG_H

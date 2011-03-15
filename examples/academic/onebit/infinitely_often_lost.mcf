@@ -1,0 +1,5 @@
+% There is a path along which a message (after reading through
+% action ra) can be lost infinitely often (through c3).
+%
+
+<true*>(exists d:D .<ra(d)>(nu X. mu Y. (<i_lost>X || <!i_lost && !sb(d)>Y)))

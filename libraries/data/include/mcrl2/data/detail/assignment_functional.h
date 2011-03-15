@@ -16,11 +16,14 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/assignment.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
-namespace detail {
+namespace detail
+{
 
 /// Returns the left hand side of a data assignment.
 struct assignment_lhs: public std::unary_function<assignment, variable>
@@ -40,7 +43,7 @@ struct has_left_hand_side
   const variable& m_variable;
 
   has_left_hand_side(const variable& variable)
-   : m_variable(variable)
+    : m_variable(variable)
   {}
 
   /// \brief Function call operator

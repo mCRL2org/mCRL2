@@ -8,24 +8,22 @@
 
 #include <boost/test/minimal.hpp>
 
-#include <aterm2.h>
 #include <mcrl2/atermpp/aterm_init.h>
 #include <mcrl2/lts/lts_algorithm.h>
+#include <mcrl2/lts/lts_aut.h>
 
 using namespace mcrl2::lts;
 
-int test_main(int argc, char **argv)
+int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc,argv);
-
-  lts l1;
-  lts l2;
-  lts l3;
-  lts l4;
-  ATerm lab_a = (ATerm) ATmakeAppl0(ATmakeAFun("a",0,ATfalse));
-  ATerm lab_b = (ATerm) ATmakeAppl0(ATmakeAFun("b",0,ATfalse));
-  ATerm lab_c = (ATerm) ATmakeAppl0(ATmakeAFun("c",0,ATfalse));
-  ATerm lab_tau = (ATerm) ATmakeAppl0(ATmakeAFun("tau",0,ATfalse));
+  lts_aut_t l1;
+  lts_aut_t l2;
+  lts_aut_t l3;
+  lts_aut_t l4;
+  const detail::action_label_string lab_a("a");
+  const detail::action_label_string lab_b("b");
+  const detail::action_label_string lab_c("c");
+  const detail::action_label_string lab_tau("tau");
 
   for (int i=0; i<5; i++)
   {
@@ -39,22 +37,22 @@ int test_main(int argc, char **argv)
   l3.set_initial_state(0);
   l4.set_initial_state(0);
 
-  l1.add_label(lab_a);
-  l1.add_label(lab_b);
-  l1.add_label(lab_c);
-  l1.add_label(lab_tau,true);
-  l2.add_label(lab_a);
-  l2.add_label(lab_b);
-  l2.add_label(lab_c);
-  l2.add_label(lab_tau,true);
-  l3.add_label(lab_a);
-  l3.add_label(lab_b);
-  l3.add_label(lab_c);
-  l3.add_label(lab_tau,true);
-  l4.add_label(lab_a);
-  l4.add_label(lab_b);
-  l4.add_label(lab_c);
-  l4.add_label(lab_tau,true);
+  l1.add_action(lab_a);
+  l1.add_action(lab_b);
+  l1.add_action(lab_c);
+  l1.add_action(lab_tau,true);
+  l2.add_action(lab_a);
+  l2.add_action(lab_b);
+  l2.add_action(lab_c);
+  l2.add_action(lab_tau,true);
+  l3.add_action(lab_a);
+  l3.add_action(lab_b);
+  l3.add_action(lab_c);
+  l3.add_action(lab_tau,true);
+  l4.add_action(lab_a);
+  l4.add_action(lab_b);
+  l4.add_action(lab_c);
+  l4.add_action(lab_tau,true);
 
   // a.(b+c)
   l1.add_transition(transition(0,0,1));
@@ -77,21 +75,20 @@ int test_main(int argc, char **argv)
   l4.add_transition(transition(0,0,1));
   l4.add_transition(transition(1,1,2));
   l4.add_transition(transition(1,1,3));
+  BOOST_CHECK(compare(l1,l2,lts_eq_trace));
+  BOOST_CHECK(compare(l2,l1,lts_eq_trace));
 
-  BOOST_CHECK( compare(l1,l2,lts_eq_trace) );
-  BOOST_CHECK( compare(l2,l1,lts_eq_trace) );
+  BOOST_CHECK(! compare(l1,l3,lts_eq_trace));
+  BOOST_CHECK(! compare(l3,l1,lts_eq_trace));
 
-  BOOST_CHECK( ! compare(l1,l3,lts_eq_trace) );
-  BOOST_CHECK( ! compare(l3,l1,lts_eq_trace) );
+  BOOST_CHECK(! compare(l1,l4,lts_eq_trace));
+  BOOST_CHECK(! compare(l4,l1,lts_eq_trace));
 
-  BOOST_CHECK( ! compare(l1,l4,lts_eq_trace) );
-  BOOST_CHECK( ! compare(l4,l1,lts_eq_trace) );
+  BOOST_CHECK(compare(l2,l3,lts_eq_weak_trace));
+  BOOST_CHECK(compare(l3,l2,lts_eq_weak_trace));
 
-  BOOST_CHECK( compare(l2,l3,lts_eq_weak_trace) );
-  BOOST_CHECK( compare(l3,l2,lts_eq_weak_trace) );
-
-  BOOST_CHECK( ! compare(l3,l4,lts_eq_weak_trace) );
-  BOOST_CHECK( ! compare(l4,l3,lts_eq_weak_trace) );
+  BOOST_CHECK(! compare(l3,l4,lts_eq_weak_trace));
+  BOOST_CHECK(! compare(l4,l3,lts_eq_weak_trace));
 
   return 0;
 }

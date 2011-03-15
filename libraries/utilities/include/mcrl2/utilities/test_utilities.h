@@ -1,4 +1,4 @@
-// Author(s): Frank Stappers 
+// Author(s): Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -16,17 +16,18 @@
 
 namespace mcrl2
 {
-  namespace utilities
+namespace utilities
+{
+/// \brief Garbage collect after each case.
+/// Use with BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+struct collect_after_test_case
+{
+  ~collect_after_test_case()
   {
-    /// \brief Garbage collect after each case.
-    /// Use with BOOST_GLOBAL_FIXTURE(collect_after_test_case)
-    struct collect_after_test_case {
-      ~collect_after_test_case()
-      {
-        core::garbage_collect();
-      }
-    };
+    core::garbage_collect();
   }
+};
 }
-  
+}
+
 #endif //MCRL2_UTILITIES_TEST_UTILITIES_H

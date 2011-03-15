@@ -11,7 +11,6 @@ project(ltsgraph)
 cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_BUILD_GUI_TOOLS )
-add_definitions(-DTIXML_USE_TICPP)
 
 IF(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
@@ -36,7 +35,6 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   graph.cpp
   transition.cpp
   export_latex.cpp
-  settingsdialog.cpp
   springlayout.cpp
   mainframe.cpp
   algodialog.cpp
@@ -60,33 +58,15 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-
-  # ######### required for squadt connectivity ##########
-  add_definitions("-DENABLE_SQUADT_CONNECTIVITY")
-  include_directories(${CMAKE_SOURCE_DIR}/tools/squadt/libraries/tipi/include)
-  # #####################################################
-
-else( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    ${wxWidgets_LIBRARIES}
-    mcrl2_lts
-    mcrl2_utilities_command_line
-    mcrl2_utilities_wx
-    ticpp
-  )
-
-  #Add Squadt Connectivity when required
-  include(${CMAKE_SOURCE_DIR}/scripts/SquadtConnectivity.cmake)
-
-endif( MCRL2_MONO_LIB )
+target_link_libraries(${PROJECT_NAME}
+  ${wxWidgets_LIBRARIES}
+  mcrl2_lts
+  mcrl2_utilities_command_line
+  mcrl2_utilities_wx
+)
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

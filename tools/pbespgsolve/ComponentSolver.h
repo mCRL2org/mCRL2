@@ -20,35 +20,35 @@
     and uses the SPM algorithm to solve independent subgames. */
 class ComponentSolver : public ParityGameSolver, public virtual Logger
 {
-public:
-    ComponentSolver( const ParityGame &game,
-                     ParityGameSolverFactory &pgsf );
+  public:
+    ComponentSolver(const ParityGame& game,
+                    ParityGameSolverFactory& pgsf);
     ~ComponentSolver();
 
     ParityGame::Strategy solve();
 
-private:
+  private:
     // SCC callback
-    int operator()(const verti *vertices, size_t num_vertices);
+    int operator()(const verti* vertices, size_t num_vertices);
     friend class SCC<ComponentSolver>;
 
-protected:
-    ParityGameSolverFactory &pgsf_;     //!< Solver factory to use
+  protected:
+    ParityGameSolverFactory& pgsf_;     //!< Solver factory to use
     ParityGame::Strategy    strategy_;  //!< The resulting strategy
     std::vector<bool>       solved_;    //!< Which vertices are solved?
 };
 
 class ComponentSolverFactory : public ParityGameSolverFactory
 {
-public:
-    ComponentSolverFactory(ParityGameSolverFactory &pgsf)
-        : pgsf_(pgsf) { };
+  public:
+    ComponentSolverFactory(ParityGameSolverFactory& pgsf)
+      : pgsf_(pgsf) { };
 
-    ParityGameSolver *create( const ParityGame &game,
-        const verti *vertex_map, verti vertex_map_size );
+    ParityGameSolver* create(const ParityGame& game,
+                             const verti* vertex_map, verti vertex_map_size);
 
-protected:
-    ParityGameSolverFactory &pgsf_;     //!< Factory used to create subsolvers
+  protected:
+    ParityGameSolverFactory& pgsf_;     //!< Factory used to create subsolvers
 };
 
 #endif /* ndef COMPONENT_SOLVER_H_INCLUDED */

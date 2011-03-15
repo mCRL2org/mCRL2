@@ -47,9 +47,10 @@ enum SettingID
   SimSelColor,
   SimPosColor,
   BackgroundColor,
-  TransitionAttraction,
-  TransitionLength,
-  StateRepulsion
+  StatePosStyle,
+  StateRankStyle,
+  ClusterVisStyle,
+  FsmStyle
 };
 
 /* abstract base class for subscribers */
@@ -74,7 +75,7 @@ class Settings
     bool getBool(SettingID s);
     float getFloat(SettingID s);
     RGB_Color getRGB(SettingID s);
-		void loadDefaults();
+    void loadDefaults();
     void setInt(SettingID s,int v);
     void setBool(SettingID s,bool v);
     void setFloat(SettingID s,float v);

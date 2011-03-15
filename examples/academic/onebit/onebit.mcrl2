@@ -44,7 +44,7 @@ proc C(f:Frame,st:Status)=
        eq_choice(st) -> (i_del.C(f,del)+i_lost.C(f,read))<>delta+
        eq_del(st) -> s2(f).C(f,read)<>delta ;
 
-init hide ({c4,c2,ccl,c,i_del,i_lost},
+init hide ({c4,c2,ccl,c,i_del},
        allow({c,ccl,c2,c4,i_del,i_lost,ra,sb,rc,sd},
          comm({r2|s2->c2,r4|s4->c4},
            rename({sb->sd},

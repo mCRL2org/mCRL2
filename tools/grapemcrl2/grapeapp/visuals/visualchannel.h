@@ -17,59 +17,59 @@ using namespace grape::libgrape;
 
 namespace grape
 {
-  using libgrape::channel;
+using libgrape::channel;
 
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+/**
+ * \short Represents a visualchannel.
+ */
+class visualchannel : public visual_object
+{
+  private:
+  protected:
+  public:
+
     /**
-     * \short Represents a visualchannel.
+     * Default constructor.
+     * Initializes visual_channel.
+     * @pre: p_channel should be pointed to an existing channel
      */
-    class visualchannel : public visual_object
-    {
-      private:
-      protected:
-      public:
+    visualchannel(channel* p_channel = 0);
 
-        /**
-         * Default constructor.
-         * Initializes visual_channel.
-         * @pre: p_channel should be pointed to an existing channel
-         */
-        visualchannel( channel* p_channel = 0 );
+    /**
+     * Copy constructor.
+     * Creates a new visual_channel based on an existing visual_channel
+     * @param p_channel The visual_channel to be copied.
+     */
+    visualchannel(const visualchannel& p_channel);
 
-        /**
-         * Copy constructor.
-         * Creates a new visual_channel based on an existing visual_channel
-         * @param p_channel The visual_channel to be copied.
-         */
-        visualchannel( const visualchannel &p_channel );
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~visualchannel(void);
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~visualchannel( void );
+    /**
+     * Draw channel
+     */
+    void draw(void);
 
-        /**
-         * Draw channel
-         */
-        void draw( void );
+    /**
+     * Test if coordinate is inside the object
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate is inside the drawn object.
+     */
+    bool is_inside(libgrape::coordinate& p_coord);
 
-        /**
-         * Test if coordinate is inside the object
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate is inside the drawn object.
-         */
-        bool is_inside( libgrape::coordinate &p_coord );
-
-        /**
-         * Test if coordinate is on the border of the object
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate on the border of a drawn object.
-         */
-        grape_direction is_on_border( libgrape::coordinate &p_coord );        
-    };
-  } // namespace grapeapp
+    /**
+     * Test if coordinate is on the border of the object
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate on the border of a drawn object.
+     */
+    grape_direction is_on_border(libgrape::coordinate& p_coord);
+};
+} // namespace grapeapp
 } // namespace grape
 
 #endif // VISUALS_VISUALCHANNEL_H

@@ -23,7 +23,6 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -39,7 +38,6 @@ using mcrl2::core::gsVerboseMsg;
 using mcrl2::core::gsMessage;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
-using mcrl2::utilities::tools::squadt_tool;
 using mcrl2::lps::t_lin_method;
 using mcrl2::lps::lmStack;
 using mcrl2::lps::lmRegular;
@@ -47,13 +45,13 @@ using mcrl2::lps::lmRegular2;
 using mcrl2::lps::t_lin_options;
 using mcrl2::lps::linearise;
 
-class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
+class mcrl22lps_tool : public rewriter_tool< input_output_tool >
 {
-  typedef squadt_tool< rewriter_tool< input_output_tool > > super;
+    typedef rewriter_tool< input_output_tool > super;
 
   private:
     t_lin_options m_linearisation_options;
-    bool noalpha;   // indicates whether alpa reduction is needed.
+    bool noalpha;   // indicates whether alpha reduction is needed.
     bool opt_check_only;
 
   protected:
@@ -62,49 +60,52 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
     {
       super::add_options(desc);
       desc.add_option("lin-method", make_mandatory_argument("NAME"),
-          "use linearisation method NAME:\n"
-          "  'regular' for generating an LPS in regular form\n"
-          "  (specification should be regular, default),\n"
-          "  'regular2' for a variant of 'regular' that uses more data variables\n"
-          "  (useful when 'regular' does not work), or\n"
-          "  'stack' for using stack data types\n"
-          "  (useful when 'regular' and 'regular2' do not work)"
-          , 'l');
+                      "use linearisation method NAME:\n"
+                      "  'regular' for generating an LPS in regular form\n"
+                      "  (specification should be regular, default),\n"
+                      "  'regular2' for a variant of 'regular' that uses more data variables\n"
+                      "  (useful when 'regular' does not work), or\n"
+                      "  'stack' for using stack data types\n"
+                      "  (useful when 'regular' and 'regular2' do not work)"
+                      , 'l');
       desc.add_option("cluster",
-          "all actions in the final LPS are clustered", 'c');
+                      "all actions in the final LPS are clustered", 'c');
       desc.add_option("no-cluster",
-          "the actions in intermediate LPSs are not clustered "
-          "(default behaviour is that intermediate LPSs are "
-          "clustered and the final LPS is not clustered)", 'n');
+                      "the actions in intermediate LPSs are not clustered "
+                      "(default behaviour is that intermediate LPSs are "
+                      "clustered and the final LPS is not clustered)", 'n');
       desc.add_option("no-alpha",
-          "alphabet reductions are not applied", 'z');
+                      "alphabet reductions are not applied", 'z');
       desc.add_option("newstate",
-          "state variables are encoded using enumerated types "
-          "(requires linearisation method 'regular' or 'regular2'); without this option numbers are used", 'w');
+                      "state variables are encoded using enumerated types "
+                      "(requires linearisation method 'regular' or 'regular2'); without this option numbers are used", 'w');
       desc.add_option("binary",
-          "when clustering use binary case functions instead of "
-          "n-ary; in the presence of -w/--newstate, state variables are "
-          "encoded by a vector of boolean variables", 'b');
+                      "when clustering use binary case functions instead of "
+                      "n-ary; in the presence of -w/--newstate, state variables are "
+                      "encoded by a vector of boolean variables", 'b');
       desc.add_option("statenames",
-          "the names of state variables are derived from the specification", 'a');
+                      "the names of state variables are derived from the specification", 'a');
       desc.add_option("no-rewrite",
-          "do not rewrite data terms while linearising; useful when the rewrite "
-          "system does not terminate", 'o');
+                      "do not rewrite data terms while linearising; useful when the rewrite "
+                      "system does not terminate", 'o');
       desc.add_option("no-globvars",
-          "instantiate don't care values with arbitrary constants, "
-          "instead of modelling them by global variables. This has no effect"
-          "on global variable that are declared in the specification.", 'f');
+                      "instantiate don't care values with arbitrary constants, "
+                      "instead of modelling them by global variables. This has no effect"
+                      "on global variable that are declared in the specification.", 'f');
       desc.add_option("no-sumelm",
-          "avoid applying sum elimination in parallel composition", 'm');
+                      "avoid applying sum elimination in parallel composition", 'm');
       desc.add_option("no-deltaelm",
-          "avoid removing spurious delta summands", 'g');
+                      "avoid removing spurious delta summands", 'g');
       desc.add_option("delta",
-          "add a true->delta summands to each state in each process; "
-          "these delta's subsume all other conditional timed delta's, "
-          "effectively reducing the number of delta summands drastically "
-          "in the resulting linear process; speeds up linearisation ", 'D');
+                      "add a true->delta summands to each state in each process; "
+                      "these delta's subsume all other conditional timed delta's, "
+                      "effectively reducing the number of delta summands drastically "
+                      "in the resulting linear process; speeds up linearisation ", 'D');
+      desc.add_option("no-constelm",
+                      "do not try to apply constant elimination when generating a linear "
+                      "process.");
       desc.add_option("check-only",
-          "check syntax and static semantics; do not linearise", 'e');
+                      "check syntax and static semantics; do not linearise", 'e');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -123,26 +124,37 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
       m_linearisation_options.nosumelm                = 0 < parser.options.count("no-sumelm");
       m_linearisation_options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
       m_linearisation_options.add_delta               = 0 < parser.options.count("delta");
+      m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm");
       m_linearisation_options.lin_method = lmRegular;
 
-      if (0 < parser.options.count("lin-method")) {
-        if (1 < parser.options.count("lin-method")) {
+      if (0 < parser.options.count("lin-method"))
+      {
+        if (1 < parser.options.count("lin-method"))
+        {
           parser.error("multiple use of option -l/--lin-method; only one occurrence is allowed");
         }
         std::string lin_method_str(parser.option_argument("lin-method"));
-        if (lin_method_str == "stack") {
+        if (lin_method_str == "stack")
+        {
           m_linearisation_options.lin_method = lmStack;
-        } else if (lin_method_str == "regular") {
+        }
+        else if (lin_method_str == "regular")
+        {
           m_linearisation_options.lin_method = lmRegular;
-        } else if (lin_method_str == "regular2") {
+        }
+        else if (lin_method_str == "regular2")
+        {
           m_linearisation_options.lin_method = lmRegular2;
-        } else {
+        }
+        else
+        {
           parser.error("option -l/--lin-method has illegal argument '" + lin_method_str + "'");
         }
       }
 
       //check for dangerous and illegal option combinations
-      if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack) {
+      if (m_linearisation_options.newstate && m_linearisation_options.lin_method == lmStack)
+      {
         parser.error("option -w/--newstate cannot be used with -lstack/--lin-method=stack");
       }
 
@@ -154,336 +166,68 @@ class mcrl22lps_tool : public squadt_tool< rewriter_tool< input_output_tool > >
   public:
 
     mcrl22lps_tool() : super(
-             TOOLNAME,
-             AUTHOR,
-             "translate an mCRL2 specification to an LPS",
-             "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
-             "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
-             "stdin is used."), noalpha(false), opt_check_only(false)
+        TOOLNAME,
+        AUTHOR,
+        "translate an mCRL2 specification to an LPS",
+        "Linearises the mCRL2 specification in INFILE and writes the resulting LPS to "
+        "OUTFILE. If OUTFILE is not present, stdout is used. If INFILE is not present, "
+        "stdin is used."), noalpha(false), opt_check_only(false)
     {}
 
-    bool run() 
-    { //linearise infilename with options
+    bool run()
+    {
+      //linearise infilename with options
       process_specification spec;
-      if (m_linearisation_options.infilename.empty()) 
-      { //parse specification from stdin
+      if (m_linearisation_options.infilename.empty())
+      {
+        //parse specification from stdin
         gsVerboseMsg("reading input from stdin...\n");
         spec = parse_process_specification(std::cin,!noalpha);
-      } 
-      else 
-      { //parse specification from infilename
+      }
+      else
+      {
+        //parse specification from infilename
         gsVerboseMsg("reading input from file '%s'...\n", m_linearisation_options.infilename.c_str());
         std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
-        if (!instream.is_open()) {
+        if (!instream.is_open())
+        {
           throw mcrl2::runtime_error("cannot open input file: " + m_linearisation_options.infilename);
         }
         spec = parse_process_specification(instream,!noalpha);
         instream.close();
       }
       //report on well-formedness (if needed)
-      if (opt_check_only) {
-        if (m_linearisation_options.infilename.empty()) {
+      if (opt_check_only)
+      {
+        if (m_linearisation_options.infilename.empty())
+        {
           gsMessage("stdin contains a well-formed mCRL2 specification\n");
-        } else {
+        }
+        else
+        {
           gsMessage("the file '%s' contains a well-formed mCRL2 specification\n", m_linearisation_options.infilename.c_str());
         }
         return true;
       }
       //store the result
       mcrl2::lps::specification linear_spec(linearise(spec,m_linearisation_options));
-      if (m_linearisation_options.outfilename.empty()) {
+      if (m_linearisation_options.outfilename.empty())
+      {
         gsVerboseMsg("writing LPS to stdout...\n");
-      } else {
+      }
+      else
+      {
         gsVerboseMsg("writing LPS to file '%s'...\n", m_linearisation_options.outfilename.c_str());
       }
       linear_spec.save(m_linearisation_options.outfilename);
       return true;
     }
-
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-
-# define option_linearisation_method     "linearisation_method"
-# define option_final_cluster            "final_cluster"
-# define option_no_intermediate_cluster  "no_intermediate_cluster"
-# define option_no_alpha                 "no_alpha"
-# define option_newstate                 "newstate"
-# define option_binary                   "binary"
-# define option_statenames               "statenames"
-# define option_no_rewrite               "no_rewrite"
-# define option_no_globalvars              "no_globalvars"
-# define option_check_only               "check_only"
-# define option_no_sumelm                "no_sumelm"
-# define option_no_deltaelm              "no_dataelm"
-# define option_add_delta                "add_delta"
-
-  private:
-
-    /** \brief compiles a t_lin_options instance from a configuration */
-    bool extract_task_options(tipi::configuration const& c)
-    {
-      if (c.option_exists(option_linearisation_method)) 
-      { m_linearisation_options.lin_method = c.get_option_argument< t_lin_method >(option_linearisation_method, 0);
-      }
-      else 
-      { send_error("Configuration does not contain a linearisation method\n");
-
-        return false;
-      }
-
-      m_linearisation_options.final_cluster           = c.get_option_argument< bool >(option_final_cluster);
-      m_linearisation_options.no_intermediate_cluster = c.get_option_argument< bool >(option_no_intermediate_cluster);
-      noalpha                                         = c.get_option_argument< bool >(option_no_alpha);
-      m_linearisation_options.newstate                = c.get_option_argument< bool >(option_newstate);
-      m_linearisation_options.binary                  = c.get_option_argument< bool >(option_binary);
-      m_linearisation_options.statenames              = c.get_option_argument< bool >(option_statenames);
-      m_linearisation_options.norewrite               = c.get_option_argument< bool >(option_no_rewrite);
-      m_linearisation_options.noglobalvars            = c.get_option_argument< bool >(option_no_globalvars);
-      opt_check_only                                  = c.get_option_argument< bool >(option_check_only);
-      m_linearisation_options.nosumelm                = c.get_option_argument< bool >(option_no_sumelm);
-      m_linearisation_options.nodeltaelimination      = c.get_option_argument< bool >(option_no_deltaelm);
-      m_linearisation_options.add_delta               = c.get_option_argument< bool >(option_add_delta);
-
-      m_linearisation_options.infilename       = input_filename();
-      m_linearisation_options.outfilename      = output_filename();
-      m_linearisation_options.rewrite_strategy = rewrite_strategy();
-
-      return true;
-    }
-
-    static bool initialise_types()
-    {
-      tipi::datatype::enumeration< t_lin_method > method_enumeration;
-
-      method_enumeration.
-        add(lmRegular, "regular").
-        add(lmRegular2, "regular2").
-        add(lmStack, "expansion");
-
-      return true;
-    }
-
-    void synchronise_with_configuration(tipi::configuration& c)
-    {
-      bool initialised = initialise_types();
-
-      static_cast< void > (initialised); // harmless, and prevents unused variable warnings
-
-      super::synchronise_with_configuration(c);
-    }
-
-  public:
-
-    /** \brief configures tool capabilities */
-    void set_capabilities(tipi::tool::capabilities& c) const
-    {
-      c.add_input_configuration("main-input", tipi::mime_type("mcrl2", tipi::mime_type::text),
-                                                            tipi::tool::category::transformation);
-    }
-
-    /** \brief queries the user via SQuADT if needed to obtain configuration information */
-    void user_interactive_configuration(tipi::configuration& c)
-    {
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::datatype;
-      using namespace tipi::layout::elements;
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      synchronise_with_configuration(c);
-
-      // Set defaults for options
-      if (!c.option_exists(option_final_cluster)) {
-        c.add_option(option_final_cluster).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_no_intermediate_cluster)) {
-        c.add_option(option_no_intermediate_cluster).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_no_alpha)) {
-        c.add_option(option_no_alpha).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_newstate)) {
-        c.add_option(option_newstate).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_binary)) {
-        c.add_option(option_binary).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_statenames)) {
-        c.add_option(option_statenames).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_no_rewrite)) {
-        c.add_option(option_no_rewrite).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_no_globalvars)) {
-        c.add_option(option_no_globalvars).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_check_only)) {
-        c.add_option(option_check_only).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_no_sumelm)) {
-        c.add_option(option_no_sumelm).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_no_deltaelm)) {
-        c.add_option(option_no_deltaelm).set_argument_value< 0 >(false);
-      }
-      if (!c.option_exists(option_add_delta)) {
-        c.add_option(option_add_delta).set_argument_value< 0 >(false);
-      }
-
-      /* Create display */
-      tipi::tool_display d;
-
-      // Helper for linearisation method selection
-      mcrl2::utilities::squadt::radio_button_helper < t_lin_method > method_selector(d);
-
-      layout::vertical_box& m = d.create< vertical_box >().set_default_margins(margins(0,5,0,5));
-
-      m.append(d.create< label >().set_text("Method: ")).
-        append(d.create< horizontal_box >().
-            append(method_selector.associate(lmStack, "Stack")).
-            append(method_selector.associate(lmRegular, "Regular", true)).
-            append(method_selector.associate(lmRegular2, "Regular2")));
-
-      checkbox& clusterintermediate = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_intermediate_cluster));
-      checkbox& clusterfinal        = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_final_cluster));
-      checkbox& newstate            = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_newstate));
-      checkbox& binary              = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_binary));
-      checkbox& statenames          = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_statenames));
-      checkbox& add_delta           = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_add_delta));
-      checkbox& rewrite             = d.create< checkbox >().set_status(c.get_option_argument< bool >(option_no_rewrite));
-      checkbox& alpha               = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_alpha));
-      checkbox& sumelm              = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_sumelm));
-      checkbox& deltaelm            = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_deltaelm));
-      checkbox& globalvars          = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_no_globalvars));
-      checkbox& check_only          = d.create< checkbox >().set_status(!c.get_option_argument< bool >(option_check_only));
-
-      // two columns to select the linearisation options of the tool
-      m.append(d.create< label >().set_text(" ")).
-        append(d.create< horizontal_box >().
-            append(d.create< vertical_box >().set_default_alignment(layout::right).
-                append(clusterintermediate.set_label("Intermediate clustering")).
-                append(clusterfinal.set_label("Final clustering")).
-                append(newstate.set_label("Use enumerations for state variables")).
-                append(binary.set_label("Encode enumerations by booleans")).
-                append(statenames.set_label("Derive state names from specification")).
-                append(add_delta.set_label("Add delta summands"))).
-            append(d.create< vertical_box >().set_default_alignment(layout::left).
-                append(rewrite.set_label("Use rewriting")).
-                append(alpha.set_label("Apply alphabet axioms")).
-                append(sumelm.set_label("Apply sum elimination")).
-                append(deltaelm.set_label("Apply delta elimination")).
-                append(globalvars.set_label("Generate global variables")).
-                append(check_only.set_label("Check input only and do not linearise"))));
-
-      add_rewrite_option(d, m);
-
-      // Add okay button
-      button& okay_button = d.create< button >().set_label("OK");
-
-      m.append(d.create< label >().set_text(" ")).
-        append(okay_button, layout::right);
-
-      if (c.option_exists(option_linearisation_method)) {
-        method_selector.set_selection(c.get_option_argument< t_lin_method >(option_linearisation_method, 0));
-      }
-
-      send_display_layout(d.manager(m));
-
-      /* Wait for the OK button to be pressed */
-      okay_button.await_change();
-
-      // Update configuration
-      if (!c.output_exists("main-output")) {
-        c.add_output("main-output", tipi::mime_type("lps", tipi::mime_type::application), c.get_output_name(".lps"));
-      }
-
-      c.add_option(option_linearisation_method).
-              set_argument_value< 0 >(method_selector.get_selection());
-
-      if (opt_check_only) { // file will not be produced
-        c.remove_output("main-output");
-      } 
-
-      c.get_option(option_final_cluster).set_argument_value< 0 >(clusterfinal.get_status());
-      c.get_option(option_no_intermediate_cluster).set_argument_value< 0 >(!clusterintermediate.get_status());
-      c.get_option(option_no_alpha).set_argument_value< 0 >(!alpha.get_status());
-      c.get_option(option_newstate).set_argument_value< 0 >(newstate.get_status());
-      c.get_option(option_binary).set_argument_value< 0 >(binary.get_status());
-      c.get_option(option_statenames).set_argument_value< 0 >(statenames.get_status());
-      c.get_option(option_no_rewrite).set_argument_value< 0 >(!rewrite.get_status());
-      c.get_option(option_no_globalvars).set_argument_value< 0 >(!globalvars.get_status());
-      c.get_option(option_check_only).set_argument_value< 0 >(!check_only.get_status());
-      c.get_option(option_no_sumelm).set_argument_value< 0 >(!sumelm.get_status());
-      c.get_option(option_no_deltaelm).set_argument_value< 0 >(!deltaelm.get_status());
-      c.get_option(option_add_delta).set_argument_value< 0 >(add_delta.get_status());
-
-      send_clear_display();
-
-      // Let squadt_tool update configuration for rewriter and add output file configuration
-      update_configuration(c);
-    }
-
-    /** \brief check an existing configuration object to see if it is usable */
-    bool check_configuration(tipi::configuration const& c) const
-    {
-      return c.input_exists("main-input") &&
-             c.input_exists("main-output") &&
-             c.input_exists(option_linearisation_method);
-    }
-
-    /** \brief performs the task specified by a configuration */
-    bool perform_task(tipi::configuration& c)
-    {
-      using namespace boost;
-      using namespace tipi;
-      using namespace tipi::layout;
-      using namespace tipi::datatype;
-      using namespace tipi::layout::elements;
-
-      synchronise_with_configuration(c);
-
-      // Extract configuration
-      extract_task_options(c);
-
-      /* Create display */
-      tipi::tool_display d;
-
-      label& message = d.create< label >();
-
-      d.manager(d.create< vertical_box >().
-                            append(message.set_text("Linearisation in progress"), layout::left));
-
-      send_display_layout(d);
-
-      // Perform linearisation
-
-      std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
-      if (!instream.is_open()) 
-      { throw mcrl2::runtime_error("Cannot open input file: " + m_linearisation_options.infilename);
-      }
-      process_specification input_result = parse_process_specification(instream,!noalpha);
-      instream.close();
- 
-      if (opt_check_only) 
-      { message.set_text(str(format("%s contains a well-formed mCRL2 specification.") % m_linearisation_options.infilename));
-      }
-      else 
-      { mcrl2::lps::specification specification(linearise(input_result, m_linearisation_options));
-        //store the result
-        specification.save(m_linearisation_options.outfilename);
-        message.set_text("Linearisation finished");
-      }
-
-      send_display_layout(d);
-
-      return true;
-    }
-#endif
 };
 
 class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
 {
   public:
-	mcrl22lps_gui_tool()
+    mcrl22lps_gui_tool()
     {
 
       m_gui_options["statenames"] = create_checkbox_widget();
@@ -495,6 +239,7 @@ class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
       m_gui_options["no-deltaelm"] = create_checkbox_widget();
       m_gui_options["check-only"] = create_checkbox_widget();
       m_gui_options["check-only"] = create_checkbox_widget();
+      m_gui_options["no-constelm"] = create_checkbox_widget();
 
       std::vector<std::string> values;
       values.clear();
@@ -514,7 +259,7 @@ class mcrl22lps_gui_tool: public mcrl2_gui_tool<mcrl22lps_tool>
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  
+
   return mcrl22lps_gui_tool().execute(argc, argv);
 }
 

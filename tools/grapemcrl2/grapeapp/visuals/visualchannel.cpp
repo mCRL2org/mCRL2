@@ -19,28 +19,29 @@
 #include "mcrl2/utilities/font_renderer.h"
 #include "compoundreference.h"
 
-namespace grape {
+namespace grape
+{
 
 using namespace grape::grapeapp;
 using namespace mcrl2::utilities::wx;
 
-visualchannel::visualchannel( channel* p_channel )
+visualchannel::visualchannel(channel* p_channel)
 {
   m_object = p_channel;
 }
 
-visualchannel::visualchannel( const visualchannel &p_channel )
-: visual_object( p_channel )
+visualchannel::visualchannel(const visualchannel& p_channel)
+  : visual_object(p_channel)
 {
 }
 
-visualchannel::~visualchannel( void )
+visualchannel::~visualchannel(void)
 {
 }
 
-void visualchannel::draw( void )
+void visualchannel::draw(void)
 {
-  channel *c = static_cast<channel *>(m_object);
+  channel* c = static_cast<channel*>(m_object);
 
   float x = m_object->get_coordinate().m_x;
   float y = m_object->get_coordinate().m_y;
@@ -48,7 +49,7 @@ void visualchannel::draw( void )
   wxString rename_to = c->get_rename_to();
 
   // draw channel
-  draw_channel( m_object->get_coordinate(), 0.5 * m_object->get_width(), m_object->get_selected(), c->get_channel_type() );
+  draw_channel(m_object->get_coordinate(), 0.5 * m_object->get_width(), m_object->get_selected(), c->get_channel_type());
 
   // draw channel name
   compound_reference* cref = c->get_reference();
@@ -80,22 +81,25 @@ void visualchannel::draw( void )
     texty = y + m_object->get_width();
     vertical_align = al_top;
   }
-  //draw text 
+  //draw text
   wxString text = name;
-  if (rename_to != _T("")) text += _T(" -> ") + rename_to;   
+  if (rename_to != _T(""))
+  {
+    text += _T(" -> ") + rename_to;
+  }
   grape_glcanvas::get_font_renderer()->draw_text(std::string(text.fn_str()), textx, texty, 0.0015f, horizontal_align, vertical_align);
 }
 
-bool visualchannel::is_inside( libgrape::coordinate &p_coord )
+bool visualchannel::is_inside(libgrape::coordinate& p_coord)
 {
   // test is inside ellipse
-  return is_inside_ellipse( m_object->get_coordinate(), m_object->get_width() * 0.5, m_object->get_height() * 0.5, p_coord ) || ( grab_bounding_box( m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected() ) != GRAPE_DIR_NONE );
+  return is_inside_ellipse(m_object->get_coordinate(), m_object->get_width() * 0.5, m_object->get_height() * 0.5, p_coord) || (grab_bounding_box(m_object->get_coordinate(), m_object->get_width(), m_object->get_height(), p_coord, m_object->get_selected()) != GRAPE_DIR_NONE);
 }
 
-grape_direction visualchannel::is_on_border( libgrape::coordinate &p_coord )
+grape_direction visualchannel::is_on_border(libgrape::coordinate& p_coord)
 {
   // test if a coordinate is on the border of a channel
-  return grab_bounding_box( m_object->get_coordinate(), m_object->get_width() * 0.5, m_object->get_height() * 0.5, p_coord, m_object->get_selected() );
+  return grab_bounding_box(m_object->get_coordinate(), m_object->get_width() * 0.5, m_object->get_height() * 0.5, p_coord, m_object->get_selected());
 }
 
 }

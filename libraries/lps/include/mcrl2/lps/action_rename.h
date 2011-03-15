@@ -18,15 +18,17 @@
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
-#include "mcrl2/data/detail/internal_format_conversion.h"
-#include "mcrl2/lps/detail/algorithm.h"
+#include "mcrl2/lps/normalize_sorts.h"
+#include "mcrl2/lps/translate_user_notation.h"
+#include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/find.h"
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -48,326 +50,486 @@
 // <ActionRenameSpec>
 //                ::= ActionRenameSpec(<DataSpec>, <ActSpec>, <ActionRenameRules>)
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
-  /// \brief Right hand side of an action rename rule
-  class action_rename_rule_rhs: public atermpp::aterm_appl
-  {
-    public:
-      /// \brief Constructor.
-      action_rename_rule_rhs()
-        : atermpp::aterm_appl(core::detail::constructActionRenameRuleRHS())
-      { }
+/// \brief Right hand side of an action rename rule
+class action_rename_rule_rhs
+{
+    action m_act;
+    bool m_is_delta;
+    bool m_is_tau;
 
-      /// \brief Constructor.
-      /// \param t A term
-      action_rename_rule_rhs(atermpp::aterm_appl t)
-        : atermpp::aterm_appl(t)
-      {
-        assert(core::detail::check_rule_ActionRenameRuleRHS(m_term));
-      }
+  public:
+    /// \brief Constructor.
+    action_rename_rule_rhs()
+      : m_act(),
+        m_is_delta(false),
+        m_is_tau(false)
+    { }
 
-      /// \brief Returns true if the right hand side is equal to delta.
-      /// \return True if the right hand side is equal to delta.
-      bool is_delta() const
-      {
-        return core::detail::gsIsDelta(*this);
-      }
+    /// \brief Constructor.
+    /// \param t A term
+    action_rename_rule_rhs(atermpp::aterm_appl t)
+      : m_act(core::detail::gsIsDelta(t)||core::detail::gsIsTau(t)?action():t),
+        m_is_delta(core::detail::gsIsDelta(t)),
+        m_is_tau(core::detail::gsIsTau(t))
+    {
+      assert(core::detail::check_rule_ActionRenameRuleRHS(t));
+    }
 
-      /// \brief Returns true if the right hand side is equal to tau.
-      /// \return True if the right hand side is equal to tau.
-      bool is_tau() const
-      {
-        return core::detail::gsIsTau(*this);
-      }
+    /// \brief Returns true if the right hand side is equal to delta.
+    /// \return True if the right hand side is equal to delta.
+    bool is_delta() const
+    {
+      return m_is_delta;
+    }
 
-      /// \brief Returns the action.
-      /// \pre The right hand side must be an action
-      /// \return The action.
-      action act() const
-      {
-        return *this;
-      }
-  };
+    /// \brief Returns true if the right hand side is equal to tau.
+    /// \return True if the right hand side is equal to tau.
+    bool is_tau() const
+    {
+      return m_is_tau;
+    }
+
+    /// \brief Returns the action.
+    /// \pre The right hand side must be an action
+    /// \return The action.
+    action act() const
+    {
+      return m_act;
+    }
+
+    /// \brief Protects the aterms in this class
+    void protect()
+    {
+      m_act.protect();
+    }
+
+    /// \brief Unprotects the aterms in this class
+    void unprotect()
+    {
+      m_act.unprotect();
+    }
+
+    /// \brief Marks the aterms in this class
+    void mark()
+    {
+      m_act.mark();
+    }
+};
 
 //                ::= ActionRenameRule(<DataVarId>*, <DataExprOrNil>,
 //                      <ParamIdOrAction>, <ActionRenameRuleRHS>)
 
-  /// \brief Action rename rule
-  class action_rename_rule: public atermpp::aterm_appl
-  {
-    protected:
-      /// \brief The data variables of the rule
-      data::variable_list m_variables;
+/// \brief Action rename rule
+class action_rename_rule
+{
+  protected:
+    /// \brief The data variables of the rule
+    data::variable_list m_variables;
 
-      /// \brief The condition of the rule
-      data::data_expression    m_condition;
+    /// \brief The condition of the rule
+    data::data_expression    m_condition;
 
-      /// \brief The left hand side of the rule
-      action                   m_lhs;
+    /// \brief The left hand side of the rule
+    action                   m_lhs;
 
-      /// \brief right hand side of the rule
-      action_rename_rule_rhs   m_rhs;
+    /// \brief right hand side of the rule
+    action_rename_rule_rhs   m_rhs;
 
-      /// \brief Initialize the action rename rule with an aterm_appl.
-      /// \param t A term
-      void init_term(atermpp::aterm_appl t)
+  public:
+    /// \brief Constructor.
+    action_rename_rule()
+    { }
+
+    /// \brief Constructor.
+    /// \param t A term
+    action_rename_rule(atermpp::aterm_appl t)
+    {
+      assert(core::detail::check_rule_ActionRenameRule(t));
+      atermpp::aterm_appl::iterator i = t.begin();
+      m_variables       = atermpp::aterm_list(*i++);
+      m_condition       = atermpp::aterm_appl(*i++);
+      m_lhs             = atermpp::aterm_appl(*i++);
+      m_rhs             = atermpp::aterm_appl(*i);
+    }
+
+    /// \brief Constructor.
+    /// \param t A term
+    action_rename_rule(const data::variable_list    variables,
+                       const data::data_expression  condition,
+                       const action                 lhs,
+                       const action_rename_rule_rhs rhs)
+      : m_variables(variables), m_condition(condition), m_lhs(lhs), m_rhs(rhs)
+    {
+    }
+
+    /// \brief Returns the variables of the rule.
+    /// \return The variables of the rule.
+    data::variable_list variables() const
+    {
+      return m_variables;
+    }
+
+    /// \brief Returns the condition of the rule.
+    /// \return The condition of the rule.
+    data::data_expression condition() const
+    {
+      return m_condition;
+    }
+
+    /// \brief Returns the left hand side of the rule.
+    /// \return The left hand side of the rule.
+    action lhs() const
+    {
+      return m_lhs;
+    }
+
+    /// \brief Returns the right hand side of the rule.
+    /// \return The right hand side of the rule.
+    action_rename_rule_rhs rhs() const
+    {
+      return m_rhs;
+    }
+    //
+    /// \brief Protects the aterms in this class
+    void protect()
+    {
+      m_variables.protect();
+      m_condition.protect();
+      m_lhs.protect();
+      m_rhs.protect();
+    }
+
+    /// \brief Unprotects the aterms in this class
+    void unprotect()
+    {
+      m_variables.unprotect();
+      m_condition.unprotect();
+      m_lhs.unprotect();
+      m_rhs.unprotect();
+    }
+
+    /// \brief Marks the aterms in this class
+    void mark()
+    {
+      m_variables.mark();
+      m_condition.mark();
+      m_lhs.mark();
+      m_rhs.mark();
+    }
+};
+
+/// \brief Read-only singly linked list of action rename rules
+// typedef atermpp::term_list<action_rename_rule> action_rename_rule_list;
+
+/// \brief Action rename specification
+class action_rename_specification
+{
+  protected:
+
+    /// \brief The data specification of the action rename specification
+    data::data_specification m_data;
+
+    /// \brief The action labels of the action rename specification
+    action_label_list        m_action_labels;
+
+    /// \brief The action rename rules of the action rename specification
+    atermpp::vector <action_rename_rule>  m_rules;
+
+  public:
+    /// \brief Constructor.
+    action_rename_specification()
+    { }
+
+    /// \brief Constructor.
+    /// \param t A term
+    action_rename_specification(atermpp::aterm_appl t)
+    {
+      assert(core::detail::check_rule_ActionRenameSpec(t));
+      atermpp::aterm_appl::iterator i = t.begin();
+      m_data            = atermpp::aterm_appl(*i++);
+      m_action_labels   = atermpp::aterm_appl(*i++)(0);
+
+      atermpp::aterm_list rules_list = atermpp::aterm_appl(*i)(0);
+      for (atermpp::aterm_list::const_iterator i=rules_list.begin(); i!=rules_list.end(); ++i)
       {
-        m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
-        atermpp::aterm_appl::iterator i = t.begin();
-        m_variables       = atermpp::aterm_list(*i++);
-        m_condition       = atermpp::aterm_appl(*i++);
-        m_lhs             = atermpp::aterm_appl(*i++);
-        m_rhs             = atermpp::aterm_appl(*i);
+        m_rules.push_back(action_rename_rule(*i));
       }
+    }
 
-    public:
-      /// \brief Constructor.
-      action_rename_rule()
-        : atermpp::aterm_appl(core::detail::constructActionRenameRule())
-      { }
+    /// \brief Constructor.
+    /// \param data A data specification
+    /// \param action_labels A sequence of action labels
+    /// \param rules A sequence of action rename rules
+    action_rename_specification(
+      const data::data_specification& data,
+      const action_label_list action_labels,
+      const atermpp::vector <action_rename_rule> &rules)
+      :
+      m_data(data),
+      m_action_labels(action_labels),
+      m_rules(rules)
+    {
+      /* m_term = reinterpret_cast<ATerm>(
+      core::detail::gsMakeActionRenameSpec(
+        data::detail::data_specification_to_aterm_data_spec(data),
+        core::detail::gsMakeActSpec(action_labels),
+        core::detail::gsMakeActionRenameRules(rules)
+      )
+      ); */
+    }
 
-      /// \brief Constructor.
-      /// \param t A term
-      action_rename_rule(atermpp::aterm_appl t)
-        : atermpp::aterm_appl(t)
-      {
-        assert(core::detail::check_rule_ActionRenameRule(m_term));
-        init_term(t);
-      }
+    /// \brief Returns the data action_rename_specification.
+    /// \return The data action_rename_specification.
+    data::data_specification data() const
+    {
+      return m_data;
+    }
 
-      /// \brief Returns the variables of the rule.
-      /// \return The variables of the rule.
-      data::variable_list variables() const
-      {
-        return m_variables;
-      }
+    /// \brief Returns the sequence of action labels
+    /// \return A sequence of action labels containing all action
+    /// labels occurring in the action_rename_specification (but it can have more).
+    action_label_list action_labels() const
+    {
+      return m_action_labels;
+    }
 
-      /// \brief Returns the condition of the rule.
-      /// \return The condition of the rule.
-      data::data_expression condition() const
-      {
-        return m_condition;
-      }
+    /// \brief Returns the action rename rules.
+    /// \return The action rename rules.
+    atermpp::vector <action_rename_rule> rules() const
+    {
+      return m_rules;
+    }
 
-      /// \brief Returns the left hand side of the rule.
-      /// \return The left hand side of the rule.
-      action lhs() const
-      {
-        return m_lhs;
-      }
+    /// \brief Indicates whether the action_rename_specification is well typed.
+    /// \return Always returns true.
+    bool is_well_typed() const
+    {
+      return true;
+    }
+    /// \brief Protects the aterms in this class
+    void protect()
+    {
+      // m_data.protect();
+      m_action_labels.protect();
+    }
 
-      /// \brief Returns the right hand side of the rule.
-      /// \return The right hand side of the rule.
-      action_rename_rule_rhs rhs() const
-      {
-        return m_rhs;
-      }
-  };
+    /// \brief Unprotects the aterms in this class
+    void unprotect()
+    {
+      // m_data.unprotect();
+      m_action_labels.unprotect();
+    }
 
-  /// \brief Read-only singly linked list of action rename rules
-  typedef atermpp::term_list<action_rename_rule> action_rename_rule_list;
+    /// \brief Marks the aterms in this class
+    void mark()
+    {
+      // m_data.mark();
+      m_action_labels.mark();
+    }
+};
 
-  /// \brief Action rename specification
-  class action_rename_specification: public atermpp::aterm_appl
-  {
-    protected:
-
-      /// \brief The data specification of the action rename specification
-      data::data_specification m_data;
-
-      /// \brief The action labels of the action rename specification
-      action_label_list        m_action_labels;
-
-      /// \brief The action rename rules of the action rename specification
-      action_rename_rule_list  m_rules;
-
-      /// \brief Initialize the action_rename_specification with an aterm_appl.
-      /// \param t A term
-      void init_term(atermpp::aterm_appl t)
-      {
-        m_term = atermpp::aterm_traits<atermpp::aterm_appl>::term(t);
-        atermpp::aterm_appl::iterator i = t.begin();
-        m_data            = atermpp::aterm_appl(*i++);
-        m_action_labels   = atermpp::aterm_appl(*i++)(0);
-        m_rules           = atermpp::aterm_appl(*i)(0);
-      }
-
-    public:
-      /// \brief Constructor.
-      action_rename_specification()
-        : atermpp::aterm_appl(core::detail::constructActionRenameSpec())
-      { }
-
-      /// \brief Constructor.
-      /// \param t A term
-      action_rename_specification(atermpp::aterm_appl t)
-        : atermpp::aterm_appl(t)
-      {
-        assert(core::detail::check_rule_ActionRenameSpec(m_term));
-        init_term(t);
-      }
-
-      /// \brief Constructor.
-      /// \param data A data specification
-      /// \param action_labels A sequence of action labels
-      /// \param rules A sequence of action rename rules
-      action_rename_specification(data::data_specification const& data, action_label_list action_labels, action_rename_rule_list rules)
-        :
-          m_data(data),
-          m_action_labels(action_labels),
-          m_rules(rules)
-      {
-          m_term = reinterpret_cast<ATerm>(
-          core::detail::gsMakeActionRenameSpec(
-            data::detail::data_specification_to_aterm_data_spec(data),
-            core::detail::gsMakeActSpec(action_labels),
-            core::detail::gsMakeActionRenameRules(rules)
-          )
-        );
-      }
-
-      /// \brief Reads the action rename specification from file.
-      /// \param filename A string
-      /// If filename is nonempty, input is read from the file named filename.
-      /// If filename is empty, input is read from stdin.
-      void load(const std::string& filename)
-      {
-        atermpp::aterm t = core::detail::load_aterm(filename);
-        if (!t || t.type() != AT_APPL || !core::detail::gsIsActionRenameSpec(atermpp::aterm_appl(t)))
-        {
-          throw runtime_error(((filename.empty())?"stdin":("'" + filename + "'")) + " does not contain an action rename specification");
-        }
-        init_term(atermpp::aterm_appl(t));
-        if (!is_well_typed())
-        {
-          throw runtime_error("action rename specification is not well typed (action_rename_specification::load())");
-        }
-      }
-
-      /// \brief Writes the action rename specification to file.
-      /// \param filename A string
-      /// If filename is nonempty, output is written to the file named filename.
-      /// If filename is empty, output is written to stdout.
-      /// \param binary
-      /// If binary is true the linear process is saved in compressed binary format.
-      /// Otherwise an ascii representation is saved. In general the binary format is
-      /// much more compact than the ascii representation.
-      void save(const std::string& filename, bool binary = true)
-      {
-        if (!is_well_typed())
-        {
-          throw runtime_error("action rename specification is not well typed (action_rename_specification::save())");
-        }
-        core::detail::save_aterm(m_term, filename, binary);
-      }
-
-      /// \brief Returns the data action_rename_specification.
-      /// \return The data action_rename_specification.
-      data::data_specification data() const
-      { return m_data; }
-
-      /// \brief Returns the sequence of action labels
-      /// \return A sequence of action labels containing all action
-      /// labels occurring in the action_rename_specification (but it can have more).
-      action_label_list action_labels() const
-      { return m_action_labels; }
-
-      /// \brief Returns the action rename rules.
-      /// \return The action rename rules.
-      action_rename_rule_list rules() const
-      {
-        return m_rules;
-      }
-
-      /// \brief Indicates whether the action_rename_specification is well typed.
-      /// \return Always returns true.
-      bool is_well_typed() const
-      {
-        return true;
-      }
-  };
+}
+}
 
 /// \cond INTERNAL_DOCS
-  namespace detail {
-    /// \brief Reads an action rename specification from a stream
-    /// \param from An input stream
-    /// \return A term in an undocumented format
-    inline
-    ATermAppl parse_action_rename_specification(std::istream& from)
-    {
-      ATermAppl result = core::parse_action_rename_spec(from);
-      if (result == NULL)
-         throw runtime_error("parse error");
-      return result;
-    }
-
-    /// \brief Type checks an action rename specification
-    /// \param ar_spec A term
-    /// \param spec A term
-    /// \return A term in an undocumented format
-    inline
-    ATermAppl type_check_action_rename_specification(ATermAppl ar_spec, ATermAppl spec)
-    {
-      ATermAppl result = core::type_check_action_rename_spec(ar_spec, spec);
-      if (result == NULL)
-        throw runtime_error("type check error");
-      return result;
-    }
-
-    /// \brief Renames variables
-    /// \param rcond A data expression
-    /// \param rleft An action
-    /// \param rright An action
-    /// \param generator A generator for fresh identifiers
-    template <typename IdentifierGenerator>
-    void rename_renamerule_variables(data::data_expression& rcond, lps::action& rleft, lps::action& rright, IdentifierGenerator& generator)
-    {
-      atermpp::map< data::variable, data::variable > renamings;
-
-      std::set< data::variable > new_vars = data::find_variables(rleft.arguments());
-
-      for (std::set< data::variable >::const_iterator i = new_vars.begin(); i != new_vars.end(); ++i)
-      {
-        mcrl2::core::identifier_string new_name = generator(i->name());
-
-        if (new_name != i->name())
-        {
-          renamings[*i] = data::variable(new_name, i->sort());
-        }
-      }
-
-      lps::substitute(rcond, mcrl2::data::make_map_substitution_adapter(renamings));
-      lps::substitute(rleft, mcrl2::data::make_map_substitution_adapter(renamings));
-      lps::substitute(rright, mcrl2::data::make_map_substitution_adapter(renamings));
-    }
-
-  } // namespace detail
-  /// \endcond
-
-  /// \brief Parses an action rename specification.
-  /// Parses an acion rename specification.
-  /// If the action rename specification contains data types that are not
-  /// present in the data specification of \p spec they are added to it.
-  /// \param in An input stream
-  /// \param spec A linear process specification
-  /// \return An action rename specification
-  inline
-  action_rename_specification parse_action_rename_specification(
-                                 std::istream& in,
-                                 lps::specification const& spec)
+namespace atermpp
+{
+template<>
+struct aterm_traits<mcrl2::lps::action_rename_rule_rhs>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::action_rename_rule_rhs t)
   {
-    //std::istringstream in(text);
-    ATermAppl result = detail::parse_action_rename_specification(in);
-    lps::specification copy_specification(spec);
-    /* copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data()); */
-    ATermAppl lps_spec = specification_to_aterm(copy_specification);
-    result           = detail::type_check_action_rename_specification(result, lps_spec);
-    result           = data::detail::internal_format_conversion_term(result,spec.data());
-    return action_rename_specification(result);
+    t.act().protect();
   }
+  static void unprotect(mcrl2::lps::action_rename_rule_rhs t)
+  {
+    t.act().unprotect();
+  }
+  static void mark(mcrl2::lps::action_rename_rule_rhs t)
+  {
+    t.act().mark();
+  }
+  //static ATerm term(mcrl2::lps::action_rename_rule_rhs t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::action_rename_rule_rhs& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<mcrl2::lps::action_rename_rule>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::action_rename_rule t)
+  {
+    t.protect();
+  }
+  static void unprotect(mcrl2::lps::action_rename_rule t)
+  {
+    t.unprotect();
+  }
+  static void mark(mcrl2::lps::action_rename_rule t)
+  {
+    t.mark();
+  }
+  //static ATerm term(mcrl2::lps::action_rename_rule t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::action_rename_rule& t)    { return &t.term(); }
+};
+
+template<>
+struct aterm_traits<mcrl2::lps:: action_rename_specification>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::lps::action_rename_specification t)
+  {
+    t.protect();
+  }
+  static void unprotect(mcrl2::lps::action_rename_specification t)
+  {
+    t.unprotect();
+  }
+  static void mark(mcrl2::lps::action_rename_specification t)
+  {
+    t.mark();
+  }
+  //static ATerm term(mcrl2::lps::action_rename_specification t)     { return t.term(); }
+  //static ATerm* ptr(mcrl2::lps::action_rename_specification& t)    { return &t.term(); }
+};
+} // namespace atermpp
+/// \endcond
+
+namespace mcrl2
+{
+
+namespace lps
+{
+
+/// \cond INTERNAL_DOCS
+namespace detail
+{
+/// \brief Reads an action rename specification from a stream
+/// \param from An input stream
+/// \return A term in an undocumented format
+inline
+ATermAppl parse_action_rename_specification(std::istream& from)
+{
+  ATermAppl result = core::parse_action_rename_spec(from);
+  if (result == NULL)
+  {
+    throw runtime_error("parse error");
+  }
+  return result;
+}
+
+/// \brief Type checks an action rename specification
+/// \param ar_spec A term
+/// \param spec A term
+/// \return A term in an undocumented format
+inline
+ATermAppl type_check_action_rename_specification(ATermAppl ar_spec, ATermAppl spec)
+{
+  ATermAppl result = core::type_check_action_rename_spec(ar_spec, spec);
+  if (result == NULL)
+  {
+    throw runtime_error("type check error");
+  }
+  return result;
+}
+
+/// \brief Renames variables
+/// \param rcond A data expression
+/// \param rleft An action
+/// \param rright An action
+/// \param generator A generator for fresh identifiers
+template <typename IdentifierGenerator>
+void rename_renamerule_variables(data::data_expression& rcond, lps::action& rleft, lps::action& rright, IdentifierGenerator& generator)
+{
+  atermpp::map< data::variable, data::variable > renamings;
+
+  std::set< data::variable > new_vars = data::find_variables(rleft.arguments());
+
+  for (std::set< data::variable >::const_iterator i = new_vars.begin(); i != new_vars.end(); ++i)
+  {
+    mcrl2::core::identifier_string new_name = generator(i->name());
+
+    if (new_name != i->name())
+    {
+      renamings[*i] = data::variable(new_name, i->sort());
+    }
+  }
+
+  rcond = data::replace_free_variables(rcond, mcrl2::data::make_map_substitution(renamings));
+  rleft = lps::replace_free_variables(rleft, mcrl2::data::make_map_substitution(renamings));
+  rright = lps::replace_free_variables(rright, mcrl2::data::make_map_substitution(renamings));
+}
+
+action translate_user_notation_and_normalise_sorts_action(
+  const action &a,
+  data::data_specification& data_spec)
+{
+  return lps::normalize_sorts(lps::translate_user_notation(a),data_spec);
+}
+
+action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(
+  const action_rename_rule_rhs& arr,
+  data::data_specification& data_spec)
+{
+  if (arr.is_delta() || arr.is_tau())
+  {
+    return arr;
+  }
+
+  return translate_user_notation_and_normalise_sorts_action(arr.act(),data_spec);
+}
+
+
+action_rename_specification translate_user_notation_and_normalise_sorts_action_rename_spec(const action_rename_specification& ars)
+{
+  data::data_specification data_spec=ars.data();
+  data_spec.declare_data_specification_to_be_type_checked();
+  const action_label_list al=lps::normalize_sorts(ars.action_labels(),data_spec);
+
+  atermpp::vector<action_rename_rule> l(ars.rules());
+  for (atermpp::vector<action_rename_rule>::iterator i=l.begin();
+       i!=l.end(); ++i)
+  {
+    *i = action_rename_rule(data::normalize_sorts(i->variables(),data_spec),
+                            data::normalize_sorts(data::translate_user_notation(i->condition()),data_spec),
+                            translate_user_notation_and_normalise_sorts_action(i->lhs(),data_spec),
+                            translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(i->rhs(),data_spec));
+  }
+
+  return action_rename_specification(data_spec,al,l);
+}
+
+
+} // namespace detail
+/// \endcond
+
+/// \brief Parses an action rename specification.
+/// Parses an acion rename specification.
+/// If the action rename specification contains data types that are not
+/// present in the data specification of \p spec they are added to it.
+/// \param in An input stream
+/// \param spec A linear process specification
+/// \return An action rename specification
+inline
+action_rename_specification parse_action_rename_specification(
+  std::istream& in,
+  lps::specification const& spec)
+{
+  ATermAppl result = detail::parse_action_rename_specification(in);
+  // lps::specification copy_specification(spec);
+  /* copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data()); */
+  ATermAppl lps_spec = specification_to_aterm(spec);
+  result           = detail::type_check_action_rename_specification(result, lps_spec);
+  action_rename_specification result_act(result);
+  return detail::translate_user_notation_and_normalise_sorts_action_rename_spec(result_act);
+}
 
 
 /// \brief  Rename the actions in a linear specification using a given action_rename_spec
@@ -384,50 +546,39 @@ namespace lps {
 /// \return The lps_old_spec where all actions have been renamed according
 ///         to action_rename_spec.
 lps::specification action_rename(
-            const action_rename_specification &action_rename_spec,
-            const lps::specification &lps_old_spec)
+  const action_rename_specification& action_rename_spec,
+  const lps::specification& lps_old_spec)
 {
   using namespace mcrl2::core;
   using namespace mcrl2::data;
   using namespace mcrl2::lps;
   using namespace std;
 
-  action_rename_rule_list rename_rules = action_rename_spec.rules();
-  summand_list lps_old_summands = lps_old_spec.process().summands();
-  summand_list lps_summands; //for changes in lps_old_summands
+  const atermpp::vector <action_rename_rule> rename_rules = action_rename_spec.rules();
+  action_summand_vector lps_old_action_summands = lps_old_spec.process().action_summands();
+  deadlock_summand_vector lps_deadlock_summands = lps_old_spec.process().deadlock_summands();
   action_list lps_new_actions;
 
   data::postfix_identifier_generator generator("");
-  generator.add_to_context(specification_to_aterm(lps_old_spec));
-
-  bool to_tau=false;
-  bool to_delta=false;
+  generator.add_identifiers(lps::find_identifiers(lps_old_spec));
 
   //go through the rename rules of the rename file
   if (gsDebug)
-  { std::cerr << "Rename rules found: " << rename_rules.size() << "\n";
-  }
-  for(action_rename_rule_list::iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
   {
-    summand_list lps_new_summands;
+    std::cerr << "Rename rules found: " << rename_rules.size() << "\n";
+  }
+  for (atermpp::vector <action_rename_rule>::const_iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
+  {
+    action_summand_vector lps_new_action_summands;
 
     data_expression rule_condition = i->condition();
     action rule_old_action =  i->lhs();
     action rule_new_action;
     action_rename_rule_rhs new_element = i->rhs();
 
-    if(is_action(new_element))
-    {
-      rule_new_action =  action(new_element);
-      to_tau = false;
-      to_delta = false;
-    }
-    else
-    {
-      rule_new_action = action();
-      if(mcrl2::core::detail::gsIsTau(new_element)){ to_tau = true; to_delta = false;}
-      else if (mcrl2::core::detail::gsIsDelta(new_element)){ to_tau = false; to_delta = true;}
-    }
+    rule_new_action =  new_element.act();
+    const bool to_tau = new_element.is_tau();
+    const bool to_delta = new_element.is_delta();
 
     // Check here that the arguments of the rule_old_action only consist
     // of uniquely occurring variables or closed terms. Furthermore, check that the variables
@@ -439,14 +590,16 @@ lps::specification action_rename(
     // first check that the arguments of rule_old_action are variables or closed
     // terms.
 
-    for(data_expression_list::iterator
-                       rule_old_argument_i = rule_old_action.arguments().begin();
-                       rule_old_argument_i != rule_old_action.arguments().end();
-                       rule_old_argument_i++)
-    { if (!is_variable(*rule_old_argument_i) &&
+    for (data_expression_list::iterator
+         rule_old_argument_i = rule_old_action.arguments().begin();
+         rule_old_argument_i != rule_old_action.arguments().end();
+         rule_old_argument_i++)
+    {
+      if (!is_variable(*rule_old_argument_i) &&
           (!(data::find_variables(*rule_old_argument_i).empty())))
-      { throw mcrl2::runtime_error("The arguments of the lhs " + core::pp(rule_old_action) +
-                          " are not variables or closed expressions");
+      {
+        throw mcrl2::runtime_error("The arguments of the lhs " + core::pp(rule_old_action) +
+                                   " are not variables or closed expressions");
       }
     }
 
@@ -456,45 +609,51 @@ lps::specification action_rename(
 
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_new_rule.begin(),variables_in_new_rule.end()))
-    { throw mcrl2::runtime_error("There are variables occurring in rhs " + core::pp(rule_new_action) +
-                   " of a rename rule not occurring in lhs " + core::pp(rule_old_action));
+    {
+      throw mcrl2::runtime_error("There are variables occurring in rhs " + core::pp(rule_new_action) +
+                                 " of a rename rule not occurring in lhs " + core::pp(rule_old_action));
     }
 
     // Check whether the variables in condition are included in the lefthandside.
     std::set < variable > variables_in_condition = data::find_free_variables(rule_condition);
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_condition.begin(),variables_in_condition.end()))
-    { throw mcrl2::runtime_error("There are variables occurring in the condition " + core::pp(rule_condition) +
-                   " of a rename rule not occurring in lhs " + core::pp(rule_old_action));
+    {
+      throw mcrl2::runtime_error("There are variables occurring in the condition " + core::pp(rule_condition) +
+                                 " of a rename rule not occurring in lhs " + core::pp(rule_old_action));
     }
 
     // check for double occurrences of variables in the lhs. Note that variables_in_old_rule
     // is empty at the end.
-    for(data_expression_list::iterator i=rule_old_action.arguments().begin() ;
-                     i!=rule_old_action.arguments().end() ; i++)
-    { if (is_variable(*i))
-      { if (variables_in_old_rule.find(*i)==variables_in_old_rule.end())
-        { throw mcrl2::runtime_error("Variable " + core::pp(*i) + " occurs more than once in lhs " +
-                       core::pp(rule_old_action) + " of an action rename rule");
+    for (data_expression_list::iterator i=rule_old_action.arguments().begin() ;
+         i!=rule_old_action.arguments().end() ; i++)
+    {
+      if (is_variable(*i))
+      {
+        if (variables_in_old_rule.find(*i)==variables_in_old_rule.end())
+        {
+          throw mcrl2::runtime_error("Variable " + core::pp(*i) + " occurs more than once in lhs " +
+                                     core::pp(rule_old_action) + " of an action rename rule");
         }
         else
-        { variables_in_old_rule.erase(*i);
+        {
+          variables_in_old_rule.erase(*i);
         }
       }
     }
     assert(variables_in_old_rule.empty());
 
 
-    lps_summands = summand_list();
     //go through the summands of the old lps
     if (gsDebug)
-    { std::cerr << "Summands found: " << lps_old_summands.size() << "\n";
-    }
-    for(summand_list::iterator losi = lps_old_summands.begin();
-                                    losi != lps_old_summands.end(); ++losi)
     {
-      summand lps_old_summand = *losi;
-      action_list lps_old_actions = lps_old_summand.actions();
+      std::cerr << "Action summands found: " << lps_old_action_summands.size() << "\n";
+    }
+    for (action_summand_vector::const_iterator losi = lps_old_action_summands.begin();
+         losi != lps_old_action_summands.end(); ++losi)
+    {
+      action_summand lps_old_action_summand = *losi;
+      action_list lps_old_actions = lps_old_action_summand.multi_action().actions();
 
       /* For each individual action in the multi-action, for which the
          rename rule applies, two new summands must be made, namely one
@@ -503,24 +662,27 @@ lps::specification action_rename(
          with k summands 2^k new summands can result. */
 
       atermpp::vector < variable_list >
-                           lps_new_sum_vars(1,lps_old_summand.summation_variables());
+      lps_new_sum_vars(1,lps_old_action_summand.summation_variables());
       atermpp::vector < data_expression >
-                         lps_new_condition(1,lps_old_summand.condition());
-      atermpp::vector < std::pair <bool, action_list > >
-                           lps_new_actions(1,std::make_pair(lps_old_summand.is_delta(),action_list()));
+      lps_new_condition(1,lps_old_action_summand.condition());
+      atermpp::vector < action_list >
+      lps_new_actions(1,action_list());
+      std::vector < bool > lps_new_actions_is_delta(1,false);
 
       if (gsDebug)
-      { std::cerr << "Actions in summand found: " << lps_old_actions.size() << "\n";
+      {
+        std::cerr << "Actions in summand found: " << lps_old_actions.size() << "\n";
       }
-      for(action_list::iterator loai = lps_old_actions.begin();
-                loai != lps_old_actions.end(); loai++)
+      for (action_list::iterator loai = lps_old_actions.begin();
+           loai != lps_old_actions.end(); loai++)
       {
         action lps_old_action = *loai;
-        //std::cerr << "Considering " << lps_old_action << "\nand " << rule_old_action << "\n";
+
         if (equal_signatures(lps_old_action, rule_old_action))
         {
           if (gsDebug)
-          { std::cerr << "Renaming action " << core::pp(rule_old_action) << "\n";
+          {
+            std::cerr << "Renaming action " << core::pp(rule_old_action) << "\n";
           }
 
           //rename all previously used variables
@@ -529,110 +691,137 @@ lps::specification action_rename(
           action renamed_rule_new_action=rule_new_action;
           detail::rename_renamerule_variables(renamed_rule_condition, renamed_rule_old_action, renamed_rule_new_action, generator);
 
-          /*
-          if (is_nil(renamed_rule_condition))
-          { renamed_rule_condition=sort_bool::true_();
-          }
-          */ // JK 15/10/2009 condition is always a data expression
-
           //go through the arguments of the action
           data_expression_list::iterator
-                    lps_old_argument_i = lps_old_action.arguments().begin();
+          lps_old_argument_i = lps_old_action.arguments().begin();
           data_expression new_equalities_condition=sort_bool::true_();
-          for(data_expression_list::iterator
-                       rule_old_argument_i = renamed_rule_old_action.arguments().begin();
-                       rule_old_argument_i != renamed_rule_old_action.arguments().end();
-                       rule_old_argument_i++)
-          { if (is_variable(*rule_old_argument_i))
+          for (data_expression_list::iterator
+               rule_old_argument_i = renamed_rule_old_action.arguments().begin();
+               rule_old_argument_i != renamed_rule_old_action.arguments().end();
+               rule_old_argument_i++)
+          {
+            if (is_variable(*rule_old_argument_i))
             {
               new_equalities_condition=lazy::and_(new_equalities_condition,
-                               data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+                                                  data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             else
-            { assert((data::find_variables(*rule_old_argument_i).empty())); // the argument must be closed,
-                                                                               // which is checked above.
+            {
+              assert((data::find_variables(*rule_old_argument_i).empty())); // the argument must be closed,
+              // which is checked above.
               renamed_rule_condition=
-                        lazy::and_(renamed_rule_condition,
-                             data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
+                lazy::and_(renamed_rule_condition,
+                           data::equal_to(*rule_old_argument_i, *lps_old_argument_i));
             }
             lps_old_argument_i++;
           }
 
           /* insert the new equality condition in all the newly generated summands */
           for (atermpp::vector < data_expression > :: iterator i=lps_new_condition.begin() ;
-                       i!=lps_new_condition.end() ; i++ )
-          { *i=lazy::and_(*i,new_equalities_condition);
+               i!=lps_new_condition.end() ; i++)
+          {
+            *i=lazy::and_(*i,new_equalities_condition);
           }
 
           /* insert the new sum variables in all the newly generated summands */
           std::set<variable> new_vars = find_variables(renamed_rule_old_action);
-          for(std::set<variable>::iterator sdvi = new_vars.begin();
-                         sdvi != new_vars.end(); sdvi++)
+          for (std::set<variable>::iterator sdvi = new_vars.begin();
+               sdvi != new_vars.end(); sdvi++)
           {
-            for ( atermpp::vector < variable_list > :: iterator i=lps_new_sum_vars.begin() ;
-                        i!=lps_new_sum_vars.end() ; i++ )
-            { *i = push_front(*i, *sdvi);
+            for (atermpp::vector < variable_list > :: iterator i=lps_new_sum_vars.begin() ;
+                 i!=lps_new_sum_vars.end() ; i++)
+            {
+              *i = push_front(*i, *sdvi);
             }
           }
 
           if (renamed_rule_condition==sort_bool::true_())
           {
             if (to_delta)
-            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator
-                      i=lps_new_actions.begin() ;
-                      i!=lps_new_actions.end() ; i++ )
-              { *i=std::make_pair(true,action_list()); /* the action becomes delta */
+            {
+              std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+              for (atermpp::vector < action_list > :: iterator
+                   i=lps_new_actions.begin() ;
+                   i!=lps_new_actions.end() ; ++i,++i_is_delta)
+              {
+                *i=action_list(); /* the action becomes delta */
+                *i_is_delta=true;
               }
             }
             else if (!to_tau)
-            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
-                        i!=lps_new_actions.end() ; i++ )
-              { if (!((*i).first)) // the action is not delta
-                { *i=std::make_pair(false,push_front((*i).second,renamed_rule_new_action));
+            {
+              std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+              for (atermpp::vector < action_list > :: iterator i=lps_new_actions.begin() ;
+                   i!=lps_new_actions.end() ; ++i,++i_is_delta)
+              {
+                if (!*i_is_delta) // the action is not delta
+                {
+                  *i=push_front(*i,renamed_rule_new_action);
+                  *i_is_delta=false;
                 }
               }
             }
           }
           else if (renamed_rule_condition==sort_bool::false_())
           {
-            for(atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
-                        i!=lps_new_actions.end() ; i++ )
-            { if (!((*i).first)) // The action does not equal delta.
-              { *i=std::make_pair(false,push_front((*i).second,lps_old_action));
+            std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+            for (atermpp::vector < action_list > :: iterator i=lps_new_actions.begin() ;
+                 i!=lps_new_actions.end() ; ++i,++i_is_delta)
+            {
+              if (!*i_is_delta) // The action does not equal delta.
+              {
+                *i=push_front(*i,lps_old_action);
+                *i_is_delta=false;
               }
             }
 
           }
           else
-          { /* Duplicate summands, one where the renaming is applied, and one where it is not
+          {
+            /* Duplicate summands, one where the renaming is applied, and one where it is not
                applied. */
 
-            atermpp::vector < std::pair <bool, action_list > > lps_new_actions_temp(lps_new_actions);
+            atermpp::vector < action_list > lps_new_actions_temp(lps_new_actions);
+            std::vector < bool > lps_new_actions_is_delta_temp(lps_new_actions_is_delta);
 
             if (!to_tau) // if the new element is tau, we do not insert it in the multi-action.
-            { for(atermpp::vector < std::pair <bool, action_list > > :: iterator
-                        i=lps_new_actions.begin() ;
-                        i!=lps_new_actions.end() ; i++ )
-              { if (to_delta)
-                { *i=std::make_pair(true,action_list());
+            {
+              std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+              for (atermpp::vector < action_list > :: iterator
+                   i=lps_new_actions.begin() ;
+                   i!=lps_new_actions.end() ; ++i,++i_is_delta)
+              {
+                if (to_delta)
+                {
+                  *i=action_list();
+                  *i_is_delta=true;
                 }
                 else
-                { *i=std::make_pair(false,push_front(i->second,renamed_rule_new_action));
+                {
+                  *i=push_front(*i,renamed_rule_new_action);
+                  *i_is_delta=false;
                 }
               }
             }
 
-            for(atermpp::vector < std::pair <bool, action_list > > :: iterator
-                        i=lps_new_actions_temp.begin() ;
-                        i!=lps_new_actions_temp.end() ; i++ )
-            { if (!(i->first)) // The element is not equal to delta
-              { *i=std::make_pair(false,push_front(i->second,lps_old_action));
+            std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta_temp.begin();
+            for (atermpp::vector < action_list > :: iterator
+                 i=lps_new_actions_temp.begin() ;
+                 i!=lps_new_actions_temp.end() ; ++i,++i_is_delta)
+            {
+              if (!*i_is_delta) // The element is not equal to delta
+              {
+                *i=push_front(*i,lps_old_action);
+                *i_is_delta=false;
               }
             }
 
             lps_new_actions.insert(lps_new_actions.end(),
                                    lps_new_actions_temp.begin(),
                                    lps_new_actions_temp.end());
+            lps_new_actions_is_delta.insert(lps_new_actions_is_delta.end(),
+                                            lps_new_actions_is_delta_temp.begin(),
+                                            lps_new_actions_is_delta_temp.end());
 
 
             /* lps_new_condition_temp will contain the conditions in conjunction with
@@ -642,13 +831,15 @@ lps::specification action_rename(
             atermpp::vector < data_expression > lps_new_condition_temp(lps_new_condition);
 
             for (atermpp::vector < data_expression > :: iterator i=lps_new_condition.begin() ;
-                         i!=lps_new_condition.end() ; i++ )
-            { *i=lazy::and_(*i,renamed_rule_condition);
+                 i!=lps_new_condition.end() ; i++)
+            {
+              *i=lazy::and_(*i,renamed_rule_condition);
             }
 
             for (atermpp::vector < data_expression > :: iterator i=lps_new_condition_temp.begin() ;
-                         i!=lps_new_condition_temp.end() ; i++ )
-            { *i=lazy::and_(*i,sort_bool::not_(renamed_rule_condition));
+                 i!=lps_new_condition_temp.end() ; i++)
+            {
+              *i=lazy::and_(*i,sort_bool::not_(renamed_rule_condition));
             }
 
             lps_new_condition.insert(lps_new_condition.end(),
@@ -663,64 +854,85 @@ lps::specification action_rename(
 
         }//end if(equal_signatures(...))
         else
-        { for ( atermpp::vector < std::pair <bool, action_list > > :: iterator i=lps_new_actions.begin() ;
-                i!=lps_new_actions.end() ; i++ )
-          { *i = std::make_pair((*i).first,push_front((*i).second, lps_old_action));
+        {
+          std::vector < bool >::iterator i_is_delta=lps_new_actions_is_delta.begin();
+          for (atermpp::vector < action_list > :: iterator i=lps_new_actions.begin() ;
+               i!=lps_new_actions.end() ; ++i,++i_is_delta)
+          {
+            *i = push_front(*i, lps_old_action);
           }
         }
         if (gsDebug)
-        { std::cerr << "Action done\n";
+        {
+          std::cerr << "Action done\n";
         }
 
       } //end of action list iterator
 
-      /* Add the summands to lps_new_summands */
+      /* Add the summands to lps_new_action_summands or to the deadlock summands*/
 
-      atermpp::vector < std::pair <bool, action_list > > :: iterator i_act=lps_new_actions.begin();
+      atermpp::vector < action_list > :: iterator i_act=lps_new_actions.begin();
+      std::vector < bool > :: iterator i_act_is_delta=lps_new_actions_is_delta.begin();
       atermpp::vector < variable_list > :: iterator i_sumvars=lps_new_sum_vars.begin();
-      for( atermpp::vector < data_expression > :: iterator i_cond=lps_new_condition.begin() ;
+      for (atermpp::vector < data_expression > :: iterator i_cond=lps_new_condition.begin() ;
            i_cond!=lps_new_condition.end() ; i_cond++)
-      { //create a summand for the new lps
-        summand lps_new_summand = summand( *i_sumvars,
-                                           *i_cond,
-                                           (*i_act).first,
-                                           reverse((*i_act).second),
-                                           lps_old_summand.time(),
-                                           lps_old_summand.assignments());
-        lps_new_summands = push_front(lps_new_summands, lps_new_summand);
+      {
+        //create a summand for the new lps
+        if (*i_act_is_delta)
+        {
+          // Create a deadlock summand.
+          const deadlock_summand d(*i_sumvars,
+                                   *i_cond,
+                                   deadlock(lps_old_action_summand.multi_action().time()));
+          lps_deadlock_summands.push_back(d);
+        }
+        else
+        {
+          // create an action summand.
+          action_summand lps_new_summand(*i_sumvars,
+                                         *i_cond,
+                                         multi_action(reverse(*i_act), lps_old_action_summand.multi_action().time()),
+                                         lps_old_action_summand.assignments());
+          lps_new_action_summands.push_back(lps_new_summand);
+        }
         i_act++;
         i_sumvars++;
       }
     } // end of summand list iterator
-    lps_old_summands = lps_new_summands;
+    lps_old_action_summands = lps_new_action_summands;
   } //end of rename rule iterator
 
   if (gsDebug)
-  { std::cerr << "Simplifying the result...\n";
+  {
+    std::cerr << "Simplifying the result...\n";
   }
 
-  linear_process new_process = lps_old_spec.process();
-  new_process.set_summands(lps_old_summands); // These are the renamed sumands.
+  linear_process new_process(lps_old_spec.process().process_parameters(),
+                             lps_deadlock_summands,
+                             lps_old_action_summands);
 
   // add action_rename_spec.action_labels to action_rename_spec.action_labels without adding duplates.
   action_label_list all=action_rename_spec.action_labels();
-  for(action_label_list::const_iterator i=lps_old_spec.action_labels().begin();
-           i!=lps_old_spec.action_labels().end(); ++i)
-  { if (find(action_rename_spec.action_labels().begin(),
+  for (action_label_list::const_iterator i=lps_old_spec.action_labels().begin();
+       i!=lps_old_spec.action_labels().end(); ++i)
+  {
+    if (find(action_rename_spec.action_labels().begin(),
              action_rename_spec.action_labels().end(),*i)==action_rename_spec.action_labels().end())
-    { // Not found;
+    {
+      // Not found;
       all=push_front(all,*i);
     }
   }
   specification lps_new_spec = specification(
-                                          lps_old_spec.data(),
-                                          all,
-                                          lps_old_spec.global_variables(),
-                                          new_process,
-                                          lps_old_spec.initial_process());
+                                 lps_old_spec.data(),
+                                 all,
+                                 lps_old_spec.global_variables(),
+                                 new_process,
+                                 lps_old_spec.initial_process());
 
   if (gsDebug)
-  { std::cerr << "New lps complete\n";
+  {
+    std::cerr << "New lps complete\n";
   }
   return lps_new_spec;
 } //end of rename(...)

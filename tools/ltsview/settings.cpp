@@ -13,6 +13,7 @@
 
 #include <map>
 #include <vector>
+#include "enums.h"
 #include "rgb_color.h"
 #include "settings.h"
 
@@ -28,7 +29,10 @@ class AbsSetting
   public:
     AbsSetting(SettingID i): id(i) {}
     virtual ~AbsSetting() {}
-    void subscribe(Subscriber* ss) { subscribers.push_back(ss); }
+    void subscribe(Subscriber* ss)
+    {
+      subscribers.push_back(ss);
+    }
     virtual void reset() {}
 };
 
@@ -52,9 +56,12 @@ template< class T > class Setting: public AbsSetting
     Setting(SettingID i, T dv): AbsSetting(i), def_value(dv), value(dv) {}
 
     ~Setting() {}
-    
-    T getValue() { return value; }
-    
+
+    T getValue()
+    {
+      return value;
+    }
+
     void setValue(T v)
     {
       if (value != v)
@@ -63,8 +70,11 @@ template< class T > class Setting: public AbsSetting
         notify_all();
       }
     }
-    
-    void reset() { setValue(def_value); }
+
+    void reset()
+    {
+      setValue(def_value);
+    }
 };
 
 /* -------------------------------------------------------------------------- */
@@ -72,16 +82,18 @@ template< class T > class Setting: public AbsSetting
 Settings::Settings() { }
 
 void Settings::loadDefaults()
-{ 
+{
   settings[StateSize] = new Setting<float>(StateSize, 0.1f);
   settings[BranchRotation] = new Setting<int>(BranchRotation, 0);
   settings[ClusterHeight] = new Setting<float>(ClusterHeight, 0.0f);
   settings[BranchTilt] = new Setting<int>(BranchTilt, 30);
   settings[Quality] = new Setting<int>(Quality, 12);
-  settings[TransitionAttraction] = new Setting<float>(TransitionAttraction, 1.0f);
-  settings[TransitionLength] = new Setting<float>(TransitionLength, 1.0f);
-  settings[StateRepulsion] = new Setting<float>(StateRepulsion, 1.0f);
   settings[Alpha] = new Setting<int>(Alpha, 178);
+  settings[StateRankStyle] = new Setting<RankStyle>(StateRankStyle, ITERATIVE);
+  settings[ClusterVisStyle] = new Setting<VisStyle>(ClusterVisStyle, CONES);
+  settings[StatePosStyle] = new Setting<StatePositioningStyle>(StatePosStyle,
+      SINGLE_PASS);
+  settings[FsmStyle] = new Setting<bool>(FsmStyle, false);
   settings[LongInterpolation] = new Setting<bool>(LongInterpolation, false);
   settings[DisplayBackpointers] = new Setting<bool>(DisplayBackpointers, false);
   settings[DisplayStates] = new Setting<bool>(DisplayStates, false);
@@ -93,7 +105,8 @@ void Settings::loadDefaults()
   settings[NavSmoothShading] = new Setting<bool>(NavSmoothShading, true);
   settings[NavLighting] = new Setting<bool>(NavLighting, true);
   settings[NavTransparency] = new Setting<bool>(NavTransparency, true);
-  settings[DownEdgeColor] = new Setting<RGB_Color>(DownEdgeColor, RGB_Color(255, 255, 255));
+  settings[DownEdgeColor] = new Setting<RGB_Color>(DownEdgeColor, RGB_Color(255,
+      255, 255));
   settings[UpEdgeColor] = new Setting<RGB_Color>(UpEdgeColor, RGB_Color(0, 0, 255));
   settings[InterpolateColor1] = new Setting<RGB_Color>(InterpolateColor1, RGB_Color(255, 255, 255));
   settings[InterpolateColor2] = new Setting<RGB_Color>(InterpolateColor2, RGB_Color(0, 0, 255));
@@ -109,7 +122,7 @@ void Settings::loadDefaults()
 Settings::~Settings()
 {
   for (map<SettingID, AbsSetting*>::iterator i = settings.begin();
-      i != settings.end(); ++i)
+       i != settings.end(); ++i)
   {
     delete i->second;
   }
@@ -135,7 +148,8 @@ float Settings::getFloat(SettingID s)
   return static_cast<Setting<float>*>(settings[s])->getValue();
 }
 
-RGB_Color Settings::getRGB(SettingID s) {
+RGB_Color Settings::getRGB(SettingID s)
+{
   return static_cast<Setting<RGB_Color>*>(settings[s])->getValue();
 }
 

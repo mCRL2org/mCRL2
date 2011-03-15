@@ -15,117 +15,123 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/enum/enumerator.h"
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
-typedef struct {
-	ATermList vars;
-	ATermList vals;
-	ATerm expr;
+typedef struct
+{
+  ATermList vars;
+  ATermList vals;
+  ATerm expr;
 } fs_expr;
 
 class EnumeratorSolutionsStandard;
 
-typedef struct {
-		Rewriter *rewr_obj;
+typedef struct
+{
+  Rewriter* rewr_obj;
 
-		ATermTable constructors;
-		ATerm rewr_true, rewr_false;
+  ATermTable constructors;
+  ATerm rewr_true, rewr_false;
 
-		int *max_vars;
+  int* max_vars;
 
-		ATerm opidAnd;
-		ATermIndexedSet eqs;
-		AFun tupAFun;
+  ATerm opidAnd;
+  ATermIndexedSet eqs;
+  AFun tupAFun;
 
-		bool (EnumeratorSolutionsStandard::*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);
-		ATerm (EnumeratorSolutionsStandard::*build_solution_aux)(ATerm,ATermList);
+  bool (EnumeratorSolutionsStandard::*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);
+  ATerm(EnumeratorSolutionsStandard::*build_solution_aux)(ATerm,ATermList);
 } enumstd_info;
 
 class EnumeratorStandard : public Enumerator
 {
-	public:
-		EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter *r, bool clean_up_rewriter = false);
-		~EnumeratorStandard();
+  public:
+    EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter = false);
+    ~EnumeratorStandard();
 
-		ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);
+    ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);
 
-		EnumeratorSolutions *findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutions *old = NULL);
-		EnumeratorSolutions *findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions *old = NULL);
+    EnumeratorSolutions* findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutions* old = NULL);
+    EnumeratorSolutions* findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions* old = NULL);
 
-		Rewriter *getRewriter();
-                enumstd_info& getInfo() {
-                  return info;
-                }
+    Rewriter* getRewriter();
+    enumstd_info& getInfo()
+    {
+      return info;
+    }
 
-	private:
-		bool clean_up_rewr_obj;
+  private:
+    bool clean_up_rewr_obj;
 
-		enumstd_info info;
+    enumstd_info info;
 
-		int max_vars;
+    int max_vars;
 };
 
 class EnumeratorSolutionsStandard : public EnumeratorSolutions
 {
-	public:
-		EnumeratorSolutionsStandard(enumstd_info &Info) : info(Info), enum_vars(0), enum_expr(0), fs_stack(0), fs_stack_size(0), ss_stack(0), ss_stack_size(0)
-                {
-                  ATprotectList(&enum_vars);
-                  ATprotect(&enum_expr);
-                }
-
-		EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const&other);
-		EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info &Info);
-		~EnumeratorSolutionsStandard();
-
-		bool next(ATermList *solution);
-		// bool errorOccurred();
-
-		void reset(ATermList Vars, ATerm Expr, bool true_only);
-
-		bool FindInner3Equality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
-		bool FindInnerCEquality(ATerm t, ATermList vars, ATerm *v, ATerm *e);
-		ATerm build_solution_aux_innerc(ATerm t, ATermList substs);
-		ATerm build_solution_aux_inner3(ATerm t, ATermList substs);
-	private:
-		enumstd_info info;
-
-		ATermList enum_vars;
-		ATerm enum_expr;
-
-		bool check_true;
-		// bool error;
-
-		int used_vars;
-
-		fs_expr *fs_stack;
-		int fs_stack_size;
-		int fs_stack_pos;
-
-		ATermList *ss_stack;
-		int ss_stack_size;
-		int ss_stack_pos;
-
-		void fs_reset();
-		void fs_push(ATermList vars, ATermList vals, ATerm expr);
-		void fs_pop(fs_expr *e = NULL);
-
-		void ss_reset();
-		void ss_push(ATermList s);
-		ATermList ss_pop();
-
-		void EliminateVars(fs_expr *e);
-		bool IsInner3Eq(ATerm a);
-		bool IsInnerCEq(ATermAppl a);
-		bool FindInnerCEquality_aux(ATerm t);
-		ATerm build_solution_single(ATerm t, ATermList substs);
-		ATermList build_solution2(ATermList vars, ATermList substs);
-		ATermList build_solution(ATermList vars, ATermList substs);
-};
+  public:
+    EnumeratorSolutionsStandard(enumstd_info& Info) : info(Info), enum_vars(0), enum_expr(0), fs_stack(0), fs_stack_size(0), ss_stack(0), ss_stack_size(0)
+    {
+      ATprotectList(&enum_vars);
+      ATprotect(&enum_expr);
     }
-  }
+
+    EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other);
+    EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info& Info);
+    ~EnumeratorSolutionsStandard();
+
+    bool next(ATermList* solution);
+    // bool errorOccurred();
+
+    void reset(ATermList Vars, ATerm Expr, bool true_only);
+
+    bool FindInner3Equality(ATerm t, ATermList vars, ATerm* v, ATerm* e);
+    bool FindInnerCEquality(ATerm t, ATermList vars, ATerm* v, ATerm* e);
+    ATerm build_solution_aux_innerc(ATerm t, ATermList substs);
+    ATerm build_solution_aux_inner3(ATerm t, ATermList substs);
+  private:
+    enumstd_info info;
+
+    ATermList enum_vars;
+    ATerm enum_expr;
+
+    bool check_true;
+    // bool error;
+
+    int used_vars;
+
+    fs_expr* fs_stack;
+    int fs_stack_size;
+    int fs_stack_pos;
+
+    ATermList* ss_stack;
+    int ss_stack_size;
+    int ss_stack_pos;
+
+    void fs_reset();
+    void fs_push(ATermList vars, ATermList vals, ATerm expr);
+    void fs_pop(fs_expr* e = NULL);
+
+    void ss_reset();
+    void ss_push(ATermList s);
+    ATermList ss_pop();
+
+    void EliminateVars(fs_expr* e);
+    bool IsInner3Eq(ATerm a);
+    bool IsInnerCEq(ATermAppl a);
+    bool FindInnerCEquality_aux(ATerm t);
+    ATerm build_solution_single(ATerm t, ATermList substs);
+    ATermList build_solution2(ATermList vars, ATermList substs);
+    ATermList build_solution(ATermList vars, ATermList substs);
+};
+}
+}
 }
 
 #endif

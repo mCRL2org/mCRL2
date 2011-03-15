@@ -23,76 +23,76 @@ using namespace grape::libgrape;
 
 namespace grape
 {
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+/**
+ * \short A class showing a dialog with a combobox and text edit.
+ */
+class grape_parameter_dialog : public wxDialog
+{
+  private:
+    wxGrid*        m_grid;          /**< Grid shown in the dialog, used for parameters.*/
+    list_of_decl_init m_init;       /**< The parameter initialisation. */
+    int           m_combo_current;  /**< The current selected value in the combobox.*/
+
     /**
-     * \short A class showing a dialog with a combobox and text edit.
+     * Private default constructor.
      */
-    class grape_parameter_dialog : public wxDialog
-    {
-      private:
-        wxGrid        *m_grid;          /**< Grid shown in the dialog, used for parameters.*/
-        list_of_decl_init m_init;       /**< The parameter initialisation. */
-        int           m_combo_current;  /**< The current selected value in the combobox.*/
+    grape_parameter_dialog();
 
-        /**
-         * Private default constructor.
-         */
-        grape_parameter_dialog();
+    /**
+     * Check wether all parameters are filled.
+     * If not, the OK button is disabled
+     */
+    void check_parameters();
 
-        /**
-         * Check wether all parameters are filled.
-         * If not, the OK button is disabled
-         */
-        void check_parameters();
-        
-	      /**
-	       * Change grid event handler.
-	       * Appending grid rows.
-	       * @param p_event The generated event.
-      	 */
-         void event_change_text( wxGridEvent &p_event );
-       
-        DECLARE_EVENT_TABLE()
+    /**
+     * Change grid event handler.
+     * Appending grid rows.
+     * @param p_event The generated event.
+     */
+    void event_change_text(wxGridEvent& p_event);
 
-      public:
+    DECLARE_EVENT_TABLE()
 
-        /**
-         * Constructor.
-         * @param p_parameter_declarations The list of parameter declarations to show in the dialog.
-         */
-        grape_parameter_dialog(list_of_decl &p_parameter_declarations);
+  public:
 
-        /**
-         * Default destructor.
-         */
-        ~grape_parameter_dialog();
+    /**
+     * Constructor.
+     * @param p_parameter_declarations The list of parameter declarations to show in the dialog.
+     */
+    grape_parameter_dialog(list_of_decl& p_parameter_declarations);
 
-        /**
-         * Shows the dialog.
-         * @return @c true if the user pressed OK. @c false if the user cancelled the dialog.
-         */
-        bool show_modal();
+    /**
+     * Default destructor.
+     */
+    ~grape_parameter_dialog();
 
-        /**
-         * Returns the initialisations.
-         * @return The list of parameter declarations, along with their initialisation.
-         */
-        list_of_decl_init get_initialisations() const;
+    /**
+     * Shows the dialog.
+     * @return @c true if the user pressed OK. @c false if the user cancelled the dialog.
+     */
+    bool show_modal();
 
-        /**
-         * Combobox selection change event handler.
-         * @param p_event The generated event.
-         */
-        void event_combo(wxCommandEvent &p_event);
+    /**
+     * Returns the initialisations.
+     * @return The list of parameter declarations, along with their initialisation.
+     */
+    list_of_decl_init get_initialisations() const;
 
-        /**
-         * Ok button event handler.
-         * @param p_event The generated event.
-         */
-        void event_ok(wxCommandEvent &p_event);
-    };
-  }
+    /**
+     * Combobox selection change event handler.
+     * @param p_event The generated event.
+     */
+    void event_combo(wxCommandEvent& p_event);
+
+    /**
+     * Ok button event handler.
+     * @param p_event The generated event.
+     */
+    void event_ok(wxCommandEvent& p_event);
+};
+}
 }
 
 #endif // GRAPE_SELECT_DIALOG_H

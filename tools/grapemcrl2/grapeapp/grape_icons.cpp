@@ -55,46 +55,46 @@ IconMap g_icons;
 void init_icons()
 {
   static bool initialized = false;
-  if ( initialized )
+  if (initialized)
   {
     return;
   }
 
-  g_icons[_T("archref")] = wxBitmap( archref_xpm );
-  g_icons[_T("attach")] = wxBitmap( attach_xpm );
-  g_icons[_T("blocked")] = wxBitmap( blocked_xpm );
-  g_icons[_T("chancomm")] = wxBitmap( chancomm_xpm );
-  g_icons[_T("channel")] = wxBitmap( channel_xpm );
-  g_icons[_T("close")] = wxBitmap( close_xpm );
-  g_icons[_T("comment")] = wxBitmap( comment_xpm );
-  g_icons[_T("copy")] = wxBitmap( copy_xpm );
-  g_icons[_T("cut")] = wxBitmap( cut_xpm );
-  g_icons[_T("del")] = wxBitmap( delete_xpm );
-  g_icons[_T("detach")] = wxBitmap( detach_xpm );
-  g_icons[_T("edit")] = wxBitmap( edit_xpm );
-  g_icons[_T("export")] = wxBitmap( export_xpm );
-  g_icons[_T("exit")] = wxBitmap( exit_xpm );
-  g_icons[_T("grape")] = wxBitmap( grape_xpm );
-  g_icons[_T("helpabout")] = wxBitmap( helpabout_xpm );
-  g_icons[_T("helpcontents")] = wxBitmap( helpcontents_xpm );
-  g_icons[_T("image")] = wxBitmap( image_xpm );
-  g_icons[_T("initdes")] = wxBitmap( initdes_xpm );
-  g_icons[_T("new")] = wxBitmap( new_xpm );
-  g_icons[_T("newarch")] = wxBitmap( newarch_xpm );
-  g_icons[_T("newproc")] = wxBitmap( newproc_xpm );
-  g_icons[_T("open")] = wxBitmap( open_xpm );
-  g_icons[_T("paste")] = wxBitmap( paste_xpm );
-  g_icons[_T("procref")] = wxBitmap( procref_xpm );
-  g_icons[_T("properties")] = wxBitmap( properties_xpm );
-  g_icons[_T("redo")] = wxBitmap( redo_xpm );
-  g_icons[_T("save")] = wxBitmap( save_xpm );
-  g_icons[_T("saveas")] = wxBitmap( saveas_xpm );
-  g_icons[_T("state")] = wxBitmap( state_xpm );
-  g_icons[_T("termtransition")] = wxBitmap( termtransition_xpm );
-  g_icons[_T("text")] = wxBitmap( text_xpm );
-  g_icons[_T("toolselect")] = wxBitmap( toolselect_xpm );
-  g_icons[_T("transition")] = wxBitmap( transition_xpm );
-  g_icons[_T("undo")] = wxBitmap( undo_xpm );
-  g_icons[_T("validate")] = wxBitmap( validate_xpm );
-  g_icons[_T("visible")] = wxBitmap( visible_xpm );
+  g_icons[_T("archref")] = wxBitmap(archref_xpm);
+  g_icons[_T("attach")] = wxBitmap(attach_xpm);
+  g_icons[_T("blocked")] = wxBitmap(blocked_xpm);
+  g_icons[_T("chancomm")] = wxBitmap(chancomm_xpm);
+  g_icons[_T("channel")] = wxBitmap(channel_xpm);
+  g_icons[_T("close")] = wxBitmap(close_xpm);
+  g_icons[_T("comment")] = wxBitmap(comment_xpm);
+  g_icons[_T("copy")] = wxBitmap(copy_xpm);
+  g_icons[_T("cut")] = wxBitmap(cut_xpm);
+  g_icons[_T("del")] = wxBitmap(delete_xpm);
+  g_icons[_T("detach")] = wxBitmap(detach_xpm);
+  g_icons[_T("edit")] = wxBitmap(edit_xpm);
+  g_icons[_T("export")] = wxBitmap(export_xpm);
+  g_icons[_T("exit")] = wxBitmap(exit_xpm);
+  g_icons[_T("grape")] = wxBitmap(grape_xpm);
+  g_icons[_T("helpabout")] = wxBitmap(helpabout_xpm);
+  g_icons[_T("helpcontents")] = wxBitmap(helpcontents_xpm);
+  g_icons[_T("image")] = wxBitmap(image_xpm);
+  g_icons[_T("initdes")] = wxBitmap(initdes_xpm);
+  g_icons[_T("new")] = wxBitmap(new_xpm);
+  g_icons[_T("newarch")] = wxBitmap(newarch_xpm);
+  g_icons[_T("newproc")] = wxBitmap(newproc_xpm);
+  g_icons[_T("open")] = wxBitmap(open_xpm);
+  g_icons[_T("paste")] = wxBitmap(paste_xpm);
+  g_icons[_T("procref")] = wxBitmap(procref_xpm);
+  g_icons[_T("properties")] = wxBitmap(properties_xpm);
+  g_icons[_T("redo")] = wxBitmap(redo_xpm);
+  g_icons[_T("save")] = wxBitmap(save_xpm);
+  g_icons[_T("saveas")] = wxBitmap(saveas_xpm);
+  g_icons[_T("state")] = wxBitmap(state_xpm);
+  g_icons[_T("termtransition")] = wxBitmap(termtransition_xpm);
+  g_icons[_T("text")] = wxBitmap(text_xpm);
+  g_icons[_T("toolselect")] = wxBitmap(toolselect_xpm);
+  g_icons[_T("transition")] = wxBitmap(transition_xpm);
+  g_icons[_T("undo")] = wxBitmap(undo_xpm);
+  g_icons[_T("validate")] = wxBitmap(validate_xpm);
+  g_icons[_T("visible")] = wxBitmap(visible_xpm);
 }

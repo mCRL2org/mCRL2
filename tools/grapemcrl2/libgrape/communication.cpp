@@ -16,54 +16,54 @@
 
 using namespace grape::libgrape;
 
-communication::communication( channel* p_channel )
+communication::communication(channel* p_channel)
 {
   m_linetype = straight;
   m_breakpoints.Empty();
   m_channel = p_channel;
 }
 
-communication::communication( const communication &p_communication )
+communication::communication(const communication& p_communication)
 {
   m_linetype = p_communication.m_linetype;
   m_breakpoints = p_communication.m_breakpoints;
   m_channel = p_communication.m_channel;
 }
 
-communication::~communication( void )
+communication::~communication(void)
 {
   // There are no references to be removed, as no object maintains a list of communications that are attached to it.
   m_breakpoints.Clear();
 }
 
-channel* communication::get_channel( void )
+channel* communication::get_channel(void)
 {
   return m_channel;
 }
 
-void communication::add_breakpoint ( coordinate &p_coordinate, int p_place )
+void communication::add_breakpoint(coordinate& p_coordinate, int p_place)
 {
-  m_breakpoints.Insert( p_coordinate, p_place, 1 );
+  m_breakpoints.Insert(p_coordinate, p_place, 1);
 }
 
-void communication::move_breakpoint ( coordinate &p_coordinate, int p_place )
+void communication::move_breakpoint(coordinate& p_coordinate, int p_place)
 {
-  m_breakpoints.RemoveAt( p_place, 1 );
-  m_breakpoints.Insert( p_coordinate, p_place, 1 );
+  m_breakpoints.RemoveAt(p_place, 1);
+  m_breakpoints.Insert(p_coordinate, p_place, 1);
 }
 
-void communication::remove_breakpoint ( int p_place )
+void communication::remove_breakpoint(int p_place)
 {
-  m_breakpoints.RemoveAt( p_place, 1 );
+  m_breakpoints.RemoveAt(p_place, 1);
 }
 
 
-void communication::set_linetype( linetype p_linetype )
+void communication::set_linetype(linetype p_linetype)
 {
   m_linetype = p_linetype;
 }
 
-linetype communication::get_linetype( void ) const
+linetype communication::get_linetype(void) const
 {
   return m_linetype;
 }
@@ -72,5 +72,5 @@ linetype communication::get_linetype( void ) const
 
 // WxWidgets dynamic array implementation.
 #include <wx/arrimpl.cpp>
-WX_DEFINE_OBJARRAY( arr_communication )
+WX_DEFINE_OBJARRAY(arr_communication)
 

@@ -21,7 +21,8 @@
 
 #include "workarounds.h" // for M_PI on Windows with MSVC
 
-ExporterSVG::ExporterSVG(Graph* g, LTSGraph* app) : Exporter(g) {
+ExporterSVG::ExporterSVG(Graph* g, LTSGraph* app) : Exporter(g)
+{
   owner = app;
 }
 
@@ -71,17 +72,17 @@ bool ExporterSVG::export_to(wxString filename)
 
   // First put in the transitions, since transitions move from/to the centers
   // of states, instead of borders.
-  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  for (size_t i = 0; i < graph->getNumberOfStates(); ++i)
   {
     State* from = graph->getState(i);
-    for(size_t j = 0; j < from->getNumberOfTransitions(); ++j)
+    for (size_t j = 0; j < from->getNumberOfTransitions(); ++j)
     {
       Transition* tr = from->getTransition(j);
       // Interpolate and draw the path
       drawBezier(tr);
     }
 
-    for(size_t j = 0; j < from->getNumberOfSelfLoops(); ++j)
+    for (size_t j = 0; j < from->getNumberOfSelfLoops(); ++j)
     {
       Transition* tr = from->getSelfLoop(j);
       // draw the loop. We do this in a seperate function to avoid clutter
@@ -91,7 +92,7 @@ bool ExporterSVG::export_to(wxString filename)
 
   // Go through all the states again, to make sure that no transitions are seen
   // on top of them (SVG uses the painter's algorithm to render)
-  for(size_t i = 0; i < graph->getNumberOfStates(); ++i)
+  for (size_t i = 0; i < graph->getNumberOfStates(); ++i)
   {
     State* from = graph->getState(i);
     boost::format f("<circle cx = \"%1%\" cy =\"%2%\" r=\"%3%\" stroke=\"%4%\" stroke-width=\"%5%\" fill=\"rgb(%6%, %7%, %8%)\"/>\n\n");
@@ -103,7 +104,7 @@ bool ExporterSVG::export_to(wxString filename)
     unsigned int stroke_width;
     std::string stroke;
 
-    if(from->isInitialState())
+    if (from->isInitialState())
     {
       stroke = "green";
       stroke_width = 2;
@@ -120,13 +121,13 @@ bool ExporterSVG::export_to(wxString filename)
     int blue = c.Blue();
 
     f%fromX
-     %fromY
-     %radius
-     %stroke
-     %stroke_width
-     %red
-     %green
-     %blue;
+    %fromY
+    %radius
+    %stroke
+    %stroke_width
+    %red
+    %green
+    %blue;
 
     svg_code += boost::str(f);
 
@@ -148,9 +149,9 @@ bool ExporterSVG::export_to(wxString filename)
 
   wxTextFile svgFile(filename);
 
-  if(svgFile.Exists())
+  if (svgFile.Exists())
   {
-    if(!svgFile.Open(filename))
+    if (!svgFile.Open(filename))
     {
       return false;
     }
@@ -171,12 +172,12 @@ bool ExporterSVG::export_to(wxString filename)
   svgFile.AddLine(svgCodeWX);
   svgFile.AddLine(wxEmptyString);
 
-  if(!svgFile.Write())
+  if (!svgFile.Write())
   {
     return false;
   }
 
-  if(!svgFile.Close())
+  if (!svgFile.Close())
   {
     return false;
   }
@@ -186,7 +187,7 @@ bool ExporterSVG::export_to(wxString filename)
 
 void ExporterSVG::drawBezier(Transition* tr)
 {
-  State *from, *to;
+  State* from, *to;
   double xFrom, yFrom, xTo, yTo, xVirtual, yVirtual, zVirtual, xControl, yControl;
   double aspect = owner->getAspectRatio();
 
@@ -214,8 +215,8 @@ void ExporterSVG::drawBezier(Transition* tr)
 
   boost::format p1("M%1%,%2% Q%3%,%4% %5%,%6%\"\n");
   p1 % xFrom    % yFrom
-     % xControl % yControl
-     % xTo      % yTo;
+  % xControl % yControl
+  % xTo      % yTo;
 
   svg_code += boost::str(p1);
 
@@ -260,14 +261,14 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
   double sinGamma = sin(gamma);
   double sinDelta = sin(delta);
 
-  if(fabs(cosGamma + cosDelta) > 0.01)
+  if (fabs(cosGamma + cosDelta) > 0.01)
   {
     double xFactor = (8 * (xVirtual - xState)) / (3 * (cos(gamma) + cos(delta)));
     xControl1 = xState + xFactor * cosGamma;
     xControl2 = xState + xFactor * cosDelta;
   }
 
-  if(fabs(sinGamma + sinDelta) <= 0.01)
+  if (fabs(sinGamma + sinDelta) <= 0.01)
   {
     float additive = tan(beta) * (xControl1 - xState);
     yControl1 = yState + additive;
@@ -279,7 +280,7 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
     yControl1 = yState + yFactor * sinGamma;
     yControl2 = yState + yFactor * sinDelta;
 
-    if(fabs(cosGamma + cosDelta) <= .01)
+    if (fabs(cosGamma + cosDelta) <= .01)
     {
       float additive = tan(beta)* (yControl1 - yState);
       xControl1 = xState - additive;
@@ -289,9 +290,9 @@ void ExporterSVG::drawSelfLoop(Transition* tr)
 
   boost::format f("<path d=\"M%1%,%2% C%3%,%4% %5%,%6% %7%,%8%\"\n");
   f%xState%yState
-   %xControl1%yControl1
-   %xControl2%yControl2
-   %xState%yState;
+  %xControl1%yControl1
+  %xControl2%yControl2
+  %xState%yState;
 
   svg_code += boost::str(f);
   svg_code += " stroke = \"black\" stroke-width=\"1\" fill=\"none\"\n";

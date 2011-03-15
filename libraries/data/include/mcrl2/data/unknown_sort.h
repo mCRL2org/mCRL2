@@ -12,11 +12,14 @@
 #ifndef MCRL2_DATA_UNKNOWN_SORT_H
 #define MCRL2_DATA_UNKNOWN_SORT_H
 
+#include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class unknown_sort ---//
 /// \brief Unknown sort expression
@@ -30,7 +33,7 @@ class unknown_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    unknown_sort(atermpp::aterm_appl term)
+    unknown_sort(const atermpp::aterm_appl& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortUnknown(m_term));
@@ -38,7 +41,7 @@ class unknown_sort: public sort_expression
 };
 //--- end generated class unknown_sort ---//
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

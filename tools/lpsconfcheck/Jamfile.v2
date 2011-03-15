@@ -1,6 +1,0 @@
-project toolset/lpsconfcheck ;
-
-tool lpsconfcheck
-       : lpsconfcheck.cpp
-         /libraries//lps
-       ;

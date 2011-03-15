@@ -19,34 +19,36 @@
 #include "mcrl2/pbes/pbes_translate.h"
 #include "mcrl2/lps/linearise.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-  /// \brief Applies the lps2pbes algorithm
-  /// \param spec A linear process specification
-  /// \param formula A modal formula
-  /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
-  /// \return The result of the algorithm
-  inline
-  pbes<> lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed)
-  {
-    return pbes_translate(formula, spec, timed);
-  }
+/// \brief Applies the lps2pbes algorithm
+/// \param spec A linear process specification
+/// \param formula A modal formula
+/// \param timed Determines whether the timed or untimed version of the translation algorithm is used
+/// \return The result of the algorithm
+inline
+pbes<> lps2pbes(const lps::specification& spec, const state_formulas::state_formula& formula, bool timed)
+{
+  return pbes_translate(formula, spec, timed);
+}
 
-  /// \brief Applies the lps2pbes algorithm
-  /// \param spec_text A string
-  /// \param formula_text A string
-  /// \param timed Determines whether the timed or untimed version of the translation algorithm is used
-  /// \return The result of the algorithm
-  inline
-  pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
-  {
-    pbes<> result;
-    lps::specification spec = lps::linearise(spec_text);
-    state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
-    return lps2pbes(spec, f, timed);
-  }
+/// \brief Applies the lps2pbes algorithm
+/// \param spec_text A string
+/// \param formula_text A string
+/// \param timed Determines whether the timed or untimed version of the translation algorithm is used
+/// \return The result of the algorithm
+inline
+pbes<> lps2pbes(const std::string& spec_text, const std::string& formula_text, bool timed)
+{
+  pbes<> result;
+  lps::specification spec = lps::linearise(spec_text);
+  state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
+  return lps2pbes(spec, f, timed);
+}
 
 } // namespace pbes_system
 

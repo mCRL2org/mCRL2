@@ -16,9 +16,11 @@
 #include "mcrl2/fdr/expression_fwd.h"
 #include "mcrl2/fdr/set_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated field expression class declarations ---//
 /// \brief class field_expression
@@ -101,32 +103,32 @@ class output: public field_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a simpleinput expression
-    /// \param t A term
-    /// \return True if it is a simpleinput expression
-    inline
-    bool is_simpleinput(const field_expression& t)
-    {
-      return fdr::detail::gsIsSimpleInput(t);
-    }
+/// \brief Test for a simpleinput expression
+/// \param t A term
+/// \return True if it is a simpleinput expression
+inline
+bool is_simpleinput(const field_expression& t)
+{
+  return fdr::detail::gsIsSimpleInput(t);
+}
 
-    /// \brief Test for a input expression
-    /// \param t A term
-    /// \return True if it is a input expression
-    inline
-    bool is_input(const field_expression& t)
-    {
-      return fdr::detail::gsIsInput(t);
-    }
+/// \brief Test for a input expression
+/// \param t A term
+/// \return True if it is a input expression
+inline
+bool is_input(const field_expression& t)
+{
+  return fdr::detail::gsIsInput(t);
+}
 
-    /// \brief Test for a output expression
-    /// \param t A term
-    /// \return True if it is a output expression
-    inline
-    bool is_output(const field_expression& t)
-    {
-      return fdr::detail::gsIsOutput(t);
-    }
+/// \brief Test for a output expression
+/// \param t A term
+/// \return True if it is a output expression
+inline
+bool is_output(const field_expression& t)
+{
+  return fdr::detail::gsIsOutput(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

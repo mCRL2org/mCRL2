@@ -16,12 +16,13 @@
 #include <string>
 #include <sstream>
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/find.h"
 #include "mcrl2/atermpp/container_utility.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
 /// \brief Identifier generator that generates names with a postfix consisting of a number.
 class number_postfix_generator
@@ -32,7 +33,7 @@ class number_postfix_generator
 
     /// \brief An index.
     unsigned int m_index;
-  
+
   public:
     /// \brief Constructor.
     number_postfix_generator()
@@ -43,7 +44,7 @@ class number_postfix_generator
     /// \param prefix A string
     /// \param index A positive integer
     number_postfix_generator(const std::string& prefix, unsigned int index = 0)
-     : m_prefix(prefix), m_index(index)
+      : m_prefix(prefix), m_index(index)
     {}
 
     /// \brief Generates a fresh identifier that doesn't appear in the context.
@@ -62,7 +63,7 @@ class number_postfix_generator
 /// A context is maintained containing already used identifiers.
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers are generated that do not appear in the context.
-template < typename Generator = number_postfix_generator >
+template <typename Generator = number_postfix_generator>
 class identifier_generator
 {
   public:
@@ -86,57 +87,29 @@ class identifier_generator
     /// \param s An identifier.
     virtual void remove_identifier(core::identifier_string s) = 0;
 
-    /// \brief Adds identifiers of term t to the context.
-    /// \param t A term
-    template <typename Term>
-    void add_to_context(Term t, typename atermpp::detail::disable_if_container< Term >::type* = 0)
+    /// \brief Add a set of identifiers to the context.
+    void add_identifiers(const std::set<core::identifier_string>& ids)
     {
-      std::set<core::identifier_string> s = core::find_identifiers(t);
-      for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
+      for (std::set<core::identifier_string>::const_iterator i = ids.begin(); i != ids.end(); ++i)
       {
         add_identifier(*i);
       }
     }
 
-    /// \brief Adds identifiers of term t to the context.
-    /// \param t A container with terms
-    template < typename Container >
-    void add_to_context(Container const& c, typename atermpp::detail::enable_if_container< Container >::type* = 0)
+    /// \brief Remove a set of identifiers from the context.
+    void remove_identifiers(const std::set<core::identifier_string>& ids)
     {
-      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
-      {
-        add_to_context(*i);
-      }
-    }
-
-    /// \brief Adds identifiers to the context.
-    /// \param c A sequence of identifiers.
-    template <typename Container>
-    void add_identifiers(const Container& c)
-    {
-      for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
-      {
-        add_identifier(*i);
-      }
-    }
-
-    /// \brief Removes identifiers appearing in term t from the context.
-    /// \param t A term
-    template <typename Term>
-    void remove_from_context(Term t)
-    {
-      std::set<core::identifier_string> s = core::find_identifiers(t);
-      for (std::set<core::identifier_string>::iterator i = s.begin(); i != s.end(); ++i)
+      for (std::set<core::identifier_string>::const_iterator i = ids.begin(); i != ids.end(); ++i)
       {
         remove_identifier(*i);
       }
     }
-
+   
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s An identifier.
     /// \return True if the identifier appears in the context.
     virtual bool has_identifier(core::identifier_string s) const = 0;
-   
+
     /// \brief Returns a fresh identifier, with the given hint as prefix.
     /// The returned identifier is added to the context.
     /// \param hint A string
@@ -155,7 +128,7 @@ class identifier_generator
         }
       }
 
-      add_to_context(id);
+      add_identifier(id);
       return id;
     }
 };

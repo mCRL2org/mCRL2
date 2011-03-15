@@ -45,24 +45,21 @@ set(mcrl2_core_src
 
 set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
 
-if( NOT MCRL2_MONO_LIB)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
-  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-  include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-  include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
-  
-  # actual target:
-  add_library(${PROJECT_NAME}
-    ${mcrl2_core_src}
-  )
-  
-  target_link_libraries(${PROJECT_NAME}
-    aterm
-  )
-  
-  # add install target:
-  install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
+include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
+include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
+include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 
-endif( NOT MCRL2_MONO_LIB)
+# actual target:
+add_library(${PROJECT_NAME}
+  ${mcrl2_core_src}
+)
+
+target_link_libraries(${PROJECT_NAME}
+  aterm
+)
+
+# add install target:
+install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})

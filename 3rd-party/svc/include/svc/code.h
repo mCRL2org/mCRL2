@@ -25,39 +25,40 @@
 
 #ifdef __cplusplus
 extern "C" {
-#endif 
+#endif
 
 #define NO_INT INT_MAX
 #define NO_TERM NULL
 
-typedef unsigned char Bit;
-typedef unsigned char Byte;
-typedef struct {
-   Byte buffer;
-   unsigned short numBits;
-   FILE           *fp;
-   long last;
-} BitStream;
+  typedef unsigned char Bit;
+  typedef unsigned char Byte;
+  typedef struct
+  {
+    Byte buffer;
+    unsigned short numBits;
+    FILE*           fp;
+    long last;
+  } BitStream;
 
 
-BitStream *BSinit(FILE *);
-void BSfree(BitStream *);
-void BSwriteBit(BitStream *, Bit );
-void BSwriteByte(BitStream *, Byte);
-void BSwriteChar(BitStream *, char);
-void BSwriteString(BitStream *, char *);
-void BSwriteInt(BitStream *, long);
-int BSreadBit(BitStream *, Bit *);
-int BSreadChar(BitStream *, char *);
-int BSreadByte(BitStream *, Byte *);
-int BSreadString(BitStream *, char *);
-int BSreadInt(BitStream *, long *);
-void BSflush(BitStream *);
-int  BSseek(BitStream *, long, int);
-long BStell(BitStream *);
+  BitStream* BSinit(FILE*);
+  void BSfree(BitStream*);
+  void BSwriteBit(BitStream*, Bit);
+  void BSwriteByte(BitStream*, Byte);
+  void BSwriteChar(BitStream*, char);
+  void BSwriteString(BitStream*, char*);
+  void BSwriteInt(BitStream*, long);
+  int BSreadBit(BitStream*, Bit*);
+  int BSreadChar(BitStream*, char*);
+  int BSreadByte(BitStream*, Byte*);
+  int BSreadString(BitStream*, char*);
+  int BSreadInt(BitStream*, long*);
+  void BSflush(BitStream*);
+  int  BSseek(BitStream*, long, int);
+  long BStell(BitStream*);
 
 #ifdef __cplusplus
 }
-#endif 
+#endif
 
 #endif

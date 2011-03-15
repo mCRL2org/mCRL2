@@ -16,9 +16,11 @@
 #include "mcrl2/fdr/expression_fwd.h"
 #include "mcrl2/fdr/boolean_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated comprehension expression class declarations ---//
 /// \brief class comprehension_expression
@@ -96,32 +98,32 @@ class ecomprehension: public comprehension_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a nil expression
-    /// \param t A term
-    /// \return True if it is a nil expression
-    inline
-    bool is_nil(const comprehension_expression& t)
-    {
-      return fdr::detail::gsIsNil(t);
-    }
+/// \brief Test for a nil expression
+/// \param t A term
+/// \return True if it is a nil expression
+inline
+bool is_nil(const comprehension_expression& t)
+{
+  return fdr::detail::gsIsNil(t);
+}
 
-    /// \brief Test for a bcomprehension expression
-    /// \param t A term
-    /// \return True if it is a bcomprehension expression
-    inline
-    bool is_bcomprehension(const comprehension_expression& t)
-    {
-      return fdr::detail::gsIsBComprehension(t);
-    }
+/// \brief Test for a bcomprehension expression
+/// \param t A term
+/// \return True if it is a bcomprehension expression
+inline
+bool is_bcomprehension(const comprehension_expression& t)
+{
+  return fdr::detail::gsIsBComprehension(t);
+}
 
-    /// \brief Test for a ecomprehension expression
-    /// \param t A term
-    /// \return True if it is a ecomprehension expression
-    inline
-    bool is_ecomprehension(const comprehension_expression& t)
-    {
-      return fdr::detail::gsIsEComprehension(t);
-    }
+/// \brief Test for a ecomprehension expression
+/// \param t A term
+/// \return True if it is a ecomprehension expression
+inline
+bool is_ecomprehension(const comprehension_expression& t)
+{
+  return fdr::detail::gsIsEComprehension(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

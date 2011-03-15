@@ -13,6 +13,7 @@ cmake_minimum_required(VERSION 2.6)
 # ######### General setup ##########
 set(PREFIX "utilities")
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
@@ -28,18 +29,13 @@ file(GLOB TERM_OBJS "*.cpp")
 foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
   project( "${PREFIX}_${result}" )
-  add_executable("${PREFIX}_${result}" "${OBJ}"  )
-  if( MCRL2_MONO_LIB )
-    target_link_libraries(${PREFIX}_${result}
-      mcrl2_monolib
-    )
-  else( MCRL2_MONO_LIB )  
+  add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_data
      mcrl2_utilities_command_line
   )
-  endif( MCRL2_MONO_LIB )
-  add_test("${PREFIX}_${result}" "${utilities_tests_BINARY_DIR}/${PREFIX}_${result}" )
-  set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+  # MACRO is defined in CMakeLists.txt in root of source tree
+  build_and_run_test_target( ${PREFIX}_${result} )
+
 
 endforeach( OBJ )  

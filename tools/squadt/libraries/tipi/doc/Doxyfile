@@ -1,3 +1,0 @@
-EXCLUDE_PATTERNS  += */transport/* */utility/*
-HIDE_SCOPE_NAMES   = NO
-SORT_BY_SCOPE_NAME = YES

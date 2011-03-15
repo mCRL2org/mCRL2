@@ -20,9 +20,11 @@
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/core/detail/struct_core.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief Pbes fixpoint symbol (mu or nu).
 // <FixPoint>     ::= Mu

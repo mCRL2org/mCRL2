@@ -14,11 +14,11 @@
 #define AUTHOR "Muck van Weerdenburg"
 
 #if defined(__GNUG__) && !defined(NO_GCC_PRAGMA)
-    #pragma implementation "xsim.h"
+#pragma implementation "xsim.h"
 #endif
 
 #ifdef __BORLANDC__
-    #pragma hdrstop
+#pragma hdrstop
 #endif
 
 #include <cstring>
@@ -31,26 +31,25 @@
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg);
+void xsim_message_handler(mcrl2::core::messageType msg_type, const char* msg);
 
 //------------------------------------------------------------------------------
 // XSim
 //------------------------------------------------------------------------------
-class XSim: public wx::tool< XSim, squadt_tool< rewriter_tool< input_tool > > >
+class XSim: public wx::tool< XSim, rewriter_tool< input_tool > >
 {
-  typedef wx::tool< XSim, squadt_tool< rewriter_tool< input_tool > > > super;
+    typedef wx::tool< XSim, rewriter_tool< input_tool > > super;
 
-private:
+  private:
     bool dummies;
 
-protected:
+  protected:
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
@@ -63,84 +62,53 @@ protected:
       dummies = 0 < parser.options.count("dummy");
     }
 
-public:
+  public:
 
     static XSim* instance;
 
     XSim() : super("LPSXSim",
-      "graphical simulation of an LPS", // what-is
-      "Simulator for linear process specifications.", // GUI specific description
-      "Simulate LPSs in a graphical environment. If INFILE is supplied it will be "
-      "loaded into the simulator.", // description
-       std::vector< std::string >(1, "Muck van Weerdenburg"))
+                     "graphical simulation of an LPS", // what-is
+                     "Simulator for linear process specifications.", // GUI specific description
+                     "Simulate LPSs in a graphical environment. If INFILE is supplied it will be "
+                     "loaded into the simulator.", // description
+                     std::vector< std::string >(1, "Muck van Weerdenburg"))
     { }
 
     // Graphical subsystem needs to be initialised first, run() is the entry point
     bool run()
     {
-      XSimMain *frame = new XSimMain( 0, -1, wxT("LPSXSim"), wxPoint(-1,-1), wxSize(500,400) );
+      XSimMain* frame = new XSimMain(0, -1, wxT("LPSXSim"), wxPoint(-1,-1), wxSize(500,400));
       frame->simulator->use_dummies = dummies;
       frame->simulator->rewr_strat  = rewrite_strategy();
       frame->Show(true);
-    
-      if (!this->m_input_filename.empty()) 
+
+      if (!this->m_input_filename.empty())
       {
         frame->LoadFile(wxString(this->m_input_filename.c_str(), wxConvLocal));
       }
-    
+
       instance = this;
 
       return true;
     }
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    // Special initialisation
-    void initialise() {
-      gsSetCustomMessageHandler(xsim_message_handler);
-    }
-
-    // Configures tool capabilities.
-    void set_capabilities(tipi::tool::capabilities& c) const {
-      /* The tool has only one main input combination it takes an LPS and then behaves as a reporter */
-      c.add_input_configuration("main-input",
-           tipi::mime_type("lps", tipi::mime_type::application), tipi::tool::category::simulation);
-    }
-
-    // Queries the user via SQuADt if needed to obtain configuration information
-    void user_interactive_configuration(tipi::configuration&) { }
-
-    // Check an existing configuration object to see if it is usable
-    bool check_configuration(tipi::configuration const& c) const {
-      bool valid = c.input_exists("main-input");
-
-      if (!valid) {
-        send_error("Invalid input combination!");
-      }
-
-     return valid;
-   }
-
-   bool perform_task(tipi::configuration& c) {
-     this->m_input_filename = c.get_input("main-input").location();
-
-     return run_and_wait();
-   }
-#endif
 };
 
 XSim* XSim::instance = NULL;
 
-void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
+void xsim_message_handler(mcrl2::core::messageType msg_type, const char* msg)
 {
   using namespace ::mcrl2::utilities;
   using namespace mcrl2::core;
 
-  if ( XSim::instance == NULL )
+  if (XSim::instance == NULL)
   {
     std::cerr << msg << "this message was brought to you by LPSXSim (all rights reserved)" << std::endl;
-  } else {
-    const char *msg_end = msg+std::strlen(msg)-1;
-    while ( (msg <= msg_end) && ((*msg == '\r') || (*msg == '\n')) )
+  }
+  else
+  {
+    const char* msg_end = msg+std::strlen(msg)-1;
+    while ((msg <= msg_end) && ((*msg == '\r') || (*msg == '\n')))
     {
       --msg_end;
     }
@@ -148,21 +116,21 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
     switch (msg_type)
     {
       case gs_warning:
-        {
+      {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 warning"),wxOK|wxICON_EXCLAMATION).ShowModal();
-        }
-        break;
+      }
+      break;
       case gs_error:
-        {
+      {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 error"),wxOK|wxICON_ERROR).ShowModal();
-        }
-        break;
+      }
+      break;
       case gs_notice:
       default:
-        {
+      {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 notice"),wxOK|wxICON_INFORMATION).ShowModal();
-        }
-        break;
+      }
+      break;
     }
   }
 }
@@ -170,7 +138,7 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char *msg)
 class XSim_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<XSim>
 {
   public:
-	XSim_gui_tool()
+    XSim_gui_tool()
     {
       //m_gui_options["no-state"] = create_checkbox_widget();
     }
@@ -182,16 +150,17 @@ IMPLEMENT_WX_THEME_SUPPORT
 
 #ifdef __WINDOWS__
 extern "C" int WINAPI WinMain(HINSTANCE hInstance,
-                                  HINSTANCE hPrevInstance,
-                                  wxCmdLineArgType lpCmdLine,
-                                  int nCmdShow) {
+                              HINSTANCE hPrevInstance,
+                              wxCmdLineArgType lpCmdLine,
+                              int nCmdShow)
+{
 
   MCRL2_ATERMPP_INIT(0, lpCmdLine)
 
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #else
-int main(int argc, char **argv)
+int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 

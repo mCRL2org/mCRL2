@@ -18,21 +18,24 @@
 
 /// \brief Extracts information from data expressions.
 /// The class Expression_Info provides information about the structure of data expressions.
-class Expression_Info {
+class Expression_Info
+{
 
   public:
 
     /// \brief Indicates whether or not the expression has a main operator.
-    inline bool is_operator(ATermAppl a_expression) {
+    inline bool is_operator(ATermAppl a_expression)
+    {
       return mcrl2::data::is_application(mcrl2::data::data_expression(a_expression));
     }
 
     /// \brief Returns an argument of the main operator of an expression.
-    inline ATermAppl get_argument(ATermAppl a_expression, const size_t a_number) {
+    inline ATermAppl get_argument(ATermAppl a_expression, const size_t a_number)
+    {
       mcrl2::data::data_expression a(a_expression);
       assert(is_application(a));
       mcrl2::data::data_expression_list::const_iterator i = mcrl2::data::application(a).arguments().begin();
-      for(size_t j = 0; j < a_number; ++j)
+      for (size_t j = 0; j < a_number; ++j)
       {
         ++i;
       }
@@ -41,7 +44,8 @@ class Expression_Info {
     }
 
     /// \brief Returns the main operator of an expression.
-    inline ATermAppl get_operator(ATermAppl a_expression) {
+    inline ATermAppl get_operator(ATermAppl a_expression)
+    {
       assert(mcrl2::data::is_application(a_expression));
       return mcrl2::data::application(mcrl2::data::data_expression(a_expression)).head();
     }

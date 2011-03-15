@@ -15,9 +15,12 @@
 #include <mcrl2/data/detail/rewrite.h>
 #include <mcrl2/data/data_specification.h>
 
-namespace mcrl2 {
-  namespace data {
-    namespace detail {
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
 
 /** \brief Enumeration strategies. **/
 typedef enum { ENUM_STANDARD } EnumerateStrategy;
@@ -44,30 +47,31 @@ typedef void (*FindSolutionsCallBack)(ATermList);
  **/
 class EnumeratorSolutions
 {
-	public:
-		/** \brief Destructor. **/
-		virtual ~EnumeratorSolutions() {
-                }
+  public:
+    /** \brief Destructor. **/
+    virtual ~EnumeratorSolutions()
+    {
+    }
 
-		/**
-		 * \brief Get next solutions (if available).
-		 * \param[out] solution Place to store the solutions.
-		 * \return Whether or not a solution was found and stored in
-		 *         solution. If so, *solution is a substitution list
-		 *         from libstruct, mapping mCRL2 data variables to terms
-		 *         in the internal rewriter format.
-		 *
-		 * Once this function returns false, it will continue to return
-		 * false. That is, when false is returned all solutions have
-		 * been enumerated.
-		 **/
-		virtual bool next(ATermList *solution) = 0;
-		/**
-		 * \brief Check whether or not an error occurred during
-		 *        enumeration.
-		 * \return Whether or not an error occurred during enumeration.
-		 **/
-		// virtual bool errorOccurred() = 0;
+    /**
+     * \brief Get next solutions (if available).
+     * \param[out] solution Place to store the solutions.
+     * \return Whether or not a solution was found and stored in
+     *         solution. If so, *solution is a substitution list
+     *         from libstruct, mapping mCRL2 data variables to terms
+     *         in the internal rewriter format.
+     *
+     * Once this function returns false, it will continue to return
+     * false. That is, when false is returned all solutions have
+     * been enumerated.
+     **/
+    virtual bool next(ATermList* solution) = 0;
+    /**
+     * \brief Check whether or not an error occurred during
+     *        enumeration.
+     * \return Whether or not an error occurred during enumeration.
+     **/
+    // virtual bool errorOccurred() = 0;
 };
 
 /**
@@ -82,91 +86,92 @@ class EnumeratorSolutions
  **/
 class Enumerator
 {
-	public:
-		/** \brief Destructor. **/
-		virtual ~Enumerator() {
-                }
+  public:
+    /** \brief Destructor. **/
+    virtual ~Enumerator()
+    {
+    }
 
-		/** \deprecated **/
-		virtual ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL) = 0;
+    /** \deprecated **/
+    virtual ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL) = 0;
 
-		/**
-		 * \brief Enumerate all valuations that (might) make an
-		 *        expression true.
-		 * \param[in] Vars      A list of the variables to be instantiated.
-		 * \param[in] Expr      A boolean expression, in the internal
-		 *                  rewriter format, for which to find the
-		 *                  valuations.
-		 * \param[in] true_only Boolean to indicate whether only those
-		 *                  valuations such that Expr is equivalent to
-		 *                  true should be returned or also those for
-		 *                  which Expr cannot be determined to be true
-		 *                  or false.
-		 * \param[in] old       An EnumeratorSolutions object which can be
-		 *                  used to retrieve the satisfying valuations.
-		 *                  If NULL, a new object is created.
-		 * \return An EnumeratorSolutions object which can be used to
-		 *         retrieve all valuations of the variables in Var such
-		 *         that Expr becomes true. If old is not NULL, old
-		 *         itself is returned (reinitialised for the new
-		 *         enumeration).
-		 *
-		 * Calling findSolutions(v,e,true,es) is equivalent to calling
-		 * findSolutions(v,e,es) and means that an error will be
-		 * generated if there is a valuation of Vars for which Expr
-		 * cannot be determined to be equivalent to either true or
-		 * false.
-		 *
-		 * The optional argument old allows one to reuse
-		 * EnumeratorSolutions objects (avoiding superfluous allocation
-		 * and deallocation). Typical use is as follows (where e is a
-		 * Enumerator object):
-		 *
-		 * \code
-		 *   EnumeratorSolutions *es = NULL;
-		 *   while ( c )
-		 *   {
-		 *     es = e->findSolutions(vars,expr,b,es);
-		 *     ...
-		 *   }
-		 * \endcode
-		 **/
-		virtual EnumeratorSolutions *findSolutions(ATermList Vars, ATerm Expr, bool true_only, EnumeratorSolutions *old = NULL) = 0;
-		/**
-		 * \brief Enumerate all valuations that make an expression true.
-		 * \param[in] Vars A list of the variables to be instantiated.
-		 * \param[in] Expr A boolean expression, in the internal rewriter
-		 *             format, for which to find all solutions.
-		 * \param[in] old An EnumeratorSolutions object which can be used to
-		 *            retrieve the satisfying valuations. If NULL, a new
-		 *            object is created.
-		 * \return An EnumeratorSolutions object which can be used to
-		 *         retrieve all valuations of the variables in Vars such
-		 *         that Expr is equivalent to true. If old is not NULL,
-		 *         old itself is returned (reinitialised for the new
-		 *         enumeration).
-		 *
-		 * The optional argument old allows one to reuse
-		 * EnumeratorSolutions objects (avoiding superfluous allocation
-		 * and deallocation). Typical use is as follows (where e is a
-		 * Enumerator object):
-		 *
-		 * \code
-		 *   EnumeratorSolutions *es = NULL;
-		 *   while ( c )
-		 *   {
-		 *     es = e->findSolutions(vars,expr,es);
-		 *     ...
-		 *   }
-		 * \endcode
-		 **/
-		virtual EnumeratorSolutions *findSolutions(ATermList Vars, ATerm Expr, EnumeratorSolutions *old = NULL) = 0;
+    /**
+     * \brief Enumerate all valuations that (might) make an
+     *        expression true.
+     * \param[in] Vars      A list of the variables to be instantiated.
+     * \param[in] Expr      A boolean expression, in the internal
+     *                  rewriter format, for which to find the
+     *                  valuations.
+     * \param[in] true_only Boolean to indicate whether only those
+     *                  valuations such that Expr is equivalent to
+     *                  true should be returned or also those for
+     *                  which Expr cannot be determined to be true
+     *                  or false.
+     * \param[in] old       An EnumeratorSolutions object which can be
+     *                  used to retrieve the satisfying valuations.
+     *                  If NULL, a new object is created.
+     * \return An EnumeratorSolutions object which can be used to
+     *         retrieve all valuations of the variables in Var such
+     *         that Expr becomes true. If old is not NULL, old
+     *         itself is returned (reinitialised for the new
+     *         enumeration).
+     *
+     * Calling findSolutions(v,e,true,es) is equivalent to calling
+     * findSolutions(v,e,es) and means that an error will be
+     * generated if there is a valuation of Vars for which Expr
+     * cannot be determined to be equivalent to either true or
+     * false.
+     *
+     * The optional argument old allows one to reuse
+     * EnumeratorSolutions objects (avoiding superfluous allocation
+     * and deallocation). Typical use is as follows (where e is a
+     * Enumerator object):
+     *
+     * \code
+     *   EnumeratorSolutions *es = NULL;
+     *   while ( c )
+     *   {
+     *     es = e->findSolutions(vars,expr,b,es);
+     *     ...
+     *   }
+     * \endcode
+     **/
+    virtual EnumeratorSolutions* findSolutions(ATermList Vars, ATerm Expr, bool true_only, EnumeratorSolutions* old = NULL) = 0;
+    /**
+     * \brief Enumerate all valuations that make an expression true.
+     * \param[in] Vars A list of the variables to be instantiated.
+     * \param[in] Expr A boolean expression, in the internal rewriter
+     *             format, for which to find all solutions.
+     * \param[in] old An EnumeratorSolutions object which can be used to
+     *            retrieve the satisfying valuations. If NULL, a new
+     *            object is created.
+     * \return An EnumeratorSolutions object which can be used to
+     *         retrieve all valuations of the variables in Vars such
+     *         that Expr is equivalent to true. If old is not NULL,
+     *         old itself is returned (reinitialised for the new
+     *         enumeration).
+     *
+     * The optional argument old allows one to reuse
+     * EnumeratorSolutions objects (avoiding superfluous allocation
+     * and deallocation). Typical use is as follows (where e is a
+     * Enumerator object):
+     *
+     * \code
+     *   EnumeratorSolutions *es = NULL;
+     *   while ( c )
+     *   {
+     *     es = e->findSolutions(vars,expr,es);
+     *     ...
+     *   }
+     * \endcode
+     **/
+    virtual EnumeratorSolutions* findSolutions(ATermList Vars, ATerm Expr, EnumeratorSolutions* old = NULL) = 0;
 
-		/**
-		 * \brief Get rewriter used by this object.
-		 * \return Rewriter object used by this Enumerator object.
-		 **/
-		virtual Rewriter *getRewriter() = 0;
+    /**
+     * \brief Get rewriter used by this object.
+     * \return Rewriter object used by this Enumerator object.
+     **/
+    virtual Rewriter* getRewriter() = 0;
 };
 
 /**
@@ -181,10 +186,10 @@ class Enumerator
  * \param[in] strategy          The strategy to use for solution finding.
  * \return A Enumerator object with the given parameters.
  **/
-Enumerator *createEnumerator(mcrl2::data::data_specification const& spec, Rewriter *r, bool clean_up_rewriter = false, EnumerateStrategy strategy = ENUM_STANDARD);
+Enumerator* createEnumerator(mcrl2::data::data_specification const& spec, Rewriter* r, bool clean_up_rewriter = false, EnumerateStrategy strategy = ENUM_STANDARD);
 
-    } // namespace detail
-  } // namespace data
+} // namespace detail
+} // namespace data
 } // namespace mcrl2
 
 #endif

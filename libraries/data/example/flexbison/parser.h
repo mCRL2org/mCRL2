@@ -2,20 +2,20 @@
 /* A Bison parser, made by GNU Bison 2.4.1.  */
 
 /* Skeleton interface for Bison LALR(1) parsers in C++
-   
+
       Copyright (C) 2002, 2003, 2004, 2005, 2006, 2007, 2008 Free Software
    Foundation, Inc.
-   
+
    This program is free software: you can redistribute it and/or modify
    it under the terms of the GNU General Public License as published by
    the Free Software Foundation, either version 3 of the License, or
    (at your option) any later version.
-   
+
    This program is distributed in the hope that it will be useful,
    but WITHOUT ANY WARRANTY; without even the implied warranty of
    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
    GNU General Public License for more details.
-   
+
    You should have received a copy of the GNU General Public License
    along with this program.  If not, see <http://www.gnu.org/licenses/>.  */
 
@@ -28,7 +28,7 @@
    special exception, which will cause the skeleton and the resulting
    Bison output files to be licensed under the GNU General Public
    License without this special exception.
-   
+
    This special exception was added by the Free Software Foundation in
    version 2.2 of Bison.  */
 
@@ -47,12 +47,13 @@
 /* Line 35 of lalr1.cc  */
 #line 1 "[Bison:b4_percent_define_default]"
 
-namespace example {
+namespace example
+{
 
 /* Line 35 of lalr1.cc  */
 #line 54 "parser.h"
-  class position;
-  class location;
+class position;
+class location;
 
 /* Line 35 of lalr1.cc  */
 #line 1 "[Bison:b4_percent_define_default]"
@@ -87,49 +88,50 @@ namespace example {
    the previous symbol: RHS[0] (always defined).  */
 
 #ifndef YYLLOC_DEFAULT
-# define YYLLOC_DEFAULT(Current, Rhs, N)		\
-do {							\
-  if (N)						\
-    {							\
-      (Current).begin = (Rhs)[1].begin;			\
-      (Current).end   = (Rhs)[N].end;			\
-    }							\
-  else							\
-    {							\
-      (Current).begin = (Current).end = (Rhs)[0].end;	\
-    }							\
-} while (false)
+# define YYLLOC_DEFAULT(Current, Rhs, N)    \
+  do {              \
+    if (N)            \
+    {             \
+      (Current).begin = (Rhs)[1].begin;     \
+      (Current).end   = (Rhs)[N].end;     \
+    }             \
+    else              \
+    {             \
+      (Current).begin = (Current).end = (Rhs)[0].end; \
+    }             \
+  } while (false)
 #endif
 
 
 /* Line 35 of lalr1.cc  */
 #line 1 "[Bison:b4_percent_define_default]"
 
-namespace example {
+namespace example
+{
 
 /* Line 35 of lalr1.cc  */
 #line 112 "parser.h"
 
-  /// A Bison parser.
-  class Parser
-  {
+/// A Bison parser.
+class Parser
+{
   public:
     /// Symbol semantic values.
 #ifndef YYSTYPE
     union semantic_type
     {
 
-/* Line 35 of lalr1.cc  */
+      /* Line 35 of lalr1.cc  */
 #line 55 "parser.yy"
-                       
-    int  			integerVal;      
-    double 			doubleVal;     
-    std::string*		stringVal; 
-    class CalcNode*		calcnode;
+
+      int       integerVal;
+      double      doubleVal;
+      std::string*    stringVal;
+      class CalcNode*   calcnode;
 
 
 
-/* Line 35 of lalr1.cc  */
+      /* Line 35 of lalr1.cc  */
 #line 134 "parser.h"
     };
 #else
@@ -141,66 +143,67 @@ namespace example {
     struct token
     {
       /* Tokens.  */
-   enum yytokentype {
-     END = 0,
-     EOL = 258,
-     INTEGER = 259,
-     DOUBLE = 260,
-     STRING = 261
-   };
+      enum yytokentype
+      {
+        END = 0,
+        EOL = 258,
+        INTEGER = 259,
+        DOUBLE = 260,
+        STRING = 261
+      };
 
     };
     /// Token type.
     typedef token::yytokentype token_type;
 
     /// Build a parser object.
-    Parser (class Driver&	driver_yyarg);
-    virtual ~Parser ();
+    Parser(class Driver& driver_yyarg);
+    virtual ~Parser();
 
     /// Parse.
     /// \returns  0 iff parsing succeeded.
-    virtual int parse ();
+    virtual int parse();
 
 #if YYDEBUG
     /// The current debugging stream.
-    std::ostream& debug_stream () const;
+    std::ostream& debug_stream() const;
     /// Set the current debugging stream.
-    void set_debug_stream (std::ostream &);
+    void set_debug_stream(std::ostream&);
 
     /// Type for debugging levels.
     typedef int debug_level_type;
     /// The current debugging level.
-    debug_level_type debug_level () const;
+    debug_level_type debug_level() const;
     /// Set the current debugging level.
-    void set_debug_level (debug_level_type l);
+    void set_debug_level(debug_level_type l);
 #endif
 
   private:
     /// Report a syntax error.
     /// \param loc    where the syntax error is found.
     /// \param msg    a description of the syntax error.
-    virtual void error (const location_type& loc, const std::string& msg);
+    virtual void error(const location_type& loc, const std::string& msg);
 
     /// Generate an error message.
     /// \param state   the state where the error occurred.
     /// \param tok     the lookahead token.
-    virtual std::string yysyntax_error_ (int yystate, int tok);
+    virtual std::string yysyntax_error_(int yystate, int tok);
 
 #if YYDEBUG
     /// \brief Report a symbol value on the debug stream.
     /// \param yytype       The token type.
     /// \param yyvaluep     Its semantic value.
     /// \param yylocationp  Its location.
-    virtual void yy_symbol_value_print_ (int yytype,
-					 const semantic_type* yyvaluep,
-					 const location_type* yylocationp);
+    virtual void yy_symbol_value_print_(int yytype,
+                                        const semantic_type* yyvaluep,
+                                        const location_type* yylocationp);
     /// \brief Report a symbol on the debug stream.
     /// \param yytype       The token type.
     /// \param yyvaluep     Its semantic value.
     /// \param yylocationp  Its location.
-    virtual void yy_symbol_print_ (int yytype,
-				   const semantic_type* yyvaluep,
-				   const location_type* yylocationp);
+    virtual void yy_symbol_print_(int yytype,
+                                  const semantic_type* yyvaluep,
+                                  const location_type* yylocationp);
 #endif
 
 
@@ -260,7 +263,7 @@ namespace example {
 
 #if YYERROR_VERBOSE
     /// Convert the symbol name \a n to a form suitable for a diagnostic.
-    virtual std::string yytnamerr_ (const char *n);
+    virtual std::string yytnamerr_(const char* n);
 #endif
 
 #if YYDEBUG
@@ -275,9 +278,9 @@ namespace example {
     /// For each scanner token number, its symbol number.
     static const unsigned short int yytoken_number_[];
     /// Report on the debug stream that the rule \a r is going to be reduced.
-    virtual void yy_reduce_print_ (int r);
+    virtual void yy_reduce_print_(int r);
     /// Print the state stack on the debug stream.
-    virtual void yystack_print_ ();
+    virtual void yystack_print_();
 
     /* Debugging.  */
     int yydebug_;
@@ -285,20 +288,20 @@ namespace example {
 #endif
 
     /// Convert a scanner token number \a t to a symbol number.
-    token_number_type yytranslate_ (int t);
+    token_number_type yytranslate_(int t);
 
     /// \brief Reclaim the memory associated to a symbol.
     /// \param yymsg        Why this token is reclaimed.
     /// \param yytype       The symbol type.
     /// \param yyvaluep     Its semantic value.
     /// \param yylocationp  Its location.
-    inline void yydestruct_ (const char* yymsg,
-			     int yytype,
-			     semantic_type* yyvaluep,
-			     location_type* yylocationp);
+    inline void yydestruct_(const char* yymsg,
+                            int yytype,
+                            semantic_type* yyvaluep,
+                            location_type* yylocationp);
 
     /// Pop \a n symbols the three stacks.
-    inline void yypop_ (unsigned int n = 1);
+    inline void yypop_(unsigned int n = 1);
 
     /* Constants.  */
     static const int yyeof_;
@@ -314,8 +317,8 @@ namespace example {
     static const token_number_type yyundef_token_;
 
     /* User arguments.  */
-    class Driver&	driver;
-  };
+    class Driver& driver;
+};
 
 /* Line 35 of lalr1.cc  */
 #line 1 "[Bison:b4_percent_define_default]"

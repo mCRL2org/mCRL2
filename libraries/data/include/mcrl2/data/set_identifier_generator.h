@@ -15,9 +15,11 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/data/identifier_generator.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace data {
+namespace data
+{
 
 /// \brief Identifier generator that stores the identifiers of the
 /// context in a set.
@@ -34,14 +36,6 @@ class set_identifier_generator: public identifier_generator<>
     /// \brief Constructor.
     set_identifier_generator()
     {}
-
-    /// \brief Constructor.
-    /// \param t A term
-    template <typename Term>
-    set_identifier_generator(Term t)
-    {
-      add_to_context(t);
-    }
 
     /// \brief Clears the context.
     void clear_context()
@@ -97,14 +91,6 @@ class multiset_identifier_generator: public identifier_generator<>
     /// \brief Constructor.
     multiset_identifier_generator()
     {}
-
-    /// \brief Constructor.
-    /// \param t A term
-    template <typename Term>
-    multiset_identifier_generator(Term t)
-    {
-      add_to_context(t);
-    }
 
     /// \brief Clears the context.
     void clear_context()

@@ -13,20 +13,20 @@
 
 namespace grape
 {
-  namespace libgrape
-  {
-    /**
-     * \short Linetype enumeration.
-     * An enumeration that includes all possible line types ({straight, curved, zigzag}).
-     */
-    enum linetype
-    {
-      straight,
-      curved,
-      zigzag
-    };
+namespace libgrape
+{
+/**
+ * \short Linetype enumeration.
+ * An enumeration that includes all possible line types ({straight, curved, zigzag}).
+ */
+enum linetype
+{
+  straight,
+  curved,
+  zigzag
+};
 
-  } // namespace libgrape
+} // namespace libgrape
 } // namespace grape
 
 #endif // LIBGRAPE_LINETYPE_H

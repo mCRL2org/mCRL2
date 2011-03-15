@@ -16,55 +16,57 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/application.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
-    /// \brief function symbol.
+/// \brief function symbol.
+///
+class lambda: public abstraction
+{
+  public:
+
+    /// Constructor.
     ///
-    class lambda: public abstraction
+    /// \param[in] d A data expression.
+    /// \pre d is a lambda abstraction.
+    lambda(const data_expression& d)
+      : abstraction(d)
     {
-      public:
+      assert(is_abstraction(d));
+      assert(static_cast<abstraction>(d).binding_operator() == lambda_binder());
+    }
 
-        /// Constructor.
-        ///
-        /// \param[in] d A data expression.
-        /// \pre d is a lambda abstraction.
-        lambda(const data_expression& d)
-          : abstraction(d)
-        {
-          assert(is_abstraction(d));
-          assert(static_cast<abstraction>(d).binding_operator() == lambda_binder());
-        }
+    /// Constructor.
+    ///
+    /// \param[in] variable A nonempty list of binding variables.
+    /// \param[in] body The body of the lambda abstraction.
+    /// \pre variables is not empty.
+    lambda(const variable& variable,
+           const data_expression& body)
+      : abstraction(lambda_binder(), atermpp::convert< variable_list >(make_list(variable)), body)
+    {
+    }
 
-        /// Constructor.
-        ///
-        /// \param[in] variable A nonempty list of binding variables.
-        /// \param[in] body The body of the lambda abstraction.
-        /// \pre variables is not empty.
-        lambda(const variable& variable,
-               const data_expression& body)
-          : abstraction(lambda_binder(), atermpp::convert< variable_list >(make_list(variable)), body)
-        {
-        }
+    /// Constructor.
+    ///
+    /// \param[in] variables A nonempty list of binding variables (objects of type variable).
+    /// \param[in] body The body of the lambda abstraction.
+    /// \pre variables is not empty.
+    template < typename Container >
+    lambda(const Container& variables,
+           const data_expression& body,
+           typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+      : abstraction(lambda_binder(), variables, body)
+    {
+      assert(!variables.empty());
+    }
 
-        /// Constructor.
-        ///
-        /// \param[in] variables A nonempty list of binding variables (objects of type variable).
-        /// \param[in] body The body of the lambda abstraction.
-        /// \pre variables is not empty.
-        template < typename Container >
-        lambda(const Container& variables,
-               const data_expression& body,
-               typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-          : abstraction(lambda_binder(), variables, body)
-        {
-          assert(!variables.empty());
-        }
+}; // class lambda
 
-    }; // class lambda
-
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

@@ -17,34 +17,34 @@
 
 // ---------------------------------------
 BitmapPanel::BitmapPanel(
-    wxWindow* parent,
-    wxSize size,
-    const char* const* image )
-    : wxPanel(
-        parent,
-        wxID_ANY )
+  wxWindow* parent,
+  wxSize size,
+  const char* const* image)
+  : wxPanel(
+    parent,
+    wxID_ANY)
 // --------------------------------------
 {
-    // no resize
-    this->SetClientSize( size );
-    this->SetMinSize( this->GetSize() );
-    this->SetMaxSize( this->GetSize() );
+  // no resize
+  this->SetClientSize(size);
+  this->SetMinSize(this->GetSize());
+  this->SetMaxSize(this->GetSize());
 
-    /*
-    // load image
-    bitmap = new wxBitmap(
-        path,
-        wxBITMAP_TYPE_BMP );
-    if ( bitmap->Ok() != true )
-    {
-        wxString msg;
-        msg.Append( "Error opening file: " );
-        msg.Append( path );
-        wxLogError( msg );
-    }
-    */
-    // load image, cast for wxWidgets 2.6 compatibility
-    bitmap = new wxBitmap( const_cast< const char** >( image ) );
+  /*
+  // load image
+  bitmap = new wxBitmap(
+      path,
+      wxBITMAP_TYPE_BMP );
+  if ( bitmap->Ok() != true )
+  {
+      wxString msg;
+      msg.Append( "Error opening file: " );
+      msg.Append( path );
+      wxLogError( msg );
+  }
+  */
+  // load image, cast for wxWidgets 2.6 compatibility
+  bitmap = new wxBitmap(const_cast< const char** >(image));
 }
 
 
@@ -52,8 +52,8 @@ BitmapPanel::BitmapPanel(
 BitmapPanel::~BitmapPanel()
 // ------------------------
 {
-    delete bitmap;
-    bitmap = NULL;
+  delete bitmap;
+  bitmap = NULL;
 }
 
 
@@ -61,26 +61,26 @@ BitmapPanel::~BitmapPanel()
 
 
 // ------------------------------------------------
-void BitmapPanel::onEvtPaint( wxPaintEvent& /*event*/ )
+void BitmapPanel::onEvtPaint(wxPaintEvent& /*event*/)
 // ------------------------------------------------
 {
-    if ( bitmap->Ok() == true )
-    {
-        wxClientDC dc( this );
+  if (bitmap->Ok() == true)
+  {
+    wxClientDC dc(this);
 
-        // aparently BeginDrawing() and EndDrawing() are depricated and do nothing
-        //dc.BeginDrawing();
-        dc.DrawBitmap( *bitmap, 0, 0, false );
-        //dc.EndDrawing();
-    }
+    // aparently BeginDrawing() and EndDrawing() are depricated and do nothing
+    //dc.BeginDrawing();
+    dc.DrawBitmap(*bitmap, 0, 0, false);
+    //dc.EndDrawing();
+  }
 }
 
 
 // -- event table ---------------------------------------------------
 
 
-BEGIN_EVENT_TABLE( BitmapPanel, wxPanel )
-    EVT_PAINT( BitmapPanel::onEvtPaint )
+BEGIN_EVENT_TABLE(BitmapPanel, wxPanel)
+  EVT_PAINT(BitmapPanel::onEvtPaint)
 END_EVENT_TABLE()
 
 

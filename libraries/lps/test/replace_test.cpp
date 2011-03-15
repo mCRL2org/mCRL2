@@ -15,10 +15,9 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/substitution.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/substitute.h"
-#include "mcrl2/lps/detail/lps_substituter.h"
+#include "mcrl2/lps/print.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -42,14 +41,13 @@ const std::string SPEC =
 void test_replace()
 {
   specification spec = parse_linear_process_specification(SPEC);
-  summand s = spec.process().summands().front();
+  action_summand s = spec.process().action_summands().front();
   variable b("b", sort_bool::bool_());
   variable c("c", sort_bool::bool_());
   variable d("d", sort_bool::bool_());
   assignment a(c, d);
-  summand t = data::replace_variables(s, a); // must become lps::replace
-  std::cout << "<s>" << pp(s) << std::endl;
-  std::cout << "<t>" << pp(t) << std::endl;
+  action_summand t = s;
+  lps::replace_variables(t, a);
   core::garbage_collect();
 }
 
@@ -92,14 +90,8 @@ void test_lps_substituter()
   data::mutable_map_substitution<> sigma;
   sigma[variable("s", sort_pos::pos())] = sort_pos::pos(3);
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
-  lps::detail::lps_substituter<data::mutable_map_substitution<> > subst(sigma);
 
-  data::data_expression d;
-  subst(d);
-  data::assignment a;
-  subst(a);
-
-  subst(spec1);
+  lps::replace_variables(spec1, sigma);
   std::cerr << pp(spec1.process()) << std::endl;
   std::cerr << "-------------------------------------" << std::endl;
   std::cerr << pp(spec2.process()) << std::endl;
@@ -113,8 +105,7 @@ void test_lps_substitute()
   data::variable w("w", sort_pos::pos());
   data::mutable_map_substitution<> sigma;
   sigma[v] = w;
-
-  lps::substitute(v, sigma, false);
+  lps::replace_free_variables(v, sigma);
   core::garbage_collect();
 }
 

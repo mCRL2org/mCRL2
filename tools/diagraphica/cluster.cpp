@@ -21,38 +21,38 @@ using namespace std;
 Cluster::Cluster()
 // ---------------
 {
-    index      = -1;
-    parent     = NULL;
-    attribute  = NULL;
-    attrValIdx = -1;
+  index      = NON_EXISTING;
+  parent     = NULL;
+  attribute  = NULL;
+  attrValIdx = NON_EXISTING;
 }
 
 
 // -----------------------------------------
-Cluster::Cluster( const vector< int > &crd )
+Cluster::Cluster(const vector< size_t > &crd)
 // -----------------------------------------
 {
-    coord      = crd;
-    index      = -1;
-    parent     = NULL;
-    attribute  = NULL;
-    attrValIdx = -1;
+  coord      = crd;
+  index      = NON_EXISTING;
+  parent     = NULL;
+  attribute  = NULL;
+  attrValIdx = NON_EXISTING;
 }
 
 
 // ------------------------------------
-Cluster::Cluster( const Cluster &clst )
+Cluster::Cluster(const Cluster& clst)
 // ------------------------------------
 {
-    coord 	   = clst.coord;
-    index      = clst.index;
-    parent     = clst.parent;
-    children   = clst.children;
-    nodes      = clst.nodes;
-    attribute  = clst.attribute;
-    attrValIdx = clst.attrValIdx;
-    inBundles  = clst.inBundles;
-    outBundles = clst.outBundles;
+  coord      = clst.coord;
+  index      = clst.index;
+  parent     = clst.parent;
+  children   = clst.children;
+  nodes      = clst.nodes;
+  attribute  = clst.attribute;
+  attrValIdx = clst.attrValIdx;
+  inBundles  = clst.inBundles;
+  outBundles = clst.outBundles;
 }
 
 
@@ -60,12 +60,12 @@ Cluster::Cluster( const Cluster &clst )
 Cluster::~Cluster()
 // ----------------
 {
-    clearParent();
-    clearChildren();
-    clearNodes();
-    clearAttribute();
-    clearInBundles();
-    clearOutBundles();
+  clearParent();
+  clearChildren();
+  clearNodes();
+  clearAttribute();
+  clearInBundles();
+  clearOutBundles();
 }
 
 
@@ -73,110 +73,110 @@ Cluster::~Cluster()
 
 
 // ----------------------------------------------
-void Cluster::setCoord( const vector< int> &crd )
+void Cluster::setCoord(const vector< size_t > &crd)
 // ----------------------------------------------
 {
-    coord = crd;
+  coord = crd;
 }
 
 
 // -------------------------------------
-void Cluster::setIndex( const int &idx )
+void Cluster::setIndex(const size_t& idx)
 // -------------------------------------
 {
-    index = idx;
+  index = idx;
 }
 
 
 // ----------------------------------
-void Cluster::setParent( Cluster* p )
+void Cluster::setParent(Cluster* p)
 // ----------------------------------
 {
-    parent = p;
+  parent = p;
 }
 
 
 // ---------------------------------
-void Cluster::addChild( Cluster* c )
+void Cluster::addChild(Cluster* c)
 // ---------------------------------
 {
-    children.push_back( c );
+  children.push_back(c);
 }
 
 
 // -----------------------------------------------------
-void Cluster::setChildren( const vector< Cluster* > &c )
+void Cluster::setChildren(const vector< Cluster* > &c)
 // -----------------------------------------------------
 {
-    clearChildren();
-    children = c;
+  clearChildren();
+  children = c;
 }
 
 
 // -----------------------------
-void Cluster::addNode( Node* n )
+void Cluster::addNode(Node* n)
 // -----------------------------
 {
-    nodes.push_back( n );
+  nodes.push_back(n);
 }
 
 
 // -----------------------------------------------
-void Cluster::setNodes( const vector< Node* > &n )
+void Cluster::setNodes(const vector< Node* > &n)
 // -----------------------------------------------
 {
-    clearNodes();
-    nodes = n;
+  clearNodes();
+  nodes = n;
 }
 
 
 // ------------------------------------------
-void Cluster::setAttribute( Attribute* attr )
+void Cluster::setAttribute(Attribute* attr)
 // ------------------------------------------
 {
-    attribute = attr;
+  attribute = attr;
 }
 
 
 // ------------------------------------------
-void Cluster::setAttrValIdx( const int &idx )
+void Cluster::setAttrValIdx(const size_t& idx)
 // ------------------------------------------
 {
-    attrValIdx = idx;
+  attrValIdx = idx;
 }
 
 
 // -----------------------------------
-void Cluster::addInBundle( Bundle* b )
+void Cluster::addInBundle(Bundle* b)
 // -----------------------------------
 {
-    inBundles.push_back( b );
+  inBundles.push_back(b);
 }
 
 
 // ----------------------------------------------------
-void Cluster::setInBundles( const vector< Bundle* > b )
+void Cluster::setInBundles(const vector< Bundle* > b)
 // ----------------------------------------------------
 {
-    clearInBundles();
-    inBundles = b;
+  clearInBundles();
+  inBundles = b;
 }
 
 
 // ------------------------------------
-void Cluster::addOutBundle( Bundle* b )
+void Cluster::addOutBundle(Bundle* b)
 // ------------------------------------
 {
-    outBundles.push_back( b );
+  outBundles.push_back(b);
 }
 
 
 // -----------------------------------------------------
-void Cluster::setOutBundles( const vector< Bundle* > b )
+void Cluster::setOutBundles(const vector< Bundle* > b)
 // -----------------------------------------------------
 {
-    clearOutBundles();
-    outBundles = b;
+  clearOutBundles();
+  outBundles = b;
 }
 
 
@@ -184,37 +184,39 @@ void Cluster::setOutBundles( const vector< Bundle* > b )
 
 
 // ------------------------
-int Cluster::getSizeCoord()
+size_t Cluster::getSizeCoord()
 // ------------------------
 {
-    return coord.size();
+  return coord.size();
 }
 
 
 // ------------------------------------
-int Cluster::getCoord( const int &idx )
+size_t Cluster::getCoord(const size_t& idx)
 // ------------------------------------
 {
-    int result = -1;
-    if ( 0 <= idx && static_cast <size_t> (idx) < coord.size() )
-        result = coord[idx];
-    return result;
+  size_t result = NON_EXISTING;
+  if (idx != NON_EXISTING && static_cast <size_t>(idx) < coord.size())
+  {
+    result = coord[idx];
+  }
+  return result;
 }
 
 
 // -----------------------------------------
-void Cluster::getCoord( vector< int > &crd )
+void Cluster::getCoord(vector< size_t > &crd)
 // -----------------------------------------
 {
-    crd = coord;
+  crd = coord;
 }
 
 
 // --------------------
-int Cluster::getIndex()
+size_t Cluster::getIndex()
 // --------------------
 {
-    return index;
+  return index;
 }
 
 
@@ -222,58 +224,70 @@ int Cluster::getIndex()
 Cluster* Cluster::getParent()
 // --------------------------
 {
-    return parent;
+  return parent;
 }
 
 
 // ---------------------------
-int Cluster::getSizeChildren()
+size_t Cluster::getSizeChildren()
 // ---------------------------
 {
-    return children.size();
+  return children.size();
 }
 
 
 // -----------------------------------------
-Cluster* Cluster::getChild( const int &idx )
+Cluster* Cluster::getChild(const size_t& idx)
 // -----------------------------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < children.size() )
-        return children[idx];
-    else
-        throw mcrl2::runtime_error( "Error retrieving cluster child." );
+  if (idx != NON_EXISTING && static_cast <size_t>(idx) < children.size())
+  {
+    return children[idx];
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error retrieving cluster child.");
+  }
 }
 
 
 // ------------------------
-int Cluster::getSizeNodes()
+size_t Cluster::getSizeNodes()
 // ------------------------
 {
-    if (this != NULL)
-      {return nodes.size();}
-    else
-      {return 0;}
+  if (this != NULL)
+  {
+    return nodes.size();
+  }
+  else
+  {
+    return 0;
+  }
 }
 
 
 // -------------------------------------
-Node* Cluster::getNode( const int &idx )
+Node* Cluster::getNode(const size_t& idx)
 // -------------------------------------
 {
-    if ( 0 <= idx && static_cast <size_t> (idx) < nodes.size() )
-        return nodes[idx];
-    else
-        throw mcrl2::runtime_error( "Error retrieving cluster node." );
+  if (idx != NON_EXISTING && static_cast <size_t>(idx) < nodes.size())
+  {
+    return nodes[idx];
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error retrieving cluster node.");
+  }
 }
 
 
 // ----------------------------
-int Cluster::getSizeDescNodes()
+size_t Cluster::getSizeDescNodes()
 // ----------------------------
 {
-    int sum = 0;
-    getSizeDescNodes( this, sum );
-    return sum;
+  size_t sum = 0;
+  getSizeDescNodes(this, sum);
+  return sum;
 }
 
 
@@ -281,53 +295,61 @@ int Cluster::getSizeDescNodes()
 Attribute* Cluster::getAttribute()
 // -------------------------------
 {
-    return attribute;
+  return attribute;
 }
 
 
 // -------------------------
-int Cluster::getAttrValIdx()
+size_t Cluster::getAttrValIdx()
 // -------------------------
 {
-    return attrValIdx;
+  return attrValIdx;
 }
 
 
 // ----------------------------
-int Cluster::getSizeInBundles()
+size_t Cluster::getSizeInBundles()
 // ----------------------------
 {
-    return inBundles.size();
+  return inBundles.size();
 }
 
 
 // -------------------------------------------
-Bundle* Cluster::getInBundle( const int &idx )
+Bundle* Cluster::getInBundle(const size_t& idx)
 // -------------------------------------------
 {
-	if ( 0 <= idx && static_cast <size_t> (idx) < inBundles.size() )
-		return inBundles[idx];
-	else
-        throw mcrl2::runtime_error( "Error retrieving cluster incoming bundle." );
+  if (idx != NON_EXISTING && static_cast <size_t>(idx) < inBundles.size())
+  {
+    return inBundles[idx];
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error retrieving cluster incoming bundle.");
+  }
 }
 
 
 // -----------------------------
-int Cluster::getSizeOutBundles()
+size_t Cluster::getSizeOutBundles()
 // -----------------------------
 {
-    return outBundles.size();
+  return outBundles.size();
 }
 
 
 // --------------------------------------------
-Bundle* Cluster::getOutBundle( const int &idx )
+Bundle* Cluster::getOutBundle(const size_t& idx)
 // --------------------------------------------
 {
-	if ( 0 <= idx && static_cast <size_t> (idx) < outBundles.size() )
-		return outBundles[idx];
-	else
-        throw mcrl2::runtime_error( "Error retrieving cluster outgoing bundle." );
+  if (idx != NON_EXISTING && static_cast <size_t>(idx) < outBundles.size())
+  {
+    return outBundles[idx];
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Error retrieving cluster outgoing bundle.");
+  }
 }
 
 
@@ -338,7 +360,7 @@ Bundle* Cluster::getOutBundle( const int &idx )
 void Cluster::clearParent()
 // ------------------------
 {
-    parent = NULL;
+  parent = NULL;
 }
 
 
@@ -346,9 +368,11 @@ void Cluster::clearParent()
 void Cluster::clearChildren()
 // --------------------------
 {
-    for ( size_t i = 0; i < children.size(); ++i )
-        children[i] = NULL;
-    children.clear();
+  for (size_t i = 0; i < children.size(); ++i)
+  {
+    children[i] = NULL;
+  }
+  children.clear();
 }
 
 
@@ -356,9 +380,11 @@ void Cluster::clearChildren()
 void Cluster::clearNodes()
 // -----------------------
 {
-    for ( size_t i = 0; i < nodes.size(); ++i )
-        nodes[i] = NULL;
-    nodes.clear();
+  for (size_t i = 0; i < nodes.size(); ++i)
+  {
+    nodes[i] = NULL;
+  }
+  nodes.clear();
 }
 
 
@@ -366,8 +392,8 @@ void Cluster::clearNodes()
 void Cluster::clearAttribute()
 // ---------------------------
 {
-    attribute  = NULL;
-    attrValIdx = -1;
+  attribute  = NULL;
+  attrValIdx = NON_EXISTING;
 }
 
 
@@ -375,9 +401,11 @@ void Cluster::clearAttribute()
 void Cluster::clearInBundles()
 // ---------------------------
 {
-	for ( size_t i = 0; i < inBundles.size(); ++i )
-		inBundles[i] = NULL;
-    inBundles.clear();
+  for (size_t i = 0; i < inBundles.size(); ++i)
+  {
+    inBundles[i] = NULL;
+  }
+  inBundles.clear();
 }
 
 
@@ -385,9 +413,11 @@ void Cluster::clearInBundles()
 void Cluster::clearOutBundles()
 // ----------------------------
 {
-	for ( size_t i = 0; i < outBundles.size(); ++i )
-		outBundles[i] = NULL;
-    outBundles.clear();
+  for (size_t i = 0; i < outBundles.size(); ++i)
+  {
+    outBundles[i] = NULL;
+  }
+  outBundles.clear();
 }
 
 
@@ -396,17 +426,21 @@ void Cluster::clearOutBundles()
 
 // ----------------------------
 void Cluster::getSizeDescNodes(
-    Cluster* curClst,
-    int &sum )
+  Cluster* curClst,
+  size_t& sum)
 // ----------------------------
 {
-    if ( curClst->getSizeChildren() == 0 )
-        sum += curClst->getSizeNodes();
-    else
+  if (curClst->getSizeChildren() == 0)
+  {
+    sum += curClst->getSizeNodes();
+  }
+  else
+  {
+    for (size_t i = 0; i < curClst->getSizeChildren(); ++i)
     {
-        for ( int i = 0; i < curClst->getSizeChildren(); ++i )
-            getSizeDescNodes( curClst->getChild( i ), sum );
+      getSizeDescNodes(curClst->getChild(i), sum);
     }
+  }
 }
 
 

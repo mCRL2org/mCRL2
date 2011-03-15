@@ -6,41 +6,45 @@ extern "C"
 {
 #endif /* __cplusplus */
 
-struct Entry;
-typedef struct Entry Entry;
+#include "atypes.h"
 
-typedef struct _EntryCache{
-	Entry **blocks;
-	unsigned int nrOfBlocks;
-	
-	Entry *nextEntry;
-	unsigned int spaceLeft;
-	
-	Entry *freeList;
-} *EntryCache;
+  struct Entry;
+  typedef struct Entry Entry;
 
-typedef struct _IDMappings{
-	EntryCache entryCache;
-	
-	Entry **table;
-	unsigned int tableSize;
-	unsigned int hashMask;
-	
-	unsigned int load;
-	unsigned int threshold;
-} *IDMappings;
+  typedef struct _EntryCache
+  {
+    Entry** blocks;
+    size_t nrOfBlocks;
 
-IDMappings IMcreateIDMappings(float loadPercentage);
+    Entry* nextEntry;
+    size_t spaceLeft;
 
-int IMmakeIDMapping(IDMappings idMappings, void *key, unsigned int h, int value);
+    Entry* freeList;
+  }* EntryCache;
 
-int IMgetID(IDMappings idMappings, void *key, unsigned int h);
+  typedef struct _IDMappings
+  {
+    EntryCache entryCache;
 
-void IMremoveIDMapping(IDMappings idMappings, void *key, unsigned int h);
+    Entry** table;
+    size_t tableSize;
+    size_t hashMask;
 
-unsigned int IMgetSize(IDMappings idMappings);
+    unsigned int load;
+    size_t threshold;
+  }* IDMappings;
 
-void IMdestroyIDMappings(IDMappings idMappings);
+  IDMappings IMcreateIDMappings(unsigned int loadPercentage);
+
+  size_t IMmakeIDMapping(IDMappings idMappings, void* key, size_t h, size_t value);
+
+  size_t IMgetID(IDMappings idMappings, void* key, size_t h);
+
+  void IMremoveIDMapping(IDMappings idMappings, void* key, size_t h);
+
+  unsigned int IMgetSize(IDMappings idMappings);
+
+  void IMdestroyIDMappings(IDMappings idMappings);
 
 #ifdef __cplusplus
 }

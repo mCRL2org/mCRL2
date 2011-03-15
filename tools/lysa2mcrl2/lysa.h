@@ -25,8 +25,8 @@
 * (and the patched FlexLexer.h workaround) are the only direct dependencies on the mCRL2
 * toolset code for the parser itself.
 *
-* As such, if you want to reuse the LySa parser outside the mCRL2 toolset, reimplement 
-* the following functions (and copy build/workarounds/all/FlexLexer.h to somewhere 
+* As such, if you want to reuse the LySa parser outside the mCRL2 toolset, reimplement
+* the following functions (and copy build/workarounds/all/FlexLexer.h to somewhere
 * sensible).
 */
 
@@ -40,47 +40,47 @@ using mcrl2::core::gsDebugMsg;
 namespace lysa
 {
 #define S(v) ((string)(*(v)))
-  using boost::shared_ptr;
-  using boost::dynamic_pointer_cast;
-  using boost::static_pointer_cast;
-  using boost::weak_ptr;
-  using std::string;	
-  using std::vector;
+using boost::shared_ptr;
+using boost::dynamic_pointer_cast;
+using boost::static_pointer_cast;
+using boost::weak_ptr;
+using std::string;
+using std::vector;
 
-  //identical to bison's YYLTYPE
-  struct parse_location
-  {
-    int first_line;
-    int first_column;
-    int last_line;
-    int last_column;
-  };
+//identical to bison's YYLTYPE
+struct parse_location
+{
+  int first_line;
+  int first_column;
+  int last_line;
+  int last_column;
+};
 
-  struct lysa_options
-  {
-    string prefix;	           //prefix for LySa identifiers
-    //string fmt_file_name;      //DEPRECATED: filename of format strings
-    //string preamble_file_name; //DEPRECATED: filename of preamble (or empty)
-    bool make_symbolic;        //if true, make a symbolic attacker
-    string attacker_index;     //if nonempty, add CPDYonAttackerIndex to every
-                               //destorig and set attackerIndex map
-    string zero_action;        //if nonempty, first this action before delta'ing if Zero is encountered
-    Strategy* strategy;           //a strategy determines which format and preamble is used, and whether make_symbolic is true.
-  };
+struct lysa_options
+{
+  string prefix;             //prefix for LySa identifiers
+  //string fmt_file_name;      //DEPRECATED: filename of format strings
+  //string preamble_file_name; //DEPRECATED: filename of preamble (or empty)
+  bool make_symbolic;        //if true, make a symbolic attacker
+  string attacker_index;     //if nonempty, add CPDYonAttackerIndex to every
+  //destorig and set attackerIndex map
+  string zero_action;        //if nonempty, first this action before delta'ing if Zero is encountered
+  Strategy* strategy;           //a strategy determines which format and preamble is used, and whether make_symbolic is true.
+};
 
-  enum Calculus { LySa, TypedLySa, Unknown };
+enum Calculus { LySa, TypedLySa, Unknown };
 
-  class Var;
-  class Name;
-  class Identifier;
-  class Expression;
-  class Indices;
+class Var;
+class Name;
+class Identifier;
+class Expression;
+class Indices;
 
-  typedef shared_ptr<Expression> E_ptr;
-  typedef std::set<int> domain;
+typedef shared_ptr<Expression> E_ptr;
+typedef std::set<int> domain;
 
-  class ProcessInfo
-  {
+class ProcessInfo
+{
   protected:
     Calculus _calculus;
   public:
@@ -93,21 +93,24 @@ namespace lysa
         options(options),
         current_line(0),
         current_col(0)
-      {};
-    Calculus calculus() { return _calculus; };
+    {};
+    Calculus calculus()
+    {
+      return _calculus;
+    };
     void set_calculus(Calculus c);
     void override_calculus(Calculus c);
-  };
+};
 
-  extern shared_ptr<ProcessInfo> current_process_info;
-  void start_parsing(lysa_options &options);
-  void set_current_position(parse_location &pos);
-  template<typename T> string join(T& input, string sep);
-  template<typename T> string join_ptr(T& input, string sep);
+extern shared_ptr<ProcessInfo> current_process_info;
+void start_parsing(lysa_options& options);
+void set_current_position(parse_location& pos);
+template<typename T> string join(T& input, string sep);
+template<typename T> string join_ptr(T& input, string sep);
 
 
-  class Expression
-  {
+class Expression
+{
   protected:
     int line_in_input;
     int col_in_input;
@@ -116,8 +119,14 @@ namespace lysa
     string position_in_input();
     shared_ptr<ProcessInfo> process_info;
     virtual operator string() = 0;
-    void hint(string h)    { _hint = h; };
-    string hint()		  		 { return _hint; };
+    void hint(string h)
+    {
+      _hint = h;
+    };
+    string hint()
+    {
+      return _hint;
+    };
     virtual vector<E_ptr> subexpressions();
     Expression() : process_info(current_process_info)
     {
@@ -129,26 +138,29 @@ namespace lysa
     virtual E_ptr find_opar_before_dy(E_ptr last_opar);
     std::list<E_ptr> find_let_until(E_ptr stop_at);
     virtual ~Expression() {};
-  };
+};
 
-  class String : public Expression
-  {
+class String : public Expression
+{
   public:
     string s;
     String(string s) : s(s) {};
-    virtual operator string() { return s; };
+    virtual operator string()
+    {
+      return s;
+    };
     virtual ~String() {};
-  };
+};
 
-  class Term : public Expression {};
-  class Proc : public Expression {};
-  class IndexDef;
-  class Annotation;
+class Term : public Expression {};
+class Proc : public Expression {};
+class IndexDef;
+class Annotation;
 
-  typedef std::list<string> string_list;
+typedef std::list<string> string_list;
 
-  class Indices : public Expression, public string_list
-  {
+class Indices : public Expression, public string_list
+{
   public:
     Indices() {};
     //if isShort, then every character is split into a separate index
@@ -156,40 +168,40 @@ namespace lysa
     virtual operator string();
     virtual void push_back(string s);
     virtual ~Indices() {};
-  };
+};
 
-  class Iset;
-  class IndexDef : public Expression
-  {
+class Iset;
+class IndexDef : public Expression
+{
   public:
     string index;
     string set;
     shared_ptr<Iset> iset;
 
-    
-    IndexDef(E_ptr i, E_ptr s) : 
+
+    IndexDef(E_ptr i, E_ptr s) :
       index(process_info->options.prefix + static_pointer_cast<String>(i)->s),
       set(static_pointer_cast<String>(s)->s) {} ;
-    IndexDef(E_ptr i, E_ptr s, E_ptr iset) : 
+    IndexDef(E_ptr i, E_ptr s, E_ptr iset) :
       index(process_info->options.prefix + static_pointer_cast<String>(i)->s),
-      set(static_pointer_cast<String>(s)->s), 
+      set(static_pointer_cast<String>(s)->s),
       iset(static_pointer_cast<Iset>(iset)) {};
     virtual operator string();
     virtual ~IndexDef() {};
-  };
-  typedef std::list<shared_ptr<IndexDef> > IndexDef_list;
-  class IndexDefs : public Expression, public IndexDef_list
-  {
+};
+typedef std::list<shared_ptr<IndexDef> > IndexDef_list;
+class IndexDefs : public Expression, public IndexDef_list
+{
   public:
     operator string();
     IndexDefs() {};
     IndexDefs(E_ptr id);
     virtual void push_back(E_ptr id);
-  };
+};
 
-  typedef std::list<shared_ptr<Term> > Term_list;
-  class Terms : public Expression, public Term_list
-  {
+typedef std::list<shared_ptr<Term> > Term_list;
+class Terms : public Expression, public Term_list
+{
   public:
     Terms() {};
     Terms(E_ptr t);
@@ -197,10 +209,10 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~Terms() {};
-  };
+};
 
-  class Identifier : public Term
-  {
+class Identifier : public Term
+{
   public:
     string name;
     shared_ptr<Indices> indices;
@@ -209,20 +221,20 @@ namespace lysa
     Identifier(E_ptr s, E_ptr i) : name(process_info->options.prefix + static_pointer_cast<String>(s)->s), indices(static_pointer_cast<Indices>(i)) {};
     virtual operator string();
     virtual ~Identifier() {};
-  };
+};
 
-  //NOTE: a Name is any identifier that is not a typed variable definition, crypto-point or asymmetic name!
-  //in other words, it can be either a literal name or a variable. only scope can tell th difference between
-  //those two.
-  class Name : public Identifier 
-  {	
+//NOTE: a Name is any identifier that is not a typed variable definition, crypto-point or asymmetic name!
+//in other words, it can be either a literal name or a variable. only scope can tell th difference between
+//those two.
+class Name : public Identifier
+{
   public:
     Name(E_ptr s) : Identifier(s) {};
     Name(E_ptr s, E_ptr i) : Identifier(s, i) {};
-  };
+};
 
-  class TypedVar : public Name 
-  {	
+class TypedVar : public Name
+{
   public:
     typedef enum {V_None, V_Name, V_Ciphertext} Type;
     Type type;
@@ -231,10 +243,10 @@ namespace lysa
     TypedVar(E_ptr s, E_ptr i, Type type) : Name(s, i), type(type) {};
     virtual operator string();
     virtual ~TypedVar() {};
-  };
+};
 
-  class ASymName : public Name
-  {
+class ASymName : public Name
+{
   public:
     bool hasPlus;
 
@@ -242,31 +254,31 @@ namespace lysa
     ASymName(E_ptr s, E_ptr i, bool hasPlus) : Name(s, i), hasPlus(hasPlus) {};
     virtual operator string();
     virtual ~ASymName() {};
-  };
+};
 
-  class Ciphertext : public Term
-  {
+class Ciphertext : public Term
+{
   public:
     shared_ptr<Terms> terms;
     shared_ptr<Term> key;
     shared_ptr<Annotation> anno;
     bool isASym;
 
-    Ciphertext(bool isASym, E_ptr t, E_ptr k, E_ptr a) : 
-    terms(static_pointer_cast<Terms>(t)), key(static_pointer_cast<Term>(k)), anno(static_pointer_cast<Annotation>(a)), isASym(isASym) {};
+    Ciphertext(bool isASym, E_ptr t, E_ptr k, E_ptr a) :
+      terms(static_pointer_cast<Terms>(t)), key(static_pointer_cast<Term>(k)), anno(static_pointer_cast<Annotation>(a)), isASym(isASym) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~Ciphertext() {};
-  };
+};
 
-  class Iset : public Expression
-  {
+class Iset : public Expression
+{
   public:
     virtual domain to_domain() = 0;
-  };
+};
 
-  class IsetIndices : public Iset
-  {
+class IsetIndices : public Iset
+{
   public:
     shared_ptr<Indices> indices;
 
@@ -275,65 +287,74 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~IsetIndices() {};
-  };
+};
 
-  enum IsetDefSet { ZERO, NATURAL1, NATURAL2, NATURAL3, NATURAL01, NATURAL02, NATURAL03 };
-  class IsetDefSetSemval : public Expression
-  {
+enum IsetDefSet { ZERO, NATURAL1, NATURAL2, NATURAL3, NATURAL01, NATURAL02, NATURAL03 };
+class IsetDefSetSemval : public Expression
+{
   public:
     IsetDefSet v;
     IsetDefSetSemval(IsetDefSet v) : v(v) {};
-    virtual operator string() { return ""; };
+    virtual operator string()
+    {
+      return "";
+    };
     virtual ~IsetDefSetSemval() {};
-  };
-  class IsetDef : public Iset
-  {
+};
+class IsetDef : public Iset
+{
   public:
     IsetDefSet def_set;
     IsetDef(E_ptr d) : def_set((static_pointer_cast<IsetDefSetSemval>(d))->v) {};
     virtual domain to_domain();
     virtual operator string();
     virtual ~IsetDef() {};
-  };
+};
 
-  class IsetUnion : public Iset
-  {
+class IsetUnion : public Iset
+{
   public:
     shared_ptr<Iset> iset_left;
     shared_ptr<Iset> iset_right;
 
-    IsetUnion(E_ptr l, E_ptr r) : 
-    iset_left(static_pointer_cast<Iset>(l)), iset_right(static_pointer_cast<Iset>(r)) {};
+    IsetUnion(E_ptr l, E_ptr r) :
+      iset_left(static_pointer_cast<Iset>(l)), iset_right(static_pointer_cast<Iset>(r)) {};
     virtual domain to_domain();
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
-  };
+};
 
-  class Zero : public Proc 
-  {
+class Zero : public Proc
+{
   public:
-    virtual operator string() { return "0"; }
+    virtual operator string()
+    {
+      return "0";
+    }
     virtual ~Zero() {};
-  };
+};
 
-  class DY : public Proc 
-  {
+class DY : public Proc
+{
   public:
     virtual operator string();
-    DY() { process_info->set_calculus(lysa::TypedLySa); };
+    DY()
+    {
+      process_info->set_calculus(lysa::TypedLySa);
+    };
     virtual E_ptr find_opar_before_dy(E_ptr last_opar);
     virtual ~DY() {};
-  };
+};
 
-  class Let : public Proc
-  {
+class Let : public Proc
+{
   public:
     string name;
     shared_ptr<Iset> iset;
     shared_ptr<Proc> proc;
 
     Let(Calculus calc, E_ptr n, E_ptr is, E_ptr p) :
-    name(static_pointer_cast<String>(n)->s), iset(static_pointer_cast<Iset>(is)), proc(static_pointer_cast<Proc>(p)) 
+      name(static_pointer_cast<String>(n)->s), iset(static_pointer_cast<Iset>(is)), proc(static_pointer_cast<Proc>(p))
     {
       process_info->set_calculus(calc);
     };
@@ -341,10 +362,10 @@ namespace lysa
     string to_string_without_deepening();
     virtual vector<E_ptr> subexpressions();
     virtual ~Let() {};
-  };
+};
 
-  class Send : public Proc
-  {
+class Send : public Proc
+{
   public:
     shared_ptr<Terms> terms;
     shared_ptr<Proc>  proc;
@@ -353,10 +374,10 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~Send() {};
-  };
+};
 
-  class PMatchTerms : public Expression
-  {
+class PMatchTerms : public Expression
+{
   public:
     shared_ptr<Terms> match_terms;
     shared_ptr<Terms> vars;
@@ -365,10 +386,10 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~PMatchTerms() {};
-  };
+};
 
-  class Receive : public Proc
-  {
+class Receive : public Proc
+{
   public:
     shared_ptr<PMatchTerms> terms;
     shared_ptr<Proc>  proc;
@@ -377,10 +398,10 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~Receive() {};
-  };
+};
 
-  class Decrypt : public Proc
-  {
+class Decrypt : public Proc
+{
   public:
     shared_ptr<Term> ciphertext;
     shared_ptr<PMatchTerms> terms;
@@ -388,34 +409,34 @@ namespace lysa
     shared_ptr<Proc> proc;
     shared_ptr<Annotation> anno;
 
-    Decrypt(E_ptr c, E_ptr t, E_ptr k, E_ptr a, E_ptr p) : 
-    ciphertext(static_pointer_cast<Name>(c)), terms(static_pointer_cast<PMatchTerms>(t)), key(static_pointer_cast<Term>(k)), proc(static_pointer_cast<Proc>(p)), anno(static_pointer_cast<Annotation>(a)) {};
+    Decrypt(E_ptr c, E_ptr t, E_ptr k, E_ptr a, E_ptr p) :
+      ciphertext(static_pointer_cast<Name>(c)), terms(static_pointer_cast<PMatchTerms>(t)), key(static_pointer_cast<Term>(k)), proc(static_pointer_cast<Proc>(p)), anno(static_pointer_cast<Annotation>(a)) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~Decrypt() {};
-  };
+};
 
-  class New : public Proc
-  {
+class New : public Proc
+{
   public:
     bool isASym;
     shared_ptr<Name> name;
     shared_ptr<Proc> proc;
     shared_ptr<IndexDefs> index_defs;
 
-    New(E_ptr n, bool isASym, E_ptr p) : 
-    isASym(isASym), name(static_pointer_cast<Name>(n)), proc(static_pointer_cast<Proc>(p)), index_defs(new IndexDefs()) {};
+    New(E_ptr n, bool isASym, E_ptr p) :
+      isASym(isASym), name(static_pointer_cast<Name>(n)), proc(static_pointer_cast<Proc>(p)), index_defs(new IndexDefs()) {};
     New(E_ptr n, bool isASym, E_ptr id, E_ptr p) :
-    isASym(isASym), name(static_pointer_cast<Name>(n)), proc(static_pointer_cast<Proc>(p)), index_defs(static_pointer_cast<IndexDefs>(id)) {};
+      isASym(isASym), name(static_pointer_cast<Name>(n)), proc(static_pointer_cast<Proc>(p)), index_defs(static_pointer_cast<IndexDefs>(id)) {};
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~New() {};
-  };
+};
 
-  class Parallel : public Proc {};
+class Parallel : public Proc {};
 
-  class OrdinaryParallel : public Parallel 
-  {
+class OrdinaryParallel : public Parallel
+{
   public:
     std::list<shared_ptr<Proc> > procs;
 
@@ -423,10 +444,10 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~OrdinaryParallel() {};
-  };
+};
 
-  class IndexedParallel : public Parallel 
-  {
+class IndexedParallel : public Parallel
+{
   public:
     shared_ptr<Proc> proc;
     shared_ptr<IndexDefs> index_defs;
@@ -435,10 +456,10 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~IndexedParallel() {};
-  };
+};
 
-  class Replication : public Parallel 
-  {
+class Replication : public Parallel
+{
   public:
     shared_ptr<Proc> proc;
 
@@ -446,19 +467,19 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~Replication() {};
-  };
+};
 
 
-  class Cryptopoint : public Identifier
-  {
+class Cryptopoint : public Identifier
+{
   public:
     Cryptopoint(E_ptr s) : Identifier(s) {};
     Cryptopoint(E_ptr s, E_ptr i) : Identifier(s, i) {};
-  };
+};
 
-  typedef std::list<shared_ptr<Cryptopoint> > Cryptopoint_list;
-  class Cryptopoints : public Expression, public Cryptopoint_list
-  {
+typedef std::list<shared_ptr<Cryptopoint> > Cryptopoint_list;
+class Cryptopoints : public Expression, public Cryptopoint_list
+{
   public:
     Cryptopoints() {};
     Cryptopoints(E_ptr c);
@@ -466,14 +487,17 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~Cryptopoints() {};
-  };
+};
 
-  class Annotation : public Expression
-  {
+class Annotation : public Expression
+{
   public:
     shared_ptr<Cryptopoint> at;
     bool isDest;
-    bool empty() { return at.get()==0; }
+    bool empty()
+    {
+      return at.get()==0;
+    }
     shared_ptr<Cryptopoints> dest_orig;
 
     Annotation(bool isDest) : isDest(isDest), dest_orig(new Cryptopoints()) {};
@@ -482,7 +506,7 @@ namespace lysa
     virtual operator string();
     virtual vector<E_ptr> subexpressions();
     virtual ~Annotation() {};
-  };
+};
 
 
 #undef S

@@ -14,13 +14,15 @@
 
 using namespace std;
 
-int attribList[11] = {
-    WX_GL_RGBA,
-    WX_GL_DOUBLEBUFFER,
-    WX_GL_MIN_ALPHA,    8,
-    WX_GL_MIN_RED,      8,
-    WX_GL_MIN_BLUE,     8,
-    WX_GL_MIN_GREEN,    8, 0 };
+int attribList[11] =
+{
+  WX_GL_RGBA,
+  WX_GL_DOUBLEBUFFER,
+  WX_GL_MIN_ALPHA,    8,
+  WX_GL_MIN_RED,      8,
+  WX_GL_MIN_BLUE,     8,
+  WX_GL_MIN_GREEN,    8, 0
+};
 
 
 // -- constructors and desctructor ----------------------------------
@@ -28,35 +30,35 @@ int attribList[11] = {
 
 // ----------------------------------
 GLCanvas::GLCanvas(
-    Mediator* m,
-    wxWindow* parent,
-    wxWindowID id )
-    : wxGLCanvas(
-        parent,
-        id,
-        wxDefaultPosition,
-        wxDefaultSize,
-		wxNO_FULL_REPAINT_ON_RESIZE |
-        wxCLIP_CHILDREN,
-        wxString( wxT("") ),
-        attribList ),
-      Colleague( m )
+  Mediator* m,
+  wxWindow* parent,
+  wxWindowID id)
+  : wxGLCanvas(
+    parent,
+    id,
+    wxDefaultPosition,
+    wxDefaultSize,
+    wxNO_FULL_REPAINT_ON_RESIZE |
+    wxCLIP_CHILDREN,
+    wxString(wxT("")),
+    attribList),
+  Colleague(m)
 // ----------------------------------
 {
-    // want to intercept arrow keys
-    // IMPORTANT can only set style once, otherwise its overridden
-    // I.e. when a new style is set somewhere else,
-    //      arrow keys are NO LONGER intercepted
-    SetWindowStyle( wxWANTS_CHARS /*| wxSUNKEN_BORDER*/ );
+  // want to intercept arrow keys
+  // IMPORTANT can only set style once, otherwise its overridden
+  // I.e. when a new style is set somewhere else,
+  //      arrow keys are NO LONGER intercepted
+  SetWindowStyle(wxWANTS_CHARS /*| wxSUNKEN_BORDER*/);
 
-    wxToolTip::Enable( true );
-    wxToolTip::SetDelay( 1 );
+  wxToolTip::Enable(true);
+  wxToolTip::SetDelay(1);
 
-    scaleFactor  = 1.0;
-    xTranslation = 0.0;
-    yTranslation = 0.0;
+  scaleFactor  = 1.0;
+  xTranslation = 0.0;
+  yTranslation = 0.0;
 
-    handleMouseMotion = true;
+  handleMouseMotion = true;
 }
 
 
@@ -70,41 +72,41 @@ GLCanvas::~GLCanvas()
 
 
 // ---------------------------------------------
-void GLCanvas::setScaleFactor( const double &f )
+void GLCanvas::setScaleFactor(const double& f)
 // ---------------------------------------------
 // ------------------------------------------------------------------
 // Size(viewport)  = Size(world)*scaleFactor
 // So, Size(world) = Size(viewport)/scaleFactor
 // ------------------------------------------------------------------
 {
-    scaleFactor = f;
+  scaleFactor = f;
 }
 
 
 // ----------------------------------------------
-void GLCanvas::setXTranslation( const double &x )
+void GLCanvas::setXTranslation(const double& x)
 // ----------------------------------------------
 {
-    xTranslation = x;
+  xTranslation = x;
 }
 
 
 // ----------------------------------------------
-void GLCanvas::setYTranslation( const double &y )
+void GLCanvas::setYTranslation(const double& y)
 // ----------------------------------------------
 {
-    yTranslation = y;
+  yTranslation = y;
 }
 
 
 // ---------------------------
 void GLCanvas::setTranslation(
-    const double &x,
-    const double &y )
+  const double& x,
+  const double& y)
 // ---------------------------
 {
-    setXTranslation( x );
-    setYTranslation( y );
+  setXTranslation(x);
+  setYTranslation(y);
 }
 
 
@@ -112,7 +114,7 @@ void GLCanvas::setTranslation(
 void GLCanvas::enableMouseMotion()
 // -------------------------------
 {
-    handleMouseMotion = true;
+  handleMouseMotion = true;
 }
 
 
@@ -123,7 +125,7 @@ void GLCanvas::enableMouseMotion()
 double GLCanvas::getScaleFactor()
 // ------------------------------
 {
-    return scaleFactor;
+  return scaleFactor;
 }
 
 
@@ -131,7 +133,7 @@ double GLCanvas::getScaleFactor()
 double GLCanvas::getXTranslation()
 // -------------------------------
 {
-    return xTranslation;
+  return xTranslation;
 }
 
 
@@ -139,18 +141,18 @@ double GLCanvas::getXTranslation()
 double GLCanvas::getYTranslation()
 // -------------------------------
 {
-    return yTranslation;
+  return yTranslation;
 }
 
 
 // ---------------------------
 void GLCanvas::getTranslation(
-    double &x,
-    double &y )
+  double& x,
+  double& y)
 // ---------------------------
 {
-    x = getXTranslation();
-    y = getYTranslation();
+  x = getXTranslation();
+  y = getYTranslation();
 }
 
 
@@ -159,7 +161,7 @@ void GLCanvas::getTranslation(
 void GLCanvas::disableMouseMotion()
 // --------------------------------
 {
-    handleMouseMotion = false;
+  handleMouseMotion = false;
 }
 
 
@@ -171,16 +173,16 @@ double GLCanvas::getWidth()
 // GLCanvas::getSize().
 // ------------------------------------------------------------------
 {
-    double result = 0;
-    double width;
-    double height;
+  double result = 0;
+  double width;
+  double height;
 
-    getSize(
-        width,
-        height );
-    result = width;
+  getSize(
+    width,
+    height);
+  result = width;
 
-    return result;
+  return result;
 }
 
 
@@ -192,23 +194,23 @@ double GLCanvas::getHeight()
 // GLCanvas::getSize().
 // ------------------------------------------------------------------
 {
-    double result;
-    double width;
-    double height;
+  double result;
+  double width;
+  double height;
 
-    getSize(
-        width,
-        height);
-    result = height;
+  getSize(
+    width,
+    height);
+  result = height;
 
-    return result;
+  return result;
 }
 
 
 // -----------------------
 void GLCanvas::getSize(
-    double &width,
-    double &height )
+  double& width,
+  double& height)
 // -----------------------
 // ------------------------------------------------------------------
 // Return viewport width and height in WORLD coordinates. Before
@@ -229,31 +231,31 @@ void GLCanvas::getSize(
 //     world height     = ( aspect*2 ) / scaleFactor
 // ------------------------------------------------------------------
 {
-    int widthViewPort;
-    int heightViewPort;
-    double aspect;
+  int widthViewPort;
+  int heightViewPort;
+  double aspect;
 
-    // get pixel (device) sizes
-    GetClientSize(
-        &widthViewPort,
-        &heightViewPort );
+  // get pixel (device) sizes
+  GetClientSize(
+    &widthViewPort,
+    &heightViewPort);
 
-    // calc aspect ratio
-    aspect = ( double )widthViewPort / ( double )heightViewPort;
+  // calc aspect ratio
+  aspect = (double)widthViewPort / (double)heightViewPort;
 
-    // calc result
-    if ( aspect > 1)
-    {
-        // width > height, so starting height = 2
-        width = ( aspect*2.0 ) / ( double )scaleFactor;
-        height = 2.0 / ( double )scaleFactor;
-    }
-    else
-    {
-        // height >= width, so starting width = 2
-        width = 2.0 / ( double )scaleFactor;
-        height = ( (1/aspect)*2.0 ) / ( double )scaleFactor;
-    }
+  // calc result
+  if (aspect > 1)
+  {
+    // width > height, so starting height = 2
+    width = (aspect*2.0) / (double)scaleFactor;
+    height = 2.0 / (double)scaleFactor;
+  }
+  else
+  {
+    // height >= width, so starting width = 2
+    width = 2.0 / (double)scaleFactor;
+    height = ((1/aspect)*2.0) / (double)scaleFactor;
+  }
 }
 
 
@@ -267,62 +269,62 @@ double GLCanvas::getPixelSize()
 //                                     ( d(1 pixel)/w(in pixels) )
 // ------------------------------------------------------------------
 {
-    double result = 0.0;
+  double result = 0.0;
 
-    // get pixel (device) sizes
-    int widthPixels;
-    int heightPixels;
-    GetClientSize(
-        &widthPixels,
-        &heightPixels );
+  // get pixel (device) sizes
+  int widthPixels;
+  int heightPixels;
+  GetClientSize(
+    &widthPixels,
+    &heightPixels);
 
-    // get world sizes
-    double widthWorld;
-    double heightWorld;
-    getSize(
-        widthWorld,
-        heightWorld );
+  // get world sizes
+  double widthWorld;
+  double heightWorld;
+  getSize(
+    widthWorld,
+    heightWorld);
 
-    result = widthWorld * ( 1 / (double)widthPixels );
+  result = widthWorld * (1 / (double)widthPixels);
 
-    return result;
+  return result;
 }
 
 
 // ---------------------------
 void GLCanvas::getWorldCoords(
-    const double &deviceX,
-    const double &deviceY,
-    double &worldX,
-    double &worldY )
+  const double& deviceX,
+  const double& deviceY,
+  double& worldX,
+  double& worldY)
 // ---------------------------
 {
-    if ( IsShown() &&
-         GetParent()->IsShown() )
-    {
-        // this is current context
-        SetCurrent();
+  if (IsShown() &&
+      GetParent()->IsShown())
+  {
+    // this is current context
+    SetCurrent();
 
-        GLint viewport[4];
-        GLdouble modelviewMatrix[16];
-        GLdouble projMatrix[16];
-        GLdouble tempZ;
+    GLint viewport[4];
+    GLdouble modelviewMatrix[16];
+    GLdouble projMatrix[16];
+    GLdouble tempZ;
 
-        glGetIntegerv( GL_VIEWPORT, viewport );
-        glGetDoublev( GL_MODELVIEW_MATRIX, modelviewMatrix );
-        glGetDoublev( GL_PROJECTION_MATRIX, projMatrix );
+    glGetIntegerv(GL_VIEWPORT, viewport);
+    glGetDoublev(GL_MODELVIEW_MATRIX, modelviewMatrix);
+    glGetDoublev(GL_PROJECTION_MATRIX, projMatrix);
 
-        gluUnProject(
-            (GLdouble)deviceX,                  // window x
-            (GLdouble)( viewport[3] - deviceY ),// window y
-            0.0,                                // window z
-            modelviewMatrix,
-            projMatrix,
-            viewport,
-            &worldX,
-            &worldY,
-            &tempZ );
-    }
+    gluUnProject(
+      (GLdouble)deviceX,                  // window x
+      (GLdouble)(viewport[3] - deviceY),  // window y
+      0.0,                                // window z
+      modelviewMatrix,
+      projMatrix,
+      viewport,
+      &worldX,
+      &worldY,
+      &tempZ);
+  }
 }
 
 
@@ -337,15 +339,15 @@ void GLCanvas::clear()
 // been assigned to the canvas.
 // ------------------------------------------------------------------
 {
-    if ( IsShown() &&
-         GetParent()->IsShown() && GetContext() )
-    {
-        // this is current context
-        SetCurrent();
+  if (IsShown() &&
+      GetParent()->IsShown() && GetContext())
+  {
+    // this is current context
+    SetCurrent();
 
-        glClearColor( 1.0, 1.0, 1.0, 1.0 );
-        glClear( GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT );
-    }
+    glClearColor(1.0, 1.0, 1.0, 1.0);
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  }
 }
 
 
@@ -375,58 +377,65 @@ void GLCanvas::display()
 //                   top    = (1/apsect)*1
 // ------------------------------------------------------------------
 {
-    if (!GetContext()) return;
-    // get current size of canvas
-    int width, height;
-    GetClientSize( &width, &height );
+  if (!GetContext())
+  {
+    return;
+  }
+  // get current size of canvas
+  int width, height;
+  GetClientSize(&width, &height);
 
-	// this is current context
-    SetCurrent();
+  // this is current context
+  SetCurrent();
 
-    // set up viewing volume
-    glMatrixMode( GL_PROJECTION );
-    glLoadIdentity();
-    // casting to GLdouble ensures smooth transitions
-    GLdouble aspect = (GLdouble)width / (GLdouble)height;
+  // set up viewing volume
+  glMatrixMode(GL_PROJECTION);
+  glLoadIdentity();
+  // casting to GLdouble ensures smooth transitions
+  GLdouble aspect = (GLdouble)width / (GLdouble)height;
 
-    // specify clipping rectangle ( left, right, bottom, top )
-    if ( aspect > 1 )
-		// width > height
-        gluOrtho2D( aspect*(-1), aspect*1, -1, 1 );
-	else
-		// height >= width
-		gluOrtho2D( -1, 1, (1/aspect)*(-1), (1/aspect)*1 );
+  // specify clipping rectangle ( left, right, bottom, top )
+  if (aspect > 1)
+    // width > height
+  {
+    gluOrtho2D(aspect*(-1), aspect*1, -1, 1);
+  }
+  else
+    // height >= width
+  {
+    gluOrtho2D(-1, 1, (1/aspect)*(-1), (1/aspect)*1);
+  }
 
-    // switch back to the default matrix mode
-    glMatrixMode( GL_MODELVIEW );
-    glLoadIdentity();
-    // and set up viewport
-    glViewport( 0, 0, width, height );
+  // switch back to the default matrix mode
+  glMatrixMode(GL_MODELVIEW);
+  glLoadIdentity();
+  // and set up viewport
+  glViewport(0, 0, width, height);
 
-    // draw
-    mediator->handlePaintEvent( this );
+  // draw
+  mediator->handlePaintEvent(this);
 
-    // swap buffers
-    glFinish();
-    SwapBuffers();
+  // swap buffers
+  glFinish();
+  SwapBuffers();
 
-    // check for errors
-    int error = glGetError();
-    if ( error != GL_NO_ERROR )
-    {
-        *mediator << "OpenGL error.\n";
-        string s = string( (char*)gluErrorString( error ) );
-        *mediator << s;
-        *mediator << "\n";
-    }
+  // check for errors
+  int error = glGetError();
+  if (error != GL_NO_ERROR)
+  {
+    *mediator << "OpenGL error.\n";
+    string s = string((char*)gluErrorString(error));
+    *mediator << s;
+    *mediator << "\n";
+  }
 }
 
 
 // --------------------------------------------
-void GLCanvas::showToolTip( const string &msg )
+void GLCanvas::showToolTip(const string& msg)
 // --------------------------------------------
 {
-    tooltip = wxString(msg.c_str(), wxConvLocal);
+  tooltip = wxString(msg.c_str(), wxConvLocal);
 }
 
 
@@ -434,32 +443,35 @@ void GLCanvas::showToolTip( const string &msg )
 void GLCanvas::clearToolTip()
 // --------------------------
 {
-    if ( tooltip.IsEmpty() != true )
-        tooltip.Clear();
+  if (tooltip.IsEmpty() != true)
+  {
+    tooltip.Clear();
+  }
 }
 
 
 // ---------------------------------------------
-void GLCanvas::onEvtPaint( wxPaintEvent& /*event*/ )
+void GLCanvas::onEvtPaint(wxPaintEvent& /*event*/)
 // ---------------------------------------------
 // ------------------------------------------------------------------
 // Get the device context for that part of the screen that needs to
 // be repainted and redraw.
 // ------------------------------------------------------------------
 {
-    if ( IsShown() && GetContext() ) {
-        // this is current context
-        SetCurrent();
-        wxPaintDC dc( this );
-        display();
+  if (IsShown() && GetContext())
+  {
+    // this is current context
+    SetCurrent();
+    wxPaintDC dc(this);
+    display();
 
-        SetToolTip( tooltip );
-    }
+    SetToolTip(tooltip);
+  }
 }
 
 
 // -------------------------------------------
-void GLCanvas::onEvtSize( wxSizeEvent& /*event*/ )
+void GLCanvas::onEvtSize(wxSizeEvent& /*event*/)
 // -------------------------------------------
 // ------------------------------------------------------------------
 // Ensure that the viewport is adjusted to match the canvas when it
@@ -467,28 +479,30 @@ void GLCanvas::onEvtSize( wxSizeEvent& /*event*/ )
 // ------------------------------------------------------------------
 {
   // set this as current context
-  if (GetParent()->IsShown() ) {
+  if (GetParent()->IsShown())
+  {
     // update visualizers using this canvas
-    mediator->handleSizeEvent( this );
+    mediator->handleSizeEvent(this);
 
     // call to GetContext() necessary for some Linux distributions
-    if ( GetContext() ) {
-        // get size of canvas
-        int width, height;
-        SetCurrent();
+    if (GetContext())
+    {
+      // get size of canvas
+      int width, height;
+      SetCurrent();
 
-        // set up viewport to match canvas size
-        GetClientSize( &width, &height );
-        glMatrixMode( GL_MODELVIEW );
-        glLoadIdentity();
-        glViewport( 0, 0, width, height );
+      // set up viewport to match canvas size
+      GetClientSize(&width, &height);
+      glMatrixMode(GL_MODELVIEW);
+      glLoadIdentity();
+      glViewport(0, 0, width, height);
     }
   }
 }
 
 
 // ----------------------------------------------------
-void GLCanvas::OnEraseBackground( wxEraseEvent& /*event*/ )
+void GLCanvas::OnEraseBackground(wxEraseEvent& /*event*/)
 // ----------------------------------------------------
 // ------------------------------------------------------------------
 // This function inherited from 'wxGLCanvas' must be overridden to
@@ -498,168 +512,170 @@ void GLCanvas::OnEraseBackground( wxEraseEvent& /*event*/ )
 
 
 // -------------------------------------------------
-void GLCanvas::onLftMouseDown( wxMouseEvent& event )
+void GLCanvas::onLftMouseDown(wxMouseEvent& event)
 // -------------------------------------------------
 {
-    SetCurrent();
-    mediator->handleMouseLftDownEvent(
-        this,
-        event.GetX(),
-        event.GetY() );
-    Refresh();
+  SetCurrent();
+  mediator->handleMouseLftDownEvent(
+    this,
+    event.GetX(),
+    event.GetY());
+  Refresh();
 
+  event.Skip();
+}
+
+
+// -----------------------------------------------
+void GLCanvas::onLftMouseUp(wxMouseEvent& event)
+// -----------------------------------------------
+{
+  SetCurrent();
+  mediator->handleMouseLftUpEvent(
+    this,
+    event.GetX(),
+    event.GetY());
+  Refresh();
+
+  event.Skip();
+}
+
+
+// ---------------------------------------------------
+void GLCanvas::onLftMouseDClick(wxMouseEvent& event)
+// ---------------------------------------------------
+{
+  SetCurrent();
+  mediator->handleMouseLftDClickEvent(
+    this,
+    event.GetX(),
+    event.GetY());
+  Refresh();
+}
+
+
+// -------------------------------------------------
+void GLCanvas::onRgtMouseDown(wxMouseEvent& event)
+// -------------------------------------------------
+{
+  SetCurrent();
+  mediator->handleMouseRgtDownEvent(
+    this,
+    event.GetX(),
+    event.GetY());
+  Refresh();
+}
+
+
+// -----------------------------------------------
+void GLCanvas::onRgtMouseUp(wxMouseEvent& event)
+// -----------------------------------------------
+{
+  SetCurrent();
+  mediator->handleMouseRgtUpEvent(
+    this,
+    event.GetX(),
+    event.GetY());
+  Refresh();
+}
+
+
+// ---------------------------------------------------
+void GLCanvas::onRgtMouseDClick(wxMouseEvent& event)
+// ---------------------------------------------------
+{
+  SetCurrent();
+  mediator->handleMouseRgtDClickEvent(
+    this,
+    event.GetX(),
+    event.GetY());
+  Refresh();
+}
+
+
+// ------------------------------------------------
+void GLCanvas::onMouseMotion(wxMouseEvent& event)
+// ------------------------------------------------
+{
+  if (handleMouseMotion == true)
+  {
+    SetCurrent();
+    mediator->handleMouseMotionEvent(
+      this,
+      event.GetX(),
+      event.GetY());
+    Update();
+    Refresh();
+  }
+  else
+  {
     event.Skip();
+  }
 }
 
 
 // -----------------------------------------------
-void GLCanvas::onLftMouseUp( wxMouseEvent &event )
+void GLCanvas::onMouseWheel(wxMouseEvent& event)
 // -----------------------------------------------
 {
-    SetCurrent();
-	mediator->handleMouseLftUpEvent(
-        this,
-        event.GetX(),
-        event.GetY() );
-	Refresh();
+  // this is current context
+  SetCurrent();
 
-    event.Skip();
-}
+  int delta = event.GetWheelRotation();
 
-
-// ---------------------------------------------------
-void GLCanvas::onLftMouseDClick( wxMouseEvent &event )
-// ---------------------------------------------------
-{
-    SetCurrent();
-    mediator->handleMouseLftDClickEvent(
-        this,
-        event.GetX(),
-        event.GetY() );
+  if (delta > 0)
+  {
+    mediator->handleMouseWheelIncEvent(
+      this,
+      event.GetX(),
+      event.GetY());
     Refresh();
-}
-
-
-// -------------------------------------------------
-void GLCanvas::onRgtMouseDown( wxMouseEvent &event )
-// -------------------------------------------------
-{
-    SetCurrent();
-    mediator->handleMouseRgtDownEvent(
-        this,
-        event.GetX(),
-        event.GetY() );
+  }
+  else
+  {
+    mediator->handleMouseWheelDecEvent(
+      this,
+      event.GetX(),
+      event.GetY());
     Refresh();
-}
-
-
-// -----------------------------------------------
-void GLCanvas::onRgtMouseUp( wxMouseEvent &event )
-// -----------------------------------------------
-{
-    SetCurrent();
-	mediator->handleMouseRgtUpEvent(
-        this,
-        event.GetX(),
-        event.GetY() );
-	Refresh();
-}
-
-
-// ---------------------------------------------------
-void GLCanvas::onRgtMouseDClick( wxMouseEvent &event )
-// ---------------------------------------------------
-{
-    SetCurrent();
-    mediator->handleMouseRgtDClickEvent(
-        this,
-        event.GetX(),
-        event.GetY() );
-    Refresh();
+  }
 }
 
 
 // ------------------------------------------------
-void GLCanvas::onMouseMotion( wxMouseEvent &event )
-// ------------------------------------------------
-{
-    if ( handleMouseMotion == true )
-    {
-        SetCurrent();
-        mediator->handleMouseMotionEvent(
-            this,
-            event.GetX(),
-            event.GetY() );
-        Update();
-        Refresh();
-    }
-    else
-        event.Skip();
-}
-
-
-// -----------------------------------------------
-void GLCanvas::onMouseWheel( wxMouseEvent &event )
-// -----------------------------------------------
-{
-    // this is current context
-    SetCurrent();
-
-	int delta = event.GetWheelRotation();
-
-    if ( delta > 0 )
-    {
-        mediator->handleMouseWheelIncEvent(
-            this,
-            event.GetX(),
-            event.GetY() );
-        Refresh();
-    }
-    else
-    {
-        mediator->handleMouseWheelDecEvent(
-            this,
-            event.GetX(),
-            event.GetY() );
-        Refresh();
-    }
-}
-
-
-// ------------------------------------------------
-void GLCanvas:: onEnterMouse( wxMouseEvent& /*event*/ )
+void GLCanvas:: onEnterMouse(wxMouseEvent& /*event*/)
 // ------------------------------------------------
 // -------------------------------------------------------------------
 // This function simply sets the focus to this canvas. This allows key
 // events to be caught and handled.
 // -------------------------------------------------------------------
 {
-    // this is current context
-    SetCurrent();
+  // this is current context
+  SetCurrent();
 
-    SetFocus();
-    mediator->handleMouseEnterEvent( this );
-    Refresh();
+  SetFocus();
+  mediator->handleMouseEnterEvent(this);
+  Refresh();
 }
 
 
 // ------------------------------------------------
-void GLCanvas:: onLeaveMouse( wxMouseEvent& /*event*/ )
+void GLCanvas:: onLeaveMouse(wxMouseEvent& /*event*/)
 // ------------------------------------------------
 // -------------------------------------------------------------------
 // This function simply sets resets cursor to the default icon.
 // -------------------------------------------------------------------
 {
-    // this is current context
-    SetCurrent();
+  // this is current context
+  SetCurrent();
 
-	mediator->handleMouseLeaveEvent( this );
-    Refresh();
+  mediator->handleMouseLeaveEvent(this);
+  Refresh();
 }
 
 
 // ------------------------------------------
-void GLCanvas::onKeyDown( wxKeyEvent &event )
+void GLCanvas::onKeyDown(wxKeyEvent& event)
 // ------------------------------------------
 // ------------------------------------------------------------------
 // In order to catch key events, this canvas must have the focus.
@@ -667,19 +683,19 @@ void GLCanvas::onKeyDown( wxKeyEvent &event )
 // the focus to this canvas.
 // ------------------------------------------------------------------
 {
-	SetCurrent();
-	mediator->handleKeyDownEvent(
-        this,
-        event.GetKeyCode(),
-	event.GetModifiers() );
-	event.Skip();
+  SetCurrent();
+  mediator->handleKeyDownEvent(
+    this,
+    event.GetKeyCode(),
+    event.GetModifiers());
+  event.Skip();
 
-	Refresh();
+  Refresh();
 }
 
 
 // ----------------------------------------
-void GLCanvas::onKeyUp( wxKeyEvent &event )
+void GLCanvas::onKeyUp(wxKeyEvent& event)
 // ----------------------------------------
 // ------------------------------------------------------------------
 // In order to catch key events, this canvas must have the focus.
@@ -687,41 +703,41 @@ void GLCanvas::onKeyUp( wxKeyEvent &event )
 // the focus to this canvas.
 // ------------------------------------------------------------------
 {
-    // this is current context
-    SetCurrent();
+  // this is current context
+  SetCurrent();
 
-    mediator->handleKeyUpEvent(this,event.GetKeyCode(), event.GetModifiers() );
-    event.Skip();
+  mediator->handleKeyUpEvent(this,event.GetKeyCode(), event.GetModifiers());
+  event.Skip();
 
-    Refresh();
+  Refresh();
 }
 
 
 // -- implement event table -----------------------------------------
 
 
-BEGIN_EVENT_TABLE( GLCanvas, wxGLCanvas )
-    EVT_PAINT( GLCanvas::onEvtPaint )
-    EVT_SIZE( GLCanvas::onEvtSize )
+BEGIN_EVENT_TABLE(GLCanvas, wxGLCanvas)
+  EVT_PAINT(GLCanvas::onEvtPaint)
+  EVT_SIZE(GLCanvas::onEvtSize)
 
-    // prevent flicker on repaint
-    EVT_ERASE_BACKGROUND( GLCanvas::OnEraseBackground )
+  // prevent flicker on repaint
+  EVT_ERASE_BACKGROUND(GLCanvas::OnEraseBackground)
 
-    // mouse interaction
-    EVT_LEFT_DOWN( GLCanvas::onLftMouseDown )
-    EVT_LEFT_UP( GLCanvas::onLftMouseUp )
-	EVT_LEFT_DCLICK( GLCanvas::onLftMouseDClick )
-    EVT_RIGHT_DOWN( GLCanvas::onRgtMouseDown )
-	EVT_RIGHT_UP( GLCanvas::onRgtMouseUp )
-    EVT_RIGHT_DCLICK( GLCanvas::onRgtMouseDClick )
-    EVT_MOTION( GLCanvas::onMouseMotion )
-	EVT_MOUSEWHEEL( GLCanvas::onMouseWheel )
-    EVT_ENTER_WINDOW( GLCanvas::onEnterMouse )
-    EVT_LEAVE_WINDOW( GLCanvas::onLeaveMouse )
+  // mouse interaction
+  EVT_LEFT_DOWN(GLCanvas::onLftMouseDown)
+  EVT_LEFT_UP(GLCanvas::onLftMouseUp)
+  EVT_LEFT_DCLICK(GLCanvas::onLftMouseDClick)
+  EVT_RIGHT_DOWN(GLCanvas::onRgtMouseDown)
+  EVT_RIGHT_UP(GLCanvas::onRgtMouseUp)
+  EVT_RIGHT_DCLICK(GLCanvas::onRgtMouseDClick)
+  EVT_MOTION(GLCanvas::onMouseMotion)
+  EVT_MOUSEWHEEL(GLCanvas::onMouseWheel)
+  EVT_ENTER_WINDOW(GLCanvas::onEnterMouse)
+  EVT_LEAVE_WINDOW(GLCanvas::onLeaveMouse)
 
-    // keyboard interaction
-    EVT_KEY_DOWN( GLCanvas::onKeyDown )
-    EVT_KEY_UP( GLCanvas::onKeyUp )
+  // keyboard interaction
+  EVT_KEY_DOWN(GLCanvas::onKeyDown)
+  EVT_KEY_UP(GLCanvas::onKeyUp)
 END_EVENT_TABLE()
 
 

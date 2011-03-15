@@ -16,20 +16,22 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 
-namespace atermpp {
+namespace atermpp
+{
 
-  namespace detail {
+namespace detail
+{
 
-    /// \brief Converts a string to an ATerm string
-    /// \param s A string
-    /// \return The converted string
-    inline
-    ATermAppl str2appl(std::string const& s)
-    {
-      return ATmakeAppl0(ATmakeAFun(s.c_str(), 0, ATtrue));
-    }
+/// \brief Converts a string to an ATerm string
+/// \param s A string
+/// \return The converted string
+inline
+ATermAppl str2appl(std::string const& s)
+{
+  return ATmakeAppl0(ATmakeAFun(s.c_str(), 0, ATtrue));
+}
 
-  } // namespace detail
+} // namespace detail
 
 } // namespace atermpp
 

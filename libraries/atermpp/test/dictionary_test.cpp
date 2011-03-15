@@ -22,6 +22,7 @@
 using namespace std;
 using namespace atermpp;
 
+/*  The dictionaries have been removed from the ATerm library.
 void test_dictionary()
 {
   aterm a = make_term("a");
@@ -38,11 +39,11 @@ void test_dictionary()
   BOOST_CHECK(dict.get(a) == c);
   dict.remove(a);
   BOOST_CHECK(dict.get(a) == aterm());
-}
+} */
 
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
-  test_dictionary();
+  /* test_dictionary(); */
   return 0;
 }

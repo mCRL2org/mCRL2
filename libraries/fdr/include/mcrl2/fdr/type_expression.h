@@ -16,9 +16,11 @@
 #include "mcrl2/fdr/name.h"
 #include "mcrl2/fdr/set_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated type expression class declarations ---//
 /// \brief class type_expression
@@ -137,50 +139,50 @@ class typename_: public type_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a typeproduct expression
-    /// \param t A term
-    /// \return True if it is a typeproduct expression
-    inline
-    bool is_typeproduct(const type_expression& t)
-    {
-      return fdr::detail::gsIsTypeProduct(t);
-    }
+/// \brief Test for a typeproduct expression
+/// \param t A term
+/// \return True if it is a typeproduct expression
+inline
+bool is_typeproduct(const type_expression& t)
+{
+  return fdr::detail::gsIsTypeProduct(t);
+}
 
-    /// \brief Test for a typetuple expression
-    /// \param t A term
-    /// \return True if it is a typetuple expression
-    inline
-    bool is_typetuple(const type_expression& t)
-    {
-      return fdr::detail::gsIsTypeTuple(t);
-    }
+/// \brief Test for a typetuple expression
+/// \param t A term
+/// \return True if it is a typetuple expression
+inline
+bool is_typetuple(const type_expression& t)
+{
+  return fdr::detail::gsIsTypeTuple(t);
+}
 
-    /// \brief Test for a typeset expression
-    /// \param t A term
-    /// \return True if it is a typeset expression
-    inline
-    bool is_typeset(const type_expression& t)
-    {
-      return fdr::detail::gsIsTypeSet(t);
-    }
+/// \brief Test for a typeset expression
+/// \param t A term
+/// \return True if it is a typeset expression
+inline
+bool is_typeset(const type_expression& t)
+{
+  return fdr::detail::gsIsTypeSet(t);
+}
 
-    /// \brief Test for a simpletypename expression
-    /// \param t A term
-    /// \return True if it is a simpletypename expression
-    inline
-    bool is_simpletypename(const type_expression& t)
-    {
-      return fdr::detail::gsIsSimpleTypeName(t);
-    }
+/// \brief Test for a simpletypename expression
+/// \param t A term
+/// \return True if it is a simpletypename expression
+inline
+bool is_simpletypename(const type_expression& t)
+{
+  return fdr::detail::gsIsSimpleTypeName(t);
+}
 
-    /// \brief Test for a typename expression
-    /// \param t A term
-    /// \return True if it is a typename expression
-    inline
-    bool is_typename(const type_expression& t)
-    {
-      return fdr::detail::gsIsTypeName(t);
-    }
+/// \brief Test for a typename expression
+/// \param t A term
+/// \return True if it is a typename expression
+inline
+bool is_typename(const type_expression& t)
+{
+  return fdr::detail::gsIsTypeName(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

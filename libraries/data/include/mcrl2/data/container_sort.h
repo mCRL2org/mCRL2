@@ -20,9 +20,11 @@
 #include "mcrl2/data/container_type.h"
 #include "mcrl2/data/sort_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class container_sort ---//
 /// \brief A container sort
@@ -36,7 +38,7 @@ class container_sort: public sort_expression
 
     /// \brief Constructor.
     /// \param term A term
-    container_sort(atermpp::aterm_appl term)
+    container_sort(const atermpp::aterm_appl& term)
       : sort_expression(term)
     {
       assert(core::detail::check_term_SortCons(m_term));
@@ -59,15 +61,15 @@ class container_sort: public sort_expression
 };
 //--- end generated class container_sort ---//
 
-    /// \brief list of function sorts
-    ///
-    typedef atermpp::term_list<container_sort> container_sort_list;
+/// \brief list of function sorts
+///
+typedef atermpp::term_list<container_sort> container_sort_list;
 
-    /// \brief list of function sorts
-    ///
-    typedef atermpp::vector<container_sort> container_sort_vector;
+/// \brief list of function sorts
+///
+typedef atermpp::vector<container_sort> container_sort_vector;
 
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

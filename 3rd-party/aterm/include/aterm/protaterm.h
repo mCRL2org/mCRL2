@@ -6,7 +6,7 @@
 
 class IProtectedATerm
 {
-  typedef std::multiset< IProtectedATerm* > pa_container;
+    typedef std::multiset< IProtectedATerm* > pa_container;
 
   protected:
 
@@ -24,18 +24,18 @@ class IProtectedATerm
       return pa_container();
     }
 
-    static pa_container &p_aterms()
+    static pa_container& p_aterms()
     {
       static pa_container _p_aterms = initialise_p_aterms();
       return _p_aterms;
     }
 
-    void ATprotectProtectedATerm(IProtectedATerm *i)
+    void ATprotectProtectedATerm(IProtectedATerm* i)
     {
       p_aterms().insert(i);
     }
 
-    void ATunprotectProtectedATerm(IProtectedATerm *i)
+    void ATunprotectProtectedATerm(IProtectedATerm* i)
     {
       p_aterms().erase(p_aterms().find(i));
     }

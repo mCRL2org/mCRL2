@@ -24,13 +24,13 @@
 
 class Colleague
 {
-public:
+  public:
     // -- constructors and destructors -----------------------------
-    Colleague( Mediator* m );
-    Colleague( const Colleague &colleague );
+    Colleague(Mediator* m);
+    Colleague(const Colleague& colleague);
     virtual ~Colleague();
 
-protected:
+  protected:
     // -- data members ----------------------------------------------
     Mediator* mediator;     // association
 };

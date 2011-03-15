@@ -15,18 +15,19 @@
 #include <iterator>
 #include <cassert>
 #include <string>
-#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/utility.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
-#include "mcrl2/data/assignment_list_substitution.h"
-#include "mcrl2/atermpp/convert.h"
+#include "mcrl2/data/replace.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace lps {
+namespace lps
+{
 
 /// \brief Initial state of a linear process.
 // LinearProcessInit(<DataVarId>*, <DataVarIdInit>*)
@@ -44,8 +45,8 @@ class process_initializer: public atermpp::aterm_appl
 
     /// \brief Constructor.
     process_initializer(const data::assignment_list& assignments)
-     : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments)),
-       m_assignments(assignments)
+      : atermpp::aterm_appl(core::detail::gsMakeLinearProcessInit(assignments)),
+        m_assignments(assignments)
     {
     }
 
@@ -68,15 +69,9 @@ class process_initializer: public atermpp::aterm_appl
     /// \brief Returns the initial state of the LPS.
     /// \param process_parameters The parameters of the correponding linear process
     /// \return The initial state of the LPS.
-    data::data_expression_list state(data::variable_list process_parameters) const
+    data::data_expression_list state(const data::variable_list& process_parameters) const
     {
-    	data::assignment_list_substitution sigma(m_assignments);
-    	std::vector<data::data_expression> result;
-    	for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
-      {
-      	result.push_back(sigma(*i));
-      }
-      return atermpp::convert<data::data_expression_list>(result);
+      return data::replace_free_variables(atermpp::convert<data::data_expression_list>(process_parameters), data::assignment_sequence_substitution(m_assignments));
     }
 };
 

@@ -16,11 +16,14 @@
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
 /// Visitor for collecting the quantifier variables that occur in a pbes expression.
 struct quantifier_visitor: public pbes_expression_visitor<pbes_expression>

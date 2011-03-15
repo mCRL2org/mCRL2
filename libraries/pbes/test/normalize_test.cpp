@@ -20,7 +20,6 @@
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/detail/pfnf_visitor.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -32,7 +31,7 @@ using namespace mcrl2::pbes_system;
 void test_normalize1()
 {
   using namespace pbes_system;
-  using namespace pbes_system::pbes_expr;
+  namespace p = pbes_system::pbes_expr;
 
   pbes_expression x = propositional_variable_instantiation("x:X");
   pbes_expression y = propositional_variable_instantiation("y:Y");
@@ -41,7 +40,7 @@ void test_normalize1()
   pbes_expression f1;
   pbes_expression f2;
 
-  f = not_(not_(x));
+  f = p::not_(p::not_(x));
   f1 = normalize(f);
   f2 = x;
   std::cout << "f  = " << f  << std::endl;
@@ -57,7 +56,7 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  f  = not_(and_(not_(x), not_(y)));
+  f  = p::not_(p::and_(p::not_(x), p::not_(y)));
   f1 = normalize(f);
   f2 = or_(x, y);
   std::cout << "f  = " << f << std::endl;
@@ -65,9 +64,9 @@ void test_normalize1()
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  f  = imp(and_(not_(x), not_(y)), z);
+  f  = p::imp(p::and_(p::not_(x), p::not_(y)), z);
   f1 = normalize(f);
-  f2 = or_(or_(x, y), z);
+  f2 = p::or_(p::or_(x, y), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
@@ -87,14 +86,14 @@ void test_normalize1()
 
   f  = imp(and_(x, y), z);
   f1 = normalize(f);
-  f2 = or_(or_(data::sort_bool::not_(x), data::sort_bool::not_(y)), z);
+  f2 = p::or_(p::or_(data::sort_bool::not_(x), data::sort_bool::not_(y)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
   std::cout << "f2 = " << f2 << std::endl;
   BOOST_CHECK(f1 == f2);
 
-  pbes_expression T = true_();
-  pbes_expression F = false_();
+  pbes_expression T = p::true_();
+  pbes_expression F = p::false_();
   x = pbes_expression(mcrl2::core::detail::gsMakePBESImp(T, F));
   y = normalize(x);
   std::cout << "x = " << x << std::endl;
@@ -102,7 +101,7 @@ void test_normalize1()
 
   data::variable_list ab = make_list(data::variable("s", data::basic_sort("S")));
   x = propositional_variable_instantiation("x:X");
-  y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(false_(), false_())), false_()));
+  y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(p::false_(), p::false_())), p::false_()));
   z = normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
@@ -124,9 +123,9 @@ void test_normalize3()
 {
   // test case from Aad Mathijssen, 1-4-2008
   lps::specification spec = lps::linearise(
-    "proc P = tau.P;\n"
-    "init P;        \n"
-  );
+                              "proc P = tau.P;\n"
+                              "init P;        \n"
+                            );
   state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
@@ -163,39 +162,10 @@ pbes_system::pbes_expression expr(const std::string& text)
   return pbes_system::parse_pbes_expression(text, VARIABLE_SPECIFICATION);
 }
 
-void test_pfnf_expression(std::string s)
-{
-  pbes_system::detail::pfnf_visitor<pbes_system::pbes_expression> visitor;
-  pbes_system::pbes_expression t1 = expr(s);
-  visitor.visit(t1);
-  pbes_system::pbes_expression t2 = visitor.evaluate();
-  data::rewriter datar;
-  pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
-  if (R(t1) != R(t2))
-  {
-    BOOST_CHECK(R(t1) == R(t2));
-    std::cout << "--- failed test --- " << std::endl;
-    std::cout << "t1    " << core::pp(t1) << std::endl;
-    std::cout << "t2    " << core::pp(t2) << std::endl;
-    std::cout << "R(t1) " << core::pp(R(t1)) << std::endl;
-    std::cout << "R(t2) " << core::pp(R(t2)) << std::endl;
-  }
-  core::garbage_collect();
-}
-
-void test_pfnf_visitor()
-{
-  test_pfnf_expression("forall m:Nat. false");
-  test_pfnf_expression("X && Y(3) || X");
-  // test_pfnf_expression("forall m:Nat. (Y(m) || exists n:Nat. Y(n))");
-  // test_pfnf_expression("forall m:Nat. (Y(m) || exists m:Nat. Y(m))");
-  core::garbage_collect();
-}
-
 inline
 pbes_expression parse(const std::string& expr)
 {
-  std::string var_decl = 
+  std::string var_decl =
     "datavar    \n"
     "  m: Nat;  \n"
     "  n: Nat;  \n"
@@ -213,7 +183,13 @@ pbes_expression parse(const std::string& expr)
 inline
 std::string print(const pbes_expression& x)
 {
-	return core::pp(x);
+  return core::pp(x);
+}
+
+inline
+pbes_expression norm(const pbes_expression& x)
+{
+  return detail::normalize_and_or(x);
 }
 
 void test_normalize_and_or_equality(std::string expr1, std::string expr2)
@@ -223,19 +199,19 @@ void test_normalize_and_or_equality(std::string expr1, std::string expr2)
     expr2,
     parse,
     print,
-	  std::equal_to<pbes_expression>(),
-	  detail::normalize_and_or,
+    std::equal_to<pbes_expression>(),
+    norm,
     "normalize_and_or",
-	  detail::normalize_and_or,
+    norm,
     "normalize_and_or"
   );
 }
 
 void test_normalize_and_or()
 {
-	test_normalize_and_or_equality("X && Y", "Y && X");
-	test_normalize_and_or_equality("X && X && Y", "X && Y && X");
-	test_normalize_and_or_equality("X && X && Y", "Y && X && X");
+  test_normalize_and_or_equality("X && Y", "Y && X");
+  test_normalize_and_or_equality("X && X && Y", "X && Y && X");
+  test_normalize_and_or_equality("X && X && Y", "Y && X && X");
   core::garbage_collect();
 }
 
@@ -246,7 +222,6 @@ int test_main(int argc, char** argv)
   test_normalize1();
   test_normalize2();
   test_normalize3();
-  test_pfnf_visitor();
   test_normalize_and_or();
 
   return 0;

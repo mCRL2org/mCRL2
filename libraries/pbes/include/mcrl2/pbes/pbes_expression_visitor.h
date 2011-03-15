@@ -14,9 +14,11 @@
 
 #include "mcrl2/core/term_traits.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
 /// \brief A visitor class for pbes expressions. There is a visit_<node> and a leave_<node>
 /// function for each type of node. By default these functions do nothing, so they
@@ -192,67 +194,91 @@ struct pbes_expression_visitor
   {
     typedef core::term_traits<Term> tr;
 
-    if (tr::is_data(e)) {
+    if (tr::is_data(e))
+    {
       visit_data_expression(e, tr::term2dataterm(e), a);
       leave_data_expression();
-    } else if (tr::is_true(e)) {
+    }
+    else if (tr::is_true(e))
+    {
       visit_true(e, a);
       leave_true();
-    } else if (tr::is_false(e)) {
+    }
+    else if (tr::is_false(e))
+    {
       visit_false(e, a);
       leave_false();
-    } else if (tr::is_not(e)) {
+    }
+    else if (tr::is_not(e))
+    {
       term_type n = tr::arg(e);
       bool result = visit_not(e, n, a);
-      if (result) {
+      if (result)
+      {
         visit(n, a);
       }
       leave_not();
-    } else if (tr::is_and(e)) {
+    }
+    else if (tr::is_and(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       bool result = visit_and(e, l, r, a);
-      if (result) {
+      if (result)
+      {
         visit(l, a);
         visit(r, a);
       }
       leave_and();
-    } else if (tr::is_or(e)) {
+    }
+    else if (tr::is_or(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       bool result = visit_or(e, l, r, a);
-      if (result) {
+      if (result)
+      {
         visit(l, a);
         visit(r, a);
       }
       leave_or();
-    } else if (tr::is_imp(e)) {
+    }
+    else if (tr::is_imp(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       bool result = visit_imp(e, l, r, a);
-      if (result) {
+      if (result)
+      {
         visit(l, a);
         visit(r, a);
       }
       leave_imp();
-    } else if (tr::is_forall(e)) {
+    }
+    else if (tr::is_forall(e))
+    {
       variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       bool result = visit_forall(e, qvars, qexpr, a);
-      if (result) {
+      if (result)
+      {
         visit(qexpr, a);
       }
       leave_forall();
-    } else if (tr::is_exists(e)) {
+    }
+    else if (tr::is_exists(e))
+    {
       variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       bool result = visit_exists(e, qvars, qexpr, a);
-      if (result) {
+      if (result)
+      {
         visit(qexpr, a);
       }
       leave_exists();
     }
-    else if(tr::is_prop_var(e)) {
+    else if (tr::is_prop_var(e))
+    {
       visit_propositional_variable(e, e, a);
       leave_propositional_variable();
     }
@@ -431,67 +457,91 @@ struct pbes_expression_visitor<Term, void>
   {
     typedef core::term_traits<Term> tr;
 
-    if (tr::is_data(e)) {
+    if (tr::is_data(e))
+    {
       visit_data_expression(e, tr::term2dataterm(e));
       leave_data_expression();
-    } else if (tr::is_true(e)) {
+    }
+    else if (tr::is_true(e))
+    {
       visit_true(e);
       leave_true();
-    } else if (tr::is_false(e)) {
+    }
+    else if (tr::is_false(e))
+    {
       visit_false(e);
       leave_false();
-    } else if (tr::is_not(e)) {
+    }
+    else if (tr::is_not(e))
+    {
       term_type n = tr::arg(e);
       bool result = visit_not(e, n);
-      if (result) {
+      if (result)
+      {
         visit(n);
       }
       leave_not();
-    } else if (tr::is_and(e)) {
+    }
+    else if (tr::is_and(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       bool result = visit_and(e, l, r);
-      if (result) {
+      if (result)
+      {
         visit(l);
         visit(r);
       }
       leave_and();
-    } else if (tr::is_or(e)) {
+    }
+    else if (tr::is_or(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       bool result = visit_or(e, l, r);
-      if (result) {
+      if (result)
+      {
         visit(l);
         visit(r);
       }
       leave_or();
-    } else if (tr::is_imp(e)) {
+    }
+    else if (tr::is_imp(e))
+    {
       term_type l = tr::left(e);
       term_type r = tr::right(e);
       bool result = visit_imp(e, l, r);
-      if (result) {
+      if (result)
+      {
         visit(l);
         visit(r);
       }
       leave_imp();
-    } else if (tr::is_forall(e)) {
+    }
+    else if (tr::is_forall(e))
+    {
       variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       bool result = visit_forall(e, qvars, qexpr);
-      if (result) {
+      if (result)
+      {
         visit(qexpr);
       }
       leave_forall();
-    } else if (tr::is_exists(e)) {
+    }
+    else if (tr::is_exists(e))
+    {
       variable_sequence_type qvars = tr::var(e);
       term_type qexpr = tr::arg(e);
       bool result = visit_exists(e, qvars, qexpr);
-      if (result) {
+      if (result)
+      {
         visit(qexpr);
       }
       leave_exists();
     }
-    else if(tr::is_prop_var(e)) {
+    else if (tr::is_prop_var(e))
+    {
       visit_propositional_variable(e, e);
       leave_propositional_variable();
     }

@@ -21,41 +21,44 @@
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace pbes_system {
+namespace pbes_system
+{
 
-namespace detail {
+namespace detail
+{
 
-  struct propositional_variable_visitor: public pbes_expression_visitor<pbes_expression>
-  {
-    struct found_propositional_variable
+struct propositional_variable_visitor: public pbes_expression_visitor<pbes_expression>
+{
+  struct found_propositional_variable
     {};
-    
-    /// \brief Visit propositional_variable node
-    /// \param e A term
-    /// \return The result of visiting the node
-    bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& /* v */)
-    {
-      throw found_propositional_variable();
-      return true;
-    } 
-  };
-  
-  inline
-  bool has_propositional_variables(const pbes_expression& t)
+
+  /// \brief Visit propositional_variable node
+  /// \param e A term
+  /// \return The result of visiting the node
+  bool visit_propositional_variable(const pbes_expression& /* e */, const propositional_variable_instantiation& /* v */)
   {
-    propositional_variable_visitor visitor;
-    try
-    {
-      visitor.visit(t);
-    }
-    catch (propositional_variable_visitor::found_propositional_variable&)
-    {
-      return true;
-    }
-    return false;
+    throw found_propositional_variable();
+    return true;
   }
+};
+
+inline
+bool has_propositional_variables(const pbes_expression& t)
+{
+  propositional_variable_visitor visitor;
+  try
+  {
+    visitor.visit(t);
+  }
+  catch (propositional_variable_visitor::found_propositional_variable&)
+  {
+    return true;
+  }
+  return false;
+}
 
 } // namespace detail
 
@@ -65,8 +68,8 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
 /// \brief pbes equation.
 class pbes_equation
 {
-  friend struct atermpp::aterm_traits<pbes_equation>;
-  
+    friend struct atermpp::aterm_traits<pbes_equation>;
+
   protected:
     /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
@@ -133,10 +136,10 @@ class pbes_equation
     /// \param variable A propositional variable declaration
     /// \param expr A PBES expression
     pbes_equation(const fixpoint_symbol& symbol, const propositional_variable& variable, const pbes_expression& expr)
-      : 
-        m_symbol(symbol),
-        m_variable(variable),
-        m_formula(expr)
+      :
+      m_symbol(symbol),
+      m_variable(variable),
+      m_formula(expr)
     {
     }
 
@@ -208,9 +211,9 @@ class pbes_equation
     {
       // check 1)
       if (data::detail::sequence_contains_duplicates(
-             boost::make_transform_iterator(variable().parameters().begin(), data::detail::variable_name()),
-             boost::make_transform_iterator(variable().parameters().end()  , data::detail::variable_name())
-            )
+            boost::make_transform_iterator(variable().parameters().begin(), data::detail::variable_name()),
+            boost::make_transform_iterator(variable().parameters().end()  , data::detail::variable_name())
+          )
          )
       {
         std::cerr << "pbes_equation::is_well_typed() failed: the names of the binding variable parameters are not unique" << std::endl;
@@ -221,11 +224,11 @@ class pbes_equation
       detail::quantifier_visitor qvisitor;
       qvisitor.visit(formula());
       if (data::detail::sequences_do_overlap(
-             boost::make_transform_iterator(variable().parameters().begin(), data::detail::variable_name()),
-             boost::make_transform_iterator(variable().parameters().end()  , data::detail::variable_name()),
-             boost::make_transform_iterator(qvisitor.variables.begin()     , data::detail::variable_name()),
-             boost::make_transform_iterator(qvisitor.variables.end()       , data::detail::variable_name())
-           )
+            boost::make_transform_iterator(variable().parameters().begin(), data::detail::variable_name()),
+            boost::make_transform_iterator(variable().parameters().end()  , data::detail::variable_name()),
+            boost::make_transform_iterator(qvisitor.variables.begin()     , data::detail::variable_name()),
+            boost::make_transform_iterator(qvisitor.variables.end()       , data::detail::variable_name())
+          )
          )
       {
         std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << mcrl2::core::pp(pbes_equation_to_aterm(*this)) << std::endl;
@@ -284,15 +287,25 @@ std::string pp(const pbes_equation& eqn)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp {
+namespace atermpp
+{
 
 template<>
 struct aterm_traits<mcrl2::pbes_system::pbes_equation>
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::pbes_equation t)   { t.protect(); }
-  static void unprotect(mcrl2::pbes_system::pbes_equation t) { t.unprotect(); }
-  static void mark(mcrl2::pbes_system::pbes_equation t)      { t.mark(); }
+  static void protect(mcrl2::pbes_system::pbes_equation t)
+  {
+    t.protect();
+  }
+  static void unprotect(mcrl2::pbes_system::pbes_equation t)
+  {
+    t.unprotect();
+  }
+  static void mark(mcrl2::pbes_system::pbes_equation t)
+  {
+    t.mark();
+  }
   //static ATerm term(mcrl2::pbes_system::pbes_equation t)     { return t.term(); }
   //static ATerm* ptr(mcrl2::pbes_system::pbes_equation& t)    { return &t.term(); }
 };

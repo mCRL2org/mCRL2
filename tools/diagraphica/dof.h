@@ -18,37 +18,37 @@
 
 class DOF
 {
-public:
-	// -- constructors and destructor -------------------------------
+  public:
+    // -- constructors and destructor -------------------------------
     DOF(
-        const int &idx,
-        const std::string &lbl );
-    DOF( const DOF &dof );
-	virtual ~DOF();
+      const int& idx,
+      const std::string& lbl);
+    DOF(const DOF& dof);
+    virtual ~DOF();
 
     // -- std::set functions ---------------------------------------------
-    void setIndex( const int &idx );
-    void setLabel( const std::string &lbl );
-    void setMin( const double &m );
-    void setMax( const double &m );
-    void setMinMax( const double &mn, const double &mx );
+    void setIndex(const int& idx);
+    void setLabel(const std::string& lbl);
+    void setMin(const double& m);
+    void setMax(const double& m);
+    void setMinMax(const double& mn, const double& mx);
     void setValue(
-        const int &idx,
-        const double &val );
-    void addValue( const double &val );
-    void clearValue( const int &idx );
-    void setDir( const int &dr );
-    void setAttribute( Attribute* a );
-    void setTextStatus( const int &status );
+      const size_t& idx,
+      const double& val);
+    void addValue(const double& val);
+    void clearValue(const size_t& idx);
+    void setDir(const int& dr);
+    void setAttribute(Attribute* a);
+    void setTextStatus(const int& status);
 
     // -- get functions ---------------------------------------------
-    int getIndex();
+    size_t getIndex();
     std::string getLabel();
     double getMin();
     double getMax();
-    int getSizeValues();
-    double getValue( const int &idx );
-    void getValues( std::vector< double > &vals );
+    size_t getSizeValues();
+    double getValue(const size_t& idx);
+    void getValues(std::vector< double > &vals);
     int getDir();
     Attribute* getAttribute();
     int getTextStatus();
@@ -56,15 +56,15 @@ public:
     // -- public constants ------------------------------------------
     enum
     {
-        ID_TEXT_NONE,
-        ID_TEXT_ALL,
-        ID_TEXT_ATTR,
-        ID_TEXT_VAL
+      ID_TEXT_NONE,
+      ID_TEXT_ALL,
+      ID_TEXT_ATTR,
+      ID_TEXT_VAL
     };
 
-protected:
+  protected:
     // -- data members ----------------------------------------------
-	int    index;    // index in attribute
+    size_t    index;    // index in attribute
     std::string label;
     /*
     double min;

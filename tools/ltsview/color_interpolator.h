@@ -19,12 +19,15 @@ class ColorInterpolator
 {
   private:
     std::vector< RGB_Color > colors;
-    static void RGBToHSV(RGB_Color &c, int &h, int &s, int &v);
+    static void RGBToHSV(RGB_Color& c, int& h, int& s, int& v);
     static RGB_Color HSVToRGB(int h, int s, int v);
   public:
-    ColorInterpolator() {} 
+    ColorInterpolator() {}
     ~ColorInterpolator() {}
     void computeColors(RGB_Color c1, RGB_Color c2, int n, bool is_long);
-    RGB_Color getColor(int i) { return colors[i]; }
+    RGB_Color getColor(int i)
+    {
+      return colors[i];
+    }
 };
 #endif

@@ -28,32 +28,36 @@ class StringTemplate;
 
 class StringTemplateFile
 {
-protected:
-	std::map<std::string, std::string> format_strings;
-public:
-	StringTemplateFile(string filecontent);
-	StringTemplate get(string id);
-  string fmt_string(string id);
-	string all(string id, map<string, string> substitutions);
+  protected:
+    std::map<std::string, std::string> format_strings;
+  public:
+    StringTemplateFile(string filecontent);
+    StringTemplate get(string id);
+    string fmt_string(string id);
+    string all(string id, map<string, string> substitutions);
 };
 
 class StringTemplate
 {
-protected:
-	std::string subject;
-	std::string current_key;
-  std::map<std::string, boost::shared_ptr<std::ostringstream> > streams;
-public:
-	StringTemplate(string format_string) : subject(format_string) {};
-  StringTemplate(StringTemplateFile& stf, string id) : subject(stf.fmt_string(id)) {};
+  protected:
+    std::string subject;
+    std::string current_key;
+    std::map<std::string, boost::shared_ptr<std::ostringstream> > streams;
+  public:
+    StringTemplate(string format_string) : subject(format_string) {};
+    StringTemplate(StringTemplateFile& stf, string id) : subject(stf.fmt_string(id)) {};
 
-	void replace(string key, string value);
-	bool has(string key);
-	bool replace_by(string value);
+    void replace(string key, string value);
+    bool has(string key);
+    bool replace_by(string value);
 
-  ostringstream& operator[] (string key);
-  void finalise();
-	string get() { finalise(); return subject; }
+    ostringstream& operator[](string key);
+    void finalise();
+    string get()
+    {
+      finalise();
+      return subject;
+    }
 };
 
 

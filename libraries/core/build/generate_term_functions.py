@@ -88,6 +88,7 @@ def generate_libstruct_functions(rules, filename, ignored_phases = []):
             'arguments'  : comma + calls[name]
         }
     text = string.strip(text + mtext)
+    text = text + '\n'
     insert_text_in_file(filename, text, 'generated code')
 
 CHECK_RULE = '''template <typename Term>
@@ -116,16 +117,22 @@ bool %(check_name)s(Term t)
 CHECK_TERM_TYPE = '''  // check the type of the term
   atermpp::aterm term(atermpp::aterm_traits<Term>::term(t));
   if (term.type() != AT_APPL)
+  {
     return false;
+  }
   atermpp::aterm_appl a(term);
   if (!gsIs%(name)s(a))
+  {
     return false;
+  }
 
 '''
 
 CHECK_TERM_CHILDREN = '''  // check the children
   if (a.size() != %(arity)d)
+  {
     return false;
+  }
 '''
 
 #---------------------------------------------------------------#
@@ -142,7 +149,7 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
     for rule in rules:
         name = rule.name()
         rhs_functions = rule.functions(ignored_phases)
-        body = '  return    ' + '\n         || '.join(map(lambda x: x.check_name() + '(t)', rhs_functions)) + ';'
+        body = '  return ' + '\n         || '.join(map(lambda x: x.check_name() + '(t)', rhs_functions)) + ';'
         text = text + CHECK_RULE % {
             'name'      : name,
             'body'      : body
@@ -170,11 +177,10 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
                     body = body + '  if (!check_list_argument(a(%d), %s<atermpp::aterm>, 0))\n' % (i, arg.check_name())
                 elif arg.repetitions == '+':
                     body = body + '  if (!check_list_argument(a(%d), %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
-                body = body + '    {\n'
-                body = body + '      std::cerr << "%s" << std::endl;\n'                % (arg.check_name())
-#                body = body + '      std::cerr << a(%d).to_string() << std::endl;\n'   % (i)
-                body = body + '      return false;\n'
-                body = body + '    }\n'
+                body = body + '  {\n'
+                body = body + '    std::cerr << "%s" << std::endl;\n'                % (arg.check_name())
+                body = body + '    return false;\n'
+                body = body + '  }\n'
             body = body + '#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS\n'
 
         text = text + CHECK_TERM % {
@@ -186,14 +192,16 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
         ptext = ptext + 'template <typename Term> bool %s(Term t);\n' % f.check_name()
 
     text = string.strip(ptext + '\n' + text)
+    text = text + '\n'
     insert_text_in_file(filename, text, 'generated code')
 
 CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
 ATermAppl initConstruct%(name)s(ATermAppl& t)
 {
-  t = ATmakeAppl%(arity)d(gsAFun%(name)s()%(arguments)s);
+  t = 0;
   ATprotect(reinterpret_cast<ATerm*>(&t));
+  t = ATmakeAppl%(arity)d(gsAFun%(name)s()%(arguments)s);
   return t;
 }
 
@@ -339,15 +347,21 @@ def parse_ebnf(filename):
 #                          postprocess_libstruct
 #---------------------------------------------------------------#
 def postprocess_libstruct(filename):
-    src = '''ATermAppl gsMakeProcess\(ATermAppl ProcVarId_0, ATermList DataExpr_1\)
+    src = '''inline
+ATermAppl gsMakeProcess\(ATermAppl ProcVarId_0, ATermList DataExpr_1\)
 \{
+  return ATmakeAppl2\(gsAFunProcess\(\), \(ATerm\) ProcVarId_0, \(ATerm\) DataExpr_1\);
+\}
 '''
-    dest = '''ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
+    dest = '''inline
+ATermAppl gsMakeProcess(ATermAppl ProcVarId_0, ATermList DataExpr_1)
 {
   // Check whether lengths of process type and its arguments match.
   // Could be replaced by at test for equal types.
 
   assert(ATgetLength((ATermList)ATgetArgument(ProcVarId_0,1))==ATgetLength(DataExpr_1));
+  return ATmakeAppl2(gsAFunProcess(), (ATerm) ProcVarId_0, (ATerm) DataExpr_1);
+}
 '''
     text = path(filename).text()
     text = re.sub(re.compile(src, re.M), dest, text)

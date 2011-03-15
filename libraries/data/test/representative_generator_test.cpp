@@ -33,14 +33,14 @@ using namespace mcrl2::data;
 void test_representative_generator()
 {
   data_specification specification=parse_data_specification
-              ("map f__:Nat; \n"
-               "    g__:List(Bool);\n"
-               "    h__:Set(Real);\n"
-              );
+                                   ("map f__:Nat; \n"
+                                    "    g__:List(Bool);\n"
+                                    "    h__:Set(Real);\n"
+                                   );
 
   atermpp::vector< data::structured_sort_constructor_argument > arguments;
-  arguments.push_back(structured_sort_constructor_argument(basic_sort("E"), "s"));
-  arguments.push_back(structured_sort_constructor_argument(sort_nat::nat(), "n"));
+  arguments.push_back(structured_sort_constructor_argument("s", basic_sort("E")));
+  arguments.push_back(structured_sort_constructor_argument("n", sort_nat::nat()));
 
   atermpp::vector< structured_sort_constructor > constructors;
   constructors.push_back(structured_sort_constructor("d", boost::make_iterator_range(arguments.begin(), arguments.begin() + 1)));
@@ -63,15 +63,15 @@ void test_representative_generator()
 
   // Should be e(0), since constants are preferred to other constructors or mappings
   BOOST_CHECK(default_expression_generator(basic_sort("E")) ==
-      boost::next(constructors.begin(), 1)->constructor_function(basic_sort("E"))(default_expression_generator(sort_nat::nat())));
+              boost::next(constructors.begin(), 1)->constructor_function(basic_sort("E"))(default_expression_generator(sort_nat::nat())));
 
   // Should be d(e(0)), since constants are preferred to other constructors or mappings
   BOOST_CHECK(default_expression_generator(basic_sort("D")) ==
-       boost::next(constructors.begin(), 0)->constructor_function(basic_sort("D"))(default_expression_generator(basic_sort("E"))));
+              boost::next(constructors.begin(), 0)->constructor_function(basic_sort("D"))(default_expression_generator(basic_sort("E"))));
 
   // Check whether the representative of the set of reals is the empty set of reals.
-  BOOST_CHECK(default_expression_generator(container_sort(set_container(),data::sort_real::real_())) == 
-                         data::sort_set::emptyset(data::sort_real::real_()));
+  BOOST_CHECK(default_expression_generator(container_sort(set_container(),data::sort_real::real_())) ==
+              data::sort_set::emptyset(data::sort_real::real_()));
 
 
 }

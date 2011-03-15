@@ -21,9 +21,11 @@
 #include "mcrl2/fdr/renaming_expression_fwd.h"
 #include "mcrl2/fdr/set_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated process expression class declarations ---//
 /// \brief class process_expression
@@ -490,212 +492,212 @@ class rename: public process_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a stop expression
-    /// \param t A term
-    /// \return True if it is a stop expression
-    inline
-    bool is_stop(const process_expression& t)
-    {
-      return fdr::detail::gsIsSTOP(t);
-    }
+/// \brief Test for a stop expression
+/// \param t A term
+/// \return True if it is a stop expression
+inline
+bool is_stop(const process_expression& t)
+{
+  return fdr::detail::gsIsSTOP(t);
+}
 
-    /// \brief Test for a skip expression
-    /// \param t A term
-    /// \return True if it is a skip expression
-    inline
-    bool is_skip(const process_expression& t)
-    {
-      return fdr::detail::gsIsSKIP(t);
-    }
+/// \brief Test for a skip expression
+/// \param t A term
+/// \return True if it is a skip expression
+inline
+bool is_skip(const process_expression& t)
+{
+  return fdr::detail::gsIsSKIP(t);
+}
 
-    /// \brief Test for a chaos expression
-    /// \param t A term
-    /// \return True if it is a chaos expression
-    inline
-    bool is_chaos(const process_expression& t)
-    {
-      return fdr::detail::gsIsCHAOS(t);
-    }
+/// \brief Test for a chaos expression
+/// \param t A term
+/// \return True if it is a chaos expression
+inline
+bool is_chaos(const process_expression& t)
+{
+  return fdr::detail::gsIsCHAOS(t);
+}
 
-    /// \brief Test for a prefix expression
-    /// \param t A term
-    /// \return True if it is a prefix expression
-    inline
-    bool is_prefix(const process_expression& t)
-    {
-      return fdr::detail::gsIsPrefix(t);
-    }
+/// \brief Test for a prefix expression
+/// \param t A term
+/// \return True if it is a prefix expression
+inline
+bool is_prefix(const process_expression& t)
+{
+  return fdr::detail::gsIsPrefix(t);
+}
 
-    /// \brief Test for a externalchoice expression
-    /// \param t A term
-    /// \return True if it is a externalchoice expression
-    inline
-    bool is_externalchoice(const process_expression& t)
-    {
-      return fdr::detail::gsIsExternalChoice(t);
-    }
+/// \brief Test for a externalchoice expression
+/// \param t A term
+/// \return True if it is a externalchoice expression
+inline
+bool is_externalchoice(const process_expression& t)
+{
+  return fdr::detail::gsIsExternalChoice(t);
+}
 
-    /// \brief Test for a internalchoice expression
-    /// \param t A term
-    /// \return True if it is a internalchoice expression
-    inline
-    bool is_internalchoice(const process_expression& t)
-    {
-      return fdr::detail::gsIsInternalChoice(t);
-    }
+/// \brief Test for a internalchoice expression
+/// \param t A term
+/// \return True if it is a internalchoice expression
+inline
+bool is_internalchoice(const process_expression& t)
+{
+  return fdr::detail::gsIsInternalChoice(t);
+}
 
-    /// \brief Test for a sequentialcomposition expression
-    /// \param t A term
-    /// \return True if it is a sequentialcomposition expression
-    inline
-    bool is_sequentialcomposition(const process_expression& t)
-    {
-      return fdr::detail::gsIsSequentialComposition(t);
-    }
+/// \brief Test for a sequentialcomposition expression
+/// \param t A term
+/// \return True if it is a sequentialcomposition expression
+inline
+bool is_sequentialcomposition(const process_expression& t)
+{
+  return fdr::detail::gsIsSequentialComposition(t);
+}
 
-    /// \brief Test for a interrupt expression
-    /// \param t A term
-    /// \return True if it is a interrupt expression
-    inline
-    bool is_interrupt(const process_expression& t)
-    {
-      return fdr::detail::gsIsInterrupt(t);
-    }
+/// \brief Test for a interrupt expression
+/// \param t A term
+/// \return True if it is a interrupt expression
+inline
+bool is_interrupt(const process_expression& t)
+{
+  return fdr::detail::gsIsInterrupt(t);
+}
 
-    /// \brief Test for a hiding expression
-    /// \param t A term
-    /// \return True if it is a hiding expression
-    inline
-    bool is_hiding(const process_expression& t)
-    {
-      return fdr::detail::gsIsHiding(t);
-    }
+/// \brief Test for a hiding expression
+/// \param t A term
+/// \return True if it is a hiding expression
+inline
+bool is_hiding(const process_expression& t)
+{
+  return fdr::detail::gsIsHiding(t);
+}
 
-    /// \brief Test for a interleave expression
-    /// \param t A term
-    /// \return True if it is a interleave expression
-    inline
-    bool is_interleave(const process_expression& t)
-    {
-      return fdr::detail::gsIsInterleave(t);
-    }
+/// \brief Test for a interleave expression
+/// \param t A term
+/// \return True if it is a interleave expression
+inline
+bool is_interleave(const process_expression& t)
+{
+  return fdr::detail::gsIsInterleave(t);
+}
 
-    /// \brief Test for a sharing expression
-    /// \param t A term
-    /// \return True if it is a sharing expression
-    inline
-    bool is_sharing(const process_expression& t)
-    {
-      return fdr::detail::gsIsSharing(t);
-    }
+/// \brief Test for a sharing expression
+/// \param t A term
+/// \return True if it is a sharing expression
+inline
+bool is_sharing(const process_expression& t)
+{
+  return fdr::detail::gsIsSharing(t);
+}
 
-    /// \brief Test for a alphaparallel expression
-    /// \param t A term
-    /// \return True if it is a alphaparallel expression
-    inline
-    bool is_alphaparallel(const process_expression& t)
-    {
-      return fdr::detail::gsIsAlphaParallel(t);
-    }
+/// \brief Test for a alphaparallel expression
+/// \param t A term
+/// \return True if it is a alphaparallel expression
+inline
+bool is_alphaparallel(const process_expression& t)
+{
+  return fdr::detail::gsIsAlphaParallel(t);
+}
 
-    /// \brief Test for a repexternalchoice expression
-    /// \param t A term
-    /// \return True if it is a repexternalchoice expression
-    inline
-    bool is_repexternalchoice(const process_expression& t)
-    {
-      return fdr::detail::gsIsRepExternalChoice(t);
-    }
+/// \brief Test for a repexternalchoice expression
+/// \param t A term
+/// \return True if it is a repexternalchoice expression
+inline
+bool is_repexternalchoice(const process_expression& t)
+{
+  return fdr::detail::gsIsRepExternalChoice(t);
+}
 
-    /// \brief Test for a repinternalchoice expression
-    /// \param t A term
-    /// \return True if it is a repinternalchoice expression
-    inline
-    bool is_repinternalchoice(const process_expression& t)
-    {
-      return fdr::detail::gsIsRepInternalChoice(t);
-    }
+/// \brief Test for a repinternalchoice expression
+/// \param t A term
+/// \return True if it is a repinternalchoice expression
+inline
+bool is_repinternalchoice(const process_expression& t)
+{
+  return fdr::detail::gsIsRepInternalChoice(t);
+}
 
-    /// \brief Test for a repsequentialcomposition expression
-    /// \param t A term
-    /// \return True if it is a repsequentialcomposition expression
-    inline
-    bool is_repsequentialcomposition(const process_expression& t)
-    {
-      return fdr::detail::gsIsRepSequentialComposition(t);
-    }
+/// \brief Test for a repsequentialcomposition expression
+/// \param t A term
+/// \return True if it is a repsequentialcomposition expression
+inline
+bool is_repsequentialcomposition(const process_expression& t)
+{
+  return fdr::detail::gsIsRepSequentialComposition(t);
+}
 
-    /// \brief Test for a repinterleave expression
-    /// \param t A term
-    /// \return True if it is a repinterleave expression
-    inline
-    bool is_repinterleave(const process_expression& t)
-    {
-      return fdr::detail::gsIsRepInterleave(t);
-    }
+/// \brief Test for a repinterleave expression
+/// \param t A term
+/// \return True if it is a repinterleave expression
+inline
+bool is_repinterleave(const process_expression& t)
+{
+  return fdr::detail::gsIsRepInterleave(t);
+}
 
-    /// \brief Test for a repsharing expression
-    /// \param t A term
-    /// \return True if it is a repsharing expression
-    inline
-    bool is_repsharing(const process_expression& t)
-    {
-      return fdr::detail::gsIsRepSharing(t);
-    }
+/// \brief Test for a repsharing expression
+/// \param t A term
+/// \return True if it is a repsharing expression
+inline
+bool is_repsharing(const process_expression& t)
+{
+  return fdr::detail::gsIsRepSharing(t);
+}
 
-    /// \brief Test for a repalphaparallel expression
-    /// \param t A term
-    /// \return True if it is a repalphaparallel expression
-    inline
-    bool is_repalphaparallel(const process_expression& t)
-    {
-      return fdr::detail::gsIsRepAlphaParallel(t);
-    }
+/// \brief Test for a repalphaparallel expression
+/// \param t A term
+/// \return True if it is a repalphaparallel expression
+inline
+bool is_repalphaparallel(const process_expression& t)
+{
+  return fdr::detail::gsIsRepAlphaParallel(t);
+}
 
-    /// \brief Test for a untimedtimeout expression
-    /// \param t A term
-    /// \return True if it is a untimedtimeout expression
-    inline
-    bool is_untimedtimeout(const process_expression& t)
-    {
-      return fdr::detail::gsIsUntimedTimeOut(t);
-    }
+/// \brief Test for a untimedtimeout expression
+/// \param t A term
+/// \return True if it is a untimedtimeout expression
+inline
+bool is_untimedtimeout(const process_expression& t)
+{
+  return fdr::detail::gsIsUntimedTimeOut(t);
+}
 
-    /// \brief Test for a boolguard expression
-    /// \param t A term
-    /// \return True if it is a boolguard expression
-    inline
-    bool is_boolguard(const process_expression& t)
-    {
-      return fdr::detail::gsIsBoolGuard(t);
-    }
+/// \brief Test for a boolguard expression
+/// \param t A term
+/// \return True if it is a boolguard expression
+inline
+bool is_boolguard(const process_expression& t)
+{
+  return fdr::detail::gsIsBoolGuard(t);
+}
 
-    /// \brief Test for a linkedparallel expression
-    /// \param t A term
-    /// \return True if it is a linkedparallel expression
-    inline
-    bool is_linkedparallel(const process_expression& t)
-    {
-      return fdr::detail::gsIsLinkedParallel(t);
-    }
+/// \brief Test for a linkedparallel expression
+/// \param t A term
+/// \return True if it is a linkedparallel expression
+inline
+bool is_linkedparallel(const process_expression& t)
+{
+  return fdr::detail::gsIsLinkedParallel(t);
+}
 
-    /// \brief Test for a replinkedparallel expression
-    /// \param t A term
-    /// \return True if it is a replinkedparallel expression
-    inline
-    bool is_replinkedparallel(const process_expression& t)
-    {
-      return fdr::detail::gsIsRepLinkedParallel(t);
-    }
+/// \brief Test for a replinkedparallel expression
+/// \param t A term
+/// \return True if it is a replinkedparallel expression
+inline
+bool is_replinkedparallel(const process_expression& t)
+{
+  return fdr::detail::gsIsRepLinkedParallel(t);
+}
 
-    /// \brief Test for a rename expression
-    /// \param t A term
-    /// \return True if it is a rename expression
-    inline
-    bool is_rename(const process_expression& t)
-    {
-      return fdr::detail::gsIsRename(t);
-    }
+/// \brief Test for a rename expression
+/// \param t A term
+/// \return True if it is a rename expression
+inline
+bool is_rename(const process_expression& t)
+{
+  return fdr::detail::gsIsRename(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

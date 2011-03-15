@@ -32,92 +32,93 @@
 #define RPC RecProcessChannels
 #define RC  RecChannel
 
-struct t_options {
+struct t_options
+{
   std::string infilename;
   std::string outfilename;
   bool no_statepar;
 };
 
 typedef struct
-  {
-    std::string Name;
-    std::string Type;
-    std::string InitValue;
-  } RecProcessVariable;
+{
+  std::string Name;
+  std::string Type;
+  std::string InitValue;
+} RecProcessVariable;
 
 typedef struct
-  {
-    std::string Name;
-    std::string Type;
-    std::string HashCount;
-  } RecProcessChannels;
+{
+  std::string Name;
+  std::string Type;
+  std::string HashCount;
+} RecProcessChannels;
 
 typedef struct
-   {
-     std::string Name;
-     std::string Type;
-   } RecVariableType;
+{
+  std::string Name;
+  std::string Type;
+} RecVariableType;
 
 typedef struct
-   {
-     int state;
-     int holdsForState;
-   } RecStreams;
+{
+  size_t state;
+  int holdsForState;
+} RecStreams;
 
 typedef struct
-   {
-     int stream;
-     int position;
-   } RecStreamPos;
+{
+  int stream;
+  size_t position;
+} RecStreamPos;
 
 //Information per parenthesis
 typedef struct
-   {
-     std::set<int> endstates;
-     bool looped;
-     bool guardedloop;
-     int  begin_state;
-     int  end_state;
-     std::set<int>  streams;
-     bool parallel;
-     bool alternative;
+{
+  std::set<size_t> endstates;
+  bool looped;
+  bool guardedloop;
+  size_t  begin_state;
+  size_t  end_state;
+  std::set<int>  streams;
+  bool parallel;
+  bool alternative;
 
-   } RecParenthesisInfo;
+} RecParenthesisInfo;
 
 //Information per transition
 typedef struct
-  {
-    int state;
-    int stream;
-    int originates_from_stream;
-    bool terminate;
-    int parenthesis_level;
-    bool looped_state;
-    bool guardedloop;
-    std::string guard;
-    std::string action;
-    std::map<std::string, std::string> vectorUpdate; // First:  Identifier Variable
-                                                     // Second: Expression
-    int nextstate;
-  } RecActionTransition;
+{
+  size_t state;
+  int stream;
+  int originates_from_stream;
+  bool terminate;
+  size_t parenthesis_level;
+  bool looped_state;
+  bool guardedloop;
+  std::string guard;
+  std::string action;
+  std::map<std::string, std::string> vectorUpdate; // First:  Identifier Variable
+  // Second: Expression
+  size_t nextstate;
+} RecActionTransition;
 
 typedef struct
-  {
-    std::vector<RPV> DeclarationVariables;
-    std::vector<RPV> SpecificationVariables;
-    std::vector<RPC> DeclarationChannels;
-    int NumberOfStreams;
-  } RecProcessVectors;
+{
+  std::vector<RPV> DeclarationVariables;
+  std::vector<RPV> SpecificationVariables;
+  std::vector<RPC> DeclarationChannels;
+  size_t NumberOfStreams;
+} RecProcessVectors;
 
 typedef struct
-  {
-     std::string send_end;
-     std::string recv_end;
-     std::string Type;
-  } RecChannel;
+{
+  std::string send_end;
+  std::string recv_end;
+  std::string Type;
+} RecChannel;
 
 template <class T>
-inline std::string to_string (const T& t)
+inline std::string to_string(const T& t)
 {
   std::stringstream ss;
   ss << t;
@@ -125,7 +126,7 @@ inline std::string to_string (const T& t)
 }
 
 template < >
-inline std::string to_string (const std::string& t)
+inline std::string to_string(const std::string& t)
 {
   return t;
 }
@@ -136,8 +137,8 @@ class CAsttransform
     CAsttransform()
       : parenthesis_level(0),
         terminate(true),
-        state(-1),
-        next_state(-1),
+        state(ATERM_NON_EXISTING_POSITION),
+        next_state(ATERM_NON_EXISTING_POSITION),
         loop(false),
         guardedloop(false),
         guardedStarBeginState(0),
@@ -146,7 +147,7 @@ class CAsttransform
         alternative(false),
         parallel(false),
         no_statepar(false)
-      {}
+    {}
 
     bool translator(ATermAppl ast);
     bool set_options(t_options options);
@@ -156,7 +157,7 @@ class CAsttransform
     std::string mcrl2_result;
     bool StrcmpIsFun(const char* str, ATermAppl aterm);
     std::string variable_prefix; //prefix stores the name of the process globally
-    int parenthesis_level;
+    size_t parenthesis_level;
     std::pair<std:: vector<RVT>, std::vector<RPC> > manipulateDeclaredProcessDefinition(ATermAppl input);
     std::vector<RVT> manipulateDeclaredProcessVariables(ATermList input);
 
@@ -170,7 +171,7 @@ class CAsttransform
     void manipulateStatements(ATermAppl input);
     std::map<std::string, std::string> manipulateAssignmentStat(ATermList input_id, ATermList input_exp);
     std::vector<std::string> getExpressionsFromList(ATermList input);
-    bool onlyIdentifiersInExpression(ATermList input );
+    bool onlyIdentifiersInExpression(ATermList input);
     std::map<int, std::set<int> > affectedStreamMap;
 
     std::string manipulateExplicitTemplates(ATermList input);
@@ -182,23 +183,23 @@ class CAsttransform
     std::vector<RAT> transitionSystem;
 
     bool terminate;  //terminate per parenthesis level
-    int state;
-    int next_state;
+    size_t state;
+    size_t next_state;
 
     //Begin_state: used to deterime the beginstates per parenthesis level
-    std::map<int, int> begin_state; //first:  parenthesis level
-                                    //second: begin state
-    std::map<int, int> end_state;   //first:  parenthesis level
-                                    //second: end state
+    std::map<size_t, size_t> begin_state; //first:  parenthesis level
+    //second: begin state
+    std::map<size_t, size_t> end_state;   //first:  parenthesis level
+    //second: end state
 
-    std::map<int, std::set<int> > endstates_per_parenthesis_level;
-    std::map<int, std::vector<RPI>  > info_per_parenthesis_level_per_parenthesis;
+    std::map<size_t, std::set<size_t> > endstates_per_parenthesis_level;
+    std::map<size_t, std::vector<RPI>  > info_per_parenthesis_level_per_parenthesis;
 
-    int determineEndState(std::set<int> org_set, int lvl);
+    size_t determineEndState(std::set<size_t> org_set, size_t lvl);
     bool loop;  //Variable to indicate if a parenthesis_level is looped
     bool guardedloop; //Variable to indicatie if a parenthesis_level is a guarded loop
     std::string guardedStarExpression; //Variable that contains the guard of *>
-    int guardedStarBeginState; //Variable to indicatie the state where the *> starts
+    size_t guardedStarBeginState; //Variable to indicatie the state where the *> starts
     bool transitionexists(RAT transition, std::vector<RAT> transitionvector);
 
     int stream_number; //Variable used for indicate the current stream ( Parallel )

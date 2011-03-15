@@ -23,9 +23,11 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/application.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace data {
+namespace data
+{
 
 //--- start generated class variable ---//
 /// \brief A data variable
@@ -39,7 +41,7 @@ class variable: public data_expression
 
     /// \brief Constructor.
     /// \param term A term
-    variable(atermpp::aterm_appl term)
+    variable(const atermpp::aterm_appl& term)
       : data_expression(term)
     {
       assert(core::detail::check_term_DataVarId(m_term));
@@ -65,24 +67,26 @@ class variable: public data_expression
       return atermpp::arg2(*this);
     }
 };
+
+/// \brief list of variables
+typedef atermpp::term_list<variable> variable_list;
+
+/// \brief vector of variables
+typedef atermpp::vector<variable>    variable_vector;
+
 //--- end generated class variable ---//
 
-    /// \brief list of variables
-    typedef atermpp::term_list< variable >                         variable_list;
-    /// \brief list of variables
-    typedef atermpp::vector< variable >                            variable_vector;
+/// \brief Converts an container with variables to a variable_list
+/// \param r A range of variables.
+/// \note This function uses implementation details of the iterator type
+/// and hence is sometimes efficient than copying all elements of the list.
+template < typename Container >
+inline variable_list make_variable_list(Container const& r, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
+{
+  return atermpp::convert< variable_list >(r);
+}
 
-    /// \brief Converts an container with variables to a variable_list
-    /// \param r A range of variables.
-    /// \note This function uses implementation details of the iterator type
-    /// and hence is sometimes efficient than copying all elements of the list.
-    template < typename Container >
-    inline variable_list make_variable_list(Container const& r, typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
-    {
-      return atermpp::convert< variable_list >(r);
-    }
-
-  } // namespace data
+} // namespace data
 
 } // namespace mcrl2
 

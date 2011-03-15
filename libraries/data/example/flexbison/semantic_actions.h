@@ -14,7 +14,7 @@
  * different nullary, unary and binary nodes are derived. */
 class CalcNode
 {
-public:
+  public:
     /// required for virtual functions. in the derived classes the operands are
     /// deleted.
     virtual ~CalcNode()
@@ -23,16 +23,16 @@ public:
 
     /// evaluate the complete calculation tree and return the floating point
     /// result value
-    virtual double	evaluate() const = 0;
+    virtual double  evaluate() const = 0;
 
     /// output the calculation tree to the given stream. tries to format the
     /// output to make tree levels visible.
-    virtual void	print(std::ostream &os, unsigned int depth=0) const = 0;
+    virtual void  print(std::ostream& os, unsigned int depth=0) const = 0;
 
     /// helper function for print() which makes the indention string
     static inline std::string indent(unsigned int d)
     {
-	return std::string(d * 2, ' ');
+      return std::string(d * 2, ' ');
     }
 };
 
@@ -40,23 +40,23 @@ public:
 class CNConstant : public CalcNode
 {
     /// the constant value returned
-    double	value;
-    
-public:
+    double  value;
+
+  public:
     /// construct a constant calculation node from a value
     explicit CNConstant(double _value)
-	: CalcNode(), value(_value)
+      : CalcNode(), value(_value)
     {
     }
 
     virtual double evaluate() const
     {
-	return value;
+      return value;
     }
 
-    virtual void print(std::ostream &os, unsigned int depth) const
+    virtual void print(std::ostream& os, unsigned int depth) const
     {
-	os << indent(depth) << value << std::endl;
+      os << indent(depth) << value << std::endl;
     }
 };
 
@@ -64,28 +64,28 @@ public:
 class CNNegate : public CalcNode
 {
     /// calculation subtree
-    CalcNode* 	node;
+    CalcNode*   node;
 
-public:
+  public:
     explicit CNNegate(CalcNode* _node)
-	: CalcNode(), node(_node)
+      : CalcNode(), node(_node)
     {
     }
 
     virtual ~CNNegate()
     {
-	delete node;
+      delete node;
     }
 
     virtual double evaluate() const
     {
-	return - node->evaluate();
+      return - node->evaluate();
     }
 
-    virtual void print(std::ostream &os, unsigned int depth) const
+    virtual void print(std::ostream& os, unsigned int depth) const
     {
-	os << indent(depth) << "- negate" << std::endl;
-	node->print(os, depth+1);
+      os << indent(depth) << "- negate" << std::endl;
+      node->print(os, depth+1);
     }
 };
 
@@ -93,33 +93,33 @@ public:
 class CNAdd : public CalcNode
 {
     /// left calculation operand
-    CalcNode* 	left;
+    CalcNode*   left;
 
     /// right calculation operand
-    CalcNode* 	right;
-    
-public:
+    CalcNode*   right;
+
+  public:
     explicit CNAdd(CalcNode* _left, CalcNode* _right)
-	: CalcNode(), left(_left), right(_right)
+      : CalcNode(), left(_left), right(_right)
     {
     }
 
     virtual ~CNAdd()
     {
-	delete left;
-	delete right;
+      delete left;
+      delete right;
     }
 
     virtual double evaluate() const
     {
-	return left->evaluate() + right->evaluate();
+      return left->evaluate() + right->evaluate();
     }
 
-    virtual void print(std::ostream &os, unsigned int depth) const
+    virtual void print(std::ostream& os, unsigned int depth) const
     {
-	os << indent(depth) << "+ add" << std::endl;
-	left->print(os, depth+1);
-	right->print(os, depth+1);
+      os << indent(depth) << "+ add" << std::endl;
+      left->print(os, depth+1);
+      right->print(os, depth+1);
     }
 };
 
@@ -127,33 +127,33 @@ public:
 class CNSubtract : public CalcNode
 {
     /// left calculation operand
-    CalcNode* 	left;
+    CalcNode*   left;
 
     /// right calculation operand
-    CalcNode* 	right;
-    
-public:
+    CalcNode*   right;
+
+  public:
     explicit CNSubtract(CalcNode* _left, CalcNode* _right)
-	: CalcNode(), left(_left), right(_right)
+      : CalcNode(), left(_left), right(_right)
     {
     }
 
     virtual ~CNSubtract()
     {
-	delete left;
-	delete right;
+      delete left;
+      delete right;
     }
 
     virtual double evaluate() const
     {
-	return left->evaluate() - right->evaluate();
+      return left->evaluate() - right->evaluate();
     }
 
-    virtual void print(std::ostream &os, unsigned int depth) const
+    virtual void print(std::ostream& os, unsigned int depth) const
     {
-	os << indent(depth) << "- subtract" << std::endl;
-	left->print(os, depth+1);
-	right->print(os, depth+1);
+      os << indent(depth) << "- subtract" << std::endl;
+      left->print(os, depth+1);
+      right->print(os, depth+1);
     }
 };
 
@@ -161,33 +161,33 @@ public:
 class CNMultiply : public CalcNode
 {
     /// left calculation operand
-    CalcNode* 	left;
+    CalcNode*   left;
 
     /// right calculation operand
-    CalcNode* 	right;
-    
-public:
+    CalcNode*   right;
+
+  public:
     explicit CNMultiply(CalcNode* _left, CalcNode* _right)
-	: CalcNode(), left(_left), right(_right)
+      : CalcNode(), left(_left), right(_right)
     {
     }
 
     virtual ~CNMultiply()
     {
-	delete left;
-	delete right;
+      delete left;
+      delete right;
     }
 
     virtual double evaluate() const
     {
-	return left->evaluate() * right->evaluate();
+      return left->evaluate() * right->evaluate();
     }
 
-    virtual void print(std::ostream &os, unsigned int depth) const
+    virtual void print(std::ostream& os, unsigned int depth) const
     {
-	os << indent(depth) << "* multiply" << std::endl;
-	left->print(os, depth+1);
-	right->print(os, depth+1);
+      os << indent(depth) << "* multiply" << std::endl;
+      left->print(os, depth+1);
+      right->print(os, depth+1);
     }
 };
 
@@ -195,33 +195,33 @@ public:
 class CNDivide : public CalcNode
 {
     /// left calculation operand
-    CalcNode* 	left;
+    CalcNode*   left;
 
     /// right calculation operand
-    CalcNode* 	right;
-    
-public:
+    CalcNode*   right;
+
+  public:
     explicit CNDivide(CalcNode* _left, CalcNode* _right)
-	: CalcNode(), left(_left), right(_right)
+      : CalcNode(), left(_left), right(_right)
     {
     }
 
     virtual ~CNDivide()
     {
-	delete left;
-	delete right;
+      delete left;
+      delete right;
     }
 
     virtual double evaluate() const
     {
-	return left->evaluate() / right->evaluate();
+      return left->evaluate() / right->evaluate();
     }
 
-    virtual void print(std::ostream &os, unsigned int depth) const
+    virtual void print(std::ostream& os, unsigned int depth) const
     {
-	os << indent(depth) << "/ divide" << std::endl;
-	left->print(os, depth+1);
-	right->print(os, depth+1);
+      os << indent(depth) << "/ divide" << std::endl;
+      left->print(os, depth+1);
+      right->print(os, depth+1);
     }
 };
 
@@ -230,33 +230,33 @@ public:
 class CNModulo : public CalcNode
 {
     /// left calculation operand
-    CalcNode* 	left;
+    CalcNode*   left;
 
     /// right calculation operand
-    CalcNode* 	right;
-    
-public:
+    CalcNode*   right;
+
+  public:
     explicit CNModulo(CalcNode* _left, CalcNode* _right)
-	: CalcNode(), left(_left), right(_right)
+      : CalcNode(), left(_left), right(_right)
     {
     }
 
     virtual ~CNModulo()
     {
-	delete left;
-	delete right;
+      delete left;
+      delete right;
     }
 
     virtual double evaluate() const
     {
-	return std::fmod(left->evaluate(), right->evaluate());
+      return std::fmod(left->evaluate(), right->evaluate());
     }
 
-    virtual void print(std::ostream &os, unsigned int depth) const
+    virtual void print(std::ostream& os, unsigned int depth) const
     {
-	os << indent(depth) << "% modulo" << std::endl;
-	left->print(os, depth+1);
-	right->print(os, depth+1);
+      os << indent(depth) << "% modulo" << std::endl;
+      left->print(os, depth+1);
+      right->print(os, depth+1);
     }
 };
 
@@ -264,33 +264,33 @@ public:
 class CNPower : public CalcNode
 {
     /// left calculation operand
-    CalcNode* 	left;
+    CalcNode*   left;
 
     /// right calculation operand
-    CalcNode* 	right;
-    
-public:
+    CalcNode*   right;
+
+  public:
     explicit CNPower(CalcNode* _left, CalcNode* _right)
-	: CalcNode(), left(_left), right(_right)
+      : CalcNode(), left(_left), right(_right)
     {
     }
 
     virtual ~CNPower()
     {
-	delete left;
-	delete right;
+      delete left;
+      delete right;
     }
 
     virtual double evaluate() const
     {
-	return std::pow(left->evaluate(), right->evaluate());
+      return std::pow(left->evaluate(), right->evaluate());
     }
 
-    virtual void print(std::ostream &os, unsigned int depth) const
+    virtual void print(std::ostream& os, unsigned int depth) const
     {
-	os << indent(depth) << "^ power" << std::endl;
-	left->print(os, depth+1);
-	right->print(os, depth+1);
+      os << indent(depth) << "^ power" << std::endl;
+      left->print(os, depth+1);
+      right->print(os, depth+1);
     }
 };
 
@@ -299,49 +299,53 @@ public:
  * actions. */
 class CalcContext
 {
-public:
+  public:
 
     /// type of the variable storage
     typedef std::map<std::string, double> variablemap_type;
 
     /// variable storage. maps variable string to doubles
-    variablemap_type		variables;
+    variablemap_type    variables;
 
     /// array of unassigned expressions found by the parser. these are then
     /// outputted to the user.
-    std::vector<CalcNode*>	expressions;
+    std::vector<CalcNode*>  expressions;
 
     /// free the saved expression trees
     ~CalcContext()
     {
-	clearExpressions();
+      clearExpressions();
     }
 
     /// free all saved expression trees
-    void	clearExpressions()
+    void  clearExpressions()
     {
-	for(unsigned int i = 0; i < expressions.size(); ++i)
-	{
-	    delete expressions[i];
-	}
-	expressions.clear();
+      for (unsigned int i = 0; i < expressions.size(); ++i)
+      {
+        delete expressions[i];
+      }
+      expressions.clear();
     }
 
     /// check if the given variable name exists in the storage
-    bool	existsVariable(const std::string &varname) const
+    bool  existsVariable(const std::string& varname) const
     {
-	return variables.find(varname) != variables.end();
+      return variables.find(varname) != variables.end();
     }
-    
+
     /// return the given variable from the storage. throws an exception if it
     /// does not exist.
-    double	getVariable(const std::string &varname) const
+    double  getVariable(const std::string& varname) const
     {
-	variablemap_type::const_iterator vi = variables.find(varname);
-	if (vi == variables.end())
-	    throw(std::runtime_error("Unknown variable."));
-	else
-	    return vi->second;
+      variablemap_type::const_iterator vi = variables.find(varname);
+      if (vi == variables.end())
+      {
+        throw(std::runtime_error("Unknown variable."));
+      }
+      else
+      {
+        return vi->second;
+      }
     }
 };
 

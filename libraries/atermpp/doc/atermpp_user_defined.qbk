@@ -46,7 +46,7 @@ Now that we have defined `aterm_traits<MyTerm>`, it is safe to use `MyTerm` in a
    v.push_back(MyTerm("g(y)");
 
 Also the search and replace algorithms of section
-[link mcrl2_atermpp.programming.algorithms ATerm algorithms]
+[link aterm___library.programming.algorithms ATerm algorithms]
 can be applied to `MyTerm`.
 
 [endsect]

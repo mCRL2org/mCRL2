@@ -18,9 +18,11 @@
 #include "mcrl2/fdr/process_expression_fwd.h"
 #include "mcrl2/fdr/test_expression_fwd.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated check expression class declarations ---//
 /// \brief class check_expression
@@ -124,41 +126,41 @@ class notcheck: public check_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a bcheck expression
-    /// \param t A term
-    /// \return True if it is a bcheck expression
-    inline
-    bool is_bcheck(const check_expression& t)
-    {
-      return fdr::detail::gsIsBCheck(t);
-    }
+/// \brief Test for a bcheck expression
+/// \param t A term
+/// \return True if it is a bcheck expression
+inline
+bool is_bcheck(const check_expression& t)
+{
+  return fdr::detail::gsIsBCheck(t);
+}
 
-    /// \brief Test for a rcheck expression
-    /// \param t A term
-    /// \return True if it is a rcheck expression
-    inline
-    bool is_rcheck(const check_expression& t)
-    {
-      return fdr::detail::gsIsRCheck(t);
-    }
+/// \brief Test for a rcheck expression
+/// \param t A term
+/// \return True if it is a rcheck expression
+inline
+bool is_rcheck(const check_expression& t)
+{
+  return fdr::detail::gsIsRCheck(t);
+}
 
-    /// \brief Test for a tcheck expression
-    /// \param t A term
-    /// \return True if it is a tcheck expression
-    inline
-    bool is_tcheck(const check_expression& t)
-    {
-      return fdr::detail::gsIsTCheck(t);
-    }
+/// \brief Test for a tcheck expression
+/// \param t A term
+/// \return True if it is a tcheck expression
+inline
+bool is_tcheck(const check_expression& t)
+{
+  return fdr::detail::gsIsTCheck(t);
+}
 
-    /// \brief Test for a notcheck expression
-    /// \param t A term
-    /// \return True if it is a notcheck expression
-    inline
-    bool is_notcheck(const check_expression& t)
-    {
-      return fdr::detail::gsIsNotCheck(t);
-    }
+/// \brief Test for a notcheck expression
+/// \param t A term
+/// \return True if it is a notcheck expression
+inline
+bool is_notcheck(const check_expression& t)
+{
+  return fdr::detail::gsIsNotCheck(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

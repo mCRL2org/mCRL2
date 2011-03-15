@@ -17,7 +17,8 @@
 
 class wxListCtrl;
 
-class InfoDialog: public wxDialog {
+class InfoDialog: public wxDialog
+{
   public:
     InfoDialog(wxWindow* parent);
     void setLTSInfo(int ns,int nt,int nc,int nr);

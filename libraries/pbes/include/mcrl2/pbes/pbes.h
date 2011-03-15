@@ -29,59 +29,55 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/data/substitution.h"
-#include "mcrl2/data/representative_generator.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/map_substitution.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/detail/data_utility.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/data/representative_generator.h"
-#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/pbes/detail/quantifier_visitor.h"
 #include "mcrl2/pbes/detail/occurring_variable_visitor.h"
 #include "mcrl2/pbes/detail/pbes_functional.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
 /// \brief The main namespace for the PBES library.
-namespace pbes_system {
+namespace pbes_system
+{
 
 using mcrl2::core::pp;
 
 template <typename Container> class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
-template <typename Object, typename SetContainer>
-void remove_parameters(Object& o, const SetContainer& to_be_removed);
-
-template <typename Object, typename Substitution>
-void substitute(Object& o, const Substitution& sigma, bool replace_parameters);
-                     
 template <typename Container>
 std::set<data::variable> find_free_variables(Container const& container);
 
 template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
 
-template <typename Object, typename OutIter>
-void traverse_sort_expressions(const Object& o, OutIter dest);
+template <typename Container, typename OutputIterator>
+void find_sort_expressions(Container const& container, OutputIterator o);
+
+pbes_equation normalize(const pbes_equation& e);
+bool is_normalized(const pbes_expression& t);
 
 /// \cond INTERNAL_DOCS
 
-  /// \brief Normalizes a PBES equation
-  struct normalize_pbes_equation
+/// \brief Normalizes a PBES equation
+struct normalize_pbes_equation
+{
+  /// \brief Function call operator
+  /// \param e A PBES equation
+  /// \return The function result
+  pbes_equation operator()(const pbes_equation& e) const
   {
-    /// \brief Function call operator
-    /// \param e A PBES equation
-    /// \return The function result
-    pbes_equation operator()(const pbes_equation& e) const
-    {
-      return normalize(e);
-    }
-  };
+    return normalize(e);
+  }
+};
 
 /// \endcond
 
@@ -109,7 +105,7 @@ std::set<data::variable> compute_quantifier_variables(Iterator first, Iterator l
 template <typename Container = atermpp::vector<pbes_equation> >
 class pbes
 {
-  friend struct atermpp::aterm_traits<pbes<Container> >;
+    friend struct atermpp::aterm_traits<pbes<Container> >;
 
   protected:
     /// \brief The data specification
@@ -170,7 +166,7 @@ class pbes
       }
       data::variable_list::iterator i = v.begin();
       data::data_expression_list::iterator j = w.begin();
-      for ( ; i != v.end(); ++i, ++j)
+      for (; i != v.end(); ++i, ++j)
       {
         if (!m_data.equal_sorts(i->sort(), j->sort()))
         {
@@ -231,15 +227,15 @@ class pbes
     /// \param t An aterm representing a pbes_specification.
     /// \param data_specification_is_type_checked A boolean that indicates whether the
     ///         data specification in the term has been type checked. If so, the internal data specification
-    ///         data structures will be set up. Otherwise, the function 
+    ///         data structures will be set up. Otherwise, the function
     ///         declare_data_specification_to_be_type_checked must be invoked after type checking,
     ///         before the data specification can be used.
-    
+
     pbes(atermpp::aterm_appl t, const bool data_specification_is_type_checked=true)
     {
       init_term(t);
       if (data_specification_is_type_checked)
-      { 
+      {
         m_data.declare_data_specification_to_be_type_checked();
       }
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
@@ -253,11 +249,11 @@ class pbes
          const Container& equations,
          propositional_variable_instantiation initial_state)
       :
-        m_data(data),
-        m_equations(equations),
-        m_initial_state(initial_state)
+      m_data(data),
+      m_equations(equations),
+      m_initial_state(initial_state)
     {
-      m_global_variables = find_free_variables(*this);
+      m_global_variables = pbes_system::find_free_variables(*this);
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
 
@@ -271,10 +267,10 @@ class pbes
          const atermpp::set<data::variable>& global_variables,
          propositional_variable_instantiation initial_state)
       :
-        m_data(data),
-        m_equations(equations),
-        m_global_variables(global_variables),
-        m_initial_state(initial_state)
+      m_data(data),
+      m_equations(equations),
+      m_global_variables(global_variables),
+      m_initial_state(initial_state)
     {
       assert(core::detail::check_rule_PBES(pbes_to_aterm(*this)));
     }
@@ -349,9 +345,9 @@ class pbes
       init_term(atermpp::aterm_appl(t));
       m_data.declare_data_specification_to_be_type_checked();
       complete_data_specification(*this); // Add all the sorts that are used in the specification
-                                          // to the data specification. This is important for those
-                                          // sorts that are built in, because these are not explicitly 
-                                          // declared.
+      // to the data specification. This is important for those
+      // sorts that are built in, because these are not explicitly
+      // declared.
 
       // The well typedness check is only done in debug mode, since for large
       // PBESs it takes too much time
@@ -371,38 +367,17 @@ class pbes
       for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
       {
         if (!i->is_bes())
+        {
           return false;
+        }
       }
       if (m_initial_state.parameters().size() > 0)
       {
         return false;
-      }     
+      }
       return true;
     }
 
-    /// \brief Attempts to eliminate the free variables of the PBES, by substituting
-    /// a constant value for them. If no constant value is found for one of the variables,
-    /// an exception is thrown.
-    void instantiate_global_variables()
-    {
-      data::mutable_map_substitution<> sigma;
-      data::representative_generator default_expression_generator(data());
-      std::set<data::variable> to_be_removed;
-      const atermpp::set<data::variable>& v = global_variables();
-      for (atermpp::set<data::variable>::const_iterator i = v.begin(); i != v.end(); ++i)
-      {
-        data::data_expression d = default_expression_generator(i->sort());
-        if (d == data::data_expression())
-        {
-          throw mcrl2::runtime_error("Error in pbes::instantiate_global_variables: could not instantiate " + pp(*i));
-        }
-        sigma[*i] = d;
-        to_be_removed.insert(*i);
-      }
-      pbes_system::substitute(*this, sigma, false);
-      pbes_system::remove_parameters(*this, to_be_removed);
-      assert(global_variables().empty());
-    }
 
     /// \brief Writes the pbes to file.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
@@ -557,17 +532,17 @@ class pbes
 
       std::set<data::sort_expression> declared_sorts = data::detail::make_set(data().sorts());
       const atermpp::set<data::variable>& declared_global_variables = global_variables();
-      std::set<data::variable> occurring_global_variables = find_free_variables(*this);
+      std::set<data::variable> occurring_global_variables = pbes_system::find_free_variables(*this);
       std::set<data::variable> quantifier_variables = compute_quantifier_variables(equations().begin(), equations().end());
       atermpp::set<propositional_variable> declared_variables = compute_declared_variables();
       atermpp::set<propositional_variable_instantiation> occ = occurring_variable_instantiations();
 
       // check 1)
       if (!data::detail::check_sorts(
-              boost::make_transform_iterator(declared_global_variables.begin(), data::detail::sort_of_variable()),
-              boost::make_transform_iterator(declared_global_variables.end()  , data::detail::sort_of_variable()),
-              declared_sorts
-             )
+            boost::make_transform_iterator(declared_global_variables.begin(), data::detail::sort_of_variable()),
+            boost::make_transform_iterator(declared_global_variables.end()  , data::detail::sort_of_variable()),
+            declared_sorts
+          )
          )
       {
         std::cerr << "pbes::is_well_typed() failed: some of the sorts of the free variables "
@@ -583,10 +558,10 @@ class pbes
       {
         const data::variable_list& variables = i->variable().parameters();
         if (!data::detail::check_sorts(
-               boost::make_transform_iterator(variables.begin(), data::detail::sort_of_variable()),
-               boost::make_transform_iterator(variables.end()  , data::detail::sort_of_variable()),
-               declared_sorts
-              )
+              boost::make_transform_iterator(variables.begin(), data::detail::sort_of_variable()),
+              boost::make_transform_iterator(variables.end()  , data::detail::sort_of_variable()),
+              declared_sorts
+            )
            )
         {
           std::cerr << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
@@ -600,10 +575,10 @@ class pbes
 
       // check 3)
       if (!data::detail::check_sorts(
-              boost::make_transform_iterator(quantifier_variables.begin(), data::detail::sort_of_variable()),
-              boost::make_transform_iterator(quantifier_variables.end()  , data::detail::sort_of_variable()),
-              declared_sorts
-             )
+            boost::make_transform_iterator(quantifier_variables.begin(), data::detail::sort_of_variable()),
+            boost::make_transform_iterator(quantifier_variables.end()  , data::detail::sort_of_variable()),
+            declared_sorts
+          )
          )
       {
         std::cerr << "pbes::is_well_typed() failed: some of the sorts of the quantifier variables "
@@ -616,9 +591,9 @@ class pbes
 
       // check 4)
       if (data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(equations().begin(), detail::pbes_equation_variable_name()),
-               boost::make_transform_iterator(equations().end()  , detail::pbes_equation_variable_name())
-              )
+            boost::make_transform_iterator(equations().begin(), detail::pbes_equation_variable_name()),
+            boost::make_transform_iterator(equations().end()  , detail::pbes_equation_variable_name())
+          )
          )
       {
         std::cerr << "pbes::is_well_typed() failed: the names of the binding variables are not unique" << std::endl;
@@ -642,9 +617,9 @@ class pbes
 
       // check 6)
       if (data::detail::sequence_contains_duplicates(
-               boost::make_transform_iterator(occurring_global_variables.begin(), data::detail::variable_name()),
-               boost::make_transform_iterator(occurring_global_variables.end()  , data::detail::variable_name())
-              )
+            boost::make_transform_iterator(occurring_global_variables.begin(), data::detail::variable_name()),
+            boost::make_transform_iterator(occurring_global_variables.end()  , data::detail::variable_name())
+          )
          )
       {
         std::cerr << "pbes::is_well_typed() failed: the free variables have no unique names" << std::endl;
@@ -704,11 +679,11 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
   atermpp::aterm_appl result;
 
   result = core::detail::gsMakePBES(
-      data::detail::data_specification_to_aterm_data_spec(p.data()),
-      global_variables,
-      equations,
-      initial_state);
-  
+             data::detail::data_specification_to_aterm_data_spec(p.data()),
+             global_variables,
+             equations,
+             initial_state);
+
   return result;
 }
 
@@ -716,9 +691,9 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
 /// \param spec A pbes specification
 /// \return A pretty print representation of the specification
 template <typename Container>
-std::string pp(const pbes<Container>& spec)
+std::string pp(const pbes<Container>& spec, core::t_pp_format pp_format = core::ppDefault)
 {
-  return core::pp(pbes_to_aterm(spec));
+  return core::pp(pbes_to_aterm(spec), pp_format);
 }
 
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
@@ -727,7 +702,7 @@ template <typename Container>
 void complete_data_specification(pbes<Container>& p)
 {
   std::set<data::sort_expression> s;
-  pbes_system::traverse_sort_expressions(p, std::inserter(s, s.end()));
+  pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
   p.data().add_context_sorts(s);
 }
 
@@ -746,34 +721,40 @@ bool operator==(const pbes<Container1>& p1, const pbes<Container2>& p2)
 } // namespace mcrl2
 
 /// \cond INTERNAL_DOCS
-namespace atermpp {
+namespace atermpp
+{
 template<typename Container>
 struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 {
   typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::pbes<Container> t)   { t.protect(); }
-  static void unprotect(mcrl2::pbes_system::pbes<Container> t) { t.unprotect(); }
-  static void mark(mcrl2::pbes_system::pbes<Container> t)      { t.mark(); }
-  static ATerm term(mcrl2::pbes_system::pbes<Container> t)     { atermpp::aterm x = pbes_to_aterm(t); return x; }
-  static ATerm* ptr(mcrl2::pbes_system::pbes<Container>& t)    { atermpp::aterm x = pbes_to_aterm(t); ATerm y = x; return &y; }
+  static void protect(mcrl2::pbes_system::pbes<Container> t)
+  {
+    t.protect();
+  }
+  static void unprotect(mcrl2::pbes_system::pbes<Container> t)
+  {
+    t.unprotect();
+  }
+  static void mark(mcrl2::pbes_system::pbes<Container> t)
+  {
+    t.mark();
+  }
+  static ATerm term(mcrl2::pbes_system::pbes<Container> t)
+  {
+    atermpp::aterm x = pbes_to_aterm(t);
+    return x;
+  }
+  // static ATerm* ptr(mcrl2::pbes_system::pbes<Container>& t)    { atermpp::aterm x = pbes_to_aterm(t); ATerm y = x; return &y; }
 };
 }
 /// \endcond
 
-#ifndef MCRL2_PBES_REMOVE_H
-#include "mcrl2/pbes/remove.h"
-#endif
-
-#ifndef MCRL2_PBES_SUBSTITUTE_H
-#include "mcrl2/pbes/substitute.h"
-#endif
-
-#ifndef MCRL2_PBES_TRAVERSE_H
-#include "mcrl2/pbes/traverse.h"
-#endif
-
 #ifndef MCRL2_PBES_FIND_H
 #include "mcrl2/pbes/find.h"
+#endif
+
+#ifndef MCRL2_PBES_NORMALIZE_H
+#include "mcrl2/pbes/normalize.h"
 #endif
 
 #endif // MCRL2_PBES_PBES_H

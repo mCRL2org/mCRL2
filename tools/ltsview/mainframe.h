@@ -30,7 +30,8 @@ class Mediator;
 class Settings;
 class Simulation;
 
-class MainFrame : public wxFrame {
+class MainFrame : public wxFrame
+{
   public:
     MainFrame(Mediator* owner,Settings* ss);
     void addMarkRule(wxString str,int mr);
@@ -47,7 +48,6 @@ class MainFrame : public wxFrame {
     void onSavePic(wxCommandEvent& event);
     void onSaveVec(wxCommandEvent& event);
     void onSaveText(wxCommandEvent& event);
-    void onRankStyle(wxCommandEvent& event);
     void onVisStyle(wxCommandEvent& event);
     void onFSMStyle(wxCommandEvent& event);
     void onResetView(wxCommandEvent& event);

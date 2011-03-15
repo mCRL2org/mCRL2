@@ -17,7 +17,8 @@
 
 InfoDialog::InfoDialog(wxWindow* parent) :
   wxDialog(parent,wxID_ANY,wxT("Info"),wxDefaultPosition,wxDefaultSize,
-             wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER) {
+           wxDEFAULT_DIALOG_STYLE|wxRESIZE_BORDER)
+{
 
   int lf = wxALIGN_CENTER | wxALIGN_CENTER_VERTICAL | wxEXPAND | wxALL;
 
@@ -28,7 +29,7 @@ InfoDialog::InfoDialog(wxWindow* parent) :
 
   wxPanel* panel = new wxPanel(topNotebook, wxID_ANY);
   lts_info = new wxListCtrl(panel,wxID_ANY,wxDefaultPosition,wxDefaultSize,
-      wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_NO_HEADER);
+                            wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES|wxLC_NO_HEADER);
   lts_info->InsertColumn(0, wxT(""));
   lts_info->InsertColumn(1, wxT(""),wxLIST_FORMAT_RIGHT);
   lts_info->InsertItem(0,wxT("States:"));
@@ -49,8 +50,8 @@ InfoDialog::InfoDialog(wxWindow* parent) :
 
   wxPanel* clus_panel = new wxPanel(topNotebook, wxID_ANY);
   cluster_info = new wxListCtrl(clus_panel, wxID_ANY, wxDefaultPosition,
-      wxDefaultSize,
-      wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES | wxLC_NO_HEADER);
+                                wxDefaultSize,
+                                wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES | wxLC_NO_HEADER);
   cluster_info->InsertColumn(0, wxT(""));
   cluster_info->InsertColumn(1, wxT(""), wxLIST_FORMAT_RIGHT);
   cluster_info->InsertItem(0, wxT("Nr of states:"));
@@ -69,7 +70,7 @@ InfoDialog::InfoDialog(wxWindow* parent) :
 
   wxPanel* panel1 = new wxPanel(topNotebook, wxID_ANY);
   state_info = new wxListCtrl(panel1,wxID_ANY,wxDefaultPosition,wxDefaultSize,
-      wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES);
+                              wxLC_REPORT|wxSUNKEN_BORDER|wxLC_HRULES|wxLC_VRULES);
   state_info->InsertColumn(0, wxT("Parameter"));
   state_info->InsertColumn(1, wxT("Value"));
   wxFlexGridSizer* selSizer = new wxFlexGridSizer(1,1,0,0);
@@ -90,7 +91,8 @@ InfoDialog::InfoDialog(wxWindow* parent) :
   Layout();
 }
 
-void InfoDialog::setLTSInfo(int ns,int nt,int nc,int nr) {
+void InfoDialog::setLTSInfo(int ns,int nt,int nc,int nr)
+{
   lts_info->SetItem(0,1,wxString::Format(wxT("%d"),ns));
   lts_info->SetItem(1,1,wxString::Format(wxT("%d"),nt));
   lts_info->SetItem(2,1,wxString::Format(wxT("%d"),nc));
@@ -98,17 +100,20 @@ void InfoDialog::setLTSInfo(int ns,int nt,int nc,int nr) {
   lts_info->SetColumnWidth(1,wxLIST_AUTOSIZE);
 }
 
-void InfoDialog::setNumMarkedStates(int n) {
+void InfoDialog::setNumMarkedStates(int n)
+{
   lts_info->SetItem(4,1,wxString::Format(wxT("%d"),n));
   lts_info->SetColumnWidth(1,wxLIST_AUTOSIZE);
 }
 
-void InfoDialog::setNumMarkedTransitions(int n) {
+void InfoDialog::setNumMarkedTransitions(int n)
+{
   lts_info->SetItem(5,1,wxString::Format(wxT("%d"),n));
   lts_info->SetColumnWidth(1,wxLIST_AUTOSIZE);
 }
 
-void InfoDialog::setParameterName(int i,std::string p) {
+void InfoDialog::setParameterName(int i,std::string p)
+{
   state_info->InsertItem(i,wxString(p.c_str(),wxConvLocal));
   setStateInfoColWidth(0);
 
@@ -117,7 +122,8 @@ void InfoDialog::setParameterName(int i,std::string p) {
   cluster_info->SetColumnWidth(0, wxLIST_AUTOSIZE);
 }
 
-void InfoDialog::setParameterValue(int i,std::string v) {
+void InfoDialog::setParameterValue(int i,std::string v)
+{
   state_info->SetItem(i,1,wxString(v.c_str(),wxConvLocal));
   setStateInfoColWidth(1);
 }
@@ -147,19 +153,22 @@ void InfoDialog::setClusterStateNr(int i)
   cluster_info->SetColumnWidth(1, wxLIST_AUTOSIZE);
 }
 
-void InfoDialog::resetParameterNames() {
+void InfoDialog::resetParameterNames()
+{
   state_info->DeleteAllItems();
   setStateInfoColWidth(0);
   setStateInfoColWidth(1);
 }
 
-void InfoDialog::resetParameterValues() {
-  for (int j = 0; j < state_info->GetItemCount(); ++j) {
+void InfoDialog::resetParameterValues()
+{
+  for (int j = 0; j < state_info->GetItemCount(); ++j)
+  {
     state_info->SetItem(j,1,wxEmptyString);
   }
   setStateInfoColWidth(1);
 
-  for(int j = 0; j < cluster_info->GetItemCount(); ++j)
+  for (int j = 0; j < cluster_info->GetItemCount(); ++j)
   {
     cluster_info->SetItem(j, 1, wxEmptyString);
   }
@@ -167,7 +176,8 @@ void InfoDialog::resetParameterValues() {
   cluster_info->SetColumnWidth(1, wxLIST_AUTOSIZE);
 }
 
-void InfoDialog::setStateInfoColWidth(int col) {
+void InfoDialog::setStateInfoColWidth(int col)
+{
   state_info->SetColumnWidth(col,wxLIST_AUTOSIZE);
   int w = state_info->GetColumnWidth(col);
   state_info->SetColumnWidth(col,wxLIST_AUTOSIZE_USEHEADER);

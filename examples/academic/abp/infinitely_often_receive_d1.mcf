@@ -1,0 +1,5 @@
+% It is possible to infinitely often start sending a d1 message
+% (through action r1)
+%
+% This property holds for the alternating bit protocol.
+nu X. mu Y. (<r1(d1)>X || <!r1(d1)>Y)

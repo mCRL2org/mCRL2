@@ -15,9 +15,11 @@
 #include "mcrl2/fdr/term_include_files.h"
 #include "mcrl2/fdr/dotted_expression.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated classes ---//
 /// \brief A map

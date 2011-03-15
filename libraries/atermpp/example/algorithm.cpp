@@ -38,7 +38,7 @@ struct is_a_or_b
   bool operator()(aterm t) const
   {
     return (t.type() == AT_APPL) &&
-    (aterm_appl(t).function().name() == "a" || aterm_appl(t).function().name() == "b");
+           (aterm_appl(t).function().name() == "a" || aterm_appl(t).function().name() == "b");
   }
 };
 

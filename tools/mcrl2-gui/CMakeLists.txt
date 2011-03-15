@@ -12,25 +12,27 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_BUILD_GUI_TOOLS )
 
-add_definitions(-DTIXML_USE_TICPP)
-
 # ######### General setup ##########
 
 set(MACOSX_BUNDLE_ICON_FILE mcrl2-gui.icns)
 
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
-if(MCRL2_SINGLE_BUNDLE)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml DESTINATION MacOS/share/mcrl2)
-else(MCRL2_SINGLE_BUNDLE)
+if(NOT APPLE)
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml" COPYONLY )
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png" COPYONLY )
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/tool_catalog.xml DESTINATION share/mcrl2)
-endif(MCRL2_SINGLE_BUNDLE)
-
-configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png" COPYONLY )
-if(MCRL2_SINGLE_BUNDLE)
-  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png DESTINATION MacOS/share/mcrl2)
-else(MCRL2_SINGLE_BUNDLE)
   install(FILES ${CMAKE_CURRENT_BINARY_DIR}/share/mcrl2/mcrl2.png DESTINATION share/mcrl2)
-endif(MCRL2_SINGLE_BUNDLE)
+
+  if( UNIX )
+		# Install desktop icons			
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/icons/mcrl2-gui.png DESTINATION share/icons)
+    install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/share/applications/mcrl2-gui.desktop DESTINATION share/applications)
+  endif( UNIX )
+
+else(NOT APPLE)
+  # Copy directly into application
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/tool_catalog.xml" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/tool_catalog.xml" COPYONLY )
+  configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/share/mcrl2/mcrl2.png" "${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.app/share/mcrl2/mcrl2.png" COPYONLY )
+endif(NOT APPLE)
 
 # ########## mcrl2_tools_mcrl2 executable ##########
 
@@ -54,23 +56,15 @@ ENDIF (APPLE)
 
 include_directories(${PROJECT_SOURCE_DIR})
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/ticpp/include)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 
-if( MCRL2_MONO_LIB )
-  target_link_libraries(${PROJECT_NAME}
-    mcrl2_monolib
-  )
-else( MCRL2_MONO_LIB )
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
-  ticpp
   mcrl2_utilities_command_line
   mcrl2_utilities_wx
   mcrl2_core
 )
-endif( MCRL2_MONO_LIB )
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

@@ -18,14 +18,14 @@
 
 class StandardSimulatorGUI: public StandardSimulator, public SimulatorInterfaceGUI
 {
-public:
+  public:
     // constructors and destructors
-    StandardSimulatorGUI(wxWindow *window);
+    StandardSimulatorGUI(wxWindow* window);
     virtual ~StandardSimulatorGUI();
-    virtual void LoadView(const std::string &filename);
-    virtual wxWindow *MainWindow();
-private:
-    wxWindow *w;
+    virtual void LoadView(const std::string& filename);
+    virtual wxWindow* MainWindow();
+  private:
+    wxWindow* w;
 };
 
 #endif

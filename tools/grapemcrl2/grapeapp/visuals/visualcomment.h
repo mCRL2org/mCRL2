@@ -17,72 +17,72 @@ using namespace grape::libgrape;
 
 namespace grape
 {
-  using libgrape::comment;
+using libgrape::comment;
 
-  namespace grapeapp
-  {
+namespace grapeapp
+{
+/**
+ * \short Represents a visualcomment.
+ */
+class visualcomment : public visual_object
+{
+  private:
+  protected:
+  public:
+
     /**
-     * \short Represents a visualcomment.
+     * Default constructor.
+     * Initializes visual_comment.
+     * @pre: p_comment should be pointed to an existing comment
      */
-    class visualcomment : public visual_object
-    {
-      private:
-      protected:
-      public:
+    visualcomment(comment* p_comment = 0);
 
-        /**
-         * Default constructor.
-         * Initializes visual_comment.
-         * @pre: p_comment should be pointed to an existing comment
-         */
-        visualcomment( comment* p_comment = 0 );
+    /**
+     * Copy constructor.
+     * Creates a new visual_comment based on an existing visual_comment
+     * @param p_visualcomment The visual_comment to be copied.
+     */
+    visualcomment(const visualcomment& p_visualcomment);
 
-        /**
-         * Copy constructor.
-         * Creates a new visual_comment based on an existing visual_comment
-         * @param p_visualcomment The visual_comment to be copied.
-         */
-        visualcomment( const visualcomment &p_visualcomment );
+    /**
+     * Default destructor.
+     * Frees allocated memory.
+     */
+    ~visualcomment(void);
 
-        /**
-         * Default destructor.
-         * Frees allocated memory.
-         */
-        ~visualcomment( void );
+    /**
+     * Draw comment
+     */
+    void draw(void);
 
-        /**
-         * Draw comment
-         */
-        void draw( void );
+    /**
+     * Test if coordinate is inside the object
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate is inside the drawn object.
+     */
+    bool is_inside(libgrape::coordinate& p_coord);
 
-        /**
-         * Test if coordinate is inside the object
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate is inside the drawn object.
-         */
-        bool is_inside( libgrape::coordinate &p_coord );
+    /**
+     * Test if coordinate is on the border of the object
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate on the border of a drawn object.
+     */
+    grape_direction is_on_border(libgrape::coordinate& p_coord);
 
-        /**
-         * Test if coordinate is on the border of the object
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate on the border of a drawn object.
-         */
-        grape_direction is_on_border( libgrape::coordinate &p_coord );
-        
-        /**
-         * Test if coordinate is inside the reference
-         * @param p_coord test coordinate
-         * @return Returns whether the specified coordinate is inside the reference
-         */
-        bool is_inside_reference( libgrape::coordinate &p_coord );
-                
-        /**
-         * Get reference coordinate
-         * @return The coordinate
-         */
-        coordinate get_reference_coordinate( void );        
-    };
-  } // namespace grapeapp
+    /**
+     * Test if coordinate is inside the reference
+     * @param p_coord test coordinate
+     * @return Returns whether the specified coordinate is inside the reference
+     */
+    bool is_inside_reference(libgrape::coordinate& p_coord);
+
+    /**
+     * Get reference coordinate
+     * @return The coordinate
+     */
+    coordinate get_reference_coordinate(void);
+};
+} // namespace grapeapp
 } // namespace grape
 
 #endif // VISUALS_VISUALCOMMENT_H

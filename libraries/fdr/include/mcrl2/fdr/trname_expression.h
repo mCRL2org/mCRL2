@@ -14,9 +14,11 @@
 
 #include "mcrl2/fdr/term_include_files.h"
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-namespace fdr {
+namespace fdr
+{
 
 //--- start generated trname expression class declarations ---//
 /// \brief class trname_expression
@@ -142,77 +144,77 @@ class explicate: public trname_expression
 
 //--- start generated is-functions ---//
 
-    /// \brief Test for a normal expression
-    /// \param t A term
-    /// \return True if it is a normal expression
-    inline
-    bool is_normal(const trname_expression& t)
-    {
-      return fdr::detail::gsIsnormal(t);
-    }
+/// \brief Test for a normal expression
+/// \param t A term
+/// \return True if it is a normal expression
+inline
+bool is_normal(const trname_expression& t)
+{
+  return fdr::detail::gsIsnormal(t);
+}
 
-    /// \brief Test for a normalise expression
-    /// \param t A term
-    /// \return True if it is a normalise expression
-    inline
-    bool is_normalise(const trname_expression& t)
-    {
-      return fdr::detail::gsIsnormalise(t);
-    }
+/// \brief Test for a normalise expression
+/// \param t A term
+/// \return True if it is a normalise expression
+inline
+bool is_normalise(const trname_expression& t)
+{
+  return fdr::detail::gsIsnormalise(t);
+}
 
-    /// \brief Test for a normalize expression
-    /// \param t A term
-    /// \return True if it is a normalize expression
-    inline
-    bool is_normalize(const trname_expression& t)
-    {
-      return fdr::detail::gsIsnormalize(t);
-    }
+/// \brief Test for a normalize expression
+/// \param t A term
+/// \return True if it is a normalize expression
+inline
+bool is_normalize(const trname_expression& t)
+{
+  return fdr::detail::gsIsnormalize(t);
+}
 
-    /// \brief Test for a sbsim expression
-    /// \param t A term
-    /// \return True if it is a sbsim expression
-    inline
-    bool is_sbsim(const trname_expression& t)
-    {
-      return fdr::detail::gsIssbsim(t);
-    }
+/// \brief Test for a sbsim expression
+/// \param t A term
+/// \return True if it is a sbsim expression
+inline
+bool is_sbsim(const trname_expression& t)
+{
+  return fdr::detail::gsIssbsim(t);
+}
 
-    /// \brief Test for a tau_loop_factor expression
-    /// \param t A term
-    /// \return True if it is a tau_loop_factor expression
-    inline
-    bool is_tau_loop_factor(const trname_expression& t)
-    {
-      return fdr::detail::gsIstau_loop_factor(t);
-    }
+/// \brief Test for a tau_loop_factor expression
+/// \param t A term
+/// \return True if it is a tau_loop_factor expression
+inline
+bool is_tau_loop_factor(const trname_expression& t)
+{
+  return fdr::detail::gsIstau_loop_factor(t);
+}
 
-    /// \brief Test for a diamond expression
-    /// \param t A term
-    /// \return True if it is a diamond expression
-    inline
-    bool is_diamond(const trname_expression& t)
-    {
-      return fdr::detail::gsIsdiamond(t);
-    }
+/// \brief Test for a diamond expression
+/// \param t A term
+/// \return True if it is a diamond expression
+inline
+bool is_diamond(const trname_expression& t)
+{
+  return fdr::detail::gsIsdiamond(t);
+}
 
-    /// \brief Test for a model_compress expression
-    /// \param t A term
-    /// \return True if it is a model_compress expression
-    inline
-    bool is_model_compress(const trname_expression& t)
-    {
-      return fdr::detail::gsIsmodel_compress(t);
-    }
+/// \brief Test for a model_compress expression
+/// \param t A term
+/// \return True if it is a model_compress expression
+inline
+bool is_model_compress(const trname_expression& t)
+{
+  return fdr::detail::gsIsmodel_compress(t);
+}
 
-    /// \brief Test for a explicate expression
-    /// \param t A term
-    /// \return True if it is a explicate expression
-    inline
-    bool is_explicate(const trname_expression& t)
-    {
-      return fdr::detail::gsIsexplicate(t);
-    }
+/// \brief Test for a explicate expression
+/// \param t A term
+/// \return True if it is a explicate expression
+inline
+bool is_explicate(const trname_expression& t)
+{
+  return fdr::detail::gsIsexplicate(t);
+}
 //--- end generated is-functions ---//
 
 } // namespace fdr

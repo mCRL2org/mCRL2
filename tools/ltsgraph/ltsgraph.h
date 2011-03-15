@@ -13,10 +13,10 @@
 #define LTSGRAPH_H
 
 #ifndef MAINFRAME_H
-  #include "mainframe.h"
+#include "mainframe.h"
 #else
-  //Forward declaration
-  class MainFrame;
+//Forward declaration
+class MainFrame;
 #endif
 
 #include "graph.h"
@@ -28,29 +28,28 @@
 
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/squadt_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 #ifndef __glu_h__
 #ifdef __APPLE__
-  #include <OpenGL/glu.h>
+#include <OpenGL/glu.h>
 #else
-  #include <GL/glu.h>
+#include <GL/glu.h>
 #endif
 #endif
 
 class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
-   mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > >
+  mcrl2::utilities::tools::input_tool >
 {
     typedef mcrl2::utilities::wx::tool< LTSGraph,
-       mcrl2::utilities::tools::squadt_tool< mcrl2::utilities::tools::input_tool > > super;
+            mcrl2::utilities::tools::input_tool > super;
 
   private:
-    Graph *graph; // The labeled transition system (graph) that we work on
+    Graph* graph; // The labeled transition system (graph) that we work on
 
-    GLCanvas *glCanvas;  // GLcanvas for visualisation
-    Visualizer *visualizer; // Visualizer of objects
-    MainFrame *mainFrame;  // Mainframe/central GUI.
+    GLCanvas* glCanvas;  // GLcanvas for visualisation
+    Visualizer* visualizer; // Visualizer of objects
+    MainFrame* mainFrame;  // Mainframe/central GUI.
     std::vector<LayoutAlgorithm*> algorithms; // The layout algorithms loaded.
 
     State* selectedState;
@@ -66,18 +65,11 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
 
     bool run();
 
-    void openFile(std::string const &path);
+    void openFile(std::string const& path);
     void display();
 
-#ifdef ENABLE_SQUADT_CONNECTIVITY
-    void set_capabilities(tipi::tool::capabilities&) const;
-    void user_interactive_configuration(tipi::configuration&);
-    bool check_configuration(tipi::configuration const&) const;
-    bool perform_task(tipi::configuration&);
-#endif
-
-	void moveObject(double invect[4]);
-	void moveObject(double x, double y);
+    void moveObject(double invect[4]);
+    void moveObject(double x, double y);
     void toggleVectorSelected();
     void lockObject();
     void dragObject();
@@ -108,16 +100,16 @@ class LTSGraph : public mcrl2::utilities::wx::tool< LTSGraph,
     std::string getFileName() const;
     int getRadius() const;
     double getAspectRatio() const;
-	void getCanvasMdlvwMtrx(double * mtrx);
-	void getCanvasCamPos(double & x, double & y, double & z);
-	void forceWalls();
-	bool get3dMode();
+    void getCanvasMdlvwMtrx(double* mtrx);
+    void getCanvasCamPos(double& x, double& y, double& z);
+    void forceWalls();
+    bool get3dMode();
 };
 
 class LTSGraph_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<LTSGraph>
 {
   public:
-	LTSGraph_gui_tool()
+    LTSGraph_gui_tool()
     {
       //m_gui_options["no-state"] = create_checkbox_widget();
     }

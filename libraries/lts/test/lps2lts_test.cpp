@@ -24,8 +24,13 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lts/exploration.h"
-#include "mcrl2/lts/lts.h"
+#include "mcrl2/lts/detail/exploration.h"
+#include "mcrl2/lts/lts_aut.h"
+#include "mcrl2/lts/lts_fsm.h"
+#include "mcrl2/lts/lts_lts.h"
+#include "mcrl2/lts/lts_svc.h"
+#include "mcrl2/lts/lts_dot.h"
+#include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
@@ -54,7 +59,7 @@ std::string temporary_filename(std::string const& prefix = "")
 
 std::string nextstate_format_to_string(const NextStateFormat f)
 {
-  switch(f)
+  switch (f)
   {
     case GS_STATE_VECTOR:
       return std::string("vector");
@@ -67,7 +72,8 @@ std::string nextstate_format_to_string(const NextStateFormat f)
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-lts::lts translate_lps_to_lts(lps::specification const& specification,
+template <class LTS_TYPE>
+LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
                               lts::exploration_strategy const strategy = lts::es_breadth,
                               mcrl2::data::rewriter::strategy const rewrite_strategy = mcrl2::data::rewriter::jitty,
                               NextStateFormat format = GS_STATE_VECTOR,
@@ -83,8 +89,9 @@ lts::lts translate_lps_to_lts(lps::specification const& specification,
   options.stateformat = format;
 
   options.lts = temporary_filename("lps2lts_test");
-  options.outformat = lts::lts_aut;
 
+  LTS_TYPE result;
+  options.outformat = result.type();
   lts::lps2lts_algorithm lps2lts;
   core::garbage_collect();
   lps2lts.initialise_lts_generation(&options);
@@ -94,7 +101,7 @@ lts::lts translate_lps_to_lts(lps::specification const& specification,
   lps2lts.finalise_lts_generation();
   core::garbage_collect();
 
-  lts::lts result(options.lts, options.outformat);
+  result.load(options.lts);
 
   boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
 
@@ -169,33 +176,83 @@ nextstate_format_vector nextstate_formats()
 }
 
 void check_lps2lts_specification(std::string const& specification,
-                                 const unsigned int expected_states,
-                                 const unsigned int expected_transitions,
-                                 const unsigned int expected_labels,
+                                 const size_t expected_states,
+                                 const size_t expected_transitions,
+                                 const size_t expected_labels,
                                  std::string priority_action = "")
 {
+  std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
   lps::specification lps = lps::parse_linear_process_specification(specification);
 
   rewrite_strategy_vector rstrategies(rewrite_strategies());
-  for(rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
+  for (rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
   {
     exploration_strategy_vector estrategies(exploration_strategies());
-    for(exploration_strategy_vector::const_iterator expl_strategy = estrategies.begin(); expl_strategy != estrategies.end(); ++expl_strategy)
+    for (exploration_strategy_vector::const_iterator expl_strategy = estrategies.begin(); expl_strategy != estrategies.end(); ++expl_strategy)
     {
       nextstate_format_vector nsformats(nextstate_formats());
-      for(nextstate_format_vector::const_iterator state_format = nsformats.begin(); state_format != nsformats.end(); ++state_format)
+      for (nextstate_format_vector::const_iterator state_format = nsformats.begin(); state_format != nsformats.end(); ++state_format)
       {
-        lts::lts result = translate_lps_to_lts(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+        std::cerr << "AUT FORMAT\n";
+        lts::lts_aut_t result1 = translate_lps_to_lts<lts::lts_aut_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
 
-        BOOST_CHECK_EQUAL(result.num_states(), expected_states);
-        BOOST_CHECK_EQUAL(result.num_transitions(), expected_transitions);
-        BOOST_CHECK_EQUAL(result.num_labels(), expected_labels);
+        core::garbage_collect();
+
+        BOOST_CHECK_EQUAL(result1.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result1.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result1.num_action_labels(), expected_labels);
+
+        std::cerr << "LTS FORMAT\n";
+        lts::lts_lts_t result2 = translate_lps_to_lts<lts::lts_lts_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        core::garbage_collect();
+
+        BOOST_CHECK_EQUAL(result2.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result2.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result2.num_action_labels(), expected_labels);
+
+        std::cerr << "FSM FORMAT\n";
+        lts::lts_fsm_t result3 = translate_lps_to_lts<lts::lts_fsm_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        core::garbage_collect();
+
+        BOOST_CHECK_EQUAL(result3.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result3.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result3.num_action_labels(), expected_labels);
+
+        std::cerr << "DOT FORMAT\n";
+        lts::lts_dot_t result4 = translate_lps_to_lts<lts::lts_dot_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        core::garbage_collect();
+
+        BOOST_CHECK_EQUAL(result4.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result4.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result4.num_action_labels(), expected_labels);
+
+        lts::lts_svc_t result5 = translate_lps_to_lts<lts::lts_svc_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        std::cerr << "SVC FORMAT\n";
+        BOOST_CHECK_EQUAL(result5.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result5.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result5.num_action_labels(), expected_labels);
+
+#ifdef USE_BCG
+        lts::lts_bcg_t result6 = translate_lps_to_lts<lts::lts_bcg_t>(lps, *expl_strategy, *rewr_strategy, *state_format, priority_action);
+
+        core::garbage_collect();
+
+        std::cerr << "BCG FORMAT\n";
+        BOOST_CHECK_EQUAL(result6.num_states(), expected_states);
+        BOOST_CHECK_EQUAL(result6.num_transitions(), expected_transitions);
+        BOOST_CHECK_EQUAL(result6.num_action_labels(), expected_labels);
+#endif
       }
     }
   }
 }
 
-BOOST_AUTO_TEST_CASE(test_a_delta) {
+BOOST_AUTO_TEST_CASE(test_a_delta)
+{
   std::string lps(
     "act a;\n"
     "proc P(b:Bool) = (b) -> a.P(!b)\n"
@@ -205,7 +262,8 @@ BOOST_AUTO_TEST_CASE(test_a_delta) {
   check_lps2lts_specification(lps, 2, 1, 1);
 }
 
-BOOST_AUTO_TEST_CASE(test_abp) {
+BOOST_AUTO_TEST_CASE(test_abp)
+{
   std::string abp(
     "sort Error = struct e;\n"
     "     D = struct d1 | d2;\n"
@@ -332,19 +390,46 @@ BOOST_AUTO_TEST_CASE(test_timed) // For bug #756
 BOOST_AUTO_TEST_CASE(test_struct)
 {
   std::string spec(
-      "sort Bits = struct b0 | b1;\n"
-      "     t_sys_regset_fsm_state = Bits;\n"
-      "     t_timer_counter_fsm_state = Bits;\n"
-      "map  timer_counter_fsm_state_idle: Bits;\n"
-      "act  a: t_sys_regset_fsm_state;\n"
-      "glob globd: t_sys_regset_fsm_state;\n"
-      "proc P(s3_P: Pos) =\n"
-      "       (s3_P == 1) ->\n"
-      "         a(globd) .\n"
-      "         P(s3_P = 2)\n"
-      "     + delta;\n"
-      "init P(1);\n"
-      );
+    "sort Bits = struct b0 | b1;\n"
+    "     t_sys_regset_fsm_state = Bits;\n"
+    "     t_timer_counter_fsm_state = Bits;\n"
+    "map  timer_counter_fsm_state_idle: Bits;\n"
+    "act  a: t_sys_regset_fsm_state;\n"
+    "glob globd: t_sys_regset_fsm_state;\n"
+    "proc P(s3_P: Pos) =\n"
+    "       (s3_P == 1) ->\n"
+    "         a(globd) .\n"
+    "         P(s3_P = 2)\n"
+    "     + delta;\n"
+    "init P(1);\n"
+  );
+  check_lps2lts_specification(spec, 2, 1, 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_alias_complex)
+{
+  std::string spec(
+    "sort Bits = struct singleBit(bit: Bool)?isSingleBit | bitVector(bitVec: List(Bool))?isBitVector;\n"
+    "     t_sys_regset_fsm_state = Bits;\n"
+    "     t_timer_counter_fsm_state = Bits;\n"
+    "\n"
+    "map  repeat_rec: Bool # Nat -> List(Bool);\n"
+    "     repeat: Bool # Nat -> Bits;\n"
+    "\n"
+    "var  b: Bool;\n"
+    "     n: Nat;\n"
+    "eqn  repeat(b, n)  =  if(n <= 1, singleBit(b), bitVector(repeat_rec(b, n)));\n"
+    "\n"
+    "act  a: t_sys_regset_fsm_state;\n"
+    "\n"
+    "proc P(s3: Pos) =\n"
+    "       (s3 == 1) ->\n"
+    "         a(repeat(true, 32)) .\n"
+    "         P(s3 = 2)\n"
+    "     + delta;\n"
+    "\n"
+    "init P(1);\n"
+  );
   check_lps2lts_specification(spec, 2, 1, 1);
 }
 

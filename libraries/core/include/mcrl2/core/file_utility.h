@@ -16,18 +16,20 @@
 #include <string>
 #include <boost/lexical_cast.hpp>
 
-namespace mcrl2 {
+namespace mcrl2
+{
 
-  namespace core {
+namespace core
+{
 
-    inline
-    std::string create_filename(const std::string& prefix = "file", const std::string& extension = ".txt")
-    {
-      time_t seconds = time(0);
-      return prefix + boost::lexical_cast<std::string>(seconds) + extension;
-    }
+inline
+std::string create_filename(const std::string& prefix = "file", const std::string& extension = ".txt")
+{
+  time_t seconds = time(0);
+  return prefix + boost::lexical_cast<std::string>(seconds) + extension;
+}
 
-  } // namespace core
+} // namespace core
 
 } // namespace mcrl2
 
