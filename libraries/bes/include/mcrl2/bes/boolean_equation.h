@@ -33,8 +33,10 @@ typedef pbes_system::fixpoint_symbol fixpoint_symbol;
 
 /// \brief boolean equation.
 // <BooleanEquation>   ::= BooleanEquation(<FixPoint>, <BooleanVariable>, <BooleanExpression>)
-class boolean_equation: public atermpp::aterm_appl
+class boolean_equation
 {
+  friend struct atermpp::aterm_traits<boolean_equation>;
+
   protected:
     /// \brief The fixpoint symbol of the equation
     fixpoint_symbol m_symbol;
@@ -44,6 +46,32 @@ class boolean_equation: public atermpp::aterm_appl
 
     /// \brief The formula of the equation
     boolean_expression m_formula;
+
+    /// \brief Protects the term from being freed during garbage collection.
+    void protect()
+    {
+      m_symbol.protect();
+      m_variable.protect();
+      m_formula.protect();
+    }
+
+    /// \brief Unprotect the term.
+    /// Releases protection of the term which has previously been protected through a
+    /// call to protect.
+    void unprotect()
+    {
+      m_symbol.unprotect();
+      m_variable.unprotect();
+      m_formula.unprotect();
+    }
+
+    /// \brief Mark the term for not being garbage collected.
+    void mark()
+    {
+      m_symbol.mark();
+      m_variable.mark();
+      m_formula.mark();
+    }
 
   public:
     /// \brief The expression type of the equation.
@@ -57,16 +85,14 @@ class boolean_equation: public atermpp::aterm_appl
 
     /// \brief Constructor.
     boolean_equation()
-      : atermpp::aterm_appl(core::detail::constructBooleanEquation())
     {}
 
     /// \brief Constructor.
     /// \param t A term
     boolean_equation(atermpp::aterm_appl t)
-      : atermpp::aterm_appl(t)
     {
-      assert(core::detail::check_rule_BooleanEquation(m_term));
-      iterator i = t.begin();
+      assert(core::detail::check_rule_BooleanEquation(t));
+      atermpp::aterm_appl::iterator i = t.begin();
       m_symbol   = fixpoint_symbol(*i++);
       atermpp::aterm_appl var(*i++);
       m_variable = boolean_variable(var);
@@ -78,8 +104,7 @@ class boolean_equation: public atermpp::aterm_appl
     /// \param variable A boolean variable
     /// \param expr A boolean expression
     boolean_equation(fixpoint_symbol symbol, boolean_variable variable, boolean_expression expr)
-      : atermpp::aterm_appl(core::detail::gsMakeBooleanEquation(symbol, variable, expr)),
-        m_symbol(symbol),
+      : m_symbol(symbol),
         m_variable(variable),
         m_formula(expr)
     {
@@ -128,6 +153,34 @@ class boolean_equation: public atermpp::aterm_appl
     }
 };
 
+inline bool
+operator==(const boolean_equation& x, const boolean_equation& y)
+{
+  return x.symbol() == y.symbol() &&
+         x.variable() == y.variable() &&
+         x.formula() == y.formula();
+}
+
+inline bool
+operator!=(const boolean_equation& x, const boolean_equation& y)
+{
+  return !(x == y);
+}
+
+inline bool
+operator<(const boolean_equation& x, const boolean_equation& y)
+{
+  return ATermAppl(x.variable()) < ATermAppl(y.variable());
+}
+
+/// \brief Conversion to ATermAppl.
+/// \return The boolean equation converted to ATerm format.
+inline
+atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
+{
+  return core::detail::gsMakeBooleanEquation(eqn.symbol(), eqn.variable(), eqn.formula());
+}
+
 /// \brief Read-only singly linked list of boolean equations
 typedef atermpp::term_list<boolean_equation> boolean_equation_list;
 
@@ -143,5 +196,30 @@ std::string pp(const boolean_equation& eq)
 } // namespace bes
 
 } // namespace mcrl2
+
+/// \cond INTERNAL_DOCS
+namespace atermpp
+{
+
+template<>
+struct aterm_traits<mcrl2::bes::boolean_equation>
+{
+  typedef ATermAppl aterm_type;
+  static void protect(mcrl2::bes::boolean_equation t)
+  {
+    t.protect();
+  }
+  static void unprotect(mcrl2::bes::boolean_equation t)
+  {
+    t.unprotect();
+  }
+  static void mark(mcrl2::bes::boolean_equation t)
+  {
+    t.mark();
+  }
+};
+
+} // namespace atermpp
+/// \endcond
 
 #endif // MCRL2_BES_BOOLEAN_EQUATION_H

@@ -648,6 +648,13 @@ std::string pp(const boolean_variable& v)
   return std::string(v.name());
 }
 
+/// \brief Comparison operator for boolean expressions
+inline bool
+operator<(const boolean_expression& x, const boolean_expression& y)
+{
+  return ATermAppl(x) < ATermAppl(y);
+}
+
 /// \brief Pretty print function
 /// \param e A boolean expression
 /// \param add_parens If true, parentheses are put around sub-expressions.

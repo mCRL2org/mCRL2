@@ -36,8 +36,13 @@ namespace bes
 {
 
 // forward declarations
+template <typename Container> class boolean_equation_system;
+
 template <typename Container, typename OutputIterator>
 void find_boolean_variables(Container const& container, OutputIterator o);
+
+template <typename Container>
+atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system<Container>& p);
 
 /// \brief boolean equation system
 // <BES>          ::= BES(<BooleanEquation>*, <BooleanExpression>)
@@ -52,13 +57,6 @@ class boolean_equation_system
 
     /// \brief The initial state
     boolean_expression m_initial_state;
-
-    /// \brief Conversion to ATerm
-    /// \return The converted term
-    ATerm term() const
-    {
-      return reinterpret_cast<ATerm>(ATermAppl(*this));
-    }
 
     /// \brief Initialize the boolean_equation_system with an atermpp::aterm_appl.
     /// \param t A term
@@ -85,9 +83,7 @@ class boolean_equation_system
       :
       m_equations(equations),
       m_initial_state(initial_state)
-    {
-      assert(core::detail::check_rule_BES(term()));
-    }
+    {}
 
     /// \brief Returns the equations.
     /// \return The equations
@@ -155,7 +151,7 @@ class boolean_equation_system
       {
         throw mcrl2::runtime_error("boolean equation system is not well typed (boolean_equation_system::save())");
       }
-      atermpp::aterm_appl t = ATermAppl(*this);
+      atermpp::aterm_appl t = boolean_equation_system_to_aterm(*this);
       core::detail::save_aterm(t, filename, binary);
     }
 
@@ -239,6 +235,27 @@ std::string pp(const boolean_equation_system<Container>& p)
   }
   out << "\ninit " << pp(p.initial_state()) << ";" << std::endl;
   return out.str();
+}
+
+template <typename Container>
+bool operator==(const boolean_equation_system<Container>& x, const boolean_equation_system<Container>& y)
+{
+	return x.equations() == y.equations() && x.initial_state() == y.initial_state();
+}
+
+/// \brief Conversion to ATermAppl.
+/// \return The boolean equation system converted to ATerm format.
+template <typename Container>
+atermpp::aterm_appl boolean_equation_system_to_aterm(const boolean_equation_system<Container>& p)
+{
+  atermpp::aterm_list eqn_list;
+  const Container& eqn = p.equations();
+  for (typename Container::const_reverse_iterator i = eqn.rbegin(); i != eqn.rend(); ++i)
+  {
+    atermpp::aterm a = boolean_equation_to_aterm(*i);
+    eqn_list = atermpp::push_front(eqn_list, a);
+  }
+  return core::detail::gsMakeBES(eqn_list, p.initial_state());
 }
 
 } // namespace bes

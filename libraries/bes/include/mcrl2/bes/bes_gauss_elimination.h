@@ -71,27 +71,6 @@ struct bes_traits
       return fixpoint_symbol::nu();
     }
 
-    /*
-        /// \brief Applies the substitution X := phi to the boolean equation eq.
-        /// \param eq A boolean equation
-        /// \param X A boolean variable
-        /// \param phi A boolean expression
-        /// \return The substition result
-        static inline
-        void substitute(equation_type& eq, const variable_type& X, const expression_type& phi)
-        {
-          eq.formula() = bes_traits::substitute(eq.formula(), X, phi);
-        }
-
-        /// \brief Applies the substitution from a solved pbes equation e2 to the pbes equation e1.
-        /// \param e1 A boolean equation
-        /// \param e2 A boolean equation
-        static inline
-        void substitute(equation_type& e1, const equation_type& e2)
-        {
-          bes_traits::substitute(e1, e2.variable(), e2.formula());
-        }
-    */
     /// \brief Pretty print an equation without generating a newline after the equal sign
     /// \param eq An equation
     /// \return A pretty printed string
