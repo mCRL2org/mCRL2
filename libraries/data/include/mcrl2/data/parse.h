@@ -308,8 +308,8 @@ data_expression parse_data_expression(std::istream& text,
   // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
   data_expression t(data_expr);
   type_check(t, begin, end, data_spec);
-  t = data::translate_user_notation(t);
   t = data::normalize_sorts(t, data_spec);
+  t = data::translate_user_notation(t);
   return t;
 }
 
@@ -386,18 +386,9 @@ sort_expression parse_sort_expression(std::istream& text,
   {
     throw mcrl2::runtime_error("error parsing sort expression");
   }
-  /* atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(
-                                              mcrl2::data::remove_all_system_defined(data_spec)); */
-  //atermpp::aterm_appl aterm_data_spec=mcrl2::data::detail::data_specification_to_aterm_data_spec(data_spec);
-  //sort_expr = core::type_check_sort_expr(sort_expr, aterm_data_spec);
-  //if (sort_expr == 0)
-  //  throw mcrl2::runtime_error("error type checking sort expression");
   sort_expression result(sort_expr);
   type_check(result, data_spec);
   return normalize_sorts(result,data_spec);
-  // Undo sort renamings for compatibility with type checker
-  // sort_expr = data::detail::undo_compatibility_renamings(data_spec, sort_expr);
-  // return normalize_sorts(sort_expression(sort_expr),data_spec);
 }
 
 /// \brief Parses and type checks a sort expression.

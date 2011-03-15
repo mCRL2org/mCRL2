@@ -65,8 +65,8 @@ std::istream& operator>>(std::istream& from, pbes<Container>& p)
 
   p = pbes<Container>(result,false);
   type_check(p);
-  pbes_system::translate_user_notation(p);
   pbes_system::normalize_sorts(p, p.data());
+  pbes_system::translate_user_notation(p);
   complete_data_specification(p);
   return from;
 }
