@@ -647,19 +647,27 @@ if(MCRL2_ENABLE_CADP_SUPPORT )
 
   # Set location to root of CADP install path
 
-	if( MCRL2_CADP_INSTALL_PATH )
+  if( MCRL2_CADP_INSTALL_PATH )
   execute_process(COMMAND ${MCRL2_CADP_INSTALL_PATH}/com/arch
-		OUTPUT_VARIABLE MCRL2_CADP_ARCHICTECTURE
+    OUTPUT_VARIABLE MCRL2_CADP_ARCHITECTURE
     OUTPUT_STRIP_TRAILING_WHITESPACE 
   )
-	endif( MCRL2_CADP_INSTALL_PATH )
+  endif( MCRL2_CADP_INSTALL_PATH )
 
-	if( MCRL2_CADP_ARCHICTECTURE )
+  if( MCRL2_CADP_ARCHITECTURE )
 
-		set(USE_BCG "")
+    message( STATUS "---------------------------------------------------------------------------")
+    message( STATUS "Make sure that:")
+    message( STATUS " * the build architecture matches the ${MCRL2_CADP_ARCHITECTURE}-architecture detected by CADP")                  
+    message( STATUS " * the variable BUILD_SHARED_LIBS = OFF ")
+    message( STATUS "---------------------------------------------------------------------------")
+
+    set( BUILD_SHARED_LIBS OFF FORCE )
+ 
+    set(USE_BCG "")
     add_definitions( "-DUSE_BCG" )
 
-	  set(MCRL2_CADP_BINARY_DIR  "${MCRL2_CADP_INSTALL_PATH}/bin.${MCRL2_CADP_ARCHICTECTURE}" )
+	  set(MCRL2_CADP_BINARY_DIR  "${MCRL2_CADP_INSTALL_PATH}/bin.${MCRL2_CADP_ARCHITECTURE}" )
 	  set(MCRL2_CADP_INCLUDE_DIR "${MCRL2_CADP_INSTALL_PATH}/incl" )
 
 	  include_directories( ${MCRL2_CADP_INCLUDE_DIR} )	
@@ -673,10 +681,10 @@ if(MCRL2_ENABLE_CADP_SUPPORT )
 						    IMPORTED_LOCATION ${MCRL2_CADP_BINARY_DIR}/libBCG_IO.a)
 		message( STATUS "CADP found: ${MCRL2_CADP_BINARY_DIR}")
  
-  else( MCRL2_CADP_ARCHICTECTURE  )
-		message( STATUS "CADP not found")
+  else( MCRL2_CADP_ARCHITECTURE  )
+    message( STATUS "CADP not found")
     set( USE_BCG "//" )
-	endif( MCRL2_CADP_ARCHICTECTURE )
+endif( MCRL2_CADP_ARCHITECTURE )
 
 else(MCRL2_ENABLE_CADP_SUPPORT)
   set( USE_BCG "//" )
