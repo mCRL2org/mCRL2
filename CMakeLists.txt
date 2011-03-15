@@ -662,8 +662,6 @@ if(MCRL2_ENABLE_CADP_SUPPORT )
     message( STATUS " * the variable BUILD_SHARED_LIBS = OFF ")
     message( STATUS "---------------------------------------------------------------------------")
 
-    set( BUILD_SHARED_LIBS OFF FORCE )
- 
     set(USE_BCG "")
     add_definitions( "-DUSE_BCG" )
 
