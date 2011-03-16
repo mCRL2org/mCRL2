@@ -429,6 +429,8 @@ void XSimMain::StateChanged(ATermAppl /*Transition*/, ATerm State, ATermList Nex
   {
     SetCurrentState(State);
     UpdateTransitions(NextStates);
+
+	transview->Focus(0);
     // if ( simulator->ErrorOccurred() )
   }
   catch (mcrl2::runtime_error e)
