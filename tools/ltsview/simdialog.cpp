@@ -164,6 +164,7 @@ void SimDialog::onSimTransitionActivated(wxListEvent& event)
 {
   onSimTransitionSelected(event);
   sim->followTrans();
+  mediator->selectStateByID( sim->getCurrState()->getID() );
 }
 
 void SimDialog::onKeyDown(wxKeyEvent& event)
