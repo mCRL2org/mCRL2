@@ -322,7 +322,7 @@ class bes_reduction_algorithm
         boolean_operand_t op = BOOL_VAR;
         cur_state = i->from();
 
-        while (i->from() == cur_state && i != transitions.end())
+        while (i != transitions.end() && i->from() == cur_state)
         {
           std::string label = pp(m_lts.action_label(i->label()));
           size_t index = label.find(":");
