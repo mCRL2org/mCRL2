@@ -47,7 +47,7 @@ void tooltipListView::OnMouseMotion(wxMouseEvent& event)
       this->GetItem( info );
 
       // Extract the text from cell
-      TransTooltip.Append( wxT("\t") + info.m_text + wxT("\n") );
+      TransTooltip.Append( wxT("  ") + info.m_text + wxT("\n") );
 
       TransTooltip.Append( wxT("- State Change:\n") );
 
@@ -57,8 +57,8 @@ void tooltipListView::OnMouseMotion(wxMouseEvent& event)
       wxString tmp = info.m_text;
       if( !tmp.IsEmpty() )
       {
-        tmp.Replace(wxT(","), wxT("\n\t"));
-        TransTooltip.Append( wxT("\t") + tmp ) ;
+        tmp.Replace(wxT(","), wxT("\n  "));
+        TransTooltip.Append( wxT("  ") + tmp ) ;
       }
       this->SetToolTip( TransTooltip );
     }
