@@ -81,7 +81,7 @@ class pbes_equation
     pbes_expression m_formula;
 
     /// \brief Protects the term from being freed during garbage collection.
-    void protect()
+    void protect() const
     {
       m_symbol.protect();
       m_variable.protect();
@@ -91,7 +91,7 @@ class pbes_equation
     /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    void unprotect()
+    void unprotect() const
     {
       m_symbol.unprotect();
       m_variable.unprotect();
@@ -99,7 +99,7 @@ class pbes_equation
     }
 
     /// \brief Mark the term for not being garbage collected.
-    void mark()
+    void mark() const
     {
       m_symbol.mark();
       m_variable.mark();
@@ -293,21 +293,18 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::pbes_system::pbes_equation>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::pbes_equation t)
+  static void protect(const mcrl2::pbes_system::pbes_equation& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::pbes_system::pbes_equation t)
+  static void unprotect(const mcrl2::pbes_system::pbes_equation& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::pbes_system::pbes_equation t)
+  static void mark(const mcrl2::pbes_system::pbes_equation& t)
   {
     t.mark();
   }
-  //static ATerm term(mcrl2::pbes_system::pbes_equation t)     { return t.term(); }
-  //static ATerm* ptr(mcrl2::pbes_system::pbes_equation& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

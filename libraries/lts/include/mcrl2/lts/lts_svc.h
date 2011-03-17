@@ -126,21 +126,18 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lts::detail::action_label_svc>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lts::detail::action_label_svc t)
+  static void protect(const mcrl2::lts::detail::action_label_svc& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lts::detail::action_label_svc t)
+  static void unprotect(const mcrl2::lts::detail::action_label_svc& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lts::detail::action_label_svc t)
+  static void mark(const mcrl2::lts::detail::action_label_svc& t)
   {
     t.mark();
   }
-// static ATerm term(mcrl2::lts::detail::action_label_svc t)     { return t.term(); }
-// static ATerm* ptr(mcrl2::lts::detail::action_label_svc& t)    { return &t.term(); }
 };
 } // namespace atermpp
 /// \endcond

@@ -21,7 +21,6 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/atermpp/aterm_int.h"
-/* #include "mcrl2/atermpp/aterm_real.h" */
 #include "mcrl2/atermpp/utility.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/atermpp/vector.h"
@@ -107,13 +106,6 @@ void test_operators()
     bool b = (a1 < a2);
     std::clog << "b = " << (b?"true":"false") << std::endl;
   }
-
-  /* {
-    aterm_real a1 = make_term("1.0");
-    aterm_real a2 = make_term("2.0");
-    bool b = (a1 < a2);
-    std::clog << "b = " << (b?"true":"false") << std::endl;
-  } */
 
   {
     aterm_list a1 = make_term("[1,2]");

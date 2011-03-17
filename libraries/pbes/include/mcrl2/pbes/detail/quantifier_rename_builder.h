@@ -31,18 +31,17 @@ namespace atermpp
 template<>
 struct aterm_traits<std::pair<mcrl2::data::variable, mcrl2::data::variable> >
 {
-  typedef ATermAppl aterm_type;
-  static void protect(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)
+  static void protect(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
   {
     t.first.protect();
     t.second.protect();
   }
-  static void unprotect(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)
+  static void unprotect(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
   {
     t.first.unprotect();
     t.second.unprotect();
   }
-  static void mark(std::pair<mcrl2::data::variable, mcrl2::data::variable> t)
+  static void mark(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
   {
     t.first.mark();
     t.second.mark();

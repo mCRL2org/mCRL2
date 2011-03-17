@@ -104,19 +104,19 @@ class action_rename_rule_rhs
     }
 
     /// \brief Protects the aterms in this class
-    void protect()
+    void protect() const
     {
       m_act.protect();
     }
 
     /// \brief Unprotects the aterms in this class
-    void unprotect()
+    void unprotect() const
     {
       m_act.unprotect();
     }
 
     /// \brief Marks the aterms in this class
-    void mark()
+    void mark() const
     {
       m_act.mark();
     }
@@ -197,7 +197,7 @@ class action_rename_rule
     }
     //
     /// \brief Protects the aterms in this class
-    void protect()
+    void protect() const
     {
       m_variables.protect();
       m_condition.protect();
@@ -206,7 +206,7 @@ class action_rename_rule
     }
 
     /// \brief Unprotects the aterms in this class
-    void unprotect()
+    void unprotect() const
     {
       m_variables.unprotect();
       m_condition.unprotect();
@@ -215,7 +215,7 @@ class action_rename_rule
     }
 
     /// \brief Marks the aterms in this class
-    void mark()
+    void mark() const
     {
       m_variables.mark();
       m_condition.mark();
@@ -313,21 +313,21 @@ class action_rename_specification
       return true;
     }
     /// \brief Protects the aterms in this class
-    void protect()
+    void protect() const
     {
       // m_data.protect();
       m_action_labels.protect();
     }
 
     /// \brief Unprotects the aterms in this class
-    void unprotect()
+    void unprotect() const
     {
       // m_data.unprotect();
       m_action_labels.unprotect();
     }
 
     /// \brief Marks the aterms in this class
-    void mark()
+    void mark() const
     {
       // m_data.mark();
       m_action_labels.mark();
@@ -343,61 +343,52 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lps::action_rename_rule_rhs>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::action_rename_rule_rhs t)
+  static void protect(const mcrl2::lps::action_rename_rule_rhs& t)
   {
     t.act().protect();
   }
-  static void unprotect(mcrl2::lps::action_rename_rule_rhs t)
+  static void unprotect(const mcrl2::lps::action_rename_rule_rhs& t)
   {
     t.act().unprotect();
   }
-  static void mark(mcrl2::lps::action_rename_rule_rhs t)
+  static void mark(const mcrl2::lps::action_rename_rule_rhs& t)
   {
     t.act().mark();
   }
-  //static ATerm term(mcrl2::lps::action_rename_rule_rhs t)     { return t.term(); }
-  //static ATerm* ptr(mcrl2::lps::action_rename_rule_rhs& t)    { return &t.term(); }
 };
 
 template<>
 struct aterm_traits<mcrl2::lps::action_rename_rule>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::action_rename_rule t)
+  static void protect(const mcrl2::lps::action_rename_rule& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lps::action_rename_rule t)
+  static void unprotect(const mcrl2::lps::action_rename_rule& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lps::action_rename_rule t)
+  static void mark(const mcrl2::lps::action_rename_rule& t)
   {
     t.mark();
   }
-  //static ATerm term(mcrl2::lps::action_rename_rule t)     { return t.term(); }
-  //static ATerm* ptr(mcrl2::lps::action_rename_rule& t)    { return &t.term(); }
 };
 
 template<>
 struct aterm_traits<mcrl2::lps:: action_rename_specification>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::action_rename_specification t)
+  static void protect(const mcrl2::lps::action_rename_specification& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lps::action_rename_specification t)
+  static void unprotect(const mcrl2::lps::action_rename_specification& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lps::action_rename_specification t)
+  static void mark(const mcrl2::lps::action_rename_specification& t)
   {
     t.mark();
   }
-  //static ATerm term(mcrl2::lps::action_rename_specification t)     { return t.term(); }
-  //static ATerm* ptr(mcrl2::lps::action_rename_specification& t)    { return &t.term(); }
 };
 } // namespace atermpp
 /// \endcond

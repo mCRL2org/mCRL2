@@ -45,7 +45,7 @@ class multi_action
     data::data_expression m_time;
 
     /// \brief Protects the term from being freed during garbage collection.
-    void protect()
+    void protect() const
     {
       m_time.protect();
       m_actions.protect();
@@ -54,14 +54,14 @@ class multi_action
     /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    void unprotect()
+    void unprotect() const
     {
       m_time.unprotect();
       m_actions.unprotect();
     }
 
     /// \brief Mark the term for not being garbage collected.
-    void mark()
+    void mark() const
     {
       m_time.mark();
       m_actions.mark();
@@ -470,21 +470,18 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lps::multi_action>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::multi_action t)
+  static void protect(const mcrl2::lps::multi_action& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lps::multi_action t)
+  static void unprotect(const mcrl2::lps::multi_action& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lps::multi_action t)
+  static void mark(const mcrl2::lps::multi_action& t)
   {
     t.mark();
   }
-  //static ATerm term(mcrl2::lps::multi_action t)     { return t.term(); }
-  //static ATerm* ptr(mcrl2::lps::multi_action& t)    { return &t.term(); }
 };
 } // namespace atermpp
 /// \endcond

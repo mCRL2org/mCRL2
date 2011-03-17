@@ -69,17 +69,17 @@ class A
       return value() < other.value();
     }
 
-    void protect()
+    void protect() const
     {
-      ATprotect(&x);
+      aterm_protect(&x);
     }
 
-    void unprotect()
+    void unprotect() const
     {
-      ATunprotect(&x);
+      aterm_unprotect(&x);
     }
 
-    void mark()
+    void mark() const
     {
       ATmarkTerm(x);
     }
@@ -96,29 +96,24 @@ namespace atermpp
 template<>
 struct aterm_traits<A>
 {
-  typedef ATermAppl aterm_type;
   static void protect(A t)
   {
     t.protect();
     std::cout << "aterm_protect_traits<A>::protect() " << t << std::endl;
   }
-  static void unprotect(A t)
+  static void unprotect(const A& t)
   {
     t.unprotect();
     std::cout << "aterm_protect_traits<A>::unprotect() " << t << std::endl;
   }
-  static void mark(A t)
+  static void mark(const A& t)
   {
     t.mark();
     std::cout << "aterm_protect_traits<A>::mark() " << t << std::endl;
   }
-  static ATerm term(A t)
+  static ATerm term(const A& t)
   {
     return t.term();
-  }
-  static ATerm* ptr(A& t)
-  {
-    return &t.term();
   }
 };
 } // namespace atermpp

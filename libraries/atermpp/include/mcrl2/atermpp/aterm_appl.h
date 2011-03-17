@@ -244,52 +244,44 @@ typedef term_appl<aterm> aterm_appl;
 template <typename Term>
 struct aterm_traits<term_appl<Term> >
 {
-  typedef ATermAppl aterm_type;
-  static void protect(term_appl<Term> t)
+  static void protect(const term_appl<Term>& t)
   {
     t.protect();
   }
-  static void unprotect(term_appl<Term> t)
+  static void unprotect(const term_appl<Term>& t)
   {
     t.unprotect();
   }
-  static void mark(term_appl<Term> t)
+  static void mark(const term_appl<Term>& t)
   {
     t.mark();
   }
-  static ATerm term(term_appl<Term> t)
+  static ATerm term(const term_appl<Term>& t)
   {
     return t.term();
-  }
-  static ATerm* ptr(term_appl<Term>& t)
-  {
-    return &t.term();
   }
 };
 
 template <typename T>
 struct aterm_appl_traits
 {
-  /// \brief The type of the aterm pointer (ATermAppl / ATermList ...)
-  typedef ATermAppl aterm_type;
-
   /// \brief Protects the term t from garbage collection.
   /// \param t A term
-  static void protect(aterm_appl t)
+  static void protect(const aterm_appl& t)
   {
     t.protect();
   }
 
   /// \brief Unprotects the term t from garbage collection.
   /// \param t A term
-  static void unprotect(aterm_appl t)
+  static void unprotect(const aterm_appl& t)
   {
     t.unprotect();
   }
 
   /// \brief Marks t for garbage collection.
   /// \param t A term
-  static void mark(aterm_appl t)
+  static void mark(const aterm_appl& t)
   {
     t.mark();
   }
@@ -297,17 +289,9 @@ struct aterm_appl_traits
   /// \brief Returns the ATerm that corresponds to the term t.
   /// \param t A term
   /// \return The ATerm that corresponds to the term t.
-  static ATerm term(aterm_appl t)
+  static ATerm term(const aterm_appl& t)
   {
     return t.term();
-  }
-
-  /// \brief Returns a pointer to the ATerm that corresponds to the term t.
-  /// \param t A term
-  /// \return A pointer to the  ATerm that corresponds to the term t.
-  static ATerm* ptr(aterm_appl& t)
-  {
-    return &t.term();
   }
 };
 

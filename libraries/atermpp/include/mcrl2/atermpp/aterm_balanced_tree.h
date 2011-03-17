@@ -408,26 +408,21 @@ term_balanced_tree< Term > apply(term_balanced_tree<Term> l, const Function f)
 template <typename Term>
 struct aterm_traits<term_balanced_tree<Term> >
 {
-  typedef ATermList aterm_type;
-  static void protect(term_balanced_tree<Term> t)
+  static void protect(const term_balanced_tree<Term>& t)
   {
     t.protect();
   }
-  static void unprotect(term_balanced_tree<Term> t)
+  static void unprotect(const term_balanced_tree<Term>& t)
   {
     t.unprotect();
   }
-  static void mark(term_balanced_tree<Term> t)
+  static void mark(const term_balanced_tree<Term>& t)
   {
     t.mark();
   }
-  static ATerm term(term_balanced_tree<Term> t)
+  static ATerm term(const term_balanced_tree<Term>& t)
   {
     return t.term();
-  }
-  static ATerm* ptr(term_balanced_tree<Term>& t)
-  {
-    return &t.term();
   }
 };
 /// \endcond

@@ -201,7 +201,7 @@ class boolean_equation_system
     }
 
     /// \brief Protects the term from being freed during garbage collection.
-    void protect()
+    void protect() const
     {
       m_initial_state.protect();
     }
@@ -209,13 +209,13 @@ class boolean_equation_system
     /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    void unprotect()
+    void unprotect() const
     {
       m_initial_state.unprotect();
     }
 
     /// \brief Mark the term for not being garbage collected.
-    void mark()
+    void mark() const
     {
       m_initial_state.mark();
     }
@@ -268,29 +268,20 @@ namespace atermpp
 template<typename Container>
 struct aterm_traits<mcrl2::bes::boolean_equation_system<Container> >
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::bes::boolean_equation_system<Container> t)
+  static void protect(const mcrl2::bes::boolean_equation_system<Container>& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::bes::boolean_equation_system<Container> t)
+  static void unprotect(const mcrl2::bes::boolean_equation_system<Container>& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::bes::boolean_equation_system<Container> t)
+  static void mark(const mcrl2::bes::boolean_equation_system<Container>& t)
   {
     t.mark();
   }
-  static ATerm term(mcrl2::bes::boolean_equation_system<Container> t)
-  {
-    return t.term();
-  }
-  static ATerm* ptr(mcrl2::bes::boolean_equation_system<Container>& t)
-  {
-    return &t.term();
-  }
 };
-}
+} // namespace atermpp
 /// \endcond
 
 #ifndef MCRL2_BES_FIND_H

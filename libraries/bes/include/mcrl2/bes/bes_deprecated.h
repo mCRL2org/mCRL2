@@ -2571,27 +2571,22 @@ namespace atermpp
 template<>
 struct aterm_traits<bes::bes_expression>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(bes::bes_expression t)
+  static void protect(const bes::bes_expression& t)
   {
     t.aterm().protect();  // protect the term against garbage collection
   }
-  static void unprotect(bes::bes_expression t)
+  static void unprotect(const bes::bes_expression& t)
   {
     t.aterm().unprotect();  // undo the protection against garbage collection
   }
-  static void mark(bes::bes_expression t)
+  static void mark(const bes::bes_expression& t)
   {
     t.aterm().mark();  // mark the term for not being garbage collected
   }
   // when it is inside a protected container
-  static ATerm term(bes::bes_expression t)
+  static ATerm term(const bes::bes_expression& t)
   {
     return t.term();  // return the ATerm corresponding to t
-  }
-  static ATerm* ptr(bes::bes_expression& t)
-  {
-    return &t.term();  // return the address of the ATerm corresponding to t
   }
 };
 } // namespace atermpp

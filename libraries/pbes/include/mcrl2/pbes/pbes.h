@@ -492,7 +492,7 @@ class pbes
     }
 
     /// \brief Protects the term from being freed during garbage collection.
-    void protect()
+    void protect() const
     {
       m_initial_state.protect();
     }
@@ -500,13 +500,13 @@ class pbes
     /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    void unprotect()
+    void unprotect() const
     {
       m_initial_state.unprotect();
     }
 
     /// \brief Mark the term for not being garbage collected.
-    void mark()
+    void mark() const
     {
       m_initial_state.mark();
     }
@@ -726,25 +726,23 @@ namespace atermpp
 template<typename Container>
 struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::pbes<Container> t)
+  static void protect(const mcrl2::pbes_system::pbes<Container>& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::pbes_system::pbes<Container> t)
+  static void unprotect(const mcrl2::pbes_system::pbes<Container>& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::pbes_system::pbes<Container> t)
+  static void mark(const mcrl2::pbes_system::pbes<Container>& t)
   {
     t.mark();
   }
-  static ATerm term(mcrl2::pbes_system::pbes<Container> t)
+  static ATerm term(const mcrl2::pbes_system::pbes<Container>& t)
   {
     atermpp::aterm x = pbes_to_aterm(t);
     return x;
   }
-  // static ATerm* ptr(mcrl2::pbes_system::pbes<Container>& t)    { atermpp::aterm x = pbes_to_aterm(t); ATerm y = x; return &y; }
 };
 }
 /// \endcond

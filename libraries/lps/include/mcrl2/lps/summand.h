@@ -394,7 +394,7 @@ class summand_base
     data::data_expression m_condition;
 
     /// \brief Protects the term from being freed during garbage collection.
-    void protect()
+    void protect() const
     {
       m_summation_variables.protect();
       m_condition.protect();
@@ -403,14 +403,14 @@ class summand_base
     /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    void unprotect()
+    void unprotect() const
     {
       m_summation_variables.unprotect();
       m_condition.unprotect();
     }
 
     /// \brief Mark the term for not being garbage collected.
-    void mark()
+    void mark() const
     {
       m_summation_variables.mark();
       m_condition.mark();
@@ -469,7 +469,7 @@ class deadlock_summand: public summand_base
     lps::deadlock m_deadlock;
 
     /// \brief Protects the term from being freed during garbage collection.
-    void protect()
+    void protect() const
     {
       super::protect();
       m_deadlock.protect();
@@ -478,14 +478,14 @@ class deadlock_summand: public summand_base
     /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    void unprotect()
+    void unprotect() const
     {
       super::unprotect();
       m_deadlock.unprotect();
     }
 
     /// \brief Mark the term for not being garbage collected.
-    void mark()
+    void mark() const
     {
       super::mark();
       m_deadlock.mark();
@@ -566,7 +566,7 @@ class action_summand: public summand_base
     data::assignment_list m_assignments;
 
     /// \brief Protects the term from being freed during garbage collection.
-    void protect()
+    void protect() const
     {
       super::protect();
       m_multi_action.protect();
@@ -576,7 +576,7 @@ class action_summand: public summand_base
     /// \brief Unprotect the term.
     /// Releases protection of the term which has previously been protected through a
     /// call to protect.
-    void unprotect()
+    void unprotect() const
     {
       super::unprotect();
       m_multi_action.unprotect();
@@ -584,7 +584,7 @@ class action_summand: public summand_base
     }
 
     /// \brief Mark the term for not being garbage collected.
-    void mark()
+    void mark() const
     {
       super::mark();
       m_multi_action.mark();
@@ -703,61 +703,52 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lps::summand_base>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::summand_base t)
+  static void protect(const mcrl2::lps::summand_base& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lps::summand_base t)
+  static void unprotect(const mcrl2::lps::summand_base& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lps::summand_base t)
+  static void mark(const mcrl2::lps::summand_base& t)
   {
     t.mark();
   }
-  //static ATerm term(mcrl2::lps::summand_base t)     { return t.term(); }
-  //static ATerm* ptr(mcrl2::lps::summand_base& t)    { return &t.term(); }
 };
 
 template<>
 struct aterm_traits<mcrl2::lps::deadlock_summand>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::deadlock_summand t)
+  static void protect(const mcrl2::lps::deadlock_summand& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lps::deadlock_summand t)
+  static void unprotect(const mcrl2::lps::deadlock_summand& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lps::deadlock_summand t)
+  static void mark(const mcrl2::lps::deadlock_summand& t)
   {
     t.mark();
   }
-  //static ATerm term(mcrl2::lps::deadlock_summand t)     { return t.term(); }
-  //static ATerm* ptr(mcrl2::lps::deadlock_summand& t)    { return &t.term(); }
 };
 
 template<>
 struct aterm_traits<mcrl2::lps::action_summand>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lps::action_summand t)
+  static void protect(const mcrl2::lps::action_summand& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lps::action_summand t)
+  static void unprotect(const mcrl2::lps::action_summand& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lps::action_summand t)
+  static void mark(const mcrl2::lps::action_summand& t)
   {
     t.mark();
   }
-  //static ATerm term(mcrl2::lps::action_summand t)     { return t.term(); }
-  //static ATerm* ptr(mcrl2::lps::action_summand& t)    { return &t.term(); }
 };
 
 } // namespace atermpp

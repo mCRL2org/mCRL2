@@ -32,7 +32,6 @@ template <typename Term>
 void test_term_traits(Term& t)
 {
   atermpp::aterm_traits<Term>::term(t);
-  atermpp::aterm_traits<Term>::ptr(t);
 }
 
 int test_main(int argc, char* argv[])

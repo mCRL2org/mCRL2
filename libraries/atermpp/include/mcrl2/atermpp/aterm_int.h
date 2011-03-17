@@ -72,26 +72,21 @@ class aterm_int: public aterm_base
 template <>
 struct aterm_traits<aterm_int>
 {
-  typedef ATermInt aterm_type;
-  static void protect(aterm_int t)
+  static void protect(const aterm_int& t)
   {
     t.protect();
   }
-  static void unprotect(aterm_int t)
+  static void unprotect(const aterm_int& t)
   {
     t.unprotect();
   }
-  static void mark(aterm_int t)
+  static void mark(const aterm_int& t)
   {
     t.mark();
   }
-  static ATerm term(aterm_int t)
+  static ATerm term(const aterm_int& t)
   {
     return t.term();
-  }
-  static ATerm* ptr(aterm_int& t)
-  {
-    return &t.term();
   }
 };
 /// \endcond
