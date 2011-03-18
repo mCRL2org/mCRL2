@@ -36,7 +36,7 @@ class ATerm_Info
 {
   protected:
     /// \brief The rewriter used to translate formulas to the internal format of rewriters.
-    Rewriter* f_rewriter;
+    boost::shared_ptr<detail::Rewriter> f_rewriter;
 
     /// \brief ATermAppl representing the constant \c true.
     ATerm f_true;
@@ -239,7 +239,7 @@ class ATerm_Info
 
   public:
     /// \brief Constructor that initializes the rewriter.
-    ATerm_Info(Rewriter* a_rewriter)
+    ATerm_Info(boost::shared_ptr<detail::Rewriter> a_rewriter)
     {
       // pre: true
       // post: f_rewriter == a_rewriter
@@ -343,7 +343,7 @@ class AI_Jitty: public ATerm_Info
 {
   public:
     /// \brief Constructor that initializes all fields.
-    AI_Jitty(Rewriter* a_rewriter)
+    AI_Jitty(boost::shared_ptr<detail::Rewriter> a_rewriter)
       : ATerm_Info(a_rewriter)
     {
       f_true = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(sort_bool::true_()), 0);
@@ -501,7 +501,7 @@ class AI_Inner: public ATerm_Info
 {
   public:
     /// \brief Constructor that initializes all fields.
-    AI_Inner(Rewriter* a_rewriter)
+    AI_Inner(boost::shared_ptr<detail::Rewriter> a_rewriter)
       : ATerm_Info(a_rewriter)
     {
       f_true = f_rewriter->toRewriteFormat(sort_bool::true_());

@@ -128,11 +128,11 @@ class BDD_Prover: public Prover
 
       core::gsDebugMsg("Formula: %P\n", f_formula);
 
-      f_internal_bdd = f_rewriter->toRewriteFormat(f_formula);
-      f_internal_bdd = f_rewriter->rewriteInternal(f_internal_bdd);
+      f_internal_bdd = m_rewriter->toRewriteFormat(f_formula);
+      f_internal_bdd = m_rewriter->rewriteInternal(f_internal_bdd);
       f_internal_bdd = f_manipulator->orient(f_internal_bdd);
 
-      core::gsDebugMsg("Formula rewritten and oriented: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
+      core::gsDebugMsg("Formula rewritten and oriented: %P\n", m_rewriter->fromRewriteFormat(f_internal_bdd));
 
       while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd)
       {
@@ -140,10 +140,10 @@ class BDD_Prover: public Prover
         v_previous_1 = f_internal_bdd;
         f_internal_bdd = bdd_down(f_internal_bdd);
         core::gsDebugMsg("End of iteration.\n");
-        core::gsDebugMsg("Intermediate BDD: %P\n", f_rewriter->fromRewriteFormat(f_internal_bdd));
+        core::gsDebugMsg("Intermediate BDD: %P\n", m_rewriter->fromRewriteFormat(f_internal_bdd));
       }
 
-      f_bdd = f_rewriter->fromRewriteFormat(f_internal_bdd);
+      f_bdd = m_rewriter->fromRewriteFormat(f_internal_bdd);
       core::gsDebugMsg("Resulting BDD: %P\n", f_bdd);
 
       ATtableDestroy(f_formula_to_bdd);
@@ -191,24 +191,24 @@ class BDD_Prover: public Prover
       }
       else
       {
-        core::gsDebugMsg("%sSmallest guard: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_guard));
+        core::gsDebugMsg("%sSmallest guard: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_guard));
       }
 
       ATerm v_term1, v_term2;
 
       v_term1 = f_manipulator->set_true(a_formula, v_guard);
-      v_term1 = f_rewriter->rewriteInternal(v_term1);
+      v_term1 = m_rewriter->rewriteInternal(v_term1);
       v_term1 = f_manipulator->orient(v_term1);
-      core::gsDebugMsg("%sTrue-branch after rewriting and orienting: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_term1));
+      core::gsDebugMsg("%sTrue-branch after rewriting and orienting: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_term1));
       v_term1 = bdd_down(v_term1, a_indent);
-      core::gsDebugMsg("%sBDD of the true-branch: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_term1));
+      core::gsDebugMsg("%sBDD of the true-branch: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_term1));
 
       v_term2 = f_manipulator->set_false(a_formula, v_guard);
-      v_term2 = f_rewriter->rewriteInternal(v_term2);
+      v_term2 = m_rewriter->rewriteInternal(v_term2);
       v_term2 = f_manipulator->orient(v_term2);
-      core::gsDebugMsg("%sFalse-branch after rewriting and orienting: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_term2));
+      core::gsDebugMsg("%sFalse-branch after rewriting and orienting: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_term2));
       v_term2 = bdd_down(v_term2, a_indent);
-      core::gsDebugMsg("%sBDD of the false-branch: %P\n", a_indent.c_str(), f_rewriter->fromRewriteFormat(v_term2));
+      core::gsDebugMsg("%sBDD of the false-branch: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_term2));
 
       v_bdd = f_manipulator->make_reduced_if_then_else(v_guard, v_term1, v_term2);
       ATtablePut(f_formula_to_bdd, a_formula, v_bdd);

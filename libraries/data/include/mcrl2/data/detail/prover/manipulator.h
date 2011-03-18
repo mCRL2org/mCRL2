@@ -28,7 +28,7 @@ class ATerm_Manipulator
 {
   protected:
     /// \brief The rewriter used to translate formulas to one of the internal formats of the rewriter.
-    Rewriter* f_rewriter;
+    boost::shared_ptr<detail::Rewriter> f_rewriter;
 
     /// \brief A class that provides information on the structure of expressions in one of the
     /// \brief internal formats of the rewriter.
@@ -77,7 +77,7 @@ class ATerm_Manipulator
     virtual ATerm make_if_then_else(ATerm a_expr, ATerm a_high, ATerm a_low) = 0;
   public:
     /// \brief Constructor initializing the rewriter and the field \c f_info.
-    ATerm_Manipulator(Rewriter* a_rewriter, ATerm_Info* a_info)
+    ATerm_Manipulator(boost::shared_ptr<detail::Rewriter> a_rewriter, ATerm_Info* a_info)
     {
       f_rewriter = a_rewriter;
       f_info = a_info;
@@ -235,7 +235,7 @@ class AM_Jitty: public ATerm_Manipulator
 
   public:
     /// \brief Constructor initializing all fields.
-    AM_Jitty(Rewriter* a_rewriter, ATerm_Info* a_info)
+    AM_Jitty(boost::shared_ptr<detail::Rewriter> a_rewriter, ATerm_Info* a_info)
       : ATerm_Manipulator(a_rewriter, a_info)
     {
       using namespace mcrl2::core::detail;
@@ -478,7 +478,7 @@ class AM_Inner: public ATerm_Manipulator
 
   public:
     /// \brief Constructor initializing all fields.
-    AM_Inner(Rewriter* a_rewriter, ATerm_Info* a_info)
+    AM_Inner(boost::shared_ptr<detail::Rewriter> a_rewriter, ATerm_Info* a_info)
       : ATerm_Manipulator(a_rewriter, a_info)
     {
       using namespace mcrl2::core::detail;

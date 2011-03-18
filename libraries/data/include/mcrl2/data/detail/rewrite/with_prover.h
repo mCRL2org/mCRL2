@@ -52,7 +52,7 @@ class RewriterProver: public Rewriter
 
   public:
     BDD_Prover* prover_obj;
-    Rewriter* rewr_obj;
+    boost::shared_ptr<detail::Rewriter> rewr_obj;
 };
 
 }
