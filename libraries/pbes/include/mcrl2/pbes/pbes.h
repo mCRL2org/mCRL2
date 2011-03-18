@@ -358,27 +358,6 @@ class pbes
       //}
     }
 
-    /// \brief Returns true if the PBES is a BES (boolean equation system).
-    /// \return True if the PBES is a BES (boolean equation system).
-    bool is_bes() const
-    {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
-      {
-        if (!i->is_bes())
-        {
-          return false;
-        }
-      }
-      if (m_initial_state.parameters().size() > 0)
-      {
-        return false;
-      }
-      return true;
-    }
-
-
     /// \brief Writes the pbes to file.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is

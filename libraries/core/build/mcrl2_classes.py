@@ -183,7 +183,7 @@ pbes<Container>(const data::data_specification& data, const Container& equations
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
-pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XCU | PBExpr            | A pbes expression
+pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XC  | PBExpr            | A pbes expression
 propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECU | PropVarInst       | A propositional variable instantiation
 true_()                                                                                                                 : public pbes_system::pbes_expression | E   | PBESTrue          | The value true for pbes expressions
 false_()                                                                                                                : public pbes_system::pbes_expression | E   | PBESFalse         | The value false for pbes expressions

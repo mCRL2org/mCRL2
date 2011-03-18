@@ -25,6 +25,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_translate.h"
@@ -178,8 +179,8 @@ void test_pbes()
   pbes<> p = lps2pbes(spec, formula, timed);
   pbes_expression e = p.equations().front().formula();
 
-  BOOST_CHECK(!p.is_bes());
-  BOOST_CHECK(!e.is_bes());
+  BOOST_CHECK(!is_bes(p));
+  BOOST_CHECK(!is_bes(e));
 
   try
   {
@@ -376,7 +377,7 @@ void test_is_bes()
     "init X;           \n"
     ;
   pbes<> p = txt2pbes(text);
-  BOOST_CHECK(p.is_bes());
+  BOOST_CHECK(is_bes(p));
 }
 
 int test_main(int argc, char** argv)

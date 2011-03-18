@@ -26,6 +26,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
@@ -287,7 +288,7 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
 
       if (mcrl2::core::gsVerbose)
       {
-        if (p.is_bes())
+        if (is_bes(p))
         {
           core::gsVerboseMsg("The result is a BES.\n");
         }

@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_BES_PARSE_H
 #define MCRL2_PBES_BES_PARSE_H
 
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/pbes/detail/pbes_expression2boolean_expression_visitor.h"
@@ -41,7 +42,7 @@ std::istream& operator>>(std::istream& from, boolean_equation_system<Container>&
 {
   pbes_system::pbes<> p;
   from >> p;
-  if (!p.is_bes())
+  if (!is_bes(p))
   {
     throw mcrl2::runtime_error("parsing of boolean equation system failed: it is not a BES!");
   }

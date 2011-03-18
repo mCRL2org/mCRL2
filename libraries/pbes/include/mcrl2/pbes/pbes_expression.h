@@ -35,10 +35,6 @@ namespace mcrl2
 namespace pbes_system
 {
 
-// prototype
-inline
-bool is_bes(atermpp::aterm_appl t);
-
 //--- start generated classes ---//
 /// \brief A pbes expression
 class pbes_expression: public atermpp::aterm_appl
@@ -56,27 +52,6 @@ class pbes_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_PBExpr(m_term));
     }
-//--- start user section pbes_expression ---//
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    pbes_expression substitute(Substitution f) const
-    {
-      throw std::runtime_error("pbes_expression::substitute(Substitution) is a deprecated interface!");
-      return pbes_expression(f(*this));
-    }
-
-    /// \brief Returns true if the expression is a boolean expression.
-    /// \return True if the expression is a boolean expression.
-    bool is_bes() const
-    {
-      return mcrl2::pbes_system::is_bes(*this);
-    }
-//--- end user section pbes_expression ---//
 };
 
 /// \brief list of pbes_expressions
@@ -857,51 +832,6 @@ pbes_expression exists(data::variable_list l, pbes_expression p)
 }
 
 } // namespace pbes_expr_optimized
-
-/// \brief Returns true if the pbes expression t is a boolean expression
-/// \param t A term
-/// \return True if the pbes expression t is a boolean expression
-inline
-bool is_bes(atermpp::aterm_appl t)
-{
-  using namespace pbes_expr;
-  using namespace accessors;
-
-  if (is_pbes_and(t))
-  {
-    return is_bes(left(t)) && is_bes(right(t));
-  }
-  else if (is_pbes_or(t))
-  {
-    return is_bes(left(t)) && is_bes(right(t));
-  }
-  else if (is_pbes_imp(t))
-  {
-    return is_bes(left(t)) && is_bes(right(t));
-  }
-  else if (is_pbes_forall(t))
-  {
-    return false;
-  }
-  else if (is_pbes_exists(t))
-  {
-    return false;
-  }
-  else if (is_propositional_variable_instantiation(t))
-  {
-    return propositional_variable_instantiation(t).parameters().empty();
-  }
-  else if (is_true(t))
-  {
-    return true;
-  }
-  else if (is_false(t))
-  {
-    return true;
-  }
-
-  return false;
-}
 
 } // namespace pbes_system
 

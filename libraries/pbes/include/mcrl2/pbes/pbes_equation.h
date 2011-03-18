@@ -193,13 +193,6 @@ class pbes_equation
       return !detail::has_propositional_variables(formula());
     }
 
-    /// \brief Returns true if the equation is a BES (boolean equation system).
-    /// \return True if the equation is a BES (boolean equation system).
-    bool is_bes() const
-    {
-      return variable().parameters().empty() && formula().is_bes();
-    }
-
     /// \brief Checks if the equation is well typed
     /// \return True if
     /// <ul>

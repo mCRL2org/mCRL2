@@ -22,6 +22,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -535,7 +536,7 @@ void test_abp_no_deadlock()
   pbes<> q = algorithm.get_result();
   std::cout << "--- ABP ---" << std::endl;
   std::cout << pp(q) << std::endl;
-  BOOST_CHECK(q.is_bes());
+  BOOST_CHECK(is_bes(q));
 }
 
 int test_main(int argc, char** argv)

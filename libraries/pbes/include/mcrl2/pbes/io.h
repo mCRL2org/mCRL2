@@ -16,6 +16,7 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/bes/io.h"
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbesinstconversion.h"
 #include "mcrl2/core/messaging.h"
 
@@ -59,7 +60,7 @@ void save_pbes(const pbes<>& pbes_spec, std::string outfilename, pbes_output_for
     }
     case pbes_output_bes:
     {
-      if (!pbes_spec.is_bes())
+      if (!is_bes(pbes_spec))
       {
         throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
       }
@@ -78,7 +79,7 @@ void save_pbes(const pbes<>& pbes_spec, std::string outfilename, pbes_output_for
     }
     case pbes_output_cwi:
     {
-      if (!pbes_spec.is_bes())
+      if (!is_bes(pbes_spec))
       {
         throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
       }
