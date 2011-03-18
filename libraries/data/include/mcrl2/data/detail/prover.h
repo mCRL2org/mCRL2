@@ -18,6 +18,7 @@
 #include "mcrl2/data/detail/prover/manipulator.h"
 #include "mcrl2/data/detail/prover/info.h"
 #include "mcrl2/data/detail/prover/utilities.h"
+#include "mcrl2/data/selection.h"
 #include "time.h"
 
 namespace mcrl2
@@ -59,14 +60,11 @@ enum Answer
 /// \brief A base class for provers. Provers take an expression of sort Bool in internal mCRL2 format and
 /// \brief can indicate whether or not this expression is a tautology or a contradiction.
 
-class Prover
+class Prover:protected mcrl2::data::rewriter
 {
   protected:
     /// \brief An expression of sort Bool in the internal format of mCRL2.
     ATermAppl f_formula;
-
-    /// \brief A rewriter that rewrites expressions given a set of rewrite rules.
-    Rewriter* f_rewriter;
 
     /// \brief A class that can be used to manipulate expressions in the internal format of the rewriter.
     ATerm_Manipulator* f_manipulator;
@@ -92,7 +90,8 @@ class Prover
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
     Prover(const data_specification& a_data_spec,
            mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
-           int a_time_limit = 0)
+           int a_time_limit = 0): 
+                       mcrl2::data::rewriter(a_data_spec, a_rewrite_strategy)
     {
       f_time_limit = a_time_limit;
       f_processed = false;
@@ -101,16 +100,14 @@ class Prover
       {
         case(mcrl2::data::rewriter::innermost):
         {
-          f_rewriter = createRewriter(a_data_spec, GS_REWR_INNER);
-          f_info = new AI_Inner(f_rewriter);
-          f_manipulator = new AM_Inner(f_rewriter, f_info);
+          f_info = new AI_Inner(m_rewriter);
+          f_manipulator = new AM_Inner(m_rewriter, f_info);
           break;
         }
         case(mcrl2::data::rewriter::jitty):
         {
-          f_rewriter = createRewriter(a_data_spec, GS_REWR_JITTY);
-          f_info = new AI_Jitty(f_rewriter);
-          f_manipulator = new AM_Jitty(f_rewriter, f_info);
+          f_info = new AI_Jitty(m_rewriter);
+          f_manipulator = new AM_Jitty(m_rewriter, f_info);
           break;
         }
 #ifdef MCRL2_INNERC_AVAILABLE
@@ -166,8 +163,6 @@ class Prover
       f_manipulator = 0;
       delete f_info;
       f_info = 0;
-      delete f_rewriter;
-      f_rewriter = 0;
       core::gsDebugMsg("Rewriter, ATerm_Info and ATerm_Manipulator have been freed.\n");
     }
 
@@ -207,9 +202,9 @@ class Prover
     virtual ATermAppl get_counter_example() = 0;
 
     /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
-    Rewriter* get_rewriter()
+    boost::shared_ptr<detail::Rewriter> get_rewriter()
     {
-      return f_rewriter;
+      return m_rewriter;
     }
 };
 }

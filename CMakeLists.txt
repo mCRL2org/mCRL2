@@ -1086,9 +1086,9 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2"			 "lpsparunfold")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "lpsbinary")
 
 endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 
