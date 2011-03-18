@@ -210,7 +210,7 @@ extern "C"
 
   /* Compare two ATerms. This is a complete stable ordering on ATerms.
    * They are compared 'lexicographically', function names before the
-   * arguments, terms before annotations. Function names are compared
+   * arguments. Function names are compared
    * using strcmp, integers and reals are compared
    * using integer and double comparison, blobs are compared using memcmp.
    * If the types of the terms are different the integer value of ATgetType

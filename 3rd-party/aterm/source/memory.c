@@ -280,7 +280,7 @@ void AT_initMemory(unsigned int argc, char* argv[])
   /*{{{  Create the empty list */
 
   ATempty = (ATermList)AT_allocate(TERM_SIZE_LIST);
-  ATempty->header = EMPTY_HEADER(0);
+  ATempty->header = EMPTY_HEADER;
   CHECK_HEADER(ATempty->header);
   ATempty->aterm.next = NULL;
   ATempty->aterm.head = NULL;
@@ -622,7 +622,7 @@ ATermAppl ATmakeAppl(AFun sym, ...)
   ATerm* buffer;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
-  header = APPL_HEADER(0, arity > MAX_INLINE_ARITY ?
+  header = APPL_HEADER(arity > MAX_INLINE_ARITY ?
                        MAX_INLINE_ARITY+1 : arity, sym);
 
   buffer = AT_alloc_protected(arity);
@@ -687,7 +687,7 @@ ATermAppl ATmakeAppl(AFun sym, ...)
 ATermAppl ATmakeAppl0(AFun sym)
 {
   ATermAppl cur, prev, *hashspot;
-  header_type header = APPL_HEADER(0, 0, sym);
+  header_type header = APPL_HEADER(0, sym);
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -746,7 +746,7 @@ ATermAppl ATmakeAppl0(AFun sym)
 ATermAppl ATmakeAppl1(AFun sym, ATerm arg0)
 {
   ATermAppl cur, prev, *hashspot;
-  header_type header = APPL_HEADER(0, 1, sym);
+  header_type header = APPL_HEADER(1, sym);
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -805,7 +805,7 @@ ATermAppl ATmakeAppl1(AFun sym, ATerm arg0)
 ATermAppl ATmakeAppl2(AFun sym, ATerm arg0, ATerm arg1)
 {
   ATermAppl cur, prev, *hashspot;
-  header_type header = APPL_HEADER(0, 2, sym);
+  header_type header = APPL_HEADER(2, sym);
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -871,7 +871,7 @@ ATermAppl ATmakeAppl2(AFun sym, ATerm arg0, ATerm arg1)
 ATermAppl ATmakeAppl3(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2)
 {
   ATermAppl cur;
-  header_type header = APPL_HEADER(0, 3, sym);
+  header_type header = APPL_HEADER(3, sym);
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -934,7 +934,7 @@ ATermAppl ATmakeAppl4(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2, ATerm arg3)
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   PARK_SYMBOL(sym);
 
-  header = APPL_HEADER(0, 4, sym);
+  header = APPL_HEADER(4, sym);
 
   CHECK_TERM(arg0);
   CHECK_TERM(arg1);
@@ -993,7 +993,7 @@ ATermAppl ATmakeAppl5(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
                       ATerm arg3, ATerm arg4)
 {
   ATermAppl cur;
-  header_type header = APPL_HEADER(0, 5, sym);
+  header_type header = APPL_HEADER(5, sym);
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -1062,7 +1062,7 @@ ATermAppl ATmakeAppl6(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
                       ATerm arg3, ATerm arg4, ATerm arg5)
 {
   ATermAppl cur;
-  header_type header = APPL_HEADER(0, 6, sym);
+  header_type header = APPL_HEADER(6, sym);
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -1137,7 +1137,7 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
   ATermList argptr;
   size_t i, arity = ATgetArity(sym);
   ATbool found;
-  header_type header = APPL_HEADER(0, arity > MAX_INLINE_ARITY ?
+  header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?
                                    MAX_INLINE_ARITY+1 : arity, sym);
   HashNumber hnr;
 
@@ -1217,7 +1217,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
   size_t i, arity = ATgetArity(sym);
   ATbool found;
   HashNumber hnr;
-  header_type header = APPL_HEADER(0, arity > MAX_INLINE_ARITY ?
+  header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?
                                    MAX_INLINE_ARITY+1 : arity, sym);
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -1286,7 +1286,7 @@ ATermInt ATmakeInt(int val)
 {
   ATermInt cur;
   const size_t long_val = val;
-  header_type header = INT_HEADER(0);
+  header_type header = INT_HEADER;
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -1329,7 +1329,7 @@ ATermInt ATmakeInt(int val)
 ATermList ATmakeList1(ATerm el)
 {
   ATermList cur;
-  header_type header = LIST_HEADER(0, 1);
+  header_type header = LIST_HEADER(1);
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
@@ -1392,7 +1392,7 @@ ATermList ATinsert(ATermList tail, ATerm el)
     newLength = curLength+1;
   }
 
-  header = LIST_HEADER(0, newLength);
+  header = LIST_HEADER(newLength);
 
   CHECK_TERM((ATerm)tail);
   CHECK_TERM(el);
@@ -1440,8 +1440,6 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
 {
   size_t i, arity;
   AFun sym = ATgetAFun(appl);
-  /* ATerm annos = AT_getAnnotations((ATerm)appl); */
-  ATerm annos = NULL;
   ATermAppl cur;
   ATbool found;
   HashNumber hnr;
@@ -1469,9 +1467,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
   cur = (ATermAppl) hashtable[hnr & table_mask];
   while (cur)
   {
-    if (EQUAL_HEADER(cur->header,appl->header)
-        /*  && (AT_getAnnotations((ATerm)cur) == annos)) { */
-        && (NULL == annos))
+    if (EQUAL_HEADER(cur->header,appl->header))
     {
       found = ATtrue;
       for (i=0; i<arity; i++)
@@ -1503,7 +1499,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
 
   if (!cur)
   {
-    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity) + (annos?1:0));
+    cur = (ATermAppl) AT_allocate(TERM_SIZE_APPL(arity));
     /* Delay masking until after AT_allocate */
     hnr &= table_mask;
     cur->header = HIDE_AGE_MARK(appl->header);
@@ -1518,10 +1514,6 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
       {
         ATgetArgument(cur, i) = arg;
       }
-    }
-    if (annos)
-    {
-      ATgetArgument(cur, arity) = annos;
     }
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;

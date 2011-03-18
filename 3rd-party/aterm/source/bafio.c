@@ -682,7 +682,6 @@ static void add_term(sym_entry* entry, ATerm t)
 static void collect_terms(ATerm t)
 {
   AFun sym = -1;
-  /* ATerm annos; */
   sym_entry* entry;
 
   if (!IS_MARKED(t->header))
@@ -822,7 +821,7 @@ static top_symbol* find_top_symbol(top_symbols* syms, AFun sym)
 }
 
 /*}}}  */
-/*{{{  static ATbool write_arg(sym_entry *trm_sym, ATerm arg, arg_idx, writer, anno_done) */
+/*{{{  static ATbool write_arg(sym_entry *trm_sym, ATerm arg, arg_idx, writer) */
 
 /**
  * Write an argument using a byte_writer.

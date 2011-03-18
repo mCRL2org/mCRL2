@@ -109,14 +109,14 @@ extern "C"
 #define CLR_MARK(h)           do { (h) &= ~MASK_MARK; } while (0)
 #define CLR_QUOTED(h)         do { (h) &= ~MASK_QUOTED; } while (0)
 
-#define APPL_HEADER(anno,ari,sym) ((anno) | ((ari) << SHIFT_ARITY) | \
-                                   (AT_APPL << SHIFT_TYPE) | \
-                                   ((header_type)(sym) << SHIFT_SYMBOL))
-#define INT_HEADER(anno)          ((anno) | AT_INT << SHIFT_TYPE)
-#define EMPTY_HEADER(anno)        ((anno) | AT_LIST << SHIFT_TYPE)
+#define APPL_HEADER(ari,sym) (((ari) << SHIFT_ARITY) | \
+                              (AT_APPL << SHIFT_TYPE) | \
+                              ((header_type)(sym) << SHIFT_SYMBOL))
+#define INT_HEADER           (AT_INT << SHIFT_TYPE)
+#define EMPTY_HEADER         (AT_LIST << SHIFT_TYPE)
 
-#define LIST_HEADER(anno,len)     ((anno) | (AT_LIST << SHIFT_TYPE) | \
-                                   ((MachineWord)(len) << SHIFT_LENGTH) | (2 << SHIFT_ARITY))
+#define LIST_HEADER(len)     ((AT_LIST << SHIFT_TYPE) | \
+                              ((MachineWord)(len) << SHIFT_LENGTH) | (2 << SHIFT_ARITY))
 
 #define SYMBOL_HEADER(arity,quoted) \
   (((header_type)(arity) << SHIFT_SYM_ARITY) | \
