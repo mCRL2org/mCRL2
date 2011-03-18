@@ -25,6 +25,8 @@ Changes between toolset releases July 2010 and March 2011:
    - New tool bespp that prints a BES in human readable format.
      PBESs
    - tau*a reduction is available from ltsconvert.
+   - New tool mcrl2xi that can be used to edit mCRL2 specifications.
+     It provides the functionality as the command-line tool mcrl2i.
 
  New experimental tools:
    - besconvert can be used to reduce BESs modulo strong bisimulation and
