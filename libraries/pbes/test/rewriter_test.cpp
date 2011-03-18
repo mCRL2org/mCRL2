@@ -32,7 +32,7 @@
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"

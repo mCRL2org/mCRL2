@@ -18,7 +18,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -85,7 +85,7 @@ void test_pbesrewr1()
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
-  pbesrewr(p, pbesr);
+  pbes_rewrite(p, pbesr);
   // p.save("pbesrewr.pbes");
 }
 
@@ -103,7 +103,7 @@ void test_pbesrewr2()
   data::rewriter_with_variables datarv(datar);
   bool enumerate_infinite_sorts = true;
   enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
-  pbesrewr(p, pbesr);
+  pbes_rewrite(p, pbesr);
   BOOST_CHECK(p.is_well_typed());
 }
 
@@ -127,7 +127,7 @@ void test_pbesrewr3()
   enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
   try
   {
-    pbesrewr(p, pbesr); // we expect that an exception is raised because of the type D that cannot be enumerated
+    pbes_rewrite(p, pbesr); // we expect that an exception is raised because of the type D that cannot be enumerated
   }
   catch (mcrl2::runtime_error)
   {

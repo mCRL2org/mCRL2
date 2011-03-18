@@ -13,7 +13,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pfnf_visitor.h"
@@ -99,7 +99,7 @@ void test_pfnf(const std::string& pbes_spec)
   std::cerr << "- before:" << std::endl;
   std::cerr << pp(p) << std::endl;
   pfnf_rewriter R;
-  pbesrewr(p, R);
+  pbes_rewrite(p, R);
   std::cerr << "- after:" << std::endl;
   std::cerr << pp(p) << std::endl;
   std::cerr << "-----------------" << std::endl;
@@ -146,7 +146,7 @@ void test_pfnf_rewriter2(const std::string& text)
   bool result1 = pbes2_bool_test(p);
 #endif
   pfnf_rewriter R;
-  pbesrewr(p, R);
+  pbes_rewrite(p, R);
 
   std::cout << "--- after ---\n";
   std::cout << pp(p) << std::endl;

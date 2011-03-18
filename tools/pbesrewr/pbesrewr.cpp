@@ -20,7 +20,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -73,7 +73,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         case simplify:
         {
           simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
-          pbesrewr(p, pbesr);
+          pbes_rewrite(p, pbesr);
           break;
         }
         case quantifier_all:
@@ -83,7 +83,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = true;
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbesrewr(p, pbesr);
+          pbes_rewrite(p, pbesr);
           break;
         }
         case quantifier_finite:
@@ -93,13 +93,13 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbesrewr(p, pbesr);
+          pbes_rewrite(p, pbesr);
           break;
         }
         case pfnf:
         {
           pfnf_rewriter pbesr;
-          pbesrewr(p, pbesr);
+          pbes_rewrite(p, pbesr);
           break;
         }
         case prover:
