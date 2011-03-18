@@ -6,20 +6,20 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lps/include/mcrl2/lps/rewrite.h
+/// \file pbes/include/mcrl2/pbes/rewrite.h
 /// \brief add your file description here.
 
-#ifndef LPS_INCLUDE_MCRL2_LPS_REWRITE_H
-#define LPS_INCLUDE_MCRL2_LPS_REWRITE_H
+#ifndef PBES_INCLUDE_MCRL2_PBES_REWRITE_H
+#define PBES_INCLUDE_MCRL2_PBES_REWRITE_H
 
 #include "mcrl2/data/rewrite.h"
-#include "mcrl2/lps/builder.h"
+#include "mcrl2/pbes/builder.h"
 
 namespace mcrl2 {
 
-namespace lps {
+namespace pbes_system {
 
-//--- start generated lps rewrite code ---//
+//--- start generated pbes_system rewrite code ---//
 /// \brief Rewrites all embedded expressions in an object x
 /// \param x an object containing expressions
 /// \param R a rewriter
@@ -29,7 +29,7 @@ void rewrite(T& x,
              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_builder<lps::data_expression_builder>(R)(x);
+  data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R)(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x
@@ -42,7 +42,7 @@ T rewrite(const T& x,
           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_builder<lps::data_expression_builder>(R)(x);
+  return data::detail::make_rewrite_data_expressions_builder<pbes_system::data_expression_builder>(R)(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -56,7 +56,7 @@ void rewrite(T& x,
              typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
             )
 {
-  data::detail::make_rewrite_data_expressions_with_substitution_builder<lps::data_expression_builder>(R, sigma)(x);
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma)(x);
 }
 
 /// \brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
@@ -71,12 +71,12 @@ T rewrite(const T& x,
           typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
          )
 {
-  return data::detail::make_rewrite_data_expressions_with_substitution_builder<lps::data_expression_builder>(R, sigma)(x);
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<pbes_system::data_expression_builder>(R, sigma)(x);
 }
-//--- end generated lps rewrite code ---//
+//--- end generated pbes_system rewrite code ---//
 
-} // namespace lps
+} // namespace pbes_system
 
 } // namespace mcrl2
 
-#endif // LPS_INCLUDE_MCRL2_LPS_REWRITE_H
+#endif // PBES_INCLUDE_MCRL2_PBES_REWRITE_H
