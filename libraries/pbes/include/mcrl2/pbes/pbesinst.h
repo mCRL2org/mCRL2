@@ -41,7 +41,7 @@ struct t_instantiations
   data::data_expression_list finite_exp;   // List of all finite expressions
   data::data_expression_list infinite_exp; // List of all infinite expressions
 
-  void protect()
+  void protect() const
   {
     finite_var.protect();
     infinite_var.protect();
@@ -49,7 +49,7 @@ struct t_instantiations
     infinite_exp.protect();
   }
 
-  void unprotect()
+  void unprotect() const
   {
     finite_var.unprotect();
     infinite_var.unprotect();
@@ -57,7 +57,7 @@ struct t_instantiations
     infinite_exp.unprotect();
   }
 
-  void mark()
+  void mark() const
   {
     finite_var.mark();
     infinite_var.mark();
@@ -433,15 +433,15 @@ using mcrl2::pbes_system::t_instantiations;
 template<>
 struct aterm_traits<t_instantiations>
 {
-  static void protect(t_instantiations t)
+  static void protect(const t_instantiations& t)
   {
     t.protect();
   }
-  static void unprotect(t_instantiations t)
+  static void unprotect(const t_instantiations& t)
   {
     t.unprotect();
   }
-  static void mark(t_instantiations t)
+  static void mark(const t_instantiations& t)
   {
     t.mark();
   }

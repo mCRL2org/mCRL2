@@ -49,19 +49,17 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::bes::detail::standard_form_pair>
 {
-  typedef ATermAppl aterm_type;
-
-  static void protect(mcrl2::bes::detail::standard_form_pair& t)
+  static void protect(const mcrl2::bes::detail::standard_form_pair& t)
   {
     t.first.protect();
   }
 
-  static void unprotect(mcrl2::bes::detail::standard_form_pair& t)
+  static void unprotect(const mcrl2::bes::detail::standard_form_pair& t)
   {
     t.first.unprotect();
   }
 
-  static void mark(mcrl2::bes::detail::standard_form_pair& t)
+  static void mark(const mcrl2::bes::detail::standard_form_pair& t)
   {
     t.first.mark();
   }

@@ -14,7 +14,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/aterm_real.h"
 #include "mcrl2/atermpp/aterm_string.h"
 
 using namespace std;
@@ -24,7 +23,6 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   aterm_int i(10);
-  /* aterm_real r(2.5); Deprecated */
   aterm x=aterm_appl(function_symbol("x",0));
   aterm y=aterm_appl(function_symbol("y",0));
   aterm_appl f(function_symbol("f", 2), x, y);

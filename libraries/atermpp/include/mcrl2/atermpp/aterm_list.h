@@ -372,26 +372,21 @@ term_list<Term> operator+(Term t, term_list<Term> l)
 template <typename Term>
 struct aterm_traits<term_list<Term> >
 {
-  typedef ATermList aterm_type;
-  static void protect(term_list<Term> t)
+  static void protect(const term_list<Term>& t)
   {
     t.protect();
   }
-  static void unprotect(term_list<Term> t)
+  static void unprotect(const term_list<Term>& t)
   {
     t.unprotect();
   }
-  static void mark(term_list<Term> t)
+  static void mark(const term_list<Term>& t)
   {
     t.mark();
   }
-  static ATerm term(term_list<Term> t)
+  static ATerm term(const term_list<Term>& t)
   {
     return t.term();
-  }
-  static ATerm* ptr(term_list<Term>& t)
-  {
-    return &t.term();
   }
 };
 /// \endcond

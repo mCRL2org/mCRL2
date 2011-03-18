@@ -115,26 +115,21 @@ std::string unquote(aterm_string t)
 template <>
 struct aterm_traits<aterm_string>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(aterm_string t)
+  static void protect(const aterm_string& t)
   {
     t.protect();
   }
-  static void unprotect(aterm_string t)
+  static void unprotect(const aterm_string& t)
   {
     t.unprotect();
   }
-  static void mark(aterm_string t)
+  static void mark(const aterm_string& t)
   {
     t.mark();
   }
-  static ATerm term(aterm_string t)
+  static ATerm term(const aterm_string& t)
   {
     return t.term();
-  }
-  static ATerm* ptr(aterm_string& t)
-  {
-    return &t.term();
   }
 };
 /// \endcond

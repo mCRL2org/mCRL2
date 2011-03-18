@@ -34,21 +34,18 @@ namespace atermpp
 template<>
 struct aterm_traits<std::pair<mcrl2::pbes_system::pbes_expression, size_t> >
 {
-  typedef ATermAppl aterm_type;
-  static void protect(std::pair<mcrl2::pbes_system::pbes_expression, size_t> t)
+  static void protect(const std::pair<mcrl2::pbes_system::pbes_expression, size_t>& t)
   {
     t.first.protect();
   }
-  static void unprotect(std::pair<mcrl2::pbes_system::pbes_expression, size_t> t)
+  static void unprotect(const std::pair<mcrl2::pbes_system::pbes_expression, size_t>& t)
   {
     t.first.unprotect();
   }
-  static void mark(std::pair<mcrl2::pbes_system::pbes_expression, size_t> t)
+  static void mark(const std::pair<mcrl2::pbes_system::pbes_expression, size_t>& t)
   {
     t.first.mark();
   }
-  // static ATerm term(std::pair<mcrl2::pbes_system::pbes_expression, size_t> t)     { return t.first.term(); }
-  // static ATerm* ptr(std::pair<mcrl2::pbes_system::pbes_expression, size_t>& t)    { return &t.first.term(); }
 };
 } // namespace atermpp
 

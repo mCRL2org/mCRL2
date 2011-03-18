@@ -21,6 +21,7 @@
 /// \brief The main namespace for the ATerm++ library.
 namespace atermpp
 {
+	
 /// \brief Base class for aterm.
 class aterm_base
 {
@@ -79,20 +80,6 @@ class aterm_base
     }
 
     /// \brief Constructor.
-    /// \param term A real-valued term
-    /* aterm_base(ATermReal term)
-      : m_term(reinterpret_cast<ATerm>(term))
-    { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
-    } */
-
-    /// \brief Constructor.
-    /// \param term A term containing binary data
-    /* aterm_base(ATermBlob term)
-      : m_term(reinterpret_cast<ATerm>(term))
-    { assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
-    } */
-
-    /// \brief Constructor.
     /// \param term A term
     aterm_base(ATermAppl term)
       : m_term(reinterpret_cast<ATerm>(term))
@@ -100,30 +87,23 @@ class aterm_base
       assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
     }
 
-    /// \brief Constructor.
-    /// \param s A string
-    /*      aterm_base(const std::string& s)
-            : m_term(ATmake(const_cast<char*>(s.c_str())))
-          {}
-    */
-
     /// \brief Protect the aterm.
     /// Protects the aterm from being freed at garbage collection.
-    void protect()
+    void protect() const
     {
-      ATprotect(&m_term);
+      aterm_protect(&m_term);
     }
 
     /// \brief Unprotect the aterm.
     /// Releases protection of the aterm which has previously been protected through a
     /// call to protect.
-    void unprotect()
+    void unprotect() const
     {
-      ATunprotect(&m_term);
+      aterm_unprotect(&m_term);
     }
 
     /// \brief Mark the aterm for not being garbage collected.
-    void mark()
+    void mark() const
     {
       ATmarkTerm(m_term);
     }
@@ -149,26 +129,21 @@ class aterm_base
 template <>
 struct aterm_traits<aterm_base>
 {
-  typedef ATerm aterm_type;
-  static void protect(aterm_base t)
+  static void protect(const aterm_base& t)
   {
     t.protect();
   }
-  static void unprotect(aterm_base t)
+  static void unprotect(const aterm_base& t)
   {
     t.unprotect();
   }
-  static void mark(aterm_base t)
+  static void mark(const aterm_base& t)
   {
     t.mark();
   }
-  static ATerm term(aterm_base t)
+  static ATerm term(const aterm_base& t)
   {
     return t.term();
-  }
-  static ATerm* ptr(aterm_base& t)
-  {
-    return &t.term();
   }
 };
 /// \endcond
@@ -262,26 +237,21 @@ class aterm: public aterm_base
 template <>
 struct aterm_traits<aterm>
 {
-  typedef ATerm aterm_type;
-  static void protect(aterm t)
+  static void protect(const aterm& t)
   {
     t.protect();
   }
-  static void unprotect(aterm t)
+  static void unprotect(const aterm& t)
   {
     t.unprotect();
   }
-  static void mark(aterm t)
+  static void mark(const aterm& t)
   {
     t.mark();
   }
-  static ATerm term(aterm t)
+  static ATerm term(const aterm& t)
   {
     return t.term();
-  }
-  static ATerm* ptr(aterm& t)
-  {
-    return &t.term();
   }
 };
 /// \endcond

@@ -69,18 +69,17 @@ namespace atermpp
 template<typename Term>
 struct aterm_traits<mcrl2::pbes_system::detail::true_false_pair<Term> >
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::pbes_system::detail::true_false_pair<Term> t)
+  static void protect(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
   {
     t.TC.protect();
     t.FC.protect();
   }
-  static void unprotect(mcrl2::pbes_system::detail::true_false_pair<Term> t)
+  static void unprotect(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
   {
     t.TC.unprotect();
     t.FC.unprotect();
   }
-  static void mark(mcrl2::pbes_system::detail::true_false_pair<Term> t)
+  static void mark(const mcrl2::pbes_system::detail::true_false_pair<Term>& t)
   {
     t.TC.mark();
     t.FC.mark();

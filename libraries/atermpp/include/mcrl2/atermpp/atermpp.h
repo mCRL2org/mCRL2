@@ -15,9 +15,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "mcrl2/atermpp/aterm_real.h"
 #include "mcrl2/atermpp/aterm_int.h"
-#include "mcrl2/atermpp/aterm_blob.h"
 #include "mcrl2/atermpp/aterm_string.h"
 #include "mcrl2/atermpp/transform.h"
 

@@ -448,41 +448,35 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::lts::detail::state_label_lts>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lts::detail::state_label_lts t)
+  static void protect(const mcrl2::lts::detail::state_label_lts& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lts::detail::state_label_lts t)
+  static void unprotect(const mcrl2::lts::detail::state_label_lts& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lts::detail::state_label_lts t)
+  static void mark(const mcrl2::lts::detail::state_label_lts& t)
   {
     t.mark();
   }
-  // static ATerm term(mcrl2::lts::detail::state_label_lts t)     { return t.term(); }
-  // static ATerm* ptr(mcrl2::lts::detail::state_label_lts& t)    { return &t.term(); }
 };
 
 template<>
 struct aterm_traits<mcrl2::lts::detail::action_label_lts>
 {
-  typedef ATermAppl aterm_type;
-  static void protect(mcrl2::lts::detail::action_label_lts t)
+  static void protect(const mcrl2::lts::detail::action_label_lts& t)
   {
     t.protect();
   }
-  static void unprotect(mcrl2::lts::detail::action_label_lts t)
+  static void unprotect(const mcrl2::lts::detail::action_label_lts& t)
   {
     t.unprotect();
   }
-  static void mark(mcrl2::lts::detail::action_label_lts t)
+  static void mark(const mcrl2::lts::detail::action_label_lts& t)
   {
     t.mark();
   }
-  // static ATerm term(mcrl2::lts::detail::action_label_lts t)     { return t.term(); }
-  // static ATerm* ptr(mcrl2::lts::detail::action_label_lts& t)    { return &t.term(); }
 };
 } // namespace atermpp
 /// \endcond

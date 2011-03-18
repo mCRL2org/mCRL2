@@ -126,17 +126,17 @@ struct pfnf_visitor_implication
     g = pbes_system::replace_free_variables(g, variable_data_expression_substitution(sigma));
   }
   
-  void mark()
+  void mark() const
   {
   	g.mark();
   }
   
-  void protect()
+  void protect() const
   {
   	g.protect();
   }
   
-  void unprotect()
+  void unprotect() const
   {
   	g.unprotect();
   }
@@ -172,17 +172,17 @@ struct pfnf_visitor_expression
     expr = pbes_system::replace_free_variables(expr, variable_data_expression_substitution(sigma));
   }
 
-  void mark()
+  void mark() const
   {
   	expr.mark();
   }
   
-  void protect()
+  void protect() const
   {
   	expr.protect();
   }
   
-  void unprotect()
+  void unprotect() const
   {
   	expr.unprotect();
   }
@@ -200,19 +200,17 @@ namespace atermpp
 template<>
 struct aterm_traits<mcrl2::pbes_system::detail::pfnf_visitor_quantifier>
 {
-  typedef ATermAppl aterm_type;
-
-  static void protect(mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
+  static void protect(const mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
   {
     t.second.protect();
   }
 
-  static void unprotect(mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
+  static void unprotect(const mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
   {
     t.second.unprotect();
   }
 
-  static void mark(mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
+  static void mark(const mcrl2::pbes_system::detail::pfnf_visitor_quantifier& t)
   {
     t.second.mark();
   }
@@ -221,19 +219,17 @@ struct aterm_traits<mcrl2::pbes_system::detail::pfnf_visitor_quantifier>
 template<>
 struct aterm_traits<mcrl2::pbes_system::detail::pfnf_visitor_implication>
 {
-  typedef ATermAppl aterm_type;
-
-  static void protect(mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
+  static void protect(const mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
   {
     t.protect();
   }
 
-  static void unprotect(mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
+  static void unprotect(const mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
   {
     t.unprotect();
   }
 
-  static void mark(mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
+  static void mark(const mcrl2::pbes_system::detail::pfnf_visitor_implication& t)
   {
     t.mark();
   }
@@ -242,19 +238,17 @@ struct aterm_traits<mcrl2::pbes_system::detail::pfnf_visitor_implication>
 template<>
 struct aterm_traits<mcrl2::pbes_system::detail::pfnf_visitor_expression>
 {
-  typedef ATermAppl aterm_type;
-
-  static void protect(mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
+  static void protect(const mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
   {
     t.protect();
   }
 
-  static void unprotect(mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
+  static void unprotect(const mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
   {
     t.unprotect();
   }
 
-  static void mark(mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
+  static void mark(const mcrl2::pbes_system::detail::pfnf_visitor_expression& t)
   {
     t.mark();
   }
