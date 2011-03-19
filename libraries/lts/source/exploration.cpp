@@ -1332,7 +1332,7 @@ bool lps2lts_algorithm::generate_lts()
         NextStateGenerator* nsgen = nsgens[nsgens_num-1];
         state = nsgen->get_state();
         check_divergence(state);
-        multi_action Transition;
+        ATermAppl Transition;
         ATerm NewState;
         bool new_state = false;
         bool add_new_states = (current_state < lgopts->max_states);
