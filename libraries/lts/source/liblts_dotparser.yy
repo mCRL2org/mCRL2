@@ -25,10 +25,6 @@ void dotyyerror(const char *s);
 int dotyylex(void);
 %}
 
-// %union {
-//   ATermAppl aterm;
-//   ATermList atermlist;
-// }
 
 //more verbose and specific error messages
 %error-verbose

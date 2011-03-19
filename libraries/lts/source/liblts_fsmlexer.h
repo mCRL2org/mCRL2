@@ -10,19 +10,9 @@
 class fsm_lexer
 {
   public:
-    // ATermIndexedSet protect_table;
-
     mcrl2::lts::detail::state_label_fsm stateVector;
-    // ATermList valueTable;
-    // ATermList stateId;
-    // ATermList typeValues;
     std::string typeId;
-    // ATermTable labelTable;
     std::map < std::string, size_t> labelTable;
-
-    // AFun const_ATtype;
-    // AFun const_ATvalue;
-
     mcrl2::lts::lts_fsm_t* fsm_lts;
 };
 
