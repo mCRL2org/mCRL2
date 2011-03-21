@@ -15,6 +15,7 @@
 #include "aterm2.h"
 #include "svc/svc.h"
 #include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_lts.h"
 
@@ -35,18 +36,13 @@ class lps2lts_lts
     lps2lts_lts_options lts_opts;
     size_t initial_state;
     std::ofstream aut;
-    SVCfile svcf;
-    SVCfile* svc;
-    SVCparameterIndex svcparam;
     std::string lts_filename;
     lts_lts_t generic_lts;
     ATermIndexedSet aterm2state, aterm2label;
 
   public:
     lps2lts_lts():
-      initial_state(0),
-      svc(&svcf),
-      svcparam(0)
+      initial_state(0)
     {
     }
 
