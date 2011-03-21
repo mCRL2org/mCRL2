@@ -240,7 +240,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
           throw(e);
         }
       }
-      p.normalize();
+      pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
 

@@ -13,6 +13,7 @@
 #define MCRL2_PBES_NORMALIZE_H
 
 #include "mcrl2/exception.h"
+#include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/traverser.h"
 #include "mcrl2/pbes/pbes_equation.h"
 #include "mcrl2/data/bool.h"
@@ -56,123 +57,129 @@ struct is_normalized_traverser: public pbes_expression_traverser<is_normalized_t
 };
 /// \endcond
 
+/// \cond INTERNAL_DOCS
+// \brief Visitor for checking if a pbes expression is normalized.
+struct normalize_builder: public pbes_expression_builder<normalize_builder>
+{
+  typedef pbes_expression_builder<normalize_builder> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+
+  typedef core::term_traits<pbes_expression> tr;
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+
+  bool negated;
+
+  normalize_builder()
+    : negated(false)
+  {}
+
+  pbes_expression operator()(const data::data_expression& x)
+  {
+    return negated ? data::sort_bool::not_(x) : x;
+  }
+
+  pbes_expression operator()(const true_& x)
+  {
+    return negated ? tr::false_() : tr::true_();
+  }
+
+  pbes_expression operator()(const false_& x)
+  {
+    return negated ? tr::true_() : tr::false_();
+  }
+
+  pbes_expression operator()(const not_& x)
+  {
+    negated = !negated;
+    pbes_expression result = super::operator()(x.operand());
+    negated = !negated;
+    return result;
+  }
+
+  pbes_expression operator()(const and_& x)
+  {
+    pbes_expression left = super::operator()(x.left());
+    pbes_expression right = super::operator()(x.right());
+    return negated ? tr::or_(left, right) : tr::and_(left, right);
+  }
+
+  pbes_expression operator()(const or_& x)
+  {
+    pbes_expression left = super::operator()(x.left());
+    pbes_expression right = super::operator()(x.right());
+    return negated ? tr::and_(left, right) : tr::or_(left, right);
+  }
+
+  pbes_expression operator()(const imp& x)
+  {
+    negated = !negated;
+    pbes_expression left = super::operator()(x.left());
+    negated = !negated;
+    pbes_expression right = super::operator()(x.right());
+    return negated ? tr::and_(left, right) : tr::or_(left, right);
+  }
+
+  pbes_expression operator()(const forall& x)
+  {
+    pbes_expression body = super::operator()(x.body());
+    return negated ? tr::exists(x.variables(), body) : tr::forall(x.variables(), body);
+  }
+
+  pbes_expression operator()(const exists& x)
+  {
+    pbes_expression body = super::operator()(x.body());
+    return negated ? tr::forall(x.variables(), body) : tr::exists(x.variables(), body);
+  }
+
+  pbes_expression operator()(const propositional_variable_instantiation& x)
+  {
+    if (negated)
+    {
+      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + x.to_string());
+    }
+    return x;
+  }
+};
+/// \endcond
+
 /// \brief Checks if a pbes expression is normalized
 /// \param t A PBES expression
 /// \return True if the pbes expression is normalized
-inline
-bool is_normalized(const pbes_expression& t)
+template <typename T>
+bool is_normalized(const T& x)
 {
   is_normalized_traverser f;
-  f(t);
+  f(x);
   return f.result;
 }
 
-/// \brief The function normalize brings a pbes expression into positive normal form,
+/// \brief The function normalize brings (embedded) pbes expressions into positive normal form,
 /// i.e. a formula without any occurrences of ! or =>.
-/// \param f A PBES expression
-/// \return The result of the normalization.
-inline
-pbes_expression normalize(pbes_expression f)
+/// \param x an object containing pbes expressions
+template <typename T>
+void normalize(T& x,
+               typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+              )
 {
-  namespace p = pbes_expr;
-  using namespace accessors;
-
-  if (is_pbes_not(f))
-  {
-    f = arg(f); // remove the not
-    if (data::is_data_expression(f))
-    {
-      return data::sort_bool::not_(f);
-    }
-    else if (is_pbes_true(f))
-    {
-      return p::false_();
-    }
-    else if (is_pbes_false(f))
-    {
-      return p::true_();
-    }
-    else if (is_pbes_not(f))
-    {
-      return normalize(arg(f));
-    }
-    else if (is_pbes_and(f))
-    {
-      return p::or_(normalize(not_(left(f))), normalize(not_(right(f))));
-    }
-    else if (is_pbes_or(f))
-    {
-      return p::and_(normalize(not_(left(f))), normalize(not_(right(f))));
-    }
-    else if (is_pbes_imp(f))
-    {
-      return p::and_(normalize(left(f)), normalize(not_(right(f))));
-    }
-    else if (is_pbes_forall(f))
-    {
-      return p::exists(var(f), normalize(not_(arg(f))));
-    }
-    else if (is_pbes_exists(f))
-    {
-      return p::forall(var(f), normalize(not_(arg(f))));
-    }
-    else if (is_propositional_variable_instantiation(f))
-    {
-      throw mcrl2::runtime_error(std::string("normalize error: illegal argument ") + f.to_string());
-    }
-  }
-  else // !is_pbes_not(f)
-  {
-    if (data::is_data_expression(f))
-    {
-      return f;
-    }
-    else if (is_pbes_true(f))
-    {
-      return f;
-    }
-    else if (is_pbes_false(f))
-    {
-      return f;
-      //} else if (is_not(f)) {
-      // ;
-    }
-    else if (is_pbes_and(f))
-    {
-      return p::and_(normalize(left(f)), normalize(right(f)));
-    }
-    else if (is_pbes_or(f))
-    {
-      return p::or_(normalize(left(f)), normalize(right(f)));
-    }
-    else if (is_pbes_imp(f))
-    {
-      return p::or_(normalize(not_(left(f))), normalize(right(f)));
-    }
-    else if (is_pbes_forall(f))
-    {
-      return pbes_expr::forall(var(f), normalize(arg(f)));
-    }
-    else if (is_pbes_exists(f))
-    {
-      return pbes_expr::exists(var(f), normalize(arg(f)));
-    }
-    else if (is_propositional_variable_instantiation(f))
-    {
-      return f;
-    }
-  }
-  throw mcrl2::runtime_error(std::string("normalize error: unknown argument ") + f.to_string());
-  return pbes_expression();
+  normalize_builder f;
+  f(x);
 }
 
-/// \brief Applies normalization to the right hand side of the equation.
-/// \param e A PBES equation
-/// \return The result of the normalization.
-inline
-pbes_equation normalize(const pbes_equation& e)
+/// \brief The function normalize brings (embedded) pbes expressions into positive normal form,
+/// i.e. a formula without any occurrences of ! or =>.
+/// \param x an object containing pbes expressions
+template <typename T>
+T normalize(const T& x,
+            typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+           )
 {
-  return pbes_equation(e.symbol(), e.variable(), normalize(e.formula()));
+  normalize_builder f;
+  return f(x);
 }
 
 } // namespace pbes_system

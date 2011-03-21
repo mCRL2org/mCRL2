@@ -13,6 +13,7 @@
 #include <iostream>
 #include <string>
 #include <boost/lexical_cast.hpp>
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/utilities/tool.h"
@@ -242,7 +243,7 @@ class lpsbisim2pbes_tool: public input_input_tool
       }
       if (normalize)
       {
-        result.normalize();
+        pbes_system::normalize(result);
       }
       result.save(output_filename());
 

@@ -46,7 +46,7 @@ class pbes_normalize_tool: public input_output_tool
       p.load(input_filename());
 
       // apply the algorithm
-      p.normalize();
+      normalize(p);
 
       // save the result
       p.save(output_filename());

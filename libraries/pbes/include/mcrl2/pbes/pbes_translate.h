@@ -38,6 +38,7 @@
 #include "mcrl2/modal_formula/detail/action_formula_accessors.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/monotonicity.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
@@ -811,8 +812,8 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       propositional_variable_instantiation init(Xe, data::sort_real::real_(0) + fi + pi + Par(Xf, data::variable_list(), f));
 
       pbes<> result(spec.data(), e, spec.global_variables(), init);
-      result.normalize();
-      assert(result.is_normalized());
+      pbes_system::normalize(result);
+      assert(pbes_system::is_normalized(result));
       assert(result.is_closed());
       complete_data_specification(result);
       return result;
@@ -1364,8 +1365,8 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 
       pbes<> result = pbes<>(spec.data(), e, spec.global_variables(), init);
       assert(is_monotonous(result));
-      result.normalize();
-      assert(result.is_normalized());
+      pbes_system::normalize(result);
+      assert(pbes_system::is_normalized(result));
       assert(result.is_closed());
       complete_data_specification(result);
       return result;

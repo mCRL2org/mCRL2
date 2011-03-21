@@ -41,7 +41,7 @@ void test_normalize1()
   pbes_expression f2;
 
   f = p::not_(p::not_(x));
-  f1 = normalize(f);
+  f1 = pbes_system::normalize(f);
   f2 = x;
   std::cout << "f  = " << f  << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
@@ -49,7 +49,7 @@ void test_normalize1()
   BOOST_CHECK(f1 == f2);
 
   f = imp(not_(x), y);
-  f1 = normalize(f);
+  f1 = pbes_system::normalize(f);
   f2 = or_(x, y);
   std::cout << "f  = " << f  << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
@@ -57,7 +57,7 @@ void test_normalize1()
   BOOST_CHECK(f1 == f2);
 
   f  = p::not_(p::and_(p::not_(x), p::not_(y)));
-  f1 = normalize(f);
+  f1 = pbes_system::normalize(f);
   f2 = or_(x, y);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
@@ -65,7 +65,7 @@ void test_normalize1()
   BOOST_CHECK(f1 == f2);
 
   f  = p::imp(p::and_(p::not_(x), p::not_(y)), z);
-  f1 = normalize(f);
+  f1 = pbes_system::normalize(f);
   f2 = p::or_(p::or_(x, y), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
@@ -77,7 +77,7 @@ void test_normalize1()
   z = data::variable("z", data::sort_bool::bool_());
 
   f  = not_(x);
-  f1 = normalize(f);
+  f1 = pbes_system::normalize(f);
   f2 = data::sort_bool::not_(x);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
@@ -85,7 +85,7 @@ void test_normalize1()
   BOOST_CHECK(f1 == f2);
 
   f  = imp(and_(x, y), z);
-  f1 = normalize(f);
+  f1 = pbes_system::normalize(f);
   f2 = p::or_(p::or_(data::sort_bool::not_(x), data::sort_bool::not_(y)), z);
   std::cout << "f  = " << f << std::endl;
   std::cout << "f1 = " << f1 << std::endl;
@@ -95,14 +95,14 @@ void test_normalize1()
   pbes_expression T = p::true_();
   pbes_expression F = p::false_();
   x = pbes_expression(mcrl2::core::detail::gsMakePBESImp(T, F));
-  y = normalize(x);
+  y = pbes_system::normalize(x);
   std::cout << "x = " << x << std::endl;
   std::cout << "y = " << y << std::endl;
 
   data::variable_list ab = make_list(data::variable("s", data::basic_sort("S")));
   x = propositional_variable_instantiation("x:X");
   y = and_(x, imp(pbes_expression(mcrl2::core::detail::gsMakePBESAnd(p::false_(), p::false_())), p::false_()));
-  z = normalize(y);
+  z = pbes_system::normalize(y);
   std::cout << "y = " << y << std::endl;
   std::cout << "z = " << z << std::endl;
   core::garbage_collect();
@@ -115,7 +115,7 @@ void test_normalize2()
   state_formulas::state_formula formula  = state_formulas::parse_state_formula("nu X. [true]X", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
-  p.normalize();
+  pbes_system::normalize(p);
   core::garbage_collect();
 }
 
@@ -129,7 +129,7 @@ void test_normalize3()
   state_formulas::state_formula formula = state_formulas::parse_state_formula("![true*]<true>true", spec);
   bool timed = false;
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
-  p.normalize();
+  pbes_system::normalize(p);
   core::garbage_collect();
 }
 

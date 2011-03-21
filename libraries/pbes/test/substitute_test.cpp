@@ -77,6 +77,7 @@ void test_propositional_variable_substitution()
   propositional_variable_substitution sigma(X, phi);
   pbes_system::replace_propositional_variables(p, sigma);
   std::cout << pp(p) << std::endl;
+  std::cout << pp(p2) << std::endl;
 
   // compare textual representations, to avoid conflicts between types
   BOOST_CHECK(pp(p) == pp(p2));

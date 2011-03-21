@@ -45,6 +45,7 @@
 #include "mcrl2/data/data_equation.h" // for debug std::cerr
 
 //Boolean equation systems
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
@@ -245,7 +246,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
           throw(e);
         }
       }
-      p.normalize();
+      pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
 

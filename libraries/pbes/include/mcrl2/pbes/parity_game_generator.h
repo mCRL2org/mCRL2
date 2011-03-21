@@ -24,6 +24,7 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
@@ -239,7 +240,7 @@ class parity_game_generator: public core::algorithm
       }
 
       // Normalize the pbes, since the parity game generator currently doesn't handle negation and implication.
-      m_pbes.normalize();
+      pbes_system::normalize(m_pbes);
 
       // Compute equation index map.
       for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
