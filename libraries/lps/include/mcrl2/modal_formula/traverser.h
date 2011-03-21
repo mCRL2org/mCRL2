@@ -110,7 +110,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -118,7 +118,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -251,14 +251,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const action_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const action_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -391,14 +391,14 @@ struct add_traverser_action_formula_expressions: public Traverser<Derived>
   void operator()(const action_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const action_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -531,7 +531,7 @@ struct add_traverser_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -539,7 +539,7 @@ struct add_traverser_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -673,7 +673,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -681,7 +681,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1309,7 +1309,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1317,7 +1317,7 @@ struct add_traverser_sort_expressions: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1537,14 +1537,14 @@ struct add_traverser_data_expressions: public Traverser<Derived>
   void operator()(const state_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const state_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1764,14 +1764,14 @@ struct add_traverser_state_formula_expressions: public Traverser<Derived>
   void operator()(const state_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const state_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1988,7 +1988,7 @@ struct add_traverser_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -1996,7 +1996,7 @@ struct add_traverser_variables: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -2217,7 +2217,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 
@@ -2225,7 +2225,7 @@ struct add_traverser_identifier_strings: public Traverser<Derived>
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this)(x.variables());
-    static_cast<Derived&>(*this)(x.operand());
+    static_cast<Derived&>(*this)(x.body());
     static_cast<Derived&>(*this).leave(x);
   }
 

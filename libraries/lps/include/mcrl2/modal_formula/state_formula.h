@@ -315,8 +315,8 @@ class forall: public state_formula
     }
 
     /// \brief Constructor.
-    forall(const data::variable_list& variables, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateForall(variables, operand))
+    forall(const data::variable_list& variables, const state_formula& body)
+      : state_formula(core::detail::gsMakeStateForall(variables, body))
     {}
 
     data::variable_list variables() const
@@ -324,7 +324,7 @@ class forall: public state_formula
       return atermpp::list_arg1(*this);
     }
 
-    state_formula operand() const
+    state_formula body() const
     {
       return atermpp::arg2(*this);
     }
@@ -358,8 +358,8 @@ class exists: public state_formula
     }
 
     /// \brief Constructor.
-    exists(const data::variable_list& variables, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateExists(variables, operand))
+    exists(const data::variable_list& variables, const state_formula& body)
+      : state_formula(core::detail::gsMakeStateExists(variables, body))
     {}
 
     data::variable_list variables() const
@@ -367,7 +367,7 @@ class exists: public state_formula
       return atermpp::list_arg1(*this);
     }
 
-    state_formula operand() const
+    state_formula body() const
     {
       return atermpp::arg2(*this);
     }
