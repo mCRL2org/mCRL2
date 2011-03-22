@@ -81,7 +81,7 @@ MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint&
   wxStaticText* heading = new wxStaticText(panel, wxID_ANY, wxT("Select a directory to export symbolic links for individual tools."), wxPoint(15, 15));
   heading->SetFont(font);
 
-  new wxStaticText(panel, wxID_ANY, wxT("This is necessary to use the tools outside the SquaDT environment."), wxPoint(15, 40));
+  new wxStaticText(panel, wxID_ANY, wxT("This is necessary to use the tools outside the mCRL2-gui environment."), wxPoint(15, 40));
 
   new wxStaticText(panel, wxID_ANY, wxT("For command-line tools this directory should be added to the PATH variable."), wxPoint(15, 60));
 
