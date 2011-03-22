@@ -54,7 +54,7 @@
 char            aterm_id[] = "$Id: aterm.c 24415 2007-12-12 14:20:55Z eriks $";
 
 /* Flag to tell whether to keep quiet or not. */
-ATbool low_memory = ATfalse;
+bool low_memory = false;
 
 /* warning_handler is called when a recoverable error is detected */
 static void (*warning_handler)(const char* format, va_list args) = NULL;
@@ -65,7 +65,7 @@ static void (*error_handler)(const char* format, va_list args) = NULL;
 static void (*abort_handler)(const char* format, va_list args) = NULL;
 
 /* Flag set when ATinit is called. */
-static ATbool initialized = ATfalse;
+static bool initialized = false;
 
 /* We need a buffer for printing and parsing */
 static size_t buffer_size = 0;
@@ -204,12 +204,12 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   }
 #endif
 
-  initialized = ATtrue;
+  initialized = true;
 
   atexit(AT_cleanup);
 }
 
-ATbool ATisInitialized()
+bool ATisInitialized()
 {
   return initialized;
 }
@@ -669,13 +669,13 @@ resize_buffer(size_t n)
 
 /*}}}  */
 
-/*{{{  ATbool ATwriteToTextFile(ATerm t, FILE *f) */
+/*{{{  bool ATwriteToTextFile(ATerm t, FILE *f) */
 
 /**
  * Write a term in text format to file.
  */
 
-ATbool
+bool
 writeToTextFile(ATerm t, FILE* f)
 {
   AFun          sym;
@@ -744,20 +744,20 @@ writeToTextFile(ATerm t, FILE* f)
       {
         ATerror("ATwriteToTextFile: free term %p not in freelist?\n", t);
       }
-      return ATfalse;
+      return false;
 
     case AT_SYMBOL:
       ATerror("ATwriteToTextFile: not a term but an afun: %y\n", t);
-      return ATfalse;
+      return false;
   }
 
-  return ATtrue;
+  return true;
 }
 
-ATbool
+bool
 ATwriteToTextFile(ATerm t, FILE* f)
 {
-  ATbool result = ATtrue;
+  bool result = true;
 
   if (ATgetType(t) == AT_LIST)
   {
@@ -786,10 +786,10 @@ ATwriteToTextFile(ATerm t, FILE* f)
  * Write an ATerm to a named plaintext file
  */
 
-ATbool ATwriteToNamedTextFile(ATerm t, const char* name)
+bool ATwriteToNamedTextFile(ATerm t, const char* name)
 {
   FILE*  f;
-  ATbool result;
+  bool result;
 
   if (!strcmp(name, "-"))
   {
@@ -798,7 +798,7 @@ ATbool ATwriteToNamedTextFile(ATerm t, const char* name)
 
   if (!(f = fopen(name, "wb")))
   {
-    return ATfalse;
+    return false;
   }
 
   result = ATwriteToTextFile(t, f);
@@ -1315,7 +1315,7 @@ fparse_quoted_appl(int* c, FILE* f)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeAFun(name, ATgetLength(args), ATtrue);
+  sym = ATmakeAFun(name, ATgetLength(args), true);
   AT_free(name);
   return (ATerm)ATmakeApplList(sym, args);
 }
@@ -1374,7 +1374,7 @@ fparse_unquoted_appl(int* c, FILE* f)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeAFun(name ? name : "", ATgetLength(args), ATfalse);
+  sym = ATmakeAFun(name ? name : "", ATgetLength(args), false);
   if (name != NULL)
   {
     AT_free(name);
@@ -1732,7 +1732,7 @@ sparse_quoted_appl(int* c, char** s)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeAFun(name, ATgetLength(args), ATtrue);
+  sym = ATmakeAFun(name, ATgetLength(args), true);
   AT_free(name);
   return (ATerm)ATmakeApplList(sym, args);
 }
@@ -1791,7 +1791,7 @@ sparse_unquoted_appl(int* c, char** s)
   }
 
   /* Wrap up this function application */
-  sym = ATmakeAFun(name ? name : "", ATgetLength(args), ATfalse);
+  sym = ATmakeAFun(name ? name : "", ATgetLength(args), false);
   if (name != NULL)
   {
     AT_free(name);
@@ -1951,7 +1951,7 @@ void AT_markTerm(ATerm t)
   mark_stack[0] = NULL;
   *current++ = t;
 
-  while (ATtrue)
+  while (true)
   {
     if (current >= limit)
     {
@@ -2044,7 +2044,7 @@ void AT_markTerm_young(ATerm t)
   mark_stack[0] = NULL;
   *current++ = t;
 
-  while (ATtrue)
+  while (true)
   {
     if (current >= limit)
     {

@@ -11,20 +11,20 @@ cmake_minimum_required(VERSION 2.6)
 
 # main target
 add_library(${PROJECT_NAME}
-  source/version.c
-  source/idmappings.c
+  source/version.cpp
+  source/idmappings.cpp
 #  source/make.c
-  source/bafio.c
-  source/memmgnt.c
-  source/memory.c
-  source/aterm.c
-  source/hash.c
-  source/list.c
-  source/afun.c
-  source/safio.c
-  source/byteencoding.c
-  source/byteio.c
-  source/gc.c
+  source/bafio.cpp
+  source/memmgnt.cpp
+  source/memory.cpp
+  source/aterm.cpp
+  source/hash.cpp
+  source/list.cpp
+  source/afun.cpp
+  source/safio.cpp
+  source/byteencoding.cpp
+  source/byteio.cpp
+  source/gc.cpp
 #  source/md5c.c
 #  source/tafio.c
 )

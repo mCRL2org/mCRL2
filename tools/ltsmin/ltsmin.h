@@ -16,10 +16,9 @@
 #include <cerrno>
 #include "aterm1.h"
 #include <cassert>
-extern "C" {
 #include "svc/svcerrno.h"
 #include "svc/svc.h"
-}
+
 #define EXIT_OK 0
 #define EXIT_NOTOK 1
 #define EXIT_ERR_ARGS -1
@@ -74,7 +73,7 @@ extern BLOK* blok;
 extern BLOCKS blocks;
 extern unsigned int Pi_pt, n_partitions;
 extern SVCint nstate, nlabel; /* number of states, number of labels */
-extern ATbool* mark;
+extern bool* mark;
 extern SVCint* blockref;
 extern SVCstateIndex* s; /* In this resides the partition */
 extern ATerm* label_name;
@@ -84,7 +83,7 @@ extern INTERVAL* Pi;
 
 extern int label_tau;
 extern SVCfile inFile[], outFile[];
-extern SVCbool readIndex[];
+extern bool readIndex[];
 extern int traceLevel, optimal, classes;
 extern ATermTable* lab_src_tgt, *lab_tgt_src;
 
@@ -116,4 +115,4 @@ void ReduceBranching(void);
 void SCC(void);
 int Compare(SVCstateIndex init1,SVCstateIndex init2);
 int CompareBranching(SVCstateIndex init1,SVCstateIndex init2);
-//SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool tauloops);
+//SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool tauloops);

@@ -3,10 +3,8 @@
 
 #include "atypes.h"
 
-#ifdef __cplusplus
 extern "C"
 {
-#endif /* __cplusplus */
 
   size_t BEserializeMultiByteInt(int i, char* c);
 
@@ -17,8 +15,6 @@ extern "C"
 
   /* double BEdeserializeDouble(char *c); */
 
-#ifdef __cplusplus
-}
-#endif /* __cplusplus */
+} // extern "C"
 
 #endif /*BYTEENCODING_H_*/

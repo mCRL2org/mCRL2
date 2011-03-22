@@ -614,7 +614,7 @@ ATermAppl ATmakeAppl(AFun sym, ...)
 {
   ATermAppl cur;
   size_t i, arity = ATgetArity(sym);
-  ATbool found;
+  bool found;
   header_type header;
   HashNumber hnr;
   va_list args;
@@ -644,12 +644,12 @@ ATermAppl ATmakeAppl(AFun sym, ...)
   {
     if (EQUAL_HEADER(cur->header,header))
     {
-      found = ATtrue;
+      found = true;
       for (i=0; i<arity; i++)
       {
         if (!ATisEqual(ATgetArgument(cur, i), buffer[i]))
         {
-          found = ATfalse;
+          found = false;
           break;
         }
       }
@@ -1161,13 +1161,13 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
   {
     if (EQUAL_HEADER(cur->header,header))
     {
-      found = ATtrue;
+      found = true;
       argptr = args;
       for (i=0; i<arity; i++)
       {
         if (!ATisEqual(ATgetArgument(cur, i), ATgetFirst(argptr)))
         {
-          found = ATfalse;
+          found = false;
           break;
         }
         argptr = ATgetNext(argptr);
@@ -1215,7 +1215,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
 {
   ATermAppl cur;
   size_t i, arity = ATgetArity(sym);
-  ATbool found;
+  bool found;
   HashNumber hnr;
   header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?
                                    MAX_INLINE_ARITY+1 : arity, sym);
@@ -1235,12 +1235,12 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
   {
     if (EQUAL_HEADER(cur->header,header))
     {
-      found = ATtrue;
+      found = true;
       for (i=0; i<arity; i++)
       {
         if (!ATisEqual(ATgetArgument(cur, i), args[i]))
         {
-          found = ATfalse;
+          found = false;
           break;
         }
       }
@@ -1441,7 +1441,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
   size_t i, arity;
   AFun sym = ATgetAFun(appl);
   ATermAppl cur;
-  ATbool found;
+  bool found;
   HashNumber hnr;
 
   CHECK_TERM(arg);
@@ -1469,14 +1469,14 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
   {
     if (EQUAL_HEADER(cur->header,appl->header))
     {
-      found = ATtrue;
+      found = true;
       for (i=0; i<arity; i++)
       {
         if (i!=n)
         {
           if (!ATisEqual(ATgetArgument(cur, i), ATgetArgument(appl, i)))
           {
-            found = ATfalse;
+            found = false;
             break;
           }
         }
@@ -1484,7 +1484,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
         {
           if (!ATisEqual(ATgetArgument(cur, i), arg))
           {
-            found = ATfalse;
+            found = false;
             break;
           }
         }
@@ -1524,17 +1524,17 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
 
 /*}}}  */
 
-/*{{{  ATbool ATisValidTerm(ATerm term) */
+/*{{{  bool ATisValidTerm(ATerm term) */
 
 /**
  * Determine if a given term is valid.
  */
 
-ATbool AT_isValidTerm(ATerm term)
+bool AT_isValidTerm(ATerm term)
 {
   Block* cur;
   header_type header;
-  ATbool inblock = ATfalse;
+  bool inblock = false;
   size_t idx = ADDR_TO_BLOCK_IDX(term);
   int type;
   ptrdiff_t offset = 0;
@@ -1549,7 +1549,7 @@ ATbool AT_isValidTerm(ATerm term)
       offset  = ((char*)term) - ((char*)&cur->data);
       if (offset >= 0 && offset < (ptrdiff_t)(BLOCK_SIZE * sizeof(header_type)))
       {
-        inblock = ATtrue;
+        inblock = true;
         break;
       }
     }
@@ -1565,7 +1565,7 @@ ATbool AT_isValidTerm(ATerm term)
         offset  = ((char*)term) - ((char*)&cur->data);
         if (offset >= 0 && offset < (ptrdiff_t)(BLOCK_SIZE * sizeof(header_type)))
         {
-          inblock = ATtrue;
+          inblock = true;
           break;
         }
       }
@@ -1574,7 +1574,7 @@ ATbool AT_isValidTerm(ATerm term)
 
   if (!inblock)
   {
-    return ATfalse;
+    return false;
   }
 
   /* Check if we point to the start of a term. Pointers inside terms
@@ -1582,14 +1582,14 @@ ATbool AT_isValidTerm(ATerm term)
      */
   if (offset % (cur->size*sizeof(header)))
   {
-    return ATfalse;
+    return false;
   }
 
   header = term->header;
   type = GET_TYPE(header);
 
   /* The only possibility left for an invalid term is AT_FREE */
-  return (((type == AT_FREE) || (type == AT_SYMBOL)) ? ATfalse : ATtrue);
+  return (((type == AT_FREE) || (type == AT_SYMBOL)) ? false : true);
 }
 
 /*}}}  */
@@ -1605,7 +1605,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
 {
   Block* cur;
   TermInfo* ti;
-  ATbool inblock = ATfalse;
+  bool inblock = false;
   size_t idx = ADDR_TO_BLOCK_IDX(term);
   int type;
 
@@ -1633,7 +1633,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
 
       if (cur->data <= (header_type*)term && (header_type*)term < end)
       {
-        inblock = ATtrue;
+        inblock = true;
         break;
       }
     }
@@ -1661,7 +1661,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
 
         if (cur->data <= (header_type*)term && (header_type*)term < end)
         {
-          inblock = ATtrue;
+          inblock = true;
           break;
         }
       }

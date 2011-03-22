@@ -3,10 +3,8 @@
 
 #include <stdio.h>
 
-#ifdef __cplusplus
 extern "C"
 {
-#endif/* __cplusplus */
 
 #define FILE_WRITER   0
 #define STRING_WRITER 1
@@ -52,8 +50,6 @@ extern "C"
   void init_file_reader(byte_reader* reader, FILE* file);
   void init_string_reader(byte_reader* reader, const unsigned char* buf, size_t max_size);
 
-#ifdef __cplusplus
-}
-#endif/* __cplusplus */
+} // extern "C"
 
 #endif

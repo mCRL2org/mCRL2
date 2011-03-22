@@ -25,7 +25,7 @@ using namespace mcrl2::data::detail;
 static void read_from_lts(lts_lts_t& l, string const& filename)
 {
   SVCfile f;
-  SVCbool b;
+  bool b;
   bool svc_file_has_state_info = false;
 
   if (SVCopen(&f,const_cast< char* >(filename.c_str()),SVCread,&b))
@@ -241,7 +241,7 @@ static void add_extra_mcrl2_lts_data(
 static void write_to_lts(const lts_lts_t& l, string const& filename)
 {
   SVCfile f;
-  SVCbool b = l.has_state_info() ? SVCfalse : SVCtrue;
+  bool b = !l.has_state_info();
   if (SVCopen(&f,const_cast< char* >(filename.c_str()),SVCwrite,&b))
   {
     throw mcrl2::runtime_error("cannot open .lts file '" + filename + "' for writing.");

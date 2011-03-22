@@ -51,8 +51,8 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
 
-#define JITTYC_COMPILE_COMMAND (CC " -c " CFLAGS " " SCFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.c")
-#define JITTYC_LINK_COMMAND (CC " " LDFLAGS " " SLDFLAGS " -o %s.so %s.o")
+#define JITTYC_COMPILE_COMMAND (CXX " -c " CXXFLAGS " " SCXXFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.cpp")
+#define JITTYC_LINK_COMMAND (CXX " " LDFLAGS " " SLDFLAGS " -o %s.so %s.o")
 
 namespace mcrl2
 {
@@ -3183,7 +3183,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   file_base << getpid() << "_" << reinterpret_cast< long >(this);
 
-  file_c  = file_base.str() + ".c";
+  file_c  = file_base.str() + ".cpp";
   file_o  = file_base.str() + ".o";
   file_so = file_base.str() + ".so";
 
@@ -3211,7 +3211,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "static ATermAppl makeAppl4(AFun a, ATerm h, ATermAppl t1, ATermAppl t2, ATermAppl t3, ATermAppl t4) { return ATmakeAppl5(a,h,(ATerm) t1, (ATerm) t2, (ATerm) t3, (ATerm) t4); }\n"
           "static ATermAppl makeAppl5(AFun a, ATerm h, ATermAppl t1, ATermAppl t2, ATermAppl t3, ATermAppl t4, ATermAppl t5) { return ATmakeAppl6(a,h,(ATerm) t1, (ATerm) t2, (ATerm) t3, (ATerm) t4, (ATerm) t5); }\n"
           "\n"
-          "ATermAppl rewrite(ATermAppl);\n"
+          "extern \"C\" {\n ATermAppl rewrite(ATermAppl);\n }\n"
           "\n"
          );
 
@@ -3327,6 +3327,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "static ATerm *substs = NULL;\n"
           "static long substs_size = 0;\n"
           "\n"
+          "extern \"C\" { \n"
           "void set_subst(ATermAppl Var, ATerm Expr)\n"
           "{\n"
           "  long n = ATgetAFun(ATgetArgument(Var,0));\n"
@@ -3406,6 +3407,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "  {\n"
           "    substs[i] = NULL;\n"
           "  }\n"
+          "}\n"
           "}\n"
           "\n"
           "\n"
@@ -3650,7 +3652,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f,  "\n");
   }
 
-  fprintf(f,  "void rewrite_init()\n"
+  fprintf(f,  "extern \"C\" {\n"
+          "void rewrite_init()\n"
           "{\n"
 #ifndef USE_VARAFUN_VALUE
           "  varAFun = ATmakeAFun(\"DataVarId\", 2, ATfalse);\n"
@@ -3887,6 +3890,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "    return r;\n"
           "  }\n"
           "}\n"
+      "}\n"
          );
 
   fclose(f);

@@ -39,8 +39,8 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-#define INNERC_COMPILE_COMMAND (CC " -c " CFLAGS " " SCFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.c")
-#define INNERC_LINK_COMMAND (CC " " LDFLAGS " " SLDFLAGS " -o %s.so %s.o")
+#define INNERC_COMPILE_COMMAND (CXX " -c " CXXFLAGS " " SCXXFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.cpp")
+#define INNERC_LINK_COMMAND (CXX " " LDFLAGS " " SLDFLAGS " -o %s.so %s.o")
 
 #define ATXgetArgument(x,y) ((unsigned int) (intptr_t) ATgetArgument(x,y))
 
@@ -1743,7 +1743,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
 
   file_base << getpid() << "_" << reinterpret_cast< long >(this);
 
-  file_c  = file_base.str() + ".c";
+  file_c  = file_base.str() + ".cpp";
   file_o  = file_base.str() + ".o";
   file_so = file_base.str() + ".so";
 
@@ -1765,7 +1765,9 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "extern void ATprotectAppl(ATermAppl *a);\n"
           "#endif\n"
           "\n"
+          "extern \"C\" {\n"
           "ATermAppl rewrite(ATermAppl);\n"
+          "}\n"
           "\n"
          );
 
@@ -1868,6 +1870,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "static ATerm *substs = NULL;\n"
           "static long substs_size = 0;\n"
           "\n"
+          "extern \"C\" {\n"
           "void set_subst(ATermAppl Var, ATerm Expr)\n"
           "{\n"
           "  long n = ATgetAFun(ATgetArgument(Var,0));\n"
@@ -1947,6 +1950,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "  {\n"
           "    substs[i] = NULL;\n"
           "  }\n"
+          "}\n"
           "}\n"
           "\n"
           "\n"
@@ -2197,7 +2201,8 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
     fprintf(f,  "\n");
   }
 
-  fprintf(f,  "void rewrite_init()\n"
+  fprintf(f,  "extern \"C\" {"
+          "void rewrite_init()\n"
           "{\n"
 #ifndef USE_VARAFUN_VALUE
           "  varAFun = ATmakeAFun(\"DataVarId\", 2, ATfalse);\n"
@@ -2364,6 +2369,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "    ATermAppl r=(ATermAppl) get_subst(t);\n"
           "    return r;\n"
           "  }\n"
+          "}\n"
           "}\n",
           num_opids,
           num_opids

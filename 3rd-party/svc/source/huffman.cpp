@@ -36,8 +36,6 @@ void HFstats(struct HFnode*, int, long*);
 
 void HFdumpCode(FILE*, struct HFnode*);
 
-
-
 /* Initialise 'tree' by adding one separator code */
 
 int HFinit(HFtree* tree, HTable* terms)
@@ -48,8 +46,8 @@ int HFinit(HFtree* tree, HTable* terms)
   NO_ATERM=NULL;
   ATprotect(&ESCAPE_SEQUENCE);
   ATprotect(&NO_ATERM);
-  ESCAPE_SEQUENCE=(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,ATtrue),(ATerm)ATmakeAppl0(ATmakeAFun("NEW",0,ATfalse)));
-  NO_ATERM       =(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,ATtrue),(ATerm)ATmakeAppl0(ATmakeAFun("NIL",0,ATfalse)));
+  ESCAPE_SEQUENCE=(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,true),(ATerm)ATmakeAppl0(ATmakeAFun("NEW",0,false)));
+  NO_ATERM       =(ATerm)ATmakeAppl1(ATmakeAFun("ESC",1,true),(ATerm)ATmakeAppl0(ATmakeAFun("NIL",0,false)));
 
   /* Init LZ buffer */
 
@@ -188,7 +186,7 @@ void HFdumpCodes(struct HFnode* tree)
     if (tree->low==NULL && tree->high==NULL)
     {
 
-      ATfprintf(stderr, "%6d %t: ", tree->frequency, tree->term? tree->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,ATfalse)));
+      ATfprintf(stderr, "%6d %t: ", tree->frequency, tree->term? tree->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,false)));
       HFdumpCode(stderr, tree);
       fprintf(stderr, "\n");
 

@@ -3,10 +3,8 @@
 
 #include "aterm2.h"
 
-#ifdef __cplusplus
 extern "C"
 {
-#endif/* __cplusplus */
 
 #define MAX_BLOCKS_PER_SIZE 1024
 
@@ -91,7 +89,7 @@ extern "C"
   HashNumber AT_hashnumber(ATerm t);
   ATerm AT_allocate(size_t size);
   void  AT_freeTerm(size_t size, ATerm t);
-  ATbool AT_isValidTerm(ATerm term);
+  bool AT_isValidTerm(ATerm term);
   ATerm AT_isInsideValidTerm(ATerm term);
   void  AT_validateFreeList(size_t size);
   size_t AT_inAnyFreeList(ATerm t);
@@ -123,8 +121,6 @@ extern "C"
 
 #define AT_getMaxTermSize() (maxTermSize)
 
-#ifdef __cplusplus
-}
-#endif/* __cplusplus */
+} // extern "C"
 
 #endif

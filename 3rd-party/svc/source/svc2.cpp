@@ -40,19 +40,19 @@ int SVCerrno;
    error occurred, for instance because there
    is no room left to store the new term */
 
-SVClabelIndex SVCnewLabel(SVCfile* file, ATerm term, SVCbool* _new)
+SVClabelIndex SVCnewLabel(SVCfile* file, ATerm term, bool* _new)
 {
   SVClabelIndex index;
 
 
   if (HTmember(&file->file.labelTable, term, &index))
   {
-    *_new=SVCfalse;
+    *_new=false;
     return index;
   }
   else
   {
-    *_new=SVCtrue;
+    *_new=true;
     if (file->file.fileMode==SVCwrite)
     {
       file->header.numLabels++;
@@ -94,18 +94,18 @@ ATerm SVClabel2ATerm(SVCfile* file, SVClabelIndex index)
 }
 
 
-SVCstateIndex SVCnewState(SVCfile* file, ATerm term, SVCbool* _new)
+SVCstateIndex SVCnewState(SVCfile* file, ATerm term, bool* _new)
 {
   SVCstateIndex index;
 
 
   if (HTmember(&file->file.stateTable, term, &index))
   {
-    *_new=SVCfalse;
+    *_new=false;
   }
   else
   {
-    *_new=SVCtrue;
+    *_new=true;
     if (file->file.fileMode==SVCwrite)
     {
       file->header.numStates++;
@@ -142,19 +142,19 @@ ATerm SVCstate2ATerm(SVCfile* file, SVCstateIndex index)
 }
 
 
-SVCparameterIndex SVCnewParameter(SVCfile* file, ATerm term, SVCbool* _new)
+SVCparameterIndex SVCnewParameter(SVCfile* file, ATerm term, bool* _new)
 {
   SVCparameterIndex index;
 
 
   if (HTmember(&file->file.parameterTable, term, &index))
   {
-    *_new=SVCfalse;
+    *_new=false;
     return index;
   }
   else
   {
-    *_new=SVCtrue;
+    *_new=true;
     if (file->file.fileMode==SVCwrite)
     {
       file->header.numParameters++;
@@ -258,12 +258,12 @@ int SVCgetNextTransition(SVCfile* file,
 }
 
 
-int SVCopen(SVCfile* file, char* filename, SVCfileMode mode, SVCbool* indexed)
+int SVCopen(SVCfile* file, char* filename, SVCfileMode mode, bool* indexed)
 {
   char* version;
   char buffy[256];
   time_t now;
-  SVCbool _new;
+  bool _new;
 
   file->transitionNumber = 0L;
   switch (mode)
@@ -373,7 +373,7 @@ char* SVCgetFormatVersion(SVCfile* file)
 
 }
 
-SVCbool SVCgetIndexFlag(SVCfile* file)
+bool SVCgetIndexFlag(SVCfile* file)
 {
 
   return file->file.indexFlag;

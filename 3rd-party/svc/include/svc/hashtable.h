@@ -23,10 +23,6 @@
 #ifndef __HASH_TABLE_H
 #define __HASH_TABLE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "aterm2.h"
 #include "ptable.h"
 
@@ -43,10 +39,6 @@ extern "C" {
   ATerm HTgetTerm(HTable*, long);
   void* HTgetPtr(HTable*, long);
   void HTsetPtr(HTable*, long, void*);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif
 
