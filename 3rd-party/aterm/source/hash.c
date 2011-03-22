@@ -216,7 +216,7 @@ static void insertKeyValue(ATermIndexedSet s,
   }
   else if (n == s->nr_entries-1)
   {
-    keytable = AT_grow_protected(s->keys[x], y+1);
+    keytable = AT_grow_protected((void*)s->keys[x], y+1);
     s->keys[x] = keytable;
     if (keytable == NULL)
     {
@@ -225,7 +225,7 @@ static void insertKeyValue(ATermIndexedSet s,
 
     if (s->values != NULL)
     {
-      valuetable = AT_grow_protected(s->values[x], y+1);
+      valuetable = AT_grow_protected((void*)s->values[x], y+1);
       s->values[x] = valuetable;
       if (valuetable == NULL)
       {
@@ -393,7 +393,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
 
   hashset->nr_free_tables = INITIAL_NR_OF_TABLES;
   hashset->first_free_position = 0;
-  hashset->free_table=(size_t**)AT_calloc(sizeof(size_t*),
+  hashset->free_table=AT_calloc(sizeof(size_t*),
                                 hashset->nr_free_tables);
   if (hashset->free_table == NULL)
   {
@@ -422,10 +422,10 @@ void ATindexedSetReset(ATermIndexedSet hashset)
 }
 
 /*}}}  */
-/*{{{  static size_t keyPut(ATermIndexedSet hashset, key, value, bool *isnew)*/
+/*{{{  static size_t keyPut(ATermIndexedSet hashset, key, value, ATbool *isnew)*/
 
 static size_t keyPut(ATermIndexedSet hashset, ATerm key,
-                     ATerm value, bool* isnew)
+                     ATerm value, ATbool* isnew)
 {
   size_t n,m;
 
@@ -437,7 +437,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
     {
       if (isnew != NULL)
       {
-        *isnew = false;
+        *isnew = ATfalse;
       }
       if (value != NULL)
       {
@@ -459,7 +459,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
     {
       if (isnew != NULL)
       {
-        *isnew = false;
+        *isnew = ATfalse;
       }
       if (value != NULL)
       {
@@ -474,7 +474,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
 
   if (isnew != NULL)
   {
-    *isnew = true;
+    *isnew = ATtrue;
   }
   insertKeyValue(hashset, n, key, value);
   if (hashset->nr_entries >= hashset->max_entries)
@@ -493,7 +493,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
  * an index. If elem is already in the set, deliver 0
  */
 
-size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, bool* isnew)
+size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, ATbool* isnew)
 {
   return keyPut(hashset, elem, NULL, isnew);
 }
@@ -655,7 +655,7 @@ void ATtablePut(ATermTable table, ATerm key, ATerm value)
   /* insert entry key into the hashtable, and deliver
      an index. If key is already in the set, deliver 0 */
 
-  bool isnew;
+  ATbool isnew;
 
   keyPut(table, key, value, &isnew);
 }
@@ -727,7 +727,7 @@ void ATtableRemove(ATermTable table, ATerm key)
   if (ltable == NULL)
   {
     /* create a new key table */
-    ltable = (size_t*)AT_malloc(sizeof(size_t)*ELEMENTS_PER_TABLE);
+    ltable = AT_malloc(sizeof(size_t)*ELEMENTS_PER_TABLE);
     table->free_table[x] = ltable;
     if (ltable == NULL)
     {

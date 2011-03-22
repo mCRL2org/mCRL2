@@ -1,10 +1,12 @@
 #ifndef HASHTABLE_H_
 #define HASHTABLE_H_
 
-#include "atypes.h"
-
+#ifdef __cplusplus
 extern "C"
 {
+#endif /* __cplusplus */
+
+#include "atypes.h"
 
   struct Entry;
   typedef struct Entry Entry;
@@ -44,6 +46,8 @@ extern "C"
 
   void IMdestroyIDMappings(IDMappings idMappings);
 
-} // extern "C"
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* HASHTABLE_H_ */

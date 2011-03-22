@@ -6,8 +6,10 @@
 #define ENCODING_H
 #include "atypes.h"
 
+#ifdef __cplusplus
 extern "C"
 {
+#endif/* __cplusplus */
 
   /*
    32-bit:
@@ -92,7 +94,7 @@ extern "C"
 #define GET_ARITY(h)        ((size_t)(((h) & MASK_ARITY) >> SHIFT_ARITY))
 #define GET_SYMBOL(h)       ((AFun)((h) >> SHIFT_SYMBOL))
 #define GET_LENGTH(h)         ((size_t)((h) >> SHIFT_LENGTH))
-#define IS_QUOTED(h)          (((h) & MASK_QUOTED) ? true : false)
+#define IS_QUOTED(h)          (((h) & MASK_QUOTED) ? ATtrue : ATfalse)
 
 #define SET_MARK(h)           do { (h) |= MASK_MARK; } while (0)
 
@@ -158,6 +160,8 @@ extern "C"
 
   typedef void (*ATermProtFunc)();
 
-} // extern "C"
+#ifdef __cplusplus
+}
+#endif/* __cplusplus */
 
 #endif

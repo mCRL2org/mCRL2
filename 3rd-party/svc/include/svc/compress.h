@@ -23,6 +23,10 @@
 #ifndef __COMPRESS_H
 #define __COMPRESS_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "huffman.h"
 
 
@@ -55,5 +59,9 @@
   void  CSflush(CompressedStream*);
   int  CSseek(CompressedStream*, long, int);
   long CStell(CompressedStream*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

@@ -25,6 +25,10 @@
 #ifndef _SVC1_H
 #define _SVC1_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "aterm1.h"
 
 #include "compress.h"
@@ -32,7 +36,9 @@
 #define SVC_VERSION     "1.2 beta"
 
   typedef long             SVCint;
-
+  typedef enum {SVCfalse=0,
+                SVCtrue
+               }    SVCbool;
   typedef enum {SVCwrite,
                 SVCread
                }    SVCfileMode;
@@ -44,7 +50,7 @@
                       *csLabels,
                       *csParameters;
     BitStream* bs;
-    bool firstTransition,
+    SVCbool firstTransition,
             indexFlag;
     char* formatVersion;
     SVCfileMode fileMode;
@@ -84,7 +90,7 @@
   };
 
 
-  int svcInit(ltsFile*, char*, SVCfileMode, bool*);
+  int svcInit(ltsFile*, char*, SVCfileMode, SVCbool*);
   int svcReadVersion(ltsFile*, char** version);
   int svcReadHeader(ltsFile*, struct ltsHeader*);
   int svcReadNextTransition(ltsFile*, struct ltsTransition*);
@@ -95,5 +101,9 @@
   int svcWriteTrailer(ltsFile*);
   int svcFree(ltsFile*);
   char* svcError(int errnum);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

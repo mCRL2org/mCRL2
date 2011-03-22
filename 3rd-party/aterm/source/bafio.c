@@ -62,7 +62,7 @@ typedef struct
 
   size_t toptable_size;
   top_symbol** toptable;
-} top_symbols_t;
+} top_symbols;
 
 typedef struct _sym_entry
 {
@@ -72,7 +72,7 @@ typedef struct _sym_entry
   size_t nr_terms;
   trm_bucket* terms;
 
-  top_symbols_t* top_symbols; /* top symbols occuring in this symbol */
+  top_symbols* top_symbols; /* top symbols occuring in this symbol */
 
   size_t termtable_size;
   trm_bucket** termtable;
@@ -278,7 +278,7 @@ readBits(size_t* val, size_t nr_bits, byte_reader* reader)
 /*}}}  */
 /*{{{  static int writeInt(size_t val, byte_writer *writer) */
 
-static bool writeInt(size_t val, byte_writer* writer)
+static ATbool writeInt(size_t val, byte_writer* writer)
 {
   size_t nr_items;
   unsigned char buf[8];
@@ -286,11 +286,11 @@ static bool writeInt(size_t val, byte_writer* writer)
   nr_items = writeIntToBuf(val, buf);
   if (write_bytes((char*)buf, nr_items, writer) != nr_items)
   {
-    return false;
+    return ATfalse;
   }
 
   /* Ok */
-  return true;
+  return ATtrue;
 }
 
 /*}}}  */
@@ -367,22 +367,22 @@ static int readInt(size_t* val, byte_reader* reader)
 /*}}}  */
 /*{{{  static int writeString(const char *str, size_t len, byte_writer *writer) */
 
-static bool writeString(const char* str, size_t len, byte_writer* writer)
+static ATbool writeString(const char* str, size_t len, byte_writer* writer)
 {
   /* Write length. */
   if (!writeInt(len, writer))
   {
-    return false;
+    return ATfalse;
   }
 
   /* Write actual string. */
   if (write_bytes(str, len, writer) != len)
   {
-    return false;
+    return ATfalse;
   }
 
   /* Ok */
-  return true;
+  return ATtrue;
 }
 
 /*}}}  */
@@ -427,25 +427,25 @@ static size_t readString(byte_reader* reader)
  * Write a symbol to file.
  */
 
-static bool write_symbol(AFun sym, byte_writer* writer)
+static ATbool write_symbol(AFun sym, byte_writer* writer)
 {
   char* name = ATgetName(sym);
   if (!writeString(name, strlen(name), writer))
   {
-    return false;
+    return ATfalse;
   }
 
   if (!writeInt(ATgetArity(sym), writer))
   {
-    return false;
+    return ATfalse;
   }
 
   if (!writeInt(ATisQuoted(sym), writer))
   {
-    return false;
+    return ATfalse;
   }
 
-  return true;
+  return ATtrue;
 }
 
 /*}}}  */
@@ -546,7 +546,7 @@ static void gather_top_symbols(sym_entry* cur_entry,
 {
   size_t index;
   size_t hnr;
-  top_symbols_t* tss;
+  top_symbols* tss;
   sym_entry* top_entry;
 
   tss = &cur_entry->top_symbols[cur_arg];
@@ -603,8 +603,8 @@ static void build_arg_tables()
     }
     else
     {
-      cur_entry->top_symbols = (top_symbols_t*)AT_calloc(arity,
-                               sizeof(top_symbols_t));
+      cur_entry->top_symbols = (top_symbols*)AT_calloc(arity,
+                               sizeof(top_symbols));
       if (!cur_entry->top_symbols)
       {
         ATerror("build_arg_tables: out of memory (arity: %d)\n", arity);
@@ -739,7 +739,7 @@ static void collect_terms(ATerm t)
  * Write all symbols in a term to file.
  */
 
-static bool write_symbols(byte_writer* writer)
+static ATbool write_symbols(byte_writer* writer)
 {
   size_t sym_idx, arg_idx, top_idx;
 
@@ -748,11 +748,11 @@ static bool write_symbols(byte_writer* writer)
     sym_entry* cur_sym = &sym_entries[sym_idx];
     if (!write_symbol(cur_sym->id, writer))
     {
-      return false;
+      return ATfalse;
     }
     if (!writeInt(cur_sym->nr_terms, writer))
     {
-      return false;
+      return ATfalse;
     }
 
     for (arg_idx=0; arg_idx<cur_sym->arity; arg_idx++)
@@ -760,20 +760,20 @@ static bool write_symbols(byte_writer* writer)
       size_t nr_symbols = cur_sym->top_symbols[arg_idx].nr_symbols;
       if (!writeInt(nr_symbols, writer))
       {
-        return false;
+        return ATfalse;
       }
       for (top_idx=0; top_idx<nr_symbols; top_idx++)
       {
         top_symbol* ts = &cur_sym->top_symbols[arg_idx].symbols[top_idx];
         if (!writeInt(ts->index, writer))
         {
-          return false;
+          return ATfalse;
         }
       }
     }
   }
 
-  return true;
+  return ATtrue;
 }
 
 /*}}}  */
@@ -805,7 +805,7 @@ static size_t find_term(sym_entry* entry, ATerm t)
  * Find a top symbol in a topsymbol table.
  */
 
-static top_symbol* find_top_symbol(top_symbols_t* syms, AFun sym)
+static top_symbol* find_top_symbol(top_symbols* syms, AFun sym)
 {
   size_t hnr = sym % syms->toptable_size;
   top_symbol* cur = syms->toptable[hnr];
@@ -828,9 +828,9 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, AFun sym)
  */
 
 /* forward declaration */
-static bool write_term(ATerm, byte_writer*);
+static ATbool write_term(ATerm, byte_writer*);
 
-static bool write_arg(sym_entry* trm_sym, ATerm arg, size_t arg_idx,
+static ATbool write_arg(sym_entry* trm_sym, ATerm arg, size_t arg_idx,
                         byte_writer* writer)
 {
   top_symbol* ts;
@@ -843,7 +843,7 @@ static bool write_arg(sym_entry* trm_sym, ATerm arg, size_t arg_idx,
 
   if (writeBits(ts->code, ts->code_width, writer)<0)
   {
-    return false;
+    return ATfalse;
   }
 
   arg_sym = &sym_entries[ts->index];
@@ -851,16 +851,16 @@ static bool write_arg(sym_entry* trm_sym, ATerm arg, size_t arg_idx,
   arg_trm_idx = find_term(arg_sym, arg);
   if (writeBits(arg_trm_idx, arg_sym->term_width, writer)<0)
   {
-    return false;
+    return ATfalse;
   }
 
   if (arg_trm_idx >= arg_sym->cur_index &&
       !write_term(arg, writer))
   {
-    return false;
+    return ATfalse;
   }
 
-  return true;
+  return ATtrue;
 }
 
 /*}}}  */
@@ -870,7 +870,7 @@ static bool write_arg(sym_entry* trm_sym, ATerm arg, size_t arg_idx,
  * Write a term using a writer.
  */
 
-static bool write_term(ATerm t, byte_writer* writer)
+static ATbool write_term(ATerm t, byte_writer* writer)
 {
   size_t arg_idx;
   sym_entry* trm_sym = NULL;
@@ -881,7 +881,7 @@ static bool write_term(ATerm t, byte_writer* writer)
         /* If ATerm integers are > 32 bits, then this can fail. */
         if (writeBits(ATgetInt((ATermInt)t), INT_SIZE_IN_BAF, writer) < 0)
         {
-          return false;
+          return ATfalse;
         }
         trm_sym = &sym_entries[at_lookup_table[AS_INT]->index];
         break;
@@ -897,11 +897,11 @@ static bool write_term(ATerm t, byte_writer* writer)
           trm_sym = &sym_entries[at_lookup_table[AS_LIST]->index];
           if (!write_arg(trm_sym, ATgetFirst(list), 0, writer))
           {
-            return false;
+            return ATfalse;
           }
           if (!write_arg(trm_sym, (ATerm)ATgetNext(list), 1, writer))
           {
-            return false;
+            return ATfalse;
           }
         }
       }
@@ -918,7 +918,7 @@ static bool write_term(ATerm t, byte_writer* writer)
           ATerm cur_arg = ATgetArgument((ATermAppl)t, arg_idx);
           if (!write_arg(trm_sym, cur_arg, arg_idx, writer))
           {
-            return false;
+            return ATfalse;
           }
         }
       }
@@ -936,7 +936,7 @@ static bool write_term(ATerm t, byte_writer* writer)
   }
   trm_sym->cur_index++;
 
-  return true;
+  return ATtrue;
 }
 
 /*}}}  */
@@ -962,7 +962,7 @@ static void free_write_space()
 
     for (j=0; j<entry->arity; j++)
     {
-      top_symbols_t* topsyms = &entry->top_symbols[j];
+      top_symbols* topsyms = &entry->top_symbols[j];
       if (topsyms->symbols)
       {
         AT_free(topsyms->symbols);
@@ -990,7 +990,7 @@ static void free_write_space()
 /*}}}  */
 /*{{{  ATbool write_baf(ATerm t, byte_writer *writer) */
 
-static bool
+static ATbool
 write_baf(ATerm t, byte_writer* writer)
 {
   size_t nr_unique_terms = 0;
@@ -1074,56 +1074,56 @@ write_baf(ATerm t, byte_writer* writer)
 
   if (!writeInt(0, writer))
   {
-    return false;
+    return ATfalse;
   }
 
   if (!writeInt(BAF_MAGIC, writer))
   {
-    return false;
+    return ATfalse;
   }
 
   if (!writeInt(BAF_VERSION, writer))
   {
-    return false;
+    return ATfalse;
   }
 
   if (!writeInt(nr_unique_symbols, writer))
   {
-    return false;
+    return ATfalse;
   }
 
   if (!writeInt(nr_unique_terms, writer))
   {
-    return false;
+    return ATfalse;
   }
 
   /*}}}  */
 
   if (!write_symbols(writer))
   {
-    return false;
+    return ATfalse;
   }
 
   /* Write the top symbol */
   sym = get_top_symbol(t)->id;
   if (!writeInt(get_top_symbol(t)-sym_entries, writer))
   {
-    return false;
+    return ATfalse;
   }
 
   if (!write_term(t, writer))
   {
-    return false;
+    return ATfalse;
   }
 
   if (flushBitsToWriter(writer)<0)
   {
-    return false;
+    return ATfalse;
   }
 
   free_write_space();
 
-  return true;
+  return ATtrue;
 }
 
 /*}}}  */
@@ -1133,14 +1133,14 @@ write_baf(ATerm t, byte_writer* writer)
 unsigned char* ATwriteToBinaryString(ATerm t, size_t* len)
 {
   static byte_writer writer;
-  static bool initialized = false;
+  static ATbool initialized = ATfalse;
 
   if (!initialized)
   {
     writer.type = STRING_WRITER;
     writer.u.string_data.buf = (unsigned char*)AT_calloc(BUFSIZ, 1);
     writer.u.string_data.max_size = BUFSIZ;
-    initialized = true;
+    initialized = ATtrue;
   }
   writer.u.string_data.cur_size = 0;
 
@@ -1160,15 +1160,15 @@ unsigned char* ATwriteToBinaryString(ATerm t, size_t* len)
 /*}}}  */
 /*{{{  ATbool ATwriteToBinaryFile(ATerm t, FILE *file) */
 
-bool ATwriteToBinaryFile(ATerm t, FILE* file)
+ATbool ATwriteToBinaryFile(ATerm t, FILE* file)
 {
   static byte_writer writer;
-  static bool initialized = false;
+  static ATbool initialized = ATfalse;
 
   if (!initialized)
   {
     writer.type = FILE_WRITER;
-    initialized = true;
+    initialized = ATtrue;
   }
   writer.u.file_data = file;
 
@@ -1190,10 +1190,10 @@ bool ATwriteToBinaryFile(ATerm t, FILE* file)
   * Write an ATerm to a named BAF file
   */
 
-bool ATwriteToNamedBinaryFile(ATerm t, const char* name)
+ATbool ATwriteToNamedBinaryFile(ATerm t, const char* name)
 {
   FILE*  f;
-  bool result;
+  ATbool result;
 
   if (!strcmp(name, "-"))
   {
@@ -1202,7 +1202,7 @@ bool ATwriteToNamedBinaryFile(ATerm t, const char* name)
 
   if (!(f = fopen(name, "wb")))
   {
-    return false;
+    return ATfalse;
   }
 
   result = ATwriteToBinaryFile(t, f);
@@ -1241,7 +1241,7 @@ static AFun read_symbol(byte_reader* reader)
     return ATERM_NON_EXISTING_POSITION;
   }
 
-  return ATmakeAFun(text_buffer, arity, quoted);
+  return ATmakeAFun(text_buffer, arity, quoted ? ATtrue : ATfalse);
 }
 
 /*}}}  */
@@ -1252,7 +1252,7 @@ static AFun read_symbol(byte_reader* reader)
  * Read all symbols from file.
  */
 
-static bool read_all_symbols(byte_reader* reader)
+static ATbool read_all_symbols(byte_reader* reader)
 {
   size_t k, val;
   size_t i, j, arity;
@@ -1277,7 +1277,7 @@ static bool read_all_symbols(byte_reader* reader)
 
     if (readInt(&val, reader) < 0 || val == 0)
     {
-      return false;
+      return ATfalse;
     }
     read_symbols[i].nr_terms = val;
     read_symbols[i].term_width = bit_width(val);
@@ -1328,7 +1328,7 @@ static bool read_all_symbols(byte_reader* reader)
     {
       if (readInt(&val, reader) < 0)
       {
-        return false;
+        return ATfalse;
       }
 
       read_symbols[i].nr_topsyms[j] = val;
@@ -1342,7 +1342,7 @@ static bool read_all_symbols(byte_reader* reader)
       {
         if (readInt(&val, reader) < 0)
         {
-          return false;
+          return ATfalse;
         }
         read_symbols[i].topsyms[j][k] = val;
       }
@@ -1350,7 +1350,7 @@ static bool read_all_symbols(byte_reader* reader)
 
   }
 
-  return true;
+  return ATtrue;
 }
 
 /*}}}  */

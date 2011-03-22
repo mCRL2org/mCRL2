@@ -23,6 +23,11 @@
 #ifndef __BLOCKLIST_H
 #define __BLOCKLIST_H
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
   typedef unsigned short Bool;
   typedef struct HFnode* HFcursor;
 
@@ -64,5 +69,9 @@
   void Bdelete(tBlock*, HFcursor);
   unsigned long Bfrequency(tBlock*);
   void Bfree(tBlock*);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

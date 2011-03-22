@@ -10,7 +10,7 @@
 
 char memmgnt_id[] = "$Id: memmgnt.c 23071 2007-07-02 10:06:17Z eriks $";
 
-extern bool low_memory;
+extern ATbool low_memory;
 void free_unused_blocks();
 
 #define MAX_UNUSED_BLOCKS 16

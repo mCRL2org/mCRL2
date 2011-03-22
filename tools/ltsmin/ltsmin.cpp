@@ -53,7 +53,7 @@ class ltsmin_tool : public ltsmin_base
 
     bool run()
     {
-      bool indexed = false;
+      SVCbool indexed = SVCfalse;
 
       if (SVCopen(inFile, const_cast < char* >(options.inputname.c_str()), SVCread, readIndex))
       {
@@ -182,7 +182,7 @@ void doReduce(t_tool_options const& options)
   Reduce();
   if (add_state_parameter)
   {
-    bool b;
+    SVCbool b;
     SVCfile inf;
     SVCopen(&inf, const_cast < char* >(options.inputname.c_str()), SVCread, &b);
     WriteDataAddParam(&inf,initState,WITH_TAULOOPS);
@@ -202,7 +202,7 @@ void doBranchReduce(t_tool_options const& options)
   ReduceBranching();
   if (add_state_parameter)
   {
-    bool b;
+    SVCbool b;
     SVCfile inf;
     SVCopen(&inf, const_cast < char* >(options.inputname.c_str()), SVCread, &b);
     WriteDataAddParam(&inf,initState,DELETE_TAULOOPS);

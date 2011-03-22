@@ -169,32 +169,32 @@ void AT_initAFun(int argc, char* argv[])
     ATerror("AT_initAFun: cannot allocate initial protection buffer.\n");
   }
 
-  sym = ATmakeAFun("<int>", 0, false);
+  sym = ATmakeAFun("<int>", 0, ATfalse);
   assert(sym == AS_INT);
   ATprotectAFun(sym);
 
   /* Can't remove real and blob below, as the symbols
      for PLACE_HOLDERS have predetermined values.... They are not
      used anymore. */
-  sym = ATmakeAFun("<real>", 0, false);
+  sym = ATmakeAFun("<real>", 0, ATfalse);
   ATprotectAFun(sym);
 
-  sym = ATmakeAFun("<blob>", 0, false);
+  sym = ATmakeAFun("<blob>", 0, ATfalse);
   ATprotectAFun(sym);
 
-  sym = ATmakeAFun("<_>", 1, false);
+  sym = ATmakeAFun("<_>", 1, ATfalse);
 
   ATprotectAFun(sym);
 
-  sym = ATmakeAFun("[_,_]", 2, false);
+  sym = ATmakeAFun("[_,_]", 2, ATfalse);
   assert(sym == AS_LIST);
   ATprotectAFun(sym);
 
-  sym = ATmakeAFun("[]", 0, false);
+  sym = ATmakeAFun("[]", 0, ATfalse);
   assert(sym == AS_EMPTY_LIST);
   ATprotectAFun(sym);
 
-  sym = ATmakeAFun("{_}", 2, false);
+  sym = ATmakeAFun("{_}", 2, ATfalse);
   ATprotectAFun(sym);
 }
 /*}}}  */
@@ -338,9 +338,9 @@ ShortHashNumber AT_hashAFun(const char* name, size_t arity)
 
 /*}}}  */
 
-/*{{{  AFun ATmakeAFun(const char *name, int arity, bool quoted) */
+/*{{{  AFun ATmakeAFun(const char *name, int arity, ATbool quoted) */
 
-AFun ATmakeAFun(const char* name, size_t arity, bool quoted)
+AFun ATmakeAFun(const char* name, size_t arity, ATbool quoted)
 {
   header_type header = SYMBOL_HEADER(arity, quoted);
   ShortHashNumber hnr = AT_hashAFun(name, arity) & table_mask;
@@ -449,13 +449,13 @@ void AT_freeAFun(SymEntry sym)
 }
 
 /*}}}  */
-/*{{{  bool AT_findAFun(char *name, int arity, bool quoted) */
+/*{{{  ATbool AT_findAFun(char *name, int arity, ATbool quoted) */
 
 /**
  * Check for the existence of a symbol
  */
 
-/* bool AT_findAFun(char *name, size_t arity, bool quoted)
+/* ATbool AT_findAFun(char *name, size_t arity, ATbool quoted)
 {
   header_type header = SYMBOL_HEADER(arity, quoted);
   ShortHashNumber hnr = AT_hashAFun(name, arity) & table_mask;
@@ -470,7 +470,7 @@ void AT_freeAFun(SymEntry sym)
   while (cur && (!EQUAL_HEADER(cur->header,header) || !streq(cur->name, name)))
     cur = cur->next;
 
-  return (cur == NULL) ? false : true;
+  return (cur == NULL) ? ATfalse : ATtrue;
 } */
 
 /*}}}  */

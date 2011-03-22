@@ -22,6 +22,11 @@
 
 #include <stdlib.h>
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+
 #define PT_INITIALSIZE 1024
 
 
@@ -36,3 +41,8 @@
   void PTput(PTable*, long index, void* ptr);
   void* PTget(PTable*, long index);
   void PTfree(PTable*);
+
+#ifdef __cplusplus
+}
+#endif
+

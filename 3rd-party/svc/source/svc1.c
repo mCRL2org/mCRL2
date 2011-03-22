@@ -37,7 +37,7 @@ int svcErrno;
 
 /* Initialise `file' with file `filename' */
 
-int svcInit(ltsFile* file, char* filename, SVCfileMode fileMode, bool* indexed)
+int svcInit(ltsFile* file, char* filename, SVCfileMode fileMode, SVCbool* indexed)
 {
   FILE* fp;
   Bit indexFlag;

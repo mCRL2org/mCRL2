@@ -14,15 +14,15 @@ cmake_minimum_required(VERSION 2.6)
 
 # actual target:
 add_library(${PROJECT_NAME}
-  source/huffman.cpp
-  source/lz.cpp
-  source/compress.cpp
-  source/blocklist.cpp
-  source/code.cpp
-  source/ptable.cpp
-  source/svc1.cpp
-  source/svc2.cpp
-  source/hashtable.cpp
+  source/huffman.c
+  source/lz.c
+  source/compress.c
+  source/blocklist.c
+  source/code.c
+  source/ptable.c
+  source/svc1.c
+  source/svc2.c
+  source/hashtable.c
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
