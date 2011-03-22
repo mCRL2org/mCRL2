@@ -3,11 +3,6 @@
 
 #include "aterm2.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif/* __cplusplus */
-
   typedef struct ProtEntry
   {
     struct ProtEntry* next;
@@ -18,7 +13,7 @@ extern "C"
 #define STRING_MARK 0xFF /* marker for binary strings */
 #define LENSPEC 12
 
-  extern ATbool low_memory;
+  extern bool low_memory;
 
   extern ProtEntry** at_prot_table;
   extern size_t at_prot_table_size;
@@ -31,9 +26,5 @@ extern "C"
 
   void AT_unmarkIfAllMarked(ATerm t);
   size_t  AT_calcUniqueAFuns(ATerm t);
-
-#ifdef __cplusplus
-}
-#endif/* __cplusplus */
 
 #endif

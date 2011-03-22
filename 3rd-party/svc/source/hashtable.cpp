@@ -61,7 +61,7 @@ void HTfree(HTable* table)
 
 unsigned int HTinsert(HTable* table, ATerm a, void* ptr)
 {
-  ATbool _new;
+  bool _new;
   unsigned int ret;
 
   ret= (unsigned int)ATindexedSetPut(table->terms, a, &_new);

@@ -32,7 +32,7 @@ BLOK* blok;
 BLOCKS blocks;
 
 SVCfile inFile[MAX_INFILES], outFile[1];
-SVCbool readIndex[MAX_INFILES];
+bool readIndex[MAX_INFILES];
 ATermTable* lab_src_tgt, *lab_tgt_src, graph, graph_i;
 ATerm* label_name, *par_name;
 /* End data definition */
@@ -800,7 +800,7 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
 static int WriteTransitions(void)
 {
   int b, n_tau_transitions = 0;
-  SVCbool nnew;
+  bool nnew;
   for (b=0; b<nstate; b++)
   {
     ATerm bname = (ATerm) ATmakeInt(b);
@@ -873,7 +873,7 @@ SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool
 int WriteData(SVCstateIndex initState, int omit_tauloops)
 {
   static char buf[1024];
-  SVCbool nnew;
+  bool nnew;
   int n_tau_transitions;
   SVCstateIndex newState = SVCnewState(outFile,
                                        (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse)), &nnew);
@@ -937,19 +937,19 @@ SVCstateIndex get_new_state(SVCfile* in, SVCstateIndex s)
 
   state = ATmakeApplArray(state_afun,state_args);
 
-  SVCbool nnew;
+  bool nnew;
   return SVCnewState(outFile,(ATerm) state, &nnew);
 }
 
 SVClabelIndex get_new_label(SVCfile* in, SVClabelIndex l)
 {
-  SVCbool nnew;
+  bool nnew;
   return SVCnewLabel(outFile,SVClabel2ATerm(in,l), &nnew);
 }
 
 SVCparameterIndex get_new_param()
 {
-  SVCbool nnew;
+  bool nnew;
   return SVCnewParameter(outFile, (ATerm)ATmakeList0(), &nnew);
 }
 

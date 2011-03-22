@@ -37,14 +37,14 @@ using namespace mcrl2::lts::detail;
 static void read_from_svc(lts_svc_t& l, string const& filename)
 {
   SVCfile f;
-  SVCbool b;
+  bool b;
 
   if (SVCopen(&f,const_cast< char* >(filename.c_str()),SVCread,&b))
   {
     throw mcrl2::runtime_error("cannot open SVC file '" + filename + "' for reading.");
   }
 
-  bool svc_file_has_state_info = (SVCgetIndexFlag(&f) == SVCfalse);
+  bool svc_file_has_state_info = !SVCgetIndexFlag(&f);
 
   assert(SVCgetInitialState(&f)==0);
   if (svc_file_has_state_info)
@@ -92,7 +92,7 @@ static void read_from_svc(lts_svc_t& l, string const& filename)
 static void write_to_svc(const lts_svc_t& l, const string& filename)
 {
   SVCfile f;
-  SVCbool b = l.has_state_info() ? SVCfalse : SVCtrue;
+  bool b = !l.has_state_info();
   if (SVCopen(&f,const_cast< char* >(filename.c_str()),SVCwrite,&b))
   {
     throw mcrl2::runtime_error("cannot open SVC file '" + filename + "' for writing.");

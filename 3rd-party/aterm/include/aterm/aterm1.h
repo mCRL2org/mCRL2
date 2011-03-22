@@ -64,13 +64,7 @@
 #include <stdio.h>
 #include <stdarg.h>
 #include "encoding.h"
-#include "abool.h"
 #include "atypes.h"
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif/* __cplusplus */
 
   /** Returns the type of an ATerm, \see AT_APPL */
 #define ATgetType(t) GET_TYPE((t)->header)
@@ -88,30 +82,30 @@ extern "C"
 #define AT_SYMBOL       7L /**< internally used type*/
 
 
-#define ATisEqual(t1,t2) ((ATbool)((ATerm)(t1) == (ATerm)(t2)))
+#define ATisEqual(t1,t2) ((ATerm)(t1) == (ATerm)(t2))
 #define ATisEqualAFun(f1, f2) ((f1) == (f2))
 
   /**
    * Serialize a term to file, in readable ATerm format. No sharing is applied
    * in the serialized format.
    */
-  ATbool ATwriteToTextFile(ATerm t, FILE* file);
+  bool ATwriteToTextFile(ATerm t, FILE* file);
 
-  ATbool ATwriteToBinaryFile(ATerm t, FILE* file);
+  bool ATwriteToBinaryFile(ATerm t, FILE* file);
 
   /**
    * Call ATwriteToTextFile() after opening a file.
    * \arg t term to write
    * \arg name name of the file. If the name equals "-", stdout is used.
    */
-  ATbool ATwriteToNamedTextFile(ATerm t, const char* name);
+  bool ATwriteToNamedTextFile(ATerm t, const char* name);
 
   /**
    * Call ATwriteToBinaryFile() after opening a file.
    * \arg t term to write
    * \arg name name of the file. If the name equals "-", stdout is used.
    */
-  ATbool ATwriteToNamedBinaryFile(ATerm t, const char* name);
+  bool ATwriteToNamedBinaryFile(ATerm t, const char* name);
 
   /**
    * Serialize an ATerm to a static buffer. Note that the buffer is
@@ -170,11 +164,11 @@ extern "C"
 
 
   /* SAF I/O stuff */
-  ATbool ATwriteToSAFFile(ATerm aTerm, FILE* file);
+  bool ATwriteToSAFFile(ATerm aTerm, FILE* file);
 
   ATerm ATreadFromSAFFile(FILE* file);
 
-  ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char* filename);
+  bool ATwriteToNamedSAFFile(ATerm aTerm, const char* filename);
 
   ATerm ATreadFromNamedSAFFile(const char* filename);
 
@@ -284,7 +278,7 @@ extern "C"
    * Check whether the ATerm library has been initialized.
    * \returns ATtrue if the library was initialized, and ATfalse otherwise
    */
-  ATbool ATisInitialized();
+  bool ATisInitialized();
 
   /**
    * Set another handler for warning messages. Basically, this replaces
@@ -353,9 +347,5 @@ extern "C"
    * \see fprintf(), but with a va_list instead of a variable argument list.
    */
   int  ATvfprintf(FILE* stream, const char* format, va_list args);
-
-#ifdef __cplusplus
-}
-#endif/* __cplusplus */
 
 #endif

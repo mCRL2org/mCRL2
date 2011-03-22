@@ -7,7 +7,6 @@
 #include <inttypes.h>
 #endif */
 #include "stddef.h"
-#include "abool.h"
 
 #ifndef AT_64BIT
 /* Covers gcc, icc, msvc and Solaris cc */
@@ -18,10 +17,6 @@
 # endif
 #endif
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif/* __cplusplus */
 
   typedef size_t ShortHashNumber;
   typedef size_t MachineWord;
@@ -65,9 +60,5 @@ extern "C"
 #endif /* AT_64BIT */
 
 #define ADDR_TO_HNR(a) (((HashNumber)(a)) >> 2)
-
-#ifdef __cplusplus
-}
-#endif/* __cplusplus */
 
 #endif /* ATYPES_H */

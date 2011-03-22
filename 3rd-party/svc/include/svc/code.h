@@ -23,10 +23,6 @@
 #ifndef __CODE_H
 #define __CODE_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #define NO_INT INT_MAX
 #define NO_TERM NULL
 
@@ -56,9 +52,5 @@ extern "C" {
   void BSflush(BitStream*);
   int  BSseek(BitStream*, long, int);
   long BStell(BitStream*);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

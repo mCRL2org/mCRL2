@@ -14,12 +14,6 @@
 #include <unistd.h>
 #include "aterm1.h"
 #include "afun.h"
-#include "abool.h"
-
-#ifdef __cplusplus
-extern "C"
-{
-#endif/* __cplusplus */
 
   /* The largest size_t is used as an indicator that an element does not exist.
      This is used as a replacement of a negative number as an indicator of non
@@ -29,6 +23,10 @@ extern "C"
   /**
     * We define some new datatypes.
     */
+
+typedef bool ATbool;
+#define ATtrue true
+#define ATfalse false
 
   struct __ATermInt
   {
@@ -153,8 +151,8 @@ extern "C"
 #define   ATgetNext(l)  (((ATermList)l)->aterm.tail)
 
   /*ATbool ATisEmpty(ATermList list);*/
-#define ATisEmpty(list) ((ATbool)(((ATermList)list)->aterm.head == NULL \
-                                  && ((ATermList)list)->aterm.tail == NULL))
+#define ATisEmpty(list) (((ATermList)list)->aterm.head == NULL \
+                                  && ((ATermList)list)->aterm.tail == NULL)
 
   ATermList ATgetTail(ATermList list, int start);
   ATermList ATgetSlice(ATermList list, size_t start, size_t end);
@@ -182,13 +180,13 @@ extern "C"
   ATindexedSetCreate(size_t initial_size, unsigned int max_load_pct);
   void       ATindexedSetDestroy(ATermIndexedSet set);
   void       ATindexedSetReset(ATermIndexedSet set);
-  size_t     ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool* isnew);
+  size_t     ATindexedSetPut(ATermIndexedSet set, ATerm elem, bool* isnew);
   ssize_t     ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem); /* A negative value represents non existence. */
   void       ATindexedSetRemove(ATermIndexedSet set, ATerm elem);
   ATermList  ATindexedSetElements(ATermIndexedSet set);
   ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
 
-  AFun  ATmakeAFun(const char* name, size_t arity, ATbool quoted);
+  AFun  ATmakeAFun(const char* name, size_t arity, bool quoted);
 
   /*char   *ATgetName(AFun sym);*/
 #define ATgetName(sym) (at_lookup_table[(sym)]->name)
@@ -206,7 +204,7 @@ extern "C"
      "RSA Data Security, Inc. MD5 Message-Digest Algorithm" (see RFC1321)
   */
   unsigned char* ATchecksum(ATerm t);
-  ATbool ATdiff(ATerm t1, ATerm t2, ATerm* templ, ATerm* diffs);
+  bool ATdiff(ATerm t1, ATerm t2, ATerm* templ, ATerm* diffs);
 
   /* Compare two ATerms. This is a complete stable ordering on ATerms.
    * They are compared 'lexicographically', function names before the
@@ -218,8 +216,8 @@ extern "C"
    */
   int ATcompare(ATerm t1, ATerm t2);
 
-  void ATsetChecking(ATbool on);
-  ATbool ATgetChecking(void);
+  void ATsetChecking(bool on);
+  bool ATgetChecking(void);
 
   extern size_t at_gc_count;
 #define ATgetGCCount()    (at_gc_count)
@@ -230,9 +228,5 @@ extern "C"
 #define ATwriteToStringBuffer(t,b) AT_writeToStringBuffer((t),(b))
 
 #define ATgetAFunId(afun) ((afun))
-
-#ifdef __cplusplus
-}
-#endif/* __cplusplus */
 
 #endif

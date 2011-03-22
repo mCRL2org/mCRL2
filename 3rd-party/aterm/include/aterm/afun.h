@@ -5,11 +5,6 @@
 #include "encoding.h"
 #include "stdio.h"
 
-#ifdef __cplusplus
-extern "C"
-{
-#endif/* __cplusplus */
-
 #define AS_INT          0
 #define AS_REAL         1
 #define AS_BLOB         2
@@ -48,8 +43,8 @@ extern "C"
   void AT_initAFun(int argc, char* argv[]);
   size_t AT_printAFun(AFun sym, FILE* f);
 
-#define AT_isValidAFun(sym) (((AFun)sym != (AFun)(-1) && (MachineWord)(AFun)sym < AT_symbolTableSize() \
-                              && !SYM_IS_FREE(at_lookup_table[(AFun)sym])) ?  ATtrue : ATfalse)
+#define AT_isValidAFun(sym) ((AFun)sym != (AFun)(-1) && (MachineWord)(AFun)sym < AT_symbolTableSize() \
+                              && !SYM_IS_FREE(at_lookup_table[(AFun)sym]))
 
 
 #define AT_isMarkedAFun(sym) IS_MARKED(at_lookup_table[(AFun)sym]->header)
@@ -59,11 +54,7 @@ extern "C"
   void AT_markProtectedAFuns_young();
 
   size_t AT_hashAFun(const char* name, size_t arity);
-  ATbool AT_findAFun(char* name, size_t arity, ATbool quoted);
+  bool AT_findAFun(char* name, size_t arity, bool quoted);
   void AT_unmarkAllAFuns();
-
-#ifdef __cplusplus
-}
-#endif/* __cplusplus */
 
 #endif

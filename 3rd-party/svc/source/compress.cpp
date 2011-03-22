@@ -225,7 +225,7 @@ int CSuwriteATerm(CompressedStream* cs, ATerm term)
 int CSwriteString(CompressedStream* cs, char* str)
 {
 
-  return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeAppl(ATmakeAFun(str,0,ATfalse)));
+  return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeAppl(ATmakeAFun(str,0,false)));
 }
 
 int CSuwriteString(CompressedStream* cs, char* str)
