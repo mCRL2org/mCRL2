@@ -717,7 +717,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     }
   }
 
-  info.tupAFun = NULL;
+  info.tupAFun = 0;
   ATprotectAFun(info.tupAFun);
   info.tupAFun = ATmakeAFun("@tup@",2,ATfalse);
 

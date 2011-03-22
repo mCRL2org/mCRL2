@@ -68,7 +68,7 @@ class data_specification;
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-data_equation translate_user_notation_data_equation(const data_equation& x);
+  data_equation translate_user_notation_data_equation(const data_equation& x);
 } // namespace detail
 
 /* sort_expression normalize_sorts(const sort_expression& x,
@@ -177,104 +177,6 @@ class data_specification
 
     friend atermpp::aterm_appl detail::data_specification_to_aterm_data_spec(const data_specification&);
 
-    // This function returns the normal form of e, under the two maps map1 and map2.
-    // This normal form is obtained by repeatedly applying map1 and map2, until this
-    // is not possible anymore. It is assumed that this procedure terminates. There is
-    // no check for loops.
-    sort_expression find_normal_form(
-      const sort_expression& e,
-      const atermpp::multimap< sort_expression, sort_expression >  &map1,
-      const atermpp::multimap< sort_expression, sort_expression >  &map2,
-      std::set < sort_expression > sorts_already_seen = std::set < sort_expression >()) const
-    {
-      assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
-      assert(!is_unknown_sort(e));
-      assert(!is_multiple_possible_sorts(e));
-
-      if (is_function_sort(e))
-      {
-        const function_sort fs(e);
-        const sort_expression normalised_codomain=
-          find_normal_form(fs.codomain(),map1,map2,sorts_already_seen);
-        const sort_expression_list domain=fs.domain();
-        sort_expression_list normalised_domain;
-        for (sort_expression_list::const_iterator i=domain.begin();
-             i!=domain.end(); ++i)
-        {
-          normalised_domain=push_front(normalised_domain,
-                                       find_normal_form(*i,map1,map2,sorts_already_seen));
-        }
-        return function_sort(reverse(normalised_domain),normalised_codomain);
-      }
-
-      if (is_container_sort(e))
-      {
-        const container_sort cs(e);
-        return container_sort(cs.container_name(),find_normal_form(cs.element_sort(),map1,map2,sorts_already_seen));
-      }
-
-      sort_expression result_sort;
-
-      if (is_structured_sort(e))
-      {
-        const structured_sort ss(e);
-        structured_sort_constructor_list constructors=ss.constructors();
-        structured_sort_constructor_list normalised_constructors;
-        for (structured_sort_constructor_list::const_iterator i=constructors.begin();
-             i!=constructors.end(); ++i)
-        {
-          structured_sort_constructor constructor=*i;
-          structured_sort_constructor_argument_list normalised_ssa;
-          structured_sort_constructor_argument_list ssca=constructor.arguments();
-          for (structured_sort_constructor_argument_list::const_iterator j=ssca.begin();
-               j!=ssca.end(); ++j)
-          {
-            normalised_ssa=push_front(normalised_ssa,
-                                      structured_sort_constructor_argument(j->name(),
-                                          find_normal_form(j->sort(),map1,map2,sorts_already_seen)));
-          }
-
-          normalised_constructors=push_front(
-                                    normalised_constructors,
-                                    structured_sort_constructor(
-                                      constructor.name(),
-                                      reverse(normalised_ssa),
-                                      constructor.recogniser()));
-
-        }
-        result_sort=structured_sort(reverse(normalised_constructors));
-      }
-
-      if (is_basic_sort(e))
-      {
-        result_sort=e;
-      }
-
-
-      assert(is_basic_sort(result_sort) || is_structured_sort(result_sort));
-      const atermpp::multimap< sort_expression, sort_expression >::const_iterator i1=map1.find(result_sort);
-      if (i1!=map1.end()) // found
-      {
-#ifndef NDEBUG
-        sorts_already_seen.insert(result_sort);
-#endif
-        return find_normal_form(i1->second,map1,map2
-                                ,sorts_already_seen
-                               );
-      }
-      const atermpp::multimap< sort_expression, sort_expression >::const_iterator i2=map2.find(result_sort);
-      if (i2!=map2.end()) // found
-      {
-#ifndef NDEBUG
-        sorts_already_seen.insert(result_sort);
-#endif
-        return find_normal_form(i2->second,map1,map2,
-                                sorts_already_seen
-                               );
-      }
-      return result_sort;
-    }
-
     ///\brief Builds a specification from aterm
     void build_from_aterm(const atermpp::aterm_appl& t);
 
@@ -282,6 +184,14 @@ class data_specification
     // it forms a confluent terminating rewriting system using which
     // sorts can be normalised.
     void reconstruct_m_normalised_aliases() const;
+
+    // The function below checks whether there is an alias loop, e.g. aliases
+    // of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops
+    // through structured sorts are allowed. If a loop is detected, an exception
+    // is thrown.
+    void check_for_alias_loop(
+      const sort_expression s,
+      std::set < sort_expression > sorts_already_seen) const;
 
   protected:
 
@@ -475,52 +385,6 @@ class data_specification
       {
         add_system_defined_equation(*i);
       }
-    }
-
-    // The function below checks whether there is an alias loop, e.g. aliases
-    // of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops
-    // through structured sorts are allowed. If a loop is detected, an exception
-    // is thrown.
-    void check_for_alias_loop(
-      const sort_expression s,
-      std::set < sort_expression > sorts_already_seen) const
-    {
-      if (is_basic_sort(s))
-      {
-        if (sorts_already_seen.count(s)>0)
-        {
-          throw mcrl2::runtime_error("Sort alias " + s.to_string() + " is defined in terms of itself.");
-        }
-        const ltr_aliases_map::const_iterator i=m_aliases.find(s);
-        if (i!=m_aliases.end())  // s is in m_aliases
-        {
-          sorts_already_seen.insert(s);
-          check_for_alias_loop(i->second,sorts_already_seen);
-          sorts_already_seen.erase(s);
-        }
-        return;
-      }
-
-      if (is_container_sort(s))
-      {
-        check_for_alias_loop(container_sort(s).element_sort(),sorts_already_seen);
-        return;
-      }
-
-      if (is_function_sort(s))
-      {
-        for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(s).domain());
-             !r.empty(); r.advance_begin(1))
-        {
-          check_for_alias_loop(r.front(),sorts_already_seen);
-        }
-
-        check_for_alias_loop(function_sort(s).codomain(),sorts_already_seen);
-        return;
-      }
-
-      assert(is_structured_sort(s)); // In this case we do not need to carry out a check.
-
     }
 
   public:
