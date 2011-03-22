@@ -96,8 +96,13 @@ set( CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/scripts" )
 
 include(CheckCXXCompilerFlag)
 
-check_cxx_compiler_flag(-fprofile-arcs CXX_ACCEPTS_PROFILE_ARCS )
-check_cxx_compiler_flag(-ftest-coverage CXX_ACCEPTS_TEST_COVERAGE )
+if( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
+  set( CXX_ACCEPTS_PROFILE_ARCS true)
+  set( CXX_ACCEPTS_TEST_COVERAGE true)
+else( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
+  check_cxx_compiler_flag(-fprofile-arcs CXX_ACCEPTS_PROFILE_ARCS )
+  check_cxx_compiler_flag(-ftest-coverage CXX_ACCEPTS_TEST_COVERAGE )
+endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
 set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Woverloaded-virtual -Wwrite-strings" CACHE STRING "Flags used by the C++ compiler during maintainer builds." FORCE)
 set(CMAKE_C_FLAGS_MAINTAINER "-g -O0 -Wall -pedantic -W" CACHE STRING "Flags used by the C compiler during maintainer builds." FORCE)
