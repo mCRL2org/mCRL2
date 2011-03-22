@@ -123,7 +123,7 @@ a simple depth first search.
  
 Second, the set of aliases is stored from 
 left to right in a map $\it sort\_aliases\_to\_be\_investigated$, except structured
-sorts.
+sorts which are stored from right to left.
 So, if $A=B$ is declared, then ${\it sort\_aliases\_to\_be\_investigated}(B)=A$.
 The name of this map uses the word `{\it investigated}' because it
 must be investigated whether these rewrite rules are confluent.
@@ -134,16 +134,37 @@ into a confluent term rewriting system, guaranteeing unique representations.
 
 So, if there are two overlapping left hand sides in the rewrite system, this
 means that one term is a subterm of the other. So, we have a rule 
-$C(g(t))\rightarrow u_1$ and a term $g(t)\rightarrow u_2$ where $C$ represents a
+$C(g(t))\rightarrow u_1$ and a rule $g(t)\rightarrow u_2$ where $C$ represents a
 possibly empty context. So, the term
 $C(g(t))$ can rewrite to both $u_1$ and $C(u_2)$. In this case we simply add
-a rewrite rule $C(u_2)\rightarrow N(u_1)$ where $N(u_1)$ is the normal form
-of $u_1$. 
+a rewrite rule $C(u_2)\rightarrow u_1$. 
 
-Note that the terms at the left and
-the right hand side do not become more complex. Therefore, given that there
-are a finite number of sorts, there is an upperbound on the number of equations,
-and this procedure is guaranteed to terminate.
+An important observation is that the rules always have one of the following 
+shapes:
+\[\begin{array}{rcl}
+{\bf struct}\ldots  &\rightarrow& A,\\
+B&\rightarrow & {\it Exp}
+\end{array}\]
+where $A$ and $B$ are basic sorts and ${\it Exp}$ is a sort expression which
+can be a basic sort, but can also contain all other type forming constructs.
+There are the following invariants on the rules. 
+For each basic sort $B$ there is at most one rule of the form
+$B\rightarrow \cdots$. Furthermore, a basic sort $A$ occurring at the right
+of a struct rule can never occur as the left hand side of a rewrite rule also. 
+ 
+So, when one left hand side of a rule overlaps with another left hand side, one of the rules
+must have the shape ${\bf struct}\ldots \rightarrow\ldots$, whereas the other
+can contain a struct or a basic term at the left hand side. As the rule with
+a struct rewrites to a basic sort $A$, the newly added rewrite rule has $A$ at
+its right hand side. 
+
+The number of newly added rules in this way is bounded. When both left hand sides contain 
+structs,
+the newly added rule has a strictly smaller number of structs in its right hand side
+than one of its originals. Moreover, no new basic sort is introduced that can 
+act as the lhs of a new rule. When a rule of the shape $A\rightarrow {\it Exp}$ contains overlap,
+a rule is obtained where an occurrence of $A$ is replaced by an occurrence of ${\it Exp}$.
+But as these rules are acyclic, this can only be performed a finite number of times.
 
 In more detail, we have two sets of rewrite rules. One that is definitive
 ${\it m\_normalised\_sort\_aliases}$ and $\it sort\_aliases\_to\_be\_investigated$ 
@@ -153,10 +174,8 @@ $\it sort\_aliases\_to\_be\_investigated$. Each rewrite rule $t_1\rightarrow u_1
 in $\it sort\_aliases\_to\_be\_investigated$ is checked with
 each rule $t_2\rightarrow u_2$ in ${\it m\_normalised\_sort\_aliases}$.
 If $t_1$ is a subterm of $t_2$ (i.e.\ $t_2=C(t_1)$) and 
-$N(u_2)$ and $C(u_1)$ do not have the same normal forms, then a rule $C(u_1)\rightarrow
-N(u_2)$ is added to $\it sort\_aliases\_to\_be\_investigated$ where $N(u_2)$ is
-the normal form of $u_2$ under application of $\it sort\_aliases\_to\_be\_investigated$ and
-${\it m\_normalised\_sort\_aliases}$.
+$u_2$ and $C(u_1)$ do not have the same normal forms, then a rule $C(u_1)\rightarrow
+u_2$ is added to $\it sort\_aliases\_to\_be\_investigated$.
 If $t_2$ is a subterm of $t_1$ a symmetric sequence of steps is done.
 After all rewrite rules $t_1\rightarrow u_1$ in ${\it m\_normalised\_sort\_aliases}$
 have been investigated, $t_2\rightarrow u_2$ is added to 
@@ -164,7 +183,7 @@ ${\it m\_normalised\_sort\_aliases}$.
 
 The resulting rewrite system is terminating, provided that the original rewrite system
 was terminating. Each new rule that is added has the shape $C = a$, where $C$ is
-a basic or complex type, and $a$ is a basic type, which is a normal form in the
+a basic or complex type, and $a$ is a basic sort, which is a normal form in the
 rewrite system. The only way that there is non termination, is when there
 is an infinite sequence of basic sorts $a_1$, $a_2,\ldots$, such that $a_i$ rewrites
 to $a_{i+1}$. This loop came into existence by adding some rewrite rule $a=a'$ at
@@ -180,5 +199,4 @@ left hand side of a sort alias is replaced by the right hand side. This is repea
 until no such substitution can be applied. This can be done using a simple 
 innermost rewriting procedure. This rewriter has been implemented in 
 {\tt normalize\_sorts\_function}. 
-
 \end{document}
