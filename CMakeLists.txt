@@ -1305,15 +1305,17 @@ set(CPACK_PACKAGE_INSTALL_DIRECTORY mCRL2) #USED FOR NSIS, Adding this line will
 SET(CPACK_PACKAGE_INSTALL_REGISTRY_KEY "mCRL2")
 SET(CPACK_PACKAGE_VENDOR "TUe")
 
-if( NOT MSVC )
-  string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
-  if(CMAKE_BUILD_TYPE MATCHES "release")
-    #Strip files for Release packages
+if( NOT APPLE )
+  if( NOT MSVC )
+    string(TOLOWER ${CMAKE_BUILD_TYPE} CMAKE_BUILD_TYPE)
+    if(CMAKE_BUILD_TYPE MATCHES "release")
+      #Strip files for Release packages
+      SET( CPACK_STRIP_FILES true )
+    endif(CMAKE_BUILD_TYPE MATCHES "release")
+  else( NOT MSVC )
     SET( CPACK_STRIP_FILES true )
-  endif(CMAKE_BUILD_TYPE MATCHES "release")
-else( NOT MSVC )
-  SET( CPACK_STRIP_FILES true )
-endif( NOT MSVC )
+  endif( NOT MSVC )
+endif( NOT APPLE )
 
 # Create Desktop link to mcrl2-gui
 set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
