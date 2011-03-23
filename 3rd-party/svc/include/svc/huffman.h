@@ -23,6 +23,10 @@
 #ifndef __HUFFMANHEADER
 #define __HUFFMANHEADER
 
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 #include "hashtable.h"
 #include "blocklist.h"
 #include "lz.h"
@@ -53,5 +57,10 @@
   int HFencodeIndex(BitStream*, HFtree*, long);
   int HFdecodeATerm(BitStream*, HFtree*, ATerm*);
   int HFdecodeIndex(BitStream*, HFtree*, long*);
+
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif

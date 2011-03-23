@@ -1,13 +1,15 @@
-#ifndef VERSION_H
-#define VERSION_H
+#ifndef ABOOL_H
+#define ABOOL_H
 
 #ifdef __cplusplus
 extern "C"
 {
 #endif/* __cplusplus */
 
-  extern char* at_version;
-  extern char* at_date;
+  typedef enum {
+    ATfalse=0, ATtrue
+  }
+          ATbool;
 
 #ifdef __cplusplus
 }

@@ -7,6 +7,11 @@
 
 #define SAF_IDENTIFICATION_TOKEN '?'
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
   /* Stores */
   typedef struct _ProtectedMemoryStack
   {
@@ -114,7 +119,7 @@
     size_t tempBytesSize;
     size_t tempBytesIndex;
     size_t tempArity;
-    bool tempIsQuoted;
+    ATbool tempIsQuoted;
 
     int isDone;
   }* BinaryReader;
@@ -128,5 +133,9 @@
   ATerm ATgetRoot(BinaryReader binaryReader);
 
   void ATdestroyBinaryReader(BinaryReader binaryReader);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* SAFIO_H */

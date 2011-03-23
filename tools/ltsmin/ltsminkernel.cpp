@@ -9,11 +9,10 @@
 /// \file ltsminkernel.cpp
 
 #include "ltsmin.h"
-#include "aterm2.h"
 
-static bool RefineBranching(int action, int splitter);
+static ATbool RefineBranching(int action, int splitter);
 
-static bool branching = false;
+static ATbool branching = ATfalse;
 
 static int offset = -1;
 
@@ -48,17 +47,17 @@ static ATermList GetLabels(INTERVAL* p)
   return result;
 }
 
-/* static bool AllTausAreExitting(SVCstateIndex p) {
+/* static ATbool AllTausAreExitting(SVCstateIndex p) {
      ATermList
      targets = (ATermList) ATtableGet(lab_src_tgt[label_tau],(ATerm) ATmakeInt(p));
      int b = blockref[p];
-     if (!targets) return true;
+     if (!targets) return ATtrue;
      for (;!ATisEmpty(targets);targets=ATgetNext(targets))
           {ATerm target = ATgetFirst(targets);
 
-          if (blockref[ATgetInt((ATermInt) target)] != b) return false;
+          if (blockref[ATgetInt((ATermInt) target)] != b) return ATfalse;
           }
-    return true;
+    return ATtrue;
 } */
 
 static void AddBlock(int b)
@@ -94,7 +93,7 @@ static void Unstable(int a, INTERVAL* p)
       {
         SVCstateIndex source = ATgetInt((ATermInt) ATgetFirst(sources));
         int b = blockref[source];
-        mark[source] = true;
+        mark[source] = ATtrue;
         AddBlock(b);
       }
     }
@@ -112,7 +111,7 @@ static int partition(SVCstateIndex left, SVCstateIndex right)
       }
     for (; mark[s[right]]; right--)
     {
-      /* mark[s[right]] = false; */
+      /* mark[s[right]] = ATfalse; */
       if (left == right)
       {
         return right;
@@ -122,7 +121,7 @@ static int partition(SVCstateIndex left, SVCstateIndex right)
       SVCstateIndex swap = s[left];
       s[left] = s[right];
       s[right] = swap;
-      /* mark[swap] = false; */
+      /* mark[swap] = ATfalse; */
       right--;
       left++;
     }
@@ -132,7 +131,7 @@ static int partition(SVCstateIndex left, SVCstateIndex right)
     SVCstateIndex swap = s[left];
     if (mark[swap])
     {
-      /* mark[swap] = false; */
+      /* mark[swap] = ATfalse; */
       return left;
     }
     left++;
@@ -140,7 +139,7 @@ static int partition(SVCstateIndex left, SVCstateIndex right)
   return left;
 }
 
-static bool split(INTERVAL* p, INTERVAL* p1, INTERVAL* p2)
+static ATbool split(INTERVAL* p, INTERVAL* p1, INTERVAL* p2)
 {
   SVCstateIndex left = p->left, right = p->right, left_bound_p2;
   left_bound_p2 = partition(left, right - 1);
@@ -149,25 +148,25 @@ static bool split(INTERVAL* p, INTERVAL* p1, INTERVAL* p2)
     int i;
     for (i=left; i<right; i++)
     {
-      mark[s[i]] = false;
+      mark[s[i]] = ATfalse;
     }
-    return false;
+    return ATfalse;
   }
   if (left_bound_p2 == right)
   {
-    return false;
+    return ATfalse;
   }
   p1->left = left;
   p1->right= p2->left = left_bound_p2;
   p2->right = right;
   p1->mode = p2->mode = UNSTABLE;
-  return true;
+  return ATtrue;
 }
 
-static bool isParentOf(int parent, int b)
+static ATbool isParentOf(int parent, int b)
 {
   for (; b>0&&b!=parent; b=blok[b].parent) {};
-  return (b==parent)?true:false;
+  return (b==parent)?ATtrue:ATfalse;
 }
 
 static void UpdateBlock(int b, INTERVAL* p)
@@ -197,7 +196,7 @@ static void PushUnstableMark(int action, int splitter, int parent, INTERVAL* p)
     int i = p->left, right = p->right;
     for (; i<right; i++)
     {
-      mark[s[i]] = false;
+      mark[s[i]] = ATfalse;
     }
   }
   Pi_pt++;
@@ -215,13 +214,13 @@ static void ClearMarks(int k)
     int i = p->left;
     for (; i<p->right; i++)
     {
-      mark[s[i]] = false;
+      mark[s[i]] = ATfalse;
     }
   }
   blocks.pt = 0;
 }
 
-static bool Refine(int action, int splitter)
+static ATbool Refine(int action, int splitter)
 {
 
   /* Splits the blocks in "blocks" into two blocks.
@@ -230,7 +229,7 @@ static bool Refine(int action, int splitter)
   split blocks.  */
 
   INTERVAL* p = Pi+splitter;
-  bool result = false;
+  ATbool result = ATfalse;
   int i = 0;
   for (; i<blocks.pt && !isRemoved(p); i++)
   {
@@ -250,19 +249,19 @@ static bool Refine(int action, int splitter)
     RemoveInterval(Pi+b);
     if (!result)
     {
-      result = true;
+      result = ATtrue;
     }
   }
   ClearMarks(i);
   return result;
 }
 
-static bool CheckUnstableBlock(int splitter)
+static ATbool CheckUnstableBlock(int splitter)
 /* for all labels while p not splitted */
 {
   INTERVAL* p = Pi+splitter;
   ATermList labels = GetLabels(p);
-  bool result = false;
+  ATbool result = ATfalse;
   for (; !ATisEmpty(labels) && !isRemoved(p);
        labels = ATgetNext(labels))
   {
@@ -272,14 +271,14 @@ static bool CheckUnstableBlock(int splitter)
     {
       if (RefineBranching(a, splitter))
       {
-        result = true;
+        result = ATtrue;
       }
     }
     else
     {
       if (Refine(a, splitter))
       {
-        result = true;
+        result = ATtrue;
       }
     }
   }
@@ -301,12 +300,12 @@ static int NumberOfPartitions(void)
   return cnt;
 }
 
-static bool ReduceKernel(void)
+static ATbool ReduceKernel(void)
 /*
 For all unstable blocks refine partition until there are no unstable
 blocks */
 {
-  bool result = false;
+  ATbool result = ATfalse;
   Pi_pt = n_partitions;
   while (Pi_pt > 0)
   {
@@ -317,7 +316,7 @@ blocks */
       p->mode = STABLE;
       if (CheckUnstableBlock(Pi_pt))
       {
-        result = true;
+        result = ATtrue;
       }
     }
   }
@@ -351,16 +350,16 @@ void ReduceBranching(void)
 {
   if (label_tau >= 0)
   {
-    branching = true;
+    branching = ATtrue;
   }
   Reduce();
 }
 /* ------------------- Branching bisimulation ----------------------------*/
 
-static bool MarkTau(int b,  INTERVAL* p2)
+static ATbool MarkTau(int b,  INTERVAL* p2)
 {
   int left = p2->left, right = p2->right, i;
-  bool result = false;
+  ATbool result = ATfalse;
   /* ATwarning("Entry MarkTau b = %d left = %d right = %d\n", b, left, right); */
   for (i=left; i<right; i++)
   {
@@ -378,21 +377,21 @@ static bool MarkTau(int b,  INTERVAL* p2)
       int d = ATgetInt((ATermInt) source);
       if (blockref[d] == b && !mark[d])
       {
-        result = mark[d] = true;
+        result = mark[d] = ATtrue;
       }
     }
   }
   return result;
 }
 
-static bool RefineBranching(int action, int splitter)
+static ATbool RefineBranching(int action, int splitter)
 {
   INTERVAL* p = Pi+splitter;
-  bool result = false;
+  ATbool result = ATfalse;
   int i = 0;
   for (; i<blocks.pt && !isRemoved(p); i++)
   {
-    bool stop = false;
+    ATbool stop = ATfalse;
     int b = blocks.b[i];
     INTERVAL p1[1], p2[1], q[1], *r = Pi + b;
     if (action == label_tau && b == splitter)
@@ -400,7 +399,7 @@ static bool RefineBranching(int action, int splitter)
       int i;
       for (i=p->left; i<p->right; i++)
       {
-        mark[s[i]] = false;
+        mark[s[i]] = ATfalse;
       }
       continue;
     }
@@ -421,9 +420,9 @@ static bool RefineBranching(int action, int splitter)
         int i;
         for (i = p2->left; i < q->right; i++)
         {
-          mark[s[i]]= false;
+          mark[s[i]]= ATfalse;
         }
-        stop = true;
+        stop = ATtrue;
         break;
       }
       q->left = p2->left;
@@ -436,7 +435,7 @@ static bool RefineBranching(int action, int splitter)
     q->right); */
     if (!result)
     {
-      result = true;
+      result = ATtrue;
     }
     PushUnstableMark(-1, splitter, b, p1);
     PushUnstableMark(action, splitter, b, q);
@@ -476,7 +475,7 @@ static int InsideSplitter(ATermList tgt, int splitter)
   return d;
 }
 
-static void PrintTransition(ATerm p, bool tp, int action, ATerm q, bool tq)
+static void PrintTransition(ATerm p, ATbool tp, int action, ATerm q, ATbool tq)
 {
   static char buf[80];
   size_t pt = 0;
@@ -502,7 +501,7 @@ static void PrintTransition(ATerm p, bool tp, int action, ATerm q, bool tq)
   ATfprintf(stderr,"%s\n",buf);
 }
 
-static bool PrintNonBisimilarStates(int* p, int* q)
+static ATbool PrintNonBisimilarStates(int* p, int* q)
 {
   int b1 = blockref[*p], b2 = blockref[*q], splitter = -1, action = -1;
   ATermList tgt1 = NULL, tgt2 = NULL;
@@ -521,42 +520,42 @@ static bool PrintNonBisimilarStates(int* p, int* q)
   {
     if (!tgt1)
     {
-      PrintTransition(p_lab, true, action, q_lab, false);
-      return false;
+      PrintTransition(p_lab, ATtrue, action, q_lab, ATfalse);
+      return ATfalse;
     }
     else
     {
-      PrintTransition(p_lab, false, action, q_lab, false);
+      PrintTransition(p_lab, ATfalse, action, q_lab, ATfalse);
       *p = ATgetInt((ATermInt) ATgetFirst(tgt1));
       *q = InsideSplitter(tgt2, splitter);
-      return true;
+      return ATtrue;
     }
   }
   if (blok[b2].action == -1)
   {
     if (!tgt2)
     {
-      PrintTransition(p_lab, false, action, q_lab, true);
-      return false;
+      PrintTransition(p_lab, ATfalse, action, q_lab, ATtrue);
+      return ATfalse;
     }
     else
     {
-      PrintTransition(p_lab, false, action, q_lab, false);
+      PrintTransition(p_lab, ATfalse, action, q_lab, ATfalse);
       *q = ATgetInt((ATermInt) ATgetFirst(tgt2));
       *p = InsideSplitter(tgt1, splitter);
-      return true;
+      return ATtrue;
     }
   }
-  return false;
+  return ATfalse;
 }
 
-static bool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
-                                        SVCstateIndex init2, bool* different)
+static ATbool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
+                                        SVCstateIndex init2, ATbool* different)
 /* for all labels while p is not splitted */
 {
   INTERVAL* p = Pi+ splitter;
   ATermList labels = GetLabels(p);
-  bool result = false;
+  ATbool result = ATfalse;
   offset = SVCnumStates(inFile);
   for (; !ATisEmpty(labels) && !isRemoved(p);
        labels = ATgetNext(labels))
@@ -567,14 +566,14 @@ static bool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
     {
       if (RefineBranching(a, splitter))
       {
-        result = true;
+        result = ATtrue;
       }
     }
     else
     {
       if (Refine(a, splitter))
       {
-        result = true;
+        result = ATtrue;
       }
     }
     if (blockref[init1] !=  blockref[init2])
@@ -585,18 +584,18 @@ static bool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
                   branching?"branching":"strongly");
         while (PrintNonBisimilarStates((int*) &init1, (int*) &init2)) {};
       }
-      *different = true;
+      *different = ATtrue;
       return result;
     }
   }
-  *different = false;
+  *different = ATfalse;
   return result;
 }
 
-static bool CompareKernel(SVCstateIndex init1,SVCstateIndex init2,
-                            bool* different)
+static ATbool CompareKernel(SVCstateIndex init1,SVCstateIndex init2,
+                            ATbool* different)
 {
-  bool result = false;
+  ATbool result = ATfalse;
   Pi_pt = n_partitions;
   while (Pi_pt-- > 0)
   {
@@ -606,10 +605,10 @@ static bool CompareKernel(SVCstateIndex init1,SVCstateIndex init2,
       p->mode = STABLE;
       if (CompareCheckUnstableBlock(Pi_pt, init1, init2, different))
       {
-        result = true;
+        result = ATtrue;
         if (*different)
         {
-          return false;
+          return ATfalse;
         }
       }
     }
@@ -620,7 +619,7 @@ static bool CompareKernel(SVCstateIndex init1,SVCstateIndex init2,
 int Compare(SVCstateIndex init1, SVCstateIndex init2)
 {
   int cnt = 0, nBlocks = 0, last_nBlocks = 0;
-  bool different = true;
+  ATbool different = ATtrue;
   StartSplitting();
   do
   {
@@ -643,7 +642,7 @@ int CompareBranching(SVCstateIndex init1,SVCstateIndex init2)
 {
   if (label_tau>=0)
   {
-    branching = true;
+    branching = ATtrue;
   }
   return Compare(init1, init2);
 }

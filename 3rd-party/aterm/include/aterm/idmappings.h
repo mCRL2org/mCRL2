@@ -1,6 +1,11 @@
 #ifndef HASHTABLE_H_
 #define HASHTABLE_H_
 
+#ifdef __cplusplus
+extern "C"
+{
+#endif /* __cplusplus */
+
 #include "atypes.h"
 
   struct Entry;
@@ -40,5 +45,9 @@
   unsigned int IMgetSize(IDMappings idMappings);
 
   void IMdestroyIDMappings(IDMappings idMappings);
+
+#ifdef __cplusplus
+}
+#endif /* __cplusplus */
 
 #endif /* HASHTABLE_H_ */

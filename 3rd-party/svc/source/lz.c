@@ -285,7 +285,7 @@ static int add2scratch(int last, char ch)
     {
       scratchSize=2*scratchSize;
     }
-    scratch = (char*)realloc(scratch, scratchSize);
+    scratch = realloc(scratch, scratchSize);
     if (scratch==NULL)
     {
       fprintf(stderr,"Cannot realloc scratchbuffer in lz.c (svc library)\n");
