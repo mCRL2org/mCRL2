@@ -374,7 +374,9 @@ void data_specification::reconstruct_m_normalised_aliases() const
         const bool rhs_to_s1 = is_basic_sort(s1) && basic_sort(s1).to_string()<=rhs.to_string();
         const sort_expression left_hand_side=(rhs_to_s1?rhs:s1);
         const sort_expression pre_normal_form=(rhs_to_s1?s1:rhs);
-        const sort_expression e1=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
+        assert(is_basic_sort(pre_normal_form));
+        // const sort_expression e1=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
+        const sort_expression e1=pre_normal_form;
         if (e1!=left_hand_side)
         {
           sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e1));
@@ -391,8 +393,10 @@ void data_specification::reconstruct_m_normalised_aliases() const
           const bool i_second_to_s2 = is_basic_sort(s2) && basic_sort(s2).to_string()<=i->second.to_string();
           const sort_expression left_hand_side=(i_second_to_s2?i->second:s2);
           const sort_expression pre_normal_form=(i_second_to_s2?s2:i->second);
-          const sort_expression e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,
-                                   sort_aliases_to_be_investigated);
+          assert(is_basic_sort(pre_normal_form));
+          // const sort_expression e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases, 
+          //             sort_aliases_to_be_investigated);
+          const sort_expression e2=pre_normal_form;
           if (e2!=left_hand_side)
           {
             sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e2));
