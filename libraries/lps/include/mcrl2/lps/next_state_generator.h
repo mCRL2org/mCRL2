@@ -40,7 +40,9 @@ class next_state_generator
     specification m_specification;
     data::rewriter::strategy m_rewriter_strategy;
     legacy_rewriter m_rewriter;
-    data::enumerator_factory<mcrl2::data::classic_enumerator<> > m_enumerator;
+    
+    // N.B. mutable is needed here due to the 'classic' next state interface
+    mutable data::enumerator_factory<mcrl2::data::classic_enumerator<> > m_enumerator;
 
   public:
     /// \brief A type that represents a transition to a 'next' state.
@@ -70,7 +72,13 @@ class next_state_generator
       {
         return atermpp::aterm_appl(reinterpret_cast<ATermAppl>(state))(i);
       }
-      
+
+      /// \brief Returns the label of the transition.
+      atermpp::aterm_appl label() const
+      {
+        return transition;
+      }
+
       /// \brief Returns the number of components of the state.
       std::size_t size() const
       {
@@ -251,8 +259,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     }
 
     /// \brief Returns the initial state of the specification.
-    // TODO: this function should be const, but cannot because of the createNextState interface
-    atermpp::aterm initial_state()
+    atermpp::aterm initial_state() const
     {
       NextState* nstate = createNextState(m_specification, m_enumerator, false);
       atermpp::aterm result = nstate->getInitialState();
@@ -265,6 +272,21 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     {
       ATerm t = s[i];
       return atermpp::aterm_appl(m_rewriter.translate(t));
+    }     
+
+    /// \brief Converts a value in next state format to a data expression.
+    data::data_expression aterm2expression(const atermpp::aterm& x) const
+    {
+      ATerm a = x;
+      atermpp::aterm_appl result = m_rewriter.translate(a);
+      return result;
+    }     
+
+    /// \brief Converts a data expression to a value in next state format.
+    atermpp::aterm expression2aterm(const data::data_expression& x) const
+    {
+      ATermAppl a = x;
+      return m_rewriter.translate(a);
     }     
 
     /// \brief Returns a string representation of the given state.
