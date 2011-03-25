@@ -284,7 +284,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     }
 
     /// \brief Returns the currently loaded specification.
-    const lps::specification& specification()
+    const lps::specification& get_specification() const
     {
       return m_specification;
     }
