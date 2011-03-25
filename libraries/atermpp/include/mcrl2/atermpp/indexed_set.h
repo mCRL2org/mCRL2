@@ -34,15 +34,16 @@ struct indexed_set_deleter
 class indexed_set
 {
   protected:
-    /// The wrapped ATermTable.
-    boost::shared_ptr<_ATermTable> m_set;
+    boost::shared_ptr<_ATermTable> m_set; /**< the wrapped ATermTable */
+    std::size_t m_size;                   /**< the number of entries of the table */
 
   public:
     /// Create a new indexed_set.
     /// \param initial_size The initial capacity of the set.
     /// \param max_load_pct The maximum load percentage.
     indexed_set(size_t initial_size = 100, unsigned int max_load_pct = 75)
-      : m_set(ATindexedSetCreate(initial_size, max_load_pct), indexed_set_deleter())
+      : m_set(ATindexedSetCreate(initial_size, max_load_pct), indexed_set_deleter()),
+        m_size(0)
     {}
 
     /// \brief Clear the hash table in the set.
@@ -52,6 +53,7 @@ class indexed_set
     void reset()
     {
       ATindexedSetReset(m_set.get());
+      m_size = 0;
     }
 
     /// \brief Enter elem into the set.
@@ -67,6 +69,10 @@ class indexed_set
     {
       ATbool b;
       size_t l = ATindexedSetPut(m_set.get(), elem, &b);
+      if (b == ATtrue)
+      {
+        m_size++;
+      }
       return std::make_pair(l, b == ATtrue);
     }
 
@@ -94,9 +100,15 @@ class indexed_set
     /// The elem is removed from the indexed set, and if a number was assigned to elem,
     /// it is freed to be reassigned to an element, that may be put into the set at some later instance.
     /// \param elem An element of the set.
+    // TODO: ATindexedSetRemove should return whether the deletion was successful, to avoid the extra check
+    // that the element is present in the set
     void remove(aterm elem)
     {
-      ATindexedSetRemove(m_set.get(), elem);
+      if (index(elem) != -1)
+      {
+        ATindexedSetRemove(m_set.get(), elem);
+        m_size--;
+      }
     }
 
     /// \brief Retrieve all elements in set.
@@ -106,6 +118,12 @@ class indexed_set
     aterm_list elements()
     {
       return aterm_list(ATindexedSetElements(m_set.get()));
+    }
+    
+    /// \brief Returns the size of the indexed set.
+    std::size_t size() const
+    {
+      return m_size;
     }
 };
 
