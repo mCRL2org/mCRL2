@@ -222,7 +222,7 @@ std::string interface_description::option_descriptor::man_page_description() con
     << boost::xpressive::regex_replace(
          boost::xpressive::regex_replace(word_wrap(m_description, 80),
                                                boost::xpressive::sregex(boost::xpressive::as_xpr('\'')), std::string("\\&'")),
-         boost::xpressive::sregex(boost::xpressive::as_xpr('\.')), std::string("\\\&.")
+         boost::xpressive::sregex(boost::xpressive::as_xpr('.')), std::string("\\&.")
        )
     << std::endl;
 
