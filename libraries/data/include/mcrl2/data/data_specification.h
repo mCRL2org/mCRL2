@@ -191,7 +191,8 @@ class data_specification
     // is thrown.
     void check_for_alias_loop(
       const sort_expression s,
-      std::set < sort_expression > sorts_already_seen) const;
+      std::set < sort_expression > sorts_already_seen,
+      const bool toplevel=true) const;
 
   protected:
 

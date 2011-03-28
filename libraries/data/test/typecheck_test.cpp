@@ -88,7 +88,7 @@ data::data_specification parse_data_specification(const std::string& ds_in, bool
   if (test) // If term is successfully parsed, always check that the printed result is equal!
   {
     std::string ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
-    // std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
+    std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
     BOOST_CHECK_EQUAL(ds_in, ds_out);
 
     return data::data_specification(ds_aterm);
@@ -811,6 +811,15 @@ BOOST_AUTO_TEST_CASE(test_recursive_struct_list_indirect)
   );
 }
 
+BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this. 
+{
+  test_data_specification(
+    "sort B = List(struct f(B));\n",
+    true
+  );
+}
+
+
 template <typename VariableIterator>
 void test_data_expression_in_specification_context(const std::string& de_in,
     const std::string& ds_in,
@@ -1455,6 +1464,7 @@ BOOST_AUTO_TEST_CASE(test_aliases)
     true
   );
 }
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

@@ -100,13 +100,10 @@ class indexed_set
     /// The elem is removed from the indexed set, and if a number was assigned to elem,
     /// it is freed to be reassigned to an element, that may be put into the set at some later instance.
     /// \param elem An element of the set.
-    // TODO: ATindexedSetRemove should return whether the deletion was successful, to avoid the extra check
-    // that the element is present in the set
     void remove(aterm elem)
     {
-      if (index(elem) != -1)
+      if (ATindexedSetRemove(m_set.get(), elem))
       {
-        ATindexedSetRemove(m_set.get(), elem);
         m_size--;
       }
     }

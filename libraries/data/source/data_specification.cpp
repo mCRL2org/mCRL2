@@ -171,7 +171,8 @@ bool data_specification::is_certainly_finite(const sort_expression& s) const
 // is thrown.
 void data_specification::check_for_alias_loop(
   const sort_expression s,
-  std::set < sort_expression > sorts_already_seen) const
+  std::set < sort_expression > sorts_already_seen,
+  const bool toplevel) const
 {
   if (is_basic_sort(s))
   {
@@ -183,7 +184,7 @@ void data_specification::check_for_alias_loop(
     if (i!=m_aliases.end())  // s is in m_aliases
     {
       sorts_already_seen.insert(s);
-      check_for_alias_loop(i->second,sorts_already_seen);
+      check_for_alias_loop(i->second,sorts_already_seen,true);
       sorts_already_seen.erase(s);
     }
     return;
@@ -191,7 +192,7 @@ void data_specification::check_for_alias_loop(
 
   if (is_container_sort(s))
   {
-    check_for_alias_loop(container_sort(s).element_sort(),sorts_already_seen);
+    check_for_alias_loop(container_sort(s).element_sort(),sorts_already_seen,false);
     return;
   }
 
@@ -200,14 +201,31 @@ void data_specification::check_for_alias_loop(
     for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(s).domain());
          !r.empty(); r.advance_begin(1))
     {
-      check_for_alias_loop(r.front(),sorts_already_seen);
+      check_for_alias_loop(r.front(),sorts_already_seen,false);
     }
 
-    check_for_alias_loop(function_sort(s).codomain(),sorts_already_seen);
+    check_for_alias_loop(function_sort(s).codomain(),sorts_already_seen,false);
     return;
   }
 
-  assert(is_structured_sort(s)); // In this case we do not need to carry out a check.
+  // A sort declaration with a struct on toplevel can be recursive. Otherwise a
+  // check needs to be made.
+  if (is_structured_sort(s) && !toplevel)
+  {
+    const structured_sort ss(s);
+    structured_sort_constructor_list constructors=ss.constructors();
+    for (structured_sort_constructor_list::const_iterator i=constructors.begin();
+         i!=constructors.end(); ++i)
+    {
+      structured_sort_constructor constructor=*i;
+      structured_sort_constructor_argument_list ssca=constructor.arguments();
+      for (structured_sort_constructor_argument_list::const_iterator j=ssca.begin();
+           j!=ssca.end(); ++j)
+      {
+        check_for_alias_loop(j->sort(),sorts_already_seen,false);
+      }
+    }
+  }
 
 }
 
@@ -325,7 +343,7 @@ void data_specification::reconstruct_m_normalised_aliases() const
        i!=m_aliases.end(); ++i)
   {
     std::set < sort_expression > sorts_already_seen; // Empty set.
-    check_for_alias_loop(i->first,sorts_already_seen);
+    check_for_alias_loop(i->first,sorts_already_seen,true);
   }
 
   // Copy m_normalised_aliases. All aliases are stored from left to right,
