@@ -173,8 +173,8 @@ extern "C"
   void       ATtableDestroy(ATermTable table);
   void       ATtableReset(ATermTable table);
   void       ATtablePut(ATermTable table, ATerm key, ATerm value);
-  ATerm    ATtableGet(ATermTable table, ATerm key);
-  void       ATtableRemove(ATermTable table, ATerm key);
+  ATerm      ATtableGet(ATermTable table, ATerm key);
+  ATbool     ATtableRemove(ATermTable table, ATerm key); /* Returns true if removal was successful. */
   ATermList  ATtableKeys(ATermTable table);
   ATermList  ATtableValues(ATermTable table);
 
@@ -183,8 +183,8 @@ extern "C"
   void       ATindexedSetDestroy(ATermIndexedSet set);
   void       ATindexedSetReset(ATermIndexedSet set);
   size_t     ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool* isnew);
-  ssize_t     ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem); /* A negative value represents non existence. */
-  void       ATindexedSetRemove(ATermIndexedSet set, ATerm elem);
+  ssize_t    ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem); /* A negative value represents non existence. */
+  ATbool     ATindexedSetRemove(ATermIndexedSet set, ATerm elem);   /* Returns true if removal was successful. */
   ATermList  ATindexedSetElements(ATermIndexedSet set);
   ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
 

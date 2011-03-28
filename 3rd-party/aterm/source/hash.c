@@ -530,9 +530,9 @@ ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
 /*}}}  */
 /*{{{  void ATindexedSetRemove(ATermIndexedSet hashset, ATerm elem) */
 
-void ATindexedSetRemove(ATermIndexedSet hashset, ATerm elem)
+ATbool ATindexedSetRemove(ATermIndexedSet hashset, ATerm elem)
 {
-  ATtableRemove(hashset, elem);
+  return ATtableRemove(hashset, elem);
 }
 
 /*}}}  */
@@ -678,7 +678,7 @@ ATerm ATtableGet(ATermTable table, ATerm key)
 /*}}}  */
 /*{{{  void ATtableRemove(ATermTable table, ATerm key) */
 
-void ATtableRemove(ATermTable table, ATerm key)
+ATbool ATtableRemove(ATermTable table, ATerm key)
 {
   size_t start,c,v,x,y;
   size_t* ltable;
@@ -690,7 +690,7 @@ void ATtableRemove(ATermTable table, ATerm key)
     v = table->hashtable[c];
     if (v == EMPTY)
     {
-      return;
+      return ATfalse;
     }
     if (v != DELETED && ATisEqual(key, tableGet(table->keys, v)))
     {
@@ -700,7 +700,7 @@ void ATtableRemove(ATermTable table, ATerm key)
     c = (c + STEP) & table->sizeMinus1;
     if (c == start)
     {
-      return;
+      return ATfalse;
     }
   }
 
@@ -739,6 +739,7 @@ void ATtableRemove(ATermTable table, ATerm key)
   ltable[y] = v;
   table->first_free_position++;
   table->nr_deletions++;
+  return ATtrue;
 }
 
 /*}}}  */
