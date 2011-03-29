@@ -21,6 +21,7 @@
 
 #ifndef SIM_HASHTABLE_H
 #define SIM_HASHTABLE_H
+#include <cstddef>
 #include <vector>
 
 struct bucket2
