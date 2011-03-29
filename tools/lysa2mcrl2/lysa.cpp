@@ -51,53 +51,6 @@ void ProcessInfo::override_calculus(Calculus c)
   _calculus = c;
 }
 
-template< typename T>   string join_ptr(T& input, string sep)
-{
-  string s = "";
-  typename T::iterator it=input.begin();
-  typename T::iterator it_end=input.end();
-
-  if (it==it_end)
-  {
-    return s;
-  }
-  //write first element
-  s += (string)(**it);
-  it++;
-
-  //write other elements
-
-  for (; it!=it_end; it++)
-  {
-    s += sep + (string)(**it);
-  }
-  return s;
-}
-template< typename T>   string join(T& input, string sep)
-{
-  string s = "";
-  typename T::iterator it=input.begin();
-  typename T::iterator it_end=input.end();
-
-  if (it==it_end)
-  {
-    return s;
-  }
-  //write first element
-  s += (string)(*it);
-  it++;
-
-  //write other elements
-
-  for (; it!=it_end; it++)
-  {
-    s += sep + (string)(*it);
-  }
-  return s;
-}
-//template string join(Indices& input, string sep);
-
-
 string Expression::position_in_input()
 {
   ostringstream s;
