@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file lps/include/mcrl2/lps/ltsmin.h
+/// \file mcrl2/lps/ltsmin.h
 /// \brief add your file description here.
 
-#ifndef LPS_INCLUDE_MCRL2_LPS_LTSMIN_H
-#define LPS_INCLUDE_MCRL2_LPS_LTSMIN_H
+#ifndef MCRL2_LPS_LTSMIN_H
+#define MCRL2_LPS_LTSMIN_H
 
 #include <functional>
 #include <set>
@@ -68,11 +68,12 @@ class pins
   protected:
     size_t m_group_count;
     size_t m_state_length; /**< the number of process parameters */
-    std::vector<std::vector<size_t> > m_group_read_info;
-    std::vector<std::vector<size_t> > m_group_write_info;
+    std::vector<std::vector<size_t> > m_read_group;
+    std::vector<std::vector<size_t> > m_write_group;
     lps::next_state_generator m_generator;
     atermpp::function_symbol m_state_fun; /**< the function symbol used for 'next states' */
     std::vector<std::string> m_process_parameter_names;
+    ltsmin_state_type m_ltsmin_state; /**< used by the functions next_state_all and next_state_long */
 
     /// \brief The pins class maintains for each type a mapping of integers to known values of the type.
     /// There are always at least two entries in the map:
@@ -87,9 +88,28 @@ class pins
       return m_generator.get_specification().process();
     }
        
-    // N.B. This is meant as a possible future extension.
-    // \brief m_process_parameter_index[i] is the index of the typemap that corresponds to the i-th process parameter.
-    // std::vector<int> m_process_parameter_index;
+    template <typename Iter>
+    std::string print_vector(Iter first, Iter last) const
+    {
+      std::ostringstream out;
+      out << "[";
+      for (Iter i = first; i != last; ++i)
+      {
+        if (i != first)
+        {
+          out << ", ";
+        }
+        out << *i;
+      }
+      out << "]";
+      return out.str();
+    }
+
+    template <typename Container>
+    std::string print_vector(const Container& c) const
+    {
+      return print_vector(c.begin(), c.end());
+    }
 
     void initialize_read_write_groups()
     {
@@ -98,8 +118,8 @@ class pins
       m_group_count  = proc.action_summands().size();
       m_state_length = proc.process_parameters().size();
 
-      m_group_read_info.resize(m_group_count);
-      m_group_write_info.resize(m_group_count);
+      m_read_group.resize(m_group_count);
+      m_write_group.resize(m_group_count);
 
       // the set with process parameters
       std::set<data::variable> parameters(proc.process_parameters().begin(), proc.process_parameters().end());
@@ -146,11 +166,11 @@ class pins
         {
           if (!used_read_parameters.empty() && used_read_parameters.find(*j) != used_read_parameters.end())
           {
-            m_group_read_info[i - summands.begin()].push_back(j - parameters_list.begin());
+            m_read_group[i - summands.begin()].push_back(j - parameters_list.begin());
           }
           if (!used_read_parameters.empty() && used_write_parameters.find(*j) != used_write_parameters.end())
           {
-            m_group_write_info[i - summands.begin()].push_back(j - parameters_list.begin());
+            m_write_group[i - summands.begin()].push_back(j - parameters_list.begin());
           }
         }
       }
@@ -160,16 +180,19 @@ class pins
     {
       m_datatype_mappings.push_back(atermpp::indexed_set()); // state type
       m_datatype_mappings.push_back(atermpp::indexed_set()); // label type
-      //const lps::linear_process& proc = process();
-      //for (data::variable_list::const_iterator i = proc.process_parameters().begin(); i != proc.process_parameters().end(); ++i)
-      //{
-      //  m_process_parameter_index.push_back(0);
-      //}
     }
 
-    std::size_t aterm2index(const atermpp::aterm& x) const
+    /// \brief Returns the index of the aterm x in the first datatype map. If it is not present yet, it will be added.
+    std::size_t aterm2index(const atermpp::aterm& x)
     {
-      return m_datatype_mappings[0].index(x);
+      std::size_t result = m_datatype_mappings[0].index(x);
+      if (result == (std::size_t) -1)
+      {
+        std::pair<std::size_t, bool> p = m_datatype_mappings[0].put(x);
+        assert(p.second);
+        return p.first;
+      }
+      return result;
     }
 
     atermpp::aterm index2aterm(std::size_t i) const
@@ -177,19 +200,26 @@ class pins
       return m_datatype_mappings[0].get(i);
     }
 
-    std::size_t expression2index(const data::data_expression& x) const
+    std::size_t expression2index(const data::data_expression& x)
     {
       return aterm2index(m_generator.expression2aterm(x));
     }
 
-    const data::data_expression& index2expression(std::size_t i) const
+    data::data_expression index2expression(std::size_t i) const
     {
       return m_generator.aterm2expression(index2aterm(i));
     }
 
     std::size_t label2index(const atermpp::aterm_appl& x)
     {
-      return m_datatype_mappings[1].index(x);
+      std::size_t result = m_datatype_mappings[1].index(x);
+      if (result == (std::size_t) -1)
+      {
+        std::pair<std::size_t, bool> p = m_datatype_mappings[1].put(x);
+        assert(p.second);
+        return p.first;
+      }
+      return result;
     }
                                    
     /// \brief Converts state component represented as integers into aterms (in the next state format).
@@ -216,6 +246,12 @@ class pins
       return m_generator.get_specification().process().process_parameters().size();
     }
 
+    /// \brief Returns the number of available groups. This equals the number ofaction summands of the LPS.
+    std::size_t group_count() const
+    {
+      return m_generator.get_specification().process().action_summands().size();
+    }
+
     /// \brief Constructor
     /// \param filename The name of a file containing an mCRL2 specification
     /// \param rewriter_strategy The rewriter strategy used for generating next states
@@ -234,6 +270,14 @@ class pins
       {
         m_process_parameter_names.push_back(i->name());
       }
+
+      // TODO: allocate this in a safer way by using some kind of smart pointer
+      m_ltsmin_state = new int[process_parameter_count()];
+    }
+
+    ~pins()
+    {
+      delete[] m_ltsmin_state;
     }
 
     /// \brief Serializes the i-th value of the datatype map with index d.
@@ -265,7 +309,7 @@ class pins
     /// in a datatype map.
     /// \param d A datatype index (0 <= i < datatype_count()).
     /// \return The index of the data value in the datatype map with index d, or -1 if it is not found in this map.
-    std::size_t parse(datatype_index d, const std::string& s) const
+    std::size_t parse(datatype_index d, const std::string& s)
     {
       if (d == 0)
       {
@@ -282,9 +326,16 @@ class pins
       throw std::runtime_error("Out of bounds error in pins::parse!");
     }
 
+    /// \brief Returns the number of datatype maps.
+    std::size_t datatype_count() const
+    {
+      return m_datatype_mappings.size();
+    }
+
     /// \brief Returns the name of the datatype map with index d
     /// - The datatype map with index 0 is named "state"
     /// - The datatype map with index 1 is named "action_label"
+    /// \pre 0 <= i < datatype_count()
     std::string datatype_name(datatype_index d) const
     {
       switch (d)
@@ -295,13 +346,8 @@ class pins
       return "unknown";
     }
 
-    /// \brief Returns the number of datatype maps.
-    std::size_t datatype_count() const
-    {
-      return m_datatype_mappings.size();
-    }
-
     /// \brief Returns the number of elements in datatype map d.
+    /// \pre 0 <= i < datatype_count()
     std::size_t datatype_size(datatype_index d) const
     {
       return m_datatype_mappings[d].size();
@@ -310,23 +356,19 @@ class pins
     /// \brief Indices of process parameters that influence event or next state of a summand by being read
     /// \param[in] index the selected summand
     /// \returns reference to a vector of indices of parameters
+    /// \pre 0 <= i < group_count()
     const std::vector<size_t>& read_group(size_t index) const
     {
-      return m_group_read_info[index];
+      return m_read_group[index];
     }
 
     /// \brief Indices of process parameters that influence event or next state of a summand by being written
     /// \param[in] index the selected summand
     /// \returns reference to a vector of indices of parameters
+    /// \pre 0 <= i < group_count()
     const std::vector<size_t>& write_group(size_t index) const
     {
-      return m_group_write_info[index];
-    }
-
-    /// \brief Returns the number of action summands of the LPS.
-    std::size_t summand_count() const
-    {
-      return m_generator.get_specification().process().action_summands().size();
+      return m_write_group[index];
     }
 
     /// \brief Returns a human-readable, unique name for process parameter i
@@ -352,7 +394,7 @@ class pins
     /// \pre 0 <= i < edge_label_count()
     datatype_index edge_label_type(std::size_t i) const
     {
-      return 0;
+      return 1;
     }
 
     /// \brief Returns the name of the i-th action label (always "action").
@@ -363,7 +405,7 @@ class pins
     }
 
     /// \brief Assigns the initial state to s.
-    void get_initial_state(ltsmin_state_type& s) const
+    void get_initial_state(ltsmin_state_type& s)
     {
       ATerm a = m_generator.initial_state();
       atermpp::aterm_appl initial_state(reinterpret_cast<ATermAppl>(a));
@@ -374,6 +416,8 @@ class pins
     }
 
     /// \brief Iterates over the 'next states' of state src, and invokes a callback function for each discovered state.
+    /// \param src An LTSMin state
+    /// \param f A 'callback' function object
     ///
     /// StateFunction is a callback function that must provide the function operator() with the following interface:
     ///
@@ -385,7 +429,7 @@ class pins
     /// - state is the next state
     /// - group is the number of the summand from which the next state was generated, or -1 if it is unknown which summand
     template <typename StateFunction>
-    void next_state_all(const int* src, StateFunction& f)
+    void next_state_all(const ltsmin_state_type& src, StateFunction& f)
     {
       std::size_t nparams = process_parameter_count();
       atermpp::aterm_appl init(m_state_fun,
@@ -398,9 +442,11 @@ class pins
         const lps::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
-          f[i] = aterm2index(s[i]);
+          m_ltsmin_state[i] = aterm2index(s[i]);
         }
-        f(label2index(s.label()), -1);
+        std::size_t label = label2index(s.label());
+        int group = -1; // we don't know the summand
+        f(label, m_ltsmin_state, group);
       }
     }
 
@@ -430,10 +476,60 @@ class pins
         const lps::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
-          f[i] = aterm2index(s[i]);
+          m_ltsmin_state[i] = aterm2index(s[i]);
         }
-        f(label2index(s.label()), group);
+        std::size_t label = label2index(s.label());
+        f(label, m_ltsmin_state, group);
       }
+    }
+    
+    /// \brief Prints an overview of several relevant attributes.
+    std::string info()
+    {
+      std::ostringstream out;
+
+      out << "\n--- EDGE LABELS ---\n";
+      out << "edge_label_count() = " << edge_label_count() << std::endl;
+      for (std::size_t i = 0; i < edge_label_count(); i++)
+      {
+        out << "\n";
+        out << "edge_label_name(" << i << ") = " << edge_label_name(i) << std::endl;
+        out << "edge_label_type(" << i << ") = " << edge_label_type(i) << std::endl;        
+      }
+
+      out << "\n--- PROCESS PARAMETERS ---\n";
+      out << "process_parameter_count() = " << process_parameter_count() << std::endl;
+      for (std::size_t i = 0; i < process_parameter_count(); i++)
+      {
+        out << "\n";
+        out << "process_parameter_name(" << i << ") = " << process_parameter_name(i) << std::endl;
+        out << "process_parameter_type(" << i << ") = " << process_parameter_type(i) << std::endl;
+      }
+
+      out << "\n--- SUMMANDS ---\n";
+      out << "group_count() = " << group_count() << std::endl;
+      for (std::size_t i = 0; i < group_count(); i++)
+      {
+        out << "\n";
+        out << " read_group(" << i << ") = " << print_vector(read_group(i)) << std::endl;
+        out << "write_group(" << i << ") = " << print_vector(write_group(i)) << std::endl;
+      }
+
+      out << "\n--- INITIAL STATE ---\n";
+      ltsmin_state_type init = new int[process_parameter_count()];
+      get_initial_state(init);
+      out << "initial state = " << print_vector(init, init + process_parameter_count()) << std::endl;
+
+      out << "\n--- DATA TYPE MAPS ---\n";
+      out << "datatype_count() = " << datatype_count() << std::endl;
+      for (std::size_t i = 0; i < datatype_count(); i++)
+      {
+        out << "\n";
+        out << "datatype_name(" << i << ") = " << datatype_name(i) << std::endl;
+        out << "datatype_size(" << i << ") = " << datatype_size(i) << std::endl;
+      }
+
+      return out.str();
     }
 };
 
@@ -441,4 +537,4 @@ class pins
 
 } // namespace mcrl2
 
-#endif // LPS_INCLUDE_MCRL2_LPS_LTSMIN_H
+#endif // MCRL2_LPS_LTSMIN_H
