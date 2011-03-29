@@ -100,7 +100,7 @@ void test_ltsmin()
 
   // find successors of the initial state for individual groups
   std::size_t count = 0;
-  for (int group = 0; group < p.group_count(); group++)
+  for (std::size_t group = 0; group < p.group_count(); group++)
   {
     state_callback_function f_long(p.process_parameter_count());
     p.next_state_long(initial_state, group, f_long);
@@ -109,10 +109,38 @@ void test_ltsmin()
   }
   BOOST_CHECK(count == f_all.state_count);
 
+  // check serialize/deserialize
+  for (std::size_t d = 0; d < p.datatype_count(); ++d)
+  {
+    for (std::size_t i = 0; i < p.datatype_size(d); ++i)
+    {
+      std::string s = p.serialize(d, i);
+      std::cout << "serialize(" << d << ", " << i << ") = " << p.serialize(d, i) << std::endl;
+      std::size_t j = p.deserialize(d, s);
+      BOOST_CHECK(i == j);
+    }
+  }
+
+  // check print/parse
+  for (std::size_t d = 0; d < p.datatype_count(); ++d)
+  {
+    for (std::size_t i = 0; i < p.datatype_size(d); ++i)
+    {
+      std::string s = p.print(d, i);
+      std::cout << "print(" << d << ", " << i << ") = " << s << std::endl;
+      //std::size_t j = p.parse(d, s);
+      //std::cout << "parse(" << d << ", " << s << ") = " << j << std::endl;
+    }
+  }
+  BOOST_CHECK(p.print(0, 0) == "1");
+  BOOST_CHECK(p.print(0, 1) == "d1");
+
   // cleanup temporary files
   boost::filesystem::remove(boost::filesystem::path(abp_filename));
     
   delete[] initial_state;
+  
+  //BOOST_CHECK(false);
 }
 
 int test_main(int argc, char* argv[])

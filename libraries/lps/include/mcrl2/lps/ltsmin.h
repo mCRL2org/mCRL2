@@ -246,7 +246,7 @@ class pins
       return m_generator.get_specification().process().process_parameters().size();
     }
 
-    /// \brief Returns the number of available groups. This equals the number ofaction summands of the LPS.
+    /// \brief Returns the number of available groups. This equals the number of action summands of the LPS.
     std::size_t group_count() const
     {
       return m_generator.get_specification().process().action_summands().size();
@@ -285,7 +285,14 @@ class pins
     /// \return A string that uniquely corresponds with the value.
     std::string serialize(datatype_index d, std::size_t i)
     {
-      return m_datatype_mappings[d].get(i).to_string();
+      if (d == 0)
+      {
+        return m_generator.aterm2expression(m_datatype_mappings[d].get(i)).to_string();
+      }
+      else
+      {
+        return m_datatype_mappings[d].get(i).to_string();
+      }
     }
 
     /// \brief Deserializes a string to a data value, and returns the corresponding index
@@ -294,15 +301,33 @@ class pins
     /// \return The index of the data value in the datatype map with index d, or -1 if it is not found in this map.
     std::size_t deserialize(datatype_index d, const std::string& s)
     {
-      return m_datatype_mappings[d].index(atermpp::read_from_string(s));
+      ATerm t = atermpp::read_from_string(s);
+      atermpp::aterm_appl a(reinterpret_cast<ATermAppl>(t));
+      if (d == 0)
+      {
+        return m_datatype_mappings[0].index(m_generator.expression2aterm(a));
+      }
+      else
+      {
+        return m_datatype_mappings[d].index(a);
+      }
     }
 
     /// \brief Returns a pretty printed representation of the i-th value of the datatype map with index d.
     /// \param d A datatype index (0 <= i < datatype_count()).
-    /// \return A string representation that does not uniquely correspond with the value.
+    /// \pre 0 <= i < datatype_size(d)
+    /// \return A pretty print representation of the value. Note that the pretty print representation is
+    /// not guaranteed to correspond uniquely with the value.
     std::string print(datatype_index d, int i)
     {
-      return core::pp(m_datatype_mappings[d].get(i));
+      if (d == 0)
+      {
+        return core::pp(m_generator.aterm2expression(m_datatype_mappings[0].get(i)));
+      }
+      else
+      {
+        return core::pp(m_datatype_mappings[d].get(i));
+      }     
     }
 
     /// \brief Parses a textual representation of a data value, and returns the corresponding index
@@ -318,10 +343,11 @@ class pins
       }
       if (d == 1)
       {
-        lps::multi_action a = lps::parse_multi_action(s);
-        // TODO: change this when multi_action becomes a proper term
-        ATermAppl t = core::detail::gsMakeMultAct(a.actions());
-        return m_datatype_mappings[d].index(atermpp::aterm_appl(t));
+        throw std::runtime_error("pins::parse is not implemented yet for action labels!");
+//        lps::multi_action a = lps::parse_multi_action(s, m_generator.get_specification().data());
+//        // TODO: change this when multi_action becomes a proper term
+//        ATermAppl t = core::detail::gsMakeMultAct(a.actions());
+//        return m_datatype_mappings[d].index(atermpp::aterm_appl(t));
       }
       throw std::runtime_error("Out of bounds error in pins::parse!");
     }
