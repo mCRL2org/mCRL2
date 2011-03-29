@@ -65,7 +65,7 @@ class indexed_set
     /// \param elem A term.
     /// \return A pair denoting the index of the element in the set, and a boolean denoting whether the term
     /// was already contained in the set.
-    std::pair<size_t, bool> put(aterm elem)
+    std::pair<size_t, bool> put(const aterm& elem)
     {
       ATbool b;
       size_t l = ATindexedSetPut(m_set.get(), elem, &b);
@@ -81,7 +81,7 @@ class indexed_set
     /// which case the return value is (size_t)-1, i.e. the largest number in size_t.
     /// \param elem An element of the set.
     /// \return The index of the element.
-    size_t index(aterm elem)
+    size_t index(const aterm& elem) const
     {
       return ATindexedSetGetIndex(m_set.get(), elem);
     }
@@ -91,7 +91,7 @@ class indexed_set
     /// to this index. If it is invoked with an invalid index, effects are not predictable.
     /// \param index A positive number.
     /// \return The element in the set with the given index.
-    aterm get(size_t index)
+    aterm get(size_t index) const
     {
       return ATindexedSetGetElem(m_set.get(), index);
     }
@@ -100,7 +100,7 @@ class indexed_set
     /// The elem is removed from the indexed set, and if a number was assigned to elem,
     /// it is freed to be reassigned to an element, that may be put into the set at some later instance.
     /// \param elem An element of the set.
-    void remove(aterm elem)
+    void remove(const aterm& elem)
     {
       if (ATindexedSetRemove(m_set.get(), elem))
       {
@@ -112,7 +112,7 @@ class indexed_set
     /// A list with all valid elements stored in the indexed set is returned.  The list is
     /// ordered from element with index 0 onwards.
     /// \return An ordered list containing the elements of the set.
-    aterm_list elements()
+    aterm_list elements() const
     {
       return aterm_list(ATindexedSetElements(m_set.get()));
     }
