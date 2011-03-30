@@ -127,7 +127,7 @@ MachineWord AT_symbolTableSize()
 /*}}}  */
 
 /*{{{  void AT_initAFun(int argc, char *argv[]) */
-void AT_initAFun(int, char*)
+void AT_initAFun(int, char**)
 {
   AFun sym;
 

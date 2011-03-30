@@ -296,7 +296,7 @@ void resize_hashtable()
  * Initialize memory allocation datastructures
  */
 
-void AT_initMemory(int, char*)
+void AT_initMemory(int, char**)
 {
   size_t i;
   HashNumber hnr;

@@ -35,7 +35,7 @@ namespace aterm
   extern SymEntry* at_lookup_table;
 
   MachineWord AT_symbolTableSize();
-  void AT_initAFun(int argc, char* argv[]);
+  void AT_initAFun(int argc, char** argv);
   size_t AT_printAFun(AFun sym, FILE* f);
 
   inline
