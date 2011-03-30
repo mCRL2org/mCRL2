@@ -8,6 +8,8 @@
 
 #include "wx.hpp" // precompiled headers
 
+#include <cstddef>
+
 #include "state.h"
 #include "transition.h"
 
