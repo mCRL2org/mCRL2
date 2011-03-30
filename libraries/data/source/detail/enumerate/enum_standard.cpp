@@ -356,7 +356,7 @@ ATerm EnumeratorSolutionsStandard::build_solution_aux_innerc(ATerm t, ATermList 
 
     if (!ATisInt(head) && !gsIsDataVarId((ATermAppl) head))
     {
-      fun = ATmakeAFun("@appl_bs@",arity+extra_arity,ATfalse);
+      fun = ATmakeAFun("@appl_bs@",arity+extra_arity,false);
       k = extra_arity+1;
       for (int i=1; i<k; i++)
       {
@@ -694,7 +694,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     {
       if (r.front().name() == "==")
       {
-        ATbool b;
+        bool b;
         ATindexedSetPut(info.eqs,info.rewr_obj->toRewriteFormat(r.front()),&b);
       }
     }
@@ -711,7 +711,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     {
       if (r.front().name() == "==")
       {
-        ATbool b;
+        bool b;
         ATindexedSetPut(info.eqs,ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(r.front()),0),&b);
       }
     }
@@ -719,7 +719,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
 
   info.tupAFun = 0;
   ATprotectAFun(info.tupAFun);
-  info.tupAFun = ATmakeAFun("@tup@",2,ATfalse);
+  info.tupAFun = ATmakeAFun("@tup@",2,false);
 
   info.constructors = ATtableCreate(boost::distance(data_spec.sorts()),50);
   for (data_specification::sorts_const_range r(data_spec.sorts()); !r.empty(); r.advance_begin(1))

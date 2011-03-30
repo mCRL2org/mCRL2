@@ -158,7 +158,7 @@ struct aterm_traits<aterm_base>
 inline
 bool operator!(const aterm_base& x)
 {
-  return ATisEqual(aterm_traits<aterm_base>::term(x), ATfalse);
+  return ATisEqual(aterm_traits<aterm_base>::term(x), false);
 }
 
 /// \brief Writes a string representation of the aterm t to the stream out.
@@ -312,7 +312,7 @@ aterm read_from_named_file(const std::string& name)
 inline
 bool write_to_named_text_file(aterm t, const std::string& filename)
 {
-  return ATwriteToNamedTextFile(t, filename.c_str()) == ATtrue;
+  return ATwriteToNamedTextFile(t, filename.c_str()) == true;
 }
 
 /// \brief Writes term t to file named filename in Binary aterm Format (baf).
@@ -322,7 +322,7 @@ bool write_to_named_text_file(aterm t, const std::string& filename)
 inline
 bool write_to_named_binary_file(aterm t, const std::string& filename)
 {
-  return ATwriteToNamedBinaryFile(t, filename.c_str()) == ATtrue;
+  return ATwriteToNamedBinaryFile(t, filename.c_str()) == true;
 }
 
 /// \brief Writes term t to file named filename in Streamable aterm Format (saf).
@@ -384,7 +384,7 @@ bool write_to_named_saf_file(aterm t, const std::string& filename)
 inline
 bool operator==(const aterm& x, const aterm& y)
 {
-  return ATisEqual(x, y) == ATtrue;
+  return ATisEqual(x, y) == true;
 }
 
 /// \brief Equality operator.
@@ -394,7 +394,7 @@ bool operator==(const aterm& x, const aterm& y)
 inline
 bool operator==(const aterm& x, ATerm y)
 {
-  return ATisEqual(x, y) == ATtrue;
+  return ATisEqual(x, y) == true;
 }
 
 /// \brief Equality operator.
@@ -404,7 +404,7 @@ bool operator==(const aterm& x, ATerm y)
 inline
 bool operator==(const ATerm& x, aterm y)
 {
-  return ATisEqual(x, y) == ATtrue;
+  return ATisEqual(x, y) == true;
 }
 
 /// \brief Inequality operator.
@@ -414,7 +414,7 @@ bool operator==(const ATerm& x, aterm y)
 inline
 bool operator!=(const aterm& x, const aterm& y)
 {
-  return ATisEqual(x, y) == ATfalse;
+  return ATisEqual(x, y) == false;
 }
 
 /// \brief Inequality operator.
@@ -424,7 +424,7 @@ bool operator!=(const aterm& x, const aterm& y)
 inline
 bool operator!=(const aterm& x, ATerm y)
 {
-  return ATisEqual(x, y) == ATfalse;
+  return ATisEqual(x, y) == false;
 }
 
 /// \brief Inequality operator.
@@ -434,7 +434,7 @@ bool operator!=(const aterm& x, ATerm y)
 inline
 bool operator!=(const ATerm& x, aterm y)
 {
-  return ATisEqual(x, y) == ATfalse;
+  return ATisEqual(x, y) == false;
 }
 
 } // namespace atermpp

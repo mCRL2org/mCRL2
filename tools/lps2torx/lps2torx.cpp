@@ -90,7 +90,7 @@ class torx_data
     {
       stateactions = ATindexedSetCreate(initial_size,50);
       state_indices = ATtableCreate(initial_size,50);
-      fun_trip = ATmakeAFun("@trip@",2,ATfalse);
+      fun_trip = ATmakeAFun("@trip@",2,false);
       ATprotectAFun(fun_trip);
       num_indices = 0;
     }
@@ -104,11 +104,11 @@ class torx_data
 
     index_pair add_action_state(ATerm from, ATerm action, ATerm to)
     {
-      ATbool is_new;
+      bool is_new;
       index_pair p;
 
       p.action = ATindexedSetPut(stateactions,triple(from,action,to),&is_new);
-      if (is_new == ATtrue)
+      if (is_new == true)
       {
         num_indices = num_indices + 1;
       }
@@ -193,7 +193,7 @@ class lps2torx_tool : public lps2torx_base
 
       ATerm initial_state = nstate->getInitialState();
 
-      ATerm dummy_action = (ATerm) ATmakeAppl0(ATmakeAFun("@dummy_action@",0,ATfalse));
+      ATerm dummy_action = (ATerm) ATmakeAppl0(ATmakeAFun("@dummy_action@",0,false));
       td.add_action_state(initial_state,dummy_action,initial_state);
 
       gsVerboseMsg("generating state space...\n");

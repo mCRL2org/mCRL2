@@ -242,7 +242,7 @@ bool StandardSimulator::ChooseTransition(size_t index)
 
     if (tau_prior)
     {
-      ATbool b;
+      bool b;
       ATindexedSetPut(seen_states,current_state,&b);
 
       bool found = false;

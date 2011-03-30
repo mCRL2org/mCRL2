@@ -2,7 +2,6 @@
 #define ATYPES_H
 
 #include "stddef.h"
-#include "abool.h"
 
 namespace aterm
 {

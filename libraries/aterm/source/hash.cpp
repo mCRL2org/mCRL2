@@ -450,7 +450,7 @@ void ATindexedSetReset(ATermIndexedSet hashset)
 /*{{{  static size_t keyPut(ATermIndexedSet hashset, key, value, ATbool *isnew)*/
 
 static size_t keyPut(ATermIndexedSet hashset, ATerm key,
-                     ATerm value, ATbool* isnew)
+                     ATerm value, bool* isnew)
 {
   size_t n,m;
 
@@ -462,7 +462,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
     {
       if (isnew != NULL)
       {
-        *isnew = ATfalse;
+        *isnew = false;
       }
       if (value != NULL)
       {
@@ -484,7 +484,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
     {
       if (isnew != NULL)
       {
-        *isnew = ATfalse;
+        *isnew = false;
       }
       if (value != NULL)
       {
@@ -499,7 +499,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
 
   if (isnew != NULL)
   {
-    *isnew = ATtrue;
+    *isnew = true;
   }
   insertKeyValue(hashset, n, key, value);
   if (hashset->nr_entries >= hashset->max_entries)
@@ -518,7 +518,7 @@ static size_t keyPut(ATermIndexedSet hashset, ATerm key,
  * an index. If elem is already in the set, deliver 0
  */
 
-size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, ATbool* isnew)
+size_t ATindexedSetPut(ATermIndexedSet hashset, ATerm elem, bool* isnew)
 {
   return keyPut(hashset, elem, NULL, isnew);
 }
@@ -555,7 +555,7 @@ ssize_t ATindexedSetGetIndex(ATermIndexedSet hashset, ATerm elem)
 /*}}}  */
 /*{{{  void ATindexedSetRemove(ATermIndexedSet hashset, ATerm elem) */
 
-ATbool ATindexedSetRemove(ATermIndexedSet hashset, ATerm elem)
+bool ATindexedSetRemove(ATermIndexedSet hashset, ATerm elem)
 {
   return ATtableRemove(hashset, elem);
 }
@@ -680,7 +680,7 @@ void ATtablePut(ATermTable table, ATerm key, ATerm value)
   /* insert entry key into the hashtable, and deliver
      an index. If key is already in the set, deliver 0 */
 
-  ATbool isnew;
+  bool isnew;
 
   keyPut(table, key, value, &isnew);
 }
@@ -703,7 +703,7 @@ ATerm ATtableGet(ATermTable table, ATerm key)
 /*}}}  */
 /*{{{  void ATtableRemove(ATermTable table, ATerm key) */
 
-ATbool ATtableRemove(ATermTable table, ATerm key)
+bool ATtableRemove(ATermTable table, ATerm key)
 {
   size_t start,c,v,x,y;
   size_t* ltable;
@@ -715,7 +715,7 @@ ATbool ATtableRemove(ATermTable table, ATerm key)
     v = table->hashtable[c];
     if (v == EMPTY)
     {
-      return ATfalse;
+      return false;
     }
     if (v != DELETED && ATisEqual(key, tableGet(table->keys, v)))
     {
@@ -725,7 +725,7 @@ ATbool ATtableRemove(ATermTable table, ATerm key)
     c = (c + STEP) & table->sizeMinus1;
     if (c == start)
     {
-      return ATfalse;
+      return false;
     }
   }
 
@@ -764,7 +764,7 @@ ATbool ATtableRemove(ATermTable table, ATerm key)
   ltable[y] = v;
   table->first_free_position++;
   table->nr_deletions++;
-  return ATtrue;
+  return true;
 }
 
 /*}}}  */

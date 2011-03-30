@@ -67,13 +67,13 @@ class indexed_set
     /// was already contained in the set.
     std::pair<size_t, bool> put(const aterm& elem)
     {
-      ATbool b;
+      bool b;
       size_t l = ATindexedSetPut(m_set.get(), elem, &b);
-      if (b == ATtrue)
+      if (b == true)
       {
         m_size++;
       }
-      return std::make_pair(l, b == ATtrue);
+      return std::make_pair(l, b == true);
     }
 
     /// \brief Find the index of elem in set.

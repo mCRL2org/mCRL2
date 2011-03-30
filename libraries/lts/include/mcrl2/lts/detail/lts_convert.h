@@ -497,7 +497,7 @@ class aut_svc_convertor
   public:
     action_label_svc translate_label(const action_label_string& l) const
     {
-      return action_label_svc((ATerm)ATmakeAppl0(ATmakeAFun(pp(l).c_str(),0,ATfalse)));
+      return action_label_svc((ATerm)ATmakeAppl0(ATmakeAFun(pp(l).c_str(),0,false)));
     }
 
     state_label_svc translate_state(const state_label_empty&) const

@@ -113,7 +113,7 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 //Ret: specification containing one sort, constructor, operation, equation,
 //     action and process specification, and one initialisation, in that order.
 
-#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(chi_parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
+#define safe_assign(lhs, rhs) { bool b; ATindexedSetPut(chi_parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
 
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
 void UnaryTypeCheck(ATermAppl arg1, std::string type);

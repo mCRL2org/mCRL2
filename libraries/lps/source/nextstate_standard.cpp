@@ -216,7 +216,7 @@ ATermAppl NextStateStandard::makeStateVector(ATerm state)
   if (!stateAFun_made)
   {
     stateAFun_made = true;
-    info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+    info.stateAFun = ATmakeAFun("STATE",info.statelen,false);
     ATprotectAFun(info.stateAFun);
   }
 
@@ -303,7 +303,7 @@ ATerm NextStateStandard::parseStateVector(ATermAppl state, ATerm match)
   if (!stateAFun_made)
   {
     stateAFun_made = true;
-    info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+    info.stateAFun = ATmakeAFun("STATE",info.statelen,false);
     ATprotectAFun(info.stateAFun);
   }
 
@@ -497,7 +497,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
   tree_init = NULL;
 
   info.stateformat = state_format;
-  info.pairAFun = ATmakeAFun("@STATE_PAIR@",2,ATfalse);
+  info.pairAFun = ATmakeAFun("@STATE_PAIR@",2,false);
   ATprotectAFun(info.pairAFun);
 
   info.nil = NULL;
@@ -525,7 +525,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
   if (info.stateformat == GS_STATE_VECTOR)
   {
     stateAFun_made = true;
-    info.stateAFun = ATmakeAFun("STATE",info.statelen,ATfalse);
+    info.stateAFun = ATmakeAFun("STATE",info.statelen,false);
     ATprotectAFun(info.stateAFun);
   }
   else
@@ -544,7 +544,7 @@ NextStateStandard::NextStateStandard(mcrl2::lps::specification const& spec, bool
   }
   ATprotectArray(stateargs,info.statelen);
 
-  smndAFun = ATmakeAFun("@SMND@",4,ATfalse);
+  smndAFun = ATmakeAFun("@SMND@",4,false);
   ATprotectAFun(smndAFun);
   ATermList sums = lps::deprecated::linear_process_summands(spec.process());
   l = ATmakeList0();

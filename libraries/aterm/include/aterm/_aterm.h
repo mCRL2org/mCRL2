@@ -15,7 +15,7 @@ namespace aterm
 
   const int STRING_MARK = 0xFF; /* marker for binary strings */
 
-  extern ATbool low_memory;
+  extern bool low_memory;
 
   extern ProtEntry** at_prot_table;
   extern size_t at_prot_table_size;

@@ -13,7 +13,7 @@ namespace aterm
 
 char memmgnt_id[] = "$Id: memmgnt.c 23071 2007-07-02 10:06:17Z eriks $";
 
-extern ATbool low_memory;
+extern bool low_memory;
 void free_unused_blocks();
 
 static const size_t MAX_UNUSED_BLOCKS = 16;

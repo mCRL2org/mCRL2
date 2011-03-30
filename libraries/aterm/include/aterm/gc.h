@@ -1,7 +1,6 @@
 #ifndef GC_H
 #define GC_H
 
-#include "abool.h"
 #include "aterm2.h"
 
 namespace aterm
@@ -12,7 +11,7 @@ namespace aterm
   void AT_cleanupGC();
   void AT_collect_minor();
 
-  extern void AT_init_gc_parameters(ATbool low_memory);
+  extern void AT_init_gc_parameters(bool low_memory);
   extern size_t gc_min_number_of_blocks;
   extern size_t max_freeblocklist_size;
   extern size_t min_nb_minor_since_last_major;

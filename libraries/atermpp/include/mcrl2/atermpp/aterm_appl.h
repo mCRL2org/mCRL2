@@ -309,7 +309,7 @@ struct select_traits_base< T, typename boost::enable_if<typename boost::is_base_
 template <typename Term>
 bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
+  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == true;
 }
 
 /// \brief Equality operator.
@@ -319,7 +319,7 @@ bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
 template <typename Term>
 bool operator==(const term_appl<Term>& x, ATermAppl y)
 {
-  return ATisEqual((ATermAppl)aterm_traits<term_appl<Term> >::term(x), y) == ATtrue;
+  return ATisEqual((ATermAppl)aterm_traits<term_appl<Term> >::term(x), y) == true;
 }
 
 /// \brief Equality operator.
@@ -329,7 +329,7 @@ bool operator==(const term_appl<Term>& x, ATermAppl y)
 template <typename Term>
 bool operator==(ATermAppl x, const term_appl<Term>& y)
 {
-  return ATisEqual(x, (ATermAppl)aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
+  return ATisEqual(x, (ATermAppl)aterm_traits<term_appl<Term> >::term(y)) == true;
 }
 
 /// \brief Inequality operator.
@@ -339,7 +339,7 @@ bool operator==(ATermAppl x, const term_appl<Term>& y)
 template <typename Term>
 bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATfalse;
+  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == false;
 }
 
 /// \brief Inequality operator.
@@ -349,7 +349,7 @@ bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
 template <typename Term>
 bool operator!=(const term_appl<Term>& x, ATermAppl y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATfalse;
+  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == false;
 }
 
 /// \brief Inequality operator.
@@ -359,7 +359,7 @@ bool operator!=(const term_appl<Term>& x, ATermAppl y)
 template <typename Term>
 bool operator!=(ATermAppl x, const term_appl<Term>& y)
 {
-  return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == ATfalse;
+  return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == false;
 }
 
 } // namespace atermpp

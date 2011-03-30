@@ -47,7 +47,7 @@ static ATermList typelist = NULL;
 
 bool is_mCRL_spec(ATermAppl spec)
 {
-  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, ATfalse);
+  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, false);
 }
 
 
@@ -98,14 +98,14 @@ static void add_id(ATermList* ids, ATermAppl id)
   }
 }
 
-static ATbool is_domain(ATermList args, ATermAppl sort)
+static bool is_domain(ATermList args, ATermAppl sort)
 {
   if (!is_basic_sort(mcrl2::data::sort_expression(sort)))
   {
     ATermList dom = ATLgetArgument(sort,0);
     if (ATgetLength(args) != ATgetLength(dom))
     {
-      return ATfalse;
+      return false;
     }
     else
     {
@@ -113,19 +113,19 @@ static ATbool is_domain(ATermList args, ATermAppl sort)
       {
         if (!ATisEqual(static_cast<ATermAppl>(mcrl2::data::data_expression(ATAgetFirst(args)).sort()),ATgetFirst(dom)))
         {
-          return ATfalse;
+          return false;
         }
       }
-      return ATtrue;
+      return true;
     }
   }
   if (ATisEmpty(args))
   {
-    return ATtrue;
+    return true;
   }
   else
   {
-    return ATfalse;
+    return false;
   }
 }
 
@@ -154,7 +154,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
   using namespace mcrl2::data;
 
   ATermList l = ATgetArguments(t);
-  ATermAppl t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,ATtrue));
+  ATermAppl t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,true));
 
   if (ATisEmpty(l))
   {
@@ -207,8 +207,8 @@ static ATermList get_substs(ATermList ids)
 
 //  if ( !remove_standard_functions )
   {
-    ATbool b;
-    ATindexedSetPut(used,(ATerm) ATmakeAppl0(ATmakeAFun("if",0,ATtrue)),&b);
+    bool b;
+    ATindexedSetPut(used,(ATerm) ATmakeAppl0(ATmakeAFun("if",0,true)),&b);
   }
 
   for (; !ATisEmpty(ids); ids=ATgetNext(ids))
@@ -242,13 +242,13 @@ static ATermList get_substs(ATermList ids)
     size_t i = 0;
     ATermAppl new_id = 0;
     while (!is_user_identifier(s) ||
-           ATindexedSetGetIndex(used,(ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >=0)
+           ATindexedSetGetIndex(used,(ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >=0)
     {
       sprintf(t,"%lu",i);
       i++;
     }
 
-    ATbool b;
+    bool b;
     ATindexedSetPut(used,(ATerm) new_id,&b);
 
     substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) new_id));

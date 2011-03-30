@@ -322,7 +322,7 @@ class specification_basic_type:public boost::noncopyable
 
     size_t addObject(ATermAppl o, bool& b)
     {
-      ATbool isnew=ATfalse;
+      bool isnew=false;
       size_t result=ATindexedSetPut(objectIndexTable,(ATerm)o,&isnew);
       if (objectdata.size()<=result)
       {

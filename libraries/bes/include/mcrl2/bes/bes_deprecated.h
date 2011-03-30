@@ -97,7 +97,7 @@ enum transformation_strategy
 /* Declare a protected PAIR symbol */
 inline AFun initAFunPair(AFun& f)
 {
-  f = ATmakeAFun("PAIR", 2, ATfalse);
+  f = ATmakeAFun("PAIR", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -368,7 +368,7 @@ void use_hashtables(void)
 
 inline AFun initAFunBESAnd(AFun& f)
 {
-  f = ATmakeAFun("BESAnd", 2, ATfalse);
+  f = ATmakeAFun("BESAnd", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -381,7 +381,7 @@ inline AFun AFunBESAnd()
 
 inline AFun initAFunBESOr(AFun& f)
 {
-  f = ATmakeAFun("BESOr", 2, ATfalse);
+  f = ATmakeAFun("BESOr", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -394,7 +394,7 @@ inline AFun AFunBESOr()
 
 inline AFun initAFunBESIf(AFun& f)
 {
-  f = ATmakeAFun("BESIf", 3, ATfalse);
+  f = ATmakeAFun("BESIf", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -409,7 +409,7 @@ inline AFun AFunBESIf()
 inline
 AFun initAFunBESFalse(AFun& f)
 {
-  f = ATmakeAFun("BESFalse", 0, ATfalse);
+  f = ATmakeAFun("BESFalse", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -431,7 +431,7 @@ bool gsIsBESFalse(ATermAppl Term)
 inline
 AFun initAFunBESTrue(AFun& f)
 {
-  f = ATmakeAFun("BESTrue", 0, ATfalse);
+  f = ATmakeAFun("BESTrue", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -453,7 +453,7 @@ bool gsIsBESTrue(ATermAppl Term)
 inline
 AFun initAFunBESDummy(AFun& f)
 {
-  f = ATmakeAFun("BESDummy", 0, ATfalse);
+  f = ATmakeAFun("BESDummy", 0, false);
   ATprotectAFun(f);
   return f;
 }

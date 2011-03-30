@@ -47,7 +47,7 @@ namespace atermpp
 template <BOOST_PP_ENUM_PARAMS(n, class T)>
 bool match(const aterm& t, const std::string& pattern, BOOST_PP_ENUM(n, TEXT1, nil))
 {
-  return ATmatch(t, const_cast<char*>(pattern.c_str()), BOOST_PP_ENUM(n, TEXT2, nil)) == ATtrue;
+  return ATmatch(t, const_cast<char*>(pattern.c_str()), BOOST_PP_ENUM(n, TEXT2, nil)) == true;
 }
 
 #  undef TEXT1

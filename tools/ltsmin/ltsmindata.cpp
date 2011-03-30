@@ -23,7 +23,7 @@ using namespace mcrl2::core::detail;
 unsigned int Pi_pt = 0, n_partitions = 0;
 
 SVCint nstate=0, nlabel=0, npar=0;
-ATbool* mark;
+bool* mark;
 SVCint* blockref;
 SVCstateIndex* s; /* In this resides the partition */
 ATermList* lab, *par; /* [[key, sources], ... ] */
@@ -38,7 +38,7 @@ ATerm* label_name, *par_name;
 /* End data definition */
 
 static size_t n_transitions = 0, n_states = 0;
-static ATbool omitTauLoops;
+static bool omitTauLoops;
 
 int label_tau = -1;
 
@@ -72,7 +72,7 @@ static ATerm* MakeArrayOfATerms(int n)
 static void AllocData(void)
 {
   int i;
-  if (!(mark = (ATbool*) malloc(nstate * sizeof(ATbool))))
+  if (!(mark = (bool*) malloc(nstate * sizeof(bool))))
   {
     ATerror("Cannot allocate boolean array of size %d\n", nstate);
   }
@@ -149,7 +149,7 @@ void StartSplitting(void)
   n_partitions = 0;
   for (i=0; i<nstate; i++)
   {
-    mark[i] = ATfalse;
+    mark[i] = false;
     s[i] = i;
     blockref[i] = Pi_pt;
   }
@@ -608,7 +608,7 @@ static ATerm BlockCode(int b)
 {
   static ATermIndexedSet indeks = NULL;
   size_t d;
-  ATbool nnew;
+  bool nnew;
   if (b< 0)
   {
     ATindexedSetDestroy(indeks);
@@ -790,7 +790,7 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
   n_partitions = 0; */
   for (i=0; i<nstate; i++)
   {
-    mark[i] = ATfalse;
+    mark[i] = false;
     s[i] = i;
     blockref[i] = 0;
   }
@@ -856,7 +856,7 @@ static ATermList  StableBlockNumbers(void)
   return result;
 }
 
-SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool
+SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool
                                        deleteTauLoops)
 {
   ATermList blocks = StableBlockNumbers();
@@ -876,7 +876,7 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
   SVCbool nnew;
   int n_tau_transitions;
   SVCstateIndex newState = SVCnewState(outFile,
-                                       (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse)), &nnew);
+                                       (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?true:false)), &nnew);
   SVCsetInitialState(outFile, newState);
   SVCsetType(outFile, const_cast< char* >("mCRL2"));
   SVCsetCreator(outFile, const_cast< char* >("ltsmin"));
@@ -926,7 +926,7 @@ SVCstateIndex get_new_state(SVCfile* in, SVCstateIndex s)
   {
     state_arity = ATgetArity(ATgetAFun(state));
     state_args = (ATerm*) malloc((state_arity+1)*sizeof(ATerm));
-    state_afun = ATmakeAFun(ATgetName(ATgetAFun(state)),state_arity+1,ATfalse);
+    state_afun = ATmakeAFun(ATgetName(ATgetAFun(state)),state_arity+1,false);
   }
 
   for (int i=0; i<state_arity; i++)
@@ -964,7 +964,7 @@ int WriteDataAddParam(SVCfile* in, SVCstateIndex initState, int is_branching)
   SVCsetCreator(outFile, const_cast< char* >("ltsmin2"));
 
   SVCstateIndex init = SVCgetInitialState(in);
-  ReturnEquivalenceClasses(initState,is_branching?ATtrue:ATfalse);
+  ReturnEquivalenceClasses(initState,is_branching?true:false);
 
   SVCsetInitialState(outFile, get_new_state(in,init));
 

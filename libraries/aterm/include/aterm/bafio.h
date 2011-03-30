@@ -8,7 +8,7 @@ namespace aterm
 
   void   AT_initBafIO(int argc, char* argv[]);
   void   AT_getBafVersion(int* major, int* minor);
-  ATbool AT_interpretBaf(FILE* input, FILE* output);
+  bool AT_interpretBaf(FILE* input, FILE* output);
   ATerm  AT_readFromBinaryFile(FILE* f);
 
 } // namespace aterm

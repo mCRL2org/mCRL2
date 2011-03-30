@@ -214,7 +214,7 @@ class term_list: public aterm_base
     /// \return True if the list is empty.
     bool empty() const
     {
-      return ATisEmpty(list()) == ATtrue;
+      return ATisEmpty(list()) == true;
     }
 
     /// \brief Returns the first element.
@@ -398,7 +398,7 @@ struct aterm_traits<term_list<Term> >
 template <typename Term>
 bool operator==(const term_list<Term>& x, const term_list<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == ATtrue;
+  return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == true;
 }
 
 /// \brief Equality operator.
@@ -408,7 +408,7 @@ bool operator==(const term_list<Term>& x, const term_list<Term>& y)
 template <typename Term>
 bool operator==(const term_list<Term>& x, ATermList y)
 {
-  return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == ATtrue;
+  return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == true;
 }
 
 /// \brief Equality operator.
@@ -418,7 +418,7 @@ bool operator==(const term_list<Term>& x, ATermList y)
 template <typename Term>
 bool operator==(ATermList x, const term_list<Term>& y)
 {
-  return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == ATtrue;
+  return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == true;
 }
 
 /// \brief Inequality operator.
@@ -428,7 +428,7 @@ bool operator==(ATermList x, const term_list<Term>& y)
 template <typename Term>
 bool operator!=(const term_list<Term>& x, const term_list<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == ATfalse;
+  return ATisEqual(aterm_traits<term_list<Term> >::term(x), aterm_traits<term_list<Term> >::term(y)) == false;
 }
 
 /// \brief Inequality operator.
@@ -438,7 +438,7 @@ bool operator!=(const term_list<Term>& x, const term_list<Term>& y)
 template <typename Term>
 bool operator!=(const term_list<Term>& x, ATermList y)
 {
-  return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == ATfalse;
+  return ATisEqual(aterm_traits<term_list<Term> >::term(x), y) == false;
 }
 
 /// \brief Inequality operator.
@@ -448,7 +448,7 @@ bool operator!=(const term_list<Term>& x, ATermList y)
 template <typename Term>
 bool operator!=(ATermList x, const term_list<Term>& y)
 {
-  return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == ATfalse;
+  return ATisEqual(x, aterm_traits<term_list<Term> >::term(y)) == false;
 }
 
 // implementation

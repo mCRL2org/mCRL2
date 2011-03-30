@@ -391,7 +391,7 @@ class AI_Jitty: public ATerm_Info
         ATerm v_term;
 
         v_term = ATgetArgument(a_term, 0);
-        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, ATfalse), v_term);
+        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, false), v_term);
         v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
 
         if (core::detail::gsIsOpId((ATermAppl) v_term))   // XXX why is a variable not allowed?
@@ -482,7 +482,7 @@ class AI_Jitty: public ATerm_Info
         ATerm v_term;
 
         v_term = ATgetArgument(a_term, 0);
-        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, ATfalse), v_term);
+        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, false), v_term);
         v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
         v_term = ATgetArgument(v_term, 0);
         return (v_term == f_eq);

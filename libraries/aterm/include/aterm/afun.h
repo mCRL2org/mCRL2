@@ -91,7 +91,7 @@ namespace aterm
   void AT_markProtectedAFuns_young();
 
   size_t AT_hashAFun(const char* name, size_t arity);
-  ATbool AT_findAFun(char* name, size_t arity, ATbool quoted);
+  bool AT_findAFun(char* name, size_t arity, bool quoted);
   void AT_unmarkAllAFuns();
 
 }

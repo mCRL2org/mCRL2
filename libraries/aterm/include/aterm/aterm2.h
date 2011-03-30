@@ -14,7 +14,6 @@
 #include <unistd.h>
 #include "aterm1.h"
 #include "afun.h"
-#include "abool.h"
 
   /* The largest size_t is used as an indicator that an element does not exist.
      This is used as a replacement of a negative number as an indicator of non
@@ -300,7 +299,7 @@ namespace aterm
   void       ATtableReset(ATermTable table);
   void       ATtablePut(ATermTable table, ATerm key, ATerm value);
   ATerm      ATtableGet(ATermTable table, ATerm key);
-  ATbool     ATtableRemove(ATermTable table, ATerm key); /* Returns true if removal was successful. */
+  bool     ATtableRemove(ATermTable table, ATerm key); /* Returns true if removal was successful. */
   ATermList  ATtableKeys(ATermTable table);
   ATermList  ATtableValues(ATermTable table);
 
@@ -308,13 +307,13 @@ namespace aterm
   ATindexedSetCreate(size_t initial_size, unsigned int max_load_pct);
   void       ATindexedSetDestroy(ATermIndexedSet set);
   void       ATindexedSetReset(ATermIndexedSet set);
-  size_t     ATindexedSetPut(ATermIndexedSet set, ATerm elem, ATbool* isnew);
+  size_t     ATindexedSetPut(ATermIndexedSet set, ATerm elem, bool* isnew);
   ssize_t    ATindexedSetGetIndex(ATermIndexedSet set, ATerm elem); /* A negative value represents non existence. */
-  ATbool     ATindexedSetRemove(ATermIndexedSet set, ATerm elem);   /* Returns true if removal was successful. */
+  bool     ATindexedSetRemove(ATermIndexedSet set, ATerm elem);   /* Returns true if removal was successful. */
   ATermList  ATindexedSetElements(ATermIndexedSet set);
   ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
 
-  AFun  ATmakeAFun(const char* name, size_t arity, ATbool quoted);
+  AFun  ATmakeAFun(const char* name, size_t arity, bool quoted);
 
   inline
   char* ATgetName(const AFun sym)
@@ -343,7 +342,7 @@ namespace aterm
      "RSA Data Security, Inc. MD5 Message-Digest Algorithm" (see RFC1321)
   */
   unsigned char* ATchecksum(ATerm t);
-  ATbool ATdiff(ATerm t1, ATerm t2, ATerm* templ, ATerm* diffs);
+  bool ATdiff(ATerm t1, ATerm t2, ATerm* templ, ATerm* diffs);
 
   /* Compare two ATerms. This is a complete stable ordering on ATerms.
    * They are compared 'lexicographically', function names before the
@@ -355,8 +354,8 @@ namespace aterm
    */
   int ATcompare(ATerm t1, ATerm t2);
 
-  void ATsetChecking(ATbool on);
-  ATbool ATgetChecking(void);
+  void ATsetChecking(bool on);
+  bool ATgetChecking(void);
 
   extern size_t at_gc_count;
 

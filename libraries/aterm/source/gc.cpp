@@ -45,7 +45,7 @@ size_t good_gc_ratio;
 size_t small_allocation_rate_ratio;
 size_t old_increase_rate_ratio;
 
-ATbool at_mark_young;
+bool at_mark_young;
 
 /*}}}  */
 
@@ -108,7 +108,7 @@ ATerm* stack_top()
 
 /*{{{  static void mark_memory(ATerm *start, ATerm *stop) */
 
-static void mark_memory(ATerm* start, ATerm* stop,ATbool check_term) /* CHANGED BY JFG */
+static void mark_memory(ATerm* start, ATerm* stop,bool check_term) /* CHANGED BY JFG */
 {
   ATerm* cur;
   /* Traverse the stack */
@@ -151,7 +151,7 @@ static void mark_memory(ATerm* start, ATerm* stop,ATbool check_term) /* CHANGED 
 /*}}}  */
 /*{{{  static void mark_memory_young(ATerm *start, ATerm *stop)  */
 
-static void mark_memory_young(ATerm* start, ATerm* stop, ATbool check_term) /* CHANGED BY JFG  */
+static void mark_memory_young(ATerm* start, ATerm* stop, bool check_term) /* CHANGED BY JFG  */
 {
   ATerm* cur;
 
@@ -200,13 +200,13 @@ void ATmarkTerm(ATerm t)
 
 void ATmarkArray(ATerm* start, size_t size)
 {
-  if (at_mark_young == ATtrue)
+  if (at_mark_young == true)
   {
-    mark_memory_young(start,start+size,ATfalse);
+    mark_memory_young(start,start+size,false);
   }
   else
   {
-    mark_memory(start,start+size,ATfalse);
+    mark_memory(start,start+size,false);
   }
 }
 
@@ -233,7 +233,7 @@ VOIDCDECL mark_phase()
   jmp_buf env; /* Buffer for registers */
   setjmp(env); /* Save registers to buffer */
   /* Now check buffer for ATerms and mark them */
-  mark_memory((ATerm*)((char*)env), (ATerm*)((char*)env) + 12, ATtrue);
+  mark_memory((ATerm*)((char*)env), (ATerm*)((char*)env) + 12, true);
 #elif defined(_MSC_VER) && defined(WIN32)
   size_t r_eax, r_ebx, r_ecx, r_edx, \
   r_esi, r_edi, r_esp, r_ebp;
@@ -297,7 +297,7 @@ VOIDCDECL mark_phase()
 
   start = (ATerm*)((char*)env);
   stop  = ((ATerm*)(((char*)env) + sizeof(jmp_buf)));
-  mark_memory(start, stop,ATtrue);
+  mark_memory(start, stop,true);
 #endif
 
   stackTop = stack_top();
@@ -307,7 +307,7 @@ VOIDCDECL mark_phase()
 
   stack_size = stop-start;
 
-  mark_memory(start, stop,ATtrue);
+  mark_memory(start, stop,true);
 
   /* Traverse protected terms */
   for (i=0; i<at_prot_table_size; i++)
@@ -329,18 +329,18 @@ VOIDCDECL mark_phase()
 
   for (prot=at_prot_memory; prot != NULL; prot=prot->next)
   {
-    mark_memory((ATerm*)prot->start, (ATerm*)((prot->start) + prot->size),ATfalse);
+    mark_memory((ATerm*)prot->start, (ATerm*)((prot->start) + prot->size),false);
   }
 
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next)
   {
     if (pblock->protsize>0)
     {
-      mark_memory(pblock->term, &pblock->term[pblock->protsize],ATfalse);
+      mark_memory(pblock->term, &pblock->term[pblock->protsize],false);
     }
   }
 
-  at_mark_young = ATfalse;
+  at_mark_young = false;
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
@@ -373,7 +373,7 @@ VOIDCDECL mark_phase_young()
      explanation, see mark_phase(). */
   jmp_buf env;
   setjmp(env);
-  mark_memory_young((ATerm*)((char*)env), (ATerm*)((char*)env) + 12, ATtrue);
+  mark_memory_young((ATerm*)((char*)env), (ATerm*)((char*)env) + 12, true);
 #elif defined(_MSC_VER) && defined(WIN32)
 
   size_t r_eax, r_ebx, r_ecx, r_edx, \
@@ -437,7 +437,7 @@ VOIDCDECL mark_phase_young()
 
   start = (ATerm*)((char*)env);
   stop  = ((ATerm*)(((char*)env) + sizeof(jmp_buf)));
-  mark_memory_young(start, stop, ATtrue);
+  mark_memory_young(start, stop, true);
 #endif
 
   stackTop = stack_top();
@@ -446,7 +446,7 @@ VOIDCDECL mark_phase_young()
 
   stack_size = stop-start;
 
-  mark_memory_young(start, stop, ATtrue);
+  mark_memory_young(start, stop, true);
 
   /* Traverse protected terms */
   for (i=0; i<at_prot_table_size; i++)
@@ -467,7 +467,7 @@ VOIDCDECL mark_phase_young()
 
   for (prot=at_prot_memory; prot != NULL; prot=prot->next)
   {
-    mark_memory_young((ATerm*)prot->start, (ATerm*)((prot->start) + prot->size),ATfalse);
+    mark_memory_young((ATerm*)prot->start, (ATerm*)((prot->start) + prot->size),false);
   }
 
   for (pblock=protected_blocks; pblock != NULL; pblock=pblock->next)
@@ -475,14 +475,14 @@ VOIDCDECL mark_phase_young()
     {
       if (pblock->protsize>0)
       {
-        mark_memory_young(pblock->term, &pblock->term[pblock->protsize], ATfalse);
+        mark_memory_young(pblock->term, &pblock->term[pblock->protsize], false);
       }
       ++count;
     }
 
   }
 
-  at_mark_young = ATtrue;
+  at_mark_young = true;
   for (i=0; i<at_prot_functions_count; i++)
   {
     at_prot_functions[i]();
@@ -529,7 +529,7 @@ void sweep_phase()
 /*}}}  */
 /*{{{  void AT_init_gc_parameters(ATbool low_memory)  */
 
-void AT_init_gc_parameters(ATbool low_memory)
+void AT_init_gc_parameters(bool low_memory)
 {
   if (low_memory)
   {

@@ -93,7 +93,7 @@ static AFun ATappendAFun(AFun id, const char* str)
   return Res;
 }
 
-static AFun ATmakeAFunInt(size_t name, size_t arity, ATbool quoted)
+static AFun ATmakeAFunInt(size_t name, size_t arity, bool quoted)
 {
   // input: an integer value (name), it's arity and whether it is quoted or not
   // output: an AFun, as in ATmakeAFun, but now with a name from an integer value
@@ -110,7 +110,7 @@ static AFun ATmakeAFunInt(size_t name, size_t arity, ATbool quoted)
 //==================================================
 static inline AFun ATmakeAFunInt0(size_t name)
 {
-  return ATmakeAFunInt(name, 0, ATtrue);
+  return ATmakeAFunInt(name, 0, true);
 }
 
 static inline ATermAppl Pair(ATerm ma1, ATerm ma2)
@@ -171,7 +171,7 @@ static inline ATermList gsaATintersectList(ATermList l, ATermList m)
   return ATreverse(r);
 }
 
-static inline ATbool gsaATisDisjoint(ATermList l, ATermList m)
+static inline bool gsaATisDisjoint(ATermList l, ATermList m)
 {
   return ATisEmpty(gsaATintersectList(l,m));
 }
@@ -179,7 +179,7 @@ static inline ATbool gsaATisDisjoint(ATermList l, ATermList m)
 static inline void gsaATindexedSetPutList(ATermIndexedSet m, ATermList l)
 {
   //add l into m
-  ATbool b;
+  bool b;
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     ATindexedSetPut(m,ATgetFirst(l),&b);
@@ -243,7 +243,7 @@ static inline ATermList untypeMAL(ATermList LMAct)
 {
   //returns List of "untyped multiaction name" of List(MAct)
   assert(ATisEmpty(ATindexedSetElements(tmpIndexedSet)));
-  ATbool b;
+  bool b;
   for (; !ATisEmpty(LMAct); LMAct=ATgetNext(LMAct))
   {
     ATindexedSetPut(tmpIndexedSet,(ATerm)untypeMA(ATLgetFirst(LMAct)),&b);
@@ -315,13 +315,13 @@ static ATermList merge_list(ATermList l, ATermList m)
   ATermIndexedSet r=ATindexedSetCreate(128,50);
   for (; !ATisEmpty(m); m=ATgetNext(m))
   {
-    ATbool isnew;
+    bool isnew;
     ATerm el=ATgetFirst(m);
     ATindexedSetPut(r,el,&isnew);
   }
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    ATbool isnew;
+    bool isnew;
     ATerm el=ATgetFirst(l);
     ATindexedSetPut(r,el,&isnew);
   }
@@ -595,7 +595,7 @@ static ATermList sync_list(ATermList l, ATermList m, size_t length=0, ATermList 
           /* if(ATindexOf(n,(ATerm)ma,0)<0)
              n = ATinsert(n,(ATerm)ma);
           */
-          ATbool is_new;
+          bool is_new;
           ATindexedSetPut(n,(ATerm)ma,&is_new);
         }
       }
@@ -611,7 +611,7 @@ static ATermList sync_list(ATermList l, ATermList m, size_t length=0, ATermList 
 static void sync_list_ht(ATermIndexedSet m, ATermList l1, ATermList l2, size_t length=0)
 {
   //put the synchronization of l1 and l2 into m (if length, then not longet than length)
-  ATbool b;
+  bool b;
   for (; !ATisEmpty(l1); l1=ATgetNext(l1))
   {
     ATermList ll=ATLgetFirst(l1);
@@ -979,7 +979,7 @@ static ATermList extend_allow_comm(ATermList V, ATermList C)
   // for all elements of V get a set of multiactions using the reverse mapping.
   ATermIndexedSet m = ATindexedSetCreate(10000,80);
 
-  ATbool b;
+  bool b;
   for (ATermList tV=V; !ATisEmpty(tV); tV=ATgetNext(tV))
   {
     ATindexedSetPut(m,(ATerm)ATLgetArgument(ATAgetFirst(tV),0),&b);
@@ -1342,7 +1342,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
   else if (gsIsProcess(a) || gsIsProcessAssignment(a))
   {
     ATermAppl pn=ATAgetArgument(a,0);
-    ATbool full_alpha_know=ATtrue;
+    bool full_alpha_know=true;
     ATermList l = ATLtableGet(alphas,(ATerm)pn);
     if (!l)
     {
@@ -1350,7 +1350,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
       //l = ATLtableGet(alphas,(ATerm)Pair((ATerm)ATmakeAppl0(ATmakeAFunInt0(max_len)),(ATerm)pn));
       //if(!l)
       l = gsaGetAlpha(a,max_len,get_allow_list(V));
-      full_alpha_know=ATfalse;
+      full_alpha_know=false;
     }
     else
     {
@@ -2466,7 +2466,7 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
     }
     // Transform k into an aterm with a string representing a value,
     // instead of an expression in internal format.
-    new_k=gsMakeOpId(ATmakeAppl0(ATmakeAFun(core::pp(new_k).c_str(),0,ATfalse)),data::sort_pos::pos());
+    new_k=gsMakeOpId(ATmakeAppl0(ATmakeAFun(core::pp(new_k).c_str(),0,false)),data::sort_pos::pos());
 
     if (!gsIsDataExprNumber(new_k))
     {
@@ -2594,7 +2594,7 @@ static void gsAlpha(
     std::cerr << "applying alphabet reductions...\n";
   }
   //create the tables
-  afunPair=ATmakeAFun("p",2,ATfalse);
+  afunPair=ATmakeAFun("p",2,false);
   ATprotectAFun(afunPair);
   syncs = ATtableCreate(10000,80);
   untypes = ATtableCreate(10000,80);
@@ -2660,7 +2660,7 @@ static void gsAlpha(
   //also check if process name depends recursively on itself.
   //(mCRL processes cannot recursively depend on itself for the *current* linearizer to work)
   //n-parallel pCRL processes always recursively depend on themselves
-  props_afun=ATmakeAFun("props",2,ATfalse);
+  props_afun=ATmakeAFun("props",2,false);
   pCRL_aterm=NULL, npCRL_aterm=NULL, mCRL_aterm=NULL, rec_aterm=NULL, nrec_aterm=NULL;
   ATprotectAFun(props_afun);
   ATprotectAppl(&pCRL_aterm);

@@ -147,7 +147,7 @@ inline size_t ADDR_TO_BLOCK_IDX(void* a)
   HashNumber AT_hashnumber(ATerm t);
   ATerm AT_allocate(size_t size);
   void  AT_freeTerm(size_t size, ATerm t);
-  ATbool AT_isValidTerm(ATerm term);
+  bool AT_isValidTerm(ATerm term);
   ATerm AT_isInsideValidTerm(ATerm term);
   void  AT_validateFreeList(size_t size);
   size_t AT_inAnyFreeList(ATerm t);

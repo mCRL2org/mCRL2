@@ -98,31 +98,31 @@ static Body body;
 // Static function declarations
 static void gstcDataInit(void);
 static void gstcDataDestroy(void);
-static ATbool gstcReadInSorts(ATermList);
-static ATbool gstcReadInConstructors(ATermList NewSorts=NULL);
-static ATbool gstcReadInFuncs(ATermList, ATermList);
-static ATbool gstcReadInActs(ATermList);
-static ATbool gstcReadInProcsAndInit(ATermList, ATermAppl);
-static ATbool gstcReadInPBESAndInit(ATermAppl, ATermAppl);
+static bool gstcReadInSorts(ATermList);
+static bool gstcReadInConstructors(ATermList NewSorts=NULL);
+static bool gstcReadInFuncs(ATermList, ATermList);
+static bool gstcReadInActs(ATermList);
+static bool gstcReadInProcsAndInit(ATermList, ATermAppl);
+static bool gstcReadInPBESAndInit(ATermAppl, ATermAppl);
 
-static ATbool gstcTransformVarConsTypeData(void);
-static ATbool gstcTransformActProcVarConst(void);
-static ATbool gstcTransformPBESVarConst(void);
+static bool gstcTransformVarConsTypeData(void);
+static bool gstcTransformActProcVarConst(void);
+static bool gstcTransformPBESVarConst(void);
 
 static ATermList gstcWriteProcs(ATermList);
 static ATermList gstcWritePBES(ATermList);
 
-static ATbool gstcInTypesA(ATermAppl, ATermList);
-static ATbool gstcEqTypesA(ATermAppl, ATermAppl);
-static ATbool gstcInTypesL(ATermList, ATermList);
-static ATbool gstcEqTypesL(ATermList, ATermList);
+static bool gstcInTypesA(ATermAppl, ATermList);
+static bool gstcEqTypesA(ATermAppl, ATermAppl);
+static bool gstcInTypesL(ATermList, ATermList);
+static bool gstcEqTypesL(ATermList, ATermList);
 
-static ATbool gstcIsSortDeclared(ATermAppl SortName);
-static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr);
-static ATbool gstcIsSortExprListDeclared(ATermList SortExprList);
-static ATbool gstcReadInSortStruct(ATermAppl);
-static ATbool gstcAddConstant(ATermAppl, const char*);
-static ATbool gstcAddFunction(ATermAppl, const char*, bool allow_double_decls=false);
+static bool gstcIsSortDeclared(ATermAppl SortName);
+static bool gstcIsSortExprDeclared(ATermAppl SortExpr);
+static bool gstcIsSortExprListDeclared(ATermList SortExprList);
+static bool gstcReadInSortStruct(ATermAppl);
+static bool gstcAddConstant(ATermAppl, const char*);
+static bool gstcAddFunction(ATermAppl, const char*, bool allow_double_decls=false);
 
 static void gstcAddSystemConstant(ATermAppl);
 static void gstcAddSystemFunction(ATermAppl);
@@ -131,9 +131,9 @@ static void gstcATermTableCopy(ATermTable Vars, ATermTable CopyVars);
 
 static ATermTable gstcAddVars2Table(ATermTable,ATermList);
 static ATermTable gstcRemoveVars(ATermTable Vars, ATermList VarDecls);
-static ATbool gstcVarsUnique(ATermList VarDecls);
+static bool gstcVarsUnique(ATermList VarDecls);
 static ATermAppl gstcRewrActProc(ATermTable, ATermAppl, bool is_pbes=false);
-static inline ATermAppl gstcMakeActionOrProc(ATbool, ATermAppl, ATermList, ATermList);
+static inline ATermAppl gstcMakeActionOrProc(bool, ATermAppl, ATermList, ATermList);
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable, ATermAppl);
 static ATermAppl gstcTraversePBESVarConstPB(ATermTable, ATermAppl);
 static ATermAppl gstcTraverseVarConsTypeD(ATermTable DeclaredVars, ATermTable AllowedVars, ATermAppl*, ATermAppl, ATermTable FreeVars=NULL, bool strict_ambiguous=true, bool warn_upcasting=false);
@@ -141,14 +141,14 @@ static ATermAppl gstcTraverseVarConsTypeDN(ATermTable DeclaredVars, ATermTable A
 
 static ATermList gstcInsertType(ATermList TypeList, ATermAppl Type);
 
-static inline ATbool gstcIsPos(ATermAppl Number)
+static inline bool gstcIsPos(ATermAppl Number)
 {
   char c=gsATermAppl2String(Number)[0];
-  return (ATbool)(isdigit(c) && c>'0');
+  return (bool)(isdigit(c) && c>'0');
 }
-static inline ATbool gstcIsNat(ATermAppl Number)
+static inline bool gstcIsNat(ATermAppl Number)
 {
-  return (ATbool) isdigit(gsATermAppl2String(Number)[0]);
+  return (bool) isdigit(gsATermAppl2String(Number)[0]);
 }
 
 static inline ATermAppl INIT_KEY(void)
@@ -161,9 +161,9 @@ static ATermAppl gstcMaximumType(ATermAppl Type1, ATermAppl Type2);
 
 static ATermList gstcGetNotInferredList(ATermList TypeListList);
 static ATermList gstcAdjustNotInferredList(ATermList TypeList, ATermList TypeListList);
-static ATbool gstcIsNotInferredL(ATermList TypeListList);
-static ATbool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType);
-static ATbool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList);
+static bool gstcIsNotInferredL(ATermList TypeListList);
+static bool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType);
+static bool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList);
 static ATermAppl gstcUnwindType(ATermAppl Type);
 static ATermAppl gstcUnSet(ATermAppl PosType);
 static ATermAppl gstcUnBag(ATermAppl PosType);
@@ -173,14 +173,14 @@ static ATermList gstcTypeListsIntersect(ATermList TypeListList1, ATermList TypeL
 static ATermList gstcGetVarTypes(ATermList VarDecls);
 static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType);
 static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList);
-static ATbool gstcHasUnknown(ATermAppl Type);
-static ATbool gstcIsNumericType(ATermAppl Type);
+static bool gstcHasUnknown(ATermAppl Type);
+static bool gstcIsNumericType(ATermAppl Type);
 static ATermAppl gstcExpandNumTypesUp(ATermAppl Type);
 static ATermAppl gstcExpandNumTypesDown(ATermAppl Type);
 static ATermAppl gstcMinType(ATermList TypeList);
-static ATbool gstcMActIn(ATermList MAct, ATermList MActs);
-static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2);
-static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
+static bool gstcMActIn(ATermList MAct, ATermList MActs);
+static bool gstcMActEq(ATermList MAct1, ATermList MAct2);
+static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2);
 static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2);
 static ATermAppl gstcMatchIf(ATermAppl Type);
 static ATermAppl gstcMatchEqNeqComparison(ATermAppl Type);
@@ -1657,10 +1657,10 @@ static bool gstc_check_for_sort_alias_loop_through_function_sort_via_expression(
   return false;
 }
 
-static ATbool gstcReadInSorts(ATermList Sorts)
+static bool gstcReadInSorts(ATermList Sorts)
 {
-  ATbool nnew;
-  ATbool Result=ATtrue;
+  bool nnew;
+  bool Result=true;
   for (; !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
   {
     ATermAppl Sort=ATAgetFirst(Sorts);
@@ -1668,34 +1668,34 @@ static ATbool gstcReadInSorts(ATermList Sorts)
     if (sort_bool::is_bool(basic_sort(core::identifier_string(SortName))))
     {
       gsErrorMsg("attempt to redeclare sort Bool\n");
-      return ATfalse;
+      return false;
     }
     if (sort_pos::is_pos(basic_sort(core::identifier_string(SortName))))
     {
       gsErrorMsg("attempt to redeclare sort Pos\n");
-      return ATfalse;
+      return false;
     }
     if (sort_nat::is_nat(basic_sort(core::identifier_string(SortName))))
     {
       gsErrorMsg("attempt to redeclare sort Nat\n");
-      return ATfalse;
+      return false;
     }
     if (sort_int::is_int(basic_sort(core::identifier_string(SortName))))
     {
       gsErrorMsg("attempt to redeclare sort Int\n");
-      return ATfalse;
+      return false;
     }
     if (sort_real::is_real(basic_sort(core::identifier_string(SortName))))
     {
       gsErrorMsg("attempt to redeclare sort Real\n");
-      return ATfalse;
+      return false;
     }
     if (ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0
         || ATAtableGet(context.defined_sorts, (ATerm)SortName))
     {
 
       gsErrorMsg("double declaration of sort %P\n",SortName);
-      return ATfalse;
+      return false;
     }
     if (gsIsSortId(Sort))
     {
@@ -1731,14 +1731,14 @@ static ATbool gstcReadInSorts(ATermList Sorts)
     if (gstc_check_for_sort_alias_loop_through_function_sort_via_expression(ar,s,visited,false))
     {
       gsErrorMsg("sort %P is recursively defined via a function sort, or a set or a bag type container\n",ATgetFirst(sort_aliases));
-      return ATfalse;
+      return false;
     }
   }
 
   return Result;
 }
 
-static ATbool gstcReadInConstructors(ATermList NewSorts)
+static bool gstcReadInConstructors(ATermList NewSorts)
 {
   ATermList Sorts=NewSorts;
   if (!Sorts)
@@ -1750,14 +1750,14 @@ static ATbool gstcReadInConstructors(ATermList NewSorts)
     ATermAppl SortExpr=ATAtableGet(context.defined_sorts,ATgetFirst(Sorts));
     if (!gstcIsSortExprDeclared(SortExpr))
     {
-      return ATfalse;
+      return false;
     }
     if (!gstcReadInSortStruct(SortExpr))
     {
-      return ATfalse;
+      return false;
     }
   }
-  return ATtrue;
+  return true;
 }
 
 
@@ -1978,13 +1978,13 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
 
 }
 
-static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps)
+static bool gstcReadInFuncs(ATermList Cons, ATermList Maps)
 {
   if (gsDebug)
   {
     std::cerr << "Start Read-in Func\n";
   }
-  ATbool Result=ATtrue;
+  bool Result=true;
 
   size_t constr_number=ATgetLength(Cons);
   for (ATermList Funcs=ATconcat(Cons,Maps); !ATisEmpty(Funcs); Funcs=ATgetNext(Funcs))
@@ -1995,7 +1995,7 @@ static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps)
 
     if (!gstcIsSortExprDeclared(FuncType))
     {
-      return ATfalse;
+      return false;
     }
 
     //if FuncType is a defined function sort, unwind it
@@ -2020,7 +2020,7 @@ static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps)
     {
       if (!gstcAddFunction(gsMakeOpId(FuncName,FuncType),"function"))
       {
-        return ATfalse;
+        return false;
       }
     }
     else
@@ -2028,7 +2028,7 @@ static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps)
       if (!gstcAddConstant(gsMakeOpId(FuncName,FuncType),"constant"))
       {
         gsErrorMsg("could not add constant\n");
-        return ATfalse;
+        return false;
       }
     }
 
@@ -2046,32 +2046,32 @@ static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps)
       if (!gsIsSortId(ConstructorType))
       {
         gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType);
-        return ATfalse;
+        return false;
       }
       if (sort_bool::is_bool(sort_expression(ConstructorType)))
       {
         gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType);
-        return ATfalse;
+        return false;
       }
       if (sort_pos::is_pos(sort_expression(ConstructorType)))
       {
         gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType);
-        return ATfalse;
+        return false;
       }
       if (sort_nat::is_nat(sort_expression(ConstructorType)))
       {
         gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType);
-        return ATfalse;
+        return false;
       }
       if (sort_int::is_int(sort_expression(ConstructorType)))
       {
         gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType);
-        return ATfalse;
+        return false;
       }
       if (sort_real::is_real(sort_expression(ConstructorType)))
       {
         gsErrorMsg("Could not add constructor %P of sort %P. Constructors of a built-in sorts are not allowed.\n",FuncName,FuncType);
-        return ATfalse;
+        return false;
       }
     }
 
@@ -2087,15 +2087,15 @@ static ATbool gstcReadInFuncs(ATermList Cons, ATermList Maps)
 
   if (!gstc_check_for_empty_constructor_domains(Cons))
   {
-    return ATfalse;
+    return false;
   }
 
   return Result;
 }
 
-static ATbool gstcReadInActs(ATermList Acts)
+static bool gstcReadInActs(ATermList Acts)
 {
-  ATbool Result=ATtrue;
+  bool Result=true;
   for (; !ATisEmpty(Acts); Acts=ATgetNext(Acts))
   {
     ATermAppl Act=ATAgetFirst(Acts);
@@ -2104,7 +2104,7 @@ static ATbool gstcReadInActs(ATermList Acts)
 
     if (!gstcIsSortExprListDeclared(ActType))
     {
-      return ATfalse;
+      return false;
     }
 
     ATermList Types=ATLtableGet(context.actions, (ATerm)ActName);
@@ -2120,7 +2120,7 @@ static ATbool gstcReadInActs(ATermList Acts)
       if (gstcInTypesL(ActType, Types))
       {
         gsErrorMsg("double declaration of action %P\n", ActName);
-        return ATfalse;
+        return false;
       }
       else
       {
@@ -2138,9 +2138,9 @@ static ATbool gstcReadInActs(ATermList Acts)
   return Result;
 }
 
-static ATbool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
+static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
 {
-  ATbool Result=ATtrue;
+  bool Result=true;
   for (; !ATisEmpty(Procs); Procs=ATgetNext(Procs))
   {
     ATermAppl Proc=ATAgetFirst(Procs);
@@ -2149,14 +2149,14 @@ static ATbool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
     if (ATLtableGet(context.actions, (ATerm)ProcName))
     {
       gsErrorMsg("declaration of both process and action %P\n", ProcName);
-      return ATfalse;
+      return false;
     }
 
     ATermList ProcType=ATLgetArgument(ATAgetArgument(Proc,0),1);
 
     if (!gstcIsSortExprListDeclared(ProcType))
     {
-      return ATfalse;
+      return false;
     }
 
     ATermList Types=ATLtableGet(context.processes,(ATerm)ProcName);
@@ -2172,7 +2172,7 @@ static ATbool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
       if (gstcInTypesL(ProcType, Types))
       {
         gsErrorMsg("double declaration of process %P\n", ProcName);
-        return ATfalse;
+        return false;
       }
       else
       {
@@ -2186,7 +2186,7 @@ static ATbool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
     if (!gstcVarsUnique(ProcVars))
     {
       gsErrorMsg("the formal variables in process %P are not unique\n",Proc);
-      return ATfalse;
+      return false;
     }
 
     ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATLgetArgument(Proc,1));
@@ -2203,9 +2203,9 @@ static ATbool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
   return Result;
 }
 
-static ATbool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
+static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
 {
-  ATbool Result=ATtrue;
+  bool Result=true;
 
   //ATermList PBFreeVars=ATLgetArgument(GlobVarSpec,0);
   ATermList PBEqns=ATLgetArgument(PBEqnSpec,0);
@@ -2226,7 +2226,7 @@ static ATbool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
 
     if (!gstcIsSortExprListDeclared(PBType))
     {
-      return ATfalse;
+      return false;
     }
 
     ATermList Types=ATLtableGet(context.PBs,(ATerm)PBName);
@@ -2238,14 +2238,14 @@ static ATbool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
     {
       // temporarily prohibit overloading here
       gsErrorMsg("attempt to overload propositional variable %P\n", PBName);
-      return ATfalse;
+      return false;
       // the table context.PBs contains a list of types for each
       // PBES name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
       if (gstcInTypesL(PBType, Types))
       {
         gsErrorMsg("double declaration of propositional variable %P\n", PBName);
-        return ATfalse;
+        return false;
       }
       else
       {
@@ -2322,9 +2322,9 @@ static ATermList gstcWritePBES(ATermList oldPBES)
 }
 
 
-static ATbool gstcTransformVarConsTypeData(void)
+static bool gstcTransformVarConsTypeData(void)
 {
-  ATbool Result=ATtrue;
+  bool Result=true;
   ATermTable DeclaredVars=ATtableCreate(63,50);
   ATermTable FreeVars=ATtableCreate(63,50);
 
@@ -2440,12 +2440,12 @@ static ATbool gstcTransformVarConsTypeData(void)
 
   ATtableDestroy(FreeVars);
   ATtableDestroy(DeclaredVars);
-  return b?Result:ATfalse;
+  return b?Result:false;
 }
 
-static ATbool gstcTransformActProcVarConst(void)
+static bool gstcTransformActProcVarConst(void)
 {
-  ATbool Result=ATtrue;
+  bool Result=true;
   ATermTable Vars=ATtableCreate(63,50);
 
   //process and data terms in processes and init
@@ -2458,7 +2458,7 @@ static ATbool gstcTransformActProcVarConst(void)
     ATermTable NewVars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,(ATerm)ProcVar));
     if (!NewVars)
     {
-      Result = ATfalse;
+      Result = false;
       break;
     }
     else
@@ -2469,7 +2469,7 @@ static ATbool gstcTransformActProcVarConst(void)
     ATermAppl NewProcTerm=gstcTraverseActProcVarConstP(Vars,ATAtableGet(body.proc_bodies,(ATerm)ProcVar));
     if (!NewProcTerm)
     {
-      Result = ATfalse;
+      Result = false;
       break;
     }
     ATtablePut(body.proc_bodies,(ATerm)ProcVar,(ATerm)NewProcTerm);
@@ -2479,9 +2479,9 @@ static ATbool gstcTransformActProcVarConst(void)
   return Result;
 }
 
-static ATbool gstcTransformPBESVarConst(void)
+static bool gstcTransformPBESVarConst(void)
 {
-  ATbool Result=ATtrue;
+  bool Result=true;
   ATermTable Vars=ATtableCreate(63,50);
 
   //PBEs and data terms in PBEqns and init
@@ -2494,7 +2494,7 @@ static ATbool gstcTransformPBESVarConst(void)
     ATermTable NewVars=gstcAddVars2Table(Vars,ATLtableGet(body.proc_pars,(ATerm)PBVar));
     if (!NewVars)
     {
-      Result = ATfalse;
+      Result = false;
       break;
     }
     else
@@ -2505,7 +2505,7 @@ static ATbool gstcTransformPBESVarConst(void)
     ATermAppl NewPBTerm=gstcTraversePBESVarConstPB(Vars,ATAtableGet(body.proc_bodies,(ATerm)PBVar));
     if (!NewPBTerm)
     {
-      Result = ATfalse;
+      Result = false;
       break;
     }
     ATtablePut(body.proc_bodies,(ATerm)PBVar,(ATerm)NewPBTerm);
@@ -2517,64 +2517,64 @@ static ATbool gstcTransformPBESVarConst(void)
 
 
 // ======== Auxiliary functions
-static ATbool gstcInTypesA(ATermAppl Type, ATermList Types)
+static bool gstcInTypesA(ATermAppl Type, ATermList Types)
 {
   for (; !ATisEmpty(Types); Types=ATgetNext(Types))
     if (gstcEqTypesA(Type,ATAgetFirst(Types)))
     {
-      return ATtrue;
+      return true;
     }
-  return ATfalse;
+  return false;
 }
 
-static ATbool gstcEqTypesA(ATermAppl Type1, ATermAppl Type2)
+static bool gstcEqTypesA(ATermAppl Type1, ATermAppl Type2)
 {
   if (ATisEqual(Type1, Type2))
   {
-    return ATtrue;
+    return true;
   }
 
   if (!Type1 || !Type2)
   {
-    return ATfalse;
+    return false;
   }
 
   return ATisEqual(gstcUnwindType(Type1),gstcUnwindType(Type2));
 }
 
-static ATbool gstcInTypesL(ATermList Type, ATermList Types)
+static bool gstcInTypesL(ATermList Type, ATermList Types)
 {
   for (; !ATisEmpty(Types); Types=ATgetNext(Types))
     if (gstcEqTypesL(Type,ATLgetFirst(Types)))
     {
-      return ATtrue;
+      return true;
     }
-  return ATfalse;
+  return false;
 }
 
-static ATbool gstcEqTypesL(ATermList Type1, ATermList Type2)
+static bool gstcEqTypesL(ATermList Type1, ATermList Type2)
 {
   if (ATisEqual(Type1, Type2))
   {
-    return ATtrue;
+    return true;
   }
   if (!Type1 || !Type2)
   {
-    return ATfalse;
+    return false;
   }
   if (ATgetLength(Type1)!=ATgetLength(Type2))
   {
-    return ATfalse;
+    return false;
   }
   for (; !ATisEmpty(Type1); Type1=ATgetNext(Type1),Type2=ATgetNext(Type2))
     if (!gstcEqTypesA(ATAgetFirst(Type1),ATAgetFirst(Type2)))
     {
-      return ATfalse;
+      return false;
     }
-  return ATtrue;
+  return true;
 }
 
-static ATbool gstcIsSortDeclared(ATermAppl SortName)
+static bool gstcIsSortDeclared(ATermAppl SortName)
 {
 
   // if (gsDebug) { std::cerr << "gstcIsSortDeclared: SortName %P\n",SortName);
@@ -2585,20 +2585,20 @@ static ATbool gstcIsSortDeclared(ATermAppl SortName)
       sort_int::is_int(basic_sort(core::identifier_string(SortName))) ||
       sort_real::is_real(basic_sort(core::identifier_string(SortName))))
   {
-    return ATtrue;
+    return true;
   }
   if (ATindexedSetGetIndex(context.basic_sorts, (ATerm)SortName)>=0)
   {
-    return ATtrue;
+    return true;
   }
   if (ATAtableGet(context.defined_sorts,(ATerm)SortName))
   {
-    return ATtrue;
+    return true;
   }
-  return ATfalse;
+  return false;
 }
 
-static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr)
+static bool gstcIsSortExprDeclared(ATermAppl SortExpr)
 {
   if (gsIsSortId(SortExpr))
   {
@@ -2606,9 +2606,9 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr)
     if (!gstcIsSortDeclared(SortName))
     {
       gsErrorMsg("basic or defined sort %P is not declared\n",SortName);
-      return ATfalse;
+      return false;
     }
-    return ATtrue;
+    return true;
   }
 
   if (gsIsSortCons(SortExpr))
@@ -2620,13 +2620,13 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr)
   {
     if (!gstcIsSortExprDeclared(ATAgetArgument(SortExpr,1)))
     {
-      return ATfalse;
+      return false;
     }
     if (!gstcIsSortExprListDeclared(ATLgetArgument(SortExpr,0)))
     {
-      return ATfalse;
+      return false;
     }
-    return ATtrue;
+    return true;
   }
 
   if (gsIsSortStruct(SortExpr))
@@ -2644,32 +2644,32 @@ static ATbool gstcIsSortExprDeclared(ATermAppl SortExpr)
         // not to forget, recursive call for ProjSort ;-)
         if (!gstcIsSortExprDeclared(ProjSort))
         {
-          return ATfalse;
+          return false;
         }
       }
     }
-    return ATtrue;
+    return true;
   }
 
   assert(0);
   gsErrorMsg("this is not a sort expression %T\n",SortExpr);
-  return ATfalse;
+  return false;
 }
 
-static ATbool gstcIsSortExprListDeclared(ATermList SortExprList)
+static bool gstcIsSortExprListDeclared(ATermList SortExprList)
 {
   for (; !ATisEmpty(SortExprList); SortExprList=ATgetNext(SortExprList))
     if (!gstcIsSortExprDeclared(ATAgetFirst(SortExprList)))
     {
-      return ATfalse;
+      return false;
     }
-  return ATtrue;
+  return true;
 }
 
 
-static ATbool gstcReadInSortStruct(ATermAppl SortExpr)
+static bool gstcReadInSortStruct(ATermAppl SortExpr)
 {
-  ATbool Result=ATtrue;
+  bool Result=true;
 
   if (gsIsSortId(SortExpr))
   {
@@ -2677,9 +2677,9 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr)
     if (!gstcIsSortDeclared(SortName))
     {
       gsErrorMsg("basic or defined sort %P is not declared\n",SortName);
-      return ATfalse;
+      return false;
     }
-    return ATtrue;
+    return true;
   }
 
   if (gsIsSortCons(SortExpr))
@@ -2691,16 +2691,16 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr)
   {
     if (!gstcReadInSortStruct(ATAgetArgument(SortExpr,1)))
     {
-      return ATfalse;
+      return false;
     }
     for (ATermList Sorts=ATLgetArgument(SortExpr,0); !ATisEmpty(Sorts); Sorts=ATgetNext(Sorts))
     {
       if (!gstcReadInSortStruct(ATAgetFirst(Sorts)))
       {
-        return ATfalse;
+        return false;
       }
     }
-    return ATtrue;
+    return true;
   }
 
   if (gsIsSortStruct(SortExpr))
@@ -2714,7 +2714,7 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr)
       if (!gsIsNil(Name) &&
           !gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),sort_bool::bool_())),"recognizer"))
       {
-        return ATfalse;
+        return false;
       }
 
       // constructor type and projections
@@ -2724,7 +2724,7 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr)
       {
         if (!gstcAddConstant(gsMakeOpId(Name,SortExpr),"constructor constant"))
         {
-          return ATfalse;
+          return false;
         }
         else
         {
@@ -2741,33 +2741,33 @@ static ATbool gstcReadInSortStruct(ATermAppl SortExpr)
         // not to forget, recursive call for ProjSort ;-)
         if (!gstcReadInSortStruct(ProjSort))
         {
-          return ATfalse;
+          return false;
         }
 
         ATermAppl ProjName=ATAgetArgument(Proj,0);
         if (!gsIsNil(ProjName) &&
             !gstcAddFunction(gsMakeOpId(ProjName,gsMakeSortArrow(ATmakeList1((ATerm)SortExpr),ProjSort)),"projection",true))
         {
-          return ATfalse;
+          return false;
         }
         ConstructorType=ATinsert(ConstructorType,(ATerm)ProjSort);
       }
       if (!gstcAddFunction(gsMakeOpId(Name,gsMakeSortArrow(ATreverse(ConstructorType),SortExpr)),"constructor"))
       {
-        return ATfalse;
+        return false;
       }
     }
-    return ATtrue;
+    return true;
   }
 
   assert(0);
   return Result;
 }
 
-static ATbool gstcAddConstant(ATermAppl OpId, const char* msg)
+static bool gstcAddConstant(ATermAppl OpId, const char* msg)
 {
   assert(gsIsOpId(OpId));
-  ATbool Result=ATtrue;
+  bool Result=true;
 
   ATermAppl Name = function_symbol(OpId).name();
   ATermAppl Sort = function_symbol(OpId).sort();
@@ -2775,23 +2775,23 @@ static ATbool gstcAddConstant(ATermAppl OpId, const char* msg)
   if (ATAtableGet(context.constants, (ATerm)Name) /*|| ATLtableGet(context.functions, (ATerm)Name)*/)
   {
     gsErrorMsg("double declaration of %s %P\n", msg, Name);
-    return ATfalse;
+    return false;
   }
 
   if (ATLtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name))
   {
     gsErrorMsg("attempt to declare a constant with the name that is a built-in identifier (%P)\n", Name);
-    return ATfalse;
+    return false;
   }
 
   ATtablePut(context.constants, (ATerm)Name, (ATerm)Sort);
   return Result;
 }
 
-static ATbool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_decls)
+static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_decls)
 {
   assert(gsIsOpId(OpId));
-  ATbool Result=ATtrue;
+  bool Result=true;
   const function_symbol f(OpId);
   const sort_expression_list domain=function_sort(f.sort()).domain();
   ATermAppl Name = f.name();
@@ -2807,7 +2807,7 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double
     if (ATAtableGet(gssystem.constants, (ATerm)Name))
     {
       gsErrorMsg("attempt to redeclare the system constant with %s %P\n", msg, OpId);
-      return ATfalse;
+      return false;
     }
   }
   else // domain.size()>0
@@ -2819,7 +2819,7 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double
       {
         // f matches a predefined function
         gsErrorMsg("attempt to redeclare a system function with %s %P:%P\n", msg, OpId,Sort);
-        return ATfalse;
+        return false;
       }
     }
   }
@@ -2833,7 +2833,7 @@ static ATbool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double
     if (!allow_double_decls)
     {
       gsErrorMsg("double declaration of %s %P\n", msg, Name);
-      return ATfalse;
+      return false;
     }
   }
   else
@@ -2899,9 +2899,9 @@ static void gstcATermTableCopy(ATermTable Orig, ATermTable Copy)
 }
 
 
-static ATbool gstcVarsUnique(ATermList VarDecls)
+static bool gstcVarsUnique(ATermList VarDecls)
 {
-  ATbool Result=ATtrue;
+  bool Result=true;
   ATermIndexedSet Temp=ATindexedSetCreate(63,50);
 
   for (; !ATisEmpty(VarDecls); VarDecls=ATgetNext(VarDecls))
@@ -2910,11 +2910,11 @@ static ATbool gstcVarsUnique(ATermList VarDecls)
     ATermAppl VarName=ATAgetArgument(VarDecl,0);
     // if already defined -- replace (other option -- warning)
     // if variable name is a constant name -- it has more priority (other options -- warning, error)
-    ATbool nnew;
+    bool nnew;
     ATindexedSetPut(Temp, (ATerm)VarName, &nnew);
     if (!nnew)
     {
-      Result=ATfalse;
+      Result=false;
       goto final;
     }
   }
@@ -2965,19 +2965,19 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
   ATermAppl Name=ATAgetArgument(ProcTerm,0);
   ATermList ParList;
 
-  ATbool action=ATfalse;
+  bool action=false;
 
   if (!is_pbes)
   {
     if ((ParList=ATLtableGet(context.actions,(ATerm)Name)))
     {
-      action=ATtrue;
+      action=true;
     }
     else
     {
       if ((ParList=ATLtableGet(context.processes,(ATerm)Name)))
       {
-        action=ATfalse;
+        action=false;
       }
       else
       {
@@ -3110,7 +3110,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
   return Result;
 }
 
-static inline ATermAppl gstcMakeActionOrProc(ATbool action, ATermAppl Name,
+static inline ATermAppl gstcMakeActionOrProc(bool action, ATermAppl Name,
     ATermList FormParList, ATermList FactParList)
 {
   return (action)?gsMakeAction(gsMakeActId(Name,FormParList),FactParList)
@@ -3296,7 +3296,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
           gsErrorMsg("%s an undefined action %P (typechecking %P)\n",msg,Act,ProcTerm);
           return NULL;
         }
-        ATbool nnew;
+        bool nnew;
         ATindexedSetPut(Acts,(ATerm)Act,&nnew);
         if (!nnew)
         {
@@ -3349,7 +3349,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
           return NULL;
         }
 
-        ATbool nnew;
+        bool nnew;
         ATindexedSetPut(ActsFrom,(ATerm)ActFrom,&nnew);
         if (!nnew)
         {
@@ -5382,24 +5382,24 @@ static ATermList gstcAdjustNotInferredList(ATermList PosTypeList, ATermList Type
   return gstcGetNotInferredList(ATreverse(NewTypeListList));
 }
 
-static ATbool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList)
+static bool gstcIsTypeAllowedL(ATermList TypeList, ATermList PosTypeList)
 {
   //Checks if TypeList is allowed by PosTypeList (each respective element)
   assert(ATgetLength(TypeList)==ATgetLength(PosTypeList));
   for (; !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList),PosTypeList=ATgetNext(PosTypeList))
     if (!gstcIsTypeAllowedA(ATAgetFirst(TypeList),ATAgetFirst(PosTypeList)))
     {
-      return ATfalse;
+      return false;
     }
-  return ATtrue;
+  return true;
 }
 
-static ATbool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType)
+static bool gstcIsTypeAllowedA(ATermAppl Type, ATermAppl PosType)
 {
   //Checks if Type is allowed by PosType
   if (data::is_unknown_sort(data::sort_expression(PosType)))
   {
-    return ATtrue;
+    return true;
   }
   if (gsIsSortsPossible(PosType))
   {
@@ -5593,17 +5593,17 @@ static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList)
   return ATreverse(Result);
 }
 
-static ATbool gstcIsNotInferredL(ATermList TypeList)
+static bool gstcIsNotInferredL(ATermList TypeList)
 {
   for (; !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList))
   {
     ATermAppl Type=ATAgetFirst(TypeList);
     if (is_unknown_sort(Type) || is_multiple_possible_sorts(Type))
     {
-      return ATtrue;
+      return true;
     }
   }
-  return ATfalse;
+  return false;
 }
 
 static ATermAppl gstcUnwindType(ATermAppl Type)
@@ -5842,15 +5842,15 @@ static ATermList gstcGetVarTypes(ATermList VarDecls)
   return ATreverse(Result);
 }
 
-static ATbool gstcHasUnknown(ATermAppl Type)
+static bool gstcHasUnknown(ATermAppl Type)
 {
   if (data::is_unknown_sort(data::sort_expression(Type)))
   {
-    return ATtrue;
+    return true;
   }
   if (gsIsSortId(Type))
   {
-    return ATfalse;
+    return false;
   }
   if (gsIsSortCons(Type))
   {
@@ -5858,7 +5858,7 @@ static ATbool gstcHasUnknown(ATermAppl Type)
   }
   if (gsIsSortStruct(Type))
   {
-    return ATfalse;
+    return false;
   }
 
   if (gsIsSortArrow(Type))
@@ -5866,23 +5866,23 @@ static ATbool gstcHasUnknown(ATermAppl Type)
     for (ATermList TypeList=ATLgetArgument(Type,0); !ATisEmpty(TypeList); TypeList=ATgetNext(TypeList))
       if (gstcHasUnknown(ATAgetFirst(TypeList)))
       {
-        return ATtrue;
+        return true;
       }
     return gstcHasUnknown(ATAgetArgument(Type,1));
   }
 
-  return ATtrue;
+  return true;
 }
 
-static ATbool gstcIsNumericType(ATermAppl Type)
+static bool gstcIsNumericType(ATermAppl Type)
 {
   //returns true if Type is Bool,Pos,Nat,Int or Real
   //otherwise return fase
   if (data::is_unknown_sort(data::sort_expression(Type)))
   {
-    return ATfalse;
+    return false;
   }
-  return (ATbool)(sort_bool::is_bool(sort_expression(Type))||
+  return (bool)(sort_bool::is_bool(sort_expression(Type))||
                   sort_pos::is_pos(sort_expression(Type))||
                   sort_nat::is_nat(sort_expression(Type))||
                   sort_int::is_int(sort_expression(Type))||
@@ -6039,11 +6039,11 @@ static ATermAppl gstcExpandNumTypesDown(ATermAppl Type)
     Type=gstcUnwindType(Type);
   }
 
-  ATbool function=ATfalse;
+  bool function=false;
   ATermList Args=NULL;
   if (gsIsSortArrow(Type))
   {
-    function=ATtrue;
+    function=true;
     Args=ATLgetArgument(Type,0);
     Type=ATAgetArgument(Type,1);
   }
@@ -6071,28 +6071,28 @@ static ATermAppl gstcMinType(ATermList TypeList)
 
 
 // =========================== MultiActions
-static ATbool gstcMActIn(ATermList MAct, ATermList MActs)
+static bool gstcMActIn(ATermList MAct, ATermList MActs)
 {
   //returns true if MAct is in MActs
   for (; !ATisEmpty(MActs); MActs=ATgetNext(MActs))
     if (gstcMActEq(MAct,ATLgetFirst(MActs)))
     {
-      return ATtrue;
+      return true;
     }
 
-  return ATfalse;
+  return false;
 }
 
-static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2)
+static bool gstcMActEq(ATermList MAct1, ATermList MAct2)
 {
   //returns true if the two multiactions are equal.
   if (ATgetLength(MAct1)!=ATgetLength(MAct2))
   {
-    return ATfalse;
+    return false;
   }
   if (ATisEmpty(MAct1))
   {
-    return ATtrue;
+    return true;
   }
   ATermAppl Act1=ATAgetFirst(MAct1);
   MAct1=ATgetNext(MAct1);
@@ -6112,21 +6112,21 @@ static ATbool gstcMActEq(ATermList MAct1, ATermList MAct2)
       NewMAct2=ATinsert(NewMAct2,(ATerm)Act2);
     }
   }
-  return ATfalse;
+  return false;
 gstcMActEq_found:
   return gstcMActEq(MAct1,MAct2);
 }
 
-static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2)
+static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2)
 {
   //returns true if MAct1 is a submultiaction of MAct2.
   if (ATgetLength(MAct1)>ATgetLength(MAct2))
   {
-    return ATfalse;
+    return false;
   }
   if (ATisEmpty(MAct1))
   {
-    return ATtrue;
+    return true;
   }
   ATermAppl Act1=ATAgetFirst(MAct1);
   MAct1=ATgetNext(MAct1);
@@ -6146,7 +6146,7 @@ static ATbool gstcMActSubEq(ATermList MAct1, ATermList MAct2)
       NewMAct2=ATinsert(NewMAct2,(ATerm)Act2);
     }
   }
-  return ATfalse;
+  return false;
 gstcMActSubEqMA_found:
   return gstcMActSubEq(MAct1,MAct2);
 }
@@ -6942,7 +6942,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     }
 
     ATermList r=ATmakeList0();
-    ATbool success=ATtrue;
+    bool success=true;
     for (; !ATisEmpty(Pars); Pars=ATgetNext(Pars),TypeList=ATgetNext(TypeList))
     {
       ATermAppl Par=ATAgetFirst(Pars);
@@ -6951,7 +6951,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       if (!NewParType)
       {
         gsErrorMsg("typechecking %P\n",StateFrm);
-        success=ATfalse;
+        success=false;
         break;
       }
 
@@ -6962,7 +6962,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         if (!NewParType)
         {
           gsErrorMsg("cannot (up)cast %P to type %P (typechecking state formula %P)\n",Par,ParType,StateFrm);
-          success=ATfalse;
+          success=false;
           break;
         }
       }
@@ -6988,7 +6988,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     ATermTable FormPars=ATtableCreate(63,50);
     ATermList r=ATmakeList0();
     ATermList t=ATmakeList0();
-    ATbool success=ATtrue;
+    bool success=true;
     for (ATermList l=ATLgetArgument(StateFrm,1); !ATisEmpty(l); l=ATgetNext(l))
     {
       ATermAppl o=ATAgetFirst(l);
@@ -6997,7 +6997,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       if (ATAtableGet(FormPars,(ATerm)VarName))
       {
         gsErrorMsg("non-unique formal parameter %P (typechecking %P)\n",VarName,StateFrm);
-        success=ATfalse;
+        success=false;
         break;
       }
 
@@ -7005,7 +7005,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       if (!gstcIsSortExprDeclared(VarType))
       {
         gsErrorMsg("type error occurred while typechecking %P\n",StateFrm);
-        success=ATfalse;
+        success=false;
         break;
       }
 
@@ -7016,7 +7016,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       if (!VarInitType)
       {
         gsErrorMsg("typechecking %P\n",StateFrm);
-        success=ATfalse;
+        success=false;
         break;
       }
 
@@ -7027,7 +7027,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         if (!VarInitType)
         {
           gsErrorMsg("cannot (up)cast %P to type %P (typechecking state formula %P)\n",VarInit,VarType,StateFrm);
-          success=ATfalse;
+          success=false;
           break;
         }
       }

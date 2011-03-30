@@ -96,7 +96,7 @@ void save_aterm(ATerm term, const std::string& filename, bool binary = true)
     throw mcrl2::runtime_error("could not open output file '" + filename + "' for writing (" + err_msg + ")");
   }
   //write specification to stream
-  ATbool result;
+  bool result;
   if (binary)
   {
     result = ATwriteToSAFFile(term, stream);
@@ -109,7 +109,7 @@ void save_aterm(ATerm term, const std::string& filename, bool binary = true)
   {
     fclose(stream);
   }
-  if (result == ATfalse)
+  if (result == false)
   {
     throw mcrl2::runtime_error("could not write ATerm to " + ((stream == stdout)?"stdout":("'" + filename + "'")));
   }

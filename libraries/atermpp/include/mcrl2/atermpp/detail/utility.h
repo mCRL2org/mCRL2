@@ -28,7 +28,7 @@ namespace detail
 inline
 ATermAppl str2appl(std::string const& s)
 {
-  return ATmakeAppl0(ATmakeAFun(s.c_str(), 0, ATtrue));
+  return ATmakeAppl0(ATmakeAFun(s.c_str(), 0, true));
 }
 
 } // namespace detail

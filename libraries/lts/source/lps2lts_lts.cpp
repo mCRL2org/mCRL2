@@ -75,7 +75,7 @@ void lps2lts_lts::save_initial_state(size_t idx, ATerm state)
       break;
     default:
     {
-      ATbool is_new;
+      bool is_new;
       const size_t t = ATindexedSetPut(aterm2state,state,&is_new);
       if (is_new /* && lts_opts.outinfo */)
       {
@@ -111,7 +111,7 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action,
       break;
     default:
     {
-      ATbool is_new;
+      bool is_new;
       const size_t from_state = ATindexedSetPut(aterm2state,from,&is_new);
       if (is_new /* && lts_opts.outinfo */)
       {
@@ -129,7 +129,7 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action,
       const size_t label = ATindexedSetPut(aterm2label,(ATerm) action,&is_new);
       if (is_new)
       {
-        const size_t t = generic_lts.add_action((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue);
+        const size_t t = generic_lts.add_action((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == true);
         assert(t==label);
         static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
       }

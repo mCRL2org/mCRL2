@@ -908,7 +908,7 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
       ATermConstruct* ac = &(binaryReader->stack[binaryReader->stackPosition]);
 
       size_t arity = binaryReader->tempArity;
-      ATbool isQuoted = binaryReader->tempIsQuoted;
+      bool isQuoted = binaryReader->tempIsQuoted;
       char* name = binaryReader->tempBytes;
 
       AFun fun = ATmakeAFun(name, arity, isQuoted);
@@ -1173,7 +1173,7 @@ BinaryReader ATcreateBinaryReader()
   binaryReader->tempBytesSize = 0;
   binaryReader->tempBytesIndex = 0;
   binaryReader->tempArity = 0;
-  binaryReader->tempIsQuoted = ATfalse;
+  binaryReader->tempIsQuoted = false;
 
   binaryReader->isDone = 0;
 
@@ -1240,7 +1240,7 @@ void ATdestroyBinaryReader(BinaryReader binaryReader)
  * Writes the given ATerm in SAF format to the given file.
  * NOTE: The given file must be opened in binary mode (at least on Win32 this is required).
  */
-ATbool ATwriteToSAFFile(ATerm aTerm, FILE* file)
+bool ATwriteToSAFFile(ATerm aTerm, FILE* file)
 {
   BinaryWriter binaryWriter;
   ByteBuffer byteBuffer;
@@ -1249,7 +1249,7 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE* file)
   if (bytesWritten != 1)
   {
     ATwarning("Unable to write SAF identifier token to file.\n");
-    return ATfalse;
+    return false;
   }
 
   binaryWriter = ATcreateBinaryWriter(aTerm);
@@ -1273,7 +1273,7 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE* file)
       ATwarning("Unable to write block size bytes to file.\n");
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryWriter(binaryWriter);
-      return ATfalse;
+      return false;
     }
 
     bytesWritten = fwrite(byteBuffer->buffer, sizeof(char), byteBuffer->limit, file);
@@ -1282,7 +1282,7 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE* file)
       ATwarning("Unable to write bytes to file.\n");
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryWriter(binaryWriter);
-      return ATfalse;
+      return false;
     }
   }
   while (!ATisFinishedWriting(binaryWriter));
@@ -1293,18 +1293,18 @@ ATbool ATwriteToSAFFile(ATerm aTerm, FILE* file)
   if (fflush(file) != 0)
   {
     ATwarning("Unable to flush file stream.\n");
-    return ATfalse;
+    return false;
   }
 
-  return ATtrue;
+  return true;
 }
 
 /**
  * Writes the given ATerm in SAF format to the file with the given name.
  */
-ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char* filename)
+bool ATwriteToNamedSAFFile(ATerm aTerm, const char* filename)
 {
-  ATbool result;
+  bool result;
   FILE* file;
 
   if (strcmp(filename, "-") == 0)
@@ -1316,14 +1316,14 @@ ATbool ATwriteToNamedSAFFile(ATerm aTerm, const char* filename)
   if (file == NULL)
   {
     ATwarning("Unable to open file for writing: %s\n", filename);
-    return ATfalse;
+    return false;
   }
 
   result = ATwriteToSAFFile(aTerm, file);
 
   if (fclose(file) != 0)
   {
-    return ATfalse;
+    return false;
   }
 
   return result;

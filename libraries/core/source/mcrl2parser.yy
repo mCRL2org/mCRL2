@@ -47,7 +47,7 @@ extern ATermIndexedSet mcrl2_parser_protect_table;
 
 #define YYMAXDEPTH 640000
 
-#define safe_assign(lhs, rhs) { ATbool b; lhs = rhs; ATindexedSetPut(mcrl2_parser_protect_table, (ATerm) lhs, &b); }
+#define safe_assign(lhs, rhs) { bool b; lhs = rhs; ATindexedSetPut(mcrl2_parser_protect_table, (ATerm) lhs, &b); }
 %}
 
 %union {

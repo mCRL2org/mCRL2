@@ -2304,7 +2304,7 @@ void mcrl2_lexer::process_string(void) {
   col_nr += YYLeng();
   mcrl2yylval.appl = gsString2ATermAppl(YYText());
   // Protect the contents of mcrl2yylval.appl by adding it to an indexed set.
-  ATbool dummy;
+  bool dummy;
   ATindexedSetPut(mcrl2_parser_protect_table,(ATerm)mcrl2yylval.appl,&dummy);
 }
 

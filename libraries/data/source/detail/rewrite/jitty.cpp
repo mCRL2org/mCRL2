@@ -129,7 +129,7 @@ static AFun getAppl2(size_t arity)
 
   for (size_t i=old_apples; i<num_apples; i++)
   {
-    apples[i] = ATmakeAFun("@REWR@",i,ATfalse);
+    apples[i] = ATmakeAFun("@REWR@",i,false);
     ATprotectAFun(apples[i]);
   }
 

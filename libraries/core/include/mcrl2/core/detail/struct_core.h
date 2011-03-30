@@ -36,7 +36,7 @@ namespace detail
 inline
 AFun initAFunActAnd(AFun& f)
 {
-  f = ATmakeAFun("ActAnd", 2, ATfalse);
+  f = ATmakeAFun("ActAnd", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -58,7 +58,7 @@ bool gsIsActAnd(ATermAppl Term)
 inline
 AFun initAFunActAt(AFun& f)
 {
-  f = ATmakeAFun("ActAt", 2, ATfalse);
+  f = ATmakeAFun("ActAt", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -80,7 +80,7 @@ bool gsIsActAt(ATermAppl Term)
 inline
 AFun initAFunActExists(AFun& f)
 {
-  f = ATmakeAFun("ActExists", 2, ATfalse);
+  f = ATmakeAFun("ActExists", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -102,7 +102,7 @@ bool gsIsActExists(ATermAppl Term)
 inline
 AFun initAFunActFalse(AFun& f)
 {
-  f = ATmakeAFun("ActFalse", 0, ATfalse);
+  f = ATmakeAFun("ActFalse", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -124,7 +124,7 @@ bool gsIsActFalse(ATermAppl Term)
 inline
 AFun initAFunActForall(AFun& f)
 {
-  f = ATmakeAFun("ActForall", 2, ATfalse);
+  f = ATmakeAFun("ActForall", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -146,7 +146,7 @@ bool gsIsActForall(ATermAppl Term)
 inline
 AFun initAFunActId(AFun& f)
 {
-  f = ATmakeAFun("ActId", 2, ATfalse);
+  f = ATmakeAFun("ActId", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -168,7 +168,7 @@ bool gsIsActId(ATermAppl Term)
 inline
 AFun initAFunActImp(AFun& f)
 {
-  f = ATmakeAFun("ActImp", 2, ATfalse);
+  f = ATmakeAFun("ActImp", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -190,7 +190,7 @@ bool gsIsActImp(ATermAppl Term)
 inline
 AFun initAFunActNot(AFun& f)
 {
-  f = ATmakeAFun("ActNot", 1, ATfalse);
+  f = ATmakeAFun("ActNot", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -212,7 +212,7 @@ bool gsIsActNot(ATermAppl Term)
 inline
 AFun initAFunActOr(AFun& f)
 {
-  f = ATmakeAFun("ActOr", 2, ATfalse);
+  f = ATmakeAFun("ActOr", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -234,7 +234,7 @@ bool gsIsActOr(ATermAppl Term)
 inline
 AFun initAFunActSpec(AFun& f)
 {
-  f = ATmakeAFun("ActSpec", 1, ATfalse);
+  f = ATmakeAFun("ActSpec", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -256,7 +256,7 @@ bool gsIsActSpec(ATermAppl Term)
 inline
 AFun initAFunActTrue(AFun& f)
 {
-  f = ATmakeAFun("ActTrue", 0, ATfalse);
+  f = ATmakeAFun("ActTrue", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -278,7 +278,7 @@ bool gsIsActTrue(ATermAppl Term)
 inline
 AFun initAFunAction(AFun& f)
 {
-  f = ATmakeAFun("Action", 2, ATfalse);
+  f = ATmakeAFun("Action", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -300,7 +300,7 @@ bool gsIsAction(ATermAppl Term)
 inline
 AFun initAFunActionRenameRule(AFun& f)
 {
-  f = ATmakeAFun("ActionRenameRule", 4, ATfalse);
+  f = ATmakeAFun("ActionRenameRule", 4, false);
   ATprotectAFun(f);
   return f;
 }
@@ -322,7 +322,7 @@ bool gsIsActionRenameRule(ATermAppl Term)
 inline
 AFun initAFunActionRenameRules(AFun& f)
 {
-  f = ATmakeAFun("ActionRenameRules", 1, ATfalse);
+  f = ATmakeAFun("ActionRenameRules", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -344,7 +344,7 @@ bool gsIsActionRenameRules(ATermAppl Term)
 inline
 AFun initAFunActionRenameSpec(AFun& f)
 {
-  f = ATmakeAFun("ActionRenameSpec", 3, ATfalse);
+  f = ATmakeAFun("ActionRenameSpec", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -366,7 +366,7 @@ bool gsIsActionRenameSpec(ATermAppl Term)
 inline
 AFun initAFunAllow(AFun& f)
 {
-  f = ATmakeAFun("Allow", 2, ATfalse);
+  f = ATmakeAFun("Allow", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -388,7 +388,7 @@ bool gsIsAllow(ATermAppl Term)
 inline
 AFun initAFunAtTime(AFun& f)
 {
-  f = ATmakeAFun("AtTime", 2, ATfalse);
+  f = ATmakeAFun("AtTime", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -410,7 +410,7 @@ bool gsIsAtTime(ATermAppl Term)
 inline
 AFun initAFunBES(AFun& f)
 {
-  f = ATmakeAFun("BES", 2, ATfalse);
+  f = ATmakeAFun("BES", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -432,7 +432,7 @@ bool gsIsBES(ATermAppl Term)
 inline
 AFun initAFunBInit(AFun& f)
 {
-  f = ATmakeAFun("BInit", 2, ATfalse);
+  f = ATmakeAFun("BInit", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -454,7 +454,7 @@ bool gsIsBInit(ATermAppl Term)
 inline
 AFun initAFunBagComp(AFun& f)
 {
-  f = ATmakeAFun("BagComp", 0, ATfalse);
+  f = ATmakeAFun("BagComp", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -476,7 +476,7 @@ bool gsIsBagComp(ATermAppl Term)
 inline
 AFun initAFunBinder(AFun& f)
 {
-  f = ATmakeAFun("Binder", 3, ATfalse);
+  f = ATmakeAFun("Binder", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -498,7 +498,7 @@ bool gsIsBinder(ATermAppl Term)
 inline
 AFun initAFunBlock(AFun& f)
 {
-  f = ATmakeAFun("Block", 2, ATfalse);
+  f = ATmakeAFun("Block", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -520,7 +520,7 @@ bool gsIsBlock(ATermAppl Term)
 inline
 AFun initAFunBooleanAnd(AFun& f)
 {
-  f = ATmakeAFun("BooleanAnd", 2, ATfalse);
+  f = ATmakeAFun("BooleanAnd", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -542,7 +542,7 @@ bool gsIsBooleanAnd(ATermAppl Term)
 inline
 AFun initAFunBooleanEquation(AFun& f)
 {
-  f = ATmakeAFun("BooleanEquation", 3, ATfalse);
+  f = ATmakeAFun("BooleanEquation", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -564,7 +564,7 @@ bool gsIsBooleanEquation(ATermAppl Term)
 inline
 AFun initAFunBooleanFalse(AFun& f)
 {
-  f = ATmakeAFun("BooleanFalse", 0, ATfalse);
+  f = ATmakeAFun("BooleanFalse", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -586,7 +586,7 @@ bool gsIsBooleanFalse(ATermAppl Term)
 inline
 AFun initAFunBooleanImp(AFun& f)
 {
-  f = ATmakeAFun("BooleanImp", 2, ATfalse);
+  f = ATmakeAFun("BooleanImp", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -608,7 +608,7 @@ bool gsIsBooleanImp(ATermAppl Term)
 inline
 AFun initAFunBooleanNot(AFun& f)
 {
-  f = ATmakeAFun("BooleanNot", 1, ATfalse);
+  f = ATmakeAFun("BooleanNot", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -630,7 +630,7 @@ bool gsIsBooleanNot(ATermAppl Term)
 inline
 AFun initAFunBooleanOr(AFun& f)
 {
-  f = ATmakeAFun("BooleanOr", 2, ATfalse);
+  f = ATmakeAFun("BooleanOr", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -652,7 +652,7 @@ bool gsIsBooleanOr(ATermAppl Term)
 inline
 AFun initAFunBooleanTrue(AFun& f)
 {
-  f = ATmakeAFun("BooleanTrue", 0, ATfalse);
+  f = ATmakeAFun("BooleanTrue", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -674,7 +674,7 @@ bool gsIsBooleanTrue(ATermAppl Term)
 inline
 AFun initAFunBooleanVariable(AFun& f)
 {
-  f = ATmakeAFun("BooleanVariable", 1, ATfalse);
+  f = ATmakeAFun("BooleanVariable", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -696,7 +696,7 @@ bool gsIsBooleanVariable(ATermAppl Term)
 inline
 AFun initAFunChoice(AFun& f)
 {
-  f = ATmakeAFun("Choice", 2, ATfalse);
+  f = ATmakeAFun("Choice", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -718,7 +718,7 @@ bool gsIsChoice(ATermAppl Term)
 inline
 AFun initAFunComm(AFun& f)
 {
-  f = ATmakeAFun("Comm", 2, ATfalse);
+  f = ATmakeAFun("Comm", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -740,7 +740,7 @@ bool gsIsComm(ATermAppl Term)
 inline
 AFun initAFunCommExpr(AFun& f)
 {
-  f = ATmakeAFun("CommExpr", 2, ATfalse);
+  f = ATmakeAFun("CommExpr", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -762,7 +762,7 @@ bool gsIsCommExpr(ATermAppl Term)
 inline
 AFun initAFunConsSpec(AFun& f)
 {
-  f = ATmakeAFun("ConsSpec", 1, ATfalse);
+  f = ATmakeAFun("ConsSpec", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -784,7 +784,7 @@ bool gsIsConsSpec(ATermAppl Term)
 inline
 AFun initAFunDataAppl(AFun& f)
 {
-  f = ATmakeAFun("DataAppl", 2, ATfalse);
+  f = ATmakeAFun("DataAppl", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -806,7 +806,7 @@ bool gsIsDataAppl(ATermAppl Term)
 inline
 AFun initAFunDataEqn(AFun& f)
 {
-  f = ATmakeAFun("DataEqn", 4, ATfalse);
+  f = ATmakeAFun("DataEqn", 4, false);
   ATprotectAFun(f);
   return f;
 }
@@ -828,7 +828,7 @@ bool gsIsDataEqn(ATermAppl Term)
 inline
 AFun initAFunDataEqnSpec(AFun& f)
 {
-  f = ATmakeAFun("DataEqnSpec", 1, ATfalse);
+  f = ATmakeAFun("DataEqnSpec", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -850,7 +850,7 @@ bool gsIsDataEqnSpec(ATermAppl Term)
 inline
 AFun initAFunDataSpec(AFun& f)
 {
-  f = ATmakeAFun("DataSpec", 4, ATfalse);
+  f = ATmakeAFun("DataSpec", 4, false);
   ATprotectAFun(f);
   return f;
 }
@@ -872,7 +872,7 @@ bool gsIsDataSpec(ATermAppl Term)
 inline
 AFun initAFunDataVarId(AFun& f)
 {
-  f = ATmakeAFun("DataVarId", 2, ATfalse);
+  f = ATmakeAFun("DataVarId", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -894,7 +894,7 @@ bool gsIsDataVarId(ATermAppl Term)
 inline
 AFun initAFunDataVarIdInit(AFun& f)
 {
-  f = ATmakeAFun("DataVarIdInit", 2, ATfalse);
+  f = ATmakeAFun("DataVarIdInit", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -916,7 +916,7 @@ bool gsIsDataVarIdInit(ATermAppl Term)
 inline
 AFun initAFunDelta(AFun& f)
 {
-  f = ATmakeAFun("Delta", 0, ATfalse);
+  f = ATmakeAFun("Delta", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -938,7 +938,7 @@ bool gsIsDelta(ATermAppl Term)
 inline
 AFun initAFunExists(AFun& f)
 {
-  f = ATmakeAFun("Exists", 0, ATfalse);
+  f = ATmakeAFun("Exists", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -960,7 +960,7 @@ bool gsIsExists(ATermAppl Term)
 inline
 AFun initAFunForall(AFun& f)
 {
-  f = ATmakeAFun("Forall", 0, ATfalse);
+  f = ATmakeAFun("Forall", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -982,7 +982,7 @@ bool gsIsForall(ATermAppl Term)
 inline
 AFun initAFunGlobVarSpec(AFun& f)
 {
-  f = ATmakeAFun("GlobVarSpec", 1, ATfalse);
+  f = ATmakeAFun("GlobVarSpec", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1004,7 +1004,7 @@ bool gsIsGlobVarSpec(ATermAppl Term)
 inline
 AFun initAFunHide(AFun& f)
 {
-  f = ATmakeAFun("Hide", 2, ATfalse);
+  f = ATmakeAFun("Hide", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1026,7 +1026,7 @@ bool gsIsHide(ATermAppl Term)
 inline
 AFun initAFunId(AFun& f)
 {
-  f = ATmakeAFun("Id", 1, ATfalse);
+  f = ATmakeAFun("Id", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1048,7 +1048,7 @@ bool gsIsId(ATermAppl Term)
 inline
 AFun initAFunIdAssignment(AFun& f)
 {
-  f = ATmakeAFun("IdAssignment", 2, ATfalse);
+  f = ATmakeAFun("IdAssignment", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1070,7 +1070,7 @@ bool gsIsIdAssignment(ATermAppl Term)
 inline
 AFun initAFunIdInit(AFun& f)
 {
-  f = ATmakeAFun("IdInit", 2, ATfalse);
+  f = ATmakeAFun("IdInit", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1092,7 +1092,7 @@ bool gsIsIdInit(ATermAppl Term)
 inline
 AFun initAFunIfThen(AFun& f)
 {
-  f = ATmakeAFun("IfThen", 2, ATfalse);
+  f = ATmakeAFun("IfThen", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1114,7 +1114,7 @@ bool gsIsIfThen(ATermAppl Term)
 inline
 AFun initAFunIfThenElse(AFun& f)
 {
-  f = ATmakeAFun("IfThenElse", 3, ATfalse);
+  f = ATmakeAFun("IfThenElse", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1136,7 +1136,7 @@ bool gsIsIfThenElse(ATermAppl Term)
 inline
 AFun initAFunLMerge(AFun& f)
 {
-  f = ATmakeAFun("LMerge", 2, ATfalse);
+  f = ATmakeAFun("LMerge", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1158,7 +1158,7 @@ bool gsIsLMerge(ATermAppl Term)
 inline
 AFun initAFunLambda(AFun& f)
 {
-  f = ATmakeAFun("Lambda", 0, ATfalse);
+  f = ATmakeAFun("Lambda", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1180,7 +1180,7 @@ bool gsIsLambda(ATermAppl Term)
 inline
 AFun initAFunLinProcSpec(AFun& f)
 {
-  f = ATmakeAFun("LinProcSpec", 5, ATfalse);
+  f = ATmakeAFun("LinProcSpec", 5, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1202,7 +1202,7 @@ bool gsIsLinProcSpec(ATermAppl Term)
 inline
 AFun initAFunLinearProcess(AFun& f)
 {
-  f = ATmakeAFun("LinearProcess", 2, ATfalse);
+  f = ATmakeAFun("LinearProcess", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1224,7 +1224,7 @@ bool gsIsLinearProcess(ATermAppl Term)
 inline
 AFun initAFunLinearProcessInit(AFun& f)
 {
-  f = ATmakeAFun("LinearProcessInit", 1, ATfalse);
+  f = ATmakeAFun("LinearProcessInit", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1246,7 +1246,7 @@ bool gsIsLinearProcessInit(ATermAppl Term)
 inline
 AFun initAFunLinearProcessSummand(AFun& f)
 {
-  f = ATmakeAFun("LinearProcessSummand", 5, ATfalse);
+  f = ATmakeAFun("LinearProcessSummand", 5, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1268,7 +1268,7 @@ bool gsIsLinearProcessSummand(ATermAppl Term)
 inline
 AFun initAFunMapSpec(AFun& f)
 {
-  f = ATmakeAFun("MapSpec", 1, ATfalse);
+  f = ATmakeAFun("MapSpec", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1290,7 +1290,7 @@ bool gsIsMapSpec(ATermAppl Term)
 inline
 AFun initAFunMerge(AFun& f)
 {
-  f = ATmakeAFun("Merge", 2, ATfalse);
+  f = ATmakeAFun("Merge", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1312,7 +1312,7 @@ bool gsIsMerge(ATermAppl Term)
 inline
 AFun initAFunMu(AFun& f)
 {
-  f = ATmakeAFun("Mu", 0, ATfalse);
+  f = ATmakeAFun("Mu", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1334,7 +1334,7 @@ bool gsIsMu(ATermAppl Term)
 inline
 AFun initAFunMultAct(AFun& f)
 {
-  f = ATmakeAFun("MultAct", 1, ATfalse);
+  f = ATmakeAFun("MultAct", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1356,7 +1356,7 @@ bool gsIsMultAct(ATermAppl Term)
 inline
 AFun initAFunMultActName(AFun& f)
 {
-  f = ATmakeAFun("MultActName", 1, ATfalse);
+  f = ATmakeAFun("MultActName", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1378,7 +1378,7 @@ bool gsIsMultActName(ATermAppl Term)
 inline
 AFun initAFunNil(AFun& f)
 {
-  f = ATmakeAFun("Nil", 0, ATfalse);
+  f = ATmakeAFun("Nil", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1400,7 +1400,7 @@ bool gsIsNil(ATermAppl Term)
 inline
 AFun initAFunNu(AFun& f)
 {
-  f = ATmakeAFun("Nu", 0, ATfalse);
+  f = ATmakeAFun("Nu", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1422,7 +1422,7 @@ bool gsIsNu(ATermAppl Term)
 inline
 AFun initAFunOpId(AFun& f)
 {
-  f = ATmakeAFun("OpId", 2, ATfalse);
+  f = ATmakeAFun("OpId", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1444,7 +1444,7 @@ bool gsIsOpId(ATermAppl Term)
 inline
 AFun initAFunPBES(AFun& f)
 {
-  f = ATmakeAFun("PBES", 4, ATfalse);
+  f = ATmakeAFun("PBES", 4, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1466,7 +1466,7 @@ bool gsIsPBES(ATermAppl Term)
 inline
 AFun initAFunPBESAnd(AFun& f)
 {
-  f = ATmakeAFun("PBESAnd", 2, ATfalse);
+  f = ATmakeAFun("PBESAnd", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1488,7 +1488,7 @@ bool gsIsPBESAnd(ATermAppl Term)
 inline
 AFun initAFunPBESExists(AFun& f)
 {
-  f = ATmakeAFun("PBESExists", 2, ATfalse);
+  f = ATmakeAFun("PBESExists", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1510,7 +1510,7 @@ bool gsIsPBESExists(ATermAppl Term)
 inline
 AFun initAFunPBESFalse(AFun& f)
 {
-  f = ATmakeAFun("PBESFalse", 0, ATfalse);
+  f = ATmakeAFun("PBESFalse", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1532,7 +1532,7 @@ bool gsIsPBESFalse(ATermAppl Term)
 inline
 AFun initAFunPBESForall(AFun& f)
 {
-  f = ATmakeAFun("PBESForall", 2, ATfalse);
+  f = ATmakeAFun("PBESForall", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1554,7 +1554,7 @@ bool gsIsPBESForall(ATermAppl Term)
 inline
 AFun initAFunPBESImp(AFun& f)
 {
-  f = ATmakeAFun("PBESImp", 2, ATfalse);
+  f = ATmakeAFun("PBESImp", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1576,7 +1576,7 @@ bool gsIsPBESImp(ATermAppl Term)
 inline
 AFun initAFunPBESNot(AFun& f)
 {
-  f = ATmakeAFun("PBESNot", 1, ATfalse);
+  f = ATmakeAFun("PBESNot", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1598,7 +1598,7 @@ bool gsIsPBESNot(ATermAppl Term)
 inline
 AFun initAFunPBESOr(AFun& f)
 {
-  f = ATmakeAFun("PBESOr", 2, ATfalse);
+  f = ATmakeAFun("PBESOr", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1620,7 +1620,7 @@ bool gsIsPBESOr(ATermAppl Term)
 inline
 AFun initAFunPBESTrue(AFun& f)
 {
-  f = ATmakeAFun("PBESTrue", 0, ATfalse);
+  f = ATmakeAFun("PBESTrue", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1642,7 +1642,7 @@ bool gsIsPBESTrue(ATermAppl Term)
 inline
 AFun initAFunPBEqn(AFun& f)
 {
-  f = ATmakeAFun("PBEqn", 3, ATfalse);
+  f = ATmakeAFun("PBEqn", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1664,7 +1664,7 @@ bool gsIsPBEqn(ATermAppl Term)
 inline
 AFun initAFunPBEqnSpec(AFun& f)
 {
-  f = ATmakeAFun("PBEqnSpec", 1, ATfalse);
+  f = ATmakeAFun("PBEqnSpec", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1686,7 +1686,7 @@ bool gsIsPBEqnSpec(ATermAppl Term)
 inline
 AFun initAFunPBInit(AFun& f)
 {
-  f = ATmakeAFun("PBInit", 1, ATfalse);
+  f = ATmakeAFun("PBInit", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1708,7 +1708,7 @@ bool gsIsPBInit(ATermAppl Term)
 inline
 AFun initAFunParamId(AFun& f)
 {
-  f = ATmakeAFun("ParamId", 2, ATfalse);
+  f = ATmakeAFun("ParamId", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1730,7 +1730,7 @@ bool gsIsParamId(ATermAppl Term)
 inline
 AFun initAFunProcEqn(AFun& f)
 {
-  f = ATmakeAFun("ProcEqn", 3, ATfalse);
+  f = ATmakeAFun("ProcEqn", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1752,7 +1752,7 @@ bool gsIsProcEqn(ATermAppl Term)
 inline
 AFun initAFunProcEqnSpec(AFun& f)
 {
-  f = ATmakeAFun("ProcEqnSpec", 1, ATfalse);
+  f = ATmakeAFun("ProcEqnSpec", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1774,7 +1774,7 @@ bool gsIsProcEqnSpec(ATermAppl Term)
 inline
 AFun initAFunProcSpec(AFun& f)
 {
-  f = ATmakeAFun("ProcSpec", 5, ATfalse);
+  f = ATmakeAFun("ProcSpec", 5, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1796,7 +1796,7 @@ bool gsIsProcSpec(ATermAppl Term)
 inline
 AFun initAFunProcVarId(AFun& f)
 {
-  f = ATmakeAFun("ProcVarId", 2, ATfalse);
+  f = ATmakeAFun("ProcVarId", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1818,7 +1818,7 @@ bool gsIsProcVarId(ATermAppl Term)
 inline
 AFun initAFunProcess(AFun& f)
 {
-  f = ATmakeAFun("Process", 2, ATfalse);
+  f = ATmakeAFun("Process", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1840,7 +1840,7 @@ bool gsIsProcess(ATermAppl Term)
 inline
 AFun initAFunProcessAssignment(AFun& f)
 {
-  f = ATmakeAFun("ProcessAssignment", 2, ATfalse);
+  f = ATmakeAFun("ProcessAssignment", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1862,7 +1862,7 @@ bool gsIsProcessAssignment(ATermAppl Term)
 inline
 AFun initAFunProcessInit(AFun& f)
 {
-  f = ATmakeAFun("ProcessInit", 1, ATfalse);
+  f = ATmakeAFun("ProcessInit", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1884,7 +1884,7 @@ bool gsIsProcessInit(ATermAppl Term)
 inline
 AFun initAFunPropVarDecl(AFun& f)
 {
-  f = ATmakeAFun("PropVarDecl", 2, ATfalse);
+  f = ATmakeAFun("PropVarDecl", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1906,7 +1906,7 @@ bool gsIsPropVarDecl(ATermAppl Term)
 inline
 AFun initAFunPropVarInst(AFun& f)
 {
-  f = ATmakeAFun("PropVarInst", 2, ATfalse);
+  f = ATmakeAFun("PropVarInst", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1928,7 +1928,7 @@ bool gsIsPropVarInst(ATermAppl Term)
 inline
 AFun initAFunRegAlt(AFun& f)
 {
-  f = ATmakeAFun("RegAlt", 2, ATfalse);
+  f = ATmakeAFun("RegAlt", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1950,7 +1950,7 @@ bool gsIsRegAlt(ATermAppl Term)
 inline
 AFun initAFunRegNil(AFun& f)
 {
-  f = ATmakeAFun("RegNil", 0, ATfalse);
+  f = ATmakeAFun("RegNil", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1972,7 +1972,7 @@ bool gsIsRegNil(ATermAppl Term)
 inline
 AFun initAFunRegSeq(AFun& f)
 {
-  f = ATmakeAFun("RegSeq", 2, ATfalse);
+  f = ATmakeAFun("RegSeq", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -1994,7 +1994,7 @@ bool gsIsRegSeq(ATermAppl Term)
 inline
 AFun initAFunRegTrans(AFun& f)
 {
-  f = ATmakeAFun("RegTrans", 1, ATfalse);
+  f = ATmakeAFun("RegTrans", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2016,7 +2016,7 @@ bool gsIsRegTrans(ATermAppl Term)
 inline
 AFun initAFunRegTransOrNil(AFun& f)
 {
-  f = ATmakeAFun("RegTransOrNil", 1, ATfalse);
+  f = ATmakeAFun("RegTransOrNil", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2038,7 +2038,7 @@ bool gsIsRegTransOrNil(ATermAppl Term)
 inline
 AFun initAFunRename(AFun& f)
 {
-  f = ATmakeAFun("Rename", 2, ATfalse);
+  f = ATmakeAFun("Rename", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2060,7 +2060,7 @@ bool gsIsRename(ATermAppl Term)
 inline
 AFun initAFunRenameExpr(AFun& f)
 {
-  f = ATmakeAFun("RenameExpr", 2, ATfalse);
+  f = ATmakeAFun("RenameExpr", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2082,7 +2082,7 @@ bool gsIsRenameExpr(ATermAppl Term)
 inline
 AFun initAFunSeq(AFun& f)
 {
-  f = ATmakeAFun("Seq", 2, ATfalse);
+  f = ATmakeAFun("Seq", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2104,7 +2104,7 @@ bool gsIsSeq(ATermAppl Term)
 inline
 AFun initAFunSetBagComp(AFun& f)
 {
-  f = ATmakeAFun("SetBagComp", 0, ATfalse);
+  f = ATmakeAFun("SetBagComp", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2126,7 +2126,7 @@ bool gsIsSetBagComp(ATermAppl Term)
 inline
 AFun initAFunSetComp(AFun& f)
 {
-  f = ATmakeAFun("SetComp", 0, ATfalse);
+  f = ATmakeAFun("SetComp", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2148,7 +2148,7 @@ bool gsIsSetComp(ATermAppl Term)
 inline
 AFun initAFunSortArrow(AFun& f)
 {
-  f = ATmakeAFun("SortArrow", 2, ATfalse);
+  f = ATmakeAFun("SortArrow", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2170,7 +2170,7 @@ bool gsIsSortArrow(ATermAppl Term)
 inline
 AFun initAFunSortBag(AFun& f)
 {
-  f = ATmakeAFun("SortBag", 0, ATfalse);
+  f = ATmakeAFun("SortBag", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2192,7 +2192,7 @@ bool gsIsSortBag(ATermAppl Term)
 inline
 AFun initAFunSortCons(AFun& f)
 {
-  f = ATmakeAFun("SortCons", 2, ATfalse);
+  f = ATmakeAFun("SortCons", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2214,7 +2214,7 @@ bool gsIsSortCons(ATermAppl Term)
 inline
 AFun initAFunSortFBag(AFun& f)
 {
-  f = ATmakeAFun("SortFBag", 0, ATfalse);
+  f = ATmakeAFun("SortFBag", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2236,7 +2236,7 @@ bool gsIsSortFBag(ATermAppl Term)
 inline
 AFun initAFunSortFSet(AFun& f)
 {
-  f = ATmakeAFun("SortFSet", 0, ATfalse);
+  f = ATmakeAFun("SortFSet", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2258,7 +2258,7 @@ bool gsIsSortFSet(ATermAppl Term)
 inline
 AFun initAFunSortId(AFun& f)
 {
-  f = ATmakeAFun("SortId", 1, ATfalse);
+  f = ATmakeAFun("SortId", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2280,7 +2280,7 @@ bool gsIsSortId(ATermAppl Term)
 inline
 AFun initAFunSortList(AFun& f)
 {
-  f = ATmakeAFun("SortList", 0, ATfalse);
+  f = ATmakeAFun("SortList", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2302,7 +2302,7 @@ bool gsIsSortList(ATermAppl Term)
 inline
 AFun initAFunSortRef(AFun& f)
 {
-  f = ATmakeAFun("SortRef", 2, ATfalse);
+  f = ATmakeAFun("SortRef", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2324,7 +2324,7 @@ bool gsIsSortRef(ATermAppl Term)
 inline
 AFun initAFunSortSet(AFun& f)
 {
-  f = ATmakeAFun("SortSet", 0, ATfalse);
+  f = ATmakeAFun("SortSet", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2346,7 +2346,7 @@ bool gsIsSortSet(ATermAppl Term)
 inline
 AFun initAFunSortSpec(AFun& f)
 {
-  f = ATmakeAFun("SortSpec", 1, ATfalse);
+  f = ATmakeAFun("SortSpec", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2368,7 +2368,7 @@ bool gsIsSortSpec(ATermAppl Term)
 inline
 AFun initAFunSortStruct(AFun& f)
 {
-  f = ATmakeAFun("SortStruct", 1, ATfalse);
+  f = ATmakeAFun("SortStruct", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2390,7 +2390,7 @@ bool gsIsSortStruct(ATermAppl Term)
 inline
 AFun initAFunSortUnknown(AFun& f)
 {
-  f = ATmakeAFun("SortUnknown", 0, ATfalse);
+  f = ATmakeAFun("SortUnknown", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2412,7 +2412,7 @@ bool gsIsSortUnknown(ATermAppl Term)
 inline
 AFun initAFunSortsPossible(AFun& f)
 {
-  f = ATmakeAFun("SortsPossible", 1, ATfalse);
+  f = ATmakeAFun("SortsPossible", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2434,7 +2434,7 @@ bool gsIsSortsPossible(ATermAppl Term)
 inline
 AFun initAFunStateAnd(AFun& f)
 {
-  f = ATmakeAFun("StateAnd", 2, ATfalse);
+  f = ATmakeAFun("StateAnd", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2456,7 +2456,7 @@ bool gsIsStateAnd(ATermAppl Term)
 inline
 AFun initAFunStateDelay(AFun& f)
 {
-  f = ATmakeAFun("StateDelay", 0, ATfalse);
+  f = ATmakeAFun("StateDelay", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2478,7 +2478,7 @@ bool gsIsStateDelay(ATermAppl Term)
 inline
 AFun initAFunStateDelayTimed(AFun& f)
 {
-  f = ATmakeAFun("StateDelayTimed", 1, ATfalse);
+  f = ATmakeAFun("StateDelayTimed", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2500,7 +2500,7 @@ bool gsIsStateDelayTimed(ATermAppl Term)
 inline
 AFun initAFunStateExists(AFun& f)
 {
-  f = ATmakeAFun("StateExists", 2, ATfalse);
+  f = ATmakeAFun("StateExists", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2522,7 +2522,7 @@ bool gsIsStateExists(ATermAppl Term)
 inline
 AFun initAFunStateFalse(AFun& f)
 {
-  f = ATmakeAFun("StateFalse", 0, ATfalse);
+  f = ATmakeAFun("StateFalse", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2544,7 +2544,7 @@ bool gsIsStateFalse(ATermAppl Term)
 inline
 AFun initAFunStateForall(AFun& f)
 {
-  f = ATmakeAFun("StateForall", 2, ATfalse);
+  f = ATmakeAFun("StateForall", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2566,7 +2566,7 @@ bool gsIsStateForall(ATermAppl Term)
 inline
 AFun initAFunStateImp(AFun& f)
 {
-  f = ATmakeAFun("StateImp", 2, ATfalse);
+  f = ATmakeAFun("StateImp", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2588,7 +2588,7 @@ bool gsIsStateImp(ATermAppl Term)
 inline
 AFun initAFunStateMay(AFun& f)
 {
-  f = ATmakeAFun("StateMay", 2, ATfalse);
+  f = ATmakeAFun("StateMay", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2610,7 +2610,7 @@ bool gsIsStateMay(ATermAppl Term)
 inline
 AFun initAFunStateMu(AFun& f)
 {
-  f = ATmakeAFun("StateMu", 3, ATfalse);
+  f = ATmakeAFun("StateMu", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2632,7 +2632,7 @@ bool gsIsStateMu(ATermAppl Term)
 inline
 AFun initAFunStateMust(AFun& f)
 {
-  f = ATmakeAFun("StateMust", 2, ATfalse);
+  f = ATmakeAFun("StateMust", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2654,7 +2654,7 @@ bool gsIsStateMust(ATermAppl Term)
 inline
 AFun initAFunStateNot(AFun& f)
 {
-  f = ATmakeAFun("StateNot", 1, ATfalse);
+  f = ATmakeAFun("StateNot", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2676,7 +2676,7 @@ bool gsIsStateNot(ATermAppl Term)
 inline
 AFun initAFunStateNu(AFun& f)
 {
-  f = ATmakeAFun("StateNu", 3, ATfalse);
+  f = ATmakeAFun("StateNu", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2698,7 +2698,7 @@ bool gsIsStateNu(ATermAppl Term)
 inline
 AFun initAFunStateOr(AFun& f)
 {
-  f = ATmakeAFun("StateOr", 2, ATfalse);
+  f = ATmakeAFun("StateOr", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2720,7 +2720,7 @@ bool gsIsStateOr(ATermAppl Term)
 inline
 AFun initAFunStateTrue(AFun& f)
 {
-  f = ATmakeAFun("StateTrue", 0, ATfalse);
+  f = ATmakeAFun("StateTrue", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2742,7 +2742,7 @@ bool gsIsStateTrue(ATermAppl Term)
 inline
 AFun initAFunStateVar(AFun& f)
 {
-  f = ATmakeAFun("StateVar", 2, ATfalse);
+  f = ATmakeAFun("StateVar", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2764,7 +2764,7 @@ bool gsIsStateVar(ATermAppl Term)
 inline
 AFun initAFunStateYaled(AFun& f)
 {
-  f = ATmakeAFun("StateYaled", 0, ATfalse);
+  f = ATmakeAFun("StateYaled", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2786,7 +2786,7 @@ bool gsIsStateYaled(ATermAppl Term)
 inline
 AFun initAFunStateYaledTimed(AFun& f)
 {
-  f = ATmakeAFun("StateYaledTimed", 1, ATfalse);
+  f = ATmakeAFun("StateYaledTimed", 1, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2808,7 +2808,7 @@ bool gsIsStateYaledTimed(ATermAppl Term)
 inline
 AFun initAFunStructCons(AFun& f)
 {
-  f = ATmakeAFun("StructCons", 3, ATfalse);
+  f = ATmakeAFun("StructCons", 3, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2830,7 +2830,7 @@ bool gsIsStructCons(ATermAppl Term)
 inline
 AFun initAFunStructProj(AFun& f)
 {
-  f = ATmakeAFun("StructProj", 2, ATfalse);
+  f = ATmakeAFun("StructProj", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2852,7 +2852,7 @@ bool gsIsStructProj(ATermAppl Term)
 inline
 AFun initAFunSum(AFun& f)
 {
-  f = ATmakeAFun("Sum", 2, ATfalse);
+  f = ATmakeAFun("Sum", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2874,7 +2874,7 @@ bool gsIsSum(ATermAppl Term)
 inline
 AFun initAFunSync(AFun& f)
 {
-  f = ATmakeAFun("Sync", 2, ATfalse);
+  f = ATmakeAFun("Sync", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2896,7 +2896,7 @@ bool gsIsSync(ATermAppl Term)
 inline
 AFun initAFunTau(AFun& f)
 {
-  f = ATmakeAFun("Tau", 0, ATfalse);
+  f = ATmakeAFun("Tau", 0, false);
   ATprotectAFun(f);
   return f;
 }
@@ -2918,7 +2918,7 @@ bool gsIsTau(ATermAppl Term)
 inline
 AFun initAFunWhr(AFun& f)
 {
-  f = ATmakeAFun("Whr", 2, ATfalse);
+  f = ATmakeAFun("Whr", 2, false);
   ATprotectAFun(f);
   return f;
 }
@@ -3743,7 +3743,7 @@ ATermAppl gsString2ATermAppl(const char* s)
 {
   if (s != NULL)
   {
-    return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
+    return ATmakeAppl0(ATmakeAFun(s, 0, true));
   }
   else
   {
@@ -3756,7 +3756,7 @@ bool gsIsString(ATermAppl term)
 //Ret: term is a quoted constant
 {
   AFun head = ATgetAFun(term);
-  return ((ATgetArity(head) == 0) && (ATisQuoted(head) == ATtrue));
+  return ((ATgetArity(head) == 0) && (ATisQuoted(head) == true));
 }
 
 inline

@@ -109,44 +109,44 @@ static void initialise_common()
 {
   if (is_initialised == 0)
   {
-    afunS = ATmakeAFun("@@S",2,ATfalse); // Store term ( target_variable, result_tree )
+    afunS = ATmakeAFun("@@S",2,false); // Store term ( target_variable, result_tree )
     ATprotectAFun(afunS);
-    afunM = ATmakeAFun("@@M",3,ATfalse); // Match term ( match_variable, true_tree , false_tree )
+    afunM = ATmakeAFun("@@M",3,false); // Match term ( match_variable, true_tree , false_tree )
     ATprotectAFun(afunM);
-    afunF = ATmakeAFun("@@F",3,ATfalse); // Match function ( match_function, true_tree, false_tree )
+    afunF = ATmakeAFun("@@F",3,false); // Match function ( match_function, true_tree, false_tree )
     ATprotectAFun(afunF);
-    afunN = ATmakeAFun("@@N",1,ATfalse); // Go to next parameter ( result_tree )
+    afunN = ATmakeAFun("@@N",1,false); // Go to next parameter ( result_tree )
     ATprotectAFun(afunN);
-    afunD = ATmakeAFun("@@D",1,ATfalse); // Go down a level ( result_tree )
+    afunD = ATmakeAFun("@@D",1,false); // Go down a level ( result_tree )
     ATprotectAFun(afunD);
-    afunR = ATmakeAFun("@@R",1,ATfalse); // End of tree ( matching_rule )
+    afunR = ATmakeAFun("@@R",1,false); // End of tree ( matching_rule )
     ATprotectAFun(afunR);
-    afunCR = ATmakeAFun("@@CR",2,ATfalse); // End of tree ( condition, matching_rule )
+    afunCR = ATmakeAFun("@@CR",2,false); // End of tree ( condition, matching_rule )
     ATprotectAFun(afunCR);
-    afunC = ATmakeAFun("@@C",3,ATfalse); // Check condition ( condition, true_tree, false_tree )
+    afunC = ATmakeAFun("@@C",3,false); // Check condition ( condition, true_tree, false_tree )
     ATprotectAFun(afunC);
-    afunX = ATmakeAFun("@@X",0,ATfalse); // End of tree
+    afunX = ATmakeAFun("@@X",0,false); // End of tree
     ATprotectAFun(afunX);
-    afunRe = ATmakeAFun("@@Re",2,ATfalse); // End of tree ( matching_rule , vars_of_rule)
+    afunRe = ATmakeAFun("@@Re",2,false); // End of tree ( matching_rule , vars_of_rule)
     ATprotectAFun(afunRe);
-    afunCRe = ATmakeAFun("@@CRe",4,ATfalse); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
+    afunCRe = ATmakeAFun("@@CRe",4,false); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
     ATprotectAFun(afunCRe);
-    afunMe = ATmakeAFun("@@Me",2,ATfalse); // Match term ( match_variable, variable_index )
+    afunMe = ATmakeAFun("@@Me",2,false); // Match term ( match_variable, variable_index )
     ATprotectAFun(afunMe);
 
     dummy=NULL;
     ATprotect(&dummy);
     dummy = (ATerm) gsMakeNil();
 
-    afunARtrue = ATmakeAFun("@@true",0,ATfalse);
+    afunARtrue = ATmakeAFun("@@true",0,false);
     ATprotectAFun(afunARtrue);
-    afunARfalse = ATmakeAFun("@@false",0,ATfalse);
+    afunARfalse = ATmakeAFun("@@false",0,false);
     ATprotectAFun(afunARfalse);
-    afunARand = ATmakeAFun("@@and",2,ATfalse);
+    afunARand = ATmakeAFun("@@and",2,false);
     ATprotectAFun(afunARand);
-    afunARor = ATmakeAFun("@@or",2,ATfalse);
+    afunARor = ATmakeAFun("@@or",2,false);
     ATprotectAFun(afunARor);
-    afunARvar = ATmakeAFun("@@var",1,ATfalse);
+    afunARvar = ATmakeAFun("@@var",1,false);
     ATprotectAFun(afunARvar);
     ar_true = NULL;
     ATprotectAppl(&ar_true);
@@ -498,7 +498,7 @@ static ATerm Apply(ATermList l)
   int n=ATgetLength(l);
   sprintf(c,"appl#%d",n);
 
-  return (ATerm)ATmakeApplList(ATmakeAFun(c,n,ATfalse),l);
+  return (ATerm)ATmakeApplList(ATmakeAFun(c,n,false),l);
 }
 
 #ifdef USE_APPL_VALUE
@@ -519,7 +519,7 @@ static AFun get_appl_afun_value(size_t arity)
     for (; old_num < num_apples; old_num++)
     {
       sprintf(c,"appl#%lu",old_num+1);
-      apples[old_num] = ATmakeAFun(c,old_num+1,ATfalse);
+      apples[old_num] = ATmakeAFun(c,old_num+1,false);
       ATprotectAFun(apples[old_num]);
     }
   }
@@ -590,7 +590,7 @@ static ATerm get_rewrappl_value(int i)
     ATprotectArray(rewrappls,num_rewrappls);
     for (; old_num < num_rewrappls; old_num++)
     {
-      rewrappls[old_num] = (ATerm) ATmakeAppl(ATmakeAFun("appl#1",1,ATfalse),ATmakeInt(old_num));
+      rewrappls[old_num] = (ATerm) ATmakeAppl(ATmakeAFun("appl#1",1,false),ATmakeInt(old_num));
     }
   }
   return rewrappls[i];

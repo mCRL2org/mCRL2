@@ -451,7 +451,7 @@ class Trace
     {
       if (trace_pair_set == 0)
       {
-        trace_pair = ATmakeAFun("pair",2,ATfalse);
+        trace_pair = ATmakeAFun("pair",2,false);
         ATprotectAFun(trace_pair);
       }
       trace_pair_set++;
@@ -602,7 +602,7 @@ class Trace
         if (is.gcount() > 0)
         {
           // XXX need to parse trace
-          addAction(ATmakeAppl0(ATmakeAFun(buf,0,ATfalse)));
+          addAction(ATmakeAppl0(ATmakeAFun(buf,0,false)));
         }
       }
       is.clear();

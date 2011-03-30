@@ -311,7 +311,7 @@ void Bdump(FILE* fp, tBlock* block)
   for (tmp=block->first; tmp!=NULL; tmp=tmp->next)
   {
     ATfprintf(stderr, "    %t %6d(%p<%p<%p)\n",
-              tmp->term?tmp->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,ATfalse)),
+              tmp->term?tmp->term:(ATerm)ATmakeAppl0(ATmakeAFun("nil",0,false)),
               tmp->frequency, tmp->previous, tmp, tmp->next);
     if (tmp==block->last)
     {

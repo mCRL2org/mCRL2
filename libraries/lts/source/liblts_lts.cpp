@@ -86,7 +86,7 @@ static void read_from_lts(lts_lts_t& l, string const& filename)
     for (size_t i=l.num_action_labels(); i<=(size_t)label; i++)
     {
       ATermAppl lab = (ATermAppl) SVClabel2ATerm(&f,(SVClabelIndex) i);
-      l.add_action((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==ATtrue)?true:false);
+      l.add_action((ATerm) lab,(ATisEmpty(ATLgetArgument(lab,0))==true)?true:false);
     }
 
     l.add_transition(transition((size_t) from,
@@ -181,9 +181,9 @@ static void add_extra_mcrl2_lts_data(
   }
 
   ATerm arg1 = (ATerm)(has_data_spec?data_spec:gsMakeNil());
-  ATerm arg2 = (ATerm)(has_params?ATmakeAppl1(ATmakeAFun("ParamSpec",1,ATfalse),(ATerm) params):gsMakeNil());
+  ATerm arg2 = (ATerm)(has_params?ATmakeAppl1(ATmakeAFun("ParamSpec",1,false),(ATerm) params):gsMakeNil());
   ATerm arg3 = (ATerm)(has_act_labels?core::detail::gsMakeActSpec(act_labels):gsMakeNil());
-  ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,ATfalse),arg1,arg2,arg3);
+  ATerm data = (ATerm) ATmakeAppl3(ATmakeAFun("mCRL2LTS1",3,false),arg1,arg2,arg3);
 
   /* From the remarks on MSDN:
    *
@@ -212,7 +212,7 @@ static void add_extra_mcrl2_lts_data(
     return;
   }
 
-  if (ATwriteToBinaryFile(data,f) == ATfalse)
+  if (ATwriteToBinaryFile(data,f) == false)
   {
     fclose(f);
     throw mcrl2::runtime_error("Error writing extra LTS information to '" + filename +

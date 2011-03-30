@@ -3050,7 +3050,7 @@ bool gsHasConsistentContext(const ATermTable DataVarDecls,
       if (CorVarDecl != NULL)
       {
         //check consistency of VarDecl with CorVarDecl
-        Result = (ATisEqual(VarDecl, CorVarDecl) == ATtrue);
+        Result = (ATisEqual(VarDecl, CorVarDecl) == true);
       }
     }
   }

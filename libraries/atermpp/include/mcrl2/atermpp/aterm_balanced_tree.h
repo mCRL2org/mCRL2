@@ -283,7 +283,7 @@ class term_balanced_tree: public aterm_base
     /// \return True if the list is empty.
     bool empty() const
     {
-      return ATisEmpty(term()) == ATtrue;
+      return ATisEmpty(term()) == true;
     }
 
     /// \brief Conversion to ATermList.
@@ -434,7 +434,7 @@ struct aterm_traits<term_balanced_tree<Term> >
 template <typename Term>
 bool operator==(const term_balanced_tree<Term>& x, const term_balanced_tree<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == ATtrue;
+  return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == true;
 }
 
 /// \brief Inequality operator.
@@ -444,7 +444,7 @@ bool operator==(const term_balanced_tree<Term>& x, const term_balanced_tree<Term
 template <typename Term>
 bool operator!=(const term_balanced_tree<Term>& x, const term_balanced_tree<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == ATfalse;
+  return ATisEqual(aterm_traits<term_balanced_tree<Term> >::term(x), aterm_traits<term_balanced_tree<Term> >::term(y)) == false;
 }
 
 } // namespace atermpp

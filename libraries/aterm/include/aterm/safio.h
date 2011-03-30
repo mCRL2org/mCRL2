@@ -117,7 +117,7 @@ namespace aterm
     size_t tempBytesSize;
     size_t tempBytesIndex;
     size_t tempArity;
-    ATbool tempIsQuoted;
+    bool tempIsQuoted;
 
     int isDone;
   }* BinaryReader;

@@ -59,7 +59,7 @@ namespace core
 #else
 # define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
   MCRL2_ATERM_INIT_(argc, argv, argv)\
-  ATsetChecking(ATtrue);
+  ATsetChecking(true);
 #endif
 /// MCRL2_ATERM_INIT_VERBOSE(argc, argv) initialises the ATerm library with
 /// MCRL2_ATERM_INIT(argc,argv) and activates additional messages

@@ -231,7 +231,7 @@ class AM_Jitty: public ATerm_Manipulator
     virtual ATerm make_if_then_else(ATerm a_expr, ATerm a_high, ATerm a_low)
     {
       return (ATerm) ATmakeAppl4(
-               ATmakeAFun("@REWR@", 4, ATfalse), f_if_then_else, a_expr, a_high, a_low);
+               ATmakeAFun("@REWR@", 4, false), f_if_then_else, a_expr, a_high, a_low);
     }
 
   public:

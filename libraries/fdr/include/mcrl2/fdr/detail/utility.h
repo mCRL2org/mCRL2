@@ -32,7 +32,7 @@ namespace detail
 inline
 ATermAppl gsString2ATermAppl(const char* s)
 {
-  return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
+  return ATmakeAppl0(ATmakeAFun(s, 0, true));
 }
 
 // checks
