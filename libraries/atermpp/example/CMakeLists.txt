@@ -15,7 +15,7 @@ set(PREFIX "example_atermpp")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/aterm/)
 
 ##---------------------------------------------------
 ## Example std_container 
@@ -29,7 +29,7 @@ add_executable("${PROJECT_NAME}"
 )
 
 target_link_libraries(${PROJECT_NAME}
-   aterm 
+   mcrl2_aterm 
 )
 
 ##---------------------------------------------------
@@ -44,5 +44,5 @@ add_executable("${PROJECT_NAME}"
 )
 
 target_link_libraries(${PROJECT_NAME}
-   aterm 
+   mcrl2_aterm 
 )

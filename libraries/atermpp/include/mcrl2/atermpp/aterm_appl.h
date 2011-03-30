@@ -147,7 +147,7 @@ class term_appl: public aterm_base
     /// \return The result of the assignment.
     term_appl<Term>& operator=(ATermAppl t)
     {
-      assert(t==NULL || ATgetType(t) != AT_FREE);
+      assert(t==NULL || ATgetType((ATerm)t) != AT_FREE);
       m_term = reinterpret_cast<ATerm>(t);
       return *this;
     }
@@ -319,7 +319,7 @@ bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
 template <typename Term>
 bool operator==(const term_appl<Term>& x, ATermAppl y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATtrue;
+  return ATisEqual((ATermAppl)aterm_traits<term_appl<Term> >::term(x), y) == ATtrue;
 }
 
 /// \brief Equality operator.
@@ -329,7 +329,7 @@ bool operator==(const term_appl<Term>& x, ATermAppl y)
 template <typename Term>
 bool operator==(ATermAppl x, const term_appl<Term>& y)
 {
-  return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
+  return ATisEqual(x, (ATermAppl)aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
 }
 
 /// \brief Inequality operator.

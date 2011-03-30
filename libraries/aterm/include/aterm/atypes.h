@@ -1,0 +1,86 @@
+#ifndef ATYPES_H
+#define ATYPES_H
+
+#include "stddef.h"
+#include "abool.h"
+
+namespace aterm
+{
+
+#ifndef AT_64BIT
+/* Covers gcc, icc, msvc and Solaris cc */
+# if defined(__LP64__) || defined(_LP64) || defined(__lp64) || \
+     defined(_ADDR64) || defined(__arch64__) || defined(_M_X64) || \
+   defined(_M_IA64) || defined(WIN64)
+#  define AT_64BIT
+# endif
+#endif
+
+  typedef size_t ShortHashNumber;
+  typedef size_t MachineWord;
+  typedef size_t HashNumber;
+
+  /* The largest size_t is used as an indicator that an element does not exist.
+   *    This is used as a replacement of a negative number as an indicator of non
+   *       existence */
+
+  /*  #define NON_EXISTING (size_t)(-1) */
+  static const size_t ATERM_NON_EXISTING_POSITION=(size_t)(-1);
+
+  /* Avoid warnings under windows, by renaming all strdup's into _strdup's,
+     and renaming the _strdup into strdup under other platforms than windows.
+     Furthermore, ssize_t is not defined on windows. */
+#if defined(_MSC_VER) || defined(WIN32) || defined(WIN64)
+#if defined(ssize_t)
+#else
+#ifndef HAVE_SSIZE_T
+#if defined(WIN64) ||  defined(_WIN64) ||  defined(__WIN64__)
+  /* int64 is not supported by all GCC */
+  typedef __int64 ssize_t;
+#else
+#ifndef __MINGW32__
+  typedef int ssize_t;
+#endif
+#endif
+  /* prevent ssize_t redefinitions in other libraries */
+#define HAVE_SSIZE_T
+#endif
+
+#endif
+#else
+#define _strdup strdup
+#endif
+
+#ifdef AT_64BIT
+
+inline
+ShortHashNumber ADDR_TO_SHORT_HNR(void* a)
+{
+  return (ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^ (((MachineWord)(a)) >> 34));
+}
+
+#else
+
+inline
+ShortHashNumber ADDR_TO_SHORT_HNR(void* a)
+{
+  return ((ShortHashNumber)(a)) >> 2;
+}
+#endif // AT_64BIT
+
+//#define ADDR_TO_SHORT_HNR(a) ((ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^ (((MachineWord)(a)) >> 34)))
+//#else
+//#define ADDR_TO_SHORT_HNR(a) (((ShortHashNumber)(a)) >> 2)
+//#endif /* AT_64BIT */
+
+inline
+HashNumber ADDR_TO_HNR(void* a)
+{
+  return ((HashNumber)(a)) >> 2;
+}
+
+//#define ADDR_TO_HNR(a) (((HashNumber)(a)) >> 2)
+
+} // namespace aterm
+
+#endif /* ATYPES_H */

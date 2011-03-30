@@ -18,6 +18,8 @@
 #include "aterm2.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 
+using namespace aterm;
+
 /// \brief The main namespace for the ATerm++ library.
 namespace atermpp
 {
@@ -84,6 +86,7 @@ class aterm_base
     aterm_base(ATermAppl term)
       : m_term(reinterpret_cast<ATerm>(term))
     {
+      assert((term == NULL) || (ATgetType(term)!= AT_FREE));
       assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
     }
 
@@ -112,7 +115,7 @@ class aterm_base
     /// Result is one of AT_APPL, AT_INT,
     /// AT_REAL, AT_LIST, AT_PLACEHOLDER, or AT_BLOB.
     /// \return The type of the term.
-    int type() const
+    size_t type() const
     {
       return ATgetType(m_term);
     }

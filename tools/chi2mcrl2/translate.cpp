@@ -24,6 +24,8 @@
 #include "libstruct_core.h"
 #include <limits.h>
 
+#include "mcrl2/core/aterm_ext.h"
+
 using namespace mcrl2::core;
 using namespace std;
 
@@ -295,7 +297,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
 
   //Manipulate the process variables declared in the definition
   vector<RPV> DeclaredProcessDefinitionRPV;
-  DeclaredProcessDefinition = manipulateDeclaredProcessDefinition((ATermAppl) ATgetArgument(input, 1));
+  DeclaredProcessDefinition = manipulateDeclaredProcessDefinition(ATAgetArgument(input, 1));
   //Empty Initial value is added:: RVT --> RPV
   for (itRVT = DeclaredProcessDefinition.first.begin(); itRVT != DeclaredProcessDefinition.first.end(); itRVT++)
   {
@@ -309,7 +311,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
   ProcessChannelMap = DeclaredProcessDefinition.second;
 
   //Manipulate the procees variables declared and the statements in the specification
-  ProcessSpecification = manipulateProcessSpecification((ATermAppl) ATgetArgument(input, 2));
+  ProcessSpecification = manipulateProcessSpecification(ATAgetArgument(input, 2));
   for (itRPV = ProcessSpecification.first.begin(); itRPV != ProcessSpecification.first.end(); itRPV++)
   {
     ProcessVariableMap.push_back(*itRPV);
@@ -1064,7 +1066,7 @@ pair< vector<RVT>, vector<RPC> > CAsttransform::manipulateDeclaredProcessDefinit
   // INPUT: ProcDecl( ... )
   // Arity is 1 because VarDecl the argument is of the form list*
 
-  if ATisEmpty(input)
+  if (false /*ATisEmpty(input)*/) // XXX Fixme: was never true
   {
     gsDebugMsg("No variables/channels are declare in the process definition");
     return make_pair(result_var, result_chan);
@@ -1072,7 +1074,7 @@ pair< vector<RVT>, vector<RPC> > CAsttransform::manipulateDeclaredProcessDefinit
   else
   {
     //Get first argument
-    ATermList to_process = (ATermList) ATgetArgument(input, 0);
+    ATermList to_process = ATLgetArgument(input, 0);
     while (!ATisEmpty(to_process))
     {
       if (StrcmpIsFun("VarDecl", (ATermAppl) ATgetFirst(to_process)))
@@ -1099,7 +1101,7 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariables(ATermList inp
   gsDebugMsg("input of manipulateDeclaredProcessVariables: %T\n", input);
   // INPUT: VarDecl( ... ),VarDecl( ... ),...
 
-  ATermList to_process = (ATermList) ATgetArgument(input, 0);
+  ATermList to_process = (ATermList) ATLgetFirst(input);
   while (!ATisEmpty(to_process))
   {
     ATerm element = ATgetFirst(to_process);
@@ -1128,7 +1130,7 @@ std::vector<RPC> CAsttransform::manipulateDeclaredProcessChannels(ATermList inpu
   gsDebugMsg("input of manipulateDeclaredProcessChannels: %T\n", input);
   // INPUT: ChanDecl( ... ),...
 
-  ATermList to_process = (ATermList) ATgetArgument(input, 0);
+  ATermList to_process = (ATermList) ATLgetFirst(input);
   while (!ATisEmpty(to_process))
   {
     ATerm element = ATgetFirst(to_process);
@@ -1194,7 +1196,7 @@ pair< std::vector<RPV>, std::vector<RPC> > CAsttransform::manipulateProcessSpeci
   std::vector<RPV> tmpRPV;
   std::vector<RPC> tmpRPC;
 
-  if ATisEmpty(input)
+  if (false /* ATisEmpty(input) */) // XXX Fixme. was never true
   {
     gsDebugMsg("No variables/channels are declare in the process definition");
     return make_pair(result_var, result_chan);
@@ -1202,7 +1204,7 @@ pair< std::vector<RPV>, std::vector<RPC> > CAsttransform::manipulateProcessSpeci
   else
   {
     //Get first argument
-    ATermList to_process = (ATermList) ATgetArgument(input, 0);
+    ATermList to_process = ATLgetArgument(input, 0);
     while (!ATisEmpty(to_process))
     {
       if (StrcmpIsFun("VarSpec", (ATermAppl) ATgetFirst(to_process)))
@@ -1232,7 +1234,7 @@ pair< std::vector<RPV>, std::vector<RPC> > CAsttransform::manipulateProcessSpeci
     parenthesis_level = 0;
     begin_state[parenthesis_level] = state;
 
-    manipulateStatements((ATermAppl) ATgetArgument(input, 1));
+    manipulateStatements((ATermAppl) ATAgetArgument(input, 1));
   }
 
   return make_pair(result_var, result_chan);
@@ -1444,14 +1446,14 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
   // INPUT: ProcDecl( ... )
   // Arity is 1 because VarDecl the argument is of the form list*
 
-  if ATisEmpty(input)
+  if (ATisEmpty(input))
   {
     gsDebugMsg("No variables/channels are declare in the process definition");
     return result;
   }
   else
   {
-    ATermList to_process = (ATermList) ATgetArgument(input, 0);
+    ATermList to_process = (ATermList) ATLgetFirst(input);
     while (!ATisEmpty(to_process))
     {
       ATerm element = ATgetFirst(to_process);

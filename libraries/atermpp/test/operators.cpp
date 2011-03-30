@@ -30,7 +30,7 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  aterm t      = make_term("[1,2]");
+  atermpp::aterm t      = make_term("[1,2]");
   aterm_appl a = make_term("f(x)");
   aterm_list l = make_term("[3]");
   ATerm T      = t;
@@ -101,7 +101,7 @@ int test_main(int argc, char* argv[])
   b = L < l;
 
   // set
-  set<aterm> st;
+  set<atermpp::aterm> st;
   set<aterm_appl> sa;
   set<aterm_list> sl;
   set<ATerm> sT;

@@ -13,6 +13,7 @@
 #define MANIPULATOR_H
 
 #include "mcrl2/data/detail/prover/info.h"
+#include "mcrl2/core/aterm_ext.h"
 
 namespace mcrl2
 {

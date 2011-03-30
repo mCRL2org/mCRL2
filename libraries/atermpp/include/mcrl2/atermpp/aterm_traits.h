@@ -17,6 +17,9 @@
 
 #include "aterm2.h"
 
+// XXX Remove
+using namespace aterm;
+
 namespace atermpp
 {
 

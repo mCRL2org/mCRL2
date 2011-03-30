@@ -25,10 +25,6 @@
 #ifndef _SVC1_H
 #define _SVC1_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "aterm1.h"
 
 #include "compress.h"
@@ -83,7 +79,7 @@ extern "C" {
 
   struct ltsTransition
   {
-    ATerm fromState,    /* label of source state */
+    aterm::ATerm fromState,    /* label of source state */
           toState,      /* label of destination state */
           label,        /* label of transition */
           parameters;   /* parameters of the transition */
@@ -101,9 +97,5 @@ extern "C" {
   int svcWriteTrailer(ltsFile*);
   int svcFree(ltsFile*);
   char* svcError(int errnum);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

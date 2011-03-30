@@ -41,10 +41,10 @@ void test_indexed_set()
   BOOST_CHECK(t.index(make_term("a")) == 0);
   BOOST_CHECK(t.index(make_term("b")) == 1);
 
-  aterm a = t.get(0);
+  atermpp::aterm a = t.get(0);
   BOOST_CHECK(a == make_term("a"));
 
-  aterm b = t.get(1);
+  atermpp::aterm b = t.get(1);
   BOOST_CHECK(b == make_term("b"));
 
   t.remove(a);

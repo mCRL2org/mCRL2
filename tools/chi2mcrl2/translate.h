@@ -32,6 +32,9 @@
 #define RPC RecProcessChannels
 #define RC  RecChannel
 
+// XXX Remove
+using namespace aterm;
+
 struct t_options
 {
   std::string infilename;

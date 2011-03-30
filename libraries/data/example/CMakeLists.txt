@@ -17,7 +17,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include/ )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/aterm/)
 
 ##---------------------------------------------------
 ## Example ABC 

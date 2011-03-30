@@ -28,6 +28,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/function_update.h"
 
+using namespace aterm;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
@@ -50,9 +51,9 @@ extern ATermIndexedSet mcrl2_parser_protect_table;
 %}
 
 %union {
-  ATerm term;
-  ATermAppl appl;
-  ATermList list;
+  aterm::ATerm term;
+  aterm::ATermAppl appl;
+  aterm::ATermList list;
 };
 
 //generate a GLR parser

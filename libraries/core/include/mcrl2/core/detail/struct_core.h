@@ -19,6 +19,8 @@
 #include <ctype.h>
 #include <assert.h>
 
+// XXX remove
+using namespace aterm;
 
 namespace mcrl2
 {

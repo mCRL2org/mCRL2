@@ -27,7 +27,7 @@ namespace core
   * \return The parsed identifier, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_identifier(std::istream& se_stream);
+aterm::ATermAppl parse_identifier(std::istream& se_stream);
 
 
 /** \brief  Parse an mCRL2 sort expression.
@@ -36,7 +36,7 @@ ATermAppl parse_identifier(std::istream& se_stream);
   * \return The parsed sort expression, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_sort_expr(std::istream& se_stream);
+aterm::ATermAppl parse_sort_expr(std::istream& se_stream);
 
 
 /** \brief  Parse an mCRL2 data expression.
@@ -45,7 +45,7 @@ ATermAppl parse_sort_expr(std::istream& se_stream);
   * \return The parsed data expression, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_data_expr(std::istream& de_stream);
+aterm::ATermAppl parse_data_expr(std::istream& de_stream);
 
 
 /** \brief  Parse an mCRL2 data specification.
@@ -54,7 +54,7 @@ ATermAppl parse_data_expr(std::istream& de_stream);
   * \return The parsed data specification, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_data_spec(std::istream& ps_stream);
+aterm::ATermAppl parse_data_spec(std::istream& ps_stream);
 
 
 /** \brief  Parse an mCRL2 multiaction.
@@ -63,7 +63,7 @@ ATermAppl parse_data_spec(std::istream& ps_stream);
   * \return The parsed multiaction, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_mult_act(std::istream& ma_stream);
+aterm::ATermAppl parse_mult_act(std::istream& ma_stream);
 
 
 /** \brief  Parse an mCRL2 process expression.
@@ -72,7 +72,7 @@ ATermAppl parse_mult_act(std::istream& ma_stream);
   * \return The parsed process expression, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_proc_expr(std::istream& pe_stream);
+aterm::ATermAppl parse_proc_expr(std::istream& pe_stream);
 
 
 /** \brief  Parse an mCRL2 process specification.
@@ -82,7 +82,7 @@ ATermAppl parse_proc_expr(std::istream& pe_stream);
   * \return the parsed process specification, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_proc_spec(std::istream& ps_stream);
+aterm::ATermAppl parse_proc_spec(std::istream& ps_stream);
 
 
 /** \brief  Parse an mCRL2 state formula.
@@ -91,7 +91,7 @@ ATermAppl parse_proc_spec(std::istream& ps_stream);
   * \return The parsed state formula, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_state_frm(std::istream& sf_stream);
+aterm::ATermAppl parse_state_frm(std::istream& sf_stream);
 
 
 /** \brief  Parse an mCRL2 action rename specification.
@@ -101,7 +101,7 @@ ATermAppl parse_state_frm(std::istream& sf_stream);
   * \return The parsed rename rule file, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_action_rename_spec(std::istream& sf_stream);
+aterm::ATermAppl parse_action_rename_spec(std::istream& sf_stream);
 
 
 /** \brief  Parse an mCRL2 parameterised boolean equation system (PBES)
@@ -112,7 +112,7 @@ ATermAppl parse_action_rename_spec(std::istream& sf_stream);
   * \return The parsed PBES specification, if everything went well;
   *         NULL, otherwise.
 **/
-ATermAppl parse_pbes_spec(std::istream& pbes_spec_stream);
+aterm::ATermAppl parse_pbes_spec(std::istream& pbes_spec_stream);
 
 
 /** \brief  Parse mCRL2 data variables, according to the syntax of
@@ -123,7 +123,7 @@ ATermAppl parse_pbes_spec(std::istream& pbes_spec_stream);
   * \return The parsed list of data variables, if everything went well;
   *         NULL, otherwise.
 **/
-ATermList parse_data_vars(std::istream& sf_stream);
+aterm::ATermList parse_data_vars(std::istream& sf_stream);
 
 /** \brief  Returns wheter s is a valid user identifier
  *  \param[in] s An input string

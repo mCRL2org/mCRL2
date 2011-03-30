@@ -16,10 +16,12 @@
 #include <cerrno>
 #include "aterm1.h"
 #include <cassert>
-extern "C" {
+
 #include "svc/svcerrno.h"
 #include "svc/svc.h"
-}
+
+using namespace aterm;
+
 #define EXIT_OK 0
 #define EXIT_NOTOK 1
 #define EXIT_ERR_ARGS -1

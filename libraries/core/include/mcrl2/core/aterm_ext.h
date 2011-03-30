@@ -16,6 +16,9 @@
 #include <cassert>
 #include <aterm2.h>
 
+// XXX Remove
+using namespace aterm;
+
 namespace mcrl2
 {
 namespace core
@@ -191,66 +194,6 @@ inline ATermList ATLtableGet(ATermTable Table, ATerm Key)
   assert(ATisListOrNull(Result));
   return (ATermList) Result;
 }
-
-#ifndef ATprotectAppl
-/**
- * \brief Convenience function for protection of AtermAppl objects
- **/
-inline void ATprotectAppl(ATermAppl* PAppl)
-{
-  ATprotect((ATerm*) PAppl);
-}
-#endif
-
-#ifndef ATprotectList
-/**
- * \brief Convenience function for protection of AtermList objects
- **/
-inline void ATprotectList(ATermList* PList)
-{
-  ATprotect((ATerm*) PList);
-}
-#endif
-
-#ifndef ATprotectInt
-/**
- * \brief Convenience function for protection of AtermInt objects
- **/
-inline void ATprotectInt(ATermInt* PInt)
-{
-  ATprotect((ATerm*) PInt);
-}
-#endif
-
-#ifndef ATunprotectAppl
-/**
- * \brief Convenience function for unprotection of AtermAppl objects
- **/
-inline void ATunprotectAppl(ATermAppl* PAppl)
-{
-  ATunprotect((ATerm*) PAppl);
-}
-#endif
-
-#ifndef ATunprotectList
-/**
- * \brief Convenience function for unprotection of AtermList objects
- **/
-inline void ATunprotectList(ATermList* PList)
-{
-  ATunprotect((ATerm*) PList);
-}
-#endif
-
-#ifndef ATunprotectInt
-/**
- * \brief Convenience function for unprotection of AtermInt objects
- **/
-inline void ATunprotectInt(ATermInt* PInt)
-{
-  ATunprotect((ATerm*) PInt);
-}
-#endif
 
 //Substitutions on ATerm's
 //------------------------

@@ -23,20 +23,13 @@ using namespace atermpp;
 
 void test_aterm()
 {
-  aterm a = make_term("f(x)");
-  aterm label = make_term("label");
-  /* Annotations have been removed.
-  aterm annotation = make_term("annotation");
-  aterm b = set_annotation(a, label, annotation);
-  BOOST_CHECK(a != b);
-  aterm c = remove_annotation(b, label);
-  BOOST_CHECK(a == c);
-  */
+  atermpp::aterm a = make_term("f(x)");
+  atermpp::aterm label = make_term("label");
 
-  aterm d = aterm_int(10);
+  atermpp::aterm d = aterm_int(10);
   BOOST_CHECK(aterm_int(d).value() == 10);
 
-  aterm e = aterm();
+  atermpp::aterm e = atermpp::aterm();
   BOOST_CHECK(!e);
 }
 

@@ -24,7 +24,7 @@ namespace core
 inline void garbage_collect()
 {
 #ifdef MCRL2_WITH_GARBAGE_COLLECTION
-  AT_collect();
+  aterm::AT_collect();
 #endif
 }
 

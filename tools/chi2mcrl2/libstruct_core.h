@@ -18,6 +18,9 @@
 #include <string.h>
 #include <ctype.h>
 
+// XXX Remove
+using namespace aterm;
+
 //Global precondition: the ATerm library has been initialised
 
 //--- begin generated code

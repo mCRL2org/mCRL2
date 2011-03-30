@@ -23,10 +23,6 @@
 #ifndef __LZ_H
 #define __LZ_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "aterm1.h"
 #include "code.h"
 
@@ -46,15 +42,12 @@ extern "C" {
 
 
   void LZinit(LZbuffer* buffer);
-  int LZwriteATerm(BitStream* fp, LZbuffer* buffer, ATerm term);
-  int LZreadATerm(BitStream* fp, LZbuffer* buffer, ATerm* term);
+  int LZwriteATerm(BitStream* fp, LZbuffer* buffer, aterm::ATerm term);
+  int LZreadATerm(BitStream* fp, LZbuffer* buffer, aterm::ATerm* term);
   int LZwriteString(BitStream* fp, LZbuffer* buffer, char* str);
   int LZreadString(BitStream* fp, LZbuffer* buffer, char** str);
   int LZwriteInt(BitStream* fp, LZbuffer* buffer, long n);
   int LZreadInt(BitStream* fp, LZbuffer* buffer, long* n);
 
-#ifdef __cplusplus
-}
-#endif
 
 #endif

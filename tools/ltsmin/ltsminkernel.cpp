@@ -10,6 +10,8 @@
 
 #include "ltsmin.h"
 
+using namespace aterm;
+
 static ATbool RefineBranching(int action, int splitter);
 
 static ATbool branching = ATfalse;

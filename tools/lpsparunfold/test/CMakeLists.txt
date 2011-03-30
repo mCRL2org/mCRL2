@@ -21,7 +21,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/tools/lpsparunfold/test)
 
 file(GLOB TERM_OBJS "*.cpp")

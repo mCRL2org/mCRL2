@@ -35,6 +35,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace std;
+using namespace aterm;
 
 using namespace mcrl2;
 using utilities::tools::input_output_tool;

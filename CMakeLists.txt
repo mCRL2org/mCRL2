@@ -697,7 +697,7 @@ endif(MCRL2_ENABLE_CADP_SUPPORT)
 ## 3rd party dependencies
 ##---------------------------------------------------
 
-add_subdirectory ( 3rd-party/aterm )
+add_subdirectory ( libraries/aterm )
 add_subdirectory ( 3rd-party/svc )
 if(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( 3rd-party/tr)
@@ -880,7 +880,7 @@ message(STATUS "MCRL2_INSTALL_HEADERS: ${MCRL2_INSTALL_HEADERS}" )
 if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
-    3rd-party/aterm/include/
+    libraries/aterm/include/
     libraries/atermpp/include/
     libraries/core/include/
     libraries/data/include/

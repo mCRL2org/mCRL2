@@ -83,12 +83,12 @@ struct normalize_builder: public pbes_expression_builder<normalize_builder>
     return negated ? data::sort_bool::not_(x) : x;
   }
 
-  pbes_expression operator()(const true_& x)
+  pbes_expression operator()(const true_&)
   {
     return negated ? tr::false_() : tr::true_();
   }
 
-  pbes_expression operator()(const false_& x)
+  pbes_expression operator()(const false_&)
   {
     return negated ? tr::true_() : tr::false_();
   }

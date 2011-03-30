@@ -25,10 +25,6 @@
 #ifndef _SVC_H
 #define _SVC_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "aterm1.h"
 #include "svc1.h"
 
@@ -50,21 +46,21 @@ extern "C" {
 
   /* Datatype 'SVClabel' */
 
-  SVClabelIndex SVCnewLabel(SVCfile*, ATerm, SVCbool*);
-  SVClabelIndex SVCaterm2Label(SVCfile*, ATerm);
-  ATerm SVClabel2ATerm(SVCfile*, SVClabelIndex);
+  SVClabelIndex SVCnewLabel(SVCfile*, aterm::ATerm, SVCbool*);
+  SVClabelIndex SVCaterm2Label(SVCfile*, aterm::ATerm);
+  aterm::ATerm SVClabel2ATerm(SVCfile*, SVClabelIndex);
 
   /* Datatype 'SVCstate' */
 
-  SVCstateIndex SVCnewState(SVCfile*, ATerm, SVCbool*);
-  SVCstateIndex SVCaterm2State(SVCfile*, ATerm);
-  ATerm SVCstate2ATerm(SVCfile*, SVCstateIndex);
+  SVCstateIndex SVCnewState(SVCfile*, aterm::ATerm, SVCbool*);
+  SVCstateIndex SVCaterm2State(SVCfile*, aterm::ATerm);
+  aterm::ATerm SVCstate2ATerm(SVCfile*, SVCstateIndex);
 
   /* Datatype 'SVCparameter' */
 
-  SVCparameterIndex SVCnewParameter(SVCfile*, ATerm, SVCbool*);
-  SVCparameterIndex SVCaterm2Parameter(SVCfile*, ATerm);
-  ATerm SVCparameter2ATerm(SVCfile*, SVCparameterIndex);
+  SVCparameterIndex SVCnewParameter(SVCfile*, aterm::ATerm, SVCbool*);
+  SVCparameterIndex SVCaterm2Parameter(SVCfile*, aterm::ATerm);
+  aterm::ATerm SVCparameter2ATerm(SVCfile*, SVCparameterIndex);
 
   /* Datatype 'SVCTransition' */
 
@@ -102,9 +98,5 @@ extern "C" {
   SVCint SVCnumTransitions(SVCfile*);
 
   char* SVCerror(int);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

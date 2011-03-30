@@ -177,7 +177,7 @@ class term_list: public aterm_base
     /// \param t A term containing a list.
     term_list<Term>& operator=(ATermList t)
     {
-      assert(ATgetType(t) == AT_LIST);
+      assert(ATgetType((ATerm)t) == AT_LIST);
       m_term = reinterpret_cast<ATerm>(t);
       return *this;
     }

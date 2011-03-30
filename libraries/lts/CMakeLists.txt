@@ -21,7 +21,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/aterm)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 
 
@@ -57,9 +57,10 @@ add_library(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
+  mcrl2_aterm
+  svc
   mcrl2_data
   mcrl2_lps
-  svc
 )
 
 if( USE_BCG STREQUAL "" )

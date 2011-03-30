@@ -62,65 +62,6 @@ static data_expression negate_inequality(const data_expression e)
   }
 }
 
-/// \brief Split constant and variable parts of a data expression
-/// \param e A data expression of the form c1 * x1 + ... + cn * xn + d1 + ... +
-///          dm, where ci and di are constants and xi are variables. Constants
-///          and variables may occur mixed.
-/// \ret The pair (c1 * x1 + ... + cn * xn, d1 + ... + dm)
-/* static
-std::pair<data_expression, data_expression> split_variables_and_constants(const data_expression& e)
-{
-  // gsDebugMsg("Splitting constants and variables in %P\n", (ATermAppl)e);
-  std::pair<data_expression, data_expression> result;
-  if(sort_real::is_plus_application(e))
-  {
-    std::pair<data_expression, data_expression> left = split_variables_and_constants(application(e).left());
-    std::pair<data_expression, data_expression> right = split_variables_and_constants(application(e).right());
-    result = std::make_pair(sort_real::plus(left.first, right.first), sort_real::plus(left.second, right.second));
-  }
-  else if (sort_real::is_minus_application(e))
-  {
-    std::pair<data_expression, data_expression> left = split_variables_and_constants(application(e).left());
-    std::pair<data_expression, data_expression> right = split_variables_and_constants(application(e).right());
-    result = std::make_pair(sort_real::plus(left.first, sort_real::negate(right.first)), sort_real::plus(left.second, sort_real::negate(right.second)));
-  }
-  else if (sort_real::is_negate_application(e))
-  {
-    data_expression argument = *static_cast<const data_application&>(e).arguments().begin();
-    if(sort_real::is_plus_application(argument))
-    {
-      result = split_variables_and_constants(sort_real::plus(sort_real::is_negate_application(application(argument).left), sort_real::is_negate_application(application(argument).right())));
-    }
-    else if(sort_real::is_minus_application(argument))
-    {
-      result = split_variables_and_constants(sort_real::plus(sort_real::is_negate_application(application(argument).left), application(argument).right()));
-    }
-    else if(is_number(argument))
-    {
-      result = std::make_pair(real_zero(), e);
-    }
-    else
-    {
-      result = std::make_pair(e, real_zero());
-    }
-  }
-  else if (mcrl2::data::sort_real::is_creal(e) && !is_number(*static_cast<const data_application&>(e).arguments().begin()))
-  {
-    result = std::make_pair(e, real_zero());
-  }
-  else if (is_multiplies(e) || is_variable(e))
-  {
-    result = std::make_pair(e, real_zero());
-  }
-  else
-  {
-    assert(is_number(e));
-    result = std::make_pair(real_zero(), e);
-  }
-  // gsDebugMsg("split version: left = %P, right = %P\n", (ATermAppl)result.first, (ATermAppl)result.second);
-  return result;
-} */
-
 /// \brief Returns a list of all real variables in l
 /// \param l a list of data variables
 /// \ret The list of all v in l such that v.sort() == real()
@@ -157,7 +98,7 @@ variable_list get_nonreal_variables(const variable_list& l)
 
 static data::function_symbol& negate_function_symbol(const sort_expression s)
 {
-  static data::function_symbol f("negate",data::make_function_sort(s,s));
+  static data::function_symbol f = initialise_static_expression(f,data::function_symbol("negate",data::make_function_sort(s,s)));
   assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
   return f;
 }
