@@ -142,7 +142,7 @@ inline size_t ADDR_TO_BLOCK_IDX(void* a)
   }
 //#define AT_isPotentialTerm(term) (min_heap_address <= (header_type*)(term) && (header_type*)(term) <= max_heap_address)
 
-  void AT_initMemory(unsigned int argc, char** argv);
+  void AT_initMemory(int argc, char** argv);
   void AT_cleanupMemory();
   HashNumber AT_hashnumber(ATerm t);
   ATerm AT_allocate(size_t size);
