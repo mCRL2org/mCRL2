@@ -76,8 +76,7 @@ namespace aterm
   inline
   bool AT_isValidAFun(const ATerm sym)
   {
-    return ((AFun)sym != (AFun)(-1) && (MachineWord)(AFun)sym < AT_symbolTableSize()
-                                  && !SYM_IS_FREE(at_lookup_table[(AFun)sym]));
+    return AT_isValidAFun((AFun)sym);
   }
 
   inline

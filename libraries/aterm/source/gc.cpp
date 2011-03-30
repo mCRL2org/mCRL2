@@ -216,7 +216,6 @@ void ATmarkArray(ATerm* start, size_t size)
 VOIDCDECL mark_phase()
 {
   size_t i,j;
-  size_t stack_size;
   ATerm* stackTop;
   ATerm* start, *stop;
   ProtEntry* prot;
@@ -305,8 +304,6 @@ VOIDCDECL mark_phase()
   start = MIN(stackTop, stackBot);
   stop  = MAX(stackTop, stackBot);
 
-  stack_size = stop-start;
-
   mark_memory(start, stop,true);
 
   /* Traverse protected terms */
@@ -361,7 +358,6 @@ VOIDCDECL mark_phase()
 VOIDCDECL mark_phase_young()
 {
   size_t i,j;
-  size_t stack_size;
   ATerm* stackTop;
   ATerm* start, *stop;
   ProtEntry* prot;
@@ -443,8 +439,6 @@ VOIDCDECL mark_phase_young()
   stackTop = stack_top();
   start = MIN(stackTop, stackBot);
   stop  = MAX(stackTop, stackBot);
-
-  stack_size = stop-start;
 
   mark_memory_young(start, stop, true);
 

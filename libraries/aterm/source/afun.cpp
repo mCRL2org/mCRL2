@@ -16,8 +16,6 @@ namespace aterm
 
 static const size_t INITIAL_AFUN_TABLE_CLASS = 14;
 static const size_t SYMBOL_HASH_SIZE = 65353; /* nextprime(65335) */
-#define MCRL2_SYMBOL_HASH_OPT "-at-symboltable"
-#define MCRL2_AFUN_TABLE_OPT "-at-afuntable"
 
 static const size_t SHIFT_INDEX = 1;
 /* Keep the sign of sym below; Therefore ptrdiff_t is used, instead of size_t. This goes wrong when
@@ -129,31 +127,9 @@ MachineWord AT_symbolTableSize()
 /*}}}  */
 
 /*{{{  void AT_initAFun(int argc, char *argv[]) */
-void AT_initAFun(int argc, char* argv[])
+void AT_initAFun(int, char*)
 {
-  size_t i;
   AFun sym;
-
-  for (i = 1; i < (size_t)argc; i++)
-  {
-    if (streq(argv[i], MCRL2_SYMBOL_HASH_OPT))
-    {
-      ATerror("Option %s is deprecated, use %s instead!\n"
-              "Note that %s uses 2^<arg> as the actual table size.\n",
-              MCRL2_SYMBOL_HASH_OPT, MCRL2_AFUN_TABLE_OPT, MCRL2_AFUN_TABLE_OPT);
-    }
-    else if (streq(argv[i], MCRL2_AFUN_TABLE_OPT))
-    {
-      table_class = atoi(argv[++i]);
-      table_size  = AT_TABLE_SIZE(table_class);
-      table_mask  = AT_TABLE_MASK(table_class);
-    }
-    else if (streq(argv[i], "-at-help"))
-    {
-      fprintf(stderr, "    %-20s: initial afun table class "
-              "(default=%lu)\n",  MCRL2_AFUN_TABLE_OPT " <class>", table_class);
-    }
-  }
 
   hash_table = (SymEntry*) AT_calloc(table_size, sizeof(SymEntry));
   if (hash_table == NULL)

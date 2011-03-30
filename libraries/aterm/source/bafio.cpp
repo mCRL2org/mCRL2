@@ -974,8 +974,6 @@ write_baf(ATerm t, byte_writer* writer)
   size_t nr_symbols = AT_symbolTableSize();
   AFun lcv;
   size_t cur;
-  size_t nr_bits;
-  AFun sym;
 
   /* Initialize bit buffer */
   bit_buffer     = '\0';
@@ -994,8 +992,6 @@ write_baf(ATerm t, byte_writer* writer)
   if (!sym_entries)
     ATerror("write_baf: out of memory (%d unique symbols!\n",
             nr_unique_symbols);
-
-  nr_bits = bit_width(nr_unique_symbols);
 
   /*{{{  Collect all unique symbols in the input term */
 
@@ -1082,7 +1078,6 @@ write_baf(ATerm t, byte_writer* writer)
   }
 
   /* Write the top symbol */
-  sym = get_top_symbol(t)->id;
   if (!writeInt(get_top_symbol(t)-sym_entries, writer))
   {
     return false;

@@ -11,7 +11,6 @@ cmake_minimum_required(VERSION 2.6)
 
 # main target
 add_library(${PROJECT_NAME}
-  source/version.cpp
   source/idmappings.cpp
   source/bafio.cpp
   source/memmgnt.cpp

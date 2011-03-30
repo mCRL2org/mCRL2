@@ -296,14 +296,10 @@ void resize_hashtable()
  * Initialize memory allocation datastructures
  */
 
-void AT_initMemory(unsigned int argc, char* argv[])
+void AT_initMemory(int, char*)
 {
   size_t i;
   HashNumber hnr;
-
-  /* Suppress unused variable warning */
-  (void)argc;
-  (void)argv;
 
   /*{{{  Initialize blocks */
 

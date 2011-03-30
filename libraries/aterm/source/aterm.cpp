@@ -18,7 +18,6 @@
 #include "gc.h"
 #include "util.h"
 #include "bafio.h"
-#include "version.h"
 #include "atypes.h"
 #include "safio.h"
 

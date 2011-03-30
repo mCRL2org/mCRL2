@@ -194,7 +194,7 @@ namespace aterm
   inline
   bool IS_MARKED(const header_type h)
   {
-    return h & MASK_MARK;
+    return (h & MASK_MARK) != (header_type)(0);
   }
 //#define IS_MARKED(h)          ((h) & MASK_MARK)
 
@@ -231,7 +231,7 @@ namespace aterm
   inline
   bool IS_QUOTED(const header_type h)
   {
-    return h & MASK_QUOTED;
+    return (h & MASK_QUOTED) != (header_type)(0);
   }
 //#define IS_QUOTED(h)          (((h) & MASK_QUOTED) ? ATtrue : ATfalse)
 
@@ -313,7 +313,7 @@ namespace aterm
   header_type LIST_HEADER(const size_t len)
   {
     return (AT_LIST << SHIFT_TYPE) |
-        ((MachineWord)(len) << SHIFT_LENGTH) | (2 << SHIFT_ARITY);
+        ((MachineWord)(len) << SHIFT_LENGTH) | ((MachineWord)(2) << SHIFT_ARITY);
   }
 /*
 #define LIST_HEADER(len)     ((AT_LIST << SHIFT_TYPE) | \
