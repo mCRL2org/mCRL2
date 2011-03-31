@@ -128,8 +128,8 @@ void test_ltsmin()
     {
       std::string s = p.print(d, i);
       std::cout << "print(" << d << ", " << i << ") = " << s << std::endl;
-      //std::size_t j = p.parse(d, s);
-      //std::cout << "parse(" << d << ", " << s << ") = " << j << std::endl;
+      std::size_t j = p.parse(d, s);
+      std::cout << "parse(" << d << ", " << s << ") = " << j << std::endl;
     }
   }
   BOOST_CHECK(p.print(0, 0) == "1");
