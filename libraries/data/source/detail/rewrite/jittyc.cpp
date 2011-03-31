@@ -3440,7 +3440,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "    {\n"
           "      char c[10];\n"
           "      sprintf(c,\"appl#%%i\",i+1);\n"
-          "      apples[i] = ATmakeAFun(c,i+1,ATfalse);\n"
+          "      apples[i] = ATmakeAFun(c,i+1,false);\n"
           "      ATprotectAFun(apples[i]);\n"
           "    }\n"
           "  }\n"
@@ -3657,7 +3657,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "void rewrite_init()\n"
           "{\n"
 #ifndef USE_VARAFUN_VALUE
-          "  varAFun = ATmakeAFun(\"DataVarId\", 2, ATfalse);\n"
+          "  varAFun = ATmakeAFun(\"DataVarId\", 2, false);\n"
           "  ATprotectAFun(varAFun);\n"
           "\n"
 #endif
