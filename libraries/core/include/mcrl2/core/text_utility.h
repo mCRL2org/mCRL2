@@ -22,6 +22,18 @@ namespace mcrl2
 
 namespace core
 {
+/// \brief Transform parameter into string.
+/// \param x Some expression
+/// \pre type T has operator <<
+/// \return The string representation of x.
+template <typename T>
+inline
+std::string to_string(const T& x)
+{
+  std::stringstream ss;
+  ss << x;
+  return ss.str();
+}
 
 /// \brief Split a string into paragraphs.
 /// \param text A string

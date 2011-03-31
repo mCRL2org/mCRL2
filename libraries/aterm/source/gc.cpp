@@ -36,7 +36,7 @@ static const size_t TO_YOUNG_RATIO = 25;
 
 extern ATprotected_block protected_blocks;
 
-AFun at_parked_symbol = -1;
+AFun at_parked_symbol = (size_t)-1; // Init
 
 size_t gc_min_number_of_blocks;
 size_t max_freeblocklist_size;

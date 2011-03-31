@@ -69,7 +69,7 @@ namespace core
   MCRL2_ATERM_INIT_(3, debug_args, argv)\
    
 //-------------------------------------------------------------------------
-//For all function below we use the precondition the ATerm library has been
+//For all functions below we use the precondition the ATerm library has been
 //initialised.
 //-------------------------------------------------------------------------
 

@@ -480,7 +480,7 @@ static sym_entry* get_top_symbol(ATerm t)
       break;
     default:
       ATabort("get_top_symbol: illegal term (%n)\n", t);
-      sym = -1;
+      sym = (AFun)-1; // error path...
       break;
   }
 
@@ -658,7 +658,7 @@ static void add_term(sym_entry* entry, ATerm t)
 
 static void collect_terms(ATerm t)
 {
-  AFun sym = -1;
+  AFun sym = (AFun)-1; // Reset on all non-error paths...
   sym_entry* entry;
 
   if (!IS_MARKED(t->header))

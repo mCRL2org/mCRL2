@@ -277,27 +277,7 @@ namespace aterm
   bool ATisInitialized();
 
   /**
-   * Set another handler for warning messages. Basically, this replaces
-   * the default implementation of the ATwarning() function.
-   */
-  void ATsetWarningHandler(void (*handler)(const char* format, va_list args));
-
-  /**
-   * Set another handler for error messages. Basically, this replaces
-   * the default implementation of the ATerror() function.
-   */
-  void ATsetErrorHandler(void (*handler)(const char* format, va_list args));
-
-  /**
-   * Set another handler for fatal error messages. Basically, this replaces
-   * the default implementation of the ATabort() function.
-   */
-  void ATsetAbortHandler(void (*handler)(const char* format, va_list args));
-
-  /**
-   * Prints a message to standard error, using ATfprintf(). If another
-   * handler was set using ATsetWarningHandler(), that function is called
-   * instead.
+   * Prints a message to standard error, using ATfprintf().
    *
    */
   void ATwarning(const char* format, ...);
@@ -305,8 +285,6 @@ namespace aterm
   /**
    * Prints a message to standard error, using ATfprintf(), and then exits
    * the program with return code 1.
-   * If another handler was set using ATsetErrorHandler(),
-   * that function is called instead.
    *
    */
   void ATerror(const char* format, ...);
@@ -314,8 +292,6 @@ namespace aterm
   /**
    * Prints a message to standard error, using ATfprintf(), and then exits
    * the program using the abort() system call which will dump a core file.
-   * If another handler was set using ATsetAbortHandler(),
-   * that function is called instead.
    *
    */
   void ATabort(const char* format, ...);

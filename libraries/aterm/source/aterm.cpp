@@ -59,14 +59,6 @@ char            aterm_id[] = "$Id: aterm.c 24415 2007-12-12 14:20:55Z eriks $";
 /* Flag to tell whether to keep quiet or not. */
 bool low_memory = false;
 
-/* warning_handler is called when a recoverable error is detected */
-static void (*warning_handler)(const char* format, va_list args) = NULL;
-/* error_handler is called when a fatal error is detected */
-static void (*error_handler)(const char* format, va_list args) = NULL;
-/* abort_handler is called when a fatal error is detected that
-   warrants a core being dumped. */
-static void (*abort_handler)(const char* format, va_list args) = NULL;
-
 /* Flag set when ATinit is called. */
 static bool initialized = false;
 
@@ -199,7 +191,6 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   AT_initMemory(argc, argv);
   AT_initAFun(argc, argv);
   AT_initList(argc, argv);
-  /* AT_initMake(argc, argv); */
   AT_initGC(argc, argv, bottomOfStack);
   AT_initBafIO(argc, argv);
 
@@ -231,45 +222,7 @@ bool ATisInitialized()
 }
 
 /*}}}  */
-/*{{{  void ATsetWarningHandler(handler) */
 
-/**
- * Change the warning handler.
- */
-
-void
-ATsetWarningHandler(void (*handler)(const char* format, va_list args))
-{
-  warning_handler = handler;
-}
-
-/*}}}  */
-/*{{{  void ATsetErrorHandler(handler) */
-
-/**
- * Change the error handler.
- */
-
-void
-ATsetErrorHandler(void (*handler)(const char* format, va_list args))
-{
-  error_handler = handler;
-}
-
-/*}}}  */
-/*{{{  void ATsetAbortHandler(handler) */
-
-/**
- * Change the abort handler.
- */
-
-void
-ATsetAbortHandler(void (*handler)(const char* format, va_list args))
-{
-  abort_handler = handler;
-}
-
-/*}}}  */
 /*{{{  void ATwarning(const char *format, ...) */
 
 void
@@ -278,14 +231,7 @@ ATwarning(const char* format,...)
   va_list args;
 
   va_start(args, format);
-  if (warning_handler)
-  {
-    warning_handler(format, args);
-  }
-  else
-  {
-    ATvfprintf(stderr, format, args);
-  }
+  ATvfprintf(stderr, format, args);
 
   va_end(args);
 }
@@ -303,16 +249,9 @@ ATerror(const char* format,...)
   va_list         args;
 
   va_start(args, format);
-  if (error_handler)
-  {
-    error_handler(format, args);
-  }
-  else
-  {
-    ATvfprintf(stderr, format, args);
-    assert(0);
-    exit(1);
-  }
+  ATvfprintf(stderr, format, args);
+  assert(0);
+  exit(1);
   va_end(args);
 }
 
@@ -329,15 +268,8 @@ ATabort(const char* format,...)
   va_list         args;
 
   va_start(args, format);
-  if (abort_handler)
-  {
-    abort_handler(format, args);
-  }
-  else
-  {
-    ATvfprintf(stderr, format, args);
-    abort();
-  }
+  ATvfprintf(stderr, format, args);
+  abort();
 
   va_end(args);
 }
@@ -1075,7 +1007,7 @@ static size_t textSize(ATerm t)
 
     default:
       ATerror("textSize: Illegal type %d\n", ATgetType(t));
-      return -1;
+      return (size_t)-1; // error path
   }
   return size;
 }

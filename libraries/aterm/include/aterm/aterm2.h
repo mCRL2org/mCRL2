@@ -155,7 +155,7 @@ namespace aterm
   inline
   int ATgetInt(const ATermInt t)
   {
-    return t->aterm.value;
+    return (int)t->aterm.value; // See comment in definition __ATermInt
   }
 
   /* The ATermAppl type */

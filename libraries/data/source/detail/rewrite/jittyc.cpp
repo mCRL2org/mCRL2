@@ -615,13 +615,13 @@ static ATerm toInnerc(ATerm Term)
     }
     else
     {
-      ATerror("%s: Do not deal with application terms correctly\n%t\n\n",NAME,Term);
+      throw mcrl2::runtime_error(std::string(NAME) + ": Do not deal with application terms correctly " + atermpp::aterm(Term).to_string());
     }
   }
 
   if (ATisEmpty((ATermList) Term))
   {
-    ATerror("%s: invalid jitty format term (%t)\n",NAME,Term);
+    throw mcrl2::runtime_error(std::string(NAME) + ": invalid jitty format term (" + atermpp::aterm(Term).to_string() + ")");
   }
 
   ATermList l=ATinsert(ATempty,ATgetFirst((ATermList)Term));

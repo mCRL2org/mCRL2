@@ -62,8 +62,8 @@ size_t divELEMENTS_PER_TABLE(const size_t n)
 
 /* in the hashtable we use the following constants to
    indicate designated positions */
-static const size_t EMPTY = -1;
-static const size_t DELETED = -2;
+static const size_t EMPTY = (size_t)-1;
+static const size_t DELETED = (size_t)-2;
 
 static const size_t a_prime_number = 134217689;
 

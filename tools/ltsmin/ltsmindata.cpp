@@ -11,6 +11,7 @@
 #include "mcrl2/core/print.h"
 #include "ltsmin.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/text_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/lps/multi_action.h"
@@ -63,8 +64,10 @@ static void Info(SVCfile* inFile)
 static ATerm* MakeArrayOfATerms(int n)
 {
   ATerm* result = (ATerm*) calloc(n, sizeof(ATerm));
-  if (!result) ATerror("Cannot allocate array with ATerms of size %d",
-                         n);
+  if (!result)
+  {
+    throw mcrl2::runtime_error("Cannot allocate array with ATerms of size " + to_string(n));
+  }
   ATprotectArray(result, n);
   return result;
 }
@@ -74,50 +77,50 @@ static void AllocData(void)
   int i;
   if (!(mark = (bool*) malloc(nstate * sizeof(bool))))
   {
-    ATerror("Cannot allocate boolean array of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate boolean array of size " + to_string(nstate));
   }
   if (!(blockref = (SVCint*) malloc(nstate * sizeof(SVCint))))
   {
-    ATerror("Cannot allocate array with block references of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate array with block references of size " + to_string(nstate));
   }
   if (!(blocks.b = (int*) malloc(nstate * sizeof(int))))
   {
-    ATerror("Cannot allocate array with block references of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate array with block references of size " + to_string(nstate));
   }
   if (!(s = (SVCstateIndex*) malloc(nstate * sizeof(SVCstateIndex))))
   {
-    ATerror("Cannot allocate array with state numbers of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate array with state numbers of size " + to_string(nstate));
   }
   if (!(lab = (ATermList*) calloc(nstate,  sizeof(ATermList))))
   {
-    ATerror("Cannot allocate array with [labels] of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate array with [labels] of size " + to_string(nstate));
   }
   ATprotectArray((ATerm*) lab, nstate);
   if (!(Pi = (INTERVAL*) calloc(2*nstate, sizeof(INTERVAL))))
   {
-    ATerror("Indexed array Pi is not allocated (%d)\n",2*nstate);
+    throw mcrl2::runtime_error("Indexed array Pi is not allocated (" + to_string(2*nstate) + ")");
   }
   if (!(lab_src_tgt = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
   {
-    ATerror("Array of tables is not allocated (%d)\n",nlabel);
+    throw mcrl2::runtime_error("Array of tables is not allocated (" + to_string(nlabel) + ")");
   }
   if (!(lab_tgt_src = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
   {
-    ATerror("Array of tables is not allocated (%d)\n",nlabel);
+    throw mcrl2::runtime_error("Array of tables is not allocated (" + to_string(nlabel) + ")");
   }
   if (!(blok = (BLOK*) malloc(2*nstate * sizeof(BLOK))))
   {
-    ATerror("BLOK is not allocated (%d)\n",nstate);
+    throw mcrl2::runtime_error("BLOK is not allocated (" + to_string(nstate) + ")");
   }
   for (i=0; i<nlabel; i++)
   {
     if (!(lab_src_tgt[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
     {
-      ATerror("Not possible to create table (%d)",i);
+      throw mcrl2::runtime_error("Not possible to create table (" + to_string(i) + ")");
     }
     if (!(lab_tgt_src[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
     {
-      ATerror("Not possible to create table (%d)",i);
+      throw mcrl2::runtime_error("Not possible to create table (" + to_string(i) + ")");
     }
   }
   label_name = MakeArrayOfATerms(nlabel);
@@ -129,7 +132,7 @@ static void AllocData(void)
   {
     if (!(par = (ATermList*) calloc(nstate,  sizeof(ATermList))))
     {
-      ATerror("Cannot allocate array with [parameters] of size %d\n", nstate);
+      throw mcrl2::runtime_error("Cannot allocate array with [parameters] of size " + to_string(nstate));
     }
     ATprotectArray((ATerm*) par, nstate);
     par_name = MakeArrayOfATerms(npar);
@@ -207,11 +210,11 @@ void DfsNumbering(ATerm t)
     }
     if (dfsn>nstate || dfsn <0)
     {
-      ATerror("Wrong3: %d\n",dfsn);
+      throw mcrl2::runtime_error("Wrong3: " + to_string(dfsn));
     }
     if (d>nstate || d <0)
     {
-      ATerror("Wrong4: %d\n",d);
+      throw mcrl2::runtime_error("Wrong4: " + to_string(d));
     }
     visited[d] = dfsn;
     dfsn2state[dfsn] = d;
@@ -240,7 +243,7 @@ int TakeComponent(ATerm t)
     }
     if (d>=nstate || d <0)
     {
-      ATerror("Wrong: %d\n",d);
+      throw mcrl2::runtime_error("Wrong: " + to_string(d));
     }
     visited[d] = -1;
     if (sources)
@@ -253,7 +256,7 @@ int TakeComponent(ATerm t)
     }
     if (s_pt>=nstate || s_pt <0)
     {
-      ATerror("Wrong2: %d\n",s_pt);
+      throw mcrl2::runtime_error("Wrong2: " + to_string(s_pt));
     }
     s[s_pt] = d;
     s_pt++;
@@ -291,7 +294,7 @@ void SCC(void)
   ExtraNode();
   if (!(visited = (int*) calloc(nstate+1, sizeof(int))))
   {
-    ATerror("Visited is not allocated (%d)\n",nstate);
+    throw mcrl2::runtime_error("Visited is not allocated (" + to_string(nstate) + ")");
   }
   for (i=0; i<=nstate; i++)
   {
@@ -299,7 +302,7 @@ void SCC(void)
   }
   if (!(dfsn2state = (int*) calloc(nstate+1, sizeof(int))))
   {
-    ATerror("Dfsn2state is not allocated (%d)\n",nstate);
+    throw mcrl2::runtime_error("Dfsn2state is not allocated (" + to_string(nstate) + ")");
   }
   DfsNumbering((ATerm) ATmakeInt(nstate));
   RemoveExtraNode();
@@ -484,7 +487,7 @@ static int Recode(int label)
   {
     if (!(newlabel = (int*) calloc(n, sizeof(int))))
     {
-      ATerror("No allocation of newlabel (%d)",n);
+      throw mcrl2::runtime_error("No allocation of newlabel (" + to_string(n) + ")");
     }
     for (i=0; i<n; i++)
     {
@@ -741,7 +744,7 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
   n_states = ATgetLength(blocks);
   if (!(newlab = (ATermList*) calloc(n_states,  sizeof(ATermList))))
   {
-    ATerror("Cannot allocate array with [labels] of size %d\n", n_states);
+    throw mcrl2::runtime_error("Cannot allocate array with [labels] of size " + to_string(n_states));
   }
   ATprotectArray((ATerm*) newlab, n_states);
   for (i=0; i<nlabel; i++)

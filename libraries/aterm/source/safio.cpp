@@ -1142,7 +1142,7 @@ BinaryReader ATcreateBinaryReader()
   }
   binaryReader->stack = stack;
   binaryReader->stackSize = DEFAULTSTACKSIZE;
-  binaryReader->stackPosition = -1;
+  binaryReader->stackPosition = (size_t)-1; // Initialise
 
   sharedTerms = (ATerm*) AT_malloc(DEFAULTSHAREDTERMARRAYSIZE * sizeof(ATerm));
   if (sharedTerms == NULL)

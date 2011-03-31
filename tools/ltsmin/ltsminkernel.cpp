@@ -246,8 +246,6 @@ static bool Refine(int action, int splitter)
     /* Removals */
     PushUnstableMark(-1, splitter, b, p1);
     PushUnstableMark(action, splitter, b, p2);
-    /* {int i;for (i=0;i<p2->right;i++) if (mark[s[i]])
-         ATerror("Mark is not cleared %d\n",i);} */
     RemoveInterval(Pi+b);
     if (!result)
     {

@@ -512,7 +512,7 @@ void ATunprotectAFun(AFun sym)
     if (protected_symbols[lcv] == sym)
     {
       protected_symbols[lcv] = protected_symbols[--nr_protected_symbols];
-      protected_symbols[nr_protected_symbols] = -1;
+      protected_symbols[nr_protected_symbols] = (AFun)-1; // Reset
       break;
     }
   }

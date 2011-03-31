@@ -110,7 +110,7 @@ ATprotected_block find_best_unused_block(size_t minsize, size_t maxsize)
    * to maxsize
    */
   ATprotected_block block = unused_blocks, tail, best = NULL;
-  size_t bestsize = -1;
+  size_t bestsize = (size_t)-1; // Assigned on all paths
   size_t unused_blocks_count = 0;
   size_t optsize = maxsize + maxsize/2;
 
