@@ -62,6 +62,37 @@ struct state_callback_function
   }
 };
 
+void test_data_type(lps::pins_data_type& type, const std::string& name)
+{
+  std::cout << "test_data_type(" << name << ")" << std::endl; 
+  BOOST_CHECK(type.name() == name);
+
+  // check serialize/deserialize
+  for (std::size_t i = 0; i < type.size(); ++i)
+  {
+    std::string s = type.serialize(i);
+    std::cout << "serialize(" << i << ") = " << type.serialize(i) << std::endl;
+    std::size_t j = type.deserialize(s);
+    BOOST_CHECK(i == j);
+  }
+
+  // check print/parse
+  for (std::size_t i = 0; i < type.size(); ++i)
+  {
+    std::string s = type.print(i);
+    std::cout << "print(" <<  i << ") = " << s << std::endl;
+    std::size_t j = type.parse(s);
+    std::cout << "parse(" <<  s << ") = " << j << std::endl;
+  }
+
+  // test iterator
+  for (lps::pins_data_type::index_iterator i = type.index_begin(); i != type.index_end(); ++i)
+  {
+    std::cout << "iterator " << (i - type.index_begin()) << " -> " << *i << std::endl;
+    BOOST_CHECK(*i == i - type.index_begin());
+  }
+}
+
 void test_ltsmin()
 {
   // create an input file
@@ -81,10 +112,7 @@ void test_ltsmin()
     BOOST_CHECK(p.process_parameter_type(i) == 0);
   }
 
-  BOOST_CHECK(p.datatype_name(0) == "state");
-  BOOST_CHECK(p.datatype_name(1) == "action_label");
   BOOST_CHECK(p.datatype_count() == 2);
-
   BOOST_CHECK(p.group_count() == 10);
   
   std::cout << p.info() << std::endl;
@@ -109,38 +137,20 @@ void test_ltsmin()
   }
   BOOST_CHECK(count == f_all.state_count);
 
-  // check serialize/deserialize
-  for (std::size_t d = 0; d < p.datatype_count(); ++d)
-  {
-    for (std::size_t i = 0; i < p.datatype_size(d); ++i)
-    {
-      std::string s = p.serialize(d, i);
-      std::cout << "serialize(" << d << ", " << i << ") = " << p.serialize(d, i) << std::endl;
-      std::size_t j = p.deserialize(d, s);
-      BOOST_CHECK(i == j);
-    }
-  }
+  lps::pins_data_type& state_type = p.data_type(0);
+  test_data_type(state_type, "state");
+  BOOST_CHECK(state_type.print(0) == "1");
+  BOOST_CHECK(state_type.print(1) == "d1");
 
-  // check print/parse
-  for (std::size_t d = 0; d < p.datatype_count(); ++d)
-  {
-    for (std::size_t i = 0; i < p.datatype_size(d); ++i)
-    {
-      std::string s = p.print(d, i);
-      std::cout << "print(" << d << ", " << i << ") = " << s << std::endl;
-      std::size_t j = p.parse(d, s);
-      std::cout << "parse(" << d << ", " << s << ") = " << j << std::endl;
-    }
-  }
-  BOOST_CHECK(p.print(0, 0) == "1");
-  BOOST_CHECK(p.print(0, 1) == "d1");
+  lps::pins_data_type& action_label_type = p.data_type(1);
+  test_data_type(action_label_type, "action_label");
 
   // cleanup temporary files
   boost::filesystem::remove(boost::filesystem::path(abp_filename));
     
   delete[] initial_state;
   
-  //BOOST_CHECK(false);
+  BOOST_CHECK(false);
 }
 
 int test_main(int argc, char* argv[])

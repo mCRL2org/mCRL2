@@ -18,6 +18,7 @@
 #include <string>
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
+#include <boost/iterator/iterator_facade.hpp>
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/find.h"
@@ -58,41 +59,229 @@ data::rewriter::strategy parse_rewriter_strategy(const std::string& rewriter_str
   }
   return data::rewriter::jitty;
 }
-            
+
 /// \brief Models a pins data type. A pins data type maintains a mapping between known values
-/// of a data type and integers. The mapping is dense, meaning that all integers in the interval
-/// [0, ..., size()[ have a corresponding value.
+/// of a data type and integers.
 class pins_data_type
 {
-  /// \brief Serializes the i-th value of the data type to a binary string.
-  /// It is guaranteed that serialize(deserialize(i)) == i.
-  /// \pre 0 <= i < size()
-  virtual std::string serialize(int i) const = 0;
+  public:
 
-  /// \brief Deserializes a string to a data value, and returns the corresponding index.
-  /// \return The index of the data value.
-  /// \throw <std::runtime_error> { if deserialization failed, or if the value was not found in the mapping }
-  virtual std::size_t deserialize(const std::string& s) const = 0;
+    /// \brief Forward iterator used for iterating over indices.
+    class index_iterator: public boost::iterator_facade<index_iterator, const std::size_t, boost::forward_traversal_tag>
+    {
+      public:
+        index_iterator(std::size_t max_index)
+          : m_index(0),
+            m_max_index(max_index)
+        {}
 
-  /// \brief Returns a human readable representation of the value with index i.
-  /// It is guaranteed that parse(print(i)) == i.
-  /// \pre 0 <= i < size()
-  virtual std::string print(int i) const = 0;
+        index_iterator(std::size_t index, std::size_t max_index)
+          : m_index(index),
+            m_max_index(max_index)
+        {}
 
-  /// \brief Parses a string to a data value, and returns the corresponding index.
-  /// \return The index of the data value.
-  /// \throw <std::runtime_error> { if deserialization failed, or if the value was not found in the mapping }
-  virtual std::size_t parse(const std::string& s) const = 0;
+     private:
+        friend class boost::iterator_core_access;
 
-  /// \brief Returns the name of the data type.
-  virtual const std::string& name() const = 0;
+        void increment()
+        {
+          m_index++;
+        }
 
-  /// \brief Returns the number of values that are stored in the map.
-  virtual std::size_t size() const = 0;
-  
-  /// \brief Destructor.  
-  virtual ~pins_data_type()
-  {}
+        bool equal(const index_iterator& other) const
+        {
+          return this->m_index == other.m_index;
+        }
+
+        const std::size_t& dereference() const
+        {
+          return m_index;
+        }
+
+        std::ptrdiff_t distance_to(const index_iterator& other) const
+        {
+          return other.m_index - this->m_index;
+        }
+
+        std::size_t m_index;
+        std::size_t m_max_index;
+    };
+
+    /// \brief Serializes the i-th value of the data type to a binary string.
+    /// It is guaranteed that serialize(deserialize(i)) == i.
+    /// \pre i is a valid index
+    virtual std::string serialize(int i) const = 0;
+
+    /// \brief Deserializes a string to a data value, and returns the corresponding index.
+    /// If the value is not in the mapping, it will be added.
+    /// \return The index of the data value.
+    /// \throw <std::runtime_error> { if deserialization failed }
+    virtual std::size_t deserialize(const std::string& s) = 0;
+
+    /// \brief Returns a human readable representation of the value with index i.
+    /// N.B. It is not guaranteed that parse(print(i)) == i.
+    /// \pre i is a valid index
+    virtual std::string print(int i) const = 0;
+
+    /// \brief Parses a string to a data value, and returns the corresponding index.
+    /// If the value is not in the mapping, it will be added.
+    /// \return The index of the data value.
+    /// \throw <std::runtime_error> { if parsing failed }
+    virtual std::size_t parse(const std::string& s) = 0;
+
+    /// \brief Returns the name of the data type.
+    virtual const std::string& name() const = 0;
+
+    /// \brief Returns the number of values that are stored in the map.
+    virtual std::size_t size() const = 0;
+
+    /// \brief Destructor.
+    virtual ~pins_data_type()
+    {}
+
+    /// \brief Returns an iterator to the beginning of the indices
+    index_iterator index_begin() const
+    {
+      return index_iterator(0, size());
+    }
+
+    /// \brief Returns an iterator to the end of the indices
+    index_iterator index_end() const
+    {
+      return index_iterator(size());
+    }
+};
+
+/// \brief Models the mapping of mCRL2 state values to integers.
+class state_data_type: public pins_data_type
+{
+  protected:
+    lps::next_state_generator& m_generator;
+    std::string m_name;
+    atermpp::indexed_set m_indexed_set;
+
+    std::size_t expression2index(const data::data_expression& x)
+    {
+      return m_indexed_set[m_generator.expression2aterm(x)];
+    }
+
+    data::data_expression index2expression(std::size_t i) const
+    {
+      return m_generator.aterm2expression(m_indexed_set.get(i));
+    }
+
+  public:
+    state_data_type(lps::next_state_generator& generator)
+      : m_generator(generator),
+        m_name("state")
+    {}
+
+    std::string serialize(int i) const
+    {
+      return index2expression(i).to_string();
+    }
+
+    std::size_t deserialize(const std::string& s)
+    {
+      ATerm t = atermpp::read_from_string(s);
+      data::data_expression d = atermpp::aterm_appl(reinterpret_cast<ATermAppl>(t));
+      return expression2index(d);
+    }
+
+    std::string print(int i) const
+    {
+      return core::pp(index2expression(i));
+    }
+
+    std::size_t parse(const std::string& s)
+    {
+      data::data_expression e = data::parse_data_expression(s, m_generator.get_specification().data());
+      return expression2index(e);
+    }
+
+    const std::string& name() const
+    {
+      return m_name;
+    }
+
+    std::size_t size() const
+    {
+      return m_indexed_set.size();
+    }
+
+    std::size_t operator[](const atermpp::aterm& x)
+    {
+      return m_indexed_set[x];
+    }
+
+    atermpp::indexed_set& indexed_set()
+    {
+      return m_indexed_set;
+    }
+};
+
+/// \brief Models the mapping of mCRL2 action labels to integers.
+class action_label_data_type: public pins_data_type
+{
+  protected:
+    lps::next_state_generator& m_generator;
+    std::string m_name;
+    atermpp::indexed_set m_indexed_set;
+
+    std::size_t expression2index(const data::data_expression& x)
+    {
+      return m_indexed_set[x];
+    }
+
+    data::data_expression index2expression(std::size_t i) const
+    {
+      ATerm a = m_indexed_set.get(i);
+      return atermpp::aterm_appl(reinterpret_cast<ATermAppl>(a));
+    }
+
+  public:
+    action_label_data_type(lps::next_state_generator& generator)
+      : m_generator(generator),
+        m_name("action_label")
+    {}
+
+    std::string serialize(int i) const
+    {
+      return index2expression(i).to_string();
+    }
+
+    std::size_t deserialize(const std::string& s)
+    {
+      ATerm t = atermpp::read_from_string(s);
+      data::data_expression d = atermpp::aterm_appl(reinterpret_cast<ATermAppl>(t));
+      return expression2index(d);
+    }
+
+    std::string print(int i) const
+    {
+      return core::pp(index2expression(i));
+    }
+
+    std::size_t parse(const std::string& s)
+    {
+      data::data_expression e = data::parse_data_expression(s, m_generator.get_specification().data());
+      return expression2index(e);
+    }
+
+    const std::string& name() const
+    {
+      return m_name;
+    }
+
+    std::size_t size() const
+    {
+      return m_indexed_set.size();
+    }
+
+    std::size_t operator[](const atermpp::aterm& x)
+    {
+      return m_indexed_set[x];
+    }
 };
 
 class pins
@@ -110,20 +299,15 @@ class pins
     atermpp::function_symbol m_state_fun; /**< the function symbol used for 'next states' */
     std::vector<std::string> m_process_parameter_names;
     ltsmin_state_type m_ltsmin_state; /**< used by the functions next_state_all and next_state_long */
-
-    /// \brief The pins class maintains for each type a mapping of integers to known values of the type.
-    /// There are always at least two entries in the map:
-    /// - index 0: the state type
-    /// - index 1: the label type
-    /// N.B. The mappings contain values in the next state format, so they need to be translated to data expressions before they can be printed.
-    std::vector<atermpp::indexed_set> m_datatype_mappings;
+    state_data_type m_state_data_type; /**< the type mapping for state values */
+    action_label_data_type m_action_label_data_type; /**< the type mapping for action labels */
 
     /// \brief Returns the process of the LPS specification
     const linear_process& process()
     {
       return m_generator.get_specification().process();
     }
-       
+
     template <typename Iter>
     std::string print_vector(Iter first, Iter last) const
     {
@@ -212,52 +396,26 @@ class pins
       }
     }
 
-    void initialize_type_mappings()
-    {
-      m_datatype_mappings.push_back(atermpp::indexed_set()); // state type
-      m_datatype_mappings.push_back(atermpp::indexed_set()); // label type
-    }
-
-    /// \brief Returns the index of the aterm x in the first datatype map. If it is not present yet, it will be added.
-    std::size_t aterm2index(const atermpp::aterm& x)
-    {
-      return m_datatype_mappings[0][x];
-    }
-
-    atermpp::aterm index2aterm(std::size_t i) const
-    {
-      return m_datatype_mappings[0].get(i);
-    }
-
-    std::size_t expression2index(const data::data_expression& x)
-    {
-      return aterm2index(m_generator.expression2aterm(x));
-    }
-
-    data::data_expression index2expression(std::size_t i) const
-    {
-      return m_generator.aterm2expression(index2aterm(i));
-    }
-
-    std::size_t label2index(const atermpp::aterm_appl& x)
-    {
-      return m_datatype_mappings[1][x];
-    }
-                                   
     /// \brief Converts state component represented as integers into aterms (in the next state format).
     struct state_component_converter: public std::unary_function<std::size_t, atermpp::aterm>
     {
       const atermpp::indexed_set& datatype_map;
-      
+
       state_component_converter(const atermpp::indexed_set& datatype_map_)
         : datatype_map(datatype_map_)
       {}
-      
+
       atermpp::aterm operator()(std::size_t i) const
       {
         return datatype_map.get(i);
       }
     };
+
+    /// \brief Returns the index of the aterm x in the first datatype map. If it is not present yet, it will be added.
+    std::size_t aterm2index(const atermpp::aterm& x)
+    {
+      return m_state_data_type[x];
+    }
 
   public:
     typedef std::size_t datatype_index; /**< the index type for datatype maps */
@@ -278,11 +436,12 @@ class pins
     /// \param filename The name of a file containing an mCRL2 specification
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     pins(const std::string& filename, const std::string& rewriter_strategy)
-      : m_generator(filename, parse_rewriter_strategy(rewriter_strategy))
+      : m_generator(filename, parse_rewriter_strategy(rewriter_strategy)),
+        m_state_data_type(m_generator),
+        m_action_label_data_type(m_generator)
     {
       initialize_read_write_groups();
-      initialize_type_mappings();
-      
+
       // TODO: this is ugly, is there a better way to create states?
       m_state_fun = atermpp::function_symbol("STATE", process_parameter_count(), false);
 
@@ -302,102 +461,25 @@ class pins
       delete[] m_ltsmin_state;
     }
 
-    /// \brief Serializes the i-th value of the datatype map with index d.
-    /// \param d A datatype index (0 <= i < datatype_count()).
-    /// \return A string that uniquely corresponds with the value.
-    std::string serialize(datatype_index d, std::size_t i)
-    {
-      if (d == 0)
-      {
-        return m_generator.aterm2expression(m_datatype_mappings[d].get(i)).to_string();
-      }
-      else
-      {
-        return m_datatype_mappings[d].get(i).to_string();
-      }
-    }
-
-    /// \brief Deserializes a string to a data value, and returns the corresponding index
-    /// in a datatype map.
-    /// \param d A datatype index (0 <= i < datatype_count()).
-    /// \return The index of the data value in the datatype map with index d, or -1 if it is not found in this map.
-    std::size_t deserialize(datatype_index d, const std::string& s)
-    {
-      ATerm t = atermpp::read_from_string(s);
-      atermpp::aterm_appl a(reinterpret_cast<ATermAppl>(t));
-      if (d == 0)
-      {
-        return m_datatype_mappings[0].index(m_generator.expression2aterm(a));
-      }
-      else
-      {
-        return m_datatype_mappings[d].index(a);
-      }
-    }
-
-    /// \brief Returns a pretty printed representation of the i-th value of the datatype map with index d.
-    /// \param d A datatype index (0 <= i < datatype_count()).
-    /// \pre 0 <= i < datatype_size(d)
-    /// \return A pretty print representation of the value. Note that the pretty print representation is
-    /// not guaranteed to correspond uniquely with the value.
-    std::string print(datatype_index d, int i)
-    {
-      if (d == 0)
-      {
-        return core::pp(m_generator.aterm2expression(m_datatype_mappings[0].get(i)));
-      }
-      else
-      {
-        return core::pp(m_datatype_mappings[d].get(i));
-      }     
-    }
-
-    /// \brief Parses a textual representation of a data value, and returns the corresponding index
-    /// in a datatype map.
-    /// \param d A datatype index (0 <= i < datatype_count()).
-    /// \return The index of the data value in the datatype map with index d, or -1 if it is not found in this map.
-    std::size_t parse(datatype_index d, const std::string& s)
-    {
-      if (d == 0)
-      {
-        data::data_expression e = data::parse_data_expression(s, m_generator.get_specification().data());
-        return expression2index(e);
-      }
-      if (d == 1)
-      {
-        lps::multi_action a = lps::parse_multi_action(s, m_generator.get_specification().action_labels(), m_generator.get_specification().data());
-        // TODO: change this when multi_action becomes a proper term
-        ATermAppl t = core::detail::gsMakeMultAct(a.actions());
-        return m_datatype_mappings[0][atermpp::aterm_appl(t)];
-      }
-      throw std::runtime_error("Out of bounds error in pins::parse!");
-    }
-
     /// \brief Returns the number of datatype maps.
     std::size_t datatype_count() const
     {
-      return m_datatype_mappings.size();
+      return 2;
     }
 
-    /// \brief Returns the name of the datatype map with index d
-    /// - The datatype map with index 0 is named "state"
-    /// - The datatype map with index 1 is named "action_label"
+    /// \brief Returns a reference to the datatype map with index i.
     /// \pre 0 <= i < datatype_count()
-    std::string datatype_name(datatype_index d) const
+    pins_data_type& data_type(std::size_t i)
     {
-      switch (d)
+      if (i == 0)
       {
-        case 0: return "state";
-        case 1: return "action_label";
+        return m_state_data_type;
       }
-      return "unknown";
-    }
-
-    /// \brief Returns the number of elements in datatype map d.
-    /// \pre 0 <= i < datatype_count()
-    std::size_t datatype_size(datatype_index d) const
-    {
-      return m_datatype_mappings[d].size();
+      if (i == 1)
+      {
+        return m_action_label_data_type;
+      }
+      throw std::runtime_error("Error: invalid index in pins::data_type");
     }
 
     /// \brief Indices of process parameters that influence event or next state of a summand by being read
@@ -458,7 +540,7 @@ class pins
       atermpp::aterm_appl initial_state(reinterpret_cast<ATermAppl>(a));
 	    for (size_t i = 0; i < m_state_length; ++i)
 	    {
-	      s[i] = aterm2index(initial_state(i));
+	      s[i] = m_state_data_type[initial_state(i)];
       }
     }
 
@@ -480,8 +562,8 @@ class pins
     {
       std::size_t nparams = process_parameter_count();
       atermpp::aterm_appl init(m_state_fun,
-                               boost::make_transform_iterator(src, state_component_converter(m_datatype_mappings[0])),
-                               boost::make_transform_iterator(src + nparams, state_component_converter(m_datatype_mappings[0]))
+                               boost::make_transform_iterator(src, state_component_converter(m_state_data_type.indexed_set())),
+                               boost::make_transform_iterator(src + nparams, state_component_converter(m_state_data_type.indexed_set()))
                               );
       next_state_generator::iterator i = m_generator.begin(init);
       while (++i)
@@ -489,11 +571,11 @@ class pins
         const lps::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
-          m_ltsmin_state[i] = aterm2index(s[i]);
+          m_ltsmin_state[i] = m_state_data_type[s[i]];
         }
-        std::size_t label = label2index(s.label());
+        std::size_t label_index = m_action_label_data_type[s.label()];
         int group = -1; // we don't know the summand
-        f(label, m_ltsmin_state, group);
+        f(label_index, m_ltsmin_state, group);
       }
     }
 
@@ -514,8 +596,8 @@ class pins
     {
       std::size_t nparams = process_parameter_count();
       atermpp::aterm_appl init(m_state_fun,
-                               boost::make_transform_iterator(src, state_component_converter(m_datatype_mappings[0])),
-                               boost::make_transform_iterator(src + nparams, state_component_converter(m_datatype_mappings[0]))
+                               boost::make_transform_iterator(src, state_component_converter(m_state_data_type.indexed_set())),
+                               boost::make_transform_iterator(src + nparams, state_component_converter(m_state_data_type.indexed_set()))
                               );
       next_state_generator::iterator i = m_generator.begin(init, group);
       while (++i)
@@ -523,13 +605,13 @@ class pins
         const lps::next_state_generator::state_type& s = *i;
         for (size_t i = 0; i < nparams; ++i)
         {
-          m_ltsmin_state[i] = aterm2index(s[i]);
+          m_ltsmin_state[i] = m_state_data_type[s[i]];
         }
-        std::size_t label = label2index(s.label());
-        f(label, m_ltsmin_state, group);
+        std::size_t label_index = m_action_label_data_type[s.label()];
+        f(label_index, m_ltsmin_state, group);
       }
     }
-    
+
     /// \brief Prints an overview of several relevant attributes.
     std::string info()
     {
@@ -541,7 +623,7 @@ class pins
       {
         out << "\n";
         out << "edge_label_name(" << i << ") = " << edge_label_name(i) << std::endl;
-        out << "edge_label_type(" << i << ") = " << edge_label_type(i) << std::endl;        
+        out << "edge_label_type(" << i << ") = " << edge_label_type(i) << std::endl;
       }
 
       out << "\n--- PROCESS PARAMETERS ---\n";
@@ -571,9 +653,12 @@ class pins
       out << "datatype_count() = " << datatype_count() << std::endl;
       for (std::size_t i = 0; i < datatype_count(); i++)
       {
+        const pins_data_type& type = data_type(i);
         out << "\n";
-        out << "datatype_name(" << i << ") = " << datatype_name(i) << std::endl;
-        out << "datatype_size(" << i << ") = " << datatype_size(i) << std::endl;
+        out << "datatype " << i
+            << " name = " << type.name()
+            << " size = " << type.size()
+            << std::endl;
       }
 
       return out.str();
