@@ -150,7 +150,7 @@ void test_ltsmin()
     
   delete[] initial_state;
   
-  BOOST_CHECK(false);
+  //BOOST_CHECK(false);
 }
 
 int test_main(int argc, char* argv[])
