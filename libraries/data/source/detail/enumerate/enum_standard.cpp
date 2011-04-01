@@ -21,15 +21,6 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-#define ATisList(x) (ATgetType(x) == AT_LIST)
-#define ATisAppl(x) (ATgetType(x) == AT_APPL)
-#define ATisInt(x) (ATgetType(x) == AT_INT)
-
-#define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
-#define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
-#define ATAgetArgument(x,y) ((ATermAppl) ATgetArgument(x,y))
-#define ATLgetArgument(x,y) ((ATermList) ATgetArgument(x,y))
-
 #define MAX_VARS_INIT   1000
 #define MAX_VARS_FACTOR 5
 

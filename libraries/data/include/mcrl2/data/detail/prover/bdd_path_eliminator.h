@@ -145,12 +145,12 @@ class BDD_Path_Eliminator: public BDD_Simplifier
           v_iterate_over_set = v_set;
           while (!ATisEmpty(v_iterate_over_set))
           {
-            v_guard_from_set = core::ATAgetFirst(v_iterate_over_set);
+            v_guard_from_set = ATAgetFirst(v_iterate_over_set);
             v_iterate_over_set = ATgetNext(v_iterate_over_set);
             v_iterate_over_path = a_path;
             while (!ATisEmpty(v_iterate_over_path))
             {
-              v_guard_from_path = core::ATAgetFirst(v_iterate_over_path);
+              v_guard_from_path = ATAgetFirst(v_iterate_over_path);
               v_iterate_over_path = ATgetNext(v_iterate_over_path);
               if (variables_overlap(v_guard_from_set, v_guard_from_path))
               {
@@ -223,7 +223,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
       }
       else if (core::detail::gsIsDataVarId(a_expression_1))
       {
-        return core::gsOccurs((ATerm) a_expression_1, (ATerm) a_expression_2);
+        return gsOccurs((ATerm) a_expression_1, (ATerm) a_expression_2);
       }
       else
       {

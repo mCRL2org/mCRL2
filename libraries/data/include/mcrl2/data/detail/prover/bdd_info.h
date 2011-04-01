@@ -27,7 +27,7 @@ class BDD_Info
     /// \return The guard at the root of the BDD.
     inline ATermAppl get_guard(ATermAppl a_bdd)
     {
-      return mcrl2::core::ATAgetFirst(mcrl2::core::ATLgetArgument(a_bdd, 1));
+      return ATAgetFirst(ATLgetArgument(a_bdd, 1));
     }
 
     /// \brief Method that returns the true-branch of a BDD.
@@ -35,7 +35,7 @@ class BDD_Info
     /// \return The true-branch of the BDD.
     inline ATermAppl get_true_branch(ATermAppl a_bdd)
     {
-      return mcrl2::core::ATAgetFirst(ATgetNext(mcrl2::core::ATLgetArgument(a_bdd, 1)));
+      return ATAgetFirst(ATgetNext(ATLgetArgument(a_bdd, 1)));
     }
 
     /// \brief Method that returns the false-branch of a BDD.
@@ -43,7 +43,7 @@ class BDD_Info
     /// \return The false-branch of the BDD.
     inline ATermAppl get_false_branch(ATermAppl a_bdd)
     {
-      return mcrl2::core::ATAgetFirst(ATgetNext(ATgetNext(mcrl2::core::ATLgetArgument(a_bdd, 1))));
+      return ATAgetFirst(ATgetNext(ATgetNext(ATLgetArgument(a_bdd, 1))));
     }
 
     /// \brief Method that indicates whether or not a BDD equals true.

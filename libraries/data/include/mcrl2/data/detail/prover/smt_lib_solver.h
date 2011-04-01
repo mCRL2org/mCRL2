@@ -80,7 +80,7 @@ class SMT_LIB_Solver: public SMT_Solver
           {
             f_extrasorts = f_extrasorts + " ";
           }
-          v_sort = core::ATAgetFirst(v_sorts);
+          v_sort = ATAgetFirst(v_sorts);
           v_sorts = ATgetNext(v_sorts);
           size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
           assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
@@ -103,7 +103,7 @@ class SMT_LIB_Solver: public SMT_Solver
         f_operators_extrafuns = "  :extrafuns (";
         while (!ATisEmpty(v_operators))
         {
-          ATermAppl v_operator = core::ATAgetFirst(v_operators);
+          ATermAppl v_operator = ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
           size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
           assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
@@ -128,7 +128,7 @@ class SMT_LIB_Solver: public SMT_Solver
             }
             for (ATermList l = v_sort_domain_list; !ATisEmpty(l) ; l = ATgetNext(l))
             {
-              sort_expression v_sort_domain_elt(core::ATAgetFirst(l));
+              sort_expression v_sort_domain_elt(ATAgetFirst(l));
               if (is_function_sort(v_sort_domain_elt))
               {
                 throw mcrl2::runtime_error("Function " + pp(v_operator) +
@@ -177,10 +177,10 @@ class SMT_LIB_Solver: public SMT_Solver
         f_variables_extrafuns = "  :extrafuns (";
         while (!ATisEmpty(v_variables))
         {
-          ATermAppl v_variable = core::ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
           char* v_variable_string;
-          v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
+          v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
           sort_expression v_sort = data_expression(v_variable).sort();
           if (sort_real::is_real(v_sort))
           {
@@ -240,7 +240,7 @@ class SMT_LIB_Solver: public SMT_Solver
         f_sorts_notes = "  :notes \"";
         while (!ATisEmpty(v_sorts))
         {
-          sort_expression v_sort(core::ATAgetFirst(v_sorts));
+          sort_expression v_sort(ATAgetFirst(v_sorts));
           v_sorts = ATgetNext(v_sorts);
           size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort));
           assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
@@ -264,13 +264,13 @@ class SMT_LIB_Solver: public SMT_Solver
         f_operators_notes = "  :notes \"";
         while (!ATisEmpty(v_operators))
         {
-          ATermAppl v_operator = core::ATAgetFirst(v_operators);
+          ATermAppl v_operator = ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
           size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
           assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
           char* v_operator_string = (char*) malloc((core::NrOfChars(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%lu", v_operator_number);
-          char* v_operator_original_id = core::detail::gsATermAppl2String(core::ATAgetArgument(v_operator, 0));
+          char* v_operator_original_id = core::detail::gsATermAppl2String(ATAgetArgument(v_operator, 0));
           f_operators_notes = f_operators_notes + "(" + v_operator_string + " = " + v_operator_original_id + ")";
           free(v_operator_string);
           v_operator_string = 0;
@@ -712,7 +712,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       char* v_string;
 
-      v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
+      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -722,7 +722,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       char* v_string;
 
-      v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
+      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -733,7 +733,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       char* v_string;
 
-      v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
+      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -799,9 +799,9 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         while (!ATisEmpty(v_variables))
         {
-          ATermAppl v_variable = core::ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          char* v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
+          char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
           f_formula = f_formula + " (>= " + v_variable_string + " 0)";
         }
       }
@@ -814,9 +814,9 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         while (!ATisEmpty(v_variables))
         {
-          ATermAppl v_variable = core::ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          char* v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
+          char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
           f_formula = f_formula + " (>= " + v_variable_string + " 1)";
         }
       }
@@ -843,7 +843,7 @@ class SMT_LIB_Solver: public SMT_Solver
       core::gsVerboseMsg("Formula to be solved: %P\n", a_formula);
       while (!ATisEmpty(a_formula))
       {
-        v_clause = core::ATAgetFirst(a_formula);
+        v_clause = ATAgetFirst(a_formula);
         a_formula = ATgetNext(a_formula);
         f_formula = f_formula + " ";
         translate_clause(v_clause, true);

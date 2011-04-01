@@ -16,12 +16,7 @@
 #include <cassert>
 #include <aterm2.h>
 
-// XXX Remove
-using namespace aterm;
-
-namespace mcrl2
-{
-namespace core
+namespace aterm
 {
 
 //Workarounds for the initialisation of the ATerm library
@@ -96,13 +91,43 @@ inline ATermList ATinsertUnique(ATermList list, ATerm el)
 }
 
 /**
+ * \brief Condition on an ATerm
+ * \param[in] t an ATerm
+ * \return t is an ATermAppl
+ */
+inline bool ATisAppl(ATerm t)
+{
+  return ATgetType(t) == AT_APPL;
+}
+
+/**
+ * \brief Condition on an ATerm
+ * \param[in] t an ATerm
+ * \return t is an ATermList
+ */
+inline bool ATisList(ATerm t)
+{
+  return ATgetType(t) == AT_LIST;
+}
+
+/**
+ * \brief Condition on an ATerm
+ * \param[in] t an ATerm
+ * \return t is an ATermInt
+ */
+inline bool ATisInt(ATerm t)
+{
+  return ATgetType(t) == AT_INT;
+}
+
+/**
  * \brief Condition on an Aterm
  * \param[in] t an ATerm
  * \return t is NULL or an ATermAppl
  **/
 inline bool ATisApplOrNull(ATerm t)
 {
-  return (t == 0) || ATgetType(t) == AT_APPL;
+  return (t == 0) || ATisAppl(t);
 }
 
 /**
@@ -112,7 +137,7 @@ inline bool ATisApplOrNull(ATerm t)
  **/
 inline bool ATisListOrNull(ATerm t)
 {
-  return (t == 0) || ATgetType(t) == AT_LIST;
+  return (t == 0) || ATisList(t);
 }
 
 /**
@@ -193,6 +218,12 @@ inline ATermList ATLtableGet(ATermTable Table, ATerm Key)
   ATerm Result = ATtableGet(Table, Key);
   assert(ATisListOrNull(Result));
   return (ATermList) Result;
+}
+
+inline
+ATermList ATinsertA(ATermList l, ATermAppl t)
+{
+  return ATinsert(l, (ATerm)t);
 }
 
 //Substitutions on ATerm's
@@ -328,23 +359,6 @@ ATermList gsAddSubstToSubsts(ATermAppl subst, ATermList substs);
  **/
 bool gsOccurs(ATerm elt, ATerm term);
 
-/** \brief Counts the number of times a symbol occurs as head of a subterm.
- * \param[in] elt a term of which to count instances
- * \param[in] term a term to search inside
- * \pre term is an ATerm containing ATermAppl's and ATermList's only
- * \return the number of times elt occurs in term
- **/
-int gsCount(ATerm elt, ATerm term);
-
-/**
- * \brief Counts the number of times a symbol occurs as head of a subterm.
- * \param[in] fun a symbol
- * \param[in] term a term
- * \pre term is an ATerm containing ATermAppl's and ATermList's only
- * \return the number of fun occurs in term (as an AFun)
- **/
-int gsCountAFun(AFun fun, ATerm term);
-}
 }
 
 #endif

@@ -89,7 +89,7 @@ class Induction
       v_list_variables = ATindexedSetElements(f_list_variables);
       while (!ATisEmpty(v_list_variables))
       {
-        v_list_variable = core::ATAgetFirst(v_list_variables);
+        v_list_variable = ATAgetFirst(v_list_variables);
         v_list_variables = ATgetNext(v_list_variables);
         v_sort = get_sort_of_list_elements(v_list_variable);
         ATtablePut(f_lists_to_sorts, (ATerm) v_list_variable, (ATerm) v_sort);
@@ -111,9 +111,9 @@ class Induction
       v_list_sort = data_expression(a_list_variable).sort();
       while (!ATisEmpty(v_constructors))
       {
-        v_constructor = core::ATAgetFirst(v_constructors);
+        v_constructor = ATAgetFirst(v_constructors);
         v_constructors = ATgetNext(v_constructors);
-        v_constructor_name = core::ATAgetArgument(v_constructor, 0);
+        v_constructor_name = ATAgetArgument(v_constructor, 0);
         if (v_constructor_name == f_cons_name)
         {
           v_constructor_sort = data_expression(v_constructor).sort();
@@ -147,7 +147,7 @@ class Induction
         v_dummy_string = 0;
         f_fresh_dummy_number++;
       }
-      while (core::gsOccurs((ATerm) v_result, (ATerm) f_formula));
+      while (gsOccurs((ATerm) v_result, (ATerm) f_formula));
       return v_result;
     }
 
@@ -165,19 +165,19 @@ class Induction
       ATermAppl v_induction_step;
       ATermAppl v_result;
 
-      v_induction_variable = core::ATAgetFirst(ATindexedSetElements(f_list_variables));
+      v_induction_variable = ATAgetFirst(ATindexedSetElements(f_list_variables));
       v_induction_variable_sort = data_expression(v_induction_variable).sort();
 
       v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       v_dummy_variable = get_fresh_dummy(v_dummy_sort);
 
-      v_substitution = core::gsMakeSubst_Appl(v_induction_variable, sort_list::nil(sort_expression(v_induction_variable_sort)));
+      v_substitution = gsMakeSubst_Appl(v_induction_variable, sort_list::nil(sort_expression(v_induction_variable_sort)));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      v_base_case = core::gsSubstValues_Appl(v_substitution_list, f_formula, true);
+      v_base_case = gsSubstValues_Appl(v_substitution_list, f_formula, true);
 
-      v_substitution = core::gsMakeSubst_Appl(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
+      v_substitution = gsMakeSubst_Appl(v_induction_variable, sort_list::cons_(data_expression(v_dummy_variable).sort(), data_expression(v_dummy_variable), data_expression(v_induction_variable)));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      v_induction_step = core::gsSubstValues_Appl(v_substitution_list, f_formula, true);
+      v_induction_step = gsSubstValues_Appl(v_substitution_list, f_formula, true);
       v_induction_step = sort_bool::implies(data_expression(f_formula), data_expression(v_induction_step));
 
       v_result = sort_bool::and_(data_expression(v_base_case), data_expression(v_induction_step));
@@ -200,13 +200,13 @@ class Induction
         {
           while (!ATisEmpty(a_list_of_variables))
           {
-            data_expression v_variable(core::ATAgetFirst(a_list_of_variables));
+            data_expression v_variable(ATAgetFirst(a_list_of_variables));
             a_list_of_variables = ATgetNext(a_list_of_variables);
-            data_expression v_dummy(core::ATAgetFirst(a_list_of_dummies));
+            data_expression v_dummy(ATAgetFirst(a_list_of_dummies));
             a_list_of_dummies = ATgetNext(a_list_of_dummies);
-            ATermAppl v_substitution = core::gsMakeSubst_Appl(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
+            ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(v_dummy.sort(), v_dummy, v_variable));
             ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
-            v_clause = sort_bool::and_(data_expression(v_clause), data_expression(core::gsSubstValues_Appl(v_substitution_list, a_hypothesis, true)));
+            v_clause = sort_bool::and_(data_expression(v_clause), data_expression(gsSubstValues_Appl(v_substitution_list, a_hypothesis, true)));
           }
         }
 
@@ -228,13 +228,13 @@ class Induction
       ATermAppl v_dummy_sort = get_sort_of_list_elements(v_variable);
       ATermAppl v_dummy = get_fresh_dummy(v_dummy_sort);
       ATermList v_list_of_dummies = ATinsert(a_list_of_dummies, (ATerm) v_dummy);
-      ATermAppl v_substitution = core::gsMakeSubst_Appl(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
+      ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
       ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      ATermAppl v_formula_1 = core::gsSubstValues_Appl(v_substitution_list, a_formula, true);
-      v_substitution = core::gsMakeSubst_Appl(v_variable, sort_list::nil(sort_expression(v_variable_sort)));
+      ATermAppl v_formula_1 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
+      v_substitution = gsMakeSubst_Appl(v_variable, sort_list::nil(sort_expression(v_variable_sort)));
       v_substitution_list = ATmakeList1((ATerm) v_substitution);
-      ATermAppl v_formula_2 = core::gsSubstValues_Appl(v_substitution_list, a_formula, true);
-      ATermAppl v_hypothesis = core::gsSubstValues_Appl(v_substitution_list, a_hypothesis, true);
+      ATermAppl v_formula_2 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
+      ATermAppl v_hypothesis = gsSubstValues_Appl(v_substitution_list, a_hypothesis, true);
 
       if (a_variable_number < a_number_of_variables - 1)
       {
@@ -312,11 +312,11 @@ class Induction
       {
         core::gsVerboseMsg("Induction on %d variables.\n", f_count);
         ATermList v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, ATmakeList0(), ATmakeList0());
-        v_result = core::ATAgetFirst(v_list_of_clauses);
+        v_result = ATAgetFirst(v_list_of_clauses);
         v_list_of_clauses = ATgetNext(v_list_of_clauses);
         while (!ATisEmpty(v_list_of_clauses))
         {
-          data_expression v_clause(core::ATAgetFirst(v_list_of_clauses));
+          data_expression v_clause(ATAgetFirst(v_list_of_clauses));
           v_list_of_clauses = ATgetNext(v_list_of_clauses);
           v_result = sort_bool::and_(data_expression(v_result), v_clause);
         }

@@ -42,15 +42,7 @@ static AFun nilAFun;
 static AFun opidAFun;
 static unsigned int is_initialised = 0;
 
-#define ATAgetArgument(x,y) ((ATermAppl) ATgetArgument(x,y))
-#define ATLgetArgument(x,y) ((ATermList) ATgetArgument(x,y))
-#define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
-#define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
 #define gsIsOpId(x) (ATgetAFun(x) == opidAFun)
-
-#define ATisAppl(x) (ATgetType(x) == AT_APPL)
-#define ATisList(x) (ATgetType(x) == AT_LIST)
-#define ATisInt(x) (ATgetType(x) == AT_INT)
 
 #define is_nil(x) (ATisList(x)?false:(ATgetAFun((ATermAppl) x) == nilAFun))
 

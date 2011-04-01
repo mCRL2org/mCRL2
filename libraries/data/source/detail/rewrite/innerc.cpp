@@ -51,26 +51,6 @@ namespace data
 namespace detail
 {
 
-static ATermList ATinsertA(ATermList l, ATermAppl a)
-{
-  return ATinsert(l,(ATerm)a);
-}
-
-static bool ATisAppl(ATerm a)
-{
-  return (ATgetType(a) == AT_APPL);
-}
-
-static bool ATisList(ATerm a)
-{
-  return (ATgetType(a) == AT_LIST);
-}
-
-static bool ATisInt(ATerm a)
-{
-  return (ATgetType(a) == AT_INT);
-}
-
 static AFun afunS, afunM, afunF, afunN, afunD, afunR, afunCR, afunC, afunX, afunRe, afunCRe, afunMe;
 static ATerm dummy;
 

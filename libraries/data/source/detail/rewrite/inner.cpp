@@ -64,10 +64,6 @@ static ATerm dummy;
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
 #define gsIsOpId(x) (ATgetAFun(x) == opidAFun)
 
-#define ATisList(x) (ATgetType(x) == AT_LIST)
-#define ATisAppl(x) (ATgetType(x) == AT_APPL)
-#define ATisInt(x) (ATgetType(x) == AT_INT)
-
 #define is_nil(x) (ATisList(x)?false:(ATgetAFun((ATermAppl) x) == nilAFun))
 
 

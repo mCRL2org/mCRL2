@@ -173,7 +173,7 @@ class Formula_Checker
 
       while (!ATisEmpty(a_formulas))
       {
-        v_formula = core::ATAgetFirst(a_formulas);
+        v_formula = ATAgetFirst(a_formulas);
         core::gsMessage("'%P': ", v_formula);
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();

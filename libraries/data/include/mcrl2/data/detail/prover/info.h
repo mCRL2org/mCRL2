@@ -113,7 +113,7 @@ class ATerm_Info
 
     bool delta1(ATerm a_term1, ATerm a_term2)
     {
-      return core::gsOccurs(a_term2, a_term1);
+      return gsOccurs(a_term2, a_term1);
     }
 
     bool majo1(ATerm a_term1, ATerm a_term2, size_t a_number)
@@ -226,11 +226,11 @@ class ATerm_Info
     /// \brief Compares terms by checking whether one is a part of the other.
     Compare_Result compare_term_occurs(ATerm a_term1, ATerm a_term2)
     {
-      if (core::gsOccurs(a_term1, a_term2))
+      if (gsOccurs(a_term1, a_term2))
       {
         return compare_result_smaller;
       }
-      if (core::gsOccurs(a_term2, a_term1))
+      if (gsOccurs(a_term2, a_term1))
       {
         return compare_result_bigger;
       }
@@ -399,7 +399,7 @@ class AI_Jitty: public ATerm_Info
           v_term = ATgetArgument(v_term, 1);
           while (v_number_of_arguments != 0)
           {
-            v_number_of_arguments -= ATgetLength(core::ATLgetArgument((ATermAppl) v_term, 0));
+            v_number_of_arguments -= ATgetLength(ATLgetArgument((ATermAppl) v_term, 0));
             v_term = ATgetArgument(v_term, 1);
           }
           return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
@@ -554,7 +554,7 @@ class AI_Inner: public ATerm_Info
           v_term = ATgetArgument(v_term, 1);
           while (v_number_of_arguments != 0)
           {
-            v_number_of_arguments -= ATgetLength(core::ATLgetArgument((ATermAppl) v_term, 0));
+            v_number_of_arguments -= ATgetLength(ATLgetArgument((ATermAppl) v_term, 0));
             v_term = ATgetArgument(v_term, 1);
           }
           return (v_term == (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));

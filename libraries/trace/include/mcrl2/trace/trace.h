@@ -561,13 +561,13 @@ class Trace
         }
         else if (isTimedMAct(e))
         {
-          if (core::detail::gsIsNil(core::ATAgetArgument(e,1)))
+          if (core::detail::gsIsNil(ATAgetArgument(e,1)))
           {
-            addAction(core::ATAgetArgument(e,0));
+            addAction(ATAgetArgument(e,0));
           }
           else
           {
-            addAction(core::ATAgetArgument(e,0),core::ATAgetArgument(e,1));
+            addAction(ATAgetArgument(e,0),ATAgetArgument(e,1));
           }
         }
         else

@@ -15,9 +15,7 @@
 #include "aterm_ext.h"
 #include "memory_utility.h"
 
-namespace mcrl2
-{
-namespace core
+namespace aterm
 {
 
 //Substitutions on ATerm's
@@ -195,51 +193,5 @@ bool gsOccurs(ATerm Elt, ATerm Term)
   return Result;
 }
 
-/*      int gsCount(ATerm Elt, ATerm Term)
-      {
-        int Result = 0;
-        if (ATisEqual(Elt, Term)) {
-          Result = 1;
-        } else {
-          //count occurrences of Elt in the arguments/elements of Term
-          if (ATgetType(Term) == AT_APPL) {
-            AFun Head = ATgetAFun((ATermAppl) Term);
-            int NrArgs = ATgetArity(Head);
-            for (int i = 0; i < NrArgs; i++) {
-              Result += gsCount(Elt, ATgetArgument((ATermAppl) Term, i));
-            }
-          } else if (ATgetType(Term) == AT_LIST) {
-            while (!ATisEmpty((ATermList) Term))
-            {
-              Result += gsCount(Elt, ATgetFirst((ATermList) Term));
-              Term = (ATerm) ATgetNext((ATermList) Term);
-            }
-          }
-        }
-        return Result;
-      }
-
-      int gsCountAFun(AFun fun, ATerm term)
-      {
-        int result = 0;
-        if (ATgetType(term) == AT_APPL) {
-          AFun head = ATgetAFun((ATermAppl) term);
-          if (fun == head) {
-            result += 1;
-          }
-          int nr_args = ATgetArity(head);
-          for (int i = 0; i < nr_args; i++) {
-            result += gsCountAFun(fun, ATgetArgument((ATermAppl) term, i));
-          }
-        } else if (ATgetType(term) == AT_LIST) {
-          while (!ATisEmpty((ATermList) term))
-          {
-            result += gsCountAFun(fun, ATgetFirst((ATermList) term));
-            term = (ATerm) ATgetNext((ATermList) term);
-          }
-        }
-        return result;
-      } */
-}
 }
 
