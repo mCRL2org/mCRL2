@@ -14,7 +14,6 @@
 #include "_aterm.h"
 #include "memory.h"
 #include "afun.h"
-#include "list.h"
 #include "gc.h"
 #include "util.h"
 #include "bafio.h"
@@ -180,7 +179,6 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   /* Initialize other components */
   AT_initMemory(argc, argv);
   AT_initAFun(argc, argv);
-  AT_initList(argc, argv);
   AT_initGC(argc, argv, bottomOfStack);
   AT_initBafIO(argc, argv);
 
@@ -1172,8 +1170,6 @@ fparse_quoted_appl(int* c, FILE* f)
   /* First parse the identifier */
   fnext_char(c, f);
 
-  assert(*c!=STRING_MARK);
-
   while (*c != '"')
   {
     switch (*c)
@@ -1606,8 +1602,6 @@ sparse_quoted_appl(int* c, char** s)
 
   /* First parse the identifier */
   snext_char(c, s);
-
-  assert(*c != STRING_MARK);
 
   while (*c != '"')
   {

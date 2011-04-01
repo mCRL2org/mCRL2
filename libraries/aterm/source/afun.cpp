@@ -42,7 +42,7 @@ static const size_t MAGIC_PRIME = 7;
 /*}}}  */
 /*{{{  globals */
 
-char afun_id[] = "$Id: afun.c 23071 2007-07-02 10:06:17Z eriks $";
+char afun_id[] = "$Id$";
 
 static size_t table_class = INITIAL_AFUN_TABLE_CLASS;
 static MachineWord table_size  = AT_TABLE_SIZE(INITIAL_AFUN_TABLE_CLASS);
@@ -251,61 +251,6 @@ size_t AT_printAFun(AFun fun, FILE* f)
 }
 
 /*}}}  */
-/*{{{  int AT_writeAFun(AFun fun, byte_writer *writer) */
-
-/**
-  * Print an afun.
-  */
-
-/* size_t AT_writeAFun(AFun fun, byte_writer *writer)
-{
-  SymEntry entry = at_lookup_table[fun];
-  char *id = entry->name;
-  size_t size = 0;
-
-  if (IS_QUOTED(entry->header)) {
-    / * This function symbol needs quotes * /
-    write_byte('"', writer);
-    size++;
-    while(*id) {
-      / * We need to escape special characters * /
-      switch(*id) {
-      case '\\':
-      case '"':
-  write_byte('\\', writer);
-  write_byte(*id, writer);
-  size += 2;
-  break;
-      case '\n':
-  write_byte('\\', writer);
-  write_byte('n', writer);
-  size += 2;
-  break;
-      case '\t':
-  write_byte('\\', writer);
-  write_byte('t', writer);
-  size += 2;
-  break;
-      case '\r':
-  write_byte('\\', writer);
-  write_byte('r', writer);
-  size += 2;
-  break;
-      default:
-  write_byte(*id, writer);
-  size++;
-      }
-      id++;
-    }
-    write_byte('"', writer);
-    size++;
-  } else {
-    size += write_bytes(id, strlen(id), writer);
-  }
-  return size;
-} */
-
-/*}}}  */
 
 /*{{{  ShortHashNumber AT_hashAFun(const char *name, int arity) */
 
@@ -440,31 +385,6 @@ void AT_freeAFun(SymEntry sym)
 }
 
 /*}}}  */
-/*{{{  ATbool AT_findAFun(char *name, int arity, ATbool quoted) */
-
-/**
- * Check for the existence of a symbol
- */
-
-/* ATbool AT_findAFun(char *name, size_t arity, ATbool quoted)
-{
-  header_type header = SYMBOL_HEADER(arity, quoted);
-  ShortHashNumber hnr = AT_hashAFun(name, arity) & table_mask;
-  SymEntry cur;
-
-  if(arity >= MAX_ARITY)
-    ATabort("cannot handle symbols with arity %d (max=%d)\n",
-      arity, MAX_ARITY);
-
-  / * Find symbol in table * /
-  cur = hash_table[hnr];
-  while (cur && (!EQUAL_HEADER(cur->header,header) || !streq(cur->name, name)))
-    cur = cur->next;
-
-  return (cur == NULL) ? ATfalse : ATtrue;
-} */
-
-/*}}}  */
 
 /*{{{  void ATprotectAFun(AFun sym) */
 
@@ -547,20 +467,6 @@ void AT_markProtectedAFuns_young()
     }
   }
 }
-
-/*}}}  */
-/*{{{  void AT_unmarkAllAFuns() */
-
-/* void AT_unmarkAllAFuns()
-{
-  AFun s;
-
-  for (s=0; s<table_size; s++) {
-    if (AT_isValidAFun((AFun)s)) {
-      AT_unmarkAFun(s);
-    }
-  }
-} */
 
 /*}}}  */
 

@@ -5,7 +5,6 @@
 #include <string.h>
 #include <assert.h>
 #include "memory.h"
-#include "list.h"
 #include "aterm2.h"
 #include "memory_utility.h"
 
@@ -21,24 +20,10 @@ static const size_t MAGIC_K = 1999;
 /*}}}  */
 /*{{{  variables */
 
-char list_id[] = "$Id: list.c 23071 2007-07-02 10:06:17Z eriks $";
+char list_id[] = "$Id$";
 
 /*}}}  */
 
-/*{{{  void AT_initList(int argc, char *argv[]) */
-
-/**
- * Initialize list operations
- */
-
-void AT_initList(int argc, char* argv[])
-{
-  /* Suppress unused arguments warning */
-  (void) argc;
-  (void) argv;
-}
-
-/*}}}  */
 /*{{{  ATermList ATgetTail(ATermList list, int start) */
 
 ATermList ATgetTail(ATermList list, int start0)

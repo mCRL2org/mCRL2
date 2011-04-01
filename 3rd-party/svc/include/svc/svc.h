@@ -28,7 +28,7 @@
 #include "aterm1.h"
 #include "svc1.h"
 
-
+#include <string>
 
   typedef SVCint SVCstateIndex;
   typedef SVCint SVClabelIndex;
@@ -97,6 +97,6 @@
   SVCint SVCnumParameters(SVCfile*);
   SVCint SVCnumTransitions(SVCfile*);
 
-  char* SVCerror(int);
+  std::string SVCerror(int);
 
 #endif

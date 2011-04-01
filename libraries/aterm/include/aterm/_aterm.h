@@ -13,8 +13,6 @@ namespace aterm
     size_t     size;
   } ProtEntry;
 
-  const int STRING_MARK = 0xFF; /* marker for binary strings */
-
   extern ProtEntry** at_prot_table;
   extern size_t at_prot_table_size;
   extern ProtEntry* at_prot_memory;

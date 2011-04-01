@@ -18,16 +18,19 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: svc1.c,v 1.3 2008/09/30 08:22:51 bertl Exp $ */
+   $Id$ */
 
+// C includes
 #include <stdlib.h>
 #include <string.h>
 #include <errno.h>
-#include <svc/svcerrno.h>
-#include <svc/svc1.h>
 #if defined(_MSC_VER)
 # include <fcntl.h>
 #endif
+
+// svc includes
+#include <svc/svcerrno.h>
+#include <svc/svc1.h>
 
 #if !(defined __USE_SVID || defined __USE_BSD || defined __USE_XOPEN_EXTENDED || defined __APPLE__ || defined _MSC_VER)
 extern char* _strdup(const char* s);
@@ -375,10 +378,6 @@ int svcWriteVersion(ltsFile* file)
 
   CSflush(file->csStates);
   file->versionPosition=CStell(file->csStates);
-  /*
-  fprintf(stderr,"WriteVersion %d at %ld\n",  indexFlag, file->versionPosition);
-     CSuwriteInt(file->csStates, indexFlag);
-  */
   CSuwriteString(file->csStates, SVC_VERSION);
 
   return 0;
@@ -523,7 +522,7 @@ int svcFree(ltsFile* file)
 
 /* Return an error message string for the svc error number in `errnum' */
 
-char* svcError(int errnum)
+std::string svcError(int errnum)
 {
 
   switch (errnum)

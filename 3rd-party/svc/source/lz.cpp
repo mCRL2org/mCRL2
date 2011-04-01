@@ -18,12 +18,12 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: lz.c,v 1.2 2005/11/10 16:11:47 bertl Exp $ */
+   $Id$ */
 
 /* Bert Lisser: scratch buffer changed from fixed data array into reallocable
    array on the heap. Added function "int add2scratch(int last, char *c)" */
 
-#include <string.h>
+#include <string>
 #include <stdlib.h>
 #include <svc/lz.h>
 
@@ -35,7 +35,7 @@ extern char* _strdup(const char* s);
 
 
 
-static int compress(BitStream* bs, LZbuffer* buffer, char* string);
+static int compress(BitStream* bs, LZbuffer* buffer, char* string_);
 static int decompress(BitStream* bs, LZbuffer* buffer, char** str);
 static void LZmakeToken(char c, unsigned int offset, unsigned int length, LZtoken token);
 static void LZsplitToken(char* c, unsigned int* offset, unsigned int* length, LZtoken token);
@@ -164,19 +164,19 @@ static int LZreadToken(BitStream* bs, LZtoken token)
 
 
 
-int LZwriteString(BitStream* bs, LZbuffer* buffer, char* string)
+int LZwriteString(BitStream* bs, LZbuffer* buffer, char* string_)
 {
 
-  compress(bs,buffer,string);
+  compress(bs,buffer,string_);
   return 1;
 }
 
 
 
-int LZreadString(BitStream* bs, LZbuffer* buffer, char** string)
+int LZreadString(BitStream* bs, LZbuffer* buffer, char** string_)
 {
 
-  decompress(bs,buffer,string);
+  decompress(bs,buffer,string_);
   return 1;
 }
 
@@ -226,7 +226,7 @@ int LZreadATerm(BitStream* bs, LZbuffer* buffer, ATerm* term)
 
 
 
-static int compress(BitStream* bs, LZbuffer* buffer, char* string)
+static int compress(BitStream* bs, LZbuffer* buffer, char* string_)
 {
   int i=0,j=0,k=0;
   int offset=0,length=0;
@@ -238,14 +238,14 @@ static int compress(BitStream* bs, LZbuffer* buffer, char* string)
 
     length=1;
     offset=0;
-    c=string[i];
+    c=string_[i];
     for (j=0; j<SEARCHBUF_SIZE-length; j++)
     {
-      for (k=0; string[i+k]!='\0' && string[i+k]==buffer->search[(buffer->last-j+k+SEARCHBUF_SIZE)%SEARCHBUF_SIZE]&&k<LOOKAHEADBUF_SIZE; k++)
+      for (k=0; string_[i+k]!='\0' && string_[i+k]==buffer->search[(buffer->last-j+k+SEARCHBUF_SIZE)%SEARCHBUF_SIZE]&&k<LOOKAHEADBUF_SIZE; k++)
       {
-        buffer->search[(buffer->last+k+1+SEARCHBUF_SIZE)%SEARCHBUF_SIZE]=string[i+k];
+        buffer->search[(buffer->last+k+1+SEARCHBUF_SIZE)%SEARCHBUF_SIZE]=string_[i+k];
       }
-      if (string[i+k]=='\0'&&
+      if (string_[i+k]=='\0'&&
           buffer->search[(buffer->last-j+k+SEARCHBUF_SIZE)%SEARCHBUF_SIZE]=='\0' &&
           k<LOOKAHEADBUF_SIZE)
       {
@@ -262,7 +262,7 @@ static int compress(BitStream* bs, LZbuffer* buffer, char* string)
       }
     }
 
-    buffer->search[(buffer->last+length)%SEARCHBUF_SIZE]=string[i+length-1];
+    buffer->search[(buffer->last+length)%SEARCHBUF_SIZE]=string_[i+length-1];
     LZmakeToken(c,  offset, length, token);
     LZwriteToken(bs, token);
 
@@ -270,7 +270,7 @@ static int compress(BitStream* bs, LZbuffer* buffer, char* string)
 
     i+=length;
   }
-  while (string[i-1]!='\0');
+  while (string_[i-1]!='\0');
 
   return 1;
 }

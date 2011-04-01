@@ -29,7 +29,9 @@
 
 #include "compress.h"
 
-#define SVC_VERSION     "1.2 beta"
+#include <string>
+
+#define SVC_VERSION  "1.2 beta"
 
   typedef long             SVCint;
   typedef enum {SVCfalse=0,
@@ -96,6 +98,6 @@
   int svcWriteTransition(ltsFile*,  struct ltsTransition*);
   int svcWriteTrailer(ltsFile*);
   int svcFree(ltsFile*);
-  char* svcError(int errnum);
+  std::string svcError(int errnum);
 
 #endif

@@ -18,10 +18,10 @@
    along with this program; if not, write to the Free Software
    Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
 
-   $Id: svc2.c,v 1.3 2008/09/30 08:22:51 bertl Exp $ */
+   $Id$ */
 
-#include <string.h>
 #include <time.h>
+#include <string>
 #include <svc/svcerrno.h>
 #include <svc/svc.h>
 
@@ -497,7 +497,7 @@ SVCint SVCnumTransitions(SVCfile* file)
 }
 
 
-char* SVCerror(int errnum)
+std::string SVCerror(int errnum)
 {
 
   switch (errnum)
