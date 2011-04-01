@@ -652,7 +652,7 @@ static void print_state(FILE* f,ATerm state)
 {
   size_t arity = ATgetArity(ATgetAFun((ATermAppl) state));
   fprintf(f,"[");
-  for (int i=0; i<arity; i++)
+  for (size_t i = 0; i<arity; i++)
   {
     if (i == 0)
     {
@@ -873,7 +873,7 @@ SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool
   }
 }
 
-int WriteData(SVCstateIndex initState, bool omit_tauloops)
+int WriteData(SVCstateIndex initState, int omit_tauloops)
 {
   static char buf[1024];
   SVCbool nnew;
