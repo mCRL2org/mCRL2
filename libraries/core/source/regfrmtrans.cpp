@@ -188,7 +188,7 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
   {
     //implement expressions in the arguments of part
     AFun head = ATgetAFun(part);
-    int nr_args = ATgetArity(head);
+    size_t nr_args = ATgetArity(head);
     if (nr_args > 0)
     {
       MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATerm,nr_args);

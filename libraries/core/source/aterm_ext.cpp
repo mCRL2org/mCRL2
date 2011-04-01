@@ -59,7 +59,7 @@ ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
     {
       //Term is an ATermAppl; distribute substitutions over the arguments
       AFun Head = ATgetAFun((ATermAppl) Term);
-      int NrArgs = ATgetArity(Head);
+      size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
@@ -112,7 +112,7 @@ ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive)
     {
       //Term is an ATermAppl; distribute substitutions over the arguments
       AFun Head = ATgetAFun((ATermAppl) Term);
-      int NrArgs = ATgetArity(Head);
+      size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
         MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
@@ -177,7 +177,7 @@ bool gsOccurs(ATerm Elt, ATerm Term)
     if (ATgetType(Term) == AT_APPL)
     {
       AFun Head = ATgetAFun((ATermAppl) Term);
-      int NrArgs = ATgetArity(Head);
+      size_t NrArgs = ATgetArity(Head);
       for (int i = 0; i < NrArgs && !Result; i++)
       {
         Result = gsOccurs(Elt, ATgetArgument((ATermAppl) Term, i));

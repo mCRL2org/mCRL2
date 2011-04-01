@@ -2362,8 +2362,8 @@ static int AT_compareLists(ATermList t1, ATermList t2)
 
 int ATcompare(ATerm t1, ATerm t2)
 {
-  int type1;
-  int type2;
+  size_t type1;
+  size_t type2;
   int result = 0;
 
   if (ATisEqual(t1, t2))

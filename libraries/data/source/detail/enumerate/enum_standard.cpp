@@ -338,8 +338,8 @@ ATerm EnumeratorSolutionsStandard::build_solution_aux_innerc(ATerm t, ATermList 
   else
   {
     ATerm head = ATgetArgument((ATermAppl) t,0);
-    int arity = ATgetArity(ATgetAFun((ATermAppl) t));
-    int extra_arity = 0;
+    size_t arity = ATgetArity(ATgetAFun((ATermAppl) t));
+    size_t extra_arity = 0;
 
     if (!ATisInt(head))
     {
@@ -366,7 +366,7 @@ ATerm EnumeratorSolutionsStandard::build_solution_aux_innerc(ATerm t, ATermList 
     }
 
     args[0] = head;
-    for (int i=1; i<arity; i++,k++)
+    for (size_t i=1; i<arity; i++,k++)
     {
       args[k] = build_solution_aux_innerc(ATgetArgument((ATermAppl) t,i),substs);
     }

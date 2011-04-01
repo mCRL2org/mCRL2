@@ -658,7 +658,7 @@ static void add_term(sym_entry* entry, ATerm t)
 
 static void collect_terms(ATerm t)
 {
-  AFun sym = (AFun)-1; // Reset on all non-error paths...
+  AFun sym;
   sym_entry* entry;
 
   if (!IS_MARKED(t->header))
@@ -686,7 +686,7 @@ static void collect_terms(ATerm t)
       case AT_APPL:
       {
         ATermAppl appl = (ATermAppl)t;
-        int cur_arity, cur_arg;
+        size_t cur_arity, cur_arg;
 
         sym = ATgetAFun(appl);
         cur_arity = ATgetArity(sym);
@@ -698,6 +698,7 @@ static void collect_terms(ATerm t)
       break;
       default:
         ATerror("collect_terms: illegal term\n");
+        sym = (AFun)(-1); // Kill compiler warnings
         break;
     }
     entry = &sym_entries[at_lookup_table[sym]->index];

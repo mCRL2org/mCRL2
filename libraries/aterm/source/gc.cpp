@@ -601,7 +601,7 @@ static void reclaim_empty_block(size_t blocks, size_t size, Block* removed_block
    */
   if (at_freeblocklist_size > max_freeblocklist_size)
   {
-    int idx, next_idx;
+    size_t idx, next_idx;
     Block* cur;
     Block* prev = NULL;
 

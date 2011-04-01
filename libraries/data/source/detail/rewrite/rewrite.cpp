@@ -119,11 +119,11 @@ void Rewriter::setSubstitutionList(ATermList Substs)
 
 void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
-  long n = ATgetAFun(ATgetArgument(Var,0));
+  size_t n = ATgetAFun(ATgetArgument(Var,0));
 
   if (n >= substs_size)
   {
-    long newsize;
+    size_t newsize;
 
     if (n >= 2*substs_size)
     {
@@ -152,7 +152,7 @@ void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
       throw mcrl2::runtime_error("Failed to increase the size of a substitution array.");
     }
 
-    for (long i=substs_size; i<newsize; i++)
+    for (size_t i=substs_size; i<newsize; i++)
     {
       substs[i]=NULL;
     }
@@ -185,7 +185,7 @@ ATerm Rewriter::getSubstitutionInternal(ATermAppl Var)
 
 void Rewriter::clearSubstitution(ATermAppl Var)
 {
-  long n = ATgetAFun(ATgetArgument(Var,0));
+  size_t n = ATgetAFun(ATgetArgument(Var,0));
 
   if (n < substs_size)
   {
@@ -195,7 +195,7 @@ void Rewriter::clearSubstitution(ATermAppl Var)
 
 void Rewriter::clearSubstitutions()
 {
-  for (long i=0; i<substs_size; i++)
+  for (size_t i=0; i<substs_size; i++)
   {
     substs[i] = NULL;
   }
@@ -211,7 +211,7 @@ void Rewriter::clearSubstitutions(ATermList Vars)
 
 ATerm Rewriter::lookupSubstitution(ATermAppl Var)
 {
-  long n = ATgetAFun(ATgetArgument(Var,0));
+  size_t n = ATgetAFun(ATgetArgument(Var,0));
 
   if (n >= substs_size)
   {

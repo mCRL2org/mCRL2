@@ -66,7 +66,7 @@ class function_symbol
 
     /// \brief Return the arity (number of arguments) of the function symbol (function_symbol).
     /// \return The arity of the function symbol.
-    unsigned int arity() const
+    size_t arity() const
     {
       return ATgetArity(m_function);
     }

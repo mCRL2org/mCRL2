@@ -82,7 +82,7 @@ class Invariant_Checker
     bool f_all_violations;
     std::string f_dot_file_name;
     void print_counter_example();
-    void save_dot_file(int a_summand_number);
+    void save_dot_file(size_t a_summand_number);
     bool check_init(const data::data_expression a_invariant);
     bool check_summand(const data::data_expression a_invariant, const action_summand a_summand, const size_t a_summand_number);
     bool check_summands(const data::data_expression a_invariant);

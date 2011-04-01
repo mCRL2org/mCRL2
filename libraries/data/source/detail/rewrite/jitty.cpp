@@ -168,8 +168,8 @@ ATermAppl RewriterJitty::toInner(ATermAppl Term, bool add_opids)
     }
     else
     {
-      int arity = ATgetArity(ATgetAFun(arg0));
-      for (int i = 0; i < arity; ++i)
+      size_t arity = ATgetArity(ATgetAFun(arg0));
+      for (size_t i = 0; i < arity; ++i)
       {
         l = ATinsert(l, ATgetArgument(arg0, i));
       }
@@ -716,9 +716,9 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
       return false;
     }
 
-    int arity = ATgetArity(ATgetAFun((ATermAppl) p));
+    size_t arity = ATgetArity(ATgetAFun((ATermAppl) p));
 
-    for (int i=0; i<arity; i++)
+    for (size_t i=0; i<arity; i++)
     {
       if (!match_jitty(ATgetArgument((ATermAppl) t,i),ATgetArgument((ATermAppl) p,i),vars,vals,len))
       {

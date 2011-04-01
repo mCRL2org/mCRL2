@@ -242,7 +242,7 @@ class Rewriter
 
   private:
     ATerm* substs;
-    long substs_size;
+    size_t substs_size;
 };
 
 /**

@@ -153,18 +153,17 @@ class AM_Jitty: public ATerm_Manipulator
 
       AFun v_symbol;
       ATerm v_function;
-      int v_arity;
+      size_t v_arity;
 
       v_symbol = ATgetAFun(a_formula);
       v_function = ATgetArgument(a_formula, 0);
       v_arity = ATgetArity(v_symbol);
 
       ATerm* v_parts;
-      int i;
 
       v_parts = new ATerm[v_arity + 1];
       v_parts[0] = v_function;
-      for (i = 1; i < v_arity; i++)
+      for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = set_true_auxiliary(ATgetArgument(a_formula, i), a_guard);
       }
@@ -202,18 +201,17 @@ class AM_Jitty: public ATerm_Manipulator
 
       AFun v_symbol;
       ATerm v_function;
-      int v_arity;
+      size_t v_arity;
 
       v_symbol = ATgetAFun(a_formula);
       v_function = ATgetArgument(a_formula, 0);
       v_arity = ATgetArity(v_symbol);
 
       ATerm* v_parts;
-      int i;
 
       v_parts = new ATerm[v_arity + 1];
       v_parts[0] = v_function;
-      for (i = 1; i < v_arity; i++)
+      for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = set_false_auxiliary(ATgetArgument(a_formula, i), a_guard);
       }
@@ -279,18 +277,17 @@ class AM_Jitty: public ATerm_Manipulator
 
       AFun v_symbol;
       ATerm v_function;
-      int v_arity;
+      size_t v_arity;
 
       v_symbol = ATgetAFun(a_term);
       v_function = ATgetArgument(a_term, 0);
       v_arity = ATgetArity(v_symbol);
 
       ATerm* v_parts;
-      int i;
 
       v_parts = new ATerm[v_arity + 1];
       v_parts[0] = v_function;
-      for (i = 1; i < v_arity; i++)
+      for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = orient(ATgetArgument(a_term, i));
       }

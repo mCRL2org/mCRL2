@@ -32,7 +32,7 @@ class term_appl: public aterm_base
     /// built-in C++ operator[](ATermAppl, int)
     /// \param i A positive integer
     /// \return The default constructed term
-    Term operator[](unsigned int i) const
+    Term operator[](size_t i) const
     {
       return Term();
     }
@@ -204,7 +204,7 @@ class term_appl: public aterm_base
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
     /// \return The argument with the given index.
-    Term operator()(unsigned int i) const
+    Term operator()(size_type i) const
     {
       return Term(ATgetArgument(appl(), i));
     }
@@ -214,7 +214,7 @@ class term_appl: public aterm_base
     /// \param t A term
     /// \param i A positive integer
     /// \return The term with one of its arguments replaced.
-    term_appl<Term> set_argument(Term t, size_t i)
+    term_appl<Term> set_argument(Term t, size_type i)
     {
       return ATsetArgument(appl(), t, i);
     }
@@ -223,7 +223,7 @@ class term_appl: public aterm_base
     /// \deprecated
     /// \param i A positive integer
     /// \return The argument with the given index.
-    aterm argument(size_t i) const
+    aterm argument(size_type i) const
     {
       return aterm(ATgetArgument(appl(), i));
     }

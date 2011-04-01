@@ -148,7 +148,7 @@ static inline bool gstcIsPos(ATermAppl Number)
 }
 static inline bool gstcIsNat(ATermAppl Number)
 {
-  return (bool) isdigit(gsATermAppl2String(Number)[0]);
+  return isdigit(gsATermAppl2String(Number)[0]) != 0;
 }
 
 static inline ATermAppl INIT_KEY(void)
@@ -3120,7 +3120,7 @@ static inline ATermAppl gstcMakeActionOrProc(bool action, ATermAppl Name,
 static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTerm)
 {
   ATermAppl Result=NULL;
-  int n = ATgetArity(ATgetAFun(ProcTerm));
+  size_t n = ATgetArity(ATgetAFun(ProcTerm));
   if (n==0)
   {
     return ProcTerm;

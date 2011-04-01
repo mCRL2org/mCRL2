@@ -45,7 +45,7 @@ void Invariant_Checker::print_counter_example()
 
 // --------------------------------------------------------------------------------------------
 
-void Invariant_Checker::save_dot_file(int a_summand_number)
+void Invariant_Checker::save_dot_file(size_t a_summand_number)
 {
   if (! f_dot_file_name.empty())
   {
@@ -53,7 +53,7 @@ void Invariant_Checker::save_dot_file(int a_summand_number)
 
     v_file_name << f_dot_file_name;
 
-    if (a_summand_number == -1)
+    if (a_summand_number == (size_t)-1) // Dangerous
     {
       v_file_name << "-init.dot";
     }
@@ -88,7 +88,7 @@ bool Invariant_Checker::check_init(const data_expression a_invariant)
     if (f_bdd_prover.is_contradiction() != answer_yes)
     {
       print_counter_example();
-      save_dot_file(-1);
+      save_dot_file((size_t)(-1));
     }
     return false;
   }

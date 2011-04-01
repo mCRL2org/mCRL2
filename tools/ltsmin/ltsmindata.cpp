@@ -650,7 +650,7 @@ void GetBlockBoundaries(SVCint b, SVCstateIndex* left, SVCstateIndex* right)
 
 static void print_state(FILE* f,ATerm state)
 {
-  int arity = ATgetArity(ATgetAFun((ATermAppl) state));
+  size_t arity = ATgetArity(ATgetAFun((ATermAppl) state));
   fprintf(f,"[");
   for (int i=0; i<arity; i++)
   {
@@ -873,7 +873,7 @@ SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool
   }
 }
 
-int WriteData(SVCstateIndex initState, int omit_tauloops)
+int WriteData(SVCstateIndex initState, bool omit_tauloops)
 {
   static char buf[1024];
   SVCbool nnew;
@@ -918,21 +918,23 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
 }
 
 
-int state_arity = -1;
+size_t state_arity = (size_t)-1; // Yikes... why is this declared here?
 ATerm* state_args;
 AFun state_afun;
+
 SVCstateIndex get_new_state(SVCfile* in, SVCstateIndex s)
 {
   ATermAppl state = (ATermAppl) SVCstate2ATerm(in,s);
 
-  if (state_arity < 0)
+  if (state_arity != (size_t)(-1))
   {
     state_arity = ATgetArity(ATgetAFun(state));
     state_args = (ATerm*) malloc((state_arity+1)*sizeof(ATerm));
     state_afun = ATmakeAFun(ATgetName(ATgetAFun(state)),state_arity+1,false);
   }
 
-  for (int i=0; i<state_arity; i++)
+  assert(state_arity != (size_t)(-1));
+  for (size_t i=0; i<state_arity; i++)
   {
     state_args[i] = ATgetArgument(state,i);
   }
