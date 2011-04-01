@@ -28,8 +28,6 @@ namespace aterm
 
 /*{{{  defines */
 
-#define MCRL2_LOW_MEMORY_FLAG "-at-low-memory"
-
 static const size_t DEFAULT_BUFFER_SIZE = 4096;
 
 static const int ERROR_SIZE = 32;
@@ -54,10 +52,7 @@ static const size_t PROTECT_FUNC_EXPAND_SIZE = 32;
 /*}}}  */
 /*{{{  globals */
 
-char            aterm_id[] = "$Id: aterm.c 24415 2007-12-12 14:20:55Z eriks $";
-
-/* Flag to tell whether to keep quiet or not. */
-bool low_memory = false;
+char            aterm_id[] = "$Id$";
 
 /* Flag set when ATinit is called. */
 static bool initialized = false;
@@ -137,12 +132,7 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
     return;
   }
 
-  /*{{{  Optionally print some information */
-
-  AT_init_gc_parameters(low_memory);
-
-  /*}}}  */
-  /*{{{  Perform some sanity checks */
+  AT_init_gc_parameters();
 
   /* Protect novice users that simply pass NULL as bottomOfStack */
   if (bottomOfStack == NULL)
@@ -388,7 +378,6 @@ void ATunprotectArray(ATerm* start)
 void ATaddProtectFunction(ATermProtFunc f)
 {
   ATermProtFunc* new_at_prot_functions;
-  size_t old_at_prot_functions_size = at_prot_functions_size;
 
   if (at_prot_functions_count == at_prot_functions_size)
   {
@@ -399,23 +388,10 @@ void ATaddProtectFunction(ATermProtFunc f)
     }
     else
     {
-      if (low_memory)
-      {
-        at_prot_functions_size += 1;
-      }
-      else
-      {
-        at_prot_functions_size += PROTECT_FUNC_EXPAND_SIZE;
-      }
+      at_prot_functions_size += PROTECT_FUNC_EXPAND_SIZE;
 
-      new_at_prot_functions = (ATermProtFunc*) AT_realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
-
-      /* Reallocation failed again; try with a single extra element */
-      if ((!new_at_prot_functions) && (!low_memory))
-      {
-        at_prot_functions_size = old_at_prot_functions_size + 1;
-        new_at_prot_functions = (ATermProtFunc*) AT_realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
-      }
+      new_at_prot_functions = (ATermProtFunc*) 
+             AT_realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
     }
 
     if (!new_at_prot_functions)

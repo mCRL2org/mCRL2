@@ -95,7 +95,7 @@ void CHECK_TERM(const ATerm t)
 /*}}}  */
 /*{{{  globals */
 
-char memory_id[] = "$Id: memory.c 23465 2007-08-27 09:35:50Z eriks $";
+char memory_id[] = "$Id$";
 
 size_t maxTermSize = INITIAL_MAX_TERM_SIZE;
 
@@ -469,15 +469,9 @@ void AT_growMaxTermSize(size_t neededsize)
   TermInfo* newterminfo;
   size_t newsize;
 
-  if (low_memory)
-  {
-    newsize = neededsize;
-  }
-  else
-  {
-    /* Grow twice as much as currently needed, to accomodate for future growth */
-    newsize = maxTermSize+(neededsize-maxTermSize)*2;
-  }
+  /* Grow to the minimum of what is needed and twice as the current size,
+     to avoid the overhead of repeatedly growing chuncks of memory */
+  newsize = (neededsize> 2*maxTermSize?neededsize:2*maxTermSize);
 
 #ifndef NDEBUG
   fprintf(stderr, "Growing administrative structures to accomodate terms of size %lu\n", newsize);
@@ -490,7 +484,7 @@ void AT_growMaxTermSize(size_t neededsize)
     newsize = neededsize;
     newterminfo = (TermInfo*)AT_realloc((void*)terminfo, newsize*sizeof(TermInfo));
   }
-  if (!newsize)
+  if (!newterminfo)
   {
     ATerror("AT_growMaxTermSize: cannot allocate %d extra TermInfo elements.\n", newsize-maxTermSize);
   }

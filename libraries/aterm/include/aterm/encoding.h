@@ -96,7 +96,7 @@ namespace aterm
   static const header_type SHIFT_TYPE = _HT(4);
   static const header_type SHIFT_ARITY = _HT(7);
   static const header_type SHIFT_AGE = _HT(0);
-  static const header_type SHIFT_REMOVE_MARK_AGE = _HT(3);
+  // static const header_type SHIFT_REMOVE_MARK_AGE = _HT(3);   Not used.
 //#define SHIFT_TYPE       4
 //#define SHIFT_ARITY      7
 //#define SHIFT_AGE        0
@@ -337,7 +337,7 @@ namespace aterm
 static const size_t FREE_HEADER = AT_FREE << SHIFT_TYPE;
 //#define FREE_HEADER               (AT_FREE << SHIFT_TYPE)
 
-static const size_t ARG_OFFSET = TERM_SIZE_APPL(0);
+  static const size_t ARG_OFFSET = TERM_SIZE_APPL(0);
 //#define ARG_OFFSET                TERM_SIZE_APPL(0)
 
 static const size_t MAX_HEADER_BITS = 64;
@@ -362,7 +362,7 @@ MachineWord AT_TABLE_MASK(const size_t table_class)
 static const size_t INT_SIZE_IN_BAF = 32;
 //#define INT_SIZE_IN_BAF 32
 
-static const size_t MAX_ARITY = MAX_LENGTH;
+  static const size_t MAX_ARITY = MAX_LENGTH;
 //#define MAX_ARITY             MAX_LENGTH
 
 static const size_t MIN_TERM_SIZE = TERM_SIZE_APPL(0);

@@ -26,7 +26,7 @@ namespace aterm
 
 /*{{{  global variables */
 
-char gc_id[] = "$Id: gc.c 23071 2007-07-02 10:06:17Z eriks $";
+char gc_id[] = "$Id$";
 
 static ATerm* stackBot = NULL;
 
@@ -521,32 +521,17 @@ void sweep_phase()
 }
 
 /*}}}  */
-/*{{{  void AT_init_gc_parameters(ATbool low_memory)  */
+/*{{{  void AT_init_gc_parameters()  */
 
-void AT_init_gc_parameters(bool low_memory)
+void AT_init_gc_parameters()
 {
-  if (low_memory)
-  {
-    gc_min_number_of_blocks = 2;
-    max_freeblocklist_size  = 30;
-    min_nb_minor_since_last_major = 2;
-
-    good_gc_ratio = 50;
-    small_allocation_rate_ratio = 25;
-    old_increase_rate_ratio = 50;
-
-  }
-  else
-  {
-    /* 20MB for 10 sizes in average*/
-    gc_min_number_of_blocks = 2*(20*1024*1024)/(10*sizeof(Block));
-    max_freeblocklist_size  = 100;
-    min_nb_minor_since_last_major = 10;
-    good_gc_ratio = 50;
-    small_allocation_rate_ratio = 75;
-    old_increase_rate_ratio = 50;
-
-  }
+  /* 20MB for 10 sizes in average*/
+  gc_min_number_of_blocks = 2*(20*1024*1024)/(10*sizeof(Block));
+  max_freeblocklist_size  = 100;
+  min_nb_minor_since_last_major = 10;
+  good_gc_ratio = 50;
+  small_allocation_rate_ratio = 75;
+  old_increase_rate_ratio = 50;
 }
 
 /*}}}  */

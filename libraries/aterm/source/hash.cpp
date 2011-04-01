@@ -220,8 +220,7 @@ static void insertKeyValue(ATermIndexedSet s,
   if (keytable == NULL)
   {
     /* create a new key table */
-    /* keytable = AT_alloc_protected_minmax(y+1, ELEMENTS_PER_TABLE);  JFG */
-    keytable = AT_alloc_protected_minmax(ELEMENTS_PER_TABLE, ELEMENTS_PER_TABLE);
+    keytable = AT_alloc_protected(ELEMENTS_PER_TABLE);
     s->keys[x] = keytable;
     if (keytable == NULL)
     {
@@ -230,31 +229,11 @@ static void insertKeyValue(ATermIndexedSet s,
 
     if (s->values != NULL)
     {
-      /* valuetable = AT_alloc_protected_minmax(y+1, ELEMENTS_PER_TABLE); */
-      valuetable = AT_alloc_protected_minmax(ELEMENTS_PER_TABLE, ELEMENTS_PER_TABLE);
+      valuetable = AT_alloc_protected(ELEMENTS_PER_TABLE);
       s->values[x] = valuetable;
       if (valuetable == NULL)
       {
         ATerror("insertKeyValue: Cannot create new value table\n");
-      }
-    }
-  }
-  else if (n == s->nr_entries-1)
-  {
-    keytable = AT_grow_protected((ATerm*)s->keys[x], y+1);
-    s->keys[x] = keytable;
-    if (keytable == NULL)
-    {
-      ATerror("insertKeyValue: Cannot grow key table\n");
-    }
-
-    if (s->values != NULL)
-    {
-      valuetable = AT_grow_protected((ATerm*)s->values[x], y+1);
-      s->values[x] = valuetable;
-      if (valuetable == NULL)
-      {
-        ATerror("insertKeyValue: Cannot grow value table\n");
       }
     }
   }
@@ -655,11 +634,11 @@ void ATtableReset(ATermTable table)
              (table->keys[i]!=NULL)); i++)
   {
     /* table->keys[i] = AT_realloc_protected_minmax(table->keys[i], 0, ELEMENTS_PER_TABLE);   JFG */
-    table->keys[i] = AT_realloc_protected_minmax(table->keys[i], ELEMENTS_PER_TABLE, ELEMENTS_PER_TABLE);
+    table->keys[i] = AT_realloc_protected(table->keys[i], ELEMENTS_PER_TABLE);
     if (table->values!=NULL)
     {
       /* table->values[i] = AT_realloc_protected_minmax(table->values[i], 0, ELEMENTS_PER_TABLE);   */
-      table->values[i] = AT_realloc_protected_minmax(table->values[i], ELEMENTS_PER_TABLE, ELEMENTS_PER_TABLE);
+      table->values[i] = AT_realloc_protected(table->values[i], ELEMENTS_PER_TABLE);
     }
   }
 
