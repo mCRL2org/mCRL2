@@ -170,8 +170,6 @@ inline size_t ADDR_TO_BLOCK_IDX(void* a)
   void* AT_realloc(void* ptr, size_t size);
   void AT_free(void* ptr);
   ATerm* AT_alloc_protected(size_t nelem);
-  ATerm* AT_realloc_protected(ATerm* term, size_t nelem);
-  ATerm* AT_grow_protected(ATerm* term, size_t nelem);
   void AT_free_protected(ATerm* term);
   void AT_free_protected_blocks(); 
 

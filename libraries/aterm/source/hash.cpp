@@ -630,24 +630,17 @@ void ATtableReset(ATermTable table)
     table->hashtable[i] = EMPTY;
   }
 
-  for (i=0; ((i<table->nr_tables) &&
-             (table->keys[i]!=NULL)); i++)
+  for (i=0; (i<table->nr_tables) && (table->keys[i]!=NULL); i++)
   {
-    /* table->keys[i] = AT_realloc_protected_minmax(table->keys[i], 0, ELEMENTS_PER_TABLE);   JFG */
-    table->keys[i] = AT_realloc_protected(table->keys[i], ELEMENTS_PER_TABLE);
+    AT_free_protected(table->keys[i]);
+    table->keys[i]=NULL;
     if (table->values!=NULL)
     {
-      /* table->values[i] = AT_realloc_protected_minmax(table->values[i], 0, ELEMENTS_PER_TABLE);   */
-      table->values[i] = AT_realloc_protected(table->values[i], ELEMENTS_PER_TABLE);
+      AT_free_protected(table->values[i]);
+      table->values[i]=NULL;
     }
   }
 
-  /*
-    for(i=0; ((i<table->nr_free_tables) &&
-        (table->free_table[i]!=NULL)); i++) {
-      memset(table->free_table[i], 0, ELEMENTS_PER_TABLE);
-    }
-  */
   table->first_free_position = 0;
 }
 

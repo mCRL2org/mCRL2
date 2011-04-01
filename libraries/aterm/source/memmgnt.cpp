@@ -220,7 +220,7 @@ ATprotected_block find_free_block(size_t new_size)
   protected_blocks = block;
 
   return block;
-}
+} 
 
 ATprotected_block find_block(ATerm* term)
 {
@@ -368,30 +368,7 @@ ATerm* AT_alloc_protected(size_t size)
     return NULL;
   }
   return block->term;
-}
-
-ATerm* AT_realloc_protected(ATerm* term, size_t size)
-{
-  /* Resize an existing block to the new protected size
-   */
-  ATprotected_block block;
-
-  if (!term)
-  {
-    return AT_alloc_protected(size);
-  }
-
-  block = find_block(term);
-  assert(block);
-
-  block = resize_block(block, size);
-  if (!block)
-  {
-    return NULL;
-  }
-
-  return block->term;
-}
+} 
 
 void AT_free_protected(ATerm* term)
 {
