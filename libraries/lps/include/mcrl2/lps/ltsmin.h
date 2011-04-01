@@ -31,25 +31,6 @@ namespace mcrl2 {
 
 namespace lps {
 
-namespace detail {
-
-  /// \brief Returns the index of an aterm in an indexed set. If the aterm is not present yet,
-  /// it will be added.
-  inline
-  std::size_t indexed_set_index(atermpp::indexed_set& s, const atermpp::aterm& x)
-  {
-    std::size_t result = s.index(x);
-    if (result == (std::size_t) -1)
-    {
-      std::pair<std::size_t, bool> p = s.put(x);
-      assert(p.second);
-      return p.first;
-    }
-    return result;
-  }
-
-} // namespace detail
-
 inline
 data::rewriter::strategy parse_rewriter_strategy(const std::string& rewriter_strategy)
 {
@@ -240,7 +221,7 @@ class pins
     /// \brief Returns the index of the aterm x in the first datatype map. If it is not present yet, it will be added.
     std::size_t aterm2index(const atermpp::aterm& x)
     {
-      return detail::indexed_set_index(m_datatype_mappings[0], x);
+      return m_datatype_mappings[0][x];
     }
 
     atermpp::aterm index2aterm(std::size_t i) const
@@ -260,7 +241,7 @@ class pins
 
     std::size_t label2index(const atermpp::aterm_appl& x)
     {
-      return detail::indexed_set_index(m_datatype_mappings[1], x);
+      return m_datatype_mappings[1][x];
     }
                                    
     /// \brief Converts state component represented as integers into aterms (in the next state format).
@@ -387,7 +368,7 @@ class pins
         lps::multi_action a = lps::parse_multi_action(s, m_generator.get_specification().action_labels(), m_generator.get_specification().data());
         // TODO: change this when multi_action becomes a proper term
         ATermAppl t = core::detail::gsMakeMultAct(a.actions());
-        return detail::indexed_set_index(m_datatype_mappings[0], atermpp::aterm_appl(t));
+        return m_datatype_mappings[0][atermpp::aterm_appl(t)];
       }
       throw std::runtime_error("Out of bounds error in pins::parse!");
     }

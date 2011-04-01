@@ -86,6 +86,23 @@ class indexed_set
       return ATindexedSetGetIndex(m_set.get(), elem);
     }
 
+    /// \brief Find the index of elem in set.
+    /// The index assigned to elem is returned. When elem is not in the set, it
+    /// will be added first.
+    /// \param elem An element of the set.
+    /// \return The index of the element.
+    size_t operator[](const aterm& elem) const
+    {
+      std::size_t result = ATindexedSetGetIndex(m_set.get(), elem);
+      if (result == (std::size_t) -1)
+      {
+        bool b;
+        result = ATindexedSetPut(m_set.get(), elem, &b);
+        assert(b);
+      }
+      return result;
+    }
+
     /// \brief Retrieve the element at index in set.
     /// This function must be invoked with a valid index and it returns the elem assigned
     /// to this index. If it is invoked with an invalid index, effects are not predictable.
