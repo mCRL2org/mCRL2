@@ -24,7 +24,7 @@
 #include <fstream>
 #include <string>
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/aterm_ext.h"
+#include <aterm_ext.h>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct_core.h"

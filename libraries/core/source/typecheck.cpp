@@ -15,7 +15,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/aterm_ext.h"
+#include <aterm_ext.h>
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/basic_sort.h"

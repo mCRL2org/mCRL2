@@ -32,7 +32,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include <aterm_ext.h>
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/assignment.h"
 

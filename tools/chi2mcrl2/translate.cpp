@@ -24,7 +24,7 @@
 #include "libstruct_core.h"
 #include <limits.h>
 
-#include "mcrl2/core/aterm_ext.h"
+#include <aterm_ext.h>
 
 using namespace mcrl2::core;
 using namespace std;

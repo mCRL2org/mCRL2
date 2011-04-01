@@ -30,7 +30,7 @@
 #include "xsimmain.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/aterm_ext.h"
+#include <aterm_ext.h>
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)

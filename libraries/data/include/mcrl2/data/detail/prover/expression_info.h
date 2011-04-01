@@ -12,7 +12,7 @@
 #ifndef EXPRESSION_INFO_H
 #define EXPRESSION_INFO_H
 
-#include "mcrl2/core/aterm_ext.h"
+#include <aterm_ext.h>
 #include "mcrl2/data/application.h"
 
 

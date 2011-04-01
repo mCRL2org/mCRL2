@@ -21,7 +21,7 @@
 #include <aterm2.h>
 #include "lpstrans.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include <aterm_ext.h>
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/exception.h"

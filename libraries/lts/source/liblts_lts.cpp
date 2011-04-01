@@ -11,7 +11,7 @@
 #include <string>
 #include <sstream>
 #include "svc/svc.h"
-#include "mcrl2/core/aterm_ext.h"
+#include <aterm_ext.h>
 #include "mcrl2/lts/lts_lts.h"
 
 

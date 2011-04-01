@@ -23,6 +23,7 @@ add_library(${PROJECT_NAME}
   source/byteencoding.cpp
   source/byteio.cpp
   source/gc.cpp
+  source/aterm_ext.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/aterm)
