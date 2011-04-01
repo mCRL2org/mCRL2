@@ -29,6 +29,8 @@
 
 #include "compress.h"
 
+#include "string.h"
+
 #include <string>
 
 #define SVC_VERSION  "1.2 beta"

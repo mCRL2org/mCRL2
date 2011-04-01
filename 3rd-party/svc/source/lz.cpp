@@ -23,8 +23,9 @@
 /* Bert Lisser: scratch buffer changed from fixed data array into reallocable
    array on the heap. Added function "int add2scratch(int last, char *c)" */
 
-#include <string>
+#include <string.h>
 #include <stdlib.h>
+#include <string>
 #include <svc/lz.h>
 
 using namespace aterm;

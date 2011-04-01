@@ -28,8 +28,6 @@
 #include "aterm1.h"
 #include "svc1.h"
 
-#include <string>
-
   typedef SVCint SVCstateIndex;
   typedef SVCint SVClabelIndex;
   typedef SVCint SVCparameterIndex;
