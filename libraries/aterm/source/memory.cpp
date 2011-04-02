@@ -163,12 +163,11 @@ static size_t term_size(ATerm t)
 
 static HashNumber hash_number(ATerm t, size_t size)
 {
-  size_t i;
   HashNumber hnr;
 
   hnr = START(HIDE_AGE_MARK(t->word[0]));
 
-  for (i=ARG_OFFSET; i<size; i++)
+  for (size_t i=ARG_OFFSET; i<size; i++)
   {
     hnr = COMBINE(hnr, t->word[i]);
   }
@@ -298,7 +297,6 @@ void resize_hashtable()
 
 void AT_initMemory(int, char**)
 {
-  size_t i;
   HashNumber hnr;
 
   /*{{{  Initialize blocks */
@@ -315,7 +313,7 @@ void AT_initMemory(int, char**)
             table_size);
   }
 
-  for (i=0; i<BLOCK_TABLE_SIZE; i++)
+  for (size_t i=0; i<BLOCK_TABLE_SIZE; i++)
   {
     block_table[i].first_before = NULL;
     block_table[i].first_after  = NULL;
@@ -652,7 +650,7 @@ void AT_freeTerm(size_t size, ATerm t)
 ATermAppl ATmakeAppl(AFun sym, ...)
 {
   ATermAppl cur;
-  size_t i, arity = ATgetArity(sym);
+  size_t arity = ATgetArity(sym);
   bool found;
   header_type header;
   HashNumber hnr;
@@ -668,7 +666,7 @@ ATermAppl ATmakeAppl(AFun sym, ...)
 
   hnr = START(header);
   va_start(args, sym);
-  for (i=0; i<arity; i++)
+  for (size_t i=0; i<arity; i++)
   {
     arg = va_arg(args, ATerm);
     CHECK_TERM(arg);
@@ -684,7 +682,7 @@ ATermAppl ATmakeAppl(AFun sym, ...)
     if (EQUAL_HEADER(cur->header,header))
     {
       found = true;
-      for (i=0; i<arity; i++)
+      for (size_t i=0; i<arity; i++)
       {
         if (!ATisEqual(ATgetArgument(cur, i), buffer[i]))
         {
@@ -707,7 +705,7 @@ ATermAppl ATmakeAppl(AFun sym, ...)
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
-    for (i=0; i<arity; i++)
+    for (size_t i=0; i<arity; i++)
     {
       ATgetArgument(cur, i) = buffer[i];
     }
@@ -1174,7 +1172,7 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
 {
   ATermAppl cur;
   ATermList argptr;
-  size_t i, arity = ATgetArity(sym);
+  size_t arity = ATgetArity(sym);
   bool found;
   header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?
                                    MAX_INLINE_ARITY+1 : arity, sym);
@@ -1188,7 +1186,7 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
 
   argptr = args;
   hnr = START(header);
-  for (i=0; i<arity; i++)
+  for (size_t i=0; i<arity; i++)
   {
     hnr = COMBINE(hnr, HN((char*)ATgetFirst(argptr)));
     argptr = ATgetNext(argptr);
@@ -1202,7 +1200,7 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
     {
       found = true;
       argptr = args;
-      for (i=0; i<arity; i++)
+      for (size_t i=0; i<arity; i++)
       {
         if (!ATisEqual(ATgetArgument(cur, i), ATgetFirst(argptr)))
         {
@@ -1230,7 +1228,7 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
     cur->header = header;
     CHECK_HEADER(cur->header);
     argptr = args;
-    for (i=0; i<arity; i++)
+    for (size_t i=0; i<arity; i++)
     {
       ATgetArgument(cur, i) = ATgetFirst(argptr);
       CHECK_ARGUMENT(cur, i);
@@ -1253,7 +1251,7 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
 ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
 {
   ATermAppl cur;
-  size_t i, arity = ATgetArity(sym);
+  size_t arity = ATgetArity(sym);
   bool found;
   HashNumber hnr;
   header_type header = APPL_HEADER(arity > MAX_INLINE_ARITY ?
@@ -1263,7 +1261,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
   PARK_SYMBOL(sym);
 
   hnr = START(header);
-  for (i=0; i<arity; i++)
+  for (size_t i=0; i<arity; i++)
   {
     hnr = COMBINE(hnr, (HashNumber)(char*)args[i]);
   }
@@ -1275,7 +1273,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
     if (EQUAL_HEADER(cur->header,header))
     {
       found = true;
-      for (i=0; i<arity; i++)
+      for (size_t i=0; i<arity; i++)
       {
         if (!ATisEqual(ATgetArgument(cur, i), args[i]))
         {
@@ -1301,7 +1299,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
-    for (i=0; i<arity; i++)
+    for (size_t i=0; i<arity; i++)
     {
       ATgetArgument(cur, i) = args[i];
       CHECK_ARGUMENT(cur, i);
@@ -1477,7 +1475,7 @@ ATermList ATinsert(ATermList tail, ATerm el)
 
 ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
 {
-  size_t i, arity;
+  size_t arity;
   AFun sym = ATgetAFun(appl);
   ATermAppl cur;
   bool found;
@@ -1489,7 +1487,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
   assert(n < arity);
 
   hnr = START(appl->header);
-  for (i=0; i<arity; i++)
+  for (size_t i=0; i<arity; i++)
   {
     if (i!=n)
     {
@@ -1509,7 +1507,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
     if (EQUAL_HEADER(cur->header,appl->header))
     {
       found = true;
-      for (i=0; i<arity; i++)
+      for (size_t i=0; i<arity; i++)
       {
         if (i!=n)
         {
@@ -1543,7 +1541,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
     hnr &= table_mask;
     cur->header = HIDE_AGE_MARK(appl->header);
     CHECK_HEADER(cur->header);
-    for (i=0; i<arity; i++)
+    for (size_t i=0; i<arity; i++)
     {
       if (i!=n)
       {
@@ -1731,9 +1729,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
 
 size_t AT_inAnyFreeList(ATerm t)
 {
-  size_t i;
-
-  for (i=MIN_TERM_SIZE; i<maxTermSize; i++)
+  for (size_t i=MIN_TERM_SIZE; i<maxTermSize; i++)
   {
     ATerm cur = terminfo[i].at_freelist;
 

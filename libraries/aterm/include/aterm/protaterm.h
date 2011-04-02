@@ -13,7 +13,7 @@ class IProtectedATerm
 
   protected:
 
-    static void AT_protectProtectedATerms()
+    static void AT_protectProtectedATerms()  // This method has a wrong name. It is used for marking terms.
     {
       for (pa_container::iterator i=p_aterms().begin(); i!=p_aterms().end(); i++)
       {
@@ -40,12 +40,12 @@ class IProtectedATerm
 
     void ATunprotectProtectedATerm(IProtectedATerm* i)
     {
-      p_aterms().erase(p_aterms().find(i));
+      p_aterms().erase(i);
     }
 
   public:
 
-    virtual void ATprotectTerms() = 0;
+    virtual void ATprotectTerms() = 0; // This method has a wrong name. It marks terms.
 
     virtual ~IProtectedATerm() = 0;
 };
