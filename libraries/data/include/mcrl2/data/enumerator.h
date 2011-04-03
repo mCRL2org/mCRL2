@@ -54,9 +54,6 @@ struct data_enumerator_helper
   {
     data_expression d = data::replace_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
 
-    // 9/8/2009. Changed line below from std::vector<variable> to atermpp::vector<variable> because it appears that
-    // at times variables can occur only in this vector of variables, causing problems when garbage collected.
-    // Jan Friso Groote.
     atermpp::vector<variable> v;
     for (atermpp::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
     {

@@ -48,16 +48,16 @@ typedef struct
   ATerm(EnumeratorSolutionsStandard::*build_solution_aux)(ATerm,ATermList);
 } enumstd_info;
 
-class EnumeratorStandard : public Enumerator
+class EnumeratorStandard // : public Enumerator
 {
   public:
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter = false);
     ~EnumeratorStandard();
 
-    ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);
+    // ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);
 
-    EnumeratorSolutions* findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutions* old = NULL);
-    EnumeratorSolutions* findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions* old = NULL);
+    EnumeratorSolutionsStandard* findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutionsStandard* old = NULL);
+    // EnumeratorSolutions* findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions* old = NULL);
 
     Rewriter* getRewriter();
     enumstd_info& getInfo()
@@ -73,7 +73,7 @@ class EnumeratorStandard : public Enumerator
     int max_vars;
 };
 
-class EnumeratorSolutionsStandard : public EnumeratorSolutions
+class EnumeratorSolutionsStandard // : public EnumeratorSolutions
 {
   public:
     EnumeratorSolutionsStandard(enumstd_info& Info) : info(Info), enum_vars(0), enum_expr(0), fs_stack(0), fs_stack_size(0), ss_stack(0), ss_stack_size(0)

@@ -499,12 +499,6 @@ bool EnumeratorSolutionsStandard::next(ATermList* solution)
   }
 }
 
-/* bool EnumeratorSolutionsStandard::errorOccurred()
-{
-   ATfprintf(stderr,"Check for error is %d\n",error);
-   return error;
-} */
-
 void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_only)
 {
   enum_vars = Vars;
@@ -513,8 +507,6 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
 
   fs_reset();
   ss_reset();
-
-  // error = false;
 
   used_vars = 0;
 
@@ -563,7 +555,7 @@ EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm E
   ATprotect(&enum_expr);
 
   reset(Vars,Expr,true_only);
-}
+} 
 
 EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other) :
   info(other.info), enum_vars(other.enum_vars), enum_expr(other.enum_expr),
@@ -749,7 +741,7 @@ EnumeratorStandard::~EnumeratorStandard()
   }
 }
 
-EnumeratorSolutions* EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutions* old)
+EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutionsStandard* old)
 {
   if (old == NULL)
   {
@@ -762,12 +754,12 @@ EnumeratorSolutions* EnumeratorStandard::findSolutions(ATermList vars, ATerm exp
   }
 }
 
-EnumeratorSolutions* EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions* old)
+/* EnumeratorSolutionsStandard EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, EnumeratorSolutionsStandard* old)
 {
   return findSolutions(vars,expr,true,old);
-}
+} */
 
-ATermList EnumeratorStandard::FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
+/* ATermList EnumeratorStandard::FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
 {
   EnumeratorSolutions* sols = findSolutions(Vars,Expr);
   ATermList r = ATmakeList0();
@@ -787,14 +779,14 @@ ATermList EnumeratorStandard::FindSolutions(ATermList Vars, ATerm Expr, FindSolu
   }
 
   return r;
-}
+} */
 
 Rewriter* EnumeratorStandard::getRewriter()
 {
   return info.rewr_obj;
 }
 
-Enumerator* createEnumerator(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter, EnumerateStrategy strategy)
+/* Enumerator* createEnumerator(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter, EnumerateStrategy strategy)
 {
   switch (strategy)
   {
@@ -803,7 +795,8 @@ Enumerator* createEnumerator(mcrl2::data::data_specification const& data_spec, R
     default:
       return NULL;
   }
-}
+} */
+
 } // namespace detail
 } // namespace data
 } // namespace mcrl2

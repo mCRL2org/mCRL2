@@ -22,7 +22,7 @@
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/enumerator_factory.h"
+// #include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/find.h"
@@ -47,7 +47,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
     DataRewriter m_rewriter;
 
     /// Enumerator factory
-    data::enumerator_factory< enumerator_type > m_enumerator_factory;
+    // data::enumerator_factory< enumerator_type > m_enumerator_factory;
 
     /// Mapping of finite variables to boolean vectors
     atermpp::map<data::variable, atermpp::vector<data::variable> > m_new_parameters;
@@ -131,8 +131,8 @@ class binary_algorithm: public lps::detail::lps_algorithm
           //Get all constructors for par
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-          // for (enumerator_type j(m_enumerator_factory.make(par)); j != enumerator_type(); ++j)
-          for (enumerator_type j(m_enumerator_factory.make(par)); j != enumerator_type() ; ++j)
+          // for (enumerator_type j(m_enumerator_factory.make(par)); j != enumerator_type() ; ++j)
+          for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
           {
             enumerated_elements.push_back((*j)(par));
           }
@@ -276,8 +276,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
     binary_algorithm(specification& spec,
                      DataRewriter& r)
       : lps_algorithm(spec,core::gsVerbose),
-        m_rewriter(r),
-        m_enumerator_factory(spec.data(), m_rewriter)
+        m_rewriter(r)
     {}
 
     /// \brief Apply the algorithm to the specification passed in the

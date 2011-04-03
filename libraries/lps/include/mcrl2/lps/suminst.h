@@ -17,7 +17,6 @@
 #include "mcrl2/core/messaging.h"
 
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/enumerator_factory.h"
 
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/replace.h"
@@ -43,9 +42,6 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
     /// Rewriter
     DataRewriter m_rewriter;
-
-    /// Enumerator factory
-    data::enumerator_factory< enumerator_type > m_enumerator_factory;
 
     template <typename SummandType, typename Container>
     void instantiate_summand(const SummandType& s, Container& result)
@@ -83,7 +79,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
         {
           core::gsDebugMsg("Enumerating condition: %s\n", data::pp(s.condition()).c_str());
 
-          for (enumerator_type i(m_enumerator_factory.make(boost::make_iterator_range(variables), s.condition())); i != enumerator_type(); ++i)
+          for (enumerator_type i(enumerator_type(m_spec.data(),boost::make_iterator_range(variables), m_rewriter, s.condition())); i != enumerator_type(); ++i)
           {
             core::gsDebugMsg("substitutions: %s\n", data::print_substitution(*i).c_str());
 
@@ -125,8 +121,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
       : lps_algorithm(spec, core::gsVerbose),
         m_finite_sorts_only(finite_sorts_only),
         m_tau_summands_only(tau_summands_only),
-        m_rewriter(r),
-        m_enumerator_factory(spec.data(), m_rewriter)
+        m_rewriter(r)
     {}
 
     void run()

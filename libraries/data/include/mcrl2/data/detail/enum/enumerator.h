@@ -23,9 +23,9 @@ namespace detail
 {
 
 /** \brief Enumeration strategies. **/
-typedef enum { ENUM_STANDARD } EnumerateStrategy;
+// typedef enum { ENUM_STANDARD } EnumerateStrategy;
 
-typedef void (*FindSolutionsCallBack)(ATermList);
+// typedef void (*FindSolutionsCallBack)(ATermList);
 
 /**
  * \brief Iterator-like class to retreive valuations that satisfy a certain
@@ -45,15 +45,15 @@ typedef void (*FindSolutionsCallBack)(ATermList);
  *   }
  * \endcode
  **/
-class EnumeratorSolutions
+/* class EnumeratorSolutions
 {
   public:
-    /** \brief Destructor. **/
+    / ** \brief Destructor. ** /
     virtual ~EnumeratorSolutions()
     {
     }
 
-    /**
+    / **
      * \brief Get next solutions (if available).
      * \param[out] solution Place to store the solutions.
      * \return Whether or not a solution was found and stored in
@@ -64,15 +64,15 @@ class EnumeratorSolutions
      * Once this function returns false, it will continue to return
      * false. That is, when false is returned all solutions have
      * been enumerated.
-     **/
+     ** /
     virtual bool next(ATermList* solution) = 0;
-    /**
+    / **
      * \brief Check whether or not an error occurred during
      *        enumeration.
      * \return Whether or not an error occurred during enumeration.
-     **/
+     ** /
     // virtual bool errorOccurred() = 0;
-};
+}; */
 
 /**
  * \brief Interface class for finding solutions to boolean expressions.
@@ -84,18 +84,18 @@ class EnumeratorSolutions
  * Note that EnumeratorSolutions objects that are returned by a Enumerator
  * object are only to be used with this same Enumerator object.
  **/
-class Enumerator
+/* class Enumerator
 {
   public:
-    /** \brief Destructor. **/
+    / ** \brief Destructor. ** /
     virtual ~Enumerator()
     {
     }
 
-    /** \deprecated **/
+    / ** \deprecated ** /
     virtual ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL) = 0;
 
-    /**
+    / **
      * \brief Enumerate all valuations that (might) make an
      *        expression true.
      * \param[in] Vars      A list of the variables to be instantiated.
@@ -135,9 +135,9 @@ class Enumerator
      *     ...
      *   }
      * \endcode
-     **/
+     ** /
     virtual EnumeratorSolutions* findSolutions(ATermList Vars, ATerm Expr, bool true_only, EnumeratorSolutions* old = NULL) = 0;
-    /**
+    / **
      * \brief Enumerate all valuations that make an expression true.
      * \param[in] Vars A list of the variables to be instantiated.
      * \param[in] Expr A boolean expression, in the internal rewriter
@@ -164,15 +164,15 @@ class Enumerator
      *     ...
      *   }
      * \endcode
-     **/
+     ** /
     virtual EnumeratorSolutions* findSolutions(ATermList Vars, ATerm Expr, EnumeratorSolutions* old = NULL) = 0;
 
-    /**
+    / **
      * \brief Get rewriter used by this object.
      * \return Rewriter object used by this Enumerator object.
-     **/
+     ** /
     virtual Rewriter* getRewriter() = 0;
-};
+}; */
 
 /**
  * \brief Create a Enumerator object.
@@ -185,8 +185,9 @@ class Enumerator
  *                          Enumerator object.
  * \param[in] strategy          The strategy to use for solution finding.
  * \return A Enumerator object with the given parameters.
- **/
+ ** /
 Enumerator* createEnumerator(mcrl2::data::data_specification const& spec, Rewriter* r, bool clean_up_rewriter = false, EnumerateStrategy strategy = ENUM_STANDARD);
+*/
 
 } // namespace detail
 } // namespace data
