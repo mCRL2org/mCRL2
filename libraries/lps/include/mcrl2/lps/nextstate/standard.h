@@ -13,9 +13,8 @@
 
 #include "aterm2.h"
 #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/data/enumerator_factory.h"
 
-class NextStateStandard;
+class NextState;
 
 /// \cond INTERNAL_DOCS
 // inherits from rewriter only for data implementation/reconstruction
@@ -39,7 +38,8 @@ struct legacy_rewriter : public mcrl2::data::rewriter
 
   legacy_rewriter(mcrl2::data::rewriter const& other) :
     mcrl2::data::rewriter(other)
-  { }
+  { 
+  }
 
   legacy_rewriter()
   {
@@ -150,60 +150,6 @@ struct legacy_selector
   }
 };
 
-// serves to extract the rewriter object, which used to be an implementation
-// detail of the enumerator that was exposed through its interface
-template < typename Enumerator >
-class legacy_enumerator_factory : public mcrl2::data::enumerator_factory< Enumerator >
-{
-    typedef mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > standard_factory;
-
-    struct extractor : public standard_factory
-    {
-      extractor(standard_factory& other) : standard_factory(other)
-      {
-      }
-
-      standard_factory::evaluator_type evaluator()
-      {
-        return *(standard_factory::m_evaluator);
-      }
-
-      boost::shared_ptr< typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type > context()
-      {
-        return boost::shared_ptr< typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type >(
-                 new typename mcrl2::data::enumerator_factory< Enumerator >::shared_context_type(*standard_factory::m_enumeration_context, *standard_factory::m_evaluator));
-      }
-    };
-
-    boost::shared_ptr< const legacy_rewriter > m_local_evaluator;
-
-  public:
-
-    // \attention not exception safe
-    legacy_enumerator_factory(standard_factory& other) :
-      mcrl2::data::enumerator_factory< Enumerator >(extractor(other).context(), *(new legacy_rewriter(extractor(other).evaluator())))
-    {
-      m_local_evaluator.reset(this->m_evaluator);
-    }
-
-    legacy_enumerator_factory(legacy_enumerator_factory const& other) :
-      mcrl2::data::enumerator_factory< Enumerator >(other),
-      m_local_evaluator(other.m_local_evaluator)
-    {
-    }
-
-    Enumerator make(ATermList v, ATerm c)
-    {
-      return mcrl2::data::enumerator_factory< Enumerator >::make(atermpp::term_list< mcrl2::data::variable >(v), atermpp::aterm(c));
-    }
-
-
-    legacy_rewriter const& get_evaluator()
-    {
-      return *m_local_evaluator;
-    }
-};
-
 namespace mcrl2
 {
 namespace data
@@ -283,18 +229,17 @@ struct expression_traits< atermpp::aterm >
 
 struct ns_info
 {
-  NextStateStandard* parent;
+  NextState* parent;
 
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator<
-  mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
-        legacy_rewriter, legacy_selector > enumerator_type;
+              mcrl2::data::mutable_map_substitution< atermpp::map< atermpp::aterm_appl, atermpp::aterm > >,
+              legacy_rewriter, legacy_selector > enumerator_type;
 
-  typedef legacy_enumerator_factory< enumerator_type > enumerator_factory_type;
 
   mcrl2::data::data_specification const&                            m_specification;
-  boost::shared_ptr< legacy_enumerator_factory< enumerator_type > > m_enumerator_factory;
-  legacy_rewriter const&                                            m_rewriter; // only for translation to/from rewrite format
+  // Storing the legacy rewriter below by reference can lead to problems.
+  legacy_rewriter const                                            m_rewriter; // only for translation to/from rewrite format
 
   size_t num_summands;
   ATermAppl* summands;
@@ -309,7 +254,7 @@ struct ns_info
 
   enumerator_type get_sols(ATermList v, ATerm c)
   {
-    const enumerator_type m=m_enumerator_factory->make(v, c);
+    const enumerator_type m(m_specification,mcrl2::data::variable_list(v),m_rewriter,c);
 
     return m;
   }
@@ -324,24 +269,24 @@ struct ns_info
     return m_rewriter.translate(term);
   }
 
-  ns_info(mcrl2::data::data_specification const& specification,
-          mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& factory) :
+  ns_info(const mcrl2::data::data_specification & specification,
+          const legacy_rewriter & rewriter) :
     m_specification(specification),
-    m_enumerator_factory(new enumerator_factory_type(factory)),
-    m_rewriter(m_enumerator_factory->get_evaluator())
+    m_rewriter(rewriter)
   {
 
     // Configure selector to compare with term that represents false
     legacy_selector::term() = m_rewriter.translate(mcrl2::data::sort_bool::true_());
   }
+
 };
 /// \endcond
 
-class NextStateGeneratorStandard : public NextStateGenerator
+class NextStateGenerator // : public NextStateGenerator
 {
   public:
-    NextStateGeneratorStandard(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
-    ~NextStateGeneratorStandard();
+    NextStateGenerator(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
+    ~NextStateGenerator();
 
     bool next(ATermAppl* Transition, ATerm* State, bool* prioritised = NULL);
 
@@ -375,13 +320,12 @@ class NextStateGeneratorStandard : public NextStateGenerator
     ATermList ListFromFormat(ATermList l);
 };
 
-class NextStateStandard : public NextState
+class NextState // : public NextState
 {
-    friend class NextStateGeneratorStandard;
+    friend class NextStateGenerator;
   public:
-    typedef mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory_type;
-    NextStateStandard(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, enumerator_factory_type& e);
-    ~NextStateStandard();
+    NextState(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, const legacy_rewriter& e);
+    ~NextState();
 
     void prioritise(const char* action);
 
@@ -426,5 +370,15 @@ class NextStateStandard : public NextState
     ATermAppl ActionToRewriteFormat(ATermAppl act, ATermList free_vars);
     ATermList AssignsToRewriteFormat(ATermList assigns, ATermList free_vars);
 };
+
+
+NextState* createNextState(
+     mcrl2::lps::specification const& spec,
+     const mcrl2::data::rewriter &rewriter,
+     bool allow_free_vars,
+     int state_format = GS_STATE_VECTOR,
+     NextStateStrategy strategy = nsStandard
+   ); 
+
 
 #endif

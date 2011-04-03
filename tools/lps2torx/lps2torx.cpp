@@ -25,7 +25,7 @@
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/utilities/tool.h"
@@ -182,11 +182,10 @@ class lps2torx_tool : public lps2torx_base
                                 data::rewriter(lps_specification.data(),
                                     mcrl2::data::used_data_equation_selector(lps_specification.data(), mcrl2::lps::find_function_symbols(lps_specification), lps_specification.global_variables()), strategy) :
                                 data::rewriter(lps_specification.data(), strategy);
-      mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > enumerator_factory(lps_specification.data(), rewriter);
 
       NextState* nstate = createNextState(
                             lps_specification,
-                            enumerator_factory,
+                            rewriter,
                             !usedummies,
                             stateformat
                           );

@@ -57,9 +57,7 @@ std::clog << "--- rewrite rule selection function symbols ---\n";
 std::clog << core::detail::print_pp_set(lps::find_function_symbols(s)) << std::endl;
 #endif
 
-  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > E(s.data(), R);
-
-  NextState* nstate = createNextState(s, E, false);
+  NextState* nstate = createNextState(s, R, false);
 
   atermpp::aterm initial_state = nstate->getInitialState();
 

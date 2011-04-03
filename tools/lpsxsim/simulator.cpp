@@ -87,8 +87,7 @@ void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
   delete nextstategen;
   delete nextstate;
   m_rewriter.reset(new mcrl2::data::rewriter(spec.data(), rewr_strat));
-  m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(spec.data(), *m_rewriter));
-  nextstate = createNextState(spec, *m_enumerator_factory, !use_dummies,GS_STATE_VECTOR);
+  nextstate = createNextState(spec, *m_rewriter, !use_dummies,GS_STATE_VECTOR);
   nextstategen = NULL;
   initial_state = nextstate->getInitialState();
 

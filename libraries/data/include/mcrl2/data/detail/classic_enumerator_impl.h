@@ -30,9 +30,6 @@ namespace data
 template < typename MutableSubstitution, typename Evaluator, typename Selector >
 class classic_enumerator;
 
-template < typename Enumerator >
-class enumerator_factory;
-
 /// \cond INTERNAL
 namespace detail
 {
@@ -114,9 +111,6 @@ class classic_enumerator_impl
 {
 
     friend class data::classic_enumerator< MutableSubstitution, Evaluator, Selector >;
-
-    template < typename T >
-    friend class data::enumerator_factory;
 
   private:
 

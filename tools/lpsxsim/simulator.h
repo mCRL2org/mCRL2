@@ -15,7 +15,7 @@
 #include <memory>
 #include "aterm2.h"
 
-#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/data/rewriter.h"
 #include "simbase.h"
 
@@ -87,7 +87,6 @@ class StandardSimulator: virtual public SimulatorInterface
     viewlist views;
     ATermIndexedSet seen_states;
     std::auto_ptr< mcrl2::data::rewriter >  m_rewriter;
-    std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > > m_enumerator_factory;
     NextState* nextstate;
     NextStateGenerator* nextstategen;
 

@@ -41,9 +41,6 @@ class next_state_generator
     data::rewriter::strategy m_rewriter_strategy;
     legacy_rewriter m_rewriter;
     
-    // N.B. mutable is needed here due to the 'classic' next state interface
-    mutable data::enumerator_factory<mcrl2::data::classic_enumerator<> > m_enumerator;
-
   public:
     /// \brief A type that represents a transition to a 'next' state.
     struct state_type
@@ -107,9 +104,10 @@ class next_state_generator
 
         /// \brief Constructor.
         iterator(const specification& lps_spec,
-                 mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator
+                 legacy_rewriter &rewriter
                 )
-          : m_next_state(createNextState(lps_spec, enumerator, false)),
+          // : m_next_state(createNextState(lps_spec, enumerator, false)),
+          : m_next_state(createNextState(lps_spec, rewriter, false)),
             m_generator(m_next_state->getNextStates(m_next_state->getInitialState())),
             m_state(0, m_next_state->getInitialState())
         {
@@ -121,10 +119,10 @@ class next_state_generator
 
         /// \brief Constructor.
         iterator(const specification& lps_spec,
-                 mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
+                 legacy_rewriter &rewriter,
                  const atermpp::aterm& state
                 )
-          : m_next_state(createNextState(lps_spec, enumerator, false)),
+          : m_next_state(createNextState(lps_spec, rewriter, false)),
             m_generator(m_next_state->getNextStates(state))
         {
           m_state.state = state;
@@ -132,10 +130,10 @@ class next_state_generator
 
         /// \brief Constructor.
         iterator(const specification& lps_spec,
-                 mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
+                 legacy_rewriter &rewriter,
                  size_t summand_index
                 )
-          : m_next_state(createNextState(lps_spec, enumerator, false)),
+          : m_next_state(createNextState(lps_spec, rewriter, false)),
             m_generator(m_next_state->getNextStates(m_next_state->getInitialState(), summand_index)),
             m_state(0, m_next_state->getInitialState())
         {
@@ -147,11 +145,11 @@ class next_state_generator
 
         /// \brief Constructor.
         iterator(const specification& lps_spec,
-                 mcrl2::data::enumerator_factory<mcrl2::data::classic_enumerator<> >& enumerator,
+                 legacy_rewriter &rewriter,
                  const atermpp::aterm& state,
                  size_t summand_index
                 )
-          : m_next_state(createNextState(lps_spec, enumerator, false)),
+          : m_next_state(createNextState(lps_spec, rewriter, false)),
             m_generator(m_next_state->getNextStates(state, summand_index))
         {
           m_state.state = state;
@@ -199,7 +197,6 @@ class next_state_generator
       m_specification.process().deadlock_summands().clear();
       lps::detail::instantiate_global_variables(m_specification);
       m_rewriter = legacy_rewriter(m_specification.data(), data::used_data_equation_selector(m_specification.data(), lps::find_function_symbols(m_specification), m_specification.global_variables()), m_rewriter_strategy);
-      m_enumerator = data::enumerator_factory<mcrl2::data::classic_enumerator<> >(m_specification.data(), m_rewriter);
     }
 
     /// \brief Constructor
@@ -207,8 +204,8 @@ class next_state_generator
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     next_state_generator(const std::string& filename, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
       : m_rewriter_strategy(rewriter_strategy),
-        m_rewriter(data::data_specification()),
-        m_enumerator(data::data_specification(), m_rewriter)
+        m_rewriter(data::data_specification())
+        // m_enumerator(data::data_specification(), m_rewriter)
     {
       load(filename);
     }
@@ -217,8 +214,8 @@ class next_state_generator
     next_state_generator(const specification& lps_spec, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
       : m_specification(lps_spec),
         m_rewriter_strategy(rewriter_strategy),
-        m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables()), rewriter_strategy),
-        m_enumerator(lps_spec.data(), m_rewriter)
+        m_rewriter(lps_spec.data(), data::used_data_equation_selector(lps_spec.data(), lps::find_function_symbols(lps_spec), lps_spec.global_variables()), rewriter_strategy)
+        // m_enumerator(lps_spec.data(), m_rewriter)
     {
       m_specification.process().deadlock_summands().clear();
       lps::detail::instantiate_global_variables(m_specification);
@@ -233,13 +230,13 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     /// \brief Returns an iterator for generating the successors of the initial state.
     iterator begin()
     {
-      return iterator(m_specification, m_enumerator);
+      return iterator(m_specification, m_rewriter);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     iterator begin(const atermpp::aterm& state)
     {
-      return iterator(m_specification, m_enumerator, state);
+      return iterator(m_specification, m_rewriter, state);
     }
 
     /// \brief Returns an iterator for generating the successors of the initial state.
@@ -247,7 +244,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     /// generated.
     iterator begin(size_t summand_index)
     {
-      return iterator(m_specification, m_enumerator, summand_index);
+      return iterator(m_specification, m_rewriter, summand_index);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
@@ -255,13 +252,14 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     /// generated.
     iterator begin(const atermpp::aterm& state, size_t summand_index)
     {
-      return iterator(m_specification, m_enumerator, state, summand_index);
+      return iterator(m_specification, m_rewriter, state, summand_index);
     }
 
     /// \brief Returns the initial state of the specification.
     atermpp::aterm initial_state() const
     {
-      NextState* nstate = createNextState(m_specification, m_enumerator, false);
+      // NextState* nstate = createNextState(m_specification, m_enumerator, false);
+      NextState* nstate = createNextState(m_specification, m_rewriter, false);
       atermpp::aterm result = nstate->getInitialState();
       delete nstate;
       return result;

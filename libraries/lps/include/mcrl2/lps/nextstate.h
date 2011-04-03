@@ -15,7 +15,6 @@
 #include <vector>
 #include "aterm2.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
 
@@ -44,15 +43,15 @@ typedef enum { nsStandard } NextStateStrategy;
  *   }
  * \endcode
  **/
-class NextStateGenerator
+/* class NextStateGenerator
 {
   public:
-    /** \brief Destructor. **/
+    / ** \brief Destructor. ** /
     virtual ~NextStateGenerator()
     {
     }
 
-    /**
+    / **
      * \brief Get next transition (if available).
      * \param Transition  A place to store the mCRL2 action of a
      *                    transition.
@@ -67,22 +66,22 @@ class NextStateGenerator
      * Once this function returns false, it will continue to return
      * false. That is, when false is returned all transitions have
      * been explored.
-     **/
+     ** /
     virtual bool next(ATermAppl* Transition, ATerm* State, bool* prioritised = NULL) = 0;
-    /**
+    / **
      * \brief Check whether or not an error occurred during
      *        exploration.
      * \return Whether or not an error occurred during exploration.
-     **/
+     ** /
     // virtual bool errorOccurred() = 0; Should be done via exception handling.
 
-    /**
+    / **
      * \brief Get the state from which the transitions (if any)
      *        originate.
      * \return The state being explored.
-     **/
+     ** /
     virtual ATerm get_state() const = 0;
-};
+}; */
 
 /**
  * \brief Interface class for exploring the possible transitions from states.
@@ -93,15 +92,15 @@ class NextStateGenerator
  * Note that states and NextStateGenerators returned by a NextState object are
  * only to be used with this same NextState object.
  **/
-class NextState
+/* class NextState
 {
   public:
-    /** \brief Destructor. **/
+    / ** \brief Destructor. ** /
     virtual ~NextState()
     {
     }
 
-    /**
+    / **
      * \brief Prioritise an action.
      * \param action The name of the action to be prioritised.
      *
@@ -113,19 +112,19 @@ class NextState
      * \code prioritise("a"); prioritise("b"); \endcode
      * will first give all "b" actions, then all "a" actions and
      * then the remaining actions.
-     **/
+     ** /
     virtual void prioritise(const char* action) = 0;
 
-    /**
+    / **
      * \brief Get the initial state.
      * \return The initial state. Note that the format of this
      *         state is unspecified. Use the functions
      *         getStateArgument() and makeStateVector() to get
      *         a specific element of the state, respectively
      *         a mCRL2 LTS state vector.
-     **/
+     ** /
     virtual ATerm getInitialState() = 0;
-    /**
+    / **
      * \brief Get the transitions from a given state.
      * \param state The state to explore.
      * \param old   A NextStateGenerator to be used for retreiving
@@ -148,13 +147,13 @@ class NextState
      *     ...
      *   }
      * \endcode
-     **/
+     ** /
     virtual NextStateGenerator* getNextStates(
       ATerm state,
       NextStateGenerator* old = NULL
     ) = 0;
 
-    /**
+    / **
      * \brief Get the transitions from a given state.
      * \param state The state to explore.
                  * \param index Index of the summand of which to generate the next states.
@@ -179,34 +178,34 @@ class NextState
      *     ...
      *   }
      * \endcode
-     **/
+     ** /
     virtual NextStateGenerator* getNextStates(
       ATerm state,
       size_t index,
       NextStateGenerator* old = NULL
     ) = 0;
 
-    /**
+    / **
      * \brief Get number of state parameters.
      * \return Number of state parameters.
-     **/
+     ** /
     virtual size_t getStateLength() = 0;
 
-    /**
+    / **
      * \brief Get an argument from a state.
      * \param state The state to get the argument from.
      * \param index The number of the state argument (starting from
      *              0).
      * \return Argument index of state.
-     **/
+     **i /
     virtual ATermAppl getStateArgument(ATerm state, size_t index) = 0;
-    /**
+    / **
      * \brief Make a mCRL2 LTS state vector from a state.
      * \param state A state.
      * \return The mCRL2 LTS state vector representation of state.
-     **/
+     ** /
     virtual ATermAppl makeStateVector(ATerm state) = 0;
-    /**
+    / **
      * \brief Make a state from a mCRL2 LTS state vector.
      * \param state A mCRL2 LTS state.
      * \param match Optional state for matching.
@@ -216,38 +215,37 @@ class NextState
      *         does not fit the specification) or is match is not
      *         NULL and there is not instantiation of the variables
      *         in match such that it corresponds with state.
-     **/
+     ** /
     virtual ATerm parseStateVector(ATermAppl state, ATerm match = NULL) = 0;
 
-    /**
+    / **
      * \brief Get rewriter used by this object.
      * \deprecated
      * \details This function does not work reliably anymore with
      * the new data library and the new rewriters, especially when
      * standard data types are use.
      * \return Rewriter object used by this NextState object.
-     **/
+     ** /
     virtual mcrl2::data::rewriter& getRewriter() = 0;
 
-};
+}; */
 
 /**
  * \brief Create a NextState object.
  * \param spec                A mCRL2 LPS containing the process to be explored.
- * \param e                   Enumerator to use for finding solutions of
- *                            conditions.
+ * \param rewriter            Rewriter to be used to evaluate conditions.
  * \param allow_free_vars     Whether to allow free variables or to substitute
  *                            them  with dummy values.
  * \param state_format        Format to store the state in (internally).
  * \param strategy            The strategy to use for state exploration.
  * \return A NextState object with the given parameters.
  **/
-NextState* createNextState(
+/* NextState* createNextState(
   mcrl2::lps::specification const& spec,
-  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >& e,
+  const mcrl2::data::rewriter &rewriter,
   bool allow_free_vars,
   int state_format = GS_STATE_VECTOR,
   NextStateStrategy strategy = nsStandard
-);
+); */
 
 #endif

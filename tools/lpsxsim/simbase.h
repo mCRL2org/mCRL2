@@ -41,7 +41,7 @@
 
 #include <list>
 #include "aterm2.h"
-#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lps/nextstate/standard.h"
 
 class SimulatorInterface;
 class SimulatorViewInterface;

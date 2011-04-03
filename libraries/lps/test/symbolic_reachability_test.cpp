@@ -10,7 +10,7 @@
 #include <boost/test/minimal.hpp>
 
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/lps/nextstate.h"
+#include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/atermpp/set.h"
@@ -225,10 +225,9 @@ int test_main(int argc, char** argv)
     model.process().deadlock_summands().clear();
 
     data::rewriter        rewriter(model.data());
-    data::enumerator_factory< data::classic_enumerator< > > enumerator_factory(model.data(), rewriter);
 
     // Note the second argument that specifies that don't care variables are not treated specially
-    NextState* explorer = createNextState(model, enumerator_factory, false);
+    NextState* explorer = createNextState(model, rewriter, false);
 
     std::stack< ATerm >     stack;
     atermpp::set< ATerm >   known;

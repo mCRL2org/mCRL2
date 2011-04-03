@@ -107,7 +107,6 @@ struct lts_generation_options
   size_t todo_max;
   size_t initial_table_size;
   std::auto_ptr< mcrl2::data::rewriter > m_rewriter;
-  std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > > m_enumerator_factory;
   mcrl2::lps::specification specification;
   std::string trace_prefix;
   std::string lts;

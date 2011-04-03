@@ -219,9 +219,6 @@ class classic_enumerator :
 
     friend class boost::iterator_core_access;
 
-    template < typename T >
-    friend class enumerator_factory;
-
     template < typename M, typename E, typename S >
     friend class classic_enumerator;
 

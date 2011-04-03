@@ -149,11 +149,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->speci
     lgopts->m_rewriter.reset(new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
   }
 
-  lgopts->m_enumerator_factory.reset(
-    new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >
-    (lgopts->specification.data(), *(lgopts->m_rewriter)));
-
-  nstate = createNextState(lgopts->specification,*(lgopts->m_enumerator_factory),!lgopts->usedummies,lgopts->stateformat);
+  nstate = createNextState(lgopts->specification,*(lgopts->m_rewriter),!lgopts->usedummies,lgopts->stateformat);
 
   if (lgopts->priority_action != "")
   {
@@ -752,7 +748,8 @@ bool lps2lts_algorithm::generate_lts()
 
     if (lgopts->expl_strat == es_random)
     {
-      NextStateGenerator* nsgen = NULL;
+      NextStateGenerator *nsgen = NULL;
+
       while ((current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermAppl Transition;

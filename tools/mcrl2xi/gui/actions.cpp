@@ -14,10 +14,6 @@
 #include <wx/textfile.h>
 
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/enumerator_factory.h"
-
-
-
 #include <iostream>
 #include <sstream>
 #include <string>
@@ -170,16 +166,12 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
     rewriter rewr(spec.data(),m_rewrite_strategy);
     term=rewr(term);
 
-    enumerator_factory < classic_enumerator< mutable_map_substitution< >,
-                                             rewriter,
-                                             selectors::select_not< false > > > e(spec.data(),rewr);
-    for (classic_enumerator< mutable_map_substitution< >,
-                             rewriter,
-                             selectors::select_not< false > > i =
-           e.make(atermpp::convert < std::set <mcrl2::data::variable > >(vars),rewr,term);
-         i != classic_enumerator< mutable_map_substitution< >,
-                                  rewriter,
-                                  selectors::select_not< false > >() ; ++i)
+    typedef classic_enumerator< mutable_map_substitution< >,
+                                     rewriter,
+                                     selectors::select_not< false > > enumerator_type;
+
+    for (enumerator_type i = enumerator_type(spec.data(),atermpp::convert < std::set <mcrl2::data::variable > >(vars),rewr,term);
+                 i != enumerator_type() ; ++i)
     {
       p_solutions->AppendText(wxT("["));
       for (atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
