@@ -219,7 +219,7 @@ static ATermList get_substs(ATermList ids)
     if ((t[0] >= '0' && t[0] <= '9') || t[0] == '\'')
     {
       s[0] = '_';
-      strncpy(s+1,t,100);
+      strncpy(s+1,t,99);
     }
     else
     {
