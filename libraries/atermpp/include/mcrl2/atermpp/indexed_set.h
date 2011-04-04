@@ -91,13 +91,14 @@ class indexed_set
     /// will be added first.
     /// \param elem An element of the set.
     /// \return The index of the element.
-    size_t operator[](const aterm& elem) const
+    size_t operator[](const aterm& elem)
     {
       std::size_t result = ATindexedSetGetIndex(m_set.get(), elem);
       if (result == (std::size_t) -1)
       {
         bool b;
         result = ATindexedSetPut(m_set.get(), elem, &b);
+        m_size++;
         assert(b);
       }
       return result;
