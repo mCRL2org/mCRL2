@@ -31,6 +31,7 @@ foreach( OBJ ${TERM_OBJS} )
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
   target_link_libraries("${PREFIX}_${result}"
      boost_filesystem
+     boost_system
      mcrl2_lps
   )
 
