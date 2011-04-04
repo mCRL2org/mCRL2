@@ -732,9 +732,7 @@ void check_unmarked_block(size_t blocks)
 void major_sweep_phase_old()
 {
   size_t size;
-  size_t reclaiming = 0;
-  size_t alive = 0;
-
+  
   for (size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
   {
     Block* prev_block = NULL;
@@ -828,8 +826,6 @@ void major_sweep_phase_old()
       }
 
       block = next_block;
-      alive += alive_in_block;
-      reclaiming += dead_in_block;
     }
   }
 }
@@ -839,13 +835,9 @@ void major_sweep_phase_old()
 
 void major_sweep_phase_young()
 {
-  size_t reclaiming = 0;
-  size_t alive = 0;
-  size_t size;
-
   old_bytes_in_young_blocks_since_last_major = 0;
 
-  for (size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
+  for (size_t size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
   {
     Block* prev_block = NULL;
     Block* next_block;
@@ -964,9 +956,6 @@ void major_sweep_phase_young()
       {
         end = block->end;
       }
-
-      alive += alive_in_block;
-      reclaiming += dead_in_block;
     }
 
 #ifndef NDEBUG
@@ -989,13 +978,9 @@ void major_sweep_phase_young()
 
 void minor_sweep_phase_young()
 {
-  size_t size;
-  size_t reclaiming = 0;
-  size_t alive = 0;
-
   old_bytes_in_young_blocks_since_last_major = 0;
 
-  for (size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
+  for (size_t size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
   {
     Block* prev_block = NULL;
     Block* next_block;
@@ -1115,8 +1100,6 @@ void minor_sweep_phase_young()
       {
         end = block->end;
       }
-      alive += alive_in_block;
-      reclaiming += dead_in_block;
     }
 
 #ifndef NDEBUG

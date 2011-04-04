@@ -134,6 +134,8 @@ static void write_to_bcg(const lts_bcg_t& l, const string& filename)
     BCG_IO_WRITE_BCG_EDGE(t.from(),buf,t.to());
   }
 
+  free(buf);
+
   BCG_IO_WRITE_BCG_END();
 
 }

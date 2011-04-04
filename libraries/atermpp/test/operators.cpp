@@ -99,6 +99,7 @@ int test_main(int argc, char* argv[])
   b = l < l;
   b = l < L;
   b = L < l;
+  static_cast<void>(b); // Silence compiler/static analysis warnings
 
   // set
   set<atermpp::aterm> st;
