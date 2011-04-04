@@ -8,129 +8,129 @@
 namespace aterm
 {
 
-  static const char SAF_IDENTIFICATION_TOKEN = '?';
+static const char SAF_IDENTIFICATION_TOKEN = '?';
 
-  /* Stores */
-  typedef struct _ProtectedMemoryStack
-  {
-    ATerm** blocks;
-    size_t* freeBlockSpaces;
-    size_t nrOfBlocks;
+/* Stores */
+typedef struct _ProtectedMemoryStack
+{
+  ATerm** blocks;
+  size_t* freeBlockSpaces;
+  size_t nrOfBlocks;
 
-    size_t currentBlockNr;
-    ATerm* currentIndex;
-    size_t spaceLeft;
-  }* ProtectedMemoryStack;
+  size_t currentBlockNr;
+  ATerm* currentIndex;
+  size_t spaceLeft;
+}* ProtectedMemoryStack;
 
-  /* Buffer */
-  typedef struct _ByteBuffer
-  {
-    char* buffer;
-    size_t capacity;
+/* Buffer */
+typedef struct _ByteBuffer
+{
+  char* buffer;
+  size_t capacity;
 
-    char* currentPos;
-    size_t limit;
-  }* ByteBuffer;
+  char* currentPos;
+  size_t limit;
+}* ByteBuffer;
 
-  ByteBuffer ATcreateByteBuffer(size_t size);
+ByteBuffer ATcreateByteBuffer(size_t size);
 
-  ByteBuffer ATwrapBuffer(char* buffer, size_t capacity);
+ByteBuffer ATwrapBuffer(char* buffer, size_t capacity);
 
-  size_t ATgetRemainingBufferSpace(ByteBuffer byteBuffer);
+size_t ATgetRemainingBufferSpace(ByteBuffer byteBuffer);
 
-  void ATflipByteBuffer(ByteBuffer byteBuffer);
+void ATflipByteBuffer(ByteBuffer byteBuffer);
 
-  void ATresetByteBuffer(ByteBuffer byteBuffer);
+void ATresetByteBuffer(ByteBuffer byteBuffer);
 
-  void ATdestroyByteBuffer(ByteBuffer byteBuffer);
-
-
-  /* For writing */
-  typedef struct _ATermMapping
-  {
-    ATerm term;
-    size_t subTermIndex;
-    size_t nrOfSubTerms;
-    ATermList nextPartOfList; /* This is for a ATermList 'nextTerm' optimalization only. */
-  } ATermMapping;
-
-  typedef struct _BinaryWriter
-  {
-    ATermMapping* stack;
-    size_t stackSize;
-    size_t stackPosition;
-
-    IDMappings sharedTerms;
-    int currentSharedTermKey;
-
-    IDMappings sharedAFuns;
-    int currentSharedAFunKey;
-
-    ATerm currentTerm;
-    size_t indexInTerm;
-    size_t totalBytesInTerm;
-  }* BinaryWriter;
-
-  BinaryWriter ATcreateBinaryWriter(ATerm term);
-
-  void ATserialize(BinaryWriter binaryWriter, ByteBuffer buffer);
-
-  int ATisFinishedWriting(BinaryWriter binaryWriter);
-
-  void ATdestroyBinaryWriter(BinaryWriter binaryWriter);
+void ATdestroyByteBuffer(ByteBuffer byteBuffer);
 
 
-  /* For reading */
-  typedef struct _ATermConstruct
-  {
-    size_t type;
+/* For writing */
+typedef struct _ATermMapping
+{
+  ATerm term;
+  size_t subTermIndex;
+  size_t nrOfSubTerms;
+  ATermList nextPartOfList; /* This is for a ATermList 'nextTerm' optimalization only. */
+} ATermMapping;
 
-    ATerm tempTerm;
-    size_t termKey;
+typedef struct _BinaryWriter
+{
+  ATermMapping* stack;
+  size_t stackSize;
+  size_t stackPosition;
 
-    size_t nrOfSubTerms;
-    size_t subTermIndex;
-    ATerm* subTerms;
+  IDMappings sharedTerms;
+  int currentSharedTermKey;
 
-  } ATermConstruct;
+  IDMappings sharedAFuns;
+  int currentSharedAFunKey;
 
-  typedef struct _BinaryReader
-  {
-    ProtectedMemoryStack protectedMemoryStack;
+  ATerm currentTerm;
+  size_t indexInTerm;
+  size_t totalBytesInTerm;
+}* BinaryWriter;
 
-    ATermConstruct* stack;
-    size_t stackSize;
-    size_t stackPosition;
+BinaryWriter ATcreateBinaryWriter(ATerm term);
 
-    ATerm* sharedTerms;
-    size_t sharedTermsSize;
-    size_t sharedTermsIndex;
+void ATserialize(BinaryWriter binaryWriter, ByteBuffer buffer);
 
-    SymEntry* sharedAFuns;
-    size_t sharedAFunsSize;
-    size_t sharedAFunsIndex;
+int ATisFinishedWriting(BinaryWriter binaryWriter);
 
-    char* tempNamePage;
+void ATdestroyBinaryWriter(BinaryWriter binaryWriter);
 
-    size_t tempType;
-    char* tempBytes;
-    size_t tempBytesSize;
-    size_t tempBytesIndex;
-    size_t tempArity;
-    bool tempIsQuoted;
 
-    int isDone;
-  }* BinaryReader;
+/* For reading */
+typedef struct _ATermConstruct
+{
+  size_t type;
 
-  BinaryReader ATcreateBinaryReader();
+  ATerm tempTerm;
+  size_t termKey;
 
-  void ATdeserialize(BinaryReader binaryReader, ByteBuffer buffer);
+  size_t nrOfSubTerms;
+  size_t subTermIndex;
+  ATerm* subTerms;
 
-  int ATisFinishedReading(BinaryReader binaryReader);
+} ATermConstruct;
 
-  ATerm ATgetRoot(BinaryReader binaryReader);
+typedef struct _BinaryReader
+{
+  ProtectedMemoryStack protectedMemoryStack;
 
-  void ATdestroyBinaryReader(BinaryReader binaryReader);
+  ATermConstruct* stack;
+  size_t stackSize;
+  size_t stackPosition;
+
+  ATerm* sharedTerms;
+  size_t sharedTermsSize;
+  size_t sharedTermsIndex;
+
+  SymEntry* sharedAFuns;
+  size_t sharedAFunsSize;
+  size_t sharedAFunsIndex;
+
+  char* tempNamePage;
+
+  size_t tempType;
+  char* tempBytes;
+  size_t tempBytesSize;
+  size_t tempBytesIndex;
+  size_t tempArity;
+  bool tempIsQuoted;
+
+  int isDone;
+}* BinaryReader;
+
+BinaryReader ATcreateBinaryReader();
+
+void ATdeserialize(BinaryReader binaryReader, ByteBuffer buffer);
+
+int ATisFinishedReading(BinaryReader binaryReader);
+
+ATerm ATgetRoot(BinaryReader binaryReader);
+
+void ATdestroyBinaryReader(BinaryReader binaryReader);
 
 } // namespace aterm
 

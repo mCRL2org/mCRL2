@@ -6,9 +6,9 @@
 namespace aterm
 {
 
-  size_t BEserializeMultiByteInt(int i, char* c);
+size_t BEserializeMultiByteInt(int i, char* c);
 
-  int BEdeserializeMultiByteInt(char* c, size_t* i);
+int BEdeserializeMultiByteInt(char* c, size_t* i);
 
 } // namespace aterm
 

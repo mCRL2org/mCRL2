@@ -732,7 +732,7 @@ void check_unmarked_block(size_t blocks)
 void major_sweep_phase_old()
 {
   size_t size;
-  
+
   for (size=MIN_TERM_SIZE; size<AT_getMaxTermSize(); size++)
   {
     Block* prev_block = NULL;

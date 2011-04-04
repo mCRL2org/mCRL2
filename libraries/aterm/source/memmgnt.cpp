@@ -220,7 +220,7 @@ ATprotected_block find_free_block(size_t new_size)
   protected_blocks = block;
 
   return block;
-} 
+}
 
 ATprotected_block find_block(ATerm* term)
 {
@@ -368,7 +368,7 @@ ATerm* AT_alloc_protected(size_t size)
     return NULL;
   }
   return block->term;
-} 
+}
 
 void AT_free_protected(ATerm* term)
 {
@@ -379,13 +379,13 @@ void AT_free_protected(ATerm* term)
     assert(block);
     free_block(block);
   }
-} 
+}
 
 void AT_free_protected_blocks()
 {
   /* Free all blocks in use */
   free_unused_blocks();
   free_protected_blocks();
-} 
+}
 
 } // namespace aterm

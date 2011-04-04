@@ -438,7 +438,9 @@ void ATprotectAFun(AFun sym)
     protected_symbols = (AFun*)AT_realloc(protected_symbols,
                                           max_protected_symbols * sizeof(AFun));
     if (!protected_symbols)
+    {
       throw std::runtime_error("ATprotectAFun: no space to hold " + to_string(max_protected_symbols) + " protected symbols.");
+    }
   }
 
   protected_symbols[nr_protected_symbols++] = sym;

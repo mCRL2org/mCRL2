@@ -532,12 +532,16 @@ static void gather_top_symbols(sym_entry* cur_entry,
   tss->symbols = (top_symbol*) AT_calloc(total_top_symbols,
                                          sizeof(top_symbol));
   if (!tss->symbols)
+  {
     throw std::runtime_error("build_arg_tables: out of memory (top_symbols: " + to_string(total_top_symbols) + ")");
+  }
   tss->toptable_size = (total_top_symbols*5)/4;
   tss->toptable = (top_symbol**) AT_calloc(tss->toptable_size,
                   sizeof(top_symbol*));
   if (!tss->toptable)
+  {
     throw std::runtime_error("build_arg_tables: out of memory (table_size: " + to_string(tss->toptable_size) + ")");
+  }
 
   index = 0;
   for (top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym)
@@ -808,7 +812,7 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, AFun sym)
 static bool write_term(ATerm, byte_writer*);
 
 static bool write_arg(sym_entry* trm_sym, ATerm arg, size_t arg_idx,
-                        byte_writer* writer)
+                      byte_writer* writer)
 {
   top_symbol* ts;
   sym_entry* arg_sym;
@@ -908,7 +912,7 @@ static bool write_term(ATerm t, byte_writer* writer)
   if (trm_sym->terms[trm_sym->cur_index].t != t)
   {
     throw std::runtime_error("terms out of sync at pos " + to_string(trm_sym->cur_index) + " of sym " + ATwriteAFunToString(trm_sym->id) +
-            ", term in table was " + ATwriteToString(trm_sym->terms[trm_sym->cur_index].t) + ", expected " + ATwriteToString(t));
+                             ", term in table was " + ATwriteToString(trm_sym->terms[trm_sym->cur_index].t) + ", expected " + ATwriteToString(t));
   }
   trm_sym->cur_index++;
 
@@ -989,7 +993,9 @@ write_baf(ATerm t, byte_writer* writer)
 
   sym_entries = (sym_entry*) AT_calloc(nr_unique_symbols, sizeof(sym_entry));
   if (!sym_entries)
+  {
     std::runtime_error("write_baf: out of memory (" + to_string(nr_unique_symbols) + " unique symbols!");
+  }
 
   /*{{{  Collect all unique symbols in the input term */
 
@@ -1008,13 +1014,17 @@ write_baf(ATerm t, byte_writer* writer)
       sym_entries[cur].terms = (trm_bucket*) AT_calloc(entry->count,
                                sizeof(trm_bucket));
       if (!sym_entries[cur].terms)
+      {
         std::runtime_error("write_baf: out of memory (sym: " + ATwriteAFunToString(lcv) + ", terms: " + to_string(entry->count) + ")");
+      }
       sym_entries[cur].termtable_size = (entry->count*5)/4;
       sym_entries[cur].termtable =
         (trm_bucket**) AT_calloc(sym_entries[cur].termtable_size,
                                  sizeof(trm_bucket*));
       if (!sym_entries[cur].termtable)
+      {
         std::runtime_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
+      }
 
       entry->index = cur;
       entry->count = 0; /* restore invariant that symbolcount is zero */
@@ -1277,17 +1287,17 @@ static bool read_all_symbols(byte_reader* reader)
       read_symbols[i].nr_topsyms = (size_t*)AT_calloc(arity, sizeof(size_t));
       if (!read_symbols[i].nr_topsyms)
         std::runtime_error("read_all_symbols: out of memory trying to allocate "
-                "space for " + to_string(arity) + " arguments.");
+                           "space for " + to_string(arity) + " arguments.");
 
       read_symbols[i].sym_width = (size_t*)AT_calloc(arity, sizeof(size_t));
       if (!read_symbols[i].sym_width)
         std::runtime_error("read_all_symbols: out of memory trying to allocate "
-                        "space for " + to_string(arity) + " arguments.");
+                           "space for " + to_string(arity) + " arguments.");
 
       read_symbols[i].topsyms = (size_t**)AT_calloc(arity, sizeof(size_t*));
       if (!read_symbols[i].topsyms)
         std::runtime_error("read_all_symbols: out of memory trying to allocate "
-                        "space for " + to_string(arity) + " arguments.");
+                           "space for " + to_string(arity) + " arguments.");
     }
 
     /*}}}  */
@@ -1303,7 +1313,9 @@ static bool read_all_symbols(byte_reader* reader)
       read_symbols[i].sym_width[j] = bit_width(val);
       read_symbols[i].topsyms[j] = (size_t*)AT_calloc(val, sizeof(size_t));
       if (!read_symbols[i].topsyms[j])
+      {
         std::runtime_error("read_symbols: could not allocate space for " + to_string(val) + " top symbols.");
+      }
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
       {

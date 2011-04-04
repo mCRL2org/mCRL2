@@ -68,7 +68,7 @@ static void resize_buffer(const size_t n);
 inline
 void RESIZE_BUFFER(const size_t n)
 {
-  if(n > buffer_size)
+  if (n > buffer_size)
   {
     resize_buffer(n);
   }
@@ -153,7 +153,9 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   buffer_size = DEFAULT_BUFFER_SIZE;
   buffer = (char*) AT_malloc(DEFAULT_BUFFER_SIZE);
   if (!buffer)
+  {
     throw std::runtime_error("ATinit: cannot allocate string buffer of size " + to_string(DEFAULT_BUFFER_SIZE));
+  }
 
   /*}}}  */
   /*{{{  Initialize protected terms */
@@ -161,7 +163,9 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
   at_prot_table = (ProtEntry**)AT_calloc(at_prot_table_size, sizeof(ProtEntry*));
   if (!at_prot_table)
+  {
     throw std::runtime_error("ATinit: cannot allocate space for prot-table of size " + to_string(at_prot_table_size));
+  }
 
   /*}}}  */
   /*{{{  Initialize mark stack */
@@ -169,7 +173,9 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   /* Allocate initial mark stack */
   mark_stack = (ATerm*) AT_malloc(sizeof(ATerm) * INITIAL_MARK_STACK_SIZE);
   if (!mark_stack)
+  {
     throw std::runtime_error("cannot allocate marks stack of " + to_string(INITIAL_MARK_STACK_SIZE) + " entries.");
+  }
   mark_stack_size = INITIAL_MARK_STACK_SIZE;
 
   /*}}}  */
@@ -334,8 +340,8 @@ void ATaddProtectFunction(ATermProtFunc f)
     {
       at_prot_functions_size += PROTECT_FUNC_EXPAND_SIZE;
 
-      new_at_prot_functions = (ATermProtFunc*) 
-             AT_realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
+      new_at_prot_functions = (ATermProtFunc*)
+                              AT_realloc(at_prot_functions, at_prot_functions_size*sizeof(ATermProtFunc));
     }
 
     if (!new_at_prot_functions)
@@ -1457,7 +1463,8 @@ void snext_skip_layout(int* c, char** s)
   do
   {
     snext_char(c, s);
-  } while(isspace(*c));
+  }
+  while (isspace(*c));
 }
 //#define snext_skip_layout(c,s) do { snext_char(c, s); } while(isspace(*c))
 

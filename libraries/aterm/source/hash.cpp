@@ -72,7 +72,7 @@ static const size_t a_prime_number = 134217689;
 inline
 size_t hashcode(void* a, const size_t sizeMinus1)
 {
-  return ((((size_t)(a) >> 2) * a_prime_number ) & sizeMinus1);
+  return ((((size_t)(a) >> 2) * a_prime_number) & sizeMinus1);
 }
 //#define hashcode(a,sizeMinus1) (((((size_t) a) >> 2) * a_prime_number ) & sizeMinus1)
 
@@ -90,11 +90,11 @@ struct _ATermTable
   size_t max_entries;
   size_t* hashtable;
   size_t nr_tables;
-  union _ATerm*** keys;
+  union _ATerm** * keys;
   size_t nr_free_tables;
   size_t first_free_position;
   size_t** free_table;
-  union _ATerm*** values;
+  union _ATerm** * values;
 };
 
 /*}}}  */
@@ -380,7 +380,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
   if (hashset->hashtable==NULL)
   {
     std::runtime_error("ATindexedSetCreate: cannot allocate ATermIndexedSet "
-            "of " + to_string(initial_size) + " entries");
+                       "of " + to_string(initial_size) + " entries");
   }
   for (i=0 ; i<=hashset->sizeMinus1 ; i++)
   {
@@ -398,7 +398,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
   hashset->nr_free_tables = INITIAL_NR_OF_TABLES;
   hashset->first_free_position = 0;
   hashset->free_table=(size_t**)AT_calloc(sizeof(size_t*),
-                                hashset->nr_free_tables);
+                                          hashset->nr_free_tables);
   if (hashset->free_table == NULL)
   {
     std::runtime_error("ATindexedSetCreate: cannot allocate table to store deleted elements");

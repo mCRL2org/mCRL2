@@ -6,43 +6,43 @@
 namespace aterm
 {
 
-  struct Entry;
-  typedef struct Entry Entry;
+struct Entry;
+typedef struct Entry Entry;
 
-  typedef struct _EntryCache
-  {
-    Entry** blocks;
-    size_t nrOfBlocks;
+typedef struct _EntryCache
+{
+  Entry** blocks;
+  size_t nrOfBlocks;
 
-    Entry* nextEntry;
-    size_t spaceLeft;
+  Entry* nextEntry;
+  size_t spaceLeft;
 
-    Entry* freeList;
-  }* EntryCache;
+  Entry* freeList;
+}* EntryCache;
 
-  typedef struct _IDMappings
-  {
-    EntryCache entryCache;
+typedef struct _IDMappings
+{
+  EntryCache entryCache;
 
-    Entry** table;
-    size_t tableSize;
-    size_t hashMask;
+  Entry** table;
+  size_t tableSize;
+  size_t hashMask;
 
-    unsigned int load;
-    size_t threshold;
-  }* IDMappings;
+  unsigned int load;
+  size_t threshold;
+}* IDMappings;
 
-  IDMappings IMcreateIDMappings(unsigned int loadPercentage);
+IDMappings IMcreateIDMappings(unsigned int loadPercentage);
 
-  size_t IMmakeIDMapping(IDMappings idMappings, void* key, size_t h, size_t value);
+size_t IMmakeIDMapping(IDMappings idMappings, void* key, size_t h, size_t value);
 
-  size_t IMgetID(IDMappings idMappings, void* key, size_t h);
+size_t IMgetID(IDMappings idMappings, void* key, size_t h);
 
-  void IMremoveIDMapping(IDMappings idMappings, void* key, size_t h);
+void IMremoveIDMapping(IDMappings idMappings, void* key, size_t h);
 
-  unsigned int IMgetSize(IDMappings idMappings);
+unsigned int IMgetSize(IDMappings idMappings);
 
-  void IMdestroyIDMappings(IDMappings idMappings);
+void IMdestroyIDMappings(IDMappings idMappings);
 
 } // namespace aterm
 
