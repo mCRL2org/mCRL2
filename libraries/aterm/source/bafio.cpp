@@ -3,6 +3,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdexcept>
 
 #ifdef WIN32
 #include <fcntl.h>
@@ -411,7 +412,7 @@ static size_t readString(byte_reader* reader)
     text_buffer = (char*) AT_realloc(text_buffer, text_buffer_size);
     if (!text_buffer)
     {
-      ATerror("out of memory in readString (%d)\n", text_buffer_size);
+      throw std::runtime_error("out of memory in readString (" + to_string(text_buffer_size) + ")");
     }
   }
 
@@ -479,7 +480,7 @@ static sym_entry* get_top_symbol(ATerm t)
       sym = ATgetAFun((ATermAppl)t);
       break;
     default:
-      ATabort("get_top_symbol: illegal term (%n)\n", t);
+      throw std::runtime_error("get_top_symbol: illegal term (" + ATwriteToString(t) + ")");
       sym = (AFun)-1; // error path...
       break;
   }
@@ -531,14 +532,12 @@ static void gather_top_symbols(sym_entry* cur_entry,
   tss->symbols = (top_symbol*) AT_calloc(total_top_symbols,
                                          sizeof(top_symbol));
   if (!tss->symbols)
-    ATerror("build_arg_tables: out of memory (top_symbols: %d)\n",
-            total_top_symbols);
+    throw std::runtime_error("build_arg_tables: out of memory (top_symbols: " + to_string(total_top_symbols) + ")");
   tss->toptable_size = (total_top_symbols*5)/4;
   tss->toptable = (top_symbol**) AT_calloc(tss->toptable_size,
                   sizeof(top_symbol*));
   if (!tss->toptable)
-    ATerror("build_arg_tables: out of memory (table_size: %d)\n",
-            tss->toptable_size);
+    throw std::runtime_error("build_arg_tables: out of memory (table_size: " + to_string(tss->toptable_size) + ")");
 
   index = 0;
   for (top_entry=first_topsym; top_entry; top_entry=top_entry->next_topsym)
@@ -584,7 +583,7 @@ static void build_arg_tables()
                                sizeof(top_symbols_t));
       if (!cur_entry->top_symbols)
       {
-        ATerror("build_arg_tables: out of memory (arity: %d)\n", arity);
+        throw std::runtime_error("build_arg_tables: out of memory (arity: " + to_string(arity) + ")");
       }
     }
 
@@ -617,7 +616,7 @@ static void build_arg_tables()
             arg = ATgetArgument((ATermAppl)term, cur_arg);
             break;
           default:
-            ATerror("build_arg_tables: illegal term\n");
+            throw std::runtime_error("build_arg_tables: illegal term");
             break;
         }
         topsym = get_top_symbol(arg);
@@ -697,7 +696,7 @@ static void collect_terms(ATerm t)
       }
       break;
       default:
-        ATerror("collect_terms: illegal term\n");
+        throw std::runtime_error("collect_terms: illegal term");
         sym = (AFun)(-1); // Kill compiler warnings
         break;
     }
@@ -902,15 +901,14 @@ static bool write_term(ATerm t, byte_writer* writer)
       }
       break;
       default:
-        ATerror("write_term: illegal term\n");
+        throw std::runtime_error("write_term: illegal term");
         break;
     }
   }
   if (trm_sym->terms[trm_sym->cur_index].t != t)
   {
-    ATerror("terms out of sync at pos %d of sym %y, "
-            "term in table was %d, expected %t\n", trm_sym->cur_index,
-            trm_sym->id, trm_sym->terms[trm_sym->cur_index].t, t);
+    throw std::runtime_error("terms out of sync at pos " + to_string(trm_sym->cur_index) + " of sym " + ATwriteAFunToString(trm_sym->id) +
+            ", term in table was " + ATwriteToString(trm_sym->terms[trm_sym->cur_index].t) + ", expected " + ATwriteToString(t));
   }
   trm_sym->cur_index++;
 
@@ -991,8 +989,7 @@ write_baf(ATerm t, byte_writer* writer)
 
   sym_entries = (sym_entry*) AT_calloc(nr_unique_symbols, sizeof(sym_entry));
   if (!sym_entries)
-    ATerror("write_baf: out of memory (%d unique symbols!\n",
-            nr_unique_symbols);
+    std::runtime_error("write_baf: out of memory (" + to_string(nr_unique_symbols) + " unique symbols!");
 
   /*{{{  Collect all unique symbols in the input term */
 
@@ -1011,15 +1008,13 @@ write_baf(ATerm t, byte_writer* writer)
       sym_entries[cur].terms = (trm_bucket*) AT_calloc(entry->count,
                                sizeof(trm_bucket));
       if (!sym_entries[cur].terms)
-        ATerror("write_baf: out of memory (sym: %d, terms: %d)\n",
-                lcv, entry->count);
+        std::runtime_error("write_baf: out of memory (sym: " + ATwriteAFunToString(lcv) + ", terms: " + to_string(entry->count) + ")");
       sym_entries[cur].termtable_size = (entry->count*5)/4;
       sym_entries[cur].termtable =
         (trm_bucket**) AT_calloc(sym_entries[cur].termtable_size,
                                  sizeof(trm_bucket*));
       if (!sym_entries[cur].termtable)
-        ATerror("write_baf: out of memory (termtable_size: %d\n",
-                sym_entries[cur].termtable_size);
+        std::runtime_error("write_baf: out of memory (termtable_size: " + to_string(sym_entries[cur].termtable_size) + ")");
 
       entry->index = cur;
       entry->count = 0; /* restore invariant that symbolcount is zero */
@@ -1237,7 +1232,7 @@ static bool read_all_symbols(byte_reader* reader)
     AFun sym = read_symbol(reader);
     if (sym == (AFun)(-1))
     {
-      ATerror("read_symbols: error reading symbol, giving up.\n");
+      std::runtime_error("read_symbols: error reading symbol, giving up.");
     }
 
     read_symbols[i].sym = sym;
@@ -1264,7 +1259,7 @@ static bool read_all_symbols(byte_reader* reader)
     }
     if (!read_symbols[i].terms)
     {
-      ATerror("read_symbols: could not allocate space for %d terms.\n", val);
+      std::runtime_error("read_symbols: could not allocate space for " + to_string(val) + " terms.");
     }
 
     /*}}}  */
@@ -1281,18 +1276,18 @@ static bool read_all_symbols(byte_reader* reader)
     {
       read_symbols[i].nr_topsyms = (size_t*)AT_calloc(arity, sizeof(size_t));
       if (!read_symbols[i].nr_topsyms)
-        ATerror("read_all_symbols: out of memory trying to allocate "
-                "space for %d arguments.\n", arity);
+        std::runtime_error("read_all_symbols: out of memory trying to allocate "
+                "space for " + to_string(arity) + " arguments.");
 
       read_symbols[i].sym_width = (size_t*)AT_calloc(arity, sizeof(size_t));
       if (!read_symbols[i].sym_width)
-        ATerror("read_all_symbols: out of memory trying to allocate "
-                "space for %d arguments .\n", arity);
+        std::runtime_error("read_all_symbols: out of memory trying to allocate "
+                        "space for " + to_string(arity) + " arguments.");
 
       read_symbols[i].topsyms = (size_t**)AT_calloc(arity, sizeof(size_t*));
       if (!read_symbols[i].topsyms)
-        ATerror("read_all_symbols: out of memory trying to allocate "
-                "space for %d arguments.\n", arity);
+        std::runtime_error("read_all_symbols: out of memory trying to allocate "
+                        "space for " + to_string(arity) + " arguments.");
     }
 
     /*}}}  */
@@ -1308,8 +1303,7 @@ static bool read_all_symbols(byte_reader* reader)
       read_symbols[i].sym_width[j] = bit_width(val);
       read_symbols[i].topsyms[j] = (size_t*)AT_calloc(val, sizeof(size_t));
       if (!read_symbols[i].topsyms[j])
-        ATerror("read_symbols: could not allocate space for %d top symbols.\n",
-                val);
+        std::runtime_error("read_symbols: could not allocate space for " + to_string(val) + " top symbols.");
 
       for (k=0; k<read_symbols[i].nr_topsyms[j]; k++)
       {
@@ -1343,7 +1337,7 @@ static ATerm read_term(sym_read_entry* sym, byte_reader* reader)
     args = AT_alloc_protected(arity);
     if (!args)
     {
-      ATerror("could not allocate space for %d arguments.\n", arity);
+      std::runtime_error("could not allocate space for " + to_string(arity) + " arguments.");
     }
     /* !!! leaks memory on the "return NULL" paths */
   }
@@ -1492,7 +1486,7 @@ ATerm read_baf(byte_reader* reader)
 
   if (val != BAF_MAGIC)
   {
-    ATwarning("read_baf: input is not in BAF!\n");
+    ATfprintf(stderr, "read_baf: input is not in BAF!\n");
     return NULL;
   }
 
@@ -1503,7 +1497,7 @@ ATerm read_baf(byte_reader* reader)
 
   if (val != BAF_VERSION)
   {
-    ATwarning("read_baf: wrong BAF version, giving up!\n");
+    ATfprintf(stderr, "read_baf: wrong BAF version, giving up!\n");
     return NULL;
   }
 
@@ -1525,8 +1519,7 @@ ATerm read_baf(byte_reader* reader)
                  sizeof(sym_read_entry));
   if (!read_symbols)
   {
-    ATerror("read_baf: out of memory when allocating %d syms.\n",
-            nr_unique_symbols);
+    std::runtime_error("read_baf: out of memory when allocating " + to_string(nr_unique_symbols) + " syms.");
   }
 
   /*}}}  */

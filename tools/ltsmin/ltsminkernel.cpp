@@ -8,6 +8,7 @@
 //
 /// \file ltsminkernel.cpp
 
+#include <iostream>
 #include "ltsmin.h"
 
 using namespace aterm;
@@ -186,8 +187,6 @@ static void PushUnstableMark(int action, int splitter, int parent, INTERVAL* p)
   and assign to the belonging states a new block number,
   which is the (relative) address of the block on stack */
   Pi_pt = n_partitions;
-  /* while (!isEmpty(Pi + Pi_pt)) Pi_pt++; */
-  /* ATwarning("QQQ: PushUnstableMark %d\n", Pi_pt); */
   Pi[Pi_pt] = *p;
   blok[Pi_pt].action = action;
   blok[Pi_pt].splitter = splitter;
@@ -310,7 +309,6 @@ blocks */
   while (Pi_pt > 0)
   {
     INTERVAL* p = Pi+ (--Pi_pt);
-    /* ATwarning("QQ: %d\n",p->removed); */
     if (p->mode == UNSTABLE)
     {
       p->mode = STABLE;
@@ -334,16 +332,11 @@ blocks */
   {
     nBlocks = NumberOfPartitions();
     if (traceLevel && cnt>=2 && last_nBlocks != nBlocks)
-      ATwarning("Extra cycle needed. Number of blocks is increased from %d to %d\n",
-                last_nBlocks, nBlocks);
+      std::cerr << "Extra cycle needed. Number of blocks is increased from " << last_nBlocks << " to " << nBlocks << std::endl;
     cnt++;
     last_nBlocks = nBlocks;
   }
   while (ReduceKernel() && branching);
-  /*
-  if (traceLevel && branching) ATwarning("Cycle %d finished. Number of partitions: %d\n",
-    cnt, nBlocks);
-  */
 }
 
 void ReduceBranching(void)
@@ -360,7 +353,6 @@ static bool MarkTau(int b,  INTERVAL* p2)
 {
   int left = p2->left, right = p2->right, i;
   bool result = false;
-  /* ATwarning("Entry MarkTau b = %d left = %d right = %d\n", b, left, right); */
   for (i=left; i<right; i++)
   {
     ATermList sources = (ATermList)
@@ -370,7 +362,6 @@ static bool MarkTau(int b,  INTERVAL* p2)
     {
       continue;
     }
-    /* ATwarning("Sources = %t\n",sources); */
     for (; !ATisEmpty(sources); sources=ATgetNext(sources))
     {
       ATerm source = ATgetFirst(sources);
@@ -412,7 +403,6 @@ static bool RefineBranching(int action, int splitter)
     q->mode = UNSTABLE;
     while (MarkTau(b, p2))
     {
-      /* ATwarning("Inside Mark Tau: %d %d\n",p1->left, p1->right); */
       r=p1;
       if (!split(r, p1, p2) /* No nonmarked states */
           /* && p1->left == p1->right */)
@@ -431,8 +421,6 @@ static bool RefineBranching(int action, int splitter)
     {
       continue;
     }
-    /* ATwarning("%d < %d== %d < %d\n",p1->left, p1->right, q->left,
-    q->right); */
     if (!result)
     {
       result = true;
@@ -479,7 +467,7 @@ static void PrintTransition(ATerm p, bool tp, int action, ATerm q, bool tq)
 {
   static char buf[80];
   size_t pt = 0;
-  strncpy(buf, ATwriteToString(p),24);
+  strncpy(buf, ATwriteToString(p).c_str(),24);
   strcat(buf, (tp?"!":" "));
   pt = strlen(buf);
   for (; pt<25; pt++)
@@ -488,7 +476,7 @@ static void PrintTransition(ATerm p, bool tp, int action, ATerm q, bool tq)
   }
   buf[pt] = '\0';
   strcat(buf,"V ");
-  strncat(buf, ATwriteToString(label_name[action]), 21);
+  strncat(buf, ATwriteToString(label_name[action]).c_str(), 21);
   pt = strlen(buf);
   for (; pt<50; pt++)
   {
@@ -496,7 +484,7 @@ static void PrintTransition(ATerm p, bool tp, int action, ATerm q, bool tq)
   }
   buf[pt]='\0';
   strcat(buf,"V   ");
-  strncat(buf, ATwriteToString(q),24);
+  strncat(buf, ATwriteToString(q).c_str(),24);
   strcat(buf, (tq?"'!":"'"));
   ATfprintf(stderr,"%s\n",buf);
 }
@@ -580,8 +568,7 @@ static bool CompareCheckUnstableBlock(int splitter, SVCstateIndex init1,
     {
       if (traceLevel)
       {
-        ATwarning("Not %s bisimilar. Generation of witness trace.\n",
-                  branching?"branching":"strongly");
+        std::cerr << "Not " << (branching?"branching":"strongly") << "bisimilar. Generation of witness trace." << std::endl;
         while (PrintNonBisimilarStates((int*) &init1, (int*) &init2)) {};
       }
       *different = true;
@@ -625,16 +612,11 @@ int Compare(SVCstateIndex init1, SVCstateIndex init2)
   {
     nBlocks = NumberOfPartitions();
     if (traceLevel && cnt>=2 && last_nBlocks != nBlocks)
-      ATwarning("Extra cycle needed. Number of blocks is increased from %d to %d\n",
-                last_nBlocks, nBlocks);
+      std::cerr << "Extra cycle needed. Number of blocks is increased from " << last_nBlocks << " to " << nBlocks << std::endl;
     cnt++;
     last_nBlocks = nBlocks;
   }
   while (CompareKernel(init1, init2, &different) && branching);
-  /*
-  if (traceLevel && branching) ATwarning("Cycle %d finished. Number of partitions: %d\n",
-    cnt, nBlocks);
-  */
   return different?EXIT_NOTOK:EXIT_OK;
 }
 

@@ -15,9 +15,6 @@
 #define PRINT_C
 #include "mcrl2/core/detail/print_implementation.h"
 
-using namespace mcrl2::core::detail;
-// using boost::intmax_t;
-
 namespace mcrl2
 {
 namespace core
@@ -25,7 +22,7 @@ namespace core
 
 void PrintPart_C(FILE* OutStream, const ATerm Part, t_pp_format pp_format)
 {
-  PrintPart__C(OutStream, Part, pp_format);
+  detail::PrintPart__C(OutStream, Part, pp_format);
 }
 
 int gsprintf(const char* format, ...)
@@ -81,7 +78,6 @@ int gsvfprintf(FILE* stream, const char* format, va_list args)
     bool islonglong = false;
     bool islong = false;
     bool islongdouble = false;
-    bool isintmax = false;
     bool issize = false;
     bool isptrdiff = false;
     switch (*p)
@@ -111,7 +107,6 @@ int gsvfprintf(FILE* stream, const char* format, va_list args)
         break;
       case 'j':
         *s++ = *p++;
-        isintmax = true;
         break;
       case 'z':
         *s++ = *p++;
@@ -144,12 +139,9 @@ int gsvfprintf(FILE* stream, const char* format, va_list args)
           fprintf(stream, fmt, va_arg(args, long int));
         }
         else if (islonglong)
-          // fprintf(stream, fmt, va_arg(args, boost::int64_t));
         {
           fprintf(stream, fmt, va_arg(args, long long));
         }
-        /* else if ( isintmax )
-          fprintf(stream, fmt, va_arg(args, intmax_t)); */
         else if (issize)
         {
           fprintf(stream, fmt, va_arg(args, size_t));
@@ -201,32 +193,15 @@ int gsvfprintf(FILE* stream, const char* format, va_list args)
         /*
          * ATerm specifics start here: "%T" to print an ATerm; "%F" to
          * print an AFun
-         *
-         * Commented out are:
-         * "%I" to print a list; "%N" to print a single ATerm node;
-         * "%H" to print the MD5 sum of a ATerm
          */
       case 'T':
         fmt[strlen(fmt)-1] = 't';
         ATfprintf(stream, fmt, va_arg(args, ATerm));
         break;
-        /*      case 'I':
-                fmt[strlen(fmt)-1] = 'l';
-                ATfprintf(stream, fmt, va_arg(args, ATermList));
-                break;*/
       case 'F':
         fmt[strlen(fmt)-1] = 'y';
         ATfprintf(stream, fmt, va_arg(args, AFun));
         break;
-        /*      case 'N':
-                fmt[strlen(fmt)-1] = 'n';
-                ATfprintf(stream, fmt, va_arg(args, ATerm));
-                break;
-              case 'H':
-                fmt[strlen(fmt)-1] = 'h';
-                ATfprintf(stream, fmt, va_arg(args, ATerm));
-                break;*/
-
       default:
         fputc(*p, stream);
         break;

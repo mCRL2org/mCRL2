@@ -252,7 +252,7 @@ int test_main(int argc, char** argv)
         {
           if (known.find(state) == known.end())
           {
-            ATwarning("%t\n", state);
+            std::cerr << atermpp::aterm(state) << std::endl;
 
             known.insert(state);
             stack.push(state);

@@ -3,6 +3,7 @@
 #include <ctype.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdexcept>
 #include "aterm2.h"
 #include "memory.h"
 #include "util.h"
@@ -83,7 +84,7 @@ static void resize_table()
   at_lookup_table_alias = (ATerm*)at_lookup_table;
   if (!at_lookup_table)
   {
-    ATerror("afun.c:resize_table - could not allocate space for lookup table of %ld afuns\n", new_size);
+    throw std::runtime_error("afun.c:resize_table - could not allocate space for lookup table of " + to_string(new_size) + " afuns");
   }
   for (i = table_size; i < new_size; i++)
   {
@@ -94,7 +95,7 @@ static void resize_table()
   hash_table = (SymEntry*)AT_realloc(hash_table, new_size*sizeof(SymEntry));
   if (!hash_table)
   {
-    ATerror("afun.c:resize_table - could not allocate space for hashtable of %ld afuns\n", new_size);
+    throw std::runtime_error("afun.c:resize_table - could not allocate space for hashtable of " + to_string(new_size) + " afuns");
   }
   memset(hash_table, 0, new_size*sizeof(SymEntry));
 
@@ -134,16 +135,14 @@ void AT_initAFun(int, char**)
   hash_table = (SymEntry*) AT_calloc(table_size, sizeof(SymEntry));
   if (hash_table == NULL)
   {
-    ATerror("AT_initAFun: cannot allocate %ld hash-entries.\n",
-            table_size);
+    throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(table_size) + " hash-entries.");
   }
 
   at_lookup_table = (SymEntry*) AT_calloc(table_size, sizeof(SymEntry));
   at_lookup_table_alias = (ATerm*)at_lookup_table;
   if (at_lookup_table == NULL)
   {
-    ATerror("AT_initAFun: cannot allocate %ld lookup-entries.\n",
-            table_size);
+    throw std::runtime_error("AT_initAFun: cannot allocate " + to_string(table_size) + " lookup-entries.");
   }
 
   first_free = 0;
@@ -157,7 +156,7 @@ void AT_initAFun(int, char**)
                                        sizeof(AFun));
   if (!protected_symbols)
   {
-    ATerror("AT_initAFun: cannot allocate initial protection buffer.\n");
+    throw std::runtime_error("AT_initAFun: cannot allocate initial protection buffer.");
   }
 
   sym = ATmakeAFun("<int>", 0, false);
@@ -252,6 +251,49 @@ size_t AT_printAFun(AFun fun, FILE* f)
 
 /*}}}  */
 
+std::string ATwriteAFunToString(const AFun fun)
+{
+  std::ostringstream oss;
+  SymEntry entry = at_lookup_table[fun];
+  char* id = entry->name;
+
+  if (IS_QUOTED(entry->header))
+  {
+    /* This function symbol needs quotes */
+    oss << "\"";
+    while (*id)
+    {
+      /* We need to escape special characters */
+      switch (*id)
+      {
+        case '\\':
+        case '"':
+          oss << "\\" << *id;
+          break;
+        case '\n':
+          oss << "\\n";
+          break;
+        case '\t':
+          oss << "\\t";
+          break;
+        case '\r':
+          oss << "\\r";
+          break;
+        default:
+          oss << *id;
+      }
+      ++id;
+    }
+    oss << "\"";
+  }
+  else
+  {
+    oss << std::string(id);
+  }
+
+  return oss.str();
+}
+
 /*{{{  ShortHashNumber AT_hashAFun(const char *name, int arity) */
 
 /**
@@ -284,8 +326,7 @@ AFun ATmakeAFun(const char* name, size_t arity, bool quoted)
 
   if (arity >= MAX_ARITY)
   {
-    ATabort("cannot handle symbols with arity %d (max=%d)\n",
-            arity, MAX_ARITY-1);
+    throw std::runtime_error("cannot handle symbols with arity " + to_string(arity) + "(max=" + to_string(MAX_ARITY-1) + ")");
   }
 
   /* Find symbol in table */
@@ -310,7 +351,7 @@ AFun ATmakeAFun(const char* name, size_t arity, bool quoted)
       free_entry = first_free;
       if (free_entry == (AFun)(-1))
       {
-        ATerror("AT_initAFun: out of symbol slots!\n");
+        throw std::runtime_error("AT_initAFun: out of symbol slots!");
       }
     }
     /* fprintf(stderr,"First_free %d %lu\n",SIZEOF_LONG,first_free); */
@@ -327,14 +368,12 @@ AFun ATmakeAFun(const char* name, size_t arity, bool quoted)
     cur->name = _strdup(name);
     if (cur->name == NULL)
     {
-      ATerror("ATmakeAFun: no room for name of length %d\n", strlen(name));
+      throw std::runtime_error("ATmakeAFun: no room for name of length " + to_string(strlen(name)));
     }
 
     cur->next = hash_table[hnr];
     hash_table[hnr] = cur;
   }
-
-  /*ATwarning("AT_makeAFun(%p)\tid = %d\n", cur, cur->id);*/
 
   return cur->id;
 }
@@ -353,8 +392,6 @@ void AT_freeAFun(SymEntry sym)
   terminfo[TERM_SIZE_SYMBOL].nb_reclaimed_cells_during_last_gc++;
 
   assert(sym->name);
-
-  /*ATwarning("AT_freeAFun: name: [%s], addr: %p, id: %d\n", sym->name, sym, sym->id);*/
 
   /* Calculate hashnumber */
   hnr = AT_hashAFun(sym->name, GET_LENGTH(sym->header));
@@ -401,8 +438,7 @@ void ATprotectAFun(AFun sym)
     protected_symbols = (AFun*)AT_realloc(protected_symbols,
                                           max_protected_symbols * sizeof(AFun));
     if (!protected_symbols)
-      ATerror("ATprotectAFun: no space to hold %ld protected symbols.\n",
-              max_protected_symbols);
+      throw std::runtime_error("ATprotectAFun: no space to hold " + to_string(max_protected_symbols) + " protected symbols.");
   }
 
   protected_symbols[nr_protected_symbols++] = sym;

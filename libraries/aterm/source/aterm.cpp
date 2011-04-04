@@ -3,8 +3,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <string.h>
+#include <string>
 #include <assert.h>
+#include <stdexcept>
 
 #ifdef WIN32
 #include <fcntl.h>
@@ -19,6 +20,7 @@
 #include "bafio.h"
 #include "atypes.h"
 #include "safio.h"
+#include "afun.h"
 
 /*}}}  */
 
@@ -136,7 +138,7 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   /* Protect novice users that simply pass NULL as bottomOfStack */
   if (bottomOfStack == NULL)
   {
-    ATerror("ATinit: illegal bottomOfStack (arg 3) passed.\n");
+    throw std::runtime_error("ATinit: illegal bottomOfStack (arg 3) passed.");
   }
 
   /* Check for reasonably sized ATerm (32 bits, 4 bytes)     */
@@ -151,8 +153,7 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   buffer_size = DEFAULT_BUFFER_SIZE;
   buffer = (char*) AT_malloc(DEFAULT_BUFFER_SIZE);
   if (!buffer)
-    ATerror("ATinit: cannot allocate string buffer of size %d\n",
-            DEFAULT_BUFFER_SIZE);
+    throw std::runtime_error("ATinit: cannot allocate string buffer of size " + to_string(DEFAULT_BUFFER_SIZE));
 
   /*}}}  */
   /*{{{  Initialize protected terms */
@@ -160,8 +161,7 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   at_prot_table_size = INITIAL_PROT_TABLE_SIZE;
   at_prot_table = (ProtEntry**)AT_calloc(at_prot_table_size, sizeof(ProtEntry*));
   if (!at_prot_table)
-    ATerror("ATinit: cannot allocate space for prot-table of size %ud\n",
-            at_prot_table_size);
+    throw std::runtime_error("ATinit: cannot allocate space for prot-table of size " + to_string(at_prot_table_size));
 
   /*}}}  */
   /*{{{  Initialize mark stack */
@@ -169,8 +169,7 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
   /* Allocate initial mark stack */
   mark_stack = (ATerm*) AT_malloc(sizeof(ATerm) * INITIAL_MARK_STACK_SIZE);
   if (!mark_stack)
-    ATerror("cannot allocate marks stack of %ud entries.\n",
-            INITIAL_MARK_STACK_SIZE);
+    throw std::runtime_error("cannot allocate marks stack of " + to_string(INITIAL_MARK_STACK_SIZE) + " entries.");
   mark_stack_size = INITIAL_MARK_STACK_SIZE;
 
   /*}}}  */
@@ -207,59 +206,6 @@ ATinit(int argc, char* argv[], ATerm* bottomOfStack)
 bool ATisInitialized()
 {
   return initialized;
-}
-
-/*}}}  */
-
-/*{{{  void ATwarning(const char *format, ...) */
-
-void
-ATwarning(const char* format,...)
-{
-  va_list args;
-
-  va_start(args, format);
-  ATvfprintf(stderr, format, args);
-
-  va_end(args);
-}
-
-/*}}}  */
-/*{{{  void ATerror(const char *format, ...) */
-
-/**
- * A fatal error was detected.
- */
-
-void
-ATerror(const char* format,...)
-{
-  va_list         args;
-
-  va_start(args, format);
-  ATvfprintf(stderr, format, args);
-  assert(0);
-  exit(1);
-  va_end(args);
-}
-
-/*}}}  */
-/*{{{  void ATabort(const char *format, ...) */
-
-/**
- * A fatal error was detected.
- */
-
-void
-ATabort(const char* format,...)
-{
-  va_list         args;
-
-  va_start(args, format);
-  ATvfprintf(stderr, format, args);
-  abort();
-
-  va_end(args);
 }
 
 /*}}}  */
@@ -314,7 +260,7 @@ void ATprotectArray(ATerm* start, size_t size)
     ProtEntry* entries = (ProtEntry*)AT_calloc(PROTECT_EXPAND_SIZE, sizeof(ProtEntry));
     if (!entries)
     {
-      ATerror("out of memory in ATprotect.\n");
+      throw std::runtime_error("out of memory in ATprotect.");
     }
 
     for (i=0; i<PROTECT_EXPAND_SIZE; i++)
@@ -394,7 +340,7 @@ void ATaddProtectFunction(ATermProtFunc f)
 
     if (!new_at_prot_functions)
     {
-      ATerror("out of memory in ATaddProtectFunction.\n");
+      throw std::runtime_error("out of memory in ATaddProtectFunction.");
     }
     else
     {
@@ -585,7 +531,7 @@ resize_buffer(size_t n)
   buffer = (char*) AT_realloc(buffer, buffer_size);
   if (!buffer)
   {
-    ATerror("resize_buffer(aterm.c): cannot allocate string buffer of size %d\n", buffer_size);
+    throw std::runtime_error("resize_buffer(aterm.c): cannot allocate string buffer of size " + to_string(buffer_size));
   }
 }
 
@@ -605,7 +551,6 @@ writeToTextFile(ATerm t, FILE* f)
   size_t    i, arity; /* size; */
   ATermAppl       appl;
   ATermList       list;
-  /* ATermBlob       blob; */
   char*            name;
 
   switch (ATgetType(t))
@@ -660,16 +605,16 @@ writeToTextFile(ATerm t, FILE* f)
     case AT_FREE:
       if (AT_inAnyFreeList(t))
       {
-        ATerror("ATwriteToTextFile: printing free term at %p!\n", t);
+        throw std::runtime_error("ATwriteToTextFile: printing free term at " + to_string(t));
       }
       else
       {
-        ATerror("ATwriteToTextFile: free term %p not in freelist?\n", t);
+        throw std::runtime_error("ATwriteToTextFile: free term " + to_string(t) + " not in freelist?");
       }
       return false;
 
     case AT_SYMBOL:
-      ATerror("ATwriteToTextFile: not a term but an afun: %y\n", t);
+      throw std::runtime_error("ATwriteToTextFile: not a term but an afun: " + ATwriteAFunToString((AFun)t));
       return false;
   }
 
@@ -823,10 +768,10 @@ writeAFunToString(AFun sym, char* buf)
 /*}}}  */
 /*{{{  static char *writeToString(ATerm t, char *buf) */
 
-static char*    topWriteToString(ATerm t, char* buf);
+static void topWriteToStream(const ATerm t, std::ostream& os);
 
-static char*
-writeToString(ATerm t, char* buf)
+static void
+writeToStream(const ATerm t, std::ostream& os)
 {
   ATermList list;
   ATermAppl appl;
@@ -837,79 +782,60 @@ writeToString(ATerm t, char* buf)
   switch (ATgetType(t))
   {
     case AT_INT:
-      /*{{{  write integer */
-
-      sprintf(buf, "%d", ATgetInt((ATermInt) t));
-      buf += strlen(buf);
-
-      /*}}}  */
+      os << ATgetInt((ATermInt) t);
       break;
-
     case AT_APPL:
-      /*{{{  write appl */
-
       appl = (ATermAppl) t;
       sym = ATgetAFun(appl);
       arity = ATgetArity(sym);
       name = ATgetName(sym);
-      buf = writeAFunToString(sym, buf);
+      os << ATwriteAFunToString(sym);
       if (arity > 0 || (!ATisQuoted(sym) && *name == '\0'))
       {
-        *buf++ = '(';
+        os << "(";
         if (arity > 0)
         {
-          buf = topWriteToString(ATgetArgument(appl, 0), buf);
+          topWriteToStream(ATgetArgument(appl, 0), os);
           for (i = 1; i < arity; i++)
           {
-            *buf++ = ',';
-            buf = topWriteToString(ATgetArgument(appl, i), buf);
+            os << ",";
+            topWriteToStream(ATgetArgument(appl, i), os);
           }
         }
-        *buf++ = ')';
+        os << ")";
       }
-
-      /*}}}  */
       break;
 
     case AT_LIST:
-      /*{{{  write list */
-
       list = (ATermList) t;
       if (!ATisEmpty(list))
       {
-        buf = topWriteToString(ATgetFirst(list), buf);
+        topWriteToStream(ATgetFirst(list), os);
         list = ATgetNext(list);
         while (!ATisEmpty(list))
         {
-          *buf++ = ',';
-          buf = topWriteToString(ATgetFirst(list), buf);
+          os << ",";
+          topWriteToStream(ATgetFirst(list), os);
           list = ATgetNext(list);
         }
       }
-
-      /*}}}  */
       break;
-
   }
-  return buf;
 }
 
-static char*
-topWriteToString(ATerm t, char* buf)
+static void
+topWriteToStream(const ATerm t, std::ostream& os)
 {
-
   if (ATgetType(t) == AT_LIST)
   {
-    *buf++ = '[';
-    buf = writeToString(t, buf);
-    *buf++ = ']';
+    os << "[";
+    writeToStream(t, os);
+    os << "]";
   }
   else
   {
-    buf = writeToString(t, buf);
+    writeToStream(t, os);
   }
-
-  return buf;
 }
 
 /*}}}  */
@@ -980,7 +906,7 @@ static size_t textSize(ATerm t)
       break;
 
     default:
-      ATerror("textSize: Illegal type %d\n", ATgetType(t));
+      throw std::runtime_error("textSize: Illegal type " + to_string(ATgetType(t)));
       return (size_t)-1; // error path
   }
   return size;
@@ -1011,32 +937,14 @@ AT_calcTextSize(ATerm t)
  * Write a term into its text representation.
  */
 
-char*
-ATwriteToString(ATerm t)
+std::string
+ATwriteToString(const ATerm t)
 {
-  size_t size = topTextSize(t)+1;
-  char* end;
-
-  RESIZE_BUFFER(size);
-
-  end = topWriteToString(t, buffer);
-  *end++ = '\0';
-
-  assert(((size_t)(end - buffer)) == size);
-
-  return buffer;
+  std::ostringstream oss;
+  topWriteToStream(t, oss);
+  return oss.str();
 }
 
-
-/**
- * Write the text representation of a term into a buffer.
- */
-
-void
-AT_writeToStringBuffer(ATerm t, char* buffer)
-{
-  topWriteToString(t, buffer);
-}
 
 /*}}}  */
 
@@ -1210,7 +1118,7 @@ fparse_quoted_appl(int* c, FILE* f)
   name = _strdup(buffer);
   if (!name)
   {
-    ATerror("fparse_quoted_appl: symbol too long.");
+    throw std::runtime_error("fparse_quoted_appl: symbol too long.");
   }
 
   fnext_skip_layout(c, f);
@@ -1268,7 +1176,7 @@ fparse_unquoted_appl(int* c, FILE* f)
     name = _strdup(buffer);
     if (!name)
     {
-      ATerror("fparse_unquoted_appl: symbol too long.");
+      throw std::runtime_error("fparse_unquoted_appl: symbol too long.");
     }
 
     fskip_layout(c, f);
@@ -1479,7 +1387,7 @@ ATerm ATreadFromFile(FILE* file)
     int token = ungetc(SAF_IDENTIFICATION_TOKEN, file);
     if (token != SAF_IDENTIFICATION_TOKEN)
     {
-      ATerror("Unable to unget the SAF identification token.\n");
+      throw std::runtime_error("Unable to unget the SAF identification token.");
     }
 
     return ATreadFromSAFFile(file);
@@ -1647,7 +1555,7 @@ sparse_quoted_appl(int* c, char** s)
   name = _strdup(buffer);
   if (!name)
   {
-    ATerror("fparse_quoted_appl: symbol too long.");
+    throw std::runtime_error("fparse_quoted_appl: symbol too long.");
   }
 
   snext_skip_layout(c, s);
@@ -1705,7 +1613,7 @@ sparse_unquoted_appl(int* c, char** s)
     name = _strdup(buffer);
     if (!name)
     {
-      ATerror("sparse_unquoted_appl: symbol too long.");
+      throw std::runtime_error("sparse_unquoted_appl: symbol too long.");
     }
 
     sskip_layout(c, s);
@@ -1903,7 +1811,7 @@ void AT_markTerm(ATerm t)
       mark_stack = (ATerm*) AT_realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
       if (!mark_stack)
       {
-        ATerror("cannot realloc mark stack to %lu entries.\n", mark_stack_size);
+        throw std::runtime_error("cannot realloc mark stack to " + to_string(mark_stack_size) + "entries.");
       }
       limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
 
@@ -1916,7 +1824,7 @@ void AT_markTerm(ATerm t)
     {
       if (current != mark_stack)
       {
-        ATabort("AT_markTerm: premature end of mark_stack.\n");
+        std::runtime_error("AT_markTerm: premature end of mark_stack.");
       }
       break;
     }
@@ -1996,7 +1904,7 @@ void AT_markTerm_young(ATerm t)
       mark_stack = (ATerm*) AT_realloc(mark_stack, sizeof(ATerm) * mark_stack_size);
       if (!mark_stack)
       {
-        ATerror("cannot realloc mark stack to %lu entries.\n", mark_stack_size);
+        throw std::runtime_error("cannot realloc mark stack to " + to_string(mark_stack_size) + " entries.");
       }
       limit = mark_stack + mark_stack_size - MARK_STACK_MARGE;
       fflush(stderr);
@@ -2010,7 +1918,7 @@ void AT_markTerm_young(ATerm t)
     {
       if (current != mark_stack)
       {
-        ATabort("AT_markTerm: premature end of mark_stack.\n");
+        std::runtime_error("AT_markTerm: premature end of mark_stack.");
       }
       break;
     }
@@ -2110,7 +2018,7 @@ void AT_unmarkIfAllMarked(ATerm t)
       }
       break;
       default:
-        ATerror("collect_terms: illegal term\n");
+        throw std::runtime_error("collect_terms: illegal term");
         break;
     }
 
@@ -2365,7 +2273,7 @@ int ATcompare(ATerm t1, ATerm t2)
       result = AT_compareLists((ATermList) t1, (ATermList) t2);
       break;
     default:
-      ATabort("Unknown ATerm type %d\n", type1);
+      throw std::runtime_error("Unknown ATerm type " + to_string(type1));
       break;
   }
 

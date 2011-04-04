@@ -1,10 +1,11 @@
 /*{{{  includes */
 
-#include <stdlib.h>
-#include <time.h>
-#include <limits.h>
-#include <assert.h>
-#include <setjmp.h>
+#include <cstdlib>
+#include <ctime>
+#include <climits>
+#include <cassert>
+#include <csetjmp>
+#include <stdexcept>
 
 #ifndef WIN32
 #include <unistd.h>
@@ -603,7 +604,7 @@ static void reclaim_empty_block(size_t blocks, size_t size, Block* removed_block
     }
     if (!cur)
     {
-      ATabort("### block %d not found\n",removed_block);
+      std::runtime_error("### block " + to_string(removed_block) + " not found");
     }
 
     if (prev==NULL)
@@ -787,7 +788,7 @@ void major_sweep_phase_old()
               dead_in_block++;
               break;
             default:
-              ATabort("panic in sweep phase\n");
+              std::runtime_error("panic in sweep phase");
           }
         }
       }
@@ -913,7 +914,7 @@ void major_sweep_phase_young()
               dead_in_block++;
               break;
             default:
-              ATabort("panic in sweep phase\n");
+              std::runtime_error("panic in sweep phase");
           }
         }
       }
@@ -1068,7 +1069,7 @@ void minor_sweep_phase_young()
               break;
 
             default:
-              ATabort("panic in sweep phase\n");
+              std::runtime_error("panic in sweep phase");
           }
           assert(!IS_MARKED(t->header));
         }

@@ -124,7 +124,7 @@ class aterm_base
     /// \return A string representation of the term.
     std::string to_string() const
     {
-      return std::string(ATwriteToString(m_term));
+      return ATwriteToString(m_term);
     }
 };
 

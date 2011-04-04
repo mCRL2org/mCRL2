@@ -52,8 +52,7 @@
  *    - ATinit() should be called from your main() function
  *    - ATmake() to construct terms.  Now deprecated and removed.
  *    - ATmatch() to deconstruct terms. Deprecated and removed.
- *    - ATwarning() to print terms to stderr (for debugging)
- *    - ATprotect() to protect global variable from the garbage collector
+  *    - ATprotect() to protect global variable from the garbage collector
  *    - ATreadFromNamedFile to read terms from disk
  *
  */
@@ -61,8 +60,8 @@
 #ifndef ATERM1_H
 #define ATERM1_H
 
-#include <stdio.h>
-#include <stdarg.h>
+#include <cstdio>
+#include <cstdarg>
 #include "encoding.h"
 #include "atypes.h"
 #include "afun.h"
@@ -114,11 +113,10 @@ namespace aterm
   bool ATwriteToNamedBinaryFile(ATerm t, const char* name);
 
   /**
-   * Serialize an ATerm to a static buffer. Note that the buffer is
-   * shared between calls to ATwriteToString, and should not be freed.
+   * Serialize an ATerm to a string.
    * \arg t term to write
    */
-  char*  ATwriteToString(ATerm t);
+  std::string ATwriteToString(const ATerm t);
 
   /**
    * Serialize an ATerm to a static buffer in binary format. Note that
@@ -275,26 +273,6 @@ namespace aterm
    * \returns ATtrue if the library was initialized, and ATfalse otherwise
    */
   bool ATisInitialized();
-
-  /**
-   * Prints a message to standard error, using ATfprintf().
-   *
-   */
-  void ATwarning(const char* format, ...);
-
-  /**
-   * Prints a message to standard error, using ATfprintf(), and then exits
-   * the program with return code 1.
-   *
-   */
-  void ATerror(const char* format, ...);
-
-  /**
-   * Prints a message to standard error, using ATfprintf(), and then exits
-   * the program using the abort() system call which will dump a core file.
-   *
-   */
-  void ATabort(const char* format, ...);
 
   /**
    * Prints a formatted message to stdout using ATvprintf

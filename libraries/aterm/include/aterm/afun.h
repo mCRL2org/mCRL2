@@ -1,6 +1,7 @@
 #ifndef AFUN_H
 #define AFUN_H
 
+#include <string>
 #include "atypes.h"
 #include "encoding.h"
 #include "stdio.h"
@@ -92,6 +93,8 @@ namespace aterm
   size_t AT_hashAFun(const char* name, size_t arity);
   bool AT_findAFun(char* name, size_t arity, bool quoted);
   void AT_unmarkAllAFuns();
+
+  std::string ATwriteAFunToString(const AFun t);
 
 }
 

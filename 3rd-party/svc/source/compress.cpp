@@ -221,7 +221,7 @@ int CSwriteATerm(CompressedStream* cs, ATerm term)
 int CSuwriteATerm(CompressedStream* cs, ATerm term)
 {
 
-  BSwriteString(cs->bs,ATwriteToString(term));
+  BSwriteString(cs->bs,ATwriteToString(term).c_str());
   return 1;
 }
 int CSwriteString(CompressedStream* cs, char* str)

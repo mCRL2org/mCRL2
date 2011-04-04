@@ -1,10 +1,12 @@
 #include <string.h>
 #include <stdlib.h>
 #include <assert.h>
+#include <stdexcept>
 #include "safio.h"
 #include "byteencoding.h"
 #include "memory.h"
 #include "encoding.h"
+#include "util.h"
 
 namespace aterm
 {
@@ -56,19 +58,19 @@ static ProtectedMemoryStack createProtectedMemoryStack()
   ProtectedMemoryStack protectedMemoryStack = (ProtectedMemoryStack) AT_malloc(sizeof(struct _ProtectedMemoryStack));
   if (protectedMemoryStack == NULL)
   {
-    ATerror("Unable to allocate protected memory stack.\n");
+    std::runtime_error("Unable to allocate protected memory stack.");
   }
 
   block = (ATerm*) AT_alloc_protected(PROTECTEDMEMORYSTACKBLOCKSIZE);
   if (block == NULL)
   {
-    ATerror("Unable to allocate block for the protected memory stack.\n");
+    std::runtime_error("Unable to allocate block for the protected memory stack.");
   }
 
   protectedMemoryStack->blocks = (ATerm**) AT_malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(ATerm*));
   if (protectedMemoryStack->blocks == NULL)
   {
-    ATerror("Unable to allocate blocks for the protected memory stack.\n");
+    std::runtime_error("Unable to allocate blocks for the protected memory stack.");
   }
 
   protectedMemoryStack->blocks[0] = block;
@@ -82,7 +84,7 @@ static ProtectedMemoryStack createProtectedMemoryStack()
   protectedMemoryStack->freeBlockSpaces = (size_t*) AT_malloc(PROTECTEDMEMORYSTACKBLOCKSINCREMENT * sizeof(size_t));
   if (protectedMemoryStack->freeBlockSpaces == NULL)
   {
-    ATerror("Unable to allocate array for registering free block spaces of the protected memory stack.\n");
+    std::runtime_error("Unable to allocate array for registering free block spaces of the protected memory stack.");
   }
 
   return protectedMemoryStack;
@@ -129,7 +131,7 @@ static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack
     block = (ATerm*) AT_alloc_protected(PROTECTEDMEMORYSTACKBLOCKSIZE);
     if (block == NULL)
     {
-      ATerror("Unable to allocate block for the protected memory stack.\n");
+      std::runtime_error("Unable to allocate block for the protected memory stack.");
     }
 
     if ((nrOfBlocks & PROTECTEDMEMORYSTACKBLOCKSINCREMENTMASK) == 0)
@@ -138,13 +140,13 @@ static void expandProtectedMemoryStack(ProtectedMemoryStack protectedMemoryStack
       protectedMemoryStack->blocks = (ATerm**) AT_realloc(protectedMemoryStack->blocks, newSize * sizeof(ATerm*));
       if (protectedMemoryStack->blocks == NULL)
       {
-        ATerror("Unable to allocate blocks array for the protected memory stack.\n");
+        std::runtime_error("Unable to allocate blocks array for the protected memory stack.");
       }
 
       protectedMemoryStack->freeBlockSpaces = (size_t*) AT_realloc(protectedMemoryStack->freeBlockSpaces, newSize * sizeof(size_t));
       if (protectedMemoryStack->freeBlockSpaces == NULL)
       {
-        ATerror("Unable to allocate array for registering free block spaces of the protected memory stack.\n");
+        std::runtime_error("Unable to allocate array for registering free block spaces of the protected memory stack.");
       }
     }
 
@@ -183,7 +185,7 @@ static ATerm* getProtectedMemoryBlock(ProtectedMemoryStack protectedMemoryStack,
     memoryBlock = (ATerm*) AT_alloc_protected(size);
     if (memoryBlock == NULL)
     {
-      ATerror("Unable to allocated large memoryBlock.\n");
+      std::runtime_error("Unable to allocated large memoryBlock.");
     }
   }
 
@@ -233,13 +235,13 @@ ByteBuffer ATcreateByteBuffer(size_t capacity)
   ByteBuffer byteBuffer = (ByteBuffer) AT_malloc(sizeof(struct _ByteBuffer));
   if (byteBuffer == NULL)
   {
-    ATerror("Failed to allocate byte buffer.\n");
+    std::runtime_error("Failed to allocate byte buffer.");
   }
 
   buffer = (char*) AT_malloc(capacity * sizeof(char));
   if (buffer == NULL)
   {
-    ATerror("Failed to allocate buffer string for the byte buffer.\n");
+    std::runtime_error("Failed to allocate buffer string for the byte buffer.");
   }
   byteBuffer->buffer = buffer;
   byteBuffer->currentPos = buffer;
@@ -261,7 +263,7 @@ ByteBuffer ATwrapBuffer(char* buffer, size_t capacity)
   ByteBuffer byteBuffer = (ByteBuffer) AT_malloc(sizeof(struct _ByteBuffer));
   if (byteBuffer == NULL)
   {
-    ATerror("Failed to allocate byte buffer.\n");
+    std::runtime_error("Failed to allocate byte buffer.");
   }
 
   byteBuffer->buffer = buffer;
@@ -365,7 +367,7 @@ static void ensureWriteStackCapacity(BinaryWriter binaryWriter)
     binaryWriter->stack = (ATermMapping*) AT_realloc(binaryWriter->stack, (binaryWriter->stackSize += STACKSIZEINCREMENT) * sizeof(struct _ATermMapping));
     if (binaryWriter->stack == NULL)
     {
-      ATerror("The binary writer was unable to enlarge the stack.\n");
+      std::runtime_error("The binary writer was unable to enlarge the stack.");
     }
   }
 }
@@ -421,7 +423,7 @@ static ATerm getNextTerm(BinaryWriter binaryWriter)
     }
     else
     {
-      ATerror("Could not find next term. Someone broke the above code.\n");
+      std::runtime_error("Could not find next term. Someone broke the above code.");
     }
 
     child->term = next;
@@ -565,13 +567,13 @@ BinaryWriter ATcreateBinaryWriter(ATerm term)
   BinaryWriter binaryWriter = (BinaryWriter) AT_malloc(sizeof(struct _BinaryWriter));
   if (binaryWriter == NULL)
   {
-    ATerror("Unable to allocate memory for the binary writer.\n");
+    std::runtime_error("Unable to allocate memory for the binary writer.");
   }
 
   stack = (ATermMapping*) AT_malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermMapping));
   if (stack == NULL)
   {
-    ATerror("Unable to allocate memory for the binaryWriter's stack.\n");
+    std::runtime_error("Unable to allocate memory for the binaryWriter's stack.");
   }
   binaryWriter->stack = stack;
   binaryWriter->stackSize = DEFAULTSTACKSIZE;
@@ -660,7 +662,7 @@ void ATserialize(BinaryWriter binaryWriter, ByteBuffer byteBuffer)
           binaryWriter->stack[binaryWriter->stackPosition].nextPartOfList = (ATermList) currentTerm; /* <- for ATermList->next optimizaton. */
           break;
         default:
-          ATerror("%d is not a valid term type.\n", type);
+          std::runtime_error(to_string(type) + " is not a valid term type.");
       }
 
       /* Don't add the term to the shared list until we are completely done with it. */
@@ -720,7 +722,7 @@ static void ensureReadStackCapacity(BinaryReader binaryReader)
     binaryReader->stack = (ATermConstruct*) AT_realloc(binaryReader->stack, (binaryReader->stackSize += STACKSIZEINCREMENT) * sizeof(struct _ATermConstruct));
     if (binaryReader->stack == NULL)
     {
-      ATerror("Unable to allocate memory for expanding the binaryReader's stack.\n");
+      std::runtime_error("Unable to allocate memory for expanding the binaryReader's stack.");
     }
   }
 }
@@ -735,7 +737,7 @@ static void ensureReadSharedTermCapacity(BinaryReader binaryReader)
     binaryReader->sharedTerms = (ATerm*) AT_realloc(binaryReader->sharedTerms, (binaryReader->sharedTermsSize += SHAREDTERMARRAYINCREMENT) * sizeof(ATerm));
     if (binaryReader->sharedTerms == NULL)
     {
-      ATerror("Unable to allocate memory for expanding the binaryReader's shared terms array.\n");
+      std::runtime_error("Unable to allocate memory for expanding the binaryReader's shared terms array.");
     }
   }
 }
@@ -750,7 +752,7 @@ static void ensureReadSharedAFunCapacity(BinaryReader binaryReader)
     binaryReader->sharedAFuns = (SymEntry*) AT_realloc(binaryReader->sharedAFuns, (binaryReader->sharedAFunsSize += SHAREDSYMBOLARRAYINCREMENT) * sizeof(SymEntry));
     if (binaryReader->sharedAFuns == NULL)
     {
-      ATerror("Unable to allocate memory for expanding the binaryReader's shared signatures array.\n");
+      std::runtime_error("Unable to allocate memory for expanding the binaryReader's shared signatures array.");
     }
   }
 }
@@ -837,7 +839,7 @@ static ATerm buildTerm(BinaryReader binaryReader, ATermConstruct* parent)
   else
   {
     constructedTerm = NULL; /* This line is purely for shutting up the compiler. */
-    ATerror("Unable to construct term.\n");
+    std::runtime_error("Unable to construct term.");
   }
 
   return constructedTerm;
@@ -866,7 +868,7 @@ static void linkTerm(BinaryReader binaryReader, ATerm aTerm)
     }
     else
     {
-      ATerror("Encountered a term that didn't fit anywhere. Type: %d.\n", ATgetType(term));
+      std::runtime_error("Encountered a term that didn't fit anywhere. Type: " + to_string(ATgetType(term)));
     }
 
     term = buildTerm(binaryReader, parent);
@@ -940,7 +942,7 @@ static void readData(BinaryReader binaryReader, ByteBuffer byteBuffer)
     }
     else
     {
-      ATerror("Unsupported chunkified type: %s.\n", binaryReader->tempType);
+      std::runtime_error("Unsupported chunkified type: " +to_string(binaryReader->tempType));
     }
 
     resetTempReaderData(binaryReader);
@@ -1003,7 +1005,7 @@ static void touchAppl(BinaryReader binaryReader, ByteBuffer byteBuffer, size_t h
       binaryReader->tempBytes = (char*) AT_malloc((nameLength + 1) * sizeof(char));
       if (binaryReader->tempBytes == NULL)
       {
-        ATerror("The binary reader was unable to allocate memory for temporary function symbol data.\n");
+        std::runtime_error("The binary reader was unable to allocate memory for temporary function symbol data.");
       }
     }
     binaryReader->tempBytes[nameLength] = '\0'; /* CStrings are \0 terminated. */
@@ -1109,7 +1111,7 @@ void ATdeserialize(BinaryReader binaryReader, ByteBuffer byteBuffer)
           touchInt(binaryReader, byteBuffer);
           break;
         default:
-          ATerror("Unknown type id: %d. Current buffer position: %d\n.", type, (byteBuffer->currentPos - byteBuffer->buffer));
+          std::runtime_error("Unknown type id: " + to_string(type) + ". Current buffer position: " + to_string(byteBuffer->currentPos - byteBuffer->buffer));
       }
     }
 
@@ -1130,7 +1132,7 @@ BinaryReader ATcreateBinaryReader()
   BinaryReader binaryReader = (BinaryReader) AT_malloc(sizeof(struct _BinaryReader));
   if (binaryReader == NULL)
   {
-    ATerror("Unable to allocate memory for the binary reader.\n");
+    std::runtime_error("Unable to allocate memory for the binary reader.");
   }
 
   binaryReader->protectedMemoryStack = createProtectedMemoryStack();
@@ -1138,7 +1140,7 @@ BinaryReader ATcreateBinaryReader()
   stack = (ATermConstruct*) AT_malloc(DEFAULTSTACKSIZE * sizeof(struct _ATermConstruct));
   if (stack == NULL)
   {
-    ATerror("Unable to allocate memory for the binaryReader's stack.\n");
+    std::runtime_error("Unable to allocate memory for the binaryReader's stack.");
   }
   binaryReader->stack = stack;
   binaryReader->stackSize = DEFAULTSTACKSIZE;
@@ -1147,7 +1149,7 @@ BinaryReader ATcreateBinaryReader()
   sharedTerms = (ATerm*) AT_malloc(DEFAULTSHAREDTERMARRAYSIZE * sizeof(ATerm));
   if (sharedTerms == NULL)
   {
-    ATerror("Unable to allocate memory for the binaryReader's shared terms array.\n");
+    std::runtime_error("Unable to allocate memory for the binaryReader's shared terms array.");
   }
   binaryReader->sharedTerms = sharedTerms;
   binaryReader->sharedTermsSize = DEFAULTSHAREDTERMARRAYSIZE;
@@ -1156,7 +1158,7 @@ BinaryReader ATcreateBinaryReader()
   sharedAFuns = (SymEntry*) AT_malloc(DEFAULTSHAREDSYMBOLARRAYSIZE * sizeof(SymEntry));
   if (sharedAFuns == NULL)
   {
-    ATerror("Unable to allocate memory for the binaryReader's shared symbols array.\n");
+    std::runtime_error("Unable to allocate memory for the binaryReader's shared symbols array.");
   }
   binaryReader->sharedAFuns = sharedAFuns;
   binaryReader->sharedAFunsSize = DEFAULTSHAREDSYMBOLARRAYSIZE;
@@ -1165,7 +1167,7 @@ BinaryReader ATcreateBinaryReader()
   binaryReader->tempNamePage = (char*) AT_malloc(TEMPNAMEPAGESIZE * sizeof(char));
   if (binaryReader->tempNamePage == NULL)
   {
-    ATerror("Unable to allocate temporary name page.\n");
+    std::runtime_error("Unable to allocate temporary name page.");
   }
 
   binaryReader->tempType = 0;
@@ -1197,7 +1199,7 @@ ATerm ATgetRoot(BinaryReader binaryReader)
 {
   if (binaryReader->isDone <= 0)
   {
-    ATwarning("Can't retrieve the root of the tree while it's still being constructed. Returning NULL.");
+    ATfprintf(stderr, "Can't retrieve the root of the tree while it's still being constructed. Returning NULL.");
     return NULL;
   }
 
@@ -1248,7 +1250,7 @@ bool ATwriteToSAFFile(ATerm aTerm, FILE* file)
   size_t bytesWritten = fwrite("?", sizeof(char), 1, file);
   if (bytesWritten != 1)
   {
-    ATwarning("Unable to write SAF identifier token to file.\n");
+    ATfprintf(stderr, "Unable to write SAF identifier token to file.\n");
     return false;
   }
 
@@ -1270,7 +1272,7 @@ bool ATwriteToSAFFile(ATerm aTerm, FILE* file)
     bytesWritten = fwrite(sizeBytes, sizeof(char), 2, file);
     if (bytesWritten != 2)
     {
-      ATwarning("Unable to write block size bytes to file.\n");
+      ATfprintf(stderr, "Unable to write block size bytes to file.\n");
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryWriter(binaryWriter);
       return false;
@@ -1279,7 +1281,7 @@ bool ATwriteToSAFFile(ATerm aTerm, FILE* file)
     bytesWritten = fwrite(byteBuffer->buffer, sizeof(char), byteBuffer->limit, file);
     if (bytesWritten != byteBuffer->limit)
     {
-      ATwarning("Unable to write bytes to file.\n");
+      ATfprintf(stderr, "Unable to write bytes to file.\n");
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryWriter(binaryWriter);
       return false;
@@ -1292,7 +1294,7 @@ bool ATwriteToSAFFile(ATerm aTerm, FILE* file)
 
   if (fflush(file) != 0)
   {
-    ATwarning("Unable to flush file stream.\n");
+    ATfprintf(stderr, "Unable to flush file stream.\n");
     return false;
   }
 
@@ -1315,7 +1317,7 @@ bool ATwriteToNamedSAFFile(ATerm aTerm, const char* filename)
   file = fopen(filename, "wb");
   if (file == NULL)
   {
-    ATwarning("Unable to open file for writing: %s\n", filename);
+    ATfprintf(stderr, "Unable to open file for writing: %s\n", filename);
     return false;
   }
 
@@ -1343,13 +1345,13 @@ ATerm ATreadFromSAFFile(FILE* file)
   size_t bytesRead = fread(buffer, sizeof(char), 1, file); /* Consume the first character in the stream. */
   if (bytesRead <= 0)
   {
-    ATwarning("Unable to read SAF id token from file.\n");
+    ATfprintf(stderr, "Unable to read SAF id token from file.\n");
     return NULL;
   }
 
   if (buffer[0] != SAF_IDENTIFICATION_TOKEN)
   {
-    ATerror("Not a SAF file.\n");
+    std::runtime_error("Not a SAF file.");
   }
 
   binaryReader = ATcreateBinaryReader();
@@ -1367,7 +1369,7 @@ ATerm ATreadFromSAFFile(FILE* file)
     }
     else if (bytesRead != 2)
     {
-      ATwarning("Unable to read block size bytes from file: %d.\n", bytesRead);
+      ATfprintf(stderr, "Unable to read block size bytes from file: %d.\n", bytesRead);
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryReader(binaryReader);
       return NULL;
@@ -1383,7 +1385,7 @@ ATerm ATreadFromSAFFile(FILE* file)
     bytesRead = fread(byteBuffer->buffer, sizeof(char), blockSize, file);
     if (bytesRead != blockSize)
     {
-      ATwarning("Unable to read bytes from file.\n");
+      ATfprintf(stderr, "Unable to read bytes from file.\n");
       ATdestroyByteBuffer(byteBuffer);
       ATdestroyBinaryReader(binaryReader);
       return NULL;
@@ -1397,7 +1399,7 @@ ATerm ATreadFromSAFFile(FILE* file)
 
   if (!ATisFinishedReading(binaryReader))
   {
-    ATwarning("Term incomplete, missing data.\n");
+    ATfprintf(stderr, "Term incomplete, missing data.\n");
     term = NULL;
   }
   else
@@ -1426,7 +1428,7 @@ ATerm ATreadFromNamedSAFFile(const char* filename)
   file = fopen(filename, "rb");
   if (file == NULL)
   {
-    ATwarning("Unable to open file for reading: %s\n", filename);
+    ATfprintf(stderr, "Unable to open file for reading: %s\n", filename);
     return NULL;
   }
 
@@ -1468,7 +1470,7 @@ char* ATwriteToSAFString(ATerm aTerm, size_t* length)
   BufferNode* root = (BufferNode*) AT_malloc(sizeof(struct _BufferNode));
   if (root == NULL)
   {
-    ATerror("Unable to allocate space for BufferNode.\n");
+    std::runtime_error("Unable to allocate space for BufferNode.");
   }
   last = root;
 
@@ -1495,7 +1497,7 @@ char* ATwriteToSAFString(ATerm aTerm, size_t* length)
   result = (char*) malloc(totalBytesWritten * sizeof(char));
   if (result == NULL)
   {
-    ATerror("Unable to allocate space for result string.\n");
+    std::runtime_error("Unable to allocate space for result string.");
   }
 
   currentBufferNode = root->next;
@@ -1556,7 +1558,7 @@ ATerm ATreadFromSAFString(char* data, size_t length)
 
   if (!ATisFinishedReading(binaryReader))
   {
-    ATwarning("Term incomplete, missing data.\n");
+    ATfprintf(stderr, "Term incomplete, missing data.\n");
     term = NULL;
   }
   else

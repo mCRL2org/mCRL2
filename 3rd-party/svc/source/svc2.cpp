@@ -401,7 +401,7 @@ int SVCsetInitialState(SVCfile* file, SVCstateIndex index)
   }
   else
   {
-    file->header.initialState=_strdup(ATwriteToString(SVCstate2ATerm(file,index)));
+    file->header.initialState=_strdup(ATwriteToString(SVCstate2ATerm(file,index)).c_str());
   }
   return 0;
 }

@@ -226,7 +226,6 @@ int TakeComponent(ATerm t)
 {
   static int s_pt = 0;
   int d = ATgetInt((ATermInt) t);
-  /* ATwarning("Help d = %d visited[d] = %d dfsn = %d\n",d, visited[d], dfsn); */
   if (visited[d]<0)
   {
     return s_pt;
@@ -268,7 +267,6 @@ int TakeComponent(ATerm t)
 static void MakeUnitPartition(void)
 {
   int i;
-  /* ATwarning("Make Unit Partition\n"); */
   for (i=0; i<nstate; i++)
   {
     blockref[i] = i;
@@ -316,7 +314,6 @@ void SCC(void)
     Pi_pt++;
     n_partitions++;
   }
-  /* for (i=0;i<Pi_pt;i++) ATwarning("(%d,%d)\n",Pi[i].left, Pi[i].right); */
   free(visited);
   free(dfsn2state);
 }
@@ -595,7 +592,6 @@ void ReadCompareData(SVCstateIndex* init1, SVCstateIndex* init2)
 static ATermList Union(ATermList t1s, ATermList t2s)
 {
   ATermList result = t2s;
-  /* ATwarning("Arguments union %t %t",t1s,t2s); */
   for (; !ATisEmpty(t1s); t1s=ATgetNext(t1s))
   {
     ATerm t1 = ATgetFirst(t1s);
@@ -675,7 +671,6 @@ static void TransitionsGoingToBlock(SVCint b, ATermList* newlab)
   GetBlockBoundaries(b, &left, &right);
   if (classes) fprintf(stdout,
                          "--------------------------- block %d --------------------------\n", (int) b);
-  /* ATwarning("TransitionGoingTo b = %d newb = %d\n",b, newb); */
   for (i = left; i < right; i++)
   {
     ATermList labels = lab[s[i]], pars = ATempty;
@@ -837,25 +832,16 @@ static int WriteTransitions(void)
   return n_tau_transitions;
 }
 
-/*static void TestTransitions(void) {
-int label;
-for (label=0;label<nlabel;label++) {
-ATwarning("Test: %d: %t\n",label, ATtableKeys(lab_tgt_src[label]));
-}
-}*/
-
 static ATermList  StableBlockNumbers(void)
 /* returns a list of the block numbers of all stable blocks */
 {
   ATermList result = ATempty;
   int i, cnt = 0;
-  /* if (traceLevel) ATwarning("Highest possible block number %d\n",n_partitions-1); */
   for (i = n_partitions; i>=0; --i)
     if (Pi[i].mode==STABLE)
     {
       result = (cnt++, ATinsert(result, (ATerm) ATmakeInt(i)));
     }
-  /* if (traceLevel) ATwarning("Number of blocks: %d\n", cnt); */
   return result;
 }
 
@@ -864,10 +850,8 @@ SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool
 {
   ATermList blocks = StableBlockNumbers();
   omitTauLoops = deleteTauLoops;
-  /* ATwarning("Blocks = %t\n",blocks); */
   {
     SVCstateIndex result =  MakeEquivalenceClasses(initState, blocks);
-    /* ATwarning("Block number of initial state: %d\n", result); */
     BlockCode(-1);
     return result;
   }
@@ -894,17 +878,11 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
   {
     sprintf(buf, "strong bisimulation equivalence classes");
   }
-  /* if (traceLevel)
-       {
-       ATwarning("Number of states: %d\n",n_states);
-       ATwarning("Number of transitions: %d\n",n_transitions);
-       if (label_tau>=0)
-       ATwarning("Number of tau steps: %d\n",n_tau_transitions);
-       } */
+
   SVCsetComments(outFile, buf);
   if (traceLevel)
   {
-    ATwarning("Info output file: \n");
+    fprintf(stderr, "Info output file: \n");
   }
   if (traceLevel)
   {

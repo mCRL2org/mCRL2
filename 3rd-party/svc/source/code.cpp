@@ -190,7 +190,7 @@ int BSreadByte(BitStream* bs, Byte* byte)
 
 }
 
-void BSwriteString(BitStream* bs, char* str)
+void BSwriteString(BitStream* bs, const char* str)
 {
 
   /*

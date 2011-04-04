@@ -367,14 +367,6 @@ namespace aterm
 
   size_t  ATcalcTextSize(ATerm t);
 
-  void AT_writeToStringBuffer(ATerm t, char* buffer);
-
-  inline
-  void ATwriteToStringBuffer(const ATerm t, char* buf)
-  {
-    AT_writeToStringBuffer(t,buf);
-  }
-
   inline
   size_t ATgetAFunId(const AFun afun)
   {

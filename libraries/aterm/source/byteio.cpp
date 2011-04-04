@@ -1,5 +1,6 @@
 #include <assert.h>
 #include <stdlib.h>
+#include <stdexcept>
 
 #include "aterm1.h"
 /* #include "_afun.h" */
@@ -25,7 +26,7 @@ static void resize_buffer(byte_writer* writer, size_t delta)
     writer->u.string_data.buf = (unsigned char*)AT_realloc(writer->u.string_data.buf, new_size);
     if (!writer->u.string_data.buf)
     {
-      ATerror("bafio: unable to resize buffer to %d bytes.\n", new_size);
+      std::runtime_error("bafio: unable to resize buffer to " + to_string(new_size) + " bytes.");
     }
     writer->u.string_data.max_size = new_size;
   }

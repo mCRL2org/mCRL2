@@ -2,9 +2,18 @@
 #define UTIL_H
 
 #include <string.h>
+#include <sstream>
 
 namespace aterm
 {
+
+template <typename T>
+std::string to_string(const T& t)
+{
+  std::ostringstream oss;
+  oss << t;
+  return oss.str();
+}
 
 #ifndef streq
 #  define streq(s,t)  (!(strcmp(s,t)))

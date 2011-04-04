@@ -46,7 +46,7 @@ extern "C" {
   void BSwriteBit(BitStream*, Bit);
   void BSwriteByte(BitStream*, Byte);
   void BSwriteChar(BitStream*, char);
-  void BSwriteString(BitStream*, char*);
+  void BSwriteString(BitStream*, const char*);
   void BSwriteInt(BitStream*, long);
   int BSreadBit(BitStream*, Bit*);
   int BSreadChar(BitStream*, char*);
