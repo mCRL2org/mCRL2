@@ -263,12 +263,6 @@ namespace aterm
   void ATinit(int argc, char* argv[], ATerm* bottomOfStack);
 
   /**
-   * \todo I don't know this function.
-   */
-  /* void ATinitialize(int argc, char *argv[]);
-  */
-
-  /**
    * Check whether the ATerm library has been initialized.
    * \returns ATtrue if the library was initialized, and ATfalse otherwise
    */

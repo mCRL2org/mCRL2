@@ -259,11 +259,9 @@ namespace aterm
   {
     return ATempty;
   }
-//#define ATmakeList0() (ATempty)
 
   ATermList ATmakeList1(ATerm el0);
 
-  /* ATermList ATmakeList2(ATerm el0, ATerm el1); */
   inline
   ATermList ATmakeList2(ATerm el0, ATerm el1)
   {
