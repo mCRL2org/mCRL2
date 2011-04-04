@@ -228,15 +228,17 @@ class action_label_data_type: public pins_data_type
     std::string m_name;
     atermpp::indexed_set m_indexed_set;
 
-    std::size_t expression2index(const data::data_expression& x)
+    std::size_t expression2index(const lps::multi_action& x)
     {
-      return m_indexed_set[x];
+      atermpp::aterm_appl a = lps::detail::multi_action_to_aterm(x);
+      return m_indexed_set[a];
     }
 
-    data::data_expression index2expression(std::size_t i) const
+    lps::multi_action index2expression(std::size_t i) const
     {
       ATerm a = m_indexed_set.get(i);
-      return atermpp::aterm_appl(reinterpret_cast<ATermAppl>(a));
+      atermpp::aterm_appl t = reinterpret_cast<ATermAppl>(a);
+      return t;
     }
 
   public:
@@ -247,25 +249,26 @@ class action_label_data_type: public pins_data_type
 
     std::string serialize(int i) const
     {
-      return index2expression(i).to_string();
+      atermpp::aterm_appl a = lps::detail::multi_action_to_aterm(index2expression(i));
+      return a.to_string();
     }
 
     std::size_t deserialize(const std::string& s)
     {
-      ATerm t = atermpp::read_from_string(s);
-      data::data_expression d = atermpp::aterm_appl(reinterpret_cast<ATermAppl>(t));
-      return expression2index(d);
+      ATerm a = atermpp::read_from_string(s);
+      atermpp::aterm_appl t = reinterpret_cast<ATermAppl>(a);
+      return expression2index(t);
     }
 
     std::string print(int i) const
     {
-      return core::pp(index2expression(i));
+      return lps::pp(index2expression(i));
     }
 
     std::size_t parse(const std::string& s)
     {
-      data::data_expression e = data::parse_data_expression(s, m_generator.get_specification().data());
-      return expression2index(e);
+      lps::multi_action m = lps::parse_multi_action(s, m_generator.get_specification().action_labels(), m_generator.get_specification().data());
+      return expression2index(m);
     }
 
     const std::string& name() const

@@ -209,6 +209,15 @@ bool is_multi_action(const atermpp::aterm_appl& t)
 /// \cond INTERNAL_DOCS
 namespace detail
 {
+
+/// \brief Conversion to ATermAppl.
+/// \return The multi action converted to ATerm format.
+inline
+atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
+{
+  return core::detail::gsMakeMultAct(m.actions());
+}
+   
 /// \brief Visits all permutations of the arrays, and calls f for each instance.
 /// \pre The range [first, last) contains sorted arrays.
 /// \param first Start of a sequence of arrays

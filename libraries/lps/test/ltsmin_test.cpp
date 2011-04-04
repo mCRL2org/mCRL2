@@ -26,13 +26,13 @@ using namespace mcrl2;
 typedef int* state_vector;
 
 inline
-std::string print_state(const state_vector& s, std::size_t size)
+std::string print_state(const state_vector& s, std::size_t size, const std::string& msg = "state: ")
 {
   int* first = s;
   int* last = s + size;
 
   std::ostringstream out;
-  out << "[";
+  out << msg << "[";
   for (int* i = first; i != last; ++i)
   {
     if (i != first)
@@ -58,7 +58,7 @@ struct state_callback_function
   void operator()(int edge_label, const state_vector& next_state, int group)
   {
     state_count++;
-    std::cout << "visit state " << print_state(next_state, state_size) << " edge label = " << edge_label << " group = " << group << std::endl;
+    std::cout << print_state(next_state, state_size, "visit state: ") << " edge label = " << edge_label << " group = " << group << std::endl;
   }
 };
 
@@ -99,9 +99,10 @@ void test_ltsmin()
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   std::string abp_filename = "temporary_abp.lps";
   spec.save(abp_filename);
-
+  
   lps::pins p(abp_filename, "jitty");
-
+  std::size_t N = p.process_parameter_count();
+  
   BOOST_CHECK(p.edge_label_count() == 1);
   BOOST_CHECK(p.edge_label_name(0) == "action");
   BOOST_CHECK(p.edge_label_type(0) == 1);
@@ -118,9 +119,10 @@ void test_ltsmin()
   std::cout << p.info() << std::endl;
 
   // get the initial state
-  state_vector initial_state = new int[p.process_parameter_count()];
+  state_vector initial_state = new int[N];
   p.get_initial_state(initial_state);
-
+  std::cout << print_state(initial_state, N, "initial state: ") << std::endl;
+  
   // find all successors of the initial state
   state_callback_function f_all(p.process_parameter_count()); 
   p.next_state_all(initial_state, f_all);
@@ -149,8 +151,12 @@ void test_ltsmin()
   boost::filesystem::remove(boost::filesystem::path(abp_filename));
     
   delete[] initial_state;
+
+  std::cout << p.info() << std::endl; 
   
-  //BOOST_CHECK(false);
+#ifdef MCRL2_FORCE_LTSMIN_TEST_FAILURE
+  BOOST_CHECK(false);
+#endif
 }
 
 int test_main(int argc, char* argv[])
