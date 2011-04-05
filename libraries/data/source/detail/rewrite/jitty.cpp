@@ -31,6 +31,7 @@
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/fresh_variable_generator.h"
 
 #include "mcrl2/data/detail/enum/enumerator.h"
 #include "mcrl2/data/detail/enum/standard.h"
@@ -1076,16 +1077,15 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
 
 					/* Create for each of the sorts for enumeration a new variable*/
           variable_vector vv;
-          int count = 0;
+
+					data::fresh_variable_generator<> generator;
+          generator.add_identifiers(find_identifiers(d));
+          generator.set_hint("var");
+ 
           for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
           {
-
-						/* Name should be generated with the variable generator functions*/
-            std::stringstream ss;
-						ss << count;
-            variable v( "binder_var" + ss.str() , *i );
+            variable v(generator(*i));
             vv.push_back( v );
-            count++;
           }
 
 					/* Create application from reconstructed variables and Body */
