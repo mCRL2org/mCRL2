@@ -1136,6 +1136,83 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
         assert(false);
 
       }
+
+      /* Check for forall */
+      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == "forall" )
+      {
+
+        /* Get Body of forall */
+        ATerm t1 = ATgetArgument(aaa,1);
+        data_expression d(fromInner((ATermAppl) t1));
+
+
+				/* Get Sort for enumeration from Body*/
+        if(is_function_sort(d.sort()))
+        {
+          function_sort fs = d.sort();
+          sort_expression_list fsdomain = fs.domain();
+
+					/* Create for each of the sorts for enumeration a new variable*/
+          variable_vector vv;
+
+					data::fresh_variable_generator<> generator;
+          generator.add_identifiers(find_identifiers(d));
+          generator.set_hint("var");
+ 
+          for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
+          {
+            variable v(generator(*i));
+            vv.push_back( v );
+          }
+
+					/* Create application from reconstructed variables and Body */
+          data_expression e_new_rw = mcrl2::data::sort_bool::not_( application (d, atermpp::convert< data_expression_list >(vv) ) );
+
+					/* Convert to internal rewrite format, such that proper rewrite rules are added */
+          ATerm XX = toRewriteFormat( e_new_rw );
+
+					/* Add sorts if required (like Nat, Pos,...) */
+          std::set<mcrl2::data::sort_expression> sv = find_sort_expressions( e_new_rw );
+					m_data_specification.add_context_sorts( sv );
+					/* Create Enumerator */
+          EnumeratorStandard ES( m_data_specification, this );
+
+          /* Find A solution*/
+          EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
+
+					/* Create ATermList to store solutions */
+          ATermList x = ATempty;
+          bool has_solution = false;
+					/* Change "if" to "while" to find all valid solutions */
+          if( sol->next(&x) )
+          {
+            has_solution = true;
+#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+            gsMessage(" Solution found by enumeration: %T \n", x);
+#endif
+          }
+
+          if( has_solution )
+          {
+#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+            gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
+#endif
+            return toRewriteFormat( mcrl2::data::sort_bool::false_() );
+          }
+          else
+          {
+#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+            gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
+#endif
+            return toRewriteFormat( mcrl2::data::sort_bool::true_() );
+          }
+
+        }
+
+				/* We should never reach this part of the code...*/
+        assert(false);
+
+      }
     }
   }
 #endif
