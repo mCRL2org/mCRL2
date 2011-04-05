@@ -27,6 +27,13 @@
 #include <aterm_ext.h>
 #include "mcrl2/exception.h"
 #include "boost/config.hpp"
+#include <iostream>
+
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/core/print.h"
+
+#include "mcrl2/data/detail/enum/enumerator.h"
+#include "mcrl2/data/detail/enum/standard.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -413,6 +420,8 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
   ATermList n;
   ATermInt i;
 
+  m_data_specification = DataSpec;
+
   initialise_common();
 
   jitty_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
@@ -725,6 +734,7 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
 ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+	gsMessage("    term(%T)\n", Term	);
   gsMessage("    rewrite(%T)\n",fromInner(Term));
   gsMessage("    rewrite(  %P  )\n",fromInner(Term));
 #endif
@@ -959,6 +969,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
     gsMessage("      return %T\n",a);
     gsMessage("      return3  %P\n",fromInner(a));
 #endif
+
     return a;
   }
 }
@@ -1032,6 +1043,107 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
   gsMessage("  rewrite(%T)\n",fromInner((ATermAppl)Term));
 #endif
   ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
+
+#ifndef MCRl2_DISABLE_QUANTIFIER_ENUMERATION	
+  /* Check for possible quantifiers
+   * Working on inner format
+   * */
+  if (ATisAppl( aaa ) )
+  {
+		/* Convert internal rewrite number to ATerm representation*/
+    ATerm t = ATgetArgument(aaa,0);
+
+		/* Sanity check: Make sure that we have an internal number*/
+		if (ATisInt(t))
+    {
+  
+      ATermAppl a = int2term[ATgetInt((ATermInt) t)];
+
+      /* Check for exists */
+      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == "exists" )
+      {
+
+        /* Get Body of Exists */
+        ATerm t1 = ATgetArgument(aaa,1);
+        data_expression d(fromInner((ATermAppl) t1));
+
+
+				/* Get Sort for enumeration from Body*/
+        if(is_function_sort(d.sort()))
+        {
+          function_sort fs = d.sort();
+          sort_expression_list fsdomain = fs.domain();
+
+					/* Create for each of the sorts for enumeration a new variable*/
+          variable_vector vv;
+          int count = 0;
+          for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
+          {
+
+						/* Name should be generated with the variable generator functions*/
+            std::stringstream ss;
+            variable v( "binder_var" + ss.str() , *i );
+            vv.push_back( v );
+            count++;
+          }
+
+          /* For now only support one variable */
+          if( vv.size() != 1 )
+					{
+						std::cerr << "Still to implement: Exists with multiple variables" << std::endl;
+            return aaa;
+					}
+
+          data_expression e_new_rw = make_application (d, *vv.begin() );
+
+          ATerm XX = toRewriteFormat( e_new_rw );
+
+					/* Add sorts if required (like Nat, Pos,...) */
+          std::set<mcrl2::data::sort_expression> sv = find_sort_expressions( e_new_rw );
+					m_data_specification.add_context_sorts( sv );
+					/* Create Enumerator */
+          EnumeratorStandard ES( m_data_specification, this );
+
+          /* Find A solution*/
+          EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
+
+					/* Create ATermList to store solutions */
+          ATermList x = ATempty;
+          bool has_solution = false;
+					/* Change "if" to "while" to find all valid solutions */
+          if( sol->next(&x) )
+          {
+            has_solution = true;
+#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+            gsMessage(" Solution found by enumeration: %T \n", x);
+#endif
+          }
+
+          if( has_solution )
+          {
+#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+            gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
+#endif
+            return toRewriteFormat( mcrl2::data::sort_bool::true_() );
+          }
+          else
+          {
+#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+            gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
+#endif
+            return toRewriteFormat( mcrl2::data::sort_bool::false_() );
+          }
+
+        }
+
+				/* We should never reach this part of the code...*/
+        assert(false);
+
+      }
+    }
+  }
+#endif
+
 #ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
   gsMessage("  return(%T)\n",fromInner((ATermAppl)aaa));
 #endif

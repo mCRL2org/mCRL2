@@ -1014,6 +1014,11 @@ endif( MCRL2_ENABLE_TEST_TARGETS )
   add_test(ltsconvert_bisim_test ${ltsconvert_BINARY_DIR}/ltsconvert -ebisim ${testdir}/abp_celm_pelm_sinst.lts ${testdir}/abp_celm_pelm_sinst_bisim.aut)
   set_tests_properties( ltsconvert_bisim_test PROPERTIES DEPENDS lps2lts_abp_lts )
 
+	if( MCRL2_ENABLE_EXPERIMENTAL )
+    add_test(pbesinst_abp ${pbesinst_BINARY_DIR}/pbesinst -v ${testdir}/abp_celm_pelm_sinst.pbes ${testdir}/abp_celm_pelm_sinst_pinst.pbes)
+    set_tests_properties( pbesinst_abp PROPERTIES DEPENDS lps2pbes_abp )
+
+	endif( MCRL2_ENABLE_EXPERIMENTAL )
 
   # Simulation tools
   # add_test(lpssim_abp ${lpssim_BINARY_DIR}/lpssim ${testdir}/abp_celm_pelm_sinst.lps )

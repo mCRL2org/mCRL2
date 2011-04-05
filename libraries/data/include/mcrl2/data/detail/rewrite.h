@@ -243,6 +243,8 @@ class Rewriter
   private:
     ATerm* substs;
     size_t substs_size;
+  protected:
+    mcrl2::data::data_specification m_data_specification;
 };
 
 /**

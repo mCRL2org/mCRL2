@@ -548,7 +548,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
 
   smndAFun = ATmakeAFun("@SMND@",4,false);
   ATprotectAFun(smndAFun);
-  ATermList sums = lps::deprecated::linear_process_summands(spec.process());
+  ATermList sums = mcrl2::lps::deprecated::linear_process_summands(spec.process());
   l = ATmakeList0();
   for (bool b=true; !ATisEmpty(sums); sums=ATgetNext(sums))
   {
@@ -1088,7 +1088,7 @@ ATerm NextStateGenerator::get_state() const
 
 NextState* createNextState(
   mcrl2::lps::specification const& spec,
-  const data::rewriter &rewriter,
+  const mcrl2::data::rewriter &rewriter,
   bool allow_free_vars,
   int state_format,
   NextStateStrategy strategy
