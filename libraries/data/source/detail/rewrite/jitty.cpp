@@ -1082,20 +1082,16 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
 
 						/* Name should be generated with the variable generator functions*/
             std::stringstream ss;
+						ss << count;
             variable v( "binder_var" + ss.str() , *i );
             vv.push_back( v );
             count++;
           }
 
-          /* For now only support one variable */
-          if( vv.size() != 1 )
-					{
-						std::cerr << "Still to implement: Exists with multiple variables" << std::endl;
-            return aaa;
-					}
+					/* Create application from reconstructed variables and Body */
+          data_expression e_new_rw = application (d, atermpp::convert< data_expression_list >(vv) );
 
-          data_expression e_new_rw = make_application (d, *vv.begin() );
-
+					/* Convert to internal rewrite format, such that proper rewrite rules are added */
           ATerm XX = toRewriteFormat( e_new_rw );
 
 					/* Add sorts if required (like Nat, Pos,...) */
