@@ -163,6 +163,16 @@ make_filter_iterator_range(boost::iterator_range< Iterator > const& r, Adaptable
            iterator_type(predicate, r), iterator_type(predicate, r.end()));
 }
 
+template < typename AdaptableUnaryPredicate, typename Container >
+boost::iterator_range< filter_iterator< typename Container::const_iterator, AdaptableUnaryPredicate > >
+make_filter_iterator_range(Container const& c, AdaptableUnaryPredicate predicate)
+{
+  typedef filter_iterator< typename Container::const_iterator, AdaptableUnaryPredicate > iterator_type;
+
+  return boost::iterator_range< iterator_type >(
+           iterator_type(predicate, c), iterator_type(predicate, c.end()));
+}
+
 } // namespace detail
 
 } // namespace atermpp

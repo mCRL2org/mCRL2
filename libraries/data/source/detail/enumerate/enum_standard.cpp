@@ -705,11 +705,12 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
   info.tupAFun = ATmakeAFun("@tup@",2,false);
 
   info.constructors = ATtableCreate(boost::distance(data_spec.sorts()),50);
-  for (data_specification::sorts_const_range r(data_spec.sorts()); !r.empty(); r.advance_begin(1))
+  const atermpp::set<sort_expression> sorts = data_spec.sorts();
+  for (atermpp::set<sort_expression>::const_iterator r = sorts.begin(); r != sorts.end(); ++r)
   {
     atermpp::aterm_list constructors;
 
-    for (data_specification::constructors_const_range rc(data_spec.constructors(r.front())); !rc.empty(); rc.advance_begin(1))
+    for (data_specification::constructors_const_range rc(data_spec.constructors(*r)); !rc.empty(); rc.advance_begin(1))
     {
       constructors = atermpp::push_front(constructors,
                                          atermpp::aterm(ATmakeAppl2(info.tupAFun,
@@ -718,7 +719,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     }
 
     ATtablePut(info.constructors,
-               reinterpret_cast< ATerm >(static_cast< ATermAppl >(r.front())),
+               reinterpret_cast< ATerm >(static_cast< ATermAppl >(*r)),
                reinterpret_cast< ATerm >(static_cast< ATermList >(constructors)));
   }
 }

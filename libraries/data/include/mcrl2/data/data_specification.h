@@ -126,12 +126,6 @@ class data_specification
 
   public:
 
-    /// \brief iterator range over constant list of sort expressions
-    typedef boost::iterator_range< atermpp::set< sort_expression >::const_iterator >              sorts_const_range;
-
-    /// \brief iterator range over constant list of sort expressions
-    typedef boost::iterator_range< atermpp::set< variable >::const_iterator >                     variable_const_range;
-
     /// \brief const iterator over aliases (objects of type function_symbol)
     typedef boost::transform_iterator< convert_to_alias, ltr_aliases_map::const_iterator >       aliases_const_iterator;
     /// \brief iterator range over list of aliases
@@ -146,9 +140,6 @@ class data_specification
     typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    mappings_const_iterator;
     /// \brief const iterator range over mappings (objects of type function_symbol)
     typedef boost::iterator_range< mappings_const_iterator >                                      mappings_const_range;
-
-    /// \brief iterator range over constant list of data equations (objects of type data_equation)
-    typedef boost::iterator_range< atermpp::set< data_equation >::const_iterator >                equations_const_range;
 
   private:
 
@@ -426,11 +417,11 @@ class data_specification
     ///      the specification.
     /// \return The sort declarations of this specification.
     inline
-    sorts_const_range sorts() const
+    const atermpp::set<sort_expression>& sorts() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
-      return sorts_const_range(m_normalised_sorts);
+      return m_normalised_sorts;
     }
 
     /// \brief Gets all sorts defined by a user (excluding the system defined sorts).
@@ -438,10 +429,10 @@ class data_specification
     /// \details The time complexity of this operation is constant.
     /// \return The user defined sort declaration.
     inline
-    sorts_const_range user_defined_sorts() const
+    const atermpp::set<sort_expression>& user_defined_sorts() const
     {
       assert(m_data_specification_is_type_checked);
-      return sorts_const_range(m_sorts);
+      return m_sorts;
     }
 
     /// \brief Gets all constructors including those that are system defined.
@@ -523,11 +514,11 @@ class data_specification
     /// \return All equations in this specification, including those for
     ///  structured sorts.
     inline
-    equations_const_range equations() const
+    const atermpp::set< data_equation >& equations() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
-      return equations_const_range(m_normalised_equations);
+      return m_normalised_equations;
     }
 
     /// \brief Gets all user defined equations.
@@ -536,10 +527,10 @@ class data_specification
     /// \return All equations in this specification, including those for
     ///  structured sorts.
     inline
-    equations_const_range user_defined_equations() const
+    const atermpp::set< data_equation >& user_defined_equations() const
     {
       assert(m_data_specification_is_type_checked);
-      return equations_const_range(m_equations);
+      return m_equations;
     }
 
     /// \brief Gets a normalisation mapping that maps each sort to its unique normalised sort
@@ -565,7 +556,7 @@ class data_specification
 
     /// \brief Return the user defined context sorts of the current specification.
     /// \details Time complexity is constant.
-    sorts_const_range context_sorts() const
+    const atermpp::set<sort_expression>& context_sorts() const
     {
       return m_sorts_in_context;
     }
@@ -573,7 +564,6 @@ class data_specification
     /// \brief Adds a sort to this specification
     ///
     /// \param[in] s A sort expression.
-    /// \note this operation does not invalidate iterators of sorts_const_range
     void add_sort(const sort_expression& s)
     {
       assert(m_data_specification_is_type_checked);
@@ -996,8 +986,6 @@ class data_specification
     /// constructors, mappings and equations.
     /// \param[in] s A sort expression.
     /// \post s does not occur in this specification.
-    /// \note this operation does not invalidate iterators of sorts_const_range,
-    /// only if they point to the element that is removed
     void remove_sort(const sort_expression& s)
     {
       assert(m_data_specification_is_type_checked);
@@ -1177,8 +1165,8 @@ function_symbol find_constructor(data_specification const& data, std::string con
 inline
 sort_expression find_sort(data_specification const& data, std::string const& s)
 {
-  data_specification::sorts_const_range r(data.sorts());
-  data_specification::sorts_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
+  const atermpp::set<sort_expression> r(data.sorts());
+  const atermpp::set<sort_expression>::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
   return (i == r.end()) ? sort_expression() : *i;
 }
 
@@ -1193,8 +1181,8 @@ inline
 data_equation_vector find_equations(data_specification const& specification, const data_expression& d)
 {
   data_equation_vector result;
-  data_specification::equations_const_range equations(specification.equations());
-  for (data_specification::equations_const_range::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  const atermpp::set< data_equation > equations(specification.equations());
+  for (atermpp::set< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
   {
     if (i->lhs() == d || i->rhs() == d)
     {

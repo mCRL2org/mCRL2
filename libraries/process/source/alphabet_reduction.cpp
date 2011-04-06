@@ -2927,9 +2927,10 @@ nP_checked:
 
   ////First make a table of Positive constants
   ATermTable consts=ATtableCreate(10000,80);
-  for (mcrl2::data::data_specification::equations_const_range r=data_spec.equations(); !r.empty(); r.advance_begin(1))
+  const atermpp::set< data::data_equation > eqns(data_spec.equations());
+  for (atermpp::set< data::data_equation >::const_iterator r=eqns.begin(); r != eqns.end(); ++r)
   {
-    ATermAppl eq=r.front();
+    ATermAppl eq=*r;
     ATermAppl left=ATAgetArgument(eq,2);
     ATermAppl right=ATAgetArgument(eq,3);
     if (gsIsOpId(left) && data::sort_pos::is_pos(data::sort_expression(ATAgetArgument(left,1))))
