@@ -243,8 +243,16 @@ class Rewriter
   private:
     ATerm* substs;
     size_t substs_size;
+
+    virtual ATermAppl fromInner(ATermAppl Term);
+
+    ATerm internal_existenial_quantifier_enumeration( ATerm ATermInInnerFormat );
+    ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
+
   protected:
     mcrl2::data::data_specification m_data_specification;
+    ATerm internal_quantifier_enumeration( ATerm ATermInInnerFormat );
+    ATermAppl* int2term;
 };
 
 /**

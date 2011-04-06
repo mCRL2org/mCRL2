@@ -427,9 +427,6 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
 
   initialise_common();
 
-  jitty_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
-  //term2int = ATtableCreate(100,50);
-
   num_opids = 0;
   max_vars = 0;
   need_rebuild = false;
@@ -463,9 +460,12 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
 
     ATermAppl u = toInner((ATermAppl)j->lhs(),true);
 
-    if ((n = (ATermList) ATtableGet(jitty_eqns,ATgetArgument(u,0))) == NULL)
+    atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( (ATermInt) ATgetArgument(u,0));
+    if (it == jitty_eqns.end())
     {
       n = ATmakeList0();
+    } else {
+      n = it->second;
     }
     if (j->variables().size() > max_vars)
     {
@@ -475,7 +475,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
                                        (ATerm) toInner(j->condition(),true),
                                        (ATerm) u,
                                        (ATerm) toInner(j->rhs(),true)));
-    ATtablePut(jitty_eqns,ATgetArgument(u,0),(ATerm) n);
+    jitty_eqns[ (ATermInt) ATgetArgument(u,0)] = n;
   }
 
   int2term = (ATermAppl*) malloc(num_opids*sizeof(ATermAppl));
@@ -494,16 +494,16 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
     i = l1->second;
     int2term[ATgetInt(i)] = (ATermAppl) l1->first;
 
-    ATermList n;
+     atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
 
-    if ((n = (ATermList) ATtableGet(jitty_eqns,(ATerm) i)) == NULL)
+    if (it == jitty_eqns.end() )
     {
       jitty_strat[ATgetInt(i)] = NULL;
     }
     else
     {
 //gsfprintf(stderr,"%T\n",ATAgetFirst(l1));
-      jitty_strat[ATgetInt(i)] = create_strategy(ATreverse(n), jitty_true);
+      jitty_strat[ATgetInt(i)] = create_strategy(ATreverse( it->second ), jitty_true);
     }
   }
 }
@@ -515,9 +515,6 @@ RewriterJitty::~RewriterJitty()
   ATunprotectArray((ATerm*) int2term);
   free(int2term);
   ATunprotectAppl(&jitty_true);
-  ATtableDestroy(jitty_eqns);
-  //ATtableDestroy(term2int);
-
   finalise_common();
 }
 
@@ -534,7 +531,7 @@ bool RewriterJitty::addRewriteRule(ATermAppl Rule)
   }
 
   ATermAppl u = (ATermAppl) toRewriteFormat(ATAgetArgument(Rule,2));
-  ATermList n = (ATermList) ATtableGet(jitty_eqns,ATgetArgument(u,0));
+  ATermList n = (ATermList) jitty_eqns[ (ATermInt) ATgetArgument(u,0)];
   if (n == NULL)
   {
     n = ATmakeList0();
@@ -544,7 +541,7 @@ bool RewriterJitty::addRewriteRule(ATermAppl Rule)
     max_vars = ATgetLength(ATLgetArgument(Rule,0));
   }
   n = ATinsert(n,(ATerm) ATmakeList4(ATgetArgument(Rule,0),toRewriteFormat(ATAgetArgument(Rule,1)),(ATerm) u,toRewriteFormat(ATAgetArgument(Rule,3))));
-  ATtablePut(jitty_eqns,ATgetArgument(u,0),(ATerm) n);
+  jitty_eqns[ (ATermInt) ATgetArgument(u,0)] = n;
 
   jitty_strat[ATgetInt((ATermInt) ATgetArgument(u,0))] = NULL; //create_strategy(n);
   need_rebuild = true;
@@ -555,7 +552,7 @@ bool RewriterJitty::addRewriteRule(ATermAppl Rule)
 bool RewriterJitty::removeRewriteRule(ATermAppl Rule)
 {
   ATermAppl u = (ATermAppl) toRewriteFormat(ATAgetArgument(Rule,2));
-  ATermList n = (ATermList) ATtableGet(jitty_eqns,ATgetArgument(u,0));
+  ATermList n = jitty_eqns[ (ATermInt) ATgetArgument(u,0)];
   if (n == NULL)
   {
     return true;
@@ -573,12 +570,13 @@ bool RewriterJitty::removeRewriteRule(ATermAppl Rule)
   ATermInt i = (ATermInt) ATgetArgument(u,0);
   if (ATisEmpty(n))
   {
-    ATtableRemove(jitty_eqns,(ATerm) i);
+    atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
+    jitty_eqns.erase( it );
     jitty_strat[ATgetInt(i)] = NULL;
   }
   else
   {
-    ATtablePut(jitty_eqns,(ATerm) i,(ATerm) n);
+    jitty_eqns[i] = n;
     jitty_strat[ATgetInt(i)] = NULL;//create_strategy(n);
     need_rebuild = true;
   }
@@ -1036,13 +1034,14 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
 {
   if (need_rebuild)
   {
-    ATermList opids = ATtableKeys(jitty_eqns);
-    for (; !ATisEmpty(opids); opids=ATgetNext(opids))
+    for( atermpp::map< ATermInt, ATermList >::iterator opids = jitty_eqns.begin()
+        ; opids != jitty_eqns.end()
+        ; ++opids )
     {
-      ATermInt i = (ATermInt) ATgetFirst(opids);
+      ATermInt i = opids->first;
       if (jitty_strat[ATgetInt(i)] == NULL)
       {
-        jitty_strat[ATgetInt(i)] = create_strategy((ATermList) ATtableGet(jitty_eqns,(ATerm) i), jitty_true);
+        jitty_strat[ATgetInt(i)] = create_strategy( opids->second , jitty_true);
       }
     }
     need_rebuild = false;
@@ -1052,183 +1051,10 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
 #endif
   ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
 
-#ifndef MCRl2_DISABLE_QUANTIFIER_ENUMERATION	
-  /* Check for possible quantifiers
-   * Working on inner format
-   * */
-  if (ATisAppl( aaa ) )
-  {
-		/* Convert internal rewrite number to ATerm representation*/
-    ATerm t = ATgetArgument(aaa,0);
-
-		/* Sanity check: Make sure that we have an internal number*/
-		if (ATisInt(t))
-    {
-  
-      ATermAppl a = int2term[ATgetInt((ATermInt) t)];
-
-      /* Check for exists */
-      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == "exists" )
-      {
-
-        /* Get Body of Exists */
-        ATerm t1 = ATgetArgument(aaa,1);
-        data_expression d(fromInner((ATermAppl) t1));
-
-
-				/* Get Sort for enumeration from Body*/
-        if(is_function_sort(d.sort()))
-        {
-          function_sort fs = d.sort();
-          sort_expression_list fsdomain = fs.domain();
-
-					/* Create for each of the sorts for enumeration a new variable*/
-          variable_vector vv;
-
-					data::fresh_variable_generator<> generator;
-          generator.add_identifiers(find_identifiers(d));
-          generator.set_hint("var");
- 
-          for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
-          {
-            variable v(generator(*i));
-            vv.push_back( v );
-          }
-
-					/* Create application from reconstructed variables and Body */
-          data_expression e_new_rw = application (d, atermpp::convert< data_expression_list >(vv) );
-
-					/* Convert to internal rewrite format, such that proper rewrite rules are added */
-          ATerm XX = toRewriteFormat( e_new_rw );
-
-					/* Add sorts if required (like Nat, Pos,...) */
-          std::set<mcrl2::data::sort_expression> sv = find_sort_expressions( e_new_rw );
-					m_data_specification.add_context_sorts( sv );
-					/* Create Enumerator */
-          EnumeratorStandard ES( m_data_specification, this );
-
-          /* Find A solution*/
-          EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
-
-					/* Create ATermList to store solutions */
-          ATermList x = ATempty;
-          bool has_solution = false;
-					/* Change "if" to "while" to find all valid solutions */
-          if( sol->next(&x) )
-          {
-            has_solution = true;
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage(" Solution found by enumeration: %T \n", x);
-#endif
-          }
-
-          if( has_solution )
-          {
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
-#endif
-            return toRewriteFormat( mcrl2::data::sort_bool::true_() );
-          }
-          else
-          {
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
-#endif
-            return toRewriteFormat( mcrl2::data::sort_bool::false_() );
-          }
-
-        }
-
-				/* We should never reach this part of the code...*/
-        assert(false);
-
-      }
-
-      /* Check for forall */
-      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == "forall" )
-      {
-
-        /* Get Body of forall */
-        ATerm t1 = ATgetArgument(aaa,1);
-        data_expression d(fromInner((ATermAppl) t1));
-
-
-				/* Get Sort for enumeration from Body*/
-        if(is_function_sort(d.sort()))
-        {
-          function_sort fs = d.sort();
-          sort_expression_list fsdomain = fs.domain();
-
-					/* Create for each of the sorts for enumeration a new variable*/
-          variable_vector vv;
-
-					data::fresh_variable_generator<> generator;
-          generator.add_identifiers(find_identifiers(d));
-          generator.set_hint("var");
- 
-          for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
-          {
-            variable v(generator(*i));
-            vv.push_back( v );
-          }
-
-					/* Create application from reconstructed variables and Body */
-          data_expression e_new_rw = mcrl2::data::sort_bool::not_( application (d, atermpp::convert< data_expression_list >(vv) ) );
-
-					/* Convert to internal rewrite format, such that proper rewrite rules are added */
-          ATerm XX = toRewriteFormat( e_new_rw );
-
-					/* Add sorts if required (like Nat, Pos,...) */
-          std::set<mcrl2::data::sort_expression> sv = find_sort_expressions( e_new_rw );
-					m_data_specification.add_context_sorts( sv );
-					/* Create Enumerator */
-          EnumeratorStandard ES( m_data_specification, this );
-
-          /* Find A solution*/
-          EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
-
-					/* Create ATermList to store solutions */
-          ATermList x = ATempty;
-          bool has_solution = false;
-					/* Change "if" to "while" to find all valid solutions */
-          if( sol->next(&x) )
-          {
-            has_solution = true;
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage(" Solution found by enumeration: %T \n", x);
-#endif
-          }
-
-          if( has_solution )
-          {
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
-#endif
-            return toRewriteFormat( mcrl2::data::sort_bool::false_() );
-          }
-          else
-          {
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
-#endif
-            return toRewriteFormat( mcrl2::data::sort_bool::true_() );
-          }
-
-        }
-
-				/* We should never reach this part of the code...*/
-        assert(false);
-
-      }
-    }
-  }
-#endif
-
 #ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
   gsMessage("  return(%T)\n",fromInner((ATermAppl)aaa));
 #endif
-  return aaa;
-  // return (ATerm) rewrite_aux((ATermAppl) Term);
+  return internal_quantifier_enumeration(aaa);
 }
 
 RewriteStrategy RewriterJitty::getStrategy()

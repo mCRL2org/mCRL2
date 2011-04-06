@@ -47,8 +47,7 @@ class RewriterJitty: public Rewriter
     ATermAppl jitty_true;
 
     atermpp::map< ATerm, ATermInt > term2int;
-    ATermAppl* int2term;
-    ATermTable jitty_eqns;
+    atermpp::map< ATermInt, ATermList > jitty_eqns;
     ATermList* jitty_strat;
 
     ATermAppl rewrite_aux(ATermAppl Term);

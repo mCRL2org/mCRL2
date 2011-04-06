@@ -64,7 +64,7 @@ class RewriterCompilingJitty: public Rewriter
     int true_num;
 
     ATermTable term2int;
-    ATermAppl* int2term;
+    //ATermAppl* int2term;
     ATermList* jittyc_eqns;
 
     ATermTable int2ar_idx;

@@ -47,7 +47,7 @@ class RewriterInnermost: public Rewriter
     ATermInt trueint;
 
     ATermTable term2int;
-    ATermAppl* int2term;
+    //ATermAppl* int2term;
     ATermList* inner_eqns;
     ATermAppl* inner_trees;
 
