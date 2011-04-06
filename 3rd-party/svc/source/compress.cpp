@@ -224,13 +224,13 @@ int CSuwriteATerm(CompressedStream* cs, ATerm term)
   BSwriteString(cs->bs,ATwriteToString(term).c_str());
   return 1;
 }
-int CSwriteString(CompressedStream* cs, char* str)
+int CSwriteString(CompressedStream* cs, const char* str)
 {
 
   return HFencodeATerm(cs->bs, &cs->tree, (ATerm)ATmakeAppl(ATmakeAFun(str,0,false)));
 }
 
-int CSuwriteString(CompressedStream* cs, char* str)
+int CSuwriteString(CompressedStream* cs, const char* str)
 {
   BSwriteString(cs->bs,str);
   return 1;

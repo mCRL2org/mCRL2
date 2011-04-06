@@ -48,8 +48,8 @@
   int   CSwriteATerm(CompressedStream*, aterm::ATerm);
   int   CSwriteIndex(CompressedStream*, aterm::ATerm);
   int   CSuwriteATerm(CompressedStream*, aterm::ATerm);
-  int   CSwriteString(CompressedStream*, char*);
-  int   CSuwriteString(CompressedStream*, char*);
+  int   CSwriteString(CompressedStream*, const char*);
+  int   CSuwriteString(CompressedStream*, const char*);
   int   CSwriteInt(CompressedStream*, long);
   int   CSuwriteInt(CompressedStream*, long);
   void  CSflush(CompressedStream*);

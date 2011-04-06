@@ -192,7 +192,7 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
     if (nr_args > 0)
     {
       MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATerm,nr_args);
-      for (int i = 0; i < nr_args; i++)
+      for (size_t i = 0; i < nr_args; i++)
       {
         ATerm arg = ATgetArgument(part, i);
         if (ATgetType(arg) == AT_APPL)
