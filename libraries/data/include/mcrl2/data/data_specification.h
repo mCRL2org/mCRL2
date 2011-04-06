@@ -68,13 +68,8 @@ class data_specification;
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-  data_equation translate_user_notation_data_equation(const data_equation& x);
+data_equation translate_user_notation_data_equation(const data_equation& x);
 } // namespace detail
-
-/* sort_expression normalize_sorts(const sort_expression& x,
-                                const data_specification& data_spec);
-
-class data_specification; */
 
 // prototype, find.h included at the end of this file to prevent circular dependencies.
 template < typename Container >
@@ -131,45 +126,27 @@ class data_specification
 
   public:
 
-    /// \brief iterator range over list of sort expressions
-    typedef boost::iterator_range< atermpp::set< sort_expression >::iterator >                    sorts_range;
     /// \brief iterator range over constant list of sort expressions
     typedef boost::iterator_range< atermpp::set< sort_expression >::const_iterator >              sorts_const_range;
 
-    /// \brief iterator range over list of sort expressions
-    typedef boost::iterator_range< atermpp::set< variable >::iterator >                           variable_range;
     /// \brief iterator range over constant list of sort expressions
     typedef boost::iterator_range< atermpp::set< variable >::const_iterator >                     variable_const_range;
 
-    /// \brief iterator over aliases (objects of type function_symbol)
-    typedef boost::transform_iterator< convert_to_alias, ltr_aliases_map::iterator >          aliases_iterator;
     /// \brief const iterator over aliases (objects of type function_symbol)
-    typedef boost::transform_iterator< convert_to_alias, ltr_aliases_map::const_iterator >    aliases_const_iterator;
+    typedef boost::transform_iterator< convert_to_alias, ltr_aliases_map::const_iterator >       aliases_const_iterator;
     /// \brief iterator range over list of aliases
-    typedef boost::iterator_range< aliases_iterator >                                             aliases_range;
-    /// \brief iterator range over constant list of aliases
     typedef boost::iterator_range< aliases_const_iterator >                                       aliases_const_range;
 
-    /// \brief iterator over constructors (objects of type function_symbol)
-    typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::iterator >          constructors_iterator;
     /// \brief const iterator over constructors (objects of type function_symbol)
     typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    constructors_const_iterator;
-    /// \brief iterator range over constructors (objects of type function_symbol)
-    typedef boost::iterator_range< constructors_iterator >                                        constructors_range;
     /// \brief const iterator range over constructors (objects of type function_symbol)
     typedef boost::iterator_range< constructors_const_iterator >                                  constructors_const_range;
 
-    /// \brief iterator over mappings (objects of type function_symbol)
-    typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::iterator >          mappings_iterator;
     /// \brief const iterator over mappings (objects of type function_symbol)
     typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    mappings_const_iterator;
-    /// \brief iterator range over mappings (objects of type function_symbol)
-    typedef boost::iterator_range< mappings_iterator >                                            mappings_range;
     /// \brief const iterator range over mappings (objects of type function_symbol)
     typedef boost::iterator_range< mappings_const_iterator >                                      mappings_const_range;
 
-    /// \brief iterator range over list of data equations (objects of type data_equation)
-    typedef boost::iterator_range< atermpp::set< data_equation >::iterator >                      equations_range;
     /// \brief iterator range over constant list of data equations (objects of type data_equation)
     typedef boost::iterator_range< atermpp::set< data_equation >::const_iterator >                equations_const_range;
 

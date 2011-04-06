@@ -186,7 +186,6 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
     {
       di = vi->second;
     }
-    data::data_expression condition = make_condition(di, d);
 //std::clog << "condition = " << core::pp(condition) << std::endl;
 
     atermpp::set<pbes_expression> result;

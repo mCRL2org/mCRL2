@@ -3472,9 +3472,6 @@ class specification_basic_type:public boost::noncopyable
             }
             else
             {
-              const basic_sort se_pos = sort_pos::pos();
-              //declare sort Pos, if needed
-              // insert_numeric_sort_decls(se_pos, spec);
               stackvar=variable(spec.fresh_name(s3), sort_pos::pos());
             }
             spec.insertvariable(stackvar,true);
