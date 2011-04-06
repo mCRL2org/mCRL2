@@ -13,6 +13,7 @@
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/atermpp/map.h"
 
 namespace mcrl2
 {
@@ -45,7 +46,7 @@ class RewriterJitty: public Rewriter
 
     ATermAppl jitty_true;
 
-    ATermTable term2int;
+    atermpp::map< ATerm, ATermInt > term2int;
     ATermAppl* int2term;
     ATermTable jitty_eqns;
     ATermList* jitty_strat;

@@ -83,20 +83,22 @@ static void finalise_common()
 
 ATerm RewriterJitty::OpId2Int(ATermAppl Term, bool add_opids)
 {
-  ATermInt i;
 
-  if ((i = (ATermInt) ATtableGet(term2int,(ATerm) Term)) == NULL)
+  atermpp::map< ATerm, ATermInt >::iterator f = term2int.find( (ATerm) Term );
+  if( f == term2int.end())
   {
     if (!add_opids)
     {
       return (ATerm) Term;
     }
-    i = ATmakeInt(num_opids);
-    ATtablePut(term2int,(ATerm) Term,(ATerm) i);
+    ATermInt i = ATmakeInt(num_opids);
+    term2int[(ATerm) Term] =  i;
     num_opids++;
+    return (ATerm) i;
   }
 
-  return (ATerm) i;
+  ATermInt j = f->second;
+  return (ATerm) j;
 }
 
 
@@ -426,7 +428,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
   initialise_common();
 
   jitty_eqns = ATtableCreate(100,50); // XXX would be nice to know the number op OpIds
-  term2int = ATtableCreate(100,50);
+  //term2int = ATtableCreate(100,50);
 
   num_opids = 0;
   max_vars = 0;
@@ -484,13 +486,16 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
   ATprotectArray((ATerm*) jitty_strat,num_opids);
 
 
-  ATermList l1 = ATtableKeys(term2int);
-  for (; !ATisEmpty(l1); l1=ATgetNext(l1))
+  for( atermpp::map< ATerm, ATermInt >::iterator l1 = term2int.begin()
+      ; l1 != term2int.end()
+      ; ++l1)
   {
+
+    i = l1->second;
+    int2term[ATgetInt(i)] = (ATermAppl) l1->first;
+
     ATermList n;
 
-    i = (ATermInt) ATtableGet(term2int,ATgetFirst(l1));
-    int2term[ATgetInt(i)] = ATAgetFirst(l1);
     if ((n = (ATermList) ATtableGet(jitty_eqns,(ATerm) i)) == NULL)
     {
       jitty_strat[ATgetInt(i)] = NULL;
@@ -511,7 +516,7 @@ RewriterJitty::~RewriterJitty()
   free(int2term);
   ATunprotectAppl(&jitty_true);
   ATtableDestroy(jitty_eqns);
-  ATtableDestroy(term2int);
+  //ATtableDestroy(term2int);
 
   finalise_common();
 }
@@ -995,13 +1000,15 @@ ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
       jitty_strat[k] = NULL;
     }
     ATprotectArray((ATerm*) jitty_strat,num_opids);
-    ATermList l = ATtableKeys(term2int);
-    for (; !ATisEmpty(l); l=ATgetNext(l))
+
+    for( atermpp::map< ATerm, ATermInt >::iterator l = term2int.begin()
+        ; l != term2int.end()
+        ; ++l)
     {
-      ATermInt i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
+      ATermInt i = l->second;
       if (((size_t) ATgetInt(i)) >= old_opids)
       {
-        int2term[ATgetInt(i)] = ATAgetFirst(l);
+        int2term[ATgetInt(i)] = (ATermAppl) l->first;
         jitty_strat[ATgetInt(i)] = NULL;
       }
     }
