@@ -31,9 +31,16 @@ struct __ATermInt
 {
   header_type header;
   ATerm       next;
-  MachineWord value; /* Only use lower 32 bits as int, but using "int" here may lead to non
-                      initialisation of the other 32 bits; It is conceivable to replace this
-                      int by a 64 bit integer */
+  union
+  {
+    int value;
+    MachineWord reserved; /* Only use lower 32 bits as int. The value is used ambiguously
+                             as integer and as MachineWord. For all cases using bitwise
+                             operations, the MachineWord version must be used,
+                             as failing to do so may lead to improper initialisation
+                             of the last 32 bits during casting. */
+  };
+
 };
 
 static const size_t TERM_SIZE_INT = sizeof(struct __ATermInt)/sizeof(size_t);
@@ -155,7 +162,7 @@ ATermInt ATmakeInt(int value);
 inline
 int ATgetInt(const ATermInt t)
 {
-  return (int)t->aterm.value; // See comment in definition __ATermInt
+  return t->aterm.value;
 }
 
 /* The ATermAppl type */

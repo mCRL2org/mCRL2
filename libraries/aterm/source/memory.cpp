@@ -1320,17 +1320,28 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
 ATermInt ATmakeInt(int val)
 {
   ATermInt cur;
-  const size_t long_val = val;
+  /* The following emulates the encoding trick that is also used in the definition
+   * of ATermInt. Not using a union here leads to incorrect hashing results.
+   */
+  union
+  {
+    int value;
+    MachineWord reserved;
+  } _val;
+
+  _val.reserved = 0;
+  _val.value = val;
+
   header_type header = INT_HEADER;
   HashNumber hnr;
 
   AGGRESSIVE_GARBAGE_COLLECT_CHECK;
   hnr = START(header);
-  hnr = COMBINE(hnr, HN(long_val));
+  hnr = COMBINE(hnr, HN(_val.reserved));
   hnr = FINISH(hnr);
 
   cur = (ATermInt) hashtable[hnr & table_mask];
-  while (cur && (!EQUAL_HEADER(cur->header,header) || (cur->aterm.value != long_val)))
+  while (cur && (!EQUAL_HEADER(cur->header,header) || (cur->aterm.value != _val.value)))
   {
     cur = (ATermInt) cur->aterm.next;
   }
@@ -1342,7 +1353,8 @@ ATermInt ATmakeInt(int val)
     hnr &= table_mask;
     cur->header = header;
     CHECK_HEADER(cur->header);
-    cur->aterm.value = long_val;
+    cur->aterm.reserved = _val.reserved;
+    cur->aterm.value = _val.value;
 
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
