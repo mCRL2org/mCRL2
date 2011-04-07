@@ -124,159 +124,121 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
   return PrintPart_CXX(atermpp::aterm_traits<Term>::term(part), pp_format);
 }
 
+/// \cond INTERNAL_DOCS
 namespace detail
 {
 
 template <typename Derived>
-class print_traverser: public traverser<Derived>
+struct printer: public core::traverser<Derived>
 {
-  protected:
-    std::ostream& out;
-    bool m_print_sorts;
+  typedef core::traverser<Derived> super;
 
-    enum precedence_type
-    {
-      max_precedence = 10000000
-    };
+  // using super::enter;
+  // using super::leave;
+  using super::operator();
+
+  bool m_print_sorts;
+  std::ostream* m_out;
+#ifdef MCRL2_PRINT_DEBUG
+  std::ostringstream debug;
+  std::vector<std::string> debug_strings;
+  std::vector<std::size_t> debug_positions;
+#endif
+
+  std::ostream& out()
+  {
+    return *m_out;
+  }
+
+  bool print_sorts() const
+  {
+    return m_print_sorts;
+  }
+
+  bool& print_sorts()
+  {
+    return m_print_sorts;
+  }
 
 #ifdef MCRL2_PRINT_DEBUG
-    std::ostringstream debug;
-    std::vector<std::string> debug_strings;
-    std::vector<std::size_t> debug_positions;
-#endif
-  public:
-    typedef traverser<Derived> super;
+  template <typename T>
+  std::string print_debug(const T& t)
+  {
+    return pp(t);
+  }
 
-#ifndef MCRL2_PRINT_DEBUG
-    using super::enter;
-    using super::leave;
-#endif
-    using super::operator();
+  // Enter object
+  template <typename Expression>
+  void enter(const Expression& x)
+  {
+    debug_strings.push_back(print_debug(x));
+    debug_positions.push_back(debug.str().size());
+  }
 
-    print_traverser(std::ostream& o)
-      : out(o),
-        m_print_sorts(false)
-    {}
-
-    void print(const std::string& s)
+  // Leave object
+  template <typename Expression>
+  void leave(const Expression& x)
+  {
+    std::string expected = debug_strings.back();
+    debug_strings.pop_back();
+    std::size_t begin_pos = debug_positions.back();
+    debug_positions.pop_back();
+    std::string result = debug.str().substr(begin_pos);
+    if (expected != result)
     {
-      out << s;
+      std::cerr << "--- Error in print ---\n"
+                << "  expected: " << expected << "\n"
+                << "       got: " << result << std::endl;
+      BOOST_CHECK(expected == result);
+    }
+  }
+#endif
+
+  void print(const std::string& s)
+  {
+    out() << s;
 #ifdef MCRL2_PRINT_DEBUG
-      debug << s;
+    debug << s;
 #endif
-    }
+  }
 
-    template <typename T>
-    int precedence(const T& t)
-    {
-      return max_precedence;
-    }
-
-    template <typename Container>
-    void print_container(const Container& container,
-                         int container_precedence = -1,
-                         const std::string& separator = ", ",
-                         const std::string& open_bracket = "(",
-                         const std::string& close_bracket = ")"
-                        )
-    {
-      for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-      {
-        if (i != container.begin())
-        {
-          print(separator);
-        }
-        bool print_brackets = (precedence(*i) < container_precedence);
-        if (print_brackets)
-        {
-          print(open_bracket);
-        }
-        static_cast<Derived&>(*this)(*i);
-        if (print_brackets)
-        {
-          print(close_bracket);
-        }
-      }
-    }
-
-    void operator()(const core::identifier_string& x)
-    {
-      static_cast<Derived&>(*this).enter(x);
-      print(std::string(x));
-      static_cast<Derived&>(*this).leave(x);
-    }
-
-#ifdef MCRL2_PRINT_DEBUG
-    template <typename T>
-    std::string print_debug(const T& t)
-    {
-      return pp(t);
-    }
-
-    // Enter object
-    template <typename Expression>
-    void enter(const Expression& x)
-    {
-      debug_strings.push_back(static_cast<Derived&>(*this).print_debug(x));
-      debug_positions.push_back(debug.str().size());
-    }
-
-    // Leave object
-    template <typename Expression>
-    void leave(const Expression& x)
-    {
-      std::string expected = debug_strings.back();
-      debug_strings.pop_back();
-      std::size_t begin_pos = debug_positions.back();
-      debug_positions.pop_back();
-      std::string result = debug.str().substr(begin_pos);
-      if (expected != result)
-      {
-        std::cerr << "--- Error in print ---\n"
-                  << "  expected: " << expected << "\n"
-                  << "       got: " << result << std::endl;
-        BOOST_CHECK(expected == result);
-      }
-    }
-#endif
+  void operator()(const core::identifier_string& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(std::string(x));
+    static_cast<Derived&>(*this).leave(x);
+  }
 };
 
-// apply a traverser with one additional template argument
-template <template <class> class Traverser, class OutputStream>
-class apply_print_traverser: public Traverser<apply_print_traverser<Traverser, OutputStream> >
+template <template <class> class Traverser>
+struct apply_printer: public Traverser<apply_printer<Traverser> >
 {
-    typedef Traverser<apply_print_traverser<Traverser, OutputStream> > super;
+  typedef Traverser<apply_printer<Traverser> > super;
 
-  public:
-    using super::enter;
-    using super::leave;
-    using super::operator();
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  
+  apply_printer(std::ostream& out, bool print_sorts = false)
+  {
+    typedef printer<apply_printer<Traverser> > Super;
+    static_cast<Super&>(*this).m_out = &out;
+    static_cast<Super&>(*this).m_print_sorts = print_sorts;
+  }
 
-//#if BOOST_MSVC
-//    template <typename Container>
-//    void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
-//    {
-//      super::operator()(container);
-//    }
-//    template <typename T>
-//    void operator()(const T& x)
-//    {
-//      super::operator()(x);
-//    }
-//#endif
-
-    apply_print_traverser(std::ostream& out):
-      super(out)
-    {}
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
 };
 
 } // namespace detail
+/// \endcond
 
 /// \brief Prints the object t to a stream.
 template <typename T>
 void print(const T& t, std::ostream& out)
 {
-  detail::apply_print_traverser<detail::print_traverser, std::ostringstream> printer(out);
+  detail::apply_printer<core::detail::printer> printer(out);
   printer(t);
 }
 
