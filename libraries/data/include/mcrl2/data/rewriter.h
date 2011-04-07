@@ -224,7 +224,7 @@ class rewriter: public basic_rewriter<data_expression>
     {
 #ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
 std::clog << "\n--- rewrite rule selection ---\n";
-const data_specification::equations_const_range eqn = d.equations();
+const atermpp::set<data_equation> eqn = d.equations();
 for (atermpp::set<data_equation>::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
 {
   std::clog << selector(*i) << " " << core::pp(*i) << std::endl;
