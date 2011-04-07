@@ -62,7 +62,6 @@ struct state_formula_predicate_variable_rename_builder: public state_formulas::s
   /// \brief Removes the last added replacement.
   void pop()
   {
-    std::pair<core::identifier_string, core::identifier_string> p = replacements.front();
     replacements.pop_front();
   }
 

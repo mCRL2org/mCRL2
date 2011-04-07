@@ -23,7 +23,7 @@ namespace aterm
 
 static AFun substafun;
 static bool substafun_notset = true;
-ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue)
+ATermAppl gsMakeSubst(const ATerm OldValue, const ATerm NewValue)
 {
   if (substafun_notset)
   {
@@ -34,7 +34,7 @@ ATermAppl gsMakeSubst(ATerm OldValue, ATerm NewValue)
   return ATmakeAppl2(substafun, OldValue, NewValue);
 }
 
-ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
+ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
 {
   ATermList l = Substs;
   while (!ATisEmpty(l))
@@ -92,7 +92,7 @@ ATerm gsSubstValues(ATermList Substs, ATerm Term, bool Recursive)
   }
 }
 
-ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive)
+ATerm gsSubstValuesTable(const ATermTable Substs, ATerm Term, const bool Recursive)
 {
   ATerm Result = ATtableGet(Substs, Term);
   if ((Result) != NULL)
@@ -145,24 +145,10 @@ ATerm gsSubstValuesTable(ATermTable Substs, ATerm Term, bool Recursive)
   }
 }
 
-/* ATermList gsAddSubstToSubsts(ATermAppl Subst, ATermList Substs)
-{
-  //add Subst to Substs in which Subst is performed on the RHS's
-  ATermList Result = ATmakeList0();
-  while (!ATisEmpty(Substs)) {
-    ATermAppl SubstsElt = ATAgetFirst(Substs);
-    Result = ATinsert(Result, (ATerm) ATsetArgument(SubstsElt,
-      (ATerm) gsSubstValues(ATmakeList1((ATerm) Subst),
-        ATgetArgument(SubstsElt, 1) , true), 1));
-    Substs = ATgetNext(Substs);
-  }
-  return ATinsert(ATreverse(Result), (ATerm) Subst);
-} */
-
 //Occurrences of ATerm's
 //----------------------
 
-bool gsOccurs(ATerm Elt, ATerm Term)
+bool gsOccurs(const ATerm Elt, ATerm Term)
 {
   bool Result = false;
   if (ATisEqual(Elt, Term))

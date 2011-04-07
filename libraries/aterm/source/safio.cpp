@@ -559,7 +559,7 @@ static void visitList(ATermList arg, ByteBuffer byteBuffer)
 /**
  * Constructs a binary writer that is responsible for serializing the given ATerm.
  */
-BinaryWriter ATcreateBinaryWriter(ATerm term)
+BinaryWriter ATcreateBinaryWriter(const ATerm term)
 {
   ATermMapping* stack;
   ATermMapping* tm;
@@ -1242,7 +1242,7 @@ void ATdestroyBinaryReader(BinaryReader binaryReader)
  * Writes the given ATerm in SAF format to the given file.
  * NOTE: The given file must be opened in binary mode (at least on Win32 this is required).
  */
-bool ATwriteToSAFFile(ATerm aTerm, FILE* file)
+bool ATwriteToSAFFile(const ATerm aTerm, FILE* file)
 {
   BinaryWriter binaryWriter;
   ByteBuffer byteBuffer;
@@ -1304,7 +1304,7 @@ bool ATwriteToSAFFile(ATerm aTerm, FILE* file)
 /**
  * Writes the given ATerm in SAF format to the file with the given name.
  */
-bool ATwriteToNamedSAFFile(ATerm aTerm, const char* filename)
+bool ATwriteToNamedSAFFile(const ATerm aTerm, const char* filename)
 {
   bool result;
   FILE* file;
@@ -1457,7 +1457,7 @@ typedef struct _BufferNode
  * Since the string will contain \0 bytes, the value the length parameter has after this function returns will specify the number of bytes that were written.
  * Note that the resulting string has been malloced and will need to be freed by the user.
  */
-char* ATwriteToSAFString(ATerm aTerm, size_t* length)
+char* ATwriteToSAFString(const ATerm aTerm, size_t* length)
 {
   char* result;
   size_t totalBytesWritten = 0;

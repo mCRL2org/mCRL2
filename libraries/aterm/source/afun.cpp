@@ -195,7 +195,7 @@ void AT_initAFun(int, char**)
   * Print an afun.
   */
 
-size_t AT_printAFun(AFun fun, FILE* f)
+size_t AT_printAFun(const AFun fun, FILE* f)
 {
   SymEntry entry = at_lookup_table[fun];
   char* id = entry->name;
@@ -300,7 +300,7 @@ std::string ATwriteAFunToString(const AFun fun)
  * Calculate the hash value of a symbol.
  */
 
-ShortHashNumber AT_hashAFun(const char* name, size_t arity)
+ShortHashNumber AT_hashAFun(const char* name, const size_t arity)
 {
   ShortHashNumber hnr;
   const char* walk = name;
@@ -318,7 +318,7 @@ ShortHashNumber AT_hashAFun(const char* name, size_t arity)
 
 /*{{{  AFun ATmakeAFun(const char *name, int arity, ATbool quoted) */
 
-AFun ATmakeAFun(const char* name, size_t arity, bool quoted)
+AFun ATmakeAFun(const char* name, const size_t arity, const bool quoted)
 {
   header_type header = SYMBOL_HEADER(arity, quoted);
   ShortHashNumber hnr = AT_hashAFun(name, arity) & table_mask;
@@ -429,7 +429,7 @@ void AT_freeAFun(SymEntry sym)
   * Protect a symbol.
   */
 
-void ATprotectAFun(AFun sym)
+void ATprotectAFun(const AFun sym)
 {
 
   if (nr_protected_symbols >= max_protected_symbols)
@@ -453,7 +453,7 @@ void ATprotectAFun(AFun sym)
   * Unprotect a symbol.
   */
 
-void ATunprotectAFun(AFun sym)
+void ATunprotectAFun(const AFun sym)
 {
   /* It is essential for performance that in this file
    * the protected_symbols array is traversed from back

@@ -37,7 +37,7 @@ extern SymEntry* at_lookup_table;
 
 MachineWord AT_symbolTableSize();
 void AT_initAFun(int argc, char** argv);
-size_t AT_printAFun(AFun sym, FILE* f);
+size_t AT_printAFun(const AFun sym, FILE* f);
 
 inline
 bool SYM_IS_FREE(const SymEntry sym)
@@ -90,8 +90,8 @@ void  AT_freeAFun(SymEntry sym);
 void AT_markProtectedAFuns();
 void AT_markProtectedAFuns_young();
 
-size_t AT_hashAFun(const char* name, size_t arity);
-bool AT_findAFun(char* name, size_t arity, bool quoted);
+size_t AT_hashAFun(const char* name, const size_t arity);
+bool AT_findAFun(const char* name, const size_t arity, const bool quoted);
 void AT_unmarkAllAFuns();
 
 std::string ATwriteAFunToString(const AFun t);

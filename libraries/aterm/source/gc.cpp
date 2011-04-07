@@ -109,9 +109,9 @@ ATerm* stack_top()
 
 /*{{{  static void mark_memory(ATerm *start, ATerm *stop) */
 
-static void mark_memory(ATerm* start, ATerm* stop,bool check_term) /* CHANGED BY JFG */
+static void mark_memory(const ATerm* start, const ATerm* stop, const bool check_term) /* CHANGED BY JFG */
 {
-  ATerm* cur;
+  const ATerm* cur;
   /* Traverse the stack */
   if (check_term)
   {
@@ -152,9 +152,9 @@ static void mark_memory(ATerm* start, ATerm* stop,bool check_term) /* CHANGED BY
 /*}}}  */
 /*{{{  static void mark_memory_young(ATerm *start, ATerm *stop)  */
 
-static void mark_memory_young(ATerm* start, ATerm* stop, bool check_term) /* CHANGED BY JFG  */
+static void mark_memory_young(const ATerm* start, const ATerm* stop, const bool check_term) /* CHANGED BY JFG  */
 {
-  ATerm* cur;
+  const ATerm* cur;
 
   if (check_term)
   {
@@ -194,12 +194,12 @@ static void mark_memory_young(ATerm* start, ATerm* stop, bool check_term) /* CHA
 
 /*}}}  */
 
-void ATmarkTerm(ATerm t)
+void ATmarkTerm(const ATerm t)
 {
   ATmarkArray(&t,1);
 }
 
-void ATmarkArray(ATerm* start, size_t size)
+void ATmarkArray(const ATerm* start, const size_t size)
 {
   if (at_mark_young == true)
   {

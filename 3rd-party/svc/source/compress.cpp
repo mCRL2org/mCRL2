@@ -283,9 +283,6 @@ static void calcDelta(CompressedStream* bs, long* n)
 
 static void uncalcDelta(CompressedStream* bs, long* n)
 {
-  long tmp;
-
-  tmp=*n;
   *n=*n+bs->preLast;
   bs->preLast=bs->last;
   bs->last=*n;

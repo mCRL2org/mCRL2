@@ -284,7 +284,7 @@ static ATermList convert_sorts(ATermAppl spec, ATermList* ids)
 
 static ATermList convert_funcs(ATermList funcs, ATermList* ids, bool funcs_are_cons = false)
 {
-  ATermList r,l,m, sorts;
+  ATermList r,l, sorts;
   ATermAppl sort;
 
   r = ATmakeList0();
@@ -295,7 +295,6 @@ static ATermList convert_funcs(ATermList funcs, ATermList* ids, bool funcs_are_c
       has_func_T = true;
     }
 
-    m = ATmakeList0();
     l = ATreverse(ATLgetArgument(ATAgetFirst(funcs),1));
     sorts = ATmakeList0();
     sort = static_cast<ATermAppl>(mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(ATAgetFirst(funcs),2))));

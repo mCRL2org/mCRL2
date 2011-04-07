@@ -45,24 +45,6 @@ namespace aterm
 # define MCRL2_ATERM_INIT(argc, argv) \
   MCRL2_ATERM_INIT_(argc, argv, argv);
 
-/// MCRL2_ATERM_INIT_DEBUG(argc, argv) initialises the ATerm library with
-///  MCRL2_ATERM_INIT(argc,argv) and activates debugging checks
-/// \see MCRL2_ATERM_INIT(argc, argv)
-#if defined(NDEBUG)
-# define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
-  MCRL2_ATERM_INIT_(argc, argv, argv)
-#else
-# define MCRL2_ATERM_INIT_DEBUG(argc, argv)\
-  MCRL2_ATERM_INIT_(argc, argv, argv)\
-  ATsetChecking(true);
-#endif
-/// MCRL2_ATERM_INIT_VERBOSE(argc, argv) initialises the ATerm library with
-/// MCRL2_ATERM_INIT(argc,argv) and activates additional messages
-/// \see MCRL2_ATERM_INIT(argc, argv)
-#define MCRL2_ATERM_INIT_VERBOSE(argc, argv)\
-  char* debug_args[3] = { "" , "-at-verbose" , "-at-print-gc-info" }; \
-  MCRL2_ATERM_INIT_(3, debug_args, argv)\
-   
 //-------------------------------------------------------------------------
 //For all functions below we use the precondition the ATerm library has been
 //initialised.
@@ -81,7 +63,7 @@ namespace aterm
  * \param[in] el the aterm to prepend
  * \return el ++ list if not el in list, list if el in list
  **/
-inline ATermList ATinsertUnique(ATermList list, ATerm el)
+inline ATermList ATinsertUnique(const ATermList list, const ATerm el)
 {
   if (ATindexOf(list, el, 0) == (size_t)(-1))
   {
@@ -95,7 +77,7 @@ inline ATermList ATinsertUnique(ATermList list, ATerm el)
  * \param[in] t an ATerm
  * \return t is an ATermAppl
  */
-inline bool ATisAppl(ATerm t)
+inline bool ATisAppl(const ATerm t)
 {
   return ATgetType(t) == AT_APPL;
 }
@@ -105,7 +87,7 @@ inline bool ATisAppl(ATerm t)
  * \param[in] t an ATerm
  * \return t is an ATermList
  */
-inline bool ATisList(ATerm t)
+inline bool ATisList(const ATerm t)
 {
   return ATgetType(t) == AT_LIST;
 }
@@ -115,7 +97,7 @@ inline bool ATisList(ATerm t)
  * \param[in] t an ATerm
  * \return t is an ATermInt
  */
-inline bool ATisInt(ATerm t)
+inline bool ATisInt(const ATerm t)
 {
   return ATgetType(t) == AT_INT;
 }
@@ -125,7 +107,7 @@ inline bool ATisInt(ATerm t)
  * \param[in] t an ATerm
  * \return t is NULL or an ATermAppl
  **/
-inline bool ATisApplOrNull(ATerm t)
+inline bool ATisApplOrNull(const ATerm t)
 {
   return (t == 0) || ATisAppl(t);
 }
@@ -135,7 +117,7 @@ inline bool ATisApplOrNull(ATerm t)
  * \param[in] t an ATerm
  * \return t is NULL or an ATermList
  **/
-inline bool ATisListOrNull(ATerm t)
+inline bool ATisListOrNull(const ATerm t)
 {
   return (t == 0) || ATisList(t);
 }
@@ -143,7 +125,7 @@ inline bool ATisListOrNull(ATerm t)
 /**
  * \brief Gets an ATermAppl at a specified position in a list
  **/
-inline ATermAppl ATAelementAt(ATermList List, size_t Index)
+inline ATermAppl ATAelementAt(const ATermList List, const size_t Index)
 {
   ATerm Result = ATelementAt(List, Index);
   assert(ATisApplOrNull(Result));
@@ -153,7 +135,7 @@ inline ATermAppl ATAelementAt(ATermList List, size_t Index)
 /**
  * \brief Gets an ATermList at a specified position in a list
  **/
-inline ATermList ATLelementAt(ATermList List, size_t Index)
+inline ATermList ATLelementAt(const ATermList List, const size_t Index)
 {
   ATerm Result = ATelementAt(List, Index);
   assert(ATisListOrNull(Result));
@@ -163,7 +145,7 @@ inline ATermList ATLelementAt(ATermList List, size_t Index)
 /**
  * \brief Gets the argument as ATermAppl at the specified position
  **/
-inline ATermAppl ATAgetArgument(ATermAppl Appl, size_t Nr)
+inline ATermAppl ATAgetArgument(const ATermAppl Appl, const size_t Nr)
 {
   ATerm Result = ATgetArgument(Appl, Nr);
   assert(ATisApplOrNull(Result));
@@ -173,7 +155,7 @@ inline ATermAppl ATAgetArgument(ATermAppl Appl, size_t Nr)
 /**
  * \brief Gets the argument as ATermList at the specified position
  **/
-inline ATermList ATLgetArgument(ATermAppl Appl, size_t Nr)
+inline ATermList ATLgetArgument(const ATermAppl Appl, const size_t Nr)
 {
   ATerm Result = ATgetArgument(Appl, Nr);
   assert(ATisListOrNull(Result));
@@ -183,7 +165,7 @@ inline ATermList ATLgetArgument(ATermAppl Appl, size_t Nr)
 /**
  * \brief Gets the first argument as ATermAppl
  **/
-inline ATermAppl ATAgetFirst(ATermList List)
+inline ATermAppl ATAgetFirst(const ATermList List)
 {
   ATerm Result = ATgetFirst(List);
   assert(ATisApplOrNull(Result));
@@ -193,7 +175,7 @@ inline ATermAppl ATAgetFirst(ATermList List)
 /**
  * \brief Gets the first argument as ATermList
  **/
-inline ATermList ATLgetFirst(ATermList List)
+inline ATermList ATLgetFirst(const ATermList List)
 {
   ATerm Result = ATgetFirst(List);
   assert(ATisListOrNull(Result));
@@ -203,7 +185,7 @@ inline ATermList ATLgetFirst(ATermList List)
 /**
  * \brief Gets the term associated with a key as ATermAppl
  **/
-inline ATermAppl ATAtableGet(ATermTable Table, ATerm Key)
+inline ATermAppl ATAtableGet(const ATermTable Table, const ATerm Key)
 {
   ATerm Result = ATtableGet(Table, Key);
   assert(ATisApplOrNull(Result));
@@ -213,7 +195,7 @@ inline ATermAppl ATAtableGet(ATermTable Table, ATerm Key)
 /**
  * \brief Gets the term associated with a key as ATermList
  **/
-inline ATermList ATLtableGet(ATermTable Table, ATerm Key)
+inline ATermList ATLtableGet(const ATermTable Table, const ATerm Key)
 {
   ATerm Result = ATtableGet(Table, Key);
   assert(ATisListOrNull(Result));
@@ -221,7 +203,7 @@ inline ATermList ATLtableGet(ATermTable Table, ATerm Key)
 }
 
 inline
-ATermList ATinsertA(ATermList l, ATermAppl t)
+ATermList ATinsertA(const ATermList l, const ATermAppl t)
 {
   return ATinsert(l, (ATerm)t);
 }
@@ -237,7 +219,7 @@ ATermList ATinsertA(ATermList l, ATermAppl t)
  *
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  **/
-ATermAppl gsMakeSubst(ATerm old_value, ATerm new_value);
+ATermAppl gsMakeSubst(const ATerm old_value, const ATerm new_value);
 
 /**
  * \brief Creates a new substitution
@@ -248,7 +230,7 @@ ATermAppl gsMakeSubst(ATerm old_value, ATerm new_value);
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  * \note ATermAppl variant of gsMakeSubst
  **/
-inline ATermAppl gsMakeSubst_Appl(ATermAppl old_value, ATermAppl new_value)
+inline ATermAppl gsMakeSubst_Appl(const ATermAppl old_value, const ATermAppl new_value)
 {
   return gsMakeSubst((ATerm) old_value, (ATerm) new_value);
 }
@@ -262,7 +244,7 @@ inline ATermAppl gsMakeSubst_Appl(ATermAppl old_value, ATermAppl new_value)
  * \return a substitution, i.e. an ATermAppl of the form 'subst(old_value, new_value)'
  * \note ATermList variant of gsMakeSubst
  **/
-inline ATermAppl gsMakeSubst_List(ATermList old_value, ATermList new_value)
+inline ATermAppl gsMakeSubst_List(const ATermList old_value, const ATermList new_value)
 {
   return gsMakeSubst((ATerm) old_value, (ATerm) new_value);
 }
@@ -280,7 +262,7 @@ inline ATermAppl gsMakeSubst_List(ATermList old_value, ATermList new_value)
  *     from head to tail; if recursive and there was no match, the
  *     substitutions are distributed over the arguments/elements of term
  **/
-ATerm gsSubstValues(ATermList substs, ATerm term, bool recursive);
+ATerm gsSubstValues(const ATermList substs, ATerm term, const bool recursive);
 
 /**
  * \brief Applies a list of substitutions to a term
@@ -296,7 +278,7 @@ ATerm gsSubstValues(ATermList substs, ATerm term, bool recursive);
  *     substitutions are distributed over the arguments/elements of term
  * \note This is the ATermAppl variant of gsSubstValues
  **/
-inline ATermAppl gsSubstValues_Appl(ATermList substs, ATermAppl appl, bool recursive)
+inline ATermAppl gsSubstValues_Appl(const ATermList substs, ATermAppl appl, bool recursive)
 {
   return (ATermAppl) gsSubstValues(substs, (ATerm) appl, recursive);
 }
@@ -315,7 +297,7 @@ inline ATermAppl gsSubstValues_Appl(ATermList substs, ATermAppl appl, bool recur
  *     substitutions are distributed over the arguments/elements of term
  * \note This is the ATermList variant of gsSubstValues
  **/
-inline ATermList gsSubstValues_List(ATermList substs, ATermList list, bool recursive)
+inline ATermList gsSubstValues_List(const ATermList substs, ATermList list, const bool recursive)
 {
   return (ATermList) gsSubstValues(substs, (ATerm) list, recursive);
 }
@@ -330,20 +312,7 @@ inline ATermList gsSubstValues_List(ATermList substs, ATermList list, bool recur
  *     Term is an ATerm consisting of ATermAppl's and ATermList's only
  * \return Term in which all substitutions from substs are performed recursively
  **/
-ATerm gsSubstValuesTable(ATermTable substs, ATerm term, bool recursive);
-
-/**
- * \brief Adds a substitution to a list of substitutions
- *
- * \param[in] subst a substitution specification
- * \param[in] substs a list of substitutions
- * \pre subst is a substitution
- *      substs is a list of substitions
- * \return a list of substitutions with:
- *     - subst as the head
- *     - substs, in which subst is performed on the RHS's, as the tail
- **/
-ATermList gsAddSubstToSubsts(ATermAppl subst, ATermList substs);
+ATerm gsSubstValuesTable(const ATermTable substs, ATerm term, const bool recursive);
 
 //Occurrences of ATerm's
 //----------------------
@@ -357,7 +326,7 @@ ATermList gsAddSubstToSubsts(ATermAppl subst, ATermList substs);
  * \note that this is a faster implementation than gsCount(elt, term) > 0 because
  *       it is used at a crucial point in the rewriter
  **/
-bool gsOccurs(ATerm elt, ATerm term);
+bool gsOccurs(const ATerm elt, ATerm term);
 
 }
 

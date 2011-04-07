@@ -152,7 +152,7 @@ AT_getBafVersion(int* major, int* minor)
 
 static
 size_t
-writeIntToBuf(size_t val, unsigned char* buf)
+writeIntToBuf(const size_t val, unsigned char* buf)
 {
   if (val < (1 << 7))
   {
@@ -201,7 +201,7 @@ writeIntToBuf(size_t val, unsigned char* buf)
 
 /*{{{  static int writeBits(size_t val, int nr_bits, byte_writer *writer) */
 
-static int writeBits(size_t val, size_t nr_bits, byte_writer* writer)
+static int writeBits(size_t val, const size_t nr_bits, byte_writer* writer)
 {
   size_t cur_bit;
 
@@ -255,7 +255,7 @@ flushBitsToWriter(byte_writer* writer)
 
 static
 int
-readBits(size_t* val, size_t nr_bits, byte_reader* reader)
+readBits(size_t* val, const size_t nr_bits, byte_reader* reader)
 {
   size_t cur_bit, mask = 1;
 
@@ -285,7 +285,7 @@ readBits(size_t* val, size_t nr_bits, byte_reader* reader)
 /*}}}  */
 /*{{{  static int writeInt(size_t val, byte_writer *writer) */
 
-static bool writeInt(size_t val, byte_writer* writer)
+static bool writeInt(const size_t val, byte_writer* writer)
 {
   size_t nr_items;
   unsigned char buf[8];
@@ -374,7 +374,7 @@ static int readInt(size_t* val, byte_reader* reader)
 /*}}}  */
 /*{{{  static int writeString(const char *str, size_t len, byte_writer *writer) */
 
-static bool writeString(const char* str, size_t len, byte_writer* writer)
+static bool writeString(const char* str, const size_t len, byte_writer* writer)
 {
   /* Write length. */
   if (!writeInt(len, writer))
@@ -434,7 +434,7 @@ static size_t readString(byte_reader* reader)
  * Write a symbol to file.
  */
 
-static bool write_symbol(AFun sym, byte_writer* writer)
+static bool write_symbol(const AFun sym, byte_writer* writer)
 {
   char* name = ATgetName(sym);
   if (!writeString(name, strlen(name), writer))
@@ -464,7 +464,7 @@ static bool write_symbol(AFun sym, byte_writer* writer)
  * (AS_INT, etc) when the term is not an AT_APPL.
  */
 
-static sym_entry* get_top_symbol(ATerm t)
+static sym_entry* get_top_symbol(const ATerm t)
 {
   AFun sym;
 
@@ -519,8 +519,8 @@ static size_t bit_width(size_t val)
   */
 
 static void gather_top_symbols(sym_entry* cur_entry,
-                               size_t cur_arg,
-                               size_t total_top_symbols)
+                               const size_t cur_arg,
+                               const size_t total_top_symbols)
 {
   size_t index;
   size_t hnr;
@@ -643,7 +643,7 @@ static void build_arg_tables()
 /**
   * Add a term to the termtable of a symbol.
   */
-static void add_term(sym_entry* entry, ATerm t)
+static void add_term(sym_entry* entry, const ATerm t)
 {
   size_t hnr = AT_hashnumber(t) % entry->termtable_size;
   entry->terms[entry->cur_index].t = t;
@@ -659,7 +659,7 @@ static void add_term(sym_entry* entry, ATerm t)
  * Collect all terms in the appropriate symbol table.
  */
 
-static void collect_terms(ATerm t)
+static void collect_terms(const ATerm t)
 {
   AFun sym;
   sym_entry* entry;
@@ -764,7 +764,7 @@ static bool write_symbols(byte_writer* writer)
   * Find a term in a sym_entry.
   */
 
-static size_t find_term(sym_entry* entry, ATerm t)
+static size_t find_term(sym_entry* entry, const ATerm t)
 {
   size_t hnr = AT_hashnumber(t) % entry->termtable_size;
   trm_bucket* cur = entry->termtable[hnr];
@@ -786,7 +786,7 @@ static size_t find_term(sym_entry* entry, ATerm t)
  * Find a top symbol in a topsymbol table.
  */
 
-static top_symbol* find_top_symbol(top_symbols_t* syms, AFun sym)
+static top_symbol* find_top_symbol(top_symbols_t* syms, const AFun sym)
 {
   size_t hnr = sym % syms->toptable_size;
   top_symbol* cur = syms->toptable[hnr];
@@ -809,9 +809,9 @@ static top_symbol* find_top_symbol(top_symbols_t* syms, AFun sym)
  */
 
 /* forward declaration */
-static bool write_term(ATerm, byte_writer*);
+static bool write_term(const ATerm, byte_writer*);
 
-static bool write_arg(sym_entry* trm_sym, ATerm arg, size_t arg_idx,
+static bool write_arg(sym_entry* trm_sym, const ATerm arg, const size_t arg_idx,
                       byte_writer* writer)
 {
   top_symbol* ts;
@@ -851,7 +851,7 @@ static bool write_arg(sym_entry* trm_sym, ATerm arg, size_t arg_idx,
  * Write a term using a writer.
  */
 
-static bool write_term(ATerm t, byte_writer* writer)
+static bool write_term(const ATerm t, byte_writer* writer)
 {
   size_t arg_idx;
   sym_entry* trm_sym = NULL;
@@ -971,7 +971,7 @@ static void free_write_space()
 /*{{{  ATbool write_baf(ATerm t, byte_writer *writer) */
 
 static bool
-write_baf(ATerm t, byte_writer* writer)
+write_baf(const ATerm t, byte_writer* writer)
 {
   size_t nr_unique_terms = 0;
   size_t nr_symbols = AT_symbolTableSize();
@@ -1108,7 +1108,7 @@ write_baf(ATerm t, byte_writer* writer)
 
 /*{{{  char *ATwriteToBinaryString(ATerm t, int *len) */
 
-unsigned char* ATwriteToBinaryString(ATerm t, size_t* len)
+unsigned char* ATwriteToBinaryString(const ATerm t, size_t* len)
 {
   static byte_writer writer;
   static bool initialized = false;

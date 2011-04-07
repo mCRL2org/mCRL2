@@ -71,7 +71,7 @@ typedef struct _BinaryWriter
   size_t totalBytesInTerm;
 }* BinaryWriter;
 
-BinaryWriter ATcreateBinaryWriter(ATerm term);
+BinaryWriter ATcreateBinaryWriter(const ATerm term);
 
 void ATserialize(BinaryWriter binaryWriter, ByteBuffer buffer);
 

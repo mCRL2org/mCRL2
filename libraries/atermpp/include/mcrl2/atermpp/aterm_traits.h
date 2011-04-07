@@ -23,18 +23,6 @@ using namespace aterm;
 namespace atermpp
 {
 
-inline
-void aterm_protect(const ATerm* x)
-{
-	ATprotect(const_cast<ATerm*>(x));
-}
-
-inline
-void aterm_unprotect(const ATerm* x)
-{
-	ATunprotect(const_cast<ATerm*>(x));
-}
-
 class aterm;
 
 template < typename T >
@@ -79,13 +67,13 @@ struct aterm_traits<ATerm>
 {
   static void protect(const ATerm* t)
   {
-    aterm_protect(t);
+    ATprotect(t);
   }
   static void unprotect(const ATerm* t)
   {
-    aterm_unprotect(t);
+    ATunprotect(t);
   }
-  static void mark(ATerm t)
+  static void mark(const ATerm t)
   {
     ATmarkTerm(t);
   }

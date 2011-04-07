@@ -36,7 +36,7 @@ static void resize_buffer(byte_writer* writer, size_t delta)
 
 /*{{{  int write_byte(int byte, byte_writer *writer) */
 
-int write_byte(int byte, byte_writer* writer)
+int write_byte(const int byte, byte_writer* writer)
 {
   switch (writer->type)
   {
@@ -57,7 +57,7 @@ int write_byte(int byte, byte_writer* writer)
 /*}}}  */
 /*{{{  unsigned int write_bytes(const char *buf, unsigned int count, byte_writer *writer) */
 
-size_t write_bytes(const char* buf, size_t count, byte_writer* writer)
+size_t write_bytes(const char* buf, const size_t count, byte_writer* writer)
 {
   switch (writer->type)
   {
@@ -163,7 +163,7 @@ void init_file_reader(byte_reader* reader, FILE* file)
 /*}}}  */
 /*{{{  void init_string_reader(byte_reader *reader, const unsigned char *buf, int max_size) */
 
-void init_string_reader(byte_reader* reader, const unsigned char* buf, size_t max_size)
+void init_string_reader(byte_reader* reader, const unsigned char* buf, const size_t max_size)
 {
   reader->type = STRING_READER;
   reader->bytes_read = 0;

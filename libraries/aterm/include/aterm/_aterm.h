@@ -9,7 +9,7 @@ namespace aterm
 typedef struct ProtEntry
 {
   struct ProtEntry* next;
-  ATerm*            start;
+  const ATerm*            start;
   size_t     size;
 } ProtEntry;
 

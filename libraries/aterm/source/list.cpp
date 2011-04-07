@@ -26,7 +26,7 @@ char list_id[] = "$Id$";
 
 /*{{{  ATermList ATgetTail(ATermList list, int start) */
 
-ATermList ATgetTail(ATermList list, int start0)
+ATermList ATgetTail(ATermList list, const int start0)
 {
   size_t start;
   if (start0 < 0)
@@ -57,7 +57,7 @@ ATermList ATgetTail(ATermList list, int start0)
  * The last element is the element at end-1.
  */
 
-ATermList ATgetSlice(ATermList list, size_t start, size_t end)
+ATermList ATgetSlice(ATermList list, const size_t start, const size_t end)
 {
   size_t i, size;
   ATermList result = ATmakeList0();
@@ -96,7 +96,7 @@ ATermList ATgetSlice(ATermList list, size_t start, size_t end)
  * Append 'el' to the end of 'list'
  */
 
-ATermList ATappend(ATermList list, ATerm el)
+ATermList ATappend(ATermList list, const ATerm el)
 {
   size_t i, len = ATgetLength(list);
   ATermList result;
@@ -127,7 +127,7 @@ ATermList ATappend(ATermList list, ATerm el)
  * Concatenate list2 to the end of list1.
  */
 
-ATermList ATconcat(ATermList list1, ATermList list2)
+ATermList ATconcat(ATermList list1, const ATermList list2)
 {
   size_t i, len = ATgetLength(list1);
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
@@ -169,7 +169,7 @@ ATermList ATconcat(ATermList list1, ATermList list2)
  * Note that 'start' must indicate a valid position in 'list'.
  */
 
-size_t ATindexOf(ATermList list, ATerm el, int startpos)
+size_t ATindexOf(ATermList list, const ATerm el, const int startpos)
 {
   size_t i, start;
 
@@ -206,7 +206,7 @@ size_t ATindexOf(ATermList list, ATerm el, int startpos)
 
 ATerm ATelementAt(ATermList list, size_t index)
 {
-  for (; index > 0 && !ATisEmpty(list); index--)
+  for (; index > 0 && !ATisEmpty(list); --index)
   {
     list = ATgetNext(list);
   }
@@ -226,7 +226,7 @@ ATerm ATelementAt(ATermList list, size_t index)
  * Remove one occurence of an element from a list.
  */
 
-ATermList ATremoveElement(ATermList list, ATerm t)
+ATermList ATremoveElement(ATermList list, const ATerm t)
 {
   size_t i = 0;
   ATerm el = NULL;
@@ -268,7 +268,7 @@ ATermList ATremoveElement(ATermList list, ATerm t)
  * Remove an element from a specific position in a list.
  */
 
-ATermList ATremoveElementAt(ATermList list, size_t idx)
+ATermList ATremoveElementAt(ATermList list, const size_t idx)
 {
   size_t i;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
@@ -295,7 +295,7 @@ ATermList ATremoveElementAt(ATermList list, size_t idx)
  * Replace one element of a list.
  */
 
-ATermList ATreplace(ATermList list, ATerm el, size_t idx)
+ATermList ATreplace(ATermList list, const ATerm el, const size_t idx)
 {
   size_t i;
   ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
@@ -383,7 +383,7 @@ ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
  * This function facilitates porting of old aterm-lib or ToolBus code.
  */
 
-ATermList ATgetArguments(ATermAppl appl)
+ATermList ATgetArguments(const ATermAppl appl)
 {
   AFun s = ATgetAFun(appl);
   size_t i, len = ATgetArity(s);

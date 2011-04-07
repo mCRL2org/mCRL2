@@ -162,7 +162,7 @@ static size_t term_size(ATerm t)
 
 /*{{{  static HashNumber hash_number(ATerm t, size_t size) */
 
-static HashNumber hash_number(ATerm t, size_t size)
+static HashNumber hash_number(const ATerm t, const size_t size)
 {
   HashNumber hnr;
 
@@ -180,7 +180,7 @@ static HashNumber hash_number(ATerm t, size_t size)
 /*}}}  */
 /*{{{  HashNumber AT_hashnumber(ATerm t) */
 
-HashNumber AT_hashnumber(ATerm t)
+HashNumber AT_hashnumber(const ATerm t)
 {
   return hash_number(t, term_size(t));
 }
@@ -496,7 +496,7 @@ void AT_growMaxTermSize(size_t neededsize)
 
 /*{{{  ATerm AT_allocate(size_t size)  */
 
-ATerm AT_allocate(size_t size)
+ATerm AT_allocate(const size_t size)
 {
   ATerm at;
   TermInfo* ti;
@@ -602,7 +602,7 @@ ATerm AT_allocate(size_t size)
  * Free a term of a particular size.
  */
 
-void AT_freeTerm(size_t size, ATerm t)
+void AT_freeTerm(const size_t size, const ATerm t)
 {
   HashNumber hnr = hash_number(t, size);
   ATerm prev = NULL, cur;
@@ -645,7 +645,7 @@ void AT_freeTerm(size_t size, ATerm t)
  * Create a new ATermAppl. The argument count can be found in the symbol.
  */
 
-ATermAppl ATmakeAppl(AFun sym, ...)
+ATermAppl ATmakeAppl(const AFun sym, ...)
 {
   ATermAppl cur;
   size_t arity = ATgetArity(sym);
@@ -719,7 +719,7 @@ ATermAppl ATmakeAppl(AFun sym, ...)
 /*}}}  */
 /*{{{  ATermAppl ATmakeAppl0(AFun sym) */
 
-ATermAppl ATmakeAppl0(AFun sym)
+ATermAppl ATmakeAppl0(const AFun sym)
 {
   ATermAppl cur, prev, *hashspot;
   header_type header = APPL_HEADER(0, sym);
@@ -778,7 +778,7 @@ ATermAppl ATmakeAppl0(AFun sym)
  * Create an ATermAppl with one argument.
  */
 
-ATermAppl ATmakeAppl1(AFun sym, ATerm arg0)
+ATermAppl ATmakeAppl1(const AFun sym, const ATerm arg0)
 {
   ATermAppl cur, prev, *hashspot;
   header_type header = APPL_HEADER(1, sym);
@@ -837,7 +837,7 @@ ATermAppl ATmakeAppl1(AFun sym, ATerm arg0)
  * Create an ATermAppl with one argument.
  */
 
-ATermAppl ATmakeAppl2(AFun sym, ATerm arg0, ATerm arg1)
+ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1)
 {
   ATermAppl cur, prev, *hashspot;
   header_type header = APPL_HEADER(2, sym);
@@ -903,7 +903,7 @@ ATermAppl ATmakeAppl2(AFun sym, ATerm arg0, ATerm arg1)
  * Create an ATermAppl with one argument.
  */
 
-ATermAppl ATmakeAppl3(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2)
+ATermAppl ATmakeAppl3(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2)
 {
   ATermAppl cur;
   header_type header = APPL_HEADER(3, sym);
@@ -960,7 +960,7 @@ ATermAppl ATmakeAppl3(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2)
  * Create an ATermAppl with four arguments.
  */
 
-ATermAppl ATmakeAppl4(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2, ATerm arg3)
+ATermAppl ATmakeAppl4(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2, const ATerm arg3)
 {
   ATermAppl cur;
   header_type header;
@@ -1024,8 +1024,8 @@ ATermAppl ATmakeAppl4(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2, ATerm arg3)
  * Create an ATermAppl with five arguments.
  */
 
-ATermAppl ATmakeAppl5(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
-ATerm arg3, ATerm arg4)
+ATermAppl ATmakeAppl5(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2,
+const ATerm arg3, const ATerm arg4)
 {
   ATermAppl cur;
   header_type header = APPL_HEADER(5, sym);
@@ -1093,8 +1093,8 @@ ATerm arg3, ATerm arg4)
  * Create an ATermAppl with six arguments.
  */
 
-ATermAppl ATmakeAppl6(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
-ATerm arg3, ATerm arg4, ATerm arg5)
+ATermAppl ATmakeAppl6(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2,
+const ATerm arg3, const ATerm arg4, const ATerm arg5)
 {
   ATermAppl cur;
   header_type header = APPL_HEADER(6, sym);
@@ -1166,7 +1166,7 @@ ATerm arg3, ATerm arg4, ATerm arg5)
  * Build a function application from a symbol and a list of arguments.
  */
 
-ATermAppl ATmakeApplList(AFun sym, ATermList args)
+ATermAppl ATmakeApplList(const AFun sym, const ATermList args)
 {
   ATermAppl cur;
   ATermList argptr;
@@ -1246,7 +1246,7 @@ ATermAppl ATmakeApplList(AFun sym, ATermList args)
  * Build a function application from a symbol and an array of arguments.
  */
 
-ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
+ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[])
 {
   ATermAppl cur;
   size_t arity = ATgetArity(sym);
@@ -1317,7 +1317,7 @@ ATermAppl ATmakeApplArray(AFun sym, ATerm args[])
  * Create an ATermInt
  */
 
-ATermInt ATmakeInt(int val)
+ATermInt ATmakeInt(const int val)
 {
   ATermInt cur;
   /* The following emulates the encoding trick that is also used in the definition
@@ -1373,7 +1373,7 @@ ATermInt ATmakeInt(int val)
  * Build a list with one element.
  */
 
-ATermList ATmakeList1(ATerm el)
+ATermList ATmakeList1(const ATerm el)
 {
   ATermList cur;
   header_type header = LIST_HEADER(1);
@@ -1418,7 +1418,7 @@ ATermList ATmakeList1(ATerm el)
  * Insert an element at the front of a list.
  */
 
-ATermList ATinsert(ATermList tail, ATerm el)
+ATermList ATinsert(const ATermList tail, const ATerm el)
 {
   size_t curLength = GET_LENGTH(tail->header);
   size_t newLength;
@@ -1483,7 +1483,7 @@ ATermList ATinsert(ATermList tail, ATerm el)
  * Change one argument of an application.
  */
 
-ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
+ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n)
 {
   size_t arity;
   AFun sym = ATgetAFun(appl);
@@ -1577,7 +1577,7 @@ ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n)
  * Determine if a given term is valid.
  */
 
-bool AT_isValidTerm(ATerm term)
+bool AT_isValidTerm(const ATerm term)
 {
   Block* cur;
   header_type header;
@@ -1737,7 +1737,7 @@ ATerm AT_isInsideValidTerm(ATerm term)
  * Check if a term is in any free list.
  */
 
-size_t AT_inAnyFreeList(ATerm t)
+size_t AT_inAnyFreeList(const ATerm t)
 {
   for (size_t i=MIN_TERM_SIZE; i<maxTermSize; i++)
   {

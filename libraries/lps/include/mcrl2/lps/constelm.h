@@ -177,7 +177,6 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
       // sigma contains substitutions of free variables and process parameters
       data::mutable_map_substitution<> sigma;
-      data::data_expression_vector::iterator e_i = e.begin();
 
       std::set<data::variable> G(d.begin(), d.end());
       std::set<data::variable> dG;

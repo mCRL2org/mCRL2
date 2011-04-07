@@ -53,7 +53,7 @@ typedef int ssize_t;
 #ifdef AT_64BIT
 
 inline
-ShortHashNumber ADDR_TO_SHORT_HNR(void* a)
+ShortHashNumber ADDR_TO_SHORT_HNR(const void* a)
 {
   return (ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^(((MachineWord)(a)) >> 34));
 }
@@ -61,7 +61,7 @@ ShortHashNumber ADDR_TO_SHORT_HNR(void* a)
 #else
 
 inline
-ShortHashNumber ADDR_TO_SHORT_HNR(void* a)
+ShortHashNumber ADDR_TO_SHORT_HNR(const void* a)
 {
   return ((ShortHashNumber)(a)) >> 2;
 }
@@ -73,7 +73,7 @@ ShortHashNumber ADDR_TO_SHORT_HNR(void* a)
 //#endif /* AT_64BIT */
 
 inline
-HashNumber ADDR_TO_HNR(void* a)
+HashNumber ADDR_TO_HNR(const void* a)
 {
   return ((HashNumber)(a)) >> 2;
 }

@@ -48,7 +48,7 @@ inline static int unsignedToSignedInt(unsigned int unsignedInt)
  * This will save space when encoding small values (which are most frequent);
  * the down side is that encoding large and negative values will require one extra byte.
  */
-size_t BEserializeMultiByteInt(int i, char* c)
+size_t BEserializeMultiByteInt(const int i, char* c)
 {
   unsigned int ui = signedToUnsignedInt(i);
 
@@ -88,7 +88,7 @@ size_t BEserializeMultiByteInt(int i, char* c)
  * Deserializes a 'multi-byte' encoded integer from a sequence of bytes.
  * When this function returns the parameter 'unsigned int *count' will hold how many bytes where read during the decoding process.
  */
-int BEdeserializeMultiByteInt(char* c, size_t* count)
+int BEdeserializeMultiByteInt(const char* c, size_t* count)
 {
   unsigned char part = (unsigned char) c[0];
   unsigned int result = (part & SEVENBITS);

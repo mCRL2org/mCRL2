@@ -653,10 +653,6 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
     {
       namespace z = pbes_expr_optimized;
 
-      //const variable_list& d  = p.process_parameters();
-      //const variable_list& d1 = q.process_parameters();
-      data_expression_list        gi = i->next_state(p.process_parameters());
-      action_list                 ai = i->multi_action().actions();
       atermpp::vector<pbes_expression> v;
       for (my_iterator j = q.action_summands().begin(); j != q.action_summands().end(); ++j)
       {

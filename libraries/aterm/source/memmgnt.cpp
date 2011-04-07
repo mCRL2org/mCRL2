@@ -23,7 +23,7 @@ static const size_t MIN_BLOCK_SIZE = 256;
 
 /* static int total_count=0; */
 
-void* AT_malloc(size_t size)
+void* AT_malloc(const size_t size)
 {
   void* ptr=malloc(size);
   if (!ptr)
@@ -34,7 +34,7 @@ void* AT_malloc(size_t size)
   return ptr;
 }
 
-void* AT_calloc(size_t nmemb, size_t size)
+void* AT_calloc(const size_t nmemb, const size_t size)
 {
   void* ptr=calloc(nmemb, size);
   if (!ptr)
@@ -45,7 +45,7 @@ void* AT_calloc(size_t nmemb, size_t size)
   return ptr;
 }
 
-void* AT_realloc(void* ptr, size_t size)
+void* AT_realloc(void* ptr, const size_t size)
 {
   void* newptr=realloc(ptr, size);
   if (!newptr)
@@ -358,7 +358,7 @@ ATprotected_block resize_block(ATprotected_block block, size_t new_size)
   return newblock;
 }
 
-ATerm* AT_alloc_protected(size_t size)
+ATerm* AT_alloc_protected(const size_t size)
 {
   /* Allocate a protected block of ATerms with the exact size given
    */

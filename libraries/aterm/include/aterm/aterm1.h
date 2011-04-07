@@ -94,23 +94,23 @@ bool ATisEqualAFun(const AFun f1, const AFun f2)
  * Serialize a term to file, in readable ATerm format. No sharing is applied
  * in the serialized format.
  */
-bool ATwriteToTextFile(ATerm t, FILE* file);
+bool ATwriteToTextFile(const ATerm t, FILE* file);
 
-bool ATwriteToBinaryFile(ATerm t, FILE* file);
+bool ATwriteToBinaryFile(const ATerm t, FILE* file);
 
 /**
  * Call ATwriteToTextFile() after opening a file.
  * \arg t term to write
  * \arg name name of the file. If the name equals "-", stdout is used.
  */
-bool ATwriteToNamedTextFile(ATerm t, const char* name);
+bool ATwriteToNamedTextFile(const ATerm t, const char* name);
 
 /**
  * Call ATwriteToBinaryFile() after opening a file.
  * \arg t term to write
  * \arg name name of the file. If the name equals "-", stdout is used.
  */
-bool ATwriteToNamedBinaryFile(ATerm t, const char* name);
+bool ATwriteToNamedBinaryFile(const ATerm t, const char* name);
 
 /**
  * Serialize an ATerm to a string.
@@ -125,7 +125,7 @@ std::string ATwriteToString(const ATerm t);
  * \arg t term to write
  * \arg len result variable that will hold the length of the string
  */
-unsigned char* ATwriteToBinaryString(ATerm t, size_t* len);
+unsigned char* ATwriteToBinaryString(const ATerm t, size_t* len);
 
 /**
  * Read a textual ATerm from a file.
@@ -168,15 +168,15 @@ ATerm ATreadFromBinaryString(const unsigned char* s, size_t size);
 
 
 /* SAF I/O stuff */
-bool ATwriteToSAFFile(ATerm aTerm, FILE* file);
+bool ATwriteToSAFFile(const ATerm aTerm, FILE* file);
 
 ATerm ATreadFromSAFFile(FILE* file);
 
-bool ATwriteToNamedSAFFile(ATerm aTerm, const char* filename);
+bool ATwriteToNamedSAFFile(const ATerm aTerm, const char* filename);
 
 ATerm ATreadFromNamedSAFFile(const char* filename);
 
-char* ATwriteToSAFString(ATerm aTerm, size_t* length);
+char* ATwriteToSAFString(const ATerm aTerm, size_t* length);
 
 ATerm ATreadFromSAFString(char* data, size_t length);
 
@@ -192,26 +192,26 @@ ATerm ATparse(const char* s)
  * Protect an ATerm from being garbage collected in the future.
  * \arg atp memory address of an ATerm
  */
-void ATprotect(ATerm* atp);
+void ATprotect(const ATerm* atp);
 
 /**
  * Remove the protection from the garbage collector for a certain term.
  * \arg atp the address of a previously protected ATerm, see ATprotect()
  */
-void ATunprotect(ATerm* atp);
+void ATunprotect(const ATerm* atp);
 
 /**
  * Efficiently ATprotect() an array of terms from the garbage collector.
  * \arg start array of terms
  * \arg size  length of |start|
  */
-void ATprotectArray(ATerm* start, size_t size);
+void ATprotectArray(const ATerm* start, const size_t size);
 
 /**
  * Efficiently ATunprotect() an array of terms.
  * \arg start previously protected array of terms
  */
-void ATunprotectArray(ATerm* start);
+void ATunprotectArray(const ATerm* start);
 
 /**
  * Register a function to be called before every garbage collection
@@ -224,7 +224,7 @@ void ATunprotectArray(ATerm* start);
  *
  * \todo Should this functionality be in the level one interface?
  */
-void ATaddProtectFunction(ATermProtFunc f);
+void ATaddProtectFunction(const ATermProtFunc f);
 
 /**
  * unregister a previously registered marking function. See ATaddProtectFunction().
@@ -238,7 +238,7 @@ void ATaddProtectFunction(ATermProtFunc f);
  * using ATaddProtectFunction(). Otherwise, you WILL get bus errors and
  * core dumps.
  */
-void ATmarkTerm(ATerm t);
+void ATmarkTerm(const ATerm t);
 
 
 /**
@@ -247,7 +247,7 @@ void ATmarkTerm(ATerm t);
  * using ATaddProtectFunction(). Otherwise, you WILL get bus errors and
  * core dumps.
  */
-void ATmarkArray(ATerm* start, size_t size);
+void ATmarkArray(const ATerm* start, const size_t size);
 
 /**
  * Initialize the ATerm library. It is essential to call this function in the

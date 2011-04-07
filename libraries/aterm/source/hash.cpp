@@ -560,7 +560,7 @@ ATerm ATindexedSetGetElem(ATermIndexedSet hashset, size_t index)
 
 /*{{{  ATermTable ATtableCreate(size_t initial_size, int max_load_pct) */
 
-ATermTable ATtableCreate(size_t initial_size, unsigned int max_load_pct)
+ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_pct)
 {
   ATermTable hashtable;
 

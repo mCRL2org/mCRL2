@@ -42,10 +42,6 @@ static const size_t MARK_STACK_MARGE = AT_getMaxTermSize();
 static const size_t INITIAL_PROT_TABLE_SIZE = 100003;
 static const size_t PROTECT_EXPAND_SIZE = 100000;
 
-/* The same for the protected arrays */
-/* #define PROTECT_ARRAY_INITIAL_SIZE 128
-#define PROTECT_ARRAY_EXPAND_SIZE  256 */
-
 /* The same for protection function */
 static const size_t PROTECT_FUNC_INITIAL_SIZE = 32;
 static const size_t PROTECT_FUNC_EXPAND_SIZE = 32;
@@ -223,7 +219,7 @@ bool ATisInitialized()
  */
 
 void
-ATprotect(ATerm* term)
+ATprotect(const ATerm* term)
 {
   ATprotectArray(term, 1);
 }
@@ -236,7 +232,7 @@ ATprotect(ATerm* term)
  */
 
 void
-ATunprotect(ATerm* term)
+ATunprotect(const ATerm* term)
 {
   ATunprotectArray(term);
 }
@@ -248,7 +244,7 @@ ATunprotect(ATerm* term)
  * Protect an array
  */
 
-void ATprotectArray(ATerm* start, size_t size)
+void ATprotectArray(const ATerm* start, const size_t size)
 {
   ProtEntry* entry;
   ShortHashNumber hnr;
@@ -293,7 +289,7 @@ void ATprotectArray(ATerm* start, size_t size)
  * Unprotect an array of terms.
  */
 
-void ATunprotectArray(ATerm* start)
+void ATunprotectArray(const ATerm* start)
 {
   ShortHashNumber hnr;
   ProtEntry* entry, *prev;
@@ -325,7 +321,7 @@ void ATunprotectArray(ATerm* start)
 
 /*}}}  */
 
-void ATaddProtectFunction(ATermProtFunc f)
+void ATaddProtectFunction(const ATermProtFunc f)
 {
   ATermProtFunc* new_at_prot_functions;
 
@@ -531,7 +527,7 @@ ATvfprintf(FILE* stream, const char* format, va_list args)
  */
 
 static void
-resize_buffer(size_t n)
+resize_buffer(const size_t n)
 {
   buffer_size = n;
   buffer = (char*) AT_realloc(buffer, buffer_size);
@@ -550,7 +546,7 @@ resize_buffer(size_t n)
  */
 
 bool
-writeToTextFile(ATerm t, FILE* f)
+writeToTextFile(const ATerm t, FILE* f)
 {
   AFun          sym;
   ATerm           arg;
@@ -628,7 +624,7 @@ writeToTextFile(ATerm t, FILE* f)
 }
 
 bool
-ATwriteToTextFile(ATerm t, FILE* f)
+ATwriteToTextFile(const ATerm t, FILE* f)
 {
   bool result = true;
 
@@ -659,7 +655,7 @@ ATwriteToTextFile(ATerm t, FILE* f)
  * Write an ATerm to a named plaintext file
  */
 
-bool ATwriteToNamedTextFile(ATerm t, const char* name)
+bool ATwriteToNamedTextFile(const ATerm t, const char* name)
 {
   FILE*  f;
   bool result;
@@ -687,7 +683,7 @@ bool ATwriteToNamedTextFile(ATerm t, const char* name)
  */
 
 static size_t
-symbolTextSize(AFun sym)
+symbolTextSize(const AFun sym)
 {
   char*           id = ATgetName(sym);
 
@@ -720,59 +716,8 @@ symbolTextSize(AFun sym)
 }
 
 /*}}}  */
-/*{{{  static char *writeAFunToString(AFun sym, char *buf) */
 
-/**
- * Write a symbol in a string buffer.
- */
-
-static char*
-writeAFunToString(AFun sym, char* buf)
-{
-  char*           id = ATgetName(sym);
-
-  if (ATisQuoted(sym))
-  {
-    *buf++ = '"';
-    while (*id)
-    {
-      /* We need to escape special characters */
-      switch (*id)
-      {
-        case '\\':
-        case '"':
-          *buf++ = '\\';
-          *buf++ = *id;
-          break;
-        case '\n':
-          *buf++ = '\\';
-          *buf++ = 'n';
-          break;
-        case '\t':
-          *buf++ = '\\';
-          *buf++ = 't';
-          break;
-        case '\r':
-          *buf++ = '\\';
-          *buf++ = 'r';
-          break;
-        default:
-          *buf++ = *id;
-      }
-      id++;
-    }
-    *buf++ = '"';
-    return buf;
-  }
-  else
-  {
-    strcpy(buf, id);
-    return buf + strlen(buf);
-  }
-}
-
-/*}}}  */
-/*{{{  static char *writeToString(ATerm t, char *buf) */
+/*{{{  static char *writeToStream(ATerm t, std::ostream& os) */
 
 static void topWriteToStream(const ATerm t, std::ostream& os);
 
@@ -849,11 +794,11 @@ topWriteToStream(const ATerm t, std::ostream& os)
  * Calculate the size of a term in text format
  */
 
-static size_t  topTextSize(ATerm t);
+static size_t  topTextSize(const ATerm t);
 
 /*{{{  static size_t textSize(ATerm t) */
 
-static size_t textSize(ATerm t)
+static size_t textSize(const ATerm t)
 {
   char numbuf[32];
   /* ATerm trm; */
@@ -921,7 +866,7 @@ static size_t textSize(ATerm t)
 /*}}}  */
 
 static size_t
-topTextSize(ATerm t)
+topTextSize(const ATerm t)
 {
   size_t size = textSize(t);
 
@@ -961,7 +906,7 @@ ATwriteToString(const ATerm t)
  */
 
 static void
-store_char(int c, size_t pos)
+store_char(const int c, const size_t pos)
 {
   if (pos >= buffer_size)
   {
@@ -2245,7 +2190,7 @@ static int AT_compareLists(ATermList t1, ATermList t2)
 /*}}}  */
 /*{{{  int ATcompare(ATerm t1, ATerm t2) */
 
-int ATcompare(ATerm t1, ATerm t2)
+int ATcompare(const ATerm t1, const ATerm t2)
 {
   size_t type1;
   size_t type2;

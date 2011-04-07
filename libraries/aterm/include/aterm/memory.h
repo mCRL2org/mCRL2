@@ -46,7 +46,7 @@ static const size_t PTR_ALIGN_SHIFT = 2;
 //#define PTR_ALIGN_SHIFT 2
 #endif
 
-inline size_t ADDR_TO_BLOCK_IDX(void* a)
+inline size_t ADDR_TO_BLOCK_IDX(const void* a)
 {
   return (((HashNumber)(a))>>(BLOCK_SHIFT+PTR_ALIGN_SHIFT)) % BLOCK_TABLE_SIZE;
 }
@@ -144,13 +144,12 @@ bool AT_isPotentialTerm(const ATerm term)
 
 void AT_initMemory(int argc, char** argv);
 void AT_cleanupMemory();
-HashNumber AT_hashnumber(ATerm t);
-ATerm AT_allocate(size_t size);
-void  AT_freeTerm(size_t size, ATerm t);
-bool AT_isValidTerm(ATerm term);
+HashNumber AT_hashnumber(const ATerm t);
+ATerm AT_allocate(const size_t size);
+void  AT_freeTerm(const size_t size, const ATerm t);
+bool AT_isValidTerm(const ATerm term);
 ATerm AT_isInsideValidTerm(ATerm term);
-void  AT_validateFreeList(size_t size);
-size_t AT_inAnyFreeList(ATerm t);
+size_t AT_inAnyFreeList(const ATerm t);
 void AT_printAllTerms(FILE* file);
 void AT_printAllAFunCounts(FILE* file);
 size_t AT_getAllocatedCount();
@@ -165,11 +164,11 @@ struct _ATprotected_block
 typedef struct _ATprotected_block* ATprotected_block;
 
 /* Protected Memory management functions */
-void* AT_malloc(size_t size);
-void* AT_calloc(size_t nmemb, size_t size);
-void* AT_realloc(void* ptr, size_t size);
+void* AT_malloc(const size_t size);
+void* AT_calloc(const size_t nmemb, const size_t size);
+void* AT_realloc(void* ptr, const size_t size);
 void AT_free(void* ptr);
-ATerm* AT_alloc_protected(size_t nelem);
+ATerm* AT_alloc_protected(const size_t nelem);
 void AT_free_protected(ATerm* term);
 void AT_free_protected_blocks();
 

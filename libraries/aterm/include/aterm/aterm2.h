@@ -96,51 +96,51 @@ typedef struct _ATermTable* ATermTable;
  * example usage: ATprotectList(&ATempty);
  */
 inline
-void ATprotectTerm(ATerm* p)
+void ATprotectTerm(const ATerm* p)
 {
   ATprotect(p);
 }
 
 inline
-void ATprotectList(ATermList* p)
+void ATprotectList(const ATermList* p)
 {
-  ATprotect((ATerm*) p);
+  ATprotect((const ATerm*) p);
 }
 
 inline
-void ATprotectAppl(ATermAppl* p)
+void ATprotectAppl(const ATermAppl* p)
 {
-  ATprotect((ATerm*) p);
+  ATprotect((const ATerm*) p);
 }
 
 inline
-void ATprotectInt(ATermInt* p)
+void ATprotectInt(const ATermInt* p)
 {
-  ATprotect((ATerm*) p);
+  ATprotect((const ATerm*) p);
 }
 
 inline
-void ATunprotectTerm(ATerm* p)
+void ATunprotectTerm(const ATerm* p)
 {
   ATunprotect(p);
 }
 
 inline
-void ATunprotectList(ATermList* p)
+void ATunprotectList(const ATermList* p)
 {
-  ATunprotect((ATerm*) p);
+  ATunprotect((const ATerm*) p);
 }
 
 inline
-void ATunprotectAppl(ATermAppl* p)
+void ATunprotectAppl(const ATermAppl* p)
 {
-  ATunprotect((ATerm*) p);
+  ATunprotect((const ATerm*) p);
 }
 
 inline
-void ATunprotectInt(ATermInt* p)
+void ATunprotectInt(const ATermInt* p)
 {
-  ATunprotect((ATerm*) p);
+  ATunprotect((const ATerm*) p);
 }
 
 /** The following functions implement the operations of
@@ -157,7 +157,7 @@ bool ATisEqual(const TermType1 t1, const TermType2 t2)
 }
 
 /* The ATermInt type */
-ATermInt ATmakeInt(int value);
+ATermInt ATmakeInt(const int value);
 
 inline
 int ATgetInt(const ATermInt t)
@@ -166,17 +166,17 @@ int ATgetInt(const ATermInt t)
 }
 
 /* The ATermAppl type */
-ATermAppl ATmakeAppl(AFun sym, ...);
-ATermAppl ATmakeAppl0(AFun sym);
-ATermAppl ATmakeAppl1(AFun sym, ATerm arg0);
-ATermAppl ATmakeAppl2(AFun sym, ATerm arg0, ATerm arg1);
-ATermAppl ATmakeAppl3(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2);
-ATermAppl ATmakeAppl4(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
-                      ATerm arg3);
-ATermAppl ATmakeAppl5(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
-                      ATerm arg4, ATerm arg5);
-ATermAppl ATmakeAppl6(AFun sym, ATerm arg0, ATerm arg1, ATerm arg2,
-                      ATerm arg4, ATerm arg5, ATerm arg6);
+ATermAppl ATmakeAppl(const AFun sym, ...);
+ATermAppl ATmakeAppl0(const AFun sym);
+ATermAppl ATmakeAppl1(const AFun sym, const ATerm arg0);
+ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1);
+ATermAppl ATmakeAppl3(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2);
+ATermAppl ATmakeAppl4(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2,
+                      const ATerm arg3);
+ATermAppl ATmakeAppl5(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2,
+                      const ATerm arg4, const ATerm arg5);
+ATermAppl ATmakeAppl6(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2,
+                      const ATerm arg4, const ATerm arg5, const ATerm arg6);
 
 /*AFun    ATgetAFun(ATermAppl appl);*/
 inline
@@ -206,59 +206,57 @@ ATerm& ATgetArgument(const ATerm t, const size_t idx)
   return ATgetArgument((ATermAppl)t, idx);
 }
 
-ATermAppl ATsetArgument(ATermAppl appl, ATerm arg, size_t n);
+ATermAppl ATsetArgument(const ATermAppl appl, const ATerm arg, const size_t n);
 
 /* Portability */
-ATermList ATgetArguments(ATermAppl appl);
-ATermAppl ATmakeApplList(AFun sym, ATermList args);
-ATermAppl ATmakeApplArray(AFun sym, ATerm args[]);
+ATermList ATgetArguments(const ATermAppl appl);
+ATermAppl ATmakeApplList(const AFun sym, const ATermList args);
+ATermAppl ATmakeApplArray(const AFun sym, const ATerm args[]);
 
 size_t ATgetLength(ATermList list);
 
 inline
-ATerm& ATgetFirst(ATermList l)
+ATerm& ATgetFirst(const ATermList l)
 {
   return l->aterm.head;
 }
 
 /* ATermList ATgetNext(ATermList list);*/
 inline
-ATermList& ATgetNext(ATermList l)
+ATermList& ATgetNext(const ATermList l)
 {
   return l->aterm.tail;
 }
 
 /*ATbool ATisEmpty(ATermList list);*/
 inline
-bool ATisEmpty(ATermList l)
+bool ATisEmpty(const ATermList l)
 {
   return l->aterm.head == NULL && l->aterm.tail == NULL;
 }
 
 // XXX Remove
 inline
-bool ATisEmpty(ATerm l)
+bool ATisEmpty(const ATerm l)
 {
   return ATisEmpty((ATermList)l);
 }
 
-ATermList ATgetTail(ATermList list, int start);
-ATermList ATgetSlice(ATermList list, size_t start, size_t end);
-ATermList ATinsert(ATermList list, ATerm el);
-ATermList ATappend(ATermList list, ATerm el);
-ATermList ATconcat(ATermList list1, ATermList list2);
-size_t    ATindexOf(ATermList list, ATerm el, int start);
+ATermList ATgetTail(ATermList list, const int start);
+ATermList ATgetSlice(ATermList list, const size_t start, const size_t end);
+ATermList ATinsert(const ATermList list, const ATerm el);
+ATermList ATappend(ATermList list, const ATerm el);
+ATermList ATconcat(ATermList list1, const ATermList list2);
+size_t    ATindexOf(ATermList list, const ATerm el, const int start);
 ATerm     ATelementAt(ATermList list, size_t index);
-ATermList ATremoveElement(ATermList list, ATerm el);
-ATermList ATremoveElementAt(ATermList list, size_t idx);
-ATermList ATreplace(ATermList list, ATerm el, size_t idx);
+ATermList ATremoveElement(ATermList list, const ATerm el);
+ATermList ATremoveElementAt(ATermList list, const size_t idx);
+ATermList ATreplace(ATermList list, const ATerm el, const size_t idx);
 ATermList ATreverse(ATermList list);
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2));
 
 /* The ATermList type */
 extern ATermList ATempty;
-
-ATermList ATmakeList(size_t n, ...);
 
 /* ATermList ATmakeList0(); */
 inline
@@ -267,39 +265,39 @@ ATermList ATmakeList0()
   return ATempty;
 }
 
-ATermList ATmakeList1(ATerm el0);
+ATermList ATmakeList1(const ATerm el0);
 
 inline
-ATermList ATmakeList2(ATerm el0, ATerm el1)
+ATermList ATmakeList2(const ATerm el0, const ATerm el1)
 {
   return ATinsert(ATmakeList1(el1), el0);
 }
 
 inline
-ATermList ATmakeList3(ATerm el0, ATerm el1, ATerm el2)
+ATermList ATmakeList3(const ATerm el0, const ATerm el1, const ATerm el2)
 {
   return ATinsert(ATmakeList2(el1, el2), el0);
 }
 
 inline
-ATermList ATmakeList4(ATerm el0, ATerm el1, ATerm el2, ATerm el3)
+ATermList ATmakeList4(const ATerm el0, const ATerm el1, const ATerm el2, const ATerm el3)
 {
   return ATinsert(ATmakeList3(el1, el2, el3), el0);
 }
 
 inline
-ATermList ATmakeList5(ATerm el0, ATerm el1, ATerm el2, ATerm el3, ATerm el4)
+ATermList ATmakeList5(const ATerm el0, const ATerm el1, const ATerm el2, const ATerm el3, const ATerm el4)
 {
   return ATinsert(ATmakeList4(el1, el2, el3, el4), el0);
 }
 
 inline
-ATermList ATmakeList6(ATerm el0, ATerm el1, ATerm el2, ATerm el3, ATerm el4, ATerm el5)
+ATermList ATmakeList6(const ATerm el0, const ATerm el1, const ATerm el2, const ATerm el3, const ATerm el4, const ATerm el5)
 {
   return ATinsert(ATmakeList5(el1, el2, el3, el4, el5), el0);
 }
 
-ATermTable ATtableCreate(size_t initial_size, unsigned int max_load_pct);
+ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_pct);
 void       ATtableDestroy(ATermTable table);
 void       ATtableReset(ATermTable table);
 void       ATtablePut(ATermTable table, ATerm key, ATerm value);
@@ -318,7 +316,7 @@ bool     ATindexedSetRemove(ATermIndexedSet set, ATerm elem);   /* Returns true 
 ATermList  ATindexedSetElements(ATermIndexedSet set);
 ATerm      ATindexedSetGetElem(ATermIndexedSet set, size_t index);
 
-AFun  ATmakeAFun(const char* name, size_t arity, bool quoted);
+AFun  ATmakeAFun(const char* name, const size_t arity, const bool quoted);
 
 inline
 char* ATgetName(const AFun sym)
@@ -338,16 +336,8 @@ bool ATisQuoted(const AFun sym)
   return IS_QUOTED(at_lookup_table_alias[sym]->header);
 }
 
-void    ATprotectAFun(AFun sym);
-void    ATunprotectAFun(AFun sym);
-void ATprotectMemory(void* start, size_t size);
-void ATunprotectMemory(void* start);
-
-/* Calculate checksum using the
-   "RSA Data Security, Inc. MD5 Message-Digest Algorithm" (see RFC1321)
-*/
-unsigned char* ATchecksum(ATerm t);
-bool ATdiff(ATerm t1, ATerm t2, ATerm* templ, ATerm* diffs);
+void    ATprotectAFun(const AFun sym);
+void    ATunprotectAFun(const AFun sym);
 
 /* Compare two ATerms. This is a complete stable ordering on ATerms.
  * They are compared 'lexicographically', function names before the
@@ -357,10 +347,7 @@ bool ATdiff(ATerm t1, ATerm t2, ATerm* templ, ATerm* diffs);
  * If the types of the terms are different the integer value of ATgetType
  * is used.
  */
-int ATcompare(ATerm t1, ATerm t2);
-
-void ATsetChecking(bool on);
-bool ATgetChecking(void);
+int ATcompare(const ATerm t1, const ATerm t2);
 
 extern size_t at_gc_count;
 
@@ -369,8 +356,6 @@ size_t ATgetGCCount()
 {
   return at_gc_count;
 }
-
-size_t  ATcalcTextSize(ATerm t);
 
 inline
 size_t ATgetAFunId(const AFun afun)
