@@ -173,6 +173,24 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return sort_list::is_nil_function_symbol(x);
   }
 
+  bool is_fset_cons_list(data_expression x)
+  {
+    while (sort_fset::is_fset_cons_application(x))
+    {
+      x = sort_fset::tail(x);
+    }
+    return sort_fset::is_fset_empty_function_symbol(x);
+  }
+
+  bool is_fset_insert_list(data_expression x)
+  {
+    while (sort_fset::is_fsetinsert_application(x))
+    {
+      x = sort_fset::right(x);
+    }
+    return sort_fset::is_fset_empty_function_symbol(x);
+  }
+
   bool is_numeric_cast(const data_expression& x)
   {
     return data::sort_nat::is_pos2nat_application(x)
@@ -206,6 +224,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            ;
   }
 
+  bool is_fset_true(data_expression x)
+  {
+    return sort_bool::is_true_function_symbol(sort_set::left(x));
+  }
+
+  bool is_fset_false(data_expression x)
+  {
+    return sort_bool::is_false_function_symbol(sort_set::left(x));
+  }
+
+  bool is_fset_lambda(data_expression x)
+  {
+    return is_lambda(sort_set::left(x)) && sort_fset::is_fset_empty_function_symbol(sort_set::right(x));
+  }
 
   void print_cons_list(data_expression x)
   {
@@ -232,6 +264,59 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_container(arguments, 7);
     derived().print("]");
   }
+
+  void print_cons_set(data_expression x)
+  {
+    data_expression_vector arguments;
+    while (sort_fset::is_fset_cons_application(x) || sort_fset::is_fsetinsert_application(x))
+    {
+      arguments.push_back(sort_fset::head(x));
+      x = sort_fset::tail(x);
+    }
+    derived().print("{");
+    print_container(arguments, 6);
+    derived().print("}");
+  }
+
+  void print_fset_true(data_expression x)
+  {
+    derived().print("!{");
+    // TODO: compute the complement of the set
+    derived()(sort_set::right(x));
+    derived().print("}");
+  }
+  
+  void print_fset_false(data_expression x)
+  {
+    derived().print("{");
+    derived()(sort_set::right(x));
+    derived().print("}");   
+  }
+  
+  void print_fset_lambda(data_expression x)
+  {
+    sort_expression s = function_sort(sort_set::left(x).sort()).domain().front(); // the sort of the set elements
+    data::lambda left(sort_set::left(x));
+    derived().print("{ ");
+    derived()(left.variables());
+    derived().print(" | ");
+    derived()(left.body());
+    derived().print(" }");
+  }
+  
+  void print_fset_default(data_expression x)
+  {
+    sort_expression s = function_sort(sort_set::left(x).sort()).domain().front();
+    variable var("x", s); // TODO: generate fresh variable w.r.t. x
+    data_expression lhs(sort_set::left(x)(var));
+    data_expression rhs(sort_set::setin(s, var, sort_set::setfset(s, sort_set::right(x))));
+    data_expression body = not_equal_to(lhs, rhs);
+    derived().print("{ ");
+    derived()(var);
+    derived().print(" | ");
+    derived()(body);
+    derived().print(" }");   
+  }  
 
   void print_abstraction(const abstraction& x, const std::string& op)
   {
@@ -501,31 +586,31 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_set::is_setunion_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " union ");
+      print_container(x.arguments(), data::detail::precedence(x), " + ");
     }
     else if (sort_set::is_setdifference_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " difference ");
+      print_container(x.arguments(), data::detail::precedence(x), " - ");
     }
     else if (sort_bag::is_bagjoin_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " bagjoin ");
+      print_container(x.arguments(), data::detail::precedence(x), " + ");
     }
     else if (sort_bag::is_bagdifference_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " bagdifference ");
+      print_container(x.arguments(), data::detail::precedence(x), " - ");
     }
     else if (sort_int::is_div_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " bagdifference ");
+      print_container(x.arguments(), data::detail::precedence(x), " / ");
     }
     else if (sort_int::is_mod_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " mod ");
+      print_container(x.arguments(), data::detail::precedence(x), " % ");
     }
     else if (sort_real::is_divides_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " divides ");
+      print_container(x.arguments(), data::detail::precedence(x), " / ");
     }
     else if (sort_int::is_times_application(x))
     {
@@ -537,11 +622,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_set::is_setintersection_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " setintersection ");
+      print_container(x.arguments(), data::detail::precedence(x), " * ");
     }
     else if (sort_bag::is_bagintersect_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " bagintersect ");
+      print_container(x.arguments(), data::detail::precedence(x), " * ");
     }
     else if (is_numeric_cast(x))
     {
@@ -552,6 +637,57 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       // TODO: fall back on old pretty printer, since it is unknown how to print numeric constants
       derived().print(core::pp(x));
+    }
+    else if (sort_set::is_setconstructor_application(x))
+    {
+      if (is_fset_true(x))
+      {
+        print_fset_true(x);
+      }
+      else if (is_fset_false(x))
+      {
+        print_fset_false(x);
+      }
+      else if (is_fset_lambda(x))
+      {
+        print_fset_lambda(x);
+      }
+      else
+      {
+        print_fset_default(x);
+      }
+    }
+    else if (sort_set::is_setfset_application(x))
+    {
+      derived()(sort_set::arg(x));
+    }
+    else if (sort_fset::is_fset_empty_function_symbol(x))
+    {
+    }
+    else if (sort_fset::is_fset_cons_application(x))
+    {
+      if (is_fset_cons_list(x))
+      {
+        print_cons_set(x);
+      }
+    }
+    else if (sort_fset::is_fsetinsert_application(x))
+    {
+      if (is_fset_insert_list(x))
+      {
+        print_cons_set(x);
+      }
+    }
+    else if (sort_set::is_setcomprehension_application(x))
+    {
+      sort_expression s = function_sort(sort_set::arg(x).sort()).domain().front();
+      variable var("x", s); // TODO: generate fresh variable w.r.t. x
+      data_expression body(sort_set::arg(x)(var));
+      derived().print("{ ");
+      derived()(var);
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");   
     }
     else
     {
