@@ -130,12 +130,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         derived().print(separator);
       }
-      bool print_brackets = data::detail::precedence(*i) < container_precedence;
+      bool print_brackets = (container.size() > 1) && (data::detail::precedence(*i) < container_precedence);
       if (print_brackets)
       {
         derived().print(open_bracket);
       }
-      static_cast<Derived&>(*this)(*i);
+      derived()(*i);
       if (print_brackets)
       {
         derived().print(close_bracket);
@@ -207,7 +207,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   }
 
 
-  bool print_cons_list(data_expression x)
+  void print_cons_list(data_expression x)
   {
     data_expression_vector arguments;
     while (sort_list::is_cons_application(x))
@@ -215,18 +215,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       arguments.push_back(sort_list::head(x));
       x = sort_list::tail(x);
     }
-
-    if (sort_list::is_nil_function_symbol(x))
-    {
-      derived().print("[");
-      print_container(arguments, 6);
-      derived().print("]");
-      return true;
-    }
-    return false; // did not print the list
+    derived().print("[");
+    print_container(arguments, 6);
+    derived().print("]");
   }
 
-  bool print_snoc_list(data_expression x)
+  void print_snoc_list(data_expression x)
   {
     data_expression_vector arguments;
     while (sort_list::is_snoc_application(x))
@@ -234,45 +228,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       arguments.insert(arguments.begin(), sort_list::rhead(x));
       x = sort_list::rtail(x);
     }
-
-    if (sort_list::is_nil_function_symbol(x))
-    {
-      derived().print("[");
-      print_container(arguments, 7);
-      derived().print("]");
-      return true;
-    }
-    return false; // did not print the list
-  }
-
-  template <typename Container>
-  void print_list_container(const Container& container,
-                            int container_precedence = -1,
-                            const std::string& separator = ", ",
-                            const std::string& open_bracket = "(",
-                            const std::string& close_bracket = ")"
-                           )
-  {
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (i != container.begin())
-      {
-        derived().print(separator);
-      }
-      int p = data::detail::precedence(*i);
-      bool print_brackets = (p < container_precedence)
-                            || (p != container_precedence && (p == 6 || p == 7 || p == 8))
-                            ;
-      if (print_brackets)
-      {
-        derived().print(open_bracket);
-      }
-      derived()(*i);
-      if (print_brackets)
-      {
-        derived().print(close_bracket);
-      }
-    }
+    derived().print("[");
+    print_container(arguments, 7);
+    derived().print("]");
   }
 
   void print_abstraction(const abstraction& x, const std::string& op)
@@ -460,7 +418,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(x.name());
-    derived()(x.sort());
+//    derived()(x.sort());
     derived().leave(x);
   }
 
@@ -511,26 +469,22 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       if (is_cons_list(x))
       {
-        derived().print("[");
-        print_container(x.arguments());
-        derived().print("]");
+        print_cons_list(x);
       }
       else
       {
-        print_container(x.arguments(), data::detail::max_precedence, " |> ");
+        print_container(x.arguments(), data::detail::precedence(x), " |> ");
       }
     }
     else if (sort_list::is_snoc_application(x))
     {
       if (is_snoc_list(x))
       {
-        derived().print("[");
-        print_container(x.arguments());
-        derived().print("]");
+        print_snoc_list(x);
       }
       else
       {
-        print_container(x.arguments(), data::detail::max_precedence, " <| ");
+        print_container(x.arguments(), data::detail::precedence(x), " <| ");
       }
     }
     else if (sort_list::is_concat_application(x))
