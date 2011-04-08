@@ -974,7 +974,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
     gsMessage("      return3  %P\n",fromInner(a));
 #endif
 
-    return a;
+    return (ATermAppl) internal_quantifier_enumeration((ATerm) a);
   }
 }
 
@@ -1054,7 +1054,7 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
 #ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
   gsMessage("  return(%T)\n",fromInner((ATermAppl)aaa));
 #endif
-  return internal_quantifier_enumeration(aaa);
+  return aaa;
 }
 
 RewriteStrategy RewriterJitty::getStrategy()
