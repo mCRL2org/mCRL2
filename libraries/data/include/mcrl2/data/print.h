@@ -137,17 +137,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
   }
 
-#ifdef MCRL2_PRINT_DEBUG
-  std::string print_debug(const variable& x)
+  bool is_abstraction_application(const application& x) const
   {
-    std::string result = pp(x);
-    if (derived().print_sorts())
-    {
-      result = result + ": " + pp(x.sort());
-    }
-    return result;
+    //std::cout << "\n<abstraction>" << pp(x) << " " << pp(x.head()) << " " << std::boolalpha << is_abstraction(x.head()) << std::endl;
+    return is_abstraction(x.head());
   }
-#endif
 
   bool is_cons_list(data_expression x) const
   {
@@ -752,21 +746,49 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
 
     //-------------------------------------------------------------------//
-    //                            function application
+    //                            function update
     //-------------------------------------------------------------------//
     else if (is_function_update_application(x)) {
         //std::cout << "\n<function_update>" << pp(x) << " " << x << std::endl;
         data_expression x1 = data::arg1(x);
         data_expression x2 = data::arg2(x);
         data_expression x3 = data::arg3(x);
+        bool print_parentheses = is_abstraction(x1);
+        if (print_parentheses)
+        {
+          derived().print("(");
+        }
         derived()(x1);
+        if (print_parentheses)
+        {
+          derived().print(")");
+        }
         derived().print("[");
         derived()(x2);
         derived().print(" -> ");
         derived()(x3);
         derived().print("]");
     }
-   
+
+    //-------------------------------------------------------------------//
+    //                            abstraction
+    //-------------------------------------------------------------------//
+    else if (is_abstraction_application(x)) {
+      if (x.arguments().size() > 0) {
+        derived().print("(");         
+      }
+      derived()(x.head());
+      if (x.arguments().size() > 0)
+      {
+        derived().print(")(");
+      }
+      print_container(x.arguments());
+      if (x.arguments().size() > 0)
+      {
+        derived().print(")");
+      }
+    }
+    
     //-------------------------------------------------------------------//
     //                            function application
     //-------------------------------------------------------------------//
