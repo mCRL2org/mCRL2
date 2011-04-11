@@ -301,6 +301,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived()(left.variables());
     print_sorts() = false;
     derived().print(" | ");
+//    std::cout << "\n<fset-lambda-body>" << core::pp(left.body()) << " " << left.body() << std::endl;
     derived()(left.body());
     derived().print(" }");
   }
@@ -687,12 +688,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_fset_cons_list(x);
       }
+      else {
+          // TODO: can this case occur?
+          assert(false);
+      }
     }
     else if (sort_fset::is_fsetinsert_application(x))
     {
       if (is_fset_insert_list(x))
       {
         print_fset_insert_list(x);
+      }
+      else {
+          // TODO: can this case occur?
+          assert(false);
       }
     }
 
@@ -721,7 +730,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_int::is_mod_application(x))
     {
-      print_container(x.arguments(), data::detail::precedence(x), " % ");
+      print_container(x.arguments(), data::detail::precedence(x), " mod ");
     }
     else if (sort_int::is_times_application(x))
     {
@@ -743,11 +752,27 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
 
     //-------------------------------------------------------------------//
-    //                            default case
+    //                            function application
+    //-------------------------------------------------------------------//
+    else if (is_function_update_application(x)) {
+        //std::cout << "\n<function_update>" << pp(x) << " " << x << std::endl;
+        data_expression x1 = data::arg1(x);
+        data_expression x2 = data::arg2(x);
+        data_expression x3 = data::arg3(x);
+        derived()(x1);
+        derived().print("[");
+        derived()(x2);
+        derived().print(" -> ");
+        derived()(x3);
+        derived().print("]");
+    }
+   
+    //-------------------------------------------------------------------//
+    //                            function application
     //-------------------------------------------------------------------//
     else
     {
-      //std::cout << "\n<default>" << core::pp(x) << "</default>\n";
+      //std::cout << "\n<function application>" << core::pp(x)\n";
       derived()(x.head());
       if (x.arguments().size() > 0)
       {
