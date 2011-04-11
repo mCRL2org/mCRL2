@@ -515,7 +515,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::function_symbol& x)
   {
     derived().enter(x);
-    derived()(x.name());
+    // TODO: re-implement this functionality without relying on core::pp
+    derived().print(core::pp(x));
 //    derived()(x.sort());
     derived().leave(x);
   }
