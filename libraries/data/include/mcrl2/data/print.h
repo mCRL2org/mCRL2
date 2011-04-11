@@ -248,7 +248,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fset_cons_list(data_expression x)
   {
     data_expression_vector arguments;
-    while (sort_fset::is_fset_cons_application(x) || sort_fset::is_fsetinsert_application(x))
+    while (sort_fset::is_fset_cons_application(x))
     {
       arguments.push_back(sort_fset::head(x));
       x = sort_fset::tail(x);
@@ -258,6 +258,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print("}");
   }
 
+  void print_fset_insert_list(data_expression x)
+  {
+    data_expression_vector arguments;
+    while (sort_fset::is_fsetinsert_application(x))
+    {
+      arguments.push_back(sort_fset::left(x));
+      x = sort_fset::right(x);
+    }
+    derived().print("{");
+    print_container(arguments, 6);
+    derived().print("}");
+  }
+  
   void print_fset_true(data_expression x)
   {
     derived().print("!{");
@@ -673,7 +686,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       if (is_fset_insert_list(x))
       {
-        print_fset_cons_list(x);
+        print_fset_insert_list(x);
       }
     }
 
