@@ -57,13 +57,6 @@ namespace mcrl2
 namespace data
 {
 
-/// \brief Pretty prints a data specification
-/// \param[in] specification a data specification
-/* inline std::string pp(data_specification const& specification)
-{
-  return core::pp(detail::data_specification_to_aterm_data_spec(specification));
-} */
-
 /// \brief Pretty prints the contents of a container
 /// \param[in] c a container with data or sort expressions
 template < typename Container >
@@ -211,18 +204,18 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            ;
   }
 
-  bool is_empty_list(const data_expression& x)
-  {
-    return sort_list::is_nil_function_symbol(x);
-  }
-
-  bool is_list(const application& x)
-  {
-    return sort_list::is_cons_application(x)
-           || sort_list::is_snoc_application(x)
-           || is_empty_list(x)
-           ;
-  }
+//  bool is_empty_list(const data_expression& x)
+//  {
+//    return sort_list::is_nil_function_symbol(x);
+//  }
+//
+//  bool is_list(const application& x)
+//  {
+//    return sort_list::is_cons_application(x)
+//           || sort_list::is_snoc_application(x)
+//           || is_empty_list(x)
+//           ;
+//  }
 
   bool is_fset_true(data_expression x)
   {
@@ -265,7 +258,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print("]");
   }
 
-  void print_cons_set(data_expression x)
+  void print_fset_cons_list(data_expression x)
   {
     data_expression_vector arguments;
     while (sort_fset::is_fset_cons_application(x) || sort_fset::is_fsetinsert_application(x))
@@ -510,6 +503,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::application& x)
   {
     derived().enter(x);
+
+    //-------------------------------------------------------------------//
+    //                            sort_bool
+    //-------------------------------------------------------------------//
     if (sort_bool::is_implies_application(x))
     {
       print_container(x.arguments(), data::detail::precedence(x), " => ");
@@ -522,6 +519,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_container(x.arguments(), data::detail::precedence(x), " || ");
     }
+
+    //-------------------------------------------------------------------//
+    //                            "data"
+    //-------------------------------------------------------------------//
     else if (data::is_equal_to_application(x))
     {
       print_container(x.arguments(), data::detail::precedence(x), " == ");
@@ -546,9 +547,37 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_container(x.arguments(), data::detail::precedence(x), " >= ");
     }
+
+    //-------------------------------------------------------------------//
+    //                            sort_real
+    //-------------------------------------------------------------------//
+    else if (sort_real::is_plus_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " + ");
+    }
+    else if (sort_real::is_minus_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " - ");
+    }
+    else if (sort_real::is_divides_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " / ");
+    }
+
+    //-------------------------------------------------------------------//
+    //                            sort_list
+    //-------------------------------------------------------------------//
     else if (sort_list::is_in_application(x))
     {
       print_container(x.arguments(), data::detail::precedence(x), " in ");
+    }
+    else if (sort_list::is_concat_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " ++ ");
+    }
+    else if (sort_list::is_element_at_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " . ");
     }
     else if (sort_list::is_cons_application(x))
     {
@@ -572,18 +601,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         print_container(x.arguments(), data::detail::precedence(x), " <| ");
       }
     }
-    else if (sort_list::is_concat_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " ++ ");
-    }
-    else if (sort_real::is_plus_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " + ");
-    }
-    else if (sort_real::is_minus_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " - ");
-    }
+
+    //-------------------------------------------------------------------//
+    //                            sort_set
+    //-------------------------------------------------------------------//
     else if (sort_set::is_setunion_application(x))
     {
       print_container(x.arguments(), data::detail::precedence(x), " + ");
@@ -592,51 +613,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       print_container(x.arguments(), data::detail::precedence(x), " - ");
     }
-    else if (sort_bag::is_bagjoin_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " + ");
-    }
-    else if (sort_bag::is_bagdifference_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " - ");
-    }
-    else if (sort_int::is_div_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " / ");
-    }
-    else if (sort_int::is_mod_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " % ");
-    }
-    else if (sort_real::is_divides_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " / ");
-    }
-    else if (sort_int::is_times_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " * ");
-    }
-    else if (sort_list::is_element_at_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " . ");
-    }
     else if (sort_set::is_setintersection_application(x))
     {
       print_container(x.arguments(), data::detail::precedence(x), " * ");
-    }
-    else if (sort_bag::is_bagintersect_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " * ");
-    }
-    else if (is_numeric_cast(x))
-    {
-      // ignore numeric casts like Pos2Nat
-      derived()(x.arguments().front());
-    }
-    else if (is_numeric_constant(x))
-    {
-      // TODO: fall back on old pretty printer, since it is unknown how to print numeric constants
-      derived().print(core::pp(x));
     }
     else if (sort_set::is_setconstructor_application(x))
     {
@@ -657,27 +636,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         print_fset_default(x);
       }
     }
-    else if (sort_set::is_setfset_application(x))
-    {
-      derived()(sort_set::arg(x));
-    }
-    else if (sort_fset::is_fset_empty_function_symbol(x))
-    {
-    }
-    else if (sort_fset::is_fset_cons_application(x))
-    {
-      if (is_fset_cons_list(x))
-      {
-        print_cons_set(x);
-      }
-    }
-    else if (sort_fset::is_fsetinsert_application(x))
-    {
-      if (is_fset_insert_list(x))
-      {
-        print_cons_set(x);
-      }
-    }
     else if (sort_set::is_setcomprehension_application(x))
     {
       sort_expression s = function_sort(sort_set::arg(x).sort()).domain().front();
@@ -689,8 +647,86 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived()(body);
       derived().print(" }");   
     }
+    else if (sort_set::is_setfset_application(x))
+    {
+      std::cout << "\n<setfset>" << core::pp(x) << " " << x << std::endl;
+      data_expression y = sort_set::arg(x);
+      if (sort_fset::is_fset_empty_function_symbol(y))
+      {
+        derived().print("{}");
+      }
+      else
+      {
+        derived()(y);
+      }
+    }
+    else if (sort_fset::is_fset_cons_application(x))
+    {
+      if (is_fset_cons_list(x))
+      {
+        print_fset_cons_list(x);
+      }
+    }
+    else if (sort_fset::is_fsetinsert_application(x))
+    {
+      if (is_fset_insert_list(x))
+      {
+        print_fset_cons_list(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            sort_bag
+    //-------------------------------------------------------------------//
+    else if (sort_bag::is_bagjoin_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " + ");
+    }
+    else if (sort_bag::is_bagdifference_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " - ");
+    }
+    else if (sort_bag::is_bagintersect_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " * ");
+    }
+
+    //-------------------------------------------------------------------//
+    //                            sort_int
+    //-------------------------------------------------------------------//
+    else if (sort_int::is_div_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " / ");
+    }
+    else if (sort_int::is_mod_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " % ");
+    }
+    else if (sort_int::is_times_application(x))
+    {
+      print_container(x.arguments(), data::detail::precedence(x), " * ");
+    }
+
+    //-------------------------------------------------------------------//
+    //                            numeric values
+    //-------------------------------------------------------------------//
+    else if (is_numeric_cast(x))
+    {
+      // ignore numeric casts like Pos2Nat
+      derived()(x.arguments().front());
+    }
+    else if (is_numeric_constant(x))
+    {
+      // TODO: fall back on old pretty printer, since it is unknown how to print numeric constants
+      derived().print(core::pp(x));
+    }
+
+    //-------------------------------------------------------------------//
+    //                            default case
+    //-------------------------------------------------------------------//
     else
     {
+      std::cout << "\n<default>" << core::pp(x) << "</default>\n";
       derived()(x.head());
       if (x.arguments().size() > 0)
       {
@@ -737,14 +773,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived()(x.rhs());
     derived().leave(x);
   }
-
-#ifdef MCRL2_PRINT_DEBUG
-  template <typename T>
-  std::string print_debug(const T& t)
-  {
-    return pp(t);
-  }
-#endif
 };
 
 } // namespace detail
