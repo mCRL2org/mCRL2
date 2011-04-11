@@ -204,19 +204,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            ;
   }
 
-//  bool is_empty_list(const data_expression& x)
-//  {
-//    return sort_list::is_nil_function_symbol(x);
-//  }
-//
-//  bool is_list(const application& x)
-//  {
-//    return sort_list::is_cons_application(x)
-//           || sort_list::is_snoc_application(x)
-//           || is_empty_list(x)
-//           ;
-//  }
-
   bool is_fset_true(data_expression x)
   {
     return sort_bool::is_true_function_symbol(sort_set::left(x));
@@ -274,6 +261,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fset_true(data_expression x)
   {
     derived().print("!{");
+//std::cout << "\n<fset_true>" << core::pp(x) << " " << x << std::endl;
     // TODO: compute the complement of the set
     derived()(sort_set::right(x));
     derived().print("}");
@@ -282,6 +270,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fset_false(data_expression x)
   {
     derived().print("{");
+//std::cout << "\n<fset_false>" << core::pp(x) << " " << x << std::endl;
     derived()(sort_set::right(x));
     derived().print("}");   
   }
@@ -290,6 +279,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     sort_expression s = function_sort(sort_set::left(x).sort()).domain().front(); // the sort of the set elements
     data::lambda left(sort_set::left(x));
+
+//std::cout << "\n<fset_lambda>" << core::pp(left.variables()) << std::endl;
+
     derived().print("{ ");
     derived()(left.variables());
     derived().print(" | ");
@@ -299,16 +291,26 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   
   void print_fset_default(data_expression x)
   {
-    sort_expression s = function_sort(sort_set::left(x).sort()).domain().front();
-    variable var("x", s); // TODO: generate fresh variable w.r.t. x
-    data_expression lhs(sort_set::left(x)(var));
-    data_expression rhs(sort_set::setin(s, var, sort_set::setfset(s, sort_set::right(x))));
-    data_expression body = not_equal_to(lhs, rhs);
-    derived().print("{ ");
-    derived()(var);
-    derived().print(" | ");
-    derived()(body);
-    derived().print(" }");   
+//std::cout << "\n<fset_default>" << core::pp(x) << " " << x << std::endl;
+    data_expression right = sort_set::right(x);
+    // TODO: check if this is the correct way to handle this case
+    if (sort_fset::is_fset_empty_function_symbol(right))
+    {
+      derived().print("{}");
+    }
+    else
+    {
+      sort_expression s = function_sort(sort_set::left(x).sort()).domain().front();
+      variable var("x", s); // TODO: generate fresh variable w.r.t. x
+      data_expression lhs(sort_set::left(x)(var));
+      data_expression rhs(sort_set::setin(s, var, sort_set::setfset(s, right)));
+      data_expression body = not_equal_to(lhs, rhs);
+      derived().print("{ ");
+      derived()(var);
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");
+    }
   }  
 
   void print_abstraction(const abstraction& x, const std::string& op)
@@ -649,7 +651,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (sort_set::is_setfset_application(x))
     {
-      std::cout << "\n<setfset>" << core::pp(x) << " " << x << std::endl;
+      //std::cout << "\n<setfset>" << core::pp(x) << " " << x << std::endl;
       data_expression y = sort_set::arg(x);
       if (sort_fset::is_fset_empty_function_symbol(y))
       {
@@ -726,7 +728,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else
     {
-      std::cout << "\n<default>" << core::pp(x) << "</default>\n";
+      //std::cout << "\n<default>" << core::pp(x) << "</default>\n";
       derived()(x.head());
       if (x.arguments().size() > 0)
       {
