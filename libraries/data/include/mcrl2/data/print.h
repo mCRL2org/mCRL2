@@ -100,9 +100,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 {
   typedef data::add_traverser_sort_expressions<core::detail::printer, Derived> super;
 
-  // using super::enter;
-  // using super::leave;
+  using super::enter;
+  using super::leave;
   using super::operator();
+  using core::detail::printer<Derived>::print_sorts;
 
   Derived& derived()
   {
@@ -296,7 +297,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 //std::cout << "\n<fset_lambda>" << core::pp(left.variables()) << std::endl;
 
     derived().print("{ ");
+    print_sorts() = true;
     derived()(left.variables());
+    print_sorts() = false;
     derived().print(" | ");
     derived()(left.body());
     derived().print(" }");
@@ -319,7 +322,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       data_expression rhs(sort_set::setin(s, var, sort_set::setfset(s, right)));
       data_expression body = not_equal_to(lhs, rhs);
       derived().print("{ ");
+      print_sorts() = true;
       derived()(var);
+      print_sorts() = false;
       derived().print(" | ");
       derived()(body);
       derived().print(" }");
