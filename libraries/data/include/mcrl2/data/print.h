@@ -510,8 +510,22 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::function_symbol& x)
   {
     derived().enter(x);
-    // TODO: re-implement this functionality without relying on core::pp
-    derived().print(core::pp(x));
+    if (sort_nat::is_c0_function_symbol(x))
+    {
+      derived().print("0");
+    }
+    else if (sort_pos::is_c1_function_symbol(x))
+    {
+      derived().print("1");
+    }
+    else if (sort_fbag::is_fbag_empty_function_symbol(x))
+    {
+      derived().print("{}");
+    }
+    else
+    {
+      derived().print(x.name());
+    }    
 //    derived()(x.sort());
     derived().leave(x);
   }
