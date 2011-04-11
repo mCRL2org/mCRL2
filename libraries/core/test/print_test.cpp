@@ -21,9 +21,9 @@ using namespace mcrl2;
 
 void test_print()
 {
-  // print directly using print_traverser
+  // print directly using core::detail::printer
   std::ostringstream out1;
-  core::detail::apply_print_traverser<core::detail::print_traverser, std::ostringstream> printer(out1);
+  core::detail::apply_printer<core::detail::printer> printer(out1);
   core::identifier_string s("abc");
   printer(s);
   BOOST_CHECK(out1.str() == "abc");
