@@ -28,6 +28,8 @@
 
 #include <wx/fdrepdlg.h>
 
+#include "icons/mcrl2xi.xpm"
+
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_CLOSE, MainFrame::OnQuit)
   EVT_MENU(wxID_NEW, MainFrame::OnNewFile)
@@ -72,6 +74,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
   wxFrame((wxFrame*) NULL, wxID_ANY, title, pos, size)
 {
 
+  SetIcon(wxIcon(mcrl2xi_xpm));
 
 #ifdef __WXMAC__
   // required since ABOUT is not the default id of the about menu
