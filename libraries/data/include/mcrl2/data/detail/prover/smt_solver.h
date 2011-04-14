@@ -21,6 +21,9 @@ namespace data
 namespace detail
 {
 
+// XXX remove
+using namespace aterm;
+
 class SMT_Solver
 {
   public:

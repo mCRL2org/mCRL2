@@ -22,6 +22,9 @@ namespace data
 namespace detail
 {
 
+// XXX remove
+using namespace aterm;
+
 /** \brief A base class for simplifying binary decision diagrams.
  *
  * \detail
