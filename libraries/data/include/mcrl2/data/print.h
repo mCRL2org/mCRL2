@@ -35,6 +35,10 @@
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/real.h"
+#include "mcrl2/data/set_identifier_generator.h"
+#include "mcrl2/data/find.h"
+#include "mcrl2/data/detail/print_utility.h"
+#include "mcrl2/exception.h"
 
 namespace atermpp
 {
@@ -59,7 +63,7 @@ namespace data
 
 /// \brief Pretty prints the contents of a container
 /// \param[in] c a container with data or sort expressions
-template < typename Container >
+template <typename Container>
 inline std::string pp(Container const& c, typename atermpp::detail::enable_if_container< Container >::type* = 0)
 {
   std::string result;
@@ -95,6 +99,7 @@ inline std::string pp(atermpp::term_list< Expression > const& c)
 namespace detail
 {
 
+
 template <typename Derived>
 struct printer: public data::add_traverser_sort_expressions<core::detail::printer, Derived>
 {
@@ -110,6 +115,17 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return static_cast<Derived&>(*this);
   }
 
+  core::identifier_string generate_identifier(const std::string& prefix, const data_expression& context) const
+  {
+    data::set_identifier_generator generator;
+    std::set<variable> variables = data::find_variables(context);
+    for (std::set<variable>::iterator i = variables.begin(); i != variables.end(); ++i)
+    {
+      generator.add_identifier(i->name());
+    }
+    return generator(prefix);
+  }
+  
   template <typename Container>
   void print_container(const Container& container,
                        int container_precedence = -1,
@@ -312,7 +328,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else
     {
       sort_expression s = function_sort(sort_set::left(x).sort()).domain().front();
-      variable var("x", s); // TODO: generate fresh variable w.r.t. x
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
       data_expression lhs(sort_set::left(x)(var));
       data_expression rhs(sort_set::setin(s, var, sort_set::setfset(s, right)));
       data_expression body = not_equal_to(lhs, rhs);
@@ -338,6 +355,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
+  void print_numeric_constant(data_expression x)
+  {
+    x = detail::reconstruct_numeric_expression(x);
+    derived().print(detail::function_symbol_name(x));
+  }
+  
   void operator()(const data::container_type& x)
   {
     // skip
@@ -669,7 +692,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     else if (sort_set::is_setcomprehension_application(x))
     {
       sort_expression s = function_sort(sort_set::arg(x).sort()).domain().front();
-      variable var("x", s); // TODO: generate fresh variable w.r.t. x
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
       data_expression body(sort_set::arg(x)(var));
       derived().print("{ ");
       derived()(var);
@@ -755,8 +779,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else if (is_numeric_constant(x))
     {
-      // TODO: fall back on old pretty printer, since it is unknown how to print numeric constants
-      derived().print(core::pp(x));
+      print_numeric_constant(x);
     }
 
     //-------------------------------------------------------------------//
