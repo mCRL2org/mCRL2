@@ -360,7 +360,22 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     x = detail::reconstruct_numeric_expression(x);
     derived().print(detail::function_symbol_name(x));
   }
-  
+
+  void print_function_application(const application& x)
+  {
+    //std::cout << "\n<function application>" << core::pp(x) << "\n";
+    derived()(x.head());
+    if (x.arguments().size() > 0)
+    {
+      derived().print("(");
+    }
+    print_container(x.arguments());
+    if (x.arguments().size() > 0)
+    {
+      derived().print(")");
+    }
+  }
+
   void operator()(const data::container_type& x)
   {
     // skip
@@ -556,27 +571,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::application& x)
   {
     derived().enter(x);
+//std::cout << "\n<application>" << pp(x) << " " << x << std::endl;
 
     //-------------------------------------------------------------------//
-    //                            sort_bool
+    //                            generic operations
     //-------------------------------------------------------------------//
-    if (sort_bool::is_implies_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " => ");
-    }
-    else if (sort_bool::is_and_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " && ");
-    }
-    else if (sort_bool::is_or_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " || ");
-    }
-
-    //-------------------------------------------------------------------//
-    //                            "data"
-    //-------------------------------------------------------------------//
-    else if (data::is_equal_to_application(x))
+    if (data::is_equal_to_application(x))
     {
       print_container(x.arguments(), data::detail::precedence(x), " == ");
     }
@@ -602,176 +602,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
 
     //-------------------------------------------------------------------//
-    //                            sort_real
-    //-------------------------------------------------------------------//
-    else if (sort_real::is_plus_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " + ");
-    }
-    else if (sort_real::is_minus_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " - ");
-    }
-    else if (sort_real::is_divides_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " / ");
-    }
-
-    //-------------------------------------------------------------------//
-    //                            sort_list
-    //-------------------------------------------------------------------//
-    else if (sort_list::is_in_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " in ");
-    }
-    else if (sort_list::is_concat_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " ++ ");
-    }
-    else if (sort_list::is_element_at_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " . ");
-    }
-    else if (sort_list::is_cons_application(x))
-    {
-      if (is_cons_list(x))
-      {
-        print_cons_list(x);
-      }
-      else
-      {
-        print_container(x.arguments(), data::detail::precedence(x), " |> ");
-      }
-    }
-    else if (sort_list::is_snoc_application(x))
-    {
-      if (is_snoc_list(x))
-      {
-        print_snoc_list(x);
-      }
-      else
-      {
-        print_container(x.arguments(), data::detail::precedence(x), " <| ");
-      }
-    }
-
-    //-------------------------------------------------------------------//
-    //                            sort_set
-    //-------------------------------------------------------------------//
-    else if (sort_set::is_setunion_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " + ");
-    }
-    else if (sort_set::is_setdifference_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " - ");
-    }
-    else if (sort_set::is_setintersection_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " * ");
-    }
-    else if (sort_set::is_setconstructor_application(x))
-    {
-      if (is_fset_true(x))
-      {
-        print_fset_true(x);
-      }
-      else if (is_fset_false(x))
-      {
-        print_fset_false(x);
-      }
-      else if (is_fset_lambda(x))
-      {
-        print_fset_lambda(x);
-      }
-      else
-      {
-        print_fset_default(x);
-      }
-    }
-    else if (sort_set::is_setcomprehension_application(x))
-    {
-      sort_expression s = function_sort(sort_set::arg(x).sort()).domain().front();
-      core::identifier_string name = generate_identifier("x", x);
-      variable var(name, s);
-      data_expression body(sort_set::arg(x)(var));
-      derived().print("{ ");
-      derived()(var);
-      derived().print(" | ");
-      derived()(body);
-      derived().print(" }");   
-    }
-    else if (sort_set::is_setfset_application(x))
-    {
-      //std::cout << "\n<setfset>" << core::pp(x) << " " << x << std::endl;
-      data_expression y = sort_set::arg(x);
-      if (sort_fset::is_fset_empty_function_symbol(y))
-      {
-        derived().print("{}");
-      }
-      else
-      {
-        derived()(y);
-      }
-    }
-    else if (sort_fset::is_fset_cons_application(x))
-    {
-      if (is_fset_cons_list(x))
-      {
-        print_fset_cons_list(x);
-      }
-      else {
-          // TODO: can this case occur?
-          assert(false);
-      }
-    }
-    else if (sort_fset::is_fsetinsert_application(x))
-    {
-      if (is_fset_insert_list(x))
-      {
-        print_fset_insert_list(x);
-      }
-      else {
-          // TODO: can this case occur?
-          assert(false);
-      }
-    }
-
-    //-------------------------------------------------------------------//
-    //                            sort_bag
-    //-------------------------------------------------------------------//
-    else if (sort_bag::is_bagjoin_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " + ");
-    }
-    else if (sort_bag::is_bagdifference_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " - ");
-    }
-    else if (sort_bag::is_bagintersect_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " * ");
-    }
-
-    //-------------------------------------------------------------------//
-    //                            sort_int
-    //-------------------------------------------------------------------//
-    else if (sort_int::is_div_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " / ");
-    }
-    else if (sort_int::is_mod_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " mod ");
-    }
-    else if (sort_int::is_times_application(x))
-    {
-      print_container(x.arguments(), data::detail::precedence(x), " * ");
-    }
-
-    //-------------------------------------------------------------------//
     //                            numeric values
     //-------------------------------------------------------------------//
+    // TODO: can these be moved to int/pos/nat?
     else if (is_numeric_cast(x))
     {
       // ignore numeric casts like Pos2Nat
@@ -783,34 +616,314 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
 
     //-------------------------------------------------------------------//
+    //                            bool
+    //-------------------------------------------------------------------//
+    else if (sort_bool::is_bool(x.sort()))
+    {
+      if (sort_bool::is_implies_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " => ");
+      }
+      else if (sort_bool::is_and_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " && ");
+      }
+      else if (sort_bool::is_or_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " || ");
+      }
+      else if (sort_list::is_in_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " in ");
+      }
+      else if (sort_list::is_element_at_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " . ");
+      }
+      else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            pos
+    //-------------------------------------------------------------------//
+    else if (sort_pos::is_pos(x.sort()))
+    {   
+      // else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            nat
+    //-------------------------------------------------------------------//
+    else if (sort_nat::is_nat(x.sort()))
+    {   
+      if (sort_int::is_mod_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " mod ");
+      }
+      else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            int
+    //-------------------------------------------------------------------//
+    else if (sort_int::is_int(x.sort()))
+    {   
+      if (sort_int::is_div_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " / ");
+      }
+      else if (sort_int::is_plus_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " - ");
+      }
+      else if (sort_int::is_minus_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " - ");
+      }
+      else if (sort_int::is_times_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " * ");
+      }
+      else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            real
+    //-------------------------------------------------------------------//
+    else if (sort_real::is_real(x.sort()))
+    {
+      if (sort_real::is_plus_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " + ");
+      }
+      else if (sort_real::is_minus_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " - ");
+      }
+      else if (sort_real::is_divides_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " / ");
+      }
+      else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            list
+    //-------------------------------------------------------------------//
+    else if (sort_list::is_list(x.sort()))
+    {
+      if (sort_list::is_concat_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " ++ ");
+      }
+      else if (sort_list::is_cons_application(x))
+      {
+        if (is_cons_list(x))
+        {
+          print_cons_list(x);
+        }
+        else
+        {
+          print_container(x.arguments(), data::detail::precedence(x), " |> ");
+        }
+      }
+      else if (sort_list::is_snoc_application(x))
+      {
+        if (is_snoc_list(x))
+        {
+          print_snoc_list(x);
+        }
+        else
+        {
+          print_container(x.arguments(), data::detail::precedence(x), " <| ");
+        }
+      }
+      else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            set
+    //-------------------------------------------------------------------//
+    else if (sort_set::is_set(x.sort()))
+    {
+      if (sort_set::is_setunion_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " + ");
+      }
+      else if (sort_set::is_setdifference_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " - ");
+      }
+      else if (sort_set::is_setintersection_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " * ");
+      }
+      else if (sort_set::is_setconstructor_application(x))
+      {
+        if (is_fset_true(x))
+        {
+          print_fset_true(x);
+        }
+        else if (is_fset_false(x))
+        {
+          print_fset_false(x);
+        }
+        else if (is_fset_lambda(x))
+        {
+          print_fset_lambda(x);
+        }
+        else
+        {
+          print_fset_default(x);
+        }
+      }
+      else if (sort_set::is_setcomprehension_application(x))
+      {
+        sort_expression s = function_sort(sort_set::arg(x).sort()).domain().front();
+        core::identifier_string name = generate_identifier("x", x);
+        variable var(name, s);
+        data_expression body(sort_set::arg(x)(var));
+        derived().print("{ ");
+        derived()(var);
+        derived().print(" | ");
+        derived()(body);
+        derived().print(" }");   
+      }
+      else if (sort_set::is_setfset_application(x))
+      {
+        //std::cout << "\n<setfset>" << core::pp(x) << " " << x << std::endl;
+        data_expression y = sort_set::arg(x);
+        if (sort_fset::is_fset_empty_function_symbol(y))
+        {
+          derived().print("{}");
+        }
+        else
+        {
+          derived()(y);
+        }
+      }
+      else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            fset
+    //-------------------------------------------------------------------//
+    else if (sort_fset::is_fset(x.sort()))
+    {
+      if (sort_fset::is_fset_cons_application(x))
+      {
+        if (is_fset_cons_list(x))
+        {
+          print_fset_cons_list(x);
+        }
+        else {
+            // TODO: can this case occur?
+            assert(false);
+        }
+      }
+      else if (sort_fset::is_fsetinsert_application(x))
+      {
+        if (is_fset_insert_list(x))
+        {
+          print_fset_insert_list(x);
+        }
+        else {
+            // TODO: can this case occur?
+            assert(false);
+        }
+      }
+      else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            bag
+    //-------------------------------------------------------------------//
+    else if (sort_bag::is_bag(x.sort()))
+    {   
+      if (sort_bag::is_bagjoin_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " + ");
+      }
+      else if (sort_bag::is_bagdifference_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " - ");
+      }
+      else if (sort_bag::is_bagintersect_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " * ");
+      }
+      else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
+    //                            fbag
+    //-------------------------------------------------------------------//
+    else if (sort_fbag::is_fbag(x.sort()))
+    {
+      //else
+      {
+        print_function_application(x);
+      }
+    }
+
+    //-------------------------------------------------------------------//
     //                            function update
     //-------------------------------------------------------------------//
-    else if (is_function_update_application(x)) {
-        //std::cout << "\n<function_update>" << pp(x) << " " << x << std::endl;
-        data_expression x1 = data::arg1(x);
-        data_expression x2 = data::arg2(x);
-        data_expression x3 = data::arg3(x);
-        bool print_parentheses = is_abstraction(x1);
-        if (print_parentheses)
-        {
-          derived().print("(");
-        }
-        derived()(x1);
-        if (print_parentheses)
-        {
-          derived().print(")");
-        }
-        derived().print("[");
-        derived()(x2);
-        derived().print(" -> ");
-        derived()(x3);
-        derived().print("]");
+    else if (is_function_update_application(x))
+    {
+      //std::cout << "\n<function_update>" << pp(x) << " " << x << std::endl;
+      data_expression x1 = data::arg1(x);
+      data_expression x2 = data::arg2(x);
+      data_expression x3 = data::arg3(x);
+      bool print_parentheses = is_abstraction(x1);
+      if (print_parentheses)
+      {
+        derived().print("(");
+      }
+      derived()(x1);
+      if (print_parentheses)
+      {
+        derived().print(")");
+      }
+      derived().print("[");
+      derived()(x2);
+      derived().print(" -> ");
+      derived()(x3);
+      derived().print("]");
     }
 
     //-------------------------------------------------------------------//
     //                            abstraction
     //-------------------------------------------------------------------//
-    else if (is_abstraction_application(x)) {
+    else if (is_abstraction_application(x))
+    {
       if (x.arguments().size() > 0) {
         derived().print("(");         
       }
@@ -831,17 +944,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else
     {
-      //std::cout << "\n<function application>" << core::pp(x)\n";
-      derived()(x.head());
-      if (x.arguments().size() > 0)
-      {
-        derived().print("(");
-      }
-      print_container(x.arguments());
-      if (x.arguments().size() > 0)
-      {
-        derived().print(")");
-      }
+      std::cout << "\n<error: unknown application>" << core::pp(x) << "\n";
+      print_function_application(x);
     }
     derived().leave(x);
   }
