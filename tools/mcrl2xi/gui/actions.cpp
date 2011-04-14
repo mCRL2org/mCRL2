@@ -166,12 +166,12 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
     rewriter rewr(spec.data(),m_rewrite_strategy);
     term=rewr(term);
 
-    typedef classic_enumerator< mutable_map_substitution< >,
-                                     rewriter,
-                                     selectors::select_not< false > > enumerator_type;
+    typedef classic_enumerator< rewriter > enumerator_type;
 
-    for (enumerator_type i = enumerator_type(spec.data(),atermpp::convert < std::set <mcrl2::data::variable > >(vars),rewr,term);
-                 i != enumerator_type() ; ++i)
+    enumerator_type enumerator(spec.data(),rewr);
+
+    for (enumerator_type::iterator i = enumerator.begin(atermpp::convert < std::set <mcrl2::data::variable > >(vars),term);
+                 i != enumerator.end() ; ++i)
     {
       p_solutions->AppendText(wxT("["));
       for (atermpp::set< mcrl2::data::variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)

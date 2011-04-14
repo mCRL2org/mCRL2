@@ -84,10 +84,11 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
 
     EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other);
     EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info& Info);
+    EnumeratorSolutionsStandard();
+
     ~EnumeratorSolutionsStandard();
 
     bool next(ATermList* solution);
-    // bool errorOccurred();
 
     void reset(ATermList Vars, ATerm Expr, bool true_only);
 
@@ -101,8 +102,7 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
     ATermList enum_vars;
     ATerm enum_expr;
 
-    bool check_true;
-    // bool error;
+    bool not_equal_to_false;
 
     int used_vars;
 

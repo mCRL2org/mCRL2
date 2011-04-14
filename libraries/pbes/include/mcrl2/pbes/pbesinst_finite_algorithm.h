@@ -189,7 +189,9 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
 //std::clog << "condition = " << core::pp(condition) << std::endl;
 
     atermpp::set<pbes_expression> result;
-    for (data::classic_enumerator<> i(m_data_spec, di, super::m_data_rewriter); i != data::classic_enumerator<>(); ++i)
+    data::classic_enumerator<> enumerator(m_data_spec, super::m_data_rewriter);
+    for (data::classic_enumerator<>::iterator i=enumerator.begin(di, data::sort_bool::true_()); 
+              i != enumerator.end(); ++i)
     {
 //std::clog << "sigma = " << data::print_substitution(sigma) << std::endl;
 //std::clog << "*i    = " << data::to_string(*i) << std::endl;
@@ -327,8 +329,10 @@ class pbesinst_finite_algorithm: public core::algorithm
         std::vector<data::variable> infinite_parameters;
         detail::split_parameters(i->variable(), index_map, finite_parameters, infinite_parameters);
         data::variable_list infinite = atermpp::convert<data::variable_list>(infinite_parameters);
-
-        for (data::classic_enumerator<> j(p.data(), finite_parameters, rewr); j != data::classic_enumerator<>(); ++j)
+        
+        data::classic_enumerator<> enumerator(p.data(),rewr);
+        for (data::classic_enumerator<>::iterator j=enumerator.begin(finite_parameters, data::sort_bool::true_()); 
+                     j != enumerator.end(); ++j)
         {
           // apply the substitution *j
           // TODO: use a generic substitution routine (does that already exist in the data library?)

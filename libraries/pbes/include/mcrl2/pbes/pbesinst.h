@@ -315,10 +315,20 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
         // if (check_finite(data.constructors(), current_sort))
         if (data.is_certainly_finite(current_sort))
         {
-          data::variable x("x", current_sort);
+          using namespace mcrl2::data;
+          variable x("x", current_sort);
 
-          // data::data_expression_list enumerations_from_sort = data::detail::enumerate_constructors (data.constructors(), current_sort);
-          sort_enumerations.put(current_sort, atermpp::convert< data::data_expression_list >(make_enumeration_sequence(x, data::make_simple_classic_enumerator< >(data, x))));
+          // data_expression_list enumerations_from_sort = detail::enumerate_constructors (data.constructors(), current_sort);
+          typedef classic_enumerator< PbesRewriter > enumerator_type;
+          enumerator_type enumerator(data, rewrite);
+          data_expression_list l;
+          for(typename enumerator_type::iterator i=enumerator.begin(std::vector<variable>(1,x),sort_bool::true_());
+                   i!=enumerator.end(); ++i)
+            {
+              const data_expression d=i->find(x)->second;
+              l=push_front(l,d);
+            }
+          sort_enumerations.put(current_sort, l);
         }
       }
     }

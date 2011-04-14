@@ -39,7 +39,7 @@ namespace lps
 template<typename DataRewriter>
 class binary_algorithm: public lps::detail::lps_algorithm
 {
-    typedef data::classic_enumerator< data::mutable_map_substitution< >, data::rewriter, data::selectors::select_not< false > > enumerator_type;
+    typedef data::classic_enumerator< data::rewriter > enumerator_type;
 
   protected:
     /// Rewriter
@@ -117,6 +117,8 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       data::fresh_variable_generator<> generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
+      enumerator_type enumerator(m_spec.data(),m_rewriter,true);
+
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {
@@ -127,7 +129,9 @@ class binary_algorithm: public lps::detail::lps_algorithm
           //Get all constructors for par
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-          for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
+          // for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
+          for (enumerator_type::iterator j=enumerator.begin(push_front(data::variable_list(),par),data::data_expression(data::sort_bool::true_())); 
+                j != enumerator.end() ; ++j)
           {
             enumerated_elements.push_back((*j)(par));
           }
@@ -151,6 +155,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           }
           // n = new_pars.size() && new_pars.size() = ceil(log_2(j)) && new_pars.size() = ceil(log_2(enumerated_elements.size()))
 
+core::gsVerbose=true;
           if (core::gsVerbose)
           {
             std::cerr << "Parameter " << pp(par) << ":" << pp(par.sort()) << " has been replaced by " << new_pars.size() << " parameter(s) " << pp(new_pars) << " of sort Bool" << std::endl;

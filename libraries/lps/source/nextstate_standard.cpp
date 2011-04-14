@@ -17,7 +17,7 @@
 #include "aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/classic_enumerator.h"
+// #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/nextstate/standard.h"
@@ -38,6 +38,12 @@ using namespace mcrl2::core::detail;
 
 static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
 {
+  if (info.stateformat==GS_STATE_TREE)
+  { 
+    ATfprintf(stderr,"GS_STATE_TREE... %t\n",(ATermAppl)s);
+    return "";
+  }
+
   std::string result("state(");
   size_t index = 0;
   for (atermpp::aterm_appl::const_iterator i = s.begin(); i != s.end(); ++i)
@@ -47,7 +53,7 @@ static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
       result.append(", ");
     }
 
-    result.append(core::pp(atermpp::aterm(info.export_term(static_cast<ATerm>(*i)))));
+    result.append(pp(atermpp::aterm(info.export_term(static_cast<ATerm>(*i)))));
   }
   result.append(")");
   return result;
@@ -69,7 +75,7 @@ static std::string print_assignments(atermpp::aterm_list a, ns_info const& info)
     }
   }
   res = atermpp::reverse(res);
-  return core::pp(res);
+  return pp(res);
 }
 #endif // MCRL2_NEXTSTATE_DEBUG
 
@@ -399,21 +405,28 @@ ATermList NextState::ListToFormat(ATermList l,ATermList free_vars)
   }
 }
 
-#define LISTFROMFORMAT_IMPLEMENTATION \
-  if ( ATisEmpty(l) ) \
-  { \
-    return l; \
-  } else { \
-    return ATinsert(ListFromFormat(ATgetNext(l)),(ATerm) info.export_term(ATgetFirst(l))); \
-  }
 ATermList NextState::ListFromFormat(ATermList l)
 {
-  LISTFROMFORMAT_IMPLEMENTATION
+  if ( ATisEmpty(l) ) 
+  { 
+    return l; 
+  } 
+  else 
+  { 
+    return ATinsert(ListFromFormat(ATgetNext(l)),(ATerm) info.export_term(ATgetFirst(l))); 
+  }
 }
 
 ATermList NextStateGenerator::ListFromFormat(ATermList l)
 {
-  LISTFROMFORMAT_IMPLEMENTATION
+  if ( ATisEmpty(l) ) 
+  { 
+    return l; 
+  } 
+  else 
+  { 
+    return ATinsert(ListFromFormat(ATgetNext(l)),(ATerm) info.export_term(ATgetFirst(l)));
+  }
 }
 
 ATermAppl NextState::ActionToRewriteFormat(ATermAppl act, ATermList free_vars)
@@ -421,7 +434,7 @@ ATermAppl NextState::ActionToRewriteFormat(ATermAppl act, ATermList free_vars)
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::ActionToRewriteFormat(act, free_vars) called, with" << std::endl <<
             "  act = " << atermpp::aterm_appl(act) << std::endl <<
-            "  act (human readable): " << core::pp(atermpp::aterm_appl(act)) << std::endl <<
+            "  act (human readable): " << pp(atermpp::aterm_appl(act)) << std::endl <<
             "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
   ATermList l = ATLgetArgument(act,0);
@@ -479,7 +492,7 @@ ATermList NextState::AssignsToRewriteFormat(ATermList assigns, ATermList free_va
 NextState::NextState(mcrl2::lps::specification const& spec, 
                                      bool allow_free_vars, 
                                      int state_format,
-                                     const legacy_rewriter& rewriter) : info(spec.data(), rewriter)
+                                     const mcrl2::data::detail::legacy_rewriter& rewriter) : info(spec.data(), rewriter)
 {
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::Nextate(spec, allow_free_vars, state_format, rewriter), with" <<  std::endl <<
@@ -611,11 +624,12 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   // rewriter is intermingled with rewriting, causing the rewriter to rewrite too often.
   for (size_t i=0; i<info.statelen; i++)
   {
-    stateargs[i] = info.m_rewriter(stateargs[i]);
+    stateargs[i] = info.m_rewriter.rewrite_internal(stateargs[i]);
   }
 
   initial_state = NULL;
   ATprotect(&initial_state);
+
   switch (info.stateformat)
   {
     case GS_STATE_VECTOR:
@@ -819,7 +833,7 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
     else
     {
 
-      stateargs[i] = info.m_rewriter(a);
+      stateargs[i] = info.m_rewriter.rewrite_internal(a);
       // The assertion below is not true if there are global variables,
       // which is for instance the case for lpsxsim and lpssim.
       // assert(mcrl2::data::find_variables(atermpp::make_list(mcrl2::data::data_expression(info.export_term(stateargs[i])))).empty());
@@ -852,7 +866,7 @@ ATermAppl NextStateGenerator::rewrActionArgs(ATermAppl act)
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     ATermAppl a = ATAgetFirst(l);
-    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter(ATLgetArgument(a,1))));
+    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal(ATLgetArgument(a,1))));
     m = ATinsert(m,(ATerm) a);
   }
   m = ATreverse(m);
@@ -1006,7 +1020,7 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
   std::clog << "NextStateGenerator::next(Transition, State, prioritised) called" << std::endl;
 #endif
 
-  while (valuations == ns_info::enumerator_type() && (sum_idx < info.num_summands))   // valuations is empty.
+  while (valuations == ns_info::enumerator_type::iterator_internal() && (sum_idx < info.num_summands))   // valuations is empty.
   {
     if (single_summand)
     {
@@ -1039,16 +1053,20 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
     ++sum_idx;
   }
 
-  if (valuations != ns_info::enumerator_type())   // valuations contains unprocessed valuations.
+  if (valuations != ns_info::enumerator_type::iterator_internal())   // valuations contains unprocessed valuations.
   {
     if (*info.current_id != id)
     {
       set_substitutions();
     }
-    for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i)
+    ATermList assignments= *valuations;
+    for(ATermList assignment_iterator=assignments ; !ATisEmpty(assignment_iterator) ;  
+                   assignment_iterator=ATgetNext(assignment_iterator))
+    // for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i)
     {
-
-      info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
+      ATerm i=ATgetFirst(assignment_iterator);
+      // info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
+      info.m_rewriter.set_internally_associated_value(ATAgetArgument(i,0),ATgetArgument(i,1));
     }
 
     *Transition = rewrActionArgs((ATermAppl) cur_act);
@@ -1059,9 +1077,12 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
       *prioritised = (sum_idx <= info.num_prioritised);
     }
 
-    for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i)
+    for( ; !ATisEmpty(assignments) ;  assignments=ATgetNext(assignments))
+    // for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i)
     {
-      info.m_rewriter.clear_internally_associated_value(i->first);
+      ATerm i=ATgetFirst(assignments);
+      // info.m_rewriter.clear_internally_associated_value(i->first);
+      info.m_rewriter.clear_internally_associated_value(ATAgetArgument(i,0));
     }
     ++valuations;
 

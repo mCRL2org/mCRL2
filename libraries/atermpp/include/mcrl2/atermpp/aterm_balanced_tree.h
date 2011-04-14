@@ -355,10 +355,12 @@ class term_balanced_tree_iterator: public boost::iterator_facade<
 
     void initialise(aterm tree)
     {
+ATfprintf(stderr,"AAAAAAAAAA0\n");
       m_trees.push(tree);
       m_trees.push(tree);
-
+ATfprintf(stderr,"AAAAAAAAAA1\n");
       increment();
+ATfprintf(stderr,"AAAAAAAAAA2\n");
     }
 
   public:

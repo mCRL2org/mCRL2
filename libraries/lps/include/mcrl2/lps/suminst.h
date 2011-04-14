@@ -31,7 +31,7 @@ template<typename DataRewriter>
 class suminst_algorithm: public lps::detail::lps_algorithm
 {
 
-    typedef data::classic_enumerator< data::mutable_map_substitution<>, data::rewriter, data::selectors::select_not< false > > enumerator_type;
+    typedef data::classic_enumerator< data::rewriter > enumerator_type;
 
   protected:
     /// Only instantiate finite sorts
@@ -42,6 +42,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
     /// Rewriter
     DataRewriter m_rewriter;
+    enumerator_type m_enumerator;
 
     template <typename SummandType, typename Container>
     void instantiate_summand(const SummandType& s, Container& result)
@@ -77,9 +78,11 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
         try
         {
+core::gsDebug=true;
           core::gsDebugMsg("Enumerating condition: %s\n", data::pp(s.condition()).c_str());
 
-          for (enumerator_type i(enumerator_type(m_spec.data(),boost::make_iterator_range(variables), m_rewriter, s.condition())); i != enumerator_type(); ++i)
+          for (enumerator_type::iterator i=m_enumerator.begin(boost::make_iterator_range(variables), s.condition()); 
+                  i != m_enumerator.end(); ++i)
           {
             core::gsDebugMsg("substitutions: %s\n", data::print_substitution(*i).c_str());
 
@@ -121,7 +124,8 @@ class suminst_algorithm: public lps::detail::lps_algorithm
       : lps_algorithm(spec, core::gsVerbose),
         m_finite_sorts_only(finite_sorts_only),
         m_tau_summands_only(tau_summands_only),
-        m_rewriter(r)
+        m_rewriter(r),
+        m_enumerator(spec.data(),r,true)
     {}
 
     void run()

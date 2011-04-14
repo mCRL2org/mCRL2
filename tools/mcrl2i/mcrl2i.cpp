@@ -273,12 +273,12 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             }
 
             term=rewr(term);
-            typedef classic_enumerator< mutable_map_substitution< >,
-                                     rewriter,
-                                     selectors::select_not< false > > enumerator_type;
-            for (enumerator_type
-                      i=enumerator_type(spec,atermpp::convert < std::set <variable > >(vars),rewr,term);
-                      i != enumerator_type() ; ++i)
+            typedef classic_enumerator< rewriter > enumerator_type;
+            enumerator_type enumerator(spec,rewr,true);
+
+            for (enumerator_type::iterator
+                      i=enumerator.begin(atermpp::convert < std::set <variable > >(vars),term);
+                      i != enumerator.end() ; ++i)
             {
               cout << "[";
               for (atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)

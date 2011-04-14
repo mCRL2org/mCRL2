@@ -378,10 +378,10 @@ struct mutable_map_substitution : public std::unary_function<typename Associativ
   }
 
   // Needed by classic_enumerator
-  bool operator==(const mutable_map_substitution<AssociativeContainer>& other) const
+  /* bool operator==(const mutable_map_substitution<AssociativeContainer>& other) const
   {
     return m_map == other.m_map;
-  }
+  } */
 };
 
 /// \brief Utility function for creating a mutable_map_substitution.

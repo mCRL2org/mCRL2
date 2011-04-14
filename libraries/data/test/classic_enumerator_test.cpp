@@ -60,11 +60,11 @@ void enumerate< classic_enumerator< > >(data_specification const& d,
                                         data_expression const& c, size_t t)
 {
 
-  typedef classic_enumerator< mutable_map_substitution<>, rewriter, selectors::select_not< false > > enumerator_type;
+  typedef classic_enumerator< rewriter > enumerator_type;
 
   rewriter evaluator(d);
-
-  for (enumerator_type i(d, v, evaluator, c); --t != 0 && i != enumerator_type(); ++i)
+  enumerator_type enumerator(d,evaluator);
+  for (enumerator_type::iterator i=enumerator.begin(v, c); --t != 0 && i != enumerator.end(); ++i)
   {
     std::clog << mcrl2::core::pp(data::replace_free_variables(c, *i)) << std::endl;
   }
@@ -186,9 +186,8 @@ void enumerate< detail::EnumeratorStandard >(data_specification const& d,
 
 void empty_test()
 {
-  using namespace mcrl2::data::selectors;
 
-  typedef classic_enumerator< mutable_map_substitution< >, data::rewriter, select_not< false > >  enumerator_type;
+  typedef classic_enumerator< data::rewriter > enumerator_type;
 
   // test manual construction of evaluator with rewriter
   data::data_specification specification;
@@ -199,7 +198,8 @@ void empty_test()
   size_t count = 0;
 
   // explicit with condition evaluator and condition
-  for (enumerator_type i(specification, variables, evaluator); i != enumerator_type(); ++i, ++count)
+  enumerator_type enumerator(specification,evaluator);
+  for (enumerator_type::iterator i=enumerator.begin(variables,sort_bool::true_()); i != enumerator.end(); ++i, ++count)
   {
     BOOST_CHECK(i->begin() == i->end()); // trivial valuation
   }
@@ -207,7 +207,7 @@ void empty_test()
   BOOST_CHECK(count == 1);
 
   // explicit with condition but without condition evaluator
-  for (enumerator_type i(specification, variables, evaluator); i != enumerator_type(); ++i, ++count)
+  for (enumerator_type::iterator i=enumerator.begin(variables, sort_bool::true_()); i != enumerator.end(); ++i, ++count)
   {
     BOOST_CHECK(i->begin() == i->end()); //trivial valuation
   }
@@ -216,7 +216,7 @@ void empty_test()
 
   variables.insert(variable("y", sort_nat::nat()));
 
-  for (enumerator_type i(specification, variables, evaluator, sort_bool::false_()); i != enumerator_type(); ++i)
+  for (enumerator_type::iterator i=enumerator.begin(variables, sort_bool::false_()); i != enumerator.end(); ++i)
   {
     BOOST_CHECK(false);
   }
@@ -300,7 +300,8 @@ void check_concepts()
 
   BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_map_substitution< > >));
 
-  BOOST_CONCEPT_ASSERT((Enumerator< classic_enumerator< > >));
+  // BOOST_CONCEPT_ASSERT((Enumerator< classic_enumerator< > >));
+  BOOST_CONCEPT_ASSERT((classic_enumerator< >::iterator ));
 }
 
 int test_main(int argc, char** argv)

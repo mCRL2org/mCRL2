@@ -460,21 +460,23 @@ bool EnumeratorSolutionsStandard::next(ATermList* solution)
         info.rewr_obj->setSubstitutionInternal(var,term_rf);
         ATerm new_expr = info.rewr_obj->rewriteInternal(e.expr);
 
-        if (!ATisEqual(new_expr,info.rewr_false))
+        if ((not_equal_to_false && !ATisEqual(new_expr,info.rewr_false)) ||
+            (!not_equal_to_false && !ATisEqual(new_expr,info.rewr_true)))
         {
           fs_push(ATgetNext(ATreverse(uvars)),ATinsert(e.vals,(ATerm) ATmakeAppl2(info.tupAFun,(ATerm) var,(ATerm) term_rf)),new_expr);
           if (ATisEmpty(fs_top().vars) || (EliminateVars(&fs_top()), ATisEmpty(fs_top().vars) || ATisEqual(fs_top().expr,info.rewr_false)))
           {
-            if (!ATisEqual(fs_top().expr,info.rewr_false))
+            if ((not_equal_to_false && !ATisEqual(fs_top().expr,info.rewr_false)) ||
+                (!not_equal_to_false && !ATisEqual(fs_top().expr,info.rewr_true)))
             {
-              if (check_true && !ATisEqual(fs_top().expr,info.rewr_true))
+              /* if (check_true && !ATisEqual(fs_top().expr,info.rewr_true))
               {
                 std::string error_message("term does not evaluate to true or false: " + pp(info.rewr_obj->fromRewriteFormat(fs_top().expr)));
                 fs_reset();
                 info.rewr_obj->clearSubstitution(var);
                 throw mcrl2::runtime_error(error_message);
               }
-              else
+              else */
               {
                 ss_push(build_solution(enum_vars,fs_top().vals));
               }
@@ -499,11 +501,11 @@ bool EnumeratorSolutionsStandard::next(ATermList* solution)
   }
 }
 
-void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_only)
+void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool netf)
 {
   enum_vars = Vars;
   enum_expr = info.rewr_obj->rewriteInternal(Expr);
-  check_true = true_only;
+  not_equal_to_false = netf;
 
   fs_reset();
   ss_reset();
@@ -522,11 +524,11 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
   }
   else if (ATisEmpty(fs_bottom().vars))
   {
-    if (check_true && !ATisEqual(fs_bottom().expr,info.rewr_true))
+    if ((not_equal_to_false && !ATisEqual(fs_bottom().expr,info.rewr_true)) ||
+        (!not_equal_to_false && !ATisEqual(fs_bottom().expr,info.rewr_false)))
     {
       throw mcrl2::runtime_error("term does not evaluate to true or false " +
                                  pp(info.rewr_obj->fromRewriteFormat(fs_bottom().expr)));
-      // error = true;
     }
     else
     {
@@ -536,7 +538,21 @@ void EnumeratorSolutionsStandard::reset(ATermList Vars, ATerm Expr, bool true_on
   }
 }
 
-EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info& Info)
+EnumeratorSolutionsStandard::EnumeratorSolutionsStandard()
+{
+  fs_stack = NULL;
+  fs_stack_size = 0;
+  fs_stack_pos = 0;
+  ss_stack = NULL;
+  ss_stack_size = 0;
+  ss_stack_pos = 0;
+  enum_vars = NULL;
+  enum_expr = NULL;
+  ATprotectList(&enum_vars);
+  ATprotect(&enum_expr);
+} 
+
+EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool not_equal_to_false, enumstd_info& Info)
 {
   info = Info; // ATerms inside need not to be protected as they should already
   // be protected by the Enumerator and this object should not live
@@ -548,20 +564,20 @@ EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(ATermList Vars, ATerm E
   ss_stack = NULL;
   ss_stack_size = 0;
   ss_stack_pos = 0;
-  // error=false;
   enum_vars = NULL;
   enum_expr = NULL;
   ATprotectList(&enum_vars);
   ATprotect(&enum_expr);
 
-  reset(Vars,Expr,true_only);
+  reset(Vars,Expr,not_equal_to_false);
 } 
 
 EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other) :
   info(other.info), enum_vars(other.enum_vars), enum_expr(other.enum_expr),
-  // check_true(other.check_true), error(other.error), used_vars(other.used_vars),
-  check_true(other.check_true), used_vars(other.used_vars),
-  fs_stack(0), ss_stack(0)
+  not_equal_to_false(other.not_equal_to_false), 
+  used_vars(other.used_vars),
+  fs_stack(0), 
+  ss_stack(0)
 {
   fs_stack_pos = other.fs_stack_pos;
   ss_stack_pos = other.ss_stack_pos;
@@ -742,15 +758,15 @@ EnumeratorStandard::~EnumeratorStandard()
   }
 }
 
-EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutionsStandard* old)
+EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, bool not_equal_to_false, EnumeratorSolutionsStandard* old)
 {
   if (old == NULL)
   {
-    return new EnumeratorSolutionsStandard(vars,expr,true_only,info);
+    return new EnumeratorSolutionsStandard(vars,expr,not_equal_to_false,info);
   }
   else
   {
-    ((EnumeratorSolutionsStandard*) old)->reset(vars,expr,true_only);
+    ((EnumeratorSolutionsStandard*) old)->reset(vars,expr,not_equal_to_false);
     return old;
   }
 }
