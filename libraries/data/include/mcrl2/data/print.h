@@ -683,7 +683,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_int::is_plus_application(x))
       {
-        print_container(x.arguments(), data::detail::precedence(x), " - ");
+        print_container(x.arguments(), data::detail::precedence(x), " + ");
       }
       else if (sort_int::is_minus_application(x))
       {
