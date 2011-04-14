@@ -148,4 +148,4 @@ struct legacy_rewriter : public mcrl2::data::rewriter
 } // namespace data
 } // namespace mcrl2
 
-#endif _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
+#endif // _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
