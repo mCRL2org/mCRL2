@@ -246,12 +246,8 @@ class Rewriter
 
     virtual ATermAppl fromInner(ATermAppl Term);
 
-    ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
-    ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
-
   protected:
-    mcrl2::data::data_specification m_data_specification;
-    ATerm internal_quantifier_enumeration( ATerm ATermInInnerFormat );
+
     ATermAppl* int2term;
 };
 
