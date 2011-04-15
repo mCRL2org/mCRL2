@@ -12,6 +12,7 @@
 #ifndef MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 #define MCRL2_DATA_DETAIL_PRINT_UTILITY_H
 
+#include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -53,8 +54,8 @@ inline
 bool is_numeric_string(const core::identifier_string& name)
 {
   std::string s = name;
-  // TODO: use xpressive
-  return true;
+  boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
+  return boost::xpressive::regex_match(s, re);
 }
 
 inline
