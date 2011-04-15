@@ -246,7 +246,7 @@ class Rewriter
 
     virtual ATermAppl fromInner(ATermAppl Term);
 
-    ATerm internal_existenial_quantifier_enumeration( ATerm ATermInInnerFormat );
+    ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
     ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
 
   protected:

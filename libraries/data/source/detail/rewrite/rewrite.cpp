@@ -239,8 +239,9 @@ ATermAppl Rewriter::fromInner(ATermAppl Term )
   return Term;
 }
 
-ATerm Rewriter::internal_existenial_quantifier_enumeration( ATerm ATermInInnerFormat )
+ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat )
 {
+  // ATermInInnerFormat is an expression with a existential quantifier in internal format.
   if (ATisAppl( ATermInInnerFormat ) )
   {
     /* Convert internal rewrite number to ATerm representation*/
@@ -433,7 +434,7 @@ ATerm Rewriter::internal_universal_quantifier_enumeration( ATerm ATermInInnerFor
 ATerm Rewriter::internal_quantifier_enumeration( ATerm ATermInInnerFormat )
 {
   /* Post processing is only performed when necessary */
-  ATermInInnerFormat = internal_existenial_quantifier_enumeration( ATermInInnerFormat );
+  ATermInInnerFormat = internal_existential_quantifier_enumeration( ATermInInnerFormat );
   ATermInInnerFormat = internal_universal_quantifier_enumeration( ATermInInnerFormat );
   return ATermInInnerFormat;
 }
