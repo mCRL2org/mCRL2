@@ -94,6 +94,13 @@ class basic_rewriter
       m_rewriter(detail::createRewriter(data_specification(), static_cast< detail::RewriteStrategy >(s)))
     {}
 
+//		/// \brief Constructor.
+//    basic_rewriter(data_specification const& d, strategy s = jitty) :
+//      m_rewriter(detail::createRewriter(
+//          data_specification()
+//          , static_cast< detail::RewriteStrategy >(s)))
+//    {}
+
   public:
 
     /// \brief Adds an equation to the rewrite rules.

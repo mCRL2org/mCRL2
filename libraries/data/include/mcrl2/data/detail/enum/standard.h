@@ -35,13 +35,13 @@ typedef struct
 {
   Rewriter* rewr_obj;
 
-  ATermTable constructors;
+  atermpp::map<ATermAppl, ATermList> constructors;
   ATerm rewr_true, rewr_false;
 
   int* max_vars;
 
   ATerm opidAnd;
-  ATermIndexedSet eqs;
+  atermpp::set< ATerm > eqs;
   AFun tupAFun;
 
   bool (EnumeratorSolutionsStandard::*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);

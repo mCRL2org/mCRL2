@@ -135,7 +135,7 @@ ATermList EnumeratorSolutionsStandard::ss_pop()
 
 bool EnumeratorSolutionsStandard::IsInner3Eq(ATerm a)
 {
-  return ATindexedSetGetIndex(info.eqs,a) >=0  /* != ATERM_NON_EXISTING_POSITION */ ;
+  return info.eqs.find(a) != info.eqs.end();
 }
 
 bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, ATerm* v, ATerm* e)
@@ -185,7 +185,7 @@ bool EnumeratorSolutionsStandard::FindInner3Equality(ATerm t, ATermList vars, AT
 
 bool EnumeratorSolutionsStandard::IsInnerCEq(ATermAppl a)
 {
-  return ATindexedSetGetIndex(info.eqs,ATgetArgument(a,0)) >= 0 /* !=ATERM_NON_EXISTING_POSITION */;
+  return info.eqs.find(ATgetArgument(a,0)) != info.eqs.end() ;
 }
 
 static struct
@@ -402,16 +402,14 @@ bool EnumeratorSolutionsStandard::next(ATermList* solution)
     }
     else
     {
-      ATermList l = (ATermList) ATtableGet(info.constructors,(ATerm) sort);
-      if (l == NULL)
-      {
-        l = ATempty;
-      }
-      if (ATisEmpty(l))
+      atermpp::map<ATermAppl, ATermList>::iterator it = info.constructors.find(sort);
+
+      if ( it == info.constructors.end() )
       {
         fs_reset();
         throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + " as it does not have constructor functions");
       }
+      ATermList l = it->second;
 
       for (; !ATisEmpty(l); l=ATgetNext(l))
       {
@@ -679,8 +677,6 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
   ATprotect(&info.rewr_false);
   info.rewr_false = info.rewr_obj->toRewriteFormat(sort_bool::false_());
 
-  info.eqs = ATindexedSetCreate(100,50);
-
   if ((info.rewr_obj->getStrategy() == GS_REWR_INNER) || (info.rewr_obj->getStrategy() == GS_REWR_INNER_P))
   {
     info.FindEquality = &EnumeratorSolutionsStandard::FindInner3Equality;
@@ -693,8 +689,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     {
       if (r.front().name() == "==")
       {
-        bool b;
-        ATindexedSetPut(info.eqs,info.rewr_obj->toRewriteFormat(r.front()),&b);
+        info.eqs.insert(info.rewr_obj->toRewriteFormat(r.front()));
       }
     }
   }
@@ -710,8 +705,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     {
       if (r.front().name() == "==")
       {
-        bool b;
-        ATindexedSetPut(info.eqs,ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(r.front()),0),&b);
+        info.eqs.insert( ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(r.front()),0) );
       }
     }
   }
@@ -720,7 +714,6 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
   ATprotectAFun(info.tupAFun);
   info.tupAFun = ATmakeAFun("@tup@",2,false);
 
-  info.constructors = ATtableCreate(boost::distance(data_spec.sorts()),50);
   const atermpp::set<sort_expression> sorts = data_spec.sorts();
   for (atermpp::set<sort_expression>::const_iterator r = sorts.begin(); r != sorts.end(); ++r)
   {
@@ -734,9 +727,7 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
                                              (ATerm) map_ATreverse(gsGetSortExprDomains(rc.front().sort())))));
     }
 
-    ATtablePut(info.constructors,
-               reinterpret_cast< ATerm >(static_cast< ATermAppl >(*r)),
-               reinterpret_cast< ATerm >(static_cast< ATermList >(constructors)));
+    info.constructors[*r] = constructors;
   }
 }
 
@@ -746,11 +737,8 @@ EnumeratorStandard::~EnumeratorStandard()
   ATunprotect(&info.rewr_false);
 
   ATunprotect(&info.opidAnd);
-  ATindexedSetDestroy(info.eqs);
 
   ATunprotectAFun(info.tupAFun);
-
-  ATtableDestroy(info.constructors);
 
   if (clean_up_rewr_obj)
   {
