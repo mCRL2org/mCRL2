@@ -56,7 +56,7 @@ class RewriterJitty: public Rewriter
     ATermAppl toInner(ATermAppl Term, bool add_opids);
     ATermAppl fromInner(ATermAppl Term);
 
-    const mcrl2::data::data_specification *m_data_specification;
+    mcrl2::data::data_specification m_data_specification;
 
     ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
     ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );

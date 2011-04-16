@@ -423,7 +423,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
   ATermList n;
   ATermInt i;
 
-  m_data_specification = &DataSpec;
+  m_data_specification = DataSpec;
 
   initialise_common();
 
@@ -1106,9 +1106,9 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
 
           /* Add sorts if required (like Nat, Pos,...) */
           std::set<mcrl2::data::sort_expression> sv = find_sort_expressions( e_new_rw );
-          m_data_specification->add_context_sorts( sv );
+          m_data_specification.add_context_sorts( sv );
           /* Create Enumerator */
-          EnumeratorStandard ES( *m_data_specification, this );
+          EnumeratorStandard ES( m_data_specification, this );
 
           /* Find A solution*/
           EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
@@ -1203,9 +1203,9 @@ ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInn
 
           /* Add sorts if required (like Nat, Pos,...) */
           std::set<mcrl2::data::sort_expression> sv = find_sort_expressions( e_new_rw );
-          m_data_specification->add_context_sorts( sv );
+          m_data_specification.add_context_sorts( sv );
           /* Create Enumerator */
-          EnumeratorStandard ES( *m_data_specification, this );
+          EnumeratorStandard ES( m_data_specification, this );
 
           /* Find A solution*/
           EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
