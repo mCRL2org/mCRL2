@@ -44,7 +44,7 @@ pbes<> pbesinst(const pbes<>& p, bool lazy = false)
   }
   else
   {
-    return do_finite_algorithm(p, pbesr);
+    return do_finite_algorithm(p, pbesr,datar);
   }
 }
 

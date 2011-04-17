@@ -283,7 +283,8 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 /// \param pbes_spec A PBES
 /// \param rewrite A PBES rewriter
 template <typename PbesRewriter>
-pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
+pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2::data::rewriter &data_rewriter)
+                   // Last argument is required for the enumerator, which needs a data rewriter.
 {
   // Instantiate free variables in the system
   pbes_system::detail::instantiate_global_variables(pbes_spec);
@@ -304,6 +305,8 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   //Populate sort_enumerations with all enumerations for the finite sorts of the system
   core::gsVerboseMsg("Enumerating finite data sorts...\n");
+  typedef data::classic_enumerator<> enumerator_type;
+  enumerator_type enumerator(data, data_rewriter);
   for (atermpp::vector<pbes_equation>::const_iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
   {
     data::variable_list parameters = eq_i->variable().parameters();
@@ -319,8 +322,6 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
           variable x("x", current_sort);
 
           // data_expression_list enumerations_from_sort = detail::enumerate_constructors (data.constructors(), current_sort);
-          typedef classic_enumerator< PbesRewriter > enumerator_type;
-          enumerator_type enumerator(data, rewrite);
           data_expression_list l;
           for(typename enumerator_type::iterator i=enumerator.begin(std::vector<variable>(1,x),sort_bool::true_());
                    i!=enumerator.end(); ++i)
