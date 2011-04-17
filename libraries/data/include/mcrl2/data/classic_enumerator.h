@@ -123,7 +123,7 @@ class classic_enumerator
   private:
 
     const data_specification &                                   m_specification;
-    const detail::legacy_rewriter &                              m_evaluator;     // Only here for conversion trick
+    const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
     boost::shared_ptr<detail::EnumeratorStandard>                m_enumerator;    // embedded rewriter should not be part of context
 
     // for copy constructor, since it is unsafe to copy EnumeratorSolutionsStandard

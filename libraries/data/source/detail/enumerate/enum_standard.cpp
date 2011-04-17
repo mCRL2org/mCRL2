@@ -404,7 +404,7 @@ bool EnumeratorSolutionsStandard::next(ATermList* solution)
     {
       atermpp::map<ATermAppl, ATermList>::iterator it = info.constructors.find(sort);
 
-      if ( it == info.constructors.end() )
+      if ( it == info.constructors.end() || ATisEmpty(it->second) )
       {
         fs_reset();
         throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + " as it does not have constructor functions");
