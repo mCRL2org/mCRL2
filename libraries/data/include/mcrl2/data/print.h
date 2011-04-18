@@ -252,7 +252,16 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     while (sort_fbag::is_fbaginsert_application(x))
     {
-      x = sort_fbag::right(x);
+      x = sort_fbag::arg1(x);
+    }
+    return sort_fbag::is_fbag_empty_function_symbol(x);
+  }
+
+  bool is_fbag_cinsert_list(data_expression x)
+  {
+    while (sort_fbag::is_fbagcinsert_application(x))
+    {
+      x = sort_fbag::arg1(x);
     }
     return sort_fbag::is_fbag_empty_function_symbol(x);
   }
@@ -361,13 +370,23 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   
   void print_fbag_zero(const data_expression& x)
   {
-    derived().print("{");
-    derived()(sort_bag::right(x));
-    derived().print("}");
+//std::cout << "\n<fbag_zero>" << core::pp(x) << " " << x << std::endl;
+    // TODO: check if this is the correct way to handle this case
+    if (sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    {
+      derived().print("{}");
+    }
+    else
+    {
+      derived().print("{");
+      derived()(sort_bag::right(x));
+      derived().print("}");
+    }
   } 
   
   void print_fbag_one(const data_expression& x)
   {
+//std::cout << "\n<fbag_one>" << core::pp(x) << " " << x << std::endl;
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
@@ -387,7 +406,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   
   void print_fbag_lambda(data_expression x)
   {
-//std::cout << "\n<fbag_lambda>" << core::pp(left.variables()) << std::endl;
+//std::cout << "\n<fbag_lambda>" << core::pp(x) << " " << x << std::endl;
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
@@ -441,7 +460,18 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fbag_insert_list(data_expression x)
   {
     atermpp::vector<std::pair<data_expression, data_expression> > arguments;
-    while (sort_fbag::is_fbag_cons_application(x))
+    while (sort_fbag::is_fbaginsert_application(x))
+    {
+      arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_nat::cnat(sort_fbag::arg2(x))));
+      x = sort_fbag::arg3(x);
+    }
+    print_list(arguments, "{", "}");
+  }
+
+  void print_fbag_cinsert_list(data_expression x)
+  {
+    atermpp::vector<std::pair<data_expression, data_expression> > arguments;
+    while (sort_fbag::is_fbagcinsert_application(x))
     {
       arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_fbag::arg2(x)));
       x = sort_fbag::arg3(x);
@@ -1170,6 +1200,18 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         if (is_fbag_insert_list(x))
         {
           print_fbag_insert_list(x);
+        }
+        else
+        {
+          // TODO: can this case occur?
+          throw mcrl2::runtime_error("unexpected case in fbag " + x.to_string());
+        }
+      }
+      else if (sort_fbag::is_fbagcinsert_application(x))
+      {
+        if (is_fbag_cinsert_list(x))
+        {
+          print_fbag_cinsert_list(x);
         }
         else
         {
