@@ -42,6 +42,27 @@
 
 namespace atermpp
 {
+
+template<>
+struct aterm_traits<std::pair<mcrl2::data::variable, mcrl2::data::variable> >
+{
+  static void protect(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
+  {
+    t.first.protect();
+    t.second.protect();
+  }
+  static void unprotect(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
+  {
+    t.first.unprotect();
+    t.second.unprotect();
+  }
+  static void mark(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
+  {
+    t.first.mark();
+    t.second.mark();
+  }
+};
+
 namespace detail
 {
 
@@ -153,6 +174,29 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
   }
 
+  template <typename Container>
+  void print_list(const Container& container,
+                  const std::string& opener = "(",
+                  const std::string& closer = ")",
+                  const std::string& separator = ", "
+                 )
+  {
+    if (container.empty())
+    {
+      return;
+    }
+    derived().print(opener);
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+    }
+    derived().print(closer);
+  }
+
   bool is_abstraction_application(const application& x) const
   {
     //std::cout << "\n<abstraction>" << pp(x) << " " << pp(x.head()) << " " << std::boolalpha << is_abstraction(x.head()) << std::endl;
@@ -195,6 +239,24 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return sort_fset::is_fset_empty_function_symbol(x);
   }
 
+  bool is_fbag_cons_list(data_expression x)
+  {
+    while (sort_fbag::is_fbag_cons_application(x))
+    {
+      x = sort_fbag::tail(x);
+    }
+    return sort_fbag::is_fbag_empty_function_symbol(x);
+  }
+
+  bool is_fbag_insert_list(data_expression x)
+  {
+    while (sort_fbag::is_fbaginsert_application(x))
+    {
+      x = sort_fbag::right(x);
+    }
+    return sort_fbag::is_fbag_empty_function_symbol(x);
+  }
+
   bool is_numeric_cast(const data_expression& x)
   {
     return data::sort_nat::is_pos2nat_application(x)
@@ -228,6 +290,21 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   bool is_fset_lambda(data_expression x)
   {
     return is_lambda(sort_set::left(x)) && sort_fset::is_fset_empty_function_symbol(sort_set::right(x));
+  }
+
+  bool is_fbag_zero(const data_expression& x)
+  {
+    return sort_bag::is_zero_function_function_symbol(sort_bag::left(x));
+  }
+
+  bool is_fbag_one(const data_expression& x)
+  {
+    return sort_bag::is_one_function_function_symbol(sort_bag::left(x));
+  }
+
+  bool is_fbag_lambda(data_expression x)
+  {
+    return is_lambda(sort_bag::left(x)) && sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x));
   }
 
   void print_cons_list(data_expression x)
@@ -282,10 +359,99 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print("}");
   }
   
+  void print_fbag_zero(const data_expression& x)
+  {
+    derived().print("{");
+    derived()(sort_bag::right(x));
+    derived().print("}");
+  } 
+  
+  void print_fbag_one(const data_expression& x)
+  {
+    sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
+    core::identifier_string name = generate_identifier("x", x);
+    variable var(name, s);
+    data_expression body = number(sort_nat::nat(), "1");
+    if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    {
+      body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
+    }
+    derived().print("{ ");
+    print_sorts() = true;
+    derived()(var);
+    print_sorts() = false;
+    derived().print(" | ");
+    derived()(body);
+    derived().print(" }");
+  } 
+  
+  void print_fbag_lambda(data_expression x)
+  {
+//std::cout << "\n<fbag_lambda>" << core::pp(left.variables()) << std::endl;
+    sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
+    core::identifier_string name = generate_identifier("x", x);
+    variable var(name, s);
+    data::lambda left(sort_set::left(x));
+    data_expression body = left.body();
+    if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    {
+      body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
+    }
+    derived().print("{ ");
+    print_sorts() = true;
+    derived()(left.variables());
+    print_sorts() = false;
+    derived().print(" | ");
+    derived()(body);
+    derived().print(" }");
+  }   
+  
+  void print_fbag_default(data_expression x)
+  {
+//std::cout << "\n<fbag_default>" << core::pp(x) << " " << x << std::endl;
+    data_expression right = sort_set::right(x);
+    sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
+    core::identifier_string name = generate_identifier("x", x);
+    variable var(name, s);
+    data_expression body = sort_bag::left(x)(var);
+    if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    {
+      body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
+    }
+    derived().print("{ ");
+    print_sorts() = true;
+    derived()(var);
+    print_sorts() = false;
+    derived().print(" | ");
+    derived()(body);
+    derived().print(" }");
+  }  
+
+  void print_fbag_cons_list(data_expression x)
+  {
+    atermpp::vector<std::pair<data_expression, data_expression> > arguments;
+    while (sort_fbag::is_fbag_cons_application(x))
+    {
+      arguments.push_back(std::make_pair(sort_fbag::head(x), sort_fbag::headcount(x)));
+      x = sort_fbag::tail(x);
+    }
+    print_list(arguments, "{", "}");
+  }
+
+  void print_fbag_insert_list(data_expression x)
+  {
+    atermpp::vector<std::pair<data_expression, data_expression> > arguments;
+    while (sort_fbag::is_fbag_cons_application(x))
+    {
+      arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_fbag::arg2(x)));
+      x = sort_fbag::arg3(x);
+    }
+    print_list(arguments, "{", "}");
+  }
+
   void print_fset_true(data_expression x)
   {
     derived().print("!{");
-//std::cout << "\n<fset_true>" << core::pp(x) << " " << x << std::endl;
     // TODO: compute the complement of the set
     derived()(sort_set::right(x));
     derived().print("}");
@@ -294,7 +460,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fset_false(data_expression x)
   {
     derived().print("{");
-//std::cout << "\n<fset_false>" << core::pp(x) << " " << x << std::endl;
     derived()(sort_set::right(x));
     derived().print("}");   
   }
@@ -303,22 +468,17 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     sort_expression s = function_sort(sort_set::left(x).sort()).domain().front(); // the sort of the set elements
     data::lambda left(sort_set::left(x));
-
-//std::cout << "\n<fset_lambda>" << core::pp(left.variables()) << std::endl;
-
     derived().print("{ ");
     print_sorts() = true;
     derived()(left.variables());
     print_sorts() = false;
     derived().print(" | ");
-//    std::cout << "\n<fset-lambda-body>" << core::pp(left.body()) << " " << left.body() << std::endl;
     derived()(left.body());
     derived().print(" }");
   }
   
   void print_fset_default(data_expression x)
   {
-//std::cout << "\n<fset_default>" << core::pp(x) << " " << x << std::endl;
     data_expression right = sort_set::right(x);
     // TODO: check if this is the correct way to handle this case
     if (sort_fset::is_fset_empty_function_symbol(right))
@@ -377,6 +537,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print("(");
     print_container(x.arguments());
     derived().print(")");
+  }
+
+  // N.B. This is interpreted as the bag element 'x.first: x.second'
+  void operator()(const std::pair<data_expression, data_expression>& x)
+  {
+    derived()(x.first);
+    derived().print(": ");
+    derived()(x.second);
   }
 
   void operator()(const data::container_type& x)
@@ -888,9 +1056,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         {
           print_fset_cons_list(x);
         }
-        else {
-            // TODO: can this case occur?
-            assert(false);
+        else
+        {
+          // TODO: can this case occur?
+          throw mcrl2::runtime_error("unexpected case in fset " + x.to_string());
         }
       }
       else if (sort_fset::is_fsetinsert_application(x))
@@ -899,9 +1068,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         {
           print_fset_insert_list(x);
         }
-        else {
-            // TODO: can this case occur?
-            assert(false);
+        else
+        {
+          // TODO: can this case occur?
+          throw mcrl2::runtime_error("unexpected case in fset " + x.to_string());
         }
       }
       else
@@ -927,6 +1097,51 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_container(x.arguments(), data::detail::precedence(x), " - ");
       }
+
+      else if (sort_bag::is_bagconstructor_application(x))
+      {
+        if (is_fbag_zero(x))
+        {
+          print_fbag_zero(x);
+        }
+        else if (is_fbag_one(x))
+        {
+          print_fbag_one(x);
+        }
+        else if (is_fbag_lambda(x))
+        {
+          print_fbag_lambda(x);
+        }
+        else
+        {
+          print_fbag_default(x);
+        }
+      }
+      else if (sort_bag::is_bagcomprehension_application(x))
+      {
+        sort_expression s = function_sort(sort_bag::arg(x).sort()).domain().front();
+        core::identifier_string name = generate_identifier("x", x);
+        variable var(name, s);
+        data_expression body(sort_bag::arg(x)(var));
+        derived().print("{ ");
+        derived()(var);
+        derived().print(" | ");
+        derived()(body);
+        derived().print(" }");   
+      }
+      else if (sort_bag::is_bagfbag_application(x))
+      {
+        //std::cout << "\n<bagfbag>" << core::pp(x) << " " << x << std::endl;
+        data_expression y = sort_bag::arg(x);
+        if (sort_fbag::is_fbag_empty_function_symbol(y))
+        {
+          derived().print("{}");
+        }
+        else
+        {
+          derived()(y);
+        }
+      }
       else
       {
         print_function_application(x);
@@ -938,7 +1153,31 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (sort_fbag::is_fbag(x.sort()))
     {
-      //else
+      if (sort_fbag::is_fbag_cons_application(x))
+      {
+        if (is_fbag_cons_list(x))
+        {
+          print_fbag_cons_list(x);
+        }
+        else
+        {
+          // TODO: can this case occur?
+          throw mcrl2::runtime_error("unexpected case in fbag " + x.to_string());
+        }
+      }
+      else if (sort_fbag::is_fbaginsert_application(x))
+      {
+        if (is_fbag_insert_list(x))
+        {
+          print_fbag_insert_list(x);
+        }
+        else
+        {
+          // TODO: can this case occur?
+          throw mcrl2::runtime_error("unexpected case in fbag " + x.to_string());
+        }
+      }
+      else
       {
         print_function_application(x);
       }
@@ -1033,6 +1272,186 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived()(x.rhs());
     derived().leave(x);
   }
+
+/*
+  template <typename Container>
+  void print_declarations(const Container& container,
+                          const std::string& separator = ", ",
+                          const std::string& opener = "(",
+                          const std::string& closer = ")"
+                         )
+  {
+    if (container.empty())
+    {
+      return;
+    }
+    derived().print(opener);
+    sort_expression last_sort;
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+      if (i->sort() != last_sort)
+      {
+        derived().print(": ");
+        derived()(i->sort());
+      }
+    }
+    derived().print(closer);
+  }
+
+  template <typename Container>
+  void print_equations(const Container& container,
+                       const std::string& separator = ", ",
+                       const std::string& opener = "(",
+                       const std::string& closer = ")"
+                      )
+  {
+    if (container.empty())
+    {
+      return;
+    }
+    derived().print(opener);
+    sort_expression last_sort;
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+      if (i->sort() != last_sort)
+      {
+        derived().print(": ");
+        derived()(i->sort());
+      }
+    }
+    derived().print(closer);
+  }
+
+  template <typename Container>
+  void print_equations(const Container& container,
+                       const std::string& opener = "(",
+                       const std::string& closer = ")",
+                       const std::string& separator = ", "
+                      )
+  {
+    if (container.empty())
+    {
+      return;
+    }
+    derived().print(opener);
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+    }
+    derived().print(closer);
+  }
+
+  void print_variables(const std::map<core::identifier_string> variable>& variable_map,
+                       const std::string& opener = "(",
+                       const std::string& closer = ")",
+                       const std::string& separator = ", "
+                      )
+  {
+    if (container.empty())
+    {
+      return;
+    }
+    derived().print(opener);
+    std::map<std::string, std::std<std::string> > variable_strings;
+    for (std::map<core::identifier_string> variable>::const_iterator i = variable_map.begin(); i != variable_map.end(); ++i)
+    {
+      std::string sort_name = derived()(i->second.sort());
+      variable_strings[].insert(i->first);
+    }
+    for (std::map<std::string, std::std<std::string> >::iterator i = variable_strings.begin(); i != variable_strings.end(); ++i)
+    {
+      derived().print(core::string_join(i->second, ", "));
+      derived().print(": ");
+    }
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+    }
+    derived().print(closer);
+  }
+
+  /// \brief Searches in the range of equations [first, last) for the first equation
+  /// that conflicts with one of the previous equations. We say that equation e1 conflicts
+  /// with another equation e2 if their declared variables contain a variable with the same
+  /// name and a different sort, or if a declared variable in e1 has the same name as a
+  /// function symbol appearing in equation e2.
+  template <typename Iter>
+  Iter find_conflicting_equation(Iter first, Iter last, std::map<core::identifier_string, variable>& variable_map, std::set<core::identifier>& function_symbol_names)
+  {
+    std::set<data::function_symbol> f = data::find_function_symbols(*first);
+    for (std::set<data::function_symbol>::iterator i = f.begin(); i != f.end(); ++i)
+    {
+      function_symbol_names.insert(i->name());
+    }
+    const variable_list& v = first->variables();
+    for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+      variable_map[i->name()] = *i;
+    }
+
+    for (Iter i = ++first; i != last; ++i)
+    {
+      const variable_list& v = i->variables();
+      for (variable_list::const_iterator j = v.begin(); j != v.end(); ++j)
+      {
+        std::map<core::identifier_string> variable>::const_iterator k = variable_map.find(j->name());
+        if (k != variable_map.end() && *j != k->second)
+        {
+          return i;
+        }
+      }
+      std::set<data::function_symbol> f = data::find_function_symbols(*i);
+      for (std::set<data::function_symbol>::iterator j = f.begin(); j != f.end(); ++j)
+      {
+        function_symbol_names.insert(j->name());
+      }
+      for (variable_list::const_iterator j = v.begin(); j != v.end(); ++j)
+      {
+        variable_map[j->name()] = *j;
+      }
+    }
+    return last; // no conflict found
+  }
+
+  void operator()(const data::data_specification& x)
+  {
+    derived().enter(x);
+    print_list(x.sorts(), "sort ", "\n", ";\n    ");
+    print_declarations(x.constructors(), "cons ", ";\n", ";\n     ");
+    print_declarations(x.mappings(), "map ", ";\n", ";\n     ");
+    atermpp::vector<data_equation>::const_iterator first = x.equations().begin();
+    atermpp::vector<data_equation>::const_iterator last = x.equations().end();
+    atermpp::vector<data_equation>::const_iterator i = first;
+    while (i != last)
+    {
+      std::map<core::identifier_string> variable> variable_map;
+      std::set<core::identifier> function_symbol_names;
+      i = find_conflicting_equation(i, last, variable_map, function_symbol_names);
+      print_variables(variable_map);
+      print_equations(x.equations(), "eqn ", ";\n", ";\n     ");
+    }
+    derived().leave(x);
+  }
+*/
+
 };
 
 } // namespace detail
