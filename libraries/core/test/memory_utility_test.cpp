@@ -34,6 +34,8 @@ BOOST_AUTO_TEST_CASE(test_alloca)
   }
 }
 
+/* The following case is disabled. It was added to show that
+ * this kind of array declaration does not work on MSVC
 BOOST_AUTO_TEST_CASE(test_varsize_array)
 {
   size_t nr_args = args();
@@ -48,3 +50,4 @@ BOOST_AUTO_TEST_CASE(test_varsize_array)
     BOOST_CHECK(array[i] == 10*i);
   }
 }
+*/
