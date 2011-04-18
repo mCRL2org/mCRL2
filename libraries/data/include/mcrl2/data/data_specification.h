@@ -239,7 +239,7 @@ class data_specification
     void add_system_defined_sort(const sort_expression& s) const
     {
       sort_expression normalised(normalize_sorts(s,*this));
-      if (!is_function_sort(normalised))
+      if (!is_function_sort(normalised) && std::find(m_normalised_sorts.begin(), m_normalised_sorts.end(), normalised) == m_normalised_sorts.end())
       {
         m_normalised_sorts.push_back(normalised);
       }
@@ -1229,7 +1229,6 @@ data_equation_vector find_equations(data_specification const& specification, con
   return result;
 }
 
-/*
 template <typename Container>
 void group_functions_by_target_sort(atermpp::map<sort_expression, atermpp::vector<function_symbol> >& c, const Container& functions)
 {
@@ -1242,7 +1241,6 @@ void group_functions_by_target_sort(atermpp::map<sort_expression, atermpp::vecto
     }
   }
 }
-*/
 
 } // namespace data
 

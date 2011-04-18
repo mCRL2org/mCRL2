@@ -481,7 +481,7 @@ void test_utility_functionality()
   function_symbol h("h", s0);
 
   {
-    const atermpp::set<sort_expression> sorts(spec.sorts());
+    const atermpp::vector<sort_expression> sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) == sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) == sorts.end());
     data_specification::constructors_const_range constructors(spec.constructors());
@@ -496,7 +496,7 @@ void test_utility_functionality()
   spec.add_mapping(g);
 
   {
-    const atermpp::set<sort_expression> sorts(spec.sorts());
+    const atermpp::vector<sort_expression> sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) != sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) != sorts.end()); // Automatically added!
     data_specification::constructors_const_range constructors(spec.constructors());
@@ -511,7 +511,7 @@ void test_utility_functionality()
   spec.add_sort(s);
   spec.add_alias(alias(basic_sort("a"),s));
 
-  const atermpp::set<sort_expression> sorts(spec.sorts());
+  const atermpp::vector<sort_expression> sorts(spec.sorts());
   data_specification::constructors_const_range constructors(spec.constructors());
   data_specification::mappings_const_range mappings(spec.mappings());
 
@@ -577,7 +577,7 @@ void test_normalisation()
   structured_sort sA(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
   structured_sort sB(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
 
-  const atermpp::set<sort_expression> sorts(specification.sorts());
+  const atermpp::vector<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sA,specification)) != sorts.end());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sB,specification)) != sorts.end());
 
@@ -632,7 +632,7 @@ void test_copy()
 
   BOOST_CHECK(normalize_sorts(basic_sort("A"),other) == normalize_sorts(basic_sort("S"),other));
 
-  const atermpp::set<sort_expression> sorts(specification.sorts());
+  const atermpp::vector<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), basic_sort("A")) == sorts.end());
 }
 

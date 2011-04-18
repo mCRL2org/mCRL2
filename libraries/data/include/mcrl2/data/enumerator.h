@@ -73,7 +73,7 @@ class data_enumerator
   protected:
 
     /// \brief A map that caches the constructors corresponding to sort expressions.
-    typedef std::map<sort_expression, std::vector<function_symbol> > constructor_map;
+    typedef atermpp::map<sort_expression, atermpp::vector<function_symbol> > constructor_map;
 
     /// \brief A data specification.
     const data_specification* m_data;
@@ -90,14 +90,8 @@ class data_enumerator
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const std::vector<function_symbol>& constructors(sort_expression s) const
+    const atermpp::vector<function_symbol>& constructors(sort_expression s) const
     {
-      constructor_map::const_iterator i = m_constructors.find(s);
-      if (i != m_constructors.end())
-      {
-        return i->second;
-      }
-      m_constructors[s] = boost::copy_range< std::vector<function_symbol> >(m_data->constructors(s));
       return m_constructors[s];
     }
 
@@ -117,7 +111,9 @@ class data_enumerator
                     const data::rewriter& rewriter,
                     IdentifierGenerator& generator)
       : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
-    {}
+    {
+      group_functions_by_target_sort(m_constructors, data_spec.constructors());
+    }
 
     /// \brief The data specification.
     /// \return The data specification.
@@ -131,7 +127,6 @@ class data_enumerator
     /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
     atermpp::vector<data_expression_with_variables> enumerate(const variable& v) const
     {
-      // std::cerr << "Enumerate " << v << "\n";
       atermpp::vector<data_expression_with_variables> result;
       const std::vector<function_symbol>& c = constructors(v.sort());
 
@@ -159,10 +154,6 @@ class data_enumerator
           result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
         }
       }
-      /* for(atermpp::vector<data_expression_with_variables>::const_iterator i=result.begin();
-               i!=result.end(); ++i)
-      { std::cerr << "Enumerate result " << core::pp(*i) << "\n";
-      } */
       return result;
     }
 

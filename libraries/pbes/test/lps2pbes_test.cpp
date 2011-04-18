@@ -71,10 +71,10 @@ void test_timed()
   bool timed = true;
   pbes<> p = lps2pbes(spec, formula, timed);
   BOOST_CHECK(p.is_well_typed());
-  const atermpp::set<sort_expression> user_def_sorts(p.data().user_defined_sorts());
+  const atermpp::vector<sort_expression> user_def_sorts(p.data().user_defined_sorts());
   BOOST_CHECK(std::find(user_def_sorts.begin(), user_def_sorts.end(), sort_real::real_()) == user_def_sorts.end());
 
-  const atermpp::set<sort_expression> sorts(p.data().sorts());
+  const atermpp::vector<sort_expression> sorts(p.data().sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), sort_real::real_()) != sorts.end());
   core::garbage_collect();
 }

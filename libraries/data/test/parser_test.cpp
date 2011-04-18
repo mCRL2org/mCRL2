@@ -33,8 +33,8 @@ void parser_test()
 
   data::data_specification spec(data::parse_data_specification(text));
 
-  std::cerr << "number of sorts " << boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() << "\n";
-  BOOST_CHECK(boost::copy_range< data::sort_expression_vector >(spec.sorts()).size() == 6); // Bool, S, List(S), S->List(S), Nat, @NatPair.
+  std::cerr << "number of sorts " << spec.sorts().size() << "\n";
+  BOOST_CHECK(spec.sorts().size() == 6); // Bool, S, List(S), S->List(S), Nat, @NatPair.
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.constructors(data::basic_sort("S"))).size() == 1);
   std::cerr << "number of functions " << boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() << "\n";
   BOOST_CHECK(boost::copy_range< data::function_symbol_vector >(spec.mappings()).size() == 99);
