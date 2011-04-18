@@ -444,8 +444,8 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
 
     l = dataappl_eqns;*/
   // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
-  const atermpp::set< data_equation > l = DataSpec.equations();
-  for (atermpp::set< data_equation >::const_iterator j=l.begin();
+  const atermpp::vector< data_equation > l = DataSpec.equations();
+  for (atermpp::vector< data_equation >::const_iterator j=l.begin();
        j!=l.end(); ++j)
   {
     try

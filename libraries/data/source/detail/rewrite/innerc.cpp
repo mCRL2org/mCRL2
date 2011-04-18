@@ -1658,8 +1658,8 @@ void RewriterCompilingInnermost::CompileRewriteSystem(const data_specification& 
   true_num = ATgetInt(true_inner);
 
   // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
-  const atermpp::set< data_equation > l=DataSpec.equations();
-  for (atermpp::set< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
+  const atermpp::vector< data_equation > l=DataSpec.equations();
+  for (atermpp::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
     addRewriteRule(*j);
   }

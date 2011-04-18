@@ -38,7 +38,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec, bool add_distribution
   m_glob_vars = spec.global_variables();
   m_action_label_list = spec.action_labels();
 
-  for (atermpp::set<sort_expression>::const_iterator i =  m_data_specification.sorts().begin();
+  for (atermpp::vector<sort_expression>::const_iterator i =  m_data_specification.sorts().begin();
        i != m_data_specification.sorts().end();
        ++i)
   {

@@ -1241,8 +1241,8 @@ RewriterInnermost::RewriterInnermost(const data_specification& DataSpec)
   }*/
 
 //  l = dataappl_eqns;
-  const atermpp::set< data_equation > l = DataSpec.equations();
-  for (atermpp::set< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
+  const atermpp::vector< data_equation > l = DataSpec.equations();
+  for (atermpp::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
     try
     {

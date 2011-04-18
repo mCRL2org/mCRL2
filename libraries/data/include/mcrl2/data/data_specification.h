@@ -184,7 +184,7 @@ class data_specification
     mutable bool m_normalised_data_is_up_to_date;
 
     /// \brief The basic sorts and structured sorts in the specification.
-    atermpp::set< sort_expression >     m_sorts;
+    atermpp::vector< sort_expression >     m_sorts;
 
     /// \brief The sorts that occur in the context of this data specification.
     /// The normalised sorts, constructors, mappings and equations are complete
@@ -201,10 +201,10 @@ class data_specification
     sort_to_symbol_map                  m_mappings;
 
     /// \brief The equations of the specification.
-    atermpp::set< data_equation >       m_equations;
+    atermpp::vector< data_equation >       m_equations;
 
     /// \brief Set containing all the sorts, including the system defined ones.
-    mutable atermpp::set< sort_expression >         m_normalised_sorts;
+    mutable atermpp::vector< sort_expression >         m_normalised_sorts;
 
     /// \brief Set containing all constructors, including the system defined ones.
     /// The types in these constructors are normalised.
@@ -216,7 +216,7 @@ class data_specification
     //
     /// \brief Table containing all equations, including the system defined ones.
     ///        The sorts in these equations are normalised.
-    mutable atermpp::set< data_equation >           m_normalised_equations;
+    mutable atermpp::vector< data_equation >           m_normalised_equations;
 
     /// \brief Table containing how sorts should be mapped to normalised sorts.
     // sort_normaliser               m_sort_normaliser;
@@ -241,7 +241,7 @@ class data_specification
       sort_expression normalised(normalize_sorts(s,*this));
       if (!is_function_sort(normalised))
       {
-        m_normalised_sorts.insert(normalised);
+        m_normalised_sorts.push_back(normalised);
       }
     }
 
@@ -279,7 +279,7 @@ class data_specification
     /// \note this operation does not invalidate iterators of equations_const_range
     void add_system_defined_equation(const data_equation& e) const
     {
-      m_normalised_equations.insert(normalize_sorts(e,*this));
+      m_normalised_equations.push_back(normalize_sorts(e,*this));
     }
 
     /// \brief Adds constructors, mappings and equations for a structured sort
@@ -417,7 +417,7 @@ class data_specification
     ///      the specification.
     /// \return The sort declarations of this specification.
     inline
-    const atermpp::set<sort_expression>& sorts() const
+    const atermpp::vector<sort_expression>& sorts() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
@@ -429,7 +429,7 @@ class data_specification
     /// \details The time complexity of this operation is constant.
     /// \return The user defined sort declaration.
     inline
-    const atermpp::set<sort_expression>& user_defined_sorts() const
+    const atermpp::vector<sort_expression>& user_defined_sorts() const
     {
       assert(m_data_specification_is_type_checked);
       return m_sorts;
@@ -514,7 +514,7 @@ class data_specification
     /// \return All equations in this specification, including those for
     ///  structured sorts.
     inline
-    const atermpp::set< data_equation >& equations() const
+    const atermpp::vector< data_equation >& equations() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
@@ -527,7 +527,7 @@ class data_specification
     /// \return All equations in this specification, including those for
     ///  structured sorts.
     inline
-    const atermpp::set< data_equation >& user_defined_equations() const
+    const atermpp::vector< data_equation >& user_defined_equations() const
     {
       assert(m_data_specification_is_type_checked);
       return m_equations;
@@ -567,8 +567,9 @@ class data_specification
     void add_sort(const sort_expression& s)
     {
       assert(m_data_specification_is_type_checked);
-      if (m_sorts.insert(s).second)
+      if (std::find(m_sorts.begin(), m_sorts.end(), s) == m_sorts.end())
       {
+        m_sorts.push_back(s);
         data_is_not_necessarily_normalised_anymore();
       }
     }
@@ -618,7 +619,7 @@ class data_specification
     void add_equation(const data_equation& e)
     {
       assert(m_data_specification_is_type_checked);
-      m_equations.insert(detail::translate_user_notation_data_equation(e));
+      m_equations.push_back(detail::translate_user_notation_data_equation(e));
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -666,7 +667,7 @@ class data_specification
       m_normalised_equations.clear();
       std::set < sort_expression > sorts_already_added_to_m_normalised_sorts;
       reconstruct_m_normalised_aliases();
-      for (atermpp::set< sort_expression >::const_iterator i=m_sorts.begin();
+      for (atermpp::vector< sort_expression >::const_iterator i=m_sorts.begin();
            i!=m_sorts.end(); ++i)
       {
         add_system_defined_sort(*i);
@@ -689,7 +690,7 @@ class data_specification
       detail::insert(dependent_sorts, make_sort_range(mappings_const_range(m_mappings)));
 
       // equations
-      for (atermpp::set< data_equation >::const_iterator r(m_equations.begin()); r != m_equations.end(); ++r)
+      for (atermpp::vector< data_equation >::const_iterator r(m_equations.begin()); r != m_equations.end(); ++r)
       {
         // make function sort in case of constants to add the corresponding sort as needed
         detail::insert(dependent_sorts, find_sort_expressions(*r));
@@ -753,7 +754,7 @@ class data_specification
       }
 
       // Normalise the sorts of the expressions and variables in equations.
-      for (atermpp::set< data_equation >::const_iterator i=m_equations.begin();
+      for (atermpp::vector< data_equation >::const_iterator i=m_equations.begin();
            i!=m_equations.end(); ++i)
       {
         add_system_defined_equation(*i);
@@ -989,8 +990,16 @@ class data_specification
     void remove_sort(const sort_expression& s)
     {
       assert(m_data_specification_is_type_checked);
-      m_sorts.erase(s);
-      m_normalised_sorts.erase(normalize_sorts(s,*this));
+      const atermpp::vector<sort_expression>::iterator i = std::find(m_sorts.begin(), m_sorts.end(), s);
+      if(i != m_sorts.end())
+      {
+        m_sorts.erase(i);
+      }
+      const atermpp::vector<sort_expression>::iterator j = std::find(m_normalised_sorts.begin(), m_normalised_sorts.end(), normalize_sorts(s, *this));
+      if(j != m_normalised_sorts.end())
+      {
+        m_normalised_sorts.erase(j);
+      }
     }
 
     /// \brief Removes alias from specification.
@@ -998,7 +1007,11 @@ class data_specification
     void remove_alias(alias const& a)
     {
       assert(m_data_specification_is_type_checked);
-      m_sorts.erase(a.name());
+      const atermpp::vector<sort_expression>::iterator i = std::find(m_sorts.begin(), m_sorts.end(), a.name());
+      if(i != m_sorts.end())
+      {
+        m_sorts.erase(i);
+      }
       m_aliases.erase(a.name());
       data_is_not_necessarily_normalised_anymore();
     }
@@ -1042,8 +1055,18 @@ class data_specification
     {
       assert(m_data_specification_is_type_checked);
       const data_equation e1=data::detail::translate_user_notation_data_equation(e);
-      m_equations.erase(e1);
-      m_normalised_equations.erase(normalize_sorts(e1,*this));
+
+      const atermpp::vector<data_equation>::iterator i = std::find(m_equations.begin(), m_equations.end(), e1);
+      if(i != m_equations.end())
+      {
+        m_equations.erase(i);
+      }
+
+      const atermpp::vector<data_equation>::iterator j = std::find(m_normalised_equations.begin(), m_normalised_equations.end(), normalize_sorts(e1,*this));
+      if(j != m_normalised_equations.end())
+      {
+        m_normalised_equations.erase(j);
+      }
     }
 
     /// \brief Checks whether two sort expressions represent the same sort
@@ -1165,8 +1188,8 @@ function_symbol find_constructor(data_specification const& data, std::string con
 inline
 sort_expression find_sort(data_specification const& data, std::string const& s)
 {
-  const atermpp::set<sort_expression> r(data.sorts());
-  const atermpp::set<sort_expression>::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
+  const atermpp::vector<sort_expression> r(data.sorts());
+  const atermpp::vector<sort_expression>::const_iterator i = std::find_if(r.begin(), r.end(), detail::sort_has_name(s));
   return (i == r.end()) ? sort_expression() : *i;
 }
 
@@ -1181,8 +1204,8 @@ inline
 data_equation_vector find_equations(data_specification const& specification, const data_expression& d)
 {
   data_equation_vector result;
-  const atermpp::set< data_equation > equations(specification.equations());
-  for (atermpp::set< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
+  const atermpp::vector< data_equation > equations(specification.equations());
+  for (atermpp::vector< data_equation >::const_iterator i = equations.begin(); i != equations.end(); ++i)
   {
     if (i->lhs() == d || i->rhs() == d)
     {
@@ -1205,6 +1228,21 @@ data_equation_vector find_equations(data_specification const& specification, con
   }
   return result;
 }
+
+/*
+template <typename Container>
+void group_functions_by_target_sort(atermpp::map<sort_expression, atermpp::vector<function_symbol> >& c, const Container& functions)
+{
+  for (typename Container::const_iterator i = functions.begin(); i != functions.end(); ++i)
+  {
+    sort_expression index_sort(i->sort().target_sort());
+    if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), *i) == c[index_sort].end())
+    {
+      c[index_sort].push_back(*i);
+    }
+  }
+}
+*/
 
 } // namespace data
 

@@ -2927,8 +2927,8 @@ nP_checked:
 
   ////First make a table of Positive constants
   ATermTable consts=ATtableCreate(10000,80);
-  const atermpp::set< data::data_equation > eqns(data_spec.equations());
-  for (atermpp::set< data::data_equation >::const_iterator r=eqns.begin(); r != eqns.end(); ++r)
+  const atermpp::vector< data::data_equation > eqns(data_spec.equations());
+  for (atermpp::vector< data::data_equation >::const_iterator r=eqns.begin(); r != eqns.end(); ++r)
   {
     ATermAppl eq=*r;
     ATermAppl left=ATAgetArgument(eq,2);

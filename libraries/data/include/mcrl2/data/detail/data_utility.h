@@ -97,7 +97,8 @@ void set_remove_if(std::set<T>& s, UnaryPredicate f)
 /// \param s A sort expression
 /// \param sorts A set of sort expressions
 /// \return True if the sort is contained in <tt>sorts</tt>
-inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts)
+template <typename SortContainer>
+inline bool check_sort(sort_expression s, const SortContainer& sorts)
 {
   struct local
   {
@@ -111,19 +112,19 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
   set_remove_if(s_sorts, boost::bind(&local::is_not_function_sort, _1));
   for (std::set<sort_expression>::const_iterator i = s_sorts.begin(); i != s_sorts.end(); ++i)
   {
-    if (sorts.find(*i) == sorts.end())
+    if (std::find(sorts.begin(), sorts.end(), *i) == sorts.end())
     {
       // sort *i is not well-typed, a system defined sort or an alias
       if (!(is_system_defined(*i)) && is_alias(*i))
       {
         alias sort_alias(*i);
 
-        if (sorts.find(sort_alias.name()) == sorts.end())
+        if (std::find(sorts.begin(), sorts.end(), sort_alias.name()) == sorts.end())
         {
           // sort_alias.reference() is a basic, structured or container sort
           sort_expression sort_reference(sort_alias.reference());
 
-          if (sorts.find(sort_reference) == sorts.end())
+          if (std::find(sorts.begin(), sorts.end(), sort_reference) == sorts.end())
           {
             // sort_reference is structured or container sort
             if (is_structured_sort(sort_reference))
@@ -132,7 +133,7 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
             }
             else if (is_container_sort(sort_reference))
             {
-              if (sorts.find(container_sort(sort_reference).element_sort()) == sorts.end())
+              if (std::find(sorts.begin(), sorts.end(), container_sort(sort_reference).element_sort()) == sorts.end())
               {
                 return false;
               }
@@ -156,8 +157,8 @@ inline bool check_sort(sort_expression s, const std::set<sort_expression>& sorts
 /// \param last End of a sequence of sorts
 /// \param sorts A set of sort expressions
 /// \return True if the sequence of sorts is contained in <tt>sorts</tt>
-template <typename Iterator>
-bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>& sorts)
+template <typename Iterator, typename SortContainer>
+bool check_sorts(Iterator first, Iterator last, const SortContainer& sorts)
 {
   for (Iterator i = first; i != last; ++i)
   {
@@ -173,8 +174,8 @@ bool check_sorts(Iterator first, Iterator last, const std::set<sort_expression>&
 /// \param variables A container with data variables
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and the range sort of the given variables are contained in sorts.
-template <typename VariableContainer>
-bool check_variable_sorts(const VariableContainer& variables, const std::set<sort_expression>& sorts)
+template <typename VariableContainer, typename SortContainer>
+bool check_variable_sorts(const VariableContainer& variables, const SortContainer& sorts)
 {
   for (typename VariableContainer::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
@@ -207,9 +208,9 @@ bool check_variable_names(variable_list const& variables, const std::set<core::i
 /// \param range A sequence of data operations
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and range sort of the given functions are contained in sorts.
-template < typename ForwardTraversalIterator >
+template < typename ForwardTraversalIterator, typename SortContainer >
 inline
-bool check_data_spec_sorts(boost::iterator_range< ForwardTraversalIterator > const& range, const atermpp::set<sort_expression>& sorts)
+bool check_data_spec_sorts(boost::iterator_range< ForwardTraversalIterator > const& range, const SortContainer& sorts)
 {
   for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
   {
@@ -225,8 +226,9 @@ bool check_data_spec_sorts(boost::iterator_range< ForwardTraversalIterator > con
 /// \param functions A sequence of data operations
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and range sort of the given functions are contained in sorts.
+template < typename SortContainer >
 inline
-bool check_data_spec_sorts(function_symbol_list const& functions, const atermpp::set<sort_expression>& sorts)
+bool check_data_spec_sorts(function_symbol_list const& functions, const SortContainer& sorts)
 {
   return check_data_spec_sorts(boost::make_iterator_range(functions), sorts);
 }

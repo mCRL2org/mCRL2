@@ -3073,8 +3073,8 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   true_inner = (ATermInt) OpId2Int(sort_bool::true_(),true);
   true_num = ATgetInt(true_inner);
 
-  const atermpp::set< data_equation > l=DataSpec.equations();
-  for (atermpp::set< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
+  const atermpp::vector< data_equation > l=DataSpec.equations();
+  for (atermpp::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
     addRewriteRule(*j);
   }

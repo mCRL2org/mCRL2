@@ -714,8 +714,8 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
   ATprotectAFun(info.tupAFun);
   info.tupAFun = ATmakeAFun("@tup@",2,false);
 
-  const atermpp::set<sort_expression> sorts = data_spec.sorts();
-  for (atermpp::set<sort_expression>::const_iterator r = sorts.begin(); r != sorts.end(); ++r)
+  const atermpp::vector<sort_expression> sorts = data_spec.sorts();
+  for (atermpp::vector<sort_expression>::const_iterator r = sorts.begin(); r != sorts.end(); ++r)
   {
     atermpp::aterm_list constructors;
 
