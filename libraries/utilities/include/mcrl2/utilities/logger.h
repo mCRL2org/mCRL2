@@ -401,7 +401,7 @@ inline std::string now_time()
     time_t t;
 
     time(&t);
-    tm r = {0};
+    tm r;
     strftime(buffer, sizeof(buffer), "%X", localtime_r(&t, &r));
     struct timeval tv;
     gettimeofday(&tv, 0);
