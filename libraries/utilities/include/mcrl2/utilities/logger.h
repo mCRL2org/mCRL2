@@ -290,7 +290,7 @@ class file_output: output_policy_interface
     /// \brief Gets a stream handle for hint
     /// \param[in] hint Hint for which to provide a stream handle.
     static
-    FILE*& get_stream(const std::string& hint)
+    FILE* get_stream(const std::string& hint)
     {
       std::map<std::string, FILE*>::iterator i = hint_to_stream().find(hint);
       if(i == hint_to_stream().end())
@@ -319,7 +319,7 @@ class file_output: output_policy_interface
     /// \param[in] stream A file handle
     /// \param[in] hint The hint for which to set the handle to stream.
     static
-    void set_stream(FILE*& stream, const std::string& hint = default_hint())
+    void set_stream(FILE* stream, const std::string& hint = default_hint())
     {
       hint_to_stream()[hint] = stream;
     }
