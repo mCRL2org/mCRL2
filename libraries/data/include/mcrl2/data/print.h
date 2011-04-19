@@ -971,9 +971,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
           print_container(x.arguments(), data::detail::precedence(x), " <| ");
         }
       }
+      else if (sort_list::is_list_enumeration_application(x))
+      {
+        derived().print("[");
+        print_container(x.arguments(), data::detail::precedence(x));
+        derived().print("]");
+      }
       else
       {
-        // TODO: handle ListEnum
         print_function_application(x);
       }
     }

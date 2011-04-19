@@ -16,6 +16,7 @@
 #include <boost/xpressive/xpressive.hpp>
 #endif
 #include "mcrl2/atermpp/aterm_access.h"
+#include "mcrl2/core/text_utility.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
@@ -43,20 +44,6 @@ data::data_expression bool_to_numeric(data::data_expression const& e, data::sort
 {
   // TODO Maybe enforce that SortExpr is a PNIR sort
   return data::if_(e, data::function_symbol("1", s), data::function_symbol("0", s));
-}
-
-inline
-//Ret: true if s is of form "0 | -? [1-9][0-9]*", false otherwise
-bool is_numeric_string(const core::identifier_string& name)
-{
-#ifdef MCRL2_USE_BOOST_XPRESSIVE
-  std::string s = name;
-  boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
-  return boost::xpressive::regex_match(s, re);
-#else
-  // TODO: need to implement this without using xpressive :-(
-  return true;
-#endif
 }
 
 inline
@@ -139,7 +126,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
     if (is_function_symbol(value))
     {
       core::identifier_string name = function_symbol(value).name();
-      if (is_numeric_string(name))
+      if (core::is_numeric_string(name))
       {
         x = data::function_symbol(name, data::sort_nat::nat());
       }
@@ -162,7 +149,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
     if (is_function_symbol(value))
     {
       core::identifier_string name = function_symbol(value).name();
-      if (is_numeric_string(name))
+      if (core::is_numeric_string(name))
       {
         x = data::function_symbol(name, data::sort_int::int_());
       }
@@ -175,7 +162,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
     if (is_function_symbol(value))
     {
       core::identifier_string name = atermpp::arg1(value);
-      if (is_numeric_string(name))
+      if (core::is_numeric_string(name))
       {
         x = data::function_symbol(name, data::sort_real::real_());
       }
@@ -191,7 +178,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
       if (is_function_symbol(numerator))
       {
         core::identifier_string name = function_symbol(numerator).name();
-        if (is_numeric_string(name))
+        if (core::is_numeric_string(name))
         {
           x = data::function_symbol(name, data::sort_real::real_());
         }
@@ -204,7 +191,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
       if (is_function_symbol(denominator))
       {
         core::identifier_string name = function_symbol(denominator).name();
-        if (is_numeric_string(name))
+        if (core::is_numeric_string(name))
         {
           x = data::sort_real::divides(data::data_expression(numerator),
                                        data::function_symbol(name, data::sort_int::int_())
