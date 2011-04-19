@@ -208,6 +208,15 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
   return string_join(result, "\n");
 }
 
+/// \brief Test if a string is a number. 
+/// \param s A string of text.
+/// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
+bool is_numeric_string(const std::string& s)
+{
+  boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
+  return boost::xpressive::regex_match(s, re);
+}
+
 } // namespace core
 
 } // namespace mcrl2

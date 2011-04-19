@@ -99,6 +99,11 @@ std::string string_join(const Container& c, const std::string& separator)
 /// \return The wrapped text.
 std::string word_wrap_text(const std::string& text, unsigned int max_line_length = 78);
 
+/// \brief Test if a string is a number. 
+/// \param s A string of text.
+/// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
+bool is_numeric_string(const std::string& s);
+
 } // namespace core
 
 } // namespace mcrl2
