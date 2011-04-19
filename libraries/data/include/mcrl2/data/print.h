@@ -223,45 +223,33 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   bool is_fset_cons_list(data_expression x)
   {
-    while (sort_fset::is_fset_cons_application(x))
+    while (sort_fset::is_fset_cons_application(x) || sort_fset::is_fsetinsert_application(x))
     {
-      x = sort_fset::tail(x);
+      if (sort_fset::is_fset_cons_application(x))
+      {
+        x = sort_fset::tail(x);
+      }
+      else // if (sort_fset::is_fsetinsert_application(x))
+      {
+        x = sort_fset::right(x);
+      }
     }
     return sort_fset::is_fset_empty_function_symbol(x);
   }
 
-  bool is_fset_insert_list(data_expression x)
-  {
-    while (sort_fset::is_fsetinsert_application(x))
-    {
-      x = sort_fset::right(x);
-    }
-    return sort_fset::is_fset_empty_function_symbol(x);
-  }
-
+  /// \brief Returns true if x is a list composed of cons, insert and cinsert applications.
   bool is_fbag_cons_list(data_expression x)
   {
-    while (sort_fbag::is_fbag_cons_application(x))
+    while (sort_fbag::is_fbag_cons_application(x) || sort_fbag::is_fbaginsert_application(x) || sort_fbag::is_fbagcinsert_application(x))
     {
-      x = sort_fbag::tail(x);
-    }
-    return sort_fbag::is_fbag_empty_function_symbol(x);
-  }
-
-  bool is_fbag_insert_list(data_expression x)
-  {
-    while (sort_fbag::is_fbaginsert_application(x))
-    {
-      x = sort_fbag::arg1(x);
-    }
-    return sort_fbag::is_fbag_empty_function_symbol(x);
-  }
-
-  bool is_fbag_cinsert_list(data_expression x)
-  {
-    while (sort_fbag::is_fbagcinsert_application(x))
-    {
-      x = sort_fbag::arg1(x);
+      if (sort_fbag::is_fbag_cons_application(x))
+      {
+        x = sort_fbag::tail(x);
+      }
+      else
+      {
+        x = sort_fbag::arg3(x);
+      }
     }
     return sort_fbag::is_fbag_empty_function_symbol(x);
   }
@@ -345,29 +333,24 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fset_cons_list(data_expression x)
   {
     data_expression_vector arguments;
-    while (sort_fset::is_fset_cons_application(x))
+    while (sort_fset::is_fset_cons_application(x) || sort_fset::is_fsetinsert_application(x))
     {
-      arguments.push_back(sort_fset::head(x));
-      x = sort_fset::tail(x);
+      if (sort_fset::is_fset_cons_application(x))
+      {
+        arguments.push_back(sort_fset::head(x));
+        x = sort_fset::tail(x);
+      }
+      else // if (sort_fset::is_fsetinsert_application(x))
+      {
+        arguments.push_back(sort_fset::left(x));
+        x = sort_fset::right(x);
+      }
     }
     derived().print("{");
     print_container(arguments, 6);
     derived().print("}");
   }
-
-  void print_fset_insert_list(data_expression x)
-  {
-    data_expression_vector arguments;
-    while (sort_fset::is_fsetinsert_application(x))
-    {
-      arguments.push_back(sort_fset::left(x));
-      x = sort_fset::right(x);
-    }
-    derived().print("{");
-    print_container(arguments, 6);
-    derived().print("}");
-  }
-  
+ 
   void print_fbag_zero(const data_expression& x)
   {
 //std::cout << "\n<fbag_zero>" << core::pp(x) << " " << x << std::endl;
@@ -410,7 +393,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
-    data::lambda left(sort_set::left(x));
+    data::lambda left(sort_bag::left(x));
     data_expression body = left.body();
     if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
     {
@@ -449,32 +432,23 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fbag_cons_list(data_expression x)
   {
     atermpp::vector<std::pair<data_expression, data_expression> > arguments;
-    while (sort_fbag::is_fbag_cons_application(x))
+    while (sort_fbag::is_fbag_cons_application(x) || sort_fbag::is_fbaginsert_application(x) || sort_fbag::is_fbagcinsert_application(x))
     {
-      arguments.push_back(std::make_pair(sort_fbag::head(x), sort_fbag::headcount(x)));
-      x = sort_fbag::tail(x);
-    }
-    print_list(arguments, "{", "}");
-  }
-
-  void print_fbag_insert_list(data_expression x)
-  {
-    atermpp::vector<std::pair<data_expression, data_expression> > arguments;
-    while (sort_fbag::is_fbaginsert_application(x))
-    {
-      arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_nat::cnat(sort_fbag::arg2(x))));
-      x = sort_fbag::arg3(x);
-    }
-    print_list(arguments, "{", "}");
-  }
-
-  void print_fbag_cinsert_list(data_expression x)
-  {
-    atermpp::vector<std::pair<data_expression, data_expression> > arguments;
-    while (sort_fbag::is_fbagcinsert_application(x))
-    {
-      arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_fbag::arg2(x)));
-      x = sort_fbag::arg3(x);
+      if (sort_fbag::is_fbag_cons_application(x))
+      {
+        arguments.push_back(std::make_pair(sort_fbag::head(x), sort_fbag::headcount(x)));
+        x = sort_fbag::tail(x);
+      }
+      else if (sort_fbag::is_fbaginsert_application(x))
+      {
+        arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_nat::cnat(sort_fbag::arg2(x))));
+        x = sort_fbag::arg3(x);
+      }
+      else // if (sort_fbag::is_fbagcinsert_application(x))
+      {
+        arguments.push_back(std::make_pair(sort_fbag::arg1(x), sort_fbag::arg2(x)));
+        x = sort_fbag::arg3(x);
+      }
     }
     print_list(arguments, "{", "}");
   }
@@ -1081,29 +1055,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (sort_fset::is_fset(x.sort()))
     {
-      if (sort_fset::is_fset_cons_application(x))
+      if (is_fset_cons_list(x))
       {
-        if (is_fset_cons_list(x))
-        {
-          print_fset_cons_list(x);
-        }
-        else
-        {
-          // TODO: can this case occur?
-          throw mcrl2::runtime_error("unexpected case in fset " + x.to_string());
-        }
-      }
-      else if (sort_fset::is_fsetinsert_application(x))
-      {
-        if (is_fset_insert_list(x))
-        {
-          print_fset_insert_list(x);
-        }
-        else
-        {
-          // TODO: can this case occur?
-          throw mcrl2::runtime_error("unexpected case in fset " + x.to_string());
-        }
+        print_fset_cons_list(x);
       }
       else
       {
@@ -1184,41 +1138,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (sort_fbag::is_fbag(x.sort()))
     {
-      if (sort_fbag::is_fbag_cons_application(x))
+      if (is_fbag_cons_list(x))
       {
-        if (is_fbag_cons_list(x))
-        {
-          print_fbag_cons_list(x);
-        }
-        else
-        {
-          // TODO: can this case occur?
-          throw mcrl2::runtime_error("unexpected case in fbag " + x.to_string());
-        }
-      }
-      else if (sort_fbag::is_fbaginsert_application(x))
-      {
-        if (is_fbag_insert_list(x))
-        {
-          print_fbag_insert_list(x);
-        }
-        else
-        {
-          // TODO: can this case occur?
-          throw mcrl2::runtime_error("unexpected case in fbag " + x.to_string());
-        }
-      }
-      else if (sort_fbag::is_fbagcinsert_application(x))
-      {
-        if (is_fbag_cinsert_list(x))
-        {
-          print_fbag_cinsert_list(x);
-        }
-        else
-        {
-          // TODO: can this case occur?
-          throw mcrl2::runtime_error("unexpected case in fbag " + x.to_string());
-        }
+        print_fbag_cons_list(x);
       }
       else
       {

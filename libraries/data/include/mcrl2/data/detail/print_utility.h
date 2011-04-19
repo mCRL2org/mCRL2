@@ -60,15 +60,14 @@ bool is_numeric_string(const core::identifier_string& name)
 }
 
 inline
-data_expression reconstruct_pos_mult(const application& x, std::vector<char>& result)
-{
-  data_expression head = x.head();
+data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>& result)
+{ 
   if (data::sort_pos::is_c1_function_symbol(x))
   {
     //x is 1; return result
     return data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos());
   }
-  else if (data::sort_pos::is_cdub_function_symbol(head))
+  else if (data::sort_pos::is_cdub_application(x))
   {
     //x is of the form cDub(b,p); return (result*2)*v(p) + result*v(b)
     data_expression bool_arg = sort_pos::bit(x);
