@@ -61,7 +61,17 @@ class RewriterJitty: public Rewriter
     ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
     ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
     ATerm internal_quantifier_enumeration( ATerm ATermInInnerFormat );
+    core::identifier_string forall_function_symbol()
+    {
+      static core::identifier_string forall_function_symbol = initialise_static_expression(forall_function_symbol, core::identifier_string("forall"));
+      return forall_function_symbol;
+    }
 
+    core::identifier_string exists_function_symbol()
+    {
+      static core::identifier_string exists_function_symbol = initialise_static_expression(exists_function_symbol, core::identifier_string("exists"));
+      return exists_function_symbol;
+    }
 
 };
 }

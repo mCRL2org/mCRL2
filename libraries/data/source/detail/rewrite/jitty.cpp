@@ -1072,7 +1072,7 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
       ATermAppl a = int2term[ATgetInt((ATermInt) t)];
 
       /* Check for exists quantifier */
-      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == "exists" )
+      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == exists_function_symbol() )
       {
 
         /* Get Body of Exists */
@@ -1168,7 +1168,7 @@ ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInn
       ATermAppl a = int2term[ATgetInt((ATermInt) t)];
 
       /* Check for forall quantifier */
-      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == "forall" )
+      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == forall_function_symbol() )
       {
 
         /* Get Body of forall */
