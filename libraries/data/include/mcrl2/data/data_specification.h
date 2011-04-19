@@ -79,12 +79,35 @@ std::set<sort_expression> find_sort_expressions(Container const& container);
 namespace detail
 {
 template < typename Container, typename Sequence >
+inline
 void insert(Container& container, Sequence sequence)
 {
   container.insert(sequence.begin(), sequence.end());
 }
 
+template < typename Container, typename T >
+inline
+void insert_unique(Container& container, const T& t)
+{
+  if(std::find(container.begin(), container.end(), t) == container.end())
+  {
+    container.push_back(t);
+  }
+}
+
+template < typename Container, typename T >
+inline
+void remove(Container& container, const T& t)
+{
+  typename Container::iterator i = std::find(container.begin(), container.end(), t);
+  if(i != container.end())
+  {
+    container.erase(i);
+  }
+}
+
 atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specification&);
+
 }
 /// \endcond
 
@@ -92,54 +115,59 @@ atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specificati
 
 class data_specification
 {
-  protected:
-
-    /// \brief map from sort expression to constructors
-    typedef atermpp::multimap< sort_expression, data::function_symbol > sort_to_symbol_map;
-
-    /// \brief map from basic_sort (names) to sort expression
-    typedef atermpp::multimap< basic_sort, sort_expression >           ltr_aliases_map;
-
   private:
 
-    /// \cond INTERNAL_DOCS
-    /// \brief projects a pair of sort and a constructor to the latter
-    struct symbol_projection : public std::unary_function< sort_to_symbol_map::value_type const, data::function_symbol >
+    struct target_sort_to_function_map
     {
-      /// \brief Application to constant pair
-      data::function_symbol const& operator()(sort_to_symbol_map::value_type const& v) const
+      bool _outdated;
+      atermpp::map<sort_expression, atermpp::vector<function_symbol> > _mapping;
+
+      target_sort_to_function_map()
+        : _outdated(true)
+      {}
+
+      /// \brief Groups functions according to their target sorts.
+      /// \param [in,out] c container in which the functions are stored grouped by target sort.
+      /// \param [in] functions a container with function symbols
+      template <typename Container>
+      void group_functions_by_target_sort(atermpp::map<sort_expression, atermpp::vector<function_symbol> >& c, const Container& functions)
       {
-        return v.second;
+        for (typename Container::const_iterator i = functions.begin(); i != functions.end(); ++i)
+        {
+          sort_expression index_sort(i->sort().target_sort());
+          if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), *i) == c[index_sort].end())
+          {
+            c[index_sort].push_back(*i);
+          }
+        }
+      }
+
+      template <typename FunctionContainer>
+      void reset(const FunctionContainer& c)
+      {
+        if(_outdated)
+        {
+          _mapping.clear();
+          group_functions_by_target_sort(_mapping, c);
+          _outdated = false;
+        }
+      }
+
+      void expire()
+      {
+        _outdated = true;
+      }
+
+      atermpp::map<sort_expression, atermpp::vector<function_symbol> >& mapping()
+      {
+        assert(!_outdated);
+        return _mapping;
       }
     };
 
-    struct convert_to_alias : public std::unary_function< ltr_aliases_map::value_type const, alias >
-    {
-      /// \brief Application to constant pair
-      alias operator()(ltr_aliases_map::value_type const& e) const
-      {
-        return alias(e.first,e.second);
-      }
-    };
+    /// \brief Cached constructors by target sort
 
     /// \endcond
-
-  public:
-
-    /// \brief const iterator over aliases (objects of type function_symbol)
-    typedef boost::transform_iterator< convert_to_alias, ltr_aliases_map::const_iterator >       aliases_const_iterator;
-    /// \brief iterator range over list of aliases
-    typedef boost::iterator_range< aliases_const_iterator >                                       aliases_const_range;
-
-    /// \brief const iterator over constructors (objects of type function_symbol)
-    typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    constructors_const_iterator;
-    /// \brief const iterator range over constructors (objects of type function_symbol)
-    typedef boost::iterator_range< constructors_const_iterator >                                  constructors_const_range;
-
-    /// \brief const iterator over mappings (objects of type function_symbol)
-    typedef boost::transform_iterator< symbol_projection, sort_to_symbol_map::const_iterator >    mappings_const_iterator;
-    /// \brief const iterator range over mappings (objects of type function_symbol)
-    typedef boost::iterator_range< mappings_const_iterator >                                      mappings_const_range;
 
   private:
 
@@ -184,7 +212,7 @@ class data_specification
     mutable bool m_normalised_data_is_up_to_date;
 
     /// \brief The basic sorts and structured sorts in the specification.
-    atermpp::vector< sort_expression >     m_sorts;
+    sort_expression_vector     m_sorts;
 
     /// \brief The sorts that occur in the context of this data specification.
     /// The normalised sorts, constructors, mappings and equations are complete
@@ -192,31 +220,37 @@ class data_specification
     mutable atermpp::set< sort_expression >     m_sorts_in_context;
 
     /// \brief The basic sorts and structured sorts in the specification.
-    ltr_aliases_map                     m_aliases;
+    alias_vector                     m_aliases;
 
     /// \brief A mapping of sort expressions to the constructors corresponding to that sort.
-    sort_to_symbol_map                  m_constructors;
+    function_symbol_vector             m_constructors;
 
     /// \brief The mappings of the specification.
-    sort_to_symbol_map                  m_mappings;
+    function_symbol_vector             m_mappings;
 
     /// \brief The equations of the specification.
     atermpp::vector< data_equation >       m_equations;
 
     /// \brief Set containing all the sorts, including the system defined ones.
-    mutable atermpp::vector< sort_expression >         m_normalised_sorts;
+    mutable sort_expression_vector         m_normalised_sorts;
 
     /// \brief Set containing all constructors, including the system defined ones.
     /// The types in these constructors are normalised.
-    mutable sort_to_symbol_map         m_normalised_constructors;
+    mutable function_symbol_vector         m_normalised_constructors;
+
+    /// \brief Cache normalised constructors grouped by target sort.
+    mutable target_sort_to_function_map m_grouped_normalised_constructors;
 
     /// \brief Set containing system defined all mappings, including the system defined ones.
     /// The types in these mappings are normalised.
-    mutable sort_to_symbol_map         m_normalised_mappings;
+    mutable function_symbol_vector         m_normalised_mappings;
+
+    /// \brief Cache normalised mappings grouped by target sort.
+    mutable target_sort_to_function_map m_grouped_normalised_mappings;
     //
     /// \brief Table containing all equations, including the system defined ones.
     ///        The sorts in these equations are normalised.
-    mutable atermpp::vector< data_equation >           m_normalised_equations;
+    mutable data_equation_vector           m_normalised_equations;
 
     /// \brief Table containing how sorts should be mapped to normalised sorts.
     // sort_normaliser               m_sort_normaliser;
@@ -255,7 +289,7 @@ class data_specification
     inline
     void add_system_defined_constructor(const function_symbol& f) const
     {
-      add_function(m_normalised_constructors,normalize_sorts(f,*this));
+      detail::insert_unique(m_normalised_constructors,normalize_sorts(f,*this));
     }
 
     /// \brief Adds a mapping to this specification, and marks it as system
@@ -267,7 +301,7 @@ class data_specification
     /// \note this operation does not invalidate iterators of mappings_const_range
     void add_system_defined_mapping(const function_symbol& f) const
     {
-      add_function(m_normalised_mappings,normalize_sorts(f,*this));
+      detail::insert_unique(m_normalised_mappings,normalize_sorts(f,*this));
     }
 
     /// \brief Adds an equation to this specification, and marks it as system
@@ -306,46 +340,13 @@ class data_specification
       std::for_each(e.begin(), e.end(), boost::bind(&data_specification::add_system_defined_equation, this, _1));
     }
 
-    void remove_function(sort_to_symbol_map& container, const function_symbol& f)
-    {
-      boost::iterator_range< sort_to_symbol_map::iterator > r(container.equal_range(f.sort().target_sort()));
-
-      sort_to_symbol_map::iterator i =
-        std::find(r.begin(), r.end(), sort_to_symbol_map::value_type(f.sort().target_sort(), f));
-
-      if (i != container.end())
-      {
-        container.erase(i);
-      }
-    }
-
-    void add_function(sort_to_symbol_map& container, const function_symbol& f) const
-    {
-      sort_expression index_sort(f.sort().target_sort());
-      constructors_const_range relevant_range(container.equal_range(index_sort));
-      if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
-      {
-        container.insert(std::make_pair(index_sort, f));
-      }
-    }
-
-    void add_function(sort_to_symbol_map& container, const function_symbol& f)
-    {
-      sort_expression index_sort(f.sort().target_sort());
-      constructors_const_range relevant_range(container.equal_range(index_sort));
-      if (std::find(relevant_range.begin(), relevant_range.end(), f) == relevant_range.end())
-      {
-        container.insert(std::make_pair(index_sort, f));
-      }
-    }
-
     void add_standard_mappings_and_equations(sort_expression const& sort) const
     {
       function_symbol_vector symbols(standard_generate_functions_code(normalize_sorts(sort,*this)));
 
       for (function_symbol_vector::const_iterator i = symbols.begin(); i != symbols.end(); ++i)
       {
-        add_function(m_normalised_mappings,*i);
+        detail::insert_unique(m_normalised_mappings,*i);
       }
 
       data_equation_vector equations(standard_generate_equations_code(sort));
@@ -417,7 +418,7 @@ class data_specification
     ///      the specification.
     /// \return The sort declarations of this specification.
     inline
-    const atermpp::vector<sort_expression>& sorts() const
+    const sort_expression_vector& sorts() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
@@ -429,7 +430,7 @@ class data_specification
     /// \details The time complexity of this operation is constant.
     /// \return The user defined sort declaration.
     inline
-    const atermpp::vector<sort_expression>& user_defined_sorts() const
+    const sort_expression_vector& user_defined_sorts() const
     {
       assert(m_data_specification_is_type_checked);
       return m_sorts;
@@ -440,21 +441,21 @@ class data_specification
     /// \return All constructors in this specification, including those for
     /// structured sorts.
     inline
-    constructors_const_range constructors() const
+    const function_symbol_vector& constructors() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
-      return constructors_const_range(m_normalised_constructors);
+      return m_normalised_constructors;
     }
 
     /// \brief Gets the constructors defined by the user, excluding those that
     /// are system defined.
     /// \details The time complexity for this operation is constant.
     inline
-    constructors_const_range user_defined_constructors() const
+    const function_symbol_vector& user_defined_constructors() const
     {
       assert(m_data_specification_is_type_checked);
-      return constructors_const_range(m_constructors);
+      return m_constructors;
     }
 
     /// \brief Gets all constructors of a sort including those that are system defined.
@@ -463,11 +464,12 @@ class data_specification
     /// \param[in] s A sort expression.
     /// \return The constructors for sort s in this specification.
     inline
-    constructors_const_range constructors(const sort_expression& s) const
+    const function_symbol_vector& constructors(const sort_expression& s) const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
-      return constructors_const_range(m_normalised_constructors.equal_range(normalize_sorts(s,*this)));
+      m_grouped_normalised_constructors.reset(constructors());
+      return m_grouped_normalised_constructors.mapping()[normalize_sorts(s,*this)];
     }
 
     /// \brief Gets all mappings in this specification including those that are system defined.
@@ -476,11 +478,11 @@ class data_specification
     /// \return All mappings in this specification, including recognisers and
     /// projection functions from structured sorts.
     inline
-    mappings_const_range mappings() const
+    const function_symbol_vector& mappings() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
-      return mappings_const_range(m_normalised_mappings);
+      return m_normalised_mappings;
     }
 
     /// \brief Gets all user defined mappings in this specification.
@@ -489,10 +491,10 @@ class data_specification
     /// \return All mappings in this specification, including recognisers and
     /// projection functions from structured sorts.
     inline
-    mappings_const_range user_defined_mappings() const
+    const function_symbol_vector& user_defined_mappings() const
     {
       assert(m_data_specification_is_type_checked);
-      return mappings_const_range(m_mappings);
+      return m_mappings;
     }
 
     /// \brief Gets all mappings of a sort including those that are system defined
@@ -501,11 +503,12 @@ class data_specification
     /// \return All mappings in this specification, for which s occurs as a
     /// right-hand side of the mapping's sort.
     inline
-    mappings_const_range mappings(const sort_expression& s) const
+    const function_symbol_vector& mappings(const sort_expression& s) const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
-      return mappings_const_range(m_normalised_mappings.equal_range(normalize_sorts(s,*this)));
+      m_grouped_normalised_mappings.reset(mappings());
+      return m_grouped_normalised_mappings.mapping()[normalize_sorts(s, *this)];
     }
 
     /// \brief Gets all equations in this specification including those that are system defined
@@ -514,7 +517,7 @@ class data_specification
     /// \return All equations in this specification, including those for
     ///  structured sorts.
     inline
-    const atermpp::vector< data_equation >& equations() const
+    const data_equation_vector& equations() const
     {
       assert(m_data_specification_is_type_checked);
       normalise_specification_if_required();
@@ -527,7 +530,7 @@ class data_specification
     /// \return All equations in this specification, including those for
     ///  structured sorts.
     inline
-    const atermpp::vector< data_equation >& user_defined_equations() const
+    const data_equation_vector& user_defined_equations() const
     {
       assert(m_data_specification_is_type_checked);
       return m_equations;
@@ -548,7 +551,7 @@ class data_specification
     /// \brief Gets the user defined aliases.
     /// \details The time complexity is constant.
     inline
-    ltr_aliases_map user_defined_aliases() const
+    const alias_vector& user_defined_aliases() const
     {
       assert(m_data_specification_is_type_checked);
       return m_aliases;
@@ -583,7 +586,7 @@ class data_specification
     void add_alias(alias const& a)
     {
       assert(m_data_specification_is_type_checked);
-      m_aliases.insert(std::pair<basic_sort, sort_expression>(a.name(),a.reference()));
+      detail::insert_unique(m_aliases, a);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -595,7 +598,7 @@ class data_specification
     void add_constructor(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      add_function(m_constructors, f);
+      detail::insert_unique(m_constructors, f);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -607,7 +610,7 @@ class data_specification
     void add_mapping(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      add_function(m_mappings, f);
+      detail::insert_unique(m_mappings, f);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -684,10 +687,10 @@ class data_specification
       dependent_sorts.insert(sort_bool::bool_());
 
       // constructors
-      detail::insert(dependent_sorts, make_sort_range(constructors_const_range(m_constructors)));
+      detail::insert(dependent_sorts, make_sort_range(m_constructors));
 
       // mappings
-      detail::insert(dependent_sorts, make_sort_range(mappings_const_range(m_mappings)));
+      detail::insert(dependent_sorts, make_sort_range(m_mappings));
 
       // equations
       for (atermpp::vector< data_equation >::const_iterator r(m_equations.begin()); r != m_equations.end(); ++r)
@@ -697,11 +700,11 @@ class data_specification
       }
 
       // aliases, with both left and right hand sides.
-      for (ltr_aliases_map::const_iterator i=m_aliases.begin();
+      for (alias_vector::const_iterator i=m_aliases.begin();
            i!=m_aliases.end(); ++i)
       {
-        dependent_sorts.insert(i->first);
-        detail::insert(dependent_sorts,find_sort_expressions(i->second));
+        dependent_sorts.insert(i->name());
+        detail::insert(dependent_sorts,find_sort_expressions(i->reference()));
       }
 
       for (atermpp::set< sort_expression >::const_iterator i=dependent_sorts.begin();
@@ -712,44 +715,35 @@ class data_specification
       }
 
 
-      for (ltr_aliases_map ::const_iterator i=m_aliases.begin();
+      for (alias_vector::const_iterator i=m_aliases.begin();
            i!=m_aliases.end(); ++i)
       {
-        add_system_defined_sort(i->first);
-        add_system_defined_sort(i->second);
-        import_system_defined_sort(i->first,sorts_already_added_to_m_normalised_sorts);
-        import_system_defined_sort(i->second,sorts_already_added_to_m_normalised_sorts);
+        add_system_defined_sort(i->name());
+        add_system_defined_sort(i->reference());
+        import_system_defined_sort(i->name(),sorts_already_added_to_m_normalised_sorts);
+        import_system_defined_sort(i->reference(),sorts_already_added_to_m_normalised_sorts);
       }
 
       // sort_to_symbol_map new_constructors;
-      for (sort_to_symbol_map::const_iterator i=m_constructors.begin();
+      for (function_symbol_vector::const_iterator i=m_constructors.begin();
            i!=m_constructors.end(); ++i)
       {
-        const sort_expression normalised_sort=normalize_sorts(i->first,*this);
-        const function_symbol normalised_constructor=normalize_sorts(i->second,*this);
+        const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
+        const function_symbol normalised_constructor=normalize_sorts(*i,*this);
 
-        mappings_const_range range(m_normalised_constructors.equal_range(normalised_constructor.sort().target_sort()));
-        if (std::find(range.begin(), range.end(), normalised_constructor) == range.end())
-        {
-          m_normalised_constructors.insert(std::pair<sort_expression, function_symbol>
-                                           (normalised_sort,normalised_constructor));
-        }
+        detail::insert_unique(m_normalised_constructors, normalised_constructor);
         add_system_defined_sort(normalised_sort);
       }
 
       // Normalise the sorts of the mappings.
-      for (sort_to_symbol_map::const_iterator i=m_mappings.begin();
+      for (function_symbol_vector::const_iterator i=m_mappings.begin();
            i!=m_mappings.end(); ++i)
       {
-        const sort_expression normalised_sort=normalize_sorts(i->first,*this);
-        const function_symbol normalised_mapping=normalize_sorts(i->second,*this);
+        const sort_expression normalised_sort=normalize_sorts(i->sort().target_sort(),*this);
+        const function_symbol normalised_mapping=normalize_sorts(*i,*this);
 
-        mappings_const_range range(m_normalised_mappings.equal_range(normalised_mapping.sort().target_sort()));
-        if (std::find(range.begin(), range.end(), normalised_mapping) == range.end())
-        {
-          m_normalised_mappings.insert((std::pair<sort_expression, function_symbol>
-                                        (normalised_sort,normalised_mapping)));
-        }
+        detail::insert_unique(m_normalised_mappings, normalised_mapping);
+
         add_system_defined_sort(normalised_sort);
       }
 
@@ -768,6 +762,8 @@ class data_specification
       if (!m_normalised_data_is_up_to_date)
       {
         m_normalised_data_is_up_to_date=true;
+        m_grouped_normalised_constructors.expire();
+        m_grouped_normalised_mappings.expire();
         normalise_sorts();
       }
     }
@@ -960,28 +956,6 @@ class data_specification
 
   public:
 
-    /* /// \brief returns a sort expression that is represented by an alias.
-    /// \details For a sort expression e, it is figured out which sort
-    /// it represents. Concretely: if e is no alias, e is returned. If
-    /// e=f is an alias and f is a basic sort, then the sort expression represented by e is
-    /// returned. If e=C where C is a container sort, function sort or structured sort
-    /// C is returned. The aliases in C are not unfolded.
-
-    sort_expression unalias(const basic_sort &e) const
-    {
-      assert(m_data_specification_is_type_checked);
-      const ltr_aliases_map::const_iterator i=m_aliases.find(e);
-      if (i==m_aliases.end())  // Not found
-      {
-        return e;
-      }
-      if (is_basic_sort(i->second))
-      { return unalias(i->second);
-      }
-      // *i is a more complex type;
-      return i->second;
-    } */
-
     /// \brief Removes sort from specification.
     /// Note that this also removes aliases for the sort but does not remove
     /// constructors, mappings and equations.
@@ -1012,7 +986,7 @@ class data_specification
       {
         m_sorts.erase(i);
       }
-      m_aliases.erase(a.name());
+      detail::remove(m_aliases, a);
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -1027,8 +1001,8 @@ class data_specification
     void remove_constructor(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      remove_function(m_normalised_constructors,normalize_sorts(f,*this));
-      remove_function(m_constructors,f);
+      detail::remove(m_normalised_constructors, normalize_sorts(f,*this));
+      detail::remove(m_constructors, f);
     }
 
     /// \brief Removes mapping from specification.
@@ -1041,8 +1015,8 @@ class data_specification
     void remove_mapping(const function_symbol& f)
     {
       assert(m_data_specification_is_type_checked);
-      remove_function(m_mappings,f);
-      remove_function(m_normalised_mappings,normalize_sorts(f,*this));
+      detail::remove(m_normalised_mappings, normalize_sorts(f,*this));
+      detail::remove(m_mappings, f);
     }
 
     /// \brief Removes equation from specification.
@@ -1056,17 +1030,8 @@ class data_specification
       assert(m_data_specification_is_type_checked);
       const data_equation e1=data::detail::translate_user_notation_data_equation(e);
 
-      const atermpp::vector<data_equation>::iterator i = std::find(m_equations.begin(), m_equations.end(), e1);
-      if(i != m_equations.end())
-      {
-        m_equations.erase(i);
-      }
-
-      const atermpp::vector<data_equation>::iterator j = std::find(m_normalised_equations.begin(), m_normalised_equations.end(), normalize_sorts(e1,*this));
-      if(j != m_normalised_equations.end())
-      {
-        m_normalised_equations.erase(j);
-      }
+      detail::remove(m_normalised_equations, normalize_sorts(e1,*this));
+      detail::remove(m_equations, e1);
     }
 
     /// \brief Checks whether two sort expressions represent the same sort
@@ -1145,6 +1110,8 @@ class data_specification
       m_normalised_sorts=other.m_normalised_sorts;
       m_normalised_mappings=other.m_normalised_mappings;
       m_normalised_constructors=other.m_normalised_constructors;
+      m_grouped_normalised_mappings=other.m_grouped_normalised_mappings;
+      m_grouped_normalised_constructors=other.m_grouped_normalised_constructors;
       m_normalised_equations=other.m_normalised_equations;
       m_normalised_aliases=other.m_normalised_aliases;
       return *this;
@@ -1161,9 +1128,8 @@ class data_specification
 inline
 function_symbol find_mapping(data_specification const& data, std::string const& s)
 {
-  data_specification::mappings_const_range r(data.mappings());
-
-  data_specification::mappings_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
+  const function_symbol_vector r(data.mappings());
+  function_symbol_vector::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
   return (i == r.end()) ? function_symbol() : *i;
 }
 
@@ -1175,8 +1141,8 @@ function_symbol find_mapping(data_specification const& data, std::string const& 
 inline
 function_symbol find_constructor(data_specification const& data, std::string const& s)
 {
-  data_specification::constructors_const_range r(data.constructors());
-  data_specification::constructors_const_range::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
+  const function_symbol_vector r(data.constructors());
+  function_symbol_vector::const_iterator i = std::find_if(r.begin(), r.end(), detail::function_symbol_has_name(s));
   return (i == r.end()) ? function_symbol() : *i;
 }
 
@@ -1227,19 +1193,6 @@ data_equation_vector find_equations(data_specification const& specification, con
     }
   }
   return result;
-}
-
-template <typename Container>
-void group_functions_by_target_sort(atermpp::map<sort_expression, atermpp::vector<function_symbol> >& c, const Container& functions)
-{
-  for (typename Container::const_iterator i = functions.begin(); i != functions.end(); ++i)
-  {
-    sort_expression index_sort(i->sort().target_sort());
-    if(c.find(index_sort) == c.end() || std::find(c[index_sort].begin(), c[index_sort].end(), *i) == c[index_sort].end())
-    {
-      c[index_sort].push_back(*i);
-    }
-  }
 }
 
 } // namespace data

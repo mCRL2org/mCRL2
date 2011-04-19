@@ -208,11 +208,11 @@ bool check_variable_names(variable_list const& variables, const std::set<core::i
 /// \param range A sequence of data operations
 /// \param sorts A set of sort expressions
 /// \return True if the domain sorts and range sort of the given functions are contained in sorts.
-template < typename ForwardTraversalIterator, typename SortContainer >
+template < typename Container, typename SortContainer >
 inline
-bool check_data_spec_sorts(boost::iterator_range< ForwardTraversalIterator > const& range, const SortContainer& sorts)
+bool check_data_spec_sorts(const Container& container, const SortContainer& sorts)
 {
-  for (ForwardTraversalIterator i = range.begin(); i != range.end(); ++i)
+  for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
   {
     if (!check_sort(i->sort(), sorts))
     {
@@ -220,17 +220,6 @@ bool check_data_spec_sorts(boost::iterator_range< ForwardTraversalIterator > con
     }
   }
   return true;
-}
-
-/// \brief Returns true if the domain sorts and range sort of the given functions are contained in sorts.
-/// \param functions A sequence of data operations
-/// \param sorts A set of sort expressions
-/// \return True if the domain sorts and range sort of the given functions are contained in sorts.
-template < typename SortContainer >
-inline
-bool check_data_spec_sorts(function_symbol_list const& functions, const SortContainer& sorts)
-{
-  return check_data_spec_sorts(boost::make_iterator_range(functions), sorts);
 }
 
 } // namespace detail

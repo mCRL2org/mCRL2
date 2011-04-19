@@ -42,16 +42,8 @@ void test_system_defined_sorts()
     "init X(0,1);\n");
 
   specification spec = linearise(SPEC);
-  // complete_data_specification(spec);
-  // std::cout << "<dataspec>" << data::pp(spec.data()) << std::endl;
-
-  boost::iterator_range<data_specification::constructors_const_iterator> r = spec.data().constructors(data::sort_nat::nat());
-
-  // make a copy of the range, since it is a filter iterator
-  std::vector< data::function_symbol > c;
-  std::copy(r.begin(), r.end(), std::back_inserter(c));
-
-  BOOST_CHECK(c.size() != 0);
+  function_symbol_vector r = spec.data().constructors(data::sort_nat::nat());
+  BOOST_CHECK(r.size() != 0);
 }
 
 int test_main(int argc, char* argv[])

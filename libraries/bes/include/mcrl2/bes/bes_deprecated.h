@@ -2076,14 +2076,16 @@ class boolean_equation_system
 
       // Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
       // This can be removed if the jittyc or innerc compilers are not in use anymore.
-      for (data_specification::constructors_const_range c=pbes_spec.data().constructors(); !c.empty() ; c.advance_begin(1))
+      const function_symbol_vector constructors(pbes_spec.data().constructors());
+      for (function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
       {
-        Mucks_rewriter.translate(c.front());
+        Mucks_rewriter.translate(*i);
       }
 
-      for (data_specification::constructors_const_range c=pbes_spec.data().mappings(); !c.empty() ; c.advance_begin(1))
+      const function_symbol_vector mappings(pbes_spec.data().mappings());
+      for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
       {
-        Mucks_rewriter.translate(c.front());
+        Mucks_rewriter.translate(*i);
       }
 
       // Variables in which the result is stored

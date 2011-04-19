@@ -92,6 +92,12 @@ class data_enumerator
     /// \return The constructors corresponding to the sort expression.
     const atermpp::vector<function_symbol>& constructors(sort_expression s) const
     {
+      constructor_map::const_iterator i = m_constructors.find(s);
+      if (i != m_constructors.end())
+      {
+        return i->second;
+      }
+      m_constructors[s] = m_data->constructors(s);
       return m_constructors[s];
     }
 
@@ -111,9 +117,7 @@ class data_enumerator
                     const data::rewriter& rewriter,
                     IdentifierGenerator& generator)
       : m_data(&data_spec), m_rewriter(&rewriter), m_generator(&generator)
-    {
-      group_functions_by_target_sort(m_constructors, data_spec.constructors());
-    }
+    {}
 
     /// \brief The data specification.
     /// \return The data specification.

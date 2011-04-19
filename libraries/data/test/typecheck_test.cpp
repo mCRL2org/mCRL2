@@ -31,9 +31,10 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 // Expected failures, these are not going to be fixed in the current
 // implementation of the type checker
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_list_pos_nat, 2)
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables, 2)
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables_reversed, 2)
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables, 1)
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables_reversed, 1)
 //BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_matching_ambiguous, 1 ) //succeeds
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4, 1)   // Fails because of silly reordering in type checker
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1)   // Fails because of silly reordering in type checker
 
 // Parse functions that do not change any context (i.e. do not typecheck and
@@ -105,12 +106,12 @@ void test_data_expression(const std::string& de_in,
                           const std::string& expected_sort = "",
                           bool test_type_checker = true)
 {
-  std::clog << "==========================================" << std::endl
+  std::clog << std::endl
+            << "==========================================" << std::endl
             << "Testing type checking of data expression: " << std::endl
             << "  de_in: " << de_in << std::endl
             << "  expect success: " << (expect_success?("yes"):("no")) << std::endl
-            << "  expected type: " << expected_sort << std::endl
-            << "==========================================" << std::endl;
+            << "  expected type: " << expected_sort << std::endl;
 
   data::data_expression x(parse_data_expression(de_in));
 
@@ -133,8 +134,12 @@ void test_data_expression(const std::string& de_in,
         if (expected_sort != "")
         {
           BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
-          std::clog << "x: " << x << std::endl;
+          std::clog << "    expression x: " << x << std::endl;
         }
+      }
+      else
+      {
+        std::clog << "  failed to typecheck" << std::endl;
       }
     }
     else

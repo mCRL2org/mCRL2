@@ -39,9 +39,9 @@ atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specificati
   {
     return gsMakeDataSpec(
              gsMakeSortSpec(atermpp::convert< atermpp::aterm_list >(s.m_sorts) +
-                            atermpp::convert< atermpp::aterm_list >(data_specification::aliases_const_range(s.m_aliases))),
-             gsMakeConsSpec(atermpp::convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_constructors))),
-             gsMakeMapSpec(atermpp::convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_mappings))),
+                            atermpp::convert< atermpp::aterm_list >(s.m_aliases)),
+             gsMakeConsSpec(atermpp::convert< atermpp::aterm_list >(s.m_constructors)),
+             gsMakeMapSpec(atermpp::convert< atermpp::aterm_list >(s.m_mappings)),
              gsMakeDataEqnSpec(atermpp::convert< atermpp::aterm_list >(s.m_equations)));
   }
   else
@@ -62,11 +62,17 @@ class finiteness_helper
 
     bool is_finite_aux(const sort_expression s)
     {
-      for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
+      function_symbol_vector constructors(m_specification.constructors(s));
+      if(constructors.empty())
       {
-        if (is_function_sort(r.front().sort()))
+        return false;
+      }
+
+      for (function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
+      {
+        if (is_function_sort(i->sort()))
         {
-          const function_sort f_sort(r.front().sort());
+          const function_sort f_sort(i->sort());
           const sort_expression_list l=f_sort.domain();
 
           for (sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -180,12 +186,15 @@ void data_specification::check_for_alias_loop(
     {
       throw mcrl2::runtime_error("Sort alias " + s.to_string() + " is defined in terms of itself.");
     }
-    const data_specification::ltr_aliases_map::const_iterator i=m_aliases.find(s);
-    if (i!=m_aliases.end())  // s is in m_aliases
+    for(alias_vector::const_iterator i = m_aliases.begin(); i != m_aliases.end(); ++i)
     {
-      sorts_already_seen.insert(s);
-      check_for_alias_loop(i->second,sorts_already_seen,true);
-      sorts_already_seen.erase(s);
+      if(i->name() == s)
+      {
+        sorts_already_seen.insert(s);
+        check_for_alias_loop(i->reference(),sorts_already_seen,true);
+        sorts_already_seen.erase(s);
+        return;
+      }
     }
     return;
   }
@@ -339,11 +348,10 @@ void data_specification::reconstruct_m_normalised_aliases() const
 
   // Check for loops in the aliases. The type checker should already have done this,
   // but we check it again here.
-  for (ltr_aliases_map::const_iterator i=m_aliases.begin();
-       i!=m_aliases.end(); ++i)
+  for (alias_vector::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
   {
     std::set < sort_expression > sorts_already_seen; // Empty set.
-    check_for_alias_loop(i->first,sorts_already_seen,true);
+    check_for_alias_loop(i->name(),sorts_already_seen,true);
   }
 
   // Copy m_normalised_aliases. All aliases are stored from left to right,
@@ -352,16 +360,15 @@ void data_specification::reconstruct_m_normalised_aliases() const
   // rewritten from left to right, as this can cause sorts to be infinitely rewritten.
 
   atermpp::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
-  for (ltr_aliases_map::const_iterator i=m_aliases.begin();
-       i!=m_aliases.end(); ++i)
+  for (alias_vector::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
   {
-    if (is_structured_sort(i->second))
+    if (is_structured_sort(i->reference()))
     {
-      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->second,i->first));
+      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->reference(),i->name()));
     }
     else
     {
-      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->first,i->second));
+      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->name(),i->reference()));
     }
   }
 
@@ -490,10 +497,7 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   {
     if (data::is_alias(*i)) // Compatibility with legacy code
     {
-      // if (!detail::has_legacy_name(alias(*i).name()))
-      {
-        add_alias(*i);
-      }
+      add_alias(*i);
     }
     else
     {
@@ -504,14 +508,12 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   // Store the constructors.
   for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
   {
-    // m_constructors.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
     add_constructor(*i);
   }
 
   // Store the mappings.
   for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
   {
-    // m_mappings.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
     add_mapping(*i);
   }
 
@@ -521,7 +523,7 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
     add_equation(*i);
   }
 
-  // data_is_not_necessarily_normalised_anymore();
+  //data_is_not_necessarily_normalised_anymore();
 }
 } // namespace data
 } // namespace mcrl2

@@ -675,11 +675,12 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     ATprotect(&info.opidAnd);
     info.opidAnd = info.rewr_obj->toRewriteFormat(sort_bool::and_());
 
-    for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
+    const function_symbol_vector mappings(data_spec.mappings());
+    for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
     {
-      if (r.front().name() == "==")
+      if (i->name() == "==")
       {
-        info.eqs.insert(info.rewr_obj->toRewriteFormat(r.front()));
+        info.eqs.insert(info.rewr_obj->toRewriteFormat(*i));
       }
     }
   }
@@ -691,11 +692,12 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
     ATprotect(&info.opidAnd);
     info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(sort_bool::and_()),0);
 
-    for (data_specification::mappings_const_range r(data_spec.mappings()); !r.empty(); r.advance_begin(1))
+    const function_symbol_vector mappings(data_spec.mappings());
+    for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
     {
-      if (r.front().name() == "==")
+      if (i->name() == "==")
       {
-        info.eqs.insert( ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(r.front()),0) );
+        info.eqs.insert( ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(*i),0) );
       }
     }
   }
@@ -709,12 +711,13 @@ EnumeratorStandard::EnumeratorStandard(mcrl2::data::data_specification const& da
   {
     atermpp::aterm_list constructors;
 
-    for (data_specification::constructors_const_range rc(data_spec.constructors(*r)); !rc.empty(); rc.advance_begin(1))
+    function_symbol_vector r_constructors(data_spec.constructors(*r));
+    for (function_symbol_vector::const_iterator i = r_constructors.begin(); i != r_constructors.end(); ++i)
     {
       constructors = atermpp::push_front(constructors,
                                          atermpp::aterm(ATmakeAppl2(info.tupAFun,
-                                             reinterpret_cast< ATerm >(static_cast< ATermAppl >(rc.front())),
-                                             (ATerm) map_ATreverse(gsGetSortExprDomains(rc.front().sort())))));
+                                             reinterpret_cast< ATerm >(static_cast< ATermAppl >(*i)),
+                                             (ATerm) map_ATreverse(gsGetSortExprDomains(i->sort())))));
     }
 
     info.constructors[*r] = constructors;

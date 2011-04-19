@@ -135,44 +135,6 @@ class application: public detail::application_base
     }
 }; // class application
 
-/// \brief Returns the outermost function of a data expression.
-inline data_expression head_symbol(const data_expression& x)
-{
-  if (is_application(x))
-  {
-    return head_symbol(application(x).head());
-  }
-  return x;
-}
-
-/// \brief get first argument
-/// \pre  is_application(e) && !application(e).arguments().empty()
-inline data_expression first_argument(data_expression const& e)
-{
-  assert(!application(e).arguments().empty());
-
-  return *(application(e).arguments().begin());
-}
-
-/// \brief get last argument
-/// \pre  is_application(e) && !application(e).arguments().empty()
-inline data_expression last_argument(data_expression const& e)
-{
-  assert(!application(e).arguments().empty());
-
-  data_expression_list r(application(e).arguments());
-
-  for (data_expression_list::const_iterator i = r.begin(), j = i; i != r.end(); i = j++)
-  {
-    if (j == r.end())
-    {
-      return *i;
-    }
-  }
-
-  return *r.begin();
-}
-
 /// \brief Apply data expression to a data expression
 inline application make_application(data_expression const& head,
                                     data_expression const& e0)

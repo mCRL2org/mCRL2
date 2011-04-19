@@ -50,8 +50,8 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec, bool add_distribution
 
   {
     size_t size = mapping_and_constructor_names.size();
-    data_specification::constructors_const_range fsl= m_data_specification.constructors();
-    for (data_specification::constructors_const_range::const_iterator i = fsl.begin();
+    function_symbol_vector fsl= m_data_specification.constructors();
+    for (function_symbol_vector::const_iterator i = fsl.begin();
          i != fsl.end();
          ++i)
     {
@@ -62,8 +62,8 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec, bool add_distribution
 
   {
     size_t size = mapping_and_constructor_names.size();
-    data_specification::mappings_const_range fsl= m_data_specification.mappings();
-    for (data_specification::mappings_const_range::const_iterator i = fsl.begin();
+    function_symbol_vector fsl= m_data_specification.mappings();
+    for (function_symbol_vector::const_iterator i = fsl.begin();
          i != fsl.end();
          ++i)
     {
@@ -100,7 +100,7 @@ mcrl2::core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapp
 
 function_symbol_vector lpsparunfold::determine_affected_constructors()
 {
-  data_specification::constructors_const_range t = m_data_specification.constructors(m_unfold_process_parameter);
+  function_symbol_vector t = m_data_specification.constructors(m_unfold_process_parameter);
   function_symbol_vector k = function_symbol_vector(t.begin(), t.end());
 
   gsDebugMsg("k:\t");

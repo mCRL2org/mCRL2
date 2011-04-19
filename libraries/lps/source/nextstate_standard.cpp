@@ -525,10 +525,10 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   // In certain cases it could be useful to add the mappings also, but this appears to
   // give a substantial performance penalty, due to the addition of symbols to the
   // rewriter that are not used.
-  for (mcrl2::data::data_specification::constructors_const_range c=spec.data().constructors();
-       !c.empty() ; c.advance_begin(1))
+  const mcrl2::data::function_symbol_vector constructors(spec.data().constructors());
+  for (mcrl2::data::function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
   {
-    info.import_term(mcrl2::data::data_expression(c.front()));
+    info.import_term(mcrl2::data::data_expression(*i));
   }
 
   free_vars = atermpp::convert< mcrl2::data::variable_list >(spec.global_variables());

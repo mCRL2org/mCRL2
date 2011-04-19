@@ -499,14 +499,15 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               {
-                for (data::data_specification::constructors_const_range rf(data.constructors(i->sort())); !rf.empty(); rf.advance_begin(1))
+                data::function_symbol_vector i_constructors(data.constructors(i->sort()));
+                for (data::function_symbol_vector::const_iterator rf = i_constructors.begin(); rf != i_constructors.end(); ++rf)
                 {
                   data::sort_expression_list dsorts;
 
                   // boost::iterator_range< data::sort_expression_list::const_iterator > dsorts;
-                  if (is_function_sort(rf.front().sort()))
+                  if (is_function_sort(rf->sort()))
                   {
-                    data::function_sort sa=rf.front().sort();
+                    data::function_sort sa=rf->sort();
                     // In case the function f has a sort A->(B->C),
                     // then the function below does not work correctly.
                     // This code must be replaced by enumerator code,
@@ -514,7 +515,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     if (is_function_sort(sa.codomain()))
                     {
                       throw mcrl2::runtime_error("Cannot deal with constructors of type (A->(B->C)): " +
-                                                 pp(rf.front()) + ":" + pp(rf.front().sort()));
+                                                 pp(*rf) + ":" + pp(rf->sort()));
                     }
                     dsorts=sa.domain();
                   }
@@ -541,8 +542,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   }
 
                   pbes_expression d((!function_arguments.empty())?
-                                    static_cast<data::data_expression>(data::application(rf.front(), reverse(function_arguments))):
-                                    static_cast<data::data_expression>(rf.front()));
+                                    static_cast<data::data_expression>(data::application(*rf, reverse(function_arguments))):
+                                    static_cast<data::data_expression>(*rf));
                   // sigma[*i]=d;
                   r.setSubstitution(*i,d);
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format));
@@ -646,12 +647,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
               }
               else
               {
-                for (data::data_specification::constructors_const_range rf(data.constructors(i->sort())); !rf.empty(); rf.advance_begin(1))
+
+                data::function_symbol_vector i_constructors(data.constructors(i->sort()));
+                for (data::function_symbol_vector::const_iterator rf = i_constructors.begin(); rf != i_constructors.end(); ++rf)
                 {
                   data::sort_expression_list dsorts;
-                  if (is_function_sort(rf.front().sort()))
+                  if (is_function_sort(rf->sort()))
                   {
-                    data::function_sort sa=rf.front().sort();
+                    data::function_sort sa=rf->sort();
                     // In case the function f has a sort A->(B->C),
                     // then the function below does not work correctly.
                     // This code must be replaced by enumerator code,
@@ -659,7 +662,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     if (is_function_sort(sa.codomain()))
                     {
                       throw mcrl2::runtime_error("Cannot deal with constructors of type (A->(B->C)): " +
-                                                 pp(rf.front()) + ":" + pp(rf.front().sort()));
+                                                 pp(*rf) + ":" + pp(rf->sort()));
                     }
                     dsorts=sa.domain();
                   }
@@ -684,8 +687,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
                   pbes_expression d((!function_arguments.empty())?
-                                    static_cast<data::data_expression>(data::application(rf.front(), reverse(function_arguments))):
-                                    static_cast<data::data_expression>(rf.front()));
+                                    static_cast<data::data_expression>(data::application(*rf, reverse(function_arguments))):
+                                    static_cast<data::data_expression>(*rf));
                   r.setSubstitution(*i,d);
                   // sigma[*i]=d;
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format));
