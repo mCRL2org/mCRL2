@@ -43,7 +43,7 @@ namespace data
 {
 
 // Assumes that all terms are in internal rewrite format.
-template <>
+/* template <>
 struct expression_traits< atermpp::aterm >
 {
   static mcrl2::data::detail::legacy_rewriter& get_rewriter()
@@ -62,7 +62,7 @@ struct expression_traits< atermpp::aterm >
   {
     return get_rewriter().convert_to(mcrl2::data::data_expression(mcrl2::data::sort_bool::true_()));
   }
-};
+}; */
 }
 } 
 
@@ -75,9 +75,9 @@ struct ns_info
   typedef mcrl2::data::classic_enumerator< mcrl2::data::detail::legacy_rewriter > enumerator_type;
 
 
-  mcrl2::data::data_specification const&                            m_specification;
+  const mcrl2::data::data_specification &m_specification;
   // Storing the legacy rewriter below by reference can lead to problems.
-  mcrl2::data::detail::legacy_rewriter const                                            m_rewriter; // only for translation to/from rewrite format
+  const mcrl2::data::detail::legacy_rewriter m_rewriter; // only for translation to/from rewrite format
   enumerator_type m_enumerator;
 
   size_t num_summands;

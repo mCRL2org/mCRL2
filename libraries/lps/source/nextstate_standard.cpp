@@ -26,6 +26,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::data;
 
 #define ATAgetFirst(x) ((ATermAppl) ATgetFirst(x))
 #define ATLgetFirst(x) ((ATermList) ATgetFirst(x))
@@ -790,7 +791,7 @@ NextStateGenerator* NextState::getNextStates(ATerm state, size_t index, NextStat
 }
 
 ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
-{
+{ 
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::makeNewState(old, assigns) called, with " << std::endl <<
             "  old = " << atermpp::aterm(old) << std::endl <<
@@ -821,11 +822,11 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
           break;
         case GS_STATE_TREE:
 //                                      stateargs[i] = getTreeElement(old,i);
-          stateargs[i] = info.m_rewriter.internally_associated_value((ATermAppl) ATgetFirst(l));
+          stateargs[i] = info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
           if (ATisEqual(stateargs[i], ATgetFirst(l)))   // Make sure substitutions were not reset by enumerator
           {
             set_substitutions();
-            stateargs[i] = info.m_rewriter.internally_associated_value((ATermAppl) ATgetFirst(l));
+            stateargs[i] = info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
           }
           break;
       }
@@ -896,7 +897,7 @@ void NextStateGenerator::SetTreeStateVars(ATerm tree, ATermList* vars)
     }
   }
 
-  info.m_rewriter.set_internally_associated_value((ATermAppl) ATgetFirst(*vars), tree);
+  info.m_rewriter.set_internally_associated_value(variable(ATgetFirst(*vars)), tree);
   *vars = ATgetNext(*vars);
 }
 
@@ -959,7 +960,7 @@ void NextStateGenerator::set_substitutions()
         ATerm a = ATgetArgument((ATermAppl) cur_state,i);
         if (!ATisEqual(a,info.nil))
         {
-          info.m_rewriter.set_internally_associated_value((ATermAppl) ATgetFirst(l), a);
+          info.m_rewriter.set_internally_associated_value(variable(ATgetFirst(l)), a);
 #ifdef MCRL2_NEXTSTATE_DEBUG
           std::cerr << "Set substitution " << pp(info.export_term(ATgetFirst(l))) << ":=" <<
                     pp(info.export_term(a)) << "\n";
@@ -1066,7 +1067,7 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
     {
       ATerm i=ATgetFirst(assignment_iterator);
       // info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
-      info.m_rewriter.set_internally_associated_value(ATAgetArgument(i,0),ATgetArgument(i,1));
+      info.m_rewriter.set_internally_associated_value(variable(ATAgetArgument(i,0)),ATgetArgument(i,1));
     }
 
     *Transition = rewrActionArgs((ATermAppl) cur_act);
@@ -1082,7 +1083,7 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
     {
       ATerm i=ATgetFirst(assignments);
       // info.m_rewriter.clear_internally_associated_value(i->first);
-      info.m_rewriter.clear_internally_associated_value(ATAgetArgument(i,0));
+      info.m_rewriter.clear_internally_associated_value(variable(ATAgetArgument(i,0)));
     }
     ++valuations;
 

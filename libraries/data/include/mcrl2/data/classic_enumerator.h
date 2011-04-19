@@ -236,7 +236,6 @@ class classic_enumerator
           { vars=ATinsert(vars,(ATerm)(ATermAppl)*i);
           } 
 
-ATfprintf(stderr,"CONDITION %t\n",(ATermAppl)condition);
           m_enclosing_enumerator->m_generator=
                  m_enclosing_enumerator->m_enumerator->findSolutions(
                           ATreverse(vars),

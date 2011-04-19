@@ -467,17 +467,7 @@ bool EnumeratorSolutionsStandard::next(ATermList* solution)
             if ((not_equal_to_false && !ATisEqual(fs_top().expr,info.rewr_false)) ||
                 (!not_equal_to_false && !ATisEqual(fs_top().expr,info.rewr_true)))
             {
-              /* if (check_true && !ATisEqual(fs_top().expr,info.rewr_true))
-              {
-                std::string error_message("term does not evaluate to true or false: " + pp(info.rewr_obj->fromRewriteFormat(fs_top().expr)));
-                fs_reset();
-                info.rewr_obj->clearSubstitution(var);
-                throw mcrl2::runtime_error(error_message);
-              }
-              else */
-              {
-                ss_push(build_solution(enum_vars,fs_top().vals));
-              }
+              ss_push(build_solution(enum_vars,fs_top().vals));
             }
             fs_pop(NULL);
           }
@@ -759,48 +749,11 @@ EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(ATermList vars, A
   }
 }
 
-/* EnumeratorSolutionsStandard EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, EnumeratorSolutionsStandard* old)
-{
-  return findSolutions(vars,expr,true,old);
-} */
-
-/* ATermList EnumeratorStandard::FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f)
-{
-  EnumeratorSolutions* sols = findSolutions(Vars,Expr);
-  ATermList r = ATmakeList0();
-
-  ATermList l;
-  // while ( sols->next(&l) && !sols->errorOccurred() )
-  while (sols->next(&l))
-  {
-    if (f == NULL)
-    {
-      ATinsert(r,(ATerm) l);
-    }
-    else
-    {
-      f(l);
-    }
-  }
-
-  return r;
-} */
-
 Rewriter* EnumeratorStandard::getRewriter()
 {
   return info.rewr_obj;
 }
 
-/* Enumerator* createEnumerator(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter, EnumerateStrategy strategy)
-{
-  switch (strategy)
-  {
-    case ENUM_STANDARD:
-      return new EnumeratorStandard(data_spec, r,clean_up_rewriter);
-    default:
-      return NULL;
-  }
-} */
 
 } // namespace detail
 } // namespace data

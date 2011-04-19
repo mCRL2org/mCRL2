@@ -78,7 +78,6 @@ class suminst_algorithm: public lps::detail::lps_algorithm
 
         try
         {
-core::gsDebug=true;
           core::gsDebugMsg("Enumerating condition: %s\n", data::pp(s.condition()).c_str());
 
           for (enumerator_type::iterator i=m_enumerator.begin(boost::make_iterator_range(variables), s.condition()); 
@@ -97,7 +96,7 @@ core::gsDebug=true;
           {
             core::gsVerboseMsg("All valuations for the variables in the condition of this summand reduce to false; removing this summand\n");
           }
-          core::gsVerboseMsg("Replaced with %d summands\n", nr_summands);
+          core::gsVerboseMsg("lpssuminst replaced a summand with %d summands\n", nr_summands);
         }
         catch (mcrl2::runtime_error const& e)
         {
