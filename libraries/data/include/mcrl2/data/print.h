@@ -548,7 +548,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_numeric_constant(data_expression x)
   {
     x = detail::reconstruct_numeric_expression(x);
-    derived().print(detail::function_symbol_name(x));
+    derived().print(function_symbol(x).name());
   }
 
   void print_function_application(const application& x)
@@ -999,6 +999,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else
       {
+        // TODO: handle ListEnum
         print_function_application(x);
       }
     }

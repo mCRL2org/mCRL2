@@ -35,12 +35,6 @@ namespace data {
 
 namespace detail {
 
-inline
-std::string function_symbol_name(const data::data_expression& x)
-{
-  return function_symbol(x).name();
-}
-
 /// \pre BoolExpr is a boolean expression, SortExpr is of type Pos, Nat, Int or
 //     Real.
 /// \return if(BoolExpr, 1, 0) of sort SortExpr
@@ -55,57 +49,20 @@ inline
 //Ret: true if s is of form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const core::identifier_string& name)
 {
-#ifdef MCRL2_USE_BOOST_EXPRESSIVE
+#ifdef MCRL2_USE_BOOST_XPRESSIVE
   std::string s = name;
   boost::xpressive::sregex re = boost::xpressive::sregex::compile("0|(-?[1-9][0-9]*)");
   return boost::xpressive::regex_match(s, re);
 #else
+  // TODO: need to implement this without using xpressive :-(
   return true;
 #endif
 }
 
 inline
-data_expression application_head(data_expression x)
+data_expression reconstruct_pos_mult(const application& x, std::vector<char>& result)
 {
-  while (is_application(x))
-  {
-    x = atermpp::arg1(x);
-  }
-  return x;
-}
-
-inline
-data_expression_list application_arguments(data_expression x)
-{
-  data_expression_list l;
-  while (is_application(x))
-  {
-    data_expression_list m = atermpp::list_arg1(x);
-    l =  m + l;
-    x = atermpp::arg1(x);
-  }
-  return l;
-}
-
-inline
-data_expression first_list_element(const data_expression_list& l)
-{
-  data_expression_list::const_iterator i = l.begin();
-  return *i;
-}
-
-inline
-data_expression second_list_element(const data_expression_list& l)
-{
-  data_expression_list::const_iterator i = l.begin();
-  return *++i;
-}
-
-inline
-data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>& result)
-{
-  data_expression head = application_head(x);
-  data_expression_list arguments = application_arguments(x);
+  data_expression head = x.head();
   if (data::sort_pos::is_c1_function_symbol(x))
   {
     //x is 1; return result
@@ -114,8 +71,8 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
   else if (data::sort_pos::is_cdub_function_symbol(head))
   {
     //x is of the form cDub(b,p); return (result*2)*v(p) + result*v(b)
-    data_expression bool_arg = first_list_element(arguments);
-    data_expression pos_arg = second_list_element(arguments);
+    data_expression bool_arg = sort_pos::bit(x);
+    data_expression pos_arg = sort_pos::number(x);
     data::detail::decimal_number_multiply_by_two(result);
     pos_arg = reconstruct_pos_mult(pos_arg, result);
     if (data::sort_bool::is_false_function_symbol(bool_arg))
@@ -176,14 +133,13 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
   {
     x = data::function_symbol("0", data::sort_nat::nat());
   }
-  else if ((sort_nat::is_cnat_application(x) || sort_nat::is_pos2nat_application(x)) && sort_pos::is_pos(first_list_element(atermpp::list_arg2(x)).sort()))
+  else if ((sort_nat::is_cnat_application(x) || sort_nat::is_pos2nat_application(x)) && sort_pos::is_pos(sort_nat::arg(x).sort()))
   {
-    data_expression value = first_list_element(atermpp::list_arg2(x));
-    value = reconstruct_numeric_expression(value);
+    data_expression value = reconstruct_numeric_expression(sort_nat::arg(x));
     x = data::sort_nat::pos2nat(value);
     if (is_function_symbol(value))
     {
-      core::identifier_string name = atermpp::arg1(value);
+      core::identifier_string name = function_symbol(value).name();
       if (is_numeric_string(name))
       {
         x = data::function_symbol(name, data::sort_nat::nat());
@@ -195,28 +151,27 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
   }
   else if (data::sort_int::is_cneg_application(x))
   {
-    x = data::sort_int::negate(first_list_element(atermpp::list_arg2(x)));
+    x = data::sort_int::negate(sort_int::arg(x));
   }
   else if ( (data::sort_int::is_cint_application(x) || data::sort_int::is_nat2int_application(x))
-            && data::sort_nat::is_nat(data_expression(atermpp::arg2(x)).sort())
+            && data::sort_nat::is_nat(sort_int::arg(x).sort())
           )
   {
-    data_expression value = arg2(x);
+    data_expression value = sort_int::arg(x);
     value = reconstruct_numeric_expression(value);
     x = data::sort_int::nat2int(data::data_expression(value));
     if (is_function_symbol(value))
     {
-      core::identifier_string name = atermpp::arg1(value);
+      core::identifier_string name = function_symbol(value).name();
       if (is_numeric_string(name))
       {
         x = data::function_symbol(name, data::sort_int::int_());
       }
     }
   }
-  else if (data::sort_real::is_int2real_application(x) && data::sort_int::is_int(data_expression(atermpp::arg2(x)).sort()))
+  else if (data::sort_real::is_int2real_application(x) && data::sort_int::is_int(sort_real::arg(x).sort()))
   {
-    data_expression value = atermpp::arg2(x);
-    value = reconstruct_numeric_expression(value);
+    data_expression value = reconstruct_numeric_expression(sort_real::arg(x));
     x = data::sort_real::int2real(value);
     if (is_function_symbol(value))
     {
@@ -229,15 +184,14 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
   }
   else if (data::sort_real::is_creal_application(x))
   {
-    data_expression_list arguments = atermpp::list_arg1(x);
-    data_expression numerator = reconstruct_numeric_expression(first_list_element(arguments));
-    data_expression denominator = reconstruct_numeric_expression(second_list_element(arguments));
+    data_expression numerator = reconstruct_numeric_expression(sort_real::numerator(x));
+    data_expression denominator = reconstruct_numeric_expression(sort_real::denominator(x));
     if (denominator == data::function_symbol("1", data::sort_pos::pos()))
     {
       x = data::sort_real::int2real(data::data_expression(numerator));
       if (is_function_symbol(numerator))
       {
-        core::identifier_string name = atermpp::arg1(numerator);
+        core::identifier_string name = function_symbol(numerator).name();
         if (is_numeric_string(name))
         {
           x = data::function_symbol(name, data::sort_real::real_());
@@ -250,7 +204,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
                                    data::sort_int::pos2int(data::data_expression(denominator)));
       if (is_function_symbol(denominator))
       {
-        core::identifier_string name = atermpp::arg1(denominator);
+        core::identifier_string name = function_symbol(denominator).name();
         if (is_numeric_string(name))
         {
           x = data::sort_real::divides(data::data_expression(numerator),
