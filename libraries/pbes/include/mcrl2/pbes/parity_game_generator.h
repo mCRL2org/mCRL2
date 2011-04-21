@@ -29,27 +29,6 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 
-namespace atermpp
-{
-/// \cond INTERNAL_DOCS
-template<>
-struct aterm_traits<std::pair<mcrl2::pbes_system::pbes_expression, size_t> >
-{
-  static void protect(const std::pair<mcrl2::pbes_system::pbes_expression, size_t>& t)
-  {
-    t.first.protect();
-  }
-  static void unprotect(const std::pair<mcrl2::pbes_system::pbes_expression, size_t>& t)
-  {
-    t.first.unprotect();
-  }
-  static void mark(const std::pair<mcrl2::pbes_system::pbes_expression, size_t>& t)
-  {
-    t.first.mark();
-  }
-};
-} // namespace atermpp
-
 namespace mcrl2
 {
 

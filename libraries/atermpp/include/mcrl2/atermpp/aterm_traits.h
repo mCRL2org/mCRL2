@@ -15,6 +15,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/type_traits/is_base_of.hpp>
 
+#include <utility>
 #include "aterm2.h"
 
 // XXX Remove
@@ -143,6 +144,26 @@ struct aterm_traits<ATermInt>
   static ATerm term(ATermInt t)
   {
     return reinterpret_cast<ATerm>(t);
+  }
+};
+
+template<typename T1, typename T2>
+struct aterm_traits<std::pair<T1, T2> >
+{
+  static void protect(const std::pair<T1, T2>& t)
+  {
+    aterm_traits<T1>::protect(t.first);
+    aterm_traits<T2>::protect(t.second);
+  }
+  static void unprotect(const std::pair<T1, T2>& t)
+  {
+    aterm_traits<T1>::unprotect(t.first);
+    aterm_traits<T2>::unprotect(t.second);
+  }
+  static void mark(const std::pair<T1, T2>& t)
+  {
+    aterm_traits<T1>::mark(t.first);
+    aterm_traits<T2>::mark(t.second);
   }
 };
 /// \endcond

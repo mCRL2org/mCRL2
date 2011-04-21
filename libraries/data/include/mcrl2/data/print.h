@@ -43,26 +43,6 @@
 namespace atermpp
 {
 
-template<>
-struct aterm_traits<std::pair<mcrl2::data::variable, mcrl2::data::variable> >
-{
-  static void protect(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
-  {
-    t.first.protect();
-    t.second.protect();
-  }
-  static void unprotect(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
-  {
-    t.first.unprotect();
-    t.second.unprotect();
-  }
-  static void mark(const std::pair<mcrl2::data::variable, mcrl2::data::variable>& t)
-  {
-    t.first.mark();
-    t.second.mark();
-  }
-};
-
 namespace detail
 {
 
