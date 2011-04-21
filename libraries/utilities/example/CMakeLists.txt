@@ -26,10 +26,25 @@ set(PROJECT_NAME "${PREFIX}_cmdline1")
 project( ${PROJECT_NAME} )
 
 add_executable("${PROJECT_NAME}" 
-      cmdline1.cpp 
+      cmdline1.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
    mcrl2_utilities_command_line
    mcrl2_core
 )
+
+##--------------------------------------------------
+## Logger example, used in quickbook documentation
+##--------------------------------------------------
+set(PROJECT_NAME "${PREFIX}_logger")
+project( ${PROJECT_NAME} )
+
+add_executable("${PROJECT_NAME}" 
+      logger.cpp
+)
+
+target_link_libraries(${PROJECT_NAME}
+   mcrl2_core
+)
+

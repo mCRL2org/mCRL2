@@ -1,12 +1,12 @@
 #ifndef MCRL_UTILITIES_LOGGER_H
 #define MCRL_UTILITIES_LOGGER_H
 
+#include <cstdio>
 #include <ctime>
+#include <stdexcept>
 #include <string>
 #include <sstream>
-#include <set>
-
-#include <iostream>
+#include <map>
 
 #include "mcrl2/core/text_utility.h"
 
