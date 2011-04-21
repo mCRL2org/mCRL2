@@ -62,6 +62,9 @@ namespace mcrl2
 namespace data
 {
 
+// forward declaration
+template <typename T> std::string print(const T& t);
+
 /// \brief Pretty prints the contents of a container
 /// \param[in] c a container with data or sort expressions
 template <typename Container>
@@ -99,7 +102,6 @@ inline std::string pp(atermpp::term_list< Expression > const& c)
 
 namespace detail
 {
-
 
 template <typename Derived>
 struct printer: public data::add_traverser_sort_expressions<core::detail::printer, Derived>
@@ -1223,7 +1225,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-/*
+  // Container contains elements of type T such that t.sort() is a sort_expression.
   template <typename Container>
   void print_declarations(const Container& container,
                           const std::string& separator = ", ",
@@ -1231,111 +1233,85 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                           const std::string& closer = ")"
                          )
   {
+    typedef typename Container::value_type T;
+    
+    // print nothing if the container is empty
     if (container.empty())
     {
       return;
     }
-    derived().print(opener);
-    sort_expression last_sort;
+
+    // sort_map[s] will contain all elements t of container with t.sort() == s.
+    std::map<sort_expression, std::vector<T> > sort_map;
+
+    // sorts will contain all sort expressions s that appear as a key in sort_map,
+    // in the order they are encountered in container
+    std::vector<sort_expression> sorts;
+
     for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
     {
-      if (i != container.begin())
+      if (sort_map.find(i->sort()) == sort_map.end())
       {
-        derived().print(separator);
+        sorts.push_back(i->sort());
       }
-      derived()(*i);
-      if (i->sort() != last_sort)
-      {
-        derived().print(": ");
-        derived()(i->sort());
-      }
+      sort_map[i->sort()].push_back(*i);
     }
-    derived().print(closer);
-  }
 
-  template <typename Container>
-  void print_equations(const Container& container,
-                       const std::string& separator = ", ",
-                       const std::string& opener = "(",
-                       const std::string& closer = ")"
-                      )
-  {
-    if (container.empty())
+    // do the actual printing
+    derived().print(opener);   
+    for (std::vector<sort_expression>::iterator i = sorts.begin(); i != sorts.end(); ++i)
     {
-      return;
-    }
-    derived().print(opener);
-    sort_expression last_sort;
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (i != container.begin())
+      const std::vector<T>& v = sort_map[*i];
+      for (typename std::vector<T>::const_iterator j = v.begin(); j != v.end(); ++j)
       {
-        derived().print(separator);
+        derived()(*j);
       }
-      derived()(*i);
-      if (i->sort() != last_sort)
-      {
-        derived().print(": ");
-        derived()(i->sort());
-      }
-    }
-    derived().print(closer);
-  }
-
-  template <typename Container>
-  void print_equations(const Container& container,
-                       const std::string& opener = "(",
-                       const std::string& closer = ")",
-                       const std::string& separator = ", "
-                      )
-  {
-    if (container.empty())
-    {
-      return;
-    }
-    derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (i != container.begin())
-      {
-        derived().print(separator);
-      }
-      derived()(*i);
-    }
-    derived().print(closer);
-  }
-
-  void print_variables(const std::map<core::identifier_string> variable>& variable_map,
-                       const std::string& opener = "(",
-                       const std::string& closer = ")",
-                       const std::string& separator = ", "
-                      )
-  {
-    if (container.empty())
-    {
-      return;
-    }
-    derived().print(opener);
-    std::map<std::string, std::std<std::string> > variable_strings;
-    for (std::map<core::identifier_string> variable>::const_iterator i = variable_map.begin(); i != variable_map.end(); ++i)
-    {
-      std::string sort_name = derived()(i->second.sort());
-      variable_strings[].insert(i->first);
-    }
-    for (std::map<std::string, std::std<std::string> >::iterator i = variable_strings.begin(); i != variable_strings.end(); ++i)
-    {
-      derived().print(core::string_join(i->second, ", "));
       derived().print(": ");
-    }
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (i != container.begin())
-      {
-        derived().print(separator);
-      }
       derived()(*i);
     }
     derived().print(closer);
+  }
+
+  // Adds variables v and function symbols f to variable_map and function_symbol_names respectively.
+  void update_mappings(const data_equation& eqn,
+                       std::vector<variable>& variables,
+                       std::map<core::identifier_string, variable>& variable_map,
+                       std::set<core::identifier_string>& function_symbol_names
+                      )
+  {
+    std::set<function_symbol> f = data::find_function_symbols(eqn);
+    for (std::set<function_symbol>::iterator i = f.begin(); i != f.end(); ++i)
+    {
+      function_symbol_names.insert(i->name());
+    }
+    const variable_list& v = eqn.variables();
+    for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+      std::pair<std::map<core::identifier_string, variable>::iterator, bool> k = variable_map.insert(std::make_pair(i->name(), *i));
+      if (!k.second) // new variable encountered
+      {
+        variables.push_back(*i);
+      }
+    }
+  }
+
+  bool has_conflict(const data_equation& eqn,
+                    const std::map<core::identifier_string, variable>& variable_map
+                   )
+  {
+    //std::cout << "<eqn>" << std::endl;
+    //std::cout << core::pp(eqn) << std::endl;
+    const variable_list& v = eqn.variables();
+    //std::cout << "<done>" << std::endl;
+    for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
+    {
+      std::map<core::identifier_string, variable>::const_iterator j = variable_map.find(i->name());
+      if (j != variable_map.end() && *i != j->second)
+      {
+        return true;
+      }
+    }
+    return false;
   }
 
   /// \brief Searches in the range of equations [first, last) for the first equation
@@ -1344,38 +1320,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   /// name and a different sort, or if a declared variable in e1 has the same name as a
   /// function symbol appearing in equation e2.
   template <typename Iter>
-  Iter find_conflicting_equation(Iter first, Iter last, std::map<core::identifier_string, variable>& variable_map, std::set<core::identifier>& function_symbol_names)
+  Iter find_conflicting_equation(Iter first, Iter last, std::vector<variable>& variables)
   {
-    std::set<data::function_symbol> f = data::find_function_symbols(*first);
-    for (std::set<data::function_symbol>::iterator i = f.begin(); i != f.end(); ++i)
+    std::map<core::identifier_string, variable> variable_map;
+    std::set<core::identifier_string> function_symbol_names;
+    for (Iter i = first; i != last; ++i)
     {
-      function_symbol_names.insert(i->name());
-    }
-    const variable_list& v = first->variables();
-    for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
-    {
-      variable_map[i->name()] = *i;
-    }
-
-    for (Iter i = ++first; i != last; ++i)
-    {
-      const variable_list& v = i->variables();
-      for (variable_list::const_iterator j = v.begin(); j != v.end(); ++j)
+      if (has_conflict(*i, variable_map))
       {
-        std::map<core::identifier_string> variable>::const_iterator k = variable_map.find(j->name());
-        if (k != variable_map.end() && *j != k->second)
-        {
-          return i;
-        }
+        return i;
       }
-      std::set<data::function_symbol> f = data::find_function_symbols(*i);
-      for (std::set<data::function_symbol>::iterator j = f.begin(); j != f.end(); ++j)
+      else
       {
-        function_symbol_names.insert(j->name());
-      }
-      for (variable_list::const_iterator j = v.begin(); j != v.end(); ++j)
-      {
-        variable_map[j->name()] = *j;
+        update_mappings(*i, variables, variable_map, function_symbol_names);
       }
     }
     return last; // no conflict found
@@ -1389,18 +1346,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_declarations(x.mappings(), "map ", ";\n", ";\n     ");
     atermpp::vector<data_equation>::const_iterator first = x.equations().begin();
     atermpp::vector<data_equation>::const_iterator last = x.equations().end();
-    atermpp::vector<data_equation>::const_iterator i = first;
-    while (i != last)
+//std::cout << "<N>" << x.equations().size() << std::endl;
+    while (first != last)
     {
-      std::map<core::identifier_string> variable> variable_map;
-      std::set<core::identifier> function_symbol_names;
-      i = find_conflicting_equation(i, last, variable_map, function_symbol_names);
-      print_variables(variable_map);
-      print_equations(x.equations(), "eqn ", ";\n", ";\n     ");
+//std::cout << "<last - first>" << (last - first) << std::endl;
+      std::vector<variable> variables;
+      atermpp::vector<data_equation>::const_iterator i = find_conflicting_equation(first, last, variables);
+//std::cout << "<i - first>" << (i - first) << std::endl;
+      print_declarations(variables, "var ", ";\n", ";\n     ");
+      print_list(std::vector<data_equation>(first, i), "eqn ", ";\n", ";\n     ");
+      first = i;
     }
     derived().leave(x);
   }
-*/
 
 };
 
