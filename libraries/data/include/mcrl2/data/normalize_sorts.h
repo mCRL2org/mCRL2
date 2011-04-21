@@ -58,10 +58,10 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
     {
       // Rewrite the arguments into normal form.
       atermpp::vector< sort_expression > new_domain;
-      for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(e).domain());
-           !r.empty(); r.advance_begin(1))
+      sort_expression_list e_domain(function_sort(e).domain());
+      for (sort_expression_list::const_iterator i = e_domain.begin(); i != e_domain.end(); ++i)
       {
-        new_domain.push_back(this->operator()(r.front()));
+        new_domain.push_back(this->operator()(*i));
       }
       new_sort=function_sort(new_domain, this->operator()(function_sort(e).codomain()));
     }
@@ -77,18 +77,18 @@ struct normalize_sorts_function: public std::unary_function<data::sort_expressio
     {
       // Rewrite the argument sorts to normal form.
       atermpp::vector< structured_sort_constructor > new_constructors;
-      for (structured_sort::constructors_const_range r(structured_sort(e).struct_constructors());
-           !r.empty(); r.advance_begin(1))
+      structured_sort_constructor_list e_constructors(structured_sort(e).struct_constructors());
+      for (structured_sort_constructor_list::const_iterator i = e_constructors.begin(); i != e_constructors.end(); ++i)
       {
         atermpp::vector< structured_sort_constructor_argument > new_arguments;
-        for (structured_sort_constructor::arguments_const_range ra(r.front().arguments());
-             !ra.empty(); ra.advance_begin(1))
+        structured_sort_constructor_argument_list i_arguments(i->arguments());
+        for (structured_sort_constructor_argument_list::const_iterator j = i_arguments.begin(); j != i_arguments.end(); ++j)
         {
           new_arguments.push_back(structured_sort_constructor_argument(
-                                    ra.front().name(),
-                                    this->operator()(ra.front().sort())));
+                                    j->name(),
+                                    this->operator()(j->sort())));
         }
-        new_constructors.push_back(structured_sort_constructor(r.front().name(), new_arguments, r.front().recogniser()));
+        new_constructors.push_back(structured_sort_constructor(i->name(), new_arguments, i->recogniser()));
       }
       new_sort=structured_sort(new_constructors);
     }

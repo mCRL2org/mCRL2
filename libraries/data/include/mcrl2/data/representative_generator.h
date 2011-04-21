@@ -132,9 +132,10 @@ class representative_generator
 
       data_expression_vector arguments;
 
-      for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(symbol.sort()).domain()); !r.empty(); r.advance_begin(1))
+      sort_expression_list symbol_domain(function_sort(symbol.sort()).domain());
+      for (sort_expression_list::const_iterator i = symbol_domain.begin(); i != symbol_domain.end(); ++i)
       {
-        data_expression representative = find_representative(r.front(), maximum_depth - 1);
+        data_expression representative = find_representative(*i, maximum_depth - 1);
 
         if (representative == data_expression())
         {

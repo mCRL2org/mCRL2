@@ -144,9 +144,10 @@ class data_enumerator
         {
           atermpp::vector<variable> variables;
 
-          for (boost::iterator_range< sort_expression_list::iterator > j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+          sort_expression_list i_domain(function_sort(i->sort()).domain());
+          for (sort_expression_list::const_iterator j = i_domain.begin(); j != i_domain.end(); ++j)
           {
-            variables.push_back(variable((*m_generator)(), j.front()));
+            variables.push_back(variable((*m_generator)(), *j));
           }
 
           variable_list w(atermpp::convert< variable_list >(variables));

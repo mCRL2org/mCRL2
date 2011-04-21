@@ -125,32 +125,6 @@ typedef atermpp::term_list< sort_expression >  sort_expression_list;
 /// \brief vector of sorts
 typedef atermpp::vector< sort_expression >     sort_expression_vector;
 
-/// \brief Converts an iterator range to sort_expression_list
-/// \param r A range of sort expressions.
-/// \note This function uses implementation details of the iterator type
-/// and hence is sometimes efficient than copying all elements of the list.
-template < typename ForwardTraversalIterator >
-inline sort_expression_list make_sort_expression_list(boost::iterator_range< ForwardTraversalIterator > const& r)
-{
-  return atermpp::convert< sort_expression_list >(r);
-}
-
-/// \brief Converts an iterator range to sort_expression_list
-/// \param r A range of sort expressions.
-template < typename ForwardTraversalIterator >
-inline sort_expression_vector make_sort_expression_vector(boost::iterator_range< ForwardTraversalIterator > const& r)
-{
-  return atermpp::convert< sort_expression_vector >(r);
-}
-
-/// \brief Converts a vector to a sort_expression_list
-/// \param r A range of sort expressions.
-template < typename Expression >
-inline sort_expression_list make_sort_expression_list(atermpp::vector< Expression >const& r)
-{
-  return atermpp::convert< sort_expression_list >(r);
-}
-
 } // namespace data
 
 } // namespace mcrl2

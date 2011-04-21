@@ -289,8 +289,8 @@ struct expression_traits : public core::term_traits< Expression >
     return abstraction(abstraction(variable_binder).binding_operator(), abstraction(variable_binder).variables(), new_body);
   }
 
-  template < typename ForwardTraversalIterator >
-  static application make_application(data_expression const& e, boost::iterator_range< ForwardTraversalIterator > const& arguments)
+  template < typename Container >
+  static application make_application(data_expression const& e, Container const& arguments)
   {
     return application(e, arguments);
   }

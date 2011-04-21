@@ -125,9 +125,9 @@ class structured_sort: public detail::structured_sort_base
     function_symbol_vector constructor_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (constructors_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
+      for (structured_sort_constructor_list::const_iterator i = struct_constructors().begin(); i != struct_constructors().end(); ++i)
       {
-        result.push_back(i.front().constructor_function(s));
+        result.push_back(i->constructor_function(s));
       }
       return result;
     }
@@ -135,9 +135,9 @@ class structured_sort: public detail::structured_sort_base
     function_symbol_vector projection_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (constructors_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
+      for (structured_sort_constructor_list::const_iterator i = struct_constructors().begin(); i != struct_constructors().end(); ++i)
       {
-        function_symbol_vector projections(i.front().projection_functions(s));
+        function_symbol_vector projections(i->projection_functions(s));
 
         for (function_symbol_vector::const_iterator j = projections.begin(); j != projections.end(); ++j)
         {
@@ -150,11 +150,11 @@ class structured_sort: public detail::structured_sort_base
     function_symbol_vector recogniser_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (constructors_const_range i = struct_constructors(); !i.empty(); i.advance_begin(1))
+      for (structured_sort_constructor_list::const_iterator i = struct_constructors().begin(); i != struct_constructors().end(); ++i)
       {
-        if (i.front().recogniser() != no_identifier())
+        if (i->recogniser() != no_identifier())
         {
-          result.push_back(i.front().recogniser_function(s));
+          result.push_back(i->recogniser_function(s));
         }
       }
       return result;
@@ -174,7 +174,7 @@ class structured_sort: public detail::structured_sort_base
           data_expression right_smaller       = (i < j)  ? sort_bool::true_() : sort_bool::false_();
           data_expression right_smaller_equal = (i <= j) ? sort_bool::true_() : sort_bool::false_();
 
-          if (i->argument_sorts().empty() && j->argument_sorts().empty())
+          if (i->arguments().empty() && j->arguments().empty())
           {
             data_expression operand_left  = i->constructor_function(s);
             data_expression operand_right = j->constructor_function(s);
@@ -193,30 +193,32 @@ class structured_sort: public detail::structured_sort_base
             // Create variables for equation
             atermpp::vector< variable > variables;
 
-            if (i->argument_sorts().empty())
+            if (i->arguments().empty())
             {
               operand_left = i->constructor_function(s);
             }
             else
             {
-              for (structured_sort_constructor::arguments_const_range k(i->arguments()); k.begin() != k.end(); k.advance_begin(1))
+              structured_sort_constructor_argument_list i_arguments = i->arguments();
+              for (structured_sort_constructor_argument_list::const_iterator k = i_arguments.begin(); k != i_arguments.end(); ++k)
               {
-                variables.push_back(variable(generator(), k.front().sort()));
+                variables.push_back(variable(generator(), k->sort()));
               }
 
               // create first operand of ==, < or <=
               operand_left = application(i->constructor_function(s), variables);
             }
 
-            if (j->argument_sorts().empty())
+            if (j->arguments().empty())
             {
               operand_right = j->constructor_function(s);
             }
             else
             {
-              for (structured_sort_constructor::arguments_const_range k(j->arguments()); k.begin() != k.end(); k.advance_begin(1))
+              structured_sort_constructor_argument_list j_arguments = j->arguments();
+              for (structured_sort_constructor_argument_list::const_iterator k = j_arguments.begin(); k != j_arguments.end(); ++k)
               {
-                variables.push_back(variable(generator(), k.front().sort()));
+                variables.push_back(variable(generator(), k->sort()));
               }
 
               // create second operand of ==, < or <=
@@ -275,31 +277,30 @@ class structured_sort: public detail::structured_sort_base
     {
       data_equation_vector result;
 
-      for (constructors_const_range i(struct_constructors());
-           i.begin() != i.end(); i.advance_begin(1))
+      for (structured_sort_constructor_list::const_iterator i = struct_constructors().begin(); i != struct_constructors().end(); ++i)
       {
-        if (!i.front().argument_sorts().empty())
+        if (!i->arguments().empty())
         {
-          structured_sort_constructor::arguments_const_range arguments(i.front().arguments());
+          structured_sort_constructor_argument_list arguments(i->arguments());
 
           number_postfix_generator generator("v");
 
           atermpp::vector< variable > variables;
 
           // Create variables for equation
-          for (structured_sort_constructor::arguments_const_range::const_iterator j(arguments.begin()); j != arguments.end(); ++j)
+          for (structured_sort_constructor_argument_list::const_iterator j(arguments.begin()); j != arguments.end(); ++j)
           {
             variables.push_back(variable(generator(), j->sort()));
           }
 
           atermpp::vector< variable >::const_iterator v = variables.begin();
 
-          for (structured_sort_constructor::arguments_const_range::const_iterator j(arguments.begin()); j != arguments.end(); ++j, ++v)
+          for (structured_sort_constructor_argument_list::const_iterator j(arguments.begin()); j != arguments.end(); ++j, ++v)
           {
             if (j->name() != no_identifier())
             {
               application lhs(function_symbol(j->name(), make_function_sort(s, j->sort()))
-                              (application(i.front().constructor_function(s), variables)));
+                              (application(i->constructor_function(s), variables)));
 
               result.push_back(data_equation(variables, lhs, *v));
             }
@@ -314,32 +315,31 @@ class structured_sort: public detail::structured_sort_base
     {
       data_equation_vector result;
 
-      constructors_const_range cl(struct_constructors());
+      structured_sort_constructor_list cl(struct_constructors());
 
-      for (constructors_const_range::iterator i = cl.begin(); i != cl.end(); ++i)
+      for (structured_sort_constructor_list::const_iterator i = cl.begin(); i != cl.end(); ++i)
       {
-        for (constructors_const_range::iterator j = cl.begin(); j != cl.end(); ++j)
+        for (structured_sort_constructor_list::const_iterator j = cl.begin(); j != cl.end(); ++j)
         {
           if (j->recogniser() != no_identifier())
           {
             data_expression right = (*i == *j) ? sort_bool::true_() : sort_bool::false_();
 
-            if (i->argument_sorts().empty())
+            if (i->arguments().empty())
             {
               result.push_back(data_equation(j->recogniser_function(s)(i->constructor_function(s)), right));
             }
             else
             {
-              typedef structured_sort_constructor::arguments_const_range argument_range;
 
               number_postfix_generator generator("v");
 
-              argument_range arguments(i->arguments());
+              structured_sort_constructor_argument_list arguments(i->arguments());
 
               // Create variables for equation
               variable_vector variables;
 
-              for (argument_range::const_iterator k(arguments.begin()); k != arguments.end(); ++k)
+              for (structured_sort_constructor_argument_list::const_iterator k(arguments.begin()); k != arguments.end(); ++k)
               {
                 variables.push_back(variable(generator(), k->sort()));
               }
@@ -353,28 +353,6 @@ class structured_sort: public detail::structured_sort_base
 
       return result;
     }
-
-  public:
-
-    /// \brief iterator range over list of constructor declarations
-    typedef boost::iterator_range< structured_sort_constructor_list::iterator >       constructors_range;
-    /// \brief iterator range over constant list of constructor declarations
-    typedef boost::iterator_range< structured_sort_constructor_list::const_iterator > constructors_const_range;
-
-    /// \brief iterator range over list of constructor functions
-    typedef boost::iterator_range< function_symbol_list::iterator >                   constructor_function_range;
-    /// \brief iterator range over constant list of constructor functions
-    typedef boost::iterator_range< function_symbol_list::const_iterator >             constructor_function_const_range;
-
-    /// \brief iterator range over list of constructor functions
-    typedef boost::iterator_range< function_symbol_list::iterator >                   projection_function_range;
-    /// \brief iterator range over constant list of constructor functions
-    typedef boost::iterator_range< function_symbol_list::const_iterator >             projection_function_const_range;
-
-    /// \brief iterator range over list of constructor functions
-    typedef boost::iterator_range< function_symbol_list::iterator >                   recogniser_function_range;
-    /// \brief iterator range over constant list of constructor functions
-    typedef boost::iterator_range< function_symbol_list::const_iterator >             recogniser_function_const_range;
 
   public:
 
@@ -401,9 +379,9 @@ class structured_sort: public detail::structured_sort_base
 
     /// \brief Returns the struct constructors of this sort
     ///
-    constructors_const_range struct_constructors() const
+    structured_sort_constructor_list struct_constructors() const
     {
-      return structured_sort_constructor_list(atermpp::arg1(*this));
+      return constructors();
     }
 
 

@@ -73,24 +73,6 @@ struct converter< atermpp::term_list< TargetExpression >,
   }
 };
 
-template < typename TargetExpression, typename SourceExpression >
-struct converter< atermpp::term_list< TargetExpression >,
-    boost::iterator_range< atermpp::term_list_iterator< SourceExpression > >,
-    TargetExpression, SourceExpression >
-{
-
-  static atermpp::term_list< TargetExpression >
-  convert(boost::iterator_range< atermpp::term_list_iterator< SourceExpression > > const& r)
-  {
-
-    if (ATisEmpty(r.end().list()))
-    {
-      return atermpp::term_list< TargetExpression >(r.begin().list());
-    }
-
-    return atermpp::term_list< TargetExpression >(r.begin(), r.end());
-  }
-};
 } // namespace detail
 /// \endcond
 

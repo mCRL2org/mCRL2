@@ -504,7 +504,6 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                 {
                   data::sort_expression_list dsorts;
 
-                  // boost::iterator_range< data::sort_expression_list::const_iterator > dsorts;
                   if (is_function_sort(rf->sort()))
                   {
                     data::function_sort sa=rf->sort();

@@ -122,20 +122,16 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
       return make_constructor(name, atermpp::term_list< structured_sort_constructor_argument >(), recogniser);
     }
 
-  public:
-
-    /// \brief iterator range over list of structured sort constructors
-    typedef atermpp::term_list< structured_sort_constructor_argument >::const_iterator  arguments_iterator;
-    /// \brief iterator range over list of structured sort constructors
-    typedef boost::iterator_range< arguments_iterator >                                 arguments_range;
-    /// \brief iterator range over constant list of structured sort constructors
-    typedef boost::iterator_range< arguments_iterator >                                 arguments_const_range;
-    /// \brief iterator range over list of structured sort constructors
-    typedef atermpp::detail::transform_iterator< get_argument_sort, arguments_iterator >         argument_sorts_iterator;
-    /// \brief iterator range over list of structured sort constructors
-    typedef boost::iterator_range< argument_sorts_iterator >                            argument_sorts_range;
-    /// \brief iterator range over constant list of structured sort constructors
-    typedef boost::iterator_range< argument_sorts_iterator >                            argument_sorts_const_range;
+    /// \brief Returns the sorts of the arguments in an output iterator.
+    ///
+    template <typename OutIter>
+    void argument_sorts(OutIter out) const
+    {
+      for(structured_sort_constructor_argument_list::const_iterator i = arguments().begin(); i != arguments().end(); ++i)
+      {
+        *out++ = i->sort();
+      }
+    }
 
   public:
 
@@ -228,13 +224,6 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
       : detail::structured_sort_constructor_base(make_constructor(detail::make_identifier(name), detail::make_identifier(recogniser)))
     { }
 
-    /// \brief Returns the sorts of the arguments.
-    ///
-    argument_sorts_const_range argument_sorts() const
-    {
-      return boost::iterator_range< argument_sorts_iterator >(arguments());
-    }
-
     /// \overload
     core::identifier_string recogniser() const
     {
@@ -253,7 +242,9 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
     /// sort struct c|d.
     function_symbol constructor_function(const sort_expression& s) const
     {
-      argument_sorts_const_range arguments(argument_sorts());
+      sort_expression_vector arguments;
+      std::back_insert_iterator<sort_expression_vector> inserter(arguments);
+      argument_sorts(inserter);
 
       return function_symbol(name(), (arguments.empty()) ? s : function_sort(arguments, s));
     }
@@ -264,11 +255,11 @@ class structured_sort_constructor: public detail::structured_sort_constructor_ba
     function_symbol_vector projection_functions(const sort_expression& s) const
     {
       function_symbol_vector result;
-      for (arguments_const_range i(arguments()); !i.empty(); i.advance_begin(1))
+      for (structured_sort_constructor_argument_list::const_iterator i = arguments().begin(); i != arguments().end(); ++i)
       {
-        if (i.front().name() != no_identifier())
+        if (i->name() != no_identifier())
         {
-          result.push_back(function_symbol(i.front().name(), make_function_sort(s, i.front().sort())));
+          result.push_back(function_symbol(i->name(), make_function_sort(s, i->sort())));
         }
       }
       return result;

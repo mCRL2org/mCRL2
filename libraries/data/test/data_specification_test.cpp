@@ -181,14 +181,11 @@ void test_sorts()
 
   basic_sort s2("S2");
   sort_expression_vector s2l(atermpp::make_vector(reinterpret_cast<sort_expression&>(s2)));
-  boost::iterator_range<sort_expression_vector::const_iterator> s2l_range(s2l);
   spec.add_context_sort(s2);
-  //std::for_each(s2l_range.begin(), s2l_range.end(),
-  //      boost::bind(&data_specification::add_context_sort, spec1, _1));
-  spec1.add_context_sorts(s2l_range);
+  spec1.add_context_sorts(s2l);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
-  std::for_each(s2l_range.begin(), s2l_range.end(), boost::bind(&data_specification::remove_sort, &spec, _1));
+  std::for_each(s2l.begin(), s2l.end(), boost::bind(&data_specification::remove_sort, &spec, _1));
   spec1.remove_sort(s2);
   compare_for_equality(spec, spec1);
 }
@@ -266,12 +263,11 @@ void test_constructors()
 
   spec.add_constructor(i);
   function_symbol_vector il(atermpp::make_vector(i));
-  boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::add_constructor, &spec1, _1));
+  std::for_each(il.begin(), il.end(), boost::bind(&data_specification::add_constructor, &spec1, _1));
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   spec.remove_constructor(i);
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::remove_constructor, &spec1, _1));
+  std::for_each(il.begin(), il.end(), boost::bind(&data_specification::remove_constructor, &spec1, _1));
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }
 
@@ -289,9 +285,6 @@ void test_functions()
   function_symbol_vector fgl(atermpp::make_vector(f,g));
   function_symbol_vector hl(atermpp::make_vector(h));
   function_symbol_vector fghl(atermpp::make_vector(f,g,h));
-  boost::iterator_range<function_symbol_vector::const_iterator> fgl_range(boost::make_iterator_range(fgl));
-  boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
-  boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
   data_specification spec;
   spec.add_sort(s);
@@ -301,7 +294,7 @@ void test_functions()
   spec.add_mapping(h);
 
   data_specification spec1(spec);
-  std::for_each(fghl_range.begin(), fghl_range.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
+  std::for_each(fghl.begin(), fghl.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
 
   BOOST_CHECK(boost::distance(spec.mappings()) == 35);
 
@@ -323,11 +316,10 @@ void test_functions()
   function_symbol i("i", s0);
   spec.add_mapping(i);
   function_symbol_vector il(atermpp::make_vector(i));
-  boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
+  std::for_each(il.begin(), il.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
   compare_for_equality(spec, spec1);
 
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::remove_mapping, &spec, _1));
+  std::for_each(il.begin(), il.end(), boost::bind(&data_specification::remove_mapping, &spec, _1));
   spec1.remove_mapping(i);
   compare_for_equality(spec, spec1);
 }
@@ -343,8 +335,7 @@ void test_equations()
   data_expression_vector xel(atermpp::make_vector(reinterpret_cast<data_expression&>(x)));
   application fx(f, boost::make_iterator_range(xel));
   variable_vector xl(atermpp::make_vector(x));
-  boost::iterator_range<variable_vector::const_iterator> x_range(xl);
-  data_equation fxx(x_range, x, fx, x);
+  data_equation fxx(xl, x, fx, x);
 
   data_specification spec;
   data_specification spec1;
@@ -355,16 +346,14 @@ void test_equations()
   BOOST_CHECK(compare_for_equality(spec, spec1));
   spec.add_equation(fxx);
   data_equation_vector fxxl(atermpp::make_vector(fxx));
-  boost::iterator_range<data_equation_vector::const_iterator> fxxl_range(fxxl);
-  std::for_each(fxxl_range.begin(), fxxl_range.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
+  std::for_each(fxxl.begin(), fxxl.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
-  data_equation fxf(x_range, x, fx, f);
+  data_equation fxf(xl, x, fx, f);
   data_equation_vector fxfl(atermpp::make_vector(fxf));
-  boost::iterator_range<data_equation_vector::const_iterator> fxfl_range(fxfl);
   spec.add_equation(fxf);
-  std::for_each(fxfl_range.begin(), fxfl_range.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
+  std::for_each(fxfl.begin(), fxfl.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
@@ -372,7 +361,7 @@ void test_equations()
   BOOST_CHECK(result.size() == 2);
   BOOST_CHECK(std::find(result.begin(), result.end(), fxf) != result.end());
   BOOST_CHECK(std::find(result.begin(), result.end(), fxx) != result.end());
-  std::for_each(fxfl_range.begin(), fxfl_range.end(), boost::bind(&data_specification::remove_equation, &spec, _1));
+  std::for_each(fxfl.begin(), fxfl.end(), boost::bind(&data_specification::remove_equation, &spec, _1));
   spec1.remove_equation(fxf);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }

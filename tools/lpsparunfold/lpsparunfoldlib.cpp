@@ -179,7 +179,7 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
     if (is_function_sort(i->sort()))
     {
       function_sort fs = function_sort(i->sort());
-      boost::iterator_range<sort_expression_list::const_iterator> sel  = fs.domain();
+      sort_expression_list sel  = fs.domain();
       for (sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); j++)
       {
         mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
@@ -251,7 +251,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     if (is_function_sort(i -> sort()))
     {
       function_sort fs = function_sort(i -> sort());
-      boost::iterator_range<sort_expression_list::const_iterator> sel = fs.domain();
+      sort_expression_list sel = fs.domain();
 
       data_expression_vector dal;
       for (sort_expression_list::const_iterator j = sel.begin(); j != sel.end(); ++j)
@@ -842,7 +842,7 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
   mcrl2::core::identifier_string istr = generator(fstr);
 
   variable_vector vars;
-  boost::iterator_range<sort_expression_list::const_iterator> dom = function_sort(case_function.sort()).domain();
+  sort_expression_list dom = function_sort(case_function.sort()).domain();
   for (sort_expression_list::const_iterator i = dom.begin(); i != dom.end(); ++i)
   {
     istr = generator(fstr);

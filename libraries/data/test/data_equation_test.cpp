@@ -31,11 +31,10 @@ void data_equation_test()
   function_symbol c("c", s);
   function_symbol f("f", s);
   variable x("x", s);
-  variable_vector xl(atermpp::make_vector(x));
-  boost::iterator_range<variable_vector::const_iterator> xl_range(boost::make_iterator_range(xl));
+  variable_list xl(atermpp::make_list(x));
 
-  data_equation e(xl_range, c, x, f);
-  BOOST_CHECK(e.variables() == xl_range);
+  data_equation e(xl, c, x, f);
+  BOOST_CHECK(e.variables() == xl);
   BOOST_CHECK(e.condition() == c);
   BOOST_CHECK(e.lhs() == x);
   BOOST_CHECK(e.rhs() == f);

@@ -207,10 +207,10 @@ void data_specification::check_for_alias_loop(
 
   if (is_function_sort(s))
   {
-    for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(s).domain());
-         !r.empty(); r.advance_begin(1))
+    sort_expression_list s_domain(function_sort(s).domain());
+    for (sort_expression_list::const_iterator i = s_domain.begin(); i != s_domain.end(); ++i)
     {
-      check_for_alias_loop(r.front(),sorts_already_seen,false);
+      check_for_alias_loop(*i,sorts_already_seen,false);
     }
 
     check_for_alias_loop(function_sort(s).codomain(),sorts_already_seen,false);
