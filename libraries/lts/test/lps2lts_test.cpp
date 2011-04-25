@@ -117,7 +117,9 @@ rewrite_strategy_vector initialise_rewrite_strategies()
 {
   std::vector<rewrite_strategy> result;
   result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
+  // The innermost rewriter is being phased out. Therefore, there is no need to test it
+  // anymore.
+  // result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
 #ifdef MCRL2_TEST_COMPILERS
 #ifdef MCRL2_JITTYC_AVAILABLE
   result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
