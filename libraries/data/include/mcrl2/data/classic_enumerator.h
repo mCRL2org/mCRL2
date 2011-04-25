@@ -129,6 +129,12 @@ class classic_enumerator
     // for copy constructor, since it is unsafe to copy EnumeratorSolutionsStandard
     detail::EnumeratorSolutionsStandard                          *m_generator;
     bool                                                         m_not_equal_to_false;
+    // The variable m_assignments below is only used by the iterator_internal class. This is
+    // to prevent the overhead of protecting these ATerm variables, each time an iterator_internal
+    // is constructed. As a consequence, iterator_internal elements cannot be used simultaneously.
+    // This is also the problem of the underlying m_enumerator. This should be resolved in due
+    // time, because this will lead to problems.
+    ATermList m_assignments;
 
   
   public:
@@ -143,8 +149,6 @@ class classic_enumerator
         typedef classic_enumerator < evaluator_type > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
         bool m_enumerator_iterator_valid;
-        atermpp::aterm_appl m_condition;
-        ATermList m_assignments;
 
       public:
         
@@ -154,7 +158,6 @@ class classic_enumerator
           m_enclosing_enumerator(e),
           m_enumerator_iterator_valid(false)
         {
-          // Protect variables, condition and assignments?
           m_enclosing_enumerator->m_generator=
                  m_enclosing_enumerator->m_enumerator->findSolutions(
                                      (ATermList)variables,
@@ -179,7 +182,7 @@ class classic_enumerator
   
         void increment()
         {
-          m_enumerator_iterator_valid=m_enclosing_enumerator->m_generator->next(&m_assignments);
+          m_enumerator_iterator_valid=m_enclosing_enumerator->m_generator->next(&m_enclosing_enumerator->m_assignments);
         }
     
         bool equal(iterator_internal const& other) const
@@ -190,7 +193,7 @@ class classic_enumerator
     
         ATermList const& dereference() const
         {
-          return m_assignments;
+          return m_enclosing_enumerator->m_assignments;
         }
     };
 
@@ -218,7 +221,6 @@ class classic_enumerator
 
         enclosing_classic_enumerator *m_enclosing_enumerator;
         bool m_enumerator_iterator_valid;
-        data_expression m_condition;
         substitution_type m_substitution;
 
       public:
@@ -323,12 +325,15 @@ class classic_enumerator
       m_evaluator(evaluator),
       m_enumerator(new detail::EnumeratorStandard(m_specification, &m_evaluator.get_rewriter())),
       m_generator(NULL),
-      m_not_equal_to_false(not_equal_to_false)
+      m_not_equal_to_false(not_equal_to_false),
+      m_assignments(NULL)
     {
+      ATprotectList(&m_assignments);
     } 
 
     ~classic_enumerator()
     {
+      ATunprotectList(&m_assignments);
       if (m_generator!=NULL)
       { 
         delete m_generator;
@@ -343,8 +348,10 @@ class classic_enumerator
       m_evaluator(other.m_evaluator),
       m_enumerator(other.m_enumerator),
       m_generator(other.m_generator),
-      m_not_equal_to_false(other.m_not_equal_to_false)
+      m_not_equal_to_false(other.m_not_equal_to_false),
+      m_assignments(other.m_assignments)
     {
+      ATprotectList(&m_assignments);
     }
 
 
@@ -356,6 +363,8 @@ class classic_enumerator
       m_enumerator=other.m_enumerator;
       m_generator=other.m_generator;
       m_not_equal_to_false=other.m_not_equal_to_false;
+      m_assignments=other.m_assignments;
+      ATprotectList(&m_assignments);
 
       return *this;
     }
