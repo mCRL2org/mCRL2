@@ -112,32 +112,6 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
 typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
-static inline
-rewrite_strategy_vector initialise_rewrite_strategies()
-{
-  std::vector<rewrite_strategy> result;
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
-  // The innermost rewriter is being phased out. Therefore, there is no need to test it
-  // anymore.
-  // result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
-#ifdef MCRL2_TEST_COMPILERS
-#ifdef MCRL2_JITTYC_AVAILABLE
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
-#endif // MCRL2_JITTYC_AVAILABLE
-#ifdef MCRL2_INNERC_AVAILABLE
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
-#endif // MCRL2_JITTYC_AVAILABLE
-#endif // MCRL2_TEST_COMPILERS
-  return result;
-}
-
-static inline
-rewrite_strategy_vector rewrite_strategies()
-{
-  static rewrite_strategy_vector rewrite_strategies = initialise_rewrite_strategies();
-  return rewrite_strategies;
-}
-
 // Configure exploration strategies to be tested;
 typedef std::vector< lts::exploration_strategy > exploration_strategy_vector;
 
@@ -186,7 +160,7 @@ void check_lps2lts_specification(std::string const& specification,
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
   lps::specification lps = lps::parse_linear_process_specification(specification);
 
-  rewrite_strategy_vector rstrategies(rewrite_strategies());
+  rewrite_strategy_vector rstrategies(utilities::get_test_rewrite_strategies());
   for (rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
   {
     exploration_strategy_vector estrategies(exploration_strategies());
