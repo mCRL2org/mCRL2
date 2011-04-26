@@ -75,16 +75,12 @@ std::string print(pbespg_solver_type solver_type)
 struct pbespgsolve_options
 {
   pbespg_solver_type solver_type;
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
   bool use_scc_decomposition;
-#endif
   bool verify_solution;
 
   pbespgsolve_options()
     : solver_type(spm_solver),
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       use_scc_decomposition(true),
-#endif
       verify_solution(true)
   {
   }

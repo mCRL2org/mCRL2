@@ -193,10 +193,8 @@ void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
   pbespgsolve_options options;
   test_pbespgsolve(pbes_spec, options, expected_result);
 
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
   options.use_scc_decomposition = false;
   test_pbespgsolve(pbes_spec, options, expected_result);
-#endif
 }
 
 

@@ -76,9 +76,7 @@ class pg_solver_tool : public input_tool
                       "  'spm' (default), or\n"
                       "  'recursive'",
                       's');
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       desc.add_option("scc", "Use scc decomposition", 'c');
-#endif
       desc.add_option("verify", "Verify the solution", 'e');
       desc.add_hidden_option("equation_limit",
                              make_optional_argument("NAME", "-1"),
@@ -90,9 +88,7 @@ class pg_solver_tool : public input_tool
     {
       super::parse_options(parser);
       m_options.solver_type = parse_solver_type(parser.option_argument("solver-type"));
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       m_options.use_scc_decomposition = (parser.options.count("scc") > 0);
-#endif
       m_options.verify_solution = (parser.options.count("verify") > 0);
       if (parser.options.count("equation_limit") > 0)
       {
@@ -121,9 +117,7 @@ class pg_solver_tool : public input_tool
         std::clog << "pbespgsolve parameters:" << std::endl;
         std::clog << "  input file:        " << input_filename() << std::endl;
         std::clog << "  solver type:       " << print(m_options.solver_type) << std::endl;
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
         std::clog << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
-#endif
         std::clog << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
       }
 
