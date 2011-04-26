@@ -25,7 +25,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 set(PROJECT_NAME "${PREFIX}_cmdline1")
 project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" 
+add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
       cmdline1.cpp
 )
 
@@ -34,17 +34,21 @@ target_link_libraries(${PROJECT_NAME}
    mcrl2_core
 )
 
+build_and_run_test_target( ${PROJECT_NAME} )
+
 ##--------------------------------------------------
 ## Logger example, used in quickbook documentation
 ##--------------------------------------------------
 set(PROJECT_NAME "${PREFIX}_logger")
 project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" 
+add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
       logger.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
    mcrl2_core
 )
+
+build_and_run_test_target( ${PROJECT_NAME} )
 

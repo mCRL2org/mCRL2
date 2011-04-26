@@ -39,7 +39,7 @@ foreach( OBJ ${TERM_OBJS} )
   set(PROJECT_NAME "${PREFIX}_${result}")
   project( ${PROJECT_NAME} )
 
-  add_executable("${PROJECT_NAME}" 
+  add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
         ${OBJ} 
   )
   
@@ -48,6 +48,8 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_lts
      mcrl2_utilities_command_line
   )
+
+  build_and_run_test_target( ${PROJECT_NAME} )
 
 endforeach( OBJ )
 

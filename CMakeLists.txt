@@ -798,22 +798,6 @@ if(MCRL2_ENABLE_DEPRECATED)
 endif(MCRL2_ENABLE_DEPRECATED)
 
 ##---------------------------------------------------
-## Experimental tool dependencies
-##---------------------------------------------------
-
-option(MCRL2_COMPILE_EXAMPLES "Enable/disable creation of example tools" OFF)
-message(STATUS "MCRL2_COMPILE_EXAMPLES: ${MCRL2_COMPILE_EXAMPLES}" )
-
-if(MCRL2_COMPILE_EXAMPLES)
-   add_subdirectory( libraries/atermpp/example)
-   add_subdirectory( libraries/data/example)
-   add_subdirectory( libraries/lps/example)
-   add_subdirectory( libraries/utilities/example )
-   add_subdirectory( libraries/pbes/example)
-   add_subdirectory( libraries/bes/example)
-endif(MCRL2_COMPILE_EXAMPLES)
-
-##---------------------------------------------------
 ## Create "libraries/utilities/include/mcrl2/setup.h",
 ## required for the compiling rewriters
 ##---------------------------------------------------
@@ -954,6 +938,23 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURR
   add_subdirectory( libraries/process/test )
   add_subdirectory( libraries/atermpp/test )
   add_subdirectory( libraries/trace/test )
+
+##---------------------------------------------------
+## Experimental tool dependencies
+##---------------------------------------------------
+
+option(MCRL2_COMPILE_EXAMPLES "Enable/disable creation of example tools" OFF)
+message(STATUS "MCRL2_COMPILE_EXAMPLES: ${MCRL2_COMPILE_EXAMPLES}" )
+
+if(MCRL2_COMPILE_EXAMPLES)
+   add_subdirectory( libraries/atermpp/example)
+   add_subdirectory( libraries/data/example)
+   add_subdirectory( libraries/lps/example)
+   add_subdirectory( libraries/utilities/example )
+   add_subdirectory( libraries/pbes/example)
+   add_subdirectory( libraries/bes/example)
+endif(MCRL2_COMPILE_EXAMPLES)
+
 
 if( MCRL2_ENABLE_TEST_TARGETS )
    add_subdirectory( tools/lpsparunfold/test )

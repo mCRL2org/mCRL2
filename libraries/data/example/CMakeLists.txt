@@ -44,13 +44,15 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/aterm/)
 set(PROJECT_NAME "${PREFIX}_enumerator")
 project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" 
-      enumerator.cpp 
+add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
+      enumerator.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
    mcrl2_data
 )
+
+build_and_run_test_target( ${PROJECT_NAME} )
 
 ##---------------------------------------------------
 ## Example example[1..5]
@@ -63,13 +65,15 @@ foreach( OBJ ${TERM_OBJS} )
   set(PROJECT_NAME "${PREFIX}_${result}")
   project( ${PROJECT_NAME} )
 
-  add_executable("${PROJECT_NAME}" 
+  add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
         ${OBJ} 
   )
   
   target_link_libraries(${PROJECT_NAME}
      mcrl2_data
   )
+
+  build_and_run_test_target( ${PROJECT_NAME} )
   
 endforeach( OBJ )
 
@@ -80,11 +84,13 @@ endforeach( OBJ )
 set(PROJECT_NAME "${PREFIX}_parse_data")
 project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" 
+add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
       parse_data.cpp 
 )
 
 target_link_libraries(${PROJECT_NAME}
    mcrl2_data
 )
+
+build_and_run_test_target( ${PROJECT_NAME} )
 
