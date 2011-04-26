@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -40,18 +40,37 @@ typedef unsigned short          compat_uint16_t;
 typedef unsigned int            compat_uint32_t;
 typedef unsigned long long      compat_uint64_t;
 
+/* Integer limits, assuming 8-bit bytes and 4-byte integers. */
+#ifdef INT_MAX
+    #if INT_MAX - 0x7fffffff
+        #error "Unexpected value for INT_MAX! INT_MAX != 0x7fffffff"
+    #endif
+#else
+    #define INT_MAX 0x7fffffff
+#endif
+#ifdef INT_MIN
+    #if (INT_MIN - (-INT_MAX - 1))
+        #error "INT_MIN != -INT_MAX - 1"
+    #endif
+    #if (INT_MIN - (-0x80000000))
+        #error "Unexpected value for INT_MIN! INT_MIN != -0x80000000"
+    #endif
+#else
+    #define INT_MIN -0x80000000
+#endif
+
 /* Case-insensitive string comparison functions.
    redefined here to support non-POSIX platforms. */
-int compat_strcasecmp(const char* s1, const char* s2);
-int compat_strncasecmp(const char* s1, const char* s2, size_t n);
+int compat_strcasecmp(const char *s1, const char *s2);
+int compat_strncasecmp(const char *s1, const char *s2, size_t n);
 
 /* Figure out which hashtable implementation to use: */
-#if ((__cplusplus > 199711L || __GNUC__ >= 4) && !__clang__)  /* C++ TR1 supported (GCC 4) */
+#if (__cplusplus > 199711L || __GNUC__ >= 4)  /* C++ TR1 supported (GCC 4) */
 #include <tr1/unordered_set>
 #include <tr1/unordered_map>
 #define HASH_SET(k) std::tr1::unordered_set<k>
 #define HASH_MAP(k,v) std::tr1::unordered_map<k, v>
-#elif (__GNUC__ >= 3 && !__clang__)  /* GCC 3 hash tables (untested) */
+#elif (__GNUC__ >= 3)  /* GCC 3 hash tables (untested) */
 #include <ext/hash_set>
 #include <ext/hash_map>
 #define HASH_SET(k) __gnu_cxx::hash_set<k>

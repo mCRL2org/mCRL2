@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -11,10 +11,11 @@
 #include "assert.h"
 
 PredecessorLiftingStrategy::PredecessorLiftingStrategy(
-    const ParityGame &game, bool backward, bool stack )
-    : LiftingStrategy(game), backward_(backward),stack_(stack)
+    const ParityGame &game, const SmallProgressMeasures &spm,
+    bool backward, bool stack )
+    : LiftingStrategy(game), spm_(spm), backward_(backward), stack_(stack)
 {
-    assert(game.graph().edge_dir() & StaticGraph::EDGE_PREDECESSOR);
+    assert(graph_.edge_dir() & StaticGraph::EDGE_PREDECESSOR);
 
     // Initialize data
     verti V = game.graph().V();
@@ -32,28 +33,25 @@ PredecessorLiftingStrategy::~PredecessorLiftingStrategy()
     delete[] queue_;
 }
 
-verti PredecessorLiftingStrategy::next(verti prev_vertex, bool prev_lifted)
+void PredecessorLiftingStrategy::lifted(verti v)
 {
-    const StaticGraph &graph = game_.graph();
-
-    if (prev_lifted)
+    for ( StaticGraph::const_iterator it = graph_.pred_begin(v);
+          it != graph_.pred_end(v); ++it )
     {
-        // prev_vertex was lifted; add its predecessors to the queue
-        for ( StaticGraph::const_iterator it = graph.pred_begin(prev_vertex);
-              it != graph.pred_end(prev_vertex); ++it )
+        if (!queued_[*it] && !spm_.is_top(*it))
         {
-            if (!queued_[*it])
-            {
-                // Add predecessor to the queue
-                queued_[*it] = true;
-                queue_[queue_end_++] = *it;
-                if (queue_end_ == queue_capacity_) queue_end_ = 0;
-                ++queue_size_;
-                assert(queue_size_ <= queue_capacity_);
-            }
+            // Add predecessor to the queue
+            queued_[*it] = true;
+            queue_[queue_end_++] = *it;
+            if (queue_end_ == queue_capacity_) queue_end_ = 0;
+            ++queue_size_;
+            assert(queue_size_ <= queue_capacity_);
         }
     }
+}
 
+verti PredecessorLiftingStrategy::next()
+{
     if (queue_size_ == 0) return NO_VERTEX;
 
     // Remove an element from the queue
@@ -83,7 +81,5 @@ size_t PredecessorLiftingStrategy::memory_use() const
 LiftingStrategy *PredecessorLiftingStrategyFactory::create(
     const ParityGame &game, const SmallProgressMeasures &spm )
 {
-    (void)spm;  // unused
-
-    return new PredecessorLiftingStrategy(game, backward_, stack_);
+    return new PredecessorLiftingStrategy(game, spm, backward_, stack_);
 }

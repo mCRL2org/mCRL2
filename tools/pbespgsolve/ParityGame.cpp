@@ -1,20 +1,18 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include "ParityGame.h"
-#include <map>
 #include <algorithm>
+#include <deque>
+#include <map>
 #include <stdlib.h>
 #include <assert.h>
-#include <assert.h>
-
-typedef HASH_MAP(verti, verti) vertex_map_t;
 
 ParityGame::ParityGame()
     : d_(0), vertex_(NULL), cardinality_(NULL)
@@ -25,6 +23,28 @@ ParityGame::~ParityGame()
 {
     delete[] vertex_;
     delete[] cardinality_;
+}
+
+void ParityGame::clear()
+{
+    delete[] vertex_;
+    delete[] cardinality_;
+
+    d_ = 0;
+    graph_.clear();
+    vertex_ = NULL;
+    cardinality_ = NULL;
+}
+
+void ParityGame::assign(const ParityGame &game)
+{
+    if (&game == this) return;
+
+    graph_.assign(game.graph_);
+    verti V = graph_.V();
+    reset(V, game.d_);
+    std::copy(game.vertex_, game.vertex_ + V, vertex_);
+    recalculate_cardinalities(V);
 }
 
 void ParityGame::reset(verti V, int d)
@@ -57,91 +77,6 @@ void ParityGame::make_random( verti V, unsigned out_deg,
         vertex_[v].priority = rand()%d;
     }
     recalculate_cardinalities(V);
-}
-
-#if 0  // FIXME: remove this permanently if I don't need it anymore
-void ParityGame::make_subgame( const ParityGame &game,
-                               const verti *vertices, verti num_vertices,
-                               const Strategy &strategy )
-{
-    const StaticGraph &graph = game.graph();
-    reset(num_vertices + 2, game.d());
-
-    // Create dummy vertex won by even
-    const verti v_even = num_vertices + 0;
-    vertex_[v_even].player   = PLAYER_EVEN;
-    vertex_[v_even].priority = 0;
-
-    // Create dummy vertex won by odd
-    const verti v_odd  = num_vertices + 1;
-    vertex_[v_odd].player   = PLAYER_ODD;
-    vertex_[v_odd].priority = 1;
-
-    // Create a map of old->new vertex indices
-    vertex_map_t vertex_map;
-    for (verti n = 0; n < num_vertices; ++n)
-    {
-        vertex_[n] = game.vertex_[vertices[n]];
-        vertex_map[vertices[n]] = n;
-    }
-
-    // Create new edge list
-    StaticGraph::edge_list edges;
-    for (verti v = 0; v < num_vertices; ++v)
-    {
-        for ( StaticGraph::const_iterator it = graph.succ_begin(vertices[v]);
-              it != graph.succ_end(vertices[v]); ++it )
-        {
-            verti w;
-            vertex_map_t::const_iterator map_it = vertex_map.find(*it);
-            if (map_it != vertex_map.end())
-            {
-                w = map_it->second;
-            }
-            else
-            {
-                w = (winner(strategy, *it) == PLAYER_EVEN) ? v_even : v_odd;
-            }
-            edges.push_back(std::make_pair(v, w));
-        }
-    }
-    edges.push_back(std::make_pair(v_even, v_even));
-    edges.push_back(std::make_pair(v_odd,  v_odd));
-    graph_.assign(edges, graph.edge_dir());
-    recalculate_cardinalities(num_vertices + 2);
-}
-#endif
-
-void ParityGame::make_subgame( const ParityGame &game,
-                               const verti *vertices, verti num_vertices )
-{
-    const StaticGraph &graph = game.graph();
-    reset(num_vertices, game.d());
-
-    // Create a map of old->new vertex indices
-    vertex_map_t vertex_map;
-    for (verti n = 0; n < num_vertices; ++n)
-    {
-        vertex_[n] = game.vertex_[vertices[n]];
-        vertex_map[vertices[n]] = n;
-    }
-
-    // Create new edge list
-    StaticGraph::edge_list edges;
-    for (verti v = 0; v < num_vertices; ++v)
-    {
-        for ( StaticGraph::const_iterator it = graph.succ_begin(vertices[v]);
-              it != graph.succ_end(vertices[v]); ++it )
-        {
-            vertex_map_t::const_iterator map_it = vertex_map.find(*it);
-            if (map_it != vertex_map.end())
-            {
-                edges.push_back(std::make_pair(v, map_it->second));
-            }
-        }
-    }
-    graph_.assign(edges, graph.edge_dir());
-    recalculate_cardinalities(num_vertices);
 }
 
 void ParityGame::make_dual()
@@ -192,35 +127,38 @@ void ParityGame::shuffle(const std::vector<verti> &perm)
     vertex_ = new_vertex;
 }
 
-void ParityGame::compress_priorities()
+ParityGame::Player ParityGame::compress_priorities( const verti cardinality[],
+                                                    bool preserve_parity )
 {
+    if (cardinality == 0) cardinality = cardinality_;
+
     // Quickly check if we have anything to compress first:
-    if (std::find(cardinality_ + 1, cardinality_ + d_, 0) == cardinality_ + d_)
+    if ( empty() || std::find( cardinality + preserve_parity,
+                               cardinality + d_, 0 ) == cardinality + d_ )
     {
-        return;
+        return (d_ == 0) ? PLAYER_NONE : PLAYER_EVEN;
     }
 
     // Find out how to map old priorities to new priorities
     std::vector<int> prio_map(d_, -1);
-    int last_prio = 0;
-    prio_map[0] = last_prio;
-    for (int p = 1; p < d_; ++p)
+    int first_prio = 0, last_prio = 0;
+    if (!preserve_parity)
     {
-        if (cardinality_[p] == 0) continue;  // remove priority p
-        if (last_prio%2 != p%2) ++last_prio;
-        prio_map[p] = last_prio;
+        // Find lowest priority in use:
+        while (cardinality[first_prio] == 0) ++first_prio;
+        assert(first_prio < d_);  // fails only if cardinality count is invalid!
     }
-
-    // Remap priorities of all vertices
-    for (verti v = 0; v < graph_.V(); ++v)
+    bool swap_players = first_prio%2 != 0;
+    prio_map[first_prio] = last_prio;
+    for (int p = first_prio + 1; p < d_; ++p)
     {
-        assert(prio_map[vertex_[v].priority] >= 0);
-        vertex_[v].priority = prio_map[vertex_[v].priority];
+        if (cardinality[p] == 0) continue;  // remove priority p
+        if ((last_prio%2 ^ p%2) != swap_players) ++last_prio;
+        prio_map[p] = last_prio;
     }
 
     // Update priority limit and cardinality counts
     int new_d = last_prio + 1;
-    assert(new_d < d_);
     verti *new_cardinality = new verti[new_d];
     std::fill(new_cardinality, new_cardinality + new_d, 0);
     for (int p = 0; p < d_; ++p)
@@ -233,6 +171,102 @@ void ParityGame::compress_priorities()
     delete[] cardinality_;
     cardinality_ = new_cardinality;
     d_ = new_d;
+
+    // Remap priorities and players of all vertices
+    for (verti v = 0; v < graph_.V(); ++v)
+    {
+        assert(prio_map[vertex_[v].priority] >= 0);
+        vertex_[v].priority = prio_map[vertex_[v].priority];
+        if (swap_players) vertex_[v].player = Player(1 - vertex_[v].player);
+    }
+
+    return swap_players ? PLAYER_ODD : PLAYER_EVEN;
+}
+
+int ParityGame::propagate_priority( verti v, StaticGraph::const_iterator it,
+                                             StaticGraph::const_iterator end )
+{
+    int p = priority(v), q = 0;
+    for ( ; it != end; ++it)
+    {
+        verti w = *it;
+        int r = priority(w);
+        if (r >= p) return 0;
+        if (r > q) q = r;
+    }
+    vertex_[v].priority = q;
+    --cardinality_[p];
+    ++cardinality_[q];
+    return p - q;
+}
+
+/* N.B. this method is designed to be reasonably fast and use little memory
+    in the common case that few priorities can be propagated, which is why the
+    algorithm starts with a first pass looking for vertices which can be
+    updated, rather than putting them all in the initial queue, which would be
+    simpler but require more memory up-front. */
+long long ParityGame::propagate_priorities()
+{
+    long long res = 0;
+    std::deque<verti> todo;
+
+    // Make an initial pass to look for updatable vertices:
+    for (verti v = 0; v < graph_.V(); ++v)
+    {
+        if (priority(v) > 0)
+        {
+            int change = propagate_priority(v, graph_.succ_begin(v),
+                                               graph_.succ_end(v) )
+                       + propagate_priority(v, graph_.pred_begin(v),
+                                               graph_.pred_end(v) );
+            if (change > 0) {
+                res += change;
+                todo.push_back(v);
+            }
+        }
+    }
+
+    // Check neighbours of updated vertices again:
+    while (!todo.empty())
+    {
+        verti w = todo.front();
+        int p = priority(w);
+        todo.pop_front();
+
+        // Perform backwards propagation on predecessors:
+        for ( StaticGraph::const_iterator it = graph_.pred_begin(w);
+              it != graph_.pred_end(w); ++it )
+        {
+            verti v = *it;
+            if (priority(v) > p)
+            {
+                int change = propagate_priority(v, graph_.succ_begin(v),
+                                                   graph_.succ_end(v) );
+                if (change > 0) {
+                    res += change;
+                    todo.push_back(v);
+                }
+            }
+        }
+
+        // Perform forwards propagation on successors:
+        for ( StaticGraph::const_iterator it = graph_.succ_begin(w);
+              it != graph_.succ_end(w); ++it )
+        {
+            verti v = *it;
+            if (priority(v) > p)
+            {
+                int change = propagate_priority(v, graph_.pred_begin(v),
+                                                   graph_.pred_end(v) );
+                if (change > 0) {
+                    res += change;
+                    todo.push_back(v);
+                }
+            }
+        }
+    }
+
+    return res;
 }
 
 size_t ParityGame::memory_use() const
@@ -243,8 +277,19 @@ size_t ParityGame::memory_use() const
     return res;
 }
 
-ParityGame::Player ParityGame::winner(const Strategy &s, verti v) const
+bool ParityGame::proper() const
 {
-    /* A vertex is won by its player iff the player has a strategy for it: */
-    return (s[v] != NO_VERTEX) ? player(v) : ParityGame::Player(1 - player(v));
+    for (verti v = 0; v < graph_.V(); ++v)
+    {
+        if (graph_.succ_begin(v) == graph_.succ_end(v)) return false;
+    }
+    return true;
+}
+
+void ParityGame::swap(ParityGame &pg)
+{
+    std::swap(d_, pg.d_);
+    std::swap(graph_, pg.graph_);
+    std::swap(vertex_, pg.vertex_);
+    std::swap(cardinality_, pg.cardinality_);
 }

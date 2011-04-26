@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -22,6 +22,10 @@ void Logger::print_message(Severity severity, const char *fmt, va_list ap)
 {
 #ifdef USE_TIMER
     fprintf(stderr, "[%7.3f] ", timer_.elapsed());
+#endif
+#ifdef WITH_MPI
+    extern int mpi_rank, mpi_size;
+    if (mpi_size > 1) fprintf(stderr, "(%d/%d) ", mpi_rank, mpi_size);
 #endif
     switch (severity)
     {

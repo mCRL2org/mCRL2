@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -15,7 +15,7 @@
 #include <assert.h>
 
 /* Implements Tarjan's algorithm for finding strongly connected components in
-   a directed graph. It visits each vertex and edge in the graph once, so it has
+   a directed graph. It visits each vertex and edge in the graph once, so it has 
    run-time complexity O(V + E). For each vertex, two items are stored: the
    vertex index (which denotes the order in which vertices are visited) and a
    lowest link index, which gives the lowest index of a vertex that is reachable
@@ -31,48 +31,45 @@
 template<class Callback>
 class SCC
 {
-  public:
-    SCC(const StaticGraph& graph, Callback& callback)
-      : graph_(graph), callback_(callback)
+public:
+    SCC(const StaticGraph &graph, Callback &callback)
+        : graph_(graph), callback_(callback)
     {
     }
 
     int run()
     {
-      // Initialize data structures used in the algorithm
-      next_index = 0;
-      info.clear();
-      info.insert(info.end(), graph_.V(),
-                  std::make_pair((verti)-1, (verti)-1));
-      stack.clear();
+        // Initialize data structures used in the algorithm
+        next_index = 0;
+        info.clear();
+        info.insert( info.end(), graph_.V(),
+                     std::make_pair((verti)-1, (verti)-1) );
+        stack.clear();
 
-      // Process all vertices
-      for (verti v = 0; v < graph_.V(); ++v)
-      {
-        if (info[v].first == (verti)-1)
+        // Process all vertices
+        for (verti v = 0; v < graph_.V();++v)
         {
-          assert(stack.empty());
-          add(v);
-          int res = dfs();
-          if (res != 0)
-          {
-            return res;
-          }
+            if (info[v].first == (verti)-1)
+            {
+                assert(stack.empty());
+                add(v);
+                int res = dfs();
+                if (res != 0) return res;
+            }
         }
-      }
-      assert(stack.empty());
-      return 0;
+        assert(stack.empty());
+        return 0;
     }
 
-  private:
+private:
     void add(verti v)
     {
-      // Mark vertex as visited and part of the current component
-      info[v].first = info[v].second = next_index++;
-      component.push_back(v);
+        // Mark vertex as visited and part of the current component
+        info[v].first = info[v].second = next_index++;
+        component.push_back(v);
 
-      // Add to stack to be processed in depth-first-search
-      stack.push_back(std::make_pair(v, 0));
+        // Add to stack to be processed in depth-first-search
+        stack.push_back(std::make_pair(v, 0));
     }
 
     /* This implements depth-first-search using a stack, which is a bit more
@@ -81,72 +78,71 @@ class SCC
        stack size) as well as conserving some memory. */
     int dfs()
     {
-      int res = 0;
+        int res = 0;
 
-      while (res == 0 && !stack.empty())
-      {
-        verti v = stack.back().first;
-        StaticGraph::const_iterator edge_it =
-          graph_.succ_begin(v) + stack.back().second++;
-
-        if (edge_it != graph_.succ_end(v))
+        while (res == 0 && !stack.empty())
         {
-          // Find next successor `w` of `v`
-          verti w = *edge_it;
+            verti v = stack.back().first;
+            StaticGraph::const_iterator edge_it =
+                graph_.succ_begin(v) + stack.back().second++;
 
-          if (info[w].first == (verti)-1)  // unvisited?
-          {
-            add(w);
-          }
-          else if (info[w].second != (verti)-1) // part of current component?
-          {
-            /* Check if w's index is lower than v's lowest link, if so,
-               set it to be our lowest link index. */
-            info[v].second = std::min(info[v].second, info[w].first);
-          }
-        }
-        else
-        {
-          // We're done with this vertex
-          stack.pop_back();
-
-          if (!stack.empty())
-          {
-            /* Push my lower link index to parent vertex `u`, if it
-               is lower than the parent's current lower link index. */
-            size_t u = stack.back().first;
-            info[u].second = std::min(info[u].second, info[v].second);
-          }
-
-          // Check if v is the component's root (idx == lowest link idx)
-          if (info[v].first == info[v].second)
-          {
-            // Find v in the current component
-            std::vector<verti>::iterator it = component.end();
-            do
+            if (edge_it != graph_.succ_end(v))
             {
-              assert(it != component.begin());
-              info[*--it].second = (verti)-1;  // mark as removed
+                // Find next successor `w` of `v`
+                verti w = *edge_it;
+
+                if (info[w].first == (verti)-1)  // unvisited?
+                {
+                    add(w);
+                }
+                else
+                if (info[w].second != (verti)-1)  // part of current component?
+                {
+                    /* Check if w's index is lower than v's lowest link, if so,
+                       set it to be our lowest link index. */
+                    info[v].second = std::min(info[v].second, info[w].first);
+                }
             }
-            while (*it != v);
+            else
+            {
+                // We're done with this vertex
+                stack.pop_back();
 
-            // Call callback functor to handle this component
-            res = callback_((const verti*)&*it, component.end() - it);
+                if (!stack.empty())
+                {
+                    /* Push my lower link index to parent vertex `u`, if it
+                       is lower than the parent's current lower link index. */
+                    int u = stack.back().first;
+                    info[u].second = std::min(info[u].second, info[v].second);
+                }
 
-            // Remove vertices from current component
-            component.erase(it, component.end());
-          }
+                // Check if v is the component's root (idx == lowest link idx)
+                if (info[v].first == info[v].second)
+                {
+                    // Find v in the current component
+                    std::vector<verti>::iterator it = component.end();
+                    do {
+                        assert(it != component.begin());
+                        info[*--it].second = (verti)-1;  // mark as removed
+                    } while (*it != v);
+
+                    // Call callback functor to handle this component
+                    res = callback_((const verti*)&*it, component.end() - it);
+
+                    // Remove vertices from current component
+                    component.erase(it, component.end());
+                }
+            }
         }
-      }
 
-      return res;
+        return res;
     }
 
-  public:
-    const StaticGraph& graph_;
-    Callback& callback_;
+public:
+    const StaticGraph &graph_;
+    Callback &callback_;
 
-  private:
+private:
     verti next_index;
     std::vector<std::pair<verti, verti> > info;     // index and lowest link
     std::vector<verti> component;                   // current component

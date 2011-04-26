@@ -113,7 +113,7 @@ class pbespgsolve_algorithm
 
         // Create a SPM solver factory:
         solver_factory.reset(
-          new SmallProgressMeasuresFactory(*lift_strat_factory));
+          new SmallProgressMeasuresSolverFactory(lift_strat_factory.get()));
       }
       else if (options.solver_type == recursive_solver)
       {
@@ -159,8 +159,10 @@ class pbespgsolve_algorithm
         throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
       }
 
+      verti error_vertex;
+
       // Optional: verify the solution
-      if (m_options.verify_solution && !pg.verify(solution))
+      if (m_options.verify_solution && !pg.verify(solution, &error_vertex))
       {
         throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
       }

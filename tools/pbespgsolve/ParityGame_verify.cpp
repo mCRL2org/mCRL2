@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -13,9 +13,10 @@
 
 struct VerifySCC  // used by ParityGame::verify
 {
-    const ParityGame    &_game;
-    const StaticGraph   &_graph;
-    const int           _prio;
+    const ParityGame    &game;
+    const StaticGraph   &graph;
+    const int           prio;
+    verti * const       error;
 
     int operator() (const verti *scc, size_t scc_size)
     {
@@ -23,17 +24,21 @@ struct VerifySCC  // used by ParityGame::verify
         for (size_t i = 0; i < scc_size; ++i)
         {
             verti v = scc[i];
-            if (_game.priority(v) == _prio)
+            if (game.priority(v) == prio)
             {
                 // Cycle detected if |SCC| > 1 or v has a self-edge:
-                if (scc_size > 1 || _graph.has_succ(v, v)) return 1;
+                if (scc_size > 1 || graph.has_succ(v, v))
+                {
+                    if (error) *error = v;
+                    return 1;
+                }
             }
         }
         return 0;
     }
 };
 
-bool ParityGame::verify(const Strategy &s) const
+bool ParityGame::verify(const Strategy &s, verti *error) const
 {
     assert(s.size() == graph_.V());
 
@@ -45,25 +50,35 @@ bool ParityGame::verify(const Strategy &s) const
 
         if (pl == player(v))  /* vertex won by owner */
         {
-            // Verify owner has a strategy: (always true)
-            if (s[v] == NO_VERTEX) return false;
-
-            // Verify strategy uses existent edges:
-            if (!graph_.has_succ(v, s[v])) return false;
-
-            // Verify strategy stays within winning set:
-            if (winner(s, s[v]) != pl) return false;
+            /* Verify that:
+                1. the vertex owner has a strategy (necessarily passes)
+                2. the strategy uses an existing edge
+                3. the strategy doesn't move outside the owner's winning set */
+            if ( s[v] == NO_VERTEX || !graph_.has_succ(v, s[v]) ||
+                 winner(s, s[v]) != pl )
+            {
+                if (error) *error = v;
+                return false;
+            }
         }
         else  /* vertex lost by owner */
         {
-            // Verify owner has no strategy: (always true)
-            if (s[v] != NO_VERTEX) return false;
+            // Verify owner has no strategy: (necessarily passes)
+            if (s[v] != NO_VERTEX)
+            {
+                if (error) *error = v;
+                return false;
+            }
 
             // Verify owner cannot move outside this winning set:
             for (StaticGraph::const_iterator it = graph_.succ_begin(v);
                  it != graph_.succ_end(v); ++it)
             {
-                if (winner(s, *it) != pl) return false;
+                if (winner(s, *it) != pl)
+                {
+                    if (error) *error = v;
+                    return false;
+                }
             }
         }
     }
@@ -115,9 +130,13 @@ bool ParityGame::verify(const Strategy &s) const
         subgraph.assign(edges, StaticGraph::EDGE_SUCCESSOR);
 
         // Find a vertex with priority prio on a cycle:
-        VerifySCC verifier = { *this, subgraph, prio };
-        if (decompose_graph(subgraph, verifier) != 0) return false;
+        VerifySCC verifier = { *this, subgraph, prio, error };
+        if (decompose_graph(subgraph, verifier) != 0)
+        {
+            // VerifySCC has already set *error here.
+            return false;
+        }
     }
-
+    if (error) *error = NO_VERTEX;
     return true;
 }

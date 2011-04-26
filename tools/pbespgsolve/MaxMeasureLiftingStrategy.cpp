@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -33,6 +33,17 @@ MaxMeasureLiftingStrategy::MaxMeasureLiftingStrategy(
         : LiftingStrategy(game), spm_(spm), queued_(new bool[graph_.V()]),
           pq_pos_(new verti[graph_.V()]), pq_(new verti[graph_.V()])
 {
+    // Initialize queue
+    pq_size_ = 0;
+    for (verti v = 0; v < graph_.V(); ++v)
+    {
+        queued_[v] = true;
+        pq_pos_[v] = (verti)-1;
+        push(v);
+    }
+    /* FIXME: pushing everything takes O(V log V) time; we can sort the
+              queue array faster than that by using our knowledge that
+              all progress measures are either zero or top. */
 }
 
 MaxMeasureLiftingStrategy::~MaxMeasureLiftingStrategy()
@@ -117,13 +128,31 @@ void MaxMeasureLiftingStrategy::push(verti v)
     move_up(i);
 }
 
+void MaxMeasureLiftingStrategy::remove(verti v)
+{
+    verti i = pq_pos_[v];
+    if (i != (verti)-1)
+    {
+        pq_pos_[v] = (verti)-1;
+        if (i < --pq_size_)
+        {
+            pq_[i] = pq_[pq_size_];
+            pq_pos_[pq_[i]] = i;
+            move_down(i);
+        }
+    }
+}
+
 void MaxMeasureLiftingStrategy::pop()
 {
     assert(pq_size_ > 0);
     pq_pos_[pq_[0]] = (verti)-1;
-    pq_[0] = pq_[--pq_size_];
-    pq_pos_[pq_[0]] = 0;
-    move_down(0);
+    if (0 < --pq_size_)
+    {
+        pq_[0] = pq_[pq_size_];
+        pq_pos_[pq_[0]] = 0;
+        move_down(0);
+    }
 }
 
 int MaxMeasureLiftingStrategy::cmp(verti i, verti j)
@@ -154,42 +183,41 @@ bool MaxMeasureLiftingStrategy::check()
     return true;
 }
 
-verti MaxMeasureLiftingStrategy::next(verti prev_vertex, bool prev_lifted)
+void MaxMeasureLiftingStrategy::lifted(verti v)
 {
-    if (prev_vertex == NO_VERTEX)
+    bool queued_any = false;
+
+    // Queue predecessors with measure less than top:
+    for ( StaticGraph::const_iterator it = graph_.pred_begin(v);
+          it != graph_.pred_end(v); ++it )
     {
-        // Initialize queue
-        pq_size_ = 0;
-        for (verti v = 0; v < graph_.V(); ++v)
+        if (!spm_.is_top(*it))
         {
-            queued_[v] = true;
-            pq_pos_[v] = (verti)-1;
-            push(v);
-        }
-        /* FIXME: pushing everything takes O(V log V) time; we can sort the 
-                  queue array faster than that by using our knowledge that
-                  all progress measures are either zero or top. */
-    }
-
-    // assert(check());  // debug
-
-    if (prev_lifted)
-    {
-        // Add to (or move up in) queue
-        push(prev_vertex);
-
-        // Mark predecessors as queued
-        for (StaticGraph::const_iterator it = graph_.pred_begin(prev_vertex);
-             it != graph_.pred_end(prev_vertex); ++it)
-        {
+            queued_any = true;
             queued_[*it] = true;
         }
     }
 
+    if (queued_any)
+    {
+        // Add to (or move up in) queue
+        push(v);
+    }
+    else
+    {
+        // No eligible predecessors, remove from queue:
+        remove(v);
+    }
+}
+
+verti MaxMeasureLiftingStrategy::next()
+{
+    // assert(check());  // debug
+
     // Find a predecessor to lift
     while (pq_size_ > 0)
     {
-        verti w = pq_[0];
+        verti w = top();
         for (StaticGraph::const_iterator it = graph_.pred_begin(w);
              it != graph_.pred_end(w); ++it)
         {

@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -26,9 +26,9 @@
 */
 
 template<class Callback>
-int decompose_graph(const StaticGraph& graph, Callback& callback)
+int decompose_graph(const StaticGraph &graph, Callback &callback)
 {
-  return SCC<Callback>(graph, callback).run();
+    return SCC<Callback>(graph, callback).run();
 }
 
 #endif /* ndef SCC_H_INCLUDED */

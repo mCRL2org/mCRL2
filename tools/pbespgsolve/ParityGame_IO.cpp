@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -19,26 +19,44 @@
 void ParityGame::read_pgsolver( std::istream &is,
                                 StaticGraph::EdgeDirection edge_dir )
 {
-    // Read header line (if present)
+    int max_prio = 0;
+    std::vector<ParityGameVertex> vertices;
+    StaticGraph::edge_list edges;
+
+    // Read "parity" header line (if present)
     char ch = 0;
-    is.get(ch);
-    if (isdigit(ch))
+    while (!isalnum(ch)) is.get(ch);
+    is.putback(ch);
+    if (!isdigit(ch))
     {
-        // No header; put character back to parse later
-        is.putback(ch);
+        std::string parity;
+        verti max_vertex;
+
+        if (!(is >> parity >> max_vertex)) return;
+        if (parity != "parity") return;
+        vertices.reserve(max_vertex + 1);
+
+        // Skip to terminating semicolon
+        while (is.get(ch) && ch != ';') ch = 0;
     }
-    else
+
+    // Read and discard "start" line (if present)
+    while (!isalnum(ch)) is.get(ch);
+    is.putback(ch);
+    if (!isdigit(ch))
     {
+        std::string start;
+        verti vertex;
+
+        if (!(is >> start >> vertex)) return;
+        if (start != "start") return;
+
         // Skip to terminating semicolon
         while (is.get(ch) && ch != ';') ch = 0;
     }
 
     // Invalid vertex (used to mark uninitialized vertices)
     ParityGameVertex invalid = { (unsigned char)-1, (unsigned char)-1 };
-
-    int max_prio = 0;
-    std::vector<ParityGameVertex> vertices;
-    StaticGraph::edge_list edges;
 
     // Read vertex specs
     while (is)
@@ -48,7 +66,7 @@ void ParityGame::read_pgsolver( std::istream &is,
         if (!(is >> id >> prio >> player)) break;
 
         assert(prio >= 0);
-        assert(prio < 256);
+        assert(prio < 65536);
         assert(player == 0 || player == 1);
         if (prio > max_prio) max_prio = prio;
         if (id >= vertices.size()) vertices.resize(id + 1, invalid);
@@ -70,14 +88,45 @@ void ParityGame::read_pgsolver( std::istream &is,
 
             edges.push_back(std::make_pair(id, succ));
 
-            // Skip to separator (comma) or end-of-list (semicolon)
-            while (is.get(ch) && ch != ',' && ch != ';') ch = 0;
+            // Skip to separator (comma) or end-of-list (semicolon), while
+            // ignoring the contents of quoted strings.
+            bool quoted = false, escaped = false;
+            while (is.get(ch)) {
+                if (ch == '"' && !escaped) quoted = !quoted;
+                escaped = ch == '\\' && !escaped;
+                if ((ch == ',' || ch == ';') && !quoted) break;
+            }
 
-        } while (ch == ',');
+        } while (is && ch == ',');
     }
 
     // Ensure max_prio is even, so max_prio - p preserves parity:
     if (max_prio%2 == 1) ++max_prio;
+
+    // Look for unused vertex indices:
+    std::vector<verti> vertex_map(vertices.size(), NO_VERTEX);
+    verti used = 0;
+    for (verti v = 0; v < (verti)vertices.size(); ++v)
+    {
+        if (vertices[v] != invalid) {
+            vertices[used] = vertices[v];
+            vertex_map[v] = used++;
+        }
+    }
+    if (used < (verti)vertices.size())
+    {
+        // Remove unused vertices:
+        vertices.erase(vertices.begin() + used, vertices.end());
+
+        // Remap edges to new vertex indices:
+        for ( StaticGraph::edge_list::iterator it = edges.begin();
+              it != edges.end(); ++it )
+        {
+            it->first  = vertex_map[it->first];
+            it->second = vertex_map[it->second];
+            assert(it->first != NO_VERTEX && it->second != NO_VERTEX);
+        }
+    }
 
     // Assign vertex info and recount cardinalities
     reset((verti)vertices.size(), max_prio + 1);
@@ -98,10 +147,10 @@ void ParityGame::write_pgsolver(std::ostream &os) const
 {
     // Get max priority and make it even so max_prio - p preserves parity:
     int max_prio = d();
-    if (max_prio%2 == 1) ++max_prio;
+    if (max_prio%2 == 1) --max_prio;
 
     // Write out graph
-    os << "parity " << graph_.V() - 1 << ";\n";
+    os << "parity " << (long long)graph_.V() - 1 << ";\n";
     for (verti v = 0; v < graph_.V(); ++v)
     {
         os << v << ' ' << (max_prio - priority(v)) << ' ' << player(v);
@@ -180,7 +229,7 @@ void ParityGame::write_dot(std::ostream &os) const
     os << "}\n";
 }
 
-void ParityGame::write_debug(std::ostream &os) const
+void ParityGame::write_debug(const Strategy &s, std::ostream &os) const
 {
     for (verti v = 0; v < graph_.V(); ++v)
     {
@@ -200,6 +249,10 @@ void ParityGame::write_debug(std::ostream &os) const
             os << sep << *it;
             sep = ',';
         }
+
+        // Print strategy (if applicable)
+        if (!s.empty() && s.at(v) != NO_VERTEX) os << " -> " << s.at(v);
+
         os << '\n';
     }
     os << std::flush;

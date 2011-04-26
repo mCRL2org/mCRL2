@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -18,7 +18,7 @@ StaticGraph::StaticGraph()
     : successors_(NULL), predecessors_(NULL),
       successor_index_(NULL), predecessor_index_(NULL)
 {
-    reset(0, 0, EDGE_SUCCESSOR);
+    reset(0, 0, EDGE_NONE);
 }
 
 StaticGraph::~StaticGraph()
@@ -27,6 +27,11 @@ StaticGraph::~StaticGraph()
     delete[] predecessors_;
     delete[] successor_index_;
     delete[] predecessor_index_;
+}
+
+void StaticGraph::clear()
+{
+    reset(0, 0, EDGE_NONE);
 }
 
 void StaticGraph::reset(verti V, edgei E, EdgeDirection edge_dir)
@@ -104,15 +109,23 @@ void StaticGraph::make_random(verti V, unsigned out_deg, EdgeDirection edge_dir)
     assign(edges, edge_dir);
 }
 
-template<class It, class Cmp> bool is_sorted(It i, It j, Cmp &cmp)
+void StaticGraph::assign(const StaticGraph &graph)
 {
-    if (i == j) return true;
-    for (;;)
+    if (&graph == this) return;
+
+    reset(graph.V_, graph.E_, graph.edge_dir_);
+
+    if (edge_dir_ & EDGE_SUCCESSOR)
     {
-        It k = i;
-        if (++k == j) return true;
-        if (cmp(*k, *i)) return false; // *(i+1) > *i
-        i = k;
+        std::copy(graph.successors_, graph.successors_ + E_, successors_);
+        std::copy(graph.successor_index_, graph.successor_index_ + V_ + 1,
+                  successor_index_);
+    }
+    if (edge_dir_ & EDGE_PREDECESSOR)
+    {
+        std::copy(graph.predecessors_, graph.predecessors_ + E_, predecessors_);
+        std::copy(graph.predecessor_index_, graph.predecessor_index_ + V_ + 1,
+                  predecessor_index_);
     }
 }
 
@@ -136,7 +149,7 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     if (edge_dir_ & EDGE_SUCCESSOR)
     {
         /* Sort edges by predecessor first, successor second */
-        if (!::is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
+        if (!is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
         {
             std::sort(edges.begin(), edges.end(), edge_cmp_forward);
         }
@@ -173,6 +186,78 @@ void StaticGraph::assign(edge_list edges, EdgeDirection edge_dir)
     }
 }
 
+void StaticGraph::remove_edges(StaticGraph::edge_list &edges)
+{
+    // Add end-of-list marker:
+    edges.push_back(std::make_pair(V_, V_));
+
+    if (edge_dir_ & EDGE_SUCCESSOR)
+    {
+        // Sort edges by predecessor first, successor second
+        if (!is_sorted(edges.begin(), edges.end(), edge_cmp_forward))
+        {
+            std::sort(edges.begin(), edges.end(), edge_cmp_forward);
+        }
+
+        // Loop over existing edges and remove those listed in `edges':
+        StaticGraph::edge_list::const_iterator it = edges.begin();
+        const verti *p = successors_;
+        verti v = 0;
+        edgei e = 0;
+        while (v < V_)
+        {
+            if (p == successors_ + successor_index_[v + 1])
+            {
+                successor_index_[++v] = e;
+                continue;
+            }
+            std::pair<verti, verti> edge(v, *p++);
+            while (edge_cmp_forward(*it, edge)) ++it;
+            if (*it == edge) ++it; else successors_[e++] = edge.second;
+        }
+    }
+
+    if (edge_dir_ & EDGE_PREDECESSOR)
+    {
+        // Sort edges by successor first, predecessor second
+        std::sort(edges.begin(), edges.end(), edge_cmp_backward);
+
+        // Loop over existing edges and remove those listed in `edges':
+        StaticGraph::edge_list::const_iterator it = edges.begin();
+        const verti *p = predecessors_;
+        verti v = 0;
+        edgei e = 0;
+        while (v < V_)
+        {
+            if (p == predecessors_ + predecessor_index_[v + 1])
+            {
+                predecessor_index_[++v] = e;
+                continue;
+            }
+            std::pair<verti, verti> edge(*p++, v);
+            while (edge_cmp_backward(*it, edge)) ++it;
+            if (*it == edge) ++it; else predecessors_[e++] = edge.first;
+        }
+    }
+
+    // Remove end-of-list marker:
+    edges.pop_back();
+
+    // Update edge count
+    if (edge_dir_ & EDGE_SUCCESSOR)
+    {
+        if (edge_dir_ & EDGE_PREDECESSOR)
+        {
+            assert(successor_index_[V_] == predecessor_index_[V_]);
+        }
+        E_ = successor_index_[V_];
+    }
+    else
+    {
+        assert(edge_dir_ & EDGE_PREDECESSOR);
+        E_ = predecessor_index_[V_];
+    }
+}
 
 void StaticGraph::write_raw(std::ostream &os) const
 {
@@ -222,4 +307,16 @@ size_t StaticGraph::memory_use() const
     res += sizeof(verti)*E_;
     if (edge_dir_ == EDGE_BIDIRECTIONAL) res *= 2;
     return res;
+}
+
+void StaticGraph::swap(StaticGraph &g)
+{
+    if (this == &g) return;
+    std::swap(V_, g.V_);
+    std::swap(E_, g.E_);
+    std::swap(successors_, g.successors_);
+    std::swap(predecessors_, g.predecessors_);
+    std::swap(successor_index_, g.successor_index_);
+    std::swap(predecessor_index_, g.predecessor_index_);
+    std::swap(edge_dir_, g.edge_dir_);
 }
