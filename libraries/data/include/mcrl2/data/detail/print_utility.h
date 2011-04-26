@@ -49,10 +49,12 @@ data::data_expression bool_to_numeric(data::data_expression const& e, data::sort
 inline
 data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>& result)
 { 
+  //std::cout << "\n<reconstruct_pos_mult>" << core::pp(x) << " " << x << std::endl;
+  data_expression reconstruction_result;
   if (data::sort_pos::is_c1_function_symbol(x))
   {
     //x is 1; return result
-    return data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos());
+    reconstruction_result = data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos());
   }
   else if (data::sort_pos::is_cdub_application(x))
   {
@@ -64,25 +66,25 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
     if (data::sort_bool::is_false_function_symbol(bool_arg))
     {
       //result*v(b) = 0
-      return pos_arg;
+      reconstruction_result = pos_arg;
     }
     else if (data::sort_bool::is_true_function_symbol(bool_arg))
     {
       //result*v(b) = result
-      return data::sort_real::plus(pos_arg,
-                                   data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos()));
+      reconstruction_result = data::sort_real::plus(pos_arg,
+                                                    data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos()));
     }
     else if (data::detail::vector_number_to_string(result) == "1")
     {
       //result*v(b) = v(b)
-      return data::sort_real::plus(pos_arg, bool_to_numeric(bool_arg, data::sort_nat::nat()));
+      reconstruction_result = data::sort_real::plus(pos_arg, bool_to_numeric(bool_arg, data::sort_nat::nat()));
     }
     else
     {
       //result*v(b)
-      return data::sort_real::plus(pos_arg,
-                                   data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(result), data::sort_nat::nat()),
-                                   bool_to_numeric(bool_arg, data::sort_nat::nat())));
+      reconstruction_result = data::sort_real::plus(pos_arg,
+                                                    data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(result), data::sort_nat::nat()),
+                                                    bool_to_numeric(bool_arg, data::sort_nat::nat())));
     }
   }
   else
@@ -90,18 +92,21 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
     //x is not a Pos constructor
     if (data::detail::vector_number_to_string(result) == "1")
     {
-      return x;
+      reconstruction_result = x;
     }
     else
     {
-      return data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos()), x);
+      reconstruction_result = data::sort_real::times(data::function_symbol(data::detail::vector_number_to_string(result), data::sort_pos::pos()), x);
     }
   }
+  //std::cout << "\n<reconstruct_pos_mult-result>" << core::pp(reconstruction_result) << " " << reconstruction_result << std::endl;
+  return reconstruction_result;
 }
 
 inline
 data::data_expression reconstruct_numeric_expression(data::data_expression x)
 {
+  //std::cout << "\n<reconstruct_numeric_expression>" << core::pp(x) << " " << x << std::endl;
   if (data::sort_pos::is_c1_function_symbol(x) || data::sort_pos::is_cdub_application(x))
   {
     if (data::sort_pos::is_positive_constant(x))
@@ -207,6 +212,7 @@ data::data_expression reconstruct_numeric_expression(data::data_expression x)
                               sort_real::arg1(x))
                              );
   }
+  //std::cout << "\n<reconstruct_numeric_expression-result>" << core::pp(x) << " " << x << std::endl;
   return x;
 }
 

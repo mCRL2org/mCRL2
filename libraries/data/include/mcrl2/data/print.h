@@ -68,7 +68,7 @@ template <typename T> std::string print(const T& t);
 /// \brief Pretty prints the contents of a container
 /// \param[in] c a container with data or sort expressions
 template <typename Container>
-inline std::string pp(Container const& c, typename atermpp::detail::enable_if_container< Container >::type* = 0)
+inline std::string pp(Container const& c, typename atermpp::detail::enable_if_container<Container>::type* = 0)
 {
   std::string result;
 
@@ -253,7 +253,26 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            || data::sort_nat::is_c0_function_symbol(x.head())
            || data::sort_pos::is_cdub_application(x)
            || data::sort_nat::is_cnat_application(x)
+           || data::sort_int::is_cint_application(x)
+           || data::sort_real::is_creal_application(x)
            ;
+  }
+
+  bool is_numeric_expression(const application& x)
+  {
+    return    sort_pos::is_pos(x.sort()) 
+           || sort_nat::is_nat(x.sort())
+           || sort_int::is_int(x.sort())
+           || sort_real::is_real(x.sort());
+  }
+
+  bool is_standard_sort(const sort_expression& x)
+  {
+    return    sort_pos::is_pos(x) 
+           || sort_bool::is_bool(x)
+           || sort_nat::is_nat(x)
+           || sort_int::is_int(x)
+           || sort_real::is_real(x);
   }
 
   bool is_fset_true(data_expression x)
@@ -501,12 +520,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void print_numeric_constant(data_expression x)
-  {
-    x = detail::reconstruct_numeric_expression(x);
-    derived().print(function_symbol(x).name());
-  }
-
   void print_function_application(const application& x)
   {
     //std::cout << "\n<function application>" << core::pp(x) << " " << x.arguments().size() << "\n";
@@ -604,8 +617,17 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(x.name());
-    derived()(x.arguments());
-    derived()(x.recogniser());
+    print_list(x.arguments(), " = ", "", " | ");
+    derived().leave(x);
+  }
+
+  void operator()(const data::alias& x)
+  {
+std::cout << "\n<alias>" << core::pp(x.name()) << " " << core::pp(x.reference()) << " " << x.reference() << std::endl;    
+    derived().enter(x);
+    derived()(x.name());
+    derived().print(" = ");
+    derived()(x.reference());
     derived().leave(x);
   }
 
@@ -657,15 +679,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::structured_sort& x)
   {
     derived().enter(x);
-    derived()(x.constructors());
+    print_list(x.constructors(), "struct ", "", " | ");
     derived().leave(x);
   }
 
   void operator()(const data::function_sort& x)
   {
     derived().enter(x);
-    derived()(x.domain());
-    derived().print(" -> ");
+    print_list(x.domain(), "", " -> ", " # ");
     derived()(x.codomain());
     derived().leave(x);
   }
@@ -732,15 +753,22 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     //                            numeric values
     //-------------------------------------------------------------------//
+    // TODO: should this be is_numeric_expression?
+    if (is_numeric_constant(x))
+    {
+      data_expression y = detail::reconstruct_numeric_expression(x);
+      if (is_function_symbol(y))
+      {
+        derived().print(function_symbol(y).name());
+        return;
+      }
+    }
+
     // TODO: can these be moved to int/pos/nat/real?
     if (is_numeric_cast(x))
     {
       // ignore numeric casts like Pos2Nat
       derived()(x.arguments().front());
-    }
-    else if (is_numeric_constant(x))
-    {
-      print_numeric_constant(x);
     }
 
     //-------------------------------------------------------------------//
@@ -1186,7 +1214,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else
     {
-      std::cout << "\n<error: unknown application>" << core::pp(x) << "\n";
+      //std::cout << "\n<error: unknown application>" << core::pp(x) << " " << x << " " << core::pp(x.sort()) << "\n";
       print_function_application(x);
     }
     derived().leave(x);
@@ -1227,10 +1255,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   // Container contains elements of type T such that t.sort() is a sort_expression.
   template <typename Container>
-  void print_declarations(const Container& container,
-                          const std::string& separator = ", ",
+  void print_function_declarations(const Container& container,
                           const std::string& opener = "(",
-                          const std::string& closer = ")"
+                          const std::string& closer = ")",
+                          const std::string& separator = ", "
                          )
   {
     typedef typename Container::value_type T;
@@ -1261,11 +1289,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(opener);   
     for (std::vector<sort_expression>::iterator i = sorts.begin(); i != sorts.end(); ++i)
     {
-      const std::vector<T>& v = sort_map[*i];
-      for (typename std::vector<T>::const_iterator j = v.begin(); j != v.end(); ++j)
+      if (i != sorts.begin())
       {
-        derived()(*j);
+        derived().print(separator);
       }
+      const std::vector<T>& v = sort_map[*i];
+      print_list(v, "", "", ",");
       derived().print(": ");
       derived()(*i);
     }
@@ -1288,7 +1317,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
     {
       std::pair<std::map<core::identifier_string, variable>::iterator, bool> k = variable_map.insert(std::make_pair(i->name(), *i));
-      if (!k.second) // new variable encountered
+      if (k.second) // new variable encountered
       {
         variables.push_back(*i);
       }
@@ -1338,25 +1367,85 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return last; // no conflict found
   }
 
+  template <typename Container>
+  bool has_non_standard_sorts(const Container& c)
+  {
+    for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+    {
+      if (!is_standard_sort(*i))
+      {
+        return true;
+      }
+    }
+    return false;
+  }
+
+  template <typename AliasContainer, typename SortContainer>
+  void print_sort_declarations(const AliasContainer& aliases,
+                               const SortContainer& sorts,
+                               const std::string& opener = "(",
+                               const std::string& closer = ")",
+                               const std::string& separator = ", "
+                              )
+  {
+    if (aliases.empty() && sorts.empty())
+    {
+      return;
+    }
+    bool first_element = true;
+    derived().print(opener);
+
+    // print aliases
+    for (typename AliasContainer::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
+    {
+      if (!first_element)
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+      first_element = false;
+    }
+
+    // print sorts
+    for (typename SortContainer::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+    {
+      if (!first_element)
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+      first_element = false;
+    }
+
+    derived().print(closer);
+  }
+
+  template <typename Container>
+  void print_equations(const Container& equations,
+                       const std::string& opener = "(",
+                       const std::string& closer = ")",
+                       const std::string& separator = ", "
+                      )
+  {
+    typename Container::const_iterator first = equations.begin();
+    typename Container::const_iterator last = equations.end();
+    while (first != last)
+    {
+      std::vector<variable> variables;
+      typename Container::const_iterator i = find_conflicting_equation(first, last, variables);
+      print_function_declarations(variables, "var  ", ";\n", ";\n     ");
+      print_list(std::vector<data_equation>(first, i), opener, closer, separator);
+      first = i;
+    }
+  }
+
   void operator()(const data::data_specification& x)
   {
     derived().enter(x);
-    print_list(x.sorts(), "sort ", "\n", ";\n    ");
-    print_declarations(x.constructors(), "cons ", ";\n", ";\n     ");
-    print_declarations(x.mappings(), "map ", ";\n", ";\n     ");
-    atermpp::vector<data_equation>::const_iterator first = x.equations().begin();
-    atermpp::vector<data_equation>::const_iterator last = x.equations().end();
-//std::cout << "<N>" << x.equations().size() << std::endl;
-    while (first != last)
-    {
-//std::cout << "<last - first>" << (last - first) << std::endl;
-      std::vector<variable> variables;
-      atermpp::vector<data_equation>::const_iterator i = find_conflicting_equation(first, last, variables);
-//std::cout << "<i - first>" << (i - first) << std::endl;
-      print_declarations(variables, "var ", ";\n", ";\n     ");
-      print_list(std::vector<data_equation>(first, i), "eqn ", ";\n", ";\n     ");
-      first = i;
-    }
+    print_sort_declarations(x.user_defined_aliases(), x.user_defined_sorts(), "sort ", ";\n\n", ";\n     ");
+    print_function_declarations(x.user_defined_constructors(), "cons ",";\n\n", ";\n     ");
+    print_function_declarations(x.user_defined_mappings(), "map  ",";\n\n", ";\n     ");
+    print_equations(x.user_defined_equations(), "eqn  ", ";\n", ";\n      ");   
     derived().leave(x);
   }
 
