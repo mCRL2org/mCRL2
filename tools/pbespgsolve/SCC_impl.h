@@ -100,7 +100,7 @@ private:
                 {
                     /* Check if w's index is lower than v's lowest link, if so,
                        set it to be our lowest link index. */
-                    info[v].second = std::min(info[v].second, info[w].first);
+                    info[v].second = (std::min)(info[v].second, info[w].first);
                 }
             }
             else
@@ -113,7 +113,7 @@ private:
                     /* Push my lower link index to parent vertex `u`, if it
                        is lower than the parent's current lower link index. */
                     int u = stack.back().first;
-                    info[u].second = std::min(info[u].second, info[v].second);
+                    info[u].second = (std::min)(info[u].second, info[v].second);
                 }
 
                 // Check if v is the component's root (idx == lowest link idx)
