@@ -71,12 +71,12 @@ class A
 
     void protect() const
     {
-      aterm_protect(&x);
+      ATprotect(&x);
     }
 
     void unprotect() const
     {
-      aterm_unprotect(&x);
+      ATunprotect(&x);
     }
 
     void mark() const
