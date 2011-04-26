@@ -609,6 +609,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(x.name());
+    derived().print(": ");
     derived()(x.sort());
     derived().leave(x);
   }
@@ -617,13 +618,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(x.name());
-    print_list(x.arguments(), " = ", "", " | ");
+    print_list(x.arguments(), "(", ")", ", ");
     derived().leave(x);
   }
 
   void operator()(const data::alias& x)
   {
-std::cout << "\n<alias>" << core::pp(x.name()) << " " << core::pp(x.reference()) << " " << x.reference() << std::endl;    
     derived().enter(x);
     derived()(x.name());
     derived().print(" = ");
@@ -1246,9 +1246,14 @@ std::cout << "\n<alias>" << core::pp(x.name()) << " " << core::pp(x.reference())
   void operator()(const data::data_equation& x)
   {
     derived().enter(x);
-    derived()(x.variables());
-    derived()(x.condition());
+    // TODO: check if this is the correct way to print conditions
+    if (!sort_bool::is_true_function_symbol(x.condition()))
+    {
+      derived()(x.condition());
+      derived().print(" => ");
+    }
     derived()(x.lhs());
+    derived().print("  = ");
     derived()(x.rhs());
     derived().leave(x);
   }
@@ -1445,7 +1450,7 @@ std::cout << "\n<alias>" << core::pp(x.name()) << " " << core::pp(x.reference())
     print_sort_declarations(x.user_defined_aliases(), x.user_defined_sorts(), "sort ", ";\n\n", ";\n     ");
     print_function_declarations(x.user_defined_constructors(), "cons ",";\n\n", ";\n     ");
     print_function_declarations(x.user_defined_mappings(), "map  ",";\n\n", ";\n     ");
-    print_equations(x.user_defined_equations(), "eqn  ", ";\n", ";\n      ");   
+    print_equations(x.user_defined_equations(), "eqn  ", ";\n", ";\n     ");   
     derived().leave(x);
   }
 
