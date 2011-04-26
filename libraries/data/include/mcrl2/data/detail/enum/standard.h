@@ -36,7 +36,7 @@ class fs_expr
     {}
 
     // Constructor
-    fs_expr(const variable_list &vars, const data_expression_list &vals, const data_expression &expr):
+    fs_expr(const variable_list &vars, const atermpp::term_list< atermpp::aterm_appl > &vals, const atermpp::aterm_appl &expr):
        m_vars(vars), m_vals(vals), m_expr(expr)
     {}
 
@@ -50,7 +50,7 @@ class fs_expr
       return m_vals;
     }
 
-    data_expression expr() const
+    atermpp::aterm_appl expr() const
     {
       return m_expr;
     }
