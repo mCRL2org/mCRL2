@@ -697,11 +697,9 @@ endif(MCRL2_ENABLE_CADP_SUPPORT)
 ## 3rd party dependencies
 ##---------------------------------------------------
 
-add_subdirectory ( libraries/aterm )
 add_subdirectory ( 3rd-party/svc )
 if(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( 3rd-party/tr)
-
   add_subdirectory ( 3rd-party/gl2ps )
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
@@ -709,6 +707,7 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
 ## Library dependencies
 ##---------------------------------------------------
 
+  add_subdirectory ( libraries/aterm )
   add_subdirectory ( libraries/data )
   add_subdirectory ( libraries/utilities )
   add_subdirectory ( libraries/core )
@@ -850,8 +849,8 @@ else ( NOT APPLE )
   set(R_SLDFLAGS "-bundle -undefined dynamic_lookup")
 endif( NOT APPLE )
 
-set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/include/aterm\\\"")
-set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lATerm")
+set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\"")
+set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lmcrl2_aterm")
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/setup.h.in" "${CMAKE_CURRENT_BINARY_DIR}/libraries/utilities/include/mcrl2/setup.h" @ONLY  )
 
@@ -867,7 +866,6 @@ message(STATUS "MCRL2_INSTALL_HEADERS: ${MCRL2_INSTALL_HEADERS}" )
 if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
-    libraries/aterm/include/
     libraries/atermpp/include/
     libraries/core/include/
     libraries/data/include/
@@ -879,6 +877,12 @@ install(
     libraries/trace/include/
     libraries/utilities/include/
   DESTINATION include
+  PATTERN ".svn" EXCLUDE
+)
+install(
+  DIRECTORY
+    libraries/aterm/include/
+  DESTINATION include/mcrl2
   PATTERN ".svn" EXCLUDE
 )
 endif( MCRL2_INSTALL_HEADERS )
