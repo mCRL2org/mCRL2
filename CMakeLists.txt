@@ -947,17 +947,32 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURR
 ## Experimental tool dependencies
 ##---------------------------------------------------
 
-option(MCRL2_COMPILE_EXAMPLES "Enable/disable creation of example tools" OFF)
-message(STATUS "MCRL2_COMPILE_EXAMPLES: ${MCRL2_COMPILE_EXAMPLES}" )
+option(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES "Enable/disable testing of compiled tool examples" OFF)
+message(STATUS "MCRL2_ENABLE_TEST_COMPILED_EXAMPLES: ${MCRL2_ENABLE_TEST_COMPILED_EXAMPLES}" )
 
-if(MCRL2_COMPILE_EXAMPLES)
+  macro( build_and_run_test_example_target TARGET )
+    if(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES)
+      ADD_TEST("${TARGET}" ${CMAKE_CTEST_COMMAND}
+       --build-and-test
+       "${CMAKE_CURRENT_SOURCE_DIR}"
+       "${CMAKE_CURRENT_BINARY_DIR}"
+       --build-noclean
+       --build-nocmake
+       --build-generator "${CMAKE_GENERATOR}"
+       --build-target "${TARGET}"
+       --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
+       --test-command "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
+      )
+      set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+    endif(MCRL2_ENABLE_TEST_COMPILED_EXAMPLES)
+  endmacro( build_and_run_test_example_target TARGET )
+
    add_subdirectory( libraries/atermpp/example)
    add_subdirectory( libraries/data/example)
    add_subdirectory( libraries/lps/example)
    add_subdirectory( libraries/utilities/example )
    add_subdirectory( libraries/pbes/example)
    add_subdirectory( libraries/bes/example)
-endif(MCRL2_COMPILE_EXAMPLES)
 
 
 if( MCRL2_ENABLE_TEST_TARGETS )

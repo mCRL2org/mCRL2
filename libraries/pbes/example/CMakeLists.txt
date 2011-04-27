@@ -49,7 +49,7 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_utilities_command_line
   )
 
-  build_and_run_test_target( ${PROJECT_NAME} )
+  build_and_run_test_example_target( ${PROJECT_NAME} )
 
 endforeach( OBJ )
 

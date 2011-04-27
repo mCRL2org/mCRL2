@@ -34,7 +34,7 @@ target_link_libraries(${PROJECT_NAME}
    mcrl2_core
 )
 
-build_and_run_test_target( ${PROJECT_NAME} )
+build_and_run_test_example_target( ${PROJECT_NAME} )
 
 ##--------------------------------------------------
 ## Logger example, used in quickbook documentation
@@ -50,5 +50,5 @@ target_link_libraries(${PROJECT_NAME}
    mcrl2_core
 )
 
-build_and_run_test_target( ${PROJECT_NAME} )
+build_and_run_test_example_target( ${PROJECT_NAME} )
 

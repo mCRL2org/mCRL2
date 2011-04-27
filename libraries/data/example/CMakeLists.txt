@@ -52,7 +52,7 @@ target_link_libraries(${PROJECT_NAME}
    mcrl2_data
 )
 
-build_and_run_test_target( ${PROJECT_NAME} )
+build_and_run_test_example_target( ${PROJECT_NAME} )
 
 ##---------------------------------------------------
 ## Example example[1..5]
@@ -73,7 +73,7 @@ foreach( OBJ ${TERM_OBJS} )
      mcrl2_data
   )
 
-  build_and_run_test_target( ${PROJECT_NAME} )
+  build_and_run_test_example_target( ${PROJECT_NAME} )
   
 endforeach( OBJ )
 
@@ -92,5 +92,5 @@ target_link_libraries(${PROJECT_NAME}
    mcrl2_data
 )
 
-build_and_run_test_target( ${PROJECT_NAME} )
+build_and_run_test_example_target( ${PROJECT_NAME} )
 
