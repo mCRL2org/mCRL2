@@ -266,7 +266,6 @@ bool EnumeratorSolutionsStandard::next(ATermList* solution)
             if ((m_not_equal_to_false && fs_stack.back().expr()!=info.rewr_false) ||
                 (!m_not_equal_to_false && fs_stack.back().expr()!=info.rewr_true))
             {
-ATfprintf(stderr,"SOLUTIONnext %t\n%t\n",(ATermList)enum_vars,(ATermList)fs_stack.front().vals());
               ss_stack.push_back(build_solution(enum_vars,fs_stack.back().vals()));
             }
             fs_stack.pop_back();
@@ -320,7 +319,6 @@ void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp
     }
     else
     {
-ATfprintf(stderr,"SOLUTION %t\n%t\n",(ATermList)enum_vars,(ATermList)fs_stack.front().vals());
       ss_stack.push_back(build_solution(enum_vars,fs_stack.front().vals()));
     }
     fs_stack.pop_back();
