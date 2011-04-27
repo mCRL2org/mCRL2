@@ -25,7 +25,7 @@
 #ifndef _SVC_H
 #define _SVC_H
 
-#include "aterm1.h"
+#include "mcrl2/aterm/aterm1.h"
 #include "svc1.h"
 
   typedef SVCint SVCstateIndex;

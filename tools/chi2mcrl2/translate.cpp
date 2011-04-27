@@ -10,7 +10,7 @@
 #include <iostream>
 #include <cstdio>
 #include <string.h>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/messaging.h"
 #include "translate.h"
 #include <vector>
@@ -19,12 +19,11 @@
 #include <list>
 #include <stack>
 #include <iterator>
-#include <gc.h>
 #include <map>
 #include "libstruct_core.h"
 #include <limits.h>
 
-#include <aterm_ext.h>
+#include "mcrl2/aterm/aterm_ext.h"
 
 using namespace mcrl2::core;
 using namespace std;

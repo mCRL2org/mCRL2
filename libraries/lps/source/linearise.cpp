@@ -37,7 +37,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
-#include <aterm_ext.h>
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"
 #include "mcrl2/exception.h"

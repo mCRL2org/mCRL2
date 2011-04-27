@@ -13,10 +13,10 @@
 #include <cassert>
 #include <climits>
 #include <sstream>
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
-#include <aterm_ext.h>
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;

@@ -12,7 +12,7 @@
 #ifndef BDD_MANIPULATOR_H
 #define BDD_MANIPULATOR_H
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/standard.h"
 
 /// The class BDD_Manipulator provides functionality for constructing binary decision diagrams.

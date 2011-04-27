@@ -25,7 +25,7 @@
 #ifndef _SVC1_H
 #define _SVC1_H
 
-#include "aterm1.h"
+#include "mcrl2/aterm/aterm1.h"
 
 #include "compress.h"
 

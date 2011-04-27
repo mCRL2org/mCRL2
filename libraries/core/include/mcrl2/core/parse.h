@@ -14,7 +14,7 @@
 #define MCRL2_PARSE_H
 
 #include <iostream>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 
 namespace mcrl2
 {

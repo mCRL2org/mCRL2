@@ -19,7 +19,7 @@
 #include "libgrape/decl.h"
 #include "libgrape/varupdate.h"
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/table.h"
 
 #define CONVERSION_ERROR                17

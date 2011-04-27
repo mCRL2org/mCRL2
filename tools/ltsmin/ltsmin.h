@@ -14,7 +14,7 @@
 #include <cstring>
 #include <string>
 #include <cerrno>
-#include "aterm1.h"
+#include "mcrl2/aterm/aterm1.h"
 #include <cassert>
 
 #include "svc/svcerrno.h"

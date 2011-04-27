@@ -16,9 +16,9 @@
 #include <cerrno>
 #include <string>
 #include <cstring>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include "aterm2.h"
 
 namespace mcrl2
 {

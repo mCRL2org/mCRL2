@@ -12,7 +12,7 @@
 #ifndef MCRL2_REGFRMTRANS_H
 #define MCRL2_REGFRMTRANS_H
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 
 namespace mcrl2
 {

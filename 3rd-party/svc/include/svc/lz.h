@@ -23,7 +23,7 @@
 #ifndef __LZ_H
 #define __LZ_H
 
-#include "aterm1.h"
+#include "mcrl2/aterm/aterm1.h"
 #include "code.h"
 
 #define SEARCH_BITS       15

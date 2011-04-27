@@ -1,7 +1,7 @@
 #ifndef ATYPES_H
 #define ATYPES_H
 
-#include "stddef.h"
+#include <cstddef>
 
 namespace aterm
 {

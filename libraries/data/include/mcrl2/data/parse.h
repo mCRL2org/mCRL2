@@ -17,7 +17,7 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "boost/algorithm/string.hpp"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
@@ -25,7 +25,6 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/parse.h"
-//#include "mcrl2/core/typecheck.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/print.h"

@@ -1,7 +1,7 @@
 #ifndef BYTEIO_H
 #define BYTEIO_H
 
-#include <stdio.h>
+#include <cstdio>
 
 namespace aterm
 {

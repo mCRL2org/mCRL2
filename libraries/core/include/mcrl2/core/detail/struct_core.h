@@ -14,10 +14,10 @@
 //This file describes the functions that can be used for the internal ATerm
 //structure.
 
-#include <aterm2.h>
 #include <string.h>
 #include <ctype.h>
 #include <assert.h>
+#include "mcrl2/aterm/aterm2.h"
 
 // XXX remove
 using namespace aterm;

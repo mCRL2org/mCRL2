@@ -12,7 +12,7 @@
 #ifndef MCRL2_CORE_GARBAGE_COLLECTION_H
 #define MCRL2_CORE_GARBAGE_COLLECTION_H
 
-#include "gc.h"
+#include "mcrl2/aterm/gc.h"
 
 namespace mcrl2
 {

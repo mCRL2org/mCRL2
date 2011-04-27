@@ -13,7 +13,7 @@
 #define BDD_SIMPLIFIER_H
 
 #include <ctime>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 namespace mcrl2
 {

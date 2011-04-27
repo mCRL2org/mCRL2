@@ -20,12 +20,12 @@
 
 #include <wx/wx.h>
 #include <sstream>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "xsimtrace.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lps/nextstate.h"
-#include <aterm_ext.h>
 
 using namespace std;
 using namespace mcrl2::core;

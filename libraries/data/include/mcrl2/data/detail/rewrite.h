@@ -11,7 +11,7 @@
 #ifndef __LIBREWRITE_H
 #define __LIBREWRITE_H
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/data_specification.h"
 
 

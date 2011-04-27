@@ -14,7 +14,7 @@
 #include <wx/wx.h>
 #include <wx/splitter.h>
 #include <tooltipListView.h>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 
 #include "simbase.h"
 #include "simulatorgui.h"

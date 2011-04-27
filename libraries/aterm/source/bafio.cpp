@@ -1,6 +1,6 @@
 /*{{{  includes */
 
-#include <stdio.h>
+#include <cstdio>
 #include <stdlib.h>
 #include <assert.h>
 #include <stdexcept>

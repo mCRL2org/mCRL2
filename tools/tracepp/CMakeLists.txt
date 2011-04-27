@@ -22,7 +22,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 # actual target:

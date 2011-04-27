@@ -11,7 +11,7 @@
 #ifndef _ENUM_STANDARD_H
 #define _ENUM_STANDARD_H
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/enum/enumerator.h"
 

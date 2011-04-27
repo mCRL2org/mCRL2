@@ -2,9 +2,10 @@
 #define AFUN_H
 
 #include <string>
+#include <cstdio>
 #include "atypes.h"
 #include "encoding.h"
-#include "stdio.h"
+
 
 namespace aterm
 {

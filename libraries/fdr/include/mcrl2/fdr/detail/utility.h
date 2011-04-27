@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include <cassert>
 
 namespace mcrl2

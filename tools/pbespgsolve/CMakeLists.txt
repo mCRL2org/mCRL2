@@ -49,7 +49,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include/mcrl2/atermpp/)
-include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/tools/pbespgsolve)
 

@@ -3,7 +3,6 @@
 #include <stdexcept>
 
 #include "aterm1.h"
-/* #include "_afun.h" */
 #include "byteio.h"
 #include "util.h"
 #include "memory.h"

@@ -13,7 +13,7 @@
 
 #include <istream>
 #include <vector>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 
 //Global precondition: the ATerm library has been initialised
 

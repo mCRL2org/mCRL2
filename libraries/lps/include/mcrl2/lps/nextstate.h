@@ -11,13 +11,6 @@
 #ifndef _LIBNEXTSTATE_H
 #define _LIBNEXTSTATE_H
 
-/* #include <memory>
-#include <vector>
-#include "aterm2.h"
-#include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/lps/specification.h" */
-
 /** \brief Internal NextState state storage method **/
 typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
                , GS_STATE_TREE    /** \brief Store states in a binary tree **/

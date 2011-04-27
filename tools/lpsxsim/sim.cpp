@@ -22,10 +22,10 @@
 #include <cstdlib>
 #include <cstring>
 #include <cassert>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 #include "mcrl2/core/messaging.h"
-#include <aterm_ext.h>
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"

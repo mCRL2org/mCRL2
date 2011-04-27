@@ -15,7 +15,7 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_traits.h"
 
 using namespace aterm;

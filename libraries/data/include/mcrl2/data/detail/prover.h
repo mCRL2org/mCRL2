@@ -11,7 +11,7 @@
 #ifndef PROVER_H
 #define PROVER_H
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"

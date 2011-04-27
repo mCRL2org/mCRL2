@@ -24,7 +24,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
-#include <aterm_ext.h>
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/data/data_equation.h"
 
 using namespace mcrl2::core;

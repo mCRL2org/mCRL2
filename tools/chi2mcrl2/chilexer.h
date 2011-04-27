@@ -11,7 +11,7 @@
 #define MCRL2_CHI2LEXER_H
 
 #include <istream>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 
 //Global precondition: the ATerm library has been initialised
 

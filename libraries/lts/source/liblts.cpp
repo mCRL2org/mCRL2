@@ -18,10 +18,9 @@
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
-// #include <boost/bind.hpp>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/set.h"
-#include <aterm_ext.h>
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/messaging.h"

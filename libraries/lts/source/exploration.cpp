@@ -8,7 +8,7 @@
 //
 /// \file exploration.cpp
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include <time.h>
 #include <sstream>
 #include <set>

@@ -13,7 +13,7 @@
 #define MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 
 #include <string>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 namespace atermpp
 {

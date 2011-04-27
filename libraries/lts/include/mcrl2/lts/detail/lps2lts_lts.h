@@ -12,7 +12,7 @@
 
 #include <memory>
 #include <fstream>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "svc/svc.h"
 #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/next_state_generator.h"

@@ -28,7 +28,7 @@
 /* Declare a local array NAME of type TYPE and SIZE elements (where SIZE
    is not a constant value) */
 #ifdef _MSC_VER
-#include "malloc.h"
+#include <malloc.h>
 #define ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) _alloca((SIZE)*sizeof(TYPE))
 #else
 #define ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(NAME,TYPE,SIZE)  TYPE *NAME = (TYPE *) alloca((SIZE)*sizeof(TYPE))

@@ -19,7 +19,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "chilexer.h"
 #include "translate.h"
 #include "mcrl2/atermpp/aterm_init.h"

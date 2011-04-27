@@ -25,7 +25,7 @@
 #include <iostream>
 #include <wx/msgdlg.h>
 #include <wx/string.h>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include "xsimmain.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/utilities/wx_tool.h"

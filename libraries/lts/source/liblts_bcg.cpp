@@ -12,7 +12,7 @@
 
 #include <string>
 #include "mcrl2/core/messaging.h"
-#include <aterm_ext.h>
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/exception.h"
 #include "bcg_user.h"

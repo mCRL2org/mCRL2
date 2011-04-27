@@ -849,7 +849,7 @@ else ( NOT APPLE )
   set(R_SLDFLAGS "-bundle -undefined dynamic_lookup")
 endif( NOT APPLE )
 
-set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\"")
+set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/include\\\"")
 set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lmcrl2_aterm")
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/setup.h.in" "${CMAKE_CURRENT_BINARY_DIR}/libraries/utilities/include/mcrl2/setup.h" @ONLY  )
@@ -866,6 +866,7 @@ message(STATUS "MCRL2_INSTALL_HEADERS: ${MCRL2_INSTALL_HEADERS}" )
 if ( MCRL2_INSTALL_HEADERS )
 install(
   DIRECTORY
+    libraries/aterm/include/
     libraries/atermpp/include/
     libraries/core/include/
     libraries/data/include/
@@ -877,12 +878,6 @@ install(
     libraries/trace/include/
     libraries/utilities/include/
   DESTINATION include
-  PATTERN ".svn" EXCLUDE
-)
-install(
-  DIRECTORY
-    libraries/aterm/include/
-  DESTINATION include/mcrl2
   PATTERN ".svn" EXCLUDE
 )
 endif( MCRL2_INSTALL_HEADERS )

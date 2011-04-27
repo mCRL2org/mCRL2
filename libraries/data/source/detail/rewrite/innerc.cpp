@@ -26,10 +26,10 @@
 #include <cassert>
 #include <stdexcept>
 #include <sstream>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/messaging.h"
-#include <aterm_ext.h>
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
@@ -1739,7 +1739,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   //
   fprintf(f,  "#include <stdlib.h>\n"
           "#include <string.h>\n"
-          "#include <aterm2.h>\n"
+          "#include \"mcrl2/aterm/aterm2.h\"\n"
           "#include \"assert.h\"\n"
           "using namespace aterm;\n"
           "\n"

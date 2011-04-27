@@ -16,7 +16,7 @@
 #include <boost/type_traits/is_base_of.hpp>
 
 #include <utility>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 // XXX Remove
 using namespace aterm;

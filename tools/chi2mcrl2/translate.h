@@ -12,7 +12,7 @@
 #include <cstring>
 #include <cmath>
 #include <iostream>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/messaging.h"
 #include <cstdio>
 #include <vector>

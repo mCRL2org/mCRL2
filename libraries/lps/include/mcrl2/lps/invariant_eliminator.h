@@ -15,7 +15,7 @@
 #ifndef INVARIANT_ELIMINATOR_H
 #define INVARIANT_ELIMINATOR_H
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/specification.h"

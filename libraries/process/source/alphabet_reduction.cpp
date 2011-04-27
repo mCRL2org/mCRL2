@@ -13,13 +13,11 @@
 #include <cstring>
 #include <cassert>
 #include <sstream>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
-#include <aterm_ext.h>
-// #include "mcrl2/data/pos.h"
-// #include "mcrl2/data/int.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/process/alphabet_reduction.h"
 #include "mcrl2/data/data_specification.h"
 

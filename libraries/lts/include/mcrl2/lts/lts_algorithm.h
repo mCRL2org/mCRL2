@@ -28,7 +28,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <boost/bind.hpp>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/lts.h"

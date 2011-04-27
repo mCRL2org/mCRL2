@@ -3,7 +3,6 @@
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #define __FSMLEXER_H
 
-// #include <aterm2.h>
 #include "mcrl2/lts/lts_fsm.h"
 
 

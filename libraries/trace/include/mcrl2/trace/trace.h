@@ -19,12 +19,12 @@
 #ifndef _TRACE_H__
 #define _TRACE_H__
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include "mcrl2/atermpp/vector.h"
-#include <aterm_ext.h>
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/detail/struct_core.h"

@@ -8,7 +8,7 @@
 //
 /// \file lpstrans.h
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 aterm::ATermAppl translate(aterm::ATermAppl spec, bool convert_bools, bool convert_funcs);
 //Pre: spec is an mCRL LPE

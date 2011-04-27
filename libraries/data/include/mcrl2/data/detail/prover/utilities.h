@@ -14,7 +14,7 @@
 
 #include <cmath>
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
 
 namespace mcrl2

@@ -14,8 +14,8 @@
 
 #include <memory>
 #include <deque>
+#include "mcrl2/aterm/protaterm.h"          // IProtectedATerm
 #include "mcrl2/atermpp/aterm_traits.h"
-#include "protaterm.h"          // IProtectedATerm
 
 namespace atermpp
 {

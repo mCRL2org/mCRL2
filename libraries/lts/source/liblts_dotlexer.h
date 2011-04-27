@@ -3,8 +3,8 @@
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #define __DOTLEXER_H
 
-#include <aterm1.h>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm1.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/lts/lts_dot.h"
 
 class dot_lexer

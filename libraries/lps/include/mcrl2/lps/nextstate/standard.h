@@ -11,7 +11,7 @@
 #ifndef _NEXTSTATE_STANDARD_H
 #define _NEXTSTATE_STANDARD_H
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/lps/nextstate.h"

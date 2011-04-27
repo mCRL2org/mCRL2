@@ -16,14 +16,16 @@
 /*}}}  */
 /*{{{  includes */
 #include <stdexcept>
-#include "aterm2.h"
-#include "_aterm.h"
-#include "util.h"
-#include "memory.h"
 #include <assert.h>
 #include <stdlib.h>
 #include <string.h>
 #include <limits.h>
+
+#include "aterm2.h"
+#include "_aterm.h"
+#include "util.h"
+#include "memory.h"
+
 
 /*}}}  */
 

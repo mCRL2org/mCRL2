@@ -12,7 +12,7 @@
 #ifndef INFO_H
 #define INFO_H
 
-#include <aterm_ext.h>
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/utilities.h"
 

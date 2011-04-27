@@ -13,11 +13,11 @@
 #include <stdexcept>
 #include <string>
 #include <cstring>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"
-#include <aterm_ext.h>
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/inner.h"
