@@ -14,6 +14,7 @@
 
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
 {
