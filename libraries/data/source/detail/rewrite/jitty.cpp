@@ -1114,10 +1114,10 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
           EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
 
           /* Create ATermList to store solutions */
-          ATermList x = ATempty;
+          atermpp::term_list<atermpp::aterm_appl> x;
           bool has_solution = false;
           /* Change "if" to "while" to find all valid solutions */
-          if( sol->next(&x) )
+          if (sol->next(x))
           {
             has_solution = true;
 #ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
@@ -1211,10 +1211,10 @@ ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInn
           EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
 
           /* Create ATermList to store solutions */
-          ATermList x = ATempty;
+          atermpp::term_list<atermpp::aterm_appl> x;
           bool has_solution = false;
           /* Change "if" to "while" to find all valid solutions */
-          if( sol->next(&x) )
+          if (sol->next(x))
           {
             has_solution = true;
 #ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL

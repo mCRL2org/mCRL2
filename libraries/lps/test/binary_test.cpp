@@ -279,7 +279,6 @@ void test_bug_623()
 
 void test_abp()
 {
-  core::gsDebug = true;
   specification spec = linearise(lps::detail::ABP_SPECIFICATION());
   std::clog << "--- before ---\n" << pp(spec) << std::endl;
   rewriter r(spec.data());

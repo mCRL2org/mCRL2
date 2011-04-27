@@ -19,54 +19,6 @@
 
 class NextState;
 
-// Uses static context so code is not reentrant
-struct legacy_selector
-{
-  static atermpp::aterm& term()
-  {
-    static atermpp::aterm term = mcrl2::data::sort_bool::true_();
-
-    return term;
-  }
-
-  /// \brief returns true if and only if the argument is equal to true
-  template < typename ExpressionType >
-  static bool test(ExpressionType const& e)
-  {
-    return e == term();
-  }
-};
-
-namespace mcrl2
-{
-namespace data
-{
-
-// Assumes that all terms are in internal rewrite format.
-/* template <>
-struct expression_traits< atermpp::aterm >
-{
-  static mcrl2::data::detail::legacy_rewriter& get_rewriter()
-  {
-    static mcrl2::data::detail::legacy_rewriter local_rewriter = mcrl2::data::detail::legacy_rewriter(mcrl2::data::rewriter());
-
-    return local_rewriter;
-  }
-
-  static atermpp::aterm false_()
-  {
-    return get_rewriter().convert_to(mcrl2::data::data_expression(mcrl2::data::sort_bool::false_()));
-  }
-
-  static atermpp::aterm true_()
-  {
-    return get_rewriter().convert_to(mcrl2::data::data_expression(mcrl2::data::sort_bool::true_()));
-  }
-}; */
-}
-} 
-
-
 struct ns_info
 {
   NextState* parent;
@@ -93,8 +45,6 @@ struct ns_info
 
   enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c)
   {
-    // const enumerator_type m(m_specification,mcrl2::data::variable_list(v),m_rewriter,c);
-
     return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c); // Laatste expressie is intern.
   }
 
@@ -114,8 +64,6 @@ struct ns_info
     m_rewriter(rewriter),
     m_enumerator(specification,rewriter)
   {
-    // Configure selector to compare with term that represents false
-    legacy_selector::term() = m_rewriter.convert_to(mcrl2::data::data_expression(mcrl2::data::sort_bool::true_()));
   }
 
 };
@@ -149,6 +97,7 @@ class NextStateGenerator // : public NextStateGenerator
 
     ATerm* stateargs;
 
+    mcrl2::data::variable_list enumerated_variables;
     ns_info::enumerator_type::iterator_internal valuations;
 
     void set_substitutions();

@@ -991,6 +991,7 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
 
   if (info.num_summands == 0)
   {
+    enumerated_variables=variable_list();
     valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
   }
   else
@@ -1007,6 +1008,7 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
     cur_act = ATgetArgument(info.summands[SummandIndex],2);
     cur_nextstate = (ATermList) ATgetArgument(info.summands[SummandIndex],3);
 
+    enumerated_variables=ATLgetArgument(info.summands[SummandIndex],0);
     valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
                                ATgetArgument(info.summands[SummandIndex],1));
   }
@@ -1019,7 +1021,6 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextStateGenerator::next(Transition, State, prioritised) called" << std::endl;
 #endif
-
   while (valuations == ns_info::enumerator_type::iterator_internal() && (sum_idx < info.num_summands))   // valuations is empty.
   {
     if (single_summand)
@@ -1047,6 +1048,8 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
               "             " << pp(atermpp::aterm_appl(info.export_term(ATgetArgument(info.summands[sum_idx],1)))) << std::endl;
 #endif
 
+    enumerated_variables=ATLgetArgument(info.summands[sum_idx],0);
+// std::cerr << "ENUMERATED VARIABLES " << pp(enumerated_variables) << "\n";
     valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
                                ATgetArgument(info.summands[sum_idx],1));
 
@@ -1060,13 +1063,15 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
       set_substitutions();
     }
     ATermList assignments= *valuations;
-    for(ATermList assignment_iterator=assignments ; !ATisEmpty(assignment_iterator) ;  
-                   assignment_iterator=ATgetNext(assignment_iterator))
+    assert(ATgetLength(assignments)==enumerated_variables.size());
+    variable_list::const_iterator j=enumerated_variables.begin();
+    for( ; !ATisEmpty(assignments) ;  assignments=ATgetNext(assignments), ++j)
     // for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i)
     {
-      ATerm i=ATgetFirst(assignment_iterator);
+      ATerm t=ATgetFirst(assignments);
+// ATfprintf(stderr,"ASSIGNMENT %t   %t\n", (ATermAppl)*j,t);
       // info.m_rewriter.set_internally_associated_value(static_cast< ATermAppl >(i->first), i->second);
-      info.m_rewriter.set_internally_associated_value(variable(ATAgetArgument(i,0)),ATgetArgument(i,1));
+      info.m_rewriter.set_internally_associated_value(*j,t);
     }
 
     *Transition = rewrActionArgs((ATermAppl) cur_act);
@@ -1077,12 +1082,10 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
       *prioritised = (sum_idx <= info.num_prioritised);
     }
 
-    for( ; !ATisEmpty(assignments) ;  assignments=ATgetNext(assignments))
-    // for (ns_info::enumerator_type::substitution_type::const_iterator i(valuations->begin()); i != valuations->end(); ++i)
+    for(variable_list::const_iterator j=enumerated_variables.begin(); 
+              j!=enumerated_variables.end(); ++j)
     {
-      ATerm i=ATgetFirst(assignments);
-      // info.m_rewriter.clear_internally_associated_value(i->first);
-      info.m_rewriter.clear_internally_associated_value(variable(ATAgetArgument(i,0)));
+      info.m_rewriter.clear_internally_associated_value(*j);
     }
     ++valuations;
 

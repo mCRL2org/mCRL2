@@ -170,11 +170,15 @@ void enumerate< detail::EnumeratorStandard >(data_specification const& d,
              new detail::EnumeratorSolutionsStandard(
                  static_cast< ATermList >(variables), rewriter.get_rewriter().toRewriteFormat(c),true,enumerator->info)); */
 
-  ATermList substitution;
+  atermpp::term_list<atermpp::aterm_appl> results; 
 
-  while (solutions->next(&substitution) && t-- != 0)
+  while (solutions->next(results) && t-- != 0)
   {
-    rewriter.get_rewriter().setSubstitutionInternalList(substitution);
+    atermpp::term_list<atermpp::aterm_appl>::const_iterator j=results.begin();
+    for(variable_list::const_iterator i=variables.begin(); i!=variables.end(); ++i,++j)
+    { 
+      rewriter.get_rewriter().setSubstitutionInternal((ATermAppl)*i,(ATerm)(ATermAppl)*j);
+    }
 
     std::clog << mcrl2::core::pp(rewriter.get_rewriter().rewrite(static_cast< ATermAppl >(c))) << std::endl;
 

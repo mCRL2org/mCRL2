@@ -12,8 +12,10 @@
 #define _ENUM_STANDARD_H
 
 #include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/enum/enumerator.h"
+
 
 /// \cond INTERNAL_DOCS
 namespace mcrl2
@@ -26,9 +28,13 @@ namespace detail
 class fs_expr
 {
   protected:
-    variable_list m_vars;
-    atermpp::term_list< atermpp::aterm_appl > m_vals;  // data_expression_list in internal format.
-    atermpp::aterm_appl m_expr;  // data_expression in internal format.
+    variable_list m_vars;                              // The vars over which enumeration must take place.
+    variable_list m_substituted_vars;                  // Variables for which a substitution exist. The substituted
+                                                       // values are given in m_vals;
+    atermpp::term_list< atermpp::aterm_appl > m_vals;  // Data expressions in internal format that are to be substituted
+                                                       // in the variables in m_substituted_vars.
+    atermpp::aterm_appl m_expr;                        // data_expression in internal format to which internal variables
+                                                       // must adhere.
 
   public:
     // Default constructor
@@ -36,13 +42,23 @@ class fs_expr
     {}
 
     // Constructor
-    fs_expr(const variable_list &vars, const atermpp::term_list< atermpp::aterm_appl > &vals, const atermpp::aterm_appl &expr):
-       m_vars(vars), m_vals(vals), m_expr(expr)
-    {}
+    fs_expr(
+        const variable_list &vars, 
+        const variable_list &substituted_vars, 
+        const atermpp::term_list< atermpp::aterm_appl > &vals, 
+        const atermpp::aterm_appl &expr):
+       m_vars(vars), m_substituted_vars(substituted_vars),m_vals(vals), m_expr(expr)
+    {
+    }
 
     variable_list vars() const
     {
       return m_vars;
+    }
+
+    variable_list substituted_vars() const
+    {
+      return m_substituted_vars;
     }
 
     atermpp::term_list< atermpp::aterm_appl > vals() const
@@ -58,20 +74,23 @@ class fs_expr
 
 class EnumeratorSolutionsStandard;
 
-typedef struct
+class enumstd_info
 {
-  Rewriter* rewr_obj;
-
-  atermpp::map<ATermAppl, ATermList> constructors;
-  atermpp::aterm_appl rewr_true, rewr_false;
-
-  int* max_vars;
-
-  ATerm opidAnd;
-  atermpp::set< ATerm > eqs;
-  AFun tupAFun;
-
-} enumstd_info;
+  public:
+    Rewriter* rewr_obj;
+  
+    // atermpp::map<ATermAppl, ATermList> constructors;
+    const mcrl2::data::data_specification &m_data_spec;
+    atermpp::aterm_appl rewr_true, rewr_false;
+  
+    ATerm opidAnd;
+    atermpp::set< ATerm > eqs;
+    // AFun tupAFun;
+  
+    enumstd_info(const mcrl2::data::data_specification &data_spec):
+      m_data_spec(data_spec)
+    {} 
+};
 
 class EnumeratorStandard // : public Enumerator
 {
@@ -92,7 +111,6 @@ class EnumeratorStandard // : public Enumerator
 
     enumstd_info info;
 
-    int max_vars;
 };
 
 class EnumeratorSolutionsStandard // : public EnumeratorSolutions
@@ -113,10 +131,11 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
                    const atermpp::aterm_appl &Expr, 
                    const bool not_equal_to_false, 
                    enumstd_info& Info) :
+      info(Info),
       m_not_equal_to_false(not_equal_to_false),
-      used_vars(0)
+      used_vars(0),
+      max_vars(0)
     { 
-      info = Info; 
       enum_vars.protect();
       enum_expr.protect();
 
@@ -124,29 +143,27 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
     }
 
 
-    EnumeratorSolutionsStandard():
+    /* EnumeratorSolutionsStandard():
       m_not_equal_to_false(true),
       used_vars(0)
     {
       enum_vars.protect();
       enum_expr.protect();
-    }
+    } */
 
 
     ~EnumeratorSolutionsStandard();
 
-    bool next(ATermList* solution);
+    // returns a list of values for the variables given.
+    bool next(atermpp::term_list<atermpp::aterm_appl> &solution);
 
     void reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool netf);
 
-    // bool FindInnerCEquality(ATerm t, ATermList vars, ATerm* v, ATerm* e);
     bool FindInnerCEquality(const atermpp::aterm_appl T, 
                             const mcrl2::data::variable_list vars, 
                             mcrl2::data::variable &v, 
                             atermpp::aterm_appl &e);
-    ATerm build_solution_aux_innerc(ATerm t, ATermList substs);
-    // ATerm build_solution_aux_inner3(ATerm t, ATermList substs);
-    // bool FindInner3Equality(ATerm t, ATermList vars, ATerm* v, ATerm* e);
+    // ATerm build_solution_aux_innerc(ATerm t, ATermList substs);
   private:
     enumstd_info info;
 
@@ -156,30 +173,36 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
     bool m_not_equal_to_false;
 
     int used_vars;
+    int max_vars;
 
-    atermpp::vector < fs_expr> fs_stack;
-    // int fs_stack_size;
-    // int fs_stack_pos;
+    atermpp::deque < fs_expr> fs_stack;
 
     atermpp::vector<ATermList> ss_stack;
-    // int ss_stack_size;
-    // int ss_stack_pos;
-
-    // void fs_reset();
-    // void fs_push(ATermList vars, ATermList vals, ATerm expr);
-    // void fs_pop(fs_expr* e = NULL);
-
-    // void ss_reset();
-    // void ss_push(ATermList s);
-    // ATermList ss_pop();
 
     void EliminateVars(fs_expr &e);
-    // bool IsInner3Eq(ATerm a);
-    bool IsInnerCEq(ATermAppl a);
+    // bool IsInnerCEq(ATermAppl a);
     bool FindInnerCEquality_aux(ATerm t);
-    ATerm build_solution_single(ATerm t, ATermList substs);
-    ATermList build_solution2(ATermList vars, ATermList substs);
-    ATermList build_solution(ATermList vars, ATermList substs);
+    //ATerm build_solution_single(ATerm t, ATermList substs);
+    // ATermList build_solution2(ATermList vars, ATermList substs);
+    // ATermList build_solution(ATermList vars, ATermList substs);
+    atermpp::aterm_appl build_solution_single(
+                 const atermpp::aterm_appl t,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+
+    atermpp::term_list < atermpp::aterm_appl> build_solution(
+                 const variable_list vars,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+
+    atermpp::term_list < atermpp::aterm_appl> build_solution2(
+                 const variable_list vars,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+    atermpp::aterm_appl build_solution_aux_innerc(
+                 const atermpp::aterm_appl t,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
 };
 }
 }
@@ -194,6 +217,7 @@ struct aterm_traits<mcrl2::data::detail::fs_expr>
   {
     assert(0); // This is not being used. This is to check this.
     t.vars().protect();
+    t.substituted_vars().protect();
     t.vals().protect();
     t.expr().protect();
   }
@@ -201,12 +225,14 @@ struct aterm_traits<mcrl2::data::detail::fs_expr>
   {
     assert(0); // This is not being used. This is to check this.
     t.vars().unprotect();
+    t.substituted_vars().unprotect();
     t.vals().unprotect();
     t.expr().unprotect();
   }
   static void mark(const mcrl2::data::detail::fs_expr& t)
   {
     t.vars().mark();
+    t.substituted_vars().mark();
     t.vals().mark();
     t.expr().mark();
   }
