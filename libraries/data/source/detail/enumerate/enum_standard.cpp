@@ -39,11 +39,11 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality(
                         mcrl2::data::variable &v, 
                         atermpp::aterm_appl &e)
 {
-  if (t(0) == info.opidAnd)
+  if (t(0) == m_enclosing_enumerator.opidAnd)
   {
     return FindInnerCEquality(t(1),vars,v,e) || FindInnerCEquality(t(2),vars,v,e);
   }
-  else if (info.eqs.find(t(0)) != info.eqs.end())  // Does term t have an equality as its function symbol?
+  else if (m_enclosing_enumerator.eqs.find(t(0)) != m_enclosing_enumerator.eqs.end())  // Does term t have an equality as its function symbol?
   {
     const atermpp::aterm_appl a1 = t(1); 
     const atermpp::aterm_appl a2 = t(2); 
@@ -81,11 +81,11 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   while (!vars.empty() && EnumeratorSolutionsStandard::FindInnerCEquality(expr,vars,var,val))
   {
     vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
-    info.rewr_obj->setSubstitutionInternal((ATermAppl) var,(ATerm)(ATermAppl)val);
+    m_enclosing_enumerator.rewr_obj->setSubstitutionInternal((ATermAppl) var,(ATerm)(ATermAppl)val);
     substituted_vars=push_front(substituted_vars,var);
     vals = push_front(vals,val);
-    expr = (atermpp::aterm_appl)info.rewr_obj->rewriteInternal((ATerm)(ATermAppl)expr);
-    info.rewr_obj->clearSubstitution((ATermAppl) var);
+    expr = (atermpp::aterm_appl)m_enclosing_enumerator.rewr_obj->rewriteInternal((ATerm)(ATermAppl)expr);
+    m_enclosing_enumerator.rewr_obj->clearSubstitution((ATermAppl) var);
   }
 
   e=fs_expr(vars,substituted_vars,vals,expr);
@@ -175,7 +175,7 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
   else
   {
     return push_front(build_solution2(pop_front(vars),substituted_vars,exprs),
-           (atermpp::aterm_appl)info.rewr_obj->rewriteInternal((ATerm)(ATermAppl)build_solution_single(vars.front(),substituted_vars,exprs)));
+           (atermpp::aterm_appl)m_enclosing_enumerator.rewr_obj->rewriteInternal((ATerm)(ATermAppl)build_solution_single(vars.front(),substituted_vars,exprs)));
   }
 }
 
@@ -187,12 +187,12 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
   return build_solution2(vars,reverse(substituted_vars),reverse(exprs));
 }
 
-bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution)
+bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution, bool &solution_is_exact)
 {
-  while (ss_stack.empty() && !fs_stack.empty())
+  while (m_enclosing_enumerator.ss_stack.empty() && !m_enclosing_enumerator.fs_stack.empty())
   {
-    const fs_expr e=fs_stack.front();
-    fs_stack.pop_front();
+    const fs_expr e=m_enclosing_enumerator.fs_stack.front();
+    m_enclosing_enumerator.fs_stack.pop_front();
     assert(!e.vars().empty());
 
     variable_list variables_in_use=e.vars();
@@ -203,18 +203,18 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
     if (is_function_sort(sort))
     {
       // HIER MOETEN FUNCTIETERMEN WORDEN TOEGEVOEGD.
-      fs_stack.clear();
+      m_enclosing_enumerator.fs_stack.clear();
       throw mcrl2::runtime_error("cannot enumerate all elements of functions sort " + pp(sort));
     }
     else
     {
-      const function_symbol_vector &constructors_for_sort = info.m_data_spec.constructors(sort);
+      const function_symbol_vector &constructors_for_sort = m_enclosing_enumerator.m_data_spec.constructors(sort);
       function_symbol_vector::const_iterator it=constructors_for_sort.begin();
       
       if ( it == constructors_for_sort.end() )
       {
         assert(!it->empty());
-        fs_stack.clear(); 
+        m_enclosing_enumerator.fs_stack.clear(); 
         throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + " as it does not have constructor functions");
       }
       for( ; it!=constructors_for_sort.end() ; ++it)
@@ -240,15 +240,15 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
           if (used_vars > max_vars)
           {
             cerr << "need more than " << max_vars << " variables to find all valuations of ";
-            for (variable_list::const_iterator k=enum_vars.begin(); k!=enum_vars.end(); ++k)
+            for (variable_list::const_iterator k=m_enclosing_enumerator.enum_vars.begin(); k!=m_enclosing_enumerator.enum_vars.end(); ++k)
             {
-              if (k != enum_vars.begin())
+              if (k != m_enclosing_enumerator.enum_vars.begin())
               {
                 cerr << ", ";
               }
               cerr << pp(*k) << ":" << pp(k->sort());
             }
-            cerr << " that satisfy " << pp(info.rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)enum_expr)) << endl;
+            cerr << " that satisfy " << pp(m_enclosing_enumerator.rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)m_enclosing_enumerator.enum_expr)) << endl;
             max_vars *= MAX_VARS_FACTOR;
           }
         }
@@ -261,40 +261,38 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
         {
           cons_term = application(*it, reverse(var_list));
         }
-        atermpp::aterm_appl term_rf = info.rewr_obj->rewriteInternal(info.rewr_obj->toRewriteFormat(cons_term));
+        atermpp::aterm_appl term_rf = m_enclosing_enumerator.rewr_obj->rewriteInternal(m_enclosing_enumerator.rewr_obj->toRewriteFormat(cons_term));
 
-        info.rewr_obj->setSubstitutionInternal(var,(ATerm)(ATermAppl)term_rf);
-        ATerm new_expr = info.rewr_obj->rewriteInternal((ATerm)(ATermAppl)e.expr());
+        m_enclosing_enumerator.rewr_obj->setSubstitutionInternal(var,(ATerm)(ATermAppl)term_rf);
+        ATerm new_expr = m_enclosing_enumerator.rewr_obj->rewriteInternal((ATerm)(ATermAppl)e.expr());
 
-        if ((m_not_equal_to_false && new_expr!=info.rewr_false) ||
-            (!m_not_equal_to_false && new_expr!=info.rewr_true))
+        if (new_expr!=forbidden_truth_value) 
         {
-          fs_stack.push_back(fs_expr(
+          m_enclosing_enumerator.fs_stack.push_back(fs_expr(
                                 uvars+var_list,
                                 push_front(e.substituted_vars(),var),
                                 push_front(e.vals(),term_rf),
                                 (atermpp::aterm_appl)new_expr));
-          if ((fs_stack.back().vars().empty()) || 
-                   (EliminateVars(fs_stack.back()), (fs_stack.back().vars().empty())) || 
-                   (m_not_equal_to_false && fs_stack.back().expr()==info.rewr_false)  ||
-                   (!m_not_equal_to_false && fs_stack.back().expr()==info.rewr_true))
+          if ((m_enclosing_enumerator.fs_stack.back().vars().empty()) || 
+                   (EliminateVars(m_enclosing_enumerator.fs_stack.back()), (m_enclosing_enumerator.fs_stack.back().vars().empty()))) 
           {
-            if ((m_not_equal_to_false && fs_stack.back().expr()!=info.rewr_false) ||
-                (!m_not_equal_to_false && fs_stack.back().expr()!=info.rewr_true))
-            {
-              ss_stack.push_back(build_solution(enum_vars,fs_stack.back().substituted_vars(),fs_stack.back().vals()));
-            }
-            fs_stack.pop_back();
+            m_enclosing_enumerator.ss_stack.push_back(
+                       ss_solution(build_solution(
+                                        m_enclosing_enumerator.enum_vars,m_enclosing_enumerator.fs_stack.back().substituted_vars(),
+                                        m_enclosing_enumerator.fs_stack.back().vals()),
+                                   m_enclosing_enumerator.fs_stack.back().expr()==desired_truth_value));
+            m_enclosing_enumerator.fs_stack.pop_back();
           }
         }
-        info.rewr_obj->clearSubstitution(var);
+        m_enclosing_enumerator.rewr_obj->clearSubstitution(var);
       }
     }
   }
-  if (!ss_stack.empty())
+  if (!m_enclosing_enumerator.ss_stack.empty())
   {
-    solution = ss_stack.back();
-    ss_stack.pop_back();
+    solution = m_enclosing_enumerator.ss_stack.back().solution();
+    solution_is_exact = m_enclosing_enumerator.ss_stack.back().solution_is_exact();
+    m_enclosing_enumerator.ss_stack.pop_back();
     return true;
   }
   else
@@ -303,91 +301,93 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
   }
 }
 
-void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool netf)
+bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution)
 {
-  enum_vars = Vars;
-  enum_expr = (atermpp::aterm_appl)info.rewr_obj->rewriteInternal((ATerm)(ATermAppl)Expr);
-  m_not_equal_to_false = netf;
+  bool dummy;
+  return next(solution,dummy);
+}
 
-  fs_stack.clear();
+void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool not_equal_to_false)
+{
+  m_enclosing_enumerator.enum_vars = Vars;
+  m_enclosing_enumerator.enum_expr = (atermpp::aterm_appl)m_enclosing_enumerator.rewr_obj->rewriteInternal((ATerm)(ATermAppl)Expr);
+  // m_not_equal_to_false = netf;
+  if (not_equal_to_false)
+  {
+    desired_truth_value=m_enclosing_enumerator.rewr_true;
+    forbidden_truth_value=m_enclosing_enumerator.rewr_false;
+  }
+  else
+  {
+    desired_truth_value=m_enclosing_enumerator.rewr_false;
+    forbidden_truth_value=m_enclosing_enumerator.rewr_true;
+  }
+
+  m_enclosing_enumerator.fs_stack.clear();
 
   used_vars = 0;
   max_vars = MAX_VARS_INIT;
 
-  fs_stack.push_back(fs_expr(enum_vars,variable_list(),atermpp::term_list< atermpp::aterm_appl>(),enum_expr));
-  if (!enum_vars.empty())
+  m_enclosing_enumerator.fs_stack.push_back(fs_expr(m_enclosing_enumerator.enum_vars,variable_list(),atermpp::term_list< atermpp::aterm_appl>(),m_enclosing_enumerator.enum_expr));
+  if (!m_enclosing_enumerator.enum_vars.empty())
   {
-    EliminateVars(fs_stack.front());
+    EliminateVars(m_enclosing_enumerator.fs_stack.front());
   }
 
-  if (fs_stack.front().expr()==info.rewr_false)
+  if (m_enclosing_enumerator.fs_stack.front().expr()==forbidden_truth_value)
   {
-    fs_stack.pop_back();
+    m_enclosing_enumerator.fs_stack.pop_back();
   }
-  else if (fs_stack.front().vars().empty())
+  else if (m_enclosing_enumerator.fs_stack.front().vars().empty())
   {
-    if ((m_not_equal_to_false && fs_stack.front().expr()!=info.rewr_true) ||
-        (!m_not_equal_to_false && fs_stack.front().expr()!=info.rewr_false))
+    if (m_enclosing_enumerator.fs_stack.front().expr()!=desired_truth_value) 
     {
       throw mcrl2::runtime_error("term does not evaluate to true or false " +
-                                 pp(info.rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)fs_stack.front().expr())));
+                                 pp(m_enclosing_enumerator.rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)m_enclosing_enumerator.fs_stack.front().expr())));
     }
     else
     {
-      ss_stack.push_back(build_solution(enum_vars,fs_stack.front().substituted_vars(),fs_stack.front().vals()));
+      m_enclosing_enumerator.ss_stack.push_back(
+                                  ss_solution(
+                                        build_solution(
+                                            m_enclosing_enumerator.enum_vars,
+                                            m_enclosing_enumerator.fs_stack.front().substituted_vars(),
+                                            m_enclosing_enumerator.fs_stack.front().vals()),
+                                        true));
     }
-    fs_stack.pop_back();
+    m_enclosing_enumerator.fs_stack.pop_back();
   }
 }
 
-EnumeratorSolutionsStandard::EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other) :
-  info(other.info), 
-  enum_vars(other.enum_vars), 
-  enum_expr(other.enum_expr),
-  m_not_equal_to_false(other.m_not_equal_to_false), 
-  used_vars(other.used_vars),
-  max_vars(other.max_vars),
-  fs_stack(other.fs_stack),
-  ss_stack(other.ss_stack)
-{
-  enum_vars.protect();
-  enum_expr.protect();
-}
-
-EnumeratorSolutionsStandard::~EnumeratorSolutionsStandard()
-{
-  enum_vars.unprotect();
-  enum_expr.unprotect();
-
-}
-
 EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &data_spec, Rewriter* r, const bool clean_up_rewriter):
-  info(data_spec)
+  m_data_spec(data_spec)
 {
-  info.rewr_obj = r;
+  rewr_obj = r;
   clean_up_rewr_obj = clean_up_rewriter;
 
-  info.rewr_true.protect();
-  info.rewr_true = (atermpp::aterm_appl)info.rewr_obj->toRewriteFormat(sort_bool::true_());
-  info.rewr_false.protect();
-  info.rewr_false = (atermpp::aterm_appl)info.rewr_obj->toRewriteFormat(sort_bool::false_());
+  rewr_true=NULL;
+  rewr_true.protect();
+  rewr_true = (atermpp::aterm_appl)rewr_obj->toRewriteFormat(sort_bool::true_());
+  rewr_false=NULL;
+  rewr_false.protect();
+  rewr_false = (atermpp::aterm_appl)rewr_obj->toRewriteFormat(sort_bool::false_());
 
-  info.opidAnd = NULL;
-  ATprotect(&info.opidAnd);
-  if ((info.rewr_obj->getStrategy() == GS_REWR_INNER) || (info.rewr_obj->getStrategy() == GS_REWR_INNER_P))
+  opidAnd = NULL;
+  ATprotect(&opidAnd);
+  if ((rewr_obj->getStrategy() == GS_REWR_INNER) || (rewr_obj->getStrategy() == GS_REWR_INNER_P))
   {
     throw mcrl2::runtime_error("The classic enumerator does not work (anymore) with the INNER and INNER_P rewriter.");
   }
   else
   {
-    info.opidAnd = ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(sort_bool::and_()),0);
+    opidAnd = ATgetArgument((ATermAppl) rewr_obj->toRewriteFormat(sort_bool::and_()),0);
 
     const function_symbol_vector mappings(data_spec.mappings());
     for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
     {
       if (i->name() == "==")
       {
-        info.eqs.insert( ATgetArgument((ATermAppl) info.rewr_obj->toRewriteFormat(*i),0) );
+        eqs.insert( ATgetArgument((ATermAppl) rewr_obj->toRewriteFormat(*i),0) );
       }
     }
   }
@@ -395,14 +395,14 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
 
 EnumeratorStandard::~EnumeratorStandard()
 {
-  info.rewr_true.unprotect();
-  info.rewr_false.unprotect();
+  rewr_true.unprotect();
+  rewr_false.unprotect();
 
-  ATunprotect(&info.opidAnd);
+  ATunprotect(&opidAnd);
 
   if (clean_up_rewr_obj)
   {
-    delete info.rewr_obj;
+    delete rewr_obj;
   }
 }
 
@@ -410,7 +410,7 @@ EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(ATermList vars, A
 {
   if (old == NULL)
   {
-    return new EnumeratorSolutionsStandard(vars,expr,not_equal_to_false,info);
+    return new EnumeratorSolutionsStandard(vars,expr,not_equal_to_false,*this);
   }
   else
   {
@@ -418,12 +418,6 @@ EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(ATermList vars, A
     return old;
   }
 }
-
-Rewriter* EnumeratorStandard::getRewriter()
-{
-  return info.rewr_obj;
-}
-
 
 } // namespace detail
 } // namespace data

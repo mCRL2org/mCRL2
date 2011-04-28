@@ -25,6 +25,31 @@ namespace data
 namespace detail
 {
 
+class ss_solution
+{
+  protected:
+    atermpp::term_list< atermpp::aterm_appl > m_solution;  // A list containing the solution of a condition in internal format.
+    bool m_solution_is_exact;                              // An indication whether the solution made the solution exactly false or true.
+
+  public:
+
+    // Constructor.
+    ss_solution(const atermpp::term_list< atermpp::aterm_appl > &solution, const bool solution_is_exact) :
+      m_solution(solution),
+      m_solution_is_exact(solution_is_exact)
+    {} 
+   
+    bool solution_is_exact() const
+    { 
+      return m_solution_is_exact;
+    }
+
+    atermpp::term_list< atermpp::aterm_appl > solution() const
+    {
+      return m_solution; 
+    }
+};
+
 class fs_expr
 {
   protected:
@@ -74,117 +99,94 @@ class fs_expr
 
 class EnumeratorSolutionsStandard;
 
-class enumstd_info
+
+class EnumeratorStandard // : public Enumerator
 {
-  public:
-    Rewriter* rewr_obj;
+
+  private:
+    bool clean_up_rewr_obj;
+
   
-    // atermpp::map<ATermAppl, ATermList> constructors;
+  public:
     const mcrl2::data::data_specification &m_data_spec;
+    Rewriter* rewr_obj;
     atermpp::aterm_appl rewr_true, rewr_false;
   
     ATerm opidAnd;
     atermpp::set< ATerm > eqs;
-    // AFun tupAFun;
   
-    enumstd_info(const mcrl2::data::data_specification &data_spec):
-      m_data_spec(data_spec)
-    {} 
-};
+    variable_list enum_vars;       // The variables over which a solution is searched.
+    atermpp::aterm_appl enum_expr; // Condition to be satisfied in internal format.
 
-class EnumeratorStandard // : public Enumerator
-{
-  public:
+    atermpp::deque < fs_expr> fs_stack;
+    atermpp::vector< ss_solution > ss_stack;
+
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter = false);
     ~EnumeratorStandard();
 
     EnumeratorSolutionsStandard* findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutionsStandard* old = NULL);
 
-    Rewriter* getRewriter();
-    enumstd_info& getInfo()
+    Rewriter* getRewriter() const
     {
-      return info;
+      return rewr_obj;
     }
-
-  private:
-    bool clean_up_rewr_obj;
-
-    enumstd_info info;
-
 };
 
 class EnumeratorSolutionsStandard // : public EnumeratorSolutions
 {
+  private:
+
+    EnumeratorStandard &m_enclosing_enumerator;
+
+    // bool m_not_equal_to_false;
+    atermpp::aterm_appl desired_truth_value;    // We search for solutions for the condition enum_expr that are not
+    atermpp::aterm_appl forbidden_truth_value;  // equal to the forbidden truth value, and if the output matches the
+                                                // desired truth value, then the variable solution_is_exact is set.
+
+    size_t used_vars;
+    size_t max_vars;
+
+
   public:
-    EnumeratorSolutionsStandard(enumstd_info& Info) : info(Info)
-    {
-      enum_vars.protect();
-      enum_expr.protect();
-    }
 
-    EnumeratorSolutionsStandard(const EnumeratorSolutionsStandard & other);
-
-
+    /* EnumeratorSolutionsStandard(const EnumeratorSolutionsStandard & other); */
 
     EnumeratorSolutionsStandard(
                    const variable_list &Vars, 
                    const atermpp::aterm_appl &Expr, 
                    const bool not_equal_to_false, 
-                   enumstd_info& Info) :
-      info(Info),
-      m_not_equal_to_false(not_equal_to_false),
+                   EnumeratorStandard &enclosing_enumerator) :
+      m_enclosing_enumerator(enclosing_enumerator),
       used_vars(0),
       max_vars(0)
     { 
-      enum_vars.protect();
-      enum_expr.protect();
-
-      reset(Vars,Expr,m_not_equal_to_false);
+      reset(Vars,Expr,not_equal_to_false);
     }
 
-
-    /* EnumeratorSolutionsStandard():
-      m_not_equal_to_false(true),
-      used_vars(0)
-    {
-      enum_vars.protect();
-      enum_expr.protect();
-    } */
-
-
-    ~EnumeratorSolutionsStandard();
+    ~EnumeratorSolutionsStandard()
+    {}
 
     // returns a list of values for the variables given.
     bool next(atermpp::term_list<atermpp::aterm_appl> &solution);
 
-    void reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool netf);
+    /// \details If not_equal_to_false is set to true, solution_is_exact returns whether the solution
+    ///          made the condition true. If not_equal_to_false was set to false, it
+    ///          indicates whether the last delivered solution made the solution true.
+    ///          The complexity is constant.
+    bool next(atermpp::term_list<atermpp::aterm_appl> &solution, bool &solution_is_exact);
 
+    void reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool not_equal_to_false);
+
+  private:
     bool FindInnerCEquality(const atermpp::aterm_appl T, 
                             const mcrl2::data::variable_list vars, 
                             mcrl2::data::variable &v, 
                             atermpp::aterm_appl &e);
-    // ATerm build_solution_aux_innerc(ATerm t, ATermList substs);
-  private:
-    enumstd_info info;
-
-    variable_list enum_vars;
-    atermpp::aterm_appl enum_expr; // Expression in internal format.
-
-    bool m_not_equal_to_false;
-
-    int used_vars;
-    int max_vars;
-
-    atermpp::deque < fs_expr> fs_stack;
-
-    atermpp::vector<ATermList> ss_stack;
 
     void EliminateVars(fs_expr &e);
-    // bool IsInnerCEq(ATermAppl a);
+
     bool FindInnerCEquality_aux(ATerm t);
-    //ATerm build_solution_single(ATerm t, ATermList substs);
-    // ATermList build_solution2(ATermList vars, ATermList substs);
-    // ATermList build_solution(ATermList vars, ATermList substs);
+
     atermpp::aterm_appl build_solution_single(
                  const atermpp::aterm_appl t,
                  const variable_list substituted_vars,
@@ -235,6 +237,25 @@ struct aterm_traits<mcrl2::data::detail::fs_expr>
     t.substituted_vars().mark();
     t.vals().mark();
     t.expr().mark();
+  }
+};
+
+template<>
+struct aterm_traits<mcrl2::data::detail::ss_solution>
+{
+  static void protect(const mcrl2::data::detail::ss_solution& t)
+  {
+    assert(0); // This is not being used. This is to check this.
+    t.solution().protect();
+  }
+  static void unprotect(const mcrl2::data::detail::ss_solution& t)
+  {
+    assert(0); // This is not being used. This is to check this.
+    t.solution().unprotect();
+  }
+  static void mark(const mcrl2::data::detail::ss_solution& t)
+  {
+    t.solution().mark();
   }
 };
 } // namespace atermpp

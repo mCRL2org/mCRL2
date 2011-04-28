@@ -149,6 +149,7 @@ class classic_enumerator
         typedef classic_enumerator < evaluator_type > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
         bool m_enumerator_iterator_valid;
+        bool m_solution_is_exact;
 
       public:
         
@@ -173,16 +174,19 @@ class classic_enumerator
         { 
         }
 
+        bool solution_is_exact() const
+        { 
+          assert(m_enumerator_iterator_valid);
+          return m_solution_is_exact;
+        }
+
       private:
   
         friend class boost::iterator_core_access;
   
-        // For past-end iterator: m_impl.get() == 0, for cheap iterator construction and comparison
-        // boost::scoped_ptr< implementation_type >  m_impl;
-  
         void increment()
         {
-          m_enumerator_iterator_valid=m_enclosing_enumerator->m_generator->next(m_enclosing_enumerator->m_assignments);
+          m_enumerator_iterator_valid=m_enclosing_enumerator->m_generator->next(m_enclosing_enumerator->m_assignments,m_solution_is_exact);
         }
     
         bool equal(iterator_internal const& other) const
@@ -193,6 +197,7 @@ class classic_enumerator
     
         const atermpp::term_list<atermpp::aterm_appl> & dereference() const
         {
+          assert(m_enumerator_iterator_valid);
           return m_enclosing_enumerator->m_assignments;
         }
     };
@@ -223,6 +228,7 @@ class classic_enumerator
         bool m_enumerator_iterator_valid;
         substitution_type m_substitution;
         variable_list m_vars;
+        bool m_solution_is_exact;
 
       public:
         template < typename Container >
@@ -256,6 +262,12 @@ class classic_enumerator
         {
         }
 
+        bool solution_is_exact() const
+        { 
+          assert(m_enumerator_iterator_valid);
+          return m_solution_is_exact;
+        }
+
       private:
   
         friend class boost::iterator_core_access;
@@ -268,7 +280,7 @@ class classic_enumerator
           // ATermList assignment_list;
           atermpp::term_list <atermpp::aterm_appl> assignment_list;
     
-          if (m_enclosing_enumerator->m_generator->next(assignment_list))
+          if (m_enclosing_enumerator->m_generator->next(assignment_list,m_solution_is_exact))
           {
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();
@@ -297,6 +309,7 @@ class classic_enumerator
     
         substitution_type const& dereference() const
         {
+          assert(m_enumerator_iterator_valid);
           return m_substitution;
         }
     };
