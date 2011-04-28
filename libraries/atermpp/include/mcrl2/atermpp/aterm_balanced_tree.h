@@ -399,7 +399,6 @@ term_balanced_tree< Term > apply(term_balanced_tree<Term> l, const Function f)
 
   for (typename term_balanced_tree< Term >::const_iterator i = l.begin(); i != l.end(); ++i)
   {
-    // std::cerr << "FUN " << *i << "\n";
     result.push_back(f(*i));
   }
 

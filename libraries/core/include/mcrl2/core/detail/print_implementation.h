@@ -516,7 +516,7 @@ void PRINT_FUNC(PrintPart_)(PRINT_OUTTYPE OutStream, const ATerm Part,
 #if defined(PRINT_C)
       gsErrorMsg("ATerm Part is not an ATermAppl or an ATermList\n");
 #elif defined(PRINT_CXX)
-      std::cerr  << "error: ATerm Part is not an ATermAppl or an ATermList\n";
+      mCRL2log(error)  << "ATerm Part is not an ATermAppl or an ATermList" << std::endl;
 #endif
       assert(false);
     }
@@ -1106,10 +1106,10 @@ void PRINT_FUNC(PrintPart_Appl)(PRINT_OUTTYPE OutStream,
 #if defined(PRINT_C)
     gsErrorMsg("the term %T is not part of the internal format\n", Part);
 #elif defined(PRINT_CXX)
-    std::cerr
-        << "error: the term "
+    mCRL2log(error)
+        << "the term "
         << ATwriteToString((ATerm) Part)
-        << " is not part of the internal format\n";
+        << " is not part of the internal format" << std::endl;
 #endif
     assert(false);
   }

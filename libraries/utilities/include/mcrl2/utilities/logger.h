@@ -7,6 +7,7 @@
 #include <string>
 #include <sstream>
 #include <map>
+#include <iostream>
 
 #include "mcrl2/core/text_utility.h"
 
@@ -18,7 +19,7 @@ enum mcrl2_log_level_t
   log_error,
   log_warning,
   log_info,
-  log_detailed_info,
+  log_verbose,
   log_debug,
   log_debug1,
   log_debug2,
@@ -60,6 +61,13 @@ class logger
 
     /// \brief The message hint of the current message
     std::string m_hint;
+
+    static
+    bool& last_message_ended_with_newline()
+    {
+      static bool m_last_message_ended_with_newline = true;
+      return m_last_message_ended_with_newline;
+    }
 
     /// \brief Mapping of message hint to loglevel. This allows a finegrained
     /// control of log messages to log levels. It can e.g. be set that for some
@@ -104,9 +112,9 @@ class logger
       {
         return log_info;
       }
-      else if (s == "detailed info")
+      else if (s == "verbose")
       {
-        return log_detailed_info;
+        return log_verbose;
       }
       else if (s == "debug")
       {
@@ -170,13 +178,30 @@ class logger
       + std::string(8 - to_string(m_level).size(), ' ')
       + std::string(2*indentation(), ' ');
 
+      bool s_ends_with_newline = (s[s.size()-1] == '\n');
+
       std::string result = s;
-      if(result[result.size()-1] == '\n')
+      // Avoid adding spurious start of line after the last line in the log.
+      if(s_ends_with_newline)
       {
         result.erase(result.end()-1);
       }
 
-      result = start_of_line + mcrl2::core::regex_replace("\n", "\n" + start_of_line, result) + "\n";
+      // Prepend if a newline was added
+      if (last_message_ended_with_newline())
+      {
+        result = start_of_line + result;
+      }
+
+      result = mcrl2::core::regex_replace("\n", "\n" + start_of_line, result);
+
+      if(s_ends_with_newline)
+      {
+        result += "\n";
+      }
+
+      last_message_ended_with_newline() = s_ends_with_newline;
+
       return result;
     }
 
@@ -190,6 +215,7 @@ class logger
     /// logging mechanism. Requires that output performs output in an atomic way.
     ~logger()
     {
+      std::string s(m_os.str());
       OutputPolicy::output(process(m_os.str()), m_hint);
     }
 
@@ -370,6 +396,11 @@ if (log_##level > MCRL2_MAX_LOG_LEVEL) ; \
 else if (log_##level > mcrl2_logger::get_reporting_level(__VA_ARGS__)) ; \
 else mcrl2_logger().get(log_##level, ##__VA_ARGS__)
 
+// \deprecated. For backwards compatibility with gsMessage
+#define mCRL2logGS(level) \
+if (level > MCRL2_MAX_LOG_LEVEL) ; \
+else if (level > mcrl2_logger::get_reporting_level()) ; \
+else mcrl2_logger().get(level)
 
 // Implementation of now_time; platform specific.
 // used to print timestamps in front of debug messages.

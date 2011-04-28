@@ -39,91 +39,61 @@ ATermAppl parse_identifier(istream& se_stream)
 
 ATermAppl parse_sort_expr(istream& se_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing sort expression...\n";
-  }
+  mCRL2log(debug) << "parsing sort expression..." << std::endl;
   return (ATermAppl) parse_tagged_stream("sort_expr", se_stream);
 }
 
 ATermAppl parse_data_expr(istream& de_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing data expression...\n";
-  }
+  mCRL2log(debug) << "parsing data expression..." << std::endl;
   return (ATermAppl) parse_tagged_stream("data_expr", de_stream);
 }
 
 ATermAppl parse_data_spec(istream& ps_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing data specification...\n";
-  }
+  mCRL2log(debug) << "parsing data specification..." << std::endl;
   return (ATermAppl) parse_tagged_stream("data_spec", ps_stream);
 }
 
 ATermAppl parse_mult_act(istream& pe_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing multiaction...\n";
-  }
+  mCRL2log(debug) << "parsing multiaction..." << std::endl;
   return (ATermAppl) parse_tagged_stream("mult_act", pe_stream);
 }
 
 ATermAppl parse_proc_expr(istream& pe_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing process expression...\n";
-  }
+  mCRL2log(debug) << "parsing process expression..." << std::endl;
   return (ATermAppl) parse_tagged_stream("proc_expr", pe_stream);
 }
 
 ATermAppl parse_proc_spec(istream& ps_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing process specification...\n";
-  }
+  mCRL2log(debug) << "parsing process specification..." << std::endl;
   return (ATermAppl) parse_tagged_stream("proc_spec", ps_stream);
 }
 
 ATermAppl parse_state_frm(istream& pe_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing state formula...\n";
-  }
+  mCRL2log(debug) << "parsing state formula..." << std::endl;
   return (ATermAppl) parse_tagged_stream("state_frm", pe_stream);
 }
 
 ATermAppl parse_action_rename_spec(istream& pe_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing action rename specification...\n";
-  }
+  mCRL2log(debug) << "parsing action rename specification..." << std::endl;
   return (ATermAppl) parse_tagged_stream("action_rename", pe_stream);
 }
 
 ATermAppl parse_pbes_spec(istream& pbes_spec_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing BPES specification...\n";
-  }
+  mCRL2log(debug)<< "parsing BPES specification..." << std::endl;
   return (ATermAppl) parse_tagged_stream("pbes_spec", pbes_spec_stream);
 }
 
 ATermList parse_data_vars(istream& pe_stream)
 {
-  if (gsDebug)
-  {
-    std::cerr << "parsing data variables...\n";
-  }
+  mCRL2log(debug) << "parsing data variables..." << std::endl;
   return (ATermList) parse_tagged_stream("data_vars", pe_stream);
 }
 

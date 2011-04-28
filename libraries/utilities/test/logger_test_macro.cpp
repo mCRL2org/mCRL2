@@ -23,7 +23,7 @@ void print_all_log_levels()
   mCRL2log(error) << "An error message" << std::endl;
   mCRL2log(warning) << "A warning" << std::endl;
   mCRL2log(info) << "Some information" << std::endl;
-  mCRL2log(detailed_info) << "Detailed information" << std::endl;
+  mCRL2log(verbose) << "Detailed information" << std::endl;
   mCRL2log(debug) << "Debugging info" << std::endl;
   mCRL2log(debug1) << "Detailed debugging info" << std::endl;
   mCRL2log(debug2) << "Detailed debugging info (2)" << std::endl;

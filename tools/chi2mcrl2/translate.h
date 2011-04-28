@@ -14,6 +14,7 @@
 #include <iostream>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/messaging.h"
+#include "mcrl2/core/text_utility.h"
 #include <cstdio>
 #include <vector>
 #include <map>
@@ -119,20 +120,6 @@ typedef struct
   std::string recv_end;
   std::string Type;
 } RecChannel;
-
-template <class T>
-inline std::string to_string(const T& t)
-{
-  std::stringstream ss;
-  ss << t;
-  return ss.str();
-}
-
-template < >
-inline std::string to_string(const std::string& t)
-{
-  return t;
-}
 
 class CAsttransform
 {

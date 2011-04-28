@@ -1095,7 +1095,7 @@ static bes_expression toBDD_rec(bes_expression b1,atermpp::table& hashtable)
   }
   else
   {
-    std::cerr << "Unexpected expression\n";
+    mCRL2log(error) << "Unexpected expression" << std::endl;
     assert(0);
   }
 
@@ -2114,7 +2114,7 @@ class boolean_equation_system
 #ifndef NDEBUG
       if (internal_opt_store_as_tree)
       {
-        std::cerr << "Warning. Do not store pbes variables in a tree structure in a debug build of pbes2bool\n";
+        mCRL2log(warning) << "Do not store pbes variables in a tree structure in a debug build of pbes2bool" << std::endl;
       }
 #endif
       pbes_expression p=// pbes_rewriter(pbes_spec.initial_state());
@@ -2142,10 +2142,7 @@ class boolean_equation_system
       atermpp::table variable_rank(2*static_cast<int>(eqsys.size()),50);
 
       // Fill the pbes_equations table
-      if (mcrl2::core::gsVerbose)
-      {
-        std::cerr << "Retrieving pbes_equations from equation system...\n";
-      }
+      mCRL2log(verbose) << "Retrieving pbes_equations from equation system..." << std::endl;
 
       assert(eqsys.size()>0); // There should be at least one equation
       fixpoint_symbol current_fixpoint_symbol=eqsys.begin()->symbol();
@@ -2179,10 +2176,8 @@ class boolean_equation_system
       size_t relevance_counter_limit=100;
 #define RELEVANCE_DIVIDE_FACTOR 100
 
-      if (mcrl2::core::gsVerbose)
-      {
-        std::cerr << "Computing a BES from the PBES....\n";
-      }
+      mCRL2log(verbose) << "Computing a BES from the PBES...." << std::endl;
+
       // Set the first BES equation X1=X2
       add_equation(
         1,
@@ -2429,12 +2424,9 @@ class boolean_equation_system
         if (nr_of_processed_variables % 10 == 0)
 #endif
         {
-          if (mcrl2::core::gsVerbose)
-          {
-            std::cerr << "Processed " << nr_of_processed_variables <<
+          mCRL2log(verbose) << "Processed " << nr_of_processed_variables <<
                       " and generated " << nr_of_generated_variables <<
-                      " boolean variables\n";
-          }
+                      " boolean variables" << std::endl;
         }
       }
       refresh_relevances();
@@ -2556,8 +2548,8 @@ class boolean_equation_system
         }
         catch (std::exception& e)
         {
-          std::cerr << "Fail to write counterexample to " << filename <<
-                    "(" << e.what() << ")\n";
+          mCRL2log(warning) << "Fail to write counterexample to " << filename <<
+                    "(" << e.what() << ")" << std::endl;
         }
       }
     }
@@ -2717,10 +2709,8 @@ static bes_expression translate_equation_for_vasy(const size_t i,
 void save_bes_in_vasy_format(const std::string& outfilename,bes::boolean_equation_system bes_equations)
 {
   using namespace mcrl2::pbes_system;
-  if (mcrl2::core::gsVerbose)
-  {
-    std::cerr << "Converting result to VASY-format...\n";
-  }
+  mCRL2log(verbose) << "Converting result to VASY-format..." << std::endl;
+
   // Use an indexed set to keep track of the variables and their vasy-representations
 
   /* First translate the right hand sides of the equations such that they only
@@ -2860,10 +2850,8 @@ static void save_rhs_in_vasy_form(std::ostream& outputfile,
 void save_bes_in_cwi_format(const std::string& outfilename,boolean_equation_system& bes_equations)
 {
   using namespace mcrl2::pbes_system;
-  if (mcrl2::core::gsVerbose)
-  {
-    std::cerr << "Converting result to CWI-format...\n";
-  }
+  mCRL2log(verbose) << "Converting result to CWI-format..." << std::endl;
+
   // Use an indexed set to keep track of the variables and their cwi-representations
 
   std::ofstream outputfile;
@@ -2961,10 +2949,8 @@ void save_bes_in_pbes_format(
 {
   using namespace mcrl2::pbes_system;
   using namespace mcrl2::data;
-  if (mcrl2::core::gsVerbose)
-  {
-    std::cerr << "Converting result to PBES-format...\n";
-  }
+  mCRL2log(verbose) << "Converting result to PBES-format..." << std::endl;
+
   // Use an indexed set to keep track of the variables and their pbes-representations
 
   atermpp::vector < pbes_equation > eqns;
@@ -3091,10 +3077,7 @@ void save_bes_in_bes_format(
 {
   using namespace mcrl2::pbes_system;
   using namespace mcrl2::bes;
-  if (mcrl2::core::gsVerbose)
-  {
-    std::cerr << "Converting result to BES-format...\n";
-  }
+  mCRL2log(verbose) << "Converting result to BES-format..." << std::endl;
   // Use an indexed set to keep track of the variables and their bes-representations
 
   atermpp::vector < boolean_equation > eqns;
@@ -3485,11 +3468,9 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
   using namespace std;
   using namespace mcrl2::pbes_system;
 
-  if (mcrl2::core::gsVerbose)
-  {
-    std::cerr << "Solving a BES with " << bes_equations.nr_of_variables() <<
-              " equations.\n";
-  }
+  mCRL2log(verbose) << "Solving a BES with " << bes_equations.nr_of_variables() <<
+              " equations." << std::endl;
+
   atermpp::vector<bes_expression> approximation(bes_equations.nr_of_variables()+1);
 
   atermpp::table bex_hashtable(10,5);
@@ -3524,10 +3505,7 @@ bool solve_bes(bes::boolean_equation_system& bes_equations,
   for (size_t current_rank=bes_equations.max_rank;
        current_rank>0 ; current_rank--)
   {
-    if (gsVerbose)
-    {
-      std::cerr << "Solve equations of rank " << current_rank << ".\n";
-    }
+    mCRL2log(verbose) << "Solve equations of rank " << current_rank << "." << std::endl;
 
     /* Calculate the stable solution for the current rank */
 

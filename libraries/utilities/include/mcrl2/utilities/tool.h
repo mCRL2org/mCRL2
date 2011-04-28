@@ -16,6 +16,8 @@
 #include <string>
 #include <stdexcept>
 
+#include "mcrl2/utilities/logger.h"
+
 #ifndef MCRL2_TOOL_CLASSES_NO_CORE
 # include "mcrl2/core/messaging.h"
 #endif
@@ -108,14 +110,17 @@ class tool
       if (parser.options.count("quiet"))
       {
         mcrl2::core::gsSetQuietMsg();
+        mcrl2_logger::set_reporting_level(log_quiet);
       }
       if (parser.options.count("verbose"))
       {
         mcrl2::core::gsSetVerboseMsg();
+        mcrl2_logger::set_reporting_level(log_verbose);
       }
       if (parser.options.count("debug"))
       {
         mcrl2::core::gsSetDebugMsg();
+        mcrl2_logger::set_reporting_level(log_debug);
       }
 #endif
     }

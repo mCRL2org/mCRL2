@@ -19,7 +19,7 @@ void print_all_log_levels()
   mCRL2log(error) << "An error message" << std::endl;
   mCRL2log(warning) << "A warning" << std::endl;
   mCRL2log(info) << "Some information" << std::endl;
-  mCRL2log(detailed_info) << "Detailed information" << std::endl;
+  mCRL2log(verbose) << "Detailed information" << std::endl;
   mCRL2log(debug) << "Debugging info" << std::endl;
   mCRL2log(debug1) << "Detailed debugging info" << std::endl;
   mCRL2log(debug2) << "Detailed debugging info (2)" << std::endl;
@@ -83,7 +83,7 @@ BOOST_AUTO_TEST_CASE(test_logging_hint)
   mcrl2_logger::set_reporting_level(log_debug, "test_hint");
   mCRL2log(debug, "test_hint") << "Testing hint, should be printed" << std::endl;
   mCRL2log(debug) << "Testing hint, should not be printed" << std::endl;
-  mcrl2_logger::set_reporting_level(log_detailed_info, "test_hint");
+  mcrl2_logger::set_reporting_level(log_verbose, "test_hint");
   mCRL2log(info) << "Testing hint, should still be printed" << std::endl;
   mcrl2_logger::clear_reporting_level("test_hint");
 }
@@ -122,6 +122,24 @@ BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_static)
 BOOST_AUTO_TEST_CASE(test_non_execution_of_arguments_dynamic)
 {
   BOOST_CHECK(MCRL2_MAX_LOG_LEVEL >= log_debug);
-  mcrl2_logger::set_reporting_level(log_detailed_info);
+  mcrl2_logger::set_reporting_level(log_verbose);
   mCRL2log(debug) << "This line should not end with BOOM! ............. " << test_assert() << std::endl;
 }
+
+BOOST_AUTO_TEST_CASE(test_fflush)
+{
+  for(int i = 0; i < 10; ++i)
+  {
+    fprintf(stderr, "%d", i);
+    fflush(stderr);
+  }
+  fprintf(stderr, "\n");
+  fflush(stderr);
+}
+
+BOOST_AUTO_TEST_CASE(test_multiline_nonewline)
+{
+  mCRL2log(info) << "There is just one newline";
+  mCRL2log(info) << "in this message" << std::endl;
+}
+

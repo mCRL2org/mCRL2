@@ -186,7 +186,7 @@ struct printer: public core::traverser<Derived>
     std::string result = debug.str().substr(begin_pos);
     if (expected != result)
     {
-      std::cerr << "--- Error in print ---\n"
+      mCRL2log(error) << "--- Error in print ---\n"
                 << "  expected: " << expected << "\n"
                 << "       got: " << result << std::endl;
       BOOST_CHECK(expected == result);

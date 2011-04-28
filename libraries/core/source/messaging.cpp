@@ -10,6 +10,7 @@
 
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/utilities/logger.h"
 
 #include "workarounds.h"
 
@@ -33,6 +34,7 @@ void gsSetQuietMsg(void)
   gsWarning = false;
   gsVerbose = false;
   gsDebug   = false;
+  mcrl2_logger::set_reporting_level(log_quiet);
 }
 
 void gsSetNormalMsg(void)
@@ -42,6 +44,7 @@ void gsSetNormalMsg(void)
   gsWarning = true;
   gsVerbose = false;
   gsDebug   = false;
+  mcrl2_logger::set_reporting_level(log_warning);
 }
 
 void gsSetVerboseMsg(void)
@@ -51,6 +54,7 @@ void gsSetVerboseMsg(void)
   gsWarning = true;
   gsVerbose = true;
   gsDebug   = false;
+  mcrl2_logger::set_reporting_level(log_verbose);
 }
 
 void gsSetDebugMsg(void)
@@ -60,6 +64,7 @@ void gsSetDebugMsg(void)
   gsWarning = true;
   gsVerbose = true;
   gsDebug   = true;
+  mcrl2_logger::set_reporting_level(log_debug);
 }
 
 // Function pointer for a custom message printing routine
@@ -105,6 +110,40 @@ static void handler_wrapper(messageType t, const char* Format, va_list args)
   free(output);
 }
 
+// Helper function (wrapper around gsvfprintf) for printing to string
+static void logger_wrapper(mcrl2_log_level_t t, const char* Format, va_list args)
+{
+
+  FILE* stream = tmpfile();
+
+  assert(stream);
+
+  gsvfprintf(stream, Format, args);
+
+  size_t n = ftell(stream);
+
+  fflush(stream);
+  rewind(stream);
+
+  char* output  = (char*) malloc((n + 1) * sizeof(char));
+  char* current = output;
+
+  while (0 < n--)
+  {
+    *current = (char) fgetc(stream);
+
+    ++current;
+  }
+
+  *current = '\0';
+
+  fclose(stream);
+
+  mCRL2logGS(t) << output;
+
+  free(output);
+}
+
 void gsMessage(const char* Format, ...)
 //Post: Format is printed to stderr where the remaining parameters are used as
 //      gsprintf arguments to Format.
@@ -116,45 +155,34 @@ void gsMessage(const char* Format, ...)
 //Also note that the message handler does not receive these messages; they are
 //part of the output.
 {
-  if (!gsQuiet)
+  va_list Args;
+  va_start(Args, Format);
+  if (custom_message_handler)
   {
-    va_list Args;
-    va_start(Args, Format);
-
-    if (custom_message_handler)
-    {
-      handler_wrapper(gs_notice, Format, Args);
-    }
-    else
-    {
-      gsvfprintf(stderr, Format, Args);
-    }
-
-    va_end(Args);
+    handler_wrapper(gs_notice, Format, Args);
   }
+  else
+  {
+    logger_wrapper(log_info, Format, Args);
+  }
+  va_end(Args);
 }
 
 void gsErrorMsg(const char* Format, ...)
 //Post: "error: " is printed to stderr followed by Format, where the remaining
 //      parameters are used as gsprintf arguments to Format.
 {
-  if (gsError)
+  va_list Args;
+  va_start(Args, Format);
+  if (custom_message_handler)
   {
-    va_list Args;
-    va_start(Args, Format);
-
-    if (custom_message_handler)
-    {
-      handler_wrapper(gs_error, Format, Args);
-    }
-    else
-    {
-      fprintf(stderr, "error: ");
-      gsvfprintf(stderr, Format, Args);
-    }
-
-    va_end(Args);
+    handler_wrapper(gs_error, Format, Args);
   }
+  else
+  {
+    logger_wrapper(log_error, Format, Args);
+  }
+  va_end(Args);
 }
 
 void gsWarningMsg(const char* Format, ...)
@@ -162,23 +190,17 @@ void gsWarningMsg(const char* Format, ...)
 //      to stderr followed by Format, where the remaining parameters are used
 //      as gsprintf arguments to Format.
 {
-  if (gsWarning)
+  va_list Args;
+  va_start(Args, Format);
+  if (custom_message_handler)
   {
-    va_list Args;
-    va_start(Args, Format);
-
-    if (custom_message_handler)
-    {
-      handler_wrapper(gs_warning, Format, Args);
-    }
-    else
-    {
-      fprintf(stderr, "warning: ");
-      gsvfprintf(stderr, Format, Args);
-    }
-
-    va_end(Args);
+    handler_wrapper(gs_warning, Format, Args);
   }
+  else
+  {
+    logger_wrapper(log_warning, Format, Args);
+  }
+  va_end(Args);
 }
 
 void gsVerboseMsg(const char* Format, ...)
@@ -186,30 +208,24 @@ void gsVerboseMsg(const char* Format, ...)
 //      stderr, where the remaining parameters are used as gsprintf arguments
 //      to Format.
 {
-  if (gsVerbose)
+  va_list Args;
+  va_start(Args, Format);
+  if (custom_message_handler)
   {
-    va_list Args;
-    va_start(Args, Format);
-
-    if (custom_message_handler)
-    {
-      handler_wrapper(gs_notice, Format, Args);
-    }
-    else
-    {
-      gsvfprintf(stderr, Format, Args);
-    }
-
-    va_end(Args);
+    handler_wrapper(gs_notice, Format, Args);
   }
+  else
+  {
+    logger_wrapper(log_info, Format, Args);
+  }
+  va_end(Args);
 }
 
-# define GS_DEBUG_MSG_FUNC(FuncName,Format) \
-  if (gsDebug) { \
-    fprintf(stderr, "(%s): ", FuncName); \
+#define GS_DEBUG_MSG_FUNC(FuncName,Format) \
+  if (log_debug <= mcrl2_logger::get_reporting_level()) { \
     va_list Args; \
     va_start(Args, Format); \
-    gsvfprintf(stderr, Format, Args); \
+    logger_wrapper(log_debug, Format, Args); \
     va_end(Args); \
   }
 

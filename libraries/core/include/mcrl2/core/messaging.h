@@ -15,6 +15,7 @@
 #include <cstdarg>
 #include <cassert>
 #include "boost/current_function.hpp"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -81,6 +82,7 @@ void gsDebugMsgFunc(const char* FuncName, const char* Format, ...);
 
 /// \brief Replaces message_handler by the function pointer passed as argument.
 void gsSetCustomMessageHandler(void (*)(messageType, const char*));
+
 }
 }
 
