@@ -20,8 +20,8 @@
 #define PRINTF(decl) decl __attribute__((format(printf, 1, 2)));
 #define NORETURN(decl) decl __attribute__((noreturn));
 #else
-#define PRINTF(decl)
-#define NORETURN(decl)
+#define PRINTF(decl) decl
+#define NORETURN(decl) decl
 #endif
 
 class Logger
