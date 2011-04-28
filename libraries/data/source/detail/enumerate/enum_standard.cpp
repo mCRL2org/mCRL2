@@ -49,14 +49,14 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality(
     const atermpp::aterm_appl a2 = t(2); 
     if (a1!=a2)
     {
-      if (gsIsDataVarId(a1) && (find(vars.begin(),vars.end(),a1)!=vars.end()) && 
+      if (is_variable(a1) && (find(vars.begin(),vars.end(),a1)!=vars.end()) && 
                                !gsOccurs((ATerm)(ATermAppl) a1,(ATerm)(ATermAppl) a2))
       {
         v = a1;
         e = a2; 
         return true;
       }
-      if (gsIsDataVarId(a2) && (find(vars.begin(),vars.end(),a2)!=vars.end()) &&
+      if (is_variable(a2) && (find(vars.begin(),vars.end(),a2)!=vars.end()) &&
                                !gsOccurs((ATerm)(ATermAppl) a2,(ATerm)(ATermAppl) a1))
       {
         v = a2;
@@ -219,7 +219,6 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
       }
       for( ; it!=constructors_for_sort.end() ; ++it)
       {
- cerr << "CONSTRUCTOR " << pp(*it) << "\n";
         // Construct the domain and target sort for the constructor.
         sort_expression target_sort=it->sort();
         sort_expression_list domain_sorts;
@@ -270,10 +269,6 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
         if ((m_not_equal_to_false && new_expr!=info.rewr_false) ||
             (!m_not_equal_to_false && new_expr!=info.rewr_true))
         {
- ATfprintf(stderr,"HIER1 %d    %t    %t\n", m_not_equal_to_false,(ATermList)uvars,(ATermList)var_list);
- cerr << "VARIABLES " << pp(uvars) << " + " << pp(var_list) << "\n";
- cerr << "EXPRESSION " << pp(info.rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)new_expr)) << endl;
- ATfprintf(stderr,"Expression %t\n", info.rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)new_expr));
           fs_stack.push_back(fs_expr(
                                 uvars+var_list,
                                 push_front(e.substituted_vars(),var),
@@ -299,13 +294,11 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
   if (!ss_stack.empty())
   {
     solution = ss_stack.back();
- cerr << "SOLUTION " << solution << "\n";
     ss_stack.pop_back();
     return true;
   }
   else
   {
- cerr << "NO SOLUTION \n";
     return false;
   }
 }
