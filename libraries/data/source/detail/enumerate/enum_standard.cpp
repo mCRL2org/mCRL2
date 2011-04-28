@@ -9,11 +9,11 @@
 #include <cstdlib>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/detail/enum/standard.h"
 #include "mcrl2/data/bool.h"
@@ -33,6 +33,21 @@ namespace data
 namespace detail
 {
 
+// Ugly add hoc class. Ought to be replaced when lambda notation can be used.
+class test_equal
+{
+  atermpp::aterm_appl m_term;
+
+  public:
+    test_equal(const atermpp::aterm_appl &t) : m_term(t)
+    {}
+
+    bool operator ()(const atermpp::aterm_appl &other) const
+    { 
+      return m_term==other;
+    }
+}; 
+
 bool EnumeratorSolutionsStandard::FindInnerCEquality(
                         const atermpp::aterm_appl t,
                         const mcrl2::data::variable_list vars, 
@@ -50,14 +65,14 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality(
     if (a1!=a2)
     {
       if (is_variable(a1) && (find(vars.begin(),vars.end(),a1)!=vars.end()) && 
-                               !gsOccurs((ATerm)(ATermAppl) a1,(ATerm)(ATermAppl) a2))
+                               (find_if(a2,test_equal(a1))==atermpp::aterm_appl()))        // true if a1 does not occur in a2.
       {
         v = a1;
         e = a2; 
         return true;
       }
       if (is_variable(a2) && (find(vars.begin(),vars.end(),a2)!=vars.end()) &&
-                               !gsOccurs((ATerm)(ATermAppl) a2,(ATerm)(ATermAppl) a1))
+                               (find_if(a1,test_equal(a2))==atermpp::aterm_appl()))        // true if a2 does not occur in a1.
       {
         v = a2;
         e = a1;
@@ -78,7 +93,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
 
   variable var;
   atermpp::aterm_appl val;
-  while (!vars.empty() && EnumeratorSolutionsStandard::FindInnerCEquality(expr,vars,var,val))
+  while (!vars.empty() && FindInnerCEquality(expr,vars,var,val))
   {
     vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
     m_enclosing_enumerator.rewr_obj->setSubstitutionInternal((ATermAppl) var,(ATerm)(ATermAppl)val);
@@ -141,7 +156,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
     AFun fun = ATgetAFun((ATermAppl) t);
     size_t k = 1;
 
-    if (!ATisInt((ATerm)(ATermAppl)head) && !gsIsDataVarId((ATermAppl) head))
+    if (!ATisInt((ATerm)(ATermAppl)head) && !is_variable((ATermAppl) head))
     {
       fun = ATmakeAFun("@appl_bs@",arity+extra_arity,false);
       k = extra_arity+1;
