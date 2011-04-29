@@ -466,6 +466,7 @@ static yyconst flex_int16_t yy_chk[114] =
 #define YYSTYPE std::string
 #include <string>
 #include <cstdio>
+// #include <aterm2.h>
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/lts/lts.h"
 #include "liblts_fsmlexer.h"

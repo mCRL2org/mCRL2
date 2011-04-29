@@ -71,8 +71,8 @@
 #include <iostream>
 #include "libstruct_core.h"
 #include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/core/messaging.h"
 #include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/core/messaging.h"
 #include <list>
 #include <map>
 #include <set>

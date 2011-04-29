@@ -21,6 +21,7 @@
 #include <sstream>
 #include <vector>
 #include "mcrl2/exception.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/traverser.h"
 
