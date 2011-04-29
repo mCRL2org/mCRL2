@@ -1454,3 +1454,10 @@ include(CPack)
    install( SCRIPT "${CMAKE_CURRENT_BINARY_DIR}/InstallLTSmin.cmake" )	 
  endif( NOT MCRL2_LTSMIN_INSTALL_PATH STREQUAL "" )
 
+
+# Print warnings
+if( Boost_FOUND AND APPLE AND BUILD_SHARED_LIBS )
+  message( STATUS "")
+  message( STATUS "Warning: Ensure that \"${Boost_LIBRARY_DIRS}\" is included in DYLD_LIBRARY_PATH.")
+  message( STATUS "")
+endif( Boost_FOUND AND APPLE AND BUILD_SHARED_LIBS )
