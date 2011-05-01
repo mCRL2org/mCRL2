@@ -173,7 +173,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
       args[k] = build_solution_aux_innerc(t(i),substituted_vars,exprs);
     }
 
-    ATerm r = (ATerm) ATmakeApplArray(fun,(ATerm *)args);
+    atermpp::aterm_appl r = ATmakeApplArray(fun,(ATerm *)args);
     return r;
   }
 }
@@ -358,7 +358,7 @@ void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp
     if (m_enclosing_enumerator.fs_stack.front().expr()!=desired_truth_value) 
     {
       throw mcrl2::runtime_error("term does not evaluate to true or false " +
-                                 pp(m_enclosing_enumerator.rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)m_enclosing_enumerator.fs_stack.front().expr())));
+                           pp(m_enclosing_enumerator.rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)m_enclosing_enumerator.fs_stack.front().expr())));
     }
     else
     {
@@ -387,22 +387,27 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   rewr_false.protect();
   rewr_false = (atermpp::aterm_appl)rewr_obj->toRewriteFormat(sort_bool::false_());
 
-  opidAnd = NULL;
-  ATprotect(&opidAnd);
+  // opidAnd = NULL;
+  opidAnd.protect();
   if ((rewr_obj->getStrategy() == GS_REWR_INNER) || (rewr_obj->getStrategy() == GS_REWR_INNER_P))
   {
     throw mcrl2::runtime_error("The classic enumerator does not work (anymore) with the INNER and INNER_P rewriter.");
   }
   else
   {
-    opidAnd = ATgetArgument((ATermAppl) rewr_obj->toRewriteFormat(sort_bool::and_()),0);
+    // opidAnd = ATgetArgument((ATermAppl) rewr_obj->toRewriteFormat(sort_bool::and_()),0);
+    atermpp::aterm_appl t=rewr_obj->toRewriteFormat(sort_bool::and_());
+    ATfprintf(stderr,"AAA %t\n",(ATermAppl)t);
+    opidAnd = t(0);
 
     const function_symbol_vector mappings(data_spec.mappings());
     for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
     {
       if (i->name() == "==")
       {
-        eqs.insert( ATgetArgument((ATermAppl) rewr_obj->toRewriteFormat(*i),0) );
+        // eqs.insert( ATgetArgument((ATermAppl) rewr_obj->toRewriteFormat(*i),0) );
+        atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
+        eqs.insert(t(0));
       }
     }
   }
@@ -413,7 +418,7 @@ EnumeratorStandard::~EnumeratorStandard()
   rewr_true.unprotect();
   rewr_false.unprotect();
 
-  ATunprotect(&opidAnd);
+  opidAnd.unprotect();
 
   if (clean_up_rewr_obj)
   {
@@ -421,7 +426,10 @@ EnumeratorStandard::~EnumeratorStandard()
   }
 }
 
-EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(ATermList vars, ATerm expr, bool not_equal_to_false, EnumeratorSolutionsStandard* old)
+EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(
+               const variable_list vars, 
+               const atermpp::aterm_appl expr, 
+               const bool not_equal_to_false, EnumeratorSolutionsStandard* old)
 {
   if (old == NULL)
   {

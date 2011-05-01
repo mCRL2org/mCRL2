@@ -12,6 +12,7 @@
 #define _ENUM_STANDARD_H
 
 #include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/enum/enumerator.h"
@@ -112,8 +113,8 @@ class EnumeratorStandard // : public Enumerator
     Rewriter* rewr_obj;
     atermpp::aterm_appl rewr_true, rewr_false;
   
-    ATerm opidAnd;
-    atermpp::set< ATerm > eqs;
+    atermpp::aterm_int opidAnd;
+    atermpp::set< atermpp::aterm_int > eqs;
   
     variable_list enum_vars;       // The variables over which a solution is searched.
     atermpp::aterm_appl enum_expr; // Condition to be satisfied in internal format.
@@ -124,7 +125,7 @@ class EnumeratorStandard // : public Enumerator
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter = false);
     ~EnumeratorStandard();
 
-    EnumeratorSolutionsStandard* findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutionsStandard* old = NULL);
+    EnumeratorSolutionsStandard* findSolutions(const variable_list vars, atermpp::aterm_appl expr, bool true_only, EnumeratorSolutionsStandard* old = NULL);
 
     Rewriter* getRewriter() const
     {
@@ -185,7 +186,7 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
 
     void EliminateVars(fs_expr &e);
 
-    bool FindInnerCEquality_aux(ATerm t);
+    bool FindInnerCEquality_aux(const atermpp::aterm_appl t);
 
     atermpp::aterm_appl build_solution_single(
                  const atermpp::aterm_appl t,

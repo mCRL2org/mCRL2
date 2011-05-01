@@ -250,7 +250,7 @@ class classic_enumerator
           m_enclosing_enumerator->m_generator=
                  m_enclosing_enumerator->m_enumerator->findSolutions(
                           m_vars,
-                          m_enclosing_enumerator->m_evaluator.convert_to(condition),
+                          (ATerm)(ATermAppl)m_enclosing_enumerator->m_evaluator.convert_to(condition),
                           m_enclosing_enumerator->m_not_equal_to_false,
                           m_enclosing_enumerator->m_generator);
 

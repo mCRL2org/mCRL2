@@ -330,7 +330,7 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
         valid = false;
         break;
       }
-      stateargs[i] = info.import_term((ATermAppl) stateargs[i]);
+      stateargs[i] = (ATerm)(ATermAppl)info.import_term((ATermAppl) stateargs[i]);
       l = ATgetNext(l);
     }
     if (valid)
@@ -401,7 +401,7 @@ ATermList NextState::ListToFormat(ATermList l,ATermList free_vars)
   }
   else
   {
-    return ATinsert(ListToFormat(ATgetNext(l),free_vars),info.import_term((ATermAppl) SetVars(ATgetFirst(l),free_vars)));
+    return ATinsert(ListToFormat(ATgetNext(l),free_vars),(ATerm)(ATermAppl)info.import_term((ATermAppl) SetVars(ATgetFirst(l),free_vars)));
   }
 }
 
@@ -468,7 +468,7 @@ ATermList NextState::AssignsToRewriteFormat(ATermList assigns, ATermList free_va
     {
       if (ATisEqual(ATAgetArgument(ATAgetFirst(m),0),ATAgetFirst(l)))
       {
-        stateargs[i] = info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(m),1),free_vars));
+        stateargs[i] = (ATerm)(ATermAppl)info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(m),1),free_vars));
         set = true;
         break;
       }
@@ -590,7 +590,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
       ATmakeAppl4(
         smndAFun,
         ATgetArgument(ATAgetFirst(sums),0),
-        info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),
+        (ATerm)(ATermAppl)info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(sums),1),free_vars)),
         (ATerm) ActionToRewriteFormat(ATAgetArgument(ATAgetFirst(sums),2),free_vars),
         (ATerm) AssignsToRewriteFormat(ATLgetArgument(ATAgetFirst(sums),4),free_vars));
   }
@@ -606,7 +606,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     {
       if (ATisEqual(ATAgetArgument(ATAgetFirst(n),0),ATAgetFirst(l)))
       {
-        stateargs[i] = info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars));
+        stateargs[i] = (ATerm)(ATermAppl)info.import_term((ATermAppl) SetVars(ATgetArgument(ATAgetFirst(n),1),free_vars));
         set = true;
         break;
       }
@@ -624,7 +624,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   // rewriter is intermingled with rewriting, causing the rewriter to rewrite too often.
   for (size_t i=0; i<info.statelen; i++)
   {
-    stateargs[i] = info.m_rewriter.rewrite_internal(stateargs[i]);
+    stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.rewrite_internal((atermpp::aterm_appl)stateargs[i]);
   }
 
   initial_state = NULL;
@@ -821,11 +821,11 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
           break;
         case GS_STATE_TREE:
 //                                      stateargs[i] = getTreeElement(old,i);
-          stateargs[i] = info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
+          stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
           if (ATisEqual(stateargs[i], ATgetFirst(l)))   // Make sure substitutions were not reset by enumerator
           {
             set_substitutions();
-            stateargs[i] = info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
+            stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
           }
           break;
       }
@@ -833,7 +833,7 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
     else
     {
 
-      stateargs[i] = info.m_rewriter.rewrite_internal(a);
+      stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.rewrite_internal((atermpp::aterm_appl)a);
       // The assertion below is not true if there are global variables,
       // which is for instance the case for lpsxsim and lpssim.
       // assert(mcrl2::data::find_variables(atermpp::make_list(mcrl2::data::data_expression(info.export_term(stateargs[i])))).empty());
@@ -866,7 +866,8 @@ ATermAppl NextStateGenerator::rewrActionArgs(ATermAppl act)
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
     ATermAppl a = ATAgetFirst(l);
-    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal(ATLgetArgument(a,1))));
+    const atermpp::term_list <atermpp::aterm_appl> l=ATLgetArgument(a,1);
+    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal(l)));
     m = ATinsert(m,(ATerm) a);
   }
   m = ATreverse(m);
@@ -992,7 +993,7 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
   if (info.num_summands == 0)
   {
     enumerated_variables=variable_list();
-    valuations = info.get_sols(ATmakeList0(),info.import_term(mcrl2::data::sort_bool::false_()));
+    valuations = info.get_sols(ATmakeList0(),(ATerm)(ATermAppl)info.import_term(mcrl2::data::sort_bool::false_()));
   }
   else
   {

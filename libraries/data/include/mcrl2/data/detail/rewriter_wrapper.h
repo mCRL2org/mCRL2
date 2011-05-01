@@ -49,40 +49,40 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     { 
     }
   
-    ATerm convert_to(const data_expression &t) const
+    atermpp::aterm_appl convert_to(const data_expression &t) const
     {
       return m_rewriter->toRewriteFormat(mcrl2::data::rewriter::implement(t));
     }
   
-    data_expression convert_from(const ATerm t) const
+    data_expression convert_from(const atermpp::aterm_appl t) const
     {
-      return this->reconstruct(atermpp::aterm_appl(m_rewriter->fromRewriteFormat(t)));
+      return this->reconstruct(atermpp::aterm_appl(m_rewriter->fromRewriteFormat((ATerm)(ATermAppl)t)));
     }
   
-    ATerm rewrite_internal(atermpp::aterm const& t) const
-    {
-      return m_rewriter->rewriteInternal(t);
-    }
-  
-    ATerm rewrite_internal(ATerm const& t) const
+    atermpp::aterm_appl rewrite_internal(atermpp::aterm const& t) const
     {
       return m_rewriter->rewriteInternal(t);
     }
   
-    ATermList rewrite_internal(ATermList const& t) const
+    atermpp::aterm_appl rewrite_internal(atermpp::aterm_appl const& t) const
+    {
+      return m_rewriter->rewriteInternal((ATerm)(ATermAppl)t);
+    }
+  
+    atermpp::term_list <atermpp::aterm_appl> rewrite_internal(const atermpp::term_list<atermpp::aterm_appl> & t) const
     {
       return m_rewriter->rewriteInternalList(t);
     }
   
-    ATerm internally_associated_value(const variable &v) const
+    atermpp::aterm_appl  internally_associated_value(const variable &v) const
     {
       return m_rewriter->getSubstitutionInternal(v);
     }
   
     /// Note the internal state of the rewriter changes so constness is violated
-    void set_internally_associated_value(const variable &v, const ATerm &e) const
+    void set_internally_associated_value(const variable &v, const atermpp::aterm_appl  &e) const
     {
-      m_rewriter->setSubstitutionInternal(v, e);
+      m_rewriter->setSubstitutionInternal(v, (ATerm)(ATermAppl)e);
     }
   
     /// Note the internal state of the rewriter changes so constness is violated

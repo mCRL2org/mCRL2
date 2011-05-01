@@ -53,7 +53,7 @@ struct ns_info
     return m_rewriter.convert_from(term);
   }
 
-  ATerm import_term(ATermAppl term) const
+  atermpp::aterm_appl import_term(ATermAppl term) const
   {
     return m_rewriter.convert_to(mcrl2::data::data_expression(term));
   }
