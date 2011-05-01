@@ -1046,12 +1046,12 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
     }
     need_rebuild = false;
   }
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
   gsMessage("  rewrite(%T)\n",fromInner((ATermAppl)Term));
 #endif
   ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
 
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
   gsMessage("  return(%T)\n",fromInner((ATermAppl)aaa));
 #endif
   return aaa;
@@ -1111,35 +1111,50 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
           EnumeratorStandard ES( m_data_specification, this );
 
           /* Find A solution*/
-          EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
+          // EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
+          const variable_list vl=atermpp::convert< variable_list >(vv);
+          EnumeratorSolutionsStandard* sol=ES.findSolutions(vl, XX, true);
+
 
           /* Create ATermList to store solutions */
           atermpp::term_list<atermpp::aterm_appl> x;
-          bool has_solution = false;
-          /* Change "if" to "while" to find all valid solutions */
-          if (sol->next(x))
+//        bool has_solution = false;
+          bool has_exact_solution = false;
+          bool has_no_solution =true;
+
+          size_t loop_upperbound=5;
+          while (loop_upperbound>0 && sol->next(x,has_exact_solution) && !has_exact_solution)
           {
-            has_solution = true;
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage(" Solution found by enumeration: %T \n", x);
-#endif
+//          if (sol->next(x))
+//            has_solution = true;
+// #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+//             gsMessage(" Solution found by enumeration: %T \n", x);
+// #endif
+            has_no_solution = false;
+            loop_upperbound--;
           }
 
-          if( has_solution )
+          if( has_exact_solution )
           {
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
             gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
 #endif
             return toRewriteFormat( mcrl2::data::sort_bool::true_() );
           }
-          else
+          else if (has_no_solution)
           {
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
             gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
 #endif
             return toRewriteFormat( mcrl2::data::sort_bool::false_() );
           }
-
+          else
+          {
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+            gsMessage("  An existential quantifier could not be eliminated and remains unchanged.\n");
+#endif
+            return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
+          }
         }
 
         /* We should never reach this part of the code...*/
@@ -1196,7 +1211,7 @@ ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInn
           }
 
           /* Create application from reconstructed variables and Body */
-          data_expression e_new_rw = mcrl2::data::sort_bool::not_( application (d, atermpp::convert< data_expression_list >(vv) ) );
+          data_expression e_new_rw = application (d, atermpp::convert< data_expression_list >(vv) );
 
           /* Convert to internal rewrite format, such that proper rewrite rules are added */
           ATerm XX = toRewriteFormat( e_new_rw );
@@ -1208,34 +1223,50 @@ ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInn
           EnumeratorStandard ES( m_data_specification, this );
 
           /* Find A solution*/
-          EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
+          // EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
+          const variable_list vl=atermpp::convert< variable_list >(vv);
+          EnumeratorSolutionsStandard *sol = ES.findSolutions(vl, XX, false);
+
 
           /* Create ATermList to store solutions */
           atermpp::term_list<atermpp::aterm_appl> x;
-          bool has_solution = false;
-          /* Change "if" to "while" to find all valid solutions */
-          if (sol->next(x))
+          bool has_exact_solution = false;
+          bool has_no_solution =true;
+          
+          size_t loop_upperbound=5;
+
+          while (loop_upperbound>0 && sol->next(x,has_exact_solution) && !has_exact_solution)
           {
-            has_solution = true;
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+            has_no_solution = false;
+            loop_upperbound--;
+
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
             gsMessage(" Solution found by enumeration: %T \n", x);
 #endif
           }
 
-          if( has_solution )
+          if( has_exact_solution )
           {
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
             gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
 #endif
             return toRewriteFormat( mcrl2::data::sort_bool::false_() );
           }
-          else
+          else if (has_no_solution)
           {
-#ifdef MCRl2_PRINT_REWRITE_STEPS_INTERNAL
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
             gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
 #endif
             return toRewriteFormat( mcrl2::data::sort_bool::true_() );
           }
+          else
+          {
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+            gsMessage("  A universal quantifier could not be eliminated and remains unchanged.\n");
+#endif
+            return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
+          }
+
 
         }
 
