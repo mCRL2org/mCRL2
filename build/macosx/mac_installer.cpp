@@ -73,7 +73,12 @@ bool MacOSXInstaller::OnInit()
 }
 
 MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint& pos)
-  : wxFrame(NULL, -1, title, pos, wxSize(550, 250), wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxRESIZE_BOX | wxMAXIMIZE_BOX))
+  : wxFrame(NULL, -1, title, pos, wxSize(550, 250), wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | 
+#if wxCHECK_VERSION(2, 9, 0)
+#else
+  wxRESIZE_BOX | 
+#endif
+  wxMAXIMIZE_BOX))
 {
   wxPanel* panel = new wxPanel(this, wxID_ANY, wxPoint(15,10), wxSize(520  ,160), wxBORDER_SUNKEN);
 
