@@ -53,17 +53,17 @@ class sim_tool : public rewriter_tool< input_tool >
       {
         if (i > 0)
         {
-          gsMessage(", ");
+          std::cout << ", ";
         }
 
         ATermAppl a = ns->getStateArgument(state,i);
         if (mcrl2::data::is_variable(a))
         {
-          gsMessage("_");
+        	std::cout << "_";
         }
         else
         {
-          gsMessage("%P",a);
+        	std::cout << pp(a);
         }
       }
     }
@@ -107,9 +107,9 @@ class sim_tool : public rewriter_tool< input_tool >
       simulator.use_dummies = m_use_dummies;
       simulator.LoadSpec(lps_specification);
 
-      gsMessage("initial state: [ ");
+      std::cout << "initial state: [ ";
       PrintState(simulator.GetState(),simulator.GetNextState());
-      gsMessage(" ]\n\n");
+      std::cout << " ]" << std::endl << std::endl;
 
       bool notdone = true;
       while (notdone)
@@ -123,21 +123,19 @@ class sim_tool : public rewriter_tool< input_tool >
           {
             ATermAppl Transition = ATAgetFirst(ATLgetFirst(l));
             ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(l)));
-            gsMessage("%i: %P  ->  [ ",i,Transition);
+            std::cout << i <<": " << pp(Transition) << "  ->  [ ";
             PrintState(NewState,simulator.GetNextState());
-            gsMessage(" ]\n\n");
+            std::cout << " ]" << std::endl << std::endl;
             i++;
           }
           if (ATisEmpty(next_states))
           {
-            printf("deadlock\n\n");
+            std::cout << "deadlock" << std::endl << std::endl;
           }
         }
         catch (mcrl2::runtime_error e)
-          // if ( simulator.ErrorOccurred() )
         {
-          std::cerr << "an error occurred while calculating the transitions from this state;\n" << e.what() << "\n";
-          // { gsMessage(std::string("an error occurred while calculating the transitions from this state;\n") + e.what() + "\n");
+          std::cerr << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
         }
 
         while (true)
@@ -174,7 +172,7 @@ class sim_tool : public rewriter_tool< input_tool >
                       "   t/trace          print trace (current state is indicated with '>')\n"
                       "   l/load FILENAME  load trace from file FILENAME\n"
                       "   s/save FILENAME  save trace to file FILENAME\n"
-                      "   h/help           print this help gsMessage\n"
+                      "   h/help           print this help message\n"
                       "   q/quit           quit\n";
           }
           else if (isdigit(s[0]))
@@ -183,11 +181,11 @@ class sim_tool : public rewriter_tool< input_tool >
             sscanf(s.c_str(),"%lu",&idx);
             if (idx < ATgetLength(next_states))
             {
-              gsMessage("\ntransition: %P\n\n",ATAgetFirst(ATLelementAt(next_states,idx)));
+              std::cout << std::endl << "transition: " << pp(ATAgetFirst(ATLelementAt(next_states,idx))) << std::endl << std::endl;
               simulator.ChooseTransition(idx);
-              gsMessage("current state: [ ");
+              std::cout << "current state: [ ";
               PrintState(simulator.GetState(),simulator.GetNextState());
-              gsMessage(" ]\n\n");
+              std::cout << " ]" << std::endl << std::endl;
               break;
             }
             else
@@ -203,9 +201,9 @@ class sim_tool : public rewriter_tool< input_tool >
           else if ((s == "i") || (s == "initial"))
           {
             simulator.SetTracePos(0);
-            gsMessage("\ninitial state: [ ");
+            std::cout << std::endl << "initial state: [ ";
             PrintState(simulator.GetState(),simulator.GetNextState());
-            gsMessage(" ]\n\n");
+            std::cout <<  " ]" << std::endl << std::endl;
             break;
           }
           else if ((s == "u") || (s == "undo"))
@@ -213,9 +211,9 @@ class sim_tool : public rewriter_tool< input_tool >
             if (simulator.GetTracePos() > 0)
             {
               simulator.Undo();
-              gsMessage("\ncurrent state: [ ");
+              std::cout << std::endl << "current state: [ ";
               PrintState(simulator.GetState(),simulator.GetNextState());
-              gsMessage(" ]\n\n");
+              std::cout << " ]" << std::endl << std::endl;
               break;
             }
             else
@@ -229,10 +227,10 @@ class sim_tool : public rewriter_tool< input_tool >
             if (trans != NULL)
             {
               simulator.Redo();
-              gsMessage("\ntransition: %P\n\n",trans);
-              gsMessage("current state: [ ");
+              std::cout << std::endl << "transition: "<< pp(trans) << std::endl << std::endl;
+              std::cout << "current state: [ ";
               PrintState(simulator.GetState(),simulator.GetNextState());
-              gsMessage(" ]\n\n");
+              std::cout << " ]" << std::endl << std::endl;
               break;
             }
             else
@@ -248,9 +246,9 @@ class sim_tool : public rewriter_tool< input_tool >
             if (idx < simulator.GetTraceLength())
             {
               simulator.SetTracePos(idx);
-              gsMessage("\ncurrent state: [ ");
+              std::cout << std::endl << "current state: [ ";
               PrintState(simulator.GetState(),simulator.GetNextState());
-              gsMessage(" ]\n\n");
+              std::cout << " ]" << std::endl << std::endl;
               break;
             }
             else
@@ -260,25 +258,33 @@ class sim_tool : public rewriter_tool< input_tool >
           }
           else if ((s == "t") || (s == "trace"))
           {
-            gsMessage("\ncurrent trace:\n\n");
+        	std::cout << std::endl << "current trace:" << std::endl << std::endl;
             ATermList trace = simulator.GetTrace();
             size_t pos = simulator.GetTracePos();
             for (size_t i=0; !ATisEmpty(trace); trace=ATgetNext(trace), ++i)
             {
               ATermAppl Transition = ATAgetFirst(ATLgetFirst(trace));
               ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(trace)));
-              gsMessage("%s %i: ",(i==pos)?">":" ",i);
+              if (i==pos)
+                { std::cout << ">"; }
+              else
+                { std::cout << " "; }
+              std::cout << i;
               if (i == 0)
               {
-                gsMessage("    ");
+            	  std::cout << "    ";
               }
               else
               {
-                gsMessage("%P  ->",Transition);
+                std::cout << pp(Transition)<< "  ->";
               }
-              gsMessage("  [ ",(i==pos)?">":" ",i,Transition);
+              std::cout <<"  [ ";
+              if (i==pos)
+                { std::cout << ">"; }
+              else
+                { std::cout << " "; }
               PrintState(NewState,simulator.GetNextState());
-              gsMessage(" ]\n\n");
+              std::cout << " ]" << std::endl << std::endl;
             }
           }
           else if ((s.substr(0,2) == "s ") || (s.substr(0,5) == "save "))
@@ -301,9 +307,9 @@ class sim_tool : public rewriter_tool< input_tool >
             {
               simulator.LoadTrace(filename);
               std::cout << "trace loaded" << std::endl;
-              gsMessage("\ninitial state: [ ");
+              std::cout << std::endl << "initial state: [ ";
               PrintState(simulator.GetState(),simulator.GetNextState());
-              gsMessage(" ]\n\n");
+              std::cout << " ]" << std::endl << std::endl;
               break;
             }
             catch (std::string err)
