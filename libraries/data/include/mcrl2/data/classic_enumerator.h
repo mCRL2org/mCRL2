@@ -15,9 +15,11 @@
 #include <set>
 
 #include "boost/assert.hpp"
-#include "boost/scoped_ptr.hpp"
-#include "boost/shared_ptr.hpp"
+// #include "boost/scoped_ptr.hpp"
+// #include "boost/shared_ptr.hpp"
 #include "boost/iterator/iterator_facade.hpp"
+
+#include "mcrl2/atermpp/convert.h"
 
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/expression_traits.h"
@@ -124,10 +126,8 @@ class classic_enumerator
 
     const data_specification &                                   m_specification;
     const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
-    boost::shared_ptr<detail::EnumeratorStandard>                m_enumerator;    // embedded rewriter should not be part of context
+    detail::EnumeratorStandard*                                  m_enumerator;    // embedded rewriter should not be part of context
 
-    // for copy constructor, since it is unsafe to copy EnumeratorSolutionsStandard
-    detail::EnumeratorSolutionsStandard                          *m_generator;
     bool                                                         m_not_equal_to_false;
     // The variable m_assignments below is only used by the iterator_internal class. This is
     // to prevent the overhead of protecting these ATerm variables, each time an iterator_internal
@@ -150,22 +150,20 @@ class classic_enumerator
         enclosing_classic_enumerator *m_enclosing_enumerator;
         bool m_enumerator_iterator_valid;
         bool m_solution_is_exact;
+        detail::EnumeratorSolutionsStandard                          m_generator;
 
       public:
         
         iterator_internal(enclosing_classic_enumerator *e,
                           const variable_list &variables,
-                          const ATermAppl &condition):
+                          const atermpp::aterm_appl &condition):
           m_enclosing_enumerator(e),
-          m_enumerator_iterator_valid(false)
+          m_enumerator_iterator_valid(false),
+          m_generator(variables,
+                      condition,
+                      m_enclosing_enumerator->m_not_equal_to_false,
+                      m_enclosing_enumerator->m_enumerator) 
         {
-          m_enclosing_enumerator->m_generator=
-                 m_enclosing_enumerator->m_enumerator->findSolutions(
-                                     (ATermList)variables,
-                                     (ATerm)condition,
-                                     m_enclosing_enumerator->m_not_equal_to_false,
-                                     m_enclosing_enumerator->m_generator);
-
           increment();
         }
 
@@ -186,7 +184,7 @@ class classic_enumerator
   
         void increment()
         {
-          m_enumerator_iterator_valid=m_enclosing_enumerator->m_generator->next(m_enclosing_enumerator->m_assignments,m_solution_is_exact);
+          m_enumerator_iterator_valid=m_generator.next(m_enclosing_enumerator->m_assignments,m_solution_is_exact);
         }
     
         bool equal(iterator_internal const& other) const
@@ -229,6 +227,7 @@ class classic_enumerator
         substitution_type m_substitution;
         variable_list m_vars;
         bool m_solution_is_exact;
+        detail::EnumeratorSolutionsStandard m_generator;
 
       public:
         template < typename Container >
@@ -238,23 +237,13 @@ class classic_enumerator
                  const substitution_type &substitution=substitution_type(),
                  typename atermpp::detail::enable_if_container< Container, variable >::type* = 0):
           m_enclosing_enumerator(e),
-          m_enumerator_iterator_valid(false)
-        {
-          
-          for(typename Container::const_iterator i=variables.begin(); i!=variables.end(); ++i)
-          { 
-            m_vars=push_front(m_vars,*i);
-          } 
-          m_vars=reverse(m_vars);
-
-          m_enclosing_enumerator->m_generator=
-                 m_enclosing_enumerator->m_enumerator->findSolutions(
-                          m_vars,
-                          (ATerm)(ATermAppl)m_enclosing_enumerator->m_evaluator.convert_to(condition),
-                          m_enclosing_enumerator->m_not_equal_to_false,
-                          m_enclosing_enumerator->m_generator);
-
-          increment();
+          m_enumerator_iterator_valid(false),
+          m_vars(atermpp::convert<variable_list,Container>(variables)),
+          m_generator(m_vars,
+                      m_enclosing_enumerator->m_evaluator.convert_to(condition),
+                      m_enclosing_enumerator->m_not_equal_to_false,
+                      m_enclosing_enumerator->m_enumerator)
+        { increment();
         }
 
         iterator():
@@ -280,7 +269,7 @@ class classic_enumerator
           // ATermList assignment_list;
           atermpp::term_list <atermpp::aterm_appl> assignment_list;
     
-          if (m_enclosing_enumerator->m_generator->next(assignment_list,m_solution_is_exact))
+          if (m_generator.next(assignment_list,m_solution_is_exact))
           {
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();
@@ -342,7 +331,7 @@ class classic_enumerator
       m_specification(specification),
       m_evaluator(evaluator),
       m_enumerator(new detail::EnumeratorStandard(m_specification, &m_evaluator.get_rewriter())),
-      m_generator(NULL),
+      // m_generator(NULL),
       m_not_equal_to_false(not_equal_to_false)
     {
       m_assignments.protect();
@@ -351,10 +340,10 @@ class classic_enumerator
     ~classic_enumerator()
     {
       m_assignments.unprotect();
-      if (m_generator!=NULL)
+      /* if (m_generator!=NULL)
       { 
         delete m_generator;
-      }
+      } */
     }
     
 
@@ -364,10 +353,10 @@ class classic_enumerator
       m_specification(other.m_specification),
       m_evaluator(other.m_evaluator),
       m_enumerator(other.m_enumerator),
-      m_generator(other.m_generator),
       m_not_equal_to_false(other.m_not_equal_to_false),
       m_assignments(other.m_assignments)
     {
+      // m_generator=other.m_generator;
       m_assignments.protect();
     }
 
@@ -378,7 +367,7 @@ class classic_enumerator
       m_specification=other.m_specification;
       m_evaluator=other.m_evaluator; 
       m_enumerator=other.m_enumerator;
-      m_generator=other.m_generator;
+      // m_generator=other.m_generator;
       m_not_equal_to_false=other.m_not_equal_to_false;
       m_assignments=other.m_assignments;
       m_assignments.unprotect();

@@ -125,7 +125,7 @@ class EnumeratorStandard // : public Enumerator
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter = false);
     ~EnumeratorStandard();
 
-    EnumeratorSolutionsStandard* findSolutions(const variable_list vars, atermpp::aterm_appl expr, bool true_only, EnumeratorSolutionsStandard* old = NULL);
+    /* EnumeratorSolutionsStandard* findSolutions(const variable_list vars, atermpp::aterm_appl expr, bool true_only, EnumeratorSolutionsStandard* old = NULL); */
 
     Rewriter* getRewriter() const
     {
@@ -137,7 +137,7 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
 {
   private:
 
-    EnumeratorStandard &m_enclosing_enumerator;
+    detail::EnumeratorStandard *m_enclosing_enumerator;
 
     // bool m_not_equal_to_false;
     atermpp::aterm_appl desired_truth_value;    // We search for solutions for the condition enum_expr that are not
@@ -150,13 +150,16 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
 
   public:
 
-    /* EnumeratorSolutionsStandard(const EnumeratorSolutionsStandard & other); */
+    /// Default constructor
+    EnumeratorSolutionsStandard()
+    {}
 
+    /// Constructor
     EnumeratorSolutionsStandard(
                    const variable_list &Vars, 
                    const atermpp::aterm_appl &Expr, 
                    const bool not_equal_to_false, 
-                   EnumeratorStandard &enclosing_enumerator) :
+                   detail::EnumeratorStandard *enclosing_enumerator) :
       m_enclosing_enumerator(enclosing_enumerator),
       used_vars(0),
       max_vars(0)

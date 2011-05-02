@@ -1113,7 +1113,7 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
           /* Find A solution*/
           // EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
           const variable_list vl=atermpp::convert< variable_list >(vv);
-          EnumeratorSolutionsStandard* sol=ES.findSolutions(vl, XX, true);
+          EnumeratorSolutionsStandard sol(vl, XX, true,&ES);
 
 
           /* Create ATermList to store solutions */
@@ -1123,7 +1123,7 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
           bool has_no_solution =true;
 
           size_t loop_upperbound=5;
-          while (loop_upperbound>0 && sol->next(x,has_exact_solution) && !has_exact_solution)
+          while (loop_upperbound>0 && sol.next(x,has_exact_solution) && !has_exact_solution)
           {
 //          if (sol->next(x))
 //            has_solution = true;
@@ -1225,7 +1225,7 @@ ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInn
           /* Find A solution*/
           // EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
           const variable_list vl=atermpp::convert< variable_list >(vv);
-          EnumeratorSolutionsStandard *sol = ES.findSolutions(vl, XX, false);
+          EnumeratorSolutionsStandard sol(vl, XX, false,&ES);
 
 
           /* Create ATermList to store solutions */
@@ -1235,7 +1235,7 @@ ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInn
           
           size_t loop_upperbound=5;
 
-          while (loop_upperbound>0 && sol->next(x,has_exact_solution) && !has_exact_solution)
+          while (loop_upperbound>0 && sol.next(x,has_exact_solution) && !has_exact_solution)
           {
             has_no_solution = false;
             loop_upperbound--;

@@ -153,8 +153,10 @@ void enumerate< detail::EnumeratorStandard >(data_specification const& d,
 
   rewriter(c); // forces data implementation and that proper rewrite rules are added
 
-  std::auto_ptr< data::detail::EnumeratorStandard > enumerator(new data::detail::EnumeratorStandard(
-        detail::data_specification_to_aterm_data_spec(d), &rewriter.get_rewriter()));
+  /* std::auto_ptr< data::detail::EnumeratorStandard > enumerator(new data::detail::EnumeratorStandard(
+        detail::data_specification_to_aterm_data_spec(d), &rewriter.get_rewriter())); */
+  data::detail::EnumeratorStandard enumerator(
+        detail::data_specification_to_aterm_data_spec(d), &rewriter.get_rewriter()); 
 
   variable_list variables;
 
@@ -163,16 +165,14 @@ void enumerate< detail::EnumeratorStandard >(data_specification const& d,
     atermpp::push_front(variables, *i);
   }
 
-  std::auto_ptr< detail::EnumeratorSolutionsStandard > solutions(enumerator->findSolutions(
-        static_cast< ATermList >(variables), rewriter.get_rewriter().toRewriteFormat(c),true));
-  /* Solution below is more elegant, but does not work as enumerator->info is not accessible.
-     std::auto_ptr< detail::EnumeratorSolutionsStandard > solutions(
-             new detail::EnumeratorSolutionsStandard(
-                 static_cast< ATermList >(variables), rewriter.get_rewriter().toRewriteFormat(c),true,enumerator->info)); */
+  /* std::auto_ptr< detail::EnumeratorSolutionsStandard > solutions(enumerator->findSolutions(
+        static_cast< ATermList >(variables), rewriter.get_rewriter().toRewriteFormat(c),true)); */
+  detail::EnumeratorSolutionsStandard solutions(variables, rewriter.get_rewriter().toRewriteFormat(c),true,&enumerator);
+
 
   atermpp::term_list<atermpp::aterm_appl> results; 
 
-  while (solutions->next(results) && t-- != 0)
+  while (solutions.next(results) && t-- != 0)
   {
     atermpp::term_list<atermpp::aterm_appl>::const_iterator j=results.begin();
     for(variable_list::const_iterator i=variables.begin(); i!=variables.end(); ++i,++j)
