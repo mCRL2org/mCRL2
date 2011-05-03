@@ -135,7 +135,7 @@ class EnumeratorStandard // : public Enumerator
 
 class EnumeratorSolutionsStandard // : public EnumeratorSolutions
 {
-  private:
+  protected:
 
     detail::EnumeratorStandard *m_enclosing_enumerator;
 
@@ -170,6 +170,19 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
     ~EnumeratorSolutionsStandard()
     {}
 
+   /**
+    * \brief Get next solution as a term_list in internal format if available.
+    * \detail The vector
+    * \param[out] solution Place to store the solutions.
+    * \return Whether or not a solution was found and stored in
+    *         solution. If so, *solution is a substitution list
+    *         from libstruct, mapping mCRL2 data variables to terms
+    *         in the internal rewriter format.
+    *
+    * Once this function returns false, it will continue to return
+    * false. That is, when false is returned all solutions have
+    *                                              * been enumerated.
+    **/
     // returns a list of values for the variables given.
     bool next(atermpp::term_list<atermpp::aterm_appl> &solution);
 
@@ -179,9 +192,10 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
     ///          The complexity is constant.
     bool next(atermpp::term_list<atermpp::aterm_appl> &solution, bool &solution_is_exact);
 
-    void reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool not_equal_to_false);
 
   private:
+    void reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool not_equal_to_false); 
+
     bool FindInnerCEquality(const atermpp::aterm_appl T, 
                             const mcrl2::data::variable_list vars, 
                             mcrl2::data::variable &v, 

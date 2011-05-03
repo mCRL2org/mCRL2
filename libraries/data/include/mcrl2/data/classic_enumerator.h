@@ -14,17 +14,11 @@
 
 #include <set>
 
-#include "boost/assert.hpp"
-// #include "boost/scoped_ptr.hpp"
-// #include "boost/shared_ptr.hpp"
 #include "boost/iterator/iterator_facade.hpp"
 
 #include "mcrl2/atermpp/convert.h"
-
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/data/detail/enum/standard.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/detail/enum/standard.h"
 
@@ -124,7 +118,6 @@ class classic_enumerator
 
   private:
 
-    const data_specification &                                   m_specification;
     const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
     detail::EnumeratorStandard*                                  m_enumerator;    // embedded rewriter should not be part of context
 
@@ -201,7 +194,7 @@ class classic_enumerator
     };
 
     iterator_internal begin_internal(const variable_list &variables,
-                                     const ATermAppl &condition_in_internal_format)
+                                     const atermpp::aterm_appl &condition_in_internal_format)
     { 
       return iterator_internal(this, variables, condition_in_internal_format);
     }
@@ -261,12 +254,8 @@ class classic_enumerator
   
         friend class boost::iterator_core_access;
   
-        // For past-end iterator: m_impl.get() == 0, for cheap iterator construction and comparison
-        // boost::scoped_ptr< implementation_type >  m_impl;
-  
         void increment()
         {
-          // ATermList assignment_list;
           atermpp::term_list <atermpp::aterm_appl> assignment_list;
     
           if (m_generator.next(assignment_list,m_solution_is_exact))
@@ -277,10 +266,10 @@ class classic_enumerator
                  i != atermpp::term_list_iterator< atermpp::aterm_appl >(); ++i,++j)
             {
               assert(static_cast< variable_type >(*j).sort() == 
-                              m_enclosing_enumerator->m_evaluator.convert_from((ATerm)(ATermAppl)*i).sort());
+                              m_enclosing_enumerator->m_evaluator.convert_from(*i).sort());
     
               m_substitution[static_cast< variable_type >(*j)] =
-                              data_expression(m_enclosing_enumerator->m_evaluator.convert_from((ATerm)(ATermAppl)*i));
+                              data_expression(m_enclosing_enumerator->m_evaluator.convert_from(*i));
             }
           
           }
@@ -328,10 +317,8 @@ class classic_enumerator
     classic_enumerator(const data_specification &specification,
                        const evaluator_type &evaluator,
                        const bool not_equal_to_false=true):
-      m_specification(specification),
       m_evaluator(evaluator),
-      m_enumerator(new detail::EnumeratorStandard(m_specification, &m_evaluator.get_rewriter())),
-      // m_generator(NULL),
+      m_enumerator(new detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter())),
       m_not_equal_to_false(not_equal_to_false)
     {
       m_assignments.protect();
@@ -340,23 +327,17 @@ class classic_enumerator
     ~classic_enumerator()
     {
       m_assignments.unprotect();
-      /* if (m_generator!=NULL)
-      { 
-        delete m_generator;
-      } */
     }
     
 
 
     /// \brief Copy constructor
     classic_enumerator(classic_enumerator const& other):
-      m_specification(other.m_specification),
       m_evaluator(other.m_evaluator),
       m_enumerator(other.m_enumerator),
       m_not_equal_to_false(other.m_not_equal_to_false),
       m_assignments(other.m_assignments)
     {
-      // m_generator=other.m_generator;
       m_assignments.protect();
     }
 
@@ -364,10 +345,8 @@ class classic_enumerator
     /// \brief Assignment operator constructor
     classic_enumerator& operator=(const classic_enumerator & other)
     {
-      m_specification=other.m_specification;
       m_evaluator=other.m_evaluator; 
       m_enumerator=other.m_enumerator;
-      // m_generator=other.m_generator;
       m_not_equal_to_false=other.m_not_equal_to_false;
       m_assignments=other.m_assignments;
       m_assignments.unprotect();
