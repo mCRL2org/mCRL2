@@ -348,7 +348,7 @@ void MainFrame::UpdateEdtFocus(wxCommandEvent& event)
   {
     focussed_editor = (xStcEditor*) event.GetClientData();
     focussed_editor_for_find = focussed_editor;
-    m_PanelMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode() != 0);
+    viewMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode() != 0);
   }
   UpdateEditMenu();
 };
