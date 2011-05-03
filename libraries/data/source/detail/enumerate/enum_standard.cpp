@@ -15,8 +15,8 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/alias.h"
-#include "mcrl2/data/detail/enum/standard.h"
 #include "mcrl2/data/bool.h"
+#include "mcrl2/data/detail/enum/standard.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -374,11 +374,10 @@ void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp
   }
 }
 
-EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &data_spec, Rewriter* r, const bool clean_up_rewriter):
+EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &data_spec, Rewriter* r): 
   m_data_spec(data_spec)
 {
   rewr_obj = r;
-  clean_up_rewr_obj = clean_up_rewriter;
 
   rewr_true=NULL;
   rewr_true.protect();
@@ -387,7 +386,6 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   rewr_false.protect();
   rewr_false = (atermpp::aterm_appl)rewr_obj->toRewriteFormat(sort_bool::false_());
 
-  // opidAnd = NULL;
   opidAnd.protect();
   if ((rewr_obj->getStrategy() == GS_REWR_INNER) || (rewr_obj->getStrategy() == GS_REWR_INNER_P))
   {
@@ -419,10 +417,10 @@ EnumeratorStandard::~EnumeratorStandard()
 
   opidAnd.unprotect();
 
-  if (clean_up_rewr_obj)
+  /* if (clean_up_rewr_obj)
   {
     delete rewr_obj;
-  }
+  } */
 }
 
 /* EnumeratorSolutionsStandard *EnumeratorStandard::findSolutions(

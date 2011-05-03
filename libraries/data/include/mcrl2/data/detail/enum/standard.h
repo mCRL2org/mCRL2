@@ -15,7 +15,6 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/rewrite.h"
-#include "mcrl2/data/detail/enum/enumerator.h"
 
 
 /// \cond INTERNAL_DOCS
@@ -101,13 +100,22 @@ class fs_expr
 class EnumeratorSolutionsStandard;
 
 
-class EnumeratorStandard // : public Enumerator
+/**
+ * \brief Class for finding solutions to boolean expressions.
+ * \deprecated
+ * Finding concrete solutions can be done by using the 
+ * EnumeratorSolutionsStandard class. For each instance of an EnumeratorStandard class
+ * at most one active instance of an EnumeratorSolutionsStandard class can be used.
+ * Creating an instance of an EnumeratorStandard class requires constant time, but
+ * is quite expensive, due to protecting internal data structures. Generating an instance
+ * of an EnumeratorSolutionsStandard class is cheap, because is uses the datastructures
+ * in the associated EnumeratorStandard class.
+ *
+ * Use of these classes is discouraged. Use the classic_enumerator class instead.
+ **/
+
+class EnumeratorStandard 
 {
-
-  private:
-    bool clean_up_rewr_obj;
-
-  
   public:
     const mcrl2::data::data_specification &m_data_spec;
     Rewriter* rewr_obj;
@@ -122,10 +130,8 @@ class EnumeratorStandard // : public Enumerator
     atermpp::deque < fs_expr> fs_stack;
     atermpp::vector< ss_solution > ss_stack;
 
-    EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter = false);
+    EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
     ~EnumeratorStandard();
-
-    /* EnumeratorSolutionsStandard* findSolutions(const variable_list vars, atermpp::aterm_appl expr, bool true_only, EnumeratorSolutionsStandard* old = NULL); */
 
     Rewriter* getRewriter() const
     {
@@ -133,7 +139,11 @@ class EnumeratorStandard // : public Enumerator
     }
 };
 
-class EnumeratorSolutionsStandard // : public EnumeratorSolutions
+/**
+ * \brief Class for enumerating solutions to boolean expressions.
+ **/
+
+class EnumeratorSolutionsStandard 
 {
   protected:
 
@@ -150,11 +160,17 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
 
   public:
 
-    /// Default constructor
+    /// \brief Default constructor
     EnumeratorSolutionsStandard()
     {}
 
-    /// Constructor
+    /// \brief Constructor. Generate solutions for the variables in Vars that satisfy Expr.
+    /// If not equal_to_false is set all solutions are generated that make Expr not equal to false.
+    /// Otherwise all solutions are generated that make Expr not equal to true.
+    /// In the enclosing enumerator, the data structures can be found that are being used. Only one
+    /// instance of an EnumeratorSolutionsStandard can be active per instance of an enclosing 
+    /// enumerator.
+
     EnumeratorSolutionsStandard(
                    const variable_list &Vars, 
                    const atermpp::aterm_appl &Expr, 
@@ -167,29 +183,24 @@ class EnumeratorSolutionsStandard // : public EnumeratorSolutions
       reset(Vars,Expr,not_equal_to_false);
     }
 
+    /// Standard destructor.
     ~EnumeratorSolutionsStandard()
     {}
 
    /**
     * \brief Get next solution as a term_list in internal format if available.
-    * \detail The vector
+    * \detail The aterm_list solution contains solutions for the variables in internal
+    *         format in the same order as the variable list Vars.
     * \param[out] solution Place to store the solutions.
+    * \param[out] solution_is_exact This optional parameter indicates whether the solution is exactly true
+    *             or false. The enumerator enumerates all solutions that are not false or not true.
     * \return Whether or not a solution was found and stored in
-    *         solution. If so, *solution is a substitution list
-    *         from libstruct, mapping mCRL2 data variables to terms
-    *         in the internal rewriter format.
+    *         solution. If false, there are no more solutions to be found.
     *
-    * Once this function returns false, it will continue to return
-    * false. That is, when false is returned all solutions have
-    *                                              * been enumerated.
     **/
-    // returns a list of values for the variables given.
+
     bool next(atermpp::term_list<atermpp::aterm_appl> &solution);
 
-    /// \details If not_equal_to_false is set to true, solution_is_exact returns whether the solution
-    ///          made the condition true. If not_equal_to_false was set to false, it
-    ///          indicates whether the last delivered solution made the solution true.
-    ///          The complexity is constant.
     bool next(atermpp::term_list<atermpp::aterm_appl> &solution, bool &solution_is_exact);
 
 

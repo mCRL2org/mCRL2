@@ -12,7 +12,9 @@
 
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
@@ -21,8 +23,6 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/detail/concepts.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -125,8 +125,6 @@ void enumerate< data_enumerator< > >(data_specification const& d,
     }
   }
 }
-
-#include "mcrl2/data/detail/enum/enumerator.h"
 
 class legacy_rewriter : public mcrl2::data::rewriter
 {

@@ -33,7 +33,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 
-#include "mcrl2/data/detail/enum/enumerator.h"
 #include "mcrl2/data/detail/enum/standard.h"
 
 using namespace mcrl2::core;
