@@ -1350,16 +1350,19 @@ endif( NOT APPLE )
 set(CPACK_CREATE_DESKTOP_LINKS mcrl2-gui)
 set(CPACK_PACKAGE_EXECUTABLES "grapemcrl2;grapemcrl2" "ltsgraph;ltsgraph" "ltsview;ltsview" "diagraphica;diagraphica" "lpsxsim;lpsxsim" "mcrl2-gui;mcrl2-gui" "mcrl2xi;mcrl2xi")
 
-  IF(APPLE AND MCRL2_SINGLE_BUNDLE)
-    SET(CPACK_SET_DESTDIR TRUE)
+IF(APPLE AND MCRL2_SINGLE_BUNDLE)
+  SET(CPACK_SET_DESTDIR TRUE)
 
-    configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+  configure_file(${CMAKE_SOURCE_DIR}/postflight.sh.in ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
 
-    SET(CMAKE_POSTFLIGHT_SCRIPT
-      ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-    SET(CPACK_POSTUPGRADE_SCRIPT
-      ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
-  ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
+  SET(CMAKE_POSTFLIGHT_SCRIPT
+    ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+  SET(CPACK_POSTUPGRADE_SCRIPT
+    ${CMAKE_CURRENT_BINARY_DIR}/postflight.sh)
+
+  set(CPACK_PACKAGE_DEFAULT_LOCATION "/Applications")
+
+ENDIF(APPLE AND MCRL2_SINGLE_BUNDLE)
 
 # NSIS VARIABLES
 SET(CPACK_NSIS_DISPLAY_NAME "mCRL2")
@@ -1398,7 +1401,6 @@ set(CPACK_RPM_PACKAGE_DESCRIPTION "the mCRL2 formal specification language tools
  specifications.  Moreover, state spaces can be manipulated, visualised and
  analysed.")
 set(CPACK_RPM_PACKAGE_VENDOR "Technische Universiteit Eindhoven (TU/e)")
-
 
 # Distro versions
 # /etc/debian_version

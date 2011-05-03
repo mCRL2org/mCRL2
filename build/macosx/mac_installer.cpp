@@ -108,7 +108,11 @@ MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint&
                             wxPoint(75,110), wxDefaultSize,
                             wxDIRP_USE_TEXTCTRL
                            );
+#if wxCHECK_VERSION(2, 9, 0)
+  dpc->SetSize(wxSize(390 , 35));
+#else
   dpc->SetSize(wxSize(390 , 20));
+#endif
 
   wxButton* okbtn = new wxButton(this, ID_Ok, wxT("Ok"),
                                  wxPoint(465, 190));
