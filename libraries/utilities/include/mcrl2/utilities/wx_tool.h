@@ -188,7 +188,12 @@ class tool : public wxApp, public ToolBase
       information.SetWebSite(wxT("http://www.mcrl2.org"), wxT("mCRL2 home page"));
 
       //show the about box
+#if wxCHECK_VERSION(2, 9, 0)
       ::wxAboutBox(information, GetTopWindow());
+#else
+      ::wxAboutBox(information);
+#endif
+
     }
 
     // Helper class for wxEventHandling
