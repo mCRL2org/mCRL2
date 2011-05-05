@@ -694,6 +694,19 @@ else(MCRL2_ENABLE_CADP_SUPPORT)
 endif(MCRL2_ENABLE_CADP_SUPPORT)
 
 ##---------------------------------------------------
+## Library and executable staging 
+##---------------------------------------------------
+
+set(MCRL2_STAGE_ROOTDIR ""
+				CACHE PATH "Path to stage executables and libraries." )
+  message( STATUS "MCRL2_STAGE_ROOTDIR: ${MCRL2_STAGE_ROOTDIR}" )
+if( MCRL2_STAGE_ROOTDIR )
+			  set(CMAKE_RUNTIME_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/bin")
+				set(CMAKE_LIBRARY_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/lib")
+				set(CMAKE_ARCHIVE_OUTPUT_DIRECTORY "${MCRL2_STAGE_ROOTDIR}/share/mcrl2")
+endif( MCRL2_STAGE_ROOTDIR )
+
+##---------------------------------------------------
 ## 3rd party dependencies
 ##---------------------------------------------------
 
