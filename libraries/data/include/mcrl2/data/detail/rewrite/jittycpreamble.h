@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <string.h>
-#include <aterm2.h>
-#include "assert.h"
+#include <assert.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 
 using namespace aterm;
 

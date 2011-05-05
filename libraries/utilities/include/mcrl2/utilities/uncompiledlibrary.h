@@ -25,13 +25,17 @@
 #include <sstream>
 #include <stdexcept>
 #include "dynamiclibrary.h"
+#include "mcrl2/setup.h"
 
 class uncompiled_library : public dynamic_library
 {
 private:
     std::string m_compile_script;
+
 public:
     uncompiled_library(const std::string& script = "mcrl2compilerewriter") : m_compile_script(script) {};
+
+    /*
     void compile(const std::string& filename) throw(std::runtime_error)
     {
       std::stringstream commandline;
@@ -46,6 +50,36 @@ public:
       }
       m_filename = std::string("./") + filename + ".bin";
     }
+    */
+
+    void compile(const std::string& filename) throw(std::runtime_error)
+    {
+      std::stringstream compilecommandline;
+      std::stringstream linkcommandline;
+
+      compilecommandline << CXX << " -c " << CXXFLAGS << " " << SCXXFLAGS << " " << CPPFLAGS << " " << ATERM_CPPFLAGS << " -o " << filename << ".o " << filename;
+      linkcommandline << CXX << " " << LDFLAGS << " " << SLDFLAGS << " -o " << filename << ".bin " << filename << ".o";
+
+      int r = system(compilecommandline.str().c_str());
+      if (r != 0)
+      {
+        std::stringstream s;
+        s << "Compilation failed, return code was " << std::hex << r;
+        s << " compile command was " << compilecommandline.str();
+        throw std::runtime_error(s.str());
+      }
+
+      r = system(linkcommandline.str().c_str());
+      if (r != 0)
+      {
+        std::stringstream s;
+        s << "Linking failed, return code was " << std::hex << r;
+        throw std::runtime_error(s.str());
+      }
+
+      m_filename = std::string("./") + filename + ".bin";
+    }
+
     virtual void unload() throw(std::runtime_error)
     {
       dynamic_library::unload();

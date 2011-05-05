@@ -14,6 +14,11 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/utilities/uncompiledlibrary.h"
+
+// Maximal arity for which we generate functions for every combination of
+// arguments that are in normal form or not
+#define NF_MAX_ARITY 3  // currently this should be such that it is at most sizeof(size_t)*8
+
 #include "nfs_array.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE
