@@ -17,6 +17,9 @@
 #include "mcrl2/data/detail/rewrite.h"
 
 
+#define MAX_VARS_INIT   1000
+#define MAX_VARS_FACTOR 5
+
 /// \cond INTERNAL_DOCS
 namespace mcrl2
 {
@@ -106,10 +109,6 @@ class EnumeratorSolutionsStandard;
  * Finding concrete solutions can be done by using the 
  * EnumeratorSolutionsStandard class. For each instance of an EnumeratorStandard class
  * at most one active instance of an EnumeratorSolutionsStandard class can be used.
- * Creating an instance of an EnumeratorStandard class requires constant time, but
- * is quite expensive, due to protecting internal data structures. Generating an instance
- * of an EnumeratorSolutionsStandard class is cheap, because is uses the datastructures
- * in the associated EnumeratorStandard class.
  *
  * Use of these classes is discouraged. Use the classic_enumerator class instead.
  **/
@@ -117,9 +116,6 @@ class EnumeratorSolutionsStandard;
 class EnumeratorStandard 
 {
   public:
-#ifndef NDEBUG
-    size_t current_enumerator_count;
-#endif
     const mcrl2::data::data_specification &m_data_spec;
     Rewriter* rewr_obj;
     atermpp::aterm_appl rewr_true, rewr_false;
@@ -127,12 +123,6 @@ class EnumeratorStandard
     atermpp::aterm_int opidAnd;
     atermpp::set< atermpp::aterm_int > eqs;
   
-    variable_list enum_vars;       // The variables over which a solution is searched.
-    atermpp::aterm_appl enum_expr; // Condition to be satisfied in internal format.
-
-    atermpp::deque < fs_expr> fs_stack;
-    atermpp::vector< ss_solution > ss_stack;
-
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
     ~EnumeratorStandard();
 
@@ -150,15 +140,16 @@ class EnumeratorSolutionsStandard
 {
   protected:
 
-#ifndef NDEBUG
-    size_t current_enumerator_count;
-#endif
     detail::EnumeratorStandard *m_enclosing_enumerator;
-
-    // bool m_not_equal_to_false;
     atermpp::aterm_appl desired_truth_value;    // We search for solutions for the condition enum_expr that are not
     atermpp::aterm_appl forbidden_truth_value;  // equal to the forbidden truth value, and if the output matches the
                                                 // desired truth value, then the variable solution_is_exact is set.
+
+    variable_list enum_vars;                    // The variables over which a solution is searched.
+    atermpp::aterm_appl enum_expr;              // Condition to be satisfied in internal format.
+
+    atermpp::deque < fs_expr> fs_stack;
+    atermpp::vector< ss_solution > ss_stack;
 
     size_t used_vars;
     size_t max_vars;
@@ -170,35 +161,41 @@ class EnumeratorSolutionsStandard
     /// \brief Default constructor
     EnumeratorSolutionsStandard():
        m_max_internal_variables(0)
-    {}
+    {
+      enum_vars.protect();
+      enum_expr.protect();
+    }
 
     /// \brief Constructor. Generate solutions for the variables in Vars that satisfy Expr.
     /// If not equal_to_false is set all solutions are generated that make Expr not equal to false.
-    /// Otherwise all solutions are generated that make Expr not equal to true.
-    /// In the enclosing enumerator, the data structures can be found that are being used. Only one
-    /// instance of an EnumeratorSolutionsStandard can be active per instance of an enclosing 
-    /// enumerator.
+    /// Otherwise all solutions are generated that make Expr not equal to true. The enumerator
+    /// uses internal variables. By setting max_internal_variables to any value larger than
+    /// 0 the number of these variables can be bound, guaranteeing termination (provided the
+    /// rewriter terminates). If set to 0, there is no bound, but the enumerator will issue 
+    /// warnings.
 
     EnumeratorSolutionsStandard(
-                   const variable_list &Vars, 
-                   const atermpp::aterm_appl &Expr, 
+                   const variable_list &vars, 
+                   const atermpp::aterm_appl &expr, 
                    const bool not_equal_to_false, 
                    detail::EnumeratorStandard *enclosing_enumerator,
                    const size_t max_internal_variables=0) :
       m_enclosing_enumerator(enclosing_enumerator),
-#ifndef NDEBUG
-      current_enumerator_count(++(m_enclosing_enumerator->current_enumerator_count)),
-#endif
+      enum_vars(vars),
       used_vars(0),
-      max_vars(0),
+      max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)
     { 
-      reset(Vars,Expr,not_equal_to_false);
+      enum_vars.protect();
+      reset(vars,expr,not_equal_to_false);
     }
 
     /// Standard destructor.
     ~EnumeratorSolutionsStandard()
-    {}
+    {
+      enum_vars.unprotect();
+      enum_expr.unprotect();
+    }
 
    /**
     * \brief Get next solution as a term_list in internal format if available.

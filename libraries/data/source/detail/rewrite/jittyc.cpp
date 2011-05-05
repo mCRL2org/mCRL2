@@ -2678,7 +2678,7 @@ int declare_rewr_functions(FILE* f, size_t func_index, int arity)
     int b = (a<=NF_MAX_ARITY)?a:0;
     for (size_t nfs=0; (nfs >> b) == 0; nfs++)
     {
-      fprintf(f,  "static inline ATermAppl rewr_%i_%i_%lu(",func_index,a,nfs);
+      fprintf(f,  "static inline ATermAppl rewr_%ld_%i_%lu(",func_index,a,nfs);
       for (int i=0; i<a; i++)
       {
         fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
