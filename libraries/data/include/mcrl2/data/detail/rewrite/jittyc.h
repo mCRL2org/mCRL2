@@ -13,6 +13,8 @@
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/utilities/uncompiledlibrary.h"
+#include "nfs_array.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE
 
@@ -26,8 +28,6 @@ namespace data
 {
 namespace detail
 {
-
-typedef size_t* nfs_array;
 
 class RewriterCompilingJitty: public Rewriter
 {
@@ -77,16 +77,13 @@ class RewriterCompilingJitty: public Rewriter
     bool calc_ar(ATermAppl expr);
     void fill_always_rewrite_array();
 
-    std::string file_c;
-    std::string file_o;
-    std::string file_so;
+    std::string rewriter_source;
+    uncompiled_library *rewriter_so;
 
-    void* so_handle;
     void (*so_rewr_init)();
     void (*so_rewr_cleanup)();
     ATermAppl(*so_rewr)(ATermAppl);
     void (*so_set_subst)(ATermAppl, ATerm);
-    ATerm(*so_get_subst)(ATermAppl);
     void (*so_clear_subst)(ATermAppl);
     void (*so_clear_substs)();
 
@@ -94,15 +91,15 @@ class RewriterCompilingJitty: public Rewriter
     int write_tree(FILE* f, ATermAppl tree, int* num_states);
     void tree2dot(ATermAppl tree, char* name, char* filename);
     ATermAppl create_tree(ATermList rules, int opid, int arity, ATermInt true_inner_);
-    ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array nfs, ATermInt true_inner_);
+    ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array &nfs, ATermInt true_inner_);
 #endif
 
-    void add_base_nfs(nfs_array a, ATermInt opid, size_t arity);
-    void extend_nfs(nfs_array a, ATermInt opid, size_t arity);
+    void add_base_nfs(nfs_array &a, ATermInt opid, size_t arity);
+    void extend_nfs(nfs_array &a, ATermInt opid, size_t arity);
     bool opid_is_nf(ATermInt opid, size_t num_args);
-    void calc_nfs_list(nfs_array a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
+    void calc_nfs_list(nfs_array &a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
     bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
-    std::string calc_inner_terms(nfs_array nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array rewr);
+    std::string calc_inner_terms(nfs_array &nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array *rewr);
     std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
     void calcTerm(FILE* f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
     void implement_tree_aux(FILE* f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool* used, ATermList nnfvars);
@@ -111,6 +108,7 @@ class RewriterCompilingJitty: public Rewriter
     void CompileRewriteSystem(const data_specification& DataSpec);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
+	FILE* MakeTempFiles();
 
     ATerm OpId2Int(ATermAppl Term, bool add_opids);
     ATerm toInner(ATermAppl Term, bool add_opids);
