@@ -2678,7 +2678,7 @@ int declare_rewr_functions(FILE* f, size_t func_index, int arity)
     int b = (a<=NF_MAX_ARITY)?a:0;
     for (size_t nfs=0; (nfs >> b) == 0; nfs++)
     {
-      fprintf(f,  "static ATermAppl rewr_%i_%i_%lu(",func_index,a,nfs);
+      fprintf(f,  "static inline ATermAppl rewr_%i_%i_%lu(",func_index,a,nfs);
       for (int i=0; i<a; i++)
       {
         fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
@@ -2696,7 +2696,7 @@ int declare_rewr_functions(FILE* f, size_t func_index, int arity)
       }
       else // (nfs > 0)
       {
-        fprintf(f,  "static ATermAppl rewr_%i_%i_0(",func_index+1+aux,a);
+        fprintf(f,  "static inline ATermAppl rewr_%i_%i_0(",func_index+1+aux,a);
         for (int i=0; i<a; i++)
         {
           fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
@@ -2775,10 +2775,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   //
   fprintf(f,
           "#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
-          "static inline bool isAppl(const ATermAppl x) { return ATgetAFun(x) != %li; }\n"
-          "static inline bool isAppl(const ATerm x) { return ATgetAFun(x) != %li; }\n"
-          "\n", (long int) ATgetAFun(static_cast<ATermAppl>(data::variable("x", data::sort_bool::bool_()))),
-          (long int) ATgetAFun(static_cast<ATermAppl>(data::variable("x", data::sort_bool::bool_())))
+          //"static inline bool isAppl(const ATermAppl x) { return ATgetAFun(x) != %li; }\n"
+          //"static inline bool isAppl(const ATerm x) { return ATgetAFun(x) != %li; }\n"
+          "#define isAppl(x) (ATgetAFun(x) != %li)\n"
+          "\n", (long int) ATgetAFun(static_cast<ATermAppl>(data::variable("x", data::sort_bool::bool_())))//,
+          //(long int) ATgetAFun(static_cast<ATermAppl>(data::variable("x", data::sort_bool::bool_())))
          );
 
   //
@@ -2919,7 +2920,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,  "\n");
   for (int i=0; i<=max_arity; i++)
   {
-    //fprintf(f,  "  int2func%i = (ftype%i *) malloc(%i*sizeof(ftype%i));\n",i,i,num_opids,i);
     fprintf(f,  "  int2func[%i] = (func_type *) malloc(%i*sizeof(func_type));\n",i+1,num_opids);
     for (j=0; j < num_opids; j++)
     {
@@ -2927,12 +2927,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       if (i <= arity)
       {
         gsfprintf(f,  "  int2func[%i][%i] = rewr_%i_%i_0_term;\n",i+1,j,j,i);
-        //gsfprintf(f,  "  int2func%i[%i] = rewr_%i_%i_0;\n",i,j,j,i);
         if (i <= NF_MAX_ARITY)
         {
           for (int k=(1 << i)-i-1; k<(1 << (i+1))-i-2; k++)
           {
-            //gsfprintf(f,  "  int2func%i[%i] = rewr_%i_%i_0;\n",i,j+1+k,j+1+k,i);
             gsfprintf(f,  "  int2func[%i][%i] = rewr_%i_%i_0_term;\n",i+1,j+1+k,j+1+k,i);
           }
         }
@@ -2953,7 +2951,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,  "\n");
   for (int i=0; i<=max_arity; i++)
   {
-    //fprintf(f,  "  free(int2func%i);\n",i);
     fprintf(f,  "  free(int2func[%i]);\n",i+1);
   }
   fprintf(f,  "}\n"

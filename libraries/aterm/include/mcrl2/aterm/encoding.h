@@ -30,12 +30,7 @@ namespace aterm
    typedef unsigned long header_type; */
 typedef MachineWord header_type;
 
-template <typename T>
-inline
-header_type _HT(const T t)
-{
-  return static_cast<MachineWord>(t);
-}
+#define MCRL2_HT(t) (static_cast<MachineWord>(t))
 
 struct __ATerm
 {
@@ -76,25 +71,26 @@ static const size_t AT_SYMBOL = 7;
 static const size_t HEADER_BITS = sizeof(size_t)*8;
 
 #ifdef AT_64BIT
-static const header_type SHIFT_LENGTH = _HT(34);
-static const header_type ARITY_BITS = _HT(8);
+static const header_type SHIFT_LENGTH = MCRL2_HT(34);
+static const header_type ARITY_BITS = MCRL2_HT(8);
 #else
-static const header_type SHIFT_LENGTH = _HT(10);
-static const header_type ARITY_BITS = _HT(3);
+static const header_type SHIFT_LENGTH = MCRL2_HT(10);
+static const header_type ARITY_BITS = MCRL2_HT(3);
 #endif /* AT_64BIT */
 
-static const header_type TYPE_BITS = _HT(3);
+static const header_type TYPE_BITS = MCRL2_HT(3);
 static const header_type LENGTH_BITS = HEADER_BITS - SHIFT_LENGTH;
 
-static const header_type SHIFT_TYPE = _HT(4);
-static const header_type SHIFT_ARITY = _HT(7);
-static const header_type SHIFT_AGE = _HT(0);
+static const header_type SHIFT_TYPE = MCRL2_HT(4);
+//#define SHIFT_TYPE 4ll
+static const header_type SHIFT_ARITY = MCRL2_HT(7);
+static const header_type SHIFT_AGE = MCRL2_HT(0);
 
-static const header_type MASK_AGE = (_HT(1)<<_HT(0)) | (_HT(1)<<_HT(1));
-static const header_type MASK_MARK = _HT(1)<<_HT(2);
-static const header_type MASK_QUOTED = _HT(1)<<_HT(3);
-static const header_type MASK_TYPE = ((_HT(1) << TYPE_BITS)-_HT(1)) << SHIFT_TYPE;
-static const header_type MASK_ARITY = ((_HT(1) << ARITY_BITS)-_HT(1)) << SHIFT_ARITY;
+static const header_type MASK_AGE = (MCRL2_HT(1)<<MCRL2_HT(0)) | (MCRL2_HT(1)<<MCRL2_HT(1));
+static const header_type MASK_MARK = MCRL2_HT(1)<<MCRL2_HT(2);
+static const header_type MASK_QUOTED = MCRL2_HT(1)<<MCRL2_HT(3);
+static const header_type MASK_TYPE = ((MCRL2_HT(1) << TYPE_BITS)-MCRL2_HT(1)) << SHIFT_TYPE;
+static const header_type MASK_ARITY = ((MCRL2_HT(1) << ARITY_BITS)-MCRL2_HT(1)) << SHIFT_ARITY;
 static const header_type MASK_AGE_MARK = MASK_AGE|MASK_MARK;
 
 static const size_t MAX_LENGTH = ((MachineWord)1) << LENGTH_BITS;
