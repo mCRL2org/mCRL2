@@ -143,7 +143,7 @@ class classic_enumerator
         enclosing_classic_enumerator *m_enclosing_enumerator;
         bool m_enumerator_iterator_valid;
         bool m_solution_is_exact;
-        detail::EnumeratorSolutionsStandard                          m_generator;
+        detail::EnumeratorSolutionsStandard m_generator;
 
       public:
         
@@ -177,7 +177,7 @@ class classic_enumerator
   
         void increment()
         {
-          m_enumerator_iterator_valid=m_generator.next(m_enclosing_enumerator->m_assignments,m_solution_is_exact);
+          m_enumerator_iterator_valid=m_generator.next(m_solution_is_exact,m_enclosing_enumerator->m_assignments);
         }
     
         bool equal(iterator_internal const& other) const
@@ -258,7 +258,7 @@ class classic_enumerator
         {
           atermpp::term_list <atermpp::aterm_appl> assignment_list;
     
-          if (m_generator.next(assignment_list,m_solution_is_exact))
+          if (m_generator.next(m_solution_is_exact,assignment_list))
           {
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();

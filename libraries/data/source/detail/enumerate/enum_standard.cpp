@@ -202,8 +202,15 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
   return build_solution2(vars,reverse(substituted_vars),reverse(exprs));
 }
 
-bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution, bool &solution_is_exact)
+// bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution, bool &solution_is_exact)
+bool EnumeratorSolutionsStandard::next(
+              bool &solution_is_exact,
+              atermpp::term_list<atermpp::aterm_appl> &solution,
+              bool &solution_possible)
 {
+  // There can only be one EnumeratorSolutionsStandard per EnumeratorStandard:
+  assert(m_enclosing_enumerator->current_enumerator_count==current_enumerator_count); 
+
   while (m_enclosing_enumerator->ss_stack.empty() && !m_enclosing_enumerator->fs_stack.empty())
   {
     const fs_expr e=m_enclosing_enumerator->fs_stack.front();
@@ -218,8 +225,17 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
     if (is_function_sort(sort))
     {
       // HIER MOETEN FUNCTIETERMEN WORDEN TOEGEVOEGD.
-      m_enclosing_enumerator->fs_stack.clear();
-      throw mcrl2::runtime_error("cannot enumerate all elements of functions sort " + pp(sort));
+      if (solution_possible)
+      {
+        solution_possible=false;
+        return false;
+      }
+      else
+      { 
+        m_enclosing_enumerator->fs_stack.clear();
+        throw mcrl2::runtime_error("cannot enumerate all elements of function sort " + pp(sort));
+      }
+        
     }
     else
     {
@@ -228,10 +244,19 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
       
       if ( it == constructors_for_sort.end() )
       {
-        assert(!it->empty());
-        m_enclosing_enumerator->fs_stack.clear(); 
-        throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + " as it does not have constructor functions");
+        if (solution_possible)
+        { 
+          solution_possible=false;
+          return false;
+        }
+        else
+        { 
+          m_enclosing_enumerator->fs_stack.clear(); 
+          throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + " as it does not have constructor functions");
+        }
       }
+
+      assert(!it->empty());
       for( ; it!=constructors_for_sort.end() ; ++it)
       {
         // Construct the domain and target sort for the constructor.
@@ -252,7 +277,31 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
           variables_in_use=push_front(variables_in_use,fv);
 
           used_vars++;
-          if (used_vars > max_vars)
+          if (m_max_internal_variables!=0 && used_vars > m_max_internal_variables)
+          {
+            if (solution_possible)
+            {
+              solution_possible=false;
+              return false;
+            }
+            else
+            {
+              m_enclosing_enumerator->fs_stack.clear();
+              stringstream exception_message;
+              exception_message << "needed more than " << m_max_internal_variables << " variables to find all valuations of ";
+              for (variable_list::const_iterator k=m_enclosing_enumerator->enum_vars.begin(); k!=m_enclosing_enumerator->enum_vars.end(); ++k)
+              {
+                if (k != m_enclosing_enumerator->enum_vars.begin())
+                {
+                  exception_message << ", ";
+                }
+                exception_message << pp(*k) << ":" << pp(k->sort());
+              }
+              exception_message << " that satisfy " << pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)m_enclosing_enumerator->enum_expr));
+              throw mcrl2::runtime_error(exception_message.str());
+            }
+          }
+          else if (used_vars > max_vars) 
           {
             cerr << "need more than " << max_vars << " variables to find all valuations of ";
             for (variable_list::const_iterator k=m_enclosing_enumerator->enum_vars.begin(); k!=m_enclosing_enumerator->enum_vars.end(); ++k)
@@ -316,10 +365,28 @@ bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &
   }
 }
 
-bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution)
+bool EnumeratorSolutionsStandard::next(
+          atermpp::term_list<atermpp::aterm_appl> &solution)
 {
-  bool dummy;
-  return next(solution,dummy);
+  bool dummy_solution_is_exact;
+  return next(dummy_solution_is_exact,solution);
+}
+
+bool EnumeratorSolutionsStandard::next(
+          bool &solution_is_exact,
+          atermpp::term_list<atermpp::aterm_appl> &solution)
+{
+  bool dummy_solution_possible=false;
+  return next(solution_is_exact,solution,dummy_solution_possible); 
+
+}
+
+bool EnumeratorSolutionsStandard::next(
+          atermpp::term_list<atermpp::aterm_appl> &solution, 
+          bool &solution_possible)
+{
+  bool dummy_solution_is_exact;
+  return next(dummy_solution_is_exact,solution,solution_possible);
 }
 
 void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool not_equal_to_false)
@@ -375,6 +442,9 @@ void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp
 }
 
 EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &data_spec, Rewriter* r): 
+#ifndef NDEBUG
+  t current_enumerator_count(0),
+#endif
   m_data_spec(data_spec)
 {
   rewr_obj = r;
@@ -393,7 +463,6 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   }
   else
   {
-    // opidAnd = ATgetArgument((ATermAppl) rewr_obj->toRewriteFormat(sort_bool::and_()),0);
     atermpp::aterm_appl t=rewr_obj->toRewriteFormat(sort_bool::and_());
     opidAnd = t(0);
 
@@ -402,7 +471,6 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
     {
       if (i->name() == "==")
       {
-        // eqs.insert( ATgetArgument((ATermAppl) rewr_obj->toRewriteFormat(*i),0) );
         atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
         eqs.insert(t(0));
       }

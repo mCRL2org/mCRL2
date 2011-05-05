@@ -117,6 +117,9 @@ class EnumeratorSolutionsStandard;
 class EnumeratorStandard 
 {
   public:
+#ifndef NDEBUG
+    size_t current_enumerator_count;
+#endif
     const mcrl2::data::data_specification &m_data_spec;
     Rewriter* rewr_obj;
     atermpp::aterm_appl rewr_true, rewr_false;
@@ -147,6 +150,9 @@ class EnumeratorSolutionsStandard
 {
   protected:
 
+#ifndef NDEBUG
+    size_t current_enumerator_count;
+#endif
     detail::EnumeratorStandard *m_enclosing_enumerator;
 
     // bool m_not_equal_to_false;
@@ -156,12 +162,14 @@ class EnumeratorSolutionsStandard
 
     size_t used_vars;
     size_t max_vars;
+    size_t m_max_internal_variables;
 
 
   public:
 
     /// \brief Default constructor
-    EnumeratorSolutionsStandard()
+    EnumeratorSolutionsStandard():
+       m_max_internal_variables(0)
     {}
 
     /// \brief Constructor. Generate solutions for the variables in Vars that satisfy Expr.
@@ -175,10 +183,15 @@ class EnumeratorSolutionsStandard
                    const variable_list &Vars, 
                    const atermpp::aterm_appl &Expr, 
                    const bool not_equal_to_false, 
-                   detail::EnumeratorStandard *enclosing_enumerator) :
+                   detail::EnumeratorStandard *enclosing_enumerator,
+                   const size_t max_internal_variables=0) :
       m_enclosing_enumerator(enclosing_enumerator),
+#ifndef NDEBUG
+      current_enumerator_count(++(m_enclosing_enumerator->current_enumerator_count)),
+#endif
       used_vars(0),
-      max_vars(0)
+      max_vars(0),
+      m_max_internal_variables(max_internal_variables)
     { 
       reset(Vars,Expr,not_equal_to_false);
     }
@@ -189,19 +202,46 @@ class EnumeratorSolutionsStandard
 
    /**
     * \brief Get next solution as a term_list in internal format if available.
-    * \detail The aterm_list solution contains solutions for the variables in internal
-    *         format in the same order as the variable list Vars.
-    * \param[out] solution Place to store the solutions.
     * \param[out] solution_is_exact This optional parameter indicates whether the solution is exactly true
     *             or false. The enumerator enumerates all solutions that are not false or not true.
+    * \param[out] solution Place to store the solutions.
+    *             The aterm_list solution contains solutions for the variables in internal
+    *             format in the same order as the variable list Vars.
+    * \param[out] solution_possible. This boolean indicates whether it was possible to
+    *             generate a solution. If there is a variable of a sort without a constructor
+    *             sort, it is not possible to generate solutions. Similarly, it can be
+    *             that the maximum number of solutions has been reached. In this case the variable
+    *             solution_possible is false, and the function returns false. 
+    *             This variable should be true when calling next. If it is initially false, 
+    *             or if a variant of next is used
+    *             without this parameter, an mcrl2::runtime_error exception is thrown if no solutions exist, or
+    *             if the maximum number of internal variables is reached.
+    * \param[in]  max_internal_variables The maximum number of variables to be 
+    *             used internally when generating solutions. If set to 0 an unbounded number
+    *             of variables are used, and warnings are printed to warn for potentially
+    *             unbounded loops.
     * \return Whether or not a solution was found and stored in
-    *         solution. If false, there are no more solutions to be found.
+    *         solution. If false, there are no more solutions to be found. 
     *
     **/
 
+    bool next(bool &solution_is_exact,
+              atermpp::term_list<atermpp::aterm_appl> &solution, 
+              bool &solution_possible);
+
+  /** \brief Get next solution as a term_list in internal format.
+   **/
     bool next(atermpp::term_list<atermpp::aterm_appl> &solution);
 
-    bool next(atermpp::term_list<atermpp::aterm_appl> &solution, bool &solution_is_exact);
+  /** \brief Get next solution as a term_list in internal format.
+   **/
+    bool next(bool &solution_is_exact,
+              atermpp::term_list<atermpp::aterm_appl> &solution);
+
+  /** \brief Get next solution as a term_list in internal format.
+   **/
+    bool next(atermpp::term_list<atermpp::aterm_appl> &solution, 
+              bool &solution_possible);
 
 
   private:
