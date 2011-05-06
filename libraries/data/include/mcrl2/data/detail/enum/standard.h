@@ -155,7 +155,6 @@ class EnumeratorSolutionsStandard
     size_t max_vars;
     size_t m_max_internal_variables;
 
-
   public:
 
     /// \brief Default constructor
@@ -173,6 +172,17 @@ class EnumeratorSolutionsStandard
     /// 0 the number of these variables can be bound, guaranteeing termination (provided the
     /// rewriter terminates). If set to 0, there is no bound, but the enumerator will issue 
     /// warnings.
+    /// \param[in] vars The list of variables for which solutions are being sought.
+    /// \param[in] expr The expression which determine the solutions. This expr is assumed to be
+    ///                 in rewrite normal form. 
+    /// \param[in] not_equal_to_false Determine whether the condition is supposed to be true, or
+    ///                               whether it should become false. If the condition must be
+    ///                               true, all solutions that make the condition not equal to
+    ///                               false are enumerated. 
+    /// \param[in] enclosing_enumerator Pointer to the enclosing enumerator.
+    /// \param[in] max_internal_variables Maximal number of internal variables that will be used
+    ///                                   when generating solutions. If 0 there is no limit, and
+    ///                                   the enumerator may not terminate.
 
     EnumeratorSolutionsStandard(
                    const variable_list &vars, 
@@ -182,11 +192,13 @@ class EnumeratorSolutionsStandard
                    const size_t max_internal_variables=0) :
       m_enclosing_enumerator(enclosing_enumerator),
       enum_vars(vars),
+      enum_expr(expr),
       used_vars(0),
       max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)
     { 
       enum_vars.protect();
+      enum_expr.protect();
       reset(vars,expr,not_equal_to_false);
     }
 
@@ -196,7 +208,7 @@ class EnumeratorSolutionsStandard
       enum_vars.unprotect();
       enum_expr.unprotect();
     }
-
+ 
    /**
     * \brief Get next solution as a term_list in internal format if available.
     * \param[out] solution_is_exact This optional parameter indicates whether the solution is exactly true

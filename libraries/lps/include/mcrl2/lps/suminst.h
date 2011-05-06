@@ -124,7 +124,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
         m_finite_sorts_only(finite_sorts_only),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),
-        m_enumerator(spec.data(),r,true)
+        m_enumerator(spec.data(),r)
     {}
 
     void run()

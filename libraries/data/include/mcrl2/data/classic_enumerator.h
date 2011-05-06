@@ -14,6 +14,7 @@
 
 #include <set>
 
+#include "boost/shared_ptr.hpp"
 #include "boost/iterator/iterator_facade.hpp"
 
 #include "mcrl2/atermpp/convert.h"
@@ -98,9 +99,6 @@ class classic_enumerator;
  * }
  * \endcode
  *
- * A shared context is kept between iterator objects to keep the cost of
- * copying low. As a consequence the iterator can be used in combination
- * with the Boost.Graph library.
  **/
 template < typename Evaluator >
 class classic_enumerator 
@@ -121,15 +119,6 @@ class classic_enumerator
     const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
     detail::EnumeratorStandard*                                  m_enumerator;    // embedded rewriter should not be part of context
 
-    bool                                                         m_not_equal_to_false;
-    // The variable m_assignments below is only used by the iterator_internal class. This is
-    // to prevent the overhead of protecting these ATerm variables, each time an iterator_internal
-    // is constructed. As a consequence, iterator_internal elements cannot be used simultaneously.
-    // This is also the problem of the underlying m_enumerator. This should be resolved in due
-    // time, because this will lead to problems.
-    atermpp::term_list<atermpp::aterm_appl> m_assignments;
-
-  
   public:
     class iterator_internal : 
         public boost::iterator_facade< 
@@ -137,32 +126,107 @@ class classic_enumerator
                  const atermpp::term_list<atermpp::aterm_appl>,
                  boost::forward_traversal_tag >
     {
-      private:
+      protected:
 
         typedef classic_enumerator < evaluator_type > enclosing_classic_enumerator;
         enclosing_classic_enumerator *m_enclosing_enumerator;
+        atermpp::term_list<atermpp::aterm_appl> m_assignments; // m_assignments are only protected if it does contain something else than the empty list.
         bool m_enumerator_iterator_valid;
         bool m_solution_is_exact;
-        detail::EnumeratorSolutionsStandard m_generator;
+        bool m_solution_possible;
+        typedef boost::shared_ptr < detail::EnumeratorSolutionsStandard> m_generator_type;
+        m_generator_type m_generator;
 
       public:
         
         iterator_internal(enclosing_classic_enumerator *e,
                           const variable_list &variables,
-                          const atermpp::aterm_appl &condition):
+                          const atermpp::aterm_appl &condition,
+                          const bool not_equal_to_false=true,
+                          const size_t max_internal_variables=0,
+                          const bool do_not_throw_exceptions=false):
           m_enclosing_enumerator(e),
           m_enumerator_iterator_valid(false),
-          m_generator(variables,
-                      condition,
-                      m_enclosing_enumerator->m_not_equal_to_false,
-                      m_enclosing_enumerator->m_enumerator) 
+          m_solution_possible(do_not_throw_exceptions)
         {
-          increment();
+          const atermpp::aterm_appl rewritten_condition=e->m_evaluator.rewrite_internal(condition);
+          if ((not_equal_to_false && rewritten_condition==e->m_evaluator.internal_false) ||
+              (!not_equal_to_false && rewritten_condition==e->m_evaluator.internal_true))
+          { 
+            // no solutions are found.
+            m_solution_possible=true;
+          }
+          else if (variables.empty())
+          { 
+            // in this case we generate exactly one solution.
+            m_enumerator_iterator_valid=true;
+            m_solution_possible=true;
+            m_solution_is_exact=((not_equal_to_false && rewritten_condition==e->m_evaluator.internal_true) ||
+                                 (!not_equal_to_false && rewritten_condition==e->m_evaluator.internal_false));
+          }
+          else 
+          {
+            // we must calculate the solutions.
+            m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard(variables,
+                                                              condition,
+                                                              not_equal_to_false,
+                                                              m_enclosing_enumerator->m_enumerator,
+                                                              max_internal_variables));
+            m_assignments.protect();
+            increment();
+          }
         }
 
         iterator_internal():
-           m_enumerator_iterator_valid(false)
+           m_enumerator_iterator_valid(false),
+           m_solution_possible(false)
         { 
+        }
+
+        ~iterator_internal()
+        {
+          if (m_generator!=NULL)
+          {
+            m_assignments.unprotect();
+            m_generator.reset();
+          }
+        }
+
+        iterator_internal& operator=(const iterator_internal &other)
+        {
+          m_enclosing_enumerator=other.m_enclosing_enumerator;
+          m_assignments=other.m_assignments; 
+          m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
+          m_solution_is_exact=other.m_solution_is_exact;
+          m_solution_possible=other.m_solution_possible;
+          if (m_generator==NULL && other.m_generator!=NULL)
+          { 
+            m_assignments.protect();
+          }
+          if (m_generator!=NULL && other.m_generator==NULL)
+          { 
+            m_assignments.unprotect();
+          }
+          m_generator=other.m_generator;
+          return *this;
+        }
+
+        iterator_internal(const iterator_internal &other)
+        {
+          m_enclosing_enumerator=other.m_enclosing_enumerator;
+          m_assignments=other.m_assignments; 
+          m_enumerator_iterator_valid=other.m_enumerator_iterator_valid;
+          m_solution_is_exact=other.m_solution_is_exact;
+          m_solution_possible=other.m_solution_possible;
+          if (m_generator==NULL && other.m_generator!=NULL)
+          { 
+            m_assignments.protect();
+          }
+          if (m_generator!=NULL && other.m_generator==NULL)
+          { 
+            m_assignments.unprotect();
+          }
+          m_generator=other.m_generator;
         }
 
         bool solution_is_exact() const
@@ -171,13 +235,26 @@ class classic_enumerator
           return m_solution_is_exact;
         }
 
-      private:
+        bool solution_is_possible() const
+        { 
+          assert(!m_enumerator_iterator_valid);
+          return m_solution_possible;
+        }
+
+      protected:
   
         friend class boost::iterator_core_access;
   
         void increment()
         {
-          m_enumerator_iterator_valid=m_generator.next(m_solution_is_exact,m_enclosing_enumerator->m_assignments);
+          if (m_generator==NULL)
+          { 
+            m_enumerator_iterator_valid=false; // There was only one solution.
+          }
+          else 
+          {
+            m_enumerator_iterator_valid=m_generator->next(m_solution_is_exact,m_assignments,m_solution_possible);
+          }
         }
     
         bool equal(iterator_internal const& other) const
@@ -189,21 +266,25 @@ class classic_enumerator
         const atermpp::term_list<atermpp::aterm_appl> & dereference() const
         {
           assert(m_enumerator_iterator_valid);
-          return m_enclosing_enumerator->m_assignments;
+          return m_assignments;
         }
     };
 
     iterator_internal begin_internal(const variable_list &variables,
-                                     const atermpp::aterm_appl &condition_in_internal_format)
+                                     const atermpp::aterm_appl &condition_in_internal_format,
+                                     const size_t max_internal_variables=0,
+                                     const bool not_equal_to_false=true,
+                                     const bool do_not_throw_exceptions=false)
+
     { 
-      return iterator_internal(this, variables, condition_in_internal_format);
+      return iterator_internal(this, variables, condition_in_internal_format,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
     }
 
     iterator_internal end_internal() const
     {
       return iterator_internal();
     }
-    
+
   public:
     class iterator : 
         public boost::iterator_facade< 
@@ -211,7 +292,7 @@ class classic_enumerator
                  const substitution_type, 
                  boost::forward_traversal_tag >
     {
-      private:
+      protected:
 
         typedef classic_enumerator < evaluator_type > enclosing_classic_enumerator;
 
@@ -220,6 +301,7 @@ class classic_enumerator
         substitution_type m_substitution;
         variable_list m_vars;
         bool m_solution_is_exact;
+        bool m_solution_possible;
         detail::EnumeratorSolutionsStandard m_generator;
 
       public:
@@ -228,19 +310,26 @@ class classic_enumerator
                  const Container &variables,
                  const expression_type &condition,
                  const substitution_type &substitution=substitution_type(),
+                 const bool not_equal_to_false=true,
+                 const size_t max_internal_variables=0,
+                 const bool do_not_throw_exceptions=false,
                  typename atermpp::detail::enable_if_container< Container, variable >::type* = 0):
           m_enclosing_enumerator(e),
           m_enumerator_iterator_valid(false),
           m_vars(atermpp::convert<variable_list,Container>(variables)),
+          m_solution_possible(do_not_throw_exceptions),
           m_generator(m_vars,
                       m_enclosing_enumerator->m_evaluator.convert_to(condition),
-                      m_enclosing_enumerator->m_not_equal_to_false,
-                      m_enclosing_enumerator->m_enumerator)
+                      not_equal_to_false,
+                      m_enclosing_enumerator->m_enumerator,
+                      max_internal_variables)
         { increment();
         }
 
         iterator():
-          m_enumerator_iterator_valid(false)
+          m_enumerator_iterator_valid(false),
+          m_solution_possible(false)
+          // m_generator(NULL)
         {
         }
 
@@ -250,7 +339,13 @@ class classic_enumerator
           return m_solution_is_exact;
         }
 
-      private:
+        bool solution_is_possible() const
+        { 
+          assert(!m_enumerator_iterator_valid);
+          return m_solution_possible;
+        }
+
+      protected:
   
         friend class boost::iterator_core_access;
   
@@ -258,7 +353,7 @@ class classic_enumerator
         {
           atermpp::term_list <atermpp::aterm_appl> assignment_list;
     
-          if (m_generator.next(m_solution_is_exact,assignment_list))
+          if (m_generator.next(m_solution_is_exact,assignment_list,m_solution_possible))
           {
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();
@@ -295,17 +390,21 @@ class classic_enumerator
     template < typename Container >
     iterator begin(const Container &variables,
                    const expression_type &condition,
+                   const size_t max_internal_variables=0,
+                   const bool not_equal_to_false=true,
+                   const bool do_not_throw_exceptions=false,
                    const substitution_type &substitution=substitution_type(),
                    typename atermpp::detail::enable_if_container< Container, variable >::type* = 0)
     { 
-      return iterator(this, variables, condition, substitution);
+      return iterator(this, variables, condition, substitution,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
     }
 
     iterator end() const
     {
       return iterator();
-    } 
-    
+    }
+
+  public: 
     /** \brief Constructs iterator representing a sequence of expressions
      *
      * \param[in] specification specification containing the definitions of sorts
@@ -315,18 +414,16 @@ class classic_enumerator
      * \param[in] substitution template for the substitution that is returned (default: empty substitution)
      **/
     classic_enumerator(const data_specification &specification,
-                       const evaluator_type &evaluator,
-                       const bool not_equal_to_false=true):
+                       const evaluator_type &evaluator):
       m_evaluator(evaluator),
-      m_enumerator(new detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter())),
-      m_not_equal_to_false(not_equal_to_false)
+      m_enumerator(new detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter()))
     {
-      m_assignments.protect();
+      // m_assignments.protect();
     } 
 
     ~classic_enumerator()
     {
-      m_assignments.unprotect();
+      // m_assignments.unprotect();
     }
     
 
@@ -334,11 +431,10 @@ class classic_enumerator
     /// \brief Copy constructor
     classic_enumerator(classic_enumerator const& other):
       m_evaluator(other.m_evaluator),
-      m_enumerator(other.m_enumerator),
-      m_not_equal_to_false(other.m_not_equal_to_false),
-      m_assignments(other.m_assignments)
+      m_enumerator(other.m_enumerator)
+      // m_assignments(other.m_assignments)
     {
-      m_assignments.protect();
+      // m_assignments.protect();
     }
 
 
@@ -347,13 +443,11 @@ class classic_enumerator
     {
       m_evaluator=other.m_evaluator; 
       m_enumerator=other.m_enumerator;
-      m_not_equal_to_false=other.m_not_equal_to_false;
-      m_assignments=other.m_assignments;
-      m_assignments.unprotect();
+      // m_assignments=other.m_assignments;
+      // m_assignments.unprotect();
 
       return *this;
     }
-
 };
 
 } // namespace data

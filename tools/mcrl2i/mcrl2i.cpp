@@ -274,10 +274,10 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
 
             term=rewr(term);
             typedef classic_enumerator< rewriter > enumerator_type;
-            enumerator_type enumerator(spec,rewr,true);
+            enumerator_type enumerator(spec,rewr);
 
             for (enumerator_type::iterator
-                      i=enumerator.begin(atermpp::convert < std::set <variable > >(vars),term);
+                      i=enumerator.begin(vars,term,10000); // Stop when more than 10000 internal variables are required
                       i != enumerator.end() ; ++i)
             {
               cout << "[";

@@ -352,15 +352,6 @@ ATermAppl RewriterCompilingJitty::fromInner(ATerm Term)
   return a;
 }
 
-static ATerm Apply(ATermList l)
-{
-  char c[10];
-  int n=ATgetLength(l);
-  sprintf(c,"appl#%d",n);
-
-  return (ATerm)ATmakeApplList(ATmakeAFun(c,n,false),l);
-}
-
 static size_t num_apples = 0;
 static AFun* apples = NULL;
 static AFun get_appl_afun_value(size_t arity)
@@ -377,12 +368,22 @@ static AFun get_appl_afun_value(size_t arity)
     char c[10];
     for (; old_num < num_apples; old_num++)
     {
-      sprintf(c,"appl#%lu",old_num+1);
-      apples[old_num] = ATmakeAFun(c,old_num+1,false);
+      sprintf(c,"appl#%lu",old_num);
+      apples[old_num] = ATmakeAFun(c,old_num,false);
       ATprotectAFun(apples[old_num]);
     }
   }
   return apples[arity];
+}
+
+static ATerm Apply(ATermList l)
+{
+/*   char c[10]; */
+  const size_t n=ATgetLength(l);
+  /* sprintf(c,"appl#%d",n); */
+
+  /* return (ATerm)ATmakeApplList(ATmakeAFun(c,n,false),l); */
+  return (ATerm)ATmakeApplList(get_appl_afun_value(n),l);
 }
 
 static size_t num_int2aterms = 0;
@@ -1752,7 +1753,7 @@ static string calc_inner_appl_head(size_t arity)
   {
     ss << "ATmakeAppl";
   }
-  ss << "(" << ((long int) get_appl_afun_value(arity)) << ",";
+  ss << "(" << ((long int) get_appl_afun_value(arity+1)) << ",";
   return ss.str();
 }
 
@@ -2309,7 +2310,7 @@ static void finish_function(FILE* f, int arity, int opid, bool* used)
       fprintf(f,  "  return ATmakeAppl("
               "%li,"
               "(ATerm) %p",
-              (long int) get_appl_afun_value(arity),
+              (long int) get_appl_afun_value(arity+1),
               (void*)get_int2aterm_value(opid)
              );
     }
@@ -2319,7 +2320,7 @@ static void finish_function(FILE* f, int arity, int opid, bool* used)
               "%li,"
               "(ATerm) %p",
               arity+1,
-              (long int) get_appl_afun_value(arity),
+              (long int) get_appl_afun_value(arity+1),
               (void*)get_int2aterm_value(opid)
              );
     }
@@ -2619,13 +2620,13 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   ar = NULL;
 }
 
-static void cleanup_file(std::string const& f)
+/* static void cleanup_file(std::string const& f)
 {
   if (unlink(const_cast< char* >(f.c_str())))
   {
     fprintf(stderr,"unable to remove file %s: %s\n",const_cast< char* >(f.c_str()),strerror(errno));
   }
-}
+} */
 
 void RewriterCompilingJitty::CleanupRewriteSystem()
 {
@@ -2678,7 +2679,7 @@ int declare_rewr_functions(FILE* f, size_t func_index, int arity)
     int b = (a<=NF_MAX_ARITY)?a:0;
     for (size_t nfs=0; (nfs >> b) == 0; nfs++)
     {
-      fprintf(f,  "static inline ATermAppl rewr_%ld_%i_%lu(",func_index,a,nfs);
+      fprintf(f,  "static inline ATermAppl rewr_%lu_%i_%lu(",func_index,a,nfs);
       for (int i=0; i<a; i++)
       {
         fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
@@ -2687,7 +2688,7 @@ int declare_rewr_functions(FILE* f, size_t func_index, int arity)
 
       if (nfs == 0)
       {
-        fprintf(f,  "static inline ATermAppl rewr_%i_%i_0_term(const ATermAppl t) { return rewr_%i_%i_0(", func_index, a, func_index, a);
+        fprintf(f,  "static inline ATermAppl rewr_%lu_%i_0_term(const ATermAppl t) { return rewr_%lu_%i_0(", func_index, a, func_index, a);
         for(int i = 1; i <= a; ++i)
         {
           fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %i)", (i == 1?"":", "), i);
@@ -2696,19 +2697,19 @@ int declare_rewr_functions(FILE* f, size_t func_index, int arity)
       }
       else // (nfs > 0)
       {
-        fprintf(f,  "static inline ATermAppl rewr_%i_%i_0(",func_index+1+aux,a);
+        fprintf(f,  "static inline ATermAppl rewr_%lu_%i_0(",func_index+1+aux,a);
         for (int i=0; i<a; i++)
         {
           fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
         }
-        fprintf(f,  ") { return rewr_%i_%i_%lu(",func_index,a,nfs);
+        fprintf(f,  ") { return rewr_%lu_%i_%lu(",func_index,a,nfs);
         for (int i=0; i<a; i++)
         {
           fprintf(f, (i==0)?"arg%i":",arg%i",i);
         }
         fprintf(f,  "); }\n");
 
-        fprintf(f,  "static inline ATermAppl rewr_%i_%i_0_term(const ATermAppl t) { return rewr_%i_%i_0(", func_index+1+aux,a,func_index+1+aux,a);
+        fprintf(f,  "static inline ATermAppl rewr_%lu_%i_0_term(const ATermAppl t) { return rewr_%lu_%i_0(", func_index+1+aux,a,func_index+1+aux,a);
         for (int i=1; i<=a; i++)
         {
           fprintf(f, (i==1)?"ATAgetArgument(t, %i)":", ATAgetArgument(t, %i)",i);
@@ -2821,7 +2822,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "  int arity = ATgetArity(ATgetAFun(a));\n"
             "  if ( arity == 1 )\n"
             "  {\n"
-            "      return ATmakeAppl(%li,ATgetArgument(a,0)", (long int) get_appl_afun_value(i));
+            "      return ATmakeAppl(%li,ATgetArgument(a,0)", (long int) get_appl_afun_value(i+1));
 
     for (int j=0;
          j<i;

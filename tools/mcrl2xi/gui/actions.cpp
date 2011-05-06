@@ -170,7 +170,7 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
 
     enumerator_type enumerator(spec.data(),rewr);
 
-    for (enumerator_type::iterator i = enumerator.begin(atermpp::convert < std::set <mcrl2::data::variable > >(vars),term);
+    for (enumerator_type::iterator i = enumerator.begin(vars,term,10000); // Stop when more than 10000 internal variables are required.
                  i != enumerator.end() ; ++i)
     {
       p_solutions->AppendText(wxT("["));

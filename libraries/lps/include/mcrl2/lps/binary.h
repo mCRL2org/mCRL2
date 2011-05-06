@@ -117,7 +117,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
 
       data::fresh_variable_generator<> generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
-      enumerator_type enumerator(m_spec.data(),m_rewriter,true);
+      enumerator_type enumerator(m_spec.data(),m_rewriter);
 
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)

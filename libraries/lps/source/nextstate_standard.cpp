@@ -1050,7 +1050,6 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
 #endif
 
     enumerated_variables=ATLgetArgument(info.summands[sum_idx],0);
-// std::cerr << "ENUMERATED VARIABLES " << pp(enumerated_variables) << "\n";
     valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
                                ATgetArgument(info.summands[sum_idx],1));
 

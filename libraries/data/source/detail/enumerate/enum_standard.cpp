@@ -199,14 +199,11 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
   return build_solution2(vars,reverse(substituted_vars),reverse(exprs));
 }
 
-// bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution, bool &solution_is_exact)
 bool EnumeratorSolutionsStandard::next(
               bool &solution_is_exact,
               atermpp::term_list<atermpp::aterm_appl> &solution,
               bool &solution_possible)
 {
-  // There can only be one EnumeratorSolutionsStandard per EnumeratorStandard:
-
   while (ss_stack.empty() && !fs_stack.empty())
   {
     const fs_expr e=fs_stack.front();
@@ -388,8 +385,7 @@ bool EnumeratorSolutionsStandard::next(
 void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool not_equal_to_false)
 {
   enum_expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)Expr);
-  enum_expr.protect();
-  // m_not_equal_to_false = netf;
+  
   if (not_equal_to_false)
   {
     desired_truth_value=m_enclosing_enumerator->rewr_true;
@@ -400,11 +396,6 @@ void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp
     desired_truth_value=m_enclosing_enumerator->rewr_false;
     forbidden_truth_value=m_enclosing_enumerator->rewr_true;
   }
-
-  /* fs_stack.clear();
-
-  used_vars = 0;
-  max_vars = MAX_VARS_INIT; */
 
   fs_stack.push_back(fs_expr(enum_vars,variable_list(),atermpp::term_list< atermpp::aterm_appl>(),enum_expr));
   if (!enum_vars.empty())
@@ -426,12 +417,12 @@ void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp
     else
     {
       ss_stack.push_back(
-                                  ss_solution(
-                                        build_solution(
-                                            enum_vars,
-                                            fs_stack.front().substituted_vars(),
-                                            fs_stack.front().vals()),
-                                        true));
+                        ss_solution(
+                              build_solution(
+                                  enum_vars,
+                                  fs_stack.front().substituted_vars(),
+                                  fs_stack.front().vals()),
+                              true));
     }
     fs_stack.pop_back();
   }
