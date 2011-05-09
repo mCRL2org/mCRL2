@@ -37,6 +37,20 @@ private:
 public:
     uncompiled_library(const std::string& script = "mcrl2compilerewriter") : m_compile_script(script) {};
 
+    /// \overload
+    /// Needed in order to properly call the uncompiled_library::unload!
+    virtual ~uncompiled_library()
+    {
+      try
+      {
+        unload();
+      }
+      catch(std::runtime_error)
+      {
+        // Ignore
+      }
+    }
+
     /*
     void compile(const std::string& filename) throw(std::runtime_error)
     {
@@ -56,6 +70,9 @@ public:
 
     void compile(const std::string& filename) throw(std::runtime_error)
     {
+      m_source_filename = filename;
+      m_object_filename = filename + ".o";
+
       std::stringstream compilecommandline;
       std::stringstream linkcommandline;
 
@@ -87,7 +104,7 @@ public:
       dynamic_library::unload();
       if (!m_source_filename.empty())
       {
-        if (unlink(m_source_filename.c_str()))
+        if (unlink(m_source_filename.c_str()) != 0)
         {
           std::stringstream s;
           s << "Could not remove file: " << m_source_filename;
@@ -97,7 +114,7 @@ public:
 
       if (!m_object_filename.empty())
       {
-        if (unlink(m_source_filename.c_str()))
+        if (unlink(m_object_filename.c_str()) != 0)
         {
           std::stringstream s;
           s << "Could not remove file: " << m_object_filename;
@@ -107,7 +124,7 @@ public:
 
       if (!m_filename.empty())
       {
-        if (unlink(m_filename.c_str()))
+        if (unlink(m_filename.c_str()) != 0)
         {
           std::stringstream s;
           s << "Could not remove file: " << m_filename;
