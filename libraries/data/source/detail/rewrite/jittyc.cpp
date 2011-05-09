@@ -2657,6 +2657,7 @@ FILE* RewriterCompilingJitty::MakeTempFiles()
 	
 	std::ostringstream file_base;
 	file_base << "jittyc_" << getpid() << "_" << reinterpret_cast< long >(this) << ".cpp";
+
 	rewriter_source = file_base.str();
 
 	result = fopen(const_cast< char* >(rewriter_source.c_str()),"w");
@@ -2728,9 +2729,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ATermList l;
   int j;
   FILE* f;
-  rewriter_so = new uncompiled_library();
 
   CleanupRewriteSystem();
+
+  rewriter_so = new uncompiled_library();
 
   int2term = (ATermAppl*) malloc(num_opids*sizeof(ATermAppl));
   memset(int2term,0,num_opids*sizeof(ATermAppl));

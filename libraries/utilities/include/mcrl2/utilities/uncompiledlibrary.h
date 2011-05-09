@@ -31,6 +31,8 @@ class uncompiled_library : public dynamic_library
 {
 private:
     std::string m_compile_script;
+    std::string m_source_filename;
+    std::string m_object_filename;
 
 public:
     uncompiled_library(const std::string& script = "mcrl2compilerewriter") : m_compile_script(script) {};
@@ -83,6 +85,26 @@ public:
     virtual void unload() throw(std::runtime_error)
     {
       dynamic_library::unload();
+      if (!m_source_filename.empty())
+      {
+        if (unlink(m_source_filename.c_str()))
+        {
+          std::stringstream s;
+          s << "Could not remove file: " << m_source_filename;
+          throw std::runtime_error(s.str());
+        }
+      }
+
+      if (!m_object_filename.empty())
+      {
+        if (unlink(m_source_filename.c_str()))
+        {
+          std::stringstream s;
+          s << "Could not remove file: " << m_object_filename;
+          throw std::runtime_error(s.str());
+        }
+      }
+
       if (!m_filename.empty())
       {
         if (unlink(m_filename.c_str()))
