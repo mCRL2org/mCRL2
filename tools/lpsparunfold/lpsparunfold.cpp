@@ -28,6 +28,7 @@
 
 //DATA
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/normalize_sorts.h"
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"
@@ -169,8 +170,10 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
           m_set_index.clear();
 
           mcrl2::data::basic_sort b_sort(m_unfoldsort);
+          mcrl2::data::sort_expression sort = normalize_sorts(b_sort, lps_specification.data());
 
-          if (!search_sort_expression(lps_specification.data().sorts(), b_sort))
+
+          if (!search_sort_expression(lps_specification.data().sorts(), sort))
           {
             std::cerr << "No sorts found of name " << m_unfoldsort << std::endl;
             break;
@@ -180,30 +183,11 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
                ; k != assignments.end()
                ; ++k)
           {
-            if (k ->lhs().sort() == b_sort)
+            if (k ->lhs().sort() == sort)
             {
               m_set_index.insert(std::distance(assignments.begin(),k));
             }
 
-            /*          This code has been changed by JFG because with the new sort library sorts in linear processes
-                        should be uniquely defined. There are no sort aliases anymore.
-
-                        mcrl2::data::data_specification::aliases_const_range aliases = lps_specification.data().aliases( k ->lhs().sort());
-                        for(mcrl2::data::data_specification::aliases_const_range::iterator j = aliases.begin()
-                                                         ; j != aliases.end()
-                                                         ; ++j)
-                        {
-                          if( b_sort == j->name())
-                          {
-                            m_set_index.insert (std::distance(assignments.begin(),k ) );
-                          }
-                        }
-            */
-
-            if (b_sort == k ->lhs().sort())
-            {
-              m_set_index.insert(std::distance(assignments.begin(),k));
-            }
           }
 
           if (m_set_index.empty())
