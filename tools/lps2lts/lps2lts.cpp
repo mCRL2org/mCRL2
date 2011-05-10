@@ -125,6 +125,11 @@ class lps2lts_tool : public lps2lts_base
                    "If INFILE is not supplied, stdin is used. "
                    "If OUTFILE is not supplied, the LTS is not stored.\n"
                    "\n"
+                   "If the 'jittyc' rewriter is used, then the MCRL2_COMPILEREWRITER environment "
+                   "variable (default value: 'mcrl2compilerewriter') determines the script that "
+                   "compiles the rewriter, and MCRL2_COMPILEDIR (default value: '.') determines "
+                   "where temporary files are stored.\n"
+                   "\n"
                    "The format of OUTFILE is determined by its extension (unless it is specified "
                    "by an option). The supported formats are:\n"
                    +mcrl2::lts::detail::supported_lts_formats_text()

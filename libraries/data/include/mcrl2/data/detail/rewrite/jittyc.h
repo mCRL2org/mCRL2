@@ -38,7 +38,7 @@ class RewriterCompilingJitty: public Rewriter
 {
   public:
     RewriterCompilingJitty(const data_specification& DataSpec);
-    ~RewriterCompilingJitty();
+    virtual ~RewriterCompilingJitty();
 
     RewriteStrategy getStrategy();
 

@@ -4,6 +4,7 @@
 #include <string>
 #include <sstream>
 #include <stdexcept>
+#include "mcrl2/utilities/logger.h"
 
 #ifdef _MSC_VER
   #include <Windows.h>
@@ -103,7 +104,7 @@ private:
 	}
 protected:
 	std::string m_filename;
-  virtual void unload() throw(std::runtime_error)
+  void unload() throw(std::runtime_error)
   {
     if (m_library)
     {
@@ -124,9 +125,9 @@ public:
     {
       unload();
     }
-    catch(std::runtime_error)
+    catch(std::runtime_error &error)
     {
-      // Ignore
+      mCRL2log(error) << "Error while unloading dynamic library: " << error.what() << std::endl;
     }
 	}
 	library_proc proc_address(const std::string &name) throw(std::runtime_error)

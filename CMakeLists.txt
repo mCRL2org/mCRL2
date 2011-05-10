@@ -868,6 +868,12 @@ set(IATERM_CPPFLAGS "${ATERM_FLAGS} -I\\\"${CMAKE_INSTALL_PREFIX}/include\\\"")
 set(IATERM_LDFLAGS  "-L\\\"${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}\\\" -lmcrl2_aterm")
 
 configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/setup.h.in" "${CMAKE_CURRENT_BINARY_DIR}/libraries/utilities/include/mcrl2/setup.h" @ONLY  )
+configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/build/autoconf/mcrl2compilerewriter.in" "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter" @ONLY )
+add_executable( mcrl2compilerewriter IMPORTED IMPORTED_LOCATION "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter" )
+install( 
+  PROGRAMS "${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/mcrl2compilerewriter"
+  DESTINATION bin/
+)
 
 ENDIF( UNIX )
 

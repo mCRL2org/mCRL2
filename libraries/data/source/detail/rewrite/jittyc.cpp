@@ -34,7 +34,6 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/setup.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 
 using namespace mcrl2::core;
@@ -2633,6 +2632,9 @@ void RewriterCompilingJitty::CleanupRewriteSystem()
   if (so_rewr_cleanup != NULL)
   {
     so_rewr_cleanup();
+  }
+  if (rewriter_so != NULL)
+  {
     delete rewriter_so;
     rewriter_so = NULL;
   }
@@ -2656,7 +2658,21 @@ FILE* RewriterCompilingJitty::MakeTempFiles()
 	FILE* result;
 	
 	std::ostringstream file_base;
-	file_base << "jittyc_" << getpid() << "_" << reinterpret_cast< long >(this) << ".cpp";
+        char* file_dir = getenv("MCRL2_COMPILEDIR");
+        if (file_dir != NULL)
+        {
+          int l = strlen(file_dir);
+          if (file_dir[l - 1] == '/')
+          {
+            file_dir[l - 1] = 0;
+          }
+          file_base << file_dir;
+        }
+        else
+        {
+          file_base << ".";
+        }
+	file_base << "/jittyc_" << getpid() << "_" << reinterpret_cast< long >(this) << ".cpp";
 
 	rewriter_source = file_base.str();
 
@@ -2732,7 +2748,16 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   CleanupRewriteSystem();
 
-  rewriter_so = new uncompiled_library();
+  // Try to find out from environment which compile script to use. Use
+  // default script called "mcrl2compilerewriter" if not set.
+  std::string compile_script;
+  char* env_compile_script = getenv("MCRL2_COMPILEREWRITER");
+  if (env_compile_script != NULL)
+    compile_script = env_compile_script;
+  else
+    compile_script = "mcrl2compilerewriter";
+  rewriter_so = new uncompiled_library(compile_script);
+  gsVerboseMsg("Using '%s' to compile rewriter.\n", compile_script.c_str());
 
   int2term = (ATermAppl*) malloc(num_opids*sizeof(ATermAppl));
   memset(int2term,0,num_opids*sizeof(ATermAppl));
@@ -3068,6 +3093,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
   catch(std::runtime_error &e)
   {
+    rewriter_so->leave_files();
     throw mcrl2::runtime_error(std::string("Could not compile rewriter: ") + e.what());
   }
   
@@ -3084,6 +3110,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   }
   catch(std::runtime_error &e)
   {
+    rewriter_so->leave_files();
     throw mcrl2::runtime_error(std::string("Could not load rewriter: ") + e.what());
   }
 

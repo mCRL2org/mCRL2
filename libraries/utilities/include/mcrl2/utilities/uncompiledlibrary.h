@@ -22,116 +22,119 @@
  *
  */
 
+#include <list>
+#include <string>
 #include <sstream>
 #include <stdexcept>
 #include "dynamiclibrary.h"
-#include "mcrl2/setup.h"
+#include "mcrl2/utilities/logger.h"
 
 class uncompiled_library : public dynamic_library
 {
 private:
+    std::list<std::string> m_tempfiles;
     std::string m_compile_script;
-    std::string m_source_filename;
-    std::string m_object_filename;
-
+    bool file_exists(const std::string& filename)
+    {
+      if (FILE * file = fopen(filename.c_str(), "r"))
+      {
+        fclose(file);
+        return true;
+      }
+      return false;
+    }
 public:
-    uncompiled_library(const std::string& script = "mcrl2compilerewriter") : m_compile_script(script) {};
+    uncompiled_library(const std::string& script) : m_compile_script(script) {};
 
-    /// \overload
-    /// Needed in order to properly call the uncompiled_library::unload!
+    void compile(const std::string& filename) throw(std::runtime_error)
+    {
+      std::stringstream commandline;
+      commandline << m_compile_script << " " << filename << " " << " 2>&1";
+
+      // Execute script.
+      FILE* stream = popen(commandline.str().c_str(), "r");
+      if (stream == NULL)
+      {
+        throw std::runtime_error("Could not execute compile script.");
+      }
+
+      // Script produces one file per line. Last file is the shared library,
+      // preceding files are temporary files that should be removed when the
+      // library is unloaded.
+      std::string files;
+      char buf[1024];
+      while (fgets(buf, 1024, stream) != NULL)
+      {
+        std::string line(buf);
+        assert(*line.rbegin() == '\n');
+        line.erase(line.size() - 1);
+        // Check that reported file exists. If not, produce error message and
+        // flush script output to the log.
+        if (!file_exists(line))
+        {
+          mCRL2log(error) << "Compile script produced unexpected output:\n";
+          mcrl2_logger::indent();
+          mCRL2log(error) << line << std::endl;
+          while (fgets(buf, 1024, stream) != NULL) 
+          {
+            mCRL2log(error) << std::string(buf);
+          }
+          mcrl2_logger::unindent();
+          pclose(stream);
+          throw std::runtime_error("Compile script failed.");
+        }
+        else
+        {
+          mCRL2log(info, "uncompiled_library") << "Temporary file '" << line << "' generated." << std::endl;
+        }
+        m_tempfiles.push_back(line);
+      }
+
+      if (ferror(stream))
+      {
+        pclose(stream);
+        throw std::runtime_error("There was a problem reading the output of the compile script.");
+      }
+
+      pclose(stream);
+
+      m_filename = m_tempfiles.back();
+    }
+
+    void leave_files()
+    {
+      m_tempfiles.clear();
+    }
+
+    void cleanup() throw(std::runtime_error)
+    {
+      for(std::list<std::string>::iterator f = m_tempfiles.begin(); f != m_tempfiles.end(); ++f)
+      {
+        if (unlink((*f).c_str()))
+        {
+          std::stringstream s;
+          s << "Could not remove file: " << *f;
+          throw std::runtime_error(s.str());
+        }
+        else
+        {
+           mCRL2log(info, "uncompiled_library") << "Temporary file '" << *f << "' deleted." << std::endl;
+        }
+      }
+    }
+
     virtual ~uncompiled_library()
     {
       try
       {
-        unload();
+        cleanup();
       }
-      catch(std::runtime_error)
+      catch (std::runtime_error &error)
       {
-        // Ignore
+        mCRL2log(error) << "Could not cleanup temporary files: " << error.what() << std::endl;
       }
     }
 
-    /*
-    void compile(const std::string& filename) throw(std::runtime_error)
-    {
-      std::stringstream commandline;
-      commandline << m_compile_script << " " << filename << " " << filename << ".bin";
-      std::cout << commandline << std::endl;
-      int r = system(commandline.str().c_str());
-      if (r != 0)
-      {
-        std::stringstream s;
-        s << "Executing compile script failed, return code was " << std::hex << r;
-        throw std::runtime_error(s.str());
-      }
-      m_filename = std::string("./") + filename + ".bin";
-    }
-    */
-
-    void compile(const std::string& filename) throw(std::runtime_error)
-    {
-      m_source_filename = filename;
-      m_object_filename = filename + ".o";
-
-      std::stringstream compilecommandline;
-      std::stringstream linkcommandline;
-
-      compilecommandline << CXX << " -c " << CXXFLAGS << " " << SCXXFLAGS << " " << CPPFLAGS << " " << ATERM_CPPFLAGS << " -o " << filename << ".o " << filename;
-      linkcommandline << CXX << " " << LDFLAGS << " " << SLDFLAGS << " -o " << filename << ".bin " << filename << ".o";
-
-      int r = system(compilecommandline.str().c_str());
-      if (r != 0)
-      {
-        std::stringstream s;
-        s << "Compilation failed, return code was " << std::hex << r;
-        s << " compile command was " << compilecommandline.str();
-        throw std::runtime_error(s.str());
-      }
-
-      r = system(linkcommandline.str().c_str());
-      if (r != 0)
-      {
-        std::stringstream s;
-        s << "Linking failed, return code was " << std::hex << r;
-        throw std::runtime_error(s.str());
-      }
-
-      m_filename = std::string("./") + filename + ".bin";
-    }
-
-    virtual void unload() throw(std::runtime_error)
-    {
-      dynamic_library::unload();
-      if (!m_source_filename.empty())
-      {
-        if (unlink(m_source_filename.c_str()) != 0)
-        {
-          std::stringstream s;
-          s << "Could not remove file: " << m_source_filename;
-          throw std::runtime_error(s.str());
-        }
-      }
-
-      if (!m_object_filename.empty())
-      {
-        if (unlink(m_object_filename.c_str()) != 0)
-        {
-          std::stringstream s;
-          s << "Could not remove file: " << m_object_filename;
-          throw std::runtime_error(s.str());
-        }
-      }
-
-      if (!m_filename.empty())
-      {
-        if (unlink(m_filename.c_str()) != 0)
-        {
-          std::stringstream s;
-          s << "Could not remove file: " << m_filename;
-          throw std::runtime_error(s.str());
-        }
-      }
-    }
 };
 
 #endif // __UNCOMPILED_LIBRARY_H
