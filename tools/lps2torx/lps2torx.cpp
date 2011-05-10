@@ -346,14 +346,14 @@ class lps2torx_tool : public lps2torx_base
         }
       }
 
-//      if (parser.arguments.size() == 0) {
-//        parser.error("no INFILE specified");
-//      } else if (parser.arguments.size() == 1) {
-//        name_for_input = parser.arguments[0];
-//      } else {
-//        //parser.arguments.size() > 1
-//        parser.error("too many file arguments");
-//      }
+      if (parser.arguments.size() == 0) {
+        parser.error("no INFILE specified");
+      } else if (parser.arguments.size() == 1) {
+        name_for_input = parser.arguments[0];
+      } else {
+        //parser.arguments.size() > 1
+        parser.error("too many file arguments");
+      }
     }
 };
 
