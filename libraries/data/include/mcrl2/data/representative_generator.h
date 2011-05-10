@@ -163,8 +163,8 @@ class representative_generator
         // present.
 
         // check if there is a mapping with sort s (constructors with sort s cannot exist).
+        const function_symbol_vector local_mappings(m_specification.mappings(sort.target_sort()));
 
-        const function_symbol_vector local_mappings(m_specification.mappings(sort));
         for (function_symbol_vector::const_iterator i =
                std::find_if(local_mappings.begin(), local_mappings.end(),
                             detail::has_sort(sort)); i != local_mappings.end();)
@@ -177,7 +177,7 @@ class representative_generator
         // s is a constant (not a function sort).
         // check if there is a constant constructor for s
 
-        function_symbol_vector local_constructors(m_specification.constructors(sort));
+        function_symbol_vector local_constructors(m_specification.constructors(sort.target_sort()));
 
         for (function_symbol_vector::const_iterator i =
                std::find_if(local_constructors.begin(), local_constructors.end(), detail::has_sort(sort));
@@ -187,7 +187,7 @@ class representative_generator
         }
 
         // check if there is a constant mapping for s
-        const function_symbol_vector local_mappings(m_specification.mappings(sort));
+        const function_symbol_vector local_mappings(m_specification.mappings(sort.target_sort()));
 
         for (function_symbol_vector::const_iterator i =
                std::find_if(local_mappings.begin(), local_mappings.end(),detail::has_sort(sort));
