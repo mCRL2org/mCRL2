@@ -32,15 +32,19 @@
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
+#include "mcrl2/lps/multi_action.h"
+
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
+using namespace mcrl2::lps;
 using namespace mcrl2;
 using namespace std;
 
-#define is_tau(x) ATisEmpty((ATermList) ATgetArgument(x,0))
+#define is_tau(x) multi_action( x ).actions().size() == 1 && \
+  multi_action( x ).actions().front().arguments().empty()
 
 void print_torx_action(ostream& os, ATermAppl mact)
 {
