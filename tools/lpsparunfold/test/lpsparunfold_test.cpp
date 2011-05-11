@@ -73,7 +73,9 @@ int test_main(int argc, char* argv[])
     BOOST_CHECK(t0.compare("Pos") == 0);
 
     /* Return */
-    lpsparunfold lpsparunfold(s0);
+
+    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > unfold_cache;
+    lpsparunfold lpsparunfold(s0, &unfold_cache);
     specification s1 = lpsparunfold.algorithm(0);
     variable_list p1 = s1.process().process_parameters();
     if (p1.size() != 3)
