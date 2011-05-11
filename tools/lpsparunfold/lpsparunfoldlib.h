@@ -35,6 +35,20 @@ typedef atermpp::vector< mcrl2::lps::deprecated::summand >     summand_vector;
 }
 }
 
+namespace lspparunfold
+{
+	struct unfold_cache_element{
+		  mcrl2::data::sort_expression cached_fresh_basic_sort;
+      mcrl2::data::function_symbol cached_case_function;
+      mcrl2::data::function_symbol cached_determine_function;
+		  mcrl2::data::function_symbol_vector cached_k;
+      mcrl2::data::function_symbol_vector cached_projection_functions;
+
+		  //mcrl2::data::function_symbol_vector elements_of_new_sorts;
+		  //mcrl2::data::data_equation_vector data_equations;
+	};
+}
+
 class lpsparunfold
 {
   public:
@@ -43,7 +57,10 @@ class lpsparunfold
       * \param[in] spec which is a valid mCRL2 process specification.
       * \post   The content of mCRL2 process specification analysed for useful information and class variables are set.
       **/
-    lpsparunfold(mcrl2::lps::specification spec, bool add_distribution_laws=false);
+    lpsparunfold(mcrl2::lps::specification spec,
+        atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
+        bool add_distribution_laws=false
+    );
 
 
     /** \brief  Destructor for lpsparunfold algorithm.
@@ -58,6 +75,8 @@ class lpsparunfold
     mcrl2::lps::specification algorithm(size_t parameter_at_index);
 
   private:
+
+    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >* m_cache;
 
     /// \brief The sort of the process parameter that needs to be unfold.
     mcrl2::data::sort_expression m_unfold_process_parameter;

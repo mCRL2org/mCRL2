@@ -28,8 +28,13 @@ using namespace mcrl2::data;
 - alias::name() [basic_sort] results in a basic sort, differs form basic_sort::name() [string]
 */
 
-lpsparunfold::lpsparunfold(mcrl2::lps::specification spec, bool add_distribution_laws)
+lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
+    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element > *cache,
+    bool add_distribution_laws
+)
 {
+  m_cache = cache;
+
   m_add_distribution_laws = add_distribution_laws;
   gsDebugMsg("Processing\n");
   m_data_specification = spec.data() ;
@@ -893,43 +898,85 @@ mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
   function_symbol determine_function;
   data_equation_vector data_equations;
 
-  /*   Alg */
-  /*     1 */
-  fresh_basic_sort = generate_fresh_basic_sort(unfold_parameter_name);
-  /*     2 */
-  k = determine_affected_constructors();
-  if (k.empty())
+  /* Updating cache*/
+  if( m_cache->find(m_unfold_process_parameter) == m_cache->end() )
   {
-    gsVerboseMsg("The selected process parameter %s has no constructors.\n", unfold_parameter_name.c_str());
-    gsVerboseMsg("No need to unfold.\n");
-    new_lps = m_lps;
-    new_init = m_init_process;
+    /* Not using cache */
+
+    /*   Alg */
+    /*     1 */
+    fresh_basic_sort = generate_fresh_basic_sort(unfold_parameter_name);
+    /*     2 */
+    k = determine_affected_constructors();
+    if (k.empty())
+    {
+      gsVerboseMsg("The selected process parameter %s has no constructors.\n", unfold_parameter_name.c_str());
+      gsVerboseMsg("No need to unfold.\n");
+      new_lps = m_lps;
+      new_init = m_init_process;
+    }
+    else
+    {
+      /*     4 */
+      elements_of_new_sorts = new_constructors(k);
+      /*     6 */
+      case_function = create_case_function(k.size());
+      /*     7 */
+      determine_function = create_determine_function();
+      /*  8-12 */
+      projection_functions = create_projection_functions(k);
+      /* 13-xx */
+      data_equations = create_data_equations(projection_functions, case_function, elements_of_new_sorts, k, determine_function);
+
+      //Reconstruct data specification
+      m_data_specification.add_sort(fresh_basic_sort);
+      std::for_each(elements_of_new_sorts.begin(), elements_of_new_sorts.end(), boost::bind(&data_specification::add_constructor, &m_data_specification, _1));
+      m_data_specification.add_mapping(determine_function);
+      m_data_specification.add_mapping(case_function);
+      std::for_each(m_additional_mappings.begin(), m_additional_mappings.end(), boost::bind(&data_specification::add_mapping, &m_data_specification, _1));
+      std::for_each(projection_functions.begin(), projection_functions.end(), boost::bind(&data_specification::add_mapping, &m_data_specification, _1));
+
+      std::for_each(data_equations.begin(), data_equations.end(), boost::bind(&data_specification::add_equation, &m_data_specification, _1));
+
+      /*----------------*/
+      new_lps = update_linear_process(case_function, k, determine_function, parameter_at_index, projection_functions);
+      new_init = update_linear_process_initialization(determine_function, parameter_at_index, projection_functions);
+
+      /* Updating cache*/
+      lspparunfold::unfold_cache_element e;
+      e.cached_case_function = case_function;
+      e.cached_k = k;
+      e.cached_determine_function = determine_function;
+      e.cached_projection_functions = projection_functions;
+      e.cached_fresh_basic_sort = fresh_basic_sort;
+
+      m_cache->insert( pair<mcrl2::data::sort_expression , lspparunfold::unfold_cache_element>( m_unfold_process_parameter , e ));
+
+    }
   }
   else
   {
-    /*     4 */ elements_of_new_sorts = new_constructors(k);
-    /*     6 */
-    case_function = create_case_function(k.size());
-    /*     7 */
-    determine_function = create_determine_function();
-    /*  8-12 */
-    projection_functions = create_projection_functions(k);
-    /* 13-xx */
-    data_equations = create_data_equations(projection_functions, case_function, elements_of_new_sorts, k, determine_function);
+    /* Using cache */
+    gsVerboseMsg("Update using cache for sort: \"%s\"...\n", mcrl2::data::pp(m_unfold_process_parameter).c_str() );
 
-    /*----------------*/
+    atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >::iterator ce = m_cache->find(m_unfold_process_parameter);
+
+    fresh_basic_sort = ce->second.cached_fresh_basic_sort;
+    k = ce->second.cached_k;
+    if (k.empty())
+    {
+      gsVerboseMsg("The selected process parameter %s has no constructors.\n", unfold_parameter_name.c_str());
+      gsVerboseMsg("No need to unfold.\n");
+      new_lps = m_lps;
+      new_init = m_init_process;
+    }
+
+    case_function = ce->second.cached_case_function;
+    determine_function = ce->second.cached_determine_function;
+    projection_functions = ce->second.cached_projection_functions;
+
     new_lps = update_linear_process(case_function, k, determine_function, parameter_at_index, projection_functions);
     new_init = update_linear_process_initialization(determine_function, parameter_at_index, projection_functions);
-
-    //Reconstruct data specification
-    m_data_specification.add_sort(fresh_basic_sort);
-    std::for_each(elements_of_new_sorts.begin(), elements_of_new_sorts.end(), boost::bind(&data_specification::add_constructor, &m_data_specification, _1));
-    m_data_specification.add_mapping(determine_function);
-    m_data_specification.add_mapping(case_function);
-    std::for_each(m_additional_mappings.begin(), m_additional_mappings.end(), boost::bind(&data_specification::add_mapping, &m_data_specification, _1));
-    std::for_each(projection_functions.begin(), projection_functions.end(), boost::bind(&data_specification::add_mapping, &m_data_specification, _1));
-
-    std::for_each(data_equations.begin(), data_equations.end(), boost::bind(&data_specification::add_equation, &m_data_specification, _1));
   }
 
   mcrl2::lps::specification new_spec = mcrl2::lps::specification(m_data_specification, m_action_label_list, m_glob_vars, new_lps, new_init);

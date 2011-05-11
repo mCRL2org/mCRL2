@@ -160,6 +160,9 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       lps_specification.load(m_input_filename);
 
+      /* lpsparunfold-cache is used to avoid the introduction of equations for already unfolded sorts */
+      atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
+
       for (size_t i =0; i != m_repeat_unfold; ++i)
       {
         mcrl2::core::gsVerboseMsg("Pass: %d of %d\n", i+1, m_repeat_unfold);
@@ -199,15 +202,18 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
         //Unfold process parameters for calculated indices
         std::set< size_t > h_set_index = m_set_index;
+
         while (!h_set_index.empty())
         {
-          lpsparunfold lpsparunfold(lps_specification, m_add_distribution_laws);
+          lpsparunfold lpsparunfold(lps_specification, &unfold_cache, m_add_distribution_laws);
           size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
           lps_specification = lpsparunfold.algorithm(index);
           h_set_index.erase(index);
         }
       }
       lps_specification.save(m_output_filename);
+
+
 
       return true;
     }
