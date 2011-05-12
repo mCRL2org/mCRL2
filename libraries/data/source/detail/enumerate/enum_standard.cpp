@@ -212,6 +212,7 @@ bool EnumeratorSolutionsStandard::next(
 {
   while (ss_stack.empty() && !fs_stack.empty())
   {
+
     const fs_expr e=fs_stack.front();
     fs_stack.pop_front();
     assert(!e.vars().empty());
@@ -339,11 +340,14 @@ bool EnumeratorSolutionsStandard::next(
           if ((fs_stack.back().vars().empty()) || 
                    (EliminateVars(fs_stack.back()), (fs_stack.back().vars().empty()))) 
           {
-            ss_stack.push_back(
+            if (fs_stack.back().expr()!=forbidden_truth_value)
+            { 
+              ss_stack.push_back(
                        ss_solution(build_solution(
                                         enum_vars,fs_stack.back().substituted_vars(),
                                         fs_stack.back().vals()),
                                    fs_stack.back().expr()==desired_truth_value));
+            }
             fs_stack.pop_back();
           }
         }
@@ -388,9 +392,9 @@ bool EnumeratorSolutionsStandard::next(
   return next(dummy_solution_is_exact,solution,solution_possible);
 }
 
-void EnumeratorSolutionsStandard::reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool not_equal_to_false)
+void EnumeratorSolutionsStandard::reset(const variable_list &vars, const atermpp::aterm_appl &expr, const bool not_equal_to_false)
 {
-  enum_expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)Expr);
+  enum_expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)expr);
   
   if (not_equal_to_false)
   {
