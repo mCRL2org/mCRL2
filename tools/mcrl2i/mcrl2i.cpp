@@ -157,6 +157,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     /// Runs the algorithm.
     bool run()
     {
+      atermpp::set < variable > context_variables;
       data_specification spec;
       if (!input_filename().empty())
       {
@@ -166,6 +167,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           mcrl2::lps::specification p;
           p.load(input_filename());
           spec=p.data();
+          context_variables = p.global_variables();
         }
         catch (mcrl2::runtime_error e)
         {
@@ -175,12 +177,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             mcrl2::pbes_system::pbes <> p;
             p.load(input_filename());
             spec=p.data();
+            context_variables = p.global_variables();
           }
           catch (mcrl2::runtime_error& e)
           {
             std::cout << "Could not read " << input_filename() << " as an LPS or a PBES. " << e.what() <<
                       "\nUsing standard data types only;\n";
             spec=data_specification();
+            context_variables.clear();
           }
         }
       }
@@ -192,7 +196,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
       rewriter rewr(spec,m_rewrite_strategy);
-      atermpp::set < variable > context_variables;
+
       atermpp::map < variable, data_expression > assignments;
 
       bool done = false;

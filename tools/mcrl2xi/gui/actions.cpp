@@ -77,7 +77,10 @@ void Options::OnEval(wxCommandEvent& /*event*/)
                          + wxT("\"")
                          + wxTextFile::GetEOL());
 
-    mcrl2::data::data_expression term = mcrl2::data::parse_data_expression(std::string(ev->getDataExprVal().mb_str()) ,spec.data());
+    atermpp::set <mcrl2::data::variable> vars = spec.global_variables();
+
+    mcrl2::data::data_expression term = mcrl2::data::parse_data_expression(std::string(ev->getDataExprVal().mb_str()),
+        vars.begin(), vars.end(), spec.data());
 
     p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
                          + wxT("Rewriting data expression: \"")
@@ -146,10 +149,11 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
       throw mcrl2::runtime_error(p_output->PrintTime() + "Expect a `.' in the input.");
     }
 
-    atermpp::set <mcrl2::data::variable> vars;
+
     wxString wx_spec = p_editor->GetStringFromDataEditor();
     mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
 
+    atermpp::set <mcrl2::data::variable> vars = spec.global_variables();
     parse_variables(std::string(dataexpr.BeforeFirst('.').mb_str()) + ";",std::inserter(vars,vars.begin()),spec.data());
 
     mcrl2::data::data_expression term =

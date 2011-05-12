@@ -166,6 +166,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
   m_mgr.AddPane(options , wxRIGHT, wxT("Actions"));
   m_mgr.AddPane(output , wxBOTTOM, wxT("Output"));
 
+  m_mgr.GetPane(output).BestSize(-1, 100);
+
   // tell the manager to "commit" all the changes just made
   m_mgr.Update();
 
