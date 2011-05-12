@@ -43,8 +43,9 @@ using namespace mcrl2::lps;
 using namespace mcrl2;
 using namespace std;
 
-#define is_tau(x) multi_action( x ).actions().size() == 1 && \
-  multi_action( x ).actions().front().arguments().empty()
+#define is_tau(x) multi_action(x).actions().empty() || \
+  ( multi_action( x ).actions().size() == 1 && \
+    multi_action( x ).actions().front().arguments().empty() )
 
 void print_torx_action(ostream& os, ATermAppl mact)
 {
