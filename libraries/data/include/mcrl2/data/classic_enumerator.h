@@ -28,79 +28,23 @@ namespace mcrl2
 namespace data
 {
 
+/// \brief The classic enumerator can enumerate solutions for boolean expressions.
+/// \details The classic enumerator enumerates solutions for variables that 
+///        make an expression not equal to false, or
+///        not equal to true. For instance in x<2 with x:Nat, it will yield the
+///        solutions 0 and 1 for x as these values make x<2 not equal
+///        to false. In an expression forall x:Nat.cond(x) it is interesting to
+///        find all solutions for x that do not make cond true. If a single
+///        solution is found that makes cond false, then forall x:Nat.cond(x) can
+///        be replaced by false. If a finite number of expressions t1,...,tn can be found
+///        that neither makes cond(t_i) false nor true, forall x:Nat.cond(x) can 
+///        be replaced by cond(t1) && cond(t2) && ... && cond(tn).
+///        By default the solutions are represented as substitutions. 
+///        The classic enumerator can also work with expressions
+///        in internal rewrite format. In that case solutions are 
+///        aterm_list < aterm_appl >'s of the same length as the
+///        list of variables.
 template < typename Evaluator = rewriter >
-class classic_enumerator;
-
-/** \brief Specialised template class for generating data enumerator components
- *
- * A data enumerator represents a sequence of valuations (specified as a
- * substitution) for a given set of variables that satisfy a given
- * condition. The classic enumerator when constructed represents a
- * sequence of <em>all</em> possible evaluations that satisfy a condition.
- *
- * An classic object is an iterator over a possibly unbounded
- * sequence of valuations. Think of iteration as picking elements from a
- * stream. The iterator itself points to an element in the sequence and
- * represents the computation of the remainder of that sequence.
- *
- * As an example of what problems an enumerator can solve consider finding
- * all lists of even length smaller than 100, containing Natural numbers
- * smaller than 100 that are prime. Provided that this criterion can be
- * captured as an open boolean expression, and that the condition
- * evaluation process is complete (enough) and terminates.
- *
- * This type models concept Data Enumerator when the template arguments satisfy:
- *  \arg MutableSubstitution a model of the MutableSubstitution concept
- *  \arg Evaluator a model of Evaluator concept
- *
- * The following example shows a function that takes a data specification,
- * a data expression that represents a condition and a set of variables
- * that occur free in the condition.
- *
- * \code
- * void enumerate(data_specification const& d,
- *          std::set< variable > variables const& v,
- *                  data_expression const& c) {
- *
- *   using namespace mcrl2::data;
- *
- *   for (classic_enumerator< > i(d, variables, c); i!=enumerator_type(); ++i)
- *   {
- *     std::cerr << mcrl2::core::pp((*i)(c)) << std::endl;
- *   }
- * }
- * \endcode
- *
- * Besides the set of variables passed as argument the condition is allowed
- * to contain other free variables. The condition evaluation component
- * selects all expressions that cannot be reduced to false. This is
- * especially useful when an enumerator must be utilised from a context
- * where bound variables occur that cannot be eliminated from the
- * condition.
- *
- * In addition to <a href="http://tinyurl.com/9xtcmg">Single Pass Iterator</a> which is
- * required by the Enumerator concept, this type also models the
- * <a href="http://tinyurl.com/ayp9xb">Forward Traversal Iterator</a>
- * concept.  As a result the computation can be branched at any point as
- * illustrated by the following example (using the types from the previous
- * example).
- *
- * \code
- * void enumerate(data_specification const& d,
- *          std::set< variable > variables const& v,
- *                  data_expression const& c) {
- *
- *   enumerator_type i(d, variables, c);
- *
- *   for (enumerator_type j = i; i!=enumerator_type(); ++i, ++j)
- *   {
- *     assert(*i == *j);
- *   }
- * }
- * \endcode
- *
- **/
-template < typename Evaluator >
 class classic_enumerator 
 {
 
@@ -114,12 +58,15 @@ class classic_enumerator
     /// \brief The type of objects that represent evaluator components
     typedef Evaluator                                                     evaluator_type;
 
-  private:
+  protected:
 
     const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
-    detail::EnumeratorStandard*                                  m_enumerator;    // embedded rewriter should not be part of context
+    detail::EnumeratorStandard*                                  m_enumerator;    // The real enumeration is done in an EnumeratorStandard
+                                                                                  // class.
 
   public:
+
+    /// \brief A class to enumerate solutions for terms in internal format.
     class iterator_internal : 
         public boost::iterator_facade< 
                  iterator_internal,
@@ -139,6 +86,7 @@ class classic_enumerator
 
       public:
         
+        /// Constructor. 
         iterator_internal(enclosing_classic_enumerator *e,
                           const variable_list &variables,
                           const atermpp::aterm_appl &condition,
@@ -329,7 +277,6 @@ class classic_enumerator
         iterator():
           m_enumerator_iterator_valid(false),
           m_solution_possible(false)
-          // m_generator(NULL)
         {
         }
 
@@ -418,12 +365,10 @@ class classic_enumerator
       m_evaluator(evaluator),
       m_enumerator(new detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter()))
     {
-      // m_assignments.protect();
     } 
 
     ~classic_enumerator()
     {
-      // m_assignments.unprotect();
     }
     
 
@@ -432,9 +377,7 @@ class classic_enumerator
     classic_enumerator(classic_enumerator const& other):
       m_evaluator(other.m_evaluator),
       m_enumerator(other.m_enumerator)
-      // m_assignments(other.m_assignments)
     {
-      // m_assignments.protect();
     }
 
 
@@ -443,8 +386,6 @@ class classic_enumerator
     {
       m_evaluator=other.m_evaluator; 
       m_enumerator=other.m_enumerator;
-      // m_assignments=other.m_assignments;
-      // m_assignments.unprotect();
 
       return *this;
     }

@@ -51,6 +51,12 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality(
                         mcrl2::data::variable &v, 
                         atermpp::aterm_appl &e)
 {
+  if (is_variable(t))
+  { 
+    assert(variable(t).sort()==sort_bool::bool_());
+    return false;
+  } 
+
   if (t(0) == m_enclosing_enumerator->opidAnd)
   {
     return FindInnerCEquality(t(1),vars,v,e) || FindInnerCEquality(t(2),vars,v,e);
