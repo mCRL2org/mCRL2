@@ -28,8 +28,8 @@ void ParityGame::assign_pbes( mcrl2::pbes_system::pbes<Container> &pbes,
     verti begin = 0, end = 3;
     for (verti v = begin; v < end; ++v)
     {
-        std::set<long unsigned int> deps = pgg.get_dependencies(v);
-        for ( std::set<long unsigned int>::const_iterator it = deps.begin();
+        std::set<size_t> deps = pgg.get_dependencies(v);
+        for ( std::set<size_t>::const_iterator it = deps.begin();
                 it != deps.end(); ++it )
         {
             verti w = (verti)*it;
