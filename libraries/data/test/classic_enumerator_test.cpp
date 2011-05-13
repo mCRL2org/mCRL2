@@ -27,175 +27,55 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
-template < typename T >
-void enumerate(data_specification const& d,
-               std::set< variable > const& v,
-               data_expression const& c, size_t t);
-
-template < typename T >
-void enumerate(data_specification const& d,
-               variable const& v,
-               data_expression const& condition, size_t t = 1000)
-{
-
-  std::set< variable > variables;
-
-  variables.insert(v);
-
-  enumerate< T >(d, variables, condition, t);
-}
-
-template < typename T >
-void enumerate(data_specification const& d,
-               variable const& v, size_t t = 1000)
-{
-
-  enumerate< T >(d, v, sort_bool::true_(), t);
-}
-
-// specialisation for classic_enumerator
-template < >
-void enumerate< classic_enumerator< > >(data_specification const& d,
-                                        std::set< variable > const& v,
-                                        data_expression const& c, size_t t)
+void enumerate(const data_specification & d,
+               const atermpp::set< variable > & v,
+               const data_expression & c, 
+               const size_t expected_no_of_solutions,
+               const bool more_solutions_possible=false)
 {
 
   typedef classic_enumerator< rewriter > enumerator_type;
 
   rewriter evaluator(d);
   enumerator_type enumerator(d,evaluator);
-  for (enumerator_type::iterator i=enumerator.begin(v, c); --t != 0 && i != enumerator.end(); ++i)
+  size_t number_of_solutions=0;
+  enumerator_type::iterator i;
+  for (i=enumerator.begin(v, c); number_of_solutions< expected_no_of_solutions && i != enumerator.end(); ++i)
   {
-    std::clog << mcrl2::core::pp(data::replace_free_variables(c, *i)) << std::endl;
+    ATfprintf(stderr,"SOLUTION %d %t\n",number_of_solutions,(ATermAppl)evaluator(c,*i));
+    number_of_solutions++;
   }
+  BOOST_CHECK(number_of_solutions==expected_no_of_solutions && (!more_solutions_possible || i==enumerator.end()));
 }
 
-#include "mcrl2/data/enumerator.h"
-
-// specialisation for data::enumerator
-template <>
-void enumerate< data_enumerator< > >(data_specification const& d,
-                                     std::set< variable > const& /*v*/,
-                                     data_expression const& c, size_t t)
+void enumerate(const std::string &specification, 
+               const std::string &enum_variables, 
+               const std::string &condition,
+               const std::string &free_variables,
+               const size_t number_of_solutions,
+               const bool more_solutions_possible=false)
 {
-  struct stack
-  {
-    std::stack< data_expression_with_variables > m_stack;
-
-    void push(atermpp::vector< data_expression_with_variables > const& expressions)
-    {
-      for (atermpp::vector< data_expression_with_variables >::const_iterator i = expressions.begin(); i != expressions.end(); ++i)
-      {
-        m_stack.push(*i);
-      }
-    }
-
-    data_expression_with_variables pop()
-    {
-      data_expression_with_variables result(m_stack.top());
-
-      m_stack.pop();
-
-      return result;
-    }
-
-    bool empty()
-    {
-      return m_stack.empty();
-    }
-  };
-
-  rewriter rewr(d);
-  number_postfix_generator generator("x_");
-  data_enumerator<number_postfix_generator> e(d, rewr, generator);
-
-  stack expression_stack;
-
-  expression_stack.push(e.enumerate(data_expression_with_variables(c)));
-
-  while (!expression_stack.empty() && t-- != 0)
-  {
-    data_expression_with_variables expression(expression_stack.pop());
-
-//    std::clog << mcrl2::core::pp(expression) << std::endl;
-
-    if (!expression.is_constant())
-    {
-      expression_stack.push(e.enumerate(expression));
-    }
-  }
-}
-
-class legacy_rewriter : public mcrl2::data::rewriter
-{
-  public:
-
-    legacy_rewriter(data_specification const& s) : mcrl2::data::rewriter(s)
-    {
-    }
-
-    mcrl2::data::detail::Rewriter& get_rewriter()
-    {
-      return *m_rewriter.get();
-    }
-};
-
-// specialisation for data::detail::Enumerator
-template <>
-void enumerate< detail::EnumeratorStandard >(data_specification const& d,
-                                             std::set< variable > const& v,
-                                             data_expression const& c, size_t t)
-{
-
-  legacy_rewriter rewriter(d);
-
-  rewriter(c); // forces data implementation and that proper rewrite rules are added
-
-  /* std::auto_ptr< data::detail::EnumeratorStandard > enumerator(new data::detail::EnumeratorStandard(
-        detail::data_specification_to_aterm_data_spec(d), &rewriter.get_rewriter())); */
-  data::detail::EnumeratorStandard enumerator(
-        detail::data_specification_to_aterm_data_spec(d), &rewriter.get_rewriter()); 
-
-  variable_list variables;
-
-  for (std::set< variable >::const_iterator i = v.begin(); i != v.end(); ++i)
-  {
-    atermpp::push_front(variables, *i);
-  }
-
-  /* std::auto_ptr< detail::EnumeratorSolutionsStandard > solutions(enumerator->findSolutions(
-        static_cast< ATermList >(variables), rewriter.get_rewriter().toRewriteFormat(c),true)); */
-  detail::EnumeratorSolutionsStandard solutions(variables, rewriter.get_rewriter().toRewriteFormat(c),true,&enumerator);
-
-
-  atermpp::term_list<atermpp::aterm_appl> results; 
-
-  while (solutions.next(results) && t-- != 0)
-  {
-    atermpp::term_list<atermpp::aterm_appl>::const_iterator j=results.begin();
-    for(variable_list::const_iterator i=variables.begin(); i!=variables.end(); ++i,++j)
-    { 
-      rewriter.get_rewriter().setSubstitutionInternal((ATermAppl)*i,(ATerm)(ATermAppl)*j);
-    }
-
-    std::clog << mcrl2::core::pp(rewriter.get_rewriter().rewrite(static_cast< ATermAppl >(c))) << std::endl;
-
-    rewriter.get_rewriter().clearSubstitutions();
-  }
-
-  // BOOST_CHECK(!solutions->errorOccurred());
-}
+  data_specification data_spec(parse_data_specification(specification));
+  atermpp::set < variable > enum_vars;
+  parse_variables(enum_variables, inserter(enum_vars,enum_vars.begin()),data_spec);
+  const data_expression cond=parse_data_expression(condition,free_variables,data_spec);
+  enumerate(data_spec,
+                              enum_vars,
+                              cond,
+                              number_of_solutions);
+} 
 
 void empty_test()
 {
 
+  std::clog << "empty_test\n";
   typedef classic_enumerator< data::rewriter > enumerator_type;
 
   // test manual construction of evaluator with rewriter
   data::data_specification specification;
   data::rewriter           evaluator(specification);
 
-  std::set< variable > variables;
+  atermpp::set< variable > variables;
 
   size_t count = 0;
 
@@ -224,18 +104,10 @@ void empty_test()
   }
 }
 
-template < typename EnumeratorType >
-void enumerate_upto_a_maximum(std::string const& specification, std::string const& variable, const size_t count)
-{
-  data_specification data_specification(parse_data_specification(specification));
 
-  enumerate< EnumeratorType >(data_specification,
-                              parse_variable(variable, data_specification), count);
-}
-
-template < typename EnumeratorType >
-void list_test(const size_t count)
+void list_test()
 {
+  
   const std::string boolean_list_specification =
     "sort list_of_booleans;                                    \n"
     "cons empty : list_of_booleans;                            \n"
@@ -247,18 +119,53 @@ void list_test(const size_t count)
     "     size(lcons(b,l)) = 1 + size(l);                      \n"
     ;
 
-  std::set< variable > variables;
+  atermpp::set< variable > variables;
 
   variables.insert(variable("x", basic_sort("list_of_booleans")));
   variables.insert(variable("y", basic_sort("Nat")));
 
-  enumerate< EnumeratorType >(parse_data_specification(boolean_list_specification),
+  std::clog << "list_test\n";
+  enumerate(parse_data_specification(boolean_list_specification),
                               variables, parse_data_expression("y == size(x) && 0 < y && y < 2",
-                                  "x : list_of_booleans; y : Nat;", boolean_list_specification), count);
+                                  "x : list_of_booleans; y : Nat;", boolean_list_specification), 0);
 }
 
-template < typename EnumeratorType >
-void tree_test(const size_t count)
+void equality_substitution_test()
+{
+  const data_specification spec=parse_data_specification("sort L=Nat;");
+  atermpp::set< variable > variables;
+  variables.insert(variable("x", basic_sort("Pos")));
+  std::clog << "Test1 equality\n";
+  enumerate(spec,
+            variables, 
+            parse_data_expression("x==17 && x!=17", "x : Pos;", spec), 
+            0);
+  std::clog << "Test2 equality\n";
+  enumerate(spec,
+            variables, 
+            parse_data_expression("x==17 && x==x", "x : Pos;", spec), 
+            1);
+  std::clog << "Test3 equality\n";
+  enumerate(spec,
+            variables, 
+            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+            1);
+  std::clog << "Test4 equality\n";
+  variables.insert(variable("b", basic_sort("Bool")));
+  enumerate(spec,
+            variables,
+            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+            2);
+  std::clog << "Test4 equality: return two non exact solutions\n";
+  atermpp::set< variable > bvar;
+  bvar.insert(variable("b", basic_sort("Bool")));
+  enumerate(spec,
+                              bvar,
+                              parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+                              2);
+}
+
+void tree_test()
 {
   const std::string tree_specification =
     "sort tree_with_booleans;                                                   \n"
@@ -266,11 +173,10 @@ void tree_test(const size_t count)
     "cons node : tree_with_booleans # tree_with_booleans -> tree_with_booleans; \n"
     ;
 
-  enumerate_upto_a_maximum< EnumeratorType >(tree_specification, "x : tree_with_booleans", count);
+  enumerate(tree_specification, "x : tree_with_booleans;", "true", "", 512,true);
 }
 
-template < typename EnumeratorType >
-void mutually_recursive_test(const size_t count)
+void mutually_recursive_test()
 {
   const std::string mutually_recursive_sort_specification =
     "sort this;                                              \n"
@@ -292,8 +198,10 @@ void mutually_recursive_test(const size_t count)
     "     maximum_b(0,b) = true;                             \n"
     ;
 
-  enumerate_upto_a_maximum< EnumeratorType >(mutually_recursive_sort_specification, "x : this", count);
-  enumerate_upto_a_maximum< EnumeratorType >(mutually_recursive_sort_specification, "x : that", count);
+  std::clog << "tree_test1\n";
+  enumerate(mutually_recursive_sort_specification, "x : this;", "true", "", 512,true);
+  std::clog << "tree_test2\n";
+  enumerate(mutually_recursive_sort_specification, "x : that;", "true", "", 512,true);
 }
 
 void check_concepts()
@@ -301,8 +209,6 @@ void check_concepts()
   using namespace mcrl2::data::concepts;
 
   BOOST_CONCEPT_ASSERT((Evaluator< mcrl2::data::rewriter, mutable_map_substitution< > >));
-
-  // BOOST_CONCEPT_ASSERT((Enumerator< classic_enumerator< > >));
   BOOST_CONCEPT_ASSERT((classic_enumerator< >::iterator ));
 }
 
@@ -316,12 +222,13 @@ int test_main(int argc, char** argv)
   empty_test();
   core::garbage_collect();
 
-  list_test< classic_enumerator< > >(2);
+  list_test();
   core::garbage_collect();
-  tree_test< classic_enumerator< > >(512);
+  tree_test();
   core::garbage_collect();
-  mutually_recursive_test< classic_enumerator< > >(512);
+  mutually_recursive_test();
   core::garbage_collect();
+  equality_substitution_test();
 
   return EXIT_SUCCESS;
 }

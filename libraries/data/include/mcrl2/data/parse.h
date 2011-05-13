@@ -368,7 +368,10 @@ data_expression parse_data_expression(const std::string& text,
                                       const data_specification& data_spec = detail::default_specification())
 {
   atermpp::vector < variable > variable_store;
-  parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
+  if (!var_decl.empty())
+  { 
+    parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
+  }
   return parse_data_expression(text,variable_store.begin(),variable_store.end(),data_spec);
 }
 
