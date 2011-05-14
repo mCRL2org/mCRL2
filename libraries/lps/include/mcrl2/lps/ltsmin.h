@@ -354,6 +354,7 @@ class pins
         std::set<data::variable> used_read_variables;
         std::set<data::variable> used_write_variables;
 
+        data::find_free_variables(i->condition(), std::inserter(used_read_variables, used_read_variables.end()));
         lps::find_free_variables(i->multi_action(), std::inserter(used_read_variables, used_read_variables.end()));
 
         data::assignment_list assignments(i->assignments());
