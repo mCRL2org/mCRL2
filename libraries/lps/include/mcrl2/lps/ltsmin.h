@@ -514,7 +514,7 @@ class pins
     /// \pre 0 <= i < process_parameter_count()
     datatype_index process_parameter_type(std::size_t i) const
     {
-      return 0;
+        return 0; (void)i;
     }
 
     /// \brief Returns the number of labels per edge (always 1).
@@ -527,14 +527,14 @@ class pins
     /// \pre 0 <= i < edge_label_count()
     datatype_index edge_label_type(std::size_t i) const
     {
-      return 1;
+      return 1; (void)i;
     }
 
     /// \brief Returns the name of the i-th action label (always "action").
     /// \pre 0 <= i < edge_label_count()
     std::string edge_label_name(std::size_t i) const
     {
-      return "action";
+      return "action"; (void)i;
     }
 
     /// \brief Assigns the initial state to s.
