@@ -55,10 +55,10 @@ struct state_callback_function
       state_count(0)
   {}
   
-  void operator()(int edge_label, const state_vector& next_state, int group)
+  void operator()(state_vector const& next_state, int* const& labels, int group=-1)
   {
     state_count++;
-    std::cout << print_state(next_state, state_size, "visit state: ") << " edge label = " << edge_label << " group = " << group << std::endl;
+    std::cout << print_state(next_state, state_size, "visit state: ") << " edge label = " << labels[0] << " group = " << group << std::endl;
   }
 };
 
@@ -120,12 +120,14 @@ void test_ltsmin()
 
   // get the initial state
   state_vector initial_state = new int[N];
+  state_vector dest_state = new int[N];
+  int labels[p.edge_label_count()];
   p.get_initial_state(initial_state);
   std::cout << print_state(initial_state, N, "initial state: ") << std::endl;
   
   // find all successors of the initial state
   state_callback_function f_all(p.process_parameter_count()); 
-  p.next_state_all(initial_state, f_all);
+  p.next_state_all(initial_state, f_all, dest_state, labels);
   std::cout << "f_all.state_count = " << f_all.state_count << std::endl;
 
   // find successors of the initial state for individual groups
@@ -133,7 +135,7 @@ void test_ltsmin()
   for (std::size_t group = 0; group < p.group_count(); group++)
   {
     state_callback_function f_long(p.process_parameter_count());
-    p.next_state_long(initial_state, group, f_long);
+    p.next_state_long(initial_state, group, f_long, dest_state, labels);
     std::cout << "group " << group << " count = " << f_long.state_count << std::endl;
     count += f_long.state_count;
   }
@@ -151,6 +153,7 @@ void test_ltsmin()
   boost::filesystem::remove(boost::filesystem::path(abp_filename));
     
   delete[] initial_state;
+  delete[] dest_state;
 
   std::cout << p.info() << std::endl; 
   
