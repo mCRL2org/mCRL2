@@ -26,7 +26,6 @@ struct ns_info
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator< mcrl2::data::detail::legacy_rewriter > enumerator_type;
 
-
   const mcrl2::data::data_specification &m_specification;
   // Storing the legacy rewriter below by reference can lead to problems.
   const mcrl2::data::detail::legacy_rewriter m_rewriter; // only for translation to/from rewrite format
@@ -48,16 +47,6 @@ struct ns_info
     return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c); // Laatste expressie is intern.
   }
 
-  ATermAppl export_term(ATerm term) const
-  {
-    return m_rewriter.convert_from(term);
-  }
-
-  atermpp::aterm_appl import_term(ATermAppl term) const
-  {
-    return m_rewriter.convert_to(mcrl2::data::data_expression(term));
-  }
-
   ns_info(const mcrl2::data::data_specification & specification,
           const mcrl2::data::detail::legacy_rewriter & rewriter) :
     m_specification(specification),
@@ -69,15 +58,13 @@ struct ns_info
 };
 /// \endcond
 
-class NextStateGenerator // : public NextStateGenerator
+class NextStateGenerator 
 {
   public:
     NextStateGenerator(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
     ~NextStateGenerator();
 
     bool next(ATermAppl* Transition, ATerm* State, bool* prioritised = NULL);
-
-    // bool errorOccurred();
 
     void reset(ATerm State, size_t SummandIndex = 0);
 
@@ -108,7 +95,7 @@ class NextStateGenerator // : public NextStateGenerator
     ATermList ListFromFormat(ATermList l);
 };
 
-class NextState // : public NextState
+class NextState 
 {
     friend class NextStateGenerator;
   public:

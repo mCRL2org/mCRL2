@@ -42,7 +42,6 @@ void enumerate(const data_specification & d,
   enumerator_type::iterator i;
   for (i=enumerator.begin(v, c); number_of_solutions< expected_no_of_solutions && i != enumerator.end(); ++i)
   {
-    ATfprintf(stderr,"SOLUTION %d %t\n",number_of_solutions,(ATermAppl)evaluator(c,*i));
     number_of_solutions++;
   }
   BOOST_CHECK(number_of_solutions==expected_no_of_solutions && (!more_solutions_possible || i==enumerator.end()));
@@ -158,11 +157,15 @@ void equality_substitution_test()
             2);
   std::clog << "Test4 equality: return two non exact solutions\n";
   atermpp::set< variable > bvar;
+  enumerate(spec,
+            bvar, // intentionally empty.
+            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+            1);
   bvar.insert(variable("b", basic_sort("Bool")));
   enumerate(spec,
-                              bvar,
-                              parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
-                              2);
+            bvar,
+            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+            2);
 }
 
 void tree_test()

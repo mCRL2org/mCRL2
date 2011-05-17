@@ -419,21 +419,21 @@ void EnumeratorSolutionsStandard::reset(const variable_list &vars, const atermpp
   }
   else if (fs_stack.front().vars().empty())
   {
-    if (fs_stack.front().expr()!=desired_truth_value) 
+    /* if (fs_stack.front().expr()!=desired_truth_value) 
     {
       throw mcrl2::runtime_error("term does not evaluate to true or false " +
                            pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)fs_stack.front().expr())));
     }
     else
-    {
+    {*/
       ss_stack.push_back(
                         ss_solution(
                               build_solution(
                                   enum_vars,
                                   fs_stack.front().substituted_vars(),
                                   fs_stack.front().vals()),
-                              true));
-    }
+                              fs_stack.front().expr()==desired_truth_value));
+    // }
     fs_stack.pop_back();
   }
 }
