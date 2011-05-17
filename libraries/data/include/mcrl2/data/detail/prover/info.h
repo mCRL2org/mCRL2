@@ -497,7 +497,7 @@ class AI_Jitty: public ATerm_Info
 /// \brief Class that provides information about the structure of
 /// \brief data expressions in the internal format of the rewriter
 /// \brief with the innermost strategy.
-class AI_Inner: public ATerm_Info
+/* class AI_Inner: public ATerm_Info
 {
   public:
     /// \brief Constructor that initializes all fields.
@@ -648,7 +648,7 @@ class AI_Inner: public ATerm_Info
       }
     }
 
-};
+}; */
 
 }
 }

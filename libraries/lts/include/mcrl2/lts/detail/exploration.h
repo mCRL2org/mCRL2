@@ -22,7 +22,7 @@
 #include "mcrl2/lts/detail/lps2lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 
 #include "workarounds.h"
 

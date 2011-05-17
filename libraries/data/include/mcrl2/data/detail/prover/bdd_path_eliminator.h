@@ -50,7 +50,6 @@ std::istream& operator>>(std::istream& is, mcrl2::data::detail::SMT_Solver_Type&
   is.readsome(solver_type, 10);
 
   s = solver_type_cvc;
-
   if (strncmp(solver_type, "cvc", 3) == 0)
   {
     if (solver_type[3] != '\0')

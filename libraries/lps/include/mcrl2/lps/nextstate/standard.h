@@ -14,8 +14,17 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/specification.h"
+
+/** \brief Internal NextState state storage method **/
+typedef enum { GS_STATE_VECTOR  /** \brief Store state as vector (ATermAppl) **/
+               , GS_STATE_TREE    /** \brief Store states in a binary tree **/
+             } NextStateFormat;
+
+/** \brief Strategies for exploring the next states. **/
+typedef enum { nsStandard } NextStateStrategy;
+
 
 class NextState;
 

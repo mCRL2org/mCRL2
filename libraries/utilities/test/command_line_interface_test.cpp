@@ -156,8 +156,8 @@ BOOST_AUTO_TEST_CASE(rewriting_options)
 #if defined(MCRL2_JITTYC_AVAILABLE)
   string_to_strategy_test< true >("jittyc");
 #endif
-  string_to_strategy_test< true >("inner");
-  string_to_strategy_test< true >("innerp");
+  string_to_strategy_test< false >("inner");
+  string_to_strategy_test< false >("innerp");
 #if defined(MCRL2_INNERC_AVAILABLE)
   string_to_strategy_test< true >("innerc");
 #endif
@@ -170,9 +170,9 @@ BOOST_AUTO_TEST_CASE(rewriting_options)
   // Missing mandatory argument for option --rewriter
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter"), std::runtime_error);
   // Valid rewriter option with valid argument
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --rewriter=inner"));
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test --rewriter=jitty"));
   // Valid rewriter option with valid argument
-  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -rinner"));
+  BOOST_CHECK_NO_THROW(command_line_parser(test_interface, "test -rjitty"));
   // Valid rewriter option with invalid argument
   BOOST_CHECK_THROW(command_line_parser(test_interface, "test --rewriter=invalid"), std::runtime_error);
 }

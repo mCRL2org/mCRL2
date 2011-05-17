@@ -419,21 +419,13 @@ void EnumeratorSolutionsStandard::reset(const variable_list &vars, const atermpp
   }
   else if (fs_stack.front().vars().empty())
   {
-    /* if (fs_stack.front().expr()!=desired_truth_value) 
-    {
-      throw mcrl2::runtime_error("term does not evaluate to true or false " +
-                           pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)fs_stack.front().expr())));
-    }
-    else
-    {*/
-      ss_stack.push_back(
-                        ss_solution(
-                              build_solution(
+    ss_stack.push_back(
+                    ss_solution(
+                          build_solution(
                                   enum_vars,
                                   fs_stack.front().substituted_vars(),
                                   fs_stack.front().vals()),
-                              fs_stack.front().expr()==desired_truth_value));
-    // }
+                          fs_stack.front().expr()==desired_truth_value));
     fs_stack.pop_back();
   }
 }
@@ -451,12 +443,12 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   rewr_false = (atermpp::aterm_appl)rewr_obj->toRewriteFormat(sort_bool::false_());
 
   opidAnd.protect();
-  if ((rewr_obj->getStrategy() == GS_REWR_INNER) || (rewr_obj->getStrategy() == GS_REWR_INNER_P))
+  /* if ((rewr_obj->getStrategy() == GS_REWR_INNER) || (rewr_obj->getStrategy() == GS_REWR_INNER_P))
   {
     throw mcrl2::runtime_error("The classic enumerator does not work (anymore) with the INNER and INNER_P rewriter.");
   }
   else
-  {
+  { */
     atermpp::aterm_appl t=rewr_obj->toRewriteFormat(sort_bool::and_());
     opidAnd = t(0);
 
@@ -469,7 +461,7 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
         eqs.insert(t(0));
       }
     }
-  }
+  // }
 }
 
 EnumeratorStandard::~EnumeratorStandard()

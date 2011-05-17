@@ -29,7 +29,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "simbase.h"
 #include "xsimmain.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)

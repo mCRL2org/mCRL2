@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/find.h"

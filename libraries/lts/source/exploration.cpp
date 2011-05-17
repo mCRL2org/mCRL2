@@ -22,7 +22,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/lts/detail/exploration.h"

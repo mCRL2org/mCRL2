@@ -242,8 +242,8 @@ Rewriter* createRewriter(const data_specification& DataSpec, RewriteStrategy Str
 {
   switch (Strategy)
   {
-    case GS_REWR_INNER:
-      return new RewriterInnermost(DataSpec);
+    /* case GS_REWR_INNER:
+      return new RewriterInnermost(DataSpec); */
     case GS_REWR_JITTY:
       return new RewriterJitty(DataSpec);
 #ifdef MCRL2_INNERC_AVAILABLE
@@ -254,14 +254,14 @@ Rewriter* createRewriter(const data_specification& DataSpec, RewriteStrategy Str
     case GS_REWR_JITTYC:
       return new RewriterCompilingJitty(DataSpec);
 #endif
-    case GS_REWR_INNER_P:
-      return new RewriterProver(DataSpec,mcrl2::data::rewriter::innermost);
+    /* case GS_REWR_INNER_P:
+      return new RewriterProver(DataSpec,mcrl2::data::rewriter::innermost); */
     case GS_REWR_JITTY_P:
       return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty);
-#ifdef MCRL2_INNERC_AVAILABLE
+/* #ifdef MCRL2_INNERC_AVAILABLE
     case GS_REWR_INNERC_P:
       return new RewriterProver(DataSpec,data::rewriter::innermost_compiling);
-#endif
+#endif */
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC_P:
       return new RewriterProver(DataSpec,data::rewriter::jitty_compiling);
@@ -401,17 +401,17 @@ bool isValidRewriteRule(ATermAppl DataEqn)
 
 void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
 {
-  if (strat == GS_REWR_INNER)
+  /* if (strat == GS_REWR_INNER)
   {
-    fprintf(stream, "inner");
+    fprintf(stream, "inner"); */
 #ifdef MCRL2_INNERC_AVAILABLE
-  }
-  else if (strat == GS_REWR_INNERC)
+  if (strat == GS_REWR_INNERC)
   {
     fprintf(stream, "innerc");
+  } 
+  else
 #endif
-  }
-  else if (strat == GS_REWR_JITTY)
+  if (strat == GS_REWR_JITTY)
   {
     fprintf(stream, "jitty");
 #ifdef MCRL2_JITTYC_AVAILABLE
@@ -420,16 +420,16 @@ void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
   {
     fprintf(stream, "jittyc");
 #endif
-  }
+/*  }
   else if (strat == GS_REWR_INNER_P)
   {
-    fprintf(stream, "innerp");
+    fprintf(stream, "innerp"); 
 #ifdef MCRL2_INNERC_AVAILABLE
   }
   else if (strat == GS_REWR_INNERC_P)
   {
     fprintf(stream, "innercp");
-#endif
+#endif */
   }
   else if (strat == GS_REWR_JITTY_P)
   {
@@ -451,9 +451,9 @@ RewriteStrategy RewriteStrategyFromString(const char* s)
 {
   static RewriteStrategy strategies[9] = { GS_REWR_INVALID,
 #ifdef MCRL2_INNERC_AVAILABLE
-                                         GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_INNER_P, GS_REWR_INNERC_P,
+                                         GS_REWR_INNERC, 
 #else
-                                         GS_REWR_INNER, GS_REWR_INVALID, GS_REWR_INNER_P, GS_REWR_INVALID,
+                                         GS_REWR_INVALID, 
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
                                          GS_REWR_JITTY, GS_REWR_JITTYC, GS_REWR_JITTY_P, GS_REWR_JITTYC_P
@@ -465,33 +465,34 @@ RewriteStrategy RewriteStrategyFromString(const char* s)
 
   size_t main_strategy = 0; // default invalid
 
-  if (std::strncmp(&s[0], "inner", 5) == 0)   // not jitty{,c,cp} inner{,c,cp}
+  if (std::strncmp(&s[0], "innerc", 6) == 0)   // not jitty{,c,cp}, only innerc
   {
     main_strategy = 1;
+    return strategies[main_strategy];
   }
   else if (std::strncmp(&s[0], "jitty", 5) == 0)   // jitty{,c,cp}
   {
-    main_strategy = 5;
-  }
-
-  if (s[5] == '\0')   // interpreting
-  {
-    return strategies[main_strategy];
-  }
-  else if (s[6] == '\0')
-  {
-    if (s[5] == 'c')   // compiling
+    main_strategy = 2;
+  
+    if (s[5] == '\0')   // interpreting
     {
-      return strategies[main_strategy + 1];
+      return strategies[main_strategy];
     }
-    else if (s[5] == 'p')   // with prover
+    else if (s[6] == '\0')
     {
-      return strategies[main_strategy + 2];
+      if (s[5] == 'c')   // compiling
+      {
+        return strategies[main_strategy + 1];
+      }
+      else if (s[5] == 'p')   // with prover
+      {
+        return strategies[main_strategy + 2];
+      }
     }
-  }
-  else if (s[5] == 'c' && s[6] == 'p' && s[7] == '\0')   // compiling with prover
-  {
-    return strategies[main_strategy + 3];
+    else if (s[5] == 'c' && s[6] == 'p' && s[7] == '\0')   // compiling with prover
+    {
+      return strategies[main_strategy + 3];
+    }
   }
 
   return GS_REWR_INVALID;

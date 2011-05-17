@@ -85,7 +85,7 @@ public:
         }
         else
         {
-          mCRL2log(info, "uncompiled_library") << "Temporary file '" << line << "' generated." << std::endl;
+          mCRL2log(debug, "uncompiled_library") << "Temporary file '" << line << "' generated." << std::endl;
         }
         m_tempfiles.push_back(line);
       }
@@ -118,7 +118,7 @@ public:
         }
         else
         {
-           mCRL2log(info, "uncompiled_library") << "Temporary file '" << *f << "' deleted." << std::endl;
+           mCRL2log(debug, "uncompiled_library") << "Temporary file '" << *f << "' deleted." << std::endl;
         }
       }
     }

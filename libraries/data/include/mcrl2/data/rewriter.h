@@ -56,7 +56,9 @@ class basic_rewriter
     /// \brief The strategy of the rewriter.
     enum strategy
     {
-      innermost                  = detail::GS_REWR_INNER   ,  /** \brief Innermost */
+// Disable inner and innerp rewriters due to different internal format. As they are hardly used,
+// this saves on maintenance.
+//      innermost                  = detail::GS_REWR_INNER   ,  /** \brief Innermost */
 #ifdef MCRL2_INNERC_AVAILABLE
       innermost_compiling        = detail::GS_REWR_INNERC  ,  /** \brief Compiling innermost */
 #endif
@@ -64,9 +66,9 @@ class basic_rewriter
 #ifdef MCRL2_JITTYC_AVAILABLE
       jitty_compiling            = detail::GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
 #endif
-      innermost_prover           = detail::GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
+//      innermost_prover           = detail::GS_REWR_INNER_P ,  /** \brief Innermost + Prover */
 #ifdef MCRL2_INNERC_AVAILABLE
-      innermost_compiling_prover = detail::GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
+//      innermost_compiling_prover = detail::GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
       jitty_prover               = detail::GS_REWR_JITTY_P ,  /** \brief JITty + Prover */
@@ -390,7 +392,7 @@ inline std::ostream& operator<<(std::ostream& os, data::rewriter::strategy& s)
 {
   static char const* strategies[] =
   {
-    "inner",
+//    "inner",
 #ifdef MCRL2_INNERC_AVAILABLE
     "innerc",
 #endif
@@ -398,10 +400,10 @@ inline std::ostream& operator<<(std::ostream& os, data::rewriter::strategy& s)
 #ifdef MCRL2_JITTYC_AVAILABLE
     "jittyc",
 #endif
-    "innerp",
-#ifdef MCRL2_JITTYC_AVAILABLE
-    "innerpc",
-#endif
+//    "innerp",
+// #ifdef MCRL2_JITTYC_AVAILABLE
+//    "innerpc",
+// #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
     "jittyp"
 #else
@@ -421,9 +423,9 @@ inline std::string pp(const mcrl2::data::basic_rewriter< mcrl2::data::data_expre
 {
   switch (s)
   {
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost:
+    /* case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost:
       return "inner";
-      break;
+      break; */
 #ifdef MCRL2_INNERC_AVAILABLE
     case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling:
       return "innerc";
@@ -437,13 +439,13 @@ inline std::string pp(const mcrl2::data::basic_rewriter< mcrl2::data::data_expre
       return "jittyc";
       break;
 #endif
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_prover:
+   /*  case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_prover:
       return "innerp";
-      break;
+      break; */
 #ifdef MCRL2_INNERC_AVAILABLE
-    case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling_prover:
-      return "innercp";
-      break;
+  /*   case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling_prover:
+      return "innerpc";
+      break; */
 #endif
     case mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_prover:
       return "jittyp";

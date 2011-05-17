@@ -27,7 +27,7 @@ set(mcrl2_data_src
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/prover/smt_lib_solver.cpp 
  
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/with_prover.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/inner.cpp
+ # ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/inner.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jitty.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/rewrite.cpp
  ${COMP_REWRITERS}

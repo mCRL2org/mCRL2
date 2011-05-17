@@ -21,7 +21,7 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/messaging.h"

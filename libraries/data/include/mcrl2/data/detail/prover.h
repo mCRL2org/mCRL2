@@ -98,12 +98,12 @@ class Prover:protected mcrl2::data::rewriter
 
       switch (a_rewrite_strategy)
       {
-        case(mcrl2::data::rewriter::innermost):
+        /* case(mcrl2::data::rewriter::innermost):
         {
           f_info = new AI_Inner(m_rewriter);
           f_manipulator = new AM_Inner(m_rewriter, f_info);
           break;
-        }
+        } */
         case(mcrl2::data::rewriter::jitty):
         {
           f_info = new AI_Jitty(m_rewriter);
@@ -117,17 +117,17 @@ class Prover:protected mcrl2::data::rewriter
           break;
         }
 #endif
-        case(mcrl2::data::rewriter::innermost_prover):
+        /* case(mcrl2::data::rewriter::innermost_prover):
         {
           throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
-        }
+        } */
 #ifdef MCRL2_INNERC_AVAILABLE
-        case(mcrl2::data::rewriter::innermost_compiling_prover):
+        /* case(mcrl2::data::rewriter::innermost_compiling_prover):
         {
           throw mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
           break;
-        }
+        } */
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
         case(mcrl2::data::rewriter::jitty_compiling):
