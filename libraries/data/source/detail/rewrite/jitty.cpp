@@ -1135,22 +1135,22 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
           { 
             if( has_exact_solution )
             {
-// #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-              gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
-// #endif
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+              gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::true_() );
+#endif
               return toRewriteFormat( mcrl2::data::sort_bool::true_() );
             }
             else if (has_no_solution)
             {
-// #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-              gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
-// #endif
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+              gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::false_() );
+#endif
               return toRewriteFormat( mcrl2::data::sort_bool::false_() );
             }
           }
-// #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
           gsMessage("  An existential quantifier could not be eliminated and remains unchanged.\n");
-// #endif
+#endif
           return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
         }
 
