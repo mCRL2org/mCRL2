@@ -25,7 +25,7 @@ namespace detail
 class RewriterJitty: public Rewriter
 {
   public:
-    RewriterJitty(const data_specification& DataSpec);
+    RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules);
     ~RewriterJitty();
 
     RewriteStrategy getStrategy();

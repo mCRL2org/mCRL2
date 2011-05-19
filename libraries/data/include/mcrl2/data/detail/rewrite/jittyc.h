@@ -37,7 +37,7 @@ namespace detail
 class RewriterCompilingJitty: public Rewriter
 {
   public:
-    RewriterCompilingJitty(const data_specification& DataSpec);
+    RewriterCompilingJitty(const data_specification& DataSpec, const bool add_rewrite_rules);
     virtual ~RewriterCompilingJitty();
 
     RewriteStrategy getStrategy();
@@ -110,7 +110,7 @@ class RewriterCompilingJitty: public Rewriter
     void implement_tree_aux(FILE* f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool* used, ATermList nnfvars);
     void implement_tree(FILE* f, ATermAppl tree, int arity, int d, int opid, bool* used);
     void implement_strategy(FILE* f, ATermList strat, int arity, int d, int opid, size_t nf_args);
-    void CompileRewriteSystem(const data_specification& DataSpec);
+    void CompileRewriteSystem(const data_specification& DataSpec, const bool add_rewrite_rules);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
 	FILE* MakeTempFiles();

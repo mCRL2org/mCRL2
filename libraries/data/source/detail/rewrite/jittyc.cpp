@@ -2595,7 +2595,7 @@ bool RewriterCompilingJitty::removeRewriteRule(ATermAppl /*Rule*/)
 }
 
 
-void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec)
+void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   made_files = false;
   need_rebuild = true;
@@ -2608,11 +2608,14 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   true_num = ATgetInt(true_inner);
 
   const data_equation_vector l=DataSpec.equations();
-  for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
-  {
-    addRewriteRule(*j);
+  if (add_rewrite_rules)
+  { 
+    for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
+    {
+      addRewriteRule(*j);
+    }
   }
-
+  
   int2term = NULL;
   jittyc_eqns = NULL;
   int2ar_idx = NULL;
@@ -3128,14 +3131,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   need_rebuild = false;
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   term2int = ATtableCreate(100,75);
   subst_store = ATtableCreate(100,75);
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
   initialise_common();
-  CompileRewriteSystem(DataSpec);
+  CompileRewriteSystem(DataSpec,add_rewrite_rules);
 }
 
 RewriterCompilingJitty::~RewriterCompilingJitty()

@@ -19,6 +19,7 @@
 
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/detail/enum/standard.h"

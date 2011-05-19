@@ -258,7 +258,7 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-Rewriter* createRewriter(const data_specification& DataSpec, RewriteStrategy Strategy = GS_REWR_JITTY);
+Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrategy Strategy = GS_REWR_JITTY, const bool add_rewrite_rules=true);
 
 /**
  * \brief Check that an mCRL2 data equation is a valid rewrite rule. If not, an runtime_error is thrown indicating the problem.

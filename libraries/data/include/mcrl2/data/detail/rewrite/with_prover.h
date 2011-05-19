@@ -26,7 +26,7 @@ namespace detail
 class RewriterProver: public Rewriter
 {
   public:
-    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat);
+    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const bool add_rewrite_rules);
     ~RewriterProver();
 
     mcrl2::data::detail::RewriteStrategy getStrategy();

@@ -82,26 +82,19 @@ class basic_rewriter
 
     /// \brief Constructor.
     /// \param[in] r A rewriter
-    basic_rewriter(boost::shared_ptr<detail::Rewriter> const& r) :
+    basic_rewriter(const boost::shared_ptr<detail::Rewriter> & r) :
       m_rewriter(r)
     {}
 
     /// \brief Copy Constructor
-    basic_rewriter(basic_rewriter const& other) :
+    basic_rewriter(const basic_rewriter &other) :
       m_rewriter(other.m_rewriter)
     {}
 
     /// \brief Constructor.
-    basic_rewriter(strategy s = jitty) :
-      m_rewriter(detail::createRewriter(data_specification(), static_cast< detail::RewriteStrategy >(s)))
+    basic_rewriter(const data_specification & d, const strategy s = jitty, const bool add_rewrite_rules=true) :
+      m_rewriter(detail::createRewriter(d, static_cast< detail::RewriteStrategy >(s),add_rewrite_rules))
     {}
-
-//		/// \brief Constructor.
-//    basic_rewriter(data_specification const& d, strategy s = jitty) :
-//      m_rewriter(detail::createRewriter(
-//          data_specification()
-//          , static_cast< detail::RewriteStrategy >(s)))
-//    {}
 
   public:
 
@@ -146,7 +139,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
 
     /// \brief Copy constructor for conversion between derived types
     template < typename CompatibleExpression >
-    basic_rewriter(basic_rewriter< CompatibleExpression > const& other) :
+    basic_rewriter(const basic_rewriter< CompatibleExpression > & other) :
       basic_rewriter< atermpp::aterm >(other),
       m_conversion_helper(other.m_conversion_helper)
     { }
@@ -169,7 +162,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
 
     /// \brief Constructor.
     /// \param[in] r A rewriter
-    basic_rewriter(basic_rewriter const& other) :
+    basic_rewriter(const basic_rewriter & other) :
       basic_rewriter< atermpp::aterm >(other),
       m_conversion_helper(other.m_conversion_helper)
     { }
@@ -177,8 +170,8 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     /// \brief Constructor.
     /// \param[in] d A data specification
     /// \param[in] s A rewriter strategy.
-    basic_rewriter(data_specification const& d, strategy s = jitty) :
-      basic_rewriter< atermpp::aterm >(s),
+    basic_rewriter(const data_specification& d, const strategy s = jitty) :
+      basic_rewriter< atermpp::aterm >(d,s,false),
       m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter))
     { }
 
@@ -187,8 +180,8 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     /// \param[in] s A rewriter strategy.
     /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
     template < typename EquationSelector >
-    basic_rewriter(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
-      basic_rewriter< atermpp::aterm >(s),
+    basic_rewriter(const data_specification& d, EquationSelector const& selector, const strategy s = jitty) :
+      basic_rewriter< atermpp::aterm >(d,s,false),
       m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter, selector))
     { }
 
@@ -212,14 +205,14 @@ class rewriter: public basic_rewriter<data_expression>
   public:
     /// \brief Constructor.
     /// \param[in] r a rewriter.
-    rewriter(rewriter const& r) :
+    rewriter(const rewriter& r) :
       basic_rewriter<data_expression>(r)
     { }
 
     /// \brief Constructor.
     /// \param[in] d A data specification
     /// \param[in] s A rewriter strategy.
-    rewriter(data_specification const& d = rewriter::default_specification(), strategy s = jitty) :
+    rewriter(const data_specification& d = rewriter::default_specification(), const strategy s = jitty) :
       basic_rewriter<data_expression>(d, s)
     { }
 
@@ -228,7 +221,7 @@ class rewriter: public basic_rewriter<data_expression>
     /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
     /// \param[in] s A rewriter strategy.
     template < typename EquationSelector >
-    rewriter(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
+    rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
       basic_rewriter<data_expression>(d, selector, s)
     {
 #ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
@@ -270,7 +263,7 @@ for (atermpp::set<data_equation>::const_iterator i = eqn.begin(); i != eqn.end()
     /// \param[in] sigma A substitution function
     /// \return The normal form of the term.
     template <typename SubstitutionFunction>
-    data_expression operator()(const data_expression& d, SubstitutionFunction const& sigma) const
+    data_expression operator()(const data_expression& d, const SubstitutionFunction& sigma) const
     {
 # ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d;
@@ -296,14 +289,14 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
 
     /// \brief Constructor. The Rewriter object that is used internally will be shared with \p r.
     /// \param[in] r A data rewriter
-    rewriter_with_variables(basic_rewriter< data_expression > const& r) :
+    rewriter_with_variables(const basic_rewriter< data_expression >& r) :
       basic_rewriter<data_expression>(r)
     {}
 
     /// \brief Constructor.
     /// \param[in] d A data specification
     /// \param[in] s A rewriter strategy.
-    rewriter_with_variables(data_specification const& d = rewriter::default_specification(), strategy s = jitty) :
+    rewriter_with_variables(const data_specification& d = rewriter::default_specification(), const strategy s = jitty) :
       basic_rewriter<data_expression>(d, s)
     { }
 
@@ -312,7 +305,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
     /// \param[in] s A rewriter strategy.
     template < typename EquationSelector >
-    rewriter_with_variables(data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
+    rewriter_with_variables(const data_specification& d, const EquationSelector & selector, const strategy s = jitty) :
       basic_rewriter<data_expression>(d, selector, s)
     { }
 
@@ -336,9 +329,9 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     /// \param[in] sigma A substitution function
     /// \return The normal form of the term.
     template <typename SubstitutionFunction>
-    data_expression_with_variables operator()(const data_expression_with_variables& d, SubstitutionFunction const& sigma) const
+    data_expression_with_variables operator()(const data_expression_with_variables& d, const SubstitutionFunction& sigma) const
     {
-      data_expression t = this->operator()(replace_free_variables(static_cast< data_expression const& >(d), sigma));
+      data_expression t = this->operator()(replace_free_variables(static_cast< const data_expression& >(d), sigma));
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;

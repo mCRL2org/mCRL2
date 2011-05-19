@@ -417,7 +417,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
   return ATreverse(strat);
 }
 
-RewriterJitty::RewriterJitty(const data_specification& DataSpec)
+RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   ATermList n;
   ATermInt i;
@@ -444,37 +444,40 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec)
     l = dataappl_eqns;*/
   // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
   const atermpp::vector< data_equation > l = DataSpec.equations();
-  for (atermpp::vector< data_equation >::const_iterator j=l.begin();
-       j!=l.end(); ++j)
+  if (add_rewrite_rules) // if false, the rewrite rules are most likely added via a backdoor, through a special equation selector.
   {
-    try
+    for (atermpp::vector< data_equation >::const_iterator j=l.begin();
+         j!=l.end(); ++j)
     {
-      CheckRewriteRule(*j);
+      try
+      {
+        CheckRewriteRule(*j);
+      }
+      catch (std::runtime_error& e)
+      {
+        gsWarningMsg("%s\n",e.what());
+        continue;
+      }
+  
+      ATermAppl u = toInner((ATermAppl)j->lhs(),true);
+  
+      atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( (ATermInt) ATgetArgument(u,0));
+      if (it == jitty_eqns.end())
+      {
+        n = ATmakeList0();
+      } else {
+        n = it->second;
+      }
+      if (j->variables().size() > max_vars)
+      {
+        max_vars = j->variables().size();
+      }
+      n = ATinsert(n,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
+                                         (ATerm) toInner(j->condition(),true),
+                                         (ATerm) u,
+                                         (ATerm) toInner(j->rhs(),true)));
+      jitty_eqns[ (ATermInt) ATgetArgument(u,0)] = n;
     }
-    catch (std::runtime_error& e)
-    {
-      gsWarningMsg("%s\n",e.what());
-      continue;
-    }
-
-    ATermAppl u = toInner((ATermAppl)j->lhs(),true);
-
-    atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( (ATermInt) ATgetArgument(u,0));
-    if (it == jitty_eqns.end())
-    {
-      n = ATmakeList0();
-    } else {
-      n = it->second;
-    }
-    if (j->variables().size() > max_vars)
-    {
-      max_vars = j->variables().size();
-    }
-    n = ATinsert(n,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
-                                       (ATerm) toInner(j->condition(),true),
-                                       (ATerm) u,
-                                       (ATerm) toInner(j->rhs(),true)));
-    jitty_eqns[ (ATermInt) ATgetArgument(u,0)] = n;
   }
 
   int2term = (ATermAppl*) malloc(num_opids*sizeof(ATermAppl));
@@ -1022,9 +1025,9 @@ ATermAppl RewriterJitty::fromRewriteFormat(ATerm Term)
 ATermAppl RewriterJitty::rewrite(ATermAppl Term)
 {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  gsVerboseMsg("Rewriting term: %T\n", Term);
-  gsVerboseMsg("toRewriteFormat(Term): %T\n", toRewriteFormat(Term));
-  gsVerboseMsg("fromInner(toRewriteFormat(Term)): %T\n", fromInner((ATermAppl) toRewriteFormat(Term)));
+  gsMessage("Rewriting term: %T\n", Term);
+  gsMessage("toRewriteFormat(Term): %T\n", toRewriteFormat(Term));
+  gsMessage("fromInner(toRewriteFormat(Term)): %T\n", fromInner((ATermAppl) toRewriteFormat(Term)));
 #endif
   return fromInner((ATermAppl) rewriteInternal(toRewriteFormat(Term)));
 }
@@ -1073,13 +1076,12 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
       /* Check for exists quantifier */
       if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == exists_function_symbol() )
       {
-
         /* Get Body of Exists */
         ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
         data_expression d(fromInner((ATermAppl) t1));
 
         /* Get Sort for enumeration from Body*/
-        if(is_function_sort(d.sort()))
+        if (is_function_sort(d.sort()))
         {
           function_sort fs = d.sort();
           sort_expression_list fsdomain = fs.domain();
@@ -1120,7 +1122,7 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
 //        bool has_solution = false;
           bool has_exact_solution = false;
           bool has_no_solution =true;
-          bool solution_possible=true;
+          bool solution_possible=true;   
 
           size_t loop_upperbound=5;
           while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
@@ -1133,22 +1135,22 @@ ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInI
           { 
             if( has_exact_solution )
             {
-  #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+// #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
               gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
-  #endif
+// #endif
               return toRewriteFormat( mcrl2::data::sort_bool::true_() );
             }
             else if (has_no_solution)
             {
-  #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+// #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
               gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
-  #endif
+// #endif
               return toRewriteFormat( mcrl2::data::sort_bool::false_() );
             }
           }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+// #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
           gsMessage("  An existential quantifier could not be eliminated and remains unchanged.\n");
-#endif
+// #endif
           return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
         }
 
@@ -1235,7 +1237,6 @@ ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInn
           {
             has_no_solution = false;
             loop_upperbound--;
-
           }
 
           if (solution_possible)

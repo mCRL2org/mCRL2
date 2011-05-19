@@ -533,10 +533,5 @@ void StandardSimulator::UpdateTransitions()
   {
     next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm) transition,newstate));
   }
-  // error = nextstategen->errorOccurred();
 }
 
-/* bool StandardSimulator::ErrorOccurred()
-{
-  return error;
-} */

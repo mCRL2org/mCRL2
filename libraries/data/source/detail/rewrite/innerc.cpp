@@ -1645,7 +1645,7 @@ bool RewriterCompilingInnermost::removeRewriteRule(ATermAppl /*Rule*/)
   return false;
 }
 
-void RewriterCompilingInnermost::CompileRewriteSystem(const data_specification& DataSpec)
+void RewriterCompilingInnermost::CompileRewriteSystem(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   made_files = false;
   need_rebuild = true;
@@ -1659,9 +1659,12 @@ void RewriterCompilingInnermost::CompileRewriteSystem(const data_specification& 
 
   // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
   const atermpp::vector< data_equation > l=DataSpec.equations();
-  for (atermpp::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
+  if (add_rewrite_rules)
   {
-    addRewriteRule(*j);
+    for (atermpp::vector< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
+    {
+      addRewriteRule(*j);
+    }
   }
 
   int2term = NULL;
@@ -2453,13 +2456,13 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   }
 }
 
-RewriterCompilingInnermost::RewriterCompilingInnermost(const data_specification& DataSpec)
+RewriterCompilingInnermost::RewriterCompilingInnermost(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   term2int = ATtableCreate(100,75);
   subst_store = ATtableCreate(100,75);
   so_rewr_cleanup = NULL;
   initialise_common();
-  CompileRewriteSystem(DataSpec);
+  CompileRewriteSystem(DataSpec,add_rewrite_rules);
 }
 
 RewriterCompilingInnermost::~RewriterCompilingInnermost()

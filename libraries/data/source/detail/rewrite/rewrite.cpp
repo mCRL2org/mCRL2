@@ -238,33 +238,33 @@ ATermAppl Rewriter::fromInner(ATermAppl Term )
   return Term;
 }
 
-Rewriter* createRewriter(const data_specification& DataSpec, RewriteStrategy Strategy)
+Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrategy Strategy, const bool add_rewrite_rules)
 {
   switch (Strategy)
   {
     /* case GS_REWR_INNER:
       return new RewriterInnermost(DataSpec); */
     case GS_REWR_JITTY:
-      return new RewriterJitty(DataSpec);
+      return new RewriterJitty(DataSpec,add_rewrite_rules);
 #ifdef MCRL2_INNERC_AVAILABLE
     case GS_REWR_INNERC:
-      return new RewriterCompilingInnermost(DataSpec);
+      return new RewriterCompilingInnermost(DataSpec,add_rewrite_rules);
 #endif
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC:
-      return new RewriterCompilingJitty(DataSpec);
+      return new RewriterCompilingJitty(DataSpec,add_rewrite_rules);
 #endif
     /* case GS_REWR_INNER_P:
       return new RewriterProver(DataSpec,mcrl2::data::rewriter::innermost); */
     case GS_REWR_JITTY_P:
-      return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty);
+      return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty,add_rewrite_rules);
 /* #ifdef MCRL2_INNERC_AVAILABLE
     case GS_REWR_INNERC_P:
       return new RewriterProver(DataSpec,data::rewriter::innermost_compiling);
 #endif */
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC_P:
-      return new RewriterProver(DataSpec,data::rewriter::jitty_compiling);
+      return new RewriterProver(DataSpec,data::rewriter::jitty_compiling,add_rewrite_rules);
 #endif
     default:
       return NULL;

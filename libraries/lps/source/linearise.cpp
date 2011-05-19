@@ -231,6 +231,7 @@ class specification_basic_type:public boost::noncopyable
       acts(),
       global_variables(glob_vars),
       data(ds),
+      rewr(data,opt.rewrite_strategy),
       options(opt),
       timeIsBeingUsed(false)
     {
@@ -243,10 +244,10 @@ class specification_basic_type:public boost::noncopyable
       storeprocs(procs);
       initdatavars.protect();
       initdatavars=idvs;
-      if (!opt.norewrite)
+      /* if (!opt.norewrite)
       {
         rewr=mcrl2::data::rewriter(data,opt.rewrite_strategy);
-      }
+      } */
       // The terminationAction and the terminatedProcId must be defined after initialisation of
       // data as otherwise fresh name does not work properly.
       terminationAction.protect();

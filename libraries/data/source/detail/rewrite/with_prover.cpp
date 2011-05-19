@@ -31,9 +31,9 @@ namespace data
 namespace detail
 {
 
-RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat)
+RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const bool add_rewrite_rules)
 {
-  prover_obj = new BDD_Prover(DataSpec,strat);
+  prover_obj = new BDD_Prover(DataSpec,strat,add_rewrite_rules);
   rewr_obj = prover_obj->get_rewriter();
 }
 
