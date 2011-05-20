@@ -354,7 +354,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
  
   void print_fbag_zero(const data_expression& x)
   {
-//std::cout << "\n<fbag_zero>" << core::pp(x) << " " << x << std::endl;
     // TODO: check if this is the correct way to handle this case
     if (sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
     {
@@ -512,9 +511,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived().print(op + " ");
-    derived().print_sorts() = true;
-    print_container(x.variables());
-    derived().print_sorts() = false;
+    print_function_declarations(x.variables(), "", "", ", ");   
     derived().print(". ");
     derived()(x.body());
     derived().leave(x);
@@ -522,7 +519,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_function_application(const application& x)
   {
-    //std::cout << "\n<function application>" << core::pp(x) << " " << x.arguments().size() << "\n";
     bool print_parentheses = is_abstraction(x.head());
     if (print_parentheses)
     {
@@ -619,6 +615,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().enter(x);
     derived()(x.name());
     print_list(x.arguments(), "(", ")", ", ");
+    if (x.recogniser() != data::no_identifier())
+    {
+      derived().print("?");
+      derived()(x.recogniser());
+    }
     derived().leave(x);
   }
 
@@ -742,7 +743,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       derived().print(x.name());
     }    
-//    derived()(x.sort());
     derived().leave(x);
   }
 
@@ -830,11 +830,18 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //                            pos
     //-------------------------------------------------------------------//
     else if (sort_pos::is_pos(x.sort()))
-    {   
-      if (sort_pos::is_plus_application(x))
+    {
+      if (   sort_pos::is_plus_application(x)
+          || sort_nat::is_plus_application(x)
+         )
       {
         print_container(x.arguments(), data::detail::precedence(x), " + ");
       }
+      else if (sort_pos::is_times_application(x))
+      {
+        print_container(x.arguments(), data::detail::precedence(x), " * ");
+      }
+      else
       {
         print_function_application(x);
       }
@@ -857,7 +864,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_container(x.arguments(), data::detail::precedence(x), " / ");
       }     
-      else if (sort_nat::is_mod_application(x))
+      else if (   sort_nat::is_mod_application(x)
+               || sort_int::is_mod_application(x)
+              )
       {
         print_container(x.arguments(), data::detail::precedence(x), " mod ");
       }
@@ -865,21 +874,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_container(x.arguments(), data::detail::precedence(x), " ^ ");
       }
-//      else if (sort_list::is_count_application(x))
-//      {
-//        derived().print("#");
-//        derived()(x.arguments().front());
-//      }
-//      else if (sort_bag::is_bagcount_application(x))
-//      {
-//        derived().print("#");
-//        derived()(x.arguments().front());
-//      }
-//      else if (sort_fbag::is_fbagcount_application(x))
-//      {
-//        derived().print("#");
-//        derived()(x.arguments().front());
-//      }
       else
       {
         print_function_application(x);
@@ -1253,7 +1247,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived().print(" => ");
     }
     derived()(x.lhs());
-    derived().print("  = ");
+    derived().print("  =  ");
     derived()(x.rhs());
     derived().leave(x);
   }

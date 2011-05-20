@@ -6,8 +6,6 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 
-#define MCRL2_PRINT_DEBUG
-
 #include <sstream>
 
 #include <boost/test/included/unit_test_framework.hpp>
@@ -30,6 +28,7 @@
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
+using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_bool;
 using namespace mcrl2::data::sort_nat;
@@ -47,7 +46,15 @@ bool print_check(data_expression const& left, std::string const& right)
   }
 
 #ifdef MCRL2_NEW_PRINT_TEST
-  print(left);
+  bool result = print(left) == right;
+  if (!result)
+  {
+    std::clog << "-----------------" << std::endl;
+    std::clog << "pp(left)    = " << pp(left) << std::endl;
+    std::clog << "print(left) = " << data::print(left) << std::endl;
+    std::clog << "expected    = " << right << std::endl;
+  }
+  return result;
 #endif
 
   return true;
