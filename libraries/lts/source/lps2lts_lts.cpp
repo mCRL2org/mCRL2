@@ -106,8 +106,7 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action,
       }
       aut << "(" << idx_from << ",\"";
       PrintPart_CXX(aut,(ATerm) action,ppDefault);
-      aut << "\"," << idx_to << ")" << endl;
-      aut.flush();
+      aut << "\"," << idx_to << ")\n";
       break;
     default:
     {
@@ -146,6 +145,7 @@ void lps2lts_lts::close_lts(size_t num_states, size_t num_trans)
     case lts_none:
       break;
     case lts_aut:
+      aut.flush();
       aut.seekp(0);
       aut << "des (0," << num_trans << "," << num_states << ")";
       aut.close();

@@ -43,18 +43,6 @@ using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 
-lps2lts_algorithm lps2lts;
-
-void premature_termination_handler(int)
-{
-  // Reset signal handlers.
-  signal(SIGABRT,NULL);
-  signal(SIGINT,NULL);
-  signal(SIGTERM,NULL);
-  lps2lts.premature_termination_handler();
-  exit(1);
-}
-
 static atermpp::set < identifier_string > parse_action_list(const std::string& s)
 {
   atermpp::set < identifier_string > result;
@@ -114,10 +102,12 @@ typedef  rewriter_tool< input_output_tool > lps2lts_base;
 class lps2lts_tool : public lps2lts_base
 {
   private:
+    lps2lts_algorithm lps2lts;
     lts_generation_options options;
     std::string m_filename;
 
   public:
+    ~lps2lts_tool() { options.m_rewriter.reset(); }
     lps2lts_tool() :
       lps2lts_base("lps2lts",AUTHOR,
                    "generate an LTS from an LPS",
@@ -137,6 +127,11 @@ class lps2lts_tool : public lps2lts_base
     {
     }
 
+    void abort()
+    {
+      lps2lts.abort();
+    }
+
     bool run()
     {
       options.specification.load(m_filename);
@@ -147,10 +142,6 @@ class lps2lts_tool : public lps2lts_base
       {
         return false;
       }
-
-      signal(SIGABRT,premature_termination_handler);
-      signal(SIGINT,premature_termination_handler);
-      signal(SIGTERM,premature_termination_handler); // At ^C print a message.
 
       try
       {
@@ -371,7 +362,7 @@ class lps2lts_tool : public lps2lts_base
 
 class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 {
-  public:
+  public:    
     lps2lts_gui_tool()
     {
       std::vector<std::string> values;
@@ -415,9 +406,36 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
     }
 };
 
+lps2lts_tool *tool_instance;
+
+void premature_termination_handler(int)
+{
+  // Reset signal handlers.
+  signal(SIGABRT,NULL);
+  signal(SIGINT,NULL);
+  signal(SIGTERM,NULL);
+  tool_instance->abort();
+}
+
 int main(int argc, char** argv)
 {
+  int result;
   MCRL2_ATERMPP_INIT(argc, argv)
+  tool_instance = new lps2lts_gui_tool();
 
-  return lps2lts_gui_tool().execute(argc,argv);
+  signal(SIGABRT,premature_termination_handler);
+  signal(SIGINT,premature_termination_handler);
+  signal(SIGTERM,premature_termination_handler); // At ^C print a message.
+
+  try
+  { 
+    result = tool_instance->execute(argc, argv);
+  } 
+  catch (...)
+  {
+    delete tool_instance;
+    throw;
+  }
+  delete tool_instance;
+  return result;
 }

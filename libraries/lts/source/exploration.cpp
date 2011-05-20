@@ -750,7 +750,7 @@ bool lps2lts_algorithm::generate_lts()
     {
       NextStateGenerator *nsgen = NULL;
 
-      while ((current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
+      while (!must_abort && (current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermAppl Transition;
         state_t NewState;
@@ -764,7 +764,7 @@ bool lps2lts_algorithm::generate_lts()
           bool priority;
           ATermAppl tempTransition;
           ATerm tempNewState;
-          while (nsgen->next(&tempTransition,&tempNewState,&priority))
+          while (!must_abort && nsgen->next(&tempTransition,&tempNewState,&priority))
           {
             if (!priority)   // don't store confluent self loops
             {
@@ -819,7 +819,7 @@ bool lps2lts_algorithm::generate_lts()
     {
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator* nsgen = NULL;
-      while ((current_state < lgopts->max_states) && (current_state < num_states) && 
+      while (!must_abort && (current_state < lgopts->max_states) && (current_state < num_states) && 
                              (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermList tmp_trans = ATmakeList0();
@@ -832,7 +832,7 @@ bool lps2lts_algorithm::generate_lts()
         {
           nsgen = nstate->getNextStates(state,nsgen);
           bool priority;
-          while (nsgen->next(&Transition,&NewState,&priority))
+          while (!must_abort && nsgen->next(&Transition,&NewState,&priority))
           {
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
@@ -1002,7 +1002,7 @@ bool lps2lts_algorithm::generate_lts()
     {
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator* nsgen = NULL;
-      while ((current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
+      while (!must_abort && (current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermList tmp_trans = ATmakeList0();
         ATermList tmp_states = ATmakeList0();
@@ -1016,7 +1016,7 @@ bool lps2lts_algorithm::generate_lts()
           // state = ATindexedSetGetElem(states,current_state);
           nsgen = nstate->getNextStates(state,nsgen);
           bool priority;
-          while (nsgen->next(&Transition,&NewState,&priority))
+          while (!must_abort && nsgen->next(&Transition,&NewState,&priority))
           {
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
@@ -1203,7 +1203,7 @@ bool lps2lts_algorithm::generate_lts()
       // bithashing: S = { h | get_bithash(h) }, E = S \ "items left in queues"
       //
       // both:       |E| <= limit
-      while ((current_state < endoflevelat) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
+      while (!must_abort && (current_state < endoflevelat) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         if (lgopts->bithashing)
         {
@@ -1225,7 +1225,7 @@ bool lps2lts_algorithm::generate_lts()
           ATermAppl Transition;
           ATerm NewState;
           bool priority;
-          while (nsgen->next(&Transition,&NewState,&priority))
+          while (!must_abort && nsgen->next(&Transition,&NewState,&priority))
           {
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
@@ -1324,7 +1324,7 @@ bool lps2lts_algorithm::generate_lts()
       // trans_seen(s) := we have seen a transition from state s
       // inv:  forall i : 0 <= i < nsgens_num-1 : trans_seen(nsgens[i]->get_state())
       //       nsgens_num > 0  ->  top_trans_seen == trans_seen(nsgens[nsgens_num-1])
-      while ((nsgens_num > 0) && (! lgopts->trace || (tracecnt < lgopts->max_traces)))
+      while (!must_abort && (nsgens_num > 0) && (! lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         NextStateGenerator* nsgen = nsgens[nsgens_num-1];
         state = nsgen->get_state();

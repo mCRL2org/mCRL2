@@ -134,6 +134,7 @@ class lps2lts_algorithm
     size_t num_found_same;
     size_t current_state;
     size_t initial_state;
+    bool must_abort;
 
     atermpp::map<atermpp::aterm,atermpp::aterm> backpointers;
     bit_hash_table bithash_table;
@@ -169,16 +170,14 @@ class lps2lts_algorithm
     bool generate_lts();
     bool finalise_lts_generation();
 
-    void premature_termination_handler()
+    void abort()
     {
-      if (!premature_termination_handler_called)
+      // Stops the exploration algorithm if it is running by making sure
+      // not a single state can be generated anymore. 
+      if (!must_abort)
       {
-        premature_termination_handler_called = true;
+        must_abort = true;
         std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
-        if (initialised && !finalised)
-        {
-          finalise_lts_generation();
-        }
       }
     }
 
