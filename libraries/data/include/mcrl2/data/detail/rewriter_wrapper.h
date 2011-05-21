@@ -96,7 +96,7 @@ struct legacy_rewriter : public mcrl2::data::rewriter
       return m_rewriter->rewriteInternal((ATerm)(ATermAppl)t);
     }
   
-    atermpp::term_list <atermpp::aterm_appl> rewrite_internal(const atermpp::term_list<atermpp::aterm_appl> & t) const
+    atermpp::term_list <atermpp::aterm_appl> rewrite_internal_list(const atermpp::term_list<atermpp::aterm_appl> & t) const
     {
       return m_rewriter->rewriteInternalList(t);
     }

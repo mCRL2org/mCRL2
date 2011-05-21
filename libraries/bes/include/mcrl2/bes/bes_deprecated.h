@@ -133,7 +133,7 @@ static size_t largest_power_of_2_smaller_than(size_t i)
 static void assign_variables_in_tree(
   ATerm t,
   mcrl2::data::variable_list::iterator& var_iter,
-  mcrl2::pbes_system::detail::legacy_pbes_data_rewriter& rewriter,
+  mcrl2::data::detail::legacy_rewriter& rewriter,
   const bool opt_precompile_pbes)
 {
   if (is_pair(t))
@@ -145,11 +145,11 @@ static void assign_variables_in_tree(
   {
     if (opt_precompile_pbes)
     {
-      rewriter.setSubstitutionInternal(*var_iter,t);
+      rewriter.set_internally_associated_value(*var_iter,(atermpp::aterm_appl)t);
     }
     else
     {
-      rewriter.setSubstitution(*var_iter,(ATermAppl)t);
+      rewriter.set_internally_associated_value(*var_iter,(mcrl2::data::data_expression)t);
     }
     var_iter++;
   }
@@ -1135,7 +1135,7 @@ class boolean_equation_system
     std::vector < std::deque < counter_example> > data_to_construct_counter_example;
     bool construct_counter_example;
     atermpp::indexed_set variable_index;  //Used for constructing counter examples
-    mcrl2::pbes_system::detail::legacy_pbes_data_rewriter Mucks_rewriter;
+    mcrl2::data::detail::legacy_rewriter Mucks_rewriter;
     const bool opt_precompile_pbes;
     const bool internal_opt_store_as_tree;
 
@@ -1814,21 +1814,16 @@ class boolean_equation_system
         propositional_variable_instantiation propvar = p;
         core::identifier_string name = propvar.name();
         data::data_expression_list parameters;
-        if (opt_precompile_pbes)
+        data::data_expression_list current_parameters(propvar.parameters());
+        for (data::data_expression_list::const_iterator l=current_parameters.begin();
+             l != current_parameters.end(); ++l)
         {
-          data::data_expression_list current_parameters(propvar.parameters());
-          for (data::data_expression_list::const_iterator l=current_parameters.begin();
-               l != current_parameters.end(); ++l)
-          {
-            parameters = atermpp::push_front(parameters, data::data_expression(Mucks_rewriter.rewriteInternal(
-                                               Mucks_rewriter.toRewriteFormat(*l))));
-          }
-          parameters = atermpp::reverse(parameters);
+          parameters = atermpp::push_front(parameters, 
+                    ((opt_precompile_pbes?
+                           data::data_expression(Mucks_rewriter.rewrite_internal(Mucks_rewriter.convert_to(*l))):
+                           Mucks_rewriter(*l))));
         }
-        else
-        {
-          parameters=Mucks_rewriter.rewriteList(propvar.parameters());
-        }
+        parameters = atermpp::reverse(parameters);
         result = pbes_expression(propositional_variable_instantiation(name, parameters));
       }
       else
@@ -1837,7 +1832,7 @@ class boolean_equation_system
 
         if (opt_precompile_pbes)
         {
-          atermpp::aterm_appl d = Mucks_rewriter.rewriteInternal(Mucks_rewriter.toRewriteFormat(p));
+          atermpp::aterm_appl d = Mucks_rewriter.rewrite_internal(Mucks_rewriter.convert_to(p));
           if (d==Mucks_rewriter.internal_true)
           {
             result = pbes_expr::true_();
@@ -1853,7 +1848,7 @@ class boolean_equation_system
         }
         else
         {
-          data::data_expression d(Mucks_rewriter.rewrite(p));
+          data::data_expression d(Mucks_rewriter(p));
           if (d == data::sort_bool::true_())
           {
             result = pbes_expr::true_();
@@ -2024,7 +2019,7 @@ class boolean_equation_system
       if (opt_precompile_pbes)
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   pp(Mucks_rewriter.fromRewriteFormat((ATerm)(ATermAppl)p)) + "\n");
+                                   pp(Mucks_rewriter.convert_from((ATermAppl)p)) + "\n");
       }
       else
       {
@@ -2079,13 +2074,13 @@ class boolean_equation_system
       const function_symbol_vector constructors(pbes_spec.data().constructors());
       for (function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
       {
-        Mucks_rewriter.toRewriteFormat(*i);
+        Mucks_rewriter.convert_to(*i);
       }
 
       const function_symbol_vector mappings(pbes_spec.data().mappings());
       for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
       {
-        Mucks_rewriter.toRewriteFormat(*i);
+        Mucks_rewriter.convert_to(*i);
       }
 
       // Variables in which the result is stored
@@ -2256,11 +2251,11 @@ class boolean_equation_system
               assert(elist!=current_variable_instantiation.parameters().end());
               if (opt_precompile_pbes)
               {
-                Mucks_rewriter.setSubstitutionInternal(*vlist,(atermpp::aterm)*elist);
+                Mucks_rewriter.set_internally_associated_value(*vlist,(atermpp::aterm)*elist);
               }
               else
               {
-                Mucks_rewriter.setSubstitution(*vlist,*elist);
+                Mucks_rewriter.set_internally_associated_value(*vlist,*elist);
               }
 
               // sigma[*vlist]=*elist;
@@ -2294,7 +2289,7 @@ class boolean_equation_system
           for (variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
           {
-            Mucks_rewriter.clearSubstitution(*vlist);
+            Mucks_rewriter.clear_internally_associated_value(*vlist);
           }
 
 
@@ -2449,7 +2444,7 @@ class boolean_equation_system
       {
         if (opt_precompile_pbes)
         {
-          data_expression t1(Mucks_rewriter.fromRewriteFormat((ATerm)t));
+          data_expression t1(Mucks_rewriter.convert_from((ATerm)t));
           f << c << pp(t1);
         }
         else
@@ -2496,7 +2491,7 @@ class boolean_equation_system
           if (opt_precompile_pbes)
           {
             ATermAppl term=*t;
-            f << pp(Mucks_rewriter.fromRewriteFormat((ATerm)term));
+            f << pp(Mucks_rewriter.convert_from((ATerm)term));
           }
           else
           {

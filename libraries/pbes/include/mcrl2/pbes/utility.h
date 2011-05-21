@@ -20,6 +20,7 @@
 #include "mcrl2/data/sort_expression.h"
 
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
@@ -39,7 +40,7 @@ namespace detail
 // It is a generalisation of the standard rewriter with as only purpose
 // to make a number of internal functions usable.
 
-struct legacy_pbes_data_rewriter : public mcrl2::data::rewriter
+/* struct legacy_pbes_data_rewriter : public mcrl2::data::rewriter
 {
   atermpp::aterm_appl internal_true;
   atermpp::aterm_appl internal_false;
@@ -118,7 +119,7 @@ struct legacy_pbes_data_rewriter : public mcrl2::data::rewriter
   {
     return m_rewriter->clearSubstitution(Var);
   }
-};
+}; */
 
 struct compare_variableL
 {
@@ -283,7 +284,7 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 
 // The function below restores a saved substitution.
 static void restore_saved_substitution(const atermpp::map<data::variable,data::data_expression> &saved_substitutions,
-                                       legacy_pbes_data_rewriter& r,
+                                       data::detail::legacy_rewriter& r,
                                        const bool use_internal_rewrite_format)
 {
   for (atermpp::map<data::variable,data::data_expression>::const_iterator i=saved_substitutions.begin();
@@ -291,11 +292,11 @@ static void restore_saved_substitution(const atermpp::map<data::variable,data::d
   {
     if (use_internal_rewrite_format)
     {
-      r.setSubstitutionInternal((ATermAppl)i->first,(ATerm)(ATermAppl)i->second);
+      r.set_internally_associated_value(i->first,static_cast<atermpp::aterm_appl>(i->second));
     }
     else
     {
-      r.setSubstitution(i->first,i->second);
+      r.set_internally_associated_value(i->first,i->second);
     }
   }
 }
@@ -337,7 +338,7 @@ static void restore_saved_substitution(const atermpp::map<data::variable,data::d
 inline pbes_expression pbes_expression_substitute_and_rewrite(
   const pbes_expression& p,
   const data::data_specification& data,
-  legacy_pbes_data_rewriter& r,
+  data::detail::legacy_rewriter& r,
   const bool use_internal_rewrite_format)
 {
   using namespace pbes_system::pbes_expr;
@@ -442,12 +443,20 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       atermpp::map < data::variable, data::data_expression > saved_substitutions;
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
-        data::data_expression d((data::data_expression)r.rewriteInternal((atermpp::aterm)*i));
+        data::data_expression d;
+        if (use_internal_rewrite_format)
+        { 
+          d=data::data_expression(r.rewrite_internal((atermpp::aterm)*i));
+        }
+        else
+        {
+          d=data::data_expression(r(*i));
+        }
 
         if (*i!=d)
         {
           saved_substitutions[*i]=d;
-          r.clearSubstitution(*i);
+          r.clear_internally_associated_value(*i);
         }
       }
       pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
@@ -524,13 +533,13 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
 
-                  pbes_expression d((!function_arguments.empty())?
+                  const data::data_expression d((!function_arguments.empty())?
                                     static_cast<data::data_expression>(data::application(*rf, reverse(function_arguments))):
                                     static_cast<data::data_expression>(*rf));
                   // sigma[*i]=d;
-                  r.setSubstitution(*i,d);
+                  r.set_internally_associated_value(*i,d);
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format));
-                  r.clearSubstitution(*i);
+                  r.clear_internally_associated_value(*i);
                   // sigma[*i] = *i; // erase *i
                   if (is_pbes_false(rt)) /* the resulting expression is false, so we can terminate */
                   {
@@ -590,17 +599,24 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       atermpp::map < data::variable, data::data_expression > saved_substitutions;
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
-        // data::data_expression d(pbes_expression_substitute_and_rewrite(*i,data,r,use_internal_rewrite_format));
-        data::data_expression d((data::data_expression)r.rewriteInternal((atermpp::aterm)*i));
+        data::data_expression d;
+        if (use_internal_rewrite_format)
+        { 
+          d=data::data_expression(r.rewrite_internal((atermpp::aterm)*i));
+        }
+        else
+        {
+          d=data::data_expression(r(*i));
+        }
 
         if (*i!=d)
         {
           saved_substitutions[*i]=d;
-          r.clearSubstitution(*i);
+          r.clear_internally_associated_value(*i);
         }
       }
 
-      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r,use_internal_rewrite_format);
+      pbes_expression expr = pbes_expression_substitute_and_rewrite(arg(p), data, r, use_internal_rewrite_format);
 
       data::fresh_variable_generator<> variable_generator("internally_generated_variable_for_exists");
       variable_generator.add_identifiers(pbes_system::find_identifiers(expr));
@@ -670,14 +686,14 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);
                     function_arguments = atermpp::push_front(function_arguments, new_variable);
                   }
-                  pbes_expression d((!function_arguments.empty())?
+                  const data::data_expression d((!function_arguments.empty())?
                                     static_cast<data::data_expression>(data::application(*rf, reverse(function_arguments))):
                                     static_cast<data::data_expression>(*rf));
-                  r.setSubstitution(*i,d);
+                  r.set_internally_associated_value(*i,d);
                   // sigma[*i]=d;
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format));
                   // sigma[*i] = *i; // erase *i
-                  r.clearSubstitution(*i);
+                  r.clear_internally_associated_value(*i);
                   if (is_pbes_true(rt)) /* the resulting expression is true, so we can terminate */
                   {
                     restore_saved_substitution(saved_substitutions,r,use_internal_rewrite_format);
@@ -723,8 +739,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     data::data_expression_list parameters;
     if (use_internal_rewrite_format)
     {
-      atermpp::term_list< data::data_expression > expressions(r.rewriteInternalList(
-            atermpp::term_list< data::data_expression >(current_parameters.begin(), current_parameters.end())));
+      atermpp::term_list< data::data_expression > expressions(r.rewrite_internal_list(
+            atermpp::term_list< atermpp::aterm_appl >(current_parameters.begin(), current_parameters.end())));
       parameters=data::data_expression_list(expressions.begin(), expressions.end());
     }
     else
@@ -732,13 +748,9 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       for (data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
       {
-        parameters = atermpp::push_front(parameters, (data::data_expression)r.rewrite(*l));
+        parameters = atermpp::push_front(parameters, (data::data_expression)r(*l));
       }
       parameters = atermpp::reverse(parameters);
-
-      atermpp::term_list< data::data_expression > expressions(r.rewriteList(
-            atermpp::term_list< data::data_expression >(current_parameters.begin(), current_parameters.end())));
-      parameters=data::data_expression_list(expressions.begin(), expressions.end());
     }
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
   }
@@ -747,7 +759,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     // p is a data::data_expression
     if (use_internal_rewrite_format)
     {
-      data::data_expression d = (data::data_expression)r.rewriteInternal((atermpp::aterm)p);
+      data::data_expression d = (data::data_expression)r.rewrite_internal((atermpp::aterm)p);
       if (d==r.internal_true)
       {
         result = pbes_expr::true_();
@@ -763,7 +775,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     }
     else
     {
-      data::data_expression d(r.rewrite(p));
+      data::data_expression d(r(p));
       if (d == data::sort_bool::true_())
       {
         result = pbes_expr::true_();

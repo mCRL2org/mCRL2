@@ -867,7 +867,7 @@ ATermAppl NextStateGenerator::rewrActionArgs(ATermAppl act)
   {
     ATermAppl a = ATAgetFirst(l);
     const atermpp::term_list <atermpp::aterm_appl> l=ATLgetArgument(a,1);
-    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal(l)));
+    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal_list(l)));
     m = ATinsert(m,(ATerm) a);
   }
   m = ATreverse(m);

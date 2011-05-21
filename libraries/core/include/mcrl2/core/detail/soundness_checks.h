@@ -1502,7 +1502,7 @@ bool check_term_Binder(Term t)
   }
   if (!check_term_argument(a(2), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_Binder" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -1902,7 +1902,7 @@ bool check_term_StateYaledTimed(Term t)
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_YaledTimed" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2014,7 +2014,7 @@ bool check_term_LinearProcessSummand(Term t)
   }
   if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_ProcessSummand" << std::endl;
     return false;
   }
   if (!check_term_argument(a(2), check_rule_MultActOrDelta<atermpp::aterm>))
@@ -2719,7 +2719,7 @@ bool check_term_PropVarInst(Term t)
   }
   if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_PropVarInst" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -2934,7 +2934,7 @@ bool check_term_IdInit(Term t)
   }
   if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_IdInit" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3530,12 +3530,12 @@ bool check_term_DataAppl(Term t)
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_Appl1" << std::endl;
     return false;
   }
   if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 1))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_Appl2" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3603,7 +3603,7 @@ bool check_term_StateDelayTimed(Term t)
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_delay_time" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -3703,7 +3703,7 @@ bool check_term_AtTime(Term t)
   }
   if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_atTime" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4098,7 +4098,7 @@ bool check_term_IfThen(Term t)
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_if_then" << std::endl;
     return false;
   }
   if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
@@ -4176,7 +4176,7 @@ bool check_term_Action(Term t)
   }
   if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_act_Id" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4359,7 +4359,7 @@ bool check_term_DataVarIdInit(Term t)
   }
   if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_VarIdInit" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4398,7 +4398,7 @@ bool check_term_Process(Term t)
   }
   if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_Process" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4569,7 +4569,7 @@ bool check_term_StateVar(Term t)
   }
   if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_StateVar" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4608,7 +4608,7 @@ bool check_term_ActionRenameRule(Term t)
   }
   if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_ActionRenameRule" << std::endl;
     return false;
   }
   if (!check_term_argument(a(2), check_rule_ParamIdOrAction<atermpp::aterm>))
@@ -4696,7 +4696,7 @@ bool check_term_ActAt(Term t)
   }
   if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_ActAt" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4735,17 +4735,17 @@ bool check_term_DataEqn(Term t)
   }
   if (!check_term_argument(a(1), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_DataEqn1" << std::endl;
     return false;
   }
   if (!check_term_argument(a(2), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_DataEqn2" << std::endl;
     return false;
   }
   if (!check_term_argument(a(3), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_DataEqn3" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4896,7 +4896,7 @@ bool check_term_ParamId(Term t)
   }
   if (!check_list_argument(a(1), check_rule_DataExpr<atermpp::aterm>, 0))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_ParamId" << std::endl;
     return false;
   }
 #endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
@@ -4991,7 +4991,7 @@ bool check_term_IfThenElse(Term t)
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_IfThenElse" << std::endl;
     return false;
   }
   if (!check_term_argument(a(1), check_rule_ProcExpr<atermpp::aterm>))
@@ -5189,7 +5189,7 @@ bool check_term_Whr(Term t)
 #ifndef LPS_NO_RECURSIVE_SOUNDNESS_CHECKS
   if (!check_term_argument(a(0), check_rule_DataExpr<atermpp::aterm>))
   {
-    std::cerr << "check_rule_DataExpr" << std::endl;
+    std::cerr << "check_rule_DataExpr_Whr" << std::endl;
     return false;
   }
   if (!check_list_argument(a(1), check_rule_WhrDecl<atermpp::aterm>, 1))
