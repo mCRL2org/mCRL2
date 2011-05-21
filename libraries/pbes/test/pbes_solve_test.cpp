@@ -201,20 +201,35 @@ void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
 
 void test_all()
 {
+  std::cerr << "Test01\n";
   test_pbes_solve(test01, false);
+  std::cerr << "Test02\n";
   test_pbes_solve(test02, true);
+  std::cerr << "Test03\n";
   test_pbes_solve(test03, false);
+  std::cerr << "Test04\n";
   test_pbes_solve(test04, true);
+  std::cerr << "Test05\n";
   test_pbes_solve(test05, false);
+  std::cerr << "Test06\n";
   test_pbes_solve(test06, true);
+  std::cerr << "Test07\n";
   test_pbes_solve(test07, false);
+  std::cerr << "Test08\n";
   test_pbes_solve(test08, true);
+  std::cerr << "Test09\n";
   test_pbes_solve(test09, true);
+  std::cerr << "Test10\n";
   test_pbes_solve(test10, false);
+  std::cerr << "Test11\n";
   test_pbes_solve(test11, true);
+  std::cerr << "Test12\n";
   test_pbes_solve(test12, false);
+  std::cerr << "Test13\n";
   test_pbes_solve(test13, true);
-  test_pbes_solve(test14, true);
+  std::cerr << "Test14\n";
+  test_pbes_solve(test14, true); 
+  std::cerr << "Test15\n";
   test_pbes_solve(test15, false);
 }
 

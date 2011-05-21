@@ -41,10 +41,25 @@ namespace detail
 
 struct legacy_pbes_data_rewriter : public mcrl2::data::rewriter
 {
+  atermpp::aterm_appl internal_true;
+  atermpp::aterm_appl internal_false;
+  
   legacy_pbes_data_rewriter(mcrl2::data::rewriter& r):mcrl2::data::rewriter(r)
-  {}
+  {
+    using namespace mcrl2::data;
+    internal_true.protect();
+    internal_true=static_cast<atermpp::aterm_appl>(toRewriteFormat((ATermAppl)sort_bool::true_()));
+    internal_false.protect();
+    internal_false=static_cast<atermpp::aterm_appl>(toRewriteFormat((ATermAppl)sort_bool::false_()));
+  }
 
-  ATerm translate(const ATermAppl t) const
+  ~legacy_pbes_data_rewriter()
+  {
+    internal_true.unprotect();
+    internal_false.unprotect(); 
+  }
+
+  ATerm toRewriteFormat(const ATermAppl t) const
   {
     return m_rewriter->toRewriteFormat(mcrl2::data::rewriter::implement(mcrl2::data::data_expression(t)));
   }
@@ -118,37 +133,6 @@ struct compare_variableL
     return v == t;
   }
 };
-
-static mcrl2::data::data_expression initialize_internal_true(mcrl2::data::data_expression& t,legacy_pbes_data_rewriter& r)
-{
-  using namespace mcrl2::data;
-  t=(data_expression)r.translate(sort_bool::true_());
-  ATprotect((ATerm*)(&t));
-  return t;
-}
-
-static bool is_true_in_internal_rewrite_format(mcrl2::data::data_expression d, legacy_pbes_data_rewriter& rewriter)
-{
-  using namespace mcrl2::data;
-  static data_expression internal_true=initialize_internal_true(internal_true,rewriter);
-  return d==internal_true;
-}
-
-
-static mcrl2::data::data_expression initialize_internal_false(mcrl2::data::data_expression& t, legacy_pbes_data_rewriter& r)
-{
-  using namespace mcrl2::data;
-  t=(data_expression)r.translate(sort_bool::false_());
-  ATprotect((ATerm*)(&t));
-  return t;
-}
-
-static bool is_false_in_internal_rewrite_format(mcrl2::data::data_expression d, legacy_pbes_data_rewriter& rewriter)
-{
-  using namespace mcrl2::data;
-  static data_expression internal_false=initialize_internal_false(internal_false,rewriter);
-  return d==internal_false;
-}
 
 //  variable v occurs in l.
 
@@ -458,7 +442,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       atermpp::map < data::variable, data::data_expression > saved_substitutions;
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
-        data::data_expression d(pbes_expression_substitute_and_rewrite(*i,data,r,use_internal_rewrite_format));
+        data::data_expression d((data::data_expression)r.rewriteInternal((atermpp::aterm)*i));
 
         if (*i!=d)
         {
@@ -606,7 +590,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       atermpp::map < data::variable, data::data_expression > saved_substitutions;
       for (data::variable_list::const_iterator i=data_vars.begin(); i!=data_vars.end(); ++i)
       {
-        data::data_expression d(pbes_expression_substitute_and_rewrite(*i,data,r,use_internal_rewrite_format));
+        // data::data_expression d(pbes_expression_substitute_and_rewrite(*i,data,r,use_internal_rewrite_format));
+        data::data_expression d((data::data_expression)r.rewriteInternal((atermpp::aterm)*i));
 
         if (*i!=d)
         {
@@ -747,7 +732,6 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       for (data::data_expression_list::const_iterator l=current_parameters.begin();
            l != current_parameters.end(); ++l)
       {
-        // parameters = atermpp::push_front(parameters, r(*l,sigma));
         parameters = atermpp::push_front(parameters, (data::data_expression)r.rewrite(*l));
       }
       parameters = atermpp::reverse(parameters);
@@ -764,11 +748,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     if (use_internal_rewrite_format)
     {
       data::data_expression d = (data::data_expression)r.rewriteInternal((atermpp::aterm)p);
-      if (is_true_in_internal_rewrite_format(d,r))
+      if (d==r.internal_true)
       {
         result = pbes_expr::true_();
       }
-      else if (is_false_in_internal_rewrite_format(d,r))
+      else if (d==r.internal_false)
       {
         result = pbes_expr::false_();
       }
@@ -794,7 +778,6 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       }
     }
   }
-
   return result;
 }
 

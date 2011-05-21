@@ -1821,7 +1821,7 @@ class boolean_equation_system
                l != current_parameters.end(); ++l)
           {
             parameters = atermpp::push_front(parameters, data::data_expression(Mucks_rewriter.rewriteInternal(
-                                               Mucks_rewriter.translate(*l))));
+                                               Mucks_rewriter.toRewriteFormat(*l))));
           }
           parameters = atermpp::reverse(parameters);
         }
@@ -1837,12 +1837,12 @@ class boolean_equation_system
 
         if (opt_precompile_pbes)
         {
-          data::data_expression d = (data::data_expression)Mucks_rewriter.rewriteInternal(Mucks_rewriter.translate(p));
-          if (detail::is_true_in_internal_rewrite_format(d,Mucks_rewriter))
+          atermpp::aterm_appl d = Mucks_rewriter.rewriteInternal(Mucks_rewriter.toRewriteFormat(p));
+          if (d==Mucks_rewriter.internal_true)
           {
             result = pbes_expr::true_();
           }
-          else if (detail::is_false_in_internal_rewrite_format(d,Mucks_rewriter))
+          else if (d==Mucks_rewriter.internal_false)
           {
             result = pbes_expr::false_();
           }
@@ -1973,7 +1973,7 @@ class boolean_equation_system
           return and_(b1,b2);
         }
       }
-      else if (is_or(p))
+      else if (mcrl2::pbes_system::is_or(p))
       {
         bes_expression b1=add_propositional_variable_instantiations_to_indexed_set_and_translate(
                             accessors::left(p),variable_index,nr_of_generated_variables,to_bdd,strategy,
@@ -2079,13 +2079,13 @@ class boolean_equation_system
       const function_symbol_vector constructors(pbes_spec.data().constructors());
       for (function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
       {
-        Mucks_rewriter.translate(*i);
+        Mucks_rewriter.toRewriteFormat(*i);
       }
 
       const function_symbol_vector mappings(pbes_spec.data().mappings());
       for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
       {
-        Mucks_rewriter.translate(*i);
+        Mucks_rewriter.toRewriteFormat(*i);
       }
 
       // Variables in which the result is stored
