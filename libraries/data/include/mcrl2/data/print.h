@@ -48,7 +48,7 @@ namespace detail
 
 // This is here to make the std::list container work with the pp container overload.
 template < typename T >
-struct is_container_impl< std::list< T > >
+struct is_container_impl<std::list<T> >
 {
   typedef boost::true_type type;
 };
@@ -179,6 +179,38 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(closer);
   }
 
+  template <typename Container>
+  void print_sort_list(const Container& container,
+                       const std::string& opener = "(",
+                       const std::string& closer = ")",
+                       const std::string& separator = ", "
+                      )
+  {
+    if (container.empty())
+    {
+      return;
+    }
+    derived().print(opener);
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      bool print_brackets = is_function_sort(*i);
+      if (print_brackets)
+      {
+        derived().print("(");
+      }
+      derived()(*i);
+      if (print_brackets)
+      {
+        derived().print(")");
+      }
+    }
+    derived().print(closer);
+  }
+
   bool is_abstraction_application(const application& x) const
   {
     //std::cout << "\n<abstraction>" << pp(x) << " " << pp(x.head()) << " " << std::boolalpha << is_abstraction(x.head()) << std::endl;
@@ -247,7 +279,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            ;
   }
 
-  bool is_numeric_constant(const application& x)
+  bool is_numeric_value(const application& x)
   {
     return data::sort_pos::is_c1_function_symbol(x.head())
            || data::sort_nat::is_c0_function_symbol(x.head())
@@ -369,7 +401,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   
   void print_fbag_one(const data_expression& x)
   {
-//std::cout << "\n<fbag_one>" << core::pp(x) << " " << x << std::endl;
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
@@ -389,7 +420,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   
   void print_fbag_lambda(data_expression x)
   {
-//std::cout << "\n<fbag_lambda>" << core::pp(x) << " " << x << std::endl;
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front(); // the sort of the bag elements
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
@@ -410,7 +440,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   
   void print_fbag_default(data_expression x)
   {
-//std::cout << "\n<fbag_default>" << core::pp(x) << " " << x << std::endl;
     data_expression right = sort_set::right(x);
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
     core::identifier_string name = generate_identifier("x", x);
@@ -542,9 +571,31 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived()(x.second);
   }
 
+  // TODO: this code should be generated!
   void operator()(const data::container_type& x)
   {
-    // skip
+    static_cast<Derived&>(*this).enter(x);
+    if (data::is_list_container(x))
+    {
+      static_cast<Derived&>(*this)(data::list_container(atermpp::aterm_appl(x)));
+    }
+    else if (data::is_set_container(x))
+    {
+      static_cast<Derived&>(*this)(data::set_container(atermpp::aterm_appl(x)));
+    }
+    else if (data::is_bag_container(x))
+    {
+      static_cast<Derived&>(*this)(data::bag_container(atermpp::aterm_appl(x)));
+    }
+    else if (data::is_fset_container(x))
+    {
+      static_cast<Derived&>(*this)(data::fset_container(atermpp::aterm_appl(x)));
+    }
+    else if (data::is_fbag_container(x))
+    {
+      static_cast<Derived&>(*this)(data::fbag_container(atermpp::aterm_appl(x)));
+    }
+    static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const data::assignment& x)
@@ -628,6 +679,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().enter(x);
     derived()(x.name());
     derived().print(" = ");
+//std::cout << "<ref>" << core::pp(x.reference()) << " " << x.reference() << std::endl;    
     derived()(x.reference());
     derived().leave(x);
   }
@@ -635,30 +687,35 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::list_container& x)
   {
     derived().enter(x);
+    derived().print("List");
     derived().leave(x);
   }
 
   void operator()(const data::set_container& x)
   {
     derived().enter(x);
+    derived().print("Set");
     derived().leave(x);
   }
 
   void operator()(const data::bag_container& x)
   {
     derived().enter(x);
+    derived().print("Bag");
     derived().leave(x);
   }
 
   void operator()(const data::fset_container& x)
   {
     derived().enter(x);
+    derived().print("Set");
     derived().leave(x);
   }
 
   void operator()(const data::fbag_container& x)
   {
     derived().enter(x);
+    derived().print("Bag");
     derived().leave(x);
   }
 
@@ -673,7 +730,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(x.container_name());
+    derived().print("(");
     derived()(x.element_sort());
+    derived().print(")");
     derived().leave(x);
   }
 
@@ -687,7 +746,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::function_sort& x)
   {
     derived().enter(x);
-    print_list(x.domain(), "", " -> ", " # ");
+    print_sort_list(x.domain(), "", " -> ", " # ");
     derived()(x.codomain());
     derived().leave(x);
   }
@@ -748,13 +807,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void operator()(const data::application& x)
   {
+//std::cout << "<application>" << core::pp(x) << " " << x << std::endl;
     derived().enter(x);
 
     //-------------------------------------------------------------------//
     //                            numeric values
     //-------------------------------------------------------------------//
-    // TODO: should this be is_numeric_expression?
-    if (is_numeric_constant(x))
+    if (is_numeric_value(x))
     {
       data_expression y = detail::reconstruct_numeric_expression(x);
       if (is_function_symbol(y))
@@ -873,6 +932,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (sort_nat::is_exp_application(x))
       {
         print_container(x.arguments(), data::detail::precedence(x), " ^ ");
+      }
+      else if (sort_nat::is_cnat_application(x))
+      {
+        derived()(sort_nat::arg(x));
       }
       else
       {
@@ -1244,7 +1307,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     if (!sort_bool::is_true_function_symbol(x.condition()))
     {
       derived()(x.condition());
-      derived().print(" => ");
+      derived().print("  ->  ");
     }
     derived()(x.lhs());
     derived().print("  =  ");
@@ -1430,6 +1493,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     typename Container::const_iterator last = equations.end();
     while (first != last)
     {
+      if (first != equations.begin())
+      {
+        derived().print("\n");
+      }
       std::vector<variable> variables;
       typename Container::const_iterator i = find_conflicting_equation(first, last, variables);
       print_function_declarations(variables, "var  ", ";\n", ";\n     ");
