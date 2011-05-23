@@ -155,7 +155,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
       }
     }
 
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm_appl,arity+extra_arity);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATermAppl,arity+extra_arity);
     AFun fun = ATgetAFun((ATermAppl) t);
     size_t k = 1;
 
@@ -165,7 +165,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
       k = extra_arity+1;
       for (size_t i=1; i<k; i++)
       {
-        args[i] = head(i);
+        args[i] = (ATermAppl)(ATerm)head(i);
       }
       head = head(0);
     }
@@ -173,7 +173,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
     args[0] = head;
     for (size_t i=1; i<arity; i++,k++)
     {
-      args[k] = build_solution_aux_innerc(t(i),substituted_vars,exprs);
+      args[k] = (ATermAppl)build_solution_aux_innerc(t(i),substituted_vars,exprs);
     }
 
     atermpp::aterm_appl r = ATmakeApplArray(fun,(ATerm *)args);
