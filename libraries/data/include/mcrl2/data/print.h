@@ -156,6 +156,35 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
   }
 
+  // TODO: this additional function is introduced to handle expressions like (a && b) || (c && d)
+  // Can this be done in a cleaner way?
+  void print_container2(const application& x,
+                        int container_precedence = -1,
+                        const std::string& separator = ", ",
+                        const std::string& open_bracket = "(",
+                        const std::string& close_bracket = ")"
+                       )
+  {
+    data_expression_list container = x.arguments();
+    for (data_expression_list::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      bool print_brackets = (container.size() > 1) && (data::detail::precedence(*i) < container_precedence || (data::detail::precedence(*i) == container_precedence && x.head() != application(*i).head()));
+      if (print_brackets)
+      {
+        derived().print(open_bracket);
+      }
+      derived()(*i);
+      if (print_brackets)
+      {
+        derived().print(close_bracket);
+      }
+    }
+  }
+
   template <typename Container>
   void print_list(const Container& container,
                   const std::string& opener = "(",
@@ -865,11 +894,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_bool::is_and_application(x))
       {
-        print_container(x.arguments(), data::detail::precedence(x), " && ");
+        print_container2(x, data::detail::precedence(x), " && ");
       }
       else if (sort_bool::is_or_application(x))
       {
-        print_container(x.arguments(), data::detail::precedence(x), " || ");
+        print_container2(x, data::detail::precedence(x), " || ");
       }
       else if (sort_list::is_in_application(x))
       {
