@@ -14,11 +14,11 @@
 #endif
 #endif
 
-#include "_aterm.h"
-#include "afun.h"
-#include "memory.h"
-#include "util.h"
-#include "gc.h"
+#include "mcrl2/aterm/_aterm.h"
+#include "mcrl2/aterm/afun.h"
+#include "mcrl2/aterm/memory.h"
+#include "mcrl2/aterm/util.h"
+#include "mcrl2/aterm/gc.h"
 
 /*}}}  */
 

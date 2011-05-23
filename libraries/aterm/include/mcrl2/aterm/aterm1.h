@@ -62,9 +62,9 @@
 
 #include <cstdio>
 #include <cstdarg>
-#include "encoding.h"
-#include "atypes.h"
-#include "afun.h"
+#include "mcrl2/aterm/encoding.h"
+#include "mcrl2/aterm/atypes.h"
+#include "mcrl2/aterm/afun.h"
 
 namespace aterm
 {

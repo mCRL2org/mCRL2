@@ -2,10 +2,10 @@
 #include <stdlib.h>
 #include <stdexcept>
 
-#include "aterm1.h"
-#include "byteio.h"
-#include "util.h"
-#include "memory.h"
+#include "mcrl2/aterm/aterm1.h"
+#include "mcrl2/aterm/byteio.h"
+#include "mcrl2/aterm/util.h"
+#include "mcrl2/aterm/memory.h"
 
 namespace aterm
 {

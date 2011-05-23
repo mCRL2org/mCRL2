@@ -1,9 +1,9 @@
 #ifndef SAFIO_H
 #define SAFIO_H
 
-#include "aterm1.h"
-#include "aterm2.h"
-#include "idmappings.h"
+#include "mcrl2/aterm/aterm1.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/idmappings.h"
 
 namespace aterm
 {

@@ -1,4 +1,4 @@
-#include "byteencoding.h"
+#include "mcrl2/aterm/byteencoding.h"
 
 namespace aterm
 {

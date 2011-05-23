@@ -12,8 +12,8 @@
   */
 
 #include <unistd.h>
-#include "aterm1.h"
-#include "afun.h"
+#include "mcrl2/aterm/aterm1.h"
+#include "mcrl2/aterm/afun.h"
 
 /* The largest size_t is used as an indicator that an element does not exist.
    This is used as a replacement of a negative number as an indicator of non

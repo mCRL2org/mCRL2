@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
-#include "memory.h"
-#include "aterm2.h"
-#include "memory_utility.h"
+#include "mcrl2/aterm/memory.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/memory_utility.h"
 
 /*}}}  */
 

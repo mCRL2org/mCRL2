@@ -14,7 +14,7 @@
 
 #include <cstdarg>
 #include <cassert>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 namespace aterm
 {

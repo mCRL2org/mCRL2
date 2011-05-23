@@ -67,18 +67,12 @@ ShortHashNumber ADDR_TO_SHORT_HNR(const void* a)
 }
 #endif // AT_64BIT
 
-//#define ADDR_TO_SHORT_HNR(a) ((ShortHashNumber)(((((MachineWord)(a)) >> 2)&0xffffffff) ^ (((MachineWord)(a)) >> 34)))
-//#else
-//#define ADDR_TO_SHORT_HNR(a) (((ShortHashNumber)(a)) >> 2)
-//#endif /* AT_64BIT */
-
 inline
 HashNumber ADDR_TO_HNR(const void* a)
 {
   return ((HashNumber)(a)) >> 2;
 }
 
-//#define ADDR_TO_HNR(a) (((HashNumber)(a)) >> 2)
 
 } // namespace aterm
 

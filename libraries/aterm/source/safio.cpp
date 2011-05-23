@@ -2,11 +2,11 @@
 #include <stdlib.h>
 #include <assert.h>
 #include <stdexcept>
-#include "safio.h"
-#include "byteencoding.h"
-#include "memory.h"
-#include "encoding.h"
-#include "util.h"
+#include "mcrl2/aterm/safio.h"
+#include "mcrl2/aterm/byteencoding.h"
+#include "mcrl2/aterm/memory.h"
+#include "mcrl2/aterm/encoding.h"
+#include "mcrl2/aterm/util.h"
 
 namespace aterm
 {

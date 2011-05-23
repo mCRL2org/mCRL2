@@ -1,7 +1,8 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <assert.h>
-#include "idmappings.h"
+
+#include "mcrl2/aterm/idmappings.h"
 
 namespace aterm
 {

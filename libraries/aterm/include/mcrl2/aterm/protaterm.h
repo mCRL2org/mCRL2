@@ -2,7 +2,7 @@
 #define ATERM_IPROTECTEDATERM
 
 #include <set>
-#include "aterm1.h"
+#include "mcrl2/aterm/aterm1.h"
 
 namespace aterm
 {

@@ -3,8 +3,8 @@
 
 #include <string>
 #include <cstdio>
-#include "atypes.h"
-#include "encoding.h"
+#include "mcrl2/aterm/atypes.h"
+#include "mcrl2/aterm/encoding.h"
 
 
 namespace aterm

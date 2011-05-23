@@ -4,7 +4,7 @@
 
 #ifndef ENCODING_H
 #define ENCODING_H
-#include "atypes.h"
+#include "mcrl2/aterm/atypes.h"
 
 namespace aterm
 {

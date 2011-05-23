@@ -1,7 +1,7 @@
 #ifndef _ATERM_H
 #define _ATERM_H
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 namespace aterm
 {

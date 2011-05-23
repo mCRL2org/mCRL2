@@ -10,12 +10,12 @@
 #include <io.h>
 #endif
 
-#include "_aterm.h"
-#include "aterm2.h"
-#include "memory.h"
-#include "afun.h"
-#include "util.h"
-#include "byteio.h"
+#include "mcrl2/aterm/_aterm.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/memory.h"
+#include "mcrl2/aterm/afun.h"
+#include "mcrl2/aterm/util.h"
+#include "mcrl2/aterm/byteio.h"
 
 /*}}}  */
 

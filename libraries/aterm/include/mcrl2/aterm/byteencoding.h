@@ -1,7 +1,7 @@
 #ifndef BYTEENCODING_H_
 #define BYTEENCODING_H_
 
-#include "atypes.h"
+#include "mcrl2/aterm/atypes.h"
 
 namespace aterm
 {

@@ -1,7 +1,7 @@
-#ifndef HASHTABLE_H_
-#define HASHTABLE_H_
+#ifndef IDMAPPINGS_H_
+#define IDMAPPINGS_H_
 
-#include "atypes.h"
+#include "mcrl2/aterm/atypes.h"
 
 namespace aterm
 {

@@ -12,8 +12,8 @@
 #include <cmath>
 #include <cctype>
 
-#include "aterm_ext.h"
-#include "memory_utility.h"
+#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/aterm/memory_utility.h"
 
 namespace aterm
 {

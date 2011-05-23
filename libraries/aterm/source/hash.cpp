@@ -21,10 +21,10 @@
 #include <string.h>
 #include <limits.h>
 
-#include "aterm2.h"
-#include "_aterm.h"
-#include "util.h"
-#include "memory.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/_aterm.h"
+#include "mcrl2/aterm/util.h"
+#include "mcrl2/aterm/memory.h"
 
 
 /*}}}  */
