@@ -340,6 +340,8 @@ bool lps2lts_algorithm::savetrace(
     trace.setState(nstate->makeStateVector(ATgetFirst(e)));
   }
 
+  delete nsgen;
+
   try
   {
     trace.save(lgopts->generate_filename_for_trace(lgopts->trace_prefix, info, "trc"));
