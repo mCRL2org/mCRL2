@@ -498,6 +498,29 @@ void test_abp_no_deadlock()
   BOOST_CHECK(is_bes(q));
 }
 
+// Example supplied by Tim Willemse, 23-05-2011
+void test_functions()
+{
+  std::string text =
+    "sort D = struct one | two;           \n"
+    "                                     \n"
+    "map  f: D -> D;                      \n"
+    "                                     \n"
+    "eqn  f  =  lambda x: D. one;         \n"
+    "                                     \n"
+    "pbes nu X(d: D, g: D -> D) =         \n"
+    "       forall e: D. X(e, g[e -> e]); \n"
+    "                                     \n"
+    "init X(one, f);                      \n"
+    ;
+  pbes<> p = txt2pbes(text);
+  data::rewriter::strategy rewrite_strategy = data::rewriter::jitty;
+  unsigned int log_level = 2;
+  pbesinst_finite_algorithm algorithm(rewrite_strategy, log_level);
+  detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, "X(*:D)");
+  algorithm.run(p, parameter_map);                                                                             
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -505,6 +528,7 @@ int test_main(int argc, char** argv)
   test_pbesinst();
   test_pbesinst_finite();
   test_abp_no_deadlock();
+  test_functions();
 
 #ifdef MCRL2_EXTENDED_TESTS
   test_cabp();
