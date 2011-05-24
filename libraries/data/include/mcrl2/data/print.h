@@ -37,6 +37,7 @@
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/exception.h"
 
@@ -1513,6 +1514,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   template <typename Container>
   void print_equations(const Container& equations,
+                       const data_specification& data_spec,
                        const std::string& opener = "(",
                        const std::string& closer = ")",
                        const std::string& separator = ", "
@@ -1520,6 +1522,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     typename Container::const_iterator first = equations.begin();
     typename Container::const_iterator last = equations.end();
+      
+    Container normalized_equations = equations;
+    data::normalize_sorts(normalized_equations, data_spec);
+
     while (first != last)
     {
       if (first != equations.begin())
@@ -1529,7 +1535,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       std::vector<variable> variables;
       typename Container::const_iterator i = find_conflicting_equation(first, last, variables);
       print_function_declarations(variables, "var  ", ";\n", ";\n     ");
-      print_list(std::vector<data_equation>(first, i), opener, closer, separator);
+
+      // N.B. We print normalized equations instead of user defined equations.
+      // print_list(std::vector<data_equation>(first, i), opener, closer, separator);
+      typename Container::const_iterator first1 = normalized_equations.begin() + (first - equations.begin());
+      typename Container::const_iterator i1 = normalized_equations.begin() + (i - equations.begin());
+      print_list(std::vector<data_equation>(first1, i1), opener, closer, separator);
+
       first = i;
     }
   }
@@ -1540,7 +1552,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_sort_declarations(x.user_defined_aliases(), x.user_defined_sorts(), "sort ", ";\n\n", ";\n     ");
     print_function_declarations(x.user_defined_constructors(), "cons ",";\n\n", ";\n     ");
     print_function_declarations(x.user_defined_mappings(), "map  ",";\n\n", ";\n     ");
-    print_equations(x.user_defined_equations(), "eqn  ", ";\n", ";\n     ");   
+    print_equations(x.user_defined_equations(), x, "eqn  ", ";\n", ";\n     ");   
+
     derived().leave(x);
   }
 
