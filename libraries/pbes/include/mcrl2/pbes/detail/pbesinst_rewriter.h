@@ -78,13 +78,18 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
           propvar_name_current += "@";
           propvar_name_current += mcrl2::core::pp(*del_i);
         }
+        else if (is_abstraction(*del_i)) // case added by Wieger, 24-05-2011
+        {
+          propvar_name_current += "@";
+          propvar_name_current += mcrl2::core::pp(*del_i);
+        }
         // else if (data::is_variable(*del_i))
         // {
         //   throw mcrl2::runtime_error(std::string("Could not rename the variable ") + core::pp(v));
         // }
         else
         {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + core::pp(v));
+          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + core::pp(v) + " " + core::pp(*del_i) + " " + del_i->to_string());
         }
       }
     }
