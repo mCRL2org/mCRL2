@@ -1061,222 +1061,160 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
 
 ATerm RewriterJitty::internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat )
 {
-  // ATermInInnerFormat is an expression with a existential quantifier in internal format.
-  if (ATisAppl( ATermInInnerFormat ) )
+  /* Get Body of Exists */
+  ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
+  data_expression d(fromInner((ATermAppl) t1));
+
+  /* Get Sort for enumeration from Body*/
+  sort_expression_list fsdomain = function_sort( d.sort() ).domain();
+
+  data::fresh_variable_generator<> generator;
+  generator.add_identifiers(find_identifiers(d));
+  generator.set_hint("var");
+
+  /* Create for each of the sorts for enumeration a new variable*/
+  variable_vector vv;
+  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
   {
-    /* Convert internal rewrite number to ATerm representation*/
-    ATerm t = ATgetArgument(ATermInInnerFormat,0);
+    variable v(generator(*i));
+    vv.push_back( v );
+  }
 
-    /* Sanity check: Make sure that we have an internal number*/
-    if (ATisInt(t))
+  /* Create Enumerator */
+  EnumeratorStandard ES( m_data_specification, this );
+
+  /* Find A solution*/
+  const variable_list vl=atermpp::convert< variable_list >(vv);
+
+  EnumeratorSolutionsStandard sol(vl,
+      toRewriteFormat( application (d, atermpp::convert< data_expression_list >(vv) ) ),
+      true,&ES,100);
+
+  /* Create ATermList to store solutions */
+  atermpp::term_list<atermpp::aterm_appl> x;
+  bool has_exact_solution = false;
+  bool has_no_solution =true;
+  bool solution_possible=true;
+
+  size_t loop_upperbound=5;
+  while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
+  {
+    has_no_solution = false;
+    loop_upperbound--;
+  }
+
+  if (solution_possible)
+  {
+    if( has_exact_solution )
     {
-
-      ATermAppl a = int2term[ATgetInt((ATermInt) t)];
-
-      /* Check for exists quantifier */
-      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == exists_function_symbol() )
-      {
-        /* Get Body of Exists */
-        ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
-        data_expression d(fromInner((ATermAppl) t1));
-
-        /* Get Sort for enumeration from Body*/
-        if (is_function_sort(d.sort()))
-        {
-          function_sort fs = d.sort();
-          sort_expression_list fsdomain = fs.domain();
-
-          /* Create for each of the sorts for enumeration a new variable*/
-          variable_vector vv;
-
-          data::fresh_variable_generator<> generator;
-          generator.add_identifiers(find_identifiers(d));
-          generator.set_hint("var");
-
-          for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
-          {
-            variable v(generator(*i));
-            vv.push_back( v );
-          }
-
-          /* Create application from reconstructed variables and Body */
-          data_expression e_new_rw = application (d, atermpp::convert< data_expression_list >(vv) );
-
-          /* Convert to internal rewrite format, such that proper rewrite rules are added */
-          ATerm XX = toRewriteFormat( e_new_rw );
-
-          /* Add sorts if required (like Nat, Pos,...) */
-          std::set<mcrl2::data::sort_expression> sv = find_sort_expressions( e_new_rw );
-          m_data_specification.add_context_sorts( sv );
-          /* Create Enumerator */
-          EnumeratorStandard ES( m_data_specification, this );
-
-          /* Find A solution*/
-          // EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
-          const variable_list vl=atermpp::convert< variable_list >(vv);
-          EnumeratorSolutionsStandard sol(vl, XX, true,&ES,100);
-
-
-          /* Create ATermList to store solutions */
-          atermpp::term_list<atermpp::aterm_appl> x;
-//        bool has_solution = false;
-          bool has_exact_solution = false;
-          bool has_no_solution =true;
-          bool solution_possible=true;   
-
-          size_t loop_upperbound=5;
-          while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
-          {
-            has_no_solution = false;
-            loop_upperbound--;
-          }
-
-          if (solution_possible)
-          { 
-            if( has_exact_solution )
-            {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-              gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::true_() );
+      gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::true_() );
 #endif
-              return toRewriteFormat( mcrl2::data::sort_bool::true_() );
-            }
-            else if (has_no_solution)
-            {
+      return toRewriteFormat( mcrl2::data::sort_bool::true_() );
+    }
+    else if (has_no_solution)
+    {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-              gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::false_() );
+      gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::false_() );
 #endif
-              return toRewriteFormat( mcrl2::data::sort_bool::false_() );
-            }
-          }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-          gsMessage("  An existential quantifier could not be eliminated and remains unchanged.\n");
-#endif
-          return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
-        }
-
-        /* We should never reach this part of the code...*/
-        assert(false);
-
-      }
+      return toRewriteFormat( mcrl2::data::sort_bool::false_() );
     }
   }
-  return ATermInInnerFormat;
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+  gsMessage("  An existential quantifier could not be eliminated and remains unchanged.\n");
+#endif
+  return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
 }
 
 ATerm RewriterJitty::internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat )\
 {
-  /* Check for possible quantifiers
-   * Working on inner format
-   * */
-  if (ATisAppl( ATermInInnerFormat ) )
+  /* Get Body of forall */
+  ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
+  data_expression d(fromInner((ATermAppl) t1));
+
+  /* Get Sort for enumeration from Body*/
+  sort_expression_list fsdomain = function_sort(d.sort()).domain();
+
+  data::fresh_variable_generator<> generator;
+  generator.add_identifiers(find_identifiers(d));
+  generator.set_hint("var");
+
+  /* Create for each of the sorts for enumeration a new variable*/
+  variable_vector vv;
+  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
   {
-    /* Convert internal rewrite number to ATerm representation*/
-    ATerm t = ATgetArgument(ATermInInnerFormat,0);
+    variable v(generator(*i));
+    vv.push_back( v );
+  }
 
-    /* Sanity check: Make sure that we have an internal number*/
-    if (ATisInt(t))
+  /* Create Enumerator */
+  EnumeratorStandard ES( m_data_specification, this );
+
+  /* Find A solution*/
+  const variable_list vl=atermpp::convert< variable_list >(vv);
+  EnumeratorSolutionsStandard sol(vl,
+      toRewriteFormat(  application (d, atermpp::convert< data_expression_list >(vv) ) ),
+      false,&ES,100);
+
+  /* Create ATermList to store solutions */
+  atermpp::term_list<atermpp::aterm_appl> x;
+  bool has_exact_solution = false;
+  bool has_no_solution =true;
+  bool solution_possible=true;
+
+  size_t loop_upperbound=5;
+
+  while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
+  {
+    has_no_solution = false;
+    loop_upperbound--;
+  }
+
+  if (solution_possible)
+  {
+    if( has_exact_solution )
     {
-
-      ATermAppl a = int2term[ATgetInt((ATermInt) t)];
-
-      /* Check for forall quantifier */
-      if( is_function_symbol(data_expression(a)) && function_symbol(a).name() == forall_function_symbol() )
-      {
-
-        /* Get Body of forall */
-        ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
-        data_expression d(fromInner((ATermAppl) t1));
-
-
-        /* Get Sort for enumeration from Body*/
-        if(is_function_sort(d.sort()))
-        {
-          function_sort fs = d.sort();
-          sort_expression_list fsdomain = fs.domain();
-
-          /* Create for each of the sorts for enumeration a new variable*/
-          variable_vector vv;
-
-          data::fresh_variable_generator<> generator;
-          generator.add_identifiers(find_identifiers(d));
-          generator.set_hint("var");
-
-          for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
-          {
-            variable v(generator(*i));
-            vv.push_back( v );
-          }
-
-          /* Create application from reconstructed variables and Body */
-          data_expression e_new_rw = application (d, atermpp::convert< data_expression_list >(vv) );
-
-          /* Convert to internal rewrite format, such that proper rewrite rules are added */
-          ATerm XX = toRewriteFormat( e_new_rw );
-
-          /* Add sorts if required (like Nat, Pos,...) */
-          std::set<mcrl2::data::sort_expression> sv = find_sort_expressions( e_new_rw );
-          m_data_specification.add_context_sorts( sv );
-          /* Create Enumerator */
-          EnumeratorStandard ES( m_data_specification, this );
-
-          /* Find A solution*/
-          // EnumeratorSolutionsStandard* sol = ES.findSolutions( (ATermList) atermpp::convert< variable_list >(vv), XX, true );
-          const variable_list vl=atermpp::convert< variable_list >(vv);
-          EnumeratorSolutionsStandard sol(vl, XX, false,&ES,100);
-
-
-          /* Create ATermList to store solutions */
-          atermpp::term_list<atermpp::aterm_appl> x;
-          bool has_exact_solution = false;
-          bool has_no_solution =true;
-          bool solution_possible=true;
-          
-          size_t loop_upperbound=5;
-
-          while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
-          {
-            has_no_solution = false;
-            loop_upperbound--;
-          }
-
-          if (solution_possible)
-          {
-            if( has_exact_solution )
-            {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-              gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
+      gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
 #endif
-              return toRewriteFormat( mcrl2::data::sort_bool::false_() );
-            }
-            else if (has_no_solution)
-            {
+      return toRewriteFormat( mcrl2::data::sort_bool::false_() );
+    }
+    else if (has_no_solution)
+    {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-              gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
+      gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
 #endif
-              return toRewriteFormat( mcrl2::data::sort_bool::true_() );
-            }
-          }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-          gsMessage("  A universal quantifier could not be eliminated and remains unchanged.\n");
-#endif
-          return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
-        }
-
-        /* We should never reach this part of the code...*/
-        assert(false);
-
-      }
+      return toRewriteFormat( mcrl2::data::sort_bool::true_() );
     }
   }
-  return ATermInInnerFormat;
-
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+  gsMessage("  A universal quantifier could not be eliminated and remains unchanged.\n");
+#endif
+  return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
 }
 
 ATerm RewriterJitty::internal_quantifier_enumeration( ATerm ATermInInnerFormat )
 {
-  /* Post processing is only performed when necessary */
-  ATermInInnerFormat = internal_existential_quantifier_enumeration( ATermInInnerFormat );
-  ATermInInnerFormat = internal_universal_quantifier_enumeration( ATermInInnerFormat );
+  if (ATisAppl( ATermInInnerFormat ) )
+  {
+    /* Convert internal rewrite number to ATerm representation*/
+    ATermAppl a = int2term[ATgetInt((ATermInt) ATgetArgument(ATermInInnerFormat,0))];
+
+
+    if( is_function_symbol(a) )
+    {
+      /* Check for universal quantifier */
+      if(function_symbol(a).name() == forall_function_symbol())
+      {
+        ATermInInnerFormat = internal_universal_quantifier_enumeration( ATermInInnerFormat );
+      }
+      /* Check for existential quantifier */
+      if(function_symbol(a).name() == exists_function_symbol())
+      {
+        ATermInInnerFormat = internal_existential_quantifier_enumeration( ATermInInnerFormat );
+      }
+    }
+  }
   return ATermInInnerFormat;
 }
 
