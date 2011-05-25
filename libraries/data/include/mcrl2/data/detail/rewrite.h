@@ -14,7 +14,6 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/data_specification.h"
 
-
 #ifndef NO_DYNLOAD
 #define MCRL2_INNERC_AVAILABLE /** \brief If defined the compiling innermost
 rewriter is available */
@@ -246,9 +245,28 @@ class Rewriter
 
     virtual ATermAppl fromInner(ATermAppl Term);
 
+    ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
+    ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
+
   protected:
 
+    mcrl2::data::data_specification m_data_specification_for_enumeration;
+    ATerm internal_quantifier_enumeration( ATerm ATermInInnerFormat );
+
     ATermAppl* int2term;
+
+    core::identifier_string forall_function_symbol()
+    {
+      static core::identifier_string forall_function_symbol = initialise_static_expression(forall_function_symbol, core::identifier_string("forall"));
+      return forall_function_symbol;
+    }
+
+    core::identifier_string exists_function_symbol()
+    {
+      static core::identifier_string exists_function_symbol = initialise_static_expression(exists_function_symbol, core::identifier_string("exists"));
+      return exists_function_symbol;
+    }
+
 };
 
 /**

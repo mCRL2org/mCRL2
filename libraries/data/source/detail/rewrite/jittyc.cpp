@@ -3137,6 +3137,7 @@ RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpe
   subst_store = ATtableCreate(100,75);
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
+  m_data_specification_for_enumeration = DataSpec;
   initialise_common();
   CompileRewriteSystem(DataSpec,add_rewrite_rules);
 }
@@ -3173,7 +3174,6 @@ ATermAppl RewriterCompilingJitty::rewrite(ATermAppl Term)
   {
     BuildRewriteSystem();
   }
-
   return fromRewriteFormat((ATerm) so_rewr((ATermAppl) toRewriteFormat(Term)));
 }
 
@@ -3185,7 +3185,8 @@ ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
   }
 
   ATerm a = (ATerm) so_rewr((ATermAppl) Term);
-  return a;
+
+  return internal_quantifier_enumeration((ATerm) a);
 }
 
 void RewriterCompilingJitty::setSubstitutionInternal(ATermAppl Var, ATerm Expr)

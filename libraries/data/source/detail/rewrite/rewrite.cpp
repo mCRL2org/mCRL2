@@ -34,6 +34,9 @@ using namespace mcrl2::data::detail;
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/detail/enum/standard.h"
 
+#include "mcrl2/data/data_expression.h"
+
+
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
@@ -237,6 +240,166 @@ ATermAppl Rewriter::fromInner(ATermAppl Term )
   assert( false );
   return Term;
 }
+
+ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat )
+{
+      /* Get Body of Exists */
+      ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
+      data_expression d(fromRewriteFormat(t1));
+
+      /* Get Sort for enumeration from Body*/
+      sort_expression_list fsdomain = function_sort( d.sort() ).domain();
+
+      data::fresh_variable_generator<> generator;
+      generator.add_identifiers(find_identifiers(d));
+      generator.set_hint("var");
+
+      /* Create for each of the sorts for enumeration a new variable*/
+      variable_vector vv;
+      for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
+      {
+        variable v(generator(*i));
+        vv.push_back( v );
+      }
+
+      /* Create Enumerator */
+      EnumeratorStandard ES( m_data_specification_for_enumeration, this );
+
+      /* Find A solution*/
+      const variable_list vl=atermpp::convert< variable_list >(vv);
+
+      EnumeratorSolutionsStandard sol(vl,
+          toRewriteFormat( application (d, atermpp::convert< data_expression_list >(vv) ) ),
+          true,&ES,100);
+
+      /* Create ATermList to store solutions */
+      atermpp::term_list<atermpp::aterm_appl> x;
+      bool has_exact_solution = false;
+      bool has_no_solution =true;
+      bool solution_possible=true;
+
+      size_t loop_upperbound=5;
+      while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
+      {
+        has_no_solution = false;
+        loop_upperbound--;
+      }
+
+      if (solution_possible)
+      {
+        if( has_exact_solution )
+        {
+    #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+          gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::true_() );
+    #endif
+          return toRewriteFormat( mcrl2::data::sort_bool::true_() );
+        }
+        else if (has_no_solution)
+        {
+    #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+          gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::false_() );
+    #endif
+          return toRewriteFormat( mcrl2::data::sort_bool::false_() );
+        }
+      }
+    #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+      gsMessage("  An existential quantifier could not be eliminated and remains unchanged.\n");
+    #endif
+
+   return ATermInInnerFormat;
+}
+
+ATerm Rewriter::internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat )
+{
+  /* Get Body of forall */
+  ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
+  data_expression d(fromRewriteFormat( t1));
+
+  /* Get Sort for enumeration from Body*/
+  sort_expression_list fsdomain = function_sort(d.sort()).domain();
+
+  data::fresh_variable_generator<> generator;
+  generator.add_identifiers(find_identifiers(d));
+  generator.set_hint("var");
+
+  /* Create for each of the sorts for enumeration a new variable*/
+  variable_vector vv;
+  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
+  {
+    variable v(generator(*i));
+    vv.push_back( v );
+  }
+
+  /* Create Enumerator */
+  EnumeratorStandard ES( m_data_specification_for_enumeration, this );
+
+  /* Find A solution*/
+  const variable_list vl=atermpp::convert< variable_list >(vv);
+  EnumeratorSolutionsStandard sol(vl,
+      toRewriteFormat(  application (d, atermpp::convert< data_expression_list >(vv) ) ),
+      false,&ES,100);
+
+  /* Create ATermList to store solutions */
+  atermpp::term_list<atermpp::aterm_appl> x;
+  bool has_exact_solution = false;
+  bool has_no_solution =true;
+  bool solution_possible=true;
+
+  size_t loop_upperbound=5;
+
+  while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
+  {
+    has_no_solution = false;
+    loop_upperbound--;
+  }
+
+  if (solution_possible)
+  {
+    if( has_exact_solution )
+    {
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+      gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
+#endif
+      return toRewriteFormat( mcrl2::data::sort_bool::false_() );
+    }
+    else if (has_no_solution)
+    {
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+      gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
+#endif
+      return toRewriteFormat( mcrl2::data::sort_bool::true_() );
+    }
+  }
+#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+  gsMessage("  A universal quantifier could not be eliminated and remains unchanged.\n");
+#endif
+  return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
+}
+
+ATerm Rewriter::internal_quantifier_enumeration( ATerm ATermInInnerFormat )
+{
+  if (ATisAppl( ATermInInnerFormat ) )
+  {
+    /* Convert internal rewrite number to ATerm representation*/
+    ATermAppl a = int2term[ATgetInt((ATermInt) ATgetArgument(ATermInInnerFormat,0))];
+
+    if( is_function_symbol(a) )
+    {
+      /* Check for universal quantifier */
+      if(function_symbol(a).name() == forall_function_symbol())
+      {
+        ATermInInnerFormat = internal_universal_quantifier_enumeration( ATermInInnerFormat );
+      }
+      /* Check for existential quantifier */
+      if(function_symbol(a).name() == exists_function_symbol())
+      {
+        ATermInInnerFormat = internal_existential_quantifier_enumeration( ATermInInnerFormat );
+      }
+    }
+  }
+  return ATermInInnerFormat;
+}
+
 
 Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrategy Strategy, const bool add_rewrite_rules)
 {
