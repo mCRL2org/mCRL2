@@ -40,6 +40,7 @@ class next_state_generator
     specification m_specification;
     data::rewriter::strategy m_rewriter_strategy;
     mcrl2::data::detail::legacy_rewriter m_rewriter;
+    NextState* m_NextState;
     
   public:
     /// \brief A type that represents a transition to a 'next' state.
@@ -93,7 +94,7 @@ class next_state_generator
       >
     {
       protected:
-        boost::shared_ptr<NextState> m_next_state;
+        NextState* m_next_state;
         boost::shared_ptr<NextStateGenerator> m_generator;
         state_type m_state;
 
@@ -103,53 +104,33 @@ class next_state_generator
         {}
 
         /// \brief Constructor.
-        iterator(const specification& lps_spec,
-                 mcrl2::data::detail::legacy_rewriter &rewriter
-                )
-          // : m_next_state(createNextState(lps_spec, enumerator, false)),
-          : m_next_state(createNextState(lps_spec, rewriter, false)),
+        iterator(NextState* next)
+          : m_next_state(next),
             m_generator(m_next_state->getNextStates(m_next_state->getInitialState())),
             m_state(0, m_next_state->getInitialState())
-        {
-          if (!lps_spec.process().deadlock_summands().empty())
-          {
-            throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
-          }
-        }
+        { }
 
         /// \brief Constructor.
-        iterator(const specification& lps_spec,
-                 mcrl2::data::detail::legacy_rewriter &rewriter,
-                 const atermpp::aterm& state
-                )
-          : m_next_state(createNextState(lps_spec, rewriter, false)),
+        iterator(NextState* next, const atermpp::aterm& state)
+          : m_next_state(next),
             m_generator(m_next_state->getNextStates(state))
         {
           m_state.state = state;
         }
 
         /// \brief Constructor.
-        iterator(const specification& lps_spec,
-                 mcrl2::data::detail::legacy_rewriter &rewriter,
-                 size_t summand_index
-                )
-          : m_next_state(createNextState(lps_spec, rewriter, false)),
+        iterator(NextState* next, size_t summand_index)
+          : m_next_state(next),
             m_generator(m_next_state->getNextStates(m_next_state->getInitialState(), summand_index)),
             m_state(0, m_next_state->getInitialState())
-        {
-          if (!lps_spec.process().deadlock_summands().empty())
-          {
-            throw mcrl2::runtime_error("can not generate next states for a process containing deadlock summands");
-          }
-        }
+        { }
 
         /// \brief Constructor.
-        iterator(const specification& lps_spec,
-                 mcrl2::data::detail::legacy_rewriter &rewriter,
+        iterator(NextState* next,
                  const atermpp::aterm& state,
                  size_t summand_index
                 )
-          : m_next_state(createNextState(lps_spec, rewriter, false)),
+          : m_next_state(next),
             m_generator(m_next_state->getNextStates(state, summand_index))
         {
           m_state.state = state;
@@ -157,7 +138,7 @@ class next_state_generator
 
         operator bool() const
         {
-          return m_next_state.get() != 0;
+          return m_next_state != 0;
         }
 
       private:
@@ -184,7 +165,7 @@ class next_state_generator
           if (!m_generator->next(&m_state.transition, &m_state.state))
           {
             // empty m_next_state, to signal that there is no next state
-            m_next_state.reset();
+            m_next_state = 0;
           }
         }
     };
@@ -197,6 +178,7 @@ class next_state_generator
       m_specification.process().deadlock_summands().clear();
       lps::detail::instantiate_global_variables(m_specification);
       m_rewriter = mcrl2::data::detail::legacy_rewriter(m_specification.data(), data::used_data_equation_selector(m_specification.data(), lps::find_function_symbols(m_specification), m_specification.global_variables()), m_rewriter_strategy);
+      m_NextState = createNextState(m_specification, m_rewriter, false);
     }
 
     /// \brief Constructor
@@ -219,6 +201,7 @@ class next_state_generator
     {
       m_specification.process().deadlock_summands().clear();
       lps::detail::instantiate_global_variables(m_specification);
+      m_NextState = createNextState(m_specification, m_rewriter, false);
 #ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
 std::clog << "--- rewrite rule selection specification ---\n";
 std::clog << lps::pp(lps_spec) << std::endl;
@@ -230,13 +213,13 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     /// \brief Returns an iterator for generating the successors of the initial state.
     iterator begin()
     {
-      return iterator(m_specification, m_rewriter);
+      return iterator(m_NextState);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
     iterator begin(const atermpp::aterm& state)
     {
-      return iterator(m_specification, m_rewriter, state);
+      return iterator(m_NextState, state);
     }
 
     /// \brief Returns an iterator for generating the successors of the initial state.
@@ -244,7 +227,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     /// generated.
     iterator begin(size_t summand_index)
     {
-      return iterator(m_specification, m_rewriter, summand_index);
+      return iterator(m_NextState, summand_index);
     }
 
     /// \brief Returns an iterator for generating the successors of the given state.
@@ -252,17 +235,13 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     /// generated.
     iterator begin(const atermpp::aterm& state, size_t summand_index)
     {
-      return iterator(m_specification, m_rewriter, state, summand_index);
+      return iterator(m_NextState, state, summand_index);
     }
 
     /// \brief Returns the initial state of the specification.
     atermpp::aterm initial_state() const
     {
-      // NextState* nstate = createNextState(m_specification, m_enumerator, false);
-      NextState* nstate = createNextState(m_specification, m_rewriter, false);
-      atermpp::aterm result = nstate->getInitialState();
-      delete nstate;
-      return result;
+      return  m_NextState->getInitialState();
     }
 
     /// \brief Returns the i-th component of the state s.
