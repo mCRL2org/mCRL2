@@ -31,13 +31,14 @@
 #include "mcrl2/utilities/wx_tool.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-void xsim_message_handler(mcrl2::core::messageType msg_type, const char* msg);
+void xsim_message_handler(mcrl2_message_t msg_type, const char* msg);
 
 //------------------------------------------------------------------------------
 // XSim
@@ -96,7 +97,7 @@ class XSim: public wx::tool< XSim, rewriter_tool< input_tool > >
 
 XSim* XSim::instance = NULL;
 
-void xsim_message_handler(mcrl2::core::messageType msg_type, const char* msg)
+void xsim_message_handler(mcrl2_message_t msg_type, const char* msg)
 {
   using namespace ::mcrl2::utilities;
   using namespace mcrl2::core;
@@ -115,17 +116,17 @@ void xsim_message_handler(mcrl2::core::messageType msg_type, const char* msg)
     wxString wx_msg(msg,wxConvLocal, msg_end - msg);
     switch (msg_type)
     {
-      case gs_warning:
+      case mcrl2_warning:
       {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 warning"),wxOK|wxICON_EXCLAMATION).ShowModal();
       }
       break;
-      case gs_error:
+      case mcrl2_error:
       {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 error"),wxOK|wxICON_ERROR).ShowModal();
       }
       break;
-      case gs_notice:
+      case mcrl2_notice:
       default:
       {
         wxMessageDialog(NULL,wx_msg,wxT("mCRL2 notice"),wxOK|wxICON_INFORMATION).ShowModal();

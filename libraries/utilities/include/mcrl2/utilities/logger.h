@@ -1,5 +1,15 @@
-#ifndef MCRL_UTILITIES_LOGGER_H
-#define MCRL_UTILITIES_LOGGER_H
+// Author(s): Jeroen Keiren
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file logger.h
+
+#ifndef MCRL2_UTILITIES_LOGGER_H
+#define MCRL2_UTILITIES_LOGGER_H
 
 #include <cstdio>
 #include <ctime>
@@ -28,8 +38,23 @@ enum mcrl2_log_level_t
   log_debug5
 };
 
+/// \brief Type for message distinction (by purpose).
+/// Should only be used for custom message handlers.
+enum mcrl2_message_t
+{
+  mcrl2_notice,
+  mcrl2_warning,
+  mcrl2_error
+};
+
 /// \prototype
 std::string now_time();
+
+/// \brief Type for function pointer for a custom message printing routine
+/// \deprecated
+/// provided for backward compatibility with gs*Msg
+typedef void (*custom_message_handler_t)(mcrl2_message_t, const char*);
+static custom_message_handler_t mcrl2_custom_message_handler = 0; //< Do not access directly
 
 /// \brief Class for logging messages
 ///
@@ -90,17 +115,36 @@ class logger
 
     /// \brief Convert log level to string
     /// This string is used to prefix messages in the logging output.
-    std::string to_string(mcrl2_log_level_t level) const
+    std::string to_string(const mcrl2_log_level_t level) const
     {
-      //static const char* const buffer[] = {"error", "warning", "info", "detailed info", "debug", "debug1", "debug2", "debug3", "debug4", "debug5"};
-      static const char* const buffer[] = {"error", "warning", "info", "info", "debug", "debug", "debug", "debug", "debug", "debug"};
+      static const char* const buffer[] = {"quiet", "error", "warning", "info", "verbose", "debug", "debug", "debug", "debug", "debug", "debug"};
       return buffer[level];
+    }
+
+    mcrl2_message_t to_message_type(const mcrl2_log_level_t level) const
+    {
+      if (level <= log_error)
+      {
+        return mcrl2_error;
+      }
+      else if (level <= log_warning)
+      {
+        return mcrl2_warning;
+      }
+      else
+      {
+        return mcrl2_notice;
+      }
     }
 
     /// \brief Convert string to log level
     mcrl2_log_level_t from_string(std::string s) const
     {
-      if (s == "error")
+      if (s == "quiet")
+      {
+        return log_quiet;
+      }
+      else if (s == "error")
       {
         return log_error;
       }
@@ -158,7 +202,7 @@ class logger
       }
       else
       {
-        return log_warning;
+        return log_info;
       }
     }
 
@@ -215,8 +259,12 @@ class logger
     /// logging mechanism. Requires that output performs output in an atomic way.
     ~logger()
     {
-      std::string s(m_os.str());
+      // With custom message handler, still log to the default location
       OutputPolicy::output(process(m_os.str()), m_hint);
+      if(mcrl2_custom_message_handler != 0)
+      {
+        (*(mcrl2_custom_message_handler))(to_message_type(m_level), process(m_os.str()).c_str());
+      }
     }
 
     /// \brief Set reporting level
@@ -277,6 +325,12 @@ class logger
       m_level = l;
       m_hint = hint;
       return m_os;
+    }
+
+    static
+    void set_custom_message_handler(custom_message_handler_t handler)
+    {
+      mcrl2_custom_message_handler = handler;
     }
 };
 

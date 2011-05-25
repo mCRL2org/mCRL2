@@ -44,7 +44,7 @@ void gsSetNormalMsg(void)
   gsWarning = true;
   gsVerbose = false;
   gsDebug   = false;
-  mcrl2_logger::set_reporting_level(log_warning);
+  mcrl2_logger::set_reporting_level(log_info);
 }
 
 void gsSetVerboseMsg(void)
@@ -65,49 +65,6 @@ void gsSetDebugMsg(void)
   gsVerbose = true;
   gsDebug   = true;
   mcrl2_logger::set_reporting_level(log_debug);
-}
-
-// Function pointer for a custom message printing routine
-void (*custom_message_handler)(messageType, const char*) = 0;
-
-// Sets custom_message_handler a custom message printing routine
-void gsSetCustomMessageHandler(void (*h)(messageType, const char*))
-{
-  custom_message_handler = h;
-}
-
-// Helper function (wrapper around gsvfprintf) for printing to string
-static void handler_wrapper(messageType t, const char* Format, va_list args)
-{
-
-  FILE* stream = tmpfile();
-
-  assert(stream);
-
-  gsvfprintf(stream, Format, args);
-
-  size_t n = ftell(stream);
-
-  fflush(stream);
-  rewind(stream);
-
-  char* output  = (char*) malloc((n + 1) * sizeof(char));
-  char* current = output;
-
-  while (0 < n--)
-  {
-    *current = (char) fgetc(stream);
-
-    ++current;
-  }
-
-  *current = '\0';
-
-  fclose(stream);
-
-  custom_message_handler(t, output);
-
-  free(output);
 }
 
 // Helper function (wrapper around gsvfprintf) for printing to string
@@ -157,14 +114,7 @@ void gsMessage(const char* Format, ...)
 {
   va_list Args;
   va_start(Args, Format);
-  if (custom_message_handler)
-  {
-    handler_wrapper(gs_notice, Format, Args);
-  }
-  else
-  {
-    logger_wrapper(log_info, Format, Args);
-  }
+  logger_wrapper(log_info, Format, Args);
   va_end(Args);
 }
 
@@ -174,14 +124,7 @@ void gsErrorMsg(const char* Format, ...)
 {
   va_list Args;
   va_start(Args, Format);
-  if (custom_message_handler)
-  {
-    handler_wrapper(gs_error, Format, Args);
-  }
-  else
-  {
-    logger_wrapper(log_error, Format, Args);
-  }
+  logger_wrapper(log_error, Format, Args);
   va_end(Args);
 }
 
@@ -192,14 +135,7 @@ void gsWarningMsg(const char* Format, ...)
 {
   va_list Args;
   va_start(Args, Format);
-  if (custom_message_handler)
-  {
-    handler_wrapper(gs_warning, Format, Args);
-  }
-  else
-  {
-    logger_wrapper(log_warning, Format, Args);
-  }
+  logger_wrapper(log_warning, Format, Args);
   va_end(Args);
 }
 
@@ -210,14 +146,7 @@ void gsVerboseMsg(const char* Format, ...)
 {
   va_list Args;
   va_start(Args, Format);
-  if (custom_message_handler)
-  {
-    handler_wrapper(gs_notice, Format, Args);
-  }
-  else
-  {
-    logger_wrapper(log_info, Format, Args);
-  }
+  logger_wrapper(log_verbose, Format, Args);
   va_end(Args);
 }
 
@@ -225,6 +154,7 @@ void gsVerboseMsg(const char* Format, ...)
   if (log_debug <= mcrl2_logger::get_reporting_level()) { \
     va_list Args; \
     va_start(Args, Format); \
+    mCRL2log(debug) << FuncName << " "; \
     logger_wrapper(log_debug, Format, Args); \
     va_end(Args); \
   }

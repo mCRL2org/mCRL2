@@ -61,9 +61,6 @@ extern bool gsVerbose;
 /// information during program execution is enabled.
 extern bool gsDebug;
 
-/// \brief Type for message distinction (by purpose).
-enum messageType {gs_notice, gs_warning, gs_error};
-
 /// \brief Function for printing regular messages  .
 void gsMessage(const char* Format, ...);
 /// \brief Function for printing error messages.
@@ -79,9 +76,6 @@ void gsDebugMsgFunc(const char* FuncName, const char* Format, ...);
 
 /// \brief Function for printing debug messages.
 #define gsDebugMsg(...)        gsDebugMsgFunc(BOOST_CURRENT_FUNCTION, __VA_ARGS__)
-
-/// \brief Replaces message_handler by the function pointer passed as argument.
-void gsSetCustomMessageHandler(void (*)(messageType, const char*));
 
 }
 }
