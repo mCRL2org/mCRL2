@@ -17,6 +17,8 @@ add_definitions(-DWITH_MCRL2)
 add_library(mcrl2_${PROJECT_NAME}
   compatibility.cpp
   ComponentSolver.cpp
+  DecycleSolver.cpp
+  DeloopSolver.cpp
   FocusListLiftingStrategy.cpp
   Graph.cpp
   LiftingStrategy.cpp

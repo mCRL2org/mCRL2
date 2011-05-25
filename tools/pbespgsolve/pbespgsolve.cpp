@@ -60,6 +60,10 @@ class pg_solver_tool : public input_tool
       {
         return spm_solver;
       }
+      else if (s == "altspm")
+      {
+        return alternative_spm_solver;
+      }
       else if (s == "recursive")
       {
         return recursive_solver;
@@ -73,10 +77,13 @@ class pg_solver_tool : public input_tool
       desc.add_option("solver-type",
                       make_optional_argument("NAME", "spm"),
                       "Use the solver type NAME:\n"
-                      "  'spm' (default), or\n"
+                      "  'spm' (default),\n"
+                      "  'altspm', or\n"
                       "  'recursive'",
                       's');
       desc.add_option("scc", "Use scc decomposition", 'c');
+      desc.add_option("loop", "Eliminate self-loops", 'L');
+      desc.add_option("cycle", "Eliminate cycles", 'C');
       desc.add_option("verify", "Verify the solution", 'e');
       desc.add_hidden_option("equation_limit",
                              make_optional_argument("NAME", "-1"),
@@ -89,6 +96,8 @@ class pg_solver_tool : public input_tool
       super::parse_options(parser);
       m_options.solver_type = parse_solver_type(parser.option_argument("solver-type"));
       m_options.use_scc_decomposition = (parser.options.count("scc") > 0);
+      m_options.use_deloop_solver = (parser.options.count("loop") > 0);
+      m_options.use_decycle_solver = (parser.options.count("cycle") > 0);
       m_options.verify_solution = (parser.options.count("verify") > 0);
       if (parser.options.count("equation_limit") > 0)
       {
@@ -117,6 +126,8 @@ class pg_solver_tool : public input_tool
         std::clog << "pbespgsolve parameters:" << std::endl;
         std::clog << "  input file:        " << input_filename() << std::endl;
         std::clog << "  solver type:       " << print(m_options.solver_type) << std::endl;
+        std::clog << "  eliminate self-loops: " << (m_options.use_deloop_solver?"yes":"no") << std::endl;
+        std::clog << "  eliminate cycles:  " << (m_options.use_decycle_solver?"yes":"no") << std::endl;
         std::clog << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
         std::clog << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
       }
