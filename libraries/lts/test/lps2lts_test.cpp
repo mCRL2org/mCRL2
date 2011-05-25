@@ -88,7 +88,7 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   options.expl_strat = strategy;
   options.stateformat = format;
 
-  options.lts = temporary_filename("lps2lts_test");
+  options.lts = temporary_filename("lps2lts_test_file");
 
   LTS_TYPE result;
   options.outformat = result.type();
@@ -102,7 +102,6 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   core::garbage_collect();
 
   result.load(options.lts);
-
   boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
 
   return result;

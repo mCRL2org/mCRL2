@@ -152,9 +152,20 @@ class lps2lts_algorithm
       premature_termination_handler_called(false),
       finalised(false),
       completely_generated(false),
+      nstate(NULL),
       states(0,0), //Table of size 0 initially
+      num_states(0),
+      trans(0),
+      level(0),
+      num_found_same(0),
+      current_state(0),
+      initial_state(0),
+      must_abort(false),
       bithash_table(),
-      lg_error(false)
+      tracecnt(0),
+      lg_error(false),
+      apply_confluence_reduction(false),
+      repr_nsgen(NULL)
     {
     }
 
