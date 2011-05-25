@@ -26,7 +26,7 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_list;
 
-void quantifier_expression_test()
+void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
 {
   data_specification specification;
   specification = parse_data_specification(
@@ -37,7 +37,7 @@ void quantifier_expression_test()
   specification.add_context_sort(sort_nat::nat());
   specification.add_context_sort(sort_set::set_(sort_nat::nat()));
 
-  rewriter r(specification);
+  rewriter r(specification, s);
 
   /* Test 1*/
   data_expression t1d1 = parse_data_expression("exists x: Bool. x == false");
@@ -75,8 +75,21 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
-  quantifier_expression_test();
+  std::cout << "jitty" << std::endl;
+  quantifier_expression_test(mcrl2::data::rewriter::jitty);
   core::garbage_collect();
+
+//#ifdef MCRL2_INNERC_AVAILABLE
+//  std::cout << "innermost_compiling" << std::endl;
+//  quantifier_expression_test(mcrl2::data::rewriter::innermost_compiling);
+//  core::garbage_collect();
+//#endif
+//
+//#ifdef MCRL2_JITTYC_AVAILABLE
+//  std::cout << "jitty_compiling" << std::endl;
+//  quantifier_expression_test(mcrl2::data::rewriter::jitty_compiling);
+//  core::garbage_collect();
+//#endif
 
   return EXIT_SUCCESS;
 }

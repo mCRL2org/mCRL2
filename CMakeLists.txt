@@ -1132,8 +1132,8 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/list.mcrl2"				 "")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/funccomp.mcrl2"		 "lpsparunfold") # rinner + lpsconfcheck, lpsinvelm = SEGFAULT
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/struct.mcrl2"			 "lpsparunfold") #Lps has no process parameters
- #run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/forall.mcrl2"			 "lpsparunfold") #Lps has no process parameters
- #run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/exists.mcrl2"			 "lpsparunfold") #Lps has no process parameters
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/forall.mcrl2"			 "lpsparunfold") #Lps has no process parameters
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/exists.mcrl2"			 "lpsparunfold") #Lps has no process parameters
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small3.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2"				 "lts2lps")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2"				 "lpsparunfold")
