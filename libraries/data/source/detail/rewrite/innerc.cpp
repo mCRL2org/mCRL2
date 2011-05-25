@@ -2461,6 +2461,7 @@ RewriterCompilingInnermost::RewriterCompilingInnermost(const data_specification&
   term2int = ATtableCreate(100,75);
   subst_store = ATtableCreate(100,75);
   so_rewr_cleanup = NULL;
+  m_data_specification_for_enumeration = DataSpec;
   initialise_common();
   CompileRewriteSystem(DataSpec,add_rewrite_rules);
 }
@@ -2516,7 +2517,9 @@ ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
     BuildRewriteSystem();
   }
 
-  return (ATerm) so_rewr((ATermAppl) Term);
+  ATerm a = (ATerm) so_rewr((ATermAppl) Term);
+
+  return internal_quantifier_enumeration((ATerm) a );
 }
 
 void RewriterCompilingInnermost::setSubstitutionInternal(ATermAppl Var, ATerm Expr)

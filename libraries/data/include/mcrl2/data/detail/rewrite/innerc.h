@@ -59,7 +59,6 @@ class RewriterCompilingInnermost: public Rewriter
     int true_num;
 
     ATermTable term2int;
-    ATermAppl* int2term;
     ATermList* innerc_eqns;
 
     std::string file_c;

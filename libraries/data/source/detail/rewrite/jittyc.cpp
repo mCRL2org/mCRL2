@@ -3186,7 +3186,7 @@ ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
 
   ATerm a = (ATerm) so_rewr((ATermAppl) Term);
 
-  return internal_quantifier_enumeration((ATerm) a);
+  return internal_quantifier_enumeration((ATerm) a );
 }
 
 void RewriterCompilingJitty::setSubstitutionInternal(ATermAppl Var, ATerm Expr)

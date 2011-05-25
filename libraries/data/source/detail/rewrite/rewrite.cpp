@@ -378,25 +378,34 @@ ATerm Rewriter::internal_universal_quantifier_enumeration( ATerm ATermInInnerFor
 
 ATerm Rewriter::internal_quantifier_enumeration( ATerm ATermInInnerFormat )
 {
+
+#ifndef MCRL2_DISABLE_QUANTIFIER_ENUMERATION
   if (ATisAppl( ATermInInnerFormat ) )
   {
-    /* Convert internal rewrite number to ATerm representation*/
-    ATermAppl a = int2term[ATgetInt((ATermInt) ATgetArgument(ATermInInnerFormat,0))];
+    ATerm arg = ATgetArgument(ATermInInnerFormat,0);
 
-    if( is_function_symbol(a) )
+    /* Make sure that we have indeed a rewrite rule */
+    if( ATisInt(arg) )
     {
-      /* Check for universal quantifier */
-      if(function_symbol(a).name() == forall_function_symbol())
+      /* Convert internal rewrite number to ATerm representation*/
+      ATermAppl a = int2term[ATgetInt((ATermInt) arg)];
+
+      if( is_function_symbol(a) )
       {
-        ATermInInnerFormat = internal_universal_quantifier_enumeration( ATermInInnerFormat );
-      }
-      /* Check for existential quantifier */
-      if(function_symbol(a).name() == exists_function_symbol())
-      {
-        ATermInInnerFormat = internal_existential_quantifier_enumeration( ATermInInnerFormat );
+        /* Check for universal quantifier */
+        if(function_symbol(a).name() == forall_function_symbol())
+        {
+          ATermInInnerFormat = internal_universal_quantifier_enumeration( ATermInInnerFormat );
+        }
+        /* Check for existential quantifier */
+        if(function_symbol(a).name() == exists_function_symbol())
+        {
+          ATermInInnerFormat = internal_existential_quantifier_enumeration( ATermInInnerFormat );
+        }
       }
     }
   }
+#endif
   return ATermInInnerFormat;
 }
 

@@ -973,7 +973,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
     gsMessage("      return3  %P\n",fromInner(a));
 #endif
 
-    return (ATermAppl) internal_quantifier_enumeration((ATerm) a);
+    return (ATermAppl) internal_quantifier_enumeration((ATerm) a );
   }
 }
 
