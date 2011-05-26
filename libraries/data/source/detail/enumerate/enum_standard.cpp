@@ -45,6 +45,53 @@ class test_equal
     }
 }; 
 
+atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
+                                const atermpp::aterm_appl condition,
+                                const atermpp::term_list< atermpp::aterm_appl > negation_term_list) const
+{ /* If negation_term_list is [t1,...,tn], generate an expression of the form
+     condition /\ !t1 /\ !t2 /\ ... /\ !tn in internal format. */
+  if (negation_term_list.empty())
+  { 
+    return condition;
+  }
+
+  return ATmakeAppl3(ATmakeAFun("#REWR#",3,false),
+                  (ATerm)(ATermInt)m_enclosing_enumerator->opidAnd,
+                  (ATerm)(ATermAppl)add_negations(condition,pop_front(negation_term_list)),
+                  (ATerm)ATmakeAppl2(ATmakeAFun("#REWR#",2,false),
+                              (ATerm)(ATermInt)m_enclosing_enumerator->opidNot,
+                              (ATerm)(ATermAppl)negation_term_list.front()));
+}
+
+void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
+                                atermpp::deque < fs_expr> &fs_stack,
+                                const variable_list var_list,
+                                const variable_list substituted_vars,
+                                const atermpp::term_list< atermpp::aterm_appl > substitution_terms,
+                                const atermpp::aterm_appl condition,
+                                const atermpp::term_list< atermpp::aterm_appl > negated_term_list) const
+{
+   /* If the negated_term_list equals t1,...,tn, store condition /\ !t1 /\ !t2 /\ ... /\ !tn
+      on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
+      store phi and psi /\ !phi separately. This allows the equality eliminator to remove
+      more equalities and therefore be more effective. */
+   
+   if (condition(0) == m_enclosing_enumerator->opidOr)
+   { 
+     assert(condition.size()==3);
+     push_on_fs_stack_and_split_or(fs_stack,var_list,substituted_vars,substitution_terms,condition(1),negated_term_list);
+     push_on_fs_stack_and_split_or(fs_stack,var_list,substituted_vars,substitution_terms,condition(2),
+                            push_front(negated_term_list,static_cast<atermpp::aterm_appl>(condition(1))));
+   }
+   else
+   { 
+     fs_stack.push_back(fs_expr(var_list,
+                              substituted_vars,
+                              substitution_terms, 
+                              add_negations(condition,negated_term_list))); 
+   }
+}
+
 bool EnumeratorSolutionsStandard::FindInnerCEquality(
                         const atermpp::aterm_appl t,
                         const mcrl2::data::variable_list vars, 
@@ -59,6 +106,7 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality(
 
   if (t(0) == m_enclosing_enumerator->opidAnd)
   {
+    assert(t.size()==3);
     return FindInnerCEquality(t(1),vars,v,e) || FindInnerCEquality(t(2),vars,v,e);
   }
   else if (m_enclosing_enumerator->eqs.find(t(0)) != m_enclosing_enumerator->eqs.end())  // Does term t have an equality as its function symbol?
@@ -368,11 +416,18 @@ bool EnumeratorSolutionsStandard::next(
 
         if (new_expr!=forbidden_truth_value) 
         {
-          fs_stack.push_back(fs_expr(
+          push_on_fs_stack_and_split_or(
+                                fs_stack,
                                 uvars+var_list,
                                 push_front(e.substituted_vars(),var),
                                 push_front(e.vals(),term_rf),
-                                (atermpp::aterm_appl)new_expr));
+                                (atermpp::aterm_appl)new_expr,
+                                atermpp::term_list < atermpp::aterm_appl > ()); 
+          /* fs_stack.push_back(fs_expr(
+                                uvars+var_list,
+                                push_front(e.substituted_vars(),var),
+                                push_front(e.vals(),term_rf),
+                                (atermpp::aterm_appl)new_expr)); */
           if ((fs_stack.back().vars().empty()) || 
                    (EliminateVars(fs_stack.back()), (fs_stack.back().vars().empty()))) 
           {
@@ -479,25 +534,24 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
   rewr_false = (atermpp::aterm_appl)rewr_obj->toRewriteFormat(sort_bool::false_());
 
   opidAnd.protect();
-  /* if ((rewr_obj->getStrategy() == GS_REWR_INNER) || (rewr_obj->getStrategy() == GS_REWR_INNER_P))
-  {
-    throw mcrl2::runtime_error("The classic enumerator does not work (anymore) with the INNER and INNER_P rewriter.");
-  }
-  else
-  { */
-    atermpp::aterm_appl t=rewr_obj->toRewriteFormat(sort_bool::and_());
-    opidAnd = t(0);
+  opidOr.protect();
+  opidNot.protect();
+  atermpp::aterm_appl t_and=rewr_obj->toRewriteFormat(sort_bool::and_());
+  opidAnd = t_and(0);
+  atermpp::aterm_appl t_or=rewr_obj->toRewriteFormat(sort_bool::or_());
+  opidOr = t_or(0);
+  atermpp::aterm_appl t_not=rewr_obj->toRewriteFormat(sort_bool::not_());
+  opidNot = t_not(0);
 
-    const function_symbol_vector mappings(data_spec.mappings());
-    for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
+  const function_symbol_vector mappings(data_spec.mappings());
+  for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
+  {
+    if (i->name() == "==")
     {
-      if (i->name() == "==")
-      {
-        atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
-        eqs.insert(t(0));
-      }
+      atermpp::aterm_appl t=rewr_obj->toRewriteFormat(*i);
+      eqs.insert(t(0));
     }
-  // }
+  }
 }
 
 EnumeratorStandard::~EnumeratorStandard()
@@ -506,6 +560,8 @@ EnumeratorStandard::~EnumeratorStandard()
   rewr_false.unprotect();
 
   opidAnd.unprotect();
+  opidOr.unprotect();
+  opidNot.unprotect();
 }
 
 } // namespace detail

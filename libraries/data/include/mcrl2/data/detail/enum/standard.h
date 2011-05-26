@@ -121,6 +121,8 @@ class EnumeratorStandard
     atermpp::aterm_appl rewr_true, rewr_false;
   
     atermpp::aterm_int opidAnd;
+    atermpp::aterm_int opidOr;
+    atermpp::aterm_int opidNot;
     atermpp::set< atermpp::aterm_int > eqs;
   
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
@@ -283,6 +285,17 @@ class EnumeratorSolutionsStandard
                  const atermpp::aterm_appl t,
                  const variable_list substituted_vars,
                  const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+    atermpp::aterm_appl add_negations(
+                 const atermpp::aterm_appl condition,
+                 const atermpp::term_list< atermpp::aterm_appl > negation_term_list) const;
+    void push_on_fs_stack_and_split_or(
+                 atermpp::deque < fs_expr> &fs_stack,
+                 const variable_list var_list,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list< atermpp::aterm_appl > substitution_terms,
+                 const atermpp::aterm_appl condition,
+                 const atermpp::term_list< atermpp::aterm_appl > negated_term_list) const;
+
 };
 }
 }
