@@ -89,7 +89,18 @@ class linear_process
   public:
     /// \brief Constructor.
     linear_process()
-    {}
+    {
+      m_process_parameters.protect();
+    }
+
+    /// \brief Copy constructor.
+    linear_process(const linear_process &other) :
+      m_process_parameters(other.m_process_parameters),
+      m_deadlock_summands(other.m_deadlock_summands),
+      m_action_summands(other.m_action_summands)
+    {
+      m_process_parameters.protect();
+    }
 
     /// \brief Constructor.
     linear_process(const data::variable_list& process_parameters,
@@ -100,7 +111,9 @@ class linear_process
       m_process_parameters(process_parameters),
       m_deadlock_summands(deadlock_summands),
       m_action_summands(action_summands)
-    { }
+    { 
+      m_process_parameters.protect();
+    }
 
     /// \brief Constructor.
     /// \param lps A term
@@ -111,7 +124,14 @@ class linear_process
       // unpack LPS(.,.,.) term
       atermpp::aterm_appl::iterator i = lps.begin();
       m_process_parameters = *i++;
+      m_process_parameters.protect();
       set_summands(*i);
+    }
+
+    /// \brief Destructor
+    ~linear_process()
+    {
+      m_process_parameters.unprotect();
     }
 
     /// \brief Returns the number of LPS summands.
