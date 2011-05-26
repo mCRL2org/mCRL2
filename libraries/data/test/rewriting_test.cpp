@@ -911,6 +911,43 @@ BOOST_AUTO_TEST_CASE(test_whether_lists_can_be_put_in_sets)
 
 }
 
+BOOST_AUTO_TEST_CASE(lambda_predicate_matching)
+{
+  /* Taken from the specification:
+  ================================  
+        map  match :(Nat -> Bool)#List(Nat)     -> List(Nat) ;
+             pre: Nat -> Bool;
+             emptyList: List(Nat);
+        eqn  match (pre, [])      = [];
+             emptyList = [];
+        
+        init ( match( lambda i:Nat. true, [] ) == emptyList  ) -> tau;
+  ================================  
+  */
+
+  std::string s(
+     "map  match    : (Nat -> Bool)#List(Nat) -> List(Nat);\n"
+     "     pre      : Nat  -> Bool;\n"
+     "     emptyList: List(Nat);\n"
+     "eqn  match(pre, [])      = [];\n"
+     "     emptyList = []; \n" 
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "lambda_predicate_matching\n";
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies());
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("match( lambda i:Nat. true, [] )", specification));
+    data::data_expression f(parse_data_expression("emptyList", specification));
+    data_rewrite_test(R, e, f);
+  }
+
+}
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
