@@ -2490,8 +2490,8 @@ class boolean_equation_system
           f << ((t==tl.begin())?"(":",");
           if (opt_precompile_pbes)
           {
-            ATermAppl term=*t;
-            f << pp(Mucks_rewriter.convert_from((ATerm)term));
+            const atermpp::aterm_appl term=*t;
+            f << pp(Mucks_rewriter.convert_from(term));
           }
           else
           {

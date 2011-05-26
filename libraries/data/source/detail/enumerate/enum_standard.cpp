@@ -212,7 +212,6 @@ bool EnumeratorSolutionsStandard::next(
 {
   while (ss_stack.empty() && !fs_stack.empty())
   {
-
     const fs_expr e=fs_stack.front();
     fs_stack.pop_front();
     assert(!e.vars().empty());
@@ -224,7 +223,6 @@ bool EnumeratorSolutionsStandard::next(
 
     if (is_function_sort(sort))
     {
-      // HIER MOETEN FUNCTIETERMEN WORDEN TOEGEVOEGD.
       if (solution_possible)
       {
         solution_possible=false;
@@ -233,9 +231,47 @@ bool EnumeratorSolutionsStandard::next(
       else
       { 
         fs_stack.clear();
-        throw mcrl2::runtime_error("cannot enumerate all elements of function sort " + pp(sort));
+        throw mcrl2::runtime_error("cannot enumerate elements of the function sort " + pp(sort));
       }
         
+    }
+    else if (sort_bag::is_bag(sort))
+    {
+      if (solution_possible)
+      {
+        solution_possible=false;
+        return false;
+      }
+      else
+      { 
+        fs_stack.clear();
+        throw mcrl2::runtime_error("cannot enumerate elements of a bag of sort " + pp(sort));
+      }
+        
+    }
+    else if (sort_set::is_set(sort))
+    {
+      const sort_expression element_sort=container_sort(sort).element_sort();
+      /* if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(element_sort))
+      { 
+        / * Enumerate and store 
+        for( TODO
+        {
+        } * /
+      } 
+      else */
+      {
+        if (solution_possible)
+        {
+          solution_possible=false;
+          return false;
+        }
+        else
+        { 
+          fs_stack.clear();
+          throw mcrl2::runtime_error("cannot enumerate all elements of a set of sort " + pp(sort));
+        }
+      }
     }
     else
     {
@@ -392,9 +428,9 @@ bool EnumeratorSolutionsStandard::next(
   return next(dummy_solution_is_exact,solution,solution_possible);
 }
 
-void EnumeratorSolutionsStandard::reset(const variable_list &vars, const atermpp::aterm_appl &expr, const bool not_equal_to_false)
+void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false)
 {
-  enum_expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)expr);
+  enum_expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)enum_expr);
   
   if (not_equal_to_false)
   {

@@ -199,7 +199,7 @@ class EnumeratorSolutionsStandard
     { 
       enum_vars.protect();
       enum_expr.protect();
-      reset(vars,expr,not_equal_to_false);
+      reset(not_equal_to_false);
     }
 
     /// Standard destructor.
@@ -254,7 +254,7 @@ class EnumeratorSolutionsStandard
 
 
   private:
-    void reset(const variable_list &Vars, const atermpp::aterm_appl &Expr, const bool not_equal_to_false); 
+    void reset(const bool not_equal_to_false); 
 
     bool FindInnerCEquality(const atermpp::aterm_appl T, 
                             const mcrl2::data::variable_list vars, 
