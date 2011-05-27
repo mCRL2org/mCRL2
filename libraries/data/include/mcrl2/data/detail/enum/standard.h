@@ -143,9 +143,9 @@ class EnumeratorSolutionsStandard
   protected:
 
     detail::EnumeratorStandard *m_enclosing_enumerator;
-    atermpp::aterm_appl desired_truth_value;    // We search for solutions for the condition enum_expr that are not
+/*    atermpp::aterm_appl desired_truth_value;    // We search for solutions for the condition enum_expr that are not
     atermpp::aterm_appl forbidden_truth_value;  // equal to the forbidden truth value, and if the output matches the
-                                                // desired truth value, then the variable solution_is_exact is set.
+                                                // desired truth value, then the variable solution_is_exact is set. */
 
     variable_list enum_vars;                    // The variables over which a solution is searched.
     atermpp::aterm_appl enum_expr;              // Condition to be satisfied in internal format.
