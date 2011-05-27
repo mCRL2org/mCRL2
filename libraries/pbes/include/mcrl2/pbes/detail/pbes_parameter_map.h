@@ -108,7 +108,7 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes<>& p, const std::string& 
     {
       continue;
     }
-    sregex sre = sregex::compile("(\\*|\\w*)\\(([:,#*\\s\\w]*)\\)\\s*", regex_constants::icase);
+    sregex sre = sregex::compile("(\\*|\\w*)\\(([:,#*\\s\\w>-]*)\\)\\s*", regex_constants::icase);
     match_results<std::string::const_iterator> what;
     if (!regex_match(line, what, sre))
     {
