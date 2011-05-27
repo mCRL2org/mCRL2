@@ -69,6 +69,16 @@ void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
   data_expression t6d2 = parse_data_expression("true");
   BOOST_CHECK(r(t6d1) == r(t6d2));
 
+  /* Test 7*/
+  data_expression t7d1 = parse_data_expression("forall b: Bool. b", specification);
+  data_expression t7d2 = parse_data_expression("false");
+  BOOST_CHECK(r(t7d1) == r(t7d2));
+
+  /* Test 8*/
+  data_expression t8d1 = parse_data_expression("forall x: Nat. x == 3", specification);
+  data_expression t8d2 = parse_data_expression("false");
+  BOOST_CHECK(r(t8d1) == r(t8d2));
+
 }
 
 int test_main(int argc, char** argv)
