@@ -12,12 +12,14 @@
 #ifndef MCRL2_PBES_PBESINST_FINITE_ALGORITHM_H
 #define MCRL2_PBES_PBESINST_FINITE_ALGORITHM_H
 
+#define MCRL2_PBESINST_DEBUG
+
 #include <algorithm>
 #include <vector>
 #include <set>
+#include <sstream>
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/core/algorithm.h"
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
@@ -25,6 +27,7 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -142,6 +145,28 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
       m_variable_map(variable_map)
   {}
 
+  void LOG_PARAMETERS(const std::vector<data::data_expression>& finite_parameters,
+                      const std::vector<data::data_expression>& infinite_parameters
+                     ) const
+  {
+    if (mcrl2_logger::get_reporting_level("pbesinst_finite") >= log_debug)
+    {
+      std::ostringstream out;
+      out << "<finite>";
+      for (std::vector<data::data_expression>::const_iterator i = finite_parameters.begin(); i != finite_parameters.end(); ++i)
+      {
+        out << core::pp(*i) << " ";
+      }
+      out << "<infinite>";
+      for (std::vector<data::data_expression>::const_iterator i = infinite_parameters.begin(); i != infinite_parameters.end(); ++i)
+      {
+        out << core::pp(*i) << " ";
+      }
+      out << std::endl;
+      mCRL2log(debug, "pbesinst_finite") << out.str();
+    }
+  }
+
   /// \brief Computes the condition 'for all i: variables[i] == expressions[i]'.
   template <typename VariableContainer, typename ExpressionContainer>
   data::data_expression make_condition(const VariableContainer& variables, const ExpressionContainer& expressions) const
@@ -174,7 +199,8 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
 
     std::vector<data::data_expression> finite_parameters;
     std::vector<data::data_expression> infinite_parameters;
-    split_parameters(v, m_index_map, finite_parameters, infinite_parameters);
+    split_parameters(v, m_index_map, finite_parameters, infinite_parameters);   
+    LOG_PARAMETERS(finite_parameters, infinite_parameters);
     data::data_expression_list d = atermpp::convert<data::data_expression_list>(finite_parameters);
     data::data_expression_list e = atermpp::convert<data::data_expression_list>(infinite_parameters);
     core::identifier_string Xi = v.name();
@@ -234,7 +260,7 @@ struct pbesinst_finite_builder: public pbes_system::detail::data_rewrite_builder
 } // namespace detail
 
 /// \brief Algorithm class for the finite pbesinst algorithm.
-class pbesinst_finite_algorithm: public core::algorithm
+class pbesinst_finite_algorithm
 {
   protected:
     /// \brief The strategy of the data rewriter.
@@ -279,13 +305,13 @@ class pbesinst_finite_algorithm: public core::algorithm
     }
 
     /// \brief Prints a log message for every 1000-th equation
-    void LOG_EQUATION_COUNT(size_t level, size_t size) const
+    void LOG_EQUATION_COUNT(size_t size) const
     {
-      if (check_log_level(level))
+      if (mcrl2_logger::get_reporting_level("pbesinst_finite") >= log_debug)
       {
         if (size > 0 && size % 1000 == 0)
         {
-          std::cout << "Generated " << size << " BES equations" << std::endl;
+          mCRL2log(debug, "pbesinst_finite") << "Generated " << size << " BES equations" << std::endl;
         }
       }
     }
@@ -295,11 +321,8 @@ class pbesinst_finite_algorithm: public core::algorithm
     /// \brief Constructor.
     /// \param print_equations If true, the generated equations are printed
     /// \param print_rewriter_output If true, invocations of the rewriter are printed
-    pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::rewriter::jitty,
-                              size_t log_level = 0
-                             )
-      : core::algorithm(log_level),
-        m_rewriter_strategy(rewriter_strategy)
+    pbesinst_finite_algorithm(data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
+      : m_rewriter_strategy(rewriter_strategy)
     {}
 
     /// \brief Runs the algorithm.
@@ -350,8 +373,8 @@ class pbesinst_finite_algorithm: public core::algorithm
           //LOG(2, "formula after  = " + core::pp(formula) + "\n");
           pbes_equation eqn(i->symbol(), X, formula);
           equations.push_back(eqn);
-          LOG_EQUATION_COUNT(1, ++m_equation_count);
-          LOG(2, "Added equation " + pbes_system::pp(eqn) + "\n");
+          LOG_EQUATION_COUNT(++m_equation_count);
+          mCRL2log(debug, "pbesinst_finite") << "Added equation " << pbes_system::pp(eqn) << "\n";
         }
       }
 

@@ -57,11 +57,13 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
   /// \return A name that uniquely corresponds to the propositional variable.
   term_type rename(const term_type& v)
   {
+std::cout << "<rename>" << core::pp(v) << std::endl;    
     assert(tr::is_prop_var(v));
     if (!tr::is_constant(v))
     {
       return v;
     }
+std::cout << "constant!" << std::endl;    
     const data::data_expression_list del = tr::param(v);
     std::string propvar_name_current = tr::name(v);
     if (!del.empty())

@@ -281,20 +281,20 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
       }
       else if (m_strategy == ts_finite)
       {
-        pbesinst_finite_algorithm algorithm(rewrite_strategy(), log_level);
+        pbesinst_finite_algorithm algorithm(rewrite_strategy());
         detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, m_finite_parameter_selection);
         algorithm.run(p, parameter_map);
       }
 
-      if (mcrl2::core::gsVerbose)
+      if (mcrl2_logger::get_reporting_level() >= log_verbose)
       {
         if (is_bes(p))
         {
-          core::gsVerboseMsg("The result is a BES.\n");
+          mCRL2log(debug) << "The result is a BES.\n";
         }
         else
         {
-          core::gsVerboseMsg("The result is a PBES.\n");
+           mCRL2log(debug) << "The result is a PBES.\n";
         }
       }
 

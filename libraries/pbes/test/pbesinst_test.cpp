@@ -51,7 +51,7 @@ inline
 pbes<> pbesinst_finite(const pbes<>& p)
 {
   pbes<> q = p;
-  pbesinst_finite_algorithm algorithm(data::rewriter::jitty, 2);
+  pbesinst_finite_algorithm algorithm(data::rewriter::jitty);
   algorithm.run(q);
   return q;
 }
@@ -474,9 +474,8 @@ void test_pbesinst_finite()
     "                                                                \n"
     "init X(d1);                                                     \n"
     ;
-  size_t log_level = 2;
   pbes<> p1 = txt2pbes(text);
-  pbesinst_finite_algorithm algorithm(data::rewriter::jitty, log_level);
+  pbesinst_finite_algorithm algorithm(data::rewriter::jitty);
   pbesinst_variable_map variable_map = detail::parse_pbes_parameter_map(p1, "X(*:D)");
   algorithm.run(p1, variable_map);
 }
@@ -515,10 +514,9 @@ void test_functions()
     ;
   pbes<> p = txt2pbes(text);
   data::rewriter::strategy rewrite_strategy = data::rewriter::jitty;
-  unsigned int log_level = 2;
-  pbesinst_finite_algorithm algorithm(rewrite_strategy, log_level);
+  pbesinst_finite_algorithm algorithm(rewrite_strategy);
   detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, "X(*:D)");
-  algorithm.run(p, parameter_map);                                                                             
+  algorithm.run(p, parameter_map);
 }
 
 int test_main(int argc, char** argv)
