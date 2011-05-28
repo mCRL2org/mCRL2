@@ -1,3 +1,25 @@
+// Author(s): Sjoerd Cranen (?)
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file mcrl2/data/nfs_array.h
+/// \brief ?
+
+#ifndef MCRL2_DATA_NFS_ARRAY_H
+#define MCRL2_DATA_NFS_ARRAY_H
+
+#include <cstddef>
+#include <cstring>
+#include <cassert>
+
+// Maximal arity for which we generate functions for every combination of
+// arguments that are in normal form or not
+#define NF_MAX_ARITY 3  // currently this should be such that it is at most sizeof(size_t)*8
+
 namespace mcrl2
 {
 namespace data
@@ -106,3 +128,5 @@ private:
 }
 }
 }
+
+#endif // MCRL2_DATA_NFS_ARRAY_H
