@@ -735,9 +735,217 @@ void test_specification()
   BOOST_CHECK(spec.constructors(basic_sort("D")).size() == 2);
 }
 
+/// \brief Pretty print a data specification
+///
+/// \param[in] data_spec A data specification.
+/// \return A pretty printed data specification
+
+inline
+std::string mypp(const data_specification& data_spec)
+{
+  return core::pp(detail::data_specification_to_aterm_data_spec(data_spec));
+}
+
+void test_bke()
+{
+  std::cout << "test_bke" << std::endl;
+
+  std::string BKE =
+    "% This model is translated from the mCRL model used for analysing the Bilateral                \n"
+    "% Key Exchange (BKE) protocol. The analysis is described in a paper with the                   \n"
+    "% name 'Analysing the BKE-security protocol with muCRL', by Jan Friso Groote,                  \n"
+    "% Sjouke Mauw and Alexander Serebrenik.                                                        \n"
+    "%                                                                                              \n"
+    "% The translation of the existing mCRL model into this mCRL2 model has been                    \n"
+    "% performed manually.  The purpose was making use of the additional language                   \n"
+    "% features of mCRL2 with respect to mCRL.                                                      \n"
+    "%                                                                                              \n"
+    "% The behaviour of this model should be bisimular with the original mcrl model                 \n"
+    "% after renaming actions. Though this is not verified for all system                           \n"
+    "% configurations below.                                                                        \n"
+    "%                                                                                              \n"
+    "% Eindhoven, June 11, 2008, Jeroen van der Wulp                                                \n"
+    "                                                                                               \n"
+    "% Agents. There are exactly three agents - A, B, E An order E < A < B is                       \n"
+    "% imposed on agents to reduce the size of the state space.                                     \n"
+    "sort Agent = struct A | B | E;                                                                 \n"
+    "map  less : Agent # Agent -> Bool;                                                             \n"
+    "var  a: Agent;                                                                                 \n"
+    "eqn  less(A,a) = (a == B);                                                                     \n"
+    "     less(B,a) = false;                                                                        \n"
+    "     less(E,a) = (a != E);                                                                     \n"
+    "                                                                                               \n"
+    "sort Address = struct address(agent : Agent);                                                  \n"
+    "map  bad_address : Address;                                                                    \n"
+    "                                                                                               \n"
+    "% A nonce is a random, unpredictable value which is used to make the                           \n"
+    "% exchanged messages unique and thus helps to counter replay attacks.                          \n"
+    "sort Nonce = struct nonce(value : Nat);                                                        \n"
+    "                                                                                               \n"
+    "% There are two kinds of keys used in the protocol: symmetric and                              \n"
+    "% asymmetric ones (functional keys).                                                           \n"
+    "% Symmetric keys have form K(n) where n is a natural number.                                   \n"
+    "sort SymmetricKey = struct symmetric_key(value : Nat);                                         \n"
+    "                                                                                               \n"
+    "% Sort for representing asymmetric keys                                                        \n"
+    "sort AsymmetricKey = struct public_key(Agent)?is_public |                                      \n"
+    "                            secret_key(Agent)?is_secret |                                      \n"
+    "                            hash(value : Nonce)?is_hash;                                       \n"
+    "map  has_complementary_key: AsymmetricKey -> Bool;                                             \n"
+    "     complementary_key    : AsymmetricKey -> AsymmetricKey;                                    \n"
+    "var  a : Agent;                                                                                \n"
+    "     n : Nonce;                                                                                \n"
+    "eqn  has_complementary_key(public_key(a)) = true;                                              \n"
+    "     has_complementary_key(secret_key(a)) = true;                                              \n"
+    "     has_complementary_key(hash(n)) = false;                                                   \n"
+    "     complementary_key(public_key(a)) = secret_key(a);                                         \n"
+    "     complementary_key(secret_key(a)) = public_key(a);                                         \n"
+    "                                                                                               \n"
+    "sort Key = struct key(SymmetricKey)?is_symmetric | key(AsymmetricKey)?is_asymmetric;           \n"
+    "map  has_complementary_key: Key -> Bool;                                                       \n"
+    "     complementary_key : Key -> Key; % gets the complementary key if key is asymmetric         \n"
+    "var  a,a1   : Agent;                                                                           \n"
+    "     n,n1   : Nat;                                                                             \n"
+    "     k,k1   : Key;                                                                             \n"
+    "     ak,ak1 : AsymmetricKey;                                                                   \n"
+    "eqn                                                                                            \n"
+    "     % gets the complementary key if key is asymmetric                                         \n"
+    "     complementary_key(key(ak)) = key(complementary_key(ak));                                  \n"
+    "     has_complementary_key(key(ak)) = has_complementary_key(ak);                               \n"
+    "                                                                                               \n"
+    "sort Message = struct                                                                          \n"
+    "        encrypt(Nonce, Address, AsymmetricKey)?is_message_1 |                                  \n"
+    "        encrypt(AsymmetricKey, Nonce, SymmetricKey, AsymmetricKey)?is_message_2 |              \n"
+    "        encrypt(AsymmetricKey, SymmetricKey)?is_message_3;                                     \n"
+    "map  valid_message_1 : Message # AsymmetricKey -> Bool;                                        \n"
+    "     valid_message_2 : Message # AsymmetricKey -> Bool;                                        \n"
+    "     valid_message_3 : Message # SymmetricKey  -> Bool;                                        \n"
+    "     used_key : Message -> Key;                  % key used to encrypt                         \n"
+    "var  sk, sk1 : SymmetricKey;                                                                   \n"
+    "     ak, ak1, ak2 : AsymmetricKey;                                                             \n"
+    "     n, n1  : Nonce;                                                                           \n"
+    "     m, m1   : Message;                                                                        \n"
+    "     a, a1   : Address;                                                                        \n"
+    "eqn  used_key(encrypt(n,a,ak)) = key(ak);                                                      \n"
+    "     used_key(encrypt(ak,n1,sk,ak1)) = key(ak1);                                               \n"
+    "     used_key(encrypt(ak,sk)) = key(sk);                                                       \n"
+    "     valid_message_1(m, ak) = is_message_1(m) && (used_key(m) == key(ak));                     \n"
+    "     valid_message_2(m, ak) = is_message_2(m) && (used_key(m) == key(ak));                     \n"
+    "     valid_message_3(m, sk) = is_message_3(m) && (used_key(m) == key(sk));                     \n"
+    "                                                                                               \n"
+    "% Type for message sets; currently cannot use Set() because set iteration is not possible      \n"
+    "sort MessageSet = List(Message);                                                               \n"
+    "map  insert                : Message # MessageSet -> MessageSet;                               \n"
+    "     select_crypted_by     : Key # MessageSet -> MessageSet;                                   \n"
+    "     select_not_crypted_by : Key # MessageSet -> MessageSet;                                   \n"
+    "     select                : (Message -> Bool) # MessageSet -> MessageSet;                     \n"
+    "var  k,k1 : Key;                                                                               \n"
+    "     m,m1 : Message;                                                                           \n"
+    "     ms   : MessageSet;                                                                        \n"
+    "     c    : Message -> Bool;                                                                   \n"
+    "eqn                                                                                            \n"
+    "     % inserts a message m, if it is not in the list                                           \n"
+    "     insert(m,[]) = [m];                                                                       \n"
+    "     m < m1  -> insert(m,m1|>ms) = m|>m1|>ms;                                                  \n"
+    "     m == m1 -> insert(m,m1|>ms) = m1|>ms;                                                     \n"
+    "     m1 < m  -> insert(m,m1|>ms) = m1|>insert(m,ms);                                           \n"
+    "                                                                                               \n"
+    "     % the set (as ordered list) of messages in m that are signed by sk                        \n"
+    "     select_crypted_by(k,ms) = select(lambda x : Message.k == used_key(x),ms);                 \n"
+    "     select_not_crypted_by(k,ms) = select(lambda x : Message.k != used_key(x),ms);             \n"
+    "                                                                                               \n"
+    "     select(c,[]) = [];                                                                        \n"
+    "     select(c,m|>ms) = if(c(m),m|>r,r) whr r = select(c, ms) end;                              \n"
+    "                                                                                               \n"
+    "% The eavesdropper's knowledge consists of:                                                    \n"
+    "%  * a list of addresses                                                                       \n"
+    "%  * a list of nonces                                                                          \n"
+    "%  * a list of keys (both symmetric and asymmetric)                                            \n"
+    "%  * a list of messages of which the key is not known                                          \n"
+    "sort Knowledge = struct                                                                        \n"
+    "        knowledge(addresses : Set(Address),                                                    \n"
+    "                  nonces : Set(Nonce),                                                         \n"
+    "                  keys : Set(Key),                                                             \n"
+    "                  messages : MessageSet);                                                      \n"
+    "map  update_knowledge : Message # Knowledge -> Knowledge;                                      \n"
+    "     propagate : MessageSet # Knowledge -> Knowledge;                                          \n"
+    "     propagate : Key # Knowledge -> Knowledge;                                                 \n"
+    "     add_key : Key # Knowledge -> Knowledge;                                                   \n"
+    "     add_nonce : Nonce # Knowledge -> Knowledge;                                               \n"
+    "     add_address : Address # Knowledge -> Knowledge;                                           \n"
+    "var  m  : Message;                                                                             \n"
+    "     as : Set(Address);                                                                        \n"
+    "     ns : Set(Nonce);                                                                          \n"
+    "     ks : Set(Key);                                                                            \n"
+    "     ms : MessageSet;                                                                          \n"
+    "     k  : Knowledge;                                                                           \n"
+    "     sk : SymmetricKey;                                                                        \n"
+    "     ak,hk : AsymmetricKey;                                                                    \n"
+    "     ck : Key;                                                                                 \n"
+    "     n, n1 : Nonce;                                                                            \n"
+    "     a  : Address;                                                                             \n"
+    "eqn                                                                                            \n"
+    "     % adds keys to knowledge that are part of known messages encrypted with a new key         \n"
+    "     has_complementary_key(ak) && complementary_key(key(ak)) in keys(k) ->                     \n"
+    "         update_knowledge(encrypt(n,a,ak),k) =                                                 \n"
+    "                propagate(key(ak), add_key(key(ak),                                            \n"
+    "                        add_address(a, add_nonce(n, k))));                                     \n"
+    "     has_complementary_key(ak) && complementary_key(key(ak)) in keys(k) ->                     \n"
+    "         update_knowledge(encrypt(hk,n1,sk,ak),k) =                                            \n"
+    "                propagate(key(sk), propagate(key(ak),                                          \n"
+    "                      add_key(key(sk),add_key(key(ak),k))));                                   \n"
+    "     key(sk) in keys(k) ->                                                                     \n"
+    "         update_knowledge(encrypt(ak,sk),k) =                                                  \n"
+    "                propagate(key(ak), add_key(key(ak),k));                                        \n"
+    "                                                                                               \n"
+    "     % adds a message that cannot be decrypted with any known key                              \n"
+    "     ((is_symmetric(ck) && !(ck in keys(k))) ||                                                \n"
+    "       (is_asymmetric(ck) && !(has_complementary_key(ck) &&                                    \n"
+    "                (complementary_key(ck) in keys(k))))) whr ck = used_key(m) end ->              \n"
+    "         update_knowledge(m,k) =                                                               \n"
+    "                knowledge(addresses(k),nonces(k),keys(k),insert(m,messages(k)));               \n"
+    "                                                                                               \n"
+    "     % adds a key to knowledge                                                                 \n"
+    "     add_key(ck,knowledge(as,ns,ks,ms)) = knowledge(as,ns,ks + {ck},ms);                       \n"
+    "     add_nonce(n,knowledge(as,ns,ks,ms)) = knowledge(as,ns + {n},ks,ms);                       \n"
+    "     add_address(a,knowledge(as,ns,ks,ms)) = knowledge(as + {a},ns,ks,ms);                     \n"
+    "                                                                                               \n"
+    "     % adds keys to knowledge that are part of messages encrypted with a key k                 \n"
+    "     propagate([],k) = k;                                                                      \n"
+    "     propagate(m|>ms,k) = propagate(ms, update_knowledge(m, k));                               \n"
+    "     propagate(ck,knowledge(as,ns,ks,ms)) =                                                    \n"
+    "        propagate(select_crypted_by(ck,ms),                                                    \n"
+    "                knowledge(as,ns,ks,select_not_crypted_by(ck,ms)));                             \n"
+    ;
+
+  data_specification data_spec = parse_data_specification(BKE);
+  const alias_vector& aliases = data_spec.user_defined_aliases();
+  for (alias_vector::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
+  {
+    std::cout << "alias " << core::pp(*i) << std::endl;
+    sort_expression s = i->reference();
+    if (is_structured_sort(s))
+    {
+      structured_sort_constructor_list constructors = structured_sort(s).constructors();
+      for (structured_sort_constructor_list::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
+      {
+        structured_sort_constructor_argument_list arguments = j->arguments();
+        for (structured_sort_constructor_argument_list::const_iterator k = arguments.begin(); k != arguments.end(); ++k)
+        {
+          std::cout << "argument: " << core::pp(*k) << " " << *k << std::endl;
+          atermpp::aterm_appl name = k->name();
+          std::cout << "name = " << name << std::endl;
+        }
+      }
+    }
+  }
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
+
+  test_bke();
 
   test_sorts();
   core::garbage_collect();
@@ -771,7 +979,7 @@ int test_main(int argc, char** argv)
 
   test_specification();
   core::garbage_collect();
-
+    
   return EXIT_SUCCESS;
 }
 
