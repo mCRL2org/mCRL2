@@ -287,15 +287,18 @@ class EnumeratorSolutionsStandard
                  const atermpp::term_list < atermpp::aterm_appl> exprs) const;
     atermpp::aterm_appl add_negations(
                  const atermpp::aterm_appl condition,
-                 const atermpp::term_list< atermpp::aterm_appl > negation_term_list) const;
+                 const atermpp::term_list< atermpp::aterm_appl > negation_term_list,
+                 const bool negated) const;
     void push_on_fs_stack_and_split_or(
                  atermpp::deque < fs_expr> &fs_stack,
                  const variable_list var_list,
                  const variable_list substituted_vars,
                  const atermpp::term_list< atermpp::aterm_appl > substitution_terms,
                  const atermpp::aterm_appl condition,
-                 const atermpp::term_list< atermpp::aterm_appl > negated_term_list) const;
-
+                 const atermpp::term_list< atermpp::aterm_appl > negated_term_list,
+                 const bool negated) const;
+    atermpp::term_list< atermpp::aterm_appl > negate(
+                 const atermpp::term_list< atermpp::aterm_appl > l) const;
 };
 }
 }

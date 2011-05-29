@@ -306,6 +306,29 @@ void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat);
  **/
 RewriteStrategy RewriteStrategyFromString(const char* s);
 
+/**
+ * \brief The apply functions below takes terms in internal format,
+ *        and transform them into a function application. In case
+ *        of Apply and ApplyArray the first element of the list
+ *        or array is the function symbol.
+ **/
+ATermAppl Apply(ATermList l);
+
+/** \brief See Apply. */
+ATermAppl ApplyArray(const size_t size, ATerm *l);
+
+/** \brief See Apply. */
+ATermAppl Apply0(const ATerm head);
+
+/** \brief See Apply. */
+ATermAppl Apply1(const ATerm head, const ATerm arg1);
+
+/** \brief See Apply. */
+ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2);
+
+/** \brief Get the AFun number of the internal application symbol with given arity. */
+AFun get_appl_afun_value(size_t arity);
+
 }
 }
 }

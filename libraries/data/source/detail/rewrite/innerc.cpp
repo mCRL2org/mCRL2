@@ -244,14 +244,14 @@ ATermAppl RewriterCompilingInnermost::fromInner(ATerm Term)
 }
 
 
-static ATerm Apply(ATermList l)
+/* static ATerm Apply(ATermList l)
 {
   char c[10];
   int n=ATgetLength(l);
   sprintf(c,"appl#%d",n);
 
   return (ATerm)ATmakeApplList(ATmakeAFun(c,n,false),l);
-}
+} */
 
 static ATerm toInnerc(ATerm Term)
 {
@@ -259,7 +259,7 @@ static ATerm toInnerc(ATerm Term)
   {
     if (ATisInt(Term))
     {
-      return Apply(ATinsert(ATempty,Term));
+      return (ATerm)Apply0(Term);
     }
     else if (gsIsDataVarId((ATermAppl)Term))
     {
@@ -284,7 +284,7 @@ static ATerm toInnerc(ATerm Term)
     l=ATinsert(l,toInnerc(ATgetFirst(l1)));
   }
   l=ATreverse(l);
-  ATerm r=Apply((ATermList) l);
+  ATerm r=(ATerm)Apply(l);
   // gsfprintf(stderr,"RESULT: %T\n%T\n%T\n\n",Term,r,l);
   return r;
 }
@@ -1744,6 +1744,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "#include <string.h>\n"
           "#include \"mcrl2/aterm/aterm2.h\"\n"
           "#include \"assert.h\"\n"
+          "#include \"mcrl2/data/detail/rewrite.h\"\n"
           "using namespace aterm;\n"
           "\n"
           "extern \"C\" { ATermAppl rewrite(ATermAppl); }\n"
@@ -1813,7 +1814,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
     fprintf(f,  "static ATermAppl rewrAppl%i;\n",i);
   }
   fprintf(f,  "\n"
-          "static AFun *apples;\n"
+//          "static AFun *apples;\n"
 #ifndef USE_VARAFUN_VALUE
           "static AFun varAFun;\n"
 #endif
@@ -1939,7 +1940,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   //
   // Implement auxiliary functions
   //
-  fprintf(f,  "static int num_apples = 0;\n"
+/*  fprintf(f,  "static int num_apples = 0;\n"
           "#define GET_APPL_INC 5\n"
           "static AFun getAppl(int arity)\n"
           "{\n"
@@ -1969,7 +1970,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "  return apples[arity];\n"
           "}\n"
           "\n"
-         );
+         ); */
 
   for (int i=1; i<=max_arity; i++)
   {
@@ -2062,10 +2063,11 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
             "      }\n"
             "    }\n"
             "\n"
-            "    return ATmakeApplArray(getAppl(arity+%i-1),args);\n"
+//            "    return ATmakeApplArray(getAppl(arity+%i-1),args);\n"
+            "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity+%i),args);\n"
             "  }\n"
             "}\n"
-            "\n",i);
+            "\n",i+1);
   }
 
   //
@@ -2192,13 +2194,15 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "  ATprotectAFun(opidAFun);\n"
           "\n"
 #endif
-          "  apples = NULL;\n"
-          "  getAppl(%i);\n",
-          max_arity
+//          "  apples = NULL;\n"
+//           "  getAppl(%i);\n",
+          "  mcrl2::data::detail::get_appl_afun_value(%i);\n",
+          max_arity+1
          );
   for (int i=0; i<=max_arity; i++)
   {
-    fprintf(f,  "  appl%i = apples[%i];\n",i,i);
+//    fprintf(f,  "  appl%i = apples[%i];\n",i,i);
+    fprintf(f,  "  appl%i = mcrl2::data::detail::get_appl_afun_value(%i);\n",i,i+1);
   }
   fprintf(f,  "\n");
   for (int i=0; i < num_opids; i++)
@@ -2251,7 +2255,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "  ATunprotectAFun(opidAFun);\n"
           "\n"
 #endif
-          "  free(apples);\n"
+//          "  free(apples);\n"
           "\n");
   for (int i=0; i < num_opids; i++)
   {
@@ -2326,7 +2330,8 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "          args[k] = ATgetArgument((ATermAppl) t,i);\n"
           "        }\n"
           // call rewrite function of head with new term
-          "        return int2func[function_index](ATmakeApplArray(getAppl(arity_u+arity_t-2),args));\n"
+//          "        return int2func[function_index](ATmakeApplArray(getAppl(arity_u+arity_t-2),args));\n"
+          "        return int2func[function_index](ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity_u+arity_t-1),args));\n"
           "      } else {\n"
           // add rewritten arguments of u to new args
           "        for (int i=1; i<arity_u; i++)\n"
@@ -2340,7 +2345,8 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "          args[k] = (ATerm) rewrite((ATermAppl) ATgetArgument((ATermAppl) t,i));\n"
           "        }\n"
           // done; return new term
-          "        return ATmakeApplArray(getAppl(arity_u+arity_t-2),args);\n"
+//          "        return ATmakeApplArray(getAppl(arity_u+arity_t-2),args);\n"
+          "        return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity_u+arity_t-1),args);\n"
           "      }\n"
           "    }\n"
           "  } else {\n"
@@ -2516,10 +2522,9 @@ ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
   {
     BuildRewriteSystem();
   }
-
   ATerm a = (ATerm) so_rewr((ATermAppl) Term);
 
-  return internal_quantifier_enumeration((ATerm) a );
+  return internal_quantifier_enumeration((ATerm) a);
 }
 
 void RewriterCompilingInnermost::setSubstitutionInternal(ATermAppl Var, ATerm Expr)

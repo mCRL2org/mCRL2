@@ -95,7 +95,7 @@ ATerm RewriterJitty::OpId2Int(ATermAppl Term, bool add_opids)
 }
 
 
-static AFun* apples;
+/* static AFun* apples;
 static size_t num_apples = 0;
 
 #define getAppl(x) ((x < num_apples)?apples[x]:getAppl2(x))
@@ -129,7 +129,7 @@ static AFun getAppl2(size_t arity)
   }
 
   return apples[arity];
-}
+} */
 
 ATermAppl RewriterJitty::toInner(ATermAppl Term, bool add_opids)
 {
@@ -147,13 +147,15 @@ ATermAppl RewriterJitty::toInner(ATermAppl Term, bool add_opids)
     if (gsIsOpId(Term))
     {
       // l = ATinsert(l,(ATerm) OpId2Int(Term,add_opids));
-      return ATmakeAppl1(getAppl(1),OpId2Int(Term,add_opids));
+      // return ATmakeAppl1(getAppl(1),OpId2Int(Term,add_opids));
+      return Apply0(OpId2Int(Term,add_opids));
 
     }
     else
     {
       // l = ATinsert(l,(ATerm) Term);
-      return ATmakeAppl1(getAppl(1),(ATerm) Term);
+      // return ATmakeAppl1(getAppl(1),(ATerm) Term);
+      return Apply0((ATerm) Term);
     }
   }
   else
@@ -180,7 +182,8 @@ ATermAppl RewriterJitty::toInner(ATermAppl Term, bool add_opids)
     l = ATreverse(l);
   }
 
-  return ATmakeApplList(getAppl(ATgetLength(l)),l);
+  // return ATmakeApplList(getAppl(ATgetLength(l)),l);
+  return Apply(l);
 }
 
 ATermAppl RewriterJitty::fromInner(ATermAppl Term)
@@ -640,7 +643,8 @@ static ATerm subst_values(ATermAppl* vars, ATerm* vals, size_t len, ATerm t)
     }
     else
     {
-      return (ATerm) ATmakeApplArray(getAppl(new_arity),args);
+      // return (ATerm) ATmakeApplArray(getAppl(new_arity),args);
+      return (ATerm)ApplyArray(new_arity,args);
     }
   }
 }
@@ -940,7 +944,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
               i++;
             }
 
-            ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs);
+            // ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs);
+            ATermAppl a = ApplyArray(new_arity,newargs);
 
             ATermAppl aa = rewrite_aux(a);
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
@@ -966,7 +971,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
       }
     }
 
-    ATermAppl a = ATmakeApplArray(getAppl(arity),rewritten);
+    // ATermAppl a = ATmakeApplArray(getAppl(arity),rewritten);
+    ATermAppl a = ApplyArray(arity,rewritten);
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
     gsMessage("      return %T\n",a);

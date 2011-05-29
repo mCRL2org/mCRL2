@@ -3,8 +3,10 @@
 #include <assert.h>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/data/detail/rewrite.h"
 
 using namespace aterm;
+using namespace mcrl2::data::detail;
 
 #ifdef _MSC_VER
 #define DLLEXPORT __declspec(dllexport)
@@ -111,7 +113,7 @@ void clear_substs()
   }
 }
 
-static AFun *apples;
+/* static AFun *apples;
 static int num_apples = 0;
 #define GET_APPL_INC 5
 static AFun getAppl(int arity)
@@ -140,4 +142,4 @@ static AFun getAppl(int arity)
   }
 
   return apples[arity];
-}
+} */
