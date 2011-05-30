@@ -243,7 +243,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   bool is_abstraction_application(const application& x) const
   {
-    //std::cout << "\n<abstraction>" << pp(x) << " " << pp(x.head()) << " " << std::boolalpha << is_abstraction(x.head()) << std::endl;
     return is_abstraction(x.head());
   }
 
@@ -685,8 +684,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::structured_sort_constructor_argument& x)
   {
     derived().enter(x);
-    derived()(x.name());
-    derived().print(": ");
+    if (x.name() != no_identifier())
+    {
+      derived()(x.name());
+      derived().print(": ");
+    }
     derived()(x.sort());
     derived().leave(x);
   }
@@ -709,7 +711,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().enter(x);
     derived()(x.name());
     derived().print(" = ");
-//std::cout << "<ref>" << core::pp(x.reference()) << " " << x.reference() << std::endl;    
     derived()(x.reference());
     derived().leave(x);
   }
@@ -1135,7 +1136,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_set::is_setfset_application(x))
       {
-        //std::cout << "\n<setfset>" << core::pp(x) << " " << x << std::endl;
         data_expression y = sort_set::arg(x);
         if (sort_fset::is_fset_empty_function_symbol(y))
         {
@@ -1218,7 +1218,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_bag::is_bagfbag_application(x))
       {
-        //std::cout << "\n<bagfbag>" << core::pp(x) << " " << x << std::endl;
         data_expression y = sort_bag::arg(x);
         if (sort_fbag::is_fbag_empty_function_symbol(y))
         {
@@ -1255,7 +1254,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else if (is_function_update_application(x))
     {
-      //std::cout << "\n<function_update>" << pp(x) << " " << x << std::endl;
       data_expression x1 = data::arg1(x);
       data_expression x2 = data::arg2(x);
       data_expression x3 = data::arg3(x);
@@ -1301,7 +1299,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     else
     {
-      //std::cout << "\n<error: unknown application>" << core::pp(x) << " " << x << " " << core::pp(x.sort()) << "\n";
       print_function_application(x);
     }
     derived().leave(x);
@@ -1311,7 +1308,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(x.body());
-    derived()(x.declarations());
+    derived().print(" whr ");
+    assignment_expression_list declarations = x.declarations();
+    for (assignment_expression_list::const_iterator i = declarations.begin(); i != declarations.end(); ++i)
+    {
+      if (i != declarations.begin())
+      {
+        derived().print(", ");
+      }
+      derived()(i->lhs());
+      derived().print(" = ");
+      derived()(i->rhs());
+    }
+    derived().print(" end");
     derived().leave(x);
   }
 
@@ -1420,10 +1429,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
                     const std::map<core::identifier_string, variable>& variable_map
                    )
   {
-    //std::cout << "<eqn>" << std::endl;
-    //std::cout << core::pp(eqn) << std::endl;
     const variable_list& v = eqn.variables();
-    //std::cout << "<done>" << std::endl;
     for (variable_list::const_iterator i = v.begin(); i != v.end(); ++i)
     {
       std::map<core::identifier_string, variable>::const_iterator j = variable_map.find(i->name());
