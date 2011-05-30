@@ -450,6 +450,9 @@ if (log_##level > MCRL2_MAX_LOG_LEVEL) ; \
 else if (log_##level > mcrl2_logger::get_reporting_level(__VA_ARGS__)) ; \
 else mcrl2_logger().get(log_##level, ##__VA_ARGS__)
 
+#define mCRL2logEnabled(level, ...) \
+((log_##level <= MCRL2_MAX_LOG_LEVEL) && log_##level <= mcrl2_logger::get_reporting_level(__VA_ARGS__))
+
 // \deprecated. For backwards compatibility with gsMessage
 #define mCRL2logGS(level) \
 if (level > MCRL2_MAX_LOG_LEVEL) ; \
