@@ -895,7 +895,6 @@ class pbes_constelm_algorithm: public core::algorithm
 
         const vertex& u = m_vertices[var.name()];
         atermpp::vector<edge>& u_edges = m_edges[var.name()];
-        variable_sequence_type Xparams = u.variable().parameters();
 
         for (typename atermpp::vector<edge>::const_iterator ei = u_edges.begin(); ei != u_edges.end(); ++ei)
         {
