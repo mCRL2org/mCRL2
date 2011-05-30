@@ -23,6 +23,7 @@
 #include <cstdio>
 
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/atermpp/aterm_init.h"
 //#include "mcrl2/utilities/rewriter_tool.h"
@@ -38,7 +39,7 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using utilities::tools::input_tool;
-//using utilities::tools::rewriter_tool;
+using utilities::tools::rewriter_tool;
 //using utilities::tools::pbes_rewriter_tool;
 
 // class pg_solver_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
@@ -47,10 +48,10 @@ using utilities::tools::input_tool;
 // scc decomposition can be compiled in using directive
 // PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
 
-class pg_solver_tool : public input_tool
+class pg_solver_tool : public rewriter_tool<input_tool>
 {
   protected:
-    typedef input_tool super;
+    typedef rewriter_tool<input_tool> super;
 
     pbespgsolve_options m_options;
 
@@ -121,16 +122,15 @@ class pg_solver_tool : public input_tool
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
-      {
-        std::clog << "pbespgsolve parameters:" << std::endl;
-        std::clog << "  input file:        " << input_filename() << std::endl;
-        std::clog << "  solver type:       " << print(m_options.solver_type) << std::endl;
-        std::clog << "  eliminate self-loops: " << (m_options.use_deloop_solver?"yes":"no") << std::endl;
-        std::clog << "  eliminate cycles:  " << (m_options.use_decycle_solver?"yes":"no") << std::endl;
-        std::clog << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
-        std::clog << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
-      }
+      m_options.rewrite_strategy = rewrite_strategy();
+
+      mCRL2log(verbose) << "pbespgsolve parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:        " << input_filename() << std::endl;
+      mCRL2log(verbose) << "  solver type:       " << print(m_options.solver_type) << std::endl;
+      mCRL2log(verbose) << "  eliminate self-loops: " << (m_options.use_deloop_solver?"yes":"no") << std::endl;
+      mCRL2log(verbose) << "  eliminate cycles:  " << (m_options.use_decycle_solver?"yes":"no") << std::endl;
+      mCRL2log(verbose) << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
+      mCRL2log(verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
 
       pbes<> p;
       try
@@ -152,11 +152,11 @@ class pg_solver_tool : public input_tool
       }
 
       size_t log_level = 0;
-      if (mcrl2::core::gsVerbose)
+      if (mCRL2logEnabled(verbose))
       {
         log_level = 1;
       }
-      if (mcrl2::core::gsDebug)
+      if (mCRL2logEnabled(debug))
       {
         log_level = 2;
       }

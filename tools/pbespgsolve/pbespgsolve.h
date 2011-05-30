@@ -86,13 +86,15 @@ struct pbespgsolve_options
   bool use_decycle_solver;
   bool use_deloop_solver;
   bool verify_solution;
+  data::rewriter::strategy rewrite_strategy;
 
   pbespgsolve_options()
     : solver_type(spm_solver),
       use_scc_decomposition(true),
       use_decycle_solver(false),
       use_deloop_solver(true),
-      verify_solution(true)
+      verify_solution(true),
+      rewrite_strategy(data::rewriter::jitty)
   {
   }
 };
@@ -100,8 +102,6 @@ struct pbespgsolve_options
 class pbespgsolve_algorithm
 {
   protected:
-    std::auto_ptr<LiftingStrategyFactory> lift_strat_factory;
-    std::auto_ptr<ParityGameSolverFactory> subsolver_factory;
     std::auto_ptr<ParityGameSolverFactory> solver_factory;
     mcrl2::utilities::execution_timer& m_timer;
     pbespgsolve_options m_options;
@@ -116,13 +116,11 @@ class pbespgsolve_algorithm
       {
         bool alternative_solver = (options.solver_type == alternative_spm_solver);
 
-        // Create a lifting strategy factory:
-        lift_strat_factory.reset(
-          new PredecessorLiftingStrategyFactory);
-
         // Create a SPM solver factory:
         solver_factory.reset(
-          new SmallProgressMeasuresSolverFactory(lift_strat_factory.get(), alternative_solver));
+          new SmallProgressMeasuresSolverFactory
+                (new PredecessorLiftingStrategyFactory, alternative_solver)
+        );
       }
       else if (options.solver_type == recursive_solver)
       {
@@ -137,23 +135,20 @@ class pbespgsolve_algorithm
       if (options.use_scc_decomposition)
       {
         // Wrap solver factory into a component solver factory:
-        subsolver_factory = solver_factory;
         solver_factory.reset(
-          new ComponentSolverFactory(*subsolver_factory));
+          new ComponentSolverFactory(*solver_factory.release()));
       }
 
       if (options.use_decycle_solver)
       {
-        subsolver_factory = solver_factory;
         solver_factory.reset(
-          new DecycleSolverFactory(*subsolver_factory));
+          new DecycleSolverFactory(*solver_factory.release()));
       }
 
       if (options.use_deloop_solver)
       {
-        subsolver_factory = solver_factory;
         solver_factory.reset(
-          new DeloopSolverFactory(*subsolver_factory));
+          new DeloopSolverFactory(*solver_factory.release()));
       }
     }
 
@@ -161,10 +156,14 @@ class pbespgsolve_algorithm
     bool run(pbes<Container>& p)
     {
       m_timer.start("initialization");
+      mCRL2log(verbose) << "Generating parity game..."  << std::endl;
       // Generate the game from a PBES:
       verti goal_v;
       ParityGame pg;
-      pg.assign_pbes(p, &goal_v); // N.B. mCRL2 could raise an exception here
+
+      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, m_options.rewrite_strategy); // N.B. mCRL2 could raise an exception here
+
+      mCRL2log(verbose) << "Solving..." << std::endl;
 
       // Create a solver:
       std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));

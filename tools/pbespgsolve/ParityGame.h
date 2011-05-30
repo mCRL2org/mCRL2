@@ -16,6 +16,7 @@
 
 #ifdef WITH_MCRL2
 #include <mcrl2/pbes/pbes.h>
+#include <mcrl2/data/rewriter.h>
 #endif
 
 #if __GNUC__ >= 3
@@ -216,7 +217,7 @@ public:
     template <typename Container>
     void assign_pbes(
         mcrl2::pbes_system::pbes<Container> &pbes, verti *goal_vertex = 0,
-        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL );
+        StaticGraph::EdgeDirection edge_dir = StaticGraph::EDGE_BIDIRECTIONAL, mcrl2::data::rewriter::strategy rewrite_strategy = mcrl2::data::rewriter::jitty );
 #endif
 
 protected:
