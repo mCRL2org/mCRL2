@@ -140,11 +140,6 @@ struct printer: public core::traverser<Derived>
 
   bool m_print_sorts;
   std::ostream* m_out;
-#ifdef MCRL2_PRINT_DEBUG
-  std::ostringstream debug;
-  std::vector<std::string> debug_strings;
-  std::vector<std::size_t> debug_positions;
-#endif
 
   std::ostream& out()
   {
@@ -161,46 +156,9 @@ struct printer: public core::traverser<Derived>
     return m_print_sorts;
   }
 
-#ifdef MCRL2_PRINT_DEBUG
-  template <typename T>
-  std::string print_debug(const T& t)
-  {
-    return pp(t);
-  }
-
-  // Enter object
-  template <typename Expression>
-  void enter(const Expression& x)
-  {
-    debug_strings.push_back(print_debug(x));
-    debug_positions.push_back(debug.str().size());
-  }
-
-  // Leave object
-  template <typename Expression>
-  void leave(const Expression& x)
-  {
-    std::string expected = debug_strings.back();
-    debug_strings.pop_back();
-    std::size_t begin_pos = debug_positions.back();
-    debug_positions.pop_back();
-    std::string result = debug.str().substr(begin_pos);
-    if (expected != result)
-    {
-      mCRL2log(error) << "--- Error in print ---\n"
-                << "  expected: " << expected << "\n"
-                << "       got: " << result << std::endl;
-      BOOST_CHECK(expected == result);
-    }
-  }
-#endif
-
   void print(const std::string& s)
   {
     out() << s;
-#ifdef MCRL2_PRINT_DEBUG
-    debug << s;
-#endif
   }
 
   void operator()(const core::identifier_string& x)
