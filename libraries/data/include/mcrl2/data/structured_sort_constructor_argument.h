@@ -159,7 +159,9 @@ class structured_sort_constructor_argument: public detail::structured_sort_const
       : detail::structured_sort_constructor_argument_base(make_argument(sort, detail::make_identifier(name)))
     {}
 
-    /// \overload
+    /// \brief Get the name of the constructor argument
+    /// \note This returns no_identifier() if no name is available, and needs
+    ///       to be treated as a special case in some user code.
     core::identifier_string name() const
     {
       return detail::make_identifier(super::name());
