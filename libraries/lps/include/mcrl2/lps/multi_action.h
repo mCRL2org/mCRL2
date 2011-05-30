@@ -379,7 +379,7 @@ struct not_equal_multi_actions_builder
 
 /// \brief Returns a string representation of a multi action
 inline
-std::string pp(const multi_action& m)
+std::string pp1(const multi_action& m)
 {
   return m.to_string();
 }

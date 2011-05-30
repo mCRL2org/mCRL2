@@ -215,7 +215,7 @@ class action_label_lts:public mcrl2::lps::multi_action
 /** \brief Print the action label to string. */
 inline std::string pp(const action_label_lts l)
 {
-  return pp(mcrl2::lps::multi_action(l));
+  return pp1(mcrl2::lps::multi_action(l));
 }
 
 /** \brief Parse a string into an action label.

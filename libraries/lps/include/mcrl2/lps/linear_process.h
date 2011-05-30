@@ -19,7 +19,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 
@@ -218,7 +217,7 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
 
 /// \brief Pretty print the linear process
 inline
-std::string pp(const linear_process& p)
+std::string pp1(const linear_process& p)
 {
   return core::pp(linear_process_to_aterm(p));
 }

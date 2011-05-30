@@ -264,7 +264,7 @@ class action_label_data_type: public pins_data_type
 
     std::string print(int i) const
     {
-      return lps::pp(index2expression(i));
+      return lps::pp1(index2expression(i));
     }
 
     std::size_t parse(const std::string& s)

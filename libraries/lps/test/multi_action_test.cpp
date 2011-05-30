@@ -93,7 +93,7 @@ void test_pp()
   action_list b1  = make_list(act("b", make_list(d1)));
   action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
   multi_action m(a11);
-  std::string s = pp(m);
+  std::string s = pp1(m);
   std::cout << "s = " << s << std::endl;
   BOOST_CHECK(s == "a(d1)|a(d1)");
 }

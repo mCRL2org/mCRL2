@@ -692,6 +692,28 @@ action_summand summand_to_action_summand(const deprecated::summand& s)
   return action_summand(s.summation_variables(), s.condition(), s.multi_action(), s.assignments());
 }
 
+inline
+std::string pp(const action_summand_vector& v)
+{
+  std::ostringstream out;
+  for (action_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    out << core::pp(action_summand_to_aterm(*i)) << std::endl;
+  }
+  return out.str();
+}
+
+inline
+std::string pp(const deadlock_summand_vector& v)
+{
+  std::ostringstream out;
+  for (deadlock_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    out << core::pp(deadlock_summand_to_aterm(*i)) << std::endl;
+  }
+  return out.str();
+}
+
 } // namespace lps
 
 } // namespace mcrl2

@@ -307,10 +307,6 @@ bool operator!=(const specification& spec1, const specification& spec2)
 #include "mcrl2/lps/find.h"
 #endif
 
-#ifndef MCRL2_LPS_PRINT_H
-#include "mcrl2/lps/print.h"
-#endif
-
 #ifndef MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
 #include "mcrl2/lps/detail/lps_well_typed_checker.h"
 #endif
