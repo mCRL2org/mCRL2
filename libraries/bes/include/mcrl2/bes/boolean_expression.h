@@ -327,12 +327,14 @@ bool is_boolean_variable(const boolean_expression& t)
 
 namespace accessors
 {
+inline
 boolean_expression left(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
   return atermpp::arg1(e);
 }
 
+inline
 boolean_expression right(boolean_expression const& e)
 {
   assert(is_and(e) || is_or(e) || is_imp(e));
@@ -592,6 +594,7 @@ namespace bes
 /// \param last End of a sequence of of boolean expressions
 /// \return Or applied to the sequence of boolean expressions [first, last)
 template <typename FwdIt>
+inline
 boolean_expression join_or(FwdIt first, FwdIt last)
 {
   typedef core::term_traits<boolean_expression> tr;
@@ -603,6 +606,7 @@ boolean_expression join_or(FwdIt first, FwdIt last)
 /// \param last End of a sequence of of boolean expressions
 /// \return And applied to the sequence of boolean expressions [first, last)
 template <typename FwdIt>
+inline
 boolean_expression join_and(FwdIt first, FwdIt last)
 {
   typedef core::term_traits<boolean_expression> tr;

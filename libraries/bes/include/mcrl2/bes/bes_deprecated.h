@@ -32,7 +32,6 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/messaging.h"
 
-// #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
 
@@ -108,12 +107,14 @@ inline AFun PAIR()
   return PAIR;
 }
 
-static ATermAppl apply_pair_symbol(ATermAppl t1, ATermAppl t2)
+static
+inline ATermAppl apply_pair_symbol(ATermAppl t1, ATermAppl t2)
 {
   return ATmakeAppl2(PAIR(),(ATerm)t1,(ATerm)t2);
 }
 
-static bool is_pair(ATerm t)
+static
+inline bool is_pair(ATerm t)
 {
   return ATgetAFun(t)==PAIR();
 }
@@ -1110,6 +1111,227 @@ inline bes_expression toBDD(bes_expression b)
   return toBDD_rec(b,hashtable);
 }
 
+///\brief returns a pbes expression which has been rewritten into internal rewrite format.
+///\details This function is used to translate a term into internal rewrite format, which is
+/// required to get good performance out of the rewriter by Muck van Weerdenburg. This code
+/// should be removed once the new rewriters are getting enough performance. Currently, however,
+/// the performance of the rewriter with the nice interface is so bad that it cannot be used
+/// for actual verification.
+///
+/// This function simplifies all data expressions in p by applying the rewriter to it.
+/// Data expressions that are true or false are translated to the pbes expressions true and false.
+/// Quantified variables that do not occur in the body are removed.
+/// Conjunctions and disjunctions of which one of the arguments is true or false are simplified.
+/// If the opt_precompile_pbes is set, the data expressions in the resulting
+/// pbes expressions are translated into the internal format belonging to the rewriter. The
+/// advantage of this is that the rewriter does not have to translate the data expressions
+/// to internal format the next time the rewriter is applied to it. This is for instance useful
+/// in the tool pbes2bool (or pbesinst) where pbes expressions must iteratively be rewritten.
+
+inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
+  mcrl2::pbes_system::pbes_expression p,
+  bool opt_precompile_pbes,
+  mcrl2::data::detail::legacy_rewriter& R
+  )
+{
+  using namespace mcrl2;
+  using namespace mcrl2::pbes_system;
+  using namespace mcrl2::pbes_system::pbes_expr;
+  using namespace mcrl2::pbes_system::accessors;
+
+  pbes_expression result;
+
+  if (is_pbes_true(p))
+
+  {
+    // p is True
+    result = p;
+  }
+  else if (is_pbes_false(p))
+  {
+    // p is False
+    result = p;
+  }
+  else if (is_pbes_and(p))
+  {
+    // p = and(left, right)
+    //Rewrite left and right as far as possible
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R);
+    if (is_pbes_false(l))
+    {
+      result = pbes_expr::false_();
+    }
+    else
+    {
+      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R);
+      //Options for left and right
+      if (is_pbes_false(rt))
+      {
+        result = pbes_expr::false_();
+      }
+      else if (is_pbes_true(l))
+      {
+        result = rt;
+      }
+      else if (is_pbes_true(rt))
+      {
+        result = l;
+      }
+      else if (l==rt)
+      {
+        result = l;
+      }
+      else
+      {
+        result = pbes_expr::and_(l,rt);
+      }
+    }
+  }
+  else if (is_pbes_or(p))
+  {
+    // p = or(left, right)
+    //Rewrite left and right as far as possible
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R);
+    if (is_pbes_true(l))
+    {
+      result = pbes_expr::true_();
+    }
+    else
+    {
+      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R);
+      if (is_pbes_true(rt))
+      {
+        result = pbes_expr::true_();
+      }
+      else if (is_pbes_false(l))
+      {
+        result = rt;
+      }
+      else if (is_pbes_false(rt))
+      {
+        result = l;
+      }
+      else if (l==rt)
+      {
+        result = l;
+      }
+      else
+      {
+        result = pbes_expr::or_(l,rt);
+      }
+    }
+  }
+  else if (is_pbes_forall(p))
+  {
+    // p = forall(data::data_expression_list, pbes_expression)
+    data::variable_list data_vars = var(p);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R);
+    //Remove data_vars which do not occur in expr
+    data::variable_list occurred_data_vars;
+    for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+    {
+      if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
+      {
+        occurred_data_vars = push_front(occurred_data_vars, *i);
+      }
+    }
+
+    // If no data_vars
+    if (occurred_data_vars.empty())
+    {
+      result = expr;
+    }
+    else
+    {
+      result=pbes_expr::forall(occurred_data_vars,expr);
+    }
+  }
+  else if (is_pbes_exists(p))
+  {
+    // p = exists(data::data_expression_list, pbes_expression)
+    data::variable_list data_vars = var(p);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R);
+    //Remove data_vars which does not occur in expr
+    data::variable_list occurred_data_vars;
+    for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
+    {
+      if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
+      {
+        occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
+      }
+    }
+
+    //If no data_vars remaining
+    if (occurred_data_vars.empty())
+    {
+      result = expr;
+    }
+    else
+    {
+      result=pbes_expr::exists(occurred_data_vars,expr);
+    }
+  }
+  else if (is_propositional_variable_instantiation(p))
+  {
+    //std::cerr << "Rewriting propositional variable instantiation " << p << std::endl;
+    // p is a propositional variable
+    propositional_variable_instantiation propvar = p;
+    core::identifier_string name = propvar.name();
+    data::data_expression_list parameters;
+    data::data_expression_list current_parameters(propvar.parameters());
+    for (data::data_expression_list::const_iterator l=current_parameters.begin();
+         l != current_parameters.end(); ++l)
+    {
+      parameters = atermpp::push_front(parameters,
+                ((opt_precompile_pbes?
+                       data::data_expression(R.rewrite_internal(R.convert_to(*l))):
+                       R(*l))));
+    }
+    parameters = atermpp::reverse(parameters);
+    result = pbes_expression(propositional_variable_instantiation(name, parameters));
+    //std::cerr << "Rewritten version: " << result << std::endl;
+  }
+  else
+  {
+    // p is a data::data_expression
+
+    if (opt_precompile_pbes)
+    {
+      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p));
+      if (d==R.internal_true)
+      {
+        result = pbes_expr::true_();
+      }
+      else if (d==R.internal_false)
+      {
+        result = pbes_expr::false_();
+      }
+      else
+      {
+        result = d;
+      }
+    }
+    else
+    {
+      data::data_expression d(R(p));
+      if (d == data::sort_bool::true_())
+      {
+        result = pbes_expr::true_();
+      }
+      else if (d == data::sort_bool::false_())
+      {
+        result = pbes_expr::false_();
+      }
+      else
+      {
+        result = d;
+      }
+    }
+  }
+
+  return result;
+}
+
 class boolean_equation_system
 {
   private:
@@ -1500,7 +1722,7 @@ class boolean_equation_system
       assert(0<v);
       check_vector_sizes(v);
       if (count_variable_relevance)
-      { 
+      {
         return control_info[v] & RELEVANCE_MASK;
       }
 
@@ -1649,223 +1871,6 @@ class boolean_equation_system
     }
 
 ////////////////////////////  Functions to generate a bes out of a pbes  /////////////////////////
-
-
-    ///\brief returns a pbes expression which has been rewritten into internal rewrite format.
-    ///\details This function is used to translate a term into internal rewrite format, which is
-    /// required to get good performance out of the rewriter by Muck van Weerdenburg. This code
-    /// should be removed once the new rewriters are getting enough performance. Currently, however,
-    /// the performance of the rewriter with the nice interface is so bad that it cannot be used
-    /// for actual verification.
-    ///
-    /// This function simplifies all data expressions in p by applying the rewriter to it.
-    /// Data expressions that are true or false are translated to the pbes expressions true and false.
-    /// Quantified variables that do not occur in the body are removed.
-    /// Conjunctions and disjunctions of which one of the arguments is true or false are simplified.
-    /// If the opt_precompile_pbes is set, the data expressions in the resulting
-    /// pbes expressions are translated into the internal format belonging to the rewriter. The
-    /// advantage of this is that the rewriter does not have to translate the data expressions
-    /// to internal format the next time the rewriter is applied to it. This is for instance useful
-    /// in the tool pbes2bool (or pbesinst) where pbes expressions must iteratively be rewritten.
-
-    inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
-      mcrl2::pbes_system::pbes_expression p)
-    {
-      using namespace mcrl2;
-      using namespace mcrl2::pbes_system;
-      using namespace mcrl2::pbes_system::pbes_expr;
-      using namespace mcrl2::pbes_system::accessors;
-
-      pbes_expression result;
-
-      if (is_pbes_true(p))
-
-      {
-        // p is True
-        result = p;
-      }
-      else if (is_pbes_false(p))
-      {
-        // p is False
-        result = p;
-      }
-      else if (is_pbes_and(p))
-      {
-        // p = and(left, right)
-        //Rewrite left and right as far as possible
-        pbes_expression l = pbes_expression_rewrite_and_simplify(left(p));
-        if (is_pbes_false(l))
-        {
-          result = pbes_expr::false_();
-        }
-        else
-        {
-          pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p));
-          //Options for left and right
-          if (is_pbes_false(rt))
-          {
-            result = pbes_expr::false_();
-          }
-          else if (is_pbes_true(l))
-          {
-            result = rt;
-          }
-          else if (is_pbes_true(rt))
-          {
-            result = l;
-          }
-          else if (l==rt)
-          {
-            result = l;
-          }
-          else
-          {
-            result = pbes_expr::and_(l,rt);
-          }
-        }
-      }
-      else if (is_pbes_or(p))
-      {
-        // p = or(left, right)
-        //Rewrite left and right as far as possible
-        pbes_expression l = pbes_expression_rewrite_and_simplify(left(p));
-        if (is_pbes_true(l))
-        {
-          result = pbes_expr::true_();
-        }
-        else
-        {
-          pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p));
-          if (is_pbes_true(rt))
-          {
-            result = pbes_expr::true_();
-          }
-          else if (is_pbes_false(l))
-          {
-            result = rt;
-          }
-          else if (is_pbes_false(rt))
-          {
-            result = l;
-          }
-          else if (l==rt)
-          {
-            result = l;
-          }
-          else
-          {
-            result = pbes_expr::or_(l,rt);
-          }
-        }
-      }
-      else if (is_pbes_forall(p))
-      {
-        // p = forall(data::data_expression_list, pbes_expression)
-        data::variable_list data_vars = var(p);
-        pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p));
-        //Remove data_vars which do not occur in expr
-        data::variable_list occurred_data_vars;
-        for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
-        {
-          if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
-          {
-            occurred_data_vars = push_front(occurred_data_vars, *i);
-          }
-        }
-
-        // If no data_vars
-        if (occurred_data_vars.empty())
-        {
-          result = expr;
-        }
-        else
-        {
-          result=pbes_expr::forall(occurred_data_vars,expr);
-        }
-      }
-      else if (is_pbes_exists(p))
-      {
-        // p = exists(data::data_expression_list, pbes_expression)
-        data::variable_list data_vars = var(p);
-        pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p));
-        //Remove data_vars which does not occur in expr
-        data::variable_list occurred_data_vars;
-        for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
-        {
-          if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
-          {
-            occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
-          }
-        }
-
-        //If no data_vars remaining
-        if (occurred_data_vars.empty())
-        {
-          result = expr;
-        }
-        else
-        {
-          result=pbes_expr::exists(occurred_data_vars,expr);
-        }
-      }
-      else if (is_propositional_variable_instantiation(p))
-      {
-        // p is a propositional variable
-        propositional_variable_instantiation propvar = p;
-        core::identifier_string name = propvar.name();
-        data::data_expression_list parameters;
-        data::data_expression_list current_parameters(propvar.parameters());
-        for (data::data_expression_list::const_iterator l=current_parameters.begin();
-             l != current_parameters.end(); ++l)
-        {
-          parameters = atermpp::push_front(parameters, 
-                    ((opt_precompile_pbes?
-                           data::data_expression(Mucks_rewriter.rewrite_internal(Mucks_rewriter.convert_to(*l))):
-                           Mucks_rewriter(*l))));
-        }
-        parameters = atermpp::reverse(parameters);
-        result = pbes_expression(propositional_variable_instantiation(name, parameters));
-      }
-      else
-      {
-        // p is a data::data_expression
-
-        if (opt_precompile_pbes)
-        {
-          atermpp::aterm_appl d = Mucks_rewriter.rewrite_internal(Mucks_rewriter.convert_to(p));
-          if (d==Mucks_rewriter.internal_true)
-          {
-            result = pbes_expr::true_();
-          }
-          else if (d==Mucks_rewriter.internal_false)
-          {
-            result = pbes_expr::false_();
-          }
-          else
-          {
-            result = d;
-          }
-        }
-        else
-        {
-          data::data_expression d(Mucks_rewriter(p));
-          if (d == data::sort_bool::true_())
-          {
-            result = pbes_expr::true_();
-          }
-          else if (d == data::sort_bool::false_())
-          {
-            result = pbes_expr::false_();
-          }
-          else
-          {
-            result = d;
-          }
-        }
-      }
-
-      return result;
-    }
 
 
     //function add_propositional_variable_instantiations_to_indexed_set
@@ -2114,7 +2119,8 @@ class boolean_equation_system
 #endif
       pbes_expression p=// pbes_rewriter(pbes_spec.initial_state());
         pbes_expression_rewrite_and_simplify(
-          pbes_spec.initial_state());
+          pbes_spec.initial_state(), opt_precompile_pbes, Mucks_rewriter);
+
       variable_index.put((internal_opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
       if (opt_strategy>=on_the_fly)
@@ -2153,7 +2159,7 @@ class boolean_equation_system
               eqi->symbol(),
               eqi->variable(),
               pbes_expression_rewrite_and_simplify(
-                eqi->formula()
+                eqi->formula(), opt_precompile_pbes, Mucks_rewriter
               ))));
         // Rewriting terms here can lead to non termination, in
         // case the quantifier-all rewriter is used. This kind of rewriting
@@ -2585,12 +2591,12 @@ namespace bes
 {
 
 template <class Container>
-void save_bes_in_pbes_format(
+inline void save_bes_in_pbes_format(
   const std::string& outfilename,
   boolean_equation_system& bes_equations,
   const typename mcrl2::pbes_system::pbes<Container> &p);
-void save_bes_in_cwi_format(const std::string& outfilename,boolean_equation_system& bes_equations);
-void save_bes_in_vasy_format(const std::string& outfilename,boolean_equation_system bes_equations);
+inline void save_bes_in_cwi_format(const std::string& outfilename,boolean_equation_system& bes_equations);
+inline void save_bes_in_vasy_format(const std::string& outfilename,boolean_equation_system bes_equations);
 
 
 static void save_rhs_in_cwi_form(std::ostream& outputfile,
@@ -2701,6 +2707,7 @@ static bes_expression translate_equation_for_vasy(const size_t i,
 /// \detail Save the BES in blocks with equal rank.
 /// \param string The name of the output file
 /// \parar bes_equations The bes equations to bes saved.
+inline
 void save_bes_in_vasy_format(const std::string& outfilename,bes::boolean_equation_system bes_equations)
 {
   using namespace mcrl2::pbes_system;
@@ -2842,6 +2849,7 @@ static void save_rhs_in_vasy_form(std::ostream& outputfile,
 ///         are saved with increasing rank. Variable X1 is the initial variable.
 /// \param string The name of the output file
 /// \param bes_equations The bes equations to bes saved.
+inline
 void save_bes_in_cwi_format(const std::string& outfilename,boolean_equation_system& bes_equations)
 {
   using namespace mcrl2::pbes_system;
@@ -2937,6 +2945,7 @@ static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expressio
 /// \param bes_equations The bes equations to bes saved.
 /// \param p A PBES from which the datatypes are taken for the PBES that is saved.
 template <class Container>
+inline
 void save_bes_in_pbes_format(
   const std::string& outfilename,
   boolean_equation_system& bes_equations,
@@ -3066,6 +3075,7 @@ static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expressio
 /// \param string The name of the output file
 /// \param bes_equations The bes equations to bes saved.
 
+inline
 void save_bes_in_bes_format(
   const std::string& outfilename,
   boolean_equation_system& bes_equations)
@@ -3455,6 +3465,7 @@ static bes_expression evaluate_bex(
   return result;
 }
 
+inline
 bool solve_bes(bes::boolean_equation_system& bes_equations,
                const bool opt_use_hashtables,
                const bool opt_construct_counter_example)
