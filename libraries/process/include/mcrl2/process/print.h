@@ -14,6 +14,7 @@
 
 #include "mcrl2/lps/print.h"
 #include "mcrl2/process/traverser.h"
+#include "mcrl2/process/detail/precedence.h"
 
 namespace mcrl2 {
 
@@ -51,19 +52,27 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().print(";\n");
   }
 
-//  void print_process_expression(const process_expression& x, int precedence = 5)
-//  {
-//    bool print_parens = (data::detail::precedence(x) < precedence);
-//    if (print_parens)
-//    {
-//      derived().print("(");
-//    }
-//    derived()(x);
-//    if (print_parens)
-//    {
-//      derived().print(")");
-//    }
-//  }
+  void print_process_expression(const process_expression& x, int precedence)
+  {
+    bool print_parens = process::detail::precedence(x) < precedence;
+    if (print_parens)
+    {
+      derived().print("(");
+    }
+    derived()(x);
+    if (print_parens)
+    {
+      derived().print(")");
+    }
+  }
+
+  template <typename T>
+  void print_binary_operation(const T& x, const std::string& op)
+  {
+    print_process_expression(x.left(), process::detail::precedence(x));
+    derived().print(op);
+    print_process_expression(x.right(), process::detail::precedence(x));
+  }
 
   void operator()(const process::process_specification& x)
   {
@@ -130,7 +139,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().print("sum ");
     print_variables(x.bound_variables(), true, true, "", "");
     derived().print(". ");   
-    derived()(x.operand());
+    print_process_expression(x.operand(), process::detail::precedence(x));
     derived().leave(x);
   }
 
@@ -212,9 +221,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::sync& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived().print(" | ");
-    derived()(x.right());
+    print_binary_operation(x, " | ");
     derived().leave(x);
   }
 
@@ -230,63 +237,53 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::seq& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived().print(" . ");
-    derived()(x.right());
+    print_binary_operation(x, " . ");
     derived().leave(x);
   }
 
   void operator()(const process::if_then& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ", true);
-    derived()(x.then_case());
+    print_condition(x.condition(), " -> ");
+    print_process_expression(x.then_case(), process::detail::precedence(x));
     derived().leave(x);
   }
 
   void operator()(const process::if_then_else& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ", true);
-    derived()(x.then_case());
+    print_condition(x.condition(), " -> ");
+    print_process_expression(x.then_case(), process::detail::precedence(x));
     derived().print(" <> ");
-    derived()(x.else_case());
+    print_process_expression(x.else_case(), process::detail::precedence(x));
     derived().leave(x);
   }
 
   void operator()(const process::bounded_init& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived().print(" << ");
-    derived()(x.right());
+    print_binary_operation(x, " << ");
     derived().leave(x);
   }
 
   void operator()(const process::merge& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived().print(" || ");
-    derived()(x.right());
+    print_binary_operation(x, " || ");
     derived().leave(x);
   }
 
   void operator()(const process::left_merge& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived().print(" ||_ ");
-    derived()(x.right());
+    print_binary_operation(x, " ||_ ");
     derived().leave(x);
   }
 
   void operator()(const process::choice& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived().print(" + ");
-    derived()(x.right());
+    print_binary_operation(x, " + ");
     derived().leave(x);
   }
 

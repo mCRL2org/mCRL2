@@ -314,23 +314,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(closer);
   }
 
-  void print_condition(const data_expression& condition, const std::string& arrow = "  ->  ", bool print_parens = false)
-  {
-    if (!sort_bool::is_true_function_symbol(condition))
-    {
-      if (print_parens)
-      {
-        derived().print("(");
-      }
-      derived()(condition);
-      if (print_parens)
-      {
-        derived().print(")");
-      }
-      derived().print(arrow);
-    }
-  }
-
   void print_data_expression(const data_expression& x, int precedence = 5)
   {
     bool print_parens = (data::detail::precedence(x) < precedence);
@@ -342,6 +325,16 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     if (print_parens)
     {
       derived().print(")");
+    }
+  }
+
+  void print_condition(const data_expression& condition, const std::string& arrow = "  ->  ")
+  {
+    if (!sort_bool::is_true_function_symbol(condition))
+    {
+      // TODO: a cleaner way to determine the precedence is needed
+      print_data_expression(condition, 100);
+      derived().print(arrow);
     }
   }
 
@@ -1694,8 +1687,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_sort_declarations(x.user_defined_aliases(), x.user_defined_sorts(), "sort ", ";\n\n", ";\n     ");
     print_function_declarations(x.user_defined_constructors(), "cons ",";\n\n", ";\n     ");
     print_function_declarations(x.user_defined_mappings(), "map  ",";\n\n", ";\n     ");
-    print_equations(x.user_defined_equations(), x, "eqn  ", ";\n", ";\n     ");   
-
+    print_equations(x.user_defined_equations(), x, "eqn  ", ";\n\n", ";\n     ");   
     derived().leave(x);
   }
 
