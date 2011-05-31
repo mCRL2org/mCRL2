@@ -1273,7 +1273,6 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   }
   else if (is_propositional_variable_instantiation(p))
   {
-    //std::cerr << "Rewriting propositional variable instantiation " << p << std::endl;
     // p is a propositional variable
     propositional_variable_instantiation propvar = p;
     core::identifier_string name = propvar.name();
@@ -1289,7 +1288,6 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     }
     parameters = atermpp::reverse(parameters);
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
-    //std::cerr << "Rewritten version: " << result << std::endl;
   }
   else
   {

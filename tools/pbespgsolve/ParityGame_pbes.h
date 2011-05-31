@@ -8,6 +8,9 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 
 #include <mcrl2/pbes/parity_game_generator.h>
+#include <mcrl2/pbes/parity_game_generator_deprecated.h>
+
+typedef mcrl2::pbes_system::parity_game_generator_deprecated pg_generator;
 
 template <typename Container>
 void ParityGame::assign_pbes( mcrl2::pbes_system::pbes<Container> &pbes,
@@ -21,7 +24,7 @@ void ParityGame::assign_pbes( mcrl2::pbes_system::pbes<Container> &pbes,
     if (goal_vertex) *goal_vertex = 2;
 
     // Generate min-priority parity game
-    mcrl2::pbes_system::parity_game_generator pgg(pbes, true, true, 0, rewrite_strategy);
+    pg_generator pgg(pbes, true, true, 0, rewrite_strategy);
 
     // Build the edge list
     StaticGraph::edge_list edges;
@@ -51,7 +54,7 @@ void ParityGame::assign_pbes( mcrl2::pbes_system::pbes<Container> &pbes,
     for (verti v = begin; v < end; ++v)
     {
         bool and_op = pgg.get_operation(v) ==
-                        mcrl2::pbes_system::parity_game_generator::PGAME_AND;
+                        pg_generator::PGAME_AND;
         vertex_[v - begin].player = and_op ? PLAYER_ODD : PLAYER_EVEN;
         vertex_[v - begin].priority = pgg.get_priority(v);
     }

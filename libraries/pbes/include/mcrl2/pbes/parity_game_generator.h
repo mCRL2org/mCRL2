@@ -74,6 +74,10 @@ class parity_game_generator: public core::algorithm
     /// \brief Substitution function type used by the PBES rewriter.
     typedef data::mutable_map_substitution< atermpp::map< data::variable, data::data_expression_with_variables > > substitution_function;
 
+    /// \brief Mark whether initialization has been initialized.
+    /// Needed to properly cope with virtual inheritance!
+    bool m_initialized;
+
     /// \brief The PBES that is being solved.
     pbes<>& m_pbes;
 
@@ -113,16 +117,24 @@ class parity_game_generator: public core::algorithm
     /// \brief True if it is a min-parity game.
     bool m_is_min_parity;
 
-    /// \brief Prints a log message for every 1000-th equation
-    void LOG_EQUATION_COUNT(size_t size, size_t step = 1000) const
+    virtual
+    std::string print(const pbes_expression& e)
     {
-      if (mCRL2logEnabled(verbose))
-      {
-        if (size > 0 && size % step == 0)
-        {
-          mCRL2log(verbose) << "Generated " << size << " BES equations" << std::endl;
-        }
-      }
+      return core::pp(e);
+    }
+
+    /// \brief Check whether e corresponds to true
+    virtual
+    bool is_true(const pbes_expression& e) const
+    {
+      return tr::is_true(e);
+    }
+
+    /// \brief Check whether e corresponds to false
+    virtual
+    bool is_false(const pbes_expression& e) const
+    {
+      return tr::is_false(e);
     }
 
     /// \brief Adds a BES equation for a given PBES expression, if it not already exists.
@@ -130,9 +142,12 @@ class parity_game_generator: public core::algorithm
     /// \param priority A positive integer
     /// \return The index of a BES equation corresponding to the given PBES expression.
     /// If no equation exists for the expression, a new one is added.
+    virtual
     size_t add_bes_equation(pbes_expression t, size_t priority)
     {
       size_t result;
+
+      mCRL2log(debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
 
       // TODO: can this insertion be done more efficiently?
       atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(t);
@@ -161,6 +176,7 @@ class parity_game_generator: public core::algorithm
     /// \param v A sequence of data variables
     /// \param e A sequence of data expressions
     /// \return A sugstitution function.
+    virtual
     substitution_function make_substitution(data::variable_list v, data::data_expression_list e)
     {
       assert(v.size() == e.size());
@@ -174,6 +190,7 @@ class parity_game_generator: public core::algorithm
       return sigma;
     }
 
+    virtual
     pbes_expression expand_rhs(const pbes_expression& psi)
     {
       // expand the right hand side if needed
@@ -181,87 +198,45 @@ class parity_game_generator: public core::algorithm
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
         substitution_function sigma = make_substitution(pbes_eqn.variable().parameters(), tr::param(psi));
-        mCRL2log(debug, "parity_game_generator") << "Expanding right hand side " << tr::pp(pbes_eqn.formula()) << " into ";
+        mCRL2log(debug2, "parity_game_generator") << "Expanding right hand side " << tr::pp(pbes_eqn.formula()) << " into ";
         pbes_expression result(R(pbes_eqn.formula(), sigma));
-        mCRL2log(debug, "parity_game_generator") << tr::pp(result) << std::endl;
+        mCRL2log(debug2, "parity_game_generator") << tr::pp(result) << std::endl;
         return result;
       }
       return psi;
     }
 
-    // prints the BES equation with left hand side 'index' and right hand side 'rhs'
-    void LOG_BES_EQUATION(size_t index, const std::set<size_t>& rhs) const
+    /// \brief Compute equation index map.
+    virtual
+    void compute_equation_index_map()
     {
-      if (mCRL2logEnabled(debug, "parity_game_generator"))
-      {
-        const std::pair<pbes_expression, size_t>& eqn = m_bes[index];
-        const size_t priority = eqn.second;
-        mCRL2log(debug, "parity_game_generator") << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
-        std::string op = (get_operation(index) == PGAME_AND ? " && " : " || ");
-        for (std::set<size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
-        {
-          mCRL2log(debug, "parity_game_generator") << (i == rhs.begin() ? "" : op) << "Y" << *i;
-        }
-        mCRL2log(debug, "parity_game_generator") <<  " (priority = " << priority << ")" << std::endl;
-      }
-    }
 
-  public:
-    /// \brief The operation type of the vertices.
-    enum operation_type { PGAME_OR, PGAME_AND };
-
-    /// \brief Constructor.
-    /// \param p A PBES
-    /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
-    /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-    parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, size_t log_level = 0, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
-      :
-      core::algorithm(log_level),
-      m_pbes(p),
-      generator("UNIQUE_PREFIX"),
-      datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
-      datae(p.data(), datar, generator),
-      datarv(datar),
-      R(datarv, datae),
-      m_true_false_dependencies(true_false_dependencies),
-      m_is_min_parity(is_min_parity)
-    {
-      // Overrule the log level setting by the global value
-      if (log_level == 0)
-      {
-        verbose_level() = get_parity_game_generator_log_level();
-      }
-
-      // Nothing to be done for an empty PBES.
-      if (m_pbes.equations().empty())
-      {
-        return;
-      }
-
-      // Normalize the pbes, since the parity game generator currently doesn't handle negation and implication.
-      pbes_system::normalize(m_pbes);
-
-      // Compute equation index map.
-      for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+      for (atermpp::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
       {
         m_pbes_equation_index[i->variable().name()] = i;
       }
+    }
 
-      // Compute priorities of PBES propositional variables.
+    /// \brief Compute priorities of PBES propositional variables.
+    template <typename Container>
+    void compute_priorities(const Container& equations)
+    {
+
       fixpoint_symbol sigma = fixpoint_symbol::nu();
       size_t priority = 0;
-      for (atermpp::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
+      for (typename Container::const_iterator i = equations.begin(); i != equations.end(); ++i)
       {
-        if (i->symbol() == sigma)
+        if (pbes_equation(*i).symbol() == sigma)
         {
-          m_priorities[i->variable().name()] = priority;
+          m_priorities[pbes_equation(*i).variable().name()] = priority;
         }
         else
         {
-          sigma = i->symbol();
-          m_priorities[i->variable().name()] = ++priority;
+          sigma = pbes_equation(*i).symbol();
+          m_priorities[pbes_equation(*i).variable().name()] = ++priority;
         }
       }
+
       // If it is a max-priority game, adjust the priorities
       if (!m_is_min_parity)
       {
@@ -285,18 +260,105 @@ class parity_game_generator: public core::algorithm
         add_bes_equation(tr::true_(), 0);
         add_bes_equation(tr::false_(), 1);
       }
+    }
 
-      // Add a BES equation for the initial state.
-      propositional_variable_instantiation phi = R(m_pbes.initial_state());
-      add_bes_equation(phi, m_priorities[phi.name()]);
+    // prints the BES equation with left hand side 'index' and right hand side 'rhs'
+    virtual
+    void LOG_BES_EQUATION(size_t index, const std::set<size_t>& rhs)
+    {
+      if (mCRL2logEnabled(debug, "parity_game_generator"))
+      {
+        const std::pair<pbes_expression, size_t>& eqn = m_bes[index];
+        const size_t priority = eqn.second;
+        mCRL2log(debug, "parity_game_generator") << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
+        std::string op = (get_operation(index) == PGAME_AND ? " && " : " || ");
+        for (std::set<size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
+        {
+          mCRL2log(debug, "parity_game_generator") << (i == rhs.begin() ? "" : op) << "Y" << *i;
+        }
+        mCRL2log(debug, "parity_game_generator") <<  " (priority = " << priority << ")" << std::endl;
+      }
+    }
+
+    /// \brief Prints a log message for every step-th equation
+    virtual
+    void LOG_EQUATION_COUNT(size_t size, size_t step = 1000) const
+    {
+      if (mCRL2logEnabled(verbose))
+      {
+        if (size > 0 && (size % step == 0 || (size < 1000 && size % 100 == 0)))
+        {
+          mCRL2log(verbose) << "Generated " << size << " BES equations" << std::endl;
+        }
+      }
+    }
+
+    virtual
+    void initialize_generation()
+    {
+      if (m_initialized)
+      {
+        return;
+      }
+      else
+      {
+        // Nothing to be done for an empty PBES.
+        if (m_pbes.equations().empty())
+        {
+          return;
+        }
+
+        // Normalize the pbes, since the parity game generator currently doesn't handle negation and implication.
+        pbes_system::normalize(m_pbes);
+
+        compute_equation_index_map();
+        compute_priorities(m_pbes.equations());
+
+        // Add a BES equation for the initial state.
+        propositional_variable_instantiation phi = R(m_pbes.initial_state());
+        add_bes_equation(phi, m_priorities[phi.name()]);
+
+        m_initialized = true;
+      }
+    }
+
+  public:
+    /// \brief The operation type of the vertices.
+    enum operation_type { PGAME_OR, PGAME_AND };
+
+    /// \brief Constructor.
+    /// \param p A PBES
+    /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
+    /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
+    parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, size_t log_level = 0, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
+      :
+      core::algorithm(log_level),
+      m_initialized(false),
+      m_pbes(p),
+      generator("UNIQUE_PREFIX"),
+      datar(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy),
+      datae(p.data(), datar, generator),
+      datarv(datar),
+      R(datarv, datae),
+      m_true_false_dependencies(true_false_dependencies),
+      m_is_min_parity(is_min_parity)
+    {
+      // Overrule the log level setting by the global value
+      if (log_level == 0)
+      {
+        verbose_level() = get_parity_game_generator_log_level();
+      }
     }
 
     /// \brief Returns the vertex type.
     /// \param index A positive integer
     /// \return PGAME_AND if the corresponding BES equation is a conjunction,
     /// PGAME_OR if it is a disjunction.
-    operation_type get_operation(size_t index) const
+    virtual
+    operation_type get_operation(size_t index)
     {
+      initialize_generation();
+
       assert(index < m_bes.size());
       const pbes_expression& phi = m_bes[index].first;
       if (tr::is_and(phi))
@@ -319,7 +381,7 @@ class parity_game_generator: public core::algorithm
       {
         return PGAME_OR;
       }
-      throw(std::runtime_error("Error in parity_game_generator: unexpected operation " + core::pp(phi)));
+      throw(std::runtime_error("Error in parity_game_generator: unexpected operation " + print(phi)));
     }
 
     /// \brief Returns the priority of a vertex.
@@ -327,8 +389,11 @@ class parity_game_generator: public core::algorithm
     /// and 1 if it is a minimal fixpoint.
     /// \param index A positive integer
     /// \return The block nesting depth of the variable in the BES.
-    size_t get_priority(size_t index) const
+    virtual
+    size_t get_priority(size_t index)
     {
+      initialize_generation();
+
       assert(index < m_bes.size());
       return m_bes[index].second;
     }
@@ -337,8 +402,11 @@ class parity_game_generator: public core::algorithm
     /// By default a set containing the values 0, 1 and 2 is returned, corresponding
     /// to the expressions true, false and the initial state of the PBES.
     /// \return A set of indices corresponding to proposition variables of the generated BES.
+    virtual
     std::set<size_t> get_initial_values()
     {
+      initialize_generation();
+
       std::set<size_t> result;
       if (!m_pbes.equations().empty())
       {
@@ -353,8 +421,11 @@ class parity_game_generator: public core::algorithm
     /// \param index A positive integer
     /// \return The indices of the proposition variables that appear in the
     /// right hand side of the BES equation of the given index.
+    virtual
     std::set<size_t> get_dependencies(size_t index)
     {
+      initialize_generation();
+
       assert(index < m_bes.size());
 
       std::set<size_t> result;
@@ -389,7 +460,7 @@ class parity_game_generator: public core::algorithm
           result.insert(add_bes_equation(*i, priority));
         }
       }
-      else if (tr::is_true(psi))
+      else if (is_true(psi))
       {
         if (m_true_false_dependencies)
         {
@@ -398,7 +469,7 @@ class parity_game_generator: public core::algorithm
           result.insert(i->second);
         }
       }
-      else if (tr::is_false(psi))
+      else if (is_false(psi))
       {
         if (m_true_false_dependencies)
         {
@@ -409,13 +480,14 @@ class parity_game_generator: public core::algorithm
       }
       else
       {
-        throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + core::pp(psi) + "\n" + psi.to_string()));
+        throw(std::runtime_error("Error in parity_game_generator: unexpected expression " + print(psi) + "\n" + psi.to_string()));
       }
       LOG_BES_EQUATION(index, result);
       return result;
     }
 
     /// \brief Prints the mapping from BES variables to the corresponding PBES expressions.
+    virtual
     void print_variable_mapping()
     {
       std::cerr << "--- variable mapping ---" << std::endl;
@@ -426,7 +498,7 @@ class parity_game_generator: public core::algorithm
       }
       for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
       {
-        std::cerr << std::setw(4) << i->first << " " << core::pp(i->second) << std::endl;
+        std::cerr << std::setw(4) << i->first << " " << print(i->second) << std::endl;
       }
       std::cerr << "--- priorities ---" << std::endl;
       for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)
