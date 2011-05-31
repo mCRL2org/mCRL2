@@ -210,6 +210,147 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   }
 
   template <typename Container>
+  void print_variables(const Container& container,
+                       bool print_sorts = true,
+                       bool join_sorts = true,
+                       const std::string& opener = "(",
+                       const std::string& closer = ")",
+                       const std::string& separator = ", "
+                      )
+  {
+    typedef typename Container::const_iterator iterator;
+
+    iterator first = container.begin();
+    iterator last = container.end();
+    if (first == last)
+    {
+      return;
+    }
+
+    derived().print(opener);
+    
+    while (first != last)
+    {
+      // print the elements of the interval [first, i)
+      if (first != container.begin())
+      {
+        derived().print(separator);
+      }
+
+      if (print_sorts && join_sorts)
+      {
+        // determine a consecutive interval [first, i) with elements of the same sorts
+        iterator i = first;
+        do
+        {
+          ++i;
+        }
+        while (i != last && i->sort() == first->sort());
+
+        for (iterator j = first; j != i; ++j)
+        {
+          if (j != first)
+          {
+            derived().print(",");
+          }
+          derived()(*j);
+        }
+
+        // print the sort
+        if (print_sorts)
+        {
+          derived().print(": ");
+          derived()(first->sort());
+        }
+
+        // update first
+        first = i;
+      }
+      else
+      {
+        derived()(*first);
+
+        // print the sort
+        if (print_sorts)
+        {
+          derived().print(": ");
+          derived()(first->sort());
+        }
+        
+        // update first
+        ++first;
+      }
+    }
+    derived().print(closer);
+  }
+
+  template <typename Container>
+  void print_assignments(const Container& container,
+                         bool print_lhs = true,
+                         const std::string& opener = "",
+                         const std::string& closer = "",
+                         const std::string& separator = ", ",
+                         const std::string& assignment_symbol = " = "
+                        )
+  {
+    if (container.empty())
+    {
+      return;
+    }
+    derived().print(opener);
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      if (print_lhs)
+      {
+        derived()(i->lhs());
+        derived().print(assignment_symbol);
+      }
+      derived()(i->rhs());
+    }
+    derived().print(closer);
+  }
+
+  void print_condition(const data_expression& condition, const std::string& arrow = "  ->  ", bool print_parens = false)
+  {
+    if (!sort_bool::is_true_function_symbol(condition))
+    {
+      if (print_parens)
+      {
+        derived().print("(");
+      }
+      derived()(condition);
+      if (print_parens)
+      {
+        derived().print(")");
+      }
+      derived().print(arrow);
+    }
+  }
+
+  void print_data_expression(const data_expression& x, int precedence = 5)
+  {
+    bool print_parens = (data::detail::precedence(x) < precedence);
+    if (print_parens)
+    {
+      derived().print("(");
+    }
+    derived()(x);
+    if (print_parens)
+    {
+      derived().print(")");
+    }
+  }
+
+  void print_time(const data_expression& t)
+  {
+    print_data_expression(t, 13);
+  }
+
+  template <typename Container>
   void print_sort_list(const Container& container,
                        const std::string& opener = "(",
                        const std::string& closer = ")",
@@ -1342,12 +1483,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::data_equation& x)
   {
     derived().enter(x);
-    // TODO: check if this is the correct way to print conditions
-    if (!sort_bool::is_true_function_symbol(x.condition()))
-    {
-      derived()(x.condition());
-      derived().print("  ->  ");
-    }
+    print_condition(x.condition());
     derived()(x.lhs());
     derived().print("  =  ");
     derived()(x.rhs());

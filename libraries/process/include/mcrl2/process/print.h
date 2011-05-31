@@ -31,17 +31,48 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   using super::leave;
   using super::operator();
   using core::detail::printer<Derived>::print_sorts;
+  using super::print_action_declarations;
+  using super::print_assignments;
+  using super::print_condition;
+  using super::print_data_expression;
+  using super::print_list;
+  using super::print_time;
+  using super::print_variables;
 
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
   }
 
+  void print_initial_state(const process_expression& init)
+  {
+    derived().print("init ");
+    derived()(init);
+    derived().print(";\n");
+  }
+
+//  void print_process_expression(const process_expression& x, int precedence = 5)
+//  {
+//    bool print_parens = (data::detail::precedence(x) < precedence);
+//    if (print_parens)
+//    {
+//      derived().print("(");
+//    }
+//    derived()(x);
+//    if (print_parens)
+//    {
+//      derived().print(")");
+//    }
+//  }
+
   void operator()(const process::process_specification& x)
   {
     derived().enter(x);
-    derived()(x.action_labels());
-    derived()(x.init());
+    derived()(x.data());
+    print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
+    print_variables(x.global_variables(), true, true, "glob ", ";\n\n", ";\n     ");
+    print_list(x.equations(), "proc ", "\n\n", "\n     ");
+    print_initial_state(x.init());
     derived().leave(x);
   }
 
@@ -55,46 +86,50 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::process_equation& x)
   {
     derived().enter(x);
-    derived()(x.identifier());
-    derived()(x.formal_parameters());
+    derived()(x.identifier().name());
+    print_variables(x.formal_parameters());
+    derived().print(" = ");
     derived()(x.expression());
+    derived().print(";");
     derived().leave(x);
   }
 
   void operator()(const process::process_instance& x)
   {
     derived().enter(x);
-    derived()(x.identifier());
-    derived()(x.actual_parameters());
+    derived()(x.identifier().name());
+    print_variables(x.actual_parameters(), false);
     derived().leave(x);
   }
 
   void operator()(const process::process_instance_assignment& x)
   {
     derived().enter(x);
-    derived()(x.identifier());
-    derived()(x.assignments());
+    derived()(x.identifier().name());
+    print_assignments(x.assignments(), false);
     derived().leave(x);
   }
 
   void operator()(const process::delta& x)
   {
     derived().enter(x);
-    // skip
+    derived().print("delta");
     derived().leave(x);
   }
 
   void operator()(const process::tau& x)
   {
     derived().enter(x);
-    // skip
+    derived().print("tau");
     derived().leave(x);
   }
 
   void operator()(const process::sum& x)
   {
     derived().enter(x);
-    derived()(x.bound_variables());
+    derived().print("sum ");
+    print_variables(x.bound_variables(), true, true, "", "");
+    derived().print(". ");   
     derived()(x.operand());
     derived().leave(x);
   }
@@ -102,35 +137,75 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::block& x)
   {
     derived().enter(x);
+    derived().print("block(");
+    print_list(x.block_set(), "{", "}, ", ", ");
     derived()(x.operand());
+    derived().print(")");
     derived().leave(x);
   }
 
   void operator()(const process::hide& x)
   {
     derived().enter(x);
+    derived().print("hide(");
+    print_list(x.hide_set(), "{", "}, ", ", ");
     derived()(x.operand());
+    derived().print(")");
+    derived().leave(x);
+  }
+
+  void operator()(const process::rename_expression& x)
+  {
+    derived().enter(x);
+    derived()(x.source());
+    derived().print(" -> ");
+    derived()(x.target());
     derived().leave(x);
   }
 
   void operator()(const process::rename& x)
   {
     derived().enter(x);
+    derived().print("rename(");
+    print_list(x.rename_set(), "{", "}, ", ", ");
     derived()(x.operand());
+    derived().print(")");
+    derived().leave(x);
+  }
+
+  void operator()(const process::action_name_multiset& x)
+  {
+    derived().enter(x);
+    print_list(x.names(), "", "", " | ");
+    derived().leave(x);
+  }
+
+  void operator()(const process::communication_expression& x)
+  {
+    derived().enter(x);
+    derived()(x.action_name());
+    derived().print(" -> ");
+    derived()(x.name());
     derived().leave(x);
   }
 
   void operator()(const process::comm& x)
   {
     derived().enter(x);
+    derived().print("comm(");
+    print_list(x.comm_set(), "{", "}, ", ", ");
     derived()(x.operand());
+    derived().print(")");
     derived().leave(x);
   }
 
   void operator()(const process::allow& x)
   {
     derived().enter(x);
+    derived().print("allow(");
+    print_list(x.allow_set(), "{", "}, ", ", ");
     derived()(x.operand());
+    derived().print(")");
     derived().leave(x);
   }
 
@@ -138,6 +213,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.left());
+    derived().print(" | ");
     derived()(x.right());
     derived().leave(x);
   }
@@ -146,7 +222,8 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.operand());
-    derived()(x.time_stamp());
+    derived().print(" @ ");
+    print_time(x.time_stamp());
     derived().leave(x);
   }
 
@@ -154,6 +231,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.left());
+    derived().print(" . ");
     derived()(x.right());
     derived().leave(x);
   }
@@ -161,7 +239,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then& x)
   {
     derived().enter(x);
-    derived()(x.condition());
+    print_condition(x.condition(), " -> ", true);
     derived()(x.then_case());
     derived().leave(x);
   }
@@ -169,8 +247,9 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then_else& x)
   {
     derived().enter(x);
-    derived()(x.condition());
+    print_condition(x.condition(), " -> ", true);
     derived()(x.then_case());
+    derived().print(" <> ");
     derived()(x.else_case());
     derived().leave(x);
   }
@@ -179,6 +258,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.left());
+    derived().print(" << ");
     derived()(x.right());
     derived().leave(x);
   }
@@ -187,6 +267,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.left());
+    derived().print(" || ");
     derived()(x.right());
     derived().leave(x);
   }
@@ -195,6 +276,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.left());
+    derived().print(" ||_ ");
     derived()(x.right());
     derived().leave(x);
   }
@@ -203,6 +285,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.left());
+    derived().print(" + ");
     derived()(x.right());
     derived().leave(x);
   }

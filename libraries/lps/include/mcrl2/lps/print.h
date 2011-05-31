@@ -34,64 +34,15 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   using super::leave;
   using super::operator();
   using core::detail::printer<Derived>::print_sorts;
-  using super::print_function_declarations;
+  using super::print_assignments;
+  using super::print_condition;
+  using super::print_list;
+  using super::print_time;
+  using super::print_variables;
 
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
-  }
-
-  template <typename Container>
-  void print_list(const Container& container,
-                  const std::string& opener = "(",
-                  const std::string& closer = ")",
-                  const std::string& separator = ", "
-                 )
-  {
-    if (container.empty())
-    {
-      return;
-    }
-    derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (i != container.begin())
-      {
-        derived().print(separator);
-      }
-      derived()(*i);
-    }
-    derived().print(closer);
-  }
-
-  template <typename Container>
-  void print_assignments(const Container& container,
-                         const std::string& opener = "",
-                         const std::string& closer = "",
-                         const std::string& separator = ", ",
-                         bool print_lhs = true,
-                         const std::string& assignment_symbol = " = "
-                        )
-  {
-    if (container.empty())
-    {
-      return;
-    }
-    derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (i != container.begin())
-      {
-        derived().print(separator);
-      }
-      if (print_lhs)
-      {
-        derived()(i->lhs());
-        derived().print(assignment_symbol);
-      }
-      derived()(i->rhs());
-    }
-    derived().print(closer);
   }
 
   // Container contains elements of type T such that t.sort() is a sort_expression.
@@ -163,9 +114,11 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   void operator()(const lps::deadlock& x)
   {
     derived().enter(x);
+    derived().print("delta");
     if (x.has_time())
     {
-      derived()(x.time());
+      derived().print("@");
+      print_time(x.time());
     }
     derived().leave(x);
   }
@@ -176,7 +129,8 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived()(x.actions());
     if (x.has_time())
     {
-      derived()(x.time());
+      derived().print("@");
+      print_time(x.time());
     }
     derived().leave(x);
   }
@@ -193,22 +147,12 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   void operator()(const lps::action_summand& x)
   {
     derived().enter(x);
-    
-    // print summation variables
-    print_sorts() = true;
-    print_list(x.summation_variables(), "sum ", ".\n         ", ", ");
-    print_sorts() = false;
-
-    // print condition
-    if (!data::sort_bool::is_true_function_symbol(x.condition()))
-    {
-      derived()(x.condition());
-      derived().print(" ->\n         ");
-    }
+    print_variables(x.summation_variables(), true, true, "sum ", ".\n         ", ", ");
+    print_condition(x.condition(), " ->\n         ");
     derived()(x.multi_action());
     derived().print(" .\n         ");
     derived().print("P");
-    print_assignments(x.assignments(), "P(", ")", ", ");
+    print_assignments(x.assignments(), true, "P(", ")", ", ");
     derived().leave(x);
   }
 
@@ -216,7 +160,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   {
     derived().enter(x);
     derived().print("init P");
-    print_assignments(x.assignments(), "(", ")", ", ", false);
+    print_assignments(x.assignments(), false, "(", ")", ", ");
     derived().print(";");
     derived().leave(x);
   }
@@ -251,7 +195,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().enter(x);
     derived()(x.data());
     print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
-    print_function_declarations(x.global_variables(), "glob ", ";\n\n", ";\n     ");
+    print_variables(x.global_variables(), true, true, "glob ", ";\n\n", ";\n     ");
     derived()(x.process());
     derived().print(";\n\n");
     derived()(x.initial_process());
