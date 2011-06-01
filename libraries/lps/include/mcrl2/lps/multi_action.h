@@ -328,7 +328,7 @@ struct equal_data_parameters_builder
         v.push_back(d::lazy::equal_to(*i1, *i2));
       }
     }
-    data::data_expression expr = join_and(v.begin(), v.end());
+    data::data_expression expr = d::lazy::join_and(v.begin(), v.end());
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
     std::cerr << "  <and-term> " << pp(expr) << std::endl;
 #endif
@@ -370,7 +370,7 @@ struct not_equal_multi_actions_builder
         v.push_back(data::not_equal_to(*i1, *i2));
       }
     }
-    result.push_back(join_or(v.begin(), v.end()));
+    result.push_back(data::lazy::join_or(v.begin(), v.end()));
   }
 };
 
@@ -428,7 +428,7 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   atermpp::set<data::data_expression> z;
   detail::equal_data_parameters_builder f(va, vb, z);
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
-  data::data_expression result = join_or(z.begin(), z.end());
+  data::data_expression result = data::lazy::join_or(z.begin(), z.end());
   return result;
 }
 
@@ -465,7 +465,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   atermpp::vector<data::data_expression> z;
   detail::not_equal_multi_actions_builder f(va, vb, z);
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
-  data::data_expression result = join_and(z.begin(), z.end());
+  data::data_expression result = data::lazy::join_and(z.begin(), z.end());
   return result;
 }
 
