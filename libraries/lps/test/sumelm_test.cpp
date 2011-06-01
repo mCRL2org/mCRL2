@@ -11,24 +11,42 @@
 
 #include <iostream>
 #include <string>
-#include <boost/test/minimal.hpp>
+#include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/test_utilities.h"
 
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::lps;
 
+using mcrl2::utilities::collect_after_test_case;
+BOOST_GLOBAL_FIXTURE(collect_after_test_case)
+
+void print_specifications(const specification& s0, const specification& s1)
+{
+  if (!(s0 == s1))
+  {
+    std::clog << "=== Specifications differ ===" << std::endl;
+    std::clog << "    Input specification  : " << lps::pp(s0) << std::endl
+              << "    Output specification : " << lps::pp(s1) << std::endl;
+  }
+  else
+  {
+    std::clog << "=== Specification are the same ===" << std::endl;
+  }
+}
+
 /*
  * Test case which tries to test all possibilities for substitutions. This is a
  * test for issue #367
  */
-void test_case_1()
+BOOST_AUTO_TEST_CASE(bug_367)
 {
   std::clog << "Test case 1" << std::endl;
   const std::string text(
@@ -49,10 +67,12 @@ void test_case_1()
     BOOST_CHECK(data::find_variables(i->condition()).empty());
     BOOST_CHECK(lps::find_variables(i->actions()).empty());
   }
+
+  print_specifications(s0,s1);
 }
 
 /// Sum variable y does not occur in the summand, and therefore must be removed.
-void test_case_2()
+BOOST_AUTO_TEST_CASE(no_occurrence_of_variable)
 {
   std::clog << "Test case 2" << std::endl;
   const std::string text(
@@ -70,6 +90,8 @@ void test_case_2()
   {
     BOOST_CHECK(i->summation_variables().empty());
   }
+
+  print_specifications(s0,s1);
 }
 
 /*
@@ -78,7 +100,7 @@ void test_case_2()
  * In this case, this boils down to removing sum y, and removing 4==y from the
  * condition. The rest of the specification can be left untouched
  */
-void test_case_3()
+BOOST_AUTO_TEST_CASE(reverse_equality)
 {
   std::clog << "Test case 3" << std::endl;
   const std::string text(
@@ -96,12 +118,14 @@ void test_case_3()
     BOOST_CHECK(i->summation_variables().empty());
     BOOST_CHECK(data::find_variables(i->condition()).empty());
   }
+
+  print_specifications(s0,s1);
 }
 
 /*
  * This is the same as test case 3, except with the equality in different order.
  */
-void test_case_4()
+BOOST_AUTO_TEST_CASE(equality)
 {
   std::clog << "Test case 4" << std::endl;
   const std::string text(
@@ -119,12 +143,14 @@ void test_case_4()
     BOOST_CHECK(i->summation_variables().empty());
     BOOST_CHECK(data::find_variables(i->condition()).empty());
   }
+
+  print_specifications(s0,s1);
 }
 
 /*
  * Test whether sum variables are correctly removed from actions and timing.
  */
-void test_case_5()
+BOOST_AUTO_TEST_CASE(actions_and_time)
 {
   std::clog << "Test case 5" << std::endl;
   const std::string text(
@@ -165,14 +191,15 @@ void test_case_5()
       }
     }
   }
-  std::clog << lps::pp(s1) << std::endl;
+
+  print_specifications(s0,s1);
 }
 
 /*
  * Test that a sum variable is not removed when it occurs in both sides of a
  * variable.
  */
-void test_case_6()
+BOOST_AUTO_TEST_CASE(both_sides_of_equality)
 {
   std::clog << "Test case 6" << std::endl;
   const std::string text(
@@ -196,11 +223,7 @@ void test_case_6()
   BOOST_CHECK(sumvar_count == 1);
   BOOST_CHECK(s0 == s1);
 
-  if (!(s0 == s1) || sumvar_count != 1)
-  {
-    std::clog << "Input specification  : " << lps::pp(s0) << std::endl
-              << "Output specification : " << lps::pp(s1) << std::endl;
-  }
+  print_specifications(s0,s1);
 }
 
 /*
@@ -218,7 +241,7 @@ void test_case_6()
  * - The summation over e is removed by substituting f for e
  * This should leave only a sum f:D . f == g(f) -> a . X(f).
  */
-void test_case_7()
+BOOST_AUTO_TEST_CASE(three_sums_remove_two)
 {
   std::clog << "Test case 7" << std::endl;
   const std::string text(
@@ -242,6 +265,8 @@ void test_case_7()
     }
   }
   BOOST_CHECK(sumvar_count == 1);
+
+  print_specifications(s0,s1);
 }
 
 /*
@@ -250,7 +275,7 @@ void test_case_7()
  * two summations.
  * (Test introduced after a bugreport by M. Voorhoeve)
  */
-void test_case_8()
+BOOST_AUTO_TEST_CASE(twice_lhs)
 {
   std::clog << "Test case 8" << std::endl;
   const std::string text(
@@ -274,13 +299,15 @@ void test_case_8()
     }
   }
   BOOST_CHECK(sumvar_count == 1);
+
+  print_specifications(s0,s1);
 }
 
 /*
  * Test introduced after a bug report by Bas Ploeger. In contrary to what was
  * assumed before, sum variables may not be removed from delta summands.
  */
-void test_case_9()
+BOOST_AUTO_TEST_CASE(no_unconditional_sum_removal_from_delta)
 {
   std::clog << "Test case 9" << std::endl;
   const std::string text(
@@ -301,10 +328,12 @@ void test_case_9()
     }
   }
   BOOST_CHECK(sumvar_count == 1);
+
+  print_specifications(s0,s1);
 }
 
 ///Test case for issue #380
-void test_case_10()
+BOOST_AUTO_TEST_CASE(bug_380)
 {
   std::clog << "Test case 10" << std::endl;
   const std::string text(
@@ -328,37 +357,12 @@ void test_case_10()
   }
   BOOST_CHECK(sumvar_count == 0);
 
-  if (!(s0 == s1))
-  {
-    std::clog << "Input specification  : " << lps::pp(s0) << std::endl
-              << "Output specification : " << lps::pp(s1) << std::endl;
-  }
+  print_specifications(s0, s1);
 }
 
-int test_main(int ac, char** av)
+boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(ac, av)
-
-  test_case_1();
-  core::garbage_collect();
-  test_case_2();
-  core::garbage_collect();
-  test_case_3();
-  core::garbage_collect();
-  test_case_4();
-  core::garbage_collect();
-  test_case_5();
-  core::garbage_collect();
-  test_case_6();
-  core::garbage_collect();
-  test_case_7();
-  core::garbage_collect();
-  test_case_8();
-  core::garbage_collect();
-  test_case_9();
-  core::garbage_collect();
-  test_case_10();
-  core::garbage_collect();
+  MCRL2_ATERMPP_INIT(argc, argv)
 
   return 0;
 }

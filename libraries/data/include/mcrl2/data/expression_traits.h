@@ -223,6 +223,19 @@ struct term_traits<data::data_expression>
     return data::find_variables(t).empty();
   }
 
+  static inline
+  term_type left(term_type t)
+  {
+    return data::application(t).left();
+  }
+
+  static inline
+  term_type right(term_type t)
+  {
+    return data::application(t).right();
+  }
+
+
   /// \brief Pretty print function
   /// \param t A term
   /// \return A pretty print representation of the term
@@ -315,7 +328,8 @@ struct expression_traits : public core::term_traits< Expression >
     return sort_bool::or_(e1, e1);
   }
 };
-}
+
+} // namespace core
 
 } // namespace mcrl2
 
