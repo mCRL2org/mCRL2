@@ -198,9 +198,9 @@ class parity_game_generator: public core::algorithm
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
         substitution_function sigma = make_substitution(pbes_eqn.variable().parameters(), tr::param(psi));
-        mCRL2log(debug2, "parity_game_generator") << "Expanding right hand side " << tr::pp(pbes_eqn.formula()) << " into ";
+        mCRL2log(debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into ";
         pbes_expression result(R(pbes_eqn.formula(), sigma));
-        mCRL2log(debug2, "parity_game_generator") << tr::pp(result) << std::endl;
+        mCRL2log(debug2, "parity_game_generator") << print(result) << std::endl;
         return result;
       }
       return psi;
@@ -434,7 +434,7 @@ class parity_game_generator: public core::algorithm
       pbes_expression& psi = eqn.first;
       const size_t priority = eqn.second;
 
-      mCRL2log(debug, "parity_game_generator") << std::endl << "Generating equation for expression " << tr::pp(psi) << std::endl;
+      mCRL2log(debug, "parity_game_generator") << std::endl << "Generating equation for expression " << print(psi) << std::endl;
 
       // expand the right hand side if needed
       psi = expand_rhs(psi);
@@ -498,7 +498,7 @@ class parity_game_generator: public core::algorithm
       }
       for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
       {
-        std::cerr << std::setw(4) << i->first << " " << print(i->second) << std::endl;
+        std::cerr << std::setw(4) << i->first << " " << core::pp(i->second) << std::endl;
       }
       std::cerr << "--- priorities ---" << std::endl;
       for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)

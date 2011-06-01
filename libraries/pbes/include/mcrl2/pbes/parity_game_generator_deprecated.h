@@ -1,4 +1,4 @@
-// Author(s): Wieger Wesselink
+// Author(s): Jeroen Keiren
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -6,8 +6,9 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/pbes/parity_game_generator.h
-/// \brief A class for generating a parity game from a pbes.
+/// \file mcrl2/pbes/parity_game_generator_deprecated.h
+/// \brief A class for generating a parity game from a pbes. This version is
+///        more efficient that the one in mcrl2/pbes/parity_game_generator.h
 
 #ifndef MCRL2_PBES_PARITY_GAME_GENERATOR_DEPRECATED_H
 #define MCRL2_PBES_PARITY_GAME_GENERATOR_DEPRECATED_H
@@ -32,7 +33,7 @@
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 
-#include "mcrl2/bes/bes_deprecated.h"
+#include "mcrl2/bes/bes_deprecated.h" // We use some implementation tricks from this
 
 namespace mcrl2
 {
@@ -61,18 +62,42 @@ class parity_game_generator_deprecated: public parity_game_generator
     /// \brief Stores an internal representation of equations
     atermpp::vector<internal_equation_t> m_internal_equations;
 
+    pbes_expression from_rewrite_format(const pbes_expression& e)
+    {
+      if(is_pbes_true(e) || is_pbes_false(e))
+      {
+        return e;
+      }
+      else if(tr::is_and(e))
+      {
+        return tr::and_(from_rewrite_format(tr::left(e)), from_rewrite_format(tr::right(e)));
+      }
+      else if(tr::is_or(e))
+      {
+        return tr::or_(from_rewrite_format(tr::left(e)), from_rewrite_format(tr::right(e)));
+      }
+      else if(tr::is_prop_var(e))
+      {
+        tr::data_term_sequence_type args = tr::param(e);
+        data::data_expression_vector pretty_args;
+        for(tr::data_term_sequence_type::const_iterator i = args.begin(); i != args.end(); ++i)
+        {
+          pretty_args.push_back(datar_internal.convert_from((atermpp::aterm_appl)*i));
+        }
+        return tr::prop_var(tr::name(e), pretty_args.begin(), pretty_args.end());
+      }
+      else
+      {
+        return datar_internal.convert_from((atermpp::aterm_appl)e);
+      }
+    }
+
     virtual
     std::string print(const pbes_expression& e)
     {
       if(m_precompile_pbes)
       {
-        return core::pp(datar_internal.convert_from((atermpp::aterm_appl)e));
-        std::string result = e.to_string();
-        if(is_data(e))
-        {
-          result = result + " (" + core::pp(datar_internal.convert_from(e)) + ")";
-        }
-        return result;
+        return e.to_string() + " (" + core::pp(from_rewrite_format(e)) + ")";
       }
       else
       {
