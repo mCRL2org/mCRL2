@@ -10,6 +10,8 @@
 
 #include "boost.hpp" // precompiled headers
 
+#include "mcrl2/core/text_utility.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/lps/suminst.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
@@ -30,12 +32,32 @@ class suminst_tool: public rewriter_tool<input_output_tool>
 
     bool m_tau_summands_only;
     bool m_finite_sorts_only;
+    std::string m_sorts_string;
+    atermpp::set<data::sort_expression> m_sorts;
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
       desc.add_option("finite", "only instantiate variables whose sorts are finite", 'f');
       desc.add_option("tau", "only instantiate variables in tau summands", 't');
+      desc.add_option("sorts",
+                       make_optional_argument("NAME", ""),
+                       "select sorts that need to be expanded (comma separated list)\n"
+                       "  Examples: Bool; Bool, List(Nat)",
+                       's');
+    }
+
+    atermpp::set<data::sort_expression> parse_sort_expressions(const std::string& s, const data::data_specification& spec)
+    {
+      std::vector<std::string> parts = core::split(core::remove_whitespace(s), ",");
+      atermpp::set<data::sort_expression> result;
+
+      for(std::vector<std::string>::const_iterator i = parts.begin(); i != parts.end(); ++i)
+      {
+        result.insert(data::parse_sort_expression(*i, spec));
+      }
+
+      return result;
     }
 
     void parse_options(const command_line_parser& parser)
@@ -43,6 +65,16 @@ class suminst_tool: public rewriter_tool<input_output_tool>
       super::parse_options(parser);
       m_tau_summands_only = 0 < parser.options.count("tau");
       m_finite_sorts_only = 0 < parser.options.count("finite");
+      if(parser.options.count("sorts"))
+      {
+        m_sorts_string = parser.option_argument("sorts");
+        boost::trim(m_sorts_string);
+      }
+
+      if(m_finite_sorts_only && !m_sorts_string.empty())
+      {
+        throw mcrl2::runtime_error("options `--sorts' and `--finite' are mutually exclusive");
+      }
     }
 
   public:
@@ -63,11 +95,26 @@ class suminst_tool: public rewriter_tool<input_output_tool>
     bool run()
     {
       lps::specification lps_specification;
-
       lps_specification.load(m_input_filename);
 
+      // Determine set of sorts to be expanded
+      if(!m_sorts_string.empty())
+      {
+        m_sorts = parse_sort_expressions(m_sorts_string, lps_specification.data());
+      }
+      else if (m_finite_sorts_only)
+      {
+        m_sorts = lps::finite_sorts(lps_specification.data());
+      }
+      else
+      {
+        m_sorts = atermpp::convert<atermpp::set<data::sort_expression> >(lps_specification.data().sorts());
+      }
+
+      mCRL2log(verbose, "lpssuminst") << "expanding summation variables of sorts: " << data::pp(m_sorts) << std::endl;
+
       mcrl2::data::rewriter r = create_rewriter(lps_specification.data());
-      lps::suminst_algorithm<data::rewriter>(lps_specification, r, m_finite_sorts_only, m_tau_summands_only).run();
+      lps::suminst_algorithm<data::rewriter>(lps_specification, r, m_sorts, m_tau_summands_only).run();
       lps_specification.save(m_output_filename);
 
       return true;
