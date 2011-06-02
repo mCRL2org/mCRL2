@@ -11,6 +11,7 @@
 #ifndef __LIBREWRITE_H
 #define __LIBREWRITE_H
 
+// #include "mcrl2/atermpp/map.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/data/data_specification.h"
 
@@ -243,7 +244,7 @@ class Rewriter
     ATerm* substs;
     size_t substs_size;
 
-    virtual ATermAppl fromInner(ATermAppl Term);
+    /* virtual ATermAppl fromInner(ATermAppl Term); */
 
     ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
     ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
@@ -252,8 +253,6 @@ class Rewriter
 
     mcrl2::data::data_specification m_data_specification_for_enumeration;
     ATerm internal_quantifier_enumeration( ATerm ATermInInnerFormat );
-
-    ATermAppl* int2term;
 
     core::identifier_string forall_function_symbol()
     {
@@ -328,6 +327,32 @@ ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2);
 
 /** \brief Get the AFun number of the internal application symbol with given arity. */
 AFun get_appl_afun_value(size_t arity);
+
+/** The functions below are used for fromInner and toInner(c). */
+
+size_t get_num_opids();
+
+ATermAppl get_int2term(const size_t n);
+
+void set_int2term(const size_t n, const ATermAppl t);
+
+atermpp::map< ATerm, ATermInt >::const_iterator term2int_begin();
+
+atermpp::map< ATerm, ATermInt >::const_iterator term2int_end();
+
+size_t getArity(ATermAppl op);
+
+ATerm OpId2Int(ATermAppl Term, bool add_opids);
+
+ATerm toInner(ATermAppl Term, bool add_opids);
+
+ATermAppl fromInner(ATerm Term);
+
+ATermAppl toInnerc(ATermAppl Term, const bool add_opids);
+
+void initialize_internal_translation_table_rewriter();
+
+
 
 }
 }

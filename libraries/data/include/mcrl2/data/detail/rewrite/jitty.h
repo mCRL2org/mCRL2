@@ -40,21 +40,21 @@ class RewriterJitty: public Rewriter
     bool removeRewriteRule(ATermAppl Rule);
 
   private:
-    unsigned int num_opids;
+    // unsigned int num_opids;
     size_t max_vars;
     bool need_rebuild;
 
     ATermAppl jitty_true;
 
-    atermpp::map< ATerm, ATermInt > term2int;
+    // atermpp::map< ATerm, ATermInt > term2int;
     atermpp::map< ATermInt, ATermList > jitty_eqns;
     ATermList* jitty_strat;
 
     ATermAppl rewrite_aux(ATermAppl Term);
 
-    ATerm OpId2Int(ATermAppl Term, bool add_opids);
+    /* ATerm OpId2Int(ATermAppl Term, bool add_opids);
     ATermAppl toInner(ATermAppl Term, bool add_opids);
-    ATermAppl fromInner(ATermAppl Term);
+    ATermAppl fromInner(ATermAppl Term); */
 
 };
 }

@@ -73,162 +73,6 @@ static void finalise_common()
   }
 }
 
-
-ATerm RewriterJitty::OpId2Int(ATermAppl Term, bool add_opids)
-{
-
-  atermpp::map< ATerm, ATermInt >::iterator f = term2int.find( (ATerm) Term );
-  if( f == term2int.end())
-  {
-    if (!add_opids)
-    {
-      return (ATerm) Term;
-    }
-    ATermInt i = ATmakeInt(num_opids);
-    term2int[(ATerm) Term] =  i;
-    num_opids++;
-    return (ATerm) i;
-  }
-
-  ATermInt j = f->second;
-  return (ATerm) j;
-}
-
-
-/* static AFun* apples;
-static size_t num_apples = 0;
-
-#define getAppl(x) ((x < num_apples)?apples[x]:getAppl2(x))
-static AFun getAppl2(size_t arity)
-{
-  size_t old_apples = num_apples;
-
-  if (old_apples == 0)
-  {
-    while (num_apples <= arity)
-    {
-      num_apples += 10;
-    }
-
-    apples = (AFun*) malloc(num_apples*sizeof(AFun));
-  }
-  else if (old_apples <= arity)
-  {
-    while (num_apples <= arity)
-    {
-      num_apples += 10;
-    }
-
-    apples = (AFun*) realloc(apples,num_apples*sizeof(AFun));
-  }
-
-  for (size_t i=old_apples; i<num_apples; i++)
-  {
-    apples[i] = ATmakeAFun("@REWR@",i,false);
-    ATprotectAFun(apples[i]);
-  }
-
-  return apples[arity];
-} */
-
-ATermAppl RewriterJitty::toInner(ATermAppl Term, bool add_opids)
-{
-  ATermList l;
-
-  if (gsIsNil(Term) || gsIsDataVarId(Term))
-  {
-    return Term;
-  }
-
-  l = ATmakeList0();
-
-  if (!gsIsDataAppl(Term))
-  {
-    if (gsIsOpId(Term))
-    {
-      // l = ATinsert(l,(ATerm) OpId2Int(Term,add_opids));
-      // return ATmakeAppl1(getAppl(1),OpId2Int(Term,add_opids));
-      return Apply0(OpId2Int(Term,add_opids));
-
-    }
-    else
-    {
-      // l = ATinsert(l,(ATerm) Term);
-      // return ATmakeAppl1(getAppl(1),(ATerm) Term);
-      return Apply0((ATerm) Term);
-    }
-  }
-  else
-  {
-    ATermAppl arg0 = toInner(ATAgetArgument(Term, 0), add_opids);
-    // Reflect the way of encoding the other arguments!
-    if (gsIsNil(arg0) || gsIsDataVarId(arg0))
-    {
-      l = ATinsert(l, (ATerm) arg0);
-    }
-    else
-    {
-      size_t arity = ATgetArity(ATgetAFun(arg0));
-      for (size_t i = 0; i < arity; ++i)
-      {
-        l = ATinsert(l, ATgetArgument(arg0, i));
-      }
-    }
-    for (ATermList args = ATLgetArgument((ATermAppl) Term,1); !ATisEmpty(args) ; args = ATgetNext(args))
-    {
-      l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
-    }
-
-    l = ATreverse(l);
-  }
-
-  // return ATmakeApplList(getAppl(ATgetLength(l)),l);
-  return Apply(l);
-}
-
-ATermAppl RewriterJitty::fromInner(ATermAppl Term)
-{
-  ATermAppl a;
-
-  if (gsIsDataVarId(Term))
-  {
-    return Term;
-  }
-
-  size_t arity = ATgetArity(ATgetAFun(Term));
-  ATerm t = ATgetArgument(Term,0);
-  if (ATisInt(t))
-  {
-    a = int2term[ATgetInt((ATermInt) t)];
-  }
-  else
-  {
-    a = (ATermAppl) t;
-  }
-
-  if (gsIsOpId(a) || gsIsDataVarId(a))
-  {
-    size_t i = 1;
-    ATermAppl sort = ATAgetArgument(a, 1);
-    while (is_function_sort(sort_expression(sort)) && (i < arity))
-    {
-      ATermList sort_dom = ATLgetArgument(sort, 0);
-      ATermList list = ATmakeList0();
-      while (!ATisEmpty(sort_dom))
-      {
-        assert(i < arity);
-        list = ATinsert(list, (ATerm) fromInner(ATAgetArgument(Term,i)));
-        sort_dom = ATgetNext(sort_dom);
-        ++i;
-      }
-      list = ATreverse(list);
-      a = gsMakeDataAppl(a, list);
-      sort = ATAgetArgument(sort, 1);
-    }
-  }
-  return a;
-}
-
 static ATermList get_vars(ATerm a)
 {
   if (gsIsDataVarId((ATermAppl) a))
@@ -426,13 +270,13 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
 
   initialise_common();
 
-  num_opids = 0;
+  // num_opids = 0;
   max_vars = 0;
   need_rebuild = false;
 
   jitty_true=NULL;
   ATprotectAppl(&jitty_true);
-  jitty_true = toInner(sort_bool::true_(),true);
+  jitty_true = (ATermAppl)toInnerc(sort_bool::true_(),true);
 
   /*  l = opid_eqns;
     for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -459,7 +303,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
         continue;
       }
   
-      ATermAppl u = toInner((ATermAppl)j->lhs(),true);
+      ATermAppl u = (ATermAppl)toInnerc((ATermAppl)j->lhs(),true);
   
       atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( (ATermInt) ATgetArgument(u,0));
       if (it == jitty_eqns.end())
@@ -473,28 +317,25 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
         max_vars = j->variables().size();
       }
       n = ATinsert(n,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
-                                         (ATerm) toInner(j->condition(),true),
+                                         (ATerm) toInnerc(j->condition(),true),
                                          (ATerm) u,
-                                         (ATerm) toInner(j->rhs(),true)));
+                                         (ATerm) toInnerc(j->rhs(),true)));
       jitty_eqns[ (ATermInt) ATgetArgument(u,0)] = n;
     }
   }
 
-  int2term = (ATermAppl*) malloc(num_opids*sizeof(ATermAppl));
-  memset(int2term,0,num_opids*sizeof(ATermAppl));
-  ATprotectArray((ATerm*) int2term,num_opids);
-  jitty_strat = (ATermList*) malloc(num_opids*sizeof(ATermList));
-  memset(jitty_strat,0,num_opids*sizeof(ATermList));
-  ATprotectArray((ATerm*) jitty_strat,num_opids);
+  jitty_strat = (ATermList*) malloc(get_num_opids()*sizeof(ATermList));
+  memset(jitty_strat,0,get_num_opids()*sizeof(ATermList));
+  ATprotectArray((ATerm*) jitty_strat,get_num_opids());
 
 
-  for( atermpp::map< ATerm, ATermInt >::iterator l1 = term2int.begin()
-      ; l1 != term2int.end()
+  for(atermpp::map< ATerm, ATermInt >::const_iterator l1 = term2int_begin()
+      ; l1 != term2int_end()
       ; ++l1)
   {
 
     i = l1->second;
-    int2term[ATgetInt(i)] = (ATermAppl) l1->first;
+    set_int2term(ATgetInt(i),(ATermAppl) l1->first);
 
      atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
 
@@ -504,7 +345,6 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
     }
     else
     {
-//gsfprintf(stderr,"%T\n",ATAgetFirst(l1));
       jitty_strat[ATgetInt(i)] = create_strategy(ATreverse( it->second ), jitty_true);
     }
   }
@@ -514,8 +354,6 @@ RewriterJitty::~RewriterJitty()
 {
   ATunprotectArray((ATerm*) jitty_strat);
   free(jitty_strat);
-  ATunprotectArray((ATerm*) int2term);
-  free(int2term);
   ATunprotectAppl(&jitty_true);
   finalise_common();
 }
@@ -680,45 +518,10 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
   }
   else
   {
-//    t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
     if (ATisInt(t) || gsIsDataVarId((ATermAppl) t))
     {
       return false;
     }
-    /*    ATerm head = ATgetArgument((ATermAppl) t, 0);
-        if ( !ATisInt(head) )
-        {
-          head = RWapplySubstitution(head);
-          if ( ATisInt(head) )
-          {
-            t = (ATerm) ATsetArgument((ATermAppl) t,head,0);
-          } else if ( !gsIsDataVarId((ATermAppl) head) )
-          {
-            int ar1 = ATgetArity(ATgetAFun((ATermAppl) head));
-            int ar2 = ATgetArity(ATgetAFun((ATermAppl) t));
-
-            if ( ar1+ar2-1 != ATgetArity(ATgetAFun(p)) )
-            {
-              return false;
-            }
-
-            for (int i=0; i<ar1; i++)
-            {
-              if ( !match_jitty(ATgetArgument((ATermAppl) head,i),ATgetArgument((ATermAppl) p,i),vars,vals,len) )
-              {
-                return false;
-              }
-            }
-            for (int i=1; i<ar2; i++)
-            {
-              if ( !match_jitty(ATgetArgument((ATermAppl) t,i),ATgetArgument((ATermAppl) p,ar1+i-1),vars,vals,len) )
-              {
-                return false;
-              }
-            }
-            return true;
-          }
-        }*/
     if (!ATisEqualAFun(ATgetAFun((ATermAppl) p),ATgetAFun((ATermAppl) t)))
     {
       return false;
@@ -985,33 +788,26 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
 ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
 {
-  size_t old_opids = num_opids;
-  ATermAppl a = toInner((ATermAppl) Term,true);
-  if (old_opids < num_opids)
+  size_t old_opids = get_num_opids();
+  ATermAppl a = (ATermAppl)toInnerc((ATermAppl) Term,true);
+  if (old_opids < get_num_opids())
   {
-    ATunprotectArray((ATerm*) int2term);
-    int2term = (ATermAppl*) realloc(int2term,num_opids*sizeof(ATermAppl));
-    for (size_t k = old_opids; k < num_opids; k++)
-    {
-      int2term[k] = NULL;
-    }
-    ATprotectArray((ATerm*) int2term,num_opids);
     ATunprotectArray((ATerm*) jitty_strat);
-    jitty_strat = (ATermList*) realloc(jitty_strat,num_opids*sizeof(ATermList));
-    for (size_t k = old_opids; k < num_opids; k++)
+    jitty_strat = (ATermList*) realloc(jitty_strat,get_num_opids()*sizeof(ATermList));
+    for (size_t k = old_opids; k < get_num_opids(); k++)
     {
       jitty_strat[k] = NULL;
     }
-    ATprotectArray((ATerm*) jitty_strat,num_opids);
+    ATprotectArray((ATerm*) jitty_strat,get_num_opids());
 
-    for( atermpp::map< ATerm, ATermInt >::iterator l = term2int.begin()
-        ; l != term2int.end()
+    for( atermpp::map< ATerm, ATermInt >::const_iterator l = term2int_begin()
+        ; l != term2int_end()
         ; ++l)
     {
       ATermInt i = l->second;
       if (((size_t) ATgetInt(i)) >= old_opids)
       {
-        int2term[ATgetInt(i)] = (ATermAppl) l->first;
+        set_int2term(ATgetInt(i),(ATermAppl) l->first);
         jitty_strat[ATgetInt(i)] = NULL;
       }
     }
@@ -1022,7 +818,7 @@ ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
 
 ATermAppl RewriterJitty::fromRewriteFormat(ATerm Term)
 {
-  return fromInner((ATermAppl) Term);
+  return (ATermAppl)fromInner(Term);
 }
 
 ATermAppl RewriterJitty::rewrite(ATermAppl Term)
@@ -1032,7 +828,7 @@ ATermAppl RewriterJitty::rewrite(ATermAppl Term)
   gsMessage("toRewriteFormat(Term): %T\n", toRewriteFormat(Term));
   gsMessage("fromInner(toRewriteFormat(Term)): %T\n", fromInner((ATermAppl) toRewriteFormat(Term)));
 #endif
-  return fromInner((ATermAppl) rewriteInternal(toRewriteFormat(Term)));
+  return (ATermAppl)fromInner(rewriteInternal(toRewriteFormat(Term)));
 }
 
 ATerm RewriterJitty::rewriteInternal(ATerm Term)

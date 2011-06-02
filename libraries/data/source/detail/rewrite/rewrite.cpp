@@ -20,7 +20,6 @@
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
-#include "mcrl2/data/detail/rewrite/inner.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
 #ifdef MCRL2_INNERC_AVAILABLE
 #include "mcrl2/data/detail/rewrite/innerc.h"
@@ -234,12 +233,12 @@ ATerm Rewriter::lookupSubstitution(ATermAppl Var)
   return r;
 }
 
-ATermAppl Rewriter::fromInner(ATermAppl Term )
+/* ATermAppl Rewriter::fromInner(ATermAppl Term )
 {
-  /* This function needs to be overwritten by Inner(C)/Jitty(C) - rewriter */
+  / * This function needs to be overwritten by Inner(C)/Jitty(C) - rewriter * /
   assert( false );
   return Term;
-}
+} */
 
 ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat )
 {
@@ -388,7 +387,7 @@ ATerm Rewriter::internal_quantifier_enumeration( ATerm ATermInInnerFormat )
     if( ATisInt(arg) )
     {
       /* Convert internal rewrite number to ATerm representation*/
-      ATermAppl a = int2term[ATgetInt((ATermInt) arg)];
+      ATermAppl a = get_int2term(ATgetInt((ATermInt) arg));
 
       if( is_function_symbol(a) )
       {
@@ -718,6 +717,239 @@ ATermAppl Apply1(const ATerm head, const ATerm arg1)
 ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2)
 {
  return ATmakeAppl3(get_appl_afun_value(3),head,arg1,arg2);
+}
+
+/*************  Below the functions toInner and fromInner are being defined *********************/
+
+
+atermpp::map< ATerm, ATermInt > &term2int()
+{ 
+  static atermpp::map< ATerm, ATermInt > term2int;
+  return term2int;
+}
+
+atermpp::map< ATerm, ATermInt >::const_iterator term2int_begin()
+{ 
+  return term2int().begin();
+}
+
+atermpp::map< ATerm, ATermInt >::const_iterator term2int_end()
+{ 
+  return term2int().end();
+}
+
+atermpp::vector < ATermAppl > &int2term()
+{ 
+  static atermpp::vector < ATermAppl > int2term;
+  return int2term;
+}
+
+size_t get_num_opids()
+{
+  return int2term().size();
+}
+
+ATermAppl get_int2term(const size_t n)
+{
+  assert(n<int2term().size());
+  return int2term()[n];
+}
+
+void set_int2term(const size_t n, const ATermAppl t)
+{
+  if (n>=int2term().size())
+  {
+    int2term().resize(n+1);
+  }
+  int2term()[n]=t;
+}
+
+size_t getArity(ATermAppl op)
+{
+  ATermAppl sort = ATAgetArgument(op,1);
+  int arity = 0;
+
+  while (is_function_sort(sort_expression(sort)))
+  {
+    ATermList sort_dom = ATLgetArgument(sort, 0);
+    arity += ATgetLength(sort_dom);
+    sort = ATAgetArgument(sort, 1);
+  }
+
+  return arity;
+}
+
+void initialize_internal_translation_table_rewriter()
+{
+}
+
+ATerm OpId2Int(ATermAppl Term, bool add_opids)
+{
+  atermpp::map< ATerm, ATermInt >::iterator f = term2int().find( (ATerm) Term );
+  if (f == term2int().end())
+  {
+    if (!add_opids)
+    {
+      return (ATerm) Term;
+    }
+    const size_t num_opids=get_num_opids();
+    ATermInt i = ATmakeInt(num_opids);
+    term2int()[(ATerm) Term] =  i;
+    int arity = getArity(Term);
+    if (arity > NF_MAX_ARITY)
+    {
+      arity = NF_MAX_ARITY;
+    }
+    assert(int2term().size()==num_opids);
+    int2term().push_back(Term);
+    size_t num_aux = (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2; Reserve extra space
+                                                   // to accomodate function symbols that represent
+                                                   // terms with partially normalized arguments.
+    if (arity <= NF_MAX_ARITY)
+    {
+      for(size_t k=0; k<num_aux; ++k)
+      {
+        int2term().push_back((ATermAppl)atermpp::aterm_appl()); 
+      }
+    }
+    return (ATerm) i;
+  }
+
+  ATermInt j = f->second;
+  return (ATerm) j;
+} 
+
+
+ATerm toInner(ATermAppl Term, bool add_opids)
+{
+  ATermList l;
+
+  if (!gsIsDataAppl(Term))
+  {
+    if (gsIsOpId(Term))
+    {
+      return (ATerm) OpId2Int(Term,add_opids);
+    }
+    else
+    {
+      return (ATerm) Term;
+    }
+  }
+
+  l = ATmakeList0();
+
+  if (gsIsDataAppl(Term))
+  {
+    for (ATermList args = ATLgetArgument((ATermAppl) Term, 1) ; !ATisEmpty(args) ; args = ATgetNext(args))
+    {
+      l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
+    }
+
+    l = ATreverse(l);
+
+    ATerm arg0 = toInner(ATAgetArgument((ATermAppl) Term, 0), add_opids);
+    if (ATisList(arg0))
+    {
+      l = ATconcat((ATermList) arg0, l);
+    }
+    else
+    {
+      l = ATinsert(l, arg0);
+    }
+  }
+
+  return (ATerm) l;
+}
+
+ATermAppl fromInner(ATerm Term)
+{
+  ATermAppl a;
+
+  if (gsIsDataVarId((ATermAppl)Term))
+  {
+    return (ATermAppl)Term;
+  }
+
+  size_t arity = ATgetArity(ATgetAFun(Term));
+  ATerm t = ATgetArgument(Term,0);
+  if (ATisInt(t))
+  {
+    a = get_int2term(ATgetInt((ATermInt) t));
+  }
+  else
+  {
+    a = (ATermAppl) t;
+  }
+
+  if (gsIsOpId(a) || gsIsDataVarId(a))
+  {
+    size_t i = 1;
+    ATermAppl sort = ATAgetArgument(a, 1);
+    while (is_function_sort(sort_expression(sort)) && (i < arity))
+    {
+      ATermList sort_dom = ATLgetArgument(sort, 0);
+      ATermList list = ATmakeList0();
+      while (!ATisEmpty(sort_dom))
+      {
+        assert(i < arity);
+        list = ATinsert(list, (ATerm) fromInner(ATgetArgument(Term,i)));
+        sort_dom = ATgetNext(sort_dom);
+        ++i;
+      }
+      list = ATreverse(list);
+      a = gsMakeDataAppl(a, list);
+      sort = ATAgetArgument(sort, 1);
+    }
+  }
+  return a;
+} 
+
+ATermAppl toInnerc(ATermAppl Term, const bool add_opids)
+{
+  ATermList l;
+
+  if (gsIsNil(Term) || gsIsDataVarId(Term))
+  {
+    return Term;
+  }
+
+  l = ATmakeList0();
+
+  if (!gsIsDataAppl(Term))
+  {
+    if (gsIsOpId(Term))
+    {
+      l = ATinsert(l,(ATerm) OpId2Int(Term,add_opids));
+      return Apply0(OpId2Int(Term,add_opids));
+    }
+    else
+    {
+      return Apply0((ATerm) Term);
+    }
+  }
+  else
+  {
+    ATermAppl arg0 = toInnerc(ATAgetArgument(Term, 0), add_opids);
+    // Reflect the way of encoding the other arguments!
+    if (gsIsNil(arg0) || gsIsDataVarId(arg0))
+    {
+      l = ATinsert(l, (ATerm) arg0);
+    }
+    else
+    {
+      size_t arity = ATgetArity(ATgetAFun(arg0));
+      for (size_t i = 0; i < arity; ++i)
+      {
+        l = ATinsert(l, ATgetArgument(arg0, i));
+      }
+    }
+    for (ATermList args = ATLgetArgument((ATermAppl) Term,1); !ATisEmpty(args) ; args = ATgetNext(args))
+    {
+      l = ATinsert(l,(ATerm) toInnerc((ATermAppl) ATgetFirst(args),add_opids));
+    }
+    l = ATreverse(l);
+  }
+  return Apply(l);
 }
 
 

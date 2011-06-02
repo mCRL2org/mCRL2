@@ -59,12 +59,12 @@ class RewriterCompilingJitty: public Rewriter
     bool need_rebuild;
     bool made_files;
 
-    int num_opids;
+//    int num_opids;
 
     ATermInt true_inner;
     int true_num;
 
-    ATermTable term2int;
+    //ATermTable term2int;
     //ATermAppl* int2term;
     ATermList* jittyc_eqns;
 
@@ -111,9 +111,9 @@ class RewriterCompilingJitty: public Rewriter
     void BuildRewriteSystem();
 	FILE* MakeTempFiles();
 
-    ATerm OpId2Int(ATermAppl Term, bool add_opids);
+    /* ATerm OpId2Int(ATermAppl Term, bool add_opids);
     ATerm toInner(ATermAppl Term, bool add_opids);
-    ATermAppl fromInner(ATerm Term);
+    ATermAppl fromInner(ATerm Term); */
 };
 
 }

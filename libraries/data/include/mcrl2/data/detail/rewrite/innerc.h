@@ -52,13 +52,13 @@ class RewriterCompilingInnermost: public Rewriter
 
   private:
     ATermTable tmp_eqns, subst_store;
-    int num_opids;
+    // size_t num_opids;
     bool need_rebuild, made_files;
 
     ATermInt true_inner;
     int true_num;
 
-    ATermTable term2int;
+//   ATermTable term2int;
     ATermList* innerc_eqns;
 
     std::string file_c;
@@ -87,9 +87,9 @@ class RewriterCompilingInnermost: public Rewriter
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
 
-    ATerm OpId2Int(ATermAppl Term, bool add_opids);
+    /* ATerm OpId2Int(ATermAppl Term, bool add_opids);
     ATerm toInner(ATermAppl Term, bool add_opids);
-    ATermAppl fromInner(ATerm Term);
+    ATermAppl fromInner(ATerm Term); */
 };
 
 }
