@@ -149,7 +149,9 @@ ATermAppl RewriterCompilingInnermost::fromRewriteFormat(ATerm t)
     BuildRewriteSystem();
   }
 
-  if (ATisInt(t))
+  return fromInner(t);
+
+  /* if (ATisInt(t))
   {
     return get_int2term(ATgetInt((ATermInt) t));
   }
@@ -180,7 +182,7 @@ ATermAppl RewriterCompilingInnermost::fromRewriteFormat(ATerm t)
     sort = ATAgetArgument(sort, 1);
   }
 
-  return a;
+  return a; */
 }
 
 static char* whitespace_str = NULL;

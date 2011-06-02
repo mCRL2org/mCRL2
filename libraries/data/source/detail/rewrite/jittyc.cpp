@@ -2826,7 +2826,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   size_t max_arity = 0;
   for (size_t j=0; j < get_num_opids(); ++j)
   {
-ATfprintf(stderr,"AAAAAAAAAAAABC %i   %t\n",j,get_int2term(j));
     size_t arity = getArity(get_int2term(j));
     if (arity > max_arity)
     {

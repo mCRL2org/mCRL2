@@ -688,6 +688,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     }
     else
     {
+ATfprintf(stderr,"PROBLEMATIC TERM %t\n",(ATermAppl)p);
       data::data_expression d(r(p));
       if (d == data::sort_bool::true_())
       {

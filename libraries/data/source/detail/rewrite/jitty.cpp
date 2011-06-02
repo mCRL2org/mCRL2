@@ -544,15 +544,15 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
 ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-	gsMessage("    term(%T)\n", Term	);
-  gsMessage("    rewrite(%T)\n",fromInner(Term));
-  gsMessage("    rewrite(  %P  )\n",fromInner(Term));
+	gsMessage("AUX:    term(%T)\n", Term	);
+  gsMessage("AUX:    rewrite(%T)\n",fromInner((ATerm)Term));
+  gsMessage("AUX:    rewrite(  %P  )\n",fromInner((ATerm)Term));
 #endif
   if (gsIsDataVarId(Term))
   {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-    gsMessage("      return %T\n",fromInner(Term));
-    gsMessage("      return1  %P\n",fromInner((ATermAppl) lookupSubstitution(Term)));
+    gsMessage("      return %T\n",fromInner((ATerm)Term));
+    gsMessage("      return1  %P\n",fromInner(lookupSubstitution(Term)));
 #endif
     return (ATermAppl) lookupSubstitution(Term);
   }
@@ -752,8 +752,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
             ATermAppl aa = rewrite_aux(a);
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage("        return %T\n",fromInner(aa));
-            gsMessage("        return2  %P\n",fromInner(aa));
+            gsMessage("        return %T\n",(ATerm)fromInner((ATerm)aa));
+            gsMessage("        return2  %P\n",(ATerm)fromInner((ATerm)aa));
 #endif
             return aa;
           }
@@ -779,7 +779,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
     gsMessage("      return %T\n",a);
-    gsMessage("      return3  %P\n",fromInner(a));
+    gsMessage("      return3  %P\n",(ATerm)fromInner((ATerm)a));
 #endif
 
     return (ATermAppl) internal_quantifier_enumeration((ATerm) a );
@@ -818,7 +818,7 @@ ATerm RewriterJitty::toRewriteFormat(ATermAppl Term)
 
 ATermAppl RewriterJitty::fromRewriteFormat(ATerm Term)
 {
-  return (ATermAppl)fromInner(Term);
+  return fromInner(Term);
 }
 
 ATermAppl RewriterJitty::rewrite(ATermAppl Term)
@@ -826,9 +826,9 @@ ATermAppl RewriterJitty::rewrite(ATermAppl Term)
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
   gsMessage("Rewriting term: %T\n", Term);
   gsMessage("toRewriteFormat(Term): %T\n", toRewriteFormat(Term));
-  gsMessage("fromInner(toRewriteFormat(Term)): %T\n", fromInner((ATermAppl) toRewriteFormat(Term)));
+  gsMessage("fromInner(toRewriteFormat(Term)): %T\n", (ATerm)fromInner(toRewriteFormat(Term)));
 #endif
-  return (ATermAppl)fromInner(rewriteInternal(toRewriteFormat(Term)));
+  return fromInner(rewriteInternal(toRewriteFormat(Term)));
 }
 
 ATerm RewriterJitty::rewriteInternal(ATerm Term)
@@ -848,12 +848,12 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
     need_rebuild = false;
   }
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  gsMessage("  rewrite(%T)\n",fromInner((ATermAppl)Term));
+  gsMessage("  rewrite(%T)\n",fromInner(Term));
 #endif
   ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  gsMessage("  return(%T)\n",fromInner((ATermAppl)aaa));
+  gsMessage("  return(%T)\n",fromInner(aaa));
 #endif
   return aaa;
 }

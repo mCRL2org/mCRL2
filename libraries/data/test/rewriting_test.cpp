@@ -927,10 +927,9 @@ BOOST_AUTO_TEST_CASE(lambda_predicate_matching)
 
   std::string s(
      "map  match    : (Nat -> Bool)#List(Nat) -> List(Nat);\n"
-     "     pre      : Nat  -> Bool;\n"
      "     emptyList: List(Nat);\n"
-     "eqn  match(pre, [])      = [];\n"
-     "     emptyList = []; \n" 
+     "var  v      : Nat  -> Bool;\n"
+     "eqn  match(v, [])      = emptyList;"
   );
 
   data_specification specification(parse_data_specification(s));
