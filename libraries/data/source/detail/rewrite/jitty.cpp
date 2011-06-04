@@ -254,10 +254,6 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
     arity++;
   }
 
-  //XXX Add unused, so we don't need to check all args during rewriting
-
-//gsfprintf(stderr,"strat: %T\n\n",ATreverse(strat));
-
   return ATreverse(strat);
 }
 
@@ -286,7 +282,6 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
     }
 
     l = dataappl_eqns;*/
-  // l = reinterpret_cast< ATermList >(static_cast< ATerm >(atermpp::arg4(DataSpec).argument(0)));
   const atermpp::vector< data_equation > l = DataSpec.equations();
   if (add_rewrite_rules) // if false, the rewrite rules are most likely added via a backdoor, through a special equation selector.
   {
@@ -481,7 +476,6 @@ static ATerm subst_values(ATermAppl* vars, ATerm* vals, size_t len, ATerm t)
     }
     else
     {
-      // return (ATerm) ATmakeApplArray(getAppl(new_arity),args);
       return (ATerm)ApplyArray(new_arity,args);
     }
   }
@@ -489,7 +483,6 @@ static ATerm subst_values(ATermAppl* vars, ATerm* vals, size_t len, ATerm t)
 
 static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* len)
 {
-//gsfprintf(stderr,"match_jitty(  %T  ,  %T  ,  %T   )\n\n",t,p,*vars);
   if (ATisInt(p))
   {
     return ATisEqual(p,t);
@@ -774,7 +767,6 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
       }
     }
 
-    // ATermAppl a = ATmakeApplArray(getAppl(arity),rewritten);
     ATermAppl a = ApplyArray(arity,rewritten);
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL

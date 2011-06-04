@@ -233,13 +233,6 @@ ATerm Rewriter::lookupSubstitution(ATermAppl Var)
   return r;
 }
 
-/* ATermAppl Rewriter::fromInner(ATermAppl Term )
-{
-  / * This function needs to be overwritten by Inner(C)/Jitty(C) - rewriter * /
-  assert( false );
-  return Term;
-} */
-
 ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat )
 {
       /* Get Body of Exists */

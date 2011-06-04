@@ -115,7 +115,7 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     /// Note the internal state of the rewriter changes so constness is violated
     void set_internally_associated_value(const variable &v, const data_expression &e) const
     {
-      m_rewriter->setSubstitution(v, e);
+      m_rewriter->setSubstitution(v, mcrl2::data::rewriter::implement(e));
     }
   
     /// Note the internal state of the rewriter changes so constness is violated

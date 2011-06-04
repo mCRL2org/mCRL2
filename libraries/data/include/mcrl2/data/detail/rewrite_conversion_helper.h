@@ -150,7 +150,6 @@ class rewrite_conversion_helper
       static number_postfix_generator symbol_generator("lambda@");
 
       const atermpp::map< data_expression, data_expression >::const_iterator i = m_implementation_context.find(expression);
-
       if (i == m_implementation_context.end())
       {
         const atermpp::term_list< variable > bound_variables = atermpp::convert< atermpp::term_list< variable > >(implement(expression.variables()));

@@ -247,14 +247,14 @@ for (atermpp::set<data_equation>::const_iterator i = eqn.begin(); i != eqn.end()
     /// \return The normal form of d.
     data_expression operator()(const data_expression& d) const
     {
-# ifdef MCRL2_PRINT_REWRITE_STEPS
+#ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE: " << d;
       data_expression result(reconstruct(m_rewriter->rewrite(implement(d))));
       std::cerr << " ------------> " << result << std::endl;
       return result;
 #else
       return reconstruct(m_rewriter->rewrite(implement(d)));
-#endif
+#endif 
     }
 
     /// \brief Rewrites the data expression d, and on the fly applies a substitution function
@@ -266,7 +266,7 @@ for (atermpp::set<data_equation>::const_iterator i = eqn.begin(); i != eqn.end()
     data_expression operator()(const data_expression& d, const SubstitutionFunction& sigma) const
     {
 # ifdef MCRL2_PRINT_REWRITE_STEPS
-      std::cerr << "REWRITE " << d;
+      std::cerr << "REWRITE " << d << "\n";
       data_expression result(reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma)))));
       std::cerr << " ------------> " << result << std::endl;
       return result;

@@ -150,39 +150,6 @@ ATermAppl RewriterCompilingInnermost::fromRewriteFormat(ATerm t)
   }
 
   return fromInner(t);
-
-  /* if (ATisInt(t))
-  {
-    return get_int2term(ATgetInt((ATermInt) t));
-  }
-  else if (gsIsDataVarId((ATermAppl) t))
-  {
-    return (ATermAppl) t;
-  }
-
-  ATermAppl a = fromRewriteFormat(ATgetArgument((ATermAppl) t, 0));
-  assert(gsIsOpId(a) || gsIsDataVarId(a));
-
-  int i = 1;
-  int arity = ATgetArity(ATgetAFun((ATermAppl) t));
-  ATermAppl sort = ATAgetArgument(a, 1);
-  while (is_function_sort(sort_expression(sort)) && (i < arity))
-  {
-    ATermList sort_dom = ATLgetArgument(sort, 0);
-    ATermList list = ATmakeList0();
-    while (!ATisEmpty(sort_dom))
-    {
-      assert(i < arity);
-      list = ATinsert(list, (ATerm) fromRewriteFormat(ATgetArgument((ATermAppl) t,i)));
-      sort_dom = ATgetNext(sort_dom);
-      ++i;
-    }
-    list = ATreverse(list);
-    a = gsMakeDataAppl(a, list);
-    sort = ATAgetArgument(sort, 1);
-  }
-
-  return a; */
 }
 
 static char* whitespace_str = NULL;
@@ -1522,7 +1489,8 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "#include <string.h>\n"
           "#include \"mcrl2/aterm/aterm2.h\"\n"
           "#include \"assert.h\"\n"
-          "#include \"mcrl2/data/detail/rewrite.h\"\n"
+//           "#include \"mcrl2/data/detail/rewrite.h\"\n"
+          "#include \"mcrl2/data/detail/rewrite/innerc.h\"\n"
           "using namespace aterm;\n"
           "\n"
           "extern \"C\" { ATermAppl rewrite(ATermAppl); }\n"
@@ -1591,6 +1559,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
 #endif
           "static AFun dataapplAFun;\n"
           "static AFun opidAFun;\n"
+          "mcrl2::data::detail::RewriterCompilingInnermost *this_rewriter;\n"
          );
   for (size_t i=0; i<=(max_arity==0?1:max_arity); i++)
   {
@@ -1613,101 +1582,6 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   }
   fprintf(f,  "static ftype1 *int2func;\n");
 
-  //
-  // Implement substitution functions
-  //
-  fprintf(f,  "\n"
-          "\n"
-          "static ATerm *substs = NULL;\n"
-          "static long substs_size = 0;\n"
-          "\n"
-          "extern \"C\" {\n"
-          "void set_subst(ATermAppl Var, ATerm Expr)\n"
-          "{\n"
-          "  long n = ATgetAFun(ATgetArgument(Var,0));\n"
-          "\n"
-          "  if ( n >= substs_size )\n"
-          "  {\n"
-          "    long newsize;\n"
-          "\n"
-          "    if ( n >= 2*substs_size )\n"
-          "    {\n"
-          "      if ( n < 1024 )\n"
-          "      {\n"
-          "        newsize = 1024;\n"
-          "      } else {\n"
-          "        newsize = n+1;\n"
-          "      }\n"
-          "    } else {\n"
-          "      newsize = 2*substs_size;\n"
-          "    }\n"
-          "\n"
-          "    if ( substs_size > 0 )\n"
-          "    {\n"
-          "      ATunprotectArray(substs);\n"
-          "    }\n"
-          "    substs = (ATerm *) realloc(substs,newsize*sizeof(ATerm));\n"
-          "    \n"
-          "    if ( substs == NULL )\n"
-          "    {\n"
-          "      fprintf(stderr,\"Failed to increase the size of a substitution array\");\n"
-          "      exit(1);\n"
-          "    }\n"
-          "\n"
-          "    for (long i=substs_size; i<newsize; i++)\n"
-          "    {\n"
-          "      substs[i]=NULL;\n"
-          "    }\n"
-          "\n"
-          "    ATprotectArray(substs,newsize);\n"
-          "    substs_size = newsize;\n"
-          "  }\n"
-          "\n"
-          "  substs[n] = Expr;\n"
-          "}\n"
-          "\n"
-          "ATerm get_subst(ATermAppl Var)\n"
-          "{\n"
-          "  long n = ATgetAFun(ATgetArgument(Var,0));\n"
-          "\n"
-          "  if ( n >= substs_size )\n"
-          "  {\n"
-          "    return (ATerm) Var;\n"
-          "  }\n"
-          "  \n"
-          "  ATerm r = substs[n];\n"
-          "  \n"
-          "  if ( r == NULL )\n"
-          "  {\n"
-          "    return (ATerm) Var;\n"
-          "  }\n"
-          "  \n"
-          "  return r;\n"
-          "}\n"
-          "\n"
-          "void clear_subst(ATermAppl Var)\n"
-          "{\n"
-          "  long n = ATgetAFun(ATgetArgument(Var,0));\n"
-          "\n"
-          "  if ( n < substs_size )\n"
-          "  {\n"
-          "    substs[n] = NULL;\n"
-          "  }\n"
-          "}\n"
-          "\n"
-          "void clear_substs()\n"
-          "{\n"
-          "  for (long i=0; i<substs_size; i++)\n"
-          "  {\n"
-          "    substs[i] = NULL;\n"
-          "  }\n"
-          "}\n"
-          "} // extern C\n"
-          "\n"
-          "\n"
-         );
-
-
   for (size_t i=1; i<=max_arity; i++)
   {
     fprintf(f,
@@ -1719,7 +1593,6 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
     fprintf(f, ")\n"
             "{\n");
     fprintf(f,
-//      "  ATprintf(\"%%t\\n\",a);\n"
             "  int arity = ATgetArity(ATgetAFun(a));\n"
             "  if ( arity == 1 )\n"
             "  {\n"
@@ -1905,8 +1778,9 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   }
 
   fprintf(f, "extern \"C\" {\n"
-          "void rewrite_init()\n"
+          "void rewrite_init(mcrl2::data::detail::RewriterCompilingInnermost *r)\n"
           "{\n"
+          "  this_rewriter=r;\n"
 #ifndef USE_VARAFUN_VALUE
           "  varAFun = ATmakeAFun(\"DataVarId\", 2, false);\n"
           "  ATprotectAFun(varAFun);\n"
@@ -2016,7 +1890,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "      }\n"
           "    } else {\n"
           // head is a var, get value
-          "      ATerm u = get_subst((ATermAppl) head);\n"
+          "      ATerm u = this_rewriter->getSubstitutionInternal((ATermAppl) head);\n"
           "      long arity_t = ATgetArity(ATgetAFun(t));\n"
           "      long arity_u;\n"
           "      if ( isAppl(u) )\n"
@@ -2069,7 +1943,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
           "    }\n"
           "  } else {\n"
           // t is a var: just return it(s value)
-          "    ATermAppl r=(ATermAppl) get_subst(t);\n"
+          "    ATermAppl r=(ATermAppl) this_rewriter->getSubstitutionInternal(t);\n"
           "    return r;\n"
           "  }\n"
           "}\n"
@@ -2107,7 +1981,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
     unlink(const_cast< char* >(file_c.c_str()));
     throw mcrl2::runtime_error(std::string("Cannot load rewriter: ") + dlerror());
   }
-  so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
+  so_rewr_init = (void (*)(RewriterCompilingInnermost *)) dlsym(h,"rewrite_init");
   if (so_rewr_init    == NULL)
   {
     gsErrorMsg("%s\n",dlerror());
@@ -2122,7 +1996,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   {
     gsErrorMsg("%s\n",dlerror());
   }
-  so_set_subst = (void (*)(ATermAppl, ATerm)) dlsym(h,"set_subst");
+  /* so_set_subst = (void (*)(ATermAppl, ATerm)) dlsym(h,"set_subst");
   if (so_set_subst    == NULL)
   {
     gsErrorMsg("%s\n",dlerror());
@@ -2141,14 +2015,15 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
   if (so_clear_substs == NULL)
   {
     gsErrorMsg("%s\n",dlerror());
-  }
+  } */
   if ((so_rewr_init    == NULL) ||
       (so_rewr_cleanup == NULL) ||
-      (so_rewr         == NULL) ||
+      (so_rewr         == NULL) )
+      /* ||
       (so_set_subst    == NULL) ||
       (so_get_subst    == NULL) ||
       (so_clear_subst  == NULL) ||
-      (so_clear_substs == NULL))
+      (so_clear_substs == NULL)) */
   {
     unlink(const_cast< char* >(file_so.c_str()));
     unlink(const_cast< char* >(file_o.c_str()));
@@ -2156,12 +2031,12 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
     throw mcrl2::runtime_error("Cannot load rewriter functions.");
   }
 
-  so_rewr_init();
+  so_rewr_init(this);
 
-  for (ATermList keys=ATtableKeys(subst_store); !ATisEmpty(keys); keys=ATgetNext(keys))
+  /* for (ATermList keys=ATtableKeys(subst_store); !ATisEmpty(keys); keys=ATgetNext(keys))
   {
     so_set_subst((ATermAppl) ATgetFirst(keys),ATtableGet(subst_store,ATgetFirst(keys)));
-  }
+  } */
 
   need_rebuild = false;
 #ifndef NDEBUG
@@ -2183,7 +2058,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
 RewriterCompilingInnermost::RewriterCompilingInnermost(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   initialize_internal_translation_table_rewriter();
-  subst_store = ATtableCreate(100,75);
+  // subst_store = ATtableCreate(100,75);
   so_rewr_cleanup = NULL;
   m_data_specification_for_enumeration = DataSpec;
   initialise_common();
@@ -2195,7 +2070,7 @@ RewriterCompilingInnermost::~RewriterCompilingInnermost()
   CleanupRewriteSystem();
   finalise_common();
   ATtableDestroy(tmp_eqns);
-  ATtableDestroy(subst_store);
+  // ATtableDestroy(subst_store);
 #ifndef NDEBUG
   if (made_files)
   {
@@ -2244,7 +2119,7 @@ ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
   return internal_quantifier_enumeration((ATerm) a);
 }
 
-void RewriterCompilingInnermost::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
+/* void RewriterCompilingInnermost::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
 {
   so_set_subst(Var,Expr);
   ATtablePut(subst_store, (ATerm) Var, Expr);
@@ -2265,7 +2140,7 @@ void RewriterCompilingInnermost::clearSubstitutions()
 {
   so_clear_substs();
   ATtableReset(subst_store);
-}
+} */
 
 RewriteStrategy RewriterCompilingInnermost::getStrategy()
 {

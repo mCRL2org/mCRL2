@@ -45,12 +45,6 @@ class RewriterCompilingJitty: public Rewriter
     ATerm rewriteInternal(ATerm Term);
     ATermList rewriteInternalList(ATermList Terms);
 
-    void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
-    ATerm getSubstitutionInternal(ATermAppl Var);
-    void clearSubstitution(ATermAppl Var);
-    void clearSubstitutions();
-    using Rewriter::clearSubstitutions;
-
     bool addRewriteRule(ATermAppl Rule);
     bool removeRewriteRule(ATermAppl Rule);
 
@@ -59,13 +53,9 @@ class RewriterCompilingJitty: public Rewriter
     bool need_rebuild;
     bool made_files;
 
-//    int num_opids;
-
     ATermInt true_inner;
     int true_num;
 
-    //ATermTable term2int;
-    //ATermAppl* int2term;
     ATermList* jittyc_eqns;
 
     ATermTable int2ar_idx;
@@ -81,12 +71,9 @@ class RewriterCompilingJitty: public Rewriter
     std::string rewriter_source;
     uncompiled_library *rewriter_so;
 
-    void (*so_rewr_init)();
+    void (*so_rewr_init)(RewriterCompilingJitty *);
     void (*so_rewr_cleanup)();
     ATermAppl(*so_rewr)(ATermAppl);
-    void (*so_set_subst)(ATermAppl, ATerm);
-    void (*so_clear_subst)(ATermAppl);
-    void (*so_clear_substs)();
 
 #ifdef _JITTYC_STORE_TREES
     int write_tree(FILE* f, ATermAppl tree, int* num_states);
@@ -111,9 +98,6 @@ class RewriterCompilingJitty: public Rewriter
     void BuildRewriteSystem();
 	FILE* MakeTempFiles();
 
-    /* ATerm OpId2Int(ATermAppl Term, bool add_opids);
-    ATerm toInner(ATermAppl Term, bool add_opids);
-    ATermAppl fromInner(ATerm Term); */
 };
 
 }

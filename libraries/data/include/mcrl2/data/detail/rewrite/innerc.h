@@ -41,24 +41,16 @@ class RewriterCompilingInnermost: public Rewriter
     ATerm rewriteInternal(ATerm Term);
     ATermList rewriteInternalList(ATermList Terms);
 
-    void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
-    ATerm getSubstitutionInternal(ATermAppl Var);
-    void clearSubstitution(ATermAppl Var);
-    void clearSubstitutions();
-    using Rewriter::clearSubstitutions;
-
     bool addRewriteRule(ATermAppl Rule);
     bool removeRewriteRule(ATermAppl Rule);
 
   private:
-    ATermTable tmp_eqns, subst_store;
-    // size_t num_opids;
+    ATermTable tmp_eqns;
     bool need_rebuild, made_files;
 
     ATermInt true_inner;
     int true_num;
 
-//   ATermTable term2int;
     ATermList* innerc_eqns;
 
     std::string file_c;
@@ -66,13 +58,9 @@ class RewriterCompilingInnermost: public Rewriter
     std::string file_so;
 
     void* so_handle;
-    void (*so_rewr_init)();
+    void (*so_rewr_init)(RewriterCompilingInnermost *);
     void (*so_rewr_cleanup)();
     ATermAppl(*so_rewr)(ATermAppl);
-    void (*so_set_subst)(ATermAppl, ATerm);
-    ATerm(*so_get_subst)(ATermAppl);
-    void (*so_clear_subst)(ATermAppl);
-    void (*so_clear_substs)();
 
 #ifdef _INNERC_STORE_TREES
     int write_tree(FILE* f, ATermAppl tree, int* num_states);
@@ -87,9 +75,6 @@ class RewriterCompilingInnermost: public Rewriter
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
 
-    /* ATerm OpId2Int(ATermAppl Term, bool add_opids);
-    ATerm toInner(ATermAppl Term, bool add_opids);
-    ATermAppl fromInner(ATerm Term); */
 };
 
 }
