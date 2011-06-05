@@ -50,17 +50,10 @@ namespace detail
 
 Rewriter::Rewriter()
 {
-  substs = NULL;
-  substs_size = 0;
 }
 
 Rewriter::~Rewriter()
 {
-  if (substs_size > 0)
-  {
-    ATunprotectArray(substs);
-  }
-  free(substs);
 }
 
 ATermList Rewriter::rewriteList(ATermList Terms)
@@ -106,131 +99,6 @@ bool Rewriter::addRewriteRule(ATermAppl /*Rule*/)
 bool Rewriter::removeRewriteRule(ATermAppl /*Rule*/)
 {
   return false;
-}
-
-void Rewriter::setSubstitution(ATermAppl Var, ATermAppl Expr)
-{
-  setSubstitutionInternal(Var,toRewriteFormat(Expr));
-}
-
-void Rewriter::setSubstitutionList(ATermList Substs)
-{
-  for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
-  {
-    ATermAppl h = (ATermAppl) ATgetFirst(Substs);
-    setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),toRewriteFormat((ATermAppl) ATgetArgument(h,1)));
-  }
-}
-
-void Rewriter::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
-{
-  size_t n = ATgetAFun(ATgetArgument(Var,0));
-
-  if (n >= substs_size)
-  {
-    size_t newsize;
-
-    if (n >= 2*substs_size)
-    {
-      if (n < 1024)
-      {
-        newsize = 1024;
-      }
-      else
-      {
-        newsize = n+1;
-      }
-    }
-    else
-    {
-      newsize = 2*substs_size;
-    }
-
-    if (substs_size > 0)
-    {
-      ATunprotectArray(substs);
-    }
-    substs = (ATerm*) realloc(substs,newsize*sizeof(ATerm));
-
-    if (substs == NULL)
-    {
-      throw mcrl2::runtime_error("Failed to increase the size of a substitution array.");
-    }
-
-    for (size_t i=substs_size; i<newsize; i++)
-    {
-      substs[i]=NULL;
-    }
-
-    ATprotectArray(substs,newsize);
-    substs_size = newsize;
-  }
-
-  substs[n] = Expr;
-}
-
-void Rewriter::setSubstitutionInternalList(ATermList Substs)
-{
-  for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
-  {
-    ATermAppl h = (ATermAppl) ATgetFirst(Substs);
-    setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),ATgetArgument(h,1));
-  }
-}
-
-ATermAppl Rewriter::getSubstitution(ATermAppl Var)
-{
-  return fromRewriteFormat(lookupSubstitution(Var));
-}
-
-ATerm Rewriter::getSubstitutionInternal(ATermAppl Var)
-{
-  return lookupSubstitution(Var);
-}
-
-void Rewriter::clearSubstitution(ATermAppl Var)
-{
-  size_t n = ATgetAFun(ATgetArgument(Var,0));
-
-  if (n < substs_size)
-  {
-    substs[n] = NULL;
-  }
-}
-
-void Rewriter::clearSubstitutions()
-{
-  for (size_t i=0; i<substs_size; i++)
-  {
-    substs[i] = NULL;
-  }
-}
-
-void Rewriter::clearSubstitutions(ATermList Vars)
-{
-  for (; !ATisEmpty(Vars); Vars=ATgetNext(Vars))
-  {
-    clearSubstitution((ATermAppl) ATgetFirst(Vars));
-  }
-}
-
-ATerm Rewriter::lookupSubstitution(ATermAppl Var)
-{
-  size_t n = ATgetAFun(ATgetArgument(Var,0));
-
-  if (n >= substs_size)
-  {
-    return (ATerm) Var;
-  }
-
-  ATerm r = substs[n];
-
-  if (r == NULL)
-  {
-    return (ATerm) Var;
-  }
-
-  return r;
 }
 
 ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat )
@@ -406,8 +274,6 @@ Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrate
 {
   switch (Strategy)
   {
-    /* case GS_REWR_INNER:
-      return new RewriterInnermost(DataSpec); */
     case GS_REWR_JITTY:
       return new RewriterJitty(DataSpec,add_rewrite_rules);
 #ifdef MCRL2_INNERC_AVAILABLE
@@ -418,14 +284,8 @@ Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrate
     case GS_REWR_JITTYC:
       return new RewriterCompilingJitty(DataSpec,add_rewrite_rules);
 #endif
-    /* case GS_REWR_INNER_P:
-      return new RewriterProver(DataSpec,mcrl2::data::rewriter::innermost); */
     case GS_REWR_JITTY_P:
       return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty,add_rewrite_rules);
-/* #ifdef MCRL2_INNERC_AVAILABLE
-    case GS_REWR_INNERC_P:
-      return new RewriterProver(DataSpec,data::rewriter::innermost_compiling);
-#endif */
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC_P:
       return new RewriterProver(DataSpec,data::rewriter::jitty_compiling,add_rewrite_rules);

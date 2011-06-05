@@ -26,6 +26,10 @@ namespace detail
 class RewriterProver: public Rewriter
 {
   public:
+    BDD_Prover* prover_obj;
+    boost::shared_ptr<detail::Rewriter> rewr_obj; 
+
+  public:
     RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const bool add_rewrite_rules);
     ~RewriterProver();
 
@@ -50,9 +54,6 @@ class RewriterProver: public Rewriter
     void clearSubstitutions();
     void clearSubstitutions(ATermList Vars);
 
-  public:
-    BDD_Prover* prover_obj;
-    boost::shared_ptr<detail::Rewriter> rewr_obj;
 };
 
 }

@@ -173,24 +173,47 @@ class Rewriter
     /**
      * \brief Link a variable to a value for on-the-fly
      *        substitution. (Replacing any previous linked value.)
-     * \param Var  A mCRL2 data variable.
-     * \param Expr A mCRL2 data expression.
+     * \param var  A mCRL2 data variable.
+     * \param expr A mCRL2 data expression.
      **/
-    virtual void setSubstitution(ATermAppl Var, ATermAppl Expr);
+    virtual void setSubstitution(ATermAppl var, ATermAppl expr)
+    {
+      setSubstitutionInternal(var,toRewriteFormat(expr));
+    }
+
     /**
      * \brief Link variables to a values for on-the-fly
      *        substitution. (Replacing any previous linked value.)
      * \param Substs A lists of substitutions of mCRL2 data
                  *               variables to mCRL2 data expressions.
      **/
-    virtual void setSubstitutionList(ATermList Substs);
+    virtual void setSubstitutionList(ATermList Substs)
+    {
+      for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
+      {
+        ATermAppl h = (ATermAppl) ATgetFirst(Substs);
+        setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),toRewriteFormat((ATermAppl) ATgetArgument(h,1)));
+      }
+    }
+
+    
     /**
      * \brief Link a variable to a value for on-the-fly
      *        substitution. (Replacing any previous linked value.)
-     * \param Var  A mCRL2 data variable.
-     * \param Expr A term in the internal rewriter format.
+     * \param var  A mCRL2 data variable.
+     * \param expr A term in the internal rewriter format.
      **/
-    virtual void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
+    virtual void setSubstitutionInternal(ATermAppl var, ATerm expr)
+    {
+      size_t n = ATgetAFun(ATgetArgument(var,0));
+
+      if (n>=m_substitution.size())
+      {
+        m_substitution.resize(n+1);
+      }
+      m_substitution[n]=(ATermAppl)expr;
+    }
+
     /**
      * \brief Link variables to a values for on-the-fly
      *        substitution. (Replacing any previous linked value.)
@@ -198,61 +221,98 @@ class Rewriter
                  *               variables to terms in the internal rewriter
                  *               format.
      **/
-    virtual void setSubstitutionInternalList(ATermList Substs);
+    virtual void setSubstitutionInternalList(ATermList substs)
+    {
+      for (; !ATisEmpty(substs); substs=ATgetNext(substs))
+      {
+        const ATermAppl h = (ATermAppl) ATgetFirst(substs);
+        setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),ATgetArgument(h,1));
+      }
+    }
+
     /**
      * \brief Get the value linked to a variable for on-the-fly
      *        substitution.
-     * \param Var A mCRL2 data variable.
-     * \return The value linked to Var as an mCRL2 data expression.
-                 *         If no value is linked to Var, then NULL is returned.
+     * \param var A mCRL2 data variable.
+     * \return The value linked to var as an mCRL2 data expression.
+                 *         If no value is linked to var, then NULL is returned.
      **/
-    virtual ATermAppl getSubstitution(ATermAppl Var);
+    virtual ATermAppl getSubstitution(ATermAppl var)
+    {
+      return fromRewriteFormat(getSubstitutionInternal(var));
+    }
+
     /**
      * \brief Get the value linked to a variable for on-the-fly
      *        substitution.
-     * \param Var A mCRL2 data variable.
-     * \return The value linked to Var as a term in the internal
-                 *         rewriter format. If no value is linked to Var,
+     * \param var A mCRL2 data variable.
+     * \return The value linked to var as a term in the internal
+                 *         rewriter format. If no value is linked to var,
      *         then NULL is returned.
      **/
-    virtual ATerm getSubstitutionInternal(ATermAppl Var);
+    virtual ATerm getSubstitutionInternal(ATermAppl var)
+    {
+      const size_t n = ATgetAFun(ATgetArgument(var,0));
+      if (n>=m_substitution.size() || m_substitution[n]==atermpp::aterm_appl())
+      {
+        return (ATerm)var;
+      }
+      return (ATerm)(ATermAppl)m_substitution[n];
+    }
+
     /**
      * \brief Remove the value linked to a variable for on-the-fly
      *        substitution. (I.e. make sure that no value is
      *        substituted for this variable during rewriting.)
-     * \param Var A mCRL2 data variable.
+     * \param var A mCRL2 data variable.
      **/
-    virtual void clearSubstitution(ATermAppl Var);
+    virtual void clearSubstitution(ATermAppl var)
+    {
+      const size_t n = ATgetAFun(ATgetArgument(var,0));
+
+      if (n < m_substitution.size())
+      {
+        m_substitution[n] = atermpp::aterm_appl();
+      }
+    }
+
+
     /**
      * \brief Remove all values linked to a variable for on-the-fly
      *        substitution. (I.e. make sure that no substitution is
      *        done during rewriting.)
      **/
-    virtual void clearSubstitutions();
+    virtual void clearSubstitutions()
+    {
+      m_substitution.clear();
+    }
+
     /**
      * \brief Remove the values linked to variables for on-the-fly
      *        substitution. (I.e. make sure that no value is
      *        substituted for this variable during rewriting.)
-     * \param Vars A list of mCRL2 data variable.
+     * \param vars A list of mCRL2 data variable.
      **/
-    virtual void clearSubstitutions(ATermList Vars);
+    virtual void clearSubstitutions(ATermList vars)
+    {
+      for (; !ATisEmpty(vars); vars=ATgetNext(vars))
+      {
+        clearSubstitution((ATermAppl) ATgetFirst(vars));
+      }
+    }
+
+
+  /* protected:
+    ATerm lookupSubstitution(ATermAppl var); */
 
   protected:
-    ATerm lookupSubstitution(ATermAppl Var);
-
-  private:
-    ATerm* substs;
-    size_t substs_size;
-
-    /* virtual ATermAppl fromInner(ATermAppl Term); */
-
-    ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
-    ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
-
-  protected:
+    atermpp::vector < atermpp::aterm_appl > m_substitution;  // Substitution for variables to terms in internal format.
 
     mcrl2::data::data_specification m_data_specification_for_enumeration;
     ATerm internal_quantifier_enumeration( ATerm ATermInInnerFormat );
+
+    ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
+    ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
 
     core::identifier_string forall_function_symbol()
     {

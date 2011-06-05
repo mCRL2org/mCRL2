@@ -49,7 +49,7 @@ class RewriterCompilingJitty: public Rewriter
     bool removeRewriteRule(ATermAppl Rule);
 
   private:
-    ATermTable tmp_eqns, subst_store;
+    ATermTable tmp_eqns;
     bool need_rebuild;
     bool made_files;
 

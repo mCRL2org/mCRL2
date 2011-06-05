@@ -547,7 +547,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
     gsMessage("      return %T\n",fromInner((ATerm)Term));
     gsMessage("      return1  %P\n",fromInner(lookupSubstitution(Term)));
 #endif
-    return (ATermAppl) lookupSubstitution(Term);
+    return (ATermAppl) getSubstitutionInternal(Term);
   }
   else
   {
@@ -559,7 +559,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
     if (!ATisInt(op))
     {
-      head = lookupSubstitution((ATermAppl) op);
+      head = getSubstitutionInternal((ATermAppl) op);
       if (ATisInt(head))
       {
         op = head;

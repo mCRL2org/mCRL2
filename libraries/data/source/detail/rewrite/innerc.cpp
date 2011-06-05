@@ -2119,29 +2119,6 @@ ATerm RewriterCompilingInnermost::rewriteInternal(ATerm Term)
   return internal_quantifier_enumeration((ATerm) a);
 }
 
-/* void RewriterCompilingInnermost::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
-{
-  so_set_subst(Var,Expr);
-  ATtablePut(subst_store, (ATerm) Var, Expr);
-}
-
-ATerm RewriterCompilingInnermost::getSubstitutionInternal(ATermAppl Var)
-{
-  return ATtableGet(subst_store, (ATerm) Var);
-}
-
-void RewriterCompilingInnermost::clearSubstitution(ATermAppl Var)
-{
-  so_clear_subst(Var);
-  ATtableRemove(subst_store, (ATerm) Var);
-}
-
-void RewriterCompilingInnermost::clearSubstitutions()
-{
-  so_clear_substs();
-  ATtableReset(subst_store);
-} */
-
 RewriteStrategy RewriterCompilingInnermost::getStrategy()
 {
   return GS_REWR_INNERC;
