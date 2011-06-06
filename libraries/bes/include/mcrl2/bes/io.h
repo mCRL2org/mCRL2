@@ -192,33 +192,48 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
   typedef typename core::term_traits<term_type> tr;
   typedef typename tr::string_type string_type;
 
-  // Number the variables of the equations 0, 1, ... and put them in the map variables.
-  std::map<string_type, int> variables;
-  int index = 0;
-  for (Iter i = first; i != last; ++i)
-  {
-    variables[i->variable().name()] = index++;
-  }
+    // Number the variables of the equations 0, 1, ... and put them in the map variables.
+    // Also store player to which variables without operand are assigned, per
+    // block, in block_to_player.
+    std::map<string_type, int> variables;
+    int index = 0;
+    std::map<int, int> block_to_player;
 
-  out << "parity " << index -1 << ";\n";
-
-  int priority = 0;
-  fixpoint_symbol sigma = fixpoint_symbol::nu();
-  for (Iter i = first; i != last; ++i)
-  {
-    if (i->symbol() != sigma)
+    bool and_in_block = false;
+    int block = 0;
+    fixpoint_symbol sigma = fixpoint_symbol::nu();
+    int b = 0;
+    for (Iter i = first; i != last; ++i)
     {
-      ++priority;
-      sigma = i->symbol();
+      if(i->symbol() != sym)
+      {
+        block_to_player[b++] = (and_in_block)?1:0;
+        and_in_block = false;
+        sigma = i->symbol();
+      }
+      variables[i->variable().name()] = index++;
+      and_in_block = and_in_block || tr::is_and(i->formula());
     }
 
-    out << variables[i->variable().name()]
-        << " "
-        << priority
-        << " "
-        << (tr::is_and(i->formula()) ? "1" : "0")
-        << " "
-        << bes_expression2pgsolver(i->formula(), variables)
+    out << "parity " << index -1 << ";\n";
+
+    int priority = 0;
+    fixpoint_symbol sigma = fixpoint_symbol::nu();
+    for (Iter i = first; i != last; ++i)
+    {
+      if(i->symbol() != sigma)
+      {
+        ++priority;
+        sigma = i->symbol();
+      }
+
+      out << variables[i->variable().name()]
+          << " "
+          << priority
+          << " "
+          << (tr::is_and(i->formula()) ? 1 : (tr::is_or(i->formula())?0:block_to_player[priority]))
+          << " "
+          << bes_expression2pgsolver(i->formula(), variables)
 // The following is optional, print variable name for traceability.
 //          << " "
 //          << "\""
