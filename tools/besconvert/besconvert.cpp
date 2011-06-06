@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/bes/detail/bes_algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes_parse.h"
 #include "mcrl2/bes/bes2pbes.h"
@@ -37,8 +38,8 @@ namespace mcrl2
 namespace bes
 {
 
-template<typename Container = atermpp::vector<boolean_equation> >
-class bes_reduction_algorithm
+template <typename Container = atermpp::vector<boolean_equation> >
+class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 {
   public:
     enum equivalence_t
@@ -50,7 +51,9 @@ class bes_reduction_algorithm
     };
 
   protected:
-    boolean_equation_system<Container>& m_bes;
+    typedef detail::bes_algorithm<Container> super;
+    using super::m_bes; // Why doesn't the compiler see this by itself?
+
     equivalence_t m_equivalence;
     lts::lts_lts_t m_lts;
 
@@ -182,16 +185,7 @@ class bes_reduction_algorithm
     /// Initial state of the lts is the state representing the initial equation of the BES.
     void bes_to_lts()
     {
-      if (core::gsDebug)
-      {
-        std::cerr << "Tranforming BES to LTS" << std::endl;
-      }
-
-      if (m_bes.initial_state() != m_bes.equations().begin()->variable())
-      {
-        throw mcrl2::runtime_error("The first equation is not the variable designated as initial. This situation is not handled by the tool.");
-      }
-
+      mCRL2log(debug) << "Tranforming BES to LTS" << std::endl;
 
       // Collect block indices and operands of all equations
       std::map<boolean_variable, std::pair<size_t, boolean_operand_t> > statistics;
@@ -217,14 +211,8 @@ class bes_reduction_algorithm
         indices[i->variable()] = index++;
       }
 
-      size_t transitioncount = occurring_variable_count + m_bes.equations().size();
-      size_t statecount = m_bes.equations().size();// + 1;
-      size_t initial_state = 0;
-      std::stringstream aut;
-      aut << "des(0," << transitioncount << "," << statecount << ")" << std::endl;
-
-      m_lts.set_num_states(statecount, false);
-      m_lts.set_initial_state(initial_state);
+      m_lts.set_num_states(m_bes.equations().size(), false);
+      m_lts.set_initial_state(indices[m_bes.initial_state()]);
 
       atermpp::indexed_set labs(100,50);
 
@@ -280,10 +268,8 @@ class bes_reduction_algorithm
 
     void reduce_lts()
     {
-      if (core::gsDebug)
-      {
-        std::cerr << "Reduce LTS" << std::endl;
-      }
+      mCRL2log(debug) << "Reduce LTS" << std::endl;
+
       switch (m_equivalence)
       {
         case eq_bisim:
@@ -302,10 +288,7 @@ class bes_reduction_algorithm
     /// the self-loops.
     void lts_to_bes()
     {
-      if (core::gsDebug)
-      {
-        std::cerr << "Transforming reduced LTS to BES." << std::endl;
-      }
+      mCRL2log(debug) << "Transforming reduced LTS to BES." << std::endl;
 
       // Build formulas
       size_t cur_state = 0;
@@ -405,7 +388,7 @@ class bes_reduction_algorithm
 
   public:
     bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut)
-      : m_bes(v_bes),
+      : detail::bes_algorithm<Container>(v_bes),
         m_equivalence(equivalence)
     {
       initialise_allowed_eqs();
@@ -413,23 +396,14 @@ class bes_reduction_algorithm
 
     void run(utilities::execution_timer& timing)
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
-      }
-      if (core::gsDebug)
-      {
-        std::cerr << "Converting BES to standard form" << std::endl;
-      }
+      mCRL2log(verbose) << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
+      mCRL2log(debug) << "Converting BES to standard form" << std::endl;
 
       timing.start("standard form conversion");
       make_standard_form(m_bes, true);
       timing.finish("standard form conversion");
 
-      if (core::gsDebug)
-      {
-        std::cerr << "BES Reduction algorithm initialised" << std::endl;
-      }
+      mCRL2log(debug) << "BES Reduction algorithm initialised" << std::endl;
 
       timing.start("conversion to LTS");
       bes_to_lts();
@@ -442,6 +416,9 @@ class bes_reduction_algorithm
       timing.start("conversion to BES");
       lts_to_bes();
       timing.finish("conversion to BES");
+
+      mCRL2log(verbose) << "Removing unreachable equations" << std::endl;
+      super::remove_unreachable_equations();
     }
 
 };
@@ -506,9 +483,16 @@ class bes_bisimulation_tool: public super
 
       boolean_equation_system<> b;
 
-      core::gsVerboseMsg("Loading BES from input file... ");
+      mCRL2log(verbose) << "Loading BES from input file...";
       b.load(m_input_filename);
-      core::gsVerboseMsg("done\n");
+
+      bool reach = detail::bes_algorithm<>(b).remove_unreachable_equations();
+      if(!reach)
+      {
+        throw mcrl2::runtime_error("expect all equations to be reachable");
+      }
+
+      mCRL2log(verbose) << "done" << std::endl;
       bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence).run(timer());
       b.save(m_output_filename);
 

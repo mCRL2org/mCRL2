@@ -25,6 +25,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/text_utility.h"
 
 namespace mcrl2
 {
@@ -699,6 +700,18 @@ std::string pp(boolean_expression e, bool add_parens = false)
   }
   throw mcrl2::runtime_error("error in mcrl2::bes::pp: encountered unknown boolean expression " + e.to_string());
   return "";
+}
+
+template<typename Container>
+inline
+std::string pp(const Container& c, bool add_parens = false, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+{
+  std::vector<std::string> result;
+  for(typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+  {
+    result.push_back(pp(*i, add_parens));
+  }
+  return core::string_join(result, ", ");
 }
 
 } // namespace bes
