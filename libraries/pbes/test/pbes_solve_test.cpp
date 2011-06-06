@@ -12,6 +12,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/pbes/lps2pbes.h"
@@ -136,6 +137,14 @@ std::string test15 =
   "init X0(0, true);                                                                                                                                                                                                                                                                                                                                                                                         \n"
   ;
 
+// Problematic test case involving lambda expressions
+std::string test16 =
+  "sort  State = struct S;\n\n"
+  "pbes nu X(f: Nat -> State) =\n"
+  "           val(!(f(3) == S));\n\n"
+  "init X(lambda x: Nat. S);\n"
+  ;
+
 // N.B. The test cases below should not terminate, since they correspond
 // to infinite BESs.
 // TODO: Test that no solution for these cases is found within a certain number of steps.
@@ -155,10 +164,10 @@ std::string test15 =
 //    "init X(0);                                                        \n"
 //    ;
 
-void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
+void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::rewriter::strategy rewrite_strategy)
 {
   pbes<> p = txt2pbes(pbes_spec);
-  bool result = pbes2_bool_test(p);
+  bool result = pbes2_bool_test(p, rewrite_strategy);
   if (result != expected_result)
   {
     std::cout << "--- pbes2bool failed ---\n";
@@ -187,14 +196,21 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
 
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
 {
-  test_pbes2bool(pbes_spec, expected_result);
+  std::vector<data::basic_rewriter<data::data_expression>::strategy> strategies = utilities::get_test_rewrite_strategies();
 
-  // test with and without scc decomposition
-  pbespgsolve_options options;
-  test_pbespgsolve(pbes_spec, options, expected_result);
+  for(std::vector<data::basic_rewriter<data::data_expression>::strategy>::const_iterator i = strategies.begin(); i != strategies.end(); ++i)
+  {
+    test_pbes2bool(pbes_spec, expected_result, *i);
 
-  options.use_scc_decomposition = false;
-  test_pbespgsolve(pbes_spec, options, expected_result);
+    // test with and without scc decomposition
+    pbespgsolve_options options;
+    options.rewrite_strategy = *i;
+
+    test_pbespgsolve(pbes_spec, options, expected_result);
+
+    options.use_scc_decomposition = false;
+    test_pbespgsolve(pbes_spec, options, expected_result);
+  }
 }
 
 
@@ -231,6 +247,8 @@ void test_all()
   test_pbes_solve(test14, true); 
   std::cerr << "Test15\n";
   test_pbes_solve(test15, false);
+  std::cerr << "Test16\n";
+  test_pbes_solve(test16, false);
 }
 
 std::string frm_nodeadlock = "[true*]<true*>true";

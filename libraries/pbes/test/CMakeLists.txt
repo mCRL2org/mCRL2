@@ -31,20 +31,14 @@ foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
   project( "${PREFIX}_${result}" )
 
-  if( NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test")
-    message(STATUS "skipped pbes_solve_test")
-  else(NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test" )
+  add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
+  target_link_libraries("${PREFIX}_${result}"
+    mcrl2_lps
+    mcrl2_pbespgsolve
+    ${Boost_LIBRARIES}     
+  )
 
-    add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
-    target_link_libraries("${PREFIX}_${result}"
-      mcrl2_lps
-      mcrl2_pbespgsolve
-      ${Boost_LIBRARIES}     
-    )
-
-    # MACRO is defined in CMakeLists.txt in root of source tree
-    build_and_run_test_target( ${PREFIX}_${result} )
-
-  endif( NOT MCRL2_ENABLE_EXPERIMENTAL AND ${result} STREQUAL  "pbes_solve_test")
+  # MACRO is defined in CMakeLists.txt in root of source tree
+  build_and_run_test_target( ${PREFIX}_${result} )
 
 endforeach( OBJ )  

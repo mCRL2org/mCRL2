@@ -47,12 +47,12 @@ namespace pbes_system
 ///         pbes2bool uses more advanced features).
 
 template < typename Container >
-bool pbes2_bool_test(pbes< Container > &pbes_spec)
+bool pbes2_bool_test(pbes< Container > &pbes_spec, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
 {
   // Generate an enumerator, a data rewriter and a pbes rewriter.
   data::rewriter datar(pbes_spec.data(),
                        mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_system::find_function_symbols(pbes_spec), pbes_spec.global_variables()),
-                       mcrl2::data::rewriter::jitty);
+                       rewrite_strategy);
 
 #ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
 std::clog << "--- rewrite rule selection specification ---\n";
