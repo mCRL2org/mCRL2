@@ -328,12 +328,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
   }
 
-  void print_condition(const data_expression& condition, const std::string& arrow = "  ->  ")
+  void print_condition(const data_expression& condition, const std::string& arrow = "  ->  ", int precedence = 3)
   {
     if (!sort_bool::is_true_function_symbol(condition))
     {
       // TODO: a cleaner way to determine the precedence is needed
-      print_data_expression(condition, 100);
+      print_data_expression(condition, precedence);
       derived().print(arrow);
     }
   }
@@ -711,6 +711,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_function_application(const application& x)
   {
+    // print the head
     bool print_parentheses = is_abstraction(x.head());
     if (print_parentheses)
     {
@@ -720,10 +721,27 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     if (print_parentheses)
     {
       derived().print(")");
+    }   
+
+    // print the arguments
+    print_parentheses = x.arguments().size() > 0;
+    if (is_function_symbol(x.head()) && x.arguments().size() == 1)
+    {
+      std::string name(function_symbol(x.head()).name());
+      if (name == "!" || name == "#")
+      {
+        print_parentheses = data::detail::precedence(x.arguments().front()) < data::detail::max_precedence;
+      }
     }
-    derived().print("(");
+    if (print_parentheses)
+    {
+      derived().print("(");
+    }
     print_container(x.arguments());
-    derived().print(")");
+    if (print_parentheses)
+    {
+      derived().print(")");
+    }   
   }
 
   // N.B. This is interpreted as the bag element 'x.first: x.second'
@@ -1133,6 +1151,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       else if (sort_int::is_div_application(x))
       {
         print_container(x.arguments(), data::detail::precedence(x), " / ");
+      }
+      else if (sort_int::is_cint_application(x))
+      {
+        derived()(sort_int::arg(x));
       }
       else
       {

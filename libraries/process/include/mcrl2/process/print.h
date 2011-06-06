@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_PRINT_H
 
 #include "mcrl2/lps/print.h"
+#include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/detail/precedence.h"
 
@@ -80,7 +81,13 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived()(x.data());
     print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
     print_variables(x.global_variables(), true, true, "glob ", ";\n\n", ";\n     ");
-    print_list(x.equations(), "proc ", "\n\n", "\n     ");
+
+    // N.B. We have to normalize the sorts of the equations. Otherwise predicates like
+    // is_list(x) may return the wrong result.
+    atermpp::vector<process_equation> normalized_equations = x.equations();
+    process::normalize_sorts(normalized_equations, x.data());   
+    print_list(normalized_equations, "proc ", "\n\n", "\n     ");
+
     print_initial_state(x.init());
     derived().leave(x);
   }
@@ -244,7 +251,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ");
+    print_condition(x.condition(), " -> ", 6);
     print_process_expression(x.then_case(), process::detail::precedence(x));
     derived().leave(x);
   }
@@ -252,10 +259,12 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then_else& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ");
+    print_condition(x.condition(), " -> ", 6);
     print_process_expression(x.then_case(), process::detail::precedence(x));
     derived().print(" <> ");
-    print_process_expression(x.else_case(), process::detail::precedence(x));
+    // N.B. the else case is printed with a lower precedence, since we want the expression a -> b -> c <> d <> e
+    // to be printed as a -> (b -> c <> d) <> e
+    print_process_expression(x.else_case(), process::detail::precedence(x) - 1);
     derived().leave(x);
   }
 
