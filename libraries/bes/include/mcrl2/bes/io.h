@@ -202,12 +202,11 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
     bool and_in_block = false;
     int block = 0;
     fixpoint_symbol sigma = fixpoint_symbol::nu();
-    int b = 0;
     for (Iter i = first; i != last; ++i)
     {
-      if(i->symbol() != sym)
+      if(i->symbol() != sigma)
       {
-        block_to_player[b++] = (and_in_block)?1:0;
+        block_to_player[block++] = (and_in_block)?1:0;
         and_in_block = false;
         sigma = i->symbol();
       }
@@ -218,7 +217,7 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
     out << "parity " << index -1 << ";\n";
 
     int priority = 0;
-    fixpoint_symbol sigma = fixpoint_symbol::nu();
+    sigma = fixpoint_symbol::nu();
     for (Iter i = first; i != last; ++i)
     {
       if(i->symbol() != sigma)

@@ -65,6 +65,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
     lts::lts_aut_t m_lts;
     to_lts_translation_t m_translation;
     std::string m_lts_filename;
+    bool m_translate_to_lts_only;
 
     std::set<equivalence_t> m_allowed_equivalences;
     std::map<equivalence_t, std::string> m_equivalence_strings;
@@ -504,11 +505,12 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
     }
 
   public:
-    bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut, const to_lts_translation_t translation = to_lts_selfloop, const std::string& lts_filename = "")
+    bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut, const to_lts_translation_t translation = to_lts_selfloop, const std::string& lts_filename = "", const bool to_lts_only = false)
       : detail::bes_algorithm<Container>(v_bes),
         m_equivalence(equivalence),
         m_translation(translation),
-        m_lts_filename(lts_filename)
+        m_lts_filename(lts_filename),
+        m_translate_to_lts_only(to_lts_only)
 
     {
       initialise_allowed_eqs();
@@ -528,6 +530,11 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       timing.start("conversion to LTS");
       bes_to_lts();
       timing.finish("conversion to LTS");
+
+      if(m_translate_to_lts_only)
+      {
+        return;
+      }
 
       timing.start("reduction");
       reduce_lts();
@@ -555,6 +562,7 @@ class bes_bisimulation_tool: public super
     bes_reduction_algorithm<>::equivalence_t equivalence;
     std::string m_lts_filename;
     bes_reduction_algorithm<>::to_lts_translation_t m_translation;
+    bool m_no_reduction;
 
     void add_options(mcrl2::utilities::interface_description& desc)
     {
@@ -573,6 +581,8 @@ class bes_bisimulation_tool: public super
                       "  'selfloop' for a self-loop recording the information in each state,\n"
                       "  'successor' for an edge with the label of the current state to each successor state"
                       "              (may only be used with --equivalence=bisim)", 't');
+      desc.add_option("noreduction",
+                      "do not perform the reduction, only store the intermediate LTS", 'n');
     }
 
     void parse_options(const mcrl2::utilities::command_line_parser& parser)
@@ -622,6 +632,8 @@ class bes_bisimulation_tool: public super
       {
         parser.error("option --translation=successor can only be used with --equivalence=bisim");
       }
+
+      m_no_reduction = parser.options.count("noreduction") > 0;
     }
 
   public:
@@ -635,7 +647,8 @@ class bes_bisimulation_tool: public super
         "If INFILE is not "
         "present, stdin is used. If OUTFILE is not present, stdout is used."),
       equivalence(bes_reduction_algorithm<>::eq_stut),
-      m_translation(bes_reduction_algorithm<>::to_lts_selfloop)
+      m_translation(bes_reduction_algorithm<>::to_lts_selfloop),
+      m_no_reduction(false)
     {}
 
     bool run()
@@ -655,7 +668,7 @@ class bes_bisimulation_tool: public super
       }
 
       mCRL2log(verbose) << "done" << std::endl;
-      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename).run(timer());
+      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
       b.save(m_output_filename);
 
       return true;
