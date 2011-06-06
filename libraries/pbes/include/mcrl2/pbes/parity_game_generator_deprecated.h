@@ -272,8 +272,8 @@ class parity_game_generator_deprecated: public parity_game_generator
     }
 
   public:
-    /// \brief The operation type of the vertices.
-    enum operation_type { PGAME_OR, PGAME_AND };
+    using parity_game_generator::PGAME_OR;
+    using parity_game_generator::PGAME_AND;
 
     /// \brief Constructor.
     /// \param p A PBES
