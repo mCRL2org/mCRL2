@@ -1381,8 +1381,9 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 /// \return The resulting pbes
 inline pbes<> pbes_translate(const state_formulas::state_formula& formula, const lps::specification& spec, bool timed = false)
 {
-  if (formula.has_time() || spec.process().has_time())
+  if ((formula.has_time() || spec.process().has_time()) && !timed)
   {
+    mCRL2log(warning) << "Switch to timed translation because formula has " << (formula.has_time()?"":"no ") << "time, and process has " << (spec.process().has_time()?"":"no ") << "time" << std::endl;
     timed = true;
   }
 
