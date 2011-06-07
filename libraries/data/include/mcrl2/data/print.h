@@ -119,6 +119,68 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return static_cast<Derived&>(*this);
   }
 
+  void print_sort(const application& x)
+  {
+    std::cout << "<value>" << core::pp(x) << " " << x << " ";
+    if (is_numeric_value(x))
+    {
+      std::cout << "<numeric value>";
+    }
+    else if (sort_bool::is_bool(x.sort()))
+    {
+      std::cout << "<bool>";
+    }
+    else if (sort_pos::is_pos(x.sort()))
+    {
+      std::cout << "<pos>";
+    }
+    else if (sort_nat::is_nat(x.sort()))
+    {   
+      std::cout << "<nat>";
+    }
+    else if (sort_int::is_int(x.sort()))
+    {   
+      std::cout << "<int>";
+    }
+    else if (sort_real::is_real(x.sort()))
+    {
+      std::cout << "<real>";
+    }
+    else if (sort_list::is_list(x.sort()))
+    {
+      std::cout << "<list>";
+    }
+    else if (sort_set::is_set(x.sort()))
+    {
+      std::cout << "<set>";
+    }
+    else if (sort_fset::is_fset(x.sort()))
+    {
+      std::cout << "<fset>";
+    }
+    else if (sort_bag::is_bag(x.sort()))
+    {   
+      std::cout << "<bag>";
+    }
+    else if (sort_fbag::is_fbag(x.sort()))
+    {
+      std::cout << "<fbag>";
+    }
+    else if (is_function_update_application(x))
+    {
+      std::cout << "<function_update>";
+    }
+    else if (is_abstraction_application(x))
+    {
+      std::cout << "<abstraction>";
+    }
+    else // function application
+    {
+      std::cout << "<other>";
+    }
+    std::cout << std::endl;
+  }
+
   core::identifier_string generate_identifier(const std::string& prefix, const data_expression& context) const
   {
     data::set_identifier_generator generator;
@@ -990,7 +1052,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void operator()(const data::application& x)
   {
-//std::cout << "<application>" << core::pp(x) << " " << x << std::endl;
+#ifdef MCRL2_DEBUG_PRINT
+    print_sort(x);
+#endif
     derived().enter(x);
 
     //-------------------------------------------------------------------//
