@@ -35,7 +35,8 @@ using namespace mcrl2::data::sort_nat;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-bool print_check(data_expression const& left, std::string const& right)
+template <typename ExpressionType>
+bool print_check(ExpressionType const& left, std::string const& right)
 {
   if (pp(left) != right)
   {
@@ -168,6 +169,9 @@ BOOST_AUTO_TEST_CASE(test_list_print)
   data_expression l2(sort_list::list(sort_bool::bool_(), v));
   BOOST_CHECK(print_check(l2, "[true, false, true, true]"));
 
+  // Sort expression
+  BOOST_CHECK(print_check(list(bool_()), "List(Bool)"));
+
 
 }
 
@@ -197,6 +201,10 @@ BOOST_AUTO_TEST_CASE(test_set_print)
   BOOST_CHECK(print_check(parse_data_expression("{ b: Bool | b }"), "{ b: Bool | b }"));
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | x == 0 }"), "{ x: Nat | x == 0 }"));
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat. y == 0)(x) }"), "{ x: Nat | (lambda y: Nat. y == 0)(x) }"));
+
+  // Some types
+  BOOST_CHECK(print_check(fset(bool_()), "@FSet(Bool)"));
+  BOOST_CHECK(print_check(parse_sort_expression("Set(Nat)"), "Set(Nat)"));
 }
 
 BOOST_AUTO_TEST_CASE(test_bag_print)
@@ -228,6 +236,10 @@ BOOST_AUTO_TEST_CASE(test_bag_print)
   BOOST_CHECK(print_check(parse_data_expression("{ b: Bool | if(b, Pos2Nat(2), Pos2Nat(3)) }"), "{ b: Bool | if(b, 2, 3) }"));
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | x * x }"), "{ x: Nat | x * x }"));
   BOOST_CHECK(print_check(parse_data_expression("{ x: Nat | (lambda y: Nat. y * y)(x) }"), "{ x: Nat | (lambda y: Nat. y * y)(x) }"));
+
+  // Some types
+  BOOST_CHECK(print_check(fbag(bool_()), "@FBag(Bool)"));
+  BOOST_CHECK(print_check(parse_sort_expression("Bag(Nat)"), "Bag(Nat)"));
 }
 
 BOOST_AUTO_TEST_CASE(test_function_update_print)
@@ -281,6 +293,15 @@ BOOST_AUTO_TEST_CASE(test_rewrite_rule_fbag_print)
 BOOST_AUTO_TEST_CASE(test_rewrite_rule_bag_print)
 {
   BOOST_CHECK(print_container_check(sort_bag::bag_generate_equations_code(sort_bool::bool_())));
+}
+
+BOOST_AUTO_TEST_CASE(test_standard_sort_expressions)
+{
+  BOOST_CHECK(print_check(sort_bool::bool_(), "Bool"));
+  BOOST_CHECK(print_check(sort_pos::pos(), "Pos"));
+  BOOST_CHECK(print_check(sort_nat::nat(), "Nat"));
+  BOOST_CHECK(print_check(sort_int::int_(), "Int"));
+  BOOST_CHECK(print_check(sort_real::real_(), "Real"));
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

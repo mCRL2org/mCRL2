@@ -1398,6 +1398,24 @@ static void PRINT_FUNC(PrintSortExpr)(PRINT_OUTTYPE OutStream,
                               pp_format, ShowSorts, 0);
     PRINT_FUNC(fprints)(OutStream, ")");
   }
+  else if (data::sort_fset::is_fset(data::sort_expression(SortExpr)))
+  {
+    //print set sort
+    PRINT_FUNC(dbg_prints)("printing set sort\n");
+    PRINT_FUNC(fprints)(OutStream, "@FSet(");
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
+                              pp_format, ShowSorts, 0);
+    PRINT_FUNC(fprints)(OutStream, ")");
+  }
+  else if (data::sort_fbag::is_fbag(data::sort_expression(SortExpr)))
+  {
+    //print bag sort
+    PRINT_FUNC(dbg_prints)("printing bag sort\n");
+    PRINT_FUNC(fprints)(OutStream, "@FBag(");
+    PRINT_FUNC(PrintSortExpr)(OutStream, ATAgetArgument(SortExpr, 1),
+                              pp_format, ShowSorts, 0);
+    PRINT_FUNC(fprints)(OutStream, ")");
+  }
   else if (gsIsSortStruct(SortExpr))
   {
     //print structured sort
