@@ -18,7 +18,7 @@
 
 #include <windows.h>
 
-inline std::string now_time()
+std::string now_time()
 {
     const int MAX_LEN = 200;
     char buffer[MAX_LEN];
@@ -36,7 +36,7 @@ inline std::string now_time()
 
 #include <sys/time.h>
 
-inline std::string now_time()
+std::string now_time()
 {
     char buffer[11];
     time_t t;
