@@ -213,6 +213,7 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
       variables[i->variable().name()] = index++;
       and_in_block = and_in_block || tr::is_and(i->formula());
     }
+    block_to_player[block] = (and_in_block)?1:0;
 
     out << "parity " << index -1 << ";\n";
 
