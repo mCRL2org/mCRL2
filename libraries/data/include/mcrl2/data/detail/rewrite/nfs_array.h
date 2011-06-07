@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/nfs_array.h
+/// \file mcrl2/data/detail/rewrite/nfs_array.h
 /// \brief ?
 
 #ifndef MCRL2_DATA_NFS_ARRAY_H
