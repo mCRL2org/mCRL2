@@ -305,13 +305,13 @@ BOOST_AUTO_TEST_CASE(twice_lhs)
 
 /*
  * Test introduced after a bug report by Bas Ploeger. In contrary to what was
- * assumed before, sum variables may not be removed from delta summands.
+ * assumed before, sum variables may not be unconditionally removed from delta summands.
  */
 BOOST_AUTO_TEST_CASE(no_unconditional_sum_removal_from_delta)
 {
   std::clog << "Test case 9" << std::endl;
   const std::string text(
-    "proc P = sum y:Bool . y -> delta;\n"
+    "proc P = sum y:Nat . (y > 10) -> delta;\n"
     "init P;\n"
   );
 
@@ -356,6 +356,29 @@ BOOST_AUTO_TEST_CASE(bug_380)
     }
   }
   BOOST_CHECK(sumvar_count == 0);
+
+  print_specifications(s0, s1);
+}
+
+///Test case for issue #380
+BOOST_AUTO_TEST_CASE(test_boolean_variables)
+{
+  std::clog << "Test case 11" << std::endl;
+  const std::string text(
+    "act a:Bool#Bool;\n"
+    "proc P = sum b,c: Bool. (b && !c) -> a(b,c) . P;\n"
+    "init P;\n"
+  );
+
+  specification s0 = parse_linear_process_specification(text);
+  specification s1 = s0;
+  sumelm_algorithm(s1).run();
+
+  action_summand_vector v(s1.process().action_summands());
+  for(action_summand_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    BOOST_CHECK_EQUAL(i->summation_variables().size(), 0);
+  }
 
   print_specifications(s0, s1);
 }

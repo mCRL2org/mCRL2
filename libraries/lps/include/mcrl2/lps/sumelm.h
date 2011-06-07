@@ -76,12 +76,30 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
 
       for(atermpp::set<data_expression>::const_iterator i = conjuncts.begin(); i != conjuncts.end(); ++i)
       {
-        bool replacement_added = false;
-        if (is_equal_to_application(*i))
-        {
-          data_expression left = application(*i).left();
-          data_expression right = application(*i).right();
+        bool replacement_added(false);
+        data_expression left;
+        data_expression right;
 
+        if (is_equal_to_application(*i)) // v == e
+        {
+          left = application(*i).left();
+          right = application(*i).right();
+        }
+        else if (is_variable(*i) && sort_bool::is_bool(i->sort())) // v equal to v == true
+        {
+          left = *i;
+          right = sort_bool::true_();
+        }
+        else if (sort_bool::is_not_application(*i) && is_variable(sort_bool::arg(*i))) // !v equal to v == false
+        {
+          left = sort_bool::arg(*i);
+          right = sort_bool::false_();
+        }
+
+        // This conjunct was one of the above three cases; see if we can build
+        // a prober substitution
+        if(left != data_expression() && right != data_expression())
+        {
           if(!is_summand_variable(s, left) && is_summand_variable(s,right))
           {
             swap(left, right);
