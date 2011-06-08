@@ -27,6 +27,19 @@ class sumelm_tool: public input_output_tool
   protected:
 
     typedef input_output_tool super;
+    bool m_decluster;
+
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("decluster", "first decluster disjunctive conditions", 'c');
+    }
+
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      m_decluster = 0 < parser.options.count("decluster");
+    }
 
   public:
 
@@ -37,7 +50,8 @@ class sumelm_tool: public input_output_tool
         "remove superfluous summations from an LPS",
         "Remove superfluous summations from the linear process specification (LPS) in "
         "INFILE and write the result to OUTFILE. If INFILE is not present, stdin is used. "
-        "If OUTFILE is not present, stdout is used.")
+        "If OUTFILE is not present, stdout is used."),
+        m_decluster(false)
     {}
 
     ///Reads a specification from input_file,
@@ -49,7 +63,7 @@ class sumelm_tool: public input_output_tool
       lps_specification.load(m_input_filename);
 
       // apply sum elimination to lps_specification and save the output to a binary file
-      lps::sumelm_algorithm(lps_specification, core::gsVerbose||core::gsDebug).run();
+      lps::sumelm_algorithm(lps_specification, core::gsVerbose||core::gsDebug, m_decluster).run();
 
       gsDebugMsg("Sum elimination completed, saving to %s\n", m_output_filename.c_str());
       lps_specification.save(m_output_filename);

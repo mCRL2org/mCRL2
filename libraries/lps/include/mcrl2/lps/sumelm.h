@@ -22,6 +22,7 @@
 #include "mcrl2/data/join.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/decluster.h"
 
 namespace mcrl2
 {
@@ -34,6 +35,9 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
   protected:
     /// Stores the number of summation variables that has been removed.
     size_t m_removed;
+
+    /// Whether to decluster disjunctive conditions first.
+    bool m_decluster;
 
     /// Adds replacement lhs := rhs to the specified map of replacements.
     /// All replacements that have lhs as a right hand side will be changed to
@@ -148,15 +152,22 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// \param spec The specification to which sum elimination should be
     ///             applied.
     /// \param verbose Control whether verbose output should be given.
-    sumelm_algorithm(specification& spec, bool verbose = false)
+    sumelm_algorithm(specification& spec, bool verbose = false, bool decluster = false)
       : lps::detail::lps_algorithm(spec, verbose),
-        m_removed(0)
+        m_removed(0),
+        m_decluster(decluster)
     {}
 
     /// \brief Apply the sum elimination lemma to all summands in the
     ///        specification.
     void run()
     {
+      if(m_decluster)
+      {
+        // First decluster specification
+        decluster_algorithm(m_spec).run();
+      }
+
       m_removed = 0; // Re-initialise number of removed variables for a fresh run.
 
       for (action_summand_vector::iterator i = m_spec.process().action_summands().begin();
