@@ -1,0 +1,4 @@
+% This formula encodes the property that white has a winning strategy, such that
+% he wins in a finite number of steps.
+% This assumes that Black makes the first move
+mu X. <WhiteWins>true || [true]<true>X
