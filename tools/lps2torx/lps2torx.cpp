@@ -1,4 +1,4 @@
-// Author(s): Muck van Weerdenburg
+// Author(s): Frank Stappers
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -11,272 +11,42 @@
 #include "boost.hpp" // precompiled headers
 
 #define NAME "lps2torx"
-#define AUTHOR "Muck van Weerdenburg"
+#define AUTHOR "Muck van Weerdenburg, Frank Stappers"
+
+#include <iostream>
+#include <string>
+#include <cctype>
 
 #include <cstdio>
 #include <cerrno>
 #include <cstdlib>
-#include <climits>
 #include <cstring>
 #include <cassert>
-#include <iostream>
-#include <sstream>
-#include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/detail/aterm_io.h"
-#include "mcrl2/core/print.h"
-#include "mcrl2/lps/find.h"
-#include "mcrl2/lps/nextstate/standard.h"
-#include "mcrl2/data/selection.h"
+#include "mcrl2/aterm/aterm2.h"
+
 #include "mcrl2/core/messaging.h"
-#include "mcrl2/utilities/tool.h"
+#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/data/rewriter.h"
+#include "mcrl2/exception.h"
+#include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/lps/multi_action.h"
 
+#include "simulator.h"
 
-using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
+using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
-using namespace mcrl2::data;
+using namespace mcrl2::core::detail;
 using namespace mcrl2::lps;
-using namespace mcrl2;
-using namespace std;
 
-#define is_tau(x) multi_action(x).actions().empty() || \
-  ( multi_action( x ).actions().size() == 1 && \
-    multi_action( x ).actions().front().arguments().empty() )
-
-void print_torx_action(ostream& os, ATermAppl mact)
+class torx_tool : public rewriter_tool< input_tool >
 {
-  if (is_tau(mact))
-  {
-    os << "tau";
-  }
-  else
-  {
-    ATermAppl act = (ATermAppl) ATgetFirst((ATermList) ATgetArgument(mact,0));
-    PrintPart_CXX(cout,ATgetArgument(act,0), ppDefault);
-    ATermList dl = (ATermList) ATgetArgument(act,1);
-    for (; !ATisEmpty(dl); dl=ATgetNext(dl))
-    {
-      cout << "!";
-      PrintPart_CXX(cout,ATgetFirst(dl), ppDefault);
-    }
-  }
-}
 
-typedef struct
-{
-  size_t action;
-  size_t state;
-} index_pair;
-
-class torx_data
-{
-  private:
-    ATermIndexedSet stateactions;
-    ATermTable state_indices;
-    AFun fun_trip;
-    size_t num_indices;
-
-    ATerm triple(ATerm one, ATerm two, ATerm three)
-    {
-      return (ATerm) ATmakeAppl3(fun_trip,one,two,three);
-    }
-
-    ATerm third(ATerm trip)
-    {
-      return ATgetArgument((ATermAppl) trip,2);
-    }
-
-  public:
-    torx_data(size_t initial_size)
-    {
-      stateactions = ATindexedSetCreate(initial_size,50);
-      state_indices = ATtableCreate(initial_size,50);
-      fun_trip = ATmakeAFun("@trip@",2,false);
-      ATprotectAFun(fun_trip);
-      num_indices = 0;
-    }
-
-    ~torx_data()
-    {
-      ATunprotectAFun(fun_trip);
-      ATtableDestroy(state_indices);
-      ATindexedSetDestroy(stateactions);
-    }
-
-    index_pair add_action_state(ATerm from, ATerm action, ATerm to)
-    {
-      bool is_new;
-      index_pair p;
-
-      p.action = ATindexedSetPut(stateactions,triple(from,action,to),&is_new);
-      if (is_new == true)
-      {
-        num_indices = num_indices + 1;
-      }
-
-      ATerm i;
-      if ((i = ATtableGet(state_indices,to)) == NULL)
-      {
-        assert(p.action<(size_t)1<<(sizeof(int)*8-1));
-        ATtablePut(state_indices,to,(ATerm) ATmakeInt(static_cast<int>(p.action)));
-        p.state = p.action;
-      }
-      else
-      {
-        p.state = ATgetInt((ATermInt) i);
-      }
-
-      return p;
-    }
-
-    ATerm get_state(size_t index)
-    {
-      if (index < num_indices)
-      {
-        return third(ATindexedSetGetElem(stateactions,index));
-      }
-      else
-      {
-        return NULL;
-      }
-    }
-};
-
-typedef rewriter_tool< tool > lps2torx_base;
-class lps2torx_tool : public lps2torx_base
-{
-  private:
-    bool               usedummies;
-    bool               removeunused;
-    rewriter::strategy strategy;
-    int                stateformat;
-    std::string        name_for_input;
-
-  public:
-    lps2torx_tool() :
-      lps2torx_base(NAME,AUTHOR,
-                    "provide TorX explorer interface to an LPS",
-                    "Provide a TorX explorer interface to the LPS in INFILE. "
-                    "\n\n"
-                    "The LPS can be explored using TorX as described in torx_explorer(5)."
-                   )
-    {
-    }
-
-    bool run()
-    {
-      std::string str_in = (name_for_input.empty())?"stdin":("'" + name_for_input + "'");
-      gsVerboseMsg("reading LPS from %s\n", str_in.c_str());
-      lps::specification lps_specification;
-
-      lps_specification.load(name_for_input);
-
-      if (removeunused)
-      {
-        gsVerboseMsg("removing unused parts of the data specification.\n");
-      }
-
-      gsVerboseMsg("initialising...\n");
-      torx_data td(10000);
-
-      data::rewriter rewriter = (removeunused) ?
-                                data::rewriter(lps_specification.data(),
-                                    mcrl2::data::used_data_equation_selector(lps_specification.data(), mcrl2::lps::find_function_symbols(lps_specification), lps_specification.global_variables()), strategy) :
-                                data::rewriter(lps_specification.data(), strategy);
-
-      NextState* nstate = createNextState(
-                            lps_specification,
-                            rewriter,
-                            !usedummies,
-                            stateformat
-                          );
-
-      ATerm initial_state = nstate->getInitialState();
-
-      ATerm dummy_action = (ATerm) ATmakeAppl0(ATmakeAFun("@dummy_action@",0,false));
-      td.add_action_state(initial_state,dummy_action,initial_state);
-
-      gsVerboseMsg("generating state space...\n");
-
-      NextStateGenerator* nsgen = NULL;
-      // bool err = false;
-      bool notdone = true;
-      while (notdone && !cin.eof())
-      {
-        string s;
-
-        cin >> s;
-        if (s.size() != 1)
-        {
-          cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
-          continue;
-        }
-
-        switch (s[0])
-        {
-          case 'r': // Reset
-            // R event TAB solved TAB preds TAB freevars TAB identical
-            cout << "R 0\t1\t\t\t" << endl;
-            break;
-          case 'e': // Expand
-          {
-            int index;
-            ATerm state;
-
-            cin >> index;
-            state = td.get_state(index);
-            if (state == NULL)
-            {
-              cout << "E0 value " << index << " not valid" << endl;
-              break;
-            }
-
-            cout << "EB" << endl;
-            nsgen = nstate->getNextStates(state,nsgen);
-            ATermAppl Transition;
-            ATerm NewState;
-            while (nsgen->next(&Transition,&NewState))
-            {
-              index_pair p;
-
-              p = td.add_action_state(state,(ATerm) Transition,NewState);
-
-              // Ee event TAB visible TAB solved TAB label TAB preds TAB freevars TAB identical
-              cout << "Ee " << p.action << "\t" << (is_tau(Transition)?0:1) << "\t1\t";
-              print_torx_action(cout,Transition);
-              cout << "\t\t\t";
-              if (p.action != p.state)
-              {
-                cout << p.state;
-              }
-              cout << endl;
-            }
-            cout << "EE" << endl;
-
-            /* if ( nsgen->errorOccurred() )
-            {
-              err = true;
-              notdone = false;
-            } */
-            break;
-          }
-          case 'q': // Quit
-            cout << "Q" << endl;
-            notdone = false;
-            break;
-          default:
-            cout << "A_ERROR UnknownCommand: unknown or unimplemented command '" << s << "'" << endl;
-            break;
-        }
-      }
-      delete nsgen;
-      delete nstate;
-      return true;
-    }
+    typedef rewriter_tool<input_tool> super;
 
   protected:
     std::string synopsis() const
@@ -284,98 +54,206 @@ class lps2torx_tool : public lps2torx_base
       return "[OPTION]... INFILE";
     }
 
+    bool m_use_dummies;
+
     void add_options(interface_description& desc)
     {
-      lps2torx_base::add_options(desc);
-
-      desc.
-      add_option("dummy", make_mandatory_argument("BOOL"),
-                 "replace free variables in the LPS with dummy values based on the value of BOOL: 'yes' (default) or 'no'", 'y').
-      add_option("unused-data",
-                 "do not remove unused parts of the data specification", 'u').
-      add_option("state-format", make_mandatory_argument("NAME"),
-                 "store state internally in format NAME:\n"
-                 "  'vector' for a vector (fastest, default), or\n"
-                 "  'tree' for a tree (for memory efficiency)"
-                 , 'f');
+      super::add_options(desc);
+      desc.add_option("dummy", "replace free variables in the LPS with dummy values", 'y');
     }
 
     void parse_options(const command_line_parser& parser)
     {
-      lps2torx_base::parse_options(parser);
-
-      usedummies   = true;
-      removeunused = parser.options.count("unused-data") == 0;
-      strategy     = parser.option_argument_as< rewriter::strategy >("rewriter");
-      stateformat  = GS_STATE_VECTOR;
-
-      if (parser.options.count("dummy"))
-      {
-        if (parser.options.count("dummy") > 1)
-        {
-          parser.error("multiple use of option -y/--dummy; only one occurrence is allowed");
-        }
-        std::string dummy_str(parser.option_argument("dummy"));
-        if (dummy_str == "yes")
-        {
-          usedummies = true;
-        }
-        else if (dummy_str == "no")
-        {
-          usedummies = false;
-        }
-        else
-        {
-          parser.error("option -y/--dummy has illegal argument '" + dummy_str + "'");
-        }
-      }
-
-      if (parser.options.count("state-format"))
-      {
-        if (parser.options.count("state-format") > 1)
-        {
-          parser.error("multiple use of option -f/--state-format; only one occurrence is allowed");
-        }
-        std::string state_format_str(parser.option_argument("state-format"));
-        if (state_format_str == "vector")
-        {
-          stateformat = GS_STATE_VECTOR;
-        }
-        else if (state_format_str == "tree")
-        {
-          stateformat = GS_STATE_TREE;
-        }
-        else
-        {
-          parser.error("option -f/--state-format has illegal argument '" + state_format_str + "'");
-        }
-      }
+      super::parse_options(parser);
+      m_use_dummies = 0 < parser.options.count("dummy");
 
       if (parser.arguments.size() == 0) {
         parser.error("no INFILE specified");
-      } else if (parser.arguments.size() == 1) {
-        name_for_input = parser.arguments[0];
-      } else {
-        //parser.arguments.size() > 1
+      } else if (parser.arguments.size() != 1) {
         parser.error("too many file arguments");
       }
     }
-};
 
-class lps2torx_gui_tool: public mcrl2::utilities::mcrl2_gui_tool<lps2torx_tool>
-{
-  public:
-    lps2torx_gui_tool()
+    atermpp::set<ATerm>     visited_states;
+    atermpp::map<int,ATerm> int_to_seenstate_mapping;
+    atermpp::map<ATerm,int> seenstate_to_int_mapping;
+
+    /* Multi-actions:  a_1(d^1_1,...,d^1_m)|...|a_n(n^1_1, ..., d^n_m)
+     * are printed as: a_1!d^1_1!...!d^1_m!...!a_n!n^1_1!...!d^n_m
+     * */
+    std::string print_torx_transtion( multi_action ma )
     {
-      m_gui_options["state-format"] = create_textctrl_widget();
-      add_rewriter_widget();
-      m_gui_options["unused-data"] = create_checkbox_widget();
-      m_gui_options["dummy"] = create_textctrl_widget();
+      if( ma.actions().empty() )
+      {
+        return "tau";
+      }
 
-      // Override default options
-      // Setting --verbose forces lps2torx to read from 'stdin'
-      m_gui_options["verbose"] = create_checkbox_widget(false);
+      std::string result;
+      for (action_list::const_iterator i=ma.actions().begin(); i!=ma.actions().end(); ++i)
+      {
+        result = result+pp(i->label());
+        for (mcrl2::data::data_expression_list::const_iterator arg=i->arguments().begin(); arg!=i->arguments().end(); ++arg)
+        {
+          result = result+"!"+pp( *arg );
+        }
 
+        action_list::const_iterator i_next=i;
+        i_next++;
+        if (i_next!=ma.actions().end())
+        {
+          result=result+"!";
+        }
+      }
+      return result;
+    }
+
+  public:
+
+    torx_tool()
+      : super(NAME,AUTHOR,
+          "provide TorX explorer interface to an LPS",
+          "Provide a TorX explorer interface to the LPS in INFILE. "
+          "\n\n"
+          "The LPS can be explored using TorX as described in torx_explorer(5)."
+      ),
+      m_use_dummies(false)
+    {}
+
+    bool run()
+    {
+      mcrl2::lps::specification lps_specification;
+
+      lps_specification.load(m_input_filename);
+
+      StandardSimulator simulator;
+      simulator.rewr_strat = rewrite_strategy();
+      simulator.use_dummies = m_use_dummies;
+      simulator.LoadSpec(lps_specification);
+
+      visited_states.clear();
+      int_to_seenstate_mapping.clear();
+      seenstate_to_int_mapping.clear();
+
+      int max_state = 0;
+
+      bool notdone = true;
+      while (notdone)
+      {
+
+        while (true)
+        {
+          std::string s;
+
+          getline(std::cin, s);
+          if ((s.length() > 0) && (s[s.length()-1] == '\r'))
+          {
+            // remove CR
+            s.resize(s.length()-1);
+          }
+
+          if (std::cin.eof() || (s == "q") || (s == "quit"))
+          {
+            if (std::cin.eof())
+            {
+              std::cout << std::endl;
+            }
+            notdone = false;
+            break;
+          }
+          else if ((s == "h") || (s == "help"))
+          {
+            std::cout <<
+                      "During the simulation the following commands are accepted (short/long):\n"
+                      "   e N              expand transition N of the corresponding state\n"
+                      "                    (where N is a number)\n"
+                      "   r                reset to initial state\n"
+                      "   h/help           print this help message\n"
+                      "   q/quit           quit\n";
+          }
+          else if (s == "r")
+          {
+            // R event TAB solved TAB preds TAB freevars TAB identical
+            std::cout << "R 0\t1\t\t\t" << std::endl;
+            visited_states.clear();
+            visited_states.insert( simulator.GetState() );
+
+            int_to_seenstate_mapping.clear();
+            int_to_seenstate_mapping[ 0 ] = simulator.GetState();
+
+            max_state=0;
+
+            break;
+          }
+          else if (s[0] == 'e')
+          {
+
+            if(s[1] != ' ' || s.size() <= 2)
+            {
+              std::cout << "incorrect syntax (try 'h' for help)" << std::endl;
+              break;
+            }
+
+            int index = atoi(s.substr(1, s.size()-1 ).c_str());
+            atermpp::map<int,ATerm>::iterator it = int_to_seenstate_mapping.find( index );
+
+            if (it == int_to_seenstate_mapping.end())
+            {
+              std::cout << "E0 value " << index << " not valid" << std::endl;
+              break;
+            }
+
+            try
+            {
+              simulator.Reset( it->second );
+              ATermList next_states=ATempty;
+
+              visited_states.insert( simulator.GetState() );
+              next_states = simulator.GetNextStates();
+
+              std::cout << "EB" << std::endl;
+              for (ATermList l=next_states; !ATisEmpty(l); l=ATgetNext(l))
+              {
+                max_state++;
+
+                ATermAppl Transition = ATAgetFirst(ATLgetFirst(l));
+                ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(l)));
+
+                /* Interpret Transition as multi-action*/
+                multi_action ma = multi_action(Transition);
+                int is_tau = ma.actions().empty()?0:1;
+
+                /* Rebuild transition string in Torx format*/
+                std::cout << "Ee " << max_state << "\t" << is_tau << "\t" << 1 << "\t" << print_torx_transtion(ma) << "\t\t\t";
+                int_to_seenstate_mapping[max_state] = NewState;
+
+                /* Print optional first-encounted visited state */
+                if(seenstate_to_int_mapping.find(NewState) == seenstate_to_int_mapping.end())
+                {
+                  seenstate_to_int_mapping[ NewState ] = max_state;
+                }
+                else
+                {
+                  std::cout << seenstate_to_int_mapping.find(NewState)->second;
+                }
+                std::cout << std::endl;
+              }
+              std::cout << "EE" << std::endl;
+
+            }
+            catch (mcrl2::runtime_error e)
+            {
+              std::cout << "E0 an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
+            }
+            break;
+          }
+          else
+          {
+            std::cout << "unknown command (try 'h' for help)" << std::endl;
+          }
+        }
+      }
+
+      return true;
     }
 };
 
@@ -383,5 +261,6 @@ int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return lps2torx_gui_tool().execute(argc,argv);
+  return torx_tool().execute(argc, argv);
 }
+
