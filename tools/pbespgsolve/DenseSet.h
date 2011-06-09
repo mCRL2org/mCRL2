@@ -14,6 +14,25 @@
 #include <memory>
 #include <utility>
 
+// copied from mcrl2/libraries/aterm/include/mcrl2/aterm/atypes.h
+#if defined(_MSC_VER) || defined(WIN32) || defined(WIN64)
+#if defined(ssize_t)
+#else
+#ifndef HAVE_SSIZE_T
+#if defined(WIN64) ||  defined(_WIN64) ||  defined(__WIN64__)
+/* int64 is not supported by all GCC */
+typedef __int64 ssize_t;
+#else
+#ifndef __MINGW32__
+typedef int ssize_t;
+#endif
+#endif
+/* prevent ssize_t redefinitions in other libraries */
+#define HAVE_SSIZE_T
+#endif
+#endif
+#endif
+
 // N.B. this class is far from finished!
 
 template< class Key, class Alloc = std::allocator<bool> >

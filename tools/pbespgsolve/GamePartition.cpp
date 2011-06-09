@@ -28,7 +28,7 @@ GamePartition::GamePartition( const ParityGame &old_game,
 
     // We assume `intern' is sorted and therefore `internal' will
     // be sorted too. This makes it easier to create subpartitions later.
-    assert(is_sorted(intern.begin(), intern.end(), std::less<verti>()));
+    assert(::is_sorted(intern.begin(), intern.end(), std::less<verti>()));
 
     std::vector<verti> verts(intern.begin(), intern.end());
 
