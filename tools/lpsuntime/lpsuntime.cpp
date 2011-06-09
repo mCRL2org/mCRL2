@@ -44,7 +44,7 @@ class untime_tool: public input_output_tool
       lps::specification spec;
       spec.load(m_input_filename);
 
-      lps::untime_algorithm untime(spec, core::gsVerbose);
+      lps::untime_algorithm untime(spec, mCRL2logEnabled(verbose));
       untime.run();
 
       spec.save(m_output_filename);

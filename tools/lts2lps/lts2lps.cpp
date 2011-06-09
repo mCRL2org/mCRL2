@@ -88,7 +88,7 @@ class lts2lps_tool : public input_output_tool
       {
         if (1 < parser.options.count("data"))
         {
-          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
+          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
         }
         data_file_type=data_e;
         datafile = parser.option_argument("data");
@@ -98,7 +98,7 @@ class lts2lps_tool : public input_output_tool
       {
         if (1 < parser.options.count("lps") || data_file_type!=none_e)
         {
-          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
+          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
         }
 
         data_file_type=lps_e;
@@ -109,7 +109,7 @@ class lts2lps_tool : public input_output_tool
       {
         if (1 < parser.options.count("mcrl2") || data_file_type!=none_e)
         {
-          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
+          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
         }
 
         data_file_type=mcrl2_e;
@@ -155,7 +155,7 @@ class lts2lps_tool : public input_output_tool
     {
       if (data_file_type!=none_e)
       {
-        std::cerr << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
+        mCRL2log(warning) << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
       }
       l1.swap(l2);
     }
@@ -175,7 +175,7 @@ class lts2lps_tool : public input_output_tool
       /* Read data specification (if any) */
       if (data_file_type==none_e)
       {
-        std::cerr << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
+        mCRL2log(warning) << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
       }
       else if (data_file_type==lps_e)
       {
@@ -194,7 +194,7 @@ class lts2lps_tool : public input_output_tool
 
         if (!dfile)
         {
-          std::cerr << "Cannot read data specification file. Only the standard data types and no action labels can be used." << std::endl;
+          mCRL2log(warning) << "Cannot read data specification file. Only the standard data types and no action labels can be used." << std::endl;
         }
         else
         {
@@ -237,10 +237,7 @@ class lts2lps_tool : public input_output_tool
       lts_lts_t l;
       local_transform(l1,l);
 
-      if (gsVerbose)
-      {
-        std::cerr << "Start generating linear process\n";
-      }
+      mCRL2log(verbose) << "Start generating linear process\n";
 
       action_summand_vector action_summands;
       const variable process_parameter("x",mcrl2::data::sort_pos::pos());
@@ -275,10 +272,7 @@ class lts2lps_tool : public input_output_tool
       const linear_process lps1(process_parameters,deadlock_summands,action_summands);
       const lps::specification spec1(l.data(),l.action_labels(),global_variables,lps1,initial_process);
 
-      if (gsVerbose)
-      {
-        std::cerr << "Start saving the linear process\n";
-      }
+      mCRL2log(verbose) << "Start saving the linear process\n";
       spec1.save(output_filename());
       return true;
     }
@@ -298,7 +292,7 @@ class lts2lps_tool : public input_output_tool
           return transform_lps2lts<lts_lts_t>();
         }
         case lts_none:
-          std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+          mCRL2log(warning) << "Cannot determine type of input. Assuming .aut.\n";
         case lts_aut:
         {
           return transform_lps2lts<lts_aut_t>();

@@ -162,14 +162,14 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->speci
     initialise_representation(false);
   }
 
-  if (lgopts->detect_deadlock && gsVerbose)
+  if (lgopts->detect_deadlock)
   {
-    cerr << "Detect deadlocks.\n" ;
+    mCRL2log(verbose) << "Detect deadlocks.\n" ;
   }
 
-  if (lgopts->detect_divergence && gsVerbose)
+  if (lgopts->detect_divergence)
   {
-    cerr << "Detect divergences with tau action is `" << lgopts->priority_action << "'.\n";
+    mCRL2log(verbose) << "Detect divergences with tau action is `" << lgopts->priority_action << "'.\n";
   }
 
   num_states = 0;
@@ -206,7 +206,7 @@ bool lps2lts_algorithm::finalise_lts_generation()
     lts.close_lts(num_states,trans);
   }
 
-  if (!lg_error && gsVerbose)
+  if (!lg_error)
   {
     if (lgopts->expl_strat == es_random)
     {
@@ -372,7 +372,7 @@ void lps2lts_algorithm::check_actiontrace(const state_t OldState, ATermAppl Tran
         string sss(ss.str());
         bool saved_ok = savetrace(sss,OldState,nstate,NewState,Transition);
 
-        if (lgopts->detect_action || gsVerbose)
+        if (lgopts->detect_action || mCRL2logEnabled(verbose))
         {
           if (saved_ok)
           {
@@ -414,17 +414,11 @@ void lps2lts_algorithm::save_error_trace(const state_t state)
 
     if (saved_ok)
     {
-      if (gsVerbose)
-      {
-        cerr << "saved trace to error in '" << lgopts->trace_prefix << "_error.trc'.\n";
-      }
+      mCRL2log(verbose) << "saved trace to error in '" << lgopts->trace_prefix << "_error.trc'.\n";
     }
     else
     {
-      if (gsVerbose)
-      {
-        cerr << "trace to error could not be saved in '" << lgopts->trace_prefix << "_error.trc'.\n";
-      }
+      mCRL2log(verbose) << "trace to error could not be saved in '" << lgopts->trace_prefix << "_error.trc'.\n";
     }
   }
 }
@@ -441,7 +435,7 @@ void lps2lts_algorithm::check_deadlocktrace(const state_t state)
       string sss(ss.str());
       bool saved_ok = savetrace(sss,state,nstate);
 
-      if (lgopts->detect_deadlock || gsVerbose)
+      if (lgopts->detect_deadlock || mCRL2logEnabled(verbose))
       {
         if (saved_ok)
         {
@@ -552,7 +546,7 @@ void lps2lts_algorithm::check_divergence(const state_t state)
         string sss(ss.str());
         bool saved_ok = savetrace(sss,state,nstate);
 
-        if (lgopts->detect_divergence || gsVerbose)
+        if (lgopts->detect_divergence || mCRL2logEnabled(verbose))
         {
           if (saved_ok)
           {
@@ -742,11 +736,8 @@ bool lps2lts_algorithm::generate_lts()
     size_t prevcurrent = 0;
     num_found_same = 0;
     tracecnt = 0;
-    if (gsVerbose)
-    {
-      std::cerr << ("generating state space with '" +
-                    expl_strat_to_str(lgopts->expl_strat) + "' strategy...\n");
-    }
+    mCRL2log(verbose) << "generating state space with '" <<
+                    expl_strat_to_str(lgopts->expl_strat) << "' strategy...\n";
 
     if (lgopts->expl_strat == es_random)
     {
@@ -804,7 +795,7 @@ bool lps2lts_algorithm::generate_lts()
         }
 
         current_state++;
-        if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+        if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
           gsVerboseMsg(
             "monitor: currently explored %lu transition%s and encountered %lu unique state%s.\n",
@@ -986,7 +977,7 @@ bool lps2lts_algorithm::generate_lts()
         }
 
         current_state++;
-        if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+        if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
           gsVerboseMsg(
             "monitor: currently explored %lu transition%s and encountered %lu unique state%s [MAX %d].\n",
@@ -1172,7 +1163,7 @@ bool lps2lts_algorithm::generate_lts()
         }
 
         current_state++;
-        if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+        if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
           gsVerboseMsg(
             "monitor: currently explored %lu transition%s and encountered %lu unique state%s.\n",
@@ -1260,7 +1251,7 @@ bool lps2lts_algorithm::generate_lts()
         }
 
         current_state++;
-        if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+        if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
           gsVerboseMsg(
             "monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",
@@ -1279,16 +1270,13 @@ bool lps2lts_algorithm::generate_lts()
           {
             state_queue.swap_queues();
           }
-          if (!lgopts->suppress_progress_messages && gsVerbose)
+          if (!lgopts->suppress_progress_messages)
           {
-            gsVerboseMsg(
-              "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
-              level,static_cast<size_t>(current_state-prevcurrent),
-              ((current_state-prevcurrent)==1)?"":"s",
-              static_cast<size_t>(trans-prevtrans),
-              ((trans-prevtrans)==1)?"":"s"
-            );
-            fflush(stderr);
+            mCRL2log(verbose) << "monitor: level " << level << " done."
+                              << " (" << current_state - prevcurrent << " state"
+                              << ((current_state-prevcurrent)==1?"":"s") << ", "
+                              << trans-prevtrans << " transition"
+                              << ((trans-prevtrans)==1?"":"s");
           }
           level++;
           size_t nextcurrent = endoflevelat;
@@ -1405,7 +1393,7 @@ bool lps2lts_algorithm::generate_lts()
         if (new_state)
         {
           current_state++;
-          if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+          if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
           {
             gsVerboseMsg(
               "monitor: currently explored %lu state%s and %lu transition%s (stacksize is %d).\n",

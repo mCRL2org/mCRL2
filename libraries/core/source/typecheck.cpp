@@ -257,10 +257,7 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
   mCRL2log(debug) << "type checking phase started" << std::endl;
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking read-in phase started" << std::endl;
 
   if (gstcReadInSorts(ATLgetArgument(ATAgetArgument(data_spec,0),0)))
   {
@@ -272,31 +269,19 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
                           ATLgetArgument(ATAgetArgument(data_spec,2),0)))
       {
         body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
-        if (gsDebug)
-        {
-          std::cerr << "type checking read-in phase finished" << std::endl;
-        }
+        mCRL2log(debug) << "type checking read-in phase finished" << std::endl;
 
-        if (gsDebug)
-        {
-          std::cerr << "type checking transform VarConst phase started" << std::endl;
-        }
+        mCRL2log(debug) << "type checking transform VarConst phase started" << std::endl;
 
         if (gstcTransformVarConsTypeData())
         {
-          if (gsDebug)
-          {
-            std::cerr << "type checking transform VarConst phase finished" << std::endl;
-          }
+          mCRL2log(debug) << "type checking transform VarConst phase finished" << std::endl;
 
           Result = ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
 
           Result = gstcFoldSortRefs(Result);
 
-          if (gsDebug)
-          {
-            std::cerr << "type checking phase finished" << std::endl;
-          }
+          mCRL2log(debug) << "type checking phase finished" << std::endl;
         }
       }
     }
@@ -308,17 +293,11 @@ ATermAppl type_check_data_spec(ATermAppl data_spec)
 
 ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 {
-  if (gsVerbose)
-  {
-    std::cerr << "type checking process specification..." << std::endl;
-  }
+  mCRL2log(verbose) << "type checking process specification..." << std::endl;
 
   ATermAppl Result=NULL;
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase started: " << pp(proc_spec) << "" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase started: " << pp(proc_spec) << "" << std::endl;
   gstcDataInit();
 
   ATermAppl data_spec = ATAgetArgument(proc_spec, 0);
@@ -341,23 +320,14 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
             if (gstcReadInProcsAndInit(ATLgetArgument(ATAgetArgument(proc_spec,3),0),
                                        ATAgetArgument(ATAgetArgument(proc_spec,4),0)))
             {
-              if (gsDebug)
-              {
-                std::cerr << "type checking read-in phase finished" << std::endl;
-              }
+              mCRL2log(debug) << "type checking read-in phase finished" << std::endl;
 
-              if (gsDebug)
-              {
-                std::cerr << "type checking transform ActProc+VarConst phase started" << std::endl;
-              }
+              mCRL2log(debug) << "type checking transform ActProc+VarConst phase started" << std::endl;
               if (gstcTransformVarConsTypeData())
               {
                 if (gstcTransformActProcVarConst())
                 {
-                  if (gsDebug)
-                  {
-                    std::cerr << "type checking transform ActProc+VarConst phase finished" << std::endl;
-                  }
+                  mCRL2log(debug) << "type checking transform ActProc+VarConst phase finished" << std::endl;
 
                   data_spec=ATAgetArgument(proc_spec,0);
                   data_spec=ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
@@ -367,10 +337,7 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 
                   Result=gstcFoldSortRefs(Result);
 
-                  if (gsDebug)
-                  {
-                    std::cerr << "type checking phase finished" << std::endl;
-                  }
+                  mCRL2log(debug) << "type checking phase finished" << std::endl;
                 }
               }
             }
@@ -386,10 +353,7 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 
 ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
 {
-  if (gsVerbose)
-  {
-    std::cerr << "type checking sort expression..." << std::endl;
-  }
+  mCRL2log(verbose) << "type checking sort expression..." << std::endl;
   //check correctness of the sort expression in sort_expr
   //using the specification in spec
   assert(gsIsSortExpr(sort_expr));
@@ -398,17 +362,11 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
 
   ATermAppl Result=NULL;
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase started" << std::endl;
 
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking of sort expressions read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of sort expressions read-in phase started" << std::endl;
 
   ATermAppl data_spec = NULL;
   if (gsIsDataSpec(spec))
@@ -424,10 +382,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
   //XXX read-in from spec (not finished)
   if (gstcReadInSorts(sorts))
   {
-    if (gsDebug)
-    {
-      std::cerr << "type checking of sort expressions read-in phase finished" << std::endl;
-    }
+    mCRL2log(debug) << "type checking of sort expressions read-in phase finished" << std::endl;
 
     if (!is_unknown_sort(sort_expr) && !is_multiple_possible_sorts(sort_expr))
     {
@@ -452,10 +407,7 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
 
 ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAppl spec, ATermTable Vars)
 {
-  if (gsVerbose)
-  {
-    std::cerr << "type checking data expression..." << std::endl;
-  }
+  mCRL2log(verbose) << "type checking data expression..." << std::endl;
   //check correctness of the data expression in data_expr using
   //the specification in spec
 
@@ -466,17 +418,11 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
 
   ATermAppl Result=NULL;
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase started" << std::endl;
 
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking of data expression read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of data expression read-in phase started" << std::endl;
 
   ATermAppl data_spec = NULL;
   if (gsIsDataSpec(spec))
@@ -496,10 +442,7 @@ ATermAppl type_check_data_expr(ATermAppl data_expr, ATermAppl sort_expr, ATermAp
       gstcReadInConstructors() &&
       gstcReadInFuncs(constructors,mappings))
   {
-    if (gsDebug)
-    {
-      std::cerr << "type checking of data expression read-in phase finished" << std::endl;
-    }
+    mCRL2log(debug) << "type checking of data expression read-in phase finished" << std::endl;
 
     if ((sort_expr != NULL) && (is_unknown_sort(sort_expr) || is_multiple_possible_sorts(sort_expr)))
     {
@@ -542,25 +485,16 @@ ATermAppl type_check_mult_act(
   ATermAppl data_spec,
   ATermList action_labels)
 {
-  if (gsDebug)
-  {
-    std::cerr << "type checking multiaction..." << std::endl;
-  }
+  mCRL2log(debug) << "type checking multiaction..." << std::endl;
   //check correctness of the multi-action in mult_act using
   //the process specification or LPS in spec
   // assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
   ATermAppl Result=NULL;
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase started" << std::endl;
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking of multiactions read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of multiactions read-in phase started" << std::endl;
 
   // ATermAppl data_spec = ATAgetArgument(spec, 0);
   ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
@@ -575,10 +509,7 @@ ATermAppl type_check_mult_act(
       && gstcReadInActs(action_labels)
      )
   {
-    if (gsDebug)
-    {
-      std::cerr << "type checking of multiactions read-in phase finished" << std::endl;
-    }
+    mCRL2log(debug) << "type checking of multiactions read-in phase finished" << std::endl;
 
     if (gsIsMultAct(mult_act))
     {
@@ -618,24 +549,15 @@ ATermList type_check_mult_actions(
   ATermAppl data_spec,
   ATermList action_labels)
 {
-  if (gsDebug)
-  {
-    std::cerr << "type checking multiactions..." << std::endl;
-  }
+  mCRL2log(debug) << "type checking multiactions..." << std::endl;
   //check correctness of the multi-action in mult_act using
   //the process specification or LPS in spec
   // assert (gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase started" << std::endl;
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking of multiactions read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of multiactions read-in phase started" << std::endl;
 
   // ATermAppl data_spec = ATAgetArgument(spec, 0);
   ATermList sorts = ATLgetArgument(ATAgetArgument(data_spec, 0), 0);
@@ -650,10 +572,7 @@ ATermList type_check_mult_actions(
       && gstcReadInFuncs(constructors,mappings)
       && gstcReadInActs(action_labels))
   {
-    if (gsDebug)
-    {
-      std::cerr << "type checking of multiactions read-in phase finished" << std::endl;
-    }
+    mCRL2log(debug) << "type checking of multiactions read-in phase finished" << std::endl;
 
     for (; !ATisEmpty(mult_actions); mult_actions=ATgetNext(mult_actions))
     {
@@ -685,10 +604,7 @@ ATermList type_check_mult_actions(
 
 ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec)
 {
-  if (gsVerbose)
-  {
-    std::cerr << "type checking process expression..." << std::endl;
-  }
+  mCRL2log(verbose) << "type checking process expression..." << std::endl;
 
   //check correctness of the process expression in proc_expr using
   //the process specification or LPS in spec
@@ -699,10 +615,7 @@ ATermAppl type_check_proc_expr(ATermAppl proc_expr, ATermAppl spec)
 
 ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
 {
-  if (gsVerbose)
-  {
-    std::cerr << "type checking state formula..." << std::endl;
-  }
+  mCRL2log(verbose) << "type checking state formula..." << std::endl;
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec));
   //check correctness of the state formula in state_formula using
   //the process specification or LPS in spec as follows:
@@ -715,16 +628,10 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
   //4) check for monotonicity of fixpoint variables
 
   ATermAppl Result=NULL;
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase started" << std::endl;
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking of state formulas read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of state formulas read-in phase started" << std::endl;
 
   ATermAppl data_spec = ATAgetArgument(spec, 0);
   ATermList action_labels = ATLgetArgument(ATAgetArgument(spec, 1), 0);
@@ -751,10 +658,7 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
         {
           gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information\n");
         }
-        if (gsDebug)
-        {
-          std::cerr << "type checking of state formulas read-in phase finished" << std::endl;
-        }
+        mCRL2log(debug) << "type checking of state formulas read-in phase finished" << std::endl;
 
         ATermTable Vars=ATtableCreate(63,50);
         Result=gstcTraverseStateFrm(Vars,Vars,state_frm);
@@ -781,25 +685,16 @@ ATermAppl type_check_state_frm(ATermAppl state_frm, ATermAppl spec)
 ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
 {
 
-  if (gsVerbose)
-  {
-    std::cerr << "type checking action rename specification..." << std::endl;
-  }
+  mCRL2log(verbose) << "type checking action rename specification..." << std::endl;
 
   //check precondition
   assert(gsIsActionRenameSpec(ar_spec));
 
   ATermAppl Result=NULL;
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase started" << std::endl;
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking of action rename specification read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of action rename specification read-in phase started" << std::endl;
 
   ATermTable actions_from_lps=ATtableCreate(63,50);
 
@@ -820,14 +715,8 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
         {
           gsWarningMsg("ignoring the previous error(s), the formula will be typechecked without action label information\n");
         }
-        if (gsDebug)
-        {
-          std::cerr << "type checking of action rename specification read-in phase of LPS finished" << std::endl;
-        }
-        if (gsDebug)
-        {
-          std::cerr << "type checking of action rename specification read-in phase of rename file started" << std::endl;
-        }
+        mCRL2log(debug) << "type checking of action rename specification read-in phase of LPS finished" << std::endl;
+        mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file started" << std::endl;
 
         ATermAppl data_spec = ATAgetArgument(ar_spec, 0);
         ATermList LPSSorts=ATtableKeys(context.defined_sorts); // remember the sorts from the LPS.
@@ -835,10 +724,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
         {
           goto finally;
         }
-        if (gsDebug)
-        {
-          std::cerr << "type checking of action rename specification read-in phase of rename file sorts finished" << std::endl;
-        }
+        mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file sorts finished" << std::endl;
 
         // Check sorts for loops
         // Unwind sorts to enable equiv and subtype relations
@@ -846,20 +732,14 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
         {
           goto finally;
         }
-        if (gsDebug)
-        {
-          std::cerr << "type checking of action rename specification read-in phase of rename file constructors finished" << std::endl;
-        }
+        mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file constructors finished" << std::endl;
 
         if (!gstcReadInFuncs(ATLgetArgument(ATAgetArgument(data_spec,1),0),
                              ATLgetArgument(ATAgetArgument(data_spec,2),0)))
         {
           goto finally;
         }
-        if (gsDebug)
-        {
-          std::cerr << "type checking of action rename specification read-in phase of rename file functions finished" << std::endl;
-        }
+        mCRL2log(debug) << "type checking of action rename specification read-in phase of rename file functions finished" << std::endl;
 
         body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
 
@@ -869,19 +749,13 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
         {
           goto finally;
         }
-        if (gsDebug)
-        {
-          std::cerr << "type checking action rename specification read-in phase of the ActionRenameSpec finished" << std::endl;
-        }
+        mCRL2log(debug) << "type checking action rename specification read-in phase of the ActionRenameSpec finished" << std::endl;
 
         if (!gstcTransformVarConsTypeData())
         {
           goto finally;
         }
-        if (gsDebug)
-        {
-          std::cerr << "type checking transform VarConstTypeData phase finished" << std::endl;
-        }
+        mCRL2log(debug) << "type checking transform VarConstTypeData phase finished" << std::endl;
 
         data_spec=ATsetArgument(data_spec, (ATerm) gsMakeDataEqnSpec(body.equations),3);
         Result=ATsetArgument(ar_spec,(ATerm)data_spec,0);
@@ -964,10 +838,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
 
         ActionRenameRules=ATsetArgument(ActionRenameRules,(ATerm)ATreverse(NewRules),0);
         Result=ATsetArgument(Result,(ATerm)ActionRenameRules,2);
-        if (gsDebug)
-        {
-          std::cerr << "type checking transform VarConstTypeData phase finished" << std::endl;
-        }
+        mCRL2log(debug) << "type checking transform VarConstTypeData phase finished" << std::endl;
       }
       else
       {
@@ -995,24 +866,15 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   //check correctness of the PBES specification in pbes_spec
   //gsWarningMsg("type checking of PBES specifications is only partially implemented\n");
 
-  if (gsVerbose)
-  {
-    std::cerr << "type checking PBES specification..." << std::endl;
-  }
+  mCRL2log(verbose) << "type checking PBES specification..." << std::endl;
 
   assert(gsIsPBES(pbes_spec));
 
   ATermAppl Result=NULL;
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase of PBES specifications started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase of PBES specifications started" << std::endl;
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking of PBES specification read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of PBES specification read-in phase started" << std::endl;
 
 
   ATermAppl data_spec = ATAgetArgument(pbes_spec,0);
@@ -1024,10 +886,7 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   {
     goto finally;
   }
-  if (gsDebug)
-  {
-    std::cerr << "type checking of PBES specification read-in phase of sorts finished" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of PBES specification read-in phase of sorts finished" << std::endl;
 
   // Check sorts for loops
   // Unwind sorts to enable equiv and subtype relations
@@ -1035,20 +894,14 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   {
     goto finally;
   }
-  if (gsDebug)
-  {
-    std::cerr << "type checking of PBES specification read-in phase of constructors finished" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of PBES specification read-in phase of constructors finished" << std::endl;
 
   if (!gstcReadInFuncs(ATLgetArgument(ATAgetArgument(data_spec,1),0),
                        ATLgetArgument(ATAgetArgument(data_spec,2),0)))
   {
     goto finally;
   }
-  if (gsDebug)
-  {
-    std::cerr << "type checking of PBES specification read-in phase of functions finished" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of PBES specification read-in phase of functions finished" << std::endl;
 
   body.equations=ATLgetArgument(ATAgetArgument(data_spec,3),0);
 
@@ -1056,24 +909,15 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   {
     goto finally;
   }
-  if (gsDebug)
-  {
-    std::cerr << "type checking of PBES specification read-in phase of global variables finished" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of PBES specification read-in phase of global variables finished" << std::endl;
 
   if (!gstcReadInPBESAndInit(pb_eqn_spec,pb_init))
   {
     goto finally;
   }
-  if (gsDebug)
-  {
-    std::cerr << "type checking PBES read-in phase finished" << std::endl;
-  }
+  mCRL2log(debug) << "type checking PBES read-in phase finished" << std::endl;
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking transform Data+PBES phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking transform Data+PBES phase started" << std::endl;
   if (!gstcTransformVarConsTypeData())
   {
     goto finally;
@@ -1082,10 +926,7 @@ ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
   {
     goto finally;
   }
-  if (gsDebug)
-  {
-    std::cerr << "type checking transform Data+PBES phase finished" << std::endl;
-  }
+  mCRL2log(debug) << "type checking transform Data+PBES phase finished" << std::endl;
 
   data_spec=ATsetArgument(data_spec,(ATerm)gsMakeDataEqnSpec(body.equations),3);
   Result=ATsetArgument(pbes_spec,(ATerm)data_spec,0);
@@ -1105,26 +946,17 @@ finally:
 
 ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
 {
-  if (gsVerbose)
-  {
-    std::cerr << "type checking data variables..." << std::endl;
-  }
+  mCRL2log(verbose) << "type checking data variables..." << std::endl;
   //check correctness of the data variable declaration in sort_expr
   //using the specification in spec
 
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking phase started" << std::endl;
 
   gstcDataInit();
 
-  if (gsDebug)
-  {
-    std::cerr << "type checking of data variables read-in phase started" << std::endl;
-  }
+  mCRL2log(debug) << "type checking of data variables read-in phase started" << std::endl;
 
   ATermAppl data_spec = NULL;
   if (gsIsDataSpec(spec))
@@ -1140,10 +972,7 @@ ATermList type_check_data_vars(ATermList data_vars, ATermAppl spec)
   //XXX read-in from spec (not finished)
   if (gstcReadInSorts(sorts))
   {
-    if (gsDebug)
-    {
-      std::cerr << "type checking of data variables read-in phase finished" << std::endl;
-    }
+    mCRL2log(debug) << "type checking of data variables read-in phase finished" << std::endl;
 
     ATermTable Vars=ATtableCreate(63,50);
     ATermTable NewVars=gstcAddVars2Table(Vars,data_vars);
@@ -1211,10 +1040,7 @@ ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 {
   assert(gsIsDataSpec(Spec) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) || gsIsPBES(Spec) || gsIsActionRenameSpec(Spec));
-  if (gsDebug)
-  {
-    std::cerr << "specification before folding:" << pp(Spec) << "" << std::endl;
-  }
+  mCRL2log(debug) << "specification before folding:" << pp(Spec) << "" << std::endl;
   //get sort declarations
   ATermAppl DataSpec;
   if (gsIsDataSpec(Spec))
@@ -1261,10 +1087,7 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
   ATermAppl NewSpec = Spec;
   do
   {
-    if (gsDebug)
-    {
-      std::cerr << "substituting sort references in specification" << std::endl;
-    }
+    mCRL2log(debug) << "substituting sort references in specification" << std::endl;
     Spec = NewSpec;
     NewSpec = (ATermAppl) gsSubstValuesTable(Substs, (ATerm) Spec, true);
   }
@@ -1273,10 +1096,7 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 
   //add the removed sort references back to Spec
   Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(ATconcat(SortIds, SortRefs)));
-  if (gsDebug)
-  {
-    std::cerr << "specification after folding:\n" << pp(Spec) << "\n" ;
-  }
+  mCRL2log(debug) << "specification after folding:\n" << pp(Spec) << "\n" ;
   return Spec;
 }
 
@@ -1290,10 +1110,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
   do
   {
     SortRefs = NewSortRefs;
-    if (gsDebug)
-    {
-      std::cerr << "SortRefs contains the following sort references:\n" << pp(gsMakeSortSpec(SortRefs)) << "" << std::endl;
-    }
+    mCRL2log(debug) << "SortRefs contains the following sort references:\n" << pp(gsMakeSortSpec(SortRefs)) << "" << std::endl;
     //perform substitutions implied by sort references in NewSortRefs to the
     //other elements in NewSortRefs
     for (size_t i = 0; i < n; i++)
@@ -1313,10 +1130,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
         //make backward substitution
         Subst = gsMakeSubst_Appl(RHS, LHS);
       }
-      if (gsDebug)
-      {
-        std::cerr << "performing substition " << pp(ATgetArgument(Subst, 0)) << " := " << pp(ATgetArgument(Subst, 1)) << "" << std::endl;
-      }
+      mCRL2log(debug) << "performing substition " << pp(ATgetArgument(Subst, 0)) << " := " << pp(ATgetArgument(Subst, 1)) << "" << std::endl;
       //perform Subst on all elements of NewSortRefs except for the i'th
       ATermList Substs = ATmakeList1((ATerm) Subst);
       for (size_t j = 0; j < n; j++)
@@ -1332,10 +1146,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
         }
       }
     }
-    if (gsDebug)
-    {
-      std::cerr << "" << std::endl;
-    }
+    mCRL2log(debug) << std::endl;
   }
   while (!ATisEqual(NewSortRefs, SortRefs));
   //remove self references
@@ -1351,10 +1162,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
     SortRefs = ATgetNext(SortRefs);
   }
   SortRefs = ATreverse(l);
-  if (gsDebug)
-  {
-    std::cerr << "SortRefs, after removing self references:\n" << pp(gsMakeSortSpec(SortRefs)) << "" << std::endl;
-  }
+  mCRL2log(debug) << "SortRefs, after removing self references:\n" << pp(gsMakeSortSpec(SortRefs)) << "" << std::endl;
   return SortRefs;
 }
 
@@ -1698,10 +1506,7 @@ static bool gstcReadInSorts(ATermList Sorts)
     else if (gsIsSortRef(Sort))
     {
       ATtablePut(context.defined_sorts, (ATerm)SortName, (ATerm)ATAgetArgument(Sort,1));
-      if (gsDebug)
-      {
-        std::cerr << "Add sort alias " << pp(SortName) << "  " << pp((ATerm)ATAgetArgument(Sort,1)) << "" << std::endl;
-      }
+      mCRL2log(debug) << "Add sort alias " << pp(SortName) << "  " << pp((ATerm)ATAgetArgument(Sort,1)) << "" << std::endl;
     }
     else
     {
@@ -1974,10 +1779,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
 
 static bool gstcReadInFuncs(ATermList Cons, ATermList Maps)
 {
-  if (gsDebug)
-  {
-    std::cerr << "Start Read-in Func" << std::endl;
-  }
+  mCRL2log(debug) << "Start Read-in Func" << std::endl;
   bool Result=true;
 
   size_t constr_number=ATgetLength(Cons);
@@ -2069,10 +1871,7 @@ static bool gstcReadInFuncs(ATermList Cons, ATermList Maps)
       }
     }
 
-    if (gsDebug)
-    {
-      std::cerr << "Read-in Func " << pp(FuncName) << ", Types " << pp(FuncType) << "" << std::endl;
-    }
+    mCRL2log(debug) << "Read-in Func " << pp(FuncName) << ", Types " << pp(FuncType) << "" << std::endl;
   }
 
   // Check that the constructors are defined such that they cannot generate an empty sort.
@@ -2122,11 +1921,7 @@ static bool gstcReadInActs(ATermList Acts)
       }
     }
     ATtablePut(context.actions,(ATerm)ActName,(ATerm)Types);
-    if (gsDebug)
-    {
-      std::cerr << "Read-in Act Name " << pp(ActName) << ", Types ";
-      ATfprintf(stderr,"%t\n",Types); // Types is a list of list, on which pp does not work.
-    }
+    mCRL2log(debug) << "Read-in Act Name " << pp(ActName) << ", Types " << core::pp(atermpp::aterm_list(Types)) << std::endl;
   }
 
   return Result;
@@ -2185,11 +1980,7 @@ static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
 
     ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATLgetArgument(Proc,1));
     ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATAgetArgument(Proc,2));
-    if (gsDebug)
-    {
-      std::cerr << "Read-in Proc Name " << pp(ProcName) << ", Types " ;
-      ATfprintf(stderr,"%t\n",Types); // Types is a list of list, on which pp does not work.
-    }
+    mCRL2log(debug) << "Read-in Proc Name " << pp(ProcName) << ", Types " << core::pp(atermpp::aterm_list(Types));
   }
   ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
   ATtablePut(body.proc_bodies,(ATerm)INIT_KEY(),(ATerm)Init);
@@ -2256,11 +2047,7 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
     //ATtablePut(body.proc_freevars,(ATerm)Index,(ATerm)PBFreeVars);
     ATtablePut(body.proc_pars,(ATerm)Index,(ATerm)PBVars);
     ATtablePut(body.proc_bodies,(ATerm)Index,(ATerm)ATAgetArgument(PBEqn,2));
-    if (gsDebug)
-    {
-      std::cerr << "Read-in Proc Name " << pp(PBName) << ", Types ";
-      ATfprintf(stderr,"%t\n",Types); // pp cannot print list of lists of types
-    }
+    mCRL2log(debug) << "Read-in Proc Name " << pp(PBName) << ", Types " << core::pp(atermpp::aterm_list(Types)) << std::endl;
   }
   //ATtablePut(body.proc_freevars,(ATerm)INIT_KEY(),(ATerm)PBFreeVars);
   ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
@@ -2836,10 +2623,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
     Types=ATappend(Types,(ATerm)Sort);
     ATtablePut(context.functions,(ATerm)Name,(ATerm)Types);
   }
-  if (gsDebug)
-  {
-    std::cerr << "Read-in " << msg << " " << pp(Name) << ". Type " << pp(Types) << "" << std::endl;
-  }
+  mCRL2log(debug) << "Read-in " << msg << " " << pp(Name) << ". Type " << pp(Types) << "" << std::endl;
   return Result;
 }
 
@@ -3683,11 +3467,8 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
   ATermAppl Result=NULL;
 
-  if (gsDebug)
-  {
-    std::cerr << "gstcTraverseVarConsTypeD: DataTerm " << pp(*DataTerm) <<
+  mCRL2log(debug) << "gstcTraverseVarConsTypeD: DataTerm " << pp(*DataTerm) <<
               " with PosType " << pp(PosType) << "" << std::endl;
-  }
 
   if (gsIsBinder(*DataTerm))
   {
@@ -3851,10 +3632,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
       NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting);
 
-      if (gsDebug)
-      {
-        std::cerr << "Result of gstcTraverseVarConsTypeD: DataTerm " << pp(Data) << "" << std::endl;
-      }
+      mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << pp(Data) << "" << std::endl;
 
       ATtableDestroy(CopyAllowedVars);
       ATtableDestroy(CopyDeclaredVars);
@@ -4171,10 +3949,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
                       &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,
                       FreeVars,false,nArguments,warn_upcasting);
-    if (gsDebug)
-    {
-      std::cerr << "Result of gstcTraverseVarConsTypeD: DataTerm " << pp(Data) << "" << std::endl;
-    }
+    mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << pp(Data) << "" << std::endl;
 
     if (!NewType)
     {
@@ -4199,11 +3974,8 @@ static ATermAppl gstcTraverseVarConsTypeD(
     {
       ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
 
-      if (gsDebug)
-      {
-        std::cerr << "Arguments again: NeededArgumentTypes: " << pp(NeededArgumentTypes) <<
+      mCRL2log(debug) << "Arguments again: NeededArgumentTypes: " << pp(NeededArgumentTypes) <<
                   ", ArgumentTypes: " << pp(ArgumentTypes) << "" << std::endl;
-      }
 
       //arguments again
       ATermList NewArgumentTypes=ATmakeList0();
@@ -4226,10 +3998,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         if (!gstcEqTypesA(NeededType,Type))
         {
-          if (gsDebug)
-          {
-            std::cerr << "Doing again on " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "" << std::endl;
-          }
+          mCRL2log(debug) << "Doing again on " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "" << std::endl;
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if (!NewArgType)
           {
@@ -4240,10 +4009,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
             NewArgType=NeededType;
           }
           NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
-          if (gsDebug)
-          {
-            std::cerr << "Result of Doing again gstcTraverseVarConsTypeD: DataTerm " << pp(Arg) << "" << std::endl;
-          }
+          mCRL2log(debug) << "Result of Doing again gstcTraverseVarConsTypeD: DataTerm " << pp(Arg) << "" << std::endl;
           if (!NewArgType)
           {
             gsErrorMsg("needed type %P does not match possible type %P (while typechecking %P in %P)\n",NeededType,Type,Arg,*DataTerm);
@@ -4262,10 +4028,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
                                       &Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments,warn_upcasting);
 
-    if (gsDebug)
-    {
-      std::cerr << "Result of gstcTraverseVarConsTypeDN: DataTerm " << pp(Data) << "" << std::endl;
-    }
+    mCRL2log(debug) << "Result of gstcTraverseVarConsTypeDN: DataTerm " << pp(Data) << "" << std::endl;
 
     if (!NewType)
     {
@@ -4281,11 +4044,8 @@ static ATermAppl gstcTraverseVarConsTypeD(
       return NULL;
     }
 
-    if (gsDebug)
-    {
-      std::cerr << "Arguments once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " <<
+    mCRL2log(debug) << "Arguments once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " <<
                 pp(ArgumentTypes) << ", NewType: " << pp(NewType) << "" << std::endl;
-    }
 
     //and the arguments once more
     if (gsIsSortArrow(gstcUnwindType(NewType)))
@@ -4311,10 +4071,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         if (!gstcEqTypesA(NeededType,Type))
         {
-          if (gsDebug)
-          {
-            std::cerr << "Doing again on " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "" << std::endl;
-          }
+          mCRL2log(debug) << "Doing again on " << pp(Arg) << ", Type: " << pp(Type) << ", Needed type: " << pp(NeededType) << "" << std::endl;
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if (!NewArgType)
           {
@@ -4340,10 +4097,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ArgumentTypes=ATreverse(NewArgumentTypes);
     }
 
-    if (gsDebug)
-    {
-      std::cerr << "Arguments after once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " << pp(ArgumentTypes) << "" << std::endl;
-    }
+    mCRL2log(debug) << "Arguments after once more: Arguments " << pp(Arguments) << ", ArgumentTypes: " << pp(ArgumentTypes) << "" << std::endl;
 
     *DataTerm=gsMakeDataAppl(Data,Arguments);
 
@@ -4394,10 +4148,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
     if (Type)
     {
-      if (gsDebug)
-      {
-        std::cerr << "Recognised declared variable " << pp(Name) << ", Type: " << pp(Type) << "" << std::endl;
-      }
+      mCRL2log(debug) << "Recognised declared variable " << pp(Name) << ", Type: " << pp(Type) << "" << std::endl;
       *DataTerm=gsMakeDataVarId(Name,Type);
 
       if (!ATAtableGet(AllowedVars,(ATerm)Name))
@@ -4545,12 +4296,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(
   const bool warn_upcasting)
 {
   // ATERM_NON_EXISTING_POSITION for nFactPars means the number of arguments is not known.
-  if (gsDebug)
-  {
-    std::cerr << "gstcTraverseVarConsTypeDN: DataTerm ";
-    ATfprintf(stderr,"%t",*DataTerm);
-    std::cerr << " with PosType " << pp(PosType) << ", nFactPars " << nFactPars << "" << std::endl;
-  }
+  mCRL2log(debug) << "gstcTraverseVarConsTypeDN: DataTerm " << pp(*DataTerm)
+                  << " with PosType " << pp(PosType) << ", nFactPars " << nFactPars << "" << std::endl;
   if (gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
   {
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
@@ -4658,11 +4405,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       }
       return NULL;
     }
-    if (gsDebug)
-    {
-      std::cerr << "Possible types for Op/Var " << pp(Name) << " with " << nFactPars <<
+    mCRL2log(debug) << "Possible types for Op/Var " << pp(Name) << " with " << nFactPars <<
                 " argument are (ParList: " << pp(ParList) << "; PosType: " << pp(PosType) << ")" << std::endl;
-    }
 
     ATermList CandidateParList=ParList;
 
@@ -4706,10 +4450,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       }
       NewParList=ATreverse(NewParList);
 
-      if (gsDebug)
-      {
-        std::cerr << "Possible matches w/o casting for Op/Var " << pp(Name) << " with "<< nFactPars <<               " argument are (ParList: " << pp(NewParList) << "; PosType: " << pp(PosType) << "" << std::endl;
-      }
+      mCRL2log(debug) << "Possible matches w/o casting for Op/Var " << pp(Name) << " with "<< nFactPars <<               " argument are (ParList: " << pp(NewParList) << "; PosType: " << pp(PosType) << "" << std::endl;
 
       if (ATisEmpty(NewParList))
       {
@@ -4720,10 +4461,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         //and get the list. Then we take the min of the list.
 
         ParList=BackupParList;
-        if (gsDebug)
-        {
-          std::cerr << "Trying casting for Op " << pp(Name) << " with " << nFactPars << " argument (ParList: " <<                             pp(ParList) << "; PosType: " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Trying casting for Op " << pp(Name) << " with " << nFactPars << " argument (ParList: " <<                             pp(ParList) << "; PosType: " << pp(PosType) << "" << std::endl;
         PosType=gstcExpandNumTypesUp(PosType);
         for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
         {
@@ -4734,10 +4472,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
         }
         NewParList=ATreverse(NewParList);
-        if (gsDebug)
-        {
-          std::cerr << "The result of casting is " << pp(NewParList) << "" << std::endl;
-        }
+        mCRL2log(debug) << "The result of casting is " << pp(NewParList) << "" << std::endl;
         if (ATgetLength(NewParList)>1)
         {
           NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
@@ -4750,10 +4485,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         //Let's try to be more relaxed about the result, e.g. returning Pos or Nat is not a bad idea for int.
 
         ParList=BackupParList;
-        if (gsDebug)
-        {
-          std::cerr << "Trying result casting for Op " << pp(Name) << " with " << nFactPars << " argument (ParList: "                       << "; PosType: " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Trying result casting for Op " << pp(Name) << " with " << nFactPars << " argument (ParList: "                       << "; PosType: " << pp(PosType) << "" << std::endl;
         PosType=gstcExpandNumTypesDown(gstcExpandNumTypesUp(PosType));
         for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
         {
@@ -4764,10 +4496,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
         }
         NewParList=ATreverse(NewParList);
-        if (gsDebug)
-        {
-          std::cerr << "The result of casting is " << pp(NewParList) << "" << std::endl;
-        }
+        mCRL2log(debug) << "The result of casting is " << pp(NewParList) << "" << std::endl;
         if (ATgetLength(NewParList)>1)
         {
           NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
@@ -4820,10 +4549,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(data::detail::if_symbol()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing if matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing if matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchIf(Type);
         if (!NewType)
         {
@@ -4841,10 +4567,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           || ATisEqual(static_cast<ATermAppl>(data::detail::greater_equal_symbol()),ATAgetArgument(*DataTerm,0))
          )
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing ==, !=, <, <=, >= or > matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing ==, !=, <, <=, >= or > matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchEqNeqComparison(Type);
         if (!NewType)
         {
@@ -4856,10 +4579,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::cons_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing |> matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing |> matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpCons(Type);
         if (!NewType)
         {
@@ -4871,10 +4591,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::snoc_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing <| matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing <| matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpSnoc(Type);
         if (!NewType)
         {
@@ -4886,10 +4603,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::concat_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing ++ matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing ++ matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpConcat(Type);
         if (!NewType)
         {
@@ -4901,10 +4615,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::element_at_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing @ matching Type " << pp(Type) << ", PosType " << pp(PosType) << ", DataTerm: " << pp(*DataTerm) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing @ matching Type " << pp(Type) << ", PosType " << pp(PosType) << ", DataTerm: " << pp(*DataTerm) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpEltAt(Type);
         if (!NewType)
         {
@@ -4917,10 +4628,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       if (ATisEqual(static_cast<ATermAppl>(sort_list::head_name()),ATAgetArgument(*DataTerm,0))||
           ATisEqual(static_cast<ATermAppl>(sort_list::rhead_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing {R,L}head matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing {R,L}head matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
 // Type==NULL
         ATermAppl NewType=gstcMatchListOpHead(Type);
         if (!NewType)
@@ -4934,10 +4642,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       if (ATisEqual(static_cast<ATermAppl>(sort_list::tail_name()),ATAgetArgument(*DataTerm,0))||
           ATisEqual(static_cast<ATermAppl>(sort_list::rtail_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing {R,L}tail matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing {R,L}tail matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpTail(Type);
         if (!NewType)
         {
@@ -4949,10 +4654,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_bag::set2bag_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing Set2Bag matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing Set2Bag matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchSetOpSet2Bag(Type);
         if (!NewType)
         {
@@ -4964,10 +4666,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::in_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing {List,Set,Bag} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing {List,Set,Bag} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListSetBagOpIn(Type);
         if (!NewType)
         {
@@ -4981,10 +4680,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           ATisEqual(static_cast<ATermAppl>(sort_set::setdifference_name()),ATAgetArgument(*DataTerm,0))||
           ATisEqual(static_cast<ATermAppl>(sort_set::setintersection_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchSetBagOpUnionDiffIntersect(Type);
         if (!NewType)
         {
@@ -4996,10 +4692,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_set::setcomplement_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing SetCompl matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing SetCompl matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchSetOpSetCompl(Type);
         if (!NewType)
         {
@@ -5011,10 +4704,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_bag::bag2set_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing Bag2Set matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing Bag2Set matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchBagOpBag2Set(Type);
         if (!NewType)
         {
@@ -5026,10 +4716,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_bag::bagcount_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing BagCount matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing BagCount matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchBagOpBagCount(Type);
         if (!NewType)
         {
@@ -5042,10 +4729,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(data::function_update_name()),ATAgetArgument(*DataTerm,0)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
-        }
+        mCRL2log(debug) << "Doing FuncUpdate matching Type " << pp(Type) << ", PosType " << pp(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchFuncUpdate(Type);
         if (!NewType)
         {
@@ -5070,10 +4754,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       was_ambiguous=true;
       if (strict_ambiguous)
       {
-        if (gsDebug)
-        {
-          std::cerr << "ambiguous operation " << pp(Name) << " (ParList " << pp(ParList) << ")" << std::endl;
-        }
+        mCRL2log(debug) << "ambiguous operation " << pp(Name) << " (ParList " << pp(ParList) << ")" << std::endl;
         if (nFactPars!=ATERM_NON_EXISTING_POSITION)
         {
           gsErrorMsg("ambiguous operation %P with %d parameter%s\n", Name, nFactPars, (nFactPars != 1)?"s":"");
@@ -5154,10 +4835,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
   // Makes upcasting from Type to Needed Type for Par. Returns the resulting type.
   // Moreover, *Par is extended with the required type transformations.
 
-  if (gsDebug)
-  {
-    std::cerr << "gstcUpCastNumericType " << pp(NeededType) << " -- " << pp(Type) << "" << std::endl;
-  }
+  mCRL2log(debug) << "gstcUpCastNumericType " << pp(NeededType) << " -- " << pp(Type) << "" << std::endl;
 
   if (data::is_unknown_sort(data::sort_expression(Type)))
   {
@@ -5396,10 +5074,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
   // It returns the matching instantiation of Type. If matching fails,
   // it returns NULL.
 
-  if (gsDebug)
-  {
-    std::cerr << "gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " " << std::endl;
-  }
+  mCRL2log(debug) << "gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " " << std::endl;
 
   if (data::is_unknown_sort(Type))
   {
@@ -5421,28 +5096,19 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
     for (ATermList PosTypeList=ATLgetArgument(PosType,0); !ATisEmpty(PosTypeList); PosTypeList=ATgetNext(PosTypeList))
     {
       ATermAppl NewPosType=ATAgetFirst(PosTypeList);
-      if (gsDebug)
-      {
-        std::cerr << "Matching candidate gstcTypeMatchA Type: " << pp(Type) << ";    PosType: "
+      mCRL2log(debug) << "Matching candidate gstcTypeMatchA Type: " << pp(Type) << ";    PosType: "
                   << pp(PosType) << " New Type: " << pp(NewPosType) << "" << std::endl;
-      }
 
       if ((NewPosType=gstcTypeMatchA(Type,NewPosType)))
       {
-        if (gsDebug)
-        {
-          std::cerr << "Match gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) <<
+        mCRL2log(debug) << "Match gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) <<
                     " New Type: " << pp(NewPosType) << "" << std::endl;
-        }
         NewTypeList=ATinsert(NewTypeList,(ATerm)NewPosType);
       }
     }
     if (ATisEmpty(NewTypeList))
     {
-      if (gsDebug)
-      {
-        std::cerr << "No match gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " " << std::endl;
-      }
+      mCRL2log(debug) << "No match gstcTypeMatchA Type: " << pp(Type) << ";    PosType: " << pp(PosType) << " " << std::endl;
       return NULL;
     }
 
@@ -5536,10 +5202,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
         return NULL;
       }
       Type=gsMakeSortArrow(ArgTypes,ResType);
-      if (gsDebug)
-      {
-        std::cerr << "gstcTypeMatchA Done: Type: " << pp(Type) << ";    PosType: " << pp(PosType) << "" << std::endl;
-      }
+      mCRL2log(debug) << "gstcTypeMatchA Done: Type: " << pp(Type) << ";    PosType: " << pp(PosType) << "" << std::endl;
       return Type;
     }
   }
@@ -5549,11 +5212,8 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
 
 static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList)
 {
-  if (gsDebug)
-  {
-    std::cerr << "gstcTypeMatchL TypeList: " << pp(TypeList) << ";    PosTypeList: " <<
+  mCRL2log(debug) << "gstcTypeMatchL TypeList: " << pp(TypeList) << ";    PosTypeList: " <<
               pp(PosTypeList) << "" << std::endl;
-  }
 
   if (ATgetLength(TypeList)!=ATgetLength(PosTypeList))
   {
@@ -6138,10 +5798,7 @@ static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2)
     }
     if (!Res)
     {
-      if (gsDebug)
-      {
-        std::cerr << "gstcUnifyMinType: No match: Type1 " << pp(Type1) << "; Type2 " << pp(Type2) << "; " << std::endl;
-      }
+      mCRL2log(debug) << "gstcUnifyMinType: No match: Type1 " << pp(Type1) << "; Type2 " << pp(Type2) << "; " << std::endl;
       return NULL;
     }
   }
@@ -6150,10 +5807,7 @@ static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2)
   {
     Res=ATAgetFirst(ATLgetArgument(Res,0));
   }
-  if (gsDebug)
-  {
-    std::cerr << "gstcUnifyMinType: Type1 " << pp(Type1) << "; Type2 " << pp(Type2) << "; Res: " << pp(Res) << "" << std::endl;
-  }
+  mCRL2log(debug) << "gstcUnifyMinType: Type1 " << pp(Type1) << "; Type2 " << pp(Type2) << "; Res: " << pp(Res) << "" << std::endl;
   return Res;
 }
 
@@ -6799,10 +6453,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
 
 static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm)
 {
-  if (gsDebug)
-  {
-    std::cerr << "gstcTraverseStateFrm: " + pp(StateFrm) + "" << std::endl;
-  }
+  mCRL2log(debug) << "gstcTraverseStateFrm: " + pp(StateFrm) + "" << std::endl;
 
   if (gsIsStateTrue(StateFrm) || gsIsStateFalse(StateFrm) || gsIsStateDelay(StateFrm) || gsIsStateYaled(StateFrm))
   {
@@ -7047,10 +6698,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
 
 static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm)
 {
-  if (gsDebug)
-  {
-    std::cerr << "gstcTraverseRegFrm: " + pp(RegFrm) + "" << std::endl;
-  }
+  mCRL2log(debug) << "gstcTraverseRegFrm: " + pp(RegFrm) + "" << std::endl;
   if (gsIsRegNil(RegFrm))
   {
     return RegFrm;
@@ -7092,11 +6740,7 @@ static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm)
 
 static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm)
 {
-  if (gsDebug)
-  {
-    std::cerr << "gstcTraverseActFrm: " + pp(ActFrm) + "" << std::endl;
-  }
-
+  mCRL2log(debug) << "gstcTraverseActFrm: " + pp(ActFrm) + "" << std::endl;
 
   if (gsIsActTrue(ActFrm) || gsIsActFalse(ActFrm))
   {

@@ -510,11 +510,8 @@ static void add_postponed_inequalities_to_context(
       {
         variable xi(variable_generator("xi"), c.sort());
         context.push_back(real_representing_variable(xi,inequalities_to_add_lhs[i], inequalities_to_add_rhs[i]));
-        if (core::gsVerbose)
-        {
-          std::cerr << "Introduced variable " <<  pp(xi) << " for <" << pp(inequalities_to_add_lhs[i]) <<
+        mCRL2log(verbose) << "Introduced variable " <<  pp(xi) << " for <" << pp(inequalities_to_add_lhs[i]) <<
                     "," <<  pp(inequalities_to_add_rhs[i]) << ">\n";
-        }
 
         for (std::vector < summand_information >::iterator j = summand_info.begin();
              j != summand_info.end(); ++j)

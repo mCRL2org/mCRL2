@@ -79,10 +79,7 @@ static void check_whether_actions_on_commandline_exist(
   for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
                i!=actions.end(); ++i)
   {
-    if (gsVerbose)
-    {
-      std::cerr << "checking for occurrences of action '" << string(*i) << "'.\n";
-    }
+    mCRL2log(verbose) << "checking for occurrences of action '" << string(*i) << "'.\n";
 
     bool found=(*i=="tau"); // If i equals tau, it does not need to be declared.
     for(action_label_list::const_iterator j=action_labels.begin(); 
@@ -325,7 +322,7 @@ class lps2lts_tool : public lps2lts_base
         parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
       } */
 
-      if (parser.options.count("suppress") && !gsVerbose)
+      if (parser.options.count("suppress") && !mCRL2logEnabled(verbose))
       {
         parser.error("option --suppress requires --verbose (of -v)");
       }

@@ -19,54 +19,6 @@ namespace mcrl2
 namespace core
 {
 
-//Message printing options
-//------------------------
-bool gsQuiet   = false;//indicates if quiet mode is enabled
-bool gsError = true;   //indicates if error messages should be printed
-bool gsWarning = true; //indicates if warning messages should be printed
-bool gsVerbose = false;//indicates if verbose messages should be printed
-bool gsDebug   = false;//indicates if debug messages should be printed
-
-void gsSetQuietMsg(void)
-{
-  gsQuiet   = true;
-  gsError = true;   
-  gsWarning = false;
-  gsVerbose = false;
-  gsDebug   = false;
-  mcrl2_logger::set_reporting_level(log_quiet);
-}
-
-void gsSetNormalMsg(void)
-{
-  gsQuiet   = false;
-  gsError = true;   
-  gsWarning = true;
-  gsVerbose = false;
-  gsDebug   = false;
-  mcrl2_logger::set_reporting_level(log_info);
-}
-
-void gsSetVerboseMsg(void)
-{
-  gsQuiet   = false;
-  gsError = true;   
-  gsWarning = true;
-  gsVerbose = true;
-  gsDebug   = false;
-  mcrl2_logger::set_reporting_level(log_verbose);
-}
-
-void gsSetDebugMsg(void)
-{
-  gsQuiet   = false;
-  gsError = true;   
-  gsWarning = true;
-  gsVerbose = true;
-  gsDebug   = true;
-  mcrl2_logger::set_reporting_level(log_debug);
-}
-
 // Helper function (wrapper around gsvfprintf) for printing to string
 static void logger_wrapper(mcrl2_log_level_t t, const char* Format, va_list args)
 {

@@ -314,10 +314,7 @@ bool Confluence_Checker::check_summands(
       if (f_generate_invariants)
       {
         const data_expression v_new_invariant(f_bdd_prover.get_bdd());
-        if (core::gsVerbose)
-        {
-          std::cerr << "\nChecking invariant: " << pp(v_new_invariant) << "\n";
-        }
+        mCRL2log(verbose) << "\nChecking invariant: " << pp(v_new_invariant) << "\n";
         if (f_invariant_checker.check_invariant(v_new_invariant))
         {
           gsVerboseMsg("Invariant holds\n");

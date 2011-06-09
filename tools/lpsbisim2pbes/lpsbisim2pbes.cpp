@@ -213,15 +213,12 @@ class lpsbisim2pbes_tool: public input_input_tool
       specification M;
       specification S;
 
-      if (core::gsVerbose)
-      {
-        std::clog << "lpsbisim2pbes parameters:" << std::endl;
-        std::clog << "  input file 1 :         " << input_filename1() << std::endl;
-        std::clog << "  input file 2 :         " << input_filename2() << std::endl;
-        std::clog << "  output file  :         " << output_filename() << std::endl;
-        std::clog << "  bisimulation :         " << print_bisimulation_type(m_bisimulation_type) << std::endl;
-        std::clog << "  normalize    :         " << normalize << std::endl;
-      }
+      mCRL2log(verbose) << "lpsbisim2pbes parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file 1 :         " << input_filename1() << std::endl;
+      mCRL2log(verbose) << "  input file 2 :         " << input_filename2() << std::endl;
+      mCRL2log(verbose) << "  output file  :         " << output_filename() << std::endl;
+      mCRL2log(verbose) << "  bisimulation :         " << print_bisimulation_type(m_bisimulation_type) << std::endl;
+      mCRL2log(verbose) << "  normalize    :         " << normalize << std::endl;
 
       M.load(input_filename1());
       S.load(input_filename2());

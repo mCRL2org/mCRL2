@@ -1388,10 +1388,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
         }
         while (ATAtableGet(procs,(ATerm)new_pn));
 
-        if (gsVerbose)
-        {
-          std::cerr << "- created process " << core::pp(new_pn) << "\n";
-        }
+        mCRL2log(verbose) << "- created process " << core::pp(new_pn) << "\n";
         ATermAppl p=ATAtableGet(procs,(ATerm)pn);
         assert(p);
         p=PushAllow(V,p);
@@ -2587,10 +2584,7 @@ static void gsAlpha(
   process_equation_list& equations,
   process_expression& init)
 {
-  if (gsVerbose)
-  {
-    std::cerr << "applying alphabet reductions...\n";
-  }
+  mCRL2log(verbose) << "applying alphabet reductions...\n";
   //create the tables
   afunPair=ATmakeAFun("p",2,false);
   ATprotectAFun(afunPair);
@@ -2902,10 +2896,7 @@ nP_checked:
 
       if (good)
       {
-        if (gsVerbose)
-        {
-          std::cerr << "- process " << core::pp(p) << " is a recursive parallel process in n-parallel pCRL format\n";
-        }
+        mCRL2log(verbose) << "- process " << core::pp(p) << " is a recursive parallel process in n-parallel pCRL format\n";
         ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm));
         ATtablePut(subs_npCRL,(ATerm)p,(ATerm)ATmakeList0());
       }

@@ -192,13 +192,10 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
     bool run()
     {
 
-      if (core::gsVerbose)
-      {
-        std::cerr << "lpsconfcheck parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
-      }
+      mCRL2log(verbose) << "lpsconfcheck parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
 
       lps::specification specification;
 

@@ -86,11 +86,11 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
     bool run()
     {
       size_t loglevel = 0;
-      if (mcrl2::core::gsVerbose)
+      if (mCRL2logEnabled(verbose))
       {
         loglevel = 1;
       }
-      if (mcrl2::core::gsDebug)
+      if (mCRL2logEnabled(debug))
       {
         loglevel = 2;
       }

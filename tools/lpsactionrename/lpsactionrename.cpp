@@ -167,7 +167,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       if (m_sumelm)
       {
         gsVerboseMsg("applying sum elimination...\n");
-        sumelm_algorithm(lps_new_spec, core::gsVerbose||core::gsDebug).run();
+        sumelm_algorithm(lps_new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
         if (m_rewrite)
         {
           gsVerboseMsg("rewriting data expressions in LPS...\n");

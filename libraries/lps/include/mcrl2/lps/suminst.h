@@ -140,7 +140,7 @@ class suminst_algorithm: public lps::detail::lps_algorithm
                       DataRewriter& r,
                       atermpp::set<data::sort_expression> sorts = atermpp::set<data::sort_expression>(),
                       bool tau_summands_only = false)
-      : lps_algorithm(spec, core::gsVerbose),
+      : lps_algorithm(spec, mCRL2logEnabled(verbose)),
         m_sorts(sorts),
         m_tau_summands_only(tau_summands_only),
         m_rewriter(r),

@@ -75,11 +75,11 @@ class bessolve_tool: public input_output_tool
                    solution_strategy_to_string(strategy).c_str());
 
       unsigned int log_level = 0;
-      if (core::gsVerbose)
+      if (mCRL2logEnabled(verbose))
       {
         log_level = 1;
       }
-      if (core::gsDebug)
+      if (mCRL2logEnabled(debug))
       {
         log_level = 2;
       }

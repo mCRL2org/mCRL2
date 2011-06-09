@@ -68,51 +68,33 @@ lts_type guess_format(string const& s)
 
     if (ext == "aut")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected Aldebaran extension.\n";
-      }
+      mCRL2log(verbose) << "Detected Aldebaran extension.\n";
       return lts_aut;
     }
     else if (ext == "lts")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected mCRL2 extension.\n";
-      }
+      mCRL2log(verbose) << "Detected mCRL2 extension.\n";
       return lts_lts;
     }
     else if (ext == "svc")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected SVC extension; assuming mCRL2 format.\n";
-      }
+      mCRL2log(verbose) << "Detected SVC extension; assuming mCRL2 format.\n";
       return lts_lts;
     }
     else if (ext == "fsm")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected Finite State Machine extension.\n";
-      }
+      mCRL2log(verbose) << "Detected Finite State Machine extension.\n";
       return lts_fsm;
     }
     else if (ext == "dot")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected GraphViz extension.\n";
-      }
+      mCRL2log(verbose) << "Detected GraphViz extension.\n";
       return lts_dot;
 #ifdef USE_BCG
     }
     else if (ext == "bcg")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected Binary Coded Graph extension.\n";
-      }
+      mCRL2log(verbose) << "Detected Binary Coded Graph extension.\n";
       return lts_bcg;
 #endif
     }

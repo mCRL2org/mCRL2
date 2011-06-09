@@ -971,25 +971,25 @@ class pbes_constelm_algorithm: public core::algorithm
       }
 
       // print the parameters and equation that are removed
-      if (mcrl2::core::gsVerbose)
+      if (mCRL2logEnabled(verbose))
       {
-        std::cerr << "\nremoved the following constant parameters:" << std::endl;
+        mCRL2log(verbose) << "\nremoved the following constant parameters:" << std::endl;
         std::map<propositional_variable_decl_type, std::vector<variable_type> > v = redundant_parameters();
         for (typename std::map<propositional_variable_decl_type, std::vector<variable_type> >::iterator i = v.begin(); i != v.end(); ++i)
         {
           for (typename std::vector<variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            std::cerr << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
+            mCRL2log(verbose) << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
           }
         }
 
         if (remove_redundant_equations)
         {
-          std::cerr << "\nremoved the following equations:" << std::endl;
+          mCRL2log(verbose) << "\nremoved the following equations:" << std::endl;
           const std::set<propositional_variable_decl_type> r = redundant_equations();
           for (typename std::set<propositional_variable_decl_type>::const_iterator i = r.begin(); i != r.end(); ++i)
           {
-            std::cerr << "  equation " << core::pp(i->name()) << std::endl;
+            mCRL2log(verbose) << "  equation " << core::pp(i->name()) << std::endl;
           }
         }
       }

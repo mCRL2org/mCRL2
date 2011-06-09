@@ -46,7 +46,6 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using mcrl2::core::gsDebug;
 using namespace mcrl2::utilities::tools;
 using mcrl2::utilities::tools::rewriter_tool;
 

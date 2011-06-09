@@ -112,11 +112,9 @@ template < class LTS_TYPE>
 scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
   :aut(l)
 {
-  if (core::gsDebug)
-  {
-    std::cerr << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
-              l.num_transitions() << " transitions\n";
-  }
+  mCRL2log(debug) << "Tau loop (SCC) partitioner created for " << l.num_states() << " states and " <<
+              l.num_transitions() << " transitions" << std::endl;
+
   // read and store tau transitions.
   std::map < state_type, std::vector < state_type > > src_tgt;
   for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
@@ -157,10 +155,7 @@ scc_partitioner<LTS_TYPE>::scc_partitioner(LTS_TYPE& l)
       equivalence_class_index++;
     }
   }
-  if (core::gsDebug)
-  {
-    std::cerr << "Tau loop (SCC) partitioner reduces lts to " << equivalence_class_index << " states.\n";
-  }
+  mCRL2log(debug) << "Tau loop (SCC) partitioner reduces lts to " << equivalence_class_index << " states." << std::endl;
 
   dfsn2state.clear();
 }

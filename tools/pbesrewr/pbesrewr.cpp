@@ -52,13 +52,10 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       using namespace pbes_system;
       using namespace utilities;
 
-      if (core::gsVerbose)
-      {
-        std::clog << "pbesrewr parameters:" << std::endl;
-        std::clog << "  input file:         " << m_input_filename << std::endl;
-        std::clog << "  output file:        " << m_output_filename << std::endl;
-        std::clog << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
-      }
+      mCRL2log(verbose) << "pbesrewr parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       // load the pbes
       pbes<> p;

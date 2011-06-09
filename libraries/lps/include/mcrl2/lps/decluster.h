@@ -39,7 +39,7 @@ class decluster_algorithm: public lps::detail::lps_algorithm
 
   public:
     decluster_algorithm(specification& spec)
-      : lps_algorithm(spec, core::gsVerbose)
+      : lps_algorithm(spec, mCRL2logEnabled(verbose))
     {}
 
     void run()

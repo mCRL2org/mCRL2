@@ -85,20 +85,17 @@ class pbes_abstract_tool: public input_output_tool
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
-      {
-        std::cerr << "pbesabstract parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  parameters:         " << m_parameter_selection << std::endl;
-      }
+      mCRL2log(verbose) << "pbesabstract parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  parameters:         " << m_parameter_selection << std::endl;
 
       size_t log_level = 0;
-      if (mcrl2::core::gsVerbose)
+      if (mCRL2logEnabled(verbose))
       {
         log_level = 1;
       }
-      if (mcrl2::core::gsDebug)
+      if (mCRL2logEnabled(debug))
       {
         log_level = 2;
       }

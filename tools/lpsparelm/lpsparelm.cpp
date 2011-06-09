@@ -41,7 +41,7 @@ class lps_parelm_tool : public input_output_tool
     {
       lps::specification spec;
       spec.load(m_input_filename);
-      lps::parelm(spec, true, mcrl2::core::gsVerbose);
+      lps::parelm(spec, true, mCRL2logEnabled(verbose));
       spec.save(m_output_filename);
       return true;
     }

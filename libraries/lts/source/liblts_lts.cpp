@@ -295,10 +295,7 @@ void lts_lts_t::save(const std::string& filename) const
   }
   else
   {
-    if (core::gsVerbose)
-    {
-      std::cerr << "Starting to save file " << filename << "\n";
-    }
+    mCRL2log(verbose) << "Starting to save file " << filename << "\n";
     write_to_lts(*this,filename);
   }
 }

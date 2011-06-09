@@ -2040,7 +2040,7 @@ void RewriterCompilingInnermost::BuildRewriteSystem()
 
   need_rebuild = false;
 #ifndef NDEBUG
-  if (!gsDebug)
+  if (!mCRL2logEnabled(debug))
 #endif
   {
     cleanup_file(file_c);

@@ -554,10 +554,7 @@ lps::specification action_rename(
   generator.add_identifiers(lps::find_identifiers(lps_old_spec));
 
   //go through the rename rules of the rename file
-  if (gsDebug)
-  {
-    std::cerr << "Rename rules found: " << rename_rules.size() << "\n";
-  }
+  mCRL2log(debug) << "Rename rules found: " << rename_rules.size() << "\n";
   for (atermpp::vector <action_rename_rule>::const_iterator i = rename_rules.begin(); i != rename_rules.end(); ++i)
   {
     action_summand_vector lps_new_action_summands;
@@ -636,10 +633,7 @@ lps::specification action_rename(
 
 
     //go through the summands of the old lps
-    if (gsDebug)
-    {
-      std::cerr << "Action summands found: " << lps_old_action_summands.size() << "\n";
-    }
+    mCRL2log(debug) << "Action summands found: " << lps_old_action_summands.size() << "\n";
     for (action_summand_vector::const_iterator losi = lps_old_action_summands.begin();
          losi != lps_old_action_summands.end(); ++losi)
     {
@@ -660,10 +654,7 @@ lps::specification action_rename(
       lps_new_actions(1,action_list());
       std::vector < bool > lps_new_actions_is_delta(1,false);
 
-      if (gsDebug)
-      {
-        std::cerr << "Actions in summand found: " << lps_old_actions.size() << "\n";
-      }
+      mCRL2log(debug) << "Actions in summand found: " << lps_old_actions.size() << "\n";
       for (action_list::iterator loai = lps_old_actions.begin();
            loai != lps_old_actions.end(); loai++)
       {
@@ -671,10 +662,7 @@ lps::specification action_rename(
 
         if (equal_signatures(lps_old_action, rule_old_action))
         {
-          if (gsDebug)
-          {
-            std::cerr << "Renaming action " << core::pp(rule_old_action) << "\n";
-          }
+          mCRL2log(debug) << "Renaming action " << core::pp(rule_old_action) << "\n";
 
           //rename all previously used variables
           data_expression renamed_rule_condition=rule_condition;
@@ -853,10 +841,7 @@ lps::specification action_rename(
             *i = push_front(*i, lps_old_action);
           }
         }
-        if (gsDebug)
-        {
-          std::cerr << "Action done\n";
-        }
+        mCRL2log(debug) << "Action done\n";
 
       } //end of action list iterator
 
@@ -893,10 +878,7 @@ lps::specification action_rename(
     lps_old_action_summands = lps_new_action_summands;
   } //end of rename rule iterator
 
-  if (gsDebug)
-  {
-    std::cerr << "Simplifying the result...\n";
-  }
+  mCRL2log(debug) << "Simplifying the result...\n";
 
   linear_process new_process(lps_old_spec.process().process_parameters(),
                              lps_deadlock_summands,
@@ -921,10 +903,7 @@ lps::specification action_rename(
                                  new_process,
                                  lps_old_spec.initial_process());
 
-  if (gsDebug)
-  {
-    std::cerr << "New lps complete\n";
-  }
+  mCRL2log(debug) << "New lps complete\n";
   return lps_new_spec;
 } //end of rename(...)
 

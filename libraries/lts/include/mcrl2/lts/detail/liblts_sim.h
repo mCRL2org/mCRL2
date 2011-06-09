@@ -13,6 +13,7 @@
 #define LIBLTS_SIM_H
 #include <vector>
 #include <cstdlib>
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/lts/lts.h"
@@ -179,10 +180,7 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
   using namespace mcrl2::core;
   initialise_datastructures();
 
-  if (gsDebug)
-  {
-    gsMessage("--------------------- INITIALISATION ---------------------------\n");
-  }
+  mCRL2log(debug) << "--------------------- INITIALISATION ---------------------------" << std::endl;
 
   gsVerboseMsg("  initialisation; number of blocks: %u\n",s_Sigma);
   bool change;
@@ -206,10 +204,7 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
      * time. */
     P.swap(Q);
 
-    if (gsDebug)
-    {
-      gsMessage("--------------------- ITERATION %u ----------------------------------\n",i);
-    }
+    mCRL2log(debug) << "--------------------- ITERATION " << i << " ----------------------------------" << std::endl;
 
     gsVerboseMsg("  iteration %u; number of blocks: %u\n",i,s_Sigma);
 
@@ -229,7 +224,8 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
     }
     ++i;
   }
-  if (gsDebug)
+
+  if (mCRL2logEnabled(debug))
   {
     print_Pi_Q();
   }
@@ -365,9 +361,9 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
     parent[alpha] = alpha;
   }
 
-  if (gsDebug)
+  if (mCRL2logEnabled(debug))
   {
-    gsMessage("--------------------- Refine ---------------------------------------\n");
+    mCRL2log(debug) << "--------------------- Refine ---------------------------------------" << std::endl;
     print_Sigma_P();
   }
 
@@ -376,18 +372,18 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
   Sort.reserve(s_Sigma);
   reverse_topological_sort(Sort);
 
-  if (gsDebug)
+  if (mCRL2logEnabled(debug))
   {
-    gsMessage("reverse topological sort is: [");
+    mCRL2log(debug) << "reverse topological sort is: [";
     for (size_t i = 0; i < Sort.size(); ++i)
     {
-      gsMessage("%u",Sort[i]);
+      mCRL2log(debug) << Sort[i];
       if (i+1 < Sort.size())
       {
-        gsMessage(",");
+        mCRL2log(debug) << ",";
       }
     }
-    gsMessage("]\n");
+    mCRL2log(debug) << "]" << std::endl;
   }
 
   /* Some local variables */
@@ -400,11 +396,8 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
   /* The main loop */
   for (l = 0; l < aut.num_action_labels(); ++l)
   {
-    if (gsDebug)
-    {
-      gsMessage("---------------------------------------------------\n");
-      gsMessage("Label = \"%s\"\n", mcrl2::lts::detail::pp(aut.action_label(l)).c_str());
-    }
+    mCRL2log(debug) << "---------------------------------------------------" << std::endl;
+    mCRL2log(debug) << "Label = \"" << mcrl2::lts::detail::pp(aut.action_label(l)) << "\"" << std::endl;
 
     /* reset the stable function */
     stable.assign(s_Pi,v_false);
@@ -557,10 +550,7 @@ template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::update()
 {
   using namespace mcrl2::core;
-  if (gsDebug)
-  {
-    gsMessage("--------------------- Update ---------------------------------------\n");
-  }
+  mCRL2log(debug) << "--------------------- Update ---------------------------------------" << std::endl;
 
   size_t l,alpha,gamma;
   std::vector<size_t>::iterator alphai, last;
@@ -596,13 +586,13 @@ void sim_partitioner<LTS_TYPE>::update()
     }
   }
 
-  if (gsDebug)
+  if (mCRL2logEnabled(debug))
   {
-    gsMessage("------ Filter(false) ------\nExists: ");
+    mCRL2log(debug) << "------ Filter(false) ------\nExists: ";
     print_structure(exists);
-    gsMessage("\nForall: ");
+    mCRL2log(debug) << "\nForall: ";
     print_structure(forall);
-    gsMessage("\nSimulation relation: ");
+    mCRL2log(debug) << "\nSimulation relation: ";
     print_relation(s_Pi,Q);
   }
 
@@ -638,13 +628,13 @@ void sim_partitioner<LTS_TYPE>::update()
       pre_forall[l].push_back(forall->get_num_elements());
     }
   }
-  if (gsDebug)
+  if (mCRL2logEnabled(debug))
   {
-    gsMessage("------ Filter(true) ------\nExists: ");
+    mCRL2log(debug) << "------ Filter(true) ------\nExists: ";
     print_structure(exists);
-    gsMessage("\nForall: ");
+    mCRL2log(debug) << "\nForall: ";
     print_structure(forall);
-    gsMessage("\nSimulation relation: ");
+    mCRL2log(debug) << "\nSimulation relation: ";
     print_relation(s_Pi,Q);
   }
 

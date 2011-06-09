@@ -368,12 +368,9 @@ class specification_basic_type:public boost::noncopyable
 
         n=addObject(sort,isnew);
 
-        if ((isnew==0) && (core::gsDebug))
+        if (isnew == 0)
         {
-          std::string s;
-          s =  "sort " + pp(sort) +  "is added twice\n";
-          gsWarningMsg(s.c_str());
-
+          mCRL2log(warning) << "sort " << pp(sort) << "is added twice" << std::endl;
           return;
         }
 
@@ -5744,13 +5741,8 @@ class specification_basic_type:public boost::noncopyable
         // is essential for all processes. In these cases a
         // message about the block operator is very confusing.
       {
-        if (core::gsVerbose)
-        {
-          std::stringstream out;
-          out << "- calculating the " << (is_allow?"allow":"block") <<
+        mCRL2log(verbose) << "- calculating the " << (is_allow?"allow":"block") <<
               " operator on " << sourcesumlist.size() << " summands";
-          gsVerboseMsg(out.str().c_str());
-        }
       }
 
       /* First add the resulting sums in two separate lists
@@ -5847,11 +5839,9 @@ class specification_basic_type:public boost::noncopyable
                                    deprecated::summand(variable_list(),sort_bool::true_(),true,action_list(),assignment_list()));
         }
       }
-      if ((core::gsVerbose) && (sourcesumlist_length>2 || is_allow))
+      if (mCRL2logEnabled(verbose) && (sourcesumlist_length>2 || is_allow))
       {
-        std::stringstream out;
-        out << ", resulting in " << resultsumlist.size() << " summands\n";
-        gsVerboseMsg(out.str().c_str());
+        mCRL2log(verbose) << ", resulting in " << resultsumlist.size() << " summands\n";
       }
 
       return resultsumlist;
@@ -6508,12 +6498,7 @@ class specification_basic_type:public boost::noncopyable
       /* We follow the implementation of Muck van Weerdenburg, described in
          a note: Calculation of communication with open terms. */
 
-      if (core::gsVerbose)
-      {
-        std::stringstream out;
-        out << "- calculating the communication operator on " << summands.size() << " summands";
-        gsVerboseMsg(out.str().c_str());
-      }
+      mCRL2log(verbose) << "- calculating the communication operator on " << summands.size() << " summands";
 
       /* first we sort the multiactions in communications */
       communication_expression_list resultingCommunications;
@@ -6636,12 +6621,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      if (core::gsVerbose)
-      {
-        std::stringstream out;
-        out << " resulting in " << resultsumlist.size() << " summands\n";
-        gsVerboseMsg(out.str().c_str());
-      }
+      mCRL2log(verbose) << " resulting in " << resultsumlist.size() << " summands\n";
       return reverse(resultsumlist);
     }
 
@@ -7128,13 +7108,8 @@ class specification_basic_type:public boost::noncopyable
       variable_list& pars_result,
       assignment_list& init_result)
     {
-      if (core::gsVerbose)
-      {
-        std::stringstream out;
-        out << "- calculating parallel composition: " << summands1.size() <<
+      mCRL2log(verbose) << "- calculating parallel composition: " << summands1.size() <<
             " || " << summands2.size() << " = ";
-        gsVerboseMsg(out.str().c_str());
-      }
 
       // At this point the parameters of pars1 and pars2 are unique, except for
       // those that are constant in both processes.
@@ -7152,12 +7127,7 @@ class specification_basic_type:public boost::noncopyable
       pars3=reverse(pars3);
       deprecated::summand_list result=combine_summand_lists(summands1,summands2,pars1,pars3,pars2);
 
-      if (core::gsVerbose)
-      {
-        std::stringstream out;
-        out << result.size() << " resulting summands.\n";
-        gsVerboseMsg(out.str().c_str());
-      }
+      mCRL2log(verbose) << result.size() << " resulting summands.\n";
       pars_result=pars1+pars3;
       init_result=init1 + init2;
       return result;
@@ -7216,7 +7186,7 @@ class specification_basic_type:public boost::noncopyable
 
           specification temporary_spec(data,acts,global_variables,lps,initializer);
 
-          constelm_algorithm < rewriter > alg(temporary_spec,rewr,gsVerbose);
+          constelm_algorithm < rewriter > alg(temporary_spec,rewr,mCRL2logEnabled(verbose));
           alg.run(true); // Remove constants from the specification, where global variables are
           // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification
@@ -7661,12 +7631,7 @@ class specification_basic_type:public boost::noncopyable
         {
           if (print_info)
           {
-            if (core::gsVerbose)
-            {
-              std::stringstream out;
-              out << "process " << procId.name() << " contains time.\n";
-              gsVerboseMsg(out.str().c_str());
-            }
+            mCRL2log(verbose) << "process " << procId.name() << " contains time.\n";
           }
         }
         if (objectdata[n].containstime!=ct)
@@ -8174,12 +8139,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
   mcrl2::lps::t_lin_options lin_options)
 {
-  if (core::gsVerbose)
-  {
-    std::string s;
-    s = "Linearising the process specification using the '" + lin_method_to_string(lin_options.lin_method) + " ' method.\n";
-    gsWarningMsg(s.c_str());
-  }
+  mCRL2log(verbose) << "Linearising the process specification using the '" << lin_method_to_string(lin_options.lin_method) << " ' method.\n";
   data_specification data_spec=type_checked_spec.data();
   std::set<data::sort_expression> s;
   process::find_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));

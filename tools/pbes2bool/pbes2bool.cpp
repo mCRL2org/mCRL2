@@ -219,13 +219,10 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
       using namespace pbes_system;
       using namespace utilities;
 
-      if (core::gsVerbose)
-      {
-        std::cerr << "pbes2bool parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
-        std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
-      }
+      mCRL2log(verbose) << "pbes2bool parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
+      mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
