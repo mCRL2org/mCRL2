@@ -35,7 +35,6 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::process;
 
 using mcrl2::core::gsVerboseMsg;
-using mcrl2::core::gsMessage;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::lps::t_lin_method;
@@ -201,11 +200,11 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       {
         if (m_linearisation_options.infilename.empty())
         {
-          gsMessage("stdin contains a well-formed mCRL2 specification\n");
+          mCRL2log(info) << "stdin contains a well-formed mCRL2 specification" << std::endl;
         }
         else
         {
-          gsMessage("the file '%s' contains a well-formed mCRL2 specification\n", m_linearisation_options.infilename.c_str());
+          mCRL2log(info) << "the file '" << m_linearisation_options.infilename << "' contains a well-formed mCRL2 specification" << std::endl;
         }
         return true;
       }

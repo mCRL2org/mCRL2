@@ -177,9 +177,8 @@ class ltscompare_tool : public ltscompare_base
 
         result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
-        gsMessage("LTSs are %s%s\n",
-                  ((result) ? "" : "not "),
-                  equivalent_string(tool_options.equivalence));
+        mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
+                       << equivalent_string(tool_options.equivalence) << std::endl;
       }
 
       if (tool_options.preorder != lts_pre_none)
@@ -189,11 +188,10 @@ class ltscompare_tool : public ltscompare_base
 
         result = compare(l1,l2,tool_options.preorder);
 
-        gsMessage("LTS in %s is %s%s LTS in %s\n",
-                  tool_options.name_for_first.c_str(),
-                  ((result) ? "" : "not "),
-                  preorder_string(tool_options.preorder),
-                  tool_options.name_for_second.c_str());
+        mCRL2log(info) << "LTS in " << tool_options.name_for_first
+                       << " is " << ((result) ? "" : "not ")
+                       << preorder_string(tool_options.preorder)
+                       << " LTS in " << tool_options.name_for_second << std::endl;
       }
 
       return result;

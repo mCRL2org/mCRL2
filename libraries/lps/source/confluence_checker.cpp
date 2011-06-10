@@ -299,7 +299,7 @@ bool Confluence_Checker::check_summands(
 
   if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2))
   {
-    gsMessage(":");
+    mCRL2log(info) << ":";
   }
   else
   {
@@ -307,7 +307,7 @@ bool Confluence_Checker::check_summands(
     f_bdd_prover.set_formula(v_condition);
     if (f_bdd_prover.is_tautology() == answer_yes)
     {
-      gsMessage("+");
+      mCRL2log(info) << "+";
     }
     else
     {
@@ -318,7 +318,7 @@ bool Confluence_Checker::check_summands(
         if (f_invariant_checker.check_invariant(v_new_invariant))
         {
           gsVerboseMsg("Invariant holds\n");
-          gsMessage("i");
+          mCRL2log(info) << "i";
         }
         else
         {
@@ -326,11 +326,11 @@ bool Confluence_Checker::check_summands(
           v_is_confluent = false;
           if (f_check_all)
           {
-            gsMessage("-");
+            mCRL2log(info) << "-";
           }
           else
           {
-            gsMessage("Not confluent with summand %d.", a_summand_number_2);
+            mCRL2log(info) << "Not confluent with summand " << a_summand_number_2 << ".";
           }
           print_counter_example();
           save_dot_file(a_summand_number_1, a_summand_number_2);
@@ -341,11 +341,11 @@ bool Confluence_Checker::check_summands(
         v_is_confluent = false;
         if (f_check_all)
         {
-          gsMessage("-");
+          mCRL2log(info) << "-";
         }
         else
         {
-          gsMessage("Not confluent with summand %d.", a_summand_number_2);
+          mCRL2log(info) << "Not confluent with summand " << a_summand_number_2 << ".";
         }
         print_counter_example();
         save_dot_file(a_summand_number_1, a_summand_number_2);
@@ -379,7 +379,7 @@ action_summand Confluence_Checker::check_confluence_and_mark_summand(
   if (!a_summand_sum_variables.empty())
   {
     v_is_confluent = false;
-    gsMessage("Summand %d is not proven confluent because it contains a sum operator.",a_summand_number);
+    mCRL2log(info) << "Summand " << a_summand_number << " is not proven confluent because it contains a sum operator.";
   }
 
   for (action_summand_vector::const_iterator i=v_summands.begin();
@@ -391,7 +391,7 @@ action_summand Confluence_Checker::check_confluence_and_mark_summand(
     {
       if (f_intermediate[v_summand_number] > a_summand_number)
       {
-        gsMessage(".");
+        mCRL2log(info) << ".";
         v_summand_number++;
       }
       else
@@ -400,11 +400,11 @@ action_summand Confluence_Checker::check_confluence_and_mark_summand(
         {
           if (f_check_all)
           {
-            gsMessage("-");
+            mCRL2log(info) << "-";
           }
           else
           {
-            gsMessage("Not confluent with summand %d.", v_summand_number);
+            mCRL2log(info) << "Not confluent with summand " << v_summand_number << ".";
           }
           v_is_confluent = false;
         }
@@ -443,7 +443,7 @@ action_summand Confluence_Checker::check_confluence_and_mark_summand(
 
   if (v_is_confluent)
   {
-    gsMessage("Confluent with all summands.");
+    mCRL2log(info) << "Confluent with all summands.";
     a_is_marked = true;
     return action_summand(a_summand.summation_variables(),
                           a_summand.condition(),
@@ -510,9 +510,9 @@ specification Confluence_Checker::check_confluence_and_mark(const data_expressio
     {
       if (v_summand.is_tau())
       {
-        gsMessage("tau-summand %2d: ", v_summand_number);
+        mCRL2log(info) << "tau-summand " << v_summand_number << ": ";
         *i = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
-        gsMessage("\n");
+        mCRL2log(info) << std::endl;
       }
     }
     v_summand_number++;

@@ -13,6 +13,8 @@
 #define LIBLTS_SIM_H
 #include <vector>
 #include <cstdlib>
+#include <string>
+#include <sstream>
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/exception.h"
@@ -147,13 +149,13 @@ class sim_partitioner
     void initialise_pre_EA();
     void induce_P_on_Pi();
 
-    void print_Sigma_P();
-    void print_Pi_Q();
-    void print_Sigma();
-    void print_Pi();
-    void print_relation(size_t s,std::vector< std::vector<bool> > &R);
-    void print_block(size_t b);
-    void print_structure(hash_table3* struc);
+    std::string print_Sigma_P();
+    std::string print_Pi_Q();
+    std::string print_Sigma();
+    std::string print_Pi();
+    std::string print_relation(size_t s,std::vector< std::vector<bool> > &R);
+    std::string print_block(size_t b);
+    std::string print_structure(hash_table3* struc);
 };
 
 
@@ -589,11 +591,11 @@ void sim_partitioner<LTS_TYPE>::update()
   if (mCRL2logEnabled(debug))
   {
     mCRL2log(debug) << "------ Filter(false) ------\nExists: ";
-    print_structure(exists);
+    mCRL2log(debug) << print_structure(exists);
     mCRL2log(debug) << "\nForall: ";
-    print_structure(forall);
+    mCRL2log(debug) << print_structure(forall);
     mCRL2log(debug) << "\nSimulation relation: ";
-    print_relation(s_Pi,Q);
+    mCRL2log(debug) << print_relation(s_Pi,Q);
   }
 
   /* Apply the first filtering to Q */
@@ -631,11 +633,11 @@ void sim_partitioner<LTS_TYPE>::update()
   if (mCRL2logEnabled(debug))
   {
     mCRL2log(debug) << "------ Filter(true) ------\nExists: ";
-    print_structure(exists);
+    mCRL2log(debug) << print_structure(exists);
     mCRL2log(debug) << "\nForall: ";
-    print_structure(forall);
+    mCRL2log(debug) << print_structure(forall);
     mCRL2log(debug) << "\nSimulation relation: ";
-    print_relation(s_Pi,Q);
+    mCRL2log(debug) << print_relation(s_Pi,Q);
   }
 
   /* Apply the second filtering to Q */
@@ -979,72 +981,77 @@ void sim_partitione<LTS_TYPE>r::update_nfa()
 /* ----------------- FOR DEBUGGING ---------------------------------- */
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_Sigma_P()
+std::string sim_partitioner<LTS_TYPE>::print_Sigma_P()
 {
   using namespace mcrl2::core;
-  print_Sigma();
-  gsMessage("Simulation relation: ");
-  print_relation(s_Sigma,P);
+  std::stringstream result;
+  result << print_Sigma() << "Simulation relation: " << print_relation(s_Sigma,P);
+  return result.str();
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_Pi_Q()
+std::string sim_partitioner<LTS_TYPE>::print_Pi_Q()
 {
   using namespace mcrl2::core;
-  print_Pi();
-  gsMessage("Simulation relation: ");
-  print_relation(s_Pi,Q);
+  std::stringstream result;
+  result << print_Pi() << "Simulation relation: " << print_relation(s_Pi,Q);
+  return result.str();
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_Sigma()
+std::string sim_partitioner<LTS_TYPE>::print_Sigma()
 {
   using namespace mcrl2::core;
+  std::stringstream result;
   std::vector<size_t>::iterator ci, last;
   for (size_t b = 0; b < s_Sigma; ++b)
   {
-    gsMessage("block %u: {",b);
+    result << "block " << b << ": {";
     last = children[b].end();
     for (ci = children[b].begin(); ci != last; ++ci)
     {
-      print_block(*ci);
+      result << print_block(*ci);
     }
-    gsMessage("}\n");
+    result << "}" << std::endl;
   }
+  return result.str();
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_Pi()
+std::string sim_partitioner<LTS_TYPE>::print_Pi()
 {
+  std::stringstream result;
   using namespace mcrl2::core;
   for (size_t b = 0; b < s_Pi; ++b)
   {
-    gsMessage("block %u: {",b);
-    print_block(b);
-    gsMessage("}\n");
+    result << "block " << b << ": {" << print_block(b) << "}" << std::endl;
   }
+  return result.str();
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_block(size_t b)
+std::string sim_partitioner<LTS_TYPE>::print_block(size_t b)
 {
+  std::stringstream result;
   using namespace mcrl2::core;
   for (ptrdiff_t i = contents_u[b]; i != LIST_END; i = state_buckets[i].next)
   {
-    gsMessage("%d,",i);
+    result << i << ",";
   }
   for (ptrdiff_t i = contents_t[b]; i != LIST_END; i = state_buckets[i].next)
   {
-    gsMessage("%d,",i);
+    result << i << ",";
   }
+  return result.str();
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_relation(size_t s,
+std::string sim_partitioner<LTS_TYPE>::print_relation(size_t s,
     std::vector< std::vector<bool> > &R)
 {
   using namespace mcrl2::core;
-  gsMessage("{");
+  std::stringstream result;
+  result << "{";
   size_t beta,gamma;
   for (beta = 0; beta < s; ++beta)
   {
@@ -1052,26 +1059,28 @@ void sim_partitioner<LTS_TYPE>::print_relation(size_t s,
     {
       if (R[beta][gamma])
       {
-        gsMessage("(%u,%u),",beta,gamma);
+        result << "(" << beta << "," << gamma << "),";
       }
     }
   }
-  gsMessage("}\n");
+  result << "}" << std::endl;
+  return result.str();
 }
 
 template <class LTS_TYPE>
-void sim_partitioner<LTS_TYPE>::print_structure(hash_table3* struc)
+std::string sim_partitioner<LTS_TYPE>::print_structure(hash_table3* struc)
 {
   using namespace mcrl2::core;
-  gsMessage("{");
+  std::stringstream result;
+  result << "{";
   hash_table3_iterator i(struc);
   for (; !i.is_end(); ++i)
   {
-    gsMessage("(%u,%s,%u),", i.get_x(),
-              mcrl2::lts::detail::pp(aut.action_label(i.get_y())).c_str(),
-              i.get_z());
+    result << "(" << i.get_x() << "," << mcrl2::lts::detail::pp(aut.action_label(i.get_y()))
+           << "," << i.get_z() << "),";
   }
-  gsMessage("}");
+  result << "}";
+  return result.str();
 }
 
 } // namespace detail

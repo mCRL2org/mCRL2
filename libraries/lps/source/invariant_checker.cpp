@@ -124,7 +124,7 @@ bool Invariant_Checker::check_summand(
   }
   else
   {
-    gsMessage("The invariant does not hold for summand %d.\n", a_summand_number);
+    mCRL2log(info) << "The invariant does not hold for summand " << a_summand_number << std::endl;
     if (f_bdd_prover.is_contradiction() != answer_yes)
     {
       print_counter_example();
@@ -184,7 +184,7 @@ bool Invariant_Checker::check_invariant(const data::data_expression a_invariant)
   }
   else
   {
-    gsMessage("The invariant does not hold for the initial state.\n");
+    mCRL2log(info) << "The invariant does not hold for the initial state." << std::endl;
     v_result = false;
   }
   if ((f_all_violations || v_result))
@@ -195,17 +195,17 @@ bool Invariant_Checker::check_invariant(const data::data_expression a_invariant)
     }
     else
     {
-      gsMessage("The invariant does not hold for all summands.\n");
+      mCRL2log(info) << "The invariant does not hold for all summands." << std::endl;
       v_result = false;
     }
   }
   if (v_result)
   {
-    gsMessage("The invariant holds for this LPS.\n");
+    mCRL2log(info) << "The invariant holds for this LPS." << std::endl;
   }
   else
   {
-    gsMessage("The invariant does not hold for this LPS.\n");
+    mCRL2log(info) << "The invariant does not hold for this LPS." << std::endl;
   }
 
   return v_result;

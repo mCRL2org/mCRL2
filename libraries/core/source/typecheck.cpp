@@ -358,7 +358,6 @@ ATermAppl type_check_sort_expr(ATermAppl sort_expr, ATermAppl spec)
   //using the specification in spec
   assert(gsIsSortExpr(sort_expr));
   assert(gsIsProcSpec(spec) || gsIsLinProcSpec(spec) || gsIsPBES(spec) || gsIsDataSpec(spec));
-  //gsWarningMsg("type checking of sort expressions is partially implemented\n");
 
   ATermAppl Result=NULL;
 
@@ -864,7 +863,6 @@ finally:
 ATermAppl type_check_pbes_spec(ATermAppl pbes_spec)
 {
   //check correctness of the PBES specification in pbes_spec
-  //gsWarningMsg("type checking of PBES specifications is only partially implemented\n");
 
   mCRL2log(verbose) << "type checking PBES specification..." << std::endl;
 
@@ -4237,7 +4235,6 @@ static ATermAppl gstcTraverseVarConsTypeD(
       }
       else
       {
-        //gsWarningMsg("ambiguous system constant %T\n",Name);
         *DataTerm=gsMakeOpId(Name,data::unknown_sort());
         return data::unknown_sort();
       }

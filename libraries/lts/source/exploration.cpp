@@ -376,30 +376,28 @@ void lps2lts_algorithm::check_actiontrace(const state_t OldState, ATermAppl Tran
         {
           if (saved_ok)
           {
-            gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
-                      Transition,
-                      const_cast< char* >(lgopts->trace_prefix.c_str()),
-                      tracecnt,
-                      ATermAppl(atermpp::aterm_appl(*j)),
-                      states.index(OldState));
+            mCRL2log(info) << "detect: action '"
+                           << core::pp(Transition)
+                           << "' found and saved to '"
+                           << lgopts->trace_prefix << "_act_" << tracecnt << "_" << core::pp(*j) << ".trc'"
+                           << "(state index: " << states.index(OldState) << ")." << std::endl;
           }
           else
           {
-            gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%s.trc' (state index: %lu).\n",
-                      Transition,
-                      const_cast< char* >(lgopts->trace_prefix.c_str()),
-                      tracecnt,
-                      ATermAppl(atermpp::aterm_appl(*j)),
-                      states.index(OldState));
+            mCRL2log(info) << "detect: action '"
+                           << core::pp(Transition)
+                           << "' found, but could not be saved to '"
+                           << lgopts->trace_prefix << "_act_" << tracecnt << "_" << core::pp(*j) << ".trc'"
+                           << "(state index: " << states.index(OldState) << ")." << std::endl;
           }
         }
         tracecnt++;
       }
       else
       {
-        gsMessage("detect: action '%P' found (state index: %lu).\n",
-                  Transition,
-                  states.index(OldState));
+        mCRL2log(info) << "detect: action '"
+                       << core::pp(Transition)
+                       << "' found (state index: " << states.index(OldState) << ")." << std::endl;
       }
     }
   }

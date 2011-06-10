@@ -59,7 +59,7 @@ mcrl2::lps::deprecated::summand Invariant_Eliminator::simplify_summand(
   {
     if (f_simplify_all)
     {
-      gsMessage("Summand number %d is simplified.\n", a_summand_number);
+      mCRL2log(info) << "Summand number " << a_summand_number << " is simplified." << std::endl;
       return deprecated::summand(a_summand.summation_variables(),
                      data_expression(f_bdd_prover.get_bdd()),
                      a_summand.is_delta(),
@@ -120,7 +120,7 @@ specification Invariant_Eliminator::simplify(
       }
       else
       {
-        gsMessage("Summand number %d is eliminated.\n", v_summand_number);
+        mCRL2log(info) << "Summand number " << v_summand_number << " is eliminated." << std::endl;
       }
     }
     v_summand_number++;
