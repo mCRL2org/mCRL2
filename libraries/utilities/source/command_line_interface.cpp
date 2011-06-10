@@ -351,6 +351,8 @@ interface_description::interface_description(std::string const& path,
   add_hidden_option("quiet", "do not display warning messages", 'q');
   add_hidden_option("verbose", "display short intermediate messages", 'v');
   add_hidden_option("debug", "display detailed intermediate messages", 'd');
+  add_hidden_option("log-level", make_mandatory_argument<std::string>("LEVEL", ""),
+                    "display intermediate messages up to and including level");
 }
 
 std::string interface_description::copyright_message()
@@ -437,6 +439,7 @@ std::string interface_description::textual_description() const
     << m_options.find("quiet")->second.textual_description(27, 53)
     << m_options.find("verbose")->second.textual_description(27, 53)
     << m_options.find("debug")->second.textual_description(27, 53)
+    << m_options.find("log-level")->second.textual_description(27, 53)
     << m_options.find("help")->second.textual_description(27, 53)
     << m_options.find("version")->second.textual_description(27, 53)
     << std::endl;
@@ -551,6 +554,7 @@ std::string interface_description::man_page() const
   s << m_options.find("quiet")->second.man_page_description()
     << m_options.find("verbose")->second.man_page_description()
     << m_options.find("debug")->second.man_page_description()
+    << m_options.find("log-level")->second.man_page_description()
     << m_options.find("help")->second.man_page_description()
     << m_options.find("version")->second.man_page_description()
     << std::endl;
@@ -633,6 +637,7 @@ std::string interface_description::wiki_page() const
   s << m_options.find("quiet")->second.wiki_page_description()
     << m_options.find("verbose")->second.wiki_page_description()
     << m_options.find("debug")->second.wiki_page_description()
+    << m_options.find("log-level")->second.wiki_page_description()
     << m_options.find("help")->second.wiki_page_description()
     << m_options.find("version")->second.wiki_page_description();
 

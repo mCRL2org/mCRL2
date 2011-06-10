@@ -38,6 +38,69 @@ enum mcrl2_log_level_t
   log_debug5
 };
 
+/// \brief Convert log level to string
+/// This string is used to prefix messages in the logging output.
+inline
+std::string log_level_to_string(const mcrl2_log_level_t level)
+{
+  static const char* const buffer[] = {"quiet", "error", "warning", "info", "verbose", "debug", "debug1", "debug2", "debug3", "debug4", "debug5"};
+  return buffer[level];
+}
+
+/// \brief Convert string to log level
+inline
+mcrl2_log_level_t log_level_from_string(const std::string& s)
+{
+  if (s == "quiet")
+  {
+    return log_quiet;
+  }
+  else if (s == "error")
+  {
+    return log_error;
+  }
+  else if (s == "warning")
+  {
+    return log_warning;
+  }
+  else if (s == "info")
+  {
+    return log_info;
+  }
+  else if (s == "verbose")
+  {
+    return log_verbose;
+  }
+  else if (s == "debug")
+  {
+    return log_debug;
+  }
+  else if (s == "debug1")
+  {
+    return log_debug1;
+  }
+  else if (s == "debug2")
+  {
+    return log_debug2;
+  }
+  else if (s == "debug3")
+  {
+    return log_debug3;
+  }
+  else if (s == "debug4")
+  {
+    return log_debug4;
+  }
+  else if (s == "debug5")
+  {
+    return log_debug5;
+  }
+  else
+  {
+    throw std::runtime_error("Unknown log-level " + s + " provided.");
+  }
+}
+
 /// \brief Type for message distinction (by purpose).
 /// Should only be used for custom message handlers.
 enum mcrl2_message_t
@@ -113,14 +176,6 @@ class logger
       return indentation;
     }
 
-    /// \brief Convert log level to string
-    /// This string is used to prefix messages in the logging output.
-    std::string to_string(const mcrl2_log_level_t level) const
-    {
-      static const char* const buffer[] = {"quiet", "error", "warning", "info", "verbose", "debug", "debug", "debug", "debug", "debug", "debug"};
-      return buffer[level];
-    }
-
     mcrl2_message_t to_message_type(const mcrl2_log_level_t level) const
     {
       if (level <= log_error)
@@ -134,59 +189,6 @@ class logger
       else
       {
         return mcrl2_notice;
-      }
-    }
-
-    /// \brief Convert string to log level
-    mcrl2_log_level_t from_string(std::string s) const
-    {
-      if (s == "quiet")
-      {
-        return log_quiet;
-      }
-      else if (s == "error")
-      {
-        return log_error;
-      }
-      else if (s == "warning")
-      {
-        return log_warning;
-      }
-      else if (s == "info")
-      {
-        return log_info;
-      }
-      else if (s == "verbose")
-      {
-        return log_verbose;
-      }
-      else if (s == "debug")
-      {
-        return log_debug;
-      }
-      else if (s == "debug1")
-      {
-        return log_debug1;
-      }
-      else if (s == "debug2")
-      {
-        return log_debug2;
-      }
-      else if (s == "debug3")
-      {
-        return log_debug3;
-      }
-      else if (s == "debug4")
-      {
-        return log_debug4;
-      }
-      else if (s == "debug5")
-      {
-        return log_debug5;
-      }
-      else
-      {
-        throw std::runtime_error("Unknown log-level " + s + " provided.");
       }
     }
 
@@ -217,9 +219,9 @@ class logger
       std::string start_of_line =
         "["
       + now_time()
-      + " " + m_hint + (m_hint == std::string()?"":"::") + to_string(m_level)
+      + " " + m_hint + (m_hint == std::string()?"":"::") + log_level_to_string(m_level)
       + "]"
-      + std::string(8 - to_string(m_level).size(), ' ')
+      + std::string(8 - log_level_to_string(m_level).size(), ' ')
       + std::string(2*indentation(), ' ');
 
       bool s_ends_with_newline = (s[s.size()-1] == '\n');

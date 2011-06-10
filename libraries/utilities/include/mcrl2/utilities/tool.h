@@ -119,6 +119,10 @@ class tool
       {
         mcrl2_logger::set_reporting_level(log_debug);
       }
+      if (parser.options.count("log-level") > 0)
+      {
+        mcrl2_logger::set_reporting_level(log_level_from_string(parser.option_argument("log-level")));
+      }
 #endif
     }
 
