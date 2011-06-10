@@ -1002,7 +1002,7 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
     // export architecture diagram
     try
     {
-      export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, mcrl2::core::gsVerbose);
+      export_architecture_diagram_to_mcrl2(export_doc, export_name, diagram_id, mCRL2logEnabled(verbose));
     }
     catch (int i)
     {
@@ -1015,7 +1015,7 @@ bool grape_event_export_current_diagram_mcrl2::Do(void)
     // export process diagram
     try
     {
-      export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, mcrl2::core::gsVerbose);
+      export_process_diagram_to_mcrl2(export_doc, export_name, diagram_id, param_init, mCRL2logEnabled(verbose));
     }
     catch (int i)
     {

@@ -442,7 +442,7 @@ bool grape_event_export_datatype_specification_mcrl2::Do(void)
   }
   try
   {
-    export_datatype_specification_to_mcrl2(export_doc, export_name, mcrl2::core::gsVerbose);
+    export_datatype_specification_to_mcrl2(export_doc, export_name, mCRL2logEnabled(verbose));
   }
   catch (int i)
   {
