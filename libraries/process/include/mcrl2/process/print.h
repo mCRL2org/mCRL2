@@ -68,7 +68,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   }
 
   template <typename T>
-  void print_binary_operation(const T& x, const std::string& op)
+  void print_binary_process_operation(const T& x, const std::string& op)
   {
     print_process_expression(x.left(), process::detail::precedence(x));
     derived().print(op);
@@ -228,7 +228,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::sync& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " | ");
+    print_binary_process_operation(x, " | ");
     derived().leave(x);
   }
 
@@ -244,7 +244,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::seq& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " . ");
+    print_binary_process_operation(x, " . ");
     derived().leave(x);
   }
 
@@ -252,7 +252,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     print_condition(x.condition(), " -> ", data::detail::prefix_precedence());
-    print_process_expression(x.then_case(), process::detail::precedence(x));
+    print_process_expression(x.then_case(), 5);
     derived().leave(x);
   }
 
@@ -260,39 +260,39 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     print_condition(x.condition(), " -> ", data::detail::prefix_precedence());
-    print_process_expression(x.then_case(), process::detail::precedence(x));
+    print_process_expression(x.then_case(), 5);
     derived().print(" <> ");
     // N.B. the else case is printed with a lower precedence, since we want the expression a -> b -> c <> d <> e
     // to be printed as a -> (b -> c <> d) <> e
-    print_process_expression(x.else_case(), process::detail::precedence(x) - 1);
+    print_process_expression(x.else_case(), 5);
     derived().leave(x);
   }
 
   void operator()(const process::bounded_init& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " << ");
+    print_binary_process_operation(x, " << ");
     derived().leave(x);
   }
 
   void operator()(const process::merge& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " || ");
+    print_binary_process_operation(x, " || ");
     derived().leave(x);
   }
 
   void operator()(const process::left_merge& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " ||_ ");
+    print_binary_process_operation(x, " ||_ ");
     derived().leave(x);
   }
 
   void operator()(const process::choice& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " + ");
+    print_binary_process_operation(x, " + ");
     derived().leave(x);
   }
 
