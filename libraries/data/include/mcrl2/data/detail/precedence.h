@@ -124,6 +124,138 @@ int precedence(const data_expression& x)
   return max_precedence;
 }
 
+inline
+int infix_precedence_left(const core::identifier_string& name)
+{
+  if (name == data::sort_bool::implies_name())
+  {
+    return 3;
+  }
+  else if ((name == data::sort_bool::and_name()) || (name == data::sort_bool::or_name()))
+  {
+    return 4;
+  }
+  else if ((name == data::detail::equal_symbol()) || (name == data::detail::not_equal_symbol()))
+  {
+    return 5;
+  }
+  else if (
+    (name == data::detail::less_symbol()) || (name == data::detail::less_equal_symbol()) ||
+    (name == data::detail::greater_symbol()) || (name == data::detail::greater_equal_symbol()) ||
+    (name == data::sort_list::in_name())
+  )
+  {
+    return 6;
+  }
+  else if ((name == data::sort_list::cons_name()))
+  {
+    return 9;
+  }
+  else if ((name == data::sort_list::snoc_name()))
+  {
+    return 7;
+  }
+  else if ((name == data::sort_list::concat_name()))
+  {
+    return 8;
+  }
+  else if (
+    (name == data::sort_real::plus_name()) || (name == data::sort_real::minus_name()) ||
+    (name == data::sort_set::setunion_name()) || (name == data::sort_set::setdifference_name()) ||
+    (name == data::sort_bag::bagjoin_name()) || (name == data::sort_bag::bagdifference_name())
+  )
+  {
+    return 9;
+  }
+  else if ((name == data::sort_int::div_name()) || (name == data::sort_int::mod_name()) ||
+           (name == data::sort_real::divides_name()))
+  {
+    return 10;
+  }
+  else if (
+    (name == data::sort_int::times_name()) || (name == data::sort_list::element_at_name()) ||
+    (name == data::sort_set::setintersection_name()) ||
+    (name == data::sort_bag::bagintersect_name())
+  )
+  {
+    return 11;
+  }
+  else
+  {
+    //something went wrong
+    return -1;
+  }
+}
+
+inline
+int infix_precedence_right(const core::identifier_string& name)
+{
+  if (name == data::sort_bool::implies_name())
+  {
+    return 2;
+  }
+  else if ((name == data::sort_bool::and_name()) || (name == data::sort_bool::or_name()))
+  {
+    return 3;
+  }
+  else if ((name == data::detail::equal_symbol()) || (name == data::detail::not_equal_symbol()))
+  {
+    return 4;
+  }
+  else if (
+    (name == data::detail::less_symbol()) || (name == data::detail::less_equal_symbol()) ||
+    (name == data::detail::greater_symbol()) || (name == data::detail::greater_equal_symbol()) ||
+    (name == data::sort_list::in_name())
+  )
+  {
+    return 6;
+  }
+  else if ((name == data::sort_list::cons_name()))
+  {
+    return 6;
+  }
+  else if ((name == data::sort_list::snoc_name()))
+  {
+    return 9;
+  }
+  else if ((name == data::sort_list::concat_name()))
+  {
+    return 9;
+  }
+  else if (
+    (name == data::sort_real::plus_name()) || (name == data::sort_real::minus_name()) ||
+    (name == data::sort_set::setunion_name()) || (name == data::sort_set::setdifference_name()) ||
+    (name == data::sort_bag::bagjoin_name()) || (name == data::sort_bag::bagdifference_name())
+  )
+  {
+    return 10;
+  }
+  else if ((name == data::sort_int::div_name()) || (name == data::sort_int::mod_name()) ||
+           (name == data::sort_real::divides_name()))
+  {
+    return 11;
+  }
+  else if (
+    (name == data::sort_int::times_name()) || (name == data::sort_list::element_at_name()) ||
+    (name == data::sort_set::setintersection_name()) ||
+    (name == data::sort_bag::bagintersect_name())
+  )
+  {
+    return 12;
+  }
+  else
+  {
+    //something went wrong
+    return -1;
+  }
+}
+
+inline
+int prefix_precedence()
+{
+  return 13;
+}
+
 } // namespace detail
 
 } // namespace data

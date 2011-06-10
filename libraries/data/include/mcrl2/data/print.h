@@ -119,6 +119,42 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     return static_cast<Derived&>(*this);
   }
 
+  bool is_infix_operation(const application& x)
+  {
+    if (x.arguments().size() != 2)
+    {
+      return false;
+    }
+    core::identifier_string name = function_symbol(x.head()).name();
+    return
+      (name == data::sort_bool::implies_name())          ||
+      (name == data::sort_bool::and_name())          ||
+      (name == data::sort_bool::or_name())           ||
+      (name == data::detail::equal_symbol())           ||
+      (name == data::detail::not_equal_symbol())          ||
+      (name == data::detail::less_symbol())           ||
+      (name == data::detail::less_equal_symbol())          ||
+      (name == data::detail::greater_symbol())           ||
+      (name == data::detail::greater_equal_symbol())          ||
+      (name == data::sort_list::in_name())        ||
+      (name == data::sort_list::cons_name())         ||
+      (name == data::sort_list::snoc_name())         ||
+      (name == data::sort_list::concat_name())       ||
+      (name == data::sort_real::plus_name())          ||
+      (name == data::sort_real::minus_name())         ||
+      (name == data::sort_set::setunion_name())     ||
+      (name == data::sort_set::setdifference_name())      ||
+      (name == data::sort_bag::bagjoin_name())      ||
+      (name == data::sort_bag::bagdifference_name())      ||
+      (name == data::sort_int::div_name())          ||
+      (name == data::sort_int::mod_name())          ||
+      (name == data::sort_real::divides_name())       ||
+      (name == data::sort_int::times_name())         ||
+      (name == data::sort_list::element_at_name())        ||
+      (name == data::sort_set::setintersection_name()) ||
+      (name == data::sort_bag::bagintersect_name());
+  }
+
   void print_sort(const application& x)
   {
     std::cout << "<value>" << core::pp(x) << " " << x << " ";
@@ -773,6 +809,20 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_function_application(const application& x)
   {
+    if (is_infix_operation(x))
+    {
+      data_expression_list::const_iterator i = x.arguments().begin();
+      core::identifier_string name = function_symbol(x.head()).name();
+      data_expression left = *i++;
+      data_expression right = *i;
+      print_data_expression(left, data::detail::infix_precedence_left(name));
+      derived().print(" ");
+      derived()(x.head());
+      derived().print(" ");
+      print_data_expression(right, data::detail::infix_precedence_right(name));
+      return;
+    }
+    
     // print the head
     bool print_parentheses = is_abstraction(x.head());
     if (print_parentheses)
