@@ -61,6 +61,53 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
       return;
     }
 
+    typename Container::const_iterator first = container.begin();
+    typename Container::const_iterator last = container.end();
+
+    derived().print(opener);   
+
+    while (first != last)
+    {
+      if (first != container.begin())
+      {
+        derived().print(separator);
+      }
+
+      typename Container::const_iterator i = first;
+      do
+      {
+        ++i;
+      }
+      while (i != last && first->sorts() == i->sorts());
+
+      print_list(std::vector<action_label>(first, i), "", "", ",");
+      if (!first->sorts().empty())
+      {
+        derived().print(": ");
+        print_list(first->sorts(), "", "", " # ");
+      }
+      
+      first = i;
+    }
+    derived().print(closer);
+  }
+
+  // Container contains elements of type T such that t.sort() is a sort_expression.
+  template <typename Container>
+  void print_action_declarations_maximally_shared(const Container& container,
+                                                  const std::string& opener = "(",
+                                                  const std::string& closer = ")",
+                                                  const std::string& separator = ", "
+                                                 )
+  {
+    typedef typename Container::value_type T;
+    
+    // print nothing if the container is empty
+    if (container.empty())
+    {
+      return;
+    }
+
     // sort_map[s] will contain all elements t of container with t.sorts() == s.
     std::map<data::sort_expression_list, std::vector<T> > sort_map;
 

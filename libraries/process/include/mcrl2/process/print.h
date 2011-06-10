@@ -248,6 +248,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().leave(x);
   }
 
+  // TODO: find out why precedences are hard coded here
   void operator()(const process::if_then& x)
   {
     derived().enter(x);
@@ -256,6 +257,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().leave(x);
   }
 
+  // TODO: find out why precedences are hard coded here
   void operator()(const process::if_then_else& x)
   {
     derived().enter(x);
