@@ -47,11 +47,6 @@ class rewriter_tool: public Tool
 #ifdef MCRL2_JITTYC_AVAILABLE
         "  'jittyc' for compiled jitty rewriting,\n"
 #endif
-//        "  'inner' for innermost rewriting,\n"
-//        "  'innerp' for innermost rewriting with prover, or\n"
-#ifdef MCRL2_INNERC_AVAILABLE
-        "  'innerc' for compiled innermost rewriting"
-#endif
         ,'r'
       );
     }

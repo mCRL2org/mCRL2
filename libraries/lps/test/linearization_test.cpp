@@ -1075,7 +1075,6 @@ BOOST_AUTO_TEST_CASE(test_bug_775b)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  core::gsSetVerboseMsg();
   MCRL2_ATERMPP_INIT(argc, argv)
 
   return 0;

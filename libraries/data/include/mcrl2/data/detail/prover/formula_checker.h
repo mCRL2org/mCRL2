@@ -37,7 +37,7 @@ namespace detail
 /// The class Formula_Checker uses an instance of the class BDD_Prover to prove a number of propositional formulas. The
 /// prover is initialized with the parameters a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type,
 /// a_apply_induction and a_lps. The parameter a_rewrite_strategy specifies which rewrite strategy is used by the prover's
-/// rewriter. It can be set to either GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_JITTY or GS_REWR_JITTYC. The parameter
+/// rewriter. It can be set to either GS_REWR_JITTY or GS_REWR_JITTYC. The parameter
 /// a_time_limit specifies the maximum amount of time in seconds to be spent by the prover on proving a single formula. If
 /// a_time_limit is set to 0, no time limit will be enforced. The parameter a_path_eliminator specifies whether or not
 /// path elimination is applied. When path elimination is applied, the prover uses an SMT solver to remove inconsistent

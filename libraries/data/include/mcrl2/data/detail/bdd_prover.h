@@ -43,8 +43,8 @@ namespace detail
  * prover's rewriter with the data equations in internal mCRL2 format
  * contained in the LPS passed as parameter a_lps and the rewrite
  * strategy passed as parameter a_rewrite_strategy. The parameter
- * a_rewrite_strategy can be set to either GS_REWR_INNER,
- * GS_REWR_INNERC, GS_REWR_JITTY or GS_REWR_JITTYC. To limit the
+ * a_rewrite_strategy can be set to either 
+ * GS_REWR_JITTY or GS_REWR_JITTYC. To limit the
  * number of seconds spent on proving a single formula, a time limit
  * can be set. If the time limit is set to 0, no time limit will be
  * enforced. The parameter a_apply_induction indicates whether or

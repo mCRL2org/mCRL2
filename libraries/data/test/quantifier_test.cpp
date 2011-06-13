@@ -156,13 +156,7 @@ int test_main(int argc, char** argv)
   quantifier_expression_test(mcrl2::data::rewriter::jitty);
   core::garbage_collect();
 
-/* #ifdef MCRL2_INNERC_AVAILABLE
-  std::cerr << "innermost_compiling" << std::endl;
-  quantifier_expression_test(mcrl2::data::rewriter::innermost_compiling);
-  core::garbage_collect();
-#endif 
-
-#ifdef MCRL2_JITTYC_AVAILABLE
+/* #ifdef MCRL2_JITTYC_AVAILABLE
   std::cerr << "jitty_compiling" << std::endl;
   quantifier_expression_test(mcrl2::data::rewriter::jitty_compiling);
   core::garbage_collect();

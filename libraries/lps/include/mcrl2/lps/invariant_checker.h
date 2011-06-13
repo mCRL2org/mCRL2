@@ -30,7 +30,7 @@
 /// of an mCRL2 LPS. The constructor Invariant_Checker::Invariant_Checker initializes the BDD based prover with the
 /// parameters a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type and the data specification of the LPS
 /// passed as parameter a_lps. The parameter a_rewrite_strategy specifies which rewrite strategy is used by the prover's
-/// rewriter. It can be set to either GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_JITTY or GS_REWR_JITTYC. The parameter
+/// rewriter. It can be set to either GS_REWR_JITTY or GS_REWR_JITTYC. The parameter
 /// a_time_limit specifies the maximum amount of time in seconds to be spent by the prover on proving a single expression.
 /// If a_time_limit is set to 0, no time limit will be enforced. The parameter a_path_eliminator specifies whether or not
 /// path elimination is applied. When path elimination is applied, the prover uses an SMT solver to remove inconsistent

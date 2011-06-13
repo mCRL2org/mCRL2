@@ -184,7 +184,6 @@ std::string random3 =
 
 void test_pbes(const std::string& pbes_spec, bool test_finite, bool test_lazy)
 {
-  core::gsSetNormalMsg();
   pbes<> p = txt2pbes(pbes_spec);
   std::cout << "------------------------------\n" << pbes_system::pp(p) << std::endl;
   if (!p.is_closed())

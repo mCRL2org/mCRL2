@@ -133,14 +133,8 @@ RewriteStrategy RewriterProver::getStrategy()
 {
   switch (rewr_obj->getStrategy())
   {
-    /* case GS_REWR_INNER:
-      return GS_REWR_INNER_P; */
     case GS_REWR_JITTY:
       return GS_REWR_JITTY_P;
-/* #ifdef MCRL2_INNERC_AVAILABLE
-    case GS_REWR_INNERC:
-      return GS_REWR_INNERC_P;
-#endif */
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC:
       return GS_REWR_JITTYC_P;

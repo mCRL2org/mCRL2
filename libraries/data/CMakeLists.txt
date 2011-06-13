@@ -17,7 +17,7 @@ if(UNIX)
   LINK_LIBRARIES(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
   set(COMP_REWRITERS 
    ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jittyc.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/innerc.cpp
+#   ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/innerc.cpp
   )
 endif(UNIX)
 

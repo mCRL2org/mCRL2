@@ -16,8 +16,6 @@
 #include "mcrl2/data/data_specification.h"
 
 #ifndef NO_DYNLOAD
-#define MCRL2_INNERC_AVAILABLE /** \brief If defined the compiling innermost
-rewriter is available */
 #define MCRL2_JITTYC_AVAILABLE /** \brief If defined the compiling JITty
 rewriter is available */
 #endif
@@ -30,17 +28,10 @@ namespace detail
 {
 
 /** \brief Rewrite strategies. */
-typedef enum { // GS_REWR_INNER     /** \brief Innermost */
-#ifdef MCRL2_INNERC_AVAILABLE
-               GS_REWR_INNERC,    /** \brief Compiling innermost */
-#endif
+typedef enum { 
                GS_REWR_JITTY,     /** \brief JITty */
 #ifdef MCRL2_JITTYC_AVAILABLE
                GS_REWR_JITTYC,    /** \brief Compiling JITty */
-#endif
-               // GS_REWR_INNER_P,   /** \brief Innermost + Prover */
-#ifdef MCRL2_INNERC_AVAILABLE
-//                GS_REWR_INNERC_P,  /** \brief Compiling innermost + Prover*/
 #endif
                GS_REWR_JITTY_P,   /** \brief JITty + Prover */
 #ifdef MCRL2_JITTYC_AVAILABLE

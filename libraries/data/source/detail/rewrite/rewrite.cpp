@@ -21,9 +21,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jitty.h"
-#ifdef MCRL2_INNERC_AVAILABLE
-#include "mcrl2/data/detail/rewrite/innerc.h"
-#endif
 #ifdef MCRL2_JITTYC_AVAILABLE
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #endif
@@ -276,10 +273,6 @@ Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrate
   {
     case GS_REWR_JITTY:
       return new RewriterJitty(DataSpec,add_rewrite_rules);
-#ifdef MCRL2_INNERC_AVAILABLE
-    case GS_REWR_INNERC:
-      return new RewriterCompilingInnermost(DataSpec,add_rewrite_rules);
-#endif
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC:
       return new RewriterCompilingJitty(DataSpec,add_rewrite_rules);
@@ -425,16 +418,6 @@ bool isValidRewriteRule(ATermAppl DataEqn)
 
 void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
 {
-  /* if (strat == GS_REWR_INNER)
-  {
-    fprintf(stream, "inner"); */
-#ifdef MCRL2_INNERC_AVAILABLE
-  if (strat == GS_REWR_INNERC)
-  {
-    fprintf(stream, "innerc");
-  } 
-  else
-#endif
   if (strat == GS_REWR_JITTY)
   {
     fprintf(stream, "jitty");
@@ -444,16 +427,6 @@ void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
   {
     fprintf(stream, "jittyc");
 #endif
-/*  }
-  else if (strat == GS_REWR_INNER_P)
-  {
-    fprintf(stream, "innerp"); 
-#ifdef MCRL2_INNERC_AVAILABLE
-  }
-  else if (strat == GS_REWR_INNERC_P)
-  {
-    fprintf(stream, "innercp");
-#endif */
   }
   else if (strat == GS_REWR_JITTY_P)
   {
@@ -474,11 +447,6 @@ void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)
 RewriteStrategy RewriteStrategyFromString(const char* s)
 {
   static RewriteStrategy strategies[9] = { GS_REWR_INVALID,
-#ifdef MCRL2_INNERC_AVAILABLE
-                                         GS_REWR_INNERC, 
-#else
-                                         GS_REWR_INVALID, 
-#endif
 #ifdef MCRL2_JITTYC_AVAILABLE
                                          GS_REWR_JITTY, GS_REWR_JITTYC, GS_REWR_JITTY_P, GS_REWR_JITTYC_P
                                          };
@@ -489,14 +457,9 @@ RewriteStrategy RewriteStrategyFromString(const char* s)
 
   size_t main_strategy = 0; // default invalid
 
-  if (std::strncmp(&s[0], "innerc", 6) == 0)   // not jitty{,c,cp}, only innerc
+  if (std::strncmp(&s[0], "jitty", 5) == 0)   // jitty{,c,cp}
   {
     main_strategy = 1;
-    return strategies[main_strategy];
-  }
-  else if (std::strncmp(&s[0], "jitty", 5) == 0)   // jitty{,c,cp}
-  {
-    main_strategy = 2;
   
     if (s[5] == '\0')   // interpreting
     {

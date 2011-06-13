@@ -158,9 +158,7 @@ BOOST_AUTO_TEST_CASE(rewriting_options)
 #endif
   string_to_strategy_test< false >("inner");
   string_to_strategy_test< false >("innerp");
-#if defined(MCRL2_INNERC_AVAILABLE)
-  string_to_strategy_test< true >("innerc");
-#endif
+  string_to_strategy_test< false >("innerc");
   string_to_strategy_test< false >("innera");
   string_to_strategy_test< false >("ainner");
 

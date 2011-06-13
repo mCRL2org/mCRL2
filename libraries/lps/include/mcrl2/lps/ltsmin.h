@@ -39,20 +39,10 @@ data::rewriter::strategy parse_rewriter_strategy(const std::string& rewriter_str
   {
 		return data::rewriter::jitty;
   }
-  /* else if (rewriter_strategy == "inner")
-  {
-    return data::rewriter::innermost;
-  } */
 #ifdef MCRL2_JITTYC_AVAILABLE
   else if (rewriter_strategy == "jittyc")
   {
 		return data::rewriter::jitty_compiling;
-  }
-#endif
-#ifdef MCRL2_INNERC_AVAILABLE
-  else if (rewriter_strategy == "innerc")
-  {
-    return data::rewriter::innermost_compiling;
   }
 #endif
   else

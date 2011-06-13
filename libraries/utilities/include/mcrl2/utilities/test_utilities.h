@@ -38,14 +38,10 @@ std::vector<data::basic_rewriter<data::data_expression>::strategy> initialise_te
 {
   std::vector<data::basic_rewriter<data::data_expression>::strategy> result;
   result.push_back(data::basic_rewriter<data::data_expression>::jitty);
-//  result.push_back(data::basic_rewriter<data::data_expression>::innermost); /* Being phased out, hence untested */
 #ifdef MCRL2_TEST_COMPILERS
 #ifdef MCRL2_JITTYC_AVAILABLE
   result.push_back(data::basic_rewriter<data::data_expression>::jitty_compiling);
 #endif // MCRL2_JITTYC_AVAILABLE
-#ifdef MCRL2_INNERC_AVAILABLE
-  result.push_back(data::basic_rewriter<data::data_expression>::innermost_compiling);
-#endif // MCRL2_INNERC_AVAILABLE
 #endif // MCRL2_TEST_COMPILERS
 
   return result;

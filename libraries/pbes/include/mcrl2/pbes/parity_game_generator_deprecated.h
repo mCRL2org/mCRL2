@@ -131,7 +131,7 @@ class parity_game_generator_deprecated: public parity_game_generator
 
     /// \brief Add mappings and equations to datar_internal
     /// Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
-    // This can be removed if the jittyc or innerc compilers are not in use anymore.
+    // This can be removed if the jittyc compilers are not in use anymore.
     void initialize_internal_rewriter()
     {
       const data::function_symbol_vector constructors(m_pbes.data().constructors());
