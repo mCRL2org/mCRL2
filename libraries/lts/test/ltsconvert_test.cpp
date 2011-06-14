@@ -128,6 +128,18 @@ const std::string test11=
   "(1,\"tau\",3)\n"
   "(3,\"tau\",4)\n";
 
+// The test below caused the tau_star reduction to go astray, as there
+// were problems with the reachability check.
+const std::string test12=
+  "des (0,7,6)\n"
+  "(0,\"tau\",1)\n"
+  "(0,\"tau\",2)\n"
+  "(1,\"tau\",3)\n"
+  "(2,\"tau\",4)\n"
+  "(2,\"a\",5)\n"
+  "(3,\"c\",5)\n"
+  "(4,\"b\",5)\n";
+
 
 
 BOOST_AUTO_TEST_CASE(test_state_space_reductions)
@@ -231,7 +243,20 @@ BOOST_AUTO_TEST_CASE(test_state_space_reductions)
   lts_aut_t t11b=parse_aut(test11);
   reduce(t11b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
   BOOST_CHECK(t11b.num_states()==2 && t11b.num_transitions()==2);
-  // BOOST_CHECK_THROW(linearise(various_case_22), mcrl2::runtime_error);
+
+  std::cerr << "Test12\n";
+  lts_aut_t t12=parse_aut(test12);
+  reduce(t12,lts_eq_bisim); //Strong bisimulation reduction
+  BOOST_CHECK(t12.num_states()==6 && t12.num_transitions()==7);
+  lts_aut_t t12a=parse_aut(test12);
+  reduce(t12a,lts_eq_branching_bisim); //Branching bisimulation reduction
+  BOOST_CHECK(t12a.num_states()==5 && t12a.num_transitions()==6);
+  lts_aut_t t12b=parse_aut(test12);
+  reduce(t12b,lts_eq_divergence_preserving_branching_bisim); //Divergence preserving bisimulation reduction
+  BOOST_CHECK(t12b.num_states()==5 && t12b.num_transitions()==6);
+  lts_aut_t t12c=parse_aut(test12);
+  reduce(t12c,lts_red_tau_star); //Tau star reduction
+  BOOST_CHECK(t12c.num_states()==2 && t12c.num_transitions()==3);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

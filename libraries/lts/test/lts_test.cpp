@@ -171,7 +171,7 @@ void test_abp()
   l=l_abp;
   std::cerr << "ACTION LABELS " << l.num_action_labels() << "\n";
   reduce(l,lts::lts_eq_weak_trace);
-  test_lts("abp test weak trace",l,4, 3, 4);
+  test_lts("abp test weak trace",l,5, 3, 4);
   l=l_abp;
   BOOST_CHECK(!is_deterministic(l));
   reduce(l,lts::lts_red_determinisation);

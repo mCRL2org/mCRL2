@@ -319,7 +319,6 @@ void lts_aut_t::save(string const& filename) const
       throw mcrl2::runtime_error("cannot create .aut file '" + filename + ".");
       return;
     }
-
     write_to_aut(*this,os);
     os.close();
   }

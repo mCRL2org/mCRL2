@@ -40,13 +40,16 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
   // have access.
 
   const transition_const_range r=l.get_transitions();
-  std::vector < transition > local_transitions(r.begin(),r.end());
+  atermpp::vector < transition > local_transitions(r.begin(),r.end()); 
 
   size_t* trans_lut = l.get_transition_indices();
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(new_trans_lut,size_t,l.num_states() + 1);
 
 
   new_trans_lut[0] = l.num_transitions();
+  l.clear_transitions();
+
+  // Calculate the tau* a transitive closure.
   for (size_t state = 0; state < l.num_states(); state++)
   {
     size_t t = trans_lut[state];
@@ -114,110 +117,19 @@ void tau_star_reduce(lts<STATE_LABEL_T,ACTION_LABEL_T> &l)
     new_trans_lut[state+1] = local_transitions.size();
   }
 
-  using namespace mcrl2::lts::detail;
-
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(reachable,t_reach,l.num_states());
-  for (size_t i=0; i<l.num_states(); i++)
-  {
-    reachable[i] = unknown;
-  }
-  reachable[l.initial_state()] = reached;
-  bool notdone = true;
-  while (notdone)
-  {
-    notdone = false;
-    for (size_t i=0; i<l.num_states(); i++)
-    {
-      if (reachable[i] == reached)
-      {
-        size_t t = trans_lut[i];
-        while (t < trans_lut[i+1])
-        {
-          if (reachable[local_transitions[t].to()] == unknown)
-          {
-            reachable[local_transitions[t].to()] = reached;
-            if (local_transitions[t].to() < i)
-            {
-              notdone = true;
-            }
-          }
-          t++;
-        }
-        t = new_trans_lut[i];
-        while (t < new_trans_lut[i+1])
-        {
-          if (reachable[local_transitions[t].to()] == unknown)
-          {
-            reachable[local_transitions[t].to()] = reached;
-            if (local_transitions[t].to() < i)
-            {
-              notdone = true;
-            }
-          }
-          t++;
-        }
-        reachable[i] = explored;
-      }
-    }
-  }
-
   free(trans_lut);
-
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(state_map,size_t,l.num_states());
-  size_t new_nstates = 0;
-  for (size_t i=0; i < l.num_states(); i++)
-  {
-    if (reachable[i] != unknown)
-    {
-      state_map[i] = new_nstates;
-      if (l.has_state_info())
-      {
-        l.set_state_label(new_nstates,l.state_label(i));
-      }
-      new_nstates++;
+  
+  // Add the newly generated transitions
+  for(std::vector < transition >::const_iterator i=local_transitions.begin();
+            i!=local_transitions.end(); ++i)
+  { 
+    if (!l.is_tau(i->label()))
+    { 
+      l.add_transition(*i);
     }
   }
-
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(label_map,size_t,l.num_action_labels());
-  size_t new_nlabels = 0;
-  for (size_t i=0; i < l.num_action_labels(); i++)
-  {
-    if (!l.is_tau(i))
-    {
-      label_map[i] = new_nlabels;
-      // if ( l.has_label_info() )
-      {
-        l.set_action_label(new_nlabels,l.action_label(i));
-      }
-      new_nlabels++;
-    }
-  }
-  l.set_num_action_labels(new_nlabels);
-
-  std::set < transition > new_transitions;
-  for (std::vector < transition >::const_iterator i=local_transitions.begin(); i!=local_transitions.end(); ++i)
-  {
-    const transition t=*i;
-    if ((reachable[t.from()] != unknown) &&
-        !l.is_tau(t.label()))
-    {
-      new_transitions.insert(transition(state_map[t.from()],label_map[t.label()],state_map[t.to()]));
-    }
-  }
-
-  l.clear_transitions();
-  for (std::set < transition >::const_iterator i=new_transitions.begin();
-       i!=new_transitions.end(); ++i)
-  {
-    l.add_transition(*i);
-  }
-
-  for (size_t i=0; i < l.num_action_labels(); i++)
-  {
-    l.set_tau(i,false);
-  }
-
-  l.set_num_states(new_nstates);
+  
+  reachability_check(l, true); // Remove unreachable parts.
 }
 
 }

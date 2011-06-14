@@ -770,6 +770,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     {
       detail::bisimulation_reduce(l,true,false);
       detail::tau_star_reduce(l);
+      detail::bisimulation_reduce(l,false);
       return;
     }
     case lts_red_determinisation:
