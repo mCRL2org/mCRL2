@@ -2944,7 +2944,6 @@ ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
   {
     BuildRewriteSystem();
   }
-ATfprintf(stderr,"REWRITE INTERNAL %t\n",Term);
   ATerm a = (ATerm) so_rewr((ATermAppl) Term);
 
   return internal_quantifier_enumeration((ATerm) a );
