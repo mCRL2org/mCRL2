@@ -485,7 +485,9 @@ RewriteStrategy RewriteStrategyFromString(const char* s)
   return GS_REWR_INVALID;
 }
 
-static size_t num_apples = 0;
+std::vector <AFun> apples;
+
+/* static size_t num_apples = 0;
 static AFun* apples = NULL;
 
 AFun get_appl_afun_value(size_t arity)
@@ -533,7 +535,7 @@ ATermAppl Apply1(const ATerm head, const ATerm arg1)
 ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2)
 {
  return ATmakeAppl3(get_appl_afun_value(3),head,arg1,arg2);
-}
+} */
 
 /*************  Below the functions toInner and fromInner are being defined *********************/
 
@@ -583,7 +585,7 @@ void set_int2term(const size_t n, const ATermAppl t)
 size_t getArity(ATermAppl op)
 {
   ATermAppl sort = ATAgetArgument(op,1);
-  int arity = 0;
+  size_t arity = 0;
 
   while (is_function_sort(sort_expression(sort)))
   {
@@ -591,7 +593,6 @@ size_t getArity(ATermAppl op)
     arity += ATgetLength(sort_dom);
     sort = ATAgetArgument(sort, 1);
   }
-
   return arity;
 }
 
@@ -634,7 +635,6 @@ ATerm OpId2Int(ATermAppl Term, bool add_opids)
   ATermInt j = f->second;
   return (ATerm) j;
 } 
-
 
 ATerm toInner(ATermAppl Term, bool add_opids)
 {

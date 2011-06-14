@@ -429,6 +429,26 @@ BOOST_AUTO_TEST_CASE(test_alias_complex)
   check_lps2lts_specification(spec, 2, 1, 1);
 }
 
+BOOST_AUTO_TEST_CASE(function_updates)
+{
+  std::string spec(
+    "act  set,s: Pos;\n"
+    "proc P(b_Sensor: Pos -> Bool) =\n"
+    "       sum n_Sensor: Pos.\n"
+    "         (n_Sensor <= 2) ->\n"
+    "         s(n_Sensor) .\n"
+    "         P(b_Sensor = b_Sensor[n_Sensor -> true])\n"
+    "     + sum n_Sensor0: Pos.\n"
+    "         (b_Sensor(n_Sensor0) && n_Sensor0 <= 2) ->\n"
+    "         set(n_Sensor0) .\n"
+    "         P(b_Sensor = b_Sensor[n_Sensor0 -> false])\n"
+    "     + delta;\n"
+    "init P(lambda n: Pos. false);\n"
+  );
+  check_lps2lts_specification(spec, 4, 12, 4);
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

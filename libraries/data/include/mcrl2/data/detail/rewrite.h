@@ -356,28 +356,65 @@ void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat);
  **/
 RewriteStrategy RewriteStrategyFromString(const char* s);
 
+// extern size_t num_apples;
+extern std::vector <AFun> apples;
+
+/** \brief Get the AFun number of the internal application symbol with given arity. */
+inline AFun get_appl_afun_value(size_t arity)
+{
+  if (arity >= apples.size())
+  {
+    for (size_t old_num=apples.size(); old_num <=arity; ++old_num)
+    {
+      assert(old_num==apples.size());
+      apples.push_back(ATmakeAFun("#REWR#",old_num,false));
+      ATprotectAFun(apples[old_num]);
+    }
+  }
+  assert(arity<apples.size());
+  return apples[arity];
+}
+
 /**
  * \brief The apply functions below takes terms in internal format,
  *        and transform them into a function application. In case
  *        of Apply and ApplyArray the first element of the list
  *        or array is the function symbol.
  **/
-ATermAppl Apply(ATermList l);
+inline ATermAppl Apply(ATermList l)
+{
+  const size_t n=ATgetLength(l);
+  return ATmakeApplList(get_appl_afun_value(n),l);
+}
 
 /** \brief See Apply. */
-ATermAppl ApplyArray(const size_t size, ATerm *l);
+inline ATermAppl ApplyArray(const size_t size, ATerm *l)
+{
+  return ATmakeApplArray(get_appl_afun_value(size),l);
+}
+
 
 /** \brief See Apply. */
-ATermAppl Apply0(const ATerm head);
+inline ATermAppl Apply0(const ATerm head)
+{
+ return ATmakeAppl1(get_appl_afun_value(1),head);
+}
+
 
 /** \brief See Apply. */
-ATermAppl Apply1(const ATerm head, const ATerm arg1);
+inline ATermAppl Apply1(const ATerm head, const ATerm arg1)
+{
+ return ATmakeAppl2(get_appl_afun_value(2),head,arg1);
+}
+
 
 /** \brief See Apply. */
-ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2);
+inline ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2)
+{
+ return ATmakeAppl3(get_appl_afun_value(3),head,arg1,arg2);
+}
 
-/** \brief Get the AFun number of the internal application symbol with given arity. */
-AFun get_appl_afun_value(size_t arity);
+
 
 /** The functions below are used for fromInner and toInner(c). */
 

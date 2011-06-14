@@ -1544,7 +1544,7 @@ static string calc_inner_appl_head(size_t arity)
   {
     ss << "ATmakeAppl";
   }
-  ss << "(" << ((long int) get_appl_afun_value(arity+1)) << ",";
+  ss << "(" << ((long int) get_appl_afun_value(arity+1)) << ",";    // YYYY
   return ss.str();
 }
 
@@ -2101,7 +2101,7 @@ static void finish_function(FILE* f, size_t arity, int opid, bool* used)
       fprintf(f,  "  return ATmakeAppl("
               "%li,"
               "(ATerm) %p",
-              (long int) get_appl_afun_value(arity+1),
+              (long int) get_appl_afun_value(arity+1),   // YYYY
               (void*)get_int2aterm_value(opid)
              );
     }
@@ -2111,7 +2111,7 @@ static void finish_function(FILE* f, size_t arity, int opid, bool* used)
               "%li,"
               "(ATerm) %p",
               arity+1,
-              (long int) get_appl_afun_value(arity+1),
+              (long int) get_appl_afun_value(arity+1),    // YYYY
               (void*)get_int2aterm_value(opid)
              );
     }
@@ -2624,7 +2624,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "  int arity = ATgetArity(ATgetAFun(a));\n"
             "  if ( arity == 1 )\n"
             "  {\n"
-            "      return ATmakeAppl(%li,ATgetArgument(a,0)", (long int) get_appl_afun_value(i+1));
+            "      return ATmakeAppl(%li,ATgetArgument(a,0)", (long int) get_appl_afun_value(i+1)); // YYYY
 
     for (size_t j=0; j<i; j++)
     {
@@ -2645,7 +2645,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
     fprintf(f,
             "\n"
-            "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity+%ld-1),args);\n"
+            "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity+%ld),args);\n"  // YYYY+
             "  }\n"
             "}\n"
             "\n",i);
@@ -2710,7 +2710,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "{\n"
           "  this_rewriter=r;\n"
           "  mcrl2::data::detail::get_appl_afun_value(%ld);\n",
-          max_arity
+          max_arity+1                                                        // YYYY+
          );
   fprintf(f,  "\n");
 
@@ -2788,7 +2788,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  }\n"
       "  ATerm args[arity_u+arity_t-1];\n"
       "  args[0] = (ATerm) head;\n"
-      "  int function_index;"
+      "  int function_index;\n"
       "  if ( ATisInt(head) && ((function_index = ATgetInt((ATermInt) head)) < %ld) )\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
@@ -2801,7 +2801,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      args[k] = ATgetArgument((ATermAppl) t,i);\n"
       "    }\n"
       "    size_t arity = arity_u+arity_t-2;\n"
-      "    const ATermAppl intermediate = ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity),args);\n"
+      "    const ATermAppl intermediate = ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity+1),args);\n"   // YYYY+
       "    assert(arity <= %ld);\n"
       "    assert(int2func[arity+1][function_index] != NULL);\n"
       "    return int2func[arity+1][function_index](intermediate);\n"
@@ -2817,7 +2817,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    {\n"
       "      args[k] = (ATerm) rewrite((ATermAppl) ATgetArgument((ATermAppl) t,i));\n"
       "    }\n"
-      "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity_u+arity_t-1),args);\n"
+      "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity_u+arity_t-1),args);\n"   // YYYY+
       "  }\n"
       "}\n\n",
       get_num_opids(), max_arity
@@ -2944,7 +2944,7 @@ ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
   {
     BuildRewriteSystem();
   }
-
+ATfprintf(stderr,"REWRITE INTERNAL %t\n",Term);
   ATerm a = (ATerm) so_rewr((ATermAppl) Term);
 
   return internal_quantifier_enumeration((ATerm) a );
