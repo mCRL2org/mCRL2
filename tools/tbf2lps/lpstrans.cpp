@@ -498,27 +498,27 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
   typelist = ATmakeList0();
   ATprotectList(&typelist);
 
-  gsVerboseMsg("converting sort declarations...\n");
+  mCRL2log(verbose) << "converting sort declarations..." << std::endl;
   sort_spec = gsMakeSortSpec(convert_sorts(spec,&ids));
 
-  gsVerboseMsg("converting constructor function declarations...\n");
+  mCRL2log(verbose) << "converting constructor function declarations..." << std::endl;
   cons_spec = gsMakeConsSpec(convert_cons(spec,&ids));
 
-  gsVerboseMsg("converting mapping declarations...\n");
+  mCRL2log(verbose) << "converting mapping declarations..." << std::endl;
   map_spec = gsMakeMapSpec(convert_maps(spec,&ids));
 
-  gsVerboseMsg("converting data equations...\n");
+  mCRL2log(verbose) << "converting data equations..." << std::endl;
   data_eqn_spec = gsMakeDataEqnSpec(convert_datas(spec,&ids));
 
   data_spec = gsMakeDataSpec(sort_spec, cons_spec, map_spec, data_eqn_spec);
 
-  gsVerboseMsg("converting initial LPE state...\n");
+  mCRL2log(verbose) << "converting initial LPE state..." << std::endl;
   init = gsMakeLinearProcessInit(convert_init(spec,&ids));
 
-  gsVerboseMsg("converting LPE...\n");
+  mCRL2log(verbose) << "converting LPE..." << std::endl;
   lps = convert_lps(spec,&ids);
 
-  gsVerboseMsg("constructing action declarations...\n");
+  mCRL2log(verbose) << "constructing action declarations..." << std::endl;
   act_spec = gsMakeActSpec(get_lps_acts(lps,&ids));
 
   ATermAppl r = gsMakeLinProcSpec(data_spec, act_spec, gsMakeGlobVarSpec(ATmakeList0()), lps, init);

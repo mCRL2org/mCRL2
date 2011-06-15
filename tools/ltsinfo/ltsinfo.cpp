@@ -128,13 +128,13 @@ class ltsinfo_tool : public ltsinfo_base
       }
       std::cout << "Has action labels." << std::endl;
 
-      gsVerboseMsg("checking reachability...\n");
+      mCRL2log(verbose) << "checking reachability..." << std::endl;
       if (!reachability_check(l))
       {
         std::cout << "Warning: some states are not reachable from the initial state! (This might result in unspecified behaviour of LTS tools.)" << std::endl;
       }
 
-      gsVerboseMsg("check whether lts is deterministic...\n");
+      mCRL2log(verbose) << "check whether lts is deterministic..." << std::endl;
       std::cout << "LTS is ";
       if (!is_deterministic(l))
       {

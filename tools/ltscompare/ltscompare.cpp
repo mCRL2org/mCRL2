@@ -172,8 +172,8 @@ class ltscompare_tool : public ltscompare_base
       bool result = true;
       if (tool_options.equivalence != lts_eq_none)
       {
-        gsVerboseMsg("comparing LTSs using %s...\n",
-                     name_of_equivalence(tool_options.equivalence).c_str());
+        mCRL2log(verbose) << "comparing LTSs using " <<
+                     name_of_equivalence(tool_options.equivalence) << "..." << std::endl;
 
         result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
@@ -183,8 +183,8 @@ class ltscompare_tool : public ltscompare_base
 
       if (tool_options.preorder != lts_pre_none)
       {
-        gsVerboseMsg("comparing LTSs using %s...\n",
-                     name_of_preorder(tool_options.preorder).c_str());
+        mCRL2log(verbose) << "comparing LTSs using " <<
+                     name_of_preorder(tool_options.preorder) << "..." << std::endl;
 
         result = compare(l1,l2,tool_options.preorder);
 

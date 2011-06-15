@@ -134,7 +134,7 @@ ATermAppl translate_file(t_options& options)
   if (options.infilename == "")
   {
     //parse specification from stdin
-    gsVerboseMsg("Parsing input from stdin...\n");
+    mCRL2log(verbose) << "Parsing input from stdin..." << std::endl;
     result = parse_stream(cin);
   }
   else
@@ -145,7 +145,7 @@ ATermAppl translate_file(t_options& options)
     {
       throw mcrl2::runtime_error("cannot open input file '" + options.infilename + "'");
     }
-    gsVerboseMsg("Parsing input file '%s'...\n", options.infilename.c_str());
+    mCRL2log(verbose) << "Parsing input file '" <<  options.infilename << "'..." << std::endl;
     result = parse_stream(instream);
     instream.close();
   }

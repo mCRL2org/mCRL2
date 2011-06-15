@@ -113,7 +113,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
 
   if (lgopts->removeunused)
   {
-    gsVerboseMsg("removing unused parts of the data specification.\n");
+    mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
 
     std::set<data::function_symbol> used_function_symbols=
                                   lps::find_function_symbols(lgopts->specification);
@@ -153,7 +153,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->speci
 
   if (lgopts->priority_action != "")
   {
-    gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",lgopts->priority_action.c_str());
+    mCRL2log(verbose) << "applying confluence reduction with tau action '" << lgopts->priority_action << "'..." << std::endl;
     nstate->prioritise(lgopts->priority_action.c_str());
     initialise_representation(true);
   }
@@ -188,7 +188,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->speci
   else
   {
     lgopts->outformat = mcrl2::lts::lts_none;
-    gsVerboseMsg("not saving state space.\n");
+    mCRL2log(verbose) << "not saving state space." << std::endl;
   }
 
   initialised = true;
@@ -210,55 +210,37 @@ bool lps2lts_algorithm::finalise_lts_generation()
   {
     if (lgopts->expl_strat == es_random)
     {
-      gsVerboseMsg(
-        "done with random walk of %lu transition%s (visited %lu unique state%s).\n",
-        trans,
-        (trans==1)?"":"s",
-        num_states,
-        (num_states==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with random walk of "
+                        << trans << "transition" << ((trans==1)?"":"s")
+                        << " (visited " << num_states
+                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_value_prioritized)
     {
-      gsVerboseMsg(
-        "done with value prioritized walk of %lu transition%s (visited %lu unique state%s).\n",
-        trans,
-        (trans==1)?"":"s",
-        num_states,
-        (num_states==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with value prioritized walk of "
+                        << trans << "transition" << ((trans==1)?"":"s")
+                        << " (visited " << num_states
+                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_value_random_prioritized)
     {
-      gsVerboseMsg(
-        "done with random value prioritized walk of %lu transition%s (visited %lu unique state%s).\n",
-        trans,
-        (trans==1)?"":"s",
-        num_states,
-        (num_states==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with random value prioritized walk of "
+                        << trans << "transition" << ((trans==1)?"":"s")
+                        << " (visited " << num_states
+                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_breadth)
     {
-      gsVerboseMsg(
-        "done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",
-        static_cast<size_t>(level-1),
-        (level==2)?"":"s",
-        num_states,
-        (num_states==1)?"":"s",
-        trans,
-        (trans==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with state space generation ("
+                        << level-1 << "level" << ((level==2)?"":"s") << ", "
+                        << num_states << " state" << ((num_states == 1)?"":"s")
+                        << " and " << trans << "transition" << ((trans==1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_depth)
     {
-      gsVerboseMsg(
-        "done with state space generation (%lu state%s and %lu transition%s).\n",
-        num_states,
-        (num_states==1)?"":"s",
-        trans,
-        (trans==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with state space generation ("
+                        << num_states << "state" << ((num_states == 1)?"":"s")
+                        << " and " << trans << "transition" << ((trans==1)?"":"s") << ")" << std::endl;
     }
   }
 
@@ -795,13 +777,9 @@ bool lps2lts_algorithm::generate_lts()
         current_state++;
         if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          gsVerboseMsg(
-            "monitor: currently explored %lu transition%s and encountered %lu unique state%s.\n",
-            trans,
-            (trans==1)?"":"s",
-            num_states,
-            (num_states==1)?"":"s"
-          );
+          mCRL2log(verbose) << "monitor: currently explored "
+                            << trans << " transition" << ((trans==1)?"":"s")
+                            << " and encountered " << num_states << " unique state" << ((num_states==1)?"":"s") << std::endl;
         }
       }
       delete nsgen;
@@ -977,14 +955,10 @@ bool lps2lts_algorithm::generate_lts()
         current_state++;
         if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          gsVerboseMsg(
-            "monitor: currently explored %lu transition%s and encountered %lu unique state%s [MAX %d].\n",
-            trans,
-            (trans==1)?"":"s",
-            num_states,
-            (num_states==1)?"":"s",
-            lgopts->todo_max
-          );
+          mCRL2log(verbose) << "monitor: currently explored "
+                                      << trans << " transition" << ((trans==1)?"":"s")
+                                      << " and encountered " << num_states << " unique state" << ((num_states==1)?"":"s")
+                                      << " [MAX " << lgopts->todo_max << "]." << std::endl;
         }
       }
       delete nsgen;
@@ -1163,13 +1137,9 @@ bool lps2lts_algorithm::generate_lts()
         current_state++;
         if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          gsVerboseMsg(
-            "monitor: currently explored %lu transition%s and encountered %lu unique state%s.\n",
-            trans,
-            (trans==1)?"":"s",
-            num_states,
-            (num_states==1)?"":"s"
-          );
+          mCRL2log(verbose) << "monitor: currently explored "
+                                      << trans << " transition" << ((trans==1)?"":"s")
+                                      << " and encountered " << num_states << " unique state" << ((num_states==1)?"":"s") << std::endl;
         }
       }
       delete nsgen;
@@ -1251,16 +1221,10 @@ bool lps2lts_algorithm::generate_lts()
         current_state++;
         if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          gsVerboseMsg(
-            "monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",
-            level,
-            current_state,
-            (current_state==1)?"":"s",
-            trans,
-            (trans==1)?"":"s",
-            num_states,
-            (num_states==1)?"":"s"
-          );
+          mCRL2log(verbose) << "monitor: currently at level " << level << "with "
+                                      << current_state << " state" << ((current_state==1)?"":"s") << " and "
+                                      << trans << " transition" << ((trans==1)?"":"s")
+                                      << " explored and " << num_states << " state" << ((num_states==1)?"":"s") << " seen." << std::endl;
         }
         if (current_state == endoflevelat)
         {
@@ -1393,14 +1357,10 @@ bool lps2lts_algorithm::generate_lts()
           current_state++;
           if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
           {
-            gsVerboseMsg(
-              "monitor: currently explored %lu state%s and %lu transition%s (stacksize is %d).\n",
-              current_state,
-              (current_state==1)?"":"s",
-              trans,
-              (trans==1)?"":"s",
-              nsgens_num
-            );
+            mCRL2log(verbose) << "monitor: currently explored "
+                              << current_state << " state" << ((current_state==1)?"":"s")
+                              << " and " << trans << " transition" << ((trans==1)?"":"s")
+                              << " (stacksize is " << nsgens_num << ")" << std::endl;
           }
         }
       }

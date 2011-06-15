@@ -94,7 +94,7 @@ class t_tool_options
 
       if (outtype == lts_none)
       {
-        gsVerboseMsg("trying to detect output format by extension...\n");
+        mCRL2log(verbose) << "trying to detect output format by extension..." << std::endl;
 
         outtype = mcrl2::lts::detail::guess_format(outfilename);
 
@@ -155,18 +155,18 @@ class ltsconvert_tool : public ltsconvert_base
 
       if (tool_options.equivalence != lts_eq_none)
       {
-        gsVerboseMsg("reducing LTS (modulo %s)...\n", name_of_equivalence(tool_options.equivalence).c_str());
-        gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
+        mCRL2log(verbose) << "reducing LTS (modulo " <<  name_of_equivalence(tool_options.equivalence) << ")..." << std::endl;
+        mCRL2log(verbose) << "before reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions " << std::endl;
         reduce(l,tool_options.equivalence);
-        gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+        mCRL2log(verbose) << "after reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
       }
 
       if (tool_options.determinise)
       {
-        gsVerboseMsg("determinising LTS...\n");
-        gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+        mCRL2log(verbose) << "determinising LTS..." << std::endl;
+        mCRL2log(verbose) << "before determinisation: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
         determinise(l);
-        gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+        mCRL2log(verbose) << "after determinisation: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
       }
 
       mcrl2::lps::specification spec;

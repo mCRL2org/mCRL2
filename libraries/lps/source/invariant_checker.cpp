@@ -119,7 +119,7 @@ bool Invariant_Checker::check_summand(
   f_bdd_prover.set_formula(v_formula);
   if (f_bdd_prover.is_tautology() == answer_yes)
   {
-    gsVerboseMsg("The invariant holds for summand %d.\n", a_summand_number);
+    mCRL2log(verbose) << "The invariant holds for summand " << a_summand_number << "." << std::endl;
     return true;
   }
   else
@@ -180,7 +180,7 @@ bool Invariant_Checker::check_invariant(const data::data_expression a_invariant)
 
   if (check_init(a_invariant))
   {
-    gsVerboseMsg("The invariant holds for the initial state.\n");
+    mCRL2log(verbose) << "The invariant holds for the initial state." << std::endl;
   }
   else
   {
@@ -191,7 +191,7 @@ bool Invariant_Checker::check_invariant(const data::data_expression a_invariant)
   {
     if (check_summands(a_invariant))
     {
-      gsVerboseMsg("The invariant holds for all summands.\n");
+      mCRL2log(verbose) << "The invariant holds for all summands." << std::endl;
     }
     else
     {

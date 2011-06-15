@@ -2383,7 +2383,7 @@ class boolean_equation_system
                 // Take the lowest element for substitution, to generate
                 // short counterexample.
 
-                // gsVerboseMsg("------------------ %d\n",(size_t)w);
+                // mCRL2log(verbose) << "------------------ " << (size_t)w << "" << std::endl;
                 to_set_to_true_or_false.erase(w);
                 for (std::set <variable_type>::iterator
                      v=variable_occurrence_set_begin(w);

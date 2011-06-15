@@ -59,7 +59,7 @@ class tbf2lps_tool: public input_output_tool
 
       if (input_filename().empty())
       {
-        gsVerboseMsg("reading mCRL LPS from stdin...\n");
+        mCRL2log(verbose) << "reading mCRL LPS from stdin..." << std::endl;
 
         mcrl_spec = (ATermAppl) ATreadFromFile(stdin);
 
@@ -74,7 +74,7 @@ class tbf2lps_tool: public input_output_tool
       }
       else
       {
-        gsVerboseMsg("reading mCRL LPS from '%s'...\n", input_filename().c_str());
+        mCRL2log(verbose) << "reading mCRL LPS from '" <<  input_filename() << "'..." << std::endl;
 
         FILE* in_stream = fopen(input_filename().c_str(), "rb");
 
@@ -105,13 +105,13 @@ class tbf2lps_tool: public input_output_tool
 
       if (output_filename().empty())
       {
-        gsVerboseMsg("writing mCRL2 LPS to stdout...\n");
+        mCRL2log(verbose) << "writing mCRL2 LPS to stdout..." << std::endl;
 
         ATwriteToSAFFile((ATerm) spec, stdout);
       }
       else
       {
-        gsVerboseMsg("writing mCRL2 LPS to '%s'...\n", output_filename().c_str());
+        mCRL2log(verbose) << "writing mCRL2 LPS to '" <<  output_filename() << "'..." << std::endl;
 
         FILE* outstream = fopen(output_filename().c_str(), "wb");
 

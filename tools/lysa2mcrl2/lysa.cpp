@@ -36,7 +36,7 @@ void ProcessInfo::set_calculus(Calculus c)
   if (_calculus==Unknown)
   {
     _calculus = c;
-    gsVerboseMsg("recognised %s syntax.\n", calculus_names[c].c_str());
+    mCRL2log(verbose) << "recognised " << calculus_names[c] << " syntax." << std::endl;
   }
   else
   {

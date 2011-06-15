@@ -305,12 +305,12 @@ class Induction
       f_fresh_dummy_number = 0;
       if (f_count == 1)
       {
-        core::gsVerboseMsg("Induction on one variable.\n");
+        mCRL2log(verbose) << "Induction on one variable." << std::endl;
         v_result = apply_induction_one();
       }
       else
       {
-        core::gsVerboseMsg("Induction on %d variables.\n", f_count);
+        mCRL2log(verbose) << "Induction on " << f_count << " variables." << std::endl;
         ATermList v_list_of_clauses = create_clauses(f_formula, f_formula, 0, f_count, ATmakeList0(), ATmakeList0());
         v_result = ATAgetFirst(v_list_of_clauses);
         v_list_of_clauses = ATgetNext(v_list_of_clauses);

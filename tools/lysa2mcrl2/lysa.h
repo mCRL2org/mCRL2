@@ -31,7 +31,6 @@
 */
 
 #include "mcrl2/core/messaging.h"
-using mcrl2::core::gsVerboseMsg;
 using mcrl2::core::gsDebugMsg;
 
 

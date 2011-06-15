@@ -843,7 +843,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
     new_inequalities_lhss.clear();
     new_inequalities_rhss.clear();
     iteration++;
-    gsVerboseMsg("Iteration %d, starting with %d context variables\n", iteration, context.size());
+    mCRL2log(verbose) << "Iteration " <<  iteration << ", starting with " <<  context.size() << " context variables" << std::endl;
 
     for (std::vector < summand_information >::iterator i = summand_info.begin();
          i != summand_info.end(); ++i)
@@ -909,20 +909,20 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   }
   while ((iteration < max_iterations) && !new_inequalities_sizes.empty());
 
-  gsVerboseMsg("Generated the following variables in %d iterations:\n", iteration);
+  mCRL2log(verbose) << "Generated the following variables in " <<  iteration << " iterations:" << std::endl;
   for (context_type::iterator i = context.begin(); i != context.end(); ++i)
   {
-    gsVerboseMsg("< %P, %P > %P\n", (ATermAppl)i->get_lowerbound(),
-                 (ATermAppl)i->get_upperbound(), (ATermAppl)i->get_variable());
+    mCRL2log(verbose) << "< " << core::pp(atermpp::aterm_appl(i->get_lowerbound())) << ", " << core::pp(atermpp::aterm_appl(i->get_upperbound()))
+                      << " > " << core::pp(atermpp::aterm_appl(i->get_variable())) << std::endl;
   }
 
   if (!new_inequalities_sizes.empty())
   {
-    gsVerboseMsg("A may-bisimilar lps is being generated, which is most likely not strongly bisimilar.\n");
+    mCRL2log(verbose) << "A may-bisimilar lps is being generated, which is most likely not strongly bisimilar." << std::endl;
   }
   else
   {
-    gsVerboseMsg("A strongly bisimilar lps is being generated.\n");
+    mCRL2log(verbose) << "A strongly bisimilar lps is being generated." << std::endl;
   }
 
 

@@ -184,7 +184,7 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
 
   mCRL2log(debug) << "--------------------- INITIALISATION ---------------------------" << std::endl;
 
-  gsVerboseMsg("  initialisation; number of blocks: %u\n",s_Sigma);
+  mCRL2log(verbose) << "  initialisation; number of blocks: " << s_Sigma << std::endl;
   bool change;
   size_t i;
 
@@ -208,7 +208,7 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
 
     mCRL2log(debug) << "--------------------- ITERATION " << i << " ----------------------------------" << std::endl;
 
-    gsVerboseMsg("  iteration %u; number of blocks: %u\n",i,s_Sigma);
+    mCRL2log(verbose) << "  iteration " << i << "; number of blocks: " << s_Sigma << std::endl;
 
     refine(change);
     if (change)

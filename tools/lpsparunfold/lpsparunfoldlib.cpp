@@ -84,7 +84,7 @@ mcrl2::data::basic_sort lpsparunfold::generate_fresh_basic_sort(std::string str)
   mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers(sort_names);
   mcrl2::core::identifier_string nstr = generator(str);
-  gsVerboseMsg("Generated fresh sort \"%s\" for \"%s\"\n", string(nstr).c_str(), str.c_str());
+  mCRL2log(verbose) << "Generated fresh sort \"" <<  string(nstr) << "\" for \"" <<  str << "\"" << std::endl;
   sort_names.insert(nstr);
   return basic_sort(std::string(nstr));
 }
@@ -109,7 +109,7 @@ function_symbol_vector lpsparunfold::determine_affected_constructors()
   function_symbol_vector k = function_symbol_vector(t.begin(), t.end());
 
   gsDebugMsg("k:\t");
-  gsVerboseMsg("%s has %d constructor function(s)\n", unfold_parameter_name.c_str() , k.size());
+  mCRL2log(verbose) << "" <<  unfold_parameter_name  << " has " <<  k.size() << " constructor function(s)" << std::endl;
 
   for (function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i)
   {
@@ -221,11 +221,11 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   gsDebugMsg("");
   if (m_add_distribution_laws)
   {
-    gsVerboseMsg("Adding equations with additional distribution laws...\n");
+    mCRL2log(verbose) << "Adding equations with additional distribution laws..." << std::endl;
   }
   else
   {
-    gsVerboseMsg("Adding equations...\n");
+    mCRL2log(verbose) << "Adding equations..." << std::endl;
   }
 
   {
@@ -245,7 +245,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     if (is_basic_sort(i -> sort()))
     {
       data_expression lhs = make_application(determine_function, *i);
-      gsVerboseMsg("- Added equation %s\n", pp(data_equation(lhs, elements_of_new_sorts[e])).c_str());
+      mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > svars = find_variables(lhs);
       set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
       svars.insert(tmp_var.begin(), tmp_var.end());
@@ -272,7 +272,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
         dal.push_back(y);
       }
       data_expression lhs = make_application(determine_function , application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
-      gsVerboseMsg("- Added equation %s\n", pp(data_equation(lhs, elements_of_new_sorts[e])).c_str());
+      mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > svars = find_variables(lhs);
       set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
       svars.insert(tmp_var.begin(), tmp_var.end());
@@ -284,7 +284,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       while (!pi.empty() && f < static_cast<size_t>(std::distance(dal.begin(), dal.end())))
       {
         data_expression lhs = make_application(pi.front(), application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
-        gsVerboseMsg("- Added equation %s\n", pp(data_equation(lhs, dal[f])).c_str());
+        mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, dal[f])) << std::endl;
         set< variable > vars = find_variables(lhs);
         set< variable > tmp_var = find_variables(dal[f]);
         vars.insert(tmp_var.begin(), tmp_var.end());
@@ -323,7 +323,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     {
 
       data_expression lhs = make_application(determine_function , *i);
-      gsVerboseMsg("- Added equation %s\n", pp(data_equation(lhs, elements_of_new_sorts[e])).c_str());
+      mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > vars = find_variables(lhs);
       set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
       vars.insert(tmp_var.begin(), tmp_var.end());
@@ -355,7 +355,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
         cerr << "ACCESSING UNIMPLEMENTED CONTAINER SORT" << endl;
       }
 
-      gsVerboseMsg("- Added equation %s\n", pp(data_equation(lhs, elements_of_new_sorts[e])).c_str());
+      mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > vars = find_variables(lhs);
       set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
       vars.insert(tmp_var.begin(), tmp_var.end());
@@ -409,7 +409,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   }
 
   gsDebugMsg("");
-  gsVerboseMsg("Updating LPS...\n");
+  mCRL2log(verbose) << "Updating LPS..." << std::endl;
   /* Create new process parameters */
   mcrl2::data::variable_vector new_process_parameters;
   for (mcrl2::data::variable_list::iterator i = lps_proc_pars.begin();
@@ -419,14 +419,14 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
     if (static_cast<size_t>(std::distance(lps_proc_pars.begin(), i)) == parameter_at_index)
     {
       gsDebugMsg("");
-      gsVerboseMsg("Unfolding parameter %s at index %d...\n", std::string(i->name()).c_str(), std::distance(lps_proc_pars.begin(), i));
+      mCRL2log(verbose) << "Unfolding parameter " << i->name() << " at index " << std::distance(lps_proc_pars.begin(), i) << "..." << std::endl;
       mcrl2::data::variable_vector process_parameters_injection;
 
       /* Generate fresh process parameter for new Sort */
       mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name, process_parameter_names);
       process_parameters_injection.push_back(mcrl2::data::variable(idstr , fresh_basic_sort));
 
-      gsVerboseMsg("- Created process parameter %s of type %s\n", pp(process_parameters_injection.back()).c_str(), pp(fresh_basic_sort).c_str());
+      mCRL2log(verbose) << "- Created process parameter " <<  pp(process_parameters_injection.back()) << " of type " <<  pp(fresh_basic_sort) << "" << std::endl;
 
       for (mcrl2::data::function_symbol_vector::iterator j = affected_constructors.begin()
            ; j != affected_constructors.end()
@@ -442,7 +442,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
           {
             mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name, process_parameter_names);
             process_parameters_injection.push_back(mcrl2::data::variable(idstr ,  *k));
-            gsVerboseMsg("- Injecting process parameter: %s::%s\n", pp(idstr).c_str(), pp(*k). c_str());
+            mCRL2log(verbose) << "- Injecting process parameter: " <<  pp(idstr) << "::" <<  pp(*k) << std::endl;
           }
           processed = true;
         }
@@ -570,7 +570,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
   //
   //update inital process
   //
-  gsVerboseMsg("Updating initialization...\n\n");
+  mCRL2log(verbose) << "Updating initialization...\n" << std::endl;
 
   data::assignment_list ass = m_init_process.assignments();
   //Create new left-hand assignment_list
@@ -696,7 +696,7 @@ atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparu
 
     gsDebugMsg("");
 
-    gsVerboseMsg("Parameter substitution:\t%s\t->\t%s\n", pp(i -> first).c_str(), pp(mcrl2::data::application(case_function, dev)).c_str());
+    mCRL2log(verbose) << "Parameter substitution:\t" << pp(i->first) << "\t->\t" <<  pp(mcrl2::data::application(case_function, dev)) << std::endl;
     result.insert(std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application(case_function, dev)));
   }
   return result ;
@@ -730,7 +730,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector(lps_proc_pars_list.begin(), lps_proc_pars_list.end());
   gsDebugMsg("- Number of parameters in LPS: %d\n", lps_proc_pars.size());
-  gsVerboseMsg("Unfolding process parameter at index: %d\n", parameter_at_index);
+  mCRL2log(verbose) << "Unfolding process parameter at index: " <<  parameter_at_index << "" << std::endl;
   if (lps_proc_pars.size() <= parameter_at_index)
   {
     cerr << "Given index out of bounds. Index value needs to be in the range [0," << lps_proc_pars.size() <<")." << endl;
@@ -830,14 +830,14 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
   /* Generate new case functions for laws */
   application rhs(new_case_function , rw_data_expressions);
 
-  gsVerboseMsg("- Added distribution law for \"%s\" over \"%s\": %s\n", pp(function_for_distribution).c_str(), pp(case_function).c_str() , pp(data_equation(lhs,  rhs)).c_str());
+  mCRL2log(verbose) << "- Added distribution law for \"" << pp(function_for_distribution) << "\" over \"" << pp(case_function) << "\": " << pp(data_equation(lhs,  rhs)) << std::endl;
 
   return data_equation(variables_used, lhs, rhs);
 }
 
 mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function_symbol_vector elements_of_new_sorts, function_symbol case_function)
 {
-  gsVerboseMsg("- Generating case function for:\t%s: %s\n", mcrl2::data::pp(case_function).c_str(), mcrl2::data::pp(case_function.sort()).c_str());
+  mCRL2log(verbose) << "- Generating case function for:\t" <<  mcrl2::data::pp(case_function) << ": " <<  mcrl2::data::pp(case_function.sort()) << "" << std::endl;
 
   //cerr << mcrl2::data::pp(elements_of_new_sorts) << endl;
   /* Generate variable identifier string for projection */
@@ -861,7 +861,7 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
   {
     sub_args[0] = data_expression(elements_of_new_sorts[i-1]);
     data_expression lhs = application(case_function , sub_args);
-    gsVerboseMsg("- Added equation %s\n", pp(data_equation(lhs, vars[e])).c_str());
+    mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, vars[e])) << std::endl;
     set< variable > svars = find_variables(lhs);
     set< variable > tmp_var = find_variables(vars[e]);
     svars.insert(tmp_var.begin(), tmp_var.end());
@@ -876,7 +876,7 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
     eq_args.insert(eq_args.begin(), vars.front());
 
     data_expression lhs = application(case_function , eq_args);
-    gsVerboseMsg("- Added equation %s\n", pp(data_equation(lhs, vars.back())).c_str());
+    mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, vars.back())) << std::endl;
     set< variable > svars = find_variables(lhs);
     svars.insert(vars.back());
     del.push_back(data_equation(variable_list(svars.begin(), svars.end()), lhs, vars.back()));
@@ -910,8 +910,8 @@ mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
     k = determine_affected_constructors();
     if (k.empty())
     {
-      gsVerboseMsg("The selected process parameter %s has no constructors.\n", unfold_parameter_name.c_str());
-      gsVerboseMsg("No need to unfold.\n");
+      mCRL2log(verbose) << "The selected process parameter " <<  unfold_parameter_name << " has no constructors." << std::endl;
+      mCRL2log(verbose) << "No need to unfold." << std::endl;
       new_lps = m_lps;
       new_init = m_init_process;
     }
@@ -957,7 +957,7 @@ mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
   else
   {
     /* Using cache */
-    gsVerboseMsg("Update using cache for sort: \"%s\"...\n", mcrl2::data::pp(m_unfold_process_parameter).c_str() );
+    mCRL2log(verbose) << "Update using cache for sort: \"" <<  mcrl2::data::pp(m_unfold_process_parameter)  << "\"..." << std::endl;
 
     atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element >::iterator ce = m_cache->find(m_unfold_process_parameter);
 
@@ -965,8 +965,8 @@ mcrl2::lps::specification lpsparunfold::algorithm(size_t parameter_at_index)
     k = ce->second.cached_k;
     if (k.empty())
     {
-      gsVerboseMsg("The selected process parameter %s has no constructors.\n", unfold_parameter_name.c_str());
-      gsVerboseMsg("No need to unfold.\n");
+      mCRL2log(verbose) << "The selected process parameter " <<  unfold_parameter_name << " has no constructors." << std::endl;
+      mCRL2log(verbose) << "No need to unfold." << std::endl;
       new_lps = m_lps;
       new_init = m_init_process;
     }

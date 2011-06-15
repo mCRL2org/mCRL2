@@ -34,7 +34,6 @@ using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::lps;
 
-using mcrl2::core::gsVerboseMsg;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 
@@ -130,17 +129,17 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       //load LPS
       if (input_filename().empty())
       {
-        gsVerboseMsg("reading LPS from stdin...\n");
+        mCRL2log(verbose) << "reading LPS from stdin..." << std::endl;
       }
       else
       {
-        gsVerboseMsg("reading LPS from file '%s'...\n", input_filename().c_str());
+        mCRL2log(verbose) << "reading LPS from file '" <<  input_filename() << "'..." << std::endl;
       }
       specification lps_old_spec;
       lps_old_spec.load(input_filename());
 
       //load action rename file
-      gsVerboseMsg("reading input from file '%s'...\n", m_action_rename_filename.c_str());
+      mCRL2log(verbose) << "reading input from file '" <<  m_action_rename_filename << "'..." << std::endl;
       std::ifstream rename_stream(m_action_rename_filename.c_str());
       if (!rename_stream.is_open())
       {
@@ -155,33 +154,33 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       rename_stream.close();
 
       //rename all assigned actions
-      gsVerboseMsg("renaming actions in LPS...\n");
+      mCRL2log(verbose) << "renaming actions in LPS..." << std::endl;
       specification lps_new_spec = action_rename(action_rename_spec, lps_old_spec);
       data::rewriter datar;
       if (m_rewrite)
       {
-        gsVerboseMsg("rewriting data expressions in LPS...\n");
+        mCRL2log(verbose) << "rewriting data expressions in LPS..." << std::endl;
         datar = create_rewriter(lps_new_spec.data());
         lps::rewrite(lps_new_spec, datar);
       }
       if (m_sumelm)
       {
-        gsVerboseMsg("applying sum elimination...\n");
+        mCRL2log(verbose) << "applying sum elimination..." << std::endl;
         sumelm_algorithm(lps_new_spec, mCRL2logEnabled(verbose)||mCRL2logEnabled(debug)).run();
         if (m_rewrite)
         {
-          gsVerboseMsg("rewriting data expressions in LPS...\n");
+          mCRL2log(verbose) << "rewriting data expressions in LPS..." << std::endl;
           lps::rewrite(lps_new_spec, datar);
         }
       }
       //save the result
       if (output_filename().empty())
       {
-        gsVerboseMsg("writing LPS to stdout...\n");
+        mCRL2log(verbose) << "writing LPS to stdout..." << std::endl;
       }
       else
       {
-        gsVerboseMsg("writing LPS to file '%s'...\n", output_filename().c_str());
+        mCRL2log(verbose) << "writing LPS to file '" <<  output_filename() << "'..." << std::endl;
       }
       lps_new_spec.save(output_filename());
 

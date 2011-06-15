@@ -30,7 +30,7 @@ static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
   num_params=l.process_parameters().size();
 
   // print parameters with used values
-  gsVerboseMsg("writing parameter table...\n");
+  mCRL2log(verbose) << "writing parameter table..." << std::endl;
   for (size_t i=0; i<num_params; i++)
   {
 
@@ -45,7 +45,7 @@ static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
   }
 
   // print states
-  gsVerboseMsg("writing states...\n");
+  mCRL2log(verbose) << "writing states..." << std::endl;
   os << "---" << std::endl;
   for (size_t i=0; i<l.num_states(); i++)
   {
@@ -78,7 +78,7 @@ static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)
   }
 
   // print transitions
-  gsVerboseMsg("writing transitions...\n");
+  mCRL2log(verbose) << "writing transitions..." << std::endl;
   os << "---" << std::endl;
   for (transition_const_range t=l.get_transitions();  !t.empty(); t.advance_begin(1))
   {

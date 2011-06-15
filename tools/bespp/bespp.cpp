@@ -81,10 +81,9 @@ class bespp_tool: public input_output_tool
       bes::boolean_equation_system<> bes;
       bes.load(input_filename());
 
-      gsVerboseMsg("printing BES from %s to %s in the %s format\n",
-                   input_filename().empty()?"standard input":input_filename().c_str(),
-                   output_filename().empty()?"standard output":output_filename().c_str(),
-                   pp_format_to_string(format).c_str());
+      mCRL2log(verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())
+                        << " to " << (output_filename().empty()?"standard output":output_filename())
+                        << " in the " << pp_format_to_string(format) << " format";
 
       if (format != ppDefault)
       {

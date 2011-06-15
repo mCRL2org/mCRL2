@@ -53,17 +53,6 @@ static void logger_wrapper(mcrl2_log_level_t t, const char* Format, va_list args
   free(output);
 }
 
-void gsVerboseMsg(const char* Format, ...)
-//Post: If the printing of verbose information is enabled, Format is printed to
-//      stderr, where the remaining parameters are used as gsprintf arguments
-//      to Format.
-{
-  va_list Args;
-  va_start(Args, Format);
-  logger_wrapper(log_verbose, Format, Args);
-  va_end(Args);
-}
-
 #define GS_DEBUG_MSG_FUNC(FuncName,Format) \
   if (log_debug <= mcrl2_logger::get_reporting_level()) { \
     va_list Args; \

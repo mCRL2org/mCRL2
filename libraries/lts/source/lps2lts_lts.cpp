@@ -39,10 +39,10 @@ void lps2lts_lts::open_lts(const char* filename, lps2lts_lts_options& opts)
   switch (lts_opts.outformat)
   {
     case lts_none:
-      gsVerboseMsg("not saving state space.\n");
+      mCRL2log(verbose) << "not saving state space." << std::endl;
       break;
     case lts_aut:
-      gsVerboseMsg("writing state space in AUT format to '%s'.\n",filename);
+      mCRL2log(verbose) << "writing state space in AUT format to '" << filename << "'." << std::endl;
       /* lts_opts.outinfo = false; */
       aut.open(filename);
       if (!aut.is_open())
@@ -52,8 +52,8 @@ void lps2lts_lts::open_lts(const char* filename, lps2lts_lts_options& opts)
       }
       break;
     default:
-      gsVerboseMsg("writing state space in %s format to '%s'.\n",
-                   mcrl2::lts::detail::string_for_type(lts_opts.outformat).c_str(),filename);
+      mCRL2log(verbose) << "writing state space in " << mcrl2::lts::detail::string_for_type(lts_opts.outformat)
+                        << " format to '" << filename << "'." << std::endl;
       generic_lts.set_data(lts_opts.spec->data());
       generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
       generic_lts.set_action_labels(lts_opts.spec->action_labels());

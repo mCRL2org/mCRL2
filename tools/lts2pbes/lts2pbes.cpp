@@ -307,11 +307,11 @@ class lts2pbes_tool : public input_output_tool
       //save the result
       if (output_filename().empty())
       {
-        gsVerboseMsg("writing PBES to stdout...\n");
+        mCRL2log(verbose) << "writing PBES to stdout..." << std::endl;
       }
       else
       {
-        gsVerboseMsg("writing PBES to file '%s'...\n", output_filename().c_str());
+        mCRL2log(verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
       }
       result.save(output_filename());
       return true;

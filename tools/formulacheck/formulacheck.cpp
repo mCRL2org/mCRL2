@@ -157,7 +157,7 @@ class formulacheck_tool : public prover_tool< rewriter_tool<input_tool> >
       if (!infilename.empty())
       {
         //load data specification from file infilename
-        gsVerboseMsg("reading LPS or PBES from '%s'\n", infilename.c_str());
+        mCRL2log(verbose) << "reading LPS or PBES from '" <<  infilename << "'" << std::endl;
         try
         {
           lps::specification s;

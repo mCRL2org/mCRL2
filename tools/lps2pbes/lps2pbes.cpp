@@ -25,8 +25,6 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-using mcrl2::core::gsVerboseMsg;
-
 class lps2pbes_tool : public input_output_tool
 {
     typedef input_output_tool super;
@@ -85,16 +83,16 @@ class lps2pbes_tool : public input_output_tool
       //load LPS
       if (input_filename().empty())
       {
-        gsVerboseMsg("reading LPS from stdin...\n");
+        mCRL2log(verbose) << "reading LPS from stdin..." << std::endl;
       }
       else
       {
-        gsVerboseMsg("reading LPS from file '%s'...\n", input_filename().c_str());
+        mCRL2log(verbose) << "reading LPS from file '" <<  input_filename() << "'..." << std::endl;
       }
       lps::specification spec;
       spec.load(input_filename());
       //load formula file
-      gsVerboseMsg("reading input from file '%s'...\n", formfilename.c_str());
+      mCRL2log(verbose) << "reading input from file '" <<  formfilename << "'..." << std::endl;
       std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
       if (!instream.is_open())
       {
@@ -103,16 +101,16 @@ class lps2pbes_tool : public input_output_tool
       state_formulas::state_formula formula = state_formulas::parse_state_formula(instream, spec);
       instream.close();
       //convert formula and LPS to a PBES
-      gsVerboseMsg("converting state formula and LPS to a PBES...\n");
+      mCRL2log(verbose) << "converting state formula and LPS to a PBES..." << std::endl;
       pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed);
       //save the result
       if (output_filename().empty())
       {
-        gsVerboseMsg("writing PBES to stdout...\n");
+        mCRL2log(verbose) << "writing PBES to stdout..." << std::endl;
       }
       else
       {
-        gsVerboseMsg("writing PBES to file '%s'...\n", output_filename().c_str());
+        mCRL2log(verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
       }
       result.save(output_filename());
       return true;

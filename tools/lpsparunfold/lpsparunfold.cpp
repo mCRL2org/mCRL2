@@ -165,7 +165,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       for (size_t i =0; i != m_repeat_unfold; ++i)
       {
-        mcrl2::core::gsVerboseMsg("Pass: %d of %d\n", i+1, m_repeat_unfold);
+        mCRL2log(verbose) << "Pass: " << i+1 << " of " << m_repeat_unfold << std::endl;
 
         //Calculate process parameters indices where m_unfoldsort occurs
         if (!m_unfoldsort.empty())

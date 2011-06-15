@@ -378,7 +378,7 @@ void add_tau_action(std::string const& action)
   }
   tau_actions[num_tau_actions] = (char*) malloc((action.size() + 1) * sizeof(char));
   strncpy(tau_actions[num_tau_actions], action.c_str(), action.size() + 1);
-  gsVerboseMsg("marked action '%s' as a tau action\n", tau_actions[num_tau_actions]);
+  mCRL2log(verbose) << "marked action '" <<  tau_actions[num_tau_actions] << "' as a tau action" << std::endl;
   num_tau_actions++;
 }
 

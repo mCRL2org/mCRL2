@@ -77,7 +77,7 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
     {
       if (strncmp(output, "sat", 3) == 0)
       {
-        core::gsVerboseMsg("The formula is satisfiable\n");
+        mCRL2log(verbose) << "The formula is satisfiable" << std::endl;
 
         ::close(pipe_stdout[0]);
         ::close(pipe_stderr[0]);
@@ -88,11 +88,11 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
       }
       else if (strncmp(output, "unsat", 5) == 0)
       {
-        core::gsVerboseMsg("The formula is unsatisfiable\n");
+        mCRL2log(verbose) << "The formula is unsatisfiable" << std::endl;
       }
       else if (strncmp(output, "unknown", 7) == 0)
       {
-        core::gsVerboseMsg("%s cannot determine whether this formula is satisfiable or not.\n", T::name());
+        mCRL2log(verbose) << T::name() << " cannot determine whether this formula is satisfiable or not." << std::endl;
       }
     }
     else

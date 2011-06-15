@@ -2535,7 +2535,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   else
     compile_script = "mcrl2compilerewriter";
   rewriter_so = new uncompiled_library(compile_script);
-  gsVerboseMsg("Using '%s' to compile rewriter.\n", compile_script.c_str());
+  mCRL2log(verbose) << "Using '" << compile_script << "' to compile rewriter." << std::endl;
 
   jittyc_eqns = (ATermList*) malloc(get_num_opids()*sizeof(ATermList));
   memset(jittyc_eqns,0,get_num_opids()*sizeof(ATermList));
@@ -2859,7 +2859,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
 
   fclose(f);
 
-  gsVerboseMsg("compiling rewriter...\n");
+  mCRL2log(verbose) << "compiling rewriter..." << std::endl;
 
   try
   {
@@ -2871,7 +2871,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     throw mcrl2::runtime_error(std::string("Could not compile rewriter: ") + e.what());
   }
   
-  gsVerboseMsg("loading rewriter...\n");
+  mCRL2log(verbose) << "loading rewriter..." << std::endl;
 
   try
   {
@@ -2886,11 +2886,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     throw mcrl2::runtime_error(std::string("Could not load rewriter: ") + e.what());
   }
 
-  gsVerboseMsg("initialising rewriter...\n");
+  mCRL2log(verbose) << "initialising rewriter..." << std::endl;
 
   so_rewr_init(this);
 
-  gsVerboseMsg("Adding rewrite rules...\n");
+  mCRL2log(verbose) << "Adding rewrite rules..." << std::endl;
 
   need_rebuild = false;
 }

@@ -115,7 +115,7 @@ specification Invariant_Eliminator::simplify(
         v_simplified_summands = push_front(v_simplified_summands, v_summand);
         if (!a_no_elimination)
         {
-          gsVerboseMsg("Summand number %d could not be eliminated.\n", v_summand_number);
+          mCRL2log(verbose) << "Summand number " << v_summand_number << " could not be eliminated." << std::endl;
         }
       }
       else

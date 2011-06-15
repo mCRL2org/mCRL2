@@ -184,7 +184,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 {
   // Instantiate free variables in the system
   pbes_system::detail::instantiate_global_variables(pbes_spec);
-  core::gsVerboseMsg("Using lazy approach...\n");
+  mCRL2log(verbose) << "Using lazy approach..." << std::endl;
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
@@ -205,7 +205,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   std::vector< core::identifier_string > names_order;
 
-  core::gsVerboseMsg("Retrieving PBES equations from equation system...\n");
+  mCRL2log(verbose) << "Retrieving PBES equations from equation system..." << std::endl;
   for (atermpp::vector<pbes_equation>::iterator eqi = eqsys.begin(); eqi != eqsys.end(); eqi++)
   {
     pbes_equations.put(eqi->variable().name(), pbes_equation_to_aterm(*eqi));
@@ -214,7 +214,7 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
   states_todo.insert(initial_state);
 
-  core::gsVerboseMsg("Computing BES...\n");
+  mCRL2log(verbose) << "Computing BES..." << std::endl;
   while (states_todo.size() != 0)
   {
     // Get the first element of the set
@@ -264,11 +264,11 @@ pbes<> do_lazy_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite)
 
     if (++nr_of_equations % 1000 == 0)
     {
-      core::gsVerboseMsg("At equation %d\n", nr_of_equations);
+      mCRL2log(verbose) << "At equation " <<  nr_of_equations << std::endl;
     }
   }
 
-  core::gsVerboseMsg("Sorting result...\n");
+  mCRL2log(verbose) << "Sorting result..." << std::endl;
   new_equation_system = sort_names(names_order, new_equation_system);
 
   // Rewrite initial state
@@ -288,7 +288,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
 {
   // Instantiate free variables in the system
   pbes_system::detail::instantiate_global_variables(pbes_spec);
-  core::gsVerboseMsg("Using finite approach...\n");
+  mCRL2log(verbose) << "Using finite approach..." << std::endl;
 
   propositional_variable_instantiation initial_state = pbes_spec.initial_state();
   atermpp::vector<pbes_equation> eqsys = pbes_spec.equations();
@@ -304,7 +304,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
   atermpp::table sort_enumerations(10,50);
 
   //Populate sort_enumerations with all enumerations for the finite sorts of the system
-  core::gsVerboseMsg("Enumerating finite data sorts...\n");
+  mCRL2log(verbose) << "Enumerating finite data sorts..." << std::endl;
   typedef data::classic_enumerator<> enumerator_type;
   enumerator_type enumerator(data, data_rewriter);
   for (atermpp::vector<pbes_equation>::const_iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
@@ -335,7 +335,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
     }
   }
 
-  core::gsVerboseMsg("Computing PBES without finite data sorts...\n");
+  mCRL2log(verbose) << "Computing PBES without finite data sorts..." << std::endl;
   for (atermpp::vector<pbes_equation>::iterator eq_i = eqsys.begin(); eq_i != eqsys.end(); eq_i++)
   {
     pbes_equation equation = *eq_i;
@@ -354,7 +354,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
     instantiation_list.push_back(current_values);
 
     std::string propvar_name_string = propvar_name;
-    core::gsVerboseMsg("Creating all possible instantiations for propositional variable %s...\n", propvar_name_string.c_str());
+    mCRL2log(verbose) << "Creating all possible instantiations for propositional variable " <<  propvar_name_string << "..." << std::endl;
 
     for (data::variable_list::iterator p = propvar_parameters.begin(); p != propvar_parameters.end(); p++)
     {
@@ -388,7 +388,7 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
       instantiation_list = intermediate_instantiation_list;
     }
 
-    core::gsVerboseMsg("Computing Boolean equations for each instantiation of propositional variable %s...\n", propvar_name_string.c_str());
+    mCRL2log(verbose) << "Computing Boolean equations for each instantiation of propositional variable " <<  propvar_name_string << "..." << std::endl;
 
     for (atermpp::vector< t_instantiations >::iterator inst_i = instantiation_list.begin(); inst_i != instantiation_list.end(); inst_i++)
     {
@@ -416,13 +416,13 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
 
       if (++nr_of_equations % 1000 == 0)
       {
-        core::gsVerboseMsg("At Boolean equation %d\n", nr_of_equations);
+        mCRL2log(verbose) << "At Boolean equation " <<  nr_of_equations << "" << std::endl;
       }
 
     }
   }
 
-  core::gsVerboseMsg("Instantiation process finished.\nNumber of Boolean equations computed: %d\n", nr_of_equations);
+  mCRL2log(verbose) << "Instantiation process finished.\nNumber of Boolean equations computed: " <<  nr_of_equations << "" << std::endl;
 
   // rewrite initial state
   propositional_variable_instantiation new_initial_state = create_naive_propositional_variable_instantiation(initial_state, &sort_enumerations);

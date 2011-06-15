@@ -129,7 +129,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
         }
         else
         {
-          gsVerboseMsg("Eliminating or simplifying summand number %u.\n", m_summand_number);
+          mCRL2log(verbose) << "Eliminating or simplifying summand number " <<  m_summand_number << "." << std::endl;
         }
       }
       if (parser.options.count("time-limit"))
@@ -213,7 +213,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
           throw mcrl2::runtime_error("cannot open input file '" + m_invariant_file_name + "'");
         }
 
-        gsVerboseMsg("parsing input file '%s'...\n", m_invariant_file_name.c_str());
+        mCRL2log(verbose) << "parsing input file '" <<  m_invariant_file_name << "'..." << std::endl;
 
         data::variable_list& parameters=specification.process().process_parameters();
         m_invariant = parse_data_expression(instream, parameters.begin(), parameters.end(), specification.data());

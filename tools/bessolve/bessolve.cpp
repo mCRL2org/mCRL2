@@ -70,9 +70,9 @@ class bessolve_tool: public input_output_tool
       bes::boolean_equation_system<> bes;
       bes.load(input_filename());
 
-      gsVerboseMsg("solving BES in %s using %s\n",
-                   input_filename().empty()?"standard input":input_filename().c_str(),
-                   solution_strategy_to_string(strategy).c_str());
+      mCRL2log(verbose) << "solving BES in " <<
+                   (input_filename().empty()?"standard input":input_filename()) << " using " <<
+                   solution_strategy_to_string(strategy) << "" << std::endl;
 
       unsigned int log_level = 0;
       if (mCRL2logEnabled(verbose))

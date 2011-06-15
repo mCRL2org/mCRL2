@@ -49,7 +49,7 @@ bool CAsttransform::translator(ATermAppl ast)
     *
     *
     **/
-  gsVerboseMsg("Options: State parameter elimination: %s\n", no_statepar?"yes":"no");
+  mCRL2log(verbose) << "Options: State parameter elimination: " <<  (no_statepar?"yes":"no") << std::endl;
 
   /**
     * Write the special Terminate actions for the mcrl2 specification

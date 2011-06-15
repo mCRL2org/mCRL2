@@ -317,12 +317,12 @@ bool Confluence_Checker::check_summands(
         mCRL2log(verbose) << "\nChecking invariant: " << pp(v_new_invariant) << "\n";
         if (f_invariant_checker.check_invariant(v_new_invariant))
         {
-          gsVerboseMsg("Invariant holds\n");
+          mCRL2log(verbose) << "Invariant holds" << std::endl;
           mCRL2log(info) << "i";
         }
         else
         {
-          gsVerboseMsg("Invariant doesn't hold\n");
+          mCRL2log(verbose) << "Invariant doesn't hold" << std::endl;
           v_is_confluent = false;
           if (f_check_all)
           {

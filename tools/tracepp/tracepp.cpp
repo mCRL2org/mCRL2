@@ -147,23 +147,23 @@ inline void save_trace(Trace& trace, output_type outtype, std::ostream& out)
   switch (outtype)
   {
     case otPlain:
-      gsVerboseMsg("writing result in plain text...\n");
+      mCRL2log(verbose) << "writing result in plain text..." << std::endl;
       trace.save(out,tfPlain);
       break;
     case otMcrl2:
-      gsVerboseMsg("writing result in mCRL2 trace format...\n");
+      mCRL2log(verbose) << "writing result in mCRL2 trace format..." << std::endl;
       trace.save(out,tfMcrl2);
       break;
     case otAut:
-      gsVerboseMsg("writing result in aut format...\n");
+      mCRL2log(verbose) << "writing result in aut format..." << std::endl;
       trace2aut(out,trace);
       break;
-      /*      gsVerboseMsg("writing result in svc format...\n");
+      /*      mCRL2log(verbose) << "writing result in svc format..." << std::endl;
         case otSvc:
         trace2svc(*OutStream,trace);
         break;*/
     case otStates:
-      gsVerboseMsg("writing result in plain text with state vectors...\n");
+      mCRL2log(verbose) << "writing result in plain text with state vectors..." << std::endl;
       trace2statevector(out,trace);
       break;
     default:
@@ -195,13 +195,13 @@ class tracepp_tool: public input_output_tool
 
       if (input_filename().empty())
       {
-        gsVerboseMsg("reading input from stdin...\n");
+        mCRL2log(verbose) << "reading input from stdin..." << std::endl;
 
         trace.load(std::cin);
       }
       else
       {
-        gsVerboseMsg("reading input from '%s'...\n", input_filename().c_str());
+        mCRL2log(verbose) << "reading input from '" <<  input_filename() << "'..." << std::endl;
 
         std::ifstream in(input_filename().c_str(), std::ios_base::binary|std::ios_base::in);
 
@@ -219,11 +219,11 @@ class tracepp_tool: public input_output_tool
 
       if (output_filename().empty())
       {
-        gsVerboseMsg("writing result to stdout...\n");
+        mCRL2log(verbose) << "writing result to stdout..." << std::endl;
 
         if (format_for_output == otDot)
         {
-          gsVerboseMsg("writing result in dot format...\n");
+          mCRL2log(verbose) << "writing result in dot format..." << std::endl;
 
           trace2dot(std::cout,trace,"stdin");
         }
@@ -234,7 +234,7 @@ class tracepp_tool: public input_output_tool
       }
       else
       {
-        gsVerboseMsg("writing result to '%s'...\n", output_filename().c_str());
+        mCRL2log(verbose) << "writing result to '" <<  output_filename() << "'..." << std::endl;
 
         std::ofstream out(output_filename().c_str(), std::ios_base::binary|std::ios_base::out|std::ios_base::trunc);
 
@@ -242,7 +242,7 @@ class tracepp_tool: public input_output_tool
         {
           if (format_for_output == otDot)
           {
-            gsVerboseMsg("writing result in dot format...\n");
+            mCRL2log(verbose) << "writing result in dot format..." << std::endl;
 
             trace2dot(out,trace,
                       input_filename().substr(input_filename().find_last_of('.')).c_str());

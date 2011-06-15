@@ -643,7 +643,7 @@ namespace mcrl2 {
       ATindexedSetReset(f_nat_variables);
       ATindexedSetReset(f_pos_variables);
 
-      gsVerboseMsg("Formula to be solved: %P\n", a_formula);
+      mCRL2log(verbose) << "Formula to be solved: " <<  core::pp(a_formula) << "" << std::endl;
       while (!ATisEmpty(a_formula)) {
         v_clause = ATAgetFirst(a_formula);
         a_formula = ATgetNext(a_formula);
@@ -654,7 +654,7 @@ namespace mcrl2 {
       add_pos_clauses(v_expressions);
 
       f_formula = f_validity_checker->andExpr(v_expressions);
-      gsVerboseMsg("Formula in CVC Lite format: %s\n", f_formula.toString().c_str());
+      mCRL2log(verbose) << "Formula in CVC Lite format: " <<  f_formula.toString() << "" << std::endl;
     }
 
   // Class SMT_Solver_CVC_Fast - Functions declared public -----------------------------------
@@ -680,10 +680,10 @@ namespace mcrl2 {
       f_validity_checker->poptoScope(0);
       translate(a_formula);
       if (f_validity_checker->checkUnsat(f_formula)) {
-        gsVerboseMsg("The formula is unsatisfiable\n");
+        mCRL2log(verbose) << "The formula is unsatisfiable" << std::endl;
         return false;
       } else {
-        gsVerboseMsg("The formula is satisfiable\n");
+        mCRL2log(verbose) << "The formula is satisfiable" << std::endl;
         return true;
       }
     }

@@ -31,11 +31,9 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-using mcrl2::core::gsVerboseMsg;
-
 class txt2pbes_tool: public input_output_tool
 {
-    typedef input_output_tool super;
+  typedef input_output_tool super;
 
   public:
     txt2pbes_tool()
@@ -54,13 +52,13 @@ class txt2pbes_tool: public input_output_tool
       if (input_filename().empty())
       {
         //parse specification from stdin
-        gsVerboseMsg("reading input from stdin...\n");
+        mCRL2log(verbose) << "reading input from stdin..." << std::endl;
         p = pbes_system::txt2pbes(std::cin);
       }
       else
       {
         //parse specification from input filename
-        gsVerboseMsg("reading input from file '%s'...\n", input_filename().c_str());
+        mCRL2log(verbose) << "reading input from file '" <<  input_filename() << "'..." << std::endl;
         std::ifstream instream(input_filename().c_str(), std::ifstream::in|std::ifstream::binary);
         if (!instream.is_open())
         {
@@ -71,11 +69,11 @@ class txt2pbes_tool: public input_output_tool
       }
       if (output_filename().empty())
       {
-        gsVerboseMsg("writing PBES to stdout...\n");
+        mCRL2log(verbose) << "writing PBES to stdout..." << std::endl;
       }
       else
       {
-        gsVerboseMsg("writing PBES to file '%s'...\n", output_filename().c_str());
+        mCRL2log(verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
       }
       p.save(output_filename());
       return true;

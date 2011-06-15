@@ -840,7 +840,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
-      core::gsVerboseMsg("Formula to be solved: %P\n", a_formula);
+      mCRL2log(verbose) << "Formula to be solved: " << core::pp(a_formula) << std::endl;
       while (!ATisEmpty(a_formula))
       {
         v_clause = ATAgetFirst(a_formula);
@@ -862,7 +862,7 @@ class SMT_LIB_Solver: public SMT_Solver
         "(benchmark nameless\n" + f_sorts_notes + f_operators_notes + f_predicates_notes +
         f_extrasorts + f_operators_extrafuns + f_variables_extrafuns + f_extrapreds + f_formula +
         ")\n";
-      core::gsVerboseMsg("Corresponding benchmark:\n%s", f_benchmark.c_str());
+      mCRL2log(verbose) << "Corresponding benchmark:" << std::endl << f_benchmark;;
     }
 
 
