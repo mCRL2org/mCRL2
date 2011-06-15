@@ -171,7 +171,7 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
+  mCRL2log(warning) << "the use of this tool is deprecated; use ltsconvert instead" << std::endl;
 
   return ltsmin_tool().execute(argc,argv);
 }

@@ -98,7 +98,7 @@ void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
 
 void StandardSimulator::LoadView(const std::string& /*filename*/)
 {
-  gsErrorMsg("cannot open DLLs without wxWidgets\n");
+  mCRL2log(error) << "cannot open DLLs without wxWidgets" << std::endl;
 }
 
 void StandardSimulator::SetTauPrioritisation(bool enable)

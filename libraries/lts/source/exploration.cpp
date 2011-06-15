@@ -1414,7 +1414,7 @@ bool lps2lts_algorithm::generate_lts()
     }
     else
     {
-      gsErrorMsg("unknown exploration strategy\n");
+      mCRL2log(error) << "unknown exploration strategy" << std::endl;
     }
   }
 

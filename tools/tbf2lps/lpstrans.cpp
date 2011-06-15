@@ -314,7 +314,7 @@ static ATermList convert_funcs(ATermList funcs, ATermList* ids, bool funcs_are_c
       if (funcs_are_cons && remove_bools && !strcmp("Bool",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),2)))))
       {
         std::string name(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0))));
-        gsErrorMsg("constructor %s of sort Bool found (only T and F are allowed)\n",const_cast< char* >(name.substr(0, name.find_last_of('#')).c_str()));
+        mCRL2log(error) << "constructor " << name.substr(0, name.find_last_of('#')) << " of sort Bool found (only T and F are allowed)" << std::endl;
         exit(1);
       }
       add_id(ids,ATAgetArgument(ATAgetFirst(funcs),0));
@@ -411,7 +411,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList* ids)
       assert(has_func_T);
       if (!has_func_T)
       {
-        gsErrorMsg("cannot convert summand condition due to the absence of boolean constructor T\n");
+        mCRL2log(error) << "cannot convert summand condition due to the absence of boolean constructor T" << std::endl;
         exit(1);
       }
       c = mcrl2::data::equal_to(mcrl2::data::data_expression(c), mcrl2::data::function_symbol("T",mcrl2::data::sort_bool::bool_()));

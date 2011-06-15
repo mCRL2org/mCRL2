@@ -1837,29 +1837,19 @@ class specification_basic_type:public boost::noncopyable
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       {
-        std::string s ;
-        std::stringstream out;
-        out << numberOfNewProcesses;
-        s = "generated " + out.str() + " new internal processes.";
-        gsWarningMsg(s.c_str());
+        mCRL2log(warning) << "generated " << numberOfNewProcesses << " new internal processes.";
 
         if (!options.lin_method!=lmStack)
         {
-          std::string s ;
-          s = " A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method.\n";
-          gsWarningMsg(s.c_str());
+          mCRL2log(warning) << " A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method." << std::endl;
         }
         else if (options.lin_method==lmRegular2)
         {
-          std::string s ;
-          s = " A possible unbounded loop can be avoided by using `stack' as the linearisation method.\n";
-          gsWarningMsg(s.c_str());
+          mCRL2log(warning) << " A possible unbounded loop can be avoided by using `stack' as the linearisation method." << std::endl;
         }
         else
         {
-          std::string s ;
-          s = "\n";
-          gsWarningMsg(s.c_str());
+          mCRL2log(warning) << std::endl;
         }
         warningNumber=warningNumber*2;
       }
@@ -8010,11 +8000,7 @@ class specification_basic_type:public boost::noncopyable
         if (multiaction==push_front(action_list(),terminationAction))
         {
           acts=push_front(acts,terminationAction.label());
-          std::string s;
-          s = "The action ";
-          s += pp(terminationAction);
-          s += " is added to signal termination of the linear process.\n";
-          gsWarningMsg(s.c_str());
+          mCRL2log(warning) << "The action " << pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
           return;
         }
       }
@@ -8098,9 +8084,7 @@ class specification_basic_type:public boost::noncopyable
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
       if (determinewhetherprocessescontaintime(init1) && !(options.add_delta))
       {
-        std::string s;
-        s = "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use `Add true->delta summands to each state in each process' or command line option `-D' to suppress.\n";
-        gsWarningMsg(s.c_str());
+        mCRL2log(warning) << "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use `Add true->delta summands to each state in each process' or command line option `-D' to suppress." << std::endl;
       }
       atermpp::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);

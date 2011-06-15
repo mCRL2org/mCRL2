@@ -625,7 +625,7 @@ class Trace
           assert(actions[i]!=NULL);
           if (!core::detail::gsIsMultAct(actions[i]) && !error_shown)
           {
-            core::gsErrorMsg("saving trace that is not in mCRL2 format to a mCRL2 trace format\n");
+            mCRL2log(error) << "saving trace that is not in mCRL2 format to a mCRL2 trace format" << std::endl;
             error_shown = true;
           }
           trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i], (times[i]==NULL)?core::detail::gsMakeNil():times[i]));

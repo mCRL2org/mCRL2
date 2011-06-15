@@ -348,7 +348,7 @@ class lps2lts_tool : public lps2lts_base
 
           if (options.outformat == lts_none)
           {
-            gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+            mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
             options.outformat = lts_lts;
           }
         }

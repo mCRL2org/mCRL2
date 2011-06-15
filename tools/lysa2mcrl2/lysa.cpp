@@ -128,13 +128,13 @@ string Expression::typed_lysa_to_lysa()
     }
     else
     {
-      gsWarningMsg("Cannot find attacker. Converting entire process to LySa.");
+      mCRL2log(warning) << "Cannot find attacker. Converting entire process to LySa." << std::endl;
       return S(this);
     }
   }
   else
   {
-    gsWarningMsg("Input process detected as LySa when trying to convert Typed LySa to LySa");
+    mCRL2log(warning) << "Input process detected as LySa when trying to convert Typed LySa to LySa" << std::endl;
     return S(this);
   }
 }

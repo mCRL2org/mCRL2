@@ -229,10 +229,8 @@ void mcrl2_lexer::yyerror(const char *s) {
     if (oldcol_nr < 0) {
       oldcol_nr = 0;
     }
-    gsErrorMsg(
-      "token '%s' at position %d, %d caused the following error: %s\n",
-      YYText(), line_nr, oldcol_nr, s
-    );
+    mCRL2log(error) << "token '" << YYText() << "' at position " 
+                    << line_nr << ", " << oldcol_nr << " caused the following error: " << s << std::endl;
   }
 }
 

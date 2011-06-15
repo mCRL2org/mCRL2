@@ -48,7 +48,7 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
   }
   else if (pid < 0)
   {
-    core::gsErrorMsg(strerror(errno));
+    mCRL2log(error) << strerror(errno) << std::endl;
 
     ::close(pipe_stdin[0]);
     ::close(pipe_stdin[1]);
@@ -104,7 +104,8 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
         message.append(output, 0, i);
       }
 
-      core::gsErrorMsg("Fatal: SMT prover %s returned :\n\n%s\n", T::name(), message.c_str());
+      mCRL2log(error) << "Fatal: SMT prover " << T::name() << " returned :" << std::endl << std::endl
+                      << message << std::endl;
     }
 
     ::close(pipe_stdout[0]);
@@ -124,9 +125,8 @@ bool binary_smt_solver< T >::usable()
 {
   if (!binary_smt_solver::execute("(benchmark nameless :formula true)"))
   {
-    core::gsErrorMsg(
-      "The SMT solver %s is not available.\n"
-      "Consult the manual of the tool you are using for instructions on how to obtain %s.\n", T::name(), T::name());
+    mCRL2log(error) << "The SMT solver " << T::name() << " is not available." << std::endl
+                    << "Consult the manual of the tool you are using for instructions on how to obtain " << T::name() << "." << std::endl;
 
     return false;
   }

@@ -10,7 +10,7 @@
 #include <iostream>
 #include <cstdio>
 #include <string.h>
-#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/messaging.h"
 #include "translate.h"
 #include <vector>
@@ -70,7 +70,7 @@ bool CAsttransform::translator(ATermAppl ast)
   }
   else
   {
-    gsErrorMsg("No valid AST input\n");
+    mCRL2log(error) << "No valid AST input" << std::endl;
     exit(1);
   }
 
@@ -349,7 +349,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
 
   if (info.parallel && info.alternative)
   {
-    gsErrorMsg("It is not allowed to use the parallel and alternative operator on the same parenthesis level.");
+    mCRL2log(error) << "It is not allowed to use the parallel and alternative operator on the same parenthesis level." << std::endl;
     exit(1);
   }
 
@@ -924,7 +924,7 @@ std::string CAsttransform::manipulateProcess(ATermAppl input)
     {
       if (collect_streams.size() > 1)
       {
-        gsErrorMsg("Option -n cannot be used when having parallel processes!");
+        mCRL2log(error) << "Option -n cannot be used when having parallel processes!" << std::endl;
         exit(0);
       }
       result.append("\nproc "+processName+to_string(terminate_state.state));
@@ -1106,7 +1106,7 @@ std::vector<RVT> CAsttransform::manipulateDeclaredProcessVariables(ATermList inp
     ATerm element = ATgetFirst(to_process);
     if (!StrcmpIsFun("DataVarID", (ATermAppl) element))
     {
-      gsErrorMsg("Expcted DataVarID: %T", element);
+      mCRL2log(error) << "Expcted DataVarID: " << atermpp::aterm(element) << std::endl;
       exit(1);
     }
 
@@ -1135,7 +1135,7 @@ std::vector<RPC> CAsttransform::manipulateDeclaredProcessChannels(ATermList inpu
     ATerm element = ATgetFirst(to_process);
     if (!(StrcmpIsFun("ChannelTypedID", (ATermAppl) element)))
     {
-      gsErrorMsg("Expected ChannelTypedID instead of: %T", element);
+      mCRL2log(error) << "Expected ChannelTypedID instead of: " << atermpp::aterm(element) << std::endl;
       exit(1);
     }
 
@@ -1277,7 +1277,7 @@ std::string CAsttransform::processType(ATermAppl input)
     return structset[input];
   }
 
-  gsErrorMsg("Type is not supported %T\n", input);
+  mCRL2log(error) << "Type is not supported " << atermpp::aterm(input) << std::endl;
   exit(1);
   return "";
 }
@@ -1346,7 +1346,7 @@ std::string CAsttransform::initialValueVariable(string Type)
   {
     return "0.0";
   }
-  gsErrorMsg("Cannot set initial value for Type %s\n", Type.c_str());
+  mCRL2log(error) << "Cannot set initial value for Type " << Type << std::endl;
   exit(0);
   return "";
 }
@@ -1433,7 +1433,8 @@ std::string CAsttransform::processValue(ATermAppl input)
     result.append(")");
     return result;
   }
-  gsErrorMsg("%s:%d: processDataVarIDValue %T not defined \n",__FILE__,__LINE__, input);
+  mCRL2log(error) << __FILE__ << ":" << __LINE__ << ": processDataVarIDValue "
+                  << atermpp::aterm(input) << " not defined" << std::endl;
   exit(1);
   return "";
 }
@@ -1477,7 +1478,7 @@ std::vector<RPV> CAsttransform::manipulateProcessVariableDeclarations(ATermList 
       if (!StrcmpIsFun("DataVarExprID", (ATermAppl) element) &&
           !StrcmpIsFun("DataVarID", (ATermAppl) element))
       {
-        gsErrorMsg("Expected DataVarID or DataVarExprID: %T", element);
+        mCRL2log(error) << "Expected DataVarID or DataVarExprID: " << atermpp::aterm(element) << std::endl;
         exit(1);
       }
       to_process = ATgetNext(to_process);
@@ -2040,7 +2041,7 @@ std::string CAsttransform::manipulateExpression(ATermAppl input)
 
     return result;
   }
-  gsErrorMsg("%s:%d: Encounterd unknown expression: %T\n",__FILE__,__LINE__, input);
+  mCRL2log(error) << __FILE__ << ":" << __LINE__ << ": Encounterd unknown expression: " << atermpp::aterm(input) << std::endl;
   exit(1);
   return "";
 
@@ -2063,7 +2064,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
 
     if (ProcessForInstantation.find(processName) == ProcessForInstantation.end())
     {
-      gsErrorMsg("Instantation of process %s is not declared\n", processName.c_str());
+      mCRL2log(error) << "Instantation of process " << processName << " is not declared" << std::endl;
       exit(1);
     }
 
@@ -2073,7 +2074,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
     //Determine if the number of arguments match between instantations
     if (ATgetLength(to_process) != Chi_interfaces[processName].size())
     {
-      gsErrorMsg("Number of arguments does not correspond for %s\n", processName.c_str());
+      mCRL2log(error) << "Number of arguments does not correspond for " << processName << std::endl;
       exit(1);
     }
 
@@ -2125,7 +2126,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
           }
           else
           {
-            gsErrorMsg("Multiple receiving ends for \"%s\"\n", channelID.first.c_str());
+            mCRL2log(error) << "Multiple receiving ends for \"" << channelID.first << "\"" << std::endl;
             exit(1);
           }
         }
@@ -2142,7 +2143,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
           }
           else
           {
-            gsErrorMsg("Multiple sending ends for channel \"%s\"\n", channelID.first.c_str());
+            mCRL2log(error) << "Multiple sending ends for channel \"" << channelID.first << "\"" << std::endl;
             exit(1);
           }
         }
@@ -2158,19 +2159,15 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
       {
         if (StrcmpIsFun("DataVarExpr", (ATermAppl) ATgetFirst(tmp_to_process)))
         {
-          gsErrorMsg("Interfaces for %T and %T do not match for process %s\n",
-                     ATgetArgument(Chi_interfaces[processName].at(i),0),
-                     ATgetArgument(ATgetFirst(tmp_to_process),0),
-                     processName.c_str()
-                    );
+          mCRL2log(error) << "Interfaces for " << atermpp::aterm(ATgetArgument(Chi_interfaces[processName].at(i),0))
+                          << " and " << atermpp::aterm(ATgetArgument(ATgetFirst(tmp_to_process),0))
+                          << " do not match for process " << processName << std::endl;
         }
         if (StrcmpIsFun("ChannelTypedID", (ATermAppl) ATgetFirst(tmp_to_process)))
         {
-          gsErrorMsg("Interfaces for %T and %T do not match for process %s\n",
-                     ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i),0),0),
-                     ATgetArgument(ATgetArgument(ATgetFirst(tmp_to_process),0),0),
-                     processName.c_str()
-                    );
+          mCRL2log(error) << "Interfaces for " << atermpp::aterm(ATgetArgument(ATgetArgument(Chi_interfaces[processName].at(i),0),0))
+                                  << " and " << atermpp::aterm(ATgetArgument(ATgetArgument(ATgetFirst(tmp_to_process),0),0))
+                                  << " do not match for process " << processName << std::endl;
         }
         exit(1);
       }
@@ -2256,7 +2253,7 @@ void CAsttransform::manipulateModelStatements(ATermAppl input)
 
     return ;
   }
-  gsErrorMsg("%T operator is not supported yet.\n",  input) ;
+  mCRL2log(error) << atermpp::aterm(input) << " operator is not supported yet." << std::endl;
   exit(1);
   return;
 }
@@ -2531,7 +2528,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
   }
   if (StrcmpIsFun("ParStat", input))
   {
-    gsErrorMsg("Parallel processes are only supported in at model level\n");
+    mCRL2log(error) << "Parallel processes are only supported in at model level" << std::endl;
     exit(0);
     int bypass_originates_from_stream = stream_number;
     terminate = true;
@@ -2622,7 +2619,7 @@ void CAsttransform::manipulateStatements(ATermAppl input)
     return;
   }
 
-  gsErrorMsg("%T operator is not supported yet.\n",  input) ;
+  mCRL2log(error) << atermpp::aterm(input) << " operator is not supported yet." << std::endl;
   exit(1);
   return;
 }
@@ -2638,7 +2635,7 @@ std::map<std::string, std::string> CAsttransform::manipulateAssignmentStat(ATerm
   gsDebugMsg("input of manipulateAssignmentStat: %T \n \t %T\n", input_id, input_exp);
   if (ATgetLength(input_id) != ATgetLength(input_exp))
   {
-    gsErrorMsg("Assignment to %T contains a number of assignments not equal to the number of variables\n", input_id);
+    mCRL2log(error) << "Assignment to " << atermpp::aterm(input_id) << " contains a number of assignments not equal to the number of variables" << std::endl;
     exit(1);
   }
 

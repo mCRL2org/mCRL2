@@ -13,6 +13,7 @@
 #include <cmath>
 #include <iostream>
 #include "libstruct_core.h"
+#include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/messaging.h"
@@ -218,7 +219,7 @@ ProcessDefinition:
             **/
           if(used_process_identifiers.find($2) != used_process_identifiers.end())
           {
-            gsErrorMsg("Duplicate definition for process %T", $2);
+            mCRL2log(error) << "Duplicate definition for process " << atermpp::aterm($2) << std::endl;
             exit(1);
           } else {
             used_process_identifiers.insert($2);
@@ -335,7 +336,7 @@ IdentifierTypeExpression:
             if (strcmp( ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(list),1),0))), "Void" ) == 0)
             {
               chigetposition();
-              gsErrorMsg("Expression %T can not be of type \"void\"\n", ATgetFirst(list));
+              mCRL2log(error) << "Expression " << atermpp::aterm(ATgetFirst(list)) << " cannot be of type \"void\"" << std::endl;
               exit(1);
             }
             list = ATgetNext( list ) ;
@@ -354,7 +355,7 @@ IdentifierTypeExpression:
             //An expression cannot be of type "void"
             if (strcmp( ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(list),1),0))), "Void" ) == 0)
             {
-              gsErrorMsg("Expression %T can not be of type \"void\"\n", ATgetFirst(list));
+              mCRL2log(error) << "Expression " << atermpp::aterm(ATgetFirst(list)) << " cannot be of type \"void\"" << std::endl;
               exit(1);
             }
             new_list = ATinsert( new_list , (ATerm) gsMakeDataVarExprID( (ATermAppl) ATgetFirst(list), $3));
@@ -429,7 +430,7 @@ IdentifierType:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetFirst( list )))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetTail( list, 1 ) ;
@@ -441,7 +442,7 @@ IdentifierType:
 			if (var_type_map.end() != var_type_map.find(ATgetFirst( list )))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			var_type_map[ATgetFirst( list )]= (ATerm) $3;
@@ -494,7 +495,7 @@ ChannelDeclaration:
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetTail( list, 1 ) ;
@@ -507,7 +508,7 @@ ChannelDeclaration:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
@@ -541,7 +542,7 @@ ChannelDeclaration:
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetTail( list, 1 ) ;
@@ -553,7 +554,7 @@ ChannelDeclaration:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
@@ -630,7 +631,7 @@ ChannelDefinition:
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetNext( list ) ;
@@ -642,7 +643,7 @@ ChannelDefinition:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
@@ -675,7 +676,7 @@ ChannelDefinition:
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetNext( list ) ;
@@ -687,7 +688,7 @@ ChannelDefinition:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
@@ -865,7 +866,7 @@ AssignmentStatement:
             if (!ContainerTypeChecking((ATermAppl) ATgetArgument(ATgetFirst(ids), 1), (ATermAppl) ATgetArgument(ATgetFirst(exprs), 1)))
 		    {
               chigetposition();
-              gsErrorMsg("Assignment failed: Incompatible Types Checking failed %T and %T\n", ids, exprs);
+              mCRL2log(error) << "Assignment failed: Incompatible Types Checking failed " << atermpp::aterm(ids) << " and " << atermpp::aterm(exprs) << std::endl;
 		      exit(1);
             }
             ids = ATgetNext(ids);
@@ -895,7 +896,7 @@ OptGuard: /* empty */
 			  **/
 			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 				{
-				  gsErrorMsg("OptGaurd failed: Incompatible Types Checking failed\n");
+				  mCRL2log(error) << "OptGuard failed: Incompatible Types Checking failed" << std::endl;
 				  exit(1);
 				};
 
@@ -910,7 +911,7 @@ OptChannel: /* empty */
 		}
 	| Expression COLON
       	{ safe_assign($$, $1);
-		  gsErrorMsg("OptChannel not yet implemented");
+		  mCRL2log(error) << "OptChannel not yet implemented" << std::endl;
 		  assert(false);
       	  gsDebugMsg("OptChannel: parsed \n  %T\n", $$);
 		}
@@ -1114,7 +1115,7 @@ ExpressionIdentifier:
 		  if (var_type_map.end() == var_type_map.find( (ATerm) $1))
 		    {
               chigetposition();
-		      gsErrorMsg("ExpressionIdentifier: Variable %T is not defined!\n", $1 );
+		      mCRL2log(error) << "ExpressionIdentifier: Variable " << atermpp::aterm($1) << " is not defined!" << std::endl;
 		      exit(1);
 		    };
 
@@ -1168,7 +1169,7 @@ BasicExpression:
           if(!channel_exists && !variable_exists)
           {
               chigetposition();
-              gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
+              mCRL2log(error) << "BasicExpression: Variable/Channel " << atermpp::aterm($1) << " is not defined!" << std::endl;
               exit(1);
           }
 
@@ -1196,14 +1197,14 @@ BasicExpression:
             if( strcmp("TupleType", ATgetName( ATgetAFun( tuple_type ) ) ) != 0 )
             {
               chigetposition();
-              gsErrorMsg("%T is not a Tuple", $1);
+              mCRL2log(error) << atermpp::aterm($1) << " is not a Tuple" << std::endl;
               exit(1);
             }
 
             if (!is_number(ATgetName(ATgetAFun(ATgetArgument($3,0)))) )
             {
               chigetposition();
-              gsErrorMsg("BasicExpression: Expected a number after the \".\"\n");
+              mCRL2log(error) << "BasicExpression: Expected a number after the \".\"" << std::endl;
               exit(1);
             }
 
@@ -1212,7 +1213,7 @@ BasicExpression:
             if (index >= (int) ATgetLength( (ATermList) ATgetArgument( tuple_type, 0 ) ) )
             {
               chigetposition();
-              gsErrorMsg("BasicExpression: Index value \"%d\" is out of bounds for %T\n", index, $1 );
+              mCRL2log(error) << "BasicExpression: Index value \"" << index << "\" is out of bounds for " << atermpp::aterm($1) << std::endl;
               exit(1);
             }
 
@@ -1256,7 +1257,7 @@ BasicExpression:
                (var_type_map.find((ATerm) $1) == var_type_map.end()) )
           {
               chigetposition();
-              gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
+              mCRL2log(error) << "BasicExpression: Variable/Channel " << atermpp::aterm($1) << " is not defined!" << std::endl;
               exit(1);
           }
 		}
@@ -1568,7 +1569,7 @@ PlusExpression:
          if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
 	     {
            chigetposition();
-		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		   exit(1);
 		 }
    		 safe_assign($$, gsMakeBinarySetExpression( $2,
@@ -1586,7 +1587,9 @@ PlusExpression:
        if (!processed)
        {
          chigetposition();
-         gsErrorMsg("Expressions %T and %T cannot be used with \"+\"\n", ATAgetArgument($1,0), ATAgetArgument($3,0));
+         mCRL2log(error) << "Expressions " << atermpp::aterm(ATAgetArgument($1,0)) << " and "
+                         << atermpp::aterm(ATAgetArgument($3, 0)) << " cannot be used with \"+\"" << std::endl;
+   
          exit(1);
        }
      }
@@ -1629,7 +1632,7 @@ MinusExpression:
          if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
 	     {
            chigetposition();
-		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		   exit(1);
 		 }
    		 safe_assign($$, gsMakeBinaryListExpression( $2,
@@ -1649,7 +1652,7 @@ MinusExpression:
          if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
 	     {
            chigetposition();
-		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		   exit(1);
 		 }
    		 safe_assign($$, gsMakeBinarySetExpression( $2,
@@ -1663,7 +1666,9 @@ MinusExpression:
        if (!processed)
        {
          chigetposition();
-         gsErrorMsg("Expressions %T and %T cannot be used with \"-\"\n", ATAgetArgument($1,0), ATAgetArgument($3,0));
+         mCRL2log(error) << "Expressions " << atermpp::aterm(ATAgetArgument($1,0))
+                         << " and " << atermpp::aterm(ATAgetArgument($3,0))
+                         << " cannot be used with \"-\"" << std::endl;
          exit(1);
        }
 
@@ -1681,7 +1686,7 @@ EqualityExpression:
               )
 				{
                   chigetposition();
-				  gsErrorMsg("EqualityExpression: Incompatible Types Checking failed\n");
+				  mCRL2log(error) << "EqualityExpression: Incompatible Types Checking failed" << std::endl;
 				  exit(1);
 				};
 
@@ -1710,7 +1715,7 @@ EqualityExpression:
               )
 				{
                   chigetposition();
-				  gsErrorMsg("EqualityExpression: Incompatible Types Checking failed\n");
+				  mCRL2log(error) << "EqualityExpression: Incompatible Types Checking failed" << std::endl;
 				  exit(1);
 				};
 
@@ -1741,7 +1746,7 @@ MemberTest:
          if(!ContainerTypeChecking(gsMakeSetType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
 	     {
            chigetposition();
-		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		   exit(1);
 		 }
    		 safe_assign($$, gsMakeBinarySetExpression( $2,
@@ -1755,7 +1760,7 @@ MemberTest:
          {
          if(!ContainerTypeChecking(gsMakeListType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
 	       {
-		     gsErrorMsg("Incompatible Types Checking failed\n");
+		     mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		     exit(1);
 		   }
  	  	 safe_assign($$, gsMakeBinaryListExpression( $2,
@@ -1768,7 +1773,9 @@ MemberTest:
          if (!processed)
          {
            chigetposition();
-           gsErrorMsg("Experrsions %T and %T cannot be used with \"in\"", ATAgetArgument($1,0), ATAgetArgument($3,0));
+           mCRL2log(error) << "Expressions " << atermpp::aterm(ATAgetArgument($1,0))
+                          << " and " << atermpp::aterm(ATAgetArgument($3,0))
+                          << " cannot be used with \"in\"" << std::endl;
            exit(1);
         }
     }
@@ -1816,8 +1823,8 @@ SetExpression:
              if (type != elementType )
              {
                chigetposition();
-               gsErrorMsg("SetLiteral contains mixed types %T and %T\n"
-                         , type, elementType);
+               mCRL2log(error) << "SetLiteral contains mixed types " << atermpp::aterm(type)
+                               << " and " << atermpp::aterm(elementType) << std::endl;
                exit(1);
              }
 			 to_process = ATgetNext( to_process) ;
@@ -1836,7 +1843,8 @@ SetExpression:
              )
 			{
               chigetposition();
-			  gsErrorMsg("r%d: Union failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+        mCRL2log(error) << "r" << __LINE__ << ": Union failed: Incompatible Types Checking failed:" << std::endl
+                        << atermpp::aterm($1) << " and " << atermpp::aterm($3) << std::endl;
 			  exit(1);
 			};
 
@@ -1856,7 +1864,8 @@ SetExpression:
              )
 			{
               chigetposition();
-			  gsErrorMsg("r%d: Intersection failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+        mCRL2log(error) << "r" << __LINE__ << ": Intersection failed: Incompatible Types Checking failed:" << std::endl
+                        << atermpp::aterm($1) << " and " << atermpp::aterm($3) << std::endl;
 			  exit(1);
 			};
 
@@ -1876,7 +1885,8 @@ SetExpression:
              )
 			{
               chigetposition();
-			  gsErrorMsg("r%d: Subsection failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+			  mCRL2log(error) << "r" << __LINE__ << ": Subsection failed: Incompatible Types Checking failed:" << std::endl
+                        << atermpp::aterm($1) << " and " << atermpp::aterm($3) << std::endl;
 			  exit(1);
 			};
 
@@ -1891,7 +1901,7 @@ SetExpression:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
@@ -1918,7 +1928,8 @@ ListExpression:
               )
 				{
                   chigetposition();
-				  gsErrorMsg("Concatination failed: Incompatible Types Checking failed:\n %T and %T\n", $1, $3);
+          mCRL2log(error) << "r" << __LINE__ << ": Concatenation failed: Incompatible Types Checking failed:" << std::endl
+                        << atermpp::aterm($1) << " and " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
@@ -1938,7 +1949,7 @@ ListExpression:
               )
 				{
                   chigetposition();
-				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 				  exit(1);
 				};
 
@@ -1960,7 +1971,7 @@ Functions:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
@@ -1974,7 +1985,7 @@ Functions:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
@@ -1989,7 +2000,7 @@ Functions:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
@@ -2004,7 +2015,7 @@ Functions:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
@@ -2019,7 +2030,7 @@ Functions:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
@@ -2034,15 +2045,15 @@ Functions:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
+				  mCRL2log(error) << "Functions: " << atermpp::aterm($1) << " cannot bet used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
 			if(! (ATAgetArgument($5,1) == gsMakeType( gsString2ATermAppl("Nat" ) ) ) )
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on 2nd argument %T\n", $1, $5);
-				  gsErrorMsg("Type checking failed\n");
+				  mCRL2log(error) << "Functions: " << atermpp::aterm($1) << " cannot be used on 2nd argument " << atermpp::aterm($5) << std::endl;
+				  mCRL2log(error) << "Type checking failed" << std::endl;
 				  exit(1);
 				};
 
@@ -2058,16 +2069,16 @@ Functions:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
-				  exit(1);
+				  mCRL2log(error) << "Functions: " << atermpp::aterm($1) << " cannot bet used on " << atermpp::aterm($3) << std::endl;
+          exit(1);
 				};
 
 			if(! (ATAgetArgument($5,1) == gsMakeType( gsString2ATermAppl("Nat" ) ) ) )
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on 2nd argument %T\n", $1, $5);
-				  gsErrorMsg("Type checking failed\n");
-				  exit(1);
+				  mCRL2log(error) << "Functions: " << atermpp::aterm($1) << " cannot be used on 2nd argument " << atermpp::aterm($5) << std::endl;
+          mCRL2log(error) << "Type checking failed" << std::endl;
+          exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction2( $1,
@@ -2082,7 +2093,7 @@ Functions:
             gsDebugMsg("R:%d\n",__LINE__);
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
@@ -2094,7 +2105,7 @@ Functions:
     | INSERT LBRACKET  Expression RBRACKET
       {
         chigetposition();
-        gsErrorMsg("%T is not supported", $1);
+        mCRL2log(error) << atermpp::aterm($1) << " is not supported" << std::endl;
         exit(1);
       }
     ;
@@ -2120,8 +2131,8 @@ ListLiteral:
              if (type != elementType )
              {
                chigetposition();
-               gsErrorMsg("ListLiteral contains mixed types %T and %T\n"
-                         , type, elementType);
+               mCRL2log(error) << "ListLiteral contains mixed types " <<
+                        atermpp::aterm(type) << " and " << atermpp::aterm(elementType) << std::endl;
                exit(1);
              }
 			 to_process = ATgetNext( to_process) ;
@@ -2163,13 +2174,13 @@ void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)
     if(arg1 != arg2)
         {
           chigetposition();
-          gsErrorMsg("BinTypeCheck: Incompatible Types Checking failed\n");
+          mCRL2log(error) << "BinTypeCheck: Incompatible Types Checking failed" << std::endl;
           exit(1);
         };
     if(arg1 != gsMakeType(gsString2ATermAppl(type.c_str())))
         {
           chigetposition();
-          gsErrorMsg("Expected type %s\n", type.c_str());
+          mCRL2log(error) << "Expected type " << type << std::endl;
           exit(1);
         };
   return;
@@ -2185,7 +2196,7 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
     if( arg1 != arg2 )
         {
           chigetposition();
-          gsErrorMsg("UnaryTypeCheck: Incompatible Type, expected %s\n", type.c_str());
+          mCRL2log(error) << "UnaryTypeCheck: Incompatible Type, expected " << type << std::endl;
           exit(1);
         };
   return;

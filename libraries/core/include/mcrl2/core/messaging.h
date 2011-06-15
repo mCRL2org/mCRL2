@@ -23,12 +23,8 @@ namespace mcrl2
 namespace core
 {
 
-/// \brief Function for printing error messages.
-void gsErrorMsg(const char* Format, ...);
 /// \brief Function for printing verbose messages.
 void gsVerboseMsg(const char* Format, ...);
-/// \brief Function for printing warning messages.
-void gsWarningMsg(const char* Format, ...);
 /// \brief Function for printing debug messages.
 void gsDebugMsg(const char* Format, ...);
 /// \brief Function for printing debug messages.

@@ -58,7 +58,6 @@ typedef int flex_int32_t;
 typedef unsigned char flex_uint8_t; 
 typedef unsigned short int flex_uint16_t;
 typedef unsigned int flex_uint32_t;
-#endif /* ! C99 */
 
 /* Limits of integral types. */
 #ifndef INT8_MIN
@@ -89,14 +88,16 @@ typedef unsigned int flex_uint32_t;
 #define UINT32_MAX             (4294967295U)
 #endif
 
+#endif /* ! C99 */
+
 #endif /* ! FLEXINT_H */
 
 /* begin standard C++ headers. */
 #include <iostream> 
 #include <errno.h>
 #include <cstdlib>
-#include <cstring>
 #include <cstdio>
+#include <cstring>
 /* end standard C++ headers. */
 
 #ifdef __cplusplus
@@ -153,7 +154,15 @@ typedef unsigned int flex_uint32_t;
 
 /* Size of default input buffer. */
 #ifndef YY_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k.
+ * Moreover, YY_BUF_SIZE is 2*YY_READ_BUF_SIZE in the general case.
+ * Ditto for the __ia64__ case accordingly.
+ */
+#define YY_BUF_SIZE 32768
+#else
 #define YY_BUF_SIZE 16384
+#endif /* __ia64__ */
 #endif
 
 /* The state buf must be large enough to hold one state per character in the main buffer.
@@ -514,7 +523,7 @@ extern void fsmyyerror(const char* s);
 void processId();
 void processQuoted();
 void processNumber();
-#line 518 "liblts_fsmlexer.cpp"
+#line 527 "liblts_fsmlexer.cpp"
 
 #define INITIAL 0
 
@@ -544,7 +553,12 @@ static int yy_flex_strlen (yyconst char * );
 
 /* Amount of stuff to slurp up with each read. */
 #ifndef YY_READ_BUF_SIZE
+#ifdef __ia64__
+/* On IA-64, the buffer size is 16k, not 8k */
+#define YY_READ_BUF_SIZE 16384
+#else
 #define YY_READ_BUF_SIZE 8192
+#endif /* __ia64__ */
 #endif
 
 /* Copy whatever the last rule matched to the standard output. */
@@ -617,7 +631,7 @@ YY_DECL
 #line 78 "liblts_fsmlexer.ll"
 
 
-#line 621 "liblts_fsmlexer.cpp"
+#line 635 "liblts_fsmlexer.cpp"
 
 	if ( !(yy_init) )
 		{
@@ -827,7 +841,7 @@ YY_RULE_SETUP
 #line 105 "liblts_fsmlexer.ll"
 ECHO;
 	YY_BREAK
-#line 831 "liblts_fsmlexer.cpp"
+#line 845 "liblts_fsmlexer.cpp"
 case YY_STATE_EOF(INITIAL):
 	yyterminate();
 

@@ -391,7 +391,7 @@ class ltscompare_tool : public ltscompare_base
       }
       else
       {
-        gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
+        mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
         tool_options.format_for_first = lts_aut;
       }
       if (parser.options.count("in2"))

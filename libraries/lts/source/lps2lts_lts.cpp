@@ -47,7 +47,7 @@ void lps2lts_lts::open_lts(const char* filename, lps2lts_lts_options& opts)
       aut.open(filename);
       if (!aut.is_open())
       {
-        gsErrorMsg("cannot open '%s' for writing\n",filename);
+        mCRL2log(error) << "cannot open '" << filename << "' for writing" << std::endl;
         exit(1);
       }
       break;

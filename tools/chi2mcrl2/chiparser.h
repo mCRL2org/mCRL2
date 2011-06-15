@@ -134,7 +134,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2638 of glr.c  */
-#line 68 "chiparser.yy"
+#line 69 "chiparser.yy"
 
   ATermAppl appl;
   ATermList list;

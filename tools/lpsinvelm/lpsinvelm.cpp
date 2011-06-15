@@ -229,7 +229,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       bool invariance_result = true;
       if (m_no_check)
       {
-        gsWarningMsg("The invariant is not checked; it may not hold for this LPS.\n");
+        mCRL2log(warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
       }
       else
       {

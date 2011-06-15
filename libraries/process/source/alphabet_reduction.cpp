@@ -1410,7 +1410,10 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
       if (ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) &&
           ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),0),pCRL_aterm))
       {
-        gsWarningMsg("an allow operation allowing only the (multi-)action(s) from %P\nis applied to sequential non-directly-recursive process %P.\nThis disallows (multi-)action(s) %P of this process.\nThis warning could also indicate a forgotten (multi-)action in this allow operation.\n\n",V,pn,list_minus(gsaMakeMultActNameL(untypeMAL(ll)),V));
+        mCRL2log(warning) << "an allow operation allowing only the (multi-)action(s) from " << core::pp(V) << std::endl
+                          << "is applied to sequential non-directly-recursive process " << core::pp(pn) << "." << std::endl
+                          << "This disallows (multi-)action(s) " << core::pp(list_minus(gsaMakeMultActNameL(untypeMAL(ll)),V)) << "of this process." << std::endl
+                          << "This warning could also indicate a forgotten (multi-)action in this allow operation." << std::endl << std::endl;
       }
 
       a = gsMakeAllow(V,a);
@@ -2141,7 +2144,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, size_t length, ATermList allowed, 
   }
   else
   {
-    gsWarningMsg("a: %T\n\n", a);
+    mCRL2log(warning) << "a: " << atermpp::aterm(a) << std::endl << std::endl;
     assert(0);
   }
 
@@ -2437,7 +2440,7 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
 
     if (gsIsProcessAssignment(a))
     {
-      gsErrorMsg("n-parallel processes in combination with short-hand assignments are not supported.\n",a);
+      mCRL2log(error) << "n-parallel processes in combination with short-hand assignments are not supported." << std::endl;
       return NULL;
     }
 
@@ -2455,8 +2458,8 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
     }
     if (!new_k)
     {
-      gsErrorMsg("the parameter in the process term %P is not a concrete positive number. As the expansion of n-parallel processes is done"
-                 "by preprocessing, it is not possible to use a variable, and define it using an equation.\n",a);
+      mCRL2log(error) << "the parameter in the process term " << core::pp(a) << " is not a concrete positive number. As the expansion of n-parallel processes is done"
+                      << "by preprocessing, it is not possible to use a variable, and define it using an equation." << std::endl;
       return NULL;
     }
     // Transform k into an aterm with a string representing a value,
@@ -2465,7 +2468,7 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
 
     if (!gsIsDataExprNumber(new_k))
     {
-      gsErrorMsg("The parameter %P should be a number; it equals %P\n",par,new_k);
+      mCRL2log(error) << "The parameter " << core::pp(par) << " should be a number; it equals " << core::pp(new_k) << std::endl;
       return NULL;
     }
     k=ATAgetArgument(new_k,0);

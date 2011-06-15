@@ -567,7 +567,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   {
     if (b && !gsIsNil(ATAgetArgument(ATAgetFirst(sums),3)))   // Summand is timed
     {
-      gsWarningMsg("specification uses time, which is (currently) not supported; ignoring timing\n");
+      mCRL2log(warning) << "specification uses time, which is (currently) not supported; ignoring timing" << std::endl;
       b = false;
     }
     if (!gsIsDelta(ATAgetArgument(ATAgetFirst(sums),2)))
@@ -613,7 +613,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
     }
     if (!set)
     {
-      gsErrorMsg("Parameter '%T' does not have an initial value.",ATgetArgument(ATAgetFirst(l),0));
+      mCRL2log(error) << "Parameter '" << atermpp::aterm(ATgetArgument(ATAgetFirst(l),0)) << "' does not have an initial value." << std::endl;
       initial_state = NULL;
       ATprotect(&initial_state);
       return;

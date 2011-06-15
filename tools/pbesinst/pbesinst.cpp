@@ -256,7 +256,7 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
 
       if (!p.is_closed())
       {
-        core::gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+        mCRL2log(error) << "The PBES is not closed. Pbes2bes cannot handle this kind of PBESs" << std::endl << "Computation aborted." << std::endl;
         return false;
       }
 

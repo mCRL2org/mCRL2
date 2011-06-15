@@ -2300,7 +2300,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   ar = (ATermAppl*) malloc(ar_size*sizeof(ATermAppl));
   if (ar == NULL)
   {
-    gsErrorMsg("cannot allocate enough memory (%li bytes)\n",ar_size*sizeof(ATermAppl));
+    mCRL2log(error) << "cannot allocate enough memory (" << ar_size*sizeof(ATermAppl) << "bytes)" << std::endl;
   }
   for (size_t i=0; i<ar_size; i++)
   {
@@ -2363,7 +2363,7 @@ bool RewriterCompilingJitty::addRewriteRule(ATermAppl Rule)
   }
   catch (std::runtime_error& e)
   {
-    gsWarningMsg("%s\n",e.what());
+    mCRL2log(warning) << e.what() << std::endl;
     return false;
   }
 

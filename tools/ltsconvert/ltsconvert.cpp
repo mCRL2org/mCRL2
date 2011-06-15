@@ -102,12 +102,12 @@ class t_tool_options
         {
           if (!lpsfile.empty())
           {
-            gsWarningMsg("no output format set; using fsm because --lps was used\n");
+            mCRL2log(warning) << "no output format set; using fsm because --lps was used" << std::endl;
             outtype = lts_fsm;
           }
           else
           {
-            gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+            mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
             outtype = lts_lts;
           }
         }
@@ -395,7 +395,7 @@ class ltsconvert_tool : public ltsconvert_base
         {
           if (tool_options.intype == lts_none)
           {
-            gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
+            mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
             tool_options.intype = lts_aut;
           }
         }
@@ -409,12 +409,12 @@ class ltsconvert_tool : public ltsconvert_base
           {
             if (!tool_options.lpsfile.empty())
             {
-              gsWarningMsg("no output format set; using fsm because --lps was used\n");
+              mCRL2log(warning) << "no output format set; using fsm because --lps was used" << std::endl;
               tool_options.outtype = lts_fsm;
             }
             else
             {
-              gsWarningMsg("no output format set or detected; using default (aut)\n");
+              mCRL2log(warning) << "no output format set or detected; using default (aut)" << std::endl;
               tool_options.outtype = lts_aut;
             }
           }

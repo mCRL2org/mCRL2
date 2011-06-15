@@ -53,27 +53,6 @@ static void logger_wrapper(mcrl2_log_level_t t, const char* Format, va_list args
   free(output);
 }
 
-void gsErrorMsg(const char* Format, ...)
-//Post: "error: " is printed to stderr followed by Format, where the remaining
-//      parameters are used as gsprintf arguments to Format.
-{
-  va_list Args;
-  va_start(Args, Format);
-  logger_wrapper(log_error, Format, Args);
-  va_end(Args);
-}
-
-void gsWarningMsg(const char* Format, ...)
-//Post: If the printing of warning messages is enabled, "warning: " is printed
-//      to stderr followed by Format, where the remaining parameters are used
-//      as gsprintf arguments to Format.
-{
-  va_list Args;
-  va_start(Args, Format);
-  logger_wrapper(log_warning, Format, Args);
-  va_end(Args);
-}
-
 void gsVerboseMsg(const char* Format, ...)
 //Post: If the printing of verbose information is enabled, Format is printed to
 //      stderr, where the remaining parameters are used as gsprintf arguments

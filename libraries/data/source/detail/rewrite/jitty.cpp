@@ -294,7 +294,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
       }
       catch (std::runtime_error& e)
       {
-        gsWarningMsg("%s\n",e.what());
+        mCRL2log(warning) << e.what() << std::endl;
         continue;
       }
   
@@ -361,7 +361,7 @@ bool RewriterJitty::addRewriteRule(ATermAppl Rule)
   }
   catch (std::runtime_error& e)
   {
-    gsWarningMsg("%s\n",e.what());
+    mCRL2log(warning) << e.what() << std::endl;
     return false;
   }
 
