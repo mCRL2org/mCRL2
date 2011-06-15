@@ -247,9 +247,28 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
 
-      data::rewriter datar= (opt_data_elm) ?
-                            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy()) :
-                            data::rewriter(p.data(), rewrite_strategy());
+      data::rewriter datar;
+      if (opt_data_elm) 
+      {  
+        // Create a rewriter with only the necessary data equations.
+        using namespace mcrl2::data;
+        std::set < function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
+        std::set < function_symbol > init_symbol_set=pbes_system::find_function_symbols(p.initial_state());
+        std::set < function_symbol > function_symbol_set;
+        set_union(eqn_symbol_set.begin(),eqn_symbol_set.end(),
+                  init_symbol_set.begin(),init_symbol_set.end(),
+                  inserter(function_symbol_set,function_symbol_set.begin()));
+        datar=data::rewriter(p.data(), 
+                             mcrl2::data::used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()), 
+                             rewrite_strategy());
+      }
+      else
+      {
+        // Create a rewriter with all data equations. This is safer, but increases the time and memory to 
+        // compile the rewrite system.
+        data::rewriter(p.data(), rewrite_strategy());
+      }
+  
 
       timer().start("instantiation");
       ::bes::boolean_equation_system bes_equations=
