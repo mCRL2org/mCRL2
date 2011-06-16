@@ -12,6 +12,7 @@
 #ifndef BDD2DOT_H
 #define BDD2DOT_H
 
+#include <fstream>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/messaging.h"
 #include "mcrl2/core/print.h"
@@ -28,7 +29,7 @@ class BDD2Dot
     int f_node_number;
 
     /// \brief The file the output is written to.
-    FILE* f_dot_file;
+    std::ofstream f_dot_file;
 
     /// \brief A table containing all the visited nodes. It maps these nodes to the corresponding node numbers.
     ATermTable f_visited;
@@ -51,11 +52,11 @@ class BDD2Dot
 
       if (f_bdd_info.is_true(a_bdd))
       {
-        fprintf(f_dot_file, "  %d [shape=box, label=\"T\"];\n", f_node_number);
+        f_dot_file << "  " << f_node_number << " [shape=box, label=\"T\"];" << std::endl;
       }
       else if (f_bdd_info.is_false(a_bdd))
       {
-        fprintf(f_dot_file, "  %d [shape=box, label=\"F\"];\n", f_node_number);
+        f_dot_file << "  " << f_node_number << " [shape=box, label=\"F\"];" << std::endl;
       }
       else if (f_bdd_info.is_if_then_else(a_bdd))
       {
@@ -66,13 +67,13 @@ class BDD2Dot
         int v_true_number = ATgetInt((ATermInt) ATtableGet(f_visited, (ATerm) v_true_branch));
         int v_false_number = ATgetInt((ATermInt) ATtableGet(f_visited, (ATerm) v_false_branch));
         ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
-        mcrl2::core::gsfprintf(f_dot_file, "  %d [label=\"%P\"];\n", f_node_number, v_guard);
-        fprintf(f_dot_file, "  %d -> %d;\n", f_node_number, v_true_number);
-        fprintf(f_dot_file, "  %d -> %d [style=dashed];\n", f_node_number, v_false_number);
+        f_dot_file << "  " << f_node_number << " [label=\"" << mcrl2::core::pp(v_guard) << "\"];" << std::endl;
+        f_dot_file << "  " << f_node_number << " -> " << v_true_number << ";" << std::endl;
+        f_dot_file << "  " << f_node_number << " -> " << v_false_number << " [style=dashed];" << std::endl;
       }
       else
       {
-        mcrl2::core::gsfprintf(f_dot_file, "  %d [shape=box, label=\"%P\"];\n", f_node_number, a_bdd);
+        f_dot_file << "  " << f_node_number << " [shape=box, label=\"" << mcrl2::core::pp(a_bdd) << "\"];" << std::endl;
       }
       ATtablePut(f_visited, (ATerm) a_bdd, (ATerm) ATmakeInt(f_node_number++));
     }
@@ -88,13 +89,13 @@ class BDD2Dot
     /// \param a_file_name A file name.
     void output_bdd(ATermAppl a_bdd, char const* a_file_name)
     {
-      f_visited = ATtableCreate(200, 75);
+      f_visited = ATtableCreate(200,75);
       f_node_number = 0;
-      f_dot_file = fopen(a_file_name, "w");
-      fprintf(f_dot_file, "digraph BDD {\n");
+      f_dot_file.open(a_file_name);
+      f_dot_file << "digraph BDD {" << std::endl;
       aux_output_bdd(a_bdd);
-      fprintf(f_dot_file, "}\n");
-      fclose(f_dot_file);
+      f_dot_file << "}" << std::endl;
+      f_dot_file.close();
       ATtableDestroy(f_visited);
     }
 };

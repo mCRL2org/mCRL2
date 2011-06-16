@@ -652,11 +652,11 @@ static void print_state(FILE* f,ATerm state)
   {
     if (i == 0)
     {
-      gsfprintf(f,"%P",ATgetArgument((ATermAppl) state,i));
+      fprintf(f,"%s",core::pp(ATgetArgument((ATermAppl) state,i)));
     }
     else
     {
-      gsfprintf(f,",%P",ATgetArgument((ATermAppl) state,i));
+      fprintf(f,",%s",core::pp(ATgetArgument((ATermAppl) state,i)));
     }
   }
   fprintf(f,"]");
@@ -678,7 +678,7 @@ static void TransitionsGoingToBlock(SVCint b, ATermList* newlab)
     if (classes)
     {
       print_state(stdout,SVCstate2ATerm(inFile,s[i]));
-      gsfprintf(stdout, "\n");
+      fprintf(stdout, "\n");
     }
     for (; !ATisEmpty(labels); labels = ATgetNext(labels))
     {
@@ -951,14 +951,9 @@ int WriteDataAddParam(SVCfile* in, SVCstateIndex initState, int is_branching)
 
   SVCsetInitialState(outFile, get_new_state(in,init));
 
-//  fprintf(stderr,"%i: %i\n",init,blockref[init]);
-//  fprintf(stderr,"%i: %i\n",init,ATgetInt((ATermInt) BlockCode(init)));
   SVCparameterIndex new_param = get_new_param();
   while (SVCgetNextTransition(in,&from,&lab,&to,&param))
   {
-//    fprintf(stderr,"%i(%i) - %i -> %i(%i)\n",from,blockref[from],lab,to,blockref[to]);
-//  gsfprintf(stderr,"%i(%i) = ",from,blockref[from]);print_state(stderr,SVCstate2ATerm(in,from));fprintf(stderr,"\n");
-//    fprintf(stderr,"%i(%i) - %i -> %i(%i)\n",from,ATgetInt((ATermInt) BlockCode(from)),lab,to,ATgetInt((ATermInt) BlockCode(to)));
     SVCstateIndex new_from = get_new_state(in,from);
     SVCstateIndex new_to = get_new_state(in,to);
     SVClabelIndex new_lab = get_new_label(in,lab);

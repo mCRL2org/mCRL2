@@ -376,105 +376,6 @@ static char* whitespace(int len)
 }
 
 
-#ifdef _JITTYC_STORE_TREES
-int RewriterCompilingJitty::write_tree(FILE* f, ATermAppl tree, int* num_states)
-{
-  if (isS(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    fprintf(f,"n%i [label=\"S(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
-    fprintf(f,"n%i -> n%i\n",*num_states,n);
-    return (*num_states)++;
-  }
-  else if (isM(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
-    if (ATisInt(ATgetArgument(tree,0)))
-    {
-      fprintf(f,"n%i [label=\"M(%i)\"]\n",*num_states,ATgetInt((ATermInt) ATgetArgument(tree,0)));
-    }
-    else
-    {
-      fprintf(f,"n%i [label=\"M(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
-    }
-    fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
-    fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);
-    return (*num_states)++;
-  }
-  else if (isF(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
-    if (ATisInt(ATgetArgument(tree,0)))
-    {
-      fprintf(f,"n%i [label=\"F(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(get_int2term(ATgetInt((ATermInt) 
-                            ATgetArgument(tree,0))),0))));
-    }
-    else
-    {
-      fprintf(f,"n%i [label=\"F(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
-    }
-    fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
-    fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);
-    return (*num_states)++;
-  }
-  else if (isD(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,0),num_states);
-    fprintf(f,"n%i [label=\"D\"]\n",*num_states);
-    fprintf(f,"n%i -> n%i\n",*num_states,n);
-    return (*num_states)++;
-  }
-  else if (isN(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,0),num_states);
-    fprintf(f,"n%i [label=\"N\"]\n",*num_states);
-    fprintf(f,"n%i -> n%i\n",*num_states,n);
-    return (*num_states)++;
-  }
-  else if (isC(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
-    gsfprintf(f,"n%i [label=\"C(%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)));
-    fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
-    fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);
-    return (*num_states)++;
-  }
-  else if (isR(tree))
-  {
-    gsfprintf(f,"n%i [label=\"R(%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)));
-    return (*num_states)++;
-  }
-  else if (isX(tree))
-  {
-    ATfprintf(f,"n%i [label=\"X\"]\n",*num_states);
-    return (*num_states)++;
-  }
-
-  return -1;
-}
-
-void RewriterCompilingJitty::tree2dot(ATermAppl tree, char* name, char* filename)
-{
-  FILE* f;
-  int num_states = 0;
-
-  if ((f = fopen(filename,"w")) == NULL)
-  {
-    perror("fopen");
-    return;
-  }
-
-  fprintf(f,"digraph \"%s\" {\n",name);
-  write_tree(f,tree,&num_states);
-  fprintf(f,"}\n");
-
-  fclose(f);
-}
-#endif
-
 static void term2seq(ATerm t, ATermList* s, int* var_cnt)
 {
   if (ATisInt(t))
@@ -1001,11 +902,7 @@ static ATermAppl build_tree(build_pars pars, int i)
   }
 }
 
-#ifdef _JITTYC_STORE_TREES
-ATermAppl RewriterCompilingJitty::create_tree(ATermList rules, int opid, int arity, ATermInt true_inner)
-#else
 static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATermInt true_inner)
-#endif
 // Create a match tree for OpId int2term[opid] and update the value of
 // *max_vars accordingly.
 //
@@ -1017,7 +914,6 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
 //       the number of variables in the result tree
 // Ret:  A match tree for int2term[opid]
 {
-//gsfprintf(stderr,"%P (%i)\n",int2term[opid],opid);
   // Create sequences representing the trees for each rewrite rule and
   // store the total number of variables used in these sequences.
   // (The total number of variables in all sequences should be an upper
@@ -1058,13 +954,6 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
     tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
   }
   //ATprintf("tree: %t\n",tree);
-
-#ifdef _JITTYC_STORE_TREES
-  char s[100],t[100];
-  sprintf(s,"tree_%i_%s_%i",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))),arity);
-  sprintf(t,"tree_%i_%s_%i.dot",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))),arity);
-  tree2dot(tree,s,t);
-#endif
 
   return tree;
 }
@@ -1153,11 +1042,6 @@ static ATermList dep_vars(ATermList eqn)
                                  get_vars(cond)
                                )); // List of variables occurring in each argument of the lhs (except the first element which contains variables from the condition and variables which occur more than once in the result)
 
-  //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
-  //gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATLgetFirst(rules),2));
-  //gsfprintf(stderr,"rule: %P\n",fromRewriteFormat(ATelementAt(ATLgetFirst(rules),2)));
-  //gsfprintf(stderr,"pars: %T\n",pars);
-
   // Indices of arguments that need to be rewritten
   for (size_t i = 0; i < rule_arity; i++)
   {
@@ -1225,15 +1109,9 @@ static ATermList dep_vars(ATermList eqn)
   return deps;
 }
 
-#ifdef _JITTYC_STORE_TREES
-ATermList RewriterCompilingJitty::create_strategy(ATermList rules, int opid, size_t arity, nfs_array &nfs, ATermInt true_inner)
-#else
 static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array &nfs, ATermInt true_inner)
-#endif
 {
   ATermList strat = ATmakeList0();
-
-  //gsfprintf(stderr,"create_strategy: opid %i, arity %i, nfs %i\n",opid,arity,nfs[0]);
 
   // Array to keep note of the used parameters
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
@@ -1267,11 +1145,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
                                    get_doubles(ATelementAt(ATLgetFirst(rules),3),t),
                                    get_vars(cond)
                                  )); // List of variables occurring in each argument of the lhs (except the first element which contains variables from the condition and variables which occur more than once in the result)
-
-    //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
-    //gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATLgetFirst(rules),2));
-    //gsfprintf(stderr,"rule: %P\n",fromRewriteFormat(ATelementAt(ATLgetFirst(rules),2)));
-    //gsfprintf(stderr,"pars: %T\n",pars);
 
     // Indices of arguments that need to be rewritten
     for (size_t i = 0; i < rule_arity; i++)
@@ -1327,7 +1200,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
       // Add vars used in expression
       vars = ATinsert(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
     }
-    //gsfprintf(stderr,"vars: %T\n",vars);
 
     // Create dependency list for this rule
     ATermList deps = ATmakeList0();
@@ -1346,7 +1218,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
 
     // Add rule with its dependencies
     dep_list = ATinsert(dep_list,(ATerm) ATmakeList2((ATerm) deps,ATgetFirst(rules)));
-    //gsfprintf(stderr,"\n");
   }
 
   // Process all rules with their dependencies
@@ -1371,7 +1242,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
     // Create and add tree of collected rules
     if (!ATisEmpty(no_deps))
     {
-      //gsfprintf(stderr,"add: %T\n",no_deps);
       strat = ATinsert(strat, (ATerm) create_tree(no_deps,opid,arity,true_inner));
     }
 
@@ -1401,7 +1271,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
       used[maxidx] = true;
       ATermInt rewr_arg = ATmakeInt(maxidx);
 
-      //gsfprintf(stderr,"add: %T\n",rewr_arg);
       strat = ATinsert(strat,(ATerm) rewr_arg);
 
       ATermList l = ATmakeList0();
@@ -1412,8 +1281,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
       dep_list = ATreverse(l);
     }
   }
-
-  //gsfprintf(stderr,"strat: %T\n\n",ATreverse(strat));
 
   return ATreverse(strat);
 }
@@ -1865,14 +1732,8 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
 // arity     Arity of the head symbol of the expression where are
 //           matching (for construction of return values)
 {
-#ifdef IT_DEBUG
-  fprintf(IT_DEBUG_FILE "implement_tree_aux: cur_arg=%i, parent=%i, level=%i, cnt=%i\n",cur_arg,parent,level,cnt);
-#endif
   if (isS(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "S(%P)\n",ATgetArgument(tree,0));
-#endif
     if (level == 0)
     {
       fprintf(f,"%sconst ATermAppl %s = arg%i; // S\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,cur_arg);
@@ -1890,9 +1751,6 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isM(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "M(%P)\n",ATgetArgument(tree,0));
-#endif
     if (level == 0)
     {
       fprintf(f,"%sif ( ATisEqual(%s,arg%i) ) // M\n"
@@ -1917,9 +1775,6 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isF(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "F(%P)\n",get_int2term(ATgetInt((ATermInt) ATgetArgument(tree,0))));
-#endif
     if (level == 0)
     {
       // TODO: if parent was also an F of the same level we can omit isAppl
@@ -1965,9 +1820,6 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isD(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "D\n");
-#endif
     int i = pop_st();
     int j = pop_st();
     implement_tree_aux(f,ATAgetArgument(tree,0),j,i,level-1,cnt,d,arity,used,nnfvars);
@@ -1977,17 +1829,11 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isN(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "N\n");
-#endif
     implement_tree_aux(f,ATAgetArgument(tree,0),cur_arg+1,parent,level,cnt,d,arity,used,nnfvars);
     return;
   }
   else if (isC(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "C\n");
-#endif
     fprintf(f,"%sif ( ATisEqual(",whitespace(d*2));
     calcTerm(f,ATgetArgument(tree,0),0,nnfvars);
 
@@ -2004,36 +1850,24 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isR(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "R\n");
-#endif
     fprintf(f,"%sreturn ",whitespace(d*2));
     if (level > 0)
     {
       //cur_arg = peekn_st(level);
       cur_arg = peekn_st(2*level-1);
     }
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "arity=%i, cur_arg=%i\n",arity,cur_arg);
-#endif
     calcTerm(f,add_args(ATgetArgument(tree,0),arity-cur_arg-1),get_startarg(ATgetArgument(tree,0),cur_arg+1),nnfvars);
     fprintf(f,"; // R\n");
     return;
   }
   else
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "X\n");
-#endif
     return;
   }
 }
 
 void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, int d, int opid, bool* used)
 {
-#ifdef IT_DEBUG
-  gsfprintf(IT_DEBUG_FILE "implement_tree %P (%i)\n",get_int2term(opid),opid);
-#endif
   int l = 0;
 
   ATermList nnfvars = ATmakeList0();
@@ -2132,12 +1966,6 @@ static void finish_function(FILE* f, size_t arity, int opid, bool* used)
 
 void RewriterCompilingJitty::implement_strategy(FILE* f, ATermList strat, int arity, int d, int opid, size_t nf_args)
 {
-//#ifdef IS_DEBUG
-#ifndef IT_DEBUG_INLINE
-  gsfprintf(IT_DEBUG_FILE "implement_strategy %P (%i)\n",get_int2term(opid),opid);
-  gsfprintf(IT_DEBUG_FILE "implement_strategy: %T\n",strat);
-  fflush(f);
-#endif
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
   for (int i=0; i<arity; i++)
   {
@@ -2323,23 +2151,9 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
     }
   }
 
-#define PRINT_AR \
-  for (ATermList l=ATtableKeys(term2int); !ATisEmpty(l); l=ATgetNext(l)) \
-  { \
-    ATermAppl opid = (ATermAppl) ATgetFirst(l); \
-    size_t idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,ATtableGet(term2int,(ATerm) opid))); \
-    for (size_t i=1; i<=getArity(opid); i++) \
-    { \
-      for (size_t j=0; j<i; j++) \
-      { \
-        gsfprintf(stderr,"%P (%i), arity %i, arg %i:  (%i)  %T\n",opid,idx,i,j,idx+((i-1)*i)/2+j,ar[idx+((i-1)*i)/2+j]); \
-      } \
-    } \
-  }
   bool notdone = true;
   while (notdone)
   {
-    //PRINT_AR
     notdone = false;
     for (size_t i=0; i<ar_size; i++)
     {
@@ -2350,7 +2164,6 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
       }
     }
   }
-  //PRINT_AR
 }
 
 bool RewriterCompilingJitty::addRewriteRule(ATermAppl Rule)
@@ -2658,7 +2471,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   {
     size_t arity = getArity(get_int2term(j));
 
-    gsfprintf(f,  "// %T\n",get_int2term(j));
+    fprintf(f,  "// %s\n",atermpp::aterm(get_int2term(j)).to_string().c_str());
 
     for (size_t a=0; a<=arity; a++)
     {
@@ -2725,12 +2538,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       size_t arity = getArity(get_int2term(j));
       if (i <= arity)
       {
-        gsfprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j,j,i);
+        fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j,j,i);
         if (i <= NF_MAX_ARITY)
         {
           for (size_t k=(1 << i)-i-1; k<(1 << (i+1))-i-2; k++)
           {
-            gsfprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j+1+k,j+1+k,i);
+            fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j+1+k,j+1+k,i);
           }
         }
       }

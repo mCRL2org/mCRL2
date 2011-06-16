@@ -19,7 +19,6 @@
 
 #ifdef MCRL2_JITTYC_AVAILABLE
 
-//#define _JITTYC_STORE_TREES
 #include <utility>
 #include <string>
 
@@ -74,13 +73,6 @@ class RewriterCompilingJitty: public Rewriter
     void (*so_rewr_init)(RewriterCompilingJitty *);
     void (*so_rewr_cleanup)();
     ATermAppl(*so_rewr)(ATermAppl);
-
-#ifdef _JITTYC_STORE_TREES
-    int write_tree(FILE* f, ATermAppl tree, int* num_states);
-    void tree2dot(ATermAppl tree, char* name, char* filename);
-    ATermAppl create_tree(ATermList rules, int opid, int arity, ATermInt true_inner_);
-    ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array &nfs, ATermInt true_inner_);
-#endif
 
     void add_base_nfs(nfs_array &a, ATermInt opid, size_t arity);
     void extend_nfs(nfs_array &a, ATermInt opid, size_t arity);

@@ -56,40 +56,6 @@ std::string pp_format_to_string(const t_pp_format pp_format)
   }
 }
 
-/** \brief Extensions of the printf function. The following new
- *         conversion formats are supported:
- *         - '%P' for pretty printing ATerm's
- *         - '%T' for normal printing of ATerm's
- *         - '%F' for printing of AFun's
-**/
-int gsprintf(const char* format, ...);
-
-/** \brief Extensions of the fprintf function. The following new
- *         conversion formats are supported:
- *         - '%P' for pretty printing ATerm's
- *         - '%T' for normal printing of ATerm's
- *         - '%F' for printing of AFun's
-**/
-int gsfprintf(FILE* stream, const char* format, ...);
-
-/** \brief Extensions of the vfprintf functions. The following new
- *         conversion formats are supported:
- *         - '%P' for the pretty printing ATerm's
- *         - '%T' for the normal printing of ATerm's
- *         - '%F' for the printing of AFun's
-**/
-int gsvfprintf(FILE* stream, const char* format, va_list args);
-
-/** \brief Print a textual description of an ATerm representation of an
- *         mCRL2 specification or expression to an output stream.
- *  \param[in] out_stream A pointer to a stream to which can be written.
- *  \param[in] part An ATerm representation of a part of an mCRL2
- *             specification or expression.
- *  \param[in] pp_format A pretty print format.
- *  \post A textual representation of part is written to out_stream using
- *        method pp_format.
-**/
-void PrintPart_C(FILE* out_stream, const ATerm part, t_pp_format pp_format = ppDefault);
 
 /** \brief Print a textual description of an ATerm representation of an
  *         mCRL2 specification or expression to an output stream.
