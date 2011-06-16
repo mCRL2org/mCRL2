@@ -12,7 +12,8 @@
 #ifndef __NUMERIC_STRING_FUNCTIONS_H__
 #define __NUMERIC_STRING_FUNCTIONS_H__
 
-#include <stdlib.h>
+#include <cstddef>
+#include <cstdlib>
 #include <math.h>
 
 namespace mcrl2
