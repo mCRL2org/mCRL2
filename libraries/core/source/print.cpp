@@ -8,12 +8,8 @@
 //
 /// \file print.cpp
 
-#include "mcrl2/core/print.h"
-
-
 #include <sstream>
-
-#define PRINT_CXX
+#include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/print_implementation.h"
 
 namespace mcrl2
@@ -24,7 +20,7 @@ namespace core
 void PrintPart_CXX(std::ostream& out_stream, const ATerm part,
                    t_pp_format pp_format)
 {
-  mcrl2::core::detail::PrintPart__CXX(out_stream, part, pp_format);
+  detail::PrintPart__CXX(out_stream, part, pp_format);
 }
 
 std::string PrintPart_CXX(const ATerm part, t_pp_format pp_format)
