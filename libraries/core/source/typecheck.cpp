@@ -3946,7 +3946,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
       }
-      mCRL2log(error) << "type error while trying to cast " << gsMakeDataAppl(Data,Arguments) << " to type " << core::pp(PosType) << std::endl;
+      mCRL2log(error) << "type error while trying to cast " << pp(gsMakeDataAppl(Data,Arguments)) << " to type " << core::pp(PosType) << std::endl;
       return NULL;
     }
 
