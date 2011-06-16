@@ -12,26 +12,7 @@
 #ifndef __MCRL2_CORE_MESSAGING_H__
 #define __MCRL2_CORE_MESSAGING_H__
 
-#include <cstdarg>
-#include <cassert>
-#include "boost/current_function.hpp"
+// Backward compatibility
 #include "mcrl2/utilities/logger.h"
-
-namespace mcrl2
-{
-/// \brief The main namespace for the Core library.
-namespace core
-{
-
-/// \brief Function for printing debug messages.
-void gsDebugMsg(const char* Format, ...);
-/// \brief Function for printing debug messages.
-void gsDebugMsgFunc(const char* FuncName, const char* Format, ...);
-
-/// \brief Function for printing debug messages.
-#define gsDebugMsg(...)        gsDebugMsgFunc(BOOST_CURRENT_FUNCTION, __VA_ARGS__)
-
-}
-}
 
 #endif

@@ -126,25 +126,25 @@ class BDD_Prover: public Prover
       ATerm v_previous_1 = 0;
       ATerm v_previous_2 = 0;
 
-      core::gsDebugMsg("Formula: %P\n", f_formula);
+      mCRL2log(debug) << "Formula: " << core::pp( f_formula) << std::endl;
 
       f_internal_bdd = m_rewriter->toRewriteFormat(f_formula);
       f_internal_bdd = m_rewriter->rewriteInternal(f_internal_bdd);
       f_internal_bdd = f_manipulator->orient(f_internal_bdd);
 
-      core::gsDebugMsg("Formula rewritten and oriented: %P\n", m_rewriter->fromRewriteFormat(f_internal_bdd));
+      mCRL2log(debug) << "Formula rewritten and oriented: " << core::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
 
       while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd)
       {
         v_previous_2 = v_previous_1;
         v_previous_1 = f_internal_bdd;
         f_internal_bdd = bdd_down(f_internal_bdd);
-        core::gsDebugMsg("End of iteration.\n");
-        core::gsDebugMsg("Intermediate BDD: %P\n", m_rewriter->fromRewriteFormat(f_internal_bdd));
+        mCRL2log(debug) << "End of iteration." << std::endl;
+        mCRL2log(debug) << "Intermediate BDD: " << core::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
       }
 
       f_bdd = m_rewriter->fromRewriteFormat(f_internal_bdd);
-      core::gsDebugMsg("Resulting BDD: %P\n", f_bdd);
+      mCRL2log(debug) << "Resulting BDD: " << core::pp( f_bdd) << std::endl;
 
       ATtableDestroy(f_formula_to_bdd);
       ATtableDestroy(f_smallest);
@@ -165,7 +165,7 @@ class BDD_Prover: public Prover
 
       if (f_time_limit != 0 && (f_deadline - time(0)) <= 0)
       {
-        core::gsDebugMsg("The time limit has passed.\n");
+        mCRL2log(debug) << "The time limit has passed." << std::endl;
         return a_formula;
       }
 
@@ -191,7 +191,7 @@ class BDD_Prover: public Prover
       }
       else
       {
-        core::gsDebugMsg("%sSmallest guard: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_guard));
+        mCRL2log(debug) << a_indent << "Smallest guard: " << core::pp(m_rewriter->fromRewriteFormat(v_guard)) << std::endl;
       }
 
       ATerm v_term1, v_term2;
@@ -199,16 +199,16 @@ class BDD_Prover: public Prover
       v_term1 = f_manipulator->set_true(a_formula, v_guard);
       v_term1 = m_rewriter->rewriteInternal(v_term1);
       v_term1 = f_manipulator->orient(v_term1);
-      core::gsDebugMsg("%sTrue-branch after rewriting and orienting: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_term1));
+      mCRL2log(debug) << a_indent << "True-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
       v_term1 = bdd_down(v_term1, a_indent);
-      core::gsDebugMsg("%sBDD of the true-branch: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_term1));
+      mCRL2log(debug) << a_indent << "BDD of the true-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
 
       v_term2 = f_manipulator->set_false(a_formula, v_guard);
       v_term2 = m_rewriter->rewriteInternal(v_term2);
       v_term2 = f_manipulator->orient(v_term2);
-      core::gsDebugMsg("%sFalse-branch after rewriting and orienting: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_term2));
+      mCRL2log(debug) << a_indent << "False-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
-      core::gsDebugMsg("%sBDD of the false-branch: %P\n", a_indent.c_str(), m_rewriter->fromRewriteFormat(v_term2));
+      mCRL2log(debug) << a_indent << "BDD of the false-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
 
       v_bdd = f_manipulator->make_reduced_if_then_else(v_guard, v_term1, v_term2);
       ATtablePut(f_formula_to_bdd, a_formula, v_bdd);
@@ -226,10 +226,10 @@ class BDD_Prover: public Prover
       v_new_time_limit = f_deadline - time(0);
       if (v_new_time_limit > 0 || f_time_limit == 0)
       {
-        core::gsDebugMsg("Simplifying the BDD:\n");
+        mCRL2log(debug) << "Simplifying the BDD:" << std::endl;
         f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(0)));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
-        core::gsDebugMsg("Resulting BDD: %P\n", f_bdd);
+        mCRL2log(debug) << "Resulting BDD: " << core::pp( f_bdd) << std::endl;
       }
     }
 
@@ -247,7 +247,7 @@ class BDD_Prover: public Prover
           f_induction.initialize(v_original_formula);
           while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
           {
-            core::gsDebugMsg("Applying induction.\n");
+            mCRL2log(debug) << "Applying induction." << std::endl;
             f_formula = f_induction.apply_induction();
             build_bdd();
             eliminate_paths();
@@ -264,7 +264,7 @@ class BDD_Prover: public Prover
             f_induction.initialize(v_original_formula);
             while (f_induction.can_apply_induction() && !f_bdd_info.is_true(f_bdd))
             {
-              core::gsDebugMsg("Applying induction on the negated formula.\n");
+              mCRL2log(debug) << "Applying induction on the negated formula." << std::endl;
               f_formula = f_induction.apply_induction();
               build_bdd();
               eliminate_paths();
@@ -450,13 +450,9 @@ class BDD_Prover: public Prover
       f_apply_induction = a_apply_induction;
       f_info->set_reverse(f_reverse);
       f_info->set_full(f_full);
-      core::gsDebugMsg(
-        "Flags:\n"
-        "  Reverse: %s,\n"
-        "  Full: %s,\n",
-        bool_to_char_string(f_reverse),
-        bool_to_char_string(f_full)
-      );
+      mCRL2log(debug) << "Flags:" << std::endl
+                      << "  Reverse: " << bool_to_char_string(f_reverse) << "," << std::endl
+                      << "  Full: " << bool_to_char_string(f_full) << "," << std::endl;
       if (a_path_eliminator)
       {
         f_bdd_simplifier = new BDD_Path_Eliminator(a_solver_type);
@@ -503,12 +499,12 @@ class BDD_Prover: public Prover
       update_answers();
       if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes))
       {
-        core::gsDebugMsg("The formula appears to be satisfiable.\n");
+        mCRL2log(debug) << "The formula appears to be satisfiable." << std::endl;
         v_result = get_branch(f_bdd, true);
       }
       else
       {
-        core::gsDebugMsg("The formula is a contradiction or a tautology.\n");
+        mCRL2log(debug) << "The formula is a contradiction or a tautology." << std::endl;
         v_result = 0;
       }
       return v_result;
@@ -522,12 +518,12 @@ class BDD_Prover: public Prover
       update_answers();
       if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes))
       {
-        core::gsDebugMsg("The formula appears to be satisfiable.\n");
+        mCRL2log(debug) << "The formula appears to be satisfiable." << std::endl;
         v_result = get_branch(f_bdd, false);
       }
       else
       {
-        core::gsDebugMsg("The formula is a contradiction or a tautology.\n");
+        mCRL2log(debug) << "The formula is a contradiction or a tautology." << std::endl;
         v_result = 0;
       }
       if (v_result==0)

@@ -95,11 +95,11 @@ class chi2mcrl2_tool: public input_output_tool
 
       ATermAppl result = translate_file(options);
 
-      gsDebugMsg("Set options");
+      mCRL2log(debug) << "Set options" << std::endl;
 
       asttransform.set_options(options);
 
-      gsDebugMsg("Transforming AST to mcrl2 specification\n");
+      mCRL2log(debug) << "Transforming AST to mcrl2 specification" << std::endl;
       if (asttransform.translator(result))
       {
         mcrl2spec = asttransform.getResult();

@@ -254,7 +254,7 @@ sort_expr:
   sort_expr_arrow
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed sort expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sort expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -267,7 +267,7 @@ sort_expr_arrow:
   | domain_no_arrow ARROW sort_expr_arrow
     {
       safe_assign($$, gsMakeSortArrow($1, $3));
-      gsDebugMsg("parsed arrow sort\n  %T\n", $$);
+      mCRL2log(debug) << "parsed arrow sort\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -276,7 +276,7 @@ domain_no_arrow:
   domain_no_arrow_elts_hs
     {
       safe_assign($$, ATreverse($1));
-      gsDebugMsg("parsed non-arrow domain\n  %T\n", $$);
+      mCRL2log(debug) << "parsed non-arrow domain\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -285,12 +285,12 @@ domain_no_arrow_elts_hs:
   domain_no_arrow_elt
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed non-arrow domain elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed non-arrow domain elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | domain_no_arrow_elts_hs HASH domain_no_arrow_elt
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed non-arrow domain elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed non-arrow domain elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -299,7 +299,7 @@ domain_no_arrow_elt:
   sort_expr_struct
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed non-arrow domain element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed non-arrow domain element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -312,7 +312,7 @@ sort_expr_struct:
   | KWSTRUCT struct_constructors_bs
     {
       safe_assign($$, gsMakeSortStruct(ATreverse($2)));
-      gsDebugMsg("parsed structured sort\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -321,12 +321,12 @@ struct_constructors_bs:
   struct_constructor
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed structured sort constructors\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort constructors\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | struct_constructors_bs BAR struct_constructor
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed structured sort constructors\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort constructors\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -335,12 +335,12 @@ struct_constructor:
   ID recogniser
     {
       safe_assign($$, gsMakeStructCons($1, ATmakeList0(), $2));
-      gsDebugMsg("parsed structured sort constructor\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort constructor\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ID LPAR struct_projections_cs RPAR recogniser
     {
       safe_assign($$, gsMakeStructCons($1, ATreverse($3), $5));
-      gsDebugMsg("parsed structured sort constructor\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort constructor\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -349,12 +349,12 @@ recogniser:
   /* empty */
     {
       safe_assign($$, gsMakeNil());
-      gsDebugMsg("parsed recogniser\n  %T\n", $$);
+      mCRL2log(debug) << "parsed recogniser\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | QMARK ID
     {
       safe_assign($$, $2);
-      gsDebugMsg("parsed recogniser id\n  %T\n", $$);
+      mCRL2log(debug) << "parsed recogniser id\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -363,12 +363,12 @@ struct_projections_cs:
   struct_projection
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed structured sort projections\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort projections\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | struct_projections_cs COMMA struct_projection
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed structured sort projections\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort projections\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -377,12 +377,12 @@ struct_projection:
   sort_expr
     {
       safe_assign($$, gsMakeStructProj(gsMakeNil(), $1));
-      gsDebugMsg("parsed structured sort projection\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort projection\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ID COLON sort_expr
     {
       safe_assign($$, gsMakeStructProj($1, $3));
-      gsDebugMsg("parsed structured sort projection\n  %T\n", $$);
+      mCRL2log(debug) << "parsed structured sort projection\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -391,17 +391,17 @@ sort_expr_primary:
   ID
     {
       safe_assign($$, gsMakeSortId($1));
-      gsDebugMsg("parsed primary sort\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary sort\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | sort_constant
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed sort constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sort constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | sort_constructor
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed sort constructor\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sort constructor\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LPAR sort_expr RPAR
     {
@@ -457,7 +457,7 @@ data_expr:
   data_expr_whr
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed data expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -470,7 +470,7 @@ data_expr_whr:
   | data_expr_whr WHR id_inits_cs END
     {
       safe_assign($$, gsMakeWhr($1, ATreverse($3)));
-      gsDebugMsg("parsed where clause\n  %T\n", $$);
+      mCRL2log(debug) << "parsed where clause\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -479,12 +479,12 @@ id_inits_cs:
   id_init
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed identifier initialisations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed identifier initialisations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | id_inits_cs COMMA id_init
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed identifier initialisations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed identifier initialisations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -493,7 +493,7 @@ id_init:
   ID EQUALS data_expr
     {
       safe_assign($$, gsMakeIdInit($1, $3));
-      gsDebugMsg("parsed identifier initialisation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed identifier initialisation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -506,17 +506,17 @@ data_expr_quant:
   | LAMBDA data_vars_decls_cs DOT data_expr_quant
     {
       safe_assign($$, gsMakeBinder(gsMakeLambda(), $2, $4));
-      gsDebugMsg("parsed lambda abstraction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed lambda abstraction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | FORALL data_vars_decls_cs DOT data_expr_quant
     {
       safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT data_expr_quant
     {
       safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -526,12 +526,12 @@ data_vars_decls_cs:
   data_vars_decl
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_vars_decls_cs COMMA data_vars_decl
     {
       safe_assign($$, ATconcat($1, $3));
-      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -544,7 +544,7 @@ data_vars_decl:
       for (size_t i = 0; i < n; i++) {
         safe_assign($$, ATinsert($$, (ATerm) gsMakeDataVarId(ATAelementAt($1, i), $3)));
       }
-      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -558,7 +558,7 @@ data_expr_imp:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed implication\n  %T\n", $$);
+      mCRL2log(debug) << "parsed implication\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -571,12 +571,12 @@ data_expr_imp_rhs:
   | FORALL data_vars_decls_cs DOT data_expr_imp_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT data_expr_imp_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -590,13 +590,13 @@ data_expr_and:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed conjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_eq BARS data_expr_and_rhs
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed disjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed disjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -609,12 +609,12 @@ data_expr_and_rhs:
   | FORALL data_vars_decls_cs DOT data_expr_and_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT data_expr_and_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -628,13 +628,13 @@ data_expr_eq:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed equality expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed equality expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_rel NEQ data_expr_eq_rhs
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed equality expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed equality expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -647,17 +647,17 @@ data_expr_eq_rhs:
   | LAMBDA data_vars_decls_cs DOT data_expr_eq_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeLambda(), $2, $4));
-      gsDebugMsg("parsed lambda abstraction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed lambda abstraction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | FORALL data_vars_decls_cs DOT data_expr_eq_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT data_expr_eq_rhs
     {
       safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -671,31 +671,31 @@ data_expr_rel:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed relational expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_cons LTE data_expr_cons
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed relational expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_cons RANG data_expr_cons
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed relational expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_cons LANG data_expr_cons
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed relational expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_cons IN data_expr_cons
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed relational expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed relational expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -709,7 +709,7 @@ data_expr_cons:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed list cons expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed list cons expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -723,7 +723,7 @@ data_expr_snoc:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed list snoc expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed list snoc expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -737,7 +737,7 @@ data_expr_concat:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed list concat expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed list concat expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -751,13 +751,13 @@ data_expr_add:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed addition or set union\n  %T\n", $$);
+      mCRL2log(debug) << "parsed addition or set union\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_add MINUS data_expr_div
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed subtraction or set difference\n  %T\n", $$);
+      mCRL2log(debug) << "parsed subtraction or set difference\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -771,19 +771,19 @@ data_expr_div:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed div expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed div expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_div MOD data_expr_mult
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed mod expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed mod expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_div SLASH data_expr_mult
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed division expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed division expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -797,13 +797,13 @@ data_expr_mult:
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed multiplication or set intersection\n  %T\n", $$);
+      mCRL2log(debug) << "parsed multiplication or set intersection\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_mult DOT data_expr_prefix
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId($2), ATmakeList2((ATerm) $1, (ATerm) $3)));
-      gsDebugMsg("parsed list at expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed list at expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -816,17 +816,17 @@ data_expr_prefix:
   | EXCLAM data_expr_quant_prefix
     {
       safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((ATerm) $2)));
-      gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix data expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | MINUS data_expr_prefix
     {
       safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((ATerm) $2)));
-      gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix data expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | HASH data_expr_prefix
     {
       safe_assign($$, gsMakeDataAppl(gsMakeId($1), ATmakeList1((ATerm) $2)));
-      gsDebugMsg("parsed prefix data expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix data expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -839,12 +839,12 @@ data_expr_quant_prefix:
   | FORALL data_vars_decls_cs DOT data_expr_quant_prefix
     {
       safe_assign($$, gsMakeBinder(gsMakeForall(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT data_expr_quant_prefix
     {
       safe_assign($$, gsMakeBinder(gsMakeExists(), $2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -857,13 +857,13 @@ data_expr_postfix:
   | data_expr_postfix LPAR data_exprs_cs RPAR
     {
       safe_assign($$, gsMakeDataAppl($1, ATreverse($3)));
-      gsDebugMsg("parsed postfix data expression (function application)\n  %T\n", $$);
+      mCRL2log(debug) << "parsed postfix data expression (function application)\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
     | data_expr_postfix LBRACK data_expr ARROW data_expr RBRACK
     {
       safe_assign($$,
         gsMakeDataAppl(gsMakeId(mcrl2::data::function_update_name()), ATmakeList3((ATerm) $1, (ATerm) $3, (ATerm) $5)));
-      gsDebugMsg("parsed postfix data expression (function update)\n  %T\n", $$);
+      mCRL2log(debug) << "parsed postfix data expression (function update)\n  " << atermpp::aterm( $$) << "" << std::endl;
     } 
   ;
 
@@ -872,12 +872,12 @@ data_exprs_cs:
   data_expr
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed data expressions\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_exprs_cs COMMA data_expr
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed data expressions\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -886,7 +886,7 @@ data_expr_primary:
   ID
     {
       safe_assign($$, gsMakeId($1));
-      gsDebugMsg("parsed primary data expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary data expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_constant
     {
@@ -911,32 +911,32 @@ data_constant:
   CTRUE
     {
       safe_assign($$, gsMakeId($1));
-      gsDebugMsg("parsed data constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | CFALSE
     {
       safe_assign($$, gsMakeId($1));
-      gsDebugMsg("parsed data constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | IF
     {
       safe_assign($$, gsMakeId($1));
-      gsDebugMsg("parsed data constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | NUMBER
     {
       safe_assign($$, gsMakeId($1));
-      gsDebugMsg("parsed data constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACK RBRACK
     {
       safe_assign($$, gsMakeId(mcrl2::data::sort_list::nil_name()));
-      gsDebugMsg("parsed data constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACE RBRACE
     {
       safe_assign($$, gsMakeId(mcrl2::data::sort_set::emptyset_name()));
-      gsDebugMsg("parsed data constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -945,17 +945,17 @@ data_enumeration:
   LBRACK data_exprs_cs RBRACK
     {
       safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_list::list_enumeration_name()), ATreverse($2)));
-      gsDebugMsg("parsed data enumeration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data enumeration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACE data_exprs_cs RBRACE
     {
       safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_set::set_enumeration_name()), ATreverse($2)));
-      gsDebugMsg("parsed data enumeration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data enumeration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACE bag_enum_elts_cs RBRACE
     {
       safe_assign($$, gsMakeDataAppl(gsMakeId(mcrl2::data::sort_bag::bag_enumeration_name()), ATreverse($2)));
-      gsDebugMsg("parsed data enumeration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data enumeration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -964,12 +964,12 @@ bag_enum_elts_cs:
   bag_enum_elt
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed bag enumeration elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed bag enumeration elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | bag_enum_elts_cs COMMA bag_enum_elt
     {
       safe_assign($$, ATconcat($3, $1));
-      gsDebugMsg("parsed bag enumeration elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed bag enumeration elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -978,7 +978,7 @@ bag_enum_elt:
   data_expr COLON data_expr
     {
       safe_assign($$, ATmakeList2((ATerm) $3, (ATerm) $1));
-      gsDebugMsg("parsed bag enumeration element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed bag enumeration element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -987,7 +987,7 @@ data_comprehension:
   LBRACE data_var_decl BAR data_expr RBRACE
     {
       safe_assign($$, gsMakeBinder(gsMakeSetBagComp(), ATmakeList1((ATerm) $2), $4));
-      gsDebugMsg("parsed data comprehension\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data comprehension\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -996,7 +996,7 @@ data_var_decl:
   ID COLON sort_expr
     {
       safe_assign($$, gsMakeDataVarId($1, $3));
-      gsDebugMsg("parsed data variable declaration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declaration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1008,7 +1008,7 @@ data_spec:
   data_spec_elts
     {
       safe_assign($$, gsDataSpecEltsToSpec(ATreverse($1)));
-      gsDebugMsg("parsed data specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1017,12 +1017,12 @@ data_spec_elts:
   data_spec_elt
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed data specification elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    | data_spec_elts data_spec_elt
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed data specification elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    ;
 
@@ -1031,22 +1031,22 @@ data_spec_elt:
   sort_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed data specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | cons_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed data specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | map_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed data specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_eqn_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed data specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1055,7 +1055,7 @@ sort_spec:
   KWSORT sorts_decls_scs
     {
       safe_assign($$, gsMakeSortSpec($2));
-      gsDebugMsg("parsed sort specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sort specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1064,12 +1064,12 @@ sorts_decls_scs:
   sorts_decl SEMICOLON
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed sort declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sort declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | sorts_decls_scs sorts_decl SEMICOLON
     {
       safe_assign($$, ATconcat($1, $2));
-      gsDebugMsg("parsed sort declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sort declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1082,12 +1082,12 @@ sorts_decl:
       for (size_t i = 0; i < n; i++) {
         safe_assign($$, ATinsert($$, (ATerm) gsMakeSortId(ATAelementAt($1, i))));
       }
-      gsDebugMsg("parsed standard sort declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed standard sort declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ID EQUALS sort_expr
     {
       safe_assign($$, ATmakeList1((ATerm) gsMakeSortRef($1, $3)));
-      gsDebugMsg("parsed reference sort declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed reference sort declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1096,12 +1096,12 @@ ids_cs:
   ID
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed id's\n  %T\n", $$);
+      mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ids_cs COMMA ID
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed id's\n  %T\n", $$);
+      mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1110,12 +1110,12 @@ domain:
   domain_no_arrow
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed domain\n  %T\n", $$);
+      mCRL2log(debug) << "parsed domain\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | domain_no_arrow ARROW sort_expr
     {
       safe_assign($$, ATmakeList1((ATerm) gsMakeSortArrow($1, $3)));
-      gsDebugMsg("parsed domain\n  %T\n", $$);
+      mCRL2log(debug) << "parsed domain\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1124,7 +1124,7 @@ cons_spec:
   KWCONS ops_decls_scs
     {
       safe_assign($$, gsMakeConsSpec($2));
-      gsDebugMsg("parsed constructor operation specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed constructor operation specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1133,7 +1133,7 @@ map_spec:
   KWMAP ops_decls_scs
     {
       safe_assign($$, gsMakeMapSpec($2));
-      gsDebugMsg("parsed operation specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed operation specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1143,12 +1143,12 @@ ops_decls_scs:
   ops_decl SEMICOLON
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed operation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed operation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ops_decls_scs ops_decl SEMICOLON
     {
       safe_assign($$, ATconcat($1, $2));
-      gsDebugMsg("parsed operation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed operation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1161,7 +1161,7 @@ ops_decl:
       for (size_t i = 0; i < n; i++) {
         safe_assign($$, ATinsert($$, (ATerm) gsMakeOpId(ATAelementAt($1, i), $3)));
       }
-      gsDebugMsg("parsed operation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed operation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1170,7 +1170,7 @@ data_eqn_spec:
   data_eqn_sect
     {
       safe_assign($$, gsMakeDataEqnSpec($1));
-      gsDebugMsg("parsed data equation specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data equation specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1179,7 +1179,7 @@ data_eqn_sect:
   KWEQN data_eqn_decls_scs
     {
       safe_assign($$, ATreverse($2));
-      gsDebugMsg("parsed data equation section\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data equation section\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | KWVAR data_vars_decls_scs KWEQN data_eqn_decls_scs
     {
@@ -1191,7 +1191,7 @@ data_eqn_sect:
           ATinsert($$, (ATerm) gsMakeDataEqn($2, ATAgetArgument(DataEqn, 1),
             ATAgetArgument(DataEqn, 2), ATAgetArgument(DataEqn, 3))));
       }
-      gsDebugMsg("parsed data equation section\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data equation section\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1200,12 +1200,12 @@ data_eqn_decls_scs:
   data_eqn_decl SEMICOLON
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed data equation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_eqn_decls_scs data_eqn_decl SEMICOLON
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed equation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1214,12 +1214,12 @@ data_eqn_decl:
   data_expr EQUALS data_expr
     {
       safe_assign($$, gsMakeDataEqn(ATmakeList0(), mcrl2::data::sort_bool::true_(), $1, $3));
-      gsDebugMsg("parsed data equation declaration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data equation declaration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr ARROW data_expr EQUALS data_expr
     {
       safe_assign($$, gsMakeDataEqn(ATmakeList0(), $1, $3, $5));
-      gsDebugMsg("parsed data equation declaration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data equation declaration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1229,12 +1229,12 @@ data_vars_decls_scs:
   data_vars_decl SEMICOLON
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_vars_decls_scs data_vars_decl SEMICOLON
     {
       safe_assign($$, ATconcat($1, $2));
-      gsDebugMsg("parsed data variable declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1246,12 +1246,12 @@ mult_act:
   param_ids_bs
     {
       safe_assign($$, gsMakeMultAct(ATreverse($1)));
-      gsDebugMsg("parsed multi-action\n  %T\n", $$);
+      mCRL2log(debug) << "parsed multi-action\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | TAU
     {
       safe_assign($$, gsMakeMultAct(ATmakeList0()));
-      gsDebugMsg("parsed multi-action\n  %T\n", $$);
+      mCRL2log(debug) << "parsed multi-action\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1260,12 +1260,12 @@ param_ids_bs:
   param_id
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed parameterised id's\n  %T\n", $$);
+      mCRL2log(debug) << "parsed parameterised id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | param_ids_bs BAR param_id
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed parameterised id's\n  %T\n", $$);
+      mCRL2log(debug) << "parsed parameterised id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1274,12 +1274,12 @@ param_id:
   ID
     {
       safe_assign($$, gsMakeParamId($1, ATmakeList0()));
-      gsDebugMsg("parsed action or process\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action or process\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ID LPAR data_exprs_cs RPAR
     {
       safe_assign($$, gsMakeParamId($1, ATreverse($3)));
-      gsDebugMsg("parsed action or process\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action or process\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1291,7 +1291,7 @@ proc_expr:
   proc_expr_choice
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed process expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1304,7 +1304,7 @@ proc_expr_choice:
   | proc_expr_sum PLUS proc_expr_choice
     {
       safe_assign($$, gsMakeChoice($1, $3));
-      gsDebugMsg("parsed choice expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed choice expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1317,7 +1317,7 @@ proc_expr_sum:
   | SUM data_vars_decls_cs DOT proc_expr_sum
     {
       safe_assign($$, gsMakeSum($2, $4));
-      gsDebugMsg("parsed summation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed summation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1330,12 +1330,12 @@ proc_expr_merge:
   | proc_expr_binit BARS proc_expr_merge_rhs
     {
       safe_assign($$, gsMakeMerge($1, $3));
-      gsDebugMsg("parsed merge expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed merge expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | proc_expr_binit LMERGE proc_expr_merge_rhs
     {
       safe_assign($$, gsMakeLMerge($1, $3));
-      gsDebugMsg("parsed left merge expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed left merge expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1348,7 +1348,7 @@ proc_expr_merge_rhs:
   | SUM data_vars_decls_cs DOT proc_expr_merge_rhs
     {
       safe_assign($$, gsMakeSum($2, $4));
-      gsDebugMsg("parsed summation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed summation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1361,7 +1361,7 @@ proc_expr_binit:
   | proc_expr_binit BINIT proc_expr_binit_rhs
     {
       safe_assign($$, gsMakeBInit($1, $3));
-      gsDebugMsg("parsed bounded initialisation expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed bounded initialisation expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1374,7 +1374,7 @@ proc_expr_binit_rhs:
   | SUM data_vars_decls_cs DOT proc_expr_binit_rhs
     {
       safe_assign($$, gsMakeSum($2, $4));
-      gsDebugMsg("parsed summation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed summation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1387,12 +1387,12 @@ proc_expr_cond:
   | data_expr_prefix ARROW proc_expr_cond_la
     {
       safe_assign($$, gsMakeIfThen($1, $3));
-      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conditional expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond ELSE proc_expr_cond_la
     {
       safe_assign($$, gsMakeIfThenElse($1, $3, $5));
-      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conditional expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1405,7 +1405,7 @@ proc_expr_cond_la:
   | SUM data_vars_decls_cs DOT proc_expr_cond_la
     {
       safe_assign($$, gsMakeSum($2, $4));
-      gsDebugMsg("parsed summation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed summation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1418,7 +1418,7 @@ proc_expr_seq:
   | proc_expr_at DOT proc_expr_seq_rhs
     {
       safe_assign($$, gsMakeSeq($1, $3));
-      gsDebugMsg("parsed sequential expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sequential expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1431,7 +1431,7 @@ proc_expr_seq_wo_cond:
   | proc_expr_at DOT proc_expr_seq_rhs_wo_cond
     {
       safe_assign($$, gsMakeSeq($1, $3));
-      gsDebugMsg("parsed sequential expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sequential expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1444,17 +1444,17 @@ proc_expr_seq_rhs:
   | SUM data_vars_decls_cs DOT proc_expr_seq_rhs
     {
       safe_assign($$, gsMakeSum($2, $4));
-      gsDebugMsg("parsed summation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed summation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_prefix ARROW proc_expr_seq_rhs
     {
       safe_assign($$, gsMakeIfThen($1, $3));
-      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conditional expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_prefix ARROW proc_expr_seq_rhs_wo_cond ELSE proc_expr_seq_rhs
     {
       safe_assign($$, gsMakeIfThenElse($1, $3, $5));
-      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conditional expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1467,7 +1467,7 @@ proc_expr_seq_rhs_wo_cond:
   | SUM data_vars_decls_cs DOT proc_expr_seq_rhs_wo_cond
     {
       safe_assign($$, gsMakeSum($2, $4));
-      gsDebugMsg("parsed summation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed summation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1480,7 +1480,7 @@ proc_expr_at:
   | proc_expr_at AT data_expr_prefix
     {
       safe_assign($$, gsMakeAtTime($1, $3));
-      gsDebugMsg("parsed at time expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed at time expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1493,7 +1493,7 @@ proc_expr_at_wo_cond:
   | proc_expr_at_wo_cond AT data_expr_prefix
     {
       safe_assign($$, gsMakeAtTime($1, $3));
-      gsDebugMsg("parsed at time expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed at time expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1506,7 +1506,7 @@ proc_expr_sync:
   | proc_expr_primary BAR proc_expr_sync_rhs
     {
       safe_assign($$, gsMakeSync($1, $3));
-      gsDebugMsg("parsed sync expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sync expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1519,7 +1519,7 @@ proc_expr_sync_wo_cond:
   | proc_expr_primary BAR proc_expr_sync_rhs_wo_cond
     {
       safe_assign($$, gsMakeSync($1, $3));
-      gsDebugMsg("parsed sync expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sync expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1532,17 +1532,17 @@ proc_expr_sync_rhs:
   | SUM data_vars_decls_cs DOT proc_expr_sync_rhs
     {
       safe_assign($$, gsMakeSum($2, $4));
-      gsDebugMsg("parsed summation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed summation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_prefix ARROW proc_expr_sync_rhs
     {
       safe_assign($$, gsMakeIfThen($1, $3));
-      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conditional expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_expr_prefix ARROW proc_expr_sync_rhs_wo_cond ELSE proc_expr_sync_rhs
     {
       safe_assign($$, gsMakeIfThenElse($1, $3, $5));
-      gsDebugMsg("parsed conditional expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conditional expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1555,7 +1555,7 @@ proc_expr_sync_rhs_wo_cond:
   | SUM data_vars_decls_cs DOT proc_expr_sync_rhs_wo_cond
     {
       safe_assign($$, gsMakeSum($2, $4));
-      gsDebugMsg("parsed summation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed summation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1590,12 +1590,12 @@ proc_constant:
   DELTA
     {
       safe_assign($$, gsMakeDelta());
-      gsDebugMsg("parsed process constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | TAU
     {
       safe_assign($$, gsMakeTau());
-      gsDebugMsg("parsed process constant\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process constant\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1604,12 +1604,12 @@ id_assignment:
   ID LPAR RPAR
     {
       safe_assign($$, gsMakeIdAssignment($1, ATmakeList0()));
-      gsDebugMsg("parsed identifier assignment\n  %T\n", $$);
+      mCRL2log(debug) << "parsed identifier assignment\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ID LPAR id_inits_cs RPAR
     {
       safe_assign($$, gsMakeIdAssignment($1, ATreverse($3)));
-      gsDebugMsg("parsed identifier assignment\n  %T\n", $$);
+      mCRL2log(debug) << "parsed identifier assignment\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1618,27 +1618,27 @@ proc_quant:
   BLOCK LPAR act_names_set COMMA proc_expr RPAR
     {
       safe_assign($$, gsMakeBlock($3, $5));
-      gsDebugMsg("parsed process quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | HIDE LPAR act_names_set COMMA proc_expr RPAR
     {
       safe_assign($$, gsMakeHide($3, $5));
-      gsDebugMsg("parsed process quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | RENAME LPAR ren_expr_set COMMA proc_expr RPAR
     {
       safe_assign($$, gsMakeRename($3, $5));
-      gsDebugMsg("parsed process quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | COMM LPAR comm_expr_set COMMA proc_expr RPAR
     {
       safe_assign($$, gsMakeComm($3, $5));
-      gsDebugMsg("parsed process quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ALLOW LPAR mult_act_names_set COMMA proc_expr RPAR
     {
       safe_assign($$, gsMakeAllow($3, $5));
-      gsDebugMsg("parsed process quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1647,12 +1647,12 @@ act_names_set:
   LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
-      gsDebugMsg("parsed action name set\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action name set\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACE ids_cs RBRACE
     {
       safe_assign($$, ATreverse($2));
-      gsDebugMsg("parsed action name set\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action name set\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1661,12 +1661,12 @@ ren_expr_set:
   LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
-      gsDebugMsg("parsed renaming expression set\n  %T\n", $$);
+      mCRL2log(debug) << "parsed renaming expression set\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACE ren_exprs_cs RBRACE
     {
       safe_assign($$, ATreverse($2));
-      gsDebugMsg("parsed renaming expression set\n  %T\n", $$);
+      mCRL2log(debug) << "parsed renaming expression set\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1675,12 +1675,12 @@ ren_exprs_cs:
   ren_expr
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed renaming expressions\n  %T\n", $$);
+      mCRL2log(debug) << "parsed renaming expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ren_exprs_cs COMMA ren_expr
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed renaming expressions\n  %T\n", $$);
+      mCRL2log(debug) << "parsed renaming expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1689,7 +1689,7 @@ ren_expr:
   ID ARROW ID
     {
       safe_assign($$, gsMakeRenameExpr($1, $3));
-      gsDebugMsg("parsed renaming expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed renaming expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1698,12 +1698,12 @@ comm_expr_set:
   LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
-      gsDebugMsg("parsed communication expression set\n  %T\n", $$);
+      mCRL2log(debug) << "parsed communication expression set\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACE comm_exprs_cs RBRACE
     {
       safe_assign($$, ATreverse($2));
-      gsDebugMsg("parsed communication expression set\n  %T\n", $$);
+      mCRL2log(debug) << "parsed communication expression set\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1712,12 +1712,12 @@ comm_exprs_cs:
   comm_expr
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed communication expressions\n  %T\n", $$);
+      mCRL2log(debug) << "parsed communication expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | comm_exprs_cs COMMA comm_expr
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed communication expressions\n  %T\n", $$);
+      mCRL2log(debug) << "parsed communication expressions\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1726,17 +1726,17 @@ comm_expr:
   comm_expr_lhs
     {
       safe_assign($$, gsMakeCommExpr($1, gsMakeNil()));
-      gsDebugMsg("parsed communication expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed communication expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | comm_expr_lhs ARROW TAU
     {
       safe_assign($$, gsMakeCommExpr($1, gsMakeNil()));
-      gsDebugMsg("parsed communication expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed communication expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | comm_expr_lhs ARROW ID
     {
       safe_assign($$, gsMakeCommExpr($1, $3));
-      gsDebugMsg("parsed communication expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed communication expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1745,7 +1745,7 @@ comm_expr_lhs:
   ID BAR ids_bs
     {
       safe_assign($$, gsMakeMultActName(ATinsert(ATreverse($3), (ATerm) $1)));
-      gsDebugMsg("parsed left-hand side of communication expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed left-hand side of communication expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1754,12 +1754,12 @@ ids_bs:
   ID
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed id's\n  %T\n", $$);
+      mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ids_bs BAR ID
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed id's\n  %T\n", $$);
+      mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1768,12 +1768,12 @@ mult_act_names_set:
   LBRACE RBRACE
     {
       safe_assign($$, ATmakeList0());
-      gsDebugMsg("parsed multi action name set\n  %T\n", $$);
+      mCRL2log(debug) << "parsed multi action name set\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACE mult_act_names_cs RBRACE
     {
       safe_assign($$, ATreverse($2));
-      gsDebugMsg("parsed multi action name set\n  %T\n", $$);
+      mCRL2log(debug) << "parsed multi action name set\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1782,12 +1782,12 @@ mult_act_names_cs:
   mult_act_name
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed multi action names\n  %T\n", $$);
+      mCRL2log(debug) << "parsed multi action names\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | mult_act_names_cs COMMA mult_act_name
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed multi action names\n  %T\n", $$);
+      mCRL2log(debug) << "parsed multi action names\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1796,7 +1796,7 @@ mult_act_name:
   ids_bs
     {
       safe_assign($$, gsMakeMultActName(ATreverse($1)));
-      gsDebugMsg("parsed multi action name\n  %T\n", $$);
+      mCRL2log(debug) << "parsed multi action name\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1808,7 +1808,7 @@ proc_spec:
   proc_spec_elts
     {
       safe_assign($$, gsProcSpecEltsToSpec(ATreverse($1)));
-      gsDebugMsg("parsed process specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1817,12 +1817,12 @@ proc_spec_elts:
   proc_spec_elt
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed process specification elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    | proc_spec_elts proc_spec_elt
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed process specification elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    ;
 
@@ -1831,27 +1831,27 @@ proc_spec_elt:
   data_spec_elt
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed process specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | act_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed process specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | glob_var_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed process specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | proc_eqn_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed process specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | proc_init
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed process specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1860,7 +1860,7 @@ act_spec:
   KWACT acts_decls_scs
     {
       safe_assign($$, gsMakeActSpec($2));
-      gsDebugMsg("parsed action specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1869,12 +1869,12 @@ acts_decls_scs:
   acts_decl SEMICOLON
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed action declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | acts_decls_scs acts_decl SEMICOLON
     {
       safe_assign($$, ATconcat($1, $2));
-      gsDebugMsg("parsed action declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1888,7 +1888,7 @@ acts_decl:
         safe_assign($$,
           ATinsert($$, (ATerm) gsMakeActId(ATAelementAt($1, i), ATmakeList0())));
       }
-      gsDebugMsg("parsed action declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ids_cs COLON domain
     {
@@ -1897,7 +1897,7 @@ acts_decl:
       for (size_t i = 0; i < n; i++) {
         safe_assign($$, ATinsert($$, (ATerm) gsMakeActId(ATAelementAt($1, i), $3)));
       }
-      gsDebugMsg("parsed action declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1906,7 +1906,7 @@ glob_var_spec:
   KWGLOB data_vars_decls_scs
     {
       safe_assign($$, gsMakeGlobVarSpec($2));
-      gsDebugMsg("parsed global variables\n  %T\n", $$);
+      mCRL2log(debug) << "parsed global variables\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1915,7 +1915,7 @@ proc_eqn_spec:
   KWPROC proc_eqn_decls_scs
     {
       safe_assign($$, gsMakeProcEqnSpec(ATreverse($2)));
-      gsDebugMsg("parsed process equation specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process equation specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1924,12 +1924,12 @@ proc_eqn_decls_scs:
   proc_eqn_decl SEMICOLON
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed process equation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | proc_eqn_decls_scs proc_eqn_decl SEMICOLON
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed process equation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1939,7 +1939,7 @@ proc_eqn_decl:
     {
       safe_assign($$, gsMakeProcEqn(
         gsMakeProcVarId($1, ATmakeList0()), ATmakeList0(), $3));
-      gsDebugMsg("parsed process equation declaration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process equation declaration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | ID LPAR data_vars_decls_cs RPAR EQUALS proc_expr
     {
@@ -1950,7 +1950,7 @@ proc_eqn_decl:
       }
       safe_assign($$, gsMakeProcEqn(
         gsMakeProcVarId($1, ATreverse(SortExprs)), $3, $6));
-      gsDebugMsg("parsed process equation declaration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed process equation declaration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1959,7 +1959,7 @@ proc_init:
   KWINIT proc_expr SEMICOLON
     {
       safe_assign($$, gsMakeProcessInit($2));
-      gsDebugMsg("parsed initialisation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed initialisation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1971,7 +1971,7 @@ state_frm:
   state_frm_quant
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -1984,22 +1984,22 @@ state_frm_quant:
   | FORALL data_vars_decls_cs DOT state_frm_quant
     {
       safe_assign($$, gsMakeStateForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT state_frm_quant
     {
       safe_assign($$, gsMakeStateExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | NU ID fixpoint_params DOT state_frm_quant
     {
       safe_assign($$, gsMakeStateNu($2, $3, $5));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | MU ID fixpoint_params DOT state_frm_quant
     {
       safe_assign($$, gsMakeStateMu($2, $3, $5));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2008,12 +2008,12 @@ fixpoint_params:
   /* empty */
     {
       safe_assign($$, ATmakeList0());
-      gsDebugMsg("parsed fixpoint parameters\n  %T\n", $$);
+      mCRL2log(debug) << "parsed fixpoint parameters\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LPAR data_var_decl_inits_cs RPAR
     {
       safe_assign($$, ATreverse($2));
-      gsDebugMsg("parsed fixpoint parameters\n  %T\n", $$);
+      mCRL2log(debug) << "parsed fixpoint parameters\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2023,12 +2023,12 @@ data_var_decl_inits_cs:
   data_var_decl_init
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed data variable declaration and initialisations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declaration and initialisations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | data_var_decl_inits_cs COMMA data_var_decl_init
     {
       safe_assign($$, ATinsert($1, (ATerm) $3));
-      gsDebugMsg("parsed data variable declaration and initialisations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declaration and initialisations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2037,7 +2037,7 @@ data_var_decl_init:
   ID COLON sort_expr EQUALS data_expr
     {
       safe_assign($$, gsMakeDataVarIdInit(gsMakeDataVarId($1, $3), $5));
-      gsDebugMsg("parsed data variable declaration and initialisation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed data variable declaration and initialisation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2050,7 +2050,7 @@ state_frm_imp:
   | state_frm_and IMP state_frm_imp_rhs
     {
       safe_assign($$, gsMakeStateImp($1, $3));
-      gsDebugMsg("parsed implication\n  %T\n", $$);
+      mCRL2log(debug) << "parsed implication\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2063,22 +2063,22 @@ state_frm_imp_rhs:
   | FORALL data_vars_decls_cs DOT state_frm_imp_rhs
     {
       safe_assign($$, gsMakeStateForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT state_frm_imp_rhs
     {
       safe_assign($$, gsMakeStateExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | NU ID fixpoint_params DOT state_frm_imp_rhs
     {
       safe_assign($$, gsMakeStateNu($2, $3, $5));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | MU ID fixpoint_params DOT state_frm_imp_rhs
     {
       safe_assign($$, gsMakeStateMu($2, $3, $5));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2091,12 +2091,12 @@ state_frm_and:
   | state_frm_prefix AND state_frm_and_rhs
     {
       safe_assign($$, gsMakeStateAnd($1, $3));
-      gsDebugMsg("parsed conjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | state_frm_prefix BARS state_frm_and_rhs
     {
       safe_assign($$, gsMakeStateOr($1, $3));
-      gsDebugMsg("parsed disjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed disjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2109,22 +2109,22 @@ state_frm_and_rhs:
   | FORALL data_vars_decls_cs DOT state_frm_and_rhs
     {
       safe_assign($$, gsMakeStateForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT state_frm_and_rhs
     {
       safe_assign($$, gsMakeStateExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | NU ID fixpoint_params DOT state_frm_and_rhs
     {
       safe_assign($$, gsMakeStateNu($2, $3, $5));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | MU ID fixpoint_params DOT state_frm_and_rhs
     {
       safe_assign($$, gsMakeStateMu($2, $3, $5));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2137,27 +2137,27 @@ state_frm_prefix:
   | EXCLAM state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateNot($2));
-      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LBRACK reg_frm RBRACK state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateMust($2, $4));
-      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LANG reg_frm RANG state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateMay($2, $4));
-      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | YALED AT data_expr_prefix
     {
       safe_assign($$, gsMakeStateYaledTimed($3));
-      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | DELAY AT data_expr_prefix
     {
       safe_assign($$, gsMakeStateDelayTimed($3));
-      gsDebugMsg("parsed prefix state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2170,22 +2170,22 @@ state_frm_quant_prefix:
   | FORALL data_vars_decls_cs DOT state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | NU ID fixpoint_params DOT state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateNu($2, $3, $5));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | MU ID fixpoint_params DOT state_frm_quant_prefix
     {
       safe_assign($$, gsMakeStateMu($2, $3, $5));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2194,32 +2194,32 @@ state_frm_primary:
   VAL LPAR data_expr RPAR
     {
       safe_assign($$, $3);
-      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | param_id
     {
       safe_assign($$, gsMakeStateVar(ATAgetArgument($1, 0), ATLgetArgument($1, 1)));
-      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | CTRUE
     {
       safe_assign($$, gsMakeStateTrue());
-      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | CFALSE
     {
       safe_assign($$, gsMakeStateFalse());
-      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | YALED
     {
       safe_assign($$, gsMakeStateYaled());
-      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | DELAY
     {
       safe_assign($$, gsMakeStateDelay());
-      gsDebugMsg("parsed primary state formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary state formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LPAR state_frm RPAR
     {
@@ -2232,12 +2232,12 @@ reg_frm:
   act_frm
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | reg_frm_alt_naf
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2250,7 +2250,7 @@ reg_frm_alt_naf:
   | reg_frm_seq PLUS reg_frm_alt
     {
       safe_assign($$, gsMakeRegAlt($1, $3));
-      gsDebugMsg("parsed alternative composition\n  %T\n", $$);
+      mCRL2log(debug) << "parsed alternative composition\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2263,7 +2263,7 @@ reg_frm_alt:
   | reg_frm_seq PLUS reg_frm_alt
     {
       safe_assign($$, gsMakeRegAlt($1, $3));
-      gsDebugMsg("parsed alternative composition\n  %T\n", $$);
+      mCRL2log(debug) << "parsed alternative composition\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2276,7 +2276,7 @@ reg_frm_seq_naf:
   | reg_frm_postfix DOT reg_frm_seq
     {
       safe_assign($$, gsMakeRegSeq($1, $3));
-      gsDebugMsg("parsed sequential composition\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sequential composition\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2289,7 +2289,7 @@ reg_frm_seq:
   | reg_frm_postfix DOT reg_frm_seq
     {
       safe_assign($$, gsMakeRegSeq($1, $3));
-      gsDebugMsg("parsed sequential composition\n  %T\n", $$);
+      mCRL2log(debug) << "parsed sequential composition\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2302,12 +2302,12 @@ reg_frm_postfix_naf:
   | reg_frm_postfix STAR
     {
       safe_assign($$, gsMakeRegTransOrNil($1));
-      gsDebugMsg("parsed postfix regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed postfix regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | reg_frm_postfix PLUS
     {
       safe_assign($$, gsMakeRegTrans($1));
-      gsDebugMsg("parsed postfix regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed postfix regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2320,12 +2320,12 @@ reg_frm_postfix:
   | reg_frm_postfix STAR
     {
       safe_assign($$, gsMakeRegTransOrNil($1));
-      gsDebugMsg("parsed postfix regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed postfix regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | reg_frm_postfix PLUS
     {
       safe_assign($$, gsMakeRegTrans($1));
-      gsDebugMsg("parsed postfix regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed postfix regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2334,7 +2334,7 @@ reg_frm_primary_naf:
   NIL
     {
       safe_assign($$, gsMakeRegNil());
-      gsDebugMsg("parsed primary regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LPAR reg_frm_alt_naf RPAR
     {
@@ -2347,12 +2347,12 @@ reg_frm_primary:
   act_frm
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | NIL
     {
       safe_assign($$, gsMakeRegNil());
-      gsDebugMsg("parsed primary regular formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary regular formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LPAR reg_frm_alt_naf RPAR
     {
@@ -2365,7 +2365,7 @@ act_frm:
   act_frm_quant
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed action formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2378,12 +2378,12 @@ act_frm_quant:
   | FORALL data_vars_decls_cs DOT act_frm_quant
     {
       safe_assign($$, gsMakeActForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT act_frm_quant
     {
       safe_assign($$, gsMakeActExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2396,7 +2396,7 @@ act_frm_imp:
   | act_frm_and IMP act_frm_imp_rhs
     {
       safe_assign($$, gsMakeActImp($1, $3));
-      gsDebugMsg("parsed implication\n  %T\n", $$);
+      mCRL2log(debug) << "parsed implication\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2409,12 +2409,12 @@ act_frm_imp_rhs:
   | FORALL data_vars_decls_cs DOT act_frm_imp_rhs
     {
       safe_assign($$, gsMakeActForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT act_frm_imp_rhs
     {
       safe_assign($$, gsMakeActExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2427,12 +2427,12 @@ act_frm_and:
   | act_frm_prefix AND act_frm_and_rhs
     {
       safe_assign($$, gsMakeActAnd($1, $3));
-      gsDebugMsg("parsed conjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | act_frm_prefix BARS act_frm_and_rhs
     {
       safe_assign($$, gsMakeActOr($1, $3));
-      gsDebugMsg("parsed disjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed disjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2445,12 +2445,12 @@ act_frm_and_rhs:
   | FORALL data_vars_decls_cs DOT act_frm_and_rhs
     {
       safe_assign($$, gsMakeActForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT act_frm_and_rhs
     {
       safe_assign($$, gsMakeActExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2463,7 +2463,7 @@ act_frm_at:
   | act_frm_at AT data_expr_prefix
     {
       safe_assign($$, gsMakeActAt($1, $3));
-      gsDebugMsg("parsed conjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2476,7 +2476,7 @@ act_frm_prefix:
   | EXCLAM act_frm_quant_prefix
     {
       safe_assign($$, gsMakeActNot($2));
-      gsDebugMsg("parsed prefix action formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed prefix action formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2489,12 +2489,12 @@ act_frm_quant_prefix:
   | FORALL data_vars_decls_cs DOT act_frm_quant_prefix
     {
       safe_assign($$, gsMakeActForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT act_frm_quant_prefix
     {
       safe_assign($$, gsMakeActExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2503,22 +2503,22 @@ act_frm_primary:
   mult_act
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed primary action formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary action formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | VAL LPAR data_expr RPAR
     {
       safe_assign($$, $3);
-      gsDebugMsg("parsed primary action formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary action formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | CTRUE
     {
       safe_assign($$, gsMakeActTrue());
-      gsDebugMsg("parsed primary action formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary action formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | CFALSE
     {
       safe_assign($$, gsMakeActFalse());
-      gsDebugMsg("parsed primary action formula\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary action formula\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LPAR act_frm RPAR
     {
@@ -2534,7 +2534,7 @@ action_rename_spec:
   action_rename_spec_elts
     {
       safe_assign($$, gsActionRenameEltsToActionRename(ATreverse($1)));
-      gsDebugMsg("parsed action rename specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2543,12 +2543,12 @@ action_rename_spec_elts:
   action_rename_spec_elt
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed action rename specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    | action_rename_spec_elts action_rename_spec_elt
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed action rename specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    ;
 
@@ -2557,17 +2557,17 @@ action_rename_spec_elt:
   data_spec_elt
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed action rename specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | act_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed action rename specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | action_rename_rule_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed action rename specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2576,7 +2576,7 @@ action_rename_rule_spec:
   action_rename_rule_sect
     {
       safe_assign($$, gsMakeActionRenameRules($1));
-      gsDebugMsg("parsed action rename specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2585,7 +2585,7 @@ action_rename_rule_sect:
   RENAME action_rename_rules_scs
     {
       safe_assign($$, $2);
-      gsDebugMsg("parsed action rename rule section\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename rule section\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | KWVAR data_vars_decls_scs RENAME action_rename_rules_scs
     {
@@ -2599,7 +2599,7 @@ action_rename_rule_sect:
             ATAgetArgument(ActionRenameRule, 2),
             ATAgetArgument(ActionRenameRule, 3))));
       }
-      gsDebugMsg("parsed action rename rule section\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename rule section\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
 
 
@@ -2608,12 +2608,12 @@ action_rename_rules_scs:
   action_rename_rule SEMICOLON
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed action rename rules\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename rules\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | action_rename_rules_scs action_rename_rule SEMICOLON
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed action rename rules\n  %T\n", $$);
+      mCRL2log(debug) << "parsed action rename rules\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2622,12 +2622,12 @@ action_rename_rule:
   data_expr ARROW param_id IMP action_rename_rule_rhs
     {
       safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), $1, $3, $5));
-      gsDebugMsg("parsed action rename rule\n %T\n", $$);
+      mCRL2log(debug) << "parsed action rename rule\n " << atermpp::aterm( $$) << "" << std::endl;
     }
   | param_id IMP action_rename_rule_rhs
     {
       safe_assign($$, gsMakeActionRenameRule(ATmakeList0(), mcrl2::data::sort_bool::true_(), $1, $3));
-      gsDebugMsg("parsed action rename rule\n %T\n", $$);
+      mCRL2log(debug) << "parsed action rename rule\n " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2636,12 +2636,12 @@ action_rename_rule_rhs:
   param_id
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed right-hand-side of an action rename rule\n %T\n", $$);
+      mCRL2log(debug) << "parsed right-hand-side of an action rename rule\n " << atermpp::aterm( $$) << "" << std::endl;
     }
   | proc_constant
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed right-hand-side of an action rename rule\n %T\n", $$);
+      mCRL2log(debug) << "parsed right-hand-side of an action rename rule\n " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2653,7 +2653,7 @@ pb_expr:
   pb_expr_quant
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed parameterised boolean expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed parameterised boolean expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2666,12 +2666,12 @@ pb_expr_quant:
   | FORALL data_vars_decls_cs DOT pb_expr_quant
     {
       safe_assign($$, gsMakePBESForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT pb_expr_quant
     {
       safe_assign($$, gsMakePBESExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2684,7 +2684,7 @@ pb_expr_imp:
   | pb_expr_and IMP pb_expr_imp_rhs
     {
       safe_assign($$, gsMakePBESImp($1, $3));
-      gsDebugMsg("parsed implication\n  %T\n", $$);
+      mCRL2log(debug) << "parsed implication\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2697,12 +2697,12 @@ pb_expr_imp_rhs:
   | FORALL data_vars_decls_cs DOT pb_expr_imp_rhs
     {
       safe_assign($$, gsMakePBESForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT pb_expr_imp_rhs
     {
       safe_assign($$, gsMakePBESExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2715,12 +2715,12 @@ pb_expr_and:
   | pb_expr_not AND pb_expr_and_rhs
     {
       safe_assign($$, gsMakePBESAnd($1, $3));
-      gsDebugMsg("parsed conjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed conjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | pb_expr_not BARS pb_expr_and_rhs
     {
       safe_assign($$, gsMakePBESOr($1, $3));
-      gsDebugMsg("parsed disjunction\n  %T\n", $$);
+      mCRL2log(debug) << "parsed disjunction\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2733,12 +2733,12 @@ pb_expr_and_rhs:
   | FORALL data_vars_decls_cs DOT pb_expr_and_rhs
     {
       safe_assign($$, gsMakePBESForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT pb_expr_and_rhs
     {
       safe_assign($$, gsMakePBESExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2751,7 +2751,7 @@ pb_expr_not:
   | EXCLAM pb_expr_quant_not
     {
       safe_assign($$, gsMakePBESNot($2));
-      gsDebugMsg("parsed negation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed negation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2764,12 +2764,12 @@ pb_expr_quant_not:
   | FORALL data_vars_decls_cs DOT pb_expr_quant_not
     {
       safe_assign($$, gsMakePBESForall($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | EXISTS data_vars_decls_cs DOT pb_expr_quant_not
     {
       safe_assign($$, gsMakePBESExists($2, $4));
-      gsDebugMsg("parsed quantification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed quantification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2778,22 +2778,22 @@ pb_expr_primary:
   VAL LPAR data_expr RPAR
     {
       safe_assign($$, $3);
-      gsDebugMsg("parsed primary expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | param_id
     {
       safe_assign($$, gsMakePropVarInst(ATAgetArgument($1, 0), ATLgetArgument($1, 1)));
-      gsDebugMsg("parsed primary expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | CTRUE
     {
       safe_assign($$, gsMakePBESTrue());
-      gsDebugMsg("parsed primary expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | CFALSE
     {
       safe_assign($$, gsMakePBESFalse());
-      gsDebugMsg("parsed primary expression\n  %T\n", $$);
+      mCRL2log(debug) << "parsed primary expression\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | LPAR pb_expr RPAR
     {
@@ -2810,7 +2810,7 @@ pbes_spec:
   pbes_spec_elts
     {
       safe_assign($$, gsPBESSpecEltsToSpec(ATreverse($1)));
-      gsDebugMsg("parsed PBES specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed PBES specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2819,12 +2819,12 @@ pbes_spec_elts:
   pbes_spec_elt
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed PBES specification elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed PBES specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    | pbes_spec_elts pbes_spec_elt
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed PBES specification elements\n  %T\n", $$);
+      mCRL2log(debug) << "parsed PBES specification elements\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
    ;
 
@@ -2833,22 +2833,22 @@ pbes_spec_elt:
   data_spec_elt
     {
       safe_assign($$, $1);
-     gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+     mCRL2log(debug) << "parsed PBES specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | glob_var_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed PBES specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | pb_eqn_spec
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed PBES specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | pb_init
     {
       safe_assign($$, $1);
-      gsDebugMsg("parsed PBES specification element\n  %T\n", $$);
+      mCRL2log(debug) << "parsed PBES specification element\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2857,7 +2857,7 @@ pb_eqn_spec:
   KWPBES pb_eqn_decls_scs
     {
       safe_assign($$, gsMakePBEqnSpec(ATreverse($2)));
-      gsDebugMsg("parsed parameterised boolean equation specification\n  %T\n", $$);
+      mCRL2log(debug) << "parsed parameterised boolean equation specification\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2866,12 +2866,12 @@ pb_eqn_decls_scs:
   pb_eqn_decl SEMICOLON
     {
       safe_assign($$, ATmakeList1((ATerm) $1));
-      gsDebugMsg("parsed parameterised boolean equation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed parameterised boolean equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | pb_eqn_decls_scs pb_eqn_decl SEMICOLON
     {
       safe_assign($$, ATinsert($1, (ATerm) $2));
-      gsDebugMsg("parsed parameterised boolean equation declarations\n  %T\n", $$);
+      mCRL2log(debug) << "parsed parameterised boolean equation declarations\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2881,13 +2881,13 @@ pb_eqn_decl:
     {
       safe_assign($$,
         gsMakePBEqn($1, gsMakePropVarDecl($2, ATmakeList0()), $4));
-      gsDebugMsg("parsed parameterised boolean equation declaration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed parameterised boolean equation declaration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | fixpoint ID LPAR data_vars_decls_cs RPAR EQUALS pb_expr
     {
       safe_assign($$,
         gsMakePBEqn($1, gsMakePropVarDecl($2, $4), $7));
-      gsDebugMsg("parsed parameterised boolean equation declaration\n  %T\n", $$);
+      mCRL2log(debug) << "parsed parameterised boolean equation declaration\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2896,12 +2896,12 @@ fixpoint:
   MU
     {
       safe_assign($$, gsMakeMu());
-      gsDebugMsg("parsed fixpoint\n  %T\n", $$);
+      mCRL2log(debug) << "parsed fixpoint\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   | NU
     {
       safe_assign($$, gsMakeNu());
-      gsDebugMsg("parsed fixpoint\n  %T\n", $$);
+      mCRL2log(debug) << "parsed fixpoint\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 
@@ -2911,7 +2911,7 @@ pb_init:
     {
       safe_assign($$,
         gsMakePBInit(gsMakePropVarInst(ATAgetArgument($2, 0), ATLgetArgument($2, 1))));
-      gsDebugMsg("parsed initialisation\n  %T\n", $$);
+      mCRL2log(debug) << "parsed initialisation\n  " << atermpp::aterm( $$) << "" << std::endl;
     }
   ;
 

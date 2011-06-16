@@ -1643,8 +1643,6 @@ atermpp::set < variable >  gauss_elimination(
   Variable_iterator variables_end,
   const rewriter& r)
 {
-  // gsDebugMsg("Trying to eliminate variables %P from system %P using gauss elimination\n", (ATermList)variables, (ATermList)inequalities);
-
   atermpp::set < variable >  remaining_variables;
 
   // First copy equalities to the resulting_equalities and the inequalites to resulting_inequalities.
@@ -1797,9 +1795,6 @@ atermpp::set < variable >  gauss_elimination(
     }
     remaining_variables.insert(*i);
   }
-
-  // gsDebugMsg("Gauss elimination eliminated variables %P, resulting in the system %P\n",
-  //                       (ATermList)eliminated_variables, (ATermList)inequalities);
 
   return remaining_variables;
 }

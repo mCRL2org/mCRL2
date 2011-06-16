@@ -36,7 +36,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
   m_cache = cache;
 
   m_add_distribution_laws = add_distribution_laws;
-  gsDebugMsg("Processing\n");
+  mCRL2log(debug) << "Processing" << std::endl;
   m_data_specification = spec.data() ;
   m_lps = spec.process();
   m_init_process = spec.initial_process();
@@ -62,7 +62,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
     {
       mapping_and_constructor_names.insert(i -> name());
     };
-    gsDebugMsg("- Specification has %d constructors\n",  mapping_and_constructor_names.size() - size);
+    mCRL2log(debug) << "- Specification has " <<   mapping_and_constructor_names.size() - size << " constructors" << std::endl;
   }
 
   {
@@ -74,7 +74,7 @@ lpsparunfold::lpsparunfold(mcrl2::lps::specification spec,
     {
       mapping_and_constructor_names.insert(i -> name());
     };
-    gsDebugMsg("- Specification has %d mappings \n", mapping_and_constructor_names.size() - size);
+    mCRL2log(debug) << "- Specification has " <<  mapping_and_constructor_names.size() - size << " mappings " << std::endl;
   }
 }
 
@@ -98,7 +98,7 @@ mcrl2::core::identifier_string lpsparunfold::generate_fresh_constructor_and_mapp
   mcrl2::data::postfix_identifier_generator generator("");
   generator.add_identifiers(mapping_and_constructor_names);
   mcrl2::core::identifier_string nstr = generator(str);
-  gsDebugMsg("Generated a fresh mapping: %s\n", string(nstr).c_str());
+  mCRL2log(debug) << "Generated a fresh mapping: " <<  string(nstr) << std::endl;
   mapping_and_constructor_names.insert(nstr);
   return nstr;
 }
@@ -108,12 +108,12 @@ function_symbol_vector lpsparunfold::determine_affected_constructors()
   function_symbol_vector t = m_data_specification.constructors(m_unfold_process_parameter);
   function_symbol_vector k = function_symbol_vector(t.begin(), t.end());
 
-  gsDebugMsg("k:\t");
+  mCRL2log(debug) << "k:\t";
   mCRL2log(verbose) << "" <<  unfold_parameter_name  << " has " <<  k.size() << " constructor function(s)" << std::endl;
 
   for (function_symbol_vector::iterator i = k.begin(); i != k.end(); ++i)
   {
-    gsDebugMsg("\t%s\n", i->to_string().c_str());
+    mCRL2log(debug) << "\t" <<  i->to_string() << std::endl;
   }
   return k;
 }
@@ -131,11 +131,11 @@ function_symbol_vector lpsparunfold::new_constructors(mcrl2::data::function_symb
     std::string prefix = "c_";
     mcrl2::core::identifier_string fresh_name = generate_fresh_constructor_and_mapping_name(prefix.append(i -> name()));
     elements_of_new_sorts.push_back(function_symbol(fresh_name , fresh_basic_sort));
-    gsDebugMsg("\t%s\n", function_symbol(fresh_name , fresh_basic_sort).to_string().c_str());
+    mCRL2log(debug) << "\t" << function_symbol(fresh_name , fresh_basic_sort) << std::endl;
     mapping_and_constructor_names.insert(fresh_name);
 
   }
-  gsDebugMsg("- Created %d fresh \" c_ \" constructor(s)\n", elements_of_new_sorts.size());
+  mCRL2log(debug) << "- Created " <<  elements_of_new_sorts.size() << " fresh \" c_ \" constructor(s)" << std::endl;
   return elements_of_new_sorts;
 }
 
@@ -154,7 +154,7 @@ mcrl2::data::function_symbol lpsparunfold::create_case_function(size_t k)
 
   fs = function_symbol(idstr , mcrl2::data::function_sort(fsl, m_unfold_process_parameter));
 
-  gsDebugMsg("- Created C map: %s\n", fs.to_string().c_str());
+  mCRL2log(debug) << "- Created C map: " <<  fs.to_string() << std::endl;
 
   return fs;
 }
@@ -167,7 +167,7 @@ mcrl2::data::function_symbol lpsparunfold::create_determine_function()
   mcrl2::core::identifier_string idstr = generate_fresh_constructor_and_mapping_name(str);
   mcrl2::data::sort_expression_list fsl;
   fs = function_symbol(idstr , mcrl2::data::make_function_sort(m_unfold_process_parameter , fresh_basic_sort));
-  gsDebugMsg("\t%s\n", fs.to_string().c_str());
+  mCRL2log(debug) << "\t" <<  fs.to_string() << std::endl;
 
   return fs;
 }
@@ -195,7 +195,7 @@ mcrl2::data::function_symbol_vector lpsparunfold::create_projection_functions(fu
   }
   for (function_symbol_vector::iterator i = sfs.begin(); i != sfs.end(); ++i)
   {
-    gsDebugMsg("\t%s\n", i->to_string().c_str());
+    mCRL2log(debug) << "\t" <<  i->to_string() << std::endl;
   }
   return sfs;
 }
@@ -218,7 +218,6 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
   vars.push_back(v);
 
   /* Create Equations */
-  gsDebugMsg("");
   if (m_add_distribution_laws)
   {
     mCRL2log(verbose) << "Adding equations with additional distribution laws..." << std::endl;
@@ -408,7 +407,6 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
     process_parameter_names.insert(i -> name());
   }
 
-  gsDebugMsg("");
   mCRL2log(verbose) << "Updating LPS..." << std::endl;
   /* Create new process parameters */
   mcrl2::data::variable_vector new_process_parameters;
@@ -418,7 +416,6 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
   {
     if (static_cast<size_t>(std::distance(lps_proc_pars.begin(), i)) == parameter_at_index)
     {
-      gsDebugMsg("");
       mCRL2log(verbose) << "Unfolding parameter " << i->name() << " at index " << std::distance(lps_proc_pars.begin(), i) << "..." << std::endl;
       mcrl2::data::variable_vector process_parameters_injection;
 
@@ -449,7 +446,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
 
         if (is_basic_sort(j -> sort()))
         {
-          gsDebugMsg("- No processed parameter are injected for basic sort: %s\n", j->to_string().c_str());
+          mCRL2log(debug) << "- No processed parameter are injected for basic sort: " <<  j->to_string() << std::endl;
           processed = true;
         }
 
@@ -482,7 +479,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
       new_process_parameters.push_back(*i);
     }
   }
-  gsDebugMsg("- New LPS process parameters: %s\n", mcrl2::data::pp(new_process_parameters).c_str());
+  mCRL2log(debug) << "- New LPS process parameters: " <<  mcrl2::data::pp(new_process_parameters) << std::endl;
 
   /* Reconstruct summands */
   mcrl2::lps::summand_vector new_summands;
@@ -558,7 +555,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
     mcrl2::lps::replace_variables( new_lps, s );
   }
 
-  gsDebugMsg("\nNew LPS:\n%s\n", pp(lps::linear_process_to_aterm(new_lps)).c_str());
+  mCRL2log(debug) << "\nNew LPS:\n" <<  pp(lps::linear_process_to_aterm(new_lps)) << std::endl;
 
   assert(is_well_typed(new_lps));
 
@@ -627,7 +624,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
   }
 
   mcrl2::lps::process_initializer new_init = mcrl2::lps::process_initializer(mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()));
-  gsDebugMsg("%s\n", pp(new_init).c_str());
+  mCRL2log(debug) << pp(new_init) << std::endl;
 
   return new_init;
 }
@@ -694,8 +691,6 @@ atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparu
 
     }
 
-    gsDebugMsg("");
-
     mCRL2log(verbose) << "Parameter substitution:\t" << pp(i->first) << "\t->\t" <<  pp(mcrl2::data::application(case_function, dev)) << std::endl;
     result.insert(std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application(case_function, dev)));
   }
@@ -729,7 +724,7 @@ mcrl2::data::sort_expression lpsparunfold::sort_at_process_parameter_index(size_
 
   mcrl2::data::variable_list lps_proc_pars_list =  m_lps.process_parameters();
   mcrl2::data::variable_vector lps_proc_pars = mcrl2::data::variable_vector(lps_proc_pars_list.begin(), lps_proc_pars_list.end());
-  gsDebugMsg("- Number of parameters in LPS: %d\n", lps_proc_pars.size());
+  mCRL2log(debug) << "- Number of parameters in LPS: " <<  lps_proc_pars.size() << "" << std::endl;
   mCRL2log(verbose) << "Unfolding process parameter at index: " <<  parameter_at_index << "" << std::endl;
   if (lps_proc_pars.size() <= parameter_at_index)
   {

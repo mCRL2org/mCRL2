@@ -1522,7 +1522,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
 {
   if (data::sort_pos::is_c1_function_symbol(data::data_expression(Part)) || data::sort_pos::is_cdub_application(data::data_expression(Part)))
   {
-    //  gsDebugMsg("Reconstructing implementation of a positive number (%T)\n", Part);
+    //  mCRL2log(debug) << "Reconstructing implementation of a positive number (" << atermpp::aterm( Part) << ")" << std::endl;
     if (data::sort_pos::is_positive_constant(data::data_expression(Part)))
     {
       std::string positive_value(data::sort_pos::positive_constant_as_string(data::data_expression(Part)));
@@ -1536,13 +1536,13 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   }
   else if (data::sort_nat::is_c0_function_symbol(data::data_expression(Part)))
   {
-    //    gsDebugMsg("Reconstructing implementation of %T\n", Part);
+    //    mCRL2log(debug) << "Reconstructing implementation of " << atermpp::aterm( Part) << std::endl;
     Part = data::function_symbol("0", data::sort_nat::nat());
   }
   else if ((data::sort_nat::is_cnat_application(data::data_expression(Part)) || data::sort_nat::is_pos2nat_application(data::data_expression(Part)))
            && (data::sort_pos::is_pos(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
-    //    gsDebugMsg("Reconstructing implementation of CNat or Pos2Nat (%T)\n", Part);
+    //    mCRL2log(debug) << "Reconstructing implementation of CNat or Pos2Nat (" << atermpp::aterm( Part) << ")" << std::endl;
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_nat::pos2nat(data::data_expression(value));
@@ -1557,17 +1557,17 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   }
   else if (data::sort_nat::is_cpair_application(data::data_expression(Part)))
   {
-    //    gsDebugMsg("Currently not reconstructing implementation of CPair (%T)\n", Part);
+    //    mCRL2log(debug) << "Currently not reconstructing implementation of CPair (" << atermpp::aterm( Part) << ")" << std::endl;
   }
   else if (data::sort_int::is_cneg_application(data::data_expression(Part)))
   {
-    //    gsDebugMsg("Reconstructing implementation of CNeg (%T)\n", Part);
+    //    mCRL2log(debug) << "Reconstructing implementation of CNeg (" << atermpp::aterm( Part) << ")" << std::endl;
     Part = data::sort_int::negate(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))));
   }
   else if ((data::sort_int::is_cint_application(data::data_expression(Part)) || data::sort_int::is_nat2int_application(data::data_expression(Part)))
            && (data::sort_nat::is_nat(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
-    //    gsDebugMsg("Reconstructing implementation of CInt or Nat2Int (%T)\n", Part);
+    //    mCRL2log(debug) << "Reconstructing implementation of CInt or Nat2Int (" << atermpp::aterm( Part) << ")" << std::endl;
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_int::nat2int(data::data_expression(value));
@@ -1583,7 +1583,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   else if (data::sort_real::is_int2real_application(data::data_expression(Part))
            && (data::sort_int::is_int(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
-    //    gsDebugMsg("Reconstructing implementation of Int2Real (%T)\n", Part);
+    //    mCRL2log(debug) << "Reconstructing implementation of Int2Real (" << atermpp::aterm( Part) << ")" << std::endl;
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_real::int2real(data::data_expression(value));
@@ -1598,7 +1598,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   }
   else if (data::sort_real::is_creal_application(data::data_expression(Part)))
   {
-//    gsDebugMsg("Reconstructing implementation of CReal (%T)\n", Part);
+//    mCRL2log(debug) << "Reconstructing implementation of CReal (" << atermpp::aterm( Part) << ")" << std::endl;
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl ArgNumerator = reconstruct_numeric_expression(ATAelementAt(Args, 0));
     ATermAppl ArgDenominator = reconstruct_numeric_expression(ATAelementAt(Args, 1));
@@ -1684,7 +1684,7 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (is_setconstructor_application(expr))
   {
-    //gsDebugMsg("Reconstructing implementation of set comprehension\n");
+    //mCRL2log(debug) << "Reconstructing implementation of set comprehension" << std::endl;
     //part is an internal set representation;
     //replace by a finite set to set conversion or a set comprehension.
     sort_expression element_sort(*function_sort(sort_set::left(expr).sort()).domain().begin());
@@ -1729,7 +1729,7 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_set::is_setfset_application(expr))
   {
-    //gsDebugMsg("Reconstructing SetFSet\n");
+    //mCRL2log(debug) << "Reconstructing SetFSet" << std::endl;
     //try to reconstruct Part as the empty set or as a set enumeration
     data_expression de_fset(sort_set::arg(expr));
     data_expression result(reconstruct_container_expression(de_fset));
@@ -1835,7 +1835,7 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_bag::is_bagfbag_application(expr))
   {
-    //gsDebugMsg("Reconstructing BagFBag\n");
+    //mCRL2log(debug) << "Reconstructing BagFBag" << std::endl;
     //try to reconstruct Part as the empty bag or as a bag enumeration
     data_expression de_fbag(sort_bag::arg(expr));
     data_expression result(reconstruct_container_expression(de_fbag));

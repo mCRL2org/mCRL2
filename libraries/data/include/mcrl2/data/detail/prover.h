@@ -138,7 +138,7 @@ class Prover:protected mcrl2::data::rewriter
       f_manipulator = 0;
       delete f_info;
       f_info = 0;
-      core::gsDebugMsg("Rewriter, ATerm_Info and ATerm_Manipulator have been freed.\n");
+      mCRL2log(debug) << "Rewriter, ATerm_Info and ATerm_Manipulator have been freed." << std::endl;
     }
 
     /// \brief Sets Prover::f_formula to a_formula.
@@ -147,7 +147,7 @@ class Prover:protected mcrl2::data::rewriter
     {
       f_formula = a_formula;
       f_processed = false;
-      core::gsDebugMsg("The formula has been set.\n");
+      mCRL2log(debug) << "The formula has been set." << std::endl;
     }
 
     /// \brief Sets Prover::f_time_limit to the value a_time_limit.

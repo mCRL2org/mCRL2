@@ -1960,8 +1960,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 168 "chiparser.yy"
     {
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
-    	  gsDebugMsg("inputs contains a valid Chi-specification\n");
+          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+    	  mCRL2log(debug) << "inputs contains a valid Chi-specification" << std::endl;
           safe_assign(((*yyvalp).appl), gsMakeChiSpec((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl),ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list))));
 		  chi_spec_tree = ((*yyvalp).appl);
 		;}
@@ -1973,7 +1973,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 178 "chiparser.yy"
     {
       	  safe_assign(((*yyvalp).appl), gsMakeModelDef((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (6))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((6) - (6))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed Model Def \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed Model Def \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
         ;}
     break;
 
@@ -1982,7 +1982,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 186 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeModelSpec( ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl) ));
-      	  gsDebugMsg("parsed Model Body  \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed Model Body  \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -1991,7 +1991,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 190 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeModelSpec( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed Model Body  \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed Model Body  \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2010,7 +2010,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 204 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed Process Definition \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "parsed Process Definition \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2019,7 +2019,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 208 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed Process Definition \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "parsed Process Definition \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2041,7 +2041,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           }
 
       	  safe_assign(((*yyvalp).appl), gsMakeProcDef((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (6))].yystate.yysemantics.yysval.appl), gsMakeProcDecl(ATmakeList0()) ,(((yyGLRStackItem const *)yyvsp)[YYFILL ((6) - (6))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed proc Def \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed proc Def \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2051,7 +2051,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 232 "chiparser.yy"
     {
       	  safe_assign(((*yyvalp).appl), gsMakeProcDef((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (7))].yystate.yysemantics.yysval.appl), gsMakeProcDecl( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (7))].yystate.yysemantics.yysval.list))), (((yyGLRStackItem const *)yyvsp)[YYFILL ((7) - (7))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed proc Def\n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed proc Def\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2061,7 +2061,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 248 "chiparser.yy"
     {
 		  scope_lvl++;
-		  gsDebugMsg("Increase Scope to: %d\n",scope_lvl);
+		  mCRL2log(debug) << "Increase Scope to: " << scope_lvl << "" << std::endl;
 		;}
     break;
 
@@ -2070,7 +2070,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 256 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeProcSpec( ATmakeList0(), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl) ));
-      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed ProcessBody  \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2079,7 +2079,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 260 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeProcSpec( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list)), (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed ProcessBody  \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2090,7 +2090,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     {
 		  assert(scope_lvl > 0);
 		  scope_lvl--;
-		  gsDebugMsg("Decrease Scope to; %d\n",scope_lvl);
+		  mCRL2log(debug) << "Decrease Scope to; " << scope_lvl << "" << std::endl;
           var_type_map.clear();
           chan_type_direction_map.clear();
 		;}
@@ -2102,7 +2102,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 277 "chiparser.yy"
     {
  	  	  safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl) );
-      	  gsDebugMsg("parsed id's\n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2111,7 +2111,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 284 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("LocalVariables_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "LocalVariables_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2120,7 +2120,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 288 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("LocalVariables_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "LocalVariables_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2130,7 +2130,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 295 "chiparser.yy"
     {
 		  safe_assign(((*yyvalp).appl), gsMakeVarSpec( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list) ) );
-		  gsDebugMsg("LocalVariables: parsed \n %T\n", ((*yyvalp).appl));
+		  mCRL2log(debug) << "LocalVariables: parsed \n " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2140,7 +2140,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 300 "chiparser.yy"
     {
 		  //safe_assign($$, gsMakeVarSpec( ATreverse( $2 ) ) );  //<-- gsMakeVarSpec aanpassen
-		  gsDebugMsg("LocalVariables: parsed \n %T\n", ((*yyvalp).appl));
+		  mCRL2log(debug) << "LocalVariables: parsed \n " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2149,7 +2149,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 310 "chiparser.yy"
     { safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
-		  gsDebugMsg("IdentifierTypeExpression_csp: parsed \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "IdentifierTypeExpression_csp: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2162,13 +2162,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           ATermList list = ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list));
           while (!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert( new_list , ATgetFirst(list));
              list = ATgetNext( list ) ;
           }
 
           safe_assign(((*yyvalp).list), new_list);
-		  gsDebugMsg("IdentifierTypeExpression_csp: parsed \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "IdentifierTypeExpression_csp: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2191,7 +2191,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           }
 
 		  safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list) );
-		  gsDebugMsg("IdentifierTypeExpression: parsed \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "IdentifierTypeExpression: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2218,7 +2218,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           safe_assign(((*yyvalp).list), new_list);
 
 		  //safe_assign($$, gsMakeDataVarExprID ( $1, $3 ) );
-		  gsDebugMsg("IdentifierTypeExpression: parsed \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "IdentifierTypeExpression: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2227,7 +2227,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 374 "chiparser.yy"
     { safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list));
-		  gsDebugMsg("IdentifierType_csp: parsed \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "IdentifierType_csp: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2240,13 +2240,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           ATermList list = ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.list));
           while (!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert( new_list , ATgetFirst(list));
              list = ATgetNext( list ) ;
           }
 
           safe_assign(((*yyvalp).list), new_list);
-		  gsDebugMsg("IdentifierType_csp: parsed \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "IdentifierType_csp: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2255,7 +2255,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 395 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-		  gsDebugMsg("FormalParameter_csp: parsed \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "FormalParameter_csp: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2264,7 +2264,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 399 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-		  gsDebugMsg("FormalParameter_csp: parsed \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "FormalParameter_csp: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2274,7 +2274,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 406 "chiparser.yy"
     {
 		  safe_assign(((*yyvalp).appl), gsMakeVarDecl( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)) ) );
-		  gsDebugMsg("FormalParameter: parsed \n %T\n", ((*yyvalp).appl));
+		  mCRL2log(debug) << "FormalParameter: parsed \n " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2284,7 +2284,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 411 "chiparser.yy"
     {
 		  safe_assign(((*yyvalp).appl), gsMakeChanDecl( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.list)) ) );
-		  gsDebugMsg("FormalParameter: parsed \n %T\n", ((*yyvalp).appl));
+		  mCRL2log(debug) << "FormalParameter: parsed \n " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2330,14 +2330,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
           while (!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert( new_list , (ATerm) gsMakeDataVarID( (ATermAppl) ATgetFirst(list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
              list = ATgetNext( list ) ;
           }
 
           safe_assign(((*yyvalp).list), ATreverse(new_list));
-		  gsDebugMsg("IdentifierType: parsed \n %T\n", ((*yyvalp).list));
-		  gsDebugMsg("Typecheck Table %d\n", var_type_map.size());
+		  mCRL2log(debug) << "IdentifierType: parsed \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
+		  mCRL2log(debug) << "Typecheck Table " <<  var_type_map.size() << "" << std::endl;
   		;}
     break;
 
@@ -2346,7 +2346,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 470 "chiparser.yy"
     { safe_assign(((*yyvalp).list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.list) );
-      	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "ChannelDeclaration_csp: parsed formalparameter channel  \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2359,12 +2359,12 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           ATermList list = ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.list));
           while (!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert( new_list , ATgetFirst(list));
              list = ATgetNext( list ) ;
           }
           safe_assign(((*yyvalp).list), new_list);
-      	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "ChannelDeclaration_csp: parsed formalparameter channel \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2373,7 +2373,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 490 "chiparser.yy"
     {
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
 		  ATermList list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
 		  size_t n = ATgetLength( list );
 		  for(size_t i = 0; i < n ; ++i ){
@@ -2385,7 +2385,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 			};
 			list = ATgetTail( list, 1 ) ;
 		  }	;
-          gsDebugMsg("\n%T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list));
+          mCRL2log(debug) << "\n" << atermpp::aterm( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list)) << "" << std::endl;
 
           list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
 		  n = ATgetLength( list );
@@ -2412,7 +2412,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 		  }
 
 		  safe_assign(((*yyvalp).list), new_list );
-		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "ChannelDefinition: parsed VariableList \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2421,7 +2421,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 533 "chiparser.yy"
     {
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
 
           //Make sure that Expression is a number
           UnaryTypeCheck( (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl),1), "Nat");
@@ -2455,13 +2455,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           ATermList new_list = ATmakeList0();
 		  while(!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl) ) );
 			 list = ATgetNext( list ) ;
 		  }
 
 		  safe_assign(((*yyvalp).list), new_list );
-		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "ChannelDefinition: parsed VariableList \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2470,7 +2470,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 580 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("IdentifierChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "IdentifierChannelDeclaration_csp: parsed formalparameter channel  \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2479,7 +2479,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 584 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("IdentifierChannelDeclaration_csp: parsed formalparameter channel \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "IdentifierChannelDeclaration_csp: parsed formalparameter channel \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2489,7 +2489,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 591 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeChannelID((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl), gsMakeRecv()));
-		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", ((*yyvalp).appl));
+		  mCRL2log(debug) << "IdentifierChannelDeclaration: parsed Identifier Type With Expression \n " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
         ;}
     break;
 
@@ -2499,7 +2499,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 596 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeChannelID((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl), gsMakeSend()));
-		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", ((*yyvalp).appl));
+		  mCRL2log(debug) << "IdentifierChannelDeclaration: parsed Identifier Type With Expression \n " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
         ;}
     break;
 
@@ -2508,7 +2508,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 614 "chiparser.yy"
     { //safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("ChannelDefinition_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "ChannelDefinition_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2517,7 +2517,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 618 "chiparser.yy"
     { //safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("ChannelDefinition_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "ChannelDefinition_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2526,8 +2526,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 625 "chiparser.yy"
     {
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
-          gsDebugMsg("ChannelDefinition\n");
+          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+          mCRL2log(debug) << "ChannelDefinition" << std::endl;
 		  ATermList list = (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list);
 		  size_t n = ATgetLength( list );
 		  for(size_t i = 0; i < n ; ++i ){
@@ -2564,7 +2564,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 		  }
 
 		  safe_assign(((*yyvalp).list), new_list );
-		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "ChannelDefinition: parsed VariableList \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2573,7 +2573,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 667 "chiparser.yy"
     {
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+          mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
 
           //Make sure that Expression is a number
           UnaryTypeCheck( (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl),1), "Nat");
@@ -2607,13 +2607,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           ATermList new_list = ATmakeList0();
 		  while(!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.appl) ) );
 			 list = ATgetNext( list ) ;
 		  }
 
 		  safe_assign(((*yyvalp).list), new_list );
-		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", ((*yyvalp).list));
+		  mCRL2log(debug) << "ChannelDefinition: parsed VariableList \n " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2622,7 +2622,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 714 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("IdentifierChannelDefinition_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "IdentifierChannelDefinition_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2631,7 +2631,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 718 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("IdentifierChannelDefinition_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "IdentifierChannelDefinition_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2641,7 +2641,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 725 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeChannelID((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl), gsMakeNil()));
-		  gsDebugMsg("IdentifierChannelDefinition: parsed \n %T\n", ((*yyvalp).appl));
+		  mCRL2log(debug) << "IdentifierChannelDefinition: parsed \n " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
         ;}
     break;
 
@@ -2651,7 +2651,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 745 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)  );
-      	  gsDebugMsg("Type: parsed Type \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "Type: parsed Type \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2661,7 +2661,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 757 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeType( gsString2ATermAppl( "Bool" ) ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2671,7 +2671,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 762 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeType( gsString2ATermAppl("Nat" ) ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2681,7 +2681,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 767 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeType( gsString2ATermAppl("Void" ) ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2691,7 +2691,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 773 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeType( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl) ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2701,7 +2701,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 783 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeListType((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("ContainerType: parsed Type \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "ContainerType: parsed Type \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 
         ;}
     break;
@@ -2712,7 +2712,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 789 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeSetType((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("ContainerType: parsed Type \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "ContainerType: parsed Type \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 
         ;}
     break;
@@ -2724,7 +2724,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     {
           ATermList list = ATinsert( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl) );
           safe_assign(((*yyvalp).appl), gsMakeTupleType(ATreverse(list)));
-      	  gsDebugMsg("ContainerType: parsed Type \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "ContainerType: parsed Type \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2734,7 +2734,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 804 "chiparser.yy"
     {
           safe_assign(((*yyvalp).list), ATmakeList1( (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)) );
-      	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "ChannelDeclaration_csp: parsed formalparameter channel  \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2744,7 +2744,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 809 "chiparser.yy"
     {
           safe_assign(((*yyvalp).list), ATinsert( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl) ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2753,7 +2753,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 822 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeParenthesisedStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("Statement: parsed \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "Statement: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2762,7 +2762,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 833 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeParStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("ModelStatement: parsed \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "ModelStatement: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2773,7 +2773,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     {
         // Ugly Hack :D
         safe_assign(((*yyvalp).appl), gsMakeSkipStat( gsMakeNil(), gsMakeNil(), gsMakeSkip() ));
-        gsDebugMsg("AssignmentStatement: parsed \n  %T\n", ((*yyvalp).appl));
+        mCRL2log(debug) << "AssignmentStatement: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -2798,7 +2798,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           }
 
           safe_assign(((*yyvalp).appl), gsMakeAssignmentStat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (5))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.appl), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (5))].yystate.yysemantics.yysval.list)), ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (5))].yystate.yysemantics.yysval.list)) ) );
-      	  gsDebugMsg("AssignmentStatement: parsed \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "AssignmentStatement: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2808,7 +2808,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 #line 881 "chiparser.yy"
     {
           safe_assign(((*yyvalp).appl), gsMakeSkipStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl), gsMakeSkip() ));
-      	  gsDebugMsg("AssignmentStatement: parsed \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "AssignmentStatement: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2837,7 +2837,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
 
 			safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl) );
-      	  	gsDebugMsg("OptGuard: parsed \n  %T\n", ((*yyvalp).appl));
+      	  	mCRL2log(debug) << "OptGuard: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2856,7 +2856,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
     { safe_assign(((*yyvalp).appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl));
 		  mCRL2log(error) << "OptChannel not yet implemented" << std::endl;
 		  assert(false);
-      	  gsDebugMsg("OptChannel: parsed \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "OptChannel: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -2865,7 +2865,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 922 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1( (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("Identifier_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "Identifier_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2874,7 +2874,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 926 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("Identifier_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "Identifier_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2883,7 +2883,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 933 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("Expression_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "Expression_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2892,7 +2892,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 937 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("Expression_csp: parsed \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "Expression_csp: parsed \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -2907,11 +2907,11 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl),0),0);
           ATermAppl hash    = (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl),2);
-          gsDebugMsg("%T\n",(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl));
-          gsDebugMsg("%T\n",hash);
+          mCRL2log(debug) << "" << atermpp::aterm((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl)) << "" << std::endl;
+          mCRL2log(debug) << "" << atermpp::aterm(hash) << "" << std::endl;
 
           safe_assign(((*yyvalp).appl), gsMakeSendStat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl), channel, hash , ATreverse( (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.list)) ) );
-      	  gsDebugMsg("CommStatement: parsed %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "CommStatement: parsed " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
         ;}
     break;
 
@@ -2920,13 +2920,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 959 "chiparser.yy"
     {
-          gsDebugMsg("%T",(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
+          mCRL2log(debug) << "" << atermpp::aterm((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),0),0);
           ATermAppl hash    = (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),2);
 
           safe_assign(((*yyvalp).appl), gsMakeSendStat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), channel, hash, ATmakeList0() ) );
-      	  gsDebugMsg("CommStatement: parsed %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "CommStatement: parsed " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
         ;}
     break;
 
@@ -2939,13 +2939,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           //Check if $4 is properly typed
           //Check if $2 can receive
 
-          gsDebugMsg("%T",(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl));
+          mCRL2log(debug) << "" << atermpp::aterm((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl));
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl),0),0);
           ATermAppl hash    = (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (4))].yystate.yysemantics.yysval.appl),2);
 
           safe_assign(((*yyvalp).appl), gsMakeRecvStat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl), channel, hash, ATreverse( (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (4))].yystate.yysemantics.yysval.list)) ) );
-      	  gsDebugMsg("CommStatement: parsed %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "CommStatement: parsed " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
         ;}
     break;
 
@@ -2958,13 +2958,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
           //Check if $4 is properly typed
           //Check if $2 can receive
 
-          gsDebugMsg("%T",(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
+          mCRL2log(debug) << "" << atermpp::aterm((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl));
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),0),0);
           ATermAppl hash    = (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),2);
 
           safe_assign(((*yyvalp).appl), gsMakeRecvStat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), channel, hash, ATmakeList0() ) );
-      	  gsDebugMsg("CommStatement: parsed %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "CommStatement: parsed " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
         ;}
     break;
 
@@ -2991,7 +2991,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1016 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeSepStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed SEP statement \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed SEP statement \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3000,7 +3000,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1020 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeAltStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed ALT statement \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed ALT statement \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3009,9 +3009,9 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1031 "chiparser.yy"
     {
-          gsDebugMsg("%d\n", __LINE__);
+          mCRL2log(debug) << "" <<  __LINE__ << "" << std::endl;
       	  safe_assign(((*yyvalp).appl), gsMakeStarStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed STAR statement \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed STAR statement \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3020,12 +3020,12 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1037 "chiparser.yy"
     {
-          gsDebugMsg("%d\n", __LINE__);
-          gsDebugMsg("%T\n",(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl));
-          gsDebugMsg("%T\n",(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl));
+          mCRL2log(debug) << "" <<  __LINE__ << "" << std::endl;
+          mCRL2log(debug) << "" << atermpp::aterm((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl)) << "" << std::endl;
+          mCRL2log(debug) << "" << atermpp::aterm((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)) << "" << std::endl;
           UnaryTypeCheck(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1), "Bool");
           safe_assign(((*yyvalp).appl), gsMakeGuardedStarStat( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed GuardedSTAR statement \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed GuardedSTAR statement \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3034,7 +3034,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1049 "chiparser.yy"
     { safe_assign(((*yyvalp).appl), gsMakeDeltaStat((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (2))].yystate.yysemantics.yysval.appl), gsMakeDelta()));
-      	  gsDebugMsg("parsed deadlock statement \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed deadlock statement \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3053,7 +3053,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),1),
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl) )
 			);
-      		gsDebugMsg("parsed Negation Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Negation Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3062,7 +3062,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1096 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATmakeList1((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed expression-element \n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "parsed expression-element \n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -3071,7 +3071,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1100 "chiparser.yy"
     { safe_assign(((*yyvalp).list), ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	  gsDebugMsg("parsed expression-element\n  %T\n", ((*yyvalp).list));
+      	  mCRL2log(debug) << "parsed expression-element\n  " << atermpp::aterm( ((*yyvalp).list)) << "" << std::endl;
 		;}
     break;
 
@@ -3101,7 +3101,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 			  (ATermAppl) var_type_map[(ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (1))].yystate.yysemantics.yysval.appl)]
 			)
 		  );
-      	  gsDebugMsg("parsed Identifier's\n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "parsed Identifier's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3151,7 +3151,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
               exit(1);
           }
 
-          gsDebugMsg("BasicExpression: parsed \n  %T\n", ((*yyvalp).appl));
+          mCRL2log(debug) << "BasicExpression: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3166,14 +3166,14 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 		    * TODO: Add scope
 		    *
 		    **/
-          gsDebugMsg("%s:%d\n",__FILE__, __LINE__ );
+          mCRL2log(debug) <<  __LINE__  << ":" << __FILE__ << std::endl;
 
           UnaryTypeCheck( (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl),1), "Nat");
 
           if (var_type_map.find((ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl)) != var_type_map.end())
           {
             ATermAppl tuple_type = (ATermAppl) var_type_map[(ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl)];
-            gsDebugMsg("%T\n", tuple_type);
+            mCRL2log(debug) << "" << atermpp::aterm( tuple_type) << "" << std::endl;
 
             //Check if $1 is a tuple
             if( strcmp("TupleType", ATgetName( ATgetAFun( tuple_type ) ) ) != 0 )
@@ -3216,7 +3216,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                 (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
               )
             );
-            gsDebugMsg("BasicExpression (Tuple Selection): parsed \n  %T\n", ((*yyvalp).appl));
+            mCRL2log(debug) << "BasicExpression (Tuple Selection): parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
           }
 
           if (chan_type_direction_map.end() != chan_type_direction_map.find( (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl)))
@@ -3232,7 +3232,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   	             )
   	           );
 
-  	           gsDebugMsg("BasicExpression (Hashed Channel): parsed \n  %T\n", ((*yyvalp).appl));
+  	           mCRL2log(debug) << "BasicExpression (Hashed Channel): parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
           }
 
           if ( (chan_type_direction_map.end() == chan_type_direction_map.find( (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl))) &&
@@ -3255,7 +3255,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 					gsMakeType( gsString2ATermAppl("Bool" ))
 				)
 			);
-      		gsDebugMsg("BooleanExpression: parsed \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "BooleanExpression: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3269,7 +3269,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 					gsMakeType( gsString2ATermAppl("Bool" ))
 				)
 			);
-      		gsDebugMsg("BooleanExpression: parsed \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "BooleanExpression: parsed \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3285,7 +3285,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl) )
 			);
-      		gsDebugMsg("parsed Negation Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Negation Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3301,7 +3301,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl) )
 			);
-      		gsDebugMsg("parsed Negation Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Negation Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3319,7 +3319,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary AND Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3337,7 +3337,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary AND Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3355,7 +3355,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary AND Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3369,7 +3369,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 					gsMakeType( gsString2ATermAppl("Nat" ))
 				)
 			);
-      		gsDebugMsg("parsed Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3386,7 +3386,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 					(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed UnaryExpression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3403,7 +3403,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 					(((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (2))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed UnaryExpression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3421,7 +3421,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary POWER Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary POWER Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3439,7 +3439,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary STAR Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary STAR Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3457,7 +3457,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary DIVIDE Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary DIVIDE Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3475,7 +3475,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary MOD Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary MOD Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3493,7 +3493,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary DIV Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary DIV Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3511,7 +3511,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary MIN Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary MIN Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3529,7 +3529,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary MAX Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary MAX Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3547,7 +3547,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary LESS Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary LESS Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3565,7 +3565,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary GREATER Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary GREATER Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3583,7 +3583,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary LEQ Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary LEQ Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3601,7 +3601,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-      		gsDebugMsg("parsed Binary GEQ Expression's\n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "parsed Binary GEQ Expression's\n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3610,8 +3610,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1533 "chiparser.yy"
     {
-       gsDebugMsg("Expression 1: %T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl));
-       gsDebugMsg("Expression 2: %T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl));
+       mCRL2log(debug) << "Expression 1: " << atermpp::aterm( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl)) << "" << std::endl;
+       mCRL2log(debug) << "Expression 2: " << atermpp::aterm( (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)) << "" << std::endl;
 
        bool processed = false;
 
@@ -3633,7 +3633,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-            gsDebugMsg("PlusExpression - Nat Expression parsed: \n%T\n", ((*yyvalp).appl));
+            mCRL2log(debug) << "PlusExpression - Nat Expression parsed: \n" << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
             processed = true;
 		}
 
@@ -3654,7 +3654,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
    		 safe_assign(((*yyvalp).appl), gsMakeBinarySetExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 				         ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1),
                 	(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-         gsDebugMsg("PlusExpression - Set Expression parsed: \n  %T\n", ((*yyvalp).appl));
+         mCRL2log(debug) << "PlusExpression - Set Expression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
          processed = true;
        }
 
@@ -3679,8 +3679,8 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1600 "chiparser.yy"
     {
-       gsDebugMsg("Expression 1: %T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl));
-       gsDebugMsg("Expression 2: %T\n", (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl));
+       mCRL2log(debug) << "Expression 1: " << atermpp::aterm( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl)) << "" << std::endl;
+       mCRL2log(debug) << "Expression 2: " << atermpp::aterm( (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)) << "" << std::endl;
 
        bool processed = false;
        /**
@@ -3699,7 +3699,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 				(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)
 				)
 			);
-         gsDebugMsg("MinusExpression - Nat Expression parsed: \n%T\n", ((*yyvalp).appl));
+         mCRL2log(debug) << "MinusExpression - Nat Expression parsed: \n" << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
          processed = true;
        }
        /**
@@ -3719,7 +3719,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
    		 safe_assign(((*yyvalp).appl), gsMakeBinaryListExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 				         ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1),
                 	(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-         gsDebugMsg("MinusExpression - Literal Expression parsed: \n  %T\n", ((*yyvalp).appl));
+         mCRL2log(debug) << "MinusExpression - Literal Expression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
          processed = true;
        }
        /**
@@ -3739,7 +3739,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
    		 safe_assign(((*yyvalp).appl), gsMakeBinarySetExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 				         ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1),
                 	(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-         gsDebugMsg("MinusExpression - Set Expression parsed: \n  %T\n", ((*yyvalp).appl));
+         mCRL2log(debug) << "MinusExpression - Set Expression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
          processed = true;
        }
 
@@ -3779,13 +3779,13 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                   gsString2ATermAppl("=="),
 			  		  gsMakeType( gsString2ATermAppl("Bool" )),
 			  (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", ((*yyvalp).appl));
+      		  mCRL2log(debug) << "EqualityExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
             } else {
 			  safe_assign(((*yyvalp).appl), gsMakeBinaryExpression(
                                   gsString2ATermAppl("=="),
 			  		  gsMakeType( gsString2ATermAppl("Bool" )),
 			  (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", ((*yyvalp).appl));
+      		  mCRL2log(debug) << "EqualityExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
             }
 		;}
     break;
@@ -3813,12 +3813,12 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
                                   gsString2ATermAppl("!="),
 			  		  gsMakeType( gsString2ATermAppl("Bool" )),
 			  (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", ((*yyvalp).appl));
+      		  mCRL2log(debug) << "EqualityExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
             } else {
 			  safe_assign(((*yyvalp).appl), gsMakeBinaryExpression( gsString2ATermAppl("!="),
 			  		  gsMakeType( gsString2ATermAppl("Bool" )),
 			  (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", ((*yyvalp).appl));
+      		  mCRL2log(debug) << "EqualityExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
             }
 		;}
     break;
@@ -3840,7 +3840,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
    		 safe_assign(((*yyvalp).appl), gsMakeBinarySetExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 					gsMakeType( gsString2ATermAppl("Bool" )),
                 	(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-         gsDebugMsg("MemberTest - SetLiteral parsed: \n  %T\n", ((*yyvalp).appl));
+         mCRL2log(debug) << "MemberTest - SetLiteral parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
          processed = true;
        }
 
@@ -3854,7 +3854,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  	 safe_assign(((*yyvalp).appl), gsMakeBinaryListExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 					gsMakeType( gsString2ATermAppl("Bool" )),
 			        (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      	 gsDebugMsg("MemberTest - ListExpression parsed: \n  %T\n", ((*yyvalp).appl));
+      	 mCRL2log(debug) << "MemberTest - ListExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
          processed = true;
          }
 
@@ -3874,7 +3874,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1786 "chiparser.yy"
     {
-      	  gsDebugMsg("R:%d",__LINE__);
+      	  mCRL2log(debug) << "R:" << __LINE__;
           ATermList tuple_type = ATmakeList0();
 		  ATermList to_process = (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list);
           to_process = ATinsert(to_process, (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl));
@@ -3887,7 +3887,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 		  }
           to_process = ATinsert((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (5))].yystate.yysemantics.yysval.list), (ATerm) (((yyGLRStackItem const *)yyvsp)[YYFILL ((4) - (5))].yystate.yysemantics.yysval.appl) );
           safe_assign(((*yyvalp).appl), gsMakeTupleLiteral( ATreverse( to_process ), gsMakeTupleType( tuple_type ) ) );
-      	  gsDebugMsg("RecordExpression parsed: \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "RecordExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 
      ;}
     break;
@@ -3906,7 +3906,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1811 "chiparser.yy"
     {
-      	  gsDebugMsg("R:%d",__LINE__);
+      	  mCRL2log(debug) << "R:" << __LINE__;
           ATerm type = NULL;
 		  ATermList to_process = (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list);
 		  while(!ATisEmpty(to_process))
@@ -3916,7 +3916,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
              {
                type = elementType;
              }
-             gsDebugMsg("%T\n",ATgetFirst(to_process));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(to_process)) << "" << std::endl;
              if (type != elementType )
              {
                chigetposition();
@@ -3927,7 +3927,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 			 to_process = ATgetNext( to_process) ;
 		  }
           safe_assign(((*yyvalp).appl), gsMakeSetLiteral( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)), gsMakeSetType((ATermAppl) type)));
-      	  gsDebugMsg("SetLiteral parsed: \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "SetLiteral parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -3953,7 +3953,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   		  safe_assign(((*yyvalp).appl), gsMakeBinarySetExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 				ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1),
 		        (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", ((*yyvalp).appl));
+   		  mCRL2log(debug) << "BinarySetExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -3979,7 +3979,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   		  safe_assign(((*yyvalp).appl), gsMakeBinarySetExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 				ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1),
 		        (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", ((*yyvalp).appl));
+   		  mCRL2log(debug) << "BinarySetExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -4005,7 +4005,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
   		  safe_assign(((*yyvalp).appl), gsMakeBinarySetExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 				gsMakeType( gsString2ATermAppl("Bool" ) ),
 		        (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", ((*yyvalp).appl));
+   		  mCRL2log(debug) << "BinarySetExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -4014,7 +4014,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1899 "chiparser.yy"
     {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
                   chigetposition();
@@ -4025,7 +4025,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeFunction( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl),
 			     (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4060,7 +4060,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeBinaryListExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 					ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("ListExpression parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "ListExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -4085,7 +4085,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeBinaryListExpression( (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.appl),
 					ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl),1),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (3))].yystate.yysemantics.yysval.appl), (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (3))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("ListExpression parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "ListExpression parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
 		;}
     break;
 
@@ -4104,7 +4104,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeFunction( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl),
 					gsMakeType( gsString2ATermAppl("Nat" )),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4123,7 +4123,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeFunction( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl),
 				  (ATermAppl) ATgetArgument(ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1),0),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4132,7 +4132,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 1998 "chiparser.yy"
     {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
                   chigetposition();
@@ -4143,7 +4143,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeFunction( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl),
 			     (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4152,7 +4152,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 2013 "chiparser.yy"
     {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
                   chigetposition();
@@ -4163,7 +4163,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeFunction( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl),
 				  (ATermAppl) ATgetArgument(ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1),0),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4172,7 +4172,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 2028 "chiparser.yy"
     {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
                   chigetposition();
@@ -4183,7 +4183,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeFunction( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl),
 			       (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4192,7 +4192,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 2043 "chiparser.yy"
     {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
                   chigetposition();
@@ -4212,7 +4212,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 			       (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.appl),1),
 			       (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.appl),
                    (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (6))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n%T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n" << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4221,7 +4221,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 2067 "chiparser.yy"
     {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
                   chigetposition();
@@ -4241,7 +4241,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 			       (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.appl),1),
 			       (((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (6))].yystate.yysemantics.yysval.appl),
                    (((yyGLRStackItem const *)yyvsp)[YYFILL ((5) - (6))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n%T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n" << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4250,7 +4250,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 2092 "chiparser.yy"
     {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1))), "ListType") == 0 ))
 				{
 				  mCRL2log(error) << "functions: " << atermpp::aterm((((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl)) << " cannot be used on " << atermpp::aterm((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)) << std::endl;
@@ -4260,7 +4260,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
  	  		safe_assign(((*yyvalp).appl), gsMakeFunction( (((yyGLRStackItem const *)yyvsp)[YYFILL ((1) - (4))].yystate.yysemantics.yysval.appl),
 			       (ATermAppl) ATgetArgument((((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl),1),
 			(((yyGLRStackItem const *)yyvsp)[YYFILL ((3) - (4))].yystate.yysemantics.yysval.appl)));
-      		gsDebugMsg("Functions parsed: \n  %T\n", ((*yyvalp).appl));
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -4289,7 +4289,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 /* Line 936 of glr.c  */
 #line 2119 "chiparser.yy"
     {
-      	  gsDebugMsg("Entering ListLiteral\n");
+      	  mCRL2log(debug) << "Entering ListLiteral" << std::endl;
           ATerm type = NULL;
 		  ATermList to_process = (((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list);
 		  while(!ATisEmpty(to_process))
@@ -4299,7 +4299,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
              {
                type = elementType;
              }
-             gsDebugMsg("%T\n",ATgetFirst(to_process));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(to_process)) << "" << std::endl;
              if (type != elementType )
              {
                chigetposition();
@@ -4310,7 +4310,7 @@ yyuserAction (yyRuleNum yyn, int yyrhslen, yyGLRStackItem* yyvsp,
 			 to_process = ATgetNext( to_process) ;
 		  }
           safe_assign(((*yyvalp).appl), gsMakeListLiteral( ATreverse((((yyGLRStackItem const *)yyvsp)[YYFILL ((2) - (3))].yystate.yysemantics.yysval.list)), gsMakeListType((ATermAppl) type)));
-      	  gsDebugMsg("ListLiteral parsed: \n  %T\n", ((*yyvalp).appl));
+      	  mCRL2log(debug) << "ListLiteral parsed: \n  " << atermpp::aterm( ((*yyvalp).appl)) << "" << std::endl;
       ;}
     break;
 
@@ -6026,10 +6026,10 @@ void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)
 
 void UnaryTypeCheck(ATermAppl arg1, std::string type)
 {
-    gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
-    gsDebugMsg("arg1: %T\n", arg1);
+    mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+    mCRL2log(debug) << "arg1: " << atermpp::aterm( arg1) << "" << std::endl;
     ATermAppl arg2 = gsMakeType(gsString2ATermAppl(type.c_str()));
-    gsDebugMsg("arg2: %T\n", arg2);
+    mCRL2log(debug) << "arg2: " << atermpp::aterm( arg2) << "" << std::endl;
 
     if( arg1 != arg2 )
         {
@@ -6042,15 +6042,15 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
 
 bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
 {
-  gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
-  gsDebugMsg("arg1: %T\n", arg1);
-  gsDebugMsg("arg2: %T\n", arg2);
+  mCRL2log(debug) << __LINE__ << ";" << __FILE__ << std::endl;
+  mCRL2log(debug) << "arg1: " << atermpp::aterm( arg1) << "" << std::endl;
+  mCRL2log(debug) << "arg2: " << atermpp::aterm( arg2) << "" << std::endl;
   if(arg1 == arg2)
   {
     return true;
   }
 
-  gsDebugMsg("ContainerTypeChecking: %T, %T\n",arg1, arg2);
+  mCRL2log(debug) << "ContainerTypeChecking: " << atermpp::aterm(arg1) << ", " << atermpp::aterm( arg2) << std::endl;
   if((strcmp(ATgetName(ATgetAFun(arg1)), ATgetName(ATgetAFun(arg2)))==0)
      && ( ( strcmp(ATgetName(ATgetAFun(arg1)), "ListType") == 0 ) ||
           ( strcmp(ATgetName(ATgetAFun(arg1)), "SetType") == 0  )

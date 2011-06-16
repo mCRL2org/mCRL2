@@ -993,9 +993,9 @@ void determinise(LTS_TYPE& l)
 
         if (d_ntransitions%10000 == 0)
         {
-          gsDebugMsg(
-            "generated %d states and %d transitions; explored %d states\n",
-            tss->get_next_tag(),d_ntransitions,d_id);
+          mCRL2log(debug) <<
+            "generated " << tss->get_next_tag() << " states and " << d_ntransitions
+                         << " transitions; explored " << d_id << " states" << std::endl;
         }
       }
       d_states.clear();

@@ -31,8 +31,6 @@
 */
 
 #include "mcrl2/core/messaging.h"
-using mcrl2::core::gsDebugMsg;
-
 
 namespace lysa
 {

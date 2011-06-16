@@ -725,7 +725,7 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
   lps::deprecated::summand result = lps::deprecated::summand(get_nonreal_variables(s.summation_variables()),
                            new_condition, s.is_delta(), new_actions, nextstate);
 
-  // gsDebugMsg("Generated summand %P\n", (ATermAppl)result);
+  // mCRL2log(debug) << "Generated summand " << core::pp(result) << std::endl;
 
   return result;
 }

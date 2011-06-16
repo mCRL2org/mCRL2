@@ -1067,7 +1067,6 @@ static ATermList filter_rename_list(ATermList l, ATermList R)
 
 static ATermAppl PushBlock(ATermList H, ATermAppl a)
 {
-  // gsDebugMsg("push block: H: %T; a: %T\n\n",H,a);
   if (gsIsDelta(a) || gsIsTau(a))
   {
     return a;
@@ -1634,7 +1633,6 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
 static ATermAppl PushComm(ATermList C, ATermAppl a)
 {
   C=sort_multiactions_comm(C);
-  // gsDebugMsg("push comm: C: %P; a:%P\n",C,a);
   if (gsIsDelta(a) || gsIsTau(a) || gsIsAction(a))
   {
     return a;
@@ -1885,7 +1883,6 @@ static ATermList gsaGetAlpha(ATermAppl a, size_t length, ATermList allowed, ATer
   //
   // XXX ignore parameter not implemented yet
 
-  // gsDebugMsg("gsaGetAlpha begin: a: %P; length: %d\n\n", a, length);
 
   ATermList l=NULL; //result
 
@@ -2058,18 +2055,18 @@ static ATermList gsaGetAlpha(ATermAppl a, size_t length, ATermList allowed, ATer
         l = merge_list(l,s);
         //sync_list_ht(m,l1,l2,length);
 
-        //gsDebugMsg("result of syncing s: %d\n", ATgetLength(s));
+        //mCRL2log(debug) << "result of syncing s: " <<  ATgetLength(s) << "" << std::endl;
         //gsaATindexedSetPutList(m,s);
       }
 
       //l = ATindexedSetElements(m);
       //ATindexedSetDestroy(m);
-      // gsDebugMsg("len(l): %d\n\n", ATgetLength(l));
+      // mCRL2log(debug) << "len(l): " <<  ATgetLength(l) << "\n" << std::endl;
     }
   }
   else
   {
-    //gsDebugMsg("a: %T\n\n", a);
+    //mCRL2log(debug) << "a: " << atermpp::aterm( a) << "\n" << std::endl;
     assert(0);
   }
 
@@ -2089,7 +2086,6 @@ l_ok:
     }
   }
 
-  // gsDebugMsg("gsaGetAlpha done: a: %P; l:%T, length: %d\n\n", a, l, length);
   return l;
 }
 
@@ -2158,7 +2154,6 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, size_t length, ATermList allowed, 
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
   }
 
-  // gsDebugMsg("gsaGetSyncAlpha end: a: %P; l:%d\n\n", a, ATgetLength(l));
   return l;
 }
 
@@ -2301,7 +2296,7 @@ static ATermAppl gsApplyAlpha(ATermAppl a)
 ATermList gsaGetDeps(ATermAppl a)
 {
   //returns process names that a depends to (should be applied iteratevly).
-  // gsDebugMsg("gsaGetDeps: a: %T\n",a);
+  // mCRL2log(debug) << "gsaGetDeps: a: " << atermpp::aterm(a) << std::endl;
   ATermList r=ATmakeList0();
   if (gsIsDelta(a) || gsIsTau(a) || gsIsAction(a))
   {
@@ -2639,7 +2634,6 @@ static void gsAlpha(
         ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
       }
       ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
-      // gsDebugMsg("Phase 1: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
       if (!ATisEqual(dep,old_dep))
       {
         stable=false;
@@ -3024,7 +3018,6 @@ nP_checked:
         ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
       }
       ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
-      // gsDebugMsg("Phase 2: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
       if (!ATisEqual(dep,old_dep))
       {
         stable=false;
@@ -3136,7 +3129,6 @@ nP_checked:
           ATtablePut(deps,(ATerm)pn,(ATerm)old_dep);
         }
         ATermList dep=gsaATsortList(gsaGetDeps(ATAtableGet(procs,(ATerm)pn)));
-        // gsDebugMsg("Phase 3: proc: %T, dep: %T; old_dep: %T\n\n", pn, dep, old_dep);
         if (!ATisEqual(dep,old_dep))
         {
           stable=false;
