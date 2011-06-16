@@ -12,7 +12,7 @@
 
 #include "parser.h"
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lts/lts_fsm.h"

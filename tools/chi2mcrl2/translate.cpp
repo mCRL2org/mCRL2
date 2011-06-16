@@ -11,7 +11,7 @@
 #include <cstdio>
 #include <string.h>
 #include "mcrl2/atermpp/aterm.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "translate.h"
 #include <vector>
 #include <sstream>

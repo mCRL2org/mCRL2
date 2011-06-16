@@ -15,7 +15,7 @@
 #include <iostream>
 
 #include "grape_logpanel.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 using namespace grape::grapeapp;
 

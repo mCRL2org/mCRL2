@@ -13,7 +13,7 @@
 #include <cmath>
 #include <iostream>
 #include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/text_utility.h"
 #include <cstdio>
 #include <vector>

@@ -26,7 +26,7 @@
 #include "xsimtracedll.h"
 #include "mcrl2/core/print.h"
 // #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
 
 using namespace std;

@@ -33,7 +33,7 @@
 #include "mcrl2/core/detail/memory_utility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 
 using namespace mcrl2::core;

@@ -11,7 +11,7 @@
 #include "wx.hpp" // precompiled headers
 
 #include "wx/wx.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2gen/mcrl2gen.h"
 #include "grape_frame.h"
 

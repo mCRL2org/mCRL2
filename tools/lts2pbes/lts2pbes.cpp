@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/parse.h"

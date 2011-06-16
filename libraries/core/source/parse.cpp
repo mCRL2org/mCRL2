@@ -13,7 +13,7 @@
 #include <sstream>
 #include <stdlib.h>
 #include "mcrl2/core/detail/mcrl2lexer.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 
 using namespace std;

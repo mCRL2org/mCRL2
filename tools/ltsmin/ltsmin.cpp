@@ -13,7 +13,7 @@
 
 #include <string>
 #include "ltsmin.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/atermpp/aterm_init.h"

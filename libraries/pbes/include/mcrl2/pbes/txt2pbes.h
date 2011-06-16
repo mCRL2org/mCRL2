@@ -16,7 +16,7 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {

@@ -26,7 +26,7 @@
 #include <string>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
 
 namespace mcrl2

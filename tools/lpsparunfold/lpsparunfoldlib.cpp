@@ -5,7 +5,7 @@
 #include "lpsparunfoldlib.h"
 #include <iostream>
 #include <string>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include <iterator>
 

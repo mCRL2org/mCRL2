@@ -15,7 +15,7 @@
 #include <cmath>
 #include <iterator>
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/postfix_identifier_generator.h"

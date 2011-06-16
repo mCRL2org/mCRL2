@@ -30,7 +30,7 @@
 * sensible).
 */
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace lysa
 {

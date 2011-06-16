@@ -12,7 +12,7 @@
 #ifndef MCRL2_LPS_DECLUSTER_H
 #define MCRL2_LPS_DECLUSTER_H
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/data/join.h"
 

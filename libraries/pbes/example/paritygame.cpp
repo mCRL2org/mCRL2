@@ -12,7 +12,7 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"

@@ -23,7 +23,7 @@
 #include "event_diagram.h"
 #include "event_file.h"
 #include "mcrl2gen/mcrl2gen.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 using namespace grape::libgrape;
 using namespace grape::grapeapp;

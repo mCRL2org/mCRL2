@@ -18,7 +18,7 @@
 #include "mcrl2/bes/io.h"
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbesinstconversion.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {

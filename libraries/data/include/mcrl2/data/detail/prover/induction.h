@@ -15,7 +15,7 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/numeric_string.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 #include "mcrl2/data/detail/prover/expression_info.h"

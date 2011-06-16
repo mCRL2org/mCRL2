@@ -24,7 +24,7 @@
 #include <cassert>
 #include "mcrl2/aterm/aterm2.h"
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/rewriter.h"

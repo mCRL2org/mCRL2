@@ -18,7 +18,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/input_output_tool.h"

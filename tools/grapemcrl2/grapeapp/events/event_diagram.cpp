@@ -28,7 +28,7 @@
 
 #include "libgrape/xml.h"
 #include "mcrl2gen/mcrl2gen.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 
 using namespace grape::libgrape;

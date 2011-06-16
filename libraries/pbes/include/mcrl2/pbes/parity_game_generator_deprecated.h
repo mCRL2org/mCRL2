@@ -22,7 +22,7 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/algorithm.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
 #include "mcrl2/data/selection.h"

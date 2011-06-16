@@ -36,7 +36,7 @@
 // linear process libraries.
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
 #include "mcrl2/lps/constelm.h"

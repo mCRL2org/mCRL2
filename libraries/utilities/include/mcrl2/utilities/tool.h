@@ -18,10 +18,6 @@
 
 #include "mcrl2/utilities/logger.h"
 
-#ifndef MCRL2_TOOL_CLASSES_NO_CORE
-# include "mcrl2/core/messaging.h"
-#endif
-
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/execution_timer.h"
 

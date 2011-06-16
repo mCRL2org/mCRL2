@@ -30,7 +30,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/atermpp/table.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"

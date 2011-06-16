@@ -30,7 +30,7 @@
 #include <boost/bind.hpp>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/lts_utilities.h"

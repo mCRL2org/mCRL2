@@ -20,7 +20,7 @@
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/nextstate/standard.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/specification.h"
 
 using namespace mcrl2::core;

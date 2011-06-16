@@ -480,7 +480,7 @@ static yyconst flex_int16_t yy_chk[142] =
 #define YYSTYPE std::string
 #include <cstdio>
 // #include <aterm2.h>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "liblts_dotlexer.h"
 #include "mcrl2/lts/detail/liblts_dotparser.h"
 

@@ -22,7 +22,7 @@
 #include <functional>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/text_utility.h"
 #include "mcrl2/exception.h"
 

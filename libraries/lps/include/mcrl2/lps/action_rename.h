@@ -16,7 +16,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/find.h"

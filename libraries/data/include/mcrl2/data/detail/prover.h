@@ -12,7 +12,7 @@
 #define PROVER_H
 
 #include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/manipulator.h"

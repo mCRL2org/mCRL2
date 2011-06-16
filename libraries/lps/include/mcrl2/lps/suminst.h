@@ -14,7 +14,7 @@
 
 #include <deque>
 #include "mcrl2/atermpp/set_operations.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/data/classic_enumerator.h"
 

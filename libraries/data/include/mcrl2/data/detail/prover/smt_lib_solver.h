@@ -18,7 +18,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/numeric_string.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/bool.h"
@@ -925,7 +925,6 @@ class binary_smt_solver
     static bool usable();
 };
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
-# include "mcrl2/core/messaging.h"
 # include <unistd.h>
 /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
 /// CVC / (http://www.cs.nyu.edu/acsys/cvcl/) to determine the satisfiability

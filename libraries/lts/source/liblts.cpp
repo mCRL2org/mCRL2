@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_utilities.h"

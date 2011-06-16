@@ -13,7 +13,7 @@
 
 #include <aterm2.h>
 #include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/lexer.h"
 #include "mcrl2/data/standard_utility.h"

@@ -16,7 +16,7 @@
 
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;

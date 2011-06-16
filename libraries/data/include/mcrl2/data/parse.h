@@ -23,7 +23,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/table.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/core/regfrmtrans.h"

@@ -20,7 +20,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"

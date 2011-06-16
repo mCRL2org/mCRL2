@@ -14,7 +14,7 @@
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"

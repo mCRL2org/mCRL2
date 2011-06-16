@@ -12,7 +12,7 @@
 #include <iostream>
 #include <vector>
 #include "libstruct_core.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "chiparser.h"
 #include <map>
 #include <set>

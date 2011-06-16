@@ -15,7 +15,7 @@
 #include <iostream>
 
 #include "outputpanel.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 class message_relay;
 

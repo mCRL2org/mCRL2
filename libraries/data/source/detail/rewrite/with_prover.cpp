@@ -15,7 +15,7 @@
 #include <cassert>
 #include <memory.h>
 #include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/rewrite.h"

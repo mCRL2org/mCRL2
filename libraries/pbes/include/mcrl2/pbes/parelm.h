@@ -18,7 +18,7 @@
 #include <boost/bind.hpp>
 #include <boost/graph/adjacency_list.hpp>
 #include "mcrl2/core/reachable_nodes.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/iota.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"

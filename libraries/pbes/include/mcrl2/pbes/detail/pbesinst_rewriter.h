@@ -15,7 +15,7 @@
 #include <iostream>
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"

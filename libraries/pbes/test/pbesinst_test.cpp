@@ -16,7 +16,7 @@
 #include <string>
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"

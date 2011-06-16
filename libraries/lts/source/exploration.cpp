@@ -12,7 +12,7 @@
 #include <time.h>
 #include <sstream>
 #include <set>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"

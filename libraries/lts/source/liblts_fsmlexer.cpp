@@ -467,7 +467,7 @@ static yyconst flex_int16_t yy_chk[114] =
 #include <string>
 #include <cstdio>
 // #include <aterm2.h>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 #include "liblts_fsmlexer.h"
 #include "mcrl2/lts/detail/liblts_fsmparser.h"

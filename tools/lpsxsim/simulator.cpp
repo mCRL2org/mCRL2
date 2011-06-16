@@ -24,7 +24,7 @@
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/trace/trace.h"
 #include "simulator.h"
 
