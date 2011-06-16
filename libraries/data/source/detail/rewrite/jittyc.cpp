@@ -1866,7 +1866,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
 }
 
-void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, int d, int opid, bool* used)
+void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, int d, int /* opid */, bool* used)
 {
   int l = 0;
 

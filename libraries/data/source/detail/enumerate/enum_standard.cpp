@@ -343,7 +343,7 @@ bool EnumeratorSolutionsStandard::next(
       }
       else if (sort_set::is_set(sort))
       {
-        const sort_expression element_sort=container_sort(sort).element_sort();
+        //const sort_expression element_sort=container_sort(sort).element_sort();
         /* if (m_enclosing_enumerator->m_data_spec.is_certainly_finite(element_sort))
         { 
           / * Enumerate and store 

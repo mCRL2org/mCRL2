@@ -652,11 +652,11 @@ static void print_state(FILE* f,ATerm state)
   {
     if (i == 0)
     {
-      fprintf(f,"%s",core::pp(ATgetArgument((ATermAppl) state,i)));
+      fprintf(f,"%s",mcrl2::core::pp(ATgetArgument((ATermAppl) state,i)).c_str());
     }
     else
     {
-      fprintf(f,",%s",core::pp(ATgetArgument((ATermAppl) state,i)));
+      fprintf(f,",%s",mcrl2::core::pp(ATgetArgument((ATermAppl) state,i)).c_str());
     }
   }
   fprintf(f,"]");
