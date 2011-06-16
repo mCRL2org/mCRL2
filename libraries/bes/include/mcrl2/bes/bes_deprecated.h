@@ -2074,16 +2074,23 @@ class boolean_equation_system
 
       // Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
       // This can be removed if the jittyc or innerc compilers are not in use anymore.
-      const function_symbol_vector constructors(pbes_spec.data().constructors());
-      for (function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
-      {
-        Mucks_rewriter.convert_to(*i);
-      }
+      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_variables(pbes_spec);
+      std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(pbes_spec);
+      std::set < mcrl2::data::variable > diff_set;
+      std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
 
-      const function_symbol_vector mappings(pbes_spec.data().mappings());
-      for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
+      std::set < sort_expression > bounded_sorts;
+      for(std::set < mcrl2::data::variable > :: const_iterator i=diff_set.begin(); i!=diff_set.end(); ++i)
       {
-        Mucks_rewriter.convert_to(*i);
+        bounded_sorts.insert(i->sort());
+      }
+      for(std::set < sort_expression > :: const_iterator i=bounded_sorts.begin(); i!=bounded_sorts.end(); ++i)
+      {
+        const function_symbol_vector constructors(pbes_spec.data().constructors(*i)); 
+        for (function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
+        {
+          Mucks_rewriter.convert_to(*j);
+        }
       }
 
       // Variables in which the result is stored

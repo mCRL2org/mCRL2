@@ -524,6 +524,26 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   // In certain cases it could be useful to add the mappings also, but this appears to
   // give a substantial performance penalty, due to the addition of symbols to the
   // rewriter that are not used.
+
+  std::set < mcrl2::data::variable > vset=mcrl2::lps::find_variables(spec);
+  std::set < mcrl2::data::variable > vfset=mcrl2::lps::find_free_variables(spec);
+  std::set < mcrl2::data::variable > diff_set;
+  std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
+
+  std::set < sort_expression > bounded_sorts;
+  for(std::set < mcrl2::data::variable > :: const_iterator i=diff_set.begin(); i!=diff_set.end(); ++i)
+  {
+    bounded_sorts.insert(i->sort());
+  }
+  for(std::set < sort_expression > :: const_iterator i=bounded_sorts.begin(); i!=bounded_sorts.end(); ++i)
+  {
+    const function_symbol_vector constructors(spec.data().constructors(*i));
+    for (function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
+    {
+      info.m_rewriter.convert_to(mcrl2::data::data_expression(*j));
+    }
+  }
+
   const mcrl2::data::function_symbol_vector constructors(spec.data().constructors());
   for (mcrl2::data::function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
   {

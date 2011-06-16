@@ -638,24 +638,9 @@ ATerm OpId2Int(ATermAppl Term, bool add_opids)
 
 ATerm toInner(ATermAppl Term, bool add_opids)
 {
-  ATermList l;
-
-  if (!gsIsDataAppl(Term))
-  {
-    if (gsIsOpId(Term))
-    {
-      return (ATerm) OpId2Int(Term,add_opids);
-    }
-    else
-    {
-      return (ATerm) Term;
-    }
-  }
-
-  l = ATmakeList0();
-
   if (gsIsDataAppl(Term))
   {
+    ATermList l = ATmakeList0();
     for (ATermList args = ATLgetArgument((ATermAppl) Term, 1) ; !ATisEmpty(args) ; args = ATgetNext(args))
     {
       l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
@@ -672,9 +657,67 @@ ATerm toInner(ATermAppl Term, bool add_opids)
     {
       l = ATinsert(l, arg0);
     }
+    return (ATerm) l;
+  }
+  else
+  {
+    if (gsIsOpId(Term))
+    {
+      return (ATerm) OpId2Int(Term,add_opids);
+    }
+    else
+    {
+      return (ATerm) Term;
+    }
   }
 
-  return (ATerm) l;
+}
+
+ATermAppl toInnerc(ATermAppl Term, const bool add_opids)
+{
+
+  if (gsIsNil(Term) || gsIsDataVarId(Term))
+  {
+    return Term;
+  }
+
+  ATermList l = ATmakeList0();
+
+  if (!gsIsDataAppl(Term))
+  {
+    if (gsIsOpId(Term))
+    {
+      // l = ATinsert(l,(ATerm) OpId2Int(Term,add_opids));
+      return Apply0(OpId2Int(Term,add_opids));
+    }
+    else
+    {
+      return Apply0((ATerm) Term);
+    }
+  }
+  else
+  {
+    ATermAppl arg0 = toInnerc(ATAgetArgument(Term, 0), add_opids);
+    // Reflect the way of encoding the other arguments!
+    if (gsIsNil(arg0) || gsIsDataVarId(arg0))
+    {
+      l = ATinsert(l, (ATerm) arg0);
+    }
+    else
+    {
+      size_t arity = ATgetArity(ATgetAFun(arg0));
+      for (size_t i = 0; i < arity; ++i)
+      {
+        l = ATinsert(l, ATgetArgument(arg0, i));
+      }
+    }
+    for (ATermList args = ATLgetArgument((ATermAppl) Term,1); !ATisEmpty(args) ; args = ATgetNext(args))
+    {
+      l = ATinsert(l,(ATerm) toInnerc((ATermAppl) ATgetFirst(args),add_opids));
+    }
+    l = ATreverse(l);
+  }
+  return Apply(l);
 }
 
 ATermAppl fromInner(ATerm Term)
@@ -719,54 +762,6 @@ ATermAppl fromInner(ATerm Term)
   }
   return a;
 } 
-
-ATermAppl toInnerc(ATermAppl Term, const bool add_opids)
-{
-  ATermList l;
-
-  if (gsIsNil(Term) || gsIsDataVarId(Term))
-  {
-    return Term;
-  }
-
-  l = ATmakeList0();
-
-  if (!gsIsDataAppl(Term))
-  {
-    if (gsIsOpId(Term))
-    {
-      l = ATinsert(l,(ATerm) OpId2Int(Term,add_opids));
-      return Apply0(OpId2Int(Term,add_opids));
-    }
-    else
-    {
-      return Apply0((ATerm) Term);
-    }
-  }
-  else
-  {
-    ATermAppl arg0 = toInnerc(ATAgetArgument(Term, 0), add_opids);
-    // Reflect the way of encoding the other arguments!
-    if (gsIsNil(arg0) || gsIsDataVarId(arg0))
-    {
-      l = ATinsert(l, (ATerm) arg0);
-    }
-    else
-    {
-      size_t arity = ATgetArity(ATgetAFun(arg0));
-      for (size_t i = 0; i < arity; ++i)
-      {
-        l = ATinsert(l, ATgetArgument(arg0, i));
-      }
-    }
-    for (ATermList args = ATLgetArgument((ATermAppl) Term,1); !ATisEmpty(args) ; args = ATgetNext(args))
-    {
-      l = ATinsert(l,(ATerm) toInnerc((ATermAppl) ATgetFirst(args),add_opids));
-    }
-    l = ATreverse(l);
-  }
-  return Apply(l);
-}
 
 
 }

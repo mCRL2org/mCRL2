@@ -130,20 +130,27 @@ class parity_game_generator_deprecated: public parity_game_generator
     }
 
     /// \brief Add mappings and equations to datar_internal
-    /// Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
+    /// Declare constructors to the rewriter to prevent unnecessary compilation for bound variables.
     // This can be removed if the jittyc compilers are not in use anymore.
     void initialize_internal_rewriter()
     {
-      const data::function_symbol_vector constructors(m_pbes.data().constructors());
-      for (data::function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
-      {
-        datar_internal.convert_to(*i);
-      }
+      std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_variables(m_pbes);
+      std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(m_pbes);
+      std::set < mcrl2::data::variable > diff_set;
+      std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
 
-      const data::function_symbol_vector mappings(m_pbes.data().mappings());
-      for (data::function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
+      std::set < mcrl2::data::sort_expression > bounded_sorts;
+      for(std::set < mcrl2::data::variable > :: const_iterator i=diff_set.begin(); i!=diff_set.end(); ++i)
       {
-        datar_internal.convert_to(*i);
+        bounded_sorts.insert(i->sort());
+      }
+      for(std::set < mcrl2::data::sort_expression > :: const_iterator i=bounded_sorts.begin(); i!=bounded_sorts.end(); ++i)
+      {
+        const mcrl2::data::function_symbol_vector constructors(m_pbes.data().constructors(*i));
+        for (mcrl2::data::function_symbol_vector::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
+        {
+          datar_internal.convert_to(*i);
+        }
       }
     }
 

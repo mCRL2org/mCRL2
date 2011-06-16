@@ -216,14 +216,6 @@ class rewriter: public basic_rewriter<data_expression>
     rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
       basic_rewriter<data_expression>(d, selector, s)
     {
-#ifdef MCRL2_REWRITE_RULE_SELECTION_DEBUG
-std::clog << "\n--- rewrite rule selection ---\n";
-const atermpp::set<data_equation> eqn = d.equations();
-for (atermpp::set<data_equation>::const_iterator i = eqn.begin(); i != eqn.end(); ++i)
-{
-  std::clog << selector(*i) << " " << core::pp(*i) << std::endl;
-}
-#endif
     }
 
     /// \brief Default specification used if no specification is specified at construction
