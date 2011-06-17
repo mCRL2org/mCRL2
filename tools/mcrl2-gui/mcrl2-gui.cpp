@@ -20,8 +20,6 @@
 #define NAME   "mcrl2-gui"
 #define AUTHOR "Frank Stappers"
 
-using namespace mcrl2::core;
-
 class mCRL2_gui: public mcrl2::utilities::wx::tool< mCRL2_gui, mcrl2::utilities::tools::tool >
 {
     typedef mcrl2::utilities::wx::tool< mCRL2_gui, mcrl2::utilities::tools::tool > super;
