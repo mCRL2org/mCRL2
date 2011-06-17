@@ -14,7 +14,7 @@
 
 #include <set>
 #include <utility>
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 
 namespace mcrl2

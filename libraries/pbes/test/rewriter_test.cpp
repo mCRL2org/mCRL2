@@ -20,7 +20,7 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/detail/test_operation.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/data/parse.h"

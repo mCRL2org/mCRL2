@@ -20,7 +20,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/io.h"
 #include "mcrl2/bes/pg_parse.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -35,7 +35,7 @@ namespace bes
 /// \brief Guess output file format based on filename
 bes_output_format guess_file_format(std::string const& filename)
 {
-  std::string extension = *(core::split(filename, ".").rbegin());
+  std::string extension = *(utilities::split(filename, ".").rbegin());
 
   bes_output_format result;
   if (extension == "bes")

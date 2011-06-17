@@ -13,7 +13,7 @@
 #define MCRL2_UTILITIES_INPUT_TOOL_H
 
 #include <sstream>
-// #include "mcrl2/core/text_utility.h"
+// #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/tool.h"
 
 namespace mcrl2
@@ -71,7 +71,7 @@ class input_tool: public tool
     /// \brief Adds a message about input files to the given description.
     std::string make_tool_description(const std::string& description) const
     {
-      // return core::word_wrap_text(description + " If INFILE is not present, standard input is used.");
+      // return utilities::word_wrap_text(description + " If INFILE is not present, standard input is used.");
       return description + " If INFILE is not present, standard input is used.";
     }
 

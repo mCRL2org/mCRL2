@@ -14,7 +14,7 @@
 
 #include <algorithm>
 #include <iostream>
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
@@ -116,12 +116,12 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
 
 
 /// \brief Algorithm class for the abstract algorithm
-class pbes_abstract_algorithm: public core::algorithm
+class pbes_abstract_algorithm: public utilities::algorithm
 {
   public:
     /// \brief Constructor.
     pbes_abstract_algorithm(size_t log_level = 0)
-      : core::algorithm(log_level)
+      : utilities::algorithm(log_level)
     {}
 
     /// \brief Runs the algorithm.

@@ -15,8 +15,6 @@
 #include "liblts_dotlexer.h"
 #include "mcrl2/lts/detail/liblts_dotparser.h"
 
-using namespace mcrl2::core;
-
 //using namespace std;
 
 //fix for the broken cygwin versions of flex

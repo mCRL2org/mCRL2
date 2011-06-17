@@ -20,9 +20,9 @@
 #include <set>
 #include <vector>
 #include <algorithm>
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -175,8 +175,8 @@ struct constelm_edge_condition
     term_type result = tr::true_();
     for (typename atermpp::vector<true_false_pair<Term> >::const_iterator i = c.begin(); i != c.end(); ++i)
     {
-      result = core::optimized_and(result, core::optimized_not(i->TC));
-      result = core::optimized_and(result, core::optimized_not(i->FC));
+      result = utilities::optimized_and(result, utilities::optimized_not(i->TC));
+      result = utilities::optimized_and(result, utilities::optimized_not(i->FC));
     }
     return result;
   }
@@ -221,7 +221,7 @@ struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edg
   bool visit_data_expression(const term_type& /* e */, const data_term_type& d, edge_condition& ec)
   {
     ec.TC = d;
-    ec.FC = core::optimized_not(d);
+    ec.FC = utilities::optimized_not(d);
     return this->stop_recursion;
   }
 
@@ -274,8 +274,8 @@ struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edg
     super::visit(left, ec_left);
     edge_condition ec_right;
     super::visit(right, ec_right);
-    ec.TC = core::optimized_and(ec_left.TC, ec_right.TC);
-    ec.FC = core::optimized_or(ec_left.FC, ec_right.FC);
+    ec.TC = utilities::optimized_and(ec_left.TC, ec_right.TC);
+    ec.FC = utilities::optimized_or(ec_left.FC, ec_right.FC);
     merge_conditions(ec_left, ec_right, ec);
     return this->stop_recursion;
   }
@@ -292,8 +292,8 @@ struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edg
     super::visit(left, ec_left);
     edge_condition ec_right;
     super::visit(right, ec_right);
-    ec.TC = core::optimized_or(ec_left.TC, ec_right.TC);
-    ec.FC = core::optimized_and(ec_left.FC, ec_right.FC);
+    ec.TC = utilities::optimized_or(ec_left.TC, ec_right.TC);
+    ec.FC = utilities::optimized_and(ec_left.FC, ec_right.FC);
     merge_conditions(ec_left, ec_right, ec);
     return this->stop_recursion;
   }
@@ -310,8 +310,8 @@ struct edge_condition_visitor: public pbes_expression_visitor<Term, constelm_edg
     super::visit(left, ec_left);
     edge_condition ec_right;
     super::visit(right, ec_right);
-    ec.TC = core::optimized_or(ec_left.FC, ec_right.TC);
-    ec.FC = core::optimized_and(ec_left.TC, ec_right.FC);
+    ec.TC = utilities::optimized_or(ec_left.FC, ec_right.TC);
+    ec.FC = utilities::optimized_and(ec_left.TC, ec_right.FC);
     merge_conditions(ec_left, ec_right, ec);
     return this->stop_recursion;
   }
@@ -416,7 +416,7 @@ void print_constraint_map(const MapContainer& constraints)
 
 /// \brief Algorithm class for the constelm algorithm
 template <typename Term, typename DataRewriter, typename PbesRewriter>
-class pbes_constelm_algorithm: public core::algorithm
+class pbes_constelm_algorithm: public utilities::algorithm
 {
   public:
     /// \brief The term type
@@ -780,7 +780,7 @@ class pbes_constelm_algorithm: public core::algorithm
     /// \param datar A data rewriter
     /// \param pbesr A PBES rewriter
     pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr, size_t log_level = 0)
-      : core::algorithm(log_level), m_data_rewriter(datar), m_pbes_rewriter(pbesr)
+      : utilities::algorithm(log_level), m_data_rewriter(datar), m_pbes_rewriter(pbesr)
     {}
 
     /// \brief Returns the parameters that have been removed by the constelm algorithm

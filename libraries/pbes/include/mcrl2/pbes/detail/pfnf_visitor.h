@@ -23,7 +23,7 @@
 #include <functional>
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/convert.h"
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/rewriter.h"
@@ -326,17 +326,17 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
 
     pbes_expression and_(const pfnf_visitor_expression& left, const pfnf_visitor_expression& right) const
     {
-      return core::optimized_and(left.expr, right.expr);
+      return utilities::optimized_and(left.expr, right.expr);
     }
 
     pbes_expression or_(const pfnf_visitor_expression& left, const pfnf_visitor_expression& right) const
     {
-      return core::optimized_or(left.expr, right.expr);
+      return utilities::optimized_or(left.expr, right.expr);
     }
 
     pbes_expression not_(const pfnf_visitor_expression& x) const
     {
-      return core::optimized_not(x.expr);
+      return utilities::optimized_not(x.expr);
     }
 
     /// \brief A stack containing expressions in PFNF format.
@@ -357,8 +357,8 @@ std::cout << "RIGHT AFTER\n"; print_expression(right);
       pbes_expression result = h;
       for (atermpp::vector<pfnf_visitor_implication>::const_iterator i = g.begin(); i != g.end(); ++i)
       {
-        pbes_expression x = std::accumulate(i->rhs.begin(), i->rhs.end(), tr::false_(), &core::optimized_or<pbes_expression>);
-        result = core::optimized_and(result, core::optimized_imp(i->g, x));
+        pbes_expression x = std::accumulate(i->rhs.begin(), i->rhs.end(), tr::false_(), &utilities::optimized_or<pbes_expression>);
+        result = utilities::optimized_and(result, utilities::optimized_imp(i->g, x));
       }
       for (atermpp::vector<pfnf_visitor_quantifier>::const_iterator i = q.begin(); i != q.end(); ++i)
       {

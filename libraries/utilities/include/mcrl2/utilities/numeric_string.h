@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/numeric_string.h
+/// \file mcrl2/utilities/numeric_string.h
 /// \brief Collection of functions dealing with strings representing numbers
 
 #ifndef __NUMERIC_STRING_FUNCTIONS_H__
@@ -14,11 +14,11 @@
 
 #include <cstddef>
 #include <cstdlib>
-#include <math.h>
+#include <cmath>
 
 namespace mcrl2
 {
-namespace core
+namespace utilities
 {
 
 //String representations of numbers
@@ -34,7 +34,7 @@ size_t NrOfChars(const ptrdiff_t n)
 {
   if (n > 0)
   {
-    return (size_t) floor(log10((double) n)) + 1;
+    return (size_t) std::floor(std::log10((double) n)) + 1;
   }
   else if (n == 0)
   {
@@ -42,7 +42,7 @@ size_t NrOfChars(const ptrdiff_t n)
   }
   else //n < 0
   {
-    return (size_t) floor(log10((double)-n)) + 2;
+    return (size_t) std::floor(std::log10((double)-n)) + 2;
   }
 }
 }

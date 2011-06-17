@@ -11,7 +11,7 @@
 
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/core/numeric_string.h"
+#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
@@ -22,27 +22,27 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 BOOST_AUTO_TEST_CASE(test_zero)
 {
-  BOOST_CHECK_EQUAL(core::NrOfChars(0), 1);
+  BOOST_CHECK_EQUAL(utilities::NrOfChars(0), 1);
 }
 
 BOOST_AUTO_TEST_CASE(test_1)
 {
-  BOOST_CHECK_EQUAL(core::NrOfChars(1), 1);
+  BOOST_CHECK_EQUAL(utilities::NrOfChars(1), 1);
 }
 
 BOOST_AUTO_TEST_CASE(test_minus_1)
 {
-  BOOST_CHECK_EQUAL(core::NrOfChars(-1), 2);
+  BOOST_CHECK_EQUAL(utilities::NrOfChars(-1), 2);
 }
 
 BOOST_AUTO_TEST_CASE(test_481)
 {
-  BOOST_CHECK_EQUAL(core::NrOfChars(481), 3);
+  BOOST_CHECK_EQUAL(utilities::NrOfChars(481), 3);
 }
 
 BOOST_AUTO_TEST_CASE(test_minus_481)
 {
-  BOOST_CHECK_EQUAL(core::NrOfChars(-481), 4);
+  BOOST_CHECK_EQUAL(utilities::NrOfChars(-481), 4);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

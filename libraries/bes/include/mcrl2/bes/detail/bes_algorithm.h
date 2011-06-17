@@ -13,7 +13,7 @@
 #define MCRL2_BES_DETAIL_BES_ALGORITHM_H
 
 #include "mcrl2/atermpp/deque.h"
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 
 namespace mcrl2
@@ -27,7 +27,7 @@ namespace detail
 
 /// \brief Algorithm class for algorithms on linear process specifications.
 template <typename Container = atermpp::vector<boolean_equation> >
-class bes_algorithm: public core::algorithm
+class bes_algorithm: public utilities::algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm
@@ -37,14 +37,14 @@ class bes_algorithm: public core::algorithm
     /// \brief Constructor
     bes_algorithm(boolean_equation_system<Container>& bes, bool verbose = false)
       :
-      core::algorithm(verbose ? 1 : 0),
+      utilities::algorithm(verbose ? 1 : 0),
       m_bes(bes)
     {}
 
     /// \brief Constructor
     bes_algorithm(boolean_equation_system<Container>& bes, size_t loglevel)
       :
-      core::algorithm(loglevel),
+      utilities::algorithm(loglevel),
       m_bes(bes)
     {}
 

@@ -28,7 +28,7 @@
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 
 namespace mcrl2
 {
@@ -38,7 +38,7 @@ namespace pbes_system
 
 /// \brief Algorithm class for the eqelm algorithm
 template <typename Term, typename DataRewriter, typename PbesRewriter>
-class pbes_eqelm_algorithm: public core::algorithm
+class pbes_eqelm_algorithm: public utilities::algorithm
 {
   public:
     /// \brief The term type
@@ -278,7 +278,7 @@ class pbes_eqelm_algorithm: public core::algorithm
     /// \param datar A data rewriter
     /// \param pbesr A PBES rewriter
     pbes_eqelm_algorithm(DataRewriter datar, PbesRewriter pbesr, size_t log_level = 0)
-      : core::algorithm(log_level),
+      : utilities::algorithm(log_level),
         m_data_rewriter(datar),
         m_pbes_rewriter(pbesr)
     {}

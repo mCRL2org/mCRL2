@@ -19,7 +19,7 @@
 #include <sstream>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
@@ -248,7 +248,7 @@ std::ostream& operator<<(std::ostream& out, const progress_measures_vertex& v)
 }
 
 /// \brief Algorithm class for the small progress measures algorithm
-class small_progress_measures_algorithm: public core::algorithm
+class small_progress_measures_algorithm: public utilities::algorithm
 {
   protected:
     typedef progress_measures_vertex vertex;
@@ -350,7 +350,7 @@ class small_progress_measures_algorithm: public core::algorithm
 
   public:
     small_progress_measures_algorithm(const boolean_equation_system<>& b, unsigned int log_level = 0)
-      : core::algorithm(log_level),
+      : utilities::algorithm(log_level),
         m_bes(b)
     {}
 

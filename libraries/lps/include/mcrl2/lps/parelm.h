@@ -19,7 +19,7 @@
 #include <vector>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/integer.hpp>
-#include "mcrl2/core/reachable_nodes.h"
+#include "mcrl2/utilities/reachable_nodes.h"
 #include "mcrl2/core/detail/iota.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
@@ -187,7 +187,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #endif
 
       // compute the reachable nodes (i.e. the significant parameters)
-      std::vector<size_t> r1 = mcrl2::core::reachable_nodes(G, v.begin(), v.end());
+      std::vector<size_t> r1 = mcrl2::utilities::reachable_nodes(G, v.begin(), v.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "reachable nodes: ";
       for (std::vector<size_t>::iterator k = r1.begin(); k != r1.end(); ++k)

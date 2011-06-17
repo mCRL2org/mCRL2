@@ -2,9 +2,9 @@
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #include <boost/graph/adjacency_list.hpp>
-#include "mcrl2/core/reachable_nodes.h"
+#include "mcrl2/utilities/reachable_nodes.h"
 
-using namespace mcrl2::core;
+using namespace mcrl2::utilities;
 
 void test_reachable_nodes()
 {

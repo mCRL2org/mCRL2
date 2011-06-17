@@ -25,7 +25,7 @@
 #include <boost/utility/enable_if.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/utility.h"
@@ -105,7 +105,7 @@ class data_property_map
         elements.insert(static_cast< Derived const& >(*this).print(*i));
       }
 
-      return core::string_join(elements, ", ");
+      return utilities::string_join(elements, ", ");
     }
 
     template < typename Container >
@@ -125,7 +125,7 @@ class data_property_map
     //--------------------------------------------//
     unsigned int parse_unsigned_int(std::string const& text) const
     {
-      return boost::lexical_cast<unsigned int>(core::remove_whitespace(text));
+      return boost::lexical_cast<unsigned int>(utilities::remove_whitespace(text));
     }
 
     std::set<std::string> parse_set_string(std::string const& text) const
@@ -144,7 +144,7 @@ class data_property_map
       boost::algorithm::split(multisets, text, boost::algorithm::is_any_of(";"));
       for (std::set<std::string>::iterator i = multisets.begin(); i != multisets.end(); ++i)
       {
-        std::string s = core::regex_replace("[{}]", "", *i);
+        std::string s = utilities::regex_replace("[{}]", "", *i);
         std::vector<std::string> v;
         boost::algorithm::split(v, s, boost::algorithm::is_any_of(","));
         std::for_each(v.begin(), v.end(), boost::bind(boost::algorithm::trim<std::string>, _1, std::locale()));
@@ -259,10 +259,10 @@ class data_property_map
     /// <tt>KEY = VALUE</tt> format.
     void parse_text(const std::string& text)
     {
-      std::vector<std::string> lines = core::split(text, "\n");
+      std::vector<std::string> lines = utilities::split(text, "\n");
       for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
       {
-        std::vector<std::string> words = core::split(*i, "=");
+        std::vector<std::string> words = utilities::split(*i, "=");
         if (words.size() == 2)
         {
           boost::trim(words[0]);
@@ -288,7 +288,7 @@ class data_property_map
       {
         lines.push_back(align(i->first, n) + " = " + i->second);
       }
-      return core::string_join(lines, "\n");
+      return utilities::string_join(lines, "\n");
     }
 
     /// \brief Returns the stored properties

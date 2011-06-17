@@ -15,7 +15,7 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/atermpp/map.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/nat.h"
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/real.h"

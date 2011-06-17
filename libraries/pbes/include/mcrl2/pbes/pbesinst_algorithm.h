@@ -13,7 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbesinst_rewriter.h"
@@ -69,7 +69,7 @@ pbesinst_substitution_function make_pbesinst_substitution(data::variable_list v,
 }
 
 /// \brief Algorithm class for the pbesinst instantiation algorithm.
-class pbesinst_algorithm: public core::algorithm
+class pbesinst_algorithm: public utilities::algorithm
 {
   protected:
     /// \brief The rewriter.
@@ -121,7 +121,7 @@ class pbesinst_algorithm: public core::algorithm
                        bool print_equations = false,
                        bool print_rewriter_output = false,
                        size_t log_level = 0)
-      : core::algorithm(log_level),
+      : utilities::algorithm(log_level),
         R(data_spec, rewriter_strategy, print_rewriter_output),
         m_equation_count(0),
         m_print_equations(print_equations)

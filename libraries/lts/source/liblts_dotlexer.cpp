@@ -484,8 +484,6 @@ static yyconst flex_int16_t yy_chk[142] =
 #include "liblts_dotlexer.h"
 #include "mcrl2/lts/detail/liblts_dotparser.h"
 
-using namespace mcrl2::core;
-
 //using namespace std;
 
 //fix for the broken cygwin versions of flex

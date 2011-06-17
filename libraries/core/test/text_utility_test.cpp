@@ -10,7 +10,7 @@
 /// \brief Add your file description here.
 
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 
@@ -30,7 +30,7 @@ std::string TEXT2 =
 
 void test_remove_comments()
 {
-  std::string text = core::remove_comments(TEXT1);
+  std::string text = utilities::remove_comments(TEXT1);
   BOOST_CHECK(text == TEXT2);
 }
 
@@ -52,7 +52,7 @@ std::string TEXT4 =
 
 void test_word_wrap()
 {
-  std::string text = core::word_wrap_text(TEXT3, 5);
+  std::string text = utilities::word_wrap_text(TEXT3, 5);
   BOOST_CHECK(text == TEXT4);
 }
 

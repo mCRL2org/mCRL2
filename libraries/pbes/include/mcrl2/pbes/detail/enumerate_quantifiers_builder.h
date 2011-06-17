@@ -23,8 +23,8 @@
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/optimized_boolean_operators.h"
-#include "mcrl2/core/sequence.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
+#include "mcrl2/utilities/sequence.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/detail/simplify_rewrite_builder.h"
@@ -126,7 +126,7 @@ class quantifier_enumerator
       template <typename FwdIt>
       Term operator()(FwdIt first, FwdIt last) const
       {
-        return std::accumulate(first, last, core::term_traits<Term>::true_(), &core::optimized_and<Term>);
+        return std::accumulate(first, last, core::term_traits<Term>::true_(), &utilities::optimized_and<Term>);
       }
     };
 
@@ -141,7 +141,7 @@ class quantifier_enumerator
       template <typename FwdIt>
       Term operator()(FwdIt first, FwdIt last) const
       {
-        return std::accumulate(first, last, core::term_traits<Term>::false_(), &core::optimized_or<Term>);
+        return std::accumulate(first, last, core::term_traits<Term>::false_(), &utilities::optimized_or<Term>);
       }
     };
 
@@ -416,7 +416,7 @@ class quantifier_enumerator
             sigma[xk] = *i;
             D[k].clear();
             D[k].push_back(*i);
-            core::foreach_sequence(D,
+            utilities::foreach_sequence(D,
                                    x.begin(),
                                    make_sequence_action(A, pbesr, phi, sigma, dependencies, is_constant, stop),
                                    sequence_assign<SubstitutionFunction>(sigma)
@@ -555,7 +555,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       }
       else
       {
-        return core::optimized_forall(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite, phi, sigma));
+        return utilities::optimized_forall(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_universal_quantification(finite, phi, sigma));
       }
     }
   }
@@ -588,7 +588,7 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
       }
       else
       {
-        result = core::optimized_exists(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite, phi, sigma));
+        result = utilities::optimized_exists(infinite, quantifier_enumerator<self, DataEnumerator>(*this, m_data_enumerator).enumerate_existential_quantification(finite, phi, sigma));
       }
     }
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_BUILDER_DEBUG

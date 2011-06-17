@@ -12,7 +12,7 @@
 #include <boost/test/auto_unit_test.hpp>
 #include <boost/test/included/unit_test_framework.hpp>
 
-#include "mcrl2/core/detail/memory_utility.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 
 size_t args()
 {

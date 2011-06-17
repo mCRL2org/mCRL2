@@ -25,7 +25,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
@@ -711,7 +711,7 @@ std::string pp(const Container& c, bool add_parens = false, typename atermpp::de
   {
     result.push_back(pp(*i, add_parens));
   }
-  return core::string_join(result, ", ");
+  return utilities::string_join(result, ", ");
 }
 
 } // namespace bes

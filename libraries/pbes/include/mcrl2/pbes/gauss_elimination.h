@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_GAUSS_ELIMINATION_H
 #define MCRL2_PBES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -26,7 +26,7 @@ namespace pbes_system
 /// systems of (P)BES equations.
 
 template <typename ExpressionTraits>
-class gauss_elimination_algorithm : public core::algorithm
+class gauss_elimination_algorithm : public utilities::algorithm
 {
   public:
     typedef typename ExpressionTraits::expression_type expression_type;

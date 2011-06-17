@@ -17,7 +17,7 @@
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
@@ -36,8 +36,8 @@ int main(int argc, char* argv[])
   string mcf_file(argv[2]);  // modal formula file
   string pbes_file(argv[3]); // resulting pbes file
 
-  specification spec = linearise(core::read_text(spec_file));
-  state_formula sf = parse_state_formula(core::read_text(mcf_file), spec);
+  specification spec = linearise(utilities::read_text(spec_file));
+  state_formula sf = parse_state_formula(utilities::read_text(mcf_file), spec);
   bool timed = false;
   pbes<> p = lps2pbes(spec, sf, timed);
   p.save(pbes_file);

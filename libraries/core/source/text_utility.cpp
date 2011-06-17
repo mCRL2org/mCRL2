@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/text_utility.h
+/// \file mcrl2/utilities/text_utility.h
 /// \brief String manipulation functions.
 
 #include <fstream>
@@ -17,13 +17,13 @@
 #include <vector>
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 
 /// \brief Split a string into paragraphs.
@@ -217,6 +217,6 @@ bool is_numeric_string(const std::string& s)
   return boost::xpressive::regex_match(s, re);
 }
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2

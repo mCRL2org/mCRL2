@@ -17,7 +17,7 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include "mcrl2/core/reachable_nodes.h"
+#include "mcrl2/utilities/reachable_nodes.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/iota.h"
 #include "mcrl2/data/find.h"
@@ -233,7 +233,7 @@ class pbes_parelm_algorithm
       }
 
       // compute the indices s of the parameters that need to be removed
-      std::vector<size_t> r = core::reachable_nodes(G, v.begin(), v.end());
+      std::vector<size_t> r = utilities::reachable_nodes(G, v.begin(), v.end());
       std::sort(r.begin(), r.end());
       std::vector<size_t> q(N);
       core::detail::iota(q.begin(), q.end(), 0);

@@ -14,7 +14,7 @@
 
 #include <set>
 #include <utility>
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 
 namespace mcrl2
@@ -224,7 +224,7 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
   {
     typedef typename core::term_traits<data_term_type> tt;
     term_type t = super::visit(phi, sigma);
-    return core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
+    return utilities::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
   }
 
   /// \brief Visit exists node
@@ -238,7 +238,7 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
   {
     typedef typename core::term_traits<data_term_type> tt;
     term_type t = super::visit(phi, sigma);
-    return core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
+    return utilities::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
   }
 
   /// \brief Visit propositional_variable node

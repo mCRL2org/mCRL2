@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/text_utility.h
+/// \file mcrl2/utilities/text_utility.h
 /// \brief String manipulation functions.
 
-#ifndef MCRL2_CORE_TEXT_UTILITY_H
-#define MCRL2_CORE_TEXT_UTILITY_H
+#ifndef MCRL2_UTILITIES_TEXT_UTILITY_H
+#define MCRL2_UTILITIES_TEXT_UTILITY_H
 
 #include <string>
 #include <vector>
@@ -20,7 +20,7 @@
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 /// \brief Transform parameter into string.
 /// \param x Some expression
@@ -104,8 +104,8 @@ std::string word_wrap_text(const std::string& text, unsigned int max_line_length
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s);
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_TEXT_UTILITY_H
+#endif // MCRL2_UTILITIES_TEXT_UTILITY_H

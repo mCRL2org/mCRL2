@@ -20,6 +20,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "mcrl2/utilities/command_line_interface.h"
+
 namespace mcrl2
 {
 

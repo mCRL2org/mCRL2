@@ -22,7 +22,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/detail/optimized_logic_operators.h"
+#include "mcrl2/utilities/detail/optimized_logic_operators.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/pbes/propositional_variable.h"
@@ -730,7 +730,7 @@ using pbes_expr::split_or;
 inline
 pbes_expression not_(pbes_expression p)
 {
-  return core::detail::optimized_not(p, pbes_expr::not_, true_(), is_true, false_(), is_false);
+  return utilities::detail::optimized_not(p, pbes_expr::not_, true_(), is_true, false_(), is_false);
 }
 
 /// \brief Make a conjunction
@@ -740,7 +740,7 @@ pbes_expression not_(pbes_expression p)
 inline
 pbes_expression and_(pbes_expression p, pbes_expression q)
 {
-  return core::detail::optimized_and(p, q, pbes_expr::and_, true_(), is_true, false_(), is_false);
+  return utilities::detail::optimized_and(p, q, pbes_expr::and_, true_(), is_true, false_(), is_false);
 }
 
 /// \brief Make a disjunction
@@ -750,7 +750,7 @@ pbes_expression and_(pbes_expression p, pbes_expression q)
 inline
 pbes_expression or_(pbes_expression p, pbes_expression q)
 {
-  return core::detail::optimized_or(p, q, pbes_expr::or_, true_(), is_true, false_(), is_false);
+  return utilities::detail::optimized_or(p, q, pbes_expr::or_, true_(), is_true, false_(), is_false);
 }
 
 /// \brief Make an implication
@@ -760,7 +760,7 @@ pbes_expression or_(pbes_expression p, pbes_expression q)
 inline
 pbes_expression imp(pbes_expression p, pbes_expression q)
 {
-  return core::detail::optimized_imp(p, q, pbes_expr::imp, not_, true_(), is_true, false_(), is_false);
+  return utilities::detail::optimized_imp(p, q, pbes_expr::imp, not_, true_(), is_true, false_(), is_false);
 }
 
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)

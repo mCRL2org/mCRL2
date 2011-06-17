@@ -22,6 +22,7 @@
  *
  */
 
+#include <cassert>
 #include <list>
 #include <string>
 #include <sstream>

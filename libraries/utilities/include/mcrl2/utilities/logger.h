@@ -19,7 +19,7 @@
 #include <map>
 #include <iostream>
 
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 /// \brief Log levels that are supported
 /// \note log_debugi with i>=1 automatically indent 2*i spaces.
@@ -239,7 +239,7 @@ class logger
         result = start_of_line + result;
       }
 
-      result = mcrl2::core::regex_replace("\n", "\n" + start_of_line, result);
+      result = mcrl2::utilities::regex_replace("\n", "\n" + start_of_line, result);
 
       if(s_ends_with_newline)
       {

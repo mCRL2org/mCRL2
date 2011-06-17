@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/file_utility.h
+/// \file mcrl2/utilities/file_utility.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_CORE_FILE_UTILITY_H
-#define MCRL2_CORE_FILE_UTILITY_H
+#ifndef MCRL2_UTILITIES_FILE_UTILITY_H
+#define MCRL2_UTILITIES_FILE_UTILITY_H
 
 #include <ctime>
 #include <string>
@@ -19,7 +19,7 @@
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 
 inline
@@ -29,8 +29,8 @@ std::string create_filename(const std::string& prefix = "file", const std::strin
   return prefix + boost::lexical_cast<std::string>(seconds) + extension;
 }
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_FILE_UTILITY_H
+#endif // MCRL2_UTILITIES_FILE_UTILITY_H

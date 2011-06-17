@@ -6,19 +6,19 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/optimized_boolean_operators.h
+/// \file mcrl2/utilities/optimized_boolean_operators.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_CORE_OPTIMIZED_BOOLEAN_OPERATORS_H
-#define MCRL2_CORE_OPTIMIZED_BOOLEAN_OPERATORS_H
+#ifndef MCRL2_UTILITIES_OPTIMIZED_BOOLEAN_OPERATORS_H
+#define MCRL2_UTILITIES_OPTIMIZED_BOOLEAN_OPERATORS_H
 
-#include "mcrl2/core/detail/optimized_logic_operators.h"
+#include "mcrl2/utilities/detail/optimized_logic_operators.h"
 #include "mcrl2/core/term_traits.h"
 
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 
 /// \brief Make a negation
@@ -92,8 +92,8 @@ Term optimized_exists(VariableSequence l, Term p)
   return detail::optimized_exists(l, p, tr::exists, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
 }
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_OPTIMIZED_BOOLEAN_OPERATORS_H
+#endif // MCRL2_UTILITIES_OPTIMIZED_BOOLEAN_OPERATORS_H

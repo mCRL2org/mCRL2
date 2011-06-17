@@ -18,7 +18,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/sequence.h"
+#include "mcrl2/utilities/sequence.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
@@ -181,7 +181,7 @@ class data_enumerator
 
       atermpp::vector<data_expression_with_variables> values(enumerated_values.size());
 
-      core::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
+      utilities::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
       return result;
     }
 };

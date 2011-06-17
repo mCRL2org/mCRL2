@@ -12,7 +12,7 @@
 #include <numeric>
 #include <vector>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/sequence.h"
+#include "mcrl2/utilities/sequence.h"
 
 using namespace mcrl2;
 
@@ -59,7 +59,7 @@ void test_sequence()
   // w will hold a sequence
   std::vector<int> w(v.size());
 
-  core::foreach_sequence(v, w.begin(), f(w, sum));
+  utilities::foreach_sequence(v, w.begin(), f(w, sum));
   std::cout << "sum == " << sum << std::endl;
   BOOST_CHECK(sum == 32);
 }

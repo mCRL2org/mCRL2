@@ -18,7 +18,7 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/lps/specification.h"
@@ -38,7 +38,7 @@ namespace detail
 {
 
 /// \brief Algorithm class for algorithms on linear process specifications.
-class lps_algorithm: public core::algorithm
+class lps_algorithm: public utilities::algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm
@@ -79,14 +79,14 @@ class lps_algorithm: public core::algorithm
     /// \brief Constructor
     lps_algorithm(specification& spec, bool verbose = false)
       :
-      core::algorithm(verbose ? 1 : 0),
+      utilities::algorithm(verbose ? 1 : 0),
       m_spec(spec)
     {}
 
     /// \brief Constructor
     lps_algorithm(specification& spec, size_t loglevel)
       :
-      core::algorithm(loglevel),
+      utilities::algorithm(loglevel),
       m_spec(spec)
     {}
 

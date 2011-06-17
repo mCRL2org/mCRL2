@@ -1294,6 +1294,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       {
         print_binary_data_operation(x, " / ");
       }
+      else if (sort_real::is_creal_application(x)) // TODO: fix this!!!
+      {
+        derived()(sort_real::numerator(x));
+      }
       else
       {
         print_function_application(x);

@@ -10,12 +10,10 @@
 
 #include <cstdlib>
 #include <vector>
-#include "mcrl2/core/detail/memory_utility.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/detail/tree_set.h"
 #include "mcrl2/exception.h"
-
-using namespace mcrl2::core;
 
 #define EMPTY_SET (-1)
 #define EMPTY_LIST (-1)

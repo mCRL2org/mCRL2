@@ -15,7 +15,7 @@
 #include <set>
 #include <string>
 #include <utility>
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2
@@ -165,7 +165,7 @@ struct boolean_expr_builder
       result = visit_not(e, n, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_not(visit(n, arg1));
+        result = utilities::optimized_not(visit(n, arg1));
       }
     }
     else if (tr::is_and(e))
@@ -175,7 +175,7 @@ struct boolean_expr_builder
       result = visit_and(e, l, r, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_and(visit(l, arg1), visit(r, arg1));
+        result = utilities::optimized_and(visit(l, arg1), visit(r, arg1));
       }
     }
     else if (tr::is_or(e))
@@ -185,7 +185,7 @@ struct boolean_expr_builder
       result = visit_or(e, l, r, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_or(visit(l, arg1), visit(r, arg1));
+        result = utilities::optimized_or(visit(l, arg1), visit(r, arg1));
       }
     }
     else if (tr::is_imp(e))
@@ -195,7 +195,7 @@ struct boolean_expr_builder
       result = visit_imp(e, l, r, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_imp(visit(l, arg1), visit(r, arg1));
+        result = utilities::optimized_imp(visit(l, arg1), visit(r, arg1));
       }
     }
     else if (tr::is_variable(e))
@@ -346,7 +346,7 @@ struct boolean_expr_builder<Term, void>
       result = visit_not(e, n);
       if (!is_finished(result))
       {
-        result = core::optimized_not(visit(n));
+        result = utilities::optimized_not(visit(n));
       }
     }
     else if (tr::is_and(e))
@@ -356,7 +356,7 @@ struct boolean_expr_builder<Term, void>
       result = visit_and(e, l, r);
       if (!is_finished(result))
       {
-        result = core::optimized_and(visit(l), visit(r));
+        result = utilities::optimized_and(visit(l), visit(r));
       }
     }
     else if (tr::is_or(e))
@@ -366,7 +366,7 @@ struct boolean_expr_builder<Term, void>
       result = visit_or(e, l, r);
       if (!is_finished(result))
       {
-        result = core::optimized_or(visit(l), visit(r));
+        result = utilities::optimized_or(visit(l), visit(r));
       }
     }
     else if (tr::is_imp(e))
@@ -376,7 +376,7 @@ struct boolean_expr_builder<Term, void>
       result = visit_imp(e, l, r);
       if (!is_finished(result))
       {
-        result = core::optimized_imp(visit(l), visit(r));
+        result = utilities::optimized_imp(visit(l), visit(r));
       }
     }
     else

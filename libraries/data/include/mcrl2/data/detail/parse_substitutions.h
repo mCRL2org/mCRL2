@@ -14,7 +14,7 @@
 
 #include <string>
 #include <vector>
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 
@@ -32,10 +32,10 @@ namespace detail
 template <typename SubstitutionFunction>
 void parse_substitutions(std::string text, SubstitutionFunction& sigma)
 {
-  std::vector<std::string> substitutions = core::split(text, ";");
+  std::vector<std::string> substitutions = utilities::split(text, ";");
   for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
   {
-    std::vector<std::string> words = core::regex_split(*i, ":=");
+    std::vector<std::string> words = utilities::regex_split(*i, ":=");
     if (words.size() != 2)
     {
       continue;
@@ -51,10 +51,10 @@ void parse_substitutions(std::string text, SubstitutionFunction& sigma)
 template <typename SubstitutionFunction>
 void parse_substitutions(std::string text, const data_specification& data_spec, SubstitutionFunction& sigma)
 {
-  std::vector<std::string> substitutions = core::split(text, ";");
+  std::vector<std::string> substitutions = utilities::split(text, ";");
   for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
   {
-    std::vector<std::string> words = core::regex_split(*i, ":=");
+    std::vector<std::string> words = utilities::regex_split(*i, ":=");
     if (words.size() != 2)
     {
       continue;

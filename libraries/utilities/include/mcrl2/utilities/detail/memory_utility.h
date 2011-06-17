@@ -6,7 +6,7 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/detail/memory_utility.h
+/// \file mcrl2/utilities/detail/memory_utility.h
 /// \brief This file contains a workaround that allows to
 /// assign a small array of elements on the stack. For most
 /// systems this can be done by:
@@ -22,8 +22,8 @@
 // therefore any aterms put in there will be automatically protected.
 
 
-#ifndef MCRL2_CORE_DETAIL_MEMORY_UTILITY_H
-#define MCRL2_CORE_DETAIL_MEMORY_UTILITY_H
+#ifndef MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
+#define MCRL2_UTILITIES_DETAIL_MEMORY_UTILITY_H
 
 
 #ifdef _MSC_VER

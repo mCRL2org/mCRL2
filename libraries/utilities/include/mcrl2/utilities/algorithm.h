@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/algorithm.h
+/// \file mcrl2/utilities/algorithm.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_CORE_ALGORITHM_H
-#define MCRL2_CORE_ALGORITHM_H
+#ifndef MCRL2_UTILITIES_ALGORITHM_H
+#define MCRL2_UTILITIES_ALGORITHM_H
 
 #include <iostream>
 #include <string>
@@ -18,7 +18,7 @@
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 
 /// \brief Base class for algorithms.
@@ -65,8 +65,8 @@ class algorithm
 
 };
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_ALGORITHM_H
+#endif // MCRL2_UTILITIES_ALGORITHM_H

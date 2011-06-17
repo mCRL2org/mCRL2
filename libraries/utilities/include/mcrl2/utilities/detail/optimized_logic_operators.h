@@ -6,16 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/detail/optimized_logic_operators.h
+/// \file mcrl2/utilities/detail/optimized_logic_operators.h
 /// \brief Generic implementation of optimized logic operators.
 
-#ifndef MCRL2_CORE_DETAIL_OPTIMIZED_LOGIC_OPERATORS_H
-#define MCRL2_CORE_DETAIL_OPTIMIZED_LOGIC_OPERATORS_H
+#ifndef MCRL2_UTILITIES_DETAIL_OPTIMIZED_LOGIC_OPERATORS_H
+#define MCRL2_UTILITIES_DETAIL_OPTIMIZED_LOGIC_OPERATORS_H
 
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 
 namespace detail
@@ -221,8 +221,8 @@ T1 optimized_exists(VariableSequence v, T1 arg, Exists exists, T2 true_, UnaryPr
 
 } // namespace detail
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_DETAIL_OPTIMIZED_LOGIC_OPERATORS_H
+#endif // MCRL2_UTILITIES_DETAIL_OPTIMIZED_LOGIC_OPERATORS_H

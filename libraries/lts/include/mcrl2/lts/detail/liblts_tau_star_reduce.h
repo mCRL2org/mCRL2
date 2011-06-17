@@ -12,7 +12,7 @@
 #define _LIBLTS_TAUSTARREDUCE_H
 
 #include <cstdlib> // free
-#include "mcrl2/core/detail/memory_utility.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"

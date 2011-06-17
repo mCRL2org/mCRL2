@@ -19,7 +19,7 @@
 #include <boost/algorithm/string.hpp>
 #include <boost/xpressive/xpressive.hpp>
 #include "mcrl2/exception.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/pbes.h"
 
@@ -39,7 +39,7 @@ typedef atermpp::map<core::identifier_string, std::vector<data::variable> > pbes
 inline
 bool match_declaration(const std::string& text, const data::variable& d, const data::data_specification& data_spec)
 {
-  std::vector<std::string> words = core::split(text, ":");
+  std::vector<std::string> words = utilities::split(text, ":");
   if (words.size() != 2)
   {
     throw mcrl2::runtime_error("invalid parameter declaration: '" + text + "'");
@@ -100,7 +100,7 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes<>& p, const std::string& 
   typedef std::map<std::string, std::set<std::string> > name_map;
   name_map parameter_declarations;
 
-  std::vector<std::string> lines = core::split(text, ";");
+  std::vector<std::string> lines = utilities::split(text, ";");
   for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
   {
     std::string line = boost::trim_copy(*i);
@@ -119,7 +119,7 @@ pbes_parameter_map parse_pbes_parameter_map(const pbes<>& p, const std::string& 
     boost::trim(X);
     std::string word = what[2];
     boost::trim(word);
-    std::vector<std::string> parameters = core::regex_split(word, "\\s*,\\s*");
+    std::vector<std::string> parameters = utilities::regex_split(word, "\\s*,\\s*");
     for (std::vector<std::string>::iterator j = parameters.begin(); j != parameters.end(); ++j)
     {
       parameter_declarations[X].insert(*j);

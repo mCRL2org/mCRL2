@@ -18,7 +18,7 @@
 #include <iterator>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -261,7 +261,7 @@ void test_directory(int argc, char** argv)
       {
         std::string timed_result_file   = filename.substr(0, filename.find_last_of('.') + 1) + "expected_timed_result";
         std::string untimed_result_file = filename.substr(0, filename.find_last_of('.') + 1) + "expected_untimed_result";
-        std::string formula = mcrl2::core::read_text(filename);
+        std::string formula = mcrl2::utilities::read_text(filename);
         if (fs::exists(timed_result_file))
         {
           try

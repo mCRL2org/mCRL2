@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
@@ -65,7 +65,7 @@ size_t get_parity_game_generator_log_level()
 /// no holes in the sequence.
 /// Each vertex is labeled with a priority value, which is the
 /// block nesting depth of the proposition variable in the BES.
-class parity_game_generator: public core::algorithm
+class parity_game_generator: public utilities::algorithm
 {
   protected:
     /// \brief The traits class of the expression type.
@@ -332,7 +332,7 @@ class parity_game_generator: public core::algorithm
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
     parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, size_t log_level = 0, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
       :
-      core::algorithm(log_level),
+      utilities::algorithm(log_level),
       m_initialized(false),
       m_pbes(p),
       generator("UNIQUE_PREFIX"),

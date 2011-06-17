@@ -23,7 +23,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2
@@ -145,7 +145,7 @@ std::string boolean_variables2pgsolver(Iter first, Iter last, const VariableMap&
     }
     variables_int.insert(j->second);
   }
-  return core::string_join(variables_int, ", ");
+  return utilities::string_join(variables_int, ", ");
 }
 
 /// \brief Convert a BES expression to PGSolver format.

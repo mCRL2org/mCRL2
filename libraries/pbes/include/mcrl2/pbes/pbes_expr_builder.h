@@ -15,7 +15,7 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/term_traits.h"
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/pbes/detail/pbes_expression_builder_indenter.h"
 
 // this is only needed because of the data_true <-> pbes_true problems
@@ -214,7 +214,7 @@ struct pbes_expr_builder
       result = visit_not(e, n, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_not(visit(n, arg1));
+        result = utilities::optimized_not(visit(n, arg1));
       }
     }
     else if (tr::is_and(e))
@@ -224,7 +224,7 @@ struct pbes_expr_builder
       result = visit_and(e, l, r, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_and(visit(l, arg1), visit(r, arg1));
+        result = utilities::optimized_and(visit(l, arg1), visit(r, arg1));
       }
     }
     else if (tr::is_or(e))
@@ -234,7 +234,7 @@ struct pbes_expr_builder
       result = visit_or(e, l, r, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_or(visit(l, arg1), visit(r, arg1));
+        result = utilities::optimized_or(visit(l, arg1), visit(r, arg1));
       }
     }
     else if (tr::is_imp(e))
@@ -244,7 +244,7 @@ struct pbes_expr_builder
       result = visit_imp(e, l, r, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_imp(visit(l, arg1), visit(r, arg1));
+        result = utilities::optimized_imp(visit(l, arg1), visit(r, arg1));
       }
     }
     else if (tr::is_forall(e))
@@ -254,7 +254,7 @@ struct pbes_expr_builder
       result = visit_forall(e, qvars, qexpr, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_forall(qvars, visit(qexpr, arg1));
+        result = utilities::optimized_forall(qvars, visit(qexpr, arg1));
       }
     }
     else if (tr::is_exists(e))
@@ -264,7 +264,7 @@ struct pbes_expr_builder
       result = visit_exists(e, qvars, qexpr, arg1);
       if (!is_finished(result))
       {
-        result = core::optimized_exists(qvars, visit(qexpr, arg1));
+        result = utilities::optimized_exists(qvars, visit(qexpr, arg1));
       }
     }
     else if (tr::is_prop_var(e))
@@ -475,7 +475,7 @@ struct pbes_expr_builder<Term, void>
       result = visit_not(e, n);
       if (!is_finished(result))
       {
-        result = core::optimized_not(visit(n));
+        result = utilities::optimized_not(visit(n));
       }
     }
     else if (tr::is_and(e))
@@ -485,7 +485,7 @@ struct pbes_expr_builder<Term, void>
       result = visit_and(e, l, r);
       if (!is_finished(result))
       {
-        result = core::optimized_and(visit(l), visit(r));
+        result = utilities::optimized_and(visit(l), visit(r));
       }
     }
     else if (tr::is_or(e))
@@ -495,7 +495,7 @@ struct pbes_expr_builder<Term, void>
       result = visit_or(e, l, r);
       if (!is_finished(result))
       {
-        result = core::optimized_or(visit(l), visit(r));
+        result = utilities::optimized_or(visit(l), visit(r));
       }
     }
     else if (tr::is_imp(e))
@@ -505,7 +505,7 @@ struct pbes_expr_builder<Term, void>
       result = visit_imp(e, l, r);
       if (!is_finished(result))
       {
-        result = core::optimized_imp(visit(l), visit(r));
+        result = utilities::optimized_imp(visit(l), visit(r));
       }
     }
     else if (tr::is_forall(e))
@@ -515,7 +515,7 @@ struct pbes_expr_builder<Term, void>
       result = visit_forall(e, qvars, qexpr);
       if (!is_finished(result))
       {
-        result = core::optimized_forall(qvars, visit(qexpr));
+        result = utilities::optimized_forall(qvars, visit(qexpr));
       }
     }
     else if (tr::is_exists(e))
@@ -525,7 +525,7 @@ struct pbes_expr_builder<Term, void>
       result = visit_exists(e, qvars, qexpr);
       if (!is_finished(result))
       {
-        result = core::optimized_exists(qvars, visit(qexpr));
+        result = utilities::optimized_exists(qvars, visit(qexpr));
       }
     }
     else if (tr::is_prop_var(e))

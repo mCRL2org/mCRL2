@@ -14,10 +14,10 @@
 #include <limits.h>
 
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/core/detail/memory_utility.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/numeric_string.h"
+#include "mcrl2/utilities/numeric_string.h"
 
 using namespace mcrl2::core;
 
@@ -40,7 +40,7 @@ ATermAppl gsFreshString2ATermAppl(const char* s, ATerm Term, bool TryNoSuffix)
   if (!found)
   {
     //find "sk" that does not occur in Term
-    char* Name = (char*) malloc((strlen(s)+NrOfChars(INT_MAX)+1)*sizeof(char));
+    char* Name = (char*) malloc((strlen(s)+utilities::NrOfChars(INT_MAX)+1)*sizeof(char));
     for (int i = 0; i < INT_MAX && !found; i++)
     {
       sprintf(Name, "%s%d", s, i);
