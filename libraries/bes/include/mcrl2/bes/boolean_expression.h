@@ -18,7 +18,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/detail/join.h"
+#include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -599,7 +599,7 @@ inline
 boolean_expression join_or(FwdIt first, FwdIt last)
 {
   typedef core::term_traits<boolean_expression> tr;
-  return core::detail::join(first, last, tr::or_, tr::false_());
+  return utilities::detail::join(first, last, tr::or_, tr::false_());
 }
 
 /// \brief Returns and applied to the sequence of boolean expressions [first, last)
@@ -611,7 +611,7 @@ inline
 boolean_expression join_and(FwdIt first, FwdIt last)
 {
   typedef core::term_traits<boolean_expression> tr;
-  return core::detail::join(first, last, tr::and_, tr::true_());
+  return utilities::detail::join(first, last, tr::and_, tr::true_());
 }
 
 /// \brief Splits a disjunction into a sequence of operands
@@ -625,7 +625,7 @@ atermpp::set<boolean_expression> split_or(const boolean_expression& expr)
 {
   using namespace accessors;
   atermpp::set<boolean_expression> result;
-  core::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_or, left, right);
+  utilities::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_or, left, right);
   return result;
 }
 
@@ -640,7 +640,7 @@ atermpp::set<boolean_expression> split_and(const boolean_expression& expr)
 {
   using namespace accessors;
   atermpp::set<boolean_expression> result;
-  core::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_and, left, right);
+  utilities::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_and, left, right);
   return result;
 }
 

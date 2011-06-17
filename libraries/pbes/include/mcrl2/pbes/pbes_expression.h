@@ -20,7 +20,7 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/join.h"
+#include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 #include "mcrl2/utilities/detail/optimized_logic_operators.h"
 #include "mcrl2/data/variable.h"
@@ -673,7 +673,7 @@ pbes_expression exists(data::variable_list l, pbes_expression p)
 template <typename FwdIt>
 pbes_expression join_or(FwdIt first, FwdIt last)
 {
-  return core::detail::join(first, last, or_, false_());
+  return utilities::detail::join(first, last, or_, false_());
 }
 
 /// \brief Returns and applied to the sequence of pbes expressions [first, last)
@@ -683,7 +683,7 @@ pbes_expression join_or(FwdIt first, FwdIt last)
 template <typename FwdIt>
 pbes_expression join_and(FwdIt first, FwdIt last)
 {
-  return core::detail::join(first, last, and_, true_());
+  return utilities::detail::join(first, last, and_, true_());
 }
 
 /// \brief Splits a disjunction into a sequence of operands
@@ -697,7 +697,7 @@ atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
 {
   using namespace accessors;
   atermpp::set<pbes_expression> result;
-  core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
+  utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
   return result;
 }
 
@@ -712,7 +712,7 @@ atermpp::set<pbes_expression> split_and(const pbes_expression& expr)
 {
   using namespace accessors;
   atermpp::set<pbes_expression> result;
-  core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, left, right);
+  utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, left, right);
   return result;
 }
 } // namespace pbes_expr
@@ -770,7 +770,7 @@ pbes_expression imp(pbes_expression p, pbes_expression q)
 template <typename FwdIt>
 inline pbes_expression join_or(FwdIt first, FwdIt last)
 {
-  return core::detail::join(first, last, or_, false_());
+  return utilities::detail::join(first, last, or_, false_());
 }
 
 /// \brief Returns and applied to the sequence of pbes expressions [first, last)
@@ -780,7 +780,7 @@ inline pbes_expression join_or(FwdIt first, FwdIt last)
 template <typename FwdIt>
 inline pbes_expression join_and(FwdIt first, FwdIt last)
 {
-  return core::detail::join(first, last, and_, true_());
+  return utilities::detail::join(first, last, and_, true_());
 }
 
 /// \brief Make a universal quantification

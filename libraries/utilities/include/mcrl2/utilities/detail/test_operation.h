@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/detail/test_operation.h
+/// \file mcrl2/utilities/detail/test_operation.h
 /// \brief Function for testing operations.
 
-#ifndef MCRL2_CORE_DETAIL_TEST_OPERATION_H
-#define MCRL2_CORE_DETAIL_TEST_OPERATION_H
+#ifndef MCRL2_UTILITIES_DETAIL_TEST_OPERATION_H
+#define MCRL2_UTILITIES_DETAIL_TEST_OPERATION_H
 
 #include <functional>
 #include <string>
@@ -19,7 +19,7 @@
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 
 namespace detail
@@ -91,8 +91,8 @@ void test_operation(
 
 } // namespace detail
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_DETAIL_TEST_OPERATION_H
+#endif // MCRL2_UTILITIES_DETAIL_TEST_OPERATION_H

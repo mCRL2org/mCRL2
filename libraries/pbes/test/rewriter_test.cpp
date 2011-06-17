@@ -21,7 +21,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/core/detail/test_operation.h"
+#include "mcrl2/utilities/detail/test_operation.h"
 #include "mcrl2/pbes/parse.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/rewriter.h"
@@ -163,7 +163,7 @@ std::string print(const Term& x)
 template <typename Rewriter1, typename Rewriter2>
 void test_simplify(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string expr2)
 {
-  core::detail::test_operation(
+  utilities::detail::test_operation(
     expr1,
     expr2,
     parser(),
@@ -179,7 +179,7 @@ void test_simplify(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string ex
 template <typename Rewriter1, typename Rewriter2>
 void test_rewriters(Rewriter1 R1, Rewriter2 R2, std::string expr1, std::string expr2, const std::string& var_decl = VARIABLE_SPECIFICATION, const std::string& data_spec = "")
 {
-  core::detail::test_operation(
+  utilities::detail::test_operation(
     expr1,
     expr2,
     parser(var_decl, data_spec),

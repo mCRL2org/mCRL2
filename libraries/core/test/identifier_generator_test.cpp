@@ -10,14 +10,14 @@
 /// \brief Test for identifier generators.
 
 #include <iostream>
+#include <string>
+#include <vector>
 #include <boost/test/minimal.hpp>
 
-#include "mcrl2/core/identifier_generator.h"
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/utilities/identifier_generator.h"
 
 using namespace mcrl2;
-using namespace mcrl2::core;
+using namespace mcrl2::utilities;
 
 void identifier_generator_test()
 {
@@ -51,14 +51,10 @@ void identifier_generator_test()
   generator.add_identifier("a0");
   s = generator("a2");
   BOOST_CHECK(s == "a5");
-
-  core::garbage_collect();
 }
 
 int test_main(int argc, char** argv)
 {
-  MCRL2_ATERMPP_INIT(argc, argv);
-
   identifier_generator_test();
 
   return EXIT_SUCCESS;

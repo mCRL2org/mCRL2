@@ -15,7 +15,7 @@
 #include <set>
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/identifier_generator.h"
+#include "mcrl2/utilities/identifier_generator.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -45,7 +45,7 @@ class state_formula_name_clash_resolver: public state_formulas::state_formula_bu
     name_map m_names;
 
     /// \brief Generator for fresh variable names.
-    core::number_postfix_generator m_generator;
+    utilities::number_postfix_generator m_generator;
 
     /// \brief Pops the name of the stack
     void pop(const core::identifier_string& name)

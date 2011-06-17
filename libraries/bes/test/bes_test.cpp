@@ -37,7 +37,7 @@ void test_join()
 #ifdef MCRL2_JOIN_TEST
 // The gcc compiler gives the following error:
 //
-// D:\mcrl2\libraries\core\include/mcrl2/core/detail/join.h:54:22: error: call
+// D:\mcrl2\libraries\core\include/mcrl2/utilities/detail/join.h:54:22: error: call
 // of overloaded 'boolean_expression(const mcrl2::bes::boolean_variable&)' is
 // ambiguous
 //

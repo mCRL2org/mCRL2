@@ -6,16 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/detail/join.h
+/// \file mcrl2/utilities/detail/join.h
 /// \brief Generic join and split functions.
 
-#ifndef MCRL2_CORE_DETAIL_JOIN_H
-#define MCRL2_CORE_DETAIL_JOIN_H
+#ifndef MCRL2_UTILITIES_DETAIL_JOIN_H
+#define MCRL2_UTILITIES_DETAIL_JOIN_H
 
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 
 namespace detail
@@ -66,8 +66,8 @@ T join(FwdIt first, FwdIt last, BinaryOperation op, T empty_sequence_result)
 
 } // namespace detail
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_DETAIL_JOIN_H
+#endif // MCRL2_UTILITIES_DETAIL_JOIN_H

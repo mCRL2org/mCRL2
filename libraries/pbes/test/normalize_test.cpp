@@ -12,7 +12,7 @@
 #include <functional>
 #include <iostream>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/detail/test_operation.h"
+#include "mcrl2/utilities/detail/test_operation.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -194,7 +194,7 @@ pbes_expression norm(const pbes_expression& x)
 
 void test_normalize_and_or_equality(std::string expr1, std::string expr2)
 {
-  core::detail::test_operation(
+  utilities::detail::test_operation(
     expr1,
     expr2,
     parse,

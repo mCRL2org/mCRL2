@@ -46,7 +46,7 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   {
     using namespace accessors;
     atermpp::multiset<pbes_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::multiset<pbes_expression> >(result, result.begin()), is_or, left, right);
+    utilities::detail::split(expr, std::insert_iterator<atermpp::multiset<pbes_expression> >(result, result.begin()), is_or, left, right);
     return result;
   }
 
@@ -60,7 +60,7 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   {
     using namespace accessors;
     atermpp::multiset<pbes_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::multiset<pbes_expression> >(result, result.begin()), is_and, left, right);
+    utilities::detail::split(expr, std::insert_iterator<atermpp::multiset<pbes_expression> >(result, result.begin()), is_and, left, right);
     return result;
   }
 

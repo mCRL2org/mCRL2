@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/core/identifier_generator.h
+/// \file mcrl2/utilities/identifier_generator.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_CORE_IDENTIFIER_GENERATOR_H
-#define MCRL2_CORE_IDENTIFIER_GENERATOR_H
+#ifndef MCRL2_UTILITIES_IDENTIFIER_GENERATOR_H
+#define MCRL2_UTILITIES_IDENTIFIER_GENERATOR_H
 
 #include <cassert>
 #include <cctype>
@@ -18,12 +18,11 @@
 #include <string>
 #include <sstream>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/atermpp/container_utility.h"
 
 namespace mcrl2
 {
 
-namespace core
+namespace utilities
 {
 
 /// \brief Identifier generator that generates names with a postfix consisting of a number.
@@ -125,8 +124,8 @@ class number_postfix_generator
     }
 };
 
-} // namespace core
+} // namespace utilities
 
 } // namespace mcrl2
 
-#endif // MCRL2_CORE_IDENTIFIER_GENERATOR_H
+#endif // MCRL2_UTILITIES_IDENTIFIER_GENERATOR_H

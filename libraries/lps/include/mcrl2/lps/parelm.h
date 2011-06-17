@@ -20,7 +20,7 @@
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/integer.hpp>
 #include "mcrl2/utilities/reachable_nodes.h"
-#include "mcrl2/core/detail/iota.h"
+#include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"

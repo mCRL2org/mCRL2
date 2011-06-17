@@ -13,7 +13,7 @@
 #define MCRL2_DATA_JOIN_H
 
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/core/detail/join.h"
+#include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/data/expression_traits.h"
 
 namespace mcrl2
@@ -30,7 +30,7 @@ namespace data
   data_expression join_or(FwdIt first, FwdIt last)
   {
     typedef core::term_traits<data::data_expression> tr;
-    return core::detail::join(first, last, tr::or_, tr::false_());
+    return utilities::detail::join(first, last, tr::or_, tr::false_());
   }
 
   /// \brief Returns and applied to the sequence of data expressions [first, last)
@@ -41,7 +41,7 @@ namespace data
   data_expression join_and(FwdIt first, FwdIt last)
   {
     typedef core::term_traits<data::data_expression> tr;
-    return core::detail::join(first, last, tr::and_, tr::true_());
+    return utilities::detail::join(first, last, tr::and_, tr::true_());
   }
 
   /// \brief Splits a disjunction into a sequence of operands
@@ -55,7 +55,7 @@ namespace data
   {
     typedef core::term_traits<data::data_expression> tr;
     atermpp::set<data_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::set<data_expression> >(result, result.begin()), tr::is_or, tr::left, tr::right);
+    utilities::detail::split(expr, std::insert_iterator<atermpp::set<data_expression> >(result, result.begin()), tr::is_or, tr::left, tr::right);
     return result;
   }
 
@@ -70,7 +70,7 @@ namespace data
   {
     typedef core::term_traits<data::data_expression> tr;
     atermpp::set<data_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::set<data_expression> >(result, result.begin()), tr::is_and, tr::left, tr::right);
+    utilities::detail::split(expr, std::insert_iterator<atermpp::set<data_expression> >(result, result.begin()), tr::is_and, tr::left, tr::right);
     return result;
   }
 
