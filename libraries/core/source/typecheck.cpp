@@ -4385,7 +4385,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
     {
       if (nFactPars!=ATERM_NON_EXISTING_POSITION)
       {
-        mCRL2log(error) << "unknown operation " << core::pp(Name) << " with " << nFactPars << "parameter" << ((nFactPars != 1)?"s":"") << std::endl;
+        mCRL2log(error) << "unknown operation " << core::pp(Name) << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"") << std::endl;
       }
       else
       {
