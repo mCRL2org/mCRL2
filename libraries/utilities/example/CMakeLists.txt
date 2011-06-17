@@ -30,7 +30,7 @@ add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
 )
 
 target_link_libraries(${PROJECT_NAME}
-   mcrl2_utilities_command_line
+   mcrl2_utilities
    mcrl2_core
 )
 

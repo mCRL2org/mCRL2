@@ -7,19 +7,19 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ##################################
-# ## mcrl2_utilities_command_line ##
+# ## mcrl2_utilities ##
 # ##################################
 
-project(mcrl2_utilities_command_line)
+project(mcrl2_utilities)
 cmake_minimum_required(VERSION 2.6)
 
-set(mcrl2_utilities_command_line_src
+set(mcrl2_utilities_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/command_line_interface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logger.cpp
 )
 
-set(mcrl2_utilities_command_line_src ${mcrl2_utilities_command_line_src}  PARENT_SCOPE)
+set(mcrl2_utilities_src ${mcrl2_utilities_src}  PARENT_SCOPE)
 
 set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.cpp
   PROPERTIES COMPILE_DEFINITIONS MCRL2_REVISION="${SVN_REV} - ${CMAKE_BUILD_TYPE}"
@@ -28,7 +28,7 @@ set_source_files_properties(${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 add_library(${PROJECT_NAME}
-  ${mcrl2_utilities_command_line_src}
+  ${mcrl2_utilities_src}
 )
 
 target_link_libraries(${PROJECT_NAME}

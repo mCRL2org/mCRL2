@@ -56,7 +56,7 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_aterm
-  mcrl2_utilities_command_line
+  mcrl2_utilities
 )
 
 # add install target:

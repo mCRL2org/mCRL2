@@ -31,7 +31,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_lts
-  mcrl2_utilities_command_line
+  mcrl2_utilities
 )
 
 # install target:

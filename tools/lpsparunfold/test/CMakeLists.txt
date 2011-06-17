@@ -33,7 +33,7 @@ foreach( OBJ ${TERM_OBJS} )
 
   target_link_libraries("${PREFIX}_${result}"
     mcrl2_lps
-    mcrl2_utilities_command_line
+    mcrl2_utilities
   )
 
   add_test("${PREFIX}_${result}" "${lpsparunfold_test_container_BINARY_DIR}/${PREFIX}_${result}" )

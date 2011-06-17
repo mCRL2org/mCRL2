@@ -29,7 +29,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
-  mcrl2_utilities_command_line
+  mcrl2_utilities
 )
 
 # install target:

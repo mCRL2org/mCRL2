@@ -64,7 +64,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_lts
-  mcrl2_utilities_command_line
+  mcrl2_utilities
   mcrl2_utilities_wx
 )
 

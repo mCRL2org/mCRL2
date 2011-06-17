@@ -142,7 +142,7 @@ target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_data
   mcrl2_core
-  mcrl2_utilities_command_line
+  mcrl2_utilities
   mcrl2_utilities_wx
 )
 

@@ -46,7 +46,7 @@ foreach( OBJ ${TERM_OBJS} )
   target_link_libraries(${PROJECT_NAME}
      mcrl2_lps
      mcrl2_lts
-     mcrl2_utilities_command_line
+     mcrl2_utilities
   )
 
   build_and_run_test_example_target( ${PROJECT_NAME} )

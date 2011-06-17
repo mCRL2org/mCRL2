@@ -62,7 +62,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR})
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_simulator
-  mcrl2_utilities_command_line
+  mcrl2_utilities
   ${Boost_LIBRARIES}
 )
 
@@ -162,7 +162,7 @@ set_target_properties(${PROJECT_NAME} PROPERTIES ENABLE_EXPORTS true)
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
   mcrl2_simulator_gui
-  mcrl2_utilities_command_line
+  mcrl2_utilities
 )
 
 # install target:

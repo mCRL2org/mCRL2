@@ -32,7 +32,7 @@ foreach( OBJ ${TERM_OBJS} )
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_data
-     mcrl2_utilities_command_line
+     mcrl2_utilities
   )
   # MACRO is defined in CMakeLists.txt in root of source tree
   build_and_run_test_target( ${PREFIX}_${result} )

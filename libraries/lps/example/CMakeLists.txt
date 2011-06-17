@@ -38,7 +38,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 
 # target_link_libraries(${PROJECT_NAME}
 #    mcrl2_lps
-#    mcrl2_utilities_command_line
+#    mcrl2_utilities
 # )
 
 ##---------------------------------------------------
@@ -54,7 +54,7 @@ add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL
 
 target_link_libraries(${PROJECT_NAME}
    mcrl2_lps
-   mcrl2_utilities_command_line
+   mcrl2_utilities
 )
 
 build_and_run_test_example_target( ${PROJECT_NAME} )
