@@ -10,7 +10,7 @@
 
 #include "boost.hpp" // precompiled headers
 
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/suminst.h"
 
@@ -49,7 +49,7 @@ class suminst_tool: public rewriter_tool<input_output_tool>
 
     atermpp::set<data::sort_expression> parse_sort_expressions(const std::string& s, const data::data_specification& spec)
     {
-      std::vector<std::string> parts = core::split(core::remove_whitespace(s), ",");
+      std::vector<std::string> parts = utilities::split(utilities::remove_whitespace(s), ",");
       atermpp::set<data::sort_expression> result;
 
       for(std::vector<std::string>::const_iterator i = parts.begin(); i != parts.end(); ++i)

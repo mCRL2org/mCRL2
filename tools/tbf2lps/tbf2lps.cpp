@@ -28,7 +28,6 @@
 
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
-using namespace mcrl2::core;
 using namespace aterm;
 
 class tbf2lps_tool: public input_output_tool

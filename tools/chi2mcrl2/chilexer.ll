@@ -18,7 +18,6 @@
 #include <set>
 #include <utility>
 
-using namespace mcrl2::core;
 using namespace std;
 
 int line = 1, col = 1;

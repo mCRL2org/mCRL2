@@ -543,7 +543,6 @@ static yyconst flex_int16_t yy_chk[248] =
 #include <set>
 #include <utility>
 
-using namespace mcrl2::core;
 using namespace std;
 
 int line = 1, col = 1;

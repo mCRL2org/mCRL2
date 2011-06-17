@@ -29,7 +29,6 @@
 extern int yylex( void );
 extern char* yytext; */
 
-using namespace mcrl2::core;
 using namespace std;
 
 //external declarations from lexer.ll

@@ -33,7 +33,6 @@
 #define OUTFILEEXT ".mcrl2"
 
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 using namespace std;
 using namespace aterm;
 

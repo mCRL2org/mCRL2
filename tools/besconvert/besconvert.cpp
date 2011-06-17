@@ -110,7 +110,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       {
         tmp.insert(string_for_equivalence(*i));
       }
-      return core::string_join(tmp, ", ");
+      return utilities::string_join(tmp, ", ");
     }
 
   protected:

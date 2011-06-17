@@ -25,7 +25,7 @@
 
 #include "mcrl2/aterm/aterm_ext.h"
 
-using namespace mcrl2::core;
+using namespace mcrl2::utilities;
 using namespace std;
 
 bool CAsttransform::StrcmpIsFun(const char* str, ATermAppl aterm)

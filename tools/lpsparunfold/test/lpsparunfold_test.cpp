@@ -13,7 +13,7 @@
 #include <string>
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "../lpsparunfoldlib.h"
 #include "mcrl2/lps/specification.h"
