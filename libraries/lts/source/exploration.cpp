@@ -211,21 +211,21 @@ bool lps2lts_algorithm::finalise_lts_generation()
     if (lgopts->expl_strat == es_random)
     {
       mCRL2log(verbose) << "done with random walk of "
-                        << trans << "transition" << ((trans==1)?"":"s")
+                        << trans << " transition" << ((trans==1)?"":"s")
                         << " (visited " << num_states
                         << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_value_prioritized)
     {
       mCRL2log(verbose) << "done with value prioritized walk of "
-                        << trans << "transition" << ((trans==1)?"":"s")
+                        << trans << " transition" << ((trans==1)?"":"s")
                         << " (visited " << num_states
                         << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_value_random_prioritized)
     {
       mCRL2log(verbose) << "done with random value prioritized walk of "
-                        << trans << "transition" << ((trans==1)?"":"s")
+                        << trans << " transition" << ((trans==1)?"":"s")
                         << " (visited " << num_states
                         << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
@@ -234,13 +234,13 @@ bool lps2lts_algorithm::finalise_lts_generation()
       mCRL2log(verbose) << "done with state space generation ("
                         << level-1 << "level" << ((level==2)?"":"s") << ", "
                         << num_states << " state" << ((num_states == 1)?"":"s")
-                        << " and " << trans << "transition" << ((trans==1)?"":"s") << ")" << std::endl;
+                        << " and " << trans << " transition" << ((trans==1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_depth)
     {
       mCRL2log(verbose) << "done with state space generation ("
                         << num_states << "state" << ((num_states == 1)?"":"s")
-                        << " and " << trans << "transition" << ((trans==1)?"":"s") << ")" << std::endl;
+                        << " and " << trans << " transition" << ((trans==1)?"":"s") << ")" << std::endl;
     }
   }
 
