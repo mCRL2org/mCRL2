@@ -10,15 +10,11 @@
 /// \brief Add your file description here.
 
 #include <boost/test/included/unit_test_framework.hpp>
-#include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/utilities/numeric_string.h"
-#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
 using namespace mcrl2;
-
-BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 BOOST_AUTO_TEST_CASE(test_zero)
 {
@@ -47,7 +43,5 @@ BOOST_AUTO_TEST_CASE(test_minus_481)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  MCRL2_ATERMPP_INIT(argc, argv)
-
   return 0;
 }
