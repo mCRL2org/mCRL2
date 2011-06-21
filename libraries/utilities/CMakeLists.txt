@@ -17,6 +17,7 @@ set(mcrl2_utilities_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/command_line_interface.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/toolset_revision.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/logger.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/text_utility.cpp
 )
 
 set(mcrl2_utilities_src ${mcrl2_utilities_src}  PARENT_SCOPE)

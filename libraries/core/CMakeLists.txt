@@ -37,7 +37,6 @@ set(mcrl2_core_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2lexer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/print.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/text_utility.cpp
 )
 
 set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
