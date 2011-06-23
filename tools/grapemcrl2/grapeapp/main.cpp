@@ -95,7 +95,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 {
 
   MCRL2_ATERMPP_INIT(0, lpCmdLine);
-  gsSetVerboseMsg();
+  mcrl2_logger::set_reporting_level(log_verbose);
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #endif
