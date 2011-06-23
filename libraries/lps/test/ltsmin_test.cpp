@@ -121,7 +121,7 @@ void test_ltsmin()
   // get the initial state
   state_vector initial_state = new int[N];
   state_vector dest_state = new int[N];
-  int labels[p.edge_label_count()];
+  int* labels = new int[p.edge_label_count()];
   p.get_initial_state(initial_state);
   std::cout << print_state(initial_state, N, "initial state: ") << std::endl;
   
@@ -154,6 +154,7 @@ void test_ltsmin()
     
   delete[] initial_state;
   delete[] dest_state;
+  delete[] labels;
 
   std::cout << p.info() << std::endl; 
   
