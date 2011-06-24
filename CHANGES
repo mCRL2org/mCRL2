@@ -1,4 +1,31 @@
 ===============================================================================
+Changes between toolset releases March 2011 and July 2011:
+===============================================================================
+
+ General:
+   - Removed the innermost rewriters; only the jitty, jittyc and jittyp
+     rewriters are available.
+   - Cleaned up the implementations of the remaining rewriters.
+   - Renamed library mcrl2_utilities_command_line to mcrl2_utilities.
+   - Moved some utility functionality from mcrl2_core to mcrl2_utilities.
+   - Incorporated and cleaned up ATerm library. The ATerm library included in
+     mCRL2 now is compiled as C++.
+   - Compile rewriters using an external compile script.
+   - An interface for generating next states has been provided, in such a way
+     that it is independent of the internal structures of mCRL2.
+     This allows for a more reliable integration of mCRL2 and LTSmin
+     (http://fmt.cs.utwente.nl/tools/ltsmin/).
+   - Fix compilation with GCC 4.6.
+
+ New functionality:
+   - Improved handling of universal and existential quantification in the
+     rewriters.
+   - A new logging library has been implemented and incorporated.
+   - Improved performance of parity game generator used by pbespgsolve.
+   - The tool lps2torx now uses the simulation backend.
+   - A major update of pbespgsolve has been imported from upstream.
+
+===============================================================================
 Changes between toolset releases July 2010 and March 2011:
 ===============================================================================
 
