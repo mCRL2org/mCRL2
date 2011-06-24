@@ -21,6 +21,8 @@ namespace process {
 
 namespace detail {
 
+using namespace core::detail::precedences;
+
 // From the documentation:
 // The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
 
@@ -59,7 +61,7 @@ int precedence(const process_expression& x)
   {
     return 7;
   }
-  return data::detail::max_precedence;
+  return max_precedence;
 }
 
 } // namespace detail

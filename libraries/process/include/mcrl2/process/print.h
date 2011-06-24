@@ -36,10 +36,11 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   using super::print_action_declarations;
   using super::print_assignments;
   using super::print_condition;
-  using super::print_data_expression;
   using super::print_list;
   using super::print_time;
   using super::print_variables;
+  using super::print_expression;
+  using super::print_binary_operation;
 
   Derived& derived()
   {
@@ -51,28 +52,6 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().print("init ");
     derived()(init);
     derived().print(";\n");
-  }
-
-  void print_process_expression(const process_expression& x, int precedence)
-  {
-    bool print_parens = process::detail::precedence(x) < precedence;
-    if (print_parens)
-    {
-      derived().print("(");
-    }
-    derived()(x);
-    if (print_parens)
-    {
-      derived().print(")");
-    }
-  }
-
-  template <typename T>
-  void print_binary_process_operation(const T& x, const std::string& op)
-  {
-    print_process_expression(x.left(), process::detail::precedence(x));
-    derived().print(op);
-    print_process_expression(x.right(), process::detail::precedence(x));
   }
 
   void operator()(const process::process_specification& x)
@@ -146,7 +125,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().print("sum ");
     print_variables(x.bound_variables(), true, true, "", "");
     derived().print(". ");   
-    print_process_expression(x.operand(), process::detail::precedence(x));
+    print_expression(x.operand(), precedence(x));
     derived().leave(x);
   }
 
@@ -228,7 +207,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::sync& x)
   {
     derived().enter(x);
-    print_binary_process_operation(x, " | ");
+    print_binary_operation(x, " | ");
     derived().leave(x);
   }
 
@@ -244,7 +223,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::seq& x)
   {
     derived().enter(x);
-    print_binary_process_operation(x, " . ");
+    print_binary_operation(x, " . ");
     derived().leave(x);
   }
 
@@ -252,8 +231,8 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ", data::detail::prefix_precedence());
-    print_process_expression(x.then_case(), 5);
+    print_condition(x.condition(), " -> ", max_precedence);
+    print_expression(x.then_case(), 5);
     derived().leave(x);
   }
 
@@ -261,40 +240,40 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   void operator()(const process::if_then_else& x)
   {
     derived().enter(x);
-    print_condition(x.condition(), " -> ", data::detail::prefix_precedence());
-    print_process_expression(x.then_case(), 5);
+    print_condition(x.condition(), " -> ", max_precedence);
+    print_expression(x.then_case(), 5);
     derived().print(" <> ");
     // N.B. the else case is printed with a lower precedence, since we want the expression a -> b -> c <> d <> e
     // to be printed as a -> (b -> c <> d) <> e
-    print_process_expression(x.else_case(), 5);
+    print_expression(x.else_case(), 5);
     derived().leave(x);
   }
 
   void operator()(const process::bounded_init& x)
   {
     derived().enter(x);
-    print_binary_process_operation(x, " << ");
+    print_binary_operation(x, " << ");
     derived().leave(x);
   }
 
   void operator()(const process::merge& x)
   {
     derived().enter(x);
-    print_binary_process_operation(x, " || ");
+    print_binary_operation(x, " || ");
     derived().leave(x);
   }
 
   void operator()(const process::left_merge& x)
   {
     derived().enter(x);
-    print_binary_process_operation(x, " ||_ ");
+    print_binary_operation(x, " ||_ ");
     derived().leave(x);
   }
 
   void operator()(const process::choice& x)
   {
     derived().enter(x);
-    print_binary_process_operation(x, " + ");
+    print_binary_operation(x, " + ");
     derived().leave(x);
   }
 

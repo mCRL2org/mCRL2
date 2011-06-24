@@ -256,24 +256,39 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   }
 
   template <typename T>
-  void print_binary_data_operation(const T& x, const std::string& op)
+  void print_expression(const T& x, int prec = 5)
   {
-    print_data_expression(x.left(), data::detail::precedence(x));
+    bool print_parens = (precedence(x) < prec);
+    if (print_parens)
+    {
+      derived().print("(");
+    }
+    derived()(x);
+    if (print_parens)
+    {
+      derived().print(")");
+    }
+  }
+
+  template <typename T>
+  void print_binary_operation(const T& x, const std::string& op)
+  {
+    print_expression(x.left(), precedence(x));
     derived().print(op);
-    print_data_expression(x.right(), data::detail::precedence(x));
+    print_expression(x.right(), precedence(x));
   }
 
   // implements special handling for expressions like 'x && y || z', in
   // which different operators have the same precedence
   template <typename T>
-  void print_binary_data_operation_special(const T& x, const std::string& op)
+  void print_binary_operation_special(const T& x, const std::string& op)
   {
     data_expression left = x.left();
     data_expression right = x.right();
     int prec = data::detail::precedence(x);
-    print_data_expression(left, (prec == data::detail::precedence(left) && x.head() != application(left).head()) ? prec + 1 : prec);
+    print_expression(left, (prec == data::detail::precedence(left) && x.head() != application(left).head()) ? prec + 1 : prec);
     derived().print(op);
-    print_data_expression(right, (prec == data::detail::precedence(right) && x.head() != application(right).head()) ? prec + 1 : prec);
+    print_expression(right, (prec == data::detail::precedence(right) && x.head() != application(right).head()) ? prec + 1 : prec);
   }
 
   template <typename Container>
@@ -404,33 +419,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(closer);
   }
 
-  void print_data_expression(const data_expression& x, int precedence = 5)
-  {
-    bool print_parens = (data::detail::precedence(x) < precedence);
-    if (print_parens)
-    {
-      derived().print("(");
-    }
-    derived()(x);
-    if (print_parens)
-    {
-      derived().print(")");
-    }
-  }
-
-  void print_condition(const data_expression& condition, const std::string& arrow = "  ->  ", int precedence = 3)
+  template <typename T>
+  void print_condition(const T& condition, const std::string& arrow = "  ->  ", int precedence = 3)
   {
     if (!sort_bool::is_true_function_symbol(condition))
     {
-      // TODO: a cleaner way to determine the precedence is needed
-      print_data_expression(condition, precedence);
+      print_expression(condition, precedence);
       derived().print(arrow);
     }
   }
 
   void print_time(const data_expression& t)
   {
-    print_data_expression(t, 13);
+    print_expression(t, 13);
   }
 
   template <typename Container>
@@ -789,11 +790,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
   }  
 
-  void print_abstraction(const abstraction& x, const std::string& op)
+  template <typename Abstraction>
+  void print_abstraction(const Abstraction& x, const std::string& op)
   {
     derived().enter(x);
     derived().print(op + " ");
-    print_function_declarations(x.variables(), "", "", ", ");   
+    print_variables(x.variables(), true, true, "", "", ", ");   
     derived().print(". ");
     derived()(x.body());
     derived().leave(x);
@@ -807,11 +809,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       core::identifier_string name = function_symbol(x.head()).name();
       data_expression left = *i++;
       data_expression right = *i;
-      print_data_expression(left, data::detail::infix_precedence_left(name));
+      print_expression(left, data::detail::infix_precedence_left(left));
       derived().print(" ");
       derived()(x.head());
       derived().print(" ");
-      print_data_expression(right, data::detail::infix_precedence_right(name));
+      print_expression(right, data::detail::infix_precedence_right(right));
       return;
     }
     
@@ -1126,47 +1128,47 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       if (data::is_equal_to_application(x))
       {
-        print_binary_data_operation(x, " == ");
+        print_binary_operation(x, " == ");
       }
       else if (data::is_not_equal_to_application(x))
       {
-        print_binary_data_operation(x, " != ");
+        print_binary_operation(x, " != ");
       }     
       else if (data::is_less_application(x))
       {
-        print_binary_data_operation(x, " < ");
+        print_binary_operation(x, " < ");
       }
       else if (data::is_less_equal_application(x))
       {
-        print_binary_data_operation(x, " <= ");
+        print_binary_operation(x, " <= ");
       }
       else if (data::is_greater_application(x))
       {
-        print_binary_data_operation(x, " > ");
+        print_binary_operation(x, " > ");
       }
       else if (data::is_greater_equal_application(x))
       {
-        print_binary_data_operation(x, " >= ");
+        print_binary_operation(x, " >= ");
       }
       else if (sort_bool::is_implies_application(x))
       {
-        print_binary_data_operation(x, " => ");
+        print_binary_operation(x, " => ");
       }
       else if (sort_bool::is_and_application(x))
       {
-        print_binary_data_operation_special(x, " && ");
+        print_binary_operation_special(x, " && ");
       }
       else if (sort_bool::is_or_application(x))
       {
-        print_binary_data_operation_special(x, " || ");
+        print_binary_operation_special(x, " || ");
       }
       else if (sort_list::is_in_application(x))
       {
-        print_binary_data_operation(x, " in ");
+        print_binary_operation(x, " in ");
       }
       else if (sort_list::is_element_at_application(x))
       {
-        print_binary_data_operation(x, " . ");
+        print_binary_operation(x, " . ");
       }
       else
       {
@@ -1183,11 +1185,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
           || sort_nat::is_plus_application(x)
          )
       {
-        print_binary_data_operation(x, " + ");
+        print_binary_operation(x, " + ");
       }
       else if (sort_pos::is_times_application(x))
       {
-        print_binary_data_operation(x, " * ");
+        print_binary_operation(x, " * ");
       }
       else
       {
@@ -1202,25 +1204,25 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {   
       if (sort_nat::is_plus_application(x))
       {
-        print_binary_data_operation(x, " + ");
+        print_binary_operation(x, " + ");
       }
       else if (sort_nat::is_times_application(x))
       {
-        print_binary_data_operation(x, " * ");
+        print_binary_operation(x, " * ");
       }
       else if (sort_nat::is_div_application(x))
       {
-        print_binary_data_operation(x, " / ");
+        print_binary_operation(x, " / ");
       }     
       else if (   sort_nat::is_mod_application(x)
                || sort_int::is_mod_application(x)
               )
       {
-        print_binary_data_operation(x, " mod ");
+        print_binary_operation(x, " mod ");
       }
       else if (sort_nat::is_exp_application(x))
       {
-        print_binary_data_operation(x, " ^ ");
+        print_binary_operation(x, " ^ ");
       }
       else if (sort_nat::is_cnat_application(x))
       {
@@ -1244,19 +1246,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_int::is_plus_application(x))
       {
-        print_binary_data_operation(x, " + ");
+        print_binary_operation(x, " + ");
       }
       else if (sort_int::is_minus_application(x))
       {
-        print_binary_data_operation(x, " - ");
+        print_binary_operation(x, " - ");
       }
       else if (sort_int::is_times_application(x))
       {
-        print_binary_data_operation(x, " * ");
+        print_binary_operation(x, " * ");
       }
       else if (sort_int::is_div_application(x))
       {
-        print_binary_data_operation(x, " / ");
+        print_binary_operation(x, " / ");
       }
       else if (sort_int::is_cint_application(x))
       {
@@ -1280,19 +1282,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_real::is_plus_application(x))
       {
-        print_binary_data_operation(x, " + ");
+        print_binary_operation(x, " + ");
       }
       else if (sort_real::is_minus_application(x))
       {
-        print_binary_data_operation(x, " - ");
+        print_binary_operation(x, " - ");
       }
       else if (sort_real::is_times_application(x))
       {
-        print_binary_data_operation(x, " * ");
+        print_binary_operation(x, " * ");
       }
       else if (sort_real::is_divides_application(x))
       {
-        print_binary_data_operation(x, " / ");
+        print_binary_operation(x, " / ");
       }
       else if (sort_real::is_creal_application(x)) // TODO: fix this!!!
       {
@@ -1311,7 +1313,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       if (sort_list::is_concat_application(x))
       {
-        print_binary_data_operation(x, " ++ ");
+        print_binary_operation(x, " ++ ");
       }
       else if (sort_list::is_cons_application(x))
       {
@@ -1321,7 +1323,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         }
         else
         {
-          print_binary_data_operation(x, " |> ");
+          print_binary_operation(x, " |> ");
         }
       }
       else if (sort_list::is_snoc_application(x))
@@ -1332,7 +1334,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         }
         else
         {
-          print_binary_data_operation(x, " <| ");
+          print_binary_operation(x, " <| ");
         }
       }
       else if (sort_list::is_list_enumeration_application(x))
@@ -1359,15 +1361,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_set::is_setunion_application(x))
       {
-        print_binary_data_operation(x, " + ");
+        print_binary_operation(x, " + ");
       }
       else if (sort_set::is_setintersection_application(x))
       {
-        print_binary_data_operation(x, " * ");
+        print_binary_operation(x, " * ");
       }
       else if (sort_set::is_setdifference_application(x))
       {
-        print_binary_data_operation(x, " - ");
+        print_binary_operation(x, " - ");
       }
       else if (sort_set::is_setconstructor_application(x))
       {
@@ -1440,15 +1442,15 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {   
       if (sort_bag::is_bagjoin_application(x))
       {
-        print_binary_data_operation(x, " + ");
+        print_binary_operation(x, " + ");
       }
       else if (sort_bag::is_bagintersect_application(x))
       {
-        print_binary_data_operation(x, " * ");
+        print_binary_operation(x, " * ");
       }
       else if (sort_bag::is_bagdifference_application(x))
       {
-        print_binary_data_operation(x, " - ");
+        print_binary_operation(x, " - ");
       }
 
       else if (sort_bag::is_bagconstructor_application(x))
