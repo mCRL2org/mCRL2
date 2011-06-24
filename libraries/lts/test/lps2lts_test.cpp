@@ -429,6 +429,18 @@ BOOST_AUTO_TEST_CASE(test_alias_complex)
   check_lps2lts_specification(spec, 2, 1, 1);
 }
 
+BOOST_AUTO_TEST_CASE(test_equality_with_empty_set)
+{
+  std::string spec(
+    "map  emptyset:Set(Bool);\n"
+    "eqn  emptyset={};\n"
+    "proc P=({ b: Bool | false }  == emptyset) -> tau.P;\n"
+    "init P;"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

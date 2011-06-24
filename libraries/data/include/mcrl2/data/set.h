@@ -933,8 +933,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vs), setfset(s, vs), setconstructor(s, false_function(s), vs)));
         result.push_back(data_equation(atermpp::make_vector(vf), setcomprehension(s, vf), setconstructor(s, vf, sort_fset::fset_empty(s))));
         result.push_back(data_equation(atermpp::make_vector(ve, vf, vs), setin(s, ve, setconstructor(s, vf, vs)), not_equal_to(vf(ve), sort_fset::fsetin(s, ve, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), equal_to(vf, vg), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), equal_to(vs, vt)));
-        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), not_equal_to(vf, vg), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), forall(atermpp::make_vector(vc), equal_to(setin(s, vc, setconstructor(s, vf, vs)), setin(s, vc, setconstructor(s, vg, vt))))));
+        result.push_back(data_equation(atermpp::make_vector(vf, vg, vs, vt), equal_to(setconstructor(s, vf, vs), setconstructor(s, vg, vt)), forall(atermpp::make_vector(vc), equal_to(equal_to(vf(vc), vg(vc)), equal_to(sort_fset::fsetin(s, vc, vs), sort_fset::fsetin(s, vc, vt))))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less(vx, vy), sort_bool::and_(less_equal(vx, vy), not_equal_to(vx, vy))));
         result.push_back(data_equation(atermpp::make_vector(vx, vy), less_equal(vx, vy), equal_to(setintersection(s, vx, vy), vx)));
         result.push_back(data_equation(atermpp::make_vector(vf, vs), setcomplement(s, setconstructor(s, vf, vs)), setconstructor(s, not_function(s, vf), vs)));
