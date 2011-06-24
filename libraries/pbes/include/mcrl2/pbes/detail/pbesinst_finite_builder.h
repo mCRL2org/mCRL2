@@ -115,7 +115,7 @@ struct pbesinst_finite_builder: public pbes_expr_builder<pbes_expression, Substi
     data::data_expression condition = make_condition(finite_variables, finite_expressions);
 
     atermpp::set<pbes_expression> result;
-    data::classic_enumerator enumerator(m_dataspec,m_rewriter);
+    data::classic_enumerator<> enumerator(m_dataspec,m_rewriter);
     for (data::classic_enumerator<>::iterator i=enumerator.begin(finite_variables, m_rewriter); 
               i != enumerator.end(); ++i)
     {
