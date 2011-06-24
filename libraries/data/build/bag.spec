@@ -49,8 +49,11 @@ eqn {}  =  @bag(@zero_, @fbag_empty);
     @bagcomp(f)  =  @bag(f, @fbag_empty);
     count(e, @bag(f, b))  =  @swap_zero(f(e), @fbag_count(e, b));
     in(e, x)  =  >(count(e, x), @c0);
-    ==(f, g)  ->  ==(@bag(f, b), @bag(g, c))  =  ==(b, c);
-    !=(f, g)  ->  ==(@bag(f, b), @bag(g, c))  =  forall(d:S, ==(count(d, @bag(f,b)), count(d, @bag(g,c))));
+%    Replaced two rewrite rules below by the subsequent one. It is not clear whether the new
+%    rule always works as desired, and therefore, the old rules are left in this code for the time being.
+%    ==(f, g)  ->  ==(@bag(f, b), @bag(g, c))  =  ==(b, c);
+%    !=(f, g)  ->  ==(@bag(f, b), @bag(g, c))  =  forall(d:S, ==(count(d, @bag(f,b)), count(d, @bag(g,c))));
+    ==(@bag(f, b), @bag(g, c))  =  forall(d:S, ==(count(d, @bag(f,b)), count(d, @bag(g,c))));
     <(x, y)  =  &&(<=(x, y), !=(x, y));
     <=(x,y) = ==(*(x,y),x);
     +(@bag(f, b), @bag(g, c))  =  @bag(@add_(f, g), @fbag_join(f, g, b, c));
