@@ -922,7 +922,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
   int total_rule_vars = 0;
   for (; !ATisEmpty(rules); rules=ATgetNext(rules))
   {
-//    if ( ATgetArity(ATgetAFun((ATermAppl) ATelementAt((ATermList) ATgetFirst(rules),2))) <= arity+1 )
+//    if (ATgetArity(ATgetAFun((ATermAppl) ATelementAt((ATermList) ATgetFirst(rules),2))) <= arity+1)
 //    {
     rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules),&total_rule_vars, true_inner));
 //    }
@@ -1753,7 +1753,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   {
     if (level == 0)
     {
-      fprintf(f,"%sif ( ATisEqual(%s,arg%i) ) // M\n"
+      fprintf(f,"%sif (ATisEqual(%s,arg%i)) // M\n"
               "%s{\n",
               whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,cur_arg,
               whitespace(d*2)
@@ -1761,7 +1761,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
     }
     else
     {
-      fprintf(f,"%sif ( ATisEqual(%s,ATgetArgument(%s%i,%i)) ) // M\n"
+      fprintf(f,"%sif (ATisEqual(%s,ATgetArgument(%s%i,%i))) // M\n"
               "%s{\n",
               whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,(level==1)?"arg":"t",parent,cur_arg,
               whitespace(d*2)
@@ -1778,7 +1778,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
     if (level == 0)
     {
       // TODO: if parent was also an F of the same level we can omit isAppl
-      fprintf(f,"%sif ( "
+      fprintf(f,"%sif ("
               "isAppl(arg%i) && "
               "ATisEqual(ATgetArgument(arg%i,0),"
               "(ATerm) %p"
@@ -1793,7 +1793,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
     }
     else
     {
-      fprintf(f,"%sif ( "
+      fprintf(f,"%sif ("
               "isAppl(ATgetArgument(%s%i,%i)) && "
               "ATisEqual(ATgetArgument((ATermAppl) ATgetArgument(%s%i,%i),0),"
               "(ATerm) %p"
@@ -1834,7 +1834,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isC(tree))
   {
-    fprintf(f,"%sif ( ATisEqual(",whitespace(d*2));
+    fprintf(f,"%sif (ATisEqual(",whitespace(d*2));
     calcTerm(f,ATgetArgument(tree,0),0,nnfvars);
 
     fprintf(f,",(ATermAppl) %p) ) // C\n"
@@ -1881,7 +1881,7 @@ void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, 
 
   while (isC(tree))
   {
-    fprintf(f,"%sif ( ATisEqual(",whitespace(d*2));
+    fprintf(f,"%sif (ATisEqual(",whitespace(d*2));
     calcTerm(f,ATgetArgument(tree,0),0,ATmakeList0());
 
     fprintf(f,",(ATermAppl) %p) ) // C\n"
@@ -2356,7 +2356,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ar_size = 0;
   int2ar_idx = ATtableCreate(100,75);
 
-  for( atermpp::map< ATerm, ATermInt >::const_iterator l = term2int_begin()
+  for(atermpp::map< ATerm, ATermInt >::const_iterator l = term2int_begin()
         ; l != term2int_end()
         ; ++l)
   {
@@ -2435,7 +2435,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "{\n");
     fprintf(f,
             "  int arity = ATgetArity(ATgetAFun(a));\n"
-            "  if ( arity == 1 )\n"
+            "  if (arity == 1 )\n"
             "  {\n"
             "      return ATmakeAppl(%li,ATgetArgument(a,0)", (long int) get_appl_afun_value(i+1)); // YYYY
 
@@ -2487,9 +2487,21 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         fprintf(f,  ")\n"
                 "{\n"
                );
-        // Implement strategy
-        if (jittyc_eqns[j] != NULL)
+        if (a==1 && (function_symbol(get_int2term(j)).name() == exists_function_symbol())) // existential quantifier.
+        { 
+          fprintf(f,"  // existential quantifier\n");
+          fprintf(f,"  return (ATermAppl)this_rewriter->internal_existential_quantifier_enumeration((ATerm)ATmakeAppl2(%li,(ATerm) %p,(ATerm)arg0));\n",
+                               (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
+        }
+        else if (a==1 && (function_symbol(get_int2term(j)).name() == exists_function_symbol())) // universal quantifier.
+        { 
+          fprintf(f,"  // universal quantifier\n");
+          fprintf(f,"  return (ATermAppl)this_rewriter->internal_universal_quantifier_enumeration((ATerm)ATmakeAppl2(%li,(ATerm) %p,(ATerm)arg0));\n",
+                               (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
+        }
+        else if (jittyc_eqns[j] != NULL)
         {
+        // Implement strategy
           if (0 < a)
           {
             nfs_a.set_value(a,nfs);
@@ -2505,7 +2517,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           }
           finish_function(f,a,j,used);
         }
-
 
         fprintf(f,                 "}\n");
       }
@@ -2589,7 +2600,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
          "  const ATerm u = this_rewriter->getSubstitutionInternal(head);\n"
       "  const size_t arity_t = ATgetArity(ATgetAFun(t));\n"
       "  size_t arity_u;\n"
-      "  if ( isAppl(u) )\n"
+      "  if (isAppl(u) )\n"
       "  {\n"
       "    head = (ATermAppl)ATgetArgument((ATermAppl) u,0);\n"
       "    arity_u = ATgetArity(ATgetAFun((ATermAppl) u));\n"
@@ -2602,7 +2613,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  ATerm args[arity_u+arity_t-1];\n"
       "  args[0] = (ATerm) head;\n"
       "  int function_index;\n"
-      "  if ( ATisInt(head) && ((function_index = ATgetInt((ATermInt) head)) < %ld) )\n"
+      "  if (ATisInt(head) && ((function_index = ATgetInt((ATermInt) head)) < %ld) )\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
@@ -2639,13 +2650,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
           "ATermAppl rewrite(const ATermAppl t)\n"
           "{\n"
-          "  if ( isAppl(t) )\n"
+          "  if (isAppl(t) )\n"
           "  {\n"
           "    const ATermAppl head = (ATermAppl)ATgetArgument(t,0);\n"
-          "    if ( ATisInt(head) )\n"
+          "    if (ATisInt(head) )\n"
           "    {\n"
           "      const int function_index = ATgetInt((ATermInt)head);\n"
-          "      if ( function_index < %ld )\n"
+          "      if (function_index < %ld )\n"
           "      {\n"
           "        const size_t arity = ATgetArity(ATgetAFun(t));\n"
           "        assert(arity <= %ld);"
@@ -2759,7 +2770,7 @@ ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
   }
   ATerm a = (ATerm) so_rewr((ATermAppl) Term);
 
-  return internal_quantifier_enumeration((ATerm) a );
+  return a;
 }
 
 RewriteStrategy RewriterCompilingJitty::getStrategy()

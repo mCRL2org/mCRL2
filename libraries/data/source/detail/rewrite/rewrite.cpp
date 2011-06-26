@@ -98,14 +98,15 @@ bool Rewriter::removeRewriteRule(ATermAppl /*Rule*/)
   return false;
 }
 
-ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat )
+ATerm Rewriter::internal_existential_quantifier_enumeration(ATerm ATermInInnerFormat)
 {
+  ATfprintf(stderr,"Existential quantifier %t\n",ATermInInnerFormat);
       /* Get Body of Exists */
       ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
       data_expression d(fromRewriteFormat(t1));
 
       /* Get Sort for enumeration from Body*/
-      sort_expression_list fsdomain = function_sort( d.sort() ).domain();
+      sort_expression_list fsdomain = function_sort(d.sort()).domain();
 
       data::fresh_variable_generator<> generator;
       generator.add_identifiers(find_identifiers(d));
@@ -116,17 +117,17 @@ ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerF
       for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
       {
         variable v(generator(*i));
-        vv.push_back( v );
+        vv.push_back(v);
       }
 
       /* Create Enumerator */
-      EnumeratorStandard ES( m_data_specification_for_enumeration, this );
+      EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
       /* Find A solution*/
       const variable_list vl=atermpp::convert< variable_list >(vv);
 
       EnumeratorSolutionsStandard sol(vl,
-          toRewriteFormat( application (d, atermpp::convert< data_expression_list >(vv) ) ),
+          toRewriteFormat(application (d, atermpp::convert< data_expression_list >(vv))),
           true,&ES,100);
 
       /* Create ATermList to store solutions */
@@ -144,19 +145,19 @@ ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerF
 
       if (solution_possible)
       {
-        if( has_exact_solution )
+        if (has_exact_solution)
         {
     #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-          gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::true_() );
+          gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::true_());
     #endif
-          return toRewriteFormat( mcrl2::data::sort_bool::true_() );
+          return toRewriteFormat(mcrl2::data::sort_bool::true_());
         }
         else if (has_no_solution)
         {
     #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-          gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::false_() );
+          gsMessage("  return(%T)\n", (ATermAppl)mcrl2::data::sort_bool::false_());
     #endif
-          return toRewriteFormat( mcrl2::data::sort_bool::false_() );
+          return toRewriteFormat(mcrl2::data::sort_bool::false_());
         }
       }
     #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
@@ -166,11 +167,11 @@ ATerm Rewriter::internal_existential_quantifier_enumeration( ATerm ATermInInnerF
    return ATermInInnerFormat;
 }
 
-ATerm Rewriter::internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat )
+ATerm Rewriter::internal_universal_quantifier_enumeration(ATerm ATermInInnerFormat)
 {
   /* Get Body of forall */
   ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
-  data_expression d(fromRewriteFormat( t1));
+  data_expression d(fromRewriteFormat(t1));
 
   /* Get Sort for enumeration from Body*/
   sort_expression_list fsdomain = function_sort(d.sort()).domain();
@@ -184,16 +185,16 @@ ATerm Rewriter::internal_universal_quantifier_enumeration( ATerm ATermInInnerFor
   for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
   {
     variable v(generator(*i));
-    vv.push_back( v );
+    vv.push_back(v);
   }
 
   /* Create Enumerator */
-  EnumeratorStandard ES( m_data_specification_for_enumeration, this );
+  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
   const variable_list vl=atermpp::convert< variable_list >(vv);
   EnumeratorSolutionsStandard sol(vl,
-      toRewriteFormat(  application (d, atermpp::convert< data_expression_list >(vv) ) ),
+      toRewriteFormat(application (d, atermpp::convert< data_expression_list >(vv))),
       false,&ES,100);
 
   /* Create ATermList to store solutions */
@@ -212,19 +213,19 @@ ATerm Rewriter::internal_universal_quantifier_enumeration( ATerm ATermInInnerFor
 
   if (solution_possible)
   {
-    if( has_exact_solution )
+    if (has_exact_solution)
     {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_() );
+      gsMessage("  return(%T)\n", mcrl2::data::sort_bool::false_());
 #endif
-      return toRewriteFormat( mcrl2::data::sort_bool::false_() );
+      return toRewriteFormat(mcrl2::data::sort_bool::false_());
     }
     else if (has_no_solution)
     {
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_() );
+      gsMessage("  return(%T)\n", mcrl2::data::sort_bool::true_());
 #endif
-      return toRewriteFormat( mcrl2::data::sort_bool::true_() );
+      return toRewriteFormat(mcrl2::data::sort_bool::true_());
     }
   }
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
@@ -233,31 +234,31 @@ ATerm Rewriter::internal_universal_quantifier_enumeration( ATerm ATermInInnerFor
   return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
 }
 
-ATerm Rewriter::internal_quantifier_enumeration( ATerm ATermInInnerFormat )
+ATerm Rewriter::internal_quantifier_enumeration(ATerm ATermInInnerFormat)
 {
 
 #ifndef MCRL2_DISABLE_QUANTIFIER_ENUMERATION
-  if (ATisAppl( ATermInInnerFormat ) )
+  if (ATisAppl(ATermInInnerFormat))
   {
     ATerm arg = ATgetArgument(ATermInInnerFormat,0);
 
     /* Make sure that we have indeed a rewrite rule */
-    if( ATisInt(arg) )
+    if (ATisInt(arg))
     {
       /* Convert internal rewrite number to ATerm representation*/
       ATermAppl a = get_int2term(ATgetInt((ATermInt) arg));
 
-      if( is_function_symbol(a) )
+      if (is_function_symbol(a))
       {
         /* Check for universal quantifier */
-        if(function_symbol(a).name() == forall_function_symbol())
+        if (function_symbol(a).name() == forall_function_symbol())
         {
-          ATermInInnerFormat = internal_universal_quantifier_enumeration( ATermInInnerFormat );
+          ATermInInnerFormat = internal_universal_quantifier_enumeration(ATermInInnerFormat);
         }
         /* Check for existential quantifier */
-        if(function_symbol(a).name() == exists_function_symbol())
+        if (function_symbol(a).name() == exists_function_symbol())
         {
-          ATermInInnerFormat = internal_existential_quantifier_enumeration( ATermInInnerFormat );
+          ATermInInnerFormat = internal_existential_quantifier_enumeration(ATermInInnerFormat);
         }
       }
     }
@@ -602,7 +603,7 @@ void initialize_internal_translation_table_rewriter()
 
 ATerm OpId2Int(ATermAppl Term, bool add_opids)
 {
-  atermpp::map< ATerm, ATermInt >::iterator f = term2int().find( (ATerm) Term );
+  atermpp::map< ATerm, ATermInt >::iterator f = term2int().find((ATerm) Term);
   if (f == term2int().end())
   {
     if (!add_opids)

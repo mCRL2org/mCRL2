@@ -146,6 +146,16 @@ void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
   data_expression t14d2 = parse_data_expression("true");
   BOOST_CHECK(r(t14d1) == r(t14d2));
 
+  /* Test 15. Test whether elimination of quantifiers also happens inside a term. */
+  data_expression t15d1 = parse_data_expression("(exists x_0: Bool. false) && (forall x_0: Nat. true)", specification);
+  data_expression t15d2 = parse_data_expression("false");
+  BOOST_CHECK(r(t15d1) == r(t15d2));
+
+  /* Test 16. Similar test as test 15 */
+  data_expression t16d1 = parse_data_expression("(forall x_0: Pos. true) || (exists x_0: Bool. false)", specification);
+  data_expression t16d2 = parse_data_expression("true");
+  BOOST_CHECK(r(t16d1) == r(t16d2));
+
 }
 
 int test_main(int argc, char** argv)

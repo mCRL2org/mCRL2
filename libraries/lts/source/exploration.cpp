@@ -232,14 +232,14 @@ bool lps2lts_algorithm::finalise_lts_generation()
     else if (lgopts->expl_strat == es_breadth)
     {
       mCRL2log(verbose) << "done with state space generation ("
-                        << level-1 << "level" << ((level==2)?"":"s") << ", "
+                        << level-1 << " level" << ((level==2)?"":"s") << ", "
                         << num_states << " state" << ((num_states == 1)?"":"s")
                         << " and " << trans << " transition" << ((trans==1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_depth)
     {
       mCRL2log(verbose) << "done with state space generation ("
-                        << num_states << "state" << ((num_states == 1)?"":"s")
+                        << num_states << " state" << ((num_states == 1)?"":"s")
                         << " and " << trans << " transition" << ((trans==1)?"":"s") << ")" << std::endl;
     }
   }

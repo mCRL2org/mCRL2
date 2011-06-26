@@ -440,6 +440,18 @@ BOOST_AUTO_TEST_CASE(test_equality_with_empty_set)
   check_lps2lts_specification(spec, 1, 1, 1);
 }
 
+BOOST_AUTO_TEST_CASE(test_equality_of_finite_sets)
+{
+  std::string spec(
+    "sort R = struct r2 | r1 ;\n"
+    "map All: Set(R);\n"
+    "eqn All = {  r: R | true };\n"
+    "proc P=({r1, r2} == All) -> tau.P;\n"
+    "init P;"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

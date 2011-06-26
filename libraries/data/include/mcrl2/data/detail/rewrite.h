@@ -296,14 +296,15 @@ class Rewriter
   /* protected:
     ATerm lookupSubstitution(ATermAppl var); */
 
+  /* The functions below are public, because they are used in the compiling jitty rewriter */
+    ATerm internal_existential_quantifier_enumeration(ATerm ATermInInnerFormat);
+    ATerm internal_universal_quantifier_enumeration(ATerm ATermInInnerFormat);
+
   protected:
     atermpp::vector < atermpp::aterm_appl > m_substitution;  // Substitution for variables to terms in internal format.
 
     mcrl2::data::data_specification m_data_specification_for_enumeration;
-    ATerm internal_quantifier_enumeration( ATerm ATermInInnerFormat );
-
-    ATerm internal_existential_quantifier_enumeration( ATerm ATermInInnerFormat );
-    ATerm internal_universal_quantifier_enumeration( ATerm ATermInInnerFormat );
+    ATerm internal_quantifier_enumeration(ATerm ATermInInnerFormat);
 
     core::identifier_string forall_function_symbol()
     {
