@@ -324,29 +324,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_expression(right, (prec == data::detail::precedence(right) && x.head() != application(right).head()) ? prec + 1 : prec);
   }
 
-//  template <typename Container>
-//  void print_list(const Container& container,
-//                  const std::string& opener = "(",
-//                  const std::string& closer = ")",
-//                  const std::string& separator = ", "
-//                 )
-//  {
-//    if (container.empty())
-//    {
-//      return;
-//    }
-//    derived().print(opener);
-//    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-//    {
-//      if (i != container.begin())
-//      {
-//        derived().print(separator);
-//      }
-//      derived()(*i);
-//    }
-//    derived().print(closer);
-//  }
-
   template <typename Container>
   void print_variables(const Container& container,
                        bool print_sorts = true,
@@ -717,9 +694,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
     }
     derived().print("{ ");
-    print_sorts() = true;
-    derived()(left.variables());
-    print_sorts() = false;
+    print_variables(left.variables(), true, true, "", "", ", ");
     derived().print(" | ");
     derived()(body);
     derived().print(" }");
@@ -789,9 +764,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     sort_expression s = function_sort(sort_set::left(x).sort()).domain().front(); // the sort of the set elements
     data::lambda left(sort_set::left(x));
     derived().print("{ ");
-    print_sorts() = true;
-    derived()(left.variables());
-    print_sorts() = false;
+    print_variables(left.variables(), true, true, "", "", ", ");
     derived().print(" | ");
     derived()(left.body());
     derived().print(" }");
