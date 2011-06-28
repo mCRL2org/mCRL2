@@ -545,13 +545,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   bool is_numeric_value(const application& x)
   {
-    return data::sort_pos::is_c1_function_symbol(x.head())
-           || data::sort_nat::is_c0_function_symbol(x.head())
-           || data::sort_pos::is_cdub_application(x)
-           || data::sort_nat::is_cnat_application(x)
-           || data::sort_int::is_cint_application(x)
-           || data::sort_real::is_creal_application(x)
-           ;
+    return is_numeric_expression(x);
   }
 
   bool is_numeric_expression(const application& x)
@@ -702,22 +696,33 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   
   void print_fbag_default(data_expression x)
   {
-    data_expression right = sort_set::right(x);
-    sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
-    core::identifier_string name = generate_identifier("x", x);
-    variable var(name, s);
-    data_expression body = sort_bag::left(x)(var);
-    if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    // std::cout << "<fbag_default>" << core::pp(x) << " " << core::pp(sort_bag::left(x)) << " " << sort_bag::left(x) << std::endl;
+    //if (sort_bag::is_false_function_function_symbol(sort_bag::left(x)))
+    if (false)
     {
-      body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
+      derived().print("@bagfbag(");
+      derived()(sort_set::right(x));
+      derived().print(")");
     }
-    derived().print("{ ");
-    print_sorts() = true;
-    derived()(var);
-    print_sorts() = false;
-    derived().print(" | ");
-    derived()(body);
-    derived().print(" }");
+    else
+    {     
+      data_expression right = sort_set::right(x);
+      sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
+      core::identifier_string name = generate_identifier("x", x);
+      variable var(name, s);
+      data_expression body = sort_bag::left(x)(var);
+      if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+      {
+        body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
+      }
+      derived().print("{ ");
+      print_sorts() = true;
+      derived()(var);
+      print_sorts() = false;
+      derived().print(" | ");
+      derived()(body);
+      derived().print(" }");
+    }
   }  
 
   void print_fbag_cons_list(data_expression x)
@@ -780,19 +785,28 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else
     {
-      sort_expression s = function_sort(sort_set::left(x).sort()).domain().front();
-      core::identifier_string name = generate_identifier("x", x);
-      variable var(name, s);
-      data_expression lhs(sort_set::left(x)(var));
-      data_expression rhs(sort_set::setin(s, var, sort_set::setfset(s, right)));
-      data_expression body = not_equal_to(lhs, rhs);
-      derived().print("{ ");
-      print_sorts() = true;
-      derived()(var);
-      print_sorts() = false;
-      derived().print(" | ");
-      derived()(body);
-      derived().print(" }");
+      if (sort_set::is_false_function_function_symbol(sort_set::left(x)))
+      {
+        derived().print("@setfset(");
+        derived()(right);
+        derived().print(")");
+      }
+      else
+      {
+        sort_expression s = function_sort(sort_set::left(x).sort()).domain().front();
+        core::identifier_string name = generate_identifier("x", x);
+        variable var(name, s);
+        data_expression lhs(sort_set::left(x)(var));
+        data_expression rhs(sort_set::setin(s, var, sort_set::setfset(s, right)));
+        data_expression body = not_equal_to(lhs, rhs);     
+        derived().print("{ ");
+        print_sorts() = true;
+        derived()(var);
+        print_sorts() = false;
+        derived().print(" | ");
+        derived()(body);
+        derived().print(" }");         
+      }
     }
   }  
 
@@ -1109,6 +1123,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       derived().print("{}");
     }
+    else if (sort_fset::is_fset_empty_function_symbol(x))
+    {
+      derived().print("{}");
+    }
     else
     {
       derived().print(x.name());
@@ -1116,8 +1134,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  void operator()(const data::application& x)
+  void operator()(const data::application& y)
   {
+    // TODO: this copy is done because of the "numeric reconstruction", which
+    // will hopefully be removed in the future.
+    data::application x = y;
+      
 #ifdef MCRL2_DEBUG_PRINT
     print_sort(x);
 #endif
@@ -1128,11 +1150,16 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     if (is_numeric_value(x))
     {
-      data_expression y = detail::reconstruct_numeric_expression(x);
-      if (is_function_symbol(y))
+//std::cout << "<reconstruct>" << core::pp(x) << " -> ";
+      data_expression z = detail::reconstruct_numeric_expression(x);
+      if (is_function_symbol(z))
       {
-        derived().print(function_symbol(y).name());
+        derived().print(function_symbol(z).name());
         return;
+      }
+      else
+      {
+        x = z;
       }
     }
 
@@ -1234,13 +1261,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_nat::is_div_application(x))
       {
-        print_binary_operation(x, " / ");
+        // TODO: make a proper binary operation of div
+        print_expression(sort_nat::arg1(x), precedence(x));
+        derived().print(" div ");
+        print_expression(sort_nat::arg2(x), precedence(x));
       }     
       else if (   sort_nat::is_mod_application(x)
                || sort_int::is_mod_application(x)
               )
       {
-        print_binary_operation(x, " mod ");
+        // TODO: make a proper binary operation of mod
+        print_expression(sort_nat::arg1(x), precedence(x));
+        derived().print(" mod ");
+        print_expression(sort_nat::arg2(x), precedence(x));
       }
       else if (sort_nat::is_exp_application(x))
       {
@@ -1280,7 +1313,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_int::is_div_application(x))
       {
-        print_binary_operation(x, " / ");
+        // TODO: make a proper binary operation of div
+        print_expression(sort_int::arg1(x), precedence(x));
+        derived().print(" div ");
+        print_expression(sort_int::arg2(x), precedence(x));
       }
       else if (sort_int::is_cint_application(x))
       {
@@ -1431,6 +1467,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         {
           derived().print("{}");
         }
+        else if (data::is_variable(y))
+        {
+          derived().print("@setfset(");
+          derived()(variable(y).name());
+          derived().print(")");
+        }
         else
         {
           derived()(y);
@@ -1512,6 +1554,12 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         if (sort_fbag::is_fbag_empty_function_symbol(y))
         {
           derived().print("{}");
+        }
+        else if (data::is_variable(y))
+        {
+          derived().print("@bagfbag(");
+          derived()(variable(y).name());
+          derived().print(")");
         }
         else
         {
