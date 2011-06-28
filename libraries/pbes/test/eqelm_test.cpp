@@ -19,6 +19,8 @@
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/pbes_solver_test.h"
+#include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/core/garbage_collection.h"
@@ -94,6 +96,34 @@ void test_pbes(const std::string& pbes_spec,
   core::garbage_collect();
 }
 
+void test_eqelm(const std::string& pbes_spec)
+{
+  typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
+
+  pbes<> p = txt2pbes(pbes_spec);
+  pbes<> q = p;
+
+  data::rewriter datar(q.data());
+  my_pbes_rewriter pbesr(datar);
+  size_t log_level = 2; 
+  pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
+  algorithm.run(q);
+
+  bool result1 = pbes2_bool_test(p);
+  bool result2 = pbes2_bool_test(q);
+
+  BOOST_CHECK(result1 == result2);
+}
+
+std::string random1 =
+  "pbes mu X0(b: Bool) =                            \n"
+  "       (X1(0, 0) || false) && true;              \n"
+  "     mu X1(n,m: Nat) =                           \n"
+  "       (X1(m + 1, 0) || false) || val(!(n < 2)); \n"
+  "                                                 \n"
+  "init X0(true);                                   \n"
+  ;
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -102,6 +132,7 @@ int test_main(int argc, char** argv)
   bool remove_equations = true;
   test_pbes(t1 , x1, compute_conditions, remove_equations, "test 1");
   test_pbes(t2 , x2, compute_conditions, remove_equations, "test 2");
+  test_eqelm(random1);
 
   return 0;
 }
