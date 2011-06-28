@@ -30,7 +30,6 @@
 using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
-using mcrl2::core::pp;
 
 void test_assignment_list()
 {
@@ -53,8 +52,8 @@ void test_assignment_list()
   data_expression t  = and_(equal_to(d1, e1), not_equal_to(e2, d3));
   data_expression t0 = and_(equal_to(e1, e2), not_equal_to(e3, d3));
   data_expression t2 = data::replace_free_variables(t, assignment_sequence_substitution(assignment_list(l.begin(), l.end())));
-  std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
-  std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
+  std::cerr << "t  == " << data::pp(t) << std::endl;
+  std::cerr << "t2 == " << data::pp(t2) << std::endl;
   BOOST_CHECK(t0 == t2);
 
   assignment_list m1 = atermpp::make_list(
@@ -67,8 +66,8 @@ void test_assignment_list()
                          assignment(e1, d1)
                        );
   BOOST_CHECK(m2 == m3);
-  std::cout << "<m2>" << mcrl2::core::pp(m2) << std::endl;
-  std::cout << "<m3>" << mcrl2::core::pp(m3) << std::endl;
+  std::cout << "<m2>" << data::pp(m2) << std::endl;
+  std::cout << "<m3>" << data::pp(m3) << std::endl;
   core::garbage_collect();
 }
 
@@ -109,9 +108,9 @@ void test_variable_replace()
   data_expression t  = and_(equal_to(d1, d2), not_equal_to(d2, d3));
   data_expression t1 = data::replace_free_variables(t, make_sequence_sequence_substitution(variables, replacements));
   data_expression t2 = data::replace_free_variables(t, make_sequence_sequence_substitution(v, l));
-  std::cerr << "t  == " << mcrl2::core::pp(t) << std::endl;
-  std::cerr << "t1 == " << mcrl2::core::pp(t1) << std::endl;
-  std::cerr << "t2 == " << mcrl2::core::pp(t2) << std::endl;
+  std::cerr << "t  == " << data::pp(t) << std::endl;
+  std::cerr << "t1 == " << data::pp(t1) << std::endl;
+  std::cerr << "t2 == " << data::pp(t2) << std::endl;
   BOOST_CHECK(t1 == t2);
 
   t = and_(equal_to(d1, d2), not_equal_to(d2, d3));

@@ -454,7 +454,7 @@ bool data_specification::is_well_typed() const
   if (!detail::check_data_spec_sorts(constructors(), m_sorts))
   {
     std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors "
-              << pp(constructors()) << " are declared in " << pp(m_sorts) << std::endl;
+              << data::pp(constructors()) << " are declared in " << data::pp(m_sorts) << std::endl;
     return false;
   }
 
@@ -462,7 +462,7 @@ bool data_specification::is_well_typed() const
   if (!detail::check_data_spec_sorts(mappings(), m_sorts))
   {
     std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings "
-              << pp(mappings()) << " are declared in " << pp(m_sorts) << std::endl;
+              << data::pp(mappings()) << " are declared in " << data::pp(m_sorts) << std::endl;
     return false;
   }
 

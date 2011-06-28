@@ -38,7 +38,7 @@ void test_boolean_expressions()
   p.equations().push_back(e2);
   p.initial_state() = X1;
   std::cout << "----------------" << std::endl;
-  std::cout << pp(p) << std::endl;
+  std::cout << bes::pp(p) << std::endl;
 
   std::string filename = "boolean_expression_test.out";
   p.save(filename);
@@ -71,11 +71,11 @@ void test_bes2pbes()
   p.equations().push_back(e3);
   p.initial_state() = X1;
   std::cout << "----------------" << std::endl;
-  std::cout << pp(p) << std::endl;
+  std::cout << bes::pp(p) << std::endl;
 
   pbes_system::pbes<> q = bes2pbes(p);
   std::cout << "----------------" << std::endl;
-  std::cout << pp(q) << std::endl;
+  std::cout << pbes_system::pp(q) << std::endl;
 
   core::garbage_collect();
 }

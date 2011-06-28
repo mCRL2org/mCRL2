@@ -13,6 +13,7 @@
 #define MCRL2_BES_DETAIL_BES_ALGORITHM_H
 
 #include "mcrl2/atermpp/deque.h"
+#include "mcrl2/atermpp/map.h"
 #include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 
@@ -107,7 +108,7 @@ class bes_algorithm: public utilities::algorithm
 
       m_bes.equations() = reachable_equations;
 
-      mCRL2log(verbose) << "Removed the following unreachable equations: " << pp(unreachable_equations) << std::endl;
+      mCRL2log(verbose) << "Removed the following unreachable equations: " << bes::pp(unreachable_equations) << std::endl;
 
       return false;
     }

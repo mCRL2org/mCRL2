@@ -356,7 +356,7 @@ class small_progress_measures_algorithm: public utilities::algorithm
 
     bool run(const boolean_variable& first_variable)
     {
-      LOG(2, "--- applying small progress measures to ---\n" + pp(m_bes) + "\n\n");
+      LOG(2, "--- applying small progress measures to ---\n" + bes::pp(m_bes) + "\n\n");
       initialize_vertices();
       LOG_VERTICES(1, "--- vertices ---\n");
       LOG(1, "\nbeta = " + core::detail::print_list(m_beta) + "\n");

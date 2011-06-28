@@ -279,7 +279,7 @@ void Confluence_Checker::print_counter_example()
   if (f_counter_example)
   {
     const data_expression v_counter_example(f_bdd_prover.get_counter_example());
-    std::cerr << "  Counter example: " << pp(v_counter_example) << "\n";
+    std::cerr << "  Counter example: " << data::pp(v_counter_example) << "\n";
   }
 }
 
@@ -314,7 +314,7 @@ bool Confluence_Checker::check_summands(
       if (f_generate_invariants)
       {
         const data_expression v_new_invariant(f_bdd_prover.get_bdd());
-        mCRL2log(verbose) << "\nChecking invariant: " << pp(v_new_invariant) << "\n";
+        mCRL2log(verbose) << "\nChecking invariant: " << data::pp(v_new_invariant) << "\n";
         if (f_invariant_checker.check_invariant(v_new_invariant))
         {
           mCRL2log(verbose) << "Invariant holds" << std::endl;

@@ -672,7 +672,7 @@ std::string pp(boolean_expression e, bool add_parens = false)
 
   if (tr::is_variable(e))
   {
-    return pp(boolean_variable(e));
+    return bes::pp(boolean_variable(e));
   }
   else if (tr::is_true(e))
   {
@@ -684,19 +684,19 @@ std::string pp(boolean_expression e, bool add_parens = false)
   }
   else if (tr::is_not(e))
   {
-    return std::string("!") + (add_parens ? "(" : "") + pp(tr::arg(e), true) + (add_parens ? ")" : "");
+    return std::string("!") + (add_parens ? "(" : "") + bes::pp(tr::arg(e), true) + (add_parens ? ")" : "");
   }
   else if (tr::is_and(e))
   {
-    return (add_parens ? "(" : "") + pp(tr::left(e), true) + " && " + pp(tr::right(e), true) + (add_parens ? ")" : "");
+    return (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " && " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
   }
   else if (tr::is_or(e))
   {
-    return (add_parens ? "(" : "") + pp(tr::left(e), true) + " || " + pp(tr::right(e), true) + (add_parens ? ")" : "");
+    return (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " || " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
   }
   else if (tr::is_imp(e))
   {
-    return (add_parens ? "(" : "") + pp(tr::left(e), true) + " => " + pp(tr::right(e), true) + (add_parens ? ")" : "");
+    return (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " => " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
   }
   throw mcrl2::runtime_error("error in mcrl2::bes::pp: encountered unknown boolean expression " + e.to_string());
   return "";

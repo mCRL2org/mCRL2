@@ -32,7 +32,7 @@ void test_join()
   s.insert(boolean_variable("X1"));
   s.insert(boolean_variable("X2"));
   boolean_expression x = join_or(s.begin(), s.end());
-  std::cout << "x = " << pp(x) << std::endl;
+  std::cout << "x = " << bes::pp(x) << std::endl;
 
 #ifdef MCRL2_JOIN_TEST
 // The gcc compiler gives the following error:
@@ -48,7 +48,7 @@ void test_join()
   sv.insert(boolean_variable("X1"));
   sv.insert(boolean_variable("X2"));
   x = join_or(sv.begin(), sv.end());
-  std::cout << "x = " << pp(x) << std::endl;
+  std::cout << "x = " << bes::pp(x) << std::endl;
 #endif
 
   core::garbage_collect();

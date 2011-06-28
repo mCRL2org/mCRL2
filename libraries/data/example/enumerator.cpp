@@ -19,7 +19,7 @@ void enumerate(const std::set<variable>& variables, const data_expression& condi
 
   for (classic_enumerator<>::iterator i = enumerator.begin(variables, condition); i!= enumerator.end(); ++i)
   {
-    std::cout << core::pp((*i)(condition)) << std::endl;
+    std::cout << data::pp((*i)(condition)) << std::endl;
   }
 }
 

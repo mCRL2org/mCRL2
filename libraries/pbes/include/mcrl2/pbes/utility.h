@@ -420,7 +420,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     if (is_function_sort(sa.codomain()))
                     {
                       throw mcrl2::runtime_error("Cannot deal with constructors of type (A->(B->C)): " +
-                                                 pp(*rf) + ":" + pp(rf->sort()));
+                                                 data::pp(*rf) + ":" + data::pp(rf->sort()));
                     }
                     dsorts=sa.domain();
                   }
@@ -439,7 +439,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                       std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
                       if (!use_internal_rewrite_format)
                       {
-                        std::cerr << "Vars: " << mcrl2::data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
+                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
                       }
                     }
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);
@@ -575,7 +575,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                     if (is_function_sort(sa.codomain()))
                     {
                       throw mcrl2::runtime_error("Cannot deal with constructors of type (A->(B->C)): " +
-                                                 pp(*rf) + ":" + pp(rf->sort()));
+                                                 data::pp(*rf) + ":" + data::pp(rf->sort()));
                     }
                     dsorts=sa.domain();
                   }
@@ -593,7 +593,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                       std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
                       if (!use_internal_rewrite_format)
                       {
-                        std::cerr << "Vars: " << mcrl2::data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
+                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
                       }
                     }
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);

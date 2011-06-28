@@ -131,7 +131,7 @@ class SMT_LIB_Solver: public SMT_Solver
               sort_expression v_sort_domain_elt(ATAgetFirst(l));
               if (is_function_sort(v_sort_domain_elt))
               {
-                throw mcrl2::runtime_error("Function " + pp(v_operator) +
+                throw mcrl2::runtime_error("Function " + core::pp(v_operator) +
                                            " cannot be translated to the SMT-LIB format.");
               }
               if (sort_int::is_int(v_sort_domain_elt))
@@ -427,7 +427,7 @@ class SMT_LIB_Solver: public SMT_Solver
       else
       {
         throw mcrl2::runtime_error("Unable to handle the current clause (" +
-                                   pp(a_clause) + ").");
+                                   core::pp(a_clause) + ").");
       }
     }
 

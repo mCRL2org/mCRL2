@@ -110,7 +110,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
       data::variable_list process_parameters = m_spec.process().process_parameters();
       data::variable_vector new_parameters;
 
-      mCRL2log(debug) << "Original process parameters: " << pp(process_parameters) << std::endl;
+      mCRL2log(debug) << "Original process parameters: " << data::pp(process_parameters) << std::endl;
 
       data::fresh_variable_generator<> generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
@@ -152,7 +152,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           }
           // n = new_pars.size() && new_pars.size() = ceil(log_2(j)) && new_pars.size() = ceil(log_2(enumerated_elements.size()))
 
-          mCRL2log(verbose) << "Parameter " << pp(par) << ":" << pp(par.sort()) << " has been replaced by " << new_pars.size() << " parameter(s) " << pp(new_pars) << " of sort Bool" << std::endl;
+          mCRL2log(verbose) << "Parameter " << data::pp(par) << ":" << data::pp(par.sort()) << " has been replaced by " << new_pars.size() << " parameter(s) " << data::pp(new_pars) << " of sort Bool" << std::endl;
 
           //Store new parameters in a hastable
           m_new_parameters[par]=new_pars;
@@ -166,7 +166,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
         }
       }
 
-      mCRL2log(debug) << "New process parameter(s): " << pp(new_parameters) << std::endl;
+      mCRL2log(debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
 
       m_spec.process().process_parameters() = atermpp::convert<data::variable_list>(new_parameters);
     }
@@ -192,7 +192,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           data::variable_vector new_parameters = m_new_parameters[i->lhs()];
           data::data_expression_vector elements = m_enumerated_elements[i->lhs()];
 
-          mCRL2log(debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << pp(i->lhs()) << std::endl;
+          mCRL2log(debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(i->lhs()) << std::endl;
 
           for (size_t j = 0; j < new_parameters.size(); ++j)
           {
@@ -227,7 +227,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
         }
       }
 
-      mCRL2log(debug) << "Replaced assignment(s) " << pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
+      mCRL2log(debug) << "Replaced assignment(s) " << data::pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
 
       return atermpp::convert<data::assignment_list>(result);
     }

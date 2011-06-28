@@ -32,7 +32,7 @@ void test_data_expression(const std::string& s, variable_vector v, Predicate p, 
 {
   std::cerr << "testing data expression " << s << std::endl;
   data_expression e = parse_data_expression(s, v.begin(), v.end());
-  std::cerr << "parsed expression " << pp(e) << "   " << e << "\n";
+  std::cerr << "parsed expression " << data::pp(e) << "   " << e << "\n";
   BOOST_CHECK(p(e));
   BOOST_CHECK(!q(e));
 }

@@ -223,7 +223,7 @@ void test_linear(const std::string& text, bool result = true)
 void test_data_spec()
 {
   process_specification spec = parse_process_specification("sort  X; init tau;", false);
-  data::pp(data::detail::data_specification_to_aterm_data_spec(spec.data()));
+  data::pp(spec.data());
   core::garbage_collect();
 }
 

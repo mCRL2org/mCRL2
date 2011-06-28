@@ -151,7 +151,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   {
     if (!detail::check_process_instance(eqn, x))
     {
-      throw non_linear_process(core::pp(x) + " is not a valid process instance");
+      throw non_linear_process(process::pp(x) + " is not a valid process instance");
     }
   }
 
@@ -164,7 +164,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   {
     if (!detail::check_process_instance_assignment(eqn, x))
     {
-      throw non_linear_process(core::pp(x) + " is not a valid process instance assignment");
+      throw non_linear_process(process::pp(x) + " is not a valid process instance assignment");
     }
   }
 
@@ -177,7 +177,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   {
     if (!is_alternative(x.operand()))
     {
-      throw non_linear_process(core::pp(x.operand()) + " is not an alternative expression");
+      throw non_linear_process(process::pp(x.operand()) + " is not an alternative expression");
     }
   }
 
@@ -188,7 +188,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const block& x)
   {
-    throw non_linear_process("block expression " + core::pp(x) + " encountered");
+    throw non_linear_process("block expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Visit hide node
@@ -198,7 +198,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const hide& x)
   {
-    throw non_linear_process("hide expression " + core::pp(x) + " encountered");
+    throw non_linear_process("hide expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Visit rename node
@@ -208,7 +208,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const rename& x)
   {
-    throw non_linear_process("rename expression " + core::pp(x) + " encountered");
+    throw non_linear_process("rename expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Visit comm node
@@ -218,7 +218,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const comm& x)
   {
-    throw non_linear_process("comm expression " + core::pp(x) + " encountered");
+    throw non_linear_process("comm expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Visit allow node
@@ -228,7 +228,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const allow& x)
   {
-    throw non_linear_process("allow expression " + core::pp(x) + " encountered");
+    throw non_linear_process("allow expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Visit sync node
@@ -242,11 +242,11 @@ struct linear_process_expression_traverser: public process_expression_traverser<
     {
       if (!is_multiaction(x.left()))
       {
-        throw non_linear_process(core::pp(x.left()) + " is not a multi action");
+        throw non_linear_process(process::pp(x.left()) + " is not a multi action");
       }
       else
       {
-        throw non_linear_process(core::pp(x.right()) + " is not a multi action");
+        throw non_linear_process(process::pp(x.right()) + " is not a multi action");
       }
     }
   }
@@ -260,7 +260,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   {
     if (!is_multiaction(x.operand()) && !is_delta(x.operand()))
     {
-      throw non_linear_process(core::pp(x.operand()) + " is not a multi action and not a deadlock");
+      throw non_linear_process(process::pp(x.operand()) + " is not a multi action and not a deadlock");
     }
   }
 
@@ -273,14 +273,14 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   {
     if (!is_timed_multiaction(x.left()) || !is_process(x.right()))
     {
-      throw non_linear_process(core::pp(x.left()) + " is not a timed multi action and not a process");
+      throw non_linear_process(process::pp(x.left()) + " is not a timed multi action and not a process");
     }
     if (is_process_instance(x.right()))
     {
       process_instance q = x.right();
       if (q.identifier() != eqn.identifier())
       {
-        throw non_linear_process(core::pp(q) + " has an unexpected identifier");
+        throw non_linear_process(process::pp(q) + " has an unexpected identifier");
       }
     }
     else if (is_process_instance_assignment(x.right()))
@@ -288,12 +288,12 @@ struct linear_process_expression_traverser: public process_expression_traverser<
       process_instance_assignment q = x.right();
       if (q.identifier() != eqn.identifier())
       {
-        throw non_linear_process(core::pp(q) + " has an unexpected identifier");
+        throw non_linear_process(process::pp(q) + " has an unexpected identifier");
       }
     }
     else
     {
-      std::cerr << "seq right hand side: " << core::pp(x.right()) << std::endl;
+      std::cerr << "seq right hand side: " << process::pp(x.right()) << std::endl;
       throw std::runtime_error("unexpected error in visit_seq");
     }
   }
@@ -307,7 +307,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   {
     if (!is_action_prefix(x.then_case()) && !is_timed_deadlock(x.then_case()))
     {
-      throw non_linear_process(core::pp(x) + " is not an action prefix and not a timed deadlock");
+      throw non_linear_process(process::pp(x) + " is not an action prefix and not a timed deadlock");
     }
   }
 
@@ -319,7 +319,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const if_then_else& x)
   {
-    throw non_linear_process("if then else expression " + core::pp(x) + " encountered");
+    throw non_linear_process("if then else expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Visit bounded_init node
@@ -329,7 +329,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const bounded_init& x)
   {
-    throw non_linear_process("bounded init expression " + core::pp(x) + " encountered");
+    throw non_linear_process("bounded init expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Visit merge node
@@ -339,7 +339,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const merge& x)
   {
-    throw non_linear_process("merge expression " + core::pp(x) + " encountered");
+    throw non_linear_process("merge expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Visit left_merge node
@@ -349,7 +349,7 @@ struct linear_process_expression_traverser: public process_expression_traverser<
   /// \param right A process expression
   void enter(const left_merge& x)
   {
-    throw non_linear_process("left merge expression " + core::pp(x) + " encountered");
+    throw non_linear_process("left merge expression " + process::pp(x) + " encountered");
   }
 
   /// \brief Returns true if the process equation e is linear.

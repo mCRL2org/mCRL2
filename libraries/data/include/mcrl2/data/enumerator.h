@@ -136,7 +136,7 @@ class data_enumerator
 
       if (c.empty())
       {
-        throw mcrl2::runtime_error("Could not enumerate variable " + core::pp(v) + " of sort " + core::pp(v.sort()) + " as there are no constructors.");
+        throw mcrl2::runtime_error("Could not enumerate variable " + data::pp(v) + " of sort " + data::pp(v.sort()) + " as there are no constructors.");
       }
       for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
       {

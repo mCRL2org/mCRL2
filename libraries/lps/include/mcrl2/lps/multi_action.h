@@ -330,7 +330,7 @@ struct equal_data_parameters_builder
     }
     data::data_expression expr = d::lazy::join_and(v.begin(), v.end());
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-    std::cerr << "  <and-term> " << pp(expr) << std::endl;
+    std::cerr << "  <and-term> " << data::pp(expr) << std::endl;
 #endif
     result.insert(expr);
   }
@@ -393,8 +393,8 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
 {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
   std::cerr << "\n<equal multi actions>" << std::endl;
-  std::cerr << "a = " << pp(a.actions()) << std::endl;
-  std::cerr << "b = " << pp(b.actions()) << std::endl;
+  std::cerr << "a = " << lps::pp(a.actions()) << std::endl;
+  std::cerr << "b = " << lps::pp(b.actions()) << std::endl;
 #endif
   using namespace data::lazy;
 

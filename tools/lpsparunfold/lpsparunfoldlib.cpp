@@ -244,7 +244,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     if (is_basic_sort(i -> sort()))
     {
       data_expression lhs = make_application(determine_function, *i);
-      mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
+      mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > svars = find_variables(lhs);
       set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
       svars.insert(tmp_var.begin(), tmp_var.end());
@@ -271,7 +271,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
         dal.push_back(y);
       }
       data_expression lhs = make_application(determine_function , application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
-      mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
+      mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > svars = find_variables(lhs);
       set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
       svars.insert(tmp_var.begin(), tmp_var.end());
@@ -283,7 +283,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
       while (!pi.empty() && f < static_cast<size_t>(std::distance(dal.begin(), dal.end())))
       {
         data_expression lhs = make_application(pi.front(), application(*i, mcrl2::data::data_expression_list(dal.begin(), dal.end())));
-        mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, dal[f])) << std::endl;
+        mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, dal[f])) << std::endl;
         set< variable > vars = find_variables(lhs);
         set< variable > tmp_var = find_variables(dal[f]);
         vars.insert(tmp_var.begin(), tmp_var.end());
@@ -322,7 +322,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
     {
 
       data_expression lhs = make_application(determine_function , *i);
-      mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
+      mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > vars = find_variables(lhs);
       set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
       vars.insert(tmp_var.begin(), tmp_var.end());
@@ -354,7 +354,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
         cerr << "ACCESSING UNIMPLEMENTED CONTAINER SORT" << endl;
       }
 
-      mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
+      mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, elements_of_new_sorts[e])) << std::endl;
       set< variable > vars = find_variables(lhs);
       set< variable > tmp_var = find_variables(elements_of_new_sorts[e]);
       vars.insert(tmp_var.begin(), tmp_var.end());
@@ -423,7 +423,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
       mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name, process_parameter_names);
       process_parameters_injection.push_back(mcrl2::data::variable(idstr , fresh_basic_sort));
 
-      mCRL2log(verbose) << "- Created process parameter " <<  pp(process_parameters_injection.back()) << " of type " <<  pp(fresh_basic_sort) << "" << std::endl;
+      mCRL2log(verbose) << "- Created process parameter " <<  data::pp(process_parameters_injection.back()) << " of type " <<  data::pp(fresh_basic_sort) << "" << std::endl;
 
       for (mcrl2::data::function_symbol_vector::iterator j = affected_constructors.begin()
            ; j != affected_constructors.end()
@@ -439,7 +439,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
           {
             mcrl2::core::identifier_string idstr = generate_fresh_process_parameter_name(unfold_parameter_name, process_parameter_names);
             process_parameters_injection.push_back(mcrl2::data::variable(idstr ,  *k));
-            mCRL2log(verbose) << "- Injecting process parameter: " <<  pp(idstr) << "::" <<  pp(*k) << std::endl;
+            mCRL2log(verbose) << "- Injecting process parameter: " <<  data::pp(idstr) << "::" <<  data::pp(*k) << std::endl;
           }
           processed = true;
         }
@@ -461,7 +461,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
         }
         if (!processed)
         {
-          cerr << pp(*j) << " is not processed" << endl;
+          cerr << data::pp(*j) << " is not processed" << endl;
           cerr << *j << endl;
           abort();
         }
@@ -555,7 +555,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
     mcrl2::lps::replace_variables( new_lps, s );
   }
 
-  mCRL2log(debug) << "\nNew LPS:\n" <<  pp(lps::linear_process_to_aterm(new_lps)) << std::endl;
+  mCRL2log(debug) << "\nNew LPS:\n" <<  core::pp(lps::linear_process_to_aterm(new_lps)) << std::endl;
 
   assert(is_well_typed(new_lps));
 
@@ -624,7 +624,7 @@ mcrl2::lps::process_initializer lpsparunfold::update_linear_process_initializati
   }
 
   mcrl2::lps::process_initializer new_init = mcrl2::lps::process_initializer(mcrl2::data::assignment_list(new_ass.begin(), new_ass.end()));
-  mCRL2log(debug) << pp(new_init) << std::endl;
+  mCRL2log(debug) << lps::pp(new_init) << std::endl;
 
   return new_init;
 }
@@ -691,7 +691,7 @@ atermpp::map<mcrl2::data::data_expression, mcrl2::data::data_expression> lpsparu
 
     }
 
-    mCRL2log(verbose) << "Parameter substitution:\t" << pp(i->first) << "\t->\t" <<  pp(mcrl2::data::application(case_function, dev)) << std::endl;
+    mCRL2log(verbose) << "Parameter substitution:\t" << data::pp(i->first) << "\t->\t" <<  data::pp(mcrl2::data::application(case_function, dev)) << std::endl;
     result.insert(std::pair<mcrl2::data::data_expression, mcrl2::data::data_expression>(i -> first,  mcrl2::data::application(case_function, dev)));
   }
   return result ;
@@ -825,7 +825,7 @@ mcrl2::data::data_equation lpsparunfold::create_distribution_law_over_case(
   /* Generate new case functions for laws */
   application rhs(new_case_function , rw_data_expressions);
 
-  mCRL2log(verbose) << "- Added distribution law for \"" << pp(function_for_distribution) << "\" over \"" << pp(case_function) << "\": " << pp(data_equation(lhs,  rhs)) << std::endl;
+  mCRL2log(verbose) << "- Added distribution law for \"" << data::pp(function_for_distribution) << "\" over \"" << data::pp(case_function) << "\": " << data::pp(data_equation(lhs,  rhs)) << std::endl;
 
   return data_equation(variables_used, lhs, rhs);
 }
@@ -856,7 +856,7 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
   {
     sub_args[0] = data_expression(elements_of_new_sorts[i-1]);
     data_expression lhs = application(case_function , sub_args);
-    mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, vars[e])) << std::endl;
+    mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, vars[e])) << std::endl;
     set< variable > svars = find_variables(lhs);
     set< variable > tmp_var = find_variables(vars[e]);
     svars.insert(tmp_var.begin(), tmp_var.end());
@@ -871,7 +871,7 @@ mcrl2::data::data_equation_vector lpsparunfold::generate_case_functions(function
     eq_args.insert(eq_args.begin(), vars.front());
 
     data_expression lhs = application(case_function , eq_args);
-    mCRL2log(verbose) << "- Added equation " <<  pp(data_equation(lhs, vars.back())) << std::endl;
+    mCRL2log(verbose) << "- Added equation " <<  data::pp(data_equation(lhs, vars.back())) << std::endl;
     set< variable > svars = find_variables(lhs);
     svars.insert(vars.back());
     del.push_back(data_equation(variable_list(svars.begin(), svars.end()), lhs, vars.back()));

@@ -66,7 +66,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         std::clog << "parelm removed " << to_be_removed.size() << " process parameters: " <<std::endl;
         for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
         {
-          std::clog << pp(*i) << ":" << pp(i->sort()) << std::endl;
+          std::clog << data::pp(*i) << ":" << pp(i->sort()) << std::endl;
         }
       }
     }
@@ -112,7 +112,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #ifdef MCRL2_LPS_PARELM_DEBUG
             for (std::set<data::variable>::iterator k = new_variables.begin(); k != new_variables.end(); ++k)
             {
-              std::clog << "found dependency " << pp(x) << " -> " << pp(*k) << std::endl;
+              std::clog << "found dependency " << data::pp(x) << " -> " << data::pp(*k) << std::endl;
             }
 #endif
           }
@@ -141,7 +141,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       for (std::set<data::variable>::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {
 #ifdef MCRL2_LPS_PARELM_DEBUG
-        std::clog << "vertex " << index << " = " << pp(*i) << std::endl;
+        std::clog << "vertex " << index << " = " << data::pp(*i) << std::endl;
 #endif
         m[*i] = index++;
       }

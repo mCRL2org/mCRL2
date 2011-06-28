@@ -104,9 +104,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       if (check_log_level(level))
       {
         std::clog << msg
-                  << pp(d_j) << "\n"
-                  << "      value before: " << pp(Rd_j) << "\n"
-                  << "      value after:  " << pp(Rg_ij) << "\n"
+                  << data::pp(d_j) << "\n"
+                  << "      value before: " << data::pp(Rd_j) << "\n"
+                  << "      value after:  " << data::pp(Rg_ij) << "\n"
                   << "      replacements: " << data::print_substitution(sigma) << std::endl;
       }
     }
@@ -122,10 +122,10 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       if (check_log_level(level))
       {
         std::clog << msg
-                  << pp(cond)
+                  << data::pp(cond)
                   << data::print_substitution(sigma)
                   << " -> "
-                  << pp(c_i) << std::endl;
+                  << data::pp(c_i) << std::endl;
       }
     }
 

@@ -36,8 +36,8 @@ void test_case_1()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1,r).run();
-  std::clog << pp(s0) << std::endl;
-  std::clog << pp(s1) << std::endl;
+  std::clog << lps::pp(s0) << std::endl;
+  std::clog << lps::pp(s1) << std::endl;
   deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {

@@ -97,11 +97,11 @@ void test_pfnf(const std::string& pbes_spec)
   std::cerr << "--- test_pfnf ---" << std::endl;
   pbes<> p = txt2pbes(pbes_spec);
   std::cerr << "- before:" << std::endl;
-  std::cerr << pp(p) << std::endl;
+  std::cerr << pbes_system::pp(p) << std::endl;
   pfnf_rewriter R;
   pbes_rewrite(p, R);
   std::cerr << "- after:" << std::endl;
-  std::cerr << pp(p) << std::endl;
+  std::cerr << pbes_system::pp(p) << std::endl;
   std::cerr << "-----------------" << std::endl;
   core::garbage_collect();
 }
@@ -138,7 +138,7 @@ void test_pfnf_rewriter2(const std::string& text)
   pbes<> p = txt2pbes(text);
   std::cout << "\ntest_pfnf_rewriter2\n" << std::endl;
   std::cout << "--- before ---\n";
-  std::cout << pp(p) << std::endl;
+  std::cout << pbes_system::pp(p) << std::endl;
 
 #ifdef MCRL2_USE_PBESPGSOLVE
   bool result1 = pbespgsolve(p);
@@ -149,7 +149,7 @@ void test_pfnf_rewriter2(const std::string& text)
   pbes_rewrite(p, R);
 
   std::cout << "--- after ---\n";
-  std::cout << pp(p) << std::endl;
+  std::cout << pbes_system::pp(p) << std::endl;
 
   BOOST_CHECK(p.is_well_typed());
 #ifdef MCRL2_USE_PBESPGSOLVE

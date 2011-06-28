@@ -38,7 +38,7 @@ void instantiate_global_variables(specification& spec)
     data::data_expression d = default_expression_generator(i->sort());
     if (d == data::data_expression())
     {
-      throw mcrl2::runtime_error("Error in lps::instantiate_global_variables: could not instantiate " + pp(*i));
+      throw mcrl2::runtime_error("Error in lps::instantiate_global_variables: could not instantiate " + data::pp(*i));
     }
     sigma[*i] = d;
     to_be_removed.insert(*i);

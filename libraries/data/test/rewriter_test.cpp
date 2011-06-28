@@ -131,8 +131,8 @@ void test3()
 
   data_expression_with_variables y(x, variable_list(v.begin(), v.end()));
   data_expression_with_variables z = r(y);
-  std::cout << "y = " << core::pp(y) << " " << data::pp(y.variables()) << std::endl;
-  std::cout << "z = " << core::pp(z) << " " << data::pp(z.variables()) << std::endl;
+  std::cout << "y = " << data::pp(y) << " " << data::pp(y.variables()) << std::endl;
+  std::cout << "z = " << data::pp(z) << " " << data::pp(z.variables()) << std::endl;
   BOOST_CHECK(z.variables().empty());
 
   std::string var_decl = "m, n: Pos;\n";
@@ -164,11 +164,11 @@ void test_expressions(Rewriter R, std::string const& expr1, std::string const& e
   {
     BOOST_CHECK(R(d1, sigma) == R(d2));
     std::cout << "--- failed test --- " << expr1 << " -> " << expr2 << std::endl;
-    std::cout << "d1           " << core::pp(d1) << std::endl;
-    std::cout << "d2           " << core::pp(d2) << std::endl;
+    std::cout << "d1           " << data::pp(d1) << std::endl;
+    std::cout << "d2           " << data::pp(d2) << std::endl;
     std::cout << "sigma\n      " << data::print_substitution(sigma) << std::endl;
-    std::cout << "R(d1, sigma) " << core::pp(R(d1, sigma)) << std::endl;
-    std::cout << "R(d2)        " << core::pp(R(d2)) << std::endl;
+    std::cout << "R(d1, sigma) " << data::pp(R(d1, sigma)) << std::endl;
+    std::cout << "R(d2)        " << data::pp(R(d2)) << std::endl;
   }
 }
 

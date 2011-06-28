@@ -92,7 +92,7 @@ class data_property_map
 
     std::string print(const data::variable& v) const
     {
-      return pp(v) + ":" + pp(v.sort());
+      return data::pp(v) + ":" + data::pp(v.sort());
     }
 
     template < typename Container >

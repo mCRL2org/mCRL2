@@ -492,7 +492,7 @@ void test_abp_no_deadlock()
   algorithm.run(p);
   pbes<> q = algorithm.get_result();
   std::cout << "--- ABP ---" << std::endl;
-  std::cout << pp(q) << std::endl;
+  std::cout << pbes_system::pp(q) << std::endl;
   BOOST_CHECK(is_bes(q));
 }
 

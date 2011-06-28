@@ -21,6 +21,14 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
+/// \brief Pretty prints a term.
+/// \param[in] t A term
+template <typename T>
+std::string pp(const T& t)
+{
+  return core::pp(t);
+}
+
 namespace detail {
 
 template <typename Derived>

@@ -16,6 +16,7 @@
 #include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/traverser.h"
 #include "mcrl2/process/detail/precedence.h"
+#include "mcrl2/process/pp.h"
 
 namespace mcrl2 {
 

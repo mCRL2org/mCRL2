@@ -35,7 +35,7 @@
 
 // linear process libraries.
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/core/print.h"
+#include "mcrl2/process/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
@@ -370,7 +370,7 @@ class specification_basic_type:public boost::noncopyable
 
         if (isnew == 0)
         {
-          mCRL2log(warning) << "sort " << pp(sort) << "is added twice" << std::endl;
+          mCRL2log(warning) << "sort " << data::pp(sort) << "is added twice" << std::endl;
           return;
         }
 
@@ -383,7 +383,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return;
       }
-      throw mcrl2::runtime_error("expected a sortterm (2): " + pp(sortterm));
+      throw mcrl2::runtime_error("expected a sortterm (2): " + data::pp(sortterm));
     }
 
     void insert_equation(const data_equation eqn)
@@ -543,7 +543,7 @@ class specification_basic_type:public boost::noncopyable
 
       if ((!isnew)&&(mustbenew))
       {
-        throw mcrl2::runtime_error("variable " + pp(var) + " already exists");
+        throw mcrl2::runtime_error("variable " + data::pp(var) + " already exists");
       }
 
       objectdata[n].objectname=var.name();
@@ -673,7 +673,7 @@ class specification_basic_type:public boost::noncopyable
         return RewriteMultAct(t);
       }
 
-      throw mcrl2::runtime_error("Expected a term in pCRL format, using only basic process operators: " + pp(t));
+      throw mcrl2::runtime_error("Expected a term in pCRL format, using only basic process operators: " + process::pp(t));
       return process_expression();
     }
 
@@ -686,7 +686,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (isnew==0)
       {
-        throw mcrl2::runtime_error("Action " + pp(actionId) + " is added twice\n");
+        throw mcrl2::runtime_error("Action " + core::pp(actionId) + " is added twice\n");
       }
 
       const identifier_string str=actionId.name();
@@ -724,7 +724,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (isnew==0)
       {
-        throw mcrl2::runtime_error("Process " + pp(procId) + " is added twice\n");
+        throw mcrl2::runtime_error("Process " + process::pp(procId) + " is added twice\n");
       }
 
       objectdata[n].objectname=procId.name();
@@ -846,13 +846,13 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("Choice operator occurs in a multi-action in " + pp(body) + ".");
+          throw mcrl2::runtime_error("Choice operator occurs in a multi-action in " + process::pp(body) + ".");
         }
         const processstatustype s1=determine_process_statusterm(choice(body).left(),pCRL);
         const processstatustype s2=determine_process_statusterm(choice(body).right(),pCRL);
         if ((s1==mCRL)||(s2==mCRL))
         {
-          throw mcrl2::runtime_error("mCRL operators occur within the scope of a choice operator in " + pp(body) +".");
+          throw mcrl2::runtime_error("mCRL operators occur within the scope of a choice operator in " + process::pp(body) +".");
         }
         return pCRL;
       }
@@ -861,13 +861,13 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("Sequential operator occurs in a multi-action in " + pp(body) +".");
+          throw mcrl2::runtime_error("Sequential operator occurs in a multi-action in " + process::pp(body) +".");
         }
         const processstatustype s1=determine_process_statusterm(seq(body).left(),pCRL);
         const processstatustype s2=determine_process_statusterm(seq(body).right(),pCRL);
         if ((s1==mCRL)||(s2==mCRL))
         {
-          throw mcrl2::runtime_error("mCRL operators occur within the scope of a sequential operator in " + pp(body) +".");
+          throw mcrl2::runtime_error("mCRL operators occur within the scope of a sequential operator in " + process::pp(body) +".");
         }
         return pCRL;
       }
@@ -876,7 +876,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Parallel operator occurs in the scope of pCRL operators in " + pp(body) +".");
+          throw mcrl2::runtime_error("Parallel operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
         }
         determine_process_statusterm(process::merge(body).left(),mCRL);
         determine_process_statusterm(process::merge(body).right(),mCRL);
@@ -892,12 +892,12 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("If-then occurs in a multi-action in " + pp(body) +".");
+          throw mcrl2::runtime_error("If-then occurs in a multi-action in " + process::pp(body) +".");
         }
         const processstatustype s1=determine_process_statusterm(if_then(body).then_case(),pCRL);
         if (s1==mCRL)
         {
-          throw mcrl2::runtime_error("mCRL operators occur in the scope of the if-then operator in " + pp(body) +".");
+          throw mcrl2::runtime_error("mCRL operators occur in the scope of the if-then operator in " + process::pp(body) +".");
         }
         return pCRL;
       }
@@ -906,13 +906,13 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("If-then-else occurs in a multi-action in " + pp(body) +".");
+          throw mcrl2::runtime_error("If-then-else occurs in a multi-action in " + process::pp(body) +".");
         }
         const processstatustype s1=determine_process_statusterm(if_then_else(body).then_case(),pCRL);
         const processstatustype s2=determine_process_statusterm(if_then_else(body).else_case(),pCRL);
         if ((s1==mCRL)||(s2==mCRL))
         {
-          throw mcrl2::runtime_error("mCRL operators occur in the scope of the if-then-else operator in " + pp(body) +".");
+          throw mcrl2::runtime_error("mCRL operators occur in the scope of the if-then-else operator in " + process::pp(body) +".");
         }
         return pCRL;
       }
@@ -924,12 +924,12 @@ class specification_basic_type:public boost::noncopyable
         insertvariables(sum(body).bound_variables(),false);
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("Sum operator occurs within a multi-action in " + pp(body) +".");
+          throw mcrl2::runtime_error("Sum operator occurs within a multi-action in " + process::pp(body) +".");
         }
         const processstatustype s1=determine_process_statusterm(sum(body).operand(),pCRL);
         if (s1==mCRL)
         {
-          throw mcrl2::runtime_error("mCRL operators occur in the scope of the sum operator in " + pp(body) +".");
+          throw mcrl2::runtime_error("mCRL operators occur in the scope of the sum operator in " + process::pp(body) +".");
         }
         return pCRL;
       }
@@ -938,7 +938,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Communication operator occurs in the scope of pCRL operators in " + pp(body) +".");
+          throw mcrl2::runtime_error("Communication operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
         }
         determine_process_statusterm(comm(body).operand(),mCRL);
         return mCRL;
@@ -954,12 +954,12 @@ class specification_basic_type:public boost::noncopyable
         timeIsBeingUsed = true;
         if (status==multiAction)
         {
-          throw mcrl2::runtime_error("Time operator occurs in a multi-action in " + pp(body) +".");
+          throw mcrl2::runtime_error("Time operator occurs in a multi-action in " + process::pp(body) +".");
         }
         const processstatustype s1=determine_process_statusterm(at(body).operand(),pCRL);
         if (s1==mCRL)
         {
-          throw mcrl2::runtime_error("mCRL operator occurs in the scope of a time operator in " + pp(body) +".");
+          throw mcrl2::runtime_error("mCRL operator occurs in the scope of a time operator in " + process::pp(body) +".");
         }
         return pCRL;
       }
@@ -970,7 +970,7 @@ class specification_basic_type:public boost::noncopyable
         const processstatustype s2=determine_process_statusterm(process::sync(body).right(),pCRL);
         if ((s1!=multiAction)||(s2!=multiAction))
         {
-          throw mcrl2::runtime_error("Other objects than multi-actions occur in the scope of a synch operator in " + pp(body) +".");
+          throw mcrl2::runtime_error("Other objects than multi-actions occur in the scope of a synch operator in " + process::pp(body) +".");
         }
         return multiAction;
       }
@@ -1006,7 +1006,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Hide operator occurs in the scope of pCRL operators in " + pp(body) +".");
+          throw mcrl2::runtime_error("Hide operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
         }
         determine_process_statusterm(hide(body).operand(),mCRL);
         return mCRL;
@@ -1016,7 +1016,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Rename operator occurs in the scope of pCRL operators in " + pp(body) +".");
+          throw mcrl2::runtime_error("Rename operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
         }
         determine_process_statusterm(process::rename(body).operand(),mCRL);
         return mCRL;
@@ -1026,7 +1026,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Allow operator occurs in the scope of pCRL operators in " + pp(body) +".");
+          throw mcrl2::runtime_error("Allow operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
         }
         determine_process_statusterm(allow(body).operand(),mCRL);
         return mCRL;
@@ -1036,13 +1036,13 @@ class specification_basic_type:public boost::noncopyable
       {
         if (status!=mCRL)
         {
-          throw mcrl2::runtime_error("Block operator occurs in the scope of pCRL operators in " + pp(body) +".");
+          throw mcrl2::runtime_error("Block operator occurs in the scope of pCRL operators in " + process::pp(body) +".");
         }
         determine_process_statusterm(block(body).operand(),mCRL);
         return mCRL;
       }
 
-      throw mcrl2::runtime_error("Process has unexpected format (2) " + pp(body) +".");
+      throw mcrl2::runtime_error("Process has unexpected format (2) " + process::pp(body) +".");
       return error;
     }
 
@@ -1190,7 +1190,7 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      throw mcrl2::runtime_error("process has unexpected format (1) " + pp(body) +".");
+      throw mcrl2::runtime_error("process has unexpected format (1) " + process::pp(body) +".");
     }
 
     void collectPcrlProcesses(
@@ -1400,7 +1400,7 @@ class specification_basic_type:public boost::noncopyable
       {
         return false;
       }
-      throw mcrl2::runtime_error("unexpected process format in occursinCRLterm " + pp(p));
+      throw mcrl2::runtime_error("unexpected process format in occursinCRLterm " + process::pp(p));
       return false;
     }
 
@@ -1764,7 +1764,7 @@ class specification_basic_type:public boost::noncopyable
 
       }
 
-      throw mcrl2::runtime_error("expected a pCRL process " + pp(p));
+      throw mcrl2::runtime_error("expected a pCRL process " + process::pp(p));
       return process_expression();
     }
 
@@ -1921,7 +1921,7 @@ class specification_basic_type:public boost::noncopyable
         return at(body,time);
       }
 
-      throw mcrl2::runtime_error("expected pCRL process in wraptime " + pp(body));
+      throw mcrl2::runtime_error("expected pCRL process in wraptime " + process::pp(body));
       return process_expression();
     }
 
@@ -2343,7 +2343,7 @@ class specification_basic_type:public boost::noncopyable
         return process_instance(delta_process,data_expression_list());
       }
 
-      throw mcrl2::runtime_error("unexpected process format in bodytovarheadGNF " + pp(body) +".");
+      throw mcrl2::runtime_error("unexpected process format in bodytovarheadGNF " + process::pp(body) +".");
       return process_expression();
     }
 
@@ -2438,7 +2438,7 @@ class specification_basic_type:public boost::noncopyable
         return seq(body1,body2);
       }
 
-      throw mcrl2::runtime_error("Internal error. Unexpected process format in putbehind " + pp(body1) +".");
+      throw mcrl2::runtime_error("Internal error. Unexpected process format in putbehind " + process::pp(body1) +".");
       return process_expression();
     }
 
@@ -2491,7 +2491,7 @@ class specification_basic_type:public boost::noncopyable
         return if_then(condition,body1);
       }
 
-      throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute condition " + pp(body1) +".");
+      throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute condition " + process::pp(body1) +".");
       return data_expression();
     }
 
@@ -2531,7 +2531,7 @@ class specification_basic_type:public boost::noncopyable
         return body1;
       }
 
-      throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute_sum " + pp(body1) +".");
+      throw mcrl2::runtime_error("Internal error. Unexpected process format in distribute_sum " + process::pp(body1) +".");
       return process_expression();
     }
 
@@ -2621,7 +2621,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      throw mcrl2::runtime_error("Internal error. Expected sequence of process names (1) " + pp(sequence) + ".");
+      throw mcrl2::runtime_error("Internal error. Expected sequence of process names (1) " + process::pp(sequence) + ".");
     }
 
     variable_list parscollect(const process_expression oldbody, process_expression& newbody)
@@ -2663,7 +2663,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      throw mcrl2::runtime_error("Internal error. Expected a sequence of process names (2) " + pp(oldbody) +".");
+      throw mcrl2::runtime_error("Internal error. Expected a sequence of process names (2) " + process::pp(oldbody) +".");
       return variable_list();
     }
 
@@ -2685,7 +2685,7 @@ class specification_basic_type:public boost::noncopyable
         return firstproc.actual_parameters();
       }
 
-      throw mcrl2::runtime_error("Internal error. Expected a sequence of process names (3) " + pp(t) +".");
+      throw mcrl2::runtime_error("Internal error. Expected a sequence of process names (3) " + process::pp(t) +".");
       return data_expression_list();
     }
 
@@ -2707,7 +2707,7 @@ class specification_basic_type:public boost::noncopyable
         return firstproc;
       }
 
-      throw mcrl2::runtime_error("Internal error. Expected a sequence of process names (4) " + pp(t) +".");
+      throw mcrl2::runtime_error("Internal error. Expected a sequence of process names (4) " + process::pp(t) +".");
       return process_expression();
     }
 
@@ -2739,7 +2739,7 @@ class specification_basic_type:public boost::noncopyable
         {
           return seq(sequence).left();
         }
-        throw mcrl2::runtime_error("Internal error. Expected a sequence of process names " + pp(sequence) +".");
+        throw mcrl2::runtime_error("Internal error. Expected a sequence of process names " + process::pp(sequence) +".");
       }
       /* There is more than one process name in the sequence,
          so, we must replace them by a single name */
@@ -2826,7 +2826,7 @@ class specification_basic_type:public boost::noncopyable
         return t;
       }
 
-      throw mcrl2::runtime_error("to regular form expects GNF " + pp(t) +".");
+      throw mcrl2::runtime_error("to regular form expects GNF " + process::pp(t) +".");
       return process_expression();
     }
 
@@ -2892,7 +2892,7 @@ class specification_basic_type:public boost::noncopyable
         return at(body,time);
       }
 
-      throw mcrl2::runtime_error("expected pCRL process in distributeTime " + pp(body) +".");
+      throw mcrl2::runtime_error("expected pCRL process in distributeTime " + process::pp(body) +".");
       return process_expression();
     }
 
@@ -3069,7 +3069,7 @@ class specification_basic_type:public boost::noncopyable
         return process_expression();
       }
 
-      throw mcrl2::runtime_error("unexpected process format in procstorealGNF " + pp(body) +".");
+      throw mcrl2::runtime_error("unexpected process format in procstorealGNF " + process::pp(body) +".");
       return process_expression();
     }
 
@@ -3118,7 +3118,7 @@ class specification_basic_type:public boost::noncopyable
 
       if ((objectdata[n].processstatus==GNFbusy) && (v==first))
       {
-        throw mcrl2::runtime_error("unguarded recursion in process " + pp(procIdDecl) +".");
+        throw mcrl2::runtime_error("unguarded recursion in process " + process::pp(procIdDecl) +".");
       }
 
       if ((objectdata[n].processstatus==GNFbusy)||
@@ -3208,7 +3208,7 @@ class specification_basic_type:public boost::noncopyable
         return;
       }
 
-      throw mcrl2::runtime_error("unexpected process format " + pp(t) + " in makepCRLprocs");
+      throw mcrl2::runtime_error("unexpected process format " + process::pp(t) + " in makepCRLprocs");
     }
 
     /**************** Collectparameterlist ******************************/
@@ -3859,7 +3859,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (regular)
         {
-          throw mcrl2::runtime_error("process is not regular, as it has stacking vars " + pp(t) +".");
+          throw mcrl2::runtime_error("process is not regular, as it has stacking vars " + process::pp(t) +".");
         }
         const process_instance process=seq(t).left();
         const process_expression t2=seq(t).right();
@@ -3919,7 +3919,7 @@ class specification_basic_type:public boost::noncopyable
         return push_front(data_expression_list(),t3.front());
       }
 
-      throw mcrl2::runtime_error("expected seq or name " + pp(t) +".");
+      throw mcrl2::runtime_error("expected seq or name " + process::pp(t) +".");
       return data_expression_list();
     }
 
@@ -4198,7 +4198,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        throw mcrl2::runtime_error("expected multiaction " + pp(summandterm) +".");
+        throw mcrl2::runtime_error("expected multiaction " + process::pp(summandterm) +".");
       }
 
       if (regular)
@@ -4439,7 +4439,7 @@ class specification_basic_type:public boost::noncopyable
         }
       };
 
-      throw mcrl2::runtime_error("searching for nonexisting case function on sort " + pp(sort) +".");
+      throw mcrl2::runtime_error("searching for nonexisting case function on sort " + data::pp(sort) +".");
       return function_symbol();
     }
 
@@ -5918,8 +5918,8 @@ class specification_basic_type:public boost::noncopyable
       // Names of variables cannot be the same, even if they have different types.
       if (var.name()==var1.name())
       {
-        throw mcrl2::runtime_error("variable conflict " + pp(var) + ":" + pp(var.sort()) + " versus " +
-                                   pp(var1) + ":" + pp(var1.sort()) + ".");
+        throw mcrl2::runtime_error("variable conflict " + data::pp(var) + ":" + data::pp(var.sort()) + " versus " +
+                                   data::pp(var1) + ":" + data::pp(var1.sort()) + ".");
       }
 
       result=occursinvarandremove(var,vl);
@@ -6500,7 +6500,7 @@ class specification_basic_type:public boost::noncopyable
         const identifier_string target=i->name();
         if (gsIsNil(i->name()))  // Right hand side of communication is empty. We receive a bad datatype.
         {
-          throw mcrl2::runtime_error("Right hand side of communication " + pp(source) + " in a comm command cannot be empty or tau");
+          throw mcrl2::runtime_error("Right hand side of communication " + process::pp(source) + " in a comm command cannot be empty or tau");
         }
         resultingCommunications=push_front(resultingCommunications,
                                            communication_expression(sortActionLabels(source),target));
@@ -7285,7 +7285,7 @@ class specification_basic_type:public boost::noncopyable
         return communicationcomposition(comm(t).comm_set(),t1);
       }
 
-      throw mcrl2::runtime_error("Internal error. Expect mCRL term " + pp(t) +".");
+      throw mcrl2::runtime_error("Internal error. Expect mCRL term " + process::pp(t) +".");
       return deprecated::summand_list();
     }
 
@@ -7449,7 +7449,7 @@ class specification_basic_type:public boost::noncopyable
         return process_expression();
       }
 
-      throw mcrl2::runtime_error("unexpected process format in alphaconversionterm " + pp(t) +".");
+      throw mcrl2::runtime_error("unexpected process format in alphaconversionterm " + process::pp(t) +".");
       return process_expression();
     }
 
@@ -7482,7 +7482,7 @@ class specification_basic_type:public boost::noncopyable
       else
       {
         throw mcrl2::runtime_error("unknown type " + str(boost::format("%d") % objectdata[n].processstatus) +
-                                   " in alphaconversion of " + pp(procId) +".");
+                                   " in alphaconversion of " + process::pp(procId) +".");
       }
       return;
     }
@@ -7600,7 +7600,7 @@ class specification_basic_type:public boost::noncopyable
         return r1||r2;
       }
 
-      throw mcrl2::runtime_error("unexpected process format in containstime " + pp(t) +".");
+      throw mcrl2::runtime_error("unexpected process format in containstime " + process::pp(t) +".");
       return false;
     }
 
@@ -7783,7 +7783,7 @@ class specification_basic_type:public boost::noncopyable
         return r1&&r2;
       }
 
-      throw mcrl2::runtime_error("unexpected process format in canterminate " + pp(t) +".");
+      throw mcrl2::runtime_error("unexpected process format in canterminate " + process::pp(t) +".");
       return false;
     }
 
@@ -7975,7 +7975,7 @@ class specification_basic_type:public boost::noncopyable
       }
       else
       {
-        throw mcrl2::runtime_error("unexpected process format in split process " + pp(t) +".");
+        throw mcrl2::runtime_error("unexpected process format in split process " + process::pp(t) +".");
       }
 
       return result;
@@ -8000,7 +8000,7 @@ class specification_basic_type:public boost::noncopyable
         if (multiaction==push_front(action_list(),terminationAction))
         {
           acts=push_front(acts,terminationAction.label());
-          mCRL2log(warning) << "The action " << pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
+          mCRL2log(warning) << "The action " << core::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
           return;
         }
       }

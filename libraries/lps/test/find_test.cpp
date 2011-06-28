@@ -92,7 +92,7 @@ void test_free_variables()
                     "init X(true);\n"
                   );
   free_variables = find_free_variables(specification.process());
-  std::cerr << "--- lps ---\n" << pp(specification) << std::endl;
+  std::cerr << "--- lps ---\n" << lps::pp(specification) << std::endl;
   std::cerr << core::detail::print_pp_set(free_variables, "free variables") << std::endl;
 
   BOOST_CHECK(free_variables.find(data::variable("x", data::sort_nat::nat())) == free_variables.end());

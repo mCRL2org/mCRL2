@@ -100,6 +100,12 @@ struct printer: public core::traverser<Derived>
 {
   typedef core::traverser<Derived> super;
 
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+
   // using super::enter;
   // using super::leave;
   using super::operator();
@@ -125,6 +131,36 @@ struct printer: public core::traverser<Derived>
   void print(const std::string& s)
   {
     out() << s;
+  }
+
+  template <typename Container>
+  void print_list(const Container& container,
+                  const std::string& opener = "(",
+                  const std::string& closer = ")",
+                  const std::string& separator = ", ",
+                  bool print_empty_container = false
+                 )
+  {
+    if (container.empty() && !print_empty_container)
+    {
+      return;
+    }
+    derived().print(opener);
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+    }
+    derived().print(closer);
+  }
+
+  template <typename T>
+  void operator()(const atermpp::term_list<T>& t)
+  {
+    print_list(t, "", "", ", ");
   }
 
   void operator()(const core::identifier_string& x)

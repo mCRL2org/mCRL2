@@ -289,7 +289,7 @@ void test_instantiate_global_variables()
   std::cout << "<before>" << mcrl2::core::pp(p) << std::endl;
   std::cout << "<lps>" << lps::pp(spec) << std::endl;
   pbes_system::detail::instantiate_global_variables(p);
-  std::cout << "<after>" << pp(p) << std::endl;
+  std::cout << "<after>" << pbes_system::pp(p) << std::endl;
   core::garbage_collect();
 }
 

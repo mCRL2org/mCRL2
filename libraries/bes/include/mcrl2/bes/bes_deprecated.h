@@ -32,6 +32,8 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/utilities/logger.h"
 
+#include "mcrl2/core/print.h"
+
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
 
@@ -45,7 +47,7 @@
 #define FIXPOINT_MASK 2
 #define RANK_SHIFT 2
 
-
+// TODO: 
 namespace bes
 {
 
@@ -2022,12 +2024,12 @@ class boolean_equation_system
       if (opt_precompile_pbes)
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   pp(Mucks_rewriter.convert_from((ATermAppl)p)) + "\n");
+                                   mcrl2::core::pp(Mucks_rewriter.convert_from((ATermAppl)p)) + "\n");
       }
       else
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   pp(p) + "\n");
+                                   mcrl2::core::pp(p) + "\n");
       }
       return false_();
     }
@@ -2456,12 +2458,12 @@ class boolean_equation_system
         if (opt_precompile_pbes)
         {
           data_expression t1(Mucks_rewriter.convert_from((ATerm)t));
-          f << c << pp(t1);
+          f << c << mcrl2::core::pp(t1);
         }
         else
         {
           data_expression t1(t);
-          f << c << pp(t1);
+          f << c << mcrl2::core::pp(t1);
         }
       }
     }
@@ -2502,11 +2504,11 @@ class boolean_equation_system
           if (opt_precompile_pbes)
           {
             const atermpp::aterm_appl term=*t;
-            f << pp(Mucks_rewriter.convert_from(term));
+            f << mcrl2::core::pp(Mucks_rewriter.convert_from(term));
           }
           else
           {
-            f << pp(*t);
+            f << mcrl2::core::pp(*t);
           }
         }
         f << ((t==tl.begin())?"":")"); // No closing bracket if there are tl.begin()==tl.end()

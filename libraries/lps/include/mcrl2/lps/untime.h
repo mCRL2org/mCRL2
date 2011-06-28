@@ -104,7 +104,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
       assert(j==time_variable_candidates.end());
       if (verbose())
       {
-        std::cerr << "Time invariant " << pp(time_invariant) << std::endl;
+        std::cerr << "Time invariant " << data::pp(time_invariant) << std::endl;
       }
       return time_invariant;
     }
@@ -170,7 +170,7 @@ class untime_algorithm: public lps::detail::lps_algorithm
         m_last_action_time = data::variable(m_identifier_generator("last_action_time"), data::sort_real::real_());
         if (verbose())
         {
-          std::cerr << "Introduced variable " << pp(m_last_action_time) << " to denote time of last action" << std::endl;
+          std::cerr << "Introduced variable " << data::pp(m_last_action_time) << " to denote time of last action" << std::endl;
         }
 
         // Should happen before updating the process

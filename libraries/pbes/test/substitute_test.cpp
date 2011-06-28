@@ -43,14 +43,14 @@ void test_substitution()
 
   pbes<> p = p1;
   pbes_system::replace_free_variables(p, sigma);
-  std::cout << pp(p) << std::endl;
+  std::cout << pbes_system::pp(p) << std::endl;
   BOOST_CHECK(p == p1);
   
   pbes_system::replace_variables(p, sigma);
-  std::cout << pp(p) << std::endl;
+  std::cout << pbes_system::pp(p) << std::endl;
     
   // compare textual representations, to avoid conflicts between types
-  BOOST_CHECK(pp(p) == pp(p2));
+  BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));
 }
 
 void test_propositional_variable_substitution()
@@ -76,11 +76,11 @@ void test_propositional_variable_substitution()
   pbes_expression phi = parse_pbes_expression("X(m + 1) && Y(m)", "datavar m: Nat; \npredvar X: Nat; Y: Nat");
   propositional_variable_substitution sigma(X, phi);
   pbes_system::replace_propositional_variables(p, sigma);
-  std::cout << pp(p) << std::endl;
-  std::cout << pp(p2) << std::endl;
+  std::cout << pbes_system::pp(p) << std::endl;
+  std::cout << pbes_system::pp(p2) << std::endl;
 
   // compare textual representations, to avoid conflicts between types
-  BOOST_CHECK(pp(p) == pp(p2));
+  BOOST_CHECK(pbes_system::pp(p) == pbes_system::pp(p2));
 
   core::garbage_collect();
 }

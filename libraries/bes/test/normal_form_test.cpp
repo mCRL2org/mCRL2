@@ -26,10 +26,10 @@ void test_standard_recursive_form(const std::string& bes_spec, bool recursive_fo
   boolean_equation_system<> b;
   std::stringstream from(bes_spec);
   from >> b;
-  std::cout << "before\n" << pp(b) << std::endl;
+  std::cout << "before\n" << bes::pp(b) << std::endl;
 
   make_standard_form(b, recursive_form);
-  std::cout << "after\n" << pp(b) << std::endl;
+  std::cout << "after\n" << bes::pp(b) << std::endl;
 }
 
 void test_standard_recursive_form()

@@ -230,7 +230,7 @@ class representative_generator
         }
       }
 
-      throw mcrl2::runtime_error("Cannot find a term of sort " + pp(sort));
+      throw mcrl2::runtime_error("Cannot find a term of sort " + data::pp(sort));
     }
 
   public:

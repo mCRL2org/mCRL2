@@ -9,8 +9,8 @@ void test_parelm(std::string spec_text)
   lps::specification spec = lps::mcrl22lps(spec_text);
   lps::linear_process p   = lps::spec.process();
   lps::linear_process q   = lps::parelm(p);
-  std::cout << "<before>\n" << pp(p) << std::endl;
-  std::cout << "<after>\n"  << pp(q) << std::endl;
+  std::cout << "<before>\n" << lps::pp(p) << std::endl;
+  std::cout << "<after>\n"  << lps::pp(q) << std::endl;
   std::cout << "------------------------------------------------------------------------" << std::endl;
 }
 

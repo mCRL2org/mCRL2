@@ -40,7 +40,7 @@ bool print_check(ExpressionType const& left, std::string const& right)
 {
   if (pp(left) != right)
   {
-    std::clog << "pp(" << pp(left) << ") != " << right << std::endl;
+    std::clog << "pp(" << data::pp(left) << ") != " << right << std::endl;
     std::clog << left << " != " << right << std::endl;
 
     return false;
@@ -51,7 +51,7 @@ bool print_check(ExpressionType const& left, std::string const& right)
   if (!result)
   {
     std::clog << "-----------------" << std::endl;
-    std::clog << "pp(left)    = " << pp(left) << std::endl;
+    std::clog << "pp(left)    = " << data::pp(left) << std::endl;
     std::clog << "print(left) = " << data::print(left) << std::endl;
     std::clog << "expected    = " << right << std::endl;
   }
@@ -64,7 +64,7 @@ bool print_check(ExpressionType const& left, std::string const& right)
 template <typename Container>
 bool print_container_check(Container const& c)
 {
-  std::string r = pp(c);
+  std::string r = data::pp(c);
   if (r == "")
   {
     std::clog << "error printing container" << std::endl;

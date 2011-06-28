@@ -73,7 +73,7 @@ void test_pbes(const std::string& pbes_spec,
   BOOST_CHECK(q.is_well_typed());
   if (!q.is_well_typed())
   {
-    std::cerr << pp(pbes_to_aterm(q)) << std::endl;
+    std::cerr << pbes_system::pp(q) << std::endl;
   }
 
   pbes_system::detail::pbes_property_map info1(q);

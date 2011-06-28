@@ -48,7 +48,7 @@ void run_linearisation_test_case(const std::string& spec, const bool expect_succ
 
   for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {
-    std::clog << std::endl << "Testing with rewrite strategy " << pp(*i) << std::endl;
+    std::clog << std::endl << "Testing with rewrite strategy " << data::pp(*i) << std::endl;
 
     t_lin_options options;
     options.rewrite_strategy=*i;

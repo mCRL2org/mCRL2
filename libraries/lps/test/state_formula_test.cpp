@@ -330,7 +330,7 @@ const std::string MODEL =
 
 void test_rename()
 {
-  using mcrl2::core::pp;
+  using mcrl2::state_formulas::pp;
   std::cerr << "test_rename";
   specification spec    = linearise(SPECIFICATION);
 

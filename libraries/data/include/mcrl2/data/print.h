@@ -63,8 +63,48 @@ namespace mcrl2
 namespace data
 {
 
+namespace detail
+{
+
+inline
+void check_pp(const std::string& s1, const std::string& s2, const std::string& s3)
+{
+  if (s1 != s2)
+  {
+    std::clog << "<pp>   " << s1 << std::endl;
+    std::clog << "<print>" << s2 << std::endl;
+    std::clog << "<aterm>" << s3 << std::endl;
+    throw std::runtime_error("not equal");
+  }
+}
+
+} // namespace detail
+
+#ifdef MCRL2_ENABLE_CHECK_PP
+#define MCRL2_CHECK_PP(s1, s2, s3) data::detail::check_pp(s1, s2, s3);
+#else
+#define MCRL2_CHECK_PP(s1, s2, s3)
+#endif
+
 // forward declaration
 template <typename T> std::string print(const T& t);
+
+/// \brief Pretty prints a term
+template <typename T>
+std::string pp(const T& t, typename atermpp::detail::disable_if_container<T>::type* = 0)
+{
+  MCRL2_CHECK_PP(core::pp(t), data::print(t), t.to_string());
+  return core::pp(t);
+}
+
+/// \brief Pretty prints a data and sort expressions
+/// \param[in] c A data or sort expression.
+template <typename Expression>
+inline std::string pp(atermpp::term_list<Expression> const& c)
+{
+  MCRL2_CHECK_PP(core::pp(c), data::print(c), c.to_string());
+  return core::pp(c);
+}
 
 /// \brief Pretty prints the contents of a container
 /// \param[in] c a container with data or sort expressions
@@ -75,30 +115,22 @@ inline std::string pp(Container const& c, typename atermpp::detail::enable_if_co
 
   if (c.begin() != c.end())
   {
-    result.append(mcrl2::core::pp(*c.begin()));
+    result.append(data::pp(*c.begin()));
 
     for (typename Container::const_iterator i = ++(c.begin()); i != c.end(); ++i)
     {
-      result.append(", ").append(mcrl2::core::pp(*i));
+      result.append(", ").append(data::pp(*i));
     }
   }
 
+  MCRL2_CHECK_PP(result, data::print(c), "unknown");
   return result;
 }
 
-/// \brief Pretty prints a data and sort expressions
-/// \param[in] c A data or sort expression
-inline std::string pp(atermpp::aterm_appl const& c)
+inline
+std::string pp(const data_specification& x)
 {
-  return core::pp(c);
-}
-
-/// \brief Pretty prints a data and sort expressions
-/// \param[in] c A data or sort expression.
-template < typename Expression >
-inline std::string pp(atermpp::term_list< Expression > const& c)
-{
-  return core::pp(c);
+  return core::pp(data::detail::data_specification_to_aterm_data_spec(x));
 }
 
 namespace detail
@@ -113,6 +145,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   using super::leave;
   using super::operator();
   using core::detail::printer<Derived>::print_sorts;
+  using core::detail::printer<Derived>::print_list;
 
   Derived& derived()
   {
@@ -157,7 +190,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_sort(const application& x)
   {
-    std::cout << "<value>" << core::pp(x) << " " << x << " ";
+    std::cout << "<value>" << data::pp(x) << " " << x << " ";
     if (is_numeric_value(x))
     {
       std::cout << "<numeric value>";
@@ -291,28 +324,28 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     print_expression(right, (prec == data::detail::precedence(right) && x.head() != application(right).head()) ? prec + 1 : prec);
   }
 
-  template <typename Container>
-  void print_list(const Container& container,
-                  const std::string& opener = "(",
-                  const std::string& closer = ")",
-                  const std::string& separator = ", "
-                 )
-  {
-    if (container.empty())
-    {
-      return;
-    }
-    derived().print(opener);
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (i != container.begin())
-      {
-        derived().print(separator);
-      }
-      derived()(*i);
-    }
-    derived().print(closer);
-  }
+//  template <typename Container>
+//  void print_list(const Container& container,
+//                  const std::string& opener = "(",
+//                  const std::string& closer = ")",
+//                  const std::string& separator = ", "
+//                 )
+//  {
+//    if (container.empty())
+//    {
+//      return;
+//    }
+//    derived().print(opener);
+//    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+//    {
+//      if (i != container.begin())
+//      {
+//        derived().print(separator);
+//      }
+//      derived()(*i);
+//    }
+//    derived().print(closer);
+//  }
 
   template <typename Container>
   void print_variables(const Container& container,
@@ -891,6 +924,22 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived()(x.lhs());
     derived().print(":=");
     derived()(x.rhs());
+    derived().leave(x);
+  }
+
+  // assignment lists have their own notation
+  void operator()(const data::assignment_list& x)
+  {
+    derived().enter(x);
+    print_assignments(x, true, "[", "]");
+    derived().leave(x);
+  }
+
+  // variable lists have their own notation
+  void operator()(const data::variable_list& x)
+  {
+    derived().enter(x);
+    print_list(x, "[", "]", ", ", true);
     derived().leave(x);
   }
 

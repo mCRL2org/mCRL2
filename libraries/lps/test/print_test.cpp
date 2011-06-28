@@ -63,7 +63,7 @@ BOOST_AUTO_TEST_CASE(rational)
   s = linearise(input);
 
   std::string output;
-  output = pp(s);
+  output = lps::pp(s);
 
   // Check whether the symbol @ occurs in the pretty printed output. If this is
   // the case, still some internal symbol is exposed. As a result, our parsers

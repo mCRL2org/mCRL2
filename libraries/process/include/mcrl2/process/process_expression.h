@@ -22,6 +22,7 @@
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
 #include "mcrl2/process/communication_expression.h"
+#include "mcrl2/process/pp.h"
 
 namespace mcrl2
 {

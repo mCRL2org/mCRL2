@@ -22,6 +22,14 @@ namespace mcrl2
 namespace lps
 {
 
+/// \brief Pretty prints a term.
+/// \param[in] t A term
+template <typename T>
+std::string pp(const T& t)
+{
+  return core::pp(t);
+}
+
 namespace detail
 {
 

@@ -272,7 +272,7 @@ void test_bug_623()
     data_expression_list next_state = i->next_state(s1.process().process_parameters());
     BOOST_CHECK(next_state.size() == 2);
     BOOST_CHECK(*next_state.begin() != *(++next_state.begin()));
-    std::clog << "erroneous next state " << pp(next_state) << std::endl;
+    std::clog << "erroneous next state " << data::pp(next_state) << std::endl;
   }
 
 }
@@ -280,10 +280,10 @@ void test_bug_623()
 void test_abp()
 {
   specification spec = linearise(lps::detail::ABP_SPECIFICATION());
-  std::clog << "--- before ---\n" << pp(spec) << std::endl;
+  std::clog << "--- before ---\n" << lps::pp(spec) << std::endl;
   rewriter r(spec.data());
   binary_algorithm<rewriter>(spec, r).run();
-  std::clog << "--- after ---\n" << pp(spec) << std::endl;
+  std::clog << "--- after ---\n" << lps::pp(spec) << std::endl;
   BOOST_CHECK(is_well_typed(spec));
   core::garbage_collect();
 }

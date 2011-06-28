@@ -41,8 +41,8 @@ bool equal_content(Container1 const& c1, Container2 const& c2)
   {
     std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
                       << "Detailed comparison:" << std::endl;
-    std::clog << pp(c1) << std::endl;
-    std::clog << pp(c2) << std::endl;
+    std::clog << data::pp(c1) << std::endl;
+    std::clog << data::pp(c2) << std::endl;
   }
   return s1 == s2;
 }
@@ -82,28 +82,28 @@ bool detailed_compare_for_equality(data_specification const& left, data_specific
   /*
     if (left_aliases != right_aliases)
     {
-      std::clog << "Aliases (left)  " << pp(left.aliases()) << std::endl;
-      std::clog << "Aliases (right)  " << pp(right.aliases()) << std::endl;
+      std::clog << "Aliases (left)  " << data::pp(left.aliases()) << std::endl;
+      std::clog << "Aliases (right)  " << data::pp(right.aliases()) << std::endl;
     }*/
     if (left_sorts != right_sorts)
     {
-      std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
-      std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
+      std::clog << "Sorts (left)  " << data::pp(left.sorts()) << std::endl;
+      std::clog << "Sorts (right) " << data::pp(right.sorts()) << std::endl;
     }
     if (left_constructors != right_constructors)
     {
-      std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
-      std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
+      std::clog << "Constructors (left)  " << data::pp(left.constructors()) << std::endl;
+      std::clog << "Constructors (right) " << data::pp(right.constructors()) << std::endl;
     }
     if (left_mappings != right_mappings)
     {
-      std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
-      std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
+      std::clog << "Mappings (left)  " << data::pp(left.mappings()) << std::endl;
+      std::clog << "Mappings (right) " << data::pp(right.mappings()) << std::endl;
     }
     if (left_equations != right_equations)
     {
-      std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
-      std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
+      std::clog << "Equations (left)  " << data::pp(left.equations()) << std::endl;
+      std::clog << "Equations (right) " << data::pp(right.equations()) << std::endl;
     }
 
     std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
@@ -126,23 +126,23 @@ bool compare_for_equality(data_specification const& left, data_specification con
 
     if (left.sorts() != right.sorts())
     {
-      std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
-      std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
+      std::clog << "Sorts (left)  " << data::pp(left.sorts()) << std::endl;
+      std::clog << "Sorts (right) " << data::pp(right.sorts()) << std::endl;
     }
     if (left.constructors() != right.constructors())
     {
-      std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
-      std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
+      std::clog << "Constructors (left)  " << data::pp(left.constructors()) << std::endl;
+      std::clog << "Constructors (right) " << data::pp(right.constructors()) << std::endl;
     }
     if (left.mappings() != right.mappings())
     {
-      std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
-      std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
+      std::clog << "Mappings (left)  " << data::pp(left.mappings()) << std::endl;
+      std::clog << "Mappings (right) " << data::pp(right.mappings()) << std::endl;
     }
     if (left.equations() != right.equations())
     {
-      std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
-      std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
+      std::clog << "Equations (left)  " << data::pp(left.equations()) << std::endl;
+      std::clog << "Equations (right) " << data::pp(right.equations()) << std::endl;
     }
 
     std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
@@ -922,7 +922,7 @@ void test_bke()
   const alias_vector& aliases = data_spec.user_defined_aliases();
   for (alias_vector::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
   {
-    std::cout << "alias " << core::pp(*i) << std::endl;
+    std::cout << "alias " << data::pp(*i) << std::endl;
     sort_expression s = i->reference();
     if (is_structured_sort(s))
     {
@@ -932,7 +932,7 @@ void test_bke()
         structured_sort_constructor_argument_list arguments = j->arguments();
         for (structured_sort_constructor_argument_list::const_iterator k = arguments.begin(); k != arguments.end(); ++k)
         {
-          std::cout << "argument: " << core::pp(*k) << " " << *k << std::endl;
+          std::cout << "argument: " << data::pp(*k) << " " << *k << std::endl;
           atermpp::aterm_appl name = k->name();
           if (name != no_identifier())
           {

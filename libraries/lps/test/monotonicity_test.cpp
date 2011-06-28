@@ -38,9 +38,9 @@ void run_monotonicity_test_case(const std::string& formula, const std::string& l
   state_formula f = parse_state_formula(formula, spec, check_monotonicity);
   if (state_formulas::detail::has_name_clashes(f))
   {
-    std::cerr << "Error: " << pp(f) << " has name clashes" << std::endl;
+    std::cerr << "Error: " << state_formulas::pp(f) << " has name clashes" << std::endl;
     f = state_formulas::detail::resolve_name_clashes(f);
-    std::cerr << "resolved to " << pp(f) << std::endl;
+    std::cerr << "resolved to " << state_formulas::pp(f) << std::endl;
   }
   else
   {

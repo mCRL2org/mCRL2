@@ -249,7 +249,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))
           {
             data_expression term = parse_term(s,spec,context_variables);
-            cout << pp(term.sort()) << endl;
+            cout << data::pp(term.sort()) << endl;
           }
           else if (match_and_remove(s,"v ") || match_and_remove(s,"var "))
           {
@@ -258,7 +258,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"e ") || match_and_remove(s,"eval "))
           {
             data_expression term = parse_term(s,spec,context_variables);
-            cout << pp(rewr(term,make_map_substitution(assignments))) << "\n";
+            cout << data::pp(rewr(term,make_map_substitution(assignments))) << "\n";
           }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
@@ -286,13 +286,13 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
               cout << "[";
               for (atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
               {
-                cout << pp(*v) << " := " << pp((*i)(*v));
+                cout << data::pp(*v) << " := " << data::pp((*i)(*v));
                 if (boost::next(v)!=vars.end())
                 {
                   cout << ", ";
                 }
               }
-              cout << "] evaluates to "<< pp(rewr(term,*i)) << "\n";
+              cout << "] evaluates to "<< data::pp(rewr(term,*i)) << "\n";
             }
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))
@@ -312,7 +312,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             data_expression term = parse_term(s,spec,context_variables);
             variable var(varname,term.sort());
             term = rewr(term,make_map_substitution(assignments));
-            cout << pp(term) << "\n";
+            cout << data::pp(term) << "\n";
             assignments[var]=term;
             context_variables.insert(var);
           }

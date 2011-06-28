@@ -163,14 +163,14 @@ void parse_variables(std::istream& text,
     {
       if (v->name()==i->name())
       {
-        throw mcrl2::runtime_error("Name conflict of variables " + pp(*i) + " and " + pp(*v) + ".");
+        throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*i) + " and " + data::pp(*v) + ".");
       }
     }
     for (variable_list::const_iterator v1=data_vars.begin(); v1!=data_vars.end(); ++v1)
     {
       if (((*v1)!=(*v)) && (v1->name()==v->name()))
       {
-        throw mcrl2::runtime_error("Name conflict of variables " + pp(*v1) + " and " + pp(*v) + ".");
+        throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*v1) + " and " + data::pp(*v) + ".");
       }
     }
   }

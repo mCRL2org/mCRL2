@@ -32,10 +32,10 @@ void representation_check(Rewriter& R, data_expression const& input, data_expres
 
   if (output != normalize_sorts(expected,spec))
   {
-    std::clog << "--- test failed --- " << core::pp(input) << " ->* " << core::pp(expected) << std::endl
-              << "input    " << core::pp(input) << std::endl
-              << "expected " << core::pp(expected) << std::endl
-              << "R(input) " << core::pp(output) << std::endl
+    std::clog << "--- test failed --- " << data::pp(input) << " ->* " << data::pp(expected) << std::endl
+              << "input    " << data::pp(input) << std::endl
+              << "expected " << data::pp(expected) << std::endl
+              << "R(input) " << data::pp(output) << std::endl
               << " -- term representations -- " << std::endl
               << "input    " << input << std::endl
               << "expected " << normalize_sorts(expected,spec)<< std::endl

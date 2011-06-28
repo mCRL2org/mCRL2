@@ -444,4 +444,8 @@ bool is_at(const action_formula& t)
 
 } // namespace mcrl2
 
+#ifndef MCRL2_MODAL_FORMULA_PRINT_H
+#include "mcrl2/modal_formula/print.h"
+#endif
+
 #endif // MCRL2_MODAL_ACTION_FORMULA_H

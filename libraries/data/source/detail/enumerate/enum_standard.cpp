@@ -12,7 +12,7 @@
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/print.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/data/alias.h"
 #include "mcrl2/data/bool.h"
@@ -323,7 +323,7 @@ bool EnumeratorSolutionsStandard::next(
         else
         { 
           fs_stack.clear();
-          throw mcrl2::runtime_error("cannot enumerate elements of the function sort " + pp(sort));
+          throw mcrl2::runtime_error("cannot enumerate elements of the function sort " + data::pp(sort));
         }
           
       }
@@ -337,7 +337,7 @@ bool EnumeratorSolutionsStandard::next(
         else
         { 
           fs_stack.clear();
-          throw mcrl2::runtime_error("cannot enumerate elements of a bag of sort " + pp(sort));
+          throw mcrl2::runtime_error("cannot enumerate elements of a bag of sort " + data::pp(sort));
         }
           
       }
@@ -361,7 +361,7 @@ bool EnumeratorSolutionsStandard::next(
           else
           { 
             fs_stack.clear();
-            throw mcrl2::runtime_error("cannot enumerate all elements of a set of sort " + pp(sort));
+            throw mcrl2::runtime_error("cannot enumerate all elements of a set of sort " + data::pp(sort));
           }
         }
       }
@@ -380,7 +380,7 @@ bool EnumeratorSolutionsStandard::next(
           else
           { 
             fs_stack.clear(); 
-            throw mcrl2::runtime_error("cannot enumerate elements of sort " + pp(sort) + " as it does not have constructor functions");
+            throw mcrl2::runtime_error("cannot enumerate elements of sort " + data::pp(sort) + " as it does not have constructor functions");
           }
         }
   
@@ -425,9 +425,9 @@ bool EnumeratorSolutionsStandard::next(
                   {
                     exception_message << ", ";
                   }
-                  exception_message << pp(*k) << ":" << pp(k->sort());
+                  exception_message << data::pp(*k) << ":" << data::pp(k->sort());
                 }
-                exception_message << " that satisfy " << pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)enum_expr));
+                exception_message << " that satisfy " << core::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)enum_expr));
                 throw mcrl2::runtime_error(exception_message.str());
               }
             }
@@ -440,9 +440,9 @@ bool EnumeratorSolutionsStandard::next(
                 {
                   cerr << ", ";
                 }
-                cerr << pp(*k) << ":" << pp(k->sort());
+                cerr << data::pp(*k) << ":" << data::pp(k->sort());
               }
-              cerr << " that satisfy " << pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)enum_expr)) << endl;
+              cerr << " that satisfy " << core::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)enum_expr)) << endl;
               max_vars *= MAX_VARS_FACTOR;
             }
           }

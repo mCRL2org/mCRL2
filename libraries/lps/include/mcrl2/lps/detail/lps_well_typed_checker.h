@@ -69,7 +69,7 @@ struct lps_well_typed_checker
         )
        )
     {
-      std::cerr << "is_well_typed(" << type << ") failed: data assignments " << pp(l) << " don't have unique left hand sides." << std::endl;
+      std::cerr << "is_well_typed(" << type << ") failed: data assignments " << data::pp(l) << " don't have unique left hand sides." << std::endl;
       return false;
     }
     return true;
@@ -172,7 +172,7 @@ struct lps_well_typed_checker
   {
     if (!data::detail::unique_names(s.summation_variables()))
     {
-      std::cerr << "is_well_typed(action_summand) failed: summation variables " << pp(s.summation_variables()) << " don't have unique names." << std::endl;
+      std::cerr << "is_well_typed(action_summand) failed: summation variables " << data::pp(s.summation_variables()) << " don't have unique names." << std::endl;
       return false;
     }
     if (!check_condition(s.condition(), "action_summand"))

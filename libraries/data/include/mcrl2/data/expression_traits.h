@@ -242,7 +242,7 @@ struct term_traits<data::data_expression>
   static inline
   std::string pp(term_type t)
   {
-    return core::pp(t);
+    return data::pp(t);
   }
 };
 

@@ -30,7 +30,7 @@ void run_all_algorithms(std::string const& b, bool expected_outcome)
   from << "pbes\n" << b << std::endl;
   from >> b1;
 
-  std::clog << "solving the following input bes: \n" << pp(b1) << std::endl;
+  std::clog << "solving the following input bes: \n" << bes::pp(b1) << std::endl;
 
   core::garbage_collect();
   BOOST_CHECK_EQUAL(small_progress_measures(b1), expected_outcome);

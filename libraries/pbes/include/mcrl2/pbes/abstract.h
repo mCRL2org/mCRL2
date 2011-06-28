@@ -86,7 +86,7 @@ struct pbes_abstract_builder: public pbes_expression_builder<pbes_abstract_build
       }
       if (!is_bound(*i))
       {
-        //std::clog << "Reducing data expression " << pp(d) << " to " << pp(m_value) << "." << std::endl;
+        //std::clog << "Reducing data expression " << data::pp(d) << " to " << data::pp(m_value) << "." << std::endl;
         return m_value;
       }
     }
