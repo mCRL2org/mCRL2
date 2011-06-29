@@ -156,6 +156,59 @@ void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
   data_expression t16d2 = parse_data_expression("true");
   BOOST_CHECK(r(t16d1) == r(t16d2));
 
+  data_specification spec_1;
+  spec_1 = parse_data_specification(
+  " sort A = struct ac( first: Bool, args: List(Bool));"
+  " "
+  " map COMM: List(Bool)#Bool#List(A) -> List(A);"
+  "     COMM: List(Bool)#Bool#List(A)#(List(Bool)->Bag(Bool))#Bag(Bool) -> List(A);"
+  "     MAC: List(Bool) -> Bag(Bool);"
+  "     PART: List(A)#(List(Bool) -> Bag(Bool)) -> (List(Bool) -> Bag(Bool));"
+  "     ELM: List(Bool)#Bool#List(A)#List(Bool)#List(Bool) -> List(A);"
+  "     RM: A#List(A)->List(A);"
+  " var func: List(Bool)->Bag(Bool);"
+  "     as: List(A);"
+  "     ca: Bool;"
+  "     cal: List(Bool);"
+  "     cal_const: List(Bool);"
+  "     al: Bool;"
+  "     lsa: List(A);"
+  "     m: Bag(Bool);"
+  "     args: List(Bool);"
+  "     a, b: A;"
+  " eqn PART( [] , func ) = func;"
+  "     PART( a |> as , func ) = PART( as, func[ args(a) -> func(args(a)) + {first(a):1}]  );"
+  "     MAC( [] ) = {};"
+  "     MAC( ca |> cal ) = {ca:1} + MAC(cal);"
+  " "
+  "     COMM( cal, al, lsa ) = COMM( cal, al, lsa,  PART( lsa, lambda x: List(Bool). {} ), MAC(cal) );"
+  "     COMM( cal, al, [] , func, m ) = [];"
+  "     COMM( cal, al, a |> lsa, func, m ) = if( m <= func(args(a)), "
+  "                                                      ELM( cal, al, a |> lsa, args(a) , cal ) , "
+  "                                                      a |> COMM( cal, al, lsa, func, m)"
+  "                                                    );"
+  "     ELM( [] , al, lsa, args, cal_const ) = [ac(al, args)] ++ COMM( cal_const, al, lsa );"
+  "     ELM( ca |> cal, al, lsa, args, cal_const ) = ELM( cal, al , RM( ac( ca ,args), lsa), args, cal_const );"
+  "     RM( a, [] ) = [];"
+  "     RM( a, b |> lsa ) = if(a == b , lsa,  b |> RM( a, lsa)) ;"
+  );
+
+
+  /* Test 17. */
+  r = rewriter(spec_1, s);
+  data_expression t17d1 = parse_data_expression("exists x_0: List(A). x_0 == [ac( false, []), ac(true, []), ac(false, [])] && [ac(true, []), ac(true, [])] == COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {}), {false: 2}) ", spec_1);
+  data_expression t17d2 = parse_data_expression("true");
+  BOOST_CHECK(r(t17d1) == r(t17d2));
+
+  /* Test 18. Similar test as test 17.
+     The difference is in the structure of the body of the exists: Arguments left and right of the conjunct are swapped.
+  */
+  data_expression t18d1 = parse_data_expression("exists x_0: List(A). [ac(true, []), ac(true, [])] == COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {}), {false: 2}) && x_0 == [ac( false, []), ac(true, []), ac(false, [])]", spec_1);
+  data_expression t18d2 = parse_data_expression("true");
+  BOOST_CHECK(r(t18d1) == r(t18d2));
+  
+
+
 }
 
 int test_main(int argc, char** argv)

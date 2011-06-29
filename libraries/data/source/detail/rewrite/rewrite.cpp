@@ -100,7 +100,7 @@ bool Rewriter::removeRewriteRule(ATermAppl /*Rule*/)
 
 ATerm Rewriter::internal_existential_quantifier_enumeration(ATerm ATermInInnerFormat)
 {
-  ATfprintf(stderr,"Existential quantifier %t\n",ATermInInnerFormat);
+  // ATfprintf(stderr,"Existential quantifier %t\n",ATermInInnerFormat);
       /* Get Body of Exists */
       ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
       data_expression d(fromRewriteFormat(t1));
