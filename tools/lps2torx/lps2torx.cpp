@@ -26,6 +26,8 @@
 
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/data/print.h"
+#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/exception.h"
@@ -91,10 +93,10 @@ class torx_tool : public rewriter_tool< input_tool >
       std::string result;
       for (action_list::const_iterator i=ma.actions().begin(); i!=ma.actions().end(); ++i)
       {
-        result = result+pp(i->label());
+        result = result+mcrl2::lps::pp(i->label());
         for (mcrl2::data::data_expression_list::const_iterator arg=i->arguments().begin(); arg!=i->arguments().end(); ++arg)
         {
-          result = result+"!"+pp( *arg );
+          result = result+"!"+mcrl2::data::pp( *arg );
         }
 
         action_list::const_iterator i_next=i;
