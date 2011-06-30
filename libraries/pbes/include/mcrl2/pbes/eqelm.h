@@ -87,7 +87,11 @@ class pbes_eqelm_algorithm: public utilities::algorithm
     std::map<string_type, atermpp::set<propositional_variable_type> > m_edges;
 
     /// \brief The parameters of the propositional variable declarations.
+    /// These are stored inside a vector, for efficiency reasons.
     std::map<string_type, std::vector<variable_type> > m_parameters;
+
+    /// \brief Used for determining if a vertex has been visited before.
+    std::map<string_type, bool> m_discovered;
 
     /// \brief Puts all parameters of the same sort in the same equivalence set.
     std::vector<equivalence_class> compute_equivalence_sets(const propositional_variable_decl_type& X) const
@@ -185,10 +189,9 @@ class pbes_eqelm_algorithm: public utilities::algorithm
       return static_cast<size_t>(std::find(v.begin(), v.end(), x) - v.begin());
     }
 
-    /// \brief Propagate the equivalence relations in vertex X over the edge Ye.
+    /// \brief Propagate the equivalence relations given by the substitution vX over the edge Ye.
     template <typename Substitution>
-    void update_equivalence_classes(const string_type& /* X */,
-                                    const propositional_variable_type& Ye,
+    void update_equivalence_classes(const propositional_variable_type& Ye,
                                     const Substitution& vX,
                                     std::set<string_type>& todo
                                    )
@@ -219,7 +222,13 @@ class pbes_eqelm_algorithm: public utilities::algorithm
       if (cY != cY1)
       {
         todo.insert(Y);
+        m_discovered[Y] = true;
         cY = cY1;
+      }
+      else if (!m_discovered[Y])
+      {
+        todo.insert(Y);        
+        m_discovered[Y] = true;
       }
     }
 
@@ -293,7 +302,7 @@ class pbes_eqelm_algorithm: public utilities::algorithm
       m_edges.clear();
       std::set<string_type> todo;
 
-      // compute the edges and vertices of the graph, and initialize the todo list
+      // compute the vertices and edges of the graph
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type name = i->variable().name();
@@ -302,6 +311,7 @@ class pbes_eqelm_algorithm: public utilities::algorithm
         const variable_sequence_type& param = i->variable().parameters();
         m_parameters[name] = std::vector<variable_type>(param.begin(), param.end());
         todo.insert(name);
+        m_discovered[name] = ignore_initial_state;
       }
 
       if (!ignore_initial_state)
@@ -310,34 +320,30 @@ class pbes_eqelm_algorithm: public utilities::algorithm
         propositional_variable_type kappa = p.initial_state();
         string_type X = kappa.name();
         data::mutable_map_substitution<> vX = compute_substitution(X);
-        std::set<propositional_variable_type> edges = find_propositional_variable_instantiations(kappa);
-        for (typename atermpp::set<propositional_variable_type>::const_iterator i = edges.begin(); i != edges.end(); ++i)
+        
+        // propagate the equivalence relations in X over the edge kappa
+        if (evaluate_guard(X, kappa))
         {
-          // propagate the equivalence relations in X over the edge Ye
-          const propositional_variable_type& Ye = *i;
-          if (evaluate_guard(X, Ye))
-          {
-            todo.insert(Ye.name());
-            update_equivalence_classes(X, Ye, vX, todo);
-            LOG_EQUIVALENCE_CLASSES(2, "update equivalence classes\n");
-          }
+          todo.insert(X);
+          m_discovered[X] = true;
+          update_equivalence_classes(kappa, vX, todo);
+          LOG_EQUIVALENCE_CLASSES(2, "updated equivalence classes using initial state " + pbes_system::pp(kappa) + "\n");
         }
       }
 
       LOG_VERTICES(1, "--- vertices ---\n");
       LOG_EDGES(1, "\n--- edges ---\n");
-      LOG_EQUIVALENCE_CLASSES(2, "initial equivalence classes\n");
-      LOG_TODO_LIST(2, todo, "initial todo list: ");
+      LOG_EQUIVALENCE_CLASSES(2, "computed initial equivalence classes\n");
 
       // propagate constraints over the edges until the todo list is empty
       while (!todo.empty())
       {
-        string_type X = *todo.begin();
-        todo.erase(X);
-
-        LOG(2, "todo element X = " + core::pp(X) + "\n");
         LOG(2, "todo list = " + core::detail::print_pp_set(todo) + "\n");
         LOG_VERTICES(1, "--- vertices ---\n");
+
+        string_type X = *todo.begin();
+        todo.erase(X);
+        LOG(2, "choose todo element " + core::pp(X) + "\n");
 
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);
@@ -348,8 +354,8 @@ class pbes_eqelm_algorithm: public utilities::algorithm
           const propositional_variable_type& Ye = *i;
           if (evaluate_guard(X, Ye))
           {
-            update_equivalence_classes(X, Ye, vX, todo);
-            LOG_EQUIVALENCE_CLASSES(2, "updated equivalence classes\n");
+            update_equivalence_classes(Ye, vX, todo);
+            LOG_EQUIVALENCE_CLASSES(2, "updated equivalence classes using edge " + pbes_system::pp(Ye) + "\n");
           }
         }
       }
