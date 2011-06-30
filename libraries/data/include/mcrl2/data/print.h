@@ -645,14 +645,21 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fbag_zero(const data_expression& x)
   {
     // TODO: check if this is the correct way to handle this case
-    if (sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
+    data_expression y = sort_bag::right(x);
+    if (sort_fbag::is_fbag_empty_function_symbol(y))
     {
       derived().print("{}");
+    }
+    else if (data::is_variable(y))
+    {
+      derived().print("@bagfbag(");
+      derived()(variable(y).name());
+      derived().print(")");
     }
     else
     {
       derived().print("{");
-      derived()(sort_bag::right(x));
+      derived()(y);
       derived().print("}");
     }
   } 

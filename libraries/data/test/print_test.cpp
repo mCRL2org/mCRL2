@@ -307,6 +307,7 @@ BOOST_AUTO_TEST_CASE(test_standard_sort_expressions)
 template <typename T>
 void test_term(const std::string& s, const T& x)
 {
+  std::clog << "--- testing term " << core::pp(x) << " ---" << std::endl;
   std::string s1 = data::pp(x);
   std::string s2 = data::print(x);
   if (s1 != s2)
@@ -336,17 +337,12 @@ void test_term(const std::string& s)
 #ifdef MCRL2_PRINT_PROBLEM_CASES
 BOOST_AUTO_TEST_CASE(problem_cases)
 {
+  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[OpId(\"@zero_\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))])");
+  
   // <pp>   @bagfbag(b)  =  @bagfbag(b)
   // <print>b  =  {b}
   // <aterm>DataEqn([DataVarId("b",SortCons(SortFBag,SortId("Bool")))],OpId("true",SortId("Bool")),DataAppl(OpId("@bagfbag",SortArrow([SortCons(SortFBag,SortId("Bool"))],SortCons(SortBag,SortId("Bool")))),[DataVarId("b",SortCons(SortFBag,SortId("Bool")))]),DataAppl(OpId("@bag",SortArrow([SortArrow([SortId("Bool")],SortId("Nat")),SortCons(SortFBag,SortId("Bool"))],SortCons(SortBag,SortId("Bool")))),[OpId("@zero_",SortArrow([SortId("Bool")],SortId("Nat"))),DataVarId("b",SortCons(SortFBag,SortId("Bool")))]))
   test_term("DataEqn([DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"@bagfbag\",SortArrow([SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))]),DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[OpId(\"@zero_\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))]))");
-
-  std::string s = "DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[DataVarId(\"b\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))])";
-  ATerm a = atermpp::make_term(s);
-  data_expression x1 = atermpp::aterm_appl((ATermAppl) a);
-  data_expression x2 = detail::reconstruct_numeric_expression(x1);
-  std::cout << "<x1>" << core::pp(x1) << " " << x1 << std::endl;
-  std::cout << "<x2>" << core::pp(x2) << " " << x2 << std::endl;
 
   test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Nat\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Nat\"))],SortCons(SortBag,SortId(\"Nat\")))),[Binder(Lambda,[DataVarId(\"x\",SortId(\"Nat\"))],DataVarId(\"x\",SortId(\"Nat\"))),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"Nat\")))])");
   // <pp>   { b: Bool | b }
