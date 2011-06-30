@@ -49,6 +49,7 @@ void set_expression_test()
 {
   data::data_specification specification;
 
+  specification.add_context_sort(sort_pos::pos());
   specification.add_context_sort(sort_set::set_(sort_pos::pos()));
 
   data::rewriter normaliser(specification);
@@ -66,6 +67,18 @@ void set_expression_test()
   test_data_expression("{10} < s", v, is_less_application<data_expression>);
   test_data_expression("s <= {10}", v, is_less_equal_application<data_expression>);
   test_data_expression("{20} + {30}", v, is_setunion_application);
+
+  data_expression t1d1 = parse_data_expression("{1,2}");
+  data_expression t1d2 = parse_data_expression("{2,1}");
+  BOOST_CHECK(normaliser(t1d1) == normaliser(t1d2));
+
+  data_expression t2d1 = parse_data_expression("{1,2} == {1,2}");
+  data_expression t2d2 = parse_data_expression("true");
+  BOOST_CHECK(normaliser(t2d1) == normaliser(t2d2));
+
+  data_expression t3d1 = parse_data_expression("({1,2} != {2,3})");
+  data_expression t3d2 = parse_data_expression("true");
+  BOOST_CHECK(normaliser(t3d1) == normaliser(t3d1));
 
   data_expression e = parse_data_expression("{20}", v.begin(), v.end());
   BOOST_CHECK(is_setconstructor_application(normaliser(e)));
