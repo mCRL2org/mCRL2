@@ -23,6 +23,9 @@ using namespace mcrl2;
 using namespace mcrl2::process;
 using namespace mcrl2::lps;
 
+// Although this process is linear, the linear_process_conversion_traverser algorithm
+// is expected to generate an exception. The reason for this is that this process
+// cannot be directly represented as an LPS.
 const std::string SPEC1 =
   "act a;                  \n"
   "proc X = a;             \n"
@@ -39,6 +42,15 @@ const std::string SPEC3 =
   "act a : Bool;                      \n"
   "proc X = sum b,c:Bool . (b && c) -> a(b).X; \n"
   "init X;                            \n"
+  ;
+
+// Although this process is linear, the linear_process_conversion_traverser algorithm
+// is expected to generate an exception. The reason for this is that this process
+// cannot be directly represented as an LPS.
+const std::string SPEC4 =
+  "proc P = tau; \n"
+  "              \n"
+  "init P;       \n"
   ;
 
 const std::string ABS_SPEC_LINEARIZED =
@@ -149,16 +161,24 @@ const std::string ABS_SPEC_LINEARIZED =
   "init P(1, dc, true, 1, dc1, dc2, 1, dc9, 1, dc13, true);                                                                     \n"
   ;
 
-void test_process(std::string text)
+// The flag expect_exception should be set for linear processes that cannot be represented by an LPS.
+void test_process(std::string text, bool expect_exception = false)
 {
   process_specification pspec = parse_process_specification(text);
-  specification lspec = parse_linear_process_specification(text);
-
   bool linear = is_linear(pspec, true);
   if (linear)
   {
-    process::detail::linear_process_conversion_traverser visitor;
-    specification spec = visitor.convert(pspec);
+    try
+    {
+      process::detail::linear_process_conversion_traverser visitor;
+      specification spec = visitor.convert(pspec);
+    }
+    catch (mcrl2::runtime_error&)
+    {
+      BOOST_CHECK(expect_exception);
+      return;
+    }
+    BOOST_CHECK(!expect_exception);
   }
   else
   {
@@ -180,13 +200,16 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT(argc, argv)
 
   std::clog << "SPEC1" << std::endl;
-  test_process(SPEC1);
+  test_process(SPEC1, true);
   core::garbage_collect();
   std::clog << "SPEC2" << std::endl;
   test_process(SPEC2);
   core::garbage_collect();
   std::clog << "SPEC3" << std::endl;
   test_process(SPEC3);
+  core::garbage_collect();
+  std::clog << "SPEC4" << std::endl;
+  test_process(SPEC4, true);
   core::garbage_collect();
   std::clog << "ABS_SPEC_LINEARIZED" << std::endl;
   test_process(ABS_SPEC_LINEARIZED);

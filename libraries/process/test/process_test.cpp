@@ -204,7 +204,12 @@ std::string CASE14 =
   "init a;       \n"
   ;
 
-
+// This process is considered linear, although it cannot be directly represented as an LPS.
+const std::string CASE15 =
+  "proc P = tau; \n"
+  "              \n"
+  "init P;       \n"
+  ;
 
 void test_linear(const std::string& text, bool result = true)
 {
@@ -246,6 +251,7 @@ int test_main(int argc, char* argv[])
   test_linear(CASE13a, false);
   test_linear(CASE13b);
   test_linear(CASE14, false);
+  test_linear(CASE15);
 
   test_data_spec();
 
