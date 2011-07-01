@@ -1312,8 +1312,19 @@ void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, ATermInt opid, size_t ar
   }
 }
 
+// Determine whether the opid is a normal form, with the given number of arguments.
 bool RewriterCompilingJitty::opid_is_nf(ATermInt opid, size_t num_args)
 {
+  // First check whether the opid is a forall or an exists with one argument.
+  // Then the routines for exists/forall quantifier enumeration must be applied.
+  if (num_args==1 && 
+        (function_symbol(get_int2term(ATgetInt(opid))).name() == exists_function_symbol() ||
+         function_symbol(get_int2term(ATgetInt(opid))).name() == forall_function_symbol()))
+  {
+    return false;
+  }
+
+  // Otherwise check whether there are applicable rewrite rules.
   ATermList l = jittyc_eqns[ATgetInt(opid)];
 
   if (l == NULL)
@@ -1422,6 +1433,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
     stringstream ss;
     bool b;
     int arity = ATgetLength((ATermList) t)-1;
+
 
     if (ATisInt(ATgetFirst((ATermList) t)))
     {
@@ -2493,7 +2505,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           fprintf(f,"  return (ATermAppl)this_rewriter->internal_existential_quantifier_enumeration((ATerm)ATmakeAppl2(%li,(ATerm) %p,(ATerm)arg0));\n",
                                (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
         }
-        else if (a==1 && (function_symbol(get_int2term(j)).name() == exists_function_symbol())) // universal quantifier.
+        else if (a==1 && (function_symbol(get_int2term(j)).name() == forall_function_symbol())) // universal quantifier.
         { 
           fprintf(f,"  // universal quantifier\n");
           fprintf(f,"  return (ATermAppl)this_rewriter->internal_universal_quantifier_enumeration((ATerm)ATmakeAppl2(%li,(ATerm) %p,(ATerm)arg0));\n",
