@@ -56,6 +56,7 @@ Options::Options(wxWindow* parent, wxWindowID id, xEditor* editor, outputpanel* 
 void Options::OnEval(wxCommandEvent& /*event*/)
 {
   p_output->Clear();
+
   try
   {
     p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
@@ -69,7 +70,24 @@ void Options::OnEval(wxCommandEvent& /*event*/)
                          + wxTextFile::GetEOL());
 
     wxString wx_spec = p_editor->GetStringFromDataEditor();
-    mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
+
+    mcrl2::process::process_specification spec;
+    try
+    {
+      spec = mcrl2::process::parse_process_specification(std::string(wx_spec.Append(wxT("init delta;")).mb_str()));
+    }
+    catch(mcrl2::runtime_error& e)
+    {
+      try
+      {
+         spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
+      }
+      catch(mcrl2::runtime_error& e)
+      {
+        p_output->AppendText( wxString(e.what() , wxConvUTF8 ) );
+        return;
+      }
+    }
 
     p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
                          + wxT("Parsing data expression: \"")
@@ -151,7 +169,24 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
 
 
     wxString wx_spec = p_editor->GetStringFromDataEditor();
-    mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
+
+    mcrl2::process::process_specification spec;
+    try
+    {
+      spec = mcrl2::process::parse_process_specification(std::string(wx_spec.Append(wxT("init delta;")).mb_str()));
+    }
+    catch(mcrl2::runtime_error& e)
+    {
+      try
+      {
+         spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
+      }
+      catch(mcrl2::runtime_error& e)
+      {
+        p_output->AppendText( wxString(e.what() , wxConvUTF8 ) );
+        return;
+      }
+    }
 
     atermpp::set <mcrl2::data::variable> vars = spec.global_variables();
     parse_variables(std::string(dataexpr.BeforeFirst('.').mb_str()) + ";",std::inserter(vars,vars.begin()),spec.data());
