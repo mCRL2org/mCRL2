@@ -34,16 +34,14 @@ class text_control_buf : public std::streambuf
 
     int overflow(int c)
     {
-      wxDateTime now = wxDateTime::Now();
-      m_control.AppendText(now.FormatTime() +  wxString(static_cast< wxChar >(c)));
+      m_control.AppendText(wxString(static_cast< wxChar >(c)));
 
       return 1;
     }
 
     std::streamsize xsputn(const char* s, std::streamsize n)
     {
-      wxDateTime now = wxDateTime::Now();
-      m_control.AppendText(now.FormatTime() +  wxString(s, wxConvLocal, n));
+      m_control.AppendText(wxString(s, wxConvLocal, n));
 
       pbump(n);
 
@@ -81,8 +79,7 @@ class message_relay
 
     void message(const char* data)
     {
-      wxDateTime now = wxDateTime::Now();
-      m_control.AppendText(now.FormatTime() + wxT(" ** ") + wxString(data, wxConvLocal));
+      m_control.AppendText(wxString(data, wxConvLocal));
     }
 
   public:
@@ -113,10 +110,10 @@ outputpanel::outputpanel(wxWindow* p_parent)
   message_relay::initialise(*this);
 }
 
-std::string outputpanel::PrintTime()
-{
-  wxDateTime now = wxDateTime::Now();
-  return std::string(now.FormatTime().mb_str()) + " ** ";
-};
+//std::string outputpanel::PrintTime()
+//{
+//  wxDateTime now = wxDateTime::Now();
+//  return std::string(now.FormatTime().mb_str()) + " ** ";
+//};
 
 

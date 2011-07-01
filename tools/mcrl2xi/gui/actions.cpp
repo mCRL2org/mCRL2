@@ -53,74 +53,70 @@ Options::Options(wxWindow* parent, wxWindowID id, xEditor* editor, outputpanel* 
 
 };
 
+static
+bool parse_data_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, atermpp::set<mcrl2::data::variable>& vars)
+{
+  mcrl2_log_level_t old_level = mcrl2_logger::get_reporting_level();
+  try
+  {
+    mcrl2_logger::set_reporting_level(log_quiet);
+    data_spec = mcrl2::data::parse_data_specification(s);
+    mcrl2_logger::set_reporting_level(old_level);
+  }
+  catch(mcrl2::runtime_error& e)
+  {
+    mcrl2_logger::set_reporting_level(old_level);
+    mcrl2::process::process_specification spec;
+    try
+    {
+       spec = mcrl2::process::parse_process_specification(s);
+       data_spec = spec.data();
+       vars = spec.global_variables();
+    }
+    catch(mcrl2::runtime_error& e)
+    {
+      mCRL2log(error) << e.what() << std::endl;
+      return false;
+    }
+  }
+  return true;
+}
+
 void Options::OnEval(wxCommandEvent& /*event*/)
 {
   p_output->Clear();
 
   try
   {
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxT("Evaluate: \"")
-                         + ev->getDataExprVal()
-                         + wxT("\"")
-                         + wxTextFile::GetEOL());
-
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxT("Parsing and type checking specification")
-                         + wxTextFile::GetEOL());
+    mCRL2log(info) << "Evaluate: \"" << ev->getDataExprVal().c_str() << "\"" << std::endl;
+    mCRL2log(info) << "Parsing and type checking specification" << std::endl;
 
     wxString wx_spec = p_editor->GetStringFromDataEditor();
 
-    mcrl2::process::process_specification spec;
-    try
+    mcrl2::data::data_specification data_spec;
+    atermpp::set <mcrl2::data::variable > vars;
+
+    if(!parse_data_specification_with_variables(std::string(wx_spec.mb_str()), data_spec, vars))
     {
-      spec = mcrl2::process::parse_process_specification(std::string(wx_spec.Append(wxT("init delta;")).mb_str()));
-    }
-    catch(mcrl2::runtime_error& e)
-    {
-      try
-      {
-         spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
-      }
-      catch(mcrl2::runtime_error& e)
-      {
-        p_output->AppendText( wxString(e.what() , wxConvUTF8 ) );
-        return;
-      }
+      return;
     }
 
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxT("Parsing data expression: \"")
-                         + ev->getDataExprVal()
-                         + wxT("\"")
-                         + wxTextFile::GetEOL());
-
-    atermpp::set <mcrl2::data::variable> vars = spec.global_variables();
+    mCRL2log(info) << "Parsing data expression: \"" << ev->getDataExprVal().c_str() << "\"" << std::endl;
 
     mcrl2::data::data_expression term = mcrl2::data::parse_data_expression(std::string(ev->getDataExprVal().mb_str()),
-        vars.begin(), vars.end(), spec.data());
+        vars.begin(), vars.end(), data_spec);
 
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxT("Rewriting data expression: \"")
-                         + ev->getDataExprVal()
-                         + wxT("\"")
-                         + wxTextFile::GetEOL());
+    mCRL2log(info) << "Rewriting data expression: \"" << ev->getDataExprVal().c_str() << "\"" << std::endl;
 
-    mcrl2::data::rewriter rewr(spec.data(),m_rewrite_strategy);
+    mcrl2::data::rewriter rewr(data_spec,m_rewrite_strategy);
     atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > assignments;
 
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxT("Result: \"")
-                         + wxString(pp(rewr(term,make_map_substitution(assignments))).c_str(), wxConvUTF8)
-                         + wxT("\"")
-                         + wxTextFile::GetEOL());
+    mCRL2log(info) << "Result: \"" << pp(rewr(term,make_map_substitution(assignments))).c_str() << "\"" << std::endl;
 
   }
   catch (mcrl2::runtime_error e)
   {
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxString(e.what(), wxConvUTF8)
-                         + wxTextFile::GetEOL());
+    mCRL2log(error) << e.what() << std::endl;
   }
 };
 
@@ -129,22 +125,16 @@ void Options::OnTypeCheck(wxCommandEvent& /*event*/)
   p_output->Clear();
   try
   {
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxT("Parsing and type checking specification")
-                         + wxTextFile::GetEOL());
+    mCRL2log(info) << "Parsing and type checking specification" << std::endl;
 
     wxString wx_spec = p_editor->GetStringFromDataEditor();
     mcrl2::process::process_specification spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxT("Specification is valid")
-                         + wxTextFile::GetEOL());
+    mCRL2log(info) << "Specification is valid" << std::endl;
 
   }
   catch (mcrl2::runtime_error e)
   {
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxString(e.what(), wxConvUTF8)
-                         + wxTextFile::GetEOL());
+    mCRL2log(error) << e.what() << std::endl;
   }
 };
 
@@ -159,55 +149,43 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
   p_solutions->Clear();
   try
   {
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8) + wxT("Solving: \"") + dataexpr + wxT("\"") + wxTextFile::GetEOL());
+    mCRL2log(info) << "Solving: \"" << dataexpr.c_str() << "\"" << std::endl;
 
     int dotpos = dataexpr.Find('.');
     if (dotpos  == -1)
     {
-      throw mcrl2::runtime_error(p_output->PrintTime() + "Expect a `.' in the input.");
+      throw mcrl2::runtime_error("Expect a `.' in the input.");
     }
-
 
     wxString wx_spec = p_editor->GetStringFromDataEditor();
 
-    mcrl2::process::process_specification spec;
-    try
+    mcrl2::data::data_specification data_spec;
+    atermpp::set <mcrl2::data::variable > vars;
+
+    if(!parse_data_specification_with_variables(std::string(wx_spec.mb_str()), data_spec, vars))
     {
-      spec = mcrl2::process::parse_process_specification(std::string(wx_spec.Append(wxT("init delta;")).mb_str()));
-    }
-    catch(mcrl2::runtime_error& e)
-    {
-      try
-      {
-         spec = mcrl2::process::parse_process_specification(std::string(wx_spec.mb_str()));
-      }
-      catch(mcrl2::runtime_error& e)
-      {
-        p_output->AppendText( wxString(e.what() , wxConvUTF8 ) );
-        return;
-      }
+      return;
     }
 
-    atermpp::set <mcrl2::data::variable> vars = spec.global_variables();
-    parse_variables(std::string(dataexpr.BeforeFirst('.').mb_str()) + ";",std::inserter(vars,vars.begin()),spec.data());
+    parse_variables(std::string(dataexpr.BeforeFirst('.').mb_str()) + ";",std::inserter(vars,vars.begin()),data_spec);
 
     mcrl2::data::data_expression term =
       mcrl2::data::parse_data_expression(
         std::string(dataexpr.AfterFirst('.').mb_str()),
         vars.begin(), vars.end(),
-        spec.data()
+        data_spec
       );
     if (term.sort()!=mcrl2::data::sort_bool::bool_())
     {
-      throw mcrl2::runtime_error(p_output->PrintTime()+"Expression is not of sort Bool.");
+      throw mcrl2::runtime_error("Expression is not of sort Bool.");
     }
 
-    rewriter rewr(spec.data(),m_rewrite_strategy);
+    rewriter rewr(data_spec,m_rewrite_strategy);
     term=rewr(term);
 
     typedef classic_enumerator< rewriter > enumerator_type;
 
-    enumerator_type enumerator(spec.data(),rewr);
+    enumerator_type enumerator(data_spec,rewr);
 
     for (enumerator_type::iterator i = enumerator.begin(vars,term,10000); // Stop when more than 10000 internal variables are required.
                  i != enumerator.end() ; ++i)
@@ -237,19 +215,18 @@ void Options::SolveExpr(wxCommandEvent& /*e*/)
 
       if (sd->getStopSolving())
       {
-        p_output->AppendText(wxString(std::string(p_output->PrintTime() + "Abort by user.").c_str()  , wxConvUTF8) +  wxTextFile::GetEOL());
+        mCRL2log(info) << "Abort by user." << std::endl;
         break;
       }
       wxYield();
     }
-    p_output->AppendText(wxString(std::string(p_output->PrintTime() + "Done solving.").c_str()  , wxConvUTF8));
+
+    mCRL2log(info) << "Done solving." << std::endl;
 
   }
   catch (mcrl2::runtime_error e)
   {
-    p_output->AppendText(wxString(p_output->PrintTime().c_str(), wxConvUTF8)
-                         + wxString(e.what(), wxConvUTF8)
-                         + wxTextFile::GetEOL());
+    mCRL2log(error) << e.what() << std::endl;
   }
 
 };
