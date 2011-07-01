@@ -3,6 +3,7 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -15,11 +16,11 @@ void enumerate(const std::set<variable>& variables, const data_expression& condi
   data_spec.add_context_sort(sort_bool::bool_());
   rewriter evaluator(data_spec);
 
-  classic_enumerator<> enumerator(data_spec, evaluator, true);
+  classic_enumerator<> enumerator(data_spec, evaluator);
 
   for (classic_enumerator<>::iterator i = enumerator.begin(variables, condition); i!= enumerator.end(); ++i)
   {
-    std::cout << data::pp((*i)(condition)) << std::endl;
+    std::cout << data::pp(data::replace_free_variables(condition, *i)) << std::endl;
   }
 }
 
