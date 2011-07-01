@@ -177,11 +177,14 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   while (!vars.empty() && FindInnerCEquality(expr,vars,var,val))
   {
     vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
+    
+    ATerm old_val=m_enclosing_enumerator->rewr_obj->getSubstitutionInternal((ATermAppl) var);
     m_enclosing_enumerator->rewr_obj->setSubstitutionInternal((ATermAppl) var,(ATerm)(ATermAppl)val);
     substituted_vars=push_front(substituted_vars,var);
     vals = push_front(vals,val);
     expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)expr);
-    m_enclosing_enumerator->rewr_obj->clearSubstitution((ATermAppl) var);
+    m_enclosing_enumerator->rewr_obj->setSubstitutionInternal((ATermAppl) var,old_val);
+    // m_enclosing_enumerator->rewr_obj->clearSubstitution((ATermAppl) var);
   }
 
   e=fs_expr(vars,substituted_vars,vals,expr);
@@ -457,6 +460,8 @@ bool EnumeratorSolutionsStandard::next(
           }
           atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewriteInternal(m_enclosing_enumerator->rewr_obj->toRewriteFormat(cons_term));
   
+          ATerm old_val=m_enclosing_enumerator->rewr_obj->getSubstitutionInternal((ATermAppl) var);
+
           m_enclosing_enumerator->rewr_obj->setSubstitutionInternal(var,(ATerm)(ATermAppl)term_rf);
           /* ATerm new_expr = m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)e.expr());
   
@@ -471,7 +476,8 @@ bool EnumeratorSolutionsStandard::next(
                                   atermpp::term_list < atermpp::aterm_appl > (),
                                   false); 
           // }
-          m_enclosing_enumerator->rewr_obj->clearSubstitution(var);
+          m_enclosing_enumerator->rewr_obj->setSubstitutionInternal(var,old_val);
+          // m_enclosing_enumerator->rewr_obj->clearSubstitution(var);
         }
       }
     }
