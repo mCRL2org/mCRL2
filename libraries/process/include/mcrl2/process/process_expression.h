@@ -18,11 +18,11 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/assignment.h"
+#include "mcrl2/data/precedence.h"
 #include "mcrl2/lps/action.h"
 #include "mcrl2/process/process_identifier.h"
 #include "mcrl2/process/rename_expression.h"
 #include "mcrl2/process/communication_expression.h"
-#include "mcrl2/process/pp.h"
 
 namespace mcrl2
 {
@@ -32,6 +32,9 @@ namespace process
 
 // Make the LPS action visible.
 using lps::action;
+
+// Needed for argument dependent lookup (?)
+using namespace core::detail::precedences;
 
 //--- start generated classes ---//
 /// \brief A process expression
@@ -861,6 +864,48 @@ bool is_choice(const process_expression& t)
 }
 
 //--- end generated classes ---//
+
+// From the documentation:
+// The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
+
+/// \brief Defines a precedence relation on process expressions
+inline
+int precedence(const process_expression& x)
+{
+  if (is_choice(x))
+  {
+    return 0;
+  }
+  else if (is_sum(x))
+  {
+    return 1;
+  }
+  else if (is_merge(x) || is_left_merge(x))
+  {
+    return 2;
+  }
+  else if (is_if_then(x) || is_if_then_else(x))
+  {
+    return 3;
+  }
+  else if (is_bounded_init(x))
+  {
+    return 4;
+  }
+  else if (is_seq(x))
+  {
+    return 5;
+  }
+  else if (is_at(x))
+  {
+    return 6;
+  }
+  else if (is_sync(x))
+  {
+    return 7;
+  }
+  return max_precedence;
+}
 
 } // namespace process
 

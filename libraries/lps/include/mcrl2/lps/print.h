@@ -280,9 +280,9 @@ std::string pp(const T& t)
 
 /// \brief Pretty print a linear process
 inline
-std::string pp(const linear_process& p)
+std::string pp(const linear_process& p, core::t_pp_format pp_format = core::ppDefault)
 {
-  return core::pp(linear_process_to_aterm(p));
+  return core::pp(linear_process_to_aterm(p), pp_format);
 }
 
 /// \brief Pretty print a specification 

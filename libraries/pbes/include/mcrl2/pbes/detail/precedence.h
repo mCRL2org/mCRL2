@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_DETAIL_PRECEDENCE_H
 #define MCRL2_PBES_DETAIL_PRECEDENCE_H
 
-#include "mcrl2/data/detail/precedence.h"
+#include "mcrl2/data/precedence.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
 namespace mcrl2 {

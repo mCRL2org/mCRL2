@@ -21,14 +21,6 @@ namespace mcrl2 {
 
 namespace pbes_system {
 
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
-std::string pp(const T& t)
-{
-  return core::pp(t);
-}
-
 namespace detail {
 
 template <typename Derived>
@@ -173,6 +165,15 @@ std::string print(const T& t)
   std::ostringstream out;
   pbes_system::print(t, out);
   return out.str();
+}
+
+/// \brief Pretty prints a term.
+/// \param[in] t A term
+template <typename T>
+std::string pp(const T& t)
+{
+  MCRL2_CHECK_PP(core::pp(t), pbes_system::print(t), t.to_string());
+  return core::pp(t);
 }
 
 } // namespace pbes_system

@@ -14,6 +14,7 @@
 
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/print.h"
 
 namespace mcrl2
 {

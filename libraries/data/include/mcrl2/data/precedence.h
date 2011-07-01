@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/detail/precedence.h
+/// \file mcrl2/data/precedence.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_DATA_DETAIL_PRECEDENCE_H
-#define MCRL2_DATA_DETAIL_PRECEDENCE_H
+#ifndef MCRL2_DATA_PRECEDENCE_H
+#define MCRL2_DATA_PRECEDENCE_H
 
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/data/standard_utility.h"
@@ -29,8 +29,6 @@
 namespace mcrl2 {
 
 namespace data {
-
-namespace detail {
 
 using namespace core::detail::precedences;
 
@@ -267,16 +265,8 @@ int infix_precedence_right(const data_expression& x)
   return -1;
 }
 
-inline
-int prefix_precedence()
-{
-  return 13;
-}
-
-} // namespace detail
-
 } // namespace data
 
 } // namespace mcrl2
 
-#endif // MCRL2_DATA_DETAIL_PRECEDENCE_H
+#endif // MCRL2_DATA_PRECEDENCE_H

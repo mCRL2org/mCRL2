@@ -15,8 +15,6 @@
 #include "mcrl2/lps/print.h"
 #include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/traverser.h"
-#include "mcrl2/process/detail/precedence.h"
-#include "mcrl2/process/pp.h"
 
 namespace mcrl2 {
 
@@ -297,6 +295,34 @@ std::string print(const T& t)
   std::ostringstream out;
   process::print(t, out);
   return out.str();
+}
+
+/// \brief Pretty prints a term.
+/// \param[in] t A term
+template <typename T>
+std::string pp(const T& t)
+{
+  MCRL2_CHECK_PP(core::pp(t),
+                 process::print(t),
+                 t.to_string()
+                );
+  return core::pp(t);
+}
+
+///// \brief Pretty prints the contents of a container
+///// \param[in] t A container
+//template <typename T>
+//inline std::string pp(const T& t, typename atermpp::detail::enable_if_container<T>::type* = 0)
+//{
+//  return data::pp(t);
+//}
+
+/// \brief Pretty print function
+/// \param spec A process specification
+/// \return A pretty print representation of the specification
+inline std::string pp(const process_specification& spec)
+{
+  return core::pp(process_specification_to_aterm(spec));
 }
 
 } // namespace process

@@ -213,14 +213,6 @@ ATermAppl process_specification_to_aterm(const process_specification& spec)
          );
 }
 
-/// \brief Pretty print function
-/// \param spec A process specification
-/// \return A pretty print representation of the specification
-inline std::string pp(const process_specification& spec)
-{
-  return core::pp(process_specification_to_aterm(spec));
-}
-
 /// \brief Equality operator
 inline
 bool operator==(const process_specification& spec1, const process_specification& spec2)
