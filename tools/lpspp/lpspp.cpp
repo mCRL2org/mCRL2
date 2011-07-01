@@ -21,6 +21,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/print.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2::utilities::tools;

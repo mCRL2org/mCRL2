@@ -16,6 +16,7 @@
 
 #include <mcrl2/lps/linear_process.h>
 #include "mcrl2/lps/replace.h"
+#include "mcrl2/lps/print.h"
 
 using namespace std;
 using namespace mcrl2;
