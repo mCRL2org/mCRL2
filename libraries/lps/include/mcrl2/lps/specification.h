@@ -278,13 +278,6 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec)
          );
 }
 
-/// \brief Pretty print function
-inline
-std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
-{
-  return core::pp(specification_to_aterm(spec), pp_format);
-}
-
 /// \brief Equality operator
 inline
 bool operator==(const specification& spec1, const specification& spec2)

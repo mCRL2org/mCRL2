@@ -215,13 +215,6 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
          );
 }
 
-/// \brief Pretty print the linear process
-inline
-std::string pp1(const linear_process& p)
-{
-  return core::pp(linear_process_to_aterm(p));
-}
-
 namespace deprecated
 {
 /// \brief Set the summands of the linear process

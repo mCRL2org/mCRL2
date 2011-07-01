@@ -1,4 +1,5 @@
 #include <string>
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/parelm.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -6,11 +7,11 @@ using namespace mcrl2;
 
 void test_parelm(std::string spec_text)
 {
-  lps::specification spec = lps::mcrl22lps(spec_text);
-  lps::linear_process p   = lps::spec.process();
-  lps::linear_process q   = lps::parelm(p);
-  std::cout << "<before>\n" << lps::pp(p) << std::endl;
-  std::cout << "<after>\n"  << lps::pp(q) << std::endl;
+  lps::specification spec1 = lps::linearise(spec_text);
+  lps::specification spec2 = spec1;
+  lps::parelm(spec2);
+  std::cout << "<before>\n" << lps::pp(spec1.process()) << std::endl;
+  std::cout << "<after>\n"  << lps::pp(spec2.process()) << std::endl;
   std::cout << "------------------------------------------------------------------------" << std::endl;
 }
 

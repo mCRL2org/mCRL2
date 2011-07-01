@@ -1,4 +1,4 @@
-// Author(s): Jeroen Keiren
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -21,14 +21,6 @@ namespace mcrl2
 
 namespace lps
 {
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
-std::string pp(const T& t)
-{
-  return core::pp(t);
-}
 
 namespace detail
 {
@@ -275,6 +267,29 @@ std::string print(const T& t)
   std::ostringstream out;
   lps::print(t, out);
   return out.str();
+}
+
+/// \brief Pretty prints a term.
+/// \param[in] t A term
+template <typename T>
+std::string pp(const T& t)
+{
+  MCRL2_CHECK_PP(core::pp(t), lps::print(t), t.to_string());
+  return core::pp(t);
+}
+
+/// \brief Pretty print a linear process
+inline
+std::string pp(const linear_process& p)
+{
+  return core::pp(linear_process_to_aterm(p));
+}
+
+/// \brief Pretty print a specification 
+inline
+std::string pp(const specification& spec, core::t_pp_format pp_format = core::ppDefault)
+{
+  return core::pp(specification_to_aterm(spec), pp_format);
 }
 
 } // namespace lps

@@ -91,10 +91,10 @@ void test_lps_substituter()
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
 
   lps::replace_variables(spec1, sigma);
-  std::cerr << pp1(spec1.process()) << std::endl;
+  std::cerr << lps::pp(spec1.process()) << std::endl;
   std::cerr << "-------------------------------------" << std::endl;
-  std::cerr << pp1(spec2.process()) << std::endl;
-  BOOST_CHECK(pp1(spec1.process()) == pp1(spec2.process()));
+  std::cerr << lps::pp(spec2.process()) << std::endl;
+  BOOST_CHECK(lps::pp(spec1.process()) == lps::pp(spec2.process()));
   core::garbage_collect();
 }
 
