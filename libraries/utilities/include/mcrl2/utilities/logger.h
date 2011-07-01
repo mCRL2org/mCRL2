@@ -12,7 +12,6 @@
 #define MCRL2_UTILITIES_LOGGER_H
 
 #include <cstdio>
-#include <ctime>
 #include <stdexcept>
 #include <string>
 #include <sstream>
@@ -117,7 +116,13 @@ std::string now_time();
 /// \deprecated
 /// provided for backward compatibility with gs*Msg
 typedef void (*custom_message_handler_t)(mcrl2_message_t, const char*);
-static custom_message_handler_t mcrl2_custom_message_handler = 0; //< Do not access directly
+custom_message_handler_t& mcrl2_custom_message_handler_func(); // prototype
+
+static
+inline custom_message_handler_t& mcrl2_custom_message_handler()
+{
+  return mcrl2_custom_message_handler_func();
+}
 
 /// \brief Class for logging messages
 ///
@@ -262,11 +267,14 @@ class logger
     ~logger()
     {
       // With custom message handler, still log to the default location
-      OutputPolicy::output(process(m_os.str()), m_hint);
-      if(mcrl2_custom_message_handler != 0)
+      const std::string msg(process(m_os.str()));
+
+      if(mcrl2_custom_message_handler() != 0)
       {
-        (*(mcrl2_custom_message_handler))(to_message_type(m_level), process(m_os.str()).c_str());
+        (*(mcrl2_custom_message_handler()))(to_message_type(m_level), msg.c_str());
       }
+
+      OutputPolicy::output(msg, m_hint);
     }
 
     /// \brief Set reporting level
@@ -332,7 +340,7 @@ class logger
     static
     void set_custom_message_handler(custom_message_handler_t handler)
     {
-      mcrl2_custom_message_handler = handler;
+      mcrl2_custom_message_handler() = handler;
     }
 };
 

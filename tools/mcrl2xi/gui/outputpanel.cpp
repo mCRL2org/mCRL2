@@ -76,8 +76,7 @@ class message_relay
     message_relay(wxTextCtrl& control) : m_control(control)
     {
       m_error_stream = std::cerr.rdbuf(new text_control_buf(m_control));
-
-      mcrl2_logger::set_custom_message_handler(relay_message);
+      mcrl2_logger::set_custom_message_handler(&relay_message);
     }
 
     void message(const char* data)
@@ -103,19 +102,9 @@ class message_relay
     }
 };
 
-static void relay_message(const ::mcrl2_message_t t, const char* data)
+static void relay_message(const ::mcrl2_message_t /*t*/, const char* data)
 {
-  switch (t)
-  {
-    case mcrl2_notice:
-      break;
-    case mcrl2_warning:
-      break;
-    case mcrl2_error:
-    default:
-      communicator->message(data);
-      break;
-  }
+  communicator->message(data);
 }
 
 outputpanel::outputpanel(wxWindow* p_parent)

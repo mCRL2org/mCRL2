@@ -29,10 +29,10 @@ ENDIF(WIN32)
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   mcrl2xi.cpp
   gui/mainframe.cpp
-	gui/editor.cpp
-	gui/actions.cpp
-	gui/xstceditor.cpp
-	gui/outputpanel.cpp
+  gui/editor.cpp
+  gui/actions.cpp
+  gui/xstceditor.cpp
+  gui/outputpanel.cpp
   gui/subactions.cpp
   gui/mytextctrl.cpp
 
