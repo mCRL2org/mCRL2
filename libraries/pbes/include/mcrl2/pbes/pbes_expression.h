@@ -495,6 +495,53 @@ inline bool is_propositional_variable_instantiation(const pbes_expression& t)
   return core::detail::gsIsPropVarInst(t);
 }
 
+// From the documentation:
+// The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>", followed by "forall" and "exists".
+// The infix operators "&&", "||" and "=>" associate to the right.
+/// \brief Returns the precedence of pbes expressions
+inline
+int precedence(const pbes_expression& x)
+{
+  if (is_forall(x) || is_exists(x))
+  {
+    return 0;
+  }
+  else if (is_imp(x)) 
+  {
+    return 1;
+  }
+  else if (is_and(x) || is_or(x)) 
+  {
+    return 2;
+  }
+  else if (is_not(x)) 
+  {
+    return 3;
+  }
+  return core::detail::precedences::max_precedence;
+}
+
+/// \brief Returns true if the operations have the same precedence, but are different
+template <typename T1, typename T2>
+bool is_same_different_precedence(const T1&, const T2&)
+{
+  return false;
+}
+
+/// \brief Returns true if the operations have the same precedence, but are different
+inline
+bool is_same_different_precedence(const and_&, const pbes_expression& x)
+{
+  return is_or(x);
+}
+
+/// \brief Returns true if the operations have the same precedence, but are different
+inline
+bool is_same_different_precedence(const or_&, const pbes_expression& x)
+{
+  return is_and(x);
+}
+
 /// \brief The namespace for accessor functions on pbes expressions.
 namespace accessors
 {

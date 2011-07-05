@@ -64,6 +64,11 @@ void test_term(const std::string& s)
     sort_expression x = atermpp::aterm_appl((ATermAppl) a);
     test_term(s, x);
   }
+  else if (s.find("OpId") == 0)
+  {
+    function_symbol x = atermpp::aterm_appl((ATermAppl) a);
+    test_term(s, x);
+  }
   else
   {
     data_expression x = atermpp::aterm_appl((ATermAppl) a);
@@ -73,11 +78,25 @@ void test_term(const std::string& s)
 
 BOOST_AUTO_TEST_CASE(problem_cases)
 {
+  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[DataAppl(OpId(\"@add_\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))],SortArrow([SortId(\"Bool\")],SortId(\"Nat\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"g\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\")))]),DataAppl(OpId(\"@fbag_join\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortFBag,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"g\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\"))),DataVarId(\"c\",SortCons(SortFBag,SortId(\"Bool\")))])])");
+  
+  test_term("DataAppl(OpId(\"@bagcomp\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))],SortCons(SortBag,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\")))])");
+  test_term("DataAppl(OpId(\"==\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataVarId(\"b\",SortId(\"Bool\")),DataVarId(\"b\",SortId(\"Bool\"))])");
+  test_term("OpId(\"e1\",SortId(\"Enum\"))");
+
+  test_term("DataAppl(OpId(\"div\",SortArrow([SortId(\"Pos\"),SortId(\"Pos\")],SortId(\"Nat\"))),[OpId(\"@c1\",SortId(\"Pos\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[DataVarId(\"b\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))])])");
+  test_term("DataAppl(OpId(\"@cNeg\",SortArrow([SortId(\"Pos\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))])])");
+  test_term("DataAppl(OpId(\"-\",SortArrow([SortId(\"Real\")],SortId(\"Real\"))),[DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataVarId(\"x\",SortId(\"Int\")),DataVarId(\"p\",SortId(\"Pos\"))])])");
+  test_term("DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataAppl(OpId(\"-\",SortArrow([SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"x\",SortId(\"Int\"))]),DataVarId(\"p\",SortId(\"Pos\"))])");
+  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[OpId(\"@false_\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])"); 
+  test_term("OpId(\"@c0\",SortId(\"Nat\"))");
+  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[OpId(\"@false_\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])");
+  
+  test_term("variable_list()", variable_list());
+
   test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"Bool\")))])");
 
   test_term("DataAppl(OpId(\"mod\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"y\",SortId(\"Int\")),DataVarId(\"q\",SortId(\"Pos\"))])");
- 
-  test_term("variable_list()", variable_list());
   
   test_term("SortCons(SortFSet,SortId(\"Bool\"))");
   test_term("SortCons(SortFBag,SortId(\"Bool\"))");

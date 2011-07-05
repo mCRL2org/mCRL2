@@ -24,6 +24,7 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/detail/rewrite_container.h"
 #include "mcrl2/pbes/pbes_expression.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/data_rewrite_builder.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"

@@ -263,18 +263,6 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
   return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
 }
 
-inline
-std::string pp(const pbes_equation& eqn)
-{
-  std::ostringstream out;
-  out << core::pp(eqn.symbol())
-      << '.'
-      << core::pp(eqn.variable())
-      << " = "
-      << core::pp(eqn.formula());
-  return out.str();
-}
-
 } // namespace pbes_system
 
 } // namespace mcrl2

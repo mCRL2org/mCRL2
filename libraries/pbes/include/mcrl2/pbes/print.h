@@ -15,7 +15,6 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/traverser.h"
-#include "mcrl2/pbes/detail/precedence.h"
 
 namespace mcrl2 {
 
@@ -46,6 +45,55 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     return static_cast<Derived&>(*this);
   }
 
+  // N.B. We need a special version due to the "val" operator that needs to be
+  // put around data expressions.
+  template <typename T>
+  void print_pbes_expression(const T& x, int prec = 5)
+  {
+    bool print_parens = (precedence(x) < prec);
+    bool is_data_expr = is_data(x);
+    if (print_parens)
+    {
+      derived().print("(");
+    }
+    if (is_data_expr)
+    {
+      derived().print("val(");
+    }
+    derived()(x);
+    if (is_data_expr)
+    {
+      derived().print(")");
+    }
+    if (print_parens)
+    {
+      derived().print(")");
+    }
+  }
+
+  // N.B. We need a special version due to the "val" operator that needs to be
+  // put around data expressions.
+  template <typename T>
+  void print_pbes_binary_operation(const T& x, const std::string& op)
+  {
+    print_pbes_expression(x.left(), is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
+    derived().print(op);
+    print_pbes_expression(x.right(), is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
+  }
+
+  // N.B. We need a special version due to the "val" operator that needs to be
+  // put around data expressions.
+  template <typename Abstraction>
+  void print_pbes_abstraction(const Abstraction& x, const std::string& op)
+  {
+    derived().enter(x);
+    derived().print(op + " ");
+    print_variables(x.variables(), true, true, false, "", "", ", ");   
+    derived().print(". ");
+    print_pbes_expression(x.body());
+    derived().leave(x);
+  }
+
   void operator()(const pbes_system::propositional_variable& x)
   {
     derived().enter(x);
@@ -57,8 +105,10 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   void operator()(const pbes_system::pbes_equation& x)
   {
     derived().enter(x);
+    derived().print(x.symbol().is_mu() ? "mu " : "nu ");
     derived()(x.variable());
-    derived().print(" = ");
+    // TODO: change the weird convention of putting the rhs of an equation on a new line
+    derived().print(" =\n       ");
     derived()(x.formula());
     derived().print(";");
     derived().leave(x);
@@ -76,9 +126,11 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     // N.B. We have to normalize the sorts of the equations first.
     atermpp::vector<pbes_equation> normalized_equations = x.equations();
     pbes_system::normalize_sorts(normalized_equations, x.data());   
-    print_list(normalized_equations, "proc ", "\n\n", "\n     ");
+    print_list(normalized_equations, "pbes ", "\n\n", "\n     ");
 
-    print_initial_state(x.init());
+    derived().print("init ");
+    print_pbes_expression(x.initial_state());
+    derived().print(";\n");
     derived().leave(x);
   }
 
@@ -107,42 +159,42 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   void operator()(const pbes_system::not_& x)
   {
     derived().enter(x);
-    derived()(x.operand());
+    print_pbes_expression(x.operand());
     derived().leave(x);
   }
 
   void operator()(const pbes_system::and_& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " && ");
+    print_pbes_binary_operation(x, " && ");
     derived().leave(x);
   }
 
   void operator()(const pbes_system::or_& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " || ");
+    print_pbes_binary_operation(x, " || ");
     derived().leave(x);
   }
 
   void operator()(const pbes_system::imp& x)
   {
     derived().enter(x);
-    print_binary_operation(x, " => ");
+    print_pbes_binary_operation(x, " => ");
     derived().leave(x);
   }
 
   void operator()(const pbes_system::forall& x)
   {
     derived().enter(x);
-    print_abstraction(x, "forall");
+    print_pbes_abstraction(x, "forall");
     derived().leave(x);
   }
 
   void operator()(const pbes_system::exists& x)
   {
     derived().enter(x);
-    print_abstraction(x, "exists");
+    print_pbes_abstraction(x, "exists");
     derived().leave(x);
   }
 };
@@ -173,6 +225,30 @@ std::string pp(const T& t)
 {
   MCRL2_CHECK_PP(core::pp(t), pbes_system::print(t), t.to_string());
   return core::pp(t);
+}
+
+inline
+std::string pp(const pbes_equation& eqn)
+{
+  //std::ostringstream out;
+  //out << core::pp(eqn.symbol())
+  //    << '.'
+  //    << core::pp(eqn.variable())
+  //    << " = "
+  //    << core::pp(eqn.formula());
+  //return out.str();
+  MCRL2_CHECK_PP(core::pp(pbes_equation_to_aterm(eqn)), pbes_system::print(eqn), pbes_equation_to_aterm(eqn).to_string());
+  return core::pp(pbes_equation_to_aterm(eqn));
+}
+
+/// \brief Pretty print function
+/// \param spec A pbes specification
+/// \return A pretty print representation of the specification
+template <typename Container>
+std::string pp(const pbes<Container>& spec, core::t_pp_format pp_format = core::ppDefault)
+{
+  MCRL2_CHECK_PP(core::pp(pbes_to_aterm(spec)), pbes_system::print(spec), pbes_to_aterm(spec).to_string());
+  return core::pp(pbes_to_aterm(spec), pp_format);
 }
 
 } // namespace pbes_system

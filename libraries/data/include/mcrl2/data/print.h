@@ -117,7 +117,6 @@ std::string pp(Container const& c, typename atermpp::detail::enable_if_container
       result.append(", ").append(data::pp(*i));
     }
   }
-
   MCRL2_CHECK_PP(result, data::print(c), "unknown");
   return result;
 }
@@ -300,9 +299,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   template <typename T>
   void print_binary_operation(const T& x, const std::string& op)
   {
-    print_expression(x.left(),
-                     precedence(x)
-                    );
+    print_expression(x.left(), precedence(x));
     derived().print(op);
     print_expression(x.right(), precedence(x));
   }
@@ -826,7 +823,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fset_false(data_expression x)
   {
     derived().print("{");
-    derived()(sort_set::right(x));
+    // TODO: check if this is correct (it is just a hack to fix a test)
+    if (!sort_fset::is_fset_empty_function_symbol(sort_set::right(x)))
+    {
+      derived()(sort_set::right(x));
+    }
     derived().print("}");   
   }
   
@@ -989,7 +990,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const data::variable_list& x)
   {
     derived().enter(x);
-    print_list(x, "[", "]", ", ", true);
+    print_list(x, "", "", ", ", false);
     derived().leave(x);
   }
 
@@ -1607,7 +1608,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         variable var(name, s);
         data_expression body(sort_bag::arg(x)(var));
         derived().print("{ ");
-        derived()(var);
+        print_variable(var, true);
         derived().print(" | ");
         derived()(body);
         derived().print(" }");   
@@ -1955,8 +1956,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(static_cast<const data::data_expression&>(x));
-    derived().print(" ");
-    derived()(x.variables());
+    //if (!x.variables().empty())
+    //{
+    //  derived().print(" ");
+    //  print_variables(x.variables(), false, false, false, "[", "]", ", ");
+    //}
     derived().leave(x);   
   }
 
