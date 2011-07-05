@@ -35,6 +35,129 @@ using namespace mcrl2::data::sort_nat;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
+#ifdef MCRL2_PRINT_PROBLEM_CASES
+template <typename T>
+void test_term(const std::string& s, const T& x)
+{
+  std::clog << "--- testing term " << core::pp(x) << " ---" << std::endl;
+  std::string s1 = data::pp(x);
+  std::string s2 = data::print(x);
+  if (s1 != s2)
+  {
+    std::clog << "<pp>   " << s1 << std::endl;
+    std::clog << "<print>" << s2 << std::endl;
+    std::clog << "<aterm>" << s  << std::endl;
+    BOOST_CHECK(s1 == s2);
+  }  
+}
+
+void test_term(const std::string& s)
+{
+  ATerm a = atermpp::make_term(s);
+  if (s.find("DataEqn") == 0)
+  {
+    data_equation x = atermpp::aterm_appl((ATermAppl) a);
+    test_term(s, x);
+  }
+  else if (s.find("SortCons") == 0)
+  {
+    sort_expression x = atermpp::aterm_appl((ATermAppl) a);
+    test_term(s, x);
+  }
+  else
+  {
+    data_expression x = atermpp::aterm_appl((ATermAppl) a);
+    test_term(s, x);
+  }
+}
+
+BOOST_AUTO_TEST_CASE(problem_cases)
+{
+  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"Bool\")))])");
+
+  test_term("DataAppl(OpId(\"mod\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"y\",SortId(\"Int\")),DataVarId(\"q\",SortId(\"Pos\"))])");
+ 
+  test_term("variable_list()", variable_list());
+  
+  test_term("SortCons(SortFSet,SortId(\"Bool\"))");
+  test_term("SortCons(SortFBag,SortId(\"Bool\"))");
+
+  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[OpId(\"@false_\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))])");  
+  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])");
+  test_term("OpId(\"@c0\",SortId(\"Nat\"))");
+  test_term("DataEqn([DataVarId(\"n\",SortId(\"Nat\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"exp\",SortArrow([SortId(\"Nat\"),SortId(\"Nat\")],SortId(\"Nat\"))),[DataVarId(\"n\",SortId(\"Nat\")),OpId(\"@c0\",SortId(\"Nat\"))]),DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[OpId(\"@c1\",SortId(\"Pos\"))]))");
+  test_term("DataEqn([DataVarId(\"p\",SortId(\"Pos\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"@dub\",SortArrow([SortId(\"Bool\"),SortId(\"Int\")],SortId(\"Int\"))),[OpId(\"false\",SortId(\"Bool\")),DataAppl(OpId(\"@cNeg\",SortArrow([SortId(\"Pos\")],SortId(\"Int\"))),[DataVarId(\"p\",SortId(\"Pos\"))])]),DataAppl(OpId(\"@cNeg\",SortArrow([SortId(\"Pos\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))])]))");
+  test_term("DataEqn([DataVarId(\"p\",SortId(\"Pos\")),DataVarId(\"x\",SortId(\"Int\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"-\",SortArrow([SortId(\"Real\")],SortId(\"Real\"))),[DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataVarId(\"x\",SortId(\"Int\")),DataVarId(\"p\",SortId(\"Pos\"))])]),DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataAppl(OpId(\"-\",SortArrow([SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"x\",SortId(\"Int\"))]),DataVarId(\"p\",SortId(\"Pos\"))]))");
+  
+  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[OpId(\"@zero_\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))])");
+  
+  // <pp>   @bagfbag(b)  =  @bagfbag(b)
+  // <print>b  =  {b}
+  // <aterm>DataEqn([DataVarId("b",SortCons(SortFBag,SortId("Bool")))],OpId("true",SortId("Bool")),DataAppl(OpId("@bagfbag",SortArrow([SortCons(SortFBag,SortId("Bool"))],SortCons(SortBag,SortId("Bool")))),[DataVarId("b",SortCons(SortFBag,SortId("Bool")))]),DataAppl(OpId("@bag",SortArrow([SortArrow([SortId("Bool")],SortId("Nat")),SortCons(SortFBag,SortId("Bool"))],SortCons(SortBag,SortId("Bool")))),[OpId("@zero_",SortArrow([SortId("Bool")],SortId("Nat"))),DataVarId("b",SortCons(SortFBag,SortId("Bool")))]))
+  test_term("DataEqn([DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"@bagfbag\",SortArrow([SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))]),DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[OpId(\"@zero_\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))]))");
+
+  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Nat\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Nat\"))],SortCons(SortBag,SortId(\"Nat\")))),[Binder(Lambda,[DataVarId(\"x\",SortId(\"Nat\"))],DataVarId(\"x\",SortId(\"Nat\"))),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"Nat\")))])");
+  // <pp>   { b: Bool | b }
+  // <print>{ [b: Bool] | b }
+  // <aterm>DataAppl(OpId("@set",SortArrow([SortArrow([SortId("Bool")],SortId("Bool")),SortCons(SortFSet,SortId("Bool"))],SortCons(SortSet,SortId("Bool")))),[Binder(Lambda,[DataVarId("b",SortId("Bool"))],DataVarId("b",SortId("Bool"))),OpId("@fset_empty",SortCons(SortFSet,SortId("Bool")))])
+
+  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[Binder(Lambda,[DataVarId(\"b\",SortId(\"Bool\"))],DataVarId(\"b\",SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])");
+  
+  // <pp>   { b: Bool | if(b, 2, 3) }
+  // <print>{ [b: Bool] | if(b, 2, 3) }
+  // <aterm>DataAppl(OpId("@bag",SortArrow([SortArrow([SortId("Bool")],SortId("Nat")),SortCons(SortFBag,SortId("Bool"))],SortCons(SortBag,SortId("Bool")))),[Binder(Lambda,[DataVarId("b",SortId("Bool"))],DataAppl(OpId("if",SortArrow([SortId("Bool"),SortId("Nat"),SortId("Nat")],SortId("Nat"))),[DataVarId("b",SortId("Bool")),DataAppl(OpId("Pos2Nat",SortArrow([SortId("Pos")],SortId("Nat"))),[DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[OpId("false",SortId("Bool")),OpId("@c1",SortId("Pos"))])]),DataAppl(OpId("Pos2Nat",SortArrow([SortId("Pos")],SortId("Nat"))),[DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[OpId("true",SortId("Bool")),OpId("@c1",SortId("Pos"))])])])),OpId("@fbag_empty",SortCons(SortFBag,SortId("Bool")))])
+  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[Binder(Lambda,[DataVarId(\"b\",SortId(\"Bool\"))],DataAppl(OpId(\"if\",SortArrow([SortId(\"Bool\"),SortId(\"Nat\"),SortId(\"Nat\")],SortId(\"Nat\"))),[DataVarId(\"b\",SortId(\"Bool\")),DataAppl(OpId(\"Pos2Nat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])]),DataAppl(OpId(\"Pos2Nat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"true\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])])])),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"Bool\")))])");
+  
+  // <pp>   !true  =  false, !false  =  true, !!b  =  b, b && true  =  b, b && false  =  false, true && b  =  b, false && b  =  false, b || true  =  true, b || false  =  b, true || b  =  true, false || b  =  b, b => true  =  true, b => false  =  !b, true => b  =  b, false => b  =  true, true == b  =  b, false == b  =  !b, b == true  =  b, b == false  =  !b, false < b  =  b, true < b  =  false, b < false  =  false, b < true  =  !b, false <= b  =  true, true <= b  =  b, b <= false  =  !b, b <= true  =  true
+  // <print>!true  =  false!false  =  true!!b  =  bb && true  =  bb && false  =  falsetrue && b  =  bfalse && b  =  falseb || true  =  trueb || false  =  btrue || b  =  truefalse || b  =  bb => true  =  trueb => false  =  !btrue => b  =  bfalse => b  =  truetrue == b  =  bfalse == b  =  !bb == true  =  bb == false  =  !bfalse < b  =  btrue < b  =  falseb < false  =  falseb < true  =  !bfalse <= b  =  truetrue <= b  =  bb <= false  =  !bb <= true  =  true
+  // <aterm>unknown 
+
+  // <pp>   1 == 2 * p + 2 * if(b, 1, 0)  =  false
+  // <print>1 == @cDub(b, p)  =  false
+  // <aterm>DataEqn([DataVarId("b",SortId("Bool")),DataVarId("p",SortId("Pos"))],OpId("true",SortId("Bool")),DataAppl(OpId("==",SortArrow([SortId("Pos"),SortId("Pos")],SortId("Bool"))),[OpId("@c1",SortId("Pos")),DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[DataVarId("b",SortId("Bool")),DataVarId("p",SortId("Pos"))])]),OpId("false",SortId("Bool")))
+  test_term("DataEqn([DataVarId(\"b\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"==\",SortArrow([SortId(\"Pos\"),SortId(\"Pos\")],SortId(\"Bool\"))),[OpId(\"@c1\",SortId(\"Pos\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[DataVarId(\"b\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))])]),OpId(\"false\",SortId(\"Bool\")))"); 
+
+  test_term("DataAppl(OpId(\"mod\",SortArrow([SortId(\"Nat\"),SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"n\",SortId(\"Nat\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])])");
+
+  // <pp>   succ(succ(n))  =  2 * succ(n div 2) + 2 * if(n mod 2 == 1, 1, 0)
+  // <print>succ(succ(n))  =  @cDub(n mod 2 == 1, succ(n / 2))
+  // <aterm>DataEqn([DataVarId("n",SortId("Nat"))],OpId("true",SortId("Bool")),DataAppl(OpId("succ",SortArrow([SortId("Pos")],SortId("Pos"))),[DataAppl(OpId("succ",SortArrow([SortId("Nat")],SortId("Pos"))),[DataVarId("n",SortId("Nat"))])]),DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[DataAppl(OpId("==",SortArrow([SortId("Nat"),SortId("Nat")],SortId("Bool"))),[DataAppl(OpId("mod",SortArrow([SortId("Nat"),SortId("Pos")],SortId("Nat"))),[DataVarId("n",SortId("Nat")),DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[OpId("false",SortId("Bool")),OpId("@c1",SortId("Pos"))])]),DataAppl(OpId("@cNat",SortArrow([SortId("Pos")],SortId("Nat"))),[OpId("@c1",SortId("Pos"))])]),DataAppl(OpId("succ",SortArrow([SortId("Nat")],SortId("Pos"))),[DataAppl(OpId("div",SortArrow([SortId("Nat"),SortId("Pos")],SortId("Nat"))),[DataVarId("n",SortId("Nat")),DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[OpId("false",SortId("Bool")),OpId("@c1",SortId("Pos"))])])])]))
+  test_term("DataEqn([DataVarId(\"n\",SortId(\"Nat\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"succ\",SortArrow([SortId(\"Pos\")],SortId(\"Pos\"))),[DataAppl(OpId(\"succ\",SortArrow([SortId(\"Nat\")],SortId(\"Pos\"))),[DataVarId(\"n\",SortId(\"Nat\"))])]),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[DataAppl(OpId(\"==\",SortArrow([SortId(\"Nat\"),SortId(\"Nat\")],SortId(\"Bool\"))),[DataAppl(OpId(\"mod\",SortArrow([SortId(\"Nat\"),SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"n\",SortId(\"Nat\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])]),DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[OpId(\"@c1\",SortId(\"Pos\"))])]),DataAppl(OpId(\"succ\",SortArrow([SortId(\"Nat\")],SortId(\"Pos\"))),[DataAppl(OpId(\"div\",SortArrow([SortId(\"Nat\"),SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"n\",SortId(\"Nat\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])])])]))");
+  
+  // <pp>   n == -p  =  false
+  // <print>n == @cNeg(p)  =  false
+  // <aterm>DataEqn([DataVarId("n",SortId("Nat")),DataVarId("p",SortId("Pos"))],OpId("true",SortId("Bool")),DataAppl(OpId("==",SortArrow([SortId("Int"),SortId("Int")],SortId("Bool"))),[DataAppl(OpId("@cInt",SortArrow([SortId("Nat")],SortId("Int"))),[DataVarId("n",SortId("Nat"))]),DataAppl(OpId("@cNeg",SortArrow([SortId("Pos")],SortId("Int"))),[DataVarId("p",SortId("Pos"))])]),OpId("false",SortId("Bool")))
+  test_term("DataEqn([DataVarId(\"n\",SortId(\"Nat\")),DataVarId(\"p\",SortId(\"Pos\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"==\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Bool\"))),[DataAppl(OpId(\"@cInt\",SortArrow([SortId(\"Nat\")],SortId(\"Int\"))),[DataVarId(\"n\",SortId(\"Nat\"))]),DataAppl(OpId(\"@cNeg\",SortArrow([SortId(\"Pos\")],SortId(\"Int\"))),[DataVarId(\"p\",SortId(\"Pos\"))])]),OpId(\"false\",SortId(\"Bool\")))"); 
+  
+  // <pp>   x / p == y / q  =  x * q == y * p
+  // <print>x == y  =  x * q == y * p
+  // <aterm>DataEqn([DataVarId("p",SortId("Pos")),DataVarId("q",SortId("Pos")),DataVarId("x",SortId("Int")),DataVarId("y",SortId("Int"))],OpId("true",SortId("Bool")),DataAppl(OpId("==",SortArrow([SortId("Real"),SortId("Real")],SortId("Bool"))),[DataAppl(OpId("@cReal",SortArrow([SortId("Int"),SortId("Pos")],SortId("Real"))),[DataVarId("x",SortId("Int")),DataVarId("p",SortId("Pos"))]),DataAppl(OpId("@cReal",SortArrow([SortId("Int"),SortId("Pos")],SortId("Real"))),[DataVarId("y",SortId("Int")),DataVarId("q",SortId("Pos"))])]),DataAppl(OpId("==",SortArrow([SortId("Int"),SortId("Int")],SortId("Bool"))),[DataAppl(OpId("*",SortArrow([SortId("Int"),SortId("Int")],SortId("Int"))),[DataVarId("x",SortId("Int")),DataAppl(OpId("@cInt",SortArrow([SortId("Nat")],SortId("Int"))),[DataAppl(OpId("@cNat",SortArrow([SortId("Pos")],SortId("Nat"))),[DataVarId("q",SortId("Pos"))])])]),DataAppl(OpId("*",SortArrow([SortId("Int"),SortId("Int")],SortId("Int"))),[DataVarId("y",SortId("Int")),DataAppl(OpId("@cInt",SortArrow([SortId("Nat")],SortId("Int"))),[DataAppl(OpId("@cNat",SortArrow([SortId("Pos")],SortId("Nat"))),[DataVarId("p",SortId("Pos"))])])])]))
+  test_term("DataEqn([DataVarId(\"p\",SortId(\"Pos\")),DataVarId(\"q\",SortId(\"Pos\")),DataVarId(\"x\",SortId(\"Int\")),DataVarId(\"y\",SortId(\"Int\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"==\",SortArrow([SortId(\"Real\"),SortId(\"Real\")],SortId(\"Bool\"))),[DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataVarId(\"x\",SortId(\"Int\")),DataVarId(\"p\",SortId(\"Pos\"))]),DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataVarId(\"y\",SortId(\"Int\")),DataVarId(\"q\",SortId(\"Pos\"))])]),DataAppl(OpId(\"==\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Bool\"))),[DataAppl(OpId(\"*\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"x\",SortId(\"Int\")),DataAppl(OpId(\"@cInt\",SortArrow([SortId(\"Nat\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"q\",SortId(\"Pos\"))])])]),DataAppl(OpId(\"*\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"y\",SortId(\"Int\")),DataAppl(OpId(\"@cInt\",SortArrow([SortId(\"Nat\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"p\",SortId(\"Pos\"))])])])]))");  
+
+  test_term("OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))");
+  
+  // <pp>   {} == {}  =  true
+  // <print>@fset_empty == @fset_empty  =  true
+  // <aterm>DataEqn([],OpId("true",SortId("Bool")),DataAppl(OpId("==",SortArrow([SortCons(SortFSet,SortId("Bool")),SortCons(SortFSet,SortId("Bool"))],SortId("Bool"))),[OpId("@fset_empty",SortCons(SortFSet,SortId("Bool"))),OpId("@fset_empty",SortCons(SortFSet,SortId("Bool")))]),OpId("true",SortId("Bool")))
+  test_term("DataEqn([],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"==\",SortArrow([SortCons(SortFSet,SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortId(\"Bool\"))),[OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))]),OpId(\"true\",SortId(\"Bool\")))"); 
+
+  test_term("DataAppl(OpId(\"@setfset\",SortArrow([SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))])");
+
+  // <pp>   @setfset(s)  =  @setfset(s)
+  // <print>s  =  { x: Bool | @false_(x) != x in s }
+  // <aterm>DataEqn([DataVarId("s",SortCons(SortFSet,SortId("Bool")))],OpId("true",SortId("Bool")),DataAppl(OpId("@setfset",SortArrow([SortCons(SortFSet,SortId("Bool"))],SortCons(SortSet,SortId("Bool")))),[DataVarId("s",SortCons(SortFSet,SortId("Bool")))]),DataAppl(OpId("@set",SortArrow([SortArrow([SortId("Bool")],SortId("Bool")),SortCons(SortFSet,SortId("Bool"))],SortCons(SortSet,SortId("Bool")))),[OpId("@false_",SortArrow([SortId("Bool")],SortId("Bool"))),DataVarId("s",SortCons(SortFSet,SortId("Bool")))]))
+  test_term("DataEqn([DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"@setfset\",SortArrow([SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))]),DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[OpId(\"@false_\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))]))");
+  
+  // <pp>   @fbag_cons(v0, v1, v2) < @fbag_cons(v3, v4, v5)  =  v0 < v3 || v0 == v3 && v1 < v4 || v1 == v4 && v2 < v5
+  // <print>@fbag_cons(v0, v1, v2) < @fbag_cons(v3, v4, v5)  =  v0 < v3 || (v0 == v3 && (v1 < v4 || (v1 == v4 && v2 < v5)))
+  // <aterm>DataEqn([DataVarId("v0",SortId("Bool")),DataVarId("v1",SortId("Pos")),DataVarId("v2",SortCons(SortFBag,SortId("Bool"))),DataVarId("v3",SortId("Bool")),DataVarId("v4",SortId("Pos")),DataVarId("v5",SortCons(SortFBag,SortId("Bool")))],OpId("true",SortId("Bool")),DataAppl(OpId("<",SortArrow([SortCons(SortFBag,SortId("Bool")),SortCons(SortFBag,SortId("Bool"))],SortId("Bool"))),[DataAppl(OpId("@fbag_cons",SortArrow([SortId("Bool"),SortId("Pos"),SortCons(SortFBag,SortId("Bool"))],SortCons(SortFBag,SortId("Bool")))),[DataVarId("v0",SortId("Bool")),DataVarId("v1",SortId("Pos")),DataVarId("v2",SortCons(SortFBag,SortId("Bool")))]),DataAppl(OpId("@fbag_cons",SortArrow([SortId("Bool"),SortId("Pos"),SortCons(SortFBag,SortId("Bool"))],SortCons(SortFBag,SortId("Bool")))),[DataVarId("v3",SortId("Bool")),DataVarId("v4",SortId("Pos")),DataVarId("v5",SortCons(SortFBag,SortId("Bool")))])]),DataAppl(OpId("||",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataAppl(OpId("<",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataVarId("v0",SortId("Bool")),DataVarId("v3",SortId("Bool"))]),DataAppl(OpId("&&",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataAppl(OpId("==",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataVarId("v0",SortId("Bool")),DataVarId("v3",SortId("Bool"))]),DataAppl(OpId("||",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataAppl(OpId("<",SortArrow([SortId("Pos"),SortId("Pos")],SortId("Bool"))),[DataVarId("v1",SortId("Pos")),DataVarId("v4",SortId("Pos"))]),DataAppl(OpId("&&",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataAppl(OpId("==",SortArrow([SortId("Pos"),SortId("Pos")],SortId("Bool"))),[DataVarId("v1",SortId("Pos")),DataVarId("v4",SortId("Pos"))]),DataAppl(OpId("<",SortArrow([SortCons(SortFBag,SortId("Bool")),SortCons(SortFBag,SortId("Bool"))],SortId("Bool"))),[DataVarId("v2",SortCons(SortFBag,SortId("Bool"))),DataVarId("v5",SortCons(SortFBag,SortId("Bool")))])])])])]))
+  test_term("DataEqn([DataVarId(\"v0\",SortId(\"Bool\")),DataVarId(\"v1\",SortId(\"Pos\")),DataVarId(\"v2\",SortCons(SortFBag,SortId(\"Bool\"))),DataVarId(\"v3\",SortId(\"Bool\")),DataVarId(\"v4\",SortId(\"Pos\")),DataVarId(\"v5\",SortCons(SortFBag,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"<\",SortArrow([SortCons(SortFBag,SortId(\"Bool\")),SortCons(SortFBag,SortId(\"Bool\"))],SortId(\"Bool\"))),[DataAppl(OpId(\"@fbag_cons\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\"),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortFBag,SortId(\"Bool\")))),[DataVarId(\"v0\",SortId(\"Bool\")),DataVarId(\"v1\",SortId(\"Pos\")),DataVarId(\"v2\",SortCons(SortFBag,SortId(\"Bool\")))]),DataAppl(OpId(\"@fbag_cons\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\"),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortFBag,SortId(\"Bool\")))),[DataVarId(\"v3\",SortId(\"Bool\")),DataVarId(\"v4\",SortId(\"Pos\")),DataVarId(\"v5\",SortCons(SortFBag,SortId(\"Bool\")))])]),DataAppl(OpId(\"||\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataAppl(OpId(\"<\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataVarId(\"v0\",SortId(\"Bool\")),DataVarId(\"v3\",SortId(\"Bool\"))]),DataAppl(OpId(\"&&\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataAppl(OpId(\"==\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataVarId(\"v0\",SortId(\"Bool\")),DataVarId(\"v3\",SortId(\"Bool\"))]),DataAppl(OpId(\"||\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataAppl(OpId(\"<\",SortArrow([SortId(\"Pos\"),SortId(\"Pos\")],SortId(\"Bool\"))),[DataVarId(\"v1\",SortId(\"Pos\")),DataVarId(\"v4\",SortId(\"Pos\"))]),DataAppl(OpId(\"&&\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataAppl(OpId(\"==\",SortArrow([SortId(\"Pos\"),SortId(\"Pos\")],SortId(\"Bool\"))),[DataVarId(\"v1\",SortId(\"Pos\")),DataVarId(\"v4\",SortId(\"Pos\"))]),DataAppl(OpId(\"<\",SortArrow([SortCons(SortFBag,SortId(\"Bool\")),SortCons(SortFBag,SortId(\"Bool\"))],SortId(\"Bool\"))),[DataVarId(\"v2\",SortCons(SortFBag,SortId(\"Bool\"))),DataVarId(\"v5\",SortCons(SortFBag,SortId(\"Bool\")))])])])])]))"); 
+
+  test_term("DataAppl(OpId(\"@setcomp\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\")))])");
+  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])");  
+}
+#endif
+
 template <typename ExpressionType>
 bool print_check(ExpressionType const& left, std::string const& right)
 {
@@ -303,125 +426,6 @@ BOOST_AUTO_TEST_CASE(test_standard_sort_expressions)
   BOOST_CHECK(print_check(sort_int::int_(), "Int"));
   BOOST_CHECK(print_check(sort_real::real_(), "Real"));
 }
-
-template <typename T>
-void test_term(const std::string& s, const T& x)
-{
-  std::clog << "--- testing term " << core::pp(x) << " ---" << std::endl;
-  std::string s1 = data::pp(x);
-  std::string s2 = data::print(x);
-  if (s1 != s2)
-  {
-    std::clog << "<pp>   " << s1 << std::endl;
-    std::clog << "<print>" << s2 << std::endl;
-    std::clog << "<aterm>" << s  << std::endl;
-    BOOST_CHECK(s1 == s2);
-  }  
-}
-
-void test_term(const std::string& s)
-{
-  ATerm a = atermpp::make_term(s);
-  if (s.find("DataEqn") == 0)
-  {
-    data_equation x = atermpp::aterm_appl((ATermAppl) a);
-    test_term(s, x);
-  }
-  else if (s.find("SortCons") == 0)
-  {
-    sort_expression x = atermpp::aterm_appl((ATermAppl) a);
-    test_term(s, x);
-  }
-  else
-  {
-    data_expression x = atermpp::aterm_appl((ATermAppl) a);
-    test_term(s, x);
-  }
-}
-
-#ifdef MCRL2_PRINT_PROBLEM_CASES
-BOOST_AUTO_TEST_CASE(problem_cases)
-{
-  test_term("variable_list()", variable_list());
-  
-  test_term("SortCons(SortFSet,SortId(\"Bool\"))");
-  test_term("SortCons(SortFBag,SortId(\"Bool\"))");
-
-  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[OpId(\"@false_\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))])");  
-  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])");
-  test_term("OpId(\"@c0\",SortId(\"Nat\"))");
-  test_term("DataEqn([DataVarId(\"n\",SortId(\"Nat\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"exp\",SortArrow([SortId(\"Nat\"),SortId(\"Nat\")],SortId(\"Nat\"))),[DataVarId(\"n\",SortId(\"Nat\")),OpId(\"@c0\",SortId(\"Nat\"))]),DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[OpId(\"@c1\",SortId(\"Pos\"))]))");
-  test_term("DataEqn([DataVarId(\"p\",SortId(\"Pos\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"@dub\",SortArrow([SortId(\"Bool\"),SortId(\"Int\")],SortId(\"Int\"))),[OpId(\"false\",SortId(\"Bool\")),DataAppl(OpId(\"@cNeg\",SortArrow([SortId(\"Pos\")],SortId(\"Int\"))),[DataVarId(\"p\",SortId(\"Pos\"))])]),DataAppl(OpId(\"@cNeg\",SortArrow([SortId(\"Pos\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))])]))");
-  test_term("DataEqn([DataVarId(\"p\",SortId(\"Pos\")),DataVarId(\"x\",SortId(\"Int\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"-\",SortArrow([SortId(\"Real\")],SortId(\"Real\"))),[DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataVarId(\"x\",SortId(\"Int\")),DataVarId(\"p\",SortId(\"Pos\"))])]),DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataAppl(OpId(\"-\",SortArrow([SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"x\",SortId(\"Int\"))]),DataVarId(\"p\",SortId(\"Pos\"))]))");
-  
-  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[OpId(\"@zero_\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))])");
-  
-  // <pp>   @bagfbag(b)  =  @bagfbag(b)
-  // <print>b  =  {b}
-  // <aterm>DataEqn([DataVarId("b",SortCons(SortFBag,SortId("Bool")))],OpId("true",SortId("Bool")),DataAppl(OpId("@bagfbag",SortArrow([SortCons(SortFBag,SortId("Bool"))],SortCons(SortBag,SortId("Bool")))),[DataVarId("b",SortCons(SortFBag,SortId("Bool")))]),DataAppl(OpId("@bag",SortArrow([SortArrow([SortId("Bool")],SortId("Nat")),SortCons(SortFBag,SortId("Bool"))],SortCons(SortBag,SortId("Bool")))),[OpId("@zero_",SortArrow([SortId("Bool")],SortId("Nat"))),DataVarId("b",SortCons(SortFBag,SortId("Bool")))]))
-  test_term("DataEqn([DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"@bagfbag\",SortArrow([SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))]),DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[OpId(\"@zero_\",SortArrow([SortId(\"Bool\")],SortId(\"Nat\"))),DataVarId(\"b\",SortCons(SortFBag,SortId(\"Bool\")))]))");
-
-  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Nat\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Nat\"))],SortCons(SortBag,SortId(\"Nat\")))),[Binder(Lambda,[DataVarId(\"x\",SortId(\"Nat\"))],DataVarId(\"x\",SortId(\"Nat\"))),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"Nat\")))])");
-  // <pp>   { b: Bool | b }
-  // <print>{ [b: Bool] | b }
-  // <aterm>DataAppl(OpId("@set",SortArrow([SortArrow([SortId("Bool")],SortId("Bool")),SortCons(SortFSet,SortId("Bool"))],SortCons(SortSet,SortId("Bool")))),[Binder(Lambda,[DataVarId("b",SortId("Bool"))],DataVarId("b",SortId("Bool"))),OpId("@fset_empty",SortCons(SortFSet,SortId("Bool")))])
-
-  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[Binder(Lambda,[DataVarId(\"b\",SortId(\"Bool\"))],DataVarId(\"b\",SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])");
-  
-  // <pp>   { b: Bool | if(b, 2, 3) }
-  // <print>{ [b: Bool] | if(b, 2, 3) }
-  // <aterm>DataAppl(OpId("@bag",SortArrow([SortArrow([SortId("Bool")],SortId("Nat")),SortCons(SortFBag,SortId("Bool"))],SortCons(SortBag,SortId("Bool")))),[Binder(Lambda,[DataVarId("b",SortId("Bool"))],DataAppl(OpId("if",SortArrow([SortId("Bool"),SortId("Nat"),SortId("Nat")],SortId("Nat"))),[DataVarId("b",SortId("Bool")),DataAppl(OpId("Pos2Nat",SortArrow([SortId("Pos")],SortId("Nat"))),[DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[OpId("false",SortId("Bool")),OpId("@c1",SortId("Pos"))])]),DataAppl(OpId("Pos2Nat",SortArrow([SortId("Pos")],SortId("Nat"))),[DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[OpId("true",SortId("Bool")),OpId("@c1",SortId("Pos"))])])])),OpId("@fbag_empty",SortCons(SortFBag,SortId("Bool")))])
-  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortBag,SortId(\"Bool\")))),[Binder(Lambda,[DataVarId(\"b\",SortId(\"Bool\"))],DataAppl(OpId(\"if\",SortArrow([SortId(\"Bool\"),SortId(\"Nat\"),SortId(\"Nat\")],SortId(\"Nat\"))),[DataVarId(\"b\",SortId(\"Bool\")),DataAppl(OpId(\"Pos2Nat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])]),DataAppl(OpId(\"Pos2Nat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"true\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])])])),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"Bool\")))])");
-  
-  // <pp>   !true  =  false, !false  =  true, !!b  =  b, b && true  =  b, b && false  =  false, true && b  =  b, false && b  =  false, b || true  =  true, b || false  =  b, true || b  =  true, false || b  =  b, b => true  =  true, b => false  =  !b, true => b  =  b, false => b  =  true, true == b  =  b, false == b  =  !b, b == true  =  b, b == false  =  !b, false < b  =  b, true < b  =  false, b < false  =  false, b < true  =  !b, false <= b  =  true, true <= b  =  b, b <= false  =  !b, b <= true  =  true
-  // <print>!true  =  false!false  =  true!!b  =  bb && true  =  bb && false  =  falsetrue && b  =  bfalse && b  =  falseb || true  =  trueb || false  =  btrue || b  =  truefalse || b  =  bb => true  =  trueb => false  =  !btrue => b  =  bfalse => b  =  truetrue == b  =  bfalse == b  =  !bb == true  =  bb == false  =  !bfalse < b  =  btrue < b  =  falseb < false  =  falseb < true  =  !bfalse <= b  =  truetrue <= b  =  bb <= false  =  !bb <= true  =  true
-  // <aterm>unknown 
-
-  // <pp>   1 == 2 * p + 2 * if(b, 1, 0)  =  false
-  // <print>1 == @cDub(b, p)  =  false
-  // <aterm>DataEqn([DataVarId("b",SortId("Bool")),DataVarId("p",SortId("Pos"))],OpId("true",SortId("Bool")),DataAppl(OpId("==",SortArrow([SortId("Pos"),SortId("Pos")],SortId("Bool"))),[OpId("@c1",SortId("Pos")),DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[DataVarId("b",SortId("Bool")),DataVarId("p",SortId("Pos"))])]),OpId("false",SortId("Bool")))
-  test_term("DataEqn([DataVarId(\"b\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"==\",SortArrow([SortId(\"Pos\"),SortId(\"Pos\")],SortId(\"Bool\"))),[OpId(\"@c1\",SortId(\"Pos\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[DataVarId(\"b\",SortId(\"Bool\")),DataVarId(\"p\",SortId(\"Pos\"))])]),OpId(\"false\",SortId(\"Bool\")))"); 
-
-  test_term("DataAppl(OpId(\"mod\",SortArrow([SortId(\"Nat\"),SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"n\",SortId(\"Nat\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])])");
-
-  // <pp>   succ(succ(n))  =  2 * succ(n div 2) + 2 * if(n mod 2 == 1, 1, 0)
-  // <print>succ(succ(n))  =  @cDub(n mod 2 == 1, succ(n / 2))
-  // <aterm>DataEqn([DataVarId("n",SortId("Nat"))],OpId("true",SortId("Bool")),DataAppl(OpId("succ",SortArrow([SortId("Pos")],SortId("Pos"))),[DataAppl(OpId("succ",SortArrow([SortId("Nat")],SortId("Pos"))),[DataVarId("n",SortId("Nat"))])]),DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[DataAppl(OpId("==",SortArrow([SortId("Nat"),SortId("Nat")],SortId("Bool"))),[DataAppl(OpId("mod",SortArrow([SortId("Nat"),SortId("Pos")],SortId("Nat"))),[DataVarId("n",SortId("Nat")),DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[OpId("false",SortId("Bool")),OpId("@c1",SortId("Pos"))])]),DataAppl(OpId("@cNat",SortArrow([SortId("Pos")],SortId("Nat"))),[OpId("@c1",SortId("Pos"))])]),DataAppl(OpId("succ",SortArrow([SortId("Nat")],SortId("Pos"))),[DataAppl(OpId("div",SortArrow([SortId("Nat"),SortId("Pos")],SortId("Nat"))),[DataVarId("n",SortId("Nat")),DataAppl(OpId("@cDub",SortArrow([SortId("Bool"),SortId("Pos")],SortId("Pos"))),[OpId("false",SortId("Bool")),OpId("@c1",SortId("Pos"))])])])]))
-  test_term("DataEqn([DataVarId(\"n\",SortId(\"Nat\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"succ\",SortArrow([SortId(\"Pos\")],SortId(\"Pos\"))),[DataAppl(OpId(\"succ\",SortArrow([SortId(\"Nat\")],SortId(\"Pos\"))),[DataVarId(\"n\",SortId(\"Nat\"))])]),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[DataAppl(OpId(\"==\",SortArrow([SortId(\"Nat\"),SortId(\"Nat\")],SortId(\"Bool\"))),[DataAppl(OpId(\"mod\",SortArrow([SortId(\"Nat\"),SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"n\",SortId(\"Nat\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])]),DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[OpId(\"@c1\",SortId(\"Pos\"))])]),DataAppl(OpId(\"succ\",SortArrow([SortId(\"Nat\")],SortId(\"Pos\"))),[DataAppl(OpId(\"div\",SortArrow([SortId(\"Nat\"),SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"n\",SortId(\"Nat\")),DataAppl(OpId(\"@cDub\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\")],SortId(\"Pos\"))),[OpId(\"false\",SortId(\"Bool\")),OpId(\"@c1\",SortId(\"Pos\"))])])])]))");
-  
-  // <pp>   n == -p  =  false
-  // <print>n == @cNeg(p)  =  false
-  // <aterm>DataEqn([DataVarId("n",SortId("Nat")),DataVarId("p",SortId("Pos"))],OpId("true",SortId("Bool")),DataAppl(OpId("==",SortArrow([SortId("Int"),SortId("Int")],SortId("Bool"))),[DataAppl(OpId("@cInt",SortArrow([SortId("Nat")],SortId("Int"))),[DataVarId("n",SortId("Nat"))]),DataAppl(OpId("@cNeg",SortArrow([SortId("Pos")],SortId("Int"))),[DataVarId("p",SortId("Pos"))])]),OpId("false",SortId("Bool")))
-  test_term("DataEqn([DataVarId(\"n\",SortId(\"Nat\")),DataVarId(\"p\",SortId(\"Pos\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"==\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Bool\"))),[DataAppl(OpId(\"@cInt\",SortArrow([SortId(\"Nat\")],SortId(\"Int\"))),[DataVarId(\"n\",SortId(\"Nat\"))]),DataAppl(OpId(\"@cNeg\",SortArrow([SortId(\"Pos\")],SortId(\"Int\"))),[DataVarId(\"p\",SortId(\"Pos\"))])]),OpId(\"false\",SortId(\"Bool\")))"); 
-  
-  // <pp>   x / p == y / q  =  x * q == y * p
-  // <print>x == y  =  x * q == y * p
-  // <aterm>DataEqn([DataVarId("p",SortId("Pos")),DataVarId("q",SortId("Pos")),DataVarId("x",SortId("Int")),DataVarId("y",SortId("Int"))],OpId("true",SortId("Bool")),DataAppl(OpId("==",SortArrow([SortId("Real"),SortId("Real")],SortId("Bool"))),[DataAppl(OpId("@cReal",SortArrow([SortId("Int"),SortId("Pos")],SortId("Real"))),[DataVarId("x",SortId("Int")),DataVarId("p",SortId("Pos"))]),DataAppl(OpId("@cReal",SortArrow([SortId("Int"),SortId("Pos")],SortId("Real"))),[DataVarId("y",SortId("Int")),DataVarId("q",SortId("Pos"))])]),DataAppl(OpId("==",SortArrow([SortId("Int"),SortId("Int")],SortId("Bool"))),[DataAppl(OpId("*",SortArrow([SortId("Int"),SortId("Int")],SortId("Int"))),[DataVarId("x",SortId("Int")),DataAppl(OpId("@cInt",SortArrow([SortId("Nat")],SortId("Int"))),[DataAppl(OpId("@cNat",SortArrow([SortId("Pos")],SortId("Nat"))),[DataVarId("q",SortId("Pos"))])])]),DataAppl(OpId("*",SortArrow([SortId("Int"),SortId("Int")],SortId("Int"))),[DataVarId("y",SortId("Int")),DataAppl(OpId("@cInt",SortArrow([SortId("Nat")],SortId("Int"))),[DataAppl(OpId("@cNat",SortArrow([SortId("Pos")],SortId("Nat"))),[DataVarId("p",SortId("Pos"))])])])]))
-  test_term("DataEqn([DataVarId(\"p\",SortId(\"Pos\")),DataVarId(\"q\",SortId(\"Pos\")),DataVarId(\"x\",SortId(\"Int\")),DataVarId(\"y\",SortId(\"Int\"))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"==\",SortArrow([SortId(\"Real\"),SortId(\"Real\")],SortId(\"Bool\"))),[DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataVarId(\"x\",SortId(\"Int\")),DataVarId(\"p\",SortId(\"Pos\"))]),DataAppl(OpId(\"@cReal\",SortArrow([SortId(\"Int\"),SortId(\"Pos\")],SortId(\"Real\"))),[DataVarId(\"y\",SortId(\"Int\")),DataVarId(\"q\",SortId(\"Pos\"))])]),DataAppl(OpId(\"==\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Bool\"))),[DataAppl(OpId(\"*\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"x\",SortId(\"Int\")),DataAppl(OpId(\"@cInt\",SortArrow([SortId(\"Nat\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"q\",SortId(\"Pos\"))])])]),DataAppl(OpId(\"*\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"y\",SortId(\"Int\")),DataAppl(OpId(\"@cInt\",SortArrow([SortId(\"Nat\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"p\",SortId(\"Pos\"))])])])]))");  
-
-  test_term("OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))");
-  
-  // <pp>   {} == {}  =  true
-  // <print>@fset_empty == @fset_empty  =  true
-  // <aterm>DataEqn([],OpId("true",SortId("Bool")),DataAppl(OpId("==",SortArrow([SortCons(SortFSet,SortId("Bool")),SortCons(SortFSet,SortId("Bool"))],SortId("Bool"))),[OpId("@fset_empty",SortCons(SortFSet,SortId("Bool"))),OpId("@fset_empty",SortCons(SortFSet,SortId("Bool")))]),OpId("true",SortId("Bool")))
-  test_term("DataEqn([],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"==\",SortArrow([SortCons(SortFSet,SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortId(\"Bool\"))),[OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))]),OpId(\"true\",SortId(\"Bool\")))"); 
-
-  test_term("DataAppl(OpId(\"@setfset\",SortArrow([SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))])");
-
-  // <pp>   @setfset(s)  =  @setfset(s)
-  // <print>s  =  { x: Bool | @false_(x) != x in s }
-  // <aterm>DataEqn([DataVarId("s",SortCons(SortFSet,SortId("Bool")))],OpId("true",SortId("Bool")),DataAppl(OpId("@setfset",SortArrow([SortCons(SortFSet,SortId("Bool"))],SortCons(SortSet,SortId("Bool")))),[DataVarId("s",SortCons(SortFSet,SortId("Bool")))]),DataAppl(OpId("@set",SortArrow([SortArrow([SortId("Bool")],SortId("Bool")),SortCons(SortFSet,SortId("Bool"))],SortCons(SortSet,SortId("Bool")))),[OpId("@false_",SortArrow([SortId("Bool")],SortId("Bool"))),DataVarId("s",SortCons(SortFSet,SortId("Bool")))]))
-  test_term("DataEqn([DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"@setfset\",SortArrow([SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))]),DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[OpId(\"@false_\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),DataVarId(\"s\",SortCons(SortFSet,SortId(\"Bool\")))]))");
-  
-  // <pp>   @fbag_cons(v0, v1, v2) < @fbag_cons(v3, v4, v5)  =  v0 < v3 || v0 == v3 && v1 < v4 || v1 == v4 && v2 < v5
-  // <print>@fbag_cons(v0, v1, v2) < @fbag_cons(v3, v4, v5)  =  v0 < v3 || (v0 == v3 && (v1 < v4 || (v1 == v4 && v2 < v5)))
-  // <aterm>DataEqn([DataVarId("v0",SortId("Bool")),DataVarId("v1",SortId("Pos")),DataVarId("v2",SortCons(SortFBag,SortId("Bool"))),DataVarId("v3",SortId("Bool")),DataVarId("v4",SortId("Pos")),DataVarId("v5",SortCons(SortFBag,SortId("Bool")))],OpId("true",SortId("Bool")),DataAppl(OpId("<",SortArrow([SortCons(SortFBag,SortId("Bool")),SortCons(SortFBag,SortId("Bool"))],SortId("Bool"))),[DataAppl(OpId("@fbag_cons",SortArrow([SortId("Bool"),SortId("Pos"),SortCons(SortFBag,SortId("Bool"))],SortCons(SortFBag,SortId("Bool")))),[DataVarId("v0",SortId("Bool")),DataVarId("v1",SortId("Pos")),DataVarId("v2",SortCons(SortFBag,SortId("Bool")))]),DataAppl(OpId("@fbag_cons",SortArrow([SortId("Bool"),SortId("Pos"),SortCons(SortFBag,SortId("Bool"))],SortCons(SortFBag,SortId("Bool")))),[DataVarId("v3",SortId("Bool")),DataVarId("v4",SortId("Pos")),DataVarId("v5",SortCons(SortFBag,SortId("Bool")))])]),DataAppl(OpId("||",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataAppl(OpId("<",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataVarId("v0",SortId("Bool")),DataVarId("v3",SortId("Bool"))]),DataAppl(OpId("&&",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataAppl(OpId("==",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataVarId("v0",SortId("Bool")),DataVarId("v3",SortId("Bool"))]),DataAppl(OpId("||",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataAppl(OpId("<",SortArrow([SortId("Pos"),SortId("Pos")],SortId("Bool"))),[DataVarId("v1",SortId("Pos")),DataVarId("v4",SortId("Pos"))]),DataAppl(OpId("&&",SortArrow([SortId("Bool"),SortId("Bool")],SortId("Bool"))),[DataAppl(OpId("==",SortArrow([SortId("Pos"),SortId("Pos")],SortId("Bool"))),[DataVarId("v1",SortId("Pos")),DataVarId("v4",SortId("Pos"))]),DataAppl(OpId("<",SortArrow([SortCons(SortFBag,SortId("Bool")),SortCons(SortFBag,SortId("Bool"))],SortId("Bool"))),[DataVarId("v2",SortCons(SortFBag,SortId("Bool"))),DataVarId("v5",SortCons(SortFBag,SortId("Bool")))])])])])]))
-  test_term("DataEqn([DataVarId(\"v0\",SortId(\"Bool\")),DataVarId(\"v1\",SortId(\"Pos\")),DataVarId(\"v2\",SortCons(SortFBag,SortId(\"Bool\"))),DataVarId(\"v3\",SortId(\"Bool\")),DataVarId(\"v4\",SortId(\"Pos\")),DataVarId(\"v5\",SortCons(SortFBag,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"<\",SortArrow([SortCons(SortFBag,SortId(\"Bool\")),SortCons(SortFBag,SortId(\"Bool\"))],SortId(\"Bool\"))),[DataAppl(OpId(\"@fbag_cons\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\"),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortFBag,SortId(\"Bool\")))),[DataVarId(\"v0\",SortId(\"Bool\")),DataVarId(\"v1\",SortId(\"Pos\")),DataVarId(\"v2\",SortCons(SortFBag,SortId(\"Bool\")))]),DataAppl(OpId(\"@fbag_cons\",SortArrow([SortId(\"Bool\"),SortId(\"Pos\"),SortCons(SortFBag,SortId(\"Bool\"))],SortCons(SortFBag,SortId(\"Bool\")))),[DataVarId(\"v3\",SortId(\"Bool\")),DataVarId(\"v4\",SortId(\"Pos\")),DataVarId(\"v5\",SortCons(SortFBag,SortId(\"Bool\")))])]),DataAppl(OpId(\"||\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataAppl(OpId(\"<\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataVarId(\"v0\",SortId(\"Bool\")),DataVarId(\"v3\",SortId(\"Bool\"))]),DataAppl(OpId(\"&&\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataAppl(OpId(\"==\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataVarId(\"v0\",SortId(\"Bool\")),DataVarId(\"v3\",SortId(\"Bool\"))]),DataAppl(OpId(\"||\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataAppl(OpId(\"<\",SortArrow([SortId(\"Pos\"),SortId(\"Pos\")],SortId(\"Bool\"))),[DataVarId(\"v1\",SortId(\"Pos\")),DataVarId(\"v4\",SortId(\"Pos\"))]),DataAppl(OpId(\"&&\",SortArrow([SortId(\"Bool\"),SortId(\"Bool\")],SortId(\"Bool\"))),[DataAppl(OpId(\"==\",SortArrow([SortId(\"Pos\"),SortId(\"Pos\")],SortId(\"Bool\"))),[DataVarId(\"v1\",SortId(\"Pos\")),DataVarId(\"v4\",SortId(\"Pos\"))]),DataAppl(OpId(\"<\",SortArrow([SortCons(SortFBag,SortId(\"Bool\")),SortCons(SortFBag,SortId(\"Bool\"))],SortId(\"Bool\"))),[DataVarId(\"v2\",SortCons(SortFBag,SortId(\"Bool\"))),DataVarId(\"v5\",SortCons(SortFBag,SortId(\"Bool\")))])])])])]))"); 
-
-  test_term("DataAppl(OpId(\"@setcomp\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\")))])");
-  test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])");  
-}
-#endif
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

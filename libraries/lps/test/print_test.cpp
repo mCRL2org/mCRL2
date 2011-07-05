@@ -71,6 +71,43 @@ BOOST_AUTO_TEST_CASE(rational)
   BOOST_CHECK(output.find("@") == std::string::npos);
 }
 
+template <typename T>
+void test_term(const std::string& s, const T& x)
+{
+  std::clog << "--- testing term " << core::pp(x) << " ---" << std::endl;
+  std::string s1 = lps::pp(x);
+  std::string s2 = lps::print(x);
+  if (s1 != s2)
+  {
+    std::clog << "<pp>   " << s1 << std::endl;
+    std::clog << "<print>" << s2 << std::endl;
+    std::clog << "<aterm>" << s  << std::endl;
+    BOOST_CHECK(s1 == s2);
+  }  
+}
+
+#ifdef MCRL2_PRINT_PROBLEM_CASES
+BOOST_AUTO_TEST_CASE(problem_cases)
+{
+  std::string SPEC;
+  specification spec;
+
+  SPEC = 
+    "act  a: Bool;   \n"
+    "proc P =  a . P;\n"
+    "init P;         \n"
+    ;
+  spec = parse_linear_process_specification(SPEC);
+  test_term(specification_to_aterm(spec).to_string(), spec);
+
+  deadlock delta;
+  data::variable_list var;
+  data::data_expression cond = data::sort_bool::true_();
+  deadlock_summand s(var, cond, delta); 
+  test_term(deadlock_summand_to_aterm(s).to_string(), s);
+}
+#endif
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

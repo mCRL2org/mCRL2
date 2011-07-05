@@ -31,12 +31,10 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   using super::enter;
   using super::leave;
   using super::operator();
-  using core::detail::printer<Derived>::print_sorts;
   using super::print_action_declarations;
   using super::print_assignments;
   using super::print_condition;
   using super::print_list;
-  using super::print_time;
   using super::print_variables;
   using super::print_expression;
   using super::print_binary_operation;
@@ -58,7 +56,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().enter(x);
     derived()(x.data());
     print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
-    print_variables(x.global_variables(), true, true, "glob ", ";\n\n", ";\n     ");
+    print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
 
     // N.B. We have to normalize the sorts of the equations. Otherwise predicates like
     // is_list(x) may return the wrong result.
@@ -81,7 +79,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.identifier().name());
-    print_variables(x.formal_parameters());
+    print_variables(x.formal_parameters(), true, true, false);
     derived().print(" = ");
     derived()(x.expression());
     derived().print(";");
@@ -122,7 +120,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived().print("sum ");
-    print_variables(x.bound_variables(), true, true, "", "");
+    print_variables(x.bound_variables(), true, true, false, "", "");
     derived().print(". ");   
     print_expression(x.operand(), precedence(x));
     derived().leave(x);
@@ -215,7 +213,7 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
     derived().enter(x);
     derived()(x.operand());
     derived().print(" @ ");
-    print_time(x.time_stamp());
+    print_expression(x.time_stamp(), max_precedence);
     derived().leave(x);
   }
 

@@ -110,22 +110,11 @@ struct printer: public core::traverser<Derived>
   // using super::leave;
   using super::operator();
 
-  bool m_print_sorts;
   std::ostream* m_out;
 
   std::ostream& out()
   {
     return *m_out;
-  }
-
-  bool print_sorts() const
-  {
-    return m_print_sorts;
-  }
-
-  bool& print_sorts()
-  {
-    return m_print_sorts;
   }
 
   void print(const std::string& s)
@@ -180,11 +169,10 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
   using super::leave;
   using super::operator();
   
-  apply_printer(std::ostream& out, bool print_sorts = false)
+  apply_printer(std::ostream& out)
   {
     typedef printer<apply_printer<Traverser> > Super;
     static_cast<Super&>(*this).m_out = &out;
-    static_cast<Super&>(*this).m_print_sorts = print_sorts;
   }
 
 #if BOOST_MSVC

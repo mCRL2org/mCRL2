@@ -139,7 +139,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   using super::enter;
   using super::leave;
   using super::operator();
-  using core::detail::printer<Derived>::print_sorts;
   using core::detail::printer<Derived>::print_list;
 
   Derived& derived()
@@ -331,15 +330,26 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       derived()(x.sort());
     }
   }
-  
-  template <typename Container>
-  void print_variables(const Container& container,
-                       bool print_sorts = true,
-                       bool join_sorts = true,
-                       const std::string& opener = "(",
-                       const std::string& closer = ")",
-                       const std::string& separator = ", "
-                      )
+
+  struct get_sort_default
+  { 
+    template <typename T>
+    sort_expression operator()(const T& t) const
+    {                                           
+      return t.sort();
+    }
+  };
+
+  template <typename Container, typename SortAccessor>
+  void print_sorted_declarations(const Container& container,
+                                 bool print_sorts = true,
+                                 bool join_sorts = true,
+                                 bool maximally_shared = false,
+                                 const std::string& opener = "(",
+                                 const std::string& closer = ")",
+                                 const std::string& separator = ", ",
+                                 SortAccessor get_sort = get_sort_default()
+                                )
   {
     typedef typename Container::const_iterator iterator;
 
@@ -352,59 +362,109 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
     derived().print(opener);
     
-    while (first != last)
+    if (maximally_shared)
     {
-      // print the elements of the interval [first, i)
-      if (first != container.begin())
+      typedef typename Container::value_type T;
+      
+      // sort_map[s] will contain all elements t of container with t.sort() == s.
+      std::map<sort_expression, std::vector<T> > sort_map;
+      
+      // sorts will contain all sort expressions s that appear as a key in sort_map,
+      // in the order they are encountered in container
+      std::vector<sort_expression> sorts;
+      
+      for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
       {
-        derived().print(separator);
-      }
-
-      if (print_sorts && join_sorts)
-      {
-        // determine a consecutive interval [first, i) with elements of the same sorts
-        iterator i = first;
-        do
+        if (sort_map.find(i->sort()) == sort_map.end())
         {
-          ++i;
+          sorts.push_back(i->sort());
         }
-        while (i != last && i->sort() == first->sort());
-
-        for (iterator j = first; j != i; ++j)
+        sort_map[i->sort()].push_back(*i);
+      }
+      
+      // do the actual printing
+      for (std::vector<sort_expression>::iterator i = sorts.begin(); i != sorts.end(); ++i)
+      {
+        if (i != sorts.begin())
         {
-          if (j != first)
+          derived().print(separator);
+        }
+        const std::vector<T>& v = sort_map[*i];
+        print_list(v, "", "", ",");
+        derived().print(": ");
+        derived()(*i);
+      }
+    }
+    else
+    {
+      while (first != last)
+      {
+        if (first != container.begin())
+        {
+          derived().print(separator);
+        }
+      
+        if (print_sorts && join_sorts)
+        {
+          // determine a consecutive interval [first, i) with elements of the same sorts
+          iterator i = first;
+          do
           {
-            derived().print(",");
+            ++i;
           }
-          derived()(*j);
+      
+          // print the elements of the interval [first, i)
+          while (i != last && i->sort() == first->sort());
+      
+          for (iterator j = first; j != i; ++j)
+          {
+            if (j != first)
+            {
+              derived().print(",");
+            }
+            derived()(*j);
+          }
+      
+          // print the sort
+          if (print_sorts)
+          {
+            derived().print(": ");
+            derived()(get_sort(*first));
+          }
+      
+          // update first
+          first = i;
         }
-
-        // print the sort
-        if (print_sorts)
+        else
         {
-          derived().print(": ");
-          derived()(first->sort());
+          derived()(*first);
+      
+          // print the sort
+          if (print_sorts)
+          {
+            derived().print(": ");
+            derived()(get_sort(*first));
+          }
+          
+          // update first
+          ++first;
         }
-
-        // update first
-        first = i;
-      }
-      else
-      {
-        derived()(*first);
-
-        // print the sort
-        if (print_sorts)
-        {
-          derived().print(": ");
-          derived()(first->sort());
-        }
-        
-        // update first
-        ++first;
       }
     }
     derived().print(closer);
+  }
+  
+  template <typename Container>
+  void print_variables(const Container& container,
+                       bool print_sorts = true,
+                       bool join_sorts = true,
+                       bool maximally_shared = false,
+                       const std::string& opener = "(",
+                       const std::string& closer = ")",
+                       const std::string& separator = ", "
+                      )
+  {
+    print_sorted_declarations(container, print_sorts, join_sorts, maximally_shared, opener, closer, separator, get_sort_default());
   }
 
   template <typename Container>
@@ -445,11 +505,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       print_expression(condition, precedence);
       derived().print(arrow);
     }
-  }
-
-  void print_time(const data_expression& t)
-  {
-    print_expression(t, 13);
   }
 
   template <typename Container>
@@ -701,7 +756,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
     }
     derived().print("{ ");
-    print_variables(left.variables(), true, true, "", "", ", ");
+    print_variables(left.variables(), true, true, false, "", "", ", ");
     derived().print(" | ");
     derived()(body);
     derived().print(" }");
@@ -719,7 +774,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else
     {     
-      data_expression right = sort_set::right(x);
+      data_expression right = sort_bag::right(x);
       sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
       core::identifier_string name = generate_identifier("x", x);
       variable var(name, s);
@@ -780,7 +835,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     sort_expression s = function_sort(sort_set::left(x).sort()).domain().front(); // the sort of the set elements
     data::lambda left(sort_set::left(x));
     derived().print("{ ");
-    print_variables(left.variables(), true, true, "", "", ", ");
+    print_variables(left.variables(), true, true, false, "", "", ", ");
     derived().print(" | ");
     derived()(left.body());
     derived().print(" }");
@@ -823,7 +878,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived().print(op + " ");
-    print_variables(x.variables(), true, true, "", "", ", ");   
+    print_variables(x.variables(), true, true, false, "", "", ", ");   
     derived().print(". ");
     derived()(x.body());
     derived().leave(x);
@@ -1108,11 +1163,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(x.name());
-    if (derived().print_sorts())
-    {
-      derived().print(": ");
-      derived()(x.sort());
-    }
     derived().leave(x);
   }
 
@@ -1274,9 +1324,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived().print(" div ");
         print_expression(sort_nat::arg2(x), precedence(x));
       }     
-      else if (   sort_nat::is_mod_application(x)
-               || sort_int::is_mod_application(x)
-              )
+      else if (sort_nat::is_mod_application(x))
       {
         // TODO: make a proper binary operation of mod
         print_expression(sort_nat::arg1(x), precedence(x));
@@ -1325,6 +1373,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         // TODO: make a proper binary operation of div
         print_expression(sort_int::arg1(x), precedence(x));
         derived().print(" div ");
+        print_expression(sort_int::arg2(x), precedence(x));
+      }
+      else if (sort_int::is_mod_application(x))
+      {
+        // TODO: make a proper binary operation of mod
+        print_expression(sort_int::arg1(x), precedence(x));
+        derived().print(" mod ");
         print_expression(sort_int::arg2(x), precedence(x));
       }
       else if (sort_int::is_cint_application(x))
@@ -1740,54 +1795,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(closer);
   }
 
-  // Container contains elements of type T such that t.sort() is a sort_expression.
-  template <typename Container>
-  void print_function_declarations_maximally_shared(const Container& container,
-                          const std::string& opener = "(",
-                          const std::string& closer = ")",
-                          const std::string& separator = ", "
-                         )
-  {
-    typedef typename Container::value_type T;
-    
-    // print nothing if the container is empty
-    if (container.empty())
-    {
-      return;
-    }
-
-    // sort_map[s] will contain all elements t of container with t.sort() == s.
-    std::map<sort_expression, std::vector<T> > sort_map;
-
-    // sorts will contain all sort expressions s that appear as a key in sort_map,
-    // in the order they are encountered in container
-    std::vector<sort_expression> sorts;
-
-    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
-    {
-      if (sort_map.find(i->sort()) == sort_map.end())
-      {
-        sorts.push_back(i->sort());
-      }
-      sort_map[i->sort()].push_back(*i);
-    }
-
-    // do the actual printing
-    derived().print(opener);   
-    for (std::vector<sort_expression>::iterator i = sorts.begin(); i != sorts.end(); ++i)
-    {
-      if (i != sorts.begin())
-      {
-        derived().print(separator);
-      }
-      const std::vector<T>& v = sort_map[*i];
-      print_list(v, "", "", ",");
-      derived().print(": ");
-      derived()(*i);
-    }
-    derived().print(closer);
-  }
-
   // Adds variables v and function symbols f to variable_map and function_symbol_names respectively.
   void update_mappings(const data_equation& eqn,
                        std::vector<variable>& variables,
@@ -1922,7 +1929,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       std::vector<variable> variables;
       typename Container::const_iterator i = find_conflicting_equation(first, last, variables);
-      print_function_declarations_maximally_shared(variables, "var  ", ";\n", ";\n     ");
+      print_variables(variables, true, true, true, "var  ", ";\n", ";\n     ");
 
       // N.B. We print normalized equations instead of user defined equations.
       // print_list(std::vector<data_equation>(first, i), opener, closer, separator);
@@ -1938,8 +1945,8 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     print_sort_declarations(x.user_defined_aliases(), x.user_defined_sorts(), "sort ", ";\n\n", ";\n     ");
-    print_function_declarations(x.user_defined_constructors(), "cons ",";\n\n", ";\n     ");
-    print_function_declarations(x.user_defined_mappings(), "map  ",";\n\n", ";\n     ");
+    print_sorted_declarations(x.user_defined_constructors(), true, true, false, "cons ",";\n\n", ";\n     ", get_sort_default());
+    print_sorted_declarations(x.user_defined_mappings(), true, true, false, "map  ",";\n\n", ";\n     ", get_sort_default());
     print_equations(x.user_defined_equations(), x, "eqn  ", ";\n\n", ";\n     ");
     derived().leave(x);
   }

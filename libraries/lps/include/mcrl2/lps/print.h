@@ -22,6 +22,8 @@ namespace mcrl2
 namespace lps
 {
 
+using core::detail::precedences::max_precedence;
+
 namespace detail
 {
 
@@ -33,11 +35,10 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   using super::enter;
   using super::leave;
   using super::operator();
-  using core::detail::printer<Derived>::print_sorts;
   using super::print_assignments;
   using super::print_condition;
+  using super::print_expression;
   using super::print_list;
-  using super::print_time;
   using super::print_variables;
 
   Derived& derived()
@@ -164,8 +165,8 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().print("delta");
     if (x.has_time())
     {
-      derived().print("@");
-      print_time(x.time());
+      derived().print(" @ ");
+      print_expression(x.time(), max_precedence);
     }
     derived().leave(x);
   }
@@ -173,11 +174,18 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   void operator()(const lps::multi_action& x)
   {
     derived().enter(x);
-    derived()(x.actions());
+    if (x.actions().empty())
+    {
+      derived().print("tau");
+    }
+    else
+    {
+      derived()(x.actions());
+    }
     if (x.has_time())
     {
-      derived().print("@");
-      print_time(x.time());
+      derived().print(" @ ");
+      print_expression(x.time(), max_precedence);
     }
     derived().leave(x);
   }
@@ -185,8 +193,8 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   void operator()(const lps::deadlock_summand& x)
   {
     derived().enter(x);
-    derived()(x.summation_variables());
-    derived()(x.condition());
+    print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
+    print_condition(x.condition(), " ->\n         ", max_precedence);
     derived()(x.deadlock());
     derived().leave(x);
   }
@@ -194,12 +202,13 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   void operator()(const lps::action_summand& x)
   {
     derived().enter(x);
-    print_variables(x.summation_variables(), true, true, "sum ", ".\n         ", ", ");
-    print_condition(x.condition(), " ->\n         ");
+    print_variables(x.summation_variables(), true, true, false, "sum ", ".\n         ", ",");
+    print_condition(x.condition(), " ->\n         ", max_precedence);
     derived()(x.multi_action());
     derived().print(" .\n         ");
-    derived().print("P");
-    print_assignments(x.assignments(), true, "P(", ")", ", ");
+    derived().print("P(");
+    print_assignments(x.assignments(), true, "", "", ", ");
+    derived().print(")");
     derived().leave(x);
   }
 
@@ -216,9 +225,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   {
     derived().enter(x);
     derived().print("proc P");
-    print_sorts() = true;
-    print_list(x.process_parameters(), "(", ")", ", ");
-    print_sorts() = false;
+    print_variables(x.process_parameters(), true, true, false, "(", ")", ", ");
     derived().print(" =\n       ");
 
     // print action summands
@@ -228,12 +235,12 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     print_list(x.action_summands(), opener, closer, separator);
 
     // print deadlock summands
-    if (!x.action_summands().empty())
+    if (!x.deadlock_summands().empty())
     {
       opener = separator;
     }
     print_list(x.deadlock_summands(), opener, closer, separator);
-
+    derived().print(";\n");
     derived().leave(x);
   }
 
@@ -242,10 +249,11 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().enter(x);
     derived()(x.data());
     print_action_declarations(x.action_labels(), "act  ",";\n\n", ";\n     ");
-    print_variables(x.global_variables(), true, true, "glob ", ";\n\n", ";\n     ");
+    print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
     derived()(x.process());
-    derived().print(";\n\n");
+    derived().print("\n");
     derived()(x.initial_process());
+    derived().print("\n");
     derived().leave(x);
   }
 };
@@ -282,6 +290,7 @@ std::string pp(const T& t)
 inline
 std::string pp(const linear_process& p, core::t_pp_format pp_format = core::ppDefault)
 {
+  MCRL2_CHECK_PP(core::pp(linear_process_to_aterm(p)), lps::print(p), linear_process_to_aterm(p).to_string());
   return core::pp(linear_process_to_aterm(p), pp_format);
 }
 
@@ -289,6 +298,7 @@ std::string pp(const linear_process& p, core::t_pp_format pp_format = core::ppDe
 inline
 std::string pp(const specification& spec, core::t_pp_format pp_format = core::ppDefault)
 {
+  MCRL2_CHECK_PP(core::pp(specification_to_aterm(spec)), lps::print(spec), specification_to_aterm(spec).to_string());
   return core::pp(specification_to_aterm(spec), pp_format);
 }
 

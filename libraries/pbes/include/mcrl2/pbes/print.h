@@ -39,7 +39,6 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   using super::print_list;
   using super::print_binary_operation;
   using super::print_expression;
-//  using super::print_time;
   using super::print_variables;
 
   Derived& derived()
@@ -72,7 +71,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
 
     derived().enter(x);
     derived()(x.data());
-    print_variables(x.global_variables(), true, true, "glob ", ";\n\n", ";\n     ");
+    print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
 
     // N.B. We have to normalize the sorts of the equations first.
     atermpp::vector<pbes_equation> normalized_equations = x.equations();
