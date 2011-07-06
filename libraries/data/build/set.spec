@@ -41,7 +41,7 @@ eqn {}  =  @set(@false_, @fset_empty);
     @setfset(s)  =  @set(@false_, s);
     @setcomp(f)  =  @set(f, @fset_empty);
     in(e, @set(f, s))  =  !=(f(e), @fset_in(e, s));
-    ==(@set(f, s), @set(g, t))  =  forall(c:S, ==(==(f(c),g(c)),==(@fset_in(c, s), @fset_in(c,t))));
+    ==(@set(f, s), @set(g, t))  =  forall(c:S, !=(==(f(c),g(c)),@fset_in(c,@fset_diff(s,t))));
     <(x, y)  =  &&(<=(x, y), !=(x, y));
     <=(x,y) = ==(*(x,y),x);
     !(@set(f, s))  =  @set(@not_(f), s);
