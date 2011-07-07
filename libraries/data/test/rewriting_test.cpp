@@ -948,6 +948,66 @@ BOOST_AUTO_TEST_CASE(lambda_predicate_matching)
 
 }
 
+BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
+{
+  /* Taken from the specification:
+  ================================  
+  map F1: List(Bool)#Bool#List(Bool)#Bag(Bool) -> List(Bool);
+      F2: List(Bool) -> Bag(Bool);
+      ELM: List(Bool)#Bool#List(Bool) -> List(Bool);
+  var ca: Bool;
+      cal: List(Bool);
+      b: Bool;
+      bs: List(Bool);
+      m: Bag(Bool);
+      a: Bool;
+  eqn 
+      F1( cal, b, [] ,  m ) = [];
+      F1( cal, b, a |> bs, m ) = if( m <= {}, ELM( cal, b, a |> bs ) , [] );
+      ELM( [] , b, bs ) =  F1( [] , b, bs, { false:1 } );
+      ELM( ca |> cal, b, bs ) = ELM( cal, b , bs );
+  
+  act a: List(Bool);
+   
+  proc X = sum r: List(Bool). ( r in { a: List(Bool) | exists ac': List(Bool). a ==  F1( [false], false, ac', { false:1 })} )-> a(r) . X;
+
+  init X;
+  ================================  
+  */
+
+  std::string s(
+  "map F1: List(Bool)#Bool#List(Bool)#Bag(Bool) -> List(Bool);"
+  "    F2: List(Bool) -> Bag(Bool);"
+  "    ELM: List(Bool)#Bool#List(Bool) -> List(Bool);"
+  "var ca: Bool;"
+  "    cal: List(Bool);"
+  "    b: Bool;"
+  "    bs: List(Bool);"
+  "    m: Bag(Bool);"
+  "    a: Bool;"
+  "eqn "
+  "    F1( cal, b, [] ,  m ) = [];"
+  "    F1( cal, b, a |> bs, m ) = if( m <= {}, ELM( cal, b, a |> bs ) , [] );"
+  "    ELM( [] , b, bs ) =  F1( [] , b, bs, { false:1 } );"
+  "    ELM( ca |> cal, b, bs ) = ELM( cal, b , bs );"
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "difficult_empty_list_in_set\n";
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies());
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << data::pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("[] in { a: List(Bool) | exists ac': List(Bool). a ==  F1( [false], false, ac', { false:1 }) }", specification));
+    data::data_expression f(parse_data_expression("true", specification));
+    data_rewrite_test(R, e, f);
+  }
+
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
