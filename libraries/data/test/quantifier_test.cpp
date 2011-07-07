@@ -22,9 +22,14 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
+#include "mcrl2/utilities/test_utilities.h"
+
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::data::sort_list;
+
+typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
+typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
 
 void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
 {
@@ -218,15 +223,13 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
-  std::cout << "jitty" << std::endl;
-  quantifier_expression_test(mcrl2::data::rewriter::jitty);
-  core::garbage_collect();
-
-/* #ifdef MCRL2_JITTYC_AVAILABLE
-  std::cerr << "jitty_compiling" << std::endl;
-  quantifier_expression_test(mcrl2::data::rewriter::jitty_compiling);
-  core::garbage_collect();
-#endif */
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies());
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::clog << "  Strategy: " << data::pp(*strat) << std::endl;
+    quantifier_expression_test(*strat);
+    core::garbage_collect();
+  }
 
   return EXIT_SUCCESS;
 }
