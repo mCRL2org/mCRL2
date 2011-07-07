@@ -32,6 +32,13 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
+  if (argc < 4)
+  {
+    std::cout << "Usage: lps2pbes FILENAME-INPUT-LPS FILENAME-INPUT-MCF FILENAME-OUTPUT-PBES" << std::endl;
+    return 0;
+  }
+  
+
   string spec_file(argv[1]); // specification file
   string mcf_file(argv[2]);  // modal formula file
   string pbes_file(argv[3]); // resulting pbes file

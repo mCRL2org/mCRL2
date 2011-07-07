@@ -29,7 +29,7 @@ std::string my_algorithm()
 
 int main(int argc, char** argv)
 {
-  mcrl2_logger::set_reporting_level(log_detailed_info);
+  mcrl2_logger::set_reporting_level(log_debug3);
 
   mCRL2log(info) << "This shows the way info messages are printed, using the default messages" << std::endl;
   mCRL2log(debug) << "This line is not printed, and the function " << my_algorithm() << " is not evaluated" << std::endl;

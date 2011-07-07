@@ -12,10 +12,10 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  if (argc < 1)
+  if (argc < 2)
   {
     std::cout << "Usage: parse_data FILENAME" << std::endl;
-    return 1;
+    return 0;
   }
 
   std::string text = utilities::read_text(argv[1]);

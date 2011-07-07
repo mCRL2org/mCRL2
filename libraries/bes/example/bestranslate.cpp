@@ -126,6 +126,14 @@ class bestranslate_tool: public input_output_tool
 int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
+
+  if (argc < 3)
+  {
+    std::cout << "Usage: bestranslate INFILE OUTFILE" << std::endl;
+    return 0;
+  }
+
+
   return bestranslate_tool().execute(argc, argv);
 }
 
