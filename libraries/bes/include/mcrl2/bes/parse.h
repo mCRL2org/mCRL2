@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/bes/bes_parse.h
+/// \file mcrl2/bes/parse.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_BES_PARSE_H
-#define MCRL2_PBES_BES_PARSE_H
+#ifndef MCRL2_BES_PARSE_H
+#define MCRL2_BES_PARSE_H
 
 #include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/parse.h"
@@ -64,4 +64,4 @@ std::istream& operator>>(std::istream& from, boolean_equation_system<Container>&
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_BES_PARSE_H
+#endif // MCRL2_BES_PARSE_H

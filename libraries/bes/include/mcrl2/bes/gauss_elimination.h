@@ -6,15 +6,16 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/bes/bes_gauss_elimination.h
+/// \file mcrl2/bes/gauss_elimination.h
 /// \brief add your file description here.
 
-#ifndef MCRL2_PBES_BES_GAUSS_ELIMINATION_H
-#define MCRL2_PBES_BES_GAUSS_ELIMINATION_H
+#ifndef MCRL2_BES_GAUSS_ELIMINATION_H
+#define MCRL2_BES_GAUSS_ELIMINATION_H
 
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/gauss_elimination.h"
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/print.h"
 #include "mcrl2/bes/replace.h"
 
 namespace mcrl2
@@ -147,4 +148,4 @@ bool gauss_elimination(boolean_equation_system<Container>& p, unsigned int log_l
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_BES_GAUSS_ELIMINATION_H
+#endif // MCRL2_BES_GAUSS_ELIMINATION_H

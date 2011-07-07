@@ -13,6 +13,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
+#include "mcrl2/bes/print.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;

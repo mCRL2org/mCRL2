@@ -18,22 +18,24 @@
 #include <stdexcept>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/utilities/detail/optimized_logic_operators.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/bool.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
+#include "mcrl2/utilities/detail/join.h"
+#include "mcrl2/utilities/detail/optimized_logic_operators.h"
 
 namespace mcrl2
 {
 
 namespace pbes_system
 {
+
+using namespace core::detail::precedences;
 
 //--- start generated classes ---//
 /// \brief A pbes expression

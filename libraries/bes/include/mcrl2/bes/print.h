@@ -19,18 +19,20 @@ namespace mcrl2 {
 
 namespace bes {
 
-namespace detail
-{
+namespace detail {
 
 template <typename Derived>
-struct printer: public data::add_traverser_sort_expressions<core::detail::printer, Derived>
+struct printer: public bes::add_traverser_boolean_expressions<core::detail::printer, Derived>
 {
-  typedef data::add_traverser_sort_expressions<core::detail::printer, Derived> super;
+  typedef bes::add_traverser_boolean_expressions<core::detail::printer, Derived> super;
 
   using super::enter;
   using super::leave;
   using super::operator();
-  using core::detail::printer<Derived>::print_list;
+  using super::print_expression;
+  using super::print_unary_operation;
+  using super::print_binary_operation;
+  using super::print_list;
 
   Derived& derived()
   {
@@ -40,6 +42,9 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const bes::boolean_equation& x)
   {
     derived().enter(x);
+    derived().print(x.symbol().is_mu() ? "mu " : "nu ");
+    derived()(x.variable());
+    derived().print(" = ");
     derived()(x.formula());
     derived().leave(x);
   }
@@ -48,8 +53,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const bes::boolean_equation_system<Container>& x)
   {
     derived().enter(x);
-    derived()(x.equations());
-    derived()(x.initial_state());
+    print_list(x.equations(), "bes ", ";\n\n", "\n     ;");
+    derived().print("init ");
+    print_expression(x.initial_state());
+    derived().print(";\n");
     derived().leave(x);
   }
 
@@ -70,40 +77,38 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void operator()(const bes::not_& x)
   {
     derived().enter(x);
-    derived()(x.operand());
+    print_unary_operation(x, "!");
     derived().leave(x);
   }
 
   void operator()(const bes::and_& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived()(x.right());
+    print_binary_operation(x, " && ");
     derived().leave(x);
   }
 
   void operator()(const bes::or_& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived()(x.right());
+    print_binary_operation(x, " || ");
     derived().leave(x);
   }
 
   void operator()(const bes::imp& x)
   {
     derived().enter(x);
-    derived()(x.left());
-    derived()(x.right());
+    print_binary_operation(x, " => ");
     derived().leave(x);
   }
 
   void operator()(const bes::boolean_variable& x)
   {
     derived().enter(x);
-    // skip
+    derived()(x.name());
     derived().leave(x);
   }
+};
 
 } // namespace detail
 
@@ -121,6 +126,115 @@ std::string print(const T& t)
 {
   std::ostringstream out;
   bes::print(t, out);
+  return out.str();
+}
+
+/// \brief Pretty print function
+/// \param v A boolean variable
+/// \return A pretty printed representation of the boolean variable
+inline
+std::string pp(const boolean_variable& v)
+{
+  std::string result = std::string(v.name());
+  MCRL2_CHECK_PP(result, bes::print(v), v.to_string());
+  return result;
+}
+
+/// \brief Pretty print function
+/// \param e A boolean expression
+/// \param add_parens If true, parentheses are put around sub-expressions.
+/// \return A pretty printed representation of the boolean expression.
+// TODO: the implementation is not very efficient
+inline
+std::string pp(boolean_expression e, bool add_parens = false)
+{
+  typedef core::term_traits<boolean_expression> tr;
+
+  if (tr::is_variable(e))
+  {
+    std::string result = bes::pp(boolean_variable(e));
+    MCRL2_CHECK_PP(result, bes::print(e), e.to_string());
+    return result;
+  }
+  else if (tr::is_true(e))
+  {
+    std::string result = "true";
+    MCRL2_CHECK_PP(result, bes::print(e), e.to_string());
+    return result;
+  }
+  else if (tr::is_false(e))
+  {
+    std::string result = "false";
+    MCRL2_CHECK_PP(result, bes::print(e), e.to_string());
+    return result;
+  }
+  else if (tr::is_not(e))
+  {
+    std::string result = std::string("!") + (add_parens ? "(" : "") + bes::pp(tr::arg(e), true) + (add_parens ? ")" : "");
+    MCRL2_CHECK_PP(result, bes::print(e), e.to_string());
+    return result;
+  }
+  else if (tr::is_and(e))
+  {
+    std::string result = (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " && " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
+    MCRL2_CHECK_PP(result, bes::print(e), e.to_string());
+    return result;
+  }
+  else if (tr::is_or(e))
+  {
+    std::string result = (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " || " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
+    MCRL2_CHECK_PP(result, bes::print(e), e.to_string());
+    return result;
+  }
+  else if (tr::is_imp(e))
+  {
+    std::string result = (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " => " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
+    MCRL2_CHECK_PP(result, bes::print(e), e.to_string());
+    return result;
+  }
+  throw mcrl2::runtime_error("error in mcrl2::bes::pp: encountered unknown boolean expression " + e.to_string());
+  return "";
+}
+
+template<typename Container>
+inline
+std::string pp(const Container& c, bool add_parens = false, typename atermpp::detail::enable_if_container<Container>::type* = 0)
+{
+  std::vector<std::string> v;
+  for(typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
+  {
+    v.push_back(pp(*i, add_parens));
+  }
+  std::string result = utilities::string_join(v, ", ");
+  MCRL2_CHECK_PP(result, bes::print(c), "bes container");
+  return result;
+}
+
+/// \brief Pretty print function
+/// \param eq A boolean equation
+/// \return A pretty printed representation of the boolean equation
+inline
+std::string pp(const boolean_equation& eq)
+{
+  std::string result = core::pp(eq.symbol()) + " " + bes::pp(eq.variable()) + " = " + bes::pp(eq.formula());
+  MCRL2_CHECK_PP(result, bes::print(e), "boolean equation");
+  return result;
+}
+
+/// \brief Pretty print function
+/// \param p A boolean equation system
+/// \return A pretty printed representation of the boolean equation system
+template <typename Container>
+std::string pp(const boolean_equation_system<Container>& p)
+{
+  std::ostringstream out;
+  out << "pbes\n";
+  BOOST_FOREACH(const boolean_equation& eq, p.equations())
+  {
+    out << "    " << bes::pp(eq) << ";" << std::endl;
+  }
+  out << "\ninit " << bes::pp(p.initial_state()) << ";" << std::endl;
+  MCRL2_CHECK_PP(bes::pp(p), bes::print(p), "boolean_equation_system");
   return out.str();
 }
 

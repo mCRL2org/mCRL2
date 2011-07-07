@@ -21,7 +21,7 @@
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/bes/detail/bes_algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes_parse.h"
+#include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"

@@ -17,7 +17,7 @@
 #include <boost/test/minimal.hpp>
 #include <boost/algorithm/string.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/bes/bes_gauss_elimination.h"
+#include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/utility.h"

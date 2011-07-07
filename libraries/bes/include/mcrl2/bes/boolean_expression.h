@@ -22,6 +22,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/term_traits.h"
 #include "mcrl2/core/print.h"
@@ -32,6 +33,8 @@ namespace mcrl2
 
 namespace bes
 {
+
+using namespace core::detail::precedences;
 
 //--- start generated classes ---//
 /// \brief A boolean expression
@@ -326,6 +329,42 @@ bool is_boolean_variable(const boolean_expression& t)
 
 //--- end generated classes ---//
 
+// From the documentation:
+// The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>", followed by "forall" and "exists".
+// The infix operators "&&", "||" and "=>" associate to the right.
+/// \brief Returns the precedence of pbes expressions
+inline
+int precedence(const boolean_expression& x)
+{
+  if (is_imp(x)) 
+  {
+    return 1;
+  }
+  else if (is_and(x) || is_or(x)) 
+  {
+    return 2;
+  }
+  else if (is_not(x)) 
+  {
+    return 3;
+  }
+  return core::detail::precedences::max_precedence;
+}
+
+/// \brief Returns true if the operations have the same precedence, but are different
+inline
+bool is_same_different_precedence(const and_&, const boolean_expression& x)
+{
+  return is_or(x);
+}
+
+/// \brief Returns true if the operations have the same precedence, but are different
+inline
+bool is_same_different_precedence(const or_&, const boolean_expression& x)
+{
+  return is_and(x);
+}
+
 namespace accessors
 {
 inline
@@ -614,6 +653,12 @@ boolean_expression join_and(FwdIt first, FwdIt last)
   return utilities::detail::join(first, last, tr::and_, tr::true_());
 }
 
+inline bool
+operator<(const boolean_expression& x, const boolean_expression& y)
+{
+  return ATermAppl(x) < ATermAppl(y);
+}
+
 /// \brief Splits a disjunction into a sequence of operands
 /// Given a boolean expression of the form p1 || p2 || .... || pn, this will yield a
 /// set of the form { p1, p2, ..., pn }, assuming that pi does not have a || as main
@@ -642,76 +687,6 @@ atermpp::set<boolean_expression> split_and(const boolean_expression& expr)
   atermpp::set<boolean_expression> result;
   utilities::detail::split(expr, std::insert_iterator<atermpp::set<boolean_expression> >(result, result.begin()), is_and, left, right);
   return result;
-}
-
-/// \brief Pretty print function
-/// \param v A boolean variable
-/// \return A pretty printed representation of the boolean variable
-inline
-std::string pp(const boolean_variable& v)
-{
-  return std::string(v.name());
-}
-
-/// \brief Comparison operator for boolean expressions
-inline bool
-operator<(const boolean_expression& x, const boolean_expression& y)
-{
-  return ATermAppl(x) < ATermAppl(y);
-}
-
-/// \brief Pretty print function
-/// \param e A boolean expression
-/// \param add_parens If true, parentheses are put around sub-expressions.
-/// \return A pretty printed representation of the boolean expression.
-// TODO: the implementation is not very efficient
-inline
-std::string pp(boolean_expression e, bool add_parens = false)
-{
-  typedef core::term_traits<boolean_expression> tr;
-
-  if (tr::is_variable(e))
-  {
-    return bes::pp(boolean_variable(e));
-  }
-  else if (tr::is_true(e))
-  {
-    return "true";
-  }
-  else if (tr::is_false(e))
-  {
-    return "false";
-  }
-  else if (tr::is_not(e))
-  {
-    return std::string("!") + (add_parens ? "(" : "") + bes::pp(tr::arg(e), true) + (add_parens ? ")" : "");
-  }
-  else if (tr::is_and(e))
-  {
-    return (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " && " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
-  }
-  else if (tr::is_or(e))
-  {
-    return (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " || " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
-  }
-  else if (tr::is_imp(e))
-  {
-    return (add_parens ? "(" : "") + bes::pp(tr::left(e), true) + " => " + bes::pp(tr::right(e), true) + (add_parens ? ")" : "");
-  }
-  throw mcrl2::runtime_error("error in mcrl2::bes::pp: encountered unknown boolean expression " + e.to_string());
-  return "";
-}
-
-template<typename Container>
-inline
-std::string pp(const Container& c, bool add_parens = false, typename atermpp::detail::enable_if_container<Container>::type* = 0)
-{
-  std::vector<std::string> result;
-  for(typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
-  {
-    result.push_back(pp(*i, add_parens));
-  }
-  return utilities::string_join(result, ", ");
 }
 
 } // namespace bes

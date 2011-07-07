@@ -15,8 +15,9 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/bes/small_progress_measures.h"
-#include "mcrl2/bes/bes_gauss_elimination.h"
-#include "mcrl2/bes/bes_parse.h"
+#include "mcrl2/bes/gauss_elimination.h"
+#include "mcrl2/bes/parse.h"
+#include "mcrl2/bes/print.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

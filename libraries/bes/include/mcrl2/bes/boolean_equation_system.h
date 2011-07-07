@@ -221,22 +221,6 @@ class boolean_equation_system
     }
 };
 
-/// \brief Pretty print function
-/// \param p A boolean equation system
-/// \return A pretty printed representation of the boolean equation system
-template <typename Container>
-std::string pp(const boolean_equation_system<Container>& p)
-{
-  std::ostringstream out;
-  out << "pbes\n";
-  BOOST_FOREACH(const boolean_equation& eq, p.equations())
-  {
-    out << "    " << bes::pp(eq) << ";" << std::endl;
-  }
-  out << "\ninit " << bes::pp(p.initial_state()) << ";" << std::endl;
-  return out.str();
-}
-
 template <typename Container>
 bool operator==(const boolean_equation_system<Container>& x, const boolean_equation_system<Container>& y)
 {

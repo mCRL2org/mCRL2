@@ -16,6 +16,7 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/print.h"
 
 namespace mcrl2
 {

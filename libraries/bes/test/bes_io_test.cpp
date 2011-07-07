@@ -12,12 +12,13 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes_parse.h"
-#include "mcrl2/bes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/parse.h"
+#include "mcrl2/bes/io.h"
+#include "mcrl2/bes/print.h"
+#include "mcrl2/pbes/pbes.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;

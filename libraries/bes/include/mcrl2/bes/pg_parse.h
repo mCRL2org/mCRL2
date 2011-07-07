@@ -178,4 +178,4 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b)
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_BES_PARSE_H
+#endif // MCRL2_BES_PG_PARSE_H

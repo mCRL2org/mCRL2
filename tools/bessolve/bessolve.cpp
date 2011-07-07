@@ -23,7 +23,7 @@
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes_gauss_elimination.h"
+#include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/small_progress_measures.h"
 
 using namespace mcrl2::utilities::tools;

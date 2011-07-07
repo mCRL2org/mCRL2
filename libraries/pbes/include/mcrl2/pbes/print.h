@@ -123,8 +123,6 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   void operator()(const pbes_system::pbes<Container>& x)
   {
     derived().enter(x);
-
-    derived().enter(x);
     derived()(x.data());
     print_variables(x.global_variables(), true, true, true, "glob ", ";\n\n", ";\n     ");
 
@@ -235,13 +233,6 @@ std::string pp(const T& t)
 inline
 std::string pp(const pbes_equation& eqn)
 {
-  //std::ostringstream out;
-  //out << core::pp(eqn.symbol())
-  //    << '.'
-  //    << core::pp(eqn.variable())
-  //    << " = "
-  //    << core::pp(eqn.formula());
-  //return out.str();
   MCRL2_CHECK_PP(core::pp(pbes_equation_to_aterm(eqn)), pbes_system::print(eqn), pbes_equation_to_aterm(eqn).to_string());
   return core::pp(pbes_equation_to_aterm(eqn));
 }

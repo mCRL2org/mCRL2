@@ -17,6 +17,7 @@
 #include <utility>
 #include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/bes/print.h"
 
 namespace mcrl2
 {

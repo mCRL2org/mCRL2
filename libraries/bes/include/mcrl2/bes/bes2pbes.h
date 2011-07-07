@@ -9,8 +9,8 @@
 /// \file mcrl2/bes/bes2pbes.h
 /// \brief Contains functions to transfrom a BES into a PBES.
 
-#ifndef MCRL2_PBES_BES2PBES_H
-#define MCRL2_PBES_BES2PBES_H
+#ifndef MCRL2_BES_BES2PBES_H
+#define MCRL2_BES_BES2PBES_H
 
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/pbes/pbes.h"
@@ -68,4 +68,4 @@ pbes_system::pbes<> bes2pbes(const boolean_equation_system<>& x)
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_BES2PBES_H
+#endif // MCRL2_BES_BES2PBES_H

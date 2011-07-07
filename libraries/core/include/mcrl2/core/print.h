@@ -155,13 +155,6 @@ struct printer: public core::traverser<Derived>
     }
   }
 
-  /// \brief Returns true if the operations have the same precedence, but are different
-  template <typename T1, typename T2>
-  bool is_same_different_precedence(const T1&, const T2&)
-  {
-    return false;
-  }
-  
   template <typename T>
   void print_unary_operation(const T& x, const std::string& op)
   {

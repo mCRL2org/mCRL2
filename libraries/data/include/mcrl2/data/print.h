@@ -48,9 +48,6 @@ namespace mcrl2
 namespace data
 {
 
-// Needed for argument dependent lookup (?)
-using namespace core::detail::precedences;
-
 // forward declaration
 template <typename T> std::string print(const T& t);
 
@@ -103,7 +100,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   using super::print_unary_operation;
   using super::print_binary_operation;
   using super::print_list;
-  //using core::detail::printer<Derived>::print_list;
 
   Derived& derived()
   {

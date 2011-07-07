@@ -22,6 +22,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/print.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
