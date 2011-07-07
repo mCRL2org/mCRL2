@@ -95,6 +95,24 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
 namespace detail
 {
 
+inline
+void check_pp(const std::string& s1, const std::string& s2, const std::string& s3)
+{
+  if (s1 != s2)
+  {
+    std::clog << "<pp>   " << s1 << std::endl;
+    std::clog << "<print>" << s2 << std::endl;
+    std::clog << "<aterm>" << s3 << std::endl;
+    throw std::runtime_error("not equal");
+  }
+}
+
+#ifdef MCRL2_ENABLE_CHECK_PP
+#define MCRL2_CHECK_PP(s1, s2, s3) core::detail::check_pp(s1, s2, s3);
+#else
+#define MCRL2_CHECK_PP(s1, s2, s3)
+#endif
+
 template <typename Derived>
 struct printer: public core::traverser<Derived>
 {
@@ -120,6 +138,49 @@ struct printer: public core::traverser<Derived>
   void print(const std::string& s)
   {
     out() << s;
+  }
+
+  template <typename T>
+  void print_expression(const T& x, int prec = 5)
+  {
+    bool print_parens = (precedence(x) < prec);
+    if (print_parens)
+    {
+      derived().print("(");
+    }
+    derived()(x);
+    if (print_parens)
+    {
+      derived().print(")");
+    }
+  }
+
+  /// \brief Returns true if the operations have the same precedence, but are different
+  template <typename T1, typename T2>
+  bool is_same_different_precedence(const T1&, const T2&)
+  {
+    return false;
+  }
+  
+  template <typename T>
+  void print_unary_operation(const T& x, const std::string& op)
+  {
+    derived().print(op);
+    print_expression(x.operand(), precedence(x));
+  }
+
+  template <typename T>
+  void print_binary_operation(const T& x, const std::string& op)
+  {
+#ifdef MCRL2_DEBUG_BINARY_OPERATION
+    std::cout << "<binary>" << std::endl;
+    std::cout << "<x>" << core::pp(x) << " precedence = " << precedence(x) << std::endl;
+    std::cout << "<left>" << core::pp(x.left()) << " precedence = " << precedence(x.left()) << std::endl;
+    std::cout << "<right>" << core::pp(x.right()) << " precedence = " << precedence(x.right()) << std::endl;
+#endif
+    print_expression(x.left(), is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
+    derived().print(op);
+    print_expression(x.right(), is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
   }
 
   template <typename Container>

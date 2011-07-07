@@ -182,9 +182,15 @@ inline application make_application(data_expression const& head,
   return application(head, atermpp::make_list(e0, e1, e2, e3));
 }
 
+// The precedence function must be declared here. Unfortunately this cannot be done using the include below.
+// #include "mcrl2/data/precedence.h"
+// Instead we do a forward declare of the precedence function. The user must make sure the file precedence.h is actually included.
+// TOOO: fix this by moving the is_??? functions to the file application.h
+int precedence(const data_expression& x);
+int precedence(const application& x);
+
 } // namespace data
 
 } // namespace mcrl2
 
 #endif // MCRL2_DATA_APPLICATION_H
-

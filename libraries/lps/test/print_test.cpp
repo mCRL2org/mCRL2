@@ -13,6 +13,7 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/test_utilities.h"
@@ -71,40 +72,32 @@ BOOST_AUTO_TEST_CASE(rational)
   BOOST_CHECK(output.find("@") == std::string::npos);
 }
 
-template <typename T>
-void test_term(const std::string& s, const T& x)
+#ifdef MCRL2_PRINT_PROBLEM_CASES
+void test_specification(const std::string& spec_text)
 {
-  std::clog << "--- testing term " << core::pp(x) << " ---" << std::endl;
+  specification x = parse_linear_process_specification(spec_text);
+
   std::string s1 = lps::pp(x);
   std::string s2 = lps::print(x);
   if (s1 != s2)
   {
+    std::clog << "--- testing spec ---" << std::endl;
     std::clog << "<pp>   " << s1 << std::endl;
     std::clog << "<print>" << s2 << std::endl;
-    std::clog << "<aterm>" << s  << std::endl;
     BOOST_CHECK(s1 == s2);
   }  
 }
 
-#ifdef MCRL2_PRINT_PROBLEM_CASES
 BOOST_AUTO_TEST_CASE(problem_cases)
 {
   std::string SPEC;
-  specification spec;
 
   SPEC = 
-    "act  a: Bool;   \n"
-    "proc P =  a . P;\n"
-    "init P;         \n"
+    "act  a: Bool;         \n"
+    "proc P =  a(true) . P;\n"
+    "init P;               \n"
     ;
-  spec = parse_linear_process_specification(SPEC);
-  test_term(specification_to_aterm(spec).to_string(), spec);
-
-  deadlock delta;
-  data::variable_list var;
-  data::data_expression cond = data::sort_bool::true_();
-  deadlock_summand s(var, cond, delta); 
-  test_term(deadlock_summand_to_aterm(s).to_string(), s);
+  test_specification(SPEC);
 }
 #endif
 

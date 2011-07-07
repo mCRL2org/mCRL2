@@ -42,53 +42,14 @@
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/exception.h"
 
-namespace atermpp
-{
-
-namespace detail
-{
-
-// This is here to make the std::list container work with the pp container overload.
-template < typename T >
-struct is_container_impl<std::list<T> >
-{
-  typedef boost::true_type type;
-};
-
-} // namespace detail
-} // namespace atermpp
-
 namespace mcrl2
 {
 
 namespace data
 {
 
-namespace detail
-{
-
 // Needed for argument dependent lookup (?)
 using namespace core::detail::precedences;
-
-inline
-void check_pp(const std::string& s1, const std::string& s2, const std::string& s3)
-{
-  if (s1 != s2)
-  {
-    std::clog << "<pp>   " << s1 << std::endl;
-    std::clog << "<print>" << s2 << std::endl;
-    std::clog << "<aterm>" << s3 << std::endl;
-    throw std::runtime_error("not equal");
-  }
-}
-
-} // namespace detail
-
-#ifdef MCRL2_ENABLE_CHECK_PP
-#define MCRL2_CHECK_PP(s1, s2, s3) data::detail::check_pp(s1, s2, s3);
-#else
-#define MCRL2_CHECK_PP(s1, s2, s3)
-#endif
 
 // forward declaration
 template <typename T> std::string print(const T& t);
@@ -138,7 +99,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   using super::enter;
   using super::leave;
   using super::operator();
-  using core::detail::printer<Derived>::print_list;
+  using super::print_expression;
+  using super::print_unary_operation;
+  using super::print_binary_operation;
+  using super::print_list;
+  //using core::detail::printer<Derived>::print_list;
 
   Derived& derived()
   {
@@ -281,40 +246,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
   }
 
-  template <typename T>
-  void print_expression(const T& x, int prec = 5)
+  /// \brief Returns true if the operations have the same precedence, but are different
+  inline
+  bool is_same_different_precedence(const application& x, const application& y)
   {
-    bool print_parens = (precedence(x) < prec);
-    if (print_parens)
-    {
-      derived().print("(");
-    }
-    derived()(x);
-    if (print_parens)
-    {
-      derived().print(")");
-    }
-  }
-
-  template <typename T>
-  void print_binary_operation(const T& x, const std::string& op)
-  {
-    print_expression(x.left(), precedence(x));
-    derived().print(op);
-    print_expression(x.right(), precedence(x));
-  }
-
-  // implements special handling for expressions like 'x && y || z', in
-  // which different operators have the same precedence
-  template <typename T>
-  void print_binary_operation_special(const T& x, const std::string& op)
-  {
-    data_expression left = x.left();
-    data_expression right = x.right();
-    int prec = precedence(x);
-    print_expression(left, (prec == precedence(left) && x.head() != application(left).head()) ? prec + 1 : prec);
-    derived().print(op);
-    print_expression(right, (prec == precedence(right) && x.head() != application(right).head()) ? prec + 1 : prec);
+    return precedence(x) == precedence(y) && x.head() != y.head();
   }
 
   template <typename Variable>
@@ -759,33 +695,23 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().print(" }");
   }   
   
-  void print_fbag_default(data_expression x)
+  void print_fbag_default(const data_expression& x)
   {
     // std::cout << "<fbag_default>" << core::pp(x) << " " << core::pp(sort_bag::left(x)) << " " << sort_bag::left(x) << std::endl;
-    //if (sort_bag::is_false_function_function_symbol(sort_bag::left(x)))
-    if (false)
+    data_expression right = sort_bag::right(x);
+    sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
+    core::identifier_string name = generate_identifier("x", x);
+    variable var(name, s);
+    data_expression body = sort_bag::left(x)(var);
+    if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
     {
-      derived().print("@bagfbag(");
-      derived()(sort_set::right(x));
-      derived().print(")");
+      body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
     }
-    else
-    {     
-      data_expression right = sort_bag::right(x);
-      sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
-      core::identifier_string name = generate_identifier("x", x);
-      variable var(name, s);
-      data_expression body = sort_bag::left(x)(var);
-      if (!sort_fbag::is_fbag_empty_function_symbol(sort_bag::right(x)))
-      {
-        body = sort_nat::swap_zero(body, sort_bag::bagcount(s, var, sort_bag::bagfbag(s, sort_bag::right(x))));
-      }
-      derived().print("{ ");
-      print_variable(var, true);
-      derived().print(" | ");
-      derived()(body);
-      derived().print(" }");
-    }
+    derived().print("{ ");
+    print_variable(var, true);
+    derived().print(" | ");
+    derived()(body);
+    derived().print(" }");
   }  
 
   void print_fbag_cons_list(data_expression x)
@@ -945,28 +871,28 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   // TODO: this code should be generated!
   void operator()(const data::container_type& x)
   {
-    static_cast<Derived&>(*this).enter(x);
+    derived().enter(x);
     if (data::is_list_container(x))
     {
-      static_cast<Derived&>(*this)(data::list_container(atermpp::aterm_appl(x)));
+      derived()(data::list_container(atermpp::aterm_appl(x)));
     }
     else if (data::is_set_container(x))
     {
-      static_cast<Derived&>(*this)(data::set_container(atermpp::aterm_appl(x)));
+      derived()(data::set_container(atermpp::aterm_appl(x)));
     }
     else if (data::is_bag_container(x))
     {
-      static_cast<Derived&>(*this)(data::bag_container(atermpp::aterm_appl(x)));
+      derived()(data::bag_container(atermpp::aterm_appl(x)));
     }
     else if (data::is_fset_container(x))
     {
-      static_cast<Derived&>(*this)(data::fset_container(atermpp::aterm_appl(x)));
+      derived()(data::fset_container(atermpp::aterm_appl(x)));
     }
     else if (data::is_fbag_container(x))
     {
-      static_cast<Derived&>(*this)(data::fbag_container(atermpp::aterm_appl(x)));
+      derived()(data::fbag_container(atermpp::aterm_appl(x)));
     }
-    static_cast<Derived&>(*this).leave(x);
+    derived().leave(x);
   }
 
   void operator()(const data::assignment& x)
@@ -977,14 +903,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived()(x.rhs());
     derived().leave(x);
   }
-
-//  // assignment lists have their own notation
-//  void operator()(const data::assignment_list& x)
-//  {
-//    derived().enter(x);
-//    print_assignments(x, true, "[", "]", ", ", ":=");
-//    derived().leave(x);
-//  }
 
   // variable lists have their own notation
   void operator()(const data::variable_list& x)
@@ -1264,11 +1182,11 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
       else if (sort_bool::is_and_application(x))
       {
-        print_binary_operation_special(x, " && ");
+        print_binary_operation(x, " && ");
       }
       else if (sort_bool::is_or_application(x))
       {
-        print_binary_operation_special(x, " || ");
+        print_binary_operation(x, " || ");
       }
       else if (sort_list::is_in_application(x))
       {
@@ -1752,50 +1670,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     derived().leave(x);
   }
 
-  // Container contains elements of type T such that t.sort() is a sort_expression.
-  template <typename Container>
-  void print_function_declarations(const Container& container,
-                                   const std::string& opener = "(",
-                                   const std::string& closer = ")",
-                                   const std::string& separator = ", "
-                                  )
-  {
-    typedef typename Container::value_type T;
-    
-    // print nothing if the container is empty
-    if (container.empty())
-    {
-      return;
-    }
-
-    typename Container::const_iterator first = container.begin();
-    typename Container::const_iterator last = container.end();
-
-    derived().print(opener);   
-
-    while (first != last)
-    {
-      if (first != container.begin())
-      {
-        derived().print(separator);
-      }
-
-      typename Container::const_iterator i = first;
-      do
-      {
-        ++i;
-      }
-      while (i != last && first->sort() == i->sort());
-
-      print_list(std::vector<T>(first, i), "", "", ",");
-      derived().print(": ");
-      derived()(first->sort());
-      
-      first = i;
-    }
-    derived().print(closer);
-  }
-
   // Adds variables v and function symbols f to variable_map and function_symbol_names respectively.
   void update_mappings(const data_equation& eqn,
                        std::vector<variable>& variables,
@@ -1857,19 +1731,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       }
     }
     return last; // no conflict found
-  }
-
-  template <typename Container>
-  bool has_non_standard_sorts(const Container& c)
-  {
-    for (typename Container::const_iterator i = c.begin(); i != c.end(); ++i)
-    {
-      if (!is_standard_sort(*i))
-      {
-        return true;
-      }
-    }
-    return false;
   }
 
   template <typename AliasContainer, typename SortContainer>
@@ -1956,11 +1817,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   {
     derived().enter(x);
     derived()(static_cast<const data::data_expression&>(x));
-    //if (!x.variables().empty())
-    //{
-    //  derived().print(" ");
-    //  print_variables(x.variables(), false, false, false, "[", "]", ", ");
-    //}
     derived().leave(x);   
   }
 

@@ -13,6 +13,7 @@
 #define MCRL2_ATERMPP_CONTAINER_UTILITY_H
 
 #include <algorithm>
+#include <list>
 #include <set>
 #include <vector>
 
@@ -44,6 +45,12 @@ template < typename T >
 struct is_container_impl
 {
   typedef boost::false_type type;
+};
+
+template < typename T >
+struct is_container_impl<std::list<T> >
+{
+  typedef boost::true_type type;
 };
 
 template < typename T >

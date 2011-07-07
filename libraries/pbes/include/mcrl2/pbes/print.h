@@ -30,10 +30,6 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   using super::enter;
   using super::leave;
   using super::operator();
-//  using core::detail::printer<Derived>::print_sorts;
-//  using super::print_action_declarations;
-//  using super::print_assignments;
-//  using super::print_condition;
   using super::print_abstraction;
   using super::print_list;
   using super::print_binary_operation;
@@ -69,6 +65,15 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     {
       derived().print(")");
     }
+  }
+
+  // N.B. We need a special version due to the "val" operator that needs to be
+  // put around data expressions.
+  template <typename T>
+  void print_pbes_unary_operation(const T& x, const std::string& op)
+  {
+    derived().print(op);
+    print_pbes_expression(x.operand(), precedence(x));
   }
 
   // N.B. We need a special version due to the "val" operator that needs to be
@@ -159,7 +164,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   void operator()(const pbes_system::not_& x)
   {
     derived().enter(x);
-    print_pbes_expression(x.operand());
+    print_pbes_unary_operation(x, "!");
     derived().leave(x);
   }
 
