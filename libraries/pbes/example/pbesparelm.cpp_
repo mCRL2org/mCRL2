@@ -74,7 +74,7 @@ int main(int argc, char* argv[])
       mcrl2::core::gsSetVerboseMsg();
     }
 
-    if (mcrl2::core::gsVerbose)
+    if (mCRL2logEnabled(verbose))
     {
       std::cout << "pbesparelm parameters:" << std::endl;
       std::cout << "  input file:         " << infile << std::endl;

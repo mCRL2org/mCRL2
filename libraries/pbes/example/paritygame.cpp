@@ -99,7 +99,7 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
+      if (mCRL2logEnabled(verbose))
       {
         std::cout << "paritygame parameters:" << std::endl;
         std::cout << "  input file:         " << m_input_filename << std::endl;

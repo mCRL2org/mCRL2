@@ -68,7 +68,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
+      if (mCRL2logEnabled(verbose))
       {
         std::cerr << "pbeseqelm parameters:" << std::endl;
         std::cerr << "  input file:         " << m_input_filename << std::endl;
