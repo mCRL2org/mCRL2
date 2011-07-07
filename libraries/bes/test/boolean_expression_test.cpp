@@ -81,12 +81,27 @@ void test_bes2pbes()
   core::garbage_collect();
 }
 
+void test_precedence()
+{
+  using namespace bes;
+  typedef core::term_traits<boolean_expression> tr;
+
+  boolean_variable X1("X1");
+  boolean_variable X2("X2");
+  boolean_expression t = tr::and_(X1, X2);
+  BOOST_CHECK(precedence(t) == 2);
+
+  std::string s = bes::pp(t);
+  BOOST_CHECK(s == "X1 && X2");
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_boolean_expressions();
   test_bes2pbes();
+  test_precedence();
 
   return 0;
 }

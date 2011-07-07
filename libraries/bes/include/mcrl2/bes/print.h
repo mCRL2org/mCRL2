@@ -53,7 +53,7 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
   void operator()(const bes::boolean_equation_system<Container>& x)
   {
     derived().enter(x);
-    print_list(x.equations(), "bes ", ";\n\n", "\n     ;");
+    print_list(x.equations(), "pbes\n    ", ";\n\n", ";\n    ");
     derived().print("init ");
     print_expression(x.initial_state());
     derived().print(";\n");
@@ -217,7 +217,7 @@ inline
 std::string pp(const boolean_equation& eq)
 {
   std::string result = core::pp(eq.symbol()) + " " + bes::pp(eq.variable()) + " = " + bes::pp(eq.formula());
-  MCRL2_CHECK_PP(result, bes::print(e), "boolean equation");
+  MCRL2_CHECK_PP(result, bes::print(eq), "boolean equation");
   return result;
 }
 
@@ -234,7 +234,7 @@ std::string pp(const boolean_equation_system<Container>& p)
     out << "    " << bes::pp(eq) << ";" << std::endl;
   }
   out << "\ninit " << bes::pp(p.initial_state()) << ";" << std::endl;
-  MCRL2_CHECK_PP(bes::pp(p), bes::print(p), "boolean_equation_system");
+  MCRL2_CHECK_PP(out.str(), bes::print(p), "boolean_equation_system");
   return out.str();
 }
 

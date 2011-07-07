@@ -24,11 +24,14 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/traverser.h"
+#include "mcrl2/core/detail/precedence.h"
 
 namespace mcrl2
 {
 namespace core
 {
+
+using namespace core::detail::precedences;
 
 /// \brief t_pp_format represents the available pretty print formats
 typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
@@ -167,9 +170,9 @@ struct printer: public core::traverser<Derived>
   {
 #ifdef MCRL2_DEBUG_BINARY_OPERATION
     std::cout << "<binary>" << std::endl;
-    std::cout << "<x>" << core::pp(x) << " precedence = " << precedence(x) << std::endl;
-    std::cout << "<left>" << core::pp(x.left()) << " precedence = " << precedence(x.left()) << std::endl;
-    std::cout << "<right>" << core::pp(x.right()) << " precedence = " << precedence(x.right()) << std::endl;
+    std::cout << "<x>" << x.to_string() << " precedence = " << precedence(x) << std::endl;
+    std::cout << "<left>" << x.left().to_string() << " precedence = " << precedence(x.left()) << std::endl;
+    std::cout << "<right>" << x.right().to_string() << " precedence = " << precedence(x.right()) << std::endl;
 #endif
     print_expression(x.left(), is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
     derived().print(op);

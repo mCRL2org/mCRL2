@@ -14,6 +14,10 @@
 
 #include <cassert>
 #include <string>
+
+#include <boost/utility/enable_if.hpp>
+#include <boost/type_traits/is_base_of.hpp>
+
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/set.h"
@@ -330,9 +334,11 @@ bool is_boolean_variable(const boolean_expression& t)
 //--- end generated classes ---//
 
 // From the documentation:
-// The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>", followed by "forall" and "exists".
+// The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>".
 // The infix operators "&&", "||" and "=>" associate to the right.
-/// \brief Returns the precedence of pbes expressions
+/// \brief Returns the precedence of boolean expressions
+// N.B. The is_base_of construction is needed to make sure that the precedence also works on
+// classes of type 'and_', 'or_' and 'imp'.
 inline
 int precedence(const boolean_expression& x)
 {
@@ -350,6 +356,12 @@ int precedence(const boolean_expression& x)
   }
   return core::detail::precedences::max_precedence;
 }
+
+// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
+inline int precedence(const imp& x) { return precedence(static_cast<const boolean_expression&>(x)); }
+inline int precedence(const and_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
+inline int precedence(const or_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
+inline int precedence(const not_& x) { return precedence(static_cast<const boolean_expression&>(x)); }
 
 /// \brief Returns true if the operations have the same precedence, but are different
 inline

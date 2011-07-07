@@ -523,6 +523,14 @@ int precedence(const pbes_expression& x)
   return core::detail::precedences::max_precedence;
 }
 
+// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
+inline int precedence(const forall & x)  { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const exists & x)  { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const imp& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const and_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const or_& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const not_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
+
 /// \brief Returns true if the operations have the same precedence, but are different
 template <typename T1, typename T2>
 bool is_same_different_precedence(const T1&, const T2&)
