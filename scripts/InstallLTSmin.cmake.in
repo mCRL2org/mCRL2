@@ -13,23 +13,24 @@ if( UNIX )
  # Set additional configure flags
  # SHARED LIBS vs STATIC LIBS
  if( BUILD_SHARED_LIBS )
-   set(LTSMIN_FLAGS "--enable-shared ${LTSMIN_FLAGS}")
+ execute_process(COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} --with-mcrl2=${CMAKE_INSTALL_PREFIX} --enable-shared 
+   WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
+	 )
  else( BUILD_SHARED_LIBS )
-   set(LTSMIN_FLAGS "--enable-static ${LTSMIN_FLAGS}")
+ execute_process(COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} --with-mcrl2=${CMAKE_INSTALL_PREFIX} --enable-static 
+   WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
+	 )
  endif( BUILD_SHARED_LIBS )
 
  #Configure ltsmin
- execute_process(COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} --with-mcrl2=${CMAKE_INSTALL_PREFIX} ${LTSMIN_FLAGS} 
-   WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
-	 )
 
  #Make ltsmin 
- execute_process(COMMAND make 
+ execute_process(COMMAND "make" 
    WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@" 
 	 )
 
  #Make install 
- execute_process(COMMAND make install 
+ execute_process(COMMAND "make install"
    WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
 	 )
 
