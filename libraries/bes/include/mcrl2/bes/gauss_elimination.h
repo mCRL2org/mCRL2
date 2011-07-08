@@ -121,12 +121,12 @@ boolean_equation_solver<Rewriter> make_boolean_equation_solver(const Rewriter& r
 /// \param p A bes
 /// \return The solution of the system
 template <typename Container>
-bool gauss_elimination(boolean_equation_system<Container>& p, unsigned int log_level = 0)
+bool gauss_elimination(boolean_equation_system<Container>& p)
 {
   typedef typename core::term_traits<boolean_expression> tr;
   typedef pbes_system::boolean_expression_rewriter<boolean_expression> bes_rewriter;
 
-  pbes_system::gauss_elimination_algorithm<bes_traits> algorithm(log_level);
+  pbes_system::gauss_elimination_algorithm<bes_traits> algorithm;
   bes_rewriter besr;
   algorithm.run(p.equations().begin(), p.equations().end(), boolean_equation_solver<bes_rewriter>(besr));
   if (tr::is_false(p.equations().front().formula()))

@@ -260,7 +260,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
     /// \param r a rewriter for data
     binary_algorithm(specification& spec,
                      DataRewriter& r)
-      : lps_algorithm(spec,mCRL2logEnabled(verbose)),
+      : lps_algorithm(spec),
         m_rewriter(r)
     {}
 

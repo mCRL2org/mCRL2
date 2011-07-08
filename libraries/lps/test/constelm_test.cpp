@@ -398,9 +398,8 @@ void test_constelm(const std::string& message, const std::string& spec_text, con
 {
   specification spec = parse_linear_process_specification(spec_text);
   data::rewriter R(spec.data());
-  bool verbose = false;
   bool instantiate_free_variables = false;
-  constelm(spec, R, verbose, instantiate_free_variables);
+  constelm(spec, R, instantiate_free_variables);
   lps::detail::specification_property_map info(spec);
   BOOST_CHECK(data::detail::compare_property_maps(message, info, expected_result));
   core::garbage_collect();
@@ -425,9 +424,8 @@ void test_abp()
 {
   specification spec = linearise(lps::detail::ABP_SPECIFICATION());
   data::rewriter R(spec.data());
-  bool verbose = false;
   bool instantiate_free_variables = false;
-  constelm(spec, R, verbose, instantiate_free_variables);
+  constelm(spec, R, instantiate_free_variables);
   BOOST_CHECK(is_well_typed(spec));
   core::garbage_collect();
 }

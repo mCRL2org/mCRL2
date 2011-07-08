@@ -37,23 +37,14 @@ class bes_algorithm: public utilities::algorithm
 
   public:
     /// \brief Constructor
-    bes_algorithm(boolean_equation_system<Container>& bes, bool verbose = false)
-      :
-      utilities::algorithm(verbose ? 1 : 0),
-      m_bes(bes)
-    {}
-
-    /// \brief Constructor
-    bes_algorithm(boolean_equation_system<Container>& bes, size_t loglevel)
-      :
-      utilities::algorithm(loglevel),
-      m_bes(bes)
+    bes_algorithm(boolean_equation_system<Container>& bes)
+      : m_bes(bes)
     {}
 
     /// \brief Flag for verbose output
     bool verbose() const
     {
-      return verbose_level() >= 1;
+      return mCRL2logEnabled(verbose);
     }
 
     /// \brief Perform reachability analysis on equations of m_bes, and remove

@@ -63,7 +63,7 @@ class sumelm_tool: public input_output_tool
       lps_specification.load(m_input_filename);
 
       // apply sum elimination to lps_specification and save the output to a binary file
-      lps::sumelm_algorithm(lps_specification, mCRL2logEnabled(verbose) || mCRL2logEnabled(debug), m_decluster).run();
+      lps::sumelm_algorithm(lps_specification, m_decluster).run();
 
       mCRL2log(debug) << "Sum elimination completed, saving to " <<  m_output_filename << std::endl;
       lps_specification.save(m_output_filename);

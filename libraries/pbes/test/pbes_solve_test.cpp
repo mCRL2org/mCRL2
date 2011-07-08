@@ -275,10 +275,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  set_parity_game_generator_log_level(2);
-
-  test_all();
-  
+  test_all(); 
   test_abp();
 
   return 0;

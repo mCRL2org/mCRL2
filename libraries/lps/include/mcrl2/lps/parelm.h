@@ -216,8 +216,8 @@ class parelm_algorithm: public lps::detail::lps_algorithm
   public:
 
     /// \brief Constructor
-    parelm_algorithm(specification& spec, bool verbose = false)
-      : lps::detail::lps_algorithm(spec, verbose)
+    parelm_algorithm(specification& spec )
+      : lps::detail::lps_algorithm(spec)
     {}
 
     /// \brief Runs the parelm algorithm
@@ -236,10 +236,9 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
 /// \brief Removes unused parameters from a linear process specification.
 /// \param spec A linear process specification
-/// \param verbose If true, verbose output is generated
-void parelm(specification& spec, bool variant1 = true, bool verbose = false)
+void parelm(specification& spec, bool variant1 = true)
 {
-  parelm_algorithm algorithm(spec, verbose);
+  parelm_algorithm algorithm(spec);
   algorithm.run(variant1);
 }
 

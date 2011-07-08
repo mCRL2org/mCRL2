@@ -311,7 +311,6 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  pbes_system::set_parity_game_generator_log_level(2);
   test_bes_examples();
   test_pbespgsolve();
   // test_one_bit_sliding_window();

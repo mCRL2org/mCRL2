@@ -19,12 +19,13 @@
 #include <sstream>
 #include <vector>
 #include <boost/lexical_cast.hpp>
-#include "mcrl2/utilities/algorithm.h"
-#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/print.h"
+#include "mcrl2/core/detail/print_utility.h"
+#include "mcrl2/utilities/algorithm.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -307,39 +308,57 @@ class small_progress_measures_algorithm: public utilities::algorithm
       }
     }
 
-    /// \brief Prints the vertices
-    void LOG_VERTICES(unsigned int level, const std::string& msg = "") const
+    std::string print_vertices() const
     {
-      if (check_log_level(level))
+      std::ostringstream out;
+      for (atermpp::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
-        std::clog << msg;
-        for (atermpp::vector<boolean_equation>::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
-        {
-          const vertex& v = m_vertices.find(i->variable())->second;
-          std::clog << v.name << " " << v << std::endl;
-        }
+        const vertex& v = m_vertices.find(i->variable())->second;
+        out << v.name << " " << v << std::endl;
       }
+      return out.str();
     }
 
-    /// \brief Prints a vertex
-    void LOG_VERTEX(unsigned int level, const vertex& v, const std::string& msg = "") const
+    std::string print_vertex(const vertex& v) const
     {
-      if (check_log_level(level))
-      {
-        std::clog << msg;
-        std::clog << v.name << " (alpha = " << v.alpha << ", rank = " << v.rank << ")";
-      }
+      std::ostringstream out;
+      out << v.name << " (alpha = " << v.alpha << ", rank = " << v.rank << ")";
+      return out.str();
     }
 
-    /// \brief Prints the neighbors of a vertex
-    void LOG_NEIGHBORS(unsigned int level, const progress_measures_vertex& v, const std::string& msg = "") const
+    /// \brief Logs the vertices
+    void LOG_VERTICES_VERBOSE(const std::string& msg = "") const
     {
-      if (check_log_level(level))
+      mCRL2log(verbose) << msg << print_vertices();
+    }
+
+    /// \brief Logs the vertices
+    void LOG_VERTICES_DEBUG(const std::string& msg = "") const
+    {
+      mCRL2log(debug) << msg << print_vertices();
+    }
+
+    /// \brief Logs a vertex
+    void LOG_VERTEX_DEBUG(const vertex& v, const std::string& msg = "") const
+    {
+      mCRL2log(debug) << msg << print_vertex(v);
+    }
+
+    /// \brief Logs a vertex
+    void LOG_VERTEX_VERBOSE(const vertex& v, const std::string& msg = "") const
+    {
+      mCRL2log(verbose) << msg << print_vertex(v);
+    }
+
+    /// \brief Logs the neighbors of a vertex
+    void LOG_NEIGHBORS_DEBUG(const progress_measures_vertex& v, const std::string& msg = "") const
+    {
+      if (mCRL2logEnabled(debug))
       {
-        std::clog << msg;
+        mCRL2log(debug) << msg;
         for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
         {
-          LOG_VERTEX(level, **i, "\n      ");
+          LOG_VERTEX_DEBUG(**i, "\n      ");
         }
       }
     }
@@ -350,52 +369,51 @@ class small_progress_measures_algorithm: public utilities::algorithm
     std::vector<int> m_beta;
 
   public:
-    small_progress_measures_algorithm(const boolean_equation_system<>& b, unsigned int log_level = 0)
-      : utilities::algorithm(log_level),
-        m_bes(b)
+    small_progress_measures_algorithm(const boolean_equation_system<>& b)
+      : m_bes(b)
     {}
 
     bool run(const boolean_variable& first_variable)
     {
-      LOG(2, "--- applying small progress measures to ---\n" + bes::pp(m_bes) + "\n\n");
+      LOG_DEBUG("--- applying small progress measures to ---\n" + bes::pp(m_bes) + "\n\n");
       initialize_vertices();
-      LOG_VERTICES(1, "--- vertices ---\n");
-      LOG(1, "\nbeta = " + core::detail::print_list(m_beta) + "\n");
+      LOG_VERTICES_VERBOSE("--- vertices ---\n");
+      LOG_VERBOSE("\nbeta = " + core::detail::print_list(m_beta) + "\n");
       for (;;) // forever
       {
         bool changed = false;
         for (vertex_map::iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
         {
           vertex& v = i->second;
-          LOG_VERTEX(2, v, "\nchoose vertex ");
+          LOG_VERTEX_DEBUG(v, "\nchoose vertex ");
           unsigned int m = v.rank;
           std::vector<progress_measures_vertex*>::const_iterator j;
-          LOG_NEIGHBORS(2, v, "\n    neighbors:");
+          LOG_NEIGHBORS_DEBUG(v, "\n    neighbors:");
           if (v.even)
           {
             j = std::min_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(m));
-            LOG_VERTEX(2, **j, "\n    minimum neighbor ");
+            LOG_VERTEX_DEBUG(**j, "\n    minimum neighbor ");
           }
           else
           {
             j = std::max_element(v.successors.begin(), v.successors.end(), compare_progress_measures_vertex(m));
-            LOG_VERTEX(2, **j, "\n    maximum neighbor ");
+            LOG_VERTEX_DEBUG(**j, "\n    maximum neighbor ");
           }
           std::vector<int> alpha(m_d, 0);
           const progress_measures_vertex& w = **j;
           std::copy(w.alpha.v.begin(),  w.alpha.v.begin() + m + 1, alpha.begin());
           if (is_odd(m))
           {
-            LOG(2, "\n    inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
+            LOG_DEBUG("\n    inc(" + core::detail::print_list(alpha) + ", " + boost::lexical_cast<std::string>(m) + ") = ");
             inc(alpha, m, m_beta);
-            LOG(2, (alpha[0] < 0 ? "top" : core::detail::print_list(alpha)));
+            LOG_DEBUG((alpha[0] < 0 ? "top" : core::detail::print_list(alpha)));
           }
 
           if (!std::equal(alpha.begin(), alpha.end(), v.alpha.v.begin()))
           {
             changed = true;
             v.alpha.v = alpha;
-            LOG_VERTEX(1, v, "\nupdate vertex ");
+            LOG_VERTEX_VERBOSE(v, "\nupdate vertex ");
           }
         }
         if (!changed)
@@ -403,18 +421,17 @@ class small_progress_measures_algorithm: public utilities::algorithm
           break;
         }
       }
-      LOG_VERTICES(2, "\n--- vertices ---\n");
+      LOG_VERTICES_DEBUG("\n--- vertices ---\n");
       return !m_vertices[first_variable].alpha.is_top();
     }
-
 };
 
 inline
-bool small_progress_measures(boolean_equation_system<>& b, unsigned int loglevel = 0)
+bool small_progress_measures(boolean_equation_system<>& b)
 {
   boolean_variable first = b.equations().front().variable();
   make_standard_form(b, true);
-  small_progress_measures_algorithm algorithm(b, loglevel);
+  small_progress_measures_algorithm algorithm(b);
   return algorithm.run(first);
 }
 

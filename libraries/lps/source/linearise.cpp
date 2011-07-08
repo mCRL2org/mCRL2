@@ -7176,7 +7176,7 @@ class specification_basic_type:public boost::noncopyable
 
           specification temporary_spec(data,acts,global_variables,lps,initializer);
 
-          constelm_algorithm < rewriter > alg(temporary_spec,rewr,mCRL2logEnabled(verbose));
+          constelm_algorithm < rewriter > alg(temporary_spec,rewr);
           alg.run(true); // Remove constants from the specification, where global variables are
           // also instantiated if they exist.
           // Reconstruct the variables from the temporary specification

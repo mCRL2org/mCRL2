@@ -36,27 +36,6 @@ namespace mcrl2
 namespace pbes_system
 {
 
-template <class T> // note, T is only a dummy
-struct parity_game_generator_log_level
-{
-  static size_t log_level;
-};
-
-template <class T>
-size_t parity_game_generator_log_level<T>::log_level = 0;
-
-inline
-void set_parity_game_generator_log_level(size_t level)
-{
-  parity_game_generator_log_level<size_t>::log_level = level;
-}
-
-inline
-size_t get_parity_game_generator_log_level()
-{
-  return parity_game_generator_log_level<size_t>::log_level;
-}
-
 /// \brief Class for generating a BES from a PBES. This BES can be interpreted as
 /// a graph corresponding to a parity game problem. The proposition variables
 /// of the BES correspond to the vertices of the graph.
@@ -330,9 +309,8 @@ class parity_game_generator: public utilities::algorithm
     /// \param p A PBES
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-    parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, size_t log_level = 0, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
+    parity_game_generator(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
       :
-      utilities::algorithm(log_level),
       m_initialized(false),
       m_pbes(p),
       generator("UNIQUE_PREFIX"),
@@ -342,13 +320,7 @@ class parity_game_generator: public utilities::algorithm
       R(datarv, datae),
       m_true_false_dependencies(true_false_dependencies),
       m_is_min_parity(is_min_parity)
-    {
-      // Overrule the log level setting by the global value
-      if (log_level == 0)
-      {
-        verbose_level() = get_parity_game_generator_log_level();
-      }
-    }
+    {}
 
     /// \brief Returns the vertex type.
     /// \param index A positive integer

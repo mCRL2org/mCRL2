@@ -286,9 +286,9 @@ class parity_game_generator_deprecated: public parity_game_generator
     /// \param p A PBES
     /// \param true_false_dependencies If true, nodes are generated for the values <tt>true</tt> and <tt>false</tt>.
     /// \param is_min_parity If true a min-parity game is produced, otherwise a max-parity game
-    parity_game_generator_deprecated(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, size_t log_level = 0, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
+    parity_game_generator_deprecated(pbes<>& p, bool true_false_dependencies = false, bool is_min_parity = true, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
       :
-      parity_game_generator(p, true_false_dependencies, is_min_parity, log_level, rewrite_strategy),
+      parity_game_generator(p, true_false_dependencies, is_min_parity, rewrite_strategy),
       datar_internal(datar)
     {
 #ifdef NDEBUG

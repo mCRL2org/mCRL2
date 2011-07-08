@@ -146,8 +146,8 @@ class untime_algorithm: public lps::detail::lps_algorithm
     }
 
   public:
-    untime_algorithm(specification& spec, bool verbose = false)
-      : lps::detail::lps_algorithm(spec, verbose)
+    untime_algorithm(specification& spec)
+      : lps::detail::lps_algorithm(spec)
     {
       m_identifier_generator.add_identifiers(lps::find_identifiers(spec));
     }

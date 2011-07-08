@@ -24,7 +24,7 @@ void ParityGame::assign_pbes( mcrl2::pbes_system::pbes<Container> &pbes,
     if (goal_vertex) *goal_vertex = 2;
 
     // Generate min-priority parity game
-    pg_generator pgg(pbes, true, true, 0, rewrite_strategy);
+    pg_generator pgg(pbes, true, true, rewrite_strategy);
 
     // Build the edge list
     StaticGraph::edge_list edges;

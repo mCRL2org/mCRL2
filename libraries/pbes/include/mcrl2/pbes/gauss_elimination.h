@@ -12,9 +12,12 @@
 #ifndef MCRL2_PBES_GAUSS_ELIMINATION_H
 #define MCRL2_PBES_GAUSS_ELIMINATION_H
 
-#include "mcrl2/utilities/algorithm.h"
+#include <sstream>
+
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/utilities/algorithm.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -35,40 +38,43 @@ class gauss_elimination_algorithm : public utilities::algorithm
 
   protected:
 
-    void LOG_EQUATION(size_t level, std::string message, const equation_type& eq) const
+    std::string print_equation(const equation_type& eq) const
     {
-      if (check_log_level(level))
+      return ExpressionTraits::print(eq);
+    }
+
+    template <typename Iter>
+    std::string print_equations(Iter first, Iter last) const
+    {
+      std::ostringstream out;
+      for (Iter i = first; i != last; ++i)
       {
-        std::clog << message;
-        std::clog << "  " << ExpressionTraits::print(eq) << std::endl;
+        out << "  " << print_equation(*i) << std::endl;
       }
+      return out.str();
+    }
+
+    void LOG_EQUATION_VERBOSE(const std::string& msg, const equation_type& eq) const
+    {
+      mCRL2log(verbose) << msg << print_equation(eq) << "\n";
     }
 
     /// \brief Prints the sequence of pbes equations [first, last) to clog.
     /// \param first Start of a range of equations
     /// \param last End of a range of equations
+    template <typename Iter>
+    void LOG_EQUATIONS_DEBUG(const std::string& msg, Iter first, Iter last) const
+    {
+      mCRL2log(debug) << msg << print_equations(first, last);
+    }
 
     template <typename Iter>
-    void LOG_EQUATIONS(size_t level, std::string message, Iter first, Iter last) const
+    void LOG_EQUATIONS_DEBUG1(const std::string& msg, Iter first, Iter last) const
     {
-      if (check_log_level(level))
-      {
-        std::clog << message;
-        for (Iter i = first; i != last; ++i)
-        {
-          std::clog << "  " << ExpressionTraits::print(*i) << std::endl;
-        }
-      }
+      mCRL2log(debug1) << msg << print_equations(first, last);
     }
 
   public:
-    /// \brief Constructor
-
-    gauss_elimination_algorithm(size_t verbose_level = 0)
-      : algorithm(verbose_level)
-    {
-    }
-
     /// \brief Runs the algorithm. Applies Gauss elimination to the sequence of pbes equations [first, last).
     /// \param first Start of a range of pbes equations
     /// \param last End of a range of pbes equations
@@ -77,7 +83,7 @@ class gauss_elimination_algorithm : public utilities::algorithm
     template <typename Iter, typename FixpointEquationSolver>
     void run(Iter first, Iter last, FixpointEquationSolver solve)
     {
-      LOG_EQUATIONS(2, "equations before solving\n", first, last);
+      LOG_EQUATIONS_DEBUG("equations before solving\n", first, last);
       if (first == last)
       {
         return;
@@ -87,16 +93,16 @@ class gauss_elimination_algorithm : public utilities::algorithm
       while (i != first)
       {
         --i;
-        LOG_EQUATION(1, "solving equation\n  before: ", *i);
+        LOG_EQUATION_VERBOSE("solving equation\n  before: ", *i);
         solve(*i);
-        LOG_EQUATION(1, "   after: ", *i);
+        LOG_EQUATION_VERBOSE("   after: ", *i);
         for (Iter j = first; j != i; ++j)
         {
           j->formula() = ExpressionTraits::substitute(j->formula(), i->variable(), i->formula());
         }
-        LOG_EQUATIONS(3, "equations after substitution\n", first, last);
+        LOG_EQUATIONS_DEBUG1("equations after substitution\n", first, last);
       }
-      LOG_EQUATIONS(2, "equations after solving\n", first, last);
+      LOG_EQUATIONS_DEBUG("equations after solving\n", first, last);
     }
 };
 

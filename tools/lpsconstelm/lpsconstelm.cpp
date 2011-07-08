@@ -85,21 +85,11 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
-      size_t loglevel = 0;
-      if (mCRL2logEnabled(verbose))
-      {
-        loglevel = 1;
-      }
-      if (mCRL2logEnabled(debug))
-      {
-        loglevel = 2;
-      }
-
       lps::specification spec;
       spec.load(m_input_filename);
       mcrl2::data::rewriter R = create_rewriter(spec.data());
 
-      lps::constelm_algorithm<data::rewriter> algorithm(spec, R, loglevel);
+      lps::constelm_algorithm<data::rewriter> algorithm(spec, R);
 
       // preprocess: remove single element sorts
       if (m_remove_singleton_sorts)

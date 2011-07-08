@@ -15,6 +15,8 @@
 #include <iostream>
 #include <string>
 
+#include "mcrl2/utilities/logger.h"
+
 namespace mcrl2
 {
 
@@ -25,44 +27,23 @@ namespace utilities
 class algorithm
 {
   protected:
-    size_t m_verbose_level;
-
-    /// \brief Returns a reference to the verbosity level.
-    /// The higher this number, the more output that will be written to clog.
-    /// Verbosity level 0 means no output.
-    size_t& verbose_level()
+    /// \brief Logs the string s
+    void LOG_VERBOSE(const std::string& s) const
     {
-      return m_verbose_level;
+      mCRL2log(verbose) << s;
     }
 
-    /// \brief Returns the verbosity level.
-    size_t verbose_level() const
+    /// \brief Logs the string s
+    void LOG_DEBUG(const std::string& s) const
     {
-      return m_verbose_level;
+      mCRL2log(debug) << s;
     }
 
-    /// \brief Returns true if a message with the given level should be printed.
-    bool check_log_level(size_t level) const
+    /// \brief Logs the string s
+    void LOG_DEBUG1(const std::string& s) const
     {
-      return m_verbose_level >= level;
+      mCRL2log(debug1) << s;
     }
-
-    /// \brief Very simplistic log function
-    void LOG(size_t level, const std::string& s) const
-    {
-      if (check_log_level(level))
-      {
-        std::clog << s << std::flush;
-      }
-    }
-
-  public:
-    /// \brief Constructor
-    algorithm(size_t verbose_level = 0)
-      : m_verbose_level(verbose_level)
-    {
-    }
-
 };
 
 } // namespace utilities

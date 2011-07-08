@@ -67,8 +67,7 @@ void test_pbes(const std::string& pbes_spec,
   my_pbes_rewriter pbesr(datar);
 
   // constelm algorithm
-  size_t log_level = 2;
-  pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
+  pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
   // run the algorithm
   algorithm.run(q);
@@ -105,8 +104,7 @@ void test_eqelm(const std::string& pbes_spec)
 
   data::rewriter datar(q.data());
   my_pbes_rewriter pbesr(datar);
-  size_t log_level = 2; 
-  pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
+  pbes_eqelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
   algorithm.run(q);
 
   bool result1 = pbes2_bool_test(p);

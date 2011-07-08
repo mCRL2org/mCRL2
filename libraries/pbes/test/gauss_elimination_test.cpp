@@ -111,8 +111,7 @@ std::string BES10 =
 void test_bes(std::string bes_spec, bool expected_result)
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
-  size_t log_level = 2;
-  int result = pbes_system::gauss_elimination(p, log_level);
+  int result = pbes_system::gauss_elimination(p);
   switch (result)
   {
     case 0:
@@ -177,7 +176,6 @@ void test_bes()
   using namespace bes;
 
   typedef core::term_traits<boolean_expression> tr;
-  size_t log_level = 2;
 
   boolean_variable X("X");
   boolean_variable Y("Y");
@@ -220,10 +218,10 @@ void test_bes()
   bes4.equations().push_back(e4);
   bes4.equations().push_back(e3);
 
-  BOOST_CHECK(gauss_elimination(bes1, log_level) == false);
-  BOOST_CHECK(gauss_elimination(bes2, log_level) == true);
-  BOOST_CHECK(gauss_elimination(bes3, log_level) == false);
-  BOOST_CHECK(gauss_elimination(bes4, log_level) == true);
+  BOOST_CHECK(gauss_elimination(bes1) == false);
+  BOOST_CHECK(gauss_elimination(bes2) == true);
+  BOOST_CHECK(gauss_elimination(bes3) == false);
+  BOOST_CHECK(gauss_elimination(bes4) == true);
 
   core::garbage_collect();
 }

@@ -74,26 +74,16 @@ class bessolve_tool: public input_output_tool
                    (input_filename().empty()?"standard input":input_filename()) << " using " <<
                    solution_strategy_to_string(strategy) << "" << std::endl;
 
-      unsigned int log_level = 0;
-      if (mCRL2logEnabled(verbose))
-      {
-        log_level = 1;
-      }
-      if (mCRL2logEnabled(debug))
-      {
-        log_level = 2;
-      }
-
       bool result = false;
 
       timer().start("solving");
       switch (strategy)
       {
         case gauss:
-          result = gauss_elimination(bes, log_level);
+          result = gauss_elimination(bes);
           break;
         case spm:
-          result = small_progress_measures(bes, log_level);
+          result = small_progress_measures(bes);
           break;
         default:
           throw mcrl2::runtime_error("unhandled strategy provided");

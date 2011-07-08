@@ -17,14 +17,15 @@
 #include <map>
 #include <set>
 #include <vector>
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/rewriter.h"
-#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -79,74 +80,61 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     /// \brief The rewriter used by the constelm algorithm.
     const DataRewriter& R;
 
-    void LOG_CONSTANT_PARAMETERS(size_t level,
-                                 const data::mutable_map_substitution<>& sigma,
+    void LOG_CONSTANT_PARAMETERS(const data::mutable_map_substitution<>& sigma,
                                  const std::string& msg = "")
     {
-      if (check_log_level(level))
+      if (mCRL2logEnabled(verbose))
       {
-        std::clog << msg;
+        mCRL2log(verbose) << msg;
         for (data::mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
         {
-          std::clog << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
+          mCRL2log(verbose) << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
         }
       }
     }
 
-    void LOG_PARAMETER_CHANGE(size_t level,
-                              const data::data_expression& d_j,
+    void LOG_PARAMETER_CHANGE(const data::data_expression& d_j,
                               const data::data_expression& Rd_j,
                               const data::data_expression& Rg_ij,
                               const data::mutable_map_substitution<>& sigma,
                               const std::string& msg = ""
                              )
     {
-      if (check_log_level(level))
+      if (mCRL2logEnabled(debug))
       {
-        std::clog << msg
-                  << data::pp(d_j) << "\n"
-                  << "      value before: " << data::pp(Rd_j) << "\n"
-                  << "      value after:  " << data::pp(Rg_ij) << "\n"
-                  << "      replacements: " << data::print_substitution(sigma) << std::endl;
+        mCRL2log(debug) << msg
+                        << data::pp(d_j) << "\n"
+                        << "      value before: " << data::pp(Rd_j) << "\n"
+                        << "      value after:  " << data::pp(Rg_ij) << "\n"
+                        << "      replacements: " << data::print_substitution(sigma) << std::endl;
       }
     }
 
-    void LOG_CONDITION(size_t level,
-                       const data::data_expression& cond,
+    void LOG_CONDITION(const data::data_expression& cond,
                        const data::data_expression& c_i,
                        const data::mutable_map_substitution<>& sigma,
                        const std::string& msg = ""
                       )
 
     {
-      if (check_log_level(level))
+      if (mCRL2logEnabled(debug))
       {
-        std::clog << msg
-                  << data::pp(cond)
-                  << data::print_substitution(sigma)
-                  << " -> "
-                  << data::pp(c_i) << std::endl;
+        mCRL2log(debug) << msg
+                        << data::pp(cond)
+                        << data::print_substitution(sigma)
+                        << " -> "
+                        << data::pp(c_i) << std::endl;
       }
     }
 
   public:
 
     /// \brief Constructor
-    constelm_algorithm(specification& spec, const DataRewriter& R_, bool verbose = false)
-      :
-      lps::detail::lps_algorithm(spec, verbose),
-      m_instantiate_global_variables(false),
-      m_ignore_conditions(false),
-      R(R_)
-    {}
-
-    /// \brief Constructor
-    constelm_algorithm(specification& spec, const DataRewriter& R_, size_t loglevel)
-      :
-      lps::detail::lps_algorithm(spec, loglevel),
-      m_instantiate_global_variables(false),
-      m_ignore_conditions(false),
-      R(R_)
+    constelm_algorithm(specification& spec, const DataRewriter& R_)
+      : lps::detail::lps_algorithm(spec),
+        m_instantiate_global_variables(false),
+        m_ignore_conditions(false),
+        R(R_)
     {}
 
     /// \brief Runs the constelm algorithm
@@ -211,7 +199,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 
               if (R(g_ij, sigma) != R(d_j, sigma))
               {
-                LOG_PARAMETER_CHANGE(2, d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "POSSIBLE CHANGE FOR PARAMETER ");
+                LOG_PARAMETER_CHANGE(d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "POSSIBLE CHANGE FOR PARAMETER ");
                 data::mutable_map_substitution<> W = default_global_variable_solver().solve(V, c_i, g_ij, d_j, e[index_j], R, sigma);
                 if (!W.empty())
                 {
@@ -235,13 +223,13 @@ class constelm_algorithm: public lps::detail::lps_algorithm
               }
               else
               {
-                LOG_PARAMETER_CHANGE(3, d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "NO CHANGE FOR PARAMETER ");
+                LOG_PARAMETER_CHANGE(d_j, R(d_j, sigma), R(g_ij, sigma), sigma, "NO CHANGE FOR PARAMETER ");
               }
             }
           }
           else
           {
-            LOG_CONDITION(2, i->condition(), R(c_i, sigma), sigma, "CONDITION IS FALSE: ");
+            LOG_CONDITION(i->condition(), R(c_i, sigma), sigma, "CONDITION IS FALSE: ");
           }
         }
         for (std::set<data::variable>::iterator k = dG.begin(); k != dG.end(); ++k)
@@ -251,7 +239,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       }
       while (!dG.empty());
 
-      LOG_CONSTANT_PARAMETERS(1, sigma, "Removing the following constant parameters:\n");
+      LOG_CONSTANT_PARAMETERS(sigma, "Removing the following constant parameters:\n");
 
       // N.B. The order of removing constant parameters and rewriting has been reversed
       // as requested by Jan Friso Groote. This may lead to some gain in performance (13%
@@ -274,12 +262,11 @@ class constelm_algorithm: public lps::detail::lps_algorithm
 /// \brief Removes zero or more constant parameters from the specification spec.
 /// \param spec A linear process specification
 /// \param R A data rewriter
-/// \param verbose If true, verbose output is generated
 /// \param instantiate_global_variables If true, free variables may be instantiated as a side effect of the algorithm
 template <typename DataRewriter>
-void constelm(specification& spec, const DataRewriter& R, bool verbose = false, bool instantiate_global_variables = false)
+void constelm(specification& spec, const DataRewriter& R, bool instantiate_global_variables = false)
 {
-  constelm_algorithm<DataRewriter> algorithm(spec, R, verbose);
+  constelm_algorithm<DataRewriter> algorithm(spec, R);
   algorithm.run(instantiate_global_variables);
 }
 

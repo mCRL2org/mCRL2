@@ -77,23 +77,14 @@ class lps_algorithm: public utilities::algorithm
 
   public:
     /// \brief Constructor
-    lps_algorithm(specification& spec, bool verbose = false)
-      :
-      utilities::algorithm(verbose ? 1 : 0),
-      m_spec(spec)
-    {}
-
-    /// \brief Constructor
-    lps_algorithm(specification& spec, size_t loglevel)
-      :
-      utilities::algorithm(loglevel),
-      m_spec(spec)
+    lps_algorithm(specification& spec)
+      : m_spec(spec)
     {}
 
     /// \brief Flag for verbose output
     bool verbose() const
     {
-      return verbose_level() >= 1;
+      return mCRL2logEnabled(verbose);
     }
 
     /// \brief Applies the next state substitution to the variable v.

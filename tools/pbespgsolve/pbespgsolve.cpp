@@ -151,16 +151,6 @@ class pg_solver_tool : public rewriter_tool<input_tool>
         }
       }
 
-      size_t log_level = 0;
-      if (mCRL2logEnabled(verbose))
-      {
-        log_level = 1;
-      }
-      if (mCRL2logEnabled(debug))
-      {
-        log_level = 2;
-      }
-      set_parity_game_generator_log_level(log_level);
       bool value = pbespgsolve(p, m_options);
       std::string result = (value ? "true" : "false");
       std::clog << "The solution for the initial variable of the pbes is " << result << "\n";

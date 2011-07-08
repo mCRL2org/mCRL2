@@ -260,19 +260,9 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
         return false;
       }
 
-      unsigned int log_level = 0;
-      if (mCRL2logEnabled(verbose))
-      {
-        log_level = 1;
-      }
-      if (mCRL2logEnabled(debug))
-      {
-        log_level = 2;
-      }
-
       if (m_strategy == ts_lazy)
       {
-        pbesinst_algorithm algorithm(p.data(), rewrite_strategy(), false, false, log_level);
+        pbesinst_algorithm algorithm(p.data(), rewrite_strategy(), false, false);
         algorithm.run(p);
         p = algorithm.get_result();
       }

@@ -72,16 +72,6 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
-      size_t log_level = 0;
-      if (mCRL2logEnabled(verbose))
-      {
-        log_level = 1;
-      }
-      if (mCRL2logEnabled(debug))
-      {
-        log_level = 2;
-      }
-
       // load the pbes
       pbes<> p;
       p.load(m_input_filename);
@@ -96,7 +86,7 @@ class pbes_eqelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool
         {
           typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
           my_pbes_rewriter pbesr(datar);
-          pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
+          pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           data::number_postfix_generator name_generator("UNIQUE_PREFIX");
           algorithm.run(p, m_ignore_initial_state);
           break;
