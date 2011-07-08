@@ -18,7 +18,6 @@
 #include "bcg_user.h"
 
 using namespace mcrl2::lts;
-using namespace mcrl2::core;
 using namespace std;
 
 
@@ -104,14 +103,14 @@ static void write_to_bcg(const lts_bcg_t& l, const string& filename)
     {
       if (warn_non_i && (label_str != "i"))
       {
-        gsWarningMsg("LTS contains silent steps that are not labelled 'i'; saving as BCG means they are replaced by 'i'.\n");
+        mCRL2log(warning) << "LTS contains silent steps that are not labelled 'i'; saving as BCG means they are replaced by 'i'." << std::endl;
         warn_non_i = false;
       }
       label_str = "i";
     }
     else if (warn_i && (label_str == "i"))
     {
-      gsWarningMsg("LTS contains label 'i' without being marked as silent step; saving as BCG means it is assumed to be a silent step.\n");
+      mCRL2log(warning) << "LTS contains label 'i' without being marked as silent step; saving as BCG means it is assumed to be a silent step." << std::endl;
       warn_i = false;
     }
     if (label_str.size() > buf_size)
