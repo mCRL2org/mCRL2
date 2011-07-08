@@ -977,7 +977,7 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
 
   std::string s(
   "map F1: List(Bool)#Bool#List(Bool)#Bag(Bool) -> List(Bool);"
-  "    F2: List(Bool) -> Bag(Bool);"
+  "    F2: Set(List(Bool)); %declared to add the rewrite rules for Set(List(Bool)).\n"
   "    ELM: List(Bool)#Bool#List(Bool) -> List(Bool);"
   "var ca: Bool;"
   "    cal: List(Bool);"
