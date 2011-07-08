@@ -283,6 +283,7 @@ endmacro( add_lpssumelm_release_test ARGS)
 
 macro( gen_lpssumelm_release_tests )
 	add_lpssumelm_release_test( "" )
+	add_lpssumelm_release_test( "-c" )
 endmacro( gen_lpssumelm_release_tests )
 
 ############################
