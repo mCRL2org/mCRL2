@@ -1470,6 +1470,52 @@ BOOST_AUTO_TEST_CASE(test_aliases)
   );
 }
 
+BOOST_AUTO_TEST_CASE(test_bag_with_pos_as_argument)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "{ n: Pos | n + 1 }",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    true,
+    "Bag(Pos)"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument1)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "{ n: Pos | 0 }",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    true,
+    "Bag(Pos)"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument2)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "{ n: Nat | n }",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    true,
+    "Bag(Nat)"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_bag_with_real_as_argument)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "{ n: Pos | 2 / 3 }",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    false
+  );
+}
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

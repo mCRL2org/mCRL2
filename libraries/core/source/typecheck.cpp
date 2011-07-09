@@ -1959,7 +1959,6 @@ static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
 
     ATtablePut(body.proc_pars,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATLgetArgument(Proc,1));
     ATtablePut(body.proc_bodies,(ATerm)ATAgetArgument(Proc,0),(ATerm)ATAgetArgument(Proc,2));
-    mCRL2log(debug) << "Read-in Proc Name " << pp(ProcName) << ", Types " << core::pp(atermpp::aterm_list(Types));
   }
   ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
   ATtablePut(body.proc_bodies,(ATerm)INIT_KEY(),(ATerm)Init);
@@ -3473,8 +3472,9 @@ static ATermAppl gstcTraverseVarConsTypeD(
     //if(AllowedVars!=DeclaredVars)
     gstcATermTableCopy(DeclaredVars,CopyDeclaredVars);
 
-    if (gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
-        || gsIsBagComp(BindingOperator))
+    if (gsIsSetBagComp(BindingOperator) ||
+        gsIsSetComp(BindingOperator) ||
+        gsIsBagComp(BindingOperator))
     {
       ATermList VarDecls=ATLgetArgument(*DataTerm,1);
       ATermAppl VarDecl=ATAgetFirst(VarDecls);
@@ -3511,6 +3511,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
       if (!ResType)
       {
+        mCRL2log(error) << "the condition or count of a set/bag comprehension " << core::pp(*DataTerm) << " cannot be determined\n";
         return NULL;
       }
       if (gstcTypeMatchA(sort_bool::bool_(),ResType))
@@ -3523,14 +3524,22 @@ static ATermAppl gstcTraverseVarConsTypeD(
         NewType=sort_bag::bag(sort_expression(NewType));
         *DataTerm = ATsetArgument(*DataTerm, (ATerm)gsMakeBagComp(), 0);
       }
+      else if (gstcTypeMatchA(sort_pos::pos(),ResType))
+      {
+        NewType=sort_bag::bag(sort_expression(NewType));
+        *DataTerm = ATsetArgument(*DataTerm,(ATerm)gsMakeBagComp(), 0);
+        Data=gsMakeDataAppl(sort_nat::cnat(),ATmakeList1((ATerm)Data)); 
+      }
       else
       {
+        mCRL2log(error) << "the condition or count of a set/bag comprehension is not of sort Bool, Nat or Pos, but of sort " << core::pp(ResType) << std::endl;
         return NULL;
       }
 
       if (!(NewType=gstcTypeMatchA(NewType,PosType)))
       {
-        mCRL2log(error) << "a set or bag comprehension of type " << core::pp(ATAgetArgument(VarDecl, 1)) << " does not match possible type " << core::pp(PosType) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+        mCRL2log(error) << "a set or bag comprehension of type " << core::pp(ATAgetArgument(VarDecl, 1)) << " does not match possible type " << 
+                            core::pp(PosType) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
         return NULL;
       }
 
