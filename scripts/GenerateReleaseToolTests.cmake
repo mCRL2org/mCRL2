@@ -598,6 +598,7 @@ macro( gen_ltsconvert_release_tests )
 	  add_ltsconvert_release_test( "-ebranching-bisim" )
 	  add_ltsconvert_release_test( "-edpbranching-bisim" )
 	  add_ltsconvert_release_test( "-esim" )
+	  add_ltsconvert_release_test( "-etau-star" )
 	  add_ltsconvert_release_test( "-etrace" )
 	  add_ltsconvert_release_test( "-eweak-trace" )
 	  add_ltsconvert_release_test( "-n" )
@@ -682,6 +683,40 @@ macro( gen_lps2pbes_release_tests )
 					add_lps2pbes_release_test( "${mcf_name}" "-t;-f${MCF}" "" )
 	  endforeach(MCF ${SET_OF_MCF})
 endmacro( gen_lps2pbes_release_tests )
+
+################### 
+## Macro lts2pbes ## 
+###################
+
+macro( add_lts2pbes_release_test INPUT ARGS EXT)
+  set( TRIMMED_ARGS "" )			
+		
+  FOREACH( i ${ARGS} )
+
+    if( ${i} MATCHES "^-f")
+      set(TRIMMED_ARGS "${TRIMMED_ARGS}-f${INPUT}" )
+    else( ${i} MATCHES "^-f")
+      set(TRIMMED_ARGS "${TRIMMED_ARGS}${i}" )
+    endif( ${i} MATCHES "^-f")
+  ENDFOREACH( )
+ 
+ set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
+
+
+  ADD_TEST("lts2pbes_${POST_FIX_TEST}_${EXT}" ${lts2pbes_BINARY_DIR}/lts2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.${EXT} -m${testdir}/${BASENAME_TEST}.mcrl2 ${testdir}/dummy.pbes )
+  set_tests_properties("lts2pbes_${POST_FIX_TEST}_${EXT}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
+  set_tests_properties("lts2pbes_${POST_FIX_TEST}_${EXT}" PROPERTIES DEPENDS "lps2lts_${BASENAME_TEST}-ARGS_${EXT}" )
+
+endmacro( add_lts2pbes_release_test INPUT ARGS EXT)
+
+macro( gen_lts2pbes_release_tests )
+  foreach(MCF ${SET_OF_MCF} )
+    foreach(EXT ${LTS_EXTS} )
+      get_filename_component( mcf_name ${MCF} NAME_WE)
+	add_lts2pbes_release_test( "${mcf_name}" "-f${MCF}" "${EXT}" )
+    endforeach(EXT ${LTS_EXTS} )
+  endforeach(MCF ${SET_OF_MCF})
+endmacro( gen_lts2pbes_release_tests )
 
 ####################
 ## Macro pbesinfo  ##
@@ -961,6 +996,7 @@ endmacro( add_pbes2bes_release_test ARGS)
 
 macro( gen_pbes2bes_release_tests )
 	add_pbes2bes_release_test( "" "SAVE" )
+	add_pbes2bes_release_test( "-H"  "")
 	add_pbes2bes_release_test( "-ovasy" "" )
 	add_pbes2bes_release_test( "-opbes"  "")
 	add_pbes2bes_release_test( "-ocwi"  "")
@@ -1256,13 +1292,19 @@ macro( add_pbespgsolve_release_test ARGS )
 endmacro( add_pbespgsolve_release_test ARGS )
 
 macro( gen_pbespgsolve_release_tests )
-					add_pbespgsolve_release_test(  "" )
-# Disabled because the option now depends on a compiler flag, that is disabled
-# by default (JK 7/3/2011)                                        
-#					add_pbespgsolve_release_test(  "-c" )
-					add_pbespgsolve_release_test(  "-e" )
-					add_pbespgsolve_release_test(  "-sspm" )
-					add_pbespgsolve_release_test(  "-srecursive" )
+  add_pbespgsolve_release_test(  "" )
+  add_pbespgsolve_release_test(  "-c" )
+  add_pbespgsolve_release_test(  "-C" )
+  add_pbespgsolve_release_test(  "-L" )
+  add_pbespgsolve_release_test(  "-e" )
+  add_pbespgsolve_release_test(  "-sspm" )
+  add_pbespgsolve_release_test(  "-saltspm" )
+  add_pbespgsolve_release_test(  "-srecursive" )
+  add_pbespgsolve_release_test(  "-rjitty" )
+  add_pbespgsolve_release_test(  "-rjittyp" )
+  if( NOT WIN32 )
+    add_pbespgsolve_release_test(  "-rjittyc" )
+  endif( NOT WIN32 )
 endmacro( gen_pbespgsolve_release_tests )
 
 ###################
@@ -1598,6 +1640,19 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
     gen_bespp_release_tests()
 	endif()
 
+  list(FIND SET_OF_DISABLED_TESTS "pbespgsolve" index_find)
+    if( index_find LESS 0 )
+      gen_pbespgsolve_release_tests()
+  endif()
+
+  list(FIND SET_OF_DISABLED_TESTS "lts2pbes" index_find)
+    if( index_find LESS 0 )
+      gen_lts2pbes_release_tests()
+  endif() 
+
+  ##
+  ## Experimental tests
+  ##
   if(MCRL2_ENABLE_EXPERIMENTAL)
 	  list(FIND SET_OF_DISABLED_TESTS "lpsrealelm" index_find)
     if( index_find LESS 0 )
@@ -1629,10 +1684,6 @@ FOREACH( i ${SET_OF_MCRL2_FILES} )
       gen_pbespareqelm_release_tests()
 	  endif()
 
-		list(FIND SET_OF_DISABLED_TESTS "pbespgsolve" index_find)
-    if( index_find LESS 0 )
-      gen_pbespgsolve_release_tests()
-	  endif()
 
 		list(FIND SET_OF_DISABLED_TESTS "lpsbisim2pbes" index_find)
     if( index_find LESS 0 )
