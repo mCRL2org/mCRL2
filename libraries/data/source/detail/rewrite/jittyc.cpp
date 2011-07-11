@@ -298,10 +298,10 @@ ATerm RewriterCompilingJitty::toRewriteFormat(ATermAppl t)
 
 ATermAppl RewriterCompilingJitty::fromRewriteFormat(ATerm t)
 {
-  if (need_rebuild)
+  /* if (need_rebuild)
   {
     BuildRewriteSystem();
-  }
+  } */
 
   if (ATisInt(t))
   {
@@ -2402,10 +2402,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   // Print defs
   //
   fprintf(f,
-          "#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
           "#define isAppl(x) (ATgetAFun(x) != %li)\n"
           "\n", (long int) ATgetAFun(static_cast<ATermAppl>(data::variable("x", data::sort_bool::bool_())))
-         );
+         ); 
 
   //
   // - Calculate maximum occurring arity
@@ -2609,7 +2608,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "static ATermAppl rewrite_appl_aux(ATermAppl head, const ATermAppl t)\n"
       "{\n"
-         "  const ATerm u = this_rewriter->getSubstitutionInternal(head);\n"
+      "  const ATerm u = this_rewriter->getSubstitutionInternal(head);\n"
       "  const size_t arity_t = ATgetArity(ATgetAFun(t));\n"
       "  size_t arity_u;\n"
       "  if (isAppl(u) )\n"
@@ -2625,7 +2624,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  ATerm args[arity_u+arity_t-1];\n"
       "  args[0] = (ATerm) head;\n"
       "  int function_index;\n"
-      "  if (ATisInt(head) && ((function_index = ATgetInt((ATermInt) head)) < %ld) )\n"
+      "  if (ATisInt((ATerm)head) && ((function_index = ATgetInt((ATermInt) head)) < %ld) )\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
@@ -2665,7 +2664,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "  if (isAppl(t) )\n"
           "  {\n"
           "    const ATermAppl head = (ATermAppl)ATgetArgument(t,0);\n"
-          "    if (ATisInt(head) )\n"
+          "    if (ATisInt((ATerm)head) )\n"
           "    {\n"
           "      const int function_index = ATgetInt((ATermInt)head);\n"
           "      if (function_index < %ld )\n"
@@ -2766,12 +2765,7 @@ ATermList RewriterCompilingJitty::rewriteInternalList(ATermList l)
 
 ATermAppl RewriterCompilingJitty::rewrite(ATermAppl Term)
 {
-  if (need_rebuild)
-  {
-    BuildRewriteSystem();
-  }
-  ATermAppl a=fromRewriteFormat((ATerm) so_rewr((ATermAppl) toRewriteFormat(Term)));
-  return a;
+  return fromRewriteFormat(rewriteInternal(toRewriteFormat(Term)));
 }
 
 ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
@@ -2780,9 +2774,7 @@ ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
   {
     BuildRewriteSystem();
   }
-  ATerm a = (ATerm) so_rewr((ATermAppl) Term);
-
-  return a;
+   return (ATerm) so_rewr((ATermAppl) Term);
 }
 
 RewriteStrategy RewriterCompilingJitty::getStrategy()
