@@ -253,7 +253,7 @@ class lts2pbes_tool : public input_output_tool
 #endif
         case lts_dot:
         {
-          lts_svc_t l;
+          lts_dot_t l;
           l.load(infilename);
           convert_to_lts_lts(l, result);
           break;
