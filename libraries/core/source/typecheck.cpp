@@ -4502,7 +4502,6 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       ParList=NewParList;
     }
-
     if (ATisEmpty(ParList))
     {
       //provide some information to the upper layer for a better error message
@@ -5229,7 +5228,7 @@ static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList)
     {
       return NULL;
     }
-    Result=ATinsert(Result,(ATerm)gstcTypeMatchA(ATAgetFirst(TypeList),ATAgetFirst(PosTypeList)));
+    Result=ATinsert(Result,(ATerm)Type);
   }
   return ATreverse(Result);
 }

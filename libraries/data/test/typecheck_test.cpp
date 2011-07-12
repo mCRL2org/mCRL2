@@ -1517,6 +1517,24 @@ BOOST_AUTO_TEST_CASE(test_bag_with_real_as_argument)
   );
 }
 
+/* The test below shows an ambiguous projection function that
+ * cannot be resolved with the current typechecker. This test should
+ * be enabled with a new typechecker. */
+BOOST_AUTO_TEST_CASE(test_ambiguous_projection_function)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("p", data::basic_sort("T")));
+  test_data_expression_in_specification_context(
+    "R(pi_1(p)) && IS_T1(p)",
+    "sort S;\n"
+    "     T = struct T0 | T1(pi_1: T)?IS_T1 | T2(pi_1: S)?IS_T2;\n\n"
+    "map  R: T -> Bool;\n",
+    v.begin(),v.end(),
+    false     // <-------------- Should be set to true with a new typechecker ---------------------------------------
+  );
+}
+
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
