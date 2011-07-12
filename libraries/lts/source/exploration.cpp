@@ -1221,7 +1221,7 @@ bool lps2lts_algorithm::generate_lts()
         current_state++;
         if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          mCRL2log(verbose) << "monitor: currently at level " << level << "with "
+          mCRL2log(verbose) << "monitor: currently at level " << level << " with "
                                       << current_state << " state" << ((current_state==1)?"":"s") << " and "
                                       << trans << " transition" << ((trans==1)?"":"s")
                                       << " explored and " << num_states << " state" << ((num_states==1)?"":"s") << " seen." << std::endl;
