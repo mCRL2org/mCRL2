@@ -25,12 +25,12 @@ if( UNIX )
  #Configure ltsmin
 
  #Make ltsmin 
- execute_process(COMMAND "make" 
+ execute_process(COMMAND make
    WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@" 
 	 )
 
  #Make install 
- execute_process(COMMAND "make install"
+ execute_process(COMMAND make install
    WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
 	 )
 
