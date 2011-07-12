@@ -15,6 +15,9 @@ Changes between toolset releases March 2011 and July 2011:
      that it is independent of the internal structures of mCRL2.
      This allows for a more reliable integration of mCRL2 and LTSmin
      (http://fmt.cs.utwente.nl/tools/ltsmin/).
+   - By setting the CMake variable MCRL2_LTSMIN_INSTALL_PATH to the directory
+     containing the LTSmin sources, the mCRL2 make install will build the
+     LTSmin toolset with compatible settings.
    - Fix compilation with GCC 4.6.
 
  New functionality:
