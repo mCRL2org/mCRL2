@@ -35,7 +35,7 @@ class command_line_parser;
 /** \brief toolset version tag */
 inline std::string version_tag()
 {
-  return "March 2011";
+  return "July 2011";
 }
 
 /** \brief toolset copyright period description */
