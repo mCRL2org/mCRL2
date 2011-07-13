@@ -100,17 +100,17 @@ data_expression get_subst_equation_from_assignments(
     }
     else if (v_variable == v_variable_1)
     {
-      v_variable_1 = data::replace_free_variables(v_variable_1,
+      data_expression expr = data::replace_free_variables(data_expression(v_variable_1),
                      data::make_map_substitution(a_substitutions_1));
-      v_result = sort_bool::and_(data_expression(v_result), equal_to(v_expression_1, data_expression(v_variable_1)));
+      v_result = sort_bool::and_(data_expression(v_result), equal_to(v_expression_1, expr));
       v_next_1 = true;
       v_next_2 = false;
     }
     else if (v_variable == v_variable_2)
     {
-      v_variable_2 = data::replace_free_variables(v_variable_2,
+      data_expression expr = data::replace_free_variables(data_expression(v_variable_2),
                      data::make_map_substitution(a_substitutions_2));
-      v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_2), data_expression(v_variable_2)));
+      v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_2), expr));
       v_next_1 = false;
       v_next_2 = true;
     }
@@ -224,6 +224,7 @@ data_expression get_confluence_condition(
       data::make_map_substitution(v_substitutions_2));
   const data_expression v_subst_condition_2 = data::replace_free_variables(v_condition_2,
       data::make_map_substitution(v_substitutions_1));
+
   const data_expression v_subst_equation = get_subst_equation_from_assignments(a_variables, v_assignments_1, v_assignments_2, v_substitutions_1, v_substitutions_2);
 
   const action_list v_actions =a_summand_2.multi_action().actions();
