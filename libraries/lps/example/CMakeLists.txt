@@ -21,7 +21,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 
 ##---------------------------------------------------
 ## Example lpsparse 
@@ -38,21 +38,24 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
 
 # target_link_libraries(${PROJECT_NAME}
 #    mcrl2_lps
-#    mcrl2_utilities_command_line
+#    mcrl2_utilities
 # )
 
 ##---------------------------------------------------
 ## Example lpsrewr 
 ##--------------------------------------------------- 
 
-set(PROJECT_NAME "${PREFIX}_lpsrewr")
-project( ${PROJECT_NAME} )
+#set(PROJECT_NAME "${PREFIX}_lpsrewr")
+#project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" 
-      lpsrewr.cpp 
-)
+#add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
+#      lpsrewr.cpp 
+#)
 
-target_link_libraries(${PROJECT_NAME}
-   mcrl2_lps
-   mcrl2_utilities_command_line
-)
+#target_link_libraries(${PROJECT_NAME}
+#   mcrl2_lps
+#   mcrl2_utilities
+#)
+
+build_and_run_test_example_target( ${PROJECT_NAME} )
+

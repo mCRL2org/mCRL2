@@ -16,7 +16,7 @@
 
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/test_utilities.h"
 
 using namespace mcrl2;
@@ -25,33 +25,8 @@ using namespace mcrl2::lps;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
-typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
-
-static inline
-rewrite_strategy_vector initialise_rewrite_strategies()
-{
-  std::vector<rewrite_strategy> result;
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
-#ifdef MCRL2_TEST_COMPILERS
-#ifdef MCRL2_JITTYC_AVAILABLE
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
-#endif // MCRL2_JITTYC_AVAILABLE
-#ifdef MCRL2_INNERC_AVAILABLE
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
-#endif // MCRL2_JITTYC_AVAILABLE
-#endif // MCRL2_TEST_COMPILERS
-
-  return result;
-}
-
-static inline
-rewrite_strategy_vector get_rewrite_strategies()
-{
-  static rewrite_strategy_vector rewrite_strategies = initialise_rewrite_strategies();
-  return rewrite_strategies;
-}
+typedef data::basic_rewriter<data::data_expression>::strategy rewrite_strategy;
+typedef std::vector<rewrite_strategy> rewrite_strategy_vector;
 
 void run_linearisation_instance(const std::string& spec, const t_lin_options& options, bool expect_success)
 {
@@ -69,11 +44,11 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
 void run_linearisation_test_case(const std::string& spec, const bool expect_success = true)
 {
   // Set various rewrite strategies
-  rewrite_strategy_vector rewrite_strategies = get_rewrite_strategies();
+  rewrite_strategy_vector rewrite_strategies = utilities::get_test_rewrite_strategies();
 
   for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {
-    std::clog << std::endl << "Testing with rewrite strategy " << pp(*i) << std::endl;
+    std::clog << std::endl << "Testing with rewrite strategy " << data::pp(*i) << std::endl;
 
     t_lin_options options;
     options.rewrite_strategy=*i;
@@ -1100,7 +1075,6 @@ BOOST_AUTO_TEST_CASE(test_bug_775b)
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
-  core::gsSetVerboseMsg();
   MCRL2_ATERMPP_INIT(argc, argv)
 
   return 0;

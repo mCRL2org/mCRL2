@@ -193,13 +193,6 @@ class pbes_equation
       return !detail::has_propositional_variables(formula());
     }
 
-    /// \brief Returns true if the equation is a BES (boolean equation system).
-    /// \return True if the equation is a BES (boolean equation system).
-    bool is_bes() const
-    {
-      return variable().parameters().empty() && formula().is_bes();
-    }
-
     /// \brief Checks if the equation is well typed
     /// \return True if
     /// <ul>
@@ -268,18 +261,6 @@ inline
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 {
   return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
-}
-
-inline
-std::string pp(const pbes_equation& eqn)
-{
-  std::ostringstream out;
-  out << core::pp(eqn.symbol())
-      << '.'
-      << core::pp(eqn.variable())
-      << " = "
-      << core::pp(eqn.formula());
-  return out.str();
 }
 
 } // namespace pbes_system

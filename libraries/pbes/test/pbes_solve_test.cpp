@@ -12,7 +12,9 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/pbes/lps2pbes.h"
 #include "mcrl2/pbes/pbes_solver_test.h"
 #include "mcrl2/pbes/txt2pbes.h"
@@ -135,6 +137,14 @@ std::string test15 =
   "init X0(0, true);                                                                                                                                                                                                                                                                                                                                                                                         \n"
   ;
 
+// Problematic test case involving lambda expressions
+std::string test16 =
+  "sort  State = struct S;\n\n"
+  "pbes nu X(f: Nat -> State) =\n"
+  "           val(!(f(3) == S));\n\n"
+  "init X(lambda x: Nat. S);\n"
+  ;
+
 // N.B. The test cases below should not terminate, since they correspond
 // to infinite BESs.
 // TODO: Test that no solution for these cases is found within a certain number of steps.
@@ -154,10 +164,10 @@ std::string test15 =
 //    "init X(0);                                                        \n"
 //    ;
 
-void test_pbes2bool(const std::string& pbes_spec, bool expected_result)
+void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::rewriter::strategy rewrite_strategy)
 {
   pbes<> p = txt2pbes(pbes_spec);
-  bool result = pbes2_bool_test(p);
+  bool result = pbes2_bool_test(p, rewrite_strategy);
   if (result != expected_result)
   {
     std::cout << "--- pbes2bool failed ---\n";
@@ -186,78 +196,60 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
 
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
 {
-  test_pbes2bool(pbes_spec, expected_result);
+  std::vector<data::basic_rewriter<data::data_expression>::strategy> strategies = utilities::get_test_rewrite_strategies();
 
-  // test with and without scc decomposition
-  pbespgsolve_options options;
-  test_pbespgsolve(pbes_spec, options, expected_result);
+  for(std::vector<data::basic_rewriter<data::data_expression>::strategy>::const_iterator i = strategies.begin(); i != strategies.end(); ++i)
+  {
+    test_pbes2bool(pbes_spec, expected_result, *i);
 
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
-  options.use_scc_decomposition = false;
-  test_pbespgsolve(pbes_spec, options, expected_result);
-#endif
+    // test with and without scc decomposition
+    pbespgsolve_options options;
+    options.rewrite_strategy = *i;
+
+    test_pbespgsolve(pbes_spec, options, expected_result);
+
+    options.use_scc_decomposition = false;
+    test_pbespgsolve(pbes_spec, options, expected_result);
+  }
 }
 
 
 
 void test_all()
 {
+  std::cerr << "Test01\n";
   test_pbes_solve(test01, false);
+  std::cerr << "Test02\n";
   test_pbes_solve(test02, true);
+  std::cerr << "Test03\n";
   test_pbes_solve(test03, false);
+  std::cerr << "Test04\n";
   test_pbes_solve(test04, true);
+  std::cerr << "Test05\n";
   test_pbes_solve(test05, false);
+  std::cerr << "Test06\n";
   test_pbes_solve(test06, true);
+  std::cerr << "Test07\n";
   test_pbes_solve(test07, false);
+  std::cerr << "Test08\n";
   test_pbes_solve(test08, true);
+  std::cerr << "Test09\n";
   test_pbes_solve(test09, true);
+  std::cerr << "Test10\n";
   test_pbes_solve(test10, false);
+  std::cerr << "Test11\n";
   test_pbes_solve(test11, true);
+  std::cerr << "Test12\n";
   test_pbes_solve(test12, false);
+  std::cerr << "Test13\n";
   test_pbes_solve(test13, true);
-  test_pbes_solve(test14, true);
+  std::cerr << "Test14\n";
+  test_pbes_solve(test14, true); 
+  std::cerr << "Test15\n";
   test_pbes_solve(test15, false);
+  std::cerr << "Test16\n";
+  test_pbes_solve(test16, false);
 }
-
-const std::string ABP_SPECIFICATION =
-  "% This file contains the alternating bit protocol, as described in W.J.    \n"
-  "% Fokkink, J.F. Groote and M.A. Reniers, Modelling Reactive Systems.       \n"
-  "%                                                                          \n"
-  "% The only exception is that the domain D consists of two data elements to \n"
-  "% facilitate simulation.                                                   \n"
-  "                                                                           \n"
-  "sort                                                                       \n"
-  "  D     = struct d1 | d2;                                                  \n"
-  "  Error = struct e;                                                        \n"
-  "                                                                           \n"
-  "act                                                                        \n"
-  "  r1,s4: D;                                                                \n"
-  "  s2,r2,c2: D # Bool;                                                      \n"
-  "  s3,r3,c3: D # Bool;                                                      \n"
-  "  s3,r3,c3: Error;                                                         \n"
-  "  s5,r5,c5: Bool;                                                          \n"
-  "  s6,r6,c6: Bool;                                                          \n"
-  "  s6,r6,c6: Error;                                                         \n"
-  "  i;                                                                       \n"
-  "                                                                           \n"
-  "proc                                                                       \n"
-  "  S(b:Bool)     = sum d:D. r1(d).T(d,b);                                   \n"
-  "  T(d:D,b:Bool) = s2(d,b).(r6(b).S(!b)+(r6(!b)+r6(e)).T(d,b));             \n"
-  "                                                                           \n"
-  "  R(b:Bool)     = sum d:D. r3(d,b).s4(d).s5(b).R(!b)+                      \n"
-  "                  (sum d:D.r3(d,!b)+r3(e)).s5(!b).R(b);                    \n"
-  "                                                                           \n"
-  "  K             = sum d:D,b:Bool. r2(d,b).(i.s3(d,b)+i.s3(e)).K;           \n"
-  "                                                                           \n"
-  "  L             = sum b:Bool. r5(b).(i.s6(b)+i.s6(e)).L;                   \n"
-  "                                                                           \n"
-  "init                                                                       \n"
-  "  allow({r1,s4,c2,c3,c5,c6,i},                                             \n"
-  "    comm({r2|s2->c2, r3|s3->c3, r5|s5->c5, r6|s6->c6},                     \n"
-  "        S(true) || K || L || R(true)                                       \n"
-  "    )                                                                      \n"
-  "  );                                                                       \n"
-  ;
 
 std::string frm_nodeadlock = "[true*]<true*>true";
 std::string frm_nolivelock = "[true*]mu X.[tau]X";
@@ -265,7 +257,7 @@ std::string frm_nolivelock = "[true*]mu X.[tau]X";
 void test_abp_frm(const std::string& FORMULA, bool expected_result)
 {
   bool timed = false;
-  lps::specification spec = lps::linearise(ABP_SPECIFICATION);
+  lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   state_formulas::state_formula formula = state_formulas::parse_state_formula(FORMULA, spec);
   pbes_system::pbes<> p = pbes_system::lps2pbes(spec, formula, timed);
   std::string abp_text = pbes_system::pp(p);
@@ -283,10 +275,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  set_parity_game_generator_log_level(2);
-
-  test_all();
-  
+  test_all(); 
   test_abp();
 
   return 0;

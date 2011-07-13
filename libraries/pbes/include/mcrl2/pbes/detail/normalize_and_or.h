@@ -14,7 +14,7 @@
 
 #include <set>
 #include <utility>
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes_expression.h"
 
@@ -46,7 +46,7 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   {
     using namespace accessors;
     atermpp::multiset<pbes_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::multiset<pbes_expression> >(result, result.begin()), is_or, left, right);
+    utilities::detail::split(expr, std::insert_iterator<atermpp::multiset<pbes_expression> >(result, result.begin()), is_or, left, right);
     return result;
   }
 
@@ -60,7 +60,7 @@ struct normalize_and_or_builder: public pbes_expression_builder<Derived>
   {
     using namespace accessors;
     atermpp::multiset<pbes_expression> result;
-    core::detail::split(expr, std::insert_iterator<atermpp::multiset<pbes_expression> >(result, result.begin()), is_and, left, right);
+    utilities::detail::split(expr, std::insert_iterator<atermpp::multiset<pbes_expression> >(result, result.begin()), is_and, left, right);
     return result;
   }
 

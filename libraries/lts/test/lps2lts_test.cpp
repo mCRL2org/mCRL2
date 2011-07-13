@@ -88,7 +88,7 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   options.expl_strat = strategy;
   options.stateformat = format;
 
-  options.lts = temporary_filename("lps2lts_test");
+  options.lts = temporary_filename("lps2lts_test_file");
 
   LTS_TYPE result;
   options.outformat = result.type();
@@ -102,7 +102,6 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
   core::garbage_collect();
 
   result.load(options.lts);
-
   boost::filesystem::remove(options.lts.c_str()); // Clean up after ourselves
 
   return result;
@@ -111,30 +110,6 @@ LTS_TYPE translate_lps_to_lts(lps::specification const& specification,
 // Configure rewrite strategies to be used.
 typedef mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::strategy rewrite_strategy;
 typedef std::vector<rewrite_strategy > rewrite_strategy_vector;
-
-static inline
-rewrite_strategy_vector initialise_rewrite_strategies()
-{
-  std::vector<rewrite_strategy> result;
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty);
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost);
-#ifdef MCRL2_TEST_COMPILERS
-#ifdef MCRL2_JITTYC_AVAILABLE
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::jitty_compiling);
-#endif // MCRL2_JITTYC_AVAILABLE
-#ifdef MCRL2_INNERC_AVAILABLE
-  result.push_back(mcrl2::data::basic_rewriter< mcrl2::data::data_expression >::innermost_compiling);
-#endif // MCRL2_JITTYC_AVAILABLE
-#endif // MCRL2_TEST_COMPILERS
-  return result;
-}
-
-static inline
-rewrite_strategy_vector rewrite_strategies()
-{
-  static rewrite_strategy_vector rewrite_strategies = initialise_rewrite_strategies();
-  return rewrite_strategies;
-}
 
 // Configure exploration strategies to be tested;
 typedef std::vector< lts::exploration_strategy > exploration_strategy_vector;
@@ -184,7 +159,7 @@ void check_lps2lts_specification(std::string const& specification,
   std::cerr << "CHECK STATE SPACE GENERATION FOR:\n" << specification << "\n";
   lps::specification lps = lps::parse_linear_process_specification(specification);
 
-  rewrite_strategy_vector rstrategies(rewrite_strategies());
+  rewrite_strategy_vector rstrategies(utilities::get_test_rewrite_strategies());
   for (rewrite_strategy_vector::const_iterator rewr_strategy = rstrategies.begin(); rewr_strategy != rstrategies.end(); ++rewr_strategy)
   {
     exploration_strategy_vector estrategies(exploration_strategies());
@@ -453,6 +428,30 @@ BOOST_AUTO_TEST_CASE(test_alias_complex)
   );
   check_lps2lts_specification(spec, 2, 1, 1);
 }
+
+BOOST_AUTO_TEST_CASE(test_equality_with_empty_set)
+{
+  std::string spec(
+    "map  emptyset:Set(Bool);\n"
+    "eqn  emptyset={};\n"
+    "proc P=({ b: Bool | false }  == emptyset) -> tau.P;\n"
+    "init P;"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+
+BOOST_AUTO_TEST_CASE(test_equality_of_finite_sets)
+{
+  std::string spec(
+    "sort R = struct r2 | r1 ;\n"
+    "map All: Set(R);\n"
+    "eqn All = {  r: R | true };\n"
+    "proc P=({r1, r2} == All) -> tau.P;\n"
+    "init P;"
+  );
+  check_lps2lts_specification(spec, 1, 1, 1);
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

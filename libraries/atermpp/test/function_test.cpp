@@ -26,7 +26,7 @@ void test_aterm_function()
   // create an unquoted function symbol
   function_symbol sym("\"f\"", 1, false);
   BOOST_CHECK(!sym.is_quoted());
-  aterm x = make_term("x");
+  atermpp::aterm x = make_term("x");
 
   aterm_appl a(sym, x);
   BOOST_CHECK(a.to_string() == "\"f\"(x)");

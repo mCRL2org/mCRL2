@@ -12,7 +12,7 @@
 #ifndef MCRL2_CORE_GARBAGE_COLLECTION_H
 #define MCRL2_CORE_GARBAGE_COLLECTION_H
 
-#include "gc.h"
+#include "mcrl2/aterm/gc.h"
 
 namespace mcrl2
 {
@@ -24,7 +24,7 @@ namespace core
 inline void garbage_collect()
 {
 #ifdef MCRL2_WITH_GARBAGE_COLLECTION
-  AT_collect();
+  aterm::AT_collect();
 #endif
 }
 

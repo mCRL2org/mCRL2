@@ -38,6 +38,7 @@
 #include "mcrl2/modal_formula/detail/action_formula_accessors.h"
 #include "mcrl2/modal_formula/detail/state_formula_accessors.h"
 #include "mcrl2/pbes/monotonicity.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/detail/pbes_translate_impl.h"
@@ -214,7 +215,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<sat timed>" << x.to_string() << " " << pp(b) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<sat timed>" << x.to_string() << " " << action_formulas::pp(b) << std::flush;
       lps2pbes_increase_indent();
 #endif
       using namespace action_formulas::detail::accessors;
@@ -287,7 +288,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pp(result) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pbes_system::pp(result) << std::flush;
 #endif
       return result;
     }
@@ -307,7 +308,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<RHS timed>" << pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<RHS timed>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       namespace z = pbes_expr_optimized;
@@ -587,7 +588,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pp(result) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pbes_system::pp(result) << std::flush;
 #endif
       return result;
     }
@@ -604,7 +605,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
                                      data::variable T)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<E timed>" << pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<E timed>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       using namespace state_formulas::detail::accessors;
@@ -811,8 +812,8 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       propositional_variable_instantiation init(Xe, data::sort_real::real_(0) + fi + pi + Par(Xf, data::variable_list(), f));
 
       pbes<> result(spec.data(), e, spec.global_variables(), init);
-      result.normalize();
-      assert(result.is_normalized());
+      pbes_system::normalize(result);
+      assert(pbes_system::is_normalized(result));
       assert(result.is_closed());
       complete_data_specification(result);
       return result;
@@ -831,7 +832,7 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
     pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<sat>" << x.to_string() << " " << pp(b) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<sat>" << x.to_string() << " " << action_formulas::pp(b) << std::flush;
       lps2pbes_increase_indent();
 #endif
       using namespace action_formulas::detail::accessors;
@@ -908,7 +909,7 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pp(result) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<satresult>" << pbes_system::pp(result) << std::flush;
 #endif
       return result;
     }
@@ -930,7 +931,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
                         std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<RHS>" << pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<RHS>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       namespace z = pbes_expr_optimized;
@@ -1144,7 +1145,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pp(result) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pbes_system::pp(result) << std::flush;
 #endif
       return result;
     }
@@ -1160,7 +1161,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
       const lps::linear_process& lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<E>" << pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<E>" << pbes_system::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       using namespace state_formulas::detail::accessors;
@@ -1343,7 +1344,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 
       if (!state_formulas::is_monotonous(formula))
       {
-        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + pp(formula) + " is not monotonous!");
+        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + pbes_system::pp(formula) + " is not monotonous!");
       }
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
@@ -1364,8 +1365,8 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 
       pbes<> result = pbes<>(spec.data(), e, spec.global_variables(), init);
       assert(is_monotonous(result));
-      result.normalize();
-      assert(result.is_normalized());
+      pbes_system::normalize(result);
+      assert(pbes_system::is_normalized(result));
       assert(result.is_closed());
       complete_data_specification(result);
       return result;
@@ -1380,8 +1381,9 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 /// \return The resulting pbes
 inline pbes<> pbes_translate(const state_formulas::state_formula& formula, const lps::specification& spec, bool timed = false)
 {
-  if (formula.has_time() || spec.process().has_time())
+  if ((formula.has_time() || spec.process().has_time()) && !timed)
   {
+    mCRL2log(warning) << "Switch to timed translation because formula has " << (formula.has_time()?"":"no ") << "time, and process has " << (spec.process().has_time()?"":"no ") << "time" << std::endl;
     timed = true;
   }
 

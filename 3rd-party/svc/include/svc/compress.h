@@ -23,10 +23,6 @@
 #ifndef __COMPRESS_H
 #define __COMPRESS_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
 #include "huffman.h"
 
 
@@ -42,26 +38,22 @@ extern "C" {
 
   CompressedStream* CSinit(HTable*, BitStream*, int);
   void CSfree(CompressedStream*);
-  int   CSreadATerm(CompressedStream*, ATerm*);
-  int   CSreadIndex(CompressedStream*, ATerm*);
-  int   CSureadATerm(CompressedStream*, ATerm*);
+  int   CSreadATerm(CompressedStream*, aterm::ATerm*);
+  int   CSreadIndex(CompressedStream*, aterm::ATerm*);
+  int   CSureadATerm(CompressedStream*, aterm::ATerm*);
   int   CSreadString(CompressedStream*, char**);
   int   CSureadString(CompressedStream*, char**);
   int CSreadInt(CompressedStream*, long*);
   int CSureadInt(CompressedStream*, long*);
-  int   CSwriteATerm(CompressedStream*, ATerm);
-  int   CSwriteIndex(CompressedStream*, ATerm);
-  int   CSuwriteATerm(CompressedStream*, ATerm);
-  int   CSwriteString(CompressedStream*, char*);
-  int   CSuwriteString(CompressedStream*, char*);
+  int   CSwriteATerm(CompressedStream*, aterm::ATerm);
+  int   CSwriteIndex(CompressedStream*, aterm::ATerm);
+  int   CSuwriteATerm(CompressedStream*, aterm::ATerm);
+  int   CSwriteString(CompressedStream*, const char*);
+  int   CSuwriteString(CompressedStream*, const char*);
   int   CSwriteInt(CompressedStream*, long);
   int   CSuwriteInt(CompressedStream*, long);
   void  CSflush(CompressedStream*);
   int  CSseek(CompressedStream*, long, int);
   long CStell(CompressedStream*);
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

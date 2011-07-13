@@ -34,15 +34,16 @@ struct indexed_set_deleter
 class indexed_set
 {
   protected:
-    /// The wrapped ATermTable.
-    boost::shared_ptr<_ATermTable> m_set;
+    boost::shared_ptr<_ATermTable> m_set; /**< the wrapped ATermTable */
+    std::size_t m_size;                   /**< the number of entries of the table */
 
   public:
     /// Create a new indexed_set.
     /// \param initial_size The initial capacity of the set.
     /// \param max_load_pct The maximum load percentage.
     indexed_set(size_t initial_size = 100, unsigned int max_load_pct = 75)
-      : m_set(ATindexedSetCreate(initial_size, max_load_pct), indexed_set_deleter())
+      : m_set(ATindexedSetCreate(initial_size, max_load_pct), indexed_set_deleter()),
+        m_size(0)
     {}
 
     /// \brief Clear the hash table in the set.
@@ -52,6 +53,7 @@ class indexed_set
     void reset()
     {
       ATindexedSetReset(m_set.get());
+      m_size = 0;
     }
 
     /// \brief Enter elem into the set.
@@ -63,11 +65,15 @@ class indexed_set
     /// \param elem A term.
     /// \return A pair denoting the index of the element in the set, and a boolean denoting whether the term
     /// was already contained in the set.
-    std::pair<size_t, bool> put(aterm elem)
+    std::pair<size_t, bool> put(const aterm& elem)
     {
-      ATbool b;
+      bool b;
       size_t l = ATindexedSetPut(m_set.get(), elem, &b);
-      return std::make_pair(l, b == ATtrue);
+      if (b == true)
+      {
+        m_size++;
+      }
+      return std::make_pair(l, b == true);
     }
 
     /// \brief Find the index of elem in set.
@@ -75,9 +81,27 @@ class indexed_set
     /// which case the return value is (size_t)-1, i.e. the largest number in size_t.
     /// \param elem An element of the set.
     /// \return The index of the element.
-    size_t index(aterm elem)
+    size_t index(const aterm& elem) const
     {
       return ATindexedSetGetIndex(m_set.get(), elem);
+    }
+
+    /// \brief Find the index of elem in set.
+    /// The index assigned to elem is returned. When elem is not in the set, it
+    /// will be added first.
+    /// \param elem An element of the set.
+    /// \return The index of the element.
+    size_t operator[](const aterm& elem)
+    {
+      std::size_t result = ATindexedSetGetIndex(m_set.get(), elem);
+      if (result == (std::size_t) -1)
+      {
+        bool b;
+        result = ATindexedSetPut(m_set.get(), elem, &b);
+        m_size++;
+        assert(b);
+      }
+      return result;
     }
 
     /// \brief Retrieve the element at index in set.
@@ -85,7 +109,7 @@ class indexed_set
     /// to this index. If it is invoked with an invalid index, effects are not predictable.
     /// \param index A positive number.
     /// \return The element in the set with the given index.
-    aterm get(size_t index)
+    aterm get(size_t index) const
     {
       return ATindexedSetGetElem(m_set.get(), index);
     }
@@ -94,18 +118,27 @@ class indexed_set
     /// The elem is removed from the indexed set, and if a number was assigned to elem,
     /// it is freed to be reassigned to an element, that may be put into the set at some later instance.
     /// \param elem An element of the set.
-    void remove(aterm elem)
+    void remove(const aterm& elem)
     {
-      ATindexedSetRemove(m_set.get(), elem);
+      if (ATindexedSetRemove(m_set.get(), elem))
+      {
+        m_size--;
+      }
     }
 
     /// \brief Retrieve all elements in set.
     /// A list with all valid elements stored in the indexed set is returned.  The list is
     /// ordered from element with index 0 onwards.
     /// \return An ordered list containing the elements of the set.
-    aterm_list elements()
+    aterm_list elements() const
     {
       return aterm_list(ATindexedSetElements(m_set.get()));
+    }
+    
+    /// \brief Returns the size of the indexed set.
+    std::size_t size() const
+    {
+      return m_size;
     }
 };
 

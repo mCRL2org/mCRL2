@@ -12,9 +12,9 @@
 #include <sstream>
 #include <cstring>
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/invariant_checker.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/exception.h"
@@ -39,13 +39,13 @@ void Invariant_Checker::print_counter_example()
   {
     data_expression v_counter_example(f_bdd_prover.get_counter_example());
     assert(v_counter_example!=0);
-    std::cerr << "  Counter example: " << pp(v_counter_example) << "\n";
+    std::cerr << "  Counter example: " << data::pp(v_counter_example) << "\n";
   }
 }
 
 // --------------------------------------------------------------------------------------------
 
-void Invariant_Checker::save_dot_file(int a_summand_number)
+void Invariant_Checker::save_dot_file(size_t a_summand_number)
 {
   if (! f_dot_file_name.empty())
   {
@@ -53,7 +53,7 @@ void Invariant_Checker::save_dot_file(int a_summand_number)
 
     v_file_name << f_dot_file_name;
 
-    if (a_summand_number == -1)
+    if (a_summand_number == (size_t)-1) // Dangerous
     {
       v_file_name << "-init.dot";
     }
@@ -88,7 +88,7 @@ bool Invariant_Checker::check_init(const data_expression a_invariant)
     if (f_bdd_prover.is_contradiction() != answer_yes)
     {
       print_counter_example();
-      save_dot_file(-1);
+      save_dot_file((size_t)(-1));
     }
     return false;
   }
@@ -119,12 +119,12 @@ bool Invariant_Checker::check_summand(
   f_bdd_prover.set_formula(v_formula);
   if (f_bdd_prover.is_tautology() == answer_yes)
   {
-    gsVerboseMsg("The invariant holds for summand %d.\n", a_summand_number);
+    mCRL2log(verbose) << "The invariant holds for summand " << a_summand_number << "." << std::endl;
     return true;
   }
   else
   {
-    gsMessage("The invariant does not hold for summand %d.\n", a_summand_number);
+    mCRL2log(info) << "The invariant does not hold for summand " << a_summand_number << std::endl;
     if (f_bdd_prover.is_contradiction() != answer_yes)
     {
       print_counter_example();
@@ -180,32 +180,32 @@ bool Invariant_Checker::check_invariant(const data::data_expression a_invariant)
 
   if (check_init(a_invariant))
   {
-    gsVerboseMsg("The invariant holds for the initial state.\n");
+    mCRL2log(verbose) << "The invariant holds for the initial state." << std::endl;
   }
   else
   {
-    gsMessage("The invariant does not hold for the initial state.\n");
+    mCRL2log(info) << "The invariant does not hold for the initial state." << std::endl;
     v_result = false;
   }
   if ((f_all_violations || v_result))
   {
     if (check_summands(a_invariant))
     {
-      gsVerboseMsg("The invariant holds for all summands.\n");
+      mCRL2log(verbose) << "The invariant holds for all summands." << std::endl;
     }
     else
     {
-      gsMessage("The invariant does not hold for all summands.\n");
+      mCRL2log(info) << "The invariant does not hold for all summands." << std::endl;
       v_result = false;
     }
   }
   if (v_result)
   {
-    gsMessage("The invariant holds for this LPS.\n");
+    mCRL2log(info) << "The invariant holds for this LPS." << std::endl;
   }
   else
   {
-    gsMessage("The invariant does not hold for this LPS.\n");
+    mCRL2log(info) << "The invariant does not hold for this LPS." << std::endl;
   }
 
   return v_result;

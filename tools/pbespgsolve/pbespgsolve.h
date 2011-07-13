@@ -23,6 +23,8 @@
 #include "PredecessorLiftingStrategy.h"
 #include "RecursiveSolver.h"
 #include "ComponentSolver.h"
+#include "DecycleSolver.h"
+#include "DeloopSolver.h"
 
 namespace mcrl2
 {
@@ -33,6 +35,7 @@ namespace pbes_system
 enum pbespg_solver_type
 {
   spm_solver,
+  alternative_spm_solver,
   recursive_solver
 };
 
@@ -65,6 +68,10 @@ std::string print(pbespg_solver_type solver_type)
   {
     return "spm_solver";
   }
+  else if (solver_type == alternative_spm_solver)
+  {
+    return "alternative_spm_solver";
+  }
   else if (solver_type == recursive_solver)
   {
     return "recursive_solver";
@@ -75,17 +82,19 @@ std::string print(pbespg_solver_type solver_type)
 struct pbespgsolve_options
 {
   pbespg_solver_type solver_type;
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
   bool use_scc_decomposition;
-#endif
+  bool use_decycle_solver;
+  bool use_deloop_solver;
   bool verify_solution;
+  data::rewriter::strategy rewrite_strategy;
 
   pbespgsolve_options()
     : solver_type(spm_solver),
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       use_scc_decomposition(true),
-#endif
-      verify_solution(true)
+      use_decycle_solver(false),
+      use_deloop_solver(true),
+      verify_solution(true),
+      rewrite_strategy(data::rewriter::jitty)
   {
   }
 };
@@ -93,8 +102,6 @@ struct pbespgsolve_options
 class pbespgsolve_algorithm
 {
   protected:
-    std::auto_ptr<LiftingStrategyFactory> lift_strat_factory;
-    std::auto_ptr<ParityGameSolverFactory> subsolver_factory;
     std::auto_ptr<ParityGameSolverFactory> solver_factory;
     mcrl2::utilities::execution_timer& m_timer;
     pbespgsolve_options m_options;
@@ -105,15 +112,15 @@ class pbespgsolve_algorithm
       : m_timer(timing),
         m_options(options)
     {
-      if (options.solver_type == spm_solver)
+      if (options.solver_type == spm_solver || options.solver_type == alternative_spm_solver)
       {
-        // Create a lifting strategy factory:
-        lift_strat_factory.reset(
-          new PredecessorLiftingStrategyFactory);
+        bool alternative_solver = (options.solver_type == alternative_spm_solver);
 
         // Create a SPM solver factory:
         solver_factory.reset(
-          new SmallProgressMeasuresFactory(*lift_strat_factory));
+          new SmallProgressMeasuresSolverFactory
+                (new PredecessorLiftingStrategyFactory, alternative_solver)
+        );
       }
       else if (options.solver_type == recursive_solver)
       {
@@ -125,25 +132,38 @@ class pbespgsolve_algorithm
         throw mcrl2::runtime_error("pbespgsolve: unknown solver type");
       }
 
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       if (options.use_scc_decomposition)
       {
         // Wrap solver factory into a component solver factory:
-        subsolver_factory = solver_factory;
         solver_factory.reset(
-          new ComponentSolverFactory(*subsolver_factory));
+          new ComponentSolverFactory(*solver_factory.release()));
       }
-#endif
+
+      if (options.use_decycle_solver)
+      {
+        solver_factory.reset(
+          new DecycleSolverFactory(*solver_factory.release()));
+      }
+
+      if (options.use_deloop_solver)
+      {
+        solver_factory.reset(
+          new DeloopSolverFactory(*solver_factory.release()));
+      }
     }
 
     template <typename Container>
     bool run(pbes<Container>& p)
     {
       m_timer.start("initialization");
+      mCRL2log(verbose) << "Generating parity game..."  << std::endl;
       // Generate the game from a PBES:
       verti goal_v;
       ParityGame pg;
-      pg.assign_pbes(p, &goal_v); // N.B. mCRL2 could raise an exception here
+
+      pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, m_options.rewrite_strategy); // N.B. mCRL2 could raise an exception here
+
+      mCRL2log(verbose) << "Solving..." << std::endl;
 
       // Create a solver:
       std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));
@@ -159,8 +179,10 @@ class pbespgsolve_algorithm
         throw mcrl2::runtime_error("pbespgsolve: solving failed!\n");
       }
 
+      verti error_vertex;
+
       // Optional: verify the solution
-      if (m_options.verify_solution && !pg.verify(solution))
+      if (m_options.verify_solution && !pg.verify(solution, &error_vertex))
       {
         throw mcrl2::runtime_error("pbespgsolve: verification of the solution failed!\n");
       }

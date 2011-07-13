@@ -85,13 +85,10 @@ class bisim_partitioner
       :max_state_index(0), aut(l), tau_label(determine_tau_label(l))
     {
       assert(branching || !preserve_divergence);
-      if (core::gsVerbose)
-      {
-        std::cerr << (preserve_divergence?"Divergence preserving b)":"B") <<
+      mCRL2log(verbose) << (preserve_divergence?"Divergence preserving b)":"B") <<
                   (branching?"ranching b":"") << "isimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
-      }
       create_initial_partition(branching,preserve_divergence);
       refine_partition_until_it_becomes_stable(branching, preserve_divergence);
     }
@@ -497,12 +494,12 @@ class bisim_partitioner
           // There are flagged and non flagged states. So, the block must be split.
           // Move the unflagged states to the new block.
 
-          if (core::gsDebug)
+          if (mCRL2logEnabled(debug))
           {
             const size_t m=static_cast<size_t>(pow(10,floor(log10(static_cast<double>((blocks.size()+1)/2)))));
             if ((blocks.size()+1)/2 % m==0)
             {
-              std::cerr << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << "\n";
+              mCRL2log(debug) << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << std::endl;
             }
           }
           // Record how block *i1 is split, to use this to generate counter examples.
@@ -831,7 +828,7 @@ class bisim_partitioner
       {
         // The counter trace is simply the label l.
         mcrl2::trace::Trace counter_trace;
-        counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,ATfalse)));
+        counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,false)));
         resulting_counter_traces.insert(counter_trace);
       }
       else
@@ -849,7 +846,7 @@ class bisim_partitioner
                  j!=counter_traces.end(); ++j)
             {
               mcrl2::trace::Trace new_counter_trace;
-              new_counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,ATfalse)));
+              new_counter_trace.addAction(ATmakeAppl0(ATmakeAFun(mcrl2::lts::detail::pp(aut.action_label(l)).c_str(),0,false)));
               mcrl2::trace::Trace old_counter_trace=*j;
               old_counter_trace.resetPosition();
               for (size_t k=0 ; k< old_counter_trace.getLength(); k++)

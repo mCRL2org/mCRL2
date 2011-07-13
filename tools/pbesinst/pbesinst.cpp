@@ -26,6 +26,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
@@ -243,14 +244,11 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
     {
       using namespace mcrl2::pbes_system;
 
-      if (core::gsVerbose)
-      {
-        std::cerr << "parameters of pbesinst:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  strategy:           " << strategy_string() << std::endl;
-        std::cerr << "  output format:      " << output_format_string() << std::endl;
-      }
+      mCRL2log(verbose) << "parameters of pbesinst:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  strategy:           " << strategy_string() << std::endl;
+      mCRL2log(verbose) << "  output format:      " << output_format_string() << std::endl;
 
       // load the pbes
       pbes<> p;
@@ -258,42 +256,32 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
 
       if (!p.is_closed())
       {
-        core::gsErrorMsg("The PBES is not closed. Pbes2bes cannot handle this kind of PBES's\nComputation aborted.\n");
+        mCRL2log(error) << "The PBES is not closed. Pbes2bes cannot handle this kind of PBESs" << std::endl << "Computation aborted." << std::endl;
         return false;
-      }
-
-      unsigned int log_level = 0;
-      if (mcrl2::core::gsVerbose)
-      {
-        log_level = 1;
-      }
-      if (mcrl2::core::gsDebug)
-      {
-        log_level = 2;
       }
 
       if (m_strategy == ts_lazy)
       {
-        pbesinst_algorithm algorithm(p.data(), rewrite_strategy(), false, false, log_level);
+        pbesinst_algorithm algorithm(p.data(), rewrite_strategy(), false, false);
         algorithm.run(p);
         p = algorithm.get_result();
       }
       else if (m_strategy == ts_finite)
       {
-        pbesinst_finite_algorithm algorithm(rewrite_strategy(), log_level);
+        pbesinst_finite_algorithm algorithm(rewrite_strategy());
         detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, m_finite_parameter_selection);
         algorithm.run(p, parameter_map);
       }
 
-      if (mcrl2::core::gsVerbose)
+      if (mcrl2_logger::get_reporting_level() >= log_verbose)
       {
-        if (p.is_bes())
+        if (is_bes(p))
         {
-          core::gsVerboseMsg("The result is a BES.\n");
+          mCRL2log(debug) << "The result is a BES.\n";
         }
         else
         {
-          core::gsVerboseMsg("The result is a PBES.\n");
+           mCRL2log(debug) << "The result is a PBES.\n";
         }
       }
 

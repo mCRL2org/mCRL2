@@ -16,9 +16,7 @@
 #include <string>
 #include <stdexcept>
 
-#ifndef MCRL2_TOOL_CLASSES_NO_CORE
-# include "mcrl2/core/messaging.h"
-#endif
+#include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/utilities/command_line_interface.h"
 #include "mcrl2/utilities/execution_timer.h"
@@ -107,15 +105,19 @@ class tool
 #ifndef MCRL2_TOOL_CLASSES_NO_CORE
       if (parser.options.count("quiet"))
       {
-        mcrl2::core::gsSetQuietMsg();
+        mcrl2_logger::set_reporting_level(log_quiet);
       }
       if (parser.options.count("verbose"))
       {
-        mcrl2::core::gsSetVerboseMsg();
+        mcrl2_logger::set_reporting_level(log_verbose);
       }
       if (parser.options.count("debug"))
       {
-        mcrl2::core::gsSetDebugMsg();
+        mcrl2_logger::set_reporting_level(log_debug);
+      }
+      if (parser.options.count("log-level") > 0)
+      {
+        mcrl2_logger::set_reporting_level(log_level_from_string(parser.option_argument("log-level")));
       }
 #endif
     }

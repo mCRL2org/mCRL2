@@ -567,9 +567,8 @@ bool GLCanvas::pickObjects3d(int x, int y, wxMouseEvent const& e)
                   viewport);
 
     // Get current size of canvas
-    int width,height,depth;
+    int width,height;
     GetClientSize(&width,&height);
-    depth = (width + height) / 2;
 
     GLdouble aspect = (GLdouble)width / (GLdouble)height;
 

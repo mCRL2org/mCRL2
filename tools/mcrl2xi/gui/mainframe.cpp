@@ -28,6 +28,8 @@
 
 #include <wx/fdrepdlg.h>
 
+#include "icons/mcrl2xi.xpm"
+
 BEGIN_EVENT_TABLE(MainFrame, wxFrame)
   EVT_MENU(wxID_CLOSE, MainFrame::OnQuit)
   EVT_MENU(wxID_NEW, MainFrame::OnNewFile)
@@ -72,6 +74,7 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
   wxFrame((wxFrame*) NULL, wxID_ANY, title, pos, size)
 {
 
+  SetIcon(wxIcon(mcrl2xi_xpm));
 
 #ifdef __WXMAC__
   // required since ABOUT is not the default id of the about menu
@@ -162,6 +165,8 @@ MainFrame::MainFrame(const wxString& title, const wxPoint& pos, const wxSize& si
   m_mgr.AddPane(editor , wxCENTER, wxT("Data specification"));
   m_mgr.AddPane(options , wxRIGHT, wxT("Actions"));
   m_mgr.AddPane(output , wxBOTTOM, wxT("Output"));
+
+  m_mgr.GetPane(output).BestSize(-1, 100);
 
   // tell the manager to "commit" all the changes just made
   m_mgr.Update();
@@ -345,7 +350,7 @@ void MainFrame::UpdateEdtFocus(wxCommandEvent& event)
   {
     focussed_editor = (xStcEditor*) event.GetClientData();
     focussed_editor_for_find = focussed_editor;
-    m_PanelMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode() != 0);
+    viewMenu->Check(mcrl2xi::myID_WRAPMODE, focussed_editor->GetWrapMode() != 0);
   }
   UpdateEditMenu();
 };

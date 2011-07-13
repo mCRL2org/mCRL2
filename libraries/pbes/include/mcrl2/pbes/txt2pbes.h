@@ -13,9 +13,10 @@
 #define MCRL2_PBES_TXT2PBES_H
 
 #include <sstream>
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parse.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -33,8 +34,8 @@ pbes<> txt2pbes(std::istream& spec_stream)
   spec_stream >> result;
   try
   {
-    core::gsVerboseMsg("checking monotonicity...\n");
-    result.normalize();
+    mCRL2log(verbose) << "checking monotonicity..." << std::endl;
+    pbes_system::normalize(result);
   }
   catch (std::exception& /* e */)
   {

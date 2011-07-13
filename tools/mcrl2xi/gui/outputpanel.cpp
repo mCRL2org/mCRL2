@@ -15,11 +15,11 @@
 #include <iostream>
 
 #include "outputpanel.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 class message_relay;
 
-static void relay_message(const ::mcrl2::core::messageType t, const char* data);
+static void relay_message(const ::mcrl2_message_t t, const char* data);
 
 class text_control_buf : public std::streambuf
 {
@@ -34,16 +34,14 @@ class text_control_buf : public std::streambuf
 
     int overflow(int c)
     {
-      wxDateTime now = wxDateTime::Now();
-      m_control.AppendText(now.FormatTime() +  wxString(static_cast< wxChar >(c)));
+      m_control.AppendText(wxString(static_cast< wxChar >(c)));
 
       return 1;
     }
 
     std::streamsize xsputn(const char* s, std::streamsize n)
     {
-      wxDateTime now = wxDateTime::Now();
-      m_control.AppendText(now.FormatTime() +  wxString(s, wxConvLocal, n));
+      m_control.AppendText(wxString(s, wxConvLocal, n));
 
       pbump(n);
 
@@ -57,7 +55,7 @@ std::auto_ptr < message_relay > communicator;
 
 class message_relay
 {
-    friend void relay_message(const ::mcrl2::core::messageType, const char* data);
+    friend void relay_message(const ::mcrl2_message_t, const char* data);
 
   private:
 
@@ -76,14 +74,12 @@ class message_relay
     message_relay(wxTextCtrl& control) : m_control(control)
     {
       m_error_stream = std::cerr.rdbuf(new text_control_buf(m_control));
-
-      mcrl2::core::gsSetCustomMessageHandler(relay_message);
+      mcrl2_logger::set_custom_message_handler(&relay_message);
     }
 
     void message(const char* data)
     {
-      wxDateTime now = wxDateTime::Now();
-      m_control.AppendText(now.FormatTime() + wxT(" ** ") + wxString(data, wxConvLocal));
+      m_control.AppendText(wxString(data, wxConvLocal));
     }
 
   public:
@@ -97,25 +93,15 @@ class message_relay
 
     ~message_relay()
     {
-      mcrl2::core::gsSetCustomMessageHandler(0);
+      mcrl2_logger::set_custom_message_handler(0);
 
       delete std::cerr.rdbuf(m_error_stream);
     }
 };
 
-static void relay_message(const ::mcrl2::core::messageType t, const char* data)
+static void relay_message(const ::mcrl2_message_t /*t*/, const char* data)
 {
-  switch (t)
-  {
-    case mcrl2::core::gs_notice:
-      break;
-    case mcrl2::core::gs_warning:
-      break;
-    case mcrl2::core::gs_error:
-    default:
-      communicator->message(data);
-      break;
-  }
+  communicator->message(data);
 }
 
 outputpanel::outputpanel(wxWindow* p_parent)
@@ -124,10 +110,10 @@ outputpanel::outputpanel(wxWindow* p_parent)
   message_relay::initialise(*this);
 }
 
-std::string outputpanel::PrintTime()
-{
-  wxDateTime now = wxDateTime::Now();
-  return std::string(now.FormatTime().mb_str()) + " ** ";
-};
+//std::string outputpanel::PrintTime()
+//{
+//  wxDateTime now = wxDateTime::Now();
+//  return std::string(now.FormatTime().mb_str()) + " ** ";
+//};
 
 

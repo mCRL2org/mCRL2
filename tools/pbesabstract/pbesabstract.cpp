@@ -85,30 +85,17 @@ class pbes_abstract_tool: public input_output_tool
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
-      {
-        std::cerr << "pbesabstract parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  parameters:         " << m_parameter_selection << std::endl;
-      }
-
-      size_t log_level = 0;
-      if (mcrl2::core::gsVerbose)
-      {
-        log_level = 1;
-      }
-      if (mcrl2::core::gsDebug)
-      {
-        log_level = 2;
-      }
+      mCRL2log(verbose) << "pbesabstract parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  parameters:         " << m_parameter_selection << std::endl;
 
       // load the pbes
       pbes<> p;
       p.load(m_input_filename);
 
       // run the algorithm
-      pbes_abstract_algorithm algorithm(log_level);
+      pbes_abstract_algorithm algorithm;
       pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, m_parameter_selection);
       algorithm.run(p, parameter_map, m_value_true);
 

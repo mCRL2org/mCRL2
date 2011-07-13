@@ -13,10 +13,12 @@
 #include <cassert>
 #include <climits>
 #include <sstream>
-#include "mcrl2/core/detail/memory_utility.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/core/print.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
@@ -69,7 +71,7 @@ ATermAppl translate_reg_frms(ATermAppl state_frm)
 
 ATermAppl translate_reg_frms_appl(ATermAppl part)
 {
-  gsDebugMsg("reducing expression\n  %P\n", part);
+  mCRL2log(debug) << "reducing expression\n  " << core::pp( part) << std::endl;
   if (gsIsDataExpr(part) || gsIsMultAct(part) ||
       gsIsStateVar(part) || gsIsDataVarIdInit(part))
   {
@@ -188,11 +190,11 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
   {
     //implement expressions in the arguments of part
     AFun head = ATgetAFun(part);
-    int nr_args = ATgetArity(head);
+    size_t nr_args = ATgetArity(head);
     if (nr_args > 0)
     {
       MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATerm,nr_args);
-      for (int i = 0; i < nr_args; i++)
+      for (size_t i = 0; i < nr_args; i++)
       {
         ATerm arg = ATgetArgument(part, i);
         if (ATgetType(arg) == AT_APPL)
@@ -224,8 +226,7 @@ ATermList translate_reg_frms_list(ATermList parts)
 
 ATermAppl create_new_var_name(bool cap, int index)
 {
-  gsDebugMsg("creating variable with index %d and cap %s\n",
-             index, cap?"true":"false");
+  mCRL2log(debug) << "creating variable with index " << index << " and cap " << (cap?"true":"false") << std::endl;
   int suffix = index / 3;
 
   std::ostringstream s;
@@ -254,7 +255,7 @@ ATermAppl create_new_var_name(bool cap, int index)
 
 ATermAppl create_fresh_var_name(bool cap, ATermList terms)
 {
-  gsDebugMsg("creating fresh variable for terms %t\n", terms);
+  mCRL2log(debug) << "creating fresh variable for terms " << atermpp::aterm( terms) << std::endl;
   ATermAppl result = NULL;
   bool done = false;
   //iteratively create a unique variable and perform a number of checks on it;

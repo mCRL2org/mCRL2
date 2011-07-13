@@ -73,7 +73,12 @@ bool MacOSXInstaller::OnInit()
 }
 
 MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint& pos)
-  : wxFrame(NULL, -1, title, pos, wxSize(550, 250), wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | wxRESIZE_BOX | wxMAXIMIZE_BOX))
+  : wxFrame(NULL, -1, title, pos, wxSize(550, 250), wxDEFAULT_FRAME_STYLE & ~(wxRESIZE_BORDER | 
+#if wxCHECK_VERSION(2, 9, 0)
+#else
+  wxRESIZE_BOX | 
+#endif
+  wxMAXIMIZE_BOX))
 {
   wxPanel* panel = new wxPanel(this, wxID_ANY, wxPoint(15,10), wxSize(520  ,160), wxBORDER_SUNKEN);
 
@@ -81,7 +86,7 @@ MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint&
   wxStaticText* heading = new wxStaticText(panel, wxID_ANY, wxT("Select a directory to export symbolic links for individual tools."), wxPoint(15, 15));
   heading->SetFont(font);
 
-  new wxStaticText(panel, wxID_ANY, wxT("This is necessary to use the tools outside the SquaDT environment."), wxPoint(15, 40));
+  new wxStaticText(panel, wxID_ANY, wxT("This is necessary to use the tools outside the mCRL2-gui environment."), wxPoint(15, 40));
 
   new wxStaticText(panel, wxID_ANY, wxT("For command-line tools this directory should be added to the PATH variable."), wxPoint(15, 60));
 
@@ -103,7 +108,11 @@ MacOSXInstallerFrame::MacOSXInstallerFrame(const wxString& title, const wxPoint&
                             wxPoint(75,110), wxDefaultSize,
                             wxDIRP_USE_TEXTCTRL
                            );
+#if wxCHECK_VERSION(2, 9, 0)
+  dpc->SetSize(wxSize(390 , 35));
+#else
   dpc->SetSize(wxSize(390 , 20));
+#endif
 
   wxButton* okbtn = new wxButton(this, ID_Ok, wxT("Ok"),
                                  wxPoint(465, 190));

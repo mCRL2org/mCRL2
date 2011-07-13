@@ -184,15 +184,6 @@ atermpp::aterm_appl boolean_equation_to_aterm(const boolean_equation& eqn)
 /// \brief Read-only singly linked list of boolean equations
 typedef atermpp::term_list<boolean_equation> boolean_equation_list;
 
-/// \brief Pretty print function
-/// \param eq A boolean equation
-/// \return A pretty printed representation of the boolean equation
-inline
-std::string pp(const boolean_equation& eq)
-{
-  return core::pp(eq.symbol()) + " " + bes::pp(eq.variable()) + " = " + bes::pp(eq.formula());
-}
-
 } // namespace bes
 
 } // namespace mcrl2

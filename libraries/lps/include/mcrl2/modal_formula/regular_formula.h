@@ -260,4 +260,8 @@ bool is_trans_or_nil(const regular_formula& t)
 
 } // namespace mcrl2
 
+#ifndef MCRL2_MODAL_FORMULA_PRINT_H
+#include "mcrl2/modal_formula/print.h"
+#endif
+
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

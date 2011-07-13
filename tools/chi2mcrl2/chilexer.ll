@@ -12,13 +12,12 @@
 #include <iostream>
 #include <vector>
 #include "libstruct_core.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "chiparser.h"
 #include <map>
 #include <set>
 #include <utility>
 
-using namespace mcrl2::core;
 using namespace std;
 
 int line = 1, col = 1;
@@ -40,7 +39,7 @@ extern int chiyydebug;         /* declared in chiparser.cpp */
  */
 int yyerror(const char *s)
 {
-  gsErrorMsg("%s at line: %d col: %d\n",s,line,col);
+  mCRL2log(error) << s << " at line: " << line << "col: " << col << std::endl;
   return 0;
 }
 
@@ -238,10 +237,8 @@ void chi_lexer::yyerror(const char *s) {
   if (oldcol_nr < 0) {
     oldcol_nr = 0;
   }
-  gsErrorMsg(
-    "token '%s' at position %d, %d caused the following error: %s\n",
-    YYText(), line_nr, oldcol_nr, s
-  );
+  mCRL2log(error) << "token '" << YYText() << "' at position " << line_nr << ", "
+                  << oldcol_nr << " caused the following error: " << s << std::endl;
 }
 
 void chi_lexer::getposition()
@@ -250,10 +247,7 @@ void chi_lexer::getposition()
   if (oldcol_nr < 0) {
     oldcol_nr = 0;
   }
-  gsErrorMsg(
-    "Near position Line: %d, Column: %d:\n",
-    line_nr, oldcol_nr
-  );
+  mCRL2log(error) << "Near position line: " << line_nr << ", column: " << oldcol_nr << ":" << std::endl;
 }
 
 void chi_lexer::process_string(void) {
@@ -261,7 +255,7 @@ void chi_lexer::process_string(void) {
   chiyylval.appl = gsString2ATermAppl(YYText());
   // Storing chiyylval.appl in the chi_parser_protect table is necessary
   // as otherwise this term can be garbage collected. JFG 2/1/2011.
-  ATbool b; ATindexedSetPut(chi_parser_protect_table, (ATerm)chiyylval.appl, &b);
+  bool b; ATindexedSetPut(chi_parser_protect_table, (ATerm)chiyylval.appl, &b);
 }
 
 ATermAppl chi_lexer::parse_stream (std::istream &stream ) {

@@ -14,6 +14,7 @@
 
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/print.h"
 
 namespace mcrl2
 {
@@ -33,7 +34,7 @@ void type_check(process_expression& proc_expr, const process_specification& proc
   ATermAppl t = core::type_check_proc_expr(proc_expr, process_specification_to_aterm(proc_spec));
   if (!t)
   {
-    throw mcrl2::runtime_error("could not type check " + core::pp(proc_expr));
+    throw mcrl2::runtime_error("could not type check " + process::pp(proc_expr));
   }
   proc_expr = process_expression(t);
 }

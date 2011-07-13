@@ -9,8 +9,8 @@
 /// \file source/invariant_eliminator.cpp
 /// \brief Add your file description here.
 
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/invariant_eliminator.h"
 
@@ -59,7 +59,7 @@ mcrl2::lps::deprecated::summand Invariant_Eliminator::simplify_summand(
   {
     if (f_simplify_all)
     {
-      gsMessage("Summand number %d is simplified.\n", a_summand_number);
+      mCRL2log(info) << "Summand number " << a_summand_number << " is simplified." << std::endl;
       return deprecated::summand(a_summand.summation_variables(),
                      data_expression(f_bdd_prover.get_bdd()),
                      a_summand.is_delta(),
@@ -115,12 +115,12 @@ specification Invariant_Eliminator::simplify(
         v_simplified_summands = push_front(v_simplified_summands, v_summand);
         if (!a_no_elimination)
         {
-          gsVerboseMsg("Summand number %d could not be eliminated.\n", v_summand_number);
+          mCRL2log(verbose) << "Summand number " << v_summand_number << " could not be eliminated." << std::endl;
         }
       }
       else
       {
-        gsMessage("Summand number %d is eliminated.\n", v_summand_number);
+        mCRL2log(info) << "Summand number " << v_summand_number << " is eliminated." << std::endl;
       }
     }
     v_summand_number++;

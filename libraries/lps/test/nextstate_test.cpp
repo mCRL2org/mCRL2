@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/find.h"
@@ -37,7 +37,7 @@ std::string print_state(atermpp::aterm_appl s, legacy_rewriter& R)
       result.append(", ");
     }
 
-    result.append(core::pp(atermpp::aterm(R.translate(static_cast<ATerm>(*i)))));
+    result.append(core::pp(atermpp::aterm(R.convert_from(static_cast<ATerm>(*i)))));
   }
   result.append(")");
   return result;
@@ -57,9 +57,7 @@ std::clog << "--- rewrite rule selection function symbols ---\n";
 std::clog << core::detail::print_pp_set(lps::find_function_symbols(s)) << std::endl;
 #endif
 
-  mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > > E(s.data(), R);
-
-  NextState* nstate = createNextState(s, E, false);
+  NextState* nstate = createNextState(s, R, false);
 
   atermpp::aterm initial_state = nstate->getInitialState();
 

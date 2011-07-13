@@ -19,7 +19,7 @@
 
 #include <wx/file.h>
 #include "mcrl2/atermpp/aterm_init.h"            // Library for messaging.
-#include "mcrl2/core/messaging.h"            // Library for messaging.
+#include "mcrl2/utilities/logger.h"            // Library for messaging.
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
 
@@ -39,7 +39,7 @@ void grape::mcrl2gen::init_mcrl2libs(int p_argc, char** p_argv)
 {
   // initialize ATerm library and set verbose messaging
   MCRL2_ATERMPP_INIT(p_argc, p_argv);
-  gsSetVerboseMsg();
+  mcrl2_logger::set_reporting_level(log_verbose);
 }
 
 void grape::mcrl2gen::verbose_actions(list_of_action& p_actions)

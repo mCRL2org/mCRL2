@@ -20,7 +20,7 @@
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -52,13 +52,10 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       using namespace pbes_system;
       using namespace utilities;
 
-      if (core::gsVerbose)
-      {
-        std::clog << "pbesrewr parameters:" << std::endl;
-        std::clog << "  input file:         " << m_input_filename << std::endl;
-        std::clog << "  output file:        " << m_output_filename << std::endl;
-        std::clog << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
-      }
+      mCRL2log(verbose) << "pbesrewr parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       // load the pbes
       pbes<> p;
@@ -73,7 +70,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         case simplify:
         {
           simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
-          pbesrewr(p, pbesr);
+          pbes_rewrite(p, pbesr);
           break;
         }
         case quantifier_all:
@@ -83,7 +80,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = true;
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbesrewr(p, pbesr);
+          pbes_rewrite(p, pbesr);
           break;
         }
         case quantifier_finite:
@@ -93,13 +90,13 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbesrewr(p, pbesr);
+          pbes_rewrite(p, pbesr);
           break;
         }
         case pfnf:
         {
           pfnf_rewriter pbesr;
-          pbesrewr(p, pbesr);
+          pbes_rewrite(p, pbesr);
           break;
         }
         case prover:

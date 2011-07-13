@@ -13,10 +13,12 @@
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/utilities/uncompiledlibrary.h"
+
+#include "nfs_array.h"
 
 #ifdef MCRL2_JITTYC_AVAILABLE
 
-//#define _JITTYC_STORE_TREES
 #include <utility>
 #include <string>
 
@@ -27,13 +29,11 @@ namespace data
 namespace detail
 {
 
-typedef size_t* nfs_array;
-
 class RewriterCompilingJitty: public Rewriter
 {
   public:
-    RewriterCompilingJitty(const data_specification& DataSpec);
-    ~RewriterCompilingJitty();
+    RewriterCompilingJitty(const data_specification& DataSpec, const bool add_rewrite_rules);
+    virtual ~RewriterCompilingJitty();
 
     RewriteStrategy getStrategy();
 
@@ -44,27 +44,17 @@ class RewriterCompilingJitty: public Rewriter
     ATerm rewriteInternal(ATerm Term);
     ATermList rewriteInternalList(ATermList Terms);
 
-    void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
-    ATerm getSubstitutionInternal(ATermAppl Var);
-    void clearSubstitution(ATermAppl Var);
-    void clearSubstitutions();
-    using Rewriter::clearSubstitutions;
-
     bool addRewriteRule(ATermAppl Rule);
     bool removeRewriteRule(ATermAppl Rule);
 
   private:
-    ATermTable tmp_eqns, subst_store;
+    ATermTable tmp_eqns;
     bool need_rebuild;
     bool made_files;
-
-    int num_opids;
 
     ATermInt true_inner;
     int true_num;
 
-    ATermTable term2int;
-    ATermAppl* int2term;
     ATermList* jittyc_eqns;
 
     ATermTable int2ar_idx;
@@ -77,44 +67,29 @@ class RewriterCompilingJitty: public Rewriter
     bool calc_ar(ATermAppl expr);
     void fill_always_rewrite_array();
 
-    std::string file_c;
-    std::string file_o;
-    std::string file_so;
+    std::string rewriter_source;
+    uncompiled_library *rewriter_so;
 
-    void* so_handle;
-    void (*so_rewr_init)();
+    void (*so_rewr_init)(RewriterCompilingJitty *);
     void (*so_rewr_cleanup)();
     ATermAppl(*so_rewr)(ATermAppl);
-    void (*so_set_subst)(ATermAppl, ATerm);
-    ATerm(*so_get_subst)(ATermAppl);
-    void (*so_clear_subst)(ATermAppl);
-    void (*so_clear_substs)();
 
-#ifdef _JITTYC_STORE_TREES
-    int write_tree(FILE* f, ATermAppl tree, int* num_states);
-    void tree2dot(ATermAppl tree, char* name, char* filename);
-    ATermAppl create_tree(ATermList rules, int opid, int arity, ATermInt true_inner_);
-    ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array nfs, ATermInt true_inner_);
-#endif
-
-    void add_base_nfs(nfs_array a, ATermInt opid, size_t arity);
-    void extend_nfs(nfs_array a, ATermInt opid, size_t arity);
+    void add_base_nfs(nfs_array &a, ATermInt opid, size_t arity);
+    void extend_nfs(nfs_array &a, ATermInt opid, size_t arity);
     bool opid_is_nf(ATermInt opid, size_t num_args);
-    void calc_nfs_list(nfs_array a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
+    void calc_nfs_list(nfs_array &a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
     bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
-    std::string calc_inner_terms(nfs_array nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array rewr);
+    std::string calc_inner_terms(nfs_array &nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array *rewr);
     std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
     void calcTerm(FILE* f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
     void implement_tree_aux(FILE* f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool* used, ATermList nnfvars);
     void implement_tree(FILE* f, ATermAppl tree, int arity, int d, int opid, bool* used);
     void implement_strategy(FILE* f, ATermList strat, int arity, int d, int opid, size_t nf_args);
-    void CompileRewriteSystem(const data_specification& DataSpec);
+    void CompileRewriteSystem(const data_specification& DataSpec, const bool add_rewrite_rules);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
+	FILE* MakeTempFiles();
 
-    ATerm OpId2Int(ATermAppl Term, bool add_opids);
-    ATerm toInner(ATermAppl Term, bool add_opids);
-    ATermAppl fromInner(ATerm Term);
 };
 
 }

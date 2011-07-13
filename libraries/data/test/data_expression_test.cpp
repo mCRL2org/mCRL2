@@ -37,30 +37,6 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
-/*
-template <typename T>
-bool equal_contents(boost::iterator_range<T> r1, boost::iterator_range<T> r2)
-{
-  if (r1.size() != r2.size())
-  {
-    return false;
-  }
-
-  T i = r1.begin();
-  T j = r2.begin();
-  while (i != r1.end() && j != r2.end())
-  {
-    if (*i != *j)
-    {
-      return false;
-    }
-    ++i;
-    ++j;
-  }
-  return true;
-}
-*/
-
 void variable_test()
 {
   basic_sort s("S");
@@ -97,8 +73,7 @@ void function_symbol_test()
   sort_expression_vector s01;
   s01.push_back(s0);
   s01.push_back(s1);
-  boost::iterator_range<sort_expression_vector::iterator> s01_range(s01);
-  function_sort fs(s01_range, s);
+  function_sort fs(s01, s);
 
 
   function_symbol f("f", fs);
@@ -138,12 +113,11 @@ void application_test()
   function_symbol f("f", s01s);
   data_expression x(variable("x", s0));
   data_expression y(variable("y", s1));
-  data_expression_vector xy = atermpp::make_vector(x,y);
-  boost::iterator_range<data_expression_vector::const_iterator> xy_range(xy.begin(), xy.end());
-  application fxy(f, xy_range);
+  data_expression_list xy = atermpp::make_list(x,y);
+  application fxy(f, xy);
   BOOST_CHECK(fxy.sort() == s);
   BOOST_CHECK(fxy.head() == f);
-  BOOST_CHECK(fxy.arguments() == xy_range);
+  BOOST_CHECK(fxy.arguments() == xy);
 
   data_expression fxy_e(fxy);
   application fxy_e_(fxy_e);
@@ -161,11 +135,10 @@ void abstraction_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_vector xl = atermpp::make_vector(x);
-  boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
-  abstraction I(lambda_binder(), xl_range, x);
+  variable_list xl = atermpp::make_list(x);
+  abstraction I(lambda_binder(), xl, x);
   BOOST_CHECK(I.binding_operator() == lambda_binder());
-  BOOST_CHECK(I.variables() == xl_range);
+  BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
 
   data_expression I_e(I);
@@ -181,18 +154,16 @@ void lambda_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_vector xl = atermpp::make_vector(x);
-  boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
-  lambda I(xl_range, x);
+  variable_list xl = atermpp::make_list(x);
+  lambda I(xl, x);
   BOOST_CHECK(I.binding_operator() == lambda_binder());
   BOOST_CHECK(is_lambda(I));
-  BOOST_CHECK(I.variables() == xl_range);
+  BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
   sort_expression_vector s_l(atermpp::make_vector(s_));
   BOOST_CHECK(!s_l.empty());
-  boost::iterator_range<sort_expression_vector::const_iterator> s_l_range(s_l);
-  function_sort fs(s_l_range, s);
+  function_sort fs(s_l, s);
   BOOST_CHECK(I.sort() == fs);
 
   data_expression I_e(I);
@@ -201,7 +172,7 @@ void lambda_test()
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_e_.variables() == I.variables());
   BOOST_CHECK(I_e_.body() == I.body());
-  abstraction I_(lambda_binder(), xl_range, x);
+  abstraction I_(lambda_binder(), xl, x);
   BOOST_CHECK(I_ == I);
   BOOST_CHECK(I_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_.variables() == I.variables());
@@ -213,12 +184,11 @@ void forall_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_vector xl = atermpp::make_vector(x);
-  boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
-  forall I(xl_range, x);
+  variable_list xl = atermpp::make_list(x);
+  forall I(xl, x);
   BOOST_CHECK(I.binding_operator() == forall_binder());
   BOOST_CHECK(is_forall(I));
-  BOOST_CHECK(I.variables() == xl_range);
+  BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
   sort_expression_vector s_l(atermpp::make_vector(s_));
@@ -231,7 +201,7 @@ void forall_test()
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_e_.variables() == I.variables());
   BOOST_CHECK(I_e_.body() == I.body());
-  abstraction I_(forall_binder(), xl_range, x);
+  abstraction I_(forall_binder(), xl, x);
   BOOST_CHECK(I_ == I);
   BOOST_CHECK(I_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_.variables() == I.variables());
@@ -243,12 +213,11 @@ void exists_test()
   basic_sort s("S");
 
   variable x("x", s);
-  variable_vector xl = atermpp::make_vector(x);
-  boost::iterator_range<variable_vector::const_iterator> xl_range(xl.begin(), xl.end());
-  exists I(xl_range, x);
+  variable_list xl = atermpp::make_list(x);
+  exists I(xl, x);
   BOOST_CHECK(I.binding_operator() == exists_binder());
   BOOST_CHECK(is_exists(I));
-  BOOST_CHECK(I.variables() == xl_range);
+  BOOST_CHECK(I.variables() == xl);
   BOOST_CHECK(I.body() == x);
   sort_expression s_(s);
   sort_expression_vector s_l(atermpp::make_vector(s_));
@@ -261,7 +230,7 @@ void exists_test()
   BOOST_CHECK(I_e_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_e_.variables() == I.variables());
   BOOST_CHECK(I_e_.body() == I.body());
-  abstraction I_(exists_binder(), xl_range, x);
+  abstraction I_(exists_binder(), xl, x);
   BOOST_CHECK(I_ == I);
   BOOST_CHECK(I_.binding_operator() == I.binding_operator());
   BOOST_CHECK(I_.variables() == I.variables());
@@ -293,11 +262,10 @@ void where_declaration_test()
   variable y("y", s);
 
   assignment xy(x,y);
-  assignment_vector xyl(atermpp::make_vector(xy));
-  boost::iterator_range<assignment_vector::const_iterator> xy_range(xyl);
-  where_clause wxy(x, xy_range);
+  assignment_expression_list xyl(atermpp::make_list(xy));
+  where_clause wxy(x, xyl);
   BOOST_CHECK(wxy.body() == x);
-  BOOST_CHECK(wxy.declarations() == xy_range);
+  BOOST_CHECK(wxy.declarations() == xyl);
 
   data_expression wxy_e(wxy);
   where_clause wxy_e_(wxy_e);

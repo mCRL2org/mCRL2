@@ -29,10 +29,10 @@ ENDIF(WIN32)
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   mcrl2xi.cpp
   gui/mainframe.cpp
-	gui/editor.cpp
-	gui/actions.cpp
-	gui/xstceditor.cpp
-	gui/outputpanel.cpp
+  gui/editor.cpp
+  gui/actions.cpp
+  gui/xstceditor.cpp
+  gui/outputpanel.cpp
   gui/subactions.cpp
   gui/mytextctrl.cpp
 
@@ -40,6 +40,7 @@ add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   ${SRCS}
 )
 
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
@@ -48,12 +49,12 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
-  mcrl2_utilities_command_line
+  mcrl2_utilities
 
   ${wxWidgets_LIBRARIES}
 )

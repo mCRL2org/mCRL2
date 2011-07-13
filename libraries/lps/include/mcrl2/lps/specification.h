@@ -278,13 +278,6 @@ atermpp::aterm_appl specification_to_aterm(const specification& spec)
          );
 }
 
-/// \brief Pretty print function
-inline
-std::string pp(specification spec, core::t_pp_format pp_format = core::ppDefault)
-{
-  return core::pp(specification_to_aterm(spec), pp_format);
-}
-
 /// \brief Equality operator
 inline
 bool operator==(const specification& spec1, const specification& spec2)
@@ -305,10 +298,6 @@ bool operator!=(const specification& spec1, const specification& spec2)
 
 #ifndef MCRL2_LPS_FIND_H
 #include "mcrl2/lps/find.h"
-#endif
-
-#ifndef MCRL2_LPS_PRINT_H
-#include "mcrl2/lps/print.h"
 #endif
 
 #ifndef MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H

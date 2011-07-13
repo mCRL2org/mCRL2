@@ -16,13 +16,13 @@
 #include <string>
 #include <cassert>
 #include <signal.h>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 #include "boost/lexical_cast.hpp"
 
 #include "mcrl2/atermpp/aterm_init.h"
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
@@ -42,18 +42,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
-
-lps2lts_algorithm lps2lts;
-
-void premature_termination_handler(int)
-{
-  // Reset signal handlers.
-  signal(SIGABRT,NULL);
-  signal(SIGINT,NULL);
-  signal(SIGTERM,NULL);
-  lps2lts.premature_termination_handler();
-  exit(1);
-}
 
 static atermpp::set < identifier_string > parse_action_list(const std::string& s)
 {
@@ -91,10 +79,7 @@ static void check_whether_actions_on_commandline_exist(
   for(atermpp::set < identifier_string >::const_iterator i=actions.begin();
                i!=actions.end(); ++i)
   {
-    if (gsVerbose)
-    {
-      std::cerr << "checking for occurrences of action '" << string(*i) << "'.\n";
-    }
+    mCRL2log(verbose) << "checking for occurrences of action '" << string(*i) << "'.\n";
 
     bool found=(*i=="tau"); // If i equals tau, it does not need to be declared.
     for(action_label_list::const_iterator j=action_labels.begin(); 
@@ -114,10 +99,12 @@ typedef  rewriter_tool< input_output_tool > lps2lts_base;
 class lps2lts_tool : public lps2lts_base
 {
   private:
+    lps2lts_algorithm lps2lts;
     lts_generation_options options;
     std::string m_filename;
 
   public:
+    ~lps2lts_tool() { options.m_rewriter.reset(); }
     lps2lts_tool() :
       lps2lts_base("lps2lts",AUTHOR,
                    "generate an LTS from an LPS",
@@ -125,11 +112,21 @@ class lps2lts_tool : public lps2lts_base
                    "If INFILE is not supplied, stdin is used. "
                    "If OUTFILE is not supplied, the LTS is not stored.\n"
                    "\n"
+                   "If the 'jittyc' rewriter is used, then the MCRL2_COMPILEREWRITER environment "
+                   "variable (default value: 'mcrl2compilerewriter') determines the script that "
+                   "compiles the rewriter, and MCRL2_COMPILEDIR (default value: '.') determines "
+                   "where temporary files are stored.\n"
+                   "\n"
                    "The format of OUTFILE is determined by its extension (unless it is specified "
                    "by an option). The supported formats are:\n"
                    +mcrl2::lts::detail::supported_lts_formats_text()
                   )
     {
+    }
+
+    void abort()
+    {
+      lps2lts.abort();
     }
 
     bool run()
@@ -142,10 +139,6 @@ class lps2lts_tool : public lps2lts_base
       {
         return false;
       }
-
-      signal(SIGABRT,premature_termination_handler);
-      signal(SIGINT,premature_termination_handler);
-      signal(SIGTERM,premature_termination_handler); // At ^C print a message.
 
       try
       {
@@ -329,7 +322,7 @@ class lps2lts_tool : public lps2lts_base
         parser.error("options -b/--bit-hash and -t/--trace cannot be used together");
       } */
 
-      if (parser.options.count("suppress") && !gsVerbose)
+      if (parser.options.count("suppress") && !mCRL2logEnabled(verbose))
       {
         parser.error("option --suppress requires --verbose (of -v)");
       }
@@ -355,7 +348,7 @@ class lps2lts_tool : public lps2lts_base
 
           if (options.outformat == lts_none)
           {
-            gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+            mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
             options.outformat = lts_lts;
           }
         }
@@ -366,7 +359,7 @@ class lps2lts_tool : public lps2lts_base
 
 class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 {
-  public:
+  public:    
     lps2lts_gui_tool()
     {
       std::vector<std::string> values;
@@ -410,9 +403,36 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
     }
 };
 
+lps2lts_tool *tool_instance;
+
+void premature_termination_handler(int)
+{
+  // Reset signal handlers.
+  signal(SIGABRT,NULL);
+  signal(SIGINT,NULL);
+  signal(SIGTERM,NULL);
+  tool_instance->abort();
+}
+
 int main(int argc, char** argv)
 {
+  int result;
   MCRL2_ATERMPP_INIT(argc, argv)
+  tool_instance = new lps2lts_gui_tool();
 
-  return lps2lts_gui_tool().execute(argc,argv);
+  signal(SIGABRT,premature_termination_handler);
+  signal(SIGINT,premature_termination_handler);
+  signal(SIGTERM,premature_termination_handler); // At ^C print a message.
+
+  try
+  { 
+    result = tool_instance->execute(argc, argv);
+  } 
+  catch (...)
+  {
+    delete tool_instance;
+    throw;
+  }
+  delete tool_instance;
+  return result;
 }

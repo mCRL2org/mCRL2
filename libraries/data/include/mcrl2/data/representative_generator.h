@@ -132,9 +132,10 @@ class representative_generator
 
       data_expression_vector arguments;
 
-      for (boost::iterator_range< sort_expression_list::iterator > r(function_sort(symbol.sort()).domain()); !r.empty(); r.advance_begin(1))
+      sort_expression_list symbol_domain(function_sort(symbol.sort()).domain());
+      for (sort_expression_list::const_iterator i = symbol_domain.begin(); i != symbol_domain.end(); ++i)
       {
-        data_expression representative = find_representative(r.front(), maximum_depth - 1);
+        data_expression representative = find_representative(*i, maximum_depth - 1);
 
         if (representative == data_expression())
         {
@@ -162,9 +163,9 @@ class representative_generator
         // present.
 
         // check if there is a mapping with sort s (constructors with sort s cannot exist).
+        const function_symbol_vector local_mappings(m_specification.mappings(sort.target_sort()));
 
-        data_specification::mappings_const_range local_mappings(m_specification.mappings(sort));
-        for (data_specification::mappings_const_range::const_iterator i =
+        for (function_symbol_vector::const_iterator i =
                std::find_if(local_mappings.begin(), local_mappings.end(),
                             detail::has_sort(sort)); i != local_mappings.end();)
         {
@@ -176,9 +177,9 @@ class representative_generator
         // s is a constant (not a function sort).
         // check if there is a constant constructor for s
 
-        data_specification::constructors_const_range local_constructors(m_specification.constructors(sort));
+        function_symbol_vector local_constructors(m_specification.constructors(sort.target_sort()));
 
-        for (data_specification::constructors_const_range::const_iterator i =
+        for (function_symbol_vector::const_iterator i =
                std::find_if(local_constructors.begin(), local_constructors.end(), detail::has_sort(sort));
              i != local_constructors.end();)
         {
@@ -186,9 +187,9 @@ class representative_generator
         }
 
         // check if there is a constant mapping for s
-        data_specification::mappings_const_range local_mappings(m_specification.mappings(sort));
+        const function_symbol_vector local_mappings(m_specification.mappings(sort.target_sort()));
 
-        for (data_specification::mappings_const_range::const_iterator i =
+        for (function_symbol_vector::const_iterator i =
                std::find_if(local_mappings.begin(), local_mappings.end(),detail::has_sort(sort));
              i != local_mappings.end();)
         {
@@ -199,7 +200,7 @@ class representative_generator
         {
           // recursively traverse constructor functions of the form f:s1#...#sn -> sort.
           // operators with f:s1#...#sn->G where G is a complex sort expression are ignored
-          for (data_specification::constructors_const_range::const_iterator i =
+          for (function_symbol_vector::const_iterator i =
                  std::find_if(local_constructors.begin(), local_constructors.end(), detail::has_result_sort(sort));
                i != local_constructors.end(); ++i)
           {
@@ -213,7 +214,7 @@ class representative_generator
 
           }
 
-          for (data_specification::mappings_const_range::const_iterator i =
+          for (function_symbol_vector::const_iterator i =
                  std::find_if(local_mappings.begin(), local_mappings.end(), detail::has_result_sort(sort));
                i != local_mappings.end(); ++i)
           {
@@ -229,7 +230,7 @@ class representative_generator
         }
       }
 
-      throw mcrl2::runtime_error("Cannot find a term of sort " + pp(sort));
+      throw mcrl2::runtime_error("Cannot find a term of sort " + data::pp(sort));
     }
 
   public:

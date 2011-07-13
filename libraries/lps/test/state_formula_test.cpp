@@ -330,7 +330,7 @@ const std::string MODEL =
 
 void test_rename()
 {
-  using mcrl2::core::pp;
+  using mcrl2::state_formulas::pp;
   std::cerr << "test_rename";
   specification spec    = linearise(SPECIFICATION);
 
@@ -364,7 +364,7 @@ void test_normalize()
   state_formula f1;
   state_formula f2;
 
-  f = imp(x, not_(y));
+  f = imp(not_(x), y);
   f1 = normalize(f);
   f2 = or_(x, y);
   std::cout << "f  = " << pp(f) << std::endl;

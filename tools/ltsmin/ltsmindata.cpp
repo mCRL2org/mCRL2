@@ -10,20 +10,22 @@
 
 #include "mcrl2/core/print.h"
 #include "ltsmin.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/lps/multi_action.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::utilities;
 
 /* Data definition */
 
 unsigned int Pi_pt = 0, n_partitions = 0;
 
 SVCint nstate=0, nlabel=0, npar=0;
-ATbool* mark;
+bool* mark;
 SVCint* blockref;
 SVCstateIndex* s; /* In this resides the partition */
 ATermList* lab, *par; /* [[key, sources], ... ] */
@@ -38,7 +40,7 @@ ATerm* label_name, *par_name;
 /* End data definition */
 
 static size_t n_transitions = 0, n_states = 0;
-static ATbool omitTauLoops;
+static bool omitTauLoops;
 
 int label_tau = -1;
 
@@ -63,8 +65,10 @@ static void Info(SVCfile* inFile)
 static ATerm* MakeArrayOfATerms(int n)
 {
   ATerm* result = (ATerm*) calloc(n, sizeof(ATerm));
-  if (!result) ATerror("Cannot allocate array with ATerms of size %d",
-                         n);
+  if (!result)
+  {
+    throw mcrl2::runtime_error("Cannot allocate array with ATerms of size " + to_string(n));
+  }
   ATprotectArray(result, n);
   return result;
 }
@@ -72,52 +76,52 @@ static ATerm* MakeArrayOfATerms(int n)
 static void AllocData(void)
 {
   int i;
-  if (!(mark = (ATbool*) malloc(nstate * sizeof(ATbool))))
+  if (!(mark = (bool*) malloc(nstate * sizeof(bool))))
   {
-    ATerror("Cannot allocate boolean array of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate boolean array of size " + to_string(nstate));
   }
   if (!(blockref = (SVCint*) malloc(nstate * sizeof(SVCint))))
   {
-    ATerror("Cannot allocate array with block references of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate array with block references of size " + to_string(nstate));
   }
   if (!(blocks.b = (int*) malloc(nstate * sizeof(int))))
   {
-    ATerror("Cannot allocate array with block references of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate array with block references of size " + to_string(nstate));
   }
   if (!(s = (SVCstateIndex*) malloc(nstate * sizeof(SVCstateIndex))))
   {
-    ATerror("Cannot allocate array with state numbers of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate array with state numbers of size " + to_string(nstate));
   }
   if (!(lab = (ATermList*) calloc(nstate,  sizeof(ATermList))))
   {
-    ATerror("Cannot allocate array with [labels] of size %d\n", nstate);
+    throw mcrl2::runtime_error("Cannot allocate array with [labels] of size " + to_string(nstate));
   }
   ATprotectArray((ATerm*) lab, nstate);
   if (!(Pi = (INTERVAL*) calloc(2*nstate, sizeof(INTERVAL))))
   {
-    ATerror("Indexed array Pi is not allocated (%d)\n",2*nstate);
+    throw mcrl2::runtime_error("Indexed array Pi is not allocated (" + to_string(2*nstate) + ")");
   }
   if (!(lab_src_tgt = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
   {
-    ATerror("Array of tables is not allocated (%d)\n",nlabel);
+    throw mcrl2::runtime_error("Array of tables is not allocated (" + to_string(nlabel) + ")");
   }
   if (!(lab_tgt_src = (ATermTable*) malloc(nlabel*sizeof(ATermTable))))
   {
-    ATerror("Array of tables is not allocated (%d)\n",nlabel);
+    throw mcrl2::runtime_error("Array of tables is not allocated (" + to_string(nlabel) + ")");
   }
   if (!(blok = (BLOK*) malloc(2*nstate * sizeof(BLOK))))
   {
-    ATerror("BLOK is not allocated (%d)\n",nstate);
+    throw mcrl2::runtime_error("BLOK is not allocated (" + to_string(nstate) + ")");
   }
   for (i=0; i<nlabel; i++)
   {
     if (!(lab_src_tgt[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
     {
-      ATerror("Not possible to create table (%d)",i);
+      throw mcrl2::runtime_error("Not possible to create table (" + to_string(i) + ")");
     }
     if (!(lab_tgt_src[i] =  ATtableCreate(INITTAB, MAX_LOAD_PCT)))
     {
-      ATerror("Not possible to create table (%d)",i);
+      throw mcrl2::runtime_error("Not possible to create table (" + to_string(i) + ")");
     }
   }
   label_name = MakeArrayOfATerms(nlabel);
@@ -129,7 +133,7 @@ static void AllocData(void)
   {
     if (!(par = (ATermList*) calloc(nstate,  sizeof(ATermList))))
     {
-      ATerror("Cannot allocate array with [parameters] of size %d\n", nstate);
+      throw mcrl2::runtime_error("Cannot allocate array with [parameters] of size " + to_string(nstate));
     }
     ATprotectArray((ATerm*) par, nstate);
     par_name = MakeArrayOfATerms(npar);
@@ -149,7 +153,7 @@ void StartSplitting(void)
   n_partitions = 0;
   for (i=0; i<nstate; i++)
   {
-    mark[i] = ATfalse;
+    mark[i] = false;
     s[i] = i;
     blockref[i] = Pi_pt;
   }
@@ -207,11 +211,11 @@ void DfsNumbering(ATerm t)
     }
     if (dfsn>nstate || dfsn <0)
     {
-      ATerror("Wrong3: %d\n",dfsn);
+      throw mcrl2::runtime_error("Wrong3: " + to_string(dfsn));
     }
     if (d>nstate || d <0)
     {
-      ATerror("Wrong4: %d\n",d);
+      throw mcrl2::runtime_error("Wrong4: " + to_string(d));
     }
     visited[d] = dfsn;
     dfsn2state[dfsn] = d;
@@ -223,7 +227,6 @@ int TakeComponent(ATerm t)
 {
   static int s_pt = 0;
   int d = ATgetInt((ATermInt) t);
-  /* ATwarning("Help d = %d visited[d] = %d dfsn = %d\n",d, visited[d], dfsn); */
   if (visited[d]<0)
   {
     return s_pt;
@@ -240,7 +243,7 @@ int TakeComponent(ATerm t)
     }
     if (d>=nstate || d <0)
     {
-      ATerror("Wrong: %d\n",d);
+      throw mcrl2::runtime_error("Wrong: " + to_string(d));
     }
     visited[d] = -1;
     if (sources)
@@ -253,7 +256,7 @@ int TakeComponent(ATerm t)
     }
     if (s_pt>=nstate || s_pt <0)
     {
-      ATerror("Wrong2: %d\n",s_pt);
+      throw mcrl2::runtime_error("Wrong2: " + to_string(s_pt));
     }
     s[s_pt] = d;
     s_pt++;
@@ -265,7 +268,6 @@ int TakeComponent(ATerm t)
 static void MakeUnitPartition(void)
 {
   int i;
-  /* ATwarning("Make Unit Partition\n"); */
   for (i=0; i<nstate; i++)
   {
     blockref[i] = i;
@@ -291,7 +293,7 @@ void SCC(void)
   ExtraNode();
   if (!(visited = (int*) calloc(nstate+1, sizeof(int))))
   {
-    ATerror("Visited is not allocated (%d)\n",nstate);
+    throw mcrl2::runtime_error("Visited is not allocated (" + to_string(nstate) + ")");
   }
   for (i=0; i<=nstate; i++)
   {
@@ -299,7 +301,7 @@ void SCC(void)
   }
   if (!(dfsn2state = (int*) calloc(nstate+1, sizeof(int))))
   {
-    ATerror("Dfsn2state is not allocated (%d)\n",nstate);
+    throw mcrl2::runtime_error("Dfsn2state is not allocated (" + to_string(nstate) + ")");
   }
   DfsNumbering((ATerm) ATmakeInt(nstate));
   RemoveExtraNode();
@@ -313,7 +315,6 @@ void SCC(void)
     Pi_pt++;
     n_partitions++;
   }
-  /* for (i=0;i<Pi_pt;i++) ATwarning("(%d,%d)\n",Pi[i].left, Pi[i].right); */
   free(visited);
   free(dfsn2state);
 }
@@ -378,7 +379,7 @@ void add_tau_action(std::string const& action)
   }
   tau_actions[num_tau_actions] = (char*) malloc((action.size() + 1) * sizeof(char));
   strncpy(tau_actions[num_tau_actions], action.c_str(), action.size() + 1);
-  gsVerboseMsg("marked action '%s' as a tau action\n", tau_actions[num_tau_actions]);
+  mCRL2log(verbose) << "marked action '" <<  tau_actions[num_tau_actions] << "' as a tau action" << std::endl;
   num_tau_actions++;
 }
 
@@ -484,7 +485,7 @@ static int Recode(int label)
   {
     if (!(newlabel = (int*) calloc(n, sizeof(int))))
     {
-      ATerror("No allocation of newlabel (%d)",n);
+      throw mcrl2::runtime_error("No allocation of newlabel (" + to_string(n) + ")");
     }
     for (i=0; i<n; i++)
     {
@@ -592,7 +593,6 @@ void ReadCompareData(SVCstateIndex* init1, SVCstateIndex* init2)
 static ATermList Union(ATermList t1s, ATermList t2s)
 {
   ATermList result = t2s;
-  /* ATwarning("Arguments union %t %t",t1s,t2s); */
   for (; !ATisEmpty(t1s); t1s=ATgetNext(t1s))
   {
     ATerm t1 = ATgetFirst(t1s);
@@ -608,7 +608,7 @@ static ATerm BlockCode(int b)
 {
   static ATermIndexedSet indeks = NULL;
   size_t d;
-  ATbool nnew;
+  bool nnew;
   if (b< 0)
   {
     ATindexedSetDestroy(indeks);
@@ -647,17 +647,17 @@ void GetBlockBoundaries(SVCint b, SVCstateIndex* left, SVCstateIndex* right)
 
 static void print_state(FILE* f,ATerm state)
 {
-  int arity = ATgetArity(ATgetAFun((ATermAppl) state));
+  size_t arity = ATgetArity(ATgetAFun((ATermAppl) state));
   fprintf(f,"[");
-  for (int i=0; i<arity; i++)
+  for (size_t i = 0; i<arity; i++)
   {
     if (i == 0)
     {
-      gsfprintf(f,"%P",ATgetArgument((ATermAppl) state,i));
+      fprintf(f,"%s",mcrl2::core::pp(ATgetArgument((ATermAppl) state,i)).c_str());
     }
     else
     {
-      gsfprintf(f,",%P",ATgetArgument((ATermAppl) state,i));
+      fprintf(f,",%s",mcrl2::core::pp(ATgetArgument((ATermAppl) state,i)).c_str());
     }
   }
   fprintf(f,"]");
@@ -672,7 +672,6 @@ static void TransitionsGoingToBlock(SVCint b, ATermList* newlab)
   GetBlockBoundaries(b, &left, &right);
   if (classes) fprintf(stdout,
                          "--------------------------- block %d --------------------------\n", (int) b);
-  /* ATwarning("TransitionGoingTo b = %d newb = %d\n",b, newb); */
   for (i = left; i < right; i++)
   {
     ATermList labels = lab[s[i]], pars = ATempty;
@@ -680,7 +679,7 @@ static void TransitionsGoingToBlock(SVCint b, ATermList* newlab)
     if (classes)
     {
       print_state(stdout,SVCstate2ATerm(inFile,s[i]));
-      gsfprintf(stdout, "\n");
+      fprintf(stdout, "\n");
     }
     for (; !ATisEmpty(labels); labels = ATgetNext(labels))
     {
@@ -741,7 +740,7 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
   n_states = ATgetLength(blocks);
   if (!(newlab = (ATermList*) calloc(n_states,  sizeof(ATermList))))
   {
-    ATerror("Cannot allocate array with [labels] of size %d\n", n_states);
+    throw mcrl2::runtime_error("Cannot allocate array with [labels] of size " + to_string(n_states));
   }
   ATprotectArray((ATerm*) newlab, n_states);
   for (i=0; i<nlabel; i++)
@@ -790,7 +789,7 @@ static SVCstateIndex MakeEquivalenceClasses(SVCstateIndex initState,
   n_partitions = 0; */
   for (i=0; i<nstate; i++)
   {
-    mark[i] = ATfalse;
+    mark[i] = false;
     s[i] = i;
     blockref[i] = 0;
   }
@@ -834,37 +833,26 @@ static int WriteTransitions(void)
   return n_tau_transitions;
 }
 
-/*static void TestTransitions(void) {
-int label;
-for (label=0;label<nlabel;label++) {
-ATwarning("Test: %d: %t\n",label, ATtableKeys(lab_tgt_src[label]));
-}
-}*/
-
 static ATermList  StableBlockNumbers(void)
 /* returns a list of the block numbers of all stable blocks */
 {
   ATermList result = ATempty;
   int i, cnt = 0;
-  /* if (traceLevel) ATwarning("Highest possible block number %d\n",n_partitions-1); */
   for (i = n_partitions; i>=0; --i)
     if (Pi[i].mode==STABLE)
     {
       result = (cnt++, ATinsert(result, (ATerm) ATmakeInt(i)));
     }
-  /* if (traceLevel) ATwarning("Number of blocks: %d\n", cnt); */
   return result;
 }
 
-SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, ATbool
+SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool
                                        deleteTauLoops)
 {
   ATermList blocks = StableBlockNumbers();
   omitTauLoops = deleteTauLoops;
-  /* ATwarning("Blocks = %t\n",blocks); */
   {
     SVCstateIndex result =  MakeEquivalenceClasses(initState, blocks);
-    /* ATwarning("Block number of initial state: %d\n", result); */
     BlockCode(-1);
     return result;
   }
@@ -876,7 +864,7 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
   SVCbool nnew;
   int n_tau_transitions;
   SVCstateIndex newState = SVCnewState(outFile,
-                                       (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?ATtrue:ATfalse)), &nnew);
+                                       (ATerm) ATmakeInt(ReturnEquivalenceClasses(initState, omit_tauloops?true:false)), &nnew);
   SVCsetInitialState(outFile, newState);
   SVCsetType(outFile, const_cast< char* >("mCRL2"));
   SVCsetCreator(outFile, const_cast< char* >("ltsmin"));
@@ -891,17 +879,11 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
   {
     sprintf(buf, "strong bisimulation equivalence classes");
   }
-  /* if (traceLevel)
-       {
-       ATwarning("Number of states: %d\n",n_states);
-       ATwarning("Number of transitions: %d\n",n_transitions);
-       if (label_tau>=0)
-       ATwarning("Number of tau steps: %d\n",n_tau_transitions);
-       } */
+
   SVCsetComments(outFile, buf);
   if (traceLevel)
   {
-    ATwarning("Info output file: \n");
+    fprintf(stderr, "Info output file: \n");
   }
   if (traceLevel)
   {
@@ -915,21 +897,23 @@ int WriteData(SVCstateIndex initState, int omit_tauloops)
 }
 
 
-int state_arity = -1;
+size_t state_arity = (size_t)-1; // Yikes... why is this declared here?
 ATerm* state_args;
 AFun state_afun;
+
 SVCstateIndex get_new_state(SVCfile* in, SVCstateIndex s)
 {
   ATermAppl state = (ATermAppl) SVCstate2ATerm(in,s);
 
-  if (state_arity < 0)
+  if (state_arity != (size_t)(-1))
   {
     state_arity = ATgetArity(ATgetAFun(state));
     state_args = (ATerm*) malloc((state_arity+1)*sizeof(ATerm));
-    state_afun = ATmakeAFun(ATgetName(ATgetAFun(state)),state_arity+1,ATfalse);
+    state_afun = ATmakeAFun(ATgetName(ATgetAFun(state)),state_arity+1,false);
   }
 
-  for (int i=0; i<state_arity; i++)
+  assert(state_arity != (size_t)(-1));
+  for (size_t i=0; i<state_arity; i++)
   {
     state_args[i] = ATgetArgument(state,i);
   }
@@ -964,18 +948,13 @@ int WriteDataAddParam(SVCfile* in, SVCstateIndex initState, int is_branching)
   SVCsetCreator(outFile, const_cast< char* >("ltsmin2"));
 
   SVCstateIndex init = SVCgetInitialState(in);
-  ReturnEquivalenceClasses(initState,is_branching?ATtrue:ATfalse);
+  ReturnEquivalenceClasses(initState,is_branching?true:false);
 
   SVCsetInitialState(outFile, get_new_state(in,init));
 
-//  fprintf(stderr,"%i: %i\n",init,blockref[init]);
-//  fprintf(stderr,"%i: %i\n",init,ATgetInt((ATermInt) BlockCode(init)));
   SVCparameterIndex new_param = get_new_param();
   while (SVCgetNextTransition(in,&from,&lab,&to,&param))
   {
-//    fprintf(stderr,"%i(%i) - %i -> %i(%i)\n",from,blockref[from],lab,to,blockref[to]);
-//  gsfprintf(stderr,"%i(%i) = ",from,blockref[from]);print_state(stderr,SVCstate2ATerm(in,from));fprintf(stderr,"\n");
-//    fprintf(stderr,"%i(%i) - %i -> %i(%i)\n",from,ATgetInt((ATermInt) BlockCode(from)),lab,to,ATgetInt((ATermInt) BlockCode(to)));
     SVCstateIndex new_from = get_new_state(in,from);
     SVCstateIndex new_to = get_new_state(in,to);
     SVClabelIndex new_lab = get_new_label(in,lab);

@@ -23,9 +23,6 @@
 #ifndef __HUFFMANHEADER
 #define __HUFFMANHEADER
 
-#ifdef __cplusplus
-extern "C" {
-#endif
 
 #include "hashtable.h"
 #include "blocklist.h"
@@ -37,7 +34,7 @@ extern "C" {
     struct HFnode* high, *low, *parent, *next, *previous;
     tBlock*  block;
     unsigned long frequency;
-    ATerm        term;
+    aterm::ATerm        term;
   };
 
   typedef struct
@@ -53,14 +50,10 @@ extern "C" {
   int HFinit(HFtree*, HTable*);
   void HFfree(HFtree*);
 
-  int HFencodeATerm(BitStream*, HFtree*, ATerm);
+  int HFencodeATerm(BitStream*, HFtree*, aterm::ATerm);
   int HFencodeIndex(BitStream*, HFtree*, long);
-  int HFdecodeATerm(BitStream*, HFtree*, ATerm*);
+  int HFdecodeATerm(BitStream*, HFtree*, aterm::ATerm*);
   int HFdecodeIndex(BitStream*, HFtree*, long*);
 
-
-#ifdef __cplusplus
-}
-#endif
 
 #endif

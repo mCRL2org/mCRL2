@@ -23,6 +23,7 @@
 #include <cstdio>
 
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/atermpp/aterm_init.h"
 //#include "mcrl2/utilities/rewriter_tool.h"
@@ -38,7 +39,7 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using utilities::tools::input_tool;
-//using utilities::tools::rewriter_tool;
+using utilities::tools::rewriter_tool;
 //using utilities::tools::pbes_rewriter_tool;
 
 // class pg_solver_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
@@ -47,10 +48,10 @@ using utilities::tools::input_tool;
 // scc decomposition can be compiled in using directive
 // PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
 
-class pg_solver_tool : public input_tool
+class pg_solver_tool : public rewriter_tool<input_tool>
 {
   protected:
-    typedef input_tool super;
+    typedef rewriter_tool<input_tool> super;
 
     pbespgsolve_options m_options;
 
@@ -59,6 +60,10 @@ class pg_solver_tool : public input_tool
       if (s == "spm")
       {
         return spm_solver;
+      }
+      else if (s == "altspm")
+      {
+        return alternative_spm_solver;
       }
       else if (s == "recursive")
       {
@@ -73,12 +78,13 @@ class pg_solver_tool : public input_tool
       desc.add_option("solver-type",
                       make_optional_argument("NAME", "spm"),
                       "Use the solver type NAME:\n"
-                      "  'spm' (default), or\n"
+                      "  'spm' (default),\n"
+                      "  'altspm', or\n"
                       "  'recursive'",
                       's');
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       desc.add_option("scc", "Use scc decomposition", 'c');
-#endif
+      desc.add_option("loop", "Eliminate self-loops", 'L');
+      desc.add_option("cycle", "Eliminate cycles", 'C');
       desc.add_option("verify", "Verify the solution", 'e');
       desc.add_hidden_option("equation_limit",
                              make_optional_argument("NAME", "-1"),
@@ -90,9 +96,9 @@ class pg_solver_tool : public input_tool
     {
       super::parse_options(parser);
       m_options.solver_type = parse_solver_type(parser.option_argument("solver-type"));
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
       m_options.use_scc_decomposition = (parser.options.count("scc") > 0);
-#endif
+      m_options.use_deloop_solver = (parser.options.count("loop") > 0);
+      m_options.use_decycle_solver = (parser.options.count("cycle") > 0);
       m_options.verify_solution = (parser.options.count("verify") > 0);
       if (parser.options.count("equation_limit") > 0)
       {
@@ -116,16 +122,15 @@ class pg_solver_tool : public input_tool
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
-      {
-        std::clog << "pbespgsolve parameters:" << std::endl;
-        std::clog << "  input file:        " << input_filename() << std::endl;
-        std::clog << "  solver type:       " << print(m_options.solver_type) << std::endl;
-#ifdef MCRL2_PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
-        std::clog << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
-#endif
-        std::clog << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
-      }
+      m_options.rewrite_strategy = rewrite_strategy();
+
+      mCRL2log(verbose) << "pbespgsolve parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:        " << input_filename() << std::endl;
+      mCRL2log(verbose) << "  solver type:       " << print(m_options.solver_type) << std::endl;
+      mCRL2log(verbose) << "  eliminate self-loops: " << (m_options.use_deloop_solver?"yes":"no") << std::endl;
+      mCRL2log(verbose) << "  eliminate cycles:  " << (m_options.use_decycle_solver?"yes":"no") << std::endl;
+      mCRL2log(verbose) << "  scc decomposition: " << std::boolalpha << m_options.use_scc_decomposition << std::endl;
+      mCRL2log(verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
 
       pbes<> p;
       try
@@ -146,16 +151,6 @@ class pg_solver_tool : public input_tool
         }
       }
 
-      size_t log_level = 0;
-      if (mcrl2::core::gsVerbose)
-      {
-        log_level = 1;
-      }
-      if (mcrl2::core::gsDebug)
-      {
-        log_level = 2;
-      }
-      set_parity_game_generator_log_level(log_level);
       bool value = pbespgsolve(p, m_options);
       std::string result = (value ? "true" : "false");
       std::clog << "The solution for the initial variable of the pbes is " << result << "\n";

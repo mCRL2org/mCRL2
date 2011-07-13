@@ -16,7 +16,7 @@
 #include <cctype>
 #include <map>
 
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 
 namespace mcrl2
@@ -126,8 +126,8 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b)
       successors = successors.substr(0, index);
     }
 
-    successors = core::remove_whitespace(successors);
-    std::vector<std::string> v(core::split(successors,","));
+    successors = utilities::remove_whitespace(successors);
+    std::vector<std::string> v(utilities::split(successors,","));
     for (std::vector<std::string>::const_iterator i = v.begin(); i != v.end(); ++i)
     {
       identifier_t id;
@@ -178,4 +178,4 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b)
 
 } // namespace mcrl2
 
-#endif // MCRL2_PBES_BES_PARSE_H
+#endif // MCRL2_BES_PG_PARSE_H

@@ -22,8 +22,8 @@
 #include <functional>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2
@@ -145,7 +145,7 @@ std::string boolean_variables2pgsolver(Iter first, Iter last, const VariableMap&
     }
     variables_int.insert(j->second);
   }
-  return core::string_join(variables_int, ", ");
+  return utilities::string_join(variables_int, ", ");
 }
 
 /// \brief Convert a BES expression to PGSolver format.
@@ -192,33 +192,48 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
   typedef typename core::term_traits<term_type> tr;
   typedef typename tr::string_type string_type;
 
-  // Number the variables of the equations 0, 1, ... and put them in the map variables.
-  std::map<string_type, int> variables;
-  int index = 0;
-  for (Iter i = first; i != last; ++i)
-  {
-    variables[i->variable().name()] = index++;
-  }
+    // Number the variables of the equations 0, 1, ... and put them in the map variables.
+    // Also store player to which variables without operand are assigned, per
+    // block, in block_to_player.
+    std::map<string_type, int> variables;
+    int index = 0;
+    std::map<int, int> block_to_player;
 
-  out << "parity " << index -1 << ";\n";
-
-  int priority = 0;
-  fixpoint_symbol sigma = fixpoint_symbol::nu();
-  for (Iter i = first; i != last; ++i)
-  {
-    if (i->symbol() != sigma)
+    bool and_in_block = false;
+    int block = 0;
+    fixpoint_symbol sigma = fixpoint_symbol::nu();
+    for (Iter i = first; i != last; ++i)
     {
-      ++priority;
-      sigma = i->symbol();
+      if(i->symbol() != sigma)
+      {
+        block_to_player[block++] = (and_in_block)?1:0;
+        and_in_block = false;
+        sigma = i->symbol();
+      }
+      variables[i->variable().name()] = index++;
+      and_in_block = and_in_block || tr::is_and(i->formula());
     }
+    block_to_player[block] = (and_in_block)?1:0;
 
-    out << variables[i->variable().name()]
-        << " "
-        << priority
-        << " "
-        << (tr::is_and(i->formula()) ? "1" : "0")
-        << " "
-        << bes_expression2pgsolver(i->formula(), variables)
+    out << "parity " << index -1 << ";\n";
+
+    int priority = 0;
+    sigma = fixpoint_symbol::nu();
+    for (Iter i = first; i != last; ++i)
+    {
+      if(i->symbol() != sigma)
+      {
+        ++priority;
+        sigma = i->symbol();
+      }
+
+      out << variables[i->variable().name()]
+          << " "
+          << priority
+          << " "
+          << (tr::is_and(i->formula()) ? 1 : (tr::is_or(i->formula())?0:block_to_player[priority]))
+          << " "
+          << bes_expression2pgsolver(i->formula(), variables)
 // The following is optional, print variable name for traceability.
 //          << " "
 //          << "\""
@@ -268,25 +283,25 @@ void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename
     {
       if (aterm_ascii)
       {
-        core::gsVerboseMsg("Saving result in ATerm ascii format...\n");
+        mCRL2log(verbose) << "Saving result in ATerm ascii format..." << std::endl;
         bes_spec.save(outfilename, false);
       }
       else
       {
-        core::gsVerboseMsg("Saving result in ATerm binary format...\n");
+        mCRL2log(verbose) << "Saving result in ATerm binary format..." << std::endl;
         bes_spec.save(outfilename, true);
       }
       break;
     }
     case bes_output_cwi:
     {
-      core::gsVerboseMsg("Saving result in CWI format...\n");
+      mCRL2log(verbose) << "Saving result in CWI format..." << std::endl;
       bes::bes2cwi(bes_spec.equations().begin(), bes_spec.equations().end(), outfilename);
       break;
     }
     case bes_output_pgsolver:
     {
-      core::gsVerboseMsg("Saving result in PGSolver format...\n");
+      mCRL2log(verbose) << "Saving result in PGSolver format..." << std::endl;
       boolean_equation_system<> bes_spec_standard_form(bes_spec);
       make_standard_form(bes_spec_standard_form, true);
       bes::bes2pgsolver(bes_spec_standard_form.equations().begin(), bes_spec_standard_form.equations().end(), outfilename);

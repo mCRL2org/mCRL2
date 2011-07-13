@@ -5,7 +5,7 @@
 import os
 from path import *
 from random_bes_generator import make_bes
-from random_pbes_generator import timeout_command
+from mcrl2_tools import timeout_command
 
 def last_word(line):
     words = line.strip().split()
@@ -20,24 +20,22 @@ def test_bes(filename, equation_count, term_size = 2, error_file = 'bes_errors.t
     os.system('txt2bes %s %s' % (txtfile, besfile))
 
     # bessolve gauss
-    cmd = 'bessolve -sgauss %s' % besfile
-    text, dummy = timeout_command(cmd, 3)
+    cmd = 'bessolve'
+    text, dummy = timeout_command('bessolve', '-sgauss %s' % besfile, 3)
     if text == None:
       print "timeout on command '%s'" % cmd
       return None
     answer1 = last_word(text)
 
     # bessolve spm
-    cmd = 'bessolve -sspm %s' % besfile
-    text, dummy = timeout_command(cmd, 3)
+    text, dummy = timeout_command('bessolve', '-sspm %s' % besfile, 3)
     if text == None:
       print "timeout on command '%s'" % cmd
       return None
     answer2 = last_word(text)
 
     # pbes2bool
-    cmd = 'pbes2bool %s' % besfile
-    dummy, text = timeout_command(cmd, 3)
+    dummy, text = timeout_command('pbes2bool', besfile, 3)
     if text == None:
       print "timeout on command '%s'" % cmd
       return None

@@ -15,7 +15,7 @@
 #include <iostream>
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/make_list.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
@@ -57,11 +57,13 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
   /// \return A name that uniquely corresponds to the propositional variable.
   term_type rename(const term_type& v)
   {
+std::cout << "<rename>" << core::pp(v) << std::endl;    
     assert(tr::is_prop_var(v));
     if (!tr::is_constant(v))
     {
       return v;
     }
+std::cout << "constant!" << std::endl;    
     const data::data_expression_list del = tr::param(v);
     std::string propvar_name_current = tr::name(v);
     if (!del.empty())
@@ -78,13 +80,18 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
           propvar_name_current += "@";
           propvar_name_current += mcrl2::core::pp(*del_i);
         }
+        else if (is_abstraction(*del_i)) // case added by Wieger, 24-05-2011
+        {
+          propvar_name_current += "@";
+          propvar_name_current += mcrl2::core::pp(*del_i);
+        }
         // else if (data::is_variable(*del_i))
         // {
         //   throw mcrl2::runtime_error(std::string("Could not rename the variable ") + core::pp(v));
         // }
         else
         {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + core::pp(v));
+          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + core::pp(v) + " " + core::pp(*del_i) + " " + del_i->to_string());
         }
       }
     }

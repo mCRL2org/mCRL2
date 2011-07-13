@@ -676,7 +676,7 @@ atermpp::aterm_appl action_summand_to_aterm(const action_summand& s)
   ATermAppl result = core::detail::gsMakeLinearProcessSummand(
                        s.summation_variables(),
                        s.condition(),
-                       core::detail::gsMakeMultAct(s.multi_action().actions()),
+                       lps::detail::multi_action_to_aterm(s.multi_action()),
                        s.multi_action().time(),
                        s.assignments()
                      );

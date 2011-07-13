@@ -31,13 +31,13 @@ template <typename Container>
 void type_check(pbes<Container>& pbes_spec)
 {
   // TODO: replace all this nonsense code by a proper type check implementation
-  ATermAppl t = pbes_to_aterm(pbes_spec);
-  t = core::type_check_pbes_spec(t);
-  if (!t)
+  ATermAppl t1 = pbes_to_aterm(pbes_spec);
+  ATermAppl t2 = core::type_check_pbes_spec(t1);
+  if (!t2)
   {
-    throw mcrl2::runtime_error("could not type check " + core::pp(t));
+    throw mcrl2::runtime_error("could not type check " + core::pp(t1));
   }
-  pbes_spec = pbes<Container>(t,true);
+  pbes_spec = pbes<Container>(t2, true);
 }
 
 } // namespace pbes_system

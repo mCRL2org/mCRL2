@@ -19,8 +19,9 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/indexed_set.h"
+#include "mcrl2/bes/detail/bes_algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes_parse.h"
+#include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/normal_forms.h"
 #include "mcrl2/bes/find.h"
@@ -37,8 +38,8 @@ namespace mcrl2
 namespace bes
 {
 
-template<typename Container = atermpp::vector<boolean_equation> >
-class bes_reduction_algorithm
+template <typename Container = atermpp::vector<boolean_equation> >
+class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 {
   public:
     enum equivalence_t
@@ -49,10 +50,22 @@ class bes_reduction_algorithm
       eq_stut /**< Stuttering equivalence */
     };
 
+    enum to_lts_translation_t
+    {
+      to_lts_deadlock,
+      to_lts_selfloop,
+      to_lts_outgoing_transition // for bisimulation only
+    };
+
   protected:
-    boolean_equation_system<Container>& m_bes;
+    typedef detail::bes_algorithm<Container> super;
+    using super::m_bes; // Why doesn't the compiler see this by itself?
+
     equivalence_t m_equivalence;
-    lts::lts_lts_t m_lts;
+    lts::lts_aut_t m_lts;
+    to_lts_translation_t m_translation;
+    std::string m_lts_filename;
+    bool m_translate_to_lts_only;
 
     std::set<equivalence_t> m_allowed_equivalences;
     std::map<equivalence_t, std::string> m_equivalence_strings;
@@ -97,7 +110,7 @@ class bes_reduction_algorithm
       {
         tmp.insert(string_for_equivalence(*i));
       }
-      return core::string_join(tmp, ", ");
+      return utilities::string_join(tmp, ", ");
     }
 
   protected:
@@ -182,32 +195,32 @@ class bes_reduction_algorithm
     /// Initial state of the lts is the state representing the initial equation of the BES.
     void bes_to_lts()
     {
-      if (core::gsDebug)
-      {
-        std::cerr << "Tranforming BES to LTS" << std::endl;
-      }
-
-      if (m_bes.initial_state() != m_bes.equations().begin()->variable())
-      {
-        throw mcrl2::runtime_error("The first equation is not the variable designated as initial. This situation is not handled by the tool.");
-      }
-
+      mCRL2log(debug) << "Tranforming BES to LTS" << std::endl;
 
       // Collect block indices and operands of all equations
       std::map<boolean_variable, std::pair<size_t, boolean_operand_t> > statistics;
       std::map<boolean_variable, size_t> indices;
+      std::map<unsigned int, boolean_operand_t> block_to_operand; // Stores operand assigned to equations without boolean operand.
 
       size_t occurring_variable_count = 0; // count total number of occurring variables in right hand sides.
 
       size_t current_block = 0;
       size_t index = 0;
       fixpoint_symbol sigma = fixpoint_symbol::nu();
+      bool and_in_block = false;
       for (typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
         if (i->symbol() != sigma)
         {
+          block_to_operand[current_block] = and_in_block?BOOL_AND:BOOL_OR;
+          and_in_block = false;
           sigma = i->symbol();
           ++current_block;
+        }
+
+        if (get_operand(i->formula()) == BOOL_AND)
+        {
+          and_in_block = true;
         }
 
         std::set<boolean_variable> occurring_variables = bes::find_boolean_variables(i->formula());
@@ -217,11 +230,16 @@ class bes_reduction_algorithm
         indices[i->variable()] = index++;
       }
 
-      size_t transitioncount = occurring_variable_count + m_bes.equations().size();
-      size_t statecount = m_bes.equations().size();// + 1;
-      size_t initial_state = 0;
-      std::stringstream aut;
-      aut << "des(0," << transitioncount << "," << statecount << ")" << std::endl;
+      // Collect block indices and operands of all equations
+      unsigned int transitioncount = occurring_variable_count;
+      unsigned int statecount = m_bes.equations().size();
+      unsigned int deadlock = m_bes.equations().size(); // only used in deadlock translation
+      if (m_translation == to_lts_deadlock)
+      {
+        ++statecount;
+        transitioncount += m_bes.equations().size();
+      }
+      unsigned int initial_state = indices[m_bes.initial_state()];
 
       m_lts.set_num_states(statecount, false);
       m_lts.set_initial_state(initial_state);
@@ -230,8 +248,14 @@ class bes_reduction_algorithm
 
       for (typename Container::const_iterator i = m_bes.equations().begin(); i != m_bes.equations().end(); ++i)
       {
-        std::pair<size_t, boolean_operand_t> info = statistics[i->variable()];
-        size_t from = indices[i->variable()];
+        std::pair<unsigned int, boolean_operand_t> info = statistics[i->variable()];
+        // If variable, map to operand that was precomputed for variables.
+        if (info.second == BOOL_VAR)
+        {
+          info.second = block_to_operand[info.first];
+        }
+
+        unsigned int from = indices[i->variable()];
 
         // Create selfloop self:block(...),op(...)
         // recording block and operand.
@@ -244,9 +268,30 @@ class bes_reduction_algorithm
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
-            m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),false);
+            m_lts.add_action(mcrl2::lts::detail::action_label_string(t.label().name()),false);
           }
-          m_lts.add_transition(lts::transition(from,label_index,from));
+
+          switch (m_translation)
+          {
+            case to_lts_deadlock:
+            {
+              m_lts.add_transition(lts::transition(from,label_index,deadlock));
+              break;
+            }
+            case to_lts_selfloop:
+            {
+              m_lts.add_transition(lts::transition(from,label_index,from));
+              break;
+            }
+            case to_lts_outgoing_transition:
+            {
+              break; // No special transition needed.
+            }
+            default:
+            {
+              throw mcrl2::runtime_error("Unsupported translation");
+            }
+          }
         }
 
         // Edges to successors
@@ -254,8 +299,19 @@ class bes_reduction_algorithm
         for (std::set<boolean_variable>::const_iterator j = occurring_variables.begin(); j != occurring_variables.end(); ++j)
         {
           std::stringstream label;
-          std::pair<size_t, boolean_operand_t> info_target = statistics[*j];
-          if (info == info_target)
+          std::pair<unsigned int, boolean_operand_t> info_target = statistics[*j];
+
+          // If variable, map to operand that was precomputed for variables.
+          if (info_target.second == BOOL_VAR)
+          {
+            info_target.second = block_to_operand[info_target.first];
+          }
+
+          if (m_translation == to_lts_outgoing_transition)
+          {
+            label << "block(" << info.first << "),op(" << info.second << ")";
+          }
+          else if (info == info_target && (m_translation != to_lts_outgoing_transition))
           {
             label << "tau";
           }
@@ -270,20 +326,23 @@ class bes_reduction_algorithm
           {
             std::pair<int, bool> put_result = labs.put(t);
             label_index = put_result.first;
-            m_lts.add_action(mcrl2::lts::detail::action_label_lts(t),label.str()=="tau");
+            m_lts.add_action(mcrl2::lts::detail::action_label_string(t.label().name()),label.str()=="tau");
           }
           m_lts.add_transition(lts::transition(from,label_index,to));
         }
+      }
+
+      if (!m_lts_filename.empty())
+      {
+        m_lts.save(m_lts_filename);
       }
 
     }
 
     void reduce_lts()
     {
-      if (core::gsDebug)
-      {
-        std::cerr << "Reduce LTS" << std::endl;
-      }
+      mCRL2log(debug) << "Reduce LTS" << std::endl;
+
       switch (m_equivalence)
       {
         case eq_bisim:
@@ -302,17 +361,46 @@ class bes_reduction_algorithm
     /// the self-loops.
     void lts_to_bes()
     {
-      if (core::gsDebug)
+      mCRL2log(debug) << "Transforming reduced LTS to BES." << std::endl;
+
+      // Find deadlock state
+      // Only used if m_translation == to_lts_deadlock
+      unsigned int state_count = m_lts.num_states();
+      std::map<unsigned int, bool> has_outgoing_transition;
+      for (unsigned int i = 0; i < state_count; ++i)
       {
-        std::cerr << "Transforming reduced LTS to BES." << std::endl;
+        has_outgoing_transition[i] = false;
+      }
+
+      m_lts.sort_transitions(lts::src_lbl_tgt);
+      lts::transition_const_range transitions(m_lts.get_transitions());
+
+      for (lts::transition_const_range::const_iterator i = transitions.begin(); i != transitions.end(); ++i)
+      {
+        has_outgoing_transition[i->from()] = true;
+      }
+
+      unsigned int deadlock_state = 0;
+      bool deadlock_found = false;
+      do
+      {
+        assert(has_outgoing_transition.find(deadlock_state) != has_outgoing_transition.end());
+        deadlock_found = !has_outgoing_transition[deadlock_state];
+        if (!deadlock_found)
+        {
+          ++deadlock_state;
+        }
+      }
+      while (!deadlock_found && deadlock_state < state_count);
+
+      if (m_translation == to_lts_deadlock && !deadlock_found)
+      {
+        throw mcrl2::runtime_error("Used deadlock translation, but no deadlock found in reduced BES. Cannot proceed.");
       }
 
       // Build formulas
       size_t cur_state = 0;
-      m_lts.sort_transitions(lts::src_lbl_tgt);
-      lts::transition_const_range transitions(m_lts.get_transitions());
       lts::transition_const_range::const_iterator i = transitions.begin();
-
       atermpp::map<size_t, atermpp::vector<boolean_equation> > blocks;
 
       while (i != transitions.end())
@@ -326,14 +414,19 @@ class bes_reduction_algorithm
         {
           std::string label = pp(m_lts.action_label(i->label()));
           size_t index = label.find(":");
-          if (index != std::string::npos)
-          {
-            // Self-loop recording info detected,
-            // determine block and operand
-            // first remove self: from label
-            label = label.substr(index+1, label.size());
-            size_t comma_pos = label.find(",");
 
+          if ((m_translation == to_lts_deadlock && i->to() == deadlock_state)
+              ||(m_translation == to_lts_outgoing_transition && index == std::string::npos)
+              ||(m_translation == to_lts_selfloop && index != std::string::npos))
+          {
+            // transition recording block/operand info.
+            // strip self: from label...
+            if (index != std::string::npos)
+            {
+              label = label.substr(index+1, label.size());
+            }
+
+            size_t comma_pos = label.find(",");
             std::string block_str = label.substr(0,comma_pos);
             block_str.replace(0,block_str.find("(")+1,"");
             block_str.replace(block_str.find(")"),1,"");
@@ -344,6 +437,14 @@ class bes_reduction_algorithm
 
             block = atoi(block_str.c_str());
             op = string_to_operand(op_str);
+
+            if (m_translation == to_lts_outgoing_transition)
+            {
+              // Construct part of formula
+              std::stringstream name;
+              name << "X" << i->to();
+              variables.push_back(boolean_variable(name.str()));
+            }
           }
           else
           {
@@ -404,36 +505,36 @@ class bes_reduction_algorithm
     }
 
   public:
-    bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut)
-      : m_bes(v_bes),
-        m_equivalence(equivalence)
+    bes_reduction_algorithm(boolean_equation_system<Container>& v_bes, const equivalence_t equivalence=eq_stut, const to_lts_translation_t translation = to_lts_selfloop, const std::string& lts_filename = "", const bool to_lts_only = false)
+      : detail::bes_algorithm<Container>(v_bes),
+        m_equivalence(equivalence),
+        m_translation(translation),
+        m_lts_filename(lts_filename),
+        m_translate_to_lts_only(to_lts_only)
+
     {
       initialise_allowed_eqs();
     }
 
     void run(utilities::execution_timer& timing)
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
-      }
-      if (core::gsDebug)
-      {
-        std::cerr << "Converting BES to standard form" << std::endl;
-      }
+      mCRL2log(verbose) << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
+      mCRL2log(debug) << "Converting BES to standard form" << std::endl;
 
       timing.start("standard form conversion");
       make_standard_form(m_bes, true);
       timing.finish("standard form conversion");
 
-      if (core::gsDebug)
-      {
-        std::cerr << "BES Reduction algorithm initialised" << std::endl;
-      }
+      mCRL2log(debug) << "BES Reduction algorithm initialised" << std::endl;
 
       timing.start("conversion to LTS");
       bes_to_lts();
       timing.finish("conversion to LTS");
+
+      if(m_translate_to_lts_only)
+      {
+        return;
+      }
 
       timing.start("reduction");
       reduce_lts();
@@ -442,6 +543,9 @@ class bes_reduction_algorithm
       timing.start("conversion to BES");
       lts_to_bes();
       timing.finish("conversion to BES");
+
+      mCRL2log(verbose) << "Removing unreachable equations" << std::endl;
+      super::remove_unreachable_equations();
     }
 
 };
@@ -456,6 +560,9 @@ class bes_bisimulation_tool: public super
 {
   protected:
     bes_reduction_algorithm<>::equivalence_t equivalence;
+    std::string m_lts_filename;
+    bes_reduction_algorithm<>::to_lts_translation_t m_translation;
+    bool m_no_reduction;
 
     void add_options(mcrl2::utilities::interface_description& desc)
     {
@@ -466,6 +573,16 @@ class bes_bisimulation_tool: public super
       desc.add_option("equivalence", make_mandatory_argument("NAME"),
                       "generate an equivalent BES, preserving equivalence NAME:\n"
                       "supported equivalences: bisim, stuttering (default stuttering)", 'e');
+      desc.add_option("intermediate", make_mandatory_argument("FILE"),
+                      "save the intermediate LTS to FILE", 'l');
+      desc.add_option("translation", make_mandatory_argument("TRANSLATION"),
+                      "translate to intermediate LTS using TRANSLATION:\n"
+                      "  'deadlock' for an additional deadlock state recording labels,\n"
+                      "  'selfloop' for a self-loop recording the information in each state,\n"
+                      "  'successor' for an edge with the label of the current state to each successor state"
+                      "              (may only be used with --equivalence=bisim)", 't');
+      desc.add_option("noreduction",
+                      "do not perform the reduction, only store the intermediate LTS", 'n');
     }
 
     void parse_options(const mcrl2::utilities::command_line_parser& parser)
@@ -484,6 +601,39 @@ class bes_bisimulation_tool: public super
                        parser.option_argument("equivalence") + "'");
         }
       }
+
+      if (parser.options.count("intermediate"))
+      {
+        m_lts_filename = parser.option_argument("intermediate");
+      }
+
+      if (parser.options.count("translation"))
+      {
+        std::string str_translation(parser.option_argument("translation"));
+        if (str_translation == "deadlock")
+        {
+          m_translation = bes_reduction_algorithm<>::to_lts_deadlock;
+        }
+        else if (str_translation == "selfloop")
+        {
+          m_translation = bes_reduction_algorithm<>::to_lts_selfloop;
+        }
+        else if (str_translation == "successor")
+        {
+          m_translation = bes_reduction_algorithm<>::to_lts_outgoing_transition;
+        }
+        else
+        {
+          parser.error("option -t/--translation has illegal argument `" + str_translation + "'");
+        }
+      }
+
+      if (equivalence != bes_reduction_algorithm<>::eq_bisim && m_translation == bes_reduction_algorithm<>::to_lts_outgoing_transition)
+      {
+        parser.error("option --translation=successor can only be used with --equivalence=bisim");
+      }
+
+      m_no_reduction = parser.options.count("noreduction") > 0;
     }
 
   public:
@@ -496,7 +646,9 @@ class bes_bisimulation_tool: public super
         "reduce the (P)BES in INFILE modulo write the result to OUTFILE (as PBES)."
         "If INFILE is not "
         "present, stdin is used. If OUTFILE is not present, stdout is used."),
-      equivalence(bes_reduction_algorithm<>::eq_stut)
+      equivalence(bes_reduction_algorithm<>::eq_stut),
+      m_translation(bes_reduction_algorithm<>::to_lts_selfloop),
+      m_no_reduction(false)
     {}
 
     bool run()
@@ -506,10 +658,17 @@ class bes_bisimulation_tool: public super
 
       boolean_equation_system<> b;
 
-      core::gsVerboseMsg("Loading BES from input file... ");
+      mCRL2log(verbose) << "Loading BES from input file...";
       b.load(m_input_filename);
-      core::gsVerboseMsg("done\n");
-      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence).run(timer());
+
+      bool reach = detail::bes_algorithm<>(b).remove_unreachable_equations();
+      if(!reach)
+      {
+        throw mcrl2::runtime_error("expect all equations to be reachable");
+      }
+
+      mCRL2log(verbose) << "done" << std::endl;
+      bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
       b.save(m_output_filename);
 
       return true;

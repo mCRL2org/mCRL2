@@ -4,7 +4,6 @@
 <tool name="diagraphica" 	input_format="lts" 				gui="true"  category="Analysis" />
 <tool name="lps2lts" 		input_format="lps" output_format ="lts"     category="Transformation"/>
 <tool name="lps2pbes" 		input_format="lps" output_format ="pbes"    category="Transformation" />
-<tool name="lps2torx" 		input_format="lps"                          category="Analysis" />
 <tool name="lpsactionrename" 	input_format="lps" output_format ="lps" category="Transformation"/>
 <tool name="lpsbinary" 		input_format="lps" output_format ="lps"     category="Transformation"/> 
 <tool name="lpsconstelm" 	input_format="lps" output_format ="lps"     category="Transformation"/>

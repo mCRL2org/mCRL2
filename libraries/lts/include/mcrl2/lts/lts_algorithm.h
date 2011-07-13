@@ -28,9 +28,9 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <boost/bind.hpp>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lts/detail/liblts_merge.h"
 #include "mcrl2/lts/lts_utilities.h"
@@ -770,6 +770,7 @@ void reduce(LTS_TYPE& l,lts_equivalence eq)
     {
       detail::bisimulation_reduce(l,true,false);
       detail::tau_star_reduce(l);
+      detail::bisimulation_reduce(l,false);
       return;
     }
     case lts_red_determinisation:
@@ -992,9 +993,9 @@ void determinise(LTS_TYPE& l)
 
         if (d_ntransitions%10000 == 0)
         {
-          gsDebugMsg(
-            "generated %d states and %d transitions; explored %d states\n",
-            tss->get_next_tag(),d_ntransitions,d_id);
+          mCRL2log(debug) <<
+            "generated " << tss->get_next_tag() << " states and " << d_ntransitions
+                         << " transitions; explored " << d_id << " states" << std::endl;
         }
       }
       d_states.clear();

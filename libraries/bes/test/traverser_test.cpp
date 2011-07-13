@@ -16,7 +16,7 @@
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 //#include "mcrl2/bes/find.h"
-#include "mcrl2/bes/bes_parse.h"
+#include "mcrl2/bes/parse.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/traverser.h"
 

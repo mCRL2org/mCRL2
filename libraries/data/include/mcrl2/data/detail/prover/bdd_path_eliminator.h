@@ -15,9 +15,9 @@
 #include <iostream> // For streaming operators
 #include <cstring>
 
-#include "aterm2.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/detail/prover/bdd_simplifier.h"
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
@@ -50,7 +50,6 @@ std::istream& operator>>(std::istream& is, mcrl2::data::detail::SMT_Solver_Type&
   is.readsome(solver_type, 10);
 
   s = solver_type_cvc;
-
   if (strncmp(solver_type, "cvc", 3) == 0)
   {
     if (solver_type[3] != '\0')
@@ -145,12 +144,12 @@ class BDD_Path_Eliminator: public BDD_Simplifier
           v_iterate_over_set = v_set;
           while (!ATisEmpty(v_iterate_over_set))
           {
-            v_guard_from_set = core::ATAgetFirst(v_iterate_over_set);
+            v_guard_from_set = ATAgetFirst(v_iterate_over_set);
             v_iterate_over_set = ATgetNext(v_iterate_over_set);
             v_iterate_over_path = a_path;
             while (!ATisEmpty(v_iterate_over_path))
             {
-              v_guard_from_path = core::ATAgetFirst(v_iterate_over_path);
+              v_guard_from_path = ATAgetFirst(v_iterate_over_path);
               v_iterate_over_path = ATgetNext(v_iterate_over_path);
               if (variables_overlap(v_guard_from_set, v_guard_from_path))
               {
@@ -172,7 +171,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     {
       if (f_deadline != 0 && (f_deadline - time(0)) < 0)
       {
-        core::gsDebugMsg("The time limit has passed.\n");
+        mCRL2log(debug) << "The time limit has passed." << std::endl;
         return a_bdd;
       }
 
@@ -223,7 +222,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
       }
       else if (core::detail::gsIsDataVarId(a_expression_1))
       {
-        return core::gsOccurs((ATerm) a_expression_1, (ATerm) a_expression_2);
+        return gsOccurs((ATerm) a_expression_1, (ATerm) a_expression_2);
       }
       else
       {

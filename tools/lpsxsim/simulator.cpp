@@ -18,14 +18,14 @@
 
 #include <sstream>
 #include <cstdlib>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/trace/trace.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "simulator.h"
 
 using namespace mcrl2::core;
@@ -87,8 +87,7 @@ void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
   delete nextstategen;
   delete nextstate;
   m_rewriter.reset(new mcrl2::data::rewriter(spec.data(), rewr_strat));
-  m_enumerator_factory.reset(new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >(spec.data(), *m_rewriter));
-  nextstate = createNextState(spec, *m_enumerator_factory, !use_dummies,GS_STATE_VECTOR);
+  nextstate = createNextState(spec, *m_rewriter, !use_dummies,GS_STATE_VECTOR);
   nextstategen = NULL;
   initial_state = nextstate->getInitialState();
 
@@ -99,7 +98,7 @@ void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
 
 void StandardSimulator::LoadView(const std::string& /*filename*/)
 {
-  gsErrorMsg("cannot open DLLs without wxWidgets\n");
+  mCRL2log(error) << "cannot open DLLs without wxWidgets" << std::endl;
 }
 
 void StandardSimulator::SetTauPrioritisation(bool enable)
@@ -242,7 +241,7 @@ bool StandardSimulator::ChooseTransition(size_t index)
 
     if (tau_prior)
     {
-      ATbool b;
+      bool b;
       ATindexedSetPut(seen_states,current_state,&b);
 
       bool found = false;
@@ -534,10 +533,5 @@ void StandardSimulator::UpdateTransitions()
   {
     next_states = ATinsert(next_states,(ATerm) ATmakeList2((ATerm) transition,newstate));
   }
-  // error = nextstategen->errorOccurred();
 }
 
-/* bool StandardSimulator::ErrorOccurred()
-{
-  return error;
-} */

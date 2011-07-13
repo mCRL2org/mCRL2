@@ -10,11 +10,10 @@
 
 #include <string>
 #include <sstream>
-// #include "boost/cstdint.hpp"
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "svc/svc.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/lps/specification.h"

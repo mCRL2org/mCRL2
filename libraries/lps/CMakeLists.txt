@@ -18,12 +18,17 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 set(mcrl2_lps_src
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/implementations.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/linearise.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_checker.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/nextstate_standard.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/disjointness_checker.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp 
 )
 set(mcrl2_lps_src ${mcrl2_lps_src} PARENT_SCOPE)
 

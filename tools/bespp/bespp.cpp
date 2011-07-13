@@ -17,11 +17,12 @@
 #include <iostream>
 #include <fstream>
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/print.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
@@ -81,10 +82,9 @@ class bespp_tool: public input_output_tool
       bes::boolean_equation_system<> bes;
       bes.load(input_filename());
 
-      gsVerboseMsg("printing BES from %s to %s in the %s format\n",
-                   input_filename().empty()?"standard input":input_filename().c_str(),
-                   output_filename().empty()?"standard output":output_filename().c_str(),
-                   pp_format_to_string(format).c_str());
+      mCRL2log(verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())
+                        << " to " << (output_filename().empty()?"standard output":output_filename())
+                        << " in the " << pp_format_to_string(format) << " format";
 
       if (format != ppDefault)
       {

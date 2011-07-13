@@ -32,7 +32,7 @@ class term_appl: public aterm_base
     /// built-in C++ operator[](ATermAppl, int)
     /// \param i A positive integer
     /// \return The default constructed term
-    Term operator[](unsigned int i) const
+    Term operator[](size_t i) const
     {
       return Term();
     }
@@ -147,7 +147,7 @@ class term_appl: public aterm_base
     /// \return The result of the assignment.
     term_appl<Term>& operator=(ATermAppl t)
     {
-      assert(t==NULL || ATgetType(t) != AT_FREE);
+      assert(t==NULL || ATgetType((ATerm)t) != AT_FREE);
       m_term = reinterpret_cast<ATerm>(t);
       return *this;
     }
@@ -204,7 +204,7 @@ class term_appl: public aterm_base
     /// \brief Returns the i-th argument.
     /// \param i A positive integer
     /// \return The argument with the given index.
-    Term operator()(unsigned int i) const
+    Term operator()(size_type i) const
     {
       return Term(ATgetArgument(appl(), i));
     }
@@ -214,7 +214,7 @@ class term_appl: public aterm_base
     /// \param t A term
     /// \param i A positive integer
     /// \return The term with one of its arguments replaced.
-    term_appl<Term> set_argument(Term t, size_t i)
+    term_appl<Term> set_argument(Term t, size_type i)
     {
       return ATsetArgument(appl(), t, i);
     }
@@ -223,7 +223,7 @@ class term_appl: public aterm_base
     /// \deprecated
     /// \param i A positive integer
     /// \return The argument with the given index.
-    aterm argument(size_t i) const
+    aterm argument(size_type i) const
     {
       return aterm(ATgetArgument(appl(), i));
     }
@@ -309,7 +309,7 @@ struct select_traits_base< T, typename boost::enable_if<typename boost::is_base_
 template <typename Term>
 bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
+  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == true;
 }
 
 /// \brief Equality operator.
@@ -319,7 +319,7 @@ bool operator==(const term_appl<Term>& x, const term_appl<Term>& y)
 template <typename Term>
 bool operator==(const term_appl<Term>& x, ATermAppl y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATtrue;
+  return ATisEqual((ATermAppl)aterm_traits<term_appl<Term> >::term(x), y) == true;
 }
 
 /// \brief Equality operator.
@@ -329,7 +329,7 @@ bool operator==(const term_appl<Term>& x, ATermAppl y)
 template <typename Term>
 bool operator==(ATermAppl x, const term_appl<Term>& y)
 {
-  return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == ATtrue;
+  return ATisEqual(x, (ATermAppl)aterm_traits<term_appl<Term> >::term(y)) == true;
 }
 
 /// \brief Inequality operator.
@@ -339,7 +339,7 @@ bool operator==(ATermAppl x, const term_appl<Term>& y)
 template <typename Term>
 bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == ATfalse;
+  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), aterm_traits<term_appl<Term> >::term(y)) == false;
 }
 
 /// \brief Inequality operator.
@@ -349,7 +349,7 @@ bool operator!=(const term_appl<Term>& x, const term_appl<Term>& y)
 template <typename Term>
 bool operator!=(const term_appl<Term>& x, ATermAppl y)
 {
-  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == ATfalse;
+  return ATisEqual(aterm_traits<term_appl<Term> >::term(x), y) == false;
 }
 
 /// \brief Inequality operator.
@@ -359,7 +359,7 @@ bool operator!=(const term_appl<Term>& x, ATermAppl y)
 template <typename Term>
 bool operator!=(ATermAppl x, const term_appl<Term>& y)
 {
-  return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == ATfalse;
+  return ATisEqual(x, aterm_traits<term_appl<Term> >::term(y)) == false;
 }
 
 } // namespace atermpp

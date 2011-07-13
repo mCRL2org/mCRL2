@@ -11,10 +11,16 @@
 #ifndef _ENUM_STANDARD_H
 #define _ENUM_STANDARD_H
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/deque.h"
 #include "mcrl2/data/detail/rewrite.h"
-#include "mcrl2/data/detail/enum/enumerator.h"
 
+
+#define MAX_VARS_INIT   1000
+#define MAX_VARS_FACTOR 5
+
+/// \cond INTERNAL_DOCS
 namespace mcrl2
 {
 namespace data
@@ -22,116 +28,331 @@ namespace data
 namespace detail
 {
 
-typedef struct
+class ss_solution
 {
-  ATermList vars;
-  ATermList vals;
-  ATerm expr;
-} fs_expr;
+  protected:
+    atermpp::term_list< atermpp::aterm_appl > m_solution;  // A list containing the solution of a condition in internal format.
+    bool m_solution_is_exact;                              // An indication whether the solution made the solution exactly false or true.
+
+  public:
+
+    // Constructor.
+    ss_solution(const atermpp::term_list< atermpp::aterm_appl > &solution, const bool solution_is_exact) :
+      m_solution(solution),
+      m_solution_is_exact(solution_is_exact)
+    {} 
+   
+    bool solution_is_exact() const
+    { 
+      return m_solution_is_exact;
+    }
+
+    atermpp::term_list< atermpp::aterm_appl > solution() const
+    {
+      return m_solution; 
+    }
+};
+
+class fs_expr
+{
+  protected:
+    variable_list m_vars;                              // The vars over which enumeration must take place.
+    variable_list m_substituted_vars;                  // Variables for which a substitution exist. The substituted
+                                                       // values are given in m_vals;
+    atermpp::term_list< atermpp::aterm_appl > m_vals;  // Data expressions in internal format that are to be substituted
+                                                       // in the variables in m_substituted_vars.
+    atermpp::aterm_appl m_expr;                        // data_expression in internal format to which internal variables
+                                                       // must adhere.
+
+  public:
+    // Default constructor
+    fs_expr()
+    {}
+
+    // Constructor
+    fs_expr(
+        const variable_list &vars, 
+        const variable_list &substituted_vars, 
+        const atermpp::term_list< atermpp::aterm_appl > &vals, 
+        const atermpp::aterm_appl &expr):
+       m_vars(vars), m_substituted_vars(substituted_vars),m_vals(vals), m_expr(expr)
+    {
+    }
+
+    variable_list vars() const
+    {
+      return m_vars;
+    }
+
+    variable_list substituted_vars() const
+    {
+      return m_substituted_vars;
+    }
+
+    atermpp::term_list< atermpp::aterm_appl > vals() const
+    {
+      return m_vals;
+    }
+
+    atermpp::aterm_appl expr() const
+    {
+      return m_expr;
+    }
+};
 
 class EnumeratorSolutionsStandard;
 
-typedef struct
-{
-  Rewriter* rewr_obj;
 
-  ATermTable constructors;
-  ATerm rewr_true, rewr_false;
+/**
+ * \brief Class for finding solutions to boolean expressions.
+ * \deprecated
+ * Finding concrete solutions can be done by using the 
+ * EnumeratorSolutionsStandard class. For each instance of an EnumeratorStandard class
+ * at most one active instance of an EnumeratorSolutionsStandard class can be used.
+ *
+ * Use of these classes is discouraged. Use the classic_enumerator class instead.
+ **/
 
-  int* max_vars;
-
-  ATerm opidAnd;
-  ATermIndexedSet eqs;
-  AFun tupAFun;
-
-  bool (EnumeratorSolutionsStandard::*FindEquality)(ATerm,ATermList,ATerm*,ATerm*);
-  ATerm(EnumeratorSolutionsStandard::*build_solution_aux)(ATerm,ATermList);
-} enumstd_info;
-
-class EnumeratorStandard : public Enumerator
+class EnumeratorStandard 
 {
   public:
-    EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r, bool clean_up_rewriter = false);
+    const mcrl2::data::data_specification &m_data_spec;
+    Rewriter* rewr_obj;
+    atermpp::aterm_appl rewr_true, rewr_false;
+  
+    atermpp::aterm_int opidAnd;
+    atermpp::aterm_int opidOr;
+    atermpp::aterm_int opidNot;
+    atermpp::set< atermpp::aterm_int > eqs;
+  
+    EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 
     ~EnumeratorStandard();
 
-    ATermList FindSolutions(ATermList Vars, ATerm Expr, FindSolutionsCallBack f = NULL);
-
-    EnumeratorSolutions* findSolutions(ATermList vars, ATerm expr, bool true_only, EnumeratorSolutions* old = NULL);
-    EnumeratorSolutions* findSolutions(ATermList vars, ATerm expr, EnumeratorSolutions* old = NULL);
-
-    Rewriter* getRewriter();
-    enumstd_info& getInfo()
+    Rewriter* getRewriter() const
     {
-      return info;
+      return rewr_obj;
     }
-
-  private:
-    bool clean_up_rewr_obj;
-
-    enumstd_info info;
-
-    int max_vars;
 };
 
-class EnumeratorSolutionsStandard : public EnumeratorSolutions
+/**
+ * \brief Class for enumerating solutions to boolean expressions.
+ **/
+
+class EnumeratorSolutionsStandard 
 {
+  protected:
+
+    detail::EnumeratorStandard *m_enclosing_enumerator;
+/*    atermpp::aterm_appl desired_truth_value;    // We search for solutions for the condition enum_expr that are not
+    atermpp::aterm_appl forbidden_truth_value;  // equal to the forbidden truth value, and if the output matches the
+                                                // desired truth value, then the variable solution_is_exact is set. */
+
+    variable_list enum_vars;                    // The variables over which a solution is searched.
+    atermpp::aterm_appl enum_expr;              // Condition to be satisfied in internal format.
+
+    atermpp::deque < fs_expr> fs_stack;
+    atermpp::vector< ss_solution > ss_stack;
+
+    size_t used_vars;
+    size_t max_vars;
+    size_t m_max_internal_variables;
+
   public:
-    EnumeratorSolutionsStandard(enumstd_info& Info) : info(Info), enum_vars(0), enum_expr(0), fs_stack(0), fs_stack_size(0), ss_stack(0), ss_stack_size(0)
+
+    /// \brief Default constructor
+    EnumeratorSolutionsStandard():
+       m_max_internal_variables(0)
     {
-      ATprotectList(&enum_vars);
-      ATprotect(&enum_expr);
+      enum_vars.protect();
+      enum_expr.protect();
     }
 
-    EnumeratorSolutionsStandard(EnumeratorSolutionsStandard const& other);
-    EnumeratorSolutionsStandard(ATermList Vars, ATerm Expr, bool true_only, enumstd_info& Info);
-    ~EnumeratorSolutionsStandard();
+    /// \brief Constructor. Generate solutions for the variables in Vars that satisfy Expr.
+    /// If not equal_to_false is set all solutions are generated that make Expr not equal to false.
+    /// Otherwise all solutions are generated that make Expr not equal to true. The enumerator
+    /// uses internal variables. By setting max_internal_variables to any value larger than
+    /// 0 the number of these variables can be bound, guaranteeing termination (provided the
+    /// rewriter terminates). If set to 0, there is no bound, but the enumerator will issue 
+    /// warnings.
+    /// \param[in] vars The list of variables for which solutions are being sought.
+    /// \param[in] expr The expression which determine the solutions. This expr is assumed to be
+    ///                 in rewrite normal form. 
+    /// \param[in] not_equal_to_false Determine whether the condition is supposed to be true, or
+    ///                               whether it should become false. If the condition must be
+    ///                               true, all solutions that make the condition not equal to
+    ///                               false are enumerated. 
+    /// \param[in] enclosing_enumerator Pointer to the enclosing enumerator.
+    /// \param[in] max_internal_variables Maximal number of internal variables that will be used
+    ///                                   when generating solutions. If 0 there is no limit, and
+    ///                                   the enumerator may not terminate.
 
-    bool next(ATermList* solution);
-    // bool errorOccurred();
+    EnumeratorSolutionsStandard(
+                   const variable_list &vars, 
+                   const atermpp::aterm_appl &expr, 
+                   const bool not_equal_to_false, 
+                   detail::EnumeratorStandard *enclosing_enumerator,
+                   const size_t max_internal_variables=0) :
+      m_enclosing_enumerator(enclosing_enumerator),
+      enum_vars(vars),
+      enum_expr(expr),
+      used_vars(0),
+      max_vars(MAX_VARS_INIT),
+      m_max_internal_variables(max_internal_variables)
+    { 
+      enum_vars.protect();
+      enum_expr.protect();
+      reset(not_equal_to_false);
+    }
 
-    void reset(ATermList Vars, ATerm Expr, bool true_only);
+    /// Standard destructor.
+    ~EnumeratorSolutionsStandard()
+    {
+      enum_vars.unprotect();
+      enum_expr.unprotect();
+    }
+ 
+   /**
+    * \brief Get next solution as a term_list in internal format if available.
+    * \param[out] solution_is_exact This optional parameter indicates whether the solution is exactly true
+    *             or false. The enumerator enumerates all solutions that are not false or not true.
+    * \param[out] solution Place to store the solutions.
+    *             The aterm_list solution contains solutions for the variables in internal
+    *             format in the same order as the variable list Vars.
+    * \param[out] solution_possible. This boolean indicates whether it was possible to
+    *             generate a solution. If there is a variable of a sort without a constructor
+    *             sort, it is not possible to generate solutions. Similarly, it can be
+    *             that the maximum number of solutions has been reached. In this case the variable
+    *             solution_possible is false, and the function returns false. 
+    *             This variable should be true when calling next. If it is initially false, 
+    *             or if a variant of next is used
+    *             without this parameter, an mcrl2::runtime_error exception is thrown if no solutions exist, or
+    *             if the maximum number of internal variables is reached.
+    * \param[in]  max_internal_variables The maximum number of variables to be 
+    *             used internally when generating solutions. If set to 0 an unbounded number
+    *             of variables are used, and warnings are printed to warn for potentially
+    *             unbounded loops.
+    * \return Whether or not a solution was found and stored in
+    *         solution. If false, there are no more solutions to be found. 
+    *
+    **/
 
-    bool FindInner3Equality(ATerm t, ATermList vars, ATerm* v, ATerm* e);
-    bool FindInnerCEquality(ATerm t, ATermList vars, ATerm* v, ATerm* e);
-    ATerm build_solution_aux_innerc(ATerm t, ATermList substs);
-    ATerm build_solution_aux_inner3(ATerm t, ATermList substs);
+    bool next(bool &solution_is_exact,
+              atermpp::term_list<atermpp::aterm_appl> &solution, 
+              bool &solution_possible);
+
+  /** \brief Get next solution as a term_list in internal format.
+   **/
+    bool next(atermpp::term_list<atermpp::aterm_appl> &solution);
+
+  /** \brief Get next solution as a term_list in internal format.
+   **/
+    bool next(bool &solution_is_exact,
+              atermpp::term_list<atermpp::aterm_appl> &solution);
+
+  /** \brief Get next solution as a term_list in internal format.
+   **/
+    bool next(atermpp::term_list<atermpp::aterm_appl> &solution, 
+              bool &solution_possible);
+
+
   private:
-    enumstd_info info;
+    void reset(const bool not_equal_to_false); 
 
-    ATermList enum_vars;
-    ATerm enum_expr;
+    bool FindInnerCEquality(const atermpp::aterm_appl T, 
+                            const mcrl2::data::variable_list vars, 
+                            mcrl2::data::variable &v, 
+                            atermpp::aterm_appl &e);
 
-    bool check_true;
-    // bool error;
+    void EliminateVars(fs_expr &e);
 
-    int used_vars;
+    bool FindInnerCEquality_aux(const atermpp::aterm_appl t);
 
-    fs_expr* fs_stack;
-    int fs_stack_size;
-    int fs_stack_pos;
+    atermpp::aterm_appl build_solution_single(
+                 const atermpp::aterm_appl t,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
 
-    ATermList* ss_stack;
-    int ss_stack_size;
-    int ss_stack_pos;
+    atermpp::term_list < atermpp::aterm_appl> build_solution(
+                 const variable_list vars,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
 
-    void fs_reset();
-    void fs_push(ATermList vars, ATermList vals, ATerm expr);
-    void fs_pop(fs_expr* e = NULL);
-
-    void ss_reset();
-    void ss_push(ATermList s);
-    ATermList ss_pop();
-
-    void EliminateVars(fs_expr* e);
-    bool IsInner3Eq(ATerm a);
-    bool IsInnerCEq(ATermAppl a);
-    bool FindInnerCEquality_aux(ATerm t);
-    ATerm build_solution_single(ATerm t, ATermList substs);
-    ATermList build_solution2(ATermList vars, ATermList substs);
-    ATermList build_solution(ATermList vars, ATermList substs);
+    atermpp::term_list < atermpp::aterm_appl> build_solution2(
+                 const variable_list vars,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+    atermpp::aterm_appl build_solution_aux_innerc(
+                 const atermpp::aterm_appl t,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list < atermpp::aterm_appl> exprs) const;
+    atermpp::aterm_appl add_negations(
+                 const atermpp::aterm_appl condition,
+                 const atermpp::term_list< atermpp::aterm_appl > negation_term_list,
+                 const bool negated) const;
+    void push_on_fs_stack_and_split_or(
+                 atermpp::deque < fs_expr> &fs_stack,
+                 const variable_list var_list,
+                 const variable_list substituted_vars,
+                 const atermpp::term_list< atermpp::aterm_appl > substitution_terms,
+                 const atermpp::aterm_appl condition,
+                 const atermpp::term_list< atermpp::aterm_appl > negated_term_list,
+                 const bool negated) const;
+    atermpp::term_list< atermpp::aterm_appl > negate(
+                 const atermpp::term_list< atermpp::aterm_appl > l) const;
 };
 }
 }
 }
+
+namespace atermpp
+{
+template<>
+struct aterm_traits<mcrl2::data::detail::fs_expr>
+{
+  static void protect(const mcrl2::data::detail::fs_expr& t)
+  {
+    assert(0); // This is not being used. This is to check this.
+    t.vars().protect();
+    t.substituted_vars().protect();
+    t.vals().protect();
+    t.expr().protect();
+  }
+  static void unprotect(const mcrl2::data::detail::fs_expr& t)
+  {
+    assert(0); // This is not being used. This is to check this.
+    t.vars().unprotect();
+    t.substituted_vars().unprotect();
+    t.vals().unprotect();
+    t.expr().unprotect();
+  }
+  static void mark(const mcrl2::data::detail::fs_expr& t)
+  {
+    t.vars().mark();
+    t.substituted_vars().mark();
+    t.vals().mark();
+    t.expr().mark();
+  }
+};
+
+template<>
+struct aterm_traits<mcrl2::data::detail::ss_solution>
+{
+  static void protect(const mcrl2::data::detail::ss_solution& t)
+  {
+    assert(0); // This is not being used. This is to check this.
+    t.solution().protect();
+  }
+  static void unprotect(const mcrl2::data::detail::ss_solution& t)
+  {
+    assert(0); // This is not being used. This is to check this.
+    t.solution().unprotect();
+  }
+  static void mark(const mcrl2::data::detail::ss_solution& t)
+  {
+    t.solution().mark();
+  }
+};
+} // namespace atermpp
+/// \endcond
 
 #endif

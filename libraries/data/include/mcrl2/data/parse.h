@@ -17,15 +17,14 @@
 #include <iostream>
 #include <sstream>
 #include <fstream>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "boost/algorithm/string.hpp"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/table.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
-//#include "mcrl2/core/typecheck.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/print.h"
@@ -164,14 +163,14 @@ void parse_variables(std::istream& text,
     {
       if (v->name()==i->name())
       {
-        throw mcrl2::runtime_error("Name conflict of variables " + pp(*i) + " and " + pp(*v) + ".");
+        throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*i) + " and " + data::pp(*v) + ".");
       }
     }
     for (variable_list::const_iterator v1=data_vars.begin(); v1!=data_vars.end(); ++v1)
     {
       if (((*v1)!=(*v)) && (v1->name()==v->name()))
       {
-        throw mcrl2::runtime_error("Name conflict of variables " + pp(*v1) + " and " + pp(*v) + ".");
+        throw mcrl2::runtime_error("Name conflict of variables " + data::pp(*v1) + " and " + data::pp(*v) + ".");
       }
     }
   }
@@ -369,7 +368,10 @@ data_expression parse_data_expression(const std::string& text,
                                       const data_specification& data_spec = detail::default_specification())
 {
   atermpp::vector < variable > variable_store;
-  parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
+  if (!var_decl.empty())
+  { 
+    parse_variables(var_decl,std::back_inserter(variable_store),data_spec);
+  }
   return parse_data_expression(text,variable_store.begin(),variable_store.end(),data_spec);
 }
 

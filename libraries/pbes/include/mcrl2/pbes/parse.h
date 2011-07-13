@@ -21,7 +21,7 @@
 #include <boost/algorithm/string/join.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
@@ -33,7 +33,7 @@
 //#define MCRL2_LOG_PARSER_OUTPUT
 #ifdef MCRL2_LOG_PARSER_OUTPUT
 #include <fstream>
-#include "mcrl2/core/file_utility.h"
+#include "mcrl2/utilities/file_utility.h"
 #endif
 
 namespace mcrl2
@@ -56,7 +56,7 @@ std::istream& operator>>(std::istream& from, pbes<Container>& p)
   }
 
 #ifdef MCRL2_LOG_PARSER_OUTPUT
-  std::string filename = core::create_filename("pbes", ".txt");
+  std::string filename = utilities::create_filename("pbes", ".txt");
   std::ofstream out(filename.c_str());
   out << "CHECK PBES " << core::detail::check_rule_PBES(result) << std::endl;
   out << core::pp(result) << std::endl << std::endl;
@@ -97,7 +97,7 @@ std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes
   std::string unique_prefix("UNIQUE_PREFIX");
   int unique_prefix_index = 0;
 
-  text = core::remove_comments(text);
+  text = utilities::remove_comments(text);
   const std::string separator1 = "datavar";
   const std::string separator2 = "predvar";
   const std::string separator3 = "expressions";
@@ -125,7 +125,7 @@ std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes
   // the generated pbes specification
   std::string pbesspec = "pbes";
 
-  std::vector<std::string> pwords = core::split(predvar_text, ";");
+  std::vector<std::string> pwords = utilities::split(predvar_text, ";");
   for (std::vector<std::string>::iterator i = pwords.begin(); i != pwords.end(); ++i)
   {
     if (boost::trim_copy(*i).empty())
@@ -133,15 +133,15 @@ std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes
       continue;
     }
     std::vector<std::string> args;
-    std::vector<std::string> words = core::split(*i, ":");
+    std::vector<std::string> words = utilities::split(*i, ":");
     std::string var = boost::trim_copy(words[0]);
     if (words.size() >= 2 && !boost::trim_copy(words[1]).empty())
     {
-      args = core::split(boost::trim_copy(words[1]), "#");
+      args = utilities::split(boost::trim_copy(words[1]), "#");
     }
     for (std::vector<std::string>::iterator j = args.begin(); j != args.end(); ++j)
     {
-      std::vector<std::string> w = core::split(*j, ",");
+      std::vector<std::string> w = utilities::split(*j, ",");
       for (std::vector<std::string>::iterator k = w.begin(); k != w.end(); ++k)
       {
         *k = unique_prefix + boost::lexical_cast<std::string>(unique_prefix_index++) + ": " + *k;
@@ -156,18 +156,18 @@ std::pair<atermpp::vector<pbes_expression>, data::data_specification> parse_pbes
     pbesspec = pbesspec + "\nmu " + var + arg + " = true;";
   }
 
-  datavar_text = core::remove_whitespace(datavar_text);
+  datavar_text = utilities::remove_whitespace(datavar_text);
   if (!datavar_text.empty() && datavar_text[datavar_text.size() - 1] == ';')
   {
     datavar_text = datavar_text.erase(datavar_text.size() - 1);
   }
-  datavar_text = core::regex_replace(";", ", ", datavar_text);
+  datavar_text = utilities::regex_replace(";", ", ", datavar_text);
 
   // add a dummy propositional variable to the pbes, that is used for the initialization
   pbesspec = pbesspec + "\nmu dummy1 = true;";
 
   // for each expression add an equation to the pbes
-  std::vector<std::string> expressions = core::split(expressions_text, ";");
+  std::vector<std::string> expressions = utilities::split(expressions_text, ";");
   if (!expressions.empty() && boost::trim_copy(expressions.back()).empty())
   {
     expressions.pop_back();
@@ -239,10 +239,10 @@ template <typename SubstitutionFunction>
 void parse_substitutions(std::string text, data::data_specification const& data_spec, SubstitutionFunction& sigma)
 {
   std::cerr << "SSSSWWW" << text << std::endl;
-  std::vector<std::string> substitutions = core::split(text, ";");
+  std::vector<std::string> substitutions = utilities::split(text, ";");
   for (std::vector<std::string>::iterator i = substitutions.begin(); i != substitutions.end(); ++i)
   {
-    std::vector<std::string> words = core::regex_split(*i, ":=");
+    std::vector<std::string> words = utilities::regex_split(*i, ":=");
     if (words.size() != 2)
     {
       continue;

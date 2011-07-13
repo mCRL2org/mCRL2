@@ -15,7 +15,8 @@ set(PREFIX "example_atermpp")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 ##---------------------------------------------------
 ## Example std_container 
@@ -24,13 +25,15 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
 set(PROJECT_NAME "${PREFIX}_std_container")
 project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" 
+add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
       std_container.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
-   aterm 
+   mcrl2_aterm 
 )
+
+build_and_run_test_example_target( ${PROJECT_NAME} )
 
 ##---------------------------------------------------
 ## Example algorithm 
@@ -39,10 +42,12 @@ target_link_libraries(${PROJECT_NAME}
 set(PROJECT_NAME "${PREFIX}_algorithm")
 project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" 
+add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
       algorithm.cpp 
 )
 
 target_link_libraries(${PROJECT_NAME}
-   aterm 
+   mcrl2_aterm 
 )
+
+build_and_run_test_example_target( ${PROJECT_NAME} )

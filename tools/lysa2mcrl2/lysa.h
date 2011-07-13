@@ -30,12 +30,7 @@
 * sensible).
 */
 
-#include "mcrl2/core/messaging.h"
-using mcrl2::core::gsErrorMsg;
-using mcrl2::core::gsVerboseMsg;
-using mcrl2::core::gsWarningMsg;
-using mcrl2::core::gsDebugMsg;
-
+#include "mcrl2/utilities/logger.h"
 
 namespace lysa
 {
@@ -105,9 +100,52 @@ class ProcessInfo
 extern shared_ptr<ProcessInfo> current_process_info;
 void start_parsing(lysa_options& options);
 void set_current_position(parse_location& pos);
-template<typename T> string join(T& input, string sep);
-template<typename T> string join_ptr(T& input, string sep);
 
+template< typename T>   string join_ptr(T& input, string sep)
+{
+  string s = "";
+  typename T::iterator it=input.begin();
+  typename T::iterator it_end=input.end();
+
+  if (it==it_end)
+  {
+    return s;
+  }
+  //write first element
+  s += (string)(**it);
+  it++;
+
+  //write other elements
+
+  for (; it!=it_end; it++)
+  {
+    s += sep + (string)(**it);
+  }
+  return s;
+}
+
+template< typename T>   string join(T& input, string sep)
+{
+  string s = "";
+  typename T::iterator it=input.begin();
+  typename T::iterator it_end=input.end();
+
+  if (it==it_end)
+  {
+    return s;
+  }
+  //write first element
+  s += (string)(*it);
+  it++;
+
+  //write other elements
+
+  for (; it!=it_end; it++)
+  {
+    s += sep + (string)(*it);
+  }
+  return s;
+}
 
 class Expression
 {

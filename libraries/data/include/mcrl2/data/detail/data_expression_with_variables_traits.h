@@ -205,7 +205,7 @@ struct term_traits<data::data_expression_with_variables>
   static inline
   std::string pp(term_type t)
   {
-    return term_traits<data::data_expression>::pp(t) + " " + core::pp(t.variables());
+    return term_traits<data::data_expression>::pp(t) + " " + data::pp(t.variables());
   }
 };
 

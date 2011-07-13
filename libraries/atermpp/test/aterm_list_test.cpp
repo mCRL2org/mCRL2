@@ -32,7 +32,7 @@ struct counter
     : m_sum(sum)
   {}
 
-  void operator()(const aterm& t)
+  void operator()(const atermpp::aterm& t)
   {
     m_sum += aterm_int(t).value();
   }
@@ -46,7 +46,7 @@ struct func
   func(int)
   {}
 
-  aterm operator()(aterm x) const
+  atermpp::aterm operator()(atermpp::aterm x) const
   {
     return make_term("f(" + x.to_string() + ")");
   }
@@ -59,10 +59,10 @@ void test_aterm_list()
   aterm_list r = reverse(q); // r == [4,3,2,1]
   BOOST_CHECK(r == make_term("[4,3,2,1]"));
 
-  aterm_list r1 = push_back(q, aterm(aterm_int(5)));
+  aterm_list r1 = push_back(q, atermpp::aterm(aterm_int(5)));
   BOOST_CHECK(r1 == make_term("[1,2,3,4,5]"));
 
-  aterm f = q.front(); // f == 1
+  atermpp::aterm f = q.front(); // f == 1
   BOOST_CHECK(f == aterm_int(1));
 
   q = push_front(q, make_term("[5,6]")); // q == [[5,6],1,2,3,4]
@@ -85,7 +85,7 @@ void test_aterm_list()
   // test concatenation
   {
     aterm_list a = make_term("[1,2,3]");
-    aterm x = make_term("0");
+    atermpp::aterm x = make_term("0");
     BOOST_CHECK(x + a == make_term("[0,1,2,3]"));
     BOOST_CHECK(a + a == make_term("[1,2,3,1,2,3]"));
     BOOST_CHECK(a + x == make_term("[1,2,3,0]"));
@@ -94,9 +94,9 @@ void test_aterm_list()
 
 void test_set_operations()
 {
-  aterm x = make_term("x");
-  aterm y = make_term("y");
-  aterm z = make_term("z");
+  atermpp::aterm x = make_term("x");
+  atermpp::aterm y = make_term("y");
+  atermpp::aterm z = make_term("z");
 
   aterm_list l;
   l = push_front(l, x);

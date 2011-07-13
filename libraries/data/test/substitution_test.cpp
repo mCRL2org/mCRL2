@@ -307,18 +307,18 @@ void test_sort_substitution()
   constructors2.push_back(structured_sort_constructor("g"));
   sort_expression s2=structured_sort(constructors2);
 
-  std::cout << "s0 = " << core::pp(s0) << std::endl;
-  std::cout << "s1 = " << core::pp(s1) << std::endl;
-  std::cout << "s2 = " << core::pp(s2) << std::endl;
+  std::cout << "s0 = " << data::pp(s0) << std::endl;
+  std::cout << "s1 = " << data::pp(s1) << std::endl;
+  std::cout << "s2 = " << data::pp(s2) << std::endl;
 
   // apply the substitution s1 := s0 innermost to s2
   sort_expression s3 = data::replace_sort_expressions(s2, sort_expression_assignment(s1, s0), true);
-  std::cout << "s3 = " << core::pp(s3) << std::endl;
+  std::cout << "s3 = " << data::pp(s3) << std::endl;
   BOOST_CHECK(s3 == s0);
 
   // apply the substitution s1 := s0 to s2
   sort_expression s4 = data::replace_sort_expressions(s2, sort_expression_assignment(s1, s0), false);
-  std::cout << "s4 = " << core::pp(s4) << std::endl;
+  std::cout << "s4 = " << data::pp(s4) << std::endl;
   BOOST_CHECK(s4 == s2);
 
   core::garbage_collect();

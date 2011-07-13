@@ -11,6 +11,8 @@
 
 #include "wx.hpp" // precompiled headers
 
+#include <cstddef>
+
 #include "transition.h"
 #include "state.h"
 

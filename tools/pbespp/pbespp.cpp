@@ -17,7 +17,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -96,10 +96,10 @@ class pbespp_tool: public input_output_tool
       pbes_system::pbes<> pbes_specification;
       pbes_specification.load(input_filename());
 
-      gsVerboseMsg("printing PBES from %s to %s in the %s format\n",
-                   input_filename().empty()?"standard input":input_filename().c_str(),
-                   output_filename().empty()?"standard output":output_filename().c_str(),
-                   pp_format_to_string(format).c_str());
+      mCRL2log(verbose) << "printing PBES from "
+                        << (input_filename().empty()?"standard input":input_filename())
+                        << " to " << (output_filename().empty()?"standard output":output_filename())
+                        << " in the " << pp_format_to_string(format) << " format" << std::endl;
 
       if (output_filename().empty())
       {

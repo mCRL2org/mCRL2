@@ -19,6 +19,5 @@ class outputpanel : public wxTextCtrl
 {
   public:
     outputpanel(wxWindow* p_parent);
-    std::string PrintTime();
 };
 #endif // MCRL2XI_OUTPUTPANEL_H

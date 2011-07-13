@@ -14,7 +14,7 @@
 
 #include <set>
 #include <utility>
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/pbes/pbes_expr_builder.h"
 
@@ -154,7 +154,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   {
     term_type l = super::visit(left, sigma);
     term_type r = super::visit(right, sigma);
-    return core::detail::optimized_and(l, r, make_store_variables_function(lvar, rvar, tr::and_), tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return utilities::detail::optimized_and(l, r, make_store_variables_function(lvar, rvar, tr::and_), tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
   /// \brief Visit or node
@@ -168,7 +168,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   {
     term_type l = super::visit(left, sigma);
     term_type r = super::visit(right, sigma);
-    return core::detail::optimized_or(l, r, make_store_variables_function(lvar, rvar, tr::or_), tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return utilities::detail::optimized_or(l, r, make_store_variables_function(lvar, rvar, tr::or_), tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
   /// \brief Visit imp node
@@ -182,7 +182,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
   {
     term_type l = super::visit(left, sigma);
     term_type r = super::visit(right, sigma);
-    return core::detail::optimized_imp(l, r, make_store_variables_function(lvar, rvar, tr::imp), tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
+    return utilities::detail::optimized_imp(l, r, make_store_variables_function(lvar, rvar, tr::imp), tr::not_, tr::true_(), tr::is_true, tr::false_(), tr::is_false);
   }
 
   /// \brief Visit forall node
@@ -200,7 +200,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
 
     if (tr::is_not(t))
     {
-      result = core::optimized_not(core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), tr::arg(t)));
+      result = utilities::optimized_not(utilities::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), tr::arg(t)));
     }
     if (tr::is_and(t))
     {
@@ -208,7 +208,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
       term_type r = tr::right(t);
       data::variable_list lv = tt::set_intersection(variables, lvar);
       data::variable_list rv = tt::set_intersection(variables, rvar);
-      result = core::optimized_and(core::optimized_forall(lv, l), core::optimized_forall(rv, r));
+      result = utilities::optimized_and(utilities::optimized_forall(lv, l), utilities::optimized_forall(rv, r));
     }
     else if (tr::is_or(t))
     {
@@ -218,20 +218,20 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
       data::variable_list rv = tt::set_intersection(variables, rvar);
       if (lv.empty())
       {
-        result = core::optimized_or(l, core::optimized_forall(rv, r));
+        result = utilities::optimized_or(l, utilities::optimized_forall(rv, r));
       }
       else if (rv.empty())
       {
-        result = core::optimized_or(r, core::optimized_forall(lv, l));
+        result = utilities::optimized_or(r, utilities::optimized_forall(lv, l));
       }
       else
       {
-        result = core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
+        result = utilities::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
       }
     }
     else
     {
-      result = core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
+      result = utilities::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), t);
     }
     return result;
   }
@@ -251,7 +251,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
 
     if (tr::is_not(t))
     {
-      result = core::optimized_not(core::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), tr::arg(t)));
+      result = utilities::optimized_not(utilities::optimized_forall(tt::set_intersection(variables, tr::free_variables(t)), tr::arg(t)));
     }
     else if (tr::is_or(t))
     {
@@ -259,7 +259,7 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
       term_type r = tr::right(t);
       data::variable_list lv = tt::set_intersection(variables, lvar);
       data::variable_list rv = tt::set_intersection(variables, rvar);
-      result = core::optimized_or(core::optimized_exists(lvar, l), core::optimized_exists(rvar, r));
+      result = utilities::optimized_or(utilities::optimized_exists(lvar, l), utilities::optimized_exists(rvar, r));
     }
     else if (tr::is_and(t))
     {
@@ -269,20 +269,20 @@ struct simplify_quantifier_builder: public pbes_expr_builder<Term, SubstitutionF
       data::variable_list rv = tt::set_intersection(variables, rvar);
       if (lv.empty())
       {
-        result = core::optimized_and(l, core::optimized_exists(rv, r));
+        result = utilities::optimized_and(l, utilities::optimized_exists(rv, r));
       }
       else if (rv.empty())
       {
-        result = core::optimized_and(r, core::optimized_exists(lv, l));
+        result = utilities::optimized_and(r, utilities::optimized_exists(lv, l));
       }
       else
       {
-        result = core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
+        result = utilities::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
       }
     }
     else
     {
-      result = core::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
+      result = utilities::optimized_exists(tt::set_intersection(variables, tr::free_variables(t)), t);
     }
     return result;
   }

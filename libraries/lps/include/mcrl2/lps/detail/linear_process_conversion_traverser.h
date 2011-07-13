@@ -73,6 +73,9 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   /// \brief True if m_multi_action was changed.
   bool m_multi_action_changed;
 
+  /// \brief True if m_next_state was changed.
+  bool m_next_state_changed;
+
   /// \brief Contains intermediary results.
   data::data_expression m_condition;
 
@@ -102,17 +105,25 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     m_multi_action_changed = false;
     m_condition = data::sort_bool::true_();
     m_next_state = data::assignment_list();
+    m_next_state_changed = false;
   }
 
   /// \brief Adds a summand to the result
   void add_summand()
   {
-    if ((m_multi_action != lps::multi_action()) || m_multi_action_changed)
+    if (m_multi_action_changed)
     {
-      m_action_summands.push_back(lps::action_summand(m_sum_variables, m_condition, m_multi_action, m_next_state));
-      clear_summand();
+      if (m_next_state_changed)
+      {
+        m_action_summands.push_back(lps::action_summand(m_sum_variables, m_condition, m_multi_action, m_next_state));
+        clear_summand();
+      }
+      else
+      {
+        throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: encountered a multi action without process reference");
+      }
     }
-    else if ((m_deadlock != lps::deadlock()) || m_deadlock_changed)
+    else if (m_deadlock_changed)
     {
       m_deadlock_summands.push_back(lps::deadlock_summand(m_sum_variables, m_condition, m_deadlock));
       clear_summand();
@@ -149,6 +160,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
   {
     action a(x.label(), x.arguments());
     m_multi_action = lps::multi_action(a);
+    m_multi_action_changed = true;
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
   }
 
@@ -225,6 +237,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
     (*this)(x.right());
     lps::multi_action r = m_multi_action;
     m_multi_action = l + r;
+    m_multi_action_changed = true;
 // std::cout << "adding multi action\n" << m_multi_action.to_string() << std::endl;
   }
 
@@ -267,6 +280,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered that does not match the process equation");
       }
       m_next_state = data::make_assignment_list(m_equation.formal_parameters(), p.actual_parameters());
+      m_next_state_changed = true;
     }
     else if (is_process_instance_assignment(x.right()))
     {
@@ -278,6 +292,7 @@ struct linear_process_conversion_traverser: public process_expression_traverser<
         throw mcrl2::runtime_error("Error in linear_process_conversion_traverser::convert: seq expression encountered that does not match the process equation");
       }
       m_next_state = p.assignments(); // TODO: check if this is correct
+      m_next_state_changed = true;
     }
     else
     {

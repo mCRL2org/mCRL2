@@ -25,14 +25,15 @@
 #include <stdlib.h>
 #include <stdio.h>
 #include <string.h>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include <assert.h>
 #include <string>
 #include <sstream>
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/assignment.h"
 
@@ -47,7 +48,7 @@ static ATermList typelist = NULL;
 
 bool is_mCRL_spec(ATermAppl spec)
 {
-  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, ATfalse);
+  return ATgetAFun(spec) == ATmakeAFun("spec2gen", 2, false);
 }
 
 
@@ -98,14 +99,14 @@ static void add_id(ATermList* ids, ATermAppl id)
   }
 }
 
-static ATbool is_domain(ATermList args, ATermAppl sort)
+static bool is_domain(ATermList args, ATermAppl sort)
 {
   if (!is_basic_sort(mcrl2::data::sort_expression(sort)))
   {
     ATermList dom = ATLgetArgument(sort,0);
     if (ATgetLength(args) != ATgetLength(dom))
     {
-      return ATfalse;
+      return false;
     }
     else
     {
@@ -113,19 +114,19 @@ static ATbool is_domain(ATermList args, ATermAppl sort)
       {
         if (!ATisEqual(static_cast<ATermAppl>(mcrl2::data::data_expression(ATAgetFirst(args)).sort()),ATgetFirst(dom)))
         {
-          return ATfalse;
+          return false;
         }
       }
-      return ATtrue;
+      return true;
     }
   }
   if (ATisEmpty(args))
   {
-    return ATtrue;
+    return true;
   }
   else
   {
-    return ATfalse;
+    return false;
   }
 }
 
@@ -154,7 +155,7 @@ static ATermAppl dataterm2ATermAppl(ATermAppl t, ATermList args)
   using namespace mcrl2::data;
 
   ATermList l = ATgetArguments(t);
-  ATermAppl t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,ATtrue));
+  ATermAppl t2 = ATmakeAppl0(ATmakeAFun(ATgetName(ATgetAFun(t)),0,true));
 
   if (ATisEmpty(l))
   {
@@ -207,8 +208,8 @@ static ATermList get_substs(ATermList ids)
 
 //  if ( !remove_standard_functions )
   {
-    ATbool b;
-    ATindexedSetPut(used,(ATerm) ATmakeAppl0(ATmakeAFun("if",0,ATtrue)),&b);
+    bool b;
+    ATindexedSetPut(used,(ATerm) ATmakeAppl0(ATmakeAFun("if",0,true)),&b);
   }
 
   for (; !ATisEmpty(ids); ids=ATgetNext(ids))
@@ -219,7 +220,7 @@ static ATermList get_substs(ATermList ids)
     if ((t[0] >= '0' && t[0] <= '9') || t[0] == '\'')
     {
       s[0] = '_';
-      strncpy(s+1,t,100);
+      strncpy(s+1,t,99);
     }
     else
     {
@@ -242,13 +243,13 @@ static ATermList get_substs(ATermList ids)
     size_t i = 0;
     ATermAppl new_id = 0;
     while (!is_user_identifier(s) ||
-           ATindexedSetGetIndex(used,(ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,ATtrue)))) >=0)
+           ATindexedSetGetIndex(used,(ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >=0)
     {
       sprintf(t,"%lu",i);
       i++;
     }
 
-    ATbool b;
+    bool b;
     ATindexedSetPut(used,(ATerm) new_id,&b);
 
     substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) new_id));
@@ -284,7 +285,7 @@ static ATermList convert_sorts(ATermAppl spec, ATermList* ids)
 
 static ATermList convert_funcs(ATermList funcs, ATermList* ids, bool funcs_are_cons = false)
 {
-  ATermList r,l,m, sorts;
+  ATermList r,l, sorts;
   ATermAppl sort;
 
   r = ATmakeList0();
@@ -295,7 +296,6 @@ static ATermList convert_funcs(ATermList funcs, ATermList* ids, bool funcs_are_c
       has_func_T = true;
     }
 
-    m = ATmakeList0();
     l = ATreverse(ATLgetArgument(ATAgetFirst(funcs),1));
     sorts = ATmakeList0();
     sort = static_cast<ATermAppl>(mcrl2::data::basic_sort(mcrl2::core::identifier_string(ATAgetArgument(ATAgetFirst(funcs),2))));
@@ -315,7 +315,7 @@ static ATermList convert_funcs(ATermList funcs, ATermList* ids, bool funcs_are_c
       if (funcs_are_cons && remove_bools && !strcmp("Bool",ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),2)))))
       {
         std::string name(ATgetName(ATgetAFun(ATAgetArgument(ATAgetFirst(funcs),0))));
-        gsErrorMsg("constructor %s of sort Bool found (only T and F are allowed)\n",const_cast< char* >(name.substr(0, name.find_last_of('#')).c_str()));
+        mCRL2log(error) << "constructor " << name.substr(0, name.find_last_of('#')) << " of sort Bool found (only T and F are allowed)" << std::endl;
         exit(1);
       }
       add_id(ids,ATAgetArgument(ATAgetFirst(funcs),0));
@@ -412,7 +412,7 @@ static ATermAppl convert_lps(ATermAppl spec, ATermList* ids)
       assert(has_func_T);
       if (!has_func_T)
       {
-        gsErrorMsg("cannot convert summand condition due to the absence of boolean constructor T\n");
+        mCRL2log(error) << "cannot convert summand condition due to the absence of boolean constructor T" << std::endl;
         exit(1);
       }
       c = mcrl2::data::equal_to(mcrl2::data::data_expression(c), mcrl2::data::function_symbol("T",mcrl2::data::sort_bool::bool_()));
@@ -499,27 +499,27 @@ ATermAppl translate(ATermAppl spec, bool convert_bools, bool convert_funcs)
   typelist = ATmakeList0();
   ATprotectList(&typelist);
 
-  gsVerboseMsg("converting sort declarations...\n");
+  mCRL2log(verbose) << "converting sort declarations..." << std::endl;
   sort_spec = gsMakeSortSpec(convert_sorts(spec,&ids));
 
-  gsVerboseMsg("converting constructor function declarations...\n");
+  mCRL2log(verbose) << "converting constructor function declarations..." << std::endl;
   cons_spec = gsMakeConsSpec(convert_cons(spec,&ids));
 
-  gsVerboseMsg("converting mapping declarations...\n");
+  mCRL2log(verbose) << "converting mapping declarations..." << std::endl;
   map_spec = gsMakeMapSpec(convert_maps(spec,&ids));
 
-  gsVerboseMsg("converting data equations...\n");
+  mCRL2log(verbose) << "converting data equations..." << std::endl;
   data_eqn_spec = gsMakeDataEqnSpec(convert_datas(spec,&ids));
 
   data_spec = gsMakeDataSpec(sort_spec, cons_spec, map_spec, data_eqn_spec);
 
-  gsVerboseMsg("converting initial LPE state...\n");
+  mCRL2log(verbose) << "converting initial LPE state..." << std::endl;
   init = gsMakeLinearProcessInit(convert_init(spec,&ids));
 
-  gsVerboseMsg("converting LPE...\n");
+  mCRL2log(verbose) << "converting LPE..." << std::endl;
   lps = convert_lps(spec,&ids);
 
-  gsVerboseMsg("constructing action declarations...\n");
+  mCRL2log(verbose) << "constructing action declarations..." << std::endl;
   act_spec = gsMakeActSpec(get_lps_acts(lps,&ids));
 
   ATermAppl r = gsMakeLinProcSpec(data_spec, act_spec, gsMakeGlobVarSpec(ATmakeList0()), lps, init);

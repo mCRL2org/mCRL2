@@ -333,7 +333,7 @@ string Converter::to_mcrl2(Send& send, Context context)
 }
 string Converter::to_mcrl2(Replication& repl, Context context)
 {
-  gsWarningMsg("Ignoring replication operator %s.\n", repl.position_in_input().c_str());
+  mCRL2log(warning) << "Ignoring replication operator " << repl.position_in_input() << std::endl;
   return to_mcrl2(repl.proc, context);
 }
 string Converter::to_mcrl2(Zero& /*zero*/, Context /*context*/)

@@ -35,7 +35,7 @@ void test_table()
   }
   table t2 = t;
 
-  aterm a = t.get(make_term("a"));
+  atermpp::aterm a = t.get(make_term("a"));
   BOOST_CHECK(a = make_term("f(a)"));
 
   std::map<int, table> x;

@@ -12,7 +12,7 @@
 #ifndef __REWR_PROVER_H
 #define __REWR_PROVER_H
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include <mcrl2/data/detail/bdd_prover.h>
 #include "mcrl2/data/rewriter.h"
 
@@ -26,7 +26,11 @@ namespace detail
 class RewriterProver: public Rewriter
 {
   public:
-    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat);
+    BDD_Prover* prover_obj;
+    boost::shared_ptr<detail::Rewriter> rewr_obj; 
+
+  public:
+    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const bool add_rewrite_rules);
     ~RewriterProver();
 
     mcrl2::data::detail::RewriteStrategy getStrategy();
@@ -50,9 +54,6 @@ class RewriterProver: public Rewriter
     void clearSubstitutions();
     void clearSubstitutions(ATermList Vars);
 
-  public:
-    BDD_Prover* prover_obj;
-    boost::shared_ptr<detail::Rewriter> rewr_obj;
 };
 
 }

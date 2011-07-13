@@ -20,6 +20,8 @@
 #include <sstream>
 #include <iostream>
 
+#include "mcrl2/utilities/command_line_interface.h"
+
 namespace mcrl2
 {
 
@@ -201,11 +203,11 @@ class mcrl2_gui_tool: public Tool
 #if !defined(_WIN32)
       values.push_back("jittyc");
 #endif
-      values.push_back("inner");
-      values.push_back("innerp");
-#if !defined(_WIN32)
+//       values.push_back("inner");
+//      values.push_back("innerp");
+/* #if !defined(_WIN32)
       values.push_back("innerc");
-#endif
+#endif */
       m_gui_options["rewriter"] = create_radiobox_widget(values);
     }
 

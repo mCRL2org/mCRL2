@@ -21,7 +21,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/tools/lpsparunfold/test)
 
 file(GLOB TERM_OBJS "*.cpp")
@@ -33,6 +33,7 @@ foreach( OBJ ${TERM_OBJS} )
 
   target_link_libraries("${PREFIX}_${result}"
     mcrl2_lps
+    mcrl2_utilities
   )
 
   add_test("${PREFIX}_${result}" "${lpsparunfold_test_container_BINARY_DIR}/${PREFIX}_${result}" )

@@ -214,10 +214,8 @@ int lysayywrap(void) {
 
 void lysaLexer::yyerror(const char *s) {
 	int old_col_nr = std::max(1, col_nr - YYLeng());
-  gsErrorMsg(
-    "token '%s' at position %d, %d caused the following error:\n  %s\n", 
-    YYText(), line_nr, old_col_nr, s
-  ); 
+	mCRL2log(error) << "token '" << YYText() << "' at position" << line_nr << ", "
+	                << old_col_nr << " caused the following error:" << std::endl << "  " << s << std::endl;
 }
 
 int lysaLexer::yywrap(void) {

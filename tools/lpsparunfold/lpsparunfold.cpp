@@ -28,6 +28,7 @@
 
 //DATA
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/normalize_sorts.h"
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"
@@ -159,9 +160,12 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
       lps_specification.load(m_input_filename);
 
+      /* lpsparunfold-cache is used to avoid the introduction of equations for already unfolded sorts */
+      atermpp::map< mcrl2::data::sort_expression , lspparunfold::unfold_cache_element  >  unfold_cache;
+
       for (size_t i =0; i != m_repeat_unfold; ++i)
       {
-        mcrl2::core::gsVerboseMsg("Pass: %d of %d\n", i+1, m_repeat_unfold);
+        mCRL2log(verbose) << "Pass: " << i+1 << " of " << m_repeat_unfold << std::endl;
 
         //Calculate process parameters indices where m_unfoldsort occurs
         if (!m_unfoldsort.empty())
@@ -169,8 +173,10 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
           m_set_index.clear();
 
           mcrl2::data::basic_sort b_sort(m_unfoldsort);
+          mcrl2::data::sort_expression sort = normalize_sorts(b_sort, lps_specification.data());
 
-          if (!search_sort_expression(lps_specification.data().sorts(), b_sort))
+
+          if (!search_sort_expression(lps_specification.data().sorts(), sort))
           {
             std::cerr << "No sorts found of name " << m_unfoldsort << std::endl;
             break;
@@ -180,30 +186,11 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
                ; k != assignments.end()
                ; ++k)
           {
-            if (k ->lhs().sort() == b_sort)
+            if (k ->lhs().sort() == sort)
             {
               m_set_index.insert(std::distance(assignments.begin(),k));
             }
 
-            /*          This code has been changed by JFG because with the new sort library sorts in linear processes
-                        should be uniquely defined. There are no sort aliases anymore.
-
-                        mcrl2::data::data_specification::aliases_const_range aliases = lps_specification.data().aliases( k ->lhs().sort());
-                        for(mcrl2::data::data_specification::aliases_const_range::iterator j = aliases.begin()
-                                                         ; j != aliases.end()
-                                                         ; ++j)
-                        {
-                          if( b_sort == j->name())
-                          {
-                            m_set_index.insert (std::distance(assignments.begin(),k ) );
-                          }
-                        }
-            */
-
-            if (b_sort == k ->lhs().sort())
-            {
-              m_set_index.insert(std::distance(assignments.begin(),k));
-            }
           }
 
           if (m_set_index.empty())
@@ -215,15 +202,18 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
         //Unfold process parameters for calculated indices
         std::set< size_t > h_set_index = m_set_index;
+
         while (!h_set_index.empty())
         {
-          lpsparunfold lpsparunfold(lps_specification, m_add_distribution_laws);
+          lpsparunfold lpsparunfold(lps_specification, &unfold_cache, m_add_distribution_laws);
           size_t index = *(max_element(h_set_index.begin(), h_set_index.end()));
           lps_specification = lpsparunfold.algorithm(index);
           h_set_index.erase(index);
         }
       }
       lps_specification.save(m_output_filename);
+
+
 
       return true;
     }

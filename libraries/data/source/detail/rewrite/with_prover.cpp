@@ -14,8 +14,8 @@
 #include <cstdlib>
 #include <cassert>
 #include <memory.h>
-#include "aterm2.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/rewrite.h"
@@ -31,9 +31,9 @@ namespace data
 namespace detail
 {
 
-RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat)
+RewriterProver::RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const bool add_rewrite_rules)
 {
-  prover_obj = new BDD_Prover(DataSpec,strat);
+  prover_obj = new BDD_Prover(DataSpec,strat,add_rewrite_rules);
   rewr_obj = prover_obj->get_rewriter();
 }
 
@@ -133,14 +133,8 @@ RewriteStrategy RewriterProver::getStrategy()
 {
   switch (rewr_obj->getStrategy())
   {
-    case GS_REWR_INNER:
-      return GS_REWR_INNER_P;
     case GS_REWR_JITTY:
       return GS_REWR_JITTY_P;
-#ifdef MCRL2_INNERC_AVAILABLE
-    case GS_REWR_INNERC:
-      return GS_REWR_INNERC_P;
-#endif
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC:
       return GS_REWR_JITTYC_P;

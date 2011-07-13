@@ -12,8 +12,9 @@
 #include <cstring>
 #include <cmath>
 #include <iostream>
-#include <aterm2.h>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/text_utility.h"
 #include <cstdio>
 #include <vector>
 #include <map>
@@ -31,6 +32,9 @@
 #define RPVS RecProcessVectors
 #define RPC RecProcessChannels
 #define RC  RecChannel
+
+// XXX Remove
+using namespace aterm;
 
 struct t_options
 {
@@ -116,20 +120,6 @@ typedef struct
   std::string recv_end;
   std::string Type;
 } RecChannel;
-
-template <class T>
-inline std::string to_string(const T& t)
-{
-  std::stringstream ss;
-  ss << t;
-  return ss.str();
-}
-
-template < >
-inline std::string to_string(const std::string& t)
-{
-  return t;
-}
 
 class CAsttransform
 {

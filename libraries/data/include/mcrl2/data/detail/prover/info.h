@@ -12,7 +12,7 @@
 #ifndef INFO_H
 #define INFO_H
 
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/utilities.h"
 
@@ -113,7 +113,7 @@ class ATerm_Info
 
     bool delta1(ATerm a_term1, ATerm a_term2)
     {
-      return core::gsOccurs(a_term2, a_term1);
+      return gsOccurs(a_term2, a_term1);
     }
 
     bool majo1(ATerm a_term1, ATerm a_term2, size_t a_number)
@@ -226,11 +226,11 @@ class ATerm_Info
     /// \brief Compares terms by checking whether one is a part of the other.
     Compare_Result compare_term_occurs(ATerm a_term1, ATerm a_term2)
     {
-      if (core::gsOccurs(a_term1, a_term2))
+      if (gsOccurs(a_term1, a_term2))
       {
         return compare_result_smaller;
       }
-      if (core::gsOccurs(a_term2, a_term1))
+      if (gsOccurs(a_term2, a_term1))
       {
         return compare_result_bigger;
       }
@@ -391,7 +391,7 @@ class AI_Jitty: public ATerm_Info
         ATerm v_term;
 
         v_term = ATgetArgument(a_term, 0);
-        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, ATfalse), v_term);
+        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, false), v_term);
         v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
 
         if (core::detail::gsIsOpId((ATermAppl) v_term))   // XXX why is a variable not allowed?
@@ -399,7 +399,7 @@ class AI_Jitty: public ATerm_Info
           v_term = ATgetArgument(v_term, 1);
           while (v_number_of_arguments != 0)
           {
-            v_number_of_arguments -= ATgetLength(core::ATLgetArgument((ATermAppl) v_term, 0));
+            v_number_of_arguments -= ATgetLength(ATLgetArgument((ATermAppl) v_term, 0));
             v_term = ATgetArgument(v_term, 1);
           }
           return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
@@ -482,7 +482,7 @@ class AI_Jitty: public ATerm_Info
         ATerm v_term;
 
         v_term = ATgetArgument(a_term, 0);
-        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, ATfalse), v_term);
+        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, false), v_term);
         v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
         v_term = ATgetArgument(v_term, 0);
         return (v_term == f_eq);
@@ -492,162 +492,6 @@ class AI_Jitty: public ATerm_Info
         return false;
       }
     }
-};
-
-/// \brief Class that provides information about the structure of
-/// \brief data expressions in the internal format of the rewriter
-/// \brief with the innermost strategy.
-class AI_Inner: public ATerm_Info
-{
-  public:
-    /// \brief Constructor that initializes all fields.
-    AI_Inner(boost::shared_ptr<detail::Rewriter> a_rewriter)
-      : ATerm_Info(a_rewriter)
-    {
-      f_true = f_rewriter->toRewriteFormat(sort_bool::true_());
-      f_false = f_rewriter->toRewriteFormat(sort_bool::false_());
-      f_if_then_else_bool = f_rewriter->toRewriteFormat(if_(sort_bool::bool_()));
-      f_eq = (ATerm) static_cast<ATermAppl>(detail::equal_symbol());
-    }
-
-    /// \brief Destructor with no particular functionality.
-    virtual ~AI_Inner()
-    {}
-
-    /// \brief Indicates whether or not a term has type bool.
-    virtual bool has_type_bool(ATerm a_term)
-    {
-      if (core::detail::gsIsDataVarId((ATermAppl) a_term) || core::detail::gsIsOpId((ATermAppl) a_term))
-      {
-        ATerm v_term;
-
-        v_term = ATgetArgument(a_term, 1);
-        return (v_term == (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
-      }
-
-      size_t v_number_of_arguments;
-
-      v_number_of_arguments = get_number_of_arguments(a_term);
-      if (v_number_of_arguments == 0)
-      {
-        ATerm v_term;
-
-        v_term = (ATerm) f_rewriter->fromRewriteFormat(a_term);
-        if (core::detail::gsIsDataVarId((ATermAppl) v_term) || core::detail::gsIsOpId((ATermAppl) v_term))
-        {
-          v_term = ATgetArgument(v_term, 1);
-          return (v_term == (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
-        }
-        else
-        {
-          return false;
-        }
-      }
-      else
-      {
-        ATerm v_term;
-
-        v_term = ATgetFirst((ATermList) a_term);
-        v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
-        if (core::detail::gsIsOpId((ATermAppl) v_term))   // XXX why is a variable not allowed?
-        {
-          v_term = ATgetArgument(v_term, 1);
-          while (v_number_of_arguments != 0)
-          {
-            v_number_of_arguments -= ATgetLength(core::ATLgetArgument((ATermAppl) v_term, 0));
-            v_term = ATgetArgument(v_term, 1);
-          }
-          return (v_term == (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
-        }
-        else
-        {
-          return false;
-        }
-      }
-      return false;
-    }
-
-    /// \brief Returns the number of arguments of the main operator of a term.
-    /// \param a_term An expression in the internal format of the rewriter with the innermost strategy.
-    /// \return 0, if \c aterm is a constant or a variable.
-    ///         The number of arguments of the main operator, otherwise.
-    virtual size_t get_number_of_arguments(ATerm a_term)
-    {
-      if (ATgetType(a_term) == AT_LIST)
-      {
-        return ATgetLength((ATermList) a_term) - 1;
-      }
-      else
-      {
-        return 0;
-      }
-    }
-
-    /// \brief Returns the main operator of the term \c a_term;
-    virtual ATerm get_operator(ATerm a_term)
-    {
-      return ATgetFirst((ATermList) a_term);
-    }
-
-    /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    virtual ATerm get_argument(ATerm a_term, size_t a_number)
-    {
-      return ATelementAt((ATermList) a_term, a_number + 1);
-    }
-
-    /// \brief Indicates whether or not a term is equal to \c true.
-    virtual bool is_true(ATerm a_term)
-    {
-      return (a_term == f_true);
-    }
-
-    /// \brief Indicates whether or not a term is equal to \c false.
-    virtual bool is_false(ATerm a_term)
-    {
-      return (a_term == f_false);
-    }
-
-    /// \brief Indicates whether or not a term is equal to the \c if \c then \c else function
-    /// \brief with type Bool -> Bool -> Bool -> Bool.
-    virtual bool is_if_then_else_bool(ATerm a_term)
-    {
-      if (ATgetType(a_term) == AT_LIST)
-      {
-        ATerm v_term;
-
-        v_term = ATgetFirst((ATermList) a_term);
-        return (v_term == f_if_then_else_bool && get_number_of_arguments(a_term) == 3);
-      }
-      else
-      {
-        return false;
-      }
-    }
-
-    /// \brief Indicates whether or not a term is a single variable.
-    virtual bool is_variable(ATerm a_term)
-    {
-      return core::detail::gsIsDataVarId((ATermAppl) a_term);
-    }
-
-    /// \brief Indicates whether or not a term is an equality.
-    virtual bool is_equality(ATerm a_term)
-    {
-      if (get_number_of_arguments(a_term) == 2)
-      {
-        ATerm v_term;
-
-        v_term = ATgetFirst((ATermList) a_term);
-        v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
-        v_term = ATgetArgument(v_term, 0);
-        return (v_term == f_eq);
-      }
-      else
-      {
-        return false;
-      }
-    }
-
 };
 
 }

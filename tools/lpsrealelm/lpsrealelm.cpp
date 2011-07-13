@@ -80,14 +80,11 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
     ///i applies real time abstraction to it and writes the result to output_file.
     bool run()
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Parameters of lpsrealelm:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  data rewriter       " << m_rewrite_strategy << std::endl;
-        std::cerr << "  max_iterations:     " << max_iterations << std::endl;
-      }
+      mCRL2log(verbose) << "Parameters of lpsrealelm:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  data rewriter       " << m_rewrite_strategy << std::endl;
+      mCRL2log(verbose) << "  max_iterations:     " << max_iterations << std::endl;
 
       specification lps_specification;
       lps_specification.load(m_input_filename);
@@ -96,10 +93,7 @@ class lpsrealelm_tool: public rewriter_tool<input_output_tool >
       rewriter r=create_rewriter(lps_specification.data());
       specification new_spec = realelm(lps_specification, max_iterations, r);
 
-      if (core::gsVerbose)
-      {
-        std::cerr << "Real time abstraction completed, saving to " << m_output_filename << "\n";
-      }
+      mCRL2log(verbose) << "Real time abstraction completed, saving to " << m_output_filename << "\n";
       new_spec.save(m_output_filename);
 
       return true;

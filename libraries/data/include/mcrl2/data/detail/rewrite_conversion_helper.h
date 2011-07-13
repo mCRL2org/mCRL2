@@ -150,7 +150,6 @@ class rewrite_conversion_helper
       static number_postfix_generator symbol_generator("lambda@");
 
       const atermpp::map< data_expression, data_expression >::const_iterator i = m_implementation_context.find(expression);
-
       if (i == m_implementation_context.end())
       {
         const atermpp::term_list< variable > bound_variables = atermpp::convert< atermpp::term_list< variable > >(implement(expression.variables()));
@@ -267,47 +266,59 @@ class rewrite_conversion_helper
     {
       if (is_function_symbol(expression.head()))
       {
+        static number_postfix_generator variable_string_generator("x_");
         /* The code below is outcommented. Lambda terms, if they occur in processes
            will be handled properly with the new rewriter. Now application terms
            with "forall" and "exists" as terms can remain in the result. */
 
         function_symbol head(expression.head());
 
-        /*
-                      if (head.name() == "exists")
-                      {
-                        data_expression argument_expression(reconstruct(*expression.arguments().begin()));
-                        if(!is_abstraction(argument_expression))
-                        {
-                          throw mcrl2::runtime_error("Unexpected expression " + argument_expression.to_string() + " occurred in transforming existential quantification from rewriter format. "
-                                                     "This is caused by the lack of proper support for abstraction in the rewriters.");
-                        }
-
-                        lambda argument(argument_expression);
-
-                        return exists(argument.variables(), argument.body());
-                      }
-                      else if (head.name() == "forall")
-                      {
-                        data_expression argument_expression(reconstruct(*expression.arguments().begin()));
-                        if(!is_abstraction(argument_expression))
-                        {
-                          throw mcrl2::runtime_error("Unexpected expression " + argument_expression.to_string() + " occurred in transforming universal quantification from rewriter format. "
-                                                     "This is caused by the lack of proper support for abstraction in the rewriters.");
-                        }
-
-                        lambda argument(argument_expression);
-
-                        return forall(argument.variables(), argument.body());
-                      }
-                    }*/
-
-        if ((head.name() == "exists") || (head.name() == "forall"))
+        if (head.name() == "exists")
         {
-          std::cerr << "Warning: quantified terms are not properly translated back from rewrite format\n";
+          data_expression argument_expression(reconstruct(*expression.arguments().begin()));
+          if (!is_abstraction(argument_expression))
+          {
+            const function_sort s=argument_expression.sort();
+            assert(s.codomain()==sort_bool::bool_());
+            const sort_expression_list sl=s.domain();
+      
+            variable_list vl;
+            for(sort_expression_list::const_iterator i=sl.begin(); i!=sl.end(); ++i)
+            {
+              const variable fresh_variable(variable_string_generator(),*i);
+              vl=push_front(vl,fresh_variable);
+            }
+            vl=reverse(vl);
+            return exists(vl,reconstruct((data_expression)m_rewriter->rewrite(application(*expression.arguments().begin(),vl))));
+          }
+
+          lambda argument(argument_expression);
+
+          return exists(argument.variables(), argument.body());
+        }
+        else if (head.name() == "forall")
+        {
+          data_expression argument_expression(reconstruct(*expression.arguments().begin()));
+          if (!is_abstraction(argument_expression))
+          {
+            const function_sort s=argument_expression.sort();
+            assert(s.codomain()==sort_bool::bool_());
+            const sort_expression_list sl=s.domain();
+      
+            variable_list vl;
+            for(sort_expression_list::const_iterator i=sl.begin(); i!=sl.end(); ++i)
+            {
+              const variable fresh_variable(variable_string_generator(),*i);
+              vl=push_front(vl,fresh_variable);
+            }
+            vl=reverse(vl);
+            return forall(vl,reconstruct((data_expression)m_rewriter->rewrite(application(*expression.arguments().begin(),vl))));
+          }
+
+          lambda argument(argument_expression);
+          return forall(argument.variables(), argument.body());
         }
       }
-
       return application(reconstruct(data_expression(expression.head())), reconstruct(expression.arguments()));
     }
 

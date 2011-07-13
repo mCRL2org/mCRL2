@@ -13,7 +13,7 @@
 #include <iostream>
 #include <sstream>
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/core/algorithm.h"
+#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_expression_with_propositional_variables.h"
 #include "mcrl2/pbes/detail/pbesinst_rewriter.h"
@@ -69,7 +69,7 @@ pbesinst_substitution_function make_pbesinst_substitution(data::variable_list v,
 }
 
 /// \brief Algorithm class for the pbesinst instantiation algorithm.
-class pbesinst_algorithm: public core::algorithm
+class pbesinst_algorithm: public utilities::algorithm
 {
   protected:
     /// \brief The rewriter.
@@ -98,13 +98,13 @@ class pbesinst_algorithm: public core::algorithm
     bool m_print_equations;
 
     /// \brief Prints a log message for every 1000-th equation
-    void LOG_EQUATION_COUNT(size_t level, size_t size) const
+    void LOG_EQUATION_COUNT_VERBOSE(size_t size) const
     {
-      if (check_log_level(level))
+      if (mCRL2logEnabled(verbose))
       {
         if (size > 0 && size % 1000 == 0)
         {
-          std::cout << "Generated " << size << " BES equations" << std::endl;
+          mCRL2log(verbose) << "Generated " << size << " BES equations" << std::endl;
         }
       }
     }
@@ -119,10 +119,9 @@ class pbesinst_algorithm: public core::algorithm
     pbesinst_algorithm(data::data_specification const& data_spec,
                        data::rewriter::strategy rewriter_strategy = data::rewriter::jitty,
                        bool print_equations = false,
-                       bool print_rewriter_output = false,
-                       size_t log_level = 0)
-      : core::algorithm(log_level),
-        R(data_spec, rewriter_strategy, print_rewriter_output),
+                       bool print_rewriter_output = false
+                      )
+      : R(data_spec, rewriter_strategy, print_rewriter_output),
         m_equation_count(0),
         m_print_equations(print_equations)
     {}
@@ -168,7 +167,7 @@ class pbesinst_algorithm: public core::algorithm
           std::cerr << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;
         }
         E[index].push_back(new_eqn);
-        LOG_EQUATION_COUNT(1, ++m_equation_count);
+        LOG_EQUATION_COUNT_VERBOSE(++m_equation_count);
         detail::check_bes_equation_limit(m_equation_count);
       }
     }

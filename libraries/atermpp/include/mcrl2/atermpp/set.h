@@ -15,8 +15,8 @@
 #include <functional>
 #include <memory>
 #include <set>
+#include "mcrl2/aterm/protaterm.h"          // IProtectedATerm
 #include "mcrl2/atermpp/aterm_traits.h"
-#include "protaterm.h"          // IProtectedATerm
 
 namespace atermpp
 {

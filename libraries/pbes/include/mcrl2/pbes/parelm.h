@@ -17,9 +17,9 @@
 #include <vector>
 #include <boost/bind.hpp>
 #include <boost/graph/adjacency_list.hpp>
-#include "mcrl2/core/reachable_nodes.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/detail/iota.h"
+#include "mcrl2/utilities/reachable_nodes.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/assignment_functional.h"
@@ -233,10 +233,10 @@ class pbes_parelm_algorithm
       }
 
       // compute the indices s of the parameters that need to be removed
-      std::vector<size_t> r = core::reachable_nodes(G, v.begin(), v.end());
+      std::vector<size_t> r = utilities::reachable_nodes(G, v.begin(), v.end());
       std::sort(r.begin(), r.end());
       std::vector<size_t> q(N);
-      core::detail::iota(q.begin(), q.end(), 0);
+      utilities::detail::iota(q.begin(), q.end(), 0);
       std::vector<size_t> s;
       std::set_difference(q.begin(), q.end(), r.begin(), r.end(), std::back_inserter(s));
 
@@ -259,16 +259,16 @@ class pbes_parelm_algorithm
       }
 
       // print debug output
-      if (mcrl2::core::gsDebug)
+      if (mCRL2logEnabled(debug))
       {
-        std::cerr << "\ninfluential parameters:" << std::endl;
+        mCRL2log(debug) << "\ninfluential parameters:" << std::endl;
         for (std::set<size_t>::iterator i = v.begin(); i != v.end(); ++i)
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::variable v1 = predicate_variables[*i];
-          std::cerr << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+          mCRL2log(debug) << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
         }
-        std::cerr << "\ndependencies:" << std::endl;
+        mCRL2log(debug) << "\ndependencies:" << std::endl;
         typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
@@ -284,14 +284,14 @@ class pbes_parelm_algorithm
           data::variable v2 = predicate_variables[i2];
           std::string left  = "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")";
           std::string right = "(" + mcrl2::core::pp(X2) + ", " + mcrl2::core::pp(v2) + ")";
-          std::cerr << left << " -> " << right << std::endl;
+          mCRL2log(debug) << left << " -> " << right << std::endl;
         }
       }
 
       // print verbose output
-      if (mcrl2::core::gsVerbose)
+      if (mCRL2logEnabled(verbose))
       {
-        std::cerr << "\nremoving the following parameters:" << std::endl;
+        mCRL2log(verbose) << "\nremoving the following parameters:" << std::endl;
         for (std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
         {
           core::identifier_string X1 = i->first;
@@ -299,7 +299,7 @@ class pbes_parelm_algorithm
           for (std::vector<size_t>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
             data::variable v1 = predicate_variables[*j + propvar_offsets[X1]];
-            std::cerr << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+            mCRL2log(verbose) << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
           }
         }
       }

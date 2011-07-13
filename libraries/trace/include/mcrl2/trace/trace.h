@@ -19,14 +19,14 @@
 #ifndef _TRACE_H__
 #define _TRACE_H__
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include <iostream>
 #include <fstream>
 #include <string>
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
 
 namespace mcrl2
@@ -451,7 +451,7 @@ class Trace
     {
       if (trace_pair_set == 0)
       {
-        trace_pair = ATmakeAFun("pair",2,ATfalse);
+        trace_pair = ATmakeAFun("pair",2,false);
         ATprotectAFun(trace_pair);
       }
       trace_pair_set++;
@@ -561,13 +561,13 @@ class Trace
         }
         else if (isTimedMAct(e))
         {
-          if (core::detail::gsIsNil(core::ATAgetArgument(e,1)))
+          if (core::detail::gsIsNil(ATAgetArgument(e,1)))
           {
-            addAction(core::ATAgetArgument(e,0));
+            addAction(ATAgetArgument(e,0));
           }
           else
           {
-            addAction(core::ATAgetArgument(e,0),core::ATAgetArgument(e,1));
+            addAction(ATAgetArgument(e,0),ATAgetArgument(e,1));
           }
         }
         else
@@ -602,7 +602,7 @@ class Trace
         if (is.gcount() > 0)
         {
           // XXX need to parse trace
-          addAction(ATmakeAppl0(ATmakeAFun(buf,0,ATfalse)));
+          addAction(ATmakeAppl0(ATmakeAFun(buf,0,false)));
         }
       }
       is.clear();
@@ -625,7 +625,7 @@ class Trace
           assert(actions[i]!=NULL);
           if (!core::detail::gsIsMultAct(actions[i]) && !error_shown)
           {
-            core::gsErrorMsg("saving trace that is not in mCRL2 format to a mCRL2 trace format\n");
+            mCRL2log(error) << "saving trace that is not in mCRL2 format to a mCRL2 trace format" << std::endl;
             error_shown = true;
           }
           trace = ATinsert(trace,(ATerm) makeTimedMAct(actions[i], (times[i]==NULL)?core::detail::gsMakeNil():times[i]));

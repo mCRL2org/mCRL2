@@ -17,13 +17,13 @@
 #include <iostream>
 #include <fstream>
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes_gauss_elimination.h"
+#include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/small_progress_measures.h"
 
 using namespace mcrl2::utilities::tools;
@@ -70,19 +70,9 @@ class bessolve_tool: public input_output_tool
       bes::boolean_equation_system<> bes;
       bes.load(input_filename());
 
-      gsVerboseMsg("solving BES in %s using %s\n",
-                   input_filename().empty()?"standard input":input_filename().c_str(),
-                   solution_strategy_to_string(strategy).c_str());
-
-      unsigned int log_level = 0;
-      if (core::gsVerbose)
-      {
-        log_level = 1;
-      }
-      if (core::gsDebug)
-      {
-        log_level = 2;
-      }
+      mCRL2log(verbose) << "solving BES in " <<
+                   (input_filename().empty()?"standard input":input_filename()) << " using " <<
+                   solution_strategy_to_string(strategy) << "" << std::endl;
 
       bool result = false;
 
@@ -90,10 +80,10 @@ class bessolve_tool: public input_output_tool
       switch (strategy)
       {
         case gauss:
-          result = gauss_elimination(bes, log_level);
+          result = gauss_elimination(bes);
           break;
         case spm:
-          result = small_progress_measures(bes, log_level);
+          result = small_progress_measures(bes);
           break;
         default:
           throw mcrl2::runtime_error("unhandled strategy provided");

@@ -53,30 +53,27 @@ void function_sort_test()
   basic_sort s1("S1");
   basic_sort s("S");
 
-  sort_expression_vector s01;
-  s01.push_back(s0);
-  s01.push_back(s1);
-  boost::iterator_range<sort_expression_vector::const_iterator> s01_range = boost::make_iterator_range(s01);
-  function_sort fs(s01_range, s);
+  sort_expression_list s01 = atermpp::make_list(s0, s1);
+  function_sort fs(s01, s);
   BOOST_CHECK(!is_basic_sort(fs));
   BOOST_CHECK(is_function_sort(fs));
   BOOST_CHECK(!is_alias(fs));
   BOOST_CHECK(!is_structured_sort(fs));
   BOOST_CHECK(!is_container_sort(fs));
   BOOST_CHECK(fs == fs);
-  BOOST_CHECK(fs.domain().size() == static_cast< size_t >(s01_range.size()));
+  BOOST_CHECK(fs.domain().size() == static_cast< size_t >(s01.size()));
 
   // Element wise check
-  sort_expression_vector::const_iterator i = s01_range.begin();
+  sort_expression_list::const_iterator i = s01.begin();
   sort_expression_list::iterator j = fs.domain().begin();
-  while (i != s01_range.end() && j != fs.domain().end())
+  while (i != s01.end() && j != fs.domain().end())
   {
     BOOST_CHECK(*i == *j);
     ++i;
     ++j;
   }
 
-  BOOST_CHECK(fs.domain() == s01_range);
+  BOOST_CHECK(fs.domain() == s01);
   BOOST_CHECK(fs.codomain() == s);
 
   sort_expression fs_e(fs);
@@ -131,9 +128,7 @@ void structured_sort_test()
   BOOST_CHECK(atermpp::convert< structured_sort_constructor_argument_vector >(c2.arguments()) == a2);
   BOOST_CHECK(c2.recogniser() == data::no_identifier());
 
-  structured_sort_constructor_vector cs;
-  cs.push_back(c1);
-  cs.push_back(c2);
+  structured_sort_constructor_list cs = atermpp::make_list(c1, c2);
 
   structured_sort s(cs);
 
@@ -156,7 +151,7 @@ void structured_sort_test()
   structured_sort_constructor c("C", boost::make_iterator_range(bv));
   structured_sort bc(atermpp::make_vector(b,c));
 
-  BOOST_CHECK(bc.struct_constructors() == atermpp::make_vector(b,c));
+  BOOST_CHECK(bc.struct_constructors() == structured_sort_constructor_list(atermpp::make_list(b,c)));
   structured_sort_constructor_vector bc_constructors(bc.struct_constructors().begin(), bc.struct_constructors().end());
   BOOST_CHECK(bc_constructors[0] == b);
   BOOST_CHECK(bc_constructors[1] == c);

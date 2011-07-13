@@ -19,8 +19,10 @@
 #define MCRL2_LPS_SUMELM_H
 
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/join.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
+#include "mcrl2/lps/decluster.h"
 
 namespace mcrl2
 {
@@ -33,6 +35,9 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
   protected:
     /// Stores the number of summation variables that has been removed.
     size_t m_removed;
+
+    /// Whether to decluster disjunctive conditions first.
+    bool m_decluster;
 
     /// Adds replacement lhs := rhs to the specified map of replacements.
     /// All replacements that have lhs as a right hand side will be changed to
@@ -57,83 +62,89 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
       return data::is_variable(x) && data::search_variable(s.summation_variables(), x);
     }
 
-    /// Recursively apply sum elimination on a summand.
-    /// We build up a list of substitutions that need to be made in substitutions
-    /// the caller of this function needs to apply substitutions to the summand
-    /// once we exit recursion
-    /// working_condition is a parameter that we use to split up the problem,
-    /// at the first call of this function working_condition == summand_->condition()
-    /// should hold.
-    /// The new condition is built up on the return path of the recursion, so
-    /// the last exit of the recursion is the new condition of the summand.
-    data::data_expression recursive_substitute_equalities(const summand_base& summand_,
-        data::data_expression working_condition,
-        std::map<data::variable, data::data_expression>& substitutions)
+    template <typename T>
+    void swap(T& x, T& y)
     {
-      using namespace mcrl2::data;
+      T temp(x);
+      x = y;
+      y = temp;
+    }
 
-      // In all cases not explicitly handled we return the original working_condition
-      data_expression result = working_condition;
+    data::data_expression compute_substitutions(const summand_base& s,
+      std::map<data::variable, data::data_expression>& substitutions)
+    {
+      using namespace data;
 
-      if (sort_bool::is_and_application(working_condition))
+      atermpp::set<data_expression> conjuncts = data::split_and(s.condition());
+      atermpp::set<data_expression> new_conjuncts;
+
+      for(atermpp::set<data_expression>::const_iterator i = conjuncts.begin(); i != conjuncts.end(); ++i)
       {
-        //Recursively apply sum elimination on lhs and rhs
-        //Note that recursive application provides for progress because lhs and rhs split the working condition.
-        data_expression a,b;
-        a = recursive_substitute_equalities(summand_, application(working_condition).left(), substitutions);
-        b = recursive_substitute_equalities(summand_, application(working_condition).right(), substitutions);
-        result = lazy::and_(a,b);
-      }
-      else if (is_equal_to_application(working_condition))
-      {
-        //Check if rhs is a variable, if so, swap lhs and rhs, so that the following code
-        //is always the same.
-        if (!is_summand_variable(summand_, application(working_condition).left()) && is_summand_variable(summand_, application(working_condition).right()))
+        bool replacement_added(false);
+        data_expression left;
+        data_expression right;
+
+        if (is_equal_to_application(*i)) // v == e
         {
-          working_condition = data::equal_to(application(working_condition).right(), application(working_condition).left());
+          left = application(*i).left();
+          right = application(*i).right();
+        }
+        else if (is_variable(*i) && sort_bool::is_bool(i->sort())) // v equal to v == true
+        {
+          left = *i;
+          right = sort_bool::true_();
+        }
+        else if (sort_bool::is_not_application(*i) && is_variable(sort_bool::arg(*i))) // !v equal to v == false
+        {
+          left = sort_bool::arg(*i);
+          right = sort_bool::false_();
         }
 
-        //If lhs is a variable, check if it occurs in the summation variables, if so
-        //apply substitution lhs := rhs in actions, time and assignments.
-        //substitution in condition is accounted for on return path of recursion,
-        //substitution in summation_variables is done in calling function.
-        if (is_variable(application(working_condition).left()))
+        // This conjunct was one of the above three cases; see if we can build
+        // a prober substitution
+        if(left != data_expression() && right != data_expression())
         {
-          if (data::search_variable(summand_.summation_variables(), variable(application(working_condition).left())) &&
-              !data::search_data_expression(application(working_condition).right(), application(working_condition).left()))
+          if(!is_summand_variable(s, left) && is_summand_variable(s,right))
           {
-            if (substitutions.count(application(working_condition).left()) == 0)
+            swap(left, right);
+          }
+
+          // Expression x == e; we only add a substitution if x is a summation variable, and x does not occur in e;
+          // We evaluate the following three cases:
+          // 1. there is no substitution assinging to x yet -> add x := e
+          // 2. there is a substitution x := d, and e is a summation variable,
+          //     for which there is no substitution yet -> add e := x;
+          // 3. there is a substitution x := d, and d is a summation variable,
+          //    for which there is no substitution yet -> add d := e, and x := e
+          if (is_summand_variable(s, left) && !search_data_expression(right, left))
+          {
+            // Check if we already have a substition with left as left hand side
+            if (substitutions.find(left) == substitutions.end())
             {
-              // apply all previously added substitutions to the rhs.
-              sumelm_add_replacement(substitutions, application(working_condition).left(), application(working_condition).right());
-              result = sort_bool::true_();
+              sumelm_add_replacement(substitutions, left, right);
+              replacement_added = true;
             }
-            else if (is_variable(application(working_condition).right()) &&
-                     data::search_variable(summand_.summation_variables(), variable(application(working_condition).right())))
+            else if (is_summand_variable(s, right) && substitutions.find(right) == substitutions.end())
             {
-              // check whether the converse is possible
-              if (substitutions.count(application(working_condition).right()) == 0)
-              {
-                sumelm_add_replacement(substitutions, application(working_condition).right(),
-                                       substitutions[application(working_condition).left()]);
-                result = sort_bool::true_();
-              }
+              sumelm_add_replacement(substitutions, right, substitutions[left]);
+              replacement_added = true;
             }
-            else
+            else if (is_summand_variable(s, substitutions[left]) && substitutions.find(substitutions[left]) != substitutions.end())
             {
-              if (is_variable(substitutions[application(working_condition).left()]) &&
-                  substitutions.count(substitutions[application(working_condition).left()]) == 0 &&
-                  data::search_variable(summand_.summation_variables(), variable(substitutions[application(working_condition).left()])))
-              {
-                sumelm_add_replacement(substitutions, substitutions[application(working_condition).left()], application(working_condition).right());
-                sumelm_add_replacement(substitutions, application(working_condition).left(), application(working_condition).right());
-                result = sort_bool::true_();
-              }
+              sumelm_add_replacement(substitutions, substitutions[left], right);
+              sumelm_add_replacement(substitutions, left, right);
+              replacement_added = true;
             }
           }
         }
+
+        if(!replacement_added)
+        {
+          new_conjuncts.insert(*i);
+        }
       }
-      return result;
+
+      return data::join_and(new_conjuncts.begin(), new_conjuncts.end());
     }
 
   public:
@@ -141,15 +152,22 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
     /// \param spec The specification to which sum elimination should be
     ///             applied.
     /// \param verbose Control whether verbose output should be given.
-    sumelm_algorithm(specification& spec, bool verbose = false)
-      : lps::detail::lps_algorithm(spec, verbose),
-        m_removed(0)
+    sumelm_algorithm(specification& spec, bool decluster = false)
+      : lps::detail::lps_algorithm(spec),
+        m_removed(0),
+        m_decluster(decluster)
     {}
 
     /// \brief Apply the sum elimination lemma to all summands in the
     ///        specification.
     void run()
     {
+      if(m_decluster)
+      {
+        // First decluster specification
+        decluster_algorithm(m_spec).run();
+      }
+
       m_removed = 0; // Re-initialise number of removed variables for a fresh run.
 
       for (action_summand_vector::iterator i = m_spec.process().action_summands().begin();
@@ -177,7 +195,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
       using namespace data;
 
       atermpp::map<variable, data_expression> substitutions;
-      data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
+      data::data_expression new_condition = compute_substitutions(s, substitutions);
 
       s.condition() = data::replace_free_variables(new_condition, data::make_map_substitution(substitutions));
       lps::replace_free_variables(s.multi_action(), data::make_map_substitution(substitutions));
@@ -195,7 +213,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
       using namespace data;
 
       std::map<variable, data_expression> substitutions;
-      data_expression new_condition = recursive_substitute_equalities(s, s.condition(), substitutions);
+      data::data_expression new_condition = compute_substitutions(s, substitutions);
 
       s.condition() = data::replace_free_variables(new_condition, data::make_map_substitution(substitutions));
       if (s.deadlock().has_time())

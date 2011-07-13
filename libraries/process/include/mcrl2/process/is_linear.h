@@ -48,7 +48,7 @@ bool is_linear(const process_specification& p, bool verbose = false)
     {
       if (verbose)
       {
-        std::clog << "warning: the initial process " << core::pp(p.init()) << " is not a process instance or a process instance assignment" << std::endl;
+        std::clog << "warning: the initial process " << process::pp(p.init()) << " is not a process instance or a process instance assignment" << std::endl;
       }
       return false;
     }

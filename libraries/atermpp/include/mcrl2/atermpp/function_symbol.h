@@ -13,7 +13,7 @@
 #define MCRL2_ATERMPP_FUNCTION_SYMBOL_H
 
 #include <string>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 namespace atermpp
 {
@@ -34,7 +34,7 @@ class function_symbol
     /// \param arity The arity of the function.
     /// \param quoted True if the function symbol is a quoted string.
     function_symbol(const std::string& name, int arity, bool quoted = false)
-      : m_function(ATmakeAFun(const_cast<char*>(name.c_str()), arity, quoted ? ATtrue : ATfalse))
+      : m_function(ATmakeAFun(const_cast<char*>(name.c_str()), arity, quoted ? true : false))
     {}
 
     /// \brief Constructor.
@@ -66,7 +66,7 @@ class function_symbol
 
     /// \brief Return the arity (number of arguments) of the function symbol (function_symbol).
     /// \return The arity of the function symbol.
-    unsigned int arity() const
+    size_t arity() const
     {
       return ATgetArity(m_function);
     }

@@ -18,7 +18,7 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/modal_formula/parse.h"
@@ -253,7 +253,7 @@ class lts2pbes_tool : public input_output_tool
 #endif
         case lts_dot:
         {
-          lts_svc_t l;
+          lts_dot_t l;
           l.load(infilename);
           convert_to_lts_lts(l, result);
           break;
@@ -307,11 +307,11 @@ class lts2pbes_tool : public input_output_tool
       //save the result
       if (output_filename().empty())
       {
-        gsVerboseMsg("writing PBES to stdout...\n");
+        mCRL2log(verbose) << "writing PBES to stdout..." << std::endl;
       }
       else
       {
-        gsVerboseMsg("writing PBES to file '%s'...\n", output_filename().c_str());
+        mCRL2log(verbose) << "writing PBES to file '" <<  output_filename() << "'..." << std::endl;
       }
       result.save(output_filename());
       return true;

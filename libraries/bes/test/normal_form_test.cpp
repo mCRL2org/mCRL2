@@ -15,7 +15,8 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
-#include "mcrl2/bes/bes_parse.h"
+#include "mcrl2/bes/parse.h"
+#include "mcrl2/bes/print.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -26,10 +27,10 @@ void test_standard_recursive_form(const std::string& bes_spec, bool recursive_fo
   boolean_equation_system<> b;
   std::stringstream from(bes_spec);
   from >> b;
-  std::cout << "before\n" << pp(b) << std::endl;
+  std::cout << "before\n" << bes::pp(b) << std::endl;
 
   make_standard_form(b, recursive_form);
-  std::cout << "after\n" << pp(b) << std::endl;
+  std::cout << "after\n" << bes::pp(b) << std::endl;
 }
 
 void test_standard_recursive_form()

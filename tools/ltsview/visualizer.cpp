@@ -1369,9 +1369,8 @@ void Visualizer::drawLoop(State* state)
   Vector3D startControl = state->getLoopControl1();
   Vector3D endControl = state->getLoopControl2();
 
-  float t,it,b0,b1,b2,b3,x,y,z, statesize;
+  float t,it,b0,b1,b2,b3,x,y,z;
   int N = settings->getInt(Quality);
-  statesize = settings->getFloat(StateSize);
   glBegin(GL_LINE_STRIP);
   for (int k = 0; k < N; ++k)
   {

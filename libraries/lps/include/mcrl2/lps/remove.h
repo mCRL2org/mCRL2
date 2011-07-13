@@ -47,7 +47,7 @@ struct is_singleton_sort
 
   bool operator()(const data::sort_expression& s) const
   {
-    data::data_specification::constructors_const_range c = m_data_spec.constructors(s);
+    data::function_symbol_vector c(m_data_spec.constructors(s));
     if (boost::distance(c) != 1)
     {
       return false;

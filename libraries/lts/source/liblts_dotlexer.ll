@@ -11,11 +11,9 @@
 #define YYSTYPE std::string
 #include <cstdio>
 // #include <aterm2.h>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "liblts_dotlexer.h"
 #include "mcrl2/lts/detail/liblts_dotparser.h"
-
-using namespace mcrl2::core;
 
 //using namespace std;
 
@@ -28,8 +26,6 @@ using std::cout;
 #endif
 
 using namespace mcrl2::lts;
-
-//Global precondition: the ATerm library has been initialised
 
 //external declarations
 int dotyyparse(void);          /* declared in dotparser.cpp */

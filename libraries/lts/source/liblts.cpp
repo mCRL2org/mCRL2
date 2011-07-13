@@ -18,13 +18,12 @@
 #include <cassert>
 #include <cstdlib>
 #include <algorithm>
-// #include <boost/bind.hpp>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/set.h"
-#include "mcrl2/core/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lts/lts_utilities.h"
@@ -69,51 +68,33 @@ lts_type guess_format(string const& s)
 
     if (ext == "aut")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected Aldebaran extension.\n";
-      }
+      mCRL2log(verbose) << "Detected Aldebaran extension.\n";
       return lts_aut;
     }
     else if (ext == "lts")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected mCRL2 extension.\n";
-      }
+      mCRL2log(verbose) << "Detected mCRL2 extension.\n";
       return lts_lts;
     }
     else if (ext == "svc")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected SVC extension; assuming mCRL2 format.\n";
-      }
+      mCRL2log(verbose) << "Detected SVC extension; assuming mCRL2 format.\n";
       return lts_lts;
     }
     else if (ext == "fsm")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected Finite State Machine extension.\n";
-      }
+      mCRL2log(verbose) << "Detected Finite State Machine extension.\n";
       return lts_fsm;
     }
     else if (ext == "dot")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected GraphViz extension.\n";
-      }
+      mCRL2log(verbose) << "Detected GraphViz extension.\n";
       return lts_dot;
 #ifdef USE_BCG
     }
     else if (ext == "bcg")
     {
-      if (core::gsVerbose)
-      {
-        std::cerr << "Detected Binary Coded Graph extension.\n";
-      }
+      mCRL2log(verbose) << "Detected Binary Coded Graph extension.\n";
       return lts_bcg;
 #endif
     }

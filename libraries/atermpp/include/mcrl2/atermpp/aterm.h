@@ -15,8 +15,10 @@
 #include <string>
 #include <iostream>
 #include <cassert>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_traits.h"
+
+using namespace aterm;
 
 /// \brief The main namespace for the ATerm++ library.
 namespace atermpp
@@ -84,6 +86,7 @@ class aterm_base
     aterm_base(ATermAppl term)
       : m_term(reinterpret_cast<ATerm>(term))
     {
+      assert((term == NULL) || (ATgetType(term)!= AT_FREE));
       assert((m_term==NULL) || (ATgetType(m_term)!=AT_FREE));
     }
 
@@ -91,7 +94,7 @@ class aterm_base
     /// Protects the aterm from being freed at garbage collection.
     void protect() const
     {
-      aterm_protect(&m_term);
+      ATprotect(&m_term);
     }
 
     /// \brief Unprotect the aterm.
@@ -99,7 +102,7 @@ class aterm_base
     /// call to protect.
     void unprotect() const
     {
-      aterm_unprotect(&m_term);
+      ATunprotect(&m_term);
     }
 
     /// \brief Mark the aterm for not being garbage collected.
@@ -112,7 +115,7 @@ class aterm_base
     /// Result is one of AT_APPL, AT_INT,
     /// AT_REAL, AT_LIST, AT_PLACEHOLDER, or AT_BLOB.
     /// \return The type of the term.
-    int type() const
+    size_t type() const
     {
       return ATgetType(m_term);
     }
@@ -121,7 +124,7 @@ class aterm_base
     /// \return A string representation of the term.
     std::string to_string() const
     {
-      return std::string(ATwriteToString(m_term));
+      return ATwriteToString(m_term);
     }
 };
 
@@ -155,7 +158,7 @@ struct aterm_traits<aterm_base>
 inline
 bool operator!(const aterm_base& x)
 {
-  return ATisEqual(aterm_traits<aterm_base>::term(x), ATfalse);
+  return ATisEqual(aterm_traits<aterm_base>::term(x), false);
 }
 
 /// \brief Writes a string representation of the aterm t to the stream out.
@@ -309,7 +312,7 @@ aterm read_from_named_file(const std::string& name)
 inline
 bool write_to_named_text_file(aterm t, const std::string& filename)
 {
-  return ATwriteToNamedTextFile(t, filename.c_str()) == ATtrue;
+  return ATwriteToNamedTextFile(t, filename.c_str()) == true;
 }
 
 /// \brief Writes term t to file named filename in Binary aterm Format (baf).
@@ -319,7 +322,7 @@ bool write_to_named_text_file(aterm t, const std::string& filename)
 inline
 bool write_to_named_binary_file(aterm t, const std::string& filename)
 {
-  return ATwriteToNamedBinaryFile(t, filename.c_str()) == ATtrue;
+  return ATwriteToNamedBinaryFile(t, filename.c_str()) == true;
 }
 
 /// \brief Writes term t to file named filename in Streamable aterm Format (saf).
@@ -381,7 +384,7 @@ bool write_to_named_saf_file(aterm t, const std::string& filename)
 inline
 bool operator==(const aterm& x, const aterm& y)
 {
-  return ATisEqual(x, y) == ATtrue;
+  return ATisEqual(x, y) == true;
 }
 
 /// \brief Equality operator.
@@ -391,7 +394,7 @@ bool operator==(const aterm& x, const aterm& y)
 inline
 bool operator==(const aterm& x, ATerm y)
 {
-  return ATisEqual(x, y) == ATtrue;
+  return ATisEqual(x, y) == true;
 }
 
 /// \brief Equality operator.
@@ -401,7 +404,7 @@ bool operator==(const aterm& x, ATerm y)
 inline
 bool operator==(const ATerm& x, aterm y)
 {
-  return ATisEqual(x, y) == ATtrue;
+  return ATisEqual(x, y) == true;
 }
 
 /// \brief Inequality operator.
@@ -411,7 +414,7 @@ bool operator==(const ATerm& x, aterm y)
 inline
 bool operator!=(const aterm& x, const aterm& y)
 {
-  return ATisEqual(x, y) == ATfalse;
+  return ATisEqual(x, y) == false;
 }
 
 /// \brief Inequality operator.
@@ -421,7 +424,7 @@ bool operator!=(const aterm& x, const aterm& y)
 inline
 bool operator!=(const aterm& x, ATerm y)
 {
-  return ATisEqual(x, y) == ATfalse;
+  return ATisEqual(x, y) == false;
 }
 
 /// \brief Inequality operator.
@@ -431,7 +434,7 @@ bool operator!=(const aterm& x, ATerm y)
 inline
 bool operator!=(const ATerm& x, aterm y)
 {
-  return ATisEqual(x, y) == ATfalse;
+  return ATisEqual(x, y) == false;
 }
 
 } // namespace atermpp

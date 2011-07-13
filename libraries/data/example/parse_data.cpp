@@ -2,7 +2,7 @@
 #include <fstream>
 #include <string>
 #include <cassert>
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -12,13 +12,13 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  if (argc < 1)
+  if (argc < 2)
   {
     std::cout << "Usage: parse_data FILENAME" << std::endl;
-    return 1;
+    return 0;
   }
 
-  std::string text = core::read_text(argv[1]);
+  std::string text = utilities::read_text(argv[1]);
   try
   {
     data::data_specification d = data::parse_data_specification(text);

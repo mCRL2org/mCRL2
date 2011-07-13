@@ -315,8 +315,8 @@ class forall: public state_formula
     }
 
     /// \brief Constructor.
-    forall(const data::variable_list& variables, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateForall(variables, operand))
+    forall(const data::variable_list& variables, const state_formula& body)
+      : state_formula(core::detail::gsMakeStateForall(variables, body))
     {}
 
     data::variable_list variables() const
@@ -324,7 +324,7 @@ class forall: public state_formula
       return atermpp::list_arg1(*this);
     }
 
-    state_formula operand() const
+    state_formula body() const
     {
       return atermpp::arg2(*this);
     }
@@ -358,8 +358,8 @@ class exists: public state_formula
     }
 
     /// \brief Constructor.
-    exists(const data::variable_list& variables, const state_formula& operand)
-      : state_formula(core::detail::gsMakeStateExists(variables, operand))
+    exists(const data::variable_list& variables, const state_formula& body)
+      : state_formula(core::detail::gsMakeStateExists(variables, body))
     {}
 
     data::variable_list variables() const
@@ -367,7 +367,7 @@ class exists: public state_formula
       return atermpp::list_arg1(*this);
     }
 
-    state_formula operand() const
+    state_formula body() const
     {
       return atermpp::arg2(*this);
     }
@@ -836,5 +836,9 @@ bool state_formula::has_time() const
 } // namespace state_formulas
 
 } // namespace mcrl2
+
+#ifndef MCRL2_MODAL_FORMULA_PRINT_H
+#include "mcrl2/modal_formula/print.h"
+#endif
 
 #endif // MCRL2_MODAL_STATE_FORMULA_H

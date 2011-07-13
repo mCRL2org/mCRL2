@@ -13,6 +13,7 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 #include "mcrl2/utilities/test_utilities.h"
@@ -63,13 +64,42 @@ BOOST_AUTO_TEST_CASE(rational)
   s = linearise(input);
 
   std::string output;
-  output = pp(s);
+  output = lps::pp(s);
 
   // Check whether the symbol @ occurs in the pretty printed output. If this is
   // the case, still some internal symbol is exposed. As a result, our parsers
   // will not be able to handle the specification as input.
   BOOST_CHECK(output.find("@") == std::string::npos);
 }
+
+#ifdef MCRL2_PRINT_PROBLEM_CASES
+void test_specification(const std::string& spec_text)
+{
+  specification x = parse_linear_process_specification(spec_text);
+
+  std::string s1 = lps::pp(x);
+  std::string s2 = lps::print(x);
+  if (s1 != s2)
+  {
+    std::clog << "--- testing spec ---" << std::endl;
+    std::clog << "<pp>   " << s1 << std::endl;
+    std::clog << "<print>" << s2 << std::endl;
+    BOOST_CHECK(s1 == s2);
+  }  
+}
+
+BOOST_AUTO_TEST_CASE(problem_cases)
+{
+  std::string SPEC;
+
+  SPEC = 
+    "act  a: Bool;         \n"
+    "proc P =  a(true) . P;\n"
+    "init P;               \n"
+    ;
+  test_specification(SPEC);
+}
+#endif
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

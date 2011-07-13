@@ -24,7 +24,7 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/vector.h"
-#include "gc.h"               // AT_collect
+#include "mcrl2/aterm/gc.h"               // AT_collect
 
 using namespace std;
 using namespace atermpp;
@@ -71,12 +71,12 @@ class A
 
     void protect() const
     {
-      aterm_protect(&x);
+      ATprotect(&x);
     }
 
     void unprotect() const
     {
-      aterm_unprotect(&x);
+      ATunprotect(&x);
     }
 
     void mark() const

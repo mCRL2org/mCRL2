@@ -16,7 +16,7 @@
 #include <string>
 #include <sstream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/alphabet_reduction.h"
@@ -79,7 +79,7 @@ process_expression parse_process_expression(const std::string& text,
     const std::string& proc_decl
                                            )
 {
-  std::string proc_text = core::regex_replace(";", " = delta;", proc_decl);
+  std::string proc_text = utilities::regex_replace(";", " = delta;", proc_decl);
   std::string init_text = "init\n     " + text + ";\n";
   std::string spec_text = data_decl + "\n" + proc_text + "\n" + init_text;
   process_specification spec = parse_process_specification(spec_text);

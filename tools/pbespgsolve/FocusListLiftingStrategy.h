@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -12,8 +12,8 @@
 
 #include "SmallProgressMeasures.h"
 #include "LinearLiftingStrategy.h"
-#include <list>
 #include <utility>
+#include <vector>
 
 /*! This is an implementation of the "Focus List Approach" described in the
     Multi-Core Solver for Parity Games paper.
@@ -29,62 +29,56 @@
     algorithm switches to pass 2.
 
     TODO: improve performance by using a fixed size list instead of a std::list
-
-    TODO: instead of restarting pass 1 at the beginning, it may make sense to
-          restart at the end, although this makes it slightly more tricky to
-          determine when we are done.
 */
 
-class FocusListLiftingStrategy : public LiftingStrategy
+class FocusListLiftingStrategy : public LiftingStrategy, public virtual Logger
 {
-  public:
-    FocusListLiftingStrategy(const ParityGame& game,
-                             bool backward, size_t max_size);
-    verti next(verti prev_vertex, bool prev_lifted);
+public:
+    FocusListLiftingStrategy( const ParityGame &game,
+        bool backward, bool alternate, verti max_size, long long max_lifts );
+    void lifted(verti vertex);
+    verti next();
     size_t memory_use() const;
-    bool backward() const
-    {
-      return lls_.backward()!=0;
-    }
-    bool max_size() const
-    {
-      return max_size_!=0;
-    }
+    bool backward() const { return lls_.backward(); }
+    bool max_size() const { return focus_list_.capacity(); }
 
-  protected:
-    verti pass1(verti prev_vertex, bool prev_lifted);
-    verti pass2(verti prev_vertex, bool prev_lifted);
+protected:
+    verti phase1();
+    verti phase2();
 
-  private:
-    typedef std::list<std::pair<verti, unsigned> > focus_list;
+private:
+    typedef std::vector<std::pair<verti, unsigned> > focus_list;
 
-    const size_t max_size_;             //!< maximum allowed focus list size
-    int pass_;                          //!< current pass
+    long long max_lift_attempts_;       //!< maximum lift attempts per list
+    int phase_;                         //!< current phase
+    long long num_lift_attempts_;       //!< number of consecutive lift attempts
+    bool prev_lifted_;                  //!< whether previous vertex was lifted
 
-    // For pass 1:
+    // For phase 1:
     LinearLiftingStrategy lls_;         //!< strategy for pass 1
-    verti last_vertex_;                 //!< last vertex selected in pass 1
-    bool last_lifted_;                  //!< was last vertex lifted?
-    verti num_lift_attempts_;           //!< number of consecutive lift attempts
 
-    // For pass 2:
+    // For phase 2:
     focus_list focus_list_;             //!< nodes on the focus list
-    focus_list::iterator focus_pos_;    //!< current position in the focus list
+    focus_list::iterator read_pos_;     //!< current position in the focus list
+    focus_list::iterator write_pos_;    //!< current position in the focus list
 };
 
 
 class FocusListLiftingStrategyFactory : public LiftingStrategyFactory
 {
-  public:
-    FocusListLiftingStrategyFactory(bool backward, double ratio)
-      : backward_(backward), ratio_(ratio > 0 ? ratio : 0.1) { };
+public:
+    FocusListLiftingStrategyFactory(
+        bool backward, bool alternate, double size_ratio, double lift_ratio )
+        : backward_(backward), alternate_(alternate),
+          size_ratio_(size_ratio > 0 ? size_ratio :  0.1),
+          lift_ratio_(lift_ratio > 0 ? lift_ratio : 10.0) { };
 
-    LiftingStrategy* create(const ParityGame& game,
-                            const SmallProgressMeasures& spm);
+    LiftingStrategy *create( const ParityGame &game,
+                             const SmallProgressMeasures &spm );
 
-  private:
-    const bool      backward_;
-    const double    ratio_;
+private:
+    const bool   backward_, alternate_;
+    const double size_ratio_, lift_ratio_;
 };
 
 #endif /* ndef FOCUS_LIST_LIFTING_STRATEGY_H_INCLUDED */

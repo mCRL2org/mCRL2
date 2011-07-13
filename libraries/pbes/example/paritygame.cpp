@@ -12,7 +12,7 @@
 #include <string>
 #include <stdexcept>
 #include <vector>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/parity_game_generator.h"
 #include "mcrl2/pbes/detail/parity_game_output.h"
@@ -99,12 +99,9 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
-      {
-        std::cout << "paritygame parameters:" << std::endl;
-        std::cout << "  input file:         " << m_input_filename << std::endl;
-        std::cout << "  output file:        " << m_output_filename << std::endl;
-      }
+      mCRL2log(verbose) << "paritygame parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
       pbes_system::pbes<> p;
       p.load(m_input_filename);

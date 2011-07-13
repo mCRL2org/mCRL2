@@ -21,13 +21,17 @@
 #include <sstream>
 #include <vector>
 #include "mcrl2/exception.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/traverser.h"
+#include "mcrl2/core/detail/precedence.h"
 
 namespace mcrl2
 {
 namespace core
 {
+
+using namespace core::detail::precedences;
 
 /// \brief t_pp_format represents the available pretty print formats
 typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
@@ -55,40 +59,6 @@ std::string pp_format_to_string(const t_pp_format pp_format)
   }
 }
 
-/** \brief Extensions of the printf function. The following new
- *         conversion formats are supported:
- *         - '%P' for pretty printing ATerm's
- *         - '%T' for normal printing of ATerm's
- *         - '%F' for printing of AFun's
-**/
-int gsprintf(const char* format, ...);
-
-/** \brief Extensions of the fprintf function. The following new
- *         conversion formats are supported:
- *         - '%P' for pretty printing ATerm's
- *         - '%T' for normal printing of ATerm's
- *         - '%F' for printing of AFun's
-**/
-int gsfprintf(FILE* stream, const char* format, ...);
-
-/** \brief Extensions of the vfprintf functions. The following new
- *         conversion formats are supported:
- *         - '%P' for the pretty printing ATerm's
- *         - '%T' for the normal printing of ATerm's
- *         - '%F' for the printing of AFun's
-**/
-int gsvfprintf(FILE* stream, const char* format, va_list args);
-
-/** \brief Print a textual description of an ATerm representation of an
- *         mCRL2 specification or expression to an output stream.
- *  \param[in] out_stream A pointer to a stream to which can be written.
- *  \param[in] part An ATerm representation of a part of an mCRL2
- *             specification or expression.
- *  \param[in] pp_format A pretty print format.
- *  \post A textual representation of part is written to out_stream using
- *        method pp_format.
-**/
-void PrintPart_C(FILE* out_stream, const ATerm part, t_pp_format pp_format = ppDefault);
 
 /** \brief Print a textual description of an ATerm representation of an
  *         mCRL2 specification or expression to an output stream.
@@ -124,159 +94,157 @@ std::string pp(Term part, t_pp_format pp_format = ppDefault)
   return PrintPart_CXX(atermpp::aterm_traits<Term>::term(part), pp_format);
 }
 
+/// \cond INTERNAL_DOCS
 namespace detail
 {
 
-template <typename Derived>
-class print_traverser: public traverser<Derived>
+inline
+void check_pp(const std::string& s1, const std::string& s2, const std::string& s3)
 {
-  protected:
-    std::ostream& out;
-    bool m_print_sorts;
+  if (s1 != s2)
+  {
+    std::clog << "<pp>   " << s1 << std::endl;
+    std::clog << "<print>" << s2 << std::endl;
+    std::clog << "<aterm>" << s3 << std::endl;
+    throw std::runtime_error("not equal");
+  }
+}
 
-    enum precedence_type
+#ifdef MCRL2_ENABLE_CHECK_PP
+#define MCRL2_CHECK_PP(s1, s2, s3) core::detail::check_pp(s1, s2, s3);
+#else
+#define MCRL2_CHECK_PP(s1, s2, s3)
+#endif
+
+template <typename Derived>
+struct printer: public core::traverser<Derived>
+{
+  typedef core::traverser<Derived> super;
+
+  Derived& derived()
+  {
+    return static_cast<Derived&>(*this);
+  }
+
+
+  // using super::enter;
+  // using super::leave;
+  using super::operator();
+
+  std::ostream* m_out;
+
+  std::ostream& out()
+  {
+    return *m_out;
+  }
+
+  void print(const std::string& s)
+  {
+    out() << s;
+  }
+
+  template <typename T>
+  void print_expression(const T& x, int prec = 5)
+  {
+    bool print_parens = (precedence(x) < prec);
+    if (print_parens)
     {
-      max_precedence = 10000000
-    };
-
-#ifdef MCRL2_PRINT_DEBUG
-    std::ostringstream debug;
-    std::vector<std::string> debug_strings;
-    std::vector<std::size_t> debug_positions;
-#endif
-  public:
-    typedef traverser<Derived> super;
-
-#ifndef MCRL2_PRINT_DEBUG
-    using super::enter;
-    using super::leave;
-#endif
-    using super::operator();
-
-    print_traverser(std::ostream& o)
-      : out(o),
-        m_print_sorts(false)
-    {}
-
-    void print(const std::string& s)
-    {
-      out << s;
-#ifdef MCRL2_PRINT_DEBUG
-      debug << s;
-#endif
+      derived().print("(");
     }
-
-    template <typename T>
-    int precedence(const T& t)
+    derived()(x);
+    if (print_parens)
     {
-      return max_precedence;
+      derived().print(")");
     }
+  }
 
-    template <typename Container>
-    void print_container(const Container& container,
-                         int container_precedence = -1,
-                         const std::string& separator = ", ",
-                         const std::string& open_bracket = "(",
-                         const std::string& close_bracket = ")"
-                        )
+  template <typename T>
+  void print_unary_operation(const T& x, const std::string& op)
+  {
+    derived().print(op);
+    print_expression(x.operand(), precedence(x));
+  }
+
+  template <typename T>
+  void print_binary_operation(const T& x, const std::string& op)
+  {
+#ifdef MCRL2_DEBUG_BINARY_OPERATION
+    std::cout << "<binary>" << std::endl;
+    std::cout << "<x>" << x.to_string() << " precedence = " << precedence(x) << std::endl;
+    std::cout << "<left>" << x.left().to_string() << " precedence = " << precedence(x.left()) << std::endl;
+    std::cout << "<right>" << x.right().to_string() << " precedence = " << precedence(x.right()) << std::endl;
+#endif
+    print_expression(x.left(), is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
+    derived().print(op);
+    print_expression(x.right(), is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
+  }
+
+  template <typename Container>
+  void print_list(const Container& container,
+                  const std::string& opener = "(",
+                  const std::string& closer = ")",
+                  const std::string& separator = ", ",
+                  bool print_empty_container = false
+                 )
+  {
+    if (container.empty() && !print_empty_container)
     {
-      for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+      return;
+    }
+    derived().print(opener);
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      if (i != container.begin())
       {
-        if (i != container.begin())
-        {
-          print(separator);
-        }
-        bool print_brackets = (precedence(*i) < container_precedence);
-        if (print_brackets)
-        {
-          print(open_bracket);
-        }
-        static_cast<Derived&>(*this)(*i);
-        if (print_brackets)
-        {
-          print(close_bracket);
-        }
+        derived().print(separator);
       }
+      derived()(*i);
     }
+    derived().print(closer);
+  }
 
-    void operator()(const core::identifier_string& x)
-    {
-      static_cast<Derived&>(*this).enter(x);
-      print(std::string(x));
-      static_cast<Derived&>(*this).leave(x);
-    }
+  template <typename T>
+  void operator()(const atermpp::term_list<T>& t)
+  {
+    print_list(t, "", "", ", ");
+  }
 
-#ifdef MCRL2_PRINT_DEBUG
-    template <typename T>
-    std::string print_debug(const T& t)
-    {
-      return pp(t);
-    }
-
-    // Enter object
-    template <typename Expression>
-    void enter(const Expression& x)
-    {
-      debug_strings.push_back(static_cast<Derived&>(*this).print_debug(x));
-      debug_positions.push_back(debug.str().size());
-    }
-
-    // Leave object
-    template <typename Expression>
-    void leave(const Expression& x)
-    {
-      std::string expected = debug_strings.back();
-      debug_strings.pop_back();
-      std::size_t begin_pos = debug_positions.back();
-      debug_positions.pop_back();
-      std::string result = debug.str().substr(begin_pos);
-      if (expected != result)
-      {
-        std::cerr << "--- Error in print ---\n"
-                  << "  expected: " << expected << "\n"
-                  << "       got: " << result << std::endl;
-        BOOST_CHECK(expected == result);
-      }
-    }
-#endif
+  void operator()(const core::identifier_string& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(std::string(x));
+    static_cast<Derived&>(*this).leave(x);
+  }
 };
 
-// apply a traverser with one additional template argument
-template <template <class> class Traverser, class OutputStream>
-class apply_print_traverser: public Traverser<apply_print_traverser<Traverser, OutputStream> >
+template <template <class> class Traverser>
+struct apply_printer: public Traverser<apply_printer<Traverser> >
 {
-    typedef Traverser<apply_print_traverser<Traverser, OutputStream> > super;
+  typedef Traverser<apply_printer<Traverser> > super;
 
-  public:
-    using super::enter;
-    using super::leave;
-    using super::operator();
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  
+  apply_printer(std::ostream& out)
+  {
+    typedef printer<apply_printer<Traverser> > Super;
+    static_cast<Super&>(*this).m_out = &out;
+  }
 
-//#if BOOST_MSVC
-//    template <typename Container>
-//    void operator()(Container const& container, typename atermpp::detail::enable_if_container<Container>::type* = 0)
-//    {
-//      super::operator()(container);
-//    }
-//    template <typename T>
-//    void operator()(const T& x)
-//    {
-//      super::operator()(x);
-//    }
-//#endif
-
-    apply_print_traverser(std::ostream& out):
-      super(out)
-    {}
+#if BOOST_MSVC
+#include "mcrl2/core/detail/traverser_msvc.inc.h"
+#endif
 };
 
 } // namespace detail
+/// \endcond
 
 /// \brief Prints the object t to a stream.
 template <typename T>
 void print(const T& t, std::ostream& out)
 {
-  detail::apply_print_traverser<detail::print_traverser, std::ostringstream> printer(out);
+  detail::apply_printer<core::detail::printer> printer(out);
   printer(t);
 }
 

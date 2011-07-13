@@ -16,8 +16,9 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/bes/io.h"
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/pbesinstconversion.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -47,42 +48,42 @@ void save_pbes(const pbes<>& pbes_spec, std::string outfilename, pbes_output_for
     {
       if (aterm_ascii)
       {
-        core::gsVerboseMsg("Saving result in ATerm ascii format...\n");
+        mCRL2log(verbose) << "Saving result in ATerm ascii format..." << std::endl;
         pbes_spec.save(outfilename, false);
       }
       else
       {
-        core::gsVerboseMsg("Saving result in ATerm binary format...\n");
+        mCRL2log(verbose) << "Saving result in ATerm binary format..." << std::endl;
         pbes_spec.save(outfilename, true);
       }
       break;
     }
     case pbes_output_bes:
     {
-      if (!pbes_spec.is_bes())
+      if (!is_bes(pbes_spec))
       {
         throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
       }
       bes::boolean_equation_system<> bes_spec = pbesinstconversion(pbes_spec);
       if (aterm_ascii)
       {
-        core::gsVerboseMsg("Saving result in ATerm ascii format...\n");
+        mCRL2log(verbose) << "Saving result in ATerm ascii format..." << std::endl;
         bes_spec.save(outfilename, false);
       }
       else
       {
-        core::gsVerboseMsg("Saving result in ATerm binary format...\n");
+        mCRL2log(verbose) << "Saving result in ATerm binary format..." << std::endl;
         bes_spec.save(outfilename, true);
       }
       break;
     }
     case pbes_output_cwi:
     {
-      if (!pbes_spec.is_bes())
+      if (!is_bes(pbes_spec))
       {
         throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
       }
-      core::gsVerboseMsg("Saving result in CWI format...\n");
+      mCRL2log(verbose) << "Saving result in CWI format..." << std::endl;
       bes::bes2cwi(pbes_spec.equations().begin(), pbes_spec.equations().end(), outfilename);
       break;
     }

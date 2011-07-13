@@ -13,6 +13,7 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/find.h"
+#include "mcrl2/bes/print.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -32,12 +33,12 @@ void test_join()
   s.insert(boolean_variable("X1"));
   s.insert(boolean_variable("X2"));
   boolean_expression x = join_or(s.begin(), s.end());
-  std::cout << "x = " << pp(x) << std::endl;
+  std::cout << "x = " << bes::pp(x) << std::endl;
 
 #ifdef MCRL2_JOIN_TEST
 // The gcc compiler gives the following error:
 //
-// D:\mcrl2\libraries\core\include/mcrl2/core/detail/join.h:54:22: error: call
+// D:\mcrl2\libraries\core\include/mcrl2/utilities/detail/join.h:54:22: error: call
 // of overloaded 'boolean_expression(const mcrl2::bes::boolean_variable&)' is
 // ambiguous
 //
@@ -48,7 +49,7 @@ void test_join()
   sv.insert(boolean_variable("X1"));
   sv.insert(boolean_variable("X2"));
   x = join_or(sv.begin(), sv.end());
-  std::cout << "x = " << pp(x) << std::endl;
+  std::cout << "x = " << bes::pp(x) << std::endl;
 #endif
 
   core::garbage_collect();

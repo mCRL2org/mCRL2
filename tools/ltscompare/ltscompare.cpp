@@ -13,7 +13,7 @@
 
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/exception.h"
 
 #include "mcrl2/utilities/input_tool.h"
@@ -172,28 +172,26 @@ class ltscompare_tool : public ltscompare_base
       bool result = true;
       if (tool_options.equivalence != lts_eq_none)
       {
-        gsVerboseMsg("comparing LTSs using %s...\n",
-                     name_of_equivalence(tool_options.equivalence).c_str());
+        mCRL2log(verbose) << "comparing LTSs using " <<
+                     name_of_equivalence(tool_options.equivalence) << "..." << std::endl;
 
         result = compare(l1,l2,tool_options.equivalence,tool_options.generate_counter_examples);
 
-        gsMessage("LTSs are %s%s\n",
-                  ((result) ? "" : "not "),
-                  equivalent_string(tool_options.equivalence));
+        mCRL2log(info) << "LTSs are " << ((result) ? "" : "not ")
+                       << equivalent_string(tool_options.equivalence) << std::endl;
       }
 
       if (tool_options.preorder != lts_pre_none)
       {
-        gsVerboseMsg("comparing LTSs using %s...\n",
-                     name_of_preorder(tool_options.preorder).c_str());
+        mCRL2log(verbose) << "comparing LTSs using " <<
+                     name_of_preorder(tool_options.preorder) << "..." << std::endl;
 
         result = compare(l1,l2,tool_options.preorder);
 
-        gsMessage("LTS in %s is %s%s LTS in %s\n",
-                  tool_options.name_for_first.c_str(),
-                  ((result) ? "" : "not "),
-                  preorder_string(tool_options.preorder),
-                  tool_options.name_for_second.c_str());
+        mCRL2log(info) << "LTS in " << tool_options.name_for_first
+                       << " is " << ((result) ? "" : "not ")
+                       << preorder_string(tool_options.preorder)
+                       << " LTS in " << tool_options.name_for_second << std::endl;
       }
 
       return result;
@@ -393,7 +391,7 @@ class ltscompare_tool : public ltscompare_base
       }
       else
       {
-        gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
+        mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
         tool_options.format_for_first = lts_aut;
       }
       if (parser.options.count("in2"))

@@ -87,7 +87,7 @@ void test_fresh_variables()
   context.insert("e");
   context.insert("f_00");
   variable_list w1 = fresh_variables(w, context);
-  std::cout << "w1 = " << mcrl2::data::pp(w1) << std::endl;
+  std::cout << "w1 = " << data::pp(w1) << std::endl;
 
   context.clear();
   context.insert("e3_Sx0");

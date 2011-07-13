@@ -39,9 +39,9 @@ atermpp::aterm_appl data_specification_to_aterm_data_spec(const data_specificati
   {
     return gsMakeDataSpec(
              gsMakeSortSpec(atermpp::convert< atermpp::aterm_list >(s.m_sorts) +
-                            atermpp::convert< atermpp::aterm_list >(data_specification::aliases_const_range(s.m_aliases))),
-             gsMakeConsSpec(atermpp::convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_constructors))),
-             gsMakeMapSpec(atermpp::convert< atermpp::aterm_list >(data_specification::constructors_const_range(s.m_mappings))),
+                            atermpp::convert< atermpp::aterm_list >(s.m_aliases)),
+             gsMakeConsSpec(atermpp::convert< atermpp::aterm_list >(s.m_constructors)),
+             gsMakeMapSpec(atermpp::convert< atermpp::aterm_list >(s.m_mappings)),
              gsMakeDataEqnSpec(atermpp::convert< atermpp::aterm_list >(s.m_equations)));
   }
   else
@@ -62,11 +62,17 @@ class finiteness_helper
 
     bool is_finite_aux(const sort_expression s)
     {
-      for (data_specification::constructors_const_range r(m_specification.constructors(s)); !r.empty(); r.advance_begin(1))
+      function_symbol_vector constructors(m_specification.constructors(s));
+      if(constructors.empty())
       {
-        if (is_function_sort(r.front().sort()))
+        return false;
+      }
+
+      for (function_symbol_vector::const_iterator i = constructors.begin(); i != constructors.end(); ++i)
+      {
+        if (is_function_sort(i->sort()))
         {
-          const function_sort f_sort(r.front().sort());
+          const function_sort f_sort(i->sort());
           const sort_expression_list l=f_sort.domain();
 
           for (sort_expression_list::const_iterator i=l.begin(); i!=l.end(); ++i)
@@ -141,7 +147,7 @@ class finiteness_helper
       return (s.container_name() == set_container()) ? is_finite(s.element_sort()) : false;
     }
 
-    bool is_finite(const alias& s)
+    bool is_finite(const alias&)
     {
       assert(0);
       return false;
@@ -165,6 +171,172 @@ bool data_specification::is_certainly_finite(const sort_expression& s) const
 }
 
 
+// The function below checks whether there is an alias loop, e.g. aliases
+// of the form A=B; B=A; or more complex A=B->C; B=Set(D); D=List(A); Loops
+// through structured sorts are allowed. If a loop is detected, an exception
+// is thrown.
+void data_specification::check_for_alias_loop(
+  const sort_expression s,
+  std::set < sort_expression > sorts_already_seen,
+  const bool toplevel) const
+{
+  if (is_basic_sort(s))
+  {
+    if (sorts_already_seen.count(s)>0)
+    {
+      throw mcrl2::runtime_error("Sort alias " + s.to_string() + " is defined in terms of itself.");
+    }
+    for(alias_vector::const_iterator i = m_aliases.begin(); i != m_aliases.end(); ++i)
+    {
+      if(i->name() == s)
+      {
+        sorts_already_seen.insert(s);
+        check_for_alias_loop(i->reference(),sorts_already_seen,true);
+        sorts_already_seen.erase(s);
+        return;
+      }
+    }
+    return;
+  }
+
+  if (is_container_sort(s))
+  {
+    check_for_alias_loop(container_sort(s).element_sort(),sorts_already_seen,false);
+    return;
+  }
+
+  if (is_function_sort(s))
+  {
+    sort_expression_list s_domain(function_sort(s).domain());
+    for (sort_expression_list::const_iterator i = s_domain.begin(); i != s_domain.end(); ++i)
+    {
+      check_for_alias_loop(*i,sorts_already_seen,false);
+    }
+
+    check_for_alias_loop(function_sort(s).codomain(),sorts_already_seen,false);
+    return;
+  }
+
+  // A sort declaration with a struct on toplevel can be recursive. Otherwise a
+  // check needs to be made.
+  if (is_structured_sort(s) && !toplevel)
+  {
+    const structured_sort ss(s);
+    structured_sort_constructor_list constructors=ss.constructors();
+    for (structured_sort_constructor_list::const_iterator i=constructors.begin();
+         i!=constructors.end(); ++i)
+    {
+      structured_sort_constructor constructor=*i;
+      structured_sort_constructor_argument_list ssca=constructor.arguments();
+      for (structured_sort_constructor_argument_list::const_iterator j=ssca.begin();
+           j!=ssca.end(); ++j)
+      {
+        check_for_alias_loop(j->sort(),sorts_already_seen,false);
+      }
+    }
+  }
+
+}
+
+
+// This function returns the normal form of e, under the two maps map1 and map2.
+// This normal form is obtained by repeatedly applying map1 and map2, until this
+// is not possible anymore. It is assumed that this procedure terminates. There is
+// no check for loops.
+sort_expression find_normal_form(
+  const sort_expression& e,
+  const atermpp::multimap< sort_expression, sort_expression >  &map1,
+  const atermpp::multimap< sort_expression, sort_expression >  &map2,
+  std::set < sort_expression > sorts_already_seen = std::set < sort_expression >()) 
+{
+  assert(sorts_already_seen.find(e)==sorts_already_seen.end()); // e has not been seen already.
+  assert(!is_unknown_sort(e));
+  assert(!is_multiple_possible_sorts(e));
+
+  if (is_function_sort(e))
+  {
+    const function_sort fs(e);
+    const sort_expression normalised_codomain=
+      find_normal_form(fs.codomain(),map1,map2,sorts_already_seen);
+    const sort_expression_list domain=fs.domain();
+    sort_expression_list normalised_domain;
+    for (sort_expression_list::const_iterator i=domain.begin();
+         i!=domain.end(); ++i)
+    {
+      normalised_domain=push_front(normalised_domain,
+                                   find_normal_form(*i,map1,map2,sorts_already_seen));
+    }
+    return function_sort(reverse(normalised_domain),normalised_codomain);
+  }
+
+  if (is_container_sort(e))
+  {
+    const container_sort cs(e);
+    return container_sort(cs.container_name(),find_normal_form(cs.element_sort(),map1,map2,sorts_already_seen));
+  }
+
+  sort_expression result_sort;
+
+  if (is_structured_sort(e))
+  {
+    const structured_sort ss(e);
+    structured_sort_constructor_list constructors=ss.constructors();
+    structured_sort_constructor_list normalised_constructors;
+    for (structured_sort_constructor_list::const_iterator i=constructors.begin();
+         i!=constructors.end(); ++i)
+    {
+      structured_sort_constructor constructor=*i;
+      structured_sort_constructor_argument_list normalised_ssa;
+      structured_sort_constructor_argument_list ssca=constructor.arguments();
+      for (structured_sort_constructor_argument_list::const_iterator j=ssca.begin();
+           j!=ssca.end(); ++j)
+      {
+        normalised_ssa=push_front(normalised_ssa,
+                                  structured_sort_constructor_argument(j->name(),
+                                      find_normal_form(j->sort(),map1,map2,sorts_already_seen)));
+      }
+
+      normalised_constructors=push_front(
+                                normalised_constructors,
+                                structured_sort_constructor(
+                                  constructor.name(),
+                                  reverse(normalised_ssa),
+                                  constructor.recogniser()));
+
+    }
+    result_sort=structured_sort(reverse(normalised_constructors));
+  }
+
+  if (is_basic_sort(e))
+  {
+    result_sort=e;
+  }
+
+
+  assert(is_basic_sort(result_sort) || is_structured_sort(result_sort));
+  const atermpp::multimap< sort_expression, sort_expression >::const_iterator i1=map1.find(result_sort);
+  if (i1!=map1.end()) // found
+  {
+#ifndef NDEBUG
+    sorts_already_seen.insert(result_sort);
+#endif
+   return find_normal_form(i1->second,map1,map2
+                           ,sorts_already_seen
+                          );
+ }
+ const atermpp::multimap< sort_expression, sort_expression >::const_iterator i2=map2.find(result_sort);
+ if (i2!=map2.end()) // found
+ {
+#ifndef NDEBUG
+    sorts_already_seen.insert(result_sort);
+#endif
+    return find_normal_form(i2->second,map1,map2,
+                            sorts_already_seen
+                           );
+  }
+  return result_sort;
+}
+
 // The function below recalculates m_normalised_aliases, such that
 // it forms a confluent terminating rewriting system using which
 // sorts can be normalised.
@@ -176,11 +348,10 @@ void data_specification::reconstruct_m_normalised_aliases() const
 
   // Check for loops in the aliases. The type checker should already have done this,
   // but we check it again here.
-  for (ltr_aliases_map::const_iterator i=m_aliases.begin();
-       i!=m_aliases.end(); ++i)
+  for (alias_vector::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
   {
     std::set < sort_expression > sorts_already_seen; // Empty set.
-    check_for_alias_loop(i->first,sorts_already_seen);
+    check_for_alias_loop(i->name(),sorts_already_seen,true);
   }
 
   // Copy m_normalised_aliases. All aliases are stored from left to right,
@@ -189,16 +360,15 @@ void data_specification::reconstruct_m_normalised_aliases() const
   // rewritten from left to right, as this can cause sorts to be infinitely rewritten.
 
   atermpp::multimap< sort_expression, sort_expression > sort_aliases_to_be_investigated;
-  for (ltr_aliases_map::const_iterator i=m_aliases.begin();
-       i!=m_aliases.end(); ++i)
+  for (alias_vector::const_iterator i=m_aliases.begin(); i!=m_aliases.end(); ++i)
   {
-    if (is_structured_sort(i->second))
+    if (is_structured_sort(i->reference()))
     {
-      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->second,i->first));
+      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->reference(),i->name()));
     }
     else
     {
-      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->first,i->second));
+      sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression>(i->name(),i->reference()));
     }
   }
 
@@ -229,7 +399,9 @@ void data_specification::reconstruct_m_normalised_aliases() const
         const bool rhs_to_s1 = is_basic_sort(s1) && basic_sort(s1).to_string()<=rhs.to_string();
         const sort_expression left_hand_side=(rhs_to_s1?rhs:s1);
         const sort_expression pre_normal_form=(rhs_to_s1?s1:rhs);
-        const sort_expression e1=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
+        assert(is_basic_sort(pre_normal_form));
+        // const sort_expression e1=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,sort_aliases_to_be_investigated);
+        const sort_expression e1=pre_normal_form;
         if (e1!=left_hand_side)
         {
           sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e1));
@@ -246,8 +418,10 @@ void data_specification::reconstruct_m_normalised_aliases() const
           const bool i_second_to_s2 = is_basic_sort(s2) && basic_sort(s2).to_string()<=i->second.to_string();
           const sort_expression left_hand_side=(i_second_to_s2?i->second:s2);
           const sort_expression pre_normal_form=(i_second_to_s2?s2:i->second);
-          const sort_expression e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases,
-                                   sort_aliases_to_be_investigated);
+          assert(is_basic_sort(pre_normal_form));
+          // const sort_expression e2=find_normal_form(pre_normal_form,resulting_normalized_sort_aliases, 
+          //             sort_aliases_to_be_investigated);
+          const sort_expression e2=pre_normal_form;
           if (e2!=left_hand_side)
           {
             sort_aliases_to_be_investigated.insert(std::pair<sort_expression,sort_expression > (left_hand_side,e2));
@@ -280,7 +454,7 @@ bool data_specification::is_well_typed() const
   if (!detail::check_data_spec_sorts(constructors(), m_sorts))
   {
     std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the constructors "
-              << pp(constructors()) << " are declared in " << pp(m_sorts) << std::endl;
+              << data::pp(constructors()) << " are declared in " << data::pp(m_sorts) << std::endl;
     return false;
   }
 
@@ -288,7 +462,7 @@ bool data_specification::is_well_typed() const
   if (!detail::check_data_spec_sorts(mappings(), m_sorts))
   {
     std::clog << "data_specification::is_well_typed() failed: not all of the sorts appearing in the mappings "
-              << pp(mappings()) << " are declared in " << pp(m_sorts) << std::endl;
+              << data::pp(mappings()) << " are declared in " << data::pp(m_sorts) << std::endl;
     return false;
   }
 
@@ -323,10 +497,7 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   {
     if (data::is_alias(*i)) // Compatibility with legacy code
     {
-      // if (!detail::has_legacy_name(alias(*i).name()))
-      {
-        add_alias(*i);
-      }
+      add_alias(*i);
     }
     else
     {
@@ -337,14 +508,12 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
   // Store the constructors.
   for (atermpp::term_list_iterator< function_symbol > i = term_constructors.begin(); i != term_constructors.end(); ++i)
   {
-    // m_constructors.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
     add_constructor(*i);
   }
 
   // Store the mappings.
   for (atermpp::term_list_iterator< function_symbol > i = term_mappings.begin(); i != term_mappings.end(); ++i)
   {
-    // m_mappings.insert(sort_to_symbol_map::value_type(i->sort().target_sort(), *i));
     add_mapping(*i);
   }
 
@@ -354,7 +523,7 @@ void data_specification::build_from_aterm(atermpp::aterm_appl const& term)
     add_equation(*i);
   }
 
-  // data_is_not_necessarily_normalised_anymore();
+  //data_is_not_necessarily_normalised_anymore();
 }
 } // namespace data
 } // namespace mcrl2

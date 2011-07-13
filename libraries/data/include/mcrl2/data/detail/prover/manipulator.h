@@ -13,6 +13,7 @@
 #define MANIPULATOR_H
 
 #include "mcrl2/data/detail/prover/info.h"
+#include "mcrl2/aterm/aterm_ext.h"
 
 namespace mcrl2
 {
@@ -152,18 +153,17 @@ class AM_Jitty: public ATerm_Manipulator
 
       AFun v_symbol;
       ATerm v_function;
-      int v_arity;
+      size_t v_arity;
 
       v_symbol = ATgetAFun(a_formula);
       v_function = ATgetArgument(a_formula, 0);
       v_arity = ATgetArity(v_symbol);
 
       ATerm* v_parts;
-      int i;
 
       v_parts = new ATerm[v_arity + 1];
       v_parts[0] = v_function;
-      for (i = 1; i < v_arity; i++)
+      for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = set_true_auxiliary(ATgetArgument(a_formula, i), a_guard);
       }
@@ -201,18 +201,17 @@ class AM_Jitty: public ATerm_Manipulator
 
       AFun v_symbol;
       ATerm v_function;
-      int v_arity;
+      size_t v_arity;
 
       v_symbol = ATgetAFun(a_formula);
       v_function = ATgetArgument(a_formula, 0);
       v_arity = ATgetArity(v_symbol);
 
       ATerm* v_parts;
-      int i;
 
       v_parts = new ATerm[v_arity + 1];
       v_parts[0] = v_function;
-      for (i = 1; i < v_arity; i++)
+      for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = set_false_auxiliary(ATgetArgument(a_formula, i), a_guard);
       }
@@ -230,7 +229,7 @@ class AM_Jitty: public ATerm_Manipulator
     virtual ATerm make_if_then_else(ATerm a_expr, ATerm a_high, ATerm a_low)
     {
       return (ATerm) ATmakeAppl4(
-               ATmakeAFun("@REWR@", 4, ATfalse), f_if_then_else, a_expr, a_high, a_low);
+               ATmakeAFun("@REWR@", 4, false), f_if_then_else, a_expr, a_high, a_low);
     }
 
   public:
@@ -278,18 +277,17 @@ class AM_Jitty: public ATerm_Manipulator
 
       AFun v_symbol;
       ATerm v_function;
-      int v_arity;
+      size_t v_arity;
 
       v_symbol = ATgetAFun(a_term);
       v_function = ATgetArgument(a_term, 0);
       v_arity = ATgetArity(v_symbol);
 
       ATerm* v_parts;
-      int i;
 
       v_parts = new ATerm[v_arity + 1];
       v_parts[0] = v_function;
-      for (i = 1; i < v_arity; i++)
+      for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = orient(ATgetArgument(a_term, i));
       }

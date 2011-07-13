@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/lps/specification.h"
@@ -94,7 +94,7 @@ class t_tool_options
 
       if (outtype == lts_none)
       {
-        gsVerboseMsg("trying to detect output format by extension...\n");
+        mCRL2log(verbose) << "trying to detect output format by extension..." << std::endl;
 
         outtype = mcrl2::lts::detail::guess_format(outfilename);
 
@@ -102,12 +102,12 @@ class t_tool_options
         {
           if (!lpsfile.empty())
           {
-            gsWarningMsg("no output format set; using fsm because --lps was used\n");
+            mCRL2log(warning) << "no output format set; using fsm because --lps was used" << std::endl;
             outtype = lts_fsm;
           }
           else
           {
-            gsWarningMsg("no output format set or detected; using default (mcrl2)\n");
+            mCRL2log(warning) << "no output format set or detected; using default (mcrl2)" << std::endl;
             outtype = lts_lts;
           }
         }
@@ -155,18 +155,18 @@ class ltsconvert_tool : public ltsconvert_base
 
       if (tool_options.equivalence != lts_eq_none)
       {
-        gsVerboseMsg("reducing LTS (modulo %s)...\n", name_of_equivalence(tool_options.equivalence).c_str());
-        gsVerboseMsg("before reduction: %lu states and %lu transitions \n",l.num_states(),l.num_transitions());
+        mCRL2log(verbose) << "reducing LTS (modulo " <<  name_of_equivalence(tool_options.equivalence) << ")..." << std::endl;
+        mCRL2log(verbose) << "before reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions " << std::endl;
         reduce(l,tool_options.equivalence);
-        gsVerboseMsg("after reduction: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+        mCRL2log(verbose) << "after reduction: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
       }
 
       if (tool_options.determinise)
       {
-        gsVerboseMsg("determinising LTS...\n");
-        gsVerboseMsg("before determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+        mCRL2log(verbose) << "determinising LTS..." << std::endl;
+        mCRL2log(verbose) << "before determinisation: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
         determinise(l);
-        gsVerboseMsg("after determinisation: %lu states and %lu transitions\n",l.num_states(),l.num_transitions());
+        mCRL2log(verbose) << "after determinisation: " << l.num_states() << "u states and " << l.num_transitions() << "u transitions" << std::endl;
       }
 
       mcrl2::lps::specification spec;
@@ -395,7 +395,7 @@ class ltsconvert_tool : public ltsconvert_base
         {
           if (tool_options.intype == lts_none)
           {
-            gsWarningMsg("cannot detect format from stdin and no input format specified; assuming aut format\n");
+            mCRL2log(warning) << "cannot detect format from stdin and no input format specified; assuming aut format" << std::endl;
             tool_options.intype = lts_aut;
           }
         }
@@ -409,12 +409,12 @@ class ltsconvert_tool : public ltsconvert_base
           {
             if (!tool_options.lpsfile.empty())
             {
-              gsWarningMsg("no output format set; using fsm because --lps was used\n");
+              mCRL2log(warning) << "no output format set; using fsm because --lps was used" << std::endl;
               tool_options.outtype = lts_fsm;
             }
             else
             {
-              gsWarningMsg("no output format set or detected; using default (aut)\n");
+              mCRL2log(warning) << "no output format set or detected; using default (aut)" << std::endl;
               tool_options.outtype = lts_aut;
             }
           }

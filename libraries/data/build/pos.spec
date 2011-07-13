@@ -53,6 +53,8 @@ eqn ==(@c1, @cDub(b,p)) = false;
     succ(@c1) = @cDub(false, @c1);
     succ(@cDub(false,p)) = @cDub(true,p);
     succ(@cDub(true,p)) = @cDub(false,succ(p));
+    succ(succ(@c1)) = @cDub(true, @c1);
+    succ(succ(@cDub(b,p))) = @cDub(b,succ(p));
     +(p,q) = @addc(false,p,q);
     @addc(false,@c1,p) = succ(p);
     @addc(true,@c1,p) = succ(succ(p));

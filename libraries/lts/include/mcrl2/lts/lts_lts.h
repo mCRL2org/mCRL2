@@ -24,7 +24,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 // #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/lps/specification.h"
@@ -68,13 +68,13 @@ class state_label_lts : public atermpp::aterm_appl
       }
       if (vector_templates[arity]==NULL)
       {
-        ATermAppl stub=ATmakeAppl0(ATmakeAFun("STUB",0,ATfalse));
+        ATermAppl stub=ATmakeAppl0(ATmakeAFun("STUB",0,false));
         ATermList l=ATempty;
         for (size_t i=0; i<arity; ++i)
         {
           l=ATinsert(l,(ATerm)stub);
         }
-        vector_templates[arity]=ATmakeApplList(ATmakeAFun("STATE",arity,ATfalse),l);
+        vector_templates[arity]=ATmakeApplList(ATmakeAFun("STATE",arity,false),l);
       }
       return ATgetAFun(vector_templates[arity]);
     }
@@ -215,7 +215,7 @@ class action_label_lts:public mcrl2::lps::multi_action
 /** \brief Print the action label to string. */
 inline std::string pp(const action_label_lts l)
 {
-  return pp(mcrl2::lps::multi_action(l));
+  return pp1(mcrl2::lps::multi_action(l));
 }
 
 /** \brief Parse a string into an action label.

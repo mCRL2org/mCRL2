@@ -122,7 +122,7 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
         }
         else
         {
-          gsVerboseMsg("Checking confluence of summand number %u.\n", m_summand_number);
+          mCRL2log(verbose) << "Checking confluence of summand number " <<  m_summand_number << "." << std::endl;
         }
       }
       if (parser.options.count("time-limit"))
@@ -192,13 +192,10 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
     bool run()
     {
 
-      if (core::gsVerbose)
-      {
-        std::cerr << "lpsconfcheck parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
-      }
+      mCRL2log(verbose) << "lpsconfcheck parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
 
       lps::specification specification;
 
@@ -213,7 +210,7 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
           throw mcrl2::runtime_error("cannot open input file '" + m_invariant_filename + "'");
         }
 
-        gsVerboseMsg("parsing input file '%s'...\n", m_invariant_filename.c_str());
+        mCRL2log(verbose) << "parsing input file '" <<  m_invariant_filename << "'..." << std::endl;
 
         m_invariant = parse_data_expression(instream, specification.data());
 
@@ -257,7 +254,7 @@ class confcheck_tool : public prover_tool< rewriter_tool<input_output_tool> >
         }
         else
         {
-          gsWarningMsg("The invariant is not checked; it may not hold for this LPS.\n");
+          mCRL2log(warning) << "The invariant is not checked; it may not hold for this LPS." << std::endl;
         }
       }
 

@@ -18,7 +18,7 @@
 #include <fstream>
 #include <iostream>
 #include <string>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/linearise.h"
 #include "mcrl2/utilities/input_output_tool.h"
@@ -34,8 +34,6 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::process;
 
-using mcrl2::core::gsVerboseMsg;
-using mcrl2::core::gsMessage;
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;
 using mcrl2::lps::t_lin_method;
@@ -181,13 +179,13 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       if (m_linearisation_options.infilename.empty())
       {
         //parse specification from stdin
-        gsVerboseMsg("reading input from stdin...\n");
+        mCRL2log(verbose) << "reading input from stdin..." << std::endl;
         spec = parse_process_specification(std::cin,!noalpha);
       }
       else
       {
         //parse specification from infilename
-        gsVerboseMsg("reading input from file '%s'...\n", m_linearisation_options.infilename.c_str());
+        mCRL2log(verbose) << "reading input from file '" <<  m_linearisation_options.infilename << "'..." << std::endl;
         std::ifstream instream(m_linearisation_options.infilename.c_str(), std::ifstream::in|std::ifstream::binary);
         if (!instream.is_open())
         {
@@ -201,11 +199,11 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       {
         if (m_linearisation_options.infilename.empty())
         {
-          gsMessage("stdin contains a well-formed mCRL2 specification\n");
+          mCRL2log(info) << "stdin contains a well-formed mCRL2 specification" << std::endl;
         }
         else
         {
-          gsMessage("the file '%s' contains a well-formed mCRL2 specification\n", m_linearisation_options.infilename.c_str());
+          mCRL2log(info) << "the file '" << m_linearisation_options.infilename << "' contains a well-formed mCRL2 specification" << std::endl;
         }
         return true;
       }
@@ -213,11 +211,11 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       mcrl2::lps::specification linear_spec(linearise(spec,m_linearisation_options));
       if (m_linearisation_options.outfilename.empty())
       {
-        gsVerboseMsg("writing LPS to stdout...\n");
+        mCRL2log(verbose) << "writing LPS to stdout..." << std::endl;
       }
       else
       {
-        gsVerboseMsg("writing LPS to file '%s'...\n", m_linearisation_options.outfilename.c_str());
+        mCRL2log(verbose) << "writing LPS to file '" <<  m_linearisation_options.outfilename << "'..." << std::endl;
       }
       linear_spec.save(m_linearisation_options.outfilename);
       return true;

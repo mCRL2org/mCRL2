@@ -37,17 +37,13 @@ set(mcrl2_core_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2lexer.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/print.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/messaging.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/aterm_ext.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/print_c.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/text_utility.cpp
 )
 
 set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
@@ -58,7 +54,8 @@ add_library(${PROJECT_NAME}
 )
 
 target_link_libraries(${PROJECT_NAME}
-  aterm
+  mcrl2_aterm
+  mcrl2_utilities
 )
 
 # add install target:

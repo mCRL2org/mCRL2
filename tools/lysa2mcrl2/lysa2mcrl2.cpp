@@ -27,7 +27,7 @@ bool _getch()
 #include <sstream>
 #include <iostream>
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -41,7 +41,6 @@ bool _getch()
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 using namespace std;
 
 class lysa2mcrl2_tool: public input_output_tool
@@ -63,7 +62,7 @@ class lysa2mcrl2_tool: public input_output_tool
       boost::shared_ptr<lysa::Expression> e;
       if (input_filename().empty())
       {
-        gsVerboseMsg("parsing input from stdin...\n");
+        mCRL2log(verbose) << "parsing input from stdin..." << std::endl;
         e = parse_stream(cin, options);
       }
       else
@@ -73,7 +72,7 @@ class lysa2mcrl2_tool: public input_output_tool
         {
           throw mcrl2::runtime_error("cannot open input file '" + input_filename() + "'");
         }
-        gsVerboseMsg("parsing input from '%s'...\n", input_filename().c_str());
+        mCRL2log(verbose) << "parsing input from '" << input_filename() << "'..." << std::endl;
         e = parse_stream(infile, options);
         infile.close();
       }
@@ -85,23 +84,23 @@ class lysa2mcrl2_tool: public input_output_tool
       string converted_spec;
       if (to_lysa)
       {
-        gsVerboseMsg("converting to LySa...\n");
+        mCRL2log(verbose) << "converting to LySa..." << std::endl;
         converted_spec = e->typed_lysa_to_lysa();
       }
       else
       {
         //write mCRL2 output
-        gsVerboseMsg("converting to mCRL2...\n");
+        mCRL2log(verbose) << "converting to mCRL2..." << std::endl;
         converted_spec = lysa::Converter::to_mcrl2(e);
       }
       if (output_filename().empty())
       {
-        gsVerboseMsg("saving result to stdout...\n");
+        mCRL2log(verbose) << "saving result to stdout..." << std::endl;
         cout << converted_spec;
       }
       else
       {
-        gsVerboseMsg("saving result to '%s'...\n", output_filename().c_str());
+        mCRL2log(verbose) << "saving result to '" <<  output_filename() << "'..." << std::endl;
         ofstream outfile(output_filename().c_str());
         outfile << converted_spec;
         outfile.close();

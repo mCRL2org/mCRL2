@@ -19,8 +19,8 @@
 #include <vector>
 #include <boost/graph/adjacency_list.hpp>
 #include <boost/integer.hpp>
-#include "mcrl2/core/reachable_nodes.h"
-#include "mcrl2/core/detail/iota.h"
+#include "mcrl2/utilities/reachable_nodes.h"
+#include "mcrl2/utilities/detail/iota.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
@@ -66,7 +66,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         std::clog << "parelm removed " << to_be_removed.size() << " process parameters: " <<std::endl;
         for (std::set<data::variable>::const_iterator i = to_be_removed.begin(); i != to_be_removed.end(); ++i)
         {
-          std::clog << pp(*i) << ":" << pp(i->sort()) << std::endl;
+          std::clog << data::pp(*i) << ":" << data::pp(i->sort()) << std::endl;
         }
       }
     }
@@ -112,7 +112,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #ifdef MCRL2_LPS_PARELM_DEBUG
             for (std::set<data::variable>::iterator k = new_variables.begin(); k != new_variables.end(); ++k)
             {
-              std::clog << "found dependency " << pp(x) << " -> " << pp(*k) << std::endl;
+              std::clog << "found dependency " << data::pp(x) << " -> " << data::pp(*k) << std::endl;
             }
 #endif
           }
@@ -141,7 +141,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       for (std::set<data::variable>::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {
 #ifdef MCRL2_LPS_PARELM_DEBUG
-        std::clog << "vertex " << index << " = " << pp(*i) << std::endl;
+        std::clog << "vertex " << index << " = " << data::pp(*i) << std::endl;
 #endif
         m[*i] = index++;
       }
@@ -187,7 +187,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 #endif
 
       // compute the reachable nodes (i.e. the significant parameters)
-      std::vector<size_t> r1 = mcrl2::core::reachable_nodes(G, v.begin(), v.end());
+      std::vector<size_t> r1 = mcrl2::utilities::reachable_nodes(G, v.begin(), v.end());
 #ifdef MCRL2_LPS_PARELM_DEBUG
       std::clog << "reachable nodes: ";
       for (std::vector<size_t>::iterator k = r1.begin(); k != r1.end(); ++k)
@@ -216,8 +216,8 @@ class parelm_algorithm: public lps::detail::lps_algorithm
   public:
 
     /// \brief Constructor
-    parelm_algorithm(specification& spec, bool verbose = false)
-      : lps::detail::lps_algorithm(spec, verbose)
+    parelm_algorithm(specification& spec )
+      : lps::detail::lps_algorithm(spec)
     {}
 
     /// \brief Runs the parelm algorithm
@@ -236,10 +236,9 @@ class parelm_algorithm: public lps::detail::lps_algorithm
 
 /// \brief Removes unused parameters from a linear process specification.
 /// \param spec A linear process specification
-/// \param verbose If true, verbose output is generated
-void parelm(specification& spec, bool variant1 = true, bool verbose = false)
+void parelm(specification& spec, bool variant1 = true)
 {
-  parelm_algorithm algorithm(spec, verbose);
+  parelm_algorithm algorithm(spec);
   algorithm.run(variant1);
 }
 

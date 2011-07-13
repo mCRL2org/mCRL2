@@ -223,13 +223,26 @@ struct term_traits<data::data_expression>
     return data::find_variables(t).empty();
   }
 
+  static inline
+  term_type left(term_type t)
+  {
+    return data::application(t).left();
+  }
+
+  static inline
+  term_type right(term_type t)
+  {
+    return data::application(t).right();
+  }
+
+
   /// \brief Pretty print function
   /// \param t A term
   /// \return A pretty print representation of the term
   static inline
   std::string pp(term_type t)
   {
-    return core::pp(t);
+    return data::pp(t);
   }
 };
 
@@ -289,8 +302,8 @@ struct expression_traits : public core::term_traits< Expression >
     return abstraction(abstraction(variable_binder).binding_operator(), abstraction(variable_binder).variables(), new_body);
   }
 
-  template < typename ForwardTraversalIterator >
-  static application make_application(data_expression const& e, boost::iterator_range< ForwardTraversalIterator > const& arguments)
+  template < typename Container >
+  static application make_application(data_expression const& e, Container const& arguments)
   {
     return application(e, arguments);
   }
@@ -315,7 +328,8 @@ struct expression_traits : public core::term_traits< Expression >
     return sort_bool::or_(e1, e1);
   }
 };
-}
+
+} // namespace core
 
 } // namespace mcrl2
 

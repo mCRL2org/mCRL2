@@ -15,7 +15,7 @@
 #include <algorithm>
 #include <set>
 #include "mcrl2/atermpp/set_operations.h"
-#include "mcrl2/core/detail/join.h"
+#include "mcrl2/utilities/detail/join.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/pbes_expression_with_variables.h"

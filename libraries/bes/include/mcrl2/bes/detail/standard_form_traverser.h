@@ -15,7 +15,7 @@
 #include <iterator>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/traverser.h"
-#include "mcrl2/core/identifier_generator.h"
+#include "mcrl2/utilities/identifier_generator.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/atermpp/map.h"
 
@@ -103,7 +103,7 @@ class standard_form_traverser: public bes::boolean_expression_traverser<standard
     bool m_has_false;
 
     /// \brief For generating fresh variables.
-    core::number_postfix_generator m_generator;
+    utilities::number_postfix_generator m_generator;
 
     /// \brief A stack containing sub-terms.
     atermpp::vector<standard_form_pair> m_expression_stack;

@@ -23,8 +23,8 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
   aterm_int i(10);
-  aterm x=aterm_appl(function_symbol("x",0));
-  aterm y=aterm_appl(function_symbol("y",0));
+  atermpp::aterm x=aterm_appl(function_symbol("x",0));
+  atermpp::aterm y=aterm_appl(function_symbol("y",0));
   aterm_appl f(function_symbol("f", 2), x, y);
   BOOST_CHECK(f.to_string() == "f(x,y)");
   aterm_appl f1(function_symbol("f", 0));

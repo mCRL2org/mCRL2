@@ -91,6 +91,9 @@ class alias: public atermpp::aterm_appl
 /// \brief list of aliases
 typedef atermpp::term_list< alias >    alias_list;
 
+/// \brief vector of aliases
+typedef atermpp::vector< alias > alias_vector;
+
 } // namespace data
 
 } // namespace mcrl2

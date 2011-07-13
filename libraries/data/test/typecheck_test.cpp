@@ -31,9 +31,10 @@ BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 // Expected failures, these are not going to be fixed in the current
 // implementation of the type checker
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_list_pos_nat, 2)
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables, 2)
-BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables_reversed, 2)
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables, 1)
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_multiple_variables_reversed, 1)
 //BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES( test_matching_ambiguous, 1 ) //succeeds
+BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4, 1)   // Fails because of silly reordering in type checker
 BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1)   // Fails because of silly reordering in type checker
 
 // Parse functions that do not change any context (i.e. do not typecheck and
@@ -88,7 +89,7 @@ data::data_specification parse_data_specification(const std::string& ds_in, bool
   if (test) // If term is successfully parsed, always check that the printed result is equal!
   {
     std::string ds_out = core::PrintPart_CXX((ATerm) ds_aterm);
-    // std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
+    std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
     BOOST_CHECK_EQUAL(ds_in, ds_out);
 
     return data::data_specification(ds_aterm);
@@ -105,12 +106,12 @@ void test_data_expression(const std::string& de_in,
                           const std::string& expected_sort = "",
                           bool test_type_checker = true)
 {
-  std::clog << "==========================================" << std::endl
+  std::clog << std::endl
+            << "==========================================" << std::endl
             << "Testing type checking of data expression: " << std::endl
             << "  de_in: " << de_in << std::endl
             << "  expect success: " << (expect_success?("yes"):("no")) << std::endl
-            << "  expected type: " << expected_sort << std::endl
-            << "==========================================" << std::endl;
+            << "  expected type: " << expected_sort << std::endl;
 
   data::data_expression x(parse_data_expression(de_in));
 
@@ -133,8 +134,12 @@ void test_data_expression(const std::string& de_in,
         if (expected_sort != "")
         {
           BOOST_CHECK_EQUAL(x.sort(), parse_sort_expression(expected_sort));
-          std::clog << "x: " << x << std::endl;
+          std::clog << "    expression x: " << x << std::endl;
         }
+      }
+      else
+      {
+        std::clog << "  failed to typecheck" << std::endl;
       }
     }
     else
@@ -811,6 +816,15 @@ BOOST_AUTO_TEST_CASE(test_recursive_struct_list_indirect)
   );
 }
 
+BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this. 
+{
+  test_data_specification(
+    "sort B = List(struct f(B));\n",
+    true
+  );
+}
+
+
 template <typename VariableIterator>
 void test_data_expression_in_specification_context(const std::string& de_in,
     const std::string& ds_in,
@@ -1455,6 +1469,71 @@ BOOST_AUTO_TEST_CASE(test_aliases)
     true
   );
 }
+
+BOOST_AUTO_TEST_CASE(test_bag_with_pos_as_argument)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "{ n: Pos | n + 1 }",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    true,
+    "Bag(Pos)"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument1)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "{ n: Pos | 0 }",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    true,
+    "Bag(Pos)"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_bag_with_nat_as_argument2)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "{ n: Nat | n }",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    true,
+    "Bag(Nat)"
+  );
+}
+
+BOOST_AUTO_TEST_CASE(test_bag_with_real_as_argument)
+{
+  data::variable_vector v;
+  test_data_expression_in_specification_context(
+    "{ n: Pos | 2 / 3 }",
+    "sort dummy;\n",
+    v.begin(), v.end(),
+    false
+  );
+}
+
+/* The test below shows an ambiguous projection function that
+ * cannot be resolved with the current typechecker. This test should
+ * be enabled with a new typechecker. */
+BOOST_AUTO_TEST_CASE(test_ambiguous_projection_function)
+{
+  data::variable_vector v;
+  v.push_back(data::variable("p", data::basic_sort("T")));
+  test_data_expression_in_specification_context(
+    "R(pi_1(p)) && IS_T1(p)",
+    "sort S;\n"
+    "     T = struct T0 | T1(pi_1: T)?IS_T1 | T2(pi_1: S)?IS_T2;\n\n"
+    "map  R: T -> Bool;\n",
+    v.begin(),v.end(),
+    false     // <-------------- Should be set to true with a new typechecker ---------------------------------------
+  );
+}
+
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {

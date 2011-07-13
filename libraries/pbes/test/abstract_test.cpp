@@ -27,7 +27,7 @@ void test_pbesabstract(const std::string& pbes_spec, const std::string& variable
   detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, variable_spec);
   pbes_abstract_algorithm algorithm;
   algorithm.run(p, parameter_map, value_true);
-  std::cout << "\n-------------------------------\n" << pp(p) << std::endl;
+  std::cout << "\n-------------------------------\n" << pbes_system::pp(p) << std::endl;
 }
 
 void test_pbesabstract()

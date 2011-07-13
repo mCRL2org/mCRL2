@@ -36,8 +36,8 @@ void test_case_1()
   rewriter r(s0.data());
   specification s1(s0);
   suminst_algorithm<rewriter>(s1,r).run();
-  std::clog << pp(s0) << std::endl;
-  std::clog << pp(s1) << std::endl;
+  std::clog << lps::pp(s0) << std::endl;
+  std::clog << lps::pp(s1) << std::endl;
   deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -114,7 +114,7 @@ void test_case_4()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, true, true).run();
+  suminst_algorithm<rewriter>(s1, r, finite_sorts(s1.data()), true).run();
   deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   bool tau_sum_occurs = false;
   bool sum_occurs = false;
@@ -181,7 +181,7 @@ void test_case_6()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, false).run();
+  suminst_algorithm<rewriter>(s1, r, atermpp::convert<atermpp::set<data::sort_expression> >(s1.data().sorts())).run();
   deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
   {
@@ -201,7 +201,7 @@ void test_case_7()
   specification s0 = linearise(text);
   rewriter r(s0.data());
   specification s1(s0);
-  suminst_algorithm<rewriter>(s1, r, false).run();
+  suminst_algorithm<rewriter>(s1, r, atermpp::convert<atermpp::set<data::sort_expression> >(s1.data().sorts())).run();
   deprecated::summand_list summands1 = deprecated::linear_process_summands(s1.process());
   int sum_count = 0;
   for (deprecated::summand_list::iterator i = summands1.begin(); i != summands1.end(); ++i)
@@ -215,16 +215,22 @@ int test_main(int ac, char** av)
 {
   MCRL2_ATERMPP_INIT(ac, av)
 
+  std::clog << "test case 1" << std::endl;
   test_case_1();
   core::garbage_collect();
+  std::clog << "test case 2" << std::endl;
   test_case_2();
   core::garbage_collect();
+  std::clog << "test case 3" << std::endl;
   test_case_3();
   core::garbage_collect();
+  std::clog << "test case 4" << std::endl;
   test_case_4();
   core::garbage_collect();
+  std::clog << "test case 5" << std::endl;
   test_case_5();
   core::garbage_collect();
+  std::clog << "test case 6" << std::endl;
   test_case_6();
   core::garbage_collect();
 

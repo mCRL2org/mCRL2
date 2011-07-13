@@ -15,6 +15,7 @@
 #include <cassert>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/is_bes.h"
 #include "mcrl2/pbes/detail/pbes_expression2boolean_expression_visitor.h"
 
 namespace mcrl2
@@ -55,7 +56,7 @@ bes::boolean_equation pbesinstconversion(const pbes_equation& eq)
 inline
 bes::boolean_equation_system<> pbesinstconversion(const pbes<>& p)
 {
-  assert(p.is_bes());
+  assert(is_bes(p));
 
   atermpp::vector<bes::boolean_equation> equations;
   for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)

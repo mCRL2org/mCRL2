@@ -24,7 +24,7 @@
 #include <boost/bind.hpp>
 #include <boost/lexical_cast.hpp>
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/lps/specification.h"
@@ -98,7 +98,7 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       {
         elements.insert(print(*i));
       }
-      return core::string_join(elements, "; ");
+      return utilities::string_join(elements, "; ");
     }
 
     // super class compare functions

@@ -15,24 +15,26 @@ cmake_minimum_required(VERSION 2.6)
 add_definitions(-DWITH_MCRL2)
 
 add_library(mcrl2_${PROJECT_NAME}
-  compatibility.cc
-  ComponentSolver.cc
-  FocusListLiftingStrategy.cc
-  Graph.cc
-  LiftingStrategy.cc
-  LinearLiftingStrategy.cc
-  Logger.cc
-  #main.cc
-  MaxMeasureLiftingStrategy.cc
-  #mcrl2-example.cc
-  OldMaxMeasureLiftingStrategy.cc
-  ParityGame.cc
-  ParityGame_IO.cc
-  ParityGame_verify.cc
-  ParityGameSolver.cc
-  PredecessorLiftingStrategy.cc
-  RecursiveSolver.cc
-  SmallProgressMeasures.cc
+  compatibility.cpp
+  ComponentSolver.cpp
+  DecycleSolver.cpp
+  DeloopSolver.cpp
+  FocusListLiftingStrategy.cpp
+  Graph.cpp
+  LiftingStrategy.cpp
+  LinearLiftingStrategy.cpp
+  Logger.cpp
+  #main.cpp
+  MaxMeasureLiftingStrategy.cpp
+  #mcrl2-example.cpp
+  OldMaxMeasureLiftingStrategy.cpp
+  ParityGame.cpp
+  ParityGame_IO.cpp
+  ParityGame_verify.cpp
+  ParityGameSolver.cpp
+  PredecessorLiftingStrategy.cpp
+  RecursiveSolver.cpp
+  SmallProgressMeasures.cpp
 
   Abortable.cpp
 )
@@ -49,13 +51,13 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/pbes/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include/mcrl2/atermpp/)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/tools/pbespgsolve)
 
 target_link_libraries(mcrl2_${PROJECT_NAME}
   mcrl2_data
-  mcrl2_utilities_command_line
+  mcrl2_utilities
 )
 
 target_link_libraries(${PROJECT_NAME}

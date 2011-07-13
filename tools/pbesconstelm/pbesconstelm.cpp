@@ -68,24 +68,11 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
 
     bool run()
     {
-      if (mcrl2::core::gsVerbose)
-      {
-        std::cerr << "pbesconstelm parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  output file:        " << m_output_filename << std::endl;
-        std::cerr << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
-        std::cerr << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
-      }
-
-      size_t log_level = 0;
-      if (mcrl2::core::gsVerbose)
-      {
-        log_level = 1;
-      }
-      if (mcrl2::core::gsDebug)
-      {
-        log_level = 2;
-      }
+      mCRL2log(verbose) << "pbesconstelm parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(verbose) << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
+      mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
 
       // load the pbes
       pbes<> p;
@@ -101,7 +88,7 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
         {
           typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
           my_pbes_rewriter pbesr(datar);
-          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
+          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           data::number_postfix_generator name_generator("UNIQUE_PREFIX");
           algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
           break;
@@ -115,7 +102,7 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
           data::data_enumerator<> datae(p.data(), datar, name_generator);
           data::rewriter_with_variables datarv(datar);
           my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr, log_level);
+          pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
           break;
         }

@@ -62,25 +62,6 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
 template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o);
 
-pbes_equation normalize(const pbes_equation& e);
-bool is_normalized(const pbes_expression& t);
-
-/// \cond INTERNAL_DOCS
-
-/// \brief Normalizes a PBES equation
-struct normalize_pbes_equation
-{
-  /// \brief Function call operator
-  /// \param e A PBES equation
-  /// \return The function result
-  pbes_equation operator()(const pbes_equation& e) const
-  {
-    return normalize(e);
-  }
-};
-
-/// \endcond
-
 /// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
 /// \param first Start of a range of pbes equations
 /// \param last End of a range of pbes equations
@@ -358,27 +339,6 @@ class pbes
       //}
     }
 
-    /// \brief Returns true if the PBES is a BES (boolean equation system).
-    /// \return True if the PBES is a BES (boolean equation system).
-    bool is_bes() const
-    {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
-      {
-        if (!i->is_bes())
-        {
-          return false;
-        }
-      }
-      if (m_initial_state.parameters().size() > 0)
-      {
-        return false;
-      }
-      return true;
-    }
-
-
     /// \brief Writes the pbes to file.
     /// \param binary If binary is true the pbes is saved in compressed binary format.
     /// Otherwise an ascii representation is saved. In general the binary format is
@@ -455,29 +415,6 @@ class pbes
       atermpp::set<propositional_variable> bnd = binding_variables();
       atermpp::set<propositional_variable> occ = occurring_variables();
       return std::includes(bnd.begin(), bnd.end(), occ.begin(), occ.end()) && is_declared_in(bnd.begin(), bnd.end(), initial_state());
-    }
-
-    /// \brief Applies normalization to the equations of the pbes.
-    void normalize()
-    {
-      Container& eqns = equations();
-      std::transform(eqns.begin(), eqns.end(), eqns.begin(), normalize_pbes_equation());
-    }
-
-    /// \brief Returns true if the pbes is normalized.
-    /// \return True if the pbes is normalized.
-    bool is_normalized() const
-    {
-      using namespace std::rel_ops; // for definition of operator!= in terms of operator==
-
-      for (typename Container::const_iterator i = equations().begin(); i != equations().end(); ++i)
-      {
-        if (!pbes_system::is_normalized(i->formula()))
-        {
-          return false;
-        }
-      }
-      return true;
     }
 
     /// \brief Applies a low level substitution function to this term.
@@ -687,15 +624,6 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
   return result;
 }
 
-/// \brief Pretty print function
-/// \param spec A pbes specification
-/// \return A pretty print representation of the specification
-template <typename Container>
-std::string pp(const pbes<Container>& spec, core::t_pp_format pp_format = core::ppDefault)
-{
-  return core::pp(pbes_to_aterm(spec), pp_format);
-}
-
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param l A linear process specification
 template <typename Container>
@@ -749,10 +677,6 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 
 #ifndef MCRL2_PBES_FIND_H
 #include "mcrl2/pbes/find.h"
-#endif
-
-#ifndef MCRL2_PBES_NORMALIZE_H
-#include "mcrl2/pbes/normalize.h"
 #endif
 
 #endif // MCRL2_PBES_PBES_H

@@ -13,6 +13,7 @@
 #include <boost/range/iterator_range.hpp>
 #include <boost/test/minimal.hpp>
 
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/basic_sort.h"
 #include "mcrl2/data/find.h"
@@ -30,8 +31,92 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 
+template <typename Container1, typename Container2>
+bool equal_content(Container1 const& c1, Container2 const& c2)
+{
+  atermpp::set<typename Container1::value_type> s1(c1.begin(), c1.end());
+  atermpp::set<typename Container2::value_type> s2(c2.begin(), c2.end());
+
+  if (s1 != s2)
+  {
+    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
+                      << "Detailed comparison:" << std::endl;
+    std::clog << data::pp(c1) << std::endl;
+    std::clog << data::pp(c2) << std::endl;
+  }
+  return s1 == s2;
+}
+
+bool detailed_compare_for_equality(data_specification const& left, data_specification const& right)
+{
+  /*
+  atermpp::set<alias> left_aliases = atermpp::convert(left.aliases());
+  atermpp::set<alias> right_aliases = atermpp::convert(right.aliases());
+  BOOST_CHECK(left_aliases == right_aliases); */
+
+  atermpp::set<sort_expression> left_sorts(left.sorts().begin(), left.sorts().end());
+  atermpp::set<sort_expression> right_sorts(right.sorts().begin(), right.sorts().end());
+  BOOST_CHECK(left_sorts == right_sorts);
+
+  atermpp::set<function_symbol> left_constructors(left.constructors().begin(), left.constructors().end());
+  atermpp::set<function_symbol> right_constructors(right.constructors().begin(), right.constructors().end());
+  BOOST_CHECK(left_constructors == right_constructors);
+
+  atermpp::set<function_symbol> left_mappings(left.mappings().begin(), left.mappings().end());
+  atermpp::set<function_symbol> right_mappings(right.mappings().begin(), right.mappings().end());
+  BOOST_CHECK(left_mappings == right_mappings);
+
+  atermpp::set<data_equation> left_equations(left.equations().begin(), left.equations().end());
+  atermpp::set<data_equation> right_equations(right.equations().begin(), right.equations().end());
+  BOOST_CHECK(left_equations == right_equations);
+
+  if (/*(left_aliases != right_aliases)*/
+       (left_sorts != right_sorts)
+      || (left_constructors != right_constructors)
+      || (left_mappings != right_mappings)
+      || (left_equations != right_equations))
+  {
+    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl
+                  << "Specification detailed comparison:" << std::endl;
+
+  /*
+    if (left_aliases != right_aliases)
+    {
+      std::clog << "Aliases (left)  " << data::pp(left.aliases()) << std::endl;
+      std::clog << "Aliases (right)  " << data::pp(right.aliases()) << std::endl;
+    }*/
+    if (left_sorts != right_sorts)
+    {
+      std::clog << "Sorts (left)  " << data::pp(left.sorts()) << std::endl;
+      std::clog << "Sorts (right) " << data::pp(right.sorts()) << std::endl;
+    }
+    if (left_constructors != right_constructors)
+    {
+      std::clog << "Constructors (left)  " << data::pp(left.constructors()) << std::endl;
+      std::clog << "Constructors (right) " << data::pp(right.constructors()) << std::endl;
+    }
+    if (left_mappings != right_mappings)
+    {
+      std::clog << "Mappings (left)  " << data::pp(left.mappings()) << std::endl;
+      std::clog << "Mappings (right) " << data::pp(right.mappings()) << std::endl;
+    }
+    if (left_equations != right_equations)
+    {
+      std::clog << "Equations (left)  " << data::pp(left.equations()) << std::endl;
+      std::clog << "Equations (right) " << data::pp(right.equations()) << std::endl;
+    }
+
+    std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
+
+    return false;
+  }
+  return true;
+}
+
 bool compare_for_equality(data_specification const& left, data_specification const& right)
 {
+  return detailed_compare_for_equality(left, right);
+  /*
   if (!(left == right))
   {
     BOOST_CHECK(left == right);
@@ -41,23 +126,23 @@ bool compare_for_equality(data_specification const& left, data_specification con
 
     if (left.sorts() != right.sorts())
     {
-      std::clog << "Sorts (left)  " << pp(left.sorts()) << std::endl;
-      std::clog << "Sorts (right) " << pp(right.sorts()) << std::endl;
+      std::clog << "Sorts (left)  " << data::pp(left.sorts()) << std::endl;
+      std::clog << "Sorts (right) " << data::pp(right.sorts()) << std::endl;
     }
     if (left.constructors() != right.constructors())
     {
-      std::clog << "Constructors (left)  " << pp(left.constructors()) << std::endl;
-      std::clog << "Constructors (right) " << pp(right.constructors()) << std::endl;
+      std::clog << "Constructors (left)  " << data::pp(left.constructors()) << std::endl;
+      std::clog << "Constructors (right) " << data::pp(right.constructors()) << std::endl;
     }
     if (left.mappings() != right.mappings())
     {
-      std::clog << "Mappings (left)  " << pp(left.mappings()) << std::endl;
-      std::clog << "Mappings (right) " << pp(right.mappings()) << std::endl;
+      std::clog << "Mappings (left)  " << data::pp(left.mappings()) << std::endl;
+      std::clog << "Mappings (right) " << data::pp(right.mappings()) << std::endl;
     }
     if (left.equations() != right.equations())
     {
-      std::clog << "Equations (left)  " << pp(left.equations()) << std::endl;
-      std::clog << "Equations (right) " << pp(right.equations()) << std::endl;
+      std::clog << "Equations (left)  " << data::pp(left.equations()) << std::endl;
+      std::clog << "Equations (right) " << data::pp(right.equations()) << std::endl;
     }
 
     std::clog << "+++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++++" << std::endl;
@@ -66,6 +151,7 @@ bool compare_for_equality(data_specification const& left, data_specification con
   }
 
   return true;
+  */
 }
 
 void test_sorts()
@@ -76,9 +162,9 @@ void test_sorts()
   basic_sort s0("S0");
   alias s1(s,basic_sort("S1"));
 
-  atermpp::set< sort_expression > sl;
-  sl.insert(basic_sort("S1"));
-  sl.insert(s0);
+  atermpp::vector< sort_expression > sl;
+  sl.push_back(basic_sort("S1"));
+  sl.push_back(s0);
 
   data_specification spec;
   spec.add_sort(s);
@@ -89,20 +175,17 @@ void test_sorts()
   spec1.add_sort(s0);
   spec1.add_sort(s);
 
-  BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec.sorts().begin()));
-  BOOST_CHECK(std::equal(sl.begin(), sl.end(), spec1.sorts().begin()));
+  //BOOST_CHECK(equal_content(sl, spec.user_defined_sorts()));
+  //BOOST_CHECK(equal_content(sl, spec1.user_defined_sorts()));
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   basic_sort s2("S2");
   sort_expression_vector s2l(atermpp::make_vector(reinterpret_cast<sort_expression&>(s2)));
-  boost::iterator_range<sort_expression_vector::const_iterator> s2l_range(s2l);
   spec.add_context_sort(s2);
-  //std::for_each(s2l_range.begin(), s2l_range.end(),
-  //      boost::bind(&data_specification::add_context_sort, spec1, _1));
-  spec1.add_context_sorts(s2l_range);
+  spec1.add_context_sorts(s2l);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
-  std::for_each(s2l_range.begin(), s2l_range.end(), boost::bind(&data_specification::remove_sort, &spec, _1));
+  std::for_each(s2l.begin(), s2l.end(), boost::bind(&data_specification::remove_sort, &spec, _1));
   spec1.remove_sort(s2);
   compare_for_equality(spec, spec1);
 }
@@ -148,9 +231,6 @@ void test_constructors()
   function_symbol_vector fgl(atermpp::make_vector(f,g));
   function_symbol_vector hl(atermpp::make_vector(h));
   function_symbol_vector fghl(atermpp::make_vector(f,g,h));
-  boost::iterator_range<function_symbol_vector::const_iterator> fgl_range(boost::make_iterator_range(fgl));
-  boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
-  boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
   data_specification spec;
   spec.add_sort(s);
@@ -161,10 +241,10 @@ void test_constructors()
   spec.add_constructor(h);
 
   data_specification spec1(spec);
-  std::for_each(fghl_range.begin(), fghl_range.end(), boost::bind(&data_specification::add_constructor, &spec1, _1));
+  std::for_each(fghl.begin(), fghl.end(), boost::bind(&data_specification::add_constructor, &spec1, _1));
 
   function_symbol_vector constructors(boost::copy_range< function_symbol_vector >(spec.constructors()));
-  BOOST_CHECK(spec.constructors(s) == fgl_range);
+  BOOST_CHECK(spec.constructors(s) == fgl);
   BOOST_CHECK(constructors.size() == 5); // f,g,h, true, false.
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) != constructors.end());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), g) != constructors.end());
@@ -172,10 +252,10 @@ void test_constructors()
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
   BOOST_CHECK(spec.constructors() == spec1.constructors());
-  BOOST_CHECK(spec.constructors(s) == fgl_range);
-  BOOST_CHECK(spec.constructors(s0) == hl_range);
-  BOOST_CHECK(spec1.constructors(s) == fgl_range);
-  BOOST_CHECK(spec1.constructors(s0) == hl_range);
+  BOOST_CHECK(spec.constructors(s) == fgl);
+  BOOST_CHECK(spec.constructors(s0) == hl);
+  BOOST_CHECK(spec1.constructors(s) == fgl);
+  BOOST_CHECK(spec1.constructors(s0) == hl);
   spec.add_constructor(function_symbol("i", s0));
   function_symbol i("i", s0);
   spec.remove_constructor(i);
@@ -183,12 +263,11 @@ void test_constructors()
 
   spec.add_constructor(i);
   function_symbol_vector il(atermpp::make_vector(i));
-  boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::add_constructor, &spec1, _1));
+  std::for_each(il.begin(), il.end(), boost::bind(&data_specification::add_constructor, &spec1, _1));
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
   spec.remove_constructor(i);
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::remove_constructor, &spec1, _1));
+  std::for_each(il.begin(), il.end(), boost::bind(&data_specification::remove_constructor, &spec1, _1));
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }
 
@@ -206,9 +285,6 @@ void test_functions()
   function_symbol_vector fgl(atermpp::make_vector(f,g));
   function_symbol_vector hl(atermpp::make_vector(h));
   function_symbol_vector fghl(atermpp::make_vector(f,g,h));
-  boost::iterator_range<function_symbol_vector::const_iterator> fgl_range(boost::make_iterator_range(fgl));
-  boost::iterator_range<function_symbol_vector::const_iterator> hl_range(boost::make_iterator_range(hl));
-  boost::iterator_range<function_symbol_vector::const_iterator> fghl_range(boost::make_iterator_range(fghl));
 
   data_specification spec;
   spec.add_sort(s);
@@ -218,11 +294,11 @@ void test_functions()
   spec.add_mapping(h);
 
   data_specification spec1(spec);
-  std::for_each(fghl_range.begin(), fghl_range.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
+  std::for_each(fghl.begin(), fghl.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
 
   BOOST_CHECK(boost::distance(spec.mappings()) == 35);
 
-  data_specification::mappings_const_range mappings(spec.mappings());
+  function_symbol_vector mappings(spec.mappings());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) != mappings.end());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), g) != mappings.end());
   BOOST_CHECK(std::find(mappings.begin(), mappings.end(), h) != mappings.end());
@@ -240,11 +316,10 @@ void test_functions()
   function_symbol i("i", s0);
   spec.add_mapping(i);
   function_symbol_vector il(atermpp::make_vector(i));
-  boost::iterator_range<function_symbol_vector::const_iterator> il_range(il);
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
+  std::for_each(il.begin(), il.end(), boost::bind(&data_specification::add_mapping, &spec1, _1));
   compare_for_equality(spec, spec1);
 
-  std::for_each(il_range.begin(), il_range.end(), boost::bind(&data_specification::remove_mapping, &spec, _1));
+  std::for_each(il.begin(), il.end(), boost::bind(&data_specification::remove_mapping, &spec, _1));
   spec1.remove_mapping(i);
   compare_for_equality(spec, spec1);
 }
@@ -260,8 +335,7 @@ void test_equations()
   data_expression_vector xel(atermpp::make_vector(reinterpret_cast<data_expression&>(x)));
   application fx(f, boost::make_iterator_range(xel));
   variable_vector xl(atermpp::make_vector(x));
-  boost::iterator_range<variable_vector::const_iterator> x_range(xl);
-  data_equation fxx(x_range, x, fx, x);
+  data_equation fxx(xl, x, fx, x);
 
   data_specification spec;
   data_specification spec1;
@@ -272,16 +346,14 @@ void test_equations()
   BOOST_CHECK(compare_for_equality(spec, spec1));
   spec.add_equation(fxx);
   data_equation_vector fxxl(atermpp::make_vector(fxx));
-  boost::iterator_range<data_equation_vector::const_iterator> fxxl_range(fxxl);
-  std::for_each(fxxl_range.begin(), fxxl_range.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
+  std::for_each(fxxl.begin(), fxxl.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
-  data_equation fxf(x_range, x, fx, f);
+  data_equation fxf(xl, x, fx, f);
   data_equation_vector fxfl(atermpp::make_vector(fxf));
-  boost::iterator_range<data_equation_vector::const_iterator> fxfl_range(fxfl);
   spec.add_equation(fxf);
-  std::for_each(fxfl_range.begin(), fxfl_range.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
+  std::for_each(fxfl.begin(), fxfl.end(), boost::bind(&data_specification::add_equation, &spec1, _1));
 
   BOOST_CHECK(compare_for_equality(spec, spec1));
 
@@ -289,7 +361,7 @@ void test_equations()
   BOOST_CHECK(result.size() == 2);
   BOOST_CHECK(std::find(result.begin(), result.end(), fxf) != result.end());
   BOOST_CHECK(std::find(result.begin(), result.end(), fxx) != result.end());
-  std::for_each(fxfl_range.begin(), fxfl_range.end(), boost::bind(&data_specification::remove_equation, &spec, _1));
+  std::for_each(fxfl.begin(), fxfl.end(), boost::bind(&data_specification::remove_equation, &spec, _1));
   spec1.remove_equation(fxf);
   BOOST_CHECK(compare_for_equality(spec, spec1));
 }
@@ -366,10 +438,18 @@ void test_is_certainly_finite()
   constructors.push_back(data::structured_sort_constructor("b",
                          boost::make_iterator_range(arguments.begin() + 2, arguments.begin() + 3)));
 
-  BOOST_CHECK(spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1))));
-  BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2))));
-  BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 2, constructors.begin() + 3))));
-  BOOST_CHECK(!spec.is_certainly_finite(data::structured_sort(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3))));
+  structured_sort struct1(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1));
+  structured_sort struct2(boost::make_iterator_range(constructors.begin() + 1, constructors.begin() + 2));
+  structured_sort struct3(boost::make_iterator_range(constructors.begin() + 2, constructors.begin() + 3));
+  structured_sort struct4(boost::make_iterator_range(constructors.begin() + 0, constructors.begin() + 3));
+  spec.add_sort(struct1);
+  spec.add_sort(struct2);
+  spec.add_sort(struct3);
+  spec.add_sort(struct4);
+  BOOST_CHECK(spec.is_certainly_finite(struct1));
+  BOOST_CHECK(!spec.is_certainly_finite(struct2));
+  BOOST_CHECK(!spec.is_certainly_finite(struct3));
+  BOOST_CHECK(!spec.is_certainly_finite(struct4));
 }
 
 void test_constructor()
@@ -386,10 +466,22 @@ void test_constructor()
   data_specification spec1(a);
 }
 
-template < typename ForwardTraversalIterator, typename Expression >
-bool search(boost::iterator_range< ForwardTraversalIterator > const& range, Expression const& expression)
+template < typename Container, typename Expression >
+bool search(Container const& container, Expression const& expression)
 {
-  return std::find(range.begin(), range.end(), expression) != range.end();
+  return std::find(container.begin(), container.end(), expression) != container.end();
+}
+
+bool search_alias(const alias_vector& v, const sort_expression& s)
+{
+  for(alias_vector::const_iterator i = v.begin(); i != v.end(); ++i)
+  {
+    if(i->name() == s)
+    {
+      return true;
+    }
+  }
+  return false;
 }
 
 void test_system_defined()
@@ -432,11 +524,11 @@ void test_system_defined()
                     "sort E = D;"
                     "sort F = E;");
 
-  atermpp::multimap< basic_sort, sort_expression > aliases(specification.user_defined_aliases());
-  BOOST_CHECK(aliases.find(basic_sort("D")) != aliases.end());
-  BOOST_CHECK(aliases.find(basic_sort("E")) != aliases.end());
-  BOOST_CHECK(aliases.find(basic_sort("F")) != aliases.end());
-  BOOST_CHECK(boost::distance(specification.constructors(basic_sort("D"))) == 1);
+  alias_vector aliases(specification.user_defined_aliases());
+  BOOST_CHECK(search_alias(aliases, basic_sort("D")));
+  BOOST_CHECK(search_alias(aliases, basic_sort("E")));
+  BOOST_CHECK(search_alias(aliases, basic_sort("F")));
+  BOOST_CHECK(specification.constructors(basic_sort("D")).size() == 1);
 
   BOOST_CHECK(specification.constructors(basic_sort("D")) == specification.constructors(basic_sort("E")));
   BOOST_CHECK(specification.mappings(basic_sort("D")) == specification.mappings(basic_sort("E")));
@@ -481,12 +573,12 @@ void test_utility_functionality()
   function_symbol h("h", s0);
 
   {
-    data_specification::sorts_const_range sorts(spec.sorts());
+    const atermpp::vector<sort_expression> sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) == sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) == sorts.end());
-    data_specification::constructors_const_range constructors(spec.constructors());
+    function_symbol_vector constructors(spec.constructors());
     BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) == constructors.end());
-    data_specification::mappings_const_range mappings(spec.mappings());
+    function_symbol_vector mappings(spec.mappings());
     BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) == mappings.end());
     BOOST_CHECK(std::find(mappings.begin(), mappings.end(), g) == mappings.end());
   }
@@ -496,12 +588,12 @@ void test_utility_functionality()
   spec.add_mapping(g);
 
   {
-    data_specification::sorts_const_range sorts(spec.sorts());
+    const atermpp::vector<sort_expression> sorts(spec.sorts());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) != sorts.end());
     BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s) != sorts.end()); // Automatically added!
-    data_specification::constructors_const_range constructors(spec.constructors());
+    function_symbol_vector constructors(spec.constructors());
     BOOST_CHECK(std::find(constructors.begin(), constructors.end(), f) != constructors.end());
-    data_specification::mappings_const_range mappings(spec.mappings());
+    function_symbol_vector mappings(spec.mappings());
     BOOST_CHECK(std::find(mappings.begin(), mappings.end(), f) == mappings.end());
     BOOST_CHECK(std::find(mappings.begin(), mappings.end(), g) != mappings.end());
     BOOST_CHECK(std::find(mappings.begin(), mappings.end(), h) == mappings.end());
@@ -511,9 +603,9 @@ void test_utility_functionality()
   spec.add_sort(s);
   spec.add_alias(alias(basic_sort("a"),s));
 
-  data_specification::sorts_const_range sorts(spec.sorts());
-  data_specification::constructors_const_range constructors(spec.constructors());
-  data_specification::mappings_const_range mappings(spec.mappings());
+  const atermpp::vector<sort_expression> sorts(spec.sorts());
+  function_symbol_vector constructors(spec.constructors());
+  function_symbol_vector mappings(spec.mappings());
 
 
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), s0) != sorts.end());
@@ -577,7 +669,7 @@ void test_normalisation()
   structured_sort sA(data::structured_sort(boost::make_iterator_range(constructors.begin(), constructors.begin() + 1)));
   structured_sort sB(data::structured_sort(boost::make_iterator_range(constructors.begin() + 1, constructors.end())));
 
-  data_specification::sorts_const_range sorts(specification.sorts());
+  const atermpp::vector<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sA,specification)) != sorts.end());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), normalize_sorts(sB,specification)) != sorts.end());
 
@@ -618,7 +710,7 @@ void test_copy()
                                        "sort S;"
                                        "map f: Set(S);");
 
-  data_specification::constructors_const_range constructors(specification.constructors());
+  function_symbol_vector constructors(specification.constructors());
   BOOST_CHECK(std::find(constructors.begin(), constructors.end(), sort_bool::true_()) != constructors.end());
 
   data_specification other;
@@ -632,15 +724,233 @@ void test_copy()
 
   BOOST_CHECK(normalize_sorts(basic_sort("A"),other) == normalize_sorts(basic_sort("S"),other));
 
-  data_specification::sorts_const_range sorts(specification.sorts());
+  const atermpp::vector<sort_expression> sorts(specification.sorts());
   BOOST_CHECK(std::find(sorts.begin(), sorts.end(), basic_sort("A")) == sorts.end());
+}
+
+void test_specification()
+{
+  data_specification spec = parse_data_specification("sort D = struct d1|d2;");
+
+  BOOST_CHECK(spec.constructors(basic_sort("D")).size() == 2);
+}
+
+/// \brief Pretty print a data specification
+///
+/// \param[in] data_spec A data specification.
+/// \return A pretty printed data specification
+
+inline
+std::string mypp(const data_specification& data_spec)
+{
+  return core::pp(detail::data_specification_to_aterm_data_spec(data_spec));
+}
+
+void test_bke()
+{
+  std::cout << "test_bke" << std::endl;
+
+  std::string BKE =
+    "% This model is translated from the mCRL model used for analysing the Bilateral                \n"
+    "% Key Exchange (BKE) protocol. The analysis is described in a paper with the                   \n"
+    "% name 'Analysing the BKE-security protocol with muCRL', by Jan Friso Groote,                  \n"
+    "% Sjouke Mauw and Alexander Serebrenik.                                                        \n"
+    "%                                                                                              \n"
+    "% The translation of the existing mCRL model into this mCRL2 model has been                    \n"
+    "% performed manually.  The purpose was making use of the additional language                   \n"
+    "% features of mCRL2 with respect to mCRL.                                                      \n"
+    "%                                                                                              \n"
+    "% The behaviour of this model should be bisimular with the original mcrl model                 \n"
+    "% after renaming actions. Though this is not verified for all system                           \n"
+    "% configurations below.                                                                        \n"
+    "%                                                                                              \n"
+    "% Eindhoven, June 11, 2008, Jeroen van der Wulp                                                \n"
+    "                                                                                               \n"
+    "% Agents. There are exactly three agents - A, B, E An order E < A < B is                       \n"
+    "% imposed on agents to reduce the size of the state space.                                     \n"
+    "sort Agent = struct A | B | E;                                                                 \n"
+    "map  less : Agent # Agent -> Bool;                                                             \n"
+    "var  a: Agent;                                                                                 \n"
+    "eqn  less(A,a) = (a == B);                                                                     \n"
+    "     less(B,a) = false;                                                                        \n"
+    "     less(E,a) = (a != E);                                                                     \n"
+    "                                                                                               \n"
+    "sort Address = struct address(agent : Agent);                                                  \n"
+    "map  bad_address : Address;                                                                    \n"
+    "                                                                                               \n"
+    "% A nonce is a random, unpredictable value which is used to make the                           \n"
+    "% exchanged messages unique and thus helps to counter replay attacks.                          \n"
+    "sort Nonce = struct nonce(value : Nat);                                                        \n"
+    "                                                                                               \n"
+    "% There are two kinds of keys used in the protocol: symmetric and                              \n"
+    "% asymmetric ones (functional keys).                                                           \n"
+    "% Symmetric keys have form K(n) where n is a natural number.                                   \n"
+    "sort SymmetricKey = struct symmetric_key(value : Nat);                                         \n"
+    "                                                                                               \n"
+    "% Sort for representing asymmetric keys                                                        \n"
+    "sort AsymmetricKey = struct public_key(Agent)?is_public |                                      \n"
+    "                            secret_key(Agent)?is_secret |                                      \n"
+    "                            hash(value : Nonce)?is_hash;                                       \n"
+    "map  has_complementary_key: AsymmetricKey -> Bool;                                             \n"
+    "     complementary_key    : AsymmetricKey -> AsymmetricKey;                                    \n"
+    "var  a : Agent;                                                                                \n"
+    "     n : Nonce;                                                                                \n"
+    "eqn  has_complementary_key(public_key(a)) = true;                                              \n"
+    "     has_complementary_key(secret_key(a)) = true;                                              \n"
+    "     has_complementary_key(hash(n)) = false;                                                   \n"
+    "     complementary_key(public_key(a)) = secret_key(a);                                         \n"
+    "     complementary_key(secret_key(a)) = public_key(a);                                         \n"
+    "                                                                                               \n"
+    "sort Key = struct key(SymmetricKey)?is_symmetric | key(AsymmetricKey)?is_asymmetric;           \n"
+    "map  has_complementary_key: Key -> Bool;                                                       \n"
+    "     complementary_key : Key -> Key; % gets the complementary key if key is asymmetric         \n"
+    "var  a,a1   : Agent;                                                                           \n"
+    "     n,n1   : Nat;                                                                             \n"
+    "     k,k1   : Key;                                                                             \n"
+    "     ak,ak1 : AsymmetricKey;                                                                   \n"
+    "eqn                                                                                            \n"
+    "     % gets the complementary key if key is asymmetric                                         \n"
+    "     complementary_key(key(ak)) = key(complementary_key(ak));                                  \n"
+    "     has_complementary_key(key(ak)) = has_complementary_key(ak);                               \n"
+    "                                                                                               \n"
+    "sort Message = struct                                                                          \n"
+    "        encrypt(Nonce, Address, AsymmetricKey)?is_message_1 |                                  \n"
+    "        encrypt(AsymmetricKey, Nonce, SymmetricKey, AsymmetricKey)?is_message_2 |              \n"
+    "        encrypt(AsymmetricKey, SymmetricKey)?is_message_3;                                     \n"
+    "map  valid_message_1 : Message # AsymmetricKey -> Bool;                                        \n"
+    "     valid_message_2 : Message # AsymmetricKey -> Bool;                                        \n"
+    "     valid_message_3 : Message # SymmetricKey  -> Bool;                                        \n"
+    "     used_key : Message -> Key;                  % key used to encrypt                         \n"
+    "var  sk, sk1 : SymmetricKey;                                                                   \n"
+    "     ak, ak1, ak2 : AsymmetricKey;                                                             \n"
+    "     n, n1  : Nonce;                                                                           \n"
+    "     m, m1   : Message;                                                                        \n"
+    "     a, a1   : Address;                                                                        \n"
+    "eqn  used_key(encrypt(n,a,ak)) = key(ak);                                                      \n"
+    "     used_key(encrypt(ak,n1,sk,ak1)) = key(ak1);                                               \n"
+    "     used_key(encrypt(ak,sk)) = key(sk);                                                       \n"
+    "     valid_message_1(m, ak) = is_message_1(m) && (used_key(m) == key(ak));                     \n"
+    "     valid_message_2(m, ak) = is_message_2(m) && (used_key(m) == key(ak));                     \n"
+    "     valid_message_3(m, sk) = is_message_3(m) && (used_key(m) == key(sk));                     \n"
+    "                                                                                               \n"
+    "% Type for message sets; currently cannot use Set() because set iteration is not possible      \n"
+    "sort MessageSet = List(Message);                                                               \n"
+    "map  insert                : Message # MessageSet -> MessageSet;                               \n"
+    "     select_crypted_by     : Key # MessageSet -> MessageSet;                                   \n"
+    "     select_not_crypted_by : Key # MessageSet -> MessageSet;                                   \n"
+    "     select                : (Message -> Bool) # MessageSet -> MessageSet;                     \n"
+    "var  k,k1 : Key;                                                                               \n"
+    "     m,m1 : Message;                                                                           \n"
+    "     ms   : MessageSet;                                                                        \n"
+    "     c    : Message -> Bool;                                                                   \n"
+    "eqn                                                                                            \n"
+    "     % inserts a message m, if it is not in the list                                           \n"
+    "     insert(m,[]) = [m];                                                                       \n"
+    "     m < m1  -> insert(m,m1|>ms) = m|>m1|>ms;                                                  \n"
+    "     m == m1 -> insert(m,m1|>ms) = m1|>ms;                                                     \n"
+    "     m1 < m  -> insert(m,m1|>ms) = m1|>insert(m,ms);                                           \n"
+    "                                                                                               \n"
+    "     % the set (as ordered list) of messages in m that are signed by sk                        \n"
+    "     select_crypted_by(k,ms) = select(lambda x : Message.k == used_key(x),ms);                 \n"
+    "     select_not_crypted_by(k,ms) = select(lambda x : Message.k != used_key(x),ms);             \n"
+    "                                                                                               \n"
+    "     select(c,[]) = [];                                                                        \n"
+    "     select(c,m|>ms) = if(c(m),m|>r,r) whr r = select(c, ms) end;                              \n"
+    "                                                                                               \n"
+    "% The eavesdropper's knowledge consists of:                                                    \n"
+    "%  * a list of addresses                                                                       \n"
+    "%  * a list of nonces                                                                          \n"
+    "%  * a list of keys (both symmetric and asymmetric)                                            \n"
+    "%  * a list of messages of which the key is not known                                          \n"
+    "sort Knowledge = struct                                                                        \n"
+    "        knowledge(addresses : Set(Address),                                                    \n"
+    "                  nonces : Set(Nonce),                                                         \n"
+    "                  keys : Set(Key),                                                             \n"
+    "                  messages : MessageSet);                                                      \n"
+    "map  update_knowledge : Message # Knowledge -> Knowledge;                                      \n"
+    "     propagate : MessageSet # Knowledge -> Knowledge;                                          \n"
+    "     propagate : Key # Knowledge -> Knowledge;                                                 \n"
+    "     add_key : Key # Knowledge -> Knowledge;                                                   \n"
+    "     add_nonce : Nonce # Knowledge -> Knowledge;                                               \n"
+    "     add_address : Address # Knowledge -> Knowledge;                                           \n"
+    "var  m  : Message;                                                                             \n"
+    "     as : Set(Address);                                                                        \n"
+    "     ns : Set(Nonce);                                                                          \n"
+    "     ks : Set(Key);                                                                            \n"
+    "     ms : MessageSet;                                                                          \n"
+    "     k  : Knowledge;                                                                           \n"
+    "     sk : SymmetricKey;                                                                        \n"
+    "     ak,hk : AsymmetricKey;                                                                    \n"
+    "     ck : Key;                                                                                 \n"
+    "     n, n1 : Nonce;                                                                            \n"
+    "     a  : Address;                                                                             \n"
+    "eqn                                                                                            \n"
+    "     % adds keys to knowledge that are part of known messages encrypted with a new key         \n"
+    "     has_complementary_key(ak) && complementary_key(key(ak)) in keys(k) ->                     \n"
+    "         update_knowledge(encrypt(n,a,ak),k) =                                                 \n"
+    "                propagate(key(ak), add_key(key(ak),                                            \n"
+    "                        add_address(a, add_nonce(n, k))));                                     \n"
+    "     has_complementary_key(ak) && complementary_key(key(ak)) in keys(k) ->                     \n"
+    "         update_knowledge(encrypt(hk,n1,sk,ak),k) =                                            \n"
+    "                propagate(key(sk), propagate(key(ak),                                          \n"
+    "                      add_key(key(sk),add_key(key(ak),k))));                                   \n"
+    "     key(sk) in keys(k) ->                                                                     \n"
+    "         update_knowledge(encrypt(ak,sk),k) =                                                  \n"
+    "                propagate(key(ak), add_key(key(ak),k));                                        \n"
+    "                                                                                               \n"
+    "     % adds a message that cannot be decrypted with any known key                              \n"
+    "     ((is_symmetric(ck) && !(ck in keys(k))) ||                                                \n"
+    "       (is_asymmetric(ck) && !(has_complementary_key(ck) &&                                    \n"
+    "                (complementary_key(ck) in keys(k))))) whr ck = used_key(m) end ->              \n"
+    "         update_knowledge(m,k) =                                                               \n"
+    "                knowledge(addresses(k),nonces(k),keys(k),insert(m,messages(k)));               \n"
+    "                                                                                               \n"
+    "     % adds a key to knowledge                                                                 \n"
+    "     add_key(ck,knowledge(as,ns,ks,ms)) = knowledge(as,ns,ks + {ck},ms);                       \n"
+    "     add_nonce(n,knowledge(as,ns,ks,ms)) = knowledge(as,ns + {n},ks,ms);                       \n"
+    "     add_address(a,knowledge(as,ns,ks,ms)) = knowledge(as + {a},ns,ks,ms);                     \n"
+    "                                                                                               \n"
+    "     % adds keys to knowledge that are part of messages encrypted with a key k                 \n"
+    "     propagate([],k) = k;                                                                      \n"
+    "     propagate(m|>ms,k) = propagate(ms, update_knowledge(m, k));                               \n"
+    "     propagate(ck,knowledge(as,ns,ks,ms)) =                                                    \n"
+    "        propagate(select_crypted_by(ck,ms),                                                    \n"
+    "                knowledge(as,ns,ks,select_not_crypted_by(ck,ms)));                             \n"
+    ;
+
+  data_specification data_spec = parse_data_specification(BKE);
+  const alias_vector& aliases = data_spec.user_defined_aliases();
+  for (alias_vector::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
+  {
+    std::cout << "alias " << data::pp(*i) << std::endl;
+    sort_expression s = i->reference();
+    if (is_structured_sort(s))
+    {
+      structured_sort_constructor_list constructors = structured_sort(s).constructors();
+      for (structured_sort_constructor_list::const_iterator j = constructors.begin(); j != constructors.end(); ++j)
+      {
+        structured_sort_constructor_argument_list arguments = j->arguments();
+        for (structured_sort_constructor_argument_list::const_iterator k = arguments.begin(); k != arguments.end(); ++k)
+        {
+          std::cout << "argument: " << data::pp(*k) << " " << *k << std::endl;
+          atermpp::aterm_appl name = k->name();
+          if (name != no_identifier())
+          {
+            std::cout << "name = " << name << std::endl;
+          }
+        }
+      }
+    }
+  }
 }
 
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
-  /* test_sorts();
+  test_bke();
+
+  test_sorts();
   core::garbage_collect();
 
   test_constructors();
@@ -662,7 +972,7 @@ int test_main(int argc, char** argv)
   core::garbage_collect();
 
   test_utility_functionality();
-  core::garbage_collect(); */
+  core::garbage_collect();
 
   test_normalisation();
   core::garbage_collect();
@@ -670,6 +980,9 @@ int test_main(int argc, char** argv)
   test_copy();
   core::garbage_collect();
 
+  test_specification();
+  core::garbage_collect();
+    
   return EXIT_SUCCESS;
 }
 

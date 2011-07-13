@@ -14,12 +14,12 @@
 
 #include <string>
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/print.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/numeric_string.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/data_specification.h" // Added to make this header compile standalone
@@ -80,11 +80,11 @@ class SMT_LIB_Solver: public SMT_Solver
           {
             f_extrasorts = f_extrasorts + " ";
           }
-          v_sort = core::ATAgetFirst(v_sorts);
+          v_sort = ATAgetFirst(v_sorts);
           v_sorts = ATgetNext(v_sorts);
           size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) v_sort);
           assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
+          char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
           sprintf(v_sort_string, "sort%lu", v_sort_number);
           f_extrasorts = f_extrasorts + v_sort_string;
           free(v_sort_string);
@@ -103,11 +103,11 @@ class SMT_LIB_Solver: public SMT_Solver
         f_operators_extrafuns = "  :extrafuns (";
         while (!ATisEmpty(v_operators))
         {
-          ATermAppl v_operator = core::ATAgetFirst(v_operators);
+          ATermAppl v_operator = ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
           size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
           assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_operator_string = (char*) malloc((core::NrOfChars(v_operator_number) + 3) * sizeof(char));
+          char* v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%lu", v_operator_number);
           f_operators_extrafuns = f_operators_extrafuns + "(" + v_operator_string;
           free(v_operator_string);
@@ -128,10 +128,10 @@ class SMT_LIB_Solver: public SMT_Solver
             }
             for (ATermList l = v_sort_domain_list; !ATisEmpty(l) ; l = ATgetNext(l))
             {
-              sort_expression v_sort_domain_elt(core::ATAgetFirst(l));
+              sort_expression v_sort_domain_elt(ATAgetFirst(l));
               if (is_function_sort(v_sort_domain_elt))
               {
-                throw mcrl2::runtime_error("Function " + pp(v_operator) +
+                throw mcrl2::runtime_error("Function " + core::pp(v_operator) +
                                            " cannot be translated to the SMT-LIB format.");
               }
               if (sort_int::is_int(v_sort_domain_elt))
@@ -153,7 +153,7 @@ class SMT_LIB_Solver: public SMT_Solver
               else
               {
                 size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort_domain_elt), 0);
-                char* v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
+                char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
                 sprintf(v_sort_string, "sort%lu", v_sort_number);
                 f_operators_extrafuns = f_operators_extrafuns + " " + v_sort_string;
                 free(v_sort_string);
@@ -177,10 +177,10 @@ class SMT_LIB_Solver: public SMT_Solver
         f_variables_extrafuns = "  :extrafuns (";
         while (!ATisEmpty(v_variables))
         {
-          ATermAppl v_variable = core::ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
           char* v_variable_string;
-          v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
+          v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
           sort_expression v_sort = data_expression(v_variable).sort();
           if (sort_real::is_real(v_sort))
           {
@@ -201,7 +201,7 @@ class SMT_LIB_Solver: public SMT_Solver
           else
           {
             size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort), 0);
-            char* v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
+            char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
             sprintf(v_sort_string, "sort%lu", v_sort_number);
             f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
             free(v_sort_string);
@@ -221,7 +221,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
         size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(sort_bool::bool_()));
         assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-        v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
+        v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
         sprintf(v_sort_string, "sort%lu", v_sort_number);
         f_extrapreds = "  :extrapreds ((bool2pred ";
         f_extrapreds = f_extrapreds + v_sort_string + ")";
@@ -240,11 +240,11 @@ class SMT_LIB_Solver: public SMT_Solver
         f_sorts_notes = "  :notes \"";
         while (!ATisEmpty(v_sorts))
         {
-          sort_expression v_sort(core::ATAgetFirst(v_sorts));
+          sort_expression v_sort(ATAgetFirst(v_sorts));
           v_sorts = ATgetNext(v_sorts);
           size_t v_sort_number = ATindexedSetGetIndex(f_sorts, (ATerm) static_cast<ATermAppl>(v_sort));
           assert(v_sort_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_sort_string = (char*) malloc((core::NrOfChars(v_sort_number) + 5) * sizeof(char));
+          char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
           sprintf(v_sort_string, "sort%lu", v_sort_number);
           const char* v_sort_original_id = basic_sort(v_sort).name().to_string().c_str();
           f_sorts_notes = f_sorts_notes + "(" + v_sort_string + " = " + v_sort_original_id + ")";
@@ -264,13 +264,13 @@ class SMT_LIB_Solver: public SMT_Solver
         f_operators_notes = "  :notes \"";
         while (!ATisEmpty(v_operators))
         {
-          ATermAppl v_operator = core::ATAgetFirst(v_operators);
+          ATermAppl v_operator = ATAgetFirst(v_operators);
           v_operators = ATgetNext(v_operators);
           size_t v_operator_number = ATindexedSetGetIndex(f_operators, (ATerm) v_operator);
           assert(v_operator_number!=ATERM_NON_EXISTING_POSITION);
-          char* v_operator_string = (char*) malloc((core::NrOfChars(v_operator_number) + 3) * sizeof(char));
+          char* v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
           sprintf(v_operator_string, "op%lu", v_operator_number);
-          char* v_operator_original_id = core::detail::gsATermAppl2String(core::ATAgetArgument(v_operator, 0));
+          char* v_operator_original_id = core::detail::gsATermAppl2String(ATAgetArgument(v_operator, 0));
           f_operators_notes = f_operators_notes + "(" + v_operator_string + " = " + v_operator_original_id + ")";
           free(v_operator_string);
           v_operator_string = 0;
@@ -427,7 +427,7 @@ class SMT_LIB_Solver: public SMT_Solver
       else
       {
         throw mcrl2::runtime_error("Unable to handle the current clause (" +
-                                   pp(a_clause) + ").");
+                                   core::pp(a_clause) + ").");
       }
     }
 
@@ -691,7 +691,7 @@ class SMT_LIB_Solver: public SMT_Solver
       v_operator = f_expression_info.get_operator(a_clause);
       v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
 
-      v_operator_string = (char*) malloc((core::NrOfChars(v_operator_number) + 3) * sizeof(char));
+      v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
       sprintf(v_operator_string, "op%lu", v_operator_number);
       f_formula = f_formula + "(" + v_operator_string;
       free(v_operator_string);
@@ -712,7 +712,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       char* v_string;
 
-      v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
+      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -722,7 +722,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       char* v_string;
 
-      v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
+      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -733,7 +733,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       char* v_string;
 
-      v_string = core::detail::gsATermAppl2String(core::ATAgetArgument(a_clause, 0));
+      v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
       ATindexedSetPut(f_variables, (ATerm) a_clause, 0);
@@ -785,7 +785,7 @@ class SMT_LIB_Solver: public SMT_Solver
       v_operator = f_expression_info.get_operator(a_clause);
       v_operator_number = ATindexedSetPut(f_operators, (ATerm) v_operator, 0);
 
-      v_operator_string = (char*) malloc((core::NrOfChars(v_operator_number) + 3) * sizeof(char));
+      v_operator_string = (char*) malloc((utilities::NrOfChars(v_operator_number) + 3) * sizeof(char));
       sprintf(v_operator_string, "op%lu", v_operator_number);
       f_formula = f_formula + v_operator_string;
       free(v_operator_string);
@@ -799,9 +799,9 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         while (!ATisEmpty(v_variables))
         {
-          ATermAppl v_variable = core::ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          char* v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
+          char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
           f_formula = f_formula + " (>= " + v_variable_string + " 0)";
         }
       }
@@ -814,9 +814,9 @@ class SMT_LIB_Solver: public SMT_Solver
       {
         while (!ATisEmpty(v_variables))
         {
-          ATermAppl v_variable = core::ATAgetFirst(v_variables);
+          ATermAppl v_variable = ATAgetFirst(v_variables);
           v_variables = ATgetNext(v_variables);
-          char* v_variable_string = core::detail::gsATermAppl2String(core::ATAgetArgument(v_variable, 0));
+          char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
           f_formula = f_formula + " (>= " + v_variable_string + " 1)";
         }
       }
@@ -840,10 +840,10 @@ class SMT_LIB_Solver: public SMT_Solver
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
-      core::gsVerboseMsg("Formula to be solved: %P\n", a_formula);
+      mCRL2log(verbose) << "Formula to be solved: " << core::pp(a_formula) << std::endl;
       while (!ATisEmpty(a_formula))
       {
-        v_clause = core::ATAgetFirst(a_formula);
+        v_clause = ATAgetFirst(a_formula);
         a_formula = ATgetNext(a_formula);
         f_formula = f_formula + " ";
         translate_clause(v_clause, true);
@@ -862,7 +862,7 @@ class SMT_LIB_Solver: public SMT_Solver
         "(benchmark nameless\n" + f_sorts_notes + f_operators_notes + f_predicates_notes +
         f_extrasorts + f_operators_extrafuns + f_variables_extrafuns + f_extrapreds + f_formula +
         ")\n";
-      core::gsVerboseMsg("Corresponding benchmark:\n%s", f_benchmark.c_str());
+      mCRL2log(verbose) << "Corresponding benchmark:" << std::endl << f_benchmark;;
     }
 
 
@@ -925,7 +925,6 @@ class binary_smt_solver
     static bool usable();
 };
 #if !(defined(_MSC_VER) || defined(__MINGW32__) || defined(__CYGWIN__))
-# include "mcrl2/core/messaging.h"
 # include <unistd.h>
 /// The class inherits from the class SMT_LIB_Solver. It uses the SMT solver
 /// CVC / (http://www.cs.nyu.edu/acsys/cvcl/) to determine the satisfiability

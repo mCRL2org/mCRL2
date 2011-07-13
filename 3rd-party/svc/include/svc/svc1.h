@@ -25,15 +25,15 @@
 #ifndef _SVC1_H
 #define _SVC1_H
 
-#ifdef __cplusplus
-extern "C" {
-#endif
-
-#include "aterm1.h"
+#include "mcrl2/aterm/aterm1.h"
 
 #include "compress.h"
 
-#define SVC_VERSION     "1.2 beta"
+#include "string.h"
+
+#include <string>
+
+#define SVC_VERSION  "1.2 beta"
 
   typedef long             SVCint;
   typedef enum {SVCfalse=0,
@@ -83,7 +83,7 @@ extern "C" {
 
   struct ltsTransition
   {
-    ATerm fromState,    /* label of source state */
+    aterm::ATerm fromState,    /* label of source state */
           toState,      /* label of destination state */
           label,        /* label of transition */
           parameters;   /* parameters of the transition */
@@ -100,10 +100,6 @@ extern "C" {
   int svcWriteTransition(ltsFile*,  struct ltsTransition*);
   int svcWriteTrailer(ltsFile*);
   int svcFree(ltsFile*);
-  char* svcError(int errnum);
-
-#ifdef __cplusplus
-}
-#endif
+  std::string svcError(int errnum);
 
 #endif

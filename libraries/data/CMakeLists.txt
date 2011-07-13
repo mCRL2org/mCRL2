@@ -17,14 +17,17 @@ if(UNIX)
   LINK_LIBRARIES(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
   set(COMP_REWRITERS 
    ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jittyc.cpp
-   ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/innerc.cpp
+#   ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/innerc.cpp
   )
 endif(UNIX)
 
 set(mcrl2_data_src
- ${CMAKE_CURRENT_SOURCE_DIR}/source/implementations.cpp
+ ${CMAKE_CURRENT_SOURCE_DIR}/source/data_specification.cpp
+ ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/enumerate/enum_standard.cpp 
+ ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/prover/smt_lib_solver.cpp 
+ 
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/with_prover.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/inner.cpp
+ # ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/inner.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jitty.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/rewrite.cpp
  ${COMP_REWRITERS}
@@ -36,7 +39,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 #The following include directory is required by out-of-source builds for finding setup.h
@@ -48,6 +51,7 @@ add_library(${PROJECT_NAME}
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_core
+  mcrl2_utilities
 )
 
 # add install target:

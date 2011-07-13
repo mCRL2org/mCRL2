@@ -15,8 +15,10 @@
 #include <sstream>
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/lps/detail/linear_process_conversion_traverser.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/typecheck.h"
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 
@@ -64,32 +66,36 @@ specification parse_linear_process_specification(const std::string& text)
 }
 
 /// \brief Parses a multi_action from an input stream
-/// \param text An input stream containing a multi_action
+/// \param ma_stream An input stream containing a multi_action
+/// \param[in] action_decls A list of allowed action labels that is used for type checking.
+/// \param[in] data_spec The data specification that is used for type checking.
 /// \return The parsed multi_action
 /// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
 inline
-multi_action parse_multi_action(std::stringstream& ma_stream)
+multi_action parse_multi_action(std::stringstream& ma_stream, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
-  atermpp::aterm_appl mact = mcrl2::core::parse_mult_act(ma_stream);
-  if (mact==NULL)
+  ATermAppl a = mcrl2::core::parse_mult_act(ma_stream);
+  if (a == NULL)
   {
     throw mcrl2::runtime_error("Syntax error in multi action " + ma_stream.str());
   }
+  lps::multi_action mact = atermpp::aterm_appl(a);
+  lps::type_check(mact, data_spec, action_decls);
   return mact;
 }
 /// \brief Parses a linear process specification from a string
 /// \brief Parses a multi_action from a string
 /// \param text An input stream containing a multi_action
+/// \param[in] action_decls A list of allowed action labels that is used for type checking.
+/// \param[in] data_spec The data specification that is used for type checking.
 /// \return The parsed multi_action
 /// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
 inline
-multi_action parse_multi_action(const std::string& text)
+multi_action parse_multi_action(const std::string& text, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
   std::stringstream ma_stream(text);
-  return parse_multi_action(ma_stream);
+  return parse_multi_action(ma_stream, action_decls, data_spec);
 }
-
-
 
 } // namespace lps
 

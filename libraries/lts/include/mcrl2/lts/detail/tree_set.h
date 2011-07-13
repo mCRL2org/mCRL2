@@ -10,6 +10,7 @@
 
 #ifndef _TREE_SET_H
 #define _TREE_SET_H
+#include <cstddef>
 #include <vector>
 
 namespace mcrl2

@@ -19,7 +19,7 @@
 #include <fstream>
 #include <string>
 #include <iostream>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "chilexer.h"
 #include "translate.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -33,8 +33,8 @@
 #define OUTFILEEXT ".mcrl2"
 
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 using namespace std;
+using namespace aterm;
 
 using namespace mcrl2;
 using utilities::tools::input_output_tool;
@@ -94,11 +94,11 @@ class chi2mcrl2_tool: public input_output_tool
 
       ATermAppl result = translate_file(options);
 
-      gsDebugMsg("Set options");
+      mCRL2log(debug) << "Set options" << std::endl;
 
       asttransform.set_options(options);
 
-      gsDebugMsg("Transforming AST to mcrl2 specification\n");
+      mCRL2log(debug) << "Transforming AST to mcrl2 specification" << std::endl;
       if (asttransform.translator(result))
       {
         mcrl2spec = asttransform.getResult();
@@ -133,7 +133,7 @@ ATermAppl translate_file(t_options& options)
   if (options.infilename == "")
   {
     //parse specification from stdin
-    gsVerboseMsg("Parsing input from stdin...\n");
+    mCRL2log(verbose) << "Parsing input from stdin..." << std::endl;
     result = parse_stream(cin);
   }
   else
@@ -144,7 +144,7 @@ ATermAppl translate_file(t_options& options)
     {
       throw mcrl2::runtime_error("cannot open input file '" + options.infilename + "'");
     }
-    gsVerboseMsg("Parsing input file '%s'...\n", options.infilename.c_str());
+    mCRL2log(verbose) << "Parsing input file '" <<  options.infilename << "'..." << std::endl;
     result = parse_stream(instream);
     instream.close();
   }

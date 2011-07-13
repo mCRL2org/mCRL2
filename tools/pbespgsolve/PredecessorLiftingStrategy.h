@@ -1,7 +1,7 @@
-// Copyright (c) 2007, 2009 University of Twente
-// Copyright (c) 2007, 2009 Michael Weber <michaelw@cs.utwente.nl>
-// Copyright (c) 2009 Maks Verver <maksverver@geocities.com>
-// Copyright (c) 2009 Eindhoven University of Technology
+// Copyright (c) 2009-2011 University of Twente
+// Copyright (c) 2009-2011 Michael Weber <michaelw@cs.utwente.nl>
+// Copyright (c) 2009-2011 Maks Verver <maksverver@geocities.com>
+// Copyright (c) 2009-2011 Eindhoven University of Technology
 //
 // Distributed under the Boost Software License, Version 1.0.
 // (See accompanying file LICENSE_1_0.txt or copy at
@@ -30,7 +30,7 @@
 
 class PredecessorLiftingStrategy : public LiftingStrategy
 {
-  public:
+public:
     /*! Construct a new predecessor lifting strategy instance.
 
         If `stack` is set to true, vertices are removed in last-in-first-out
@@ -40,40 +40,37 @@ class PredecessorLiftingStrategy : public LiftingStrategy
         backward (for a stack, this actually causes the nodes to be extracted
         in forward order instead of in reverse).
     */
-    PredecessorLiftingStrategy(const ParityGame& game,
-                               bool backward, bool stack);
+    PredecessorLiftingStrategy( const ParityGame &game,
+                                const SmallProgressMeasures &spm,
+                                bool backward, bool stack );
     ~PredecessorLiftingStrategy();
-    verti next(verti prev_vertex, bool prev_lifted);
+    void lifted(verti v);
+    verti next();
     size_t memory_use() const;
 
-    bool backward() const
-    {
-      return backward_;
-    }
-    bool stack() const
-    {
-      return stack_;
-    }
+    bool backward() const { return backward_; }
+    bool stack() const { return stack_; }
 
-  private:
+private:
+    const SmallProgressMeasures &spm_;
     const bool backward_;
     const bool stack_;
-    bool* queued_;
-    verti* queue_;
+    bool *queued_;
+    verti *queue_;
     size_t queue_size_, queue_capacity_, queue_begin_, queue_end_;
 };
 
 
 class PredecessorLiftingStrategyFactory : public LiftingStrategyFactory
 {
-  public:
+public:
     PredecessorLiftingStrategyFactory(bool backward = false, bool stack = false)
-      : backward_(backward), stack_(stack) { };
+        : backward_(backward), stack_(stack) { };
 
-    LiftingStrategy* create(const ParityGame& game,
-                            const SmallProgressMeasures& spm);
+    LiftingStrategy *create( const ParityGame &game,
+                             const SmallProgressMeasures &spm );
 
-  private:
+private:
     const bool backward_, stack_;
 };
 

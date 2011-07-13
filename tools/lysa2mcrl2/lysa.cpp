@@ -36,7 +36,7 @@ void ProcessInfo::set_calculus(Calculus c)
   if (_calculus==Unknown)
   {
     _calculus = c;
-    gsVerboseMsg("recognised %s syntax.\n", calculus_names[c].c_str());
+    mCRL2log(verbose) << "recognised " << calculus_names[c] << " syntax." << std::endl;
   }
   else
   {
@@ -50,53 +50,6 @@ void ProcessInfo::override_calculus(Calculus c)
 {
   _calculus = c;
 }
-
-template< typename T>   string join_ptr(T& input, string sep)
-{
-  string s = "";
-  typename T::iterator it=input.begin();
-  typename T::iterator it_end=input.end();
-
-  if (it==it_end)
-  {
-    return s;
-  }
-  //write first element
-  s += (string)(**it);
-  it++;
-
-  //write other elements
-
-  for (; it!=it_end; it++)
-  {
-    s += sep + (string)(**it);
-  }
-  return s;
-}
-template< typename T>   string join(T& input, string sep)
-{
-  string s = "";
-  typename T::iterator it=input.begin();
-  typename T::iterator it_end=input.end();
-
-  if (it==it_end)
-  {
-    return s;
-  }
-  //write first element
-  s += (string)(*it);
-  it++;
-
-  //write other elements
-
-  for (; it!=it_end; it++)
-  {
-    s += sep + (string)(*it);
-  }
-  return s;
-}
-//template string join(Indices& input, string sep);
-
 
 string Expression::position_in_input()
 {
@@ -175,13 +128,13 @@ string Expression::typed_lysa_to_lysa()
     }
     else
     {
-      gsWarningMsg("Cannot find attacker. Converting entire process to LySa.");
+      mCRL2log(warning) << "Cannot find attacker. Converting entire process to LySa." << std::endl;
       return S(this);
     }
   }
   else
   {
-    gsWarningMsg("Input process detected as LySa when trying to convert Typed LySa to LySa");
+    mCRL2log(warning) << "Input process detected as LySa when trying to convert Typed LySa to LySa" << std::endl;
     return S(this);
   }
 }

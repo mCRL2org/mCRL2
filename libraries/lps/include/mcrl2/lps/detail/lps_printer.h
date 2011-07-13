@@ -60,14 +60,14 @@ struct lps_printer
   /// \param d A data expression
   void print(const data::data_expression& d) const
   {
-    out << pp(d);
+    out << data::pp(d);
   }
 
   /// \brief Applies the pretty printer to an assignment
   /// \param a An assignment
   void print(const data::assignment& a) const
   {
-    out << pp(a);
+    out << data::pp(a);
   }
 
   /// \brief Applies the pretty printer to an action

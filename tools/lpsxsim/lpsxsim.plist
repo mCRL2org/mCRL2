@@ -27,7 +27,7 @@
 	<key>CFBundleLongVersionString</key>
 	<string>March 2011</string>
 	<key>NSHumanReadableCopyright</key>
-	<string>Copyright 2005-2010 Technische Universiteit Eindhoven</string>
+	<string>Copyright 2005-2011 Technische Universiteit Eindhoven</string>
 	<key>LSRequiresCarbon</key>
         <true/>
 	<key>CSResourcesFileMapped</key>

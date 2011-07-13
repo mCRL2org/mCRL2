@@ -12,7 +12,7 @@
 #ifndef SMT_SOLVER_H
 #define SMT_SOLVER_H
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 
 namespace mcrl2
 {
@@ -20,6 +20,9 @@ namespace data
 {
 namespace detail
 {
+
+// XXX remove
+using namespace aterm;
 
 class SMT_Solver
 {

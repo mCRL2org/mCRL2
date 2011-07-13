@@ -452,12 +452,16 @@ class ConfigPanel: public wxNotebookPage
       }
 
       // Append output file (if any)
-      wxString output_file = wxString(m_fileIO.output_file.c_str(),
-                                      wxConvUTF8);
-      if ( !output_file.IsEmpty() )
+
+      if( suggested_output_file )
       {
-        run.Append(wxT(" "));
-        run.Append( StringSpaceEscape ( output_file ) );
+        wxString output_file = suggested_output_file->GetPath();
+  
+        if ( !output_file.IsEmpty() )
+        {
+          run.Append(wxT(" "));
+          run.Append( StringSpaceEscape ( output_file ) );
+        }
       }
 
       m_listbox_output->AppendText(run + wxTextFile::GetEOL());

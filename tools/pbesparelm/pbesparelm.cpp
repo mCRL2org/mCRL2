@@ -41,13 +41,9 @@ class pbes_parelm_tool: public input_output_tool
     bool run() /*< The virtual function `run` executes the tool.
                    The user has to override this function to add behavior. >*/
     {
-      if (core::gsVerbose) /*< The flag `core::gsVerbose` is a global boolean value that is set
-                               to true if the user has set the verbose flag on the command line. >*/
-      {
-        std::clog << "pbesparelm parameters:" << std::endl;
-        std::clog << "  input file:         " << m_input_filename << std::endl;
-        std::clog << "  output file:        " << m_output_filename << std::endl;
-      }
+      mCRL2log(verbose) << "pbesparelm parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
       // load the pbes
       pbes_system::pbes<> p;

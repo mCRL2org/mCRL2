@@ -95,8 +95,8 @@ not_(const state_formula& operand)                                              
 and_(const state_formula& left, const state_formula& right)                                                     : public state_formulas::state_formula | EI   | StateAnd        | The and operator for state formulas
 or_(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateOr         | The or operator for state formulas
 imp(const state_formula& left, const state_formula& right)                                                      : public state_formulas::state_formula | EI   | StateImp        | The implication operator for state formulas
-forall(const data::variable_list& variables, const state_formula& operand)                                      : public state_formulas::state_formula | EI   | StateForall     | The universal quantification operator for state formulas
-exists(const data::variable_list& variables, const state_formula& operand)                                      : public state_formulas::state_formula | EI   | StateExists     | The existential quantification operator for state formulas
+forall(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateForall     | The universal quantification operator for state formulas
+exists(const data::variable_list& variables, const state_formula& body)                                         : public state_formulas::state_formula | EI   | StateExists     | The existential quantification operator for state formulas
 must(const regular_formulas::regular_formula& formula, const state_formula& operand)                            : public state_formulas::state_formula | EI   | StateMust       | The must operator for state formulas
 may(const regular_formulas::regular_formula& formula, const state_formula& operand)                             : public state_formulas::state_formula | EI   | StateMay        | The may operator for state formulas
 yaled()                                                                                                         : public state_formulas::state_formula | EI   | StateYaled      | The yaled operator for state formulas
@@ -125,8 +125,8 @@ not_(const action_formula& operand)                                         : pu
 and_(const action_formula& left, const action_formula& right)               : public action_formulas::action_formula | EI   | ActAnd    | The and operator for action formulas
 or_(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActOr     | The or operator for action formulas
 imp(const action_formula& left, const action_formula& right)                : public action_formulas::action_formula | EI   | ActImp    | The implication operator for action formulas
-forall(const data::variable_list& variables, const action_formula& operand) : public action_formulas::action_formula | EI   | ActForall | The universal quantification operator for action formulas
-exists(const data::variable_list& variables, const action_formula& operand) : public action_formulas::action_formula | EI   | ActExists | The existential quantification operator for action formulas
+forall(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActForall | The universal quantification operator for action formulas
+exists(const data::variable_list& variables, const action_formula& body)    : public action_formulas::action_formula | EI   | ActExists | The existential quantification operator for action formulas
 at(const action_formula& operand, const data::data_expression& time_stamp)  : public action_formulas::action_formula | EI   | ActAt     | The at operator for action formulas
 '''
 
@@ -183,7 +183,7 @@ pbes<Container>(const data::data_specification& data, const Container& equations
 '''
 
 PBES_EXPRESSION_CLASSES = r'''
-pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XCU | PBExpr            | A pbes expression
+pbes_expression()                                                                                                       : public atermpp::aterm_appl          | XC  | PBExpr            | A pbes expression
 propositional_variable_instantiation(const core::identifier_string& name, const data::data_expression_list& parameters) : public pbes_system::pbes_expression | ECU | PropVarInst       | A propositional variable instantiation
 true_()                                                                                                                 : public pbes_system::pbes_expression | E   | PBESTrue          | The value true for pbes expressions
 false_()                                                                                                                : public pbes_system::pbes_expression | E   | PBESFalse         | The value false for pbes expressions

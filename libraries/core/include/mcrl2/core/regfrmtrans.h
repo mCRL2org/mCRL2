@@ -12,7 +12,7 @@
 #ifndef MCRL2_REGFRMTRANS_H
 #define MCRL2_REGFRMTRANS_H
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 
 namespace mcrl2
 {
@@ -26,7 +26,7 @@ namespace core
  *  \return    state_frm in which all regular formulas are translated in
  *             terms of state and action formulas.
  **/
-ATermAppl translate_reg_frms(ATermAppl state_frm);
+aterm::ATermAppl translate_reg_frms(aterm::ATermAppl state_frm);
 
 }   // namespace core
 }     // namespace mcrl2

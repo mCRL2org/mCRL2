@@ -15,8 +15,9 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/bes/small_progress_measures.h"
-#include "mcrl2/bes/bes_gauss_elimination.h"
-#include "mcrl2/bes/bes_parse.h"
+#include "mcrl2/bes/gauss_elimination.h"
+#include "mcrl2/bes/parse.h"
+#include "mcrl2/bes/print.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -30,13 +31,12 @@ void run_all_algorithms(std::string const& b, bool expected_outcome)
   from << "pbes\n" << b << std::endl;
   from >> b1;
 
-  std::clog << "solving the following input bes: \n" << pp(b1) << std::endl;
+  std::clog << "solving the following input bes: \n" << bes::pp(b1) << std::endl;
 
   core::garbage_collect();
   BOOST_CHECK_EQUAL(small_progress_measures(b1), expected_outcome);
   core::garbage_collect();
-  unsigned int loglevel = 3;
-  BOOST_CHECK_EQUAL(gauss_elimination(b1, loglevel), expected_outcome);
+  BOOST_CHECK_EQUAL(gauss_elimination(b1), expected_outcome);
 }
 
 BOOST_AUTO_TEST_CASE(test_simple_nu_mu)

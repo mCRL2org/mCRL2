@@ -14,7 +14,7 @@
 #include <iostream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/optimized_boolean_operators.h"
+#include "mcrl2/utilities/optimized_boolean_operators.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/pbes/parse.h"
@@ -55,7 +55,7 @@ pbes_system::pbes_expression expr(const std::string& text)
 
 void test_boolean_operators()
 {
-  using namespace core;
+  using namespace utilities;
 
   BOOST_CHECK(optimized_or(expr("false"), expr("X")) == expr("X"));
   BOOST_CHECK(optimized_and(expr("false"), expr("X")) == expr("false"));

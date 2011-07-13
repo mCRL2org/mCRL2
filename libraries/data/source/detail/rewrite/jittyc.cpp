@@ -14,14 +14,6 @@
 
 #ifdef MCRL2_JITTYC_AVAILABLE
 
-#define USE_NEW_CALCTERM 1
-#define EXTEND_NFS 1
-#define F_DONT_TEST_ISAPPL 1
-#define USE_VARAFUN_VALUE 1
-#define USE_APPL_VALUE 1
-#define USE_INT2ATERM_VALUE 1
-#define USE_REWRAPPL_VALUE 1
-
 #define NAME "rewr_jittyc"
 
 #include <utility>
@@ -30,29 +22,24 @@
 #include <stdexcept>
 #include <cstdio>
 #include <cstdlib>
-// #include <stdint.h>
 #include <unistd.h>
 #include <cerrno>
 #include <cstring>
-#include <dlfcn.h>
 #include <cassert>
 #include <sstream>
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/detail/memory_utility.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
-#include "mcrl2/setup.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
-
-#define JITTYC_COMPILE_COMMAND (CC " -c " CFLAGS " " SCFLAGS " " CPPFLAGS " " ATERM_CPPFLAGS " %s.c")
-#define JITTYC_LINK_COMMAND (CC " " LDFLAGS " " SLDFLAGS " -o %s.so %s.o")
+using namespace aterm;
 
 namespace mcrl2
 {
@@ -60,26 +47,6 @@ namespace data
 {
 namespace detail
 {
-
-static ATermList ATinsertA(ATermList l, ATermAppl a)
-{
-  return ATinsert(l,(ATerm)a);
-}
-
-static bool ATisAppl(ATerm a)
-{
-  return (ATgetType(a) == AT_APPL);
-}
-
-static bool ATisList(ATerm a)
-{
-  return (ATgetType(a) == AT_LIST);
-}
-
-static bool ATisInt(ATerm a)
-{
-  return (ATgetType(a) == AT_INT);
-}
 
 static AFun afunS, afunM, afunF, afunN, afunD, afunR, afunCR, afunC, afunX, afunRe, afunCRe, afunMe;
 static ATerm dummy;
@@ -99,54 +66,50 @@ static ATermAppl ar_true, ar_false;
 #define isCRe(x) ATisEqualAFun(ATgetAFun(x),afunCRe)
 #define isMe(x) ATisEqualAFun(ATgetAFun(x),afunMe)
 
-// Maximal arity for which we generate functions for every combination of
-// arguments that are in normal form or not
-#define NF_MAX_ARITY 3  // currently this should be such that it is at most sizeof(size_t)*8
-
 static size_t is_initialised = 0;
 
 static void initialise_common()
 {
   if (is_initialised == 0)
   {
-    afunS = ATmakeAFun("@@S",2,ATfalse); // Store term ( target_variable, result_tree )
+    afunS = ATmakeAFun("@@S",2,false); // Store term ( target_variable, result_tree )
     ATprotectAFun(afunS);
-    afunM = ATmakeAFun("@@M",3,ATfalse); // Match term ( match_variable, true_tree , false_tree )
+    afunM = ATmakeAFun("@@M",3,false); // Match term ( match_variable, true_tree , false_tree )
     ATprotectAFun(afunM);
-    afunF = ATmakeAFun("@@F",3,ATfalse); // Match function ( match_function, true_tree, false_tree )
+    afunF = ATmakeAFun("@@F",3,false); // Match function ( match_function, true_tree, false_tree )
     ATprotectAFun(afunF);
-    afunN = ATmakeAFun("@@N",1,ATfalse); // Go to next parameter ( result_tree )
+    afunN = ATmakeAFun("@@N",1,false); // Go to next parameter ( result_tree )
     ATprotectAFun(afunN);
-    afunD = ATmakeAFun("@@D",1,ATfalse); // Go down a level ( result_tree )
+    afunD = ATmakeAFun("@@D",1,false); // Go down a level ( result_tree )
     ATprotectAFun(afunD);
-    afunR = ATmakeAFun("@@R",1,ATfalse); // End of tree ( matching_rule )
+    afunR = ATmakeAFun("@@R",1,false); // End of tree ( matching_rule )
     ATprotectAFun(afunR);
-    afunCR = ATmakeAFun("@@CR",2,ATfalse); // End of tree ( condition, matching_rule )
+    afunCR = ATmakeAFun("@@CR",2,false); // End of tree ( condition, matching_rule )
     ATprotectAFun(afunCR);
-    afunC = ATmakeAFun("@@C",3,ATfalse); // Check condition ( condition, true_tree, false_tree )
+    afunC = ATmakeAFun("@@C",3,false); // Check condition ( condition, true_tree, false_tree )
     ATprotectAFun(afunC);
-    afunX = ATmakeAFun("@@X",0,ATfalse); // End of tree
+    afunX = ATmakeAFun("@@X",0,false); // End of tree
     ATprotectAFun(afunX);
-    afunRe = ATmakeAFun("@@Re",2,ATfalse); // End of tree ( matching_rule , vars_of_rule)
+    afunRe = ATmakeAFun("@@Re",2,false); // End of tree ( matching_rule , vars_of_rule)
     ATprotectAFun(afunRe);
-    afunCRe = ATmakeAFun("@@CRe",4,ATfalse); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
+    afunCRe = ATmakeAFun("@@CRe",4,false); // End of tree ( condition, matching_rule, vars_of_condition, vars_of_rule )
     ATprotectAFun(afunCRe);
-    afunMe = ATmakeAFun("@@Me",2,ATfalse); // Match term ( match_variable, variable_index )
+    afunMe = ATmakeAFun("@@Me",2,false); // Match term ( match_variable, variable_index )
     ATprotectAFun(afunMe);
 
     dummy=NULL;
     ATprotect(&dummy);
     dummy = (ATerm) gsMakeNil();
 
-    afunARtrue = ATmakeAFun("@@true",0,ATfalse);
+    afunARtrue = ATmakeAFun("@@true",0,false);
     ATprotectAFun(afunARtrue);
-    afunARfalse = ATmakeAFun("@@false",0,ATfalse);
+    afunARfalse = ATmakeAFun("@@false",0,false);
     ATprotectAFun(afunARfalse);
-    afunARand = ATmakeAFun("@@and",2,ATfalse);
+    afunARand = ATmakeAFun("@@and",2,false);
     ATprotectAFun(afunARand);
-    afunARor = ATmakeAFun("@@or",2,ATfalse);
+    afunARor = ATmakeAFun("@@or",2,false);
     ATprotectAFun(afunARor);
-    afunARvar = ATmakeAFun("@@var",1,ATfalse);
+    afunARvar = ATmakeAFun("@@var",1,false);
     ATprotectAFun(afunARvar);
     ar_true = NULL;
     ATprotectAppl(&ar_true);
@@ -190,107 +153,6 @@ static void finalise_common()
     ATunprotectAFun(afunS);
   }
 }
-
-
-static void clear_nfs_array(nfs_array a, size_t arity)
-{
-  if (arity == 0)
-  {
-    return;
-  }
-  memset(a,0,((arity-1)/(sizeof(size_t)*8)+1)*sizeof(size_t));
-}
-
-static void fill_nfs_array(nfs_array a, size_t arity, bool val = true)
-{
-  size_t i = 0;
-  while (i*sizeof(size_t)*8 < arity)
-  {
-    if (val)
-    {
-      a[i++] = ~((size_t) 0);
-    }
-    else
-    {
-      a[i++] = ((size_t) 0);
-    }
-  }
-}
-
-static size_t get_nfs_array_value(nfs_array a, size_t arity)
-{
-  assert(arity <= NF_MAX_ARITY);
-  return (a[0] & ((1 << arity)-1));
-}
-
-static void set_nfs_array_value(nfs_array a, size_t arity, size_t val)
-{
-  assert(arity <= NF_MAX_ARITY || val == 0);
-  a[0] = val;
-}
-
-#ifndef NDEBUG
-static bool equal_nfs_array(nfs_array a, nfs_array b, size_t arity)
-{
-  size_t i = 0;
-  while (arity >= sizeof(size_t)*8)
-  {
-    if (a[i] != b[i])
-    {
-      return false;
-    }
-    arity -= sizeof(size_t)*8;
-    ++i;
-  }
-  return (a[i] & ((1 << arity)-1)) == (b[i] & ((1 << arity)-1));
-}
-#endif
-
-static bool get_nfs_array(nfs_array a, size_t i)
-{
-  return a[i/(sizeof(size_t)*8)] & (((size_t) 1) << (i%(sizeof(size_t)*8)));
-}
-
-static void set_nfs_array(nfs_array a, size_t i, bool val = true)
-{
-  if (val)
-  {
-    a[i/(sizeof(size_t)*8)] |= ((size_t) 1) << (i%(sizeof(size_t)*8));
-  }
-  else
-  {
-    a[i/(sizeof(size_t)*8)] &= ~(((size_t) 1) << (i%(sizeof(size_t)*8)));
-  }
-}
-
-static bool is_clear_nfs_array(nfs_array a, size_t arity)
-{
-  size_t i = 0;
-  while (arity >= sizeof(size_t)*8)
-  {
-    if (a[i++] != ((size_t) 0))
-    {
-      return false;
-    }
-    arity -= sizeof(size_t)*8;
-  }
-  return (a[i] & ((1 << arity)-1)) == 0;
-}
-
-static bool is_filled_nfs_array(nfs_array a, size_t arity)
-{
-  size_t i = 0;
-  while (arity >= sizeof(size_t)*8)
-  {
-    if (a[i++] != ~((size_t) 0))
-    {
-      return false;
-    }
-    arity -= sizeof(size_t)*8;
-  }
-  return (a[i] & ((1 << arity)-1)) == (size_t)((1 << arity)-1);
-}
-
 
 #define is_ar_true(x) (ATisEqual((x),ar_true))
 #define is_ar_false(x) (ATisEqual((x),ar_false))
@@ -349,187 +211,8 @@ static ATermAppl make_ar_var(int var)
   return ATmakeAppl1(afunARvar,(ATerm) ATmakeInt(var));
 }
 
-static int getArity(ATermAppl op)
-{
-  ATermAppl sort = ATAgetArgument(op,1);
-  int arity = 0;
-
-  while (is_function_sort(sort_expression(sort)))
-  {
-    ATermList sort_dom = ATLgetArgument(sort, 0);
-    arity += ATgetLength(sort_dom);
-    sort = ATAgetArgument(sort, 1);
-  }
-
-  return arity;
-}
-
-ATerm RewriterCompilingJitty::OpId2Int(ATermAppl Term, bool add_opids)
-{
-  ATermInt i;
-
-  if ((i = (ATermInt) ATtableGet(term2int,(ATerm) Term)) == NULL)
-  {
-    if (!add_opids)
-    {
-      return (ATerm) Term;
-    }
-    i = ATmakeInt(num_opids);
-//gsfprintf(stderr,"%i := %p (%T)\n\n",num_opids,Term,Term);
-    ATtablePut(term2int,(ATerm) Term,(ATerm) i);
-    num_opids++;
-    int arity = getArity(Term);
-    if (arity > NF_MAX_ARITY)
-    {
-      arity = NF_MAX_ARITY;
-    }
-    size_t num_aux = (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2
-//      printf("%i -> %u\n",ATgetInt(i),num_aux);
-    if (arity <= NF_MAX_ARITY)
-    {
-      num_opids += num_aux;
-    }
-  }
-
-  return (ATerm) i;
-}
-
-ATerm RewriterCompilingJitty::toInner(ATermAppl Term, bool add_opids)
-{
-  ATermList l;
-
-  if (!gsIsDataAppl(Term))
-  {
-    if (gsIsOpId(Term))
-    {
-      return (ATerm) OpId2Int(Term,add_opids);
-    }
-    else
-    {
-      return (ATerm) Term;
-    }
-  }
-
-  l = ATmakeList0();
-
-  if (gsIsDataAppl(Term))
-  {
-    for (ATermList args = ATLgetArgument((ATermAppl) Term, 1) ; !ATisEmpty(args) ; args = ATgetNext(args))
-    {
-      l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
-    }
-
-    l = ATreverse(l);
-
-    ATerm arg0 = toInner(ATAgetArgument((ATermAppl) Term, 0), add_opids);
-    if (ATisList(arg0))
-    {
-      l = ATconcat((ATermList) arg0, l);
-    }
-    else
-    {
-      l = ATinsert(l, arg0);
-    }
-  }
-
-  return (ATerm) l;
-}
-
-ATermAppl RewriterCompilingJitty::fromInner(ATerm Term)
-{
-  ATermAppl a;
-
-  if (!ATisList(Term))
-  {
-    if (ATisInt(Term))
-    {
-//gsfprintf(stderr,"%i -> %p (%T)\n\n",ATgetInt((ATermInt) Term),int2term[ATgetInt((ATermInt) Term)],int2term[ATgetInt((ATermInt) Term)]);
-      return int2term[ATgetInt((ATermInt) Term)];
-    }
-    else
-    {
-      return (ATermAppl) Term;
-    }
-  }
-
-  if (ATisEmpty((ATermList) Term))
-  {
-    throw mcrl2::runtime_error(std::string(NAME) + ": invalid jitty format term.");
-  }
-
-  ATermList l = (ATermList) Term;
-  ATerm t = ATgetFirst(l);
-  if (ATisInt(t))
-  {
-    a = int2term[ATgetInt((ATermInt) t)];
-  }
-  else
-  {
-    a = (ATermAppl) t;
-  }
-
-  l = ATgetNext(l);
-
-  if (gsIsOpId(a) || gsIsDataVarId(a))
-  {
-    ATermAppl sort = ATAgetArgument(a, 1);
-    while (is_function_sort(sort_expression(sort)) && !ATisEmpty(l))
-    {
-      ATermList sort_dom = ATLgetArgument(sort, 0);
-      ATermList list = ATmakeList0();
-      while (!ATisEmpty(sort_dom))
-      {
-        list = ATinsert(list, (ATerm) fromInner(ATgetFirst(l)));
-        sort_dom = ATgetNext(sort_dom);
-        l = ATgetNext(l);
-      }
-      list = ATreverse(list);
-      a = gsMakeDataAppl(a, list);
-      sort = ATAgetArgument(sort, 1);
-    }
-  }
-
-  return a;
-}
-
-static ATerm Apply(ATermList l)
-{
-  char c[10];
-  int n=ATgetLength(l);
-  sprintf(c,"appl#%d",n);
-
-  return (ATerm)ATmakeApplList(ATmakeAFun(c,n,ATfalse),l);
-}
-
-#ifdef USE_APPL_VALUE
-static size_t num_apples = 0;
-static AFun* apples = NULL;
-static AFun get_appl_afun_value(size_t arity)
-{
-  if (arity >= num_apples)
-  {
-    size_t old_num = num_apples;
-    num_apples = arity+1;
-    apples = (AFun*) realloc(apples,num_apples*sizeof(AFun));
-    if (apples == NULL)
-    {
-      throw mcrl2::runtime_error("Cannot allocate enough memory.");
-    }
-    char c[10];
-    for (; old_num < num_apples; old_num++)
-    {
-      sprintf(c,"appl#%lu",old_num+1);
-      apples[old_num] = ATmakeAFun(c,old_num+1,ATfalse);
-      ATprotectAFun(apples[old_num]);
-    }
-  }
-  return apples[arity];
-}
-#endif
-
-#ifdef USE_INT2ATERM_VALUE
 static size_t num_int2aterms = 0;
-static ATerm* int2aterms = NULL;
+static ATerm* int2aterms = NULL; // An array with prepared ATermInt's.
 static ATerm get_int2aterm_value(int i)
 {
   assert(i >= 0);
@@ -557,14 +240,13 @@ static ATerm get_int2aterm_value(int i)
     }
   }
   return int2aterms[i];
-}
+} 
+
 static ATerm get_int2aterm_value(ATermInt i)
 {
   return get_int2aterm_value(ATgetInt(i));
 }
-#endif
 
-#ifdef USE_REWRAPPL_VALUE
 static size_t num_rewrappls = 0;
 static ATerm* rewrappls = NULL;
 static ATerm get_rewrappl_value(int i)
@@ -590,7 +272,7 @@ static ATerm get_rewrappl_value(int i)
     ATprotectArray(rewrappls,num_rewrappls);
     for (; old_num < num_rewrappls; old_num++)
     {
-      rewrappls[old_num] = (ATerm) ATmakeAppl(ATmakeAFun("appl#1",1,ATfalse),ATmakeInt(old_num));
+      rewrappls[old_num] = (ATerm)Apply0((ATerm)ATmakeInt(old_num));
     }
   }
   return rewrappls[i];
@@ -599,50 +281,14 @@ static ATerm get_rewrappl_value(ATermInt i)
 {
   return get_rewrappl_value(ATgetInt(i));
 }
-#endif
-
-static ATerm toInnerc(ATerm Term)
-{
-  if (!ATisList(Term))
-  {
-    if (ATisInt(Term))
-    {
-      return Apply(ATinsert(ATempty,Term));
-    }
-    else if (gsIsDataVarId((ATermAppl)Term))
-    {
-      return Term;
-    }
-    else
-    {
-      ATerror("%s: Do not deal with application terms correctly\n%t\n\n",NAME,Term);
-    }
-  }
-
-  if (ATisEmpty((ATermList) Term))
-  {
-    ATerror("%s: invalid jitty format term (%t)\n",NAME,Term);
-  }
-
-  ATermList l=ATinsert(ATempty,ATgetFirst((ATermList)Term));
-  for (ATermList l1=ATgetNext((ATermList)Term) ;
-       l1!=ATempty ;
-       l1=ATgetNext(l1))
-  {
-    l=ATinsert(l,toInnerc(ATgetFirst(l1)));
-  }
-  l=ATreverse(l);
-  ATerm r=Apply((ATermList) l);
-  return r;
-}
 
 ATerm RewriterCompilingJitty::toRewriteFormat(ATermAppl t)
 {
-  int old_opids = num_opids;
+  size_t old_opids = get_num_opids();
 
-  ATerm r = toInnerc(toInner(t,true));
+  ATerm r = (ATerm)toInnerc(t,true); 
 
-  if (old_opids != num_opids)
+  if (old_opids != get_num_opids())
   {
     need_rebuild = true;
   }
@@ -652,14 +298,14 @@ ATerm RewriterCompilingJitty::toRewriteFormat(ATermAppl t)
 
 ATermAppl RewriterCompilingJitty::fromRewriteFormat(ATerm t)
 {
-  if (need_rebuild)
+  /* if (need_rebuild)
   {
     BuildRewriteSystem();
-  }
+  } */
 
   if (ATisInt(t))
   {
-    return int2term[ATgetInt((ATermInt) t)];
+    return get_int2term(ATgetInt((ATermInt) t));
   }
   else if (gsIsDataVarId((ATermAppl) t))
   {
@@ -729,104 +375,6 @@ static char* whitespace(int len)
   return whitespace_str;
 }
 
-
-#ifdef _JITTYC_STORE_TREES
-int RewriterCompilingJitty::write_tree(FILE* f, ATermAppl tree, int* num_states)
-{
-  if (isS(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    fprintf(f,"n%i [label=\"S(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
-    fprintf(f,"n%i -> n%i\n",*num_states,n);
-    return (*num_states)++;
-  }
-  else if (isM(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
-    if (ATisInt(ATgetArgument(tree,0)))
-    {
-      fprintf(f,"n%i [label=\"M(%i)\"]\n",*num_states,ATgetInt((ATermInt) ATgetArgument(tree,0)));
-    }
-    else
-    {
-      fprintf(f,"n%i [label=\"M(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
-    }
-    fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
-    fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);
-    return (*num_states)++;
-  }
-  else if (isF(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
-    if (ATisInt(ATgetArgument(tree,0)))
-    {
-      fprintf(f,"n%i [label=\"F(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(int2term[ATgetInt((ATermInt) ATgetArgument(tree,0))],0))));
-    }
-    else
-    {
-      fprintf(f,"n%i [label=\"F(%s)\"]\n",*num_states,ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0))));
-    }
-    fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
-    fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);
-    return (*num_states)++;
-  }
-  else if (isD(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,0),num_states);
-    fprintf(f,"n%i [label=\"D\"]\n",*num_states);
-    fprintf(f,"n%i -> n%i\n",*num_states,n);
-    return (*num_states)++;
-  }
-  else if (isN(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,0),num_states);
-    fprintf(f,"n%i [label=\"N\"]\n",*num_states);
-    fprintf(f,"n%i -> n%i\n",*num_states,n);
-    return (*num_states)++;
-  }
-  else if (isC(tree))
-  {
-    int n = write_tree(f,ATAgetArgument(tree,1),num_states);
-    int m = write_tree(f,ATAgetArgument(tree,2),num_states);
-    gsfprintf(f,"n%i [label=\"C(%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)));
-    fprintf(f,"n%i -> n%i [label=\"true\"]\n",*num_states,n);
-    fprintf(f,"n%i -> n%i [label=\"false\"]\n",*num_states,m);
-    return (*num_states)++;
-  }
-  else if (isR(tree))
-  {
-    gsfprintf(f,"n%i [label=\"R(%P)\"]\n",*num_states,fromInner(ATgetArgument(tree,0)));
-    return (*num_states)++;
-  }
-  else if (isX(tree))
-  {
-    ATfprintf(f,"n%i [label=\"X\"]\n",*num_states);
-    return (*num_states)++;
-  }
-
-  return -1;
-}
-
-void RewriterCompilingJitty::tree2dot(ATermAppl tree, char* name, char* filename)
-{
-  FILE* f;
-  int num_states = 0;
-
-  if ((f = fopen(filename,"w")) == NULL)
-  {
-    perror("fopen");
-    return;
-  }
-
-  fprintf(f,"digraph \"%s\" {\n",name);
-  write_tree(f,tree,&num_states);
-  fprintf(f,"}\n");
-
-  fclose(f);
-}
-#endif
 
 static void term2seq(ATerm t, ATermList* s, int* var_cnt)
 {
@@ -928,9 +476,8 @@ static ATermList create_sequence(ATermList rule, int* var_cnt, ATermInt true_inn
       rseq = ATinsert(rseq, (ATerm) ATmakeAppl1(afunN,dummy));
     }
   }
-  //ATfprintf(stderr,"rseq: %t\n",rseq);
 
-  if (ATisInt(cond)/* && gsIsNil((ATermAppl) cond)*/ && ATisEqual(cond, true_inner))   // JK 15/10/2009 recognise true as condition
+  if (ATisInt(cond) && ATisEqual(cond, true_inner))
   {
     rseq = ATinsert(rseq,(ATerm) ATmakeAppl2(afunRe,rslt,(ATerm) get_used_vars(rslt)));
   }
@@ -1355,11 +902,7 @@ static ATermAppl build_tree(build_pars pars, int i)
   }
 }
 
-#ifdef _JITTYC_STORE_TREES
-ATermAppl RewriterCompilingJitty::create_tree(ATermList rules, int opid, int arity, ATermInt true_inner)
-#else
 static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATermInt true_inner)
-#endif
 // Create a match tree for OpId int2term[opid] and update the value of
 // *max_vars accordingly.
 //
@@ -1371,7 +914,6 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
 //       the number of variables in the result tree
 // Ret:  A match tree for int2term[opid]
 {
-//gsfprintf(stderr,"%P (%i)\n",int2term[opid],opid);
   // Create sequences representing the trees for each rewrite rule and
   // store the total number of variables used in these sequences.
   // (The total number of variables in all sequences should be an upper
@@ -1380,7 +922,7 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
   int total_rule_vars = 0;
   for (; !ATisEmpty(rules); rules=ATgetNext(rules))
   {
-//    if ( ATgetArity(ATgetAFun((ATermAppl) ATelementAt((ATermList) ATgetFirst(rules),2))) <= arity+1 )
+//    if (ATgetArity(ATgetAFun((ATermAppl) ATelementAt((ATermList) ATgetFirst(rules),2))) <= arity+1)
 //    {
     rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules),&total_rule_vars, true_inner));
 //    }
@@ -1412,13 +954,6 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
     tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
   }
   //ATprintf("tree: %t\n",tree);
-
-#ifdef _JITTYC_STORE_TREES
-  char s[100],t[100];
-  sprintf(s,"tree_%i_%s_%i",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))),arity);
-  sprintf(t,"tree_%i_%s_%i.dot",opid,ATgetName(ATgetAFun(ATAgetArgument(int2term[opid],0))),arity);
-  tree2dot(tree,s,t);
-#endif
 
   return tree;
 }
@@ -1504,14 +1039,8 @@ static ATermList dep_vars(ATermList eqn)
   ATermList t = ATmakeList0();
   ATermList vars = ATmakeList1((ATerm) ATconcat(
                                  get_doubles(ATelementAt(eqn,3),t),
-                                 get_vars(cond) // JK 15/10/2009 condition is always a data expression, so no case distinction needed.
-                                 /*((ATisAppl(cond) && gsIsNil((ATermAppl) cond))?ATmakeList0():get_vars(cond))*/
+                                 get_vars(cond)
                                )); // List of variables occurring in each argument of the lhs (except the first element which contains variables from the condition and variables which occur more than once in the result)
-
-  //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
-  //gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATLgetFirst(rules),2));
-  //gsfprintf(stderr,"rule: %P\n",fromRewriteFormat(ATelementAt(ATLgetFirst(rules),2)));
-  //gsfprintf(stderr,"pars: %T\n",pars);
 
   // Indices of arguments that need to be rewritten
   for (size_t i = 0; i < rule_arity; i++)
@@ -1580,21 +1109,15 @@ static ATermList dep_vars(ATermList eqn)
   return deps;
 }
 
-#ifdef _JITTYC_STORE_TREES
-ATermList RewriterCompilingJitty::create_strategy(ATermList rules, int opid, size_t arity, nfs_array nfs, ATermInt true_inner)
-#else
-static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array nfs, ATermInt true_inner)
-#endif
+static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array &nfs, ATermInt true_inner)
 {
   ATermList strat = ATmakeList0();
-
-  //gsfprintf(stderr,"create_strategy: opid %i, arity %i, nfs %i\n",opid,arity,nfs[0]);
 
   // Array to keep note of the used parameters
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
   for (size_t i = 0; i < arity; i++)
   {
-    used[i] = get_nfs_array(nfs,i);
+    used[i] = nfs.get(i);
   }
 
   // Maintain dependency count (i.e. the number of rules that depend on a given argument)
@@ -1620,14 +1143,8 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
     ATermList t = ATmakeList0();
     ATermList vars = ATmakeList1((ATerm) ATconcat(
                                    get_doubles(ATelementAt(ATLgetFirst(rules),3),t),
-                                   get_vars(cond) // JK 15/10/2009 cond is always a data expression, so no case distinction needed
-                                   /*((ATisAppl(cond) && gsIsNil((ATermAppl) cond))?ATmakeList0():get_vars(cond))*/
+                                   get_vars(cond)
                                  )); // List of variables occurring in each argument of the lhs (except the first element which contains variables from the condition and variables which occur more than once in the result)
-
-    //gsfprintf(stderr,"rule: %T\n",ATgetFirst(rules));
-    //gsfprintf(stderr,"rule: %T\n",ATAelementAt(ATLgetFirst(rules),2));
-    //gsfprintf(stderr,"rule: %P\n",fromRewriteFormat(ATelementAt(ATLgetFirst(rules),2)));
-    //gsfprintf(stderr,"pars: %T\n",pars);
 
     // Indices of arguments that need to be rewritten
     for (size_t i = 0; i < rule_arity; i++)
@@ -1683,7 +1200,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
       // Add vars used in expression
       vars = ATinsert(vars,(ATerm) get_vars(ATgetArgument(pars,i+1)));
     }
-    //gsfprintf(stderr,"vars: %T\n",vars);
 
     // Create dependency list for this rule
     ATermList deps = ATmakeList0();
@@ -1702,7 +1218,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
 
     // Add rule with its dependencies
     dep_list = ATinsert(dep_list,(ATerm) ATmakeList2((ATerm) deps,ATgetFirst(rules)));
-    //gsfprintf(stderr,"\n");
   }
 
   // Process all rules with their dependencies
@@ -1727,7 +1242,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
     // Create and add tree of collected rules
     if (!ATisEmpty(no_deps))
     {
-      //gsfprintf(stderr,"add: %T\n",no_deps);
       strat = ATinsert(strat, (ATerm) create_tree(no_deps,opid,arity,true_inner));
     }
 
@@ -1757,7 +1271,6 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
       used[maxidx] = true;
       ATermInt rewr_arg = ATmakeInt(maxidx);
 
-      //gsfprintf(stderr,"add: %T\n",rewr_arg);
       strat = ATinsert(strat,(ATerm) rewr_arg);
 
       ATermList l = ATmakeList0();
@@ -1769,40 +1282,49 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
     }
   }
 
-  //gsfprintf(stderr,"strat: %T\n\n",ATreverse(strat));
-
   return ATreverse(strat);
 }
 
-void RewriterCompilingJitty::add_base_nfs(nfs_array nfs, ATermInt opid, size_t arity)
+void RewriterCompilingJitty::add_base_nfs(nfs_array &nfs, ATermInt opid, size_t arity)
 {
   for (size_t i=0; i<arity; i++)
   {
     if (always_rewrite_argument(opid,arity,i))
     {
-      set_nfs_array(nfs,i);
+      nfs.set(i);
     }
   }
 }
 
-void RewriterCompilingJitty::extend_nfs(nfs_array nfs, ATermInt opid, size_t arity)
+void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, ATermInt opid, size_t arity)
 {
   ATermList eqns = jittyc_eqns[ATgetInt(opid)];
   if (eqns == NULL)
   {
-    fill_nfs_array(nfs,arity);
+    nfs.fill(arity);
     return;
   }
   ATermList strat = create_strategy(eqns,ATgetInt(opid),arity,nfs,true_inner);
   while (!ATisEmpty(strat) && ATisInt(ATgetFirst(strat)))
   {
-    set_nfs_array(nfs,ATgetInt((ATermInt) ATgetFirst(strat)));
+    nfs.set(ATgetInt((ATermInt) ATgetFirst(strat)));
     strat = ATgetNext(strat);
   }
 }
 
+// Determine whether the opid is a normal form, with the given number of arguments.
 bool RewriterCompilingJitty::opid_is_nf(ATermInt opid, size_t num_args)
 {
+  // First check whether the opid is a forall or an exists with one argument.
+  // Then the routines for exists/forall quantifier enumeration must be applied.
+  if (num_args==1 && 
+        (function_symbol(get_int2term(ATgetInt(opid))).name() == exists_function_symbol() ||
+         function_symbol(get_int2term(ATgetInt(opid))).name() == forall_function_symbol()))
+  {
+    return false;
+  }
+
+  // Otherwise check whether there are applicable rewrite rules.
   ATermList l = jittyc_eqns[ATgetInt(opid)];
 
   if (l == NULL)
@@ -1821,14 +1343,14 @@ bool RewriterCompilingJitty::opid_is_nf(ATermInt opid, size_t num_args)
   return true;
 }
 
-void RewriterCompilingJitty::calc_nfs_list(nfs_array nfs, size_t arity, ATermList args, int startarg, ATermList nnfvars)
+void RewriterCompilingJitty::calc_nfs_list(nfs_array &nfs, size_t arity, ATermList args, int startarg, ATermList nnfvars)
 {
   if (ATisEmpty(args))
   {
     return;
   }
 
-  set_nfs_array(nfs,arity-ATgetLength(args),calc_nfs(ATgetFirst(args),startarg,nnfvars));
+  nfs.set(arity-ATgetLength(args),calc_nfs(ATgetFirst(args),startarg,nnfvars));
   calc_nfs_list(nfs,arity,ATgetNext(args),startarg+1,nnfvars);
 }
 
@@ -1841,9 +1363,9 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
     {
       if (opid_is_nf((ATermInt) ATgetFirst((ATermList) t),arity) && arity != 0)
       {
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,size_t,arity);
+        nfs_array args(arity);
         calc_nfs_list(args,arity,ATgetNext((ATermList) t),startarg,nnfvars);
-        bool b = is_filled_nfs_array(args,arity);
+        bool b = args.is_filled(arity);
         return b;
       }
       else
@@ -1876,15 +1398,15 @@ bool RewriterCompilingJitty::calc_nfs(ATerm t, int startarg, ATermList nnfvars)
   }
 }
 
-string RewriterCompilingJitty::calc_inner_terms(nfs_array nfs, size_t arity, ATermList args, int startarg, ATermList nnfvars, nfs_array rewr)
+string RewriterCompilingJitty::calc_inner_terms(nfs_array &nfs, size_t arity, ATermList args, int startarg, ATermList nnfvars, nfs_array *rewr)
 {
   if (ATisEmpty(args))
   {
     return "";
   }
 
-  pair<bool,string> head = calc_inner_term(ATgetFirst(args),startarg,nnfvars,rewr?get_nfs_array(rewr,arity-ATgetLength(args)):false);
-  set_nfs_array(nfs,arity-ATgetLength(args),head.first);
+  pair<bool,string> head = calc_inner_term(ATgetFirst(args),startarg,nnfvars,rewr?(rewr->get(arity-ATgetLength(args))):false);
+  nfs.set(arity-ATgetLength(args),head.first);
   string tail = calc_inner_terms(nfs,arity,ATgetNext(args),startarg+1,nnfvars,rewr);
   return head.second+(ATisEmpty(ATgetNext(args))?"":",")+tail;
 }
@@ -1900,11 +1422,7 @@ static string calc_inner_appl_head(size_t arity)
   {
     ss << "ATmakeAppl";
   }
-#ifdef USE_APPL_VALUE
-  ss << "(" << ((long int) get_appl_afun_value(arity)) << ",";
-#else
-  ss << "(appl" << arity << ",";
-#endif
+  ss << "(" << ((long int) get_appl_afun_value(arity+1)) << ",";    // YYYY
   return ss.str();
 }
 
@@ -1915,6 +1433,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
     stringstream ss;
     bool b;
     int arity = ATgetLength((ATermList) t)-1;
+
 
     if (ATisInt(ATgetFirst((ATermList) t)))
     {
@@ -1929,11 +1448,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       {
         if (b || !rewr)
         {
-#ifdef USE_INT2ATERM_VALUE
           ss << "(ATerm) " << (void*) get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t)) << ")";
-#else
-          ss << "int2ATerm" << ATgetInt((ATermInt) ATgetFirst((ATermList) t)) << ")";
-#endif
         }
         else
         {
@@ -1942,61 +1457,52 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       }
       else
       {
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(args_nfs,size_t,arity);
+        // arity != 0
+        nfs_array args_nfs(arity);
         calc_nfs_list(args_nfs,arity,ATgetNext((ATermList) t),startarg,nnfvars);
-        if (b || !rewr)
-        {
-#ifndef USE_INT2ATERM_VALUE
-          ss << "int2ATerm";
-#endif
-        }
-        else
+        if (!(b || !rewr))
         {
           ss << "rewr_";
-#ifdef EXTEND_NFS
           add_base_nfs(args_nfs,(ATermInt) ATgetFirst((ATermList) t),arity);
           extend_nfs(args_nfs,(ATermInt) ATgetFirst((ATermList) t),arity);
-#endif
         }
         if (arity > NF_MAX_ARITY)
         {
-          clear_nfs_array(args_nfs,arity);
+          args_nfs.clear(arity);
         }
-        if (is_clear_nfs_array(args_nfs,arity) || b || rewr || (arity > NF_MAX_ARITY))
+        if (args_nfs.is_clear(arity) || b || rewr || (arity > NF_MAX_ARITY))
         {
-#ifdef USE_INT2ATERM_VALUE
           if (b || !rewr)
           {
             ss << "(ATerm) " << (void*) get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t));
           }
           else
-#endif
             ss << ATgetInt((ATermInt) ATgetFirst((ATermList) t));
         }
         else
         {
-#ifdef USE_INT2ATERM_VALUE
           if (b || !rewr)
           {
-            ss << "(ATerm) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+get_nfs_array_value(args_nfs,arity));
+            ss << "(ATerm) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs.get_value(arity));
           }
           else
-#endif
-            ss << (ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs);
+            // QUE?! Dit stond er vroeger // Sjoerd
+            //   ss << (ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs);
+            ss << (ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs.getraw(0));
         }
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(args_first,size_t,arity);
+        nfs_array args_first(arity);
         if (rewr && b)
         {
-          fill_nfs_array(args_nfs,arity);
+          args_nfs.fill(arity);
         }
-        string args_second = calc_inner_terms(args_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,args_nfs);
-        assert(!rewr || b || (arity > NF_MAX_ARITY) || equal_nfs_array(args_first,args_nfs,arity));
+        string args_second = calc_inner_terms(args_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,&args_nfs);
+        assert(!rewr || b || (arity > NF_MAX_ARITY) || args_first.equals(args_nfs,arity));
         if (rewr && !b)
         {
           ss << "_" << arity << "_";
           if (arity <= NF_MAX_ARITY)
           {
-            ss << get_nfs_array_value(args_first,arity);
+            ss << args_first.get_value(arity);
           }
           else
           {
@@ -2009,7 +1515,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
           ss << ",";
         }
         ss << args_second << ")";
-        if (!is_filled_nfs_array(args_first,arity))
+        if (!args_first.is_filled(arity))
         {
           b = false;
         }
@@ -2017,7 +1523,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       b = b || rewr;
 
     }
-    else
+    else // !ATisInt(ATgetFirst((ATermList) t))
     {
       if (arity == 0)
       {
@@ -2026,7 +1532,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       }
       b = rewr;
       pair<bool,string> head = calc_inner_term(ATgetFirst((ATermList) t),startarg,nnfvars,false);
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(tail_first,size_t,arity);
+      nfs_array tail_first(arity);
       string tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,NULL);
       ss << "isAppl(" << head.second << ")?";
       if (rewr)
@@ -2048,10 +1554,10 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       ss << calc_inner_appl_head(arity) << "(ATerm) " << head.second << ",";
       if (c)
       {
-        clear_nfs_array(tail_first,arity);
-        MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewrall,size_t,arity);
-        fill_nfs_array(rewrall,arity);
-        tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,rewrall);
+        tail_first.clear(arity);
+        nfs_array rewrall(arity);
+        rewrall.fill(arity);
+        tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,&rewrall);
       }
       ss << tail_second << ")";
       if (rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != ATERM_NON_EXISTING_POSITION))
@@ -2073,11 +1579,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
     }
     else
     {
-#ifdef USE_REWRAPPL_VALUE
       ss << "(ATermAppl) " << (void*) get_rewrappl_value((ATermInt) t);
-#else
-      ss << "rewrAppl" << ATgetInt((ATermInt) t);
-#endif
     }
     return pair<bool,string>(
              rewr || b,
@@ -2085,7 +1587,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
            );
 
   }
-  else if (/*ATisAppl(t) && */ gsIsNil((ATermAppl) t))
+  else if (gsIsNil((ATermAppl) t))
   {
     stringstream ss;
     bool b = (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != ATERM_NON_EXISTING_POSITION);
@@ -2119,236 +1621,9 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
 
 void RewriterCompilingJitty::calcTerm(FILE* f, ATerm t, int startarg, ATermList nnfvars, bool rewr)
 {
-#ifdef USE_NEW_CALCTERM
   pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr);
-  //fprintf(f," /* (%s,%s) */ ",p.first?"true":"false",p.second.c_str());
   fprintf(f,"%s",p.second.c_str());
   return;
-#else
-  if (ATisList(t))
-  {
-    int arity = ATgetLength((ATermList) t)-1;
-    ATermList l;
-    bool b = false;
-    bool v = false;
-
-    if (!ATisInt(ATgetFirst((ATermList) t)))
-    {
-      if (arity == 0)
-      {
-        calcTerm(f,ATgetFirst((ATermList) t),0,nnfvars,rewr);
-        return;
-      }
-
-      v = true;
-      fprintf(f,"(isAppl(");
-      calcTerm(f,ATgetFirst((ATermList) t),0,NULL,false);
-      fprintf(f,")?rewrite(build%i(",arity);
-      calcTerm(f,ATgetFirst((ATermList) t),0,NULL,false);
-      l = ATgetNext((ATermList) t);
-      int i = startarg;
-      for (; !ATisEmpty(l); l=ATgetNext(l))
-      {
-        fprintf(f,",");
-        if (ATisAppl(ATgetFirst(l)) && gsIsNil(ATAgetFirst(l)))
-        {
-          fprintf(f,"arg%i",i);
-        }
-        else
-        {
-          calcTerm(f,ATgetFirst(l),0,NULL,false);
-        }
-        i++;
-      }
-      if (rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,ATgetFirst((ATermList) t),0) >= 0))
-      {
-        fprintf(f,")):rewrite(");
-        rewr = false;
-      }
-      else
-      {
-        fprintf(f,")):(");
-      }
-    }
-
-    bool b2 = false;
-    if (ATisInt(ATgetFirst((ATermList) t)))
-    {
-      b = rewr;
-      b2 = true;
-    }
-
-    size_t nfs = 0;
-    if (b)
-    {
-      if (arity <= NF_MAX_ARITY)
-      {
-        int i = 0;
-        for (ATermList m=ATgetNext((ATermList) t); !ATisEmpty(m); m=ATgetNext(m))
-        {
-          if (ATisAppl(ATgetFirst(m)) && (nnfvars != NULL) && ((gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == -1)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == ATERM_NON_EXISTING_POSITION))))
-          {
-            nfs = nfs | (1 << i);
-          }
-          i++;
-        }
-#ifdef EXTEND_NFS
-        nfs = extend_nfs(nfs | get_base_nfs((ATermInt) ATgetFirst((ATermList) t),arity) , (ATermInt) ATgetFirst((ATermList) t) , arity);
-#endif
-      }
-      fprintf(f,"rewr_%i_%i_%u(",ATgetInt((ATermInt) ATgetFirst((ATermList) t)),arity,nfs);
-    }
-    else
-    {
-      if (arity == 0)
-      {
-#ifdef USE_REWRAPPL_VALUE
-        fprintf(f,"((ATermAppl) %p",get_rewrappl_value((ATermInt) ATgetFirst((ATermList) t)));
-#else
-        fprintf(f,"(rewrAppl%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t)));
-#endif
-      }
-      else
-      {
-        if (arity > 5)
-        {
-#ifdef USE_APPL_VALUE
-          fprintf(f,"ATmakeAppl(%li,",get_appl_afun_value(arity));
-#else
-          fprintf(f,"ATmakeAppl(appl%i,",arity);
-#endif
-        }
-        else
-        {
-#ifdef USE_APPL_VALUE
-          fprintf(f,"ATmakeAppl%i(%li,",arity+1,get_appl_afun_value(arity));
-#else
-          fprintf(f,"ATmakeAppl%i(appl%i,",arity+1,arity);
-#endif
-        }
-        if (ATisInt(ATgetFirst((ATermList) t)))
-        {
-          if (b2)
-          {
-            size_t nfs = 0;
-            if (arity <= NF_MAX_ARITY)
-            {
-              int i = 0;
-              for (ATermList m=ATgetNext((ATermList) t); !ATisEmpty(m); m=ATgetNext(m))
-              {
-                if (ATisAppl(ATgetFirst(m)) && (nnfvars != NULL) && ((gsIsDataVarId(ATAgetFirst(m)) && (ATindexOf(nnfvars,ATgetFirst(m),0) == ATERM_NON_EXISTING_POSITION)) || (gsIsNil(ATAgetFirst(m)) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == ATERM_NON_EXISTING_POSITION))))
-                {
-                  nfs = nfs | (1 << i);
-                }
-                i++;
-              }
-            }
-            if (nfs == 0)
-            {
-#ifdef USE_INT2ATERM_VALUE
-              fprintf(f,"(ATerm) %p",get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t)));
-#else
-              fprintf(f,"(ATerm) int2ATerm%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t)));
-#endif
-            }
-            else
-            {
-#ifdef USE_INT2ATERM_VALUE
-              fprintf(f,"(ATerm) %p",get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+nfs));
-#else
-              fprintf(f,"(ATerm) int2ATerm%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+nfs);
-#endif
-            }
-//    } else {
-//            fprintf(f,"(ATerm) int2ATerm%i",ATgetInt((ATermInt) ATgetFirst((ATermList) t)));
-          }
-        }
-        else
-        {
-          fprintf(f,"(ATerm) ");
-          calcTerm(f,ATgetFirst((ATermList) t),0,nnfvars,rewr);
-        }
-      }
-    }
-    l = ATgetNext((ATermList) t);
-    bool c = !b;
-    int i = startarg;
-    for (; !ATisEmpty(l); l=ATgetNext(l))
-    {
-      if (c)
-      {
-        fprintf(f,",");
-      }
-      else
-      {
-        c = true;
-      }
-      if (!b)
-      {
-        fprintf(f,"(ATerm) ");
-      }
-      if (ATisAppl(ATgetFirst(l)) && gsIsNil(ATAgetFirst(l)))
-      {
-        if (!((rewr && !b) || !((nfs&(1<<(i-startarg))) == 0)) || (ATindexOf(nnfvars,(ATerm) ATmakeInt(i),0) == ATERM_NON_EXISTING_POSITION))
-        {
-          fprintf(f,"arg%i",i);
-        }
-        else
-        {
-          fprintf(f,"rewrite(arg%i)",i);
-        }
-      }
-      else
-      {
-        calcTerm(f,ATgetFirst(l),0,nnfvars,(rewr && !b) || ((nfs&(1<<(i-startarg))) != 0));
-      }
-      i++;
-    }
-    fprintf(f,")");
-
-    if (v)
-    {
-      fprintf(f,"))");
-    }
-  }
-  else if (ATisInt(t))
-  {
-    ATermList l;
-    bool b = false;
-    if ((l = jittyc_eqns[ATgetInt((ATermInt) t)]) != NULL)
-    {
-      if (!ATisEqual(ATgetFirst(l),ATmakeInt(0)))
-      {
-        b = true;
-      }
-    }
-
-    if (b)
-    {
-      fprintf(f,"rewr_%i_0_0()",ATgetInt((ATermInt) t));
-    }
-    else
-    {
-//      fprintf(f,"ATmakeAppl1(appl0,int2ATerm%i)",ATgetInt((ATermInt) t));
-#ifdef USE_REWRAPPL_VALUE
-      fprintf(f,"(ATermAppl) %p",get_rewrappl_value((ATermInt) t));
-#else
-      fprintf(f,"rewrAppl%i",ATgetInt((ATermInt) t));
-#endif
-    }
-  }
-  else
-  {
-    if (rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,t,0) >= 0))
-    {
-      fprintf(f,"rewrite(%s)",ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) t,0)))+1);
-    }
-    else
-    {
-      fprintf(f,"%s",ATgetName(ATgetAFun(ATAgetArgument((ATermAppl) t,0)))+1);
-    }
-  }
-#endif
 }
 
 static ATerm add_args(ATerm a, int num)
@@ -2440,7 +1715,7 @@ static int peekn_st(int n)
   }
 }
 
-//#define IT_DEBUG
+// #define IT_DEBUG
 #define IT_DEBUG_INLINE
 #ifdef IT_DEBUG_INLINE
 #define IT_DEBUG_FILE f,"//"
@@ -2469,17 +1744,11 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
 // arity     Arity of the head symbol of the expression where are
 //           matching (for construction of return values)
 {
-#ifdef IT_DEBUG
-  fprintf(IT_DEBUG_FILE "implement_tree_aux: cur_arg=%i, parent=%i, level=%i, cnt=%i\n",cur_arg,parent,level,cnt);
-#endif
   if (isS(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "S(%P)\n",ATgetArgument(tree,0));
-#endif
     if (level == 0)
     {
-      fprintf(f,"%sATermAppl %s = arg%i; // S\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,cur_arg);
+      fprintf(f,"%sconst ATermAppl %s = arg%i; // S\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,cur_arg);
       if (!used[cur_arg])
       {
         nnfvars = ATinsert(nnfvars,ATgetArgument(tree,0));
@@ -2487,20 +1756,16 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
     }
     else
     {
-      fprintf(f,"%sATermAppl %s = (ATermAppl) ATgetArgument(%s%i,%i); // S\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,(level==1)?"arg":"t",parent,cur_arg);
-      //fprintf(f,"%sATermAppl %s = t%i; // S\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,cur_arg);
+      fprintf(f,"%sconst ATermAppl %s = (ATermAppl) ATgetArgument(%s%i,%i); // S\n",whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,(level==1)?"arg":"t",parent,cur_arg);
     }
     implement_tree_aux(f,ATAgetArgument(tree,1),cur_arg,parent,level,cnt,d,arity,used,nnfvars);
     return;
   }
   else if (isM(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "M(%P)\n",ATgetArgument(tree,0));
-#endif
     if (level == 0)
     {
-      fprintf(f,"%sif ( ATisEqual(%s,arg%i) ) // M\n"
+      fprintf(f,"%sif (ATisEqual(%s,arg%i)) // M\n"
               "%s{\n",
               whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,cur_arg,
               whitespace(d*2)
@@ -2508,11 +1773,9 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
     }
     else
     {
-      fprintf(f,"%sif ( ATisEqual(%s,ATgetArgument(%s%i,%i)) ) // M\n"
-              //fprintf(f,"%sif ( ATisEqual(%s,t%i) ) // M\n"
+      fprintf(f,"%sif (ATisEqual(%s,ATgetArgument(%s%i,%i))) // M\n"
               "%s{\n",
               whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,(level==1)?"arg":"t",parent,cur_arg,
-              //  whitespace(d*2),ATgetName(ATgetAFun(ATAgetArgument(ATAgetArgument(tree,0),0)))+1,cur_arg,
               whitespace(d*2)
              );
     }
@@ -2524,67 +1787,37 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isF(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "F(%P)\n",int2term[ATgetInt((ATermInt) ATgetArgument(tree,0))]);
-#endif
     if (level == 0)
     {
-      fprintf(f,"%sif ( "
-#ifdef F_DONT_TEST_ISAPPL
+      // TODO: if parent was also an F of the same level we can omit isAppl
+      fprintf(f,"%sif ("
               "isAppl(arg%i) && "
-#endif
               "ATisEqual(ATgetArgument(arg%i,0),"
-#ifdef USE_INT2ATERM_VALUE
               "(ATerm) %p"
-#else
-              "int2ATerm%i"
-#endif
               ") ) // F\n"
               "%s{\n",
               whitespace(d*2),
-#ifdef F_DONT_TEST_ISAPPL
               cur_arg,
-#endif
               cur_arg,
-#ifdef USE_INT2ATERM_VALUE
               (void*)get_int2aterm_value((ATermInt) ATgetArgument(tree,0)),
-#else
-              ATgetInt((ATermInt) ATgetArgument(tree,0)),
-#endif
               whitespace(d*2)
              );
     }
     else
     {
-      fprintf(f,"%sif ( "
-#ifdef F_DONT_TEST_ISAPPL
+      fprintf(f,"%sif ("
               "isAppl(ATgetArgument(%s%i,%i)) && "
-#endif
               "ATisEqual(ATgetArgument((ATermAppl) ATgetArgument(%s%i,%i),0),"
-#ifdef USE_INT2ATERM_VALUE
               "(ATerm) %p"
-#else
-              "int2ATerm%i"
-#endif
               ") ) // F\n"
-              //fprintf(f,"%sif ( isAppl(t%i) && ATisEqual(ATgetArgument(t%i,0),int2ATerm%i) ) // F\n"
               "%s{\n"
               "%s  ATermAppl t%i = (ATermAppl) ATgetArgument(%s%i,%i);\n",
-              //    "%s  ATermAppl t%i = (ATermAppl) ATgetArgument(t%i,1);\n",
               whitespace(d*2),
-#ifdef F_DONT_TEST_ISAPPL
               (level==1)?"arg":"t",parent,cur_arg,
-#endif
               (level==1)?"arg":"t",parent,cur_arg,
-#ifdef USE_INT2ATERM_VALUE
               (void*)get_int2aterm_value((ATermInt) ATgetArgument(tree,0)),
-#else
-              ATgetInt((ATermInt) ATgetArgument(tree,0)),
-#endif
-              //  whitespace(d*2),cur_arg,cur_arg,ATgetInt((ATermInt) ATgetArgument(tree,0)),
               whitespace(d*2),
               whitespace(d*2),cnt,(level==1)?"arg":"t",parent,cur_arg
-              //  whitespace(d*2),cnt,cur_arg
              );
     }
     push_st(cur_arg);
@@ -2599,9 +1832,6 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isD(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "D\n");
-#endif
     int i = pop_st();
     int j = pop_st();
     implement_tree_aux(f,ATAgetArgument(tree,0),j,i,level-1,cnt,d,arity,used,nnfvars);
@@ -2611,38 +1841,19 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isN(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "N\n");
-#endif
-    /*if ( level == 0 )
-    {
-      fprintf(f,"%scur = arg%i;\n",cur_arg+1);
-    } else {
-      fprintf(f,"%scur = (ATermAppl) ATgetArgument(%s%i,%i);\n",(level==1)?"arg":"t",parent,cur_arg+1);
-    }*/
     implement_tree_aux(f,ATAgetArgument(tree,0),cur_arg+1,parent,level,cnt,d,arity,used,nnfvars);
     return;
   }
   else if (isC(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "C\n");
-#endif
-    fprintf(f,"%sif ( ATisEqual(",whitespace(d*2));
+    fprintf(f,"%sif (ATisEqual(",whitespace(d*2));
     calcTerm(f,ATgetArgument(tree,0),0,nnfvars);
-#ifdef USE_REWRAPPL_VALUE
+
     fprintf(f,",(ATermAppl) %p) ) // C\n"
             "%s{\n",
             (void*)get_rewrappl_value(true_num),
             whitespace(d*2)
            );
-#else
-    fprintf(f,",rewrAppl%i) ) // C\n"
-            "%s{\n",
-            true_num,
-            whitespace(d*2)
-           );
-#endif
     implement_tree_aux(f,ATAgetArgument(tree,1),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
     fprintf(f,"%s} else {\n",whitespace(d*2));
     implement_tree_aux(f,ATAgetArgument(tree,2),cur_arg,parent,level,cnt,d+1,arity,used,nnfvars);
@@ -2651,36 +1862,24 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isR(tree))
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "R\n");
-#endif
     fprintf(f,"%sreturn ",whitespace(d*2));
     if (level > 0)
     {
       //cur_arg = peekn_st(level);
       cur_arg = peekn_st(2*level-1);
     }
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "arity=%i, cur_arg=%i\n",arity,cur_arg);
-#endif
     calcTerm(f,add_args(ATgetArgument(tree,0),arity-cur_arg-1),get_startarg(ATgetArgument(tree,0),cur_arg+1),nnfvars);
-    fprintf(f,";\n");
+    fprintf(f,"; // R\n");
     return;
   }
   else
   {
-#ifdef IT_DEBUG
-    gsfprintf(IT_DEBUG_FILE "X\n");
-#endif
     return;
   }
 }
 
-void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, int d, int /*opid*/, bool* used)
+void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, int d, int /* opid */, bool* used)
 {
-#ifdef IT_DEBUG
-  gsfprintf(IT_DEBUG_FILE "implement_tree %P (%i)\n",int2term[opid],opid);
-#endif
   int l = 0;
 
   ATermList nnfvars = ATmakeList0();
@@ -2694,9 +1893,9 @@ void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, 
 
   while (isC(tree))
   {
-    fprintf(f,"%sif ( ATisEqual(",whitespace(d*2));
+    fprintf(f,"%sif (ATisEqual(",whitespace(d*2));
     calcTerm(f,ATgetArgument(tree,0),0,ATmakeList0());
-#ifdef USE_REWRAPPL_VALUE
+
     fprintf(f,",(ATermAppl) %p) ) // C\n"
             "%s{\n"
             "%sreturn ",
@@ -2704,15 +1903,6 @@ void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, 
             whitespace(d*2),
             whitespace(d*2)
            );
-#else
-    fprintf(f,",rewrAppl%i) ) // C\n"
-            "%s{\n"
-            "%sreturn ",
-            true_num,
-            whitespace(d*2),
-            whitespace(d*2)
-           );
-#endif
     assert(isR(ATAgetArgument(tree,1)));
     calcTerm(f,add_args(ATgetArgument(ATAgetArgument(tree,1),0),arity),get_startarg(ATgetArgument(ATAgetArgument(tree,1),0),0),nnfvars);
     fprintf(f,";\n"
@@ -2727,7 +1917,7 @@ void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, 
   {
     fprintf(f,"%sreturn ",whitespace(d*2));
     calcTerm(f,add_args(ATgetArgument(tree,0),arity),get_startarg(ATgetArgument(tree,0),0),nnfvars);
-    fprintf(f,";\n");
+    fprintf(f,"; // R\n");
   }
   else
   {
@@ -2736,89 +1926,51 @@ void RewriterCompilingJitty::implement_tree(FILE* f, ATermAppl tree, int arity, 
   }
   while (l > 0)
   {
-    d--;
+    --d;
     fprintf(f,"%s}\n",whitespace(d*2));
-    l--;
+    --l;
   }
 }
 
-static void finish_function(FILE* f, int arity, int opid, bool* used)
+static void finish_function(FILE* f, size_t arity, int opid, bool* used)
 {
   if (arity == 0)
   {
-#ifdef USE_REWRAPPL_VALUE
     fprintf(f,  "  return ((ATermAppl) %p",
             (void*)get_rewrappl_value(opid)
            );
-#else
-    fprintf(f,  "  return (rewrAppl%i",
-            opid
-           );
-#endif
   }
   else
   {
     if (arity > 5)
     {
       fprintf(f,  "  return ATmakeAppl("
-#ifdef USE_APPL_VALUE
               "%li,"
-#else
-              "appl%i,"
-#endif
-#ifdef USE_INT2ATERM_VALUE
               "(ATerm) %p",
-#else
-              "(ATerm) int2ATerm%i",
-#endif
-#ifdef USE_APPL_VALUE
-              (long int) get_appl_afun_value(arity),
-#else
-              arity,
-#endif
-#ifdef USE_INT2ATERM_VALUE
+              (long int) get_appl_afun_value(arity+1),   // YYYY
               (void*)get_int2aterm_value(opid)
-#else
-              opid
-#endif
              );
     }
     else
     {
-      fprintf(f,  "  return ATmakeAppl%i("
-#ifdef USE_APPL_VALUE
+      fprintf(f,  "  return ATmakeAppl%li("
               "%li,"
-#else
-              "appl%i,"
-#endif
-#ifdef USE_INT2ATERM_VALUE
               "(ATerm) %p",
-#else
-              "(ATerm) int2ATerm%i",
-#endif
               arity+1,
-#ifdef USE_APPL_VALUE
-              (long int) get_appl_afun_value(arity),
-#else
-              arity,
-#endif
-#ifdef USE_INT2ATERM_VALUE
+              (long int) get_appl_afun_value(arity+1),    // YYYY
               (void*)get_int2aterm_value(opid)
-#else
-              opid
-#endif
              );
     }
   }
-  for (int i=0; i<arity; i++)
+  for (size_t i=0; i<arity; i++)
   {
     if ((used != NULL) && used[i])
     {
-      fprintf(f,                 ",(ATerm) arg%i",i);
+      fprintf(f,                 ",(ATerm) arg%ld",i);
     }
     else
     {
-      fprintf(f,                 ",(ATerm) rewrite(arg%i)",i);
+      fprintf(f,                 ",(ATerm) rewrite(arg%ld)",i);
     }
   }
   fprintf(f,                 ");\n");
@@ -2826,12 +1978,6 @@ static void finish_function(FILE* f, int arity, int opid, bool* used)
 
 void RewriterCompilingJitty::implement_strategy(FILE* f, ATermList strat, int arity, int d, int opid, size_t nf_args)
 {
-//#ifdef IS_DEBUG
-#ifndef IT_DEBUG_INLINE
-  gsfprintf(IT_DEBUG_FILE "implement_strategy %P (%i)\n",int2term[opid],opid);
-  gsfprintf(IT_DEBUG_FILE "implement_strategy: %T\n",strat);
-  fflush(f);
-#endif
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,arity);
   for (int i=0; i<arity; i++)
   {
@@ -2923,9 +2069,9 @@ ATermAppl RewriterCompilingJitty::build_ar_expr_aux(ATermList eqn, size_t arg, s
     else if (ATisList(rhs) && ATisInt(ATgetFirst((ATermList) rhs)))
     {
       int rhs_arity = ATgetLength((ATermList) rhs)-1;
-      int diff_arity = arity-eqn_arity;
+      size_t diff_arity = arity-eqn_arity;
       int rhs_new_arity = rhs_arity+diff_arity;
-      int idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,ATgetFirst((ATermList) rhs))) + ((rhs_new_arity-1)*rhs_new_arity)/2 + (arg - eqn_arity + rhs_arity);
+      size_t idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,ATgetFirst((ATermList) rhs))) + ((rhs_new_arity-1)*rhs_new_arity)/2 + (arg - eqn_arity + rhs_arity);
       return make_ar_var(idx);
     }
     else
@@ -2994,7 +2140,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   ar = (ATermAppl*) malloc(ar_size*sizeof(ATermAppl));
   if (ar == NULL)
   {
-    gsErrorMsg("cannot allocate enough memory (%li bytes)\n",ar_size*sizeof(ATermAppl));
+    mCRL2log(error) << "cannot allocate enough memory (" << ar_size*sizeof(ATermAppl) << "bytes)" << std::endl;
   }
   for (size_t i=0; i<ar_size; i++)
   {
@@ -3005,7 +2151,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   ATermList ints = ATtableKeys(int2ar_idx);
   for (; !ATisEmpty(ints); ints=ATgetNext(ints))
   {
-    size_t arity = getArity(int2term[ATgetInt((ATermInt) ATgetFirst(ints))]);
+    size_t arity = getArity(get_int2term(ATgetInt((ATermInt) ATgetFirst(ints))));
     ATermList eqns = jittyc_eqns[ATgetInt((ATermInt) ATgetFirst(ints))];
     int idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,ATgetFirst(ints)));
     for (size_t i=1; i<=arity; i++)
@@ -3017,23 +2163,9 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
     }
   }
 
-#define PRINT_AR \
-  for (ATermList l=ATtableKeys(term2int); !ATisEmpty(l); l=ATgetNext(l)) \
-  { \
-    ATermAppl opid = (ATermAppl) ATgetFirst(l); \
-    size_t idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,ATtableGet(term2int,(ATerm) opid))); \
-    for (size_t i=1; i<=getArity(opid); i++) \
-    { \
-      for (size_t j=0; j<i; j++) \
-      { \
-        gsfprintf(stderr,"%P (%i), arity %i, arg %i:  (%i)  %T\n",opid,idx,i,j,idx+((i-1)*i)/2+j,ar[idx+((i-1)*i)/2+j]); \
-      } \
-    } \
-  }
   bool notdone = true;
   while (notdone)
   {
-    //PRINT_AR
     notdone = false;
     for (size_t i=0; i<ar_size; i++)
     {
@@ -3044,7 +2176,6 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
       }
     }
   }
-  //PRINT_AR
 }
 
 bool RewriterCompilingJitty::addRewriteRule(ATermAppl Rule)
@@ -3057,14 +2188,13 @@ bool RewriterCompilingJitty::addRewriteRule(ATermAppl Rule)
   }
   catch (std::runtime_error& e)
   {
-    gsWarningMsg("%s\n",e.what());
+    mCRL2log(warning) << e.what() << std::endl;
     return false;
   }
 
   need_rebuild = true;
 
-  ATermAppl u = (ATermAppl) toInnerc(toInner(ATAgetArgument(Rule,2),true));
-
+  ATermAppl u = (ATermAppl) toInnerc(ATAgetArgument(Rule,2),true);
   if ((n = (ATermList) ATtableGet(tmp_eqns,ATgetArgument(u,0))) == NULL)
   {
     n = ATmakeList0();
@@ -3081,36 +2211,28 @@ bool RewriterCompilingJitty::removeRewriteRule(ATermAppl /*Rule*/)
 }
 
 
-void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec)
+void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   made_files = false;
   need_rebuild = true;
 
   tmp_eqns = ATtableCreate(100,75); // XXX would be nice to know the number op OpIds
 
-  num_opids = 0;
-
   true_inner = (ATermInt) OpId2Int(sort_bool::true_(),true);
   true_num = ATgetInt(true_inner);
 
-  const data_specification::equations_const_range l=DataSpec.equations();
-  for (atermpp::set< data_equation >::const_iterator j=l.begin(); j!=l.end(); ++j)
-  {
-    addRewriteRule(*j);
+  const data_equation_vector l=DataSpec.equations();
+  if (add_rewrite_rules)
+  { 
+    for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
+    {
+      addRewriteRule(*j);
+    }
   }
-
-  int2term = NULL;
+  
   jittyc_eqns = NULL;
   int2ar_idx = NULL;
   ar = NULL;
-}
-
-static void cleanup_file(std::string const& f)
-{
-  if (unlink(const_cast< char* >(f.c_str())))
-  {
-    fprintf(stderr,"unable to remove file %s: %s\n",const_cast< char* >(f.c_str()),strerror(errno));
-  }
 }
 
 void RewriterCompilingJitty::CleanupRewriteSystem()
@@ -3118,12 +2240,14 @@ void RewriterCompilingJitty::CleanupRewriteSystem()
   if (so_rewr_cleanup != NULL)
   {
     so_rewr_cleanup();
-    dlclose(so_handle);
   }
-  if (int2term != NULL)
+  if (rewriter_so != NULL)
   {
-    ATunprotectArray((ATerm*) int2term);
-    free(int2term);
+    delete rewriter_so;
+    rewriter_so = NULL;
+  }
+  if (jittyc_eqns != NULL)
+  {
     ATunprotectArray((ATerm*) jittyc_eqns);
     free(jittyc_eqns);
     ATtableDestroy(int2ar_idx);
@@ -3132,35 +2256,125 @@ void RewriterCompilingJitty::CleanupRewriteSystem()
   }
 }
 
+/* Opens a .cpp file, saves filenames to file_c, file_o and file_so.
+ *
+ */
+FILE* RewriterCompilingJitty::MakeTempFiles()
+{
+	FILE* result;
+	
+	std::ostringstream file_base;
+        char* file_dir = getenv("MCRL2_COMPILEDIR");
+        if (file_dir != NULL)
+        {
+          int l = strlen(file_dir);
+          if (file_dir[l - 1] == '/')
+          {
+            file_dir[l - 1] = 0;
+          }
+          file_base << file_dir;
+        }
+        else
+        {
+          file_base << ".";
+        }
+	file_base << "/jittyc_" << getpid() << "_" << reinterpret_cast< long >(this) << ".cpp";
+
+	rewriter_source = file_base.str();
+
+	result = fopen(const_cast< char* >(rewriter_source.c_str()),"w");
+	if (result == NULL)
+	{
+		perror("fopen");
+		throw mcrl2::runtime_error("Could not create temporary file for rewriter.");
+	}
+
+	return result;
+}
+
+inline
+int declare_rewr_functions(FILE* f, size_t func_index, int arity)
+{
+  /* Declare the function that gets function func_index in normal form */
+  int aux = 0;
+  for (int a=0; a<=arity; a++)
+  {
+    int b = (a<=NF_MAX_ARITY)?a:0;
+    for (size_t nfs=0; (nfs >> b) == 0; nfs++)
+    {
+      fprintf(f,  "static inline ATermAppl rewr_%lu_%i_%lu(",func_index,a,nfs);
+      for (int i=0; i<a; i++)
+      {
+        fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
+      }
+      fprintf(f,  ");\n");
+
+      if (nfs == 0)
+      {
+        fprintf(f,  "static inline ATermAppl rewr_%lu_%i_0_term(const ATermAppl t) { return rewr_%lu_%i_0(", func_index, a, func_index, a);
+        for(int i = 1; i <= a; ++i)
+        {
+          fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %i)", (i == 1?"":", "), i);
+        }
+        fprintf(f,  "); }\n");
+      }
+      else // (nfs > 0)
+      {
+        fprintf(f,  "static inline ATermAppl rewr_%lu_%i_0(",func_index+1+aux,a);
+        for (int i=0; i<a; i++)
+        {
+          fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
+        }
+        fprintf(f,  ") { return rewr_%lu_%i_%lu(",func_index,a,nfs);
+        for (int i=0; i<a; i++)
+        {
+          fprintf(f, (i==0)?"arg%i":",arg%i",i);
+        }
+        fprintf(f,  "); }\n");
+
+        fprintf(f,  "static inline ATermAppl rewr_%lu_%i_0_term(const ATermAppl t) { return rewr_%lu_%i_0(", func_index+1+aux,a,func_index+1+aux,a);
+        for (int i=1; i<=a; i++)
+        {
+          fprintf(f, (i==1)?"ATAgetArgument(t, %i)":", ATAgetArgument(t, %i)",i);
+        }
+        fprintf(f,  "); }\n");
+
+        ++aux;
+      }
+    }
+  }
+  return aux;
+}
+
 void RewriterCompilingJitty::BuildRewriteSystem()
 {
-  ATermList l;
-  ATermInt i;
-  int j;
   FILE* f;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,char,100+strlen(JITTYC_COMPILE_COMMAND)+strlen(JITTYC_LINK_COMMAND));
-  void* h;
-
   CleanupRewriteSystem();
 
-  int2term = (ATermAppl*) malloc(num_opids*sizeof(ATermAppl));
-  memset(int2term,0,num_opids*sizeof(ATermAppl));
-  ATprotectArray((ATerm*) int2term,num_opids);
-  jittyc_eqns = (ATermList*) malloc(num_opids*sizeof(ATermList));
-  memset(jittyc_eqns,0,num_opids*sizeof(ATermList));
-  ATprotectArray((ATerm*) jittyc_eqns,num_opids);
+  // Try to find out from environment which compile script to use. Use
+  // default script called "mcrl2compilerewriter" if not set.
+  std::string compile_script;
+  char* env_compile_script = getenv("MCRL2_COMPILEREWRITER");
+  if (env_compile_script != NULL)
+    compile_script = env_compile_script;
+  else
+    compile_script = "mcrl2compilerewriter";
+  rewriter_so = new uncompiled_library(compile_script);
+  mCRL2log(verbose) << "Using '" << compile_script << "' to compile rewriter." << std::endl;
+
+  jittyc_eqns = (ATermList*) malloc(get_num_opids()*sizeof(ATermList));
+  memset(jittyc_eqns,0,get_num_opids()*sizeof(ATermList));
+  ATprotectArray((ATerm*) jittyc_eqns,get_num_opids());
   ar_size = 0;
   int2ar_idx = ATtableCreate(100,75);
 
-  l = ATtableKeys(term2int);
-//  gsfprintf(stderr,"TERM2INT %T\n",l);
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  for(atermpp::map< ATerm, ATermInt >::const_iterator l = term2int_begin()
+        ; l != term2int_end()
+        ; ++l)
   {
-    i = (ATermInt) ATtableGet(term2int,ATgetFirst(l));
-    int2term[ATgetInt(i)] = ATAgetFirst(l);
+    ATermInt i = l->second;
     if (ATtableGet(tmp_eqns,(ATerm) i) != NULL)
     {
-      //jittyc_eqns[ATgetInt(i)] = create_strategy((ATermList) ATtableGet(tmp_eqns,(ATerm) i), ATgetInt(i));
       jittyc_eqns[ATgetInt(i)] = (ATermList) ATtableGet(tmp_eqns,(ATerm) i);
     }
     else
@@ -3169,381 +2383,93 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     }
     if (ATtableGet(int2ar_idx,(ATerm) i) == NULL)
     {
-      size_t arity = getArity(ATAgetFirst(l));
+      size_t arity = getArity((ATermAppl)l->first);
       ATtablePut(int2ar_idx,(ATerm) i,(ATerm) ATmakeInt(ar_size));
       ar_size += (arity*(arity+1))/2;
     }
   }
 
-#ifdef EXTEND_NFS
   fill_always_rewrite_array();
-#endif
 
-  std::ostringstream file_base("jittyc_");
-
-  file_base << getpid() << "_" << reinterpret_cast< long >(this);
-
-  file_c  = file_base.str() + ".c";
-  file_o  = file_base.str() + ".o";
-  file_so = file_base.str() + ".so";
-
-  f = fopen(const_cast< char* >(file_c.c_str()),"w");
-  if (f == NULL)
-  {
-    perror("fopen");
-    throw mcrl2::runtime_error("Could not create temporary file for rewriter.");
-  }
+  f = MakeTempFiles();
 
   //
   //  Print includes
   //
-  fprintf(f,  "#include <stdlib.h>\n"
-          "#include <string.h>\n"
-          "#include <aterm2.h>\n"
-          "#include \"assert.h\"\n"
-          "#ifndef ATprotectAppl\n"
-          "extern void ATprotectAppl(ATermAppl *a);\n"
-          "#endif\n"
-          "static ATermAppl makeAppl0(AFun a, ATerm h) { return ATmakeAppl1(a,h); }\n"
-          "static ATermAppl makeAppl1(AFun a, ATerm h, ATermAppl t) { return ATmakeAppl2(a,h,(ATerm) t); }\n"
-          "static ATermAppl makeAppl2(AFun a, ATerm h, ATermAppl t1, ATermAppl t2) { return ATmakeAppl3(a,h,(ATerm) t1, (ATerm) t2); }\n"
-          "static ATermAppl makeAppl3(AFun a, ATerm h, ATermAppl t1, ATermAppl t2, ATermAppl t3) { return ATmakeAppl4(a,h,(ATerm) t1, (ATerm) t2, (ATerm) t3); }\n"
-          "static ATermAppl makeAppl4(AFun a, ATerm h, ATermAppl t1, ATermAppl t2, ATermAppl t3, ATermAppl t4) { return ATmakeAppl5(a,h,(ATerm) t1, (ATerm) t2, (ATerm) t3, (ATerm) t4); }\n"
-          "static ATermAppl makeAppl5(AFun a, ATerm h, ATermAppl t1, ATermAppl t2, ATermAppl t3, ATermAppl t4, ATermAppl t5) { return ATmakeAppl6(a,h,(ATerm) t1, (ATerm) t2, (ATerm) t3, (ATerm) t4, (ATerm) t5); }\n"
-          "\n"
-          "ATermAppl rewrite(ATermAppl);\n"
-          "\n"
-         );
-
-  //
-  // Forward declarations of rewr_* functions
-  //
-  int max_arity = 0;
-  for (j=0; j < num_opids; j++)
-  {
-    /* if ( jittyc_eqns[j] != NULL )
-    { */
-    int arity = getArity(int2term[j]);
-    if (arity > max_arity)
-    {
-      max_arity = arity;
-    }
-
-    /* Declare the function that gets function j in normal form */
-//  fprintf(f,  "static ATermAppl rewr_%i_nnf(ATermAppl);\n",j);
-
-    int aux = 0;
-    for (int a=0; a<=arity; a++)
-    {
-      int b = (a<=NF_MAX_ARITY)?a:0;
-      for (size_t nfs=0; (nfs >> b) == 0; nfs++)
-      {
-        fprintf(f,  "static ATermAppl rewr_%i_%i_%lu(",j,a,nfs);
-        for (int i=0; i<a; i++)
-        {
-          fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
-        }
-        fprintf(f,  ");\n");
-
-        if (nfs > 0)
-        {
-          fprintf(f,  "static ATermAppl rewr_%i_%i_0(",j+1+aux,a);
-          for (int i=0; i<a; i++)
-          {
-            fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
-          }
-          fprintf(f,  ") { return rewr_%i_%i_%lu(",j,a,nfs);
-          for (int i=0; i<a; i++)
-          {
-            fprintf(f, (i==0)?"arg%i":",arg%i",i);
-          }
-          fprintf(f,  "); }\n");
-          aux++;
-        }
-      }
-    }
-//      printf("%i -> %i\n",j,aux);
-    j += aux;
-    /* } */
-  }
-  fprintf(f,  "\n\n");
+  fprintf(f, "#include \"mcrl2/data/detail/rewrite/jittycpreamble.h\"\n");
 
   //
   // Print defs
   //
   fprintf(f,
-          "#define ATisInt(x) (ATgetType(x) == AT_INT)\n"
-#ifdef USE_VARAFUN_VALUE
           "#define isAppl(x) (ATgetAFun(x) != %li)\n"
           "\n", (long int) ATgetAFun(static_cast<ATermAppl>(data::variable("x", data::sort_bool::bool_())))
-#else
-          "#define isAppl(x) (ATgetAFun(x) != varAFun)\n"
-          "\n"
-#endif
-         );
-  for (int i=0; i < num_opids; i++)
+         ); 
+
+  //
+  // - Calculate maximum occurring arity
+  // - Forward declarations of rewr_* functions
+  //
+  size_t max_arity = 0;
+  for (size_t j=0; j < get_num_opids(); ++j)
   {
-#ifndef USE_INT2ATERM_VALUE
-    fprintf(f,  "static ATerm int2ATerm%i;\n",i);
-#endif
-#ifndef USE_REWRAPPL_VALUE
-    fprintf(f,  "static ATermAppl rewrAppl%i;\n",i);
-#endif
-  }
-  fprintf(f,  "\n"
-          "static AFun *apples;\n"
-#ifndef USE_VARAFUN_VALUE
-          "static AFun varAFun;\n"
-#endif
-         );
-  for (int i=0; i<=max_arity; i++)
-  {
-#ifndef USE_APPL_VALUE
-    fprintf(f,      "static AFun appl%i;\n",i);
-#endif
-    fprintf(f,  "typedef ATermAppl (*ftype%i)(",i);
-    for (int j=0; j<i; j++)
+    size_t arity = getArity(get_int2term(j));
+    if (arity > max_arity)
     {
-      if (j == 0)
-      {
-        fprintf(f,              "ATermAppl");
-      }
-      else
-      {
-        fprintf(f,              ",ATermAppl");
-      }
+      max_arity = arity;
     }
-    fprintf(f,              ");\n");
-    fprintf(f,  "\n"
-            "ftype%i *int2func%i;\n",i,i);
+    j += declare_rewr_functions(f, j, arity);
   }
-//  fprintf(f,  "ftype1 *int2func;\n");
+  fprintf(f,  "\n\n");
 
   //
-  // Implement substitution functions
+  // Declare function types
   //
-  fprintf(f,  "\n"
-          "\n"
-          "static ATerm *substs = NULL;\n"
-          "static long substs_size = 0;\n"
-          "\n"
-          "void set_subst(ATermAppl Var, ATerm Expr)\n"
-          "{\n"
-          "  long n = ATgetAFun(ATgetArgument(Var,0));\n"
-          "\n"
-          "  if ( n >= substs_size )\n"
-          "  {\n"
-          "    long newsize;\n"
-          "\n"
-          "    if ( n >= 2*substs_size )\n"
-          "    {\n"
-          "      if ( n < 1024 )\n"
-          "      {\n"
-          "        newsize = 1024;\n"
-          "      } else {\n"
-          "        newsize = n+1;\n"
-          "      }\n"
-          "    } else {\n"
-          "      newsize = 2*substs_size;\n"
-          "    }\n"
-          "\n"
-          "    if ( substs_size > 0 )\n"
-          "    {\n"
-          "      ATunprotectArray(substs);\n"
-          "    }\n"
-          "    substs = (ATerm *) realloc(substs,newsize*sizeof(ATerm));\n"
-          "    \n"
-          "    if ( substs == NULL )\n"
-          "    {\n"
-          "      fprintf(stderr,\"Failed to increase the size of a substitution array\");\n"
-          "      exit(1);\n"
-          "    }\n"
-          "\n"
-          "    for (long i=substs_size; i<newsize; i++)\n"
-          "    {\n"
-          "      substs[i]=NULL;\n"
-          "    }\n"
-          "\n"
-          "    ATprotectArray(substs,newsize);\n"
-          "    substs_size = newsize;\n"
-          "  }\n"
-          "\n"
-          "  substs[n] = Expr;\n"
-          "}\n"
-          "\n"
-          "ATerm get_subst(ATermAppl Var)\n"
-          "{\n"
-          "  long n = ATgetAFun(ATgetArgument(Var,0));\n"
-          "\n"
-          "  if ( n >= substs_size )\n"
-          "  {\n"
-          "    return (ATerm) Var;\n"
-          "  }\n"
-          "  \n"
-          "  ATerm r = substs[n];\n"
-          "  \n"
-          "  if ( r == NULL )\n"
-          "  {\n"
-          "    return (ATerm) Var;\n"
-          "  }\n"
-          "  \n"
-          "  return r;\n"
-          "}\n"
-          "\n"
-          "void clear_subst(ATermAppl Var)\n"
-          "{\n"
-          "  long n = ATgetAFun(ATgetArgument(Var,0));\n"
-          "\n"
-          "  if ( n < substs_size )\n"
-          "  {\n"
-          "    substs[n] = NULL;\n"
-          "  }\n"
-          "}\n"
-          "\n"
-          "void clear_substs()\n"
-          "{\n"
-          "  for (long i=0; i<substs_size; i++)\n"
-          "  {\n"
-          "    substs[i] = NULL;\n"
-          "  }\n"
-          "}\n"
-          "\n"
-          "\n"
-         );
+  fprintf(f,  "typedef ATermAppl (*func_type)(const ATermAppl);\n");
+  fprintf(f,  "func_type* int2func[%ld];\n", max_arity+2);
 
+  // Set this rewriter, to use its functions.
+  fprintf(f,  "mcrl2::data::detail::RewriterCompilingJitty *this_rewriter;\n");
 
   //
-  // Implement auxiliary functions
+  // "build" functions
   //
-  fprintf(f,  "static int num_apples = 0;\n"
-          "#define GET_APPL_INC 5\n"
-          "static AFun getAppl(int arity)\n"
-          "{\n"
-          "  int old_num = num_apples;\n"
-          "\n"
-          "  if ( apples == NULL )\n"
-          "  {\n"
-          "    apples = (AFun *) malloc(0*sizeof(AFun));\n"
-          "  }\n"
-          "\n"
-          "  while ( arity >= num_apples )\n"
-          "  {\n"
-          "    num_apples += GET_APPL_INC;\n"
-          "  }\n"
-          "  if ( old_num < num_apples )\n"
-          "  {\n"
-          "    apples = (AFun *) realloc(apples,num_apples*sizeof(AFun));\n"
-          "    for (int i=old_num; i<num_apples; i++)\n"
-          "    {\n"
-          "      char c[10];\n"
-          "      sprintf(c,\"appl#%%i\",i+1);\n"
-          "      apples[i] = ATmakeAFun(c,i+1,ATfalse);\n"
-          "      ATprotectAFun(apples[i]);\n"
-          "    }\n"
-          "  }\n"
-          "\n"
-          "  return apples[arity];\n"
-          "}\n"
-          "\n"
-         );
-
-  for (int i=1; i<=max_arity; i++)
+  for (size_t i=1; i<=max_arity; ++i)
   {
     fprintf(f,
-            "static ATermAppl build%i(ATermAppl a",i);
-    for (int j=0; j<i; j++)
+            "static ATermAppl build%ld(ATermAppl a",i);
+    for (size_t j=0; j<i; ++j)
     {
-      fprintf(f, ", ATermAppl arg%i",j);
+      fprintf(f, ", ATermAppl arg%ld",j);
     }
     fprintf(f, ")\n"
             "{\n");
     fprintf(f,
-//      "  ATprintf(\"%%t\\n\",a);\n"
             "  int arity = ATgetArity(ATgetAFun(a));\n"
-            "  if ( arity == 1 )\n"
+            "  if (arity == 1 )\n"
             "  {\n"
-            /*      "    if ( ATisInt(ATgetArgument(a,0)) && \n"
-                  "       (ATgetInt((ATermInt) ATgetArgument(a,0)) < %i) && \n"
-                  "       (int2func%i[ATgetInt((ATermInt) ATgetArgument(a,0))] != NULL) )\n"
-                  "    {\n"
-                  "       return int2func%i[ATgetInt((ATermInt) ATgetArgument(a,0))](",
-                     num_opids,i,i);
-                for (int j=0; j<i; j++)
-                {
-                  if ( j == 0 )
-                  { fprintf(f,"(ATermAppl) arg%i",j);
-                  }
-                  else
-                  { fprintf(f, ", (ATermAppl) arg%i",j);
-                  }
-                }
-                fprintf(f,");\n"
-                  "    }\n"
-                  "    else\n"
-                  "    {\n"*/
-#ifdef USE_APPL_VALUE
-            "      return ATmakeAppl(%li,ATgetArgument(a,0)", (long int) get_appl_afun_value(i));
-#else
-            "      return ATmakeAppl(appl%i,ATgetArgument(a,0)", i);
-#endif
+            "      return ATmakeAppl(%li,ATgetArgument(a,0)", (long int) get_appl_afun_value(i+1)); // YYYY
 
-
-    for (int j=0;
-         j<i;
-         j++)
+    for (size_t j=0; j<i; j++)
     {
-      fprintf(f, ",arg%i",j);
+      fprintf(f, ",arg%ld",j);
     }
     fprintf(f, ");\n"
-//      "    }\n"
             "  } else {\n"
-            "    ATerm args[arity+%i];\n"
+            "    ATerm args[arity+%ld];\n"
             "\n"
             "    for (int i=0; i<arity; i++)\n"
             "    {\n"
             "      args[i] = ATgetArgument(a,i);\n"
             "    }\n",i);
-    for (int j=0;
-         j<i;
-         j++)
+    for (size_t j=0; j<i; j++)
     {
       fprintf(f,
-              "    args[arity+%i] = (ATerm) arg%i;\n",j,j);
+              "    args[arity+%ld] = (ATerm) arg%ld;\n",j,j);
     }
     fprintf(f,
-            /*      "    if ( ATisInt(args[0]) && (ATgetInt((ATermInt) args[0]) < %i) )\n"
-                  "    {\n"
-            //                      "  gsprintf(\"switch %%i\\n\",i);\n"
-                  "      switch ( arity+%i-1 )\n"
-                  "      {\n",num_opids,i);
-                for (int j=i; j<=max_arity; j++)
-                { fprintf(f,
-                  "        case %i:\n"
-                  "          if ( int2func%i[ATgetInt((ATermInt) args[0])] != NULL )\n"
-                  "          {\n"
-                  "            return int2func%i[ATgetInt((ATermInt) args[0])](",j,j,j);
-                  for (int k=0; k<j; k++)
-                  {
-                    if ( k == 0 )
-                    {
-                      fprintf(f,"(ATermAppl) args[%i]",k+1);
-                    }
-                    else
-                    {
-                      fprintf(f,", (ATermAppl) args[%i]",k+1);
-                    }
-                  }
-                  fprintf(f,");\n"
-                    "          }\n"
-                    "          break;\n");
-                }
-                fprintf(f,
-                  "        default:\n"
-                  "          break;\n"
-                  "      }\n"
-                  "    }\n"*/
             "\n"
-            "    return ATmakeApplArray(getAppl(arity+%i-1),args);\n"
+            "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity+%ld),args);\n"  // YYYY+
             "  }\n"
             "}\n"
             "\n",i);
@@ -3552,91 +2478,56 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   //
   // Implement the equations of every operation.
   //
-  for (j=0; j < num_opids; j++)
+  for (size_t j=0; j < get_num_opids(); j++)
   {
-    /* if ( jittyc_eqns[j] != NULL ) */
+    size_t arity = getArity(get_int2term(j));
 
-    int arity = getArity(int2term[j]);
+    fprintf(f,  "// %s\n",atermpp::aterm(get_int2term(j)).to_string().c_str());
 
-#ifdef IS_DEBUG
-    gsfprintf(f,  "// %T\n",int2term[j]);
-#endif
-    /*    fprintf(f,  "static ATermAppl rewr_%i_nnf(ATermAppl t)\n"
-                    "{\n",j);
-        if (arity>0)
-        { fprintf(f,  "  int arity=ATgetArity(ATgetAFun(t))-1;\n");
-        }
-        for (int a=arity; a>=0; a--)
-        {
-          if (a>0)
-          { fprintf(f,  "  if (arity==%i)\n"
-                      "  { ",a);
-          }
-          else
-          { fprintf(f,  "  ");
-          }
-          fprintf(f,  "return rewr_%i_%i(",j,a);
-          for(int i=0; i<a; i++)
-          { if (i>0)
-            { fprintf(f,",");
-            }
-            fprintf(f,  "rewrite((ATermAppl)ATgetArgument(t,%i))",i+1);
-          }
-          fprintf(f,  ");\n");
-          if (a>0)
-          { fprintf(f,  "  }\n");
-          }
-        }
-        fprintf(f,  "}\n"
-                    "\n");*/
-
-    for (int a=0; a<=arity; a++)
+    for (size_t a=0; a<=arity; a++)
     {
-      MCRL2_SYSTEM_SPECIFIC_ALLOCA(nfs_a,size_t,a);
+      nfs_array nfs_a(a);
       int b = (a<=NF_MAX_ARITY)?a:0;
       for (size_t nfs=0; (nfs >> b) == 0; nfs++)
       {
-        fprintf(f,  "static ATermAppl rewr_%i_%i_%lu(",j,a,nfs);
-        for (int i=0; i<a; i++)
+        fprintf(f,  "static ATermAppl rewr_%ld_%ld_%lu(",j,a,nfs);
+        for (size_t i=0; i<a; i++)
         {
-          fprintf(f, (i==0)?"ATermAppl arg%i":", ATermAppl arg%i",i);
+          fprintf(f, (i==0)?"ATermAppl arg%ld":", ATermAppl arg%ld",i);
         }
         fprintf(f,  ")\n"
                 "{\n"
                );
-
-        /*      fprintf(f,  "  ATfprintf(stderr,\"rewr_%i_%i_%i(",j,a,nfs);
-              for (int i=0; i<a; i++)
-              {
-                fprintf(f,  (i==0)?"%%t":", %%t");
-              }
-              gsfprintf(f,  ")  %P: %P\\n\"",int2term[j],gsGetSort(int2term[j]));
-              for (int i=0; i<a; i++)
-              {
-                fprintf(f,  ", arg%i",i);
-              }
-              fprintf(f,  ");\n");*/
-
-
-        // Implement strategy
-        if (jittyc_eqns[j] != NULL)
+        if (a==1 && (function_symbol(get_int2term(j)).name() == exists_function_symbol())) // existential quantifier.
+        { 
+          fprintf(f,"  // existential quantifier\n");
+          fprintf(f,"  return (ATermAppl)this_rewriter->internal_existential_quantifier_enumeration((ATerm)ATmakeAppl2(%li,(ATerm) %p,(ATerm)arg0));\n",
+                               (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
+        }
+        else if (a==1 && (function_symbol(get_int2term(j)).name() == forall_function_symbol())) // universal quantifier.
+        { 
+          fprintf(f,"  // universal quantifier\n");
+          fprintf(f,"  return (ATermAppl)this_rewriter->internal_universal_quantifier_enumeration((ATerm)ATmakeAppl2(%li,(ATerm) %p,(ATerm)arg0));\n",
+                               (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
+        }
+        else if (jittyc_eqns[j] != NULL)
         {
+        // Implement strategy
           if (0 < a)
           {
-            set_nfs_array_value(nfs_a,a,nfs);
+            nfs_a.set_value(a,nfs);
           }
           implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs);
         }
         else
         {
           MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,a);
-          for (int k=0; k<a; k++)
+          for (size_t k=0; k<a; k++)
           {
-            used[k] = ((nfs & (1 << k)) != 0);
+            used[k] = ((nfs & ((size_t)1 << k)) != 0);
           }
           finish_function(f,a,j,used);
         }
-
 
         fprintf(f,                 "}\n");
       }
@@ -3645,87 +2536,36 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     {
       arity = NF_MAX_ARITY;
     }
-//    printf("%i -> %u\n",j,(1 << (arity+1)) - arity - 2);
     j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2
     fprintf(f,  "\n");
   }
 
-  fprintf(f,  "void rewrite_init()\n"
+  fprintf(f,
+          "void rewrite_init(RewriterCompilingJitty *r)\n"
           "{\n"
-#ifndef USE_VARAFUN_VALUE
-          "  varAFun = ATmakeAFun(\"DataVarId\", 2, ATfalse);\n"
-          "  ATprotectAFun(varAFun);\n"
-          "\n"
-#endif
-          "  apples = NULL;\n"
-          "  getAppl(%i);\n",
-          max_arity
+          "  this_rewriter=r;\n"
+          "  mcrl2::data::detail::get_appl_afun_value(%ld);\n",
+          max_arity+1                                                        // YYYY+
          );
-#ifndef USE_APPL_VALUE
-  for (int i=0; i<=max_arity; i++)
-  {
-    fprintf(f,  "  appl%i = apples[%i];\n",i,i);
-  }
-#endif
   fprintf(f,  "\n");
-  for (int i=0; i < num_opids; i++)
-  {
-#ifndef USE_INT2ATERM_VALUE
-    fprintf(f,  "  int2ATerm%i=NULL;\n",i);
-    fprintf(f,  "  ATprotect(&int2ATerm%i);\n",i);
-    fprintf(f,  "  int2ATerm%i = (ATerm) ATmakeInt(%i);\n",i,i);
-#endif
-#ifndef USE_REWRAPPL_VALUE
-    fprintf(f,  "  rewrAppl%i=NULL;\n",i);
-    fprintf(f,  "  ATprotectAppl(&rewrAppl%i);\n",i);
-#ifdef USE_APPL_VALUE
-#ifdef USE_INT2ATERM_VALUE
-    fprintf(f,  "  rewrAppl%i = ATmakeAppl(%li,(ATerm) %p);\n",i,get_appl_afun_value(0),get_int2aterm_value(i));
-#else
-    fprintf(f,  "  rewrAppl%i = ATmakeAppl(%li,int2ATerm%i);\n",i,get_appl_afun_value(0),i);
-#endif
-#else
-#ifdef USE_INT2ATERM_VALUE
-    fprintf(f,  "  rewrAppl%i = ATmakeAppl(appl0,(ATerm) %p);\n",i,get_int2aterm_value(i));
-#else
-    fprintf(f,  "  rewrAppl%i = ATmakeAppl(appl0,int2ATerm%i);\n",i,i);
-#endif
-#endif
-#endif
-  }
-  /*      "  int2ATerm = (ATerm *) malloc(%i*sizeof(ATerm));\n"
-  //      "  memset(int2ATerm,0,%i*sizeof(ATerm));\n"
-        "  ATprotectArray(int2ATerm,%i);\n"
-        "  for (i=0; i<%i; i++)\n"
-        "  {\n"
-        "    int2ATerm[i] = (ATerm) ATmakeInt(i);\n"
-        "  }\n"
-        "\n",
-        num_opids,num_opids,num_opids//,num_opids
-           );*/
 
   /* put the functions that start the rewriting in the array int2func */
   fprintf(f,  "\n");
   fprintf(f,  "\n");
-  /*  fprintf(f,  "  int2func = (ftype1 *) malloc(%i*sizeof(ftype1));\n",num_opids);
-    for (j=0;j < num_opids;j++)
-    { gsfprintf(f,  "  int2func[%i] = rewr_%i_nnf; // %T\n",j,j,int2term[j]);
-    }
-    fprintf(f,  "\n");*/
-  for (int i=0; i<=max_arity; i++)
+  for (size_t i=0; i<=max_arity; i++)
   {
-    fprintf(f,  "  int2func%i = (ftype%i *) malloc(%i*sizeof(ftype%i));\n",i,i,num_opids,i);
-    for (j=0; j < num_opids; j++)
+    fprintf(f,  "  int2func[%ld] = (func_type *) malloc(%ld*sizeof(func_type));\n",i+1,get_num_opids());
+    for (size_t j=0; j < get_num_opids(); j++)
     {
-      int arity = getArity(int2term[j]);
+      size_t arity = getArity(get_int2term(j));
       if (i <= arity)
       {
-        gsfprintf(f,  "  int2func%i[%i] = rewr_%i_%i_0;\n",i,j,j,i);
+        fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j,j,i);
         if (i <= NF_MAX_ARITY)
         {
-          for (int k=(1 << i)-i-1; k<(1 << (i+1))-i-2; k++)
+          for (size_t k=(1 << i)-i-1; k<(1 << (i+1))-i-2; k++)
           {
-            gsfprintf(f,  "  int2func%i[%i] = rewr_%i_%i_0;\n",i,j+1+k,j+1+k,i);
+            fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j+1+k,j+1+k,i);
           }
         }
       }
@@ -3733,7 +2573,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       {
         arity = NF_MAX_ARITY;
       }
-//    printf("%i -> %u\n",j,(1 << (arity+1)) - arity - 2);
       j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2
     }
   }
@@ -3741,263 +2580,163 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           "\n"
           "void rewrite_cleanup()\n"
           "{\n"
-#ifndef USE_VARAFUN_VALUE
-          "  ATunprotectAFun(varAFun);\n"
-          "\n"
-#endif
-          "  free(apples);\n"
          );
   fprintf(f,  "\n");
-  for (int i=0; i < num_opids; i++)
+  for (size_t i=0; i<=max_arity; i++)
   {
-#ifndef USE_INT2ATERM_VALUE
-    fprintf(f,  "  ATunprotect(&int2ATerm%i);\n",i);
-#endif
-#ifndef USE_REWRAPPL_VALUE
-    fprintf(f,  "  ATunprotectAppl(&rewrAppl%i);\n",i);
-#endif
-  }
-  fprintf(f,  "\n");
-  for (int i=0; i<=max_arity; i++)
-  {
-    fprintf(f,  "  free(int2func%i);\n",i);
+    fprintf(f,  "  free(int2func[%ld]);\n",i+1);
   }
   fprintf(f,  "}\n"
           "\n"
-          "ATermAppl rewrite(ATermAppl t)\n"
+    
+         );
+
+  fprintf(f,
+          "static ATermAppl rewrite_int_aux(const ATermAppl head, const ATermAppl t)\n"
           "{\n"
-//      "  ATfprintf(stderr,\"rewrite: %%t\\n\",t);\n"
-          "  if ( isAppl(t) )\n"
+          "  const size_t arity = ATgetArity(ATgetAFun(t));\n"
+          "  ATerm args[arity];\n"
+          "  args[0] = (ATerm) head;\n"
+          "  for (size_t i=1; i<arity; ++i)\n"
           "  {\n"
-          "    ATerm head = ATgetArgument(t,0);\n"
-          "    if ( ATisInt(head) )\n"
+          "    args[i] = (ATerm) rewrite((ATermAppl) ATgetArgument(t,i));\n"
+          "  }\n"
+          "  return ATmakeApplArray(ATgetAFun(t),args);\n"
+          "}\n\n"
+  );
+
+  fprintf(f,
+      "static ATermAppl rewrite_appl_aux(ATermAppl head, const ATermAppl t)\n"
+      "{\n"
+      "  const ATerm u = this_rewriter->getSubstitutionInternal(head);\n"
+      "  const size_t arity_t = ATgetArity(ATgetAFun(t));\n"
+      "  size_t arity_u;\n"
+      "  if (isAppl(u) )\n"
+      "  {\n"
+      "    head = (ATermAppl)ATgetArgument((ATermAppl) u,0);\n"
+      "    arity_u = ATgetArity(ATgetAFun((ATermAppl) u));\n"
+      "  } \n"
+      "  else\n"
+      "  {\n"
+      "    head = (ATermAppl) u;\n"
+      "    arity_u = 1;\n"
+      "  }\n"
+      "  ATerm args[arity_u+arity_t-1];\n"
+      "  args[0] = (ATerm) head;\n"
+      "  int function_index;\n"
+      "  if (ATisInt((ATerm)head) && ((function_index = ATgetInt((ATermInt) head)) < %ld) )\n"
+      "  {\n"
+      "    for (size_t i=1; i<arity_u; ++i)\n"
+      "    {\n"
+      "      args[i] = ATgetArgument((ATermAppl) u,i);\n"
+      "    }\n"
+      "    size_t k = arity_u;\n"
+      "    for (size_t i=1; i<arity_t; ++i,++k)\n"
+      "    {\n"
+      "      args[k] = ATgetArgument((ATermAppl) t,i);\n"
+      "    }\n"
+      "    size_t arity = arity_u+arity_t-2;\n"
+      "    const ATermAppl intermediate = ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity+1),args);\n"   // YYYY+
+      "    assert(arity <= %ld);\n"
+      "    assert(int2func[arity+1][function_index] != NULL);\n"
+      "    return int2func[arity+1][function_index](intermediate);\n"
+      "  }\n"
+      "  else\n"
+      "  {\n"
+      "    for (size_t i=1; i<arity_u; ++i)\n"
+      "    {\n"
+      "      args[i] = (ATerm) rewrite((ATermAppl) ATgetArgument((ATermAppl) u,i));\n"
+      "    }\n"
+      "    size_t k = arity_u;\n"
+      "    for (size_t i=1; i<arity_t; ++i,++k)\n"
+      "    {\n"
+      "      args[k] = (ATerm) rewrite((ATermAppl) ATgetArgument((ATermAppl) t,i));\n"
+      "    }\n"
+      "    return ATmakeApplArray(mcrl2::data::detail::get_appl_afun_value(arity_u+arity_t-1),args);\n"   // YYYY+
+      "  }\n"
+      "}\n\n",
+      get_num_opids(), max_arity
+      );
+
+  fprintf(f,
+          "ATermAppl rewrite(const ATermAppl t)\n"
+          "{\n"
+          "  if (isAppl(t) )\n"
+          "  {\n"
+          "    const ATermAppl head = (ATermAppl)ATgetArgument(t,0);\n"
+          "    if (ATisInt((ATerm)head) )\n"
           "    {\n"
-          "      long function_index = ATgetInt((ATermInt)head);\n"
-          "      if ( function_index < %i )\n"
+          "      const int function_index = ATgetInt((ATermInt)head);\n"
+          "      if (function_index < %ld )\n"
           "      {\n"
-          "        switch ( ATgetArity(ATgetAFun(t))-1 )\n"
-          "        {\n",
-          num_opids
-         );
-  for (int i=0; i<=max_arity; i++)
-  {
-    fprintf(f,
-            "          case %i:\n"
-            "            assert(int2func%i[function_index] != NULL);\n"
-            "            return int2func%i[function_index](",
-            i,i,i
-           );
-    for (int j=0; j<i; j++)
-    {
-      if (j > 0)
-      {
-        fprintf(f,",");
-      }
-      fprintf(f,"(ATermAppl) ATgetArgument(t,%i)",j+1);
-    }
-    fprintf(f,
-            ");\n"
-           );
-  }
-  fprintf(f,
-          "          default:\n"
-          "            fprintf(stderr,\"too many arguments for function; rewriter failed.\");\n"
-          "            exit(1);\n"
-          "        }\n"
-          "      } else {\n"
-          "        int arity = ATgetArity(ATgetAFun(t));\n"
-          "        ATerm args[arity];\n"
-          "        args[0] = head;\n"
-          "        for (int i=1; i<arity; i++)\n"
-          "        {\n"
-          "          args[i] = (ATerm) rewrite((ATermAppl) ATgetArgument(t,i));\n"
-          "        }\n"
-          "        return ATmakeApplArray(ATgetAFun(t),args);\n"
-          "      }\n"
-          "    } else {\n"
-          "      ATerm u = get_subst((ATermAppl) head);\n"
-          "      long arity_t = ATgetArity(ATgetAFun(t));\n"
-          "      long arity_u;\n"
-          "      if ( isAppl(u) )\n"
+          "        const size_t arity = ATgetArity(ATgetAFun(t));\n"
+          "        assert(arity <= %ld);"
+          "        assert(int2func[arity][function_index] != NULL);\n"
+          "        return int2func[arity][function_index](t);\n"
+          "      }"
+          "      else"
           "      {\n"
-          "        head = ATgetArgument((ATermAppl) u,0);\n"
-          "        arity_u = ATgetArity(ATgetAFun((ATermAppl) u));\n"
-          "      } else {\n"
-          "        head = u;\n"
-          "        arity_u = 1;\n"
-          "      }\n"
-          "      ATerm args[arity_u+arity_t-1];\n"
-          "      long function_index;\n"
-          "      if ( ATisInt(head) && ((function_index = ATgetInt((ATermInt) head)) < %i) )\n"
-          "      {\n"
-          "        for (int i=1; i<arity_u; i++)\n"
-          "        {\n"
-          "          args[i] = ATgetArgument((ATermAppl) u,i);\n"
-          "        }\n"
-          "        int k = arity_u;\n"
-          "        for (int i=1; i<arity_t; i++,k++)\n"
-          "        {\n"
-          "          args[k] = ATgetArgument((ATermAppl) t,i);\n"
-          "        }\n"
-          "        switch ( arity_u+arity_t-2 )\n"
-          "        {\n",
-          num_opids
-         );
-  for (int i=0; i<=max_arity; i++)
-  {
-    fprintf(f,
-            "          case %i:\n"
-            "            assert(int2func%i[function_index] != NULL);\n"
-            "            return int2func%i[function_index](",
-            i,i,i
-           );
-    for (int j=0; j<i; j++)
-    {
-      if (j > 0)
-      {
-        fprintf(f,",");
-      }
-      fprintf(f,"(ATermAppl) args[%i]",j+1);
-    }
-    fprintf(f,
-            ");\n"
-           );
-  }
-  fprintf(f,
-          "          default:\n"
-          "            fprintf(stderr,\"too many arguments for function; rewriter failed\");\n"
-          "            exit(1);\n"
-          "        }\n"
-          "      } else {\n"
-          "        args[0] = head;\n"
-          "        for (int i=1; i<arity_u; i++)\n"
-          "        {\n"
-          "          args[i] = (ATerm) rewrite((ATermAppl) ATgetArgument((ATermAppl) u,i));\n"
-          "        }\n"
-          "        int k = arity_u;\n"
-          "        for (int i=1; i<arity_t; i++,k++)\n"
-          "        {\n"
-          "          args[k] = (ATerm) rewrite((ATermAppl) ATgetArgument((ATermAppl) t,i));\n"
-          "        }\n"
-          "        return ATmakeApplArray(getAppl(arity_u+arity_t-2),args);\n"
+          "        return rewrite_int_aux(head, t);"
           "      }\n"
           "    }\n"
-          "  } else {\n"
-          "    ATermAppl r=(ATermAppl) get_subst(t);\n"
-          "    return r;\n"
+          "    else\n"
+          "    {\n"
+          "      return rewrite_appl_aux(head, t);\n"
+          "    }\n"
           "  }\n"
-          "}\n"
+          "  else\n"
+          "  {\n"
+          "    return (ATermAppl)this_rewriter->getSubstitutionInternal(t);\n"
+          "  }\n"
+          "}\n",
+          get_num_opids(), max_arity
          );
 
   fclose(f);
-  gsVerboseMsg("compiling rewriter...\n");
-  sprintf(t,JITTYC_COMPILE_COMMAND,const_cast< char* >(file_base.str().c_str()));
-  gsVerboseMsg("%s\n",t);
-  if (system(t) != 0)
+
+  mCRL2log(verbose) << "compiling rewriter..." << std::endl;
+
+  try
   {
-    // unlink(file_c); In case of compile errors, the .c file is not removed.
-    throw mcrl2::runtime_error("Could not compile rewriter.");
+    rewriter_so->compile(rewriter_source);
+  }
+  catch(std::runtime_error &e)
+  {
+    rewriter_so->leave_files();
+    throw mcrl2::runtime_error(std::string("Could not compile rewriter: ") + e.what());
+  }
+  
+  mCRL2log(verbose) << "loading rewriter..." << std::endl;
+
+  try
+  {
+    so_rewr_init = reinterpret_cast<void(*)(RewriterCompilingJitty *)>(rewriter_so->proc_address("rewrite_init"));
+    so_rewr_cleanup = reinterpret_cast<void (*)()>(rewriter_so->proc_address("rewrite_cleanup"));
+    so_rewr = reinterpret_cast<ATermAppl(*)(ATermAppl)>(rewriter_so->proc_address("rewrite"));
+
+  }
+  catch(std::runtime_error &e)
+  {
+    rewriter_so->leave_files();
+    throw mcrl2::runtime_error(std::string("Could not load rewriter: ") + e.what());
   }
 
-  gsVerboseMsg("linking rewriter...\n");
+  mCRL2log(verbose) << "initialising rewriter..." << std::endl;
 
-  sprintf(t,JITTYC_LINK_COMMAND,const_cast< char* >(file_base.str().c_str()),const_cast< char* >(file_base.str().c_str()));
-  gsVerboseMsg("%s\n",t);
-  if (system(t) != 0)
-  {
-    unlink(const_cast< char* >(file_o.c_str()));
-    // unlink(file_c); In case of link errors, the .c file is not removed.
-    throw mcrl2::runtime_error("Could not link rewriter.");
-  }
+  so_rewr_init(this);
 
-  sprintf(t,"./%s.so",const_cast< char* >(file_base.str().c_str()));
-  if ((h = so_handle = dlopen(t,RTLD_NOW)) == NULL)
-  {
-    unlink(const_cast< char* >(file_so.c_str()));
-    unlink(const_cast< char* >(file_o.c_str()));
-    unlink(const_cast< char* >(file_c.c_str()));
-    throw mcrl2::runtime_error(std::string("Cannot load rewriter: ") + dlerror());
-  }
-  so_rewr_init = (void (*)()) dlsym(h,"rewrite_init");
-  if (so_rewr_init    == NULL)
-  {
-    gsErrorMsg("%s\n",dlerror());
-  }
-  so_rewr_cleanup = (void (*)()) dlsym(h,"rewrite_cleanup");
-  if (so_rewr_cleanup    == NULL)
-  {
-    gsErrorMsg("%s\n",dlerror());
-  }
-  so_rewr = (ATermAppl(*)(ATermAppl)) dlsym(h,"rewrite");
-  if (so_rewr         == NULL)
-  {
-    gsErrorMsg("%s\n",dlerror());
-  }
-  so_set_subst = (void (*)(ATermAppl, ATerm)) dlsym(h,"set_subst");
-  if (so_set_subst    == NULL)
-  {
-    gsErrorMsg("%s\n",dlerror());
-  }
-  so_get_subst = (ATerm(*)(ATermAppl)) dlsym(h,"get_subst");
-  if (so_get_subst    == NULL)
-  {
-    gsErrorMsg("%s\n",dlerror());
-  }
-  so_clear_subst = (void (*)(ATermAppl)) dlsym(h,"clear_subst");
-  if (so_clear_subst  == NULL)
-  {
-    gsErrorMsg("%s\n",dlerror());
-  }
-  so_clear_substs = (void (*)()) dlsym(h,"clear_substs");
-  if (so_clear_substs == NULL)
-  {
-    gsErrorMsg("%s\n",dlerror());
-  }
-  if ((so_rewr_init    == NULL) ||
-      (so_rewr_cleanup == NULL) ||
-      (so_rewr         == NULL) ||
-      (so_set_subst    == NULL) ||
-      (so_get_subst    == NULL) ||
-      (so_clear_subst  == NULL) ||
-      (so_clear_substs == NULL))
-  {
-    unlink(const_cast< char* >(file_so.c_str()));
-    unlink(const_cast< char* >(file_o.c_str()));
-    unlink(const_cast< char* >(file_c.c_str()));
-    throw mcrl2::runtime_error("Cannot load rewriter functions.");
-  }
-
-  so_rewr_init();
-
-  for (ATermList keys=ATtableKeys(subst_store); !ATisEmpty(keys); keys=ATgetNext(keys))
-  {
-    so_set_subst((ATermAppl) ATgetFirst(keys),ATtableGet(subst_store,ATgetFirst(keys)));
-  }
+  mCRL2log(verbose) << "Adding rewrite rules..." << std::endl;
 
   need_rebuild = false;
-#ifndef NDEBUG
-  if (!gsDebug)
-#endif
-  {
-    cleanup_file(file_c.c_str());
-    cleanup_file(file_o.c_str());
-    cleanup_file(file_so.c_str());
-#ifndef NDEBUG
-  }
-  else
-  {
-    made_files = true;
-#endif
-  }
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec)
+RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
-  term2int = ATtableCreate(100,75);
-  subst_store = ATtableCreate(100,75);
   so_rewr_cleanup = NULL;
+  rewriter_so = NULL;
+  m_data_specification_for_enumeration = DataSpec;
   initialise_common();
-  CompileRewriteSystem(DataSpec);
+  CompileRewriteSystem(DataSpec,add_rewrite_rules);
 }
 
 RewriterCompilingJitty::~RewriterCompilingJitty()
@@ -4005,16 +2744,6 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
   CleanupRewriteSystem();
   finalise_common();
   ATtableDestroy(tmp_eqns);
-  ATtableDestroy(subst_store);
-  ATtableDestroy(term2int);
-#ifndef NDEBUG
-  if (made_files)
-  {
-    cleanup_file(file_c.c_str());
-    cleanup_file(file_o.c_str());
-    cleanup_file(file_so.c_str());
-  }
-#endif
 }
 
 ATermList RewriterCompilingJitty::rewriteInternalList(ATermList l)
@@ -4029,63 +2758,23 @@ ATermList RewriterCompilingJitty::rewriteInternalList(ATermList l)
     BuildRewriteSystem();
   }
 
-  return ATinsertA(
+  return aterm::ATinsertA(
            rewriteInternalList(ATgetNext(l)),
            so_rewr(ATAgetFirst(l)));
 }
 
 ATermAppl RewriterCompilingJitty::rewrite(ATermAppl Term)
 {
-  /*gsVerboseMsg("Rewriting term: %T\n\n", Term);
-  gsVerboseMsg("toRewriteFormat(Term): %T\n\n", toRewriteFormat(Term));
-  gsVerboseMsg("fromInner(toRewriteFormat(Term)): %T\n\n\n", fromRewriteFormat(toRewriteFormat(Term)));*/
-  if (need_rebuild)
-  {
-    BuildRewriteSystem();
-  }
-
-  return fromRewriteFormat((ATerm) so_rewr((ATermAppl) toRewriteFormat(Term)));
+  return fromRewriteFormat(rewriteInternal(toRewriteFormat(Term)));
 }
 
 ATerm RewriterCompilingJitty::rewriteInternal(ATerm Term)
 {
-  /*gsfprintf(stderr,"in: %T\n",Term);
-  gsfprintf(stderr,"in: %T\n",fromRewriteFormat(Term));
-  gsfprintf(stderr,"in: %P\n",fromRewriteFormat(Term));*/
   if (need_rebuild)
   {
     BuildRewriteSystem();
   }
-
-  ATerm a = (ATerm) so_rewr((ATermAppl) Term);
-  /*gsfprintf(stderr,"out: %T\n",a);
-  gsfprintf(stderr,"out: %T\n",fromRewriteFormat(a));
-  gsfprintf(stderr,"out: %P\n",fromRewriteFormat(a));*/
-  return a;
-}
-
-void RewriterCompilingJitty::setSubstitutionInternal(ATermAppl Var, ATerm Expr)
-{
-  so_set_subst(Var,Expr);
-  ATtablePut(subst_store, (ATerm) Var, Expr);
-}
-
-ATerm RewriterCompilingJitty::getSubstitutionInternal(ATermAppl Var)
-{
-  return ATtableGet(subst_store, (ATerm) Var);
-//  return so_get_subst(Var);
-}
-
-void RewriterCompilingJitty::clearSubstitution(ATermAppl Var)
-{
-  so_clear_subst(Var);
-  ATtableRemove(subst_store, (ATerm) Var);
-}
-
-void RewriterCompilingJitty::clearSubstitutions()
-{
-  so_clear_substs();
-  ATtableReset(subst_store);
+   return (ATerm) so_rewr((ATermAppl) Term);
 }
 
 RewriteStrategy RewriterCompilingJitty::getStrategy()

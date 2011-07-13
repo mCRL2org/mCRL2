@@ -110,7 +110,7 @@ struct add_sort_expressions: public Builder<Derived>
   action_formulas::action_formula operator()(const action_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result = action_formulas::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.operand()));
+    action_formulas::action_formula result = action_formulas::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -118,7 +118,7 @@ struct add_sort_expressions: public Builder<Derived>
   action_formulas::action_formula operator()(const action_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result = action_formulas::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.operand()));
+    action_formulas::action_formula result = action_formulas::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -258,7 +258,7 @@ struct add_data_expressions: public Builder<Derived>
   action_formulas::action_formula operator()(const action_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result = action_formulas::forall(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+    action_formulas::action_formula result = action_formulas::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -266,7 +266,7 @@ struct add_data_expressions: public Builder<Derived>
   action_formulas::action_formula operator()(const action_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result = action_formulas::exists(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+    action_formulas::action_formula result = action_formulas::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -406,7 +406,7 @@ struct add_action_formula_expressions: public Builder<Derived>
   action_formulas::action_formula operator()(const action_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result = action_formulas::forall(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+    action_formulas::action_formula result = action_formulas::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -414,7 +414,7 @@ struct add_action_formula_expressions: public Builder<Derived>
   action_formulas::action_formula operator()(const action_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    action_formulas::action_formula result = action_formulas::exists(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+    action_formulas::action_formula result = action_formulas::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -882,7 +882,7 @@ struct add_sort_expressions: public Builder<Derived>
   state_formulas::state_formula operator()(const state_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result = state_formulas::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.operand()));
+    state_formulas::state_formula result = state_formulas::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -890,7 +890,7 @@ struct add_sort_expressions: public Builder<Derived>
   state_formulas::state_formula operator()(const state_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result = state_formulas::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.operand()));
+    state_formulas::state_formula result = state_formulas::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1120,7 +1120,7 @@ struct add_data_expressions: public Builder<Derived>
   state_formulas::state_formula operator()(const state_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result = state_formulas::forall(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+    state_formulas::state_formula result = state_formulas::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1128,7 +1128,7 @@ struct add_data_expressions: public Builder<Derived>
   state_formulas::state_formula operator()(const state_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result = state_formulas::exists(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+    state_formulas::state_formula result = state_formulas::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1358,7 +1358,7 @@ struct add_state_formula_expressions: public Builder<Derived>
   state_formulas::state_formula operator()(const state_formulas::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result = state_formulas::forall(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+    state_formulas::state_formula result = state_formulas::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -1366,7 +1366,7 @@ struct add_state_formula_expressions: public Builder<Derived>
   state_formulas::state_formula operator()(const state_formulas::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    state_formulas::state_formula result = state_formulas::exists(x.variables(), static_cast<Derived&>(*this)(x.operand()));
+    state_formulas::state_formula result = state_formulas::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }

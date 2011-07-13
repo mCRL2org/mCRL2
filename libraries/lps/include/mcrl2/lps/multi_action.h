@@ -209,6 +209,15 @@ bool is_multi_action(const atermpp::aterm_appl& t)
 /// \cond INTERNAL_DOCS
 namespace detail
 {
+
+/// \brief Conversion to ATermAppl.
+/// \return The multi action converted to ATerm format.
+inline
+atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
+{
+  return core::detail::gsMakeMultAct(m.actions());
+}
+   
 /// \brief Visits all permutations of the arrays, and calls f for each instance.
 /// \pre The range [first, last) contains sorted arrays.
 /// \param first Start of a sequence of arrays
@@ -319,9 +328,9 @@ struct equal_data_parameters_builder
         v.push_back(d::lazy::equal_to(*i1, *i2));
       }
     }
-    data::data_expression expr = join_and(v.begin(), v.end());
+    data::data_expression expr = d::lazy::join_and(v.begin(), v.end());
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-    std::cerr << "  <and-term> " << pp(expr) << std::endl;
+    std::cerr << "  <and-term> " << data::pp(expr) << std::endl;
 #endif
     result.insert(expr);
   }
@@ -361,7 +370,7 @@ struct not_equal_multi_actions_builder
         v.push_back(data::not_equal_to(*i1, *i2));
       }
     }
-    result.push_back(join_or(v.begin(), v.end()));
+    result.push_back(data::lazy::join_or(v.begin(), v.end()));
   }
 };
 
@@ -370,7 +379,7 @@ struct not_equal_multi_actions_builder
 
 /// \brief Returns a string representation of a multi action
 inline
-std::string pp(const multi_action& m)
+std::string pp1(const multi_action& m)
 {
   return m.to_string();
 }
@@ -384,8 +393,8 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
 {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
   std::cerr << "\n<equal multi actions>" << std::endl;
-  std::cerr << "a = " << pp(a.actions()) << std::endl;
-  std::cerr << "b = " << pp(b.actions()) << std::endl;
+  std::cerr << "a = " << lps::pp(a.actions()) << std::endl;
+  std::cerr << "b = " << lps::pp(b.actions()) << std::endl;
 #endif
   using namespace data::lazy;
 
@@ -419,7 +428,7 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   atermpp::set<data::data_expression> z;
   detail::equal_data_parameters_builder f(va, vb, z);
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
-  data::data_expression result = join_or(z.begin(), z.end());
+  data::data_expression result = data::lazy::join_or(z.begin(), z.end());
   return result;
 }
 
@@ -456,7 +465,7 @@ inline data::data_expression not_equal_multi_actions(const multi_action& a, cons
   atermpp::vector<data::data_expression> z;
   detail::not_equal_multi_actions_builder f(va, vb, z);
   detail::forall_permutations(intervals.begin(), intervals.end(), f);
-  data::data_expression result = join_and(z.begin(), z.end());
+  data::data_expression result = data::lazy::join_and(z.begin(), z.end());
   return result;
 }
 

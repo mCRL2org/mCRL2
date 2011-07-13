@@ -160,7 +160,7 @@ void test_process(std::string text)
   process_specification spec = parse_process_specification(text);
   std::set<data::sort_expression> sorts;
   process::find_sort_expressions(spec, std::inserter(sorts, sorts.end()));
-  std::cerr << "sorts: " << core::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;
+  std::cerr << "sorts: " << data::pp(data::sort_expression_list(sorts.begin(), sorts.end())) << std::endl;
   core::garbage_collect();
 }
 

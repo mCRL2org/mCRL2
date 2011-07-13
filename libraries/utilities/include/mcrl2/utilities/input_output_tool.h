@@ -13,7 +13,7 @@
 #define MCRL2_UTILITIES_INPUT_OUTPUT_TOOL_H
 
 #include <sstream>
-//#include "mcrl2/core/text_utility.h"
+//#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/input_tool.h"
 
 namespace mcrl2
@@ -72,7 +72,7 @@ class input_output_tool: public input_tool
     /// \brief Adds a message about input and output files to the given description.
     std::string make_tool_description(const std::string& description) const
     {
-      // return core::word_wrap_text(description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.");
+      // return utilities::word_wrap_text(description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.");
       return description + " If INFILE is not present, standard input is used. If OUTFILE is not present, standard output is used.";
     }
 

@@ -13,9 +13,10 @@
 #include <cmath>
 #include <iostream>
 #include "libstruct_core.h"
-#include "aterm2.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/utilities/logger.h"
 #include <list>
 #include <map>
 #include <set>
@@ -28,7 +29,6 @@
 extern int yylex( void );
 extern char* yytext; */
 
-using namespace mcrl2::core;
 using namespace std;
 
 //external declarations from lexer.ll
@@ -56,7 +56,7 @@ ATermAppl gsSpecEltsToSpec(ATermAppl SpecElts);
 //Ret: specification containing one sort, constructor, operation, equation,
 //     action and process specification, and one initialisation, in that order.
 
-#define safe_assign(lhs, rhs) { ATbool b; ATindexedSetPut(chi_parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
+#define safe_assign(lhs, rhs) { bool b; ATindexedSetPut(chi_parser_protect_table, (ATerm) rhs, &b); lhs = rhs; }
 
 void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type);
 void UnaryTypeCheck(ATermAppl arg1, std::string type);
@@ -165,8 +165,8 @@ bool is_number(std::string s);
 ChiProgram:
     ModelDefinition ProcessDefinitions
 		{
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
-    	  gsDebugMsg("inputs contains a valid Chi-specification\n");
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
+    	  mCRL2log(debug) << "inputs contains a valid Chi-specification" << std::endl;
           safe_assign($$, gsMakeChiSpec($1,ATreverse($2)));
 		  chi_spec_tree = $$;
 		}
@@ -176,18 +176,18 @@ ModelDefinition:
       MODEL Identifier LBRACKET RBRACKET IS ModelBody
         {
       	  safe_assign($$, gsMakeModelDef($2, $6));
-      	  gsDebugMsg("parsed Model Def \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed Model Def \n  " << atermpp::aterm( $$) << "" << std::endl;
         }
       ;
 
 ModelBody:
       BP ModelStatement ModelCloseScope
       	{ safe_assign($$, gsMakeModelSpec( ATmakeList0(), $2 ));
-      	  gsDebugMsg("parsed Model Body  \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed Model Body  \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| BP LocalVariables_csp PROC_SEP ModelStatement ModelCloseScope
       	{ safe_assign($$, gsMakeModelSpec( $2, $4));
-      	  gsDebugMsg("parsed Model Body  \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed Model Body  \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -201,11 +201,11 @@ ModelCloseScope:
 ProcessDefinitions:
        ProcessDefinition
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed Process Definition \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed Process Definition \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
      | ProcessDefinitions ProcessDefinition
       	{ safe_assign($$, ATinsert($1, (ATerm) $2));
-      	  gsDebugMsg("parsed Process Definition \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed Process Definition \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
      ;
 
@@ -218,19 +218,19 @@ ProcessDefinition:
             **/
           if(used_process_identifiers.find($2) != used_process_identifiers.end())
           {
-            gsErrorMsg("Duplicate definition for process %T", $2);
+            mCRL2log(error) << "Duplicate definition for process " << atermpp::aterm($2) << std::endl;
             exit(1);
           } else {
             used_process_identifiers.insert($2);
           }
 
       	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl(ATmakeList0()) ,$6));
-      	  gsDebugMsg("parsed proc Def \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed proc Def \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| ProcOpenScope Identifier LBRACKET FormalParameter_csp RBRACKET IS ProcessBody
 		{
       	  safe_assign($$, gsMakeProcDef($2, gsMakeProcDecl( ATreverse($4)), $7));
-      	  gsDebugMsg("parsed proc Def\n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed proc Def\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 //	| PROC Identifier ExplicitTemplates LBRACKET RBRACKET IS ProcessBody
 /*     When adding these lines don't forget to:
@@ -246,18 +246,18 @@ ProcOpenScope:
 	PROC
 		{
 		  scope_lvl++;
-		  gsDebugMsg("Increase Scope to: %d\n",scope_lvl);
+		  mCRL2log(debug) << "Increase Scope to: " << scope_lvl << "" << std::endl;
 		}
 	;
 
 ProcessBody:
 	  BP Statement ProcCloseScope
       	{ safe_assign($$, gsMakeProcSpec( ATmakeList0(), $2 ));
-      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed ProcessBody  \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| BP LocalVariables_csp PROC_SEP Statement ProcCloseScope
       	{ safe_assign($$, gsMakeProcSpec( ATreverse($2), $4));
-      	  gsDebugMsg("parsed ProcessBody  \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed ProcessBody  \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -266,7 +266,7 @@ ProcCloseScope:
 		{
 		  assert(scope_lvl > 0);
 		  scope_lvl--;
-		  gsDebugMsg("Decrease Scope to; %d\n",scope_lvl);
+		  mCRL2log(debug) << "Decrease Scope to; " << scope_lvl << "" << std::endl;
           var_type_map.clear();
           chan_type_direction_map.clear();
 		}
@@ -275,17 +275,17 @@ ProcCloseScope:
 Identifier: ID
 		{
  	  	  safe_assign($$, $1 );
-      	  gsDebugMsg("parsed id's\n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed id's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 
 LocalVariables_csp:
 	  LocalVariables
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("LocalVariables_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "LocalVariables_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| LocalVariables_csp COMMA LocalVariables
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("LocalVariables_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "LocalVariables_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -293,12 +293,12 @@ LocalVariables:
 	  VAR IdentifierTypeExpression_csp
 		{
 		  safe_assign($$, gsMakeVarSpec( $2 ) );
-		  gsDebugMsg("LocalVariables: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "LocalVariables: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| CHAN ChannelDefinition_csp
 		{
 		  //safe_assign($$, gsMakeVarSpec( ATreverse( $2 ) ) );  //<-- gsMakeVarSpec aanpassen
-		  gsDebugMsg("LocalVariables: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "LocalVariables: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
     | VAL
 //	| RecursionDefinition
@@ -307,7 +307,7 @@ LocalVariables:
 IdentifierTypeExpression_csp:
 	  IdentifierTypeExpression
       	{ safe_assign($$, $1);
-		  gsDebugMsg("IdentifierTypeExpression_csp: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierTypeExpression_csp: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| IdentifierTypeExpression_csp COMMA IdentifierTypeExpression
       	{
@@ -315,13 +315,13 @@ IdentifierTypeExpression_csp:
           ATermList list = ATreverse($1);
           while (!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert( new_list , ATgetFirst(list));
              list = ATgetNext( list ) ;
           }
 
           safe_assign($$, new_list);
-		  gsDebugMsg("IdentifierTypeExpression_csp: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierTypeExpression_csp: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -335,14 +335,14 @@ IdentifierTypeExpression:
             if (strcmp( ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(list),1),0))), "Void" ) == 0)
             {
               chigetposition();
-              gsErrorMsg("Expression %T can not be of type \"void\"\n", ATgetFirst(list));
+              mCRL2log(error) << "Expression " << atermpp::aterm(ATgetFirst(list)) << " cannot be of type \"void\"" << std::endl;
               exit(1);
             }
             list = ATgetNext( list ) ;
           }
 
 		  safe_assign($$, $1 );
-		  gsDebugMsg("IdentifierTypeExpression: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierTypeExpression: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| IdentifierType IS Expression
 		{
@@ -354,7 +354,7 @@ IdentifierTypeExpression:
             //An expression cannot be of type "void"
             if (strcmp( ATgetName(ATgetAFun(ATgetArgument(ATgetArgument(ATgetFirst(list),1),0))), "Void" ) == 0)
             {
-              gsErrorMsg("Expression %T can not be of type \"void\"\n", ATgetFirst(list));
+              mCRL2log(error) << "Expression " << atermpp::aterm(ATgetFirst(list)) << " cannot be of type \"void\"" << std::endl;
               exit(1);
             }
             new_list = ATinsert( new_list , (ATerm) gsMakeDataVarExprID( (ATermAppl) ATgetFirst(list), $3));
@@ -364,14 +364,14 @@ IdentifierTypeExpression:
           safe_assign($$, new_list);
 
 		  //safe_assign($$, gsMakeDataVarExprID ( $1, $3 ) );
-		  gsDebugMsg("IdentifierTypeExpression: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierTypeExpression: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 IdentifierType_csp:
 	  IdentifierType
       	{ safe_assign($$, $1);
-		  gsDebugMsg("IdentifierType_csp: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierType_csp: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| IdentifierType_csp COMMA IdentifierType
       	{
@@ -379,24 +379,24 @@ IdentifierType_csp:
           ATermList list = ATreverse($3);
           while (!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert( new_list , ATgetFirst(list));
              list = ATgetNext( list ) ;
           }
 
           safe_assign($$, new_list);
-		  gsDebugMsg("IdentifierType_csp: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierType_csp: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 FormalParameter_csp:
 	  FormalParameter
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-		  gsDebugMsg("FormalParameter_csp: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "FormalParameter_csp: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| FormalParameter_csp COMMA FormalParameter
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-		  gsDebugMsg("FormalParameter_csp: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "FormalParameter_csp: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -404,12 +404,12 @@ FormalParameter:
 	  VAR IdentifierType_csp
 		{
 		  safe_assign($$, gsMakeVarDecl( ATreverse($2) ) );
-		  gsDebugMsg("FormalParameter: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "FormalParameter: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
   	| CHAN ChannelDeclaration_csp
 		{
 		  safe_assign($$, gsMakeChanDecl( ATreverse($2) ) );
-		  gsDebugMsg("FormalParameter: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "FormalParameter: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -429,7 +429,7 @@ IdentifierType:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetFirst( list )))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetTail( list, 1 ) ;
@@ -441,7 +441,7 @@ IdentifierType:
 			if (var_type_map.end() != var_type_map.find(ATgetFirst( list )))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			var_type_map[ATgetFirst( list )]= (ATerm) $3;
@@ -453,21 +453,21 @@ IdentifierType:
 
           while (!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert( new_list , (ATerm) gsMakeDataVarID( (ATermAppl) ATgetFirst(list), $3));
              list = ATgetNext( list ) ;
           }
 
           safe_assign($$, ATreverse(new_list));
-		  gsDebugMsg("IdentifierType: parsed \n %T\n", $$);
-		  gsDebugMsg("Typecheck Table %d\n", var_type_map.size());
+		  mCRL2log(debug) << "IdentifierType: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
+		  mCRL2log(debug) << "Typecheck Table " <<  var_type_map.size() << "" << std::endl;
   		}
 	;
 
 ChannelDeclaration_csp:
 	  ChannelDeclaration
       	{ safe_assign($$, $1 );
-      	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", $$);
+      	  mCRL2log(debug) << "ChannelDeclaration_csp: parsed formalparameter channel  \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| ChannelDeclaration_csp COMMA ChannelDeclaration
       	{
@@ -475,31 +475,31 @@ ChannelDeclaration_csp:
           ATermList list = ATreverse($3);
           while (!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert( new_list , ATgetFirst(list));
              list = ATgetNext( list ) ;
           }
           safe_assign($$, new_list);
-      	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel \n  %T\n", $$);
+      	  mCRL2log(debug) << "ChannelDeclaration_csp: parsed formalparameter channel \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 ChannelDeclaration:
 	  IdentifierChannelDeclaration_csp COLON Type
 		{
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
 		  ATermList list = $1;
 		  size_t n = ATgetLength( list );
 		  for(size_t i = 0; i < n ; ++i ){
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetTail( list, 1 ) ;
 		  }	;
-          gsDebugMsg("\n%T\n", $1);
+          mCRL2log(debug) << "\n" << atermpp::aterm( $1) << "" << std::endl;
 
           list = $1;
 		  n = ATgetLength( list );
@@ -507,7 +507,7 @@ ChannelDeclaration:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
@@ -526,11 +526,11 @@ ChannelDeclaration:
 		  }
 
 		  safe_assign($$, new_list );
-		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", $$);
+		  mCRL2log(debug) << "ChannelDefinition: parsed VariableList \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| IdentifierChannelDeclaration_csp COLON Expression HASH Type
 		{
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
 
           //Make sure that Expression is a number
           UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
@@ -541,7 +541,7 @@ ChannelDeclaration:
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetTail( list, 1 ) ;
@@ -553,7 +553,7 @@ ChannelDeclaration:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
@@ -564,24 +564,24 @@ ChannelDeclaration:
           ATermList new_list = ATmakeList0();
 		  while(!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $5, $3 ) );
 			 list = ATgetNext( list ) ;
 		  }
 
 		  safe_assign($$, new_list );
-		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", $$);
+		  mCRL2log(debug) << "ChannelDefinition: parsed VariableList \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 IdentifierChannelDeclaration_csp:
 	  IdentifierChannelDeclaration
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("IdentifierChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", $$);
+      	  mCRL2log(debug) << "IdentifierChannelDeclaration_csp: parsed formalparameter channel  \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| IdentifierChannelDeclaration_csp COMMA IdentifierChannelDeclaration
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("IdentifierChannelDeclaration_csp: parsed formalparameter channel \n  %T\n", $$);
+      	  mCRL2log(debug) << "IdentifierChannelDeclaration_csp: parsed formalparameter channel \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -589,48 +589,48 @@ IdentifierChannelDeclaration:
 	  Identifier RECV
         {
           safe_assign($$, gsMakeChannelID($1, gsMakeRecv()));
-		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierChannelDeclaration: parsed Identifier Type With Expression \n " << atermpp::aterm( $$) << "" << std::endl;
         }
 	| Identifier EXCLAMATION
         {
           safe_assign($$, gsMakeChannelID($1, gsMakeSend()));
-		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierChannelDeclaration: parsed Identifier Type With Expression \n " << atermpp::aterm( $$) << "" << std::endl;
         }
 /*	| Identifier SENDRECV
         {
           safe_assign($$, gsMakeChannelID($1, $2));
-		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierChannelDeclaration: parsed Identifier Type With Expression \n " << atermpp::aterm( $$) << "" << std::endl;
         }
 	| Identifier RECVSEND
         {
           safe_assign($$, gsMakeChannelID($1, $2));
-		  gsDebugMsg("IdentifierChannelDeclaration: parsed Identifier Type With Expression \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierChannelDeclaration: parsed Identifier Type With Expression \n " << atermpp::aterm( $$) << "" << std::endl;
         } */
 	;
 
 ChannelDefinition_csp:
 	  ChannelDefinition
       	{ //safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("ChannelDefinition_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "ChannelDefinition_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| ChannelDefinition_csp COMMA ChannelDefinition
       	{ //safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("ChannelDefinition_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "ChannelDefinition_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 ChannelDefinition:
 	  IdentifierChannelDefinition_csp COLON Type
 		{
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
-          gsDebugMsg("ChannelDefinition\n");
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
+          mCRL2log(debug) << "ChannelDefinition" << std::endl;
 		  ATermList list = $1;
 		  size_t n = ATgetLength( list );
 		  for(size_t i = 0; i < n ; ++i ){
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetNext( list ) ;
@@ -642,7 +642,7 @@ ChannelDefinition:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $3, ATgetArgument(ATgetFirst( list ), 1) );
@@ -660,11 +660,11 @@ ChannelDefinition:
 		  }
 
 		  safe_assign($$, new_list );
-		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", $$);
+		  mCRL2log(debug) << "ChannelDefinition: parsed VariableList \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| IdentifierChannelDefinition_csp COLON Expression HASH Type
 		{
-          gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
+          mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
 
           //Make sure that Expression is a number
           UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
@@ -675,7 +675,7 @@ ChannelDefinition:
 			if (var_type_map.end() != var_type_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Variable %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Variable " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			list = ATgetNext( list ) ;
@@ -687,7 +687,7 @@ ChannelDefinition:
 			if (chan_type_direction_map.end() != chan_type_direction_map.find(ATgetArgument( ATgetFirst( list ),0)))
 			{
               chigetposition();
-			  gsErrorMsg("Channel %T is already defined!\n", ATgetFirst( list ));
+			  mCRL2log(error) << "Channel " << atermpp::aterm(ATgetFirst(list)) << " is already defined!" << std::endl;
 			  exit(1);
 			};
 			chan_type_direction_map[ATgetArgument(ATgetFirst( list ), 0)]=  make_pair( (ATerm) $5, ATgetArgument(ATgetFirst( list ), 1) );
@@ -698,24 +698,24 @@ ChannelDefinition:
           ATermList new_list = ATmakeList0();
 		  while(!ATisEmpty(list))
           {
-             gsDebugMsg("%T",ATgetFirst(list));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(list));
              new_list = ATinsert(new_list,(ATerm) gsMakeChannelTypedID( (ATermAppl) ATgetFirst(list), $5, $3 ) );
 			 list = ATgetNext( list ) ;
 		  }
 
 		  safe_assign($$, new_list );
-		  gsDebugMsg("ChannelDefinition: parsed VariableList \n %T\n", $$);
+		  mCRL2log(debug) << "ChannelDefinition: parsed VariableList \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 IdentifierChannelDefinition_csp:
 	  IdentifierChannelDefinition
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("IdentifierChannelDefinition_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "IdentifierChannelDefinition_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| IdentifierChannelDefinition_csp COMMA IdentifierChannelDefinition
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("IdentifierChannelDefinition_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "IdentifierChannelDefinition_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -723,17 +723,17 @@ IdentifierChannelDefinition:
 	  Identifier
         {
           safe_assign($$, gsMakeChannelID($1, gsMakeNil()));
-		  gsDebugMsg("IdentifierChannelDefinition: parsed \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierChannelDefinition: parsed \n " << atermpp::aterm( $$) << "" << std::endl;
         }
 /*	| Identifier SENDRECV
 		{
           safe_assign($$, gsMakeChannelID($1, gsMakeNil));
-		  gsDebugMsg("IdentifierChannelDefinition: parsed Identifier Type With Expression \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierChannelDefinition: parsed Identifier Type With Expression \n " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Identifier RECVSEND
 		{
           safe_assign($$, gsMakeChannelID($1, gsMakeNil));
-		  gsDebugMsg("IdentifierChannelDefinition: parsed Identifier Type With Expression \n %T\n", $$);
+		  mCRL2log(debug) << "IdentifierChannelDefinition: parsed Identifier Type With Expression \n " << atermpp::aterm( $$) << "" << std::endl;
 		}*/
 	;
 
@@ -743,7 +743,7 @@ Type:
 	| LBRACKET Type RBRACKET
 		{
           safe_assign($$, $2  );
-      	  gsDebugMsg("Type: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "Type: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 
 	| ContainerType
@@ -755,23 +755,23 @@ BasicType:
  	  BOOL
 		{
           safe_assign($$, gsMakeType( gsString2ATermAppl( "Bool" ) ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
  	| NAT
 		{
           safe_assign($$, gsMakeType( gsString2ATermAppl("Nat" ) ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
  	| VOID
 		{
           safe_assign($$, gsMakeType( gsString2ATermAppl("Void" ) ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
     | REAL
  	| TYPE
 		{
           safe_assign($$, gsMakeType( $1 ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 //	| Identifier
 //	| Identifier DOT Identier
@@ -781,20 +781,20 @@ ContainerType:
       SQLBRACKET Type SQRBRACKET
         {
           safe_assign($$, gsMakeListType($2));
-      	  gsDebugMsg("ContainerType: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "ContainerType: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 
         }
     | LBRACE Type RBRACE
         {
           safe_assign($$, gsMakeSetType($2));
-      	  gsDebugMsg("ContainerType: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "ContainerType: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 
         }
     | LBRACKET Type_csp COMMA Type RBRACKET
 		{
           ATermList list = ATinsert( $2, (ATerm) $4 );
           safe_assign($$, gsMakeTupleType(ATreverse(list)));
-      	  gsDebugMsg("ContainerType: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "ContainerType: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
     ;
 
@@ -802,12 +802,12 @@ Type_csp:
       Type
       	{
           safe_assign($$, ATmakeList1( (ATerm) $1) );
-      	  gsDebugMsg("ChannelDeclaration_csp: parsed formalparameter channel  \n  %T\n", $$);
+      	  mCRL2log(debug) << "ChannelDeclaration_csp: parsed formalparameter channel  \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
     | Type_csp COMMA Type
 		{
           safe_assign($$, ATinsert( $1, (ATerm) $3 ) );
-      	  gsDebugMsg("BasicType: parsed Type \n  %T\n", $$);
+      	  mCRL2log(debug) << "BasicType: parsed Type \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
     ;
 
@@ -819,7 +819,7 @@ Type_csp:
 Statement:
 	  LBRACKET Statement RBRACKET
       	{ safe_assign($$, gsMakeParenthesisedStat( $2));
-      	  gsDebugMsg("Statement: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "Statement: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| BasicStatement
 	| UnaryStatement
@@ -830,7 +830,7 @@ ModelStatement:
       Instantiation
     | ModelStatement BARS ModelStatement
       	{ safe_assign($$, gsMakeParStat( $1, $3));
-      	  gsDebugMsg("ModelStatement: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "ModelStatement: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 
 BasicStatement:
@@ -849,7 +849,7 @@ DelayStatement:
       {
         // Ugly Hack :D
         safe_assign($$, gsMakeSkipStat( gsMakeNil(), gsMakeNil(), gsMakeSkip() ));
-        gsDebugMsg("AssignmentStatement: parsed \n  %T\n", $$);
+        mCRL2log(debug) << "AssignmentStatement: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     ;
 
@@ -865,7 +865,7 @@ AssignmentStatement:
             if (!ContainerTypeChecking((ATermAppl) ATgetArgument(ATgetFirst(ids), 1), (ATermAppl) ATgetArgument(ATgetFirst(exprs), 1)))
 		    {
               chigetposition();
-              gsErrorMsg("Assignment failed: Incompatible Types Checking failed %T and %T\n", ids, exprs);
+              mCRL2log(error) << "Assignment failed: Incompatible Types Checking failed " << atermpp::aterm(ids) << " and " << atermpp::aterm(exprs) << std::endl;
 		      exit(1);
             }
             ids = ATgetNext(ids);
@@ -873,13 +873,13 @@ AssignmentStatement:
           }
 
           safe_assign($$, gsMakeAssignmentStat($1, $2, ATreverse($3), ATreverse($5) ) );
-      	  gsDebugMsg("AssignmentStatement: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "AssignmentStatement: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	|
 	  OptGuard OptChannel SKIP
       	{
           safe_assign($$, gsMakeSkipStat( $1, $2, gsMakeSkip() ));
-      	  gsDebugMsg("AssignmentStatement: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "AssignmentStatement: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 //	| OptGuard LBRACE Expression_csp RBRACE COLON Expression_csp GG Identifier
 	;
@@ -895,13 +895,13 @@ OptGuard: /* empty */
 			  **/
 			if(ATAgetArgument($1,1) != gsMakeType(gsString2ATermAppl("Bool")))
 				{
-				  gsErrorMsg("OptGaurd failed: Incompatible Types Checking failed\n");
+				  mCRL2log(error) << "OptGuard failed: Incompatible Types Checking failed" << std::endl;
 				  exit(1);
 				};
 
 
 			safe_assign($$, $1 );
-      	  	gsDebugMsg("OptGuard: parsed \n  %T\n", $$);
+      	  	mCRL2log(debug) << "OptGuard: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -910,31 +910,31 @@ OptChannel: /* empty */
 		}
 	| Expression COLON
       	{ safe_assign($$, $1);
-		  gsErrorMsg("OptChannel not yet implemented");
+		  mCRL2log(error) << "OptChannel not yet implemented" << std::endl;
 		  assert(false);
-      	  gsDebugMsg("OptChannel: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "OptChannel: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 Identifier_csp:
 	  Identifier
       	{ safe_assign($$, ATmakeList1( (ATerm) $1));
-      	  gsDebugMsg("Identifier_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "Identifier_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Identifier_csp COMMA Identifier
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("Identifier_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "Identifier_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 Expression_csp:
 	  Expression
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("Expression_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "Expression_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression_csp COMMA Expression
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("Expression_csp: parsed \n  %T\n", $$);
+      	  mCRL2log(debug) << "Expression_csp: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -947,22 +947,22 @@ CommStatement:
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument($2,0),0);
           ATermAppl hash    = (ATermAppl) ATgetArgument($2,2);
-          gsDebugMsg("%T\n",$2);
-          gsDebugMsg("%T\n",hash);
+          mCRL2log(debug) << "" << atermpp::aterm($2) << "" << std::endl;
+          mCRL2log(debug) << "" << atermpp::aterm(hash) << "" << std::endl;
 
           safe_assign($$, gsMakeSendStat($1, channel, hash , ATreverse( $4) ) );
-      	  gsDebugMsg("CommStatement: parsed %T\n", $$);
+      	  mCRL2log(debug) << "CommStatement: parsed " << atermpp::aterm( $$) << "" << std::endl;
         }
 //	| OptGuard Expression SSEND Expression_csp
 	| OptGuard Expression EXCLAMATION
         {
-          gsDebugMsg("%T",$2);
+          mCRL2log(debug) << "" << atermpp::aterm($2);
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( $2,0),0);
           ATermAppl hash    = (ATermAppl) ATgetArgument($2,2);
 
           safe_assign($$, gsMakeSendStat($1, channel, hash, ATmakeList0() ) );
-      	  gsDebugMsg("CommStatement: parsed %T\n", $$);
+      	  mCRL2log(debug) << "CommStatement: parsed " << atermpp::aterm( $$) << "" << std::endl;
         }
 //	| OptGuard Expression SSEND
 //	| OptGuard SSEND Expression_csp
@@ -972,13 +972,13 @@ CommStatement:
           //Check if $4 is properly typed
           //Check if $2 can receive
 
-          gsDebugMsg("%T",$2);
+          mCRL2log(debug) << "" << atermpp::aterm($2);
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( $2,0),0);
           ATermAppl hash    = (ATermAppl) ATgetArgument($2,2);
 
           safe_assign($$, gsMakeRecvStat($1, channel, hash, ATreverse( $4) ) );
-      	  gsDebugMsg("CommStatement: parsed %T\n", $$);
+      	  mCRL2log(debug) << "CommStatement: parsed " << atermpp::aterm( $$) << "" << std::endl;
         }
 //	| OptGuard Expression RRECV Expression_csp
 	| OptGuard Expression RECV
@@ -987,13 +987,13 @@ CommStatement:
           //Check if $4 is properly typed
           //Check if $2 can receive
 
-          gsDebugMsg("%T",$2);
+          mCRL2log(debug) << "" << atermpp::aterm($2);
 
           ATermAppl channel = (ATermAppl) ATgetArgument(ATgetArgument( $2,0),0);
           ATermAppl hash    = (ATermAppl) ATgetArgument($2,2);
 
           safe_assign($$, gsMakeRecvStat($1, channel, hash, ATmakeList0() ) );
-      	  gsDebugMsg("CommStatement: parsed %T\n", $$);
+      	  mCRL2log(debug) << "CommStatement: parsed " << atermpp::aterm( $$) << "" << std::endl;
         }
 //	| OptGuard Expression RRECV
 //	| OptGuard RRECV Expression_csp
@@ -1013,40 +1013,40 @@ Instantiation:
 BinaryStatement:
 	  Statement SEP Statement
       	{ safe_assign($$, gsMakeSepStat( $1, $3));
-      	  gsDebugMsg("parsed SEP statement \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed SEP statement \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Statement ALT Statement
       	{ safe_assign($$, gsMakeAltStat( $1, $3));
-      	  gsDebugMsg("parsed ALT statement \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed ALT statement \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 /*	| Statement BARS Statement
       	{ safe_assign($$, gsMakeParStat( $1, $3));
-      	  gsDebugMsg("parsed Paralell statement \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed Paralell statement \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}*/
 	;
 
 UnaryStatement:
 	  STAR Statement
         {
-          gsDebugMsg("%d\n", __LINE__);
+          mCRL2log(debug) << "" <<  __LINE__ << "" << std::endl;
       	  safe_assign($$, gsMakeStarStat( $2));
-      	  gsDebugMsg("parsed STAR statement \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed STAR statement \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression GUARD_REP Statement
       	{
-          gsDebugMsg("%d\n", __LINE__);
-          gsDebugMsg("%T\n",$1);
-          gsDebugMsg("%T\n",$3);
+          mCRL2log(debug) << "" <<  __LINE__ << "" << std::endl;
+          mCRL2log(debug) << "" << atermpp::aterm($1) << "" << std::endl;
+          mCRL2log(debug) << "" << atermpp::aterm($3) << "" << std::endl;
           UnaryTypeCheck(ATAgetArgument($1,1), "Bool");
           safe_assign($$, gsMakeGuardedStarStat( $1, $3));
-      	  gsDebugMsg("parsed GuardedSTAR statement \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed GuardedSTAR statement \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 AdvancedStatement:
 	  OptGuard DEADLOCK
       	{ safe_assign($$, gsMakeDeltaStat($1, gsMakeDelta()));
-      	  gsDebugMsg("parsed deadlock statement \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed deadlock statement \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -1069,7 +1069,7 @@ Expression: //NUMBER
 				ATAgetArgument($2,1),
 				$2 )
 			);
-      		gsDebugMsg("parsed Negation Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Negation Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 
 	| BasicExpression
@@ -1093,11 +1093,11 @@ Expression: //NUMBER
 ExpressionIdentier_csp: //NUMBER
 	  ExpressionIdentifier
       	{ safe_assign($$, ATmakeList1((ATerm) $1));
-      	  gsDebugMsg("parsed expression-element \n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed expression-element \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| ExpressionIdentier_csp COMMA ExpressionIdentifier
       	{ safe_assign($$, ATinsert($1, (ATerm) $3));
-      	  gsDebugMsg("parsed expression-element\n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed expression-element\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 ExpressionIdentifier:
@@ -1114,7 +1114,7 @@ ExpressionIdentifier:
 		  if (var_type_map.end() == var_type_map.find( (ATerm) $1))
 		    {
               chigetposition();
-		      gsErrorMsg("ExpressionIdentifier: Variable %T is not defined!\n", $1 );
+		      mCRL2log(error) << "ExpressionIdentifier: Variable " << atermpp::aterm($1) << " is not defined!" << std::endl;
 		      exit(1);
 		    };
 
@@ -1124,7 +1124,7 @@ ExpressionIdentifier:
 			  (ATermAppl) var_type_map[(ATerm) $1]
 			)
 		  );
-      	  gsDebugMsg("parsed Identifier's\n  %T\n", $$);
+      	  mCRL2log(debug) << "parsed Identifier's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 
 
@@ -1168,11 +1168,11 @@ BasicExpression:
           if(!channel_exists && !variable_exists)
           {
               chigetposition();
-              gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
+              mCRL2log(error) << "BasicExpression: Variable/Channel " << atermpp::aterm($1) << " is not defined!" << std::endl;
               exit(1);
           }
 
-          gsDebugMsg("BasicExpression: parsed \n  %T\n", $$);
+          mCRL2log(debug) << "BasicExpression: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Identifier DOT Expression
 
@@ -1183,27 +1183,27 @@ BasicExpression:
 		    * TODO: Add scope
 		    *
 		    **/
-          gsDebugMsg("%s:%d\n",__FILE__, __LINE__ );
+          mCRL2log(debug) <<  __LINE__  << ":" << __FILE__ << std::endl;
 
           UnaryTypeCheck( (ATermAppl) ATgetArgument($3,1), "Nat");
 
           if (var_type_map.find((ATerm) $1) != var_type_map.end())
           {
             ATermAppl tuple_type = (ATermAppl) var_type_map[(ATerm) $1];
-            gsDebugMsg("%T\n", tuple_type);
+            mCRL2log(debug) << "" << atermpp::aterm( tuple_type) << "" << std::endl;
 
             //Check if $1 is a tuple
             if( strcmp("TupleType", ATgetName( ATgetAFun( tuple_type ) ) ) != 0 )
             {
               chigetposition();
-              gsErrorMsg("%T is not a Tuple", $1);
+              mCRL2log(error) << atermpp::aterm($1) << " is not a Tuple" << std::endl;
               exit(1);
             }
 
             if (!is_number(ATgetName(ATgetAFun(ATgetArgument($3,0)))) )
             {
               chigetposition();
-              gsErrorMsg("BasicExpression: Expected a number after the \".\"\n");
+              mCRL2log(error) << "BasicExpression: Expected a number after the \".\"" << std::endl;
               exit(1);
             }
 
@@ -1212,7 +1212,7 @@ BasicExpression:
             if (index >= (int) ATgetLength( (ATermList) ATgetArgument( tuple_type, 0 ) ) )
             {
               chigetposition();
-              gsErrorMsg("BasicExpression: Index value \"%d\" is out of bounds for %T\n", index, $1 );
+              mCRL2log(error) << "BasicExpression: Index value \"" << index << "\" is out of bounds for " << atermpp::aterm($1) << std::endl;
               exit(1);
             }
 
@@ -1233,7 +1233,7 @@ BasicExpression:
                 $3
               )
             );
-            gsDebugMsg("BasicExpression (Tuple Selection): parsed \n  %T\n", $$);
+            mCRL2log(debug) << "BasicExpression (Tuple Selection): parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
           }
 
           if (chan_type_direction_map.end() != chan_type_direction_map.find( (ATerm) $1))
@@ -1249,14 +1249,14 @@ BasicExpression:
   	             )
   	           );
 
-  	           gsDebugMsg("BasicExpression (Hashed Channel): parsed \n  %T\n", $$);
+  	           mCRL2log(debug) << "BasicExpression (Hashed Channel): parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
           }
 
           if ( (chan_type_direction_map.end() == chan_type_direction_map.find( (ATerm) $1)) &&
                (var_type_map.find((ATerm) $1) == var_type_map.end()) )
           {
               chigetposition();
-              gsErrorMsg("BasicExpression: Variable/Channel %T is not defined!\n", $1 );
+              mCRL2log(error) << "BasicExpression: Variable/Channel " << atermpp::aterm($1) << " is not defined!" << std::endl;
               exit(1);
           }
 		}
@@ -1274,7 +1274,7 @@ BooleanExpression:
 					gsMakeType( gsString2ATermAppl("Bool" ))
 				)
 			);
-      		gsDebugMsg("BooleanExpression: parsed \n  %T\n", $$);
+      		mCRL2log(debug) << "BooleanExpression: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| TRUE
 		{
@@ -1283,7 +1283,7 @@ BooleanExpression:
 					gsMakeType( gsString2ATermAppl("Bool" ))
 				)
 			);
-      		gsDebugMsg("BooleanExpression: parsed \n  %T\n", $$);
+      		mCRL2log(debug) << "BooleanExpression: parsed \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| NOT Expression
 		{
@@ -1294,7 +1294,7 @@ BooleanExpression:
 				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				$2 )
 			);
-      		gsDebugMsg("parsed Negation Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Negation Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| EXCLAMATION Expression
 		{
@@ -1305,7 +1305,7 @@ BooleanExpression:
 				gsMakeType( gsString2ATermAppl("Bool" ) ),
 				$2 )
 			);
-      		gsDebugMsg("parsed Negation Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Negation Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression AND Expression
 		{
@@ -1318,7 +1318,7 @@ BooleanExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary AND Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression OR Expression
 		{
@@ -1331,7 +1331,7 @@ BooleanExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary AND Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression IMPLIES Expression
 		{
@@ -1344,7 +1344,7 @@ BooleanExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary AND Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary AND Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
@@ -1356,7 +1356,7 @@ NatIntExpression:
 					gsMakeType( gsString2ATermAppl("Nat" ))
 				)
 			);
-      		gsDebugMsg("parsed Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| PLUS Expression
 		{
@@ -1368,7 +1368,7 @@ NatIntExpression:
 					$2
 				)
 			);
-      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed UnaryExpression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| MINUS Expression
 		{
@@ -1380,7 +1380,7 @@ NatIntExpression:
 					$2
 				)
 			);
-      		gsDebugMsg("parsed UnaryExpression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed UnaryExpression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression POWER Expression
 		{
@@ -1393,7 +1393,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary POWER Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary POWER Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression STAR Expression
 		{
@@ -1406,7 +1406,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary STAR Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary STAR Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression DIVIDE Expression
 		{
@@ -1419,7 +1419,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary DIVIDE Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary DIVIDE Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression MOD Expression
 		{
@@ -1432,7 +1432,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary MOD Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary MOD Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression DIV Expression
 		{
@@ -1445,7 +1445,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary DIV Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary DIV Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression MIN Expression
 		{
@@ -1458,7 +1458,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary MIN Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary MIN Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression MAX Expression
 		{
@@ -1471,7 +1471,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary MAX Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary MAX Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression LESS Expression
 		{
@@ -1484,7 +1484,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary LESS Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary LESS Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression GREATER Expression
 		{
@@ -1497,7 +1497,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary GREATER Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary GREATER Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression LEQ Expression
 		{
@@ -1510,7 +1510,7 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary LEQ Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary LEQ Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	| Expression GEQ Expression
 		{
@@ -1523,15 +1523,15 @@ NatIntExpression:
 				$3
 				)
 			);
-      		gsDebugMsg("parsed Binary GEQ Expression's\n  %T\n", $$);
+      		mCRL2log(debug) << "parsed Binary GEQ Expression's\n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
 	;
 
 PlusExpression:
 	 Expression PLUS Expression
 	 {
-       gsDebugMsg("Expression 1: %T\n", $1);
-       gsDebugMsg("Expression 2: %T\n", $3);
+       mCRL2log(debug) << "Expression 1: " << atermpp::aterm( $1) << "" << std::endl;
+       mCRL2log(debug) << "Expression 2: " << atermpp::aterm( $3) << "" << std::endl;
 
        bool processed = false;
 
@@ -1553,7 +1553,7 @@ PlusExpression:
 				$3
 				)
 			);
-            gsDebugMsg("PlusExpression - Nat Expression parsed: \n%T\n", $$);
+            mCRL2log(debug) << "PlusExpression - Nat Expression parsed: \n" << atermpp::aterm( $$) << "" << std::endl;
             processed = true;
 		}
 
@@ -1568,13 +1568,13 @@ PlusExpression:
          if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
 	     {
            chigetposition();
-		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		   exit(1);
 		 }
    		 safe_assign($$, gsMakeBinarySetExpression( $2,
 				         ATAgetArgument($1,1),
                 	$1, $3));
-         gsDebugMsg("PlusExpression - Set Expression parsed: \n  %T\n", $$);
+         mCRL2log(debug) << "PlusExpression - Set Expression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
          processed = true;
        }
 
@@ -1586,7 +1586,9 @@ PlusExpression:
        if (!processed)
        {
          chigetposition();
-         gsErrorMsg("Expressions %T and %T cannot be used with \"+\"\n", ATAgetArgument($1,0), ATAgetArgument($3,0));
+         mCRL2log(error) << "Expressions " << atermpp::aterm(ATAgetArgument($1,0)) << " and "
+                         << atermpp::aterm(ATAgetArgument($3, 0)) << " cannot be used with \"+\"" << std::endl;
+   
          exit(1);
        }
      }
@@ -1595,8 +1597,8 @@ PlusExpression:
 MinusExpression:
 	 Expression MINUS Expression
 	 {
-       gsDebugMsg("Expression 1: %T\n", $1);
-       gsDebugMsg("Expression 2: %T\n", $3);
+       mCRL2log(debug) << "Expression 1: " << atermpp::aterm( $1) << "" << std::endl;
+       mCRL2log(debug) << "Expression 2: " << atermpp::aterm( $3) << "" << std::endl;
 
        bool processed = false;
        /**
@@ -1615,7 +1617,7 @@ MinusExpression:
 				$3
 				)
 			);
-         gsDebugMsg("MinusExpression - Nat Expression parsed: \n%T\n", $$);
+         mCRL2log(debug) << "MinusExpression - Nat Expression parsed: \n" << atermpp::aterm( $$) << "" << std::endl;
          processed = true;
        }
        /**
@@ -1629,13 +1631,13 @@ MinusExpression:
          if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
 	     {
            chigetposition();
-		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		   exit(1);
 		 }
    		 safe_assign($$, gsMakeBinaryListExpression( $2,
 				         ATAgetArgument($1,1),
                 	$1, $3));
-         gsDebugMsg("MinusExpression - Literal Expression parsed: \n  %T\n", $$);
+         mCRL2log(debug) << "MinusExpression - Literal Expression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
          processed = true;
        }
        /**
@@ -1649,13 +1651,13 @@ MinusExpression:
          if(!ContainerTypeChecking(ATAgetArgument($1,1),  ATAgetArgument($3,1)))
 	     {
            chigetposition();
-		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		   exit(1);
 		 }
    		 safe_assign($$, gsMakeBinarySetExpression( $2,
 				         ATAgetArgument($1,1),
                 	$1, $3));
-         gsDebugMsg("MinusExpression - Set Expression parsed: \n  %T\n", $$);
+         mCRL2log(debug) << "MinusExpression - Set Expression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
          processed = true;
        }
 
@@ -1663,7 +1665,9 @@ MinusExpression:
        if (!processed)
        {
          chigetposition();
-         gsErrorMsg("Expressions %T and %T cannot be used with \"-\"\n", ATAgetArgument($1,0), ATAgetArgument($3,0));
+         mCRL2log(error) << "Expressions " << atermpp::aterm(ATAgetArgument($1,0))
+                         << " and " << atermpp::aterm(ATAgetArgument($3,0))
+                         << " cannot be used with \"-\"" << std::endl;
          exit(1);
        }
 
@@ -1681,7 +1685,7 @@ EqualityExpression:
               )
 				{
                   chigetposition();
-				  gsErrorMsg("EqualityExpression: Incompatible Types Checking failed\n");
+				  mCRL2log(error) << "EqualityExpression: Incompatible Types Checking failed" << std::endl;
 				  exit(1);
 				};
 
@@ -1691,13 +1695,13 @@ EqualityExpression:
                                   gsString2ATermAppl("=="),
 			  		  gsMakeType( gsString2ATermAppl("Bool" )),
 			  $1, $3));
-      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
+      		  mCRL2log(debug) << "EqualityExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
             } else {
 			  safe_assign($$, gsMakeBinaryExpression(
                                   gsString2ATermAppl("=="),
 			  		  gsMakeType( gsString2ATermAppl("Bool" )),
 			  $1, $3));
-      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
+      		  mCRL2log(debug) << "EqualityExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
             }
 		}
 	| Expression NOTEQUAL Expression
@@ -1710,7 +1714,7 @@ EqualityExpression:
               )
 				{
                   chigetposition();
-				  gsErrorMsg("EqualityExpression: Incompatible Types Checking failed\n");
+				  mCRL2log(error) << "EqualityExpression: Incompatible Types Checking failed" << std::endl;
 				  exit(1);
 				};
 
@@ -1720,12 +1724,12 @@ EqualityExpression:
                                   gsString2ATermAppl("!="),
 			  		  gsMakeType( gsString2ATermAppl("Bool" )),
 			  $1, $3));
-      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
+      		  mCRL2log(debug) << "EqualityExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
             } else {
 			  safe_assign($$, gsMakeBinaryExpression( gsString2ATermAppl("!="),
 			  		  gsMakeType( gsString2ATermAppl("Bool" )),
 			  $1, $3));
-      		  gsDebugMsg("EqualityExpression parsed: \n  %T\n", $$);
+      		  mCRL2log(debug) << "EqualityExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
             }
 		}
 	;
@@ -1741,13 +1745,13 @@ MemberTest:
          if(!ContainerTypeChecking(gsMakeSetType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
 	     {
            chigetposition();
-		   gsErrorMsg("Incompatible Types Checking failed\n");
+		   mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		   exit(1);
 		 }
    		 safe_assign($$, gsMakeBinarySetExpression( $2,
 					gsMakeType( gsString2ATermAppl("Bool" )),
                 	$1, $3));
-         gsDebugMsg("MemberTest - SetLiteral parsed: \n  %T\n", $$);
+         mCRL2log(debug) << "MemberTest - SetLiteral parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
          processed = true;
        }
 
@@ -1755,20 +1759,22 @@ MemberTest:
          {
          if(!ContainerTypeChecking(gsMakeListType(ATAgetArgument($1,1)),  ATAgetArgument($3,1)))
 	       {
-		     gsErrorMsg("Incompatible Types Checking failed\n");
+		     mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 		     exit(1);
 		   }
  	  	 safe_assign($$, gsMakeBinaryListExpression( $2,
 					gsMakeType( gsString2ATermAppl("Bool" )),
 			        $1, $3));
-      	 gsDebugMsg("MemberTest - ListExpression parsed: \n  %T\n", $$);
+      	 mCRL2log(debug) << "MemberTest - ListExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
          processed = true;
          }
 
          if (!processed)
          {
            chigetposition();
-           gsErrorMsg("Experrsions %T and %T cannot be used with \"in\"", ATAgetArgument($1,0), ATAgetArgument($3,0));
+           mCRL2log(error) << "Expressions " << atermpp::aterm(ATAgetArgument($1,0))
+                          << " and " << atermpp::aterm(ATAgetArgument($3,0))
+                          << " cannot be used with \"in\"" << std::endl;
            exit(1);
         }
     }
@@ -1777,7 +1783,7 @@ MemberTest:
 RecordExpression:
      LBRACKET Expression_csp COMMA Expression RBRACKET
      {
-      	  gsDebugMsg("R:%d",__LINE__);
+      	  mCRL2log(debug) << "R:" << __LINE__;
           ATermList tuple_type = ATmakeList0();
 		  ATermList to_process = $2;
           to_process = ATinsert(to_process, (ATerm) $4);
@@ -1790,7 +1796,7 @@ RecordExpression:
 		  }
           to_process = ATinsert($2, (ATerm) $4 );
           safe_assign($$, gsMakeTupleLiteral( ATreverse( to_process ), gsMakeTupleType( tuple_type ) ) );
-      	  gsDebugMsg("RecordExpression parsed: \n  %T\n", $$);
+      	  mCRL2log(debug) << "RecordExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
 
      }
    ;
@@ -1802,7 +1808,7 @@ SetExpression:
       }
     | LBRACE Expression_csp RBRACE
       {
-      	  gsDebugMsg("R:%d",__LINE__);
+      	  mCRL2log(debug) << "R:" << __LINE__;
           ATerm type = NULL;
 		  ATermList to_process = $2;
 		  while(!ATisEmpty(to_process))
@@ -1812,18 +1818,18 @@ SetExpression:
              {
                type = elementType;
              }
-             gsDebugMsg("%T\n",ATgetFirst(to_process));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(to_process)) << "" << std::endl;
              if (type != elementType )
              {
                chigetposition();
-               gsErrorMsg("SetLiteral contains mixed types %T and %T\n"
-                         , type, elementType);
+               mCRL2log(error) << "SetLiteral contains mixed types " << atermpp::aterm(type)
+                               << " and " << atermpp::aterm(elementType) << std::endl;
                exit(1);
              }
 			 to_process = ATgetNext( to_process) ;
 		  }
           safe_assign($$, gsMakeSetLiteral( ATreverse($2), gsMakeSetType((ATermAppl) type)));
-      	  gsDebugMsg("SetLiteral parsed: \n  %T\n", $$);
+      	  mCRL2log(debug) << "SetLiteral parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     | Expression UNION Expression
 		{
@@ -1836,14 +1842,15 @@ SetExpression:
              )
 			{
               chigetposition();
-			  gsErrorMsg("r%d: Union failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+        mCRL2log(error) << "r" << __LINE__ << ": Union failed: Incompatible Types Checking failed:" << std::endl
+                        << atermpp::aterm($1) << " and " << atermpp::aterm($3) << std::endl;
 			  exit(1);
 			};
 
   		  safe_assign($$, gsMakeBinarySetExpression( $2,
 				ATAgetArgument($1,1),
 		        $1, $3));
-   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", $$);
+   		  mCRL2log(debug) << "BinarySetExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
     | Expression INTERSECTION Expression
 		{
@@ -1856,14 +1863,15 @@ SetExpression:
              )
 			{
               chigetposition();
-			  gsErrorMsg("r%d: Intersection failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+        mCRL2log(error) << "r" << __LINE__ << ": Intersection failed: Incompatible Types Checking failed:" << std::endl
+                        << atermpp::aterm($1) << " and " << atermpp::aterm($3) << std::endl;
 			  exit(1);
 			};
 
   		  safe_assign($$, gsMakeBinarySetExpression( $2,
 				ATAgetArgument($1,1),
 		        $1, $3));
-   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", $$);
+   		  mCRL2log(debug) << "BinarySetExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
     | Expression SUB Expression
 		{
@@ -1876,29 +1884,30 @@ SetExpression:
              )
 			{
               chigetposition();
-			  gsErrorMsg("r%d: Subsection failed: Incompatible Types Checking failed:\n %T and %T\n", __LINE__, $1, $3);
+			  mCRL2log(error) << "r" << __LINE__ << ": Subsection failed: Incompatible Types Checking failed:" << std::endl
+                        << atermpp::aterm($1) << " and " << atermpp::aterm($3) << std::endl;
 			  exit(1);
 			};
 
   		  safe_assign($$, gsMakeBinarySetExpression( $2,
 				gsMakeType( gsString2ATermAppl("Bool" ) ),
 		        $1, $3));
-   		  gsDebugMsg("BinarySetExpression parsed: \n  %T\n", $$);
+   		  mCRL2log(debug) << "BinarySetExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
     | PICK LBRACKET Expression RBRACKET
       {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction( $1,
 			     (ATermAppl) ATgetArgument($3,1),
 			$3));
-      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     ;
 
@@ -1918,14 +1927,15 @@ ListExpression:
               )
 				{
                   chigetposition();
-				  gsErrorMsg("Concatination failed: Incompatible Types Checking failed:\n %T and %T\n", $1, $3);
+          mCRL2log(error) << "r" << __LINE__ << ": Concatenation failed: Incompatible Types Checking failed:" << std::endl
+                        << atermpp::aterm($1) << " and " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeBinaryListExpression( $2,
 					ATAgetArgument($1,1),
 			$1, $3));
-      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "ListExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
     | Expression LSUBTRACT Expression
 		{
@@ -1938,14 +1948,14 @@ ListExpression:
               )
 				{
                   chigetposition();
-				  gsErrorMsg("Incompatible Types Checking failed\n");
+				  mCRL2log(error) << "Incompatible types checking failed" << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeBinaryListExpression( $2,
 					ATAgetArgument($1,1),
 			$1, $3));
-      		gsDebugMsg("ListExpression parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "ListExpression parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
 		}
       // Equality and NOTequal handled by BoolNatIntExpression
 /*  | ListLiteral IS ListLiteral
@@ -1960,89 +1970,89 @@ Functions:
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction( $1,
 					gsMakeType( gsString2ATermAppl("Nat" )),
 			$3));
-      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     | HEAD LBRACKET  Expression RBRACKET
       {
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction( $1,
 				  (ATermAppl) ATgetArgument(ATgetArgument($3,1),0),
 			$3));
-      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     | TAIL LBRACKET  Expression RBRACKET
       {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction( $1,
 			     (ATermAppl) ATgetArgument($3,1),
 			$3));
-      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     | RHEAD LBRACKET  Expression RBRACKET
       {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction( $1,
 				  (ATermAppl) ATgetArgument(ATgetArgument($3,1),0),
 			$3));
-      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     | RTAIL LBRACKET  Expression RBRACKET
       {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction( $1,
 			       (ATermAppl) ATgetArgument($3,1),
 			$3));
-      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     | TAKE LBRACKET Expression COMMA Expression RBRACKET
       {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
+				  mCRL2log(error) << "Functions: " << atermpp::aterm($1) << " cannot bet used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
 			if(! (ATAgetArgument($5,1) == gsMakeType( gsString2ATermAppl("Nat" ) ) ) )
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on 2nd argument %T\n", $1, $5);
-				  gsErrorMsg("Type checking failed\n");
+				  mCRL2log(error) << "Functions: " << atermpp::aterm($1) << " cannot be used on 2nd argument " << atermpp::aterm($5) << std::endl;
+				  mCRL2log(error) << "Type checking failed" << std::endl;
 				  exit(1);
 				};
 
@@ -2050,51 +2060,51 @@ Functions:
 			       (ATermAppl) ATgetArgument($3,1),
 			       $3,
                    $5));
-      		gsDebugMsg("Functions parsed: \n%T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n" << atermpp::aterm( $$) << "" << std::endl;
       }
     | DROP LBRACKET  Expression COMMA Expression RBRACKET
       {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on %T\n", $1, $3);
-				  exit(1);
+				  mCRL2log(error) << "Functions: " << atermpp::aterm($1) << " cannot bet used on " << atermpp::aterm($3) << std::endl;
+          exit(1);
 				};
 
 			if(! (ATAgetArgument($5,1) == gsMakeType( gsString2ATermAppl("Nat" ) ) ) )
 				{
                   chigetposition();
-				  gsErrorMsg("Functions: %T cannot used on 2nd argument %T\n", $1, $5);
-				  gsErrorMsg("Type checking failed\n");
-				  exit(1);
+				  mCRL2log(error) << "Functions: " << atermpp::aterm($1) << " cannot be used on 2nd argument " << atermpp::aterm($5) << std::endl;
+          mCRL2log(error) << "Type checking failed" << std::endl;
+          exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction2( $1,
 			       (ATermAppl) ATgetArgument($3,1),
 			       $3,
                    $5));
-      		gsDebugMsg("Functions parsed: \n%T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n" << atermpp::aterm( $$) << "" << std::endl;
       }
     /* List functions that are not supported */
     | SORT LBRACKET  Expression RBRACKET
       {
-            gsDebugMsg("R:%d\n",__LINE__);
+            mCRL2log(debug) << "R:" << __LINE__ << "" << std::endl;
 			if(!(strcmp(ATgetName(ATgetAFun(ATAgetArgument($3,1))), "ListType") == 0 ))
 				{
-				  gsErrorMsg("Functions: %T cannot used on %T", $1, $3);
+				  mCRL2log(error) << "functions: " << atermpp::aterm($1) << " cannot be used on " << atermpp::aterm($3) << std::endl;
 				  exit(1);
 				};
 
  	  		safe_assign($$, gsMakeFunction( $1,
 			       (ATermAppl) ATgetArgument($3,1),
 			$3));
-      		gsDebugMsg("Functions parsed: \n  %T\n", $$);
+      		mCRL2log(debug) << "Functions parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
     | INSERT LBRACKET  Expression RBRACKET
       {
         chigetposition();
-        gsErrorMsg("%T is not supported", $1);
+        mCRL2log(error) << atermpp::aterm($1) << " is not supported" << std::endl;
         exit(1);
       }
     ;
@@ -2106,7 +2116,7 @@ ListLiteral:
       }
   | SQLBRACKET Expression_csp SQRBRACKET
       {
-      	  gsDebugMsg("Entering ListLiteral\n");
+      	  mCRL2log(debug) << "Entering ListLiteral" << std::endl;
           ATerm type = NULL;
 		  ATermList to_process = $2;
 		  while(!ATisEmpty(to_process))
@@ -2116,18 +2126,18 @@ ListLiteral:
              {
                type = elementType;
              }
-             gsDebugMsg("%T\n",ATgetFirst(to_process));
+             mCRL2log(debug) << "" << atermpp::aterm(ATgetFirst(to_process)) << "" << std::endl;
              if (type != elementType )
              {
                chigetposition();
-               gsErrorMsg("ListLiteral contains mixed types %T and %T\n"
-                         , type, elementType);
+               mCRL2log(error) << "ListLiteral contains mixed types " <<
+                        atermpp::aterm(type) << " and " << atermpp::aterm(elementType) << std::endl;
                exit(1);
              }
 			 to_process = ATgetNext( to_process) ;
 		  }
           safe_assign($$, gsMakeListLiteral( ATreverse($2), gsMakeListType((ATermAppl) type)));
-      	  gsDebugMsg("ListLiteral parsed: \n  %T\n", $$);
+      	  mCRL2log(debug) << "ListLiteral parsed: \n  " << atermpp::aterm( $$) << "" << std::endl;
       }
 ;
 
@@ -2163,13 +2173,13 @@ void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)
     if(arg1 != arg2)
         {
           chigetposition();
-          gsErrorMsg("BinTypeCheck: Incompatible Types Checking failed\n");
+          mCRL2log(error) << "BinTypeCheck: Incompatible Types Checking failed" << std::endl;
           exit(1);
         };
     if(arg1 != gsMakeType(gsString2ATermAppl(type.c_str())))
         {
           chigetposition();
-          gsErrorMsg("Expected type %s\n", type.c_str());
+          mCRL2log(error) << "Expected type " << type << std::endl;
           exit(1);
         };
   return;
@@ -2177,15 +2187,15 @@ void BinTypeCheck(ATermAppl arg1, ATermAppl arg2, std::string type)
 
 void UnaryTypeCheck(ATermAppl arg1, std::string type)
 {
-    gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
-    gsDebugMsg("arg1: %T\n", arg1);
+    mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
+    mCRL2log(debug) << "arg1: " << atermpp::aterm( arg1) << "" << std::endl;
     ATermAppl arg2 = gsMakeType(gsString2ATermAppl(type.c_str()));
-    gsDebugMsg("arg2: %T\n", arg2);
+    mCRL2log(debug) << "arg2: " << atermpp::aterm( arg2) << "" << std::endl;
 
     if( arg1 != arg2 )
         {
           chigetposition();
-          gsErrorMsg("UnaryTypeCheck: Incompatible Type, expected %s\n", type.c_str());
+          mCRL2log(error) << "UnaryTypeCheck: Incompatible Type, expected " << type << std::endl;
           exit(1);
         };
   return;
@@ -2193,15 +2203,15 @@ void UnaryTypeCheck(ATermAppl arg1, std::string type)
 
 bool ContainerTypeChecking(ATermAppl arg1, ATermAppl arg2)
 {
-  gsDebugMsg("%s;%d\n",__FILE__,__LINE__);
-  gsDebugMsg("arg1: %T\n", arg1);
-  gsDebugMsg("arg2: %T\n", arg2);
+  mCRL2log(debug) << __FILE__ << ";" << __LINE__ << std::endl;
+  mCRL2log(debug) << "arg1: " << atermpp::aterm( arg1) << "" << std::endl;
+  mCRL2log(debug) << "arg2: " << atermpp::aterm( arg2) << "" << std::endl;
   if(arg1 == arg2)
   {
     return true;
   }
 
-  gsDebugMsg("ContainerTypeChecking: %T, %T\n",arg1, arg2);
+  mCRL2log(debug) << "ContainerTypeChecking: " << atermpp::aterm(arg1) << ", " << atermpp::aterm( arg2) << std::endl;
   if((strcmp(ATgetName(ATgetAFun(arg1)), ATgetName(ATgetAFun(arg2)))==0)
      && ( ( strcmp(ATgetName(ATgetAFun(arg1)), "ListType") == 0 ) ||
           ( strcmp(ATgetName(ATgetAFun(arg1)), "SetType") == 0  )

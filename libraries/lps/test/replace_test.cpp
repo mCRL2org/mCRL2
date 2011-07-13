@@ -16,7 +16,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -92,10 +91,10 @@ void test_lps_substituter()
   sigma[variable("i", sort_nat::nat())] = sort_nat::nat(4);
 
   lps::replace_variables(spec1, sigma);
-  std::cerr << pp(spec1.process()) << std::endl;
+  std::cerr << lps::pp(spec1.process()) << std::endl;
   std::cerr << "-------------------------------------" << std::endl;
-  std::cerr << pp(spec2.process()) << std::endl;
-  BOOST_CHECK(pp(spec1.process()) == pp(spec2.process()));
+  std::cerr << lps::pp(spec2.process()) << std::endl;
+  BOOST_CHECK(lps::pp(spec1.process()) == lps::pp(spec2.process()));
   core::garbage_collect();
 }
 

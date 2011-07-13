@@ -25,12 +25,12 @@
 #include <wx/textfile.h>
 #include <sstream>
 #include <cstdlib>
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "simbase.h"
 #include "xsimmain.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/aterm_ext.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -430,7 +430,10 @@ void XSimMain::StateChanged(ATermAppl /*Transition*/, ATerm State, ATermList Nex
     SetCurrentState(State);
     UpdateTransitions(NextStates);
 
-	transview->Focus(0);
+    if( transview->GetItemCount() > 0 )
+    {
+      transview->Focus(0);
+    }
     // if ( simulator->ErrorOccurred() )
   }
   catch (mcrl2::runtime_error e)

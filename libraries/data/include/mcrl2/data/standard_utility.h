@@ -19,7 +19,7 @@
 #include "boost/type_traits/make_unsigned.hpp"
 #include "boost/type_traits/is_floating_point.hpp"
 
-#include "mcrl2/core/detail/join.h"
+#include "mcrl2/utilities/detail/join.h"
 
 // Workaround for OS X with Apples patched gcc 4.0.1
 #undef nil
@@ -1030,7 +1030,7 @@ inline data_expression not_equal_to(data_expression const& p, data_expression co
 template < typename ForwardTraversalIterator >
 inline data_expression join_or(ForwardTraversalIterator first, ForwardTraversalIterator last)
 {
-  return core::detail::join(first, last, lazy::or_, static_cast< data_expression const& >(sort_bool::false_()));
+  return utilities::detail::join(first, last, lazy::or_, static_cast< data_expression const& >(sort_bool::false_()));
 }
 
 /// \brief Returns and applied to the sequence of data expressions [first, last)
@@ -1040,7 +1040,7 @@ inline data_expression join_or(ForwardTraversalIterator first, ForwardTraversalI
 template < typename ForwardTraversalIterator >
 inline data_expression join_and(ForwardTraversalIterator first, ForwardTraversalIterator last)
 {
-  return core::detail::join(first, last, lazy::and_, static_cast< data_expression const& >(sort_bool::true_()));
+  return utilities::detail::join(first, last, lazy::and_, static_cast< data_expression const& >(sort_bool::true_()));
 }
 }
 

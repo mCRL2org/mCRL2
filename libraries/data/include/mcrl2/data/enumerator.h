@@ -18,7 +18,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/core/sequence.h"
+#include "mcrl2/utilities/sequence.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/data_specification.h"
@@ -54,9 +54,6 @@ struct data_enumerator_helper
   {
     data_expression d = data::replace_variables(static_cast<const data_expression&>(e_), data::make_sequence_sequence_substitution(e_.variables(), values_));
 
-    // 9/8/2009. Changed line below from std::vector<variable> to atermpp::vector<variable> because it appears that
-    // at times variables can occur only in this vector of variables, causing problems when garbage collected.
-    // Jan Friso Groote.
     atermpp::vector<variable> v;
     for (atermpp::vector<data_expression_with_variables>::const_iterator i = values_.begin(); i != values_.end(); ++i)
     {
@@ -76,7 +73,7 @@ class data_enumerator
   protected:
 
     /// \brief A map that caches the constructors corresponding to sort expressions.
-    typedef std::map<sort_expression, std::vector<function_symbol> > constructor_map;
+    typedef atermpp::map<sort_expression, atermpp::vector<function_symbol> > constructor_map;
 
     /// \brief A data specification.
     const data_specification* m_data;
@@ -93,14 +90,14 @@ class data_enumerator
     /// \brief Returns the constructors with target s.
     /// \param s A sort expression
     /// \return The constructors corresponding to the sort expression.
-    const std::vector<function_symbol>& constructors(sort_expression s) const
+    const atermpp::vector<function_symbol>& constructors(sort_expression s) const
     {
       constructor_map::const_iterator i = m_constructors.find(s);
       if (i != m_constructors.end())
       {
         return i->second;
       }
-      m_constructors[s] = boost::copy_range< std::vector<function_symbol> >(m_data->constructors(s));
+      m_constructors[s] = m_data->constructors(s);
       return m_constructors[s];
     }
 
@@ -134,13 +131,12 @@ class data_enumerator
     /// \return A sequence of expressions that is the result of applying the enumerator to the variable once.
     atermpp::vector<data_expression_with_variables> enumerate(const variable& v) const
     {
-      // std::cerr << "Enumerate " << v << "\n";
       atermpp::vector<data_expression_with_variables> result;
       const std::vector<function_symbol>& c = constructors(v.sort());
 
       if (c.empty())
       {
-        throw mcrl2::runtime_error("Could not enumerate variable " + core::pp(v) + " of sort " + core::pp(v.sort()) + " as there are no constructors.");
+        throw mcrl2::runtime_error("Could not enumerate variable " + data::pp(v) + " of sort " + data::pp(v.sort()) + " as there are no constructors.");
       }
       for (std::vector<function_symbol>::const_iterator i = c.begin(); i != c.end(); ++i)
       {
@@ -148,9 +144,10 @@ class data_enumerator
         {
           atermpp::vector<variable> variables;
 
-          for (boost::iterator_range< sort_expression_list::iterator > j(function_sort(i->sort()).domain()); !j.empty(); j.advance_begin(1))
+          sort_expression_list i_domain(function_sort(i->sort()).domain());
+          for (sort_expression_list::const_iterator j = i_domain.begin(); j != i_domain.end(); ++j)
           {
-            variables.push_back(variable((*m_generator)(), j.front()));
+            variables.push_back(variable((*m_generator)(), *j));
           }
 
           variable_list w(atermpp::convert< variable_list >(variables));
@@ -162,10 +159,6 @@ class data_enumerator
           result.push_back(data_expression_with_variables(data_expression(*i), variable_list()));
         }
       }
-      /* for(atermpp::vector<data_expression_with_variables>::const_iterator i=result.begin();
-               i!=result.end(); ++i)
-      { std::cerr << "Enumerate result " << core::pp(*i) << "\n";
-      } */
       return result;
     }
 
@@ -188,7 +181,7 @@ class data_enumerator
 
       atermpp::vector<data_expression_with_variables> values(enumerated_values.size());
 
-      core::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
+      utilities::foreach_sequence(enumerated_values, values.begin(), detail::data_enumerator_helper(e, values, result));
       return result;
     }
 };

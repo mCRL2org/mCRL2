@@ -20,7 +20,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/build/precompile)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/aterm/include/aterm/)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
 
 file(GLOB TERM_OBJS "*.cpp")
 
@@ -34,6 +34,7 @@ foreach( OBJ ${TERM_OBJS} )
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL  "${OBJ}" )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_data
+     mcrl2_utilities
   )
   # MACRO is defined in CMakeLists.txt in root of source tree
   build_and_run_test_target( ${PREFIX}_${result} )

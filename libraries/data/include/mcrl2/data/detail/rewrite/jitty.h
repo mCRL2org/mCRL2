@@ -13,6 +13,7 @@
 
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/atermpp/map.h"
 
 namespace mcrl2
 {
@@ -24,7 +25,7 @@ namespace detail
 class RewriterJitty: public Rewriter
 {
   public:
-    RewriterJitty(const data_specification& DataSpec);
+    RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules);
     ~RewriterJitty();
 
     RewriteStrategy getStrategy();
@@ -39,22 +40,15 @@ class RewriterJitty: public Rewriter
     bool removeRewriteRule(ATermAppl Rule);
 
   private:
-    unsigned int num_opids;
+    // unsigned int num_opids;
     size_t max_vars;
     bool need_rebuild;
 
     ATermAppl jitty_true;
 
-    ATermTable term2int;
-    ATermAppl* int2term;
-    ATermTable jitty_eqns;
+    atermpp::map< ATermInt, ATermList > jitty_eqns;
     ATermList* jitty_strat;
-
     ATermAppl rewrite_aux(ATermAppl Term);
-
-    ATerm OpId2Int(ATermAppl Term, bool add_opids);
-    ATermAppl toInner(ATermAppl Term, bool add_opids);
-    ATermAppl fromInner(ATermAppl Term);
 };
 }
 }

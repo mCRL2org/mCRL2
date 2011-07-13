@@ -14,12 +14,14 @@
 #include <cstring>
 #include <string>
 #include <cerrno>
-#include "aterm1.h"
+#include "mcrl2/aterm/aterm1.h"
 #include <cassert>
-extern "C" {
+
 #include "svc/svcerrno.h"
 #include "svc/svc.h"
-}
+
+using namespace aterm;
+
 #define EXIT_OK 0
 #define EXIT_NOTOK 1
 #define EXIT_ERR_ARGS -1
@@ -37,8 +39,8 @@ extern "C" {
 #define SVC_EXT  ".svc"
 #define OUTFILE_EXT  ".red"
 
-#define WITH_TAULOOPS ATfalse
-#define DELETE_TAULOOPS ATtrue
+#define WITH_TAULOOPS false
+#define DELETE_TAULOOPS true
 
 /* extern declarations data structures */
 #define INITSIZE 50
@@ -74,7 +76,7 @@ extern BLOK* blok;
 extern BLOCKS blocks;
 extern unsigned int Pi_pt, n_partitions;
 extern SVCint nstate, nlabel; /* number of states, number of labels */
-extern ATbool* mark;
+extern bool* mark;
 extern SVCint* blockref;
 extern SVCstateIndex* s; /* In this resides the partition */
 extern ATerm* label_name;

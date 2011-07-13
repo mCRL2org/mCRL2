@@ -10,9 +10,9 @@
 
 #include <cstring>
 #include "mcrl2/lps/specification.h"
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/detail/lps2lts_lts.h"
 #include "mcrl2/lts/detail/lts_convert.h"
@@ -39,21 +39,21 @@ void lps2lts_lts::open_lts(const char* filename, lps2lts_lts_options& opts)
   switch (lts_opts.outformat)
   {
     case lts_none:
-      gsVerboseMsg("not saving state space.\n");
+      mCRL2log(verbose) << "not saving state space." << std::endl;
       break;
     case lts_aut:
-      gsVerboseMsg("writing state space in AUT format to '%s'.\n",filename);
+      mCRL2log(verbose) << "writing state space in AUT format to '" << filename << "'." << std::endl;
       /* lts_opts.outinfo = false; */
       aut.open(filename);
       if (!aut.is_open())
       {
-        gsErrorMsg("cannot open '%s' for writing\n",filename);
+        mCRL2log(error) << "cannot open '" << filename << "' for writing" << std::endl;
         exit(1);
       }
       break;
     default:
-      gsVerboseMsg("writing state space in %s format to '%s'.\n",
-                   mcrl2::lts::detail::string_for_type(lts_opts.outformat).c_str(),filename);
+      mCRL2log(verbose) << "writing state space in " << mcrl2::lts::detail::string_for_type(lts_opts.outformat)
+                        << " format to '" << filename << "'." << std::endl;
       generic_lts.set_data(lts_opts.spec->data());
       generic_lts.set_process_parameters(lts_opts.spec->process().process_parameters());
       generic_lts.set_action_labels(lts_opts.spec->action_labels());
@@ -75,7 +75,7 @@ void lps2lts_lts::save_initial_state(size_t idx, ATerm state)
       break;
     default:
     {
-      ATbool is_new;
+      bool is_new;
       const size_t t = ATindexedSetPut(aterm2state,state,&is_new);
       if (is_new /* && lts_opts.outinfo */)
       {
@@ -106,12 +106,11 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action,
       }
       aut << "(" << idx_from << ",\"";
       PrintPart_CXX(aut,(ATerm) action,ppDefault);
-      aut << "\"," << idx_to << ")" << endl;
-      aut.flush();
+      aut << "\"," << idx_to << ")\n";
       break;
     default:
     {
-      ATbool is_new;
+      bool is_new;
       const size_t from_state = ATindexedSetPut(aterm2state,from,&is_new);
       if (is_new /* && lts_opts.outinfo */)
       {
@@ -129,7 +128,7 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action,
       const size_t label = ATindexedSetPut(aterm2label,(ATerm) action,&is_new);
       if (is_new)
       {
-        const size_t t = generic_lts.add_action((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == ATtrue);
+        const size_t t = generic_lts.add_action((ATerm) action, ATisEmpty((ATermList) ATgetArgument(action,0)) == true);
         assert(t==label);
         static_cast <void>(t); // Avoid a warning when compiling in non debug mode.
       }
@@ -146,6 +145,7 @@ void lps2lts_lts::close_lts(size_t num_states, size_t num_trans)
     case lts_none:
       break;
     case lts_aut:
+      aut.flush();
       aut.seekp(0);
       aut << "des (0," << num_trans << "," << num_states << ")";
       aut.close();

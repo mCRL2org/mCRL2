@@ -61,7 +61,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 
 target_link_libraries(${PROJECT_NAME}
   ${wxWidgets_LIBRARIES}
-  mcrl2_utilities_command_line
+  mcrl2_utilities
   mcrl2_utilities_wx
   mcrl2_core
 )

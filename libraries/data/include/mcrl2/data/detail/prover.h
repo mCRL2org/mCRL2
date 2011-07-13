@@ -11,8 +11,8 @@
 #ifndef PROVER_H
 #define PROVER_H
 
-#include "aterm2.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/prover/manipulator.h"
@@ -98,37 +98,12 @@ class Prover:protected mcrl2::data::rewriter
 
       switch (a_rewrite_strategy)
       {
-        case(mcrl2::data::rewriter::innermost):
-        {
-          f_info = new AI_Inner(m_rewriter);
-          f_manipulator = new AM_Inner(m_rewriter, f_info);
-          break;
-        }
         case(mcrl2::data::rewriter::jitty):
         {
           f_info = new AI_Jitty(m_rewriter);
           f_manipulator = new AM_Jitty(m_rewriter, f_info);
           break;
         }
-#ifdef MCRL2_INNERC_AVAILABLE
-        case(mcrl2::data::rewriter::innermost_compiling):
-        {
-          throw mcrl2::runtime_error("The compiled innermost rewriter is not supported by the prover (only jitty or inner are supported).");
-          break;
-        }
-#endif
-        case(mcrl2::data::rewriter::innermost_prover):
-        {
-          throw mcrl2::runtime_error("The innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
-          break;
-        }
-#ifdef MCRL2_INNERC_AVAILABLE
-        case(mcrl2::data::rewriter::innermost_compiling_prover):
-        {
-          throw mcrl2::runtime_error("The compiled innermost rewriter with prover is not supported by the prover (only jitty or inner are supported).");
-          break;
-        }
-#endif
 #ifdef MCRL2_JITTYC_AVAILABLE
         case(mcrl2::data::rewriter::jitty_compiling):
         {
@@ -163,7 +138,7 @@ class Prover:protected mcrl2::data::rewriter
       f_manipulator = 0;
       delete f_info;
       f_info = 0;
-      core::gsDebugMsg("Rewriter, ATerm_Info and ATerm_Manipulator have been freed.\n");
+      mCRL2log(debug) << "Rewriter, ATerm_Info and ATerm_Manipulator have been freed." << std::endl;
     }
 
     /// \brief Sets Prover::f_formula to a_formula.
@@ -172,7 +147,7 @@ class Prover:protected mcrl2::data::rewriter
     {
       f_formula = a_formula;
       f_processed = false;
-      core::gsDebugMsg("The formula has been set.\n");
+      mCRL2log(debug) << "The formula has been set." << std::endl;
     }
 
     /// \brief Sets Prover::f_time_limit to the value a_time_limit.

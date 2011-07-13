@@ -43,7 +43,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
     pbes_expression RHS(const state_formulas::state_formula& f, state_type s)
     {
 #ifdef MCRL2_LTS2PBES_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<RHS>" << pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<RHS>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       namespace sf = state_formulas;
@@ -138,7 +138,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 
 #ifdef MCRL2_LTS2PBES_DEBUG
       lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pp(result) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<RHSresult>" << pbes_system::pp(result) << std::flush;
 #endif
       return result;
     }
@@ -148,7 +148,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
     atermpp::vector<pbes_equation> E(const state_formulas::state_formula& f)
     {
 #ifdef MCRL2_LTS2PBES_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<E>" << pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<E>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       namespace sf = state_formulas;
@@ -239,7 +239,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 
       if (!state_formulas::is_monotonous(formula))
       {
-        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + pp(formula) + " is not monotonous!");
+        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
 
       // wrap the formula inside a 'nu' if needed

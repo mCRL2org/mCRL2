@@ -15,14 +15,13 @@
 #include <cmath>
 #include <iterator>
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/find.h"
@@ -40,14 +39,11 @@ namespace lps
 template<typename DataRewriter>
 class binary_algorithm: public lps::detail::lps_algorithm
 {
-    typedef data::classic_enumerator< data::mutable_map_substitution< >, data::rewriter, data::selectors::select_not< false > > enumerator_type;
+    typedef data::classic_enumerator< data::rewriter > enumerator_type;
 
   protected:
     /// Rewriter
     DataRewriter m_rewriter;
-
-    /// Enumerator factory
-    data::enumerator_factory< enumerator_type > m_enumerator_factory;
 
     /// Mapping of finite variables to boolean vectors
     atermpp::map<data::variable, atermpp::vector<data::variable> > m_new_parameters;
@@ -114,13 +110,12 @@ class binary_algorithm: public lps::detail::lps_algorithm
       data::variable_list process_parameters = m_spec.process().process_parameters();
       data::variable_vector new_parameters;
 
-      if (core::gsDebug)
-      {
-        std::cerr << "Original process parameters: " << pp(process_parameters) << std::endl;
-      }
+      mCRL2log(debug) << "Original process parameters: " << data::pp(process_parameters) << std::endl;
 
       data::fresh_variable_generator<> generator;
       generator.add_identifiers(lps::find_identifiers(m_spec));
+      enumerator_type enumerator(m_spec.data(),m_rewriter);
+
       // Transpose all process parameters, and replace those that are finite, and not bool with boolean variables.
       for (data::variable_list::const_iterator i = process_parameters.begin(); i != process_parameters.end(); ++i)
       {
@@ -131,8 +126,9 @@ class binary_algorithm: public lps::detail::lps_algorithm
           //Get all constructors for par
           data::data_expression_vector enumerated_elements; // List to store enumerated elements of a parameter
 
-          // for (enumerator_type j(m_enumerator_factory.make(par)); j != enumerator_type(); ++j)
-          for (enumerator_type j(m_enumerator_factory.make(par)); j != enumerator_type() ; ++j)
+          // for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
+          for (enumerator_type::iterator j=enumerator.begin(push_front(data::variable_list(),par),data::data_expression(data::sort_bool::true_())); 
+                j != enumerator.end() ; ++j)
           {
             enumerated_elements.push_back((*j)(par));
           }
@@ -156,10 +152,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           }
           // n = new_pars.size() && new_pars.size() = ceil(log_2(j)) && new_pars.size() = ceil(log_2(enumerated_elements.size()))
 
-          if (core::gsVerbose)
-          {
-            std::cerr << "Parameter " << pp(par) << ":" << pp(par.sort()) << " has been replaced by " << new_pars.size() << " parameter(s) " << pp(new_pars) << " of sort Bool" << std::endl;
-          }
+          mCRL2log(verbose) << "Parameter " << data::pp(par) << ":" << data::pp(par.sort()) << " has been replaced by " << new_pars.size() << " parameter(s) " << data::pp(new_pars) << " of sort Bool" << std::endl;
 
           //Store new parameters in a hastable
           m_new_parameters[par]=new_pars;
@@ -173,10 +166,8 @@ class binary_algorithm: public lps::detail::lps_algorithm
         }
       }
 
-      if (core::gsDebug)
-      {
-        std::cerr << "New process parameter(s): " << pp(new_parameters) << std::endl;
-      }
+      mCRL2log(debug) << "New process parameter(s): " << data::pp(new_parameters) << std::endl;
+
       m_spec.process().process_parameters() = atermpp::convert<data::variable_list>(new_parameters);
     }
 
@@ -201,10 +192,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           data::variable_vector new_parameters = m_new_parameters[i->lhs()];
           data::data_expression_vector elements = m_enumerated_elements[i->lhs()];
 
-          if (core::gsDebug)
-          {
-            std::cerr << "Found " << new_parameters.size() << " new parameter(s) for parameter " << pp(i->lhs()) << std::endl;
-          }
+          mCRL2log(debug) << "Found " << new_parameters.size() << " new parameter(s) for parameter " << data::pp(i->lhs()) << std::endl;
 
           for (size_t j = 0; j < new_parameters.size(); ++j)
           {
@@ -239,10 +227,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
         }
       }
 
-      if (core::gsDebug)
-      {
-        std::cerr << "Replaced assignment(s) " << pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
-      }
+      mCRL2log(debug) << "Replaced assignment(s) " << data::pp(v) << " with assignment(s) " << data::pp(result) << std::endl;
 
       return atermpp::convert<data::assignment_list>(result);
     }
@@ -275,9 +260,8 @@ class binary_algorithm: public lps::detail::lps_algorithm
     /// \param r a rewriter for data
     binary_algorithm(specification& spec,
                      DataRewriter& r)
-      : lps_algorithm(spec,core::gsVerbose),
-        m_rewriter(r),
-        m_enumerator_factory(spec.data(), m_rewriter)
+      : lps_algorithm(spec),
+        m_rewriter(r)
     {}
 
     /// \brief Apply the algorithm to the specification passed in the
@@ -287,18 +271,12 @@ class binary_algorithm: public lps::detail::lps_algorithm
       replace_enumerated_parameters();
 
       // Initial process
-      if (core::gsDebug)
-      {
-        std::cerr << "Updating process initializer" << std::endl;
-      }
+      mCRL2log(debug) << "Updating process initializer" << std::endl;
 
       m_spec.initial_process() = process_initializer(replace_enumerated_parameters_in_assignments(m_spec.initial_process().assignments()));
 
       // Summands
-      if (core::gsDebug)
-      {
-        std::cerr << "Updating summands" << std::endl;
-      }
+      mCRL2log(debug) << "Updating summands" << std::endl;
 
       std::for_each(m_spec.process().action_summands().begin(),
                     m_spec.process().action_summands().end(),

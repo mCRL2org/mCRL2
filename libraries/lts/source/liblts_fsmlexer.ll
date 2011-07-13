@@ -11,12 +11,10 @@
 #include <string>
 #include <cstdio>
 // #include <aterm2.h>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/lts/lts.h"
 #include "liblts_fsmlexer.h"
 #include "mcrl2/lts/detail/liblts_fsmparser.h"
-
-using namespace mcrl2::core;
 
 //using namespace std;
 

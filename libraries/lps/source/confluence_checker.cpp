@@ -13,8 +13,8 @@
 #include <string>
 #include <algorithm>
 
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/lps/confluence_checker.h"
@@ -279,7 +279,7 @@ void Confluence_Checker::print_counter_example()
   if (f_counter_example)
   {
     const data_expression v_counter_example(f_bdd_prover.get_counter_example());
-    std::cerr << "  Counter example: " << pp(v_counter_example) << "\n";
+    std::cerr << "  Counter example: " << data::pp(v_counter_example) << "\n";
   }
 }
 
@@ -299,7 +299,7 @@ bool Confluence_Checker::check_summands(
 
   if (f_disjointness_checker.disjoint(a_summand_number_1, a_summand_number_2))
   {
-    gsMessage(":");
+    mCRL2log(info) << ":";
   }
   else
   {
@@ -307,33 +307,30 @@ bool Confluence_Checker::check_summands(
     f_bdd_prover.set_formula(v_condition);
     if (f_bdd_prover.is_tautology() == answer_yes)
     {
-      gsMessage("+");
+      mCRL2log(info) << "+";
     }
     else
     {
       if (f_generate_invariants)
       {
         const data_expression v_new_invariant(f_bdd_prover.get_bdd());
-        if (core::gsVerbose)
-        {
-          std::cerr << "\nChecking invariant: " << pp(v_new_invariant) << "\n";
-        }
+        mCRL2log(verbose) << "\nChecking invariant: " << data::pp(v_new_invariant) << "\n";
         if (f_invariant_checker.check_invariant(v_new_invariant))
         {
-          gsVerboseMsg("Invariant holds\n");
-          gsMessage("i");
+          mCRL2log(verbose) << "Invariant holds" << std::endl;
+          mCRL2log(info) << "i";
         }
         else
         {
-          gsVerboseMsg("Invariant doesn't hold\n");
+          mCRL2log(verbose) << "Invariant doesn't hold" << std::endl;
           v_is_confluent = false;
           if (f_check_all)
           {
-            gsMessage("-");
+            mCRL2log(info) << "-";
           }
           else
           {
-            gsMessage("Not confluent with summand %d.", a_summand_number_2);
+            mCRL2log(info) << "Not confluent with summand " << a_summand_number_2 << ".";
           }
           print_counter_example();
           save_dot_file(a_summand_number_1, a_summand_number_2);
@@ -344,11 +341,11 @@ bool Confluence_Checker::check_summands(
         v_is_confluent = false;
         if (f_check_all)
         {
-          gsMessage("-");
+          mCRL2log(info) << "-";
         }
         else
         {
-          gsMessage("Not confluent with summand %d.", a_summand_number_2);
+          mCRL2log(info) << "Not confluent with summand " << a_summand_number_2 << ".";
         }
         print_counter_example();
         save_dot_file(a_summand_number_1, a_summand_number_2);
@@ -382,7 +379,7 @@ action_summand Confluence_Checker::check_confluence_and_mark_summand(
   if (!a_summand_sum_variables.empty())
   {
     v_is_confluent = false;
-    gsMessage("Summand %d is not proven confluent because it contains a sum operator.",a_summand_number);
+    mCRL2log(info) << "Summand " << a_summand_number << " is not proven confluent because it contains a sum operator.";
   }
 
   for (action_summand_vector::const_iterator i=v_summands.begin();
@@ -394,7 +391,7 @@ action_summand Confluence_Checker::check_confluence_and_mark_summand(
     {
       if (f_intermediate[v_summand_number] > a_summand_number)
       {
-        gsMessage(".");
+        mCRL2log(info) << ".";
         v_summand_number++;
       }
       else
@@ -403,11 +400,11 @@ action_summand Confluence_Checker::check_confluence_and_mark_summand(
         {
           if (f_check_all)
           {
-            gsMessage("-");
+            mCRL2log(info) << "-";
           }
           else
           {
-            gsMessage("Not confluent with summand %d.", v_summand_number);
+            mCRL2log(info) << "Not confluent with summand " << v_summand_number << ".";
           }
           v_is_confluent = false;
         }
@@ -446,7 +443,7 @@ action_summand Confluence_Checker::check_confluence_and_mark_summand(
 
   if (v_is_confluent)
   {
-    gsMessage("Confluent with all summands.");
+    mCRL2log(info) << "Confluent with all summands.";
     a_is_marked = true;
     return action_summand(a_summand.summation_variables(),
                           a_summand.condition(),
@@ -513,9 +510,9 @@ specification Confluence_Checker::check_confluence_and_mark(const data_expressio
     {
       if (v_summand.is_tau())
       {
-        gsMessage("tau-summand %2d: ", v_summand_number);
+        mCRL2log(info) << "tau-summand " << v_summand_number << ": ";
         *i = check_confluence_and_mark_summand(a_invariant, v_summand, v_summand_number, v_is_marked);
-        gsMessage("\n");
+        mCRL2log(info) << std::endl;
       }
     }
     v_summand_number++;

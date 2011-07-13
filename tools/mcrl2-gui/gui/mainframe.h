@@ -43,6 +43,8 @@
 
 #include "wx/mimetype.h"
 
+#include "icons/mcrl2-gui.xpm"
+
 // IDs for the controls and the menu commands
 enum
 {
@@ -79,6 +81,8 @@ class MainFrame: public wxFrame
         extention_tool_mapping)
     {
       m_pidLast = 0;
+
+      SetIcon(wxIcon(mcrl2_gui_xpm));
 
 #ifdef __WXMAC__
       // required since ABOUT is not the default id of the about menu

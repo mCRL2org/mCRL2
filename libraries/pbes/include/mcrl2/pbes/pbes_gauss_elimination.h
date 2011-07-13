@@ -123,7 +123,7 @@ pbes_equation_solver<Rewriter> make_pbes_equation_solver(const Rewriter& rewrite
 /// \param p A pbes
 /// \return 0 if the solution is false, 1 if the solution is true, 2 if the solution is unknown
 template <typename Container>
-int gauss_elimination(pbes<Container>& p, size_t log_level = 0)
+int gauss_elimination(pbes<Container>& p)
 {
   typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
@@ -134,7 +134,7 @@ int gauss_elimination(pbes<Container>& p, size_t log_level = 0)
   my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
 
-  gauss_elimination_algorithm<pbes_traits> algorithm(log_level);
+  gauss_elimination_algorithm<pbes_traits> algorithm;
   algorithm.run(p.equations().begin(), p.equations().end(), pbes_equation_solver<my_rewriter>(pbesr));
 
   if (tr::is_false(p.equations().front().formula()))

@@ -12,7 +12,7 @@
 #include <algorithm>
 #include <stdlib.h>
 
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
 #include "mcrl2/data/standard_utility.h"
@@ -58,68 +58,9 @@ static data_expression negate_inequality(const data_expression e)
   }
   else
   {
-    throw mcrl2::runtime_error("Expression " + pp(e) + " is expected to be an inequality over sort Real");
+    throw mcrl2::runtime_error("Expression " + data::pp(e) + " is expected to be an inequality over sort Real");
   }
 }
-
-/// \brief Split constant and variable parts of a data expression
-/// \param e A data expression of the form c1 * x1 + ... + cn * xn + d1 + ... +
-///          dm, where ci and di are constants and xi are variables. Constants
-///          and variables may occur mixed.
-/// \ret The pair (c1 * x1 + ... + cn * xn, d1 + ... + dm)
-/* static
-std::pair<data_expression, data_expression> split_variables_and_constants(const data_expression& e)
-{
-  // gsDebugMsg("Splitting constants and variables in %P\n", (ATermAppl)e);
-  std::pair<data_expression, data_expression> result;
-  if(sort_real::is_plus_application(e))
-  {
-    std::pair<data_expression, data_expression> left = split_variables_and_constants(application(e).left());
-    std::pair<data_expression, data_expression> right = split_variables_and_constants(application(e).right());
-    result = std::make_pair(sort_real::plus(left.first, right.first), sort_real::plus(left.second, right.second));
-  }
-  else if (sort_real::is_minus_application(e))
-  {
-    std::pair<data_expression, data_expression> left = split_variables_and_constants(application(e).left());
-    std::pair<data_expression, data_expression> right = split_variables_and_constants(application(e).right());
-    result = std::make_pair(sort_real::plus(left.first, sort_real::negate(right.first)), sort_real::plus(left.second, sort_real::negate(right.second)));
-  }
-  else if (sort_real::is_negate_application(e))
-  {
-    data_expression argument = *static_cast<const data_application&>(e).arguments().begin();
-    if(sort_real::is_plus_application(argument))
-    {
-      result = split_variables_and_constants(sort_real::plus(sort_real::is_negate_application(application(argument).left), sort_real::is_negate_application(application(argument).right())));
-    }
-    else if(sort_real::is_minus_application(argument))
-    {
-      result = split_variables_and_constants(sort_real::plus(sort_real::is_negate_application(application(argument).left), application(argument).right()));
-    }
-    else if(is_number(argument))
-    {
-      result = std::make_pair(real_zero(), e);
-    }
-    else
-    {
-      result = std::make_pair(e, real_zero());
-    }
-  }
-  else if (mcrl2::data::sort_real::is_creal(e) && !is_number(*static_cast<const data_application&>(e).arguments().begin()))
-  {
-    result = std::make_pair(e, real_zero());
-  }
-  else if (is_multiplies(e) || is_variable(e))
-  {
-    result = std::make_pair(e, real_zero());
-  }
-  else
-  {
-    assert(is_number(e));
-    result = std::make_pair(real_zero(), e);
-  }
-  // gsDebugMsg("split version: left = %P, right = %P\n", (ATermAppl)result.first, (ATermAppl)result.second);
-  return result;
-} */
 
 /// \brief Returns a list of all real variables in l
 /// \param l a list of data variables
@@ -157,7 +98,7 @@ variable_list get_nonreal_variables(const variable_list& l)
 
 static data::function_symbol& negate_function_symbol(const sort_expression s)
 {
-  static data::function_symbol f("negate",data::make_function_sort(s,s));
+  static data::function_symbol f = initialise_static_expression(f,data::function_symbol("negate",data::make_function_sort(s,s)));
   assert(data::make_function_sort(s,s)==f.sort()); // Protect against using f for other sorts than sort comp.
   return f;
 }
@@ -284,7 +225,7 @@ static void split_condition(
   atermpp::vector < data_expression_list > &non_real_conditions,
   const bool negate=false)
 {
-  // std::cerr << "Split condition " << pp(e) << "\n";
+  // std::cerr << "Split condition " << data::pp(e) << "\n";
   real_conditions.clear();
   non_real_conditions.clear();
 
@@ -340,8 +281,8 @@ static void split_condition(
     {
       if (i->sort()!=sort_real::real_())
       {
-        throw  mcrl2::runtime_error("Expression " + pp(e) + " contains variable " +
-                                    pp(*i) + " not of sort Real.");
+        throw  mcrl2::runtime_error("Expression " + data::pp(e) + " contains variable " +
+                                    data::pp(*i) + " not of sort Real.");
       }
     }
     if (negate)
@@ -363,7 +304,7 @@ static void split_condition(
     {
       if (i->sort()==sort_real::real_())
       {
-        throw  mcrl2::runtime_error("Expression " + pp(e) + " contains variable " +                                          pp(*i) + " of sort Real.");
+        throw  mcrl2::runtime_error("Expression " + data::pp(e) + " contains variable " +                                          data::pp(*i) + " of sort Real.");
       }
     }
     if (negate)
@@ -405,8 +346,8 @@ static void normalize_specification(
   for (lps::deprecated::summand_list::const_iterator i = smds.begin(); i != smds.end(); ++i)
   {
     atermpp::vector <data_expression_list> real_conditions, non_real_conditions;
-    // std::cerr << "SUMMANDNORM: " << pp(*i) << "\n";
-    // std::cerr << "Condition in: " << pp(i->condition()) << "\n";
+    // std::cerr << "SUMMANDNORM: " << lps::pp(*i) << "\n";
+    // std::cerr << "Condition in: " << data::pp(i->condition()) << "\n";
     split_condition(i->condition(),real_conditions,non_real_conditions);
 
     for (atermpp::vector <data_expression_list>::const_iterator
@@ -431,10 +372,10 @@ static void normalize_specification(
         // next state. We can apply Fourier-Motzkin to eliminate these variables from
         // this sum operator and the condition.
 
-        // std::cerr << "REALPARS " << pp(i->next_state(real_parameters)) << "\n";
+        // std::cerr << "REALPARS " << data::pp(i->next_state(real_parameters)) << "\n";
         const std::set < variable> s1=data::find_variables(i->next_state(real_parameters));
         // for(std::set < variable>::const_iterator k=s1.begin(); k!=s1.end(); ++k)
-        // { std::cerr << "VAR " << pp(*k) << "\n";
+        // { std::cerr << "VAR " << data::pp(*k) << "\n";
 //
 //
         // }
@@ -446,7 +387,7 @@ static void normalize_specification(
              k!=original_real_sum_variables.end(); ++k)
         {
 
-          // std::cerr << "Treat " << pp(*k) << "\n";
+          // std::cerr << "Treat " << data::pp(*k) << "\n";
           if (s1.count(*k)==0)
           {
             // The variable does not occur in the parameters. We can eliminate it using Fourier-Motzkin
@@ -523,7 +464,7 @@ void determine_real_inequalities(
   vector < linear_inequality > &inequalities,
   const rewriter& r)
 {
-  // std::cerr << "Real inequalities in" << pp(e) << "\n";
+  // std::cerr << "Real inequalities in" << data::pp(e) << "\n";
   if (sort_bool::is_and_application(e))
   {
     determine_real_inequalities(application(e).left(), inequalities,r);
@@ -569,11 +510,8 @@ static void add_postponed_inequalities_to_context(
       {
         variable xi(variable_generator("xi"), c.sort());
         context.push_back(real_representing_variable(xi,inequalities_to_add_lhs[i], inequalities_to_add_rhs[i]));
-        if (core::gsVerbose)
-        {
-          std::cerr << "Introduced variable " <<  pp(xi) << " for <" << pp(inequalities_to_add_lhs[i]) <<
-                    "," <<  pp(inequalities_to_add_rhs[i]) << ">\n";
-        }
+        mCRL2log(verbose) << "Introduced variable " <<  data::pp(xi) << " for <" << data::pp(inequalities_to_add_lhs[i]) <<
+                    "," <<  data::pp(inequalities_to_add_rhs[i]) << ">\n";
 
         for (std::vector < summand_information >::iterator j = summand_info.begin();
              j != summand_info.end(); ++j)
@@ -638,7 +576,7 @@ static void add_inequalities_to_context_postponed(
           }
           else
           {
-            // std::cerr << "Reserved to be added <" << pp(left) << "," << pp(right) << "\n";
+            // std::cerr << "Reserved to be added <" << data::pp(left) << "," << data::pp(right) << "\n";
             inequalities_to_add_lhs_size.push_back(i->lhs().size()); // store the number of variables at the lhs.
             inequalities_to_add_lhs.push_back(left);
             inequalities_to_add_rhs.push_back(right);
@@ -673,7 +611,7 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
                          const comp_struct& cs,
                          const bool is_may_summand=false)
 {
-  // std::cerr << "SUMMAND " << pp(summand_info.get_summand()) << "\nCOND " << pp(new_condition) << "\n";
+  // std::cerr << "SUMMAND " << lps::pp(summand_info.get_summand()) << "\nCOND " << data::pp(new_condition) << "\n";
   static atermpp::vector < sort_expression_list > protect_against_garbage_collect;
   static std::map < std::pair < std::string, sort_expression_list >, std::string> action_label_map;
   // Used to recall which may actions labels have been
@@ -690,12 +628,12 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
        data::replace_free_variables(c_complete->get_lowerbound(),summand_info.get_summand_real_nextstate_map());
     data_expression substituted_upperbound=
        data::replace_free_variables(c_complete->get_upperbound(),summand_info.get_summand_real_nextstate_map()); 
-    // std::cerr << "Lower Upper " << pp(substituted_lowerbound) << "  " << pp(substituted_upperbound) << "\n";
+    // std::cerr << "Lower Upper " << data::pp(substituted_lowerbound) << "  " << data::pp(substituted_upperbound) << "\n";
     linear_inequality e(substituted_lowerbound,substituted_upperbound,linear_inequality::less,r);
     // std::cerr << "INequality: " << string(e) << "\n";
     data_expression t,u;
     const bool negate=e.typical_pair(t,u,r);  // XXXXXXXXX       This can negate inequality, causing trouble.
-    // std::cerr << "Typical pair " << pp(t) << "  " << pp(u) << "   " << negate << "\n";
+    // std::cerr << "Typical pair " << data::pp(t) << "  " << data::pp(u) << "   " << negate << "\n";
 
     bool success(false);
     /* First check whether the pair < t,u >
@@ -787,7 +725,7 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
   lps::deprecated::summand result = lps::deprecated::summand(get_nonreal_variables(s.summation_variables()),
                            new_condition, s.is_delta(), new_actions, nextstate);
 
-  // gsDebugMsg("Generated summand %P\n", (ATermAppl)result);
+  // mCRL2log(debug) << "Generated summand " << core::pp(result) << std::endl;
 
   return result;
 }
@@ -905,12 +843,12 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
     new_inequalities_lhss.clear();
     new_inequalities_rhss.clear();
     iteration++;
-    gsVerboseMsg("Iteration %d, starting with %d context variables\n", iteration, context.size());
+    mCRL2log(verbose) << "Iteration " <<  iteration << ", starting with " <<  context.size() << " context variables" << std::endl;
 
     for (std::vector < summand_information >::iterator i = summand_info.begin();
          i != summand_info.end(); ++i)
     {
-      // std::cerr << "SUMMAND_IN " << pp(i->get_summand()) << "\n" ;
+      // std::cerr << "SUMMAND_IN " << lps::pp(i->get_summand()) << "\n" ;
 
       // First calculate the newly introduced variables xi for which the next_state value is not yet known.
       // get , by only looking at variables that
@@ -925,7 +863,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
 
         variable_list sumvars= i->get_real_summation_variables();
 
-        // std::cerr << "SUMVARS " << pp(sumvars) << "\n" ;
+        // std::cerr << "SUMVARS " << data::pp(sumvars) << "\n" ;
         std::vector < linear_inequality > condition2;
         remove_redundant_inequalities(*nextstate_combination,condition2,r);
         // std::cerr << "CONDITION IN" << pp_vector(*nextstate_combination) << "\n" ;
@@ -971,20 +909,20 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   }
   while ((iteration < max_iterations) && !new_inequalities_sizes.empty());
 
-  gsVerboseMsg("Generated the following variables in %d iterations:\n", iteration);
+  mCRL2log(verbose) << "Generated the following variables in " <<  iteration << " iterations:" << std::endl;
   for (context_type::iterator i = context.begin(); i != context.end(); ++i)
   {
-    gsVerboseMsg("< %P, %P > %P\n", (ATermAppl)i->get_lowerbound(),
-                 (ATermAppl)i->get_upperbound(), (ATermAppl)i->get_variable());
+    mCRL2log(verbose) << "< " << core::pp(atermpp::aterm_appl(i->get_lowerbound())) << ", " << core::pp(atermpp::aterm_appl(i->get_upperbound()))
+                      << " > " << core::pp(atermpp::aterm_appl(i->get_variable())) << std::endl;
   }
 
   if (!new_inequalities_sizes.empty())
   {
-    gsVerboseMsg("A may-bisimilar lps is being generated, which is most likely not strongly bisimilar.\n");
+    mCRL2log(verbose) << "A may-bisimilar lps is being generated, which is most likely not strongly bisimilar." << std::endl;
   }
   else
   {
-    gsVerboseMsg("A strongly bisimilar lps is being generated.\n");
+    mCRL2log(verbose) << "A strongly bisimilar lps is being generated." << std::endl;
   }
 
 
@@ -995,7 +933,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   for (std::vector < summand_information >::iterator i = summand_info.begin();
        i != summand_info.end(); ++i)
   {
-    // std::cerr << "SUMMAND_IN__ " << pp(i->get_summand()) << "\n";
+    // std::cerr << "SUMMAND_IN__ " << lps::pp(i->get_summand()) << "\n";
 
     // Construct the real time condition for summand in terms of xi variables.
 
@@ -1085,7 +1023,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
                                      variable_generator,
                                      c,
                                      true);
-        // std::cerr << "MAY SUMMAND_OUT: " << pp(s) << "\n";
+        // std::cerr << "MAY SUMMAND_OUT: " << lps::pp(s) << "\n";
         summands = push_front(summands, s);
       }
       else
@@ -1100,7 +1038,7 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
                                      variable_generator,
                                      c,
                                      false);
-        // std::cerr << "MUST SUMMAND_OUT: " << pp(s) << "\n";
+        // std::cerr << "MUST SUMMAND_OUT: " << lps::pp(s) << "\n";
         summands = push_front(summands, s);
       }
     }

@@ -19,7 +19,6 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/data/variable.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/summand.h"
 #include "mcrl2/lps/process_initializer.h"
 
@@ -89,7 +88,18 @@ class linear_process
   public:
     /// \brief Constructor.
     linear_process()
-    {}
+    {
+      m_process_parameters.protect();
+    }
+
+    /// \brief Copy constructor.
+    linear_process(const linear_process &other) :
+      m_process_parameters(other.m_process_parameters),
+      m_deadlock_summands(other.m_deadlock_summands),
+      m_action_summands(other.m_action_summands)
+    {
+      m_process_parameters.protect();
+    }
 
     /// \brief Constructor.
     linear_process(const data::variable_list& process_parameters,
@@ -100,7 +110,9 @@ class linear_process
       m_process_parameters(process_parameters),
       m_deadlock_summands(deadlock_summands),
       m_action_summands(action_summands)
-    { }
+    { 
+      m_process_parameters.protect();
+    }
 
     /// \brief Constructor.
     /// \param lps A term
@@ -111,7 +123,14 @@ class linear_process
       // unpack LPS(.,.,.) term
       atermpp::aterm_appl::iterator i = lps.begin();
       m_process_parameters = *i++;
+      m_process_parameters.protect();
       set_summands(*i);
+    }
+
+    /// \brief Destructor
+    ~linear_process()
+    {
+      m_process_parameters.unprotect();
     }
 
     /// \brief Returns the number of LPS summands.
@@ -194,13 +213,6 @@ atermpp::aterm_appl linear_process_to_aterm(const linear_process& p)
            p.process_parameters(),
            p.summands()
          );
-}
-
-/// \brief Pretty print the linear process
-inline
-std::string pp(const linear_process& p)
-{
-  return core::pp(linear_process_to_aterm(p));
 }
 
 namespace deprecated

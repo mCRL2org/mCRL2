@@ -13,14 +13,13 @@
 
 #include <string>
 #include "ltsmin.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 
 int traceLevel = 0, optimal = 0, classes = 0, add_state_parameter = 0;
 
@@ -171,7 +170,7 @@ int main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  gsWarningMsg("the use of this tool is deprecated; use ltsconvert instead\n");
+  mCRL2log(warning) << "the use of this tool is deprecated; use ltsconvert instead" << std::endl;
 
   return ltsmin_tool().execute(argc,argv);
 }

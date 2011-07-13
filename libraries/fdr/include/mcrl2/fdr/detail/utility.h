@@ -15,7 +15,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/aterm_appl.h"
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include <cassert>
 
 namespace mcrl2
@@ -32,7 +32,7 @@ namespace detail
 inline
 ATermAppl gsString2ATermAppl(const char* s)
 {
-  return ATmakeAppl0(ATmakeAFun(s, 0, ATtrue));
+  return ATmakeAppl0(ATmakeAFun(s, 0, true));
 }
 
 // checks

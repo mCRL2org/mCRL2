@@ -12,12 +12,13 @@
 #include <sstream>
 #include <string>
 #include <boost/test/minimal.hpp>
-#include "mcrl2/core/garbage_collection.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/bes/boolean_equation_system.h"
-#include "mcrl2/bes/bes_parse.h"
-#include "mcrl2/bes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/parse.h"
+#include "mcrl2/bes/io.h"
+#include "mcrl2/bes/print.h"
+#include "mcrl2/pbes/pbes.h"
 
 using namespace mcrl2;
 using namespace mcrl2::bes;
@@ -36,10 +37,10 @@ void test_parse_bes()
   boolean_equation_system<> b;
   std::stringstream from(bes1);
   from >> b;
-  std::cout << "b = \n" << pp(b) << std::endl;
+  std::cout << "b = \n" << bes::pp(b) << std::endl;
 
   // check if the pretty printed BES can be parsed again
-  std::string bes2 = pp(b);
+  std::string bes2 = bes::pp(b);
   std::stringstream from2(bes1);
   from2 >> b;
 

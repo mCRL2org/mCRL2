@@ -45,11 +45,12 @@
 #include "mcrl2/data/data_equation.h" // for debug std::cerr
 
 //Boolean equation systems
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/utility.h"
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
-#include "mcrl2/pbes/pbesrewr.h"
+#include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -218,13 +219,10 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
       using namespace pbes_system;
       using namespace utilities;
 
-      if (core::gsVerbose)
-      {
-        std::cerr << "pbes2bool parameters:" << std::endl;
-        std::cerr << "  input file:         " << m_input_filename << std::endl;
-        std::cerr << "  data rewriter:      " << m_rewrite_strategy << std::endl;
-        std::cerr << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
-      }
+      mCRL2log(verbose) << "pbes2bool parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  data rewriter:      " << m_rewrite_strategy << std::endl;
+      mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
@@ -245,13 +243,32 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
           throw(e);
         }
       }
-      p.normalize();
+      pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
 
-      data::rewriter datar= (opt_data_elm) ?
-                            data::rewriter(p.data(), mcrl2::data::used_data_equation_selector(p.data(), pbes_system::find_function_symbols(p), p.global_variables()), rewrite_strategy()) :
-                            data::rewriter(p.data(), rewrite_strategy());
+      data::rewriter datar;
+      if (opt_data_elm) 
+      {  
+        // Create a rewriter with only the necessary data equations.
+        using namespace mcrl2::data;
+        std::set < function_symbol > eqn_symbol_set=pbes_system::find_function_symbols(p.equations());
+        std::set < function_symbol > init_symbol_set=pbes_system::find_function_symbols(p.initial_state());
+        std::set < function_symbol > function_symbol_set;
+        set_union(eqn_symbol_set.begin(),eqn_symbol_set.end(),
+                  init_symbol_set.begin(),init_symbol_set.end(),
+                  inserter(function_symbol_set,function_symbol_set.begin()));
+        datar=data::rewriter(p.data(), 
+                             mcrl2::data::used_data_equation_selector( p.data(), function_symbol_set, p.global_variables()), 
+                             rewrite_strategy());
+      }
+      else
+      {
+        // Create a rewriter with all data equations. This is safer, but increases the time and memory to 
+        // compile the rewrite system.
+        data::rewriter(p.data(), rewrite_strategy());
+      }
+  
 
       timer().start("instantiation");
       ::bes::boolean_equation_system bes_equations=
@@ -273,7 +290,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
         case simplify:
         {
           simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
-          pbesrewr(p,pbesr); // Simplify p such that it does not have to be done
+          pbes_rewrite(p,pbesr); // Simplify p such that it does not have to be done
                              // repeatedly.
           bes_equations=::bes::boolean_equation_system(
                             p,
@@ -293,7 +310,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
                                                              data::data_enumerator<> >
                           pbesr(datarv, datae, enumerate_infinite_sorts);
-          pbesrewr(p,pbesr);  // Simplify p such that this does not need to be done
+          pbes_rewrite(p,pbesr);  // Simplify p such that this does not need to be done
                               // repeatedly.
           bes_equations=::bes::boolean_equation_system(
                             p,
@@ -313,7 +330,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
           enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables,
                                                              data::data_enumerator<> >
                           pbesr1(datarv, datae, enumerate_infinite_sorts1);
-          pbesrewr(p,pbesr1);  // Simplify p such that this does not need to be done
+          pbes_rewrite(p,pbesr1);  // Simplify p such that this does not need to be done
                                // repeatedly, without expanding quantifiers over infinite
                                // domains.
           const bool enumerate_infinite_sorts2 = true;
@@ -345,8 +362,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
                             opt_construct_counter_example);
       timer().finish("solving");
 
-      core::gsMessage("The solution for the initial variable of the pbes is %s\n",
-                      (result ? "true" : "false"));
+      mCRL2log(info) << "The solution for the initial variable of the pbes is " <<
+                      (result ? "true" : "false") << std::endl;
 
       if (opt_construct_counter_example)
       {

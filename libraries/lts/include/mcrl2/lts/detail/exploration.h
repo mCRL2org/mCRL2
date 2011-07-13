@@ -17,12 +17,12 @@
 #include "boost/bind.hpp"
 #include "boost/function.hpp"
 
-#include "aterm2.h"
+#include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/lts/detail/lps2lts_lts.h"
 #include "mcrl2/lts/detail/bithashtable.h"
 #include "mcrl2/lts/detail/queue.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 
 #include "workarounds.h"
 
@@ -107,7 +107,6 @@ struct lts_generation_options
   size_t todo_max;
   size_t initial_table_size;
   std::auto_ptr< mcrl2::data::rewriter > m_rewriter;
-  std::auto_ptr< mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator<> > > m_enumerator_factory;
   mcrl2::lps::specification specification;
   std::string trace_prefix;
   std::string lts;
@@ -135,6 +134,7 @@ class lps2lts_algorithm
     size_t num_found_same;
     size_t current_state;
     size_t initial_state;
+    bool must_abort;
 
     atermpp::map<atermpp::aterm,atermpp::aterm> backpointers;
     bit_hash_table bithash_table;
@@ -152,9 +152,20 @@ class lps2lts_algorithm
       premature_termination_handler_called(false),
       finalised(false),
       completely_generated(false),
+      nstate(NULL),
       states(0,0), //Table of size 0 initially
+      num_states(0),
+      trans(0),
+      level(0),
+      num_found_same(0),
+      current_state(0),
+      initial_state(0),
+      must_abort(false),
       bithash_table(),
-      lg_error(false)
+      tracecnt(0),
+      lg_error(false),
+      apply_confluence_reduction(false),
+      repr_nsgen(NULL)
     {
     }
 
@@ -170,16 +181,14 @@ class lps2lts_algorithm
     bool generate_lts();
     bool finalise_lts_generation();
 
-    void premature_termination_handler()
+    void abort()
     {
-      if (!premature_termination_handler_called)
+      // Stops the exploration algorithm if it is running by making sure
+      // not a single state can be generated anymore. 
+      if (!must_abort)
       {
-        premature_termination_handler_called = true;
+        must_abort = true;
         std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
-        if (initialised && !finalised)
-        {
-          finalise_lts_generation();
-        }
       }
     }
 

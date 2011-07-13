@@ -13,11 +13,15 @@
 #define MCRL2_UTILITIES_TEST_UTILITIES_H
 
 #include "mcrl2/core/garbage_collection.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
 {
+
 namespace utilities
 {
+
 /// \brief Garbage collect after each case.
 /// Use with BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 struct collect_after_test_case
@@ -27,7 +31,32 @@ struct collect_after_test_case
     core::garbage_collect();
   }
 };
+
+/// \brief Static initialisation of rewrite strategies used for testing.
+static inline
+std::vector<data::basic_rewriter<data::data_expression>::strategy> initialise_test_rewrite_strategies()
+{
+  std::vector<data::basic_rewriter<data::data_expression>::strategy> result;
+  result.push_back(data::basic_rewriter<data::data_expression>::jitty);
+#ifdef MCRL2_TEST_COMPILERS
+#ifdef MCRL2_JITTYC_AVAILABLE
+  result.push_back(data::basic_rewriter<data::data_expression>::jitty_compiling);
+#endif // MCRL2_JITTYC_AVAILABLE
+#endif // MCRL2_TEST_COMPILERS
+
+  return result;
 }
+
+/// \brief Rewrite strategies that should be tested.
+static inline
+const std::vector<data::basic_rewriter<data::data_expression>::strategy>& get_test_rewrite_strategies()
+{
+  static std::vector<data::basic_rewriter<data::data_expression>::strategy> rewrite_strategies = initialise_test_rewrite_strategies();
+  return rewrite_strategies;
+}
+
+}
+
 }
 
 #endif //MCRL2_UTILITIES_TEST_UTILITIES_H

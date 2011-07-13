@@ -18,16 +18,16 @@
 #include <stdexcept>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/set.h"
+#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/core/detail/join.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/core/detail/optimized_logic_operators.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/bool.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"
+#include "mcrl2/utilities/detail/join.h"
+#include "mcrl2/utilities/detail/optimized_logic_operators.h"
 
 namespace mcrl2
 {
@@ -35,9 +35,7 @@ namespace mcrl2
 namespace pbes_system
 {
 
-// prototype
-inline
-bool is_bes(atermpp::aterm_appl t);
+using namespace core::detail::precedences;
 
 //--- start generated classes ---//
 /// \brief A pbes expression
@@ -56,27 +54,6 @@ class pbes_expression: public atermpp::aterm_appl
     {
       assert(core::detail::check_rule_PBExpr(m_term));
     }
-//--- start user section pbes_expression ---//
-    /// \brief Applies a low level substitution function to this term and returns the result.
-    /// \param f A
-    /// The function <tt>f</tt> must supply the method <tt>aterm operator()(aterm)</tt>.
-    /// This function is applied to all <tt>aterm</tt> noded appearing in this term.
-    /// \deprecated
-    /// \return The substitution result.
-    template <typename Substitution>
-    pbes_expression substitute(Substitution f) const
-    {
-      throw std::runtime_error("pbes_expression::substitute(Substitution) is a deprecated interface!");
-      return pbes_expression(f(*this));
-    }
-
-    /// \brief Returns true if the expression is a boolean expression.
-    /// \return True if the expression is a boolean expression.
-    bool is_bes() const
-    {
-      return mcrl2::pbes_system::is_bes(*this);
-    }
-//--- end user section pbes_expression ---//
 };
 
 /// \brief list of pbes_expressions
@@ -520,6 +497,61 @@ inline bool is_propositional_variable_instantiation(const pbes_expression& t)
   return core::detail::gsIsPropVarInst(t);
 }
 
+// From the documentation:
+// The "!" operator has the highest priority, followed by "&&" and "||", followed by "=>", followed by "forall" and "exists".
+// The infix operators "&&", "||" and "=>" associate to the right.
+/// \brief Returns the precedence of pbes expressions
+inline
+int precedence(const pbes_expression& x)
+{
+  if (is_forall(x) || is_exists(x))
+  {
+    return 0;
+  }
+  else if (is_imp(x)) 
+  {
+    return 1;
+  }
+  else if (is_and(x) || is_or(x)) 
+  {
+    return 2;
+  }
+  else if (is_not(x)) 
+  {
+    return 3;
+  }
+  return core::detail::precedences::max_precedence;
+}
+
+// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
+inline int precedence(const forall & x)  { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const exists & x)  { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const imp& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const and_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const or_& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const not_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
+
+/// \brief Returns true if the operations have the same precedence, but are different
+template <typename T1, typename T2>
+bool is_same_different_precedence(const T1&, const T2&)
+{
+  return false;
+}
+
+/// \brief Returns true if the operations have the same precedence, but are different
+inline
+bool is_same_different_precedence(const and_&, const pbes_expression& x)
+{
+  return is_or(x);
+}
+
+/// \brief Returns true if the operations have the same precedence, but are different
+inline
+bool is_same_different_precedence(const or_&, const pbes_expression& x)
+{
+  return is_and(x);
+}
+
 /// \brief The namespace for accessor functions on pbes expressions.
 namespace accessors
 {
@@ -698,7 +730,7 @@ pbes_expression exists(data::variable_list l, pbes_expression p)
 template <typename FwdIt>
 pbes_expression join_or(FwdIt first, FwdIt last)
 {
-  return core::detail::join(first, last, or_, false_());
+  return utilities::detail::join(first, last, or_, false_());
 }
 
 /// \brief Returns and applied to the sequence of pbes expressions [first, last)
@@ -708,7 +740,7 @@ pbes_expression join_or(FwdIt first, FwdIt last)
 template <typename FwdIt>
 pbes_expression join_and(FwdIt first, FwdIt last)
 {
-  return core::detail::join(first, last, and_, true_());
+  return utilities::detail::join(first, last, and_, true_());
 }
 
 /// \brief Splits a disjunction into a sequence of operands
@@ -722,7 +754,7 @@ atermpp::set<pbes_expression> split_or(const pbes_expression& expr)
 {
   using namespace accessors;
   atermpp::set<pbes_expression> result;
-  core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
+  utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_or, left, right);
   return result;
 }
 
@@ -737,7 +769,7 @@ atermpp::set<pbes_expression> split_and(const pbes_expression& expr)
 {
   using namespace accessors;
   atermpp::set<pbes_expression> result;
-  core::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, left, right);
+  utilities::detail::split(expr, std::insert_iterator<atermpp::set<pbes_expression> >(result, result.begin()), is_and, left, right);
   return result;
 }
 } // namespace pbes_expr
@@ -755,7 +787,7 @@ using pbes_expr::split_or;
 inline
 pbes_expression not_(pbes_expression p)
 {
-  return core::detail::optimized_not(p, pbes_expr::not_, true_(), is_true, false_(), is_false);
+  return utilities::detail::optimized_not(p, pbes_expr::not_, true_(), is_true, false_(), is_false);
 }
 
 /// \brief Make a conjunction
@@ -765,7 +797,7 @@ pbes_expression not_(pbes_expression p)
 inline
 pbes_expression and_(pbes_expression p, pbes_expression q)
 {
-  return core::detail::optimized_and(p, q, pbes_expr::and_, true_(), is_true, false_(), is_false);
+  return utilities::detail::optimized_and(p, q, pbes_expr::and_, true_(), is_true, false_(), is_false);
 }
 
 /// \brief Make a disjunction
@@ -775,7 +807,7 @@ pbes_expression and_(pbes_expression p, pbes_expression q)
 inline
 pbes_expression or_(pbes_expression p, pbes_expression q)
 {
-  return core::detail::optimized_or(p, q, pbes_expr::or_, true_(), is_true, false_(), is_false);
+  return utilities::detail::optimized_or(p, q, pbes_expr::or_, true_(), is_true, false_(), is_false);
 }
 
 /// \brief Make an implication
@@ -785,7 +817,7 @@ pbes_expression or_(pbes_expression p, pbes_expression q)
 inline
 pbes_expression imp(pbes_expression p, pbes_expression q)
 {
-  return core::detail::optimized_imp(p, q, pbes_expr::imp, not_, true_(), is_true, false_(), is_false);
+  return utilities::detail::optimized_imp(p, q, pbes_expr::imp, not_, true_(), is_true, false_(), is_false);
 }
 
 /// \brief Returns or applied to the sequence of pbes expressions [first, last)
@@ -795,7 +827,7 @@ pbes_expression imp(pbes_expression p, pbes_expression q)
 template <typename FwdIt>
 inline pbes_expression join_or(FwdIt first, FwdIt last)
 {
-  return core::detail::join(first, last, or_, false_());
+  return utilities::detail::join(first, last, or_, false_());
 }
 
 /// \brief Returns and applied to the sequence of pbes expressions [first, last)
@@ -805,7 +837,7 @@ inline pbes_expression join_or(FwdIt first, FwdIt last)
 template <typename FwdIt>
 inline pbes_expression join_and(FwdIt first, FwdIt last)
 {
-  return core::detail::join(first, last, and_, true_());
+  return utilities::detail::join(first, last, and_, true_());
 }
 
 /// \brief Make a universal quantification
@@ -857,51 +889,6 @@ pbes_expression exists(data::variable_list l, pbes_expression p)
 }
 
 } // namespace pbes_expr_optimized
-
-/// \brief Returns true if the pbes expression t is a boolean expression
-/// \param t A term
-/// \return True if the pbes expression t is a boolean expression
-inline
-bool is_bes(atermpp::aterm_appl t)
-{
-  using namespace pbes_expr;
-  using namespace accessors;
-
-  if (is_pbes_and(t))
-  {
-    return is_bes(left(t)) && is_bes(right(t));
-  }
-  else if (is_pbes_or(t))
-  {
-    return is_bes(left(t)) && is_bes(right(t));
-  }
-  else if (is_pbes_imp(t))
-  {
-    return is_bes(left(t)) && is_bes(right(t));
-  }
-  else if (is_pbes_forall(t))
-  {
-    return false;
-  }
-  else if (is_pbes_exists(t))
-  {
-    return false;
-  }
-  else if (is_propositional_variable_instantiation(t))
-  {
-    return propositional_variable_instantiation(t).parameters().empty();
-  }
-  else if (is_true(t))
-  {
-    return true;
-  }
-  else if (is_false(t))
-  {
-    return true;
-  }
-
-  return false;
-}
 
 } // namespace pbes_system
 

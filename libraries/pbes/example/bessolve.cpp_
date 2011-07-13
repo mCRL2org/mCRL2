@@ -69,7 +69,7 @@ int main(int argc, char* argv[])
       return 1;
     }
 
-    if (mcrl2::core::gsVerbose)
+    if (mCRL2logEnabled(verbose))
     {
       std::cout << "bessolve parameters:" << std::endl;
       std::cout << "  input  file      : " << infile << std::endl;

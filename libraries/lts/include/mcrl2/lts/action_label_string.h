@@ -23,7 +23,7 @@
 #include <vector>
 #include <iterator>
 #include "mcrl2/exception.h"
-#include "mcrl2/core/text_utility.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
@@ -58,14 +58,14 @@ class action_label_string: public std::string
       for (std::vector<std::string>::const_iterator i = string_vector.begin(); i != string_vector.end(); ++i)
       {
         // Actions that have parameters have priority over actions without while renaming.
-        std::string ns(core::regex_replace(*i + "\\([^\\)]*\\)" , "tau" , *this));
-        ns = core::regex_replace(*i , "tau" , ns) ;
+        std::string ns(utilities::regex_replace(*i + "\\([^\\)]*\\)" , "tau" , *this));
+        ns = utilities::regex_replace(*i , "tau" , ns) ;
         assign(ns);
       }
       // Remove all "tau|", since this indicates that we are dealing with a multi-action
-      std::string ns(core::regex_replace("tau\\|" , "" , *this));
+      std::string ns(utilities::regex_replace("tau\\|" , "" , *this));
       // Remove "|tau" from end of multi-action one still exists
-      ns =  core::regex_replace("\\|tau$" , "" , ns) ;
+      ns =  utilities::regex_replace("\\|tau$" , "" , ns) ;
       assign(ns);
       return ns=="tau";
     }

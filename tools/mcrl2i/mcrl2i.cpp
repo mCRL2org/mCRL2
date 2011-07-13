@@ -30,7 +30,6 @@
 
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/classic_enumerator.h"
-#include "mcrl2/data/enumerator_factory.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/core/detail/aterm_io.h"
 #include "mcrl2/data/data_specification.h"
@@ -47,7 +46,6 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
-using mcrl2::core::gsDebug;
 using namespace mcrl2::utilities::tools;
 using mcrl2::utilities::tools::rewriter_tool;
 
@@ -158,6 +156,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
     /// Runs the algorithm.
     bool run()
     {
+      atermpp::set < variable > context_variables;
       data_specification spec;
       if (!input_filename().empty())
       {
@@ -167,6 +166,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           mcrl2::lps::specification p;
           p.load(input_filename());
           spec=p.data();
+          context_variables = p.global_variables();
         }
         catch (mcrl2::runtime_error e)
         {
@@ -176,12 +176,14 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             mcrl2::pbes_system::pbes <> p;
             p.load(input_filename());
             spec=p.data();
+            context_variables = p.global_variables();
           }
           catch (mcrl2::runtime_error& e)
           {
             std::cout << "Could not read " << input_filename() << " as an LPS or a PBES. " << e.what() <<
                       "\nUsing standard data types only;\n";
             spec=data_specification();
+            context_variables.clear();
           }
         }
       }
@@ -193,10 +195,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
       std::cout << "mCRL2 interpreter (type h for help)" << std::endl;
 
       rewriter rewr(spec,m_rewrite_strategy);
-      enumerator_factory < classic_enumerator< mutable_map_substitution< >,
-                                     rewriter,
-                                     selectors::select_not< false > > > e(spec,rewr);
-      atermpp::set < variable > context_variables;
+
       atermpp::map < variable, data_expression > assignments;
 
       bool done = false;
@@ -250,7 +249,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"t ") || match_and_remove(s,"type "))
           {
             data_expression term = parse_term(s,spec,context_variables);
-            cout << pp(term.sort()) << endl;
+            cout << data::pp(term.sort()) << endl;
           }
           else if (match_and_remove(s,"v ") || match_and_remove(s,"var "))
           {
@@ -259,7 +258,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
           else if (match_and_remove(s,"e ") || match_and_remove(s,"eval "))
           {
             data_expression term = parse_term(s,spec,context_variables);
-            cout << pp(rewr(term,make_map_substitution(assignments))) << "\n";
+            cout << data::pp(rewr(term,make_map_substitution(assignments))) << "\n";
           }
           else if (match_and_remove(s,"s ") || match_and_remove(s,"solve "))
           {
@@ -277,24 +276,23 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             }
 
             term=rewr(term);
-            for (classic_enumerator< mutable_map_substitution< >,
-                                     rewriter,
-                                     selectors::select_not< false > > 
-                 i=e.make(atermpp::convert < std::set <variable > >(vars),rewr,term);
-                 i != classic_enumerator< mutable_map_substitution< >,
-                                          rewriter,
-                                          selectors::select_not< false > >() ; ++i)
+            typedef classic_enumerator< rewriter > enumerator_type;
+            enumerator_type enumerator(spec,rewr);
+
+            for (enumerator_type::iterator
+                      i=enumerator.begin(vars,term,10000); // Stop when more than 10000 internal variables are required
+                      i != enumerator.end() ; ++i)
             {
               cout << "[";
               for (atermpp::set< variable >::const_iterator v=vars.begin(); v!=vars.end() ; ++v)
               {
-                cout << pp(*v) << " := " << pp((*i)(*v));
+                cout << data::pp(*v) << " := " << data::pp((*i)(*v));
                 if (boost::next(v)!=vars.end())
                 {
                   cout << ", ";
                 }
               }
-              cout << "] evaluates to "<< pp(rewr(term,*i)) << "\n";
+              cout << "] evaluates to "<< data::pp(rewr(term,*i)) << "\n";
             }
           }
           else if (match_and_remove(s,"a ") || match_and_remove(s,"assign "))
@@ -314,7 +312,7 @@ class mcrl2i_tool: public rewriter_tool<input_tool>
             data_expression term = parse_term(s,spec,context_variables);
             variable var(varname,term.sort());
             term = rewr(term,make_map_substitution(assignments));
-            cout << pp(term) << "\n";
+            cout << data::pp(term) << "\n";
             assignments[var]=term;
             context_variables.insert(var);
           }

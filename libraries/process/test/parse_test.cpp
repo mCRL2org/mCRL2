@@ -52,7 +52,7 @@ void test_parse_process_specification()
 void test_parse()
 {
   process_expression x = parse_process_expression("a(m).P(0)", DATA_DECL, PROC_DECL);
-  BOOST_CHECK(core::pp(x) == "a(m) . P(0)");
+  BOOST_CHECK(process::pp(x) == "a(m) . P(0)");
   test_parse_process_specification();
 }
 

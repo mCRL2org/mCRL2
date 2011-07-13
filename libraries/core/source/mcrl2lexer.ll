@@ -12,7 +12,7 @@
 #include "mcrl2/core/detail/mcrl2lexer.h"
 #include "mcrl2/core/detail/mcrl2parser.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 
 //fix for the broken cygwin versions of flex
 #ifdef __CYGWIN__
@@ -229,10 +229,8 @@ void mcrl2_lexer::yyerror(const char *s) {
     if (oldcol_nr < 0) {
       oldcol_nr = 0;
     }
-    gsErrorMsg(
-      "token '%s' at position %d, %d caused the following error: %s\n",
-      YYText(), line_nr, oldcol_nr, s
-    );
+    mCRL2log(error) << "token '" << YYText() << "' at position " 
+                    << line_nr << ", " << oldcol_nr << " caused the following error: " << s << std::endl;
   }
 }
 
@@ -256,7 +254,7 @@ void mcrl2_lexer::process_string(void) {
   col_nr += YYLeng();
   mcrl2yylval.appl = gsString2ATermAppl(YYText());
   // Protect the contents of mcrl2yylval.appl by adding it to an indexed set.
-  ATbool dummy;
+  bool dummy;
   ATindexedSetPut(mcrl2_parser_protect_table,(ATerm)mcrl2yylval.appl,&dummy);
 }
 

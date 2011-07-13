@@ -12,9 +12,9 @@
 #ifndef FORMULA_CHECKER_H
 #define FORMULA_CHECKER_H
 
-#include "aterm2.h"
-#include "mcrl2/core/messaging.h"
-#include "mcrl2/core/aterm_ext.h"
+#include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/aterm_ext.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
@@ -37,7 +37,7 @@ namespace detail
 /// The class Formula_Checker uses an instance of the class BDD_Prover to prove a number of propositional formulas. The
 /// prover is initialized with the parameters a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type,
 /// a_apply_induction and a_lps. The parameter a_rewrite_strategy specifies which rewrite strategy is used by the prover's
-/// rewriter. It can be set to either GS_REWR_INNER, GS_REWR_INNERC, GS_REWR_JITTY or GS_REWR_JITTYC. The parameter
+/// rewriter. It can be set to either GS_REWR_JITTY or GS_REWR_JITTYC. The parameter
 /// a_time_limit specifies the maximum amount of time in seconds to be spent by the prover on proving a single formula. If
 /// a_time_limit is set to 0, no time limit will be enforced. The parameter a_path_eliminator specifies whether or not
 /// path elimination is applied. When path elimination is applied, the prover uses an SMT solver to remove inconsistent
@@ -99,7 +99,7 @@ class Formula_Checker
         }
         else
         {
-          core::gsMessage("  Witness: %P\n", v_witness);
+          mCRL2log(info) << "  Witness: " << core::pp(v_witness) << std::endl;
         }
       }
     }
@@ -121,7 +121,7 @@ class Formula_Checker
         }
         else
         {
-          core::gsMessage("  Counter-example: %P\n", v_counter_example);
+          mCRL2log(info) << "  Counter-example: " << core::pp(v_counter_example) << std::endl;
         }
       }
     }
@@ -173,22 +173,22 @@ class Formula_Checker
 
       while (!ATisEmpty(a_formulas))
       {
-        v_formula = core::ATAgetFirst(a_formulas);
-        core::gsMessage("'%P': ", v_formula);
+        v_formula = ATAgetFirst(a_formulas);
+        mCRL2log(info) << "'" << core::pp(v_formula) << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
         Answer v_is_contradiction = f_bdd_prover.is_contradiction();
         if (v_is_tautology == answer_yes)
         {
-          core::gsMessage("Tautology\n");
+          mCRL2log(info) << "Tautology" << std::endl;
         }
         else if (v_is_contradiction == answer_yes)
         {
-          core::gsMessage("Contradiction\n");
+          mCRL2log(info) << "Contradiction" << std::endl;
         }
         else
         {
-          core::gsMessage("Undeterminable\n");
+          mCRL2log(info) << "Undeterminable" << std::endl;
           print_counter_example();
           print_witness();
           save_dot_file(v_formula_number);

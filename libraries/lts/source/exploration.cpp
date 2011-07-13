@@ -8,11 +8,11 @@
 //
 /// \file exploration.cpp
 
-#include <aterm2.h>
+#include "mcrl2/aterm/aterm2.h"
 #include <time.h>
 #include <sstream>
 #include <set>
-#include "mcrl2/core/messaging.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
@@ -22,7 +22,7 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/nextstate.h"
+// #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/lts/detail/exploration.h"
@@ -113,7 +113,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
 
   if (lgopts->removeunused)
   {
-    gsVerboseMsg("removing unused parts of the data specification.\n");
+    mCRL2log(verbose) << "removing unused parts of the data specification." << std::endl;
 
     std::set<data::function_symbol> used_function_symbols=
                                   lps::find_function_symbols(lgopts->specification);
@@ -149,15 +149,11 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->speci
     lgopts->m_rewriter.reset(new mcrl2::data::rewriter(lgopts->specification.data(), lgopts->strat));
   }
 
-  lgopts->m_enumerator_factory.reset(
-    new mcrl2::data::enumerator_factory< mcrl2::data::classic_enumerator< > >
-    (lgopts->specification.data(), *(lgopts->m_rewriter)));
-
-  nstate = createNextState(lgopts->specification,*(lgopts->m_enumerator_factory),!lgopts->usedummies,lgopts->stateformat);
+  nstate = createNextState(lgopts->specification,*(lgopts->m_rewriter),!lgopts->usedummies,lgopts->stateformat);
 
   if (lgopts->priority_action != "")
   {
-    gsVerboseMsg("applying confluence reduction with tau action '%s'...\n",lgopts->priority_action.c_str());
+    mCRL2log(verbose) << "applying confluence reduction with tau action '" << lgopts->priority_action << "'..." << std::endl;
     nstate->prioritise(lgopts->priority_action.c_str());
     initialise_representation(true);
   }
@@ -166,14 +162,14 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->speci
     initialise_representation(false);
   }
 
-  if (lgopts->detect_deadlock && gsVerbose)
+  if (lgopts->detect_deadlock)
   {
-    cerr << "Detect deadlocks.\n" ;
+    mCRL2log(verbose) << "Detect deadlocks.\n" ;
   }
 
-  if (lgopts->detect_divergence && gsVerbose)
+  if (lgopts->detect_divergence)
   {
-    cerr << "Detect divergences with tau action is `" << lgopts->priority_action << "'.\n";
+    mCRL2log(verbose) << "Detect divergences with tau action is `" << lgopts->priority_action << "'.\n";
   }
 
   num_states = 0;
@@ -192,7 +188,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->speci
   else
   {
     lgopts->outformat = mcrl2::lts::lts_none;
-    gsVerboseMsg("not saving state space.\n");
+    mCRL2log(verbose) << "not saving state space." << std::endl;
   }
 
   initialised = true;
@@ -210,59 +206,41 @@ bool lps2lts_algorithm::finalise_lts_generation()
     lts.close_lts(num_states,trans);
   }
 
-  if (!lg_error && gsVerbose)
+  if (!lg_error)
   {
     if (lgopts->expl_strat == es_random)
     {
-      gsVerboseMsg(
-        "done with random walk of %lu transition%s (visited %lu unique state%s).\n",
-        trans,
-        (trans==1)?"":"s",
-        num_states,
-        (num_states==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with random walk of "
+                        << trans << " transition" << ((trans==1)?"":"s")
+                        << " (visited " << num_states
+                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_value_prioritized)
     {
-      gsVerboseMsg(
-        "done with value prioritized walk of %lu transition%s (visited %lu unique state%s).\n",
-        trans,
-        (trans==1)?"":"s",
-        num_states,
-        (num_states==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with value prioritized walk of "
+                        << trans << " transition" << ((trans==1)?"":"s")
+                        << " (visited " << num_states
+                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_value_random_prioritized)
     {
-      gsVerboseMsg(
-        "done with random value prioritized walk of %lu transition%s (visited %lu unique state%s).\n",
-        trans,
-        (trans==1)?"":"s",
-        num_states,
-        (num_states==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with random value prioritized walk of "
+                        << trans << " transition" << ((trans==1)?"":"s")
+                        << " (visited " << num_states
+                        << " unique state" << ((num_states == 1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_breadth)
     {
-      gsVerboseMsg(
-        "done with state space generation (%lu level%s, %lu state%s and %lu transition%s).\n",
-        static_cast<size_t>(level-1),
-        (level==2)?"":"s",
-        num_states,
-        (num_states==1)?"":"s",
-        trans,
-        (trans==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with state space generation ("
+                        << level-1 << " level" << ((level==2)?"":"s") << ", "
+                        << num_states << " state" << ((num_states == 1)?"":"s")
+                        << " and " << trans << " transition" << ((trans==1)?"":"s") << ")" << std::endl;
     }
     else if (lgopts->expl_strat == es_depth)
     {
-      gsVerboseMsg(
-        "done with state space generation (%lu state%s and %lu transition%s).\n",
-        num_states,
-        (num_states==1)?"":"s",
-        trans,
-        (trans==1)?"":"s"
-      );
+      mCRL2log(verbose) << "done with state space generation ("
+                        << num_states << " state" << ((num_states == 1)?"":"s")
+                        << " and " << trans << " transition" << ((trans==1)?"":"s") << ")" << std::endl;
     }
   }
 
@@ -344,6 +322,8 @@ bool lps2lts_algorithm::savetrace(
     trace.setState(nstate->makeStateVector(ATgetFirst(e)));
   }
 
+  delete nsgen;
+
   try
   {
     trace.save(lgopts->generate_filename_for_trace(lgopts->trace_prefix, info, "trc"));
@@ -374,34 +354,32 @@ void lps2lts_algorithm::check_actiontrace(const state_t OldState, ATermAppl Tran
         string sss(ss.str());
         bool saved_ok = savetrace(sss,OldState,nstate,NewState,Transition);
 
-        if (lgopts->detect_action || gsVerbose)
+        if (lgopts->detect_action || mCRL2logEnabled(verbose))
         {
           if (saved_ok)
           {
-            gsMessage("detect: action '%P' found and saved to '%s_act_%lu_%P.trc' (state index: %lu).\n",
-                      Transition,
-                      const_cast< char* >(lgopts->trace_prefix.c_str()),
-                      tracecnt,
-                      ATermAppl(atermpp::aterm_appl(*j)),
-                      states.index(OldState));
+            mCRL2log(info) << "detect: action '"
+                           << core::pp(Transition)
+                           << "' found and saved to '"
+                           << lgopts->trace_prefix << "_act_" << tracecnt << "_" << core::pp(*j) << ".trc'"
+                           << "(state index: " << states.index(OldState) << ")." << std::endl;
           }
           else
           {
-            gsMessage("detect: action '%P' found, but could not be saved to '%s_act_%lu_%s.trc' (state index: %lu).\n",
-                      Transition,
-                      const_cast< char* >(lgopts->trace_prefix.c_str()),
-                      tracecnt,
-                      ATermAppl(atermpp::aterm_appl(*j)),
-                      states.index(OldState));
+            mCRL2log(info) << "detect: action '"
+                           << core::pp(Transition)
+                           << "' found, but could not be saved to '"
+                           << lgopts->trace_prefix << "_act_" << tracecnt << "_" << core::pp(*j) << ".trc'"
+                           << "(state index: " << states.index(OldState) << ")." << std::endl;
           }
         }
         tracecnt++;
       }
       else
       {
-        gsMessage("detect: action '%P' found (state index: %lu).\n",
-                  Transition,
-                  states.index(OldState));
+        mCRL2log(info) << "detect: action '"
+                       << core::pp(Transition)
+                       << "' found (state index: " << states.index(OldState) << ")." << std::endl;
       }
     }
   }
@@ -416,17 +394,11 @@ void lps2lts_algorithm::save_error_trace(const state_t state)
 
     if (saved_ok)
     {
-      if (gsVerbose)
-      {
-        cerr << "saved trace to error in '" << lgopts->trace_prefix << "_error.trc'.\n";
-      }
+      mCRL2log(verbose) << "saved trace to error in '" << lgopts->trace_prefix << "_error.trc'.\n";
     }
     else
     {
-      if (gsVerbose)
-      {
-        cerr << "trace to error could not be saved in '" << lgopts->trace_prefix << "_error.trc'.\n";
-      }
+      mCRL2log(verbose) << "trace to error could not be saved in '" << lgopts->trace_prefix << "_error.trc'.\n";
     }
   }
 }
@@ -443,7 +415,7 @@ void lps2lts_algorithm::check_deadlocktrace(const state_t state)
       string sss(ss.str());
       bool saved_ok = savetrace(sss,state,nstate);
 
-      if (lgopts->detect_deadlock || gsVerbose)
+      if (lgopts->detect_deadlock || mCRL2logEnabled(verbose))
       {
         if (saved_ok)
         {
@@ -554,7 +526,7 @@ void lps2lts_algorithm::check_divergence(const state_t state)
         string sss(ss.str());
         bool saved_ok = savetrace(sss,state,nstate);
 
-        if (lgopts->detect_divergence || gsVerbose)
+        if (lgopts->detect_divergence || mCRL2logEnabled(verbose))
         {
           if (saved_ok)
           {
@@ -744,16 +716,14 @@ bool lps2lts_algorithm::generate_lts()
     size_t prevcurrent = 0;
     num_found_same = 0;
     tracecnt = 0;
-    if (gsVerbose)
-    {
-      std::cerr << ("generating state space with '" +
-                    expl_strat_to_str(lgopts->expl_strat) + "' strategy...\n");
-    }
+    mCRL2log(verbose) << "generating state space with '" <<
+                    expl_strat_to_str(lgopts->expl_strat) << "' strategy...\n";
 
     if (lgopts->expl_strat == es_random)
     {
-      NextStateGenerator* nsgen = NULL;
-      while ((current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
+      NextStateGenerator *nsgen = NULL;
+
+      while (!must_abort && (current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermAppl Transition;
         state_t NewState;
@@ -767,7 +737,7 @@ bool lps2lts_algorithm::generate_lts()
           bool priority;
           ATermAppl tempTransition;
           ATerm tempNewState;
-          while (nsgen->next(&tempTransition,&tempNewState,&priority))
+          while (!must_abort && nsgen->next(&tempTransition,&tempNewState,&priority))
           {
             if (!priority)   // don't store confluent self loops
             {
@@ -805,15 +775,11 @@ bool lps2lts_algorithm::generate_lts()
         }
 
         current_state++;
-        if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+        if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          gsVerboseMsg(
-            "monitor: currently explored %lu transition%s and encountered %lu unique state%s.\n",
-            trans,
-            (trans==1)?"":"s",
-            num_states,
-            (num_states==1)?"":"s"
-          );
+          mCRL2log(verbose) << "monitor: currently explored "
+                            << trans << " transition" << ((trans==1)?"":"s")
+                            << " and encountered " << num_states << " unique state" << ((num_states==1)?"":"s") << std::endl;
         }
       }
       delete nsgen;
@@ -822,7 +788,7 @@ bool lps2lts_algorithm::generate_lts()
     {
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator* nsgen = NULL;
-      while ((current_state < lgopts->max_states) && (current_state < num_states) && 
+      while (!must_abort && (current_state < lgopts->max_states) && (current_state < num_states) && 
                              (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermList tmp_trans = ATmakeList0();
@@ -835,7 +801,7 @@ bool lps2lts_algorithm::generate_lts()
         {
           nsgen = nstate->getNextStates(state,nsgen);
           bool priority;
-          while (nsgen->next(&Transition,&NewState,&priority))
+          while (!must_abort && nsgen->next(&Transition,&NewState,&priority))
           {
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
@@ -987,16 +953,12 @@ bool lps2lts_algorithm::generate_lts()
         }
 
         current_state++;
-        if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+        if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          gsVerboseMsg(
-            "monitor: currently explored %lu transition%s and encountered %lu unique state%s [MAX %d].\n",
-            trans,
-            (trans==1)?"":"s",
-            num_states,
-            (num_states==1)?"":"s",
-            lgopts->todo_max
-          );
+          mCRL2log(verbose) << "monitor: currently explored "
+                                      << trans << " transition" << ((trans==1)?"":"s")
+                                      << " and encountered " << num_states << " unique state" << ((num_states==1)?"":"s")
+                                      << " [MAX " << lgopts->todo_max << "]." << std::endl;
         }
       }
       delete nsgen;
@@ -1005,7 +967,7 @@ bool lps2lts_algorithm::generate_lts()
     {
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator* nsgen = NULL;
-      while ((current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
+      while (!must_abort && (current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermList tmp_trans = ATmakeList0();
         ATermList tmp_states = ATmakeList0();
@@ -1019,7 +981,7 @@ bool lps2lts_algorithm::generate_lts()
           // state = ATindexedSetGetElem(states,current_state);
           nsgen = nstate->getNextStates(state,nsgen);
           bool priority;
-          while (nsgen->next(&Transition,&NewState,&priority))
+          while (!must_abort && nsgen->next(&Transition,&NewState,&priority))
           {
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
@@ -1173,15 +1135,11 @@ bool lps2lts_algorithm::generate_lts()
         }
 
         current_state++;
-        if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+        if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          gsVerboseMsg(
-            "monitor: currently explored %lu transition%s and encountered %lu unique state%s.\n",
-            trans,
-            (trans==1)?"":"s",
-            num_states,
-            (num_states==1)?"":"s"
-          );
+          mCRL2log(verbose) << "monitor: currently explored "
+                                      << trans << " transition" << ((trans==1)?"":"s")
+                                      << " and encountered " << num_states << " unique state" << ((num_states==1)?"":"s") << std::endl;
         }
       }
       delete nsgen;
@@ -1206,7 +1164,7 @@ bool lps2lts_algorithm::generate_lts()
       // bithashing: S = { h | get_bithash(h) }, E = S \ "items left in queues"
       //
       // both:       |E| <= limit
-      while ((current_state < endoflevelat) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
+      while (!must_abort && (current_state < endoflevelat) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         if (lgopts->bithashing)
         {
@@ -1228,7 +1186,7 @@ bool lps2lts_algorithm::generate_lts()
           ATermAppl Transition;
           ATerm NewState;
           bool priority;
-          while (nsgen->next(&Transition,&NewState,&priority))
+          while (!must_abort && nsgen->next(&Transition,&NewState,&priority))
           {
             NewState = get_repr(NewState);
             if (!priority)   // don't store confluent self loops
@@ -1261,18 +1219,12 @@ bool lps2lts_algorithm::generate_lts()
         }
 
         current_state++;
-        if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+        if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
         {
-          gsVerboseMsg(
-            "monitor: currently at level %lu with %lu state%s and %lu transition%s explored and %lu state%s seen.\n",
-            level,
-            current_state,
-            (current_state==1)?"":"s",
-            trans,
-            (trans==1)?"":"s",
-            num_states,
-            (num_states==1)?"":"s"
-          );
+          mCRL2log(verbose) << "monitor: currently at level " << level << " with "
+                                      << current_state << " state" << ((current_state==1)?"":"s") << " and "
+                                      << trans << " transition" << ((trans==1)?"":"s")
+                                      << " explored and " << num_states << " state" << ((num_states==1)?"":"s") << " seen." << std::endl;
         }
         if (current_state == endoflevelat)
         {
@@ -1280,16 +1232,13 @@ bool lps2lts_algorithm::generate_lts()
           {
             state_queue.swap_queues();
           }
-          if (!lgopts->suppress_progress_messages && gsVerbose)
+          if (!lgopts->suppress_progress_messages)
           {
-            gsVerboseMsg(
-              "monitor: level %lu done. (%lu state%s, %lu transition%s)\n",
-              level,static_cast<size_t>(current_state-prevcurrent),
-              ((current_state-prevcurrent)==1)?"":"s",
-              static_cast<size_t>(trans-prevtrans),
-              ((trans-prevtrans)==1)?"":"s"
-            );
-            fflush(stderr);
+            mCRL2log(verbose) << "monitor: level " << level << " done."
+                              << " (" << current_state - prevcurrent << " state"
+                              << ((current_state-prevcurrent)==1?"":"s") << ", "
+                              << trans-prevtrans << " transition"
+                              << ((trans-prevtrans)==1?"i)\n":"s)\n");
           }
           level++;
           size_t nextcurrent = endoflevelat;
@@ -1327,7 +1276,7 @@ bool lps2lts_algorithm::generate_lts()
       // trans_seen(s) := we have seen a transition from state s
       // inv:  forall i : 0 <= i < nsgens_num-1 : trans_seen(nsgens[i]->get_state())
       //       nsgens_num > 0  ->  top_trans_seen == trans_seen(nsgens[nsgens_num-1])
-      while ((nsgens_num > 0) && (! lgopts->trace || (tracecnt < lgopts->max_traces)))
+      while (!must_abort && (nsgens_num > 0) && (! lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         NextStateGenerator* nsgen = nsgens[nsgens_num-1];
         state = nsgen->get_state();
@@ -1406,16 +1355,12 @@ bool lps2lts_algorithm::generate_lts()
         if (new_state)
         {
           current_state++;
-          if (!lgopts->suppress_progress_messages && gsVerbose && ((current_state%1000) == 0))
+          if (!lgopts->suppress_progress_messages && mCRL2logEnabled(verbose) && ((current_state%1000) == 0))
           {
-            gsVerboseMsg(
-              "monitor: currently explored %lu state%s and %lu transition%s (stacksize is %d).\n",
-              current_state,
-              (current_state==1)?"":"s",
-              trans,
-              (trans==1)?"":"s",
-              nsgens_num
-            );
+            mCRL2log(verbose) << "monitor: currently explored "
+                              << current_state << " state" << ((current_state==1)?"":"s")
+                              << " and " << trans << " transition" << ((trans==1)?"":"s")
+                              << " (stacksize is " << nsgens_num << ")" << std::endl;
           }
         }
       }
@@ -1429,7 +1374,7 @@ bool lps2lts_algorithm::generate_lts()
     }
     else
     {
-      gsErrorMsg("unknown exploration strategy\n");
+      mCRL2log(error) << "unknown exploration strategy" << std::endl;
     }
   }
 
