@@ -22,8 +22,8 @@
 #include <iostream>
 #include "boost/config.hpp"
 
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
@@ -33,10 +33,6 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
-
-#ifndef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  mcrl2_logger::set_reporting_level(log_quiet, "rewrite_internal");
-#endif
 
 namespace mcrl2
 {
@@ -265,6 +261,10 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 
 RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
+  #ifndef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+    mcrl2_logger::set_reporting_level(log_quiet, "rewrite_internal");
+  #endif
+
   ATermList n;
   ATermInt i;
 
