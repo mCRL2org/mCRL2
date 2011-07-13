@@ -7,6 +7,61 @@ import re
 from path import *
 from mcrl2_utility import *
 
+REWRITE_TEXT = '''/// \\\\brief Rewrites all embedded expressions in an object x
+/// \param x an object containing expressions
+/// \param R a rewriter
+template <typename T, typename Rewriter>
+void rewrite(T& x,
+             Rewriter R,
+             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+            )
+{
+  data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R)(x);
+}
+
+/// \\\\brief Rewrites all embedded expressions in an object x
+/// \param x an object containing expressions
+/// \param R a rewriter
+/// \\\\return the rewrite result
+template <typename T, typename Rewriter>
+T rewrite(const T& x,
+          Rewriter R,
+          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+         )
+{
+  return data::detail::make_rewrite_data_expressions_builder<NAMESPACE::data_expression_builder>(R)(x);
+}
+
+/// \\\\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
+/// \param x an object containing expressions
+/// \param R a rewriter
+/// \param sigma a substitution
+template <typename T, typename Rewriter, typename Substitution>
+void rewrite(T& x,
+             Rewriter R,
+             Substitution sigma,
+             typename boost::disable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+            )
+{
+  data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma)(x);
+}
+
+/// \\\\brief Rewrites all embedded expressions in an object x, and applies a substitution to variables on the fly
+/// \param x an object containing expressions
+/// \param R a rewriter
+/// \param sigma a substitution
+/// \\\\return the rewrite result
+template <typename T, typename Rewriter, typename Substitution>
+T rewrite(const T& x,
+          Rewriter R,
+          Substitution sigma,
+          typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
+         )
+{
+  return data::detail::make_rewrite_data_expressions_with_substitution_builder<NAMESPACE::data_expression_builder>(R, sigma)(x);
+}
+'''
+
 SUBSTITUTE_FUNCTION_TEXT = '''template <typename T, typename Substitution>
 void replace_sort_expressions(T& x,
                               Substitution sigma,
@@ -242,6 +297,15 @@ def print_labels(namespace, label):
     print '//--- start generated %s %s code ---//' % (namespace, label)
     print '//--- end generated %s %s code ---//' % (namespace, label)
 
+def generate_rewrite_functions():
+    generate_code('../../data/include/mcrl2/data/rewrite.h'        , 'data'            , 'rewrite', REWRITE_TEXT)
+    generate_code('../../lps/include/mcrl2/lps/rewrite.h'          , 'lps'             , 'rewrite', REWRITE_TEXT)
+    generate_code('../../lps/include/mcrl2/modal_formula/rewrite.h', 'action_formulas' , 'rewrite', REWRITE_TEXT)
+    generate_code('../../lps/include/mcrl2/modal_formula/rewrite.h', 'regular_formulas', 'rewrite', REWRITE_TEXT)
+    generate_code('../../lps/include/mcrl2/modal_formula/rewrite.h', 'state_formulas'  , 'rewrite', REWRITE_TEXT)
+    generate_code('../../pbes/include/mcrl2/pbes/rewrite.h'        , 'pbes_system'     , 'rewrite', REWRITE_TEXT)
+    generate_code('../../process/include/mcrl2/process/rewrite.h'  , 'process'         , 'rewrite', REWRITE_TEXT)
+
 def generate_replace_functions():
     generate_code('../../data/include/mcrl2/data/replace.h'        , 'data'            , 'replace', SUBSTITUTE_FUNCTION_TEXT)
     generate_code('../../lps/include/mcrl2/lps/replace.h'          , 'lps'             , 'replace', SUBSTITUTE_FUNCTION_TEXT)
@@ -261,5 +325,6 @@ def generate_find_functions():
     generate_code('../../process/include/mcrl2/process/find.h'  , 'process'         , 'find', FIND_VARIABLES_FUNCTION_TEXT)
 
 if __name__ == "__main__":
+    generate_rewrite_functions()
     generate_replace_functions()
     generate_find_functions()
