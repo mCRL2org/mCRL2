@@ -39,6 +39,20 @@ const std::string case_3(
   "act a, b;\n"
   "init a.b.delta ;\n");
 
+// The following test case unearthed an assertion failure when applying
+// substitutions.
+const std::string case_4(
+  "proc P(m: Int) =\n"
+  "       (m == 1) ->\n"
+  "         tau .\n"
+  "         P(m = m - 1)\n"
+  "     + (m == 1) ->\n"
+  "         tau .\n"
+  "         P()\n"
+  "     + delta;\n"
+  "\n"
+  "init P(0);\n"
+);
 
 static bool check_for_ctau(lps::specification const& s)  // s1 is an lps.
 {
@@ -59,44 +73,45 @@ static bool check_for_ctau(lps::specification const& s)  // s1 is an lps.
   return false;
 }
 
+void run_confluence_test_case(const std::string& s, bool has_ctau)
+{
+  using namespace mcrl2::lps;
+
+  specification s0(linearise(s));
+  Confluence_Checker checker1(s0);
+  specification s1(lps::specification(checker1.check_confluence_and_mark(data::sort_bool::true_(),0)));
+  // Check confluence for all summands and
+  // replace confluents tau's by ctau's.
+  if(has_ctau)
+  {
+    BOOST_CHECK(check_for_ctau(s1));
+  }
+  else
+  {
+    BOOST_CHECK(!check_for_ctau(s1));
+  }
+  core::garbage_collect();
+}
+
 int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  using namespace mcrl2::lps;
-
-  specification s0;
-  specification s1;
-
   // case 1
   std::cerr << "Confluence check case 1\n";
-  s0 = linearise(case_1);
-  Confluence_Checker checker1(s0);
-  s1=lps::specification(checker1.check_confluence_and_mark(data::sort_bool::true_(),0));
-  // Check confluence for all summands and
-  // replace confluents tau's by ctau's.
-  BOOST_CHECK(!check_for_ctau(s1));
-  core::garbage_collect();
+  run_confluence_test_case(case_1, false);
 
   // case 2
   std::cerr << "Confluence check case 2\n";
-  s0 = linearise(case_2);
-  Confluence_Checker checker2(s0);
-  s1=lps::specification(checker2.check_confluence_and_mark(data::sort_bool::true_(),0));
-  // Check confluence for all summands and
-  // replace confluents tau's by ctau's.
-  BOOST_CHECK(check_for_ctau(s1));
-  core::garbage_collect();
+  run_confluence_test_case(case_2, true);
 
   // case 3
   std::cerr << "Confluence check case 3\n";
-  s0 = linearise(case_3);
-  Confluence_Checker checker3(s0);
-  s1=lps::specification(checker3.check_confluence_and_mark(data::sort_bool::true_(),0));
-  // Check confluence for all summands and
-  // replace confluents tau's by ctau's.
-  BOOST_CHECK(!check_for_ctau(s1));
-  core::garbage_collect();
+  run_confluence_test_case(case_3, false);
+
+  // case 4
+  std::cerr << "Confluence check case 4\n";
+  run_confluence_test_case(case_4, false);
 
   return 0;
 }
