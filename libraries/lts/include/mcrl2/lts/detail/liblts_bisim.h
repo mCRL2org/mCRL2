@@ -1156,10 +1156,7 @@ void bisimulation_reduce(LTS_TYPE& l,
   // First, remove tau loops in case of branching bisimulation.
   if (branching)
   {
-    detail::scc_partitioner<LTS_TYPE> scc_part(l);
-    scc_part.replace_transitions(preserve_divergences);
-    l.set_num_states(scc_part.num_eq_classes());
-    l.set_initial_state(scc_part.get_eq_class(l.initial_state()));
+    scc_reduce(l,preserve_divergences);
   }
 
   // Secondly, apply the branching bisimulation reduction algorithm. If there are no tau's,
