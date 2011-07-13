@@ -1753,7 +1753,6 @@ reconstruct_container_expression(ATermAppl Part)
 
   else if (sort_bag::is_bagconstructor_application(expr))
   {
-    //gsMessage("Reconstructing implementation of bag comprehension\n");
     //part is an internal set representation;
     //replace by a finite set to set conversion or a set comprehension.
     sort_expression element_sort = *function_sort(sort_bag::left(expr).sort()).domain().begin();
@@ -1847,7 +1846,6 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_bag::is_bagcomprehension_application(expr))
   {
-    //gsMessage("BagComprehension\n");
     data_expression body(sort_bag::arg(expr));
     data_expression_vector variables;
     sort_expression_list domain_of_body_sort(function_sort(body.sort()).domain());

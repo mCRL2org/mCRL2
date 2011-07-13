@@ -19,18 +19,24 @@
 #include <cstring>
 #include <cassert>
 #include <stdexcept>
+#include <iostream>
+#include "boost/config.hpp"
+
+#include "mcrl2/utilities/detail/memory_utility.h"
+#include "mcrl2/utilities/logger.h"
+#include "mcrl2/exception.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/aterm_access.h"
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/exception.h"
-#include "boost/config.hpp"
-#include <iostream>
+#include "mcrl2/data/print.h"
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+
+#ifndef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+  mcrl2_logger::set_reporting_level(log_quiet, "rewrite_internal");
+#endif
 
 namespace mcrl2
 {
@@ -536,17 +542,17 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
 
 ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-	gsMessage("AUX:    term(%T)\n", Term	);
-  gsMessage("AUX:    rewrite(%T)\n",fromInner((ATerm)Term));
-  gsMessage("AUX:    rewrite(  %P  )\n",fromInner((ATerm)Term));
-#endif
-  if (gsIsDataVarId(Term))
+  mcrl2_logger::indent();
+	mCRL2log(debug, "rewrite_internal") << "term(" << atermpp::aterm(Term) << ")" << std::endl;
+	mCRL2log(debug, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner((ATerm)Term)) << ")" << std::endl;
+	mCRL2log(debug, "rewrite_internal") << "rewrite(  " << data::pp(fromInner((ATerm)Term)) << "  )" << std::endl;
+	if (gsIsDataVarId(Term))
   {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-    gsMessage("      return %T\n",fromInner((ATerm)Term));
-    gsMessage("      return1  %P\n",fromInner(lookupSubstitution(Term)));
-#endif
+	  mcrl2_logger::indent();
+    mCRL2log(debug, "rewrite_internal") << "return " << atermpp::aterm(fromInner((ATerm)Term)) << "" << std::endl;
+    mCRL2log(debug, "rewrite_internal") << "return1  " << data::pp(fromInner(getSubstitutionInternal(Term))) << "" << std::endl;
+    mcrl2_logger::unindent();
+    mcrl2_logger::unindent();
     return (ATermAppl) getSubstitutionInternal(Term);
   }
   else
@@ -594,14 +600,13 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
     if (ATisInt(op) && ((strat = jitty_strat[ATgetInt((ATermInt) op)]) != NULL))
     {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      gsMessage("      strat: %T\n",strat);
-#endif
+      mcrl2_logger::indent();
+      mCRL2log(debug, "rewrite_internal") << "strat: " << atermpp::aterm(strat) << "" << std::endl;
+      mcrl2_logger::indent();
       for (; !ATisEmpty(strat); strat=ATgetNext(strat))
       {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-        gsMessage("        strat action: %T\n",ATgetFirst(strat));
-#endif
+        mCRL2log(debug, "rewrite_internal") << "strat action: " << atermpp::aterm(ATgetFirst(strat)) << "" << std::endl;
+
         if (ATisInt(ATgetFirst(strat)))
         {
           size_t i = ATgetInt((ATermInt) ATgetFirst(strat))+1;
@@ -641,12 +646,11 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
             }
           }
 
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-          if (matches && !gsIsNil(ATAelementAt(rule,1)))
+          if (mCRL2logEnabled(debug, "rewrite_internal") && matches && !gsIsNil(ATAelementAt(rule,1)))
           {
-            gsMessage("        %T --> %T (%T)\n",ATelementAt(rule,1),rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true);
+            mCRL2log(debug, "rewrite_internal") << atermpp::aterm(ATelementAt(rule,1)) << " --> " << atermpp::aterm(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1)))) << " (" << atermpp::aterm(jitty_true) << ")" << std::endl;
           }
-#endif
+
           if (matches && (ATisEqual(ATAelementAt(rule,1),jitty_true) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true)))
           {
             ATermAppl rhs = ATAelementAt(rule,3);
@@ -723,14 +727,10 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
               }
               for (size_t j=1; j<rhs_arity; j++)
               {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-                gsMessage("          pre %T\n",ATgetArgument(rhs,i));
-#endif
+                mCRL2log(debug, "rewrite_internal") << "pre " << atermpp::aterm(ATgetArgument(rhs,i)) << "" << std::endl;
                 newargs[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
                 i++;
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-                gsMessage("          post %T\n",args[i]);
-#endif
+                mCRL2log(debug, "rewrite_internal") << "post " << atermpp::aterm(args[i]) << "" << std::endl;
               }
             }
 
@@ -744,19 +744,20 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
             ATermAppl a = ApplyArray(new_arity,newargs);
 
             ATermAppl aa = rewrite_aux(a);
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-            gsMessage("        return %T\n",(ATerm)fromInner((ATerm)aa));
-            gsMessage("        return2  %P\n",(ATerm)fromInner((ATerm)aa));
-#endif
+            mcrl2_logger::unindent();
+            mCRL2log(debug, "rewrite_internal") << "return " << atermpp::aterm((ATerm)fromInner((ATerm)aa)) << "" << std::endl;
+            mCRL2log(debug, "rewrite_internal") << "return2  " << data::pp((ATerm)fromInner((ATerm)aa)) << "" << std::endl;
+            mcrl2_logger::unindent();
+            mcrl2_logger::unindent();
             return aa;
           }
 
         }
       }
     }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-    gsMessage("      done with strat\n");
-#endif
+    mcrl2_logger::unindent();
+    mcrl2_logger::unindent();
+    mCRL2log(debug, "rewrite_internal") << "done with strat" << std::endl;
 
     rewritten[0] = op;
     for (size_t i=1; i<arity; i++)
@@ -769,10 +770,9 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
     ATermAppl a = ApplyArray(arity,rewritten);
 
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-    gsMessage("      return %T\n",a);
-    gsMessage("      return3  %P\n",(ATerm)fromInner((ATerm)a));
-#endif
+    mCRL2log(debug, "rewrite_internal") << "return " << atermpp::aterm(a) << std::endl;
+    mCRL2log(debug, "rewrite_internal") << "return3  " << data::pp((ATerm)fromInner((ATerm)a)) << "" << std::endl;
+    mcrl2_logger::unindent();
 
     return (ATermAppl) internal_quantifier_enumeration((ATerm) a );
   }
@@ -815,16 +815,15 @@ ATermAppl RewriterJitty::fromRewriteFormat(ATerm Term)
 
 ATermAppl RewriterJitty::rewrite(ATermAppl Term)
 {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  gsMessage("Rewriting term: %T\n", Term);
-  gsMessage("toRewriteFormat(Term): %T\n", toRewriteFormat(Term));
-  gsMessage("fromInner(toRewriteFormat(Term)): %T\n", (ATerm)fromInner(toRewriteFormat(Term)));
-#endif
+  mCRL2log(debug, "rewrite_internal") << "Rewriting term: " << atermpp::aterm( Term) << "" << std::endl;
+  mCRL2log(debug, "rewrite_internal") << "toRewriteFormat(Term): " << atermpp::aterm( toRewriteFormat(Term)) << "" << std::endl;
+  mCRL2log(debug, "rewrite_internal") << "fromInner(toRewriteFormat(Term)): " << atermpp::aterm( (ATerm)fromInner(toRewriteFormat(Term))) << "" << std::endl;
   return fromInner(rewriteInternal(toRewriteFormat(Term)));
 }
 
 ATerm RewriterJitty::rewriteInternal(ATerm Term)
 {
+  mcrl2_logger::indent();
   if (need_rebuild)
   {
     for( atermpp::map< ATermInt, ATermList >::iterator opids = jitty_eqns.begin()
@@ -839,14 +838,11 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
     }
     need_rebuild = false;
   }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  gsMessage("  rewrite(%T)\n",fromInner(Term));
-#endif
+  mCRL2log(debug, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner(Term)) << ")" << std::endl;
   ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
 
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  gsMessage("  return(%T)\n",fromInner(aaa));
-#endif
+  mCRL2log(debug, "rewrite_internal") << "return(" << atermpp::aterm(fromInner(aaa)) << ")" << std::endl;
+  mcrl2_logger::unindent();
   return aaa;
 }
 

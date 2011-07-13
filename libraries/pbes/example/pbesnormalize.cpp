@@ -34,12 +34,9 @@ class pbes_normalize_tool: public input_output_tool
 
     bool run()
     {
-      if (mCRL2logEnabled(verbose))
-      {
-        std::clog << "pbesnormalize parameters:" << std::endl;
-        std::clog << "  input file:         " << m_input_filename << std::endl;
-        std::clog << "  output file:        " << m_output_filename << std::endl;
-      }
+      mCRL2log(verbose) << "pbesnormalize parameters:" << std::endl;
+      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
 
       // load the pbes
       pbes_system::pbes<> p;

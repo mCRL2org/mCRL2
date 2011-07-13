@@ -45,17 +45,17 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 ## Example lpsrewr 
 ##--------------------------------------------------- 
 
-set(PROJECT_NAME "${PREFIX}_lpsrewr")
-project( ${PROJECT_NAME} )
+#set(PROJECT_NAME "${PREFIX}_lpsrewr")
+#project( ${PROJECT_NAME} )
 
-add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
-      lpsrewr.cpp 
-)
+#add_executable("${PROJECT_NAME}" EXCLUDE_FROM_ALL 
+#      lpsrewr.cpp 
+#)
 
-target_link_libraries(${PROJECT_NAME}
-   mcrl2_lps
-   mcrl2_utilities
-)
+#target_link_libraries(${PROJECT_NAME}
+#   mcrl2_lps
+#   mcrl2_utilities
+#)
 
 build_and_run_test_example_target( ${PROJECT_NAME} )
 
