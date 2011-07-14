@@ -272,16 +272,9 @@ template < class LTS_TYPE>
 void scc_reduce(LTS_TYPE& l,const bool preserve_divergence_loops = false)
 {
   detail::scc_partitioner<LTS_TYPE> scc_part(l);
-
-  // Clear this LTS, but keep the labels
-  // l.clear_type();
-  l.clear_states();
-
-  // Set the resulting number of states and transitions.
+  scc_part.replace_transitions(preserve_divergence_loops);
   l.set_num_states(scc_part.num_eq_classes());
   l.set_initial_state(scc_part.get_eq_class(l.initial_state()));
-
-  scc_part.replace_transitions(preserve_divergence_loops);
 }
 
 }
