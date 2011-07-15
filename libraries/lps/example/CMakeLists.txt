@@ -57,5 +57,5 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 #   mcrl2_utilities
 #)
 
-build_and_run_test_example_target( ${PROJECT_NAME} )
+#build_and_run_test_example_target( ${PROJECT_NAME} )
 
