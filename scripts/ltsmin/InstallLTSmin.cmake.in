@@ -18,23 +18,25 @@ if( UNIX )
  # Set additional configure flags
  # SHARED LIBS vs STATIC LIBS
  if( BUILD_SHARED_LIBS )
-   execute_process(COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} --with-mcrl2=${CMAKE_INSTALL_PREFIX} --enable-shared 
-     WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
-	 )
+   message( STATUS "")
+   message( STATUS "Warning: the mCRL2 and LTSmin builds do not always build reliably with BUILD_SHARED_LIBS=ON." )
+   message( STATUS "Warning: we recommend rebuilding with BUILD_SHARED_LIBS=OFF. LTSmin will NOT be built!" )
+   message( STATUS "")
  else( BUILD_SHARED_LIBS )
    execute_process(COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} --with-mcrl2=${CMAKE_INSTALL_PREFIX} --enable-static 
      WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
 	 )
+
+   #Make ltsmin 
+   execute_process(COMMAND make
+     WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@" 
+  	 )
+  
+   #Make install 
+   execute_process(COMMAND make install
+     WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
+	 )
+
  endif( BUILD_SHARED_LIBS )
-
- #Make ltsmin 
- execute_process(COMMAND make
-   WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@" 
-	 )
-
- #Make install 
- execute_process(COMMAND make install
-   WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
-	 )
 
 endif( UNIX )
