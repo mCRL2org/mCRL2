@@ -22,5 +22,11 @@ target_link_libraries(${PROJECT_NAME}
   ${OPENGL_LIBRARY}
 )
 
+if( mlib_FOUND )
+  target_link_libraries(${PROJECT_NAME}
+    ${MLIB_LIBRARY}
+  )
+endif( mlib_FOUND )
+
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})

@@ -556,6 +556,20 @@ if(NOT MCRL2_ENABLE_GUI_TOOLS )
 endif(NOT MCRL2_ENABLE_GUI_TOOLS  )
 
 ##---------------------------------------------------
+## Find mlib / required by gl2ps to resolve undefined symbols
+##---------------------------------------------------
+
+if(MCRL2_ENABLE_GUI_TOOLS AND UNIX)
+  find_package( mlib )
+  if( mlib_FOUND )
+    message(STATUS "mlib found")
+  else( mlib_FOUND )
+    message( FATAL_ERROR "mlib is required")
+  endif( mlib_FOUND )
+endif(MCRL2_ENABLE_GUI_TOOLS AND UNIX)
+
+
+##---------------------------------------------------
 ##
 ##---------------------------------------------------
 
@@ -606,6 +620,7 @@ if ( APPLE )
 
 endif (APPLE)
 
+##---------------------------------------------------
 ## Toggle man page generation
 ##---------------------------------------------------
 
