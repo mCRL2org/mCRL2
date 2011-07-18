@@ -908,6 +908,9 @@ install(
   PROGRAMS "${MCRL2_COMPILE_REWRITER_SCRIPT_LOCATION}"
   DESTINATION bin/
 )
+if (MCRL2_MAN_PAGES)
+  install(FILES "${CMAKE_CURRENT_SOURCE_DIR}/doc/man/mcrl2compilerewriter.1" DESTINATION share/man/man1)
+endif (MCRL2_MAN_PAGES)
 
 ENDIF( UNIX )
 
