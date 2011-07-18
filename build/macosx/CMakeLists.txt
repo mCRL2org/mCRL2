@@ -14,7 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 
 SET(MACOSX_BUNDLE_ICON_FILE mcrl2-logo.icns)
 
-if ( MCRL2_BUILD_GUI_TOOLS )
+if ( MCRL2_ENABLE_GUI_TOOLS )
 add_executable(${PROJECT_NAME} WIN32 MACOSX_BUNDLE
   mac_installer.cpp
   ${MACOSX_BUNDLE_ICON_FILE}
@@ -34,7 +34,6 @@ target_link_libraries(${PROJECT_NAME}
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})
 
-else ( MCRL2_BUILD_GUI_TOOLS)
-  message( FATAL "MCRL2_BUILD_GUI_TOOLS needs to be set to TRUE to create installer")
-
-endif ( MCRL2_BUILD_GUI_TOOLS )
+else ( MCRL2_ENABLE_GUI_TOOLS )
+  message( STATUS "MCRL2_BUILD_GUI_TOOLS needs to be set to TRUE to create installer")
+endif ( MCRL2_ENABLE_GUI_TOOLS )

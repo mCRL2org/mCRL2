@@ -76,7 +76,7 @@ include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 # ######## mcrl2_simulator_gui #########
 # ######################################
 
-if (MCRL2_BUILD_GUI_TOOLS )
+if (MCRL2_ENABLE_GUI_TOOLS )
 
 project(mcrl2_simulator_gui)
 
@@ -105,14 +105,14 @@ target_link_libraries(${PROJECT_NAME}
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
-endif (MCRL2_BUILD_GUI_TOOLS )
+endif (MCRL2_ENABLE_GUI_TOOLS )
 
 
 # #####################################
 # ########## Project lpsxsim ##########
 # #####################################
 
-if (MCRL2_BUILD_GUI_TOOLS)
+if (MCRL2_ENABLE_GUI_TOOLS)
 
 project(lpsxsim)
 
@@ -178,4 +178,4 @@ if( NOT WIN32 )
   add_subdirectory ( plugins/trace )
 endif( NOT WIN32 )
 
-endif (MCRL2_BUILD_GUI_TOOLS)
+endif (MCRL2_ENABLE_GUI_TOOLS)

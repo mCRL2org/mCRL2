@@ -42,7 +42,7 @@ install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 # ##    mcrl2_utilities_wx    ##
 # ##############################
 
-if(MCRL2_BUILD_GUI_TOOLS)
+if(MCRL2_ENABLE_GUI_TOOLS)
 
 project(mcrl2_utilities_wx)
 cmake_minimum_required(VERSION 2.6)
@@ -71,4 +71,4 @@ target_link_libraries(${PROJECT_NAME}
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
 
 
-endif(MCRL2_BUILD_GUI_TOOLS)
+endif(MCRL2_ENABLE_GUI_TOOLS)

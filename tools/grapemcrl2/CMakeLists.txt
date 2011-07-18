@@ -10,7 +10,7 @@
 project(grapemcrl2)
 cmake_minimum_required(VERSION 2.6)
 
-if ( MCRL2_BUILD_GUI_TOOLS )
+if ( MCRL2_ENABLE_GUI_TOOLS )
 
 # ######### General setup ##########
 
@@ -158,4 +158,4 @@ include(${CMAKE_SOURCE_DIR}/scripts/RelocateInstallTree.cmake)
 # Generate man pages
 include(${CMAKE_SOURCE_DIR}/scripts/GenerateManPages.cmake)
 
-endif ( MCRL2_BUILD_GUI_TOOLS )
+endif ( MCRL2_ENABLE_GUI_TOOLS )
