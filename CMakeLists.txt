@@ -556,18 +556,28 @@ if(NOT MCRL2_ENABLE_GUI_TOOLS )
 endif(NOT MCRL2_ENABLE_GUI_TOOLS  )
 
 ##---------------------------------------------------
-## Find mlib / required by gl2ps to resolve undefined symbols
+## Find gl2ps library, and use if available
 ##---------------------------------------------------
+if(MCRL2_ENABLE_GUI_TOOLS)
+  find_package(gl2ps)
+  if( GL2PS_FOUND )
+    message(STATUS "using system gl2ps library")
+  else( GL2PS_FOUND )
+    message(STATUS "using mcrl2-provided gl2ps library")
 
-if(MCRL2_ENABLE_GUI_TOOLS AND UNIX)
-  find_package( mlib )
-  if( mlib_FOUND )
-    message(STATUS "mlib found")
-  else( mlib_FOUND )
-    message( FATAL_ERROR "mlib is required")
-  endif( mlib_FOUND )
-endif(MCRL2_ENABLE_GUI_TOOLS AND UNIX)
-
+    ##---------------------------------------------------
+    ## Find mlib / required by gl2ps to resolve undefined symbols
+    ##---------------------------------------------------
+    if(UNIX)
+      find_package( mlib )
+      if( mlib_FOUND )
+        message(STATUS "mlib found")
+      else( mlib_FOUND )
+        message( FATAL_ERROR "mlib is required")
+      endif( mlib_FOUND )
+    endif(UNIX)
+  endif( GL2PS_FOUND)
+endif(MCRL2_ENABLE_GUI_TOOLS)
 
 ##---------------------------------------------------
 ##
@@ -728,7 +738,9 @@ endif( MCRL2_STAGE_ROOTDIR )
 add_subdirectory ( 3rd-party/svc )
 if(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( 3rd-party/tr)
-  add_subdirectory ( 3rd-party/gl2ps )
+  if(NOT ${gl2ps_FOUND})
+    add_subdirectory ( 3rd-party/gl2ps )
+  endif(NOT ${gl2ps_FOUND})
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
 ##---------------------------------------------------
