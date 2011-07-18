@@ -263,6 +263,9 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
 {
   #ifndef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
     mcrl2_logger::set_reporting_level(log_quiet, "rewrite_internal");
+  #else
+    #undef MCRL2_MAX_LOG_LEVEL
+    #define MCRL2_MAX_LOG_LEVEL log_debug5
   #endif
 
   ATermList n;
@@ -543,14 +546,14 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
 ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 {
   mcrl2_logger::indent();
-	mCRL2log(debug, "rewrite_internal") << "term(" << atermpp::aterm(Term) << ")" << std::endl;
-	mCRL2log(debug, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner((ATerm)Term)) << ")" << std::endl;
-	mCRL2log(debug, "rewrite_internal") << "rewrite(  " << data::pp(fromInner((ATerm)Term)) << "  )" << std::endl;
+	mCRL2log(debug2, "rewrite_internal") << "term(" << atermpp::aterm(Term) << ")" << std::endl;
+	mCRL2log(debug2, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner((ATerm)Term)) << ")" << std::endl;
+	mCRL2log(debug2, "rewrite_internal") << "rewrite(  " << data::pp(fromInner((ATerm)Term)) << "  )" << std::endl;
 	if (gsIsDataVarId(Term))
   {
 	  mcrl2_logger::indent();
-    mCRL2log(debug, "rewrite_internal") << "return " << atermpp::aterm(fromInner((ATerm)Term)) << "" << std::endl;
-    mCRL2log(debug, "rewrite_internal") << "return1  " << data::pp(fromInner(getSubstitutionInternal(Term))) << "" << std::endl;
+    mCRL2log(debug2, "rewrite_internal") << "return " << atermpp::aterm(fromInner((ATerm)Term)) << "" << std::endl;
+    mCRL2log(debug2, "rewrite_internal") << "return1  " << data::pp(fromInner(getSubstitutionInternal(Term))) << "" << std::endl;
     mcrl2_logger::unindent();
     mcrl2_logger::unindent();
     return (ATermAppl) getSubstitutionInternal(Term);
@@ -601,11 +604,11 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
     if (ATisInt(op) && ((strat = jitty_strat[ATgetInt((ATermInt) op)]) != NULL))
     {
       mcrl2_logger::indent();
-      mCRL2log(debug, "rewrite_internal") << "strat: " << atermpp::aterm(strat) << "" << std::endl;
+      mCRL2log(debug2, "rewrite_internal") << "strat: " << atermpp::aterm(strat) << "" << std::endl;
       mcrl2_logger::indent();
       for (; !ATisEmpty(strat); strat=ATgetNext(strat))
       {
-        mCRL2log(debug, "rewrite_internal") << "strat action: " << atermpp::aterm(ATgetFirst(strat)) << "" << std::endl;
+        mCRL2log(debug2, "rewrite_internal") << "strat action: " << atermpp::aterm(ATgetFirst(strat)) << "" << std::endl;
 
         if (ATisInt(ATgetFirst(strat)))
         {
@@ -648,7 +651,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
           if (mCRL2logEnabled(debug, "rewrite_internal") && matches && !gsIsNil(ATAelementAt(rule,1)))
           {
-            mCRL2log(debug, "rewrite_internal") << atermpp::aterm(ATelementAt(rule,1)) << " --> " << atermpp::aterm(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1)))) << " (" << atermpp::aterm(jitty_true) << ")" << std::endl;
+            mCRL2log(debug2, "rewrite_internal") << atermpp::aterm(ATelementAt(rule,1)) << " --> " << atermpp::aterm(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1)))) << " (" << atermpp::aterm(jitty_true) << ")" << std::endl;
           }
 
           if (matches && (ATisEqual(ATAelementAt(rule,1),jitty_true) || ATisEqual(rewrite_aux((ATermAppl) subst_values(vars,vals,len,ATelementAt(rule,1))),jitty_true)))
@@ -727,10 +730,10 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
               }
               for (size_t j=1; j<rhs_arity; j++)
               {
-                mCRL2log(debug, "rewrite_internal") << "pre " << atermpp::aterm(ATgetArgument(rhs,i)) << "" << std::endl;
+                mCRL2log(debug2, "rewrite_internal") << "pre " << atermpp::aterm(ATgetArgument(rhs,i)) << "" << std::endl;
                 newargs[i] = subst_values(vars,vals,len,ATgetArgument(rhs,j));
                 i++;
-                mCRL2log(debug, "rewrite_internal") << "post " << atermpp::aterm(args[i]) << "" << std::endl;
+                mCRL2log(debug2, "rewrite_internal") << "post " << atermpp::aterm(args[i]) << "" << std::endl;
               }
             }
 
@@ -745,8 +748,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
             ATermAppl aa = rewrite_aux(a);
             mcrl2_logger::unindent();
-            mCRL2log(debug, "rewrite_internal") << "return " << atermpp::aterm((ATerm)fromInner((ATerm)aa)) << "" << std::endl;
-            mCRL2log(debug, "rewrite_internal") << "return2  " << data::pp((ATerm)fromInner((ATerm)aa)) << "" << std::endl;
+            mCRL2log(debug2, "rewrite_internal") << "return " << atermpp::aterm((ATerm)fromInner((ATerm)aa)) << "" << std::endl;
+            mCRL2log(debug2, "rewrite_internal") << "return2  " << data::pp((ATerm)fromInner((ATerm)aa)) << "" << std::endl;
             mcrl2_logger::unindent();
             mcrl2_logger::unindent();
             return aa;
@@ -757,7 +760,7 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
     }
     mcrl2_logger::unindent();
     mcrl2_logger::unindent();
-    mCRL2log(debug, "rewrite_internal") << "done with strat" << std::endl;
+    mCRL2log(debug2, "rewrite_internal") << "done with strat" << std::endl;
 
     rewritten[0] = op;
     for (size_t i=1; i<arity; i++)
@@ -770,8 +773,8 @@ ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 
     ATermAppl a = ApplyArray(arity,rewritten);
 
-    mCRL2log(debug, "rewrite_internal") << "return " << atermpp::aterm(a) << std::endl;
-    mCRL2log(debug, "rewrite_internal") << "return3  " << data::pp((ATerm)fromInner((ATerm)a)) << "" << std::endl;
+    mCRL2log(debug2, "rewrite_internal") << "return " << atermpp::aterm(a) << std::endl;
+    mCRL2log(debug2, "rewrite_internal") << "return3  " << data::pp((ATerm)fromInner((ATerm)a)) << "" << std::endl;
     mcrl2_logger::unindent();
 
     return (ATermAppl) internal_quantifier_enumeration((ATerm) a );
@@ -815,9 +818,9 @@ ATermAppl RewriterJitty::fromRewriteFormat(ATerm Term)
 
 ATermAppl RewriterJitty::rewrite(ATermAppl Term)
 {
-  mCRL2log(debug, "rewrite_internal") << "Rewriting term: " << atermpp::aterm( Term) << "" << std::endl;
-  mCRL2log(debug, "rewrite_internal") << "toRewriteFormat(Term): " << atermpp::aterm( toRewriteFormat(Term)) << "" << std::endl;
-  mCRL2log(debug, "rewrite_internal") << "fromInner(toRewriteFormat(Term)): " << atermpp::aterm( (ATerm)fromInner(toRewriteFormat(Term))) << "" << std::endl;
+  mCRL2log(debug2, "rewrite_internal") << "Rewriting term: " << atermpp::aterm( Term) << "" << std::endl;
+  mCRL2log(debug2, "rewrite_internal") << "toRewriteFormat(Term): " << atermpp::aterm( toRewriteFormat(Term)) << "" << std::endl;
+  mCRL2log(debug2, "rewrite_internal") << "fromInner(toRewriteFormat(Term)): " << atermpp::aterm( (ATerm)fromInner(toRewriteFormat(Term))) << "" << std::endl;
   return fromInner(rewriteInternal(toRewriteFormat(Term)));
 }
 
@@ -838,10 +841,10 @@ ATerm RewriterJitty::rewriteInternal(ATerm Term)
     }
     need_rebuild = false;
   }
-  mCRL2log(debug, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner(Term)) << ")" << std::endl;
+  mCRL2log(debug2, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner(Term)) << ")" << std::endl;
   ATerm  aaa=(ATerm)rewrite_aux((ATermAppl) Term);
 
-  mCRL2log(debug, "rewrite_internal") << "return(" << atermpp::aterm(fromInner(aaa)) << ")" << std::endl;
+  mCRL2log(debug2, "rewrite_internal") << "return(" << atermpp::aterm(fromInner(aaa)) << ")" << std::endl;
   mcrl2_logger::unindent();
   return aaa;
 }

@@ -1,0 +1,42 @@
+# Authors: Frank Stappers 
+# Copyright: see the accompanying file COPYING or copy at
+# https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+#
+# Distributed under the Boost Software License, Version 1.0.
+# (See accompanying file LICENSE_1_0.txt or copy at
+# http://www.boost.org/LICENSE_1_0.txt)
+
+# This configures, and installs the LTSmin toolset if the root to source is provided.
+
+if( UNIX )
+
+ message(STATUS "Compiling LTSMIN to prefix ${CMAKE_INSTALL_PREFIX}, with mCRL2 from ${CMAKE_INSTALL_PREFIX}")
+
+ set(BUILD_SHARED_LIBS "@BUILD_SHARED_LIBS@")
+
+ #Configure ltsmin
+ # Set additional configure flags
+ # SHARED LIBS vs STATIC LIBS
+ if( BUILD_SHARED_LIBS )
+   message( STATUS "")
+   message( STATUS "Warning: the mCRL2 and LTSmin builds do not always build reliably with BUILD_SHARED_LIBS=ON." )
+   message( STATUS "Warning: we recommend rebuilding with BUILD_SHARED_LIBS=OFF. LTSmin will NOT be built!" )
+   message( STATUS "")
+ else( BUILD_SHARED_LIBS )
+   execute_process(COMMAND ./configure --prefix=${CMAKE_INSTALL_PREFIX} --with-mcrl2=${CMAKE_INSTALL_PREFIX} --enable-static 
+     WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
+	 )
+
+   #Make ltsmin 
+   execute_process(COMMAND make
+     WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@" 
+  	 )
+  
+   #Make install 
+   execute_process(COMMAND make install
+     WORKING_DIRECTORY "@MCRL2_LTSMIN_INSTALL_PATH@"
+	 )
+
+ endif( BUILD_SHARED_LIBS )
+
+endif( UNIX )
