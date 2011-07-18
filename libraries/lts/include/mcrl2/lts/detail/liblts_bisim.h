@@ -24,7 +24,7 @@
 #include "mcrl2/lts/lts_bcg.h"
 #include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/lts/lts_svc.h"
-
+#include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
 {
@@ -1222,6 +1222,7 @@ bool destructive_bisimulation_compare(
       const std::string filename(filename_s.str());
       mcrl2::trace::Trace i_trace= *i;
       i_trace.save(filename,mcrl2::trace::tfPlain);
+      mCRL2log(mcrl2::log::info) << "Saved counter example to: \"" << filename << "\"" << std::endl;
     }
   }
   return bisim_part.in_same_class(l1.initial_state(),init_l2);
