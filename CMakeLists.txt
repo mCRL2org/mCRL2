@@ -109,11 +109,6 @@ endif(NOT CMAKE_CONFIGURATION_TYPES AND NOT CMAKE_BUILD_TYPE)
 
 message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE} " )
 
-##-----------------------------------------------------
-## Set platform generic options 
-##-----------------------------------------------------
-option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" ON)
-
 ##---------------------------------------------------
 ## Print CMake install prefix (if any)
 ##---------------------------------------------------

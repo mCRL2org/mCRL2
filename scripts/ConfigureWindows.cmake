@@ -6,6 +6,12 @@
 # (See accompanying file LICENSE_1_0.txt or copy at
 # http://www.boost.org/LICENSE_1_0.txt)
 
+##---------------------------------------------------
+## Set Shared Build  
+##---------------------------------------------------
+
+option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF) 
+
 add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
