@@ -61,7 +61,6 @@ IF (APPLE)
  SET_SOURCE_FILES_PROPERTIES(${MACOSX_BUNDLE_ICON_FILE} PROPERTIES MACOSX_PACKAGE_LOCATION Resources)
 ENDIF (APPLE)
 
-
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)
@@ -72,9 +71,12 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/tr/include)
-include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include)
-
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+if(GL2PS_FOUND)
+  include_directories(${GL2PS_INCLUDE_DIRS})
+else(GL2PS_FOUND)
+  include_directories(${CMAKE_SOURCE_DIR}/3rd-party/gl2ps/include/gl2ps)
+endif(GL2PS_FOUND)
 
 # actual target:
 target_link_libraries(${PROJECT_NAME}
@@ -83,8 +85,17 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_utilities
   mcrl2_utilities_wx
   tr
-  gl2ps
 )
+
+if(GL2PS_FOUND)
+  target_link_libraries(${PROJECT_NAME}
+    ${GL2PS_LIBRARIES}
+  )
+else (GL2PS_FOUND)
+  target_link_libraries(${PROJECT_NAME}
+    gl2ps
+  )
+endif(GL2PS_FOUND)
 
 # install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_BIN_DIR})

@@ -15,7 +15,7 @@
 #include <vector>
 #include <wx/statline.h>
 #include <wx/statusbr.h>
-#include "gl2ps/gl2ps.h"
+#include <gl2ps.h>
 #include "glcanvas.h"
 
 using namespace std;
