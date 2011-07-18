@@ -35,10 +35,6 @@ using namespace mcrl2::log;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 
-#ifndef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  mcrl2_logger::set_reporting_level(log_quiet, "rewrite_internal");
-#endif
-
 namespace mcrl2
 {
 namespace data
@@ -267,7 +263,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   #ifndef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-    mcrl2_logger::set_reporting_level(log_quiet, "rewrite_internal");
+    mcrl2_logger::set_reporting_level(quiet, "rewrite_internal");
   #else
     #undef MCRL2_MAX_LOG_LEVEL
     #define MCRL2_MAX_LOG_LEVEL log_debug5
