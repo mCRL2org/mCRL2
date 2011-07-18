@@ -42,6 +42,7 @@ using namespace mcrl2::data;
 
 using namespace mcrl2;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::log;
 
 class parunfold_tool: public  rewriter_tool<input_output_tool>
 {

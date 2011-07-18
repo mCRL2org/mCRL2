@@ -22,6 +22,8 @@
 #include "boost/utility.hpp"
 #include "boost/lexical_cast.hpp"
 
+using namespace mcrl2::log;
+
 BEGIN_EVENT_TABLE(Options, wxPanel)
   EVT_BUTTON(OPTION_EVAL, Options::OnEval)
   EVT_SIZE(Options::OnSize)
@@ -56,10 +58,10 @@ Options::Options(wxWindow* parent, wxWindowID id, xEditor* editor, outputpanel* 
 static
 bool parse_data_specification_with_variables(const std::string s, mcrl2::data::data_specification& data_spec, atermpp::set<mcrl2::data::variable>& vars)
 {
-  mcrl2_log_level_t old_level = mcrl2_logger::get_reporting_level();
+  log_level_t old_level = mcrl2_logger::get_reporting_level();
   try
   {
-    mcrl2_logger::set_reporting_level(log_quiet);
+    mcrl2_logger::set_reporting_level(quiet);
     data_spec = mcrl2::data::parse_data_specification(s);
     mcrl2_logger::set_reporting_level(old_level);
   }

@@ -48,12 +48,12 @@ void save_pbes(const pbes<>& pbes_spec, std::string outfilename, pbes_output_for
     {
       if (aterm_ascii)
       {
-        mCRL2log(verbose) << "Saving result in ATerm ascii format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in ATerm ascii format..." << std::endl;
         pbes_spec.save(outfilename, false);
       }
       else
       {
-        mCRL2log(verbose) << "Saving result in ATerm binary format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in ATerm binary format..." << std::endl;
         pbes_spec.save(outfilename, true);
       }
       break;
@@ -67,12 +67,12 @@ void save_pbes(const pbes<>& pbes_spec, std::string outfilename, pbes_output_for
       bes::boolean_equation_system<> bes_spec = pbesinstconversion(pbes_spec);
       if (aterm_ascii)
       {
-        mCRL2log(verbose) << "Saving result in ATerm ascii format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in ATerm ascii format..." << std::endl;
         bes_spec.save(outfilename, false);
       }
       else
       {
-        mCRL2log(verbose) << "Saving result in ATerm binary format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in ATerm binary format..." << std::endl;
         bes_spec.save(outfilename, true);
       }
       break;
@@ -83,7 +83,7 @@ void save_pbes(const pbes<>& pbes_spec, std::string outfilename, pbes_output_for
       {
         throw mcrl2::runtime_error("the PBES cannot be saved as a BES");
       }
-      mCRL2log(verbose) << "Saving result in CWI format..." << std::endl;
+      mCRL2log(log::verbose) << "Saving result in CWI format..." << std::endl;
       bes::bes2cwi(pbes_spec.equations().begin(), pbes_spec.equations().end(), outfilename);
       break;
     }

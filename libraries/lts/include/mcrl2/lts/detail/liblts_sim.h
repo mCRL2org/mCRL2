@@ -28,7 +28,6 @@
 #include "mcrl2/lts/lts_dot.h"
 #include "mcrl2/lts/lts_svc.h"
 
-
 namespace mcrl2
 {
 namespace lts
@@ -182,9 +181,9 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
   using namespace mcrl2::core;
   initialise_datastructures();
 
-  mCRL2log(debug) << "--------------------- INITIALISATION ---------------------------" << std::endl;
+  mCRL2log(log::debug) << "--------------------- INITIALISATION ---------------------------" << std::endl;
 
-  mCRL2log(verbose) << "  initialisation; number of blocks: " << s_Sigma << std::endl;
+  mCRL2log(log::verbose) << "  initialisation; number of blocks: " << s_Sigma << std::endl;
   bool change;
   size_t i;
 
@@ -206,9 +205,9 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
      * time. */
     P.swap(Q);
 
-    mCRL2log(debug) << "--------------------- ITERATION " << i << " ----------------------------------" << std::endl;
+    mCRL2log(log::debug) << "--------------------- ITERATION " << i << " ----------------------------------" << std::endl;
 
-    mCRL2log(verbose) << "  iteration " << i << "; number of blocks: " << s_Sigma << std::endl;
+    mCRL2log(log::verbose) << "  iteration " << i << "; number of blocks: " << s_Sigma << std::endl;
 
     refine(change);
     if (change)
@@ -227,7 +226,7 @@ void sim_partitioner<LTS_TYPE>::partitioning_algorithm()
     ++i;
   }
 
-  if (mCRL2logEnabled(debug))
+  if (mCRL2logEnabled(log::debug))
   {
     print_Pi_Q();
   }
@@ -363,9 +362,9 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
     parent[alpha] = alpha;
   }
 
-  if (mCRL2logEnabled(debug))
+  if (mCRL2logEnabled(log::debug))
   {
-    mCRL2log(debug) << "--------------------- Refine ---------------------------------------" << std::endl;
+    mCRL2log(log::debug) << "--------------------- Refine ---------------------------------------" << std::endl;
     print_Sigma_P();
   }
 
@@ -374,18 +373,18 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
   Sort.reserve(s_Sigma);
   reverse_topological_sort(Sort);
 
-  if (mCRL2logEnabled(debug))
+  if (mCRL2logEnabled(log::debug))
   {
-    mCRL2log(debug) << "reverse topological sort is: [";
+    mCRL2log(log::debug) << "reverse topological sort is: [";
     for (size_t i = 0; i < Sort.size(); ++i)
     {
-      mCRL2log(debug) << Sort[i];
+      mCRL2log(log::debug) << Sort[i];
       if (i+1 < Sort.size())
       {
-        mCRL2log(debug) << ",";
+        mCRL2log(log::debug) << ",";
       }
     }
-    mCRL2log(debug) << "]" << std::endl;
+    mCRL2log(log::debug) << "]" << std::endl;
   }
 
   /* Some local variables */
@@ -398,8 +397,8 @@ void sim_partitioner<LTS_TYPE>::refine(bool& change)
   /* The main loop */
   for (l = 0; l < aut.num_action_labels(); ++l)
   {
-    mCRL2log(debug) << "---------------------------------------------------" << std::endl;
-    mCRL2log(debug) << "Label = \"" << mcrl2::lts::detail::pp(aut.action_label(l)) << "\"" << std::endl;
+    mCRL2log(log::debug) << "---------------------------------------------------" << std::endl;
+    mCRL2log(log::debug) << "Label = \"" << mcrl2::lts::detail::pp(aut.action_label(l)) << "\"" << std::endl;
 
     /* reset the stable function */
     stable.assign(s_Pi,v_false);
@@ -552,7 +551,7 @@ template <class LTS_TYPE>
 void sim_partitioner<LTS_TYPE>::update()
 {
   using namespace mcrl2::core;
-  mCRL2log(debug) << "--------------------- Update ---------------------------------------" << std::endl;
+  mCRL2log(log::debug) << "--------------------- Update ---------------------------------------" << std::endl;
 
   size_t l,alpha,gamma;
   std::vector<size_t>::iterator alphai, last;
@@ -588,15 +587,12 @@ void sim_partitioner<LTS_TYPE>::update()
     }
   }
 
-  if (mCRL2logEnabled(debug))
-  {
-    mCRL2log(debug) << "------ Filter(false) ------\nExists: ";
-    mCRL2log(debug) << print_structure(exists);
-    mCRL2log(debug) << "\nForall: ";
-    mCRL2log(debug) << print_structure(forall);
-    mCRL2log(debug) << "\nSimulation relation: ";
-    mCRL2log(debug) << print_relation(s_Pi,Q);
-  }
+  mCRL2log(log::debug) << "------ Filter(false) ------\nExists: ";
+  mCRL2log(log::debug) << print_structure(exists);
+  mCRL2log(log::debug) << "\nForall: ";
+  mCRL2log(log::debug) << print_structure(forall);
+  mCRL2log(log::debug) << "\nSimulation relation: ";
+  mCRL2log(log::debug) << print_relation(s_Pi,Q);
 
   /* Apply the first filtering to Q */
   filter(s_Sigma,P,false);
@@ -630,15 +626,13 @@ void sim_partitioner<LTS_TYPE>::update()
       pre_forall[l].push_back(forall->get_num_elements());
     }
   }
-  if (mCRL2logEnabled(debug))
-  {
-    mCRL2log(debug) << "------ Filter(true) ------\nExists: ";
-    mCRL2log(debug) << print_structure(exists);
-    mCRL2log(debug) << "\nForall: ";
-    mCRL2log(debug) << print_structure(forall);
-    mCRL2log(debug) << "\nSimulation relation: ";
-    mCRL2log(debug) << print_relation(s_Pi,Q);
-  }
+
+  mCRL2log(log::debug) << "------ Filter(true) ------\nExists: ";
+  mCRL2log(log::debug) << print_structure(exists);
+  mCRL2log(log::debug) << "\nForall: ";
+  mCRL2log(log::debug) << print_structure(forall);
+  mCRL2log(log::debug) << "\nSimulation relation: ";
+  mCRL2log(log::debug) << print_relation(s_Pi,Q);
 
   /* Apply the second filtering to Q */
   filter(s_Pi,Q,true);

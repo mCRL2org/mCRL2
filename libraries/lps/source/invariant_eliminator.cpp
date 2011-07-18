@@ -27,6 +27,7 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::lps;
+using namespace mcrl2::log;
 
 // Class Invariant_Eliminator ---------------------------------------------------------------------
 // Class Invariant_Eliminator - Functions declared private --------------------------------------

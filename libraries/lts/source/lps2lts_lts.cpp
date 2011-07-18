@@ -24,6 +24,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
+using namespace mcrl2::log;
 
 namespace mcrl2
 {

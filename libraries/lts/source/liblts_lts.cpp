@@ -21,6 +21,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data::detail;
+using namespace mcrl2::log;
 
 static void read_from_lts(lts_lts_t& l, string const& filename)
 {

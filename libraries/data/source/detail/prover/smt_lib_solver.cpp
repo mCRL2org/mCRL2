@@ -9,6 +9,8 @@
 #include <iostream>
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 
+using namespace mcrl2::log;
+
 namespace mcrl2
 {
 namespace data

@@ -56,6 +56,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
+using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using bes::bes_expression;

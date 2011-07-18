@@ -25,6 +25,7 @@
 
 #include "mcrl2/aterm/aterm_ext.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace std;
 

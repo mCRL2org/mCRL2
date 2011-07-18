@@ -171,7 +171,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     {
       if (f_deadline != 0 && (f_deadline - time(0)) < 0)
       {
-        mCRL2log(debug) << "The time limit has passed." << std::endl;
+        mCRL2log(log::debug) << "The time limit has passed." << std::endl;
         return a_bdd;
       }
 

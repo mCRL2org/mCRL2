@@ -233,7 +233,7 @@ class parity_game_generator_deprecated: public parity_game_generator
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
 
-        mCRL2log(debug2, "parity_game_generator") << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << (m_precompile_pbes?(pbes_eqn.formula().to_string()):(tr::pp(pbes_eqn.formula()))) << " into ";
+        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side of formula " << psi << std::endl << "  rhs: " << (m_precompile_pbes?(pbes_eqn.formula().to_string()):(tr::pp(pbes_eqn.formula()))) << " into ";
 
         pbes_expression result;
 
@@ -241,7 +241,7 @@ class parity_game_generator_deprecated: public parity_game_generator
         result = substitute_and_rewrite(pbes_eqn.formula());
         clear_substitution_internal(pbes_eqn.variable().parameters());
 
-        mCRL2log(debug2, "parity_game_generator") << (m_precompile_pbes?(result.to_string()):(tr::pp(result))) << std::endl;
+        mCRL2log(log::debug2, "parity_game_generator") << (m_precompile_pbes?(result.to_string()):(tr::pp(result))) << std::endl;
 
         return result;
       }
@@ -293,7 +293,7 @@ class parity_game_generator_deprecated: public parity_game_generator
     {
 #ifdef NDEBUG
       m_precompile_pbes = true;
-      mCRL2log(verbose) << "Using precompiled PBES" << std::endl;
+      mCRL2log(log::verbose) << "Using precompiled PBES" << std::endl;
 #else
       m_precompile_pbes = false;
 #endif

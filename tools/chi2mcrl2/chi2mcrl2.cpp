@@ -32,6 +32,7 @@
 #define INFILEEXT ".chi"
 #define OUTFILEEXT ".mcrl2"
 
+using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace std;
 using namespace aterm;

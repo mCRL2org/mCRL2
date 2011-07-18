@@ -36,6 +36,7 @@ using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::data;
 using mcrl2::utilities::tools::input_output_tool;
+using namespace mcrl2::log;
 
 class lts2pbes_tool : public input_output_tool
 {

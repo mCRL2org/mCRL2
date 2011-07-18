@@ -21,6 +21,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lts::detail;
+using namespace mcrl2::log;
 
 
 static void write_to_fsm(std::ostream& os, const lts_fsm_t& l)

@@ -16,10 +16,11 @@
 
 #include "outputpanel.h"
 #include "mcrl2/utilities/logger.h"
+using namespace mcrl2::log;
 
 class message_relay;
 
-static void relay_message(const ::mcrl2_message_t t, const char* data);
+static void relay_message(const mcrl2::log::message_t t, const char* data);
 
 class text_control_buf : public std::streambuf
 {
@@ -55,7 +56,7 @@ std::auto_ptr < message_relay > communicator;
 
 class message_relay
 {
-    friend void relay_message(const ::mcrl2_message_t, const char* data);
+    friend void relay_message(const mcrl2::log::message_t, const char* data);
 
   private:
 
@@ -99,7 +100,7 @@ class message_relay
     }
 };
 
-static void relay_message(const ::mcrl2_message_t /*t*/, const char* data)
+static void relay_message(const mcrl2::log::message_t /*t*/, const char* data)
 {
   communicator->message(data);
 }

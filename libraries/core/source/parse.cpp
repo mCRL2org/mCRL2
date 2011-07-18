@@ -17,6 +17,7 @@
 #include "mcrl2/core/print.h"
 
 using namespace std;
+using namespace mcrl2::log;
 
 namespace mcrl2
 {
@@ -117,8 +118,8 @@ bool is_user_identifier(std::string const& s)
   // the identifier is not proper. This should be replaced
   // by a try/catch block, after the parser has been adapted
   // to throw an exception, instead of printing an error.
-  mcrl2_log_level_t old_level = mcrl2_logger::get_reporting_level();
-  mcrl2_logger::set_reporting_level(log_quiet);
+  log_level_t old_level = mcrl2_logger::get_reporting_level();
+  mcrl2_logger::set_reporting_level(quiet);
   const bool result=parse_identifier(stream) != NULL;
   mcrl2_logger::set_reporting_level(old_level);
   return result;

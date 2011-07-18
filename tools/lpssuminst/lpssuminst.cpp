@@ -23,6 +23,7 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 class suminst_tool: public rewriter_tool<input_output_tool>
 {

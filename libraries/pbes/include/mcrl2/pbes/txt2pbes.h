@@ -34,7 +34,7 @@ pbes<> txt2pbes(std::istream& spec_stream)
   spec_stream >> result;
   try
   {
-    mCRL2log(verbose) << "checking monotonicity..." << std::endl;
+    mCRL2log(log::verbose) << "checking monotonicity..." << std::endl;
     pbes_system::normalize(result);
   }
   catch (std::exception& /* e */)

@@ -32,6 +32,7 @@
 
 using namespace mcrl2::bes;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::log;
 
 namespace mcrl2
 {

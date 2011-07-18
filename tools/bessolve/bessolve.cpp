@@ -26,6 +26,7 @@
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/small_progress_measures.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

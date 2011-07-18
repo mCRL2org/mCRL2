@@ -126,7 +126,7 @@ class parity_game_generator: public utilities::algorithm
     {
       size_t result;
 
-      mCRL2log(debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
+      mCRL2log(log::debug2, "parity_game_generator") << "Adding equation for " << t << std::endl;
 
       // TODO: can this insertion be done more efficiently?
       atermpp::map<pbes_expression, size_t>::iterator i = m_pbes_expression_index.find(t);
@@ -177,9 +177,9 @@ class parity_game_generator: public utilities::algorithm
       {
         const pbes_equation& pbes_eqn = *m_pbes_equation_index[tr::name(psi)];
         substitution_function sigma = make_substitution(pbes_eqn.variable().parameters(), tr::param(psi));
-        mCRL2log(debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into ";
+        mCRL2log(log::debug2, "parity_game_generator") << "Expanding right hand side " << print(pbes_eqn.formula()) << " into ";
         pbes_expression result(R(pbes_eqn.formula(), sigma));
-        mCRL2log(debug2, "parity_game_generator") << print(result) << std::endl;
+        mCRL2log(log::debug2, "parity_game_generator") << print(result) << std::endl;
         return result;
       }
       return psi;
@@ -245,17 +245,17 @@ class parity_game_generator: public utilities::algorithm
     virtual
     void LOG_BES_EQUATION(size_t index, const std::set<size_t>& rhs)
     {
-      if (mCRL2logEnabled(debug, "parity_game_generator"))
+      if (mCRL2logEnabled(log::debug, "parity_game_generator"))
       {
         const std::pair<pbes_expression, size_t>& eqn = m_bes[index];
         const size_t priority = eqn.second;
-        mCRL2log(debug, "parity_game_generator") << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
+        mCRL2log(log::debug, "parity_game_generator") << (priority % 2 == 1 ? "mu Y" : "nu Y") << index << " = ";
         std::string op = (get_operation(index) == PGAME_AND ? " && " : " || ");
         for (std::set<size_t>::const_iterator i = rhs.begin(); i != rhs.end(); ++i)
         {
-          mCRL2log(debug, "parity_game_generator") << (i == rhs.begin() ? "" : op) << "Y" << *i;
+          mCRL2log(log::debug, "parity_game_generator") << (i == rhs.begin() ? "" : op) << "Y" << *i;
         }
-        mCRL2log(debug, "parity_game_generator") <<  " (priority = " << priority << ")" << std::endl;
+        mCRL2log(log::debug, "parity_game_generator") <<  " (priority = " << priority << ")" << std::endl;
       }
     }
 
@@ -263,11 +263,11 @@ class parity_game_generator: public utilities::algorithm
     virtual
     void LOG_EQUATION_COUNT(size_t size, size_t step = 1000) const
     {
-      if (mCRL2logEnabled(verbose))
+      if (mCRL2logEnabled(log::verbose))
       {
         if (size > 0 && (size % step == 0 || (size < 1000 && size % 100 == 0)))
         {
-          mCRL2log(verbose) << "Generated " << size << " BES equations" << std::endl;
+          mCRL2log(log::verbose) << "Generated " << size << " BES equations" << std::endl;
         }
       }
     }
@@ -406,7 +406,7 @@ class parity_game_generator: public utilities::algorithm
       pbes_expression& psi = eqn.first;
       const size_t priority = eqn.second;
 
-      mCRL2log(debug, "parity_game_generator") << std::endl << "Generating equation for expression " << print(psi) << std::endl;
+      mCRL2log(log::debug, "parity_game_generator") << std::endl << "Generating equation for expression " << print(psi) << std::endl;
 
       // expand the right hand side if needed
       psi = expand_rhs(psi);

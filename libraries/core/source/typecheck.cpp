@@ -34,6 +34,7 @@
 #include "mcrl2/data/multiple_possible_sorts.h"
 #include "mcrl2/data/function_update.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
 

@@ -99,7 +99,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(info) << "  Witness: " << core::pp(v_witness) << std::endl;
+          mCRL2log(log::info) << "  Witness: " << core::pp(v_witness) << std::endl;
         }
       }
     }
@@ -121,7 +121,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(info) << "  Counter-example: " << core::pp(v_counter_example) << std::endl;
+          mCRL2log(log::info) << "  Counter-example: " << core::pp(v_counter_example) << std::endl;
         }
       }
     }
@@ -174,21 +174,21 @@ class Formula_Checker
       while (!ATisEmpty(a_formulas))
       {
         v_formula = ATAgetFirst(a_formulas);
-        mCRL2log(info) << "'" << core::pp(v_formula) << "'";
+        mCRL2log(log::info) << "'" << core::pp(v_formula) << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
         Answer v_is_contradiction = f_bdd_prover.is_contradiction();
         if (v_is_tautology == answer_yes)
         {
-          mCRL2log(info) << "Tautology" << std::endl;
+          mCRL2log(log::info) << "Tautology" << std::endl;
         }
         else if (v_is_contradiction == answer_yes)
         {
-          mCRL2log(info) << "Contradiction" << std::endl;
+          mCRL2log(log::info) << "Contradiction" << std::endl;
         }
         else
         {
-          mCRL2log(info) << "Undeterminable" << std::endl;
+          mCRL2log(log::info) << "Undeterminable" << std::endl;
           print_counter_example();
           print_witness();
           save_dot_file(v_formula_number);

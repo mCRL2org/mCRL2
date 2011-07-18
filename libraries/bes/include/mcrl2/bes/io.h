@@ -283,25 +283,25 @@ void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename
     {
       if (aterm_ascii)
       {
-        mCRL2log(verbose) << "Saving result in ATerm ascii format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in ATerm ascii format..." << std::endl;
         bes_spec.save(outfilename, false);
       }
       else
       {
-        mCRL2log(verbose) << "Saving result in ATerm binary format..." << std::endl;
+        mCRL2log(log::verbose) << "Saving result in ATerm binary format..." << std::endl;
         bes_spec.save(outfilename, true);
       }
       break;
     }
     case bes_output_cwi:
     {
-      mCRL2log(verbose) << "Saving result in CWI format..." << std::endl;
+      mCRL2log(log::verbose) << "Saving result in CWI format..." << std::endl;
       bes::bes2cwi(bes_spec.equations().begin(), bes_spec.equations().end(), outfilename);
       break;
     }
     case bes_output_pgsolver:
     {
-      mCRL2log(verbose) << "Saving result in PGSolver format..." << std::endl;
+      mCRL2log(log::verbose) << "Saving result in PGSolver format..." << std::endl;
       boolean_equation_system<> bes_spec_standard_form(bes_spec);
       make_standard_form(bes_spec_standard_form, true);
       bes::bes2pgsolver(bes_spec_standard_form.equations().begin(), bes_spec_standard_form.equations().end(), outfilename);

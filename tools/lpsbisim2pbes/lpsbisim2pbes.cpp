@@ -27,6 +27,7 @@ using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_mandatory_argument;
 using utilities::tools::tool;
+using namespace mcrl2::log;
 
 /// \brief Base class for tools that take a file as input.
 class input_input_tool: public tool

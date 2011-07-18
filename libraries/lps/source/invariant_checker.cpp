@@ -29,6 +29,7 @@ namespace detail
 using namespace mcrl2::data;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 // Class Invariant_Checker ------------------------------------------------------------------------
 // Class Invariant_Checker - Functions declared private -----------------------------------------

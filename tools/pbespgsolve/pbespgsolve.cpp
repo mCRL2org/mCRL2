@@ -40,6 +40,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using utilities::tools::input_tool;
 using utilities::tools::rewriter_tool;
+using namespace mcrl2::log;
 //using utilities::tools::pbes_rewriter_tool;
 
 // class pg_solver_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >

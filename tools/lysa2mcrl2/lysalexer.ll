@@ -11,6 +11,8 @@
 #include <sstream>
 
 
+using namespace mcrl2::log;
+
 /*
  * we store the semantic values of all lexical tokens in an object
  * derived from lysa::Expression. this way, we avoid using bison's

@@ -85,7 +85,7 @@ class bisim_partitioner
       :max_state_index(0), aut(l), tau_label(determine_tau_label(l))
     {
       assert(branching || !preserve_divergence);
-      mCRL2log(verbose) << (preserve_divergence?"Divergence preserving b)":"B") <<
+      mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b)":"B") <<
                   (branching?"ranching b":"") << "isimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
@@ -494,12 +494,12 @@ class bisim_partitioner
           // There are flagged and non flagged states. So, the block must be split.
           // Move the unflagged states to the new block.
 
-          if (mCRL2logEnabled(debug))
+          if (mCRL2logEnabled(log::debug))
           {
             const size_t m=static_cast<size_t>(pow(10,floor(log10(static_cast<double>((blocks.size()+1)/2)))));
             if ((blocks.size()+1)/2 % m==0)
             {
-              mCRL2log(debug) << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << std::endl;
+              mCRL2log(log::debug) << "Bisimulation partitioner: create block " << (blocks.size()+1)/2 << std::endl;
             }
           }
           // Record how block *i1 is split, to use this to generate counter examples.

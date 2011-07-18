@@ -56,7 +56,7 @@ class gauss_elimination_algorithm : public utilities::algorithm
 
     void LOG_EQUATION_VERBOSE(const std::string& msg, const equation_type& eq) const
     {
-      mCRL2log(verbose) << msg << print_equation(eq) << "\n";
+      mCRL2log(log::verbose) << msg << print_equation(eq) << "\n";
     }
 
     /// \brief Prints the sequence of pbes equations [first, last) to clog.
@@ -65,13 +65,13 @@ class gauss_elimination_algorithm : public utilities::algorithm
     template <typename Iter>
     void LOG_EQUATIONS_DEBUG(const std::string& msg, Iter first, Iter last) const
     {
-      mCRL2log(debug) << msg << print_equations(first, last);
+      mCRL2log(log::debug) << msg << print_equations(first, last);
     }
 
     template <typename Iter>
     void LOG_EQUATIONS_DEBUG1(const std::string& msg, Iter first, Iter last) const
     {
-      mCRL2log(debug1) << msg << print_equations(first, last);
+      mCRL2log(log::debug1) << msg << print_equations(first, last);
     }
 
   public:

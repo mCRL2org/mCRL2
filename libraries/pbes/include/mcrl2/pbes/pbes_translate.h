@@ -1383,7 +1383,7 @@ inline pbes<> pbes_translate(const state_formulas::state_formula& formula, const
 {
   if ((formula.has_time() || spec.process().has_time()) && !timed)
   {
-    mCRL2log(warning) << "Switch to timed translation because formula has " << (formula.has_time()?"":"no ") << "time, and process has " << (spec.process().has_time()?"":"no ") << "time" << std::endl;
+    mCRL2log(log::warning) << "Switch to timed translation because formula has " << (formula.has_time()?"":"no ") << "time, and process has " << (spec.process().has_time()?"":"no ") << "time" << std::endl;
     timed = true;
   }
 

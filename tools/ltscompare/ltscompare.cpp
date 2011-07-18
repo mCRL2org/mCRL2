@@ -37,6 +37,7 @@ using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 static const char* equivalent_string(lts_equivalence eq)
 {

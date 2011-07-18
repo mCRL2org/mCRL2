@@ -31,6 +31,7 @@
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
+using namespace mcrl2::log;
 
 StandardSimulator::StandardSimulator()
 {
@@ -98,7 +99,7 @@ void StandardSimulator::LoadSpec(mcrl2::lps::specification const& spec)
 
 void StandardSimulator::LoadView(const std::string& /*filename*/)
 {
-  mCRL2log(error) << "cannot open DLLs without wxWidgets" << std::endl;
+  mCRL2log(mcrl2::log::error) << "cannot open DLLs without wxWidgets" << std::endl;
 }
 
 void StandardSimulator::SetTauPrioritisation(bool enable)

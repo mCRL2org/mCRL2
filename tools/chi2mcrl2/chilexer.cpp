@@ -544,6 +544,7 @@ static yyconst flex_int16_t yy_chk[248] =
 #include <utility>
 
 using namespace std;
+using namespace mcrl2::log;
 
 int line = 1, col = 1;
 int scope_lvl;

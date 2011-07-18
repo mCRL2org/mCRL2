@@ -259,16 +259,16 @@ class pbes_parelm_algorithm
       }
 
       // print debug output
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << "\ninfluential parameters:" << std::endl;
+        mCRL2log(log::debug) << "\ninfluential parameters:" << std::endl;
         for (std::set<size_t>::iterator i = v.begin(); i != v.end(); ++i)
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::variable v1 = predicate_variables[*i];
-          mCRL2log(debug) << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+          mCRL2log(log::debug) << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
         }
-        mCRL2log(debug) << "\ndependencies:" << std::endl;
+        mCRL2log(log::debug) << "\ndependencies:" << std::endl;
         typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
         std::pair<edge_iterator, edge_iterator> e = edges(G);
         edge_iterator first = e.first;
@@ -284,14 +284,14 @@ class pbes_parelm_algorithm
           data::variable v2 = predicate_variables[i2];
           std::string left  = "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")";
           std::string right = "(" + mcrl2::core::pp(X2) + ", " + mcrl2::core::pp(v2) + ")";
-          mCRL2log(debug) << left << " -> " << right << std::endl;
+          mCRL2log(log::debug) << left << " -> " << right << std::endl;
         }
       }
 
       // print verbose output
-      if (mCRL2logEnabled(verbose))
+      if (mCRL2logEnabled(log::verbose))
       {
-        mCRL2log(verbose) << "\nremoving the following parameters:" << std::endl;
+        mCRL2log(log::verbose) << "\nremoving the following parameters:" << std::endl;
         for (std::map<core::identifier_string, std::vector<size_t> >::const_iterator i = removals.begin(); i != removals.end(); ++i)
         {
           core::identifier_string X1 = i->first;
@@ -299,7 +299,7 @@ class pbes_parelm_algorithm
           for (std::vector<size_t>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
             data::variable v1 = predicate_variables[*j + propvar_offsets[X1]];
-            mCRL2log(verbose) << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+            mCRL2log(log::verbose) << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
           }
         }
       }

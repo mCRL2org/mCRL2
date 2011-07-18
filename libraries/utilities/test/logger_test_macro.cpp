@@ -14,9 +14,11 @@
 
 // Override MCRL2_MAX_LOG_LEVEL
 // Must come before the first include of logger.h
-#define MCRL2_MAX_LOG_LEVEL log_debug3
+#define MCRL2_MAX_LOG_LEVEL debug3
 
 #include "mcrl2/utilities/logger.h"
+
+using namespace mcrl2::log;
 
 void print_all_log_levels()
 {

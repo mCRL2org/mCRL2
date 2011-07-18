@@ -119,7 +119,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
       else
       {
         //ProcInit != NULL
-        mCRL2log(error) << "parse error: multiple initialisations" << std::endl;
+        mCRL2log(log::error) << "parse error: multiple initialisations" << std::endl;
         return NULL;
       }
     }
@@ -159,7 +159,7 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
   //check whether an initialisation is present
   if (ProcInit == NULL)
   {
-    mCRL2log(error) << "parse error: missing initialisation" << std::endl;
+    mCRL2log(log::error) << "parse error: missing initialisation" << std::endl;
     return NULL;
   }
   Result = gsMakeProcSpec(
@@ -206,7 +206,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
       else
       {
         //PBEqnSpec != NULL
-        mCRL2log(error) << "parse error: multiple parameterised boolean equation specifications" << std::endl;
+        mCRL2log(log::error) << "parse error: multiple parameterised boolean equation specifications" << std::endl;
         return NULL;
       }
     }
@@ -219,7 +219,7 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
       else
       {
         //PBInit != NULL
-        mCRL2log(error) << "parse error: multiple initialisations" << std::endl;
+        mCRL2log(log::error) << "parse error: multiple initialisations" << std::endl;
         return NULL;
       }
     }
@@ -251,13 +251,13 @@ ATermAppl gsPBESSpecEltsToSpec(ATermList SpecElts)
   //check whether a parameterised boolean equation specification is present
   if (PBEqnSpec == NULL)
   {
-    mCRL2log(error) << "parse error: missing parameterised boolean equation specification" << std::endl;
+    mCRL2log(log::error) << "parse error: missing parameterised boolean equation specification" << std::endl;
     return NULL;
   }
   //check whether an initialisation is present
   if (PBInit == NULL)
   {
-    mCRL2log(error) << "parse error: missing initialisation" << std::endl;
+    mCRL2log(log::error) << "parse error: missing initialisation" << std::endl;
     return NULL;
   }
   Result = gsMakePBES(

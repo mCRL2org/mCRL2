@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 

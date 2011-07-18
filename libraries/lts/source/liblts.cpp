@@ -32,6 +32,7 @@
 
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+using namespace mcrl2::log;
 
 #ifdef USE_BCG
 // #include <bcg_user.h>

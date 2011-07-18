@@ -156,14 +156,14 @@ class pbespgsolve_algorithm
     bool run(pbes<Container>& p)
     {
       m_timer.start("initialization");
-      mCRL2log(verbose) << "Generating parity game..."  << std::endl;
+      mCRL2log(log::verbose) << "Generating parity game..."  << std::endl;
       // Generate the game from a PBES:
       verti goal_v;
       ParityGame pg;
 
       pg.assign_pbes(p, &goal_v, StaticGraph::EDGE_BIDIRECTIONAL, m_options.rewrite_strategy); // N.B. mCRL2 could raise an exception here
 
-      mCRL2log(verbose) << "Solving..." << std::endl;
+      mCRL2log(log::verbose) << "Solving..." << std::endl;
 
       // Create a solver:
       std::auto_ptr<ParityGameSolver> solver(solver_factory->create(pg));

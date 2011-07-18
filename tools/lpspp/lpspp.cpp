@@ -24,6 +24,7 @@
 #include "mcrl2/lps/print.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;

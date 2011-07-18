@@ -693,14 +693,14 @@ class pbes_constelm_algorithm: public utilities::algorithm
     /// \brief Logs the vertices of the dependency graph.
     void LOG_VERTICES_DEBUG(const std::string& msg) const
     {
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << msg;
+        mCRL2log(log::debug) << msg;
         for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
         {
           for (typename atermpp::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            mCRL2log(debug) << j->to_string() << std::endl;
+            mCRL2log(log::debug) << j->to_string() << std::endl;
           }
         }
       }
@@ -709,14 +709,14 @@ class pbes_constelm_algorithm: public utilities::algorithm
     /// \brief Logs the edges of the dependency graph.
     void LOG_EDGES_DEBUG(const std::string& msg)
     {
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << msg;
+        mCRL2log(log::debug) << msg;
         for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
         {
           for (typename atermpp::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            mCRL2log(debug) << j->to_string() << std::endl;
+            mCRL2log(log::debug) << j->to_string() << std::endl;
           }
         }
       }
@@ -724,39 +724,39 @@ class pbes_constelm_algorithm: public utilities::algorithm
 
     void LOG_TODO_LIST_DEBUG(const std::deque<propositional_variable_decl_type>& todo)
     {
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << "\n<todo list> [";
+        mCRL2log(log::debug) << "\n<todo list> [";
         for (typename std::deque<propositional_variable_decl_type>::const_iterator i = todo.begin(); i != todo.end(); ++i)
         {
           if (i != todo.begin())
           {
-            mCRL2log(debug) << ", ";
+            mCRL2log(log::debug) << ", ";
           }
-          mCRL2log(debug) << core::pp(i->name());
+          mCRL2log(log::debug) << core::pp(i->name());
         }
-        mCRL2log(debug) << "]" << std::endl;
+        mCRL2log(log::debug) << "]" << std::endl;
       }
     }
 
     void LOG_EDGE_UPDATE_DEBUG(const edge& e, const vertex& u, const vertex& v)
     {
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << "\n<updating edge>" << e.to_string() << std::endl;
-        mCRL2log(debug) << "  <source vertex       >" << u.to_string() << std::endl;
-        mCRL2log(debug) << "  <target vertex before>" << v.to_string() << std::endl;
+        mCRL2log(log::debug) << "\n<updating edge>" << e.to_string() << std::endl;
+        mCRL2log(log::debug) << "  <source vertex       >" << u.to_string() << std::endl;
+        mCRL2log(log::debug) << "  <target vertex before>" << v.to_string() << std::endl;
       }
     }
 
     void LOG_CONDITION_DEBUG(const edge& e, const vertex& u, const term_type& value)
     {
-      mCRL2log(debug) << "\nEvaluated condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
+      mCRL2log(log::debug) << "\nEvaluated condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
     }
 
     void LOG_EVALUATION_FAILURE_DEBUG(const edge& e, const vertex& u)
     {
-      mCRL2log(debug) << "\nCould not evaluate condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
+      mCRL2log(log::debug) << "\nCould not evaluate condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
     }
 
   public:
@@ -956,25 +956,25 @@ class pbes_constelm_algorithm: public utilities::algorithm
       }
 
       // print the parameters and equation that are removed
-      if (mCRL2logEnabled(verbose))
+      if (mCRL2logEnabled(log::verbose))
       {
-        mCRL2log(verbose) << "\nremoved the following constant parameters:" << std::endl;
+        mCRL2log(log::verbose) << "\nremoved the following constant parameters:" << std::endl;
         std::map<propositional_variable_decl_type, std::vector<variable_type> > v = redundant_parameters();
         for (typename std::map<propositional_variable_decl_type, std::vector<variable_type> >::iterator i = v.begin(); i != v.end(); ++i)
         {
           for (typename std::vector<variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            mCRL2log(verbose) << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
+            mCRL2log(log::verbose) << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
           }
         }
 
         if (remove_redundant_equations)
         {
-          mCRL2log(verbose) << "\nremoved the following equations:" << std::endl;
+          mCRL2log(log::verbose) << "\nremoved the following equations:" << std::endl;
           const std::set<propositional_variable_decl_type> r = redundant_equations();
           for (typename std::set<propositional_variable_decl_type>::const_iterator i = r.begin(); i != r.end(); ++i)
           {
-            mCRL2log(verbose) << "  equation " << core::pp(i->name()) << std::endl;
+            mCRL2log(log::verbose) << "  equation " << core::pp(i->name()) << std::endl;
           }
         }
       }

@@ -19,6 +19,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
+using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;

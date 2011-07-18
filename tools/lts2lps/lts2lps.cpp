@@ -43,6 +43,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
 using namespace mcrl2::data;
+using namespace mcrl2::log;
 
 
 

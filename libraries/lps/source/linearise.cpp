@@ -370,7 +370,7 @@ class specification_basic_type:public boost::noncopyable
 
         if (isnew == 0)
         {
-          mCRL2log(warning) << "sort " << data::pp(sort) << "is added twice" << std::endl;
+          mCRL2log(log::warning) << "sort " << data::pp(sort) << "is added twice" << std::endl;
           return;
         }
 
@@ -1837,19 +1837,19 @@ class specification_basic_type:public boost::noncopyable
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       {
-        mCRL2log(warning) << "generated " << numberOfNewProcesses << " new internal processes.";
+        mCRL2log(log::warning) << "generated " << numberOfNewProcesses << " new internal processes.";
 
         if (!options.lin_method!=lmStack)
         {
-          mCRL2log(warning) << " A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method." << std::endl;
+          mCRL2log(log::warning) << " A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method." << std::endl;
         }
         else if (options.lin_method==lmRegular2)
         {
-          mCRL2log(warning) << " A possible unbounded loop can be avoided by using `stack' as the linearisation method." << std::endl;
+          mCRL2log(log::warning) << " A possible unbounded loop can be avoided by using `stack' as the linearisation method." << std::endl;
         }
         else
         {
-          mCRL2log(warning) << std::endl;
+          mCRL2log(log::warning) << std::endl;
         }
         warningNumber=warningNumber*2;
       }
@@ -5731,7 +5731,7 @@ class specification_basic_type:public boost::noncopyable
         // is essential for all processes. In these cases a
         // message about the block operator is very confusing.
       {
-        mCRL2log(verbose) << "- calculating the " << (is_allow?"allow":"block") <<
+        mCRL2log(log::verbose) << "- calculating the " << (is_allow?"allow":"block") <<
               " operator on " << sourcesumlist.size() << " summands";
       }
 
@@ -5829,9 +5829,9 @@ class specification_basic_type:public boost::noncopyable
                                    deprecated::summand(variable_list(),sort_bool::true_(),true,action_list(),assignment_list()));
         }
       }
-      if (mCRL2logEnabled(verbose) && (sourcesumlist_length>2 || is_allow))
+      if (mCRL2logEnabled(log::verbose) && (sourcesumlist_length>2 || is_allow))
       {
-        mCRL2log(verbose) << ", resulting in " << resultsumlist.size() << " summands\n";
+        mCRL2log(log::verbose) << ", resulting in " << resultsumlist.size() << " summands\n";
       }
 
       return resultsumlist;
@@ -6488,7 +6488,7 @@ class specification_basic_type:public boost::noncopyable
       /* We follow the implementation of Muck van Weerdenburg, described in
          a note: Calculation of communication with open terms. */
 
-      mCRL2log(verbose) << "- calculating the communication operator on " << summands.size() << " summands";
+      mCRL2log(log::verbose) << "- calculating the communication operator on " << summands.size() << " summands";
 
       /* first we sort the multiactions in communications */
       communication_expression_list resultingCommunications;
@@ -6611,7 +6611,7 @@ class specification_basic_type:public boost::noncopyable
         }
       }
 
-      mCRL2log(verbose) << " resulting in " << resultsumlist.size() << " summands\n";
+      mCRL2log(log::verbose) << " resulting in " << resultsumlist.size() << " summands\n";
       return reverse(resultsumlist);
     }
 
@@ -7098,7 +7098,7 @@ class specification_basic_type:public boost::noncopyable
       variable_list& pars_result,
       assignment_list& init_result)
     {
-      mCRL2log(verbose) << "- calculating parallel composition: " << summands1.size() <<
+      mCRL2log(log::verbose) << "- calculating parallel composition: " << summands1.size() <<
             " || " << summands2.size() << " = ";
 
       // At this point the parameters of pars1 and pars2 are unique, except for
@@ -7117,7 +7117,7 @@ class specification_basic_type:public boost::noncopyable
       pars3=reverse(pars3);
       deprecated::summand_list result=combine_summand_lists(summands1,summands2,pars1,pars3,pars2);
 
-      mCRL2log(verbose) << result.size() << " resulting summands.\n";
+      mCRL2log(log::verbose) << result.size() << " resulting summands.\n";
       pars_result=pars1+pars3;
       init_result=init1 + init2;
       return result;
@@ -7621,7 +7621,7 @@ class specification_basic_type:public boost::noncopyable
         {
           if (print_info)
           {
-            mCRL2log(verbose) << "process " << procId.name() << " contains time.\n";
+            mCRL2log(log::verbose) << "process " << procId.name() << " contains time.\n";
           }
         }
         if (objectdata[n].containstime!=ct)
@@ -8000,7 +8000,7 @@ class specification_basic_type:public boost::noncopyable
         if (multiaction==push_front(action_list(),terminationAction))
         {
           acts=push_front(acts,terminationAction.label());
-          mCRL2log(warning) << "The action " << core::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
+          mCRL2log(log::warning) << "The action " << core::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
           return;
         }
       }
@@ -8084,7 +8084,7 @@ class specification_basic_type:public boost::noncopyable
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
       if (determinewhetherprocessescontaintime(init1) && !(options.add_delta))
       {
-        mCRL2log(warning) << "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use `Add true->delta summands to each state in each process' or command line option `-D' to suppress." << std::endl;
+        mCRL2log(log::warning) << "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use `Add true->delta summands to each state in each process' or command line option `-D' to suppress." << std::endl;
       }
       atermpp::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);
@@ -8123,7 +8123,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
   mcrl2::lps::t_lin_options lin_options)
 {
-  mCRL2log(verbose) << "Linearising the process specification using the '" << lin_method_to_string(lin_options.lin_method) << " ' method.\n";
+  mCRL2log(log::verbose) << "Linearising the process specification using the '" << lin_method_to_string(lin_options.lin_method) << " ' method.\n";
   data_specification data_spec=type_checked_spec.data();
   std::set<data::sort_expression> s;
   process::find_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));

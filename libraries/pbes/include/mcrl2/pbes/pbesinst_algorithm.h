@@ -100,11 +100,11 @@ class pbesinst_algorithm: public utilities::algorithm
     /// \brief Prints a log message for every 1000-th equation
     void LOG_EQUATION_COUNT_VERBOSE(size_t size) const
     {
-      if (mCRL2logEnabled(verbose))
+      if (mCRL2logEnabled(log::verbose))
       {
         if (size > 0 && size % 1000 == 0)
         {
-          mCRL2log(verbose) << "Generated " << size << " BES equations" << std::endl;
+          mCRL2log(log::verbose) << "Generated " << size << " BES equations" << std::endl;
         }
       }
     }

@@ -83,12 +83,12 @@ class constelm_algorithm: public lps::detail::lps_algorithm
     void LOG_CONSTANT_PARAMETERS(const data::mutable_map_substitution<>& sigma,
                                  const std::string& msg = "")
     {
-      if (mCRL2logEnabled(verbose))
+      if (mCRL2logEnabled(log::verbose))
       {
-        mCRL2log(verbose) << msg;
+        mCRL2log(log::verbose) << msg;
         for (data::mutable_map_substitution<>::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
         {
-          mCRL2log(verbose) << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
+          mCRL2log(log::verbose) << data::pp(i->first) << " := " << data::pp(i->second) << std::endl;
         }
       }
     }
@@ -100,9 +100,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                               const std::string& msg = ""
                              )
     {
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << msg
+        mCRL2log(log::debug) << msg
                         << data::pp(d_j) << "\n"
                         << "      value before: " << data::pp(Rd_j) << "\n"
                         << "      value after:  " << data::pp(Rg_ij) << "\n"
@@ -117,9 +117,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                       )
 
     {
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << msg
+        mCRL2log(log::debug) << msg
                         << data::pp(cond)
                         << data::print_substitution(sigma)
                         << " -> "

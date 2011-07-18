@@ -22,6 +22,7 @@ using std::cin;
 using std::cout;
 #endif
 
+using namespace mcrl2::log;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::core;
 
@@ -229,7 +230,7 @@ void mcrl2_lexer::yyerror(const char *s) {
     if (oldcol_nr < 0) {
       oldcol_nr = 0;
     }
-    mCRL2log(error) << "token '" << YYText() << "' at position " 
+    mCRL2log(mcrl2::log::error) << "token '" << YYText() << "' at position " 
                     << line_nr << ", " << oldcol_nr << " caused the following error: " << s << std::endl;
   }
 }

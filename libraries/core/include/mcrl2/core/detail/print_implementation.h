@@ -377,7 +377,7 @@ inline static void dbg_prints(const char* Value)
   static_cast<void>(Value); // Harmless
 //Pre:  Value is not NULL
 //Post: Value is written to stderr in C/C++ style if gsDebug is true
-  mCRL2log(debug2, "pretty printer") << Value << std::endl;
+  mCRL2log(log::debug2, "pretty printer") << Value << std::endl;
 }
 
 static void PrintAFun(std::ostream& OutStream, const AFun fun)
@@ -475,7 +475,7 @@ void PrintPart__CXX(std::ostream& OutStream, const ATerm Part,
     }
     else
     {
-      mCRL2log(error)  << "ATerm Part is not an ATermAppl or an ATermList" << std::endl;
+      mCRL2log(log::error)  << "ATerm Part is not an ATermAppl or an ATermList" << std::endl;
       assert(false);
     }
   }
@@ -492,13 +492,13 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsSortExpr(Part))
   {
     //print sort expression or unknown
-    mCRL2log(debug2, "pretty printer") << "printing sort expression or unknown\n" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing sort expression or unknown\n" << std::endl;
     PrintSortExpr(OutStream, Part, pp_format, ShowSorts, PrecLevel);
   }
   else if (gsIsStructCons(Part))
   {
     //print structured sort constructor
-    mCRL2log(debug2, "pretty printer") << "printing structured sort constructor" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing structured sort constructor" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList StructProjs = ATLgetArgument(Part, 1);
@@ -520,7 +520,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsStructProj(Part))
   {
     //print structured sort projection
-    mCRL2log(debug2, "pretty printer") << "printing structured sort projection" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing structured sort projection" << std::endl;
     ATermAppl Projection = ATAgetArgument(Part, 0);
     if (!gsIsNil(Projection))
     {
@@ -534,20 +534,20 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsNil(Part))
   {
     //print nil
-    mCRL2log(debug2, "pretty printer") << "printing nil" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing nil" << std::endl;
     OutStream <<  "nil";
   }
   else if (gsIsDataExpr(Part))
   {
     //print data expression
-    mCRL2log(debug2, "pretty printer") << "printing data expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing data expression" << std::endl;
     PrintDataExpr(OutStream, Part, pp_format, ShowSorts, PrecLevel);
 
   }
   else if (gsIsIdInit(Part))
   {
     //print identifier initialisation
-    mCRL2log(debug2, "pretty printer") << "printing identifier initialisation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing identifier initialisation" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     OutStream <<  " = ";
@@ -557,7 +557,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsMultAct(Part))
   {
     //print multiaction
-    mCRL2log(debug2, "pretty printer") << "printing multiaction" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing multiaction" << std::endl;
     ATermList Actions = ATLgetArgument(Part, 0);
     size_t ActionsLength = ATgetLength(Actions);
     if (ActionsLength == 0)
@@ -582,7 +582,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsActId(Part))
   {
     //print action identifier
-    mCRL2log(debug2, "pretty printer") << "printing action identifier" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing action identifier" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     if (ShowSorts)
@@ -599,13 +599,13 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsProcExpr(Part))
   {
     //print process expression
-    mCRL2log(debug2, "pretty printer") << "printing process expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing process expression" << std::endl;
     PrintProcExpr(OutStream, Part, pp_format, ShowSorts, PrecLevel);
   }
   else if (gsIsProcVarId(Part))
   {
     //print process variable
-    mCRL2log(debug2, "pretty printer") << "printing process variable" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing process variable" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     if (ShowSorts)
@@ -622,14 +622,14 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsMultActName(Part))
   {
     //print multiaction name
-    mCRL2log(debug2, "pretty printer") << "printing multiaction name" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing multiaction name" << std::endl;
     PrintPart_List(OutStream, ATLgetArgument(Part, 0),
                                pp_format, ShowSorts, 0, NULL, " | ");
   }
   else if (gsIsRenameExpr(Part))
   {
     //print renaming expression
-    mCRL2log(debug2, "pretty printer") << "printing renaming expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing renaming expression" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     OutStream <<  " -> ";
@@ -639,7 +639,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsCommExpr(Part))
   {
     //print communication expression
-    mCRL2log(debug2, "pretty printer") << "printing communication expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing communication expression" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermAppl CommResult = ATAgetArgument(Part, 1);
@@ -653,7 +653,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsProcSpec(Part) || gsIsLinProcSpec(Part))
   {
     //print process specification or LPS
-    mCRL2log(debug2, "pretty printer") << "printing process specification or LPS" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing process specification or LPS" << std::endl;
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
     ATermAppl ActSpec = ATAgetArgument(Part, 1);
@@ -688,7 +688,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsDataSpec(Part))
   {
     //print data specification
-    mCRL2log(debug2, "pretty printer") << "printing data specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing data specification" << std::endl;
     ATermAppl SortSpec = ATAgetArgument(Part, 0);
     bool SortSpecEmpty = ATisEmpty(ATLgetArgument(SortSpec, 0));
     ATermAppl ConsSpec = ATAgetArgument(Part, 1);
@@ -717,7 +717,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsSortSpec(Part))
   {
     //print sort specification
-    mCRL2log(debug2, "pretty printer") << "printing sort specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing sort specification" << std::endl;
     ATermList SortDecls = ATLgetArgument(Part, 0);
     if (ATgetLength(SortDecls) > 0)
     {
@@ -729,7 +729,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsConsSpec(Part) || gsIsMapSpec(Part))
   {
     //print operation specification
-    mCRL2log(debug2, "pretty printer") << "printing operation specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing operation specification" << std::endl;
     ATermList OpIds = ATLgetArgument(Part, 0);
     if (ATgetLength(OpIds) > 0)
     {
@@ -740,14 +740,14 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsDataEqnSpec(Part))
   {
     //print equation specification
-    mCRL2log(debug2, "pretty printer") << "printing equation specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing equation specification" << std::endl;
     PrintEqns(OutStream, ATLgetArgument(Part, 0),
                           pp_format, ShowSorts, PrecLevel);
   }
   else if (gsIsActSpec(Part))
   {
     //print action specification
-    mCRL2log(debug2, "pretty printer") << "printing action specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing action specification" << std::endl;
     ATermList ActIds = ATLgetArgument(Part, 0);
     if (ATgetLength(ActIds) > 0)
     {
@@ -758,7 +758,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsSortRef(Part))
   {
     //print sort reference
-    mCRL2log(debug2, "pretty printer") << "printing sort reference declaration" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing sort reference declaration" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     OutStream <<  " = ";
@@ -768,7 +768,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsDataEqn(Part))
   {
     //print data equation (without variables)
-    mCRL2log(debug2, "pretty printer") << "printing data equation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing data equation" << std::endl;
     ATermAppl Condition = ATAgetArgument(Part, 1);
     if (/*!gsIsNil(Condition) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Condition)))
     {
@@ -785,7 +785,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsGlobVarSpec(Part))
   {
     //print global variable specification
-    mCRL2log(debug2, "pretty printer") << "printing global variable specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing global variable specification" << std::endl;
     ATermList Vars = ATLgetArgument(Part, 0);
     if (ATgetLength(Vars) > 0)
     {
@@ -797,7 +797,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsProcEqnSpec(Part))
   {
     //print process equation specification
-    mCRL2log(debug2, "pretty printer") << "printing process equation specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing process equation specification" << std::endl;
     ATermList ProcEqns = ATLgetArgument(Part, 0);
     if (ATgetLength(ProcEqns) > 0)
     {
@@ -809,7 +809,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsLinearProcess(Part))
   {
     //print linear process
-    mCRL2log(debug2, "pretty printer") << "printing linear process" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing linear process" << std::endl;
     //print process name and variable declarations
     ATermList VarDecls = ATLgetArgument(Part, 0);
     size_t VarDeclsLength = ATgetLength(VarDecls);
@@ -849,7 +849,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsProcEqn(Part))
   {
     //print process equation
-    mCRL2log(debug2, "pretty printer") << "printing process equation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing process equation" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList DataVarIds = ATLgetArgument(Part, 1);
@@ -871,7 +871,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsProcessInit(Part))
   {
     //print initialisation
-    mCRL2log(debug2, "pretty printer") << "printing initialisation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing initialisation" << std::endl;
     OutStream <<  "init ";
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
@@ -880,7 +880,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsLinearProcessInit(Part))
   {
     //print linear process initialisation
-    mCRL2log(debug2, "pretty printer") << "printing LPS initialisation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing LPS initialisation" << std::endl;
     OutStream <<  "init P";
     ATermList Args = ATLgetArgument(Part, 0);
     if (ATgetLength(Args) > 0)
@@ -899,13 +899,13 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsStateFrm(Part))
   {
     //print state formula
-    mCRL2log(debug2, "pretty printer") << "printing state formula" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing state formula" << std::endl;
     PrintStateFrm(OutStream, Part, pp_format, ShowSorts, PrecLevel);
   }
   else if (gsIsDataVarIdInit(Part))
   {
     //print data variable identifier and initialisation
-    mCRL2log(debug2, "pretty printer") << "printing data variable identifier and initialisation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing data variable identifier and initialisation" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     OutStream <<  " = ";
@@ -915,13 +915,13 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsRegFrm(Part))
   {
     //print regular formula
-    mCRL2log(debug2, "pretty printer") << "printing regular formula" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing regular formula" << std::endl;
     PrintRegFrm(OutStream, Part, pp_format, ShowSorts, PrecLevel);
   }
   else if (gsIsPBES(Part))
   {
     //print PBES specification
-    mCRL2log(debug2, "pretty printer") << "printing PBES specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing PBES specification" << std::endl;
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
     ATermAppl GlobVarSpec = ATAgetArgument(Part, 1);
@@ -949,7 +949,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsPBEqnSpec(Part))
   {
     //print parameterised boolean equation specification
-    mCRL2log(debug2, "pretty printer") << "printing parameterised boolean equation specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing parameterised boolean equation specification" << std::endl;
     ATermList PBEqns = ATLgetArgument(Part, 0);
     if (ATgetLength(PBEqns) > 0)
     {
@@ -961,7 +961,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsPBInit(Part))
   {
     //print parameterised boolean initialisation
-    mCRL2log(debug2, "pretty printer") << "printing parameterised boolean initialisation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing parameterised boolean initialisation" << std::endl;
     OutStream <<  "init ";
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
@@ -970,7 +970,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsPBEqn(Part))
   {
     //print parameterised boolean equation
-    mCRL2log(debug2, "pretty printer") << "printing parameterised boolean equation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing parameterised boolean equation" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     OutStream <<  " ";
@@ -983,7 +983,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsFixpoint(Part))
   {
     //print fixpoint
-    mCRL2log(debug2, "pretty printer") << "printing fixpoint" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing fixpoint" << std::endl;
     if (gsIsNu(Part))
     {
       OutStream <<  "nu";
@@ -996,7 +996,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsPropVarDecl(Part))
   {
     //print propositional variable declaration
-    mCRL2log(debug2, "pretty printer") << "printing propositional variable declaration" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing propositional variable declaration" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(Part, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList DataVarIds = ATLgetArgument(Part, 1);
@@ -1010,13 +1010,13 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsPBExpr(Part))
   {
     //print parameterised boolean expression
-    mCRL2log(debug2, "pretty printer") << "printing parameterised boolean expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing parameterised boolean expression" << std::endl;
     PrintPBExpr(OutStream, Part, pp_format, ShowSorts, PrecLevel);
   }
   else if (gsIsActionRenameSpec(Part))
   {
     //print action rename specification
-    mCRL2log(debug2, "pretty printer") << "printing action rename specification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing action rename specification" << std::endl;
     ATermAppl DataSpec = ATAgetArgument(Part, 0);
     bool DataSpecEmpty = ATisEqual(DataSpec, gsMakeEmptyDataSpec());
     ATermAppl ActSpec = ATAgetArgument(Part, 1);
@@ -1038,7 +1038,7 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsActionRenameRule(Part))
   {
     //print action rename rule (without variables)
-    mCRL2log(debug2, "pretty printer") << "printing action rename rule" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing action rename rule" << std::endl;
     ATermAppl Condition = ATAgetArgument(Part, 1);
     if (/*!gsIsNil(Condition) && */!data::sort_bool::is_true_function_symbol(data::data_expression(Condition)))
     {
@@ -1055,13 +1055,13 @@ void PrintPart_Appl(std::ostream& OutStream,
   else if (gsIsActionRenameRules(Part))
   {
     //print action rename rules
-    mCRL2log(debug2, "pretty printer") << "printing action rename rules" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing action rename rules" << std::endl;
     PrintEqns(OutStream, ATLgetArgument(Part, 0),
                           pp_format, ShowSorts, PrecLevel);
   }
   else
   {
-    mCRL2log(error)
+    mCRL2log(log::error)
         << "the term "
         << ATwriteToString((ATerm) Part)
         << " is not part of the internal format" << std::endl;
@@ -1303,14 +1303,14 @@ static void PrintSortExpr(std::ostream& OutStream,
   if (gsIsSortId(SortExpr))
   {
     //print sort identifier
-    mCRL2log(debug2, "pretty printer") << "printing standard sort identifier" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing standard sort identifier" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(SortExpr, 0),
                                pp_format, ShowSorts, PrecLevel);
   }
   else if (gsIsSortArrow(SortExpr))
   {
     //print product arrow sort
-    mCRL2log(debug2, "pretty printer") << "printing product arrow sort" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing product arrow sort" << std::endl;
     if (PrecLevel > 0)
     {
       OutStream <<  "(";
@@ -1328,7 +1328,7 @@ static void PrintSortExpr(std::ostream& OutStream,
   else if (data::sort_list::is_list(data::sort_expression(SortExpr)))
   {
     //print list sort
-    mCRL2log(debug2, "pretty printer") << "printing list sort" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing list sort" << std::endl;
     OutStream <<  "List(";
     PrintSortExpr(OutStream, ATAgetArgument(SortExpr, 1),
                               pp_format, ShowSorts, 0);
@@ -1337,7 +1337,7 @@ static void PrintSortExpr(std::ostream& OutStream,
   else if (data::sort_set::is_set(data::sort_expression(SortExpr)))
   {
     //print set sort
-    mCRL2log(debug2, "pretty printer") << "printing set sort" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing set sort" << std::endl;
     OutStream <<  "Set(";
     PrintSortExpr(OutStream, ATAgetArgument(SortExpr, 1),
                               pp_format, ShowSorts, 0);
@@ -1346,7 +1346,7 @@ static void PrintSortExpr(std::ostream& OutStream,
   else if (data::sort_bag::is_bag(data::sort_expression(SortExpr)))
   {
     //print bag sort
-    mCRL2log(debug2, "pretty printer") << "printing bag sort" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing bag sort" << std::endl;
     OutStream <<  "Bag(";
     PrintSortExpr(OutStream, ATAgetArgument(SortExpr, 1),
                               pp_format, ShowSorts, 0);
@@ -1355,7 +1355,7 @@ static void PrintSortExpr(std::ostream& OutStream,
   else if (data::sort_fset::is_fset(data::sort_expression(SortExpr)))
   {
     //print set sort
-    mCRL2log(debug2, "pretty printer") << "printing set sort" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing set sort" << std::endl;
     OutStream <<  "@FSet(";
     PrintSortExpr(OutStream, ATAgetArgument(SortExpr, 1),
                               pp_format, ShowSorts, 0);
@@ -1364,7 +1364,7 @@ static void PrintSortExpr(std::ostream& OutStream,
   else if (data::sort_fbag::is_fbag(data::sort_expression(SortExpr)))
   {
     //print bag sort
-    mCRL2log(debug2, "pretty printer") << "printing bag sort" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing bag sort" << std::endl;
     OutStream <<  "@FBag(";
     PrintSortExpr(OutStream, ATAgetArgument(SortExpr, 1),
                               pp_format, ShowSorts, 0);
@@ -1373,7 +1373,7 @@ static void PrintSortExpr(std::ostream& OutStream,
   else if (gsIsSortStruct(SortExpr))
   {
     //print structured sort
-    mCRL2log(debug2, "pretty printer") << "printing structured sort" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing structured sort" << std::endl;
     if (PrecLevel > 1)
     {
       OutStream <<  "(";
@@ -1389,13 +1389,13 @@ static void PrintSortExpr(std::ostream& OutStream,
   else if (gsIsSortUnknown(SortExpr))
   {
     //print unknown
-    mCRL2log(debug2, "pretty printer") << "printing unknown" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing unknown" << std::endl;
     OutStream <<  "unknown";
   }
   else if (gsIsSortsPossible(SortExpr))
   {
     //print possible sorts
-    mCRL2log(debug2, "pretty printer") << "printing possible sorts" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing possible sorts" << std::endl;
     OutStream <<  "{";
     PrintPart_List(OutStream, ATLgetArgument(SortExpr, 0),
                                pp_format, ShowSorts, 0, NULL, ", ");
@@ -1484,7 +1484,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
 {
   if (data::sort_pos::is_c1_function_symbol(data::data_expression(Part)) || data::sort_pos::is_cdub_application(data::data_expression(Part)))
   {
-    //  mCRL2log(debug) << "Reconstructing implementation of a positive number (" << atermpp::aterm( Part) << ")" << std::endl;
+    //  mCRL2log(log::debug) << "Reconstructing implementation of a positive number (" << atermpp::aterm( Part) << ")" << std::endl;
     if (data::sort_pos::is_positive_constant(data::data_expression(Part)))
     {
       std::string positive_value(data::sort_pos::positive_constant_as_string(data::data_expression(Part)));
@@ -1498,13 +1498,13 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   }
   else if (data::sort_nat::is_c0_function_symbol(data::data_expression(Part)))
   {
-    //    mCRL2log(debug) << "Reconstructing implementation of " << atermpp::aterm( Part) << std::endl;
+    //    mCRL2log(log::debug) << "Reconstructing implementation of " << atermpp::aterm( Part) << std::endl;
     Part = data::function_symbol("0", data::sort_nat::nat());
   }
   else if ((data::sort_nat::is_cnat_application(data::data_expression(Part)) || data::sort_nat::is_pos2nat_application(data::data_expression(Part)))
            && (data::sort_pos::is_pos(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
-    //    mCRL2log(debug) << "Reconstructing implementation of CNat or Pos2Nat (" << atermpp::aterm( Part) << ")" << std::endl;
+    //    mCRL2log(log::debug) << "Reconstructing implementation of CNat or Pos2Nat (" << atermpp::aterm( Part) << ")" << std::endl;
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_nat::pos2nat(data::data_expression(value));
@@ -1519,17 +1519,17 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   }
   else if (data::sort_nat::is_cpair_application(data::data_expression(Part)))
   {
-    //    mCRL2log(debug) << "Currently not reconstructing implementation of CPair (" << atermpp::aterm( Part) << ")" << std::endl;
+    //    mCRL2log(log::debug) << "Currently not reconstructing implementation of CPair (" << atermpp::aterm( Part) << ")" << std::endl;
   }
   else if (data::sort_int::is_cneg_application(data::data_expression(Part)))
   {
-    //    mCRL2log(debug) << "Reconstructing implementation of CNeg (" << atermpp::aterm( Part) << ")" << std::endl;
+    //    mCRL2log(log::debug) << "Reconstructing implementation of CNeg (" << atermpp::aterm( Part) << ")" << std::endl;
     Part = data::sort_int::negate(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))));
   }
   else if ((data::sort_int::is_cint_application(data::data_expression(Part)) || data::sort_int::is_nat2int_application(data::data_expression(Part)))
            && (data::sort_nat::is_nat(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
-    //    mCRL2log(debug) << "Reconstructing implementation of CInt or Nat2Int (" << atermpp::aterm( Part) << ")" << std::endl;
+    //    mCRL2log(log::debug) << "Reconstructing implementation of CInt or Nat2Int (" << atermpp::aterm( Part) << ")" << std::endl;
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_int::nat2int(data::data_expression(value));
@@ -1545,7 +1545,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   else if (data::sort_real::is_int2real_application(data::data_expression(Part))
            && (data::sort_int::is_int(data::data_expression(ATAgetFirst(ATLgetArgument(Part, 1))).sort())))
   {
-    //    mCRL2log(debug) << "Reconstructing implementation of Int2Real (" << atermpp::aterm( Part) << ")" << std::endl;
+    //    mCRL2log(log::debug) << "Reconstructing implementation of Int2Real (" << atermpp::aterm( Part) << ")" << std::endl;
     ATermAppl value = ATAgetFirst(ATLgetArgument(Part, 1));
     value = reconstruct_numeric_expression(value);
     Part = data::sort_real::int2real(data::data_expression(value));
@@ -1560,7 +1560,7 @@ static ATermAppl reconstruct_numeric_expression(ATermAppl Part)
   }
   else if (data::sort_real::is_creal_application(data::data_expression(Part)))
   {
-//    mCRL2log(debug) << "Reconstructing implementation of CReal (" << atermpp::aterm( Part) << ")" << std::endl;
+//    mCRL2log(log::debug) << "Reconstructing implementation of CReal (" << atermpp::aterm( Part) << ")" << std::endl;
     ATermList Args = ATLgetArgument(Part, 1);
     ATermAppl ArgNumerator = reconstruct_numeric_expression(ATAelementAt(Args, 0));
     ATermAppl ArgDenominator = reconstruct_numeric_expression(ATAelementAt(Args, 1));
@@ -1646,7 +1646,7 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (is_setconstructor_application(expr))
   {
-    //mCRL2log(debug) << "Reconstructing implementation of set comprehension" << std::endl;
+    //mCRL2log(log::debug) << "Reconstructing implementation of set comprehension" << std::endl;
     //part is an internal set representation;
     //replace by a finite set to set conversion or a set comprehension.
     sort_expression element_sort(*function_sort(sort_set::left(expr).sort()).domain().begin());
@@ -1691,7 +1691,7 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_set::is_setfset_application(expr))
   {
-    //mCRL2log(debug) << "Reconstructing SetFSet" << std::endl;
+    //mCRL2log(log::debug) << "Reconstructing SetFSet" << std::endl;
     //try to reconstruct Part as the empty set or as a set enumeration
     data_expression de_fset(sort_set::arg(expr));
     data_expression result(reconstruct_container_expression(de_fset));
@@ -1796,7 +1796,7 @@ reconstruct_container_expression(ATermAppl Part)
   }
   else if (sort_bag::is_bagfbag_application(expr))
   {
-    //mCRL2log(debug) << "Reconstructing BagFBag" << std::endl;
+    //mCRL2log(log::debug) << "Reconstructing BagFBag" << std::endl;
     //try to reconstruct Part as the empty bag or as a bag enumeration
     data_expression de_fbag(sort_bag::arg(expr));
     data_expression result(reconstruct_container_expression(de_fbag));
@@ -1913,14 +1913,14 @@ void PrintDataExpr(std::ostream& OutStream,
       else if (gsIsOpIdNumericUpCast(Head) && ArgsLength == 1)
       {
         //print upcast expression
-        mCRL2log(debug2, "pretty printer") << "printing upcast expression" << std::endl;
+        mCRL2log(log::debug2, "pretty printer") << "printing upcast expression" << std::endl;
         PrintDataExpr(OutStream, ATAelementAt(Args, 0),
                                   pp_format, ShowSorts, PrecLevel);
       }
       else if (gsIsIdListEnum(Head))
       {
         //print list enumeration
-        mCRL2log(debug2, "pretty printer") << "printing list enumeration" << std::endl;
+        mCRL2log(log::debug2, "pretty printer") << "printing list enumeration" << std::endl;
         OutStream <<  "[";
         PrintPart_List(OutStream, Args,
                                    pp_format, ShowSorts, 0, NULL, ", ");
@@ -1929,7 +1929,7 @@ void PrintDataExpr(std::ostream& OutStream,
       else if (gsIsIdSetEnum(Head))
       {
         //print set enumeration
-        mCRL2log(debug2, "pretty printer") << "printing set enumeration" << std::endl;
+        mCRL2log(log::debug2, "pretty printer") << "printing set enumeration" << std::endl;
         OutStream <<  "{";
         PrintPart_List(OutStream, Args,
                                    pp_format, ShowSorts, 0, NULL, ", ");
@@ -1946,7 +1946,7 @@ void PrintDataExpr(std::ostream& OutStream,
       else if (gsIsIdFuncUpdate(Head) && Args != ATempty)
       {
         //print function update
-        mCRL2log(debug2, "pretty printer") << "printing function update" << std::endl;
+        mCRL2log(log::debug2, "pretty printer") << "printing function update" << std::endl;
         assert(ATgetLength(Args)==3);
         PrintDataExpr(OutStream, ATAelementAt(Args, 0),
                                   pp_format, ShowSorts, gsPrecIdPrefix());
@@ -1961,7 +1961,7 @@ void PrintDataExpr(std::ostream& OutStream,
       else if (gsIsIdPrefix(Head, ArgsLength))
       {
         //print prefix expression
-        mCRL2log(debug2, "pretty printer") << "printing prefix expression" << std::endl;
+        mCRL2log(log::debug2, "pretty printer") << "printing prefix expression" << std::endl;
         PrintPart_Appl(OutStream, Head,
                                    pp_format, ShowSorts, PrecLevel);
         PrintDataExpr(OutStream, ATAelementAt(Args, 0),
@@ -1970,7 +1970,7 @@ void PrintDataExpr(std::ostream& OutStream,
       else if (gsIsIdInfix(Head, ArgsLength))
       {
         //print infix expression
-        mCRL2log(debug2, "pretty printer") << "printing infix expression" << std::endl;
+        mCRL2log(log::debug2, "pretty printer") << "printing infix expression" << std::endl;
         ATermAppl HeadName = ATAgetArgument(Head, 0);
         if (PrecLevel > gsPrecIdInfix(HeadName))
         {
@@ -1991,7 +1991,7 @@ void PrintDataExpr(std::ostream& OutStream,
       else if (gsIsId(DataExpr))
       {
         //print untyped data variable or operation identifier
-        mCRL2log(debug2, "pretty printer") << "printing untyped data variable or operation identifier" << std::endl;
+        mCRL2log(log::debug2, "pretty printer") << "printing untyped data variable or operation identifier" << std::endl;
         PrintPart_Appl(OutStream, ATAgetArgument(DataExpr, 0),
                                    pp_format, ShowSorts, PrecLevel);
       }
@@ -2001,7 +2001,7 @@ void PrintDataExpr(std::ostream& OutStream,
         //print data variable or operation identifier
         if (Reconstructed == DataExpr)
         {
-          mCRL2log(debug2, "pretty printer") << "printing data variable or operation identifier" << std::endl;
+          mCRL2log(log::debug2, "pretty printer") << "printing data variable or operation identifier" << std::endl;
           PrintPart_Appl(OutStream, ATAgetArgument(DataExpr, 0),
                                      pp_format, ShowSorts, PrecLevel);
           if (ShowSorts)
@@ -2022,7 +2022,7 @@ void PrintDataExpr(std::ostream& OutStream,
         if (Reconstructed == DataExpr)
         {
           //print data application
-          mCRL2log(debug2, "pretty printer") << "printing data application" << std::endl;
+          mCRL2log(log::debug2, "pretty printer") << "printing data application" << std::endl;
           PrintDataExpr(OutStream, Head, pp_format, ShowSorts, gsPrecIdPrefix());
           OutStream <<  "(";
           PrintPart_List(OutStream, Args, pp_format, ShowSorts, 0, NULL, ", ");
@@ -2030,7 +2030,7 @@ void PrintDataExpr(std::ostream& OutStream,
         }
         else
         {
-          mCRL2log(debug2, "pretty printer") << "printing numeric representation" << std::endl;
+          mCRL2log(log::debug2, "pretty printer") << "printing numeric representation" << std::endl;
           PrintDataExpr(OutStream, Reconstructed, pp_format, ShowSorts, PrecLevel);
         }
       }
@@ -2038,13 +2038,13 @@ void PrintDataExpr(std::ostream& OutStream,
   }
   else if (gsIsBinder(DataExpr))
   {
-    mCRL2log(debug2, "pretty printer") << "printing binder" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing binder" << std::endl;
     ATermAppl BindingOperator = ATAgetArgument(DataExpr, 0);
     if (gsIsSetBagComp(BindingOperator) || gsIsSetComp(BindingOperator)
         || gsIsBagComp(BindingOperator))
     {
       //print set/bag comprehension
-      mCRL2log(debug2, "pretty printer") << "printing set/bag comprehension" << std::endl;
+      mCRL2log(log::debug2, "pretty printer") << "printing set/bag comprehension" << std::endl;
       OutStream <<  "{ ";
       assert(!ATisEmpty(ATLgetArgument(DataExpr,1)));
       PrintDecls(OutStream, ATLgetArgument(DataExpr, 1),
@@ -2058,7 +2058,7 @@ void PrintDataExpr(std::ostream& OutStream,
              || gsIsExists(BindingOperator))
     {
       //print lambda abstraction or universal/existential quantification
-      mCRL2log(debug2, "pretty printer") << "printing lambda abstraction or universal/existential quantification" << std::endl;
+      mCRL2log(log::debug2, "pretty printer") << "printing lambda abstraction or universal/existential quantification" << std::endl;
       if (PrecLevel > 1)
       {
         OutStream <<  "(";
@@ -2080,7 +2080,7 @@ void PrintDataExpr(std::ostream& OutStream,
   else if (gsIsWhr(DataExpr))
   {
     //print where clause
-    mCRL2log(debug2, "pretty printer") << "printing where clause" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing where clause" << std::endl;
     if (PrecLevel > 0)
     {
       OutStream <<  "(";
@@ -2105,7 +2105,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   if (gsIsParamId(ProcExpr) || gsIsAction(ProcExpr) || gsIsProcess(ProcExpr))
   {
     //print action or process reference
-    mCRL2log(debug2, "pretty printer") << "printing action or process reference" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing action or process reference" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(ProcExpr, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(ProcExpr, 1);
@@ -2120,7 +2120,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsIdAssignment(ProcExpr) || gsIsProcessAssignment(ProcExpr))
   {
     //print process assignment
-    mCRL2log(debug2, "pretty printer") << "printing process assignment" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing process assignment" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(ProcExpr, 0),
                                pp_format, ShowSorts, PrecLevel);
     OutStream <<  "(";
@@ -2131,19 +2131,19 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsDelta(ProcExpr))
   {
     //print delta
-    mCRL2log(debug2, "pretty printer") << "printing delta" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing delta" << std::endl;
     OutStream <<  "delta";
   }
   else if (gsIsTau(ProcExpr))
   {
     //print tau
-    mCRL2log(debug2, "pretty printer") << "printing tau" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing tau" << std::endl;
     OutStream <<  "tau";
   }
   else if (gsIsChoice(ProcExpr))
   {
     //print choice
-    mCRL2log(debug2, "pretty printer") << "printing choice" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing choice" << std::endl;
     if (PrecLevel > 0)
     {
       OutStream <<  "(";
@@ -2161,7 +2161,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsSum(ProcExpr))
   {
     //print summation
-    mCRL2log(debug2, "pretty printer") << "printing summation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing summation" << std::endl;
     if (PrecLevel > 1)
     {
       OutStream <<  "(";
@@ -2180,7 +2180,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsMerge(ProcExpr) || gsIsLMerge(ProcExpr))
   {
     //print merge or left merge
-    mCRL2log(debug2, "pretty printer") << "printing merge or left merge" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing merge or left merge" << std::endl;
     if (PrecLevel > 2)
     {
       OutStream <<  "(";
@@ -2205,7 +2205,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsBInit(ProcExpr))
   {
     //print bounded initialisation
-    mCRL2log(debug2, "pretty printer") << "printing bounded initialisation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing bounded initialisation" << std::endl;
     if (PrecLevel > 3)
     {
       OutStream <<  "(";
@@ -2223,7 +2223,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsIfThen(ProcExpr))
   {
     //print if then
-    mCRL2log(debug2, "pretty printer") << "printing if then" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing if then" << std::endl;
     if (PrecLevel > 4)
     {
       OutStream <<  "(";
@@ -2241,7 +2241,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsIfThenElse(ProcExpr))
   {
     //print if then else
-    mCRL2log(debug2, "pretty printer") << "printing if then else" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing if then else" << std::endl;
     if (PrecLevel > 4)
     {
       OutStream <<  "(";
@@ -2263,7 +2263,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsSeq(ProcExpr))
   {
     //print sequential composition
-    mCRL2log(debug2, "pretty printer") << "printing sequential composition" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing sequential composition" << std::endl;
     if (PrecLevel > 5)
     {
       OutStream <<  "(";
@@ -2281,7 +2281,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsAtTime(ProcExpr))
   {
     //print at expression
-    mCRL2log(debug2, "pretty printer") << "printing at expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing at expression" << std::endl;
     if (PrecLevel > 6)
     {
       OutStream <<  "(";
@@ -2299,7 +2299,7 @@ static void PrintProcExpr(std::ostream& OutStream,
   else if (gsIsSync(ProcExpr))
   {
     //print sync
-    mCRL2log(debug2, "pretty printer") << "printing sync" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing sync" << std::endl;
     if (PrecLevel > 7)
     {
       OutStream <<  "(";
@@ -2318,7 +2318,7 @@ static void PrintProcExpr(std::ostream& OutStream,
            gsIsComm(ProcExpr) || gsIsAllow(ProcExpr))
   {
     //print process quantification
-    mCRL2log(debug2, "pretty printer") << "printing process quantification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing process quantification" << std::endl;
     if (gsIsBlock(ProcExpr))
     {
       OutStream <<  "block";
@@ -2356,7 +2356,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   if (gsIsDataExpr(StateFrm))
   {
     //print data expression
-    mCRL2log(debug2, "pretty printer") << "printing data expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing data expression" << std::endl;
     OutStream <<  "val(";
     PrintDataExpr(OutStream, StateFrm, pp_format, ShowSorts, 0);
     OutStream <<  ")";
@@ -2364,31 +2364,31 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateTrue(StateFrm))
   {
     //print true
-    mCRL2log(debug2, "pretty printer") << "printing true" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing true" << std::endl;
     OutStream <<  "true";
   }
   else if (gsIsStateFalse(StateFrm))
   {
     //print false
-    mCRL2log(debug2, "pretty printer") << "printing false" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing false" << std::endl;
     OutStream <<  "false";
   }
   else if (gsIsStateYaled(StateFrm))
   {
     //print yaled
-    mCRL2log(debug2, "pretty printer") << "printing yaled" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing yaled" << std::endl;
     OutStream <<  "yaled";
   }
   else if (gsIsStateDelay(StateFrm))
   {
     //print delay
-    mCRL2log(debug2, "pretty printer") << "printing delay" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing delay" << std::endl;
     OutStream <<  "delay";
   }
   else if (gsIsStateYaledTimed(StateFrm))
   {
     //print timed yaled
-    mCRL2log(debug2, "pretty printer") << "printing timed yaled" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing timed yaled" << std::endl;
     OutStream <<  "yaled @ ";
     PrintDataExpr(OutStream, ATAgetArgument(StateFrm, 0),
                               pp_format, ShowSorts, gsPrecIdPrefix());
@@ -2396,7 +2396,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateDelayTimed(StateFrm))
   {
     //print timed delay
-    mCRL2log(debug2, "pretty printer") << "printing timed delay" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing timed delay" << std::endl;
     OutStream <<  "delay @ ";
     PrintDataExpr(OutStream, ATAgetArgument(StateFrm, 0),
                               pp_format, ShowSorts, gsPrecIdPrefix());
@@ -2404,7 +2404,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateVar(StateFrm))
   {
     //print fixpoint variable
-    mCRL2log(debug2, "pretty printer") << "printing fixpoint variable" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing fixpoint variable" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(StateFrm, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(StateFrm, 1);
@@ -2419,7 +2419,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateForall(StateFrm) || gsIsStateExists(StateFrm))
   {
     //print quantification
-    mCRL2log(debug2, "pretty printer") << "printing quantification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing quantification" << std::endl;
     if (PrecLevel > 0)
     {
       OutStream <<  "(";
@@ -2445,7 +2445,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateNu(StateFrm) || gsIsStateMu(StateFrm))
   {
     //print fixpoint quantification
-    mCRL2log(debug2, "pretty printer") << "printing fixpoint quantification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing fixpoint quantification" << std::endl;
     if (PrecLevel > 0)
     {
       OutStream <<  "(";
@@ -2479,7 +2479,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateImp(StateFrm))
   {
     //print implication
-    mCRL2log(debug2, "pretty printer") << "printing implication" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing implication" << std::endl;
     if (PrecLevel > 1)
     {
       OutStream <<  "(";
@@ -2497,7 +2497,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateAnd(StateFrm) || gsIsStateOr(StateFrm))
   {
     //print conjunction or disjunction
-    mCRL2log(debug2, "pretty printer") << "printing conjunction or disjunction" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing conjunction or disjunction" << std::endl;
     if (PrecLevel > 2)
     {
       OutStream <<  "(";
@@ -2522,7 +2522,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateNot(StateFrm))
   {
     //print negation
-    mCRL2log(debug2, "pretty printer") << "printing negation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing negation" << std::endl;
     if (PrecLevel > 3)
     {
       OutStream <<  "(";
@@ -2538,7 +2538,7 @@ static void PrintStateFrm(std::ostream& OutStream,
   else if (gsIsStateMust(StateFrm) || gsIsStateMay(StateFrm))
   {
     //print must or may
-    mCRL2log(debug2, "pretty printer") << "printing must or may" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing must or may" << std::endl;
     if (PrecLevel > 3)
     {
       OutStream <<  "(";
@@ -2577,19 +2577,19 @@ static void PrintRegFrm(std::ostream& OutStream,
   if (gsIsActFrm(RegFrm))
   {
     //print regular formula
-    mCRL2log(debug2, "pretty printer") << "printing action formula" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing action formula" << std::endl;
     PrintActFrm(OutStream, RegFrm, pp_format, ShowSorts, 0);
   }
   else if (gsIsRegNil(RegFrm))
   {
     //print nil
-    mCRL2log(debug2, "pretty printer") << "printing nil" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing nil" << std::endl;
     OutStream <<  "nil";
   }
   else if (gsIsRegAlt(RegFrm))
   {
     //print alternative composition
-    mCRL2log(debug2, "pretty printer") << "printing alternative composition" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing alternative composition" << std::endl;
     if (PrecLevel > 0)
     {
       OutStream <<  "(";
@@ -2607,7 +2607,7 @@ static void PrintRegFrm(std::ostream& OutStream,
   else if (gsIsRegSeq(RegFrm))
   {
     //print sequential composition
-    mCRL2log(debug2, "pretty printer") << "printing sequential composition" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing sequential composition" << std::endl;
     if (PrecLevel > 1)
     {
       OutStream <<  "(";
@@ -2625,7 +2625,7 @@ static void PrintRegFrm(std::ostream& OutStream,
   else if (gsIsRegTransOrNil(RegFrm) || gsIsRegTrans(RegFrm))
   {
     //print (reflexive) transitive closure
-    mCRL2log(debug2, "pretty printer") << "printing (reflexive) transitive closure" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing (reflexive) transitive closure" << std::endl;
     if (PrecLevel > 2)
     {
       OutStream <<  "(";
@@ -2654,7 +2654,7 @@ static void PrintActFrm(std::ostream& OutStream,
   if (gsIsDataExpr(ActFrm))
   {
     //print data expression
-    mCRL2log(debug2, "pretty printer") << "printing data expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing data expression" << std::endl;
     OutStream <<  "val(";
     PrintDataExpr(OutStream, ActFrm, pp_format, ShowSorts, 0);
     OutStream <<  ")";
@@ -2667,19 +2667,19 @@ static void PrintActFrm(std::ostream& OutStream,
   else if (gsIsActTrue(ActFrm))
   {
     //print true
-    mCRL2log(debug2, "pretty printer") << "printing true" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing true" << std::endl;
     OutStream <<  "true";
   }
   else if (gsIsActFalse(ActFrm))
   {
     //print false
-    mCRL2log(debug2, "pretty printer") << "printing false" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing false" << std::endl;
     OutStream <<  "false";
   }
   else if (gsIsActForall(ActFrm) || gsIsActExists(ActFrm))
   {
     //print quantification
-    mCRL2log(debug2, "pretty printer") << "printing quantification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing quantification" << std::endl;
     if (PrecLevel > 0)
     {
       OutStream <<  "(";
@@ -2705,7 +2705,7 @@ static void PrintActFrm(std::ostream& OutStream,
   else if (gsIsActImp(ActFrm))
   {
     //print implication
-    mCRL2log(debug2, "pretty printer") << "printing implication" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing implication" << std::endl;
     if (PrecLevel > 1)
     {
       OutStream <<  "(";
@@ -2723,7 +2723,7 @@ static void PrintActFrm(std::ostream& OutStream,
   else if (gsIsActAnd(ActFrm) || gsIsActOr(ActFrm))
   {
     //print conjunction or disjunction
-    mCRL2log(debug2, "pretty printer") << "printing conjunction or disjunction" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing conjunction or disjunction" << std::endl;
     if (PrecLevel > 2)
     {
       OutStream <<  "(";
@@ -2748,7 +2748,7 @@ static void PrintActFrm(std::ostream& OutStream,
   else if (gsIsActAt(ActFrm))
   {
     //print at expression
-    mCRL2log(debug2, "pretty printer") << "printing at expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing at expression" << std::endl;
     if (PrecLevel > 3)
     {
       OutStream <<  "(";
@@ -2766,7 +2766,7 @@ static void PrintActFrm(std::ostream& OutStream,
   else if (gsIsActNot(ActFrm))
   {
     //print negation
-    mCRL2log(debug2, "pretty printer") << "printing negation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing negation" << std::endl;
     if (PrecLevel > 4)
     {
       OutStream <<  "(";
@@ -2788,7 +2788,7 @@ static void PrintPBExpr(std::ostream& OutStream,
   if (gsIsDataExpr(PBExpr))
   {
     //print data expression
-    mCRL2log(debug2, "pretty printer") << "printing data expression" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing data expression" << std::endl;
     OutStream <<  "val(";
     PrintDataExpr(OutStream, PBExpr, pp_format, ShowSorts, 0);
     OutStream <<  ")";
@@ -2796,19 +2796,19 @@ static void PrintPBExpr(std::ostream& OutStream,
   else if (gsIsPBESTrue(PBExpr))
   {
     //print true
-    mCRL2log(debug2, "pretty printer") << "printing true" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing true" << std::endl;
     OutStream <<  "true";
   }
   else if (gsIsPBESFalse(PBExpr))
   {
     //print false
-    mCRL2log(debug2, "pretty printer") << "printing false" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing false" << std::endl;
     OutStream <<  "false";
   }
   else if (gsIsPropVarInst(PBExpr))
   {
     //print propositional variable instance
-    mCRL2log(debug2, "pretty printer") << "printing propositional variable instance" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing propositional variable instance" << std::endl;
     PrintPart_Appl(OutStream, ATAgetArgument(PBExpr, 0),
                                pp_format, ShowSorts, PrecLevel);
     ATermList Args = ATLgetArgument(PBExpr, 1);
@@ -2823,7 +2823,7 @@ static void PrintPBExpr(std::ostream& OutStream,
   else if (gsIsPBESForall(PBExpr) || gsIsPBESExists(PBExpr))
   {
     //print quantification
-    mCRL2log(debug2, "pretty printer") << "printing quantification" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing quantification" << std::endl;
     if (PrecLevel > 0)
     {
       OutStream <<  "(";
@@ -2849,7 +2849,7 @@ static void PrintPBExpr(std::ostream& OutStream,
   else if (gsIsPBESImp(PBExpr))
   {
     //print implication
-    mCRL2log(debug2, "pretty printer") << "printing implication" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing implication" << std::endl;
     if (PrecLevel > 1)
     {
       OutStream <<  "(";
@@ -2867,7 +2867,7 @@ static void PrintPBExpr(std::ostream& OutStream,
   else if (gsIsPBESAnd(PBExpr) || gsIsPBESOr(PBExpr))
   {
     //print conjunction or disjunction
-    mCRL2log(debug2, "pretty printer") << "printing conjunction or disjunction" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing conjunction or disjunction" << std::endl;
     if (PrecLevel > 2)
     {
       OutStream <<  "(";
@@ -2892,7 +2892,7 @@ static void PrintPBExpr(std::ostream& OutStream,
   else if (gsIsPBESNot(PBExpr))
   {
     //print negation
-    mCRL2log(debug2, "pretty printer") << "printing negation" << std::endl;
+    mCRL2log(log::debug2, "pretty printer") << "printing negation" << std::endl;
     if (PrecLevel > 3)
     {
       OutStream <<  "(";
@@ -2911,7 +2911,7 @@ void PrintLinearProcessSummand(std::ostream& OutStream,
     const ATermAppl Summand, t_pp_format pp_format, bool ShowSorts)
 {
   assert(gsIsLinearProcessSummand(Summand));
-  mCRL2log(debug2, "pretty printer") << "printing LPS summand" << std::endl;
+  mCRL2log(log::debug2, "pretty printer") << "printing LPS summand" << std::endl;
   //print data summations
   ATermList SumVarDecls = ATLgetArgument(Summand, 0);
   if (ATgetLength(SumVarDecls) > 0)

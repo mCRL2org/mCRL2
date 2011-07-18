@@ -22,6 +22,7 @@ using namespace std;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
+using namespace mcrl2::log;
 
 /* Remarks
 - replace on vectors does not work

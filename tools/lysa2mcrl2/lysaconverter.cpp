@@ -16,6 +16,7 @@
 #include <boost/algorithm/string.hpp>
 
 using namespace boost;
+using namespace mcrl2::log;
 
 
 namespace lysa

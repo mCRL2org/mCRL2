@@ -127,7 +127,7 @@ public:
     }
     catch(std::runtime_error &error)
     {
-      mCRL2log(error) << "Error while unloading dynamic library: " << error.what() << std::endl;
+      mCRL2log(mcrl2::log::error) << "Error while unloading dynamic library: " << error.what() << std::endl;
     }
 	}
 	library_proc proc_address(const std::string &name) throw(std::runtime_error)

@@ -112,22 +112,22 @@ class pbes_eqelm_algorithm: public utilities::algorithm
     /// \brief Prints the vertices of the dependency graph.
     void LOG_VERTICES_VERBOSE(const std::string& msg = "") const
     {
-      if (mCRL2logEnabled(verbose))
+      if (mCRL2logEnabled(log::verbose))
       {
-        mCRL2log(verbose) << msg;
+        mCRL2log(log::verbose) << msg;
         for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
         {
-          mCRL2log(verbose) << core::pp(i->first) << " -> [ ";
+          mCRL2log(log::verbose) << core::pp(i->first) << " -> [ ";
           const std::vector<equivalence_class>& v = i->second;
           for (typename std::vector<equivalence_class>::const_iterator j = v.begin(); j != v.end(); ++j)
           {
             if (j != v.begin())
             {
-              mCRL2log(verbose) << ", ";
+              mCRL2log(log::verbose) << ", ";
             }
-            mCRL2log(verbose) << core::detail::print_pp_set(*j);
+            mCRL2log(log::verbose) << core::detail::print_pp_set(*j);
           }
-          mCRL2log(verbose) << " ]" << std::endl;
+          mCRL2log(log::verbose) << " ]" << std::endl;
         }
       }
     }
@@ -135,12 +135,12 @@ class pbes_eqelm_algorithm: public utilities::algorithm
     /// \brief Prints the edges of the dependency graph.
     void LOG_EDGES_VERBOSE(const std::string& msg = "") const
     {
-      if (mCRL2logEnabled(verbose))
+      if (mCRL2logEnabled(log::verbose))
       {
-        mCRL2log(verbose) << msg;
+        mCRL2log(log::verbose) << msg;
         for (typename std::map<string_type, atermpp::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
         {
-          mCRL2log(verbose) << core::pp(i->first) << " -> " << core::detail::print_pp_set(i->second) << std::endl;
+          mCRL2log(log::verbose) << core::pp(i->first) << " -> " << core::detail::print_pp_set(i->second) << std::endl;
         }
       }
     }
@@ -148,17 +148,17 @@ class pbes_eqelm_algorithm: public utilities::algorithm
     /// \brief Prints the equivalence classes
     void LOG_EQUIVALENCE_CLASSES_DEBUG(const std::string& msg = "") const
     {
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << msg;
+        mCRL2log(log::debug) << msg;
         for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
         {
-          mCRL2log(debug) << "  vertex " << core::pp(i->first) << ": ";
+          mCRL2log(log::debug) << "  vertex " << core::pp(i->first) << ": ";
           for (typename std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            mCRL2log(debug) << core::detail::print_pp_set(*j) << " ";
+            mCRL2log(log::debug) << core::detail::print_pp_set(*j) << " ";
           }
-          mCRL2log(debug) << std::endl;
+          mCRL2log(log::debug) << std::endl;
         }
       }
     }
@@ -166,8 +166,8 @@ class pbes_eqelm_algorithm: public utilities::algorithm
     /// \brief Prints the todo list
     void LOG_TODO_LIST(const std::set<string_type>& todo, const std::string& msg = "") const
     {
-      mCRL2log(debug) << msg;
-      mCRL2log(debug) << core::detail::print_pp_set(todo) << "\n";
+      mCRL2log(log::debug) << msg;
+      mCRL2log(log::debug) << core::detail::print_pp_set(todo) << "\n";
     }
 
     /// \brief Returns true if the vertex X should propagate its values to Y

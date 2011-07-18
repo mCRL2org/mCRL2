@@ -31,8 +31,13 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/print.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
+
+#ifndef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
+  mcrl2_logger::set_reporting_level(log_quiet, "rewrite_internal");
+#endif
 
 namespace mcrl2
 {
@@ -546,12 +551,12 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
 ATermAppl RewriterJitty::rewrite_aux(ATermAppl Term)
 {
   mcrl2_logger::indent();
-	mCRL2log(debug2, "rewrite_internal") << "term(" << atermpp::aterm(Term) << ")" << std::endl;
-	mCRL2log(debug2, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner((ATerm)Term)) << ")" << std::endl;
-	mCRL2log(debug2, "rewrite_internal") << "rewrite(  " << data::pp(fromInner((ATerm)Term)) << "  )" << std::endl;
-	if (gsIsDataVarId(Term))
+  mCRL2log(debug2, "rewrite_internal") << "term(" << atermpp::aterm(Term) << ")" << std::endl;
+  mCRL2log(debug2, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner((ATerm)Term)) << ")" << std::endl;
+  mCRL2log(debug2, "rewrite_internal") << "rewrite(  " << data::pp(fromInner((ATerm)Term)) << "  )" << std::endl;
+  if (gsIsDataVarId(Term))
   {
-	  mcrl2_logger::indent();
+    mcrl2_logger::indent();
     mCRL2log(debug2, "rewrite_internal") << "return " << atermpp::aterm(fromInner((ATerm)Term)) << "" << std::endl;
     mCRL2log(debug2, "rewrite_internal") << "return1  " << data::pp(fromInner(getSubstitutionInternal(Term))) << "" << std::endl;
     mcrl2_logger::unindent();

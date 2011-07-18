@@ -831,15 +831,15 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
                      const rewriter& r)
 {
   assert(resulting_inequalities.empty());
-  if (mCRL2logEnabled(debug))
+  if (mCRL2logEnabled(log::debug))
   {
-    mCRL2log(debug) << "Starting Fourier-Motzkin elimination on " + pp_vector(inequalities_in) + " on variables ";
+    mCRL2log(log::debug) << "Starting Fourier-Motzkin elimination on " + pp_vector(inequalities_in) + " on variables ";
     for (Data_variable_iterator i=variables_begin;
          i!=variables_end; ++i)
     {
-      mCRL2log(debug) << " " << pp(*i) ;
+      mCRL2log(log::debug) << " " << pp(*i) ;
     }
-    mCRL2log(debug) << std::endl;
+    mCRL2log(log::debug) << std::endl;
   }
 
   std::vector < linear_inequality > inequalities;
@@ -984,7 +984,7 @@ void fourier_motzkin(const std::vector < linear_inequality > &inequalities_in,
       resulting_inequalities.push_back(*i);
     }
   }
-  mCRL2log(debug) << "Fourier-Motzkin elimination yields " << pp_vector(resulting_inequalities) << std::endl;
+  mCRL2log(log::debug) << "Fourier-Motzkin elimination yields " << pp_vector(resulting_inequalities) << std::endl;
 }
 
 
@@ -1240,7 +1240,7 @@ static void pivot_and_update(
   }
 
   // std::cerr << "End pivoting " << pp(xj) << "\n";
-  if (mCRL2logEnabled(debug))
+  if (mCRL2logEnabled(log::debug))
   {
     for (atermpp::map < variable,data_expression >::const_iterator i=beta.begin();
          i!=beta.end(); ++i)
@@ -1283,7 +1283,7 @@ inline bool is_inconsistent(
   // First remove all equalities by Gauss elimination and make a fresh variable
   // generator.
 
-  mCRL2log(debug) << "Starting an inconsistency check on " + pp_vector(inequalities_in) << "\n";
+  mCRL2log(log::debug) << "Starting an inconsistency check on " + pp_vector(inequalities_in) << "\n";
 
   // The required data structures
   atermpp::map < variable,data_expression > lowerbounds;
@@ -1303,7 +1303,7 @@ inline bool is_inconsistent(
   {
     if (i->is_false(r))
     {
-      mCRL2log(debug) << "Inconsistent, because linear inequalities contains an inconsistent inequality\n";
+      mCRL2log(log::debug) << "Inconsistent, because linear inequalities contains an inconsistent inequality\n";
       return true;
     }
     i->add_variables(non_basic_variables);
@@ -1341,7 +1341,7 @@ inline bool is_inconsistent(
   {
     if (i->is_false(r))
     {
-      mCRL2log(debug) << "Inconsistent, because linear inequalities contains an inconsistent inequality after gaus elimination\n";
+      mCRL2log(log::debug) << "Inconsistent, because linear inequalities contains an inconsistent inequality after gaus elimination\n";
       return true;
     }
     if (!i->is_true(r))  // This inequality is redundant and can be skipped.
@@ -1425,7 +1425,7 @@ inline bool is_inconsistent(
            ((upperbounds[*i]==lowerbounds[*i]) &&
             (rewrite_with_memory(less(upperbounds_delta_correction[*i],lowerbounds_delta_correction[*i]),r)==sort_bool::true_()))))
       {
-        mCRL2log(debug) << "Inconsistent, preprocessing " << pp(*i) << "\n";
+        mCRL2log(log::debug) << "Inconsistent, preprocessing " << pp(*i) << "\n";
         return true; // Inconsistent.
       }
       beta[*i]=lowerbounds[*i];
@@ -1505,9 +1505,9 @@ inline bool is_inconsistent(
     if (!found)
     {
       // The in_equalities are consistent. Return false.
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << "Consistent while pivoting\n";
+        mCRL2log(log::debug) << "Consistent while pivoting\n";
         /* for(atermpp::map < variable,data_expression >::const_iterator i=lowerbounds.begin();
                       i!=lowerbounds.end(); ++i)
         { variable v=i->first;
@@ -1571,7 +1571,7 @@ inline bool is_inconsistent(
       if (!found)
       {
         // The inequalities are inconsistent.
-        mCRL2log(debug) << "Inconsistent while pivoting\n";
+        mCRL2log(log::debug) << "Inconsistent while pivoting\n";
         return true;
       }
 
@@ -1606,7 +1606,7 @@ inline bool is_inconsistent(
       if (!found)
       {
         // The inequalities are inconsistent.
-        mCRL2log(debug) << "Inconsistent while pivoting (1)\n";
+        mCRL2log(log::debug) << "Inconsistent while pivoting (1)\n";
         return true;
       }
     }

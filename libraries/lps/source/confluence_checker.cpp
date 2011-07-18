@@ -20,6 +20,7 @@
 #include "mcrl2/lps/confluence_checker.h"
 #include "mcrl2/exception.h"
 
+using namespace mcrl2::log;
 
 namespace mcrl2
 {

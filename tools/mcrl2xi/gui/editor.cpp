@@ -18,6 +18,8 @@
 #include "mcrl2/process/parse.h"
 #include "mcrl2/lps/parse.h"
 
+using namespace mcrl2::log;
+
 xEditor::xEditor(wxWindow* parent, wxWindowID id, outputpanel* output) :
   wxAuiNotebook(parent , id)
 {

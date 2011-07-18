@@ -25,6 +25,7 @@
 #include "mcrl2/exception.h"
 
 using namespace std;
+using namespace mcrl2::log;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;

@@ -329,33 +329,33 @@ class small_progress_measures_algorithm: public utilities::algorithm
     /// \brief Logs the vertices
     void LOG_VERTICES_VERBOSE(const std::string& msg = "") const
     {
-      mCRL2log(verbose) << msg << print_vertices();
+      mCRL2log(log::verbose) << msg << print_vertices();
     }
 
     /// \brief Logs the vertices
     void LOG_VERTICES_DEBUG(const std::string& msg = "") const
     {
-      mCRL2log(debug) << msg << print_vertices();
+      mCRL2log(log::debug) << msg << print_vertices();
     }
 
     /// \brief Logs a vertex
     void LOG_VERTEX_DEBUG(const vertex& v, const std::string& msg = "") const
     {
-      mCRL2log(debug) << msg << print_vertex(v);
+      mCRL2log(log::debug) << msg << print_vertex(v);
     }
 
     /// \brief Logs a vertex
     void LOG_VERTEX_VERBOSE(const vertex& v, const std::string& msg = "") const
     {
-      mCRL2log(verbose) << msg << print_vertex(v);
+      mCRL2log(log::verbose) << msg << print_vertex(v);
     }
 
     /// \brief Logs the neighbors of a vertex
     void LOG_NEIGHBORS_DEBUG(const progress_measures_vertex& v, const std::string& msg = "") const
     {
-      if (mCRL2logEnabled(debug))
+      if (mCRL2logEnabled(log::debug))
       {
-        mCRL2log(debug) << msg;
+        mCRL2log(log::debug) << msg;
         for (std::vector<progress_measures_vertex*>::const_iterator i = v.successors.begin(); i != v.successors.end(); ++i)
         {
           LOG_VERTEX_DEBUG(**i, "\n      ");

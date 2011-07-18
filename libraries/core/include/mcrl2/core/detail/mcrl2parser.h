@@ -140,7 +140,7 @@ typedef union YYSTYPE
 {
 
 /* Line 2638 of glr.c  */
-#line 53 "mcrl2parser.yy"
+#line 54 "mcrl2parser.yy"
 
   aterm::ATerm term;
   aterm::ATermAppl appl;

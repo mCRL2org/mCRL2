@@ -24,6 +24,7 @@
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::log;
 
 class lps2pbes_tool : public input_output_tool
 {

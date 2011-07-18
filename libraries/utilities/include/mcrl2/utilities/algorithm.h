@@ -30,19 +30,19 @@ class algorithm
     /// \brief Logs the string s
     void LOG_VERBOSE(const std::string& s) const
     {
-      mCRL2log(verbose) << s;
+      mCRL2log(log::verbose) << s;
     }
 
     /// \brief Logs the string s
     void LOG_DEBUG(const std::string& s) const
     {
-      mCRL2log(debug) << s;
+      mCRL2log(log::debug) << s;
     }
 
     /// \brief Logs the string s
     void LOG_DEBUG1(const std::string& s) const
     {
-      mCRL2log(debug1) << s;
+      mCRL2log(log::debug1) << s;
     }
 };
 

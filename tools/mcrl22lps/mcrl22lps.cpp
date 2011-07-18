@@ -33,6 +33,7 @@
 using namespace mcrl2::utilities;
 using namespace mcrl2::data::detail;
 using namespace mcrl2::process;
+using namespace mcrl2::log;
 
 using mcrl2::utilities::tools::input_output_tool;
 using mcrl2::utilities::tools::rewriter_tool;

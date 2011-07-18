@@ -28,6 +28,7 @@ using namespace mcrl2::lts::detail;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
 using namespace mcrl2::core;
+using namespace mcrl2::log;
 
 static const std::set<lts_equivalence> &initialise_allowed_eqs()
 {

@@ -42,6 +42,7 @@ using namespace mcrl2::utilities;
 using namespace mcrl2::core;
 using namespace mcrl2::lts;
 using namespace mcrl2::lps;
+using namespace mcrl2::log;
 
 static atermpp::set < identifier_string > parse_action_list(const std::string& s)
 {

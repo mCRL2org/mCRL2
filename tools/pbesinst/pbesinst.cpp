@@ -36,6 +36,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
 using utilities::interface_description;
@@ -273,7 +274,7 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
         algorithm.run(p, parameter_map);
       }
 
-      if (mcrl2_logger::get_reporting_level() >= log_verbose)
+      if (mcrl2_logger::get_reporting_level() >= verbose)
       {
         if (is_bes(p))
         {

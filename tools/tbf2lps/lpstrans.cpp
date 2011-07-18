@@ -37,6 +37,7 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/assignment.h"
 
+using namespace mcrl2::log;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
