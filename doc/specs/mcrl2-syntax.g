@@ -24,30 +24,34 @@ SortExpr: 'Bool'
         | Id
         | '(' SortExpr ')'
         | Domain '->' SortExpr
-        | 'struct' ConstrDecl ( '|' ConstrDecl )*
+        | 'struct' ConstrDeclList
         ;
 
-Domain: SortExpr ( '#' SortExpr )* ;
+Domain: SortExprList ;
+
+SortExprList: SortExpr ( '#' SortExpr )* ;
 
 SortSpec: 'sort' SortDecl+ ;
 
-SortDecl: Ids ';'
-        | Ids '=' SortExpr ';'
+SortDecl: IdList ';'
+        | IdList '=' SortExpr ';'
         ;
 
-ConstrDecl: Id ( '(' ProjDecls ')' )? ( '?' Id )? ;
+ConstrDecl: Id ( '(' ProjDeclList ')' )? ( '?' Id )? ;
+
+ConstrDeclList: ConstrDecl ( '|' ConstrDecl )* ;
 
 ProjDecl: ( Id ':' )? Domain ;
 
-ProjDecls: ProjDecl (',' ProjDecl)* ;
+ProjDeclList: ProjDecl ( ',' ProjDecl )* ;
 
 // Constructors and mappings
 
 IdDecl: Id ':' SortExpr ;
 
-IdsDecl: Ids ':' SortExpr ;
+IdsDecl: IdList ':' SortExpr ;
 
-IdsDecls: IdsDecl ( ',' IdsDecl )* ;
+IdsDeclList: IdsDecl ( ',' IdsDecl )* ;
 
 OpSpec: ( 'cons' | 'map' ) ( OpDecl ';' )+ ;
 
@@ -55,7 +59,7 @@ OpDecl: IdsDecl ;
 
 // Equations
 
-VarSpec: 'var' ( IdsDecls ';' )+ ;
+VarSpec: 'var' ( IdsDeclList ';' )+ ;
 
 EqnSpec: VarSpec? 'eqn' EqnDecl+ ;
 
@@ -71,97 +75,120 @@ DataExpr: Id
         | 'false'
         | '[]'
         | '{}'
-        | '[' DataExprs ']'
-        | '{' BagEnumElts '}'
+        | '[' DataExprList ']'
+        | '{' BagEnumEltList '}'
         | '{' IdDecl '|' DataExpr '}'
-        | '{' DataExprs '}'
+        | '{' DataExprList '}'
         | '(' DataExpr ')'
-        | DataExpr '(' DataExprs ')'
+        | DataExpr '(' DataExprList ')'
         | '!' DataExpr
         | '-' DataExpr
         | '#' DataExpr
-        | 'forall' IdsDecls '.' DataExpr
-        | 'exists' IdsDecls '.' DataExpr
-        | 'lambda' IdsDecls '.' DataExpr
-        | DataExpr '.' DataExpr
-        | DataExpr '*' DataExpr
-        | DataExpr 'div' DataExpr
-        | DataExpr 'mod' DataExpr
-        | DataExpr '+' DataExpr
-        | DataExpr '-' DataExpr
-        | DataExpr '<' DataExpr
-        | DataExpr '>' DataExpr
-        | DataExpr '<=' DataExpr
-        | DataExpr '>=' DataExpr
-        | DataExpr 'in' DataExpr
-        | DataExpr '|>' DataExpr
-        | DataExpr '<|' DataExpr
-        | DataExpr '++' DataExpr
-        | DataExpr '==' DataExpr
-        | DataExpr '!=' DataExpr
-        | DataExpr '&&' DataExpr
-        | DataExpr '||' DataExpr
-        | DataExpr '=>' DataExpr
-        | DataExpr 'whr' WhrExprs 'end'
+        | 'forall' IdsDeclList '.' DataExpr
+        | 'exists' IdsDeclList '.' DataExpr
+        | 'lambda' IdsDeclList '.' DataExpr
+        | DataExpr dataexpr_operator DataExpr
+        | DataExpr 'whr' WhrExprList 'end'
         ;
+
+dataexpr_operator: '=>'      $binary_op_right 1
+                 | '&&'      $binary_op_right 2
+                 | '||'      $binary_op_right 2
+                 | '=='      $binary_op_right 3
+                 | '!='      $binary_op_right 3
+                 | '<'       $binary_op_left 4
+                 | '<='      $binary_op_left 4
+                 | '>='      $binary_op_left 4
+                 | '>'       $binary_op_left 4
+                 | 'in'      $binary_op_left 4
+                 | '|>'      $binary_op_left 5
+                 | '<|'      $binary_op_left 6
+                 | '++'      $binary_op_left 7
+                 | '+'       $binary_op_left 8
+                 | '-'       $binary_op_left 8
+                 | '/'       $binary_op_left 9
+                 | 'div'     $binary_op_left 9
+                 | 'mod'     $binary_op_left 9
+                 | '*'       $binary_op_left 10
+                 | '.'       $binary_op_left 10
+                 ;
 
 WhrExpr: DataExpr '=' DataExpr ;
 
-WhrExprs: WhrExpr ( ',' WhrExpr )* ;
+WhrExprList: WhrExpr ( ',' WhrExpr )* ;
 
-DataExprs: DataExpr ( ',' DataExpr )* ;
+DataExprList: DataExpr ( ',' DataExpr )* ;
 
 BagEnumElt: DataExpr ':' DataExpr ;
 
-BagEnumElts: BagEnumElt (',' BagEnumElt)* ;
+BagEnumEltList: BagEnumElt ( ',' BagEnumElt )* ;
 
 // Communication and renaming sets
 
-MAId: Id ( '|' Id )* ;
+MAId: ActionLabelList ;
 
-MAIdSet: '{' ( MAId ( ',' MAId )* )? '}' ;
+ActionLabelList: Id ( '|' Id )* ;
 
-CommExpr: MAId ( '->' Id )* ;
+MAIdList: MAId ( ',' MAId )* ;
 
-CommExprSet: '{' ( CommExpr ( ',' CommExpr )* )? '}' ;
+MAIdSet: '{' MAIdList? '}' ;
+
+CommExpr: MAId ( '->' Id )? ;
+
+CommExprList: CommExpr ( ',' CommExpr )* ;
+
+CommExprSet: '{' CommExprList? '}' ;
 
 RenExpr: Id '->' Id ;
 
-RenExprSet: '{' ( RenExpr ( ',' RenExpr )* )? '}' ;
+RenExprList: RenExpr ( ',' RenExpr )* ;
+
+RenExprSet: '{' RenExprList? '}' ;
 
 // Process expressions
 
 ProcExpr: Id
-        | Id '(' DataExprs ')'
+        | Id '(' DataExprList ')'
         | 'delta'
         | 'tau'
-        | 'sum' IdsDecls '.' ProcExpr
+        | 'sum' IdsDeclList sum_operator ProcExpr
         | 'block' '(' MAIdSet ',' ProcExpr ')'
         | 'allow' '(' MAIdSet ',' ProcExpr ')'
         | 'hide' '(' MAIdSet ',' ProcExpr ')'
         | 'rename' '(' RenExprSet ',' ProcExpr ')'
         | 'comm' '(' CommExprSet ',' ProcExpr ')'
         | '(' ProcExpr ')'
-        | ProcExpr '|' ProcExpr
-        | ProcExpr '@' DataExpr
-        | ProcExpr '.' ProcExpr
-        | DataExpr '->' ProcExpr
-        | DataExpr '->' ProcExpr '<>' ProcExpr
-        | ProcExpr '<<' ProcExpr
-        | ProcExpr '||' ProcExpr
-        | ProcExpr '||_' ProcExpr
-        | ProcExpr '+' ProcExpr
+        | ProcExpr procexpr_operator ProcExpr
+        | ProcExpr time_operator DataExpr
+        | DataExpr if_operator ProcExpr
+        | DataExpr if_operator ProcExpr '<>' ProcExpr
         ;
+
+// The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
+
+procexpr_operator: '+'   $binary_op_right 1
+                 | '||'  $binary_op_right 3
+                 | '||_' $binary_op_right 3
+                 | '.'   $binary_op_right 6
+                 | '<<'  $binary_op_left 5
+                 | '|'   $binary_op_right 8
+                 ;
+
+time_operator: '@'       $binary_op_left 7 ;
+
+sum_operator: '.'        $unary_op_left 2 ;
+
+if_operator: '->'        $binary_op_right 4 ;
 
 // Action declaration
 
-ActDecl: Ids ( ':' Domain )? ';' ;
+ActDecl: IdList ( ':' Domain )? ';' ;
 
 ActSpec: 'act' ActDecl+ ;
 
 // Process and initial state declaration
 
-ProcDecl: Id ( '(' IdsDecls ')' )? '=' ProcExpr ';' ;
+ProcDecl: Id ( '(' IdsDeclList ')' )? '=' ProcExpr ';' ;
 
 ProcSpec: 'proc' ProcDecl+ ;
 
@@ -177,7 +204,7 @@ mCRL2Spec: ( SortSpec | OpSpec | EqnSpec | ActSpec | ProcSpec | Init )+ ;
 
 // Identifiers
 
-Ids: Id ( ',' Id )* ;
+IdList: Id ( ',' Id )* ;
 
 Id: "[A-Za-z_][A-Za-z_0-9']*" ;
 
@@ -186,3 +213,4 @@ Number: "0|(-?[1-9][0-9]*)" ;
 // Whitespace
 
 whitespace: "([ \t\n]|(%[^\n]*\n))*" ;
+
