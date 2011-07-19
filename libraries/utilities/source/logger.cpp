@@ -12,6 +12,7 @@
 #include <ctime>
 #include <string>
 #include <cassert>
+#include <iostream>
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2 {

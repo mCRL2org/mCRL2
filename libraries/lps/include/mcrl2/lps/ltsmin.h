@@ -19,6 +19,7 @@
 #include <vector>
 #include <boost/iterator/transform_iterator.hpp>
 #include <boost/iterator/iterator_facade.hpp>
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/indexed_set.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/find.h"
@@ -27,6 +28,11 @@
 #include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/next_state_generator.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
+
+// For backwards compatibility
+//using namespace mcrl2::log;
+typedef mcrl2::log::log_level_t mcrl2_log_level_t;
+using mcrl2::log::mcrl2_logger;
 
 namespace mcrl2 {
 

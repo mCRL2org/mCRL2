@@ -16,7 +16,6 @@
 #include <string>
 #include <sstream>
 #include <map>
-#include <iostream>
 
 #include "mcrl2/utilities/text_utility.h"
 
