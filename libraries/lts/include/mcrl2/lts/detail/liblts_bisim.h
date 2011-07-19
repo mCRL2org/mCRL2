@@ -1222,7 +1222,7 @@ bool destructive_bisimulation_compare(
       const std::string filename(filename_s.str());
       mcrl2::trace::Trace i_trace= *i;
       i_trace.save(filename,mcrl2::trace::tfPlain);
-      mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename << "\"" << std::endl;
+      mCRL2log(mcrl2::log::info) << "Saved counterexample to: \"" << filename_s << "\"" << std::endl;
     }
   }
   return bisim_part.in_same_class(l1.initial_state(),init_l2);
