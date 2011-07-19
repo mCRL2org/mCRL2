@@ -19,3 +19,5 @@ option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" ON)
 ## Toggle man page generation 
 ##---------------------------------------------------
 set(MCRL2_MAN_PAGES ON)
+
+set(MCRL2_BIN_DIR "bin")
