@@ -12,6 +12,12 @@
 
 option(BUILD_SHARED_LIBS "Enable/disable creation of shared libraries" OFF) 
 
+##---------------------------------------------------
+## Set run-time destination  
+##---------------------------------------------------
+
+set(MCRL2_BIN_DIR "bin")
+
 add_definitions(-D_CRT_SECURE_NO_DEPRECATE)
 add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
