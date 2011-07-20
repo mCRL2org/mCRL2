@@ -14,7 +14,7 @@ else( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
   check_cxx_compiler_flag(-ftest-coverage CXX_ACCEPTS_TEST_COVERAGE )
 endif( CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX )
 
-set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Woverloaded-virtual -Wwrite-strings" CACHE STRING "Flags used by the C++ compiler during maintainer builds.")
+set(CMAKE_CXX_FLAGS_MAINTAINER "-g -O0 -Wall -W -Wextra -Wunused-variable -Wunused-parameter -Wunused-function -Wunused -Wno-system-headers -Woverloaded-virtual -Wwrite-strings -Wmissing-declarations" CACHE STRING "Flags used by the C++ compiler during maintainer builds.")
 set(CMAKE_C_FLAGS_MAINTAINER "-g -O0 -Wall -pedantic -W" CACHE STRING "Flags used by the C compiler during maintainer builds.")
 if(CXX_ACCEPTS_PROFILE_ARCS)
   set(CMAKE_CXX_FLAGS_MAINTAINER "${CMAKE_CXX_FLAGS_MAINTAINER} -fprofile-arcs")

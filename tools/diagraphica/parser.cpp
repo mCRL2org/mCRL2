@@ -1244,7 +1244,6 @@ void Parser::parseAttr(
 {
   wxXmlNode* prop = NULL;
   wxXmlNode* subp = NULL;
-  wxXmlNode* ssbp = NULL;
 
   Attribute* attr;
 
@@ -1265,7 +1264,6 @@ void Parser::parseAttr(
   {
     prop = NULL;
     subp = NULL;
-    ssbp = NULL;
     throw mcrl2::runtime_error("Missing attribute.");
   }
 
@@ -1279,7 +1277,6 @@ void Parser::parseAttr(
     {
       prop = NULL;
       subp = NULL;
-      ssbp = NULL;
       throw mcrl2::runtime_error("Types do not match.");
     }
   }
@@ -1287,7 +1284,6 @@ void Parser::parseAttr(
   {
     prop = NULL;
     subp = NULL;
-    ssbp = NULL;
     throw mcrl2::runtime_error("Missing type.");
   }
 
@@ -1471,7 +1467,6 @@ void Parser::parseShape(
 {
   wxXmlNode* prop = NULL;
   wxXmlNode* subp = NULL;
-  wxXmlNode* ssbp = NULL;
 
   double xCtr, yCtr;
   double xDFC, yDFC;
@@ -1941,7 +1936,6 @@ void Parser::parseShape(
 
   prop = NULL;
   subp = NULL;
-  ssbp = NULL;
 }
 
 

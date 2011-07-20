@@ -14,7 +14,7 @@
 #include <conio.h>
 #endif
 #ifndef _WIN32
-bool _getch()
+static bool _getch()
 {
   return true;
 }

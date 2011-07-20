@@ -742,7 +742,6 @@ void Graph::calcAttrCorrl(
   Node*      node  = NULL;
   size_t sizeDomain1  = 0;
   size_t sizeDomain2  = 0;
-  size_t numCombns    = 0;
   size_t sizeNodes    = 0;
   size_t domIdx1      = 0;
   size_t domIdx2      = 0;
@@ -754,7 +753,6 @@ void Graph::calcAttrCorrl(
   attr2       = getAttribute(attrIdx2);
   sizeDomain1 = attr1->getSizeCurValues();
   sizeDomain2 = attr2->getSizeCurValues();
-  numCombns   = sizeDomain1*sizeDomain2;
   sizeNodes   = nodes.size();
 
   // init results;
@@ -864,7 +862,6 @@ void Graph::calcAttrCorrl(
   Node*      node  = NULL;
   size_t sizeDomain1  = 0;
   size_t sizeDomain2  = 0;
-  size_t numCombns    = 0;
   vector< Node* > clustNodes;
   size_t sizeNodes    = 0;
   size_t domIdx1      = 0;
@@ -878,7 +875,6 @@ void Graph::calcAttrCorrl(
   attr2       = getAttribute(attrIdx2);
   sizeDomain1 = attr1->getSizeCurValues();
   sizeDomain2 = attr2->getSizeCurValues();
-  numCombns   = sizeDomain1*sizeDomain2;
   getDescNodesInCluster(clust, clustNodes);
   sizeNodes   = clustNodes.size();
 

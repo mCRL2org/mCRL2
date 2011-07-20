@@ -1,6 +1,7 @@
 %{
 
 #include "lysa.h"
+#include "lysalexer.h"
 #include <string.h>
 #include <math.h>
 #include <iostream>

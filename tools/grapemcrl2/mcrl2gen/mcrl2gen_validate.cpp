@@ -407,7 +407,6 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
     return visibles;
   }
 
-  bool found = false;
   // loop through channel communications
   wxXmlNode* channel_communication_node = channel_communications->GetChildren();
   while (channel_communication_node != 0)
@@ -529,7 +528,6 @@ list_of_action grape::mcrl2gen::get_architecture_visible_channel_communications(
         new_action.set_name(channel_communication_visible_name);
         new_action.set_parameters(actions_found[i].get_parameters());
         visibles.Add(new_action);
-        found = true;
       }
     }
     channel_communication_node = channel_communication_node->GetNext();

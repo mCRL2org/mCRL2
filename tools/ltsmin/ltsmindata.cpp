@@ -852,6 +852,7 @@ static ATermList  StableBlockNumbers(void)
   return result;
 }
 
+static
 SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool
                                        deleteTauLoops)
 {
@@ -907,6 +908,7 @@ size_t state_arity = (size_t)-1; // Yikes... why is this declared here?
 ATerm* state_args;
 AFun state_afun;
 
+static
 SVCstateIndex get_new_state(SVCfile* in, SVCstateIndex s)
 {
   ATermAppl state = (ATermAppl) SVCstate2ATerm(in,s);
@@ -931,12 +933,14 @@ SVCstateIndex get_new_state(SVCfile* in, SVCstateIndex s)
   return SVCnewState(outFile,(ATerm) state, &nnew);
 }
 
+static
 SVClabelIndex get_new_label(SVCfile* in, SVClabelIndex l)
 {
   SVCbool nnew;
   return SVCnewLabel(outFile,SVClabel2ATerm(in,l), &nnew);
 }
 
+static
 SVCparameterIndex get_new_param()
 {
   SVCbool nnew;

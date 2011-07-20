@@ -33,6 +33,7 @@ using namespace grape::grapeapp;
 using namespace grape::mcrl2gen;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities::tools;
+using namespace mcrl2::log;
 
 class grape_app: public mcrl2::utilities::wx::tool< grape_app, input_tool >
 {
@@ -95,7 +96,7 @@ extern "C" int WINAPI WinMain(HINSTANCE hInstance,
 {
 
   MCRL2_ATERMPP_INIT(0, lpCmdLine);
-  mcrl2_logger::set_reporting_level(log_verbose);
+  mcrl2_logger::set_reporting_level(verbose);
   return wxEntry(hInstance, hPrevInstance, lpCmdLine, nCmdShow);
 }
 #endif

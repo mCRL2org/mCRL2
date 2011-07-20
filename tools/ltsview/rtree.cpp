@@ -107,12 +107,14 @@ class RNode
 
 const float RNode::MIN_BB_SIDE_LENGTH = 0.001f;
 
+static inline
 bool lessThanCenterX(RNode* a, RNode* b)
 {
   // See cluster.cpp for an explanation on the a != b clause.
   return a != b && a->centerX() < b->centerX();
 }
 
+static inline
 bool lessThanCenterY(RNode* a, RNode* b)
 {
   // See cluster.cpp for an explanation on the a != b clause.

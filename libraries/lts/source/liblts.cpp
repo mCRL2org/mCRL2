@@ -52,14 +52,6 @@ namespace detail
 
 atermpp::vector < ATermAppl > state_label_lts::vector_templates;
 
-static
-lps::specification const& empty_specification()
-{
-  static lps::specification dummy;
-
-  return dummy;
-}
-
 lts_type guess_format(string const& s)
 {
   string::size_type pos = s.find_last_of('.');

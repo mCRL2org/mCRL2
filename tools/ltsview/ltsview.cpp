@@ -36,6 +36,7 @@
 
 using namespace std;
 
+static
 std::vector< std::string > developers()
 {
   static char const* developer_names[] = {"Bas Ploeger", "Carst Tankink"};

@@ -143,6 +143,7 @@ bool AT_isPotentialTerm(const ATerm term)
 //#define AT_isPotentialTerm(term) (min_heap_address <= (header_type*)(term) && (header_type*)(term) <= max_heap_address)
 
 void AT_initMemory(int argc, char** argv);
+void AT_initMemmgnt();
 void AT_cleanupMemory();
 HashNumber AT_hashnumber(const ATerm t);
 ATerm AT_allocate(const size_t size);

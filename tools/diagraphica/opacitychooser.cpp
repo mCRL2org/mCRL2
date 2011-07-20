@@ -134,18 +134,16 @@ void OpacityChooser::handleMouseLftDownEvent(
     if (dragIdx == -1)
     {
       double w, h;
-      double xLft, xRgt;
-      double yBot, yTop;
+      double xRgt;
+      double yTop;
       double xCur, yCur;
 
       // get size of sides
       canvas->getSize(w, h);
 
       // calc size of bounding box
-      xLft = -0.5*w;
       xRgt =  0.5*w;
       yTop =  0.5*h;
-      yBot = -0.5*h;
 
       // get cur mouse position
       canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);
@@ -282,8 +280,8 @@ void OpacityChooser::drawPath(const bool& inSelectMode)
 // ------------------------------------------------------
 {
   double w, h;
-  double xLft, xRgt;
-  double yBot, yTop;
+  double xRgt;
+  double yTop;
   double pix;
   double size;
 
@@ -293,10 +291,8 @@ void OpacityChooser::drawPath(const bool& inSelectMode)
   pix = canvas->getPixelSize();
 
   // calc size of bounding box
-  xLft = -0.5*w;
   xRgt =  0.5*w;
   yTop =  0.5*h;
-  yBot = -0.5*h;
 
   // size of positions
   size = positionsX.size();
@@ -331,8 +327,8 @@ void OpacityChooser::drawPoints(const bool& inSelectMode)
 // --------------------------------------------------------
 {
   double w, h;
-  double xLft, xRgt;
-  double yBot, yTop;
+  double xRgt;
+  double yTop;
   double pix;
   size_t size;
   double hdlDOF;
@@ -343,10 +339,8 @@ void OpacityChooser::drawPoints(const bool& inSelectMode)
   pix = canvas->getPixelSize();
 
   // calc size of bounding box
-  xLft = -0.5*w;
   xRgt =  0.5*w;
   yTop =  0.5*h;
-  yBot = -0.5*h;
 
   // size of handle
   hdlDOF = hdlSize*pix;
@@ -554,18 +548,16 @@ void OpacityChooser::handleDrag()
   if (0 <= dragIdx && static_cast <size_t>(dragIdx) < positionsX.size())
   {
     double w, h;
-    double xLft, xRgt;
-    double yBot, yTop;
+    double xRgt;
+    double yTop;
     double xCur, yCur;
 
     // get size of sides
     canvas->getSize(w, h);
 
     // calc size of bounding box
-    xLft = -0.5*w;
     xRgt =  0.5*w;
     yTop =  0.5*h;
-    yBot = -0.5*h;
 
     // get cur mouse position
     canvas->getWorldCoords(xMouseCur, yMouseCur, xCur, yCur);

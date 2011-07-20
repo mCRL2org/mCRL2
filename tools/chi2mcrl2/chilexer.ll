@@ -14,6 +14,7 @@
 #include "libstruct_core.h"
 #include "mcrl2/utilities/logger.h"
 #include "chiparser.h"
+#include "chilexer.h"
 #include <map>
 #include <set>
 #include <utility>
@@ -38,7 +39,7 @@ extern int chiyydebug;         /* declared in chiparser.cpp */
  * yyerror() is invoked when the lexer or the parser encounter an error.
  *
  */
-int yyerror(const char *s)
+inline int yyerror(const char *s)
 {
   mCRL2log(error) << s << " at line: " << line << "col: " << col << std::endl;
   return 0;
@@ -199,7 +200,6 @@ identifier  {letter}[a-zA-Z0-9\_']*
 %%
 
 //Implementation of parse_stream
-
 ATermAppl parse_stream ( std::istream &stream ) {
   a_chi_lexer = new chi_lexer();
   ATermAppl result = a_chi_lexer->parse_stream(stream);
