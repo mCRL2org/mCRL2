@@ -293,9 +293,9 @@ endif( MCRL2_STAGE_ROOTDIR )
 add_subdirectory ( 3rd-party/svc )
 if(MCRL2_ENABLE_GUI_TOOLS)
   add_subdirectory ( 3rd-party/tr)
-  if(NOT ${gl2ps_FOUND})
+  if(NOT GL2PS_FOUND)
     add_subdirectory ( 3rd-party/gl2ps )
-  endif(NOT ${gl2ps_FOUND})
+  endif(NOT GL2PS_FOUND)
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
 ##---------------------------------------------------
