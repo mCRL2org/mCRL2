@@ -28,7 +28,8 @@ set(mcrl2_lps_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/nextstate_standard.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/source/confluence_checker.cpp 
   ${CMAKE_CURRENT_SOURCE_DIR}/source/disjointness_checker.cpp 
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp 
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/invariant_eliminator.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/regfrmtrans.cpp
 )
 set(mcrl2_lps_src ${mcrl2_lps_src} PARENT_SCOPE)
 

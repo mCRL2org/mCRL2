@@ -14,12 +14,12 @@
 
 #include <iostream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/translate_user_notation.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
+#include "mcrl2/modal_formula/detail/regfrmtrans.h"
 
 namespace mcrl2
 {
@@ -32,7 +32,7 @@ namespace state_formulas
 inline
 void translate_regular_formula(state_formula& f)
 {
-  ATermAppl result = core::translate_reg_frms(f);
+  ATermAppl result = regular_formulas::detail::translate_reg_frms(f);
   if (result == NULL)
   {
     throw mcrl2::runtime_error("formula translation error");

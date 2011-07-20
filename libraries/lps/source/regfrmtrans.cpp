@@ -13,13 +13,13 @@
 #include <cassert>
 #include <climits>
 #include <sstream>
-#include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/modal_formula/detail/regfrmtrans.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::core;
@@ -27,12 +27,15 @@ using namespace mcrl2::core::detail;
 
 namespace mcrl2
 {
-namespace core
+namespace regular_formulas
+{
+namespace detail
 {
 
 //local declarations
 //------------------
 
+static
 ATermAppl translate_reg_frms_appl(ATermAppl part);
 /*Pre: part represents a part of a state formula that adheres to the internal
  *     ATerm structure after the data implementation phase
@@ -40,6 +43,7 @@ ATermAppl translate_reg_frms_appl(ATermAppl part);
  *     action formulas
  */
 
+static
 ATermList translate_reg_frms_list(ATermList parts);
 /*Pre: parts represents a part of a state formula that adheres to the internal
  *     ATerm structure after the data implementation phase
@@ -47,6 +51,7 @@ ATermList translate_reg_frms_list(ATermList parts);
  *     action formulas
  */
 
+static
 ATermAppl create_new_var_name(bool cap, int index);
 //Pre: index >= 0
 //Ret: a quoted ATermAppl of the form 'vn', where:
@@ -55,6 +60,7 @@ ATermAppl create_new_var_name(bool cap, int index);
 //     - n = "",      in case n div 3 = 0
 //     - n = n mod 3, in case n div 3 > 0
 
+static
 ATermAppl create_fresh_var_name(bool cap, ATermList terms);
 //Pre: terms is a list of arbitrary terms that adhere to the internal format
 //Ret: a quoted ATermAppl x that satisfies the following:
@@ -71,6 +77,7 @@ ATermAppl translate_reg_frms(ATermAppl state_frm)
   return translate_reg_frms_appl(state_frm);
 }
 
+static
 ATermAppl translate_reg_frms_appl(ATermAppl part)
 {
   mCRL2log(debug) << "reducing expression\n  " << core::pp( part) << std::endl;
@@ -214,6 +221,7 @@ ATermAppl translate_reg_frms_appl(ATermAppl part)
   return part;
 }
 
+static
 ATermList translate_reg_frms_list(ATermList parts)
 {
   ATermList result = ATmakeList0();
@@ -226,6 +234,7 @@ ATermList translate_reg_frms_list(ATermList parts)
   return ATreverse(result);
 }
 
+static
 ATermAppl create_new_var_name(bool cap, int index)
 {
   mCRL2log(debug) << "creating variable with index " << index << " and cap " << (cap?"true":"false") << std::endl;
@@ -255,6 +264,7 @@ ATermAppl create_new_var_name(bool cap, int index)
   return gsString2ATermAppl(s.str().c_str());
 }
 
+static
 ATermAppl create_fresh_var_name(bool cap, ATermList terms)
 {
   mCRL2log(debug) << "creating fresh variable for terms " << atermpp::aterm( terms) << std::endl;
@@ -271,5 +281,6 @@ ATermAppl create_fresh_var_name(bool cap, ATermList terms)
   return result;
 }
 
-}   // namespace core
+}   // namespace detail
+}   // namespace regular_formulas
 }     // namespace mcrl2

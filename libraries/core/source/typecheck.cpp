@@ -77,9 +77,7 @@ typedef struct
   ATermTable constants;   //name -> Set(sort expression)
   ATermTable functions;   //name -> Set(sort expression)
   ATermTable actions;         //name -> Set(List(sort expression)) because of action polymorphism
-  //ATermIndexedSet typedactions; //name#type
-  ATermTable processes;         //name -> Set(List(sort expression)) bacause of process polymorphism
-  //ATermIndexedSet typedprocesses: use keys of body.proc_parsa
+  ATermTable processes;         //name -> Set(List(sort expression)) because of process polymorphism
   ATermTable glob_vars;   //name -> Type: global variables (for proc, pbes and init)
   ATermTable PBs;
 } Context;
@@ -89,10 +87,8 @@ static Context context;
 typedef struct
 {
   ATermList equations;
-  //ATermTable proc_freevars;     //name#type -> List(Vars)
   ATermTable proc_pars;         //name#type -> List(Vars)
   ATermTable proc_bodies; //name#type -> rhs
-  //ATermAppl init;             //in the hash tables proc_pars and proc_bodies with key "init#[]" (beware when writing)
 } Body;
 static Body body;
 

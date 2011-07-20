@@ -26,7 +26,6 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/typecheck.h"
-#include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/normalize_sorts.h"

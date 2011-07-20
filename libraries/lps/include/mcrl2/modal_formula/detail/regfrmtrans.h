@@ -16,7 +16,9 @@
 
 namespace mcrl2
 {
-namespace core
+namespace regular_formulas
+{
+namespace detail
 {
 
 /** \brief     Translate regular formulas in terms of state and action formulas.
@@ -28,7 +30,8 @@ namespace core
  **/
 aterm::ATermAppl translate_reg_frms(aterm::ATermAppl state_frm);
 
-}   // namespace core
+}   // namespace detail
+}   // namespace regular_formulas
 }     // namespace mcrl2
 
 #endif // MCRL2_REGFRMTRANS_H
