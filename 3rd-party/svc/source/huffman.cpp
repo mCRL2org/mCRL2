@@ -181,6 +181,7 @@ void HFdump(struct HFnode* tree, int d)
 
 }
 
+static
 void HFdumpCodes(struct HFnode* tree)
 {
 

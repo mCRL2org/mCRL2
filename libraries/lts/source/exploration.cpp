@@ -726,7 +726,6 @@ bool lps2lts_algorithm::generate_lts()
 
       while (!must_abort && (current_state < lgopts->max_states) && (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
-        ATermAppl Transition;
         state_t NewState;
         size_t number_of_outgoing_transitions=0;
 
@@ -752,7 +751,6 @@ bool lps2lts_algorithm::generate_lts()
               if (rand()%number_of_outgoing_transitions==0)
               {
                 NewState = tempNewState;
-                Transition=tempTransition;
               }
             }
           }

@@ -65,12 +65,6 @@ namespace data
 // prototype
 class data_specification;
 
-/// \cond INTERNAL_DOCS
-namespace detail
-{
-data_equation translate_user_notation_data_equation(const data_equation& x);
-} // namespace detail
-
 // prototype, find.h included at the end of this file to prevent circular dependencies.
 template < typename Container >
 std::set<sort_expression> find_sort_expressions(Container const& container);

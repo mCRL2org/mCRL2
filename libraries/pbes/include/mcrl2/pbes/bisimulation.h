@@ -466,6 +466,7 @@ class branching_bisimulation_algorithm : public bisimulation_algorithm
 /// \param model A linear process specification
 /// \param spec A linear process specification
 /// \return A pbes that expresses branching bisimulation between the two specifications.
+inline
 pbes<> branching_bisimulation(const specification& model, const specification& spec)
 {
   return branching_bisimulation_algorithm().run(model, spec);
@@ -551,6 +552,7 @@ class strong_bisimulation_algorithm : public bisimulation_algorithm
 /// \param model A linear process specification
 /// \param spec A linear process specification
 /// \return A pbes that expresses strong bisimulation between the two specifications.
+inline
 pbes<> strong_bisimulation(const specification& model, const specification& spec)
 {
   return strong_bisimulation_algorithm().run(model, spec);
@@ -740,6 +742,7 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
 /// \param model A linear process specification
 /// \param spec A linear process specification
 /// \return A pbes that expresses weak bisimulation between the two specifications.
+inline
 pbes<> weak_bisimulation(const specification& model, const specification& spec)
 {
   return weak_bisimulation_algorithm().run(model, spec);
@@ -797,6 +800,7 @@ class branching_simulation_equivalence_algorithm : public branching_bisimulation
 /// \param model A linear process specification
 /// \param spec A linear process specification
 /// \return A pbes that expresses branching simulation equivalence between the two specifications.
+inline
 pbes<> branching_simulation_equivalence(const specification& model, const specification& spec)
 {
   return branching_simulation_equivalence_algorithm().run(model, spec);

@@ -72,6 +72,7 @@ void AT_initMemmgnt()
   unused_blocks = NULL;
 }
 
+static
 size_t new_block_size(size_t old_size, size_t new_size)
 {
   if (new_size < old_size) /* Don't shrink blocks */
@@ -90,6 +91,7 @@ size_t new_block_size(size_t old_size, size_t new_size)
   return new_size;
 }
 
+static
 ATprotected_block find_best_unused_block(size_t new_size)
 {
   /* Returns a block that has at least minsize room, and is the closest match
@@ -173,6 +175,7 @@ size_t malloc_size(const size_t s)
 }
 //#define malloc_size(s) (s*sizeof(ATerm) + sizeof(struct _ATprotected_block))
 
+static
 ATprotected_block find_free_block(size_t new_size)
 {
   ATprotected_block block;
@@ -222,6 +225,7 @@ ATprotected_block find_free_block(size_t new_size)
   return block;
 }
 
+static
 ATprotected_block find_block(ATerm* term)
 {
   /* Reconstruct the pointer to the block from the pointer to the terms */
@@ -230,6 +234,7 @@ ATprotected_block find_block(ATerm* term)
   return block;
 }
 
+static
 void free_blocks(ATprotected_block block)
 {
   /* Free given block and all blocks from this block onward */
@@ -249,6 +254,7 @@ void free_unused_blocks()
   unused_blocks = NULL;
 }
 
+static
 void free_protected_blocks()
 {
   /* Free all blocks in the protected blocks chain */
@@ -256,6 +262,7 @@ void free_protected_blocks()
   protected_blocks = NULL;
 }
 
+static
 void free_block(ATprotected_block block)
 {
   /* Free a single block */
@@ -297,65 +304,6 @@ void free_block(ATprotected_block block)
   block->next = unused_blocks;
   block->prev = NULL;
   unused_blocks = block;
-}
-
-ATprotected_block resize_block(ATprotected_block block, size_t new_size)
-{
-  ATprotected_block newblock;
-
-  /* Calculate new block size */
-  // size_t blocksize = new_block_size(block->size, new_size);
-  size_t blocksize = new_block_size(block->size, new_size);
-
-  if (blocksize != block->size)
-  {
-    /* New block size differs from old block, reallocate the block */
-    newblock = (ATprotected_block)AT_realloc((void*)block, malloc_size(blocksize));
-
-    if ((!newblock)&&(blocksize > new_size))
-    {
-      /* Realloc failed; try with maximum size */
-      blocksize = new_size;
-      newblock = (ATprotected_block)AT_realloc((void*)block, malloc_size(blocksize));
-    }
-
-    if (!newblock)
-    {
-      return NULL;
-    }
-
-    newblock->term = (ATerm*)((char*)newblock + sizeof(struct _ATprotected_block));
-    newblock->size = blocksize;
-
-    /* Update the chain links */
-    if (newblock->prev)
-    {
-      newblock->prev->next = newblock;
-    }
-    else
-    {
-      protected_blocks = newblock;
-    }
-
-    if (newblock->next)
-    {
-      newblock->next->prev = newblock;
-    }
-  }
-  else
-  {
-    /* No change in blocksize */
-    newblock = block;
-  }
-
-  /* Clear the newly protected part of the block */
-  if (newblock->protsize < new_size)
-  {
-    memset((void*)(&newblock->term[newblock->protsize]), 0, (new_size-newblock->protsize)*sizeof(ATerm));
-  }
-  newblock->protsize = new_size;
-
-  return newblock;
 }
 
 ATerm* AT_alloc_protected(const size_t size)

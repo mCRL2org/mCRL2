@@ -38,7 +38,7 @@ void print_all_log_levels()
 BOOST_AUTO_TEST_CASE(test_logging_basic)
 {
   // Print of debug3 level will not occur
-  mcrl2_logger::set_reporting_level(log_debug2);
+  mcrl2_logger::set_reporting_level(debug2);
   print_all_log_levels();
 }
 

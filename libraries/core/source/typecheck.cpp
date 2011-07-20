@@ -1558,7 +1558,7 @@ static bool gstcReadInConstructors(ATermList NewSorts)
   return true;
 }
 
-
+static
 atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_aliases()
 {
   // This function does the same as data_specification::reconstruct_m_normalised_aliases().

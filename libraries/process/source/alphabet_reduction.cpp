@@ -2294,6 +2294,7 @@ static ATermAppl gsApplyAlpha(ATermAppl a)
   return a;
 }
 
+static
 ATermList gsaGetDeps(ATermAppl a)
 {
   //returns process names that a depends to (should be applied iteratevly).
@@ -2346,6 +2347,7 @@ ATermList gsaGetDeps(ATermAppl a)
   return NULL; //to suppress warnings
 }
 
+static
 ATermAppl gsaGetProp(ATermAppl a, ATermAppl context)
 {
   //returns the type of the term.
@@ -2419,6 +2421,7 @@ ATermAppl gsaGetProp(ATermAppl a, ATermAppl context)
   return r;
 }
 
+static
 ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
 {
   if (gsIsDelta(a) || gsIsTau(a) || gsIsAction(a))

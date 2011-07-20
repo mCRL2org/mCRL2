@@ -24,7 +24,7 @@
 #ifdef MCRL2_JITTYC_AVAILABLE
 #include "mcrl2/data/detail/rewrite/jittyc.h"
 #endif
-using namespace mcrl2::data::detail;
+
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
 #include "mcrl2/data/fresh_variable_generator.h"
@@ -36,6 +36,7 @@ using namespace mcrl2::data::detail;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::data;
+using namespace mcrl2::data::detail;
 using namespace std;
 using namespace mcrl2::log;
 
@@ -488,59 +489,9 @@ RewriteStrategy RewriteStrategyFromString(const char* s)
 
 std::vector <AFun> apples;
 
-/* static size_t num_apples = 0;
-static AFun* apples = NULL;
-
-AFun get_appl_afun_value(size_t arity)
-{
-  if (arity >= num_apples)
-  {
-    size_t old_num = num_apples;
-    num_apples = arity+1;
-    apples = (AFun*) realloc(apples,num_apples*sizeof(AFun));
-    if (apples == NULL)
-    {
-      throw mcrl2::runtime_error("Cannot allocate enough memory.");
-    }
-
-    for (; old_num < num_apples; old_num++)
-    {
-      apples[old_num] = ATmakeAFun("#REWR#",old_num,false);
-      ATprotectAFun(apples[old_num]);
-    }
-  }
-  return apples[arity];
-}
-
-ATermAppl Apply(ATermList l)
-{
-  const size_t n=ATgetLength(l);
-  return ATmakeApplList(get_appl_afun_value(n),l);
-}
-
-ATermAppl ApplyArray(const size_t size, ATerm *l)
-{
-  return ATmakeApplArray(get_appl_afun_value(size),l);
-}
-
-ATermAppl Apply0(const ATerm head)
-{
- return ATmakeAppl1(get_appl_afun_value(1),head);
-}
-
-ATermAppl Apply1(const ATerm head, const ATerm arg1)
-{
- return ATmakeAppl2(get_appl_afun_value(2),head,arg1);
-}
-
-ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2)
-{
- return ATmakeAppl3(get_appl_afun_value(3),head,arg1,arg2);
-} */
-
 /*************  Below the functions toInner and fromInner are being defined *********************/
 
-
+static
 atermpp::map< ATerm, ATermInt > &term2int()
 { 
   static atermpp::map< ATerm, ATermInt > term2int;
@@ -557,6 +508,7 @@ atermpp::map< ATerm, ATermInt >::const_iterator term2int_end()
   return term2int().end();
 }
 
+static
 atermpp::vector < ATermAppl > &int2term()
 { 
   static atermpp::vector < ATermAppl > int2term;

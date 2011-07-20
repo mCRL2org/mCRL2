@@ -192,6 +192,7 @@ static void RemoveExtraNode(void)
   dfsn--;
 }
 
+static
 void DfsNumbering(ATerm t)
 {
   int d = ATgetInt((ATermInt) t);
@@ -224,6 +225,7 @@ void DfsNumbering(ATerm t)
   }
 }
 
+static
 int TakeComponent(ATerm t)
 {
   static int s_pt = 0;
@@ -384,6 +386,7 @@ void add_tau_action(std::string const& action)
   num_tau_actions++;
 }
 
+static
 bool is_tau_action(char const* action)
 {
   for (int i=0; i<num_tau_actions; i++)
@@ -396,6 +399,7 @@ bool is_tau_action(char const* action)
   return false;
 }
 
+static
 bool is_tau_mact(atermpp::aterm_appl const& mact)
 {
   mcrl2::lps::multi_action m(mact);
@@ -640,6 +644,7 @@ static ATermList  BlockNumbers(ATermList sources)
   return result;
 }
 
+static
 void GetBlockBoundaries(SVCint b, SVCstateIndex* left, SVCstateIndex* right)
 {
   *left = Pi[b].left;

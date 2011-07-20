@@ -86,6 +86,8 @@ string Converter::make_proc_def(string proc_name, string process, Context& conte
   proc_def += " = " + process;
   return proc_def;
 }
+
+static
 void stream_cartesian_product_args(ostringstream& process, vector<vector<size_t> >& ds, string name, string add_args, string separator=" || ")
 {
   if (ds.empty())
@@ -805,6 +807,7 @@ string Converter::to_mcrl2(Cryptopoint& cp)
   }
 }
 
+static
 void stream_sort_def(ostringstream& structs, map<string, size_t>& m)
 {
   pair<string, size_t> p;

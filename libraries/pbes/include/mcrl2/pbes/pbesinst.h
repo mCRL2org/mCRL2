@@ -141,6 +141,7 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
 
 /// \brief Create a new propositional variable instantiation with instantiated values and infinite variables
 /// \param propvarinst A propositional variable instantiation
+inline
 propositional_variable_instantiation create_naive_propositional_variable_instantiation(propositional_variable_instantiation propvarinst, atermpp::table* enumerated_sorts)
 {
   data::data_expression_list finite_expression;

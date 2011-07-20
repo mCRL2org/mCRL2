@@ -51,9 +51,9 @@ bool at_mark_young;
 /*}}}  */
 
 #ifdef WIN32
-#define VOIDCDECL void __cdecl
+#define VOIDCDECL static void __cdecl
 #else
-#define VOIDCDECL void
+#define VOIDCDECL static void
 #endif
 
 /*{{{  local functions */
@@ -97,6 +97,7 @@ void AT_setBottomOfStack(ATerm* bottomOfStack)
 /*}}}  */
 /*{{{  ATerm *stack_top() */
 
+static
 ATerm* stack_top()
 {
   ATerm topOfStack;
@@ -502,6 +503,7 @@ VOIDCDECL mark_phase_young()
 
 /*{{{  void sweep_phase()  */
 
+static
 void sweep_phase()
 {
   size_t size;

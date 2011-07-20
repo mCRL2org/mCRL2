@@ -35,6 +35,7 @@ namespace state_formulas
 /// \param formula A modal formula
 /// \param spec A linear process specification
 /// \return The preprocessed formula
+inline
 state_formulas::state_formula preprocess_state_formula(const state_formulas::state_formula& formula, const lps::specification& spec)
 {
   using namespace state_formulas::detail::accessors;

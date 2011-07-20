@@ -28,6 +28,7 @@ namespace lps
 {
 
 /// \brief Return a set with all finite sorts in data specification s.
+inline
 atermpp::set<data::sort_expression> finite_sorts(const data::data_specification& s)
 {
   data::sort_expression_vector sorts = s.sorts();

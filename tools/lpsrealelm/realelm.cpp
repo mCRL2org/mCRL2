@@ -738,6 +738,7 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
 /// \param r A rewriter
 /// \ret A process initialisation in which all assignments to real variables
 ///      have been replaced with an initialization for each variable in context.
+static
 assignment_list determine_process_initialization(
   const assignment_list& initialization,
   context_type& context,

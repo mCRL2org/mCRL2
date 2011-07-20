@@ -545,7 +545,7 @@ resize_buffer(const size_t n)
  * Write a term in text format to file.
  */
 
-bool
+static bool
 writeToTextFile(const ATerm t, FILE* f)
 {
   AFun          sym;
@@ -984,7 +984,7 @@ fnext_skip_layout(int* c, FILE* f)
  * Parse a list of arguments.
  */
 
-ATermList
+static ATermList
 fparse_terms(int* c, FILE* f)
 {
   ATermList list;
@@ -1260,7 +1260,7 @@ fparse_term(int* c, FILE* f)
  * Read a term from a text file. The first character has been read.
  */
 
-ATerm
+static ATerm
 readFromTextFile(int* c, FILE* file)
 {
   ATerm term;
@@ -1419,7 +1419,7 @@ void snext_skip_layout(int* c, char** s)
  * Parse a list of arguments.
  */
 
-ATermList
+static ATermList
 sparse_terms(int* c, char** s)
 {
   ATermList list;

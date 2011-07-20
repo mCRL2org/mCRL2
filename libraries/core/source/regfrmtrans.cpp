@@ -13,6 +13,7 @@
 #include <cassert>
 #include <climits>
 #include <sstream>
+#include "mcrl2/core/regfrmtrans.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/detail/memory_utility.h"

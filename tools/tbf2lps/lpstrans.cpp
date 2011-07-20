@@ -30,6 +30,7 @@
 #include <assert.h>
 #include <string>
 #include <sstream>
+#include "lpstrans.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/identifier_string.h"

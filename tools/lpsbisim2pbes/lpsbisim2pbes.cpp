@@ -112,6 +112,7 @@ enum bisimulation_type
   branching_sim
 };
 
+static
 bisimulation_type parse_bisimulation_type(const std::string& type)
 {
   if (type == "strong-bisim"        ) return strong_bisim;
@@ -122,6 +123,7 @@ bisimulation_type parse_bisimulation_type(const std::string& type)
   return strong_bisim;
 }
 
+static
 std::string print_bisimulation_type(int type)
 {
   switch (type)

@@ -243,6 +243,7 @@ void data_specification::check_for_alias_loop(
 // This normal form is obtained by repeatedly applying map1 and map2, until this
 // is not possible anymore. It is assumed that this procedure terminates. There is
 // no check for loops.
+static
 sort_expression find_normal_form(
   const sort_expression& e,
   const atermpp::multimap< sort_expression, sort_expression >  &map1,

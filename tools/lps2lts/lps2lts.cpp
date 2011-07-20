@@ -406,6 +406,7 @@ class lps2lts_gui_tool: public mcrl2_gui_tool<lps2lts_tool>
 
 lps2lts_tool *tool_instance;
 
+static
 void premature_termination_handler(int)
 {
   // Reset signal handlers.

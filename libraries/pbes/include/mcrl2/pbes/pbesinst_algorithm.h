@@ -40,6 +40,7 @@ using detail::pbesinst_rewriter;
 /// \param out An output stream
 /// \param sigma A pbesinst substitution function
 /// \return The output stream
+inline
 std::ostream& operator<<(std::ostream& out, const pbesinst_substitution_function& sigma)
 {
   for (pbesinst_substitution_function::const_iterator i = sigma.begin(); i != sigma.end(); ++i)

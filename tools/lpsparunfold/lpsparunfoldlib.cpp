@@ -343,7 +343,7 @@ data_equation_vector lpsparunfold::create_data_equations(function_symbol_vector 
         data_expression v = variable(istr, element_sort);
         sort_vars[ element_sort ].push_back(v);
       }
-      variable y = sort_vars[ element_sort ].at(sort_index[ element_sort ]);
+      //variable y = sort_vars[ element_sort ].at(sort_index[ element_sort ]);
       sort_index[ element_sort ] = sort_index[ element_sort ]+1;
 
       data_expression lhs, rhs;

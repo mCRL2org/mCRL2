@@ -34,6 +34,7 @@ using namespace mcrl2;
 
 typedef enum { gauss, spm } solution_strategy_t;
 
+static
 std::string solution_strategy_to_string(const solution_strategy_t s)
 {
   switch (s)

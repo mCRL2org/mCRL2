@@ -458,6 +458,7 @@ void rename_renamerule_variables(data::data_expression& rcond, lps::action& rlef
   rright = lps::replace_free_variables(rright, mcrl2::data::make_map_substitution(renamings));
 }
 
+inline
 action translate_user_notation_and_normalise_sorts_action(
   const action &a,
   data::data_specification& data_spec)
@@ -465,6 +466,7 @@ action translate_user_notation_and_normalise_sorts_action(
   return lps::normalize_sorts(lps::translate_user_notation(a),data_spec);
 }
 
+inline
 action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename_rule_rhs(
   const action_rename_rule_rhs& arr,
   data::data_specification& data_spec)
@@ -478,6 +480,7 @@ action_rename_rule_rhs translate_user_notation_and_normalise_sorts_action_rename
 }
 
 
+inline
 action_rename_specification translate_user_notation_and_normalise_sorts_action_rename_spec(const action_rename_specification& ars)
 {
   data::data_specification data_spec=ars.data();
@@ -536,6 +539,7 @@ action_rename_specification parse_action_rename_specification(
 /// \param  lps_old_spec The input linear specification.
 /// \return The lps_old_spec where all actions have been renamed according
 ///         to action_rename_spec.
+inline
 lps::specification action_rename(
   const action_rename_specification& action_rename_spec,
   const lps::specification& lps_old_spec)

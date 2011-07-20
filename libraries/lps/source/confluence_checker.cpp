@@ -38,6 +38,7 @@ using namespace mcrl2::core::detail;
 
 // Auxiliary functions ----------------------------------------------------------------------------
 
+static
 atermpp::map < variable,data_expression> get_substitutions_from_assignments(const assignment_list a_assignments)
 {
   atermpp::map < variable,data_expression> v_substitutions;
@@ -50,7 +51,7 @@ atermpp::map < variable,data_expression> get_substitutions_from_assignments(cons
 }
 
 // ----------------------------------------------------------------------------------------------
-
+static
 data_expression get_subst_equation_from_assignments(
   const variable_list a_variables,
   assignment_list a_assignments_1,
@@ -121,6 +122,7 @@ data_expression get_subst_equation_from_assignments(
 
 // ----------------------------------------------------------------------------------------------
 
+static
 data_expression get_equation_from_assignments(
   const variable_list a_variables,
   assignment_list a_assignments_1,
@@ -181,7 +183,7 @@ data_expression get_equation_from_assignments(
 }
 
 // ----------------------------------------------------------------------------------------------
-
+static
 data_expression get_subst_equation_from_actions(
   const action_list a_actions,
   const atermpp::map<variable,data_expression> &a_substitutions)
@@ -204,6 +206,7 @@ data_expression get_subst_equation_from_actions(
 
 // ----------------------------------------------------------------------------------------------
 
+static
 data_expression get_confluence_condition(
   const data_expression a_invariant,
   const action_summand a_summand_1,
@@ -252,6 +255,7 @@ data_expression get_confluence_condition(
 
 // --------------------------------------------------------------------------------------------
 
+static
 bool has_ctau_action(const specification& a_lps)
 {
   const action_label_list v_action_specification = a_lps.action_labels();

@@ -10,6 +10,7 @@
 #include <io.h>
 #endif
 
+#include "mcrl2/aterm/bafio.h"
 #include "mcrl2/aterm/_aterm.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/memory.h"
@@ -1472,6 +1473,7 @@ static void free_read_space()
  * Read a term from a BAF reader.
  */
 
+static
 ATerm read_baf(byte_reader* reader)
 {
   size_t val, nr_unique_terms;

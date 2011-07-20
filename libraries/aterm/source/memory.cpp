@@ -193,6 +193,7 @@ HashNumber AT_hashnumber(const ATerm t)
  * Resize the hashtable
  */
 
+static
 void resize_hashtable()
 {
   ATerm* newhalf, *p;
@@ -462,6 +463,7 @@ size_t AT_getAllocatedCount()
 
 /*}}}  */
 
+static
 void AT_growMaxTermSize(size_t neededsize)
 {
   TermInfo* newterminfo;
