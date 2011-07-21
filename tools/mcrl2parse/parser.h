@@ -89,6 +89,11 @@ struct parse_node
   {
     return std::string(node->start_loc.s, node->end - node->start_loc.s);
   }
+
+  operator bool() const
+  {
+    return node != 0;
+  }
 };
 
 struct parser_table
@@ -201,14 +206,31 @@ struct parser
     return std::string(count, ' ');
   }
 
+  std::string truncate(const std::string& s, unsigned int max_size = 10) const
+  {
+    std::string result = s.substr(0, max_size);
+
+    // truncate at newline
+    std::string::size_type pos = result.find('\n');
+    if (pos != std::string::npos)
+    {
+      result = result.substr(0, pos);
+    }
+
+    return result;
+  }
+
   void print_tree(const parse_node& node, unsigned int level = 0) const
   {
-    std::string symbol = m_table.symbol_name(node.symbol());
-    std::string prefix = indent(2 * level);
-    std::cout << prefix << "--- node " << symbol << std::endl;
-    for (unsigned int i = 0; i <= node.child_count(); i++)
+    if (node)
     {
-      print_tree(node.child(i), level + 1);
+      std::string symbol = m_table.symbol_name(node.symbol());
+      std::string prefix = indent(2 * level);
+      std::cout << prefix << "--- " << symbol << " \"" << truncate(node.string()) << "\"" << std::endl;
+      for (unsigned int i = 0; i <= node.child_count(); i++)
+      {
+        print_tree(node.child(i), level + 1);
+      }
     }
   }
 
