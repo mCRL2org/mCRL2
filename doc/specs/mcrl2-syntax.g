@@ -214,7 +214,7 @@ DataSpec: ( SortSpec | OpSpec | EqnSpec )+ ;
 
 // mCRL2 specification
 
-mCRL2Spec: ( SortSpec | OpSpec | EqnSpec | ActSpec | ProcSpec | Init )+ ;
+mCRL2Spec: ( SortSpec | OpSpec | EqnSpec | GlobVarSpec | ActSpec | ProcSpec | Init )+ ;
 
 // BES
 
