@@ -7,17 +7,17 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(mcrl2parser)
+project(mcrl2parse)
 cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
-# ########## mcrl2_tools_mcrl2parser executable ##########
+# ########## mcrl2_tools_mcrl2parse executable ##########
 
 # actual target:
 add_executable(${PROJECT_NAME}
   mcrl2parser.cpp
-  parser.cpp
+  ${CMAKE_SOURCE_DIR}/libraries/core/source/mcrl2_syntax.c
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
@@ -32,6 +32,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_utilities
+  dparser
 )
 
 # install target:
