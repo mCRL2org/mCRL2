@@ -28,24 +28,7 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-extern D_ParserTables parser_tables_mcrl2spec;
-extern D_ParserTables parser_tables_dataexpr;
-extern D_ParserTables parser_tables_dataspec;
-extern D_ParserTables parser_tables_procexpr;
-
-inline
-void parse(dparser::parser& p, const std::string& s)
-{
-  try
-  {
-    dparser::parse_node node = p.parse(s);
-    std::cout << "Parsing successful." << std::endl;
-  }
-  catch (std::exception& e)
-  {
-    std::cout << "Exception during parsing: " << e.what() << std::endl;
-  }
-}
+extern D_ParserTables parser_tables_mcrl2;
 
 class mcrl2parser_tool : public input_tool
 {
@@ -140,7 +123,7 @@ class mcrl2parser_tool : public input_tool
         "parses a string containing an mCRL2 data structure",
         "Parses the text in the file INFILE. If INFILE is not present, standard input is used."
        )
-    {}
+    { }
 
     bool run()
     {
@@ -155,32 +138,31 @@ class mcrl2parser_tool : public input_tool
         text = read_text(from);
       }
 
+      dparser::parser p(parser_tables_mcrl2);
+      unsigned int start_symbol_index = 0;
       switch(file_type)
       {
-        case mcrl2spec_e:
-        {
-          dparser::parser p(parser_tables_mcrl2spec);
-          parse(p, text);
-          break;
-        }
-        case dataexpr_e:
-        {
-          dparser::parser p(parser_tables_dataexpr);
-          parse(p, text);
-          break;
-        }
-        case dataspec_e:
-        {
-          dparser::parser p(parser_tables_dataspec);
-          parse(p, text);
-          break;
-        }
-        case procexpr_e:
-        {
-          dparser::parser p(parser_tables_procexpr);
-          parse(p, text);
-          break;
-        }
+        case mcrl2spec_e: { start_symbol_index = p.start_symbol_index("mCRL2Spec"); break; }
+        case besspec_e  : { start_symbol_index = p.start_symbol_index("BesSpec"); break; }
+        case pbesspec_e : { start_symbol_index = p.start_symbol_index("PbesSpec"); break; }
+        case dataspec_e : { start_symbol_index = p.start_symbol_index("DataSpec"); break; }
+        case besexpr_e  : { start_symbol_index = p.start_symbol_index("BesExpr"); break; }
+        case dataexpr_e : { start_symbol_index = p.start_symbol_index("DataExpr"); break; }
+        case pbesexpr_e : { start_symbol_index = p.start_symbol_index("PbesExpr"); break; }
+        case procexpr_e : { start_symbol_index = p.start_symbol_index("ProcExpr"); break; }
+        case actfrm_e   : { start_symbol_index = p.start_symbol_index("ActFrm"); break; }
+        case regfrm_e   : { start_symbol_index = p.start_symbol_index("RegFrm"); break; }
+        case statefrm_e : { start_symbol_index = p.start_symbol_index("StateFrm"); break; }
+      }
+
+      try
+      {
+        dparser::parse_node node = p.parse(text, start_symbol_index);
+        std::cout << "Parsing successful." << std::endl;
+      }
+      catch (std::exception& e)
+      {
+        std::cout << "Exception during parsing: " << e.what() << std::endl;
       }
 
       return true;

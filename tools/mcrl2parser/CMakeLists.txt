@@ -17,6 +17,7 @@ cmake_minimum_required(VERSION 2.6)
 # actual target:
 add_executable(${PROJECT_NAME}
   mcrl2parser.cpp
+  parser.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
