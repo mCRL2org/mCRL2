@@ -32,7 +32,7 @@ extern D_ParserTables parser_tables_mcrl2;
 
 class mcrl2parser_tool : public input_tool
 {
-    typedef input_tool super;
+  typedef input_tool super;
 
   protected:
     typedef enum {
@@ -50,6 +50,7 @@ class mcrl2parser_tool : public input_tool
     } file_type_t;
 
     file_type_t file_type;
+    bool partial_parses;
 
     void set_file_type(const std::string& type)
     {
@@ -73,22 +74,30 @@ class mcrl2parser_tool : public input_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc.add_option("filetype",
-          make_optional_argument("NAME", "mcrl2spec"),
-          "input has the file type NAME:\n"
-          "  'mcrl2spec' for an mCRL2 specification (default)\n"
-          "  'besspec'   for a BES specification\n"
-          "  'pbesspec'  for a PBES specification\n"
-          "  'dataspec'  for a data specification\n"
-          "  'besexpr'   for a BES expression\n"
-          "  'dataexpr'  for a data expression\n"
-          "  'pbesexpr'  for a PBES expression\n"
-          "  'procexpr'  for a process expression\n"
-          "  'actfrm'    for an action formula\n"
-          "  'regfrm'    for a regular formula\n"
-          "  'statefrm'  for a state formula\n"
-          ,
-          'f');
+      desc
+        .add_option("filetype",
+           make_optional_argument("NAME", "mcrl2spec"),
+             "input has the file type NAME:\n"
+             "  'mcrl2spec' for an mCRL2 specification (default)\n"
+             "  'besspec'   for a BES specification\n"
+             "  'pbesspec'  for a PBES specification\n"
+             "  'dataspec'  for a data specification\n"
+             "  'besexpr'   for a BES expression\n"
+             "  'dataexpr'  for a data expression\n"
+             "  'pbesexpr'  for a PBES expression\n"
+             "  'procexpr'  for a process expression\n"
+             "  'actfrm'    for an action formula\n"
+             "  'regfrm'    for a regular formula\n"
+             "  'statefrm'  for a state formula\n"
+             ,
+             'f'
+           )
+        .add_option("partial-parses",
+           make_optional_argument("NAME", "0"),
+             "allow partial parses (default: false)",
+             'p'
+           )
+        ;
     }
 
     void parse_options(const command_line_parser& parser)
@@ -102,6 +111,7 @@ class mcrl2parser_tool : public input_tool
       {
         set_file_type("mcrl2");
       }
+      partial_parses = parser.option_argument_as<bool>("partial-parses");
     }
 
     std::string read_text(std::istream& from)
@@ -157,7 +167,8 @@ class mcrl2parser_tool : public input_tool
 
       try
       {
-        dparser::parse_node node = p.parse(text, start_symbol_index);
+std::cout << "partial_parses = " << std::boolalpha << partial_parses << std::endl;
+        dparser::parse_node node = p.parse(text, start_symbol_index, partial_parses);
         std::cout << "Parsing successful." << std::endl;
       }
       catch (std::exception& e)

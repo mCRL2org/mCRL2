@@ -174,9 +174,10 @@ struct parser
     return m_table.start_symbol_index(name);
   }
 
-  parse_node parse(const std::string& text, unsigned int start_symbol_index = 0)
+  parse_node parse(const std::string& text, unsigned int start_symbol_index = 0, bool partial_parses = false)
   {
     m_parser->start_state = start_symbol_index;
+    m_parser->partial_parses = partial_parses ? 1 : 0;
     D_ParseNode* result = dparse(m_parser, const_cast<char*>(text.c_str()), text.size());
     if (!result || m_parser->syntax_errors)
     {
