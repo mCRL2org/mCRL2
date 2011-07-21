@@ -13,13 +13,17 @@ cmake_minimum_required(VERSION 2.6)
 # ##### Generate parser tables ######
 
 add_custom_command(
-  OUTPUT ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.c
-  COMMAND make_dparser -imcrl2 -o${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.c ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
+  OUTPUT ${CMAKE_SOURCE_DIR}/libraries/core/source/mcrl2_syntax.cpp
+  COMMAND make_dparser -A -imcrl2 -o${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.cpp ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
   DEPENDS make_dparser
 )
 
-add_custom_target(
-  parser_tables ALL DEPENDS ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.c
+include_directories(
+  ${CMAKE_SOURCE_DIR}/3rd-party/dparser
+)
+
+add_library(mcrl2_syntax
+  source/mcrl2_syntax.cpp
 )
 
 # ######### Set policies ############
