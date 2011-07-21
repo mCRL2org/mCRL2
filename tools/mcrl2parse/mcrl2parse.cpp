@@ -6,12 +6,12 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2parser.cpp
+/// \file mcrl2parse.cpp
 /// \brief tool for testing the new parser
 
 #include "boost.hpp" // precompiled headers
 
-#define TOOLNAME "mcrl2parser"
+#define TOOLNAME "mcrl2parse"
 #define AUTHOR "Wieger Wesselink"
 
 #include <fstream>
@@ -30,7 +30,7 @@ using namespace mcrl2::utilities::tools;
 
 extern D_ParserTables parser_tables_mcrl2;
 
-class mcrl2parser_tool : public input_tool
+class mcrl2parse_tool : public input_tool
 {
   typedef input_tool super;
 
@@ -51,6 +51,7 @@ class mcrl2parser_tool : public input_tool
 
     file_type_t file_type;
     bool partial_parses;
+    bool print_tree;
 
     void set_file_type(const std::string& type)
     {
@@ -97,6 +98,11 @@ class mcrl2parser_tool : public input_tool
              "allow partial parses (default: false)",
              'p'
            )
+        .add_option("print-tree",
+           make_optional_argument("NAME", "0"),
+             "print parse tree (default: false)",
+             't'
+           )
         ;
     }
 
@@ -112,6 +118,7 @@ class mcrl2parser_tool : public input_tool
         set_file_type("mcrl2");
       }
       partial_parses = parser.option_argument_as<bool>("partial-parses");
+      print_tree = parser.option_argument_as<bool>("print-tree");
     }
 
     std::string read_text(std::istream& from)
@@ -127,7 +134,7 @@ class mcrl2parser_tool : public input_tool
 
   public:
 
-    mcrl2parser_tool() : super(
+    mcrl2parse_tool() : super(
         TOOLNAME,
         AUTHOR,
         "parses a string containing an mCRL2 data structure",
@@ -167,9 +174,12 @@ class mcrl2parser_tool : public input_tool
 
       try
       {
-std::cout << "partial_parses = " << std::boolalpha << partial_parses << std::endl;
         dparser::parse_node node = p.parse(text, start_symbol_index, partial_parses);
         std::cout << "Parsing successful." << std::endl;
+        if (print_tree)
+        {
+          p.print_tree(node);
+        }
       }
       catch (std::exception& e)
       {
@@ -181,15 +191,15 @@ std::cout << "partial_parses = " << std::boolalpha << partial_parses << std::end
 
 };
 
-class mcrl2parser_gui_tool: public mcrl2_gui_tool<mcrl2parser_tool>
+class mcrl2parse_gui_tool: public mcrl2_gui_tool<mcrl2parse_tool>
 {
   public:
-    mcrl2parser_gui_tool() {}
+    mcrl2parse_gui_tool() {}
 };
 
 int main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv)
 
-  return mcrl2parser_gui_tool().execute(argc, argv);
+  return mcrl2parse_gui_tool().execute(argc, argv);
 }

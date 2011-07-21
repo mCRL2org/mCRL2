@@ -108,7 +108,12 @@ struct parser_table
   // Returns the name of the i-th symbol
   std::string symbol_name(unsigned int i) const
   {
-    return std::string(m_table.symbols[i].name);
+    const char* name = m_table.symbols[i].name;
+    if (!name)
+    {
+      return "";
+    }
+    return std::string(name);
   }
 
   // Returns the 'start symbol' of the i-th symbol
@@ -189,6 +194,22 @@ struct parser
   void print_symbol_table() const
   {
     m_table.print();
+  }
+
+  std::string indent(unsigned int count) const
+  {
+    return std::string(count, ' ');
+  }
+
+  void print_tree(const parse_node& node, unsigned int level = 0) const
+  {
+    std::string symbol = m_table.symbol_name(node.symbol());
+    std::string prefix = indent(2 * level);
+    std::cout << prefix << "--- node " << symbol << std::endl;
+    for (unsigned int i = 0; i <= node.child_count(); i++)
+    {
+      print_tree(node.child(i), level + 1);
+    }
   }
 
   /// \brief Callback function for nodes in the parse tree
