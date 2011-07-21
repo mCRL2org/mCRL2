@@ -5,10 +5,17 @@ from path import *
 MCRL2SYNTAXFILE = '../../doc/specs/mcrl2-syntax.g'
 
 grammars = {
-  'dataexpr'   : 'DataExpr',
-  'dataspec'   : 'DataSpec',
-  'mcrl2spec'  : 'mCRL2Spec',
-  'procexpr'   : 'ProcExpr',
+  'mcrl2spec' : 'mCRL2Spec' ,
+  'besspec'   : 'BesSpec'   ,
+  'pbesspec'  : 'PbesSpec'  ,
+  'dataspec'  : 'DataSpec'  ,
+  'besexpr'   : 'BesExpr'   ,
+  'dataexpr'  : 'DataExpr'  ,
+  'pbesexpr'  : 'PbesExpr'  ,
+  'procexpr'  : 'ProcExpr'  ,
+  'actfrm'    : 'ActFrm'    ,
+  'regfrm'    : 'RegFrm'    ,
+  'statefrm'  : 'StateFrm'  ,
 }
 
 def make_grammars(grammars):

@@ -52,28 +52,35 @@ class mcrl2parser_tool : public input_tool
     typedef input_tool super;
 
   protected:
-    typedef enum { mcrl2spec_e, dataexpr_e, dataspec_e, procexpr_e } file_type_t;
+    typedef enum {
+      mcrl2spec_e,
+      besspec_e,
+      pbesspec_e,
+      dataspec_e,
+      besexpr_e,
+      dataexpr_e,
+      pbesexpr_e,
+      procexpr_e,
+      actfrm_e,
+      regfrm_e,
+      statefrm_e
+    } file_type_t;
 
     file_type_t file_type;
 
     void set_file_type(const std::string& type)
     {
-      if (type == "mcrl2spec")
-      {
-        file_type = mcrl2spec_e;
-      }
-      else if (type == "dataexpr")
-      {
-        file_type = dataexpr_e;
-      }
-      else if (type == "dataspec")
-      {
-        file_type = dataspec_e;
-      }
-      else if (type == "procexpr")
-      {
-        file_type = procexpr_e;
-      }
+           if (type == "mcrl2spec")   { file_type = mcrl2spec_e; }
+      else if (type == "besspec"  )   { file_type = besspec_e  ; }
+      else if (type == "pbesspec" )   { file_type = pbesspec_e ; }
+      else if (type == "dataspec" )   { file_type = dataspec_e ; }
+      else if (type == "besexpr"  )   { file_type = besexpr_e  ; }
+      else if (type == "dataexpr" )   { file_type = dataexpr_e ; }
+      else if (type == "pbesexpr" )   { file_type = pbesexpr_e ; }
+      else if (type == "procexpr" )   { file_type = procexpr_e ; }
+      else if (type == "actfrm"   )   { file_type = actfrm_e   ; }
+      else if (type == "regfrm"   )   { file_type = regfrm_e   ; }
+      else if (type == "statefrm" )   { file_type = statefrm_e ; }
       else
       {
         throw std::runtime_error("unknown file type specified (got `" + type + "')");
@@ -87,9 +94,16 @@ class mcrl2parser_tool : public input_tool
           make_optional_argument("NAME", "mcrl2spec"),
           "input has the file type NAME:\n"
           "  'mcrl2spec' for an mCRL2 specification (default)\n"
+          "  'besspec'   for a BES specification\n"
+          "  'pbesspec'  for a PBES specification\n"
           "  'dataspec'  for a data specification\n"
+          "  'besexpr'   for a BES expression\n"
           "  'dataexpr'  for a data expression\n"
+          "  'pbesexpr'  for a PBES expression\n"
           "  'procexpr'  for a process expression\n"
+          "  'actfrm'    for an action formula\n"
+          "  'regfrm'    for a regular formula\n"
+          "  'statefrm'  for a state formula\n"
           ,
           'f');
     }

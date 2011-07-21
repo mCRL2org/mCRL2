@@ -13,19 +13,20 @@
 
 // Sort Expressions
 
-SortExpr: 'Bool'
-        | 'Pos'
-        | 'Nat'
-        | 'Int'
-        | 'Real'
-        | 'List' '(' SortExpr ')'
-        | 'Set' '(' SortExpr ')'
-        | 'Bag' '(' SortExpr ')'
-        | Id
-        | '(' SortExpr ')'
-        | Domain '->' SortExpr
-        | 'struct' ConstrDeclList
-        ;
+SortExpr
+  : 'Bool'
+  | 'Pos'
+  | 'Nat'
+  | 'Int'
+  | 'Real'
+  | 'List' '(' SortExpr ')'
+  | 'Set' '(' SortExpr ')'
+  | 'Bag' '(' SortExpr ')'
+  | Id
+  | '(' SortExpr ')'
+  | Domain '->' SortExpr
+  | 'struct' ConstrDeclList
+  ;
 
 Domain: SortExprList ;
 
@@ -33,9 +34,10 @@ SortExprList: SortExpr ( '#' SortExpr )* ;
 
 SortSpec: 'sort' SortDecl+ ;
 
-SortDecl: IdList ';'
-        | IdList '=' SortExpr ';'
-        ;
+SortDecl
+  : IdList ';'
+  | IdList '=' SortExpr ';'
+  ;
 
 ConstrDecl: Id ( '(' ProjDeclList ')' )? ( '?' Id )? ;
 
@@ -59,59 +61,64 @@ OpDecl: IdsDecl ;
 
 // Equations
 
+GlobVarSpec: 'glob' ( IdsDeclList ';' )+ ;
+
 VarSpec: 'var' ( IdsDeclList ';' )+ ;
 
 EqnSpec: VarSpec? 'eqn' EqnDecl+ ;
 
-EqnDecl: DataExpr '=' DataExpr ';'
-       | DataExpr '->' DataExpr '=' DataExpr ';'
-       ;
+EqnDecl
+  : DataExpr '=' DataExpr ';'
+  | DataExpr '->' DataExpr '=' DataExpr ';'
+  ;
 
 // Data expressions
 
-DataExpr: Id
-        | Number
-        | 'true'
-        | 'false'
-        | '[]'
-        | '{}'
-        | '[' DataExprList ']'
-        | '{' BagEnumEltList '}'
-        | '{' IdDecl '|' DataExpr '}'
-        | '{' DataExprList '}'
-        | '(' DataExpr ')'
-        | DataExpr '(' DataExprList ')'
-        | '!' DataExpr
-        | '-' DataExpr
-        | '#' DataExpr
-        | 'forall' IdsDeclList '.' DataExpr
-        | 'exists' IdsDeclList '.' DataExpr
-        | 'lambda' IdsDeclList '.' DataExpr
-        | DataExpr dataexpr_operator DataExpr
-        | DataExpr 'whr' WhrExprList 'end'
-        ;
+DataExpr
+  : Id
+  | Number
+  | 'true'
+  | 'false'
+  | '[]'
+  | '{}'
+  | '[' DataExprList ']'
+  | '{' BagEnumEltList '}'
+  | '{' IdDecl '|' DataExpr '}'
+  | '{' DataExprList '}'
+  | '(' DataExpr ')'
+  | DataExpr '(' DataExprList ')'
+  | '!' DataExpr
+  | '-' DataExpr
+  | '#' DataExpr
+  | 'forall' IdsDeclList '.' DataExpr
+  | 'exists' IdsDeclList '.' DataExpr
+  | 'lambda' IdsDeclList '.' DataExpr
+  | DataExpr dataexpr_binary_operator DataExpr
+  | DataExpr 'whr' WhrExprList 'end'
+  ;
 
-dataexpr_operator: '=>'      $binary_op_right 1
-                 | '&&'      $binary_op_right 2
-                 | '||'      $binary_op_right 2
-                 | '=='      $binary_op_right 3
-                 | '!='      $binary_op_right 3
-                 | '<'       $binary_op_left 4
-                 | '<='      $binary_op_left 4
-                 | '>='      $binary_op_left 4
-                 | '>'       $binary_op_left 4
-                 | 'in'      $binary_op_left 4
-                 | '|>'      $binary_op_left 5
-                 | '<|'      $binary_op_left 6
-                 | '++'      $binary_op_left 7
-                 | '+'       $binary_op_left 8
-                 | '-'       $binary_op_left 8
-                 | '/'       $binary_op_left 9
-                 | 'div'     $binary_op_left 9
-                 | 'mod'     $binary_op_left 9
-                 | '*'       $binary_op_left 10
-                 | '.'       $binary_op_left 10
-                 ;
+dataexpr_binary_operator
+  : '=>'      $binary_op_right 1
+  | '&&'      $binary_op_right 2
+  | '||'      $binary_op_right 2
+  | '=='      $binary_op_right 3
+  | '!='      $binary_op_right 3
+  | '<'       $binary_op_left 4
+  | '<='      $binary_op_left 4
+  | '>='      $binary_op_left 4
+  | '>'       $binary_op_left 4
+  | 'in'      $binary_op_left 4
+  | '|>'      $binary_op_left 5
+  | '<|'      $binary_op_left 6
+  | '++'      $binary_op_left 7
+  | '+'       $binary_op_left 8
+  | '-'       $binary_op_left 8
+  | '/'       $binary_op_left 9
+  | 'div'     $binary_op_left 9
+  | 'mod'     $binary_op_left 9
+  | '*'       $binary_op_left 10
+  | '.'       $binary_op_left 10
+  ;
 
 WhrExpr: DataExpr '=' DataExpr ;
 
@@ -147,44 +154,51 @@ RenExprSet: '{' RenExprList? '}' ;
 
 // Process expressions
 
-ProcExpr: Id
-        | Id '(' DataExprList ')'
-        | 'delta'
-        | 'tau'
-        | 'sum' IdsDeclList sum_operator ProcExpr
-        | 'block' '(' MAIdSet ',' ProcExpr ')'
-        | 'allow' '(' MAIdSet ',' ProcExpr ')'
-        | 'hide' '(' MAIdSet ',' ProcExpr ')'
-        | 'rename' '(' RenExprSet ',' ProcExpr ')'
-        | 'comm' '(' CommExprSet ',' ProcExpr ')'
-        | '(' ProcExpr ')'
-        | ProcExpr procexpr_operator ProcExpr
-        | ProcExpr time_operator DataExpr
-        | DataExpr if_operator ProcExpr
-        | DataExpr if_operator ProcExpr '<>' ProcExpr
-        ;
+ProcExpr
+  : Action
+  | 'delta'
+  | 'tau'
+  | 'sum' IdsDeclList procexpr_sum_operator ProcExpr
+  | 'block' '(' MAIdSet ',' ProcExpr ')'
+  | 'allow' '(' MAIdSet ',' ProcExpr ')'
+  | 'hide' '(' MAIdSet ',' ProcExpr ')'
+  | 'rename' '(' RenExprSet ',' ProcExpr ')'
+  | 'comm' '(' CommExprSet ',' ProcExpr ')'
+  | '(' ProcExpr ')'
+  | ProcExpr procexpr_binary_operator ProcExpr
+  | ProcExpr procexpr_time_operator DataExpr
+  | DataExpr procexpr_if_operator ProcExpr
+  | DataExpr procexpr_if_operator ProcExpr '<>' ProcExpr
+  ;
 
-// The descending order of precedence of the operators is: "|", "@", ".", { "<<", ">>" }, "->", { "||", "||_" }, "sum", "+".
+procexpr_binary_operator
+  : '+'   $binary_op_right 1
+  | '||'  $binary_op_right 3
+  | '||_' $binary_op_right 3
+  | '.'   $binary_op_right 6
+  | '<<'  $binary_op_left 5
+  | '|'   $binary_op_right 8
+  ;
 
-procexpr_operator: '+'   $binary_op_right 1
-                 | '||'  $binary_op_right 3
-                 | '||_' $binary_op_right 3
-                 | '.'   $binary_op_right 6
-                 | '<<'  $binary_op_left 5
-                 | '|'   $binary_op_right 8
-                 ;
+procexpr_time_operator: '@'       $binary_op_left 7 ;
 
-time_operator: '@'       $binary_op_left 7 ;
+procexpr_sum_operator: '.'        $unary_op_left 2 ;
 
-sum_operator: '.'        $unary_op_left 2 ;
+procexpr_if_operator: '->'        $binary_op_right 4 ;
 
-if_operator: '->'        $binary_op_right 4 ;
+// Actions
 
-// Action declaration
+Action: Id ( '(' DataExprList ')' )? ;
 
 ActDecl: IdList ( ':' Domain )? ';' ;
 
 ActSpec: 'act' ActDecl+ ;
+
+MultAct: 'tau'
+       | ActionList
+       ;
+
+ActionList: Action ( '|' Action )* ;
 
 // Process and initial state declaration
 
@@ -201,6 +215,158 @@ DataSpec: ( SortSpec | OpSpec | EqnSpec )+ ;
 // mCRL2 specification
 
 mCRL2Spec: ( SortSpec | OpSpec | EqnSpec | ActSpec | ProcSpec | Init )+ ;
+
+// BES
+
+BesSpec: BesEqnSpec BesInit ;
+
+BesEqnSpec: 'bes' BesEqnDecl+ ;
+
+BesEqnDecl: FixedPointOperator BesVar '=' BesExpr ';' ;
+
+BesVar: Id ;
+
+BesExpr
+  : 'true'
+  | 'false'
+  | besexpr_unary_operator BesExpr
+  | BesExpr besexpr_binary_operator BesExpr
+  | BesVar
+  ;
+
+BesInit: 'init' BesVar ';' ;
+
+besexpr_unary_operator: '!' $unary_op_left 4 ;
+
+besexpr_binary_operator
+  : '&&'      $binary_op_right 3
+  | '||'      $binary_op_right 3
+  | '=>'      $binary_op_right 2
+  ;
+
+// PBES
+
+PbesSpec: DataSpec? GlobVarSpec? PbesEqnSpec PbesInit ;
+
+PbesEqnSpec: 'pbes' PbesEqnDecl+ ;
+
+PbesEqnDecl: FixedPointOperator PropVarDecl '=' PbesExpr ';' ;
+
+FixedPointOperator
+  : 'mu'
+  | 'nu'
+  ;
+
+PropVarDecl: Id ( "(" IdsDeclList ")" )? ;
+
+PropVarInst: Id ( "(" DataExprList ")" )? ;
+
+PbesInit: 'init' PropVarInst ';' ;
+
+DataValExpr: 'val' '(' DataExpr ')' ;
+
+PbesExpr
+  : DataValExpr
+  | 'true'
+  | 'false'
+  | 'forall' IdsDeclList pbesexpr_quantifier_operator PbesExpr
+  | 'exists' IdsDeclList pbesexpr_quantifier_operator PbesExpr
+  | pbesexpr_unary_operator PbesExpr
+  | PbesExpr pbesexpr_binary_operator PbesExpr
+  | PropVarInst
+  ;
+
+pbesexpr_unary_operator: '!' $unary_op_left 4 ;
+
+pbesexpr_binary_operator
+  : '&&'      $binary_op_right 3
+  | '||'      $binary_op_right 3
+  | '=>'      $binary_op_right 2
+  ;
+
+pbesexpr_quantifier_operator: '.' $unary_op_left 1 ;
+
+// Action formulas
+
+ActFrm
+  : MultAct
+  | DataValExpr
+  | 'true'
+  | 'false'
+  | actfrm_unary_operator ActFrm
+  | ActFrm actfrm_binary_operator ActFrm
+  | 'forall' IdsDeclList actfrm_quantifier_operator ActFrm
+  | 'exists' IdsDeclList actfrm_quantifier_operator ActFrm
+  | ActFrm acttime_operator DataExpr
+  | '(' ActFrm ')'
+  ;
+
+actfrm_unary_operator: '!' $unary_op_left 5 ;
+
+actfrm_binary_operator
+  : '&&'      $binary_op_right 3
+  | '||'      $binary_op_right 3
+  | '=>'      $binary_op_right 2
+  ;
+
+acttime_operator: '@' $unary_op_left 4 ;
+
+actfrm_quantifier_operator: '.' $unary_op_left 1 ;
+
+// Regular formulas
+
+RegFrm
+  : ActFrm
+  | 'nil'
+  | RegFrm regfrm_binary_operator RegFrm
+  | RegFrm regfrm_unary_operator
+  | '(' RegFrm ')'
+  ;
+
+regfrm_unary_operator
+  : '*'      $unary_op_left 3
+  | '+'      $unary_op_left 3
+  ;
+
+regfrm_binary_operator
+  : '.'      $binary_op_right 1
+  | '+'      $binary_op_right 2
+  ;
+
+// State formulas
+
+StateFrm
+  : DataValExpr
+  | 'true'
+  | 'false'
+  | statefrm_unary_operator StateFrm
+  | StateFrm statefrm_binary_operator StateFrm
+  | 'forall' IdsDeclList statefrm_quantifier_operator StateFrm
+  | 'exists' IdsDeclList statefrm_quantifier_operator StateFrm
+  | '[' RegFrm ']'
+  | '<' RegFrm '>'
+  | FixedPointOperator StateVarDecl statefrm_fixedpoint_operator StateFrm
+  | StateVarInst
+  | 'delay' ( '@' DataExpr )?
+  | 'yaled' ( '@' DataExpr )?
+  | '(' StateFrm ')'
+  ;
+
+StateVarDecl: Id ( "(" IdsDeclList ")" )? ;
+
+StateVarInst: Id ( "(" DataExprList ")" )? ;
+
+statefrm_unary_operator : '!' $unary_op_left 5 ;
+
+statefrm_binary_operator
+  : '&&'      $binary_op_right 4
+  | '||'      $binary_op_right 4
+  | '=>'      $binary_op_right 3
+  ;
+
+statefrm_quantifier_operator: '.' $unary_op_left 2 ;
+
+statefrm_fixedpoint_operator : '.' $unary_op_left 1 ;
 
 // Identifiers
 
