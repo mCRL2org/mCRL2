@@ -21,6 +21,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "parser.h"
 
@@ -174,10 +175,12 @@ class mcrl2parse_tool : public input_tool
 
       try
       {
+        std::cout << input_filename() << std::endl;
         dparser::parse_node node = p.parse(text, start_symbol_index, partial_parses);
         std::cout << "Parsing successful." << std::endl;
         if (print_tree)
         {
+          std::cout << "Parse tree:" << std::endl;
           p.print_tree(node);
         }
       }

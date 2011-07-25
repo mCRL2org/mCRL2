@@ -7,6 +7,7 @@
 #include <sys/ioctl.h>  // for ioctl() and FIONREAD
 #include <unistd.h>
 #include <iostream>
+#include <stdexcept>
 #include "mcrl2/data/detail/prover/smt_lib_solver.h"
 
 using namespace mcrl2::log;
@@ -27,9 +28,10 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
   int pipe_stderr[2];
 
   // Create pipes (two pairs r/w)
-  ::pipe(&pipe_stdin[0]);
-  ::pipe(&pipe_stdout[0]);
-  ::pipe(&pipe_stderr[0]);
+  if (!(   ::pipe(&pipe_stdin[0]) 
+        && ::pipe(&pipe_stdout[0])
+        && ::pipe(&pipe_stderr[0])))
+    throw std::runtime_error("Could not create pipes.");
 
   // fork process
   pid_t pid = ::fork();
@@ -55,6 +57,7 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
     ::close(pipe_stdin[0]);
     ::close(pipe_stdin[1]);
     ::close(pipe_stdout[0]);
+
     ::close(pipe_stdout[1]);
     ::close(pipe_stderr[0]);
     ::close(pipe_stderr[1]);
@@ -63,7 +66,8 @@ bool binary_smt_solver< T >::execute(std::string const& benchmark)
   }
   else
   {
-    ::write(pipe_stdin[1], benchmark.c_str(), benchmark.size());
+    if(::write(pipe_stdin[1], benchmark.c_str(), benchmark.size()) != benchmark.size())
+      throw std::runtime_error("Could not write to pipe.");
 
     ::close(pipe_stdin[0]);
     ::close(pipe_stdin[1]);

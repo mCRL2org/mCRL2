@@ -13,6 +13,12 @@
 
 // Sort Expressions
 
+{
+#include "/windows/devel/mCRL2/tools/mcrl2parse/parser.h"
+}
+
+_: { $g->announce($n); };
+
 SortExpr
   : 'Bool'
   | 'Pos'
@@ -87,14 +93,27 @@ DataExpr
   | '{' DataExprList '}'
   | '(' DataExpr ')'
   | DataExpr '(' DataExprList ')'
-  | '!' DataExpr
-  | '-' DataExpr
-  | '#' DataExpr
-  | 'forall' IdsDeclList '.' DataExpr
-  | 'exists' IdsDeclList '.' DataExpr
-  | 'lambda' IdsDeclList '.' DataExpr
+  | dataexpr_unary_operator DataExpr
   | DataExpr dataexpr_binary_operator DataExpr
   | DataExpr 'whr' WhrExprList 'end'
+  ;
+
+dataexpr_condition
+  : '(' DataExpr ')'
+  | 'true'
+  | 'false'
+  | Id
+  | dataexpr_condition '(' DataExprList ')'
+  | '!' dataexpr_condition $unary_right 11
+  ;
+
+dataexpr_unary_operator
+  : '!'       $unary_op_right 11
+  | '-'       $unary_op_right 11
+  | '#'       $unary_op_right 11
+  | 'forall' IdsDeclList '.' $unary_op_right 0
+  | 'exists' IdsDeclList '.' $unary_op_right 0
+  | 'lambda' IdsDeclList '.' $unary_op_right 0
   ;
 
 dataexpr_binary_operator
@@ -155,10 +174,18 @@ RenExprSet: '{' RenExprList? '}' ;
 // Process expressions
 
 ProcExpr
+  : unary_op ProcExpr | ProcExpr binary_op ProcExpr | 'X';
+unary_op
+  : '-' $unary_op_right 1
+  | '!' $unary_op_right 3;
+binary_op
+  : '+' $binary_op_right 2;
+
+ProcExpr___
   : Action
   | 'delta'
   | 'tau'
-  | 'sum' IdsDeclList procexpr_sum_operator ProcExpr
+  //| 'sum' IdsDeclList '.' ProcExpr $right 2
   | 'block' '(' MAIdSet ',' ProcExpr ')'
   | 'allow' '(' MAIdSet ',' ProcExpr ')'
   | 'hide' '(' MAIdSet ',' ProcExpr ')'
@@ -167,8 +194,16 @@ ProcExpr
   | '(' ProcExpr ')'
   | ProcExpr procexpr_binary_operator ProcExpr
   | ProcExpr procexpr_time_operator DataExpr
-  | DataExpr procexpr_if_operator ProcExpr
-  | DataExpr procexpr_if_operator ProcExpr '<>' ProcExpr
+  // | dataexpr_condition '->' ProcExpr ('<>' ProcExpr)? $unary_right 4
+  | procexpr_unary_operator ProcExpr
+  ;
+
+procexpr_unary_operator
+  : 'sum' IdsDeclList '.'     $unary_op_right 2
+  | dataexpr_condition '->'   $unary_op_right 4
+  | dataexpr_condition '->' ProcExpr '<>' $unary_op_right 4
+  | '^' $unary_op_right 3
+  | '"' $unary_op_right 4
   ;
 
 procexpr_binary_operator
@@ -181,10 +216,6 @@ procexpr_binary_operator
   ;
 
 procexpr_time_operator: '@'       $binary_op_left 7 ;
-
-procexpr_sum_operator: '.'        $unary_op_left 2 ;
-
-procexpr_if_operator: '->'        $binary_op_right 4 ;
 
 // Actions
 
@@ -372,7 +403,7 @@ statefrm_fixedpoint_operator : '.' $unary_op_left 1 ;
 
 IdList: Id ( ',' Id )* ;
 
-Id: "[A-Za-z_][A-Za-z_0-9']*" ;
+Id: "[A-Za-z_][A-Za-z_0-9']*" $term -1;
 
 Number: "0|(-?[1-9][0-9]*)" ;
 

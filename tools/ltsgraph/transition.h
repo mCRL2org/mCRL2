@@ -29,8 +29,8 @@ class Transition
     // Setters
     void setControl(const double x, const double y, const double z);
     void setControlAlpha(const double alpha);
-    void setcontrolBeta(const double beta);
-    void setcontrolGamma(const double gamma);
+    void setControlBeta(const double beta);
+    void setControlGamma(const double gamma);
 
     void setLabelPos(const double x, const double y, const double z);
 

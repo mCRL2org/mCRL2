@@ -202,7 +202,7 @@ static void add_extra_mcrl2_lts_data(
    */
   char c;
   fseek(f,0,SEEK_END);
-  fread(&c,1,1,f);
+  assert(fread(&c,1,1,f) == 0);
 
   long position = ftell(f);
   if (position == -1)
