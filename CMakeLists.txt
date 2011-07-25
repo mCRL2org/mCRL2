@@ -304,6 +304,21 @@ if(MCRL2_ENABLE_GUI_TOOLS)
 endif(MCRL2_ENABLE_GUI_TOOLS)
 
 ##---------------------------------------------------
+## DParser experiment
+##---------------------------------------------------
+## TODO: Merge with experimental tools. Currently, 
+##   building dparser fails in MacOS and Windows.
+##---------------------------------------------------
+
+option(MCRL2_ENABLE_DPARSER "Enable/disable compilation of DParser-dependent tools (_very_ experimental)" OFF)
+message(STATUS "MCRL2_ENABLE_DPARSER: ${MCRL2_ENABLE_DPARSER}" )
+
+if(MCRL2_ENABLE_DPARSER)
+  add_subdirectory ( 3rd-party/dparser )
+  add_subdirectory ( tools/mcrl2parse )
+endif(MCRL2_ENABLE_DPARSER)
+
+##---------------------------------------------------
 ## Library dependencies
 ##---------------------------------------------------
 
@@ -392,7 +407,6 @@ if(MCRL2_ENABLE_EXPERIMENTAL)
   add_subdirectory ( tools/bessolve )
   add_subdirectory ( tools/lpsbisim2pbes )
   add_subdirectory ( tools/lpsrealelm )
-  add_subdirectory ( tools/mcrl2parse )
   add_subdirectory ( tools/pbesabstract )
   add_subdirectory ( tools/pbesinst )
   add_subdirectory ( tools/pbespareqelm )
