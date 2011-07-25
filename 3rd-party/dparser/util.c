@@ -54,6 +54,7 @@ int
 buf_read(const char *pathname, char **buf, int *len) {
   struct stat sb;
   int fd;
+  size_t real_size;
 
   *buf = 0;
   *len = 0;
@@ -65,7 +66,7 @@ buf_read(const char *pathname, char **buf, int *len) {
   *len = sb.st_size;
   *buf = (char*)MALLOC(*len + 2);
   // MINGW likes to convert cr lf => lf which messes with the size
-  size_t real_size = read(fd, *buf, *len);
+  real_size = read(fd, *buf, *len);
   (*buf)[real_size] = 0;
   (*buf)[real_size + 1] = 0;
   *len = real_size;

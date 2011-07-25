@@ -858,14 +858,15 @@ static int
 cmp_priorities(Parser *p, PNode *x, PNode *y) {
   StackPNode psx, psy;
   StackInt isx, isy;
-
+  int r;
+  
   stack_clear(&psx); stack_clear(&psy); stack_clear(&isx); stack_clear(&isy);
   get_exp_one(p, x, &psx, &isx);
   get_exp_one(p, y, &psy, &isy);
   get_unshared_priorities(p, &psx, &psy, &isx, &isy);
   intsort(isx.start, stack_depth(&isx));
   intsort(isy.start, stack_depth(&isy));
-  int r = compare_priorities(isx.start, stack_depth(&isx), 
+  r = compare_priorities(isx.start, stack_depth(&isx), 
 		     isy.start, stack_depth(&isy));
   stack_free(&psx); stack_free(&psy); stack_free(&isx); stack_free(&isy);
   return r;
@@ -927,12 +928,15 @@ greedycmp(const void *ax, const void *ay) {
 static int
 cmp_greediness(Parser *p, PNode *x, PNode *y) {
   VecPNode pvx, pvy;
-  vec_clear(&pvx); vec_clear(&pvy); 
+  int ix = 0, iy = 0, ret = 0;
+  
+  vec_clear(&pvx); 
+  vec_clear(&pvy); 
+
   get_unshared_pnodes(p, x, y, &pvx, &pvy);
   /* set_to_vec(&pvx); set_to_vec(&pvy); */
   qsort(pvx.v, pvx.n, sizeof(PNode *), greedycmp);
   qsort(pvy.v, pvy.n, sizeof(PNode *), greedycmp);
-  int ix = 0, iy = 0, ret = 0;
   while (1) {
     if (pvx.n <= ix || pvy.n <= iy)
       RET(0);
@@ -1201,8 +1205,9 @@ set_find_znode(VecZNode *v, PNode *pn) {
 static void
 set_add_znode_hash(VecZNode *v, ZNode *z) {
   VecZNode vv;
-  vec_clear(&vv);
   int i, j, n = v->n;
+  
+  vec_clear(&vv);
   if (n) {
     uint h = ((uintptr_t)z->pn) % n;
     for (i = h, j = 0; 
@@ -1236,8 +1241,9 @@ set_add_znode_hash(VecZNode *v, ZNode *z) {
 static void
 set_add_znode(VecZNode *v, ZNode *z) {
   VecZNode vv;
-  vec_clear(&vv);
   int i, n = v->n;
+  
+  vec_clear(&vv);
   if (n < INTEGRAL_VEC_SIZE) {
     vec_add(v, z);
     return;

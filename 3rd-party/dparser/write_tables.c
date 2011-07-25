@@ -1100,6 +1100,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
 		char *fname, int line, char *pathname) 
 {
   char *c;
+  int in_string = 0;
 
   if (!fp) {
     d_warn("trying to write code to binary file");
@@ -1111,7 +1112,6 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
   }
   fprintf(fp, "%s{ ", fname);
   c = code;
-  int in_string = 0;
   while (*c) {
     if (*c != '\\') {
       if (c[1] == '\'' || c[1] == '"') {

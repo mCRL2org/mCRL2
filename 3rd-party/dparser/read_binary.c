@@ -41,13 +41,13 @@ read_binary_tables_internal(FILE *fp, unsigned char *str,
     } else if (*intptr == -3) {
       *ptr = (void*)final_code;
     } else {
-      *ptr += (intptr_t)tables_buf;
+      (uintptr_t)*ptr += (intptr_t)tables_buf;
     }
   }
   for (i=0; i<tables.n_strings; i++) {
     intptr_t offset;
     read_chk((void*)&offset, sizeof(intptr_t), 1, fp, &str);
-    *(void**)(tables_buf+offset) += (intptr_t)strings_buf;
+    (uintptr_t)*(void**)((uintptr_t)tables_buf+offset) += (intptr_t)strings_buf;
   }
   if (fp)
     fclose(fp);

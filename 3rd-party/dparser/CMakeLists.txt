@@ -1,4 +1,4 @@
-# Authors: Frank Stappers and Aad Mathijssen
+# Author: Sjoerd Cranen
 # Copyright: see the accompanying file COPYING or copy at
 # https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 #
@@ -15,6 +15,15 @@ add_definitions(
   -DD_MINOR_VERSION=26
   -DD_BUILD_VERSION="mCRL2"
 )
+
+if(MSVC)
+add_definitions(
+  -D__MINGW32__
+  -Dstrtoll=_strtoi64
+  -Dstrncasecmp=_strnicmp
+  -Dsnprintf=_snprintf
+)
+endif(MSVC)
 
 # ######### General setup ##########
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)

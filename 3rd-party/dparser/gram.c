@@ -1539,9 +1539,9 @@ print_term_escaped(Term *t, int double_escaped) {
 	printf("%sterm %d ", double_escaped?"#":"$", t->term_priority);
     }
   } else if (t->kind == TERM_REGEX) {
+    char *quote = double_escaped ? "\\\"" : "\"";
     s = t->string ? escape_string(t->string) : NULL;
     //char *s = t->string; // ? escape_string(t->string) : NULL;
-    char *quote = double_escaped ? "\\\"" : "\"";
     printf("%s%s%s ", quote, double_escaped?escape_string(s):s, quote);
     if (t->ignore_case)
       printf("/i ");

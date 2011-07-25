@@ -97,10 +97,11 @@ nfa_closure(DFAState *x) {
 
   for (i = 0; i < x->states.n; i++)
     for (j = 0; j < x->states.v[i]->epsilon.n; j++) {
+	  NFAState *s;
       for (k = 0; k < x->states.n; k++)
 	if (x->states.v[i]->epsilon.v[j] == x->states.v[k])
 	  goto Lbreak;
-      NFAState *s = x->states.v[i];
+      s = x->states.v[i];
       vec_add(&x->states, s->epsilon.v[j]);
     Lbreak:;
     }
