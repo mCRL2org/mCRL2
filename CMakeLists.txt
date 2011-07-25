@@ -296,7 +296,6 @@ endif( MCRL2_STAGE_ROOTDIR )
 
 add_subdirectory ( 3rd-party/svc )
 if(MCRL2_ENABLE_GUI_TOOLS)
-  add_subdirectory ( 3rd-party/dparser )
   add_subdirectory ( 3rd-party/tr)
   if(NOT GL2PS_FOUND)
     add_subdirectory ( 3rd-party/gl2ps )
