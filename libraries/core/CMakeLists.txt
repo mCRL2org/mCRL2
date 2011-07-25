@@ -14,8 +14,8 @@ cmake_minimum_required(VERSION 2.6)
 
 add_custom_command(
   OUTPUT ${CMAKE_SOURCE_DIR}/libraries/core/source/mcrl2_syntax.cpp
-  COMMAND make_dparser -vdpA -H0 -imcrl2 -o${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.cpp ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
-  DEPENDS make_dparser ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
+  COMMAND make_dparser -A -imcrl2 -o${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2_syntax.cpp ${CMAKE_SOURCE_DIR}/doc/specs/mcrl2-syntax.g
+  DEPENDS make_dparser
 )
 
 include_directories(

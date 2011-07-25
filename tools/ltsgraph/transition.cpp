@@ -187,12 +187,12 @@ void Transition::setControlAlpha(const double alpha)
   controlAlpha = alpha;
 }
 
-void Transition::setControlBeta(const double beta)
+void Transition::setcontrolBeta(const double beta)
 {
   controlBeta = beta;
 }
 
-void Transition::setControlGamma(const double gamma)
+void Transition::setcontrolGamma(const double gamma)
 {
   controlGamma = gamma;
 }

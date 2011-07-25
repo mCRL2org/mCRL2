@@ -25,7 +25,7 @@ namespace dparser {
   class term;
 }
 
-#define D_ParseNode_Globals dparser::parser
+//#define D_ParseNode_Globals dparser::parser
 //#define D_ParseNode_User dparser::term*
 
 #include "dparse.h"
@@ -184,12 +184,10 @@ struct parser
     return m_table.start_symbol_index(name);
   }
 
-  parse_node parse(const std::string& text, unsigned int start_symbol_index = 0, bool partial_parses = false,
-    bool dont_use_greediness_for_disambiguation = false)
+  parse_node parse(const std::string& text, unsigned int start_symbol_index = 0, bool partial_parses = false)
   {
     m_parser->start_state = start_symbol_index;
     m_parser->partial_parses = partial_parses ? 1 : 0;
-    m_parser->dont_use_greediness_for_disambiguation = dont_use_greediness_for_disambiguation ? 1 : 0;
     D_ParseNode* result = dparse(m_parser, const_cast<char*>(text.c_str()), text.size());
     if (!result || m_parser->syntax_errors)
     {
@@ -208,13 +206,10 @@ struct parser
     return std::string(count, ' ');
   }
 
-  std::string truncate(const std::string& s, unsigned int max_size = 50) const
+  std::string truncate(const std::string& s, unsigned int max_size = 10) const
   {
-    std::string result;
-    result = (s.size() > max_size) ? s.substr(0, max_size) + "..." : s;
-    for (std::string::iterator it = result.begin(); it != result.end(); ++it)
-      if (*it == '\n')
-        *it = ' ';
+    std::string result = s.substr(0, max_size);
+
     // truncate at newline
     std::string::size_type pos = result.find('\n');
     if (pos != std::string::npos)
@@ -243,10 +238,7 @@ struct parser
   void announce(D_ParseNode& node_ref)
   {
     parse_node node(&node_ref);
-    std::cout << "---------\n" 
-              << "parsed " << m_table.symbol_name(node.symbol()) << "\n" 
-              << "---------\n"
-              << node.string() << "\n";
+    std::cout << "parsed " << m_table.symbol_name(node.symbol()) << " " << node.string() << std::endl;
   }
 
   /// \brief Callback function for nodes in the parse tree

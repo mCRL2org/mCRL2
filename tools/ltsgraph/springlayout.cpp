@@ -241,7 +241,7 @@ void SpringLayout::layoutGraph(Graph* graph)
       }
     }
   }
-  else // !app->get3dMode()
+  else
   {
     size_t nrStates = graph->getNumberOfStates();
     std::vector<float> sumFX(nrStates, 0.0f);
@@ -365,37 +365,6 @@ void SpringLayout::layoutGraph(Graph* graph)
 
         s->setX(newX);
         s->setY(newY);
-      }
-    }
-
-    for (size_t i = 0; i < graph->getNumberOfStates(); ++i)
-    {
-      State* s = graph->getState(i);
-      if (!(s->isLocked() || s->isDragged()))
-      {
-        std::map<State*, float> curves;
-        for (size_t j = 0; j < s->getNumberOfTransitions(); ++j)
-        {
-          Transition* ot = s->getTransition(j);
-          State* to = ot->getTo();
-          std::map<State*, float>::iterator curve = curves.find(to);
-          if (curve != curves.end())
-          { // Multiple transitions curve out.
-            curve->second += .015;
-          }          
-          else if (to->hasTransitionTo(s))
-          { // First transition is curved only if there is a transition back as well
-            curve = curves.insert(std::make_pair(to, 0.15)).first;
-          }
-          else
-          {
-            curve = curves.insert(std::make_pair(to, 0.0)).first;
-          }
-          double alpha = curve->second * M_PI;
-          ot->setControlAlpha(0.1);
-          ot->setControlBeta(0.0);
-          ot->setControlGamma(0.0);
-        }
       }
     }
   }

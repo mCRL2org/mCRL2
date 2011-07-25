@@ -14,14 +14,13 @@ add_definitions(
   -DD_MAJOR_VERSION=1
   -DD_MINOR_VERSION=26
   -DD_BUILD_VERSION="mCRL2"
-  -DD_USE_FREELISTS=1
 )
 
 # ######### General setup ##########
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 # actual target:
-add_library(dparser 
+add_library(dparser
   arg.c 
   parse.c 
   scan.c 
@@ -31,9 +30,7 @@ add_library(dparser
   dparse_tree.c
 )
 
-add_executable(make_dparser 
-  make_dparser.c
-  version.c
+add_library(mkdparser
   mkdparse.c 
   write_tables.c 
   grammar.g.c 
@@ -42,8 +39,14 @@ add_executable(make_dparser
   lr.c
 )
 
+add_executable(make_dparser
+  make_dparser.c
+  version.c
+)
+
 target_link_libraries(make_dparser
   dparser
+  mkdparser
 )
 
 install(TARGETS dparser DESTINATION ${MCRL2_LIB_DIR})
