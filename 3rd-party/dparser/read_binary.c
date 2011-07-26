@@ -47,7 +47,7 @@ read_binary_tables_internal(FILE *fp, unsigned char *str,
   for (i=0; i<tables.n_strings; i++) {
     intptr_t offset;
     read_chk((void*)&offset, sizeof(intptr_t), 1, fp, &str);
-    *(uintptr_t*)(tables_buf+offset) += (intptr_t)strings_buf;
+    *(uintptr_t*)((uintptr_t)tables_buf+offset) += (intptr_t)strings_buf;
   }
   if (fp)
     fclose(fp);

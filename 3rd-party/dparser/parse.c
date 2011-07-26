@@ -605,6 +605,10 @@ static int
 check_child(int ppri, AssocKind passoc, int cpri, AssocKind cassoc,
 	    int left, int right) 
 {
+  if (IS_UNARY_ASSOC(passoc) && passoc == cassoc)
+    return 1;
+  if (IS_UNARY_ASSOC(passoc) != IS_UNARY_ASSOC(cassoc))
+    return 1;
   int p = IS_BINARY_NARY_ASSOC(passoc) ? (right ? 1 : 0) : 
           (passoc == ASSOC_UNARY_LEFT ? 2 : 3);
   int c = IS_BINARY_NARY_ASSOC(cassoc) ? 0 : 
@@ -928,15 +932,12 @@ greedycmp(const void *ax, const void *ay) {
 static int
 cmp_greediness(Parser *p, PNode *x, PNode *y) {
   VecPNode pvx, pvy;
-  int ix = 0, iy = 0, ret = 0;
-  
-  vec_clear(&pvx); 
-  vec_clear(&pvy); 
-
+  vec_clear(&pvx); vec_clear(&pvy); 
   get_unshared_pnodes(p, x, y, &pvx, &pvy);
   /* set_to_vec(&pvx); set_to_vec(&pvy); */
   qsort(pvx.v, pvx.n, sizeof(PNode *), greedycmp);
   qsort(pvy.v, pvy.n, sizeof(PNode *), greedycmp);
+  int ix = 0, iy = 0, ret = 0;
   while (1) {
     if (pvx.n <= ix || pvy.n <= iy)
       RET(0);
@@ -1205,9 +1206,8 @@ set_find_znode(VecZNode *v, PNode *pn) {
 static void
 set_add_znode_hash(VecZNode *v, ZNode *z) {
   VecZNode vv;
-  int i, j, n = v->n;
-  
   vec_clear(&vv);
+  int i, j, n = v->n;
   if (n) {
     uint h = ((uintptr_t)z->pn) % n;
     for (i = h, j = 0; 
@@ -1241,9 +1241,8 @@ set_add_znode_hash(VecZNode *v, ZNode *z) {
 static void
 set_add_znode(VecZNode *v, ZNode *z) {
   VecZNode vv;
-  int i, n = v->n;
-  
   vec_clear(&vv);
+  int i, n = v->n;
   if (n < INTEGRAL_VEC_SIZE) {
     vec_add(v, z);
     return;
@@ -1796,7 +1795,7 @@ fixup_internal_symbol(Parser *p, PNode *pn, int ichild) {
 
 static PNode *
 commit_tree(Parser *p, PNode *pn) {
-  int i, n, fixup_ebnf = 0, fixup = 0, internal = 0;
+  int i, fixup_ebnf = 0, fixup = 0, internal = 0;
   LATEST(p, pn);
   if (pn->evaluated)
     return pn;
@@ -1814,7 +1813,6 @@ commit_tree(Parser *p, PNode *pn) {
       unref_pn(p, pn->children.v[i]);
       pn->children.v[i] = tpn;
     }
-    n = pn->children.v[i]->children.n;
     if (fixup && 
 	(fixup_ebnf ? is_symbol_internal_or_EBNF(p, pn->children.v[i]) :
 	 is_symbol_internal(p, pn->children.v[i])))
@@ -2175,8 +2173,6 @@ white_space(D_Parser *p, d_loc_t *loc, void **p_user_globals) {
   if (s[0] == '/') {
     if (s[1] == '/') {
       while (*s && *s != '\n') { s++; }
-      loc->line++;
-      s++;
       goto Lmore;
     }
     if (s[1] == '*') {
