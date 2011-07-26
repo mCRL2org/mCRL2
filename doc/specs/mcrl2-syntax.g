@@ -87,14 +87,32 @@ DataExpr
   | '{' DataExprList '}'
   | '(' DataExpr ')'
   | DataExpr '(' DataExprList ')'
-  | '!' DataExpr
-  | '-' DataExpr
-  | '#' DataExpr
-  | 'forall' IdsDeclList '.' DataExpr
-  | 'exists' IdsDeclList '.' DataExpr
-  | 'lambda' IdsDeclList '.' DataExpr
+  | dataexpr_unary_operator DataExpr
+  | dataexpr_quantifier DataExpr
   | DataExpr dataexpr_binary_operator DataExpr
   | DataExpr 'whr' WhrExprList 'end'
+  ;
+
+dataexpr_disambiguation
+  : '(' DataExpr ')'
+  | 'true'
+  | 'false'
+  | Id
+  | Number
+  | dataexpr_disambiguation '(' DataExprList ')'
+  | dataexpr_unary_operator dataexpr_disambiguation
+  ;
+
+dataexpr_unary_operator
+  : '!'       $unary_op_right 11
+  | '-'       $unary_op_right 11
+  | '#'       $unary_op_right 11
+  ;
+
+dataexpr_quantifier
+  : 'forall' IdsDeclList '.' $unary_op_right 0
+  | 'exists' IdsDeclList '.' $unary_op_right 0
+  | 'lambda' IdsDeclList '.' $unary_op_right 0
   ;
 
 dataexpr_binary_operator
@@ -158,7 +176,6 @@ ProcExpr
   : Action
   | 'delta'
   | 'tau'
-  | 'sum' IdsDeclList procexpr_sum_operator ProcExpr
   | 'block' '(' MAIdSet ',' ProcExpr ')'
   | 'allow' '(' MAIdSet ',' ProcExpr ')'
   | 'hide' '(' MAIdSet ',' ProcExpr ')'
@@ -166,9 +183,16 @@ ProcExpr
   | 'comm' '(' CommExprSet ',' ProcExpr ')'
   | '(' ProcExpr ')'
   | ProcExpr procexpr_binary_operator ProcExpr
-  | ProcExpr procexpr_time_operator DataExpr
-  | DataExpr procexpr_if_operator ProcExpr
-  | DataExpr procexpr_if_operator ProcExpr '<>' ProcExpr
+  | ProcExpr procexpr_time_operator dataexpr_disambiguation
+  | procexpr_unary_operator ProcExpr
+  | dataexpr_disambiguation procexpr_thenelse $unary_left 11;
+  ;
+
+procexpr_thenelse
+  : '->' ProcExpr ('<>' ProcExpr)? $unary_op_left 11;
+
+procexpr_unary_operator
+  : 'sum' IdsDeclList '.'     $unary_op_right 2
   ;
 
 procexpr_binary_operator
@@ -181,10 +205,6 @@ procexpr_binary_operator
   ;
 
 procexpr_time_operator: '@'       $binary_op_left 7 ;
-
-procexpr_sum_operator: '.'        $unary_op_left 2 ;
-
-procexpr_if_operator: '->'        $binary_op_right 4 ;
 
 // Actions
 
@@ -372,7 +392,7 @@ statefrm_fixedpoint_operator : '.' $unary_op_left 1 ;
 
 IdList: Id ( ',' Id )* ;
 
-Id: "[A-Za-z_][A-Za-z_0-9']*" ;
+Id: "[A-Za-z_][A-Za-z_0-9']*" $term -1;
 
 Number: "0|(-?[1-9][0-9]*)" ;
 
