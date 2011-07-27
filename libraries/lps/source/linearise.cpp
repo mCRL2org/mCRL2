@@ -1833,7 +1833,7 @@ class specification_basic_type:public boost::noncopyable
       const bool canterminate,
       const bool containstime)
     {
-      size_t numberOfNewProcesses=0, warningNumber=1000;
+      static size_t numberOfNewProcesses=0, warningNumber=100;
       numberOfNewProcesses++;
       if (numberOfNewProcesses == warningNumber)
       {
@@ -1851,7 +1851,7 @@ class specification_basic_type:public boost::noncopyable
         {
           mCRL2log(log::warning) << std::endl;
         }
-        warningNumber=warningNumber*2;
+        warningNumber=warningNumber*5;
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
       const process_identifier p(fresh_name("P"),get_sorts(parameters1));
@@ -7132,7 +7132,6 @@ class specification_basic_type:public boost::noncopyable
 
     deprecated::summand_list generateLPEmCRLterm(
       const process_expression t,
-      /*const bool canterminate,*/
       const bool regular,
       const bool rename_variables,
       variable_list& pars,
@@ -7140,7 +7139,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if (is_process_instance(t))
       {
-        deprecated::summand_list t3=generateLPEmCRL(process_instance(t).identifier(),/*canterminate,*/regular,pars,init);
+        deprecated::summand_list t3=generateLPEmCRL(process_instance(t).identifier(),regular,pars,init);
         size_t n=objectIndex(process_instance(t).identifier());
         data_expression_list args=process_instance(t).actual_parameters();
         init=substitute_assignmentlist(args,objectdata[n].parameters,init,pars,0,1);
@@ -7242,9 +7241,9 @@ class specification_basic_type:public boost::noncopyable
       {
         variable_list pars1,pars2;
         assignment_list init1,init2;
-        const deprecated::summand_list t1=generateLPEmCRLterm(process::merge(t).left(),/*canterminate,*/
+        const deprecated::summand_list t1=generateLPEmCRLterm(process::merge(t).left(),
                               regular,rename_variables,pars1,init1);
-        const deprecated::summand_list t2=generateLPEmCRLterm(process::merge(t).right(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(process::merge(t).right(),
                               regular,true,pars2,init2);
         deprecated::summand_list t3=parallelcomposition(t1,pars1,init1,t2,pars2,init2,pars,init);
         return t3;
@@ -7252,35 +7251,35 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_hide(t))
       {
-        const deprecated::summand_list t2=generateLPEmCRLterm(hide(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(hide(t).operand(),
                               regular,rename_variables,pars,init);
         return hidecomposition(hide(t).hide_set(),t2);
       }
 
       if (is_allow(t))
       {
-        const deprecated::summand_list t2=generateLPEmCRLterm(allow(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(allow(t).operand(),
                               regular,rename_variables,pars,init);
         return allowblockcomposition(allow(t).allow_set(),t2,true);
       }
 
       if (is_block(t))
       {
-        const deprecated::summand_list t2=generateLPEmCRLterm(block(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(block(t).operand(),
                               regular,rename_variables,pars,init);
         return allowblockcomposition(block(t).block_set(),t2,false);
       }
 
       if (is_rename(t))
       {
-        const deprecated::summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t2=generateLPEmCRLterm(process::rename(t).operand(),
                               regular,rename_variables,pars,init);
         return renamecomposition(process::rename(t).rename_set(),t2);
       }
 
       if (is_comm(t))
       {
-        const deprecated::summand_list t1=generateLPEmCRLterm(comm(t).operand(),/*canterminate,*/
+        const deprecated::summand_list t1=generateLPEmCRLterm(comm(t).operand(),
                               regular,rename_variables,pars,init);
         return communicationcomposition(comm(t).comm_set(),t1);
       }
@@ -7293,7 +7292,6 @@ class specification_basic_type:public boost::noncopyable
 
     deprecated::summand_list generateLPEmCRL(
       const process_identifier procIdDecl,
-      /*const bool canterminate,*/
       const bool regular,
       variable_list& pars,
       assignment_list& init)
@@ -7308,7 +7306,7 @@ class specification_basic_type:public boost::noncopyable
           (objectdata[n].processstatus==GNFalpha)||
           (objectdata[n].processstatus==multiAction))
       {
-        return generateLPEpCRL(procIdDecl,/*(canterminate&&objectdata[n].canterminate),*/
+        return generateLPEpCRL(procIdDecl,
                                objectdata[n].containstime,regular,pars,init);
       }
       /* process is a mCRLdone */
@@ -7318,7 +7316,6 @@ class specification_basic_type:public boost::noncopyable
       {
         objectdata[n].processstatus=mCRLlin;
         return generateLPEmCRLterm(objectdata[n].processbody,
-                                   /*(canterminate&&objectdata[n].canterminate),*/
                                    regular,false,pars,init);
       }
 
@@ -8103,7 +8100,7 @@ class specification_basic_type:public boost::noncopyable
          first variable in a sequence is always an actionvariable */
       procstorealGNF(init1,options.lin_method!=lmStack);
 
-      deprecated::summand_list t3=generateLPEmCRL(init1,/*objectdata[objectIndex(init1)].canterminate,*/
+      deprecated::summand_list t3=generateLPEmCRL(init1,
                                       options.lin_method!=lmStack,parameters,initial_state);
       t3=allowblockcomposition(action_name_multiset_list(),t3,false); // This removes superfluous delta summands.
       if (options.final_cluster)
