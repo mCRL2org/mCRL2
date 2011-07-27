@@ -116,6 +116,22 @@ message(STATUS "CMAKE_BUILD_TYPE: ${CMAKE_BUILD_TYPE} " )
 message(STATUS "CMAKE_INSTALL_PREFIX: ${CMAKE_INSTALL_PREFIX}")
 
 ##-----------------------------------------------------
+## Set platform specific options 
+##-----------------------------------------------------
+if(WIN32)
+  include(ConfigureWindows)
+endif(WIN32)
+if(UNIX AND NOT APPLE)
+  include(ConfigureUnix)
+endif(UNIX AND NOT APPLE)
+if(APPLE)
+  include(ConfigureApple)
+endif(APPLE)
+set(MCRL2_LIB_DIR "lib/mcrl2")
+
+message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
+
+##-----------------------------------------------------
 ## Set runtime path variable RPATH for install targets
 ##-----------------------------------------------------
 
@@ -139,21 +155,6 @@ set(CMAKE_INSTALL_NAME_DIR "${CMAKE_INSTALL_PREFIX}/${MCRL2_LIB_DIR}")
 # which point to directories outside the build tree to the install RPATH
 set(CMAKE_INSTALL_RPATH_USE_LINK_PATH true)
 
-##-----------------------------------------------------
-## Set platform specific options 
-##-----------------------------------------------------
-if(WIN32)
-  include(ConfigureWindows)
-endif(WIN32)
-if(UNIX AND NOT APPLE)
-  include(ConfigureUnix)
-endif(UNIX AND NOT APPLE)
-if(APPLE)
-  include(ConfigureApple)
-endif(APPLE)
-set(MCRL2_LIB_DIR "lib/mcrl2")
-
-message(STATUS "BUILD_SHARED_LIBS: ${BUILD_SHARED_LIBS}")
 
 ##---------------------------------------------------
 ## Print compiler information
