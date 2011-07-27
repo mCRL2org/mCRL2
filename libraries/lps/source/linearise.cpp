@@ -1839,7 +1839,7 @@ class specification_basic_type:public boost::noncopyable
       {
         mCRL2log(log::warning) << "generated " << numberOfNewProcesses << " new internal processes.";
 
-        if (!options.lin_method!=lmStack)
+        if (options.lin_method==lmRegular)
         {
           mCRL2log(log::warning) << " A possible unbounded loop can be avoided by using `regular2' or `stack' as linearisation method." << std::endl;
         }
@@ -8120,7 +8120,7 @@ mcrl2::lps::specification mcrl2::lps::linearise(
   const mcrl2::process::process_specification& type_checked_spec,
   mcrl2::lps::t_lin_options lin_options)
 {
-  mCRL2log(log::verbose) << "Linearising the process specification using the '" << lin_method_to_string(lin_options.lin_method) << " ' method.\n";
+  mCRL2log(log::verbose) << "linearising the process specification using the '" << lin_method_to_string(lin_options.lin_method) << " ' method.\n";
   data_specification data_spec=type_checked_spec.data();
   std::set<data::sort_expression> s;
   process::find_sort_expressions(type_checked_spec.action_labels(), std::inserter(s, s.end()));

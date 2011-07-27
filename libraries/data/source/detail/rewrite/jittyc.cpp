@@ -2361,7 +2361,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   else
     compile_script = "mcrl2compilerewriter";
   rewriter_so = new uncompiled_library(compile_script);
-  mCRL2log(verbose) << "Using '" << compile_script << "' to compile rewriter." << std::endl;
+  mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
 
   jittyc_eqns = (ATermList*) malloc(get_num_opids()*sizeof(ATermList));
   memset(jittyc_eqns,0,get_num_opids()*sizeof(ATermList));
@@ -2722,12 +2722,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     throw mcrl2::runtime_error(std::string("Could not load rewriter: ") + e.what());
   }
 
-  mCRL2log(verbose) << "initialising rewriter..." << std::endl;
-
   so_rewr_init(this);
-
-  mCRL2log(verbose) << "Adding rewrite rules..." << std::endl;
-
   need_rebuild = false;
 }
 
