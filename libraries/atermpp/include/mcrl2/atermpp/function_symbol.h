@@ -14,6 +14,7 @@
 
 #include <string>
 #include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/aterm/afun.h"
 
 namespace atermpp
 {
@@ -99,6 +100,18 @@ bool operator==(const function_symbol& x, const function_symbol& y)
 {
   // return x.name() == y.name() && x.arity() == y.arity() && x.is_quoted() == y.is_quoted();
   return AFun(x) == AFun(y);
+}
+
+inline
+bool operator==(const function_symbol& x, const AFun& y)
+{
+  return AFun(x) == y;
+}
+
+inline
+bool operator==(const AFun& x, const function_symbol& y)
+{
+  return x == AFun(y);
 }
 
 /// \brief Inequality operator.
