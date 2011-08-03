@@ -149,6 +149,7 @@ class EnumeratorSolutionsStandard
 
     variable_list enum_vars;                    // The variables over which a solution is searched.
     atermpp::aterm_appl enum_expr;              // Condition to be satisfied in internal format.
+    mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &enum_sigma;
 
     atermpp::deque < fs_expr> fs_stack;
     atermpp::vector< ss_solution > ss_stack;
@@ -157,15 +158,23 @@ class EnumeratorSolutionsStandard
     size_t max_vars;
     size_t m_max_internal_variables;
 
+    mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &default_sigma()
+    {
+      static mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > default_sigma; 
+      return default_sigma;
+    }
+
   public:
 
     /// \brief Default constructor
     EnumeratorSolutionsStandard():
-       m_max_internal_variables(0)
+       m_max_internal_variables(0),
+       enum_vars(),
+       enum_sigma(default_sigma())
     {
       enum_vars.protect();
       enum_expr.protect();
-    }
+    } 
 
     /// \brief Constructor. Generate solutions for the variables in Vars that satisfy Expr.
     /// If not equal_to_false is set all solutions are generated that make Expr not equal to false.
@@ -189,12 +198,14 @@ class EnumeratorSolutionsStandard
     EnumeratorSolutionsStandard(
                    const variable_list &vars, 
                    const atermpp::aterm_appl &expr, 
+                   mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma,
                    const bool not_equal_to_false, 
                    detail::EnumeratorStandard *enclosing_enumerator,
                    const size_t max_internal_variables=0) :
       m_enclosing_enumerator(enclosing_enumerator),
       enum_vars(vars),
       enum_expr(expr),
+      enum_sigma(sigma),
       used_vars(0),
       max_vars(MAX_VARS_INIT),
       m_max_internal_variables(max_internal_variables)

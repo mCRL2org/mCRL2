@@ -14,15 +14,13 @@
 #include <cstring>
 #include <iterator>
 #include <memory>
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/representative_generator.h"
-#include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/nextstate/standard.h"
-#include "mcrl2/utilities/logger.h"
-#include "mcrl2/lps/specification.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -645,9 +643,11 @@ NextState::NextState(mcrl2::lps::specification const& spec,
 
   // Rewrite the state arguments en block, as otherwise the generation of new symbols in the
   // rewriter is intermingled with rewriting, causing the rewriter to rewrite too often.
+  
+  mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > dummy;
   for (size_t i=0; i<info.statelen; i++)
   {
-    stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.rewrite_internal((atermpp::aterm_appl)stateargs[i]);
+    stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.rewrite_internal((atermpp::aterm_appl)stateargs[i],dummy);
   }
 
   initial_state = NULL;
@@ -844,11 +844,13 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
           break;
         case GS_STATE_TREE:
 //                                      stateargs[i] = getTreeElement(old,i);
-          stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
+          // stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
+          stateargs[i] = (ATerm)(ATermAppl)current_substitution(variable((ATermAppl)ATgetFirst(l)));
           if (ATisEqual(stateargs[i], ATgetFirst(l)))   // Make sure substitutions were not reset by enumerator
           {
             set_substitutions();
-            stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
+            // stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.internally_associated_value(variable(ATgetFirst(l)));
+            stateargs[i] = (ATerm)(ATermAppl)current_substitution(variable(ATgetFirst(l)));
           }
           break;
       }
@@ -856,7 +858,7 @@ ATerm NextStateGenerator::makeNewState(ATerm old, ATermList assigns)
     else
     {
 
-      stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.rewrite_internal((atermpp::aterm_appl)a);
+      stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.rewrite_internal((atermpp::aterm_appl)a,current_substitution);
       // The assertion below is not true if there are global variables,
       // which is for instance the case for lpsxsim and lpssim.
       // assert(mcrl2::data::find_variables(atermpp::make_list(mcrl2::data::data_expression(info.m_rewriter.convert_from(stateargs[i])))).empty());
@@ -890,7 +892,7 @@ ATermAppl NextStateGenerator::rewrActionArgs(ATermAppl act)
   {
     ATermAppl a = ATAgetFirst(l);
     const atermpp::term_list <atermpp::aterm_appl> l=ATLgetArgument(a,1);
-    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal_list(l)));
+    a = gsMakeAction(ATAgetArgument(a,0),ListFromFormat(info.m_rewriter.rewrite_internal_list(l,current_substitution)));
     m = ATinsert(m,(ATerm) a);
   }
   m = ATreverse(m);
@@ -920,7 +922,8 @@ void NextStateGenerator::SetTreeStateVars(ATerm tree, ATermList* vars)
     }
   }
 
-  info.m_rewriter.set_internally_associated_value(variable(ATgetFirst(*vars)), tree);
+  // info.m_rewriter.set_internally_associated_value(variable(ATgetFirst(*vars)), tree);
+  current_substitution[variable(ATgetFirst(*vars))]=atermpp::aterm_appl(tree);
   *vars = ATgetNext(*vars);
 }
 
@@ -980,10 +983,11 @@ void NextStateGenerator::set_substitutions()
     case GS_STATE_VECTOR:
       for (size_t i=0; !ATisEmpty(l); l=ATgetNext(l),i++)
       {
-        ATerm a = ATgetArgument((ATermAppl) cur_state,i);
-        if (!ATisEqual(a,info.nil))
+        atermpp::aterm_appl a = ATgetArgument((ATermAppl) cur_state,i);
+        if (!ATisEqual((ATermAppl)a,info.nil))
         {
-          info.m_rewriter.set_internally_associated_value(variable(ATgetFirst(l)), a);
+          // info.m_rewriter.set_internally_associated_value(variable(ATgetFirst(l)), a);
+          current_substitution[variable(ATgetFirst(l))]=a;
 #ifdef MCRL2_NEXTSTATE_DEBUG
           std::cerr << "Set substitution " << core::pp(info.m_rewriter.convert_from(ATgetFirst(l))) << ":=" <<
                     core::pp(info.m_rewriter.convert_from(a)) << "\n";
@@ -1016,7 +1020,7 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
   if (info.num_summands == 0)
   {
     enumerated_variables=variable_list();
-    valuations = info.get_sols(ATmakeList0(),(ATerm)(ATermAppl)info.m_rewriter.convert_to(mcrl2::data::sort_bool::false_()));
+    valuations = info.get_sols(ATmakeList0(),(ATerm)(ATermAppl)info.m_rewriter.convert_to(mcrl2::data::sort_bool::false_()),current_substitution);
   }
   else
   {
@@ -1034,7 +1038,8 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
 
     enumerated_variables=ATLgetArgument(info.summands[SummandIndex],0);
     valuations = info.get_sols(ATLgetArgument(info.summands[SummandIndex],0),
-                               ATgetArgument(info.summands[SummandIndex],1));
+                               ATgetArgument(info.summands[SummandIndex],1),
+                               current_substitution);
   }
 
   sum_idx = SummandIndex + 1;
@@ -1074,7 +1079,8 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
 
     enumerated_variables=ATLgetArgument(info.summands[sum_idx],0);
     valuations = info.get_sols(ATLgetArgument(info.summands[sum_idx],0),
-                               ATgetArgument(info.summands[sum_idx],1));
+                               ATgetArgument(info.summands[sum_idx],1),
+                               current_substitution);
 
     ++sum_idx;
   }
@@ -1090,14 +1096,16 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
     variable_list::const_iterator j=enumerated_variables.begin();
     for( ; !ATisEmpty(assignments) ;  assignments=ATgetNext(assignments), ++j)
     {
-      ATerm t=ATgetFirst(assignments);
-      info.m_rewriter.set_internally_associated_value(*j,t);
+      atermpp::aterm_appl t=ATgetFirst(assignments);
+      // info.m_rewriter.set_internally_associated_value(*j,t);
+      current_substitution[*j]=t;
     }
 
     if (!valuations.solution_is_exact())
     {
       throw mcrl2::runtime_error("term does not evaluate to true or false " +
-                 core::pp(info.m_rewriter.convert_from(info.m_rewriter.rewrite_internal(atermpp::aterm(ATgetArgument(info.summands[sum_idx-1],1))))));
+                 core::pp(info.m_rewriter.convert_from(info.m_rewriter.rewrite_internal(
+                          atermpp::aterm(ATgetArgument(info.summands[sum_idx-1],1)),current_substitution))));
     }
 
     *Transition = rewrActionArgs((ATermAppl) cur_act);
@@ -1111,7 +1119,8 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
     for(variable_list::const_iterator j=enumerated_variables.begin(); 
               j!=enumerated_variables.end(); ++j)
     {
-      info.m_rewriter.clear_internally_associated_value(*j);
+      // info.m_rewriter.clear_internally_associated_value(*j);
+      current_substitution[*j]=atermpp::aterm_appl(*j);
     }
     ++valuations;
 

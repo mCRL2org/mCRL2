@@ -166,14 +166,14 @@ class Formula_Checker
 
     /// \brief Checks the formulas in the list a_formulas.
     /// precondition: the parameter a_formulas is a list of expressions of sort Bool in internal mCRL2 format
-    void check_formulas(ATermList a_formulas)
+    void check_formulas(const data_expression_list a_formulas)
     {
-      ATermAppl v_formula;
       int v_formula_number = 1;
 
-      while (!ATisEmpty(a_formulas))
+      for(data_expression_list::const_iterator i=a_formulas.begin();
+                i!=a_formulas.end(); ++i)
       {
-        v_formula = ATAgetFirst(a_formulas);
+        atermpp::aterm_appl v_formula = *i;
         mCRL2log(log::info) << "'" << core::pp(v_formula) << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
@@ -193,7 +193,6 @@ class Formula_Checker
           print_witness();
           save_dot_file(v_formula_number);
         }
-        a_formulas = ATgetNext(a_formulas);
         v_formula_number++;
       }
     }

@@ -317,16 +317,23 @@ struct mutable_map_substitution : public std::unary_function<typename Associativ
     // return i == m_map.end() ? v : i->second;
   }
 
-  template <typename Expression>
+  /* template <typename Expression>
   expression_type operator()(const Expression&) const
   {
     throw std::runtime_error("data::mutable_map_substitution::operator(const Expression&) is a deprecated interface!");
     return data_expression();
-  }
+  } */
 
   assignment operator[](variable_type const& v)
   {
     return assignment(v, this->m_map);
+  }
+
+  /// \brief Resets the substitution by letting every variable yield itself. Cf. clear() of a map.
+  ///        
+  void clear() 
+  {
+    m_map.clear();
   }
 
   /// \brief Returns an iterator pointing to the beginning of the sequence of assignments
@@ -375,6 +382,11 @@ struct mutable_map_substitution : public std::unary_function<typename Associativ
   bool operator==(const Substitution&) const
   {
     return false;
+  }
+
+  mutable_map_substitution & operator=(const mutable_map_substitution& other) 
+  {
+    m_map=other.m_map;
   }
 
 };

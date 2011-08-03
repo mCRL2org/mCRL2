@@ -154,7 +154,8 @@ bool Invariant_Checker::check_summands(const data::data_expression a_invariant)
 // Class Invariant_Checker - Functions declared public --------------------------------------------
 
 Invariant_Checker::Invariant_Checker(
-  mcrl2::lps::specification const& a_lps, mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
+  mcrl2::lps::specification const& a_lps, 
+  mcrl2::data::rewriter::strategy a_rewrite_strategy, int a_time_limit, bool a_path_eliminator, SMT_Solver_Type a_solver_type,
   bool a_apply_induction, bool a_counter_example, bool a_all_violations, std::string const& a_dot_file_name
 ):
   f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction)

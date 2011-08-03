@@ -39,8 +39,8 @@ void enumerate(const data_specification & d,
   rewriter evaluator(d);
   enumerator_type enumerator(d,evaluator);
   size_t number_of_solutions=0;
-  enumerator_type::iterator i;
-  for (i=enumerator.begin(v, c); number_of_solutions< expected_no_of_solutions && i != enumerator.end(); ++i)
+  enumerator_type::iterator i=enumerator.begin(v, c);
+  for ( ; number_of_solutions< expected_no_of_solutions && i != enumerator.end(); ++i)
   {
     number_of_solutions++;
   }

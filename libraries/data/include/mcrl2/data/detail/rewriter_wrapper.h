@@ -81,27 +81,39 @@ struct legacy_rewriter : public mcrl2::data::rewriter
       return m_rewriter->toRewriteFormat(mcrl2::data::rewriter::implement(t));
     }
   
+    mutable_map_substitution < atermpp::map < variable,atermpp::aterm_appl> > convert_to(const mutable_map_substitution <> &sigma) const
+    {
+      mutable_map_substitution < atermpp::map < variable,atermpp::aterm_appl> > sigma_in_internal_format;
+      for(mutable_map_substitution <>::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+      {
+        sigma_in_internal_format[i->first]=convert_to(i->second);
+      }
+      return sigma_in_internal_format;
+    }
+  
     data_expression convert_from(const atermpp::aterm_appl t) const
     {
-      return this->reconstruct(atermpp::aterm_appl(m_rewriter->fromRewriteFormat((ATerm)(ATermAppl)t)));
+      return this->reconstruct(atermpp::aterm_appl(m_rewriter->fromRewriteFormat(t)));
     }
   
-    atermpp::aterm_appl rewrite_internal(atermpp::aterm const& t) const
+    /* atermpp::aterm_appl rewrite_internal(atermpp::aterm const& t, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) const
     {
-      return m_rewriter->rewriteInternal(t);
-    }
+      return m_rewriter->rewrite_internal(t,sigma);
+    } */
   
-    atermpp::aterm_appl rewrite_internal(atermpp::aterm_appl const& t) const
+    atermpp::aterm_appl rewrite_internal(atermpp::aterm_appl const& t, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) const
     {
-      return m_rewriter->rewriteInternal((ATerm)(ATermAppl)t);
-    }
+      return m_rewriter->rewrite_internal(t,sigma);
+    } 
   
-    atermpp::term_list <atermpp::aterm_appl> rewrite_internal_list(const atermpp::term_list<atermpp::aterm_appl> & t) const
+    atermpp::term_list <atermpp::aterm_appl> rewrite_internal_list(
+         const atermpp::term_list<atermpp::aterm_appl> & t,
+         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) const
     {
-      return m_rewriter->rewriteInternalList(t);
-    }
+      return m_rewriter->rewrite_internal_list(t,sigma);
+    } 
   
-    atermpp::aterm_appl  internally_associated_value(const variable &v) const
+    /* atermpp::aterm_appl internally_associated_value(const variable &v) const
     {
       return m_rewriter->getSubstitutionInternal(v);
     }
@@ -122,7 +134,7 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     void clear_internally_associated_value(const variable &v) const
     {
       m_rewriter->clearSubstitution(v);
-    }
+    } */
   
     mcrl2::data::detail::Rewriter& get_rewriter() const
     {

@@ -298,9 +298,9 @@ class Induction
     }
 
     /// \brief
-    ATermAppl apply_induction()
+    atermpp::aterm_appl apply_induction()
     {
-      ATermAppl v_result;
+      atermpp::aterm_appl v_result;
 
       f_fresh_dummy_number = 0;
       if (f_count == 1)

@@ -134,25 +134,29 @@ static size_t largest_power_of_2_smaller_than(size_t i)
 }
 
 static void assign_variables_in_tree(
-  ATerm t,
-  mcrl2::data::variable_list::iterator& var_iter,
-  mcrl2::data::detail::legacy_rewriter& rewriter,
-  const bool opt_precompile_pbes)
+     ATerm t,
+     mcrl2::data::variable_list::iterator& var_iter,
+     mcrl2::data::detail::legacy_rewriter& rewriter,
+     const bool opt_precompile_pbes,
+     mcrl2::data::mutable_map_substitution< > &sigma,
+     mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
 {
   if (is_pair(t))
   {
-    assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes);
-    assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes);
+    assign_variables_in_tree(ATgetArgument(t,0),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
+    assign_variables_in_tree(ATgetArgument(t,1),var_iter,rewriter,opt_precompile_pbes,sigma,sigma_internal);
   }
   else
   {
     if (opt_precompile_pbes)
     {
-      rewriter.set_internally_associated_value(*var_iter,(atermpp::aterm_appl)t);
+      // rewriter.set_internally_associated_value(*var_iter,(atermpp::aterm_appl)t);
+      sigma_internal[*var_iter]=atermpp::aterm_appl(t);
     }
     else
     {
-      rewriter.set_internally_associated_value(*var_iter,(mcrl2::data::data_expression)t);
+      // rewriter.set_internally_associated_value(*var_iter,(mcrl2::data::data_expression)t);
+      sigma[*var_iter]=mcrl2::data::data_expression(t);
     }
     var_iter++;
   }
@@ -1131,10 +1135,11 @@ inline bes_expression toBDD(bes_expression b)
 /// in the tool pbes2bool (or pbesinst) where pbes expressions must iteratively be rewritten.
 
 inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
-  mcrl2::pbes_system::pbes_expression p,
-  bool opt_precompile_pbes,
-  mcrl2::data::detail::legacy_rewriter& R
-  )
+     mcrl2::pbes_system::pbes_expression p,
+     bool opt_precompile_pbes,
+     mcrl2::data::detail::legacy_rewriter& R,
+     mcrl2::data::mutable_map_substitution< > &sigma,
+     mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
 {
   using namespace mcrl2;
   using namespace mcrl2::pbes_system;
@@ -1158,14 +1163,14 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   {
     // p = and(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R);
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R,sigma,sigma_internal);
     if (is_pbes_false(l))
     {
       result = pbes_expr::false_();
     }
     else
     {
-      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R);
+      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R,sigma,sigma_internal);
       //Options for left and right
       if (is_pbes_false(rt))
       {
@@ -1193,14 +1198,14 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   {
     // p = or(left, right)
     //Rewrite left and right as far as possible
-    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R);
+    pbes_expression l = pbes_expression_rewrite_and_simplify(left(p), opt_precompile_pbes, R,sigma,sigma_internal);
     if (is_pbes_true(l))
     {
       result = pbes_expr::true_();
     }
     else
     {
-      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R);
+      pbes_expression rt = pbes_expression_rewrite_and_simplify(right(p), opt_precompile_pbes, R,sigma,sigma_internal);
       if (is_pbes_true(rt))
       {
         result = pbes_expr::true_();
@@ -1227,7 +1232,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   {
     // p = forall(data::data_expression_list, pbes_expression)
     data::variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R,sigma,sigma_internal);
     //Remove data_vars which do not occur in expr
     data::variable_list occurred_data_vars;
     for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -1252,7 +1257,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
   {
     // p = exists(data::data_expression_list, pbes_expression)
     data::variable_list data_vars = var(p);
-    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R);
+    pbes_expression expr = pbes_expression_rewrite_and_simplify(arg(p), opt_precompile_pbes, R,sigma,sigma_internal);
     //Remove data_vars which does not occur in expr
     data::variable_list occurred_data_vars;
     for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
@@ -1285,8 +1290,8 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     {
       parameters = atermpp::push_front(parameters,
                 ((opt_precompile_pbes?
-                       data::data_expression(R.rewrite_internal(R.convert_to(*l))):
-                       R(*l))));
+                       data::data_expression(R.rewrite_internal(R.convert_to(*l),sigma_internal)):
+                       R(*l,sigma))));
     }
     parameters = atermpp::reverse(parameters);
     result = pbes_expression(propositional_variable_instantiation(name, parameters));
@@ -1297,7 +1302,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
 
     if (opt_precompile_pbes)
     {
-      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p));
+      atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p),sigma_internal);
       if (d==R.internal_true)
       {
         result = pbes_expr::true_();
@@ -1313,7 +1318,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     }
     else
     {
-      data::data_expression d(R(p));
+      data::data_expression d(R(p,sigma));
       if (d == data::sort_bool::true_())
       {
         result = pbes_expr::true_();
@@ -2081,6 +2086,11 @@ class boolean_equation_system
       std::set < mcrl2::data::variable > diff_set;
       std::set_difference(vfset.begin(),vfset.end(),vset.begin(),vset.end(),std::inserter(diff_set,diff_set.begin()));
 
+      // Declare two variable substitutions for use in the rewriters. Only one is necessary if precompilation
+      // can be switched off. 
+      mcrl2::data::mutable_map_substitution< > sigma;
+      mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > sigma_internal;
+
       std::set < sort_expression > bounded_sorts;
       for(std::set < mcrl2::data::variable > :: const_iterator i=diff_set.begin(); i!=diff_set.end(); ++i)
       {
@@ -2126,7 +2136,7 @@ class boolean_equation_system
 #endif
       pbes_expression p=// pbes_rewriter(pbes_spec.initial_state());
         pbes_expression_rewrite_and_simplify(
-          pbes_spec.initial_state(), opt_precompile_pbes, Mucks_rewriter);
+          pbes_spec.initial_state(), opt_precompile_pbes, Mucks_rewriter,sigma,sigma_internal);
 
       variable_index.put((internal_opt_store_as_tree)?pbes_expression(store_as_tree(p)):p);
 
@@ -2166,7 +2176,7 @@ class boolean_equation_system
               eqi->symbol(),
               eqi->variable(),
               pbes_expression_rewrite_and_simplify(
-                eqi->formula(), opt_precompile_pbes, Mucks_rewriter
+                eqi->formula(), opt_precompile_pbes, Mucks_rewriter,sigma,sigma_internal
               ))));
         // Rewriting terms here can lead to non termination, in
         // case the quantifier-all rewriter is used. This kind of rewriting
@@ -2241,7 +2251,7 @@ class boolean_equation_system
 
               t=ATgetArgument(t,1);
               variable_list::iterator iter=current_pbeq.variable().parameters().begin();
-              assign_variables_in_tree(t,iter,Mucks_rewriter,opt_precompile_pbes);
+              assign_variables_in_tree(t,iter,Mucks_rewriter,opt_precompile_pbes,sigma,sigma_internal);
             }
 
           }
@@ -2264,11 +2274,13 @@ class boolean_equation_system
               assert(elist!=current_variable_instantiation.parameters().end());
               if (opt_precompile_pbes)
               {
-                Mucks_rewriter.set_internally_associated_value(*vlist,(atermpp::aterm)*elist);
+                // Mucks_rewriter.set_internally_associated_value(*vlist,(atermpp::aterm)*elist);
+                sigma_internal[*vlist]=atermpp::aterm_appl(*elist);
               }
               else
               {
-                Mucks_rewriter.set_internally_associated_value(*vlist,*elist);
+                // Mucks_rewriter.set_internally_associated_value(*vlist,*elist);
+                sigma[*vlist]=data_expression(*elist);
               }
 
               // sigma[*vlist]=*elist;
@@ -2284,7 +2296,9 @@ class boolean_equation_system
             (current_pbeq.formula(),
              pbes_spec.data(),
              Mucks_rewriter,
-             opt_precompile_pbes
+             opt_precompile_pbes,
+             sigma,
+             sigma_internal
             );
 
           bes_expression new_bes_expression=
@@ -2302,7 +2316,15 @@ class boolean_equation_system
           for (variable_list::iterator vlist=current_pbeq.variable().parameters().begin() ;
                vlist!=current_pbeq.variable().parameters().end() ; vlist++)
           {
-            Mucks_rewriter.clear_internally_associated_value(*vlist);
+            // Mucks_rewriter.clear_internally_associated_value(*vlist);
+            if (opt_precompile_pbes)
+            {
+              sigma_internal[*vlist]=atermpp::aterm_appl(*vlist);
+            }
+            else
+            {
+              sigma[*vlist]=data_expression(*vlist);
+            }
           }
 
 

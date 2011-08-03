@@ -56,26 +56,26 @@ class ATerm_Manipulator
     ATermTable f_orient;
 
     /// \brief ATerm representing \c true in one of the internal formats of the rewriter.
-    ATerm f_true;
+    atermpp::aterm_appl f_true;
 
     /// \brief ATerm representing \c false in one of the internal formats of the rewriter.
-    ATerm f_false;
+    atermpp::aterm_appl f_false;
 
     /// \brief ATerm representing the \c if \c then \c else function in one of the internal formats of the rewriter.
-    ATerm f_if_then_else;
+    atermpp::aterm f_if_then_else;
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c true. Additionally, if the variable
     /// \brief on the righthand side of the guard is encountered in \c a_formula, it is replaced by the variable
     /// \brief on the lefthand side.
-    virtual ATerm set_true_auxiliary(ATerm a_formula, ATerm a_guard) = 0;
+    virtual atermpp::aterm_appl set_true_auxiliary(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard) = 0;
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c false.
-    virtual ATerm set_false_auxiliary(ATerm a_formula, ATerm a_guard) = 0;
+    virtual atermpp::aterm_appl set_false_auxiliary(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard) = 0;
 
     /// \brief Returns an expression in one of the internal formats of the rewriter.
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low.
-    virtual ATerm make_if_then_else(ATerm a_expr, ATerm a_high, ATerm a_low) = 0;
+    virtual atermpp::aterm_appl make_if_then_else(atermpp::aterm_appl a_expr, atermpp::aterm_appl a_high, atermpp::aterm_appl a_low) = 0;
   public:
     /// \brief Constructor initializing the rewriter and the field \c f_info.
     ATerm_Manipulator(boost::shared_ptr<detail::Rewriter> a_rewriter, ATerm_Info* a_info)
@@ -95,19 +95,19 @@ class ATerm_Manipulator
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low. If \c a_high equals \c a_low, the
     /// \brief method returns \c a_high instead.
-    virtual ATerm make_reduced_if_then_else(ATerm a_expr, ATerm a_high, ATerm a_low) = 0;
+    virtual atermpp::aterm_appl make_reduced_if_then_else(atermpp::aterm_appl a_expr, atermpp::aterm_appl a_high, atermpp::aterm_appl a_low) = 0;
 
     /// \brief Orients the term \c a_term such that all equations of the form t1 == t2 are
     /// \brief replaced by t2 == t1 if t1 > t2.
-    virtual ATerm orient(ATerm a_term) = 0;
+    virtual atermpp::aterm_appl orient(atermpp::aterm_appl a_term) = 0;
 
     /// \brief Initializes the table ATerm_Manipulator::f_set_true and calls the method
     /// \brief ATerm_Manipulator::f_set_true_auxiliary.
-    virtual ATerm set_true(ATerm a_formula, ATerm a_guard) = 0;
+    virtual atermpp::aterm_appl set_true(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard) = 0;
 
     /// \brief Initializes the table ATerm_Manipulator::f_set_false and calls the method
     /// \brief ATerm_Manipulator::f_set_false_auxiliary.
-    virtual ATerm set_false(ATerm a_formula, ATerm a_guard) = 0;
+    virtual atermpp::aterm_appl set_false(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard) = 0;
 };
 
 /// \brief Class that provides functionality to modify or create
@@ -120,7 +120,7 @@ class AM_Jitty: public ATerm_Manipulator
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c true. Additionally, if the variable
     /// \brief on the righthand side of the guard is encountered in \c a_formula, it is replaced by the variable
     /// \brief on the lefthand side.
-    virtual ATerm set_true_auxiliary(ATerm a_formula, ATerm a_guard)
+    virtual atermpp::aterm_appl set_true_auxiliary(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
     {
       if (a_formula == f_true || a_formula == f_false)
       {
@@ -143,32 +143,29 @@ class AM_Jitty: public ATerm_Manipulator
         return a_formula;
       }
 
-      ATerm v_result;
-
-      v_result = ATtableGet(f_set_true, a_formula);
+      ATermAppl v_result = (ATermAppl)ATtableGet(f_set_true, (ATerm)(ATermAppl)a_formula);
       if (v_result)
       {
         return v_result;
       }
 
       AFun v_symbol;
-      ATerm v_function;
+      atermpp::aterm v_function;
       size_t v_arity;
 
       v_symbol = ATgetAFun(a_formula);
-      v_function = ATgetArgument(a_formula, 0);
+      // v_function = atermpp::aterm_appl(ATgetArgument(a_formula, 0));
+      v_function = a_formula(0);
       v_arity = ATgetArity(v_symbol);
 
-      ATerm* v_parts;
-
-      v_parts = new ATerm[v_arity + 1];
+      atermpp::aterm* v_parts = new atermpp::aterm[v_arity + 1];
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = set_true_auxiliary(ATgetArgument(a_formula, i), a_guard);
       }
-      v_result = (ATerm) ATmakeApplArray(v_symbol, v_parts);
-      ATtablePut(f_set_true, a_formula, v_result);
+      v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
+      ATtablePut(f_set_true, (ATerm)(ATermAppl)a_formula, (ATerm)(ATermAppl)v_result);
       delete[] v_parts;
       v_parts = 0;
 
@@ -176,7 +173,7 @@ class AM_Jitty: public ATerm_Manipulator
     }
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c false.
-    virtual ATerm set_false_auxiliary(ATerm a_formula, ATerm a_guard)
+    virtual atermpp::aterm_appl set_false_auxiliary(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
     {
       if (a_formula == f_true || a_formula == f_false)
       {
@@ -191,32 +188,28 @@ class AM_Jitty: public ATerm_Manipulator
         return a_formula;
       }
 
-      ATerm v_result;
-
-      v_result = ATtableGet(f_set_false, a_formula);
+      ATermAppl v_result = (ATermAppl)ATtableGet(f_set_false, (ATerm)(ATermAppl)a_formula);
       if (v_result)
       {
         return v_result;
       }
 
       AFun v_symbol;
-      ATerm v_function;
+      atermpp::aterm v_function;
       size_t v_arity;
 
       v_symbol = ATgetAFun(a_formula);
-      v_function = ATgetArgument(a_formula, 0);
+      v_function = a_formula(0);
       v_arity = ATgetArity(v_symbol);
 
-      ATerm* v_parts;
-
-      v_parts = new ATerm[v_arity + 1];
+      atermpp::aterm* v_parts = new atermpp::aterm[v_arity + 1];
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
         v_parts[i] = set_false_auxiliary(ATgetArgument(a_formula, i), a_guard);
       }
-      v_result = (ATerm) ATmakeApplArray(v_symbol, v_parts);
-      ATtablePut(f_set_false, a_formula, v_result);
+      v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
+      ATtablePut(f_set_false, (ATerm)(ATermAppl)a_formula, (ATerm)(ATermAppl)v_result);
       delete[] v_parts;
       v_parts = 0;
 
@@ -226,10 +219,11 @@ class AM_Jitty: public ATerm_Manipulator
     /// \brief Returns an expression in the internal format of the rewriter with the Jitty strategy.
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low.
-    virtual ATerm make_if_then_else(ATerm a_expr, ATerm a_high, ATerm a_low)
+    virtual atermpp::aterm_appl make_if_then_else(atermpp::aterm_appl a_expr, atermpp::aterm_appl a_high, atermpp::aterm_appl a_low)
     {
-      return (ATerm) ATmakeAppl4(
-               ATmakeAFun("@REWR@", 4, false), f_if_then_else, a_expr, a_high, a_low);
+      /* return (ATerm) ATmakeAppl4(
+               ATmakeAFun("@REWR@", 4, false), f_if_then_else, a_expr, a_high, a_low); */
+      return (atermpp::aterm_appl)Apply3((ATerm)f_if_then_else, (ATerm)(ATermAppl)a_expr, (ATerm)(ATermAppl)a_high, (ATerm)(ATermAppl)a_low);
     }
 
   public:
@@ -240,7 +234,7 @@ class AM_Jitty: public ATerm_Manipulator
       using namespace mcrl2::core::detail;
       f_true =  a_rewriter->toRewriteFormat(sort_bool::true_());
       f_false = a_rewriter->toRewriteFormat(sort_bool::false_());
-      f_if_then_else = ATgetArgument((ATermAppl) a_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0);
+      f_if_then_else = atermpp::aterm(ATgetArgument((ATermAppl) a_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0));
     }
 
     /// \brief Destructor with no particular functionality.
@@ -251,7 +245,7 @@ class AM_Jitty: public ATerm_Manipulator
     /// \brief The main operator of this expression is an \c if \c then \c else function. Its guard is \c a_expr,
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low. If \c a_high equals \c a_low, the
     /// \brief method returns \c a_high instead.
-    virtual ATerm make_reduced_if_then_else(ATerm a_expr, ATerm a_high, ATerm a_low)
+    virtual atermpp::aterm_appl make_reduced_if_then_else(atermpp::aterm_appl a_expr, atermpp::aterm_appl a_high, atermpp::aterm_appl a_low)
     {
       if (a_high == a_low)
       {
@@ -265,58 +259,55 @@ class AM_Jitty: public ATerm_Manipulator
 
     /// \brief Orients the term \c a_term such that all equations of the form t1 == t2 are
     /// \brief replaced by t2 == t1 if t1 > t2.
-    virtual ATerm orient(ATerm a_term)
+    virtual atermpp::aterm_appl orient(atermpp::aterm_appl a_term)
     {
-      ATerm v_result;
-
-      v_result = ATtableGet(f_orient, a_term);
-      if (v_result)
+      // v_result is NULL if not found; Therefore type ATerm.
+      ATerm v_pre_result = ATtableGet(f_orient, (ATerm)(ATermAppl)a_term); 
+      if (v_pre_result)
       {
-        return v_result;
+        return (ATermAppl)v_pre_result;
       }
 
       AFun v_symbol;
-      ATerm v_function;
+      atermpp::aterm v_function;
       size_t v_arity;
 
       v_symbol = ATgetAFun(a_term);
-      v_function = ATgetArgument(a_term, 0);
+      v_function = a_term(0);
       v_arity = ATgetArity(v_symbol);
 
-      ATerm* v_parts;
-
-      v_parts = new ATerm[v_arity + 1];
+      atermpp::aterm v_parts[v_arity + 1];
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
-        v_parts[i] = orient(ATgetArgument(a_term, i));
+        v_parts[i] = orient(a_term(i));
       }
-      v_result = (ATerm) ATmakeApplArray(v_symbol, v_parts);
-      delete[] v_parts;
-      v_parts = 0;
+      atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
+      // delete[] v_parts;
+      // v_parts = 0;
 
       if (f_info->is_equality(v_result))
       {
-        ATerm v_term1;
-        ATerm v_term2;
+        atermpp::aterm_appl v_term1;
+        atermpp::aterm_appl v_term2;
 
-        v_term1 = ATgetArgument(v_result, 1);
-        v_term2 = ATgetArgument(v_result, 2);
+        v_term1 = v_result(1);
+        v_term2 = v_result(2);
         if (f_info->compare_term(v_term1, v_term2) == compare_result_bigger)
         {
-          v_result = (ATerm) ATmakeAppl3(v_symbol, v_function, v_term2, v_term1);
+          v_result = atermpp::aterm_appl(ATmakeAppl3(v_symbol, (ATerm)v_function, (ATerm)(ATermAppl)v_term2, (ATerm)(ATermAppl)v_term1));
         }
       }
-      ATtablePut(f_orient, a_term, v_result);
+      ATtablePut(f_orient, (ATerm)(ATermAppl)a_term, (ATerm)(ATermAppl)v_result);
 
       return v_result;
     }
 
     /// \brief Initializes the table ATerm_Manipulator::f_set_true and calls the method
     /// \brief AM_Jitty::f_set_true_auxiliary.
-    virtual ATerm set_true(ATerm a_formula, ATerm a_guard)
+    virtual atermpp::aterm_appl set_true(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
     {
-      ATerm v_result;
+      atermpp::aterm_appl v_result;
       f_set_true = ATtableCreate(2047, 50);
       v_result = set_true_auxiliary(a_formula, a_guard);
       ATtableDestroy(f_set_true);
@@ -325,9 +316,9 @@ class AM_Jitty: public ATerm_Manipulator
 
     /// \brief Initializes the table ATerm_Manipulator::f_set_false and calls the method
     /// \brief AM_Jitty::f_set_false_auxiliary.
-    virtual ATerm set_false(ATerm a_formula, ATerm a_guard)
+    virtual atermpp::aterm_appl set_false(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
     {
-      ATerm v_result;
+      atermpp::aterm_appl v_result;
       f_set_false = ATtableCreate(2047, 50);
       v_result = set_false_auxiliary(a_formula, a_guard);
       ATtableDestroy(f_set_false);
@@ -345,7 +336,7 @@ class AM_Inner: public ATerm_Manipulator
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c true. Additionally, if the variable
     /// \brief on the righthand side of the guard is encountered in \c a_formula, it is replaced by the variable
     /// \brief on the lefthand side.
-    virtual ATerm set_true_auxiliary(ATerm a_formula, ATerm a_guard)
+    virtual atermpp::aterm_appl set_true_auxiliary(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
     {
       if (a_formula == f_true || a_formula == f_false)
       {
@@ -359,58 +350,59 @@ class AM_Inner: public ATerm_Manipulator
       bool v_is_equality;
 
       v_is_equality = f_info->is_equality(a_guard);
-      if (v_is_equality && ATelementAt((ATermList) a_guard, 2) == a_formula)
+      if (v_is_equality && ATelementAt((ATermList)(ATerm)(ATermAppl) a_guard, 2) == a_formula)
       {
-        return ATelementAt((ATermList) a_guard, 1);
+        return ATelementAt((ATermList)(ATerm)(ATermAppl) a_guard, 1);
       }
       if (f_info->is_variable(a_formula))
       {
         return a_formula;
       }
 
-      ATerm v_result;
-
-      v_result = ATtableGet(f_set_true, a_formula);
+      ATermAppl v_result =(ATermAppl)ATtableGet(f_set_true, (ATerm)(ATermAppl)a_formula);
       if (v_result)
       {
         return v_result;
       }
 
+      assert(0);
+/* Code hieronder is vreemd, want gebruikt lijsten. Moet nader worden uitgezocht waarom lijsten nodig zijn JFG.
+ 
       if (ATgetType(a_formula) == AT_LIST)
       {
-        ATerm v_function;
+        atermpp::aterm_appl v_function;
         size_t v_length;
 
-        v_function = ATelementAt((ATermList) a_formula, 0);
-        v_length = ATgetLength((ATermList) a_formula);
+        v_function = atermpp::aterm_appl(ATelementAt((ATermList)(ATerm)(ATermAppl) a_formula, 0));
+        v_length = ATgetLength((ATermList)(ATerm)(ATermAppl) a_formula);
 
-        ATerm* v_parts;
+        atermpp::aterm_appl* v_parts;
         size_t i;
 
-        v_parts = new ATerm[v_length];
+        v_parts = new atermpp::aterm_appl[v_length];
         v_parts[0] = v_function;
         for (i = 1; i < v_length; i++)
         {
-          v_parts[i] = set_true_auxiliary(ATelementAt((ATermList) a_formula, i), a_guard);
+          v_parts[i] = set_true_auxiliary(ATelementAt((ATermList)(ATerm)(ATermAppl) a_formula, i), a_guard);
         }
-        v_result = (ATerm) ATmakeList0();
+        v_result = (atermpp::aterm_appl)(ATerm) ATmakeList0();
         for (i = v_length ; i > 0; i--)
         {
-          v_result = (ATerm) ATinsert((ATermList) v_result, v_parts[i-1]);
+          v_result = (atermpp::aterm_appl)(ATerm) ATinsert((ATermList)(ATerm)(ATermAppl) v_result, (ATerm)(ATermAppl)v_parts[i-1]);
         }
-        ATtablePut(f_set_true, a_formula, v_result);
+        ATtablePut(f_set_true, (ATerm)(ATermAppl)a_formula, (ATerm)(ATermAppl)v_result);
         delete[] v_parts;
         v_parts = 0;
       }
       else
       {
         v_result = a_formula;
-      }
+      } */
       return v_result;
     }
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c false.
-    virtual ATerm set_false_auxiliary(ATerm a_formula, ATerm a_guard)
+    virtual atermpp::aterm_appl set_false_auxiliary(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
     {
       if (a_formula == f_true || a_formula == f_false)
       {
@@ -425,37 +417,39 @@ class AM_Inner: public ATerm_Manipulator
         return a_formula;
       }
 
-      ATerm v_result;
-
-      v_result = ATtableGet(f_set_false, a_formula);
+      ATermAppl v_result = (ATermAppl)ATtableGet(f_set_false, (ATerm)(ATermAppl)a_formula);
       if (v_result)
       {
         return v_result;
       }
 
+      assert(0);
+/* Code hieronder is vreemd, want gebruikt lijsten. Moet nader worden uitgezocht waarom lijsten nodig zijn JFG.
+ *  
+ *
       if (ATgetType(a_formula) == AT_LIST)
       {
-        ATerm v_function;
+        atermpp::aterm_appl v_function;
         size_t v_length;
 
-        v_function = ATelementAt((ATermList) a_formula, 0);
-        v_length = ATgetLength((ATermList) a_formula);
+        v_function = (atermpp::aterm_appl)ATelementAt((ATermList)(ATerm)(ATermAppl) a_formula, 0);
+        v_length = ATgetLength((ATermList)(ATerm)(ATermAppl) a_formula);
 
-        ATerm* v_parts;
+        atermpp::aterm_appl* v_parts;
         size_t i;
 
-        v_parts = new ATerm[v_length];
+        v_parts = new atermpp::aterm_appl[v_length];
         v_parts[0] = v_function;
         for (i = 1; i < v_length; i++)
         {
-          v_parts[i] = set_false_auxiliary(ATelementAt((ATermList) a_formula, i), a_guard);
+          v_parts[i] = set_false_auxiliary(ATelementAt((ATermList)(ATerm)(ATermAppl) a_formula, i), a_guard);
         }
-        v_result = (ATerm) ATmakeList0();
+        v_result = atermpp::aterm_appl((ATerm) ATmakeList0());
         for (i = v_length; i > 0; i--)
         {
-          v_result = (ATerm) ATinsert((ATermList) v_result, v_parts[i-1]);
+          v_result = (atermpp::aterm_appl) (ATermAppl)(ATerm)ATinsert((ATermList)(ATerm)(ATermAppl) v_result, (ATerm)(ATermAppl)v_parts[i-1]);
         }
-        ATtablePut(f_set_false, a_formula, v_result);
+        ATtablePut(f_set_false, (ATerm)(ATermAppl)a_formula, (ATerm)(ATermAppl)v_result);
         delete[] v_parts;
         v_parts = 0;
       }
@@ -463,6 +457,7 @@ class AM_Inner: public ATerm_Manipulator
       {
         v_result = a_formula;
       }
+*/
       return v_result;
     }
 
@@ -471,7 +466,7 @@ class AM_Inner: public ATerm_Manipulator
     /// \brief the true-branch is \c a_high and the false-branch is \c a_low.
     virtual ATerm make_if_then_else(ATerm a_expr, ATerm a_high, ATerm a_low)
     {
-      return (ATerm) ATmakeList4(f_if_then_else, a_expr, a_high, a_low);
+      return (ATerm) ATmakeList4((ATerm)f_if_then_else, a_expr, a_high, a_low);
     }
 
   public:
@@ -509,9 +504,7 @@ class AM_Inner: public ATerm_Manipulator
     /// \brief replaced by t2 == t1 if t1 > t2.
     virtual ATerm orient(ATerm a_term)
     {
-      ATerm v_result;
-
-      v_result = ATtableGet(f_orient, a_term);
+      ATerm v_result = ATtableGet(f_orient, a_term);
       if (v_result)
       {
         return v_result;
@@ -566,9 +559,9 @@ class AM_Inner: public ATerm_Manipulator
 
     /// \brief Initializes the table ATerm_Manipulator::f_set_true and calls the method
     /// \brief ATerm_Inner::f_set_true_auxiliary.
-    virtual ATerm set_true(ATerm a_formula, ATerm a_guard)
+    virtual atermpp::aterm_appl set_true(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
     {
-      ATerm v_result;
+      atermpp::aterm_appl v_result;
       f_set_true = ATtableCreate(2047, 50);
       v_result = set_true_auxiliary(a_formula, a_guard);
       ATtableDestroy(f_set_true);
@@ -577,9 +570,9 @@ class AM_Inner: public ATerm_Manipulator
 
     /// \brief Initializes the table ATerm_Manipulator::f_set_false and calls the method
     /// \brief AM_Inner::f_set_false_auxiliary.
-    virtual ATerm set_false(ATerm a_formula, ATerm a_guard)
+    virtual atermpp::aterm_appl set_false(atermpp::aterm_appl a_formula, atermpp::aterm_appl a_guard)
     {
-      ATerm v_result;
+      atermpp::aterm_appl v_result;
       f_set_false = ATtableCreate(2047, 50);
       v_result = set_false_auxiliary(a_formula, a_guard);
       ATtableDestroy(f_set_false);

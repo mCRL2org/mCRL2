@@ -55,18 +55,17 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
   { 
     if (negated)
     { 
-      return (ATerm)Apply1((ATerm)(ATermInt)m_enclosing_enumerator->opidNot,
-                           (ATerm)(ATermAppl)condition);
+      return Apply1(atermpp::aterm(m_enclosing_enumerator->opidNot), condition);
     }
     return condition;
   }
 
-  return Apply2((ATerm)(ATermInt)m_enclosing_enumerator->opidAnd,
-                (ATerm)(ATermAppl)add_negations(condition,pop_front(negation_term_list),negated),
+  return Apply2(m_enclosing_enumerator->opidAnd,
+                add_negations(condition,pop_front(negation_term_list),negated),
                 (negated?
-                    (ATerm)(ATermAppl)negation_term_list.front():
-                    (ATerm)Apply1((ATerm)(ATermInt)m_enclosing_enumerator->opidNot,
-                                  (ATerm)(ATermAppl)negation_term_list.front())));
+                    negation_term_list.front():
+                    Apply1(m_enclosing_enumerator->opidNot,
+                           negation_term_list.front())));
 }
 
 atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(const atermpp::term_list< atermpp::aterm_appl > l) const
@@ -77,8 +76,8 @@ atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(co
   }
   return push_front(negate(pop_front(l)),
                     static_cast<atermpp::aterm_appl>(Apply1(
-                                             (ATerm)(ATermInt)m_enclosing_enumerator->opidNot,
-                                             (ATerm)(ATermAppl)l.front())));
+                                             m_enclosing_enumerator->opidNot,
+                                             l.front())));
 }
 
 void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
@@ -94,7 +93,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
       on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
       store phi and psi /\ !phi separately. This allows the equality eliminator to remove
       more equalities and therefore be more effective. */
-   const atermpp::aterm_appl condition1 = m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)condition);
+   const atermpp::aterm_appl condition1 = m_enclosing_enumerator->rewr_obj->rewrite_internal((ATerm)(ATermAppl)condition,enum_sigma);
    if (condition1(0) == m_enclosing_enumerator->opidNot)
    {
      push_on_fs_stack_and_split_or(fs_stack,var_list,substituted_vars,substitution_terms,condition1(1),negate(negated_term_list),!negated);
@@ -109,8 +108,8 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
    }
    else
    { 
-     const atermpp::aterm_appl new_expr = m_enclosing_enumerator->rewr_obj->rewriteInternal(
-                 (ATerm)(ATermAppl)add_negations(condition1,negated_term_list,negated));
+     const atermpp::aterm_appl new_expr = m_enclosing_enumerator->rewr_obj->rewrite_internal(
+                 (ATerm)(ATermAppl)add_negations(condition1,negated_term_list,negated),enum_sigma);
 
      if (new_expr!=m_enclosing_enumerator->rewr_false)
      { 
@@ -178,12 +177,21 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   {
     vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
     
-    ATerm old_val=m_enclosing_enumerator->rewr_obj->getSubstitutionInternal((ATermAppl) var);
-    m_enclosing_enumerator->rewr_obj->setSubstitutionInternal((ATermAppl) var,(ATerm)(ATermAppl)val);
-    substituted_vars=push_front(substituted_vars,var);
-    vals = push_front(vals,val);
-    expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)expr);
-    m_enclosing_enumerator->rewr_obj->setSubstitutionInternal((ATermAppl) var,old_val);
+    /* ATerm old_val=m_enclosing_enumerator->rewr_obj->getSubstitutionInternal((ATermAppl) var);
+    m_enclosing_enumerator->rewr_obj->setSubstitutionInternal((ATermAppl) var,(ATerm)(ATermAppl)val); */
+  
+    mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> >::const_iterator i=enum_sigma.find(var);
+    const atermpp::aterm_appl old_val=(i==enum_sigma.end()?var:i->second);
+    enum_sigma[var]=val;
+    substituted_vars=push_front(substituted_vars,var); 
+    vals = push_front(vals,val); 
+
+    mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > sigma;
+    expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewrite_internal((ATerm)(ATermAppl)expr,enum_sigma);
+
+    enum_sigma[var]=old_val;
+
+    /* m_enclosing_enumerator->rewr_obj->setSubstitutionInternal((ATermAppl) var,old_val); */
     // m_enclosing_enumerator->rewr_obj->clearSubstitution((ATermAppl) var);
   }
 
@@ -274,7 +282,7 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
   else
   {
     return push_front(build_solution2(pop_front(vars),substituted_vars,exprs),
-           (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)build_solution_single(vars.front(),substituted_vars,exprs)));
+           (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewrite_internal((ATerm)(ATermAppl)build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
   }
 }
 
@@ -458,16 +466,16 @@ bool EnumeratorSolutionsStandard::next(
           {
             cons_term = application(*it, reverse(var_list));
           }
-          atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewriteInternal(m_enclosing_enumerator->rewr_obj->toRewriteFormat(cons_term));
+          atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(m_enclosing_enumerator->rewr_obj->toRewriteFormat(cons_term),enum_sigma);
   
-          ATerm old_val=m_enclosing_enumerator->rewr_obj->getSubstitutionInternal((ATermAppl) var);
+          mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> >::const_iterator i=enum_sigma.find(var);
+          const atermpp::aterm_appl old_val=(i==enum_sigma.end()?var:i->second);
+          // ATerm old_val=m_enclosing_enumerator->rewr_obj->getSubstitutionInternal((ATermAppl) var);
 
-          m_enclosing_enumerator->rewr_obj->setSubstitutionInternal(var,(ATerm)(ATermAppl)term_rf);
-          /* ATerm new_expr = m_enclosing_enumerator->rewr_obj->rewriteInternal((ATerm)(ATermAppl)e.expr());
+          // m_enclosing_enumerator->rewr_obj->setSubstitutionInternal(var,(ATerm)(ATermAppl)term_rf);
+          enum_sigma[var]=term_rf;
   
-          if (new_expr!=m_enclosing_enumerator->rewr_false) 
-          { */
-            push_on_fs_stack_and_split_or(
+          push_on_fs_stack_and_split_or(
                                   fs_stack,
                                   uvars+var_list,
                                   push_front(e.substituted_vars(),var),
@@ -475,8 +483,9 @@ bool EnumeratorSolutionsStandard::next(
                                   (atermpp::aterm_appl)e.expr(),
                                   atermpp::term_list < atermpp::aterm_appl > (),
                                   false); 
-          // }
-          m_enclosing_enumerator->rewr_obj->setSubstitutionInternal(var,old_val);
+
+          // m_enclosing_enumerator->rewr_obj->setSubstitutionInternal(var,old_val);
+          enum_sigma[var]=old_val;
           // m_enclosing_enumerator->rewr_obj->clearSubstitution(var);
         }
       }
@@ -495,8 +504,7 @@ bool EnumeratorSolutionsStandard::next(
   }
 }
 
-bool EnumeratorSolutionsStandard::next(
-          atermpp::term_list<atermpp::aterm_appl> &solution)
+bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution)
 {
   bool dummy_solution_is_exact;
   return next(dummy_solution_is_exact,solution);

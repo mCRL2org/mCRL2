@@ -35,24 +35,19 @@ class RewriterProver: public Rewriter
 
     mcrl2::data::detail::RewriteStrategy getStrategy();
 
-    ATermAppl rewrite(ATermAppl Term);
+    data_expression rewrite(
+         const data_expression term,
+         mutable_map_substitution<> &sigma);
 
-    ATerm toRewriteFormat(ATermAppl Term);
-    ATermAppl fromRewriteFormat(ATerm Term);
-    ATerm rewriteInternal(ATerm Term);
+    atermpp::aterm_appl rewrite_internal(
+         const atermpp::aterm_appl term,
+         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
 
-    bool addRewriteRule(ATermAppl Rule);
-    bool removeRewriteRule(ATermAppl Rule);
+    atermpp::aterm_appl toRewriteFormat(const data_expression term);
+    data_expression fromRewriteFormat(const atermpp::aterm_appl term);
 
-    void setSubstitution(ATermAppl Var, ATermAppl Expr);
-    void setSubstitutionList(ATermList Substs);
-    void setSubstitutionInternal(ATermAppl Var, ATerm Expr);
-    void setSubstitutionInternalList(ATermList Substs);
-    ATermAppl getSubstitution(ATermAppl Var);
-    ATerm getSubstitutionInternal(ATermAppl Var);
-    void clearSubstitution(ATermAppl Var);
-    void clearSubstitutions();
-    void clearSubstitutions(ATermList Vars);
+    bool addRewriteRule(const data_equation rule);
+    bool removeRewriteRule(const data_equation rule);
 
 };
 

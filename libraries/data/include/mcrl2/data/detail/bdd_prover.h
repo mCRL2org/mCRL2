@@ -123,13 +123,14 @@ class BDD_Prover: public Prover
       f_smallest = ATtableCreate(2000, 50);
       f_deadline = time(0) + f_time_limit;
 
-      ATerm v_previous_1 = 0;
-      ATerm v_previous_2 = 0;
+      atermpp::aterm_appl v_previous_1;
+      atermpp::aterm_appl v_previous_2;
 
       mCRL2log(log::debug) << "Formula: " << core::pp( f_formula) << std::endl;
 
       f_internal_bdd = m_rewriter->toRewriteFormat(f_formula);
-      f_internal_bdd = m_rewriter->rewriteInternal(f_internal_bdd);
+
+      f_internal_bdd = m_rewriter->rewrite_internal(atermpp::aterm_appl((ATermAppl)f_internal_bdd),bdd_sigma);
       f_internal_bdd = f_manipulator->orient(f_internal_bdd);
 
       mCRL2log(log::debug) << "Formula rewritten and oriented: " << core::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
@@ -151,7 +152,7 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    ATerm bdd_down(ATerm a_formula)
+    atermpp::aterm_appl bdd_down(atermpp::aterm_appl a_formula)
     {
       std::string indent;
 
@@ -159,7 +160,7 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
-    ATerm bdd_down(ATerm a_formula, std::string& a_indent)
+    atermpp::aterm_appl bdd_down(atermpp::aterm_appl a_formula, std::string& a_indent)
     {
       a_indent.append("  ");
 
@@ -178,13 +179,13 @@ class BDD_Prover: public Prover
         return a_formula;
       }
 
-      ATerm v_bdd = ATtableGet(f_formula_to_bdd, a_formula);
-      if (v_bdd)
+      ATerm v_pre_bdd = ATtableGet(f_formula_to_bdd, (ATerm)(ATermAppl)a_formula);
+      if (v_pre_bdd)
       {
-        return v_bdd;
+        return (ATermAppl)v_pre_bdd;
       }
 
-      ATerm v_guard = smallest(a_formula);
+      atermpp::aterm_appl v_guard = smallest(a_formula);
       if (!v_guard)
       {
         return a_formula;
@@ -194,24 +195,24 @@ class BDD_Prover: public Prover
         mCRL2log(log::debug) << a_indent << "Smallest guard: " << core::pp(m_rewriter->fromRewriteFormat(v_guard)) << std::endl;
       }
 
-      ATerm v_term1, v_term2;
+      atermpp::aterm_appl v_term1, v_term2;
 
       v_term1 = f_manipulator->set_true(a_formula, v_guard);
-      v_term1 = m_rewriter->rewriteInternal(v_term1);
+      v_term1 = m_rewriter->rewrite_internal(atermpp::aterm_appl((ATermAppl)v_term1),bdd_sigma);
       v_term1 = f_manipulator->orient(v_term1);
       mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
       v_term1 = bdd_down(v_term1, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
 
       v_term2 = f_manipulator->set_false(a_formula, v_guard);
-      v_term2 = m_rewriter->rewriteInternal(v_term2);
+      v_term2 = m_rewriter->rewrite_internal(atermpp::aterm_appl(v_term2),bdd_sigma);
       v_term2 = f_manipulator->orient(v_term2);
       mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
 
-      v_bdd = f_manipulator->make_reduced_if_then_else(v_guard, v_term1, v_term2);
-      ATtablePut(f_formula_to_bdd, a_formula, v_bdd);
+      atermpp::aterm_appl v_bdd = f_manipulator->make_reduced_if_then_else(v_guard, v_term1, v_term2);
+      ATtablePut(f_formula_to_bdd, (ATerm)(ATermAppl)a_formula, (ATerm)(ATermAppl)v_bdd);
 
       a_indent.erase(a_indent.size() - 2);
 
@@ -240,8 +241,8 @@ class BDD_Prover: public Prover
       {
         build_bdd();
         eliminate_paths();
-        ATermAppl v_original_formula = f_formula;
-        ATermAppl v_original_bdd = f_bdd;
+        data_expression v_original_formula = f_formula;
+        data_expression v_original_bdd = f_bdd;
         if (f_apply_induction && !(f_bdd_info.is_true(f_bdd) || f_bdd_info.is_false(f_bdd)))
         {
           f_induction.initialize(v_original_formula);
@@ -306,7 +307,7 @@ class BDD_Prover: public Prover
     };
 
     /// \brief Returns the smallest guard in the formula a_formula.
-    ATerm smallest(ATerm a_formula)
+    atermpp::aterm_appl smallest(atermpp::aterm_appl a_formula)
     {
       if (f_info->is_variable(a_formula))
       {
@@ -316,17 +317,15 @@ class BDD_Prover: public Prover
         }
         else
         {
-          return 0;
+          return atermpp::aterm_appl();
         }
       }
       if (f_info->is_true(a_formula) || f_info->is_false(a_formula))
       {
-        return 0;
+        return atermpp::aterm_appl();
       }
 
-      ATerm v_result;
-
-      v_result = ATtableGet(f_smallest, a_formula);
+      ATermAppl v_result = (ATermAppl)ATtableGet(f_smallest, (ATerm)(ATermAppl)a_formula);
       if (v_result)
       {
         return v_result;
@@ -334,7 +333,7 @@ class BDD_Prover: public Prover
 
       size_t i;
       size_t v_length;
-      ATerm v_small;
+      atermpp::aterm_appl v_small;
 
       v_length = f_info->get_number_of_arguments(a_formula);
 
@@ -362,7 +361,7 @@ class BDD_Prover: public Prover
       }
       if (v_result)
       {
-        ATtablePut(f_smallest, a_formula, v_result);
+        ATtablePut(f_smallest, (ATerm)(ATermAppl)a_formula, (ATerm)v_result);
       }
 
       return v_result;
@@ -414,10 +413,11 @@ class BDD_Prover: public Prover
   protected:
 
     /// \brief A binary decision diagram in the internal representation of the rewriter.
-    ATerm f_internal_bdd;
+    atermpp::aterm_appl f_internal_bdd;
+    mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > bdd_sigma;
 
     /// \brief A binary decision diagram in the internal representation of mCRL2.
-    ATermAppl f_bdd;
+    data_expression f_bdd;
   public:
 
     /// \brief Constructor that initializes the attributes BDD_Prover::f_data_spec, Prover::f_time_limit and
@@ -469,6 +469,26 @@ class BDD_Prover: public Prover
       delete f_bdd_simplifier;
       f_bdd_simplifier = 0;
     }
+  
+    /// \brief Set the substitution to be used to construct the BDD
+    void set_substitution(mutable_map_substitution< > &sigma)
+    {
+      bdd_sigma.clear();
+      for(mutable_map_substitution<>::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+      { 
+        bdd_sigma[i->first]=m_rewriter->toRewriteFormat(i->second);
+      }
+    }
+
+    /// \brief Set the substitution in internal format to be used to construct the BDD
+    void set_substitution_internal(mutable_map_substitution< atermpp::map < variable, atermpp::aterm_appl> >&sigma)
+    {
+      bdd_sigma.clear();
+      for(mutable_map_substitution< atermpp::map < variable, atermpp::aterm_appl> >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+      { 
+        bdd_sigma[i->first]=i->second;
+      }
+    }
 
     /// \brief Indicates whether or not the formula Prover::f_formula is a tautology.
     virtual Answer is_tautology()
@@ -485,7 +505,7 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Returns the BDD BDD_Prover::f_bdd.
-    virtual ATermAppl get_bdd()
+    virtual data_expression get_bdd()
     {
       update_answers();
       return f_bdd;

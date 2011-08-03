@@ -20,6 +20,7 @@
 #include "boost/shared_ptr.hpp"
 #include "boost/type_traits/add_reference.hpp"
 
+#include "mcrl2/exception.h"
 #include "mcrl2/data/expression_traits.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
@@ -28,7 +29,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/exception.h"
 
 namespace mcrl2
 {
@@ -231,14 +231,16 @@ class rewriter: public basic_rewriter<data_expression>
     /// \return The normal form of d.
     data_expression operator()(const data_expression& d) const
     {
+      mutable_map_substitution<> sigma;
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE: " << d;
-      data_expression result(reconstruct(m_rewriter->rewrite(implement(d))));
-      std::cerr << " ------------> " << result << std::endl;
-      return result;
-#else
-      return reconstruct(m_rewriter->rewrite(implement(d)));
 #endif 
+      data_expression result(reconstruct(m_rewriter->rewrite(implement(d),sigma)));
+
+#ifdef MCRL2_PRINT_REWRITE_STEPS
+      std::cerr << " ------------> " << result << std::endl;
+#endif 
+      return result;
     }
 
     /// \brief Rewrites the data expression d, and on the fly applies a substitution function
@@ -251,12 +253,26 @@ class rewriter: public basic_rewriter<data_expression>
     {
 # ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d << "\n";
-      data_expression result(reconstruct(m_rewriter->rewrite(implement(replace_free_variables(d, sigma)))));
-      std::cerr << " ------------> " << result << std::endl;
-      return result;
-# else
-      return reconstruct(m_rewriter->rewrite(implement(data::replace_free_variables(d, sigma))));
 #endif
+      mutable_map_substitution<> fresh_sigma; // Temporary hack to make an empty subsitution.
+      data_expression result(reconstruct(m_rewriter->rewrite(implement(data::replace_free_variables(d, sigma)),fresh_sigma)));
+
+std::cerr << "Check whether the code fragment below without implement works. Todo for JFG\n";
+      // The code fragment below is much more efficient, provided the substitued values are already in 
+      // normal form. In that case, the implement is also not required.
+      // Unfortunately, as substitutions do not always have a const_iterator on board, the
+      // code does not work.
+      /* for(typename SubstitutionFunction::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+      {
+        fresh_sigma[i->first]=implement(i->second);
+      }
+
+      data_expression result(reconstruct(m_rewriter->rewrite(implement(d),fresh_sigma)));
+      */
+# ifdef MCRL2_PRINT_REWRITE_STEPS
+      std::cerr << " ------------> " << result << std::endl;
+#endif
+      return result;
     }
 };
 
@@ -299,7 +315,8 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     /// \return The normal form of d.
     data_expression_with_variables operator()(const data_expression_with_variables& d) const
     {
-      data_expression t = reconstruct(m_rewriter->rewrite(implement(d)));
+      mutable_map_substitution<atermpp::map < variable,data_expression> > sigma; 
+      data_expression t = reconstruct(m_rewriter->rewrite(implement(d),sigma));
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;

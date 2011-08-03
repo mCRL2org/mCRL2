@@ -394,7 +394,7 @@ ATermIndexedSet ATindexedSetCreate(size_t initial_size, unsigned int max_load_pc
                                      sizeof(ATerm*));
   if (hashset->keys == NULL)
   {
-    std::runtime_error("ATindexedSetCreate: cannot creat key index table");
+    std::runtime_error("ATindexedSetCreate: cannot create key index table");
   }
 
   hashset->nr_free_tables = INITIAL_NR_OF_TABLES;
@@ -574,7 +574,7 @@ ATermTable ATtableCreate(const size_t initial_size, const unsigned int max_load_
 
   if (hashtable->values == NULL)
   {
-    std::runtime_error("ATtableCreate: cannot creat value index table");
+    std::runtime_error("ATtableCreate: cannot create value index table");
   }
 
   return hashtable;

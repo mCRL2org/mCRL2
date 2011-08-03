@@ -93,6 +93,7 @@ class classic_enumerator
         iterator_internal(enclosing_classic_enumerator *e,
                           const variable_list &variables,
                           const atermpp::aterm_appl &condition,
+                          mcrl2::data::mutable_map_substitution< atermpp::map< data::variable, atermpp::aterm_appl > > &sigma,
                           const bool not_equal_to_false=true,
                           const size_t max_internal_variables=0,
                           const bool do_not_throw_exceptions=false):
@@ -100,7 +101,7 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_solution_possible(do_not_throw_exceptions)
         {
-          const atermpp::aterm_appl rewritten_condition=e->m_evaluator.rewrite_internal(condition);
+          const atermpp::aterm_appl rewritten_condition=e->m_evaluator.rewrite_internal(condition,sigma);
           if ((not_equal_to_false && rewritten_condition==e->m_evaluator.internal_false) ||
               (!not_equal_to_false && rewritten_condition==e->m_evaluator.internal_true))
           { 
@@ -120,6 +121,7 @@ class classic_enumerator
             // we must calculate the solutions.
             m_generator=m_generator_type(new detail::EnumeratorSolutionsStandard(variables,
                                                               condition,
+                                                              sigma,
                                                               not_equal_to_false,
                                                               m_enclosing_enumerator->m_enumerator,
                                                               max_internal_variables));
@@ -249,14 +251,15 @@ class classic_enumerator
     /// \param[in] do_not_throw_exceptions A boolean indicating whether an exception can be thrown.
     ///            if not, the function solution_is_possible can be used to indicate whether
     ///            valid solutions are being generated.
-    iterator_internal begin_internal(const variable_list &variables,
-                                     const atermpp::aterm_appl &condition_in_internal_format,
+    iterator_internal begin_internal(const variable_list variables,
+                                     const atermpp::aterm_appl condition_in_internal_format,
+                                     mcrl2::data::mutable_map_substitution< atermpp::map< data::variable, atermpp::aterm_appl > > &sigma,
                                      const size_t max_internal_variables=0,
                                      const bool not_equal_to_false=true,
                                      const bool do_not_throw_exceptions=false)
 
     { 
-      return iterator_internal(this, variables, condition_in_internal_format,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
+      return iterator_internal(this, variables, condition_in_internal_format,sigma,not_equal_to_false,max_internal_variables,do_not_throw_exceptions);
     }
 
     /// \brief The standard end iterator to indicate the end of an iteration.
@@ -285,6 +288,7 @@ class classic_enumerator
         variable_list m_vars;
         bool m_solution_is_exact;
         bool m_solution_possible;
+        mcrl2::data::mutable_map_substitution< atermpp::map< data::variable, atermpp::aterm_appl > > internal_sigma;
         detail::EnumeratorSolutionsStandard m_generator;
 
       public:
@@ -294,7 +298,7 @@ class classic_enumerator
         iterator(enclosing_classic_enumerator *e,
                  const Container &variables,
                  const expression_type &condition,
-                 const substitution_type &substitution=substitution_type(),   
+                 const substitution_type &sigma=substitution_type(),   
                  const bool not_equal_to_false=true,
                  const size_t max_internal_variables=0,
                  const bool do_not_throw_exceptions=false,
@@ -303,16 +307,18 @@ class classic_enumerator
           m_enumerator_iterator_valid(false),
           m_vars(atermpp::convert<variable_list,Container>(variables)),
           m_solution_possible(do_not_throw_exceptions),
+          internal_sigma(m_enclosing_enumerator->m_evaluator.convert_to(sigma)),
           m_generator(m_vars,
                       m_enclosing_enumerator->m_evaluator.convert_to(condition),
+                      internal_sigma,
                       not_equal_to_false,
                       m_enclosing_enumerator->m_enumerator,
-                      max_internal_variables)
+                      max_internal_variables) 
         { 
-          for (substitution_type::const_iterator i=substitution.begin(); i!=substitution.end(); ++i)
+          /* for (substitution_type::const_iterator i=substitution.begin(); i!=substitution.end(); ++i)
           { 
             m_enclosing_enumerator->m_evaluator.set_internally_associated_value(i->first,i->second);
-          }
+          } */
           increment();
         }
 

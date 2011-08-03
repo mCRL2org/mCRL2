@@ -39,13 +39,13 @@ class ATerm_Info
     boost::shared_ptr<detail::Rewriter> f_rewriter;
 
     /// \brief ATermAppl representing the constant \c true.
-    ATerm f_true;
+    atermpp::aterm_int f_true;
 
     /// \brief ATermAppl representing the constant \c false.
-    ATerm f_false;
+    atermpp::aterm_int f_false;
 
     /// \brief ATermAppl representing the \c if \c then \c else function with type Bool -> Bool -> Bool -> Bool.
-    ATerm f_if_then_else_bool;
+    atermpp::aterm_int f_if_then_else_bool;
 
     /// \brief ATermAppl representing the \c equality function.
     ATerm f_eq;
@@ -64,10 +64,10 @@ class ATerm_Info
       return (a_result1 != compare_result_equal) ? a_result1 : a_result2;
     }
 
-    Compare_Result compare_address(ATerm a_term1, ATerm a_term2)
+    Compare_Result compare_address(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
-      long v_address1 = reinterpret_cast < long >(a_term1);
-      long v_address2 = reinterpret_cast < long >(a_term2);;
+      long v_address1 = reinterpret_cast < long >((ATermAppl)a_term1);
+      long v_address2 = reinterpret_cast < long >((ATermAppl)a_term2);
 
       if (v_address1 < v_address2)
       {
@@ -80,7 +80,7 @@ class ATerm_Info
       return compare_result_equal;
     }
 
-    bool alpha1(ATerm a_term1, ATerm a_term2, size_t a_number)
+    bool alpha1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2, size_t a_number)
     {
       if (get_number_of_arguments(a_term1) == a_number)
       {
@@ -88,35 +88,31 @@ class ATerm_Info
       }
       else
       {
-        ATerm v_term = get_argument(a_term1, a_number);
+        atermpp::aterm_appl v_term = get_argument(a_term1, a_number);
         return (v_term == a_term2) || lpo1(v_term, a_term2) || alpha1(a_term1, a_term2, ++a_number);
       }
     }
 
-    bool beta1(ATerm a_term1, ATerm a_term2)
+    bool beta1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
-      ATerm v_operator_1, v_operator_2;
-
-      v_operator_1 = get_operator(a_term1);
-      v_operator_2 = get_operator(a_term2);
+      const atermpp::aterm v_operator_1 = get_operator(a_term1);
+      const atermpp::aterm v_operator_2 = get_operator(a_term2);
       return (compare_address(v_operator_1, v_operator_2) == compare_result_bigger) && majo1(a_term1, a_term2, 0);
     }
 
-    bool gamma1(ATerm a_term1, ATerm a_term2)
+    bool gamma1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
-      ATerm v_operator_1, v_operator_2;
-
-      v_operator_1 = get_operator(a_term1);
-      v_operator_2 = get_operator(a_term2);
+      const atermpp::aterm v_operator_1 = get_operator(a_term1);
+      const atermpp::aterm v_operator_2 = get_operator(a_term2);
       return (v_operator_1 == v_operator_2) && lex1(a_term1, a_term2, 0) && majo1(a_term1, a_term2, 0);
     }
 
-    bool delta1(ATerm a_term1, ATerm a_term2)
+    bool delta1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
-      return gsOccurs(a_term2, a_term1);
+      return gsOccurs((ATerm)(ATermAppl)a_term2, (ATerm)(ATermAppl)a_term1);
     }
 
-    bool majo1(ATerm a_term1, ATerm a_term2, size_t a_number)
+    bool majo1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2, size_t a_number)
     {
       if (get_number_of_arguments(a_term2) == a_number)
       {
@@ -124,12 +120,12 @@ class ATerm_Info
       }
       else
       {
-        ATerm v_term = get_argument(a_term2, a_number);
+        atermpp::aterm_appl v_term = get_argument(a_term2, a_number);
         return lpo1(a_term1, v_term) && majo1(a_term1, a_term2, ++a_number);
       }
     }
 
-    bool lex1(ATerm a_term1, ATerm a_term2, size_t a_number)
+    bool lex1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2, size_t a_number)
     {
       if (get_number_of_arguments(a_term1) == a_number)
       {
@@ -137,8 +133,8 @@ class ATerm_Info
       }
       else
       {
-        ATerm v_term1 = get_argument(a_term1, a_number);
-        ATerm v_term2 = get_argument(a_term2, a_number);
+        atermpp::aterm_appl v_term1 = get_argument(a_term1, a_number);
+        atermpp::aterm_appl v_term2 = get_argument(a_term2, a_number);
         if (v_term1 == v_term2)
         {
           return lex1(a_term1, a_term2, ++a_number);
@@ -151,7 +147,7 @@ class ATerm_Info
     }
 
     /// \brief Returns an integer corresponding to the structure of the guard passed as argument \c a_guard.
-    int get_guard_structure(ATerm a_guard)
+    int get_guard_structure(atermpp::aterm_appl a_guard)
     {
       if (is_variable(a_guard))
       {
@@ -159,7 +155,7 @@ class ATerm_Info
       }
       if (is_equality(a_guard))
       {
-        ATerm v_term1, v_term2;
+        atermpp::aterm_appl v_term1, v_term2;
 
         v_term1 = get_argument(a_guard, 0);
         v_term2 = get_argument(a_guard, 1);
@@ -191,7 +187,7 @@ class ATerm_Info
     {
       if (f_full && is_equality(a_guard1) && is_equality(a_guard2))
       {
-        ATerm v_g1a0, v_g1a1, v_g2a0, v_g2a1;
+        atermpp::aterm_appl v_g1a0, v_g1a1, v_g2a0, v_g2a1;
 
         v_g1a0 = get_argument(a_guard1, 0);
         v_g1a1 = get_argument(a_guard1, 1);
@@ -210,7 +206,7 @@ class ATerm_Info
     }
 
     /// \brief Compares terms by their type.
-    Compare_Result compare_term_type(ATerm a_term1, ATerm a_term2)
+    Compare_Result compare_term_type(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
       if (is_variable(a_term1) && !is_variable(a_term2))
       {
@@ -224,13 +220,13 @@ class ATerm_Info
     }
 
     /// \brief Compares terms by checking whether one is a part of the other.
-    Compare_Result compare_term_occurs(ATerm a_term1, ATerm a_term2)
+    Compare_Result compare_term_occurs(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
-      if (gsOccurs(a_term1, a_term2))
+      if (gsOccurs((ATerm)(ATermAppl)a_term1, (ATerm)(ATermAppl)a_term2))
       {
         return compare_result_smaller;
       }
-      if (gsOccurs(a_term2, a_term1))
+      if (gsOccurs((ATerm)(ATermAppl)a_term2, (ATerm)(ATermAppl)a_term1))
       {
         return compare_result_bigger;
       }
@@ -275,7 +271,7 @@ class ATerm_Info
     }
 
     /// \brief Compares two terms.
-    Compare_Result compare_term(ATerm a_term1, ATerm a_term2)
+    Compare_Result compare_term(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
       return lexico(
                lexico(
@@ -287,7 +283,7 @@ class ATerm_Info
     }
 
     /// \brief Compares two terms using lpo.
-    bool lpo1(ATerm a_term1, ATerm a_term2)
+    bool lpo1(atermpp::aterm_appl a_term1, atermpp::aterm_appl a_term2)
     {
       if (is_variable(a_term1) && is_variable(a_term2))
       {
@@ -308,32 +304,33 @@ class ATerm_Info
     }
 
     /// \brief Indicates whether or not a term has type bool.
-    virtual bool has_type_bool(ATerm a_term) = 0;
+    virtual bool has_type_bool(const data_expression a_term) = 0;
+    virtual bool has_type_bool(const atermpp::aterm_appl a_term) = 0;
 
     /// \brief Returns the number of arguments of the main operator of a term.
-    virtual size_t get_number_of_arguments(ATerm a_term) = 0;
+    virtual size_t get_number_of_arguments(const atermpp::aterm_appl a_term) = 0;
 
     /// \brief Returns the main operator of the term \c a_term;
-    virtual ATerm get_operator(ATerm a_term) = 0;
+    virtual atermpp::aterm get_operator(const atermpp::aterm_appl a_term) = 0;
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    virtual ATerm get_argument(ATerm a_term, size_t a_number) = 0;
+    virtual atermpp::aterm_appl get_argument(const atermpp::aterm_appl a_term, const size_t a_number) = 0;
 
     /// \brief Indicates whether or not a term is equal to \c true.
-    virtual bool is_true(ATerm a_term) = 0;
+    virtual bool is_true(atermpp::aterm_appl a_term) = 0;
 
     /// \brief Indicates whether or not a term is equal to \c false.
-    virtual bool is_false(ATerm a_term) = 0;
+    virtual bool is_false(atermpp::aterm_appl a_term) = 0;
 
     /// \brief Indicates whether or not a term is equal to the \c if \c then \c else function
     /// \brief with type Bool -> Bool -> Bool -> Bool.
-    virtual bool is_if_then_else_bool(ATerm a_term) = 0;
+    virtual bool is_if_then_else_bool(atermpp::aterm_appl a_term) = 0;
 
     /// \brief Indicates whether or not a term is a single variable.
-    virtual bool is_variable(ATerm a_term) = 0;
+    virtual bool is_variable(atermpp::aterm_appl a_term) = 0;
 
     /// \brief Indicates whether or not a term is an equality.
-    virtual bool is_equality(ATerm a_term) = 0;
+    virtual bool is_equality(atermpp::aterm_appl a_term) = 0;
 };
 
 /// \brief Class that provides information about the structure of
@@ -346,9 +343,9 @@ class AI_Jitty: public ATerm_Info
     AI_Jitty(boost::shared_ptr<detail::Rewriter> a_rewriter)
       : ATerm_Info(a_rewriter)
     {
-      f_true = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(sort_bool::true_()), 0);
-      f_false = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(sort_bool::false_()), 0);
-      f_if_then_else_bool = (ATerm) ATgetArgument((ATermAppl) f_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0);
+      f_true = (f_rewriter->toRewriteFormat(sort_bool::true_()))(0);
+      f_false = (f_rewriter->toRewriteFormat(sort_bool::false_()))(0);
+      f_if_then_else_bool = (f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0);
       f_eq = (ATerm) static_cast<ATermAppl>(detail::equal_symbol());
     }
 
@@ -357,7 +354,16 @@ class AI_Jitty: public ATerm_Info
     {}
 
     /// \brief Indicates whether or not a term has type bool.
-    virtual bool has_type_bool(ATerm a_term)
+    virtual bool has_type_bool(const data_expression a_term)
+    {
+      return a_term.sort()==sort_bool::bool_();
+    }
+
+    virtual bool has_type_bool(const atermpp::aterm_appl a_term)
+    {
+      return f_rewriter->fromRewriteFormat(a_term).sort()==sort_bool::bool_();
+    }
+    /*
     {
       if (core::detail::gsIsDataVarId((ATermAppl) a_term) || core::detail::gsIsOpId((ATermAppl) a_term))
       {
@@ -372,9 +378,9 @@ class AI_Jitty: public ATerm_Info
       v_number_of_arguments = get_number_of_arguments(a_term);
       if (v_number_of_arguments == 0)
       {
-        ATerm v_term;
+        data_expression v_term;
 
-        v_term = (ATerm) f_rewriter->fromRewriteFormat(a_term);
+        v_term = f_rewriter->fromRewriteFormat(a_term);
         if (core::detail::gsIsDataVarId((ATermAppl) v_term) || core::detail::gsIsOpId((ATermAppl) v_term))
         {
           v_term = ATgetArgument(v_term, 1);
@@ -410,13 +416,13 @@ class AI_Jitty: public ATerm_Info
         }
       }
       return false;
-    }
+    } */
 
     /// \brief Returns the number of arguments of the main operator of a term.
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
     /// \return 0, if \c aterm is a constant or a variable.
     ///         The number of arguments of the main operator, otherwise.
-    virtual size_t get_number_of_arguments(ATerm a_term)
+    virtual size_t get_number_of_arguments(const atermpp::aterm_appl a_term)
     {
       if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term))
       {
@@ -429,53 +435,47 @@ class AI_Jitty: public ATerm_Info
     }
 
     /// \brief Returns the main operator of the term \c a_term;
-    virtual ATerm get_operator(ATerm a_term)
+    virtual atermpp::aterm get_operator(const atermpp::aterm_appl a_term) 
     {
-      return ATgetArgument(a_term, 0);
+      return a_term(0);
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    virtual ATerm get_argument(ATerm a_term, size_t a_number)
+    virtual atermpp::aterm_appl get_argument(const atermpp::aterm_appl a_term, const size_t a_number)
     {
-      return ATgetArgument(a_term, a_number + 1);
+      return a_term(a_number + 1);
     }
 
     /// \brief Indicates whether or not a term is equal to \c true.
-    virtual bool is_true(ATerm a_term)
+    virtual bool is_true(const atermpp::aterm_appl a_term)
     {
-      ATerm v_term;
-
-      v_term = ATgetArgument(a_term, 0);
+      const atermpp::aterm v_term = a_term(0);
       return (v_term == f_true);
     }
 
     /// \brief Indicates whether or not a term is equal to \c false.
-    virtual bool is_false(ATerm a_term)
+    virtual bool is_false(const atermpp::aterm_appl a_term)
     {
-      ATerm v_term;
-
-      v_term = ATgetArgument(a_term, 0);
+      const atermpp::aterm v_term = a_term(0);
       return (v_term == f_false);
     }
 
     /// \brief Indicates whether or not a term is equal to the \c if \c then \c else function
     /// \brief with type Bool -> Bool -> Bool -> Bool.
-    virtual bool is_if_then_else_bool(ATerm a_term)
+    virtual bool is_if_then_else_bool(const atermpp::aterm_appl a_term)
     {
-      ATerm v_function;
-
-      v_function = ATgetArgument(a_term, 0);
+      atermpp::aterm v_function = a_term(0);
       return (v_function == f_if_then_else_bool && get_number_of_arguments(a_term) == 3);
     }
 
     /// \brief Indicates whether or not a term is a single variable.
-    virtual bool is_variable(ATerm a_term)
+    virtual bool is_variable(const atermpp::aterm_appl a_term)
     {
       return core::detail::gsIsDataVarId((ATermAppl) a_term);
     }
 
     /// \brief Indicates whether or not a term is an equality.
-    virtual bool is_equality(ATerm a_term)
+    virtual bool is_equality(atermpp::aterm_appl a_term)
     {
       if (get_number_of_arguments(a_term) == 2)
       {
@@ -483,7 +483,7 @@ class AI_Jitty: public ATerm_Info
 
         v_term = ATgetArgument(a_term, 0);
         v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, false), v_term);
-        v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
+        v_term = (ATerm)(ATermAppl) f_rewriter->fromRewriteFormat(v_term);
         v_term = ATgetArgument(v_term, 0);
         return (v_term == f_eq);
       }

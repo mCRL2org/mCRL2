@@ -289,7 +289,8 @@ class rewrite_conversion_helper
               vl=push_front(vl,fresh_variable);
             }
             vl=reverse(vl);
-            return exists(vl,reconstruct((data_expression)m_rewriter->rewrite(application(*expression.arguments().begin(),vl))));
+            mutable_map_substitution<atermpp::map < variable,data_expression> > sigma;
+            return exists(vl,reconstruct((data_expression)m_rewriter->rewrite(application(*expression.arguments().begin(),vl),sigma)));
           }
 
           lambda argument(argument_expression);
@@ -312,7 +313,8 @@ class rewrite_conversion_helper
               vl=push_front(vl,fresh_variable);
             }
             vl=reverse(vl);
-            return forall(vl,reconstruct((data_expression)m_rewriter->rewrite(application(*expression.arguments().begin(),vl))));
+            mutable_map_substitution<atermpp::map < variable,data_expression> > sigma;
+            return forall(vl,reconstruct((data_expression)m_rewriter->rewrite(application(*expression.arguments().begin(),vl),sigma)));
           }
 
           lambda argument(argument_expression);

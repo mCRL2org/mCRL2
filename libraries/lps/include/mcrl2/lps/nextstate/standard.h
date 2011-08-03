@@ -51,9 +51,10 @@ struct ns_info
   AFun stateAFun;
   size_t* current_id;
 
-  enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c)
+  enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c, 
+                                              mcrl2::data::mutable_map_substitution<atermpp::map < mcrl2::data::variable,atermpp::aterm_appl> > &sigma)
   {
-    return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c); // Laatste expressie is intern.
+    return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c, sigma); // Laatste expressie is intern.
   }
 
   ns_info(const mcrl2::data::data_specification & specification,
@@ -88,6 +89,7 @@ class NextStateGenerator
     size_t sum_idx;
 
     ATerm cur_state;
+    mcrl2::data::mutable_map_substitution<atermpp::map < mcrl2::data::variable,atermpp::aterm_appl> > current_substitution;
     ATerm cur_act;
     ATermList cur_nextstate;
 

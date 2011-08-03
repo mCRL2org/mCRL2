@@ -30,14 +30,14 @@ class RewriterJitty: public Rewriter
 
     RewriteStrategy getStrategy();
 
-    ATermAppl rewrite(ATermAppl Term);
+    data_expression rewrite(const data_expression term, mutable_map_substitution<> &sigma);
 
-    ATerm toRewriteFormat(ATermAppl Term);
-    ATermAppl fromRewriteFormat(ATerm Term);
-    ATerm rewriteInternal(ATerm Term);
+    atermpp::aterm_appl toRewriteFormat(const data_expression term);
+    data_expression fromRewriteFormat(atermpp::aterm_appl term); 
+    atermpp::aterm_appl rewrite_internal(const atermpp::aterm_appl term, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
 
-    bool addRewriteRule(ATermAppl Rule);
-    bool removeRewriteRule(ATermAppl Rule);
+    bool addRewriteRule(const data_equation Rule);
+    bool removeRewriteRule(const data_equation Rule);
 
   private:
     // unsigned int num_opids;
@@ -48,7 +48,7 @@ class RewriterJitty: public Rewriter
 
     atermpp::map< ATermInt, ATermList > jitty_eqns;
     ATermList* jitty_strat;
-    ATermAppl rewrite_aux(ATermAppl Term);
+    atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl term, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
 };
 }
 }

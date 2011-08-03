@@ -13,6 +13,8 @@
 
 // #include "mcrl2/atermpp/map.h"
 #include "mcrl2/aterm/aterm2.h"
+#include <mcrl2/atermpp/aterm_int.h>
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_specification.h"
 
 #ifndef NO_DYNLOAD
@@ -98,11 +100,12 @@ class Rewriter
 
     /**
      * \brief Rewrite an mCRL2 data term.
-     * \param Term The term to be rewritten. This term should be
-     *             in the internal mCRL2 format.
+     * \param Term The term to be rewritten. This term should be a data_term
      * \return The normal form of Term.
      **/
-    virtual ATermAppl rewrite(ATermAppl Term) = 0;
+    
+    virtual data_expression rewrite(const data_expression term, mutable_map_substitution<> &sigma) = 0;
+
     /**
      * \brief Rewrite a list of mCRL2 data terms.
      * \param Terms The list of terms to be rewritten. These terms
@@ -110,7 +113,7 @@ class Rewriter
      * \return The list Terms where each element is replaced by its
      *         normal form.
      **/
-    virtual ATermList rewriteList(ATermList Terms);
+    virtual data_expression_list rewrite_list(const data_expression_list Terms, mutable_map_substitution<> &sigma);
 
     /**
      * \brief Convert an mCRL2 data term to a term in the internal
@@ -118,21 +121,23 @@ class Rewriter
      * \param Term A mCRL2 data term.
      * \return The term Term in the internal rewriter format.
      **/
-    virtual ATerm toRewriteFormat(ATermAppl Term);
+    virtual atermpp::aterm_appl toRewriteFormat(const data_expression Term);
     /**
      * \brief Convert a term in the internal rewriter format to a
      *        mCRL2 data term.
      * \param Term A term in the internal rewriter format.
      * \return The term Term as an mCRL2 data term.
      **/
-    virtual ATermAppl fromRewriteFormat(ATerm Term);
+    virtual data_expression fromRewriteFormat(const atermpp::aterm_appl Term);
     /**
      * \brief Rewrite a term in the internal rewriter format.
      * \param Term The term to be rewritten. This term should be
      *             in the internal rewriter format.
      * \return The normal form of Term.
      **/
-    virtual ATerm rewriteInternal(ATerm Term);
+    virtual atermpp::aterm_appl rewrite_internal(
+                     const atermpp::aterm_appl Term, 
+                     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
     /**
      * \brief Rewrite a list of terms in the internal rewriter
      *        format.
@@ -141,7 +146,9 @@ class Rewriter
      * \return The list Terms where each element is replaced by its
      *         normal form.
      **/
-    virtual ATermList rewriteInternalList(ATermList Terms);
+    virtual atermpp::term_list < atermpp::aterm_appl > rewrite_internal_list(
+                     const atermpp::term_list < atermpp::aterm_appl > Terms, 
+                     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
 
     /**
      * \brief Add a rewrite rule to this rewriter.
@@ -150,7 +157,7 @@ class Rewriter
      *         that some rewriters do not support adding of rewrite
      *         rules altogether and will always return false.
      **/
-    virtual bool addRewriteRule(ATermAppl Rule);
+    virtual bool addRewriteRule(const data_equation rule);
     /**
      * \brief Remove a rewrite rule from this rewriter (if present).
      * \param Rule A mCRL2 rewrite rule (DataEqn).
@@ -159,152 +166,23 @@ class Rewriter
      *         rewrite rules altogether and will always return
      *         false.
      **/
-    virtual bool removeRewriteRule(ATermAppl Rule);
+    virtual bool removeRewriteRule(const data_equation rule);
 
-    /**
-     * \brief Link a variable to a value for on-the-fly
-     *        substitution. (Replacing any previous linked value.)
-     * \param var  A mCRL2 data variable.
-     * \param expr A mCRL2 data expression.
-     **/
-    virtual void setSubstitution(ATermAppl var, ATermAppl expr)
-    {
-      setSubstitutionInternal(var,toRewriteFormat(expr));
-    }
-
-    /**
-     * \brief Link variables to a values for on-the-fly
-     *        substitution. (Replacing any previous linked value.)
-     * \param Substs A lists of substitutions of mCRL2 data
-                 *               variables to mCRL2 data expressions.
-     **/
-    virtual void setSubstitutionList(ATermList Substs)
-    {
-      for (; !ATisEmpty(Substs); Substs=ATgetNext(Substs))
-      {
-        ATermAppl h = (ATermAppl) ATgetFirst(Substs);
-        setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),toRewriteFormat((ATermAppl) ATgetArgument(h,1)));
-      }
-    }
-
-    
-    /**
-     * \brief Link a variable to a value for on-the-fly
-     *        substitution. (Replacing any previous linked value.)
-     * \param var  A mCRL2 data variable.
-     * \param expr A term in the internal rewriter format.
-     **/
-    virtual void setSubstitutionInternal(ATermAppl var, ATerm expr)
-    {
-      size_t n = ATgetAFun(ATgetArgument(var,0));
-
-      if (n>=m_substitution.size())
-      {
-        m_substitution.resize(n+1);
-      }
-      m_substitution[n]=(ATermAppl)expr;
-    }
-
-    /**
-     * \brief Link variables to a values for on-the-fly
-     *        substitution. (Replacing any previous linked value.)
-     * \param Substs A lists of substitutions of mCRL2 data
-                 *               variables to terms in the internal rewriter
-                 *               format.
-     **/
-    virtual void setSubstitutionInternalList(ATermList substs)
-    {
-      for (; !ATisEmpty(substs); substs=ATgetNext(substs))
-      {
-        const ATermAppl h = (ATermAppl) ATgetFirst(substs);
-        setSubstitutionInternal((ATermAppl) ATgetArgument(h,0),ATgetArgument(h,1));
-      }
-    }
-
-    /**
-     * \brief Get the value linked to a variable for on-the-fly
-     *        substitution.
-     * \param var A mCRL2 data variable.
-     * \return The value linked to var as an mCRL2 data expression.
-                 *         If no value is linked to var, then NULL is returned.
-     **/
-    virtual ATermAppl getSubstitution(ATermAppl var)
-    {
-      return fromRewriteFormat(getSubstitutionInternal(var));
-    }
-
-    /**
-     * \brief Get the value linked to a variable for on-the-fly
-     *        substitution.
-     * \param var A mCRL2 data variable.
-     * \return The value linked to var as a term in the internal
-                 *         rewriter format. If no value is linked to var,
-     *         then NULL is returned.
-     **/
-    virtual ATerm getSubstitutionInternal(ATermAppl var)
-    {
-      const size_t n = ATgetAFun(ATgetArgument(var,0));
-      if (n>=m_substitution.size() || m_substitution[n]==atermpp::aterm_appl())
-      {
-        return (ATerm)var;
-      }
-      return (ATerm)(ATermAppl)m_substitution[n];
-    }
-
-    /**
-     * \brief Remove the value linked to a variable for on-the-fly
-     *        substitution. (I.e. make sure that no value is
-     *        substituted for this variable during rewriting.)
-     * \param var A mCRL2 data variable.
-     **/
-    virtual void clearSubstitution(ATermAppl var)
-    {
-      const size_t n = ATgetAFun(ATgetArgument(var,0));
-
-      if (n < m_substitution.size())
-      {
-        m_substitution[n] = atermpp::aterm_appl();
-      }
-    }
-
-
-    /**
-     * \brief Remove all values linked to a variable for on-the-fly
-     *        substitution. (I.e. make sure that no substitution is
-     *        done during rewriting.)
-     **/
-    virtual void clearSubstitutions()
-    {
-      m_substitution.clear();
-    }
-
-    /**
-     * \brief Remove the values linked to variables for on-the-fly
-     *        substitution. (I.e. make sure that no value is
-     *        substituted for this variable during rewriting.)
-     * \param vars A list of mCRL2 data variable.
-     **/
-    virtual void clearSubstitutions(ATermList vars)
-    {
-      for (; !ATisEmpty(vars); vars=ATgetNext(vars))
-      {
-        clearSubstitution((ATermAppl) ATgetFirst(vars));
-      }
-    }
-
-
-  /* protected:
-    ATerm lookupSubstitution(ATermAppl var); */
-
+  public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
-    ATerm internal_existential_quantifier_enumeration(ATerm ATermInInnerFormat);
-    ATerm internal_universal_quantifier_enumeration(ATerm ATermInInnerFormat);
+    atermpp::aterm_appl internal_existential_quantifier_enumeration(
+         const atermpp::aterm_appl termInInnerFormat,
+         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+    atermpp::aterm_appl internal_universal_quantifier_enumeration(
+         const atermpp::aterm_appl termInInnerFormat,
+         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
 
   protected:
-    atermpp::vector < atermpp::aterm_appl > m_substitution;  // Substitution for variables to terms in internal format.
 
     mcrl2::data::data_specification m_data_specification_for_enumeration;
-    ATerm internal_quantifier_enumeration(ATerm ATermInInnerFormat);
+    atermpp::aterm_appl internal_quantifier_enumeration(
+         const atermpp::aterm_appl termInInnerFormat,
+         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
 
     core::identifier_string forall_function_symbol()
     {
@@ -334,14 +212,14 @@ Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrate
  * \param DataEqn The mCRL2 data equation to be checked.
  * \throw std::runtime_error containing a reason why DataEqn is not a valid rewrite rule.
  **/
-void CheckRewriteRule(ATermAppl DataEqn);
+void CheckRewriteRule(const data_equation dataeqn);
 
 /**
  * \brief Check whether or not an mCRL2 data equation is a valid rewrite rule.
  * \param DataEqn The mCRL2 data equation to be checked.
  * \return Whether or not DataEqn is a valid rewrite rule.
  **/
-bool isValidRewriteRule(ATermAppl DataEqn);
+bool isValidRewriteRule(const data_equation dataeqn);
 
 /**
  * \brief Print a string representation of a rewrite strategy.
@@ -355,7 +233,7 @@ void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat);
  * \return Rewrite strategy represented by s. If s is not a valid rewrite
  *         strategy, ::GS_REWR_INVALID is returned.
  **/
-RewriteStrategy RewriteStrategyFromString(const char* s);
+RewriteStrategy RewriteStrategyFromString(char const* s);
 
 // extern size_t num_apples;
 extern std::vector <AFun> apples;
@@ -382,62 +260,91 @@ inline AFun get_appl_afun_value(size_t arity)
  *        of Apply and ApplyArray the first element of the list
  *        or array is the function symbol.
  **/
-inline ATermAppl Apply(ATermList l)
+inline atermpp::aterm_appl Apply(const atermpp::term_list < atermpp::aterm > l)
 {
-  const size_t n=ATgetLength(l);
-  return ATmakeApplList(get_appl_afun_value(n),l);
+  return ATmakeApplList(get_appl_afun_value(l.size()),l);
 }
 
 /** \brief See Apply. */
-inline ATermAppl ApplyArray(const size_t size, ATerm *l)
+inline atermpp::aterm_appl ApplyArray(const size_t size, const atermpp::aterm *l)
 {
-  return ATmakeApplArray(get_appl_afun_value(size),l);
-}
-
-
-/** \brief See Apply. */
-inline ATermAppl Apply0(const ATerm head)
-{
- return ATmakeAppl1(get_appl_afun_value(1),head);
+  return ATmakeApplArray(get_appl_afun_value(size), (ATerm*)l);
 }
 
 
 /** \brief See Apply. */
-inline ATermAppl Apply1(const ATerm head, const ATerm arg1)
+inline atermpp::aterm_appl Apply0(const atermpp::aterm head)
 {
- return ATmakeAppl2(get_appl_afun_value(2),head,arg1);
+ return ATmakeAppl1(get_appl_afun_value(1),(ATerm)head);
 }
 
 
 /** \brief See Apply. */
-inline ATermAppl Apply2(const ATerm head, const ATerm arg1, const ATerm arg2)
+inline atermpp::aterm_appl Apply1(
+         const atermpp::aterm head, 
+         const atermpp::aterm_appl arg1)
 {
- return ATmakeAppl3(get_appl_afun_value(3),head,arg1,arg2);
+ return ATmakeAppl2(get_appl_afun_value(2),(ATerm)head,(ATerm)(ATermAppl)arg1);
 }
 
 
+/** \brief See Apply. */
+inline atermpp::aterm_appl Apply2(
+         const atermpp::aterm head, 
+         const atermpp::aterm_appl arg1, 
+         const atermpp::aterm_appl arg2)
+{
+ return ATmakeAppl3(get_appl_afun_value(3),(ATerm)head,(ATerm)(ATermAppl)arg1,(ATerm)(ATermAppl)arg2);
+}
+
+/** \brief See Apply. */
+inline atermpp::aterm_appl Apply3(
+         const atermpp::aterm head, 
+         const atermpp::aterm_appl arg1, 
+         const atermpp::aterm_appl arg2, 
+         const atermpp::aterm_appl arg3)
+{
+ return ATmakeAppl4(get_appl_afun_value(4),(ATerm)head,(ATerm)(ATermAppl)arg1,(ATerm)(ATermAppl)arg2,(ATerm)(ATermAppl)arg3);
+}
 
 /** The functions below are used for fromInner and toInner(c). */
 
 size_t get_num_opids();
 
-ATermAppl get_int2term(const size_t n);
+data_expression get_int2term(const size_t n);
 
-void set_int2term(const size_t n, const ATermAppl t);
+void set_int2term(const size_t n, const data_expression t);
 
-atermpp::map< ATerm, ATermInt >::const_iterator term2int_begin();
+atermpp::map< data_expression, atermpp::aterm_int >::const_iterator term2int_begin();
 
-atermpp::map< ATerm, ATermInt >::const_iterator term2int_end();
+atermpp::map< data_expression, atermpp::aterm_int >::const_iterator term2int_end();
 
-size_t getArity(ATermAppl op);
+inline size_t getArity(const data_expression op)
+{
+  // This function calculates the cumulated length of all 
+  // potential function arguments.
+  sort_expression sort = op.sort();
+  size_t arity = 0;
 
-ATerm OpId2Int(ATermAppl Term, bool add_opids);
+  while (is_function_sort(sort))
+  {
+    const function_sort fsort(sort);
+    sort_expression_list sort_dom = fsort.domain();
+    arity += sort_dom.size();
+    sort = fsort.codomain();
+  }
+  return arity;
+}
 
-ATerm toInner(ATermAppl Term, bool add_opids);
 
-ATermAppl fromInner(ATerm Term);
+atermpp::aterm OpId2Int(const data_expression Term, bool add_opids);
 
-ATermAppl toInnerc(ATermAppl Term, const bool add_opids);
+// The awkward function below needs to be removed as soon as possible.
+ATerm toInner(const ATermAppl term, const bool add_opids);
+
+data_expression fromInner(const atermpp::aterm_appl term);
+
+atermpp::aterm_appl toInnerc(const data_expression Term, const bool add_opids);
 
 void initialize_internal_translation_table_rewriter();
 

@@ -111,9 +111,9 @@ void Options::OnEval(wxCommandEvent& /*event*/)
     mCRL2log(info) << "Rewriting data expression: \"" << ev->getDataExprVal().c_str() << "\"" << std::endl;
 
     mcrl2::data::rewriter rewr(data_spec,m_rewrite_strategy);
-    atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > assignments;
+    mcrl2::data::mutable_map_substitution < atermpp::map < mcrl2::data::variable, mcrl2::data::data_expression > > assignments;
 
-    mCRL2log(info) << "Result: \"" << pp(rewr(term,make_map_substitution(assignments))).c_str() << "\"" << std::endl;
+    mCRL2log(info) << "Result: \"" << pp(rewr(term,assignments)).c_str() << "\"" << std::endl;
 
   }
   catch (mcrl2::runtime_error e)

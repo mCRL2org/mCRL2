@@ -64,7 +64,7 @@ class Prover:protected mcrl2::data::rewriter
 {
   protected:
     /// \brief An expression of sort Bool in the internal format of mCRL2.
-    ATermAppl f_formula;
+    data_expression f_formula;
 
     /// \brief A class that can be used to manipulate expressions in the internal format of the rewriter.
     ATerm_Manipulator* f_manipulator;
@@ -143,7 +143,7 @@ class Prover:protected mcrl2::data::rewriter
 
     /// \brief Sets Prover::f_formula to a_formula.
     /// precondition: the argument passed as parameter a_formula is an expression of sort Bool in internal mCRL2 format
-    void set_formula(ATermAppl a_formula)
+    void set_formula(const data_expression a_formula)
     {
       f_formula = a_formula;
       f_processed = false;

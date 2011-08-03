@@ -37,15 +37,17 @@ class RewriterCompilingJitty: public Rewriter
 
     RewriteStrategy getStrategy();
 
-    ATermAppl rewrite(ATermAppl Term);
+    data_expression rewrite(const data_expression term, mutable_map_substitution<> &sigma);
 
-    ATerm toRewriteFormat(ATermAppl Term);
-    ATermAppl fromRewriteFormat(ATerm Term);
-    ATerm rewriteInternal(ATerm Term);
-    ATermList rewriteInternalList(ATermList Terms);
+    atermpp::aterm_appl rewrite_internal(
+         const atermpp::aterm_appl term,
+         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+    // ATermList rewriteInternalList(ATermList Terms);
 
-    bool addRewriteRule(ATermAppl Rule);
-    bool removeRewriteRule(ATermAppl Rule);
+    atermpp::aterm_appl toRewriteFormat(const data_expression term);
+    data_expression fromRewriteFormat(const atermpp::aterm_appl term);
+    bool addRewriteRule(const data_equation rule);
+    bool removeRewriteRule(const data_equation rule);
 
   private:
     ATermTable tmp_eqns;
@@ -72,7 +74,7 @@ class RewriterCompilingJitty: public Rewriter
 
     void (*so_rewr_init)(RewriterCompilingJitty *);
     void (*so_rewr_cleanup)();
-    ATermAppl(*so_rewr)(ATermAppl);
+    atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl,mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &);
 
     void add_base_nfs(nfs_array &a, ATermInt opid, size_t arity);
     void extend_nfs(nfs_array &a, ATermInt opid, size_t arity);
