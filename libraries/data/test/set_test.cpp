@@ -74,8 +74,6 @@ void set_expression_test()
 
   data_expression t2d1 = parse_data_expression("{1,2} == {1,2}");
   data_expression t2d2 = parse_data_expression("true");
-ATfprintf(stderr,"NORMAL1 %t\n",normaliser(t2d1));
-ATfprintf(stderr,"NORMAL2 %t\n",normaliser(t2d2));
   BOOST_CHECK(normaliser(t2d1) == normaliser(t2d2));
 
   data_expression t3d1 = parse_data_expression("({1,2} != {2,3})");
