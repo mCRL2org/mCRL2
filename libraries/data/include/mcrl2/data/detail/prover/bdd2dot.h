@@ -32,7 +32,7 @@ class BDD2Dot
     std::ofstream f_dot_file;
 
     /// \brief A table containing all the visited nodes. It maps these nodes to the corresponding node numbers.
-    ATermTable f_visited;
+    atermpp::map < atermpp::aterm_appl, atermpp::aterm_int> f_visited;
 
     /// \brief A class that gives information about the structure of BDDs.
     BDD_Info f_bdd_info;
@@ -45,7 +45,7 @@ class BDD2Dot
     /// restrictions
     void aux_output_bdd(ATermAppl a_bdd)
     {
-      if (ATtableGet(f_visited, (ATerm) a_bdd))
+      if (f_visited.count(a_bdd)>0)  // a_bdd has already been visited.
       {
         return;
       }
@@ -64,8 +64,8 @@ class BDD2Dot
         ATermAppl v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         aux_output_bdd(v_true_branch);
         aux_output_bdd(v_false_branch);
-        int v_true_number = ATgetInt((ATermInt) ATtableGet(f_visited, (ATerm) v_true_branch));
-        int v_false_number = ATgetInt((ATermInt) ATtableGet(f_visited, (ATerm) v_false_branch));
+        int v_true_number = f_visited[v_true_branch].value();
+        int v_false_number = f_visited[v_false_branch].value();
         ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
         f_dot_file << "  " << f_node_number << " [label=\"" << mcrl2::core::pp(v_guard) << "\"];" << std::endl;
         f_dot_file << "  " << f_node_number << " -> " << v_true_number << ";" << std::endl;
@@ -75,7 +75,7 @@ class BDD2Dot
       {
         f_dot_file << "  " << f_node_number << " [shape=box, label=\"" << mcrl2::core::pp(a_bdd) << "\"];" << std::endl;
       }
-      ATtablePut(f_visited, (ATerm) a_bdd, (ATerm) ATmakeInt(f_node_number++));
+      f_visited[a_bdd]= atermpp::aterm_int(f_node_number++);
     }
 
   public:
@@ -89,14 +89,14 @@ class BDD2Dot
     /// \param a_file_name A file name.
     void output_bdd(ATermAppl a_bdd, char const* a_file_name)
     {
-      f_visited = ATtableCreate(200,75);
+      // f_visited = ATtableCreate(200,75);
       f_node_number = 0;
       f_dot_file.open(a_file_name);
       f_dot_file << "digraph BDD {" << std::endl;
       aux_output_bdd(a_bdd);
       f_dot_file << "}" << std::endl;
       f_dot_file.close();
-      ATtableDestroy(f_visited);
+      // ATtableDestroy(f_visited);
     }
 };
 

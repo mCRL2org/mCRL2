@@ -101,11 +101,11 @@ class BDD_Prover: public Prover
 
     /// \brief A hashtable that maps formulas to BDDs.
     /// \brief If the BDD of a formula is unknown, it maps this formula to 0.
-    ATermTable f_formula_to_bdd;
+    atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_formula_to_bdd;
 
     /// \brief A hashtable that maps formulas to the smallest guard occuring in those formulas.
     /// \brief If the smallest guard of a formula is unknown, it maps this formula to 0.
-    ATermTable f_smallest;
+    atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > f_smallest;
 
     /// \brief Class that provides information about the structure of BDDs.
     BDD_Info f_bdd_info;
@@ -119,8 +119,8 @@ class BDD_Prover: public Prover
     /// \brief Constructs the EQ-BDD corresponding to the formula Prover::f_formula.
     void build_bdd()
     {
-      f_formula_to_bdd = ATtableCreate(60000, 25);
-      f_smallest = ATtableCreate(2000, 50);
+      // f_formula_to_bdd = ATtableCreate(60000, 25);
+      // f_smallest = ATtableCreate(2000, 50);
       f_deadline = time(0) + f_time_limit;
 
       atermpp::aterm_appl v_previous_1;
@@ -147,8 +147,8 @@ class BDD_Prover: public Prover
       f_bdd = m_rewriter->fromRewriteFormat(f_internal_bdd);
       mCRL2log(log::debug) << "Resulting BDD: " << core::pp( f_bdd) << std::endl;
 
-      ATtableDestroy(f_formula_to_bdd);
-      ATtableDestroy(f_smallest);
+      // ATtableDestroy(f_formula_to_bdd);
+      // ATtableDestroy(f_smallest);
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
@@ -179,10 +179,10 @@ class BDD_Prover: public Prover
         return a_formula;
       }
 
-      ATerm v_pre_bdd = ATtableGet(f_formula_to_bdd, (ATerm)(ATermAppl)a_formula);
-      if (v_pre_bdd)
+      const atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_formula_to_bdd.find(a_formula);
+      if (i!=f_formula_to_bdd.end()) // found
       {
-        return (ATermAppl)v_pre_bdd;
+        return i->second;
       }
 
       atermpp::aterm_appl v_guard = smallest(a_formula);
@@ -212,7 +212,7 @@ class BDD_Prover: public Prover
       mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
 
       atermpp::aterm_appl v_bdd = f_manipulator->make_reduced_if_then_else(v_guard, v_term1, v_term2);
-      ATtablePut(f_formula_to_bdd, (ATerm)(ATermAppl)a_formula, (ATerm)(ATermAppl)v_bdd);
+      f_formula_to_bdd[a_formula]=v_bdd;
 
       a_indent.erase(a_indent.size() - 2);
 
@@ -325,24 +325,24 @@ class BDD_Prover: public Prover
         return atermpp::aterm_appl();
       }
 
-      ATermAppl v_result = (ATermAppl)ATtableGet(f_smallest, (ATerm)(ATermAppl)a_formula);
-      if (v_result)
+      const atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl >::const_iterator i = f_smallest.find(a_formula);
+      if (i!=f_smallest.end()) //found
       {
-        return v_result;
+        return i->second;
       }
 
-      size_t i;
+      size_t s;
       size_t v_length;
-      atermpp::aterm_appl v_small;
+      atermpp::aterm_appl v_small,v_result;
 
       v_length = f_info->get_number_of_arguments(a_formula);
 
-      for (i = 0; i < v_length; i++)
+      for (s = 0; s < v_length; s++)
       {
-        v_small = smallest(f_info->get_argument(a_formula, i));
+        v_small = smallest(f_info->get_argument(a_formula, s));
         if (v_small)
         {
-          if (v_result)
+          if (v_result!=atermpp::aterm_appl())
           {
             if (f_info->lpo1(v_result, v_small))
             {
@@ -359,9 +359,9 @@ class BDD_Prover: public Prover
       {
         v_result = a_formula;
       }
-      if (v_result)
+      if (v_result!=atermpp::aterm_appl())
       {
-        ATtablePut(f_smallest, (ATerm)(ATermAppl)a_formula, (ATerm)v_result);
+        f_smallest[a_formula]=v_result;
       }
 
       return v_result;

@@ -22,7 +22,6 @@
 #include <iostream>
 #include "boost/config.hpp"
 
-#include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/aterm/aterm2.h"
@@ -262,13 +261,6 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
 
 RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
-  #ifndef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-    mcrl2_logger::set_reporting_level(quiet, "rewrite_internal");
-  #else
-    #undef MCRL2_MAX_LOG_LEVEL
-    #define MCRL2_MAX_LOG_LEVEL log_debug5
-  #endif
-
   ATermList n;
   ATermInt i;
 
@@ -584,7 +576,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
 
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,atermpp::aterm, arity);
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATermAppl, arity);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity);
 
     if (head_arity > 0)
     {
@@ -595,14 +587,13 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
       rewritten[i] = atermpp::aterm();
       if (i < head_arity+1)
       {
-        args[i] = ATAgetArgument((ATermAppl) head,i);
+        args[i] = head(i);
       }
       else
       {
         args[i] = ATAgetArgument(term,i-head_arity);
       }
     }
-
     if (ATisInt((ATerm)op) && ((strat = jitty_strat[ATgetInt((ATermInt)(ATerm)op)]) != NULL))
     {
       for (; !ATisEmpty(strat); strat=ATgetNext(strat))
@@ -808,7 +799,6 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
      const atermpp::aterm_appl term,
      mutable_map_substitution<atermpp::map < variable, atermpp::aterm_appl> > &sigma)
 {
-  mcrl2_logger::indent();
   if (need_rebuild)
   {
     for( atermpp::map< ATermInt, ATermList >::iterator opids = jitty_eqns.begin()
@@ -823,12 +813,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
     }
     need_rebuild = false;
   }
-  mCRL2log(debug2, "rewrite_internal") << "rewrite(" << atermpp::aterm(fromInner(term)) << ")" << std::endl;
-  atermpp::aterm_appl aaa=rewrite_aux(term, sigma);
 
-  mCRL2log(debug2, "rewrite_internal") << "return(" << atermpp::aterm(fromInner(aaa)) << ")" << std::endl;
-  mcrl2_logger::unindent();
-  return aaa;
+  return rewrite_aux(term, sigma);
 }
 
 RewriteStrategy RewriterJitty::getStrategy()

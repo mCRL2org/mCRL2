@@ -50,7 +50,7 @@ class Induction
     ATermIndexedSet f_list_variables;
 
     /// \brief
-    ATermTable f_lists_to_sorts;
+    atermpp::map < variable, sort_expression > f_lists_to_sorts;
 
     /// \brief
     BDD_Info f_bdd_info;
@@ -82,30 +82,26 @@ class Induction
     /// \brief
     void map_lists_to_sorts()
     {
-      ATermList v_list_variables;
-      ATermAppl v_list_variable;
-      ATermAppl v_sort;
-
-      v_list_variables = ATindexedSetElements(f_list_variables);
+      variable_list v_list_variables = ATindexedSetElements(f_list_variables);
       while (!ATisEmpty(v_list_variables))
       {
-        v_list_variable = ATAgetFirst(v_list_variables);
-        v_list_variables = ATgetNext(v_list_variables);
-        v_sort = get_sort_of_list_elements(v_list_variable);
-        ATtablePut(f_lists_to_sorts, (ATerm) v_list_variable, (ATerm) v_sort);
+        const variable v_list_variable = v_list_variables.front();
+        v_list_variables = pop_front(v_list_variables);
+        const sort_expression v_sort = get_sort_of_list_elements(v_list_variable);
+        f_lists_to_sorts[v_list_variable]=v_sort;
       }
     }
 
     /// \brief
-    ATermAppl get_sort_of_list_elements(ATermAppl a_list_variable)
+    sort_expression get_sort_of_list_elements(const variable a_list_variable)
     {
       ATermList v_constructors;
       ATermAppl v_constructor;
       ATermAppl v_constructor_name;
       sort_expression v_constructor_sort;
-      ATermAppl v_constructor_element_sort;
-      ATermAppl v_list_sort;
-      ATermAppl v_result = 0;
+      sort_expression v_constructor_element_sort;
+      sort_expression v_list_sort;
+      sort_expression v_result;
 
       v_constructors = f_constructors;
       v_list_sort = data_expression(a_list_variable).sort();
@@ -134,20 +130,20 @@ class Induction
     }
 
     /// \brief
-    ATermAppl get_fresh_dummy(ATermAppl a_sort)
+    variable get_fresh_dummy(const sort_expression a_sort)
     {
-      ATermAppl v_result;
+      variable v_result;
       do
       {
         char* v_dummy_string = (char*) malloc((utilities::NrOfChars(f_fresh_dummy_number) + 6) * sizeof(char));
         sprintf(v_dummy_string, "dummy%d", f_fresh_dummy_number);
         ATermAppl v_dummy_name = core::detail::gsString2ATermAppl(v_dummy_string);
-        v_result = core::detail::gsMakeDataVarId(v_dummy_name, a_sort);
+        v_result = variable(v_dummy_name, a_sort);
         free(v_dummy_string);
         v_dummy_string = 0;
         f_fresh_dummy_number++;
       }
-      while (gsOccurs((ATerm) v_result, (ATerm) f_formula));
+      while (gsOccurs((ATerm)(ATermAppl) v_result, (ATerm) f_formula));
       return v_result;
     }
 
@@ -155,18 +151,18 @@ class Induction
     /// \brief
     ATermAppl apply_induction_one()
     {
-      ATermAppl v_induction_variable;
-      ATermAppl v_induction_variable_sort;
-      ATermAppl v_dummy_variable;
-      ATermAppl v_dummy_sort;
+      variable v_induction_variable;
+      sort_expression v_induction_variable_sort;
+      variable v_dummy_variable;
+      sort_expression v_dummy_sort;
       ATermAppl v_substitution;
       ATermList v_substitution_list;
       ATermAppl v_base_case;
       ATermAppl v_induction_step;
       ATermAppl v_result;
 
-      v_induction_variable = ATAgetFirst(ATindexedSetElements(f_list_variables));
-      v_induction_variable_sort = data_expression(v_induction_variable).sort();
+      v_induction_variable = variable_list(ATindexedSetElements(f_list_variables)).front();
+      v_induction_variable_sort = v_induction_variable.sort();
 
       v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
       v_dummy_variable = get_fresh_dummy(v_dummy_sort);
@@ -215,19 +211,19 @@ class Induction
     }
 
     /// \brief
-    ATermList create_clauses(ATermAppl a_formula,
-                             ATermAppl a_hypothesis,
-                             int a_variable_number,
-                             int a_number_of_variables,
-                             ATermList a_list_of_variables,
-                             ATermList a_list_of_dummies)
+    ATermList create_clauses(const atermpp::aterm_appl a_formula,
+                             const atermpp::aterm_appl a_hypothesis,
+                             const size_t a_variable_number,
+                             const size_t a_number_of_variables,
+                             const variable_list a_list_of_variables,
+                             const variable_list a_list_of_dummies)
     {
-      ATermAppl v_variable = (ATermAppl) ATindexedSetGetElem(f_list_variables, a_variable_number);
-      ATermAppl v_variable_sort = data_expression(v_variable).sort();
-      ATermList v_list_of_variables = ATinsert(a_list_of_variables, (ATerm) v_variable);
-      ATermAppl v_dummy_sort = get_sort_of_list_elements(v_variable);
-      ATermAppl v_dummy = get_fresh_dummy(v_dummy_sort);
-      ATermList v_list_of_dummies = ATinsert(a_list_of_dummies, (ATerm) v_dummy);
+      const variable v_variable = variable(ATindexedSetGetElem(f_list_variables, a_variable_number));
+      const sort_expression v_variable_sort = data_expression(v_variable).sort();
+      const variable_list v_list_of_variables = push_front(a_list_of_variables, v_variable);
+      const sort_expression v_dummy_sort = get_sort_of_list_elements(v_variable);
+      const variable v_dummy = get_fresh_dummy(v_dummy_sort);
+      const variable_list v_list_of_dummies = push_front(a_list_of_dummies, v_dummy);
       ATermAppl v_substitution = gsMakeSubst_Appl(v_variable, sort_list::cons_(data_expression(v_dummy).sort(), data_expression(v_dummy), data_expression(v_variable)));
       ATermList v_substitution_list = ATmakeList1((ATerm) v_substitution);
       ATermAppl v_formula_1 = gsSubstValues_Appl(v_substitution_list, a_formula, true);
@@ -256,7 +252,7 @@ class Induction
     Induction(const data_specification& a_data_spec)
     {
       f_list_variables = ATindexedSetCreate(50, 75);
-      f_lists_to_sorts = ATtableCreate(50, 75);
+      // f_lists_to_sorts = ATtableCreate(50, 75);
 
       // f_constructors = reinterpret_cast< ATermList >(static_cast< ATermAppl >(atermpp::arg2(a_data_spec)));
       f_constructors=atermpp::convert< atermpp::aterm_list > (a_data_spec.constructors());
@@ -267,7 +263,7 @@ class Induction
     ~Induction()
     {
       ATindexedSetDestroy(f_list_variables);
-      ATtableDestroy(f_lists_to_sorts);
+      // ATtableDestroy(f_lists_to_sorts);
     }
 
     /// \brief
