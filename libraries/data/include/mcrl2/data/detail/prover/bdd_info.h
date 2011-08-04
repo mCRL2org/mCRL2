@@ -16,6 +16,13 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/standard.h"
 
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
+
 /// \brief The class BDD_Info provides information about the structure of binary decision diagrams.
 class BDD_Info
 {
@@ -25,25 +32,25 @@ class BDD_Info
     /// \brief Method that returns the guard of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The guard at the root of the BDD.
-    inline ATermAppl get_guard(ATermAppl a_bdd)
+    inline mcrl2::data::data_expression get_guard(const mcrl2::data::data_expression a_bdd)
     {
-      return ATAgetFirst(ATLgetArgument(a_bdd, 1));
+      return application(a_bdd).argument(0);
     }
 
     /// \brief Method that returns the true-branch of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The true-branch of the BDD.
-    inline ATermAppl get_true_branch(ATermAppl a_bdd)
+    inline mcrl2::data::data_expression get_true_branch(const mcrl2::data::data_expression  a_bdd)
     {
-      return ATAgetFirst(ATgetNext(ATLgetArgument(a_bdd, 1)));
+      return application(a_bdd).argument(1);  //ATAgetFirst(ATgetNext(ATLgetArgument(a_bdd, 1)));
     }
 
     /// \brief Method that returns the false-branch of a BDD.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return The false-branch of the BDD.
-    inline ATermAppl get_false_branch(ATermAppl a_bdd)
+    inline mcrl2::data::data_expression get_false_branch(const mcrl2::data::data_expression a_bdd)
     {
-      return ATAgetFirst(ATgetNext(ATgetNext(ATLgetArgument(a_bdd, 1))));
+      return application(a_bdd).argument(2);
     }
 
     /// \brief Method that indicates whether or not a BDD equals true.
@@ -73,5 +80,9 @@ class BDD_Info
       return mcrl2::data::is_if_application(mcrl2::data::data_expression(a_bdd));
     }
 };
+
+}
+}
+}
 
 #endif

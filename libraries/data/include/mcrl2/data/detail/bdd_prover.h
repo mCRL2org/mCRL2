@@ -130,7 +130,7 @@ class BDD_Prover: public Prover
 
       f_internal_bdd = m_rewriter->toRewriteFormat(f_formula);
 
-      f_internal_bdd = m_rewriter->rewrite_internal(atermpp::aterm_appl((ATermAppl)f_internal_bdd),bdd_sigma);
+      f_internal_bdd = m_rewriter->rewrite_internal(f_internal_bdd,bdd_sigma);
       f_internal_bdd = f_manipulator->orient(f_internal_bdd);
 
       mCRL2log(log::debug) << "Formula rewritten and oriented: " << core::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
@@ -198,7 +198,7 @@ class BDD_Prover: public Prover
       atermpp::aterm_appl v_term1, v_term2;
 
       v_term1 = f_manipulator->set_true(a_formula, v_guard);
-      v_term1 = m_rewriter->rewrite_internal(atermpp::aterm_appl((ATermAppl)v_term1),bdd_sigma);
+      v_term1 = m_rewriter->rewrite_internal(v_term1,bdd_sigma);
       v_term1 = f_manipulator->orient(v_term1);
       mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
       v_term1 = bdd_down(v_term1, a_indent);
@@ -368,22 +368,22 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Returns branch of the BDD a_bdd, depending on the polarity a_polarity.
-    ATermAppl get_branch(ATermAppl a_bdd, bool a_polarity)
+    data_expression get_branch(const data_expression a_bdd, const bool a_polarity)
     {
-      ATermAppl v_result;
+      data_expression v_result;
 
       if (f_bdd_info.is_if_then_else(a_bdd))
       {
-        ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
-        ATermAppl v_true_branch = f_bdd_info.get_true_branch(a_bdd);
-        ATermAppl v_false_branch = f_bdd_info.get_false_branch(a_bdd);
-        ATermAppl v_branch = get_branch(v_true_branch, a_polarity);
-        if (v_branch == 0)
+        data_expression v_guard = f_bdd_info.get_guard(a_bdd);
+        data_expression v_true_branch = f_bdd_info.get_true_branch(a_bdd);
+        data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
+        data_expression v_branch = get_branch(v_true_branch, a_polarity);
+        if (v_branch == atermpp::aterm_appl())
         {
           v_branch = get_branch(v_false_branch, a_polarity);
-          if (v_branch == 0)
+          if (v_branch == data_expression())
           {
-            v_result = 0;
+            v_result = data_expression();
           }
           else
           {
@@ -404,7 +404,7 @@ class BDD_Prover: public Prover
         }
         else
         {
-          v_result = 0;
+          v_result = data_expression();
         }
       }
       return v_result;
@@ -512,9 +512,9 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Returns all the guards on a path in the BDD that leads to a leaf labelled "true", if such a leaf exists.
-    virtual ATermAppl get_witness()
+    virtual atermpp::aterm_appl get_witness()
     {
-      ATermAppl v_result;
+      atermpp::aterm_appl v_result;
 
       update_answers();
       if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes))
@@ -531,9 +531,9 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Returns all the guards on a path in the BDD that leads to a leaf labelled "false", if such a leaf exists.
-    virtual ATermAppl get_counter_example()
+    virtual atermpp::aterm_appl get_counter_example()
     {
-      ATermAppl v_result;
+      atermpp::aterm_appl v_result;
 
       update_answers();
       if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes))

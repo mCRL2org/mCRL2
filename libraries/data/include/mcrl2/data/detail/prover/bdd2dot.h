@@ -18,6 +18,13 @@
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 
+namespace mcrl2
+{
+namespace data
+{
+namespace detail
+{
+
 /// \brief The class BDD2Dot offers the ability to write binary decision diagrams to dot files.
 /// The method BDD2Dot::output_bdd receives a binary decision diagram as parameter a_bdd and writes it to a file in dot
 /// format with the name passed as parameter a_file_name.
@@ -43,7 +50,7 @@ class BDD2Dot
     /// following restrictions: It either represents the constant true or the constant false, or it is an if-then-else
     /// expression with an expression of Bool as guard, and a then-branch and an else-branch that again follow these
     /// restrictions
-    void aux_output_bdd(ATermAppl a_bdd)
+    void aux_output_bdd(const data_expression a_bdd)
     {
       if (f_visited.count(a_bdd)>0)  // a_bdd has already been visited.
       {
@@ -60,13 +67,13 @@ class BDD2Dot
       }
       else if (f_bdd_info.is_if_then_else(a_bdd))
       {
-        ATermAppl v_true_branch = f_bdd_info.get_true_branch(a_bdd);
-        ATermAppl v_false_branch = f_bdd_info.get_false_branch(a_bdd);
+        const data_expression v_true_branch = f_bdd_info.get_true_branch(a_bdd);
+        const data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         aux_output_bdd(v_true_branch);
         aux_output_bdd(v_false_branch);
         int v_true_number = f_visited[v_true_branch].value();
         int v_false_number = f_visited[v_false_branch].value();
-        ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
+        const data_expression v_guard = f_bdd_info.get_guard(a_bdd);
         f_dot_file << "  " << f_node_number << " [label=\"" << mcrl2::core::pp(v_guard) << "\"];" << std::endl;
         f_dot_file << "  " << f_node_number << " -> " << v_true_number << ";" << std::endl;
         f_dot_file << "  " << f_node_number << " -> " << v_false_number << " [style=dashed];" << std::endl;
@@ -87,17 +94,19 @@ class BDD2Dot
     /// restrictions
     /// \param a_bdd A binary decision diagram.
     /// \param a_file_name A file name.
-    void output_bdd(ATermAppl a_bdd, char const* a_file_name)
+    void output_bdd(const data_expression a_bdd, char const* a_file_name)
     {
-      // f_visited = ATtableCreate(200,75);
       f_node_number = 0;
       f_dot_file.open(a_file_name);
       f_dot_file << "digraph BDD {" << std::endl;
       aux_output_bdd(a_bdd);
       f_dot_file << "}" << std::endl;
       f_dot_file.close();
-      // ATtableDestroy(f_visited);
     }
 };
+
+}
+}
+}
 
 #endif

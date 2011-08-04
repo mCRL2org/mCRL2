@@ -181,7 +181,7 @@ class Confluence_Checker
     mcrl2::data::detail::BDD_Prover f_bdd_prover;
 
     /// \brief Class that prints BDDs in dot format.
-    BDD2Dot f_bdd2dot;
+    mcrl2::data::detail::BDD2Dot f_bdd2dot;
 
     /// \brief A linear process specification.
     const mcrl2::lps::specification& f_lps;

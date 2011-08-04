@@ -76,7 +76,7 @@ class Invariant_Checker
 {
   private:
     mcrl2::data::detail::BDD_Prover f_bdd_prover;
-    BDD2Dot f_bdd2dot;
+    mcrl2::data::detail::BDD2Dot f_bdd2dot;
     process_initializer f_init;
     action_summand_vector f_summands;
     bool f_counter_example;

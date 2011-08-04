@@ -13,6 +13,8 @@
 #define BDD_PATH_ELIMINATOR_H
 
 #include <iostream> // For streaming operators
+#include <algorithm>
+#include <iterator>
 #include <cstring>
 
 #include "mcrl2/aterm/aterm2.h"
@@ -114,47 +116,45 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \brief Class that can be used to manipulate BDDs.
     BDD_Manipulator f_bdd_manipulator;
 
-    /// \brief Class that provides information about expressions.
-    Expression_Info f_expression_info;
-
     /// \brief Returns a list representing the conjunction of all guards in a_path and the guard a_guard.
     /// \param a_path A list of guards and negated guards, representing a path in a BDD.
     /// \param a_guard A guard or a negated guard.
     /// \param a_minimal A boolean value indicating whether or not minimal sets of possibly inconsistent guards are constructed.
-    ATermList create_condition(ATermList a_path, ATermAppl a_guard, bool a_minimal)
+    data_expression_list create_condition(
+               data_expression_list a_path, 
+               const data_expression a_guard, 
+               bool a_minimal)
     {
       if (!a_minimal)
       {
-        return ATinsert(a_path, (ATerm) a_guard);
+        return push_front(a_path, a_guard);
       }
       else
       {
-        ATermList v_set;
-        ATermList v_auxiliary_set;
-        ATermList v_iterate_over_set;
-        ATermList v_iterate_over_path;
-        ATermAppl v_guard_from_set;
-        ATermAppl v_guard_from_path;
+        data_expression_list v_auxiliary_set;
+        data_expression_list v_iterate_over_set;
+        data_expression_list v_iterate_over_path;
+        data_expression v_guard_from_set;
+        data_expression v_guard_from_path;
 
-        v_set = ATmakeList1((ATerm) a_guard);
-        v_auxiliary_set = ATmakeList0();
+        data_expression_list v_set(a_guard);
         while (v_set != v_auxiliary_set)
         {
           v_auxiliary_set = v_set;
           v_iterate_over_set = v_set;
-          while (!ATisEmpty(v_iterate_over_set))
+          while (!v_iterate_over_set.empty())
           {
-            v_guard_from_set = ATAgetFirst(v_iterate_over_set);
-            v_iterate_over_set = ATgetNext(v_iterate_over_set);
+            v_guard_from_set = v_iterate_over_set.front();
+            v_iterate_over_set = pop_front(v_iterate_over_set);
             v_iterate_over_path = a_path;
-            while (!ATisEmpty(v_iterate_over_path))
+            while (!v_iterate_over_path.empty())
             {
-              v_guard_from_path = ATAgetFirst(v_iterate_over_path);
-              v_iterate_over_path = ATgetNext(v_iterate_over_path);
+              v_guard_from_path = v_iterate_over_path.front();
+              v_iterate_over_path = pop_front(v_iterate_over_path);
               if (variables_overlap(v_guard_from_set, v_guard_from_path))
               {
-                v_set = ATinsert(v_set, (ATerm) v_guard_from_path);
-                a_path = ATremoveElement(a_path, (ATerm) v_guard_from_path);
+                v_set = push_front(v_set, v_guard_from_path);
+                a_path = ATremoveElement((ATermList)a_path, (ATerm)(ATermAppl) v_guard_from_path);
               }
             }
           }
@@ -167,7 +167,7 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \brief a_path are inconsistent are removed.
     /// \param a_bdd A binary decision diagram.
     /// \param a_path A list of guards and negated guards, representing a path in a BDD.
-    ATermAppl aux_simplify(ATermAppl a_bdd, ATermList a_path)
+    data_expression aux_simplify(const data_expression a_bdd, const data_expression_list a_path)
     {
       if (f_deadline != 0 && (f_deadline - time(0)) < 0)
       {
@@ -180,28 +180,28 @@ class BDD_Path_Eliminator: public BDD_Simplifier
         return a_bdd;
       }
 
-      ATermAppl v_guard = f_bdd_info.get_guard(a_bdd);
-      ATermAppl v_negated_guard = sort_bool::not_(data_expression(v_guard));
-      ATermList v_true_condition = create_condition(a_path, v_guard, true);
+      const data_expression v_guard = f_bdd_info.get_guard(a_bdd);
+      const data_expression v_negated_guard = sort_bool::not_(v_guard);
+      const data_expression_list v_true_condition = create_condition(a_path, v_guard, true);
       bool v_true_branch_enabled = f_smt_solver->is_satisfiable(v_true_condition);
       if (!v_true_branch_enabled)
       {
-        ATermList v_false_path = ATinsert(a_path, (ATerm) v_negated_guard);
+        data_expression_list v_false_path = push_front(a_path, v_negated_guard);
         return aux_simplify(f_bdd_info.get_false_branch(a_bdd), v_false_path);
       }
       else
       {
-        ATermList v_false_condition = create_condition(a_path, v_negated_guard, true);
+        data_expression_list v_false_condition = create_condition(a_path, v_negated_guard, true);
         bool v_false_branch_enabled = f_smt_solver->is_satisfiable(v_false_condition);
         if (!v_false_branch_enabled)
         {
-          ATermList v_true_path = ATinsert(a_path, (ATerm) v_guard);
+          data_expression_list v_true_path = push_front(a_path, v_guard);
           return aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path);
         }
         else
         {
-          ATermList v_true_path = ATinsert(a_path, (ATerm) v_guard);
-          ATermList v_false_path = ATinsert(a_path, (ATerm) v_negated_guard);
+          data_expression_list v_true_path = push_front(a_path, v_guard);
+          data_expression_list v_false_path = push_front(a_path, v_negated_guard);
           return f_bdd_manipulator.make_reduced_if_then_else(
                    v_guard,
                    aux_simplify(f_bdd_info.get_true_branch(a_bdd), v_true_path),
@@ -214,29 +214,15 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// \brief Returns true if the expression a_expression_1 has variables in common with expression a_expression_2.
     /// \param a_expression_1 An arbitrary expression.
     /// \param a_expression_2 An arbitrary expression.
-    bool variables_overlap(ATermAppl a_expression_1, ATermAppl a_expression_2)
+    bool variables_overlap(const data_expression a_expression_1, const data_expression a_expression_2)
     {
-      if (core::detail::gsIsOpId(a_expression_1))
-      {
-        return false;
-      }
-      else if (core::detail::gsIsDataVarId(a_expression_1))
-      {
-        return gsOccurs((ATerm) a_expression_1, (ATerm) a_expression_2);
-      }
-      else
-      {
-        assert(data::is_application(a_expression_1));
-        data::application a = data::application(data::data_expression(a_expression_1));
-        for (data_expression_list::const_iterator i = a.arguments().begin(); i != a.arguments().end(); ++i)
-        {
-          if (variables_overlap(*i, a_expression_2))
-          {
-            return true;
-          }
-        }
-        return false;
-      }
+      std::set < variable > set1=find_variables(a_expression_1);
+      std::set < variable > set2=find_variables(a_expression_2);
+      std::set < variable > intersection;
+      std::set_intersection(set1.begin(),set1.end(),
+                            set2.begin(),set2.end(),
+                            std::insert_iterator<std::set < variable > >(intersection,intersection.begin()));
+      return !intersection.empty();
     }
 
   public:
@@ -278,9 +264,9 @@ class BDD_Path_Eliminator: public BDD_Simplifier
     /// expression with an expression of sort Bool  as guard, and a then-branch and an else-branch that again follow
     /// these restrictions
     /// \param a_bdd A binary decision diagram.
-    virtual ATermAppl simplify(ATermAppl a_bdd)
+    virtual data_expression simplify(const data_expression a_bdd)
     {
-      return aux_simplify(a_bdd, ATmakeList0());
+      return aux_simplify(a_bdd, data_expression_list());
     }
 };
 
