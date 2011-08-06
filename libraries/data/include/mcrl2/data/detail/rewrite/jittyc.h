@@ -42,7 +42,6 @@ class RewriterCompilingJitty: public Rewriter
     atermpp::aterm_appl rewrite_internal(
          const atermpp::aterm_appl term,
          mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
-    // ATermList rewriteInternalList(ATermList Terms);
 
     atermpp::aterm_appl toRewriteFormat(const data_expression term);
     data_expression fromRewriteFormat(const atermpp::aterm_appl term);
@@ -50,21 +49,21 @@ class RewriterCompilingJitty: public Rewriter
     bool removeRewriteRule(const data_equation rule);
 
   private:
-    atermpp::map < atermpp::aterm_int, ATermList> tmp_eqns;
+    atermpp::set < data_equation > rewrite_rules;
     bool need_rebuild;
     bool made_files;
 
-    ATermInt true_inner;
+    atermpp::aterm_int true_inner;
     int true_num;
 
-    ATermList* jittyc_eqns;
+    atermpp::vector < data_equation_list >  jittyc_eqns;
 
     std::map < int,int> int2ar_idx;
     size_t ar_size;
     ATermAppl* ar;
     ATermAppl build_ar_expr(ATerm expr, ATermAppl var);
-    ATermAppl build_ar_expr_aux(ATermList eqn, size_t arg, size_t arity);
-    ATermAppl build_ar_expr(ATermList eqns, size_t arg, size_t arity);
+    ATermAppl build_ar_expr_aux(const data_equation eqn, const size_t arg, const size_t arity);
+    ATermAppl build_ar_expr(const data_equation_list eqns, const size_t arg, const size_t arity);
     bool always_rewrite_argument(const atermpp::aterm_int opid, const size_t arity, const size_t arg);
     bool calc_ar(ATermAppl expr);
     void fill_always_rewrite_array();
@@ -76,9 +75,9 @@ class RewriterCompilingJitty: public Rewriter
     void (*so_rewr_cleanup)();
     atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl,mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &);
 
-    void add_base_nfs(nfs_array &a, ATermInt opid, size_t arity);
-    void extend_nfs(nfs_array &a, ATermInt opid, size_t arity);
-    bool opid_is_nf(ATermInt opid, size_t num_args);
+    void add_base_nfs(nfs_array &a, const atermpp::aterm_int opid, size_t arity);
+    void extend_nfs(nfs_array &a, const atermpp::aterm_int opid, size_t arity);
+    bool opid_is_nf(const atermpp::aterm_int opid, size_t num_args);
     void calc_nfs_list(nfs_array &a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
     bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
     std::string calc_inner_terms(nfs_array &nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array *rewr);

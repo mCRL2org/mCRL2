@@ -565,15 +565,11 @@ void initialize_internal_translation_table_rewriter()
 {
 }
 
-atermpp::aterm OpId2Int(const data_expression term, bool add_opids)
+atermpp::aterm_int OpId2Int(const function_symbol term)
 {
   atermpp::map< data_expression, atermpp::aterm_int >::iterator f = term2int().find(term);
   if (f == term2int().end())
   {
-    if (!add_opids)
-    {
-      return term;
-    }
     const size_t num_opids=get_num_opids();
     atermpp::aterm_int i(num_opids);
     term2int()[term] =  i;
@@ -601,7 +597,7 @@ atermpp::aterm OpId2Int(const data_expression term, bool add_opids)
   return j;
 } 
 
-atermpp::aterm_appl toInnerc(const data_expression term, const bool add_opids)
+atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
 {
 
   assert(!gsIsNil((ATermAppl)term)); // Originally Nil was returned unchanged, but is hopefully not used anymore. JFG
@@ -613,7 +609,7 @@ atermpp::aterm_appl toInnerc(const data_expression term, const bool add_opids)
   else if (is_application(term))
   {
     atermpp::term_list <atermpp::aterm_appl> l;
-    atermpp::aterm_appl arg0 = toInnerc(application(term).head(), add_opids);
+    atermpp::aterm_appl arg0 = toInner(application(term).head(), add_opids);
     // Reflect the way of encoding the other arguments!
     // if (gsIsNil(arg0) || gsIsDataVarId(arg0))
     if (is_variable(arg0))
@@ -631,52 +627,18 @@ atermpp::aterm_appl toInnerc(const data_expression term, const bool add_opids)
     const data_expression_list args=application(term).arguments();
     for (data_expression_list::const_iterator i=args.begin(); i!=args.end(); ++i) 
     {
-      l = push_front(l, toInnerc(*i,add_opids));
+      l = push_front(l, toInner(*i,add_opids));
     }
     l = reverse(l);
     return Apply(l);
   }
-  else if (gsIsOpId(term))
+  else if (is_function_symbol(term))
   {
-    // l = ATinsert(l,(ATerm) OpId2Int(term,add_opids));
-    return Apply0((ATerm)OpId2Int(term,add_opids));
+    return Apply0(OpId2Int(term));
   }
   else
   {
     return Apply0((ATerm)(ATermAppl)term);
-  }
-}
-
-ATerm toInner(ATermAppl Term, bool add_opids)
-{
-  if (gsIsDataAppl(Term))
-  {
-    ATermList l = ATmakeList0();
-    for (ATermList args = ATLgetArgument((ATermAppl) Term, 1) ; !ATisEmpty(args) ; args = ATgetNext(args))
-    {
-      l = ATinsert(l,(ATerm) toInner((ATermAppl) ATgetFirst(args),add_opids));
-    }
-
-    l = ATreverse(l);
-
-    ATerm arg0 = toInner(ATAgetArgument((ATermAppl) Term, 0), add_opids);
-    if (ATisList(arg0))
-    {
-      l = ATconcat((ATermList) arg0, l);
-    }
-    else
-    {
-      l = ATinsert(l, arg0);
-    }
-    return (ATerm) l;
-  }
-  else if (gsIsOpId(Term))
-  {
-    return (ATerm)OpId2Int(data_expression(Term),add_opids);
-  }
-  else
-  {
-    return (ATerm) Term;
   }
 }
 

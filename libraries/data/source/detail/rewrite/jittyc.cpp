@@ -161,6 +161,9 @@ static void finalise_common()
 #define is_ar_or(x) (ATisEqualAFun(ATgetAFun(x),afunARor))
 #define is_ar_var(x) (ATisEqualAFun(ATgetAFun(x),afunARvar))
 
+// Prototype
+static ATerm toInner_list_odd(ATermAppl Term);
+
 static ATermAppl make_ar_true()
 {
   return ar_true;
@@ -267,7 +270,7 @@ atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expressio
 {
   size_t old_opids = get_num_opids();
 
-  atermpp::aterm_appl r = toInnerc(t,true); 
+  atermpp::aterm_appl r = toInner(t,true); 
 
   if (old_opids != get_num_opids())
   {
@@ -280,39 +283,6 @@ atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expressio
 data_expression RewriterCompilingJitty::fromRewriteFormat(const atermpp::aterm_appl t)
 {
   return fromInner(t);
-
-  /* if (ATisInt((ATerm)(ATermAppl)t))
-  {
-    return get_int2term(ATgetInt((ATermInt)(ATerm)(ATermAppl) t));
-  }
-  else if (gsIsDataVarId((ATermAppl) t))
-  {
-    return (ATermAppl) t;
-  }
-
-  ATermAppl a = fromRewriteFormat(ATgetArgument((ATermAppl) t, 0));
-  assert(gsIsOpId(a) || gsIsDataVarId(a));
-
-  int i = 1;
-  int arity = ATgetArity(ATgetAFun((ATermAppl) t));
-  ATermAppl sort = ATAgetArgument(a, 1);
-  while (is_function_sort(sort_expression(sort)) && (i < arity))
-  {
-    ATermList sort_dom = ATLgetArgument(sort, 0);
-    ATermList list = ATmakeList0();
-    while (!ATisEmpty(sort_dom))
-    {
-      assert(i < arity);
-      list = ATinsert(list, (ATerm) fromRewriteFormat(ATgetArgument((ATermAppl) t,i)));
-      sort_dom = ATgetNext(sort_dom);
-      ++i;
-    }
-    list = ATreverse(list);
-    a = gsMakeDataAppl(a, list);
-    sort = ATAgetArgument(sort, 1);
-  }
-
-  return a; */
 }
 
 static char* whitespace_str = NULL;
@@ -438,12 +408,12 @@ static ATermList get_used_vars(ATerm t)
   return l;
 }
 
-static ATermList create_sequence(ATermList rule, int* var_cnt, ATermInt true_inner)
+static ATermList create_sequence(const data_equation rule, int* var_cnt, ATermInt true_inner)
 {
-  ATermAppl pat = (ATermAppl) ATelementAt(rule,2);
+  ATermAppl pat = toInner(rule.lhs(),true);
   int pat_arity = ATgetArity(ATgetAFun(pat));
-  ATerm cond = ATelementAt(rule,1);
-  ATerm rslt = ATelementAt(rule,3);
+  ATerm cond = toInner_list_odd(rule.condition());
+  ATerm rslt = toInner_list_odd(rule.rhs());
   ATermList rseq = ATmakeList0();
 
   for (int i=1; i<pat_arity; ++i)
@@ -880,7 +850,7 @@ static ATermAppl build_tree(build_pars pars, int i)
   }
 }
 
-static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATermInt true_inner)
+static ATermAppl create_tree(const data_equation_list rules, int /*opid*/, int /*arity*/, ATermInt true_inner)
 // Create a match tree for OpId int2term[opid] and update the value of
 // *max_vars accordingly.
 //
@@ -898,11 +868,11 @@ static ATermAppl create_tree(ATermList rules, int /*opid*/, int /*arity*/, ATerm
   // bound for the number of variable in the final tree.)
   ATermList rule_seqs = ATmakeList0();
   int total_rule_vars = 0;
-  for (; !ATisEmpty(rules); rules=ATgetNext(rules))
+  for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
 //    if (ATgetArity(ATgetAFun((ATermAppl) ATelementAt((ATermList) ATgetFirst(rules),2))) <= arity+1)
 //    {
-    rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence((ATermList) ATgetFirst(rules),&total_rule_vars, true_inner));
+    rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence(*it,&total_rule_vars, true_inner));
 //    }
   }
 
@@ -1007,16 +977,16 @@ static ATermList get_vars(ATerm a)
   }
 }
 
-static ATermList dep_vars(ATermList eqn)
+static ATermList dep_vars(const data_equation eqn)
 {
-  size_t rule_arity = ATgetArity(ATgetAFun(ATAelementAt(eqn,2)))-1;
+  size_t rule_arity = ATgetArity(ATgetAFun(toInner(eqn.lhs(),true)))-1;
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,rule_arity);
 
-  ATerm cond = ATelementAt(eqn,1);
-  ATermAppl pars = ATAelementAt(eqn,2); // arguments of lhs
+  ATerm cond = toInner_list_odd(eqn.condition());
+  ATermAppl pars = toInner(eqn.lhs(),true); // pars is actually the lhs of the equation.
   ATermList t = ATmakeList0();
   ATermList vars = ATmakeList1((ATerm) ATconcat(
-                                 get_doubles(ATelementAt(eqn,3),t),
+                                 get_doubles(toInner_list_odd(eqn.rhs()),t),
                                  get_vars(cond)
                                )); // List of variables occurring in each argument of the lhs (except the first element which contains variables from the condition and variables which occur more than once in the result)
 
@@ -1087,7 +1057,12 @@ static ATermList dep_vars(ATermList eqn)
   return deps;
 }
 
-static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_array &nfs, ATermInt true_inner)
+static ATermList create_strategy(
+        const data_equation_list rules, 
+        const int opid, 
+        const size_t arity, 
+        nfs_array &nfs, 
+        ATermInt true_inner)
 {
   ATermList strat = ATmakeList0();
 
@@ -1108,19 +1083,19 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
   // Process all (applicable) rules
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(bs,bool,arity);
   ATermList dep_list = ATmakeList0();
-  for (; !ATisEmpty(rules); rules=ATgetNext(rules))
+  for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-    size_t rule_arity = ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(rules),2)))-1;
+    size_t rule_arity = ATgetArity(ATgetAFun(toInner(it->lhs(),true)))-1;
     if (rule_arity > arity)
     {
       continue;
     }
 
-    ATerm cond = ATelementAt(ATLgetFirst(rules),1);
-    ATermAppl pars = ATAelementAt(ATLgetFirst(rules),2); // arguments of lhs
+    ATerm cond = toInner_list_odd(it->condition());
+    ATermAppl pars = toInner(it->lhs(),true);  // the lhs, pars is an odd name.
     ATermList t = ATmakeList0();
     ATermList vars = ATmakeList1((ATerm) ATconcat(
-                                   get_doubles(ATelementAt(ATLgetFirst(rules),3),t),
+                                   get_doubles(toInner_list_odd(it->rhs()),t),
                                    get_vars(cond)
                                  )); // List of variables occurring in each argument of the lhs (except the first element which contains variables from the condition and variables which occur more than once in the result)
 
@@ -1195,30 +1170,30 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
     deps = ATreverse(deps);
 
     // Add rule with its dependencies
-    dep_list = ATinsert(dep_list,(ATerm) ATmakeList2((ATerm) deps,ATgetFirst(rules)));
+    dep_list = ATinsert(dep_list,(ATerm) ATmakeList2((ATerm) deps, (ATerm)(ATermAppl)*it));  
   }
 
   // Process all rules with their dependencies
   while (1)
   {
     // First collect rules without dependencies to the strategy
-    ATermList no_deps = ATmakeList0();
+    data_equation_list no_deps = ATmakeList0();
     ATermList has_deps = ATmakeList0();
     for (; !ATisEmpty(dep_list); dep_list=ATgetNext(dep_list))
     {
       if (ATisEmpty(ATLgetFirst(ATLgetFirst(dep_list))))
       {
-        no_deps = ATinsert(no_deps, ATgetFirst(ATgetNext(ATLgetFirst(dep_list))));
+        no_deps = push_front(no_deps, data_equation(ATgetFirst(ATgetNext(ATLgetFirst(dep_list)))));
       }
       else
       {
-        has_deps = ATinsert(has_deps,ATgetFirst(dep_list));
+        has_deps = ATinsert(has_deps,ATgetFirst(dep_list)); 
       }
     }
     dep_list = ATreverse(has_deps);
 
     // Create and add tree of collected rules
-    if (!ATisEmpty(no_deps))
+    if (!no_deps.empty())
     {
       strat = ATinsert(strat, (ATerm) create_tree(no_deps,opid,arity,true_inner));
     }
@@ -1254,7 +1229,8 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
       ATermList l = ATmakeList0();
       for (; !ATisEmpty(dep_list); dep_list=ATgetNext(dep_list))
       {
-        l = ATinsert(l,(ATerm) ATinsert(ATgetNext(ATLgetFirst(dep_list)),(ATerm) ATremoveElement(ATLgetFirst(ATLgetFirst(dep_list)),(ATerm) rewr_arg)));
+        l = ATinsert(l,(ATerm) ATinsert(ATgetNext(ATLgetFirst(dep_list)),
+                   (ATerm) ATremoveElement(ATLgetFirst(ATLgetFirst(dep_list)),(ATerm) rewr_arg)));
       }
       dep_list = ATreverse(l);
     }
@@ -1263,7 +1239,7 @@ static ATermList create_strategy(ATermList rules, int opid, size_t arity, nfs_ar
   return ATreverse(strat);
 }
 
-void RewriterCompilingJitty::add_base_nfs(nfs_array &nfs, ATermInt opid, size_t arity)
+void RewriterCompilingJitty::add_base_nfs(nfs_array &nfs, const atermpp::aterm_int opid, size_t arity)
 {
   for (size_t i=0; i<arity; i++)
   {
@@ -1274,15 +1250,15 @@ void RewriterCompilingJitty::add_base_nfs(nfs_array &nfs, ATermInt opid, size_t 
   }
 }
 
-void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, ATermInt opid, size_t arity)
+void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, const atermpp::aterm_int opid, size_t arity)
 {
-  ATermList eqns = jittyc_eqns[ATgetInt(opid)];
-  if (eqns == NULL)
+  data_equation_list eqns = (opid.value()<jittyc_eqns.size()?jittyc_eqns[opid.value()]:data_equation_list());
+  if (eqns.empty())
   {
     nfs.fill(arity);
     return;
   }
-  ATermList strat = create_strategy(eqns,ATgetInt(opid),arity,nfs,true_inner);
+  ATermList strat = create_strategy(eqns,opid.value(),arity,nfs,true_inner); 
   while (!ATisEmpty(strat) && ATisInt(ATgetFirst(strat)))
   {
     nfs.set(ATgetInt((ATermInt) ATgetFirst(strat)));
@@ -1291,28 +1267,28 @@ void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, ATermInt opid, size_t ar
 }
 
 // Determine whether the opid is a normal form, with the given number of arguments.
-bool RewriterCompilingJitty::opid_is_nf(ATermInt opid, size_t num_args)
+bool RewriterCompilingJitty::opid_is_nf(const atermpp::aterm_int opid, size_t num_args)
 {
   // First check whether the opid is a forall or an exists with one argument.
   // Then the routines for exists/forall quantifier enumeration must be applied.
   if (num_args==1 && 
-        (function_symbol(get_int2term(ATgetInt(opid))).name() == exists_function_symbol() ||
-         function_symbol(get_int2term(ATgetInt(opid))).name() == forall_function_symbol()))
+        (function_symbol(get_int2term(opid.value())).name() == exists_function_symbol() ||
+         function_symbol(get_int2term(opid.value())).name() == forall_function_symbol()))
   {
     return false;
   }
 
   // Otherwise check whether there are applicable rewrite rules.
-  ATermList l = jittyc_eqns[ATgetInt(opid)];
+  data_equation_list l = (opid.value()<jittyc_eqns.size()?jittyc_eqns[opid.value()]:data_equation_list());
 
-  if (l == NULL)
+  if (l.empty())
   {
     return true;
   }
 
-  for (; !ATisEmpty(l); l=ATgetNext(l))
+  for (data_equation_list::const_iterator it=l.begin(); it!=l.end(); ++it)
   {
-    if (ATgetArity(ATgetAFun(ATAelementAt(ATLgetFirst(l),2)))-1 <= num_args)
+    if (ATgetArity(ATgetAFun(toInner(it->lhs(),true)))-1 <= num_args)
     {
       return false;
     }
@@ -2023,18 +1999,18 @@ ATermAppl RewriterCompilingJitty::build_ar_expr(ATerm expr, ATermAppl var)
   return result;
 }
 
-ATermAppl RewriterCompilingJitty::build_ar_expr_aux(ATermList eqn, size_t arg, size_t arity)
+ATermAppl RewriterCompilingJitty::build_ar_expr_aux(const data_equation eqn, const size_t arg, const size_t arity)
 {
-  ATermAppl pars = ATAelementAt(eqn,2); // arguments of lhs
+  atermpp::aterm_appl lhs = toInner(eqn.lhs(),true); // the lhs in internal format.
 
-  size_t eqn_arity = ATgetArity(ATgetAFun(pars))-1;
+  size_t eqn_arity = ATgetArity(ATgetAFun(lhs))-1;
   if (eqn_arity > arity)
   {
     return make_ar_true();
   }
   if (eqn_arity <= arg)
   {
-    ATerm rhs = ATelementAt(eqn,3);
+    ATerm rhs = toInner_list_odd(eqn.rhs());  // rhs in special internal list format.
     if (ATisInt(rhs))
     {
       int idx = int2ar_idx[atermpp::aterm_int(rhs).value()] + ((arity-1)*arity)/2 + arg;
@@ -2054,7 +2030,7 @@ ATermAppl RewriterCompilingJitty::build_ar_expr_aux(ATermList eqn, size_t arg, s
     }
   }
 
-  ATermAppl arg_term = ATAgetArgument(pars,arg+1);
+  ATermAppl arg_term = ATAgetArgument(lhs,arg+1);
   if (!gsIsDataVarId(arg_term))
   {
     return make_ar_true();
@@ -2065,18 +2041,18 @@ ATermAppl RewriterCompilingJitty::build_ar_expr_aux(ATermList eqn, size_t arg, s
     return make_ar_true();
   }
 
-  return build_ar_expr(ATelementAt(eqn,3),arg_term);
+  return build_ar_expr(toInner_list_odd(eqn.rhs()),arg_term);
 }
 
-ATermAppl RewriterCompilingJitty::build_ar_expr(ATermList eqns, size_t arg, size_t arity)
+ATermAppl RewriterCompilingJitty::build_ar_expr(const data_equation_list eqns, const size_t arg, const size_t arity)
 {
-  if ((eqns == NULL) || ATisEmpty(eqns))
+  if (eqns.empty())
   {
     return make_ar_true();
   }
   else
   {
-    return make_ar_and(build_ar_expr_aux(ATLgetFirst(eqns),arg,arity),build_ar_expr(ATgetNext(eqns),arg,arity));
+    return make_ar_and(build_ar_expr_aux(eqns.front(),arg,arity),build_ar_expr(pop_front(eqns),arg,arity));
   }
 }
 
@@ -2125,16 +2101,16 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   }
   ATprotectArray((ATerm*) ar,ar_size);
 
-  for(std::map < int,int> ::const_iterator it=int2ar_idx.begin();it!=int2ar_idx.end(); ++it)
+  for(std::map <int,int> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
   {
     size_t arity = getArity(get_int2term(it->first));
-    ATermList eqns = jittyc_eqns[it->first];
+    data_equation_list eqns = (it->first<jittyc_eqns.size()?jittyc_eqns[it->first]:data_equation_list());
     int idx = it->second;
     for (size_t i=1; i<=arity; i++)
     {
       for (size_t j=0; j<i; j++)
       {
-        ar[idx+((i-1)*i)/2+j] = build_ar_expr(eqns,j,i);
+        ar[idx+((i-1)*i)/2+j] = build_ar_expr(eqns,j,i); 
       }
     }
   }
@@ -2154,6 +2130,40 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   }
 }
 
+static ATerm toInner_list_odd(ATermAppl Term)
+{
+  if (gsIsDataAppl(Term))
+  {
+    ATermList l = ATmakeList0();
+    for (ATermList args = ATLgetArgument((ATermAppl) Term, 1) ; !ATisEmpty(args) ; args = ATgetNext(args))
+    {
+      l = ATinsert(l,(ATerm) toInner_list_odd((ATermAppl) ATgetFirst(args)));
+    }
+
+    l = ATreverse(l);
+
+    ATerm arg0 = toInner_list_odd(ATAgetArgument((ATermAppl) Term, 0));
+    if (ATisList(arg0))
+    {
+      l = ATconcat((ATermList) arg0, l);
+    }
+    else
+    {
+      l = ATinsert(l, arg0);
+    }
+    return (ATerm) l;
+  }
+  else if (gsIsOpId(Term))
+  { 
+    return (ATerm)(ATermInt)OpId2Int(data_expression(Term));
+  } 
+  else
+  {
+    return (ATerm) Term;
+  }
+}
+
+
 bool RewriterCompilingJitty::addRewriteRule(const data_equation rule)
 {
 
@@ -2167,35 +2177,48 @@ bool RewriterCompilingJitty::addRewriteRule(const data_equation rule)
     return false;
   }
 
-  need_rebuild = true;
+  if (rewrite_rules.insert(rule).second)
+  {  
+    // The equation has been added as a rewrite rule, otherwise the equation was already present.
+    // Add and number new OpIds, if so required.
+    toInner(rule.condition(),true);
+    toInner(rule.lhs(),true);
+    toInner(rule.rhs(),true);
+    need_rebuild = true;
+  }
+  return true;
 
-  atermpp::aterm_appl u = toInnerc(rule.lhs(),true);
+  /* atermpp::aterm_appl u = toInner(rule.lhs(),true);
 
   atermpp::map < atermpp::aterm_int, ATermList>::const_iterator it=tmp_eqns.find(u(0));
   const ATermList n=(it==tmp_eqns.end()?ATmakeList0():it->second);
     
-// ATfprintf(stderr,"TO INNER %t -->\n%t\n",(ATermAppl)rule.rhs(),toInner(rule.rhs(),true));
   tmp_eqns[u(0)]= ATinsert(n,(ATerm) ATmakeList4(
                     (ATerm)(ATermList)rule.variables(),
-                    (ATerm)(ATermAppl)toInner(rule.condition(),true),
+                    (ATerm)(ATermAppl)toInner_list_odd(rule.condition()),
                     (ATerm)(ATermAppl) u,
-                    (ATerm)(ATermAppl) toInner(rule.rhs(),true)));
+                    (ATerm)(ATermAppl) toInner_list_odd(rule.rhs())));
 
-  return true;
+  return true; */
 }
 
-bool RewriterCompilingJitty::removeRewriteRule(const data_equation /*rule*/)
+bool RewriterCompilingJitty::removeRewriteRule(const data_equation rule)
 {
+  if (rewrite_rules.erase(rule)>0) // An equation is erased
+  {  
+    // The equation has been added as a rewrite rule, otherwise the equation was already present.
+    need_rebuild = true;
+    return true;
+  }
   return false;
 }
-
 
 void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec, const bool add_rewrite_rules)
 {
   made_files = false;
   need_rebuild = true;
 
-  true_inner = (ATermInt)(ATerm) OpId2Int(sort_bool::true_(),true);
+  true_inner = OpId2Int(sort_bool::true_());
   true_num = ATgetInt(true_inner);
 
   const data_equation_vector l=DataSpec.equations();
@@ -2207,7 +2230,6 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
     }
   }
   
-  jittyc_eqns = NULL;
   int2ar_idx.clear();
   ar = NULL;
 }
@@ -2223,10 +2245,8 @@ void RewriterCompilingJitty::CleanupRewriteSystem()
     delete rewriter_so;
     rewriter_so = NULL;
   }
-  if (jittyc_eqns != NULL)
+  if (ar != NULL)
   {
-    ATunprotectArray((ATerm*) jittyc_eqns);
-    free(jittyc_eqns);
     ATunprotectArray((ATerm*) ar);
     free(ar);
   }
@@ -2338,9 +2358,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   rewriter_so = new uncompiled_library(compile_script);
   mCRL2log(verbose) << "using '" << compile_script << "' to compile rewriter." << std::endl;
 
-  jittyc_eqns = (ATermList*) malloc(get_num_opids()*sizeof(ATermList));
-  memset(jittyc_eqns,0,get_num_opids()*sizeof(ATermList));
-  ATprotectArray((ATerm*) jittyc_eqns,get_num_opids());
+  jittyc_eqns.clear(); 
+
   ar_size = 0;
   int2ar_idx.clear();
 
@@ -2349,15 +2368,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         ; ++l)
   {
     int i = l->second.value();
-    atermpp::map < atermpp::aterm_int, ATermList>::const_iterator it=tmp_eqns.find(atermpp::aterm_int(l->second));
-    if (it!=tmp_eqns.end())
-    {
-      jittyc_eqns[i] = it->second;
-    }
-    else
-    {
-      jittyc_eqns[i] = NULL;
-    }
     if (int2ar_idx.count(i) == 0)
     {
       size_t arity = getArity(data_expression((ATermAppl)l->first));
@@ -2365,7 +2375,16 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       ar_size += (arity*(arity+1))/2;
     }
   }
-
+  for(atermpp::set < data_equation >::const_iterator it=rewrite_rules.begin();
+                   it!=rewrite_rules.end(); ++it) 
+  { 
+    size_t main_op_id_index=atermpp::aterm_int(toInner(it->lhs(),true)(0)).value(); // main symbol of equation.
+    if (main_op_id_index>=jittyc_eqns.size())
+    {
+      jittyc_eqns.resize(main_op_id_index+1);
+    }
+    jittyc_eqns[main_op_id_index] = push_front(jittyc_eqns[main_op_id_index],*it);
+  }
   fill_always_rewrite_array();
 
   f = MakeTempFiles();
@@ -2490,14 +2509,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           fprintf(f,"  return this_rewriter->internal_universal_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),global_sigma);\n",
                                (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
         }
-        else if (jittyc_eqns[j] != NULL)
+        else if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
         {
         // Implement strategy
           if (0 < a)
           {
             nfs_a.set_value(a,nfs);
           }
-          implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs);
+          implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs); 
         }
         else
         {

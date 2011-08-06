@@ -337,14 +337,11 @@ inline size_t getArity(const data_expression op)
 }
 
 
-atermpp::aterm OpId2Int(const data_expression Term, bool add_opids);
-
-// The awkward function below needs to be removed as soon as possible.
-ATerm toInner(const ATermAppl term, const bool add_opids);
+atermpp::aterm_int OpId2Int(const function_symbol);
 
 data_expression fromInner(const atermpp::aterm_appl term);
 
-atermpp::aterm_appl toInnerc(const data_expression Term, const bool add_opids);
+atermpp::aterm_appl toInner(const data_expression Term, const bool add_opids);
 
 void initialize_internal_translation_table_rewriter();
 

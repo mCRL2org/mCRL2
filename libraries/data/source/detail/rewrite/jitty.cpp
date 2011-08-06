@@ -274,7 +274,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
 
   jitty_true=NULL;
   ATprotectAppl(&jitty_true);
-  jitty_true = (ATermAppl)toInnerc(sort_bool::true_(),true);
+  jitty_true = (ATermAppl)toInner(sort_bool::true_(),true);
 
   /*  l = opid_eqns;
     for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -300,7 +300,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
         continue;
       }
   
-      ATermAppl u = (ATermAppl)toInnerc(j->lhs(),true);
+      ATermAppl u = (ATermAppl)toInner(j->lhs(),true);
   
       atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( (ATermInt) ATgetArgument(u,0));
       if (it == jitty_eqns.end())
@@ -314,9 +314,9 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
         max_vars = j->variables().size();
       }
       n = ATinsert(n,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
-                                         (ATerm)(ATermAppl)toInnerc(j->condition(),true),
+                                         (ATerm)(ATermAppl)toInner(j->condition(),true),
                                          (ATerm) u,
-                                         (ATerm)(ATermAppl)toInnerc(j->rhs(),true)));
+                                         (ATerm)(ATermAppl)toInner(j->rhs(),true)));
       jitty_eqns[ (ATermInt) ATgetArgument(u,0)] = n;
     }
   }
@@ -753,7 +753,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
 {
   size_t old_opids = get_num_opids();
-  atermpp::aterm_appl a = toInnerc(term,true);
+  atermpp::aterm_appl a = toInner(term,true);
   if (old_opids < get_num_opids())
   {
     ATunprotectArray((ATerm*) jitty_strat);
