@@ -119,8 +119,6 @@ class BDD_Prover: public Prover
     /// \brief Constructs the EQ-BDD corresponding to the formula Prover::f_formula.
     void build_bdd()
     {
-      // f_formula_to_bdd = ATtableCreate(60000, 25);
-      // f_smallest = ATtableCreate(2000, 50);
       f_deadline = time(0) + f_time_limit;
 
       atermpp::aterm_appl v_previous_1;
@@ -131,7 +129,7 @@ class BDD_Prover: public Prover
       f_internal_bdd = m_rewriter->toRewriteFormat(f_formula);
 
       f_internal_bdd = m_rewriter->rewrite_internal(f_internal_bdd,bdd_sigma);
-      f_internal_bdd = f_manipulator->orient(f_internal_bdd);
+      f_internal_bdd = f_manipulator.orient(f_internal_bdd);
 
       mCRL2log(log::debug) << "Formula rewritten and oriented: " << core::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
 
@@ -147,8 +145,6 @@ class BDD_Prover: public Prover
       f_bdd = m_rewriter->fromRewriteFormat(f_internal_bdd);
       mCRL2log(log::debug) << "Resulting BDD: " << core::pp( f_bdd) << std::endl;
 
-      // ATtableDestroy(f_formula_to_bdd);
-      // ATtableDestroy(f_smallest);
     }
 
     /// \brief Creates the EQ-BDD corresponding to the formula a_formula.
@@ -170,11 +166,11 @@ class BDD_Prover: public Prover
         return a_formula;
       }
 
-      if (f_info->is_true(a_formula))
+      if (f_info.is_true(a_formula))
       {
         return a_formula;
       }
-      if (f_info->is_false(a_formula))
+      if (f_info.is_false(a_formula))
       {
         return a_formula;
       }
@@ -197,21 +193,21 @@ class BDD_Prover: public Prover
 
       atermpp::aterm_appl v_term1, v_term2;
 
-      v_term1 = f_manipulator->set_true(a_formula, v_guard);
+      v_term1 = f_manipulator.set_true(a_formula, v_guard);
       v_term1 = m_rewriter->rewrite_internal(v_term1,bdd_sigma);
-      v_term1 = f_manipulator->orient(v_term1);
+      v_term1 = f_manipulator.orient(v_term1);
       mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
       v_term1 = bdd_down(v_term1, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
 
-      v_term2 = f_manipulator->set_false(a_formula, v_guard);
+      v_term2 = f_manipulator.set_false(a_formula, v_guard);
       v_term2 = m_rewriter->rewrite_internal(atermpp::aterm_appl(v_term2),bdd_sigma);
-      v_term2 = f_manipulator->orient(v_term2);
+      v_term2 = f_manipulator.orient(v_term2);
       mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
       mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
 
-      atermpp::aterm_appl v_bdd = f_manipulator->make_reduced_if_then_else(v_guard, v_term1, v_term2);
+      atermpp::aterm_appl v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
 
       a_indent.erase(a_indent.size() - 2);
@@ -309,9 +305,9 @@ class BDD_Prover: public Prover
     /// \brief Returns the smallest guard in the formula a_formula.
     atermpp::aterm_appl smallest(atermpp::aterm_appl a_formula)
     {
-      if (f_info->is_variable(a_formula))
+      if (f_info.is_variable(a_formula))
       {
-        if (f_info->has_type_bool(a_formula))
+        if (f_info.has_type_bool(a_formula))
         {
           return a_formula;
         }
@@ -320,7 +316,7 @@ class BDD_Prover: public Prover
           return atermpp::aterm_appl();
         }
       }
-      if (f_info->is_true(a_formula) || f_info->is_false(a_formula))
+      if (f_info.is_true(a_formula) || f_info.is_false(a_formula))
       {
         return atermpp::aterm_appl();
       }
@@ -335,16 +331,16 @@ class BDD_Prover: public Prover
       size_t v_length;
       atermpp::aterm_appl v_small,v_result;
 
-      v_length = f_info->get_number_of_arguments(a_formula);
+      v_length = f_info.get_number_of_arguments(a_formula);
 
       for (s = 0; s < v_length; s++)
       {
-        v_small = smallest(f_info->get_argument(a_formula, s));
+        v_small = smallest(f_info.get_argument(a_formula, s));
         if (v_small)
         {
           if (v_result!=atermpp::aterm_appl())
           {
-            if (f_info->lpo1(v_result, v_small))
+            if (f_info.lpo1(v_result, v_small))
             {
               v_result = v_small;
             }
@@ -355,7 +351,7 @@ class BDD_Prover: public Prover
           }
         }
       }
-      if (!v_result && f_info->has_type_bool(a_formula))
+      if (!v_result && f_info.has_type_bool(a_formula))
       {
         v_result = a_formula;
       }
@@ -448,8 +444,8 @@ class BDD_Prover: public Prover
       f_reverse = true;
       f_full = true;
       f_apply_induction = a_apply_induction;
-      f_info->set_reverse(f_reverse);
-      f_info->set_full(f_full);
+      f_info.set_reverse(f_reverse);
+      f_info.set_full(f_full);
       mCRL2log(log::debug) << "Flags:" << std::endl
                       << "  Reverse: " << bool_to_char_string(f_reverse) << "," << std::endl
                       << "  Full: " << bool_to_char_string(f_full) << "," << std::endl;

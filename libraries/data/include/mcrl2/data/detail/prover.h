@@ -67,10 +67,10 @@ class Prover:protected mcrl2::data::rewriter
     data_expression f_formula;
 
     /// \brief A class that can be used to manipulate expressions in the internal format of the rewriter.
-    ATerm_Manipulator* f_manipulator;
+    InternalFormatManipulator f_manipulator;
 
     /// \brief A class that provides information about expressions in the internal format of the rewriter.
-    ATerm_Info* f_info;
+    InternalFormatInfo f_info;
 
     /// \brief A flag that indicates whether or not the formala Prover::f_formula has been processed.
     bool f_processed;
@@ -91,7 +91,9 @@ class Prover:protected mcrl2::data::rewriter
     Prover(const data_specification& a_data_spec,
            mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
            int a_time_limit = 0): 
-                       mcrl2::data::rewriter(a_data_spec, a_rewrite_strategy)
+                       mcrl2::data::rewriter(a_data_spec, a_rewrite_strategy),
+                       f_info(m_rewriter),
+                       f_manipulator(m_rewriter, f_info)
     {
       f_time_limit = a_time_limit;
       f_processed = false;
@@ -100,29 +102,15 @@ class Prover:protected mcrl2::data::rewriter
       {
         case(mcrl2::data::rewriter::jitty):
         {
-          f_info = new AI_Jitty(m_rewriter);
-          f_manipulator = new AM_Jitty(m_rewriter, f_info);
           break;
         }
-#ifdef MCRL2_JITTYC_AVAILABLE
-        case(mcrl2::data::rewriter::jitty_compiling):
-        {
-          throw mcrl2::runtime_error("The compiled jitty rewriter is not supported by the prover (only jitty or inner are supported).");
-          break;
-        }
-#endif
         case(mcrl2::data::rewriter::jitty_prover):
-        {
-          throw mcrl2::runtime_error("The jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
-          break;
-        }
 #ifdef MCRL2_JITTYC_AVAILABLE
         case(mcrl2::data::rewriter::jitty_compiling_prover):
-        {
-          throw mcrl2::runtime_error("The compiled jitty rewriter with prover is not supported by the prover (only jitty or inner are supported).");
-          break;
-        }
 #endif
+        {
+          throw mcrl2::runtime_error("The proving rewriters are not supported by the prover (only jitty and jittyc are supported).");
+        }
         default:
         {
           throw mcrl2::runtime_error("Unknown type of rewriter.");
@@ -134,11 +122,6 @@ class Prover:protected mcrl2::data::rewriter
     /// \brief Destroys Prover::f_manipulator, Prover::f_info and Prover::f_rewriter.
     virtual ~Prover()
     {
-      delete f_manipulator;
-      f_manipulator = 0;
-      delete f_info;
-      f_info = 0;
-      mCRL2log(log::debug) << "Rewriter, ATerm_Info and ATerm_Manipulator have been freed." << std::endl;
     }
 
     /// \brief Sets Prover::f_formula to a_formula.

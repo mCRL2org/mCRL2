@@ -129,56 +129,39 @@ data_expression get_equation_from_assignments(
   assignment_list a_assignments_2)
 {
   data_expression v_result = sort_bool::true_();
-  assignment v_assignment_1, v_assignment_2;
-  bool v_next_1 = true, v_next_2 = true;
 
-  for (variable_list::const_iterator i=a_variables.begin(); i!=a_variables.end();)
+  for (variable_list::const_iterator i=a_variables.begin(); i!=a_variables.end(); ++i)
   {
-    variable v_variable_1, v_variable_2;
-    data_expression v_expression_1, v_expression_2;
-    variable v_variable = *i;
-    ++i;
-    if (!a_assignments_1.empty() && v_next_1)
+    const variable v_variable=*i;
+    if (!a_assignments_1.empty() && v_variable == a_assignments_1.front().lhs())
     {
-      v_assignment_1 = a_assignments_1.front();
-      a_assignments_1 = pop_front(a_assignments_1);
-      v_variable_1 = v_assignment_1.lhs();
-      v_expression_1 = v_assignment_1.rhs();
+      if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs())
+      {
+        // Create a condition from the assigments from both lists.
+        v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), a_assignments_2.front().rhs()));
+        a_assignments_2=pop_front(a_assignments_2);
+      }
+      else
+      {
+        // Create a condition from first assigment only.
+        v_result = sort_bool::and_(v_result, equal_to(a_assignments_1.front().rhs(), v_variable));
+      }
+      a_assignments_1=pop_front(a_assignments_1);
     }
-    if (!a_assignments_2.empty() && v_next_2)
+    else 
     {
-      v_assignment_2 = a_assignments_2.front();
-      a_assignments_2 = pop_front(a_assignments_2);
-      v_variable_2 = v_assignment_2.lhs();
-      v_expression_2 = v_assignment_2.rhs();
-    }
-    while (v_variable != v_variable_1 && v_variable != v_variable_2 && i!=a_variables.end())
-    {
-      v_variable = *i;
-      ++i;
-    }
-    if (v_variable_1 == v_variable_2)
-    {
-      v_result = sort_bool::and_(data_expression(v_result), equal_to(data_expression(v_expression_1), data_expression(v_expression_2)));
-      v_next_1 = true;
-      v_next_2 = true;
-    }
-    else if (v_variable == v_variable_1)
-    {
-      v_result = sort_bool::and_(v_result, equal_to(v_expression_1, data_expression(v_variable_1)));
-      v_next_1 = true;
-      v_next_2 = false;
-    }
-    else if (v_variable == v_variable_2)
-    {
-      v_result = sort_bool::and_(v_result, equal_to(v_expression_2, data_expression(v_variable_2)));
-      v_next_1 = false;
-      v_next_2 = true;
+      if (!a_assignments_2.empty() && v_variable == a_assignments_2.front().lhs())
+      {
+        // Create a condition from the second assigments only.
+        v_result = sort_bool::and_(v_result, equal_to(v_variable, a_assignments_2.front().rhs()));
+        a_assignments_2=pop_front(a_assignments_2);
+      }
     }
   }
+
   assert(a_assignments_1.empty()); // If this is not the case, the assignments do not have the
   assert(a_assignments_2.empty()); // same order as the list of variables. This means that some equations
-  // have not been generated.
+                                   // have not been generated.
   return v_result;
 }
 
@@ -193,13 +176,12 @@ data_expression get_subst_equation_from_actions(
   for (action_list::const_iterator i=a_actions.begin(); i!=a_actions.end(); ++i)
   {
     const data_expression_list v_expressions = i->arguments();
-    while (!v_expressions.empty())
-      for (data_expression_list::const_iterator j=v_expressions.begin(); j!=v_expressions.end(); ++j)
-      {
-        const data_expression v_subst_expression = data::replace_free_variables(*j,
-            data::make_map_substitution(a_substitutions));
-        v_result = sort_bool::and_(data_expression(v_result), equal_to(*j, v_subst_expression));
-      }
+    for (data_expression_list::const_iterator j=v_expressions.begin(); j!=v_expressions.end(); ++j)
+    {
+      const data_expression v_subst_expression = data::replace_free_variables(*j,
+          data::make_map_substitution(a_substitutions));
+      v_result = sort_bool::and_(data_expression(v_result), equal_to(*j, v_subst_expression));
+    }
   }
   return v_result;
 }

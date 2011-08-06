@@ -7,7 +7,7 @@
 // http://www.boost.org/LICENSE_1_0.txt)
 //
 /// \file mcrl2/data/detail/prover/info.h
-/// \brief Interface to classes ATerm_Info, AI_Jitty and AI_Inner
+/// \brief Interface to classes InternalFormatInfo
 
 #ifndef INFO_H
 #define INFO_H
@@ -32,23 +32,20 @@ enum Compare_Result
 
 /// \brief Base class for classes that provide information about the structure of
 /// \brief data expressions in one of the internal formats of the rewriter.
-class ATerm_Info
+class InternalFormatInfo
 {
   protected:
     /// \brief The rewriter used to translate formulas to the internal format of rewriters.
     boost::shared_ptr<detail::Rewriter> f_rewriter;
 
-    /// \brief ATermAppl representing the constant \c true.
+    /// \brief aterm_appl representing the internal constant \c true.
     atermpp::aterm_int f_true;
 
-    /// \brief ATermAppl representing the constant \c false.
+    /// \brief aterm_appl representing the internal constant \c false.
     atermpp::aterm_int f_false;
 
-    /// \brief ATermAppl representing the \c if \c then \c else function with type Bool -> Bool -> Bool -> Bool.
+    /// \brief aterm_appl representing the internal \c if \c then \c else function with type Bool -> Bool -> Bool -> Bool.
     atermpp::aterm_int f_if_then_else_bool;
-
-    /// \brief ATermAppl representing the \c equality function.
-    ATerm f_eq;
 
     /// \brief Flag indicating whether or not the arguments of equality functions are taken into account
     /// \brief when determining the order of expressions.
@@ -169,7 +166,7 @@ class ATerm_Info
     }
 
     /// \brief Compares the structure of two guards.
-    Compare_Result compare_guard_structure(ATerm a_guard1, ATerm a_guard2)
+    Compare_Result compare_guard_structure(const atermpp::aterm_appl a_guard1, const atermpp::aterm_appl a_guard2)
     {
       if (get_guard_structure(a_guard1) < get_guard_structure(a_guard2))
       {
@@ -183,7 +180,7 @@ class ATerm_Info
     }
 
     /// \brief Compares two guards by their arguments.
-    Compare_Result compare_guard_equality(ATerm a_guard1, ATerm a_guard2)
+    Compare_Result compare_guard_equality(const atermpp::aterm_appl a_guard1, const atermpp::aterm_appl a_guard2)
     {
       if (f_full && is_equality(a_guard1) && is_equality(a_guard2))
       {
@@ -235,31 +232,32 @@ class ATerm_Info
 
   public:
     /// \brief Constructor that initializes the rewriter.
-    ATerm_Info(boost::shared_ptr<detail::Rewriter> a_rewriter)
+    InternalFormatInfo(boost::shared_ptr<detail::Rewriter> a_rewriter)
     {
-      // pre: true
-      // post: f_rewriter == a_rewriter
       f_rewriter = a_rewriter;
+      f_true = (f_rewriter->toRewriteFormat(sort_bool::true_()))(0);
+      f_false = (f_rewriter->toRewriteFormat(sort_bool::false_()))(0);
+      f_if_then_else_bool = (f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0);
     }
 
     /// \brief Destructor with no particular functionality.
-    virtual ~ATerm_Info()
+    virtual ~InternalFormatInfo()
     {}
 
-    /// \brief Sets the flag ATerm_Info::f_reverse.
+    /// \brief Sets the flag InternalFormatInfo::f_reverse.
     void set_reverse(bool a_reverse)
     {
       f_reverse = a_reverse;
     }
 
-    /// \brief Sets the flag ATerm_Info::f_full.
+    /// \brief Sets the flag InternalFormatInfo::f_full.
     void set_full(bool a_bool)
     {
       f_full = a_bool;
     }
 
     /// \brief Compares two guards.
-    Compare_Result compare_guard(ATerm a_guard1, ATerm a_guard2)
+    Compare_Result compare_guard(const atermpp::aterm_appl a_guard1, const atermpp::aterm_appl a_guard2)
     {
       return lexico(
                lexico(
@@ -304,62 +302,13 @@ class ATerm_Info
     }
 
     /// \brief Indicates whether or not a term has type bool.
-    virtual bool has_type_bool(const data_expression a_term) = 0;
-    virtual bool has_type_bool(const atermpp::aterm_appl a_term) = 0;
-
-    /// \brief Returns the number of arguments of the main operator of a term.
-    virtual size_t get_number_of_arguments(const atermpp::aterm_appl a_term) = 0;
-
-    /// \brief Returns the main operator of the term \c a_term;
-    virtual atermpp::aterm get_operator(const atermpp::aterm_appl a_term) = 0;
-
-    /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    virtual atermpp::aterm_appl get_argument(const atermpp::aterm_appl a_term, const size_t a_number) = 0;
-
-    /// \brief Indicates whether or not a term is equal to \c true.
-    virtual bool is_true(atermpp::aterm_appl a_term) = 0;
-
-    /// \brief Indicates whether or not a term is equal to \c false.
-    virtual bool is_false(atermpp::aterm_appl a_term) = 0;
-
-    /// \brief Indicates whether or not a term is equal to the \c if \c then \c else function
-    /// \brief with type Bool -> Bool -> Bool -> Bool.
-    virtual bool is_if_then_else_bool(atermpp::aterm_appl a_term) = 0;
-
-    /// \brief Indicates whether or not a term is a single variable.
-    virtual bool is_variable(atermpp::aterm_appl a_term) = 0;
-
-    /// \brief Indicates whether or not a term is an equality.
-    virtual bool is_equality(atermpp::aterm_appl a_term) = 0;
-};
-
-/// \brief Class that provides information about the structure of
-/// \brief data expressions in the internal format of the rewriter
-/// \brief with the jitty strategy.
-class AI_Jitty: public ATerm_Info
-{
-  public:
-    /// \brief Constructor that initializes all fields.
-    AI_Jitty(boost::shared_ptr<detail::Rewriter> a_rewriter)
-      : ATerm_Info(a_rewriter)
-    {
-      f_true = (f_rewriter->toRewriteFormat(sort_bool::true_()))(0);
-      f_false = (f_rewriter->toRewriteFormat(sort_bool::false_()))(0);
-      f_if_then_else_bool = (f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0);
-      f_eq = (ATerm) static_cast<ATermAppl>(detail::equal_symbol());
-    }
-
-    /// \brief Destructor with no particular functionality.
-    virtual ~AI_Jitty()
-    {}
-
     /// \brief Indicates whether or not a term has type bool.
-    virtual bool has_type_bool(const data_expression a_term)
+    bool has_type_bool(const data_expression a_term)
     {
       return a_term.sort()==sort_bool::bool_();
     }
 
-    virtual bool has_type_bool(const atermpp::aterm_appl a_term)
+    bool has_type_bool(const atermpp::aterm_appl a_term)
     {
       return f_rewriter->fromRewriteFormat(a_term).sort()==sort_bool::bool_();
     }
@@ -368,7 +317,7 @@ class AI_Jitty: public ATerm_Info
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.
     /// \return 0, if \c aterm is a constant or a variable.
     ///         The number of arguments of the main operator, otherwise.
-    virtual size_t get_number_of_arguments(const atermpp::aterm_appl a_term)
+    size_t get_number_of_arguments(const atermpp::aterm_appl a_term)
     {
       if (!is_true(a_term) && !is_false(a_term) && !is_variable(a_term))
       {
@@ -381,26 +330,26 @@ class AI_Jitty: public ATerm_Info
     }
 
     /// \brief Returns the main operator of the term \c a_term;
-    virtual atermpp::aterm get_operator(const atermpp::aterm_appl a_term) 
+    atermpp::aterm get_operator(const atermpp::aterm_appl a_term) 
     {
       return a_term(0);
     }
 
     /// \brief Returns the argument with number \c a_number of the main operator of term \c a_term.
-    virtual atermpp::aterm_appl get_argument(const atermpp::aterm_appl a_term, const size_t a_number)
+    atermpp::aterm_appl get_argument(const atermpp::aterm_appl a_term, const size_t a_number)
     {
       return a_term(a_number + 1);
     }
 
     /// \brief Indicates whether or not a term is equal to \c true.
-    virtual bool is_true(const atermpp::aterm_appl a_term)
+    bool is_true(const atermpp::aterm_appl a_term)
     {
       const atermpp::aterm v_term = a_term(0);
       return (v_term == f_true);
     }
 
     /// \brief Indicates whether or not a term is equal to \c false.
-    virtual bool is_false(const atermpp::aterm_appl a_term)
+    bool is_false(const atermpp::aterm_appl a_term)
     {
       const atermpp::aterm v_term = a_term(0);
       return (v_term == f_false);
@@ -408,7 +357,7 @@ class AI_Jitty: public ATerm_Info
 
     /// \brief Indicates whether or not a term is equal to the \c if \c then \c else function
     /// \brief with type Bool -> Bool -> Bool -> Bool.
-    virtual bool is_if_then_else_bool(const atermpp::aterm_appl a_term)
+    bool is_if_then_else_bool(const atermpp::aterm_appl a_term)
     {
       atermpp::aterm v_function = a_term(0);
       return (v_function == f_if_then_else_bool && get_number_of_arguments(a_term) == 3);
@@ -425,13 +374,8 @@ class AI_Jitty: public ATerm_Info
     {
       if (get_number_of_arguments(a_term) == 2)
       {
-        ATerm v_term;
-
-        v_term = ATgetArgument(a_term, 0);
-        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, false), v_term);
-        v_term = (ATerm)(ATermAppl) f_rewriter->fromRewriteFormat(v_term);
-        v_term = ATgetArgument(v_term, 0);
-        return (v_term == f_eq);
+        const data_expression d_term = f_rewriter->fromRewriteFormat(a_term);
+        return detail::equal_symbol().is_application(d_term);
       }
       else
       {
