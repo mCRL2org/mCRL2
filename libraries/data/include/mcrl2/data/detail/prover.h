@@ -101,7 +101,9 @@ class Prover:protected mcrl2::data::rewriter
       switch (a_rewrite_strategy)
       {
         case(mcrl2::data::rewriter::jitty):
+        case(mcrl2::data::rewriter::jitty_compiling):
         {
+          /* These provers are ok */
           break;
         }
         case(mcrl2::data::rewriter::jitty_prover):
