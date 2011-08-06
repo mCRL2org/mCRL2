@@ -236,54 +236,56 @@ ATermAppl NextState::makeStateVector(ATerm state)
 }
 
 //Prototype
-static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars = NULL);
+static bool statearg_match(
+     const data_expression arg, 
+     const data_expression pat, 
+     atermpp::map < variable, data_expression > &vars);
 
-static bool statearg_match_list(ATermList arg, ATermList pat, ATermTable vars)
+static bool statearg_match_list(
+     data_expression_list arg, 
+     data_expression_list pat, 
+     atermpp::map < variable, data_expression > &vars)
 {
-  assert(ATgetLength(arg) == ATgetLength(pat));
+  assert(arg.size() == pat.size());
   bool r = true;
 
-  while (!ATisEmpty(arg) && r)
+  while (!arg.empty() && r)
   {
-    r = r && statearg_match(ATAgetFirst(arg), ATAgetFirst(pat), vars);
-    arg = ATgetNext(arg);
-    pat = ATgetNext(pat);
+    r = r && statearg_match(arg.front(), pat.front(), vars);
+    arg = pop_front(arg);
+    pat = pop_front(pat);
   }
 
   return r;
 }
 
-static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars)
+static bool statearg_match(
+     const data_expression arg, 
+     const data_expression pat, 
+     atermpp::map < variable, data_expression > &vars)
 {
-  ATermTable tmp_vars = vars;
-  if (vars == NULL)
-  {
-    tmp_vars = ATtableCreate(20,50);
-  }
-
-
   bool r;
-  if (gsIsDataAppl(pat))
+  if (is_application(pat))
   {
-    if (!gsIsDataAppl(arg))
+    if (!is_application(arg))
     {
       r = false;
     }
     else
     {
-      r = statearg_match(ATAgetArgument(arg,0),ATAgetArgument(pat,0),tmp_vars)
-          && statearg_match_list(ATLgetArgument(arg,1),ATLgetArgument(pat,1),tmp_vars);
+      r = statearg_match(application(arg).head(),application(pat).head(),vars)
+          && statearg_match_list(application(arg).arguments(),application(pat).arguments(),vars);
     }
   }
-  else if (gsIsDataVarId(pat))
+  else if (is_variable(pat))
   {
-    ATerm val = ATtableGet(tmp_vars,(ATerm) pat);
-    if (val == NULL)
+    atermpp::map < variable, data_expression >::const_iterator it=vars.find(pat);
+    if (it==vars.end())  // not found
     {
-      ATtablePut(tmp_vars,(ATerm) pat, (ATerm) arg);
+      vars[pat]=arg;
       r = true;
     }
-    else if (ATisEqual(arg,val))
+    else if (arg== it->second)
     {
       r = true;
     }
@@ -294,15 +296,17 @@ static bool statearg_match(ATermAppl arg, ATermAppl pat, ATermTable vars)
   }
   else
   {
-    r = ATisEqual(arg,pat);
-  }
-
-  if (vars == NULL)
-  {
-    ATtableDestroy(tmp_vars);
+    r = arg==pat;
   }
 
   return r;
+}
+
+static bool statearg_match(const data_expression arg, const data_expression pat)
+{
+  atermpp::map < variable, data_expression > vars;
+  return statearg_match(arg,pat,vars);
+
 }
 
 ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
@@ -326,7 +330,9 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
         valid = false;
         break;
       }
-      if ((match != NULL) && !statearg_match((ATermAppl) stateargs[i],getStateArgument(match,i)))
+      if ((match != NULL) && !statearg_match(
+                                 data_expression(stateargs[i]),
+                                 data_expression(getStateArgument(match,i))))
       {
         valid = false;
         break;
@@ -351,7 +357,7 @@ ATerm NextState::parseStateVector(ATermAppl state, ATerm match)
   }
 
   return NULL;
-}
+} 
 
 ATerm NextState::SetVars(ATerm a, ATermList free_vars)
 {

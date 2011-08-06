@@ -37,7 +37,6 @@ namespace detail
 enum SMT_Solver_Type
 {
   solver_type_cvc,
-  solver_type_cvc_fast
 };
 
 /// \brief standard conversion from stream to solver type
@@ -240,14 +239,6 @@ class BDD_Path_Eliminator: public BDD_Simplifier
 
           return;
         }
-      }
-      else if (a_solver_type == solver_type_cvc_fast)
-      {
-#ifdef HAVE_CVC
-        f_smt_solver = new SMT_Solver_CVC_Fast();
-#else
-        throw mcrl2::runtime_error("The fast implementation of CVC Lite is not available.");
-#endif
       }
       else
       {

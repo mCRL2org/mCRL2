@@ -170,11 +170,11 @@ class Prover:protected mcrl2::data::rewriter
 
     /// \brief Returns a witness corresponding to a situation for which the formula Prover::f_formula holds.
     /// precondition: the method Prover::set_formula has been called
-    virtual atermpp::aterm_appl get_witness() = 0;
+    virtual data_expression get_witness() = 0;
 
     /// \brief Returns a counterexample corresponding to a situation for which the formula Prover::f_formula does not hold.
     /// precondition: the method Prover::set_formula has been called
-    virtual atermpp::aterm_appl get_counter_example() = 0;
+    virtual data_expression get_counter_example() = 0;
 
     /// \brief Returns the rewriter used by this prover (i.e. it returns Prover::f_rewriter).
     boost::shared_ptr<detail::Rewriter> get_rewriter()

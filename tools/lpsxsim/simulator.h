@@ -85,7 +85,7 @@ class StandardSimulator: virtual public SimulatorInterface
     ATermList trace;
     ATermList ecart;
     viewlist views;
-    ATermIndexedSet seen_states;
+    atermpp::set < ATerm > seen_states;
     std::auto_ptr< mcrl2::data::rewriter >  m_rewriter;
     NextState* nextstate;
     NextStateGenerator* nextstategen;

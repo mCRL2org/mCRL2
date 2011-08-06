@@ -46,7 +46,7 @@ class Induction
     core::identifier_string f_cons_name;
 
     /// \brief
-    ATermIndexedSet f_list_variables;
+    atermpp::vector < variable >  f_list_variables;
 
     /// \brief
     atermpp::map < variable, sort_expression > f_lists_to_sorts;
@@ -57,12 +57,15 @@ class Induction
     /// \brief
     void recurse_expression_for_lists(const data_expression a_expression)
     {
-      if (core::detail::gsIsDataVarId(a_expression))
+      if (is_variable(a_expression))
       {
-        sort_expression v_sort = data_expression(a_expression).sort();
-        if (sort_list::is_list(v_sort))
+        const sort_expression v_sort = a_expression.sort();
+        if (sort_list::is_list(v_sort))  // the sort has shape List(D) for some sort D.
         {
-          ATindexedSetPut(f_list_variables, (ATerm)(ATermAppl) a_expression, 0);
+          if (std::find(f_list_variables.begin(), f_list_variables.end(),a_expression)==f_list_variables.end()) // not found
+          {
+            f_list_variables.push_back(a_expression);
+          }
         }
       }
       else if (is_application(a_expression))
@@ -78,11 +81,9 @@ class Induction
     /// \brief
     void map_lists_to_sorts()
     {
-      variable_list v_list_variables = ATindexedSetElements(f_list_variables);
-      while (!v_list_variables.empty())
+      for(atermpp::vector < variable >::const_iterator it=f_list_variables.begin(); it!=f_list_variables.end(); ++it)
       {
-        const variable v_list_variable = v_list_variables.front();
-        v_list_variables = pop_front(v_list_variables);
+        const variable v_list_variable = *it;
         const sort_expression v_sort = get_sort_of_list_elements(v_list_variable);
         f_lists_to_sorts[v_list_variable]=v_sort;
       }
@@ -128,7 +129,7 @@ class Induction
       do
       {
         char* v_dummy_string = (char*) malloc((utilities::NrOfChars(f_fresh_dummy_number) + 6) * sizeof(char));
-        sprintf(v_dummy_string, "dummy%d", f_fresh_dummy_number);
+        sprintf(v_dummy_string, "dummy%ld", f_fresh_dummy_number);
         core::identifier_string v_dummy_name = core::detail::gsString2ATermAppl(v_dummy_string);
         v_result = variable(v_dummy_name, a_sort);
         free(v_dummy_string);
@@ -153,7 +154,7 @@ class Induction
       data_expression v_induction_step;
       data_expression v_result;
 
-      v_induction_variable = variable_list(ATindexedSetElements(f_list_variables)).front();
+      v_induction_variable = f_list_variables.front();
       v_induction_variable_sort = v_induction_variable.sort();
 
       v_dummy_sort = get_sort_of_list_elements(v_induction_variable);
@@ -211,7 +212,7 @@ class Induction
                              const variable_list a_list_of_variables,
                              const variable_list a_list_of_dummies)
     {
-      const variable v_variable = variable(ATindexedSetGetElem(f_list_variables, a_variable_number));
+      const variable v_variable = f_list_variables[a_variable_number];
       const sort_expression v_variable_sort = data_expression(v_variable).sort();
       const variable_list v_list_of_variables = push_front(a_list_of_variables, v_variable);
       const sort_expression v_dummy_sort = get_sort_of_list_elements(v_variable);
@@ -244,8 +245,6 @@ class Induction
     /// \brief
     Induction(const data_specification& a_data_spec)
     {
-      f_list_variables = ATindexedSetCreate(50, 75);
-
       f_constructors=atermpp::convert< atermpp::aterm_list > (a_data_spec.constructors());
       f_cons_name = sort_list::cons_name();
     }
@@ -253,14 +252,13 @@ class Induction
     /// \brief
     ~Induction()
     {
-      ATindexedSetDestroy(f_list_variables);
     }
 
     /// \brief
     void initialize(const data_expression a_formula)
     {
       f_formula = a_formula;
-      ATindexedSetReset(f_list_variables);
+      f_list_variables.clear();
       recurse_expression_for_lists(a_formula);
       map_lists_to_sorts();
       f_count = 0;
@@ -269,8 +267,7 @@ class Induction
     /// \brief
     bool can_apply_induction()
     {
-      variable_list v_list_variables = ATindexedSetElements(f_list_variables);
-      if (v_list_variables.size() == f_count)
+      if (f_list_variables.size() == f_count)
       {
         return false;
       }

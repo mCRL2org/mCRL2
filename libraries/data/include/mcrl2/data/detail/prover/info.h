@@ -363,60 +363,6 @@ class AI_Jitty: public ATerm_Info
     {
       return f_rewriter->fromRewriteFormat(a_term).sort()==sort_bool::bool_();
     }
-    /*
-    {
-      if (core::detail::gsIsDataVarId((ATermAppl) a_term) || core::detail::gsIsOpId((ATermAppl) a_term))
-      {
-        ATerm v_term;
-
-        v_term = ATgetArgument(a_term, 1);
-        return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
-      }
-
-      size_t v_number_of_arguments;
-
-      v_number_of_arguments = get_number_of_arguments(a_term);
-      if (v_number_of_arguments == 0)
-      {
-        data_expression v_term;
-
-        v_term = f_rewriter->fromRewriteFormat(a_term);
-        if (core::detail::gsIsDataVarId((ATermAppl) v_term) || core::detail::gsIsOpId((ATermAppl) v_term))
-        {
-          v_term = ATgetArgument(v_term, 1);
-          return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
-        }
-        else
-        {
-          return false;
-        }
-      }
-      else
-      {
-        assert(v_number_of_arguments > 0);
-        ATerm v_term;
-
-        v_term = ATgetArgument(a_term, 0);
-        v_term = (ATerm) ATmakeAppl1(ATmakeAFun("wrap", 1, false), v_term);
-        v_term = (ATerm) f_rewriter->fromRewriteFormat(v_term);
-
-        if (core::detail::gsIsOpId((ATermAppl) v_term))   // XXX why is a variable not allowed?
-        {
-          v_term = ATgetArgument(v_term, 1);
-          while (v_number_of_arguments != 0)
-          {
-            v_number_of_arguments -= ATgetLength(ATLgetArgument((ATermAppl) v_term, 0));
-            v_term = ATgetArgument(v_term, 1);
-          }
-          return (ATisEqual(v_term, (ATerm) static_cast<ATermAppl>(sort_bool::bool_())));
-        }
-        else
-        {
-          return false;
-        }
-      }
-      return false;
-    } */
 
     /// \brief Returns the number of arguments of the main operator of a term.
     /// \param a_term An expression in the internal format of the rewriter with the jitty strategy.

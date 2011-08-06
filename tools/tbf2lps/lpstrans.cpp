@@ -205,14 +205,10 @@ static ATermList get_lps_acts(ATermAppl lps, ATermList* ids)
 
 static ATermList get_substs(ATermList ids)
 {
-  ATermIndexedSet used = ATindexedSetCreate(1000,50);
+  atermpp::set < ATerm > used;
   ATermList substs = ATmakeList0();
 
-//  if ( !remove_standard_functions )
-  {
-    bool b;
-    ATindexedSetPut(used,(ATerm) ATmakeAppl0(ATmakeAFun("if",0,true)),&b);
-  }
+  used.insert((ATerm) ATmakeAppl0(ATmakeAFun("if",0,true)));
 
   for (; !ATisEmpty(ids); ids=ATgetNext(ids))
   {
@@ -245,14 +241,13 @@ static ATermList get_substs(ATermList ids)
     size_t i = 0;
     ATermAppl new_id = 0;
     while (!is_user_identifier(s) ||
-           ATindexedSetGetIndex(used,(ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >=0)
+           (used.count((ATerm)(new_id = ATmakeAppl0(ATmakeAFun(s,0,true)))) >0))
     {
       sprintf(t,"%lu",i);
       i++;
     }
 
-    bool b;
-    ATindexedSetPut(used,(ATerm) new_id,&b);
+    used.insert((ATerm) new_id);
 
     substs = ATinsert(substs,(ATerm) gsMakeSubst(ATgetFirst(ids),(ATerm) new_id));
   }

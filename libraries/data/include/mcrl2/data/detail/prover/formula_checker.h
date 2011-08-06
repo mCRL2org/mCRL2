@@ -87,9 +87,7 @@ class Formula_Checker
     {
       if (f_witness)
       {
-        ATermAppl v_witness;
-
-        v_witness = f_bdd_prover.get_witness();
+        const data_expression v_witness = f_bdd_prover.get_witness();
         if (v_witness == 0)
         {
           throw mcrl2::runtime_error(
@@ -109,9 +107,7 @@ class Formula_Checker
     {
       if (f_counter_example)
       {
-        ATermAppl v_counter_example;
-
-        v_counter_example = f_bdd_prover.get_counter_example();
+        const data_expression v_counter_example = f_bdd_prover.get_counter_example();
         if (v_counter_example == 0)
         {
           throw mcrl2::runtime_error(

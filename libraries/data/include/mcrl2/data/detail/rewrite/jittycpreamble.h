@@ -16,9 +16,6 @@ using namespace mcrl2::data::detail;
 #endif // _MSC_VER
 
 extern "C" {
-  // DLLEXPORT void set_subst(ATermAppl Var, ATerm Expr);
-  // DLLEXPORT void clear_subst(ATermAppl Var);
-  // DLLEXPORT void clear_substs();
   DLLEXPORT void rewrite_init(RewriterCompilingJitty *r);
   DLLEXPORT void rewrite_cleanup();
   DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t,

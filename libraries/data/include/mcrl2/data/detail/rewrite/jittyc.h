@@ -50,7 +50,7 @@ class RewriterCompilingJitty: public Rewriter
     bool removeRewriteRule(const data_equation rule);
 
   private:
-    ATermTable tmp_eqns;
+    atermpp::map < atermpp::aterm_int, ATermList> tmp_eqns;
     bool need_rebuild;
     bool made_files;
 
@@ -59,13 +59,13 @@ class RewriterCompilingJitty: public Rewriter
 
     ATermList* jittyc_eqns;
 
-    ATermTable int2ar_idx;
+    std::map < int,int> int2ar_idx;
     size_t ar_size;
     ATermAppl* ar;
     ATermAppl build_ar_expr(ATerm expr, ATermAppl var);
     ATermAppl build_ar_expr_aux(ATermList eqn, size_t arg, size_t arity);
     ATermAppl build_ar_expr(ATermList eqns, size_t arg, size_t arity);
-    bool always_rewrite_argument(ATermInt opid, size_t arity, size_t arg);
+    bool always_rewrite_argument(const atermpp::aterm_int opid, const size_t arity, const size_t arg);
     bool calc_ar(ATermAppl expr);
     void fill_always_rewrite_array();
 

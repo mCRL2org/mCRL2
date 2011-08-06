@@ -378,7 +378,7 @@ class BDD_Prover: public Prover
         data_expression v_true_branch = f_bdd_info.get_true_branch(a_bdd);
         data_expression v_false_branch = f_bdd_info.get_false_branch(a_bdd);
         data_expression v_branch = get_branch(v_true_branch, a_polarity);
-        if (v_branch == atermpp::aterm_appl())
+        if (v_branch == data_expression())
         {
           v_branch = get_branch(v_false_branch, a_polarity);
           if (v_branch == data_expression())
@@ -512,47 +512,57 @@ class BDD_Prover: public Prover
     }
 
     /// \brief Returns all the guards on a path in the BDD that leads to a leaf labelled "true", if such a leaf exists.
-    virtual atermpp::aterm_appl get_witness()
+    virtual data_expression get_witness()
     {
-      atermpp::aterm_appl v_result;
-
       update_answers();
-      if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes))
+      if (is_contradiction() == answer_yes) 
       {
-        mCRL2log(log::debug) << "The formula appears to be satisfiable." << std::endl;
-        v_result = get_branch(f_bdd, true);
+        mCRL2log(log::debug) << "The formula is a contradiction." << std::endl;
+        return sort_bool::true_();
+      }
+      else if (is_tautology() == answer_yes)
+      {
+        mCRL2log(log::debug) << "The formula is a tautology." << std::endl;
+        return sort_bool::false_();
       }
       else
       {
-        mCRL2log(log::debug) << "The formula is a contradiction or a tautology." << std::endl;
-        v_result = 0;
+        mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
+        data_expression t=get_branch(f_bdd, true);
+        if (t==data_expression())
+        { throw mcrl2::runtime_error(
+            "Cannot provide witness. This is probably caused by an abrupt stop of the\n"
+            "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
+        }
+        return t;
       }
-      return v_result;
     }
 
     /// \brief Returns all the guards on a path in the BDD that leads to a leaf labelled "false", if such a leaf exists.
-    virtual atermpp::aterm_appl get_counter_example()
+    virtual data_expression get_counter_example()
     {
-      atermpp::aterm_appl v_result;
-
       update_answers();
-      if (!(is_contradiction() == answer_yes) && !(is_tautology() == answer_yes))
+      if (is_contradiction() == answer_yes) 
       {
-        mCRL2log(log::debug) << "The formula appears to be satisfiable." << std::endl;
-        v_result = get_branch(f_bdd, false);
+        mCRL2log(log::debug) << "The formula is a contradiction." << std::endl;
+        return sort_bool::false_();
+      }
+      else if (is_tautology() == answer_yes)
+      {
+        mCRL2log(log::debug) << "The formula is a tautology." << std::endl;
+        return sort_bool::true_();
       }
       else
       {
-        mCRL2log(log::debug) << "The formula is a contradiction or a tautology." << std::endl;
-        v_result = 0;
+        mCRL2log(log::debug) << "The formula is satisfiable, but not a tautology." << std::endl;
+        data_expression t=get_branch(f_bdd, false);
+        if (t==data_expression())
+        { throw mcrl2::runtime_error(
+            "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
+            "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
+        }
+        return t;
       }
-      if (v_result==0)
-      {
-        throw mcrl2::runtime_error(
-          "Cannot provide counter example. This is probably caused by an abrupt stop of the\n"
-          "conversion from expression to EQ-BDD. This typically occurs when a time limit is set.");
-      }
-      return v_result;
     }
 
 };

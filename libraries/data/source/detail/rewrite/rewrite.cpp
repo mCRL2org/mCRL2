@@ -670,18 +670,14 @@ ATerm toInner(ATermAppl Term, bool add_opids)
     }
     return (ATerm) l;
   }
+  else if (gsIsOpId(Term))
+  {
+    return (ATerm)OpId2Int(data_expression(Term),add_opids);
+  }
   else
   {
-    if (gsIsOpId(Term))
-    {
-      return (ATerm)OpId2Int(data_expression(Term),add_opids);
-    }
-    else
-    {
-      return (ATerm) Term;
-    }
+    return (ATerm) Term;
   }
-
 }
 
 data_expression fromInner(atermpp::aterm_appl term)

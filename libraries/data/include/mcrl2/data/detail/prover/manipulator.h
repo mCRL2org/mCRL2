@@ -39,7 +39,7 @@ class ATerm_Manipulator
     /// The method ATerm_Manipulator::orient stores resulting terms in this
     /// table. If a term is encountered that has already been processed, it is
     /// not processed again, but retreived from this table.
-    ATermTable f_orient;
+    atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl> f_orient;
 
     /// \brief ATerm representing \c true in one of the internal formats of the rewriter.
     atermpp::aterm_appl f_true;
@@ -74,13 +74,11 @@ class ATerm_Manipulator
     {
       f_rewriter = a_rewriter;
       f_info = a_info;
-      f_orient = ATtableCreate(2000, 50);
     }
 
     /// \brief Destructor with no particular functionality.
     virtual ~ATerm_Manipulator()
     {
-      ATtableDestroy(f_orient);
     }
 
     /// \brief Returns an expression in one of the internal formats of the rewriter.
@@ -260,10 +258,10 @@ class AM_Jitty: public ATerm_Manipulator
     virtual atermpp::aterm_appl orient(atermpp::aterm_appl a_term)
     {
       // v_result is NULL if not found; Therefore type ATerm.
-      ATerm v_pre_result = ATtableGet(f_orient, (ATerm)(ATermAppl)a_term); 
-      if (v_pre_result)
+      atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl> :: const_iterator it=f_orient.find(a_term); 
+      if (it!=f_orient.end())   // found
       {
-        return (ATermAppl)v_pre_result;
+        return it->second;
       }
 
       AFun v_symbol;
@@ -296,7 +294,7 @@ class AM_Jitty: public ATerm_Manipulator
           v_result = atermpp::aterm_appl(ATmakeAppl3(v_symbol, (ATerm)v_function, (ATerm)(ATermAppl)v_term2, (ATerm)(ATermAppl)v_term1));
         }
       }
-      ATtablePut(f_orient, (ATerm)(ATermAppl)a_term, (ATerm)(ATermAppl)v_result);
+      f_orient[a_term]=v_result;
 
       return v_result;
     }

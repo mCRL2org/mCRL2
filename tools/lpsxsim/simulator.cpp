@@ -51,8 +51,6 @@ StandardSimulator::StandardSimulator()
   ecart = ATmakeList0();
   ATprotectList(&ecart);
 
-  seen_states = ATindexedSetCreate(100,80);
-
   tau_prior = false;
   // error = false;
 
@@ -222,7 +220,7 @@ NextState* StandardSimulator::GetNextState()
   return nextstate;
 }
 
-bool StandardSimulator::ChooseTransition(size_t index)
+bool StandardSimulator::ChooseTransition(const size_t index)
 {
   if (!ATisEmpty(next_states) && (index < ATgetLength(next_states)))
   {
@@ -242,8 +240,7 @@ bool StandardSimulator::ChooseTransition(size_t index)
 
     if (tau_prior)
     {
-      bool b;
-      ATindexedSetPut(seen_states,current_state,&b);
+      seen_states.insert(current_state);
 
       bool found = false;
       size_t i=0;
@@ -252,7 +249,7 @@ bool StandardSimulator::ChooseTransition(size_t index)
         ATermList trans = ATLgetFirst(l);
         if (ATisEmpty(ATLgetArgument(ATAgetFirst(trans),0)))
         {
-          if (ATindexedSetGetIndex(seen_states,ATgetFirst(ATgetNext(trans))) <0 /* == ATERM_NON_EXISTING_POSITION */)
+          if (seen_states.count(ATgetFirst(ATgetNext(trans))) ==0)  // not present.
           {
             found = true;
             break;
@@ -262,8 +259,8 @@ bool StandardSimulator::ChooseTransition(size_t index)
       if (found)
       {
         return ChooseTransition(i);
-      } // else
-      ATindexedSetReset(seen_states);
+      }
+      seen_states.clear();
     }
 
     return true;

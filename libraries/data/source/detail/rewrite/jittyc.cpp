@@ -2015,7 +2015,7 @@ ATermAppl RewriterCompilingJitty::build_ar_expr(ATerm expr, ATermAppl var)
   size_t arity = ATgetLength(args);
   for (size_t i=0; i<arity; i++, args=ATgetNext(args))
   {
-    int idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,(ATerm) head)) + ((arity-1)*arity)/2 + i;
+    int idx = int2ar_idx[atermpp::aterm_int(head).value()] + ((arity-1)*arity)/2 + i;
     ATermAppl t = build_ar_expr(ATgetFirst(args),var);
     result = make_ar_or(result,make_ar_and(make_ar_var(idx),t));
   }
@@ -2037,7 +2037,7 @@ ATermAppl RewriterCompilingJitty::build_ar_expr_aux(ATermList eqn, size_t arg, s
     ATerm rhs = ATelementAt(eqn,3);
     if (ATisInt(rhs))
     {
-      int idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,rhs)) + ((arity-1)*arity)/2 + arg;
+      int idx = int2ar_idx[atermpp::aterm_int(rhs).value()] + ((arity-1)*arity)/2 + arg;
       return make_ar_var(idx);
     }
     else if (ATisList(rhs) && ATisInt(ATgetFirst((ATermList) rhs)))
@@ -2045,7 +2045,7 @@ ATermAppl RewriterCompilingJitty::build_ar_expr_aux(ATermList eqn, size_t arg, s
       int rhs_arity = ATgetLength((ATermList) rhs)-1;
       size_t diff_arity = arity-eqn_arity;
       int rhs_new_arity = rhs_arity+diff_arity;
-      size_t idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,ATgetFirst((ATermList) rhs))) + ((rhs_new_arity-1)*rhs_new_arity)/2 + (arg - eqn_arity + rhs_arity);
+      size_t idx = int2ar_idx[atermpp::aterm_int(ATgetFirst((ATermList) rhs)).value()] + ((rhs_new_arity-1)*rhs_new_arity)/2 + (arg - eqn_arity + rhs_arity);
       return make_ar_var(idx);
     }
     else
@@ -2080,9 +2080,12 @@ ATermAppl RewriterCompilingJitty::build_ar_expr(ATermList eqns, size_t arg, size
   }
 }
 
-bool RewriterCompilingJitty::always_rewrite_argument(ATermInt opid, size_t arity, size_t arg)
+bool RewriterCompilingJitty::always_rewrite_argument(
+     const atermpp::aterm_int opid, 
+     const size_t arity, 
+     const size_t arg)
 {
-  return !is_ar_false(ar[ATgetInt((ATermInt) ATtableGet(int2ar_idx,(ATerm) opid))+((arity-1)*arity)/2+arg]);
+  return !is_ar_false(ar[int2ar_idx[atermpp::aterm_int(opid).value()]+((arity-1)*arity)/2+arg]);
 }
 
 bool RewriterCompilingJitty::calc_ar(ATermAppl expr)
@@ -2122,12 +2125,11 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   }
   ATprotectArray((ATerm*) ar,ar_size);
 
-  ATermList ints = ATtableKeys(int2ar_idx);
-  for (; !ATisEmpty(ints); ints=ATgetNext(ints))
+  for(std::map < int,int> ::const_iterator it=int2ar_idx.begin();it!=int2ar_idx.end(); ++it)
   {
-    size_t arity = getArity(get_int2term(ATgetInt((ATermInt) ATgetFirst(ints))));
-    ATermList eqns = jittyc_eqns[ATgetInt((ATermInt) ATgetFirst(ints))];
-    int idx = ATgetInt((ATermInt) ATtableGet(int2ar_idx,ATgetFirst(ints)));
+    size_t arity = getArity(get_int2term(it->first));
+    ATermList eqns = jittyc_eqns[it->first];
+    int idx = it->second;
     for (size_t i=1; i<=arity; i++)
     {
       for (size_t j=0; j<i; j++)
@@ -2154,7 +2156,6 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
 
 bool RewriterCompilingJitty::addRewriteRule(const data_equation rule)
 {
-  ATermList n;
 
   try
   {
@@ -2168,17 +2169,17 @@ bool RewriterCompilingJitty::addRewriteRule(const data_equation rule)
 
   need_rebuild = true;
 
-  ATermAppl u = (ATermAppl) toInnerc(rule.lhs(),true);
-  if ((n = (ATermList) ATtableGet(tmp_eqns,ATgetArgument(u,0))) == NULL)
-  {
-    n = ATmakeList0();
-  }
-  n = ATinsert(n,(ATerm) ATmakeList4(
+  atermpp::aterm_appl u = toInnerc(rule.lhs(),true);
+
+  atermpp::map < atermpp::aterm_int, ATermList>::const_iterator it=tmp_eqns.find(u(0));
+  const ATermList n=(it==tmp_eqns.end()?ATmakeList0():it->second);
+    
+// ATfprintf(stderr,"TO INNER %t -->\n%t\n",(ATermAppl)rule.rhs(),toInner(rule.rhs(),true));
+  tmp_eqns[u(0)]= ATinsert(n,(ATerm) ATmakeList4(
                     (ATerm)(ATermList)rule.variables(),
                     (ATerm)(ATermAppl)toInner(rule.condition(),true),
-                    (ATerm) u,
+                    (ATerm)(ATermAppl) u,
                     (ATerm)(ATermAppl) toInner(rule.rhs(),true)));
-  ATtablePut(tmp_eqns,ATgetArgument(u,0),(ATerm) n);
 
   return true;
 }
@@ -2194,8 +2195,6 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   made_files = false;
   need_rebuild = true;
 
-  tmp_eqns = ATtableCreate(100,75); // XXX would be nice to know the number op OpIds
-
   true_inner = (ATermInt)(ATerm) OpId2Int(sort_bool::true_(),true);
   true_num = ATgetInt(true_inner);
 
@@ -2209,7 +2208,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   }
   
   jittyc_eqns = NULL;
-  int2ar_idx = NULL;
+  int2ar_idx.clear();
   ar = NULL;
 }
 
@@ -2228,7 +2227,6 @@ void RewriterCompilingJitty::CleanupRewriteSystem()
   {
     ATunprotectArray((ATerm*) jittyc_eqns);
     free(jittyc_eqns);
-    ATtableDestroy(int2ar_idx);
     ATunprotectArray((ATerm*) ar);
     free(ar);
   }
@@ -2344,25 +2342,26 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   memset(jittyc_eqns,0,get_num_opids()*sizeof(ATermList));
   ATprotectArray((ATerm*) jittyc_eqns,get_num_opids());
   ar_size = 0;
-  int2ar_idx = ATtableCreate(100,75);
+  int2ar_idx.clear();
 
   for(atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l = term2int_begin()
         ; l != term2int_end()
         ; ++l)
   {
-    atermpp::aterm_int i = l->second;
-    if (ATtableGet(tmp_eqns,(ATerm)(ATermInt) i) != NULL)
+    int i = l->second.value();
+    atermpp::map < atermpp::aterm_int, ATermList>::const_iterator it=tmp_eqns.find(atermpp::aterm_int(l->second));
+    if (it!=tmp_eqns.end())
     {
-      jittyc_eqns[ATgetInt(i)] = (ATermList) ATtableGet(tmp_eqns,(ATerm)(ATermInt) i);
+      jittyc_eqns[i] = it->second;
     }
     else
     {
-      jittyc_eqns[ATgetInt(i)] = NULL;
+      jittyc_eqns[i] = NULL;
     }
-    if (ATtableGet(int2ar_idx,(ATerm)(ATermInt) i) == NULL)
+    if (int2ar_idx.count(i) == 0)
     {
       size_t arity = getArity(data_expression((ATermAppl)l->first));
-      ATtablePut(int2ar_idx,(ATerm)(ATermInt) i,(ATerm) ATmakeInt(ar_size));
+      int2ar_idx[i]=ar_size;
       ar_size += (arity*(arity+1))/2;
     }
   }
@@ -2733,7 +2732,6 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
 {
   CleanupRewriteSystem();
   finalise_common();
-  ATtableDestroy(tmp_eqns);
 }
 
 /* ATermList RewriterCompilingJitty::rewrite_internalList(ATermList l)

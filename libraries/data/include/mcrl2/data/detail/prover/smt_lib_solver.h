@@ -59,9 +59,9 @@ class SMT_LIB_Solver: public SMT_Solver
     std::string f_formula;
     ATermIndexedSet f_sorts;
     ATermIndexedSet f_operators;
-    ATermIndexedSet f_variables;
-    ATermIndexedSet f_nat_variables;
-    ATermIndexedSet f_pos_variables;
+    atermpp::set < variable > f_variables;
+    atermpp::set < variable > f_nat_variables;
+    atermpp::set < variable > f_pos_variables;
     bool f_bool2pred;
 
     void declare_sorts()
@@ -170,43 +170,45 @@ class SMT_LIB_Solver: public SMT_Solver
     void declare_variables()
     {
       f_variables_extrafuns = "";
-      variable_list v_variables = ATindexedSetElements(f_variables);
-      if (!v_variables.empty())
-      {
+      if (!f_variables.empty())
+      { 
         f_variables_extrafuns = "  :extrafuns (";
-        while (!v_variables.empty())
+      }
+
+      for(atermpp::set < variable > :: const_iterator i=f_variables.begin(); i!=f_variables.end(); ++i)
+      {
+        const variable v_variable = *i;
+        char* v_variable_string;
+        v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
+        sort_expression v_sort = data_expression(v_variable).sort();
+        if (sort_real::is_real(v_sort))
         {
-          const variable v_variable = v_variables.front();
-          v_variables = ATgetNext(v_variables);
-          char* v_variable_string;
-          v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
-          sort_expression v_sort = data_expression(v_variable).sort();
-          if (sort_real::is_real(v_sort))
-          {
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
-          }
-          else if (sort_int::is_int(v_sort))
-          {
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          }
-          else if (sort_nat::is_nat(v_sort))
-          {
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          }
-          else if (sort_pos::is_pos(v_sort))
-          {
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
-          }
-          else
-          {
-            size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm)(ATermAppl)v_sort, 0);
-            char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
-            sprintf(v_sort_string, "sort%lu", v_sort_number);
-            f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
-            free(v_sort_string);
-            v_sort_string = 0;
-          }
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Real)";
         }
+        else if (sort_int::is_int(v_sort))
+        {
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
+        }
+        else if (sort_nat::is_nat(v_sort))
+        {
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
+        }
+        else if (sort_pos::is_pos(v_sort))
+        {
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " Int)";
+        }
+        else
+        {
+          size_t v_sort_number = ATindexedSetPut(f_sorts, (ATerm)(ATermAppl)v_sort, 0);
+          char* v_sort_string = (char*) malloc((utilities::NrOfChars(v_sort_number) + 5) * sizeof(char));
+          sprintf(v_sort_string, "sort%lu", v_sort_number);
+          f_variables_extrafuns = f_variables_extrafuns + "(" + v_variable_string + " " + v_sort_string +")";
+          free(v_sort_string);
+          v_sort_string = 0;
+        }
+      }
+      if (!f_variables.empty())
+      { 
         f_variables_extrafuns = f_variables_extrafuns + ")\n";
       }
     }
@@ -666,36 +668,36 @@ class SMT_LIB_Solver: public SMT_Solver
       f_formula = f_formula + ")";
     }
 
-    void translate_variable(const data_expression a_clause)
+    void translate_variable(const variable a_clause)
     {
       char* v_string;
 
       v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
-      ATindexedSetPut(f_variables, (ATerm)(ATermAppl) a_clause, 0);
+      f_variables.insert(a_clause);
     }
 
-    void translate_nat_variable(const data_expression a_clause)
+    void translate_nat_variable(const variable a_clause)
     {
       char* v_string;
 
       v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
-      ATindexedSetPut(f_variables, (ATerm)(ATermAppl) a_clause, 0);
-      ATindexedSetPut(f_nat_variables, (ATerm)(ATermAppl) a_clause, 0);
+      f_variables.insert(a_clause);
+      f_nat_variables.insert(a_clause);
     }
 
-    void translate_pos_variable(const data_expression a_clause)
+    void translate_pos_variable(const variable a_clause)
     {
       char* v_string;
 
       v_string = core::detail::gsATermAppl2String(ATAgetArgument(a_clause, 0));
       f_formula = f_formula + v_string;
 
-      ATindexedSetPut(f_variables, (ATerm)(ATermAppl) a_clause, 0);
-      ATindexedSetPut(f_pos_variables, (ATerm)(ATermAppl) a_clause, 0);
+      f_variables.insert(a_clause);
+      f_pos_variables.insert(a_clause);
     }
 
     void translate_int_constant(const data_expression a_clause)
@@ -751,31 +753,19 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void add_nat_clauses()
     {
-      variable_list v_variables = ATindexedSetElements(f_nat_variables);
-      if (!ATisEmpty(v_variables))
-      {
-        while (!ATisEmpty(v_variables))
-        {
-          const variable v_variable = v_variables.front();
-          v_variables = pop_front(v_variables);
-          char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
-          f_formula = f_formula + " (>= " + v_variable_string + " 0)";
-        }
+      for(atermpp::set < variable >::const_iterator i=f_nat_variables.begin(); i!=f_nat_variables.end(); ++i)
+      { 
+        char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(*i, 0));
+        f_formula = f_formula + " (>= " + v_variable_string + " 0)";
       }
     }
 
     void add_pos_clauses()
     {
-      variable_list v_variables = ATindexedSetElements(f_pos_variables);
-      if (!ATisEmpty(v_variables))
+      for(atermpp::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)  
       {
-        while (!v_variables.empty())
-        {
-          variable v_variable = v_variables.front();
-          v_variables = ATgetNext(v_variables);
-          char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(v_variable, 0));
-          f_formula = f_formula + " (>= " + v_variable_string + " 1)";
-        }
+        char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(*i, 0));
+        f_formula = f_formula + " (>= " + v_variable_string + " 1)";
       }
     }
 
@@ -791,9 +781,9 @@ class SMT_LIB_Solver: public SMT_Solver
 
       ATindexedSetReset(f_sorts);
       ATindexedSetReset(f_operators);
-      ATindexedSetReset(f_variables);
-      ATindexedSetReset(f_nat_variables);
-      ATindexedSetReset(f_pos_variables);
+      f_variables.clear();
+      f_nat_variables.clear();
+      f_pos_variables.clear();
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
@@ -828,18 +818,12 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       f_sorts = ATindexedSetCreate(100, 75);
       f_operators = ATindexedSetCreate(100, 75);
-      f_variables = ATindexedSetCreate(100, 75);
-      f_nat_variables = ATindexedSetCreate(100, 75);
-      f_pos_variables = ATindexedSetCreate(100, 75);
     }
 
     virtual ~SMT_LIB_Solver()
     {
       ATindexedSetDestroy(f_sorts);
       ATindexedSetDestroy(f_operators);
-      ATindexedSetDestroy(f_variables);
-      ATindexedSetDestroy(f_nat_variables);
-      ATindexedSetDestroy(f_pos_variables);
     }
 };
 

@@ -42,7 +42,7 @@ class BDD_Info
     /// \return The true-branch of the BDD.
     inline mcrl2::data::data_expression get_true_branch(const mcrl2::data::data_expression  a_bdd)
     {
-      return application(a_bdd).argument(1);  //ATAgetFirst(ATgetNext(ATLgetArgument(a_bdd, 1)));
+      return application(a_bdd).argument(1);  
     }
 
     /// \brief Method that returns the false-branch of a BDD.
@@ -57,27 +57,27 @@ class BDD_Info
     /// \param[in] a_bdd A binary decision diagram.
     /// \return True, if the BDD equals true.
     ///         False, if the BDD does not equal true.
-    inline bool is_true(ATermAppl a_bdd)
+    inline bool is_true(const data_expression a_bdd)
     {
-      return mcrl2::data::sort_bool::is_true_function_symbol(mcrl2::data::data_expression(a_bdd));
+      return mcrl2::data::sort_bool::is_true_function_symbol(a_bdd);
     }
 
     /// \brief Method that indicates whether or not a BDD equals false.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return True, if the BDD equals false.
     ///         False, if the BDD does not equal true.
-    inline bool is_false(ATermAppl a_bdd)
+    inline bool is_false(const data_expression a_bdd)
     {
-      return mcrl2::data::sort_bool::is_false_function_symbol(mcrl2::data::data_expression(a_bdd));
+      return mcrl2::data::sort_bool::is_false_function_symbol(a_bdd);
     }
 
     /// \brief Method that indicates wether or not the root of a BDD is a guard node.
     /// \param[in] a_bdd A binary decision diagram.
     /// \return True, if the root of the BDD is a guard node.
     ///         False, if the BDD equals true or if the BDD equals false.
-    inline bool is_if_then_else(ATermAppl a_bdd)
+    inline bool is_if_then_else(const data_expression a_bdd)
     {
-      return mcrl2::data::is_if_application(mcrl2::data::data_expression(a_bdd));
+      return mcrl2::data::is_if_application(a_bdd);
     }
 };
 
