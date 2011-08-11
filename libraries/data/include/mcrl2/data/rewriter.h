@@ -25,7 +25,6 @@
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/data/detail/data_expression_with_variables_traits.h"
-#include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/find.h"
@@ -84,8 +83,8 @@ class basic_rewriter
     {}
 
     /// \brief Constructor.
-    basic_rewriter(const data_specification & d, const strategy s = jitty, const bool add_rewrite_rules=true) :
-      m_rewriter(detail::createRewriter(d, static_cast< detail::RewriteStrategy >(s),add_rewrite_rules))
+    basic_rewriter(const data_specification & d, const used_data_equation_selector &equation_selector, const strategy s = jitty) :
+      m_rewriter(detail::createRewriter(d, equation_selector, static_cast< detail::RewriteStrategy >(s)))
     {}
 
   public:
@@ -124,47 +123,25 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
 
   protected:
 
-    /// \brief for data implementation/reconstruction
-    mutable boost::shared_ptr< detail::rewrite_conversion_helper >   m_conversion_helper;
-
-  protected:
-
     /// \brief Copy constructor for conversion between derived types
     template < typename CompatibleExpression >
     basic_rewriter(const basic_rewriter< CompatibleExpression > & other) :
-      basic_rewriter< atermpp::aterm >(other),
-      m_conversion_helper(other.m_conversion_helper)
+      basic_rewriter< atermpp::aterm >(other)
     { }
-
-    /// \brief Performs data implementation before rewriting (should become obsolete)
-    /// \param[in] expression an expression.
-    template < typename Expression >
-    Expression implement(Expression const& expression) const
-    {
-      return m_conversion_helper->implement(expression);
-    }
-
-    /// \brief Performs data reconstruction after rewriting (should become obsolete)
-    data_expression reconstruct(atermpp::aterm_appl const& expression) const
-    {
-      return m_conversion_helper->lazy_reconstruct(expression);
-    }
 
   public:
 
     /// \brief Constructor.
     /// \param[in] r A rewriter
     basic_rewriter(const basic_rewriter & other) :
-      basic_rewriter< atermpp::aterm >(other),
-      m_conversion_helper(other.m_conversion_helper)
+      basic_rewriter< atermpp::aterm >(other)
     { }
 
     /// \brief Constructor.
     /// \param[in] d A data specification
     /// \param[in] s A rewriter strategy.
     basic_rewriter(const data_specification& d, const strategy s = jitty) :
-      basic_rewriter< atermpp::aterm >(d,s,false),
-      m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter))
+      basic_rewriter< atermpp::aterm >(d,used_data_equation_selector(d),s)
     { }
 
     /// \brief Constructor.
@@ -172,9 +149,8 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     /// \param[in] s A rewriter strategy.
     /// \param[in] selsctor A component that selects the equations that are converted to rewrite rules
     template < typename EquationSelector >
-    basic_rewriter(const data_specification& d, EquationSelector const& selector, const strategy s = jitty) :
-      basic_rewriter< atermpp::aterm >(d,s,false),
-      m_conversion_helper(new detail::rewrite_conversion_helper(d, *m_rewriter, selector))
+    basic_rewriter(const data_specification& d, const EquationSelector& selector, const strategy s = jitty) :
+      basic_rewriter< atermpp::aterm >(d,selector,s)
     { }
 
     /// \brief Adds an equation to the rewrite rules.
@@ -182,7 +158,7 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     /// \return Returns true if the operation succeeded.
     bool add_rule(const data_equation& equation)
     {
-      return m_rewriter->addRewriteRule(const_cast< basic_rewriter const* >(this)->implement(equation));
+      return m_rewriter->addRewriteRule(equation);
     }
 };
 
@@ -235,7 +211,7 @@ class rewriter: public basic_rewriter<data_expression>
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE: " << d;
 #endif 
-      data_expression result(reconstruct(m_rewriter->rewrite(implement(d),sigma)));
+      data_expression result(m_rewriter->rewrite(d,sigma));
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << " ------------> " << result << std::endl;
@@ -254,21 +230,19 @@ class rewriter: public basic_rewriter<data_expression>
 # ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d << "\n";
 #endif
-      mutable_map_substitution<> fresh_sigma; // Temporary hack to make an empty subsitution.
-      data_expression result(reconstruct(m_rewriter->rewrite(implement(data::replace_free_variables(d, sigma)),fresh_sigma)));
+      // Old code by Wieger, which is very inefficient, as sigma is first substituted and rewritten, where we know
+      // it is already mapping terms to normal form, and we should not rewrite these again.
+      // data_expression result(reconstruct(m_rewriter->rewrite(implement(data::replace_free_variables(d, sigma)),empty_sigma)));
 
-std::cerr << "Check whether the code fragment below without implement works. Todo for JFG\n";
-      // The code fragment below is much more efficient, provided the substitued values are already in 
-      // normal form. In that case, the implement is also not required.
-      // Unfortunately, as substitutions do not always have a const_iterator on board, the
-      // code does not work.
-      /* for(typename SubstitutionFunction::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+      mutable_map_substitution<> sigma_with_iterator; 
+      std::set < variable > free_variables=data::find_free_variables(d);
+      for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
       {
-        fresh_sigma[i->first]=implement(i->second);
+        sigma_with_iterator[*it]=sigma(*it);
       }
-
-      data_expression result(reconstruct(m_rewriter->rewrite(implement(d),fresh_sigma)));
-      */
+        
+      data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));
+      
 # ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << " ------------> " << result << std::endl;
 #endif
@@ -316,7 +290,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     data_expression_with_variables operator()(const data_expression_with_variables& d) const
     {
       mutable_map_substitution<atermpp::map < variable,data_expression> > sigma; 
-      data_expression t = reconstruct(m_rewriter->rewrite(implement(d),sigma));
+      data_expression t = m_rewriter->rewrite(d,sigma);
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;
@@ -332,7 +306,17 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     template <typename SubstitutionFunction>
     data_expression_with_variables operator()(const data_expression_with_variables& d, const SubstitutionFunction& sigma) const
     {
-      data_expression t = this->operator()(replace_free_variables(static_cast< const data_expression& >(d), sigma));
+      // Substitution of sigma in d a priori is not very efficient.
+      // data_expression t = this->operator()(replace_free_variables(static_cast< const data_expression& >(d), sigma));
+
+      mutable_map_substitution<> sigma_with_iterator; 
+      std::set < variable > free_variables=data::find_free_variables(d);
+      for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
+      {
+        sigma_with_iterator[*it]=sigma(*it);
+      }
+        
+      data_expression t(m_rewriter->rewrite(static_cast< const data_expression& >(d),sigma_with_iterator));
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;

@@ -14,8 +14,6 @@
 #ifndef _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
 #define _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
 
-// #include <memory>
-// #include <boost/utility.hpp>
 #include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
@@ -26,14 +24,6 @@ namespace data
 /// \cond INTERNAL
 namespace detail
 {
-
-
-/// \cond INTERNAL_DOCS
-// inherits from rewriter only for data implementation/reconstruction
-//
-// To minimize changes to the existing implementation, data
-// implementation/reconstruction is performed manually.
-
 
 struct legacy_rewriter : public mcrl2::data::rewriter
 {
@@ -78,7 +68,7 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   
     atermpp::aterm_appl convert_to(const data_expression &t) const
     {
-      return m_rewriter->toRewriteFormat(mcrl2::data::rewriter::implement(t));
+      return m_rewriter->toRewriteFormat(t);
     }
   
     mutable_map_substitution < atermpp::map < variable,atermpp::aterm_appl> > convert_to(const mutable_map_substitution <> &sigma) const
@@ -93,13 +83,8 @@ struct legacy_rewriter : public mcrl2::data::rewriter
   
     data_expression convert_from(const atermpp::aterm_appl t) const
     {
-      return this->reconstruct(atermpp::aterm_appl(m_rewriter->fromRewriteFormat(t)));
+      return m_rewriter->fromRewriteFormat(t);
     }
-  
-    /* atermpp::aterm_appl rewrite_internal(atermpp::aterm const& t, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) const
-    {
-      return m_rewriter->rewrite_internal(t,sigma);
-    } */
   
     atermpp::aterm_appl rewrite_internal(atermpp::aterm_appl const& t, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) const
     {
@@ -112,29 +97,6 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     {
       return m_rewriter->rewrite_internal_list(t,sigma);
     } 
-  
-    /* atermpp::aterm_appl internally_associated_value(const variable &v) const
-    {
-      return m_rewriter->getSubstitutionInternal(v);
-    }
-  
-    /// Note the internal state of the rewriter changes so constness is violated
-    void set_internally_associated_value(const variable &v, const atermpp::aterm_appl  &e) const
-    {
-      m_rewriter->setSubstitutionInternal(v, (ATerm)(ATermAppl)e);
-    }
-  
-    /// Note the internal state of the rewriter changes so constness is violated
-    void set_internally_associated_value(const variable &v, const data_expression &e) const
-    {
-      m_rewriter->setSubstitution(v, mcrl2::data::rewriter::implement(e));
-    }
-  
-    /// Note the internal state of the rewriter changes so constness is violated
-    void clear_internally_associated_value(const variable &v) const
-    {
-      m_rewriter->clearSubstitution(v);
-    } */
   
     mcrl2::data::detail::Rewriter& get_rewriter() const
     {

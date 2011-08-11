@@ -199,7 +199,7 @@ void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
   );
 
 
-  /* Test 17. */
+  /* Test 17. * /
   r = rewriter(spec_1, s);
   data_expression t17d1 = parse_data_expression("exists x_0: List(A). x_0 == [ac( false, []), ac(true, []), ac(false, [])] && [ac(true, []), ac(true, [])] == COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {}), {false: 2}) ", spec_1);
   data_expression t17d2 = parse_data_expression("true");
@@ -207,14 +207,14 @@ void quantifier_expression_test(mcrl2::data::rewriter::strategy s)
 
   /* Test 18. Similar test as test 17.
      The difference is in the structure of the body of the exists: Arguments left and right of the conjunct are swapped.
-  */
+  * /
   data_expression t18d1 = parse_data_expression(
        "exists x_0: List(A). [ac(true, []), ac(true, [])] == "
        "        COMM([false, false], true, x_0, PART(x_0, lambda x: List(Bool). {}), {false: 2}) &&  "
        "        x_0 == [ac( false, []), ac(true, []), ac(false, [])]", spec_1);
   data_expression t18d2 = parse_data_expression("true");
   BOOST_CHECK(r(t18d1) == r(t18d2));
-  
+  */
 
 
 }
@@ -223,7 +223,7 @@ int test_main(int argc, char** argv)
 {
   MCRL2_ATERMPP_INIT(argc, argv);
 
-  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies());
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
   for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
   {
     std::clog << "  Strategy: " << data::pp(*strat) << std::endl;

@@ -11,11 +11,12 @@
 #ifndef __LIBREWRITE_H
 #define __LIBREWRITE_H
 
-// #include "mcrl2/atermpp/map.h"
 #include "mcrl2/aterm/aterm2.h"
 #include <mcrl2/atermpp/aterm_int.h>
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/selection.h"
+#include "mcrl2/data/detail/rewrite_conversion_helper.h"
 
 #ifndef NO_DYNLOAD
 #define MCRL2_JITTYC_AVAILABLE /** \brief If defined the compiling JITty
@@ -82,15 +83,21 @@ typedef enum {
  **/
 class Rewriter
 {
+  protected:
+    detail::rewrite_conversion_helper< Rewriter> m_conversion_helper; 
+
   public:
     /**
      * \brief Constructor. Do not use directly; use createRewriter()
      *        function instead.
      * \sa createRewriter()
      **/
-    Rewriter();
+    Rewriter():m_conversion_helper(*this)
+    {}
+
     /** \brief Destructor. */
-    virtual ~Rewriter();
+    virtual ~Rewriter()
+    {}
 
     /**
      * \brief Get rewriter strategy that is used.
@@ -205,7 +212,10 @@ class Rewriter
  * \return A (pointer to a) rewriter that uses the data specification DataSpec
  *         and strategy Strategy to rewrite.
  **/
-Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrategy Strategy = GS_REWR_JITTY, const bool add_rewrite_rules=true);
+Rewriter* createRewriter(
+             const data_specification& DataSpec, 
+             const used_data_equation_selector &equations_selector,
+             const RewriteStrategy Strategy = GS_REWR_JITTY);
 
 /**
  * \brief Check that an mCRL2 data equation is a valid rewrite rule. If not, an runtime_error is thrown indicating the problem.
@@ -313,7 +323,7 @@ size_t get_num_opids();
 
 data_expression get_int2term(const size_t n);
 
-void set_int2term(const size_t n, const data_expression t);
+// void set_int2term(const size_t n, const data_expression t);
 
 atermpp::map< data_expression, atermpp::aterm_int >::const_iterator term2int_begin();
 

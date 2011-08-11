@@ -259,7 +259,7 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
   return ATreverse(strat);
 }
 
-RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules)
+RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::data::used_data_equation_selector& equation_selector)
 {
   ATermList n;
   ATermInt i;
@@ -274,7 +274,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
 
   jitty_true=NULL;
   ATprotectAppl(&jitty_true);
-  jitty_true = (ATermAppl)toInner(sort_bool::true_(),true);
+  jitty_true = (ATermAppl)toRewriteFormat(sort_bool::true_());
 
   /*  l = opid_eqns;
     for (; !ATisEmpty(l); l=ATgetNext(l))
@@ -285,10 +285,10 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
 
     l = dataappl_eqns;*/
   const atermpp::vector< data_equation > l = DataSpec.equations();
-  if (add_rewrite_rules) // if false, the rewrite rules are most likely added via a backdoor, through a special equation selector.
-  {
-    for (atermpp::vector< data_equation >::const_iterator j=l.begin();
+  for (atermpp::vector< data_equation >::const_iterator j=l.begin();
          j!=l.end(); ++j)
+  {
+    if (equation_selector(*j))
     {
       try
       {
@@ -300,7 +300,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
         continue;
       }
   
-      ATermAppl u = (ATermAppl)toInner(j->lhs(),true);
+      ATermAppl u = (ATermAppl)toRewriteFormat(j->lhs());
   
       atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( (ATermInt) ATgetArgument(u,0));
       if (it == jitty_eqns.end())
@@ -314,16 +314,16 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
         max_vars = j->variables().size();
       }
       n = ATinsert(n,(ATerm) ATmakeList4((ATerm) static_cast<ATermList>(j->variables()),
-                                         (ATerm)(ATermAppl)toInner(j->condition(),true),
+                                         (ATerm)(ATermAppl)toRewriteFormat(j->condition()),
                                          (ATerm) u,
-                                         (ATerm)(ATermAppl)toInner(j->rhs(),true)));
+                                         (ATerm)(ATermAppl)toRewriteFormat(j->rhs())));
       jitty_eqns[ (ATermInt) ATgetArgument(u,0)] = n;
     }
   }
 
-  jitty_strat = (ATermList*) malloc(get_num_opids()*sizeof(ATermList));
+  /* jitty_strat = (ATermList*) malloc(get_num_opids()*sizeof(ATermList));
   memset(jitty_strat,0,get_num_opids()*sizeof(ATermList));
-  ATprotectArray((ATerm*) jitty_strat,get_num_opids());
+  ATprotectArray((ATerm*) jitty_strat,get_num_opids()); */
 
 
   for(atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l1 = term2int_begin()
@@ -332,10 +332,19 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
   {
 
     i = l1->second;
-    set_int2term(ATgetInt(i), l1->first);
+    // set_int2term(ATgetInt(i), l1->first);
 
      atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
 
+    if (ATgetInt(i)>=jitty_strat.size())
+    { 
+      int oldsize=jitty_strat.size();
+      jitty_strat.resize(ATgetInt(i)+1);
+      for( ; oldsize<jitty_strat.size(); ++oldsize)
+      {
+        jitty_strat[oldsize]=NULL;
+      }
+    }
     if (it == jitty_eqns.end() )
     {
       jitty_strat[ATgetInt(i)] = NULL;
@@ -349,8 +358,8 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const bool add_
 
 RewriterJitty::~RewriterJitty()
 {
-  ATunprotectArray((ATerm*) jitty_strat);
-  free(jitty_strat);
+  // ATunprotectArray((ATerm*) jitty_strat);
+  // free(jitty_strat);
   ATunprotectAppl(&jitty_true);
   finalise_common();
 }
@@ -753,16 +762,24 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
 {
   size_t old_opids = get_num_opids();
-  atermpp::aterm_appl a = toInner(term,true);
+  // atermpp::aterm_appl a = toInner(term,true);
+  atermpp::aterm_appl a = toInner(m_conversion_helper.implement(term),true);
   if (old_opids < get_num_opids())
   {
-    ATunprotectArray((ATerm*) jitty_strat);
+    /* ATunprotectArray((ATerm*) jitty_strat);
     jitty_strat = (ATermList*) realloc(jitty_strat,get_num_opids()*sizeof(ATermList));
     for (size_t k = old_opids; k < get_num_opids(); k++)
     {
       jitty_strat[k] = NULL;
     }
-    ATprotectArray((ATerm*) jitty_strat,get_num_opids());
+    ATprotectArray((ATerm*) jitty_strat,get_num_opids()); */
+
+    int oldsize=jitty_strat.size();
+    jitty_strat.resize(get_num_opids());
+    for( ; oldsize<jitty_strat.size(); ++oldsize)
+    {
+      jitty_strat[oldsize]=NULL;
+    }
 
     for( atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l = term2int_begin()
         ; l != term2int_end()
@@ -771,7 +788,7 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
       atermpp::aterm_int i = l->second;
       if (((size_t) ATgetInt(i)) >= old_opids)
       {
-        set_int2term(ATgetInt(i), l->first);
+        // set_int2term(ATgetInt(i), l->first);
         jitty_strat[ATgetInt(i)] = NULL;
       }
     }
@@ -782,7 +799,8 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
 
 data_expression RewriterJitty::fromRewriteFormat(const atermpp::aterm_appl term)
 {
-  return fromInner(term);
+  // return fromInner(term);
+  return m_conversion_helper.lazy_reconstruct(fromInner(term));
 }
 
 data_expression RewriterJitty::rewrite(const data_expression term, mutable_map_substitution<> &sigma)

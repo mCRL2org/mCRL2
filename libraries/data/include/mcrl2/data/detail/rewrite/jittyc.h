@@ -32,7 +32,7 @@ namespace detail
 class RewriterCompilingJitty: public Rewriter
 {
   public:
-    RewriterCompilingJitty(const data_specification& DataSpec, const bool add_rewrite_rules);
+    RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &);
     virtual ~RewriterCompilingJitty();
 
     RewriteStrategy getStrategy();
@@ -47,6 +47,7 @@ class RewriterCompilingJitty: public Rewriter
     data_expression fromRewriteFormat(const atermpp::aterm_appl term);
     bool addRewriteRule(const data_equation rule);
     bool removeRewriteRule(const data_equation rule);
+    mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > *global_sigma;
 
   private:
     atermpp::set < data_equation > rewrite_rules;
@@ -86,7 +87,7 @@ class RewriterCompilingJitty: public Rewriter
     void implement_tree_aux(FILE* f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool* used, ATermList nnfvars);
     void implement_tree(FILE* f, ATermAppl tree, int arity, int d, int opid, bool* used);
     void implement_strategy(FILE* f, ATermList strat, int arity, int d, int opid, size_t nf_args);
-    void CompileRewriteSystem(const data_specification& DataSpec, const bool add_rewrite_rules);
+    void CompileRewriteSystem(const data_specification& DataSpec, const used_data_equation_selector& equations_selector);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
 	FILE* MakeTempFiles();

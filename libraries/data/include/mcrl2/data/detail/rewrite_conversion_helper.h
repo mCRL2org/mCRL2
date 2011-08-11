@@ -46,16 +46,17 @@ namespace detail
 /// part of old data implementation that is needed by the rewriter
 /// This code should become obsolete when the rewriter can deal with
 /// abstraction.
-class rewrite_conversion_helper
+template < class Rewriter >
+class rewrite_conversion_helper 
 {
 
   private:
 
     /// \brief the known sorts (pointer type to allow assignment)
-    data_specification const*                                m_data_specification;
+    // data_specification const*                                m_data_specification;
 
     /// \brief associated rewriter object (pointer type to allow assignment)
-    mcrl2::data::detail::Rewriter*                           m_rewriter;
+    Rewriter*                                                m_rewriter;
 
     /// \brief before rewriting
     atermpp::map< data_expression, data_expression >         m_implementation_context;
@@ -65,7 +66,7 @@ class rewrite_conversion_helper
 
   protected:
 
-    template < typename Sequence >
+    /* template < typename Sequence >
     void initialise(Sequence const& s)
     {
       // Add rewrite rules (needed only for lambda expressions)
@@ -76,7 +77,7 @@ class rewrite_conversion_helper
           throw mcrl2::runtime_error("Could not add rewrite rule!");
         }
       }
-    }
+    } */
 
     // Implementor has a pointer to a rewrite conversion helper.
     // This allows the implementor object to remain constant, wheras the
@@ -112,26 +113,19 @@ class rewrite_conversion_helper
   public:
 
     // For normalising sort expressions
-    sort_expression implement(sort_expression const& expression)
+    sort_expression implement(const sort_expression& s)
     {
-      const sort_expression normalised_sort=normalize_sorts(expression,*m_data_specification);
-      if (expression!=normalised_sort)
-      {
-        std::cerr << "WARNING: SORT " << expression << " should be equal to the normalised sort " <<
-                  normalize_sorts(expression,*m_data_specification) <<
-                  ".\nThis shows that the sorts in the input have not properly been normalised\n";
-      }
-      return normalised_sort;
+      return s;
     }
 
-    function_symbol implement(function_symbol const& f)
+    function_symbol implement(const function_symbol& f)
     {
-      return function_symbol(f.name(), implement(f.sort()));
+      return f;
     }
 
-    variable implement(variable const& v)
+    variable implement(const variable& v)
     {
-      return variable(v.name(), implement(v.sort()));
+      return v;
     }
 
     data_equation implement(data_equation const& equation)
@@ -148,7 +142,6 @@ class rewrite_conversion_helper
       using namespace mcrl2::core::detail;
 
       static number_postfix_generator symbol_generator("lambda@");
-
       const atermpp::map< data_expression, data_expression >::const_iterator i = m_implementation_context.find(expression);
       if (i == m_implementation_context.end())
       {
@@ -359,7 +352,6 @@ class rewrite_conversion_helper
       {
         return reconstruct(expression);
       }
-
       return expression;
     }
 
@@ -389,31 +381,9 @@ class rewrite_conversion_helper
       return expression;
     }
 
-    rewrite_conversion_helper(data_specification const& specification,
-                              detail::Rewriter& rewriter) :
-      m_data_specification(&specification),
+    rewrite_conversion_helper(Rewriter& rewriter) :
       m_rewriter(&rewriter)
     {
-      initialise(specification.equations());
-    }
-
-    template < typename EquationSelector >
-    rewrite_conversion_helper(data_specification const& specification,
-                              detail::Rewriter& rewriter,
-                              EquationSelector& selector) :
-      m_data_specification(&specification),
-      m_rewriter(&rewriter)
-    {
-      initialise(atermpp::detail::make_filter_iterator_range< EquationSelector& >(specification.equations(), selector));
-    }
-
-    template < typename EquationSelector >
-    rewrite_conversion_helper(data_specification const& specification,
-                              detail::Rewriter& rewriter, EquationSelector const& selector) :
-      m_data_specification(&specification),
-      m_rewriter(&rewriter)
-    {
-      initialise(atermpp::detail::make_filter_iterator_range< EquationSelector const& >(specification.equations(), selector));
     }
 };
 } // namespace detail

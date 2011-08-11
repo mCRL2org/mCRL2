@@ -196,7 +196,7 @@ void test_pbespgsolve(const std::string& pbes_spec, const pbespgsolve_options& o
 
 void test_pbes_solve(const std::string& pbes_spec, bool expected_result)
 {
-  std::vector<data::basic_rewriter<data::data_expression>::strategy> strategies = utilities::get_test_rewrite_strategies();
+  std::vector<data::basic_rewriter<data::data_expression>::strategy> strategies = utilities::get_test_rewrite_strategies(false);
 
   for(std::vector<data::basic_rewriter<data::data_expression>::strategy>::const_iterator i = strategies.begin(); i != strategies.end(); ++i)
   {

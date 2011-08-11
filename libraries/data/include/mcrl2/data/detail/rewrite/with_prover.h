@@ -30,7 +30,7 @@ class RewriterProver: public Rewriter
     boost::shared_ptr<detail::Rewriter> rewr_obj; 
 
   public:
-    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const bool add_rewrite_rules);
+    RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector);
     ~RewriterProver();
 
     mcrl2::data::detail::RewriteStrategy getStrategy();

@@ -150,7 +150,7 @@ class Formula_Checker
       bool a_witness = false,
       char const* a_dot_file_name = 0
     ):
-      f_bdd_prover(a_data_spec, a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction), f_dot_file_name(a_dot_file_name)
+      f_bdd_prover(a_data_spec, used_data_equation_selector(a_data_spec),a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction), f_dot_file_name(a_dot_file_name)
     {
       f_counter_example = a_counter_example;
       f_witness = a_witness;

@@ -82,9 +82,9 @@ Invariant_Eliminator::Invariant_Eliminator(
   const mcrl2::data::detail::SMT_Solver_Type a_solver_type /* = mcrl2::data::detail::solver_type_ario */,
   const bool a_apply_induction /* = false */,
   const bool a_simplify_all /* = false */):
-  f_bdd_prover(a_lps.data(), a_rewrite_strategy, a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
-  f_lps(a_lps),
-  f_simplify_all(a_simplify_all)
+  f_bdd_prover(a_lps.data(), used_data_equation_selector(a_lps.data()),a_rewrite_strategy, 
+    a_time_limit, a_path_eliminator, a_solver_type, a_apply_induction),
+    f_lps(a_lps), f_simplify_all(a_simplify_all)
 {
 }
 

@@ -89,9 +89,10 @@ class Prover:protected mcrl2::data::rewriter
   public:
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
     Prover(const data_specification& a_data_spec,
+           const used_data_equation_selector& equations_selector,
            mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
            int a_time_limit = 0): 
-                       mcrl2::data::rewriter(a_data_spec, a_rewrite_strategy),
+                       mcrl2::data::rewriter(a_data_spec, equations_selector, a_rewrite_strategy),
                        f_info(m_rewriter),
                        f_manipulator(m_rewriter, f_info)
     {

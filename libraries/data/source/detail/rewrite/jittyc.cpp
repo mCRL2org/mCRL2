@@ -270,7 +270,7 @@ atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expressio
 {
   size_t old_opids = get_num_opids();
 
-  atermpp::aterm_appl r = toInner(t,true); 
+  atermpp::aterm_appl r = toInner(m_conversion_helper.implement(t),true); 
 
   if (old_opids != get_num_opids())
   {
@@ -282,7 +282,7 @@ atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expressio
 
 data_expression RewriterCompilingJitty::fromRewriteFormat(const atermpp::aterm_appl t)
 {
-  return fromInner(t);
+  return m_conversion_helper.lazy_reconstruct(fromInner(t));
 }
 
 static char* whitespace_str = NULL;
@@ -2164,9 +2164,9 @@ static ATerm toInner_list_odd(ATermAppl Term)
 }
 
 
-bool RewriterCompilingJitty::addRewriteRule(const data_equation rule)
+bool RewriterCompilingJitty::addRewriteRule(const data_equation rule1)
 {
-
+  const data_equation rule=m_conversion_helper.implement(rule1);
   try
   {
     CheckRewriteRule(rule);
@@ -2181,29 +2181,17 @@ bool RewriterCompilingJitty::addRewriteRule(const data_equation rule)
   {  
     // The equation has been added as a rewrite rule, otherwise the equation was already present.
     // Add and number new OpIds, if so required.
-    toInner(rule.condition(),true);
-    toInner(rule.lhs(),true);
-    toInner(rule.rhs(),true);
+    toRewriteFormat(rule.condition());
+    toRewriteFormat(rule.lhs());
+    toRewriteFormat(rule.rhs());
     need_rebuild = true;
   }
   return true;
-
-  /* atermpp::aterm_appl u = toInner(rule.lhs(),true);
-
-  atermpp::map < atermpp::aterm_int, ATermList>::const_iterator it=tmp_eqns.find(u(0));
-  const ATermList n=(it==tmp_eqns.end()?ATmakeList0():it->second);
-    
-  tmp_eqns[u(0)]= ATinsert(n,(ATerm) ATmakeList4(
-                    (ATerm)(ATermList)rule.variables(),
-                    (ATerm)(ATermAppl)toInner_list_odd(rule.condition()),
-                    (ATerm)(ATermAppl) u,
-                    (ATerm)(ATermAppl) toInner_list_odd(rule.rhs())));
-
-  return true; */
 }
 
-bool RewriterCompilingJitty::removeRewriteRule(const data_equation rule)
+bool RewriterCompilingJitty::removeRewriteRule(const data_equation rule1)
 {
+  const data_equation rule=m_conversion_helper.implement(rule1);
   if (rewrite_rules.erase(rule)>0) // An equation is erased
   {  
     // The equation has been added as a rewrite rule, otherwise the equation was already present.
@@ -2213,7 +2201,7 @@ bool RewriterCompilingJitty::removeRewriteRule(const data_equation rule)
   return false;
 }
 
-void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec, const bool add_rewrite_rules)
+void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec, const used_data_equation_selector& equations_selector)
 {
   made_files = false;
   need_rebuild = true;
@@ -2221,12 +2209,22 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   true_inner = OpId2Int(sort_bool::true_());
   true_num = ATgetInt(true_inner);
 
+  for (function_symbol_vector::const_iterator it=DataSpec.mappings().begin(); it!=DataSpec.mappings().end(); ++it)
+  {
+    OpId2Int(*it);
+  }
+
+  for (function_symbol_vector::const_iterator it=DataSpec.constructors().begin(); it!=DataSpec.constructors().end(); ++it)
+  {
+    OpId2Int(*it);
+  }
+
   const data_equation_vector l=DataSpec.equations();
-  if (add_rewrite_rules)
-  { 
-    for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
+  for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
+  {
+    if (equations_selector(*j))
     {
-      addRewriteRule(*j);
+      addRewriteRule(m_conversion_helper.implement(*j));
     }
   }
   
@@ -2423,7 +2421,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   //
   fprintf(f,  "typedef atermpp::aterm_appl (*func_type)(const atermpp::aterm_appl);\n");
   fprintf(f,  "func_type* int2func[%ld];\n", max_arity+2);
-  fprintf(f,  "mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > global_sigma;\n");
 
   // Set this rewriter, to use its functions.
   fprintf(f,  "mcrl2::data::detail::RewriterCompilingJitty *this_rewriter;\n");
@@ -2500,13 +2497,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
         if (a==1 && (function_symbol(get_int2term(j)).name() == exists_function_symbol())) // existential quantifier.
         { 
           fprintf(f,"  // existential quantifier\n");
-          fprintf(f,"  return this_rewriter->internal_existential_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),global_sigma);\n",
+          fprintf(f,"  return this_rewriter->internal_existential_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),*(this_rewriter->global_sigma));\n",
                                (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
         }
         else if (a==1 && (function_symbol(get_int2term(j)).name() == forall_function_symbol())) // universal quantifier.
         { 
           fprintf(f,"  // universal quantifier\n");
-          fprintf(f,"  return this_rewriter->internal_universal_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),global_sigma);\n",
+          fprintf(f,"  return this_rewriter->internal_universal_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),*(this_rewriter->global_sigma));\n",
                                (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
         }
         else if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
@@ -2608,9 +2605,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "     atermpp::aterm head,\n"
       "     const atermpp::aterm_appl t)\n"
       "{\n"
-//      "  const ATerm u = this_rewriter->getSubstitutionInternal(head);\n"
       "  const atermpp::aterm_appl u= \n"
-      "          (mcrl2::core::detail::gsIsDataVarId(head)?global_sigma(mcrl2::data::variable(head)):atermpp::aterm_appl(head));\n"
+      "          (mcrl2::core::detail::gsIsDataVarId(head)?(*(this_rewriter->global_sigma))(mcrl2::data::variable(head)):atermpp::aterm_appl(head));\n"
       "  const size_t arity_t = ATgetArity(ATgetAFun(t));\n"
       "  size_t arity_u;\n"
       "  if (isAppl(u) )\n"
@@ -2665,7 +2661,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t,\n"
       "     mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma)\n"
       "{\n"
-      "  global_sigma=sigma;\n"
+//       "  this_rewriter->global_sigma= &sigma;\n"
       "  return rewrite(t);\n"
       "}\n"
       "\n");
@@ -2682,11 +2678,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "      if (function_index < %ld )\n"
       "      {\n"
       "        const size_t arity = ATgetArity(ATgetAFun(t));\n"
-      "        assert(arity <= %ld);"
+      "        assert(arity <= %ld);\n"
       "        assert(int2func[arity][function_index] != NULL);\n"
-      "        return int2func[arity][function_index](t);\n"
-      "      }"
-      "      else"
+      "        const atermpp::aterm_appl a=int2func[arity][function_index](t);\n"
+      "        return a;\n"
+      "      }\n"
+      "      else\n"
       "      {\n"
       "        return rewrite_int_aux(head, t);"
       "      }\n"
@@ -2699,7 +2696,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  else\n"
       "  {\n"
 //      "    return this_rewriter->getSubstitutionInternal(t);\n"
-      "    return global_sigma(t);\n"
+      "    return (*(this_rewriter->global_sigma))(t);\n"
       "  }\n"
       "}\n",
       get_num_opids(), max_arity);
@@ -2738,13 +2735,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   need_rebuild = false;
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const bool add_rewrite_rules)
+RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &equations_selector)
 {
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
   m_data_specification_for_enumeration = DataSpec;
   initialise_common();
-  CompileRewriteSystem(DataSpec,add_rewrite_rules);
+  CompileRewriteSystem(DataSpec, equations_selector);
 }
 
 RewriterCompilingJitty::~RewriterCompilingJitty()
@@ -2752,23 +2749,6 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
   CleanupRewriteSystem();
   finalise_common();
 }
-
-/* ATermList RewriterCompilingJitty::rewrite_internalList(ATermList l)
-{
-  if (l==ATempty)
-  {
-    return ATempty;
-  }
-
-  if (need_rebuild)
-  {
-    BuildRewriteSystem();
-  }
-
-  return aterm::ATinsertA(
-           rewrite_internalList(ATgetNext(l)),
-           so_rewr(ATAgetFirst(l)));
-} */
 
 data_expression RewriterCompilingJitty::rewrite(
      const data_expression term,
@@ -2791,7 +2771,8 @@ atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
   {
     BuildRewriteSystem();
   }
-   return so_rewr(term,sigma);
+  global_sigma= &sigma;
+  return so_rewr(term,sigma);
 }
 
 RewriteStrategy RewriterCompilingJitty::getStrategy()

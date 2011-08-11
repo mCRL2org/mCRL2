@@ -48,14 +48,6 @@ namespace data
 namespace detail
 {
 
-Rewriter::Rewriter()
-{
-}
-
-Rewriter::~Rewriter()
-{
-}
-
 data_expression_list Rewriter::rewrite_list(
      const data_expression_list terms,
      mutable_map_substitution<> &sigma)
@@ -130,7 +122,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 {
   /* Get Body of Exists */
   ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
-  data_expression d(fromRewriteFormat(t1));
+  data_expression d(fromInner(t1)); // Do not apply reconstruct, which can generate an explicit lambda.
 
   /* Get Sort for enumeration from Body*/
   sort_expression_list fsdomain = function_sort(d.sort()).domain();
@@ -154,7 +146,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   const variable_list vl=atermpp::convert< variable_list >(vv);
 
   EnumeratorSolutionsStandard sol(vl,
-      toRewriteFormat(application (d, atermpp::convert< data_expression_list >(vv))),
+      toInner(application (d, atermpp::convert< data_expression_list >(vv)),false),
       sigma,true,&ES,100);
 
   /* Create ATermList to store solutions */
@@ -200,7 +192,10 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 {
   /* Get Body of forall */
   ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
-  data_expression d(fromRewriteFormat(t1));
+  data_expression d(fromInner(t1));  // Do not apply fromRewriteFormat, as this generates an explicit lambda function,
+                                     // which when translated back to rewrite format can cause recompilation of the
+                                     // compiling rewriter, which causes havoc, as eliminating quantifiers is done while
+                                     // in the midst of a rewriting session.
   
   /* Get Sort for enumeration from Body*/
   sort_expression_list fsdomain = function_sort(d.sort()).domain();
@@ -223,7 +218,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   /* Find A solution*/
   const variable_list vl=atermpp::convert< variable_list >(vv);
   EnumeratorSolutionsStandard sol(vl,
-      toRewriteFormat(application (d, atermpp::convert< data_expression_list >(vv))),
+      toInner(application (d, atermpp::convert< data_expression_list >(vv)),false),
       sigma,false,&ES,100);
   
   /* Create ATermList to store solutions */
@@ -299,21 +294,24 @@ atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(
 }
 
 
-Rewriter* createRewriter(const data_specification& DataSpec, const RewriteStrategy Strategy, const bool add_rewrite_rules)
+Rewriter* createRewriter(
+            const data_specification& DataSpec, 
+            const used_data_equation_selector &equations_selector, 
+            const RewriteStrategy Strategy)
 {
   switch (Strategy)
   {
     case GS_REWR_JITTY:
-      return new RewriterJitty(DataSpec,add_rewrite_rules);
+      return new RewriterJitty(DataSpec,equations_selector);
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC:
-      return new RewriterCompilingJitty(DataSpec,add_rewrite_rules);
+      return new RewriterCompilingJitty(DataSpec,equations_selector);
 #endif
     case GS_REWR_JITTY_P:
-      return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty,add_rewrite_rules);
+      return new RewriterProver(DataSpec,mcrl2::data::rewriter::jitty,equations_selector);
 #ifdef MCRL2_JITTYC_AVAILABLE
     case GS_REWR_JITTYC_P:
-      return new RewriterProver(DataSpec,data::rewriter::jitty_compiling,add_rewrite_rules);
+      return new RewriterProver(DataSpec,data::rewriter::jitty_compiling,equations_selector);
 #endif
     default:
       return NULL;
@@ -550,15 +548,6 @@ data_expression get_int2term(const size_t n)
 {
   assert(n<int2term().size());
   return int2term()[n];
-}
-
-void set_int2term(const size_t n, const data_expression t)
-{
-  if (n>=int2term().size())
-  {
-    int2term().resize(n+1);
-  }
-  int2term()[n]=t;
 }
 
 void initialize_internal_translation_table_rewriter()

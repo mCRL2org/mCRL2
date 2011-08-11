@@ -432,12 +432,13 @@ class BDD_Prover: public Prover
 
     BDD_Prover(
       mcrl2::data::data_specification const& data_spec,
+      const used_data_equation_selector& equations_selector,
       mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
       int a_time_limit = 0,
       bool a_path_eliminator = false,
       SMT_Solver_Type a_solver_type = solver_type_cvc,
       bool a_apply_induction = false)
-      : Prover(data_spec, a_rewrite_strategy, a_time_limit),
+      : Prover(data_spec, equations_selector, a_rewrite_strategy, a_time_limit),
         f_data_spec(data_spec),
         f_induction(data_spec)
     {

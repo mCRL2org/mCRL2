@@ -25,7 +25,7 @@ namespace detail
 class RewriterJitty: public Rewriter
 {
   public:
-    RewriterJitty(const data_specification& DataSpec, const bool add_rewrite_rules);
+    RewriterJitty(const data_specification& DataSpec, const used_data_equation_selector &);
     ~RewriterJitty();
 
     RewriteStrategy getStrategy();
@@ -47,8 +47,9 @@ class RewriterJitty: public Rewriter
     ATermAppl jitty_true;
 
     atermpp::map< ATermInt, ATermList > jitty_eqns;
-    ATermList* jitty_strat;
+    atermpp::vector < ATermList >  jitty_strat;
     atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl term, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+    void build_strategies();
 };
 }
 }

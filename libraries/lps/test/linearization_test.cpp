@@ -44,7 +44,7 @@ void run_linearisation_instance(const std::string& spec, const t_lin_options& op
 void run_linearisation_test_case(const std::string& spec, const bool expect_success = true)
 {
   // Set various rewrite strategies
-  rewrite_strategy_vector rewrite_strategies = utilities::get_test_rewrite_strategies();
+  rewrite_strategy_vector rewrite_strategies = utilities::get_test_rewrite_strategies(false);
 
   for (rewrite_strategy_vector::const_iterator i = rewrite_strategies.begin(); i != rewrite_strategies.end(); ++i)
   {

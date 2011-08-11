@@ -38,14 +38,14 @@ struct default_global_variable_solver
   /// \brief Attempts to find a valuation for global variables that makes the condition
   /// !R(c, sigma) or (R(e, sigma) = R(g, sigma)) true.
   template <typename DataRewriter, typename Substitution>
-  data::mutable_map_substitution<> solve(const data::variable_list& V,
+  data::mutable_map_substitution<> solve(
+      const data::variable_list& V,
       const data::data_expression& /* c */,
       const data::data_expression& g,
       const data::variable& /* d */,
       const data::data_expression& e,
       const DataRewriter& R,
-      const Substitution& sigma
-                                                          )
+      const Substitution& sigma)
   {
     data::mutable_map_substitution<> result;
     data::data_expression r = R(g, sigma);
@@ -149,7 +149,9 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       m_ignore_conditions = ignore_conditions;
       data::data_expression_vector e = atermpp::convert<data::data_expression_vector>(m_spec.initial_process().state(m_spec.process().process_parameters()));
 
-      // optimization: rewrite the initial state vector e
+      // essential: rewrite the initial state vector e to normal form. Essential
+      // because this value is used in W below, and assigned to the right hand side of a substitution, which
+      // must be a normal form.
       lps::rewrite(e, R);
 
       linear_process& p = m_spec.process();
@@ -172,7 +174,8 @@ class constelm_algorithm: public lps::detail::lps_algorithm
       for (data::assignment_list::const_iterator i = assignments.begin();
            i!=assignments.end(); ++i)
       {
-        sigma[i->lhs()] = i->rhs();
+        // The rewriter requires that the rhs's of a substitution are in normal form.
+        sigma[i->lhs()] = R(i->rhs());
       }
 
       // undo contains undo information of instantiations of free variables
@@ -205,7 +208,7 @@ class constelm_algorithm: public lps::detail::lps_algorithm
                 {
                   for (data::mutable_map_substitution<>::const_iterator w = W.begin(); w != W.end(); ++w)
                   {
-                    sigma[w->first] = w->second;
+                    sigma[w->first] = w->second; 
                     undo[d_j].insert(w->first);
                   }
                 }
