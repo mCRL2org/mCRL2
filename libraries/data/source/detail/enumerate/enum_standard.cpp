@@ -187,7 +187,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
     vals = push_front(vals,val); 
 
     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > sigma;
-std::cerr << "CULPRIT " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(expr)) << "\n";
+// std::cerr << "CULPRIT " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(expr)) << "\n";
     expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewrite_internal(expr,enum_sigma);
 
     enum_sigma[var]=old_val;
