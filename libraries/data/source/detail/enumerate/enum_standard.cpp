@@ -177,9 +177,6 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   {
     vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
     
-    /* ATerm old_val=m_enclosing_enumerator->rewr_obj->getSubstitutionInternal((ATermAppl) var);
-    m_enclosing_enumerator->rewr_obj->setSubstitutionInternal((ATermAppl) var,(ATerm)(ATermAppl)val); */
-  
     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> >::const_iterator i=enum_sigma.find(var);
     const atermpp::aterm_appl old_val=(i==enum_sigma.end()?var:i->second);
     enum_sigma[var]=val;
@@ -187,13 +184,9 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
     vals = push_front(vals,val); 
 
     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > sigma;
-// std::cerr << "CULPRIT " << data::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(expr)) << "\n";
     expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewrite_internal(expr,enum_sigma);
 
     enum_sigma[var]=old_val;
-
-    /* m_enclosing_enumerator->rewr_obj->setSubstitutionInternal((ATermAppl) var,old_val); */
-    // m_enclosing_enumerator->rewr_obj->clearSubstitution((ATermAppl) var);
   }
 
   e=fs_expr(vars,substituted_vars,vals,expr);

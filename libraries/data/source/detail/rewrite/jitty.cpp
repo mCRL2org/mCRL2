@@ -41,21 +41,16 @@ namespace data
 namespace detail
 {
 
-static AFun nilAFun;
 static AFun opidAFun;
 static unsigned int is_initialised = 0;
 
 #define gsIsOpId(x) (ATgetAFun(x) == opidAFun)
-
-#define is_nil(x) (ATisList(x)?false:(ATgetAFun((ATermAppl) x) == nilAFun))
 
 
 static void initialise_common()
 {
   if (is_initialised == 0)
   {
-    nilAFun = ATgetAFun(gsMakeNil());
-    ATprotectAFun(nilAFun);
     opidAFun = ATgetAFun(static_cast<ATermAppl>(sort_bool::true_()));
     ATprotectAFun(opidAFun);
   }
@@ -71,7 +66,6 @@ static void finalise_common()
   if (is_initialised == 0)
   {
     ATunprotectAFun(opidAFun);
-    ATunprotectAFun(nilAFun);
   }
 }
 
@@ -268,7 +262,6 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
 
   initialise_common();
 
-  // num_opids = 0;
   max_vars = 0;
   need_rebuild = false;
 
@@ -276,14 +269,6 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
   ATprotectAppl(&jitty_true);
   jitty_true = (ATermAppl)toRewriteFormat(sort_bool::true_());
 
-  /*  l = opid_eqns;
-    for (; !ATisEmpty(l); l=ATgetNext(l))
-    {
-      // XXX only adds the last rule where lhs is an opid; this might go "wrong" if this rule is removed later
-      ATtablePut(jitty_eqns,OpId2Int(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) ATmakeList1((ATerm) ATmakeList4((ATerm) ATmakeList0(),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),1),true),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),2),true),(ATerm) toInner(ATAgetArgument(ATAgetFirst(l),3),true))));
-    }
-
-    l = dataappl_eqns;*/
   const atermpp::vector< data_equation > l = DataSpec.equations();
   for (atermpp::vector< data_equation >::const_iterator j=l.begin();
          j!=l.end(); ++j)
@@ -321,18 +306,12 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
     }
   }
 
-  /* jitty_strat = (ATermList*) malloc(get_num_opids()*sizeof(ATermList));
-  memset(jitty_strat,0,get_num_opids()*sizeof(ATermList));
-  ATprotectArray((ATerm*) jitty_strat,get_num_opids()); */
-
-
   for(atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l1 = term2int_begin()
       ; l1 != term2int_end()
       ; ++l1)
   {
 
     i = l1->second;
-    // set_int2term(ATgetInt(i), l1->first);
 
      atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
 
@@ -358,8 +337,6 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
 
 RewriterJitty::~RewriterJitty()
 {
-  // ATunprotectArray((ATerm*) jitty_strat);
-  // free(jitty_strat);
   ATunprotectAppl(&jitty_true);
   finalise_common();
 }
@@ -500,7 +477,13 @@ static atermpp::aterm subst_values(ATermAppl* vars, ATerm* vals, size_t len, con
   }
 }
 
-static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* len)
+static bool match_jitty(
+                    ATerm t, 
+                    ATerm p, 
+                    ATermAppl* vars, 
+                    ATerm* vals, 
+                    size_t* len,
+                    const size_t maxlen)
 {
   if (ATisInt(p))
   {
@@ -508,9 +491,9 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
   }
   else if (gsIsDataVarId((ATermAppl) p))
   {
-//    t = RWapplySubstitution(t); //XXX dirty (t is not a variable)
     for (size_t i=0; i<*len; i++)
     {
+      assert(i<maxlen);
       if (ATisEqual(p,vars[i]))
       {
         if (ATisEqual(t,vals[i]))
@@ -523,6 +506,7 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
         }
       }
     }
+    assert(*len<maxlen);
     vars[*len] = (ATermAppl) p;
     vals[*len] = t;
     (*len)++;
@@ -543,7 +527,7 @@ static bool match_jitty(ATerm t, ATerm p, ATermAppl* vars, ATerm* vals, size_t* 
 
     for (size_t i=0; i<arity; i++)
     {
-      if (!match_jitty(ATgetArgument((ATermAppl) t,i),ATgetArgument((ATermAppl) p,i),vars,vals,len))
+      if (!match_jitty(ATgetArgument((ATermAppl) t,i),ATgetArgument((ATermAppl) p,i),vars,vals,len,maxlen))
       {
         return false;
       }
@@ -639,13 +623,14 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 
           for (size_t i=1; i<rule_arity; i++)
           {
-            if (!match_jitty((rewritten[i]==atermpp::aterm())?((ATerm) args[i]):(ATerm)rewritten[i],ATgetArgument(lhs,i),vars,vals,&len))
+            assert(i<arity);
+            if (!match_jitty((rewritten[i]==atermpp::aterm())?((ATerm) args[i]):(ATerm)rewritten[i],ATgetArgument(lhs,i),vars,vals,&len,max_len))
             {
               matches = false;
               break;
             }
           }
-
+          assert(len<=max_len);
           if (matches && (ATisEqual(ATAelementAt(rule,1),jitty_true) || 
                           ATisEqual((ATermAppl)rewrite_aux(subst_values(vars,vals,len,ATelementAt(rule,1)),sigma),jitty_true)))
           {
@@ -734,7 +719,6 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
               i++;
             }
 
-            // ATermAppl a = ATmakeApplArray(getAppl(new_arity),newargs);
             const atermpp::aterm_appl a = ApplyArray(new_arity,newargs);
 
             return rewrite_aux(a,sigma);
@@ -762,18 +746,9 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
 {
   size_t old_opids = get_num_opids();
-  // atermpp::aterm_appl a = toInner(term,true);
   atermpp::aterm_appl a = toInner(m_conversion_helper.implement(term),true);
   if (old_opids < get_num_opids())
   {
-    /* ATunprotectArray((ATerm*) jitty_strat);
-    jitty_strat = (ATermList*) realloc(jitty_strat,get_num_opids()*sizeof(ATermList));
-    for (size_t k = old_opids; k < get_num_opids(); k++)
-    {
-      jitty_strat[k] = NULL;
-    }
-    ATprotectArray((ATerm*) jitty_strat,get_num_opids()); */
-
     int oldsize=jitty_strat.size();
     jitty_strat.resize(get_num_opids());
     for( ; oldsize<jitty_strat.size(); ++oldsize)
@@ -781,17 +756,16 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
       jitty_strat[oldsize]=NULL;
     }
 
-    for( atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l = term2int_begin()
+    /* for( atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l = term2int_begin()
         ; l != term2int_end()
         ; ++l)
     {
       atermpp::aterm_int i = l->second;
       if (((size_t) ATgetInt(i)) >= old_opids)
       {
-        // set_int2term(ATgetInt(i), l->first);
         jitty_strat[ATgetInt(i)] = NULL;
       }
-    }
+    } */
   }
 
   return a;
@@ -799,7 +773,6 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
 
 data_expression RewriterJitty::fromRewriteFormat(const atermpp::aterm_appl term)
 {
-  // return fromInner(term);
   return m_conversion_helper.lazy_reconstruct(fromInner(term));
 }
 
@@ -832,7 +805,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
     need_rebuild = false;
   }
 
-  return rewrite_aux(term, sigma);
+  const atermpp::aterm_appl a=rewrite_aux(term, sigma);
+  return a;
 }
 
 RewriteStrategy RewriterJitty::getStrategy()

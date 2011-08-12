@@ -127,6 +127,7 @@ class used_data_equation_selector
     {
       add_symbols(specification.constructors());
       add_symbols(specification.mappings());
+      add_data_specification_symbols(specification);
     }
 };
 
