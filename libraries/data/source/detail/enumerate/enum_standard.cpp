@@ -50,22 +50,75 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
                                 const atermpp::term_list< atermpp::aterm_appl > negation_term_list,
                                 const bool negated) const
 { /* If negation_term_list is [t1,...,tn], generate an expression of the form
-     condition /\ !t1 /\ !t2 /\ ... /\ !tn in internal format. */
+     condition /\ !t1 /\ !t2 /\ ... /\ !tn in internal format. Using ad hoc
+     rewriting is cheaper than using a full fledged rewriter, that will
+     again normalise all subterms.
+  */
   if (negation_term_list.empty())
   { 
     if (negated)
     { 
+      if (condition == m_enclosing_enumerator->rewr_true)
+      {
+        return m_enclosing_enumerator->rewr_false;
+      }
+      else if (condition == m_enclosing_enumerator->rewr_false)
+      {
+        return m_enclosing_enumerator->rewr_true;
+      }
+      else if (condition(0) == m_enclosing_enumerator->opidNot)
+      {
+        return condition(1);
+      }
       return Apply1(atermpp::aterm(m_enclosing_enumerator->opidNot), condition);
     }
     return condition;
   }
 
-  return Apply2(m_enclosing_enumerator->opidAnd,
-                add_negations(condition,pop_front(negation_term_list),negated),
-                (negated?
-                    negation_term_list.front():
-                    Apply1(m_enclosing_enumerator->opidNot,
-                           negation_term_list.front())));
+  const atermpp::aterm_appl first_argument=add_negations(condition,pop_front(negation_term_list),negated);
+  atermpp::aterm_appl second_argument= negation_term_list.front();
+  if (!negated)
+  {
+    if (second_argument == m_enclosing_enumerator->rewr_true)
+    {
+      return m_enclosing_enumerator->rewr_false;
+    }
+    else if (second_argument == m_enclosing_enumerator->rewr_false)
+    {
+      return m_enclosing_enumerator->rewr_true;
+    }
+    else if (second_argument(0) == m_enclosing_enumerator->opidNot)
+    {
+      second_argument=second_argument(1);
+    }
+    else 
+    {
+      second_argument=Apply1(m_enclosing_enumerator->opidNot,second_argument);
+    }
+  }
+  
+  if (first_argument==m_enclosing_enumerator->rewr_true)
+  {
+    return second_argument;
+  }
+  else if (first_argument==m_enclosing_enumerator->rewr_false)
+  {
+    return m_enclosing_enumerator->rewr_false;
+  }
+  if (second_argument==m_enclosing_enumerator->rewr_true)
+  {
+    return first_argument;
+  }
+  else if (second_argument==m_enclosing_enumerator->rewr_false)
+  {
+    return m_enclosing_enumerator->rewr_false;
+  }
+  else
+  {
+    return  Apply2(m_enclosing_enumerator->opidAnd,
+                first_argument,
+                second_argument);
+  }
 }
 
 atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(const atermpp::term_list< atermpp::aterm_appl > l) const
@@ -80,6 +133,55 @@ atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(co
                                              l.front())));
 }
 
+void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewriting(
+                                atermpp::deque < fs_expr> &fs_stack,
+                                const variable_list var_list,
+                                const variable_list substituted_vars,
+                                const atermpp::term_list< atermpp::aterm_appl > substitution_terms,
+                                const atermpp::aterm_appl condition,
+                                const atermpp::term_list< atermpp::aterm_appl > negated_term_list,
+                                const bool negated) const
+{
+  /* If the negated_term_list equals t1,...,tn, store condition /\ !t1 /\ !t2 /\ ... /\ !tn
+     on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
+     store phi and psi /\ !phi separately. This allows the equality eliminator to remove
+     more equalities and therefore be more effective. */
+
+  if (condition(0) == m_enclosing_enumerator->opidNot)
+  {
+    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,condition(1),negate(negated_term_list),!negated);
+  }
+  else if ((negated && condition(0) == m_enclosing_enumerator->opidAnd) ||
+           (!negated && condition(0) == m_enclosing_enumerator->opidOr))
+  { 
+    assert(condition.size()==3);
+    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,condition(1),negated_term_list,negated);
+    push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,condition(2),
+                           push_front(negated_term_list,static_cast<atermpp::aterm_appl>(condition(1))),negated);
+  }
+  else
+  { 
+    const atermpp::aterm_appl new_expr = add_negations(condition,negated_term_list,negated); 
+
+    if (new_expr!=m_enclosing_enumerator->rewr_false)
+    { 
+#ifndef NDEBUG
+      // Check that substituted variables do not occur in the expression expr.
+      std::set <variable> s=data::find_free_variables(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(new_expr));
+      for(std::set <variable>::const_iterator it=s.begin(); it!=s.end(); ++it)
+      {
+        assert(std::find(substituted_vars.begin(),substituted_vars.end(),*it)==substituted_vars.end());
+      }
+#endif 
+
+      fs_stack.push_back(fs_expr(var_list,
+                             substituted_vars,
+                             substitution_terms, 
+                             new_expr));
+    }
+  }
+}
+
 void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
                                 atermpp::deque < fs_expr> &fs_stack,
                                 const variable_list var_list,
@@ -89,36 +191,14 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or(
                                 const atermpp::term_list< atermpp::aterm_appl > negated_term_list,
                                 const bool negated) const
 {
-   /* If the negated_term_list equals t1,...,tn, store condition /\ !t1 /\ !t2 /\ ... /\ !tn
-      on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
-      store phi and psi /\ !phi separately. This allows the equality eliminator to remove
-      more equalities and therefore be more effective. */
-   const atermpp::aterm_appl condition1 = m_enclosing_enumerator->rewr_obj->rewrite_internal((ATerm)(ATermAppl)condition,enum_sigma);
-   if (condition1(0) == m_enclosing_enumerator->opidNot)
-   {
-     push_on_fs_stack_and_split_or(fs_stack,var_list,substituted_vars,substitution_terms,condition1(1),negate(negated_term_list),!negated);
-   }
-   else if ((negated && condition1(0) == m_enclosing_enumerator->opidAnd) ||
-            (!negated && condition1(0) == m_enclosing_enumerator->opidOr))
-   { 
-     assert(condition1.size()==3);
-     push_on_fs_stack_and_split_or(fs_stack,var_list,substituted_vars,substitution_terms,condition1(1),negated_term_list,negated);
-     push_on_fs_stack_and_split_or(fs_stack,var_list,substituted_vars,substitution_terms,condition1(2),
-                            push_front(negated_term_list,static_cast<atermpp::aterm_appl>(condition1(1))),negated);
-   }
-   else
-   { 
-     const atermpp::aterm_appl new_expr = m_enclosing_enumerator->rewr_obj->rewrite_internal(
-                 (ATerm)(ATermAppl)add_negations(condition1,negated_term_list,negated),enum_sigma);
-
-     if (new_expr!=m_enclosing_enumerator->rewr_false)
-     { 
-       fs_stack.push_back(fs_expr(var_list,
-                              substituted_vars,
-                              substitution_terms, 
-                              new_expr));
-     }
-   }
+  EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewriting(
+                                fs_stack,
+                                var_list,
+                                substituted_vars,
+                                substitution_terms,
+                                m_enclosing_enumerator->rewr_obj->rewrite_internal(condition,enum_sigma),
+                                negated_term_list,
+                                negated);
 }
 
 bool EnumeratorSolutionsStandard::FindInnerCEquality(
@@ -177,18 +257,25 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   {
     vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
     
-    mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> >::const_iterator i=enum_sigma.find(var);
-    const atermpp::aterm_appl old_val=(i==enum_sigma.end()?var:i->second);
-    enum_sigma[var]=val;
     substituted_vars=push_front(substituted_vars,var); 
     vals = push_front(vals,val); 
 
     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > sigma;
-    expr = (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewrite_internal(expr,enum_sigma);
-
-    enum_sigma[var]=old_val;
+    sigma[var]=val;
+    // Use a rewrite here to remove occurrences of subexpressions the form t==t caused by
+    // replacing in x==t the variable x by t.
+    expr = m_enclosing_enumerator->rewr_obj->rewrite_internal(expr,sigma);
   }
 
+#ifndef NDEBUG
+  // Check that substituted variables do not occur in the expression expr.
+  std::set <variable> s=data::find_free_variables(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(expr));
+  for(std::set <variable>::const_iterator it=s.begin(); it!=s.end(); ++it)
+  {
+    assert(std::find(substituted_vars.begin(),substituted_vars.end(),*it)==substituted_vars.end());
+  }
+
+#endif 
   e=fs_expr(vars,substituted_vars,vals,expr);
 }
 
@@ -276,7 +363,7 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
   else
   {
     return push_front(build_solution2(pop_front(vars),substituted_vars,exprs),
-           (atermpp::aterm_appl)m_enclosing_enumerator->rewr_obj->rewrite_internal((ATerm)(ATermAppl)build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
+               m_enclosing_enumerator->rewr_obj->rewrite_internal(build_solution_single(vars.front(),substituted_vars,exprs),enum_sigma));
   }
 }
 
@@ -432,7 +519,7 @@ bool EnumeratorSolutionsStandard::next(
                   }
                   exception_message << data::pp(*k) << ":" << data::pp(k->sort());
                 }
-                exception_message << " that satisfy " << core::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)enum_expr));
+                exception_message << " that satisfy " << core::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr));
                 throw mcrl2::runtime_error(exception_message.str());
               }
             }
@@ -447,7 +534,7 @@ bool EnumeratorSolutionsStandard::next(
                 }
                 cerr << data::pp(*k) << ":" << data::pp(k->sort());
               }
-              cerr << " that satisfy " << core::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat((ATerm)(ATermAppl)enum_expr)) << endl;
+              cerr << " that satisfy " << core::pp(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(enum_expr)) << endl;
               max_vars *= MAX_VARS_FACTOR;
             }
           }
@@ -460,23 +547,16 @@ bool EnumeratorSolutionsStandard::next(
           {
             cons_term = application(*it, reverse(var_list));
           }
-          atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->rewrite_internal(m_enclosing_enumerator->rewr_obj->toRewriteFormat(cons_term),enum_sigma);
-  
-          mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> >::const_iterator i=enum_sigma.find(var);
-          const atermpp::aterm_appl old_val=(i==enum_sigma.end()?var:i->second);
 
-          enum_sigma[var]=term_rf;
-  
+          atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->toRewriteFormat(cons_term);
           push_on_fs_stack_and_split_or(
                                   fs_stack,
                                   uvars+var_list,
                                   push_front(e.substituted_vars(),var),
                                   push_front(e.vals(),term_rf),
-                                  (atermpp::aterm_appl)e.expr(),
+                                  atermpp::replace(e.expr(),var,term_rf), 
                                   atermpp::term_list < atermpp::aterm_appl > (),
                                   false); 
-
-          enum_sigma[var]=old_val;
         }
       }
     }

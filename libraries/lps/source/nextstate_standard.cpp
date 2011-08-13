@@ -54,7 +54,7 @@ static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
       result.append(", ");
     }
 
-    result.append(pp(atermpp::aterm(info.m_rewriter.convert_from(static_cast<ATerm>(*i)))));
+    result.append(core::pp(atermpp::aterm(info.m_rewriter.convert_from(static_cast<ATerm>(*i)))));
   }
   result.append(")");
   return result;
@@ -504,8 +504,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::Nextate(spec, allow_free_vars, state_format, rewriter), with" <<  std::endl <<
             "  allow_free_vars = " << allow_free_vars << std::endl <<
-            "  state_format = " << state_format << std::endl <<
-            "  LPS= " << mcrl2::lps::pp(spec) << std::endl;
+            "  state_format = " << state_format << std::endl << std::endl;
 #endif
   ATermList l,m,n,free_vars;
 
@@ -1103,7 +1102,6 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
     for( ; !ATisEmpty(assignments) ;  assignments=ATgetNext(assignments), ++j)
     {
       atermpp::aterm_appl t=ATgetFirst(assignments);
-      // info.m_rewriter.set_internally_associated_value(*j,t);
       current_substitution[*j]=t;
     }
 
@@ -1125,7 +1123,6 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
     for(variable_list::const_iterator j=enumerated_variables.begin(); 
               j!=enumerated_variables.end(); ++j)
     {
-      // info.m_rewriter.clear_internally_associated_value(*j);
       current_substitution[*j]=atermpp::aterm_appl(*j);
     }
     ++valuations;
