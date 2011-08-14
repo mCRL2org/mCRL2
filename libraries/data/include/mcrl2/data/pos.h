@@ -662,13 +662,11 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(vb, vq)), less(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), less(cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), less_equal(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(sort_bool::false_(), vq)), less(vp, vq)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), less(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vc, vb), less(vp, vq), less_equal(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp), less_equal(c1(), vp), sort_bool::true_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp), less_equal(cdub(vb, vp), c1()), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less_equal(cdub(vb, vp), cdub(vb, vq)), less_equal(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less_equal(cdub(sort_bool::false_(), vp), cdub(vb, vq)), less_equal(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), less_equal(cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), less(vp, vq)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), less_equal(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vb, vc), less_equal(vp, vq), less(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), maximum(vp, vq), if_(less_equal(vp, vq), vq, vp)));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), minimum(vp, vq), if_(less_equal(vp, vq), vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vp), abs(vp), vp));

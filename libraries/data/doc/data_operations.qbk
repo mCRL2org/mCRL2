@@ -76,7 +76,6 @@ numbers.
   [ [`succ(p) `]  [ [^ succ(p)] ]   [ successor ] ]
   [ [`plus(p,q) `]  [ [^ p+q ] ]   [ addition ] ]
   [ [`add_with_carry(b,p,q) `]  [ [^ @addc(b,p,q) ] ]   [ addition with carry (p + q + b) ] ]
-  [ [`multir(b,p,q,r) `]  [ [^ @multir(b,p,q,r) ] ]   [ multiplication with intermediate result ] ]
 ]
 
 [endsect] [/ Positive numbers]
