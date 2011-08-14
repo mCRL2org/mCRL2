@@ -2142,7 +2142,6 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vn), abs(vn), vn));
         result.push_back(data_equation(variable_list(), succ(c0()), sort_pos::c1()));
         result.push_back(data_equation(atermpp::make_vector(vp), succ(cnat(vp)), succ(vp)));
-        result.push_back(data_equation(atermpp::make_vector(vn), succ(succ(vn)), sort_pos::cdub(equal_to(mod(vn, sort_pos::cdub(sort_bool::false_(), sort_pos::c1())), cnat(sort_pos::c1())), succ(div(vn, sort_pos::cdub(sort_bool::false_(), sort_pos::c1()))))));
         result.push_back(data_equation(variable_list(), pred(sort_pos::c1()), c0()));
         result.push_back(data_equation(atermpp::make_vector(vp), pred(sort_pos::cdub(sort_bool::true_(), vp)), cnat(sort_pos::cdub(sort_bool::false_(), vp))));
         result.push_back(data_equation(atermpp::make_vector(vp), pred(sort_pos::cdub(sort_bool::false_(), vp)), dub(sort_bool::true_(), pred(vp))));
@@ -2169,8 +2168,8 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cnat(vp), cnat(vq)), cnat(times(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp), exp(vp, c0()), sort_pos::c1()));
         result.push_back(data_equation(atermpp::make_vector(vp), exp(vp, cnat(sort_pos::c1())), vp));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), exp(vp, cnat(sort_pos::cdub(sort_bool::false_(), vq))), exp(sort_pos::multir(sort_bool::false_(), sort_pos::c1(), vp, vp), cnat(vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), exp(vp, cnat(sort_pos::cdub(sort_bool::true_(), vq))), sort_pos::multir(sort_bool::false_(), sort_pos::c1(), vp, exp(sort_pos::multir(sort_bool::false_(), sort_pos::c1(), vp, vp), cnat(vq)))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), exp(vp, cnat(sort_pos::cdub(sort_bool::false_(), vq))), exp(times(vp, vp), cnat(vq))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), exp(vp, cnat(sort_pos::cdub(sort_bool::true_(), vq))), times(vp, exp(times(vp, vp), cnat(vq)))));
         result.push_back(data_equation(atermpp::make_vector(vn), exp(vn, c0()), cnat(sort_pos::c1())));
         result.push_back(data_equation(atermpp::make_vector(vp), exp(c0(), cnat(vp)), c0()));
         result.push_back(data_equation(atermpp::make_vector(vn, vp), exp(cnat(vp), vn), cnat(exp(vp, vn))));

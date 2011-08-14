@@ -553,64 +553,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@multir
-      /// \return Identifier \@multir
-      inline
-      core::identifier_string const& multir_name()
-      {
-        static core::identifier_string multir_name = data::detail::initialise_static_expression(multir_name, core::identifier_string("@multir"));
-        return multir_name;
-      }
-
-      /// \brief Constructor for function symbol \@multir
-      /// \return Function symbol multir
-      inline
-      function_symbol const& multir()
-      {
-        static function_symbol multir = data::detail::initialise_static_expression(multir, function_symbol(multir_name(), make_function_sort(sort_bool::bool_(), pos(), pos(), pos(), pos())));
-        return multir;
-      }
-
-
-      /// \brief Recogniser for function \@multir
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@multir
-      inline
-      bool is_multir_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e) == multir();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@multir
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \param arg3 A data expression
-      /// \return Application of \@multir to a number of arguments
-      inline
-      application multir(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2, const data_expression& arg3)
-      {
-        return multir()(arg0, arg1, arg2, arg3);
-      }
-
-      /// \brief Recogniser for application of \@multir
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol multir to a
-      ///     number of arguments
-      inline
-      bool is_multir_application(const atermpp::aterm_appl& e)
-      {
-        if (is_application(e))
-        {
-          return is_multir_function_symbol(application(e).head());
-        }
-        return false;
-      }
-
       /// \brief Give all system defined mappings for pos
       /// \return All system defined mappings for pos
       inline
@@ -624,9 +566,20 @@ namespace mcrl2 {
         result.push_back(plus());
         result.push_back(add_with_carry());
         result.push_back(times());
-        result.push_back(multir());
         return result;
       }
+      ///\brief Function for projecting out argument
+      ///        bit from an application
+      /// \param e A data expression
+      /// \pre bit is defined for e
+      /// \return The argument of e that corresponds to bit
+      inline
+      data_expression bit(const data_expression& e)
+      {
+        assert(is_cdub_application(e) || is_add_with_carry_application(e));
+        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
+      }
+
       ///\brief Function for projecting out argument
       ///        right from an application
       /// \param e A data expression
@@ -648,42 +601,6 @@ namespace mcrl2 {
       }
 
       ///\brief Function for projecting out argument
-      ///        arg1 from an application
-      /// \param e A data expression
-      /// \pre arg1 is defined for e
-      /// \return The argument of e that corresponds to arg1
-      inline
-      data_expression arg1(const data_expression& e)
-      {
-        assert(is_multir_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 1);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        arg2 from an application
-      /// \param e A data expression
-      /// \pre arg2 is defined for e
-      /// \return The argument of e that corresponds to arg2
-      inline
-      data_expression arg2(const data_expression& e)
-      {
-        assert(is_multir_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 2);
-      }
-
-      ///\brief Function for projecting out argument
-      ///        arg3 from an application
-      /// \param e A data expression
-      /// \pre arg3 is defined for e
-      /// \return The argument of e that corresponds to arg3
-      inline
-      data_expression arg3(const data_expression& e)
-      {
-        assert(is_multir_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 3);
-      }
-
-      ///\brief Function for projecting out argument
       ///        number from an application
       /// \param e A data expression
       /// \pre number is defined for e
@@ -701,18 +618,6 @@ namespace mcrl2 {
           return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
         throw mcrl2::runtime_error("Unexpected expression occurred");
-      }
-
-      ///\brief Function for projecting out argument
-      ///        bit from an application
-      /// \param e A data expression
-      /// \pre bit is defined for e
-      /// \return The argument of e that corresponds to bit
-      inline
-      data_expression bit(const data_expression& e)
-      {
-        assert(is_cdub_application(e) || is_add_with_carry_application(e) || is_multir_application(e));
-        return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
       ///\brief Function for projecting out argument
@@ -752,7 +657,6 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vp, vq), equal_to(cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), equal_to(cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), equal_to(cdub(vb, vp), cdub(vb, vq)), equal_to(vp, vq)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool::and_(equal_to(vb, vc), equal_to(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp), less(vp, c1()), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp), less(c1(), cdub(vb, vp)), sort_bool::true_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(vb, vq)), less(vp, vq)));
@@ -771,8 +675,6 @@ namespace mcrl2 {
         result.push_back(data_equation(variable_list(), succ(c1()), cdub(sort_bool::false_(), c1())));
         result.push_back(data_equation(atermpp::make_vector(vp), succ(cdub(sort_bool::false_(), vp)), cdub(sort_bool::true_(), vp)));
         result.push_back(data_equation(atermpp::make_vector(vp), succ(cdub(sort_bool::true_(), vp)), cdub(sort_bool::false_(), succ(vp))));
-        result.push_back(data_equation(variable_list(), succ(succ(c1())), cdub(sort_bool::true_(), c1())));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp), succ(succ(cdub(vb, vp))), cdub(vb, succ(vp))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), plus(vp, vq), add_with_carry(sort_bool::false_(), vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vp), add_with_carry(sort_bool::false_(), c1(), vp), succ(vp)));
         result.push_back(data_equation(atermpp::make_vector(vp), add_with_carry(sort_bool::true_(), c1(), vp), succ(succ(vp))));
@@ -781,13 +683,12 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), add_with_carry(vb, cdub(vc, vp), cdub(vc, vq)), cdub(vb, add_with_carry(vc, vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::not_(vb), add_with_carry(vb, vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), add_with_carry(vb, cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), cdub(sort_bool::not_(vb), add_with_carry(vb, vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), less_equal(vp, vq), times(vp, vq), multir(sort_bool::false_(), c1(), vp, vq)));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), less(vq, vp), times(vp, vq), multir(sort_bool::false_(), c1(), vq, vp)));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), multir(sort_bool::false_(), vp, c1(), vq), vq));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), multir(sort_bool::true_(), vp, c1(), vq), add_with_carry(sort_bool::false_(), vp, vq)));
-        result.push_back(data_equation(atermpp::make_vector(vb, vp, vq, vr), multir(vb, vp, cdub(sort_bool::false_(), vq), vr), multir(vb, vp, vq, cdub(sort_bool::false_(), vr))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq, vr), multir(sort_bool::false_(), vp, cdub(sort_bool::true_(), vq), vr), multir(sort_bool::true_(), vr, vq, cdub(sort_bool::false_(), vr))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq, vr), multir(sort_bool::true_(), vp, cdub(sort_bool::true_(), vq), vr), multir(sort_bool::true_(), add_with_carry(sort_bool::false_(), vp, vr), vq, cdub(sort_bool::false_(), vr))));
+        result.push_back(data_equation(atermpp::make_vector(vp), times(c1(), vp), vp));
+        result.push_back(data_equation(atermpp::make_vector(vp), times(vp, c1()), vp));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::false_(), vp), vq), cdub(sort_bool::false_(), times(vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(vp, cdub(sort_bool::false_(), vq)), cdub(sort_bool::false_(), times(vp, vq))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::true_(), vp), vq), add_with_carry(sort_bool::false_(), cdub(sort_bool::false_(), times(vp, vq)), vq)));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(vp, cdub(sort_bool::true_(), vq)), add_with_carry(sort_bool::false_(), vp, cdub(sort_bool::false_(), times(vp, vq)))));
         return result;
       }
 
