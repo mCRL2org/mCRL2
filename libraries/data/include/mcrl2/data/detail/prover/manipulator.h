@@ -12,6 +12,7 @@
 #ifndef MANIPULATOR_H
 #define MANIPULATOR_H
 
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/data/detail/prover/info.h"
 #include "mcrl2/aterm/aterm_ext.h"
 
@@ -214,7 +215,7 @@ class InternalFormatManipulator
       v_function = a_term(0);
       v_arity = ATgetArity(v_symbol);
 
-      atermpp::aterm v_parts[v_arity + 1];
+      MCRL2_SYSTEM_SPECIFIC_ALLOCA(v_parts, atermpp::aterm,v_arity + 1);
       v_parts[0] = v_function;
       for (size_t i = 1; i < v_arity; i++)
       {
