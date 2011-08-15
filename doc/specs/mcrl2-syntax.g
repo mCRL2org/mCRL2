@@ -95,14 +95,14 @@ DataExpr
   | DataExpr 'whr' WhrExprList 'end'
   ;
 
-dataexpr_disambiguation
+DataExprUnit
   : '(' DataExpr ')'
   | 'true'
   | 'false'
   | Id
   | Number
-  | dataexpr_disambiguation '(' DataExprList ')'
-  | dataexpr_unary_operator dataexpr_disambiguation
+  | DataExprUnit '(' DataExprList ')'
+  | dataexpr_unary_operator DataExprUnit
   ;
 
 dataexpr_unary_operator
@@ -185,9 +185,9 @@ ProcExpr
   | 'comm' '(' CommExprSet ',' ProcExpr ')'
   | '(' ProcExpr ')'
   | ProcExpr procexpr_binary_operator ProcExpr
-  | ProcExpr procexpr_time_operator dataexpr_disambiguation
+  | ProcExpr procexpr_time_operator DataExprUnit
   | procexpr_unary_operator ProcExpr
-  | dataexpr_disambiguation procexpr_thenelse $unary_left 11;
+  | DataExprUnit procexpr_thenelse $unary_left 11;
   ;
 
 procexpr_thenelse
