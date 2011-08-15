@@ -28,3 +28,9 @@ add_definitions(-DBOOST_ALL_NO_LIB=1)
 # It prevents code being compiled for the innermost and jitty compiling rewriters
 # TODO: Should be prefixed with MCRL2_
 add_definitions(-DNO_DYNLOAD)
+
+##---------------------------------------------------
+## Disable Man page generation for Windows 
+##---------------------------------------------------
+set(MCRL2_MAN_PAGES Off)
+
