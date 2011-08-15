@@ -8,8 +8,10 @@
 //
 /// \file mcrl2-syntax.g
 /// \brief dparser grammar of the mCRL2 language
-//
-// N.B. it is not complete yet!
+
+{
+#include "d.h"
+}
 
 // Sort Expressions
 
@@ -392,7 +394,60 @@ statefrm_fixedpoint_operator : '.' $unary_op_left 1 ;
 
 IdList: Id ( ',' Id )* ;
 
-Id: "[A-Za-z_][A-Za-z_0-9']*" $term -1;
+{
+  char *reserved_words[] = {
+    "sort"  ,
+    "cons"  ,
+    "map"   ,
+    "var"   ,
+    "eqn"   ,
+    "act"   ,
+    "proc"  ,
+    "init"  ,
+    "delta" ,
+    "tau"   ,
+    "sum"   ,
+    "block" ,
+    "allow" ,
+    "hide"  ,
+    "rename",
+    "comm"  ,
+    "struct",
+    "Bool"  ,
+    "Pos"   ,
+    "Nat"   ,
+    "Int"   ,
+    "Real"  ,
+    "List"  ,
+    "Set"   ,
+    "Bag"   ,
+    "true"  ,
+    "false" ,
+    "whr"   ,
+    "end"   ,
+    "lambda",
+    "forall",
+    "exists",
+    "div"   ,
+    "mod"   ,
+    "in"    ,
+    NULL
+  };
+  static int is_one_of(char *s, char **list) {
+    while (*list) { if (!strcmp(s, *list)) return 1; list++; }
+    return 0;
+  }
+}
+
+Id: "[A-Za-z_][A-Za-z_0-9']*" $term -2
+[
+  char *ts = dup_str($n0.start_loc.s, $n0.end);
+  if (is_one_of(ts, reserved_words)) {
+    d_free(ts);
+    ${reject};
+  }
+  d_free(ts);
+];
 
 Number: "0|(-?[1-9][0-9]*)" ;
 
