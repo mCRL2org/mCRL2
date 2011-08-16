@@ -59,7 +59,7 @@ class OutPutTextCtrlBase : public wxTextCtrl
   public:
     OutPutTextCtrlBase(wxWindow* parent, wxWindowID id, const wxPoint& pos =
                          wxDefaultPosition, const wxSize& size = wxDefaultSize) :
-      wxTextCtrl(parent, id, wxEmptyString ,pos, size, wxTE_MULTILINE)
+      wxTextCtrl(parent, id, wxEmptyString ,pos, size, wxTE_MULTILINE | wxTE_RICH2 | wxTE_RICH)
     {
       /*wxFont font(wxNORMAL_FONT->GetPointSize(), wxMODERN, wxFONTSTYLE_NORMAL,
           wxLIGHT, false);
