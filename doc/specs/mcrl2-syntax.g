@@ -57,9 +57,9 @@ IdsDecl: IdList ':' SortExpr ;
 
 IdsDeclList: IdsDecl ( ',' IdsDecl )* ;
 
-OpSpec: ( 'cons' | 'map' ) ( OpDecl ';' )+ ;
+ConsSpec: 'cons' ( IdsDecl ';' )+ ;
 
-OpDecl: IdsDecl ;
+MapSpec: 'map' ( IdsDecl ';' )+ ;
 
 // Equations
 
@@ -232,11 +232,11 @@ Init: 'init' ProcExpr ';' ;
 
 // Data specification
 
-DataSpec: ( SortSpec | OpSpec | EqnSpec )+ ;
+DataSpec: ( SortSpec | ConsSpec | MapSpec | EqnSpec )+ ;
 
 // mCRL2 specification
 
-mCRL2Spec: ( SortSpec | OpSpec | EqnSpec | GlobVarSpec | ActSpec | ProcSpec | Init )+ ;
+mCRL2Spec: ( SortSpec | ConsSpec | MapSpec | EqnSpec | GlobVarSpec | ActSpec | ProcSpec | Init )+ ;
 
 // BES
 
@@ -392,9 +392,9 @@ StateFrmFixedPointOperator : '.' $unary_op_left 1 ;
 
 // Action Rename Specifications
 
-ActionRenameSpec: (SortSpec | OpSpec | EqnSpec | ActSpec | ActionRenameSpec)+ ;
+ActionRenameSpec: (SortSpec | ConsSpec | MapSpec | EqnSpec | ActSpec | ActionRenameRuleSpec)+ ;
 
-ActionRenameSpec: VarSpec? 'rename' ActionRenameRule+ ;
+ActionRenameRuleSpec: VarSpec? 'rename' ActionRenameRule+ ;
 
 ActionRenameRule: (DataExpr '->')? Action '=>' ActionRenameRuleRHS ';' ;
 
