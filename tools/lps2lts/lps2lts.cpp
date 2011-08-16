@@ -169,8 +169,8 @@ class lps2lts_tool : public lps2lts_base
                  "do not remove unused parts of the data specification", 'u').
       add_option("state-format", make_mandatory_argument("NAME"),
                  "store state internally in format NAME:\n"
-                 "  'vector' for a vector (fastest, default), or\n"
-                 "  'tree' for a tree (for memory efficiency)"
+                 "  'tree' for a tree (memory efficient, default), or\n"
+                 "  'vector' for a vector (slightly faster, often far less memory efficient)"
                  , 'f').
       add_option("bit-hash", make_optional_argument("NUM", STRINGIFY(DEFAULT_BITHASHSIZE)),
                  "use bit hashing to store states and store at most NUM states; note that this "

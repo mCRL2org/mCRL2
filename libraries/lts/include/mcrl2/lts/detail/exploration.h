@@ -53,7 +53,7 @@ struct lts_generation_options
     strat(mcrl2::data::rewriter::jitty),
     usedummies(true),
     removeunused(true),
-    stateformat(GS_STATE_VECTOR),
+    stateformat(GS_STATE_TREE),
     outformat(mcrl2::lts::lts_none),
     outinfo(true),
     suppress_progress_messages(false),
