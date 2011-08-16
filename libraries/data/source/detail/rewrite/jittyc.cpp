@@ -2429,11 +2429,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
             "  size_t arity = ATgetArity(ATgetAFun(a));\n"
             "  if (arity == 1 )\n"
             "  {\n"
-            "      return ATmakeAppl(%li,a(0)", (long int) get_appl_afun_value(i+1)); // YYYY
+            "      return ATmakeAppl(%li,(ATerm)a(0)", (long int) get_appl_afun_value(i+1)); // YYYY
 
     for (size_t j=0; j<i; j++)
     {
-      fprintf(f, ",arg%ld",j);
+      fprintf(f, ",(ATermAppl)arg%ld",j);
     }
     fprintf(f, ");\n"
             "  }\n"
