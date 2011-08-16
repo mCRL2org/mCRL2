@@ -15,8 +15,10 @@
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/set.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 
@@ -42,6 +44,50 @@ struct absinthe_algorithm
     return result;
   }
 
+  struct make_set
+  {
+    data::sort_expression operator()(const data::sort_expression& s) const
+    {
+      return data::sort_set::set_(s);
+    }
+  };
+
+  void add_lifted_mappings(data::data_specification dataspec, const data::function_symbol_vector& user_mappings)
+  {
+    data::function_symbol_vector result;
+    for (data::function_symbol_vector::const_iterator i = user_mappings.begin(); i != user_mappings.end(); ++i)
+    {
+      std::string name = "Lift" + std::string(i->name());
+      data::sort_expression s = i->sort();
+      if (data::is_basic_sort(s))
+      {
+        result.push_back(data::function_symbol(name, make_set()(s)));
+      }
+      else if (data::is_function_sort(s))
+      {
+        data::function_sort fs(s);
+        result.push_back(
+          data::function_symbol(name,
+            data::function_sort(atermpp::apply(fs.domain(), make_set()), fs.codomain())
+          )
+        );
+      }
+      else if (data::is_container_sort(s))
+      {
+        result.push_back(data::function_symbol(name, make_set()(s)));
+      }
+      else
+      {
+        throw mcrl2::runtime_error("absinthe algorithm: unsupported sort " + data::pp(s) + " detected!");
+      }
+    }
+    for (data::function_symbol_vector::iterator i = result.begin(); i != result.end(); ++i)
+    {
+//std::cout << "added sort: " << data::pp(*i) << " " << data::pp(i->sort()) << std::endl;
+      dataspec.add_mapping(*i);
+    }
+  }
+
   void print_mapping(const atermpp::map<data::sort_expression, data::sort_expression>& abstraction)
   {
     for (atermpp::map<data::sort_expression, data::sort_expression>::const_iterator i = abstraction.begin(); i != abstraction.end(); ++i)
@@ -50,15 +96,17 @@ struct absinthe_algorithm
     }
   }
 
-  void run(const pbes<>& p, const std::string& abstraction_mapping_text, const std::string& dataspec_text)
+  void run(const pbes<>& p, const std::string& abstraction_mapping_text, const std::string& user_dataspec_text)
   {
-    // merge the data specifications
-    std::string text = data::pp(p.data()) + "\n" + dataspec_text;
-    data::data_specification dataspec = data::parse_data_specification(text);
+    data::data_specification user_dataspec = data::parse_data_specification(user_dataspec_text);
+    data::data_specification combined_dataspec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_dataspec_text);
 
     // parse the abstraction mapping
-    atermpp::map<data::sort_expression, data::sort_expression> abstraction = parse_approximation_mapping(abstraction_mapping_text, dataspec);
+    atermpp::map<data::sort_expression, data::sort_expression> abstraction = parse_approximation_mapping(abstraction_mapping_text, combined_dataspec);
     print_mapping(abstraction);
+
+    // add lifted versions of the user defined mappings
+    add_lifted_mappings(combined_dataspec, user_dataspec.user_defined_mappings());
   }
 };
 
