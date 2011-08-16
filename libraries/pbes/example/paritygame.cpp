@@ -99,9 +99,9 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
 
     bool run()
     {
-      mCRL2log(verbose) << "paritygame parameters:" << std::endl;
-      mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
-      mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
+      mCRL2log(log::verbose) << "paritygame parameters:" << std::endl;
+      mCRL2log(log::verbose) << "  input file:         " << m_input_filename << std::endl;
+      mCRL2log(log::verbose) << "  output file:        " << m_output_filename << std::endl;
 
       pbes_system::pbes<> p;
       p.load(m_input_filename);

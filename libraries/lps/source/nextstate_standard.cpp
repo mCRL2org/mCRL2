@@ -41,7 +41,7 @@ static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
 {
   if (info.stateformat==GS_STATE_TREE)
   { 
-    ATfprintf(stderr,"GS_STATE_TREE... %t\n",(ATermAppl)s);
+    std::cerr << "GS_STATE_TREE... " << s << "\n";
     return "";
   }
 

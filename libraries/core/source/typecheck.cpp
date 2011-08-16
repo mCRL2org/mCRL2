@@ -1229,8 +1229,8 @@ void gstcDataInit(void)
   gstcAddSystemFunction(sort_real::minimum(sort_int::int_(), sort_int::int_()));
   gstcAddSystemFunction(sort_real::minimum(sort_real::real_(), sort_real::real_()));
   //more
-  gstcAddSystemFunction(sort_real::abs(sort_pos::pos()));
-  gstcAddSystemFunction(sort_real::abs(sort_nat::nat()));
+  // gstcAddSystemFunction(sort_real::abs(sort_pos::pos()));
+  // gstcAddSystemFunction(sort_real::abs(sort_nat::nat()));
   gstcAddSystemFunction(sort_real::abs(sort_int::int_()));
   gstcAddSystemFunction(sort_real::abs(sort_real::real_()));
   //more
@@ -1262,10 +1262,10 @@ void gstcDataInit(void)
   gstcAddSystemFunction(sort_real::times(sort_int::int_(), sort_int::int_()));
   gstcAddSystemFunction(sort_real::times(sort_real::real_(), sort_real::real_()));
   //more
-  gstcAddSystemFunction(sort_int::div(sort_pos::pos(), sort_pos::pos()));
+  // gstcAddSystemFunction(sort_int::div(sort_pos::pos(), sort_pos::pos()));
   gstcAddSystemFunction(sort_int::div(sort_nat::nat(), sort_pos::pos()));
   gstcAddSystemFunction(sort_int::div(sort_int::int_(), sort_pos::pos()));
-  gstcAddSystemFunction(sort_int::mod(sort_pos::pos(), sort_pos::pos()));
+  // gstcAddSystemFunction(sort_int::mod(sort_pos::pos(), sort_pos::pos()));
   gstcAddSystemFunction(sort_int::mod(sort_nat::nat(), sort_pos::pos()));
   gstcAddSystemFunction(sort_int::mod(sort_int::int_(), sort_pos::pos()));
   gstcAddSystemFunction(sort_real::divides(sort_pos::pos(), sort_pos::pos()));

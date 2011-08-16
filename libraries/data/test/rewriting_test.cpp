@@ -133,8 +133,6 @@ BOOST_AUTO_TEST_CASE(pos_rewrite_test)
     data_rewrite_test(R, (sort_pos::maximum)(p1, p2), p2);
 
     data_rewrite_test(R, sort_pos::succ(p1), p2);
-
-    data_rewrite_test(R, sort_pos::abs(p4), p4);
   }
 }
 
@@ -185,9 +183,6 @@ BOOST_AUTO_TEST_CASE(nat_rewrite_test)
     data_rewrite_test(R, pred(nat2pos(p1)), p0);
     data_rewrite_test(R, pred(nat2pos(p2)), p1);
 
-    data_rewrite_test(R, abs(p1), p1);
-
-    data_rewrite_test(R, div(p1, sort_pos::pos(1)), p1);
     data_rewrite_test(R, div(p0, sort_pos::pos(2)), p0);
     data_rewrite_test(R, div(p2, sort_pos::pos(1)), p2);
     data_rewrite_test(R, div(p4, sort_pos::pos(2)), p2);

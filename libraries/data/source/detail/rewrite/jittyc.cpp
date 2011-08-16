@@ -606,13 +606,6 @@ static ATermList subst_var(ATermList l, ATermAppl old, ATerm new_val, ATerm num,
   return ATinsert(subst_var(l,old,new_val,num,substs),(ATerm) head);
 }
 
-//#define BT_DEBUG
-#ifdef BT_DEBUG
-#define print_return(x,y) ATermAppl a = y; ATfprintf(stderr,x "return %t\n\n",a); return a;
-#else
-#define print_return(x,y) return y;
-#endif
-//static int max_tree_vars;
 static int* treevars_usedcnt;
 
 static void inc_usedcnt(ATermList l)
@@ -625,10 +618,6 @@ static void inc_usedcnt(ATermList l)
 
 static ATermAppl build_tree(build_pars pars, int i)
 {
-#ifdef BT_DEBUG
-  ATfprintf(stderr,"build_tree(  %t  ,  %t  ,  %t  ,  %t  ,  %t  ,  %i  )\n\n",pars.Flist,pars.Slist,pars.Mlist,pars.stack,pars.upstack,i);
-#endif
-
   if (!ATisEmpty(pars.Slist))
   {
     ATermList l,m;
@@ -644,7 +633,6 @@ static ATermAppl build_tree(build_pars pars, int i)
       ATermList e = ATLgetFirst(pars.Slist);
 
       e = subst_var(e,ATAgetArgument(ATAgetFirst(e),0),(ATerm) v,(ATerm) ATmakeInt(k),ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)));
-//      e = gsSubstValues_List(ATmakeList1((ATerm) gsMakeSubst(ATgetArgument(ATAgetFirst(e),0),(ATerm) v)),e,true);
 
       l = ATinsert(l,ATgetFirst(e));
       m = ATinsert(m,(ATerm) ATgetNext(e));
@@ -676,11 +664,11 @@ static ATermAppl build_tree(build_pars pars, int i)
 
     if ((treevars_usedcnt[k] > 0) || ((k == 0) && isR(r)))
     {
-      print_return("",ATmakeAppl2(afunS,(ATerm) v,(ATerm) r));
+       return ATmakeAppl2(afunS,(ATerm) v,(ATerm) r);
     }
     else
     {
-      print_return("",r);
+       return r;
     }
   }
   else if (!ATisEmpty(pars.Mlist))
@@ -729,12 +717,12 @@ static ATermAppl build_tree(build_pars pars, int i)
 
     if (ATisEqual(true_tree,false_tree))
     {
-      print_return("",true_tree);
+       return true_tree;
     }
     else
     {
       treevars_usedcnt[ATgetInt((ATermInt) ATgetArgument((ATermAppl) M,1))]++;
-      print_return("",ATmakeAppl3(afunM,ATgetArgument((ATermAppl) M,0),(ATerm) true_tree,(ATerm) false_tree));
+      return ATmakeAppl3(afunM,ATgetArgument((ATermAppl) M,0),(ATerm) true_tree,(ATerm) false_tree);
     }
   }
   else if (!ATisEmpty(pars.Flist))
@@ -765,11 +753,11 @@ static ATermAppl build_tree(build_pars pars, int i)
 
     if (ATisEqual(true_tree,false_tree))
     {
-      print_return("",true_tree);
+      return true_tree;
     }
     else
     {
-      print_return("",ATmakeAppl3(afunF,ATgetArgument(ATAgetFirst(F),0),(ATerm) true_tree,(ATerm) false_tree));
+      return ATmakeAppl3(afunF,ATgetArgument(ATAgetFirst(F),0),(ATerm) true_tree,(ATerm) false_tree);
     }
   }
   else if (!ATisEmpty(pars.upstack))
@@ -796,12 +784,12 @@ static ATermAppl build_tree(build_pars pars, int i)
         t = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) t);
       }
 
-      print_return("",t);
+      return t;
     }
     else
     {
       inc_usedcnt((ATermList) ATgetArgument(r,1));
-      print_return("",ATmakeAppl1(afunR,ATgetArgument(r,0)));
+      return ATmakeAppl1(afunR,ATgetArgument(r,0));
     }
   }
   else
@@ -810,13 +798,12 @@ static ATermAppl build_tree(build_pars pars, int i)
     {
       if (ATisEmpty(ATgetNext(pars.stack)))
       {
-        print_return("",ATmakeAppl0(afunX));
+        return ATmakeAppl0(afunX);
       }
       else
       {
         pars.stack = ATgetNext(pars.stack);
-        print_return("",ATmakeAppl1(afunD,(ATerm) build_tree(pars,i)));
-//        print_return("",build_tree(pars,i));
+        return ATmakeAppl1(afunD,(ATerm) build_tree(pars,i));
       }
     }
     else
@@ -845,7 +832,7 @@ static ATermAppl build_tree(build_pars pars, int i)
         tree = ATmakeAppl(afunR,ATgetArgument(r,0));
       }
 
-      print_return("",ATmakeAppl1(afunN,(ATerm) tree));
+      return ATmakeAppl1(afunN,(ATerm) tree);
     }
   }
 }

@@ -274,61 +274,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier abs
-      /// \return Identifier abs
-      inline
-      core::identifier_string const& abs_name()
-      {
-        static core::identifier_string abs_name = data::detail::initialise_static_expression(abs_name, core::identifier_string("abs"));
-        return abs_name;
-      }
-
-      /// \brief Constructor for function symbol abs
-      /// \return Function symbol abs
-      inline
-      function_symbol const& abs()
-      {
-        static function_symbol abs = data::detail::initialise_static_expression(abs, function_symbol(abs_name(), make_function_sort(pos(), pos())));
-        return abs;
-      }
-
-
-      /// \brief Recogniser for function abs
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching abs
-      inline
-      bool is_abs_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e) == abs();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol abs
-      /// \param arg0 A data expression
-      /// \return Application of abs to a number of arguments
-      inline
-      application abs(const data_expression& arg0)
-      {
-        return abs()(arg0);
-      }
-
-      /// \brief Recogniser for application of abs
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol abs to a
-      ///     number of arguments
-      inline
-      bool is_abs_application(const atermpp::aterm_appl& e)
-      {
-        if (is_application(e))
-        {
-          return is_abs_function_symbol(application(e).head());
-        }
-        return false;
-      }
-
       /// \brief Generate identifier succ
       /// \return Identifier succ
       inline
@@ -561,7 +506,6 @@ namespace mcrl2 {
         function_symbol_vector result;
         result.push_back(maximum());
         result.push_back(minimum());
-        result.push_back(abs());
         result.push_back(succ());
         result.push_back(plus());
         result.push_back(add_with_carry());
@@ -608,8 +552,8 @@ namespace mcrl2 {
       inline
       data_expression number(const data_expression& e)
       {
-        assert(is_cdub_application(e) || is_abs_application(e) || is_succ_application(e));
-        if (is_abs_application(e) || is_succ_application(e))
+        assert(is_cdub_application(e) || is_succ_application(e));
+        if (is_succ_application(e))
         {
           return *boost::next(static_cast< application >(e).arguments().begin(), 0);
         }
@@ -657,19 +601,21 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vp, vq), equal_to(cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), equal_to(cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), equal_to(cdub(vb, vp), cdub(vb, vq)), equal_to(vp, vq)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), equal_to(cdub(vb, vp), cdub(vc, vq)), sort_bool::and_(equal_to(vb, vc), equal_to(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp), less(vp, c1()), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp), less(c1(), cdub(vb, vp)), sort_bool::true_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(vb, vq)), less(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), less(cdub(sort_bool::false_(), vp), cdub(sort_bool::true_(), vq)), less_equal(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less(cdub(vb, vp), cdub(sort_bool::false_(), vq)), less(vp, vq)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), less(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vc, vb), less(vp, vq), less_equal(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp), less_equal(c1(), vp), sort_bool::true_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp), less_equal(cdub(vb, vp), c1()), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less_equal(cdub(vb, vp), cdub(vb, vq)), less_equal(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vb, vp, vq), less_equal(cdub(sort_bool::false_(), vp), cdub(vb, vq)), less_equal(vp, vq)));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), less_equal(cdub(sort_bool::true_(), vp), cdub(sort_bool::false_(), vq)), less(vp, vq)));
+        result.push_back(data_equation(atermpp::make_vector(vb, vc, vp, vq), less_equal(cdub(vb, vp), cdub(vc, vq)), if_(sort_bool::implies(vb, vc), less_equal(vp, vq), less(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), maximum(vp, vq), if_(less_equal(vp, vq), vq, vp)));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), minimum(vp, vq), if_(less_equal(vp, vq), vp, vq)));
-        result.push_back(data_equation(atermpp::make_vector(vp), abs(vp), vp));
         result.push_back(data_equation(variable_list(), succ(c1()), cdub(sort_bool::false_(), c1())));
         result.push_back(data_equation(atermpp::make_vector(vp), succ(cdub(sort_bool::false_(), vp)), cdub(sort_bool::true_(), vp)));
         result.push_back(data_equation(atermpp::make_vector(vp), succ(cdub(sort_bool::true_(), vp)), cdub(sort_bool::false_(), succ(vp))));
@@ -685,8 +631,7 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vp), times(vp, c1()), vp));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::false_(), vp), vq), cdub(sort_bool::false_(), times(vp, vq))));
         result.push_back(data_equation(atermpp::make_vector(vp, vq), times(vp, cdub(sort_bool::false_(), vq)), cdub(sort_bool::false_(), times(vp, vq))));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::true_(), vp), vq), add_with_carry(sort_bool::false_(), cdub(sort_bool::false_(), times(vp, vq)), vq)));
-        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(vp, cdub(sort_bool::true_(), vq)), add_with_carry(sort_bool::false_(), vp, cdub(sort_bool::false_(), times(vp, vq)))));
+        result.push_back(data_equation(atermpp::make_vector(vp, vq), times(cdub(sort_bool::true_(), vp), cdub(sort_bool::true_(), vq)), cdub(sort_bool::true_(), add_with_carry(sort_bool::false_(), vp, add_with_carry(sort_bool::false_(), vq, cdub(sort_bool::false_(), times(vp, vq)))))));
         return result;
       }
 

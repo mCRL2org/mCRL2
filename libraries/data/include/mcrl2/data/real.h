@@ -668,14 +668,6 @@ namespace mcrl2 {
         {
           target_sort = sort_nat::nat();
         }
-        else if (s0 == sort_nat::nat())
-        {
-          target_sort = sort_nat::nat();
-        }
-        else if (s0 == sort_pos::pos())
-        {
-          target_sort = sort_pos::pos();
-        }
         else
         {
           throw mcrl2::runtime_error("cannot compute target sort for abs with domain sorts " + s0.to_string());
@@ -694,7 +686,7 @@ namespace mcrl2 {
         if (is_function_symbol(e))
         {
           function_symbol f(e);
-          return f.name() == abs_name() && function_sort(f.sort()).domain().size() == 1 && (f == abs(real_()) || f == abs(sort_int::int_()) || f == abs(sort_nat::nat()) || f == abs(sort_pos::pos()));
+          return f.name() == abs_name() && function_sort(f.sort()).domain().size() == 1 && (f == abs(real_()) || f == abs(sort_int::int_()));
         }
         return false;
       }

@@ -17,7 +17,6 @@ cons @c1 <"c1">:Pos;
 
 map max <"maximum">:Pos <"left"> #Pos <"right">->Pos;
     min <"minimum">:Pos <"left"> #Pos <"right">->Pos;
-    abs <"abs">:Pos <"number">->Pos;
     succ <"succ">:Pos <"number">->Pos;
     + <"plus">:Pos <"left"> #Pos <"right">->Pos;
     @addc <"add_with_carry">:Bool <"bit"> #Pos <"left"> #Pos <"right">->Pos;
@@ -33,19 +32,23 @@ eqn ==(@c1, @cDub(b,p)) = false;
     ==(@cDub(false,p), @cDub(true,q)) = false;
     ==(@cDub(true,p), @cDub(false,q)) = false;
     ==(@cDub(b,p), @cDub(b, q)) = ==(p,q);
+    ==(@cDub(b,p), @cDub(c, q)) = &&(==(b,c), ==(p,q));
     <(p, @c1) = false;
     <(@c1, @cDub(b,p)) = true;
     <(@cDub(b,p), @cDub(b,q)) = <(p,q);
     <(@cDub(false,p), @cDub(true, q)) = <=(p,q);
     <(@cDub(b,p), @cDub(false, q)) = <(p,q);
+% The equation below is required for the enumeration of lists
+    <(@cDub(b,p), @cDub(c,q)) = if(=>(c,b), <(p,q), <=(p,q));
     <=(@c1, p) = true;
     <=(@cDub(b,p), @c1) = false;
     <=(@cDub(b,p), @cDub(b, q)) = <=(p,q);
     <=(@cDub(false,p), @cDub(b,q)) = <=(p,q);
     <=(@cDub(true,p), @cDub(false, q)) = <(p,q);
+% The equation below is required for the enumeration of lists
+    <=(@cDub(b,p), @cDub(c,q)) = if(=>(b,c), <=(p,q), <(p,q));
     max(p,q) = if(<=(p,q),q,p);
     min(p,q) = if(<=(p,q),p,q);
-    abs(p) = p;
     succ(@c1) = @cDub(false, @c1);
     succ(@cDub(false,p)) = @cDub(true,p);
     succ(@cDub(true,p)) = @cDub(false,succ(p));
@@ -61,6 +64,4 @@ eqn ==(@c1, @cDub(b,p)) = false;
     *(p,@c1) = p;
     *(@cDub(false,p),q) = @cDub(false,*(p,q));
     *(p,@cDub(false,q)) = @cDub(false,*(p,q));
-    *(@cDub(true,p),q) = @addc(false,@cDub(false,*(p,q)),q);
-    *(p,@cDub(true,q)) = @addc(false,p,@cDub(false,*(p,q)));
-
+    *(@cDub(true,p),@cDub(true,q)) = @cDub(true,@addc(false,p,@addc(false,q,@cDub(false,*(p,q)))));

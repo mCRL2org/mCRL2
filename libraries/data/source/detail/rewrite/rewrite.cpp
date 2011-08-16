@@ -85,6 +85,7 @@ atermpp::aterm_appl Rewriter::rewrite_internal(
      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
   assert(0);
+  return data_expression();
 }
 
 atermpp::term_list<atermpp::aterm_appl> Rewriter::rewrite_internal_list(

@@ -1,5 +1,7 @@
-#define MCRL2_MAX_LOG_LEVEL log_debug3
+#define MCRL2_MAX_LOG_LEVEL debug3
 #include "mcrl2/utilities/logger.h"
+
+using namespace mcrl2::log;
 
 void do_something_special()
 {
@@ -29,7 +31,7 @@ std::string my_algorithm()
 
 int main(int argc, char** argv)
 {
-  mcrl2_logger::set_reporting_level(log_debug3);
+  mcrl2_logger::set_reporting_level(debug3);
 
   mCRL2log(info) << "This shows the way info messages are printed, using the default messages" << std::endl;
   mCRL2log(debug) << "This line is not printed, and the function " << my_algorithm() << " is not evaluated" << std::endl;
@@ -41,7 +43,7 @@ int main(int argc, char** argv)
     throw std::runtime_error("Cannot open logfile for writing");
   }
   mcrl2_logger::output_policy_t::set_stream(plogfile, "my_algorithm");
-  mcrl2_logger::set_reporting_level(log_debug3, "my_algorithm");
+  mcrl2_logger::set_reporting_level(debug3, "my_algorithm");
   
   // Execute algorithm
   my_algorithm();
