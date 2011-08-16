@@ -7,15 +7,15 @@
 # http://www.boost.org/LICENSE_1_0.txt)
 
 # ########## Project setup ##########
-project(pbesabsint)
+project(pbesabsinthe)
 cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
-# ########## mcrl2_tools_pbesabsint executable ##########
+# ########## mcrl2_tools_pbesabsinthe executable ##########
 
 add_executable(${PROJECT_NAME}
-  pbesabsint.cpp
+  pbesabsinthe.cpp
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
