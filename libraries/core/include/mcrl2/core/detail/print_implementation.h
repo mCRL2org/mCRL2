@@ -1440,8 +1440,9 @@ static ATermAppl reconstruct_pos_mult(const ATermAppl PosExpr, std::vector<char>
     //PosExpr is of the form cDub(b,p); return (Mult*2)*v(p) + Mult*v(b)
     ATermAppl BoolArg = ATAelementAt(Args, 0);
     ATermAppl PosArg = ATAelementAt(Args, 1);
-    data::detail::decimal_number_multiply_by_two(Mult);
-    PosArg = reconstruct_pos_mult(data::data_expression(PosArg), Mult);
+    std::vector<char> DoubleMult=Mult;
+    data::detail::decimal_number_multiply_by_two(DoubleMult);
+    PosArg = reconstruct_pos_mult(data::data_expression(PosArg), DoubleMult);
     if (data::sort_bool::is_false_function_symbol(data::data_expression(BoolArg)))
     {
       //Mult*v(b) = 0
