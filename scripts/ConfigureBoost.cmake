@@ -2,6 +2,11 @@
 ## Set Boost configuration
 ##---------------------------------------------------
 
+# Use static libraries when compiled static
+if( NOT BUILD_SHARED_LIBS )
+  set(Boost_USE_STATIC_LIBS ON)
+endif( NOT BUILD_SHARED_LIBS)
+
 if(MSVC)
   SET (Boost_USE_STATIC_LIBS ON)
         
