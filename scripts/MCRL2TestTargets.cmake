@@ -217,7 +217,7 @@ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/academic/abp/abp.mcrl2" "")
 
 	
 if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2"				 "lts2lps")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/tau.mcrl2"				 "lts2lps;lts2pbes")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small2.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/upcast.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/list.mcrl2"				 "")
@@ -226,14 +226,14 @@ if( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/forall.mcrl2"			 "lpsparunfold") #Lps has no process parameters
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/exists.mcrl2"			 "lpsparunfold") #Lps has no process parameters
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/small3.mcrl2"			 "lpsparunfold")  #Lps has no process parameters
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2"				 "lts2lps")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2"				 "lpsparunfold")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/par.mcrl2"				 "lts2lps;lts2pbes")  #txt2lps, because LTS contains a "Terminate" actions, which is not declared in "tau.mcrl2". Applies to aut, dot, fsm
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/time.mcrl2"				 "lpsparunfold;lpsrealelm")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta0.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/sets_bags.mcrl2"	 "lpsbinary;lts2lps;lts2pbes")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/delta.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/rational.mcrl2"		 "pbes2bool;pbesrewr;lts2lps;besinfo;bespp;lpsbinary;pbes2bes;besconvert;bessolve;pbesinst;lts2pbes;pbespgsolve;txt2bes;lpsrealelm")
  run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/lambda.mcrl2"			 "lpsparunfold")
- run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "lpsbinary")
+ run_release_tests( "${CMAKE_SOURCE_DIR}/examples/language/divide2_500.mcrl2" "lpsbinary;lpsrealelm")
 
 endif( MCRL2_ENABLE_RELEASE_TEST_TARGETS )
 

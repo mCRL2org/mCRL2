@@ -49,6 +49,9 @@ class used_data_equation_selector
   protected:
     void add_data_specification_symbols(const data_specification& specification)
     {
+      // Always add if:Bool#Bool#Bool->Bool; This symbol is used in the prover.
+      m_used_symbols.insert(if_(sort_bool::bool_()));
+
       // Add all constructors of all sorts as they may be used when enumerating over these sorts
       atermpp::set< sort_expression > sorts(boost::copy_range< atermpp::set< sort_expression > >(specification.sorts()));
       for (atermpp::set< sort_expression>::const_iterator j = sorts.begin(); j != sorts.end(); ++j)
