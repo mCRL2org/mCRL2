@@ -1237,7 +1237,7 @@ bool lps2lts_algorithm::generate_lts()
                               << " (" << current_state - prevcurrent << " state"
                               << ((current_state-prevcurrent)==1?"":"s") << ", "
                               << trans-prevtrans << " transition"
-                              << ((trans-prevtrans)==1?"i)\n":"s)\n");
+                              << ((trans-prevtrans)==1?")\n":"s)\n");
           }
           level++;
           size_t nextcurrent = endoflevelat;
