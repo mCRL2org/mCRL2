@@ -405,7 +405,7 @@ ActionRenameRuleRHS: Action | 'tau' | 'delta' ;
 IdList: Id ( ',' Id )* ;
 
 {
-  char *reserved_words[] = {
+  const char *reserved_words[] = {
     "sort"  ,
     "cons"  ,
     "map"   ,
@@ -443,7 +443,7 @@ IdList: Id ( ',' Id )* ;
     "in"    ,
     NULL
   };
-  static int is_one_of(char *s, char **list) {
+  static int is_one_of(char *s, const char **list) {
     while (*list) { if (!strcmp(s, *list)) return 1; list++; }
     return 0;
   }
