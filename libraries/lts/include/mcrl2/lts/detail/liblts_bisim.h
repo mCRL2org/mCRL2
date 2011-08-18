@@ -85,7 +85,7 @@ class bisim_partitioner
       :max_state_index(0), aut(l), tau_label(determine_tau_label(l))
     {
       assert(branching || !preserve_divergence);
-      mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b)":"B") <<
+      mCRL2log(log::verbose) << (preserve_divergence?"Divergence preserving b":"B") <<
                   (branching?"ranching b":"") << "isimulation partitioner created for "
                   << l.num_states() << " states and " <<
                   l.num_transitions() << " transitions\n";
