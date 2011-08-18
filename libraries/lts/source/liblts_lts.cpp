@@ -202,7 +202,8 @@ static void add_extra_mcrl2_lts_data(
    */
   char c;
   fseek(f,0,SEEK_END);
-  assert(fread(&c,1,1,f) == 0);
+  if(fread(&c,1,1,f) != 0)
+    throw mcrl2::runtime_error("Unexpectedly able to read past end of file.");
 
   long position = ftell(f);
   if (position == -1)
