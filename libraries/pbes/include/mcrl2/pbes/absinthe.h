@@ -14,9 +14,15 @@
 
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/exists.h"
+#include "mcrl2/data/lambda.h"
 #include "mcrl2/data/set.h"
+#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/standard.h"
+#include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/utilities/identifier_generator.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/exception.h"
 
@@ -44,6 +50,19 @@ struct absinthe_algorithm
     return result;
   }
 
+  // creates a finite set containing one data expression
+  struct make_data_expression_set
+  {
+    data::data_expression operator()(const data::data_expression& x) const
+    {
+      data::sort_expression s = x.sort();
+      data::data_expression result = data::sort_fset::fset_empty(s);
+      result = data::sort_fset::fset_cons(s, x, result);
+      return result;
+    }
+  };
+
+  // transforms the sort expression s to Set(s)
   struct make_set
   {
     data::sort_expression operator()(const data::sort_expression& s) const
@@ -52,43 +71,132 @@ struct absinthe_algorithm
     }
   };
 
-  void add_lifted_mappings(data::data_specification dataspec, const data::function_symbol_vector& user_mappings)
+  struct make_mapping
   {
-    data::function_symbol_vector result;
-    for (data::function_symbol_vector::const_iterator i = user_mappings.begin(); i != user_mappings.end(); ++i)
+    const data::function_symbol_vector& user_mappings;
+
+    make_mapping(const data::function_symbol_vector& user_mappings_)
+      : user_mappings(user_mappings_)
+    {}
+
+    data::function_symbol operator()(const data::function_symbol& f) const
     {
-      std::string name = "Lift" + std::string(i->name());
-      data::sort_expression s = i->sort();
+      std::string name = "Lift" + std::string(f.name());
+      data::sort_expression s = f.sort();
       if (data::is_basic_sort(s))
       {
-        result.push_back(data::function_symbol(name, make_set()(s)));
+        return data::function_symbol(name, make_set()(s));
       }
       else if (data::is_function_sort(s))
       {
         data::function_sort fs(s);
-        result.push_back(
-          data::function_symbol(name,
-            data::function_sort(atermpp::apply(fs.domain(), make_set()), fs.codomain())
-          )
-        );
+        return data::function_symbol(name, data::function_sort(atermpp::apply(fs.domain(), make_set()), fs.codomain()));
       }
       else if (data::is_container_sort(s))
       {
-        result.push_back(data::function_symbol(name, make_set()(s)));
+        return data::function_symbol(name, make_set()(s));
       }
-      else
-      {
-        throw mcrl2::runtime_error("absinthe algorithm: unsupported sort " + data::pp(s) + " detected!");
-      }
+      throw mcrl2::runtime_error("absinthe algorithm: unsupported sort " + data::pp(s) + " detected!");
+      return data::function_symbol();
     }
-    for (data::function_symbol_vector::iterator i = result.begin(); i != result.end(); ++i)
+  };
+
+  struct make_equation
+  {
+    const data::function_symbol_vector& user_mappings;
+    const atermpp::map<data::sort_expression, data::sort_expression>& abstraction;
+
+    make_equation(const data::function_symbol_vector& user_mappings_, const atermpp::map<data::sort_expression, data::sort_expression>& abstraction_)
+      : user_mappings(user_mappings_),
+        abstraction(abstraction_)
+    {}
+
+    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint) const
     {
-//std::cout << "added sort: " << data::pp(*i) << " " << data::pp(i->sort()) << std::endl;
-      dataspec.add_mapping(*i);
+      atermpp::vector<data::variable> result;
+      unsigned int i = 0;
+      for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
+      {
+        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), *j));
+      }
+      return result;
+    }
+
+    // Let x = [x1:D1, ..., xn:Dn] and X = [X1:Set(D1), ..., Xn:Set(Dn)]. Returns the expression
+    //
+    // exists x1:D1, ..., xn:Dn . (x1 in X1 /\ ... /\ xn in Xn)
+    data::data_expression enumerate_domain(const atermpp::vector<data::variable>& x, const atermpp::vector<data::variable>& X) const
+    {
+      atermpp::vector<data::data_expression> a;
+      atermpp::vector<data::variable>::const_iterator i = x.begin();
+      atermpp::vector<data::variable>::const_iterator j = X.begin();
+      for (; i != x.end(); ++i, ++j)
+      {
+        a.push_back(data::detail::create_set_in(*i, *j));
+      }
+      data::data_expression body = data::lazy::join_and(a.begin(), a.end());
+      return data::exists(x, body);
+    }
+
+    data::data_equation operator()(const data::function_symbol& F, const data::function_symbol& LiftF) const
+    {
+      std::string name = "Lift" + std::string(F.name());
+
+      data::variable_list variables;
+      data::data_expression condition = data::sort_bool::true_();
+      data::data_expression lhs;
+      data::data_expression rhs;
+
+      data::sort_expression s = F.sort();
+
+      if (data::is_basic_sort(s))
+      {
+        lhs = LiftF;
+        rhs = data::detail::create_finite_set(F);
+        return data::data_equation(variables, condition, lhs, rhs);
+      }
+      else if (data::is_function_sort(s))
+      {
+        data::function_sort Fs(F.sort());
+        data::function_sort LiftFs(LiftF.sort());
+
+        // TODO: generate these variables in a proper way
+        atermpp::vector<data::variable> x = make_variables(Fs.domain(), "x");
+        atermpp::vector<data::variable> X = make_variables(LiftFs.domain(), "X");
+
+        lhs = data::application(LiftF, data::data_expression_list(X.begin(), X.end()));
+        data::variable y("y", data::detail::get_set_sort(Fs.codomain()));
+        data::data_expression Y = data::application(F, data::data_expression_list(x.begin(), x.end()));
+        rhs = data::detail::create_set_comprehension(y, data::sort_bool::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y)));
+
+        return data::data_equation(variables, condition, lhs, rhs);
+      }
+// TODO: add container sorts
+//      else if (data::is_container_sort(s))
+//      {
+//        return data::data_equation(variables, condition, lhs, rhs);
+//      }
+      throw mcrl2::runtime_error("absinthe algorithm: unsupported sort " + data::pp(s) + " detected!");
+      return data::data_equation(variables, condition, lhs, rhs);
+    }
+  };
+
+  // add lifted mappings and equations to the data specification
+  void lift_data_specification(data::data_specification& dataspec, const data::function_symbol_vector& user_mappings, const atermpp::map<data::sort_expression, data::sort_expression>& abstraction)
+  {
+    for (data::function_symbol_vector::const_iterator i = user_mappings.begin(); i != user_mappings.end(); ++i)
+    {
+      data::function_symbol f = make_mapping(user_mappings)(*i);
+      dataspec.add_mapping(f);
+      std::cout << "added function symbol: " << core::pp(f) << " " << core::pp(f.sort()) << std::endl;
+
+      data::data_equation eq = make_equation(user_mappings, abstraction)(*i, f);
+      dataspec.add_equation(eq);
+      std::cout << "added equation: " << core::pp(eq) << std::endl;
     }
   }
 
-  void print_mapping(const atermpp::map<data::sort_expression, data::sort_expression>& abstraction)
+  void print_abstraction_mapping(const atermpp::map<data::sort_expression, data::sort_expression>& abstraction)
   {
     for (atermpp::map<data::sort_expression, data::sort_expression>::const_iterator i = abstraction.begin(); i != abstraction.end(); ++i)
     {
@@ -103,10 +211,9 @@ struct absinthe_algorithm
 
     // parse the abstraction mapping
     atermpp::map<data::sort_expression, data::sort_expression> abstraction = parse_approximation_mapping(abstraction_mapping_text, combined_dataspec);
-    print_mapping(abstraction);
 
-    // add lifted versions of the user defined mappings
-    add_lifted_mappings(combined_dataspec, user_dataspec.user_defined_mappings());
+    // add lifted versions of the user defined mappings and equations
+    lift_data_specification(combined_dataspec, user_dataspec.user_defined_mappings(), abstraction);
   }
 };
 
