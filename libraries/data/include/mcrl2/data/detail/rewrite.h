@@ -321,15 +321,13 @@ inline atermpp::aterm_appl Apply3(
 
 size_t get_num_opids();
 
-data_expression get_int2term(const size_t n);
+function_symbol get_int2term(const size_t n);
 
-// void set_int2term(const size_t n, const data_expression t);
+atermpp::map< function_symbol, atermpp::aterm_int >::const_iterator term2int_begin();
 
-atermpp::map< data_expression, atermpp::aterm_int >::const_iterator term2int_begin();
+atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end();
 
-atermpp::map< data_expression, atermpp::aterm_int >::const_iterator term2int_end();
-
-inline size_t getArity(const data_expression op)
+inline size_t getArity(const data::function_symbol op)
 {
   // This function calculates the cumulated length of all 
   // potential function arguments.
@@ -352,10 +350,6 @@ atermpp::aterm_int OpId2Int(const function_symbol);
 data_expression fromInner(const atermpp::aterm_appl term);
 
 atermpp::aterm_appl toInner(const data_expression Term, const bool add_opids);
-
-void initialize_internal_translation_table_rewriter();
-
-
 
 }
 }

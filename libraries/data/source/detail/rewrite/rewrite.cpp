@@ -109,11 +109,13 @@ atermpp::term_list<atermpp::aterm_appl> Rewriter::rewrite_internal_list(
 
 bool Rewriter::addRewriteRule(const data_equation /*Rule*/)
 {
+  assert(0);
   return false;
 }
 
 bool Rewriter::removeRewriteRule(const data_equation /*Rule*/)
 {
+  assert(0);
   return false;
 }
 
@@ -517,26 +519,26 @@ std::vector <AFun> apples;
 /*************  Below the functions toInner and fromInner are being defined *********************/
 
 static
-atermpp::map< data_expression, atermpp::aterm_int > &term2int()
+atermpp::map< function_symbol, atermpp::aterm_int > &term2int()
 { 
-  static atermpp::map< data_expression, atermpp::aterm_int > term2int;
+  static atermpp::map< function_symbol, atermpp::aterm_int > term2int;
   return term2int;
 }
 
-atermpp::map< data_expression, atermpp::aterm_int >::const_iterator term2int_begin()
+atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_begin()
 { 
   return term2int().begin();
 }
 
-atermpp::map< data_expression, atermpp::aterm_int >::const_iterator term2int_end()
+atermpp::map< data::function_symbol, atermpp::aterm_int >::const_iterator term2int_end()
 { 
   return term2int().end();
 }
 
 static
-atermpp::vector < data_expression > &int2term()
+atermpp::vector < data::function_symbol > &int2term()
 { 
-  static atermpp::vector < data_expression > int2term;
+  static atermpp::vector < data::function_symbol > int2term;
   return int2term;
 }
 
@@ -545,19 +547,15 @@ size_t get_num_opids()
   return int2term().size();
 }
 
-data_expression get_int2term(const size_t n)
+function_symbol get_int2term(const size_t n)
 {
   assert(n<int2term().size());
   return int2term()[n];
 }
 
-void initialize_internal_translation_table_rewriter()
-{
-}
-
 atermpp::aterm_int OpId2Int(const function_symbol term)
 {
-  atermpp::map< data_expression, atermpp::aterm_int >::iterator f = term2int().find(term);
+  atermpp::map< function_symbol, atermpp::aterm_int >::iterator f = term2int().find(term);
   if (f == term2int().end())
   {
     const size_t num_opids=get_num_opids();
@@ -577,7 +575,7 @@ atermpp::aterm_int OpId2Int(const function_symbol term)
     {
       for(size_t k=0; k<num_aux; ++k)
       {
-        int2term().push_back(data_expression()); 
+        int2term().push_back(function_symbol()); 
       }
     }
     return i;

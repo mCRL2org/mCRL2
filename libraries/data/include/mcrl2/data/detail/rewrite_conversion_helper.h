@@ -255,7 +255,7 @@ class rewrite_conversion_helper
       return application(implement(expression.head()), implement(expression.arguments()));
     }
 
-    data_expression reconstruct(application const& expression)
+    data_expression reconstruct(const application& expression)
     {
       if (is_function_symbol(expression.head()))
       {
@@ -327,7 +327,7 @@ class rewrite_conversion_helper
                                         iterator_type(container.end(), reconstructor(this)));
     }
 
-    data_expression reconstruct(data_expression const& expression)
+    data_expression reconstruct(const data_expression& expression)
     {
       if (is_function_symbol(expression))
       {
@@ -346,7 +346,7 @@ class rewrite_conversion_helper
       return expression;
     }
 
-    data_expression lazy_reconstruct(data_expression const& expression)
+    data_expression lazy_reconstruct(const data_expression& expression)
     {
       if (!m_reconstruction_context.empty())
       {
@@ -355,7 +355,7 @@ class rewrite_conversion_helper
       return expression;
     }
 
-    data_expression implement(data_expression const& expression)
+    data_expression implement(const data_expression& expression)
     {
       if (is_application(expression))
       {

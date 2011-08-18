@@ -306,7 +306,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
     }
   }
 
-  for(atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l1 = term2int_begin()
+  for(atermpp::map< function_symbol, atermpp::aterm_int >::const_iterator l1 = term2int_begin()
       ; l1 != term2int_end()
       ; ++l1)
   {
@@ -755,17 +755,6 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
     {
       jitty_strat[oldsize]=NULL;
     }
-
-    /* for( atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l = term2int_begin()
-        ; l != term2int_end()
-        ; ++l)
-    {
-      atermpp::aterm_int i = l->second;
-      if (((size_t) ATgetInt(i)) >= old_opids)
-      {
-        jitty_strat[ATgetInt(i)] = NULL;
-      }
-    } */
   }
 
   return a;
@@ -783,7 +772,7 @@ data_expression RewriterJitty::rewrite(const data_expression term, mutable_map_s
   {
     internal_sigma[i->first]=toRewriteFormat(i->second);
   }
-  return fromInner(rewrite_internal(toRewriteFormat(term), internal_sigma));
+  return fromRewriteFormat(rewrite_internal(toRewriteFormat(term), internal_sigma));
 }
 
 atermpp::aterm_appl RewriterJitty::rewrite_internal(

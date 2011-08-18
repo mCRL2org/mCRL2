@@ -51,6 +51,7 @@ class RewriterCompilingJitty: public Rewriter
 
   private:
     atermpp::set < data_equation > rewrite_rules;
+    used_data_equation_selector data_equation_selector;
     bool need_rebuild;
     bool made_files;
 
@@ -87,7 +88,7 @@ class RewriterCompilingJitty: public Rewriter
     void implement_tree_aux(FILE* f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool* used, ATermList nnfvars);
     void implement_tree(FILE* f, ATermAppl tree, int arity, int d, int opid, bool* used);
     void implement_strategy(FILE* f, ATermList strat, int arity, int d, int opid, size_t nf_args);
-    void CompileRewriteSystem(const data_specification& DataSpec, const used_data_equation_selector& equations_selector);
+    void CompileRewriteSystem(const data_specification& DataSpec);
     void CleanupRewriteSystem();
     void BuildRewriteSystem();
 	FILE* MakeTempFiles();

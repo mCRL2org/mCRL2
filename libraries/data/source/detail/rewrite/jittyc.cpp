@@ -857,10 +857,7 @@ static ATermAppl create_tree(const data_equation_list rules, int /*opid*/, int /
   int total_rule_vars = 0;
   for (data_equation_list::const_iterator it=rules.begin(); it!=rules.end(); ++it)
   {
-//    if (ATgetArity(ATgetAFun((ATermAppl) ATelementAt((ATermList) ATgetFirst(rules),2))) <= arity+1)
-//    {
     rule_seqs = ATinsert(rule_seqs, (ATerm) create_sequence(*it,&total_rule_vars, true_inner));
-//    }
   }
 
   // Generate initial parameters for built_tree
@@ -876,9 +873,7 @@ static ATermAppl create_tree(const data_equation_list rules, int /*opid*/, int /
   {
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(a,int,total_rule_vars);
     treevars_usedcnt = a;
-//    treevars_usedcnt = (int *) malloc(total_rule_vars*sizeof(int));
     tree = build_tree(init_pars,0);
-//    free(treevars_usedcnt);
     for (; !ATisEmpty(readies); readies=ATgetNext(readies))
     {
       tree = ATmakeAppl3(afunC,ATgetArgument(ATAgetFirst(readies),0),(ATerm) ATmakeAppl1(afunR,ATgetArgument(ATAgetFirst(readies),1)),(ATerm) tree);
@@ -888,7 +883,6 @@ static ATermAppl create_tree(const data_equation_list rules, int /*opid*/, int /
   {
     tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
   }
-  //ATprintf("tree: %t\n",tree);
 
   return tree;
 }
@@ -1259,8 +1253,8 @@ bool RewriterCompilingJitty::opid_is_nf(const atermpp::aterm_int opid, size_t nu
   // First check whether the opid is a forall or an exists with one argument.
   // Then the routines for exists/forall quantifier enumeration must be applied.
   if (num_args==1 && 
-        (function_symbol(get_int2term(opid.value())).name() == exists_function_symbol() ||
-         function_symbol(get_int2term(opid.value())).name() == forall_function_symbol()))
+        (get_int2term(opid.value()).name() == exists_function_symbol() ||
+         get_int2term(opid.value()).name() == forall_function_symbol()))
   {
     return false;
   }
@@ -2171,6 +2165,7 @@ bool RewriterCompilingJitty::addRewriteRule(const data_equation rule1)
     toRewriteFormat(rule.condition());
     toRewriteFormat(rule.lhs());
     toRewriteFormat(rule.rhs());
+    data_equation_selector.add_function_symbols(rule.lhs());
     need_rebuild = true;
   }
   return true;
@@ -2188,7 +2183,7 @@ bool RewriterCompilingJitty::removeRewriteRule(const data_equation rule1)
   return false;
 }
 
-void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec, const used_data_equation_selector& equations_selector)
+void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec)
 {
   made_files = false;
   need_rebuild = true;
@@ -2209,7 +2204,7 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   const data_equation_vector l=DataSpec.equations();
   for (data_equation_vector::const_iterator j=l.begin(); j!=l.end(); ++j)
   {
-    if (equations_selector(*j))
+    if (data_equation_selector(*j))
     {
       addRewriteRule(m_conversion_helper.implement(*j));
     }
@@ -2274,51 +2269,62 @@ FILE* RewriterCompilingJitty::MakeTempFiles()
 }
 
 inline
-int declare_rewr_functions(FILE* f, size_t func_index, int arity)
+int declare_rewr_functions(FILE* f, size_t func_index, int arity, const bool generate_code)
 {
-  /* Declare the function that gets function func_index in normal form */
+  /* If generate_code is false, only the variable aux is increased to calculate the 
+     return value.
+     Declare the function that gets function func_index in normal form */
   int aux = 0;
   for (int a=0; a<=arity; a++)
   {
     int b = (a<=NF_MAX_ARITY)?a:0;
     for (size_t nfs=0; (nfs >> b) == 0; nfs++)
     {
-      fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_%lu(",func_index,a,nfs);
-      for (int i=0; i<a; i++)
+      if (generate_code)
       {
-        fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
-      }
-      fprintf(f,  ");\n");
-
-      if (nfs == 0)
-      {
-        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index, a, func_index, a);
-        for(int i = 1; i <= a; ++i)
-        {
-          fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %i)", (i == 1?"":", "), i);
-        }
-        fprintf(f,  "); }\n");
-      }
-      else // (nfs > 0)
-      {
-        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0(",func_index+1+aux,a);
+        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_%lu(",func_index,a,nfs);
         for (int i=0; i<a; i++)
         {
           fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
         }
-        fprintf(f,  ") { return rewr_%lu_%i_%lu(",func_index,a,nfs);
-        for (int i=0; i<a; i++)
+        fprintf(f,  ");\n");
+      }
+  
+      if (nfs == 0)
+      {
+        if (generate_code)
         {
-          fprintf(f, (i==0)?"arg%i":",arg%i",i);
+          fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index, a, func_index, a);
+          for(int i = 1; i <= a; ++i)
+          {
+            fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %i)", (i == 1?"":", "), i);
+          }
+          fprintf(f,  "); }\n");
         }
-        fprintf(f,  "); }\n");
-
-        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index+1+aux,a,func_index+1+aux,a);
-        for (int i=1; i<=a; i++)
+      }
+      else // (nfs > 0)
+      {
+        if (generate_code)
         {
-          fprintf(f, (i==1)?"ATAgetArgument(t, %i)":", ATAgetArgument(t, %i)",i);
+          fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0(",func_index+1+aux,a);
+          for (int i=0; i<a; i++)
+          {
+            fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
+          }
+          fprintf(f,  ") { return rewr_%lu_%i_%lu(",func_index,a,nfs);
+          for (int i=0; i<a; i++)
+          {
+            fprintf(f, (i==0)?"arg%i":",arg%i",i);
+          }
+          fprintf(f,  "); }\n");
+  
+          fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index+1+aux,a,func_index+1+aux,a);
+          for (int i=1; i<=a; i++)
+          {
+            fprintf(f, (i==1)?"ATAgetArgument(t, %i)":", ATAgetArgument(t, %i)",i);
+          }
+          fprintf(f,  "); }\n");
         }
-        fprintf(f,  "); }\n");
 
         ++aux;
       }
@@ -2348,14 +2354,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   ar_size = 0;
   int2ar_idx.clear();
 
-  for(atermpp::map< data_expression, atermpp::aterm_int >::const_iterator l = term2int_begin()
+  for(atermpp::map< function_symbol, atermpp::aterm_int >::const_iterator l = term2int_begin()
         ; l != term2int_end()
         ; ++l)
   {
     int i = l->second.value();
     if (int2ar_idx.count(i) == 0)
     {
-      size_t arity = getArity(data_expression((ATermAppl)l->first));
+      size_t arity = getArity(l->first);
       int2ar_idx[i]=ar_size;
       ar_size += (arity*(arity+1))/2;
     }
@@ -2394,12 +2400,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   size_t max_arity = 0;
   for (size_t j=0; j < get_num_opids(); ++j)
   {
-    size_t arity = getArity(get_int2term(j));
+    const function_symbol fs=get_int2term(j);
+    size_t arity = getArity(fs);
     if (arity > max_arity)
     {
       max_arity = arity;
     }
-    j += declare_rewr_functions(f, j, arity);
+    j += declare_rewr_functions(f, j, arity,data_equation_selector(fs));
   }
   fprintf(f,  "\n\n");
 
@@ -2463,64 +2470,68 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   //
   for (size_t j=0; j < get_num_opids(); j++)
   {
-    size_t arity = getArity(get_int2term(j));
+    const function_symbol fs=get_int2term(j);
+    size_t arity = getArity(fs);
 
-    fprintf(f,  "// %s\n",atermpp::aterm(get_int2term(j)).to_string().c_str());
-
-    for (size_t a=0; a<=arity; a++)
+    if (data_equation_selector(fs))
     {
-      nfs_array nfs_a(a);
-      int b = (a<=NF_MAX_ARITY)?a:0;
-      for (size_t nfs=0; (nfs >> b) == 0; nfs++)
+      fprintf(f,  "// %s\n",atermpp::aterm(fs).to_string().c_str());
+  
+      for (size_t a=0; a<=arity; a++)
       {
-        fprintf(f,  "static atermpp::aterm_appl rewr_%ld_%ld_%lu(",j,a,nfs);
-        for (size_t i=0; i<a; i++)
+        nfs_array nfs_a(a);
+        int b = (a<=NF_MAX_ARITY)?a:0;
+        for (size_t nfs=0; (nfs >> b) == 0; nfs++)
         {
-          fprintf(f, (i==0)?"atermpp::aterm_appl arg%ld":", atermpp::aterm_appl arg%ld",i);
-        }
-        fprintf(f,  ")\n"
-                "{\n"
-               );
-        if (a==1 && (function_symbol(get_int2term(j)).name() == exists_function_symbol())) // existential quantifier.
-        { 
-          fprintf(f,"  // existential quantifier\n");
-          fprintf(f,"  return this_rewriter->internal_existential_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),*(this_rewriter->global_sigma));\n",
-                               (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
-        }
-        else if (a==1 && (function_symbol(get_int2term(j)).name() == forall_function_symbol())) // universal quantifier.
-        { 
-          fprintf(f,"  // universal quantifier\n");
-          fprintf(f,"  return this_rewriter->internal_universal_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),*(this_rewriter->global_sigma));\n",
-                               (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
-        }
-        else if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
-        {
-        // Implement strategy
-          if (0 < a)
+          fprintf(f,  "static atermpp::aterm_appl rewr_%ld_%ld_%lu(",j,a,nfs);
+          for (size_t i=0; i<a; i++)
           {
-            nfs_a.set_value(a,nfs);
+            fprintf(f, (i==0)?"atermpp::aterm_appl arg%ld":", atermpp::aterm_appl arg%ld",i);
           }
-          implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs); 
-        }
-        else
-        {
-          MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,a);
-          for (size_t k=0; k<a; k++)
+          fprintf(f,  ")\n"
+                  "{\n"
+                 );
+          if (a==1 && (fs.name() == exists_function_symbol())) // existential quantifier.
+          { 
+            fprintf(f,"  // existential quantifier\n");
+            fprintf(f,"  return this_rewriter->internal_existential_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),*(this_rewriter->global_sigma));\n",
+                                 (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
+          }
+          else if (a==1 && (fs.name() == forall_function_symbol())) // universal quantifier.
+          { 
+            fprintf(f,"  // universal quantifier\n");
+            fprintf(f,"  return this_rewriter->internal_universal_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),*(this_rewriter->global_sigma));\n",
+                                 (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
+          }
+          else if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
           {
-            used[k] = ((nfs & ((size_t)1 << k)) != 0);
+          // Implement strategy
+            if (0 < a)
+            {
+              nfs_a.set_value(a,nfs);
+            }
+            implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs); 
           }
-          finish_function(f,a,j,used);
+          else
+          {
+            MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,a);
+            for (size_t k=0; k<a; k++)
+            {
+              used[k] = ((nfs & ((size_t)1 << k)) != 0);
+            }
+            finish_function(f,a,j,used);
+          }
+  
+          fprintf(f,                 "}\n");
         }
-
-        fprintf(f,                 "}\n");
       }
+      fprintf(f,  "\n");
     }
     if (arity > NF_MAX_ARITY)
     {
       arity = NF_MAX_ARITY;
     }
     j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2
-    fprintf(f,  "\n");
   }
 
   fprintf(f,
@@ -2540,8 +2551,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     fprintf(f,  "  int2func[%ld] = (func_type *) malloc(%ld*sizeof(func_type));\n",i+1,get_num_opids());
     for (size_t j=0; j < get_num_opids(); j++)
     {
-      size_t arity = getArity(get_int2term(j));
-      if (i <= arity)
+      const function_symbol fs=get_int2term(j);
+      size_t arity = getArity(fs);
+      if ((i <= arity) && data_equation_selector(fs))
       {
         fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j,j,i);
         if (i <= NF_MAX_ARITY)
@@ -2648,7 +2660,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t,\n"
       "     mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma)\n"
       "{\n"
-//       "  this_rewriter->global_sigma= &sigma;\n"
       "  return rewrite(t);\n"
       "}\n"
       "\n");
@@ -2682,7 +2693,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  }\n"
       "  else\n"
       "  {\n"
-//      "    return this_rewriter->getSubstitutionInternal(t);\n"
       "    return (*(this_rewriter->global_sigma))(t);\n"
       "  }\n"
       "}\n",
@@ -2722,13 +2732,14 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   need_rebuild = false;
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &equations_selector)
+RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &equations_selector):
+    data_equation_selector(equations_selector)
 {
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
   m_data_specification_for_enumeration = DataSpec;
   initialise_common();
-  CompileRewriteSystem(DataSpec, equations_selector);
+  CompileRewriteSystem(DataSpec);
 }
 
 RewriterCompilingJitty::~RewriterCompilingJitty()

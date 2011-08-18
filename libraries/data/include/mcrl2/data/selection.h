@@ -17,6 +17,7 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2
 {
@@ -38,7 +39,10 @@ namespace data
 class used_data_equation_selector
 {
   private:
-    std::set< function_symbol > m_used_symbols;
+
+    atermpp::set< function_symbol > m_used_symbols;
+ 
+    const bool add_all;
 
     template < typename Range >
     void add_symbols(Range const& r)
@@ -78,8 +82,10 @@ class used_data_equation_selector
         {
           if (std::includes(m_used_symbols.begin(), m_used_symbols.end(), symbols_for_equation[*i].begin(), symbols_for_equation[*i].end()))
           {
-            data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
-            data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
+            // data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->rhs());
+            // data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(i->condition());
+            add_function_symbols(i->rhs());
+            add_function_symbols(i->condition());
             equations.erase(i++);
           }
           else
@@ -91,10 +97,25 @@ class used_data_equation_selector
     }
 
   public:
+    
+    /// \brief Check whether the symbol is used.
+    bool operator()(const data::function_symbol f) const
+    {
+      if (add_all)
+      {
+        return true;
+      }
+      return m_used_symbols.count(f)>0;
+    }
 
     /// \brief Check whether data equation relates to used symbols, and therefore is important.
-    bool operator()(data_equation const& e) const
+    bool operator()(const data_equation e) const
     {
+      if (add_all)
+      {
+        return true;
+      }
+
       std::set< function_symbol > used_symbols;
 
       data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(used_symbols, used_symbols.end()))(e.lhs());
@@ -102,9 +123,15 @@ class used_data_equation_selector
       return std::includes(m_used_symbols.begin(), m_used_symbols.end(), used_symbols.begin(), used_symbols.end());
     }
 
+    void add_function_symbols(const data_expression t)
+    {
+      data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(t);
+    }
+    
     /// \brief context is a range of function symbols
     template <typename Range>
-    used_data_equation_selector(data_specification const& data_spec, Range const& context)
+    used_data_equation_selector(data_specification const& data_spec, Range const& context):
+       add_all(false)
     {
       add_symbols(context);
       add_data_specification_symbols(data_spec);
@@ -113,7 +140,7 @@ class used_data_equation_selector
     used_data_equation_selector(const data_specification& specification,
                                 const std::set<function_symbol>& function_symbols,
                                 const atermpp::set<data::variable>& global_variables
-                               )
+                               ):add_all(false)
     {
       // Compensate for symbols that could be used as part of an instantiation of free variables
       for (atermpp::set<data::variable>::const_iterator j = global_variables.begin(); j != global_variables.end(); ++j)
@@ -126,11 +153,12 @@ class used_data_equation_selector
     }
 
     /// \brief select all equations
-    used_data_equation_selector(const data_specification& specification)
+    used_data_equation_selector(const data_specification& specification):
+       add_all(true)
     {
-      add_symbols(specification.constructors());
+      /* add_symbols(specification.constructors());
       add_symbols(specification.mappings());
-      add_data_specification_symbols(specification);
+      add_data_specification_symbols(specification); */
     }
 };
 
