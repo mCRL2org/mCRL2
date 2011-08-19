@@ -1817,9 +1817,7 @@ namespace mcrl2 {
 
         data_equation_vector result;
         result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), equal_to(creal(vx, vp), creal(vy, vq)), equal_to(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(atermpp::make_vector(vr), less(vr, vr), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), less(creal(vx, vp), creal(vy, vq)), less(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
-        result.push_back(data_equation(atermpp::make_vector(vr), less_equal(vr, vr), sort_bool::true_()));
         result.push_back(data_equation(atermpp::make_vector(vp, vq, vx, vy), less_equal(creal(vx, vp), creal(vy, vq)), less_equal(times(vx, sort_int::cint(sort_nat::cnat(vq))), times(vy, sort_int::cint(sort_nat::cnat(vp))))));
         result.push_back(data_equation(atermpp::make_vector(vx), int2real(vx), creal(vx, sort_pos::c1())));
         result.push_back(data_equation(atermpp::make_vector(vn), nat2real(vn), creal(sort_int::cint(vn), sort_pos::c1())));

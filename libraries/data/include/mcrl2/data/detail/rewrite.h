@@ -87,6 +87,8 @@ class Rewriter
     detail::rewrite_conversion_helper< Rewriter> m_conversion_helper; 
 
   public:
+
+    used_data_equation_selector data_equation_selector;
     /**
      * \brief Constructor. Do not use directly; use createRewriter()
      *        function instead.

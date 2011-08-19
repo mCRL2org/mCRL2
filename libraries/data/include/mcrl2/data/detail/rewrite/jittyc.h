@@ -51,7 +51,7 @@ class RewriterCompilingJitty: public Rewriter
 
   private:
     atermpp::set < data_equation > rewrite_rules;
-    used_data_equation_selector data_equation_selector;
+    // used_data_equation_selector data_equation_selector;
     bool need_rebuild;
     bool made_files;
 

@@ -181,6 +181,7 @@ class rewrite_conversion_helper
                                      (free_variables.empty()?
                                       application(lambdaAt_function, bound_variables):
                                       application(application(lambdaAt_function, free_variables),bound_variables)), body));
+          m_rewriter->data_equation_selector.add_function_symbols(lambdaAt_function);
 
           m_reconstruction_context[lambdaAt_function] =
             (free_variables.empty()?
@@ -221,11 +222,15 @@ class rewrite_conversion_helper
         }
         else if (is_exists(expression))
         {
-          return function_symbol("exists", make_function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
+           const function_symbol exists("exists", make_function_sort(abstract_body.sort(), sort_bool::bool_()));
+           m_rewriter->data_equation_selector.add_function_symbols(exists);
+           return exists(abstract_body);
         }
         else if (is_forall(expression))
         {
-          return function_symbol("forall", make_function_sort(abstract_body.sort(), sort_bool::bool_()))(abstract_body);
+          const function_symbol forall("forall", make_function_sort(abstract_body.sort(), sort_bool::bool_()));
+          m_rewriter->data_equation_selector.add_function_symbols(forall);
+          return forall(abstract_body);
         }
       }
 

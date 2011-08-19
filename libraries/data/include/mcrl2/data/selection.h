@@ -42,7 +42,7 @@ class used_data_equation_selector
 
     atermpp::set< function_symbol > m_used_symbols;
  
-    const bool add_all;
+    bool add_all;
 
     template < typename Range >
     void add_symbols(Range const& r)
@@ -127,6 +127,11 @@ class used_data_equation_selector
     {
       data::detail::make_find_function_symbols_traverser<data::data_expression_traverser>(std::inserter(m_used_symbols, m_used_symbols.end()))(t);
     }
+
+    /// \brief default constructor
+    used_data_equation_selector():
+       add_all(true)
+    {}
     
     /// \brief context is a range of function symbols
     template <typename Range>

@@ -2732,9 +2732,9 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   need_rebuild = false;
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &equations_selector):
-    data_equation_selector(equations_selector)
+RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &equations_selector)
 {
+  data_equation_selector=equations_selector;
   so_rewr_cleanup = NULL;
   rewriter_so = NULL;
   m_data_specification_for_enumeration = DataSpec;

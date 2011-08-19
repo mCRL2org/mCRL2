@@ -53,9 +53,7 @@ var m:Nat;
     s:Real;
 
 eqn  ==(@cReal(x, p), @cReal(y, q))  =  ==(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p))));
-     <(r,r) = false;
      <(@cReal(x, p), @cReal(y, q))  =  <(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p))));
-     <=(r,r) = true;
      <=(@cReal(x, p), @cReal(y, q))  =  <=(*(x, @cInt(@cNat(q))), *(y, @cInt(@cNat(p))));
      Int2Real(x)  =  @cReal(x, @c1);
      Nat2Real(n)  =  @cReal(@cInt(n), @c1);
