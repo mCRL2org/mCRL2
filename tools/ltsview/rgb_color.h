@@ -35,24 +35,24 @@ class RGB_Color
     RGB_Color(unsigned char r, unsigned char g, unsigned char b)
       : _red(r), _green(g), _blue(b) {}
     RGB_Color(wxColour c) : _red(c.Red()), _green(c.Green()), _blue(c.Blue()) {}
-    unsigned char red()
+    unsigned char red() const
     {
       return _red;
     }
-    unsigned char green()
+    unsigned char green() const
     {
       return _green;
     }
-    unsigned char blue()
+    unsigned char blue() const
     {
       return _blue;
     }
-    wxColour toWxColour()
+    wxColour toWxColour() const
     {
       return wxColour(_red, _green, _blue);
     }
-    void blendWith(RGB_Color c, float factor);
-    bool operator==(RGB_Color& c);
-    bool operator!=(RGB_Color& c);
+    void blendWith(const RGB_Color &c, float factor);
+    bool operator==(const RGB_Color& c) const;
+    bool operator!=(const RGB_Color& c) const;
 };
 #endif
