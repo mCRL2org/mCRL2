@@ -16,14 +16,19 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/data_construction.h"
+#include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/identifier_generator.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2 {
@@ -32,9 +37,38 @@ namespace pbes_system {
 
 struct absinthe_algorithm
 {
-  atermpp::map<data::sort_expression, data::sort_expression> parse_approximation_mapping(const std::string& text, const data::data_specification& dataspec)
+  typedef atermpp::map<data::sort_expression, data::sort_expression> sort_expression_substitution_map;
+
+  struct absinthe_builder: public sort_expression_builder<absinthe_builder>
   {
-    atermpp::map<data::sort_expression, data::sort_expression> result;
+    typedef sort_expression_builder<absinthe_builder> super;
+    using super::enter;
+    using super::leave;
+    using super::operator();
+
+    const sort_expression_substitution_map& m_sort_expression_substitutions;
+    bool m_is_over_approximation;
+
+    absinthe_builder(const sort_expression_substitution_map& sigmaS,
+                     bool is_over_approximation)
+      : m_sort_expression_substitutions(sigmaS),
+        m_is_over_approximation(is_over_approximation)
+    {}
+
+    data::sort_expression operator()(const data::sort_expression& x)
+    {
+      sort_expression_substitution_map::const_iterator i = m_sort_expression_substitutions.find(x);
+      if (i != m_sort_expression_substitutions.end())
+      {
+        return i->second;
+      }
+      return super::operator()(x);
+    }
+  };
+
+  sort_expression_substitution_map parse_approximation_mapping(const std::string& text, const data::data_specification& dataspec)
+  {
+    sort_expression_substitution_map result;
 
     std::vector<std::string> lines = utilities::regex_split(text, "\\n");
     for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
@@ -104,9 +138,9 @@ struct absinthe_algorithm
   struct make_equation
   {
     const data::function_symbol_vector& user_mappings;
-    const atermpp::map<data::sort_expression, data::sort_expression>& abstraction;
+    const sort_expression_substitution_map& abstraction;
 
-    make_equation(const data::function_symbol_vector& user_mappings_, const atermpp::map<data::sort_expression, data::sort_expression>& abstraction_)
+    make_equation(const data::function_symbol_vector& user_mappings_, const sort_expression_substitution_map& abstraction_)
       : user_mappings(user_mappings_),
         abstraction(abstraction_)
     {}
@@ -182,38 +216,57 @@ struct absinthe_algorithm
   };
 
   // add lifted mappings and equations to the data specification
-  void lift_data_specification(data::data_specification& dataspec, const data::function_symbol_vector& user_mappings, const atermpp::map<data::sort_expression, data::sort_expression>& abstraction)
+  void lift_data_specification(data::data_specification& dataspec, const data::function_symbol_vector& user_mappings, const sort_expression_substitution_map& sigmaS)
   {
     for (data::function_symbol_vector::const_iterator i = user_mappings.begin(); i != user_mappings.end(); ++i)
     {
+      // lift the function symbol *i
       data::function_symbol f = make_mapping(user_mappings)(*i);
       dataspec.add_mapping(f);
-      std::cout << "added function symbol: " << core::pp(f) << " " << core::pp(f.sort()) << std::endl;
+      mCRL2log(log::debug1) << "added function symbol: " << core::pp(f) << " " << core::pp(f.sort()) << std::endl;
 
-      data::data_equation eq = make_equation(user_mappings, abstraction)(*i, f);
+      // make an equation for the lifted function symbol f
+      data::data_equation eq = make_equation(user_mappings, sigmaS)(*i, f);
       dataspec.add_equation(eq);
-      std::cout << "added equation: " << core::pp(eq) << std::endl;
+      mCRL2log(log::debug1) << "added equation: " << core::pp(eq) << std::endl;
     }
   }
 
-  void print_abstraction_mapping(const atermpp::map<data::sort_expression, data::sort_expression>& abstraction)
+  void print_abstraction_mapping(const sort_expression_substitution_map& abstraction)
   {
-    for (atermpp::map<data::sort_expression, data::sort_expression>::const_iterator i = abstraction.begin(); i != abstraction.end(); ++i)
+    for (sort_expression_substitution_map::const_iterator i = abstraction.begin(); i != abstraction.end(); ++i)
     {
       std::cout << data::pp(i->first) << " -> " << data::pp(i->second) << std::endl;
     }
   }
 
-  void run(const pbes<>& p, const std::string& abstraction_mapping_text, const std::string& user_dataspec_text)
+  void run(pbes<>& p, const std::string& abstraction_mapping_text, const std::string& user_dataspec_text)
   {
+    bool over_approximation = false;
+
     data::data_specification user_dataspec = data::parse_data_specification(user_dataspec_text);
     data::data_specification combined_dataspec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_dataspec_text);
 
-    // parse the abstraction mapping
-    atermpp::map<data::sort_expression, data::sort_expression> abstraction = parse_approximation_mapping(abstraction_mapping_text, combined_dataspec);
+    // sort expressions replacements (specified by the user)
+    sort_expression_substitution_map sigmaS = parse_approximation_mapping(abstraction_mapping_text, combined_dataspec);
 
     // add lifted versions of the user defined mappings and equations
-    lift_data_specification(combined_dataspec, user_dataspec.user_defined_mappings(), abstraction);
+    lift_data_specification(combined_dataspec, user_dataspec.user_defined_mappings(), sigmaS);
+
+    std::cout << "--- abstraction mapping ---" << std::endl;
+    std::cout << abstraction_mapping_text << std::endl;
+
+    std::cout << "--- data specification extension ---" << std::endl;
+    std::cout << user_dataspec_text << std::endl;
+
+    std::cout << "--- pbes before ---" << std::endl;
+    std::cout << pbes_system::pp(p) << std::endl;
+
+    p.data() = combined_dataspec;
+    absinthe_builder(sigmaS, over_approximation)(p);
+
+    std::cout << "--- pbes after ---" << std::endl;
+    std::cout << pbes_system::pp(p) << std::endl;
   }
 };
 
