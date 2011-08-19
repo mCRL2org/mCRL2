@@ -88,6 +88,7 @@ DataExpr
   | '{' IdDecl '|' DataExpr '}'
   | '{' DataExprList '}'
   | '(' DataExpr ')'
+  | DataExpr '[' DataExpr '->' DataExpr ']'
   | DataExpr '(' DataExprList ')'
   | DataExprUnaryOperator DataExpr
   | DataExprQuantifier DataExpr
