@@ -15,7 +15,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/pbes.h"
-//#include "mcrl2/pbes/absint.h"
+#include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -32,6 +32,7 @@ class pbes_absint_tool: public input_output_tool
     typedef input_output_tool super;
 
     std::string m_dataspec_file;
+    std::string m_abstraction_file;
 
     /// The transformation strategies of the tool.
     enum approximation_strategy
@@ -67,6 +68,7 @@ class pbes_absint_tool: public input_output_tool
       set_approximation_strategy(parser.option_argument("approximation"));
 
       m_dataspec_file = parser.option_argument("data");
+      m_abstraction_file = parser.option_argument("mapping");
     }
 
     void add_options(interface_description& desc)
@@ -83,7 +85,7 @@ class pbes_absint_tool: public input_output_tool
                        'm');
 
       desc.add_option("approximation",
-                       make_optional_argument("NAME", "pbes"),
+                       make_mandatory_argument("NAME"),
                        "use the approximation strategy NAME:\n"
                        "  'over'  for an over-approximation,\n"
                        "  'under' for an under-approximation\n",
@@ -114,7 +116,13 @@ class pbes_absint_tool: public input_output_tool
       pbes<> p;
       p.load(m_input_filename);
 
-      //pbes_absint_algorithm algorithm;
+      std::string abstraction_mapping_text = utilities::read_text(m_abstraction_file);
+      std::string user_dataspec_text = utilities::read_text(m_dataspec_file);
+      bool over_approximation = m_strategy == as_over;
+
+      absinthe_algorithm algorithm;
+      algorithm.run(p, abstraction_mapping_text, user_dataspec_text, over_approximation);
+
 
       // save the result
       p.save(m_output_filename);

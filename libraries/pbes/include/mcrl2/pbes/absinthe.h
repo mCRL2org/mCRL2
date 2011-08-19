@@ -12,6 +12,7 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
+#include "mcrl2/atermpp/make_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/exists.h"
@@ -39,20 +40,17 @@ struct absinthe_algorithm
 {
   typedef atermpp::map<data::sort_expression, data::sort_expression> sort_expression_substitution_map;
 
-  struct absinthe_builder: public sort_expression_builder<absinthe_builder>
+  struct absinthe_sort_expression_builder: public sort_expression_builder<absinthe_sort_expression_builder>
   {
-    typedef sort_expression_builder<absinthe_builder> super;
+    typedef sort_expression_builder<absinthe_sort_expression_builder> super;
     using super::enter;
     using super::leave;
     using super::operator();
 
     const sort_expression_substitution_map& m_sort_expression_substitutions;
-    bool m_is_over_approximation;
 
-    absinthe_builder(const sort_expression_substitution_map& sigmaS,
-                     bool is_over_approximation)
-      : m_sort_expression_substitutions(sigmaS),
-        m_is_over_approximation(is_over_approximation)
+    absinthe_sort_expression_builder(const sort_expression_substitution_map& sigmaS)
+      : m_sort_expression_substitutions(sigmaS)
     {}
 
     data::sort_expression operator()(const data::sort_expression& x)
@@ -65,6 +63,33 @@ struct absinthe_algorithm
       return super::operator()(x);
     }
   };
+
+//  struct absinthe_data_expression_builder: public pbes_expression_builder<absinthe_data_expression_builder>
+//  {
+//    typedef pbes_expression_builder<absinthe_data_expression_builder> super;
+//    using super::enter;
+//    using super::leave;
+//    using super::operator();
+//
+//    bool m_is_over_approximation;
+//
+//    absinthe_data_expression_builder(bool is_over_approximation)
+//      : m_is_over_approximation(is_over_approximation)
+//    {}
+//
+//    pbes_expression operator()(const data::data_expression& x)
+//    {
+//      data::variable var("y", data::sort_bool::bool_());
+//      data::variable_list variables = atermpp::make_list(var);
+//      pbes_expression body = imp(data::detail::create_set_in(var, x), var);
+//      return forall(variables, body);
+//    }
+//
+//    pbes_expression operator()(const propositional_variable_instantiation& x)
+//    {
+//      return x;
+//    }
+//  };
 
   sort_expression_substitution_map parse_approximation_mapping(const std::string& text, const data::data_specification& dataspec)
   {
@@ -240,10 +265,8 @@ struct absinthe_algorithm
     }
   }
 
-  void run(pbes<>& p, const std::string& abstraction_mapping_text, const std::string& user_dataspec_text)
+  void run(pbes<>& p, const std::string& abstraction_mapping_text, const std::string& user_dataspec_text, bool over_approximation = false)
   {
-    bool over_approximation = false;
-
     data::data_specification user_dataspec = data::parse_data_specification(user_dataspec_text);
     data::data_specification combined_dataspec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_dataspec_text);
 
@@ -263,7 +286,13 @@ struct absinthe_algorithm
     std::cout << pbes_system::pp(p) << std::endl;
 
     p.data() = combined_dataspec;
-    absinthe_builder(sigmaS, over_approximation)(p);
+
+    // first transform the sort expressions
+    absinthe_sort_expression_builder builder(sigmaS);
+    builder(p);
+
+    // then transform the data expressions and the propositional variable instantiations
+    // absinthe_data_expression_builder(over_approximation)(p);
 
     std::cout << "--- pbes after ---" << std::endl;
     std::cout << pbes_system::pp(p) << std::endl;
