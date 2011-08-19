@@ -42,15 +42,6 @@ function_symbol const& true_();
 class data_equation: public atermpp::aterm_appl
 {
   public:
-
-    /// \brief iterator range over a list of variables
-    typedef atermpp::term_list< variable > variables_const;
-
-    /// \brief iterator range over a constant list of variables
-    typedef atermpp::term_list< variable > variables_const_range;
-
-  public:
-
     /// \brief Constructor.
     ///
     data_equation()
@@ -123,7 +114,7 @@ class data_equation: public atermpp::aterm_appl
     {}
 
     /// \brief Returns the variables of the data equation.
-    variables_const_range variables() const
+    variable_list variables() const
     {
       return atermpp::list_arg1(appl());
     }
