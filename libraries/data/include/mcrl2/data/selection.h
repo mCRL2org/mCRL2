@@ -56,6 +56,16 @@ class used_data_equation_selector
         add_symbols(specification.constructors(*j));
       }
 
+      // Add all equality function symbols, as they may be used when eliminating
+      // quantifiers.
+      for (function_symbol_vector::const_iterator i = specification.mappings().begin(); i != specification.mappings().end(); ++i)
+      {
+        if(is_equal_to_function_symbol(*i))
+        {
+          m_used_symbols.insert(*i);
+        }
+      }
+
       std::set< data_equation > equations(boost::copy_range< std::set< data_equation > >(specification.equations()));
 
       std::map< data_equation, std::set< function_symbol > > symbols_for_equation;
