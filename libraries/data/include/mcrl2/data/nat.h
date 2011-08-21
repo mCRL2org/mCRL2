@@ -1413,63 +1413,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@swap_zero_lte
-      /// \return Identifier \@swap_zero_lte
-      inline
-      core::identifier_string const& swap_zero_lte_name()
-      {
-        static core::identifier_string swap_zero_lte_name = data::detail::initialise_static_expression(swap_zero_lte_name, core::identifier_string("@swap_zero_lte"));
-        return swap_zero_lte_name;
-      }
-
-      /// \brief Constructor for function symbol \@swap_zero_lte
-      /// \return Function symbol swap_zero_lte
-      inline
-      function_symbol const& swap_zero_lte()
-      {
-        static function_symbol swap_zero_lte = data::detail::initialise_static_expression(swap_zero_lte, function_symbol(swap_zero_lte_name(), make_function_sort(nat(), nat(), nat(), sort_bool::bool_())));
-        return swap_zero_lte;
-      }
-
-
-      /// \brief Recogniser for function \@swap_zero_lte
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@swap_zero_lte
-      inline
-      bool is_swap_zero_lte_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e) == swap_zero_lte();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@swap_zero_lte
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@swap_zero_lte to a number of arguments
-      inline
-      application swap_zero_lte(const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return swap_zero_lte()(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@swap_zero_lte
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol swap_zero_lte to a
-      ///     number of arguments
-      inline
-      bool is_swap_zero_lte_application(const atermpp::aterm_appl& e)
-      {
-        if (is_application(e))
-        {
-          return is_swap_zero_lte_function_symbol(application(e).head());
-        }
-        return false;
-      }
-
       /// \brief Generate identifier \@first
       /// \return Identifier \@first
       inline
@@ -1780,7 +1723,6 @@ namespace mcrl2 {
         result.push_back(swap_zero_add());
         result.push_back(swap_zero_min());
         result.push_back(swap_zero_monus());
-        result.push_back(swap_zero_lte());
         result.push_back(first());
         result.push_back(last());
         result.push_back(divmod());
@@ -1832,8 +1774,8 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
-        if (is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e))
+        assert(is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
+        if (is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_divmod_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e))
         {
           return *boost::next(static_cast< application >(e).arguments().begin(), 0);
         }
@@ -1852,8 +1794,8 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_divmod_application(e) || is_ggdivmod_application(e));
-        if (is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_divmod_application(e) || is_ggdivmod_application(e))
+        assert(is_gtesubtb_application(e) || is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_divmod_application(e) || is_ggdivmod_application(e));
+        if (is_div_application(e) || is_mod_application(e) || is_exp_application(e) || is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_divmod_application(e) || is_ggdivmod_application(e))
         {
           return *boost::next(static_cast< application >(e).arguments().begin(), 1);
         }
@@ -1872,7 +1814,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_swap_zero_lte_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
+        assert(is_swap_zero_add_application(e) || is_swap_zero_min_application(e) || is_swap_zero_monus_application(e) || is_gdivmod_application(e) || is_ggdivmod_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
@@ -2059,8 +2001,6 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vn, vp), swap_zero_monus(c0(), cnat(vp), c0(), vn), c0()));
         result.push_back(data_equation(atermpp::make_vector(vn, vp, vq), swap_zero_monus(c0(), cnat(vp), cnat(vq), vn), monus(cnat(vq), swap_zero(cnat(vp), vn))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn, vp, vq), swap_zero_monus(cnat(vp), cnat(vq), vm, vn), swap_zero(monus(cnat(vp), cnat(vq)), monus(swap_zero(cnat(vp), vm), swap_zero(cnat(vq), vn)))));
-        result.push_back(data_equation(atermpp::make_vector(vm, vn), swap_zero_lte(c0(), vm, vn), less_equal(vm, vn)));
-        result.push_back(data_equation(atermpp::make_vector(vm, vn, vp), swap_zero_lte(cnat(vp), vm, vn), less_equal(swap_zero(cnat(vp), vm), swap_zero(cnat(vp), vn))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn, vu, vv), equal_to(cpair(vm, vn), cpair(vu, vv)), sort_bool::and_(equal_to(vm, vu), equal_to(vn, vv))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn, vu, vv), less(cpair(vm, vn), cpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less(vn, vv)))));
         result.push_back(data_equation(atermpp::make_vector(vm, vn, vu, vv), less_equal(cpair(vm, vn), cpair(vu, vv)), sort_bool::or_(less(vm, vu), sort_bool::and_(equal_to(vm, vu), less_equal(vn, vv)))));

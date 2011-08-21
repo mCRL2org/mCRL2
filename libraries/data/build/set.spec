@@ -16,6 +16,8 @@ sort Set(S) <"set_">;
 
 cons @set <"setconstructor"> : (S -> Bool) <"left"> # FSet(S) <"right"> -> Set(S);
 map {} <"emptyset"> : Set(S);
+% I think that @setfset and @setcomp should not be part of the rewrite system, but
+% become part of the internal generation of set representations. JFG
     @setfset <"setfset"> : FSet(S) <"arg"> -> Set(S);
     @setcomp <"setcomprehension"> : (S -> Bool) <"arg"> -> Set(S);
     in <"setin"> : S <"left"> # Set(S) <"right"> -> Bool;

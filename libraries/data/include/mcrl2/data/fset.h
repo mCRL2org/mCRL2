@@ -354,65 +354,6 @@ namespace mcrl2 {
         return false;
       }
 
-      /// \brief Generate identifier \@fset_lte
-      /// \return Identifier \@fset_lte
-      inline
-      core::identifier_string const& fsetlte_name()
-      {
-        static core::identifier_string fsetlte_name = data::detail::initialise_static_expression(fsetlte_name, core::identifier_string("@fset_lte"));
-        return fsetlte_name;
-      }
-
-      /// \brief Constructor for function symbol \@fset_lte
-      /// \param s A sort expression
-      /// \return Function symbol fsetlte
-      inline
-      function_symbol fsetlte(const sort_expression& s)
-      {
-        function_symbol fsetlte(fsetlte_name(), make_function_sort(make_function_sort(s, sort_bool::bool_()), fset(s), fset(s), sort_bool::bool_()));
-        return fsetlte;
-      }
-
-
-      /// \brief Recogniser for function \@fset_lte
-      /// \param e A data expression
-      /// \return true iff e is the function symbol matching \@fset_lte
-      inline
-      bool is_fsetlte_function_symbol(const atermpp::aterm_appl& e)
-      {
-        if (is_function_symbol(e))
-        {
-          return function_symbol(e).name() == fsetlte_name();
-        }
-        return false;
-      }
-
-      /// \brief Application of function symbol \@fset_lte
-      /// \param s A sort expression
-      /// \param arg0 A data expression
-      /// \param arg1 A data expression
-      /// \param arg2 A data expression
-      /// \return Application of \@fset_lte to a number of arguments
-      inline
-      application fsetlte(const sort_expression& s, const data_expression& arg0, const data_expression& arg1, const data_expression& arg2)
-      {
-        return fsetlte(s)(arg0, arg1, arg2);
-      }
-
-      /// \brief Recogniser for application of \@fset_lte
-      /// \param e A data expression
-      /// \return true iff e is an application of function symbol fsetlte to a
-      ///     number of arguments
-      inline
-      bool is_fsetlte_application(const atermpp::aterm_appl& e)
-      {
-        if (is_application(e))
-        {
-          return is_fsetlte_function_symbol(application(e).head());
-        }
-        return false;
-      }
-
       /// \brief Generate identifier \@fset_union
       /// \return Identifier \@fset_union
       inline
@@ -601,7 +542,6 @@ namespace mcrl2 {
         result.push_back(fsetinsert(s));
         result.push_back(fsetcinsert(s));
         result.push_back(fsetin(s));
-        result.push_back(fsetlte(s));
         result.push_back(fsetunion(s));
         result.push_back(fsetintersection(s));
         result.push_back(fsetdifference(s));
@@ -639,7 +579,7 @@ namespace mcrl2 {
       inline
       data_expression arg1(const data_expression& e)
       {
-        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e) || is_fsetdifference_application(e));
+        assert(is_fsetcinsert_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e) || is_fsetdifference_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 0);
       }
 
@@ -651,7 +591,7 @@ namespace mcrl2 {
       inline
       data_expression arg2(const data_expression& e)
       {
-        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e) || is_fsetdifference_application(e));
+        assert(is_fsetcinsert_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e) || is_fsetdifference_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 1);
       }
 
@@ -663,7 +603,7 @@ namespace mcrl2 {
       inline
       data_expression arg3(const data_expression& e)
       {
-        assert(is_fsetcinsert_application(e) || is_fsetlte_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e));
+        assert(is_fsetcinsert_application(e) || is_fsetunion_application(e) || is_fsetintersection_application(e));
         return *boost::next(static_cast< application >(e).arguments().begin(), 2);
       }
 
@@ -727,12 +667,6 @@ namespace mcrl2 {
         result.push_back(data_equation(atermpp::make_vector(vd, vs), fsetcinsert(s, vd, sort_bool::true_(), vs), fsetinsert(s, vd, vs)));
         result.push_back(data_equation(atermpp::make_vector(vd), fsetin(s, vd, fset_empty(s)), sort_bool::false_()));
         result.push_back(data_equation(atermpp::make_vector(vd, ve, vs), fsetin(s, vd, fset_cons(s, ve, vs)), sort_bool::or_(equal_to(vd, ve), fsetin(s, vd, vs))));
-        result.push_back(data_equation(atermpp::make_vector(vf), fsetlte(s, vf, fset_empty(s), fset_empty(s)), sort_bool::true_()));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vs), fsetlte(s, vf, fset_cons(s, vd, vs), fset_empty(s)), sort_bool::and_(vf(vd), fsetlte(s, vf, vs, fset_empty(s)))));
-        result.push_back(data_equation(atermpp::make_vector(ve, vf, vt), fsetlte(s, vf, fset_empty(s), fset_cons(s, ve, vt)), sort_bool::and_(sort_bool::not_(vf(ve)), fsetlte(s, vf, fset_empty(s), vt))));
-        result.push_back(data_equation(atermpp::make_vector(vd, vf, vs, vt), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, vd, vt)), fsetlte(s, vf, vs, vt)));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vs, vt), less(vd, ve), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), sort_bool::and_(vf(vd), fsetlte(s, vf, vs, fset_cons(s, ve, vt)))));
-        result.push_back(data_equation(atermpp::make_vector(vd, ve, vf, vs, vt), less(ve, vd), fsetlte(s, vf, fset_cons(s, vd, vs), fset_cons(s, ve, vt)), sort_bool::and_(sort_bool::not_(vf(ve)), fsetlte(s, vf, fset_cons(s, vd, vs), vt))));
         result.push_back(data_equation(atermpp::make_vector(vf, vg), fsetunion(s, vf, vg, fset_empty(s), fset_empty(s)), fset_empty(s)));
         result.push_back(data_equation(atermpp::make_vector(vd, vf, vg, vs), fsetunion(s, vf, vg, fset_cons(s, vd, vs), fset_empty(s)), fsetcinsert(s, vd, sort_bool::not_(vg(vd)), fsetunion(s, vf, vg, vs, fset_empty(s)))));
         result.push_back(data_equation(atermpp::make_vector(ve, vf, vg, vt), fsetunion(s, vf, vg, fset_empty(s), fset_cons(s, ve, vt)), fsetcinsert(s, ve, sort_bool::not_(vf(ve)), fsetunion(s, vf, vg, fset_empty(s), vt))));

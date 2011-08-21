@@ -48,7 +48,7 @@ map Pos2Nat <"pos2nat"> : Pos <"arg"> -> Nat;
     @swap_zero_add <"swap_zero_add">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
     @swap_zero_min <"swap_zero_min">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
     @swap_zero_monus <"swap_zero_monus">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> # Nat <"arg4"> -> Nat;
-    @swap_zero_lte <"swap_zero_lte">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> -> Bool;
+%    @swap_zero_lte <"swap_zero_lte">:Nat <"arg1"> # Nat <"arg2"> # Nat <"arg3"> -> Bool;
 
 % functions for natpair
     @first <"first"> : @NatPair <"pair"> -> Nat;
@@ -164,8 +164,8 @@ eqn ==(@c0, @cNat(p)) = false;
     @swap_zero_monus(@c0, @cNat(p), @c0, n) = @c0;
     @swap_zero_monus(@c0, @cNat(p), @cNat(q), n) = @monus(@cNat(q), @swap_zero(@cNat(p), n));
     @swap_zero_monus(@cNat(p), @cNat(q), m, n) = @swap_zero(@monus(@cNat(p),@cNat(q)),@monus(@swap_zero(@cNat(p),m), @swap_zero(@cNat(q),n)));
-    @swap_zero_lte(@c0,m,n) = <=(m,n);
-    @swap_zero_lte(@cNat(p),m,n) = <=(@swap_zero(@cNat(p),m), @swap_zero(@cNat(p),n));
+%    @swap_zero_lte(@c0,m,n) = <=(m,n);
+%    @swap_zero_lte(@cNat(p),m,n) = <=(@swap_zero(@cNat(p),m), @swap_zero(@cNat(p),n));
 
 % equations for natpair
     ==(@cPair(m,n), @cPair(u,v)) = &&(==(m,u),==(n,v));
