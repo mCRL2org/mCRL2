@@ -69,10 +69,7 @@ VarSpec: 'var' ( IdsDeclList ';' )+ ;
 
 EqnSpec: VarSpec? 'eqn' EqnDecl+ ;
 
-EqnDecl
-  : DataExpr '=' DataExpr ';'
-  | DataExpr '->' DataExpr '=' DataExpr ';'
-  ;
+EqnDecl: (DataExpr '->')? DataExpr '=' DataExpr ';' ;
 
 // Data expressions
 
@@ -97,11 +94,11 @@ DataExpr
   ;
 
 DataExprUnit
-  : '(' DataExpr ')'
+  : Id
+  | Number
   | 'true'
   | 'false'
-  | Id
-  | Number
+  | '(' DataExpr ')'
   | DataExprUnit '(' DataExprList ')'
   | DataExprUnaryOperator DataExprUnit
   ;
