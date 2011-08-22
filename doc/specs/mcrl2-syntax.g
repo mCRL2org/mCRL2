@@ -405,6 +405,10 @@ ActionRenameRuleRHS: Action | 'tau' | 'delta' ;
 
 IdList: Id ( ',' Id )* ;
 
+//--- start Id definition ---//
+// This section contains the definition of an Id. Some C-code (between braces)
+// and a semantic action (between brackets) have been added to disallow reserved
+// words to be used as an Id.
 {
   const char *reserved_words[] = {
     "sort"  ,
@@ -442,6 +446,8 @@ IdList: Id ( ',' Id )* ;
     "div"   ,
     "mod"   ,
     "in"    ,
+    "pbes"  ,
+    "bes"   ,
     NULL
   };
   static int is_one_of(char *s, const char **list) {
@@ -459,6 +465,7 @@ Id: "[A-Za-z_][A-Za-z_0-9']*" $term -2
   }
   d_free(ts);
 ];
+//--- end Id definition ---//
 
 Number: "0|(-?[1-9][0-9]*)" ;
 
