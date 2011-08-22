@@ -35,6 +35,7 @@ class pbes_absint_tool: public input_output_tool
 
     std::string m_dataspec_file;
     std::string m_abstraction_file;
+    bool m_print_used_function_symbols;
 
     /// The transformation strategies of the tool.
     enum approximation_strategy
@@ -71,6 +72,7 @@ class pbes_absint_tool: public input_output_tool
 
       m_dataspec_file = parser.option_argument("data");
       m_abstraction_file = parser.option_argument("mapping");
+      m_print_used_function_symbols = parser.options.count("used-function-symbols") > 0;
     }
 
     void add_options(interface_description& desc)
@@ -92,6 +94,7 @@ class pbes_absint_tool: public input_output_tool
                        "  'over'  for an over-approximation,\n"
                        "  'under' for an under-approximation\n",
                        'a');
+      desc.add_option("used-function-symbols", "print used function symbols", 'u');
     }
 
   public:
@@ -117,6 +120,11 @@ class pbes_absint_tool: public input_output_tool
       // load the pbes
       pbes<> p;
       p.load(m_input_filename);
+
+      if (m_print_used_function_symbols)
+      {
+        pbes_system::detail::print_used_function_symbols(p);
+      }
 
       std::string abstraction_mapping_text = utilities::read_text(m_abstraction_file);
       std::vector<std::string> paragraphs = utilities::split_paragraphs(abstraction_mapping_text);

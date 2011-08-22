@@ -29,7 +29,11 @@ std::string SORT_EXPRESSION_MAPPING =
   ;
 
 std::string FUNCTION_SYMBOL_MAPPING =
-  "tail: List(D) -> List(D) := Abstail: AbsList -> Set(AbsList) \n"
+  "tail: List(D) -> List(D)   := Abstail    : AbsList -> Set(AbsList)        \n"
+  "|>: D # List(D) -> List(D) := Absconc    : AbsD # AbsList -> Set(AbsList) \n"
+  "#: List(D) -> Nat          := Abslen     : AbsList -> Set(AbsNat)         \n"
+  ">=: Nat # Nat -> Bool      := Absge      : AbsNat # AbsNat -> Set(Bool)   \n"
+  "capacity: Pos              := Abscapacity: AbsNat                         \n"
   ;
 
 std::string PBESSPEC =
@@ -53,13 +57,6 @@ std::string DATASPEC =
   "  AbsD    = struct a;                       \n"
   "  AbsList = struct empty | one | more;      \n"
   "  AbsNat  = struct nul | een | meer;        \n"
-  "                                            \n"
-  "map                                         \n"
-  "  Abstail : AbsList -> Set(AbsList);        \n"
-  "  Absconc : AbsD # AbsList -> Set(AbsList); \n"
-  "  Abslen  : AbsList -> Set(AbsNat);         \n"
-  "  Absge   : AbsNat # AbsNat -> Set(Bool);   \n"
-  "  Abscapacity: AbsNat;                      \n"
   "                                            \n"
   "eqn                                         \n"
   "  Abstail(empty) = {empty};                 \n"
@@ -89,7 +86,62 @@ std::string DATASPEC =
 
 void test_absinthe()
 {
+SORT_EXPRESSION_MAPPING =
+"D := AbsD         \n"
+"Frame := AbsFrame \n"
+;
+
+FUNCTION_SYMBOL_MAPPING =
+"getack : Frame -> Ack  := Absgetack : AbsFrame -> Set(Ack) \n"
+"d0 : D                 := Absd0 : AbsD                     \n"
+;
+
+PBESSPEC =
+"sort D;                                                                                   \n"
+"     Ack = struct ok | nok | error;                                                       \n"
+"     Frame = struct f(data: D, acknowledgement: Ack);                                     \n"
+"     E = struct e2 | e1 | e0;                                                             \n"
+"                                                                                          \n"
+"map  d0: D;                                                                               \n"
+"     getack: Frame -> Ack;                                                                \n"
+"                                                                                          \n"
+"var  d: D;                                                                                \n"
+"     a: Ack;                                                                              \n"
+"eqn  getack(f(d, a))  =  acknowledgement(f(d, a));                                        \n"
+"                                                                                          \n"
+"pbes                                                                                      \n"
+"                                                                                          \n"
+"nu X(s: E, dd: D) =                                                                       \n"
+"     (forall d: D. forall d': D. (val(!(d' == d)) || val(!(s == e2))) || Y(e1, d', d))    \n"
+"  && (forall d: D. val(!(s == e2)) || X(e1, d))                                           \n"
+"  && (forall a: Ack. val(!(s == e1 && a == ok)) || X(e0, dd))                             \n"
+"  && (forall a: Ack. val(!(s == e1 && !(a == ok))) || X(e1, dd))                          \n"
+"  && (val(!(s == e0)) || X(e2, d0));                                                      \n"
+"                                                                                          \n"
+"mu Y(s: E, dd,d: D) =                                                                     \n"
+"       (forall d': D. val(!(s == e2)) || Y(e1, d', d))                                    \n"
+"    && (forall a': Ack. val(!(s == e1 && a' == ok)) || Y(e0, dd, d))                      \n"
+"    && (forall a': Ack. val(!(s == e1 && !(a' == ok))) || Y(e1, dd, d))                   \n"
+"    && ((val(dd == d) || val(!(s == e0))) || Y(e2, d0, d));                               \n"
+"                                                                                          \n"
+"init X(e2, d0);                                                                           \n"
+;
+
+DATASPEC =
+"sort                                                   \n"
+" AbsD;                                                 \n"
+" AbsFrame = struct f(data:AbsD, acknowledgement: Ack); \n"
+"                                                       \n"
+"var                                                    \n"
+"  d : AbsD;                                            \n"
+"  a : Ack;                                             \n"
+"                                                       \n"
+"eqn                                                    \n"
+"  Absgetack (f(d,a)) = {acknowledgement(f(d,a))};      \n"
+;
+
   pbes<> p = txt2pbes(PBESSPEC);
+  pbes_system::detail::print_used_function_symbols(p);
   absinthe_algorithm algorithm;
   algorithm.run(p, SORT_EXPRESSION_MAPPING, FUNCTION_SYMBOL_MAPPING, DATASPEC, false);
   core::garbage_collect();

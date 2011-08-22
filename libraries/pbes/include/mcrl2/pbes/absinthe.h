@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
+#include <sstream>
+
 #include <boost/algorithm/string/trim.hpp>
 
 #include "mcrl2/atermpp/make_list.h"
@@ -28,6 +30,7 @@
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/builder.h"
+#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/identifier_generator.h"
@@ -45,16 +48,29 @@ namespace detail {
   //
   // TODO: replace this by a proper parse function once the current parser has been replaced
   inline
-  data::function_symbol parse_function_symbol(const std::string& text, const std::string& dataspec_text)
+  data::function_symbol parse_function_symbol(std::string text, const std::string& dataspec_text)
   {
     const std::string prefix = "UNIQUE_FUNCTION_SYMBOL_PREFIX";
-    std::string spec_text = dataspec_text + "\nmap " + prefix + boost::algorithm::trim_copy(text) + ";\n";
+    boost::algorithm::trim(text);
+    std::string::size_type pos = text.find_first_of(':');
+    std::string name = text.substr(0, pos);
+    std::string type = prefix + text.substr(pos);
+    std::string spec_text = dataspec_text + "\nmap " + prefix + type + ";\n";
     data::data_specification dataspec = data::parse_data_specification(spec_text);
     data::function_symbol f = dataspec.user_defined_mappings().back();
-    std::string name = std::string(f.name());
-    name = name.substr(prefix.size());
     data::function_symbol result = data::function_symbol(name, f.sort());
     return result;
+  }
+
+  inline
+  void print_used_function_symbols(const pbes<>& p)
+  {
+    std::cout << "--- used function symbols ---" << std::endl;
+    std::set<data::function_symbol> find_function_symbols = pbes_system::find_function_symbols(p);
+    for (std::set<data::function_symbol>::iterator i = find_function_symbols.begin(); i != find_function_symbols.end(); ++i)
+    {
+      std::cout << data::pp(*i) << ": " << data::pp(i->sort()) << std::endl;
+    }
   }
 
 } // namespace detail
@@ -97,6 +113,19 @@ struct absinthe_algorithm
         return i->second;
       }
       return super::operator()(x);
+    }
+
+    data::data_expression operator()(const data::data_expression& x)
+    {
+      // first apply the sort and function symbol transformations
+      data::data_expression result = super::operator()(x);
+
+      // if it is a variable (in the context of a data expression), wrap it in a set
+      if (data::is_variable(x))
+      {
+        result = data::detail::create_finite_set(result);
+      }
+      return result;
     }
   };
 
@@ -151,6 +180,22 @@ struct absinthe_algorithm
     return result;
   }
 
+  std::string parse_right_hand_sides(const std::string& text)
+  {
+    std::ostringstream out;
+    out << "map" << std::endl;
+    std::vector<std::string> lines = utilities::regex_split(text, "\\n");
+    for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+    {
+      std::vector<std::string> words = utilities::regex_split(*i, ":=");
+      if (words.size() == 2)
+      {
+        out << "  " << words[1] << ";" << std::endl;
+      }
+    }
+    return out.str();
+  }
+
   function_symbol_substitution_map parse_function_symbol_mapping(const std::string& text, const data::data_specification& dataspec)
   {
     function_symbol_substitution_map result;
@@ -202,7 +247,7 @@ struct absinthe_algorithm
 
     data::function_symbol operator()(const data::function_symbol& f) const
     {
-      std::string name = "Lift" + std::string(f.name());
+      std::string name = "Lift" + boost::algorithm::trim_copy(std::string(f.name()));
       data::sort_expression s = f.sort();
       if (data::is_basic_sort(s))
       {
@@ -330,29 +375,40 @@ struct absinthe_algorithm
     }
   }
 
-  void run(pbes<>& p, const std::string& sort_expression_mapping_text, const std::string& function_symbol_mapping_text, const std::string& user_dataspec_text, bool is_over_approximation)
+  void run(pbes<>& p, const std::string& sort_expression_mapping_text, const std::string& function_symbol_mapping_text, std::string user_dataspec_text, bool is_over_approximation)
   {
-    data::data_specification user_dataspec = data::parse_data_specification(user_dataspec_text);
+    // first we have to add right hand sides of the function symbol mappings to the user dataspec
+    user_dataspec_text = user_dataspec_text + "\n" + parse_right_hand_sides(function_symbol_mapping_text) + "\n";
+
+    std::string extra = "\nsort\n";
+    for (data::sort_expression_vector::const_iterator i = p.data().user_defined_sorts().begin(); i != p.data().user_defined_sorts().end(); ++i)
+    {
+      extra = extra + "  " + data::pp(*i) + ";\n";
+    }
+    for (data::alias_vector::const_iterator i = p.data().user_defined_aliases().begin(); i != p.data().user_defined_aliases().end(); ++i)
+    {
+      extra = extra + "  " + data::pp(*i) + ";\n";
+    }
+    std::cout << "--- user spec " << std::endl;
+    std::cout << user_dataspec_text + extra << std::endl;
+    data::data_specification user_dataspec = data::parse_data_specification(user_dataspec_text + extra);
+
     data::data_specification combined_dataspec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_dataspec_text);
 
     // sort expressions replacements (specified by the user)
     sort_expression_substitution_map sigmaS = parse_sort_expression_mapping(sort_expression_mapping_text, combined_dataspec);
-    print_mapping(sigmaS, "--- sigmaS ---");
+    print_mapping(sigmaS, "\n--- sigmaS ---");
 
     // function symbol replacements (specified by the user)
     function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, combined_dataspec);
-    print_mapping(sigmaF, "--- sigmaF ---");
     for (function_symbol_substitution_map::iterator i = sigmaF.begin(); i != sigmaF.end(); ++i)
     {
       i->second = lift_function_symbol(user_dataspec.user_defined_mappings())(i->second);
     }
-    print_mapping(sigmaF, "--- sigmaF ---");
+    print_mapping(sigmaF, "\n--- sigmaF ---");
 
     // add lifted versions of the user defined mappings and equations
     lift_data_specification(combined_dataspec, user_dataspec.user_defined_mappings(), sigmaS, sigmaF);
-
-    std::cout << "--- data specification extension ---" << std::endl;
-    std::cout << user_dataspec_text << std::endl;
 
     std::cout << "--- pbes before ---" << std::endl;
     std::cout << pbes_system::pp(p) << std::endl;
