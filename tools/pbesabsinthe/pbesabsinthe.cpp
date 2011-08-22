@@ -12,8 +12,10 @@
 
 #include <iostream>
 #include <string>
+#include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/absinthe.h"
 #include "mcrl2/pbes/rewriter.h"
@@ -81,7 +83,7 @@ class pbes_absint_tool: public input_output_tool
 
       desc.add_option("mapping",
                        make_mandatory_argument("FILE"),
-                       "use the abstraction mapping in FILE. ",
+                       "use the sort and function symbol mappings in FILE. ",
                        'm');
 
       desc.add_option("approximation",
@@ -99,7 +101,7 @@ class pbes_absint_tool: public input_output_tool
         "Wieger Wesselink; Maciek Gazda and Tim Willemse",
         "apply data domain abstracion to a PBES",
         "Reads a file containing a PBES, and applies abstraction to it's data domain, based on a\n"
-        "user defined mapping. If OUTFILE is not present, standard output is used. If INFILE is not\n"
+        "user defined mappings. If OUTFILE is not present, standard output is used. If INFILE is not\n"
         "present, standard input is used."
       )
     {}
@@ -117,11 +119,16 @@ class pbes_absint_tool: public input_output_tool
       p.load(m_input_filename);
 
       std::string abstraction_mapping_text = utilities::read_text(m_abstraction_file);
+      std::vector<std::string> paragraphs = utilities::split_paragraphs(abstraction_mapping_text);
+      if (paragraphs.size() != 2)
+      {
+        throw mcrl2::runtime_error("The number of paragraphs in the file " + m_abstraction_file + " should be two!");
+      }
       std::string user_dataspec_text = utilities::read_text(m_dataspec_file);
       bool over_approximation = m_strategy == as_over;
 
       absinthe_algorithm algorithm;
-      algorithm.run(p, abstraction_mapping_text, user_dataspec_text, over_approximation);
+      algorithm.run(p, paragraphs[0], paragraphs[1], user_dataspec_text, over_approximation);
 
 
       // save the result

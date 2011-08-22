@@ -22,10 +22,14 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 
-std::string ABSTRACTION_MAPPING =
-  "D       := AbsD    \n"
-  "Nat     := AbsNat  \n"
-  "List(D) := AbsList \n"
+std::string SORT_EXPRESSION_MAPPING =
+  "D       := AbsD                                    \n"
+  "Nat     := AbsNat                                  \n"
+  "List(D) := AbsList                                 \n"
+  ;
+
+std::string FUNCTION_SYMBOL_MAPPING =
+  "tail: List(D) -> List(D) := Abstail: AbsList -> Set(AbsList) \n"
   ;
 
 std::string PBESSPEC =
@@ -87,7 +91,7 @@ void test_absinthe()
 {
   pbes<> p = txt2pbes(PBESSPEC);
   absinthe_algorithm algorithm;
-  algorithm.run(p, ABSTRACTION_MAPPING, DATASPEC);
+  algorithm.run(p, SORT_EXPRESSION_MAPPING, FUNCTION_SYMBOL_MAPPING, DATASPEC, false);
   core::garbage_collect();
 }
 
