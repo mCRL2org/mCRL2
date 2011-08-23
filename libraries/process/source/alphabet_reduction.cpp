@@ -2578,7 +2578,6 @@ static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true
 /** \brief     Apply alphabet reduction to an mCRL2 process specification.
  *  \param[in] Spec An ATerm representation of an mCRL2 process
  *             specification in the internal format after type checking.
- *  \return    Spec after applying alphabet reductions.
 **/
 // static ATermAppl gsAlpha(ATermAppl Spec)
 static void gsAlpha(
@@ -2903,8 +2902,7 @@ nP_checked:
       }
       else
       {
-        throw mcrl2::runtime_error("Process " + core::pp(p) +" is a recursive parallel process not in n-parallel pCRL format.\nIn this case alphabet reductions may not stop, or may not be performed completely.");
-
+        throw mcrl2::runtime_error("Process " + core::pp(p) + " is a recursive parallel process not in n-parallel pCRL format.");
       }
     }
   }
