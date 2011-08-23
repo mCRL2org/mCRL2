@@ -48,7 +48,7 @@ data::data_expression bool_to_numeric(data::data_expression const& e, data::sort
 
 inline
 data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>& result)
-{ 
+{
   //std::cout << "\n<reconstruct_pos_mult>" << data::pp(x) << " " << x << std::endl;
   data_expression reconstruction_result;
   if (data::sort_pos::is_c1_function_symbol(x))
@@ -61,8 +61,9 @@ data_expression reconstruct_pos_mult(const data_expression& x, std::vector<char>
     //x is of the form cDub(b,p); return (result*2)*v(p) + result*v(b)
     data_expression bool_arg = sort_pos::bit(x);
     data_expression pos_arg = sort_pos::number(x);
-    data::detail::decimal_number_multiply_by_two(result);
-    pos_arg = reconstruct_pos_mult(pos_arg, result);
+    std::vector<char> double_result = result;
+    data::detail::decimal_number_multiply_by_two(double_result);
+    pos_arg = reconstruct_pos_mult(pos_arg, double_result);
     if (data::sort_bool::is_false_function_symbol(bool_arg))
     {
       //result*v(b) = 0
