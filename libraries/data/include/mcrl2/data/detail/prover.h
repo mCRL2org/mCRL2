@@ -93,8 +93,8 @@ class Prover:protected mcrl2::data::rewriter
            mcrl2::data::rewriter::strategy a_rewrite_strategy = mcrl2::data::rewriter::jitty,
            int a_time_limit = 0): 
                        mcrl2::data::rewriter(a_data_spec, equations_selector, a_rewrite_strategy),
-                       f_info(m_rewriter),
-                       f_manipulator(m_rewriter, f_info)
+                       f_manipulator(m_rewriter, f_info),
+                       f_info(m_rewriter)
     {
       f_time_limit = a_time_limit;
       f_processed = false;

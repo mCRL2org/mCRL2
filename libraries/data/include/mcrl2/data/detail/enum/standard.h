@@ -168,9 +168,8 @@ class EnumeratorSolutionsStandard
 
     /// \brief Default constructor
     EnumeratorSolutionsStandard():
-       m_max_internal_variables(0),
-       enum_vars(),
-       enum_sigma(default_sigma())
+       enum_sigma(default_sigma()),
+       m_max_internal_variables(0)
     {
       enum_vars.protect();
       enum_expr.protect();
