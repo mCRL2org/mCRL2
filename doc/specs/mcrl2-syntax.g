@@ -87,9 +87,30 @@ DataExpr
   | '(' DataExpr ')'
   | DataExpr '[' DataExpr '->' DataExpr ']'
   | DataExpr '(' DataExprList ')'
-  | DataExprUnaryOperator DataExpr
+  | '!' DataExpr                             $unary_right 11
+  | '-' DataExpr                             $unary_right 11
+  | '#' DataExpr                             $unary_right 11
   | DataExprQuantifier DataExpr
-  | DataExpr DataExprBinaryOperator DataExpr
+  | DataExpr '=>'  DataExpr                  $binary_right 1
+  | DataExpr '&&'  DataExpr                  $binary_right 2
+  | DataExpr '||'  DataExpr                  $binary_right 2
+  | DataExpr '=='  DataExpr                  $binary_right 3
+  | DataExpr '!='  DataExpr                  $binary_right 3
+  | DataExpr '<'   DataExpr                  $binary_left  4
+  | DataExpr '<='  DataExpr                  $binary_left  4
+  | DataExpr '>='  DataExpr                  $binary_left  4
+  | DataExpr '>'   DataExpr                  $binary_left  4
+  | DataExpr 'in'  DataExpr                  $binary_left  4
+  | DataExpr '|>'  DataExpr                  $binary_left  5
+  | DataExpr '<|'  DataExpr                  $binary_left  6
+  | DataExpr '++'  DataExpr                  $binary_left  7
+  | DataExpr '+'   DataExpr                  $binary_left  8
+  | DataExpr '-'   DataExpr                  $binary_left  8
+  | DataExpr '/'   DataExpr                  $binary_left  9
+  | DataExpr 'div' DataExpr                  $binary_left  9
+  | DataExpr 'mod' DataExpr                  $binary_left  9
+  | DataExpr '*'   DataExpr                  $binary_left 10
+  | DataExpr '.'   DataExpr                  $binary_left 10
   | DataExpr 'whr' WhrExprList 'end'
   ;
 
@@ -100,42 +121,15 @@ DataExprUnit
   | 'false'
   | '(' DataExpr ')'
   | DataExprUnit '(' DataExprList ')'
-  | DataExprUnaryOperator DataExprUnit
-  ;
-
-DataExprUnaryOperator
-  : '!'       $unary_op_right 11
-  | '-'       $unary_op_right 11
-  | '#'       $unary_op_right 11
+  | '!' DataExprUnit                         $unary_right 11
+  | '-' DataExprUnit                         $unary_right 11
+  | '#' DataExprUnit                         $unary_right 11
   ;
 
 DataExprQuantifier
   : 'forall' IdsDeclList '.' $unary_op_right 0
   | 'exists' IdsDeclList '.' $unary_op_right 0
   | 'lambda' IdsDeclList '.' $unary_op_right 0
-  ;
-
-DataExprBinaryOperator
-  : '=>'      $binary_op_right 1
-  | '&&'      $binary_op_right 2
-  | '||'      $binary_op_right 2
-  | '=='      $binary_op_right 3
-  | '!='      $binary_op_right 3
-  | '<'       $binary_op_left 4
-  | '<='      $binary_op_left 4
-  | '>='      $binary_op_left 4
-  | '>'       $binary_op_left 4
-  | 'in'      $binary_op_left 4
-  | '|>'      $binary_op_left 5
-  | '<|'      $binary_op_left 6
-  | '++'      $binary_op_left 7
-  | '+'       $binary_op_left 8
-  | '-'       $binary_op_left 8
-  | '/'       $binary_op_left 9
-  | 'div'     $binary_op_left 9
-  | 'mod'     $binary_op_left 9
-  | '*'       $binary_op_left 10
-  | '.'       $binary_op_left 10
   ;
 
 WhrExpr: DataExpr '=' DataExpr ;
@@ -182,10 +176,15 @@ ProcExpr
   | 'rename' '(' RenExprSet ',' ProcExpr ')'
   | 'comm' '(' CommExprSet ',' ProcExpr ')'
   | '(' ProcExpr ')'
-  | ProcExpr ProcExprBinaryOperator ProcExpr
-  | ProcExpr ProcExprTimeOperator DataExprUnit
+  | ProcExpr '+'   ProcExpr                     $binary_right 1
+  | ProcExpr '||'  ProcExpr                     $binary_right 3
+  | ProcExpr '||_' ProcExpr                     $binary_right 3
+  | ProcExpr '.'   ProcExpr                     $binary_right 6
+  | ProcExpr '<<'  ProcExpr                     $binary_left 5
+  | ProcExpr '@' DataExprUnit                   $binary_left 7
+  | ProcExpr '|'   ProcExpr                     $binary_right 8
   | ProcExprUnaryOperator ProcExpr
-  | DataExprUnit ProcExprThenElse $unary_left 11;
+  | DataExprUnit ProcExprThenElse               $unary_left 11;
   ;
 
 ProcExprThenElse
@@ -194,17 +193,6 @@ ProcExprThenElse
 ProcExprUnaryOperator
   : 'sum' IdsDeclList '.'     $unary_op_right 2
   ;
-
-ProcExprBinaryOperator
-  : '+'   $binary_op_right 1
-  | '||'  $binary_op_right 3
-  | '||_' $binary_op_right 3
-  | '.'   $binary_op_right 6
-  | '<<'  $binary_op_left 5
-  | '|'   $binary_op_right 8
-  ;
-
-ProcExprTimeOperator: '@'       $binary_op_left 7 ;
 
 // Actions
 
@@ -249,20 +237,14 @@ BesVar: Id ;
 BesExpr
   : 'true'
   | 'false'
-  | BesExprUnaryOperator BesExpr
-  | BesExpr BesExprBinaryOperator BesExpr
+  | '!' BesExpr              $unary_left 4
+  | BesExpr '=>' BesExpr     $binary_right 2
+  | BesExpr '&&' BesExpr     $binary_right 3
+  | BesExpr '||' BesExpr     $binary_right 3
   | BesVar
   ;
 
 BesInit: 'init' BesVar ';' ;
-
-BesExprUnaryOperator: '!' $unary_op_left 4 ;
-
-BesExprBinaryOperator
-  : '&&'      $binary_op_right 3
-  | '||'      $binary_op_right 3
-  | '=>'      $binary_op_right 2
-  ;
 
 // PBES
 
@@ -277,9 +259,9 @@ FixedPointOperator
   | 'nu'
   ;
 
-PropVarDecl: Id ( "(" IdsDeclList ")" )? ;
+PropVarDecl: Id ( '(' IdsDeclList ')' )? ;
 
-PropVarInst: Id ( "(" DataExprList ")" )? ;
+PropVarInst: Id ( '(' DataExprList ')' )? ;
 
 PbesInit: 'init' PropVarInst ';' ;
 
@@ -291,17 +273,11 @@ PbesExpr
   | 'false'
   | 'forall' IdsDeclList PbesExprQuantifierOperator PbesExpr
   | 'exists' IdsDeclList PbesExprQuantifierOperator PbesExpr
-  | PbesExprUnaryOperator PbesExpr
-  | PbesExpr PbesExprBinaryOperator PbesExpr
+  | '!' PbesExpr                                                 $unary_left 4
+  | PbesExpr '=>' PbesExpr                                       $binary_right 2
+  | PbesExpr '&&' PbesExpr                                       $binary_right 3
+  | PbesExpr '||' PbesExpr                                       $binary_right 3
   | PropVarInst
-  ;
-
-PbesExprUnaryOperator: '!' $unary_op_left 4 ;
-
-PbesExprBinaryOperator
-  : '&&'      $binary_op_right 3
-  | '||'      $binary_op_right 3
-  | '=>'      $binary_op_right 2
   ;
 
 PbesExprQuantifierOperator: '.' $unary_op_left 1 ;
@@ -313,23 +289,15 @@ ActFrm
   | DataValExpr
   | 'true'
   | 'false'
-  | ActFrmUnaryOperator ActFrm
-  | ActFrm ActFrmBinaryOperator ActFrm
+  | '!' ActFrm                                                   $unary_left 5
+  | ActFrm '=>' ActFrm                                           $binary_right 2
+  | ActFrm '&&' ActFrm                                           $binary_right 3
+  | ActFrm '||' ActFrm                                           $binary_right 3
   | 'forall' IdsDeclList ActFrmQuantifierOperator ActFrm
   | 'exists' IdsDeclList ActFrmQuantifierOperator ActFrm
-  | ActFrm ActFrmTimeOperator DataExpr
+  | ActFrm '@' DataExpr                                          $unary_left 4
   | '(' ActFrm ')'
   ;
-
-ActFrmUnaryOperator: '!' $unary_op_left 5 ;
-
-ActFrmBinaryOperator
-  : '&&'      $binary_op_right 3
-  | '||'      $binary_op_right 3
-  | '=>'      $binary_op_right 2
-  ;
-
-ActFrmTimeOperator: '@' $unary_op_left 4 ;
 
 ActFrmQuantifierOperator: '.' $unary_op_left 1 ;
 
@@ -338,19 +306,11 @@ ActFrmQuantifierOperator: '.' $unary_op_left 1 ;
 RegFrm
   : ActFrm
   | 'nil'
-  | RegFrm RegFrmBinaryOperator RegFrm
-  | RegFrm RegFrmUnaryOperator
   | '(' RegFrm ')'
-  ;
-
-RegFrmUnaryOperator
-  : '*'      $unary_op_left 3
-  | '+'      $unary_op_left 3
-  ;
-
-RegFrmBinaryOperator
-  : '.'      $binary_op_right 1
-  | '+'      $binary_op_right 2
+  | '*' RegFrm                                                   $unary_left 3
+  | '+' RegFrm                                                   $unary_left 3
+  | RegFrm '.' RegFrm                                            $binary_right 1
+  | RegFrm '+' RegFrm                                            $binary_right 2
   ;
 
 // State formulas
@@ -359,8 +319,10 @@ StateFrm
   : DataValExpr
   | 'true'
   | 'false'
-  | StateFrmUnaryOperator StateFrm
-  | StateFrm StateFrmBinaryOperator StateFrm
+  | '!' StateFrm                                                 $unary_left 5
+  | StateFrm '&&' StateFrm                                       $binary_op_right 4
+  | StateFrm '||' StateFrm                                       $binary_op_right 4
+  | StateFrm '=>' StateFrm                                       $binary_op_right 3
   | 'forall' IdsDeclList StateFrmQuantifierOperator StateFrm
   | 'exists' IdsDeclList StateFrmQuantifierOperator StateFrm
   | '[' RegFrm ']'
@@ -372,17 +334,9 @@ StateFrm
   | '(' StateFrm ')'
   ;
 
-StateVarDecl: Id ( "(" IdsDeclList ")" )? ;
+StateVarDecl: Id ( '(' IdsDeclList ')' )? ;
 
-StateVarInst: Id ( "(" DataExprList ")" )? ;
-
-StateFrmUnaryOperator : '!' $unary_op_left 5 ;
-
-StateFrmBinaryOperator
-  : '&&'      $binary_op_right 4
-  | '||'      $binary_op_right 4
-  | '=>'      $binary_op_right 3
-  ;
+StateVarInst: Id ( '(' DataExprList ')' )? ;
 
 StateFrmQuantifierOperator: '.' $unary_op_left 2 ;
 
