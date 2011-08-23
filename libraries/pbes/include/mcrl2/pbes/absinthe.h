@@ -112,11 +112,13 @@ struct absinthe_algorithm
       {
         return i->second;
       }
-      return super::operator()(x);
+      throw mcrl2::runtime_error("function symbol " + data::pp(x) + " not present in the function symbol mapping!");
+      return data::data_expression();
     }
 
     data::data_expression operator()(const data::data_expression& x)
     {
+//std::cout << "<data expression>" << data::pp(x) << " " << x << std::endl;
       // first apply the sort and function symbol transformations
       data::data_expression result = super::operator()(x);
 
@@ -136,29 +138,76 @@ struct absinthe_algorithm
     using super::leave;
     using super::operator();
 
+    data::variable_list make_variables(const data::data_expression_list& x, const std::string& hint) const
+    {
+      atermpp::vector<data::variable> result;
+      unsigned int i = 0;
+      for (data::data_expression_list::const_iterator j = x.begin(); j != x.end(); ++i, ++j)
+      {
+        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), j->sort()));
+      }
+      return data::variable_list(result.begin(), result.end());
+    }
+
+    const sort_expression_substitution_map& m_sort_expression_substitutions;
     const function_symbol_substitution_map& m_function_symbol_substitutions;
     bool m_is_over_approximation;
 
-    absinthe_data_expression_builder(const function_symbol_substitution_map& sigmaF,
+    data::data_expression lift(const data::data_expression& x)
+    {
+      return absinthe_sort_expression_builder(m_sort_expression_substitutions, m_function_symbol_substitutions)(x);
+    }
+
+    data::data_expression_list lift(const data::data_expression_list& x)
+    {
+      return absinthe_sort_expression_builder(m_sort_expression_substitutions, m_function_symbol_substitutions)(x);
+    }
+
+    absinthe_data_expression_builder(const sort_expression_substitution_map& sigmaS,
+                                     const function_symbol_substitution_map& sigmaF,
                                      bool is_over_approximation)
-      : m_function_symbol_substitutions(sigmaF),
+      : m_sort_expression_substitutions(sigmaS),
+        m_function_symbol_substitutions(sigmaF),
         m_is_over_approximation(is_over_approximation)
     {}
 
     pbes_expression operator()(const data::data_expression& x)
     {
-      // apply function symbol substitutions to x
-      data::data_expression x1 = super::operator()(x);
-
-      data::variable var("y", data::sort_bool::bool_());
+      data::data_expression x1 = lift(x);
+      data::variable var("y", x1.sort());
       data::variable_list variables = atermpp::make_list(var);
-      pbes_expression body = imp(data::detail::create_set_in(var, x1), var);
-      return forall(variables, body);
+      if (m_is_over_approximation)
+      {
+        pbes_expression body = and_(data::detail::create_set_in(var, x1), var);
+        return exists(variables, body);
+      }
+      else
+      {
+        pbes_expression body = imp(data::detail::create_set_in(var, x1), var);
+        return forall(variables, body);
+      }
     }
 
     pbes_expression operator()(const propositional_variable_instantiation& x)
     {
-      return x;
+      data::data_expression_list e = lift(x.parameters());
+      data::variable_list variables = make_variables(e, "x");
+      data::data_expression_list::iterator i = e.begin();
+      data::variable_list::iterator j = variables.begin();
+      data::data_expression_vector z;
+      for (; i != e.end(); ++i, ++j)
+      {
+        z.push_back(data::detail::create_set_in(*j, *i));
+      }
+      data::data_expression q = data::lazy::join_and(z.begin(), z.end());
+      if (m_is_over_approximation)
+      {
+        return exists(variables, and_(q, propositional_variable_instantiation(x.name(), variables)));
+      }
+      else
+      {
+        return forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
+      }
     }
   };
 
@@ -233,6 +282,73 @@ struct absinthe_algorithm
     data::sort_expression operator()(const data::sort_expression& s) const
     {
       return data::sort_set::set_(s);
+    }
+  };
+
+  struct apply_sigmaS
+  {
+    const sort_expression_substitution_map& sigmaS;
+
+    apply_sigmaS(const sort_expression_substitution_map& sigmaS_)
+      : sigmaS(sigmaS_)
+    {}   
+
+    data::sort_expression operator()(const data::sort_expression& s) const
+    {
+      sort_expression_substitution_map::const_iterator i = sigmaS.find(s);
+      if (i != sigmaS.end())
+      {
+        return i->second;
+      }
+      return s;
+    }
+  };
+
+  // function that transforms a function symbol
+  struct transform_function_symbol
+  {
+    const sort_expression_substitution_map& sigmaS;
+    std::map<std::string, std::string> unprintable;
+
+    transform_function_symbol(const sort_expression_substitution_map& sigmaS_)
+      : sigmaS(sigmaS_)
+    {
+      unprintable["&&"] = "and";
+      unprintable["!"] = "not";
+      unprintable["#"] = "len";
+      unprintable[">"] = "greater";
+      unprintable["<"] = "less";
+      unprintable[">="] = "ge";
+      unprintable["<="] = "le";
+      unprintable["=="] = "eq";
+      unprintable["!="] = "neq";     
+    }
+
+    data::function_symbol operator()(const data::function_symbol& f) const
+    {
+      std::string name = std::string(f.name());
+      std::map<std::string, std::string>::const_iterator i = unprintable.find(name);
+      if (i != unprintable.end())
+      {
+        name = i->second;
+      }
+      name = "Generated_" + name;
+      data::sort_expression s = f.sort();
+      if (data::is_basic_sort(s))
+      {
+        return data::function_symbol(name, make_set()(s));
+      }
+      else if (data::is_function_sort(s))
+      {
+        data::function_sort fs(s);
+        return data::function_symbol(name, data::function_sort(atermpp::apply(fs.domain(), apply_sigmaS(sigmaS)), make_set()(fs.codomain())));
+      }
+      else if (data::is_container_sort(s))
+      {
+        return data::function_symbol(name, make_set()(s));
+      }
+      throw mcrl2::runtime_error("absinthe algorithm: unsupported sort " + data::pp(s) + " detected!");
+      return data::function_symbol();
     }
   };
 
@@ -375,6 +491,21 @@ struct absinthe_algorithm
     }
   }
 
+  // adds lifted versions of used function symbols that are not specified by the user
+  void complete_function_symbol_mapping(const pbes<>& p, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
+  {
+    std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
+    for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
+    {
+      if (sigmaF.find(*i) == sigmaF.end())
+      {
+        data::function_symbol f = transform_function_symbol(sigmaS)(*i);
+        sigmaF[*i] = f;
+        dataspec.add_mapping(f);
+      }
+    }
+  }
+
   void run(pbes<>& p, const std::string& sort_expression_mapping_text, const std::string& function_symbol_mapping_text, std::string user_dataspec_text, bool is_over_approximation)
   {
     // first we have to add right hand sides of the function symbol mappings to the user dataspec
@@ -405,6 +536,8 @@ struct absinthe_algorithm
     {
       i->second = lift_function_symbol(user_dataspec.user_defined_mappings())(i->second);
     }
+    // generate lifted versions for missing function symbols, and add them to dataspec
+    complete_function_symbol_mapping(p, sigmaS, sigmaF, combined_dataspec);
     print_mapping(sigmaF, "\n--- sigmaF ---");
 
     // add lifted versions of the user defined mappings and equations
@@ -415,12 +548,8 @@ struct absinthe_algorithm
 
     p.data() = combined_dataspec;
 
-    // first transform the sort expressions
-    absinthe_sort_expression_builder builder(sigmaS, sigmaF);
-    builder(p);
-
     // then transform the data expressions and the propositional variable instantiations
-    absinthe_data_expression_builder(sigmaF, is_over_approximation)(p);
+    absinthe_data_expression_builder(sigmaS, sigmaF, is_over_approximation)(p);
 
     std::cout << "--- pbes after ---" << std::endl;
     std::cout << pbes_system::pp(p) << std::endl;
