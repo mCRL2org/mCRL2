@@ -25,6 +25,7 @@
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2
 {
@@ -103,18 +104,17 @@ void check_pp(const std::string& s1, const std::string& s2, const std::string& s
 {
   if (s1 != s2)
   {
-    std::clog << "<pp>   " << s1 << std::endl;
-    std::clog << "<print>" << s2 << std::endl;
-    std::clog << "<aterm>" << s3 << std::endl;
-    throw std::runtime_error("not equal");
+    std::clog << "--- WARNING: difference detected between old and new pretty printer ---\n";
+    std::clog << "old:   " << s1 << std::endl;
+    std::clog << "new:   " << s2 << std::endl;
+    std::clog << "aterm: " << s3 << std::endl;
+#ifdef MCRL2_THROW_ON_PRINT_DIFFERENCES
+    throw mcrl2::runtime_error("pretty print difference detected");
+#endif
   }
 }
 
-#ifdef MCRL2_ENABLE_CHECK_PP
 #define MCRL2_CHECK_PP(s1, s2, s3) core::detail::check_pp(s1, s2, s3);
-#else
-#define MCRL2_CHECK_PP(s1, s2, s3)
-#endif
 
 template <typename Derived>
 struct printer: public core::traverser<Derived>
@@ -225,7 +225,7 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
   using super::enter;
   using super::leave;
   using super::operator();
-  
+
   apply_printer(std::ostream& out)
   {
     typedef printer<apply_printer<Traverser> > Super;
