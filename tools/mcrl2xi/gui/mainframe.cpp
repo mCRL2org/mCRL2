@@ -570,7 +570,7 @@ void MainFrame::OnReplaceAll(wxFindDialogEvent& event)
 
       m_dlgReplace->Destroy();
       m_dlgReplace = NULL;
-      wxMessageBox(wxT("Replaced ") + wxString::Format(_T("%d"), count) + wxString(" occurrences."));
+      wxMessageBox(wxT("Replaced ") + wxString::Format(wxT("%d"), count) + wxT(" occurrences."));
 
       focussed_editor_for_find->SetFocus();
 
