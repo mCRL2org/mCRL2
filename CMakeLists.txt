@@ -302,7 +302,7 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
 ##   building dparser fails in MacOS and Windows.
 ##---------------------------------------------------
 
-option(MCRL2_ENABLE_DPARSER "Enable/disable compilation of DParser-dependent tools (_very_ experimental)" OFF)
+option(MCRL2_ENABLE_DPARSER "Enable/disable compilation of DParser-dependent tools (_very_ experimental)" ON)
 message(STATUS "MCRL2_ENABLE_DPARSER: ${MCRL2_ENABLE_DPARSER}" )
 
 if(MCRL2_ENABLE_DPARSER)
