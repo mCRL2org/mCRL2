@@ -453,7 +453,7 @@ IdList: Id ( ',' Id )* ;
   }
 }
 
-Id: "[A-Za-z_][A-Za-z_0-9']*" $term -2
+Id: "[A-Za-z_][A-Za-z_0-9']*"
 [
   char *ts = dup_str($n0.start_loc.s, $n0.end);
   if (is_one_of(ts, reserved_words)) {
