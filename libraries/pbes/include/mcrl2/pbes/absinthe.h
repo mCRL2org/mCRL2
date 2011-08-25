@@ -291,7 +291,7 @@ struct absinthe_algorithm
 
     apply_sigmaS(const sort_expression_substitution_map& sigmaS_)
       : sigmaS(sigmaS_)
-    {}   
+    {}
 
     data::sort_expression operator()(const data::sort_expression& s) const
     {
@@ -321,7 +321,7 @@ struct absinthe_algorithm
       unprintable[">="] = "ge";
       unprintable["<="] = "le";
       unprintable["=="] = "eq";
-      unprintable["!="] = "neq";     
+      unprintable["!="] = "neq";
     }
 
     data::function_symbol operator()(const data::function_symbol& f) const
@@ -355,12 +355,6 @@ struct absinthe_algorithm
   // function that lifts a function symbol
   struct lift_function_symbol
   {
-    const data::function_symbol_vector& user_mappings;
-
-    lift_function_symbol(const data::function_symbol_vector& user_mappings_)
-      : user_mappings(user_mappings_)
-    {}
-
     data::function_symbol operator()(const data::function_symbol& f) const
     {
       std::string name = "Lift" + boost::algorithm::trim_copy(std::string(f.name()));
@@ -386,12 +380,10 @@ struct absinthe_algorithm
   // function that generates an equation from a function symbol and it's corresponding lifted version
   struct generate_lifted_equation
   {
-    const data::function_symbol_vector& user_mappings;
     const sort_expression_substitution_map& abstraction;
 
-    generate_lifted_equation(const data::function_symbol_vector& user_mappings_, const sort_expression_substitution_map& abstraction_)
-      : user_mappings(user_mappings_),
-        abstraction(abstraction_)
+    generate_lifted_equation(const sort_expression_substitution_map& abstraction_)
+      : abstraction(abstraction_)
     {}
 
     atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint) const
@@ -470,12 +462,12 @@ struct absinthe_algorithm
     for (data::function_symbol_vector::const_iterator i = user_mappings.begin(); i != user_mappings.end(); ++i)
     {
       // lift the function symbol *i
-      data::function_symbol f = lift_function_symbol(user_mappings)(*i);
+      data::function_symbol f = lift_function_symbol()(*i);
       dataspec.add_mapping(f);
       mCRL2log(log::debug1) << "added function symbol: " << core::pp(f) << " " << core::pp(f.sort()) << std::endl;
 
       // make an equation for the lifted function symbol f
-      data::data_equation eq = generate_lifted_equation(user_mappings, sigmaS)(*i, f);
+      data::data_equation eq = generate_lifted_equation(sigmaS)(*i, f);
       dataspec.add_equation(eq);
       mCRL2log(log::debug1) << "added equation: " << core::pp(eq) << std::endl;
     }
@@ -534,7 +526,7 @@ struct absinthe_algorithm
     function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, combined_dataspec);
     for (function_symbol_substitution_map::iterator i = sigmaF.begin(); i != sigmaF.end(); ++i)
     {
-      i->second = lift_function_symbol(user_dataspec.user_defined_mappings())(i->second);
+      i->second = lift_function_symbol()(i->second);
     }
     // generate lifted versions for missing function symbols, and add them to dataspec
     complete_function_symbol_mapping(p, sigmaS, sigmaF, combined_dataspec);
