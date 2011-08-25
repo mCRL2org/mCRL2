@@ -30,7 +30,6 @@ class xStcEditor: public wxStyledTextCtrl
     void OnDelete(wxCommandEvent& /*event*/);
     void SetFileInUse(wxString filename);
     wxString GetFileInUse();
-
     int getWrapWordCode()
     {
       return wxSTC_WRAP_WORD;
@@ -39,6 +38,17 @@ class xStcEditor: public wxStyledTextCtrl
     int getWrapNoneCode()
     {
       return wxSTC_WRAP_NONE;
+    }
+
+    void SetInsertionPoint(long pos )
+    {
+      wxStyledTextCtrl::GotoPos(pos);
+    }
+
+    void Replace(long from, long to, const wxString& value)
+    {
+      SetSelection( from, to );
+      ReplaceSelection(value);
     }
 
   private:
