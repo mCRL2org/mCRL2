@@ -26,7 +26,7 @@ SortExpr
   | 'Bag' '(' SortExpr ')'
   | Id
   | '(' SortExpr ')'
-  | Domain '->' SortExpr
+  | Domain '->' SortExpr                 $binary_right 1
   | 'struct' ConstrDeclList
   ;
 
@@ -241,6 +241,7 @@ BesExpr
   | BesExpr '=>' BesExpr     $binary_right 2
   | BesExpr '&&' BesExpr     $binary_right 3
   | BesExpr '||' BesExpr     $binary_right 3
+  | '(' BesExpr ')'
   | BesVar
   ;
 
@@ -277,6 +278,7 @@ PbesExpr
   | PbesExpr '=>' PbesExpr                                       $binary_right 2
   | PbesExpr '&&' PbesExpr                                       $binary_right 3
   | PbesExpr '||' PbesExpr                                       $binary_right 3
+  | '(' PbesExpr ')'
   | PropVarInst
   ;
 
@@ -320,9 +322,9 @@ StateFrm
   | 'true'
   | 'false'
   | '!' StateFrm                                                 $unary_left 5
+  | StateFrm '=>' StateFrm                                       $binary_op_right 3
   | StateFrm '&&' StateFrm                                       $binary_op_right 4
   | StateFrm '||' StateFrm                                       $binary_op_right 4
-  | StateFrm '=>' StateFrm                                       $binary_op_right 3
   | 'forall' IdsDeclList StateFrmQuantifierOperator StateFrm
   | 'exists' IdsDeclList StateFrmQuantifierOperator StateFrm
   | '[' RegFrm ']'
@@ -399,6 +401,7 @@ IdList: Id ( ',' Id )* ;
     "in"    ,
     "pbes"  ,
     "bes"   ,
+    "nil"   ,
     NULL
   };
   static int is_one_of(char *s, const char **list) {
