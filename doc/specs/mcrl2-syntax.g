@@ -90,7 +90,9 @@ DataExpr
   | '!' DataExpr                             $unary_right 11
   | '-' DataExpr                             $unary_right 11
   | '#' DataExpr                             $unary_right 11
-  | DataExprQuantifier DataExpr
+  | 'forall' IdsDeclList '.' DataExpr        $unary_left 0
+  | 'exists' IdsDeclList '.' DataExpr        $unary_left 0
+  | 'lambda' IdsDeclList '.' DataExpr        $unary_left 0
   | DataExpr '=>'  DataExpr                  $binary_right 1
   | DataExpr '&&'  DataExpr                  $binary_right 2
   | DataExpr '||'  DataExpr                  $binary_right 2
@@ -124,12 +126,6 @@ DataExprUnit
   | '!' DataExprUnit                         $unary_right 11
   | '-' DataExprUnit                         $unary_right 11
   | '#' DataExprUnit                         $unary_right 11
-  ;
-
-DataExprQuantifier
-  : 'forall' IdsDeclList '.' $unary_op_right 0
-  | 'exists' IdsDeclList '.' $unary_op_right 0
-  | 'lambda' IdsDeclList '.' $unary_op_right 0
   ;
 
 WhrExpr: DataExpr '=' DataExpr ;
@@ -183,16 +179,12 @@ ProcExpr
   | ProcExpr '<<'  ProcExpr                     $binary_left 5
   | ProcExpr '@' DataExprUnit                   $binary_left 7
   | ProcExpr '|'   ProcExpr                     $binary_right 8
-  | ProcExprUnaryOperator ProcExpr
-  | DataExprUnit ProcExprThenElse               $unary_left 11;
+  | DataExprUnit ProcExprThenElse               $unary_left 11
+  | 'sum' IdsDeclList '.' ProcExpr              $unary_left 2
   ;
 
 ProcExprThenElse
   : '->' ProcExpr ('<>' ProcExpr)? $unary_op_left 11;
-
-ProcExprUnaryOperator
-  : 'sum' IdsDeclList '.'     $unary_op_right 2
-  ;
 
 // Actions
 
@@ -272,8 +264,8 @@ PbesExpr
   : DataValExpr
   | 'true'
   | 'false'
-  | 'forall' IdsDeclList PbesExprQuantifierOperator PbesExpr
-  | 'exists' IdsDeclList PbesExprQuantifierOperator PbesExpr
+  | 'forall' IdsDeclList '.' PbesExpr                            $unary_left 0
+  | 'exists' IdsDeclList '.' PbesExpr                            $unary_left 0
   | '!' PbesExpr                                                 $unary_left 4
   | PbesExpr '=>' PbesExpr                                       $binary_right 2
   | PbesExpr '&&' PbesExpr                                       $binary_right 3
@@ -281,8 +273,6 @@ PbesExpr
   | '(' PbesExpr ')'
   | PropVarInst
   ;
-
-PbesExprQuantifierOperator: '.' $unary_op_left 1 ;
 
 // Action formulas
 
@@ -295,13 +285,11 @@ ActFrm
   | ActFrm '=>' ActFrm                                           $binary_right 2
   | ActFrm '&&' ActFrm                                           $binary_right 3
   | ActFrm '||' ActFrm                                           $binary_right 3
-  | 'forall' IdsDeclList ActFrmQuantifierOperator ActFrm
-  | 'exists' IdsDeclList ActFrmQuantifierOperator ActFrm
+  | 'forall' IdsDeclList '.' ActFrm                              $unary_left 0
+  | 'exists' IdsDeclList '.' ActFrm                              $unary_left 0
   | ActFrm '@' DataExpr                                          $unary_left 4
   | '(' ActFrm ')'
   ;
-
-ActFrmQuantifierOperator: '.' $unary_op_left 1 ;
 
 // Regular formulas
 
@@ -325,11 +313,11 @@ StateFrm
   | StateFrm '=>' StateFrm                                       $binary_op_right 3
   | StateFrm '&&' StateFrm                                       $binary_op_right 4
   | StateFrm '||' StateFrm                                       $binary_op_right 4
-  | 'forall' IdsDeclList StateFrmQuantifierOperator StateFrm
-  | 'exists' IdsDeclList StateFrmQuantifierOperator StateFrm
+  | 'forall' IdsDeclList '.' StateFrm                            $unary_left 2
+  | 'exists' IdsDeclList '.' StateFrm                            $unary_left 2
   | '[' RegFrm ']'
   | '<' RegFrm '>'
-  | FixedPointOperator StateVarDecl StateFrmFixedPointOperator StateFrm
+  | FixedPointOperator StateVarDecl '.' StateFrm                 $unary_left 1
   | StateVarInst
   | 'delay' ( '@' DataExpr )?
   | 'yaled' ( '@' DataExpr )?
@@ -339,10 +327,6 @@ StateFrm
 StateVarDecl: Id ( '(' IdsDeclList ')' )? ;
 
 StateVarInst: Id ( '(' DataExprList ')' )? ;
-
-StateFrmQuantifierOperator: '.' $unary_op_left 2 ;
-
-StateFrmFixedPointOperator : '.' $unary_op_left 1 ;
 
 // Action Rename Specifications
 
