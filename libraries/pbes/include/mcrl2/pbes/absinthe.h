@@ -174,6 +174,16 @@ struct absinthe_algorithm
       return absinthe_sort_expression_builder(sigmaS, sigmaF)(x);
     }
 
+    data::variable_list lift(const data::variable_list& x)
+    {
+      return absinthe_sort_expression_builder(sigmaS, sigmaF)(x);
+    }
+
+    pbes_system::propositional_variable lift(const pbes_system::propositional_variable& x)
+    {
+      return absinthe_sort_expression_builder(sigmaS, sigmaF)(x);
+    }
+
     absinthe_data_expression_builder(const sort_expression_substitution_map& sigmaS_,
                                      const function_symbol_substitution_map& sigmaF_,
                                      bool is_over_approximation)
@@ -219,6 +229,22 @@ struct absinthe_algorithm
       {
         return forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
       }
+    }
+
+    pbes_system::pbes_expression operator()(const pbes_system::forall& x)
+    {
+      return pbes_system::forall(lift(x.variables()), super::operator()(x.body()));
+    }
+
+    pbes_system::pbes_expression operator()(const pbes_system::exists& x)
+    {
+      return pbes_system::exists(lift(x.variables()), super::operator()(x.body()));
+    }
+
+    void operator()(pbes_system::pbes_equation& x)
+    {
+      x.variable() = lift(x.variable());
+      x.formula() = super::operator()(x.formula());
     }
   };
 
