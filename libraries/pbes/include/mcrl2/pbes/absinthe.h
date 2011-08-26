@@ -21,7 +21,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/exists.h"
 #include "mcrl2/data/lambda.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/sort_expression.h"
@@ -65,7 +64,7 @@ namespace detail {
     const std::string prefix = "UNIQUE_FUNCTION_SYMBOL_PREFIX";
     boost::algorithm::trim(text);
     std::string::size_type pos = text.find_first_of(':');
-    std::string name = text.substr(0, pos);
+    std::string name = boost::algorithm::trim_copy(text.substr(0, pos));
     std::string type = prefix + text.substr(pos);
     std::string spec_text = dataspec_text + "\nmap " + prefix + type + ";\n";
     data::data_specification dataspec = data::parse_data_specification(spec_text);
@@ -339,16 +338,6 @@ struct absinthe_algorithm
       }
       return s;
     }
-
-//    data::sort_expression_list operator()(const data::sort_expression_list& x) const
-//    {
-//      data::sort_expression_vector result;
-//      for (data::sort_expression_list::const_iterator i = x.begin(); i != x.end(); ++i)
-//      {
-//        result.push_back((*this)(*i));
-//      }
-//      return data::sort_expression_list(result.begin(), result.end());
-//    }
   };
 
   // function that transforms a function symbol
@@ -505,19 +494,6 @@ std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) 
   // add lifted mappings and equations to the data specification
   void lift_data_specification(data::data_specification& dataspec, const data::function_symbol_vector& user_mappings, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF)
   {
-//    for (data::function_symbol_vector::const_iterator i = user_mappings.begin(); i != user_mappings.end(); ++i)
-//    {
-//      // lift the function symbol *i
-//      data::function_symbol f = lift_function_symbol()(*i);
-//      dataspec.add_mapping(f);
-//      mCRL2log(log::debug1) << "added function symbol: " << core::pp(f) << " " << core::pp(f.sort()) << std::endl;
-//
-//      // make an equation for the lifted function symbol f
-//      data::data_equation eq = generate_lifted_equation(sigmaS)(*i, f);
-//      dataspec.add_equation(eq);
-//      mCRL2log(log::debug1) << "added equation: " << core::pp(eq) << std::endl;
-//    }
-
     for (function_symbol_substitution_map::iterator i = sigmaF.begin(); i != sigmaF.end(); ++i)
     {
       data::function_symbol f1 = i->first;
@@ -567,21 +543,6 @@ std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) 
     }
   }
 
-//  // adds lifted versions of used function symbols that are not specified by the user
-//  void complete_function_symbol_mapping_old(const pbes<>& p, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
-//  {
-//    std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
-//    for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
-//    {
-//      if (sigmaF.find(*i) == sigmaF.end())
-//      {
-//        data::function_symbol f = transform_function_symbol(sigmaS)(*i);
-//        sigmaF[*i] = f;
-//        dataspec.add_mapping(f);
-//      }
-//    }
-//  }
-
   void print_fsvec(const data::function_symbol_vector& v, const std::string& msg) const
   {
     std::cout << "--- " << msg << std::endl;
@@ -596,8 +557,7 @@ std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) 
     std::cout << "--- " << msg << std::endl;
     for (function_symbol_substitution_map::const_iterator i = v.begin(); i != v.end(); ++i)
     {
-      std::cout << "<1>" << print_symbol(i->first) << std::endl;
-      std::cout << "<2>" << print_symbol(i->second) << std::endl;
+      std::cout << print_symbol(i->first) << "  -->  " << print_symbol(i->second) << std::endl;
     }
   }
 
@@ -627,23 +587,16 @@ std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) 
     // function symbol replacements (specified by the user)
     function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, combined_dataspec);
 
+print_fsmap(sigmaF, "--- sigmaF before completion ---");
+
     // generate mapping f1 -> f2 for missing function symbols
     complete_function_symbol_mapping(p, sigmaS, sigmaF, combined_dataspec);
 
-//    for (function_symbol_substitution_map::iterator i = sigmaF.begin(); i != sigmaF.end(); ++i)
-//    {
-//      i->second = lift_function_symbol()(i->second);
-//    }
-
-    // generate lifted versions for missing function symbols, and add them to dataspec
-//    complete_function_symbol_mapping(p, sigmaS, sigmaF, combined_dataspec);
-//    print_mapping(sigmaF, "\n--- sigmaF ---");
+print_fsmap(sigmaF, "--- sigmaF after completion ---");
 
     // add lifted versions of the user defined mappings and equations
     print_fsvec(user_dataspec.user_defined_mappings(), "user_dataspec.user_defined_mappings()");
     print_fsmap(sigmaF, "sigmaF");
-
-std::cout << "HIER" << std::endl << data::pp(combined_dataspec) << std::endl;
 
     // before: the mapping sigmaF is f1 -> f2
     // after: the mapping sigmaF is f1 -> f3
