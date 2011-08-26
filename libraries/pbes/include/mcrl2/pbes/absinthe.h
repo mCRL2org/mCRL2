@@ -84,6 +84,25 @@ namespace detail {
     }
   }
 
+  // extract sort specifications from a data specification
+  inline
+  std::string extract_sort_specifications(const std::string& text)
+  {
+    std::cout << "<extract_sort_specifications>" << std::endl;
+    std::vector<std::string> specs = utilities::regex_split(text, "\\bsort\\b");
+    if (text.find("sort") != 0)
+    {
+      specs.erase(specs.begin());
+    }
+    for (std::vector<std::string>::iterator i = specs.begin(); i != specs.end(); ++i)
+    {
+      // strip trailing map/eqn/cons sections
+      std::vector<std::string> v = utilities::regex_split(*i, "(\\beqn\\b)|(\\bcons\\b)|(\\bmap\\b)");
+      *i = "  " + v.front();
+    }
+    return "sort\n" + boost::algorithm::join(specs, "\n") + "\n";
+  }
+
 } // namespace detail
 
 struct absinthe_algorithm
@@ -352,12 +371,12 @@ struct absinthe_algorithm
   };
 
   // function that transforms a function symbol
-  struct transform_function_symbol
+  struct lift_function_symbol_1_2
   {
     const sort_expression_substitution_map& sigmaS;
     std::map<std::string, std::string> unprintable;
 
-    transform_function_symbol(const sort_expression_substitution_map& sigmaS_)
+    lift_function_symbol_1_2(const sort_expression_substitution_map& sigmaS_)
       : sigmaS(sigmaS_)
     {
       unprintable["&&"] = "and";
@@ -369,6 +388,10 @@ struct absinthe_algorithm
       unprintable["<="] = "le";
       unprintable["=="] = "eq";
       unprintable["!="] = "neq";
+      unprintable["[]"] = "emptylist";
+      unprintable["++"] = "concat";
+      unprintable["<|"] = "snoc";
+      unprintable["|>"] = "cons";
     }
 
     data::function_symbol operator()(const data::function_symbol& f) const
@@ -392,7 +415,7 @@ struct absinthe_algorithm
       }
       else if (data::is_container_sort(s))
       {
-        return data::function_symbol(name, make_set()(s));
+        return data::function_symbol(name, s);
       }
       throw mcrl2::runtime_error("absinthe algorithm: unsupported sort " + print_term(s) + " detected!");
       return data::function_symbol();
@@ -400,7 +423,7 @@ struct absinthe_algorithm
   };
 
   // function that lifts a function symbol
-  struct lift_function_symbol
+  struct lift_function_symbol_2_3
   {
     data::function_symbol operator()(const data::function_symbol& f) const
     {
@@ -446,6 +469,7 @@ struct absinthe_algorithm
 
     data::data_equation operator()(const data::function_symbol& f1, const data::function_symbol& f2) const
     {
+std::cout << "lifting_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
       data::variable_list variables;
       data::data_expression condition = data::sort_bool::true_();
       data::data_expression lhs;
@@ -469,7 +493,10 @@ struct absinthe_algorithm
       }
 //      else if (data::is_container_sort(s1))
 //      {
-//        return data::data_equation(variables, condition, lhs, rhs);
+//        sort_expression_substitution_map::const_iterator i = sigmaS.find(s1);
+//        if (i != sigmaS.end())
+//        {
+//        }
 //      }
       else
       {
@@ -576,7 +603,7 @@ struct absinthe_algorithm
       data::function_symbol f1 = *i;
       if (sigmaF.find(f1) == sigmaF.end())
       {
-        data::function_symbol f2 = transform_function_symbol(sigmaS)(f1);
+        data::function_symbol f2 = lift_function_symbol_1_2(sigmaS)(f1);
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
 
@@ -590,7 +617,7 @@ struct absinthe_algorithm
     {
       data::function_symbol f1 = i->first;
       data::function_symbol f2 = i->second;
-      data::function_symbol f3 = lift_function_symbol()(f2);
+      data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 
       // TODO: is this needed?
       dataspec.add_mapping(f2);

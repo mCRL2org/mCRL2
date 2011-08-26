@@ -11,6 +11,7 @@
 
 #include <iostream>
 #include <iterator>
+#include <boost/algorithm/string/join.hpp>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
@@ -21,6 +22,44 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
+
+void test_extract_sort_specifications()
+{
+  std::string DATASPEC =
+    "eqn haha; sort                              \n"
+    "  AbsD    = struct a;                       \n"
+    "  AbsList = struct empty | one | more;      \n"
+    "  AbsNat  = struct sort1 | sort2 | meer;    \n"
+    "                                            \n"
+    "eqn                                         \n"
+    "  Abstail(empty) = {empty};                 \n"
+    "  Abstail(one)   = {empty};                 \n"
+    "  Abstail(more)  = {one,more};              \n"
+    "                                            \n"
+    "  Absconc(a,empty) = {one}; sort X; eqn     \n"
+    "  Absconc(a,one)   = {more};                \n"
+    "  Absconc(a,more)  = {more};                \n"
+    "                                            \n"
+    "  Abslen(empty)    = {nul};                 \n"
+    "  Abslen(one)      = {een};                 \n"
+    "  Abslen(more)     = {meer};                \n"
+    "                                            \n"
+    "  Absge(nul,nul)   = {true};                \n"
+    "  Absge(nul,een)   = {false};               \n"
+    "  Absge(nul,meer)  = {false};               \n"
+    "  Absge(een,nul)   = {true};                \n"
+    "  Absge(een,een)   = {true};                \n"
+    "  Absge(een,meer)  = {false};               \n"
+    "  Absge(meer,nul)  = {true};                \n"
+    "  Absge(meer,een)  = {true};                \n"
+    "  Absge(meer,meer) = {false,true};          \n"
+    "                                            \n"
+    "  Abscapacity      = meer;                  \n"
+    ;
+
+  std::string result = pbes_system::detail::extract_sort_specifications(DATASPEC);
+  std::cout << result;
+}
 
 void test_absinthe(const std::string& pbes_text, const std::string& sort_map_text, const std::string& function_symbol_map_text, const std::string& dataspec_text, bool is_over_approximation)
 {
@@ -45,6 +84,7 @@ void test1()
     "#: List(D) -> Nat          := Abslen     : AbsList -> Set(AbsNat)         \n"
     ">=: Nat # Nat -> Bool      := Absge      : AbsNat # AbsNat -> Set(Bool)   \n"
     "capacity: Pos              := Abscapacity: AbsNat                         \n"
+    "[]: List(D)                := empty      : AbsList                        \n"
     ;
 
   std::string PBESSPEC =
@@ -160,6 +200,8 @@ void test2()
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+
+  test_extract_sort_specifications();
 
   test2();
 //  BOOST_CHECK(false);
