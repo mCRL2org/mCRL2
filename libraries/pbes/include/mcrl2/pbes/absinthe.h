@@ -245,6 +245,13 @@ struct absinthe_algorithm
       x.variable() = lift(x.variable());
       x.formula() = super::operator()(x.formula());
     }
+
+    template <typename Container>
+    void operator()(pbes_system::pbes<Container>& x)
+    {
+      super::operator()(x.equations());
+      x.initial_state() = propositional_variable_instantiation(x.initial_state().name(), lift(x.initial_state().parameters()));
+    }
   };
 
   sort_expression_substitution_map parse_sort_expression_mapping(const std::string& text, const data::data_specification& dataspec)
@@ -413,15 +420,58 @@ struct absinthe_algorithm
     }
   };
 
-  // function that generates an equation from a function symbol and it's corresponding lifted version
-  struct generate_lifted_equation
+  // function that generates an equation from a function symbol and it's corresponding 'generated' version
+  struct lift_equation_1_2
   {
-    const sort_expression_substitution_map& abstraction;
+    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint) const
+    {
+      atermpp::vector<data::variable> result;
+      unsigned int i = 0;
+      for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
+      {
+        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), *j));
+      }
+      return result;
+    }
 
-    generate_lifted_equation(const sort_expression_substitution_map& abstraction_)
-      : abstraction(abstraction_)
-    {}
+    data::data_equation operator()(const data::function_symbol& f1, const data::function_symbol& f2) const
+    {
+      data::variable_list variables;
+      data::data_expression condition = data::sort_bool::true_();
+      data::data_expression lhs;
+      data::data_expression rhs;
 
+      data::sort_expression s1 = f1.sort();
+
+      if (data::is_basic_sort(s1))
+      {
+        lhs = f2;
+        rhs = data::detail::create_finite_set(f1);
+      }
+      else if (data::is_function_sort(s1))
+      {
+        data::function_sort fs1(f1.sort());
+        // TODO: generate these variables in a proper way
+        atermpp::vector<data::variable> x = make_variables(fs1.domain(), "x");
+        variables = data::variable_list(x.begin(), x.end());
+        lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
+        rhs = data::detail::create_finite_set(data::application(f2, data::data_expression_list(x.begin(), x.end())));
+      }
+//      else if (data::is_container_sort(s1))
+//      {
+//        return data::data_equation(variables, condition, lhs, rhs);
+//      }
+      else
+      {
+        throw mcrl2::runtime_error("absinthe algorithm (lift_equation_1_2): unsupported sort " + print_term(s1) + " detected!");
+      }
+      return data::data_equation(variables, condition, lhs, rhs);
+    }
+  };
+
+  // function that generates an equation from a function symbol and it's corresponding lifted version
+  struct lift_equation_2_3
+  {
     atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint) const
     {
       atermpp::vector<data::variable> result;
@@ -451,8 +501,6 @@ struct absinthe_algorithm
 
     data::data_equation operator()(const data::function_symbol& f2, const data::function_symbol& f3) const
     {
-std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) << std::endl;
-
       data::variable_list variables;
       data::data_expression condition = data::sort_bool::true_();
       data::data_expression lhs;
@@ -464,7 +512,6 @@ std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) 
       {
         lhs = f3;
         rhs = data::detail::create_finite_set(f2);
-        return data::data_equation(variables, condition, lhs, rhs);
       }
       else if (data::is_function_sort(s2))
       {
@@ -475,25 +522,53 @@ std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) 
         atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x");
         atermpp::vector<data::variable> X = make_variables(fs3.domain(), "X");
 
+        variables = data::variable_list(X.begin(), X.end());
         lhs = data::application(f3, data::data_expression_list(X.begin(), X.end()));
         data::variable y("y", data::detail::get_set_sort(fs2.codomain()));
         data::data_expression Y = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         rhs = data::detail::create_set_comprehension(y, data::sort_bool::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y)));
-
-        return data::data_equation(variables, condition, lhs, rhs);
       }
 //      else if (data::is_container_sort(s2))
 //      {
-//        return data::data_equation(variables, condition, lhs, rhs);
 //      }
-      throw mcrl2::runtime_error("absinthe algorithm (eq): unsupported sort " + print_term(s2) + " detected!");
+      else
+      {
+        throw mcrl2::runtime_error("absinthe algorithm (lift_equation_2_3): unsupported sort " + print_term(s2) + " detected!");
+      }
       return data::data_equation(variables, condition, lhs, rhs);
     }
   };
 
-  // add lifted mappings and equations to the data specification
-  void lift_data_specification(data::data_specification& dataspec, const data::function_symbol_vector& user_mappings, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF)
+  template <typename Map>
+  void print_mapping(const Map& m, const std::string& message = "")
   {
+    std::cout << message << std::endl;
+    for (typename Map::const_iterator i = m.begin(); i != m.end(); ++i)
+    {
+      std::cout << data::pp(i->first) << " -> " << data::pp(i->second) << std::endl;
+    }
+  }
+
+  // add lifted mappings and equations to the data specification
+  void lift_data_specification(const pbes<>& p, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
+  {
+    // add lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
+    std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
+    for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
+    {
+      data::function_symbol f1 = *i;
+      if (sigmaF.find(f1) == sigmaF.end())
+      {
+        data::function_symbol f2 = transform_function_symbol(sigmaS)(f1);
+        sigmaF[f1] = f2;
+        dataspec.add_mapping(f2);
+
+        data::data_equation eq = lift_equation_1_2()(f1, f2);
+        dataspec.add_equation(eq);
+        mCRL2log(log::debug1) << "added equation: " << core::pp(eq) << std::endl;
+      }
+    }
+
     for (function_symbol_substitution_map::iterator i = sigmaF.begin(); i != sigmaF.end(); ++i)
     {
       data::function_symbol f1 = i->first;
@@ -511,35 +586,9 @@ std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) 
       i->second = f3;
 
       // make an equation for the lifted function symbol f
-      data::data_equation eq = generate_lifted_equation(sigmaS)(f2, f3);
+      data::data_equation eq = lift_equation_2_3()(f2, f3);
       dataspec.add_equation(eq);
       mCRL2log(log::debug1) << "added equation: " << core::pp(eq) << std::endl;
-    }
-  }
-
-  template <typename Map>
-  void print_mapping(const Map& m, const std::string& message = "")
-  {
-    std::cout << message << std::endl;
-    for (typename Map::const_iterator i = m.begin(); i != m.end(); ++i)
-    {
-      std::cout << data::pp(i->first) << " -> " << data::pp(i->second) << std::endl;
-    }
-  }
-
-  // adds lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
-  void complete_function_symbol_mapping(const pbes<>& p, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
-  {
-    std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
-    for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
-    {
-      data::function_symbol f1 = *i;
-      if (sigmaF.find(f1) == sigmaF.end())
-      {
-        data::function_symbol f2 = transform_function_symbol(sigmaS)(f1);
-        sigmaF[f1] = f2;
-        dataspec.add_mapping(f2);
-      }
     }
   }
 
@@ -587,22 +636,12 @@ std::cout << "lifting equation " << print_symbol(f2) << " " << print_symbol(f3) 
     // function symbol replacements (specified by the user)
     function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, combined_dataspec);
 
-print_fsmap(sigmaF, "--- sigmaF before completion ---");
-
-    // generate mapping f1 -> f2 for missing function symbols
-    complete_function_symbol_mapping(p, sigmaS, sigmaF, combined_dataspec);
-
-print_fsmap(sigmaF, "--- sigmaF after completion ---");
-
-    // add lifted versions of the user defined mappings and equations
-    print_fsvec(user_dataspec.user_defined_mappings(), "user_dataspec.user_defined_mappings()");
-    print_fsmap(sigmaF, "sigmaF");
-
     // before: the mapping sigmaF is f1 -> f2
     // after: the mapping sigmaF is f1 -> f3
     // after: f2 and f3 have been added to combined_dataspec
     // after: equations for f3 have been added to combined_dataspec
-    lift_data_specification(combined_dataspec, user_dataspec.user_defined_mappings(), sigmaS, sigmaF);
+    // generate mapping f1 -> f2 for missing function symbols
+    lift_data_specification(p, sigmaS, sigmaF, combined_dataspec);
 
     std::cout << "--- pbes before ---" << std::endl;
     std::cout << pbes_system::pp(p) << std::endl;
