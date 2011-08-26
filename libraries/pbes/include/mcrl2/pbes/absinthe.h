@@ -250,7 +250,11 @@ struct absinthe_algorithm
     void operator()(pbes_system::pbes<Container>& x)
     {
       super::operator()(x.equations());
-      x.initial_state() = propositional_variable_instantiation(x.initial_state().name(), lift(x.initial_state().parameters()));
+      pbes_expression kappa = (*this)(x.initial_state());
+      core::identifier_string name("GeneratedZ");
+      propositional_variable Z(name, data::variable_list());
+      x.equations().push_back(pbes_equation(fixpoint_symbol::mu(), Z, kappa));
+      x.initial_state() = propositional_variable_instantiation(name, data::data_expression_list());
     }
   };
 
@@ -423,13 +427,19 @@ struct absinthe_algorithm
   // function that generates an equation from a function symbol and it's corresponding 'generated' version
   struct lift_equation_1_2
   {
+    const sort_expression_substitution_map& sigmaS;
+
+    lift_equation_1_2(const sort_expression_substitution_map& sigmaS_)
+      : sigmaS(sigmaS_)
+    {}
+
     atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint) const
     {
       atermpp::vector<data::variable> result;
       unsigned int i = 0;
       for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), *j));
+        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), apply_sigmaS(sigmaS)(*j)));
       }
       return result;
     }
@@ -446,7 +456,7 @@ struct absinthe_algorithm
       if (data::is_basic_sort(s1))
       {
         lhs = f2;
-        rhs = data::detail::create_finite_set(f1);
+        rhs = f1;
       }
       else if (data::is_function_sort(s1))
       {
@@ -455,7 +465,7 @@ struct absinthe_algorithm
         atermpp::vector<data::variable> x = make_variables(fs1.domain(), "x");
         variables = data::variable_list(x.begin(), x.end());
         lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
-        rhs = data::detail::create_finite_set(data::application(f2, data::data_expression_list(x.begin(), x.end())));
+        rhs = data::detail::create_finite_set(data::application(f1, data::data_expression_list(x.begin(), x.end())));
       }
 //      else if (data::is_container_sort(s1))
 //      {
@@ -472,20 +482,26 @@ struct absinthe_algorithm
   // function that generates an equation from a function symbol and it's corresponding lifted version
   struct lift_equation_2_3
   {
+    const sort_expression_substitution_map& sigmaS;
+
+    lift_equation_2_3(const sort_expression_substitution_map& sigmaS_)
+      : sigmaS(sigmaS_)
+    {}
+
     atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint) const
     {
       atermpp::vector<data::variable> result;
       unsigned int i = 0;
       for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), *j));
+        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), apply_sigmaS(sigmaS)(*j)));
       }
       return result;
     }
 
     // Let x = [x1:D1, ..., xn:Dn] and X = [X1:Set(D1), ..., Xn:Set(Dn)]. Returns the expression
     //
-    // exists x1:D1, ..., xn:Dn . (x1 in X1 /\ ... /\ xn in Xn)
+    // (x1 in X1 /\ ... /\ xn in Xn)
     data::data_expression enumerate_domain(const atermpp::vector<data::variable>& x, const atermpp::vector<data::variable>& X) const
     {
       atermpp::vector<data::data_expression> a;
@@ -496,7 +512,7 @@ struct absinthe_algorithm
         a.push_back(data::detail::create_set_in(*i, *j));
       }
       data::data_expression body = data::lazy::join_and(a.begin(), a.end());
-      return data::exists(x, body);
+      return body;
     }
 
     data::data_equation operator()(const data::function_symbol& f2, const data::function_symbol& f3) const
@@ -526,7 +542,8 @@ struct absinthe_algorithm
         lhs = data::application(f3, data::data_expression_list(X.begin(), X.end()));
         data::variable y("y", data::detail::get_set_sort(fs2.codomain()));
         data::data_expression Y = data::application(f2, data::data_expression_list(x.begin(), x.end()));
-        rhs = data::detail::create_set_comprehension(y, data::sort_bool::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y)));
+        data::data_expression body = data::sort_bool::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y));
+        rhs = data::detail::create_set_comprehension(y, data::exists(x, body));
       }
 //      else if (data::is_container_sort(s2))
 //      {
@@ -563,7 +580,7 @@ struct absinthe_algorithm
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
 
-        data::data_equation eq = lift_equation_1_2()(f1, f2);
+        data::data_equation eq = lift_equation_1_2(sigmaS)(f1, f2);
         dataspec.add_equation(eq);
         mCRL2log(log::debug1) << "added equation: " << core::pp(eq) << std::endl;
       }
@@ -586,7 +603,7 @@ struct absinthe_algorithm
       i->second = f3;
 
       // make an equation for the lifted function symbol f
-      data::data_equation eq = lift_equation_2_3()(f2, f3);
+      data::data_equation eq = lift_equation_2_3(sigmaS)(f2, f3);
       dataspec.add_equation(eq);
       mCRL2log(log::debug1) << "added equation: " << core::pp(eq) << std::endl;
     }
