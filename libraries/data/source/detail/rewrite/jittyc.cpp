@@ -2186,6 +2186,7 @@ bool RewriterCompilingJitty::removeRewriteRule(const data_equation rule1)
 void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& DataSpec)
 {
   made_files = false;
+
   need_rebuild = true;
 
   true_inner = OpId2Int(sort_bool::true_());
@@ -2657,8 +2658,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       );
 
   fprintf(f,
-      "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t,\n"
-      "     mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma)\n"
+      "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t)\n"
       "{\n"
       "  return rewrite(t);\n"
       "}\n"
@@ -2718,8 +2718,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   {
     so_rewr_init = reinterpret_cast<void(*)(RewriterCompilingJitty *)>(rewriter_so->proc_address("rewrite_init"));
     so_rewr_cleanup = reinterpret_cast<void (*)()>(rewriter_so->proc_address("rewrite_cleanup"));
-    so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const atermpp::aterm_appl,mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &)>
-                              (rewriter_so->proc_address("rewrite_external"));
+    so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const atermpp::aterm_appl)> (rewriter_so->proc_address("rewrite_external"));
 
   }
   catch(std::runtime_error &e)
@@ -2769,8 +2768,13 @@ atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
   {
     BuildRewriteSystem();
   }
+  // Save global sigma and restore it afterwards, as rewriting might be recursive with different
+  // substitutions, due to the enumerator.
+  mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > *saved_sigma=global_sigma;
   global_sigma= &sigma;
-  return so_rewr(term,sigma);
+  const atermpp::aterm_appl result=so_rewr(term);
+  global_sigma=saved_sigma;
+  return result;
 }
 
 RewriteStrategy RewriterCompilingJitty::getStrategy()

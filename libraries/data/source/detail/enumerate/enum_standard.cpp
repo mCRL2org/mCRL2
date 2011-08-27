@@ -253,6 +253,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
 
   variable var;
   atermpp::aterm_appl val;
+
   while (!vars.empty() && FindInnerCEquality(expr,vars,var,val))
   {
     vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
@@ -269,6 +270,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
 
 #ifndef NDEBUG
   // Check that substituted variables do not occur in the expression expr.
+
   std::set <variable> s=data::find_free_variables(m_enclosing_enumerator->rewr_obj->fromRewriteFormat(expr));
   for(std::set <variable>::const_iterator it=s.begin(); it!=s.end(); ++it)
   {

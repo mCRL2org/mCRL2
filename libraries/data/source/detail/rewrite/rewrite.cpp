@@ -120,11 +120,11 @@ bool Rewriter::removeRewriteRule(const data_equation /*Rule*/)
 }
 
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
-     const atermpp::aterm_appl ATermInInnerFormat,
+     const atermpp::aterm_appl t,
      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) 
 {
   /* Get Body of Exists */
-  ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
+  const atermpp::aterm_appl t1 = t(1);
   data_expression d(fromInner(t1)); // Do not apply reconstruct, which can generate an explicit lambda.
 
   /* Get Sort for enumeration from Body*/
@@ -135,22 +135,28 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   generator.set_hint("var");
 
   /* Create for each of the sorts for enumeration a new variable*/
-  variable_vector vv;
-  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
+  const size_t arity_plus1=fsdomain.size()+1; 
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::aterm,arity_plus1);
+  terms[0]=t1;
+
+  size_t count=1;
+  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i,++count)
   {
     variable v(generator(*i));
-    vv.push_back(v);
+    terms[count]=v;
+  }
+  // Put the variables in the right order in vl.
+  variable_list vl;
+  for(count-- ; count>0; count--)
+  {
+    vl=push_front(vl, variable(terms[count]));
   }
 
   /* Create Enumerator */
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  const variable_list vl=atermpp::convert< variable_list >(vv);
-
-  EnumeratorSolutionsStandard sol(vl,
-      toInner(application (d, atermpp::convert< data_expression_list >(vv)),false),
-      sigma,true,&ES,100);
+  EnumeratorSolutionsStandard sol(vl, ApplyArray(arity_plus1,terms), sigma,true,&ES,100);
 
   /* Create ATermList to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
@@ -186,15 +192,15 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   std::cerr << "An existential quantifier could not be eliminated and remains unchanged.\n";
 #endif
 
- return ATermInInnerFormat;
+ return Apply1(t(0),rewrite_internal(t1,sigma));
 }
 
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
-     const atermpp::aterm_appl ATermInInnerFormat,
+     const atermpp::aterm_appl t,
      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
   /* Get Body of forall */
-  ATerm t1 = ATgetArgument(ATermInInnerFormat,1);
+  atermpp::aterm_appl t1 = t(1);
   data_expression d(fromInner(t1));  // Do not apply fromRewriteFormat, as this generates an explicit lambda function,
                                      // which when translated back to rewrite format can cause recompilation of the
                                      // compiling rewriter, which causes havoc, as eliminating quantifiers is done while
@@ -203,26 +209,33 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   /* Get Sort for enumeration from Body*/
   sort_expression_list fsdomain = function_sort(d.sort()).domain();
   
-  data::fresh_variable_generator<> generator;
+  static data::fresh_variable_generator<> generator;
   generator.add_identifiers(find_identifiers(d));
   generator.set_hint("var");
   
   /* Create for each of the sorts for enumeration a new variable*/
-  variable_vector vv;
-  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i)
+  const size_t arity_plus1=fsdomain.size()+1;
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::aterm,arity_plus1);
+  terms[0]=t1;
+
+  size_t count=1;
+  for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i,++count)
   {
     variable v(generator(*i));
-    vv.push_back(v);
+    terms[count]=v;
   }
-  
+  // Put the variables in the right order in vl.
+  variable_list vl;
+  for(count-- ; count>0; count--)
+  {
+    vl=push_front(vl, variable(terms[count]));
+  }
+
   /* Create Enumerator */
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
   
   /* Find A solution*/
-  const variable_list vl=atermpp::convert< variable_list >(vv);
-  EnumeratorSolutionsStandard sol(vl,
-      toInner(application (d, atermpp::convert< data_expression_list >(vv)),false),
-      sigma,false,&ES,100);
+  EnumeratorSolutionsStandard sol(vl, ApplyArray(arity_plus1,terms), sigma,false,&ES,100);
   
   /* Create ATermList to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
@@ -258,18 +271,18 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 #ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
   std::cerr << "  A universal quantifier could not be eliminated and remains unchanged.\n";
 #endif
-  return ATermInInnerFormat;  // We were unable to remove the universal quantifier.
+  return Apply1(t(0),rewrite_internal(t1,sigma)); // We were unable to remove the universal quantifier.
 }
 
 atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(
-     const atermpp::aterm_appl ATermInInnerFormat,
+     const atermpp::aterm_appl t,
      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
-  atermpp::aterm_appl result=ATermInInnerFormat;
+  atermpp::aterm_appl result=t;
 #ifndef MCRL2_DISABLE_QUANTIFIER_ENUMERATION
-  if (ATisAppl((ATerm)(ATermAppl)ATermInInnerFormat))
+  if (ATisAppl((ATerm)(ATermAppl)t))
   {
-    ATerm arg = ATgetArgument(ATermInInnerFormat,0);
+    ATerm arg = ATgetArgument(t,0);
 
     /* Make sure that we have indeed a rewrite rule */
     if (ATisInt(arg))
@@ -282,12 +295,12 @@ atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(
         /* Check for universal quantifier */
         if (function_symbol(a).name() == forall_function_symbol())
         {
-          result = internal_universal_quantifier_enumeration(ATermInInnerFormat,sigma);
+          result = internal_universal_quantifier_enumeration(t,sigma);
         }
         /* Check for existential quantifier */
         else if (function_symbol(a).name() == exists_function_symbol())
         {
-          result = internal_existential_quantifier_enumeration(ATermInInnerFormat,sigma);
+          result = internal_existential_quantifier_enumeration(t,sigma);
         }
       }
     }

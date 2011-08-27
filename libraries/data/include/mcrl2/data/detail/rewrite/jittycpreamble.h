@@ -18,8 +18,7 @@ using namespace mcrl2::data::detail;
 extern "C" {
   DLLEXPORT void rewrite_init(RewriterCompilingJitty *r);
   DLLEXPORT void rewrite_cleanup();
-  DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t,
-               mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma);
+  DLLEXPORT atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t);
 }
 
 static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl t);
