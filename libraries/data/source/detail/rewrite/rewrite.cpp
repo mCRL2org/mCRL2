@@ -135,11 +135,29 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   generator.set_hint("var");
 
   /* Create for each of the sorts for enumeration a new variable*/
-  const size_t arity_plus1=fsdomain.size()+1; 
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::aterm,arity_plus1);
-  terms[0]=t1;
+  size_t arity=fsdomain.size(); 
+  if (ATisInt((ATerm)(ATermAppl)t1))
+  { 
+    arity=arity+1;
+  }
+  else 
+  {
+    arity=arity+t1.size();
+  }
 
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::aterm,arity);
   size_t count=1;
+  if (ATisInt((ATerm)(ATermAppl)t1))
+  {  
+    terms[0]=t1;
+  }
+  else
+  {
+    for(count=0 ; count<t1.size(); ++count)
+    terms[count]=t1(count);
+  }
+
+  const size_t oldcount=count;
   for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i,++count)
   {
     variable v(generator(*i));
@@ -147,7 +165,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   }
   // Put the variables in the right order in vl.
   variable_list vl;
-  for(count-- ; count>0; count--)
+  for(count-- ; count>=oldcount; count--)
   {
     vl=push_front(vl, variable(terms[count]));
   }
@@ -156,7 +174,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl, ApplyArray(arity_plus1,terms), sigma,true,&ES,100);
+  EnumeratorSolutionsStandard sol(vl, ApplyArray(arity,terms), sigma,true,&ES,100);
 
   /* Create ATermList to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
@@ -214,11 +232,29 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   generator.set_hint("var");
   
   /* Create for each of the sorts for enumeration a new variable*/
-  const size_t arity_plus1=fsdomain.size()+1;
-  MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::aterm,arity_plus1);
-  terms[0]=t1;
+  size_t arity=fsdomain.size(); 
+  if (ATisInt((ATerm)(ATermAppl)t1))
+  { 
+    arity=arity+1;
+  }
+  else 
+  {
+    arity=arity+t1.size();
+  }
 
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(terms,atermpp::aterm,arity);
   size_t count=1;
+  if (ATisInt((ATerm)(ATermAppl)t1))
+  {  
+    terms[0]=t1;
+  }
+  else
+  {
+    for(count=0 ; count<t1.size(); ++count)
+    terms[count]=t1(count);
+  }
+
+  const size_t oldcount=count;
   for(sort_expression_list::iterator i = fsdomain.begin(); i != fsdomain.end(); ++i,++count)
   {
     variable v(generator(*i));
@@ -226,7 +262,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   }
   // Put the variables in the right order in vl.
   variable_list vl;
-  for(count-- ; count>0; count--)
+  for(count-- ; count>=oldcount; count--)
   {
     vl=push_front(vl, variable(terms[count]));
   }
@@ -235,7 +271,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
   
   /* Find A solution*/
-  EnumeratorSolutionsStandard sol(vl, ApplyArray(arity_plus1,terms), sigma,false,&ES,100);
+  EnumeratorSolutionsStandard sol(vl, ApplyArray(arity,terms), sigma,false,&ES,100);
   
   /* Create ATermList to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
