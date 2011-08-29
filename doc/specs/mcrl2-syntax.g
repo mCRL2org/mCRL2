@@ -13,7 +13,7 @@
 #include "d.h"
 }
 
-// Sort Expressions
+//--- Sort Expressions
 
 SortExpr
   : 'Bool'
@@ -49,7 +49,7 @@ ProjDecl: ( Id ':' )? Domain ;
 
 ProjDeclList: ProjDecl ( ',' ProjDecl )* ;
 
-// Constructors and mappings
+//--- Constructors and mappings
 
 IdDecl: Id ':' SortExpr ;
 
@@ -61,7 +61,7 @@ ConsSpec: 'cons' ( IdsDecl ';' )+ ;
 
 MapSpec: 'map' ( IdsDecl ';' )+ ;
 
-// Equations
+//--- Equations
 
 GlobVarSpec: 'glob' ( IdsDeclList ';' )+ ;
 
@@ -71,7 +71,7 @@ EqnSpec: VarSpec? 'eqn' EqnDecl+ ;
 
 EqnDecl: (DataExpr '->')? DataExpr '=' DataExpr ';' ;
 
-// Data expressions
+//--- Data expressions
 
 DataExpr
   : Id
@@ -138,7 +138,7 @@ BagEnumElt: DataExpr ':' DataExpr ;
 
 BagEnumEltList: BagEnumElt ( ',' BagEnumElt )* ;
 
-// Communication and renaming sets
+//--- Communication and renaming sets
 
 MultActId: ActionLabelList ;
 
@@ -160,7 +160,7 @@ RenExprList: RenExpr ( ',' RenExpr )* ;
 
 RenExprSet: '{' RenExprList? '}' ;
 
-// Process expressions
+//--- Process expressions
 
 ProcExpr
   : Action
@@ -186,7 +186,7 @@ ProcExpr
 ProcExprThenElse
   : '->' ProcExpr ('<>' ProcExpr)? $unary_op_left 11;
 
-// Actions
+//--- Actions
 
 Action: Id ( '(' DataExprList ')' )? ;
 
@@ -200,7 +200,7 @@ MultAct: 'tau'
 
 ActionList: Action ( '|' Action )* ;
 
-// Process and initial state declaration
+//--- Process and initial state declaration
 
 ProcDecl: Id ( '(' IdsDeclList ')' )? '=' ProcExpr ';' ;
 
@@ -208,15 +208,15 @@ ProcSpec: 'proc' ProcDecl+ ;
 
 Init: 'init' ProcExpr ';' ;
 
-// Data specification
+//--- Data specification
 
 DataSpec: ( SortSpec | ConsSpec | MapSpec | EqnSpec )+ ;
 
-// mCRL2 specification
+//--- mCRL2 specification
 
 mCRL2Spec: ( SortSpec | ConsSpec | MapSpec | EqnSpec | GlobVarSpec | ActSpec | ProcSpec | Init )+ ;
 
-// BES
+//--- BES
 
 BesSpec: BesEqnSpec BesInit ;
 
@@ -239,7 +239,7 @@ BesExpr
 
 BesInit: 'init' BesVar ';' ;
 
-// PBES
+//--- PBES
 
 PbesSpec: DataSpec? GlobVarSpec? PbesEqnSpec PbesInit ;
 
@@ -274,7 +274,7 @@ PbesExpr
   | PropVarInst
   ;
 
-// Action formulas
+//--- Action formulas
 
 ActFrm
   : MultAct
@@ -291,7 +291,7 @@ ActFrm
   | '(' ActFrm ')'
   ;
 
-// Regular formulas
+//--- Regular formulas
 
 RegFrm
   : ActFrm
@@ -303,7 +303,7 @@ RegFrm
   | RegFrm '+' RegFrm                                            $binary_right 2
   ;
 
-// State formulas
+//--- State formulas
 
 StateFrm
   : DataValExpr
@@ -328,7 +328,7 @@ StateVarDecl: Id ( '(' IdsDeclList ')' )? ;
 
 StateVarInst: Id ( '(' DataExprList ')' )? ;
 
-// Action Rename Specifications
+//--- Action Rename Specifications
 
 ActionRenameSpec: (SortSpec | ConsSpec | MapSpec | EqnSpec | ActSpec | ActionRenameRuleSpec)+ ;
 
@@ -338,7 +338,7 @@ ActionRenameRule: (DataExpr '->')? Action '=>' ActionRenameRuleRHS ';' ;
 
 ActionRenameRuleRHS: Action | 'tau' | 'delta' ;
 
-// Identifiers
+//--- Identifiers
 
 IdList: Id ( ',' Id )* ;
 
@@ -407,7 +407,6 @@ Id: "[A-Za-z_][A-Za-z_0-9']*"
 
 Number: "0|(-?[1-9][0-9]*)" ;
 
-// Whitespace
+//--- Whitespace
 
 whitespace: "([ \t\n]|(%[^\n]*\n))*" ;
-
