@@ -13,6 +13,7 @@
 #define MCRL2_PBES_ABSINTHE_H
 
 #include <sstream>
+#include <utility>
 
 #include <boost/algorithm/string/trim.hpp>
 
@@ -73,6 +74,34 @@ namespace detail {
     return result;
   }
 
+  // Returns true if f appears as a structured sort constructor in dataspec.
+  inline
+  bool is_structured_sort_constructor(const data::data_specification& dataspec, const data::function_symbol& f)
+  {
+    for (data::alias_vector::const_iterator i = dataspec.user_defined_aliases().begin(); i != dataspec.user_defined_aliases().end(); ++i)
+    {
+      if (f.sort() != i->name())
+      {
+        continue;
+      }
+      data::sort_expression s = i->reference();
+      if (data::is_structured_sort(s))
+      {
+        data::structured_sort ss = s;
+        data::function_symbol_vector v = ss.constructor_functions();
+        for (data::function_symbol_vector::iterator j = v.begin(); j != v.end(); ++j)
+        {
+          data::function_symbol g = *j;
+          if (f.name() == g.name())
+          {
+            return true;
+          }
+        }
+      }
+    }
+    return false;
+  }
+
   inline
   void print_used_function_symbols(const pbes<>& p)
   {
@@ -84,23 +113,28 @@ namespace detail {
     }
   }
 
-  // extract sort specifications from a data specification
+  // Separates the sort declarations from the map/cons/var/eqn declarations
+  // Returns a pair containing consisiting of the combined sort spec and the combined map/eqn/var/cons declarations
   inline
-  std::string extract_sort_specifications(const std::string& text)
+  std::pair<std::string, std::string> separate_sort_declarations(const std::string& text)
   {
-    std::cout << "<extract_sort_specifications>" << std::endl;
+    std::ostringstream out1; // will contain the sort declarations
+    std::ostringstream out2; // will contain the map/cons/var/eqn declarations
+
     std::vector<std::string> specs = utilities::regex_split(text, "\\bsort\\b");
     if (text.find("sort") != 0)
     {
+      out2 << specs.front() << std::endl;
       specs.erase(specs.begin());
     }
     for (std::vector<std::string>::iterator i = specs.begin(); i != specs.end(); ++i)
     {
-      // strip trailing map/eqn/cons sections
-      std::vector<std::string> v = utilities::regex_split(*i, "(\\beqn\\b)|(\\bcons\\b)|(\\bmap\\b)");
-      *i = "  " + v.front();
+      // strip trailing map/cons/var/eqn declarations
+      std::vector<std::string> v = utilities::regex_split(*i, "(\\beqn\\b)|(\\bcons\\b)|(\\bmap\\b)|(\\bvar\\b)");
+      out1 << "  " << v.front();
+      out2 << i->substr(v.front().size());
     }
-    return "sort\n" + boost::algorithm::join(specs, "\n") + "\n";
+    return std::make_pair("sort\n" + out1.str() + "\n", out2.str() + "\n");
   }
 
 } // namespace detail
@@ -311,6 +345,25 @@ struct absinthe_algorithm
     return out.str();
   }
 
+  // Parse the right hand sides of the function symbol mapping in text, and add them to dataspec if needed
+  void parse_right_hand_sides(const std::string& text, data::data_specification& dataspec)
+  {
+    std::string dataspec_text = data::pp(dataspec);
+    std::vector<std::string> lines = utilities::regex_split(text, "\\n");
+    for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
+    {
+      std::vector<std::string> words = utilities::regex_split(*i, ":=");
+      if (words.size() == 2)
+      {
+        data::function_symbol f = pbes_system::detail::parse_function_symbol(words[1], dataspec_text);
+        if (!pbes_system::detail::is_structured_sort_constructor(dataspec, f))
+        {
+          dataspec.add_mapping(f);
+        }
+      }
+    }
+  }
+
   function_symbol_substitution_map parse_function_symbol_mapping(const std::string& text, const data::data_specification& dataspec)
   {
     function_symbol_substitution_map result;
@@ -392,6 +445,7 @@ struct absinthe_algorithm
       unprintable["++"] = "concat";
       unprintable["<|"] = "snoc";
       unprintable["|>"] = "cons";
+      unprintable["@cNat"] = "cNat";
     }
 
     data::function_symbol operator()(const data::function_symbol& f) const
@@ -620,7 +674,7 @@ std::cout << "lifting_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 
       // TODO: is this needed?
-      dataspec.add_mapping(f2);
+      // dataspec.add_mapping(f2);
       dataspec.add_mapping(f3);
 
       mCRL2log(log::debug1) << "added function symbol: " << core::pp(f2) << " " << core::pp(f2.sort()) << std::endl;
@@ -656,41 +710,39 @@ std::cout << "lifting_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol
 
   void run(pbes<>& p, const std::string& sort_expression_mapping_text, const std::string& function_symbol_mapping_text, std::string user_dataspec_text, bool is_over_approximation)
   {
-    // first we have to add right hand sides of the function symbol mappings to the user dataspec
-    user_dataspec_text = user_dataspec_text + "\n" + parse_right_hand_sides(function_symbol_mapping_text) + "\n";
+    // 0) split user_dataspec_text into user_sorts and user_equations
+    std::pair<std::string, std::string> q = pbes_system::detail::separate_sort_declarations(user_dataspec_text);
+    std::string user_sorts = q.first;
+    std::string user_equations = q.second;
 
-    std::string extra = "\nsort\n";
-    for (data::sort_expression_vector::const_iterator i = p.data().user_defined_sorts().begin(); i != p.data().user_defined_sorts().end(); ++i)
-    {
-      extra = extra + "  " + data::pp(*i) + ";\n";
-    }
-    for (data::alias_vector::const_iterator i = p.data().user_defined_aliases().begin(); i != p.data().user_defined_aliases().end(); ++i)
-    {
-      extra = extra + "  " + data::pp(*i) + ";\n";
-    }
-    std::cout << "--- user spec " << std::endl;
-    std::cout << user_dataspec_text + extra << std::endl;
-    data::data_specification user_dataspec = data::parse_data_specification(user_dataspec_text + extra);
-    data::data_specification combined_dataspec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_dataspec_text);
+    // 1) create the data specification data_spec, which consists of user_sorts and p.data()
+    data::data_specification data_spec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts);
+
+    // 2) parse the right hand sides of the function symbol mapping, and add them to data_spec
+    parse_right_hand_sides(function_symbol_mapping_text, data_spec);
+
+    // 3) add user_equations to data_spec
+    data_spec = data::parse_data_specification(data::pp(data_spec) + "\n" + user_equations);
 
     // sort expressions replacements (specified by the user)
-    sort_expression_substitution_map sigmaS = parse_sort_expression_mapping(sort_expression_mapping_text, combined_dataspec);
+    sort_expression_substitution_map sigmaS = parse_sort_expression_mapping(sort_expression_mapping_text, data_spec);
     print_mapping(sigmaS, "\n--- sigmaS ---");
 
     // function symbol replacements (specified by the user)
-    function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, combined_dataspec);
+    function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, data_spec);
 
+    // 4) add lifted sorts, mappings and equations to data_spec
     // before: the mapping sigmaF is f1 -> f2
     // after: the mapping sigmaF is f1 -> f3
-    // after: f2 and f3 have been added to combined_dataspec
-    // after: equations for f3 have been added to combined_dataspec
+    // after: f2 and f3 have been added to data_spec
+    // after: equations for f3 have been added to data_spec
     // generate mapping f1 -> f2 for missing function symbols
-    lift_data_specification(p, sigmaS, sigmaF, combined_dataspec);
+    lift_data_specification(p, sigmaS, sigmaF, data_spec);
 
     std::cout << "--- pbes before ---" << std::endl;
     std::cout << pbes_system::pp(p) << std::endl;
 
-    p.data() = combined_dataspec;
+    p.data() = data_spec;
 
     // then transform the data expressions and the propositional variable instantiations
     absinthe_data_expression_builder(sigmaS, sigmaF, is_over_approximation)(p);

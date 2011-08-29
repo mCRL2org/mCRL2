@@ -23,7 +23,7 @@ using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 
-void test_extract_sort_specifications()
+void test_separate_sort_declarations()
 {
   std::string DATASPEC =
     "eqn haha; sort                              \n"
@@ -57,8 +57,8 @@ void test_extract_sort_specifications()
     "  Abscapacity      = meer;                  \n"
     ;
 
-  std::string result = pbes_system::detail::extract_sort_specifications(DATASPEC);
-  std::cout << result;
+  std::pair<std::string, std::string> result = pbes_system::detail::separate_sort_declarations(DATASPEC);
+  std::cout << result.first << "-----------------------------\n" << result.second << std::endl;
 }
 
 void test_absinthe(const std::string& pbes_text, const std::string& sort_map_text, const std::string& function_symbol_map_text, const std::string& dataspec_text, bool is_over_approximation)
@@ -201,10 +201,10 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_extract_sort_specifications();
-
+  test_separate_sort_declarations();
+  test1();
   test2();
-//  BOOST_CHECK(false);
+  //BOOST_CHECK(false);
 
   return 0;
 }
