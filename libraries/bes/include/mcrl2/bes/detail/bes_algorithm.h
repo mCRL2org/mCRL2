@@ -14,7 +14,6 @@
 
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/atermpp/map.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
 
@@ -29,7 +28,7 @@ namespace detail
 
 /// \brief Algorithm class for algorithms on linear process specifications.
 template <typename Container = atermpp::vector<boolean_equation> >
-class bes_algorithm: public utilities::algorithm
+class bes_algorithm
 {
   protected:
     /// \brief The specification that is processed by the algorithm

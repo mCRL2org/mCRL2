@@ -21,7 +21,6 @@
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/utilities/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
@@ -209,7 +208,7 @@ class parity_game_generator_deprecated: public parity_game_generator
 
     /// \brief Make a substitution in the internal rewriter
     void make_substitution_internal(
-           const data::variable_list& v, 
+           const data::variable_list& v,
            const data::data_expression_list& e,
            mcrl2::data::mutable_map_substitution< > &sigma,
            mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
