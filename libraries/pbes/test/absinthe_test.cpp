@@ -22,6 +22,7 @@
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
+using namespace mcrl2::log;
 
 void test_separate_sort_declarations()
 {
@@ -85,6 +86,8 @@ void test1()
     ">=: Nat # Nat -> Bool      := Absge      : AbsNat # AbsNat -> Set(Bool)   \n"
     "capacity: Pos              := Abscapacity: AbsNat                         \n"
     "[]: List(D)                := empty      : AbsList                        \n"
+    "@cNat: Pos -> Nat          := AbscNat    : Pos -> Set(AbsNat)             \n"
+    "==: D # D -> Bool          := Abseq      : AbsD # AbsD -> Set(Bool)       \n"
     ;
 
   std::string PBESSPEC =
@@ -146,8 +149,9 @@ void test2()
   ;
 
   std::string FUNCTION_SYMBOL_MAPPING =
-  "getack : Frame -> Ack  := Absgetack : AbsFrame -> Set(Ack) \n"
-  "d0 : D                 := Absd0 : AbsD                     \n"
+  "getack : Frame -> Ack  := Absgetack : AbsFrame -> Set(Ack)     \n"
+  "d0 : D                 := Absd0     : AbsD                     \n"
+  "==: D # D -> Bool      := Abseq     : AbsD # AbsD -> Set(Bool) \n"
   ;
 
   std::string PBESSPEC =
@@ -200,6 +204,8 @@ void test2()
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
+
+  //mcrl2_logger::set_reporting_level(debug);
 
   test_separate_sort_declarations();
   test1();
