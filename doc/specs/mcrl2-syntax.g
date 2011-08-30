@@ -13,21 +13,21 @@
 #include "d.h"
 }
 
-//--- Sort Expressions
+//--- Sort expressions and sort declarations
 
 SortExpr
-  : 'Bool'
-  | 'Pos'
-  | 'Nat'
-  | 'Int'
-  | 'Real'
-  | 'List' '(' SortExpr ')'
-  | 'Set' '(' SortExpr ')'
-  | 'Bag' '(' SortExpr ')'
-  | Id
-  | '(' SortExpr ')'
-  | Domain '->' SortExpr                 $binary_right 1
-  | 'struct' ConstrDeclList
+  : 'Bool'                                                          // booleans
+  | 'Pos'                                                           // positive numbers
+  | 'Nat'                                                           // natural numbers
+  | 'Int'                                                           // integers
+  | 'Real'                                                          // reals
+  | 'List' '(' SortExpr ')'                                         // list sort
+  | 'Set' '(' SortExpr ')'                                          // set sort
+  | 'Bag' '(' SortExpr ')'                                          // bag sort
+  | Id                                                              // sort reference
+  | '(' SortExpr ')'                                                // sort expression with parentheses
+  | Domain '->' SortExpr                 $binary_right 1            // higher-order sort
+  | 'struct' ConstrDeclList                                         // structured sort
   ;
 
 Domain: SortExprList ;
@@ -342,7 +342,7 @@ ActionRenameRuleRHS: Action | 'tau' | 'delta' ;
 
 IdList: Id ( ',' Id )* ;
 
-//--- start Id definition ---//
+//-- start Id definition --//
 // This section contains the definition of an Id. Some C-code (between braces)
 // and a semantic action (between brackets) have been added to disallow reserved
 // words to be used as an Id.
@@ -403,7 +403,7 @@ Id: "[A-Za-z_][A-Za-z_0-9']*"
   }
   d_free(ts);
 ];
-//--- end Id definition ---//
+//-- end Id definition --//
 
 Number: "0|(-?[1-9][0-9]*)" ;
 
