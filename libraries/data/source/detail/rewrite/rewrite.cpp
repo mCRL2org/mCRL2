@@ -178,39 +178,36 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 
   /* Create ATermList to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
-  bool has_exact_solution = false;
-  bool has_no_solution =true;
+  atermpp::aterm_appl evaluated_condition=internal_false;
+  atermpp::aterm_appl partial_result=internal_false;
   bool solution_possible=true;
 
   size_t loop_upperbound=5;
-  while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
+  while (loop_upperbound>0 && 
+         partial_result!=internal_true &&
+         sol.next(evaluated_condition,x,solution_possible))
   {
-    has_no_solution = false;
+    if (partial_result==internal_false)
+    {
+      partial_result=evaluated_condition;
+    }
+    else if (partial_result==internal_true)
+    {
+      partial_result=internal_true;
+    }
+    else
+    { 
+      partial_result==Apply2(internal_or, partial_result,evaluated_condition);
+    }
     loop_upperbound--;
   }
 
-  if (solution_possible)
+  if (solution_possible && (loop_upperbound>0 || partial_result==internal_true))
   {
-    if (has_exact_solution)
-    {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      std::cerr << "  return true (exist)\n";
-#endif
-      return toRewriteFormat(mcrl2::data::sort_bool::true_());
-    }
-    else if (has_no_solution)
-    {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      std::cerr << "  return false (exist)\n";
-#endif
-      return toRewriteFormat(mcrl2::data::sort_bool::false_());
-    }
+    return partial_result;
   }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  std::cerr << "An existential quantifier could not be eliminated and remains unchanged.\n";
-#endif
 
- return Apply1(t(0),rewrite_internal(t1,sigma));
+  return Apply1(t(0),rewrite_internal(t1,sigma));
 }
 
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
@@ -275,39 +272,58 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   
   /* Create ATermList to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
-  bool has_exact_solution = false;
-  bool has_no_solution =true;
+  atermpp::aterm_appl evaluated_condition=internal_true;
+  atermpp::aterm_appl partial_result=internal_true;
   bool solution_possible=true;
-  
+
   size_t loop_upperbound=5;
-  
-  while (loop_upperbound>0 && sol.next(has_exact_solution,x,solution_possible) && !has_exact_solution)
+  while (loop_upperbound>0 && 
+         partial_result!=internal_false &&
+         sol.next(evaluated_condition,x,solution_possible))
   {
-    has_no_solution = false;
+    // The returned evaluated condition is the negation of the entered condition,
+    // as is not_equal_to_true_or_false is set to false in sol. So, we must first 
+    // negate it.
+
+    if (evaluated_condition == internal_true)
+    {
+      evaluated_condition=internal_false;
+    }
+    else if (evaluated_condition == internal_false)
+    {
+      evaluated_condition=internal_true;
+    }
+    else if (!ATisInt((ATerm)(ATermAppl)evaluated_condition) && evaluated_condition(0) == internal_not)
+    {
+      evaluated_condition=evaluated_condition(1);
+    }
+    else 
+    {
+      evaluated_condition=Apply1(internal_not, evaluated_condition);
+    }
+
+    
+    if (partial_result==internal_true)
+    {
+      partial_result=evaluated_condition;
+    }
+    else if (partial_result==internal_false)
+    {
+      partial_result=internal_false;
+    }
+    else
+    { 
+      partial_result==Apply2(internal_and, partial_result, evaluated_condition);
+    }
     loop_upperbound--;
   }
 
-  if (solution_possible)
+  if (solution_possible && (loop_upperbound>0 || partial_result==internal_false))
   {
-    if (has_exact_solution)
-    {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      std::cerr << "  return false (forall)\n";
-#endif
-      return toRewriteFormat(mcrl2::data::sort_bool::false_());
-    }
-    else if (has_no_solution)
-    {
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-      std::cerr << "  return true (forall)\n";
-#endif
-      return toRewriteFormat(mcrl2::data::sort_bool::true_());
-    }
+    return partial_result;
   }
-#ifdef MCRL2_PRINT_REWRITE_STEPS_INTERNAL
-  std::cerr << "  A universal quantifier could not be eliminated and remains unchanged.\n";
-#endif
-  return Apply1(t(0),rewrite_internal(t1,sigma)); // We were unable to remove the universal quantifier.
+
+  return Apply1(t(0),rewrite_internal(t1,sigma));
 }
 
 atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(

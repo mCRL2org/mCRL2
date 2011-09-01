@@ -219,7 +219,12 @@ class classic_enumerator
           }
           else 
           {
-            m_enumerator_iterator_valid=m_generator->next(m_solution_is_exact,m_assignments,m_solution_possible);
+            atermpp::aterm_appl instantiated_solution;
+            m_enumerator_iterator_valid=m_generator->next(instantiated_solution,m_assignments,m_solution_possible);
+            if (m_enumerator_iterator_valid)
+            {
+              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.internal_true;
+            } 
           }
         }
     
@@ -359,8 +364,13 @@ class classic_enumerator
           atermpp::term_list <atermpp::aterm_appl> assignment_list;
     
           const bool b=m_solution_possible; 
-          if (m_generator.next(m_solution_is_exact,assignment_list,m_solution_possible) && b==m_solution_possible)
+          atermpp::aterm_appl instantiated_solution;
+          if (m_generator.next(instantiated_solution,assignment_list,m_solution_possible) && b==m_solution_possible)
           {
+            if (m_solution_possible)
+            {
+              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.internal_true;
+            }
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();
             for (atermpp::term_list_iterator< atermpp::aterm_appl > i(assignment_list);

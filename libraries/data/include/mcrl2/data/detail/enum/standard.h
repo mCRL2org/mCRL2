@@ -32,19 +32,19 @@ class ss_solution
 {
   protected:
     atermpp::term_list< atermpp::aterm_appl > m_solution;  // A list containing the solution of a condition in internal format.
-    bool m_solution_is_exact;                              // An indication whether the solution made the solution exactly false or true.
+    atermpp::aterm_appl m_evaluated_condition;             // The condition after substituting the solution, in internal format.
 
   public:
 
     // Constructor.
-    ss_solution(const atermpp::term_list< atermpp::aterm_appl > &solution, const bool solution_is_exact) :
+    ss_solution(const atermpp::term_list< atermpp::aterm_appl > &solution, const atermpp::aterm_appl evaluated_condition) :
       m_solution(solution),
-      m_solution_is_exact(solution_is_exact)
+      m_evaluated_condition(evaluated_condition)
     {} 
    
-    bool solution_is_exact() const
+    atermpp::aterm_appl evaluated_condition() const
     { 
-      return m_solution_is_exact;
+      return m_evaluated_condition;
     }
 
     atermpp::term_list< atermpp::aterm_appl > solution() const
@@ -223,8 +223,8 @@ class EnumeratorSolutionsStandard
  
    /**
     * \brief Get next solution as a term_list in internal format if available.
-    * \param[out] solution_is_exact This optional parameter indicates whether the solution is exactly true
-    *             or false. The enumerator enumerates all solutions that are not false or not true.
+    * \param[out] evaluated_condition This optional parameter is used to return the
+    *             condition in which solution is substituted. 
     * \param[out] solution Place to store the solutions.
     *             The aterm_list solution contains solutions for the variables in internal
     *             format in the same order as the variable list Vars.
@@ -246,7 +246,7 @@ class EnumeratorSolutionsStandard
     *
     **/
 
-    bool next(bool &solution_is_exact,
+    bool next(atermpp::aterm_appl &evaluated_condition,
               atermpp::term_list<atermpp::aterm_appl> &solution, 
               bool &solution_possible);
 
@@ -256,7 +256,7 @@ class EnumeratorSolutionsStandard
 
   /** \brief Get next solution as a term_list in internal format.
    **/
-    bool next(bool &solution_is_exact,
+    bool next(atermpp::aterm_appl &evaluated_condition,
               atermpp::term_list<atermpp::aterm_appl> &solution);
 
   /** \brief Get next solution as a term_list in internal format.

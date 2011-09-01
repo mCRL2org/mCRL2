@@ -43,6 +43,9 @@ typedef enum {
                GS_REWR_INVALID   /** \brief Invalid strategy */
              } RewriteStrategy;
 
+
+atermpp::aterm_appl toInner(const data_expression term, const bool add_opids);
+
 /**
  * \brief Rewriter interface class.
  *
@@ -57,29 +60,6 @@ typedef enum {
  *   t = r->rewrite(t);
  *   delete r;
  * \endcode
- *
- * Most rewriters use their own format to store data terms (for reasons of
- * performance). To make optimal use of this, one can convert terms to this
- * format and use the specialised rewrite function on such terms. This is
- * especially useful when rewriting the same term for many different
- * instantiations of variables occurring in that term.
- *
- * Instead of first substituting specific values for variables before rewriting
- * a term, one can tell the rewriter to do this substitution during rewriting.
- * Typical usage would be as follows (with t an mCRL2 data term, var an mCRL2
- * data variable and values a list of mCRL2 data terms):
- *
- * \code
- *   Rewriter *r = createRewriter(equations);
- *   for (iterator i = values.begin(); i != values.end(); i++)
- *   {
- *     r->setSubstitution(var,*i);
- *     ATerm v = t->rewrite(t);
- *     // v is the normal form in of t[var:=*i]
- *     ...
- *   }
- *   delete r;
- * \endcode
  **/
 class Rewriter
 {
@@ -88,13 +68,26 @@ class Rewriter
 
   public:
 
+    atermpp::aterm_appl internal_true;
+    atermpp::aterm_appl internal_false;
+    atermpp::aterm internal_not;
+    atermpp::aterm internal_and;
+    atermpp::aterm internal_or;
+
+
     used_data_equation_selector data_equation_selector;
     /**
      * \brief Constructor. Do not use directly; use createRewriter()
      *        function instead.
      * \sa createRewriter()
      **/
-    Rewriter():m_conversion_helper(*this)
+    Rewriter():
+       m_conversion_helper(*this),
+       internal_true(toInner(sort_bool::true_(),true)),
+       internal_false(toInner(sort_bool::false_(),true)),
+       internal_not(toInner(sort_bool::not_(),true)),
+       internal_and(toInner(sort_bool::and_(),true)),
+       internal_or(toInner(sort_bool::or_(),true))
     {}
 
     /** \brief Destructor. */

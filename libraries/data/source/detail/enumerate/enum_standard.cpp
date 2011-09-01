@@ -66,7 +66,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
       {
         return m_enclosing_enumerator->rewr_true;
       }
-      else if (condition(0) == m_enclosing_enumerator->opidNot)
+      else if (!ATisInt((ATerm)(ATermAppl)condition) && condition(0) == m_enclosing_enumerator->opidNot)
       {
         return condition(1);
       }
@@ -378,7 +378,7 @@ atermpp::term_list < atermpp::aterm_appl> EnumeratorSolutionsStandard::build_sol
 }
 
 bool EnumeratorSolutionsStandard::next(
-              bool &solution_is_exact,
+              atermpp::aterm_appl &evaluated_condition,
               atermpp::term_list<atermpp::aterm_appl> &solution,
               bool &solution_possible)
 {
@@ -396,7 +396,7 @@ bool EnumeratorSolutionsStandard::next(
                        ss_solution(build_solution(
                                         enum_vars,e.substituted_vars(),
                                         e.vals()),
-                                   e.expr()==m_enclosing_enumerator->rewr_true));
+                                   e.expr()));
       }
     }
     else 
@@ -566,7 +566,7 @@ bool EnumeratorSolutionsStandard::next(
   if (!ss_stack.empty())
   {
     solution = ss_stack.back().solution();
-    solution_is_exact = ss_stack.back().solution_is_exact();
+    evaluated_condition = ss_stack.back().evaluated_condition();
     ss_stack.pop_back();
     return true;
   }
@@ -578,16 +578,16 @@ bool EnumeratorSolutionsStandard::next(
 
 bool EnumeratorSolutionsStandard::next(atermpp::term_list<atermpp::aterm_appl> &solution)
 {
-  bool dummy_solution_is_exact;
-  return next(dummy_solution_is_exact,solution);
+  atermpp::aterm_appl dummy_evaluated_condition;
+  return next(dummy_evaluated_condition,solution);
 }
 
 bool EnumeratorSolutionsStandard::next(
-          bool &solution_is_exact,
+          atermpp::aterm_appl &evaluated_condition,
           atermpp::term_list<atermpp::aterm_appl> &solution)
 {
   bool dummy_solution_possible=false;
-  return next(solution_is_exact,solution,dummy_solution_possible); 
+  return next(evaluated_condition,solution,dummy_solution_possible); 
 
 }
 
@@ -595,8 +595,8 @@ bool EnumeratorSolutionsStandard::next(
           atermpp::term_list<atermpp::aterm_appl> &solution, 
           bool &solution_possible)
 {
-  bool dummy_solution_is_exact;
-  return next(dummy_solution_is_exact,solution,solution_possible);
+  atermpp::aterm_appl dummy_evaluated_condition;
+  return next(dummy_evaluated_condition,solution,solution_possible);
 }
 
 void EnumeratorSolutionsStandard::reset(const bool not_equal_to_false)
