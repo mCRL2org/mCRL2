@@ -735,7 +735,7 @@ struct absinthe_algorithm
       {
         check_consistency(*i1, *i2, f1, sigmaS);
       }
-      check_consistency(fs1.codomain(), fs2.codomain(), f1, sigmaS);
+      // check_consistency(fs1.codomain(), fs2.codomain(), f1, sigmaS);
     }
 //    else if (data::is_container_sort(s1))
 //    {
