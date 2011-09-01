@@ -21,6 +21,7 @@
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
+#include <iterator>
 #endif
 
 namespace mcrl2 {
@@ -88,7 +89,23 @@ data_expression create_set_comprehension(const variable& x, const data_expressio
 inline
 data_expression create_set_in(const variable& x, const data_expression& X)
 {
-  return sort_set::setin(X.sort(), x, X);
+  data_expression result = sort_set::setin(x.sort(), x, X);
+
+#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
+  std::clog << "<checking create_set_in> x = " << data::pp(x) << ": " << data::pp(x.sort()) << x << " X = " << data::pp(X) << ": " << data::pp(X.sort()) << std::endl;
+  std::string text = data::pp(result);
+  std::set<variable> v = data::find_free_variables(x);
+  data::find_free_variables(X, std::inserter(v, v.end()));
+  data_expression result1 = data::parse_data_expression(text, v.begin(), v.end(), get_data_specification());
+  if (result != result1)
+  {
+    std::cout << "ERROR: in construction of " << text << std::endl;
+    std::cout << " 1) " << result << std::endl;
+    std::cout << " 2) " << result1 << std::endl;
+  }
+#endif
+
+  return result;
 }
 
 /// \brief Returns the sort s of Set(s).
