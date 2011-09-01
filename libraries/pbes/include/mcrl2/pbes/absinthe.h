@@ -12,6 +12,8 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
+#define MCRL2_DEBUG_DATA_CONSTRUCTION
+
 #include <sstream>
 #include <utility>
 
@@ -744,6 +746,10 @@ struct absinthe_algorithm
   void lift_data_specification(const pbes<>& p, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
   {
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
+
+#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
+  data::detail::set_data_specification(dataspec);
+#endif
 
     // add lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
     std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
