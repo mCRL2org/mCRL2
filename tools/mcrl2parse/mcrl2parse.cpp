@@ -28,7 +28,9 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-extern D_ParserTables parser_tables_mcrl2;
+extern "C" {
+  extern D_ParserTables parser_tables_mcrl2;
+}
 
 class mcrl2parse_tool : public input_tool
 {
