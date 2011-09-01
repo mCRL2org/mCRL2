@@ -82,7 +82,23 @@ inline
 data_expression create_set_comprehension(const variable& x, const data_expression& phi)
 {
   assert(sort_bool::is_bool(phi.sort()));
-  return sort_set::setconstructor(x.sort(), lambda(x, phi), sort_fset::fset_empty(x.sort()));
+  data_expression result = sort_set::setconstructor(x.sort(), lambda(x, phi), sort_fset::fset_empty(x.sort()));
+
+#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
+  std::clog << "<checking create_set_comprehension> x = " << data::pp(x) << ": " << data::pp(x.sort()) << x << " phi = " << data::pp(phi) << ": " << data::pp(phi.sort()) << std::endl;
+  std::string text = data::pp(result);
+  std::set<variable> v = data::find_free_variables(x);
+  data::find_free_variables(phi, std::inserter(v, v.end()));
+  data_expression result1 = data::parse_data_expression(text, v.begin(), v.end(), get_data_specification());
+  if (result != result1)
+  {
+    std::cout << "ERROR: in construction of " << text << std::endl;
+    std::cout << " 1) " << result << std::endl;
+    std::cout << " 2) " << result1 << std::endl;
+  }
+#endif
+
+  return result;
 }
 
 /// \brief Create the predicate 'x in X', with X a set.
