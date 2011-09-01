@@ -476,7 +476,7 @@ struct absinthe_algorithm
     {
       if (sigmaS.find(s) != sigmaS.end())
       {
-        throw mcrl2::runtime_error("could not lift function symbol " + print_symbol(f) + " because there is a user defined mapping for sort " + data::pp(s));
+        throw mcrl2::runtime_error("could not lift function symbol " + print_symbol(f) + " because there is a user defined abstraction for sort " + data::pp(s));
       }
     }
 
@@ -694,9 +694,57 @@ struct absinthe_algorithm
     return out.str();
   }
 
+  void check_consistency(const data::sort_expression& s, const data::sort_expression& t, const data::function_symbol& f, sort_expression_substitution_map& sigmaS) const
+  {
+    sort_expression_substitution_map::const_iterator i = sigmaS.find(s);
+    if (i != sigmaS.end() && i->second != t)
+    {
+      throw mcrl2::runtime_error("inconsistent abstraction " + data::pp(s) + " := " + data::pp(t) + " detected in the abstraction of " + print_symbol(f) + " (elsewhere it is abstracted as " + data::pp(s) + " := " + data::pp(i->second) + ").");
+    }
+    else
+    {
+      sigmaS[s] = t;
+    }
+  }
+
+  // Let f1: s1 x ... sn -> s and f2: t1 x ... tn -> t
+  // This function checks if the correspondence si -> ti conflicts with sigmaS.
+  void check_consistency(const data::function_symbol& f1, const data::function_symbol& f2, sort_expression_substitution_map& sigmaS) const
+  {
+    data::sort_expression s1 = f1.sort();
+    data::sort_expression s2 = f2.sort();
+
+    if (data::is_basic_sort(s1))
+    {
+      check_consistency(s1, s2, f1, sigmaS);
+    }
+    else if (data::is_function_sort(s1))
+    {
+      data::function_sort fs1(s1);
+      data::function_sort fs2(s2);
+
+      data::sort_expression_list domain1 = fs1.domain();
+      data::sort_expression_list domain2 = fs2.domain();
+
+      data::sort_expression_list::iterator i1 = domain1.begin();
+      data::sort_expression_list::iterator i2 = domain2.begin();
+
+      for (; i1 != domain1.end(); ++i1, ++i2)
+      {
+        check_consistency(*i1, *i2, f1, sigmaS);
+      }
+      check_consistency(fs1.codomain(), fs2.codomain(), f1, sigmaS);
+    }
+//    else if (data::is_container_sort(s1))
+//    {
+//    }
+  }
+
   // add lifted mappings and equations to the data specification
   void lift_data_specification(const pbes<>& p, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
   {
+    sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
+
     // add lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
     std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
     for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
@@ -705,6 +753,7 @@ struct absinthe_algorithm
       if (sigmaF.find(f1) == sigmaF.end())
       {
         data::function_symbol f2 = lift_function_symbol_1_2(sigmaS)(f1);
+        check_consistency(f1, f2, sigmaS_consistency);
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
 
@@ -790,6 +839,8 @@ struct absinthe_algorithm
     // generate mapping f1 -> f2 for missing function symbols
     lift_data_specification(p, sigmaS, sigmaF, data_spec);
     std::clog << "--- data specification 4) ---\n" << data::pp(data_spec) << std::endl;
+
+    std::clog << "\n--- function symbol mapping after lifting ---\n" << print_mapping(sigmaF) << std::endl;
 
     std::clog << "--- pbes before ---\n" << pbes_system::pp(p) << std::endl;
 
