@@ -56,12 +56,12 @@ const data_specification& get_data_specification()
 inline
 data_expression create_finite_set(const data_expression& x)
 {
-  sort_expression s = x.sort();
-  data_expression result = data::sort_fset::fset_empty(s);
-  result = data::sort_fset::fset_cons(s, x, result);
+  data_expression result = data::sort_fset::fset_empty(x.sort());
+  result = data::sort_fset::fsetinsert(x.sort(), x, result);
+  result = data::sort_set::setfset(x.sort(), result);
 
 #ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-  std::clog << "<checking finite set>" << data::pp(x) << " : " << data::pp(x.sort()) << std::endl;
+  std::clog << "<checking finite set>" << data::pp(x) << " : " << data::pp(x.sort()) << " " << x << std::endl;
   std::string text = data::pp(result);
   std::set<variable> v = data::find_free_variables(x);
   data_expression result1 = data::parse_data_expression(text, v.begin(), v.end(), get_data_specification());
