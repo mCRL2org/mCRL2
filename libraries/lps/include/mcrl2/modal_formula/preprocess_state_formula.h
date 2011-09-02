@@ -47,9 +47,7 @@ state_formulas::state_formula preprocess_state_formula(const state_formulas::sta
   std::set<core::identifier_string> spec_names = lps::find_identifiers(spec);
 
   // rename data variables in f, to prevent name clashes with data variables in spec
-  data::set_identifier_generator generator;
-  generator.add_identifiers(spec_variable_names);
-  f = state_formulas::rename_variables(f, generator);
+  f = state_formulas::rename_variables(f, spec_variable_names);
 
   // rename predicate variables in f, to prevent name clashes
   data::xyz_identifier_generator xyz_generator;

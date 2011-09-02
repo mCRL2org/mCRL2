@@ -931,7 +931,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
                         std::set<std::string>& context)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<RHS>" << state_formulas::pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<RHS-untimed>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       namespace z = pbes_expr_optimized;
@@ -1161,7 +1161,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
       const lps::linear_process& lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<E>" << pbes_system::pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<E-untimed>" << pbes_system::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       using namespace state_formulas::detail::accessors;
@@ -1349,6 +1349,10 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed
       state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
+
+#ifdef MCRL2_PBES_TRANSLATE_DEBUG
+      std::cerr << "<preprocessed formula>" << state_formulas::pp(f) << std::endl;
+#endif
 
       // compute the equations
       atermpp::vector<pbes_equation> e = E(f, f, lps);
