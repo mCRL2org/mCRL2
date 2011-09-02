@@ -9,8 +9,6 @@
 /// \file parser.h
 /// \brief add your file description here.
 
-// N.B. DPARSER_TABLES must be defined before including this file
-
 #ifndef DPARSER_H
 #define DPARSER_H
 
@@ -25,12 +23,7 @@ namespace dparser {
   class term;
 }
 
-//#define D_ParseNode_Globals dparser::parser
-//#define D_ParseNode_User dparser::term*
-
 #include "dparse.h"
-
-extern D_ParserTables DPARSER_TABLES;
 
 namespace dparser {
 
@@ -239,13 +232,6 @@ struct parser
   {
     parse_node node(&node_ref);
     std::cout << "parsed " << m_table.symbol_name(node.symbol()) << " " << node.string() << std::endl;
-  }
-
-  /// \brief Callback function for nodes in the parse tree
-  void preannounce(D_ParseNode& node_ref)
-  {
-    parse_node node(&node_ref);
-    std::cout << "preparsed " << m_table.symbol_name(node.symbol()) << " " << node.string() << std::endl;
   }
 };
 

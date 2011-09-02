@@ -37,6 +37,20 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
   protected:
     typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
 
+    bool m_skip_data;
+
+    void parse_options(const command_line_parser& parser)
+    {
+      super::parse_options(parser);
+      m_skip_data = parser.options.count("skip-data") > 0;
+    }
+
+    void add_options(interface_description& desc)
+    {
+      super::add_options(desc);
+      desc.add_option("skip-data", "do not rewrite data expressions", 's');
+    }
+
   public:
     pbes_rewriter()
       : super(
@@ -45,7 +59,8 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
         "rewrite and simplify a PBES",
         "Rewrite the PBES in INFILE, remove quantified variables and write the resulting PBES to OUTFILE. "
         "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."
-      )
+      ),
+      m_skip_data(false)
     {}
 
     bool run()
@@ -80,7 +95,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
           data::data_enumerator<> datae(p.data(), datar, generator);
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = true;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts, m_skip_data);
           pbes_rewrite(p, pbesr);
           break;
         }
@@ -90,7 +105,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
           data::data_enumerator<> datae(p.data(), datar, generator);
           data::rewriter_with_variables datarv(datar);
           bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts);
+          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts, m_skip_data);
           pbes_rewrite(p, pbesr);
           break;
         }

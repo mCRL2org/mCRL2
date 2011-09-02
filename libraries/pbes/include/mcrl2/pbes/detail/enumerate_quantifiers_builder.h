@@ -522,12 +522,15 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
   /// If true, quantifier variables of infinite sort are enumerated.
   bool m_enumerate_infinite_sorts;
 
+  /// If true, data expressions are not rewritten.
+  bool m_skip_data;
+
   /// \brief Constructor.
   /// \param r A data rewriter
   /// \param enumerator A data enumerator
   /// \param enumerate_infinite_sorts If true, quantifier variables of infinite sort are enumerated as well
-  enumerate_quantifiers_builder(const DataRewriter& r, const DataEnumerator& enumerator, bool enumerate_infinite_sorts = true)
-    : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts)
+  enumerate_quantifiers_builder(const DataRewriter& r, const DataEnumerator& enumerator, bool enumerate_infinite_sorts = true, bool skip_data = false)
+    : super(r), m_data_enumerator(enumerator), m_enumerate_infinite_sorts(enumerate_infinite_sorts), m_skip_data(skip_data)
   { }
 
 
@@ -595,6 +598,24 @@ struct enumerate_quantifiers_builder: public simplify_rewrite_builder<Term, Data
     std::cerr << "<visit_exists_result>" << tr::pp(result) << std::endl;
 #endif
     return result;
+  }
+
+  /// \brief Visit data_expression node
+  /// Visit data expression node.
+  /// \param x A term
+  /// \param d A data term
+  /// \param sigma A substitution function
+  /// \return The result of visiting the node
+  term_type visit_data_expression(const term_type& x, const data_term_type& d, SubstitutionFunction& sigma)
+  {
+    if (m_skip_data)
+    {
+      return x;
+    }
+    else
+    {
+      return super::visit_data_expression(x, d, sigma);
+    }
   }
 };
 
