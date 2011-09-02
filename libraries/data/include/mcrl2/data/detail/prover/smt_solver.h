@@ -13,6 +13,7 @@
 #define SMT_SOLVER_H
 
 #include "mcrl2/aterm/aterm2.h"
+#include "mcrl2/data/data_expression.h"
 
 namespace mcrl2
 {
