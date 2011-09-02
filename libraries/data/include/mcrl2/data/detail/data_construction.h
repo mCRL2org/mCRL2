@@ -103,7 +103,7 @@ data_expression create_set_comprehension(const variable& x, const data_expressio
 
 /// \brief Create the predicate 'x in X', with X a set.
 inline
-data_expression create_set_in(const variable& x, const data_expression& X)
+data_expression create_set_in(const data_expression& x, const data_expression& X)
 {
   data_expression result = sort_set::setin(x.sort(), x, X);
 

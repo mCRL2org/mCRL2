@@ -128,11 +128,11 @@ namespace detail {
   inline
   void print_used_function_symbols(const pbes<>& p)
   {
-    std::cout << "--- used function symbols ---" << std::endl;
+    std::clog << "--- used function symbols ---" << std::endl;
     std::set<data::function_symbol> find_function_symbols = pbes_system::find_function_symbols(p);
     for (std::set<data::function_symbol>::iterator i = find_function_symbols.begin(); i != find_function_symbols.end(); ++i)
     {
-      std::cout << print_symbol(*i) << std::endl;
+      std::clog << print_symbol(*i) << std::endl;
     }
   }
 
@@ -274,13 +274,15 @@ struct absinthe_algorithm
       data::variable_list variables = atermpp::make_list(var);
       if (m_is_over_approximation)
       {
-        pbes_expression body = and_(data::detail::create_set_in(var, x1), var);
-        return make_exists(variables, body);
+        // pbes_expression body = and_(data::detail::create_set_in(var, x1), var);
+        // return make_exists(variables, body);
+        return data::sort_bool::not_(data::detail::create_set_in(data::sort_bool::false_(), x1));
       }
       else
       {
-        pbes_expression body = imp(data::detail::create_set_in(var, x1), var);
-        return make_forall(variables, body);
+        // pbes_expression body = imp(data::detail::create_set_in(var, x1), var);
+        // return make_forall(variables, body);
+        return data::detail::create_set_in(data::sort_bool::true_(), x1);
       }
     }
 
@@ -484,7 +486,7 @@ struct absinthe_algorithm
 
     data::function_symbol operator()(const data::function_symbol& f) const
     {
-      std::clog << "lift_function_symbol_1_2 f = " << print_symbol(f) << std::endl;
+      //std::clog << "lift_function_symbol_1_2 f = " << print_symbol(f) << std::endl;
       std::string name = std::string(f.name());
       std::map<std::string, std::string>::const_iterator i = unprintable.find(name);
       if (i != unprintable.end())
@@ -526,7 +528,7 @@ struct absinthe_algorithm
   {
     data::function_symbol operator()(const data::function_symbol& f) const
     {
-      std::clog << "lift_function_symbol_2_3 f = " << print_symbol(f) << std::endl;
+      //std::clog << "lift_function_symbol_2_3 f = " << print_symbol(f) << std::endl;
       std::string name = "Lift" + boost::algorithm::trim_copy(std::string(f.name()));
       data::sort_expression s = f.sort();
       if (data::is_basic_sort(s))
@@ -569,7 +571,7 @@ struct absinthe_algorithm
 
     data::data_equation operator()(const data::function_symbol& f1, const data::function_symbol& f2) const
     {
-      std::clog << "lift_equation_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
+      //std::clog << "lift_equation_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
       data::variable_list variables;
       data::data_expression condition = data::sort_bool::true_();
       data::data_expression lhs;
@@ -645,7 +647,7 @@ struct absinthe_algorithm
 
     data::data_equation operator()(const data::function_symbol& f2, const data::function_symbol& f3) const
     {
-      std::clog << "lift_equation_2_3 f2 = " << print_symbol(f2) << " f3 = " << print_symbol(f3) << std::endl;
+      //std::clog << "lift_equation_2_3 f2 = " << print_symbol(f2) << " f3 = " << print_symbol(f3) << std::endl;
       data::variable_list variables;
       data::data_expression condition = data::sort_bool::true_();
       data::data_expression lhs;
@@ -776,7 +778,6 @@ struct absinthe_algorithm
       data::function_symbol f2 = i->second;
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 
-      // TODO: is this needed?
       std::clog << "adding mapping: " << core::pp(f3) << " " << core::pp(f3.sort()) << std::endl;
       dataspec.add_mapping(f3);
 
@@ -792,19 +793,19 @@ struct absinthe_algorithm
 
   void print_fsvec(const data::function_symbol_vector& v, const std::string& msg) const
   {
-    std::cout << "--- " << msg << std::endl;
+    std::clog << "--- " << msg << std::endl;
     for (data::function_symbol_vector::const_iterator i = v.begin(); i != v.end(); ++i)
     {
-      std::cout << print_symbol(*i) << std::endl;
+      std::clog << print_symbol(*i) << std::endl;
     }
   }
 
   void print_fsmap(const function_symbol_substitution_map& v, const std::string& msg) const
   {
-    std::cout << "--- " << msg << std::endl;
+    std::clog << "--- " << msg << std::endl;
     for (function_symbol_substitution_map::const_iterator i = v.begin(); i != v.end(); ++i)
     {
-      std::cout << print_symbol(i->first) << "  -->  " << print_symbol(i->second) << std::endl;
+      std::clog << print_symbol(i->first) << "  -->  " << print_symbol(i->second) << std::endl;
     }
   }
 
