@@ -93,7 +93,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   {
     derived().enter(x);
     derived().print(op + " ");
-    print_variables(x.variables(), true, true, false, "", "", ", ");   
+    print_variables(x.variables(), true, true, false, "", "", ", ");
     derived().print(". ");
     print_pbes_expression(x.body());
     derived().leave(x);
@@ -119,8 +119,12 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().leave(x);
   }
 
+#ifdef BOOST_MSVC
+  void operator()(const pbes_system::pbes<>& x)
+#else
   template <typename Container>
   void operator()(const pbes_system::pbes<Container>& x)
+#endif
   {
     derived().enter(x);
     derived()(x.data());
@@ -128,7 +132,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
 
     // N.B. We have to normalize the sorts of the equations first.
     atermpp::vector<pbes_equation> normalized_equations = x.equations();
-    pbes_system::normalize_sorts(normalized_equations, x.data());   
+    pbes_system::normalize_sorts(normalized_equations, x.data());
     print_list(normalized_equations, "pbes ", "\n\n", "\n     ");
 
     derived().print("init ");

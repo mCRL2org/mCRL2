@@ -12,7 +12,9 @@
 #ifndef MCRL2_BES_PRINT_H
 #define MCRL2_BES_PRINT_H
 
+#include <boost/foreach.hpp>
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/traverser.h"
 #include "mcrl2/core/print.h"
 
 namespace mcrl2 {
@@ -49,11 +51,13 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
     derived().leave(x);
   }
 
+#ifdef BOOST_MSVC
+  void operator()(const bes::boolean_equation_system<>& x)
+#else
   template <typename Container>
   void operator()(const bes::boolean_equation_system<Container>& x)
+#endif
   {
-    derived().enter(x);
-    print_list(x.equations(), "pbes\n    ", ";\n\n", ";\n    ");
     derived().print("init ");
     print_expression(x.initial_state());
     derived().print(";\n");
@@ -196,6 +200,17 @@ std::string pp(boolean_expression e, bool add_parens = false)
   return "";
 }
 
+/// \brief Pretty print function
+/// \param eq A boolean equation
+/// \return A pretty printed representation of the boolean equation
+inline
+std::string pp(const boolean_equation& eq, bool add_parens = false)
+{
+  std::string result = core::pp(eq.symbol()) + " " + bes::pp(eq.variable()) + " = " + bes::pp(eq.formula(), add_parens);
+  MCRL2_CHECK_PP(result, bes::print(eq), "boolean equation");
+  return result;
+}
+
 template<typename Container>
 inline
 std::string pp(const Container& c, bool add_parens = false, typename atermpp::detail::enable_if_container<Container>::type* = 0)
@@ -207,17 +222,6 @@ std::string pp(const Container& c, bool add_parens = false, typename atermpp::de
   }
   std::string result = utilities::string_join(v, ", ");
   MCRL2_CHECK_PP(result, bes::print(c), "bes container");
-  return result;
-}
-
-/// \brief Pretty print function
-/// \param eq A boolean equation
-/// \return A pretty printed representation of the boolean equation
-inline
-std::string pp(const boolean_equation& eq)
-{
-  std::string result = core::pp(eq.symbol()) + " " + bes::pp(eq.variable()) + " = " + bes::pp(eq.formula());
-  MCRL2_CHECK_PP(result, bes::print(eq), "boolean equation");
   return result;
 }
 
