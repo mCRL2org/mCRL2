@@ -28,8 +28,8 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/data/substitutions.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2
@@ -47,7 +47,7 @@ namespace detail
 /// This code should become obsolete when the rewriter can deal with
 /// abstraction.
 template < class Rewriter >
-class rewrite_conversion_helper 
+class rewrite_conversion_helper
 {
 
   private:
@@ -279,7 +279,7 @@ class rewrite_conversion_helper
             const function_sort s=argument_expression.sort();
             assert(s.codomain()==sort_bool::bool_());
             const sort_expression_list sl=s.domain();
-      
+
             variable_list vl;
             for(sort_expression_list::const_iterator i=sl.begin(); i!=sl.end(); ++i)
             {
@@ -303,7 +303,7 @@ class rewrite_conversion_helper
             const function_sort s=argument_expression.sort();
             assert(s.codomain()==sort_bool::bool_());
             const sort_expression_list sl=s.domain();
-      
+
             variable_list vl;
             for(sort_expression_list::const_iterator i=sl.begin(); i!=sl.end(); ++i)
             {
