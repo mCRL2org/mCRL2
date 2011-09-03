@@ -17,6 +17,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/data/detail/rewrite_conversion_helper.h"
+#include "mcrl2/data/fresh_variable_generator.h"
 
 #ifndef NO_DYNLOAD
 #define MCRL2_JITTYC_AVAILABLE /** \brief If defined the compiling JITty
@@ -65,6 +66,7 @@ class Rewriter
 {
   protected:
     detail::rewrite_conversion_helper< Rewriter> m_conversion_helper; 
+    data::fresh_variable_generator<> generator;  //name for variables.
 
   public:
 
@@ -83,6 +85,7 @@ class Rewriter
      **/
     Rewriter():
        m_conversion_helper(*this),
+       generator("v@r"),
        internal_true(toInner(sort_bool::true_(),true)),
        internal_false(toInner(sort_bool::false_(),true)),
        internal_not(toInner(sort_bool::not_(),true)(0)),

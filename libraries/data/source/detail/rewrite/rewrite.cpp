@@ -28,7 +28,6 @@
 
 #include "mcrl2/data/detail/rewrite/with_prover.h"
 
-#include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/data/detail/enum/standard.h"
 
 #include "mcrl2/data/data_expression.h"
@@ -130,9 +129,9 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   /* Get Sort for enumeration from Body*/
   sort_expression_list fsdomain = function_sort(d.sort()).domain();
 
-  static data::fresh_variable_generator<> generator;
+  /* static data::fresh_variable_generator<> generator;
   generator.add_identifiers(find_identifiers(d));
-  generator.set_hint("var");
+  generator.set_hint("var"); */
 
   /* Create for each of the sorts for enumeration a new variable*/
   size_t arity=fsdomain.size(); 
@@ -176,7 +175,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   /* Find A solution*/
   EnumeratorSolutionsStandard sol(vl, ApplyArray(arity,terms), sigma,true,&ES,100);
 
-  /* Create ATermList to store solutions */
+  /* Create a list to store solutions */
   atermpp::term_list<atermpp::aterm_appl> x;
   atermpp::aterm_appl evaluated_condition=internal_false;
   atermpp::aterm_appl partial_result=internal_false;
@@ -224,9 +223,9 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   /* Get Sort for enumeration from Body*/
   sort_expression_list fsdomain = function_sort(d.sort()).domain();
   
-  static data::fresh_variable_generator<> generator;
+  /* static data::fresh_variable_generator<> generator;
   generator.add_identifiers(find_identifiers(d));
-  generator.set_hint("var");
+  generator.set_hint("var"); */
   
   /* Create for each of the sorts for enumeration a new variable*/
   size_t arity=fsdomain.size(); 
