@@ -38,12 +38,6 @@ class InternalFormatInfo
     /// \brief The rewriter used to translate formulas to the internal format of rewriters.
     boost::shared_ptr<detail::Rewriter> f_rewriter;
 
-    /// \brief aterm_appl representing the internal constant \c true.
-    atermpp::aterm_int f_true;
-
-    /// \brief aterm_appl representing the internal constant \c false.
-    atermpp::aterm_int f_false;
-
     /// \brief aterm_appl representing the internal \c if \c then \c else function with type Bool -> Bool -> Bool -> Bool.
     atermpp::aterm_int f_if_then_else_bool;
 
@@ -235,8 +229,6 @@ class InternalFormatInfo
     InternalFormatInfo(boost::shared_ptr<detail::Rewriter> a_rewriter)
     {
       f_rewriter = a_rewriter;
-      f_true = (f_rewriter->toRewriteFormat(sort_bool::true_()))(0);
-      f_false = (f_rewriter->toRewriteFormat(sort_bool::false_()))(0);
       f_if_then_else_bool = (f_rewriter->toRewriteFormat(if_(sort_bool::bool_())))(0);
     }
 
@@ -344,15 +336,13 @@ class InternalFormatInfo
     /// \brief Indicates whether or not a term is equal to \c true.
     bool is_true(const atermpp::aterm_appl a_term)
     {
-      const atermpp::aterm v_term = a_term(0);
-      return (v_term == f_true);
+      return a_term==f_rewriter->internal_true;
     }
 
     /// \brief Indicates whether or not a term is equal to \c false.
     bool is_false(const atermpp::aterm_appl a_term)
     {
-      const atermpp::aterm v_term = a_term(0);
-      return (v_term == f_false);
+      return a_term == f_rewriter->internal_false;
     }
 
     /// \brief Indicates whether or not a term is equal to the \c if \c then \c else function

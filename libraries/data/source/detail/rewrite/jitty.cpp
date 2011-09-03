@@ -41,34 +41,6 @@ namespace data
 namespace detail
 {
 
-/* static AFun opidAFun;
-static unsigned int is_initialised = 0;
-
-#define gsIsOpId(x) (ATgetAFun(x) == opidAFun)
-
-
-static void initialise_common()
-{
-  if (is_initialised == 0)
-  {
-    opidAFun = ATgetAFun(static_cast<ATermAppl>(sort_bool::true_()));
-    ATprotectAFun(opidAFun);
-  }
-
-  is_initialised++;
-}
-
-static void finalise_common()
-{
-  assert(is_initialised > 0);
-  is_initialised--;
-
-  if (is_initialised == 0)
-  {
-    ATunprotectAFun(opidAFun);
-  }
-} */
-
 static variable_list get_vars(const atermpp::aterm_appl a)
 {
   if (gsIsDataVarId((ATermAppl) a))
@@ -83,13 +55,6 @@ static variable_list get_vars(const atermpp::aterm_appl a)
       l= get_vars(*arg)+l;
     }
     return l;
-
-    /* aterpp::term_list < atermpp::aterm > m = a.arguments();
-    for (; !ATisEmpty(m); m=ATgetNext(m))
-    {
-      l = ATconcat(l,get_vars(ATgetFirst(m)));
-    }
-    return l; */
   }
 }
 
@@ -271,10 +236,6 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
 
   max_vars = 0;
   need_rebuild = false;
-
-  /* jitty_true=NULL;
-  ATprotectAppl(&jitty_true);
-  jitty_true = (ATermAppl)toRewriteFormat(sort_bool::true_()); */
 
   const atermpp::vector< data_equation > l = DataSpec.equations();
   for (atermpp::vector< data_equation >::const_iterator j=l.begin();

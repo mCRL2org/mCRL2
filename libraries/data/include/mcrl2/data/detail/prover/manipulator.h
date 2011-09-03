@@ -42,13 +42,7 @@ class InternalFormatManipulator
     /// not processed again, but retreived from this table.
     atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl> f_orient;
 
-    /// \brief ATerm representing \c true in one of the internal formats of the rewriter.
-    atermpp::aterm_appl f_true;
-
-    /// \brief ATerm representing \c false in one of the internal formats of the rewriter.
-    atermpp::aterm_appl f_false;
-
-    /// \brief ATerm representing the \c if \c then \c else function in one of the internal formats of the rewriter.
+    /// \brief aterm representing the \c if \c then \c else function in one of the internal formats of the rewriter.
     atermpp::aterm f_if_then_else;
 
     /// \brief Replaces all occurences of \c a_guard in \c a_formula by \c true. Additionally, if the variable
@@ -59,13 +53,13 @@ class InternalFormatManipulator
                 const atermpp::aterm_appl a_guard,
                 atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > &f_set_true)
     {
-      if (a_formula == f_true || a_formula == f_false)
+      if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
       {
         return a_formula;
       }
       if (a_formula == a_guard)
       {
-        return f_true;
+        return f_rewriter->internal_true;
       }
 
       bool v_is_equality;
@@ -91,7 +85,6 @@ class InternalFormatManipulator
       size_t v_arity;
 
       v_symbol = ATgetAFun(a_formula);
-      // v_function = atermpp::aterm_appl(ATgetArgument(a_formula, 0));
       v_function = a_formula(0);
       v_arity = ATgetArity(v_symbol);
 
@@ -115,13 +108,13 @@ class InternalFormatManipulator
               const atermpp::aterm_appl a_guard,
               atermpp::map < atermpp::aterm_appl, atermpp::aterm_appl > &f_set_false)
     {
-      if (a_formula == f_true || a_formula == f_false)
+      if (a_formula == f_rewriter->internal_true || a_formula == f_rewriter->internal_false)
       {
         return a_formula;
       }
       if (a_formula == a_guard)
       {
-        return f_false;
+        return f_rewriter->internal_false;
       }
       if (f_info.is_variable(a_formula))
       {
@@ -170,8 +163,6 @@ class InternalFormatManipulator
       f_info(a_info)
     {
       f_rewriter = a_rewriter;
-      f_true =  a_rewriter->toRewriteFormat(sort_bool::true_());
-      f_false = a_rewriter->toRewriteFormat(sort_bool::false_());
       f_if_then_else = atermpp::aterm(ATgetArgument((ATermAppl) a_rewriter->toRewriteFormat(if_(sort_bool::bool_())), 0));
     }
 
@@ -222,8 +213,6 @@ class InternalFormatManipulator
         v_parts[i] = orient(a_term(i));
       }
       atermpp::aterm_appl v_result = atermpp::aterm_appl(ATmakeApplArray(v_symbol, (ATerm*)v_parts));
-      // delete[] v_parts;
-      // v_parts = 0;
 
       if (f_info.is_equality(v_result))
       {

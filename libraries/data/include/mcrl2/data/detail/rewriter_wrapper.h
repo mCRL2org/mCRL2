@@ -28,41 +28,25 @@ namespace detail
 struct legacy_rewriter : public mcrl2::data::rewriter
 {
   public:
-    // atermpp::aterm_appl internal_true;
-    // atermpp::aterm_appl internal_false;
 
     template < typename EquationSelector >
     legacy_rewriter(mcrl2::data::data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
         mcrl2::data::rewriter(d, selector, s)
     { 
-      // internal_true.protect();
-      // internal_true=(atermpp::aterm_appl)m_rewriter->toRewriteFormat(sort_bool::true_());
-      // internal_false.protect();
-      // internal_false=(atermpp::aterm_appl)m_rewriter->toRewriteFormat(sort_bool::false_());
     } 
   
     legacy_rewriter(const mcrl2::data::rewriter &other) :
       mcrl2::data::rewriter(other)
     { 
-      // internal_true.protect();
-      // internal_true=(atermpp::aterm_appl)m_rewriter->toRewriteFormat(sort_bool::true_());
-      // internal_false.protect();
-      // internal_false=(atermpp::aterm_appl)m_rewriter->toRewriteFormat(sort_bool::false_());
     }
 
     legacy_rewriter(const legacy_rewriter &other) :
       mcrl2::data::rewriter(other)
     { 
-      // internal_true.protect();
-      // internal_true=(atermpp::aterm_appl)m_rewriter->toRewriteFormat(sort_bool::true_());
-      // internal_false.protect();
-      // internal_false=(atermpp::aterm_appl)m_rewriter->toRewriteFormat(sort_bool::false_());
     }
 
     ~legacy_rewriter()
     {
-      // internal_true.unprotect();
-      // internal_false.unprotect();
     }
 
   
