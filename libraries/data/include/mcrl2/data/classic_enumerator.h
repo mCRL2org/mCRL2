@@ -60,7 +60,6 @@ class classic_enumerator
     typedef Evaluator                                                     evaluator_type;
 
   protected:
-
     const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
     detail::EnumeratorStandard*                                  m_enumerator;    // The real enumeration is done in an EnumeratorStandard
                                                                                   // class.
@@ -102,8 +101,8 @@ class classic_enumerator
           m_solution_possible(do_not_throw_exceptions)
         {
           const atermpp::aterm_appl rewritten_condition=e->m_evaluator.rewrite_internal(condition,sigma);
-          if ((not_equal_to_false && rewritten_condition==e->m_evaluator.internal_false) ||
-              (!not_equal_to_false && rewritten_condition==e->m_evaluator.internal_true))
+          if ((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false) ||
+              (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true))
           { 
             // no solutions are found.
             m_solution_possible=true;
@@ -113,8 +112,8 @@ class classic_enumerator
             // in this case we generate exactly one solution.
             m_enumerator_iterator_valid=true;
             m_solution_possible=true;
-            m_solution_is_exact=((not_equal_to_false && rewritten_condition==e->m_evaluator.internal_true) ||
-                                 (!not_equal_to_false && rewritten_condition==e->m_evaluator.internal_false));
+            m_solution_is_exact=((not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_true) ||
+                                 (!not_equal_to_false && rewritten_condition==e->m_evaluator.get_rewriter().internal_false));
           }
           else 
           {
@@ -223,7 +222,7 @@ class classic_enumerator
             m_enumerator_iterator_valid=m_generator->next(instantiated_solution,m_assignments,m_solution_possible);
             if (m_enumerator_iterator_valid)
             {
-              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.internal_true;
+              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.get_rewriter().internal_true;
             } 
           }
         }
@@ -369,7 +368,7 @@ class classic_enumerator
           {
             if (m_solution_possible)
             {
-              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.internal_true;
+              m_solution_is_exact=instantiated_solution==m_enclosing_enumerator->m_evaluator.get_rewriter().internal_true;
             }
             m_enumerator_iterator_valid=true;
             variable_list::const_iterator j=m_vars.begin();

@@ -68,11 +68,11 @@ class Rewriter
 
   public:
 
-    atermpp::aterm_appl internal_true;
-    atermpp::aterm_appl internal_false;
-    atermpp::aterm internal_not;
-    atermpp::aterm internal_and;
-    atermpp::aterm internal_or;
+    const atermpp::aterm_appl internal_true;
+    const atermpp::aterm_appl internal_false;
+    const atermpp::aterm internal_not;
+    const atermpp::aterm internal_and;
+    const atermpp::aterm internal_or;
 
 
     used_data_equation_selector data_equation_selector;
@@ -89,11 +89,16 @@ class Rewriter
        internal_and(toInner(sort_bool::and_(),true)(0)),
        internal_or(toInner(sort_bool::or_(),true)(0))
     { 
+      internal_true.protect();
+      internal_false.protect();
     }
 
     /** \brief Destructor. */
     virtual ~Rewriter()
-    {}
+    {
+      internal_true.unprotect();
+      internal_false.unprotect();
+    }
 
     /**
      * \brief Get rewriter strategy that is used.

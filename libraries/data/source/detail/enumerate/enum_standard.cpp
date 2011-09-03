@@ -58,19 +58,19 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
   { 
     if (negated)
     { 
-      if (condition == m_enclosing_enumerator->rewr_true)
+      if (condition == m_enclosing_enumerator->rewr_obj->internal_true)
       {
-        return m_enclosing_enumerator->rewr_false;
+        return m_enclosing_enumerator->rewr_obj->internal_false;
       }
-      else if (condition == m_enclosing_enumerator->rewr_false)
+      else if (condition == m_enclosing_enumerator->rewr_obj->internal_false)
       {
-        return m_enclosing_enumerator->rewr_true;
+        return m_enclosing_enumerator->rewr_obj->internal_true;
       }
-      else if (!ATisInt((ATerm)(ATermAppl)condition) && condition(0) == m_enclosing_enumerator->opidNot)
+      else if (!ATisInt((ATerm)(ATermAppl)condition) && condition(0) == m_enclosing_enumerator->rewr_obj->internal_not)
       {
         return condition(1);
       }
-      return Apply1(atermpp::aterm(m_enclosing_enumerator->opidNot), condition);
+      return Apply1(atermpp::aterm(m_enclosing_enumerator->rewr_obj->internal_not), condition);
     }
     return condition;
   }
@@ -79,43 +79,43 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::add_negations(
   atermpp::aterm_appl second_argument= negation_term_list.front();
   if (!negated)
   {
-    if (second_argument == m_enclosing_enumerator->rewr_true)
+    if (second_argument == m_enclosing_enumerator->rewr_obj->internal_true)
     {
-      return m_enclosing_enumerator->rewr_false;
+      return m_enclosing_enumerator->rewr_obj->internal_false;
     }
-    else if (second_argument == m_enclosing_enumerator->rewr_false)
+    else if (second_argument == m_enclosing_enumerator->rewr_obj->internal_false)
     {
-      return m_enclosing_enumerator->rewr_true;
+      return m_enclosing_enumerator->rewr_obj->internal_true;
     }
-    else if (second_argument(0) == m_enclosing_enumerator->opidNot)
+    else if (second_argument(0) == m_enclosing_enumerator->rewr_obj->internal_not)
     {
       second_argument=second_argument(1);
     }
     else 
     {
-      second_argument=Apply1(m_enclosing_enumerator->opidNot,second_argument);
+      second_argument=Apply1(m_enclosing_enumerator->rewr_obj->internal_not,second_argument);
     }
   }
   
-  if (first_argument==m_enclosing_enumerator->rewr_true)
+  if (first_argument==m_enclosing_enumerator->rewr_obj->internal_true)
   {
     return second_argument;
   }
-  else if (first_argument==m_enclosing_enumerator->rewr_false)
+  else if (first_argument==m_enclosing_enumerator->rewr_obj->internal_false)
   {
-    return m_enclosing_enumerator->rewr_false;
+    return m_enclosing_enumerator->rewr_obj->internal_false;
   }
-  if (second_argument==m_enclosing_enumerator->rewr_true)
+  if (second_argument==m_enclosing_enumerator->rewr_obj->internal_true)
   {
     return first_argument;
   }
-  else if (second_argument==m_enclosing_enumerator->rewr_false)
+  else if (second_argument==m_enclosing_enumerator->rewr_obj->internal_false)
   {
-    return m_enclosing_enumerator->rewr_false;
+    return m_enclosing_enumerator->rewr_obj->internal_false;
   }
   else
   {
-    return  Apply2(m_enclosing_enumerator->opidAnd,
+    return  Apply2(m_enclosing_enumerator->rewr_obj->internal_and,
                 first_argument,
                 second_argument);
   }
@@ -129,7 +129,7 @@ atermpp::term_list< atermpp::aterm_appl > EnumeratorSolutionsStandard::negate(co
   }
   return push_front(negate(pop_front(l)),
                     static_cast<atermpp::aterm_appl>(Apply1(
-                                             m_enclosing_enumerator->opidNot,
+                                             m_enclosing_enumerator->rewr_obj->internal_not,
                                              l.front())));
 }
 
@@ -147,12 +147,12 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
      store phi and psi /\ !phi separately. This allows the equality eliminator to remove
      more equalities and therefore be more effective. */
 
-  if (condition(0) == m_enclosing_enumerator->opidNot)
+  if (condition(0) == m_enclosing_enumerator->rewr_obj->internal_not)
   {
     push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,condition(1),negate(negated_term_list),!negated);
   }
-  else if ((negated && condition(0) == m_enclosing_enumerator->opidAnd) ||
-           (!negated && condition(0) == m_enclosing_enumerator->opidOr))
+  else if ((negated && condition(0) == m_enclosing_enumerator->rewr_obj->internal_and) ||
+           (!negated && condition(0) == m_enclosing_enumerator->rewr_obj->internal_or))
   { 
     assert(condition.size()==3);
     push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,condition(1),negated_term_list,negated);
@@ -163,7 +163,7 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
   { 
     const atermpp::aterm_appl new_expr = add_negations(condition,negated_term_list,negated); 
 
-    if (new_expr!=m_enclosing_enumerator->rewr_false)
+    if (new_expr!=m_enclosing_enumerator->rewr_obj->internal_false)
     { 
 #ifndef NDEBUG
       // Check that substituted variables do not occur in the expression expr.
@@ -213,7 +213,7 @@ bool EnumeratorSolutionsStandard::FindInnerCEquality(
     return false;
   } 
 
-  if (t(0) == m_enclosing_enumerator->opidAnd)
+  if (t(0) == m_enclosing_enumerator->rewr_obj->internal_and)
   {
     assert(t.size()==3);
     return FindInnerCEquality(t(1),vars,v,e) || FindInnerCEquality(t(2),vars,v,e);
@@ -388,9 +388,9 @@ bool EnumeratorSolutionsStandard::next(
     EliminateVars(e);
     fs_stack.pop_front();
 
-    if (e.vars().empty() || e.expr()==m_enclosing_enumerator->rewr_false) 
+    if (e.vars().empty() || e.expr()==m_enclosing_enumerator->rewr_obj->internal_false) 
     { 
-      if (e.expr()!=m_enclosing_enumerator->rewr_false) // So e.vars() is empty.
+      if (e.expr()!=m_enclosing_enumerator->rewr_obj->internal_false) // So e.vars() is empty.
       {
         ss_stack.push_back(
                        ss_solution(build_solution(
@@ -402,7 +402,7 @@ bool EnumeratorSolutionsStandard::next(
     else 
     {
       assert(!e.vars().empty());
-      assert(e.expr()!=m_enclosing_enumerator->rewr_false);
+      assert(e.expr()!=m_enclosing_enumerator->rewr_obj->internal_false);
       const variable var = e.vars().front();
       const sort_expression sort = var.sort();
       variable_list uvars = pop_front(e.vars());
@@ -615,23 +615,6 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
 {
   rewr_obj = r;
 
-  rewr_true=NULL;
-  rewr_true.protect();
-  rewr_true = (atermpp::aterm_appl)rewr_obj->toRewriteFormat(sort_bool::true_());
-  rewr_false=NULL;
-  rewr_false.protect();
-  rewr_false = (atermpp::aterm_appl)rewr_obj->toRewriteFormat(sort_bool::false_());
-
-  opidAnd.protect();
-  opidOr.protect();
-  opidNot.protect();
-  atermpp::aterm_appl t_and=rewr_obj->toRewriteFormat(sort_bool::and_());
-  opidAnd = t_and(0);
-  atermpp::aterm_appl t_or=rewr_obj->toRewriteFormat(sort_bool::or_());
-  opidOr = t_or(0);
-  atermpp::aterm_appl t_not=rewr_obj->toRewriteFormat(sort_bool::not_());
-  opidNot = t_not(0);
-
   const function_symbol_vector mappings(data_spec.mappings());
   for (function_symbol_vector::const_iterator i = mappings.begin(); i != mappings.end(); ++i)
   {
@@ -645,12 +628,6 @@ EnumeratorStandard::EnumeratorStandard(const mcrl2::data::data_specification &da
 
 EnumeratorStandard::~EnumeratorStandard()
 {
-  rewr_true.unprotect();
-  rewr_false.unprotect();
-
-  opidAnd.unprotect();
-  opidOr.unprotect();
-  opidNot.unprotect();
 }
 
 } // namespace detail

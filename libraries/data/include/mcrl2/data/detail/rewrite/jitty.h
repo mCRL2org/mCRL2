@@ -44,7 +44,7 @@ class RewriterJitty: public Rewriter
     size_t max_vars;
     bool need_rebuild;
 
-    ATermAppl jitty_true;
+    // ATermAppl jitty_true;
 
     atermpp::map< ATermInt, ATermList > jitty_eqns;
     atermpp::vector < ATermList >  jitty_strat;

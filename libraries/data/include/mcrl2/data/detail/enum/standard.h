@@ -118,11 +118,6 @@ class EnumeratorStandard
   public:
     const mcrl2::data::data_specification &m_data_spec;
     Rewriter* rewr_obj;
-    atermpp::aterm_appl rewr_true, rewr_false;
-  
-    atermpp::aterm_int opidAnd;
-    atermpp::aterm_int opidOr;
-    atermpp::aterm_int opidNot;
     atermpp::set< atermpp::aterm_int > eqs;
   
     EnumeratorStandard(mcrl2::data::data_specification const& data_spec, Rewriter* r); 

@@ -728,11 +728,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
     if (use_internal_rewrite_format)
     {
       data::data_expression d = (data::data_expression)r.rewrite_internal((atermpp::aterm)p,sigma_internal);
-      if (d==r.internal_true)
+      if (d==r.get_rewriter().internal_true)
       {
         result = pbes_expr::true_();
       }
-      else if (d==r.internal_false)
+      else if (d==r.get_rewriter().internal_false)
       {
         result = pbes_expr::false_();
       }

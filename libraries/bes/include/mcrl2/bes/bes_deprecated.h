@@ -1303,11 +1303,11 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     if (opt_precompile_pbes)
     {
       atermpp::aterm_appl d = R.rewrite_internal(R.convert_to(p),sigma_internal);
-      if (d==R.internal_true)
+      if (d==R.get_rewriter().internal_true)
       {
         result = pbes_expr::true_();
       }
-      else if (d==R.internal_false)
+      else if (d==R.get_rewriter().internal_false)
       {
         result = pbes_expr::false_();
       }

@@ -111,7 +111,7 @@ class parity_game_generator_deprecated: public parity_game_generator
       bool result = tr::is_true(e);
       if (m_precompile_pbes)
       {
-        result = result || e == datar_internal.internal_true;
+        result = result || e == datar_internal.get_rewriter().internal_true;
       }
       return result;
     }
@@ -123,7 +123,7 @@ class parity_game_generator_deprecated: public parity_game_generator
       bool result = tr::is_false(e);
       if (m_precompile_pbes)
       {
-        result = result || e == datar_internal.internal_false;
+        result = result || e == datar_internal.get_rewriter().internal_false;
       }
       return result;
     }
