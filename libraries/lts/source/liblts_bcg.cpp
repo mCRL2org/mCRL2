@@ -19,7 +19,7 @@
 
 using namespace mcrl2::lts;
 using namespace std;
-
+using namespace mcrl2::log;
 
 // BCG library initialisation
 static bool initialise()
