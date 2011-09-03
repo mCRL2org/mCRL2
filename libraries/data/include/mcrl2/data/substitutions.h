@@ -387,6 +387,7 @@ struct mutable_map_substitution : public std::unary_function<typename Associativ
   mutable_map_substitution & operator=(const mutable_map_substitution& other) 
   {
     m_map=other.m_map;
+    return *this;
   }
 
 };
