@@ -761,7 +761,7 @@ class pbes_constelm_algorithm
     /// \brief Constructor.
     /// \param datar A data rewriter
     /// \param pbesr A PBES rewriter
-    pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr, size_t log_level = 0)
+    pbes_constelm_algorithm(DataRewriter datar, PbesRewriter pbesr)
       : m_data_rewriter(datar), m_pbes_rewriter(pbesr)
     {}
 

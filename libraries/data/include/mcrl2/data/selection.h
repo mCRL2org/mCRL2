@@ -158,7 +158,7 @@ class used_data_equation_selector
     }
 
     /// \brief select all equations
-    used_data_equation_selector(const data_specification& specification):
+    used_data_equation_selector(const data_specification& /* specification */):
        add_all(true)
     {
       /* add_symbols(specification.constructors());

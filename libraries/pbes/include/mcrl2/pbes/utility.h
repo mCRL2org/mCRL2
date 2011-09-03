@@ -197,7 +197,7 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 
 // The function below restores a saved substitution.
 static void restore_saved_substitution(const atermpp::map<data::variable,atermpp::aterm_appl> &saved_substitutions,
-                                       data::detail::legacy_rewriter& r,
+                                       data::detail::legacy_rewriter& /* r */,
                                        const bool use_internal_rewrite_format,
                                        data::mutable_map_substitution< > &sigma,
                                        data::mutable_map_substitution< atermpp::map < data::variable, atermpp::aterm_appl > > &sigma_internal)
