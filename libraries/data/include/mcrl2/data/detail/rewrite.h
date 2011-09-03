@@ -85,10 +85,11 @@ class Rewriter
        m_conversion_helper(*this),
        internal_true(toInner(sort_bool::true_(),true)),
        internal_false(toInner(sort_bool::false_(),true)),
-       internal_not(toInner(sort_bool::not_(),true)),
-       internal_and(toInner(sort_bool::and_(),true)),
-       internal_or(toInner(sort_bool::or_(),true))
-    {}
+       internal_not(toInner(sort_bool::not_(),true)(0)),
+       internal_and(toInner(sort_bool::and_(),true)(0)),
+       internal_or(toInner(sort_bool::or_(),true)(0))
+    { 
+    }
 
     /** \brief Destructor. */
     virtual ~Rewriter()

@@ -197,7 +197,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
     }
     else
     { 
-      partial_result==Apply2(internal_or, partial_result,evaluated_condition);
+      partial_result=Apply2(internal_or, partial_result,evaluated_condition);
     }
     loop_upperbound--;
   }
@@ -313,7 +313,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
     }
     else
     { 
-      partial_result==Apply2(internal_and, partial_result, evaluated_condition);
+      partial_result=Apply2(internal_and, partial_result, evaluated_condition);
     }
     loop_upperbound--;
   }
@@ -712,7 +712,7 @@ data_expression fromInner(atermpp::aterm_appl term)
   }
   else
   {
-    a = data_expression(t);
+    a = variable(t);
   }
 
   if (gsIsOpId(a) || gsIsDataVarId(a))

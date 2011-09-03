@@ -253,7 +253,8 @@ static ATermList create_strategy(ATermList rules, ATermAppl jitty_true)
   return ATreverse(strat);
 }
 
-RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::data::used_data_equation_selector& equation_selector)
+RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::data::used_data_equation_selector& equation_selector):
+        Rewriter()
 {
   ATermList n;
   ATermInt i;

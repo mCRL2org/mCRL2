@@ -2731,7 +2731,8 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   need_rebuild = false;
 }
 
-RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &equations_selector)
+RewriterCompilingJitty::RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &equations_selector):
+   Rewriter()
 {
   data_equation_selector=equations_selector;
   so_rewr_cleanup = NULL;
