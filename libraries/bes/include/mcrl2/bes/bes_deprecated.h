@@ -2029,12 +2029,12 @@ class boolean_equation_system
       if (opt_precompile_pbes)
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::core::pp(Mucks_rewriter.convert_from((ATermAppl)p)) + "\n");
+                                   mcrl2::core::pp(Mucks_rewriter.convert_from((ATermAppl)p)));
       }
       else
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::core::pp(p) + "\n");
+                                   mcrl2::core::pp(p));
       }
       return false_();
     }
@@ -2233,7 +2233,7 @@ class boolean_equation_system
           // Add the required substitutions
           if (internal_opt_store_as_tree)
           {
-            // The current varable instantiation is stored as a tree, and this tree must be unfolded.
+            // The current variable instantiation is stored as a tree, and this tree must be unfolded.
             ATerm t=variable_index.get(variable_to_be_processed);
             if (!is_pair(t))
             {
@@ -2289,27 +2289,48 @@ class boolean_equation_system
             assert(elist==current_variable_instantiation.parameters().end());
           }
 
-          pbes_expression new_pbes_expression =
-            // pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma)); This is the code if the
-            // rewriters work with an acceptable performance.
-            mcrl2::pbes_system::detail::pbes_expression_substitute_and_rewrite
-            (current_pbeq.formula(),
-             pbes_spec.data(),
-             Mucks_rewriter,
-             opt_precompile_pbes,
-             sigma,
-             sigma_internal
-            );
-
-          bes_expression new_bes_expression=
-            add_propositional_variable_instantiations_to_indexed_set_and_translate(
-              new_pbes_expression,
-              variable_index,
-              nr_of_generated_variables,
-              opt_use_hashtables,
-              opt_strategy,
-              opt_construct_counter_example,
-              variable_to_be_processed);
+          bes_expression new_bes_expression;
+          try
+          {
+              // pbes_rewriter(current_pbeq.formula(),make_map_substitution_adapter(sigma)); This is the code if the
+              // rewriters work with an acceptable performance.
+            pbes_expression new_pbes_expression=
+              mcrl2::pbes_system::detail::pbes_expression_substitute_and_rewrite
+              (current_pbeq.formula(),
+               pbes_spec.data(),
+               Mucks_rewriter,
+               opt_precompile_pbes,
+               sigma,
+               sigma_internal
+              );
+  
+            new_bes_expression=
+              add_propositional_variable_instantiations_to_indexed_set_and_translate(
+                new_pbes_expression,
+                variable_index,
+                nr_of_generated_variables,
+                opt_use_hashtables,
+                opt_strategy,
+                opt_construct_counter_example,
+                variable_to_be_processed);
+          }  
+          catch (mcrl2::runtime_error &e)
+          {
+            propositional_variable_instantiation prop_var=propositional_variable_instantiation(variable_index.get(variable_to_be_processed));
+            if (opt_precompile_pbes)
+            {
+              // translate the arguments from internal format.
+              data_expression_list pars=prop_var.parameters();
+              data_expression_list resulting_pars;
+              for(data_expression_list::const_iterator it=pars.begin(); it!=pars.end(); ++it)
+              {
+                resulting_pars=push_front(resulting_pars,Mucks_rewriter.convert_from(*it));
+              }
+              prop_var=propositional_variable_instantiation(prop_var.name(),reverse(resulting_pars));
+            }
+            throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred when investigating " + 
+                  mcrl2::core::pp(prop_var));
+          }
 
           /* No need to clear up sigma, as it was locally declared. */
           /* Rewriter *data_rewriter=pbes_rewriter.get_rewriter(); */
