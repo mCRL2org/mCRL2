@@ -124,14 +124,10 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 {
   /* Get Body of Exists */
   const atermpp::aterm_appl t1 = t(1);
-  data_expression d(fromInner(t1)); // Do not apply reconstruct, which can generate an explicit lambda.
 
-  /* Get Sort for enumeration from Body*/
-  sort_expression_list fsdomain = function_sort(d.sort()).domain();
-
-  /* static data::fresh_variable_generator<> generator;
-  generator.add_identifiers(find_identifiers(d));
-  generator.set_hint("var"); */
+  /* Get Sort for enumeration from t */
+  const sort_expression sort_of_exists = get_int2term(ATgetInt((ATermInt)(ATerm)t(0))).sort();
+  const sort_expression_list fsdomain = function_sort(function_sort(sort_of_exists).domain().front()).domain();
 
   /* Create for each of the sorts for enumeration a new variable*/
   size_t arity=fsdomain.size(); 
@@ -214,18 +210,12 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
   /* Get Body of forall */
-  atermpp::aterm_appl t1 = t(1);
-  data_expression d(fromInner(t1));  // Do not apply fromRewriteFormat, as this generates an explicit lambda function,
-                                     // which when translated back to rewrite format can cause recompilation of the
-                                     // compiling rewriter, which causes havoc, as eliminating quantifiers is done while
-                                     // in the midst of a rewriting session.
-  
-  /* Get Sort for enumeration from Body*/
-  sort_expression_list fsdomain = function_sort(d.sort()).domain();
-  
-  /* static data::fresh_variable_generator<> generator;
-  generator.add_identifiers(find_identifiers(d));
-  generator.set_hint("var"); */
+  /* Get Body of Exists */
+  const atermpp::aterm_appl t1 = t(1);
+
+  /* Get Sort for enumeration from t */
+  const sort_expression sort_of_exists = get_int2term(ATgetInt((ATermInt)(ATerm)t(0))).sort();
+  const sort_expression_list fsdomain = function_sort(function_sort(sort_of_exists).domain().front()).domain();
   
   /* Create for each of the sorts for enumeration a new variable*/
   size_t arity=fsdomain.size(); 
