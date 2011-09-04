@@ -86,7 +86,7 @@ eqn ==(@c0, @cNat(p)) = false;
     succ(@c0) = @c1;
     succ(@cNat(p)) = succ(p);
 % The rule below is essential for the enumeration of lists.
-    succ(succ(n)) = @cDub(!(@even(n)), succ(div(n,@cDub(false,@c1))));
+%    succ(succ(n)) = @cDub(!(@even(n)), succ(div(n,@cDub(false,@c1))));
     pred(@c1) = @c0;
     pred(@cDub(true,p)) = @cNat(@cDub(false,p));
     pred(@cDub(false,p)) = @dub(true,pred(p));

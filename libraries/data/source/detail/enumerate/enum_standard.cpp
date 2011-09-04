@@ -146,7 +146,6 @@ void EnumeratorSolutionsStandard::push_on_fs_stack_and_split_or_without_rewritin
      on the fs_stack.  If the condition to be stored on the fs_stack has the shape phi \/ psi, then
      store phi and psi /\ !phi separately. This allows the equality eliminator to remove
      more equalities and therefore be more effective. */
-
   if (condition(0) == m_enclosing_enumerator->rewr_obj->internal_not)
   {
     push_on_fs_stack_and_split_or_without_rewriting(fs_stack,var_list,substituted_vars,substitution_terms,condition(1),negate(negated_term_list),!negated);
