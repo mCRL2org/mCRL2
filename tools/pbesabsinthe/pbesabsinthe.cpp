@@ -28,7 +28,7 @@ using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-class pbes_absint_tool: public input_output_tool
+class pbes_absinthe_tool: public input_output_tool
 {
   protected:
     typedef input_output_tool super;
@@ -67,7 +67,7 @@ class pbes_absint_tool: public input_output_tool
     {
       super::parse_options(parser);
       set_approximation_strategy(parser.option_argument("strategy"));
-      m_abstraction_file = parser.option_argument("abstraction");
+      m_abstraction_file = parser.option_argument("abstraction-file");
       m_print_used_function_symbols = parser.options.count("used-function-symbols") > 0;
     }
 
@@ -75,8 +75,8 @@ class pbes_absint_tool: public input_output_tool
     {
       super::add_options(desc);
 
-      desc.add_option("abstraction",
-                       make_mandatory_argument("FILE"),
+      desc.add_option("abstraction-file",
+                       make_optional_argument("FILE", ""),
                        "use the abstraction specification in FILE. ",
                        'a');
 
@@ -90,7 +90,7 @@ class pbes_absint_tool: public input_output_tool
     }
 
   public:
-    pbes_absint_tool()
+    pbes_absinthe_tool()
       : super(
         "pbesabsint",
         "Wieger Wesselink; Maciek Gazda and Tim Willemse",
@@ -118,7 +118,12 @@ class pbes_absint_tool: public input_output_tool
         pbes_system::detail::print_used_function_symbols(p);
       }
 
-      std::string abstraction_text = utilities::read_text(m_abstraction_file);
+      std::string abstraction_text;
+      if (!m_abstraction_file.empty())
+      {
+        abstraction_text = utilities::read_text(m_abstraction_file);
+      }
+
       bool over_approximation = m_strategy == as_over;
 
       absinthe_algorithm algorithm;
@@ -132,7 +137,7 @@ class pbes_absint_tool: public input_output_tool
 
 };
 
-class pbes_absint_gui_tool: public mcrl2_gui_tool<pbes_absint_tool>
+class pbes_absint_gui_tool: public mcrl2_gui_tool<pbes_absinthe_tool>
 {
   public:
     pbes_absint_gui_tool()

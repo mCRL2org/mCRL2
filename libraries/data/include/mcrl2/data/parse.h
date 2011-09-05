@@ -30,6 +30,8 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/normalize_sorts.h"
 
+#include <boost/algorithm/string/trim.hpp>
+
 namespace mcrl2
 {
 
@@ -95,6 +97,11 @@ inline
 data_specification parse_data_specification(
   const std::string& text)
 {
+  // handle empty data specification
+  if (boost::trim_copy(text).empty())
+  {
+    return data_specification();
+  }
   std::istringstream spec_stream(text);
   return parse_data_specification(spec_stream);
 }

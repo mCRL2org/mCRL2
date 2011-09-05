@@ -128,12 +128,71 @@ void test1()
   test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
 }
 
+// test with empty abstraction text
+void test2()
+{
+  std::string PBES_TEXT =
+  "sort D;                                                                                   \n"
+  "     Ack = struct ok | nok | error;                                                       \n"
+  "     Frame = struct f(data: D, acknowledgement: Ack);                                     \n"
+  "     E = struct e2 | e1 | e0;                                                             \n"
+  "                                                                                          \n"
+  "map  d0: D;                                                                               \n"
+  "     getack: Frame -> Ack;                                                                \n"
+  "                                                                                          \n"
+  "var  d: D;                                                                                \n"
+  "     a: Ack;                                                                              \n"
+  "eqn  getack(f(d, a))  =  acknowledgement(f(d, a));                                        \n"
+  "                                                                                          \n"
+  "pbes                                                                                      \n"
+  "                                                                                          \n"
+  "nu X(s: E, dd: D) =                                                                       \n"
+  "     (forall d: D. forall d': D. (val(!(d' == d)) || val(!(s == e2))) || Y(e1, d', d))    \n"
+  "  && (forall d: D. val(!(s == e2)) || X(e1, d))                                           \n"
+  "  && (forall a: Ack. val(!(s == e1 && a == ok)) || X(e0, dd))                             \n"
+  "  && (forall a: Ack. val(!(s == e1 && !(a == ok))) || X(e1, dd))                          \n"
+  "  && (val(!(s == e0)) || X(e2, d0));                                                      \n"
+  "                                                                                          \n"
+  "mu Y(s: E, dd,d: D) =                                                                     \n"
+  "       (forall d': D. val(!(s == e2)) || Y(e1, d', d))                                    \n"
+  "    && (forall a': Ack. val(!(s == e1 && a' == ok)) || Y(e0, dd, d))                      \n"
+  "    && (forall a': Ack. val(!(s == e1 && !(a' == ok))) || Y(e1, dd, d))                   \n"
+  "    && ((val(dd == d) || val(!(s == e0))) || Y(e2, d0, d));                               \n"
+  "                                                                                          \n"
+  "init X(e2, d0);                                                                           \n"
+  ;
+
+  std::string ABSTRACTION_TEXT = "";
+
+  test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
+}
+
+// test with empty abstraction text
+void test3()
+{
+  std::string PBES_TEXT =
+    "pbes nu X0 =                         \n"
+    "       true;                         \n"
+    "     mu X1(m: Nat, c: Bool) =        \n"
+    "       true && true && X1(0, false); \n"
+    "                                     \n"
+    "init X0;                             \n"
+    ;
+
+
+  std::string ABSTRACTION_TEXT = "";
+
+  test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_separate_sort_declarations();
   test1();
+  test2();
+  test3();
   //BOOST_CHECK(false);
 
   return 0;
