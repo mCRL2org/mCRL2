@@ -5,6 +5,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 // #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/data/detail/rewrite/jittyc.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 
 using namespace aterm;
 using namespace mcrl2::data::detail;
