@@ -35,6 +35,7 @@ class pbes_absinthe_tool: public input_output_tool
 
     std::string m_abstraction_file;
     bool m_print_used_function_symbols;
+    bool m_enable_logging;
 
     /// The transformation strategies of the tool.
     enum approximation_strategy
@@ -69,6 +70,7 @@ class pbes_absinthe_tool: public input_output_tool
       set_approximation_strategy(parser.option_argument("strategy"));
       m_abstraction_file = parser.option_argument("abstraction-file");
       m_print_used_function_symbols = parser.options.count("used-function-symbols") > 0;
+      m_enable_logging = parser.options.count("enable-logging") > 0;
     }
 
     void add_options(interface_description& desc)
@@ -87,6 +89,7 @@ class pbes_absinthe_tool: public input_output_tool
                        "  'under' for an under-approximation\n",
                        's');
       desc.add_option("used-function-symbols", "print used function symbols", 'u');
+      desc.add_option("enable-logging", "print absinthe specific log messages", 'l');
     }
 
   public:
@@ -127,6 +130,10 @@ class pbes_absinthe_tool: public input_output_tool
       bool over_approximation = m_strategy == as_over;
 
       absinthe_algorithm algorithm;
+      if (m_enable_logging)
+      {
+        algorithm.enable_logging();
+      }
       algorithm.run(p, abstraction_text, over_approximation);
 
       // save the result

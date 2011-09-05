@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_ABSINTHE_H
 #define MCRL2_PBES_ABSINTHE_H
 
-#define MCRL2_DEBUG_DATA_CONSTRUCTION
+//#define MCRL2_DEBUG_DATA_CONSTRUCTION
 
 #include <algorithm>
 #include <sstream>
@@ -130,11 +130,11 @@ namespace detail {
   inline
   void print_used_function_symbols(const pbes<>& p)
   {
-    mCRL2log(log::verbose) << "--- used function symbols ---" << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- used function symbols ---" << std::endl;
     std::set<data::function_symbol> find_function_symbols = pbes_system::find_function_symbols(p);
     for (std::set<data::function_symbol>::iterator i = find_function_symbols.begin(); i != find_function_symbols.end(); ++i)
     {
-      mCRL2log(log::verbose) << print_symbol(*i) << std::endl;
+      mCRL2log(log::debug, "absinthe") << print_symbol(*i) << std::endl;
     }
   }
 
@@ -523,7 +523,7 @@ struct absinthe_algorithm
 
     data::function_symbol operator()(const data::function_symbol& f) const
     {
-      //mCRL2log(log::verbose) << "lift_function_symbol_1_2 f = " << print_symbol(f) << std::endl;
+      //mCRL2log(log::debug, "absinthe") << "lift_function_symbol_1_2 f = " << print_symbol(f) << std::endl;
       std::string name = std::string(f.name());
       std::map<std::string, std::string>::const_iterator i = unprintable.find(name);
       if (i != unprintable.end())
@@ -565,7 +565,7 @@ struct absinthe_algorithm
   {
     data::function_symbol operator()(const data::function_symbol& f) const
     {
-      //mCRL2log(log::verbose) << "lift_function_symbol_2_3 f = " << print_symbol(f) << std::endl;
+      //mCRL2log(log::debug, "absinthe") << "lift_function_symbol_2_3 f = " << print_symbol(f) << std::endl;
       std::string name = "Lift" + boost::algorithm::trim_copy(std::string(f.name()));
       data::sort_expression s = f.sort();
       if (data::is_basic_sort(s))
@@ -608,7 +608,7 @@ struct absinthe_algorithm
 
     data::data_equation operator()(const data::function_symbol& f1, const data::function_symbol& f2) const
     {
-      //mCRL2log(log::verbose) << "lift_equation_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
+      //mCRL2log(log::debug, "absinthe") << "lift_equation_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
       data::variable_list variables;
       data::data_expression condition = data::sort_bool::true_();
       data::data_expression lhs;
@@ -684,7 +684,7 @@ struct absinthe_algorithm
 
     data::data_equation operator()(const data::function_symbol& f2, const data::function_symbol& f3) const
     {
-      //mCRL2log(log::verbose) << "lift_equation_2_3 f2 = " << print_symbol(f2) << " f3 = " << print_symbol(f3) << std::endl;
+      //mCRL2log(log::debug, "absinthe") << "lift_equation_2_3 f2 = " << print_symbol(f2) << " f3 = " << print_symbol(f3) << std::endl;
       data::variable_list variables;
       data::data_expression condition = data::sort_bool::true_();
       data::data_expression lhs;
@@ -803,8 +803,8 @@ struct absinthe_algorithm
         dataspec.add_mapping(f2);
 
         data::data_equation eq = lift_equation_1_2(sigmaS)(f1, f2);
-        mCRL2log(log::verbose) << "adding equation: " << eq << std::endl;
-        mCRL2log(log::verbose) << "adding equation: " << data::pp(eq) << std::endl;
+        mCRL2log(log::debug, "absinthe") << "adding equation: " << eq << std::endl;
+        mCRL2log(log::debug, "absinthe") << "adding equation: " << data::pp(eq) << std::endl;
         dataspec.add_equation(eq);
       }
     }
@@ -815,7 +815,7 @@ struct absinthe_algorithm
       data::function_symbol f2 = i->second;
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 
-      mCRL2log(log::verbose) << "adding mapping: " << core::pp(f3) << " " << core::pp(f3.sort()) << std::endl;
+      mCRL2log(log::debug, "absinthe") << "adding mapping: " << core::pp(f3) << " " << core::pp(f3.sort()) << std::endl;
       dataspec.add_mapping(f3);
 
       // update sigmaF
@@ -823,27 +823,32 @@ struct absinthe_algorithm
 
       // make an equation for the lifted function symbol f
       data::data_equation eq = lift_equation_2_3(sigmaS)(f2, f3);
-      mCRL2log(log::verbose) << "adding equation: " << core::pp(eq) << std::endl;
+      mCRL2log(log::debug, "absinthe") << "adding equation: " << core::pp(eq) << std::endl;
       dataspec.add_equation(eq);
     }
   }
 
   void print_fsvec(const data::function_symbol_vector& v, const std::string& msg) const
   {
-    mCRL2log(log::verbose) << "--- " << msg << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- " << msg << std::endl;
     for (data::function_symbol_vector::const_iterator i = v.begin(); i != v.end(); ++i)
     {
-      mCRL2log(log::verbose) << print_symbol(*i) << std::endl;
+      mCRL2log(log::debug, "absinthe") << print_symbol(*i) << std::endl;
     }
   }
 
   void print_fsmap(const function_symbol_substitution_map& v, const std::string& msg) const
   {
-    mCRL2log(log::verbose) << "--- " << msg << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- " << msg << std::endl;
     for (function_symbol_substitution_map::const_iterator i = v.begin(); i != v.end(); ++i)
     {
-      mCRL2log(log::verbose) << print_symbol(i->first) << "  -->  " << print_symbol(i->second) << std::endl;
+      mCRL2log(log::debug, "absinthe") << print_symbol(i->first) << "  -->  " << print_symbol(i->second) << std::endl;
     }
+  }
+
+  void enable_logging()
+  {
+    log::mcrl2_logger::set_reporting_level(log::debug, "absinthe");
   }
 
   void run(pbes<>& p, const std::string& abstraction_text, bool is_over_approximation)
@@ -878,30 +883,30 @@ struct absinthe_algorithm
     user_equations_text = q.second;
 
     // 0) split user_dataspec_text into user_sorts_text and user_equations_text
-    mCRL2log(log::verbose) << "--- user sorts ---\n" << user_sorts_text << std::endl;
-    mCRL2log(log::verbose) << "--- user equations ---\n" << user_equations_text << std::endl;
-    mCRL2log(log::verbose) << "--- function mapping ---\n" << function_symbol_mapping_text << std::endl;
-    mCRL2log(log::verbose) << "--- sort mapping ---\n" << sort_expression_mapping_text << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- user sorts ---\n" << user_sorts_text << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- user equations ---\n" << user_equations_text << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- function mapping ---\n" << function_symbol_mapping_text << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- sort mapping ---\n" << sort_expression_mapping_text << std::endl;
 
     // 1) create the data specification data_spec, which consists of user_sorts_text and p.data()
     data::data_specification data_spec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts_text);
-    mCRL2log(log::verbose) << "--- data specification 1) ---\n" << data::pp(data_spec) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- data specification 1) ---\n" << data::pp(data_spec) << std::endl;
 
     // 2) parse the right hand sides of the function symbol mapping, and add them to data_spec
     parse_right_hand_sides(function_symbol_mapping_text, data_spec);
-    mCRL2log(log::verbose) << "--- data specification 2) ---\n" << data::pp(data_spec) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- data specification 2) ---\n" << data::pp(data_spec) << std::endl;
 
     // 3) add user_equations_text to data_spec
     data_spec = data::parse_data_specification(data::pp(data_spec) + "\n" + user_equations_text);
-    mCRL2log(log::verbose) << "--- data specification 3) ---\n" << data::pp(data_spec) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- data specification 3) ---\n" << data::pp(data_spec) << std::endl;
 
     // sort expressions replacements (specified by the user)
     sort_expression_substitution_map sigmaS = parse_sort_expression_mapping(sort_expression_mapping_text, data_spec);
-    mCRL2log(log::verbose) << "\n--- sort expression mapping ---\n" << print_mapping(sigmaS) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "\n--- sort expression mapping ---\n" << print_mapping(sigmaS) << std::endl;
 
     // function symbol replacements (specified by the user)
     function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, data_spec);
-    mCRL2log(log::verbose) << "\n--- function symbol mapping ---\n" << print_mapping(sigmaF) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping ---\n" << print_mapping(sigmaF) << std::endl;
 
     // 4) add lifted sorts, mappings and equations to data_spec
     // before: the mapping sigmaF is f1 -> f2
@@ -910,18 +915,18 @@ struct absinthe_algorithm
     // after: equations for f3 have been added to data_spec
     // generate mapping f1 -> f2 for missing function symbols
     lift_data_specification(p, sigmaS, sigmaF, data_spec);
-    mCRL2log(log::verbose) << "--- data specification 4) ---\n" << data::pp(data_spec) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- data specification 4) ---\n" << data::pp(data_spec) << std::endl;
 
-    mCRL2log(log::verbose) << "\n--- function symbol mapping after lifting ---\n" << print_mapping(sigmaF) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping after lifting ---\n" << print_mapping(sigmaF) << std::endl;
 
-    mCRL2log(log::verbose) << "--- pbes before ---\n" << pbes_system::pp(p) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- pbes before ---\n" << pbes_system::pp(p) << std::endl;
 
     p.data() = data_spec;
 
     // then transform the data expressions and the propositional variable instantiations
     absinthe_data_expression_builder(sigmaS, sigmaF, is_over_approximation)(p);
 
-    mCRL2log(log::verbose) << "--- pbes after ---\n" << pbes_system::pp(p) << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- pbes after ---\n" << pbes_system::pp(p) << std::endl;
   }
 };
 

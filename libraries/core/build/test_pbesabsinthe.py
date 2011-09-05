@@ -29,7 +29,7 @@ def main():
         use_quantifiers = True
 
         for i in range(10000):
-            filename = 'pbes_abstract'
+            filename = 'pbesabsinthe'
             p = make_pbes(equation_count, atom_count, propvar_count, use_quantifiers)
             if i % 2 == 0:
                 strategy = 'over'

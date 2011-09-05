@@ -102,6 +102,7 @@ namespace detail
 inline
 void check_pp(const std::string& s1, const std::string& s2, const std::string& s3)
 {
+#ifndef MCRL2_DISABLE_PRINT_CHECKS
   if (s1 != s2)
   {
     std::clog << "--- WARNING: difference detected between old and new pretty printer ---\n";
@@ -112,6 +113,7 @@ void check_pp(const std::string& s1, const std::string& s2, const std::string& s
     throw mcrl2::runtime_error("pretty print difference detected");
 #endif
   }
+#endif
 }
 
 #define MCRL2_CHECK_PP(s1, s2, s3) core::detail::check_pp(s1, s2, s3);
