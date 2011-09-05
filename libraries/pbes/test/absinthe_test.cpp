@@ -208,7 +208,7 @@ int test_main(int argc, char* argv[])
   //mcrl2_logger::set_reporting_level(debug);
 
   test_separate_sort_declarations();
-  test1();
+  //test1();
   test2();
   //BOOST_CHECK(false);
 

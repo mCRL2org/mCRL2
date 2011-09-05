@@ -136,15 +136,24 @@ namespace detail {
     }
   }
 
-  // Separates the sort declarations from the map/cons/var/eqn declarations
-  // Returns a pair containing consisiting of the combined sort spec and the combined map/eqn/var/cons declarations
-  inline
-  std::pair<std::string, std::string> separate_sort_declarations(const std::string& text)
+  // Separates all sections with a keyword from the other keyword sections
+  // Returns a pair containing consisiting of the keyword section and the other keyword sections
+  template <typename StringContainer>
+  std::pair<std::string, std::string> separate_keyword_section(const std::string& text, const std::string& keyword, const StringContainer& other_keywords)
   {
-    std::ostringstream out1; // will contain the sort declarations
-    std::ostringstream out2; // will contain the map/cons/var/eqn declarations
+    std::ostringstream out1; // will contain the keyword sections
+    std::ostringstream out2; // will contain the other keyword sections
 
-    std::vector<std::string> specs = utilities::regex_split(text, "\\bsort\\b");
+    std::string regex_keyword = "\\b" + keyword + "\\b";
+    // create a regex that looks like this: "(\\beqn\\b)|(\\bcons\\b)|(\\bmap\\b)|(\\bvar\\b)"
+    std::vector<std::string> v = other_keywords;
+    for (typename StringContainer::iterator i = v.begin(); i != v.end(); ++i)
+    {
+      *i = "(\\b" + *i + "\\b)";
+    }
+    std::string regex_other_keywords = boost::algorithm::join(v, "|");
+
+    std::vector<std::string> specs = utilities::regex_split(text, regex_keyword);
     if (text.find("sort") != 0)
     {
       out2 << specs.front() << std::endl;
@@ -153,11 +162,25 @@ namespace detail {
     for (std::vector<std::string>::iterator i = specs.begin(); i != specs.end(); ++i)
     {
       // strip trailing map/cons/var/eqn declarations
-      std::vector<std::string> v = utilities::regex_split(*i, "(\\beqn\\b)|(\\bcons\\b)|(\\bmap\\b)|(\\bvar\\b)");
+      std::vector<std::string> v = utilities::regex_split(*i, regex_other_keywords);
       out1 << "  " << v.front();
       out2 << i->substr(v.front().size());
     }
-    return std::make_pair("sort\n" + out1.str() + "\n", out2.str() + "\n");
+    return std::make_pair(keyword + "\n" + out1.str() + "\n", out2.str() + "\n");
+  }
+
+  // Separates the sort declarations from the map/cons/var/eqn declarations
+  // Returns a pair containing consisiting of the combined sort spec and the combined map/eqn/var/cons declarations
+  inline
+  std::pair<std::string, std::string> separate_sort_declarations(const std::string& text)
+  {
+    std::string keyword = "sort";
+    std::vector<std::string> other_keywords;
+    other_keywords.push_back("var");
+    other_keywords.push_back("eqn");
+    other_keywords.push_back("map");
+    other_keywords.push_back("cons");
+    return separate_keyword_section(text, keyword, other_keywords);
   }
 
 } // namespace detail
