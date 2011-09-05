@@ -188,7 +188,7 @@ include(FindOpenGL)
 message(STATUS "OpenGL: ${OPENGL_FOUND}")
 
 if(NOT OPENGL_FOUND)
-  message( FATAL_ERROR "Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
+  message( FATAL_ERROR "OpenGL not found. Set MCRL2_ENABLE_GUI_TOOLS to FALSE to build without GUI-tools")
 else( OPENGL_FOUND )
   if ( APPLE )
     include_directories( ${OPENGL_INCLUDE_DIR} )
