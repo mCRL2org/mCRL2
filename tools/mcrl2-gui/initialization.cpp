@@ -46,7 +46,9 @@ Initialization::Initialization()
   m_extention_tool_mapping.insert(pair<string, string> ("aut", "lts"));
   m_extention_tool_mapping.insert(pair<string, string> ("dot", "lts"));
   m_extention_tool_mapping.insert(pair<string, string> ("svc", "lts"));
+#ifdef USE_BCG
   m_extention_tool_mapping.insert(pair<string, string> ("bcg", "lts"));
+#endif
   m_extention_tool_mapping.insert(pair<string, string> ("pbes", "pbes"));
   m_extention_tool_mapping.insert(pair<string, string> ("txt", "txt"));
   m_extention_tool_mapping.insert(pair<string, string> ("chi", "chi"));
