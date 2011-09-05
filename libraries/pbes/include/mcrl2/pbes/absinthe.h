@@ -14,9 +14,11 @@
 
 #define MCRL2_DEBUG_DATA_CONSTRUCTION
 
+#include <algorithm>
 #include <sstream>
 #include <utility>
 
+#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 #include "mcrl2/atermpp/make_list.h"
@@ -138,16 +140,17 @@ namespace detail {
 
   // Separates all sections with a keyword from the other keyword sections
   // Returns a pair containing consisiting of the keyword section and the other keyword sections
-  template <typename StringContainer>
-  std::pair<std::string, std::string> separate_keyword_section(const std::string& text, const std::string& keyword, const StringContainer& other_keywords)
+  inline
+  std::pair<std::string, std::string> separate_keyword_section(const std::string& text, const std::string& keyword, const std::vector<std::string>& all_keywords)
   {
     std::ostringstream out1; // will contain the keyword sections
     std::ostringstream out2; // will contain the other keyword sections
 
     std::string regex_keyword = "\\b" + keyword + "\\b";
     // create a regex that looks like this: "(\\beqn\\b)|(\\bcons\\b)|(\\bmap\\b)|(\\bvar\\b)"
-    std::vector<std::string> v = other_keywords;
-    for (typename StringContainer::iterator i = v.begin(); i != v.end(); ++i)
+    std::vector<std::string> v = all_keywords;
+    v.erase(std::remove(v.begin(), v.end(), keyword), v.end()); // erase keyword from v
+    for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
     {
       *i = "(\\b" + *i + "\\b)";
     }
@@ -175,12 +178,13 @@ namespace detail {
   std::pair<std::string, std::string> separate_sort_declarations(const std::string& text)
   {
     std::string keyword = "sort";
-    std::vector<std::string> other_keywords;
-    other_keywords.push_back("var");
-    other_keywords.push_back("eqn");
-    other_keywords.push_back("map");
-    other_keywords.push_back("cons");
-    return separate_keyword_section(text, keyword, other_keywords);
+    std::vector<std::string> all_keywords;
+    all_keywords.push_back("sort");
+    all_keywords.push_back("var");
+    all_keywords.push_back("eqn");
+    all_keywords.push_back("map");
+    all_keywords.push_back("cons");
+    return separate_keyword_section(text, keyword, all_keywords);
   }
 
 } // namespace detail
@@ -832,25 +836,53 @@ struct absinthe_algorithm
     }
   }
 
-  void run(pbes<>& p, const std::string& sort_expression_mapping_text, const std::string& function_symbol_mapping_text, std::string user_dataspec_text, bool is_over_approximation)
+  void run(pbes<>& p, const std::string& abstraction_text, bool is_over_approximation)
   {
-    // 0) split user_dataspec_text into user_sorts and user_equations
-    std::pair<std::string, std::string> q = pbes_system::detail::separate_sort_declarations(user_dataspec_text);
-    std::string user_sorts = q.first;
-    std::string user_equations = q.second;
-    std::clog << "--- user sorts ---\n" << user_sorts << std::endl;
-    std::clog << "--- user equations ---\n" << user_equations << std::endl;
+    // split the string abstraction_text into four different parts
+    std::string sort_expression_mapping_text;
+    std::string function_symbol_mapping_text;
+    std::string user_sorts_text;
+    std::string user_equations_text;
 
-    // 1) create the data specification data_spec, which consists of user_sorts and p.data()
-    data::data_specification data_spec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts);
+    std::string text = abstraction_text;
+    std::vector<std::string> all_keywords;
+    all_keywords.push_back("sort");
+    all_keywords.push_back("var");
+    all_keywords.push_back("eqn");
+    all_keywords.push_back("map");
+    all_keywords.push_back("cons");
+    all_keywords.push_back("absfunc");
+    all_keywords.push_back("abssort");
+    std::pair<std::string, std::string> q;
+
+    q = pbes_system::detail::separate_keyword_section(text, "sort", all_keywords);
+    user_sorts_text = q.first;
+    text = q.second;
+
+    q = pbes_system::detail::separate_keyword_section(text, "abssort", all_keywords);
+    sort_expression_mapping_text = q.first;
+    text = q.second;
+
+    q = pbes_system::detail::separate_keyword_section(text, "absfunc", all_keywords);
+    function_symbol_mapping_text = q.first;
+    user_equations_text = q.second;
+
+    // 0) split user_dataspec_text into user_sorts_text and user_equations_text
+    std::clog << "--- user sorts ---\n" << user_sorts_text << std::endl;
+    std::clog << "--- user equations ---\n" << user_equations_text << std::endl;
+    std::clog << "--- function mapping ---\n" << function_symbol_mapping_text << std::endl;
+    std::clog << "--- sort mapping ---\n" << sort_expression_mapping_text << std::endl;
+
+    // 1) create the data specification data_spec, which consists of user_sorts_text and p.data()
+    data::data_specification data_spec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts_text);
     std::clog << "--- data specification 1) ---\n" << data::pp(data_spec) << std::endl;
 
     // 2) parse the right hand sides of the function symbol mapping, and add them to data_spec
     parse_right_hand_sides(function_symbol_mapping_text, data_spec);
     std::clog << "--- data specification 2) ---\n" << data::pp(data_spec) << std::endl;
 
-    // 3) add user_equations to data_spec
-    data_spec = data::parse_data_specification(data::pp(data_spec) + "\n" + user_equations);
+    // 3) add user_equations_text to data_spec
+    data_spec = data::parse_data_specification(data::pp(data_spec) + "\n" + user_equations_text);
     std::clog << "--- data specification 3) ---\n" << data::pp(data_spec) << std::endl;
 
     // sort expressions replacements (specified by the user)

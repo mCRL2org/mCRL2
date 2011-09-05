@@ -33,7 +33,6 @@ class pbes_absint_tool: public input_output_tool
   protected:
     typedef input_output_tool super;
 
-    std::string m_dataspec_file;
     std::string m_abstraction_file;
     bool m_print_used_function_symbols;
 
@@ -67,11 +66,8 @@ class pbes_absint_tool: public input_output_tool
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-
-      set_approximation_strategy(parser.option_argument("approximation"));
-
-      m_dataspec_file = parser.option_argument("data");
-      m_abstraction_file = parser.option_argument("mapping");
+      set_approximation_strategy(parser.option_argument("strategy"));
+      m_abstraction_file = parser.option_argument("abstraction");
       m_print_used_function_symbols = parser.options.count("used-function-symbols") > 0;
     }
 
@@ -79,21 +75,17 @@ class pbes_absint_tool: public input_output_tool
     {
       super::add_options(desc);
 
-      desc.add_option("data", make_mandatory_argument("FILE"),
-                      "use the data specification in FILE. "
-                      "FILE must be a .mcrl2 file which does not contain an init clause. ", 'D');
-
-      desc.add_option("mapping",
+      desc.add_option("abstraction",
                        make_mandatory_argument("FILE"),
-                       "use the sort and function symbol mappings in FILE. ",
-                       'm');
+                       "use the abstraction specification in FILE. ",
+                       'a');
 
-      desc.add_option("approximation",
+      desc.add_option("strategy",
                        make_mandatory_argument("NAME"),
                        "use the approximation strategy NAME:\n"
                        "  'over'  for an over-approximation,\n"
                        "  'under' for an under-approximation\n",
-                       'a');
+                       's');
       desc.add_option("used-function-symbols", "print used function symbols", 'u');
     }
 
@@ -114,7 +106,7 @@ class pbes_absint_tool: public input_output_tool
       mCRL2log(verbose) << "pbesabsint parameters:    " << std::endl;
       mCRL2log(verbose) << "  input file:             " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:            " << m_output_filename << std::endl;
-      mCRL2log(verbose) << "  user mapping file:      " << m_dataspec_file << std::endl;
+      mCRL2log(verbose) << "  abstraction file:       " << m_abstraction_file << std::endl;
       mCRL2log(verbose) << "  approximation strategy: " << (m_strategy == as_over ? "over" : "under")  << std::endl;
 
       // load the pbes
@@ -126,18 +118,11 @@ class pbes_absint_tool: public input_output_tool
         pbes_system::detail::print_used_function_symbols(p);
       }
 
-      std::string abstraction_mapping_text = utilities::read_text(m_abstraction_file);
-      std::vector<std::string> paragraphs = utilities::split_paragraphs(abstraction_mapping_text);
-      if (paragraphs.size() != 2)
-      {
-        throw mcrl2::runtime_error("The number of paragraphs in the file " + m_abstraction_file + " should be two!");
-      }
-      std::string user_dataspec_text = utilities::read_text(m_dataspec_file);
+      std::string abstraction_text = utilities::read_text(m_abstraction_file);
       bool over_approximation = m_strategy == as_over;
 
       absinthe_algorithm algorithm;
-      algorithm.run(p, paragraphs[0], paragraphs[1], user_dataspec_text, over_approximation);
-
+      algorithm.run(p, abstraction_text, over_approximation);
 
       // save the result
       p.save(m_output_filename);

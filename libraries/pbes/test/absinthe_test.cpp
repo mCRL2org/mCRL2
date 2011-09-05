@@ -62,99 +62,17 @@ void test_separate_sort_declarations()
   std::cout << result.first << "-----------------------------\n" << result.second << std::endl;
 }
 
-void test_absinthe(const std::string& pbes_text, const std::string& sort_map_text, const std::string& function_symbol_map_text, const std::string& dataspec_text, bool is_over_approximation)
+void test_absinthe(const std::string& pbes_text, const std::string& abstraction_text, bool is_over_approximation)
 {
   pbes<> p = txt2pbes(pbes_text);
-  pbes_system::detail::print_used_function_symbols(p);
   absinthe_algorithm algorithm;
-  algorithm.run(p, sort_map_text, function_symbol_map_text, dataspec_text, is_over_approximation);
+  algorithm.run(p, abstraction_text, is_over_approximation);
   core::garbage_collect();
 }
 
 void test1()
 {
-  std::string SORT_EXPRESSION_MAPPING =
-    "D       := AbsD                                    \n"
-    "Nat     := AbsNat                                  \n"
-    "List(D) := AbsList                                 \n"
-    ;
-
-  std::string FUNCTION_SYMBOL_MAPPING =
-    "tail: List(D) -> List(D)   := Abstail    : AbsList -> Set(AbsList)        \n"
-    "|>: D # List(D) -> List(D) := Absconc    : AbsD # AbsList -> Set(AbsList) \n"
-    "#: List(D) -> Nat          := Abslen     : AbsList -> Set(AbsNat)         \n"
-    ">=: Nat # Nat -> Bool      := Absge      : AbsNat # AbsNat -> Set(Bool)   \n"
-    "capacity: Pos              := Abscapacity: AbsNat                         \n"
-    "[]: List(D)                := empty      : AbsList                        \n"
-    "@cNat: Pos -> Nat          := AbscNat    : Pos -> Set(AbsNat)             \n"
-    "==: D # D -> Bool          := Abseq      : AbsD # AbsD -> Set(Bool)       \n"
-    ;
-
-  std::string PBESSPEC =
-    "sort D;                                            \n"
-    "                                                   \n"
-    "map  d: D;                                         \n"
-    "     capacity: Pos;                                \n"
-    "                                                   \n"
-    "eqn  capacity >= 2  =  true;                       \n"
-    "                                                   \n"
-    "pbes nu X(l: List(D)) =                            \n"
-    "  X(tail(l))                                       \n"
-    "&&                                                 \n"
-    "  (forall e: D. val(#l >= capacity) || X(e |> l)); \n"
-    "                                                   \n"
-    "init X([]);                                        \n"
-    ;
-
-  std::string DATASPEC =
-    "sort                                        \n"
-    "  AbsD    = struct a;                       \n"
-    "  AbsList = struct empty | one | more;      \n"
-    "  AbsNat  = struct nul | een | meer;        \n"
-    "                                            \n"
-    "eqn                                         \n"
-    "  Abstail(empty) = {empty};                 \n"
-    "  Abstail(one)   = {empty};                 \n"
-    "  Abstail(more)  = {one,more};              \n"
-    "                                            \n"
-    "  Absconc(a,empty) = {one};                 \n"
-    "  Absconc(a,one)   = {more};                \n"
-    "  Absconc(a,more)  = {more};                \n"
-    "                                            \n"
-    "  Abslen(empty)    = {nul};                 \n"
-    "  Abslen(one)      = {een};                 \n"
-    "  Abslen(more)     = {meer};                \n"
-    "                                            \n"
-    "  Absge(nul,nul)   = {true};                \n"
-    "  Absge(nul,een)   = {false};               \n"
-    "  Absge(nul,meer)  = {false};               \n"
-    "  Absge(een,nul)   = {true};                \n"
-    "  Absge(een,een)   = {true};                \n"
-    "  Absge(een,meer)  = {false};               \n"
-    "  Absge(meer,nul)  = {true};                \n"
-    "  Absge(meer,een)  = {true};                \n"
-    "  Absge(meer,meer) = {false,true};          \n"
-    "                                            \n"
-    "  Abscapacity      = meer;                  \n"
-    ;
-
-  test_absinthe(PBESSPEC, SORT_EXPRESSION_MAPPING, FUNCTION_SYMBOL_MAPPING, DATASPEC, true);
-}
-
-void test2()
-{
-  std::string SORT_EXPRESSION_MAPPING =
-  "D := AbsD         \n"
-  "Frame := AbsFrame \n"
-  ;
-
-  std::string FUNCTION_SYMBOL_MAPPING =
-  "getack : Frame -> Ack  := Absgetack : AbsFrame -> Set(Ack)     \n"
-  "d0 : D                 := Absd0     : AbsD                     \n"
-  "==: D # D -> Bool      := Abseq     : AbsD # AbsD -> Set(Bool) \n"
-  ;
-
-  std::string PBESSPEC =
+  std::string PBES_TEXT =
   "sort D;                                                                                   \n"
   "     Ack = struct ok | nok | error;                                                       \n"
   "     Frame = struct f(data: D, acknowledgement: Ack);                                     \n"
@@ -185,31 +103,37 @@ void test2()
   "init X(e2, d0);                                                                           \n"
   ;
 
-  std::string DATASPEC =
-  "sort                                                   \n"
-  " AbsD;                                                 \n"
-  " AbsFrame = struct f(data:AbsD, acknowledgement: Ack); \n"
-  "                                                       \n"
-  "var                                                    \n"
-  "  d : AbsD;                                            \n"
-  "  a : Ack;                                             \n"
-  "                                                       \n"
-  "eqn                                                    \n"
-  "  Absgetack (f(d,a)) = {acknowledgement(f(d,a))};      \n"
+  std::string ABSTRACTION_TEXT =
+  "sort                                                                \n"
+  "  AbsD;                                                             \n"
+  "  AbsFrame = struct f(data:AbsD, acknowledgement: Ack);             \n"
+  "                                                                    \n"
+  "var                                                                 \n"
+  "  d : AbsD;                                                         \n"
+  "  a : Ack;                                                          \n"
+  "                                                                    \n"
+  "eqn                                                                 \n"
+  "  Absgetack (f(d,a)) = {acknowledgement(f(d,a))};                   \n"
+  "                                                                    \n"
+  "abssort                                                             \n"
+  "  D := AbsD                                                         \n"
+  "  Frame := AbsFrame                                                 \n"
+  "                                                                    \n"
+  "absfunc                                                             \n"
+  "  getack : Frame -> Ack  := Absgetack : AbsFrame -> Set(Ack)        \n"
+  "  d0 : D                 := Absd0     : AbsD                        \n"
+  "  ==: D # D -> Bool      := Abseq     : AbsD # AbsD -> Set(Bool)    \n"
   ;
 
-  test_absinthe(PBESSPEC, SORT_EXPRESSION_MAPPING, FUNCTION_SYMBOL_MAPPING, DATASPEC, true);
+  test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
 }
 
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  //mcrl2_logger::set_reporting_level(debug);
-
   test_separate_sort_declarations();
-  //test1();
-  test2();
+  test1();
   //BOOST_CHECK(false);
 
   return 0;
