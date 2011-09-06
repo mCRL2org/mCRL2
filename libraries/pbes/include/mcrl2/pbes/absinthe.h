@@ -305,19 +305,18 @@ struct absinthe_algorithm
     pbes_expression operator()(const data::data_expression& x)
     {
       data::data_expression x1 = lift(x);
-      data::variable var("y", apply_sigmaS(sigmaS)(x.sort()));
       data::variable_list variables = atermpp::make_list(var);
       if (m_is_over_approximation)
       {
         // pbes_expression body = and_(data::detail::create_set_in(var, x1), var);
         // return make_exists(variables, body);
-        return data::sort_bool::not_(data::detail::create_set_in(data::sort_bool::false_(), x1));
+        return data::detail::create_set_in(data::sort_bool::true_(), x1);
       }
       else
       {
         // pbes_expression body = imp(data::detail::create_set_in(var, x1), var);
         // return make_forall(variables, body);
-        return data::detail::create_set_in(data::sort_bool::true_(), x1);
+        return data::sort_bool::not_(data::detail::create_set_in(data::sort_bool::false_(), x1));
       }
     }
 
