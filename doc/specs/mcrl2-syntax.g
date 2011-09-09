@@ -194,9 +194,10 @@ ActDecl: IdList ( ':' Domain )? ';' ;
 
 ActSpec: 'act' ActDecl+ ;
 
-MultAct: 'tau'
-       | ActionList
-       ;
+MultAct
+  : 'tau'
+  | ActionList
+  ;
 
 ActionList: Action ( '|' Action )* ;
 
