@@ -38,7 +38,7 @@ SortSpec: 'sort' SortDecl+ ;
 
 SortDecl
   : IdList ';'
-  | IdList '=' SortExpr ';'
+  | Id '=' SortExpr ';'
   ;
 
 ConstrDecl: Id ( '(' ProjDeclList ')' )? ( '?' Id )? ;
