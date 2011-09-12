@@ -215,7 +215,9 @@ DataSpec: ( SortSpec | ConsSpec | MapSpec | EqnSpec )+ ;
 
 //--- mCRL2 specification
 
-mCRL2Spec: ( SortSpec | ConsSpec | MapSpec | EqnSpec | GlobVarSpec | ActSpec | ProcSpec | Init )+ ;
+mCRL2Spec: mCRL2SpecElt* Init mCRL2SpecElt* ;
+
+mCRL2SpecElt: ( SortSpec | ConsSpec | MapSpec | EqnSpec | GlobVarSpec | ActSpec | ProcSpec ) ;
 
 //--- BES
 
@@ -319,15 +321,13 @@ StateFrm
   | '[' RegFrm ']'
   | '<' RegFrm '>'
   | FixedPointOperator StateVarDecl '.' StateFrm                 $unary_left 1
-  | StateVarInst
+  | Id ( '(' DataExprList ')' )?
   | 'delay' ( '@' DataExpr )?
   | 'yaled' ( '@' DataExpr )?
   | '(' StateFrm ')'
   ;
 
 StateVarDecl: Id ( '(' IdsDeclList ')' )? ;
-
-StateVarInst: Id ( '(' DataExprList ')' )? ;
 
 //--- Action Rename Specifications
 
