@@ -217,7 +217,15 @@ DataSpec: ( SortSpec | ConsSpec | MapSpec | EqnSpec )+ ;
 
 mCRL2Spec: mCRL2SpecElt* Init mCRL2SpecElt* ;
 
-mCRL2SpecElt: ( SortSpec | ConsSpec | MapSpec | EqnSpec | GlobVarSpec | ActSpec | ProcSpec ) ;
+mCRL2SpecElt
+  : SortSpec
+  | ConsSpec
+  | MapSpec
+  | EqnSpec
+  | GlobVarSpec
+  | ActSpec
+  | ProcSpec
+  ;
 
 //--- BES
 

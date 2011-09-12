@@ -4,9 +4,6 @@
 
 import re
 import string
-from optparse import OptionParser
-from mcrl2_parser import *
-from mcrl2_utility import *
 from path import *
 
 #---------------------------------------------------------------#
@@ -35,6 +32,14 @@ def parse_alternative(text):
 
     return (text, comment, annotation)
 
+def split_lines(text):
+    result = []
+    for line in text.splitlines():
+        line = line.strip()
+        if len(line) > 0:
+            result.append(line)
+    return result
+
 #---------------------------------------------------------------#
 #                          parse_production
 #---------------------------------------------------------------#
@@ -43,10 +48,9 @@ def parse_alternative(text):
 def parse_production(text):
     # remove trailing ';'
     text = re.sub(';\s*$', '', text)
-
-    lines = text.splitlines()
+    lines = split_lines(text)
     if len(lines) > 1:
-        lhs = lines[0].strip()
+        lhs = lines[0]
         rhs = map(parse_alternative, lines[1:])
     else:
         words = text.split(':', 1)
@@ -75,41 +79,3 @@ def parse_mcrl2_syntax(filename):
         productions = paragraphs[1:]
         result.append((title, map(parse_production, productions)))
     return result
-
-#---------------------------------------------------------------#
-#                          print_alternative
-#---------------------------------------------------------------#
-def print_alternative(text, comment, annotation):
-    print '  alternative="%s" comment="%s" annotation="%s"' % (text, comment, annotation)
-
-#---------------------------------------------------------------#
-#                          print_production
-#---------------------------------------------------------------#
-def print_production(lhs, rhs):
-    print 'production %s' % lhs
-    for (text, comment, annotation) in rhs:
-        print_alternative(text, comment, annotation)
-
-#---------------------------------------------------------------#
-#                          print_section
-#---------------------------------------------------------------#
-def print_section(title, productions):
-    print 'section = %s' % title
-    for (lhs, rhs) in productions:
-        print_production(lhs, rhs)
-
-#---------------------------------------------------------------#
-#                          main
-#---------------------------------------------------------------#
-def main():
-    usage = "usage: %prog [options]"
-    parser = OptionParser(usage)
-    (options, args) = parser.parse_args()
-
-    filename = '../../../doc/specs/mcrl2-syntax.g'
-    sections = parse_mcrl2_syntax(filename)
-    for (title, productions) in sections:
-        print_section(title, productions)
-
-if __name__ == "__main__":
-    main()
