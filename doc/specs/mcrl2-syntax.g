@@ -51,8 +51,6 @@ ProjDeclList: ProjDecl ( ',' ProjDecl )* ;
 
 //--- Constructors and mappings
 
-IdDecl: Id ':' SortExpr ;
-
 IdsDecl: IdList ':' SortExpr ;
 
 IdsDeclList: IdsDecl ( ',' IdsDecl )* ;
@@ -63,15 +61,21 @@ MapSpec: 'map' ( IdsDecl ';' )+ ;
 
 //--- Equations
 
-GlobVarSpec: 'glob' ( IdsDeclList ';' )+ ;
+GlobVarSpec: 'glob' ( VarsDeclList ';' )+ ;
 
-VarSpec: 'var' ( IdsDeclList ';' )+ ;
+VarSpec: 'var' ( VarsDeclList ';' )+ ;
 
 EqnSpec: VarSpec? 'eqn' EqnDecl+ ;
 
 EqnDecl: (DataExpr '->')? DataExpr '=' DataExpr ';' ;
 
 //--- Data expressions
+
+VarDecl: Id ':' SortExpr ;
+
+VarsDecl: IdList ':' SortExpr ;
+
+VarsDeclList: VarsDecl ( ',' VarsDecl )* ;
 
 DataExpr
   : Id
@@ -82,7 +86,7 @@ DataExpr
   | '{}'
   | '[' DataExprList ']'
   | '{' BagEnumEltList '}'
-  | '{' IdDecl '|' DataExpr '}'
+  | '{' VarDecl '|' DataExpr '}'
   | '{' DataExprList '}'
   | '(' DataExpr ')'
   | DataExpr '[' DataExpr '->' DataExpr ']'
@@ -90,9 +94,9 @@ DataExpr
   | '!' DataExpr                             $unary_right 11
   | '-' DataExpr                             $unary_right 11
   | '#' DataExpr                             $unary_right 11
-  | 'forall' IdsDeclList '.' DataExpr        $unary_left 0
-  | 'exists' IdsDeclList '.' DataExpr        $unary_left 0
-  | 'lambda' IdsDeclList '.' DataExpr        $unary_left 0
+  | 'forall' VarsDeclList '.' DataExpr       $unary_left 0
+  | 'exists' VarsDeclList '.' DataExpr       $unary_left 0
+  | 'lambda' VarsDeclList '.' DataExpr       $unary_left 0
   | DataExpr '=>'  DataExpr                  $binary_right 1
   | DataExpr '&&'  DataExpr                  $binary_right 2
   | DataExpr '||'  DataExpr                  $binary_right 2
@@ -180,11 +184,10 @@ ProcExpr
   | ProcExpr '@' DataExprUnit                   $binary_left 7
   | ProcExpr '|'   ProcExpr                     $binary_right 8
   | DataExprUnit ProcExprThenElse               $unary_left 11
-  | 'sum' IdsDeclList '.' ProcExpr              $unary_left 2
+  | 'sum' VarsDeclList '.' ProcExpr             $unary_left 2
   ;
 
-ProcExprThenElse
-  : '->' ProcExpr ('<>' ProcExpr)? $unary_op_left 11;
+ProcExprThenElse: '->' ProcExpr ('<>' ProcExpr)? $unary_op_left 11;
 
 //--- Actions
 
@@ -203,7 +206,7 @@ ActionList: Action ( '|' Action )* ;
 
 //--- Process and initial state declaration
 
-ProcDecl: Id ( '(' IdsDeclList ')' )? '=' ProcExpr ';' ;
+ProcDecl: Id ( '(' VarsDeclList ')' )? '=' ProcExpr ';' ;
 
 ProcSpec: 'proc' ProcDecl+ ;
 
@@ -263,7 +266,7 @@ FixedPointOperator
   | 'nu'
   ;
 
-PropVarDecl: Id ( '(' IdsDeclList ')' )? ;
+PropVarDecl: Id ( '(' VarsDeclList ')' )? ;
 
 PropVarInst: Id ( '(' DataExprList ')' )? ;
 
@@ -275,8 +278,8 @@ PbesExpr
   : DataValExpr
   | 'true'
   | 'false'
-  | 'forall' IdsDeclList '.' PbesExpr                            $unary_left 0
-  | 'exists' IdsDeclList '.' PbesExpr                            $unary_left 0
+  | 'forall' VarsDeclList '.' PbesExpr                           $unary_left 0
+  | 'exists' VarsDeclList '.' PbesExpr                           $unary_left 0
   | '!' PbesExpr                                                 $unary_left 4
   | PbesExpr '=>' PbesExpr                                       $binary_right 2
   | PbesExpr '&&' PbesExpr                                       $binary_right 3
@@ -296,8 +299,8 @@ ActFrm
   | ActFrm '=>' ActFrm                                           $binary_right 2
   | ActFrm '&&' ActFrm                                           $binary_right 3
   | ActFrm '||' ActFrm                                           $binary_right 3
-  | 'forall' IdsDeclList '.' ActFrm                              $unary_left 0
-  | 'exists' IdsDeclList '.' ActFrm                              $unary_left 0
+  | 'forall' VarsDeclList '.' ActFrm                             $unary_left 0
+  | 'exists' VarsDeclList '.' ActFrm                             $unary_left 0
   | ActFrm '@' DataExpr                                          $unary_left 4
   | '(' ActFrm ')'
   ;
@@ -324,8 +327,8 @@ StateFrm
   | StateFrm '=>' StateFrm                                       $binary_op_right 3
   | StateFrm '&&' StateFrm                                       $binary_op_right 4
   | StateFrm '||' StateFrm                                       $binary_op_right 4
-  | 'forall' IdsDeclList '.' StateFrm                            $unary_left 2
-  | 'exists' IdsDeclList '.' StateFrm                            $unary_left 2
+  | 'forall' VarsDeclList '.' StateFrm                           $unary_left 2
+  | 'exists' VarsDeclList '.' StateFrm                           $unary_left 2
   | '[' RegFrm ']'
   | '<' RegFrm '>'
   | FixedPointOperator StateVarDecl '.' StateFrm                 $unary_left 1
@@ -335,7 +338,7 @@ StateFrm
   | '(' StateFrm ')'
   ;
 
-StateVarDecl: Id ( '(' IdsDeclList ')' )? ;
+StateVarDecl: Id ( '(' VarsDeclList ')' )? ;
 
 //--- Action Rename Specifications
 
