@@ -24,6 +24,10 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "parser.h"
 
+#ifdef MCRL2_PARSER_ACTIONS
+#include "data_actions.h"
+#endif
+
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
@@ -177,10 +181,20 @@ class mcrl2parse_tool : public input_tool
       try
       {
         dparser::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+
+#ifdef MCRL2_PARSER_ACTIONS
+        if (file_type == dataexpr_e)
+        {
+          data::data_actions actions(p.symbol_table());
+          data::data_expression d = actions.parse_DataExpr(node);
+        }
+#endif
+
         std::cout << "Parsing successful." << std::endl;
         if (print_tree)
         {
           p.print_tree(node);
+          //p.print_symbol_table();
         }
       }
       catch (std::exception& e)

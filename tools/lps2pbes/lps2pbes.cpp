@@ -13,7 +13,7 @@
 
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/modal_formula/mucalculus.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/lps2pbes.h"

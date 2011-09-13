@@ -68,6 +68,7 @@ struct parse_node
     return d_get_number_of_children(node);
   }
 
+  // 0 <= i < child_count()
   parse_node child(int i) const
   {
     return parse_node(d_get_child(node, i));
@@ -89,6 +90,7 @@ struct parse_node
   }
 };
 
+/// \brief Wrapper for D_ParserTables
 struct parser_table
 {
   D_ParserTables& m_table;
@@ -146,7 +148,7 @@ struct parser_table
     std::clog << "--------------------" << std::endl;
     for (unsigned int i = 0; i < symbol_count(); i++)
     {
-      std::clog << "symbol " << symbol_name(i) << std::endl;
+      std::clog << std::setw(3) << i << " " << symbol_name(i) << std::endl;
     }
     std::clog << "--------------------" << std::endl;
   }
@@ -170,6 +172,11 @@ struct parser
   ~parser()
   {
     free_D_Parser(m_parser);
+  }
+
+  const parser_table& symbol_table() const
+  {
+    return m_table;
   }
 
   unsigned int start_symbol_index(const std::string& name) const

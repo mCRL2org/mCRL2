@@ -31,7 +31,7 @@
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/monotonicity.h"
-#include "mcrl2/modal_formula/mucalculus.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/state_formula_rename.h"
 #include "mcrl2/modal_formula/preprocess_state_formula.h"
 #include "mcrl2/modal_formula/detail/state_variable_negator.h"
