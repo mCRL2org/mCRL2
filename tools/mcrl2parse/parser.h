@@ -227,7 +227,7 @@ struct parser
       std::string symbol = m_table.symbol_name(node.symbol());
       std::string prefix = indent(2 * level);
       std::cout << prefix << "--- " << symbol << " \"" << truncate(node.string()) << "\"" << std::endl;
-      for (unsigned int i = 0; i <= node.child_count(); i++)
+      for (int i = 0; i <= node.child_count(); i++)
       {
         print_tree(node.child(i), level + 1);
       }

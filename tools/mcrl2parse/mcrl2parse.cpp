@@ -25,7 +25,7 @@
 #include "parser.h"
 
 #ifdef MCRL2_PARSER_ACTIONS
-#include "data_actions.h"
+#include "parser_actions.h"
 #endif
 
 using namespace mcrl2;
@@ -42,16 +42,17 @@ class mcrl2parse_tool : public input_tool
 
   protected:
     typedef enum {
-      mcrl2spec_e,
-      besspec_e,
-      pbesspec_e,
-      dataspec_e,
-      besexpr_e,
-      dataexpr_e,
-      pbesexpr_e,
-      procexpr_e,
       actfrm_e,
+      besexpr_e,
+      besspec_e,
+      dataexpr_e,
+      dataspec_e,
+      mcrl2spec_e,
+      pbesexpr_e,
+      pbesspec_e,
+      procexpr_e,
       regfrm_e,
+      sortexpr_e,
       statefrm_e
     } file_type_t;
 
@@ -61,16 +62,17 @@ class mcrl2parse_tool : public input_tool
 
     void set_file_type(const std::string& type)
     {
-           if (type == "mcrl2spec")   { file_type = mcrl2spec_e; }
-      else if (type == "besspec"  )   { file_type = besspec_e  ; }
-      else if (type == "pbesspec" )   { file_type = pbesspec_e ; }
-      else if (type == "dataspec" )   { file_type = dataspec_e ; }
+      if      (type == "actfrm"   )   { file_type = actfrm_e   ; }
       else if (type == "besexpr"  )   { file_type = besexpr_e  ; }
+      else if (type == "besspec"  )   { file_type = besspec_e  ; }
       else if (type == "dataexpr" )   { file_type = dataexpr_e ; }
+      else if (type == "dataspec" )   { file_type = dataspec_e ; }
+      else if (type == "mcrl2spec")   { file_type = mcrl2spec_e; }
       else if (type == "pbesexpr" )   { file_type = pbesexpr_e ; }
+      else if (type == "pbesspec" )   { file_type = pbesspec_e ; }
       else if (type == "procexpr" )   { file_type = procexpr_e ; }
-      else if (type == "actfrm"   )   { file_type = actfrm_e   ; }
       else if (type == "regfrm"   )   { file_type = regfrm_e   ; }
+      else if (type == "sortexpr" )   { file_type = sortexpr_e ; }
       else if (type == "statefrm" )   { file_type = statefrm_e ; }
       else
       {
@@ -85,16 +87,17 @@ class mcrl2parse_tool : public input_tool
         .add_option("filetype",
            make_optional_argument("NAME", "mcrl2spec"),
              "input has the file type NAME:\n"
-             "  'mcrl2spec' for an mCRL2 specification (default)\n"
-             "  'besspec'   for a BES specification\n"
-             "  'pbesspec'  for a PBES specification\n"
-             "  'dataspec'  for a data specification\n"
-             "  'besexpr'   for a BES expression\n"
-             "  'dataexpr'  for a data expression\n"
-             "  'pbesexpr'  for a PBES expression\n"
-             "  'procexpr'  for a process expression\n"
              "  'actfrm'    for an action formula\n"
+             "  'besexpr'   for a BES expression\n"
+             "  'besspec'   for a BES specification\n"
+             "  'dataexpr'  for a data expression\n"
+             "  'dataspec'  for a data specification\n"
+             "  'mcrl2spec' for an mCRL2 specification (default)\n"
+             "  'pbesexpr'  for a PBES expression\n"
+             "  'pbesspec'  for a PBES specification\n"
+             "  'procexpr'  for a process expression\n"
              "  'regfrm'    for a regular formula\n"
+             "  'sortexpr'  for a sort expression\n"
              "  'statefrm'  for a state formula\n"
              ,
              'f'
@@ -165,16 +168,17 @@ class mcrl2parse_tool : public input_tool
       unsigned int start_symbol_index = 0;
       switch(file_type)
       {
-        case mcrl2spec_e: { start_symbol_index = p.start_symbol_index("mCRL2Spec"); break; }
-        case besspec_e  : { start_symbol_index = p.start_symbol_index("BesSpec"); break; }
-        case pbesspec_e : { start_symbol_index = p.start_symbol_index("PbesSpec"); break; }
-        case dataspec_e : { start_symbol_index = p.start_symbol_index("DataSpec"); break; }
-        case besexpr_e  : { start_symbol_index = p.start_symbol_index("BesExpr"); break; }
-        case dataexpr_e : { start_symbol_index = p.start_symbol_index("DataExpr"); break; }
-        case pbesexpr_e : { start_symbol_index = p.start_symbol_index("PbesExpr"); break; }
-        case procexpr_e : { start_symbol_index = p.start_symbol_index("ProcExpr"); break; }
         case actfrm_e   : { start_symbol_index = p.start_symbol_index("ActFrm"); break; }
+        case besexpr_e  : { start_symbol_index = p.start_symbol_index("BesExpr"); break; }
+        case besspec_e  : { start_symbol_index = p.start_symbol_index("BesSpec"); break; }
+        case dataexpr_e : { start_symbol_index = p.start_symbol_index("DataExpr"); break; }
+        case dataspec_e : { start_symbol_index = p.start_symbol_index("DataSpec"); break; }
+        case mcrl2spec_e: { start_symbol_index = p.start_symbol_index("mCRL2Spec"); break; }
+        case pbesexpr_e : { start_symbol_index = p.start_symbol_index("PbesExpr"); break; }
+        case pbesspec_e : { start_symbol_index = p.start_symbol_index("PbesSpec"); break; }
+        case procexpr_e : { start_symbol_index = p.start_symbol_index("ProcExpr"); break; }
         case regfrm_e   : { start_symbol_index = p.start_symbol_index("RegFrm"); break; }
+        case sortexpr_e : { start_symbol_index = p.start_symbol_index("SortExpr"); break; }
         case statefrm_e : { start_symbol_index = p.start_symbol_index("StateFrm"); break; }
       }
 
@@ -183,10 +187,11 @@ class mcrl2parse_tool : public input_tool
         dparser::parse_node node = p.parse(text, start_symbol_index, partial_parses);
 
 #ifdef MCRL2_PARSER_ACTIONS
-        if (file_type == dataexpr_e)
+        if (file_type == sortexpr_e)
         {
-          data::data_actions actions(p.symbol_table());
-          data::data_expression d = actions.parse_DataExpr(node);
+          data::sort_actions actions(p.symbol_table());
+          data::sort_expression s = actions.parse_SortExpr(node);
+          std::cout << s << std::endl;
         }
 #endif
 
