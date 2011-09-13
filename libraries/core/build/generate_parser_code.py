@@ -10,30 +10,31 @@ from parse_mcrl2_syntax import *
 from path import *
 
 PRODUCTION_MAPPING = '''
-  ActDecl
+  ActDecl lps::action_label_list
   ActFrm action_formulas::action_formula
   Action lps::action
-  ActionLabelList lps::action_label_list
-  ActionList lps::action_label
+  ActionLabelList lps::action_label
+  ActionList lps::action_label_list
   ActionRenameRule
   ActionRenameRuleRHS
   ActionRenameRuleSpec
   ActionRenameSpec
-  ActSpec
+  ActSpec lps::action_label_list
   BagEnumElt data::detail::data_expression_pair
   BagEnumEltList data::detail::data_expression_pair_list
   BesEqnDecl bes::boolean_equation
+  BesEqnDeclList bes::boolean_equation_list
   BesEqnSpec bes::boolean_equation_system
   BesExpr bes::boolean_expression
   BesInit bes::boolean_variable
-  BesSpec bes::boolean_equation_list
+  BesSpec
   BesVar bes::boolean_variable
-  CommExpr
-  CommExprList
-  CommExprSet
-  ConsSpec
-  ConstrDecl
-  ConstrDeclList
+  CommExpr process::communication_expression
+  CommExprList process::communication_expression_list
+  CommExprSet process::communication_expression_list
+  ConsSpec data::function_symbol_list
+  ConstrDecl data::structured_sort_constructor
+  ConstrDeclList data::structured_sort_constructor_list
   DataExpr data::data_expression
   DataExprList data::data_expression_list
   DataExprUnit data::data_expression
@@ -41,19 +42,20 @@ PRODUCTION_MAPPING = '''
   DataValExpr data::data_expression
   Domain data::sort_expression_list
   EqnDecl data::data_equation
+  EqnDeclList data::data_equation_list
   EqnSpec data::data_equation
   FixedPointOperator pbes_system::fixpoint_symbol
-  GlobVarSpec
-  IdDecl
-  IdsDecl
-  IdsDeclList
+  GlobVarSpec data::variable_list
+  IdDecl data::function_symbol
+  IdsDecl data::function_symbol_list
+  IdsDeclList data::function_symbol_list
   Init process::process_expression
-  MapSpec
-  mCRL2Spec
+  MapSpec data::function_symbol_list
+  mCRL2Spec lps::specification
   mCRL2SpecElt
   mCRL2SpecEltList
   MultAct
-  MultActId
+  MultActId lps::action_label_list
   MultActIdList
   MultActIdSet
   PbesEqnDecl
@@ -63,25 +65,28 @@ PRODUCTION_MAPPING = '''
   PbesSpec pbes_system::pbes<>
   ProcDecl
   ProcExpr process::process_expression
-  ProcExprThenElse
-  ProcSpec
-  ProjDecl
-  ProjDeclList
+  ProcExprThenElse process::process_expression
+  ProcSpec process::process_specification
+  ProjDecl data::structured_sort_constructor_argument
+  ProjDeclList data::structured_sort_constructor_argument_list
   PropVarDecl pbes_system::propositional_variable
   PropVarInst pbes_system::propositional_variable_instantiation
   RegFrm regular_formulas::regular_formula
-  RenExpr
-  RenExprList
-  RenExprSet
+  RenExpr process::rename_expression
+  RenExprList process::rename_expression_list
+  RenExprSet process::rename_expression_list
   SortDecl
-  SortExpr
-  SortExprList
+  SortExpr data::sort_expression
+  SortExprList data::sort_expression_list
   SortSpec
   StateFrm state_formulas::state_formula
   StateVarDecl
-  VarSpec
-  WhrExpr
-  WhrExprList
+  VarDecl data::variable
+  VarsDecl data::variable_list
+  VarsDeclList data::variable_list
+  VarSpec data::variable_list
+  WhrExpr data::where_clause
+  WhrExprList data::where_clause_list
 '''
 
 PRODUCTION_FUNCTION = '''  RETURNTYPE parse_PRODUCTION(const parse_node& node)
@@ -99,10 +104,38 @@ for line in PRODUCTION_MAPPING.splitlines():
     elif len(words) == 2:
         production_return_types[words[0]] = words[1]
 
+def make_condition(alternative):
+    result = []
+    words = alternative.split()
+    result.append('(node.child_count() == %d)' % len(words))
+    for i, word in enumerate(words):
+        if word.startswith("'"):
+            result.append('(symbol_name(node.child(%d)) == "%s")' % (i, word[1:-1]))
+        elif not word[-1] in '*?+':
+            result.append('(symbol_name(node.child(%d)) == "%s")' % (i, word))
+    if len(result) == 0:
+        result.append('true')
+    return ' && '.join(result)
+
+def symbol_names(rhs):
+    result = []
+    for (text, comment, annotation) in rhs:
+        words = text.split()
+        names = []
+        for i, word in enumerate(words):
+            if word.startswith("'"):
+                names.append(word[1:-1])
+            elif not word[-1] in '*?+':
+                names.append(word)
+            else:
+                names.append('??')
+        result.append(names)
+    return result
+
 #---------------------------------------------------------------#
 #                          print_alternative
 #---------------------------------------------------------------#
-def print_alternative(text):
+def print_alternative(text, add_condition = False):
     args = []
 
     words = text.split()
@@ -111,7 +144,10 @@ def print_alternative(text):
             continue
             function = production_return_types[word]
         args.append('parse_%s(node.child(%d))' % (word, i))
-    return 'return UNKNOWN(' + ', '.join(args) + ');'
+    result = 'return UNKNOWN_ALTERNATIVE(' + ', '.join(args) + ');'
+    if add_condition:
+        result = 'if (' + make_condition(text) + ') { ' + result + ' }'
+    return result
 
 #---------------------------------------------------------------#
 #                          print_production
@@ -124,13 +160,20 @@ def print_production(lhs, rhs):
     text = re.sub('RETURNTYPE', production_return_types[lhs], text)
     text = re.sub('PRODUCTION', lhs, text)
 
-    alternatives = [print_alternative(t) for (t, comment, annotation) in rhs]
-    if len(alternatives) == 1:
-        body = '    ' + alternatives[0]
+    #print 'lhs = ', lhs
+    #sn = symbol_names(rhs)
+    #for s in sn:
+    #    print ', '.join(s)
+
+    if lhs.endswith('List'):
+        body = '    return parse_list<%s>("%s");' % (production_return_types[lhs], lhs[:-4])
     else:
-        condition = 'CONDITION'
-        alternatives = ['if (' + condition + ') { ' + a + ' }' for a in alternatives]
-        body = '    ' + '\n    else '.join(alternatives)
+        add_condition = len(rhs) > 1
+        alternatives = [print_alternative(t, add_condition) for (t, comment, annotation) in rhs]
+        if len(alternatives) == 1:
+            body = '    ' + alternatives[0]
+        else:
+            body = '    ' + '\n    else '.join(alternatives) + ('\n    report_unknown_node(node);\n    return %s();' % production_return_types[lhs])
 
     text = re.sub('BODY', body, text)
     print text
@@ -159,10 +202,13 @@ def post_process_sections(sections):
     for i, (title, productions) in enumerate(sections):
         new_productions = {}
         for j, (lhs, rhs) in enumerate(productions):
+            if lhs.endswith('List'):
+                continue
+
             for k, (text, comment, annotation) in enumerate(rhs):
 
-                # Generate a new production T ::= T1 | ... | Tn for the pattern (T1 | ... | Tn)
-                regexp = "\(((?!')([^)]|('\)))*[^'])\)"
+                # Generate a new production T' ::= T for the pattern (T)
+                regexp = "(?<!')\((([^)]|('\)))*[^'])\)"
                 m = re.search(regexp, text)
                 while m != None:
                     index = 1
@@ -172,7 +218,6 @@ def post_process_sections(sections):
                         new_lhs = lhs + 'Alternative' + str(index)
                     text = re.sub(regexp, new_lhs, text, 1)
                     new_rhs = map(string.strip, re.split(r'\s*\|\s*', m.group(1)))
-                    print 'NEW', new_rhs
                     new_rhs = [(r, '', '') for r in new_rhs]
                     new_productions[new_lhs] = (new_lhs, new_rhs)
                     m = re.search(regexp, text)
