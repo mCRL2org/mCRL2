@@ -1,4 +1,5 @@
 #include <iterator>
+#include <sstream>
 #include <boost/bind.hpp>
 #include "parser.h"
 #include "mcrl2/data/parse.h"
@@ -23,14 +24,23 @@ struct default_actions
     return table.symbol_name(node.symbol());
   }
 
-  void report_unknown_node(const parse_node& node, const std::string& msg = "")
+  std::string print_node(const parse_node& node)
   {
-    std::cout << "<node>" << symbol_name(node) << std::endl;
+    std::ostringstream out;
+    out << "symbol      = " << symbol_name(node) << std::endl;
+    out << "string      = " << node.string() << std::endl;
+    out << "child_count = " << node.child_count() << std::endl;
     for (int i = 0; i < node.child_count(); i++)
     {
-      std::cout << "<child>" << symbol_name(node.child(i)) << " " << node.child(i).string() << std::endl;
+      out << "child " << i << " = " << symbol_name(node.child(i)) << " " << node.child(i).string() << std::endl;
     }
-    throw mcrl2::runtime_error("unknown node detected: " + msg + " " + node.string());
+    return out.str();
+  }
+
+  void report_unexpected_node(const parse_node& node)
+  {
+    std::cout << "--- unexpected node ---\n" << print_node(node);
+    throw mcrl2::runtime_error("unexpected node detected!");
   }
 
   template <typename OutputIterator, typename ParseFunction>
@@ -40,7 +50,6 @@ struct default_actions
     {
       return;
     }
-    std::cout << "<symbol>" << symbol_name(node) << std::endl;
     if (symbol_name(node) == type)
     {
       *out = f(node);
@@ -64,6 +73,7 @@ struct default_actions
 
   core::identifier_string parse_Id(const parse_node& node)
   {
+    //std::cout << "<id>" << print_node(node) << std::endl;
     return core::identifier_string(node.string());
   }
 };
@@ -76,7 +86,8 @@ struct sort_actions: public default_actions
 
   data::sort_expression parse_SortExpr(const parse_node& node)
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { sort_bool::bool_(); }
+    //std::cout << "<sortexpr>" << print_node(node) << std::endl;
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { return sort_bool::bool_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Pos")) { return sort_pos::pos(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Nat")) { return sort_nat::nat(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Int")) { return sort_int::int_(); }
@@ -88,7 +99,7 @@ struct sort_actions: public default_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "SortExpr") && (symbol_name(node.child(2)) == ")")) { return parse_SortExpr(node.child(1)); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "SortExprList") && (symbol_name(node.child(1)) == "->") && (symbol_name(node.child(2)) == "SortExpr")) { return function_sort(parse_SortExprList(node.child(0)), parse_SortExpr(node.child(2))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "struct") && (symbol_name(node.child(1)) == "ConstrDeclList")) { return structured_sort(parse_ConstrDeclList(node.child(1))); }
-    report_unknown_node(node);
+    report_unexpected_node(node);
     return data::sort_expression();
   }
 
@@ -99,23 +110,25 @@ struct sort_actions: public default_actions
 
   data::structured_sort_constructor parse_ConstrDecl(const parse_node& node)
   {
+    //std::cout << "<constrdecl>" << print_node(node) << std::endl;
     core::identifier_string name = parse_Id(node.child(0));
     data::structured_sort_constructor_argument_list arguments;
-    identifier recogniser = no_identifier();
+    core::identifier_string recogniser = no_identifier();
     if (node.child(1))
     {
       arguments = parse_ProjDeclList(node.child(1).child(1));
     }
     if (node.child(2))
     {
-      recogniser = parse_Id(node.child(2).child(1));
+      //std::cout << "child(2)" << print_node(node.child(2)) << std::endl;
+      recogniser = parse_Id(node.child(2).child(0).child(1));
     }
     return structured_sort_constructor(name, arguments, recogniser);
   }
 
   data::structured_sort_constructor_list parse_ConstrDeclList(const parse_node& node)
   {
-    return parse_list<data::structured_sort_constructor>(node, "ConstrDecl", boost::bind(&sort_actions::parse_SortExpr, this, _1));
+    return parse_list<data::structured_sort_constructor>(node, "ConstrDecl", boost::bind(&sort_actions::parse_ConstrDecl, this, _1));
   }
 
   data::structured_sort_constructor_argument parse_ProjDecl(const parse_node& node)
@@ -143,7 +156,7 @@ struct sort_actions: public default_actions
 //  {
 //    if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "IdList") && (symbol_name(node.child(1)) == ";")) { return UNKNOWN_ALTERNATIVE(parse_IdList(node.child(0))); }
 //    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "=") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ";")) { return UNKNOWN_ALTERNATIVE(parse_Id(node.child(0)), parse_SortExpr(node.child(2))); }
-//    report_unknown_node(node);
+//    report_unexpected_node(node);
 //    return UNKNOWN();
 //  }
 //  UNKNOWN parse_SortDeclList(const parse_node& node)

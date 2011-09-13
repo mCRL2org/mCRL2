@@ -185,6 +185,11 @@ class mcrl2parse_tool : public input_tool
       try
       {
         dparser::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+        std::cout << "Parsing successful." << std::endl;
+        if (print_tree)
+        {
+          p.print_tree(node);
+        }
 
 #ifdef MCRL2_PARSER_ACTIONS
         if (file_type == sortexpr_e)
@@ -194,13 +199,6 @@ class mcrl2parse_tool : public input_tool
           std::cout << s << std::endl;
         }
 #endif
-
-        std::cout << "Parsing successful." << std::endl;
-        if (print_tree)
-        {
-          p.print_tree(node);
-          //p.print_symbol_table();
-        }
       }
       catch (std::exception& e)
       {
