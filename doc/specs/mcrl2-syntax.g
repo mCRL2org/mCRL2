@@ -26,11 +26,9 @@ SortExpr
   | 'Bag' '(' SortExpr ')'                                          // bag sort
   | Id                                                              // sort reference
   | '(' SortExpr ')'                                                // sort expression with parentheses
-  | Domain '->' SortExpr                 $binary_right 1            // higher-order sort
+  | SortExprList '->' SortExpr                 $binary_right 1      // higher-order sort
   | 'struct' ConstrDeclList                                         // structured sort
   ;
-
-Domain: SortExprList ;
 
 SortExprList: SortExpr ( '#' SortExpr )* ;
 
@@ -45,7 +43,7 @@ ConstrDecl: Id ( '(' ProjDeclList ')' )? ( '?' Id )? ;
 
 ConstrDeclList: ConstrDecl ( '|' ConstrDecl )* ;
 
-ProjDecl: ( Id ':' )? Domain ;
+ProjDecl: ( Id ':' )? SortExpr ;
 
 ProjDeclList: ProjDecl ( ',' ProjDecl )* ;
 
@@ -193,7 +191,7 @@ ProcExprThenElse: '->' ProcExpr ('<>' ProcExpr)? $unary_op_left 11;
 
 Action: Id ( '(' DataExprList ')' )? ;
 
-ActDecl: IdList ( ':' Domain )? ';' ;
+ActDecl: IdList ( ':' SortExprList )? ';' ;
 
 ActSpec: 'act' ActDecl+ ;
 
