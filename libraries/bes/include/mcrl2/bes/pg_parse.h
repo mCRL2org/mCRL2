@@ -83,7 +83,7 @@ boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner,
 // <identifier> and <priority>, <priority> and <owner>, <owner> and <identifier>
 template <typename Container>
 inline
-void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b)
+void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, bool maxpg = true)
 {
   while (!isalnum(from.peek()))
   {
@@ -163,9 +163,19 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b)
   }
 
   atermpp::vector<boolean_equation> eqns;
-  for (std::map<priority_t, atermpp::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
+  if(maxpg)
   {
-    eqns.insert(eqns.end(), i->second.begin(), i->second.end());
+    for (std::map<priority_t, atermpp::set<boolean_equation> >::const_reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
+    {
+      eqns.insert(eqns.end(), i->second.begin(), i->second.end());
+    }
+  }
+  else
+  {
+    for (std::map<priority_t, atermpp::set<boolean_equation> >::const_iterator i = blocks.begin(); i != blocks.end(); ++i)
+    {
+      eqns.insert(eqns.end(), i->second.begin(), i->second.end());
+    }
   }
 
   b.equations() = eqns;
@@ -175,7 +185,7 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b)
 }
 
 template <typename Container>
-inline void parse_pgsolver(const std::string& filename, boolean_equation_system<Container>& b)
+inline void parse_pgsolver(const std::string& filename, boolean_equation_system<Container>& b, bool maxpg = true)
 {
   std::ifstream f;
   f.open(filename.c_str());
@@ -183,7 +193,7 @@ inline void parse_pgsolver(const std::string& filename, boolean_equation_system<
   {
     throw mcrl2::runtime_error("cannot open file " + filename + " for reading");
   }
-  parse_pgsolver(f, b);
+  parse_pgsolver(f, b, maxpg);
 }
 
 } // namespace bes

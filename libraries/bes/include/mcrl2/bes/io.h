@@ -22,6 +22,7 @@
 #include <functional>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
+#include "mcrl2/bes/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/exception.h"
@@ -185,7 +186,7 @@ std::string bes_expression2pgsolver(const Expression& p, const VariableMap& vari
 
 /// \brief Save a sequence of BES equations in CWI format to a stream.
 template <typename Iter>
-void bes2pgsolver(Iter first, Iter last, std::ostream& out)
+void bes2pgsolver(Iter first, Iter last, std::ostream& out, bool maxpg = true)
 {
   typedef typename std::iterator_traits<Iter>::value_type equation_type;
   typedef typename equation_type::term_type term_type;
@@ -215,6 +216,11 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
     }
     block_to_player[block] = (and_in_block)?1:0;
 
+    if(maxpg && block % 2 == 1)
+    {
+      ++block;
+    }
+
     out << "parity " << index -1 << ";\n";
 
     int priority = 0;
@@ -229,7 +235,7 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
 
       out << variables[i->variable().name()]
           << " "
-          << priority
+          << (maxpg?(block-priority):priority)
           << " "
           << (tr::is_and(i->formula()) ? 1 : (tr::is_or(i->formula())?0:block_to_player[priority]))
           << " "

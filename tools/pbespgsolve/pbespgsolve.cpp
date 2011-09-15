@@ -116,7 +116,7 @@ class pg_solver_tool : public rewriter_tool<input_tool>
         "pbespgsolve",
         "Maks Verver and Wieger Wesselink; Michael Weber",
         "Solve a (P)BES or parity game using a parity game solver",
-        "Reads a file containing a (P)BES or a parity game in PGSolver format,"
+        "Reads a file containing a (P)BES or a max parity game in PGSolver format,"
         "instantiates it into a BES, and applies a\n"
         "parity game solver to it. If INFILE is not present, standard input is used."
       )
