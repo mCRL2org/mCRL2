@@ -38,6 +38,7 @@
 #include "mcrl2/data/data_specification.h"
 
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
@@ -3116,19 +3117,8 @@ static mcrl2::pbes_system::pbes_expression generate_rhs_as_formula(bes_expressio
 }
 
 
-
-//function save_bes_in_bes_format
-//--------------------------------
-/// \brief Save the bes as a BES
-/// \detail The BES equations are saved as a BES file in ATerm format with name
-///         outfilename.
-/// \param string The name of the output file
-/// \param bes_equations The bes equations to bes saved.
-
 inline
-void save_bes_in_bes_format(
-  const std::string& outfilename,
-  boolean_equation_system& bes_equations)
+mcrl2::bes::boolean_equation_system<> convert_to_bes(boolean_equation_system& bes_equations)
 {
   using namespace mcrl2::pbes_system;
   using namespace mcrl2::bes;
@@ -3156,7 +3146,33 @@ void save_bes_in_bes_format(
 
   mcrl2::bes::boolean_equation_system<> result(eqns,
       boolean_variable("X1"));
-  result.save(outfilename);
+
+  return result;
+}
+
+
+//function save_bes_in_bes_format
+//--------------------------------
+/// \brief Save the bes as a BES
+/// \detail The BES equations are saved as a BES file in ATerm format with name
+///         outfilename.
+/// \param string The name of the output file
+/// \param bes_equations The bes equations to bes saved.
+
+inline
+void save_bes_in_bes_format(
+  const std::string& outfilename,
+  boolean_equation_system& bes_equations)
+{
+  convert_to_bes(bes_equations).save(outfilename);
+}
+
+inline
+void save_bes_in_pgsolver_format(
+  const std::string& outfilename,
+  boolean_equation_system& bes_equations)
+{
+  mcrl2::bes::save_bes(convert_to_bes(bes_equations),outfilename,mcrl2::bes::bes_output_pgsolver);
 }
 
 

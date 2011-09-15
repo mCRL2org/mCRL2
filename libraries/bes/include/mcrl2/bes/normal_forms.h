@@ -29,6 +29,8 @@ void make_standard_form(boolean_equation_system<>& eqn, bool recursive_form = fa
 {
   detail::standard_form_traverser t(recursive_form);
   t(eqn);
+  assert(!is_boolean_variable(eqn.initial_state()) || eqn.equations().begin()->variable() == boolean_variable(eqn.initial_state()));
+  assert(!is_boolean_variable(eqn.initial_state()) || t.m_equations.begin()->variable() == boolean_variable(eqn.initial_state()));
   eqn.equations() = t.m_equations;
 }
 

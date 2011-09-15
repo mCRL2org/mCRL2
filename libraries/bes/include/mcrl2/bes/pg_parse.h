@@ -27,6 +27,7 @@ namespace bes
 
 typedef unsigned long long identifier_t;
 typedef unsigned short priority_t;
+
 typedef bool owner_t;
 
 struct node_t
@@ -45,7 +46,7 @@ struct node_t
 // Build a formula from the strings in v. if p = 0, than a disjunction is built,
 // otherwise the result is a conjunction.
 // Prefix is added to each of the identifiers in v.
-boolean_expression formula(std::set<identifier_t> const& v, priority_t p, std::string prefix = "X")
+boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, std::string prefix = "X")
 {
   atermpp::set<boolean_expression> v_prefixed;
   for (std::set<identifier_t>::const_iterator i = v.begin(); i != v.end(); ++i)
@@ -55,7 +56,7 @@ boolean_expression formula(std::set<identifier_t> const& v, priority_t p, std::s
     v_prefixed.insert(boolean_variable(id.str()));
   }
 
-  if (p == 0)
+  if (owner == 0)
   {
     return join_or(v_prefixed.begin(), v_prefixed.end());
   }
@@ -65,7 +66,7 @@ boolean_expression formula(std::set<identifier_t> const& v, priority_t p, std::s
   }
 }
 
-/// \brief Reads a parity games from an input stream, and stores it as a BES.
+/// \brief Reads a parity game from an input stream, and stores it as a BES.
 /// \param from An input stream
 /// \param b A boolean equation system
 /// \return The input stream
@@ -171,7 +172,18 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b)
   std::stringstream init_id;
   init_id << initial_node;
   b.initial_state() = boolean_variable("X" + init_id.str());
+}
 
+template <typename Container>
+inline void parse_pgsolver(const std::string& filename, boolean_equation_system<Container>& b)
+{
+  std::ifstream f;
+  f.open(filename.c_str());
+  if(!f)
+  {
+    throw mcrl2::runtime_error("cannot open file " + filename + " for reading");
+  }
+  parse_pgsolver(f, b);
 }
 
 } // namespace bes

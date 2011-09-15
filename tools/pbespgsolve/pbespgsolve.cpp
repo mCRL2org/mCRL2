@@ -32,6 +32,7 @@
 #include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/bes/pg_parse.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
@@ -114,8 +115,9 @@ class pg_solver_tool : public rewriter_tool<input_tool>
       : super(
         "pbespgsolve",
         "Maks Verver and Wieger Wesselink; Michael Weber",
-        "Solve a (P)BES using a parity game solver",
-        "Reads a file containing a (P)BES, instantiates it into a BES, and applies a\n"
+        "Solve a (P)BES or parity game using a parity game solver",
+        "Reads a file containing a (P)BES or a parity game in PGSolver format,"
+        "instantiates it into a BES, and applies a\n"
         "parity game solver to it. If INFILE is not present, standard input is used."
       )
     {
@@ -148,7 +150,16 @@ class pg_solver_tool : public rewriter_tool<input_tool>
         }
         catch (mcrl2::runtime_error&)
         {
-          throw(e);
+          try
+          {
+            mcrl2::bes::boolean_equation_system<> b;
+            mcrl2::bes::parse_pgsolver(input_filename(), b);
+            p = mcrl2::bes::bes2pbes(b);
+          }
+          catch (mcrl2::runtime_error&)
+          {
+            throw(e);
+          }
         }
       }
 

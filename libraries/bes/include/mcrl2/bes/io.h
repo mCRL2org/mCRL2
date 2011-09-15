@@ -234,11 +234,12 @@ void bes2pgsolver(Iter first, Iter last, std::ostream& out)
           << (tr::is_and(i->formula()) ? 1 : (tr::is_or(i->formula())?0:block_to_player[priority]))
           << " "
           << bes_expression2pgsolver(i->formula(), variables)
-// The following is optional, print variable name for traceability.
-//          << " "
-//          << "\""
-//          << tr::pp(i->variable())
-//          << "\""
+#ifdef MCRL2_BES2PGSOLVER_PRINT_VARIABLE_NAMES
+          << " "
+          << "\""
+          << tr::pp(i->variable())
+          << "\""
+#endif
         << ";\n";
   }
 }
@@ -273,6 +274,20 @@ enum bes_output_format
   bes_output_pgsolver
 };
 
+static
+inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equation_system<>& bes_spec)
+{
+  if(is_boolean_variable(bes_spec.initial_state()))
+  {
+    boolean_variable init(bes_spec.initial_state());
+    if(init == bes_spec.equations().begin()->variable())
+    {
+      return true;
+    }
+  }
+  return false;
+}
+
 /// \brief Save a PBES in the format specified.
 inline
 void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename, bes_output_format output_format, bool aterm_ascii = false)
@@ -296,6 +311,10 @@ void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename
     case bes_output_cwi:
     {
       mCRL2log(log::verbose) << "Saving result in CWI format..." << std::endl;
+      if(!initial_bes_equation_corresponds_to_initial_state(bes_spec))
+      {
+        throw mcrl2::runtime_error("The initial state " + bes::pp(bes_spec.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec.equations().begin()->variable()) + " do not correspond. Cannot save BES to CWI format.");
+      }
       bes::bes2cwi(bes_spec.equations().begin(), bes_spec.equations().end(), outfilename);
       break;
     }
@@ -304,6 +323,10 @@ void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename
       mCRL2log(log::verbose) << "Saving result in PGSolver format..." << std::endl;
       boolean_equation_system<> bes_spec_standard_form(bes_spec);
       make_standard_form(bes_spec_standard_form, true);
+      if(!initial_bes_equation_corresponds_to_initial_state(bes_spec_standard_form))
+      {
+        throw mcrl2::runtime_error("The initial state " + bes::pp(bes_spec_standard_form.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec_standard_form.equations().begin()->variable()) + " do not correspond. Cannot save BES to PGSolver format.");
+      }
       bes::bes2pgsolver(bes_spec_standard_form.equations().begin(), bes_spec_standard_form.equations().end(), outfilename);
       break;
     }

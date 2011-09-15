@@ -124,7 +124,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       {
         std::string format = parser.option_argument("output");
 
-        if (!((format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes")))
+        if (!((format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes") || (format == "pgsolver")))
         {
           parser.error("unknown output format specified (got `" + format + "')");
         }
@@ -198,7 +198,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
                  " 'vasy',\n"
                  " 'pbes' (save as a PBES in internal format),\n"
                  " 'cwi',\n"
-                 " 'bes' (default, save as a BES in internal format)",
+                 " 'bes' (default, save as a BES in internal format),\n"
+                 " 'pgsolver'",
                  'o').
       add_option("tree",
                  "store state in a tree (for memory efficiency)",
@@ -356,6 +357,11 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
         save_bes_in_bes_format(m_output_filename,bes_equations);
         return true;
       }
+      if (opt_outputformat == "pgsolver")
+      {
+        save_bes_in_pgsolver_format(m_output_filename,bes_equations);
+        return true;
+      }
 
       assert(0); // This point cannot be reached. pbes2bes must always write output.
 
@@ -379,6 +385,7 @@ class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool>
       values.push_back("pbes");
       values.push_back("cwi");
       values.push_back("bes");
+      values.push_back("pgsolver");
       m_gui_options["output"] = create_radiobox_widget(values, 3);
 
       values.clear();
