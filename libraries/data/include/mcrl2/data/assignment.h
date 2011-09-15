@@ -191,6 +191,13 @@ class identifier_assignment: public assignment_expression
 //--- end user section identifier_assignment ---//
 };
 
+/// \brief list of identifier_assignments
+typedef atermpp::term_list<identifier_assignment> identifier_assignment_list;
+
+/// \brief vector of identifier_assignments
+typedef atermpp::vector<identifier_assignment>    identifier_assignment_vector;
+
+
 /// \brief Test for a identifier_assignment expression
 /// \param t A term
 /// \return True if it is a identifier_assignment expression

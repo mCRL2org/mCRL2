@@ -194,9 +194,15 @@ class mcrl2parse_tool : public input_tool
 #ifdef MCRL2_PARSER_ACTIONS
         if (file_type == sortexpr_e)
         {
-          data::sort_actions actions(p.symbol_table());
+          data::sort_expression_actions actions(p.symbol_table());
           data::sort_expression s = actions.parse_SortExpr(node);
           std::cout << s << std::endl;
+        }
+        else if (file_type == dataexpr_e)
+        {
+          data::data_expression_actions actions(p.symbol_table());
+          data::data_expression d = actions.parse_DataExpr(node);
+          std::cout << d << std::endl;
         }
 #endif
       }

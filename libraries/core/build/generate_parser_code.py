@@ -93,7 +93,6 @@ PRODUCTION_FUNCTION = '''  RETURNTYPE parse_PRODUCTION(const parse_node& node)
   {
 BODY
   }
-
 '''
 
 production_return_types = {}
