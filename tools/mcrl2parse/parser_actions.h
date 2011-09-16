@@ -250,7 +250,7 @@ struct data_expression_actions: public sort_expression_actions
   data::variable_list parse_VarsDeclList(const parse_node& node)
   {
     variable_vector result;
-    traverse(node, boost::bind(&data_expression_actions::callback_VarsDecl, this, _1, result));
+    traverse(node, boost::bind(&data_expression_actions::callback_VarsDecl, this, _1, boost::ref(result)));
     return data::variable_list(result.begin(), result.end());
   }
 
@@ -370,7 +370,7 @@ struct data_specification_actions: public data_expression_actions
   atermpp::vector<atermpp::aterm_appl> parse_SortDeclList(const parse_node& node)
   {
     atermpp::vector<atermpp::aterm_appl> result;
-    traverse(node, boost::bind(&data_specification_actions::callback_SortDecl, this, _1, result));
+    traverse(node, boost::bind(&data_specification_actions::callback_SortDecl, this, _1, boost::ref(result)));
     return result;
   }
 
@@ -397,7 +397,7 @@ struct data_specification_actions: public data_expression_actions
   data::function_symbol_vector parse_IdsDeclList(const parse_node& node)
   {
     function_symbol_vector result;
-    traverse(node, boost::bind(&data_specification_actions::callback_IdsDecl, this, _1, result));
+    traverse(node, boost::bind(&data_specification_actions::callback_IdsDecl, this, _1, boost::ref(result)));
     return result;
   }
 
@@ -434,7 +434,7 @@ struct data_specification_actions: public data_expression_actions
   data::data_equation_vector parse_EqnDeclList(const parse_node& node, const variable_list& variables)
   {
     data_equation_vector result;
-    traverse(node, boost::bind(&data_specification_actions::callback_EqnDecl, this, _1, variables, result));
+    traverse(node, boost::bind(&data_specification_actions::callback_EqnDecl, this, _1, boost::ref(variables), boost::ref(result)));
     return result;
   }
 
@@ -495,7 +495,7 @@ struct data_specification_actions: public data_expression_actions
   data::data_specification parse_DataSpec(const parse_node& node)
   {
     data_specification result;
-    traverse(node, boost::bind(&data_specification_actions::callback_DataSpecElement, this, _1, result));
+    traverse(node, boost::bind(&data_specification_actions::callback_DataSpecElement, this, _1, boost::ref(result)));
     return result;
   }
 };
