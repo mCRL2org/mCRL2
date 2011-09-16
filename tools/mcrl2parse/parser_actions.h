@@ -508,10 +508,10 @@ namespace lps {
 
 using namespace dparser;
 
-struct action_actions: public data::data_expression_actions
+struct action_actions: public data::data_specification_actions
 {
   action_actions(const parser_table& table_)
-    : data::data_expression_actions(table_)
+    : data::data_specification_actions(table_)
   {}
 
   lps::action parse_Action(const parse_node& node)
@@ -672,6 +672,75 @@ struct process_actions: public lps::action_actions
     report_unexpected_node(node);
     return process::process_expression();
   }
+
+  process::process_equation parse_ProcDecl(const parse_node& node)
+  {
+    return process::process_equation(parse_Id(node.child(0)), parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3)));
+  }
+
+  process::process_equation_list parse_ProcDeclList(const parse_node& node)
+  {
+    return parse_list<process::process_equation>(node, "ProcDecl", boost::bind(&process_actions::parse_ProcDecl, this, _1));
+  }
+
+  process::process_equation_list parse_ProcSpec(const parse_node& node)
+  {
+    return parse_ProcDeclList(node.child(1));
+  }
+
+  process::process_expression parse_Init(const parse_node& node)
+  {
+    return parse_ProcExpr(node.child(1));
+  }
+
+  bool callback_mCRL2Spec(const parse_node& node, process::process_specification& result)
+  {
+    if (symbol_name(node) == "SortSpec")
+    {
+      return callback_DataSpecElement(node, result.data());
+    }
+    else if (symbol_name(node) == "ConsSpec")
+    {
+      return callback_DataSpecElement(node, result.data());
+    }
+    else if (symbol_name(node) == "MapSpec")
+    {
+      return callback_DataSpecElement(node, result.data());
+    }
+    else if (symbol_name(node) == "EqnSpec")
+    {
+      return callback_DataSpecElement(node, result.data());
+    }
+    else if (symbol_name(node) == "GlobVarSpec")
+    {
+      data::variable_list variables = parse_GlobVarSpec(node);
+      result.global_variables() = atermpp::set<data::variable>(variables.begin(), variables.end());
+      return true;
+    }
+    else if (symbol_name(node) == "ActSpec")
+    {
+      result.action_labels() = parse_ActSpec(node);
+      return true;
+    }
+    else if (symbol_name(node) == "ProcSpec")
+    {
+      process::process_equation_list eqn = parse_ProcSpec(node);
+      result.equations() = atermpp::vector<process_equation>(eqn.begin(), eqn.end());
+      return true;
+    }
+    else if (symbol_name(node) == "Init")
+    {
+      result.init() = parse_Init(node);
+    }
+    return false;
+  }
+
+  process::process_specification parse_mCRL2Spec(const parse_node& node)
+  {
+    process::process_specification result;
+    traverse(node, boost::bind(&process_actions::callback_mCRL2Spec, this, _1, boost::ref(result)));
+    return result;
+  }
 };
 
 } // namespace process
@@ -685,7 +754,6 @@ struct lps_actions: public process::process_actions
   lps_actions(const parser_table& table_)
     : process::process_actions(table_)
   {}
-
 };
 
 } // namespace lps

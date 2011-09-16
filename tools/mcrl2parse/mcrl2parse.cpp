@@ -19,6 +19,8 @@
 #include <sstream>
 #include <string>
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/print.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -215,6 +217,12 @@ class mcrl2parse_tool : public input_tool
           process::process_actions actions(p.symbol_table());
           process::process_expression x = actions.parse_ProcExpr(node);
           std::cout << x << std::endl;
+        }
+        else if (file_type == mcrl2spec_e)
+        {
+          process::process_actions actions(p.symbol_table());
+          process::process_specification x = actions.parse_mCRL2Spec(node);
+          std::cout << process::pp(x) << std::endl;
         }
 #endif
       }

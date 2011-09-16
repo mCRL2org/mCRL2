@@ -64,10 +64,11 @@ PRODUCTION_MAPPING = '''
   PbesExpr pbes_system::pbes_expression
   PbesInit pbes_system::propositional_variable_instantiation
   PbesSpec pbes_system::pbes<>
-  ProcDecl
+  ProcDecl process::process_equation
+  ProcDeclList process::process_equation_list
   ProcExpr process::process_expression
   ProcExprThenElse process::process_expression
-  ProcSpec process::process_specification
+  ProcSpec process::process_equation_list
   ProjDecl data::structured_sort_constructor_argument
   ProjDeclList data::structured_sort_constructor_argument_list
   PropVarDecl pbes_system::propositional_variable
