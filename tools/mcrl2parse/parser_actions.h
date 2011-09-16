@@ -2,6 +2,7 @@
 #include <sstream>
 #include <boost/bind.hpp>
 #include "parser.h"
+#include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/parse.h"
@@ -106,6 +107,14 @@ struct default_actions
     atermpp::vector<T> result;
     traverse(node, make_collector(table, type, result, f));
     return atermpp::term_list<T>(result.begin(), result.end());
+  }
+
+  template <typename T, typename Function>
+  atermpp::vector<T> parse_vector(const parse_node& node, const std::string& type, Function f)
+  {
+    atermpp::vector<T> result;
+    traverse(node, make_collector(table, type, result, f));
+    return result;
   }
 
   core::identifier_string parse_Id(const parse_node& node)
@@ -745,6 +754,71 @@ struct process_actions: public lps::action_actions
 
 } // namespace process
 
+namespace bes {
+
+using namespace dparser;
+
+struct bes_actions: public data::default_actions
+{
+  bes_actions(const parser_table& table_)
+    : data::default_actions(table_)
+  {}
+
+  bes::boolean_expression parse_BesExpr(const parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return bes::true_(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return bes::false_(); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "BesExpr")) { return bes::not_(parse_BesExpr(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "=>") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::imp(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "&&") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::and_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::or_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "BesExpr") && (symbol_name(node.child(2)) == ")")) { return parse_BesExpr(node.child(1)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "BesVar")) { return parse_BesVar(node.child(0)); }
+    report_unexpected_node(node);
+    return bes::boolean_expression();
+  }
+
+  bes::boolean_variable parse_BesVar(const parse_node& node)
+  {
+    return bes::boolean_variable(parse_Id(node.child(0)));
+  }
+
+  fixpoint_symbol parse_FixedPointOperator(const parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
+    report_unexpected_node(node);
+    return pbes_system::fixpoint_symbol();
+  }
+
+  bes::boolean_equation parse_BesEqnDecl(const parse_node& node)
+  {
+    return bes::boolean_equation(parse_FixedPointOperator(node.child(0)), parse_BesVar(node.child(1)), parse_BesExpr(node.child(3)));
+  }
+
+  atermpp::vector<boolean_equation> parse_BesEqnSpec(const parse_node& node)
+  {
+    return parse_BesEqnDeclList(node.child(1));
+  }
+
+  bes::boolean_variable parse_BesInit(const parse_node& node)
+  {
+    return parse_BesVar(node.child(1));
+  }
+
+  bes::boolean_equation_system<> parse_BesSpec(const parse_node& node)
+  {
+    return bes::boolean_equation_system<>(parse_BesEqnSpec(node.child(0)), parse_BesInit(node.child(1)));
+  }
+
+  atermpp::vector<boolean_equation> parse_BesEqnDeclList(const parse_node& node)
+  {
+    return parse_vector<bes::boolean_equation>(node, "BesEqnDecl", boost::bind(&bes_actions::parse_BesEqnDecl, this, _1));
+  }
+};
+
+} // namespace bes
+
 namespace lps {
 
 using namespace dparser;
@@ -757,5 +831,18 @@ struct lps_actions: public process::process_actions
 };
 
 } // namespace lps
+
+namespace pbes_system {
+
+using namespace dparser;
+
+struct pbes_actions: public data::data_specification_actions
+{
+  pbes_actions(const parser_table& table_)
+    : data::data_specification_actions(table_)
+  {}
+};
+
+} // namespace pbes_system
 
 } // namespace mcrl2

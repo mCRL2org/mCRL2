@@ -24,6 +24,8 @@
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/print.h"
 #include "parser.h"
 
 #ifdef MCRL2_PARSER_ACTIONS
@@ -223,6 +225,18 @@ class mcrl2parse_tool : public input_tool
           process::process_actions actions(p.symbol_table());
           process::process_specification x = actions.parse_mCRL2Spec(node);
           std::cout << process::pp(x) << std::endl;
+        }
+        else if (file_type == besexpr_e)
+        {
+          bes::bes_actions actions(p.symbol_table());
+          bes::boolean_expression x = actions.parse_BesExpr(node);
+          std::cout << bes::pp(x) << std::endl;
+        }
+        else if (file_type == besspec_e)
+        {
+          bes::bes_actions actions(p.symbol_table());
+          bes::boolean_equation_system<> x = actions.parse_BesSpec(node);
+          std::cout << bes::pp(x) << std::endl;
         }
 #endif
       }
