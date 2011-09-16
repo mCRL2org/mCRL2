@@ -163,7 +163,7 @@ class pg_solver_tool : public rewriter_tool<input_tool>
         }
       }
 
-      bool value = pbespgsolve(p, m_options);
+      bool value = pbespgsolve(p, timer(), m_options);
       std::string result = (value ? "true" : "false");
       std::clog << "The solution for the initial variable of the pbes is " << result << "\n";
 
