@@ -195,20 +195,26 @@ class mcrl2parse_tool : public input_tool
         if (file_type == sortexpr_e)
         {
           data::sort_expression_actions actions(p.symbol_table());
-          data::sort_expression s = actions.parse_SortExpr(node);
-          std::cout << s << std::endl;
+          data::sort_expression x = actions.parse_SortExpr(node);
+          std::cout << x << std::endl;
         }
         else if (file_type == dataexpr_e)
         {
           data::data_expression_actions actions(p.symbol_table());
-          data::data_expression d = actions.parse_DataExpr(node);
-          std::cout << d << std::endl;
+          data::data_expression x = actions.parse_DataExpr(node);
+          std::cout << x << std::endl;
         }
         else if (file_type == dataspec_e)
         {
           data::data_specification_actions actions(p.symbol_table());
-          data::data_specification spec = actions.parse_DataSpec(node);
-          std::cout << data::pp(spec) << std::endl;
+          data::data_specification x = actions.parse_DataSpec(node);
+          std::cout << data::pp(x) << std::endl;
+        }
+        else if (file_type == procexpr_e)
+        {
+          process::process_actions actions(p.symbol_table());
+          process::process_expression x = actions.parse_ProcExpr(node);
+          std::cout << x << std::endl;
         }
 #endif
       }

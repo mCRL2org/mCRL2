@@ -15,6 +15,7 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
@@ -81,6 +82,9 @@ class action_label: public atermpp::aterm_appl
 
 /// \brief Read-only singly linked list of action labels
 typedef atermpp::term_list<action_label> action_label_list;
+
+/// \brief Read-only singly linked list of action labels
+typedef atermpp::vector<action_label> action_label_vector;
 
 /// \brief Returns true if the term t is an action label
 /// \param t A term

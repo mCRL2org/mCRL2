@@ -12,9 +12,10 @@ from path import *
 PRODUCTION_MAPPING = '''
   ActDecl lps::action_label_list
   ActFrm action_formulas::action_formula
+  ActIdSet core::identifier_string_list
   Action lps::action
   ActionLabelList lps::action_label
-  ActionList lps::action_label_list
+  ActionList lps::action_list
   ActionRenameRule
   ActionRenameRuleRHS
   ActionRenameRuleSpec
@@ -32,7 +33,7 @@ PRODUCTION_MAPPING = '''
   CommExpr process::communication_expression
   CommExprList process::communication_expression_list
   CommExprSet process::communication_expression_list
-  ConsSpec data::function_symbol_list
+  ConsSpec data::function_symbol_vector
   ConstrDecl data::structured_sort_constructor
   ConstrDeclList data::structured_sort_constructor_list
   DataExpr data::data_expression
@@ -47,17 +48,17 @@ PRODUCTION_MAPPING = '''
   FixedPointOperator pbes_system::fixpoint_symbol
   GlobVarSpec data::variable_list
   IdDecl data::function_symbol
-  IdsDecl data::function_symbol_list
-  IdsDeclList data::function_symbol_list
+  IdsDecl data::function_symbol_vector
+  IdsDeclList data::function_symbol_vector
   Init process::process_expression
-  MapSpec data::function_symbol_list
+  MapSpec data::function_symbol_vector
   mCRL2Spec lps::specification
   mCRL2SpecElt
   mCRL2SpecEltList
-  MultAct
-  MultActId lps::action_label_list
-  MultActIdList
-  MultActIdSet
+  MultAct lps::action_list
+  MultActId process::action_name_multiset
+  MultActIdList process::action_name_multiset_list
+  MultActIdSet process::action_name_multiset_list
   PbesEqnDecl
   PbesEqnSpec
   PbesExpr pbes_system::pbes_expression
@@ -167,7 +168,7 @@ def print_production(lhs, rhs):
         if len(alternatives) == 1:
             body = '    ' + alternatives[0]
         else:
-            body = '    ' + '\n    else '.join(alternatives) + ('\n    report_unknown_node(node);\n    return %s();' % production_return_types[lhs])
+            body = '    ' + '\n    else '.join(alternatives) + ('\n    report_unexpected_node(node);\n    return %s();' % production_return_types[lhs])
 
     text = re.sub('BODY', body, text)
     print text

@@ -140,15 +140,17 @@ BagEnumEltList: BagEnumElt ( ',' BagEnumElt )* ;
 
 //--- Communication and renaming sets
 
-MultActId: ActionLabelList ;
+ActIdSet: '{' IdList '}' ;
 
-ActionLabelList: Id ( '|' Id )* ;
+MultActId: Id ( '|' Id )* ;
 
 MultActIdList: MultActId ( ',' MultActId )* ;
 
 MultActIdSet: '{' MultActIdList? '}' ;
 
-CommExpr: MultActId ( '->' Id )? ;
+CommExprRhs: '->' (Id | 'tau') ;
+
+CommExpr: Id '|' MultActId CommExprRhs? ;
 
 CommExprList: CommExpr ( ',' CommExpr )* ;
 
@@ -166,9 +168,9 @@ ProcExpr
   : Action
   | 'delta'
   | 'tau'
-  | 'block' '(' MultActIdSet ',' ProcExpr ')'
+  | 'block' '(' ActIdSet ',' ProcExpr ')'
   | 'allow' '(' MultActIdSet ',' ProcExpr ')'
-  | 'hide' '(' MultActIdSet ',' ProcExpr ')'
+  | 'hide' '(' ActIdSet ',' ProcExpr ')'
   | 'rename' '(' RenExprSet ',' ProcExpr ')'
   | 'comm' '(' CommExprSet ',' ProcExpr ')'
   | '(' ProcExpr ')'
