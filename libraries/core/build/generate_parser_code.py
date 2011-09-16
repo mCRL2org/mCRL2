@@ -85,8 +85,8 @@ PRODUCTION_MAPPING = '''
   VarsDecl data::variable_list
   VarsDeclList data::variable_list
   VarSpec data::variable_list
-  WhrExpr data::where_clause
-  WhrExprList data::where_clause_list
+  WhrExpr data::identifier_assignment
+  WhrExprList data::identifier_assignment_list
 '''
 
 PRODUCTION_FUNCTION = '''  RETURNTYPE parse_PRODUCTION(const parse_node& node)
@@ -159,13 +159,8 @@ def print_production(lhs, rhs):
     text = re.sub('RETURNTYPE', production_return_types[lhs], text)
     text = re.sub('PRODUCTION', lhs, text)
 
-    #print 'lhs = ', lhs
-    #sn = symbol_names(rhs)
-    #for s in sn:
-    #    print ', '.join(s)
-
     if lhs.endswith('List'):
-        body = '    return parse_list<%s>("%s");' % (production_return_types[lhs], lhs[:-4])
+        body = '    return parse_list<%s>(node, "%s", boost::bind(&xyz_actions::parse_%s, this, _1));' % (production_return_types[lhs], lhs[:-4], lhs[:-4])
     else:
         add_condition = len(rhs) > 1
         alternatives = [print_alternative(t, add_condition) for (t, comment, annotation) in rhs]

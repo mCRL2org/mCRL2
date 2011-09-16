@@ -26,21 +26,17 @@ struct default_actions
 
   // starts a traversal in node, and calls the function f to each subnode of the given type
   template <typename Function>
-  void traverse(const parse_node& node, const std::string& type, Function f)
+  void traverse(const parse_node& node, Function f)
   {
     if (!node)
     {
       return;
     }
-    if (symbol_name(node) == type)
-    {
-      f(node);
-    }
-    else
+    if (!f(node))
     {
       for (int i = 0; i < node.child_count(); i++)
       {
-        traverse(node.child(i), type, f);
+        traverse(node.child(i), f);
       }
     }
   }
@@ -49,23 +45,33 @@ struct default_actions
   template <typename Container, typename Function>
   struct collector
   {
+    const parser_table& table;
+    const std::string& type;
     Container& container;
     Function f;
 
-    collector(Container& container_, Function f_)
-      : container(container_), f(f_)
+    collector(const parser_table& table_, const std::string& type_, Container& container_, Function f_)
+      : table(table_),
+        type(type_),
+        container(container_),
+        f(f_)
     {}
 
-    void operator()(const parse_node& node) const
+    bool operator()(const parse_node& node) const
     {
-      container.push_back(f(node));
+      if (table.symbol_name(node) == type)
+      {
+        container.push_back(f(node));
+        return true;
+      }
+      return false;
     }
   };
 
   template <typename Container, typename Function>
-  collector<Container, Function> make_collector(Container& container, Function f)
+  collector<Container, Function> make_collector(const parser_table& table, const std::string& type, Container& container, Function f)
   {
-    return collector<Container, Function>(container, f);
+    return collector<Container, Function>(table, type, container, f);
   }
 
   std::string symbol_name(const parse_node& node) const
@@ -96,7 +102,7 @@ struct default_actions
   atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, Function f)
   {
     atermpp::vector<T> result;
-    traverse(node, type, make_collector(result, f));
+    traverse(node, make_collector(table, type, result, f));
     return atermpp::term_list<T>(result.begin(), result.end());
   }
 
@@ -156,7 +162,11 @@ struct sort_expression_actions: public default_actions
     }
     if (node.child(2))
     {
-      recogniser = parse_Id(node.child(2).child(0).child(1));
+      parse_node u = node.child(2);
+      if (u.child(0))
+      {
+        recogniser = parse_Id(node.child(2).child(0).child(1));
+      }
     }
     return structured_sort_constructor(name, arguments, recogniser);
   }
@@ -222,22 +232,25 @@ struct data_expression_actions: public sort_expression_actions
     return variable(parse_Id(node.child(0)), parse_SortExpr(node.child(2)));
   }
 
-  // adds the variables corresponding to a VarsDecl node to container
-  template <typename Container>
-  void parse_VarsDecl(const parse_node& node, Container& container)
+  bool callback_VarsDecl(const parse_node& node, variable_vector& result)
   {
-    core::identifier_string_list names = parse_IdList(node.child(0));
-    data::sort_expression sort = parse_SortExpr(node.child(2));
-    for (core::identifier_string_list::iterator i = names.begin(); i != names.end(); ++i)
+    if (symbol_name(node) == "VarsDecl")
     {
-      container.push_back(variable(*i, sort));
+      core::identifier_string_list names = parse_IdList(node.child(0));
+      data::sort_expression sort = parse_SortExpr(node.child(2));
+      for (core::identifier_string_list::iterator i = names.begin(); i != names.end(); ++i)
+      {
+        result.push_back(variable(*i, sort));
+      }
+      return true;
     }
-  }
+    return false;
+  };
 
   data::variable_list parse_VarsDeclList(const parse_node& node)
   {
     variable_vector result;
-    traverse(node, "VarsDecl", boost::bind(&data_expression_actions::parse_VarsDecl<variable_vector>, this, _1, result));
+    traverse(node, boost::bind(&data_expression_actions::callback_VarsDecl, this, _1, result));
     return data::variable_list(result.begin(), result.end());
   }
 
@@ -320,6 +333,170 @@ struct data_expression_actions: public sort_expression_actions
   data::data_expression_list parse_BagEnumEltList(const parse_node& node)
   {
     return parse_DataExprList(node);
+  }
+};
+
+struct data_specification_actions: public data_expression_actions
+{
+  data_specification_actions(const parser_table& table_)
+    : data_expression_actions(table_)
+  {}
+
+  bool callback_SortDecl(const parse_node& node, atermpp::vector<atermpp::aterm_appl>& result)
+  {
+    if (symbol_name(node) == "SortDecl")
+    {
+      if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "IdList") && (symbol_name(node.child(1)) == ";"))
+      {
+        core::identifier_string_list ids = parse_IdList(node.child(0));
+        for (core::identifier_string_list::iterator i = ids.begin(); i != ids.end(); ++i)
+        {
+          result.push_back(basic_sort(*i));
+        }
+      }
+      else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "=") && (symbol_name(node.child(2)) == "SortExpr") && (symbol_name(node.child(3)) == ";"))
+      {
+        result.push_back(alias(basic_sort(parse_Id(node.child(0))), parse_SortExpr(node.child(2))));
+      }
+      else
+      {
+        report_unexpected_node(node);
+      }
+      return true;
+    }
+    return false;
+  };
+
+  atermpp::vector<atermpp::aterm_appl> parse_SortDeclList(const parse_node& node)
+  {
+    atermpp::vector<atermpp::aterm_appl> result;
+    traverse(node, boost::bind(&data_specification_actions::callback_SortDecl, this, _1, result));
+    return result;
+  }
+
+  atermpp::vector<atermpp::aterm_appl> parse_SortSpec(const parse_node& node)
+  {
+    return parse_SortDeclList(node.child(1));
+  }
+
+  bool callback_IdsDecl(const parse_node& node, function_symbol_vector& result)
+  {
+    if (symbol_name(node) == "IdsDecl")
+    {
+      core::identifier_string_list names = parse_IdList(node.child(0));
+      data::sort_expression sort = parse_SortExpr(node.child(2));
+      for (core::identifier_string_list::iterator i = names.begin(); i != names.end(); ++i)
+      {
+        result.push_back(function_symbol(*i, sort));
+      }
+      return true;
+    }
+    return false;
+  };
+
+  data::function_symbol_vector parse_IdsDeclList(const parse_node& node)
+  {
+    function_symbol_vector result;
+    traverse(node, boost::bind(&data_specification_actions::callback_IdsDecl, this, _1, result));
+    return result;
+  }
+
+  data::function_symbol_vector parse_ConsSpec(const parse_node& node)
+  {
+    return parse_IdsDeclList(node);
+  }
+
+  data::function_symbol_vector parse_MapSpec(const parse_node& node)
+  {
+    return parse_IdsDeclList(node);
+  }
+
+  data::variable_list parse_GlobVarSpec(const parse_node& node)
+  {
+    return parse_VarsDeclList(node);
+  }
+
+  data::variable_list parse_VarSpec(const parse_node& node)
+  {
+    return parse_VarsDeclList(node);
+  }
+
+  bool callback_EqnDecl(const parse_node& node, const variable_list& variables, data_equation_vector& result)
+  {
+    if (symbol_name(node) == "EqnDecl")
+    {
+      result.push_back(data_equation(variables, parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)), parse_DataExpr(node.child(4))));
+      return true;
+    }
+    return false;
+  };
+
+  data::data_equation_vector parse_EqnDeclList(const parse_node& node, const variable_list& variables)
+  {
+    data_equation_vector result;
+    traverse(node, boost::bind(&data_specification_actions::callback_EqnDecl, this, _1, variables, result));
+    return result;
+  }
+
+  data::data_equation_vector parse_EqnSpec(const parse_node& node)
+  {
+    variable_list variables = parse_VarSpec(node.child(0));
+    return parse_EqnDeclList(node.child(2), variables);
+  }
+
+  bool callback_DataSpecElement(const parse_node& node, data_specification& result)
+  {
+    if (symbol_name(node) == "SortSpec")
+    {
+      atermpp::vector<atermpp::aterm_appl> v = parse_SortSpec(node);
+      for (atermpp::vector<atermpp::aterm_appl>::iterator i = v.begin(); i != v.end(); ++i)
+      {
+        if (is_alias(*i))
+        {
+          result.add_alias(alias(*i));
+        }
+        else
+        {
+          result.add_sort(basic_sort(*i));
+        }
+      }
+      return true;
+    }
+    else if (symbol_name(node) == "ConsSpec")
+    {
+      function_symbol_vector v = parse_ConsSpec(node);
+      for (function_symbol_vector::iterator i = v.begin(); i != v.end(); ++i)
+      {
+        result.add_constructor(*i);
+      }
+      return true;
+    }
+    else if (symbol_name(node) == "MapSpec")
+    {
+      function_symbol_vector v = parse_MapSpec(node);
+      for (function_symbol_vector::iterator i = v.begin(); i != v.end(); ++i)
+      {
+        result.add_mapping(*i);
+      }
+      return true;
+    }
+    else if (symbol_name(node) == "EqnSpec")
+    {
+      data_equation_vector v = parse_EqnSpec(node.child(0));
+      for (data_equation_vector::iterator i = v.begin(); i != v.end(); ++i)
+      {
+        result.add_equation(*i);
+      }
+      return true;
+    }
+    return false;
+  }
+
+  data::data_specification parse_DataSpec(const parse_node& node)
+  {
+    data_specification result;
+    traverse(node, boost::bind(&data_specification_actions::callback_DataSpecElement, this, _1, result));
+    return result;
   }
 };
 

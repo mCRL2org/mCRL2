@@ -51,8 +51,6 @@ ProjDeclList: ProjDecl ( ',' ProjDecl )* ;
 
 IdsDecl: IdList ':' SortExpr ;
 
-IdsDeclList: IdsDecl ( ',' IdsDecl )* ;
-
 ConsSpec: 'cons' ( IdsDecl ';' )+ ;
 
 MapSpec: 'map' ( IdsDecl ';' )+ ;

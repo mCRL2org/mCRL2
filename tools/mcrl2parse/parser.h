@@ -116,6 +116,11 @@ struct parser_table
     return std::string(name);
   }
 
+  std::string symbol_name(const parse_node& node) const
+  {
+    return symbol_name(node.symbol());
+  }
+
   // Returns the 'start symbol' of the i-th symbol
   int start_symbol(unsigned int i) const
   {

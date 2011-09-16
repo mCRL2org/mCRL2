@@ -204,6 +204,12 @@ class mcrl2parse_tool : public input_tool
           data::data_expression d = actions.parse_DataExpr(node);
           std::cout << d << std::endl;
         }
+        else if (file_type == dataspec_e)
+        {
+          data::data_specification_actions actions(p.symbol_table());
+          data::data_specification spec = actions.parse_DataSpec(node);
+          std::cout << data::pp(spec) << std::endl;
+        }
 #endif
       }
       catch (std::exception& e)
