@@ -25,6 +25,8 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/libraries/data/include
   ${CMAKE_SOURCE_DIR}/libraries/process/include
   ${CMAKE_SOURCE_DIR}/libraries/lps/include
+  ${CMAKE_SOURCE_DIR}/libraries/bes/include
+  ${CMAKE_SOURCE_DIR}/libraries/pbes/include
   ${CMAKE_SOURCE_DIR}/libraries/atermpp/include
   ${CMAKE_SOURCE_DIR}/libraries/aterm/include
   ${CMAKE_SOURCE_DIR}/build/precompile
