@@ -1340,7 +1340,7 @@ string RewriterCompilingJitty::calc_inner_terms(nfs_array &nfs, size_t arity, AT
     return "";
   }
 
-  pair<bool,string> head = calc_inner_term(ATgetFirst(args),startarg,nnfvars,rewr?(rewr->get(arity-ATgetLength(args))):false);
+  pair<bool,string> head = calc_inner_term(ATgetFirst(args),startarg,nnfvars,rewr?(rewr->get(arity-ATgetLength(args))):false,arity);
   nfs.set(arity-ATgetLength(args),head.first);
   string tail = calc_inner_terms(nfs,arity,ATgetNext(args),startarg+1,nnfvars,rewr);
   return head.second+(ATisEmpty(ATgetNext(args))?"":",")+tail;
@@ -1361,13 +1361,14 @@ static string calc_inner_appl_head(size_t arity)
   return ss.str();
 }
 
-pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr)
+// if total_arity<=5 a term of type atermpp::aterm is generated, otherwise a term of type ATermAppl is generated.
+pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg, ATermList nnfvars, const bool rewr,const size_t total_arity)
 {
   if (ATisList(t))
   {
     stringstream ss;
     bool b;
-    int arity = ATgetLength((ATermList) t)-1;
+    size_t arity = ATgetLength((ATermList) t)-1;
 
 
     if (ATisInt(ATgetFirst((ATermList) t)))
@@ -1383,11 +1384,25 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       {
         if (b || !rewr)
         {
-          ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t)) << "))";
+          if (total_arity<=5) 
+          {
+            ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t)) << "))";
+          }
+          else
+          {
+            ss << "(ATermAppl) " << (void*) get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t)) << ")";
+          }
         }
         else
         {
-          ss << "rewr_" << ATgetInt((ATermInt) ATgetFirst((ATermList) t)) << "_0_0()";
+          if (total_arity<=5) 
+          {
+            ss << "rewr_" << ATgetInt((ATermInt) ATgetFirst((ATermList) t)) << "_0_0()";
+          }
+          else
+          {
+            ss << "(ATermAppl)rewr_" << ATgetInt((ATermInt) ATgetFirst((ATermList) t)) << "_0_0()";
+          }
         }
       }
       else
@@ -1397,7 +1412,14 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         calc_nfs_list(args_nfs,arity,ATgetNext((ATermList) t),startarg,nnfvars);
         if (!(b || !rewr))
         {
-          ss << "rewr_";
+          if (total_arity<=5)
+          {
+            ss << "rewr_";
+          }
+          else
+          {
+            ss << "(ATermAppl)rewr_";
+          }
           add_base_nfs(args_nfs,(ATermInt) ATgetFirst((ATermList) t),arity);
           extend_nfs(args_nfs,(ATermInt) ATgetFirst((ATermList) t),arity);
         }
@@ -1409,7 +1431,14 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         {
           if (b || !rewr)
           {
-            ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t)) << ")";
+            if (total_arity<=5)
+            {
+              ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t)) << ")";
+            }
+            else
+            {
+              ss << "(ATermAppl) " << (void*) get_int2aterm_value((ATermInt) ATgetFirst((ATermList) t));
+            }
           }
           else
             ss << ATgetInt((ATermInt) ATgetFirst((ATermList) t));
@@ -1418,7 +1447,15 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
         {
           if (b || !rewr)
           {
-            ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs.get_value(arity)) << ")";
+            if (total_arity<=5) 
+            {
+              ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs.get_value(arity)) << ")";
+            }
+            else
+            {
+              ss << "(ATermAppl) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))+((1 << arity)-arity-1)+args_nfs.get_value(arity)) << "";
+            }
+
           }
           else
             // QUE?! Dit stond er vroeger // Sjoerd
@@ -1463,10 +1500,10 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
       if (arity == 0)
       {
         assert(false);
-        return calc_inner_term(ATgetFirst((ATermList) t), startarg, nnfvars);
+        return calc_inner_term(ATgetFirst((ATermList) t), startarg, nnfvars,true,arity);
       }
       b = rewr;
-      pair<bool,string> head = calc_inner_term(ATgetFirst((ATermList) t),startarg,nnfvars,false);
+      pair<bool,string> head = calc_inner_term(ATgetFirst((ATermList) t),startarg,nnfvars,false,arity);
       nfs_array tail_first(arity);
       string tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,NULL);
       ss << "isAppl(" << head.second << ")?";
@@ -1528,6 +1565,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
   }
   else if (gsIsNil((ATermAppl) t))
   {
+    assert(0); // Nil is not expected here anymore.
     stringstream ss;
     bool b = (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != ATERM_NON_EXISTING_POSITION);
     if (rewr && b)
@@ -1560,7 +1598,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
 
 void RewriterCompilingJitty::calcTerm(FILE* f, ATerm t, int startarg, ATermList nnfvars, bool rewr)
 {
-  pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr);
+  pair<bool,string> p = calc_inner_term(t,startarg,nnfvars,rewr,0);
   fprintf(f,"%s",p.second.c_str());
   return;
 }

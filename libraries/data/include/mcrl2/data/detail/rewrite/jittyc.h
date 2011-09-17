@@ -84,7 +84,7 @@ class RewriterCompilingJitty: public Rewriter
     void calc_nfs_list(nfs_array &a, size_t arity, ATermList args, int startarg, ATermList nnfvars);
     bool calc_nfs(ATerm t, int startarg, ATermList nnfvars);
     std::string calc_inner_terms(nfs_array &nfs, size_t arity,ATermList args, int startarg, ATermList nnfvars, nfs_array *rewr);
-    std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
+    std::pair<bool,std::string> calc_inner_term(ATerm t, int startarg, ATermList nnfvars, const bool rewr, const size_t total_arity);
     void calcTerm(FILE* f, ATerm t, int startarg, ATermList nnfvars, bool rewr = true);
     void implement_tree_aux(FILE* f, ATermAppl tree, int cur_arg, int parent, int level, int cnt, int d, int arity, bool* used, ATermList nnfvars);
     void implement_tree(FILE* f, ATermAppl tree, int arity, int d, int opid, bool* used);
