@@ -1563,7 +1563,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(ATerm t, int startarg,
   }
   else if (gsIsNil((ATermAppl) t))
   {
-    assert(0); // Nil is not expected here anymore.
     stringstream ss;
     if (total_arity>5) 
     {

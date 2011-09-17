@@ -156,7 +156,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       add_option("no-check",
                  "do not check if the invariant holds before eliminating unreachable summands", 'n').
       add_option("no-elimination",
-                 "do not eliminate or simplify summands", 'e').
+                 "do not eliminate or simplify summands, but add the invariant to each condition", 'e').
       add_option("simplify-all",
                  "simplify the conditions of all summands, instead of just eliminating the summands "
                  "whose conditions in conjunction with the invariant are contradictions", 'l').
