@@ -12,6 +12,7 @@
 #ifndef MCRL2_BES_PG_PARSE_H
 #define MCRL2_BES_PG_PARSE_H
 
+#include <fstream>
 #include <cstdio>
 #include <cctype>
 #include <map>
