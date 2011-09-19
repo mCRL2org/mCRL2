@@ -30,6 +30,8 @@ namespace mcrl2
 namespace lps
 {
 
+#ifdef MCRL2_USE_NEW_PARSER
+
 struct action_rename_actions: public lps::action_actions
 {
   lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node)
@@ -116,6 +118,8 @@ action_rename_specification parse_action_rename_specification_new(const std::str
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return action_rename_actions().parse_ActionRenameSpec(node);
 }
+
+#endif // MCRL2_USE_NEW_PARSER
 
 /// \brief Parses a linear process specification from an input stream
 /// \param text An input stream containing a linear process specification

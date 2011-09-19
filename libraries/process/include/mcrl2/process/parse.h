@@ -29,6 +29,8 @@ namespace mcrl2
 namespace process
 {
 
+#ifdef MCRL2_USE_NEW_PARSER
+
 struct process_actions: public lps::action_actions
 {
   core::identifier_string_list parse_ActIdSet(const core::parse_node& node)
@@ -220,6 +222,8 @@ process_specification parse_process_specification_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return process_actions().parse_mCRL2Spec(node);
 }
+
+#endif // MCRL2_USE_NEW_PARSER
 
 /// \brief Parses a process specification from an input stream
 /// \param spec_stream An input stream

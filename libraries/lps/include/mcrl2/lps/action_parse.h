@@ -19,6 +19,8 @@ namespace mcrl2 {
 
 namespace lps {
 
+#ifdef MCRL2_USE_NEW_PARSER
+
 struct action_actions: public data::data_specification_actions
 {
   lps::action parse_Action(const core::parse_node& node)
@@ -67,6 +69,8 @@ struct action_actions: public data::data_specification_actions
     return lps::action_list();
   }
 };
+
+#endif // MCRL2_USE_NEW_PARSER
 
 } // namespace lps
 

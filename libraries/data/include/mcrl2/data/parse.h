@@ -39,6 +39,8 @@ namespace mcrl2
 namespace data
 {
 
+#ifdef MCRL2_USE_NEW_PARSER
+
 struct sort_expression_actions: public core::default_parser_actions
 {
   data::sort_expression parse_SortExpr(const core::parse_node& node)
@@ -417,6 +419,7 @@ sort_expression parse_sort_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("SortExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+std::cout << "<parse_sort_expression_new>\n" << core::default_parser_actions().print_node(node) << std::endl;
   return data_expression_actions().parse_SortExpr(node);
 }
 
@@ -439,6 +442,8 @@ data_specification parse_data_specification_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return data_specification_actions().parse_DataSpec(node);
 }
+
+#endif // MCRL2_USE_NEW_PARSER
 
 /// \cond INTERNAL_DOCS
 namespace detail
@@ -476,7 +481,7 @@ inline
 data_specification parse_data_specification(
   std::istream& in)
 {
-#ifdef MCRL2_CHECK_PARSER
+#ifdef MCRL2_CHECK_PARSER1
   std::string text = utilities::read_text(in);
   std::istringstream in2(text);
   atermpp::aterm_appl spec = core::parse_data_spec(in2);
@@ -488,7 +493,7 @@ data_specification parse_data_specification(
     throw mcrl2::runtime_error("Error while parsing data specification");
   }
   data_specification result(spec);
-#ifdef MCRL2_CHECK_PARSER
+#ifdef MCRL2_CHECK_PARSER1
   data_specification result2 = parse_data_specification_new(text);
   atermpp::aterm_appl x1 = data::detail::data_specification_to_aterm_data_spec(result);
   atermpp::aterm_appl x2 = data::detail::data_specification_to_aterm_data_spec(result2);
@@ -725,7 +730,7 @@ data_expression parse_data_expression(std::istream& in,
                                       const Variable_iterator end,
                                       const data_specification& data_spec = detail::default_specification())
 {
-#ifdef MCRL2_CHECK_PARSER
+#ifdef MCRL2_CHECK_PARSER2
   std::string text = utilities::read_text(in);
   std::istringstream in2(text);
   atermpp::aterm_appl data_expr = core::parse_data_expr(in2);
@@ -742,7 +747,7 @@ data_expression parse_data_expression(std::istream& in,
   // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
   data_expression t(data_expr);
 
-#ifdef MCRL2_CHECK_PARSER
+#ifdef MCRL2_CHECK_PARSER2
   data_expression result2 = parse_data_expression_new(text);
   if (t != result2)
   {

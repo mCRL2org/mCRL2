@@ -20,19 +20,23 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/core/dparser.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/exception.h"
 
+#ifdef MCRL2_USE_NEW_PARSER
+#include "mcrl2/core/dparser.h"
 extern "C"
 {
   extern D_ParserTables parser_tables_mcrl2;
 }
+#endif // MCRL2_USE_NEW_PARSER
 
 namespace mcrl2
 {
 namespace core
 {
+
+#ifdef MCRL2_USE_NEW_PARSER
 
 struct default_parser_actions
 {
@@ -151,6 +155,8 @@ struct default_parser_actions
     return parse_list<core::identifier_string>(node, "Id", boost::bind(&default_parser_actions::parse_Id, this, _1));
   }
 };
+
+#endif // MCRL2_USE_NEW_PARSER
 
 /** \brief  Parse an mCRL2 identifier.
   * \param[in] se_stream An input stream from which can be read.

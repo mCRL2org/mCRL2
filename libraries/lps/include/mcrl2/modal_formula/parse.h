@@ -24,6 +24,8 @@
 namespace mcrl2
 {
 
+#ifdef MCRL2_USE_NEW_PARSER
+
 namespace action_formulas
 {
 
@@ -91,8 +93,12 @@ regular_formula parse_regular_formula_new(const std::string& text)
 
 } // namespace regular_formulas
 
+#endif // MCRL2_USE_NEW_PARSER
+
 namespace state_formulas
 {
+
+#ifdef MCRL2_USE_NEW_PARSER
 
 struct state_formula_actions: public regular_formulas::regular_formula_actions
 {
@@ -141,6 +147,8 @@ state_formula parse_state_formula_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return state_formula_actions().parse_StateFrm(node);
 }
+
+#endif // MCRL2_USE_NEW_PARSER
 
 /// \brief Translates regular formulas appearing in f into action formulas.
 /// \param f A state formula

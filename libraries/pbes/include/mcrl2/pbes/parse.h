@@ -42,6 +42,8 @@ namespace mcrl2
 namespace pbes_system
 {
 
+#ifdef MCRL2_USE_NEW_PARSER
+
 struct pbes_actions: public data::data_specification_actions
 {
   pbes_system::pbes_expression parse_PbesExpr(const core::parse_node& node)
@@ -124,6 +126,8 @@ pbes<> parse_pbes_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return pbes_actions().parse_PbesSpec(node);
 }
+
+#endif // MCRL2_USE_NEW_PARSER
 
 /// \brief Reads a PBES from an input stream.
 /// \param from An input stream
