@@ -24,6 +24,11 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/exception.h"
 
+extern "C"
+{
+  extern D_ParserTables parser_tables_mcrl2;
+}
+
 namespace mcrl2
 {
 namespace core
@@ -32,6 +37,10 @@ namespace core
 struct default_parser_actions
 {
   const parser_table& table;
+
+  default_parser_actions()
+    : table(parser_tables_mcrl2)
+  {}
 
   default_parser_actions(const parser_table& table_)
     : table(table_)

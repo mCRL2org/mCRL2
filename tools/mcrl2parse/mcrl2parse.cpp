@@ -38,10 +38,6 @@ using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
-extern "C" {
-  extern D_ParserTables parser_tables_mcrl2;
-}
-
 class mcrl2parse_tool : public input_tool
 {
   typedef input_tool super;
@@ -199,73 +195,73 @@ class mcrl2parse_tool : public input_tool
 
         if (file_type == sortexpr_e)
         {
-          data::sort_expression_actions actions(p.symbol_table());
+          data::sort_expression_actions actions;
           data::sort_expression x = actions.parse_SortExpr(node);
           std::cout << x << std::endl;
         }
         else if (file_type == dataexpr_e)
         {
-          data::data_expression_actions actions(p.symbol_table());
+          data::data_expression_actions actions;
           data::data_expression x = actions.parse_DataExpr(node);
           std::cout << x << std::endl;
         }
         else if (file_type == dataspec_e)
         {
-          data::data_specification_actions actions(p.symbol_table());
+          data::data_specification_actions actions;
           data::data_specification x = actions.parse_DataSpec(node);
           std::cout << data::pp(x) << std::endl;
         }
         else if (file_type == procexpr_e)
         {
-          process::process_actions actions(p.symbol_table());
+          process::process_actions actions;
           process::process_expression x = actions.parse_ProcExpr(node);
           std::cout << x << std::endl;
         }
         else if (file_type == mcrl2spec_e)
         {
-          process::process_actions actions(p.symbol_table());
+          process::process_actions actions;
           process::process_specification x = actions.parse_mCRL2Spec(node);
           std::cout << process::pp(x) << std::endl;
         }
         else if (file_type == besexpr_e)
         {
-          bes::bes_actions actions(p.symbol_table());
+          bes::bes_actions actions;
           bes::boolean_expression x = actions.parse_BesExpr(node);
           std::cout << bes::pp(x) << std::endl;
         }
         else if (file_type == besspec_e)
         {
-          bes::bes_actions actions(p.symbol_table());
+          bes::bes_actions actions;
           bes::boolean_equation_system<> x = actions.parse_BesSpec(node);
           std::cout << bes::pp(x) << std::endl;
         }
         else if (file_type == pbesexpr_e)
         {
-          pbes_system::pbes_actions actions(p.symbol_table());
+          pbes_system::pbes_actions actions;
           pbes_system::pbes_expression x = actions.parse_PbesExpr(node);
           std::cout << pbes_system::pp(x) << std::endl;
         }
         else if (file_type == besspec_e)
         {
-          pbes_system::pbes_actions actions(p.symbol_table());
+          pbes_system::pbes_actions actions;
           pbes_system::pbes<> x = actions.parse_PbesSpec(node);
           std::cout << pbes_system::pp(x) << std::endl;
         }
         else if (file_type == actfrm_e)
         {
-          action_formulas::action_formula_actions actions(p.symbol_table());
+          action_formulas::action_formula_actions actions;
           action_formulas::action_formula x = actions.parse_ActFrm(node);
           std::cout << action_formulas::pp(x) << std::endl;
         }
         else if (file_type == regfrm_e)
         {
-          regular_formulas::regular_formula_actions actions(p.symbol_table());
+          regular_formulas::regular_formula_actions actions;
           regular_formulas::regular_formula x = actions.parse_RegFrm(node);
           std::cout << regular_formulas::pp(x) << std::endl;
         }
         else if (file_type == statefrm_e)
         {
-          state_formulas::state_formula_actions actions(p.symbol_table());
+          state_formulas::state_formula_actions actions;
           state_formulas::state_formula x = actions.parse_StateFrm(node);
           std::cout << state_formulas::pp(x) << std::endl;
         }

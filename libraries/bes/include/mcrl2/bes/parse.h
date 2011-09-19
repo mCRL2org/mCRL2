@@ -25,10 +25,6 @@ namespace bes
 
 struct bes_actions: public core::default_parser_actions
 {
-  bes_actions(const core::parser_table& table_)
-    : core::default_parser_actions(table_)
-  {}
-
   bes::boolean_expression parse_BesExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return bes::true_(); }

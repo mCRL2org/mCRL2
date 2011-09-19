@@ -21,10 +21,6 @@ namespace lps {
 
 struct action_actions: public data::data_specification_actions
 {
-  action_actions(const core::parser_table& table_)
-    : data::data_specification_actions(table_)
-  {}
-
   lps::action parse_Action(const core::parse_node& node)
   {
     return action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));

@@ -44,10 +44,6 @@ namespace pbes_system
 
 struct pbes_actions: public data::data_specification_actions
 {
-  pbes_actions(const core::parser_table& table_)
-    : data::data_specification_actions(table_)
-  {}
-
   pbes_system::pbes_expression parse_PbesExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }

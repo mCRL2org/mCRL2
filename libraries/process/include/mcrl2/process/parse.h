@@ -31,10 +31,6 @@ namespace process
 
 struct process_actions: public lps::action_actions
 {
-  process_actions(const core::parser_table& table_)
-    : lps::action_actions(table_)
-  {}
-
   core::identifier_string_list parse_ActIdSet(const core::parse_node& node)
   {
     return parse_IdList(node.child(1));

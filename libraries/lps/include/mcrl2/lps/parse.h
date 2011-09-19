@@ -32,10 +32,6 @@ namespace lps
 
 struct action_rename_actions: public lps::action_actions
 {
-  action_rename_actions(const core::parser_table& table_)
-    : lps::action_actions(table_)
-  {}
-
   lps::action_rename_rule_rhs parse_ActionRenameRuleRHS(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return action_rename_rule_rhs(parse_Action(node.child(0))); }

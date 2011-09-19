@@ -40,10 +40,6 @@ namespace data
 
 struct sort_expression_actions: public core::default_parser_actions
 {
-  sort_expression_actions(const core::parser_table& table_)
-    : core::default_parser_actions(table_)
-  {}
-
   data::sort_expression parse_SortExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { return sort_bool::bool_(); }
@@ -111,10 +107,6 @@ struct sort_expression_actions: public core::default_parser_actions
 
 struct data_expression_actions: public sort_expression_actions
 {
-  data_expression_actions(const core::parser_table& table_)
-    : sort_expression_actions(table_)
-  {}
-
   data_expression make_set_or_bag_comprehension(const variable& v, const data_expression& x)
   {
     return abstraction(set_or_bag_comprehension_binder(), atermpp::make_list(v), x);
@@ -259,10 +251,6 @@ struct data_expression_actions: public sort_expression_actions
 
 struct data_specification_actions: public data_expression_actions
 {
-  data_specification_actions(const core::parser_table& table_)
-    : data_expression_actions(table_)
-  {}
-
   bool callback_SortDecl(const core::parse_node& node, atermpp::vector<atermpp::aterm_appl>& result)
   {
     if (symbol_name(node) == "SortDecl")

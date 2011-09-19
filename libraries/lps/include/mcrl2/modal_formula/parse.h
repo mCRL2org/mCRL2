@@ -29,10 +29,6 @@ namespace action_formulas
 
 struct action_formula_actions: public lps::action_actions
 {
-  action_formula_actions(const core::parser_table& table_)
-    : lps::action_actions(table_)
-  {}
-
   action_formulas::action_formula parse_ActFrm(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return parse_MultAct(node.child(0)); }
@@ -59,10 +55,6 @@ namespace regular_formulas
 
 struct regular_formula_actions: public action_formulas::action_formula_actions
 {
-  regular_formula_actions(const core::parser_table& table_)
-    : action_formulas::action_formula_actions(table_)
-  {}
-
   regular_formulas::regular_formula parse_RegFrm(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActFrm")) { return parse_ActFrm(node.child(0)); }
@@ -84,10 +76,6 @@ namespace state_formulas
 
 struct state_formula_actions: public regular_formulas::regular_formula_actions
 {
-  state_formula_actions(const core::parser_table& table_)
-    : regular_formulas::regular_formula_actions(table_)
-  {}
-
   data::data_expression parse_Time(const core::parse_node& node)
   {
     if (node.child(1))
