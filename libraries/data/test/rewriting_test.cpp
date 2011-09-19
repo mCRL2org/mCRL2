@@ -1003,6 +1003,32 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
 
 }
 
+BOOST_AUTO_TEST_CASE(empty_list_equality)
+{
+
+  std::string s(
+  "map f: Bool#List(Bool)->List(Bool);"
+  "    n: Bool;"
+  "eqn f( n, [] ) =  [];"
+
+  );
+
+  data_specification specification(parse_data_specification(s));
+
+  std::cerr << "empty_list_equality\n";
+  rewrite_strategy_vector strategies(utilities::get_test_rewrite_strategies(false));
+  for (rewrite_strategy_vector::const_iterator strat = strategies.begin(); strat != strategies.end(); ++strat)
+  {
+    std::cerr << "  Strategy22: " << data::pp(*strat) << std::endl;
+    data::rewriter R(specification, *strat);
+
+    data::data_expression e(parse_data_expression("f( true,[] ) == [] ", specification));
+    data::data_expression f(parse_data_expression("true", specification));
+    data_rewrite_test(R, e, f);
+  }
+
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
