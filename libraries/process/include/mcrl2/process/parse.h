@@ -201,6 +201,26 @@ struct process_actions: public lps::action_actions
   }
 };
 
+inline
+process_expression parse_process_expression_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("ProcExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return process_actions().parse_ProcExpr(node);
+}
+
+inline
+process_specification parse_process_specification_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("mCRL2Spec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return process_actions().parse_mCRL2Spec(node);
+}
+
 /// \brief Parses a process specification from an input stream
 /// \param spec_stream An input stream
 /// \param alpha_reduce Indicates whether alphabet reductions need to be performed

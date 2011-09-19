@@ -48,6 +48,16 @@ struct action_formula_actions: public lps::action_actions
   }
 };
 
+inline
+action_formula parse_action_formula_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("ActFrm");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return action_formula_actions().parse_ActFrm(node);
+}
+
 } // namespace action_formulas
 
 namespace regular_formulas
@@ -68,6 +78,16 @@ struct regular_formula_actions: public action_formulas::action_formula_actions
     return regular_formulas::regular_formula();
   }
 };
+
+inline
+regular_formula parse_regular_formula_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("RegFrm");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return regular_formula_actions().parse_RegFrm(node);
+}
 
 } // namespace regular_formulas
 
@@ -111,6 +131,16 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
     return state_formulas::state_formula();
   }
 };
+
+inline
+state_formula parse_state_formula_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("StateFrm");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return state_formula_actions().parse_StateFrm(node);
+}
 
 /// \brief Translates regular formulas appearing in f into action formulas.
 /// \param f A state formula

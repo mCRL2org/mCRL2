@@ -12,10 +12,12 @@
 #ifndef MCRL2_UTILITIES_TEXT_UTILITY_H
 #define MCRL2_UTILITIES_TEXT_UTILITY_H
 
+#include <algorithm>
+#include <iostream>
+#include <iterator>
+#include <sstream>
 #include <string>
 #include <vector>
-#include <sstream>
-#include <iterator>
 
 namespace mcrl2
 {
@@ -51,6 +53,22 @@ std::vector<std::string> split(const std::string& line, const std::string& separ
 /// \param warn If true, a warning is printed to standard error if the file is not found
 /// \return The contents of the file
 std::string read_text(const std::string& filename, bool warn=false);
+
+/// \brief Read text from a stream.
+/// \param in An input stream
+/// \return The text read from the stream
+inline
+std::string read_text(std::istream& in)
+{
+  in.unsetf(std::ios::skipws); //  Turn of white space skipping on the stream
+  std::string s;
+  std::copy(
+    std::istream_iterator<char>(in),
+    std::istream_iterator<char>(),
+    std::back_inserter(s)
+  );
+  return s;
+}
 
 /// \brief Remove comments from a text (everything from '%' until end of line).
 /// \param text A string
@@ -99,7 +117,7 @@ std::string string_join(const Container& c, const std::string& separator)
 /// \return The wrapped text.
 std::string word_wrap_text(const std::string& text, unsigned int max_line_length = 78);
 
-/// \brief Test if a string is a number. 
+/// \brief Test if a string is a number.
 /// \param s A string of text.
 /// \return True if s is of the form "0 | -? [1-9][0-9]*", false otherwise
 bool is_numeric_string(const std::string& s);

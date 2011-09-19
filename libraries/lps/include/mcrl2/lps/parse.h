@@ -107,6 +107,16 @@ struct action_rename_actions: public lps::action_actions
   }
 };
 
+inline
+action_rename_specification parse_action_rename_specification_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("ActionRenameSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return action_rename_actions().parse_ActionRenameSpec(node);
+}
+
 /// \brief Parses a linear process specification from an input stream
 /// \param text An input stream containing a linear process specification
 /// \return The parsed specification

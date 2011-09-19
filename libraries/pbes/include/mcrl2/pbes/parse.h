@@ -105,6 +105,26 @@ struct pbes_actions: public data::data_specification_actions
   }
 };
 
+inline
+pbes_expression parse_pbes_expression_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return pbes_actions().parse_PbesExpr(node);
+}
+
+inline
+pbes<> parse_pbes_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return pbes_actions().parse_PbesSpec(node);
+}
+
 /// \brief Reads a PBES from an input stream.
 /// \param from An input stream
 /// \param p A PBES
