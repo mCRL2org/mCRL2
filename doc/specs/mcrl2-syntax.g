@@ -329,7 +329,8 @@ StateFrm
   | 'exists' VarsDeclList '.' StateFrm                           $unary_left 2
   | '[' RegFrm ']'
   | '<' RegFrm '>'
-  | FixedPointOperator StateVarDecl '.' StateFrm                 $unary_left 1
+  | 'mu' StateVarDecl '.' StateFrm                               $unary_left 1
+  | 'nu' StateVarDecl '.' StateFrm                               $unary_left 1
   | Id ( '(' DataExprList ')' )?
   | 'delay' ( '@' DataExpr )?
   | 'yaled' ( '@' DataExpr )?

@@ -250,6 +250,24 @@ class mcrl2parse_tool : public input_tool
           pbes_system::pbes<> x = actions.parse_PbesSpec(node);
           std::cout << pbes_system::pp(x) << std::endl;
         }
+        else if (file_type == actfrm_e)
+        {
+          action_formulas::action_formula_actions actions(p.symbol_table());
+          action_formulas::action_formula x = actions.parse_ActFrm(node);
+          std::cout << action_formulas::pp(x) << std::endl;
+        }
+        else if (file_type == regfrm_e)
+        {
+          regular_formulas::regular_formula_actions actions(p.symbol_table());
+          regular_formulas::regular_formula x = actions.parse_RegFrm(node);
+          std::cout << regular_formulas::pp(x) << std::endl;
+        }
+        else if (file_type == statefrm_e)
+        {
+          state_formulas::state_formula_actions actions(p.symbol_table());
+          state_formulas::state_formula x = actions.parse_StateFrm(node);
+          std::cout << state_formulas::pp(x) << std::endl;
+        }
 #endif
       }
       catch (std::exception& e)

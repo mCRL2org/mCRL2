@@ -12,6 +12,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/process/process_specification.h"
 
@@ -19,19 +20,17 @@ namespace mcrl2 {
 
 namespace data {
 
-using namespace dparser;
-
 struct default_actions
 {
-  const parser_table& table;
+  const dparser::parser_table& table;
 
-  default_actions(const parser_table& table_)
+  default_actions(const dparser::parser_table& table_)
     : table(table_)
   {}
 
   // starts a traversal in node, and calls the function f to each subnode of the given type
   template <typename Function>
-  void traverse(const parse_node& node, Function f)
+  void traverse(const dparser::parse_node& node, Function f)
   {
     if (!node)
     {
@@ -50,19 +49,19 @@ struct default_actions
   template <typename Container, typename Function>
   struct collector
   {
-    const parser_table& table;
+    const dparser::parser_table& table;
     const std::string& type;
     Container& container;
     Function f;
 
-    collector(const parser_table& table_, const std::string& type_, Container& container_, Function f_)
+    collector(const dparser::parser_table& table_, const std::string& type_, Container& container_, Function f_)
       : table(table_),
         type(type_),
         container(container_),
         f(f_)
     {}
 
-    bool operator()(const parse_node& node) const
+    bool operator()(const dparser::parse_node& node) const
     {
       if (table.symbol_name(node) == type)
       {
@@ -74,17 +73,17 @@ struct default_actions
   };
 
   template <typename Container, typename Function>
-  collector<Container, Function> make_collector(const parser_table& table, const std::string& type, Container& container, Function f)
+  collector<Container, Function> make_collector(const dparser::parser_table& table, const std::string& type, Container& container, Function f)
   {
     return collector<Container, Function>(table, type, container, f);
   }
 
-  std::string symbol_name(const parse_node& node) const
+  std::string symbol_name(const dparser::parse_node& node) const
   {
     return table.symbol_name(node.symbol());
   }
 
-  std::string print_node(const parse_node& node)
+  std::string print_node(const dparser::parse_node& node)
   {
     std::ostringstream out;
     out << "symbol      = " << symbol_name(node) << std::endl;
@@ -97,14 +96,14 @@ struct default_actions
     return out.str();
   }
 
-  void report_unexpected_node(const parse_node& node)
+  void report_unexpected_node(const dparser::parse_node& node)
   {
     std::cout << "--- unexpected node ---\n" << print_node(node);
     throw mcrl2::runtime_error("unexpected node detected!");
   }
 
   template <typename T, typename Function>
-  atermpp::term_list<T> parse_list(const parse_node& node, const std::string& type, Function f)
+  atermpp::term_list<T> parse_list(const dparser::parse_node& node, const std::string& type, Function f)
   {
     atermpp::vector<T> result;
     traverse(node, make_collector(table, type, result, f));
@@ -112,24 +111,24 @@ struct default_actions
   }
 
   template <typename T, typename Function>
-  atermpp::vector<T> parse_vector(const parse_node& node, const std::string& type, Function f)
+  atermpp::vector<T> parse_vector(const dparser::parse_node& node, const std::string& type, Function f)
   {
     atermpp::vector<T> result;
     traverse(node, make_collector(table, type, result, f));
     return result;
   }
 
-  core::identifier_string parse_Id(const parse_node& node)
+  core::identifier_string parse_Id(const dparser::parse_node& node)
   {
     return core::identifier_string(node.string());
   }
 
-  core::identifier_string parse_Number(const parse_node& node)
+  core::identifier_string parse_Number(const dparser::parse_node& node)
   {
     return core::identifier_string(node.string());
   }
 
-  core::identifier_string_list parse_IdList(const parse_node& node)
+  core::identifier_string_list parse_IdList(const dparser::parse_node& node)
   {
     return parse_list<core::identifier_string>(node, "Id", boost::bind(&default_actions::parse_Id, this, _1));
   }
@@ -137,11 +136,11 @@ struct default_actions
 
 struct sort_expression_actions: public default_actions
 {
-  sort_expression_actions(const parser_table& table_)
+  sort_expression_actions(const dparser::parser_table& table_)
     : default_actions(table_)
   {}
 
-  data::sort_expression parse_SortExpr(const parse_node& node)
+  data::sort_expression parse_SortExpr(const dparser::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { return sort_bool::bool_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Pos")) { return sort_pos::pos(); }
@@ -159,12 +158,12 @@ struct sort_expression_actions: public default_actions
     return data::sort_expression();
   }
 
-  data::sort_expression_list parse_SortExprList(const parse_node& node)
+  data::sort_expression_list parse_SortExprList(const dparser::parse_node& node)
   {
     return parse_list<data::sort_expression>(node, "SortExpr", boost::bind(&sort_expression_actions::parse_SortExpr, this, _1));
   }
 
-  data::structured_sort_constructor parse_ConstrDecl(const parse_node& node)
+  data::structured_sort_constructor parse_ConstrDecl(const dparser::parse_node& node)
   {
     core::identifier_string name = parse_Id(node.child(0));
     data::structured_sort_constructor_argument_list arguments;
@@ -175,7 +174,7 @@ struct sort_expression_actions: public default_actions
     }
     if (node.child(2))
     {
-      parse_node u = node.child(2);
+      dparser::parse_node u = node.child(2);
       if (u.child(0))
       {
         recogniser = parse_Id(node.child(2).child(0).child(1));
@@ -184,12 +183,12 @@ struct sort_expression_actions: public default_actions
     return structured_sort_constructor(name, arguments, recogniser);
   }
 
-  data::structured_sort_constructor_list parse_ConstrDeclList(const parse_node& node)
+  data::structured_sort_constructor_list parse_ConstrDeclList(const dparser::parse_node& node)
   {
     return parse_list<data::structured_sort_constructor>(node, "ConstrDecl", boost::bind(&sort_expression_actions::parse_ConstrDecl, this, _1));
   }
 
-  data::structured_sort_constructor_argument parse_ProjDecl(const parse_node& node)
+  data::structured_sort_constructor_argument parse_ProjDecl(const dparser::parse_node& node)
   {
     core::identifier_string name = no_identifier();
     sort_expression sort = parse_SortExpr(node.child(1));
@@ -200,7 +199,7 @@ struct sort_expression_actions: public default_actions
     return structured_sort_constructor_argument(name, sort);
   }
 
-  data::structured_sort_constructor_argument_list parse_ProjDeclList(const parse_node& node)
+  data::structured_sort_constructor_argument_list parse_ProjDeclList(const dparser::parse_node& node)
   {
     return parse_list<data::structured_sort_constructor_argument>(node, "ProjDecl", boost::bind(&sort_expression_actions::parse_ProjDecl, this, _1));
   }
@@ -208,7 +207,7 @@ struct sort_expression_actions: public default_actions
 
 struct data_expression_actions: public sort_expression_actions
 {
-  data_expression_actions(const parser_table& table_)
+  data_expression_actions(const dparser::parser_table& table_)
     : sort_expression_actions(table_)
   {}
 
@@ -240,12 +239,12 @@ struct data_expression_actions: public sort_expression_actions
     return make_application(identifier(mcrl2::data::function_update_name()), x, y, z);
   }
 
-  data::variable parse_VarDecl(const parse_node& node)
+  data::variable parse_VarDecl(const dparser::parse_node& node)
   {
     return variable(parse_Id(node.child(0)), parse_SortExpr(node.child(2)));
   }
 
-  bool callback_VarsDecl(const parse_node& node, variable_vector& result)
+  bool callback_VarsDecl(const dparser::parse_node& node, variable_vector& result)
   {
     if (symbol_name(node) == "VarsDecl")
     {
@@ -260,14 +259,14 @@ struct data_expression_actions: public sort_expression_actions
     return false;
   };
 
-  data::variable_list parse_VarsDeclList(const parse_node& node)
+  data::variable_list parse_VarsDeclList(const dparser::parse_node& node)
   {
     variable_vector result;
     traverse(node, boost::bind(&data_expression_actions::callback_VarsDecl, this, _1, boost::ref(result)));
     return data::variable_list(result.begin(), result.end());
   }
 
-  data::data_expression parse_DataExpr(const parse_node& node)
+  data::data_expression parse_DataExpr(const dparser::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return identifier(parse_Id(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return identifier(parse_Number(node.child(0))); }
@@ -313,7 +312,7 @@ struct data_expression_actions: public sort_expression_actions
     return data::data_expression();
   }
 
-  data::data_expression parse_DataExprUnit(const parse_node& node)
+  data::data_expression parse_DataExprUnit(const dparser::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return identifier(parse_Id(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return identifier(parse_Number(node.child(0))); }
@@ -328,22 +327,27 @@ struct data_expression_actions: public sort_expression_actions
     return data::data_expression();
   }
 
-  data::identifier_assignment parse_WhrExpr(const parse_node& node)
+  data::data_expression parse_DataValExpr(const dparser::parse_node& node)
+  {
+    return parse_DataExpr(node.child(2));
+  }
+
+  data::identifier_assignment parse_WhrExpr(const dparser::parse_node& node)
   {
     return identifier_assignment(parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)));
   }
 
-  data::identifier_assignment_list parse_WhrExprList(const parse_node& node)
+  data::identifier_assignment_list parse_WhrExprList(const dparser::parse_node& node)
   {
     return parse_list<data::identifier_assignment>(node, "WhrExpr", boost::bind(&data_expression_actions::parse_WhrExpr, this, _1));
   }
 
-  data::data_expression_list parse_DataExprList(const parse_node& node)
+  data::data_expression_list parse_DataExprList(const dparser::parse_node& node)
   {
     return parse_list<data::data_expression>(node, "DataExpr", boost::bind(&data_expression_actions::parse_DataExpr, this, _1));
   }
 
-  data::data_expression_list parse_BagEnumEltList(const parse_node& node)
+  data::data_expression_list parse_BagEnumEltList(const dparser::parse_node& node)
   {
     return parse_DataExprList(node);
   }
@@ -351,11 +355,11 @@ struct data_expression_actions: public sort_expression_actions
 
 struct data_specification_actions: public data_expression_actions
 {
-  data_specification_actions(const parser_table& table_)
+  data_specification_actions(const dparser::parser_table& table_)
     : data_expression_actions(table_)
   {}
 
-  bool callback_SortDecl(const parse_node& node, atermpp::vector<atermpp::aterm_appl>& result)
+  bool callback_SortDecl(const dparser::parse_node& node, atermpp::vector<atermpp::aterm_appl>& result)
   {
     if (symbol_name(node) == "SortDecl")
     {
@@ -380,19 +384,19 @@ struct data_specification_actions: public data_expression_actions
     return false;
   };
 
-  atermpp::vector<atermpp::aterm_appl> parse_SortDeclList(const parse_node& node)
+  atermpp::vector<atermpp::aterm_appl> parse_SortDeclList(const dparser::parse_node& node)
   {
     atermpp::vector<atermpp::aterm_appl> result;
     traverse(node, boost::bind(&data_specification_actions::callback_SortDecl, this, _1, boost::ref(result)));
     return result;
   }
 
-  atermpp::vector<atermpp::aterm_appl> parse_SortSpec(const parse_node& node)
+  atermpp::vector<atermpp::aterm_appl> parse_SortSpec(const dparser::parse_node& node)
   {
     return parse_SortDeclList(node.child(1));
   }
 
-  bool callback_IdsDecl(const parse_node& node, function_symbol_vector& result)
+  bool callback_IdsDecl(const dparser::parse_node& node, function_symbol_vector& result)
   {
     if (symbol_name(node) == "IdsDecl")
     {
@@ -407,34 +411,34 @@ struct data_specification_actions: public data_expression_actions
     return false;
   };
 
-  data::function_symbol_vector parse_IdsDeclList(const parse_node& node)
+  data::function_symbol_vector parse_IdsDeclList(const dparser::parse_node& node)
   {
     function_symbol_vector result;
     traverse(node, boost::bind(&data_specification_actions::callback_IdsDecl, this, _1, boost::ref(result)));
     return result;
   }
 
-  data::function_symbol_vector parse_ConsSpec(const parse_node& node)
+  data::function_symbol_vector parse_ConsSpec(const dparser::parse_node& node)
   {
     return parse_IdsDeclList(node);
   }
 
-  data::function_symbol_vector parse_MapSpec(const parse_node& node)
+  data::function_symbol_vector parse_MapSpec(const dparser::parse_node& node)
   {
     return parse_IdsDeclList(node);
   }
 
-  data::variable_list parse_GlobVarSpec(const parse_node& node)
+  data::variable_list parse_GlobVarSpec(const dparser::parse_node& node)
   {
     return parse_VarsDeclList(node);
   }
 
-  data::variable_list parse_VarSpec(const parse_node& node)
+  data::variable_list parse_VarSpec(const dparser::parse_node& node)
   {
     return parse_VarsDeclList(node);
   }
 
-  bool callback_EqnDecl(const parse_node& node, const variable_list& variables, data_equation_vector& result)
+  bool callback_EqnDecl(const dparser::parse_node& node, const variable_list& variables, data_equation_vector& result)
   {
     if (symbol_name(node) == "EqnDecl")
     {
@@ -444,20 +448,20 @@ struct data_specification_actions: public data_expression_actions
     return false;
   };
 
-  data::data_equation_vector parse_EqnDeclList(const parse_node& node, const variable_list& variables)
+  data::data_equation_vector parse_EqnDeclList(const dparser::parse_node& node, const variable_list& variables)
   {
     data_equation_vector result;
     traverse(node, boost::bind(&data_specification_actions::callback_EqnDecl, this, _1, boost::ref(variables), boost::ref(result)));
     return result;
   }
 
-  data::data_equation_vector parse_EqnSpec(const parse_node& node)
+  data::data_equation_vector parse_EqnSpec(const dparser::parse_node& node)
   {
     variable_list variables = parse_VarSpec(node.child(0));
     return parse_EqnDeclList(node.child(2), variables);
   }
 
-  bool callback_DataSpecElement(const parse_node& node, data_specification& result)
+  bool callback_DataSpecElement(const dparser::parse_node& node, data_specification& result)
   {
     if (symbol_name(node) == "SortSpec")
     {
@@ -505,7 +509,7 @@ struct data_specification_actions: public data_expression_actions
     return false;
   }
 
-  data::data_specification parse_DataSpec(const parse_node& node)
+  data::data_specification parse_DataSpec(const dparser::parse_node& node)
   {
     data_specification result;
     traverse(node, boost::bind(&data_specification_actions::callback_DataSpecElement, this, _1, boost::ref(result)));
@@ -517,25 +521,23 @@ struct data_specification_actions: public data_expression_actions
 
 namespace lps {
 
-using namespace dparser;
-
 struct action_actions: public data::data_specification_actions
 {
-  action_actions(const parser_table& table_)
+  action_actions(const dparser::parser_table& table_)
     : data::data_specification_actions(table_)
   {}
 
-  lps::action parse_Action(const parse_node& node)
+  lps::action parse_Action(const dparser::parse_node& node)
   {
     return action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  lps::action_list parse_ActionList(const parse_node& node)
+  lps::action_list parse_ActionList(const dparser::parse_node& node)
   {
     return parse_list<lps::action_label>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
   }
 
-  bool callback_ActDecl(const parse_node& node, action_label_vector& result)
+  bool callback_ActDecl(const dparser::parse_node& node, action_label_vector& result)
   {
     if (symbol_name(node) == "ActDecl")
     {
@@ -551,22 +553,22 @@ struct action_actions: public data::data_specification_actions
     return false;
   };
 
-  lps::action_label_list parse_ActDeclList(const parse_node& node)
+  lps::action_label_list parse_ActDeclList(const dparser::parse_node& node)
   {
     action_label_vector result;
     traverse(node, boost::bind(&action_actions::callback_ActDecl, this, _1, boost::ref(result)));
     return lps::action_label_list(result.begin(), result.end());
   }
 
-  lps::action_label_list parse_ActSpec(const parse_node& node)
+  lps::action_label_list parse_ActSpec(const dparser::parse_node& node)
   {
     return parse_ActDeclList(node.child(1));
   }
 
-  lps::action_list parse_MultAct(const parse_node& node)
+  lps::multi_action parse_MultAct(const dparser::parse_node& node)
   {
-    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::action_list(); }
-    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList")) { return parse_ActionList(node.child(0)); }
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return lps::multi_action(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActionList")) { return lps::multi_action(parse_ActionList(node.child(0))); }
     report_unexpected_node(node);
     return lps::action_list();
   }
@@ -576,35 +578,33 @@ struct action_actions: public data::data_specification_actions
 
 namespace process {
 
-using namespace dparser;
-
 struct process_actions: public lps::action_actions
 {
-  process_actions(const parser_table& table_)
+  process_actions(const dparser::parser_table& table_)
     : lps::action_actions(table_)
   {}
 
-  core::identifier_string_list parse_ActIdSet(const parse_node& node)
+  core::identifier_string_list parse_ActIdSet(const dparser::parse_node& node)
   {
     return parse_IdList(node.child(1));
   }
 
-  process::action_name_multiset parse_MultActId(const parse_node& node)
+  process::action_name_multiset parse_MultActId(const dparser::parse_node& node)
   {
     return action_name_multiset(parse_IdList(node));
   }
 
-  process::action_name_multiset_list parse_MultActIdList(const parse_node& node)
+  process::action_name_multiset_list parse_MultActIdList(const dparser::parse_node& node)
   {
     return parse_list<process::action_name_multiset>(node, "MultActId", boost::bind(&process_actions::parse_MultActId, this, _1));
   }
 
-  process::action_name_multiset_list parse_MultActIdSet(const parse_node& node)
+  process::action_name_multiset_list parse_MultActIdSet(const dparser::parse_node& node)
   {
     return parse_MultActIdList(node.child(1));
   }
 
-  core::identifier_string parse_CommExprRhs(const parse_node& node)
+  core::identifier_string parse_CommExprRhs(const dparser::parse_node& node)
   {
     // TODO: get rid of this 'nil'
     core::identifier_string result = core::detail::gsMakeNil();
@@ -615,7 +615,7 @@ struct process_actions: public lps::action_actions
     return result;
   }
 
-  process::communication_expression parse_CommExpr(const parse_node& node)
+  process::communication_expression parse_CommExpr(const dparser::parse_node& node)
   {
     core::identifier_string id = parse_Id(node.child(0));
     core::identifier_string_list ids = parse_IdList(node.child(2));
@@ -624,32 +624,32 @@ struct process_actions: public lps::action_actions
     return process::communication_expression(lhs, rhs);
   }
 
-  process::communication_expression_list parse_CommExprList(const parse_node& node)
+  process::communication_expression_list parse_CommExprList(const dparser::parse_node& node)
   {
     return parse_list<process::communication_expression>(node, "CommExpr", boost::bind(&process_actions::parse_CommExpr, this, _1));
   }
 
-  process::communication_expression_list parse_CommExprSet(const parse_node& node)
+  process::communication_expression_list parse_CommExprSet(const dparser::parse_node& node)
   {
     return parse_CommExprList(node.child(1));
   }
 
-  process::rename_expression parse_RenExpr(const parse_node& node)
+  process::rename_expression parse_RenExpr(const dparser::parse_node& node)
   {
     return process::rename_expression(parse_Id(node.child(0)), parse_Id(node.child(2)));
   }
 
-  process::rename_expression_list parse_RenExprList(const parse_node& node)
+  process::rename_expression_list parse_RenExprList(const dparser::parse_node& node)
   {
     return parse_list<process::rename_expression>(node, "RenExpr", boost::bind(&process_actions::parse_RenExpr, this, _1));
   }
 
-  process::rename_expression_list parse_RenExprSet(const parse_node& node)
+  process::rename_expression_list parse_RenExprSet(const dparser::parse_node& node)
   {
     return parse_RenExprList(node.child(1));
   }
 
-  process::process_expression parse_ProcExpr(const parse_node& node)
+  process::process_expression parse_ProcExpr(const dparser::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
@@ -670,7 +670,7 @@ struct process_actions: public lps::action_actions
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "ProcExprThenElse"))
     {
       data::data_expression condition = parse_DataExprUnit(node.child(0));
-      parse_node u = node.child(1);
+      dparser::parse_node u = node.child(1);
       process_expression x1 = parse_ProcExpr(u.child(1));
       if (u.child(2) && u.child(2).child(1))
       {
@@ -684,27 +684,27 @@ struct process_actions: public lps::action_actions
     return process::process_expression();
   }
 
-  process::process_equation parse_ProcDecl(const parse_node& node)
+  process::process_equation parse_ProcDecl(const dparser::parse_node& node)
   {
     return process::process_equation(parse_Id(node.child(0)), parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3)));
   }
 
-  process::process_equation_list parse_ProcDeclList(const parse_node& node)
+  process::process_equation_list parse_ProcDeclList(const dparser::parse_node& node)
   {
     return parse_list<process::process_equation>(node, "ProcDecl", boost::bind(&process_actions::parse_ProcDecl, this, _1));
   }
 
-  process::process_equation_list parse_ProcSpec(const parse_node& node)
+  process::process_equation_list parse_ProcSpec(const dparser::parse_node& node)
   {
     return parse_ProcDeclList(node.child(1));
   }
 
-  process::process_expression parse_Init(const parse_node& node)
+  process::process_expression parse_Init(const dparser::parse_node& node)
   {
     return parse_ProcExpr(node.child(1));
   }
 
-  bool callback_mCRL2Spec(const parse_node& node, process::process_specification& result)
+  bool callback_mCRL2Spec(const dparser::parse_node& node, process::process_specification& result)
   {
     if (symbol_name(node) == "SortSpec")
     {
@@ -746,7 +746,7 @@ struct process_actions: public lps::action_actions
     return false;
   }
 
-  process::process_specification parse_mCRL2Spec(const parse_node& node)
+  process::process_specification parse_mCRL2Spec(const dparser::parse_node& node)
   {
     process::process_specification result;
     traverse(node, boost::bind(&process_actions::callback_mCRL2Spec, this, _1, boost::ref(result)));
@@ -758,15 +758,13 @@ struct process_actions: public lps::action_actions
 
 namespace bes {
 
-using namespace dparser;
-
 struct bes_actions: public data::default_actions
 {
-  bes_actions(const parser_table& table_)
+  bes_actions(const dparser::parser_table& table_)
     : data::default_actions(table_)
   {}
 
-  bes::boolean_expression parse_BesExpr(const parse_node& node)
+  bes::boolean_expression parse_BesExpr(const dparser::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return bes::true_(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return bes::false_(); }
@@ -780,12 +778,12 @@ struct bes_actions: public data::default_actions
     return bes::boolean_expression();
   }
 
-  bes::boolean_variable parse_BesVar(const parse_node& node)
+  bes::boolean_variable parse_BesVar(const dparser::parse_node& node)
   {
     return bes::boolean_variable(parse_Id(node.child(0)));
   }
 
-  fixpoint_symbol parse_FixedPointOperator(const parse_node& node)
+  fixpoint_symbol parse_FixedPointOperator(const dparser::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
@@ -793,27 +791,27 @@ struct bes_actions: public data::default_actions
     return pbes_system::fixpoint_symbol();
   }
 
-  bes::boolean_equation parse_BesEqnDecl(const parse_node& node)
+  bes::boolean_equation parse_BesEqnDecl(const dparser::parse_node& node)
   {
     return bes::boolean_equation(parse_FixedPointOperator(node.child(0)), parse_BesVar(node.child(1)), parse_BesExpr(node.child(3)));
   }
 
-  atermpp::vector<boolean_equation> parse_BesEqnSpec(const parse_node& node)
+  atermpp::vector<boolean_equation> parse_BesEqnSpec(const dparser::parse_node& node)
   {
     return parse_BesEqnDeclList(node.child(1));
   }
 
-  bes::boolean_variable parse_BesInit(const parse_node& node)
+  bes::boolean_variable parse_BesInit(const dparser::parse_node& node)
   {
     return parse_BesVar(node.child(1));
   }
 
-  bes::boolean_equation_system<> parse_BesSpec(const parse_node& node)
+  bes::boolean_equation_system<> parse_BesSpec(const dparser::parse_node& node)
   {
     return bes::boolean_equation_system<>(parse_BesEqnSpec(node.child(0)), parse_BesInit(node.child(1)));
   }
 
-  atermpp::vector<boolean_equation> parse_BesEqnDeclList(const parse_node& node)
+  atermpp::vector<boolean_equation> parse_BesEqnDeclList(const dparser::parse_node& node)
   {
     return parse_vector<bes::boolean_equation>(node, "BesEqnDecl", boost::bind(&bes_actions::parse_BesEqnDecl, this, _1));
   }
@@ -823,20 +821,13 @@ struct bes_actions: public data::default_actions
 
 namespace pbes_system {
 
-using namespace dparser;
-
 struct pbes_actions: public data::data_specification_actions
 {
-  pbes_actions(const parser_table& table_)
+  pbes_actions(const dparser::parser_table& table_)
     : data::data_specification_actions(table_)
   {}
 
-  data::data_expression parse_DataValExpr(const parse_node& node)
-  {
-    return parse_DataExpr(node.child(2));
-  }
-
-  pbes_system::pbes_expression parse_PbesExpr(const parse_node& node)
+  pbes_system::pbes_expression parse_PbesExpr(const dparser::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return pbes_system::true_(); }
@@ -853,22 +844,22 @@ struct pbes_actions: public data::data_specification_actions
     return pbes_system::pbes_expression();
   }
 
-  pbes_system::propositional_variable parse_PropVarDecl(const parse_node& node)
+  pbes_system::propositional_variable parse_PropVarDecl(const dparser::parse_node& node)
   {
     return pbes_system::propositional_variable(parse_Id(node.child(0)), parse_VarsDeclList(node.child(1)));
   }
 
-  pbes_system::propositional_variable_instantiation parse_PropVarInst(const parse_node& node)
+  pbes_system::propositional_variable_instantiation parse_PropVarInst(const dparser::parse_node& node)
   {
     return pbes_system::propositional_variable_instantiation(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  pbes_system::propositional_variable_instantiation parse_PbesInit(const parse_node& node)
+  pbes_system::propositional_variable_instantiation parse_PbesInit(const dparser::parse_node& node)
   {
     return parse_PropVarInst(node.child(1));
   }
 
-  pbes_system::fixpoint_symbol parse_FixedPointOperator(const parse_node& node)
+  pbes_system::fixpoint_symbol parse_FixedPointOperator(const dparser::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
@@ -876,27 +867,126 @@ struct pbes_actions: public data::data_specification_actions
     return pbes_system::fixpoint_symbol();
   }
 
-  pbes_equation parse_PbesEqnDecl(const parse_node& node)
+  pbes_equation parse_PbesEqnDecl(const dparser::parse_node& node)
   {
     return pbes_equation(parse_FixedPointOperator(node.child(0)), parse_PropVarDecl(node.child(1)), parse_PbesExpr(node.child(3)));
   }
 
-  atermpp::vector<pbes_equation> parse_PbesEqnDeclList(const parse_node& node)
+  atermpp::vector<pbes_equation> parse_PbesEqnDeclList(const dparser::parse_node& node)
   {
     return parse_vector<pbes_equation>(node, "PbesEqnDecl", boost::bind(&pbes_actions::parse_PbesEqnDecl, this, _1));
   }
 
-  atermpp::vector<pbes_equation> parse_PbesEqnSpec(const parse_node& node)
+  atermpp::vector<pbes_equation> parse_PbesEqnSpec(const dparser::parse_node& node)
   {
     return parse_PbesEqnDeclList(node.child(1));
   }
 
-  pbes_system::pbes<> parse_PbesSpec(const parse_node& node)
+  pbes_system::pbes<> parse_PbesSpec(const dparser::parse_node& node)
   {
     return pbes<>(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), atermpp::convert<atermpp::set<data::variable> >(parse_GlobVarSpec(node.child(1))), parse_PbesInit(node.child(3)));
   }
 };
 
 } // namespace pbes_system
+
+namespace action_formulas {
+
+struct action_formula_actions: public lps::action_actions
+{
+  action_formula_actions(const dparser::parser_table& table_)
+    : lps::action_actions(table_)
+  {}
+
+  action_formulas::action_formula parse_ActFrm(const dparser::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return parse_MultAct(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return action_formulas::true_(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return action_formulas::false_(); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "ActFrm")) { return action_formulas::not_(parse_ActFrm(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (symbol_name(node.child(1)) == "=>") && (symbol_name(node.child(2)) == "ActFrm")) { return action_formulas::imp(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (symbol_name(node.child(1)) == "&&") && (symbol_name(node.child(2)) == "ActFrm")) { return action_formulas::and_(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "ActFrm")) { return action_formulas::or_(parse_ActFrm(node.child(0)), parse_ActFrm(node.child(2))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ActFrm")) { return action_formulas::forall(parse_VarsDeclList(node.child(1)), parse_ActFrm(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ActFrm")) { return action_formulas::exists(parse_VarsDeclList(node.child(1)), parse_ActFrm(node.child(3))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ActFrm") && (symbol_name(node.child(1)) == "@") && (symbol_name(node.child(2)) == "DataExpr")) { return action_formulas::at(parse_ActFrm(node.child(0)), parse_DataExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "ActFrm") && (symbol_name(node.child(2)) == ")")) { return parse_ActFrm(node.child(1)); }
+    report_unexpected_node(node);
+    return action_formulas::action_formula();
+  }
+};
+
+} // namespace action_formulas
+
+namespace regular_formulas {
+
+struct regular_formula_actions: public action_formulas::action_formula_actions
+{
+  regular_formula_actions(const dparser::parser_table& table_)
+    : action_formulas::action_formula_actions(table_)
+  {}
+
+  regular_formulas::regular_formula parse_RegFrm(const dparser::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActFrm")) { return parse_ActFrm(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nil")) { return regular_formulas::nil(); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ")")) { return parse_RegFrm(node.child(1)); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "*") && (symbol_name(node.child(1)) == "RegFrm")) { return trans_or_nil(parse_RegFrm(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "+") && (symbol_name(node.child(1)) == "RegFrm")) { return trans(parse_RegFrm(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "RegFrm")) { return seq(parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "+") && (symbol_name(node.child(2)) == "RegFrm")) { return alt(parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
+    report_unexpected_node(node);
+    return regular_formulas::regular_formula();
+  }
+};
+
+} // namespace regular_formulas
+
+namespace state_formulas {
+
+struct state_formula_actions: public regular_formulas::regular_formula_actions
+{
+  state_formula_actions(const dparser::parser_table& table_)
+    : regular_formulas::regular_formula_actions(table_)
+  {}
+
+  data::data_expression parse_Time(const dparser::parse_node& node)
+  {
+    if (node.child(1))
+    {
+      return parse_DataExpr(node.child(1));
+    }
+    else
+    {
+      return data::data_expression(core::detail::gsMakeNil());
+    }
+  }
+
+  state_formulas::state_formula parse_StateFrm(const dparser::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return state_formulas::true_(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return state_formulas::false_(); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "StateFrm")) { return state_formulas::not_(parse_StateFrm(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "StateFrm") && (symbol_name(node.child(1)) == "=>") && (symbol_name(node.child(2)) == "StateFrm")) { return state_formulas::imp(parse_StateFrm(node.child(0)), parse_StateFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "StateFrm") && (symbol_name(node.child(1)) == "&&") && (symbol_name(node.child(2)) == "StateFrm")) { return state_formulas::and_(parse_StateFrm(node.child(0)), parse_StateFrm(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "StateFrm") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "StateFrm")) { return state_formulas::or_(parse_StateFrm(node.child(0)), parse_StateFrm(node.child(2))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::forall(parse_VarsDeclList(node.child(1)), parse_StateFrm(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::exists(parse_VarsDeclList(node.child(1)), parse_StateFrm(node.child(3))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == "]")) { return state_formulas::may(parse_RegFrm(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "<") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ">")) { return state_formulas::must(parse_RegFrm(node.child(1))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "mu") && (symbol_name(node.child(1)) == "StateVarDecl") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::mu(parse_Id(node.child(1).child(0)), parse_DataExprList(node.child(1).child(1)), parse_StateFrm(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "nu") && (symbol_name(node.child(1)) == "StateVarDecl") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::nu(parse_Id(node.child(1).child(0)), parse_DataExprList(node.child(1).child(1)), parse_StateFrm(node.child(3))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "Id")) { return state_formulas::variable(parse_Id(node.child(0)), parse_DataExprList(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "delay")) { return state_formulas::delay(parse_Time(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "yaled")) { return state_formulas::yaled(parse_Time(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "StateFrm") && (symbol_name(node.child(2)) == ")")) { return parse_StateFrm(node.child(1)); }
+    report_unexpected_node(node);
+    return state_formulas::state_formula();
+  }
+};
+
+} // namespace state_formulas
 
 } // namespace mcrl2
