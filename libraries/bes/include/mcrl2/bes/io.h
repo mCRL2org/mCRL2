@@ -22,6 +22,7 @@
 #include <functional>
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/normal_forms.h"
+#include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -52,13 +53,13 @@ std::string bes_expression2cwi(const Expression& p, const VariableMap& variables
   {
     std::string left = bes_expression2cwi(tr::left(p), variables);
     std::string right = bes_expression2cwi(tr::right(p), variables);
-    result = "(" + left + " & " + right + ")";
+    result = "(" + left + "&" + right + ")";
   }
   else if (tr::is_or(p))
   {
     std::string left = bes_expression2cwi(tr::left(p), variables);
     std::string right = bes_expression2cwi(tr::right(p), variables);
-    result = "(" + left + " | " + right + ")";
+    result = "(" + left + "|" + right + ")";
   }
   else if (tr::is_prop_var(p))
   {
@@ -68,7 +69,7 @@ std::string bes_expression2cwi(const Expression& p, const VariableMap& variables
       throw mcrl2::runtime_error("Found undeclared variable in bes_expression2cwi: " + tr::pp(p));
     }
     std::stringstream out;
-    out << i->second;
+    out << "X" << i->second;
     result = out.str();
   }
   else
@@ -89,7 +90,7 @@ void bes2cwi(Iter first, Iter last, std::ostream& out)
 
   // Number the variables of the equations 0, 1, ... and put them in the map variables.
   std::map<string_type, int> variables;
-  int index = 0;
+  int index = 1;
   for (Iter i = first; i != last; ++i)
   {
     variables[i->variable().name()] = index++;
@@ -99,8 +100,8 @@ void bes2cwi(Iter first, Iter last, std::ostream& out)
   {
     out << (i->symbol().is_mu() ? "min" : "max")
         << " "
-        << variables[i->variable().name()]
-        << " = "
+        << "X" << variables[i->variable().name()]
+        << "="
         << bes_expression2cwi(i->formula(), variables)
         << "\n";
   }
@@ -277,9 +278,47 @@ enum bes_output_format
 {
   bes_output_bes,
   bes_output_cwi,
-  bes_output_pgsolver
+  bes_output_pgsolver,
+  bes_output_pbes
 };
 
+/// \brief Transform string to output format
+inline
+std::string output_format_to_string(const bes_output_format f)
+{
+  const std::string formats[] = {"bes", "cwi", "pgsolver", "pbes"};
+  return formats[f];
+}
+
+/// \brief Parse output format
+inline
+bes_output_format output_format_from_string(const std::string& s)
+{
+  if(s == "bes")
+  {
+    return bes_output_bes;
+  }
+  else if(s == "cwi")
+  {
+    return bes_output_cwi;
+  }
+  else if (s == "pgsolver")
+  {
+    return bes_output_pgsolver;
+  }
+  else if (s == "pbes")
+  {
+    return bes_output_pbes;
+  }
+  else
+  {
+    throw mcrl2::runtime_error("Unknown BES format \"" + s + "\" specified.");
+  }
+}
+
+
+// Check that the initial equation has, as a left hand side, the variable that
+// has been designated as initial.
 static
 inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equation_system<>& bes_spec)
 {
@@ -294,7 +333,7 @@ inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equa
   return false;
 }
 
-/// \brief Save a PBES in the format specified.
+/// \brief Save a BES in the format specified.
 inline
 void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename, bes_output_format output_format, bool aterm_ascii = false)
 {
@@ -334,6 +373,12 @@ void save_bes(const boolean_equation_system<>& bes_spec, std::string outfilename
         throw mcrl2::runtime_error("The initial state " + bes::pp(bes_spec_standard_form.initial_state()) + " and the left hand side of the first equation " + bes::pp(bes_spec_standard_form.equations().begin()->variable()) + " do not correspond. Cannot save BES to PGSolver format.");
       }
       bes::bes2pgsolver(bes_spec_standard_form.equations().begin(), bes_spec_standard_form.equations().end(), outfilename);
+      break;
+    }
+    case bes_output_pbes:
+    {
+      mCRL2log(log::verbose) << "Saving result in PGSolver format..." << std::endl;
+      bes2pbes(bes_spec).save(outfilename);
       break;
     }
     default:

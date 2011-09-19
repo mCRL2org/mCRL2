@@ -124,7 +124,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       {
         std::string format = parser.option_argument("output");
 
-        if (!((format == "vasy") || (format == "cwi") || (format == "pbes") || (format == "bes") || (format == "pgsolver")))
+        if (!((format == "cwi") || (format == "pbes") || (format == "bes") || (format == "pgsolver")))
         {
           parser.error("unknown output format specified (got `" + format + "')");
         }
@@ -152,6 +152,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
             break;
           default:
             parser.error("unknown strategy specified: available strategies are '0', '1', '2', and '3'");
+            break;
         }
       }
     }
@@ -195,7 +196,6 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       add_option("output",
                  make_mandatory_argument("FORMAT"),
                  "use output format FORMAT:\n"
-                 " 'vasy',\n"
                  " 'pbes' (save as a PBES in internal format),\n"
                  " 'cwi',\n"
                  " 'bes' (default, save as a BES in internal format),\n"
@@ -334,36 +334,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
         }
       } */
 
-      if (opt_outputformat == "cwi")
-      {
-        // in CWI format only if the result is a BES, otherwise Binary
-        save_bes_in_cwi_format(m_output_filename,bes_equations);
-        return true;
-      }
-      if (opt_outputformat == "vasy")
-      {
-        //Save resulting bes if necessary.
-        save_bes_in_vasy_format(m_output_filename,bes_equations);
-        return true;
-      }
-      if (opt_outputformat == "pbes")
-      {
-        //Save resulting bes if necessary.
-        save_bes_in_pbes_format(m_output_filename,bes_equations,p);
-        return true;
-      }
-      if (opt_outputformat == "bes")
-      {
-        save_bes_in_bes_format(m_output_filename,bes_equations);
-        return true;
-      }
-      if (opt_outputformat == "pgsolver")
-      {
-        save_bes_in_pgsolver_format(m_output_filename,bes_equations);
-        return true;
-      }
-
-      assert(0); // This point cannot be reached. pbes2bes must always write output.
+      mcrl2::bes::boolean_equation_system<> b(convert_to_bes(bes_equations));
+      mcrl2::bes::save_bes(b, m_output_filename, mcrl2::bes::output_format_from_string(opt_outputformat));
 
       return true;
     }
@@ -381,7 +353,6 @@ class pbes2bes_gui_tool: public mcrl2_gui_tool<pbes2bes_tool>
       m_gui_options["hashtables"] = create_checkbox_widget();
 
       values.clear();
-      values.push_back("vasy");
       values.push_back("pbes");
       values.push_back("cwi");
       values.push_back("bes");
