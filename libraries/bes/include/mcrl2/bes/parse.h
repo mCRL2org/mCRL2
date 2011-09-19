@@ -23,6 +23,65 @@ namespace mcrl2
 namespace bes
 {
 
+struct bes_actions: public core::default_parser_actions
+{
+  bes_actions(const core::parser_table& table_)
+    : core::default_parser_actions(table_)
+  {}
+
+  bes::boolean_expression parse_BesExpr(const core::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return bes::true_(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return bes::false_(); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "BesExpr")) { return bes::not_(parse_BesExpr(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "=>") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::imp(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "&&") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::and_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "BesExpr") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "BesExpr")) { return bes::or_(parse_BesExpr(node.child(0)), parse_BesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "BesExpr") && (symbol_name(node.child(2)) == ")")) { return parse_BesExpr(node.child(1)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "BesVar")) { return parse_BesVar(node.child(0)); }
+    report_unexpected_node(node);
+    return bes::boolean_expression();
+  }
+
+  bes::boolean_variable parse_BesVar(const core::parse_node& node)
+  {
+    return bes::boolean_variable(parse_Id(node.child(0)));
+  }
+
+  fixpoint_symbol parse_FixedPointOperator(const core::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
+    report_unexpected_node(node);
+    return pbes_system::fixpoint_symbol();
+  }
+
+  bes::boolean_equation parse_BesEqnDecl(const core::parse_node& node)
+  {
+    return bes::boolean_equation(parse_FixedPointOperator(node.child(0)), parse_BesVar(node.child(1)), parse_BesExpr(node.child(3)));
+  }
+
+  atermpp::vector<boolean_equation> parse_BesEqnSpec(const core::parse_node& node)
+  {
+    return parse_BesEqnDeclList(node.child(1));
+  }
+
+  bes::boolean_variable parse_BesInit(const core::parse_node& node)
+  {
+    return parse_BesVar(node.child(1));
+  }
+
+  bes::boolean_equation_system<> parse_BesSpec(const core::parse_node& node)
+  {
+    return bes::boolean_equation_system<>(parse_BesEqnSpec(node.child(0)), parse_BesInit(node.child(1)));
+  }
+
+  atermpp::vector<boolean_equation> parse_BesEqnDeclList(const core::parse_node& node)
+  {
+    return parse_vector<bes::boolean_equation>(node, "BesEqnDecl", boost::bind(&bes_actions::parse_BesEqnDecl, this, _1));
+  }
+};
+
 /// \brief Converts a pbes expression to a boolean expression.
 /// Throws an mcrl2_error if it is not a valid boolean expression.
 inline

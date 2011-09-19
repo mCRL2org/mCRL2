@@ -6,26 +6,22 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file parser.h
+/// \file mcrl2/core/dparser.h
 /// \brief add your file description here.
 
-#ifndef DPARSER_H
-#define DPARSER_H
+#ifndef MCRL2_CORE_DPARSER_H
+#define MCRL2_CORE_DPARSER_H
 
 #include <stdexcept>
 #include <iostream>
 #include <iomanip>
 #include <set>
 #include <vector>
-
-namespace dparser {
-  class parser;
-  class term;
-}
-
 #include "dparse.h"
 
-namespace dparser {
+namespace mcrl2 {
+
+namespace core {
 
 class parse_error: public std::exception
 { };
@@ -247,6 +243,8 @@ struct parser
   }
 };
 
-} // namespace dparser
+} // namespace core
 
-#endif // DPARSER_H
+} // namespace mcrl2
+
+#endif // MCRL2_CORE_DPARSER_H

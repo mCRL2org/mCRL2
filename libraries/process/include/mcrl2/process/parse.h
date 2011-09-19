@@ -15,7 +15,7 @@
 #include <iostream>
 #include <string>
 #include <sstream>
-#include "mcrl2/core/parse.h"
+#include "mcrl2/lps/action_parse.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
@@ -28,6 +28,182 @@ namespace mcrl2
 
 namespace process
 {
+
+struct process_actions: public lps::action_actions
+{
+  process_actions(const core::parser_table& table_)
+    : lps::action_actions(table_)
+  {}
+
+  core::identifier_string_list parse_ActIdSet(const core::parse_node& node)
+  {
+    return parse_IdList(node.child(1));
+  }
+
+  process::action_name_multiset parse_MultActId(const core::parse_node& node)
+  {
+    return action_name_multiset(parse_IdList(node));
+  }
+
+  process::action_name_multiset_list parse_MultActIdList(const core::parse_node& node)
+  {
+    return parse_list<process::action_name_multiset>(node, "MultActId", boost::bind(&process_actions::parse_MultActId, this, _1));
+  }
+
+  process::action_name_multiset_list parse_MultActIdSet(const core::parse_node& node)
+  {
+    return parse_MultActIdList(node.child(1));
+  }
+
+  core::identifier_string parse_CommExprRhs(const core::parse_node& node)
+  {
+    // TODO: get rid of this 'nil'
+    core::identifier_string result = core::detail::gsMakeNil();
+    if (node.child(1))
+    {
+      result = parse_Id(node.child(1));
+    }
+    return result;
+  }
+
+  process::communication_expression parse_CommExpr(const core::parse_node& node)
+  {
+    core::identifier_string id = parse_Id(node.child(0));
+    core::identifier_string_list ids = parse_IdList(node.child(2));
+    action_name_multiset lhs(atermpp::push_front(ids, id));
+    core::identifier_string rhs = parse_CommExprRhs(node.child(3));
+    return process::communication_expression(lhs, rhs);
+  }
+
+  process::communication_expression_list parse_CommExprList(const core::parse_node& node)
+  {
+    return parse_list<process::communication_expression>(node, "CommExpr", boost::bind(&process_actions::parse_CommExpr, this, _1));
+  }
+
+  process::communication_expression_list parse_CommExprSet(const core::parse_node& node)
+  {
+    return parse_CommExprList(node.child(1));
+  }
+
+  process::rename_expression parse_RenExpr(const core::parse_node& node)
+  {
+    return process::rename_expression(parse_Id(node.child(0)), parse_Id(node.child(2)));
+  }
+
+  process::rename_expression_list parse_RenExprList(const core::parse_node& node)
+  {
+    return parse_list<process::rename_expression>(node, "RenExpr", boost::bind(&process_actions::parse_RenExpr, this, _1));
+  }
+
+  process::rename_expression_list parse_RenExprSet(const core::parse_node& node)
+  {
+    return parse_RenExprList(node.child(1));
+  }
+
+  process::process_expression parse_ProcExpr(const core::parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "allow") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "MultActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return allow(parse_MultActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "hide") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return hide(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "rename") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "RenExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return rename(parse_RenExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "comm") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "CommExprSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return comm(parse_CommExprSet(node.child(2)), parse_ProcExpr(node.child(4))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "ProcExpr") && (symbol_name(node.child(2)) == ")")) { return parse_ProcExpr(node.child(1)); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "+") && (symbol_name(node.child(2)) == "ProcExpr")) { return choice(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "ProcExpr")) { return merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "||_") && (symbol_name(node.child(2)) == "ProcExpr")) { return left_merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "ProcExpr")) { return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "<<") && (symbol_name(node.child(2)) == "ProcExpr")) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "|") && (symbol_name(node.child(2)) == "ProcExpr")) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "ProcExprThenElse"))
+    {
+      data::data_expression condition = parse_DataExprUnit(node.child(0));
+      core::parse_node u = node.child(1);
+      process_expression x1 = parse_ProcExpr(u.child(1));
+      if (u.child(2) && u.child(2).child(1))
+      {
+        process_expression x2 = parse_ProcExpr(u.child(2).child(1));
+        return if_then_else(condition, x1, x2);
+      }
+      return if_then(condition, x1);
+    }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ProcExpr")) { return sum(parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3))); }
+    report_unexpected_node(node);
+    return process::process_expression();
+  }
+
+  process::process_equation parse_ProcDecl(const core::parse_node& node)
+  {
+    return process::process_equation(parse_Id(node.child(0)), parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3)));
+  }
+
+  process::process_equation_list parse_ProcDeclList(const core::parse_node& node)
+  {
+    return parse_list<process::process_equation>(node, "ProcDecl", boost::bind(&process_actions::parse_ProcDecl, this, _1));
+  }
+
+  process::process_equation_list parse_ProcSpec(const core::parse_node& node)
+  {
+    return parse_ProcDeclList(node.child(1));
+  }
+
+  process::process_expression parse_Init(const core::parse_node& node)
+  {
+    return parse_ProcExpr(node.child(1));
+  }
+
+  bool callback_mCRL2Spec(const core::parse_node& node, process::process_specification& result)
+  {
+    if (symbol_name(node) == "SortSpec")
+    {
+      return callback_DataSpecElement(node, result.data());
+    }
+    else if (symbol_name(node) == "ConsSpec")
+    {
+      return callback_DataSpecElement(node, result.data());
+    }
+    else if (symbol_name(node) == "MapSpec")
+    {
+      return callback_DataSpecElement(node, result.data());
+    }
+    else if (symbol_name(node) == "EqnSpec")
+    {
+      return callback_DataSpecElement(node, result.data());
+    }
+    else if (symbol_name(node) == "GlobVarSpec")
+    {
+      data::variable_list variables = parse_GlobVarSpec(node);
+      result.global_variables() = atermpp::set<data::variable>(variables.begin(), variables.end());
+      return true;
+    }
+    else if (symbol_name(node) == "ActSpec")
+    {
+      result.action_labels() = parse_ActSpec(node);
+      return true;
+    }
+    else if (symbol_name(node) == "ProcSpec")
+    {
+      process::process_equation_list eqn = parse_ProcSpec(node);
+      result.equations() = atermpp::vector<process_equation>(eqn.begin(), eqn.end());
+      return true;
+    }
+    else if (symbol_name(node) == "Init")
+    {
+      result.init() = parse_Init(node);
+    }
+    return false;
+  }
+
+  process::process_specification parse_mCRL2Spec(const core::parse_node& node)
+  {
+    process::process_specification result;
+    traverse(node, boost::bind(&process_actions::callback_mCRL2Spec, this, _1, boost::ref(result)));
+    return result;
+  }
+};
 
 /// \brief Parses a process specification from an input stream
 /// \param spec_stream An input stream

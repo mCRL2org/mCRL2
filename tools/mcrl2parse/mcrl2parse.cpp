@@ -26,11 +26,13 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
-#include "parser.h"
-
-#ifdef MCRL2_PARSER_ACTIONS
-#include "parser_actions.h"
-#endif
+#include "mcrl2/core/parse.h"
+#include "mcrl2/bes/parse.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/process/parse.h"
+#include "mcrl2/data/parse.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -168,7 +170,7 @@ class mcrl2parse_tool : public input_tool
         text = read_text(from);
       }
 
-      dparser::parser p(parser_tables_mcrl2);
+      core::parser p(parser_tables_mcrl2);
       unsigned int start_symbol_index = 0;
       switch(file_type)
       {
@@ -188,14 +190,13 @@ class mcrl2parse_tool : public input_tool
 
       try
       {
-        dparser::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+        core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
         std::cout << "Parsing successful." << std::endl;
         if (print_tree)
         {
           p.print_tree(node);
         }
 
-#ifdef MCRL2_PARSER_ACTIONS
         if (file_type == sortexpr_e)
         {
           data::sort_expression_actions actions(p.symbol_table());
@@ -268,7 +269,6 @@ class mcrl2parse_tool : public input_tool
           state_formulas::state_formula x = actions.parse_StateFrm(node);
           std::cout << state_formulas::pp(x) << std::endl;
         }
-#endif
       }
       catch (std::exception& e)
       {
