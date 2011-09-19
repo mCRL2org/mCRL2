@@ -100,7 +100,7 @@ boolean_equation_system<> parse_boolean_equation_system_new(const std::string& t
   return bes_actions().parse_BesSpec(node);
 }
 
-#endif MCRL2_USE_NEW_PARSER
+#endif // MCRL2_USE_NEW_PARSER
 
 /// \brief Converts a pbes expression to a boolean expression.
 /// Throws an mcrl2_error if it is not a valid boolean expression.
