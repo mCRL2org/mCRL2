@@ -22,6 +22,16 @@ namespace pbes_system {
 /// \brief Solves a pbes using a parity game solver
 /// \return The solution of the pbes
 inline
+bool pbespgsolve(pbes<>& p, const pbespgsolve_options& options = pbespgsolve_options())
+{
+  utilities::execution_timer timer;
+  pbespgsolve_algorithm algorithm(timer, options);
+  return algorithm.run(p);
+}
+
+/// \brief Solves a pbes using a parity game solver
+/// \return The solution of the pbes
+inline
 bool pbespgsolve(pbes<>& p, utilities::execution_timer& timer, const pbespgsolve_options& options = pbespgsolve_options())
 {
   pbespgsolve_algorithm algorithm(timer, options);
