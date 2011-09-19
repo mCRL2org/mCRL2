@@ -16,10 +16,10 @@ PRODUCTION_MAPPING = '''
   Action lps::action
   ActionLabelList lps::action_label
   ActionList lps::action_list
-  ActionRenameRule
-  ActionRenameRuleRHS
-  ActionRenameRuleSpec
-  ActionRenameSpec
+  ActionRenameRule lps::action_rename_rule
+  ActionRenameRuleRHS lps::action_rename_rule_rhs
+  ActionRenameRuleSpec lps::action_rename_rule
+  ActionRenameSpec lps::action_rename_specification
   ActSpec lps::action_label_list
   BagEnumElt data::detail::data_expression_pair
   BagEnumEltList data::detail::data_expression_pair_list

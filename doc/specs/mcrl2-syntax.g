@@ -347,7 +347,11 @@ ActionRenameRuleSpec: VarSpec? 'rename' ActionRenameRule+ ;
 
 ActionRenameRule: (DataExpr '->')? Action '=>' ActionRenameRuleRHS ';' ;
 
-ActionRenameRuleRHS: Action | 'tau' | 'delta' ;
+ActionRenameRuleRHS
+  : Action
+  | 'tau'
+  | 'delta'
+  ;
 
 //--- Identifiers
 

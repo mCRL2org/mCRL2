@@ -286,7 +286,13 @@ class action_rename_specification
 
     /// \brief Returns the data action_rename_specification.
     /// \return The data action_rename_specification.
-    data::data_specification data() const
+    const data::data_specification& data() const
+    {
+      return m_data;
+    }
+
+    /// \brief Returns the data specification.
+    data::data_specification& data()
     {
       return m_data;
     }
@@ -294,7 +300,13 @@ class action_rename_specification
     /// \brief Returns the sequence of action labels
     /// \return A sequence of action labels containing all action
     /// labels occurring in the action_rename_specification (but it can have more).
-    action_label_list action_labels() const
+    const action_label_list& action_labels() const
+    {
+      return m_action_labels;
+    }
+
+    /// \brief Returns the sequence of action labels
+    action_label_list& action_labels()
     {
       return m_action_labels;
     }
@@ -302,6 +314,12 @@ class action_rename_specification
     /// \brief Returns the action rename rules.
     /// \return The action rename rules.
     atermpp::vector <action_rename_rule> rules() const
+    {
+      return m_rules;
+    }
+
+    /// \brief Returns the action rename rules.
+    atermpp::vector<action_rename_rule>& rules()
     {
       return m_rules;
     }
