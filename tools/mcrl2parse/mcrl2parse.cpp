@@ -238,6 +238,18 @@ class mcrl2parse_tool : public input_tool
           bes::boolean_equation_system<> x = actions.parse_BesSpec(node);
           std::cout << bes::pp(x) << std::endl;
         }
+        else if (file_type == pbesexpr_e)
+        {
+          pbes_system::pbes_actions actions(p.symbol_table());
+          pbes_system::pbes_expression x = actions.parse_PbesExpr(node);
+          std::cout << pbes_system::pp(x) << std::endl;
+        }
+        else if (file_type == besspec_e)
+        {
+          pbes_system::pbes_actions actions(p.symbol_table());
+          pbes_system::pbes<> x = actions.parse_PbesSpec(node);
+          std::cout << pbes_system::pp(x) << std::endl;
+        }
 #endif
       }
       catch (std::exception& e)

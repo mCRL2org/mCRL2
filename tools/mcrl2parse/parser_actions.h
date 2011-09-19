@@ -2,6 +2,7 @@
 #include <sstream>
 #include <boost/bind.hpp>
 #include "parser.h"
+#include "mcrl2/atermpp/convert.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/exception.h"
@@ -11,6 +12,7 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/pbes/pbes.h"
 #include "mcrl2/process/process_specification.h"
 
 namespace mcrl2 {
@@ -819,19 +821,6 @@ struct bes_actions: public data::default_actions
 
 } // namespace bes
 
-namespace lps {
-
-using namespace dparser;
-
-struct lps_actions: public process::process_actions
-{
-  lps_actions(const parser_table& table_)
-    : process::process_actions(table_)
-  {}
-};
-
-} // namespace lps
-
 namespace pbes_system {
 
 using namespace dparser;
@@ -841,6 +830,71 @@ struct pbes_actions: public data::data_specification_actions
   pbes_actions(const parser_table& table_)
     : data::data_specification_actions(table_)
   {}
+
+  data::data_expression parse_DataValExpr(const parse_node& node)
+  {
+    return parse_DataExpr(node.child(2));
+  }
+
+  pbes_system::pbes_expression parse_PbesExpr(const parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return pbes_system::true_(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "false")) { return pbes_system::false_(); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "PbesExpr")) { return pbes_system::forall(parse_VarsDeclList(node.child(1)), parse_PbesExpr(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "PbesExpr")) { return pbes_system::exists(parse_VarsDeclList(node.child(1)), parse_PbesExpr(node.child(3))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "!") && (symbol_name(node.child(1)) == "PbesExpr")) { return pbes_system::not_(parse_PbesExpr(node.child(1))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "PbesExpr") && (symbol_name(node.child(1)) == "=>") && (symbol_name(node.child(2)) == "PbesExpr")) { return pbes_system::imp(parse_PbesExpr(node.child(0)), parse_PbesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "PbesExpr") && (symbol_name(node.child(1)) == "&&") && (symbol_name(node.child(2)) == "PbesExpr")) { return pbes_system::and_(parse_PbesExpr(node.child(0)), parse_PbesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "PbesExpr") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "PbesExpr")) { return pbes_system::or_(parse_PbesExpr(node.child(0)), parse_PbesExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "PbesExpr") && (symbol_name(node.child(2)) == ")")) { return parse_PbesExpr(node.child(1)); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "PropVarInst")) { return parse_PropVarInst(node.child(0)); }
+    report_unexpected_node(node);
+    return pbes_system::pbes_expression();
+  }
+
+  pbes_system::propositional_variable parse_PropVarDecl(const parse_node& node)
+  {
+    return pbes_system::propositional_variable(parse_Id(node.child(0)), parse_VarsDeclList(node.child(1)));
+  }
+
+  pbes_system::propositional_variable_instantiation parse_PropVarInst(const parse_node& node)
+  {
+    return pbes_system::propositional_variable_instantiation(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+  }
+
+  pbes_system::propositional_variable_instantiation parse_PbesInit(const parse_node& node)
+  {
+    return parse_PropVarInst(node.child(1));
+  }
+
+  pbes_system::fixpoint_symbol parse_FixedPointOperator(const parse_node& node)
+  {
+    if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "mu")) { return fixpoint_symbol::mu(); }
+    else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nu")) { return fixpoint_symbol::nu(); }
+    report_unexpected_node(node);
+    return pbes_system::fixpoint_symbol();
+  }
+
+  pbes_equation parse_PbesEqnDecl(const parse_node& node)
+  {
+    return pbes_equation(parse_FixedPointOperator(node.child(0)), parse_PropVarDecl(node.child(1)), parse_PbesExpr(node.child(3)));
+  }
+
+  atermpp::vector<pbes_equation> parse_PbesEqnDeclList(const parse_node& node)
+  {
+    return parse_vector<pbes_equation>(node, "PbesEqnDecl", boost::bind(&pbes_actions::parse_PbesEqnDecl, this, _1));
+  }
+
+  atermpp::vector<pbes_equation> parse_PbesEqnSpec(const parse_node& node)
+  {
+    return parse_PbesEqnDeclList(node.child(1));
+  }
+
+  pbes_system::pbes<> parse_PbesSpec(const parse_node& node)
+  {
+    return pbes<>(parse_DataSpec(node.child(0)), parse_PbesEqnSpec(node.child(2)), atermpp::convert<atermpp::set<data::variable> >(parse_GlobVarSpec(node.child(1))), parse_PbesInit(node.child(3)));
+  }
 };
 
 } // namespace pbes_system
