@@ -157,11 +157,16 @@ class identifier_assignment: public assignment_expression
     }
 
     /// \brief Constructor.
-    identifier_assignment(const identifier& lhs, const data_expression& rhs)
+    identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs)
       : assignment_expression(core::detail::gsMakeIdInit(lhs, rhs))
     {}
 
-    identifier lhs() const
+    /// \brief Constructor.
+    identifier_assignment(const std::string& lhs, const data_expression& rhs)
+      : assignment_expression(core::detail::gsMakeIdInit(core::identifier_string(lhs), rhs))
+    {}
+
+    core::identifier_string lhs() const
     {
       return atermpp::arg1(*this);
     }

@@ -60,9 +60,9 @@ lambda_binder()                   : public data::binder_type    | EIO | Lambda  
 '''
 
 ASSIGNMENT_EXPRESSION_CLASSES = r'''
-assignment_expression()                                                  : public atermpp::aterm_appl         | SXIOC | WhrDecl       | Assignment expression
-assignment(const variable& lhs, const data_expression& rhs)              : public data::assignment_expression | EIOUC | DataVarIdInit | Assignment of a data expression to a variable
-identifier_assignment(const identifier& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | IdInit        | Assignment of a data expression to a string
+assignment_expression()                                                               : public atermpp::aterm_appl         | SXIOC | WhrDecl       | Assignment expression
+assignment(const variable& lhs, const data_expression& rhs)                           : public data::assignment_expression | EIOUC | DataVarIdInit | Assignment of a data expression to a variable
+identifier_assignment(const core::identifier_string& lhs, const data_expression& rhs) : public data::assignment_expression | EIOUC | IdInit        | Assignment of a data expression to a string
 '''
 
 DATA_EXPRESSION_CLASSES = r'''

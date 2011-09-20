@@ -77,7 +77,7 @@ struct sort_expression_actions: public core::default_parser_actions
     core::identifier_string recogniser = no_identifier();
     if (node.child(1))
     {
-      arguments = parse_ProjDeclList(node.child(1).child(1));
+      arguments = parse_ProjDeclList(node.child(1));
     }
     if (node.child(2))
     {
@@ -99,9 +99,10 @@ struct sort_expression_actions: public core::default_parser_actions
   {
     core::identifier_string name = no_identifier();
     sort_expression sort = parse_SortExpr(node.child(1));
-    if (node.child(0))
+    if (node.child(0).child(0))
     {
-      name = parse_Id(node.child(0));
+      // TODO: check if this nesting depth is correct
+      name = parse_Id(node.child(0).child(0).child(0));
     }
     return structured_sort_constructor_argument(name, sort);
   }
@@ -175,6 +176,7 @@ struct data_expression_actions: public sort_expression_actions
 
   data::data_expression parse_DataExpr(const core::parse_node& node)
   {
+    assert(symbol_name(node) == "DataExpr");
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Id")) { return identifier(parse_Id(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Number")) { return identifier(parse_Number(node.child(0))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return identifier(parse_Id(node.child(0))); }
@@ -241,7 +243,7 @@ struct data_expression_actions: public sort_expression_actions
 
   data::identifier_assignment parse_WhrExpr(const core::parse_node& node)
   {
-    return identifier_assignment(parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)));
+    return identifier_assignment(parse_Id(node.child(0)), parse_DataExpr(node.child(2)));
   }
 
   data::identifier_assignment_list parse_WhrExprList(const core::parse_node& node)
@@ -349,7 +351,13 @@ struct data_specification_actions: public data_expression_actions
   {
     if (symbol_name(node) == "EqnDecl")
     {
-      result.push_back(data_equation(variables, parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2)), parse_DataExpr(node.child(4))));
+      data_expression condition = sort_bool::true_();
+      // TODO: check if this is the correct nesting depth
+      if (node.child(0).child(0))
+      {
+        condition = parse_DataExpr(node.child(0).child(0).child(0));
+      }
+      result.push_back(data_equation(variables, condition, parse_DataExpr(node.child(1)), parse_DataExpr(node.child(3))));
       return true;
     }
     return false;
@@ -364,6 +372,7 @@ struct data_specification_actions: public data_expression_actions
 
   data::data_equation_vector parse_EqnSpec(const core::parse_node& node)
   {
+    assert(symbol_name(node) == "EqnSpec");
     variable_list variables = parse_VarSpec(node.child(0));
     return parse_EqnDeclList(node.child(2), variables);
   }
@@ -406,7 +415,7 @@ struct data_specification_actions: public data_expression_actions
     }
     else if (symbol_name(node) == "EqnSpec")
     {
-      data_equation_vector v = parse_EqnSpec(node.child(0));
+      data_equation_vector v = parse_EqnSpec(node);
       for (data_equation_vector::iterator i = v.begin(); i != v.end(); ++i)
       {
         result.add_equation(*i);
@@ -493,7 +502,7 @@ inline
 data_specification parse_data_specification(
   std::istream& in)
 {
-#ifdef MCRL2_CHECK_PARSER1
+#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
   std::istringstream in2(text);
   atermpp::aterm_appl spec = core::parse_data_spec(in2);
@@ -505,7 +514,7 @@ data_specification parse_data_specification(
     throw mcrl2::runtime_error("Error while parsing data specification");
   }
   data_specification result(spec);
-#ifdef MCRL2_CHECK_PARSER1
+#ifdef MCRL2_CHECK_PARSER
   data_specification result2 = parse_data_specification_new(text);
   atermpp::aterm_appl x1 = data::detail::data_specification_to_aterm_data_spec(result);
   atermpp::aterm_appl x2 = data::detail::data_specification_to_aterm_data_spec(result2);
