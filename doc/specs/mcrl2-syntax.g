@@ -87,9 +87,9 @@ DataExpr
   | '(' DataExpr ')'
   | DataExpr '[' DataExpr '->' DataExpr ']'  $left 12
   | DataExpr '(' DataExprList ')'            $left 12
-  | '!' DataExpr                             $unary_right 11
-  | '-' DataExpr                             $unary_right 11
-  | '#' DataExpr                             $unary_right 11
+  | '!' DataExpr                             $right 11
+  | '-' DataExpr                             $right 11
+  | '#' DataExpr                             $right 11
   | 'forall' VarsDeclList '.' DataExpr       $right 0
   | 'exists' VarsDeclList '.' DataExpr       $right 0
   | 'lambda' VarsDeclList '.' DataExpr       $right 0
@@ -123,9 +123,9 @@ DataExprUnit
   | 'false'
   | '(' DataExpr ')'
   | DataExprUnit '(' DataExprList ')'        $left 12
-  | '!' DataExprUnit                         $unary_right 11
-  | '-' DataExprUnit                         $unary_right 11
-  | '#' DataExprUnit                         $unary_right 11
+  | '!' DataExprUnit                         $right 11
+  | '-' DataExprUnit                         $right 11
+  | '#' DataExprUnit                         $right 11
   ;
 
 WhrExpr: DataExpr '=' DataExpr ;
@@ -241,7 +241,7 @@ BesVar: Id ;
 BesExpr
   : 'true'
   | 'false'
-  | '!' BesExpr              $unary_left 4
+  | '!' BesExpr              $right 4
   | BesExpr '=>' BesExpr     $binary_right 2
   | BesExpr '&&' BesExpr     $binary_right 3
   | BesExpr '||' BesExpr     $binary_right 3
@@ -293,7 +293,7 @@ ActFrm
   | DataValExpr
   | 'true'
   | 'false'
-  | '!' ActFrm                                                   $unary_right 5
+  | '!' ActFrm                                                   $right 5
   | ActFrm '=>' ActFrm                                           $binary_right 2
   | ActFrm '&&' ActFrm                                           $binary_right 3
   | ActFrm '||' ActFrm                                           $binary_right 3
@@ -321,7 +321,7 @@ StateFrm
   : DataValExpr
   | 'true'
   | 'false'
-  | '!' StateFrm                                                 $unary_right 5
+  | '!' StateFrm                                                 $right 5
   | StateFrm '=>' StateFrm                                       $binary_op_right 3
   | StateFrm '&&' StateFrm                                       $binary_op_right 4
   | StateFrm '||' StateFrm                                       $binary_op_right 4
