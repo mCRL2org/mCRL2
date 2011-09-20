@@ -85,7 +85,7 @@ class Rewriter
      **/
     Rewriter():
        m_conversion_helper(*this),
-       generator("v@r"),
+       generator("x_"),
        internal_true(toInner(sort_bool::true_(),true)),
        internal_false(toInner(sort_bool::false_(),true)),
        internal_not(toInner(sort_bool::not_(),true)(0)),
@@ -184,9 +184,37 @@ class Rewriter
     atermpp::aterm_appl internal_existential_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
          mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+    atermpp::aterm_appl new_internal_existential_quantifier_enumeration(
+         const atermpp::aterm_appl termInInnerFormat,
+         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+
     atermpp::aterm_appl internal_universal_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
          mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+    atermpp::aterm_appl new_internal_universal_quantifier_enumeration(
+         const atermpp::aterm_appl termInInnerFormat,
+         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+
+    // Rewrite a where expression where the subdataexpressions are in internal format.
+    // It yields a term without a where expression.
+    atermpp::aterm_appl rewrite_where(
+                      const atermpp::aterm_appl term,
+                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+
+    // Rewrite an expression with a lambda as outermost symbol. The expression is in internal format.
+    // Bound variables are replaced by new variables to avoid a clash with variables in the right hand sides
+    // of sigma.
+
+    atermpp::aterm_appl rewrite_single_lambda(
+                      const variable_list vl,
+                      const atermpp::aterm_appl body,
+                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+
+    atermpp::aterm_appl rewrite_lambda_application(
+                      const atermpp::aterm_appl lambda_term,
+                      const atermpp::aterm_appl body,
+                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+
 
   protected:
 

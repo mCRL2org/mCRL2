@@ -845,6 +845,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_expression)
     "     nextempty: Nat#Buf -> Nat;\n"
     "     nextempty_rec: Nat#Buf#Nat -> Nat;\n"
     "     inWindow: Nat#Nat#Nat -> Bool;\n"
+    "     nat_const:Nat;\n"
     "var  i,j,k: Nat; d: D; q: Buf;\n"
     "eqn  emptyBuf = lambda j:Nat.empty;\n"
     "     insert(d,i,q) = lambda j:Nat.if(i==j,data(d),q(j));\n"
@@ -868,8 +869,8 @@ BOOST_AUTO_TEST_CASE(test_lambda_expression)
     std::cerr << "  Strategy18: " << data::pp(*strat) << std::endl;
     data::rewriter R(specification, *strat);
 
-    data::data_expression e(parse_data_expression("insert(d2,2,insert(d1,1,emptyBuf))", specification));
-    data_rewrite_test(R, e, R(e));  // Check that the lambda expressions are properly translated to and from internal format.
+    data::data_expression e(parse_data_expression("(insert(d2,2,insert(d1,1,emptyBuf)))(nat_const)", specification));
+    data_rewrite_test(R, e, R(e));  
     e=parse_data_expression("insert(d1,1,emptyBuf)(1)==data(d1)", specification);
     data_rewrite_test(R, e, sort_bool::true_());
     e=parse_data_expression("insert(d1,1,emptyBuf)(1)==empty", specification);

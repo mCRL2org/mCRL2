@@ -118,6 +118,223 @@ bool Rewriter::removeRewriteRule(const data_equation /*Rule*/)
   return false;
 }
 
+atermpp::aterm_appl Rewriter::rewrite_where(
+                      const atermpp::aterm_appl term,
+                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+{
+  using namespace atermpp;
+  const term_list < atermpp::aterm_appl > assignment_list=term(1);
+  const aterm_appl body=term(0);
+  atermpp::vector < aterm_appl > saved_substitutions(assignment_list.size());
+  size_t count=0;
+  // First rewrite and save substitutions of where clauses. Do not yet put them in 
+  // the substitution, as according to the semantics different where clauses cannot 
+  // be used in each other.
+  for( term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it, ++count)
+  { 
+    assert(count<assignment_list.size());
+    saved_substitutions[count]=rewrite_internal((*it)(1),sigma);
+  }
+  // Now save old values for variables in sigma and carry out the substitutions in sigma.
+  count=0;
+  for( term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it, ++count)
+  { 
+    assert(count<assignment_list.size());
+    const variable v=variable((*it)(0));
+    aterm_appl t=sigma(v); // temporary store used for swapping values.
+    sigma[v]=saved_substitutions[count];
+    saved_substitutions[count]=t;
+  }
+  // Rewrite the body.
+  const aterm_appl result=rewrite_internal(body,sigma);
+
+  // Restore the old values of sigma.
+  count=0;
+  for( term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it, ++count)
+  { 
+    assert(count<assignment_list.size());
+    const variable v=variable((*it)(0));
+    sigma[v]=saved_substitutions[count];
+  }
+
+  return result;
+}
+
+atermpp::aterm_appl Rewriter::rewrite_single_lambda(
+                      const variable_list vl,
+                      const atermpp::aterm_appl body,
+                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+{
+  // A lambda term without arguments; Take care that the bound variable is made unique with respect to 
+  // the variables occurring in sigma. But in case vl is empty, just rewrite...
+
+  if (vl.empty())
+  {
+    return rewrite_internal(body,sigma);
+  }
+  
+  // Create new unique variables to replace the old and create storage for
+  // storing old values for variables in vl.
+  atermpp::vector <variable> new_variables(vl.size());
+  atermpp::vector <atermpp::aterm_appl> saved_substitutions(vl.size());
+  size_t count=0;
+  for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
+  { 
+    assert(count<vl.size());
+    const variable v= *it;
+    saved_substitutions[count]=sigma(v);
+    new_variables[count]=generator(v.sort());
+    sigma[v]=atermpp::aterm_appl(new_variables[count]);
+  }
+  variable_list new_variable_list;
+
+  for(atermpp::vector <variable>::const_reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
+  {
+    new_variable_list=push_front(new_variable_list,*it);
+  }
+  const atermpp::aterm_appl result= gsMakeBinder(gsMakeLambda(),(ATermList)new_variable_list,(ATermAppl)rewrite_internal(body,sigma));
+
+  // restore saved substitutions;
+  
+  count=0;
+  for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
+  {
+    assert(count<vl.size());
+    const variable v= *it;
+    sigma[v]=saved_substitutions[count];
+  }
+
+  return result;
+}
+
+
+// The function rewrite_lambda_application rewrites a lambda term to a set of
+// arguments which are the arguments 1,...,n of t. If t has the shape
+// @REWR@(t0,t1,....,tn) and the lambda term is L, we calculate the normal form
+// in internal format for L(t1,...,tn). Note that the term t0 is ignored.
+// Note that we assume that neither L, nor t is in normal form.
+
+atermpp::aterm_appl Rewriter::rewrite_lambda_application(
+                      const atermpp::aterm_appl lambda_term,
+                      const atermpp::aterm_appl t,
+                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+{
+  using namespace atermpp;
+  assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
+  const variable_list vl=lambda_term(1);
+  const atermpp::aterm_appl lambda_body=lambda_term(2);
+  size_t arity=t.size();
+
+  atermpp::vector < aterm_appl > saved_substitutions(vl.size());
+
+  // The remaining bound variables contain those variables for which no arguments can be substituted.
+  variable_list remaining_bound_variables=vl;
+  size_t count=0;
+  // first store the arguments, after normalisation, in saved substitutions. This is done to avoid
+  // interference between the changing sigma, and normalisation. An optimisation could be that if
+  // a variable is not used in the lambda_body, normalisation does not need to be done. To be efficient, this
+  // requires preprocessing, though.
+  for( term_list < variable > :: const_iterator it=vl.begin(); it!=vl.end() && count<arity; ++it, ++count)
+  {
+    assert(count<vl.size());
+    saved_substitutions[count]=rewrite_internal(t(count+1),sigma);
+    remaining_bound_variables=pop_front(remaining_bound_variables);
+  }
+  assert(remaining_bound_variables.empty()||(arity<vl.size()));
+  // Now save old values for variables in sigma and carry out the substitutions in sigma.
+
+  count=0;
+  for( term_list < variable > :: const_iterator it=vl.begin(); it!=vl.end() && count<arity; ++it, ++count)
+  {
+    assert(count<vl.size());
+    aterm_appl t=sigma(*it); // temporary store used for swapping values.
+    sigma[*it]=saved_substitutions[count];
+    saved_substitutions[count]=t;
+  }
+  // Rewrite the body of the lambda term.
+  aterm_appl result=rewrite_single_lambda(remaining_bound_variables,lambda_body,sigma);
+
+  // Restore the old values of sigma.
+  count=0;
+  for( term_list < variable > :: const_iterator it=vl.begin(); it!=vl.end() && count<arity; ++it, ++count)
+  {
+    assert(count<vl.size());
+    sigma[*it]=saved_substitutions[count];
+  }
+
+  if (arity>vl.size())
+  {
+    // There were more arguments than bound variables.
+    assert(remaining_bound_variables.empty());
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
+    args[0]=result;
+    for(size_t i=1; i<arity-vl.size(); ++i)
+    {
+      assert(vl.size()+i<arity);
+      args[i]=t(vl.size()+i);
+    }
+    // We do not employ the knowledge that the first argument is in normal form... TODO.
+    result = rewrite_internal(ApplyArray(arity-vl.size(),args),sigma); 
+  } 
+
+  return result;
+}
+
+atermpp::aterm_appl Rewriter::new_internal_existential_quantifier_enumeration(
+     const atermpp::aterm_appl t,
+     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) 
+{
+  // This is a quantifier elimination that works on the existential quantifier as specified
+  // in data types, i.e. without applying the implement function anymore. This function is
+  // to replace internal_existential_quantifier_enumeration and should then not be called new anymore.
+  
+  /* Get Body of Exists */
+  const atermpp::aterm_appl t1 = t(2);
+
+  // Put the variables in the right order in vl.
+  variable_list vl=t(1);
+
+  /* Create Enumerator */
+  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
+
+  /* Find A solution*/
+  EnumeratorSolutionsStandard sol(vl, t1, sigma,true,&ES,100);
+
+  /* Create a list to store solutions */
+  atermpp::term_list<atermpp::aterm_appl> x;
+  atermpp::aterm_appl evaluated_condition=internal_false;
+  atermpp::aterm_appl partial_result=internal_false;
+  bool solution_possible=true;
+
+  size_t loop_upperbound=5;
+  while (loop_upperbound>0 && 
+         partial_result!=internal_true &&
+         sol.next(evaluated_condition,x,solution_possible))
+  {
+    if (partial_result==internal_false)
+    {
+      partial_result=evaluated_condition;
+    }
+    else if (partial_result==internal_true)
+    {
+      partial_result=internal_true;
+    }
+    else
+    { 
+      partial_result=Apply2(internal_or, partial_result,evaluated_condition);
+    }
+    loop_upperbound--;
+  }
+
+  if (solution_possible && (loop_upperbound>0 || partial_result==internal_true))
+  {
+    return partial_result;
+  }
+
+  return gsMakeBinder(gsMakeExists(),vl,rewrite_internal(t1,sigma));
+}
+
+
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
      const atermpp::aterm_appl t,
      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) 
@@ -205,12 +422,81 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   return Apply1(t(0),rewrite_internal(t1,sigma));
 }
 
+atermpp::aterm_appl Rewriter::new_internal_universal_quantifier_enumeration(
+     const atermpp::aterm_appl t,
+     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+{
+  /* Get Body of forall */
+  const atermpp::aterm_appl t1 = t(2);
+  const variable_list vl=t(1);
+
+  /* Create Enumerator */
+  EnumeratorStandard ES(m_data_specification_for_enumeration, this);
+  
+  /* Find A solution*/
+  EnumeratorSolutionsStandard sol(vl, t1, sigma,false,&ES,100);
+  
+  /* Create ATermList to store solutions */
+  atermpp::term_list<atermpp::aterm_appl> x;
+  atermpp::aterm_appl evaluated_condition=internal_true;
+  atermpp::aterm_appl partial_result=internal_true;
+  bool solution_possible=true;
+
+  size_t loop_upperbound=5;
+  while (loop_upperbound>0 && 
+         partial_result!=internal_false &&
+         sol.next(evaluated_condition,x,solution_possible))
+  {
+    // The returned evaluated condition is the negation of the entered condition,
+    // as is not_equal_to_true_or_false is set to false in sol. So, we must first 
+    // negate it.
+
+    if (evaluated_condition == internal_true)
+    {
+      evaluated_condition=internal_false;
+    }
+    else if (evaluated_condition == internal_false)
+    {
+      evaluated_condition=internal_true;
+    }
+    else if (!ATisInt((ATerm)(ATermAppl)evaluated_condition) && evaluated_condition(0) == internal_not)
+    {
+      evaluated_condition=evaluated_condition(1);
+    }
+    else 
+    {
+      evaluated_condition=Apply1(internal_not, evaluated_condition);
+    }
+
+    
+    if (partial_result==internal_true)
+    {
+      partial_result=evaluated_condition;
+    }
+    else if (partial_result==internal_false)
+    {
+      partial_result=internal_false;
+    }
+    else
+    { 
+      partial_result=Apply2(internal_and, partial_result, evaluated_condition);
+    }
+    loop_upperbound--;
+  }
+
+  if (solution_possible && (loop_upperbound>0 || partial_result==internal_false))
+  {
+    return partial_result;
+  }
+
+  return gsMakeBinder(gsMakeForall(),vl,rewrite_internal(t1,sigma));
+}
+
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
      const atermpp::aterm_appl t,
      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
   /* Get Body of forall */
-  /* Get Body of Exists */
   const atermpp::aterm_appl t1 = t(1);
 
   /* Get Sort for enumeration from t */
@@ -641,7 +927,7 @@ atermpp::aterm_int OpId2Int(const function_symbol term)
 
 atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
 {
-
+  
   assert(!gsIsNil((ATermAppl)term)); // Originally Nil was returned unchanged, but is hopefully not used anymore. JFG
 
   if (is_variable(term))
@@ -654,7 +940,7 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
     atermpp::aterm_appl arg0 = toInner(application(term).head(), add_opids);
     // Reflect the way of encoding the other arguments!
     // if (gsIsNil(arg0) || gsIsDataVarId(arg0))
-    if (is_variable(arg0))
+    if (is_variable(arg0) || gsIsBinder(arg0) || gsIsWhr(arg0))
     {
       l = push_front(l, arg0);
     }
@@ -666,7 +952,7 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
         l = push_front(l, atermpp::aterm_appl(arg0(i)));
       }
     }
-    const data_expression_list args=application(term).arguments();
+    const data_expression_list args= application(term).arguments();
     for (data_expression_list::const_iterator i=args.begin(); i!=args.end(); ++i) 
     {
       l = push_front(l, toInner(*i,add_opids));
@@ -678,51 +964,82 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
   {
     return Apply0(OpId2Int(term));
   }
-  else
+  else if (is_where_clause(term))
   {
-    return Apply0((ATerm)(ATermAppl)term);
+    const where_clause t=term;
+    atermpp::term_list<atermpp::aterm> l;
+    const atermpp::vector < assignment_expression > lv=atermpp::convert < atermpp::vector < assignment_expression > >(t.declarations());
+    for(atermpp::vector < assignment_expression > :: const_reverse_iterator it=lv.rbegin() ; it!=lv.rend(); ++it)
+    {
+      l=atermpp::push_front(l,atermpp::aterm(core::detail::gsMakeDataVarIdInit(it->lhs(),toInner(it->rhs(),add_opids))));
+    }
+    return gsMakeWhr(toInner(t.body(),add_opids),l);
   }
+  else if (is_abstraction(term))
+  {
+    const abstraction t=term;
+    
+    return gsMakeBinder(t.binding_operator(),t.variables(),toInner(t.body(),add_opids));
+  }
+  assert(0); // term has unexpected format.
+  return Apply0((ATerm)(ATermAppl)term);
 }
 
 data_expression fromInner(atermpp::aterm_appl term)
 {
-  data_expression a;
-
   if (gsIsDataVarId((ATermAppl)term))
   {
     return variable(term);
   }
 
+  if (gsIsWhr((ATermAppl)term))
+  {
+    const data_expression body=fromInner(term(0));
+    const atermpp::term_list<atermpp::aterm_appl> l=term(1);
+     
+    atermpp::vector < assignment_expression > lv;
+    for(atermpp::term_list<atermpp::aterm_appl> :: const_iterator it=l.begin() ; it!=l.end(); ++it)
+    {
+      const atermpp::aterm_appl ass_expr= *it;
+      lv.push_back(assignment_expression(variable(ass_expr(0)),fromInner(ass_expr(1))));
+    }
+    return where_clause(body,lv);
+  }
+
+  if (gsIsBinder((ATermAppl)term))
+  {
+    return abstraction(binder_type(term(0)),variable_list(term(1)),fromInner(term(2)));
+  }
+
   size_t arity = ATgetArity(ATgetAFun(term));
   atermpp::aterm_appl t = term(0);
+  data_expression a;
+
   if (ATisInt((ATerm)(ATermAppl)t))
   {
     a = get_int2term(ATgetInt((ATermInt)(ATerm)(ATermAppl) t));
   }
   else
   {
-    a = variable(t);
+    a = fromInner(t);
   }
 
-  if (gsIsOpId(a) || gsIsDataVarId(a))
+  size_t i = 1;
+  sort_expression sort = a.sort();
+  while (is_function_sort(sort) && (i < arity))
   {
-    size_t i = 1;
-    sort_expression sort = a.sort();
-    while (is_function_sort(sort) && (i < arity))
+    sort_expression_list sort_dom = function_sort(sort).domain();
+    data_expression_list list;
+    while (!ATisEmpty(sort_dom))
     {
-      sort_expression_list sort_dom = function_sort(sort).domain();
-      data_expression_list list;
-      while (!ATisEmpty(sort_dom))
-      {
-        assert(i < arity);
-        list = push_front(list, fromInner(ATgetArgument(term,i)));
-        sort_dom = pop_front(sort_dom);
-        ++i;
-      }
-      list = reverse(list);
-      a = application(a, list);
-      sort = function_sort(sort).codomain();
+      assert(i < arity);
+      list = push_front(list, fromInner(ATgetArgument(term,i)));
+      sort_dom = pop_front(sort_dom);
+      ++i;
     }
+    list = reverse(list);
+    a = application(a, list);
+    sort = function_sort(sort).codomain();
   }
   return a;
 } 

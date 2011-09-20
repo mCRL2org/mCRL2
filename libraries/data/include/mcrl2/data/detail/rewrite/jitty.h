@@ -50,6 +50,12 @@ class RewriterJitty: public Rewriter
     atermpp::vector < ATermList >  jitty_strat;
     atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl term, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
     void build_strategies();
+
+    atermpp::aterm_appl rewrite_aux_function_symbol(
+                      const atermpp::aterm_int op,
+                      const atermpp::aterm_appl term,
+                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+
 };
 }
 }
