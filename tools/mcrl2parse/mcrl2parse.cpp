@@ -187,83 +187,69 @@ class mcrl2parse_tool : public input_tool
 
       try
       {
-        core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-        std::cout << "Parsing successful." << std::endl;
         if (print_tree)
         {
+          core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
           p.print_tree(node);
         }
-
         if (file_type == sortexpr_e)
         {
-          data::sort_expression_actions actions;
-          data::sort_expression x = actions.parse_SortExpr(node);
+          data::sort_expression x = data::parse_sort_expression_new(text);
           std::cout << x << std::endl;
         }
         else if (file_type == dataexpr_e)
         {
-          data::data_expression_actions actions;
-          data::data_expression x = actions.parse_DataExpr(node);
+          data::data_expression x = data::parse_data_expression_new(text);
           std::cout << x << std::endl;
         }
         else if (file_type == dataspec_e)
         {
-          data::data_specification_actions actions;
-          data::data_specification x = actions.parse_DataSpec(node);
+          data::data_specification x = data::parse_data_specification_new(text);
           std::cout << data::pp(x) << std::endl;
         }
         else if (file_type == procexpr_e)
         {
-          process::process_actions actions;
-          process::process_expression x = actions.parse_ProcExpr(node);
+          process::process_expression x = process::parse_process_expression_new(text);
           std::cout << x << std::endl;
         }
         else if (file_type == mcrl2spec_e)
         {
-          process::process_actions actions;
-          process::process_specification x = actions.parse_mCRL2Spec(node);
+          process::process_specification x = process::parse_process_specification_new(text);
           std::cout << process::pp(x) << std::endl;
         }
         else if (file_type == besexpr_e)
         {
-          bes::bes_actions actions;
-          bes::boolean_expression x = actions.parse_BesExpr(node);
+          bes::boolean_expression x = bes::parse_boolean_expression_new(text);
           std::cout << bes::pp(x) << std::endl;
         }
         else if (file_type == besspec_e)
         {
-          bes::bes_actions actions;
-          bes::boolean_equation_system<> x = actions.parse_BesSpec(node);
+          bes::boolean_equation_system<> x = bes::parse_boolean_equation_system_new(text);
           std::cout << bes::pp(x) << std::endl;
         }
         else if (file_type == pbesexpr_e)
         {
-          pbes_system::pbes_actions actions;
-          pbes_system::pbes_expression x = actions.parse_PbesExpr(node);
+          pbes_system::pbes_expression x = pbes_system::parse_pbes_expression_new(text);
           std::cout << pbes_system::pp(x) << std::endl;
         }
         else if (file_type == besspec_e)
         {
-          pbes_system::pbes_actions actions;
-          pbes_system::pbes<> x = actions.parse_PbesSpec(node);
+          pbes_system::pbes<> x = pbes_system::parse_pbes_new(text);
           std::cout << pbes_system::pp(x) << std::endl;
         }
         else if (file_type == actfrm_e)
         {
-          action_formulas::action_formula_actions actions;
-          action_formulas::action_formula x = actions.parse_ActFrm(node);
+          action_formulas::action_formula x = action_formulas::parse_action_formula_new(text);
           std::cout << action_formulas::pp(x) << std::endl;
         }
         else if (file_type == regfrm_e)
         {
-          regular_formulas::regular_formula_actions actions;
-          regular_formulas::regular_formula x = actions.parse_RegFrm(node);
+          regular_formulas::regular_formula x = regular_formulas::parse_regular_formula_new(text);
           std::cout << regular_formulas::pp(x) << std::endl;
         }
         else if (file_type == statefrm_e)
         {
-          state_formulas::state_formula_actions actions;
-          state_formulas::state_formula x = actions.parse_StateFrm(node);
+          state_formulas::state_formula x = state_formulas::parse_state_formula_new(text);
           std::cout << state_formulas::pp(x) << std::endl;
         }
       }

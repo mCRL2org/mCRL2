@@ -43,6 +43,10 @@ namespace data
 
 struct sort_expression_actions: public core::default_parser_actions
 {
+  sort_expression_actions(const core::parser_table& table_)
+    : core::default_parser_actions(table_)
+  {}
+
   data::sort_expression parse_SortExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Bool")) { return sort_bool::bool_(); }
@@ -110,6 +114,10 @@ struct sort_expression_actions: public core::default_parser_actions
 
 struct data_expression_actions: public sort_expression_actions
 {
+  data_expression_actions(const core::parser_table& table_)
+    : sort_expression_actions(table_)
+  {}
+
   data_expression make_set_or_bag_comprehension(const variable& v, const data_expression& x)
   {
     return abstraction(set_or_bag_comprehension_binder(), atermpp::make_list(v), x);
@@ -254,6 +262,10 @@ struct data_expression_actions: public sort_expression_actions
 
 struct data_specification_actions: public data_expression_actions
 {
+  data_specification_actions(const core::parser_table& table_)
+    : data_expression_actions(table_)
+  {}
+
   bool callback_SortDecl(const core::parse_node& node, atermpp::vector<atermpp::aterm_appl>& result)
   {
     if (symbol_name(node) == "SortDecl")
@@ -419,8 +431,8 @@ sort_expression parse_sort_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("SortExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-std::cout << "<parse_sort_expression_new>\n" << core::default_parser_actions().print_node(node) << std::endl;
-  return data_expression_actions().parse_SortExpr(node);
+  p.print_tree(node);
+  return data_expression_actions(parser_tables_mcrl2).parse_SortExpr(node);
 }
 
 inline
@@ -430,7 +442,7 @@ data_expression parse_data_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("DataExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return data_expression_actions().parse_DataExpr(node);
+  return data_expression_actions(parser_tables_mcrl2).parse_DataExpr(node);
 }
 
 inline
@@ -440,7 +452,7 @@ data_specification parse_data_specification_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("DataSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return data_specification_actions().parse_DataSpec(node);
+  return data_specification_actions(parser_tables_mcrl2).parse_DataSpec(node);
 }
 
 #endif // MCRL2_USE_NEW_PARSER
@@ -500,8 +512,9 @@ data_specification parse_data_specification(
   if (x1 != x2)
   {
     std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "old:   " << x1 << std::endl;
-    std::clog << "new:   " << x2 << std::endl;
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << x1 << std::endl;
+    std::clog << "new:    " << x2 << std::endl;
 #ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
     throw mcrl2::runtime_error("difference detected between old and new parser");
 #endif
@@ -730,7 +743,7 @@ data_expression parse_data_expression(std::istream& in,
                                       const Variable_iterator end,
                                       const data_specification& data_spec = detail::default_specification())
 {
-#ifdef MCRL2_CHECK_PARSER2
+#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
   std::istringstream in2(text);
   atermpp::aterm_appl data_expr = core::parse_data_expr(in2);
@@ -747,13 +760,14 @@ data_expression parse_data_expression(std::istream& in,
   // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
   data_expression t(data_expr);
 
-#ifdef MCRL2_CHECK_PARSER2
+#ifdef MCRL2_CHECK_PARSER
   data_expression result2 = parse_data_expression_new(text);
   if (t != result2)
   {
     std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "old:   " << data::pp(t) << " " << t << std::endl;
-    std::clog << "new:   " << data::pp(result2) << " " << result2 << std::endl;
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << t << std::endl;
+    std::clog << "new:    " << result2 << std::endl;
 #ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
     throw mcrl2::runtime_error("difference detected between old and new parser");
 #endif
@@ -856,8 +870,9 @@ sort_expression parse_sort_expression(std::istream& in,
   if (result != result2)
   {
     std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "old:   " << data::pp(result) << " " << result << std::endl;
-    std::clog << "new:   " << data::pp(result2) << " " << result2 << std::endl;
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << result << std::endl;
+    std::clog << "new:    " << result2 << std::endl;
 #ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
     throw mcrl2::runtime_error("difference detected between old and new parser");
 #endif

@@ -46,6 +46,10 @@ namespace pbes_system
 
 struct pbes_actions: public data::data_specification_actions
 {
+  pbes_actions(const core::parser_table& table_)
+    : data::data_specification_actions(table_)
+  {}
+
   pbes_system::pbes_expression parse_PbesExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "DataValExpr")) { return parse_DataValExpr(node.child(0)); }
@@ -114,7 +118,7 @@ pbes_expression parse_pbes_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return pbes_actions().parse_PbesExpr(node);
+  return pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
 }
 
 inline
@@ -124,7 +128,7 @@ pbes<> parse_pbes_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return pbes_actions().parse_PbesSpec(node);
+  return pbes_actions(parser_tables_mcrl2).parse_PbesSpec(node);
 }
 
 #endif // MCRL2_USE_NEW_PARSER

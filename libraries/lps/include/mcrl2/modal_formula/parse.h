@@ -31,6 +31,10 @@ namespace action_formulas
 
 struct action_formula_actions: public lps::action_actions
 {
+  action_formula_actions(const core::parser_table& table_)
+    : lps::action_actions(table_)
+  {}
+
   action_formulas::action_formula parse_ActFrm(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "MultAct")) { return parse_MultAct(node.child(0)); }
@@ -57,7 +61,7 @@ action_formula parse_action_formula_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("ActFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return action_formula_actions().parse_ActFrm(node);
+  return action_formula_actions(parser_tables_mcrl2).parse_ActFrm(node);
 }
 
 } // namespace action_formulas
@@ -67,6 +71,10 @@ namespace regular_formulas
 
 struct regular_formula_actions: public action_formulas::action_formula_actions
 {
+  regular_formula_actions(const core::parser_table& table_)
+    : action_formulas::action_formula_actions(table_)
+  {}
+
   regular_formulas::regular_formula parse_RegFrm(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActFrm")) { return parse_ActFrm(node.child(0)); }
@@ -88,7 +96,7 @@ regular_formula parse_regular_formula_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("RegFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return regular_formula_actions().parse_RegFrm(node);
+  return regular_formula_actions(parser_tables_mcrl2).parse_RegFrm(node);
 }
 
 } // namespace regular_formulas
@@ -102,6 +110,10 @@ namespace state_formulas
 
 struct state_formula_actions: public regular_formulas::regular_formula_actions
 {
+  state_formula_actions(const core::parser_table& table_)
+    : regular_formulas::regular_formula_actions(table_)
+  {}
+
   data::data_expression parse_Time(const core::parse_node& node)
   {
     if (node.child(1))
@@ -145,7 +157,7 @@ state_formula parse_state_formula_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("StateFrm");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return state_formula_actions().parse_StateFrm(node);
+  return state_formula_actions(parser_tables_mcrl2).parse_StateFrm(node);
 }
 
 #endif // MCRL2_USE_NEW_PARSER

@@ -27,6 +27,10 @@ namespace bes
 
 struct bes_actions: public core::default_parser_actions
 {
+  bes_actions(const core::parser_table& table_)
+    : core::default_parser_actions(table_)
+  {}
+
   bes::boolean_expression parse_BesExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "true")) { return bes::true_(); }
@@ -87,7 +91,7 @@ boolean_expression parse_boolean_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("BesExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return bes_actions().parse_BesExpr(node);
+  return bes_actions(parser_tables_mcrl2).parse_BesExpr(node);
 }
 
 inline
@@ -97,7 +101,7 @@ boolean_equation_system<> parse_boolean_equation_system_new(const std::string& t
   unsigned int start_symbol_index = p.start_symbol_index("BesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return bes_actions().parse_BesSpec(node);
+  return bes_actions(parser_tables_mcrl2).parse_BesSpec(node);
 }
 
 #endif // MCRL2_USE_NEW_PARSER

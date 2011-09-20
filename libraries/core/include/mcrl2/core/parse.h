@@ -42,10 +42,6 @@ struct default_parser_actions
 {
   const parser_table& table;
 
-  default_parser_actions()
-    : table(parser_tables_mcrl2)
-  {}
-
   default_parser_actions(const parser_table& table_)
     : table(table_)
   {}

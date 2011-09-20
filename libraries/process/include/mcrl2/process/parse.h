@@ -33,6 +33,10 @@ namespace process
 
 struct process_actions: public lps::action_actions
 {
+  process_actions(const core::parser_table& table_)
+    : lps::action_actions(table_)
+  {}
+
   core::identifier_string_list parse_ActIdSet(const core::parse_node& node)
   {
     return parse_IdList(node.child(1));
@@ -210,7 +214,7 @@ process_expression parse_process_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("ProcExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return process_actions().parse_ProcExpr(node);
+  return process_actions(parser_tables_mcrl2).parse_ProcExpr(node);
 }
 
 inline
@@ -220,7 +224,7 @@ process_specification parse_process_specification_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("mCRL2Spec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return process_actions().parse_mCRL2Spec(node);
+  return process_actions(parser_tables_mcrl2).parse_mCRL2Spec(node);
 }
 
 #endif // MCRL2_USE_NEW_PARSER
