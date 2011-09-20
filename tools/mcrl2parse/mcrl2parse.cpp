@@ -13,6 +13,7 @@
 
 #define TOOLNAME "mcrl2parse"
 #define AUTHOR "Wieger Wesselink"
+#define MCRL2_USE_NEW_PARSER
 
 #include <fstream>
 #include <iostream>
