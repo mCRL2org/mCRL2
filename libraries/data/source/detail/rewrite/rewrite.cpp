@@ -18,6 +18,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/detail/rewrite.h"
@@ -160,51 +161,95 @@ atermpp::aterm_appl Rewriter::rewrite_where(
   return result;
 }
 
+ // function object to test if it is an aterm_appl with function symbol "f"
+ struct is_a_variable
+ {
+   bool operator()(atermpp::aterm t) const
+   {
+     return core::detail::gsIsDataVarId(t);
+   }
+ };
+
 atermpp::aterm_appl Rewriter::rewrite_single_lambda(
                       const variable_list vl,
                       const atermpp::aterm_appl body,
                       mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
+  assert(vl.size()>0);
   // A lambda term without arguments; Take care that the bound variable is made unique with respect to 
   // the variables occurring in sigma. But in case vl is empty, just rewrite...
 
-  if (vl.empty())
+  // First filter the variables in vl by those occuring as left/right hand sides in sigma.
+
+  size_t number_of_renamed_variables=0;
+  size_t count=0;
+  atermpp::vector <variable> new_variables(vl.size());
   {
-    return rewrite_internal(body,sigma);
+    // Restrict the scope of variables_in_sigma.
+    std::set < variable > variables_in_sigma;
+    for(mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> >::const_iterator it=sigma.begin();
+                  it!=sigma.end(); ++it)
+    {
+      variables_in_sigma.insert(it->first);
+      find_all_if(it->second,is_a_variable(),std::inserter(variables_in_sigma,variables_in_sigma.begin()));
+    }
+  
+    // Create new unique variables to replace the old and create storage for
+    // storing old values for variables in vl.
+    for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
+    {
+      const variable v= *it;
+      if (variables_in_sigma.count(v)>0)
+      {
+        number_of_renamed_variables++;
+        new_variables[count]=generator(v.sort());
+      }
+      new_variables[count]=v;
+    }
+  }
+
+  if (number_of_renamed_variables==0)
+  {
+    return gsMakeBinder(gsMakeLambda(),vl,rewrite_internal(body,sigma));
   }
   
-  // Create new unique variables to replace the old and create storage for
-  // storing old values for variables in vl.
-  atermpp::vector <variable> new_variables(vl.size());
-  atermpp::vector <atermpp::aterm_appl> saved_substitutions(vl.size());
-  size_t count=0;
-  for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
+  atermpp::vector <atermpp::aterm_appl> saved_substitutions;
+  count=0;
+  for(variable_list ::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
   { 
+    assert(count<number_of_renamed_variables);
+    const variable v= *it;
+    if (v!=new_variables[count])
+    {
+      saved_substitutions.push_back(sigma(v));
+      sigma[v]=atermpp::aterm_appl(new_variables[count]);
+    }
+  }
+  const atermpp::aterm_appl result= rewrite_internal(body,sigma);
+
+  // restore saved substitutions;
+  
+  count=0;
+  size_t new_variable_count=0;
+  for(variable_list ::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
+  {
     assert(count<vl.size());
     const variable v= *it;
-    saved_substitutions[count]=sigma(v);
-    new_variables[count]=generator(v.sort());
-    sigma[v]=atermpp::aterm_appl(new_variables[count]);
+    if (v!=new_variables[count])
+    {
+      assert(new_variable_count<saved_substitutions.size());
+      sigma[v]=saved_substitutions[new_variable_count];
+      new_variable_count++;
+    }
   }
+
   variable_list new_variable_list;
 
   for(atermpp::vector <variable>::const_reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
   {
     new_variable_list=push_front(new_variable_list,*it);
   }
-  const atermpp::aterm_appl result= gsMakeBinder(gsMakeLambda(),(ATermList)new_variable_list,(ATermAppl)rewrite_internal(body,sigma));
-
-  // restore saved substitutions;
-  
-  count=0;
-  for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,++count)
-  {
-    assert(count<vl.size());
-    const variable v= *it;
-    sigma[v]=saved_substitutions[count];
-  }
-
-  return result;
+  return gsMakeBinder(gsMakeLambda(),new_variable_list,result);
 }
 
 
@@ -238,6 +283,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   {
     assert(count<vl.size());
     saved_substitutions[count]=rewrite_internal(t(count+1),sigma);
+    assert(!remaining_bound_variables.empty());
     remaining_bound_variables=pop_front(remaining_bound_variables);
   }
   assert(remaining_bound_variables.empty()||(arity<vl.size()));
@@ -247,12 +293,15 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   for( term_list < variable > :: const_iterator it=vl.begin(); it!=vl.end() && count<arity; ++it, ++count)
   {
     assert(count<vl.size());
-    aterm_appl t=sigma(*it); // temporary store used for swapping values.
+    aterm_appl temp=sigma(*it); // temporary store used for swapping values.
     sigma[*it]=saved_substitutions[count];
-    saved_substitutions[count]=t;
+    saved_substitutions[count]=temp;
   }
   // Rewrite the body of the lambda term.
-  aterm_appl result=rewrite_single_lambda(remaining_bound_variables,lambda_body,sigma);
+  
+  aterm_appl result=(remaining_bound_variables.size()>0?
+                           rewrite_single_lambda(remaining_bound_variables,lambda_body,sigma):
+                           rewrite_internal(lambda_body,sigma));
 
   // Restore the old values of sigma.
   count=0;
@@ -276,7 +325,6 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
     // We do not employ the knowledge that the first argument is in normal form... TODO.
     result = rewrite_internal(ApplyArray(arity-vl.size(),args),sigma); 
   } 
-
   return result;
 }
 

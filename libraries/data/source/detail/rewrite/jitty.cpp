@@ -721,9 +721,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
     }
   }
 
-  const atermpp::aterm_appl a = ApplyArray(arity,rewritten);
-
-  return internal_quantifier_enumeration(a,sigma);
+  return ApplyArray(arity,rewritten);
 }
 
 atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)

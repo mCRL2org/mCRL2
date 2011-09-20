@@ -10,7 +10,7 @@ There are two find algorithms, `find_if` for searching a subterm that matches a
 given predicate, and `find_all_if` for finding all subterms that match a
 predicate. The program fragment below illustrates this:
 
-  #include "atermpp/algorithm.h"
+  #include "mcrl2/atermpp/algorithm.h"
 
   // function object to test if it is an aterm_appl with function symbol "f"
   struct is_f

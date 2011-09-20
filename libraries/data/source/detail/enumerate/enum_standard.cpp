@@ -311,43 +311,55 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
   {
     return build_solution_single(t,substituted_vars,exprs);
   }
-  else
+  else if (gsIsWhr(t))
   {
-    atermpp::aterm_appl head = t(0);
+    assert(0); // This is a non expected case as t is a normalform.
+  }
+  else if (gsIsBinder(t))
+  {
+    const atermpp::aterm_appl t1=t;
+    const atermpp::aterm_appl binder=t1(0);
+    const variable_list bound_variables=t1(1);
+    const atermpp::aterm_appl body=build_solution_aux_innerc(t1(2),substituted_vars,exprs);
+    return gsMakeBinder(binder,bound_variables,body);
+  }
+  else 
+  {
+    // t has the shape @REWR@(u1,...,un)
+
+    atermpp::aterm head = t(0);
     size_t arity = t.size();
     size_t extra_arity = 0;
 
-    if (!ATisInt((ATerm)(ATermAppl)head))
+    if (!ATisInt(head))
     {
       head = build_solution_single(head,substituted_vars,exprs);
       if (!is_variable(head))
       {
-        extra_arity = head.size()-1; 
+        extra_arity = atermpp::aterm_appl(head).size()-1; 
       }
     }
 
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,ATermAppl,arity+extra_arity);
-    AFun fun = ATgetAFun((ATermAppl) t);
+    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,arity+extra_arity);
     size_t k = 1;
 
-    if (!ATisInt((ATerm)(ATermAppl)head) && !is_variable((ATermAppl) head))
+    if (!ATisInt(head) && !is_variable(head))
     {
-      fun = ATmakeAFun("@appl_bs@",arity+extra_arity,false);
       k = extra_arity+1;
       for (size_t i=1; i<k; i++)
       {
-        args[i] = (ATermAppl)(ATerm)head(i);
+        args[i] = atermpp::aterm_appl(head)(i);
       }
-      head = head(0);
+      head = atermpp::aterm_appl(head)(0);
     }
 
     args[0] = head;
     for (size_t i=1; i<arity; i++,k++)
     {
-      args[k] = (ATermAppl)build_solution_aux_innerc(t(i),substituted_vars,exprs);
+      args[k] = build_solution_aux_innerc(t(i),substituted_vars,exprs);
     }
 
-    atermpp::aterm_appl r = ATmakeApplArray(fun,(ATerm *)args);
+    atermpp::aterm_appl r = ApplyArray(arity+extra_arity,args);
     return r;
   }
 }
