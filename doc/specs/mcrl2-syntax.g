@@ -90,9 +90,9 @@ DataExpr
   | '!' DataExpr                             $unary_right 11
   | '-' DataExpr                             $unary_right 11
   | '#' DataExpr                             $unary_right 11
-  | 'forall' VarsDeclList '.' DataExpr       $unary_left 0
-  | 'exists' VarsDeclList '.' DataExpr       $unary_left 0
-  | 'lambda' VarsDeclList '.' DataExpr       $unary_left 0
+  | 'forall' VarsDeclList '.' DataExpr       $right 0
+  | 'exists' VarsDeclList '.' DataExpr       $right 0
+  | 'lambda' VarsDeclList '.' DataExpr       $right 0
   | DataExpr '=>'  DataExpr                  $binary_right 1
   | DataExpr '&&'  DataExpr                  $binary_right 2
   | DataExpr '||'  DataExpr                  $binary_right 2
@@ -182,7 +182,7 @@ ProcExpr
   | ProcExpr '@' DataExprUnit                   $binary_left 7
   | ProcExpr '|'   ProcExpr                     $binary_right 8
   | DataExprUnit ProcExprThenElse               $unary_left 11
-  | 'sum' VarsDeclList '.' ProcExpr             $unary_left 2
+  | 'sum' VarsDeclList '.' ProcExpr             $right 2
   ;
 
 ProcExprThenElse: '->' ProcExpr ('<>' ProcExpr)? $unary_op_left 11;
@@ -276,9 +276,9 @@ PbesExpr
   : DataValExpr
   | 'true'
   | 'false'
-  | 'forall' VarsDeclList '.' PbesExpr                           $unary_left 0
-  | 'exists' VarsDeclList '.' PbesExpr                           $unary_left 0
-  | '!' PbesExpr                                                 $unary_left 4
+  | 'forall' VarsDeclList '.' PbesExpr                           $right 0
+  | 'exists' VarsDeclList '.' PbesExpr                           $right 0
+  | '!' PbesExpr                                                 $right 4
   | PbesExpr '=>' PbesExpr                                       $binary_right 2
   | PbesExpr '&&' PbesExpr                                       $binary_right 3
   | PbesExpr '||' PbesExpr                                       $binary_right 3
@@ -293,13 +293,13 @@ ActFrm
   | DataValExpr
   | 'true'
   | 'false'
-  | '!' ActFrm                                                   $unary_left 5
+  | '!' ActFrm                                                   $unary_right 5
   | ActFrm '=>' ActFrm                                           $binary_right 2
   | ActFrm '&&' ActFrm                                           $binary_right 3
   | ActFrm '||' ActFrm                                           $binary_right 3
-  | 'forall' VarsDeclList '.' ActFrm                             $unary_left 0
-  | 'exists' VarsDeclList '.' ActFrm                             $unary_left 0
-  | ActFrm '@' DataExpr                                          $unary_left 4
+  | 'forall' VarsDeclList '.' ActFrm                             $right 0
+  | 'exists' VarsDeclList '.' ActFrm                             $right 0
+  | ActFrm '@' DataExpr                                          $binary_left 4
   | '(' ActFrm ')'
   ;
 
@@ -321,16 +321,16 @@ StateFrm
   : DataValExpr
   | 'true'
   | 'false'
-  | '!' StateFrm                                                 $unary_left 5
+  | '!' StateFrm                                                 $unary_right 5
   | StateFrm '=>' StateFrm                                       $binary_op_right 3
   | StateFrm '&&' StateFrm                                       $binary_op_right 4
   | StateFrm '||' StateFrm                                       $binary_op_right 4
-  | 'forall' VarsDeclList '.' StateFrm                           $unary_left 2
-  | 'exists' VarsDeclList '.' StateFrm                           $unary_left 2
+  | 'forall' VarsDeclList '.' StateFrm                           $right 2
+  | 'exists' VarsDeclList '.' StateFrm                           $right 2
   | '[' RegFrm ']'
   | '<' RegFrm '>'
-  | 'mu' StateVarDecl '.' StateFrm                               $unary_left 1
-  | 'nu' StateVarDecl '.' StateFrm                               $unary_left 1
+  | 'mu' StateVarDecl '.' StateFrm                               $right 1
+  | 'nu' StateVarDecl '.' StateFrm                               $right 1
   | Id ( '(' DataExprList ')' )?
   | 'delay' ( '@' DataExpr )?
   | 'yaled' ( '@' DataExpr )?
