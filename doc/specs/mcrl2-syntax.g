@@ -103,7 +103,7 @@ DataExpr
   | DataExpr '>='  DataExpr                  $binary_left  4
   | DataExpr '>'   DataExpr                  $binary_left  4
   | DataExpr 'in'  DataExpr                  $binary_left  4
-  | DataExpr '|>'  DataExpr                  $binary_left  5
+  | DataExpr '|>'  DataExpr                  $binary_right 5
   | DataExpr '<|'  DataExpr                  $binary_left  6
   | DataExpr '++'  DataExpr                  $binary_left  7
   | DataExpr '+'   DataExpr                  $binary_left  8
