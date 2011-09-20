@@ -128,7 +128,7 @@ DataExprUnit
   | '#' DataExprUnit                         $right 11
   ;
 
-WhrExpr: DataExpr '=' DataExpr ;
+WhrExpr: Id '=' DataExpr ;
 
 WhrExprList: WhrExpr ( ',' WhrExpr )* ;
 
