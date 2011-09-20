@@ -85,8 +85,8 @@ DataExpr
   | '{' VarDecl '|' DataExpr '}'
   | '{' DataExprList '}'
   | '(' DataExpr ')'
-  | DataExpr '[' DataExpr '->' DataExpr ']'
-  | DataExpr '(' DataExprList ')'
+  | DataExpr '[' DataExpr '->' DataExpr ']'  $left 12
+  | DataExpr '(' DataExprList ')'            $left 12
   | '!' DataExpr                             $unary_right 11
   | '-' DataExpr                             $unary_right 11
   | '#' DataExpr                             $unary_right 11
@@ -122,7 +122,7 @@ DataExprUnit
   | 'true'
   | 'false'
   | '(' DataExpr ')'
-  | DataExprUnit '(' DataExprList ')'
+  | DataExprUnit '(' DataExprList ')'        $left 12
   | '!' DataExprUnit                         $unary_right 11
   | '-' DataExprUnit                         $unary_right 11
   | '#' DataExprUnit                         $unary_right 11
