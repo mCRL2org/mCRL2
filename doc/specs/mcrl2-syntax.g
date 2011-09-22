@@ -181,11 +181,12 @@ ProcExpr
   | ProcExpr '<<'  ProcExpr                     $binary_left 5
   | ProcExpr '@' DataExprUnit                   $binary_left 7
   | ProcExpr '|'   ProcExpr                     $binary_right 8
-  | DataExprUnit ProcExprThenElse               $unary_left 11
+  | DataExprUnit '->' ProcExpr                  $binary_right 11
+  | DataExprUnit '->' ElseExpr                  $binary_right 12
   | 'sum' VarsDeclList '.' ProcExpr             $right 2
   ;
 
-ProcExprThenElse: '->' ProcExpr ('<>' ProcExpr)? $unary_op_left 11;
+ElseExpr: ProcExpr '<>' ProcExpr ; 
 
 //--- Actions
 
