@@ -48,6 +48,34 @@ namespace data
 namespace detail
 {
 
+// function object to test if it is an aterm_appl with function symbol "f"
+struct is_a_variable
+{
+  bool operator()(atermpp::aterm t) const
+  {
+    return core::detail::gsIsDataVarId(t);
+  }
+};
+
+bool occur_check(const variable v, const atermpp::aterm_appl e)
+{
+  if (v==e)
+  { 
+    // The variable is reset. This is ok.
+    return true;
+  }
+  std::set<variable> s;
+  find_all_if(e,is_a_variable(),std::inserter(s,s.begin()));
+  if (s.count(v)>0)
+  {
+    // ATfprintf(stderr,"Occur check %t <-- %t\n",v,fromInner(e));
+    return false; // Occur check failed.
+  }
+  return true;
+}
+
+
+
 data_expression_list Rewriter::rewrite_list(
      const data_expression_list terms,
      mutable_map_substitution<> &sigma)
@@ -143,6 +171,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
     assert(count<assignment_list.size());
     const variable v=variable((*it)(0));
     aterm_appl t=sigma(v); // temporary store used for swapping values.
+    assert(occur_check(v,saved_substitutions[count]));
     sigma[v]=saved_substitutions[count];
     saved_substitutions[count]=t;
   }
@@ -155,20 +184,12 @@ atermpp::aterm_appl Rewriter::rewrite_where(
   { 
     assert(count<assignment_list.size());
     const variable v=variable((*it)(0));
+    assert(occur_check(v,saved_substitutions[count]));
     sigma[v]=saved_substitutions[count];
   }
 
   return result;
 }
-
- // function object to test if it is an aterm_appl with function symbol "f"
- struct is_a_variable
- {
-   bool operator()(atermpp::aterm t) const
-   {
-     return core::detail::gsIsDataVarId(t);
-   }
- };
 
 atermpp::aterm_appl Rewriter::rewrite_single_lambda(
                       const variable_list vl,
@@ -199,7 +220,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
     {
       const variable v= *it;
-      if (variables_in_sigma.count(v)>0)
+      if ((variables_in_sigma.count(v)>0) || true)
       {
         number_of_renamed_variables++;
         new_variables[count]=generator(v.sort());
@@ -222,6 +243,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
     if (v!=new_variables[count])
     {
       saved_substitutions.push_back(sigma(v));
+      assert(occur_check(v,atermpp::aterm_appl(new_variables[count])));
       sigma[v]=atermpp::aterm_appl(new_variables[count]);
     }
   }
@@ -238,6 +260,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
     if (v!=new_variables[count])
     {
       assert(new_variable_count<saved_substitutions.size());
+      assert(occur_check(v,saved_substitutions[new_variable_count]));
       sigma[v]=saved_substitutions[new_variable_count];
       new_variable_count++;
     }
@@ -269,63 +292,40 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   const variable_list vl=lambda_term(1);
   const atermpp::aterm_appl lambda_body=lambda_term(2);
   size_t arity=t.size();
+  assert(vl.size()<=arity);
 
-  atermpp::vector < aterm_appl > saved_substitutions(vl.size());
-
-  // The remaining bound variables contain those variables for which no arguments can be substituted.
-  variable_list remaining_bound_variables=vl;
-  size_t count=0;
-  // first store the arguments, after normalisation, in saved substitutions. This is done to avoid
-  // interference between the changing sigma, and normalisation. An optimisation could be that if
-  // a variable is not used in the lambda_body, normalisation does not need to be done. To be efficient, this
-  // requires preprocessing, though.
-  for( term_list < variable > :: const_iterator it=vl.begin(); it!=vl.end() && count<arity; ++it, ++count)
+  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  size_t count=1;
+  for(variable_list::const_iterator i=vl.begin(); i!=vl.end(); ++i, ++count)
   {
-    assert(count<vl.size());
-    saved_substitutions[count]=rewrite_internal(t(count+1),sigma);
-    assert(!remaining_bound_variables.empty());
-    remaining_bound_variables=pop_front(remaining_bound_variables);
+    const variable v= (*i);
+    const variable v_fresh(generator(v.sort()));
+    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+    sigma[v_fresh]=t(count);
   }
-  assert(remaining_bound_variables.empty()||(arity<vl.size()));
-  // Now save old values for variables in sigma and carry out the substitutions in sigma.
-
-  count=0;
-  for( term_list < variable > :: const_iterator it=vl.begin(); it!=vl.end() && count<arity; ++it, ++count)
-  {
-    assert(count<vl.size());
-    aterm_appl temp=sigma(*it); // temporary store used for swapping values.
-    sigma[*it]=saved_substitutions[count];
-    saved_substitutions[count]=temp;
-  }
-  // Rewrite the body of the lambda term.
+  const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
   
-  aterm_appl result=(remaining_bound_variables.size()>0?
-                           rewrite_single_lambda(remaining_bound_variables,lambda_body,sigma):
-                           rewrite_internal(lambda_body,sigma));
-
-  // Restore the old values of sigma.
-  count=0;
-  for( term_list < variable > :: const_iterator it=vl.begin(); it!=vl.end() && count<arity; ++it, ++count)
+  // Reset variables in sigma
+  for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
+                 it!=variable_renaming.end(); ++it)
   {
-    assert(count<vl.size());
-    sigma[*it]=saved_substitutions[count];
+    sigma[it->second]=it->second;
+  }
+  if (vl.size()==arity)
+  {
+    return result;
   }
 
-  if (arity>vl.size())
+  // There are more arguments than bound variables.
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
+  args[0]=result;
+  for(size_t i=1; i<arity-vl.size(); ++i)
   {
-    // There were more arguments than bound variables.
-    assert(remaining_bound_variables.empty());
-    MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity-vl.size());
-    args[0]=result;
-    for(size_t i=1; i<arity-vl.size(); ++i)
-    {
-      assert(vl.size()+i<arity);
-      args[i]=t(vl.size()+i);
-    }
-    // We do not employ the knowledge that the first argument is in normal form... TODO.
-    result = rewrite_internal(ApplyArray(arity-vl.size(),args),sigma); 
-  } 
-  return result;
+    assert(vl.size()+i<arity);
+    args[i]=t(vl.size()+i);
+  }
+  // We do not employ the knowledge that the first argument is in normal form... TODO.
+  return rewrite_internal(ApplyArray(arity-vl.size(),args),sigma); 
 }
 
 atermpp::aterm_appl Rewriter::new_internal_existential_quantifier_enumeration(
