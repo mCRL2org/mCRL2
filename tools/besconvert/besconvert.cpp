@@ -594,7 +594,6 @@ class bes_bisimulation_tool: public super
       {
         boolean_equation_system<> b; // TODO: build proper solution.
         mcrl2::bes::bes_reduction_algorithm<> a(b);
-        std::cerr << "Allowed eqs: " << a.allowed_equivalences() << std::endl;
         equivalence = a.parse_equivalence(parser.option_argument("equivalence"));
         if (a.allowed_eqs().count(equivalence) == 0)
         {

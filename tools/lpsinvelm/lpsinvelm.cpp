@@ -223,7 +223,7 @@ class invelm_tool : public prover_tool< rewriter_tool<input_output_tool> >
       }
       else
       {
-        std::cerr << "A file containing an invariant must be specified using the option --invariant=INVFILE" << std::endl;
+        mCRL2log(error) << "A file containing an invariant must be specified using the option --invariant=INVFILE" << std::endl;
         return false;
       }
 

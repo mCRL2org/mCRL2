@@ -135,7 +135,7 @@ class sim_tool : public rewriter_tool< input_tool >
         }
         catch (mcrl2::runtime_error e)
         {
-          std::cerr << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
+          mCRL2log(mcrl2::log::error) << "an error occurred while calculating the transitions from this state;\n" << e.what() << std::endl;
         }
 
         while (true)

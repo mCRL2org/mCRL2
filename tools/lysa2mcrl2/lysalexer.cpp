@@ -1956,7 +1956,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 
 void yyFlexLexer::LexerError( yyconst char msg[] )
 {
-    	std::cerr << msg << std::endl;
+  mCRL2log(error) << msg << std::endl;
 	exit( YY_EXIT_FAILURE );
 }
 

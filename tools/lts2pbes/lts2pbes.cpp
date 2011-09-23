@@ -82,7 +82,7 @@ class lts2pbes_tool : public input_output_tool
       {
         if (1 < parser.options.count("data"))
         {
-          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
+          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
         }
         data_file_type=data_e;
         datafile = parser.option_argument("data");
@@ -92,7 +92,7 @@ class lts2pbes_tool : public input_output_tool
       {
         if (1 < parser.options.count("lps") || data_file_type!=none_e)
         {
-          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
+          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
         }
 
         data_file_type=lps_e;
@@ -103,7 +103,7 @@ class lts2pbes_tool : public input_output_tool
       {
         if (1 < parser.options.count("mcrl2") || data_file_type!=none_e)
         {
-          std::cerr << "warning: multiple data specification files are specified; can only use one.\n";
+          mCRL2log(warning) << "multiple data specification files are specified; can only use one.\n";
         }
 
         data_file_type=mcrl2_e;
@@ -163,7 +163,7 @@ class lts2pbes_tool : public input_output_tool
       /* Read data specification (if any) */
       if (data_file_type == none_e)
       {
-        std::cerr << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
+        mCRL2log(info) << "No data and action label specification is provided. Only the standard data types and no action labels can be used." << std::endl;
       }
       else if (data_file_type==lps_e)
       {
@@ -182,7 +182,7 @@ class lts2pbes_tool : public input_output_tool
 
         if (!dfile)
         {
-          std::cerr << "Cannot read data specification file. Only the standard data types and no action labels can be used." << std::endl;
+          mCRL2log(info) << "Cannot read data specification file. Only the standard data types and no action labels can be used." << std::endl;
         }
         else
         {
@@ -222,13 +222,13 @@ class lts2pbes_tool : public input_output_tool
         {
           if (data_file_type != none_e)
           {
-            std::cerr << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
+            mCRL2log(warning) << "The lts file comes with a data specification. Ignoring the extra data and action label specification provided." << std::endl;
           }
           result.load(infilename);
           break;
         }
         case lts_none:
-          std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+          mCRL2log(warning) << "Cannot determine type of input. Assuming .aut.\n";
         case lts_aut:
         {
           lts_aut_t l;

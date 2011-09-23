@@ -189,7 +189,7 @@ class ltsconvert_tool : public ltsconvert_base
           return true;
         }
         case lts_none:
-          std::cerr << "Cannot determine type of output. Assuming .aut.\n";
+          mCRL2log(warning) << "Cannot determine type of output. Assuming .aut.\n";
         case lts_aut:
         {
           lts_aut_t l_out;
@@ -247,7 +247,7 @@ class ltsconvert_tool : public ltsconvert_base
           return load_convert_and_save<lts_lts_t>();
         }
         case lts_none:
-          std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+          mCRL2log(warning) << "Cannot determine type of input. Assuming .aut.\n";
         case lts_aut:
         {
           return load_convert_and_save<lts_aut_t>();
@@ -319,7 +319,7 @@ class ltsconvert_tool : public ltsconvert_base
       {
         if (1 < parser.options.count("lps"))
         {
-          std::cerr << "warning: multiple LPS files specified; can only use one\n";
+          mCRL2log(warning) << "multiple LPS files specified; can only use one\n";
         }
 
         tool_options.lpsfile = parser.option_argument("lps");
@@ -328,14 +328,14 @@ class ltsconvert_tool : public ltsconvert_base
       {
         if (1 < parser.options.count("in"))
         {
-          std::cerr << "warning: multiple input formats specified; can only use one\n";
+          mCRL2log(warning) << "multiple input formats specified; can only use one\n";
         }
 
         tool_options.intype = mcrl2::lts::detail::parse_format(parser.option_argument("in"));
 
         if (tool_options.intype == lts_none)
         {
-          std::cerr << "warning: format '" << parser.option_argument("in") <<
+          mCRL2log(warning) << "format '" << parser.option_argument("in") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }
@@ -343,14 +343,14 @@ class ltsconvert_tool : public ltsconvert_base
       {
         if (1 < parser.options.count("out"))
         {
-          std::cerr << "warning: multiple output formats specified; can only use one\n";
+          mCRL2log(warning) << "multiple output formats specified; can only use one\n";
         }
 
         tool_options.outtype = mcrl2::lts::detail::parse_format(parser.option_argument("out"));
 
         if (tool_options.outtype == lts_none)
         {
-          std::cerr << "warning: format '" << parser.option_argument("out") <<
+          mCRL2log(warning) << "format '" << parser.option_argument("out") <<
                     "' is not recognised; option ignored" << std::endl;
         }
       }

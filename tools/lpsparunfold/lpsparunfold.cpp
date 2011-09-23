@@ -179,7 +179,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
           if (!search_sort_expression(lps_specification.data().sorts(), sort))
           {
-            std::cerr << "No sorts found of name " << m_unfoldsort << std::endl;
+            mCRL2log(warning) << "No sorts found of name " << m_unfoldsort << std::endl;
             break;
           }
           mcrl2::data::assignment_list assignments = lps_specification.initial_process().assignments();
@@ -196,7 +196,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
 
           if (m_set_index.empty())
           {
-            std::cerr << "No process parameters found of sort " << m_unfoldsort << std::endl;
+            mCRL2log(warning) << "No process parameters found of sort " << m_unfoldsort << std::endl;
             break;
           }
         }

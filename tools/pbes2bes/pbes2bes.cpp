@@ -43,7 +43,7 @@
 //Data Framework
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/data/data_equation.h" // for debug std::cerr
+#include "mcrl2/data/data_equation.h"
 
 //Boolean equation systems
 #include "mcrl2/pbes/utility.h"

@@ -12,6 +12,7 @@
 
 #include "xmlimporter.h"
 #include <iostream>
+#include "mcrl2/utilities/logger.h"
 #include <wx/xml/xml.h>
 
 Graph* XMLImporter::importFile(const std::string& filename)
@@ -168,7 +169,7 @@ Graph* XMLImporter::importFile(const std::string& filename)
   }
   catch (std::exception& e)
   {
-    std::cerr << "Could not load XML file: " << e.what();
+    mCRL2log(mcrl2::log::error) << "Could not load XML file: " << e.what();
     return NULL;
   }
 }

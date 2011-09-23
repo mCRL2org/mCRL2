@@ -104,7 +104,7 @@ void xsim_message_handler(mcrl2::log::message_t msg_type, const char* msg)
 
   if (XSim::instance == NULL)
   {
-    std::cerr << msg << "this message was brought to you by LPSXSim (all rights reserved)" << std::endl;
+    mCRL2log(mcrl2::log::error) << msg << "this message was brought to you by LPSXSim (all rights reserved)" << std::endl;
   }
   else
   {

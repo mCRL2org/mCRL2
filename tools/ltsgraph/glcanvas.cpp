@@ -145,7 +145,7 @@ void GLCanvas::render2D()
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
-	  std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
+	  mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(error) << std::endl;
 	}
 
     SwapBuffers();
@@ -254,7 +254,7 @@ void GLCanvas::render3D()
 	GLenum error = glGetError();
 	if (error != GL_NO_ERROR)
 	{
-	  std::cerr << "OpenGL error: " << gluErrorString(error) << std::endl;
+	  mCRL2log(mcrl2::log::error) << "OpenGL error: " << gluErrorString(error) << std::endl;
 	}
 
     SwapBuffers();

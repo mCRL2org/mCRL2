@@ -147,7 +147,7 @@ class lps2lts_tool : public lps2lts_base
       }
       catch (mcrl2::runtime_error& e)
       {
-        std::cerr << e.what() << std::endl;
+        mCRL2log(error) << e.what() << std::endl;
         lps2lts.finalise_lts_generation();
         return false;
       }

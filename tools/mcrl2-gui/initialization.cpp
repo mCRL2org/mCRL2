@@ -29,6 +29,7 @@
 #include <wx/mimetype.h>
 
 #include "mcrl2/utilities/basename.h"
+#include "mcrl2/utilities/logger.h"
 
 #include <wx/xml/xml.h>
 #include <wx/sstream.h>
@@ -105,7 +106,7 @@ Initialization::Initialization()
 #endif
     if (result != 0)
     {
-      std::cerr << "Failed to execute " << cmd << std::endl;
+      mCRL2log(mcrl2::log::error) << "Failed to execute " << cmd << std::endl;
     }
     else
     {

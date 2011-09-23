@@ -713,13 +713,12 @@ static void TransitionsGoingToBlock(SVCint b, ATermList* newlab)
     if (classes && npar > 1)
     {
       pars = par[s[i]];
-      ATfprintf(stdout, "Summands:\t");
+      std::cout << "Summands:\t";
       for (; !ATisEmpty(pars); pars=ATgetNext(pars))
       {
-        ATfprintf(stdout, "%t ",
-                  par_name[ATgetInt((ATermInt) ATgetFirst(pars))]);
+        std::cout << atermpp::aterm(par_name[ATgetInt((ATermInt) ATgetFirst(pars))]);
       }
-      ATfprintf(stdout, "\n");
+      std::cout << std::endl;
     }
   }
   newlab[newb] = newlabels;

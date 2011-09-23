@@ -143,7 +143,7 @@ class summand_information
       smd.protect();
       real_summation_variables.protect();
       non_real_summation_variables.protect();
-      // std::cerr << "NEW REAL SUMMATION VARIABLES " << pp(rsv) << "\n";
+      // mCRL2log(debug) << "NEW REAL SUMMATION VARIABLES " << pp(rsv) << "\n";
     }
 
     summand_information(const summand_information& s)
@@ -255,7 +255,7 @@ class summand_information
       data_expression xi_u=new_xi_variable.get_upperbound();
       data_expression substituted_lowerbound = replace_free_variables(xi_t,summand_real_nextstate_map);
       data_expression substituted_upperbound = replace_free_variables(xi_u,summand_real_nextstate_map);
-      // std::cerr << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
+      // mCRL2log(debug) << "BOUNDS " << pp(substituted_lowerbound) << " -- " << pp(substituted_upperbound) << "\n";
 
       // First check whether the new value for the new xi variable is equal to itself.
       // I do not know whether optimisation below is correct.
@@ -378,7 +378,7 @@ class summand_information
         }
       }
       nextstate_context_combinations.swap(new_nextstate_context_combinations);
-      // std::cerr << "SIZE new nextstate_context combinations " << nextstate_context_combinations.size() << "\n"
+      // mCRL2log(debug) << "SIZE new nextstate_context combinations " << nextstate_context_combinations.size() << "\n"
       //          << "IN summand " << pp(smd) << "\n";
     }
 };
