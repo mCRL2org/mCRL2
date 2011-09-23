@@ -88,7 +88,7 @@ void test_free_variables()
 
   specification = parse_linear_process_specification(
                     "act a;\n"
-                    "proc X(z : Bool) = (z && forall x : Nat. exists y : Nat. x < y) -> a.X(!z);\n"
+                    "proc X(z : Bool) = (z && (forall x : Nat. exists y : Nat. x < y)) -> a.X(!z);\n"
                     "init X(true);\n"
                   );
   free_variables = find_free_variables(specification.process());
