@@ -68,6 +68,7 @@ class mcrl2parse_tool : public input_tool
     file_type_t file_type;
     bool partial_parses;
     bool print_tree;
+    bool use_new_parser;
 
     void set_file_type(const std::string& type)
     {
@@ -121,6 +122,11 @@ class mcrl2parse_tool : public input_tool
              "print parse tree (default: false)",
              't'
            )
+        .add_option("use-new-parser",
+           make_optional_argument("NAME", "1"),
+             "use new parser (default: true)",
+             'n'
+           )
         ;
     }
 
@@ -137,6 +143,7 @@ class mcrl2parse_tool : public input_tool
       }
       partial_parses = parser.option_argument_as<bool>("partial-parses");
       print_tree = parser.option_argument_as<bool>("print-tree");
+      use_new_parser = parser.option_argument_as<bool>("use-new-parser");
     }
 
     std::string read_text(std::istream& from)
@@ -159,6 +166,47 @@ class mcrl2parse_tool : public input_tool
         "Parses the text in the file INFILE. If INFILE is not present, standard input is used."
        )
     { }
+
+    void print1(const atermpp::aterm_appl& x)
+    {
+      if (x)
+      {
+        std::cout << "new: " << x << std::endl;
+      }
+    }
+
+    void print2(const atermpp::aterm_appl& x)
+    {
+      if (x)
+      {
+        std::cout << "old: " << x << std::endl;
+      }
+    }
+
+    void print1(const std::string& x)
+    {
+      std::cout << "new: " << x << std::endl;
+    }
+
+    void print2(const std::string& x)
+    {
+      std::cout << "old: " << x << std::endl;
+    }
+
+    template <typename T>
+    void compare(const T& x1, const T& x2)
+    {
+      if (x1 != x2)
+      {
+        print1(x1);
+        print2(x2);
+        std::cout << "ERROR: NOT EQUAL!";
+      }
+      else
+      {
+        print1(x1);
+      }
+    }
 
     bool run()
     {
@@ -193,6 +241,9 @@ class mcrl2parse_tool : public input_tool
 
       try
       {
+        atermpp::aterm_appl x1;
+        atermpp::aterm_appl x2;
+
         if (print_tree)
         {
           core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
@@ -200,61 +251,42 @@ class mcrl2parse_tool : public input_tool
         }
         if (file_type == sortexpr_e)
         {
-          data::sort_expression x1 = data::parse_sort_expression_new(text);
-          std::cout << x1 << std::endl;
+          if (use_new_parser) x1 = data::parse_sort_expression_new(text);
+          x2 = data::parse_sort_expression(text);
+          compare (x1, x2);
         }
         else if (file_type == dataexpr_e)
         {
-          data::data_expression x1 = data::parse_data_expression_new(text);
-          std::cout << x1 << std::endl;
+          if (use_new_parser) x1 = data::parse_data_expression_new(text);
+          x2 = data::parse_data_expression(text);
+          compare (x1, x2);
         }
         else if (file_type == dataspec_e)
         {
-          data::data_specification x1 = data::parse_data_specification_new(text);
-          data::type_check(x1);
-          std::string s1 = data::pp(x1);
-          std::cout << s1 << std::endl;
-          data::data_specification x2 = data::parse_data_specification(text);
-          std::string s2 = data::pp(x2);
-          std::cout << s2 << std::endl;
-          if (s1 != s2)
-          {
-            std::cout << "ERROR!!!!!!!!!!!!!!!" << std::endl;
-          }
+          if (use_new_parser) x1 = data::detail::data_specification_to_aterm_data_spec(data::parse_data_specification_new(text));
+          x2 = data::detail::data_specification_to_aterm_data_spec(data::parse_data_specification(text));
+          compare (x1, x2);
         }
         else if (file_type == procexpr_e)
         {
-          process::process_expression x2 = process::parse_process_expression(text, "", "");
-          std::cout << x2 << std::endl;
-          process::process_expression x1 = process::parse_process_expression_new(text);
-          std::cout << x1 << std::endl;
-          if (x1 != x2)
-          {
-            std::cout << "ERROR!!!!!!!!!!!!!!!" << std::endl;
-          }
+          if (use_new_parser) x1 = process::parse_process_expression_new(text);
+          x2 = process::parse_process_expression(text, "", "");
+          compare (x1, x2);
         }
         else if (file_type == mcrl2spec_e)
         {
-          std::istringstream in(text);
-          atermpp::aterm_appl a = core::parse_proc_spec(in);
-          process::process_specification x2(a, false);
-          std::cout << "x2 = " << atermpp::aterm_appl(process::process_specification_to_aterm(x2)) << std::endl;
-
-          process::type_check(x2);
-          std::string s2 = process::pp(x2);
-          std::cout << s2 << std::endl;
-
-          process::process_specification x1 = process::parse_process_specification_new(text);
-          std::cout << "x1 = " << atermpp::aterm_appl(process::process_specification_to_aterm(x1)) << std::endl;
-
-          process::type_check(x1);
-          std::string s1 = process::pp(x1);
-          std::cout << s1 << std::endl;
-
-//          if (s1 != s2)
-//          {
-//            std::cout << "ERROR!!!!!!!!!!!!!!!" << std::endl;
-//          }
+          if (use_new_parser) x1 = process::process_specification_to_aterm(process::parse_process_specification_new(text));
+          x2 = process::process_specification_to_aterm(process::parse_process_specification(text));
+          compare (x1, x2);
+          if (use_new_parser)
+          {
+            process::process_specification spec1(x1, false);
+            process::type_check(spec1);
+            process::translate_user_notation(spec1);
+            process::normalize_sorts(spec1, spec1.data());
+            process::process_specification spec2(x2, false);
+            compare(process::pp(spec1), process::pp(spec2));
+          }
         }
         else if (file_type == besexpr_e)
         {
@@ -268,13 +300,15 @@ class mcrl2parse_tool : public input_tool
         }
         else if (file_type == pbesexpr_e)
         {
-          pbes_system::pbes_expression x1 = pbes_system::parse_pbes_expression_new(text);
-          std::cout << pbes_system::pp(x1) << std::endl;
+          if (use_new_parser) x1 = pbes_system::parse_pbes_expression_new(text);
+          x2 = pbes_system::parse_pbes_expression(text, "", "");
+          compare (x1, x2);
         }
-        else if (file_type == besspec_e)
+        else if (file_type == pbesspec_e)
         {
-          pbes_system::pbes<> x1 = pbes_system::parse_pbes_new(text);
-          std::cout << pbes_system::pp(x1) << std::endl;
+          x1 = pbes_system::pbes_to_aterm(pbes_system::parse_pbes_new(text));
+          x2 = pbes_system::pbes_to_aterm(pbes_system::parse_pbes(text));
+          compare (x1, x2);
         }
         else if (file_type == actfrm_e)
         {

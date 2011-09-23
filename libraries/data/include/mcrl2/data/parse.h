@@ -489,6 +489,98 @@ inline static data_specification const& default_specification()
 } // namespace detail
 /// \endcond
 
+inline
+sort_expression parse_sort_expression_old(std::istream& in)
+{
+  atermpp::aterm_appl x = core::parse_sort_expr(in);
+  if (!x)
+  {
+    throw mcrl2::runtime_error("Error while parsing sort expression");
+  }
+  return sort_expression(x);
+}
+
+inline
+sort_expression parse_sort_expression_old(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_sort_expression_old(in);
+}
+
+inline
+data_expression parse_data_expression_old(std::istream& in)
+{
+  atermpp::aterm_appl x = core::parse_data_expr(in);
+  if (!x)
+  {
+    throw mcrl2::runtime_error("Error while parsing data expression");
+  }
+  return data_expression(x);
+}
+
+inline
+data_expression parse_data_expression_old(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_data_expression_old(in);
+}
+
+inline
+data_specification parse_data_specification_old(std::istream& in)
+{
+  atermpp::aterm_appl x = core::parse_data_spec(in);
+  if (!x)
+  {
+    throw mcrl2::runtime_error("Error while parsing data specification");
+  }
+  return data_specification(x);
+}
+
+inline
+data_specification parse_data_specification_old(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_data_specification_old(in);
+}
+
+inline
+void complete_sort_expression(sort_expression& x, const data_specification& data_spec = detail::default_specification())
+{
+  type_check(x, data_spec);
+  x = normalize_sorts(x, data_spec);
+}
+
+template <typename VariableIterator>
+void complete_data_expression(data_expression& x, VariableIterator first, VariableIterator last, const data_specification& data_spec = detail::default_specification())
+{
+  type_check(x, first, last, data_spec);
+  x = data::translate_user_notation(x);
+  x = data::normalize_sorts(x, data_spec);
+}
+
+inline
+void complete_data_specification(data_specification& x)
+{
+  type_check(x);
+}
+
+template <typename T>
+void compare_parse_results(const std::string& text, const T& x1, const T& x2)
+{
+  if (!(x1 == x2))
+  {
+    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << data::print(x1) << std::endl;
+    core::print_aterm(x1);
+    std::clog << "new:    " << data::print(x2) << std::endl;
+    core::print_aterm(x2);
+#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
+    throw mcrl2::runtime_error("difference detected between old and new parser");
+#endif
+  }
+}
+
 /// \brief Parses a and type checks a data specification.
 /// \details This function reads a data specification in
 ///    input string text. It is assumed that the string contains
@@ -510,43 +602,19 @@ inline static data_specification const& default_specification()
 ///  \param[in] text A textual description of the data specification.
 ///  \return the data specification corresponding to text.
 inline
-data_specification parse_data_specification(
-  std::istream& in)
+data_specification parse_data_specification(std::istream& in)
 {
 #ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  std::istringstream in2(text);
-  atermpp::aterm_appl spec = core::parse_data_spec(in2);
-#else
-  atermpp::aterm_appl spec = core::parse_data_spec(in);
-#endif
-  if (spec == 0)
-  {
-    throw mcrl2::runtime_error("Error while parsing data specification");
-  }
-  data_specification result(spec);
-#ifdef MCRL2_CHECK_PARSER
+  data_specification result = parse_data_specification_old(text);
+  complete_data_specification(result);
   data_specification result2 = parse_data_specification_new(text);
-  atermpp::aterm_appl x1 = data::detail::data_specification_to_aterm_data_spec(result);
-  atermpp::aterm_appl x2 = data::detail::data_specification_to_aterm_data_spec(result2);
-  if (x1 != x2)
-  {
-    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "string: " << text << std::endl;
-    std::clog << "old:    " << x1 << std::endl;
-    std::clog << "new:    " << x2 << std::endl;
-    type_check(result);
-    type_check(result2);
-    std::clog << "old:    " << data::pp(result) << std::endl;
-    std::clog << "new:    " << data::pp(result2) << std::endl;
-#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
-    throw mcrl2::runtime_error("difference detected between old and new parser");
+  complete_data_specification(result2);
+  compare_parse_results(text, result, result2);
+#else
+  data_specification result = parse_data_specification_old(in);
+  complete_data_specification(result);
 #endif
-  }
-#endif
-  type_check(result);
-  // N.B. Translate bag/set enumerations and numbers to internal format:
-  // This is done automatically in the data specification, when it is constructed.
   return result;
 }
 
@@ -558,8 +626,7 @@ data_specification parse_data_specification(
 ///  \param[in] text A textual description of the data specification.
 ///  \return the data specification corresponding to the input istream.
 inline
-data_specification parse_data_specification(
-  const std::string& text)
+data_specification parse_data_specification(const std::string& text)
 {
   // handle empty data specification
   if (boost::trim_copy(text).empty())
@@ -763,45 +830,22 @@ variable parse_variable(std::istream& text,
 
 template <typename Variable_iterator>
 data_expression parse_data_expression(std::istream& in,
-                                      const Variable_iterator begin,
-                                      const Variable_iterator end,
+                                      const Variable_iterator first,
+                                      const Variable_iterator last,
                                       const data_specification& data_spec = detail::default_specification())
 {
 #ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  std::istringstream in2(text);
-  atermpp::aterm_appl data_expr = core::parse_data_expr(in2);
-#else
-  atermpp::aterm_appl data_expr = core::parse_data_expr(in);
-#endif
-
-  if (data_expr == 0)
-  {
-    throw mcrl2::runtime_error("error parsing data expression");
-  }
-
-  // The typechecker replaces untyped identifiers by typed identifiers (when typechecking
-  // succeeds) and adds type transformations between terms of sorts Pos, Nat, Int and Real if necessary.
-  data_expression t(data_expr);
-
-#ifdef MCRL2_CHECK_PARSER
+  data_expression result = parse_data_expression_old(text);
+  complete_data_expression(result, first, last, data_spec);
   data_expression result2 = parse_data_expression_new(text);
-  if (t != result2)
-  {
-    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "string: " << text << std::endl;
-    std::clog << "old:    " << t << std::endl;
-    std::clog << "new:    " << result2 << std::endl;
-#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
-    throw mcrl2::runtime_error("difference detected between old and new parser");
+  complete_data_expression(result2, first, last, data_spec);
+  compare_parse_results(text, result, result2);
+#else
+  data_expression result = parse_data_expression_old(in);
+  complete_data_expression(result, first, last, data_spec);
 #endif
-  }
-#endif
-
-  type_check(t, begin, end, data_spec);
-  t = data::translate_user_notation(t);
-  t = data::normalize_sorts(t, data_spec);
-  return t;
+  return result;
 }
 
 /// \brief Parses and type checks a data expression.
@@ -877,34 +921,16 @@ sort_expression parse_sort_expression(std::istream& in,
 {
 #ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  std::istringstream in2(text);
-  atermpp::aterm_appl sort_expr = core::parse_sort_expr(in2);
-#else
-  atermpp::aterm_appl sort_expr = core::parse_sort_expr(in);
-#endif
-
-  if (sort_expr == 0)
-  {
-    throw mcrl2::runtime_error("error parsing sort expression");
-  }
-  sort_expression result(sort_expr);
-
-#ifdef MCRL2_CHECK_PARSER
+  sort_expression result = parse_sort_expression_old(text);
+  complete_sort_expression(result, data_spec);
   sort_expression result2 = parse_sort_expression_new(text);
-  if (result != result2)
-  {
-    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "string: " << text << std::endl;
-    std::clog << "old:    " << result << std::endl;
-    std::clog << "new:    " << result2 << std::endl;
-#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
-    throw mcrl2::runtime_error("difference detected between old and new parser");
+  complete_sort_expression(result2, data_spec);
+  compare_parse_results(text, result, result2);
+#else
+  sort_expression result = parse_sort_expression_old(in);
+  complete_sort_expression(result, data_spec);
 #endif
-  }
-#endif
-
-  type_check(result, data_spec);
-  return normalize_sorts(result,data_spec);
+  return result;
 }
 
 /// \brief Parses and type checks a sort expression.

@@ -154,6 +154,18 @@ struct default_parser_actions
 
 #endif // MCRL2_USE_NEW_PARSER
 
+template <typename T>
+void print_aterm(const T&)
+{
+}
+
+template<>
+inline
+void print_aterm(const atermpp::aterm_appl& x)
+{
+  std::clog << "aterm: " << x << std::endl;
+}
+
 /** \brief  Parse an mCRL2 identifier.
   * \param[in] se_stream An input stream from which can be read.
   * \post   The content of se_stream is parsed as an mCRL2 identifier.

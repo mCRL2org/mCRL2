@@ -162,6 +162,15 @@ std::istream& operator>>(std::istream& from, pbes<Container>& p)
   return from;
 }
 
+inline
+pbes<> parse_pbes(const std::string& text)
+{
+  pbes<> result;
+  std::stringstream ss(text);
+  ss >> result;
+  return result;
+}
+
 /// \brief Parses a sequence of pbes expressions. The format of the text is as
 /// follows:
 /// <ul>

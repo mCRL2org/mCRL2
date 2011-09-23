@@ -118,7 +118,11 @@ struct process_actions: public lps::action_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "+") && (symbol_name(node.child(2)) == "ProcExpr")) { return choice(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "ProcExpr")) { return merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "||_") && (symbol_name(node.child(2)) == "ProcExpr")) { return left_merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "ProcExpr")) { return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "ProcExpr"))
+    {
+std::cout << "<parse_Seq>" << node.string() << " " << atermpp::aterm_appl(parse_ProcExpr(node.child(0))) << " " << atermpp::aterm_appl(parse_ProcExpr(node.child(0))) << " -> " << seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))) << std::endl;
+      return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2)));
+    }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "<<") && (symbol_name(node.child(2)) == "ProcExpr")) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "|") && (symbol_name(node.child(2)) == "ProcExpr")) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
@@ -224,6 +228,53 @@ process_specification parse_process_specification_new(const std::string& text)
 
 #endif // MCRL2_USE_NEW_PARSER
 
+inline
+process_specification parse_process_specification_old(std::istream& in)
+{
+  atermpp::aterm_appl x = core::parse_proc_spec(in);
+  if (!x)
+  {
+    throw mcrl2::runtime_error("Error while parsing process specification");
+  }
+  return process_specification(x);
+}
+
+inline
+process_specification parse_process_specification_old(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_process_specification_old(in);
+}
+
+inline
+void complete_process_specification(process_specification& x, bool alpha_reduce = false)
+{
+  type_check(x);
+  if (alpha_reduce)
+  {
+    apply_alphabet_reduction(x);
+  }
+  process::translate_user_notation(x);
+  process::normalize_sorts(x, x.data());
+}
+
+template <typename T>
+void compare_parse_results(const std::string& text, const T& x1, const T& x2)
+{
+  if (!(x1 == x2))
+  {
+    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << process::print(x1) << std::endl;
+    core::print_aterm(x1);
+    std::clog << "new:    " << process::print(x2) << std::endl;
+    core::print_aterm(x2);
+#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
+    throw mcrl2::runtime_error("difference detected between old and new parser");
+#endif
+  }
+}
+
 /// \brief Parses a process specification from an input stream
 /// \param in An input stream
 /// \param alpha_reduce Indicates whether alphabet reductions need to be performed
@@ -233,47 +284,20 @@ process_specification parse_process_specification(std::istream& in, bool alpha_r
 {
 #ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  std::istringstream in2(text);
-  atermpp::aterm_appl x = core::parse_proc_spec(in2);
-#else
-  atermpp::aterm_appl x = core::parse_proc_spec(in);
-#endif
-
-  if (x == NULL)
-  {
-    throw mcrl2::runtime_error("parse error");
-  }
-
-  process_specification result(x, false);
-
-#ifdef MCRL2_CHECK_PARSER
+  process_specification result = parse_process_specification_old(text);
+atermpp::aterm_appl t1(process::process_specification_to_aterm(result));
+  complete_process_specification(result, alpha_reduce);
   process_specification result2 = parse_process_specification_new(text);
-  atermpp::aterm_appl x1 = process_specification_to_aterm(result);
-  atermpp::aterm_appl x2 = process_specification_to_aterm(result2);
-  if (x1 != x2)
+atermpp::aterm_appl t2(process::process_specification_to_aterm(result2));
+  complete_process_specification(result2, alpha_reduce);
+  if (t1 != t2)
   {
-    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "string: " << text << std::endl;
-    std::clog << "old:    " << x1 << std::endl;
-    std::clog << "new:    " << x2 << std::endl;
-    type_check(result);
-    type_check(result2);
-    std::clog << "old:    " << process::pp(result) << std::endl;
-    std::clog << "new:    " << process::pp(result2) << std::endl;
-#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
-    throw mcrl2::runtime_error("difference detected between old and new parser");
-#endif
+    compare_parse_results(text, result, result2);
   }
+#else
+  process_specification result = parse_process_specification_old(in);
+  complete_process_specification(result, alpha_reduce);
 #endif
-
-  type_check(result);
-  if (alpha_reduce)
-  {
-    apply_alphabet_reduction(result);
-  }
-  process::translate_user_notation(result);
-  process::normalize_sorts(result, result.data());
-
   return result;
 }
 
@@ -282,9 +306,7 @@ process_specification parse_process_specification(std::istream& in, bool alpha_r
 /// \param alpha_reduce Indicates whether alphabet reductions needdto be performed
 /// \return The parse result
 inline
-process_specification parse_process_specification(
-  const std::string& spec_string,
-  const bool alpha_reduce=false)
+process_specification parse_process_specification(const std::string& spec_string, const bool alpha_reduce=false)
 {
   std::istringstream in(spec_string);
   return parse_process_specification(in, alpha_reduce);
