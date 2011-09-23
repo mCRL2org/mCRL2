@@ -168,6 +168,7 @@ struct parser
     m_parser->initial_globals = this;
     m_parser->save_parse_tree = 1;
     m_parser->initial_scope = NULL;
+    m_parser->dont_use_greediness_for_disambiguation = 1;
   }
 
   ~parser()
@@ -207,7 +208,7 @@ struct parser
     return std::string(count, ' ');
   }
 
-  std::string truncate(const std::string& s, unsigned int max_size = 10) const
+  std::string truncate(const std::string& s, unsigned int max_size = 20) const
   {
     std::string result = s.substr(0, max_size);
 

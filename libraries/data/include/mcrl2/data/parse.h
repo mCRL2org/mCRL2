@@ -147,6 +147,17 @@ struct data_expression_actions: public sort_expression_actions
     return make_application(identifier(mcrl2::data::function_update_name()), x, y, z);
   }
 
+  template <typename ExpressionContainer>
+  data::sort_expression_list get_sorts(const ExpressionContainer& x) const
+  {
+    data::sort_expression_vector result;
+    for (typename ExpressionContainer::const_iterator i = x.begin(); i != x.end(); ++i)
+    {
+      result.push_back(i->sort());
+    }
+    return data::sort_expression_list(result.begin(), result.end());
+  }
+
   data::variable parse_VarDecl(const core::parse_node& node)
   {
     return variable(parse_Id(node.child(0)), parse_SortExpr(node.child(2)));
@@ -216,7 +227,7 @@ struct data_expression_actions: public sort_expression_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "mod") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "*") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "DataExpr")) { return make_application(identifier(parse_Id(node.child(1))), parse_DataExpr(node.child(0)), parse_DataExpr(node.child(2))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "whr") && (symbol_name(node.child(2)) == "WhrExprList") && (symbol_name(node.child(3)) == "end")) { return where_clause(parse_DataExpr(node.child(0)), parse_WhrExprList(node.child(2))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "DataExpr") && (symbol_name(node.child(1)) == "whr") && (symbol_name(node.child(2)) == "AssignmentList") && (symbol_name(node.child(3)) == "end")) { return where_clause(parse_DataExpr(node.child(0)), parse_AssignmentList(node.child(2))); }
     report_unexpected_node(node);
     return data::data_expression();
   }
@@ -241,14 +252,14 @@ struct data_expression_actions: public sort_expression_actions
     return parse_DataExpr(node.child(2));
   }
 
-  data::identifier_assignment parse_WhrExpr(const core::parse_node& node)
+  data::identifier_assignment parse_Assignment(const core::parse_node& node)
   {
     return identifier_assignment(parse_Id(node.child(0)), parse_DataExpr(node.child(2)));
   }
 
-  data::identifier_assignment_list parse_WhrExprList(const core::parse_node& node)
+  data::identifier_assignment_list parse_AssignmentList(const core::parse_node& node)
   {
-    return parse_list<data::identifier_assignment>(node, "WhrExpr", boost::bind(&data_expression_actions::parse_WhrExpr, this, _1));
+    return parse_list<data::identifier_assignment>(node, "Assignment", boost::bind(&data_expression_actions::parse_Assignment, this, _1));
   }
 
   data::data_expression_list parse_DataExprList(const core::parse_node& node)
@@ -524,6 +535,10 @@ data_specification parse_data_specification(
     std::clog << "string: " << text << std::endl;
     std::clog << "old:    " << x1 << std::endl;
     std::clog << "new:    " << x2 << std::endl;
+    type_check(result);
+    type_check(result2);
+    std::clog << "old:    " << data::pp(result) << std::endl;
+    std::clog << "new:    " << data::pp(result2) << std::endl;
 #ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
     throw mcrl2::runtime_error("difference detected between old and new parser");
 #endif

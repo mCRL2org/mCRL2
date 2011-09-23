@@ -34,6 +34,12 @@
 #include "mcrl2/modal_formula/parse.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/core/typecheck.h"
+#include "mcrl2/pbes/typecheck.h"
+#include "mcrl2/lps/typecheck.h"
+#include "mcrl2/modal_formula/typecheck.h"
+#include "mcrl2/process/typecheck.h"
+#include "mcrl2/data/typecheck.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
@@ -194,63 +200,96 @@ class mcrl2parse_tool : public input_tool
         }
         if (file_type == sortexpr_e)
         {
-          data::sort_expression x = data::parse_sort_expression_new(text);
-          std::cout << x << std::endl;
+          data::sort_expression x1 = data::parse_sort_expression_new(text);
+          std::cout << x1 << std::endl;
         }
         else if (file_type == dataexpr_e)
         {
-          data::data_expression x = data::parse_data_expression_new(text);
-          std::cout << x << std::endl;
+          data::data_expression x1 = data::parse_data_expression_new(text);
+          std::cout << x1 << std::endl;
         }
         else if (file_type == dataspec_e)
         {
-          data::data_specification x = data::parse_data_specification_new(text);
-          std::cout << data::pp(x) << std::endl;
+          data::data_specification x1 = data::parse_data_specification_new(text);
+          data::type_check(x1);
+          std::string s1 = data::pp(x1);
+          std::cout << s1 << std::endl;
+          data::data_specification x2 = data::parse_data_specification(text);
+          std::string s2 = data::pp(x2);
+          std::cout << s2 << std::endl;
+          if (s1 != s2)
+          {
+            std::cout << "ERROR!!!!!!!!!!!!!!!" << std::endl;
+          }
         }
         else if (file_type == procexpr_e)
         {
-          process::process_expression x = process::parse_process_expression_new(text);
-          std::cout << x << std::endl;
+          process::process_expression x2 = process::parse_process_expression(text, "", "");
+          std::cout << x2 << std::endl;
+          process::process_expression x1 = process::parse_process_expression_new(text);
+          std::cout << x1 << std::endl;
+          if (x1 != x2)
+          {
+            std::cout << "ERROR!!!!!!!!!!!!!!!" << std::endl;
+          }
         }
         else if (file_type == mcrl2spec_e)
         {
-          process::process_specification x = process::parse_process_specification_new(text);
-          std::cout << process::pp(x) << std::endl;
+          std::istringstream in(text);
+          atermpp::aterm_appl a = core::parse_proc_spec(in);
+          process::process_specification x2(a, false);
+          std::cout << "x2 = " << atermpp::aterm_appl(process::process_specification_to_aterm(x2)) << std::endl;
+
+          process::type_check(x2);
+          std::string s2 = process::pp(x2);
+          std::cout << s2 << std::endl;
+
+          process::process_specification x1 = process::parse_process_specification_new(text);
+          std::cout << "x1 = " << atermpp::aterm_appl(process::process_specification_to_aterm(x1)) << std::endl;
+
+          process::type_check(x1);
+          std::string s1 = process::pp(x1);
+          std::cout << s1 << std::endl;
+
+//          if (s1 != s2)
+//          {
+//            std::cout << "ERROR!!!!!!!!!!!!!!!" << std::endl;
+//          }
         }
         else if (file_type == besexpr_e)
         {
-          bes::boolean_expression x = bes::parse_boolean_expression_new(text);
-          std::cout << bes::pp(x) << std::endl;
+          bes::boolean_expression x1 = bes::parse_boolean_expression_new(text);
+          std::cout << bes::pp(x1) << std::endl;
         }
         else if (file_type == besspec_e)
         {
-          bes::boolean_equation_system<> x = bes::parse_boolean_equation_system_new(text);
-          std::cout << bes::pp(x) << std::endl;
+          bes::boolean_equation_system<> x1 = bes::parse_boolean_equation_system_new(text);
+          std::cout << bes::pp(x1) << std::endl;
         }
         else if (file_type == pbesexpr_e)
         {
-          pbes_system::pbes_expression x = pbes_system::parse_pbes_expression_new(text);
-          std::cout << pbes_system::pp(x) << std::endl;
+          pbes_system::pbes_expression x1 = pbes_system::parse_pbes_expression_new(text);
+          std::cout << pbes_system::pp(x1) << std::endl;
         }
         else if (file_type == besspec_e)
         {
-          pbes_system::pbes<> x = pbes_system::parse_pbes_new(text);
-          std::cout << pbes_system::pp(x) << std::endl;
+          pbes_system::pbes<> x1 = pbes_system::parse_pbes_new(text);
+          std::cout << pbes_system::pp(x1) << std::endl;
         }
         else if (file_type == actfrm_e)
         {
-          action_formulas::action_formula x = action_formulas::parse_action_formula_new(text);
-          std::cout << action_formulas::pp(x) << std::endl;
+          action_formulas::action_formula x1 = action_formulas::parse_action_formula_new(text);
+          std::cout << action_formulas::pp(x1) << std::endl;
         }
         else if (file_type == regfrm_e)
         {
-          regular_formulas::regular_formula x = regular_formulas::parse_regular_formula_new(text);
-          std::cout << regular_formulas::pp(x) << std::endl;
+          regular_formulas::regular_formula x1 = regular_formulas::parse_regular_formula_new(text);
+          std::cout << regular_formulas::pp(x1) << std::endl;
         }
         else if (file_type == statefrm_e)
         {
-          state_formulas::state_formula x = state_formulas::parse_state_formula_new(text);
-          std::cout << state_formulas::pp(x) << std::endl;
+          state_formulas::state_formula x1 = state_formulas::parse_state_formula_new(text);
+          std::cout << state_formulas::pp(x1) << std::endl;
         }
       }
       catch (std::exception& e)

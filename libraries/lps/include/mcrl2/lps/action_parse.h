@@ -27,14 +27,14 @@ struct action_actions: public data::data_specification_actions
     : data::data_specification_actions(table_)
   {}
 
-  lps::action parse_Action(const core::parse_node& node)
+  atermpp::aterm_appl parse_Action(const core::parse_node& node)
   {
-    return action(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
+    return core::detail::gsMakeParamId(parse_Id(node.child(0)), parse_DataExprList(node.child(1)));
   }
 
-  lps::action_list parse_ActionList(const core::parse_node& node)
+  atermpp::aterm_list parse_ActionList(const core::parse_node& node)
   {
-    return parse_list<lps::action_label>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
+    return parse_list<atermpp::aterm_appl>(node, "Action", boost::bind(&action_actions::parse_Action, this, _1));
   }
 
   bool callback_ActDecl(const core::parse_node& node, action_label_vector& result)
@@ -43,7 +43,6 @@ struct action_actions: public data::data_specification_actions
     {
       core::identifier_string_list ids = parse_IdList(node.child(0));
       data::sort_expression_list sorts = parse_SortExprList(node.child(1));
-      action_label_vector result;
       for (core::identifier_string_list::iterator i = ids.begin(); i != ids.end(); ++i)
       {
         result.push_back(action_label(*i, sorts));

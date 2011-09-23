@@ -73,7 +73,7 @@ struct process_actions: public lps::action_actions
     core::identifier_string id = parse_Id(node.child(0));
     core::identifier_string_list ids = parse_IdList(node.child(2));
     action_name_multiset lhs(atermpp::push_front(ids, id));
-    core::identifier_string rhs = parse_CommExprRhs(node.child(3));
+    core::identifier_string rhs = parse_CommExprRhs(node.child(3).child(0));
     return process::communication_expression(lhs, rhs);
   }
 
@@ -102,9 +102,11 @@ struct process_actions: public lps::action_actions
     return parse_RenExprList(node.child(1));
   }
 
+  // TODO: get rid of the gsMakeIdAssignment call
   process::process_expression parse_ProcExpr(const core::parse_node& node)
   {
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "Action")) { return parse_Action(node.child(0)); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "Id") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(3)) == ")")) { return atermpp::aterm_appl(core::detail::gsMakeIdAssignment(parse_Id(node.child(0)), parse_AssignmentList(node.child(2)))); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "delta")) { return delta(); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "tau")) { return tau(); }
     else if ((node.child_count() == 6) && (symbol_name(node.child(0)) == "block") && (symbol_name(node.child(1)) == "(") && (symbol_name(node.child(2)) == "ActIdSet") && (symbol_name(node.child(3)) == ",") && (symbol_name(node.child(4)) == "ProcExpr") && (symbol_name(node.child(5)) == ")")) { return block(parse_ActIdSet(node.child(2)), parse_ProcExpr(node.child(4))); }
@@ -120,18 +122,8 @@ struct process_actions: public lps::action_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "<<") && (symbol_name(node.child(2)) == "ProcExpr")) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "|") && (symbol_name(node.child(2)) == "ProcExpr")) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "ProcExprThenElse"))
-    {
-      data::data_expression condition = parse_DataExprUnit(node.child(0));
-      core::parse_node u = node.child(1);
-      process_expression x1 = parse_ProcExpr(u.child(1));
-      if (u.child(2) && u.child(2).child(1))
-      {
-        process_expression x2 = parse_ProcExpr(u.child(2).child(1));
-        return if_then_else(condition, x1, x2);
-      }
-      return if_then(condition, x1);
-    }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "->") && (symbol_name(node.child(2)) == "ProcExpr")) { return if_then(parse_DataExprUnit(node.child(0)), parse_ProcExpr(node.child(2))); }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "DataExprUnit") && (symbol_name(node.child(1)) == "->") && (symbol_name(node.child(2)) == "ElseExpr")) { return if_then_else(parse_DataExprUnit(node.child(0)), parse_ProcExpr(node.child(2).child(0)), parse_ProcExpr(node.child(2).child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "sum") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "ProcExpr")) { return sum(parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3))); }
     report_unexpected_node(node);
     return process::process_expression();
@@ -139,15 +131,18 @@ struct process_actions: public lps::action_actions
 
   process::process_equation parse_ProcDecl(const core::parse_node& node)
   {
-    return process::process_equation(parse_Id(node.child(0)), parse_VarsDeclList(node.child(1)), parse_ProcExpr(node.child(3)));
+    core::identifier_string name = parse_Id(node.child(0));
+    data::variable_list variables = parse_VarsDeclList(node.child(1));
+    process_identifier id(name, get_sorts(variables));
+    return process::process_equation(id, variables, parse_ProcExpr(node.child(3)));
   }
 
-  process::process_equation_list parse_ProcDeclList(const core::parse_node& node)
+  atermpp::vector<process::process_equation> parse_ProcDeclList(const core::parse_node& node)
   {
-    return parse_list<process::process_equation>(node, "ProcDecl", boost::bind(&process_actions::parse_ProcDecl, this, _1));
+    return parse_vector<process::process_equation>(node, "ProcDecl", boost::bind(&process_actions::parse_ProcDecl, this, _1));
   }
 
-  process::process_equation_list parse_ProcSpec(const core::parse_node& node)
+  atermpp::vector<process::process_equation> parse_ProcSpec(const core::parse_node& node)
   {
     return parse_ProcDeclList(node.child(1));
   }
@@ -183,13 +178,13 @@ struct process_actions: public lps::action_actions
     }
     else if (symbol_name(node) == "ActSpec")
     {
-      result.action_labels() = parse_ActSpec(node);
+      result.action_labels() = result.action_labels() + parse_ActSpec(node);
       return true;
     }
     else if (symbol_name(node) == "ProcSpec")
     {
-      process::process_equation_list eqn = parse_ProcSpec(node);
-      result.equations() = atermpp::vector<process_equation>(eqn.begin(), eqn.end());
+      atermpp::vector<process::process_equation> eqn = parse_ProcSpec(node);
+      result.equations().insert(result.equations().end(), eqn.begin(), eqn.end());
       return true;
     }
     else if (symbol_name(node) == "Init")
@@ -230,21 +225,47 @@ process_specification parse_process_specification_new(const std::string& text)
 #endif // MCRL2_USE_NEW_PARSER
 
 /// \brief Parses a process specification from an input stream
-/// \param spec_stream An input stream
+/// \param in An input stream
 /// \param alpha_reduce Indicates whether alphabet reductions need to be performed
 /// \return The parse result
 inline
-process_specification parse_process_specification(
-  std::istream& spec_stream,
-  const bool alpha_reduce=false)
+process_specification parse_process_specification(std::istream& in, bool alpha_reduce = false)
 {
-  ATermAppl x = core::parse_proc_spec(spec_stream);
+#ifdef MCRL2_CHECK_PARSER
+  std::string text = utilities::read_text(in);
+  std::istringstream in2(text);
+  atermpp::aterm_appl x = core::parse_proc_spec(in2);
+#else
+  atermpp::aterm_appl x = core::parse_proc_spec(in);
+#endif
+
   if (x == NULL)
   {
     throw mcrl2::runtime_error("parse error");
   }
 
   process_specification result(x, false);
+
+#ifdef MCRL2_CHECK_PARSER
+  process_specification result2 = parse_process_specification_new(text);
+  atermpp::aterm_appl x1 = process_specification_to_aterm(result);
+  atermpp::aterm_appl x2 = process_specification_to_aterm(result2);
+  if (x1 != x2)
+  {
+    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << x1 << std::endl;
+    std::clog << "new:    " << x2 << std::endl;
+    type_check(result);
+    type_check(result2);
+    std::clog << "old:    " << process::pp(result) << std::endl;
+    std::clog << "new:    " << process::pp(result2) << std::endl;
+#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
+    throw mcrl2::runtime_error("difference detected between old and new parser");
+#endif
+  }
+#endif
+
   type_check(result);
   if (alpha_reduce)
   {
@@ -265,8 +286,8 @@ process_specification parse_process_specification(
   const std::string& spec_string,
   const bool alpha_reduce=false)
 {
-  std::istringstream spec_stream(spec_string);
-  return parse_process_specification(spec_stream, alpha_reduce);
+  std::istringstream in(spec_string);
+  return parse_process_specification(in, alpha_reduce);
 }
 
 /// \brief Parses and type checks a process expression.
