@@ -113,7 +113,7 @@ DataExpr
   | DataExpr 'mod' DataExpr                  $binary_left  9
   | DataExpr '*'   DataExpr                  $binary_left 10
   | DataExpr '.'   DataExpr                  $binary_left 10
-  | DataExpr 'whr' WhrExprList 'end'
+  | DataExpr 'whr' AssignmentList 'end'
   ;
 
 DataExprUnit
@@ -128,9 +128,9 @@ DataExprUnit
   | '#' DataExprUnit                         $right 11
   ;
 
-WhrExpr: Id '=' DataExpr ;
+Assignment: Id '=' DataExpr ;
 
-WhrExprList: WhrExpr ( ',' WhrExpr )* ;
+AssignmentList: Assignment ( ',' Assignment )* ;
 
 DataExprList: DataExpr ( ',' DataExpr )* ;
 
@@ -166,6 +166,7 @@ RenExprSet: '{' RenExprList? '}' ;
 
 ProcExpr
   : Action
+  | Id '(' AssignmentList? ')'
   | 'delta'
   | 'tau'
   | 'block' '(' ActIdSet ',' ProcExpr ')'
