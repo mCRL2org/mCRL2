@@ -301,7 +301,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
     const variable v= (*i);
     const variable v_fresh(generator(v.sort()));
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    sigma[v_fresh]=t(count);
+    sigma[v_fresh]=rewrite_internal(t(count),sigma);
   }
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
   
