@@ -197,6 +197,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
                       mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
   assert(vl.size()>0);
+  // ATfprintf(stderr,"REWRITE SINGLE LAMBDA %t\n%t\n%t\n\n",vl,body,fromInner(body));
   // A lambda term without arguments; Take care that the bound variable is made unique with respect to 
   // the variables occurring in sigma. But in case vl is empty, just rewrite...
 
@@ -220,17 +221,18 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
     {
       const variable v= *it;
-      if ((variables_in_sigma.count(v)>0) || true)
+      if ((variables_in_sigma.count(v)>0))
       {
         number_of_renamed_variables++;
         new_variables[count]=generator(v.sort());
       }
-      new_variables[count]=v;
+      else new_variables[count]=v;
     }
   }
 
   if (number_of_renamed_variables==0)
   {
+// ATfprintf(stderr,"RETURN LAMBDA1\n");
     return gsMakeBinder(gsMakeLambda(),vl,rewrite_internal(body,sigma));
   }
   
@@ -272,6 +274,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   {
     new_variable_list=push_front(new_variable_list,*it);
   }
+// ATfprintf(stderr,"RETURN LAMBDA2\n");
   return gsMakeBinder(gsMakeLambda(),new_variable_list,result);
 }
 
