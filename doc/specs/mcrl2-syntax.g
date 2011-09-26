@@ -187,7 +187,7 @@ ProcExpr
   | 'sum' VarsDeclList '.' ProcExpr             $right 2
   ;
 
-ElseExpr: ProcExpr '<>' ProcExpr $binary_left 12 ; 
+ElseExpr: ProcExpr '<>' ProcExpr $binary_left 5 ;
 
 //--- Actions
 
