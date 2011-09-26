@@ -311,8 +311,8 @@ RegFrm
   : ActFrm
   | 'nil'
   | '(' RegFrm ')'
-  | '*' RegFrm                                                   $unary_left 3
-  | '+' RegFrm                                                   $unary_left 3
+  | RegFrm '*'                                                   $unary_right 3
+  | RegFrm '+'                                                   $unary_right 3
   | RegFrm '.' RegFrm                                            $binary_right 1
   | RegFrm '+' RegFrm                                            $binary_right 2
   ;
@@ -329,8 +329,8 @@ StateFrm
   | StateFrm '||' StateFrm                                       $binary_op_right 4
   | 'forall' VarsDeclList '.' StateFrm                           $right 2
   | 'exists' VarsDeclList '.' StateFrm                           $right 2
-  | '[' RegFrm ']'
-  | '<' RegFrm '>'
+  | '[' RegFrm ']' StateFrm                                      $right 6
+  | '<' RegFrm '>' StateFrm                                      $right 6
   | 'mu' StateVarDecl '.' StateFrm                               $right 1
   | 'nu' StateVarDecl '.' StateFrm                               $right 1
   | Id ( '(' DataExprList ')' )?
