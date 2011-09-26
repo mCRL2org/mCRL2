@@ -422,7 +422,7 @@ Id: "[A-Za-z_][A-Za-z_0-9']*"
 ];
 //-- end Id definition --//
 
-Number: "0|(-?[1-9][0-9]*)" ;
+Number: "0|([1-9][0-9]*)" ;
 
 //--- Whitespace
 
