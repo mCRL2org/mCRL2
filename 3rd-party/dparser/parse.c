@@ -161,7 +161,7 @@ insert_SNode_internal(Parser *p, SNode *sn) {
     ph->v = (SNode**)MALLOC(ph->m * sizeof(*ph->v));
     memset(ph->v, 0, ph->m * sizeof(*ph->v));
     for (i = 0; i < m; i++)
-      while ((t = v[i])) { 
+      while ((t = v[i])) {
 	v[i] = v[i]->bucket_next;
 	insert_SNode_internal(p, t);
       }
@@ -176,7 +176,7 @@ insert_SNode_internal(Parser *p, SNode *sn) {
 static void
 insert_SNode(Parser *p, SNode *sn) {
   insert_SNode_internal(p, sn);
-  ref_sn(sn); 
+  ref_sn(sn);
   sn->all_next = p->snode_hash.all;
   p->snode_hash.all = sn;
 }
@@ -323,7 +323,7 @@ find_PNode(Parser *p, char *start, char *end_skip, int symbol, D_Scope *sc, void
 void
 insert_PNode_internal(Parser *p, PNode *pn) {
   PNodeHash *ph = &p->pnode_hash;
-  uint h = PNODE_HASH(pn->parse_node.start_loc.s, pn->parse_node.end_skip, 
+  uint h = PNODE_HASH(pn->parse_node.start_loc.s, pn->parse_node.end_skip,
 		      pn->parse_node.symbol, pn->initial_scope, pn->initial_globals), i;
   PNode *t;
 
@@ -335,7 +335,7 @@ insert_PNode_internal(Parser *p, PNode *pn) {
     ph->v = (PNode**)MALLOC(ph->m * sizeof(*ph->v));
     memset(ph->v, 0, ph->m * sizeof(*ph->v));
     for (i = 0; i < m; i++)
-      while ((t = v[i])) { 
+      while ((t = v[i])) {
 	v[i] = v[i]->bucket_next;
 	insert_PNode_internal(p, t);
       }
@@ -384,7 +384,7 @@ free_old_nodes(Parser *p) {
 	pn->children.v[i] = tpn;
       }
     }
-    h = PNODE_HASH(pn->parse_node.start_loc.s, pn->parse_node.end_skip, 
+    h = PNODE_HASH(pn->parse_node.start_loc.s, pn->parse_node.end_skip,
 		   pn->parse_node.symbol, pn->initial_scope, pn->initial_globals);
     lpn = &p->pnode_hash.v[h % p->pnode_hash.m];
     tpn = pn; pn = pn->all_next;
@@ -396,23 +396,23 @@ free_old_nodes(Parser *p) {
   p->pnode_hash.all = NULL;
 }
 
-static void 
+static void
 alloc_parser_working_data(Parser *p) {
   p->pnode_hash.i = PNODE_HASH_INITIAL_SIZE_INDEX;
   p->pnode_hash.m = d_prime2[p->pnode_hash.i];
-  p->pnode_hash.v = 
+  p->pnode_hash.v =
     (PNode**)MALLOC(p->pnode_hash.m * sizeof(*p->pnode_hash.v));
   memset(p->pnode_hash.v, 0, p->pnode_hash.m * sizeof(*p->pnode_hash.v));
   p->snode_hash.i = SNODE_HASH_INITIAL_SIZE_INDEX;
   p->snode_hash.m = d_prime2[p->snode_hash.i];
-  p->snode_hash.v = 
+  p->snode_hash.v =
     (SNode**)MALLOC(p->snode_hash.m * sizeof(*p->snode_hash.v));
   memset(p->snode_hash.v, 0, p->snode_hash.m * sizeof(*p->snode_hash.v));
   p->nshift_results = 0;
   p->ncode_shifts = 0;
 }
 
-static void 
+static void
 free_parser_working_data(Parser *p) {
   int i;
 
@@ -547,7 +547,7 @@ static int
 reduce_actions(Parser *p, PNode *pn, D_Reduction *r) {
   int i, height = 0;
   PNode *c;
-  
+
   for (i = 0; i < pn->children.n; i++) {
     c = pn->children.v[i];
     if (c->op_assoc) {
@@ -572,16 +572,16 @@ reduce_actions(Parser *p, PNode *pn, D_Reduction *r) {
 }
 
 #define x 666 /* impossible */
-static int child_table[4][3][6] = { 
-{ 
+static int child_table[4][3][6] = {
+{
 /* binary parent, child on left */
   /* priority of child vs parent, or = with child|parent associativity
-     > < =LL =LR =RL =RR 
+     > < =LL =LR =RL =RR
    */
   { 1, 0, 1, 1, 0, 0}, /* binary child */
   { 1, 1, 1, 1, x, x}, /* left unary child */
   { 1, 0, x, x, 1, 1}  /* right unary child */
-}, 
+},
 { /* binary parent, child on right */
   { 1, 0, 0, 0, 1, 1}, /* binary child */
   { 1, 0, 1, 1, x, x}, /* left unary child */
@@ -589,13 +589,13 @@ static int child_table[4][3][6] = {
 },
 { /* left unary parent */
   { 1, 0, 0, x, 0, x}, /* binary child */
-  { 1, 0, 1, x, x, x}, /* left unary child */
-  { 1, 1, x, x, 1, x}  /* right unary child */
+  { 1, 1, 1, x, x, x}, /* left unary child */
+  { 1, 0, x, x, 1, x}  /* right unary child */
 },
 { /* right unary parent */
   { 1, 0, x, 0, x, 0}, /* binary child */
-  { 1, 1, x, 1, x, x}, /* left unary child */
-  { 1, 0, x, x, x, 1}  /* right unary child */
+  { 1, 0, x, 1, x, x}, /* left unary child */
+  { 1, 1, x, x, x, 1}  /* right unary child */
 }
 };
 #undef x
@@ -603,18 +603,14 @@ static int child_table[4][3][6] = {
 /* returns 1 if legal for child reduction and illegal for child shift */
 static int
 check_child(int ppri, AssocKind passoc, int cpri, AssocKind cassoc,
-	    int left, int right) 
+	    int left, int right)
 {
   int p, c, r;
-  if (IS_UNARY_ASSOC(passoc) && passoc == cassoc)
-    return 1;
-  if (IS_UNARY_ASSOC(passoc) != IS_UNARY_ASSOC(cassoc))
-    return 1;
-  p = IS_BINARY_NARY_ASSOC(passoc) ? (right ? 1 : 0) : 
-          (passoc == ASSOC_UNARY_LEFT ? 2 : 3);
-  c = IS_BINARY_NARY_ASSOC(cassoc) ? 0 : 
-          (cassoc == ASSOC_UNARY_LEFT ? 1 : 2);
-  r = 
+  p = IS_BINARY_NARY_ASSOC(passoc) ? (right ? 1 : 0) :
+      (passoc == ASSOC_UNARY_LEFT ? 2 : 3);
+  c = IS_BINARY_NARY_ASSOC(cassoc) ? 0 :
+      (cassoc == ASSOC_UNARY_LEFT ? 1 : 2);
+  r =
     cpri > ppri ? 0 : (
       cpri < ppri ? 1 : ( 2 + (
 	(IS_RIGHT_ASSOC(cassoc) ? 2 : 0) +
@@ -629,7 +625,7 @@ check_assoc_priority(PNode *pn0, PNode *pn1, PNode *pn2) {
     if (IS_UNARY_BINARY_ASSOC(pn1->op_assoc)) { /* second token is operator */
       /* check expression pn0 (child of pn1) */
       if (pn0->assoc) {
-	if (!check_child(pn1->op_priority, pn1->op_assoc, 
+	if (!check_child(pn1->op_priority, pn1->op_assoc,
 			 pn0->priority, pn0->assoc, 0, 1))
 	return -1;
       }
@@ -644,13 +640,13 @@ check_assoc_priority(PNode *pn0, PNode *pn1, PNode *pn2) {
       /* check pn0 (child of operator pn2) */
       if (pn2->op_assoc &&
 	  !check_child(pn2->op_priority, pn2->op_assoc,
-		       pn0->op_priority, pn0->op_assoc, 0, 1)) 
+		       pn0->op_priority, pn0->op_assoc, 0, 1))
 	return -1;
     }
     /* check expression pn1 (child of pn0)  */
     if (pn1->assoc) {
       if (!check_child(pn0->op_priority, pn0->op_assoc,
-		       pn1->priority, pn1->assoc, 1, 0)) 
+		       pn1->priority, pn1->assoc, 1, 0))
 	return -1;
     }
   }
@@ -676,7 +672,7 @@ check_path_priorities_internal(VecZNode *path) {
     if (!pn1->op_assoc)
       return 0;
     if (pn0->assoc) {
-      if (!check_child(pn1->op_priority, pn1->op_assoc, 
+      if (!check_child(pn1->op_priority, pn1->op_assoc,
 		       pn0->priority, pn0->assoc, 0, 1))
 	return -1;
     }
@@ -736,7 +732,7 @@ compare_priorities(int xpri[], int xn, int ypri[], int yn) {
   return 0;
 }
 
-static void 
+static void
 intsort(int *xp, int n) {
   int again = 1, i, t;
   while (again) {
@@ -797,7 +793,7 @@ get_exp_one(Parser *p, PNode *x, StackPNode *psx, StackInt *isx) {
       if (x->children.v[i]->assoc)
 	get_exp_one(p, x->children.v[i], psx, isx);
   }
-} 
+}
 
 static void
 get_exp_one_down(Parser *p, PNode *x, StackPNode *psx, StackInt *isx) {
@@ -808,13 +804,13 @@ get_exp_one_down(Parser *p, PNode *x, StackPNode *psx, StackInt *isx) {
   for (i = 0; i < x->children.n; i++)
     if (x->children.v[i]->assoc)
       get_exp_one(p, x->children.v[i], psx, isx);
-} 
+}
 
-/* get the set of priorities for unshared nodes, 
+/* get the set of priorities for unshared nodes,
    eliminating shared subtrees via priority queues */
 static void
 get_unshared_priorities(Parser *p, StackPNode *psx, StackPNode *psy,
-			StackInt *isx, StackInt *isy) 
+			StackInt *isx, StackInt *isy)
 {
   StackPNode *psr;
   PNode *t;
@@ -836,7 +832,7 @@ get_unshared_priorities(Parser *p, StackPNode *psx, StackPNode *psy,
     else if (stack_head(psx) < stack_head(psy))
       psr = psy;
     else {
-      (void)stack_pop(psx); 
+      (void)stack_pop(psx);
       (void)stack_pop(psy);
       continue;
     }
@@ -857,21 +853,21 @@ get_unshared_priorities(Parser *p, StackPNode *psx, StackPNode *psy,
 }
 
 /* compare the priorities of operators in two trees
-   while eliminating common subtrees for efficiency. 
+   while eliminating common subtrees for efficiency.
 */
 static int
 cmp_priorities(Parser *p, PNode *x, PNode *y) {
   StackPNode psx, psy;
   StackInt isx, isy;
   int r;
-  
+
   stack_clear(&psx); stack_clear(&psy); stack_clear(&isx); stack_clear(&isy);
   get_exp_one(p, x, &psx, &isx);
   get_exp_one(p, y, &psy, &isy);
   get_unshared_priorities(p, &psx, &psy, &isx, &isy);
   intsort(isx.start, stack_depth(&isx));
   intsort(isy.start, stack_depth(&isy));
-  r = compare_priorities(isx.start, stack_depth(&isx), 
+  r = compare_priorities(isx.start, stack_depth(&isx),
 		     isy.start, stack_depth(&isy));
   stack_free(&psx); stack_free(&psy); stack_free(&isx); stack_free(&isy);
   return r;
@@ -893,7 +889,7 @@ static void
 get_unshared_pnodes(Parser *p, PNode *x, PNode *y, VecPNode *pvx, VecPNode *pvy) {
   int i;
   VecPNode vx, vy;
-  vec_clear(&vx); vec_clear(&vy); 
+  vec_clear(&vx); vec_clear(&vy);
   LATEST(p, x); LATEST(p, y);
   get_all(p, x, &vx);
   get_all(p, y, &vy);
@@ -934,7 +930,7 @@ static int
 cmp_greediness(Parser *p, PNode *x, PNode *y) {
   int ix, iy, ret;
   VecPNode pvx, pvy;
-  vec_clear(&pvx); vec_clear(&pvy); 
+  vec_clear(&pvx); vec_clear(&pvy);
   get_unshared_pnodes(p, x, y, &pvx, &pvy);
   /* set_to_vec(&pvx); set_to_vec(&pvy); */
   qsort(pvx.v, pvx.n, sizeof(PNode *), greedycmp);
@@ -996,7 +992,7 @@ cmp_pnodes(Parser *p, PNode *x, PNode *y) {
 	return -1;
       if (x->priority < y->priority)
 	return 1;
-    } 
+    }
     r = cmp_priorities(p, x, y);
     if (r)
       return r;
@@ -1035,7 +1031,7 @@ make_PNode(Parser *p, uint hash, int symbol, d_loc_t *start_loc, char *e, PNode 
   new_pn->parse_node.symbol = symbol;
   new_pn->parse_node.start_loc = *start_loc;
   new_pn->ws_before = start_loc->ws;
-  if (!r || !path) /* end of last parse node of path for non-epsilon reductions */ 
+  if (!r || !path) /* end of last parse node of path for non-epsilon reductions */
     new_pn->parse_node.end = e;
   else
     new_pn->parse_node.end = pn->parse_node.end;
@@ -1059,7 +1055,7 @@ make_PNode(Parser *p, uint hash, int symbol, d_loc_t *start_loc, char *e, PNode 
       new_pn->reduction = &dummy;
       if (sh->speculative_code(
 	new_pn, (void**)&new_pn->children.v[0], new_pn->children.n,
-	(intptr_t)&((PNode*)(NULL))->parse_node, (D_Parser*)p)) 
+	(intptr_t)&((PNode*)(NULL))->parse_node, (D_Parser*)p))
       {
 	free_PNode(p, new_pn);
 	return NULL;
@@ -1082,9 +1078,9 @@ make_PNode(Parser *p, uint hash, int symbol, d_loc_t *start_loc, char *e, PNode 
       int n = path->n;
       for (i = 0; i < n; i += n-1) {
 	PNode *child = new_pn->children.v[i];
-	if (child->assoc && 
+	if (child->assoc &&
 	    !check_child(new_pn->priority, new_pn->assoc,
-			 child->priority, child->assoc, i == 0, i == n - 1)) 
+			 child->priority, child->assoc, i == 0, i == n - 1))
 	{
 	  free_PNode(p, new_pn);
 	  return NULL;
@@ -1120,13 +1116,13 @@ PNode_equal(Parser *p, PNode *pn, D_Reduction *r, VecZNode *path, D_Shift *sh) {
 /* find/create PNode */
 static PNode *
 add_PNode(Parser *p, int symbol, d_loc_t *start_loc, char *e, PNode *pn,
-	  D_Reduction *r, VecZNode *path, D_Shift *sh) 
+	  D_Reduction *r, VecZNode *path, D_Shift *sh)
 {
   D_Scope *scope = equiv_D_Scope(pn->parse_node.scope);
   uint hash;
-  PNode *old_pn = find_PNode(p, start_loc->s, e, symbol, scope, pn->parse_node.globals, &hash), 
+  PNode *old_pn = find_PNode(p, start_loc->s, e, symbol, scope, pn->parse_node.globals, &hash),
     *new_pn;
-  if (old_pn) { 
+  if (old_pn) {
     PNode *amb = 0;
     if (PNode_equal(p, old_pn, r, path, sh))
       return old_pn;
@@ -1159,7 +1155,7 @@ add_PNode(Parser *p, int symbol, d_loc_t *start_loc, char *e, PNode *pn,
       old_pn->latest = new_pn;
       old_pn = new_pn;
       break;
-    case 1: 
+    case 1:
       free_PNode(p, new_pn);
       break;
   }
@@ -1193,9 +1189,9 @@ set_find_znode(VecZNode *v, PNode *pn) {
     return NULL;
   }
   h = ((uintptr_t)pn) % n;
-  for (i = h, j = 0; 
-       i < v->n && j < SET_MAX_SEQUENTIAL; 
-       i = ((i + 1) % n), j++) 
+  for (i = h, j = 0;
+       i < v->n && j < SET_MAX_SEQUENTIAL;
+       i = ((i + 1) % n), j++)
   {
     if (!v->v[i])
       return NULL;
@@ -1210,12 +1206,12 @@ set_add_znode_hash(VecZNode *v, ZNode *z) {
   int i, j, n;
   VecZNode vv;
   vec_clear(&vv);
-  i, j, n = v->n;
+  n = v->n;
   if (n) {
     uint h = ((uintptr_t)z->pn) % n;
-    for (i = h, j = 0; 
-	 i < v->n && j < SET_MAX_SEQUENTIAL; 
-	 i = ((i + 1) % n), j++) 
+    for (i = h, j = 0;
+	 i < v->n && j < SET_MAX_SEQUENTIAL;
+	 i = ((i + 1) % n), j++)
     {
       if (!v->v[i]) {
 	v->v[i] = z;
@@ -1246,7 +1242,7 @@ set_add_znode(VecZNode *v, ZNode *z) {
   int i, n;
   VecZNode vv;
   vec_clear(&vv);
-  i, n = v->n;
+  n = v->n;
   if (n < INTEGRAL_VEC_SIZE) {
     vec_add(v, z);
     return;
@@ -1269,7 +1265,7 @@ goto_PNode(Parser *p, d_loc_t *loc, PNode *pn, SNode *ps) {
   ZNode *z = NULL;
   D_State *state;
   int i, j, k, state_index;
-  
+
   if (!IS_BIT_SET(ps->state->goto_valid, pn->parse_node.symbol))
     return NULL;
   state_index = GOTO_STATE(p, pn, ps);
@@ -1279,9 +1275,9 @@ goto_PNode(Parser *p, d_loc_t *loc, PNode *pn, SNode *ps) {
     unref_pn(p, new_ps->last_pn);
   ref_pn(pn);
   new_ps->last_pn = pn;
-  
-  DBG(printf("goto %d (%s) -> %d %p\n", 
-	     (int)(ps->state - p->t->state), 
+
+  DBG(printf("goto %d (%s) -> %d %p\n",
+	     (int)(ps->state - p->t->state),
 	     p->t->symbols[pn->parse_node.symbol].name,
 	     state_index, new_ps));
   if (ps != new_ps && new_ps->depth < ps->depth + 1)
@@ -1369,9 +1365,9 @@ shift_all(Parser *p, char *pos) {
       p->code_shifts[ncode].speculative_code = 0;
       p->shift_results[nshifts].loc = loc;
       if ((state->scanner_code(
-	&p->shift_results[nshifts].loc, 
-	&p->code_shifts[ncode].symbol, &p->code_shifts[ncode].term_priority, 
-	&p->code_shifts[ncode].op_assoc, &p->code_shifts[ncode].op_priority))) 
+	&p->shift_results[nshifts].loc,
+	&p->code_shifts[ncode].symbol, &p->code_shifts[ncode].term_priority,
+	&p->code_shifts[ncode].op_assoc, &p->code_shifts[ncode].op_priority)))
       {
 	p->shift_results[nshifts].snode = s->snode;
 	p->shift_results[nshifts++].shift = &p->code_shifts[ncode++];
@@ -1393,7 +1389,7 @@ shift_all(Parser *p, char *pos) {
       SNode *sn = r->snode;
       r->shift = 0;
       for (j = i + 1; j < nshifts; j++) {
-	if (p->shift_results[j].shift && 
+	if (p->shift_results[j].shift &&
 	    sn == p->shift_results[j].snode &&
 	    symbol == p->shift_results[j].shift->symbol) {
 	  r->shift = p->shift_results[j].shift;
@@ -1422,7 +1418,7 @@ shift_all(Parser *p, char *pos) {
     if (!r->shift)
       continue;
     p->shifts++;
-    DBG(printf("shift %d %p %d (%s)\n", 
+    DBG(printf("shift %d %p %d (%s)\n",
 	       (int)(r->snode->state - p->t->state), r->snode, r->shift->symbol,
 	       p->t->symbols[r->shift->symbol].name));
     new_pn = add_PNode(p, r->shift->symbol, &r->snode->loc, r->loc.s,
@@ -1468,8 +1464,8 @@ new_VecZNode(VecVecZNode *paths, int n, int parent) {
 }
 
 static void
-build_paths_internal(ZNode *z, VecVecZNode *paths, int parent, 
-		     int n, int n_to_go) 
+build_paths_internal(ZNode *z, VecVecZNode *paths, int parent,
+		     int n, int n_to_go)
 {
   int j, k, l;
 
@@ -1483,7 +1479,7 @@ build_paths_internal(ZNode *z, VecVecZNode *paths, int parent,
 	  vec_add(paths, new_VecZNode(paths, n - (n_to_go - 1), parent));
 	  parent = paths->n - 1;
 	}
-	build_paths_internal(z->sns.v[k]->zns.v[j], paths, parent, 
+	build_paths_internal(z->sns.v[k]->zns.v[j], paths, parent,
 			     n, n_to_go - 1);
 	l++;
       }
@@ -1500,7 +1496,7 @@ build_paths(ZNode *z, VecVecZNode *paths, int nchildren_to_go) {
 
 static void
 free_paths(VecVecZNode *paths) {
-  int i;  
+  int i;
   vec_free(&path1);
   for (i = 1; i < paths->n; i++) {
     vec_free(paths->v[i]);
@@ -1540,8 +1536,8 @@ reduce_one(Parser *p, Reduction *r) {
       p->reductions++;
       last_pn = path->v[0]->pn;
       first_z = path->v[n - 1];
-      pn = add_PNode(p, r->reduction->symbol, 
-		     &first_z->pn->parse_node.start_loc, 
+      pn = add_PNode(p, r->reduction->symbol,
+		     &first_z->pn->parse_node.start_loc,
 		     sn->loc.s, last_pn, r->reduction, path, NULL);
       if (pn)
 	for (j = 0; j < first_z->sns.n; j++)
@@ -1552,7 +1548,7 @@ reduce_one(Parser *p, Reduction *r) {
   unref_sn(p, sn);
   r->next = p->free_reductions;
   p->free_reductions = r;
-} 
+}
 
 static int
 VecSNode_equal(VecSNode *vsn1, VecSNode *vsn2) {
@@ -1591,7 +1587,7 @@ binary_op_ZNode(SNode *sn) {
 
 #ifdef D_DEBUG
 
-static const char *spaces = "                                                                                                  "; 
+static const char *spaces = "                                                                                                  ";
 static void
 print_stack(Parser *p, SNode *s, int indent) {
   int i,j;
@@ -1620,7 +1616,7 @@ print_stack(Parser *p, SNode *s, int indent) {
 #endif
 
 /* compare two stacks with operators on top of identical substacks
-   eliminating the stack with the lower priority binary operator 
+   eliminating the stack with the lower priority binary operator
    - used to eliminate unnecessary stacks created by the
      (empty) application binary operator
 */
@@ -1629,23 +1625,23 @@ cmp_stacks(Parser *p) {
   char *pos;
   Shift *a, *b, **al, **bl;
   ZNode *az, *bz;
-  
+
   pos = p->shifts_todo->snode->loc.s;
   DBG({
     int i = 0;
-    for (al = &p->shifts_todo, a = *al; a && a->snode->loc.s == pos; 
+    for (al = &p->shifts_todo, a = *al; a && a->snode->loc.s == pos;
 	 al = &a->next, a = a->next)
   {
     if (++i < 2) printf("\n");
     print_stack(p, a->snode, 0);
-    printf("\n");    
+    printf("\n");
   }});
-  for (al = &p->shifts_todo, a = *al; a && a->snode->loc.s == pos; 
-       al = &a->next, a = a->next) 
+  for (al = &p->shifts_todo, a = *al; a && a->snode->loc.s == pos;
+       al = &a->next, a = a->next)
   {
     if (!(az = binary_op_ZNode(a->snode)))
       continue;
-    for (bl = &a->next, b = a->next; b && b->snode->loc.s == pos; 
+    for (bl = &a->next, b = a->next; b && b->snode->loc.s == pos;
 	 bl = &b->next, b = b->next) {
       if (!(bz = binary_op_ZNode(b->snode)))
 	continue;
@@ -1684,7 +1680,7 @@ free_ParseTreeBelow(Parser *p, PNode *pn) {
   int i;
   PNode *amb;
 
-  for (i = 0; i < pn->children.n; i++) 
+  for (i = 0; i < pn->children.n; i++)
     unref_pn(p, pn->children.v[i]);
   vec_free(&pn->children);
   if ((amb = pn->ambiguities)) {
@@ -1714,7 +1710,7 @@ ambiguity_abort_fn(D_Parser *pp, int n, D_ParseNode **v) {
       printf("\n");
     }
   }
-  d_fail("unresolved ambiguity line %d file %s", v[0]->start_loc.line, 
+  d_fail("unresolved ambiguity line %d file %s", v[0]->start_loc.line,
 	 v[0]->start_loc.pathname);
   return v[0];
 }
@@ -1778,7 +1774,7 @@ fixup_internal_symbol(Parser *p, PNode *pn, int ichild) {
     pn->children.v[ichild] = child->children.v[0];
   } else {
     for (j = 0; j < n - 1; j++) /* expand children vector */
-      vec_add(&pn->children, NULL); 
+      vec_add(&pn->children, NULL);
     for (j = pnn - 1; j >= ichild + 1; j--) /* move to new places */
       pn->children.v[j - 1 + n] = pn->children.v[j];
     for (j = 0; j < n; j++) {
@@ -1810,14 +1806,14 @@ commit_tree(Parser *p, PNode *pn) {
   fixup_ebnf = p->user.fixup_EBNF_productions;
   internal = is_symbol_internal_or_EBNF(p, pn);
   fixup = !p->user.dont_fixup_internal_productions && internal;
-  for (i = 0; i < pn->children.n; i++) { 
+  for (i = 0; i < pn->children.n; i++) {
     PNode *tpn = commit_tree(p, pn->children.v[i]);
     if (tpn != pn->children.v[i]){
       ref_pn(tpn);
       unref_pn(p, pn->children.v[i]);
       pn->children.v[i] = tpn;
     }
-    if (fixup && 
+    if (fixup &&
 	(fixup_ebnf ? is_symbol_internal_or_EBNF(p, pn->children.v[i]) :
 	 is_symbol_internal(p, pn->children.v[i])))
     {
@@ -1843,12 +1839,12 @@ static int
 commit_stack(Parser *p, SNode *sn) {
   int res = 0;
   PNode *tpn;
-  
+
   if (sn->zns.n != 1)
     return -1;
   if (sn->zns.v[0]->sns.n > 1)
     return -2;
-  if (is_unreduced_epsilon_PNode(sn->zns.v[0]->pn)) /* wait till reduced */ 
+  if (is_unreduced_epsilon_PNode(sn->zns.v[0]->pn)) /* wait till reduced */
     return -3;
   if (sn->zns.v[0]->sns.n)
     if ((res = commit_stack(p, sn->zns.v[0]->sns.v[0])) < 0)
@@ -1886,7 +1882,7 @@ syntax_error_report_fn(struct D_Parser *ap) {
   ZNode *z = p->snode_hash.last_all ? p->snode_hash.last_all->zns.v[0] : 0;
   while (z && z->pn->parse_node.start_loc.s == z->pn->parse_node.end)
     z = (z->sns.v && z->sns.v[0]->zns.v) ? z->sns.v[0]->zns.v[0] : 0;
-  if (z && z->pn->parse_node.start_loc.s != z->pn->parse_node.end) 
+  if (z && z->pn->parse_node.start_loc.s != z->pn->parse_node.end)
     after = dup_str(z->pn->parse_node.start_loc.s, z->pn->parse_node.end);
   if (after)
     fprintf(stderr, "%s:%d: syntax error after '%s'\n", fn, p->user.loc.line, after);
@@ -1934,10 +1930,10 @@ error_recovery(Parser *p) {
 	D_ErrorRecoveryHint *er = &sn->state->error_recovery_hints.v[i];
 	if ((ss = find_substr(s, er->string))) {
 	  if (!best_sn || ss < best_s ||
-	      (best_sn && ss == best_s && 
+	      (best_sn && ss == best_s &&
 	       (best_sn->depth < sn->depth ||
 		 (best_sn->depth == sn->depth &&
-		   best_er->depth < er->depth)))) 
+		   best_er->depth < er->depth))))
 	  {
 	    best_sn = sn;
 	    best_s = ss;
@@ -2032,17 +2028,17 @@ pass_postorder(Parser *p, D_Pass *pp, PNode *pn) {
   pass_call(p, pp, pn);
 }
 
-void 
+void
 d_pass(D_Parser *ap, D_ParseNode *apn, int pass_number) {
   PNode *pn = D_ParseNode_to_PNode(apn);
   Parser *p = (Parser*)ap;
   D_Pass *pp;
-  
+
   if (pass_number >= p->t->npasses)
     d_fail("bad pass number: %d\n", pass_number);
   pp = &p->t->passes[pass_number];
   if (pp->kind & D_PASS_MANUAL)
-    pass_call(p, pp, pn);	
+    pass_call(p, pp, pn);
   else if (pp->kind & D_PASS_PRE_ORDER)
     pass_preorder(p, pp, pn);
   else if (pp->kind & D_PASS_POST_ORDER)
@@ -2081,9 +2077,9 @@ exhaustive_parse(Parser *p, int state) {
       pos = p->reductions_todo->snode->loc.s;
       if (p->shifts_todo && p->shifts_todo->snode->loc.s < pos)
 	break;
-      if (pos > epos) { 
-	epos = pos; 
-	free_old_nodes(p); 
+      if (pos > epos) {
+	epos = pos;
+	free_old_nodes(p);
       }
       for (;(r = p->reductions_todo) && r->snode->loc.s == pos;) {
 	p->reductions_todo = p->reductions_todo->next;
@@ -2092,7 +2088,7 @@ exhaustive_parse(Parser *p, int state) {
     }
     /* done? */
     if (!p->shifts_todo) {
-      if (p->accept && 
+      if (p->accept &&
 	  (p->accept->loc.s == p->end || p->user.partial_parses))
 	return 0;
       else {
@@ -2104,9 +2100,9 @@ exhaustive_parse(Parser *p, int state) {
       cmp_stacks(p);
     /* shift all */
     pos = p->shifts_todo->snode->loc.s;
-    if (pos > epos) { 
-      epos = pos; 
-      free_old_nodes(p); 
+    if (pos > epos) {
+      epos = pos;
+      free_old_nodes(p);
     }
     progress++;
     ready = progress > p->user.commit_actions_interval;
@@ -2144,13 +2140,13 @@ white_space(D_Parser *p, d_loc_t *loc, void **p_user_globals) {
       char *save = s;
       s++;
       while (wspace(*s)) s++;
-      if (!strncmp("line", s, 4)) { 
+      if (!strncmp("line", s, 4)) {
 	if (wspace(s[4])) {
 	  s += 5;
 	  while (wspace(*s)) s++;
 	}
       }
-      if (isdigit_(*s)) { 
+      if (isdigit_(*s)) {
 	loc->line = atoi(s) - 1;
 	while (isdigit_(*s)) s++;
 	while (wspace(*s)) s++;
@@ -2166,7 +2162,7 @@ white_space(D_Parser *p, d_loc_t *loc, void **p_user_globals) {
  Lmore:
   while (wspace(*s)) s++;
   if (*s == '\n') {
-    loc->line++; 
+    loc->line++;
     scol = s + 1;
     s++;
     if (*s == '#')
@@ -2196,9 +2192,9 @@ white_space(D_Parser *p, d_loc_t *loc, void **p_user_globals) {
 	  s += 2;
 	  goto LnestComment;
 	}
-	if (*s == '\n') { 
-	  loc->line++; 
-	  scol = s + 1; 
+	if (*s == '\n') {
+	  loc->line++;
+	  scol = s + 1;
 	}
 	s++;
       }
@@ -2259,13 +2255,13 @@ free_D_ParseNode(D_Parser * p, D_ParseNode *dpn) {
 }
 
 static void
-copy_user_configurables(Parser *pp, Parser *p) { 
+copy_user_configurables(Parser *pp, Parser *p) {
   memcpy(((char*)&pp->user.start_state) + sizeof(pp->user.start_state),
          ((char*)&p->user.start_state) + sizeof(p->user.start_state),
          ((char*)&pp->user.syntax_errors - (char*)&pp->user.start_state));
 }
 
-Parser * 
+Parser *
 new_subparser(Parser *p) {
   Parser * pp = (Parser *)new_D_Parser(p->t, p->user.sizeof_user_parse_node);
   copy_user_configurables(pp, p);
@@ -2290,8 +2286,8 @@ static void
 free_whitespace_parser(Parser *p) {
   if (p->whitespace_parser) {
     free_D_Parser((D_Parser*)p->whitespace_parser);
-    p->whitespace_parser = 0; 
-  } 
+    p->whitespace_parser = 0;
+  }
 }
 
 static PNode *
@@ -2330,7 +2326,7 @@ dparse(D_Parser *ap, char *buf, int buf_len) {
   SNode *sn;
   PNode *pn;
   D_ParseNode *res = NULL;
-  
+
   p->states = p->scans = p->shifts = p->reductions = p->compares = 0;
   p->start = buf;
   p->end = buf + buf_len;
@@ -2349,15 +2345,15 @@ dparse(D_Parser *ap, char *buf, int buf_len) {
   if (!r) {
     sn = p->accept;
     if (sn->zns.n != 1)
-      pn = handle_top_level_ambiguities(p, sn); 
+      pn = handle_top_level_ambiguities(p, sn);
     else
       pn = sn->zns.v[0]->pn;
     pn = commit_tree(p, pn);
     if (d_verbose_level) {
       printf(
 	"%d states %d scans %d shifts %d reductions "
-	"%d compares %d ambiguities\n", 
-	p->states, p->scans, p->shifts, p->reductions, 
+	"%d compares %d ambiguities\n",
+	p->states, p->scans, p->shifts, p->reductions,
 	p->compares, p->ambiguities);
       if (p->user.save_parse_tree) {
 	if (d_verbose_level > 1)
