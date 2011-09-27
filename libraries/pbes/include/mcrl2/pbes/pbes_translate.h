@@ -85,7 +85,7 @@ namespace detail
 {
 
 inline
-std::string print(const atermpp::vector<pbes_equation>& v)
+std::string myprint(const atermpp::vector<pbes_equation>& v)
 {
   std::ostringstream out;
   out << "[";
@@ -765,7 +765,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::myprint(result) << std::flush;
 #endif
       return result;
     }
@@ -1322,7 +1322,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
-      std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::print(result) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<Eresult>" << detail::myprint(result) << std::flush;
 #endif
       return result;
     }
@@ -1344,7 +1344,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
 
       if (!state_formulas::is_monotonous(formula))
       {
-        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + pbes_system::pp(formula) + " is not monotonous!");
+        throw mcrl2::runtime_error(std::string("lps2pbes error: the formula ") + state_formulas::pp(formula) + " is not monotonous!");
       }
 
       // resolve name conflicts and wrap the formula in a mu or nu if needed

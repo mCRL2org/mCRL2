@@ -339,7 +339,11 @@ StateFrm
   | '(' StateFrm ')'
   ;
 
-StateVarDecl: Id ( '(' VarsDeclList ')' )? ;
+StateVarDecl: Id ( '(' StateVarAssignmentList ')' )? ;
+
+StateVarAssignment: Id ':' SortExpr '=' DataExpr ;
+
+StateVarAssignmentList: StateVarAssignment ( ',' Assignment )* ;
 
 //--- Action Rename Specifications
 

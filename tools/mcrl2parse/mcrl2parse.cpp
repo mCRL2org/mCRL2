@@ -270,6 +270,7 @@ class mcrl2parse_tool : public input_tool
         else if (file_type == procexpr_e)
         {
           if (use_new_parser) x1 = process::parse_process_expression_new(text);
+          print1(x1);
           x2 = process::parse_process_expression(text, "", "");
           compare (x1, x2);
         }
@@ -313,17 +314,18 @@ class mcrl2parse_tool : public input_tool
         else if (file_type == actfrm_e)
         {
           action_formulas::action_formula x1 = action_formulas::parse_action_formula_new(text);
-          std::cout << action_formulas::pp(x1) << std::endl;
+          std::cout << x1 << std::endl;
         }
         else if (file_type == regfrm_e)
         {
           regular_formulas::regular_formula x1 = regular_formulas::parse_regular_formula_new(text);
-          std::cout << regular_formulas::pp(x1) << std::endl;
+          std::cout << x1 << std::endl;
         }
         else if (file_type == statefrm_e)
         {
-          state_formulas::state_formula x1 = state_formulas::parse_state_formula_new(text);
-          std::cout << state_formulas::pp(x1) << std::endl;
+          if (use_new_parser) x1 = state_formulas::parse_state_formula_new(text);
+          x2 = state_formulas::parse_state_formula_old(text);
+          compare (x1, x2);
         }
       }
       catch (std::exception& e)

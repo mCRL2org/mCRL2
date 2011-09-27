@@ -20,6 +20,7 @@
 #include "mcrl2/modal_formula/translate_user_notation.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/detail/regfrmtrans.h"
+#include "mcrl2/modal_formula/print.h"
 
 namespace mcrl2
 {
@@ -80,8 +81,8 @@ struct regular_formula_actions: public action_formulas::action_formula_actions
     if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "ActFrm")) { return parse_ActFrm(node.child(0)); }
     else if ((node.child_count() == 1) && (symbol_name(node.child(0)) == "nil")) { return regular_formulas::nil(); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ")")) { return parse_RegFrm(node.child(1)); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "*") && (symbol_name(node.child(1)) == "RegFrm")) { return trans_or_nil(parse_RegFrm(node.child(1))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "+") && (symbol_name(node.child(1)) == "RegFrm")) { return trans(parse_RegFrm(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "*")) { return trans_or_nil(parse_RegFrm(node.child(0))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "+")) { return trans(parse_RegFrm(node.child(0))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "RegFrm")) { return seq(parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "RegFrm") && (symbol_name(node.child(1)) == "+") && (symbol_name(node.child(2)) == "RegFrm")) { return alt(parse_RegFrm(node.child(0)), parse_RegFrm(node.child(2))); }
     report_unexpected_node(node);
@@ -114,16 +115,38 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
     : regular_formulas::regular_formula_actions(table_)
   {}
 
-  data::data_expression parse_Time(const core::parse_node& node)
+  state_formula make_delay(const core::parse_node& node)
   {
-    if (node.child(1))
+    if (node.child(0))
     {
-      return parse_DataExpr(node.child(1));
+      return delay_timed(parse_DataExpr(node.child(0).child(1)));
     }
     else
     {
-      return data::data_expression(core::detail::gsMakeNil());
+      return delay();
     }
+  }
+
+  state_formula make_yaled(const core::parse_node& node)
+  {
+    if (node.child(0))
+    {
+      return yaled_timed(parse_DataExpr(node.child(0).child(1)));
+    }
+    else
+    {
+      return yaled();
+    }
+  }
+
+  data::assignment parse_StateVarAssignment(const core::parse_node& node)
+  {
+    return data::assignment(data::variable(parse_Id(node.child(0)), parse_SortExpr(node.child(2))), parse_DataExpr(node.child(4)));
+  }
+
+  data::assignment_list parse_StateVarAssignmentList(const core::parse_node& node)
+  {
+    return parse_list<data::assignment>(node, "StateVarAssignment", boost::bind(&state_formula_actions::parse_StateVarAssignment, this, _1));
   }
 
   state_formulas::state_formula parse_StateFrm(const core::parse_node& node)
@@ -137,13 +160,13 @@ struct state_formula_actions: public regular_formulas::regular_formula_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "StateFrm") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "StateFrm")) { return state_formulas::or_(parse_StateFrm(node.child(0)), parse_StateFrm(node.child(2))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "forall") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::forall(parse_VarsDeclList(node.child(1)), parse_StateFrm(node.child(3))); }
     else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "exists") && (symbol_name(node.child(1)) == "VarsDeclList") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::exists(parse_VarsDeclList(node.child(1)), parse_StateFrm(node.child(3))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == "]")) { return state_formulas::may(parse_RegFrm(node.child(1))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "<") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ">")) { return state_formulas::must(parse_RegFrm(node.child(1))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "mu") && (symbol_name(node.child(1)) == "StateVarDecl") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::mu(parse_Id(node.child(1).child(0)), parse_DataExprList(node.child(1).child(1)), parse_StateFrm(node.child(3))); }
-    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "nu") && (symbol_name(node.child(1)) == "StateVarDecl") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::nu(parse_Id(node.child(1).child(0)), parse_DataExprList(node.child(1).child(1)), parse_StateFrm(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "[") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == "]") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::must(parse_RegFrm(node.child(1)), parse_StateFrm(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "<") && (symbol_name(node.child(1)) == "RegFrm") && (symbol_name(node.child(2)) == ">") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::may(parse_RegFrm(node.child(1)), parse_StateFrm(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "mu") && (symbol_name(node.child(1)) == "StateVarDecl") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::mu(parse_Id(node.child(1).child(0)), parse_StateVarAssignmentList(node.child(1).child(1)), parse_StateFrm(node.child(3))); }
+    else if ((node.child_count() == 4) && (symbol_name(node.child(0)) == "nu") && (symbol_name(node.child(1)) == "StateVarDecl") && (symbol_name(node.child(2)) == ".") && (symbol_name(node.child(3)) == "StateFrm")) { return state_formulas::nu(parse_Id(node.child(1).child(0)), parse_StateVarAssignmentList(node.child(1).child(1)), parse_StateFrm(node.child(3))); }
     else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "Id")) { return state_formulas::variable(parse_Id(node.child(0)), parse_DataExprList(node.child(1))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "delay")) { return state_formulas::delay(parse_Time(node.child(1))); }
-    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "yaled")) { return state_formulas::yaled(parse_Time(node.child(1))); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "delay")) { return make_delay(node.child(1)); }
+    else if ((node.child_count() == 2) && (symbol_name(node.child(0)) == "yaled")) { return make_yaled(node.child(1)); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "(") && (symbol_name(node.child(1)) == "StateFrm") && (symbol_name(node.child(2)) == ")")) { return parse_StateFrm(node.child(1)); }
     report_unexpected_node(node);
     return state_formulas::state_formula();
@@ -162,6 +185,24 @@ state_formula parse_state_formula_new(const std::string& text)
 
 #endif // MCRL2_USE_NEW_PARSER
 
+inline
+state_formula parse_state_formula_old(std::istream& in)
+{
+  atermpp::aterm_appl x = core::parse_state_frm(in);
+  if (!x)
+  {
+    throw mcrl2::runtime_error("Error while parsing state formula");
+  }
+  return state_formula(x);
+}
+
+inline
+state_formula parse_state_formula_old(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_state_formula_old(in);
+}
+
 /// \brief Translates regular formulas appearing in f into action formulas.
 /// \param f A state formula
 inline
@@ -175,6 +216,33 @@ void translate_regular_formula(state_formula& f)
   f = state_formula(result);
 }
 
+inline
+void complete_state_formula(state_formula& x, lps::specification& spec, bool check_monotonicity = true)
+{
+  type_check(x, spec, check_monotonicity);
+  translate_regular_formula(x);
+  spec.data().add_context_sorts(state_formulas::find_sort_expressions(x));
+  x = state_formulas::translate_user_notation(x);
+  x = state_formulas::normalize_sorts(x, spec.data());
+}
+
+template <typename T>
+void compare_parse_results(const std::string& text, const T& x1, const T& x2)
+{
+  if (!(x1 == x2))
+  {
+    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << state_formulas::pp(x1) << std::endl;
+    core::print_aterm(x1);
+    std::clog << "new:    " << state_formulas::pp(x2) << std::endl;
+    core::print_aterm(x2);
+#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
+    throw mcrl2::runtime_error("difference detected between old and new parser");
+#endif
+  }
+}
+
 /// \brief Parses a state formula from an input stream
 // spec may be updated as the data implementation of the state formula
 // may cause internal names to change.
@@ -183,22 +251,20 @@ void translate_regular_formula(state_formula& f)
 /// \param check_monotonicity If true, an exception will be thrown if the formula is not monotonous
 /// \return The converted modal formula
 inline
-state_formula parse_state_formula(std::istream& from, lps::specification& spec, bool check_monotonicity = true)
+state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity = true)
 {
-  ATermAppl result = core::parse_state_frm(from);
-  if (result == NULL)
-  {
-    throw mcrl2::runtime_error("parse error in parse_state_frm()");
-  }
-  state_formula f = atermpp::aterm_appl(result);
-  type_check(f, spec, check_monotonicity);
-  translate_regular_formula(f);
-
-  spec.data().add_context_sorts(state_formulas::find_sort_expressions((f)));
-  f = state_formulas::translate_user_notation(f);
-  f = state_formulas::normalize_sorts(f, spec.data());
-
-  return f;
+#ifdef MCRL2_CHECK_PARSER
+  std::string text = utilities::read_text(in);
+  state_formula result = parse_state_formula_old(text);
+  complete_state_formula(result, spec, check_monotonicity);
+  state_formula result2 = parse_state_formula_new(text);
+  complete_state_formula(result2, spec, check_monotonicity);
+  compare_parse_results(text, result, result2);
+#else
+  state_formula result = parse_state_formula_old(in);
+  complete_state_formula(result, first, last, data_spec);
+#endif
+  return result;
 }
 
 /// \brief Parses a state formula from text

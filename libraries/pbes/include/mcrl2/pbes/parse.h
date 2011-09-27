@@ -26,6 +26,7 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/typecheck.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/translate_user_notation.h"
@@ -133,6 +134,50 @@ pbes<> parse_pbes_new(const std::string& text)
 
 #endif // MCRL2_USE_NEW_PARSER
 
+inline
+pbes<> parse_pbes_old(std::istream& in)
+{
+  atermpp::aterm_appl x = core::parse_pbes_spec(in);
+  if (!x)
+  {
+    throw mcrl2::runtime_error("Error while parsing pbes specification");
+  }
+  return pbes<>(x);
+}
+
+inline
+pbes<> parse_pbes_old(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_pbes_old(in);
+}
+
+inline
+void complete_pbes(pbes<>& x)
+{
+  type_check(x);
+  pbes_system::translate_user_notation(x);
+  pbes_system::normalize_sorts(x, x.data());
+  complete_data_specification(x);
+}
+
+template <typename T>
+void compare_parse_results(const std::string& text, const T& x1, const T& x2)
+{
+  if (!(x1 == x2))
+  {
+    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << pbes_system::print(x1) << std::endl;
+    core::print_aterm(x1);
+    std::clog << "new:    " << pbes_system::print(x2) << std::endl;
+    core::print_aterm(x2);
+#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
+    throw mcrl2::runtime_error("difference detected between old and new parser");
+#endif
+  }
+}
+
 /// \brief Reads a PBES from an input stream.
 /// \param from An input stream
 /// \param p A PBES
@@ -163,12 +208,34 @@ std::istream& operator>>(std::istream& from, pbes<Container>& p)
 }
 
 inline
+pbes<> parse_pbes(std::istream& in)
+{
+#ifdef MCRL2_CHECK_PARSER
+  std::string text = utilities::read_text(in);
+  pbes<> result = parse_pbes_old(text);
+  atermpp::aterm_appl t1(pbes_to_aterm(result));
+  complete_pbes(result);
+  pbes<> result2 = parse_pbes_new(text);
+  atermpp::aterm_appl t2(pbes_to_aterm(result2));
+  complete_pbes(result2);
+  if (t1 != t2)
+  {
+std::clog << "old: " << t1 << std::endl;
+std::clog << "new: " << t2 << std::endl;
+    compare_parse_results(text, result, result2);
+  }
+#else
+  pbes<> result = parse_pbes_old(in);
+  complete_pbes(result);
+#endif
+  return result;
+}
+
+inline
 pbes<> parse_pbes(const std::string& text)
 {
-  pbes<> result;
-  std::stringstream ss(text);
-  ss >> result;
-  return result;
+  std::istringstream in(text);
+  return parse_pbes(in);
 }
 
 /// \brief Parses a sequence of pbes expressions. The format of the text is as

@@ -118,11 +118,7 @@ struct process_actions: public lps::action_actions
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "+") && (symbol_name(node.child(2)) == "ProcExpr")) { return choice(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "||") && (symbol_name(node.child(2)) == "ProcExpr")) { return merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "||_") && (symbol_name(node.child(2)) == "ProcExpr")) { return left_merge(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
-    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "ProcExpr"))
-    {
-std::cout << "<parse_Seq>" << node.string() << " " << atermpp::aterm_appl(parse_ProcExpr(node.child(0))) << " " << atermpp::aterm_appl(parse_ProcExpr(node.child(0))) << " -> " << seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))) << std::endl;
-      return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2)));
-    }
+    else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == ".") && (symbol_name(node.child(2)) == "ProcExpr")) { return seq(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "<<") && (symbol_name(node.child(2)) == "ProcExpr")) { return bounded_init(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "@") && (symbol_name(node.child(2)) == "DataExprUnit")) { return at(parse_ProcExpr(node.child(0)), parse_DataExprUnit(node.child(2))); }
     else if ((node.child_count() == 3) && (symbol_name(node.child(0)) == "ProcExpr") && (symbol_name(node.child(1)) == "|") && (symbol_name(node.child(2)) == "ProcExpr")) { return sync(parse_ProcExpr(node.child(0)), parse_ProcExpr(node.child(2))); }
@@ -285,13 +281,15 @@ process_specification parse_process_specification(std::istream& in, bool alpha_r
 #ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
   process_specification result = parse_process_specification_old(text);
-atermpp::aterm_appl t1(process::process_specification_to_aterm(result));
+  atermpp::aterm_appl t1(process::process_specification_to_aterm(result));
   complete_process_specification(result, alpha_reduce);
   process_specification result2 = parse_process_specification_new(text);
-atermpp::aterm_appl t2(process::process_specification_to_aterm(result2));
+  atermpp::aterm_appl t2(process::process_specification_to_aterm(result2));
   complete_process_specification(result2, alpha_reduce);
   if (t1 != t2)
   {
+std::clog << "old: " << t1 << std::endl;
+std::clog << "new: " << t2 << std::endl;
     compare_parse_results(text, result, result2);
   }
 #else
@@ -330,6 +328,17 @@ process_expression parse_process_expression(const std::string& text,
 }
 
 } // namespace process
+
+//namespace core {
+//
+//template<>
+//inline
+//void print_aterm(const process::process_specification& x)
+//{
+//  std::clog << "aterm: " << atermpp::aterm_appl(process_specification_to_aterm(x)) << std::endl;
+//}
+//
+//} // namespace core
 
 } // namespace mcrl2
 
