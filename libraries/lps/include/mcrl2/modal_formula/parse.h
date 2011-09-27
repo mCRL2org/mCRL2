@@ -262,7 +262,7 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
   compare_parse_results(text, result, result2);
 #else
   state_formula result = parse_state_formula_old(in);
-  complete_state_formula(result, first, last, data_spec);
+  complete_state_formula(result, spec, check_monotonicity);
 #endif
   return result;
 }
