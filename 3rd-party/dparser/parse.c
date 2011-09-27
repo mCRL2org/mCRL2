@@ -605,15 +605,16 @@ static int
 check_child(int ppri, AssocKind passoc, int cpri, AssocKind cassoc,
 	    int left, int right) 
 {
+  int p, c, r;
   if (IS_UNARY_ASSOC(passoc) && passoc == cassoc)
     return 1;
   if (IS_UNARY_ASSOC(passoc) != IS_UNARY_ASSOC(cassoc))
     return 1;
-  int p = IS_BINARY_NARY_ASSOC(passoc) ? (right ? 1 : 0) : 
+  p = IS_BINARY_NARY_ASSOC(passoc) ? (right ? 1 : 0) : 
           (passoc == ASSOC_UNARY_LEFT ? 2 : 3);
-  int c = IS_BINARY_NARY_ASSOC(cassoc) ? 0 : 
+  c = IS_BINARY_NARY_ASSOC(cassoc) ? 0 : 
           (cassoc == ASSOC_UNARY_LEFT ? 1 : 2);
-  int r = 
+  r = 
     cpri > ppri ? 0 : (
       cpri < ppri ? 1 : ( 2 + (
 	(IS_RIGHT_ASSOC(cassoc) ? 2 : 0) +
@@ -931,13 +932,14 @@ greedycmp(const void *ax, const void *ay) {
 
 static int
 cmp_greediness(Parser *p, PNode *x, PNode *y) {
+  int ix, iy, ret;
   VecPNode pvx, pvy;
   vec_clear(&pvx); vec_clear(&pvy); 
   get_unshared_pnodes(p, x, y, &pvx, &pvy);
   /* set_to_vec(&pvx); set_to_vec(&pvy); */
   qsort(pvx.v, pvx.n, sizeof(PNode *), greedycmp);
   qsort(pvy.v, pvy.n, sizeof(PNode *), greedycmp);
-  int ix = 0, iy = 0, ret = 0;
+  ix = 0, iy = 0, ret = 0;
   while (1) {
     if (pvx.n <= ix || pvy.n <= iy)
       RET(0);
@@ -1205,9 +1207,10 @@ set_find_znode(VecZNode *v, PNode *pn) {
 
 static void
 set_add_znode_hash(VecZNode *v, ZNode *z) {
+  int i, j, n;
   VecZNode vv;
   vec_clear(&vv);
-  int i, j, n = v->n;
+  i, j, n = v->n;
   if (n) {
     uint h = ((uintptr_t)z->pn) % n;
     for (i = h, j = 0; 
@@ -1240,9 +1243,10 @@ set_add_znode_hash(VecZNode *v, ZNode *z) {
 
 static void
 set_add_znode(VecZNode *v, ZNode *z) {
+  int i, n;
   VecZNode vv;
   vec_clear(&vv);
-  int i, n = v->n;
+  i, n = v->n;
   if (n < INTEGRAL_VEC_SIZE) {
     vec_add(v, z);
     return;

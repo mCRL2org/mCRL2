@@ -18,7 +18,7 @@
 #endif
 #include <limits.h>
 #include <sys/types.h>
-#ifndef __MINGW32__
+#if !defined(__MINGW32__) && !defined(_MSC_VER)
 #include <sys/mman.h>
 #include <sys/uio.h>
 #endif
@@ -83,7 +83,7 @@ typedef long long int64;
 typedef unsigned long long uint64;
 typedef short int16;
 typedef unsigned short uint16;
-#ifdef __MINGW32__
+#if defined(__MINGW32__) || defined(_MSC_VER)
 /* already part of most systems */
 typedef unsigned long ulong;
 typedef uint32 uint; 

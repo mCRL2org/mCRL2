@@ -19,7 +19,6 @@ add_definitions(
 
 if(MSVC)
 add_definitions(
-  -D__MINGW32__
   -Dstrtoll=_strtoi64
   -Dstrncasecmp=_strnicmp
   -Dsnprintf=_snprintf
