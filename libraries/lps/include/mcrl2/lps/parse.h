@@ -169,16 +169,20 @@ specification parse_linear_process_specification(const std::string& text)
 /// \return The parsed multi_action
 /// \exception mcrl2::runtime_error when the input does not match the syntax of a multi action.
 inline
-multi_action parse_multi_action(std::stringstream& ma_stream, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+multi_action parse_multi_action(std::stringstream& in, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
-  ATermAppl a = mcrl2::core::parse_mult_act(ma_stream);
-  if (a == NULL)
-  {
-    throw mcrl2::runtime_error("Syntax error in multi action " + ma_stream.str());
-  }
-  lps::multi_action mact = atermpp::aterm_appl(a);
-  lps::type_check(mact, data_spec, action_decls);
-  return mact;
+#ifdef MCRL2_CHECK_PARSER
+  std::string text = utilities::read_text(in);
+  multi_action result = parse_multi_action_old(text);
+  complete_multi_action(result, action_decls, data_spec);
+  multi_action result2 = parse_multi_action_new(text);
+  complete_multi_action(result2, action_decls, data_spec);
+  compare_parse_results(text, result, result2);
+#else
+  multi_action result = parse_multi_action_old(in);
+  complete_multi_action(result, action_decls, data_spec);
+#endif
+  return result;
 }
 /// \brief Parses a linear process specification from a string
 /// \brief Parses a multi_action from a string

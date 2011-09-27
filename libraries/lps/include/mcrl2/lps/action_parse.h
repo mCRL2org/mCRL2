@@ -14,6 +14,8 @@
 
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/print.h"
+#include "mcrl2/lps/typecheck.h"
 
 namespace mcrl2 {
 
@@ -73,7 +75,58 @@ struct action_actions: public data::data_specification_actions
   }
 };
 
+inline
+multi_action parse_multi_action_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("MultAct");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return action_actions(parser_tables_mcrl2).parse_MultAct(node);
+}
+
 #endif // MCRL2_USE_NEW_PARSER
+
+inline
+multi_action parse_multi_action_old(std::istream& in)
+{
+  atermpp::aterm_appl x = core::parse_mult_act(in);
+  if (!x)
+  {
+    throw mcrl2::runtime_error("Error while parsing multi action");
+  }
+  return multi_action(x);
+}
+
+inline
+multi_action parse_multi_action_old(const std::string& text)
+{
+  std::istringstream in(text);
+  return parse_multi_action_old(in);
+}
+
+inline
+void complete_multi_action(multi_action& x, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
+{
+  lps::type_check(x, data_spec, action_decls);
+}
+
+template <typename T>
+void compare_parse_results(const std::string& text, const T& x1, const T& x2)
+{
+  if (!(x1 == x2))
+  {
+    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
+    std::clog << "string: " << text << std::endl;
+    std::clog << "old:    " << lps::print(x1) << std::endl;
+    core::print_aterm(x1);
+    std::clog << "new:    " << lps::print(x2) << std::endl;
+    core::print_aterm(x2);
+#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
+    throw mcrl2::runtime_error("difference detected between old and new parser");
+#endif
+  }
+}
 
 } // namespace lps
 
