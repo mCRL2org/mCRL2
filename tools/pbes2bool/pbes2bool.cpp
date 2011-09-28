@@ -363,8 +363,9 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
                             opt_construct_counter_example);
       timer().finish("solving");
 
-      mCRL2log(info) << "The solution for the initial variable of the pbes is " <<
+      mCRL2log(verbose) << "The solution for the initial variable of the pbes is " <<
                       (result ? "true" : "false") << std::endl;
+      std::cout << (result ? "true" : "false") << std::endl;
 
       if (opt_construct_counter_example)
       {
