@@ -86,7 +86,8 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
                       "the names of state variables are derived from the specification", 'a');
       desc.add_option("no-rewrite",
                       "do not rewrite data terms while linearising; useful when the rewrite "
-                      "system does not terminate", 'o');
+                      "system does not terminate. This option also switches off the application of "
+                      "constant elimination.", 'o');
       desc.add_option("no-globvars",
                       "instantiate don't care values with arbitrary constants, "
                       "instead of modelling them by global variables. This has no effect"
@@ -123,7 +124,8 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.nosumelm                = 0 < parser.options.count("no-sumelm");
       m_linearisation_options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
       m_linearisation_options.add_delta               = 0 < parser.options.count("delta");
-      m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm");
+      m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm") ||
+                                                        0 < parser.options.count("no-rewrite");
       m_linearisation_options.lin_method = lmRegular;
 
       if (0 < parser.options.count("lin-method"))
