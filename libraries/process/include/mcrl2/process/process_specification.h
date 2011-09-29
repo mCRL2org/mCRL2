@@ -31,7 +31,7 @@ template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o);
 
 class process_specification;
-ATermAppl process_specification_to_aterm(const process_specification& spec);
+atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec);
 void complete_data_specification(process_specification&);
 
 /// \brief Process specification consisting of a data specification, action labels, a sequence of process equations and a process initialization.
@@ -202,7 +202,7 @@ void complete_data_specification(process_specification& spec)
 /// \return The specification converted to ATerm format.
 /// \param spec A process specification
 inline
-ATermAppl process_specification_to_aterm(const process_specification& spec)
+atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec)
 {
   return core::detail::gsMakeProcSpec(
            data::detail::data_specification_to_aterm_data_spec(spec.data()),

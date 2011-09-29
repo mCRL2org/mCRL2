@@ -18,7 +18,6 @@
 #include <sstream>
 #include <utility>
 
-#include <boost/algorithm/string/join.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 #include "mcrl2/atermpp/make_list.h"

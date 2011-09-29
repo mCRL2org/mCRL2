@@ -17,33 +17,189 @@
 
 #include <fstream>
 #include <iostream>
+#include <iterator>
 #include <sstream>
 #include <string>
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/process/process_specification.h"
-#include "mcrl2/process/print.h"
-#include "mcrl2/utilities/input_tool.h"
-#include "mcrl2/utilities/mcrl2_gui_tool.h"
+
+#include <boost/algorithm/string/trim.hpp>
+
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/bes/boolean_equation_system.h"
+#include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/core/parse.h"
-#include "mcrl2/bes/parse.h"
-#include "mcrl2/pbes/parse.h"
-#include "mcrl2/lps/parse.h"
-#include "mcrl2/modal_formula/parse.h"
-#include "mcrl2/process/parse.h"
-#include "mcrl2/data/parse.h"
 #include "mcrl2/core/typecheck.h"
-#include "mcrl2/pbes/typecheck.h"
-#include "mcrl2/lps/typecheck.h"
-#include "mcrl2/modal_formula/typecheck.h"
-#include "mcrl2/process/typecheck.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
+#include "mcrl2/lps/linearise.h"
+#include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/typecheck.h"
+#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/modal_formula/typecheck.h"
+#include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/typecheck.h"
+#include "mcrl2/process/parse.h"
+#include "mcrl2/process/print.h"
+#include "mcrl2/process/process_specification.h"
+#include "mcrl2/process/typecheck.h"
+#include "mcrl2/utilities/detail/separate_keyword_section.h"
+#include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
+
+// ---------------------------------------------------------------------------------------
+//       function                |     additional inputs              | keywords
+// -------------------------------------------------------------------|-------------------
+// parse_sort_expression         | data_specification                 | sortexpr
+// parse_data_expression         | data_specification variable_vector | dataexpr variables
+// parse_data_specification      |                                    |
+// parse_process_expression      | action_specification               | procexpr
+// parse_process_specification   |                                    |
+// parse_boolean_expression      |                                    |
+// parse_boolean_equation_system |                                    |
+// parse_pbes_expression         | pbes_specification                 | pbesexpr
+// parse_pbes                    |                                    |
+// parse_state_formula           | action_specification               | statefrm
+// parse_action_formula          | action_specification               | actfrm
+// parse_regular_formula         | action_specification               | regfrm
+// parse_multi_action            | action_specification               | multact
+
+inline
+std::vector<std::string> data_specification_keywords()
+{
+  std::vector<std::string> result;
+  result.push_back("sort");
+  result.push_back("var");
+  result.push_back("eqn");
+  result.push_back("map");
+  result.push_back("cons");
+  return result;
+}
+
+inline
+std::vector<std::string> action_specification_keywords()
+{
+  std::vector<std::string> result;
+  result.push_back("sort");
+  result.push_back("var");
+  result.push_back("eqn");
+  result.push_back("map");
+  result.push_back("cons");
+  result.push_back("act");
+  result.push_back("glob");
+  result.push_back("proc");
+  result.push_back("init");
+  return result;
+}
+
+inline
+std::vector<std::string> pbes_specification_keywords()
+{
+  std::vector<std::string> result;
+  result.push_back("sort");
+  result.push_back("var");
+  result.push_back("eqn");
+  result.push_back("map");
+  result.push_back("cons");
+  result.push_back("glob");
+  result.push_back("pbes");
+  result.push_back("init");
+  return result;
+}
+
+inline
+bool has_keyword(const std::string& text, const std::string& keyword)
+{
+  // inefficient implementation, to avoid the introduction of a regex search function
+  std::vector<std::string> words = utilities::regex_split(text, "\\b" + keyword + "\\b");
+  return words.size() > 1;
+}
+
+inline
+void separate_data_specification(const std::string& text, const std::string& keyword, data::data_specification& dataspec, std::string& keyword_text)
+{
+  if (!has_keyword(text, keyword))
+  {
+    keyword_text = text;
+    dataspec = data::data_specification();
+  }
+  else
+  {
+    std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(text, keyword, data_specification_keywords());
+    keyword_text = result.first.substr(keyword.size());
+    dataspec = data::parse_data_specification(result.second);
+  }
+}
+
+inline
+void separate_data_specification(const std::string& text, const std::string& keyword1, const std::string& keyword2, data::data_specification& dataspec, std::string& keyword1_text, std::string& keyword2_text)
+{
+  if (!has_keyword(text, keyword1))
+  {
+    keyword1_text = text;
+    keyword2_text = "";
+    dataspec = data::data_specification();
+  }
+  else
+  {
+    std::vector<std::string> keywords = data_specification_keywords();
+    keywords.push_back(keyword1);
+
+    std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(text, keyword1, keywords);
+    keyword1_text = result.first.substr(keyword1.size());
+    if (has_keyword(text, keyword2))
+    {
+      result = utilities::detail::separate_keyword_section(result.second, keyword2, data_specification_keywords());
+      keyword2_text = result.first.substr(keyword2.size());
+    }
+    else
+    {
+      keyword2_text = "";
+    }
+    dataspec = data::parse_data_specification(result.second);
+  }
+}
+
+inline
+void separate_action_specification(const std::string& text, const std::string& keyword, lps::specification& spec, std::string& keyword_text)
+{
+  if (!has_keyword(text, keyword))
+  {
+    keyword_text = text;
+    spec = lps::specification();
+  }
+  else
+  {
+    std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(text, keyword, action_specification_keywords());
+    if (!has_keyword(result.second, "init"))
+    {
+      result.second = result.second + "\ninit delta;\n";
+    }
+    keyword_text = result.first.substr(keyword.size());
+    spec = lps::linearise(result.second);
+  }
+}
+
+inline
+void separate_pbes_specification(const std::string& text, const std::string& keyword, pbes_system::pbes<>& pbesspec, std::string& keyword_text)
+{
+  if (!has_keyword(text, keyword))
+  {
+    keyword_text = text;
+    pbesspec = pbes_system::pbes<>();
+  }
+  else
+  {
+    std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(text, keyword, pbes_specification_keywords());
+    keyword_text = boost::algorithm::trim_copy(result.first);
+    pbesspec = pbes_system::parse_pbes(result.second);
+  }
+}
 
 class mcrl2parse_tool : public input_tool
 {
@@ -57,6 +213,7 @@ class mcrl2parse_tool : public input_tool
       dataexpr_e,
       dataspec_e,
       mcrl2spec_e,
+      multact_e,
       pbesexpr_e,
       pbesspec_e,
       procexpr_e,
@@ -68,7 +225,9 @@ class mcrl2parse_tool : public input_tool
     file_type_t file_type;
     bool partial_parses;
     bool print_tree;
-    bool use_new_parser;
+    bool check_parser;
+    bool check_printer;
+    bool aterm_format;
 
     void set_file_type(const std::string& type)
     {
@@ -78,6 +237,7 @@ class mcrl2parse_tool : public input_tool
       else if (type == "dataexpr" )   { file_type = dataexpr_e ; }
       else if (type == "dataspec" )   { file_type = dataspec_e ; }
       else if (type == "mcrl2spec")   { file_type = mcrl2spec_e; }
+      else if (type == "multact"  )   { file_type = multact_e  ; }
       else if (type == "pbesexpr" )   { file_type = pbesexpr_e ; }
       else if (type == "pbesspec" )   { file_type = pbesspec_e ; }
       else if (type == "procexpr" )   { file_type = procexpr_e ; }
@@ -93,8 +253,7 @@ class mcrl2parse_tool : public input_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
-      desc
-        .add_option("filetype",
+      desc.add_option("filetype",
            make_optional_argument("NAME", "mcrl2spec"),
              "input has the file type NAME:\n"
              "  'actfrm'    for an action formula\n"
@@ -103,6 +262,7 @@ class mcrl2parse_tool : public input_tool
              "  'dataexpr'  for a data expression\n"
              "  'dataspec'  for a data specification\n"
              "  'mcrl2spec' for an mCRL2 specification (default)\n"
+             "  'multact'   for a multi action\n"
              "  'pbesexpr'  for a PBES expression\n"
              "  'pbesspec'  for a PBES specification\n"
              "  'procexpr'  for a process expression\n"
@@ -111,23 +271,12 @@ class mcrl2parse_tool : public input_tool
              "  'statefrm'  for a state formula\n"
              ,
              'f'
-           )
-        .add_option("partial-parses",
-           make_optional_argument("NAME", "0"),
-             "allow partial parses (default: false)",
-             'p'
-           )
-        .add_option("print-tree",
-           make_optional_argument("NAME", "0"),
-             "print parse tree (default: false)",
-             't'
-           )
-        .add_option("use-new-parser",
-           make_optional_argument("NAME", "1"),
-             "use new parser (default: true)",
-             'n'
-           )
-        ;
+           );
+      desc.add_option("partial-parses", "allow partial parses");
+      desc.add_option("print-tree", "print parse tree", 't');
+      desc.add_option("check-parser", "compare the results of the old and new parser", 'p');
+      desc.add_option("check-printer", "compare the results of the old and new pretty printer", 'P');
+      desc.add_option("aterm-format", "compare the results in aterm format", 'a');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -141,9 +290,11 @@ class mcrl2parse_tool : public input_tool
       {
         set_file_type("mcrl2");
       }
-      partial_parses = parser.option_argument_as<bool>("partial-parses");
-      print_tree = parser.option_argument_as<bool>("print-tree");
-      use_new_parser = parser.option_argument_as<bool>("use-new-parser");
+      partial_parses = 0 < parser.options.count("partial-parses");
+      print_tree     = 0 < parser.options.count("print-tree");
+      check_parser   = 0 < parser.options.count("check-parser");
+      check_printer  = 0 < parser.options.count("check-printer");
+      aterm_format   = 0 < parser.options.count("aterm-format");
     }
 
     std::string read_text(std::istream& from)
@@ -167,44 +318,19 @@ class mcrl2parse_tool : public input_tool
        )
     { }
 
-    void print1(const atermpp::aterm_appl& x)
-    {
-      if (x)
-      {
-        std::cout << "new: " << x << std::endl;
-      }
-    }
-
-    void print2(const atermpp::aterm_appl& x)
-    {
-      if (x)
-      {
-        std::cout << "old: " << x << std::endl;
-      }
-    }
-
-    void print1(const std::string& x)
-    {
-      std::cout << "new: " << x << std::endl;
-    }
-
-    void print2(const std::string& x)
-    {
-      std::cout << "old: " << x << std::endl;
-    }
-
     template <typename T>
-    void compare(const T& x1, const T& x2)
+    void compare(const std::string& text, const T& x1, const T& x2)
     {
       if (x1 != x2)
       {
-        print1(x1);
-        print2(x2);
+        std::cout << "text: " << text << std::endl;
+        std::cout << "old:  " << x1 << std::endl;
+        std::cout << "new:  " << x2 << std::endl;
         std::cout << "ERROR: NOT EQUAL!";
       }
       else
       {
-        print1(x1);
+        std::cout << "new: " << x2 << std::endl;
       }
     }
 
@@ -221,6 +347,10 @@ class mcrl2parse_tool : public input_tool
         text = read_text(from);
       }
 
+      data::data_specification dataspec;
+      lps::specification lpsspec;
+      pbes_system::pbes<> pbesspec;
+
       core::parser p(parser_tables_mcrl2);
       unsigned int start_symbol_index = 0;
       switch(file_type)
@@ -231,6 +361,7 @@ class mcrl2parse_tool : public input_tool
         case dataexpr_e : { start_symbol_index = p.start_symbol_index("DataExpr"); break; }
         case dataspec_e : { start_symbol_index = p.start_symbol_index("DataSpec"); break; }
         case mcrl2spec_e: { start_symbol_index = p.start_symbol_index("mCRL2Spec"); break; }
+        case multact_e  : { start_symbol_index = p.start_symbol_index("MultAct"); break; }
         case pbesexpr_e : { start_symbol_index = p.start_symbol_index("PbesExpr"); break; }
         case pbesspec_e : { start_symbol_index = p.start_symbol_index("PbesSpec"); break; }
         case procexpr_e : { start_symbol_index = p.start_symbol_index("ProcExpr"); break; }
@@ -249,83 +380,216 @@ class mcrl2parse_tool : public input_tool
           core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
           p.print_tree(node);
         }
-        if (file_type == sortexpr_e)
+
+        if (check_parser)
         {
-          if (use_new_parser) x1 = data::parse_sort_expression_new(text);
-          x2 = data::parse_sort_expression(text);
-          compare (x1, x2);
-        }
-        else if (file_type == dataexpr_e)
-        {
-          if (use_new_parser) x1 = data::parse_data_expression_new(text);
-          x2 = data::parse_data_expression(text);
-          compare (x1, x2);
-        }
-        else if (file_type == dataspec_e)
-        {
-          if (use_new_parser) x1 = data::detail::data_specification_to_aterm_data_spec(data::parse_data_specification_new(text));
-          x2 = data::detail::data_specification_to_aterm_data_spec(data::parse_data_specification(text));
-          compare (x1, x2);
-        }
-        else if (file_type == procexpr_e)
-        {
-          if (use_new_parser) x1 = process::parse_process_expression_new(text);
-          print1(x1);
-          x2 = process::parse_process_expression(text, "", "");
-          compare (x1, x2);
-        }
-        else if (file_type == mcrl2spec_e)
-        {
-          if (use_new_parser) x1 = process::process_specification_to_aterm(process::parse_process_specification_new(text));
-          x2 = process::process_specification_to_aterm(process::parse_process_specification(text));
-          compare (x1, x2);
-          if (use_new_parser)
+          switch(file_type)
           {
-            process::process_specification spec1(x1, false);
-            process::type_check(spec1);
-            process::translate_user_notation(spec1);
-            process::normalize_sorts(spec1, spec1.data());
-            process::process_specification spec2(x2, false);
-            compare(process::pp(spec1), process::pp(spec2));
+            case actfrm_e   :
+            {
+              separate_action_specification(text, "actfrm", lpsspec, text);
+              action_formulas::action_formula x = action_formulas::parse_action_formula_new(text);
+              atermpp::aterm_appl a = x;
+              if (aterm_format)
+              {
+                std::cout << a << std::endl;
+              }
+              else
+              {
+                std::cout << action_formulas::pp(x) << std::endl;
+              }
+              break;
+            }
+            case besexpr_e  :
+            {
+              bes::boolean_expression x = bes::parse_boolean_expression_new(text);
+              atermpp::aterm_appl a = x;
+              if (aterm_format)
+              {
+                std::cout << a << std::endl;
+              }
+              else
+              {
+                std::cout << bes::pp(x) << std::endl;
+              }
+              break;
+            }
+            case besspec_e  :
+            {
+              bes::boolean_equation_system<> x = bes::parse_boolean_equation_system_new(text);
+              atermpp::aterm_appl a = bes::boolean_equation_system_to_aterm(x);
+              if (aterm_format)
+              {
+                std::cout << a << std::endl;
+              }
+              else
+              {
+                std::cout << bes::pp(x) << std::endl;
+              }
+              break;
+            }
+            case dataexpr_e :
+            {
+              std::string variable_text;
+              separate_data_specification(text, "dataexpr", "variables", dataspec, text, variable_text);
+              data::variable_vector v;
+              data::parse_variables(variable_text, std::back_inserter(v), dataspec);
+              data::data_expression x1 = data::parse_data_expression_old(text);
+              data::data_expression x2 = data::parse_data_expression_new(text);
+              if (aterm_format)
+              {
+                compare(text, x1, x2);
+              }
+              else
+              {
+                data::complete_data_expression(x1, v.begin(), v.end(), dataspec);
+                data::complete_data_expression(x2, v.begin(), v.end(), dataspec);
+                compare(text, data::pp(x1), data::pp(x2));
+              }
+              break;
+            }
+            case dataspec_e :
+            {
+              data::data_specification x1 = data::parse_data_specification_old(text);
+              data::data_specification x2 = data::parse_data_specification_new(text);
+              if (aterm_format)
+              {
+                compare(text, data::detail::data_specification_to_aterm_data_spec(x1), data::detail::data_specification_to_aterm_data_spec(x2));
+              }
+              else
+              {
+                data::complete_data_specification(x1);
+                data::complete_data_specification(x2);
+                compare(text, data::pp(x1), data::pp(x2));
+              }
+              break;
+            }
+            case mcrl2spec_e:
+            {
+              process::process_specification x1 = process::parse_process_specification_old(text);
+              process::process_specification x2 = process::parse_process_specification_new(text);
+              if (aterm_format)
+              {
+                compare(text, process::process_specification_to_aterm(x1), process::process_specification_to_aterm(x2));
+              }
+              else
+              {
+                process::complete_process_specification(x1, false);
+                process::complete_process_specification(x2, false);
+                compare(text, process::pp(x1), process::pp(x2));
+              }
+              break;
+            }
+            case multact_e  :
+            {
+              separate_action_specification(text, "multact", lpsspec, text);
+              lps::multi_action x1 = lps::parse_multi_action_old(text);
+              lps::multi_action x2 = lps::parse_multi_action_new(text);
+              if (aterm_format)
+              {
+                compare(text, lps::detail::multi_action_to_aterm(x1), lps::detail::multi_action_to_aterm(x2));
+              }
+              else
+              {
+                lps::complete_multi_action(x1, lpsspec.action_labels(), lpsspec.data());
+                lps::complete_multi_action(x2, lpsspec.action_labels(), lpsspec.data());
+                compare(text, core::pp(lps::detail::multi_action_to_aterm(x1)), core::pp(lps::detail::multi_action_to_aterm(x2)));
+              }
+              break;
+            }
+            case pbesexpr_e :
+            {
+              separate_pbes_specification(text, "pbesexpr", pbesspec, text);
+              pbes_system::pbes_expression x = pbes_system::parse_pbes_expression_new(text);
+              if (aterm_format)
+              {
+                std::cout << x << std::endl;
+              }
+              else
+              {
+                std::cout << core::pp(x) << std::endl;
+              }
+              break;
+            }
+            case pbesspec_e :
+            {
+              pbes_system::pbes<> x1 = pbes_system::parse_pbes_old(text);
+              pbes_system::pbes<> x2 = pbes_system::parse_pbes_new(text);
+              if (aterm_format)
+              {
+                compare(text, pbes_system::pbes_to_aterm(x1), pbes_system::pbes_to_aterm(x2));
+              }
+              else
+              {
+                pbes_system::complete_pbes(x1);
+                pbes_system::complete_pbes(x2);
+                compare(text, pbes_system::pp(x1), pbes_system::pp(x2));
+              }
+              break;
+            }
+            case procexpr_e :
+            {
+              separate_action_specification(text, "procexpr", lpsspec, text);
+              process::process_expression x = process::parse_process_expression_new(text);
+              if (aterm_format)
+              {
+                std::cout << x << std::endl;
+              }
+              else
+              {
+                std::cout << process::pp(x) << std::endl;
+              }
+              break;
+            }
+            case regfrm_e   :
+            {
+              separate_action_specification(text, "regfrm", lpsspec, text);
+              regular_formulas::regular_formula x = regular_formulas::parse_regular_formula_new(text);
+              if (aterm_format)
+              {
+                std::cout << x << std::endl;
+              }
+              else
+              {
+                std::cout << regular_formulas::pp(x) << std::endl;
+              }
+              break;
+            }
+            case sortexpr_e :
+            {
+              separate_data_specification(text, "sortexpr", dataspec, text);
+              data::sort_expression x1 = data::parse_sort_expression_old(text);
+              data::sort_expression x2 = data::parse_sort_expression_new(text);
+              if (aterm_format)
+              {
+                compare(text, x1, x2);
+              }
+              else
+              {
+                data::complete_sort_expression(x1, dataspec);
+                data::complete_sort_expression(x2, dataspec);
+                compare(text, data::pp(x1), data::pp(x2));
+              }
+              break;
+            }
+            case statefrm_e :
+            {
+              separate_action_specification(text, "statefrm", lpsspec, text);
+              state_formulas::state_formula x1 = state_formulas::parse_state_formula_old(text);
+              state_formulas::state_formula x2 = state_formulas::parse_state_formula_new(text);
+              if (aterm_format)
+              {
+                compare(text, x1, x2);
+              }
+              else
+              {
+                state_formulas::complete_state_formula(x1, lpsspec, false);
+                state_formulas::complete_state_formula(x2, lpsspec, false);
+                compare(text, state_formulas::pp(x1), state_formulas::pp(x2));
+              }
+              break;
+            }
           }
-        }
-        else if (file_type == besexpr_e)
-        {
-          bes::boolean_expression x1 = bes::parse_boolean_expression_new(text);
-          std::cout << bes::pp(x1) << std::endl;
-        }
-        else if (file_type == besspec_e)
-        {
-          bes::boolean_equation_system<> x1 = bes::parse_boolean_equation_system_new(text);
-          std::cout << bes::pp(x1) << std::endl;
-        }
-        else if (file_type == pbesexpr_e)
-        {
-          if (use_new_parser) x1 = pbes_system::parse_pbes_expression_new(text);
-          x2 = pbes_system::parse_pbes_expression(text, "", "");
-          compare (x1, x2);
-        }
-        else if (file_type == pbesspec_e)
-        {
-          x1 = pbes_system::pbes_to_aterm(pbes_system::parse_pbes_new(text));
-          x2 = pbes_system::pbes_to_aterm(pbes_system::parse_pbes(text));
-          compare (x1, x2);
-        }
-        else if (file_type == actfrm_e)
-        {
-          action_formulas::action_formula x1 = action_formulas::parse_action_formula_new(text);
-          std::cout << x1 << std::endl;
-        }
-        else if (file_type == regfrm_e)
-        {
-          regular_formulas::regular_formula x1 = regular_formulas::parse_regular_formula_new(text);
-          std::cout << x1 << std::endl;
-        }
-        else if (file_type == statefrm_e)
-        {
-          if (use_new_parser) x1 = state_formulas::parse_state_formula_new(text);
-          x2 = state_formulas::parse_state_formula_old(text);
-          compare (x1, x2);
         }
       }
       catch (std::exception& e)
