@@ -252,9 +252,9 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
         mCRL2log(warning) << e.what() << std::endl;
         continue;
       }
-  
+
       ATermAppl u = (ATermAppl)toRewriteFormat(j->lhs());
-  
+
       atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( (ATermInt) ATgetArgument(u,0));
       if (it == jitty_eqns.end())
       {
@@ -284,7 +284,7 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
      atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
 
     if (ATgetInt(i)>=jitty_strat.size())
-    { 
+    {
       int oldsize=jitty_strat.size();
       jitty_strat.resize(ATgetInt(i)+1);
       for( ; oldsize<jitty_strat.size(); ++oldsize)
@@ -441,7 +441,8 @@ static atermpp::aterm subst_values(ATermAppl* vars, ATerm* vals, size_t len, con
     for(term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
     {   
       const aterm_appl assignment= *it;
-      new_assignments.push_back(core::detail::gsMakeDataVarIdInit(variable(assignment(0)),(aterm_appl)assignment(1)));
+      new_assignments.push_back(core::detail::gsMakeDataVarIdInit(variable(assignment(0)),
+    		(aterm_appl)  subst_values(vars,vals,len,(aterm_appl)assignment(1))));
     } 
     term_list < atermpp::aterm_appl > new_assignment_list;
     for(atermpp::vector < atermpp::aterm_appl >::const_reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
@@ -527,16 +528,12 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
                       const atermpp::aterm_appl term, 
                       mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
-  // ATfprintf(stderr,"REWRITE %t\n",term);
-  // ATfprintf(stderr,"REWRITE EXT %t\n",fromInner(term));
   if (gsIsDataVarId(term))
   {
-// ATfprintf(stderr,"REWRITE END1 %t\n",sigma(term));
     return sigma(term);
   }
   else if (gsIsWhr(term))
   {
-// ATfprintf(stderr,"REWRITE END2\n");
     return rewrite_where(term,sigma); 
   }
   else if (gsIsBinder(term))
@@ -545,23 +542,19 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     if (binder==gsMakeExists())
     {
       atermpp::aterm_appl a= new_internal_existential_quantifier_enumeration(term,sigma); 
-// ATfprintf(stderr,"REWRITE END2a %t\n",a);
       return a;
     }
     if (binder==gsMakeForall())
     {
       atermpp::aterm_appl a=new_internal_universal_quantifier_enumeration(term,sigma); 
-// ATfprintf(stderr,"REWRITE END3 %t\n",a);
       return a;
     }
     if (binder==gsMakeLambda())
     {
       atermpp::aterm_appl a=rewrite_single_lambda(term(1),term(2),sigma);
-// ATfprintf(stderr,"REWRITE END4 %t\n",a);
       return a;
     }
     assert(0);
-// ATfprintf(stderr,"REWRITE END5\n");
     return term;
   }
   else // Term has the shape @REWR@(t1,...,tn);
@@ -573,7 +566,6 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     if (ATisInt(op))
     {
       atermpp::aterm_appl a= rewrite_aux_function_symbol(atermpp::aterm_int(op),term,sigma);
-// ATfprintf(stderr,"REWRITE END6 %t\n", a);
       return a;
     }
     else if (gsIsDataVarId(op))    
@@ -596,27 +588,22 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 
     // Here head has the shape
     // u(u1,...,um), lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u, 
- // ATfprintf(stderr,"HEAD %t\n",head); 
- // ATfprintf(stderr,"HEAD-EXT %t\n",fromInner(head)); 
     if (gsIsBinder(head))
     {
       const atermpp::aterm_appl binder=head(0);
       if (binder==gsMakeLambda())
       {
         atermpp::aterm_appl a= rewrite_lambda_application(head,term,sigma);
-// ATfprintf(stderr,"REWRITE END7 %t\n",a);
         return a;
       }
       if (binder==gsMakeExists())
       {
         atermpp::aterm_appl a=  new_internal_existential_quantifier_enumeration(head,sigma);
-// ATfprintf(stderr,"REWRITE END8 %t\n",a);
         return a;
       }
       if (binder==gsMakeForall())
       {
         atermpp::aterm_appl a= new_internal_universal_quantifier_enumeration(head,sigma);
-// ATfprintf(stderr,"REWRITE END9 %t\n",a);
         return a;
       }
       assert(0); // One cannot end up here.
@@ -634,7 +621,6 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
         args[i]=rewrite_aux(atermpp::aterm_appl(term(i)),sigma);
       }
       atermpp::aterm_appl a=ApplyArray(arity,args);
-  // ATfprintf(stderr,"REWRITE END10 %t\n",a);
       return a;
     }
     else
@@ -652,7 +638,6 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
         args[i+arity_op-1]=term(i);
       }
       atermpp::aterm_appl a=rewrite_aux(ApplyArray(arity+arity_op-1,args),sigma);
-  // ATfprintf(stderr,"REWRITE END10a %t\n",a);
       return a;
     }
   }

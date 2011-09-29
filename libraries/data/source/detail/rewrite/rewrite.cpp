@@ -68,7 +68,6 @@ bool occur_check(const variable v, const atermpp::aterm_appl e)
   find_all_if(e,is_a_variable(),std::inserter(s,s.begin()));
   if (s.count(v)>0)
   {
-    // ATfprintf(stderr,"Occur check %t <-- %t\n",v,fromInner(e));
     return false; // Occur check failed.
   }
   return true;
@@ -152,42 +151,26 @@ atermpp::aterm_appl Rewriter::rewrite_where(
                       mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
   using namespace atermpp;
-  const term_list < atermpp::aterm_appl > assignment_list=term(1);
-  const aterm_appl body=term(0);
-  atermpp::vector < aterm_appl > saved_substitutions(assignment_list.size());
-  size_t count=0;
-  // First rewrite and save substitutions of where clauses. Do not yet put them in 
-  // the substitution, as according to the semantics different where clauses cannot 
-  // be used in each other.
-  for( term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it, ++count)
-  { 
-    assert(count<assignment_list.size());
-    saved_substitutions[count]=rewrite_internal((*it)(1),sigma);
-  }
-  // Now save old values for variables in sigma and carry out the substitutions in sigma.
-  count=0;
-  for( term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it, ++count)
-  { 
-    assert(count<assignment_list.size());
-    const variable v=variable((*it)(0));
-    aterm_appl t=sigma(v); // temporary store used for swapping values.
-    assert(occur_check(v,saved_substitutions[count]));
-    sigma[v]=saved_substitutions[count];
-    saved_substitutions[count]=t;
-  }
-  // Rewrite the body.
-  const aterm_appl result=rewrite_internal(body,sigma);
+  const term_list < atermpp::aterm_appl > assignment_list(term(1));
+  const aterm_appl body(term(0));
 
-  // Restore the old values of sigma.
-  count=0;
-  for( term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it, ++count)
-  { 
-    assert(count<assignment_list.size());
-    const variable v=variable((*it)(0));
-    assert(occur_check(v,saved_substitutions[count]));
-    sigma[v]=saved_substitutions[count];
+  mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> > variable_renaming;
+  for(term_list < atermpp::aterm_appl >::const_iterator i=assignment_list.begin(); i!=assignment_list.end(); ++i)
+  {
+    const variable v=variable((*i)(0));
+    const variable v_fresh(generator(v.sort()));
+    variable_renaming[v]=atermpp::aterm_appl(v_fresh);
+    //std::cout << "  INNER ASS1:"<< core::pp( fromInner( (*i)(1))) << std::endl;
+    sigma[v_fresh]=rewrite_internal((*i)(1),sigma);
   }
+  const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(body,variable_renaming),sigma);
 
+  // Reset variables in sigma
+  for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
+      it!=variable_renaming.end(); ++it)
+  {
+    sigma[it->second]=it->second;
+  }
   return result;
 }
 
@@ -197,7 +180,6 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
                       mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
   assert(vl.size()>0);
-  // ATfprintf(stderr,"REWRITE SINGLE LAMBDA %t\n%t\n%t\n\n",vl,body,fromInner(body));
   // A lambda term without arguments; Take care that the bound variable is made unique with respect to 
   // the variables occurring in sigma. But in case vl is empty, just rewrite...
 
@@ -232,7 +214,6 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 
   if (number_of_renamed_variables==0)
   {
-// ATfprintf(stderr,"RETURN LAMBDA1\n");
     return gsMakeBinder(gsMakeLambda(),vl,rewrite_internal(body,sigma));
   }
   
@@ -274,7 +255,6 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   {
     new_variable_list=push_front(new_variable_list,*it);
   }
-// ATfprintf(stderr,"RETURN LAMBDA2\n");
   return gsMakeBinder(gsMakeLambda(),new_variable_list,result);
 }
 
@@ -290,7 +270,8 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
                       const atermpp::aterm_appl t,
                       mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
 {
-  using namespace atermpp;
+   using namespace atermpp;
+
   assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list vl=lambda_term(1);
   const atermpp::aterm_appl lambda_body=lambda_term(2);
