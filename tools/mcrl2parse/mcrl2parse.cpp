@@ -116,7 +116,7 @@ inline
 bool has_keyword(const std::string& text, const std::string& keyword)
 {
   // inefficient implementation, to avoid the introduction of a regex search function
-  std::vector<std::string> words = utilities::regex_split(text, "\\b" + keyword + "\\b");
+  std::vector<std::string> words = utilities::regex_split("dummy " + text, "\\b" + keyword + "\\b");
   return words.size() > 1;
 }
 
@@ -139,11 +139,11 @@ void separate_data_specification(const std::string& text, const std::string& key
 inline
 void separate_data_specification(const std::string& text, const std::string& keyword1, const std::string& keyword2, data::data_specification& dataspec, std::string& keyword1_text, std::string& keyword2_text)
 {
+  std::string data_spec_text;
   if (!has_keyword(text, keyword1))
   {
     keyword1_text = text;
     keyword2_text = "";
-    dataspec = data::data_specification();
   }
   else
   {
@@ -152,16 +152,17 @@ void separate_data_specification(const std::string& text, const std::string& key
 
     std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(text, keyword1, keywords);
     keyword1_text = result.first.substr(keyword1.size());
-    if (has_keyword(text, keyword2))
+    if (has_keyword(result.second, keyword2))
     {
       result = utilities::detail::separate_keyword_section(result.second, keyword2, data_specification_keywords());
       keyword2_text = result.first.substr(keyword2.size());
+      data_spec_text = result.second;
     }
     else
     {
       keyword2_text = "";
     }
-    dataspec = data::parse_data_specification(result.second);
+    dataspec = data::parse_data_specification(data_spec_text);
   }
 }
 
