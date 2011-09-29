@@ -41,6 +41,7 @@
 #include "mcrl2/utilities/identifier_generator.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2 {
@@ -138,48 +139,6 @@ namespace detail {
     }
   }
 
-  // Separates all sections with a keyword from the other keyword sections
-  // Returns a pair containing consisiting of the keyword section and the other keyword sections
-  inline
-  std::pair<std::string, std::string> separate_keyword_section(const std::string& text, const std::string& keyword, const std::vector<std::string>& all_keywords)
-  {
-    std::ostringstream out1; // will contain the keyword sections
-    std::ostringstream out2; // will contain the other keyword sections
-
-    std::string regex_keyword = "\\b" + keyword + "\\b";
-    // create a regex that looks like this: "(\\beqn\\b)|(\\bcons\\b)|(\\bmap\\b)|(\\bvar\\b)"
-    std::vector<std::string> v = all_keywords;
-    v.erase(std::remove(v.begin(), v.end(), keyword), v.end()); // erase keyword from v
-    for (std::vector<std::string>::iterator i = v.begin(); i != v.end(); ++i)
-    {
-      *i = "(\\b" + *i + "\\b)";
-    }
-    std::string regex_other_keywords = boost::algorithm::join(v, "|");
-
-    std::vector<std::string> specs = utilities::regex_split(text, regex_keyword);
-    if (text.find(keyword) != 0 && !specs.empty())
-    {
-      out2 << specs.front() << std::endl;
-      specs.erase(specs.begin());
-    }
-    for (std::vector<std::string>::iterator i = specs.begin(); i != specs.end(); ++i)
-    {
-      // strip trailing map/cons/var/eqn declarations
-      std::vector<std::string> v = utilities::regex_split(*i, regex_other_keywords);
-      if (!v.empty())
-      {
-        out1 << "  " << v.front();
-        out2 << i->substr(v.front().size());
-      }
-    }
-    std::string s1 = out1.str();
-    if (!s1.empty())
-    {
-      s1 = keyword + "\n" + s1;
-    }
-    return std::make_pair(s1 + "\n", out2.str() + "\n");
-  }
-
   // Separates the sort declarations from the map/cons/var/eqn declarations
   // Returns a pair containing consisiting of the combined sort spec and the combined map/eqn/var/cons declarations
   inline
@@ -192,7 +151,7 @@ namespace detail {
     all_keywords.push_back("eqn");
     all_keywords.push_back("map");
     all_keywords.push_back("cons");
-    return separate_keyword_section(text, keyword, all_keywords);
+    return utilities::detail::separate_keyword_section(text, keyword, all_keywords);
   }
 
 } // namespace detail
@@ -870,15 +829,15 @@ struct absinthe_algorithm
     all_keywords.push_back("abssort");
     std::pair<std::string, std::string> q;
 
-    q = pbes_system::detail::separate_keyword_section(text, "sort", all_keywords);
+    q = utilities::detail::separate_keyword_section(text, "sort", all_keywords);
     user_sorts_text = q.first;
     text = q.second;
 
-    q = pbes_system::detail::separate_keyword_section(text, "abssort", all_keywords);
+    q = utilities::detail::separate_keyword_section(text, "abssort", all_keywords);
     sort_expression_mapping_text = q.first;
     text = q.second;
 
-    q = pbes_system::detail::separate_keyword_section(text, "absfunc", all_keywords);
+    q = utilities::detail::separate_keyword_section(text, "absfunc", all_keywords);
     function_symbol_mapping_text = q.first;
     user_equations_text = q.second;
 
