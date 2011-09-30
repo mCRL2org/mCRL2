@@ -58,6 +58,7 @@ struct printer: public bes::add_traverser_boolean_expressions<core::detail::prin
   void operator()(const bes::boolean_equation_system<Container>& x)
 #endif
   {
+    print_list(x.equations(), "pbes\n    ", ";\n\n", ";\n    ");
     derived().print("init ");
     print_expression(x.initial_state());
     derived().print(";\n");
