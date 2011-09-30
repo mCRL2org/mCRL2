@@ -880,8 +880,8 @@ bool state_formula::has_time() const
 
 } // namespace mcrl2
 
-#ifndef MCRL2_MODAL_FORMULA_PRINT_H
-#include "mcrl2/modal_formula/print.h"
-#endif
+//#ifndef MCRL2_MODAL_FORMULA_PRINT_H
+//#include "mcrl2/modal_formula/print.h"
+//#endif
 
 #endif // MCRL2_MODAL_STATE_FORMULA_H

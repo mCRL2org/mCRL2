@@ -285,8 +285,8 @@ inline int precedence(const trans_or_nil& x) { return precedence(static_cast<con
 
 } // namespace mcrl2
 
-#ifndef MCRL2_MODAL_FORMULA_PRINT_H
-#include "mcrl2/modal_formula/print.h"
-#endif
+//#ifndef MCRL2_MODAL_FORMULA_PRINT_H
+//#include "mcrl2/modal_formula/print.h"
+//#endif
 
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H
