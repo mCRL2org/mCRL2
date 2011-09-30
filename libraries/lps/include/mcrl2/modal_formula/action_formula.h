@@ -19,6 +19,7 @@
 #include "mcrl2/atermpp/aterm_traits.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
+#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/lps/multi_action.h"
 
 namespace mcrl2
@@ -439,6 +440,41 @@ bool is_at(const action_formula& t)
 }
 
 //--- end generated classes ---//
+
+inline
+int precedence(const action_formula& x)
+{
+  if (is_forall(x) || is_exists(x))
+  {
+    return 0;
+  }
+  else if (is_imp(x))
+  {
+    return 2;
+  }
+  else if (is_and(x) || is_or(x))
+  {
+    return 3;
+  }
+  else if (is_at(x))
+  {
+    return 4;
+  }
+  else if (is_not(x))
+  {
+    return 5;
+  }
+  return core::detail::precedences::max_precedence;
+}
+
+// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
+inline int precedence(const forall& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const exists& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const imp& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const and_& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const or_& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const at& x) { return precedence(static_cast<const action_formula&>(x)); }
+inline int precedence(const not_& x) { return precedence(static_cast<const action_formula&>(x)); }
 
 } // namespace action_formulas
 

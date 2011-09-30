@@ -21,6 +21,7 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/constructors.h"
+#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
 
 namespace mcrl2
@@ -255,6 +256,30 @@ bool is_trans_or_nil(const regular_formula& t)
 }
 
 //--- end generated classes ---//
+
+inline
+int precedence(const regular_formula& x)
+{
+  if (is_seq(x))
+  {
+    return 1;
+  }
+  else if (is_alt(x))
+  {
+    return 2;
+  }
+  else if (is_trans(x) || is_trans_or_nil(x))
+  {
+    return 3;
+  }
+  return core::detail::precedences::max_precedence;
+}
+
+// TODO: is there a cleaner way to make the precedence function work for derived classes?
+inline int precedence(const seq& x) { return precedence(static_cast<const regular_formula&>(x)); }
+inline int precedence(const alt& x) { return precedence(static_cast<const regular_formula&>(x)); }
+inline int precedence(const trans& x) { return precedence(static_cast<const regular_formula&>(x)); }
+inline int precedence(const trans_or_nil& x) { return precedence(static_cast<const regular_formula&>(x)); }
 
 } // namespace regular_formulas
 

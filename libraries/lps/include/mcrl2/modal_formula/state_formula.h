@@ -21,6 +21,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
@@ -755,6 +756,48 @@ bool is_mu(const state_formula& t)
 }
 
 //--- end generated classes ---//
+
+inline
+int precedence(const state_formula& x)
+{
+  if (is_mu(x) || is_nu(x))
+  {
+    return 1;
+  }
+  else if (is_forall(x) || is_exists(x))
+  {
+    return 2;
+  }
+  else if (is_imp(x))
+  {
+    return 3;
+  }
+  else if (is_and(x) || is_or(x))
+  {
+    return 4;
+  }
+  else if (is_must(x) || is_may(x))
+  {
+    return 5;
+  }
+  else if (is_not(x))
+  {
+    return 6;
+  }
+  return core::detail::precedences::max_precedence;
+}
+
+// TODO: is there a cleaner way to make the precedence function work for derived classes like and_ ?
+inline int precedence(const mu& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const nu& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const forall& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const exists& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const imp& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const and_& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const or_& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const must& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const may& x) { return precedence(static_cast<const state_formula&>(x)); }
+inline int precedence(const not_& x) { return precedence(static_cast<const state_formula&>(x)); }
 
 /// \brief Returns a pretty print representation of f.
 inline std::string pp(const state_formula& f)
