@@ -1,0 +1,7 @@
+variables
+
+f: Nat -> Nat ;
+
+dataexpr
+
+f[0 -> 1 + 2]

@@ -58,7 +58,7 @@ using namespace mcrl2::utilities::tools;
 // parse_sort_expression         | data_specification                 | sortexpr
 // parse_data_expression         | data_specification variable_vector | dataexpr variables
 // parse_data_specification      |                                    |
-// parse_process_expression      | action_specification               | procexpr
+// parse_process_expression      | process_specification              | procexpr
 // parse_process_specification   |                                    |
 // parse_boolean_expression      |                                    |
 // parse_boolean_equation_system |                                    |
@@ -95,6 +95,12 @@ std::vector<std::string> action_specification_keywords()
   result.push_back("proc");
   result.push_back("init");
   return result;
+}
+
+inline
+std::vector<std::string> process_specification_keywords()
+{
+  return action_specification_keywords();
 }
 
 inline
@@ -187,6 +193,27 @@ void separate_action_specification(const std::string& text, const std::string& k
 }
 
 inline
+void separate_process_specification(const std::string& text, const std::string& keyword, process::process_specification& procspec, std::string& keyword_text)
+{
+  if (!has_keyword(text, keyword))
+  {
+    keyword_text = text;
+    procspec = process::process_specification();
+  }
+  else
+  {
+    std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(text, keyword, process_specification_keywords());
+    keyword_text = result.first.substr(keyword.size());
+    std::string ptext = result.second;
+    if (!has_keyword(ptext, "init"))
+    {
+      ptext = ptext + "\ninit delta;";
+    }
+    procspec = process::parse_process_specification(ptext, false);
+  }
+}
+
+inline
 void separate_pbes_specification(const std::string& text, const std::string& keyword, pbes_system::pbes<>& pbesspec, std::string& keyword_text)
 {
   if (!has_keyword(text, keyword))
@@ -197,7 +224,7 @@ void separate_pbes_specification(const std::string& text, const std::string& key
   else
   {
     std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(text, keyword, pbes_specification_keywords());
-    keyword_text = boost::algorithm::trim_copy(result.first);
+    keyword_text = result.first.substr(keyword.size());
     pbesspec = pbes_system::parse_pbes(result.second);
   }
 }
@@ -362,6 +389,7 @@ class mcrl2parse_tool : public input_tool
 
       data::data_specification dataspec;
       lps::specification lpsspec;
+      process::process_specification procspec;
       pbes_system::pbes<> pbesspec;
 
       core::parser p(parser_tables_mcrl2);
@@ -385,9 +413,6 @@ class mcrl2parse_tool : public input_tool
 
       try
       {
-        atermpp::aterm_appl x1;
-        atermpp::aterm_appl x2;
-
         if (print_tree)
         {
           core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
@@ -541,7 +566,7 @@ class mcrl2parse_tool : public input_tool
             }
             case procexpr_e :
             {
-              separate_action_specification(text, "procexpr", lpsspec, text);
+              separate_process_specification(text, "procexpr", procspec, text);
               process::process_expression x = process::parse_process_expression_new(text);
               if (aterm_format)
               {
@@ -632,7 +657,6 @@ class mcrl2parse_tool : public input_tool
             {
               std::string variable_text;
               separate_data_specification(text, "dataexpr", "variables", dataspec, text, variable_text);
-std::cout << "vtext = " << variable_text << std::endl;
               data::variable_vector v = parse_data_variables(variable_text, dataspec);
               data::data_expression x = data::parse_data_expression(text, v.begin(), v.end(), dataspec);
               compare(text, data::pp(x), data::print(x));
@@ -674,8 +698,8 @@ std::cout << "vtext = " << variable_text << std::endl;
             case procexpr_e :
             {
               std::cout << "Warning: this test may fail due to the absence of a type checker" << std::endl;
-              separate_action_specification(text, "procexpr", lpsspec, text);
-              process::process_expression x = process::parse_process_expression_new(text);
+              separate_process_specification(text, "procexpr", procspec, text);
+              process::process_expression x = process::parse_process_expression(text, process::pp(procspec));
               compare(text, process::pp(x), process::print(x));
               break;
             }

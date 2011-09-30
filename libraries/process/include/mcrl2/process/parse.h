@@ -17,6 +17,7 @@
 #include <sstream>
 #include "mcrl2/lps/action_parse.h"
 #include "mcrl2/utilities/text_utility.h"
+#include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/alphabet_reduction.h"
@@ -327,18 +328,30 @@ process_expression parse_process_expression(const std::string& text,
   return spec.init();
 }
 
-} // namespace process
+/// \brief Parses and type checks a process expression.
+/// \param[in] text The input text containing a process expression.
+/// \param[in] procspec A process specification used as context
+inline
+process_expression parse_process_expression(const std::string& text, const std::string& procspec_text)
+{
+  std::vector<std::string> keywords;
+  keywords.push_back("sort");
+  keywords.push_back("var");
+  keywords.push_back("eqn");
+  keywords.push_back("map");
+  keywords.push_back("cons");
+  keywords.push_back("act");
+  keywords.push_back("glob");
+  keywords.push_back("proc");
+  keywords.push_back("init");
+  std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(procspec_text, "init", keywords);
+  std::string init_text = "init\n     " + text + ";\n";
+  std::string ptext = result.second + init_text;
+  process_specification spec = parse_process_specification(ptext);
+  return spec.init();
+}
 
-//namespace core {
-//
-//template<>
-//inline
-//void print_aterm(const process::process_specification& x)
-//{
-//  std::clog << "aterm: " << atermpp::aterm_appl(process_specification_to_aterm(x)) << std::endl;
-//}
-//
-//} // namespace core
+} // namespace process
 
 } // namespace mcrl2
 
