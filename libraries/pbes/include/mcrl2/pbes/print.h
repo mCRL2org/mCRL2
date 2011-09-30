@@ -95,7 +95,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived().print(op + " ");
     print_variables(x.variables(), true, true, false, "", "", ", ");
     derived().print(". ");
-    print_pbes_expression(x.body());
+    print_pbes_expression(x.body(), precedence(x));
     derived().leave(x);
   }
 
