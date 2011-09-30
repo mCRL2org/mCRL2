@@ -133,6 +133,10 @@ std::string print(const T& t)
 template <typename T>
 std::string pp(const T& t)
 {
+  MCRL2_CHECK_PP(core::pp(t),
+                 action_formulas::print(t),
+                 t.to_string()
+                );
   return core::pp(t);
 }
 
@@ -223,6 +227,10 @@ std::string print(const T& t)
 template <typename T>
 std::string pp(const T& t)
 {
+  MCRL2_CHECK_PP(core::pp(t),
+                 regular_formulas::print(t),
+                 t.to_string()
+                );
   return core::pp(t);
 }
 
@@ -314,9 +322,9 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   void operator()(const state_formulas::must& x)
   {
     derived().enter(x);
-    derived.print("[");
+    derived().print("[");
     derived()(x.formula());
-    derived.print("]");
+    derived().print("]");
     derived()(x.operand());
     derived().leave(x);
   }
@@ -324,9 +332,9 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   void operator()(const state_formulas::may& x)
   {
     derived().enter(x);
-    derived.print("<");
+    derived().print("<");
     derived()(x.formula());
-    derived.print(">");
+    derived().print(">");
     derived()(x.operand());
     derived().leave(x);
   }
@@ -334,15 +342,15 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   void operator()(const state_formulas::yaled& x)
   {
     derived().enter(x);
-    derived.print("yaled");
+    derived().print("yaled");
     derived().leave(x);
   }
 
   void operator()(const state_formulas::yaled_timed& x)
   {
     derived().enter(x);
-    derived.print("yaled");
-    derived.print(" @ ");
+    derived().print("yaled");
+    derived().print(" @ ");
     derived()(x.time_stamp());
     derived().leave(x);
   }
@@ -350,15 +358,15 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
   void operator()(const state_formulas::delay& x)
   {
     derived().enter(x);
-    derived.print("delay");
+    derived().print("delay");
     derived().leave(x);
   }
 
   void operator()(const state_formulas::delay_timed& x)
   {
     derived().enter(x);
-    derived.print("delay");
-    derived.print(" @ ");
+    derived().print("delay");
+    derived().print(" @ ");
     derived()(x.time_stamp());
     derived().leave(x);
   }
@@ -418,6 +426,10 @@ std::string print(const T& t)
 template <typename T>
 std::string pp(const T& t)
 {
+  MCRL2_CHECK_PP(core::pp(t),
+                 state_formulas::print(t),
+                 t.to_string()
+                );
   return core::pp(t);
 }
 
