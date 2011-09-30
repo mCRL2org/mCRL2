@@ -202,6 +202,18 @@ void separate_pbes_specification(const std::string& text, const std::string& key
   }
 }
 
+inline
+data::variable_vector parse_data_variables(const std::string& text, const data::data_specification& dataspec)
+{
+  data::variable_vector result;
+  if (boost::algorithm::trim_copy(text).empty())
+  {
+    return result;
+  }
+  data::parse_variables(text, std::back_inserter(result), dataspec);
+  return result;
+}
+
 class mcrl2parse_tool : public input_tool
 {
   typedef input_tool super;
@@ -433,8 +445,7 @@ class mcrl2parse_tool : public input_tool
             {
               std::string variable_text;
               separate_data_specification(text, "dataexpr", "variables", dataspec, text, variable_text);
-              data::variable_vector v;
-              data::parse_variables(variable_text, std::back_inserter(v), dataspec);
+              data::variable_vector v = parse_data_variables(variable_text, dataspec);
               data::data_expression x1 = data::parse_data_expression_old(text);
               data::data_expression x2 = data::parse_data_expression_new(text);
               if (aterm_format)
@@ -621,8 +632,8 @@ class mcrl2parse_tool : public input_tool
             {
               std::string variable_text;
               separate_data_specification(text, "dataexpr", "variables", dataspec, text, variable_text);
-              data::variable_vector v;
-              data::parse_variables(variable_text, std::back_inserter(v), dataspec);
+std::cout << "vtext = " << variable_text << std::endl;
+              data::variable_vector v = parse_data_variables(variable_text, dataspec);
               data::data_expression x = data::parse_data_expression(text, v.begin(), v.end(), dataspec);
               compare(text, data::pp(x), data::print(x));
               break;
