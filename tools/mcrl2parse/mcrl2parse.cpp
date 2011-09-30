@@ -158,6 +158,7 @@ void separate_data_specification(const std::string& text, const std::string& key
 
     std::pair<std::string, std::string> result = utilities::detail::separate_keyword_section(text, keyword1, keywords);
     keyword1_text = result.first.substr(keyword1.size());
+    data_spec_text = result.second;
     if (has_keyword(result.second, keyword2))
     {
       result = utilities::detail::separate_keyword_section(result.second, keyword2, data_specification_keywords());

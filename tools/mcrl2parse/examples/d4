@@ -1,0 +1,4 @@
+map j: Pos -> Pos # Pos -> Bool;
+
+dataexpr j(3)(2,1)
+
