@@ -423,14 +423,7 @@ class ConfigPanel: public wxNotebookPage
 
           wxString arg = (*i)->GetPath();
 
-#ifdef __linux__
-          arg.Replace(wxT(" "),wxT("\\ "));
-#endif
-
-#ifdef _WIN32
-          arg.Prepend(wxT("\""));
-          arg.Append(wxT("\""));
-#endif
+          arg = StringSpaceEscape(arg);
 
           run = run + wxT(" --") + (*i)->GetLabel() + wxT("=") + arg ;
         }
@@ -522,14 +515,11 @@ class ConfigPanel: public wxNotebookPage
 
     wxString StringSpaceEscape( wxString s )
     {
-#ifdef __linux__
-      s.Replace(wxT(" "),wxT("\\ "));
-#endif
-
 #ifdef _WIN32
       s.Prepend(wxT("\""));
       s.Append(wxT("\""));
-
+#else
+      s.Replace(wxT(" "),wxT("\\ "));
 #endif
       return s;
     }
