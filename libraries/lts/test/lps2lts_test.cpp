@@ -348,7 +348,7 @@ BOOST_AUTO_TEST_CASE(test_function_updates)
     "act  set,s: Pos;\n"
     "map  f:Pos->Bool;\n"
     "var  n:Pos;\n"
-    "eqn  f(n)=false\n"
+    "eqn  f(n)=false;\n"
     "\n"
     "proc P(b_Sensor: Pos -> Bool) =\n"
     "       sum n_Sensor: Pos.\n"
