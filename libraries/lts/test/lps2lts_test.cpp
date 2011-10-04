@@ -346,6 +346,9 @@ BOOST_AUTO_TEST_CASE(test_function_updates)
 {
   std::string spec(
     "act  set,s: Pos;\n"
+    "map  f:Pos->Bool;\n"
+    "var  n:Pos;\n"
+    "eqn  f(n)=false\n"
     "\n"
     "proc P(b_Sensor: Pos -> Bool) =\n"
     "       sum n_Sensor: Pos.\n"
@@ -358,7 +361,7 @@ BOOST_AUTO_TEST_CASE(test_function_updates)
     "         P(b_Sensor = b_Sensor[n_Sensor0 -> false])\n"
     "     + delta;\n"
     "\n"
-    "init P(lambda n: Pos. false);\n"
+    "init P(f);\n"
   );
   check_lps2lts_specification(spec, 4, 12, 4);
 }
