@@ -29,13 +29,10 @@ file(GLOB TERM_OBJS "*.cpp")
 
 foreach( OBJ ${TERM_OBJS} )
   get_filename_component(result "${OBJ}" NAME_WE)
-  project( "${PREFIX}_${result}" )
 
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}"  )
   target_link_libraries("${PREFIX}_${result}"
-   mcrl2_lps
-  )
-  target_link_libraries(${PROJECT_NAME}
+    mcrl2_lps
     ${Boost_LIBRARIES}     
   ) 
   
