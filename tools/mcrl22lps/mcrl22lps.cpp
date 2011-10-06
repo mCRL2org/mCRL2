@@ -100,7 +100,12 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
                       "add a true->delta summands to each state in each process; "
                       "these delta's subsume all other conditional timed delta's, "
                       "effectively reducing the number of delta summands drastically "
-                      "in the resulting linear process; speeds up linearisation ", 'D');
+                      "in the resulting linear process; speeds up linearisation. This is the default, "
+                      "but it does not deal correctly with time.", 'D');
+      desc.add_option("timed",
+                      "Translate the process to linear form preserving all timed information. In parallel processes the number "
+                      "of possible time constraints can be large, slowing down linearisation. Confer the --delta option "
+                      "which yiels a much faster translation that does not preserve timing correctly", 'T');
       desc.add_option("no-constelm",
                       "do not try to apply constant elimination when generating a linear "
                       "process.");
@@ -123,7 +128,7 @@ class mcrl22lps_tool : public rewriter_tool< input_output_tool >
       m_linearisation_options.noglobalvars            = 0 < parser.options.count("no-globvars");
       m_linearisation_options.nosumelm                = 0 < parser.options.count("no-sumelm");
       m_linearisation_options.nodeltaelimination      = 0 < parser.options.count("no-deltaelm");
-      m_linearisation_options.add_delta               = 0 < parser.options.count("delta");
+      m_linearisation_options.add_delta               = !(0 < parser.options.count("timed"));
       m_linearisation_options.do_not_apply_constelm   = 0 < parser.options.count("no-constelm") ||
                                                         0 < parser.options.count("no-rewrite");
       m_linearisation_options.lin_method = lmRegular;

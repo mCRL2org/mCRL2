@@ -516,6 +516,7 @@ bool EnumeratorSolutionsStandard::next(
             {
               if (solution_possible)
               {
+                mCRL2log(log::warning) << "Terminated enumeration of variables because more than " << m_max_internal_variables << " are used\n";
                 solution_possible=false;
                 return false;
               }
