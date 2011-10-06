@@ -39,6 +39,7 @@ configure_file( "${CMAKE_CURRENT_SOURCE_DIR}/CTestCustom.cmake.in" "${CMAKE_CURR
      --build-generator "${CMAKE_GENERATOR}"
      --build-target "${TARGET}"
      --build-makeprogram "${CMAKE_MAKE_PROGRAM}"
+     --build-project "${PROJECT_NAME}"
      --test-command "${CMAKE_CURRENT_BINARY_DIR}/${TARGET}"
     )
     set_tests_properties("${TARGET}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
