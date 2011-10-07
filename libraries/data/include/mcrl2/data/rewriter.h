@@ -209,12 +209,12 @@ class rewriter: public basic_rewriter<data_expression>
     {
       mutable_map_substitution<> sigma;
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      std::cerr << "REWRITE: " << d;
+      mCRL2log(debug) << "REWRITE: " << d;
 #endif 
       data_expression result(m_rewriter->rewrite(d,sigma));
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      std::cerr << " ------------> " << result << std::endl;
+      mCRL2log(debug) << " ------------> " << result << std::endl;
 #endif 
       return result;
     }
@@ -228,7 +228,7 @@ class rewriter: public basic_rewriter<data_expression>
     data_expression operator()(const data_expression& d, const SubstitutionFunction& sigma) const
     {
 # ifdef MCRL2_PRINT_REWRITE_STEPS
-      std::cerr << "REWRITE " << d << "\n";
+      mCRL2log(debug) << "REWRITE " << d << "\n";
 #endif
       // Old code by Wieger, which is very inefficient, as sigma is first substituted and rewritten, where we know
       // it is already mapping terms to normal form, and we should not rewrite these again.
@@ -244,7 +244,7 @@ class rewriter: public basic_rewriter<data_expression>
       data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));
       
 # ifdef MCRL2_PRINT_REWRITE_STEPS
-      std::cerr << " ------------> " << result << std::endl;
+      mCRL2log(debug) << " ------------> " << result << std::endl;
 #endif
       return result;
     }
@@ -293,7 +293,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
       data_expression t = m_rewriter->rewrite(d,sigma);
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;
+      mCRL2log(debug) << "REWRITE " << d << " ------------> " << result << std::endl;
 #endif
       return result;
     }
@@ -319,7 +319,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
       data_expression t(m_rewriter->rewrite(static_cast< const data_expression& >(d),sigma_with_iterator));
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
-      std::cerr << "REWRITE " << d << " ------------> " << result << std::endl;
+      mCRL2log(debug) << "REWRITE " << d << " ------------> " << result << std::endl;
 #endif
       return result;
     }

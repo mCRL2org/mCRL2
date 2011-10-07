@@ -101,12 +101,12 @@ class queue
       if (queue_put.size() > queue_size_max)
       {
         queue_put.resize(queue_size_max);
-        std::cerr << "Warning: resizing put queue loses elements" << std::endl;
+        mCRL2log(log::warning) << "resizing put queue loses elements" << std::endl;
       }
       if (queue_get.size() > queue_size_max)
       {
         queue_get.resize(queue_size_max);
-        std::cerr << "Warning: resizing get queue loses elements" << std::endl;
+        mCRL2log(log::warning) << "resizing get queue loses elements" << std::endl;
       }
     }
 

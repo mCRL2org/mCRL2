@@ -87,10 +87,10 @@ ATermAppl gsDataSpecEltsToSpec(ATermList SpecElts)
              gsMakeDataEqnSpec(DataEqnDecls)
            );
   //Uncomment the lines below to check if the parser stack size isn't too big
-  //std::cerr << "SIZE_MAX:              " << SIZE_MAX << std::endl;
-  //std::cerr << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
-  //std::cerr << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
-  //std::cerr << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
+  //mCRL2log(debug) << "SIZE_MAX:              " << SIZE_MAX << std::endl;
+  //mCRL2log(debug) << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
+  //mCRL2log(debug) << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
+  //mCRL2log(debug) << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
   return Result;
 }
 
@@ -175,10 +175,10 @@ ATermAppl gsProcSpecEltsToSpec(ATermList SpecElts)
              ProcInit
            );
   //Uncomment the lines below to check if the parser stack size isn't too big
-  //std::cerr << "SIZE_MAX:              " << SIZE_MAX << std::endl;
-  //std::cerr << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
-  //std::cerr << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
-  //std::cerr << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
+  //mCRL2log(debug) << "SIZE_MAX:              " << SIZE_MAX << std::endl;
+  //mCRL2log(debug) << "YYMAXDEPTH:            " << YYMAXDEPTH << std::endl;
+  //mCRL2log(debug) << "sizeof (yyGLRStackItem): " << sizeof (yyGLRStackItem) << std::endl;
+  //mCRL2log(debug) << "SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem): " << (SIZE_MAX < YYMAXDEPTH * sizeof (yyGLRStackItem)) << std::endl;
   return Result;
 }
 

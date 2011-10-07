@@ -1271,19 +1271,19 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_abstraction(t))
       {
-        fprintf(stderr,"Warning: filtering of variables expression with binders\n");
+        mCRL2log(log::warning) << "filtering of variables expression with binders" << std::endl;
         return;
       }
 
       if (is_where_clause(t))
       {
-        fprintf(stderr,"Warning: filtering of variables expression with where clause\n");
+        mCRL2log(log::warning) << "filtering of variables expression with where clause" << std::endl;
         return;
       }
 
       if (!is_application(t))
       {
-        std::cerr << "Error: term of unexpected type " << t << "\n";
+        mCRL2log(log::error) << "term of unexpected type " << t << std::endl;
       }
 
       assert(is_application(t));

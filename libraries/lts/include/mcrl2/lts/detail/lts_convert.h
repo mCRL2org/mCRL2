@@ -20,6 +20,7 @@
 #define MCRL2_LTS_DETAIL_LTS_CONVERT_H
 
 #include <sstream>
+#include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/lps/specification.h"
@@ -110,7 +111,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .lts to .lts, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .lts, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -191,7 +192,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .lts to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -230,7 +231,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .lts to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -269,7 +270,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .lts to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -318,7 +319,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .lts to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -359,7 +360,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .lts to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .lts to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -461,7 +462,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .aut to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .aut to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -485,7 +486,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .svc to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .svc to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -525,7 +526,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .aut to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .aut to .svc, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -564,7 +565,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .svc to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .svc to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -608,7 +609,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .aut to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .aut to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -654,7 +655,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .bcg to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .bcg to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -701,7 +702,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .aut to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .aut to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -837,7 +838,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .fsm to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .fsm to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -862,7 +863,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .fsm to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .fsm to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -902,7 +903,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .fsm to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .fsm to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -964,7 +965,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .fsm to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .fsm to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -1082,7 +1083,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .bcg to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .bcg to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -1128,7 +1129,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .bcg to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .bcg to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -1155,7 +1156,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .bcg to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .bcg to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -1198,7 +1199,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .aut to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .aut to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -1270,7 +1271,7 @@ inline void lts_convert(
     lts_convert(lts_in,lts_out);
   }
 
-  std::cerr << "State labels are lost in the translation from .dot to .lts format\n";
+  mCRL2log(log::warning) << "State labels are lost in the translation from .dot to .lts format\n";
   lts_out=lts_lts_t();
   lts_out.set_data(data);
   lts_out.set_action_labels(action_labels);
@@ -1315,7 +1316,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .dot to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .dot to .aut, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -1400,7 +1401,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .dot to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .dot to .fsm, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -1440,7 +1441,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .dot to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .dot to .bcg, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }
@@ -1467,7 +1468,7 @@ inline void lts_convert(
 {
   if (extra_data_is_defined)
   {
-    std::cerr << "While translating .dot to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
+    mCRL2log(log::warning) << "While translating .dot to .dot, additional information (data specification, action declarations and process parameters) are ignored.\n";
   }
   lts_convert(lts_in,lts_out);
 }

@@ -188,7 +188,7 @@ class lps2lts_algorithm
       if (!must_abort)
       {
         must_abort = true;
-        std::cerr << "Warning: state space generation was aborted prematurely" << std::endl;
+        mCRL2log(log::warning) << "state space generation was aborted prematurely" << std::endl;
       }
     }
 

@@ -17,7 +17,6 @@
 //fix for the broken cygwin versions of flex
 #ifdef __CYGWIN__
 #include <iostream>
-using std::cerr;
 using std::cin;
 using std::cout;
 #endif

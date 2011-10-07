@@ -603,7 +603,6 @@ static yyconst flex_int16_t yy_chk[362] =
 //fix for the broken cygwin versions of flex
 #ifdef __CYGWIN__
 #include <iostream>
-using std::cerr;
 using std::cin;
 using std::cout;
 #endif
@@ -2161,7 +2160,7 @@ void yyFlexLexer::yyensure_buffer_stack(void)
 
 void yyFlexLexer::LexerError( yyconst char msg[] )
 {
-    	std::cerr << msg << std::endl;
+    	mCRL2log(error) << msg << std::endl;
 	exit( YY_EXIT_FAILURE );
 }
 

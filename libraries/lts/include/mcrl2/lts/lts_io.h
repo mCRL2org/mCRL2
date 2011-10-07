@@ -150,7 +150,7 @@ inline void load_lts_as_fsm_file(const std::string& path, lts_fsm_t& l)
       return;
     }
     case lts_none:
-      std::cerr << "Cannot determine type of input. Assuming .aut.\n";
+      mCRL2log(log::warning) << "Cannot determine type of input. Assuming .aut.\n";
     case lts_aut:
     {
       lts_aut_t l1;

@@ -75,7 +75,7 @@ class action_label_svc:public atermpp::aterm
     bool hide_actions(const std::vector<std::string> &)
     {
       using namespace std;
-      std::cerr << "Hiding actions in a .svc file is not possible, because the labels do not necessarily have an action structure \n";
+      mCRL2log(log::error) << "Hiding actions in a .svc file is not possible, because the labels do not necessarily have an action structure \n";
       return false;
     }
 };

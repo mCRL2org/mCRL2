@@ -170,7 +170,7 @@ def generate_soundness_check_functions(rules, filename, ignored_phases = []):
                 elif arg.repetitions == '+':
                     body = body + '  if (!check_list_argument(a(%d), %s<atermpp::aterm>, 1))\n' % (i, arg.check_name())
                 body = body + '  {\n'
-                body = body + '    std::cerr << "%s" << std::endl;\n'                % (arg.check_name())
+                body = body + '    mCRL2log(log::debug, "soundness_checks") << "%s" << std::endl;\n'                % (arg.check_name())
                 body = body + '    return false;\n'
                 body = body + '  }\n'
             body = body + '#endif // LPS_NO_RECURSIVE_SOUNDNESS_CHECKS\n'

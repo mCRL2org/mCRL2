@@ -459,7 +459,7 @@ bool destructive_compare(LTS_TYPE& l1,
     {
       if (generate_counter_examples)
       {
-        std::cerr << "Warning: cannot generate counter example traces for simulation equivalence\n";
+        mCRL2log(log::warning) << "cannot generate counter example traces for simulation equivalence\n";
       }
       // Run the partitioning algorithm on this merged LTS
       size_t init_l2 = l2.initial_state() + l1.num_states();
@@ -864,7 +864,7 @@ bool destructive_compare(LTS_TYPE& l1, LTS_TYPE& l2, const lts_preorder pre)
       return destructive_compare(l1,l2,lts_pre_trace);
     }
     default:
-      std::cerr << "Comparison for this preorder is not available\n";
+      mCRL2log(log::error) << "Comparison for this preorder is not available\n";
       return false;
   }
 }

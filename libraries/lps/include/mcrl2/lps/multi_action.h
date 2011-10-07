@@ -330,7 +330,7 @@ struct equal_data_parameters_builder
     }
     data::data_expression expr = d::lazy::join_and(v.begin(), v.end());
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-    std::cerr << "  <and-term> " << data::pp(expr) << std::endl;
+    mCRL2log(debug) << "  <and-term> " << data::pp(expr) << std::endl;
 #endif
     result.insert(expr);
   }
@@ -392,9 +392,9 @@ std::string pp1(const multi_action& m)
 inline data::data_expression equal_multi_actions(const multi_action& a, const multi_action& b)
 {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-  std::cerr << "\n<equal multi actions>" << std::endl;
-  std::cerr << "a = " << lps::pp(a.actions()) << std::endl;
-  std::cerr << "b = " << lps::pp(b.actions()) << std::endl;
+  mCRL2log(debug) << "\n<equal multi actions>" << std::endl;
+  mCRL2log(debug) << "a = " << lps::pp(a.actions()) << std::endl;
+  mCRL2log(debug) << "b = " << lps::pp(b.actions()) << std::endl;
 #endif
   using namespace data::lazy;
 
@@ -407,9 +407,9 @@ inline data::data_expression equal_multi_actions(const multi_action& a, const mu
   if (!detail::equal_action_signatures(va, vb))
   {
 #ifdef MCRL2_EQUAL_MULTI_ACTIONS_DEBUG
-    std::cerr << "different action signatures detected!" << std::endl;
-    std::cerr << "a = " << action_list(va.begin(), va.end()) << std::endl;
-    std::cerr << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
+    mCRL2log(debug) << "different action signatures detected!" << std::endl;
+    mCRL2log(debug) << "a = " << action_list(va.begin(), va.end()) << std::endl;
+    mCRL2log(debug) << "b = " << action_list(vb.begin(), vb.end()) << std::endl;
 #endif
     return data::sort_bool::false_();
   }

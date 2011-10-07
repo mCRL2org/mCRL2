@@ -41,7 +41,7 @@ static std::string print_state(atermpp::aterm_appl s, ns_info const& info)
 {
   if (info.stateformat==GS_STATE_TREE)
   { 
-    std::cerr << "GS_STATE_TREE... " << s << "\n";
+    mCRL2log(debug) << "GS_STATE_TREE... " << s << "\n";
     return "";
   }
 
@@ -994,7 +994,7 @@ void NextStateGenerator::set_substitutions()
           // info.m_rewriter.set_internally_associated_value(variable(ATgetFirst(l)), a);
           current_substitution[variable(ATgetFirst(l))]=a;
 #ifdef MCRL2_NEXTSTATE_DEBUG
-          std::cerr << "Set substitution " << core::pp(info.m_rewriter.convert_from(ATgetFirst(l))) << ":=" <<
+          mCRL2log(debug) << "Set substitution " << core::pp(info.m_rewriter.convert_from(ATgetFirst(l))) << ":=" <<
                     core::pp(info.m_rewriter.convert_from(a)) << "\n";
 #endif
         }

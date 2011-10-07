@@ -182,10 +182,7 @@ class sumelm_algorithm: public lps::detail::lps_algorithm
         (*this)(*i);
       }
 
-      if (verbose())
-      {
-        std::cerr << "Removed " << m_removed << " summation variables" << std::endl;
-      }
+      mCRL2log(log::verbose) << "Removed " << m_removed << " summation variables" << std::endl;
     }
 
     /// \brief Apply the sum elimination lemma to summand s.
