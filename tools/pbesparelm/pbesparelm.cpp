@@ -16,6 +16,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/parelm.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -48,7 +49,7 @@ class pbes_parelm_tool: public input_output_tool
 
       // load the pbes
       pbes_system::pbes<> p;
-      p.load(input_filename()); /*< The functions `input_filename()` and `output_filename()`
+      load_pbes(p, input_filename()); /*< The functions `input_filename()` and `output_filename()`
                                     return the corresponding values that the user has entered
                                     on the command line. >*/
 

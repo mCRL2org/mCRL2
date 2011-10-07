@@ -22,6 +22,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -75,7 +76,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
 
       // load the pbes
       pbes<> p;
-      p.load(m_input_filename);
+      load_pbes(p,m_input_filename);
 
       // data rewriter
       data::rewriter datar = create_rewriter(p.data());

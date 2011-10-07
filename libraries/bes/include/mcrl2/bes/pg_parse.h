@@ -47,6 +47,7 @@ struct node_t
 // Build a formula from the strings in v. if p = 0, than a disjunction is built,
 // otherwise the result is a conjunction.
 // Prefix is added to each of the identifiers in v.
+inline
 boolean_expression formula(std::set<identifier_t> const& v, const owner_t owner, std::string prefix = "X")
 {
   atermpp::set<boolean_expression> v_prefixed;
@@ -185,16 +186,25 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, b
   b.initial_state() = boolean_variable("X" + init_id.str());
 }
 
+/// \brief Parse parity game in PGSolver format from filename, and store the
+///        resulting BES in b.
 template <typename Container>
 inline void parse_pgsolver(const std::string& filename, boolean_equation_system<Container>& b, bool maxpg = true)
 {
-  std::ifstream f;
-  f.open(filename.c_str());
-  if(!f)
+  if(filename == "-" || filename.empty())
   {
-    throw mcrl2::runtime_error("cannot open file " + filename + " for reading");
+    parse_pgsolver(std::cin, b, maxpg);
   }
-  parse_pgsolver(f, b, maxpg);
+  else
+  {
+    std::ifstream f;
+    f.open(filename.c_str());
+    if(!f)
+    {
+      throw mcrl2::runtime_error("cannot open file " + filename + " for reading");
+    }
+    parse_pgsolver(f, b, maxpg);
+  }
 }
 
 } // namespace bes

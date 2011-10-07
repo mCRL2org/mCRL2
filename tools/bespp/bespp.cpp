@@ -21,6 +21,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/print.h"
 
@@ -81,7 +82,7 @@ class bespp_tool: public input_output_tool
     void print_specification()
     {
       bes::boolean_equation_system<> bes;
-      bes.load(input_filename());
+      load_bes(bes,input_filename());
 
       mCRL2log(verbose) << "printing BES from " << (input_filename().empty()?"standard input":input_filename())
                         << " to " << (output_filename().empty()?"standard output":output_filename())

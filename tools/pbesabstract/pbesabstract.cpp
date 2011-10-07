@@ -16,6 +16,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -93,7 +94,7 @@ class pbes_abstract_tool: public input_output_tool
 
       // load the pbes
       pbes<> p;
-      p.load(m_input_filename);
+      load_pbes(p, m_input_filename);
 
       // run the algorithm
       pbes_abstract_algorithm algorithm;

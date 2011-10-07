@@ -18,6 +18,7 @@
 //MCRL2-specific
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/bes_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
@@ -77,7 +78,7 @@ class besinfo_tool: public input_tool
     bool run()
     {
       boolean_equation_system<> b;
-      b.load(input_filename());
+      load_bes(b,input_filename());
 
       bes::detail::bes_property_map info(b);
 

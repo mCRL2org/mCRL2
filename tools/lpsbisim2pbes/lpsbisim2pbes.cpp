@@ -16,7 +16,9 @@
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/bisimulation.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/tool.h"
+#include "mcrl2/utilities/input_input_output_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/exception.h"
 
@@ -27,82 +29,8 @@ using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_mandatory_argument;
 using utilities::tools::tool;
+using utilities::tools::input_input_output_tool;
 using namespace mcrl2::log;
-
-/// \brief Base class for tools that take a file as input.
-class input_input_tool: public tool
-{
-  protected:
-    /// The first input file name
-    std::string m_input_filename1;
-
-    /// The second input file name
-    std::string m_input_filename2;
-
-    /// \brief Checks if the number of positional options is OK.
-    /// \param parser A command line parser
-    void check_positional_options(const command_line_parser& parser)
-    {
-      if (parser.options.find("help") != parser.options.end())
-      {
-        return;
-      }
-      if (parser.arguments.size() < 2)
-      {
-        parser.error("wrong number of file arguments");
-      }
-    }
-
-    /// \brief Returns the synopsis of the tool
-    /// \return The string "[OPTION]... INFILE1 INFILE2\n"
-    std::string synopsis() const
-    {
-      return "[OPTION]... INFILE1 INFILE2\n";
-    }
-
-    /// \brief Parse non-standard options
-    /// \param parser A command line parser
-    void parse_options(const command_line_parser& parser)
-    {
-      m_input_filename1 = parser.arguments[0];
-      m_input_filename2 = parser.arguments[1];
-    }
-
-  public:
-    /// \brief Constructor.
-    input_input_tool(const std::string& name,
-                     const std::string& author,
-                     const std::string& what_is,
-                     const std::string& tool_description
-                    )
-      : tool(name, author, what_is, tool_description)
-    {
-    }
-
-    /// \brief Returns a const reference to the first input filename.
-    const std::string& input_filename1() const
-    {
-      return m_input_filename1;
-    }
-
-    /// \brief Returns a reference to the first input filename.
-    std::string& input_filename1()
-    {
-      return m_input_filename1;
-    }
-
-    /// \brief Returns a const reference to the second input filename.
-    const std::string& input_filename2() const
-    {
-      return m_input_filename2;
-    }
-
-    /// \brief Returns a reference to the second input filename.
-    std::string& input_filename2()
-    {
-      return m_input_filename2;
-    }
-};
 
 enum bisimulation_type
 {
@@ -140,30 +68,21 @@ std::string print_bisimulation_type(int type)
   return "unknown type";
 }
 
-class lpsbisim2pbes_tool: public input_input_tool
+typedef input_input_output_tool super;
+class lpsbisim2pbes_tool: public super
 {
   protected:
-    /// \brief The output file name
-    std::string m_output_filename;
-
     /// \brief The type of bisimulation
     bisimulation_type m_bisimulation_type;
 
     /// \brief If true the result is normalized
     bool normalize;
 
-    /// \brief Returns the synopsis of the tool.
-    /// \return The string "[OPTION]... INFILE1 INFILE2 [OUTFILE]\n"
-    std::string synopsis() const
-    {
-      return "[OPTION]... INFILE1 INFILE2 [OUTFILE]\n";
-    }
-
     /// \brief Parse non-standard options
     /// \param parser A command line parser
     void parse_options(const command_line_parser& parser)
     {
-      input_input_tool::parse_options(parser);
+      super::parse_options(parser);
       if (2 < parser.arguments.size())
       {
         m_output_filename = parser.arguments[2];
@@ -176,6 +95,7 @@ class lpsbisim2pbes_tool: public input_input_tool
     void add_options(interface_description& desc) /*< One can add command line
                      options by overriding the virtual function `add_options`. >*/
     {
+      super::add_options(desc);
       desc.add_option("normalize", "normalize the result", 'n');
       desc.add_option("bisimulation", make_mandatory_argument("NAME"),
                       "generate a PBES for the bisimulation type NAME:\n"
@@ -189,7 +109,7 @@ class lpsbisim2pbes_tool: public input_input_tool
 
   public:
     lpsbisim2pbes_tool()
-      : input_input_tool(
+      : super(
         "lpsbisim2pbes",
         "Wieger Wesselink; Tim Willemse and Bas Ploeger",
         "computes a bisimulation relation between two LPSs",
@@ -198,18 +118,6 @@ class lpsbisim2pbes_tool: public input_input_tool
         "output is used.\n"
       )
     {}
-
-    /// \brief Returns a const reference to the output filename.
-    const std::string& output_filename() const
-    {
-      return m_output_filename;
-    }
-
-    /// \brief Returns a reference to the output filename.
-    std::string& output_filename()
-    {
-      return m_output_filename;
-    }
 
     bool run()
     {

@@ -30,6 +30,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
@@ -87,7 +88,7 @@ class pbesinfo_tool: public input_tool
     bool run()
     {
       pbes<> p;
-      p.load(input_filename());
+      load_pbes(p,input_filename());
 
       pbes_system::detail::pbes_property_map info(p);
 

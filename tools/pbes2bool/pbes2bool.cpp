@@ -47,6 +47,7 @@
 //Boolean equation systems
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/utility.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
@@ -227,23 +228,8 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
-      try
-      {
-        p.load(m_input_filename);
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        try
-        {
-          mcrl2::bes::boolean_equation_system<> b;
-          b.load(m_input_filename);
-          p = mcrl2::bes::bes2pbes(b);
-        }
-        catch (mcrl2::runtime_error&) // Throw original exception after trying both pbes and bes fails
-        {
-          throw(e);
-        }
-      }
+      load_pbes(p, m_input_filename);
+      
       pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter

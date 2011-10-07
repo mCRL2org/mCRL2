@@ -32,6 +32,7 @@
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -42,13 +43,14 @@ using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_optional_argument;
 using utilities::tools::input_output_tool;
+using utilities::tools::pbes_output_tool;
 using utilities::tools::rewriter_tool;
 
 /// The pbesinst tool.
-class pbesinst_tool: public rewriter_tool<input_output_tool>
+class pbesinst_tool: public rewriter_tool<pbes_output_tool<input_output_tool> >
 {
   protected:
-    typedef rewriter_tool<input_output_tool> super;
+    typedef rewriter_tool<pbes_output_tool<input_output_tool> > super;
 
     /// The transformation strategies of the tool.
     enum transformation_strategy
@@ -58,7 +60,7 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
     };
 
     transformation_strategy m_strategy;
-    pbes_output_format m_output_format;
+    pbes_file_format m_output_format;
     std::string m_finite_parameter_selection;
     bool m_aterm_ascii;
 
@@ -80,59 +82,10 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
       }
     }
 
-    /// Sets the output format.
-    /// \param format An output format.
-    void set_output_format(const std::string& format)
-    {
-      if (format == "pbes")
-      {
-        m_output_format = pbes_output_pbes;
-      }
-      else if (format == "bes")
-      {
-        m_output_format = pbes_output_bes;
-      }
-      else if (format == "cwi")
-      {
-        m_output_format = pbes_output_cwi;
-      }
-      else
-      {
-        throw std::runtime_error("unknown output format specified (got `" + format + "')");
-      }
-    }
-
     /// Parse the non-default options.
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      try
-      {
-        if (parser.options.count("output") == 0)
-        {
-          // Use the filename extension to determine the output format
-          if (boost::ends_with(m_output_filename, std::string(".bes")))
-          {
-            set_output_format("bes");
-          }
-          else if (boost::ends_with(m_output_filename, std::string(".cwi")))
-          {
-            set_output_format("cwi");
-          }
-          else
-          {
-            set_output_format("pbes");
-          }
-        }
-        else
-        {
-          set_output_format(parser.option_argument("output"));
-        }
-      }
-      catch (std::logic_error)
-      {
-        set_output_format("pbes");
-      }
 
       try
       {
@@ -167,13 +120,6 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
                  "  'lazy' for computing only boolean equations which can be reached from the initial state (default), or\n"
                  "  'finite' for computing all possible boolean equations.",
                  's').
-      add_option("output",
-                 make_optional_argument("NAME", "pbes"),
-                 "store the BES in output format NAME:\n"
-                 "  'pbes' for the mCRL2 PBES format (default),\n"
-                 "  'bes'  for the mCRL2 BES format\n"
-                 "  'cwi'  for the CWI BES format",
-                 'o').
       add_option("select",
                  make_optional_argument("NAME", ""),
                  "select finite parameters that need to be expanded\n"
@@ -201,24 +147,6 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
       return "unknown";
     }
 
-    /// \return A string representation of the output format.
-    std::string output_format_string() const
-    {
-      if (m_output_format == pbes_output_pbes)
-      {
-        return "pbes";
-      }
-      else if (m_output_format == pbes_output_bes)
-      {
-        return "bes";
-      }
-      else if (m_output_format == pbes_output_cwi)
-      {
-        return "cwi";
-      }
-      return "unknown";
-    }
-
   public:
     /// Constructor.
     pbesinst_tool()
@@ -236,7 +164,6 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
         "  'cwi'  for the CWI BES format\n"
       ),
       m_strategy(ts_lazy),
-      m_output_format(pbes_output_pbes),
       m_aterm_ascii(false)
     {}
 
@@ -249,11 +176,11 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  strategy:           " << strategy_string() << std::endl;
-      mCRL2log(verbose) << "  output format:      " << output_format_string() << std::endl;
+      mCRL2log(verbose) << "  output format:      " << pbes_system::file_format_to_string(pbes_output_format()) << std::endl;
 
       // load the pbes
       pbes<> p;
-      p.load(m_input_filename);
+      load_pbes(p, m_input_filename);
 
       if (!p.is_closed())
       {
@@ -287,7 +214,7 @@ class pbesinst_tool: public rewriter_tool<input_output_tool>
       }
 
       // save the result
-      save_pbes(p, m_output_filename, m_output_format, m_aterm_ascii);
+      save_pbes(p, output_filename(), pbes_output_format(), m_aterm_ascii);
 
       return true;
     }

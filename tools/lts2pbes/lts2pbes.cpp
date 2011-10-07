@@ -25,6 +25,7 @@
 #include "mcrl2/lts/detail/lts_convert.h"
 #include "mcrl2/lts/lts_io.h"
 #include "mcrl2/pbes/lts2pbes.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/process/parse.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"

@@ -13,6 +13,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/transform.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
@@ -59,7 +60,7 @@ class pbes_transform_tool: public input_output_tool
     bool run()
     {
       pbes_system::pbes<> p;
-      p.load(input_filename());
+      load_pbes(p, input_filename());
       pbes_system::pbes_transform(p, m_iterations, m_mu_value, m_nu_value);
       p.save(output_filename());
       return true;

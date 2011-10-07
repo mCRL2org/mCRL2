@@ -30,6 +30,7 @@
 //#include "mcrl2/utilities/pbes_rewriter_tool.h"
 
 #include "mcrl2/pbes/pbespgsolve.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
 #include "mcrl2/bes/pg_parse.h"
@@ -136,32 +137,7 @@ class pg_solver_tool : public rewriter_tool<input_tool>
       mCRL2log(verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
 
       pbes<> p;
-      try
-      {
-        p.load(input_filename());
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        try
-        {
-          mcrl2::bes::boolean_equation_system<> b;
-          b.load(input_filename());
-          p = mcrl2::bes::bes2pbes(b);
-        }
-        catch (mcrl2::runtime_error&)
-        {
-          try
-          {
-            mcrl2::bes::boolean_equation_system<> b;
-            mcrl2::bes::parse_pgsolver(input_filename(), b);
-            p = mcrl2::bes::bes2pbes(b);
-          }
-          catch (mcrl2::runtime_error&)
-          {
-            throw(e);
-          }
-        }
-      }
+      load_pbes(p, input_filename());
 
       bool value = pbespgsolve(p, timer(), m_options);
       std::string result = (value ? "true" : "false");

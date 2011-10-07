@@ -22,6 +22,7 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/bes/io.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/gauss_elimination.h"
 #include "mcrl2/bes/small_progress_measures.h"
@@ -70,7 +71,7 @@ class bessolve_tool: public input_output_tool
     bool run()
     {
       bes::boolean_equation_system<> bes;
-      bes.load(input_filename());
+      load_bes(bes,input_filename());
 
       mCRL2log(verbose) << "solving BES in " <<
                    (input_filename().empty()?"standard input":input_filename()) << " using " <<

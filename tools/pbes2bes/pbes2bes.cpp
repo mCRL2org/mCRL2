@@ -35,6 +35,7 @@
 
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -51,6 +52,8 @@
 #include "mcrl2/bes/bes_deprecated.h"
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/bes2pbes.h"
+#include "mcrl2/bes/io.h"
+#include "mcrl2/pbes/io.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/detail/instantiate_global_variables.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -69,22 +72,22 @@ using namespace ::bes;
 
 using namespace mcrl2;
 using utilities::tools::input_output_tool;
+using utilities::tools::bes_output_tool;
 using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> >
+class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<bes_output_tool<input_output_tool> > >
 {
   protected:
     // Tool options.
     /// The output file name
-    std::string opt_outputformat;              // The output format
     ::bes::transformation_strategy opt_strategy; // The strategy
     bool opt_use_hashtables;                   // The hashtable option
     bool opt_store_as_tree;                    // The tree storage option
     bool opt_data_elm;                         // The data elimination option
 
-    typedef pbes_rewriter_tool<rewriter_tool<input_output_tool> > super;
+    typedef pbes_rewriter_tool<rewriter_tool<bes_output_tool<input_output_tool> > > super;
 
     std::string default_rewriter() const
     {
@@ -99,7 +102,6 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
         "Generate a BES from a PBES. ",
         "Reads the PBES from INFILE and writes an equivalent BES to OUTFILE. "
         "If INFILE is not present, stdin is used. If OUTFILE is not present, stdout is used."),
-      opt_outputformat("bes"),
       opt_strategy(::bes::lazy),
       opt_use_hashtables(false),
       opt_store_as_tree(false),
@@ -117,20 +119,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       opt_use_hashtables            = 0 < parser.options.count("hashtables");
       opt_store_as_tree             = 0 < parser.options.count("tree");
       opt_data_elm                  = parser.options.count("unused-data") == 0;
-      opt_outputformat              = "bes";
       opt_strategy                  = lazy;
-
-      if (parser.options.count("output")) // Output format
-      {
-        std::string format = parser.option_argument("output");
-
-        if (!((format == "cwi") || (format == "pbes") || (format == "bes") || (format == "pgsolver")))
-        {
-          parser.error("unknown output format specified (got `" + format + "')");
-        }
-
-        opt_outputformat = format;
-      }
 
       if (parser.options.count("strategy")) // Bes solving strategy (currently only one available)
       {
@@ -193,14 +182,6 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
                  "diagrams (discouraged, due to performance)",
                  'H').
 
-      add_option("output",
-                 make_mandatory_argument("FORMAT"),
-                 "use output format FORMAT:\n"
-                 " 'pbes' (save as a PBES in internal format),\n"
-                 " 'cwi',\n"
-                 " 'bes' (default, save as a BES in internal format),\n"
-                 " 'pgsolver'",
-                 'o').
       add_option("tree",
                  "store state in a tree (for memory efficiency)",
                  't').
@@ -223,23 +204,8 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
 
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
-      try
-      {
-        p.load(m_input_filename);
-      }
-      catch (mcrl2::runtime_error& e)
-      {
-        try
-        {
-          mcrl2::bes::boolean_equation_system<> b;
-          b.load(m_input_filename);
-          p = mcrl2::bes::bes2pbes(b);
-        }
-        catch (mcrl2::runtime_error&) // Throw original exception after trying both pbes and bes fails
-        {
-          throw(e);
-        }
-      }
+      load_pbes(p, m_input_filename);
+
       pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
       // data rewriter
@@ -335,7 +301,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<input_output_tool> 
       } */
 
       mcrl2::bes::boolean_equation_system<> b(convert_to_bes(bes_equations));
-      mcrl2::bes::save_bes(b, m_output_filename, mcrl2::bes::output_format_from_string(opt_outputformat));
+      mcrl2::bes::save_bes(b, output_filename(), pbes_output_format());
 
       return true;
     }
