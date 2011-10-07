@@ -1318,7 +1318,7 @@ macro( add_lpsbisim2pbes_release_test ARGS )
 	ENDFOREACH( )
 	set( POST_FIX_TEST "${BASENAME_TEST}-ARGS${TRIMMED_ARGS}" )
 
-  ADD_TEST("lpsbisim2pbes_${POST_FIX_TEST}" ${lpsbisim2pbes_BINARY_DIR}/lpsbisim2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}.lps )
+  ADD_TEST("lpsbisim2pbes_${POST_FIX_TEST}" ${lpsbisim2pbes_BINARY_DIR}/lpsbisim2pbes ${ARGS} ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}.lps ${testdir}/${BASENAME_TEST}.pbes )
 	set_tests_properties("lpsbisim2pbes_${POST_FIX_TEST}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}")
   set_tests_properties("lpsbisim2pbes_${POST_FIX_TEST}" PROPERTIES DEPENDS "mcrl22lps_${BASENAME_TEST}-ARGS-D" )
 
