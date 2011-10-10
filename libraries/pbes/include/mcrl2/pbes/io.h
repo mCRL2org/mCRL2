@@ -64,6 +64,7 @@ void save_pbes(const pbes<>& pbes_spec,
       }
       bes::boolean_equation_system<> bes_spec = pbesinstconversion(pbes_spec);
       bes::save_bes(bes_spec, outfilename, output_format);
+      break;
     }
     default:
     {
