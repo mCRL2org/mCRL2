@@ -26,6 +26,11 @@ include_directories(
 add_library(mcrl2_syntax
   source/mcrl2_syntax.c
 )
+
+target_link_libraries(mcrl2_syntax
+  dparser
+)
+
 endif (MCRL2_ENABLE_DPARSER)
 
 # ######### Set policies ############
@@ -74,6 +79,7 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_aterm
   mcrl2_utilities
 )
+
 
 # add install target:
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
