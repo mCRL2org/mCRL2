@@ -25,7 +25,7 @@ using namespace mcrl2::pbes_system;
 // Example usage of the parity_game_generator class.
 void run1(pbes<>& p, bool min_parity_game)
 {
-  parity_game_generator pgg(p, min_parity_game);
+  parity_game_generator pgg(p, true, min_parity_game);
   std::set<size_t> todo = pgg.get_initial_values();
   std::set<size_t> done;
   while (!todo.empty())
@@ -110,7 +110,7 @@ class paritygame_tool: public mcrl2::utilities::tools::input_output_tool
       {
         run1(p, true);
       }
-      run2(p, m_max_pg, m_output_filename);
+      run2(p, !m_max_pg, m_output_filename);
 
       return true;
     }
