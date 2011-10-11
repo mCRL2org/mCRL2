@@ -181,15 +181,13 @@ int LZreadString(BitStream* bs, LZbuffer* buffer, char** string_)
   return 1;
 }
 
-int LZreadInt(BitStream* bs, LZbuffer* b, long* n)
+int LZreadInt(BitStream* bs, LZbuffer*, long* n)
 {
-  b = b; /* Prevent unused parameter warning */
   return BSreadInt(bs,n);
 }
 
-int LZwriteInt(BitStream* bs, LZbuffer* b, long n)
+int LZwriteInt(BitStream* bs, LZbuffer*, long n)
 {
-  b = b; /* Prevent unused parameter warning */
   BSwriteInt(bs,n);
   return 1;
 }
