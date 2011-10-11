@@ -526,7 +526,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   info.nil = gsMakeNil();
 
   // Declare all constructors to the rewriter to prevent unnecessary compilation.
-  // This can be removed if the jittyc or innerc compilers are not in use anymore.
+  // This can be removed if the jittyc compiler is not in use anymore.
   // In certain cases it could be useful to add the mappings also, but this appears to
   // give a substantial performance penalty, due to the addition of symbols to the
   // rewriter that are not used.

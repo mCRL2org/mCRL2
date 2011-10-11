@@ -2081,7 +2081,7 @@ class boolean_equation_system
       // Verbose msg: doing naive algorithm
 
       // Declare all constructors and mappings to the rewriter to prevent unnecessary compilation.
-      // This can be removed if the jittyc or innerc compilers are not in use anymore.
+      // This can be removed if the jittyc compiler is not in use anymore.
       std::set < mcrl2::data::variable > vset=mcrl2::pbes_system::find_variables(pbes_spec);
       std::set < mcrl2::data::variable > vfset=mcrl2::pbes_system::find_free_variables(pbes_spec);
       std::set < mcrl2::data::variable > diff_set;

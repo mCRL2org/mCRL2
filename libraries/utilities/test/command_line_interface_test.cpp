@@ -156,11 +156,6 @@ BOOST_AUTO_TEST_CASE(rewriting_options)
 #if defined(MCRL2_JITTYC_AVAILABLE)
   string_to_strategy_test< true >("jittyc");
 #endif
-  string_to_strategy_test< false >("inner");
-  string_to_strategy_test< false >("innerp");
-  string_to_strategy_test< false >("innerc");
-  string_to_strategy_test< false >("innera");
-  string_to_strategy_test< false >("ainner");
 
   // Test rewriting options (-r and --rewrite with a mandatory argument)
   tool().add_options(test_interface);

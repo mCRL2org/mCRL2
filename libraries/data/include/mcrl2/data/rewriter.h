@@ -55,8 +55,6 @@ class basic_rewriter
     /// \brief The strategy of the rewriter.
     enum strategy
     {
-// Disable inner and innerp rewriters due to different internal format. As they are hardly used,
-// this saves on maintenance.
       jitty                      = detail::GS_REWR_JITTY   ,  /** \brief JITty */
 #ifdef MCRL2_JITTYC_AVAILABLE
       jitty_compiling            = detail::GS_REWR_JITTYC  ,  /** \brief Compiling JITty */
