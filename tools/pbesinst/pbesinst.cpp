@@ -32,7 +32,7 @@
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/utilities/pbes_input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -43,14 +43,14 @@ using utilities::command_line_parser;
 using utilities::interface_description;
 using utilities::make_optional_argument;
 using utilities::tools::input_output_tool;
-using utilities::tools::pbes_output_tool;
+using utilities::tools::pbes_input_output_tool;
 using utilities::tools::rewriter_tool;
 
 /// The pbesinst tool.
-class pbesinst_tool: public rewriter_tool<pbes_output_tool<input_output_tool> >
+class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_tool> >
 {
   protected:
-    typedef rewriter_tool<pbes_output_tool<input_output_tool> > super;
+    typedef rewriter_tool<pbes_input_output_tool<input_output_tool> > super;
 
     /// The transformation strategies of the tool.
     enum transformation_strategy
@@ -180,7 +180,7 @@ class pbesinst_tool: public rewriter_tool<pbes_output_tool<input_output_tool> >
 
       // load the pbes
       pbes<> p;
-      load_pbes(p, m_input_filename);
+      load_pbes(p, input_filename(), pbes_input_format());
 
       if (!p.is_closed())
       {

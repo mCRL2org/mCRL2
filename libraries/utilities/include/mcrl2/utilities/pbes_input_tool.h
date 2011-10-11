@@ -6,11 +6,11 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/utilities/pbes_output_tool.h
+/// \file mcrl2/utilities/pbes_input_tool.h
 /// \brief Base class for tools that produce a (P)BES as output.
 
-#ifndef MCRL2_UTILITIES_PBES_OUTPUT_TOOL_H
-#define MCRL2_UTILITIES_PBES_OUTPUT_TOOL_H
+#ifndef MCRL2_UTILITIES_PBES_INPUT_TOOL_H
+#define MCRL2_UTILITIES_PBES_INPUT_TOOL_H
 
 #include <set>
 #include <string>
@@ -27,10 +27,10 @@ namespace utilities
 namespace tools
 {
 
-/// \brief Base class for filter tools that produce a pbes as output.
-/// \pre Tool provides output_filename()
+/// \brief Base class for filter tools that take a pbes as input.
+/// \pre Tool provides input_filename()
 template <typename Tool>
-class pbes_output_tool: public Tool
+class pbes_input_tool: public Tool
 {
   public:
 
@@ -43,11 +43,11 @@ class pbes_output_tool: public Tool
       switch (f)
       {
         case pbes_system::pbes_file_pbes     :
-          return "  'pbes'     PBES in internal format";
+          return "  'pbes' PBES in internal format";
         case pbes_system::pbes_file_bes      :
-          return "  'bes'      BES in internal format";
+          return "  'bes' BES in internal format";
         case pbes_system::pbes_file_cwi      :
-          return "  'cwi'      BES in CWI format";
+          return "  'cwi' BES in CWI format";
         case pbes_system::pbes_file_pgsolver :
           return "  'pgsolver' max-parity game in PGSolver format";
         default:
@@ -57,13 +57,13 @@ class pbes_output_tool: public Tool
 
   protected:
 
-    /// \brief The type of the pbes output format
-    pbes_system::pbes_file_format m_pbes_output_format;
+    /// \brief The type of the pbes input format
+    pbes_system::pbes_file_format m_pbes_input_format;
 
     /// \brief Returns the file formats that are available for this tool.
     /// Override this method to change the standard behavior.
     /// \return The set { pbes, bes, cwi, pgsolver }
-    virtual std::set<pbes_system::pbes_file_format> available_output_formats() const
+    virtual std::set<pbes_system::pbes_file_format> available_input_formats() const
     {
       std::set<pbes_system::pbes_file_format> result;
       result.insert(pbes_system::pbes_file_pbes);
@@ -76,32 +76,28 @@ class pbes_output_tool: public Tool
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual std::string default_output_format() const
+    virtual std::string default_input_format() const
     {
       return "pbes";
     }
 
     /// \brief Add options to an interface description. Also includes
-    /// output format options.
+    /// input format options.
     /// \param desc An interface description
     void add_options(interface_description& desc)
     {
       Tool::add_options(desc);
-      std::string text = "use output format FORMAT:\n";
-      std::set<pbes_system::pbes_file_format> types = available_output_formats();
+      std::string text = "use input format FORMAT:\n";
+      std::set<pbes_system::pbes_file_format> types = available_input_formats();
       for (typename std::set<pbes_system::pbes_file_format>::iterator i = types.begin(); i != types.end(); ++i)
       {
         text = text + (i == types.begin() ? "" : "\n") + output_description(*i);
-        if(pbes_system::file_format_to_string(*i) == default_output_format())
-        {
-          text = text + " (default)";
-        }
       }
       desc.add_option(
-        "out",
+        "in",
         make_mandatory_argument("FORMAT"),
         text,
-        'o'
+        'i'
       );
     }
 
@@ -110,19 +106,19 @@ class pbes_output_tool: public Tool
     void parse_options(const command_line_parser& parser)
     {
       Tool::parse_options(parser);
-      if(parser.options.count("out"))
+      if(parser.options.count("in"))
       {
-        m_pbes_output_format = pbes_system::file_format_from_string(parser.option_argument("out"));
+        m_pbes_input_format = pbes_system::file_format_from_string(parser.option_argument("in"));
       }
       else
       {
         try
         {
-          m_pbes_output_format = pbes_system::guess_format(Tool::output_filename());
+          m_pbes_input_format = pbes_system::guess_format(Tool::input_filename());
         }
         catch(mcrl2::runtime_error&)
         {
-          m_pbes_output_format = pbes_system::file_format_from_string(default_output_format());
+          m_pbes_input_format = pbes_system::file_format_from_string(default_input_format());
         }
       }
     }
@@ -134,7 +130,7 @@ class pbes_output_tool: public Tool
     /// \param author The author(s) of the tool
     /// \param what_is One-line "what is" description of the tool
     /// \param tool_description The description of the tool
-    pbes_output_tool(const std::string& name,
+    pbes_input_tool(const std::string& name,
                        const std::string& author,
                        const std::string& what_is,
                        const std::string& tool_description,
@@ -143,18 +139,18 @@ class pbes_output_tool: public Tool
       : Tool(name, author, what_is, tool_description, known_issues)
     {}
 
-    /// \brief Returns the output format
-    /// \return The output format
-    pbes_system::pbes_file_format pbes_output_format() const
+    /// \brief Returns the input file format
+    /// \return The input format
+    pbes_system::pbes_file_format pbes_input_format() const
     {
-      return m_pbes_output_format;
+      return m_pbes_input_format;
     }
 };
 
-/// \brief Base class for filter tools that produce a bes as output
-/// \pre Tool provides output_filename()
+/// \brief Base class for filter tools that take a bes as input
+/// \pre Tool provides input_filename()
 template <typename Tool>
-class bes_output_tool: public pbes_output_tool<Tool>
+class bes_input_tool: public pbes_input_tool<Tool>
 {
   public:
     /// \brief Constructor.
@@ -162,30 +158,30 @@ class bes_output_tool: public pbes_output_tool<Tool>
     /// \param author The author(s) of the tool
     /// \param what_is One-line "what is" description of the tool
     /// \param tool_description The description of the tool
-    bes_output_tool(const std::string& name,
+    bes_input_tool(const std::string& name,
                        const std::string& author,
                        const std::string& what_is,
                        const std::string& tool_description,
                        std::string known_issues = ""
                       )
-      : pbes_output_tool<Tool>(name, author, what_is, tool_description, known_issues)
+      : pbes_input_tool<Tool>(name, author, what_is, tool_description, known_issues)
     {}
 
   protected:
     /// \brief Returns the default file format.
     /// Override this method to change the standard behavior.
     /// \return The string "pbes"
-    virtual std::string default_output_format() const
+    virtual std::string default_input_format() const
     {
       return "bes";
     }
 
   public:
-    /// \brief Returns the output format
-    /// \return The output file format
-    pbes_system::pbes_file_format bes_output_format() const
+    /// \brief Returns the input format
+    /// \return The input format
+    pbes_system::pbes_file_format bes_input_format() const
     {
-      return pbes_output_tool<Tool>::pbes_output_format();
+      return pbes_input_tool<Tool>::pbes_input_format();
     }
 };
 
@@ -195,4 +191,4 @@ class bes_output_tool: public pbes_output_tool<Tool>
 
 } // namespace mcrl2
 
-#endif // MCRL2_UTILITIES_PBES_OUTPUT_TOOL_H
+#endif // MCRL2_UTILITIES_PBES_INPUT_TOOL_H

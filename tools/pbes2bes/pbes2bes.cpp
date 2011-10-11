@@ -36,6 +36,7 @@
 //Tool framework
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -77,7 +78,7 @@ using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<bes_output_tool<input_output_tool> > >
+class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > >
 {
   protected:
     // Tool options.
@@ -87,7 +88,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<bes_output_tool<inp
     bool opt_store_as_tree;                    // The tree storage option
     bool opt_data_elm;                         // The data elimination option
 
-    typedef pbes_rewriter_tool<rewriter_tool<bes_output_tool<input_output_tool> > > super;
+    typedef pbes_rewriter_tool<rewriter_tool<pbes_input_tool<bes_output_tool<input_output_tool> > > > super;
 
     std::string default_rewriter() const
     {
@@ -204,7 +205,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<bes_output_tool<inp
 
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
-      load_pbes(p, m_input_filename);
+      load_pbes(p, input_filename(), pbes_input_format());
 
       pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);
@@ -301,7 +302,7 @@ class pbes2bes_tool: public pbes_rewriter_tool<rewriter_tool<bes_output_tool<inp
       } */
 
       mcrl2::bes::boolean_equation_system<> b(convert_to_bes(bes_equations));
-      mcrl2::bes::save_bes(b, output_filename(), pbes_output_format());
+      mcrl2::bes::save_bes(b, output_filename(), bes_output_format());
 
       return true;
     }

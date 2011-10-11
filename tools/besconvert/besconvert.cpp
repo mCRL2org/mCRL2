@@ -14,7 +14,7 @@
 #include <boost/bind.hpp>
 
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/utilities/pbes_output_tool.h"
+#include "mcrl2/utilities/pbes_input_output_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 
 #include "mcrl2/atermpp/map.h"
@@ -558,7 +558,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 
 /// \brief Simple input/output tool to perform strong as well as oblivious bisimulation
 ///        reduction on a boolean equation system.
-typedef bes_output_tool<input_output_tool> super;
+typedef bes_input_output_tool<input_output_tool> super;
 class bes_bisimulation_tool: public super
 {
   protected:
@@ -661,7 +661,7 @@ class bes_bisimulation_tool: public super
       boolean_equation_system<> b;
 
       mCRL2log(verbose) << "Loading BES from input file...";
-      load_bes(b, m_input_filename);
+      load_bes(b, input_filename(), bes_input_format());
 
       bool reach = detail::bes_algorithm<>(b).remove_unreachable_equations();
       if(!reach)
@@ -671,7 +671,7 @@ class bes_bisimulation_tool: public super
 
       mCRL2log(verbose) << "done" << std::endl;
       bes_reduction_algorithm<atermpp::vector<boolean_equation> >(b, equivalence, m_translation, m_lts_filename, m_no_reduction).run(timer());
-      save_bes(b, m_output_filename, bes_output_format());
+      save_bes(b, output_filename(), bes_output_format());
 
       return true;
     }

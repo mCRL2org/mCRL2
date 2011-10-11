@@ -23,6 +23,7 @@
 #include <cstdio>
 
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/execution_timer.h"
 #include "mcrl2/atermpp/aterm_init.h"
@@ -41,9 +42,9 @@ using namespace mcrl2::pbes_system;
 using namespace mcrl2::core;
 using namespace mcrl2::utilities;
 using utilities::tools::input_tool;
+using utilities::tools::pbes_input_tool;
 using utilities::tools::rewriter_tool;
 using namespace mcrl2::log;
-//using utilities::tools::pbes_rewriter_tool;
 
 // class pg_solver_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 // TODO: extend the tool with rewriter options
@@ -51,10 +52,10 @@ using namespace mcrl2::log;
 // scc decomposition can be compiled in using directive
 // PBESPGSOLVE_ENABLE_SCC_DECOMPOSITION
 
-class pg_solver_tool : public rewriter_tool<input_tool>
+class pg_solver_tool : public rewriter_tool<pbes_input_tool<input_tool> >
 {
   protected:
-    typedef rewriter_tool<input_tool> super;
+    typedef rewriter_tool<pbes_input_tool<input_tool> > super;
 
     pbespgsolve_options m_options;
 
@@ -137,7 +138,7 @@ class pg_solver_tool : public rewriter_tool<input_tool>
       mCRL2log(verbose) << "  verify solution:   " << std::boolalpha << m_options.verify_solution << std::endl;
 
       pbes<> p;
-      load_pbes(p, input_filename());
+      load_pbes(p, input_filename(), pbes_input_format());
 
       bool value = pbespgsolve(p, timer(), m_options);
       std::string result = (value ? "true" : "false");

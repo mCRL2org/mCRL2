@@ -67,6 +67,27 @@ pbes_file_format file_format_from_string(const std::string& s)
   }
 }
 
+/// \brief Stream operator for file format
+/// \param is An input stream
+/// \param t A file format
+/// \return The input stream
+template <typename Tool>
+inline
+std::istream& operator>>(std::istream& is, pbes_system::pbes_file_format& t)
+{
+  std::string s;
+  is >> s;
+  try
+  {
+    t = file_format_from_string(s);
+  }
+  catch (std::runtime_error)
+  {
+    is.setstate(std::ios_base::failbit);
+  }
+  return is;
+}
+
 /// \brief Guess the file format of the file in filename.
 /// \param filename The file of which to guess the format.
 inline

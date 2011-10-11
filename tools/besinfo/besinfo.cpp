@@ -22,6 +22,7 @@
 #include "mcrl2/bes/boolean_equation_system.h"
 #include "mcrl2/bes/detail/bes_property_map.h"
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace std;
@@ -32,10 +33,10 @@ using namespace mcrl2::data;
 using namespace mcrl2::bes;
 using namespace mcrl2::utilities::tools;
 
-class besinfo_tool: public input_tool
+class besinfo_tool: public bes_input_tool<input_tool>
 {
   protected:
-    typedef input_tool super;
+    typedef bes_input_tool<input_tool> super;
 
     bool opt_full;
 
@@ -78,7 +79,7 @@ class besinfo_tool: public input_tool
     bool run()
     {
       boolean_equation_system<> b;
-      load_bes(b,input_filename());
+      load_bes(b,input_filename(), bes_input_format());
 
       bes::detail::bes_property_map info(b);
 

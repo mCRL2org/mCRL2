@@ -32,6 +32,7 @@
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 
 using namespace std;
@@ -42,10 +43,10 @@ using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::utilities::tools;
 
-class pbesinfo_tool: public input_tool
+class pbesinfo_tool: public pbes_input_tool<input_tool>
 {
   protected:
-    typedef input_tool super;
+    typedef pbes_input_tool<input_tool> super;
 
     bool opt_full;
 
@@ -88,7 +89,7 @@ class pbesinfo_tool: public input_tool
     bool run()
     {
       pbes<> p;
-      load_pbes(p,input_filename());
+      load_pbes(p,input_filename(), pbes_input_format());
 
       pbes_system::detail::pbes_property_map info(p);
 

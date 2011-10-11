@@ -34,6 +34,7 @@
 
 //Tool framework
 #include "mcrl2/utilities/input_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -74,7 +75,7 @@ using utilities::tools::rewriter_tool;
 using utilities::tools::pbes_rewriter_tool;
 using namespace mcrl2::utilities::tools;
 
-class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
+class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<pbes_input_tool<input_tool> > >
 {
   protected:
     // Tool options.
@@ -85,7 +86,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
     bool opt_data_elm;                         // The data elimination option
     std::string opt_counter_example_file;      // The counter example file name
 
-    typedef pbes_rewriter_tool<rewriter_tool<input_tool> > super;
+    typedef pbes_rewriter_tool<rewriter_tool<pbes_input_tool<input_tool> > > super;
 
     std::string default_rewriter() const
     {
@@ -228,7 +229,7 @@ class pbes2bool_tool: public pbes_rewriter_tool<rewriter_tool<input_tool> >
 
       // load the pbes
       mcrl2::pbes_system::pbes<> p;
-      load_pbes(p, m_input_filename);
+      load_pbes(p, input_filename(), pbes_input_format());
       
       pbes_system::normalize(p);
       pbes_system::detail::instantiate_global_variables(p);

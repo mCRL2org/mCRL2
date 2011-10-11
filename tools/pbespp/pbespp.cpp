@@ -20,6 +20,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/input_output_tool.h"
+#include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/io.h"
@@ -32,10 +33,10 @@ using namespace mcrl2;
 
 //local declarations
 
-class pbespp_tool: public input_output_tool
+class pbespp_tool: public pbes_input_tool<input_output_tool>
 {
   private:
-    typedef input_output_tool super;
+    typedef pbes_input_tool<input_output_tool> super;
 
   public:
     pbespp_tool()
@@ -96,7 +97,7 @@ class pbespp_tool: public input_output_tool
     void print_specification()
     {
       pbes_system::pbes<> pbes_specification;
-      load_pbes(pbes_specification, input_filename());
+      load_pbes(pbes_specification, input_filename(), pbes_input_format());
 
       mCRL2log(verbose) << "printing PBES from "
                         << (input_filename().empty()?"standard input":input_filename())
