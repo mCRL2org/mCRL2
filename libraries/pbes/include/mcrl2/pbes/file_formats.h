@@ -67,6 +67,8 @@ pbes_file_format file_format_from_string(const std::string& s)
   }
 }
 
+/// \brief Guess the file format of the file in filename.
+/// \param filename The file of which to guess the format.
 inline
 pbes_file_format guess_format(const std::string& filename)
 {

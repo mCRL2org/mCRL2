@@ -28,10 +28,11 @@ namespace pbes_system
 {
 
 /// \brief Save a PBES in the format specified.
+/// \param pbes_spec The pbes to be stored
+/// \param outfilename The name of the file to which the output is stored.
 /// \param output_format Determines the format in which the result is written.
-/// If the PBES is not a BES, and the format pbes_output_bes_cwi is selected, then
-/// the result will be written an ATerm binary format instead.
-/// \param save_as_bes If the PBES is a BES, then the result will be written in BES format.
+/// \param aterm_ascii Determines, if output_format is pbes, whether the file
+///        is written is ascii format.
 inline
 void save_pbes(const pbes<>& pbes_spec,
                const std::string& outfilename,
@@ -73,6 +74,10 @@ void save_pbes(const pbes<>& pbes_spec,
   }
 }
 
+/// \brief Load pbes from file.
+/// \param p The pbes to which the result is loaded.
+/// \param infilename The file from which to load the PBES.
+/// \param f The format that should be assumed for the file in infilename.
 inline
 void load_pbes(pbes<>& p,
               const std::string& infilename,
@@ -101,6 +106,11 @@ void load_pbes(pbes<>& p,
   }
 }
 
+/// \brief Load pbes from file.
+/// \param p The pbes to which the result is loaded.
+/// \param infilename The file from which to load the PBES.
+///
+/// The format of the file in infilename is guessed.
 inline
 void load_pbes(pbes<>& p,
               const std::string& infilename)

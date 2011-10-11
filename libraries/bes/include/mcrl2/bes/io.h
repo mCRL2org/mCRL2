@@ -293,6 +293,7 @@ inline bool initial_bes_equation_corresponds_to_initial_state(const boolean_equa
   return false;
 }
 
+/// \brief File formats for BES and PBES are the same.
 typedef pbes_system::pbes_file_format bes_file_format;
 using pbes_system::pbes_file_bes;
 using pbes_system::pbes_file_cwi;
@@ -301,6 +302,11 @@ using pbes_system::pbes_file_pbes;
 using pbes_system::pbes_file_unknown;
 
 /// \brief Save a BES in the format specified.
+/// \param bes_spec The bes to be stored
+/// \param outfilename The name of the file to which the output is stored.
+/// \param output_format Determines the format in which the result is written.
+/// \param aterm_ascii Determines, if output_format is bes, whether the file
+///        is written is ascii format.
 inline
 void save_bes(const boolean_equation_system<>& bes_spec,
               const std::string& outfilename,
@@ -358,6 +364,10 @@ void save_bes(const boolean_equation_system<>& bes_spec,
   }
 }
 
+/// \brief Load bes from file.
+/// \param b The bes to which the result is loaded.
+/// \param infilename The file from which to load the BES.
+/// \param f The format that should be assumed for the file in infilename.
 template <typename Container>
 inline
 void load_bes(boolean_equation_system<Container>& b,
@@ -399,6 +409,11 @@ void load_bes(boolean_equation_system<Container>& b,
   }
 }
 
+/// \brief Load bes from file.
+/// \param b The bes to which the result is loaded.
+/// \param infilename The file from which to load the BES.
+///
+/// The format of the file in infilename is guessed.
 template <typename Container>
 inline
 void load_bes(boolean_equation_system<Container>& b,
