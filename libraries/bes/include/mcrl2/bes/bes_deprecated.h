@@ -1238,7 +1238,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     data::variable_list occurred_data_vars;
     for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
     {
-      if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
+      if (pbes_system::detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
       {
         occurred_data_vars = push_front(occurred_data_vars, *i);
       }
@@ -1263,7 +1263,7 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
     data::variable_list occurred_data_vars;
     for (data::variable_list::iterator i = data_vars.begin(); i != data_vars.end(); i++)
     {
-      if (detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
+      if (pbes_system::detail::occurs_in_varL(expr, *i,opt_precompile_pbes)) // The var occurs in expr
       {
         occurred_data_vars = atermpp::push_front(occurred_data_vars, *i);
       }
