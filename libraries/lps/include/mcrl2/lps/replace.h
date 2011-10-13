@@ -164,6 +164,12 @@ struct replace_process_parameter_builder: public Binder<Builder, replace_process
     return data::assignment_expression(lhs, rhs);
   }
 
+  void operator()(lps::deadlock_summand& x)
+  {
+    count = 1;
+    super::operator()(x);
+  }
+
   void operator()(lps::action_summand& x)
   {
     count = 1;
@@ -206,6 +212,33 @@ template <typename Substitution>
 void replace_process_parameters(specification& spec, Substitution sigma)
 {
   lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(spec);
+
+  // This does not work!
+  //linear_process& p = spec.process();
+  //p.process_parameters() = data::replace_free_variables(p.process_parameters(), sigma);
+  //lps::replace_free_variables(p.action_summands(), sigma);
+  //lps::replace_free_variables(p.deadlock_summands(), sigma);
+}
+
+/// \brief Applies a substitution to the process parameters of the specification spec.
+template <typename Substitution>
+void replace_summand_variables(specification& spec, Substitution sigma)
+{
+  action_summand_vector& a = spec.process().action_summands();
+  for (action_summand_vector::iterator i = a.begin(); i != a.end(); ++i)
+  {
+    i->summation_variables() = data::replace_variables(i->summation_variables(), sigma);
+    i->condition() = data::replace_free_variables(i->condition(), sigma);
+    lps::replace_free_variables(i->multi_action(), sigma);
+    i->assignments() = lps::replace_free_variables(i->assignments(), sigma);
+  }
+  deadlock_summand_vector& d = spec.process().deadlock_summands();
+  for (deadlock_summand_vector::iterator i = d.begin(); i != d.end(); ++i)
+  {
+    i->summation_variables() = data::replace_variables(i->summation_variables(), sigma);
+    i->condition() = data::replace_free_variables(i->condition(), sigma);
+    lps::replace_free_variables(i->deadlock(), sigma);
+  }
 }
 
 } // namespace lps
