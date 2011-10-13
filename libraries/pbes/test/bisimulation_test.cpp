@@ -1,11 +1,11 @@
 #include <boost/test/included/unit_test_framework.hpp>
 #include "mcrl2/utilities/test_utilities.h"
 #include "mcrl2/lps/parse.h"
+#include "mcrl2/lps/linearise.h"
 #include "mcrl2/lps/detail/test_input.h"
 #include "mcrl2/pbes/bisimulation.h"
 #include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/atermpp/aterm_init.h"
-
 
 using namespace atermpp;
 using namespace mcrl2;
@@ -16,13 +16,24 @@ using mcrl2::utilities::collect_after_test_case;
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
 void test_bisimulation(const std::string& s1, const std::string& s2,
-                       const bool strongly_bisimilar,
-                       const bool branching_bisimilar,
-                       const bool branching_similar,
-                       const bool weakly_bisimilar)
+                       bool strongly_bisimilar,
+                       bool branching_bisimilar,
+                       bool branching_similar,
+                       bool weakly_bisimilar,
+                       bool linearize = false)
 {
-  specification spec1 = parse_linear_process_specification(s1);
-  specification spec2 = parse_linear_process_specification(s2);
+  specification spec1;
+  specification spec2;
+  if (linearize)
+  {
+    spec1 = linearise(s1);
+    spec2 = linearise(s2);
+  }
+  else
+  {
+    spec1 = parse_linear_process_specification(s1);
+    spec2 = parse_linear_process_specification(s2);
+  }
 
   pbes<> sb  = strong_bisimulation(spec1, spec2);
   BOOST_CHECK(sb.is_well_typed());
@@ -43,7 +54,7 @@ void test_bisimulation(const std::string& s1, const std::string& s2,
 
 BOOST_AUTO_TEST_CASE(ABP)
 {
-  test_bisimulation(lps::detail::ABP_SPECIFICATION(), lps::detail::ABP_SPECIFICATION(), true, true, true, true);
+  test_bisimulation(lps::detail::ABP_SPECIFICATION(), lps::detail::ABP_SPECIFICATION(), true, true, true, true, true);
 }
 
 BOOST_AUTO_TEST_CASE(SMALLSPEC)

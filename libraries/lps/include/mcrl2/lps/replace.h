@@ -77,7 +77,7 @@ T replace_variables(const T& x,
                     Substitution sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
-{   
+{
   return core::make_update_apply_builder<lps::data_expression_builder>(sigma)(x);
 }
 
@@ -119,6 +119,65 @@ T replace_free_variables(const T& x,
   return data::detail::make_replace_free_variables_builder<lps::data_expression_builder, lps::add_data_variable_binding>(sigma)(x, bound_variables);
 }
 //--- end generated lps replace code ---//
+
+namespace detail {
+
+/// \cond INTERNAL_DOCS
+template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+struct replace_process_parameter_builder: public data::detail::substitute_free_variables_builder<Builder, Binder, Substitution>
+{
+  typedef data::detail::substitute_free_variables_builder<Builder, Binder, Substitution> super;
+  using super::enter;
+  using super::leave;
+  using super::operator();
+  using super::bind_count;
+
+  replace_process_parameter_builder(Substitution sigma)
+    : super(sigma)
+  {}
+
+  // replace the assignments (in where clauses, summands and process initializers)
+  data::assignment_expression operator()(const data::assignment& x)
+  {
+    if (bind_count(x.lhs()) == 1)
+    {
+      data::assignment_expression result(super::operator()(x.lhs()), super::operator()(x.rhs()));
+      return result;
+    }
+    else
+    {
+      return super::operator()(x);
+    }
+  }
+
+  // replace the process parameters
+  void operator()(lps::linear_process& x)
+  {
+    super::operator()(x);
+    x.process_parameters() = super::operator()(x.process_parameters());
+  }
+};
+
+template <template <class> class Builder, template <template <class> class, class> class Binder, class Substitution>
+replace_process_parameter_builder<Builder, Binder, Substitution>
+make_replace_process_parameters_builder(Substitution sigma)
+{
+  return replace_process_parameter_builder<Builder, Binder, Substitution>(sigma);
+}
+/// \endcond
+
+} // namespace detail
+
+/// \brief Applies a substitution to the process parameters of the specification spec.
+template <typename Substitution>
+void replace_process_parameters(specification& spec, Substitution sigma)
+{
+  if (sigma.empty())
+  {
+    return;
+  }
+  lps::detail::make_replace_process_parameters_builder<lps::data_expression_builder, lps::add_data_variable_binding>(data::make_map_substitution(sigma))(spec);
+}
 
 } // namespace lps
 

@@ -110,6 +110,7 @@ struct substitute_free_variables_builder: public Binder<Builder, substitute_free
   using super::leave;
   using super::operator();
   using super::is_bound;
+  using super::bind_count;
   using super::increase_bind_count;
 
   Substitution sigma;
@@ -211,7 +212,7 @@ T replace_variables(const T& x,
                     Substitution sigma,
                     typename boost::enable_if<typename boost::is_base_of<atermpp::aterm_base, T>::type>::type* = 0
                    )
-{   
+{
   return core::make_update_apply_builder<data::data_expression_builder>(sigma)(x);
 }
 

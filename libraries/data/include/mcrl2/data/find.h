@@ -200,6 +200,7 @@ struct find_free_variables_traverser: public Binder<Traverser, find_free_variabl
   using super::leave;
   using super::operator();
   using super::is_bound;
+  using super::bind_count;
   using super::increase_bind_count;
 
   OutputIterator out;
