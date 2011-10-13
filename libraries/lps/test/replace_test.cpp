@@ -108,6 +108,25 @@ void test_lps_substitute()
   core::garbage_collect();
 }
 
+void test_replace_process_parameters()
+{
+  std::string SPEC =
+    "act a;                        \n"
+    "proc P(b:Bool) = a.P(b = !b); \n"
+    "init P(true);                 \n"
+    ;
+  specification spec = parse_linear_process_specification(SPEC);
+  data::mutable_map_substitution<> sigma;
+  data::variable b("b", data::sort_bool::bool_());
+  data::variable b0("b0", data::sort_bool::bool_());
+  sigma[b] = b0;
+  lps::replace_process_parameters(spec, sigma);
+  std::cout << lps::pp(spec);
+  std::set<data::variable> variables = lps::find_variables(spec);
+  BOOST_CHECK(variables.find(b) == variables.end());
+  core::garbage_collect();
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -115,6 +134,7 @@ int test_main(int argc, char* argv[])
   test_replace();
   test_lps_substituter();
   test_lps_substitute();
+  test_replace_process_parameters();
 
   return 0;
 }

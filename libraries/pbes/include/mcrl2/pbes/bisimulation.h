@@ -267,7 +267,11 @@ class bisimulation_algorithm
     void resolve_name_clashes(const specification& model, specification& spec)
     {
       atermpp::map<data::variable, data::variable> sigma = compute_name_clashes(model, spec);
-      replace_process_parameters(spec, sigma);
+      if (sigma.empty())
+      {
+        return;
+      }
+      replace_process_parameters(spec, data::make_map_substitution(sigma));
     }
 
     /// \brief Initializes the name lookup table.
