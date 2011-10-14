@@ -21,6 +21,7 @@
 // #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/pbes/rewriter.h"
 // #include "mcrl2/utilities/rewriter_tool.h"
+#include "mcrl2/pbes/detail/instantiate_global_variables.h"
 
 //Data framework
 #include "mcrl2/data/enumerator.h"
@@ -49,6 +50,8 @@ namespace pbes_system
 template < typename Container >
 bool pbes2_bool_test(pbes< Container > &pbes_spec, data::rewriter::strategy rewrite_strategy = data::rewriter::jitty)
 {
+  pbes_system::detail::instantiate_global_variables(pbes_spec);
+
   // Generate an enumerator, a data rewriter and a pbes rewriter.
   data::rewriter datar(pbes_spec.data(),
                        mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_system::find_function_symbols(pbes_spec), pbes_spec.global_variables()),
