@@ -93,7 +93,11 @@ std::string BES8 =
   "init X1;                                                 \n"
   ;
 
+#ifdef MCRL2_PARITY_GAME_CREATE_FILES
+void test_bes(std::string bes_spec, std::string output_file, bool expected_result)
+#else
 void test_bes(std::string bes_spec, std::string /* output_file */, bool /* expected_result */)
+#endif
 {
   pbes_system::pbes<> p = pbes_system::txt2pbes(bes_spec);
   pbes_system::detail::parity_game_output pgg(p);
