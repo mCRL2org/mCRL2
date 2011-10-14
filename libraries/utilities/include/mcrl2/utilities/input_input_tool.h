@@ -57,7 +57,7 @@ class input_input_tool: public tool
       tool::parse_options(parser);
       if (0 < parser.arguments.size())
       {
-        m_input_filename1 = parser.arguments[1];
+        m_input_filename1 = parser.arguments[0];
       }
       if (1 < parser.arguments.size())
       {
