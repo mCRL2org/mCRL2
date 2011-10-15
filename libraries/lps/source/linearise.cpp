@@ -216,8 +216,7 @@ class specification_basic_type:public boost::noncopyable
     std::vector < objectdatatype > objectdata;
 
     ATermIndexedSet objectIndexTable;
-    atermpp::set < identifier_string > stringTable;
-    std::map < identifier_string,size_t> freshstringIndices;
+    set_identifier_generator fresh_identifier_generator;
     std::vector < enumeratedtype > enumeratedtypes;
     stackoperations* stack_operations_list;
 
@@ -227,7 +226,8 @@ class specification_basic_type:public boost::noncopyable
                              const variable_list idvs,
                              const data_specification& ds,
                              const atermpp::set < data::variable > &glob_vars,
-                             const t_lin_options& opt):
+                             const t_lin_options& opt,
+                             const process_specification procspec):
       acts(),
       global_variables(glob_vars),
       data(ds),
@@ -236,6 +236,15 @@ class specification_basic_type:public boost::noncopyable
       timeIsBeingUsed(false)
     {
       objectIndexTable=ATindexedSetCreate(1024,75);
+      
+      // find_identifiers does not find the identifiers in the enclosed data specification.
+      fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));
+      // So, the identifiers in the data type must be added explicitly.
+      fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.equations()));
+      fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.sorts()));
+      fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.constructors()));
+      fresh_identifier_generator.add_identifiers(data::find_identifiers(ds.mappings()));
+
       stack_operations_list=NULL;
       acts.protect();
       acts=as;
@@ -251,9 +260,9 @@ class specification_basic_type:public boost::noncopyable
       // The terminationAction and the terminatedProcId must be defined after initialisation of
       // data as otherwise fresh name does not work properly.
       terminationAction.protect();
-      terminationAction=action(action_label(fresh_name("Terminate"),sort_expression_list()),data_expression_list());
+      terminationAction=action(action_label(fresh_identifier_generator("Terminate"),sort_expression_list()),data_expression_list());
       terminatedProcId.protect();
-      terminatedProcId=process_identifier(fresh_name("Terminated**"),variable_list());
+      terminatedProcId=process_identifier(fresh_identifier_generator("Terminated**"),variable_list());
 // /* Changed delta() to DeltaAtZero on 24/12/2006. Moved back in spring 2007, as this introduces unwanted time constraints. */
       insertProcDeclaration(
         terminatedProcId,
@@ -346,12 +355,7 @@ class specification_basic_type:public boost::noncopyable
 
     void addString(const identifier_string str)
     {
-      stringTable.insert(str);
-    }
-
-    bool existsString(const identifier_string str)
-    {
-      return stringTable.count(str)>0;
+      fresh_identifier_generator.add_identifier(str);
     }
 
     void insertsort(const sort_expression sortterm)
@@ -1218,31 +1222,6 @@ class specification_basic_type:public boost::noncopyable
       collectPcrlProcesses(procDecl, pcrlprocesses, visited);
     }
 
-    /************ correctopenterm ********************************************/
-
-    // TODO Should be replaced by a standard function.
-    std::string fresh_name(const std::string& name)
-    {
-      /* it still has to be checked whether a name is already being used
-         in that case a new name has to be generated. */
-      identifier_string strng(name);
-      size_t i=0;
-      // strng=new_string(name);
-      if (freshstringIndices.count(name)>0)
-      {
-        i=freshstringIndices[name];
-      }
-
-      for (; (existsString(strng)) ; ++i)
-      {
-        strng = identifier_string(str(boost::format(name + "%d") % i));
-      }
-      freshstringIndices[name]=i;
-      addString(strng);
-      const std::string result(strng);
-      return result;
-    }
-
     /****************  occursinterm *** occursintermlist ***********/
 
     bool occursinterm(const variable var, const data_expression t)
@@ -1854,7 +1833,7 @@ class specification_basic_type:public boost::noncopyable
         warningNumber=warningNumber*5;
       }
       const variable_list parameters1=parameters_that_occur_in_body(parameters, body);
-      const process_identifier p(fresh_name("P"),get_sorts(parameters1));
+      const process_identifier p(fresh_identifier_generator("P"),get_sorts(parameters1));
       insertProcDeclaration(
         p,
         parameters1,
@@ -1941,7 +1920,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (reuse_index<0)
       {
-        variable v(fresh_name(s),sort);
+        variable v(fresh_identifier_generator(s),sort);
         insertvariable(v,true);
         return v;
       }
@@ -3334,17 +3313,17 @@ class specification_basic_type:public boost::noncopyable
           //               | push(getstate: Pos, getx1: S1, ..., getxn: Sn, pop: Stack)
           //               ;
 
-          basic_sort stack_sort_alias(spec.fresh_name("Stack"));
+          basic_sort stack_sort_alias(spec.fresh_identifier_generator("Stack"));
           structured_sort_constructor_argument_vector sp_push_arguments;
           for (variable_list::const_iterator l = pl.begin() ; l!=pl.end() ; ++l)
           {
-            sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_name("get" + std::string(l->name())), l->sort()));
+            sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("get" + std::string(l->name())), l->sort()));
             sorts=push_front(sorts,l->sort());
           }
-          sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_name("pop"), stack_sort_alias));
+          sp_push_arguments.push_back(structured_sort_constructor_argument(spec.fresh_identifier_generator("pop"), stack_sort_alias));
           sorts=reverse(sorts);
-          structured_sort_constructor sc_push(spec.fresh_name("push"), sp_push_arguments);
-          structured_sort_constructor sc_emptystack(spec.fresh_name("emptystack"),spec.fresh_name("isempty"));
+          structured_sort_constructor sc_push(spec.fresh_identifier_generator("push"), sp_push_arguments);
+          structured_sort_constructor sc_emptystack(spec.fresh_identifier_generator("emptystack"),spec.fresh_identifier_generator("isempty"));
 
           structured_sort_constructor_vector constructors(1,sc_push);
           constructors.push_back(sc_emptystack);
@@ -3429,7 +3408,7 @@ class specification_basic_type:public boost::noncopyable
             size_t i=spec.upperpowerof2(no_of_states);
             for (; i>0 ; i--)
             {
-              variable name(spec.fresh_name("bst"),sort_bool::bool_());
+              variable name(spec.fresh_identifier_generator("bst"),sort_bool::bool_());
               spec.insertvariable(name,true);
               booleanStateVariables=push_front(booleanStateVariables,name);
             }
@@ -3445,22 +3424,22 @@ class specification_basic_type:public boost::noncopyable
                 if (!singlecontrolstate)
                 {
                   const size_t e=spec.create_enumeratedtype(no_of_states);
-                  stackvar=variable(spec.fresh_name(s3), spec.enumeratedtypes[e].sortId);
+                  stackvar=variable(spec.fresh_identifier_generator(s3), spec.enumeratedtypes[e].sortId);
                 }
                 else
                 {
                   /* Generate a stackvariable that is never used */
-                  stackvar=variable(spec.fresh_name("Never_used"), sort_bool::bool_());
+                  stackvar=variable(spec.fresh_identifier_generator("Never_used"), sort_bool::bool_());
                 }
               }
               else
               {
-                stackvar=variable(spec.fresh_name(s3),sort_bool::bool_());
+                stackvar=variable(spec.fresh_identifier_generator(s3),sort_bool::bool_());
               }
             }
             else
             {
-              stackvar=variable(spec.fresh_name(s3), sort_pos::pos());
+              stackvar=variable(spec.fresh_identifier_generator(s3), sort_pos::pos());
             }
             spec.insertvariable(stackvar,true);
           }
@@ -3475,14 +3454,14 @@ class specification_basic_type:public boost::noncopyable
 
             if (opns!=NULL)
             {
-              stackvar=variable(spec.fresh_name(s3),opns->stacksort);
+              stackvar=variable(spec.fresh_identifier_generator(s3),opns->stacksort);
               spec.insertvariable(stackvar,true);
             }
             else
             {
               opns=(stackoperations*) new stackoperations(push_front(parlist,
                    variable("state",sort_pos::pos())),spec);
-              stackvar = variable(spec.fresh_name(s3), opns->stacksort);
+              stackvar = variable(spec.fresh_identifier_generator(s3), opns->stacksort);
               spec.insertvariable(stackvar,true);
             }
           }
@@ -3754,7 +3733,7 @@ class specification_basic_type:public boost::noncopyable
     {
       if ((!options.noglobalvars) && allow_dont_care_var)
       {
-        const variable newVariable(fresh_name("dc"),s);
+        const variable newVariable(fresh_identifier_generator("dc"),s);
         insertvariable(newVariable,true);
         global_variables.insert(newVariable);
         return newVariable;
@@ -4358,7 +4337,7 @@ class specification_basic_type:public boost::noncopyable
           else
           {
             //create new sort identifier
-            basic_sort sort_id(spec.fresh_name(str(boost::format("Enum%d") % n)));
+            basic_sort sort_id(spec.fresh_identifier_generator(str(boost::format("Enum%d") % n)));
             sortId=sort_id;
             //create structured sort
             //  Enumi = struct en_i | ... | e0_i;
@@ -4366,7 +4345,7 @@ class specification_basic_type:public boost::noncopyable
             for (size_t j=0 ; (j<n) ; j++)
             {
               //create constructor declaration of the structured sort
-              const identifier_string s=spec.fresh_name(str(boost::format("e%d_%d") % j % n));
+              const identifier_string s=spec.fresh_identifier_generator(str(boost::format("e%d_%d") % j % n));
               const structured_sort_constructor struct_cons(s,"");
 
               struct_conss = push_front(struct_conss, struct_cons);
@@ -4479,6 +4458,7 @@ class specification_basic_type:public boost::noncopyable
       for (data_expression_list::const_iterator w=elementnames.begin();
            w!=elementnames.end() ; ++w)
       {
+        assert(auxvars.size()>0);
         insert_equation(data_equation(
                           vars,
                           application(functionname,push_front(args,*w)),
@@ -4531,7 +4511,7 @@ class specification_basic_type:public boost::noncopyable
 
       const function_sort newsort(newsortlist,sort);
       const function_symbol casefunction(
-        fresh_name(str(boost::format("C%d_%s") % n % (
+        fresh_identifier_generator(str(boost::format("C%d_%s") % n % (
                          !is_basic_sort(newsort)?"":std::string(basic_sort(sort).name())))),
         newsort);
       // insertmapping(casefunction,true);
@@ -4558,7 +4538,7 @@ class specification_basic_type:public boost::noncopyable
 
           enumeratedtype_index=spec.create_enumeratedtype(n);
 
-          var=variable(spec.fresh_name("e"),spec.enumeratedtypes[enumeratedtype_index].sortId);
+          var=variable(spec.fresh_identifier_generator("e"),spec.enumeratedtypes[enumeratedtype_index].sortId);
           spec.insertvariable(var,true);
 
           for (sort_expression_list::const_iterator w=fsorts.begin(); w!=fsorts.end(); ++w)
@@ -7491,15 +7471,14 @@ class specification_basic_type:public boost::noncopyable
       bool* stable,
       atermpp::set < process_identifier > &visited,
       bool allowrecursion,
-      bool& contains_if_then,
-      const bool print_info=false)
+      bool& contains_if_then)
     {
       if (is_merge(t))
       {
         /* the construction below is needed to guarantee that
            both subterms are recursively investigated */
-        bool r1=containstimebody(process::merge(t).left(),stable,visited,allowrecursion,contains_if_then,print_info);
-        bool r2=containstimebody(process::merge(t).right(),stable,visited,allowrecursion,contains_if_then,print_info);
+        bool r1=containstimebody(process::merge(t).left(),stable,visited,allowrecursion,contains_if_then);
+        bool r2=containstimebody(process::merge(t).right(),stable,visited,allowrecursion,contains_if_then);
         return r1||r2;
       }
 
@@ -7507,7 +7486,7 @@ class specification_basic_type:public boost::noncopyable
       {
         if (allowrecursion)
         {
-          return (containstime_rec(process_instance(t).identifier(),stable,visited,contains_if_then,print_info));
+          return (containstime_rec(process_instance(t).identifier(),stable,visited,contains_if_then));
         }
         return objectdata[objectIndex(process_instance(t).identifier())].containstime;
       }
@@ -7516,47 +7495,47 @@ class specification_basic_type:public boost::noncopyable
       {
         if (allowrecursion)
         {
-          return (containstime_rec(process_instance_assignment(t).identifier(),stable,visited,contains_if_then,print_info));
+          return (containstime_rec(process_instance_assignment(t).identifier(),stable,visited,contains_if_then));
         }
         return objectdata[objectIndex(process_instance_assignment(t).identifier())].containstime;
       }
 
       if (is_hide(t))
       {
-        return containstimebody(hide(t).operand(),stable,visited,allowrecursion,contains_if_then,print_info);
+        return containstimebody(hide(t).operand(),stable,visited,allowrecursion,contains_if_then);
       }
 
       if (is_rename(t))
       {
-        return containstimebody(process::rename(t).operand(),stable,visited,allowrecursion,contains_if_then,print_info);
+        return containstimebody(process::rename(t).operand(),stable,visited,allowrecursion,contains_if_then);
       }
 
       if (is_allow(t))
       {
-        return containstimebody(allow(t).operand(),stable,visited,allowrecursion,contains_if_then,print_info);
+        return containstimebody(allow(t).operand(),stable,visited,allowrecursion,contains_if_then);
       }
 
       if (is_block(t))
       {
-        return containstimebody(block(t).operand(),stable,visited,allowrecursion,contains_if_then,print_info);
+        return containstimebody(block(t).operand(),stable,visited,allowrecursion,contains_if_then);
       }
 
       if (is_comm(t))
       {
-        return containstimebody(comm(t).operand(),stable,visited,allowrecursion,contains_if_then,print_info);
+        return containstimebody(comm(t).operand(),stable,visited,allowrecursion,contains_if_then);
       }
 
       if (is_choice(t))
       {
-        bool r1=containstimebody(choice(t).left(),stable,visited,allowrecursion,contains_if_then,print_info);
-        bool r2=containstimebody(choice(t).right(),stable,visited,allowrecursion,contains_if_then,print_info);
+        bool r1=containstimebody(choice(t).left(),stable,visited,allowrecursion,contains_if_then);
+        bool r2=containstimebody(choice(t).right(),stable,visited,allowrecursion,contains_if_then);
         return r1||r2;
       }
 
       if (is_seq(t))
       {
-        bool r1=containstimebody(seq(t).left(),stable,visited,allowrecursion,contains_if_then,print_info);
-        bool r2=containstimebody(seq(t).right(),stable,visited,allowrecursion,contains_if_then,print_info);
+        bool r1=containstimebody(seq(t).left(),stable,visited,allowrecursion,contains_if_then);
+        bool r2=containstimebody(seq(t).right(),stable,visited,allowrecursion,contains_if_then);
         return r1||r2;
       }
 
@@ -7568,14 +7547,14 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_if_then_else(t))
       {
-        bool r1=containstimebody(if_then_else(t).then_case(),stable,visited,allowrecursion,contains_if_then,print_info);
-        bool r2=containstimebody(if_then_else(t).else_case(),stable,visited,allowrecursion,contains_if_then,print_info);
+        bool r1=containstimebody(if_then_else(t).then_case(),stable,visited,allowrecursion,contains_if_then);
+        bool r2=containstimebody(if_then_else(t).else_case(),stable,visited,allowrecursion,contains_if_then);
         return r1||r2;
       }
 
       if (is_sum(t))
       {
-        return containstimebody(sum(t).operand(),stable,visited,allowrecursion,contains_if_then,print_info);
+        return containstimebody(sum(t).operand(),stable,visited,allowrecursion,contains_if_then);
       }
 
       if (is_action(t)||
@@ -7592,8 +7571,8 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_sync(t))
       {
-        bool r1=containstimebody(process::sync(t).left(),stable,visited,allowrecursion,contains_if_then,print_info);
-        bool r2=containstimebody(process::sync(t).right(),stable,visited,allowrecursion,contains_if_then,print_info);
+        bool r1=containstimebody(process::sync(t).left(),stable,visited,allowrecursion,contains_if_then);
+        bool r2=containstimebody(process::sync(t).right(),stable,visited,allowrecursion,contains_if_then);
         return r1||r2;
       }
 
@@ -7605,21 +7584,18 @@ class specification_basic_type:public boost::noncopyable
       const process_identifier procId,
       bool* stable,
       atermpp::set < process_identifier > &visited,
-      bool& contains_if_then,
-      const bool print_info)
+      bool& contains_if_then)
     {
       size_t n=objectIndex(procId);
 
       if (visited.count(procId)==0)
       {
         visited.insert(procId);
-        bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then,print_info);
-        if ((ct) && !options.add_delta)
+        bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then);
+        if (ct && options.add_delta)
         {
-          if (print_info)
-          {
-            mCRL2log(log::verbose) << "process " << procId.name() << " contains time.\n";
-          }
+          mCRL2log(log::warning) << "process " << procId.name() << 
+              " contains time, which is now not preserved. Use --timed or -T or untick add deadlocks for a corrent timed linearisation..\n";
         }
         if (objectdata[n].containstime!=ct)
         {
@@ -7650,14 +7626,12 @@ class specification_basic_type:public boost::noncopyable
          whether there are processes that contain an if-then that will be translated
          to an if-then-else with an delta@0 in the else branch, introducing time */
       bool stable=0;
-      bool print_info=true;
       bool contains_if_then=false;
       while (!stable)
       {
         atermpp::set < process_identifier > visited;
         stable=1;
-        containstime_rec(procId,&stable,visited,contains_if_then,print_info);
-        print_info=false;
+        containstime_rec(procId,&stable,visited,contains_if_then);
       }
       return contains_if_then;
     }
@@ -7846,7 +7820,7 @@ class specification_basic_type:public boost::noncopyable
       }
 
       const process_identifier newProcId(
-        fresh_name(procId.name()),
+        fresh_identifier_generator(procId.name()),
         procId.sorts());
 
       visited_id[procId]=newProcId;
@@ -8079,9 +8053,9 @@ class specification_basic_type:public boost::noncopyable
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
-      if (determinewhetherprocessescontaintime(init1) && !(options.add_delta))
+      if (determinewhetherprocessescontaintime(init1) && options.add_delta)
       {
-        mCRL2log(log::warning) << "Warning: specification contains time due to translating c->p to c->p<>delta@0. Use `Add true->delta summands to each state in each process' or command line option `-D' to suppress." << std::endl;
+        mCRL2log(log::warning) << "Warning: specification contains time due to translating c->p to c->p<>delta@0. The current linearisation run does not preserve timing information. Use -T, or --timed to preserving time information. " << std::endl;
       }
       atermpp::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);
@@ -8134,7 +8108,8 @@ mcrl2::lps::specification mcrl2::lps::linearise(
                                 action_label_list(atermpp::convert<data::variable_list>(type_checked_spec.global_variables())),
                                 data_spec,
                                 type_checked_spec.global_variables(),
-                                lin_options);
+                                lin_options,
+                                type_checked_spec);
   process_identifier init=spec.storeinit(type_checked_spec.init());
 
   //linearise spec
