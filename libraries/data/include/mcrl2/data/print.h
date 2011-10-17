@@ -112,6 +112,10 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       return false;
     }
+    if (!is_function_symbol(x.head()))
+    {
+      return false;
+    }
     core::identifier_string name = function_symbol(x.head()).name();
     return
       (name == data::sort_bool::implies_name())          ||
@@ -694,7 +698,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_fbag_default(const data_expression& x)
   {
     // std::cout << "<fbag_default>" << core::pp(x) << " " << core::pp(sort_bag::left(x)) << " " << sort_bag::left(x) << std::endl;
-    data_expression right = sort_bag::right(x);
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
@@ -755,7 +758,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   
   void print_fset_lambda(data_expression x)
   {
-    sort_expression s = function_sort(sort_set::left(x).sort()).domain().front(); // the sort of the set elements
     data::lambda left(sort_set::left(x));
     derived().print("{ ");
     print_variables(left.variables(), true, true, false, "", "", ", ");
@@ -812,7 +814,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     if (is_infix_operation(x))
     {
       data_expression_list::const_iterator i = x.arguments().begin();
-      core::identifier_string name = function_symbol(x.head()).name();
       data_expression left = *i++;
       data_expression right = *i;
       print_expression(left, infix_precedence_left(left));
