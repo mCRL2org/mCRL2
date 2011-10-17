@@ -1,0 +1,11 @@
+map
+  z: Bool;
+  m: List(Nat);
+
+eqn
+  z =
+    true && tail(l) == l
+      whr l = m end;
+
+init
+  delta;
