@@ -18,6 +18,7 @@
 #include <set>
 #include <vector>
 #include <algorithm>
+#include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -693,12 +694,9 @@ class pbes_constelm_algorithm
     std::string print_vertices() const
     {
       std::ostringstream out;
-      for (typename edge_map::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
+      for (typename vertex_map::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
-        for (typename atermpp::vector<edge>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
-        {
-          out << j->to_string() << std::endl;
-        }
+        out << i->second.to_string() << std::endl;
       }
       return out.str();
     }
@@ -906,6 +904,7 @@ class pbes_constelm_algorithm
       }
 
       mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
+      mCRL2log(log::debug) << "\n--- visited vertices ---\n" << core::detail::print_pp_set(visited) << std::endl;
 
       // compute the redundant parameters and the redundant equations
       for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -947,10 +946,10 @@ class pbes_constelm_algorithm
 
       // remove the redundant parameters and variables/equations
       remove_parameters(p, m_redundant_parameters);
-      if (remove_redundant_equations)
-      {
-        remove_elements(p.equations(), detail::equation_is_contained_in<propositional_variable_decl_type>(m_redundant_equations));
-      }
+//      if (remove_redundant_equations)
+//      {
+//        remove_elements(p.equations(), detail::equation_is_contained_in<propositional_variable_decl_type>(m_redundant_equations));
+//      }
 
       // print the parameters and equation that are removed
       if (mCRL2logEnabled(log::verbose))
@@ -965,15 +964,15 @@ class pbes_constelm_algorithm
           }
         }
 
-        if (remove_redundant_equations)
-        {
-          mCRL2log(log::verbose) << "\nremoved the following equations:" << std::endl;
-          const std::set<propositional_variable_decl_type> r = redundant_equations();
-          for (typename std::set<propositional_variable_decl_type>::const_iterator i = r.begin(); i != r.end(); ++i)
-          {
-            mCRL2log(log::verbose) << "  equation " << core::pp(i->name()) << std::endl;
-          }
-        }
+//        if (remove_redundant_equations)
+//        {
+//          mCRL2log(log::verbose) << "\nremoved the following equations:" << std::endl;
+//          const std::set<propositional_variable_decl_type> r = redundant_equations();
+//          for (typename std::set<propositional_variable_decl_type>::const_iterator i = r.begin(); i != r.end(); ++i)
+//          {
+//            mCRL2log(log::verbose) << "  equation " << core::pp(i->name()) << std::endl;
+//          }
+//        }
       }
     }
 };

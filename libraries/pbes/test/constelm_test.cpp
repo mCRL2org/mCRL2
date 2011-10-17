@@ -85,7 +85,7 @@ std::string t6 =
   "                                                                                      \n"
   "init X(5);                                                                            \n"
   ;
-std::string x6 = "binding_variables = X(n1: Nat)";
+std::string x6 = "binding_variables = X(n1: Nat), Y(n2: Nat)";
 
 std::string t7 =
   "% multiple edges from one vertex, one edge invalidates the assertion of the other: no constants should be found \n"
@@ -189,6 +189,16 @@ std::string t15 =
   ;
 std::string x15 = "binding_variables = X0, X1";
 
+std::string t16 =
+  "pbes                      \n"
+  " nu X(n:Nat) = Y && X(n); \n"
+  " mu Y = Z;                \n"
+  " nu Z = Y;                \n"
+  "                          \n"
+  " init X(0);               \n"
+  ;
+std::string x16 = "binding_variables = X, Y, Z";
+
 void test_pbes(const std::string& pbes_spec, std::string expected_result, bool compute_conditions, bool remove_equations = true)
 {
   typedef simplifying_rewriter<pbes_expression, data::rewriter> my_pbes_rewriter;
@@ -207,7 +217,9 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
 
   // run the algorithm
   algorithm.run(q, compute_conditions, remove_equations);
-
+  BOOST_CHECK(q.is_well_typed());
+  std::cout << "\n--- q ---\n" << pbes_system::pp(q) << std::endl;
+  
   pbes_system::detail::pbes_property_map info1(q);
   pbes_system::detail::pbes_property_map info2(expected_result);
   std::string diff = info1.compare(info2);
@@ -245,6 +257,7 @@ int test_main(int argc, char** argv)
   test_pbes(t13, x13, false);
   test_pbes(t14, x14, false);
   test_pbes(t15, x15, false);
+  test_pbes(t16, x16, true);
 
   return 0;
 }

@@ -47,14 +47,15 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
     {
       super::parse_options(parser);
       m_compute_conditions = parser.options.count("compute-conditions") > 0;
-      m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
+      //m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
+      m_remove_redundant_equations = false;
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
       desc.add_option("compute-conditions", "compute propagation conditions", 'c');
-      desc.add_option("remove-equations", "remove redundant equations", 'e');
+      // desc.add_option("remove-equations", "remove redundant equations", 'e');
     }
 
   public:
@@ -74,7 +75,7 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
-      mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
+      // mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
 
       // load the pbes
       pbes<> p;
