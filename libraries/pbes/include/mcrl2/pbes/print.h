@@ -235,6 +235,13 @@ std::string pp(const T& t)
 }
 
 inline
+std::string pp(const propositional_variable_instantiation& t)
+{
+  MCRL2_CHECK_PP(core::pp(t), pbes_system::print(t), t.to_string());
+  return core::pp(t);
+}
+
+inline
 std::string pp(const pbes_equation& eqn)
 {
   MCRL2_CHECK_PP(core::pp(pbes_equation_to_aterm(eqn)), pbes_system::print(eqn), pbes_equation_to_aterm(eqn).to_string());
