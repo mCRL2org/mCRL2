@@ -113,7 +113,7 @@ DataExpr
   | DataExpr 'mod' DataExpr                  $binary_left  9
   | DataExpr '*'   DataExpr                  $binary_left 10
   | DataExpr '.'   DataExpr                  $binary_left 10
-  | DataExpr 'whr' AssignmentList 'end'
+  | DataExpr 'whr' AssignmentList 'end'      $unary_left 12
   ;
 
 DataExprUnit
