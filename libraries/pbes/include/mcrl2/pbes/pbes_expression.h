@@ -530,6 +530,8 @@ inline int precedence(const imp& x)      { return precedence(static_cast<const p
 inline int precedence(const and_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
 inline int precedence(const or_& x)      { return precedence(static_cast<const pbes_expression&>(x)); }
 inline int precedence(const not_& x)     { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const data::data_expression & x)               { return precedence(static_cast<const pbes_expression&>(x)); }
+inline int precedence(const propositional_variable_instantiation& x) { return precedence(static_cast<const pbes_expression&>(x)); }
 
 /// \brief Returns true if the operations have the same precedence, but are different
 template <typename T1, typename T2>

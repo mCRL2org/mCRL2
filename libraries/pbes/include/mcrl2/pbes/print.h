@@ -81,9 +81,9 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
   template <typename T>
   void print_pbes_binary_operation(const T& x, const std::string& op)
   {
-    print_pbes_expression(x.left(), is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
+    print_pbes_expression(x.left(), pbes_system::is_same_different_precedence(x, x.left()) ? precedence(x) + 1 : precedence(x));
     derived().print(op);
-    print_pbes_expression(x.right(), is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
+    print_pbes_expression(x.right(), pbes_system::is_same_different_precedence(x, x.right()) ? precedence(x) + 1 : precedence(x));
   }
 
   // N.B. We need a special version due to the "val" operator that needs to be
@@ -114,7 +114,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived()(x.variable());
     // TODO: change the weird convention of putting the rhs of an equation on a new line
     derived().print(" =\n       ");
-    derived()(x.formula());
+	derived()(x.formula());
     derived().print(";");
     derived().leave(x);
   }
