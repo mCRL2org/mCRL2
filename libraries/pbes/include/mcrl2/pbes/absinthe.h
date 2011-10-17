@@ -167,6 +167,10 @@ struct absinthe_algorithm
     using super::leave;
     using super::operator();
 
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
+
     const sort_expression_substitution_map& sigmaS;
     const function_symbol_substitution_map& sigmaF;
 
@@ -216,6 +220,10 @@ struct absinthe_algorithm
     using super::enter;
     using super::leave;
     using super::operator();
+
+#if BOOST_MSVC
+#include "mcrl2/core/detail/builder_msvc.inc.h"
+#endif
 
     data::variable_list make_variables(const data::data_expression_list& x, const std::string& hint) const
     {
