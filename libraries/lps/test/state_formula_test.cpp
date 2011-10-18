@@ -449,6 +449,18 @@ void test_parse()
   BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());
 }
 
+void test_find_nil()
+{
+  state_formula formula;
+  specification spec;
+
+  formula = parse_state_formula("(mu X. X) && (mu X. X)", spec);
+  BOOST_CHECK(find_nil(formula) == false);
+
+  formula = parse_state_formula("[nil]true", spec);
+  BOOST_CHECK(find_nil(formula) == true);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
@@ -458,6 +470,9 @@ int test_main(int argc, char* argv[])
   test_type_checking();
   test_not();
   test_parse();
+
+  // TODO: this test fails due to a bug in translate_reg_frms
+  // test_find_nil();
 
   return 0;
 }

@@ -246,3 +246,4 @@ if __name__ == "__main__":
 
     # regular_formula_traverser
     make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'regular_formula_traverser', 'add_traverser_regular_formula_expressions', 'regular_formulas::regular_formula_traverser_base', class_map, all_classes, 'regular_formulas', 'regular_formulas::regular_formula', regular_formula_dependencies)
+    make_traverser('../../lps/include/mcrl2/modal_formula/traverser.h', 'regular_formula_traverser', 'add_traverser_regular_formula_expressions', 'regular_formulas::regular_formula_traverser', class_map, all_classes, 'state_formulas', 'regular_formulas::regular_formula', regular_formula_dependencies)
