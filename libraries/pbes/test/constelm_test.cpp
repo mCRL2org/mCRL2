@@ -17,6 +17,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 
@@ -85,7 +86,7 @@ std::string t6 =
   "                                                                                      \n"
   "init X(5);                                                                            \n"
   ;
-std::string x6 = "binding_variables = X(n1: Nat), Y(n2: Nat)";
+std::string x6 = "binding_variables = X(n1: Nat)";
 
 std::string t7 =
   "% multiple edges from one vertex, one edge invalidates the assertion of the other: no constants should be found \n"
@@ -216,10 +217,14 @@ void test_pbes(const std::string& pbes_spec, std::string expected_result, bool c
   pbes_constelm_algorithm<pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
 
   // run the algorithm
-  algorithm.run(q, compute_conditions, remove_equations);
+  algorithm.run(q, compute_conditions);
+  if (remove_equations)
+  {
+    remove_unreachable_variables(q);
+  }
   BOOST_CHECK(q.is_well_typed());
   std::cout << "\n--- q ---\n" << pbes_system::pp(q) << std::endl;
-  
+
   pbes_system::detail::pbes_property_map info1(q);
   pbes_system::detail::pbes_property_map info2(expected_result);
   std::string diff = info1.compare(info2);
