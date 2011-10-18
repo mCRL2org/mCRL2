@@ -31,6 +31,17 @@ std::string p1 =
   ;
 std::string r1 = "binding_variable_names = X1, X2, X3, X4";
 
+std::string p2 =
+  "pbes                      \n"
+  " nu X(n:Nat) = Y && X(n); \n"
+  " mu Y = Z;                \n"
+  " nu Z = Y;                \n"
+  " nu U = U;                \n"
+  "                          \n"
+  " init X(0);               \n"
+  ;
+std::string r2 = "binding_variable_names = X, Y, Z";
+
 void test_remove_unreachable_variables(const std::string& pbes_spec, const std::string& expected_result)
 {
   pbes<> p = txt2pbes(pbes_spec);
@@ -57,6 +68,7 @@ void test_remove_unreachable_variables(const std::string& pbes_spec, const std::
 void test_remove_unreachable_variables()
 {
   test_remove_unreachable_variables(p1, r1);
+  test_remove_unreachable_variables(p2, r2);
 }
 
 int test_main(int argc, char* argv[])

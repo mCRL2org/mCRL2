@@ -787,13 +787,12 @@ class pbes_constelm_algorithm
     /// \brief Runs the constelm algorithm
     /// \param p A pbes
     /// \param name_generator A generator for fresh identifiers
-    /// \param remove_redundant_equations If true, redundant equations are removed from the PBES
     /// The call \p name_generator() should return an identifier that doesn't appear
     /// in the pbes \p p
     /// \param compute_conditions If true, propagation conditions are computed. Note
     /// that the currently implementation has exponential behavior.
     template <typename Container>
-    void run(pbes<Container>& p, bool compute_conditions = false, bool remove_redundant_equations = false)
+    void run(pbes<Container>& p, bool compute_conditions = false)
     {
       m_vertices.clear();
       m_edges.clear();
@@ -924,10 +923,6 @@ class pbes_constelm_algorithm
 
       // remove the redundant parameters
       remove_parameters(p, m_redundant_parameters);
-//      if (remove_redundant_equations)
-//      {
-//        ...
-//      }
 
       // print the parameters and equation that are removed
       if (mCRL2logEnabled(log::verbose))
@@ -938,19 +933,9 @@ class pbes_constelm_algorithm
         {
           for (typename std::vector<variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            mCRL2log(log::verbose) << "  parameter (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
+            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
           }
         }
-
-//        if (remove_redundant_equations)
-//        {
-//          mCRL2log(log::verbose) << "\nremoved the following equations:" << std::endl;
-//          const std::set<propositional_variable_decl_type> r = redundant_equations();
-//          for (typename std::set<propositional_variable_decl_type>::const_iterator i = r.begin(); i != r.end(); ++i)
-//          {
-//            mCRL2log(log::verbose) << "  equation " << core::pp(i->name()) << std::endl;
-//          }
-//        }
       }
     }
 };

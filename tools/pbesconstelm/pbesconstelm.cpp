@@ -25,6 +25,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/io.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
@@ -47,15 +48,14 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
     {
       super::parse_options(parser);
       m_compute_conditions = parser.options.count("compute-conditions") > 0;
-      //m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
-      m_remove_redundant_equations = false;
+      m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
     }
 
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
       desc.add_option("compute-conditions", "compute propagation conditions", 'c');
-      // desc.add_option("remove-equations", "remove redundant equations", 'e');
+      desc.add_option("remove-equations", "remove redundant equations", 'e');
     }
 
   public:
@@ -69,13 +69,24 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
       )
     {}
 
+    std::string print_removed_equations(const atermpp::vector<propositional_variable>& removed)
+    {
+      std::ostringstream out;
+      out << "\nremoved the following equations:" << std::endl;
+      for (atermpp::vector<propositional_variable>::const_iterator i = removed.begin(); i != removed.end(); ++i)
+      {
+        out << "  " << pbes_system::pp(*i) << std::endl;
+      }
+      return out.str();
+    }
+
     bool run()
     {
       mCRL2log(verbose) << "pbesconstelm parameters:" << std::endl;
       mCRL2log(verbose) << "  input file:         " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  compute conditions: " << std::boolalpha << m_compute_conditions << std::endl;
-      // mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
+      mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
 
       // load the pbes
       pbes<> p;
@@ -93,7 +104,12 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
           my_pbes_rewriter pbesr(datar);
           pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
           data::number_postfix_generator name_generator("UNIQUE_PREFIX");
-          algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
+          algorithm.run(p, m_compute_conditions);
+          if (m_remove_redundant_equations)
+          {
+            atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+            mCRL2log(verbose) << print_removed_equations(V);
+          }
           break;
         }
         case quantifier_all:
@@ -106,7 +122,12 @@ class pbes_constelm_tool: public pbes_rewriter_tool<rewriter_tool<input_output_t
           data::rewriter_with_variables datarv(datar);
           my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
           pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-          algorithm.run(p, m_compute_conditions, m_remove_redundant_equations);
+          algorithm.run(p, m_compute_conditions);
+          if (m_remove_redundant_equations)
+          {
+            atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+            mCRL2log(verbose) << print_removed_equations(V);
+          }
           break;
         }
         default:
