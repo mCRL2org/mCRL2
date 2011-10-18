@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, October 18, 2011 09:59:12}
+%TCIDATA{LastRevised=Tuesday, October 18, 2011 10:29:44}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1236,7 +1236,30 @@ Note that a direct implementation of this function is extremely inefficient.
 It is expected that a more suitable representation can be found.
 \end{remark}
 
-\newpage
+\section{\newpage ReachableVariables}
+
+Let $\mathcal{E=(\sigma }_{1}X_{1}(d_{X_{1}}:D_{X_{1}})=\varphi
+_{X_{1}})\cdots \mathcal{(\sigma }_{n}X_{n}(d_{X_{n}}:D_{X_{n}})=\varphi
+_{X_{n}})$ be a PBES, and let $X_{init}(e_{init})$ be the initial state. The
+algorithm \textsc{ReachableVariables} computes the reachable predicate
+variables.
+
+\begin{equation*}
+\begin{array}{l}
+\text{\textsc{ReachableVariables(}}\mathcal{E},X_{init}\text{\textsc{)}} \\ 
+\text{visited }:=\{X_{init}\};\text{ explored }:=\emptyset  \\ 
+\text{\textbf{while} visited}\neq \emptyset  \\ 
+\qquad \text{\textbf{choose} }X_{i}\in \text{visited} \\ 
+\qquad \text{visited}:=\text{visited}\setminus \{X_{i}\} \\ 
+\qquad \text{explored }:=\text{ explored}\cup \{X_{i}\} \\ 
+\qquad \text{\textbf{for each} }X_{j}(e)\text{ }\in \mathsf{iocc(}\varphi
+_{X_{i}}{)} \\ 
+\qquad \qquad \text{\textbf{if} }X_{j}\notin \text{ explored} \\ 
+\qquad \qquad \qquad \text{visited }:=\text{ visited}\cup \{X_{j}\} \\ 
+\text{\textbf{return} explored}%
+\end{array}%
+\end{equation*}%
+\pagebreak 
 
 \section{PBES abstraction}
 
