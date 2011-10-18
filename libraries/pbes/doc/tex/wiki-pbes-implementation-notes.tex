@@ -29,7 +29,7 @@
 %TCIDATA{<META NAME="SaveForMode" CONTENT="1">}
 %TCIDATA{BibliographyScheme=Manual}
 %TCIDATA{Created=Tuesday, January 15, 2008 14:02:49}
-%TCIDATA{LastRevised=Tuesday, March 01, 2011 14:42:19}
+%TCIDATA{LastRevised=Tuesday, October 18, 2011 09:59:12}
 %TCIDATA{<META NAME="GraphicsSave" CONTENT="32">}
 %TCIDATA{<META NAME="DocumentShell" CONTENT="Standard LaTeX\Blank - Standard LaTeX Article">}
 %TCIDATA{CSTFile=40 LaTeX article.cst}
@@ -1125,11 +1125,10 @@ as follows:$\qquad \qquad $%
 \text{\textsc{PbesConstelm(}}\mathcal{E}\text{, }\kappa \text{, }\mathsf{eval%
 }\text{\textsc{)}} \\ 
 \text{\textbf{for }}X\in \mathsf{occ}(\mathcal{E)}\text{ \textbf{do }}%
-c_{X}:=\bot \\ 
+c_{X}:=\emptyset  \\ 
 \text{\textbf{for }}X(e)\in \mathsf{iocc}(\kappa \mathcal{)}\text{ \textbf{%
 do }}c_{X}:=update(c_{X},\mathsf{eval}(e[d_{X}:=c_{X}])) \\ 
 todo:=\mathsf{occ}(\kappa \mathcal{)} \\ 
-visited:=todo \\ 
 \text{\textbf{while }}todo\neq \emptyset \text{ \textbf{do}} \\ 
 \qquad \text{\textbf{choose }}X\in todo \\ 
 \qquad todo:=todo\ \backslash \ \{X\} \\ 
@@ -1143,13 +1142,10 @@ _{X})[d_{X}:=c_{X}])\neq false\text{ \textbf{then}} \\
 \textbf{then}} \\ 
 \qquad \qquad \qquad \qquad c_{Y}:=c_{Y}^{\prime } \\ 
 \qquad \qquad \qquad \qquad todo:=todo\cup \{Y\} \\ 
-\qquad \qquad \qquad \qquad visited:=visited\cup \{Y\} \\ 
 \qquad \text{\textbf{for }}i:=1\cdots n\text{ \textbf{do }}\varphi
 _{X_{i}}:=\varphi _{X_{i}}[d_{X_{i}}:=c_{X_{i}}] \\ 
-redundant\_variables:=\{X\in \mathsf{occ}(\mathcal{E)\setminus }visited\ |\
-c_{X}=\bot \} \\ 
-redundant\_parameters:=\{(X,i)\ |\ c_{X}[i]=d_{X}[i]\} \\ 
-\text{\textbf{return }}(redundant\_variables\text{, }redundant\_parameters)%
+constant\_parameters:=\{(X,i)\ |\ c_{X}[i]=d_{X}[i]\} \\ 
+\text{\textbf{return }}constant\_parameters%
 \end{array}%
 \end{equation*}
 
@@ -1157,11 +1153,11 @@ where $update_{X}$ is defined as follows:%
 \begin{equation*}
 update(c,e)=_{def}c^{\prime },\text{ with }c^{\prime }[i]=\left\{ 
 \begin{array}{ll}
-e[i] & \text{if }c=\bot \text{ and }e[i]\text{ is constant} \\ 
+e[i] & \text{if }c=\emptyset \text{ and }e[i]\text{ is constant} \\ 
 c[i] & \text{if }e[i]=c[i] \\ 
 d_{X}[i] & \text{otherwise}%
 \end{array}%
-\right.
+\right. 
 \end{equation*}
 
 and where $needs\_update$ is a boolean function that determines whether an
