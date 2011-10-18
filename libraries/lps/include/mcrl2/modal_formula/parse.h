@@ -256,12 +256,20 @@ state_formula parse_state_formula(std::istream& in, lps::specification& spec, bo
 #ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
   state_formula result = parse_state_formula_old(text);
+  if (find_nil(result))
+  {
+    throw mcrl2::runtime_error("regular formulas containing nil are unsupported!");
+  }
   complete_state_formula(result, spec, check_monotonicity);
   state_formula result2 = parse_state_formula_new(text);
   complete_state_formula(result2, spec, check_monotonicity);
   compare_parse_results(text, result, result2);
 #else
   state_formula result = parse_state_formula_old(in);
+  if (find_nil(result))
+  {
+    throw mcrl2::runtime_error("regular formulas containing nil are unsupported!");
+  }
   complete_state_formula(result, spec, check_monotonicity);
 #endif
   return result;
