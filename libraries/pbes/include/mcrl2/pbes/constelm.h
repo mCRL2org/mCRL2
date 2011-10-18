@@ -687,9 +687,6 @@ class pbes_constelm_algorithm
     /// \brief The redundant parameters.
     std::map<string_type, std::vector<size_t> > m_redundant_parameters;
 
-    /// \brief The redundant propositional variables.
-    std::set<propositional_variable_decl_type> m_redundant_equations;
-
     /// \brief Logs the vertices of the dependency graph.
     std::string print_vertices() const
     {
@@ -787,13 +784,6 @@ class pbes_constelm_algorithm
       return result;
     }
 
-    /// \brief Returns the propositional variables that have optionally been removed by the constelm algorithm
-    /// \return The removed variables
-    const std::set<propositional_variable_decl_type>& redundant_equations() const
-    {
-      return m_redundant_equations;
-    }
-
     /// \brief Runs the constelm algorithm
     /// \param p A pbes
     /// \param name_generator A generator for fresh identifiers
@@ -808,7 +798,6 @@ class pbes_constelm_algorithm
       m_vertices.clear();
       m_edges.clear();
       m_redundant_parameters.clear();
-      m_redundant_equations.clear();
 
       // compute the vertices and edges of the dependency graph
       for (typename Container::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
@@ -850,7 +839,6 @@ class pbes_constelm_algorithm
 
       // initialize the todo list of vertices that need to be processed
       std::deque<propositional_variable_decl_type> todo;
-      std::set<propositional_variable_decl_type> visited;
       std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(p.initial_state());
       for (typename std::set<propositional_variable_type>::iterator i = inst.begin(); i != inst.end(); ++i)
       {
@@ -858,7 +846,6 @@ class pbes_constelm_algorithm
         vertex& u = m_vertices[i->name()];
         u.update(e, constraint_map(), m_data_rewriter);
         todo.push_back(u.variable());
-        visited.insert(u.variable());
       }
 
       mCRL2log(log::debug) << "\n--- initial vertices ---\n" << print_vertices();
@@ -897,28 +884,19 @@ class pbes_constelm_algorithm
             {
               todo.push_back(v.variable());
             }
-            visited.insert(v.variable());
           }
           mCRL2log(log::debug) << "  <target vertex after >" << v.to_string() << "\n";
         }
       }
 
       mCRL2log(log::debug) << "\n--- final vertices ---\n" << print_vertices();
-      mCRL2log(log::debug) << "\n--- visited vertices ---\n" << core::detail::print_pp_set(visited) << std::endl;
 
       // compute the redundant parameters and the redundant equations
       for (typename Container::iterator i = p.equations().begin(); i != p.equations().end(); ++i)
       {
         string_type name = i->variable().name();
         vertex& v = m_vertices[name];
-        if (v.constraints().empty())
-        {
-          if (visited.find(i->variable()) == visited.end())
-          {
-            m_redundant_equations.insert(i->variable());
-          }
-        }
-        else
+        if (!v.constraints().empty())
         {
           std::vector<size_t> r = v.constant_parameter_indices();
           if (!r.empty())
@@ -944,11 +922,11 @@ class pbes_constelm_algorithm
         }
       }
 
-      // remove the redundant parameters and variables/equations
+      // remove the redundant parameters
       remove_parameters(p, m_redundant_parameters);
 //      if (remove_redundant_equations)
 //      {
-//        remove_elements(p.equations(), detail::equation_is_contained_in<propositional_variable_decl_type>(m_redundant_equations));
+//        ...
 //      }
 
       // print the parameters and equation that are removed
