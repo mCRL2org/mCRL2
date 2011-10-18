@@ -21,6 +21,7 @@
 #include <string>
 #include <utility>
 
+#include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/enumerator.h"
@@ -30,13 +31,14 @@
 #include "mcrl2/pbes/pbesinst.h"
 #include "mcrl2/pbes/pbesinst_algorithm.h"
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
+#include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
+using namespace mcrl2::core;
 using namespace mcrl2::log;
 using namespace mcrl2::pbes_system;
 using utilities::command_line_parser;
@@ -63,6 +65,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
     pbes_file_format m_output_format;
     std::string m_finite_parameter_selection;
     bool m_aterm_ascii;
+    bool m_remove_redundant_equations;
 
     /// Sets the transformation strategy.
     /// \param s A transformation strategy.
@@ -107,6 +110,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         int limit = parser.option_argument_as<int>("equation_limit");
         pbes_system::detail::set_bes_equation_limit(limit);
       }
+      m_remove_redundant_equations = parser.options.count("remove-equations") > 0;
       m_aterm_ascii = parser.options.count("aterm-ascii") > 0;
     }
 
@@ -131,6 +135,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
                              make_optional_argument("NAME", "-1"),
                              "Set a limit to the number of generated BES equations",
                              'l');
+      desc.add_option("remove-equations", "remove redundant equations", 'e');
     }
 
     /// \return A string representation of the transformation strategy.
@@ -167,6 +172,19 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       m_aterm_ascii(false)
     {}
 
+    // TODO: reuse the code from pbesconstelm
+    std::string print_removed_equations(const atermpp::vector<propositional_variable>& removed)
+    {
+      std::ostringstream out;
+      out << "\nremoved the following equations:" << std::endl;
+      for (atermpp::vector<propositional_variable>::const_iterator i = removed.begin(); i != removed.end(); ++i)
+      {
+        // TODO: pbes_system::pp gives an ambiguity here :-(
+        out << "  " << core::pp(*i) << std::endl;
+      }
+      return out.str();
+    }
+
     /// Runs the algorithm.
     bool run()
     {
@@ -177,6 +195,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  strategy:           " << strategy_string() << std::endl;
       mCRL2log(verbose) << "  output format:      " << pbes_system::file_format_to_string(pbes_output_format()) << std::endl;
+      mCRL2log(verbose) << "  remove redundant equations: " << std::boolalpha << m_remove_redundant_equations << std::endl;
 
       // load the pbes
       pbes<> p;
@@ -197,7 +216,7 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
       else if (m_strategy == ts_finite)
       {
         pbesinst_finite_algorithm algorithm(rewrite_strategy());
-        detail::pbes_parameter_map parameter_map = detail::parse_pbes_parameter_map(p, m_finite_parameter_selection);
+        pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, m_finite_parameter_selection);
         algorithm.run(p, parameter_map);
       }
 
@@ -211,6 +230,12 @@ class pbesinst_tool: public rewriter_tool<pbes_input_output_tool<input_output_to
         {
            mCRL2log(debug) << "The result is a PBES.\n";
         }
+      }
+
+      if (m_remove_redundant_equations)
+      {
+        atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+        mCRL2log(verbose) << print_removed_equations(V);
       }
 
       // save the result
