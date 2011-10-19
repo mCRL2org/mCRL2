@@ -185,6 +185,11 @@ endif(MSVC)
 include(ConfigureBoost)
 
 ##---------------------------------------------------
+## Option to enable/disable mcrl2-gui tools 
+##---------------------------------------------------
+option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
+
+##---------------------------------------------------
 ## Detect OpenGL 
 ##---------------------------------------------------
 

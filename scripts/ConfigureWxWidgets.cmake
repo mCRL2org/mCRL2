@@ -1,6 +1,3 @@
-
-  option(MCRL2_ENABLE_GUI_TOOLS "Enable/disable creation of GUI tools" ON)
-  
   if(MCRL2_ENABLE_GUI_TOOLS)
   
     option(MCRL2_WITH_WXSTC "Enable/disable compilation of mcrl2xi with wxStyledTextControl support" OFF)
