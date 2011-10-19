@@ -166,7 +166,7 @@ class ConfigPanel: public wxNotebookPage
           fgs->Add(output_ext , wxGBPosition(row, 1), wxGBSpan(1,2));
         }
 
-        suggested_output_file->SetMinSize(wxSize(350,25));
+        suggested_output_file->SetMinSize(wxSize(350,30));
         suggested_output_file->SetTextCtrlProportion(6);
 
         m_fileIO.output_file = filesuggestion.mb_str(wxConvUTF8);
