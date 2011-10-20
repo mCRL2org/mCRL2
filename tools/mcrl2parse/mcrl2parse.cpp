@@ -28,6 +28,7 @@
 #include "mcrl2/bes/parse.h"
 #include "mcrl2/bes/print.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/core/detail/dparser_ambiguity.h"
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
@@ -393,7 +394,7 @@ class mcrl2parse_tool : public input_tool
       process::process_specification procspec;
       pbes_system::pbes<> pbesspec;
 
-      core::parser p(parser_tables_mcrl2);
+      core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
       unsigned int start_symbol_index = 0;
       switch(file_type)
       {

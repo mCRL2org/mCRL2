@@ -161,7 +161,7 @@ struct parser
   parser_table m_table;
   D_Parser* m_parser;
 
-  parser(D_ParserTables& tables)
+  parser(D_ParserTables& tables, D_AmbiguityFn ambiguity_fn = 0)
     : m_table(tables)
   {
     m_parser = new_D_Parser(&tables, 0);
@@ -169,6 +169,10 @@ struct parser
     m_parser->save_parse_tree = 1;
     m_parser->initial_scope = NULL;
     m_parser->dont_use_greediness_for_disambiguation = 1;
+    if (ambiguity_fn)
+    {
+      m_parser->ambiguity_fn = ambiguity_fn;
+    }
   }
 
   ~parser()
