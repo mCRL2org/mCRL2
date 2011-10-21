@@ -2796,10 +2796,10 @@ RewriterCompilingJitty::~RewriterCompilingJitty()
 
 data_expression RewriterCompilingJitty::rewrite(
      const data_expression term,
-     mutable_map_substitution<> &sigma)
+     substitution_type &sigma)
 {
-  mutable_map_substitution<atermpp::map < variable, atermpp::aterm_appl> > internal_sigma;
-  for(mutable_map_substitution<>::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+  internal_substitution_type internal_sigma;
+  for(substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
   {
     internal_sigma[i->first]=toRewriteFormat(i->second);
   }
@@ -2809,7 +2809,7 @@ data_expression RewriterCompilingJitty::rewrite(
 
 atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
      const atermpp::aterm_appl term,
-     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+     internal_substitution_type &sigma)
 {
   if (need_rebuild)
   {
@@ -2817,7 +2817,7 @@ atermpp::aterm_appl RewriterCompilingJitty::rewrite_internal(
   }
   // Save global sigma and restore it afterwards, as rewriting might be recursive with different
   // substitutions, due to the enumerator.
-  mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > *saved_sigma=global_sigma;
+  internal_substitution_type *saved_sigma=global_sigma;
   global_sigma= &sigma;
   const atermpp::aterm_appl result=so_rewr(term);
   global_sigma=saved_sigma;

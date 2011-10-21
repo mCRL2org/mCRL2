@@ -44,6 +44,11 @@ class basic_rewriter
     /// \brief The wrapped Rewriter.
     boost::shared_ptr<detail::Rewriter> m_rewriter;
 
+    /// \brief The type for the substitution that is used internally.
+    typedef detail::Rewriter::substitution_type substitution_type;
+    /// \brief The type for the substitution that is used for internal substitution, internally.
+    typedef detail::Rewriter::internal_substitution_type internal_substitution_type;
+
   public:
 
     /// \brief The term type of the rewriter.
@@ -119,6 +124,10 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
     /// \brief The variable type of the rewriter.
     typedef core::term_traits< expression_type >::variable_type variable_type;
 
+
+    typedef basic_rewriter< atermpp::aterm >::substitution_type substitution_type;
+    typedef basic_rewriter< atermpp::aterm >::internal_substitution_type internal_substitution_type;
+
   protected:
 
     /// \brief Copy constructor for conversion between derived types
@@ -169,6 +178,9 @@ class basic_rewriter< data_expression > : public basic_rewriter< atermpp::aterm 
 class rewriter: public basic_rewriter<data_expression>
 {
   public:
+    typedef basic_rewriter<data_expression>::substitution_type substitution_type;
+    typedef basic_rewriter<data_expression>::internal_substitution_type internal_substitution_type;
+
     /// \brief Constructor.
     /// \param[in] r a rewriter.
     rewriter(const rewriter& r) :
@@ -205,7 +217,7 @@ class rewriter: public basic_rewriter<data_expression>
     /// \return The normal form of d.
     data_expression operator()(const data_expression& d) const
     {
-      mutable_map_substitution<> sigma;
+      substitution_type sigma;
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       mCRL2log(debug) << "REWRITE: " << d;
 #endif 
@@ -232,7 +244,7 @@ class rewriter: public basic_rewriter<data_expression>
       // it is already mapping terms to normal form, and we should not rewrite these again.
       // data_expression result(reconstruct(m_rewriter->rewrite(implement(data::replace_free_variables(d, sigma)),empty_sigma)));
 
-      mutable_map_substitution<> sigma_with_iterator; 
+      substitution_type sigma_with_iterator;
       std::set < variable > free_variables=data::find_free_variables(d);
       for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
       {
@@ -287,7 +299,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
     /// \return The normal form of d.
     data_expression_with_variables operator()(const data_expression_with_variables& d) const
     {
-      mutable_map_substitution<atermpp::map < variable,data_expression> > sigma; 
+      substitution_type sigma;
       data_expression t = m_rewriter->rewrite(d,sigma);
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS
@@ -307,7 +319,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
       // Substitution of sigma in d a priori is not very efficient.
       // data_expression t = this->operator()(replace_free_variables(static_cast< const data_expression& >(d), sigma));
 
-      mutable_map_substitution<> sigma_with_iterator; 
+      substitution_type sigma_with_iterator;
       std::set < variable > free_variables=data::find_free_variables(d);
       for(std::set < variable >::const_iterator it=free_variables.begin(); it!=free_variables.end(); ++it)
       {

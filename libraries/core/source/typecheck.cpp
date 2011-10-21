@@ -1769,7 +1769,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
     mCRL2log(error) << e.what() << std::endl;
     return false;
   }
-
+  return false; // compiler warning
 }
 
 static bool gstcReadInFuncs(ATermList Cons, ATermList Maps)
@@ -5736,7 +5736,7 @@ static bool gstcMActEq(ATermList MAct1, ATermList MAct2)
     if (ATisEqual(Act1,Act2))
     {
       MAct2=ATconcat(ATreverse(NewMAct2),ATgetNext(MAct2));
-      goto gstcMActEq_found;
+      return gstcMActEq(MAct1,MAct2);
     }
     else
     {
@@ -5744,8 +5744,6 @@ static bool gstcMActEq(ATermList MAct1, ATermList MAct2)
     }
   }
   return false;
-gstcMActEq_found:
-  return gstcMActEq(MAct1,MAct2);
 }
 
 static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2)
@@ -5770,7 +5768,7 @@ static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2)
     if (ATisEqual(Act1,Act2))
     {
       MAct2=ATconcat(ATreverse(NewMAct2),ATgetNext(MAct2));
-      goto gstcMActSubEqMA_found;
+      return gstcMActSubEq(MAct1,MAct2);
     }
     else
     {
@@ -5778,8 +5776,6 @@ static bool gstcMActSubEq(ATermList MAct1, ATermList MAct2)
     }
   }
   return false;
-gstcMActSubEqMA_found:
-  return gstcMActSubEq(MAct1,MAct2);
 }
 
 static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2)

@@ -12,7 +12,8 @@
 #define __LIBREWRITE_H
 
 #include "mcrl2/aterm/aterm2.h"
-#include <mcrl2/atermpp/aterm_int.h>
+#include "mcrl2/atermpp/aterm_int.h"
+#include "mcrl2/atermpp/unordered_map.h"
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
@@ -70,6 +71,9 @@ class Rewriter
 
   public:
 
+    typedef mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > internal_substitution_type;
+    typedef mutable_map_substitution<atermpp::map < variable, data_expression > > substitution_type;
+
     const atermpp::aterm_appl internal_true;
     const atermpp::aterm_appl internal_false;
     const atermpp::aterm internal_not;
@@ -115,7 +119,7 @@ class Rewriter
      * \return The normal form of Term.
      **/
     
-    virtual data_expression rewrite(const data_expression term, mutable_map_substitution<> &sigma) = 0;
+    virtual data_expression rewrite(const data_expression term, substitution_type &sigma) = 0;
 
     /**
      * \brief Rewrite a list of mCRL2 data terms.
@@ -124,7 +128,7 @@ class Rewriter
      * \return The list Terms where each element is replaced by its
      *         normal form.
      **/
-    virtual data_expression_list rewrite_list(const data_expression_list Terms, mutable_map_substitution<> &sigma);
+    virtual data_expression_list rewrite_list(const data_expression_list Terms, substitution_type &sigma);
 
     /**
      * \brief Convert an mCRL2 data term to a term in the internal
@@ -148,7 +152,7 @@ class Rewriter
      **/
     virtual atermpp::aterm_appl rewrite_internal(
                      const atermpp::aterm_appl Term, 
-                     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+                     internal_substitution_type &sigma);
     /**
      * \brief Rewrite a list of terms in the internal rewriter
      *        format.
@@ -159,7 +163,7 @@ class Rewriter
      **/
     virtual atermpp::term_list < atermpp::aterm_appl > rewrite_internal_list(
                      const atermpp::term_list < atermpp::aterm_appl > Terms, 
-                     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+                     internal_substitution_type &sigma);
 
     /**
      * \brief Add a rewrite rule to this rewriter.
@@ -183,23 +187,23 @@ class Rewriter
   /* The functions below are public, because they are used in the compiling jitty rewriter */
     atermpp::aterm_appl internal_existential_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
-         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+         internal_substitution_type &sigma);
     atermpp::aterm_appl new_internal_existential_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
-         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+         internal_substitution_type &sigma);
 
     atermpp::aterm_appl internal_universal_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
-         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+         internal_substitution_type &sigma);
     atermpp::aterm_appl new_internal_universal_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
-         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+         internal_substitution_type &sigma);
 
     // Rewrite a where expression where the subdataexpressions are in internal format.
     // It yields a term without a where expression.
     atermpp::aterm_appl rewrite_where(
                       const atermpp::aterm_appl term,
-                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+                      internal_substitution_type &sigma);
 
     // Rewrite an expression with a lambda as outermost symbol. The expression is in internal format.
     // Bound variables are replaced by new variables to avoid a clash with variables in the right hand sides
@@ -208,12 +212,12 @@ class Rewriter
     atermpp::aterm_appl rewrite_single_lambda(
                       const variable_list vl,
                       const atermpp::aterm_appl body,
-                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+                      internal_substitution_type &sigma);
 
     atermpp::aterm_appl rewrite_lambda_application(
                       const atermpp::aterm_appl lambda_term,
                       const atermpp::aterm_appl body,
-                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+                      internal_substitution_type &sigma);
 
 
   protected:
@@ -221,7 +225,7 @@ class Rewriter
     mcrl2::data::data_specification m_data_specification_for_enumeration;
     atermpp::aterm_appl internal_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
-         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+         internal_substitution_type &sigma);
 
     core::identifier_string forall_function_symbol()
     {

@@ -29,19 +29,22 @@ class RewriterProver: public Rewriter
     BDD_Prover* prover_obj;
     boost::shared_ptr<detail::Rewriter> rewr_obj; 
 
+    typedef Rewriter::substitution_type substitution_type;
+    typedef Rewriter::internal_substitution_type internal_substitution_type;
+
   public:
     RewriterProver(const data_specification& DataSpec, mcrl2::data::rewriter::strategy strat, const used_data_equation_selector& equations_selector);
-    ~RewriterProver();
+    virtual ~RewriterProver();
 
     mcrl2::data::detail::RewriteStrategy getStrategy();
 
     data_expression rewrite(
          const data_expression term,
-         mutable_map_substitution<> &sigma);
+         substitution_type &sigma);
 
     atermpp::aterm_appl rewrite_internal(
          const atermpp::aterm_appl term,
-         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+         internal_substitution_type &sigma);
 
     atermpp::aterm_appl toRewriteFormat(const data_expression term);
     data_expression fromRewriteFormat(const atermpp::aterm_appl term);

@@ -139,8 +139,8 @@ static void assign_variables_in_tree(
      mcrl2::data::variable_list::iterator& var_iter,
      mcrl2::data::detail::legacy_rewriter& rewriter,
      const bool opt_precompile_pbes,
-     mcrl2::data::mutable_map_substitution< > &sigma,
-     mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
+     mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
+     mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
   if (is_pair(t))
   {
@@ -1139,8 +1139,8 @@ inline mcrl2::pbes_system::pbes_expression pbes_expression_rewrite_and_simplify(
      mcrl2::pbes_system::pbes_expression p,
      bool opt_precompile_pbes,
      mcrl2::data::detail::legacy_rewriter& R,
-     mcrl2::data::mutable_map_substitution< > &sigma,
-     mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
+     mcrl2::data::detail::legacy_rewriter::substitution_type &sigma,
+     mcrl2::data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
   using namespace mcrl2;
   using namespace mcrl2::pbes_system;
@@ -1364,6 +1364,9 @@ class boolean_equation_system
     bool construct_counter_example;
     atermpp::indexed_set variable_index;  //Used for constructing counter examples
     mcrl2::data::detail::legacy_rewriter Mucks_rewriter;
+    typedef mcrl2::data::detail::legacy_rewriter::substitution_type substitution_type;
+    typedef mcrl2::data::detail::legacy_rewriter::internal_substitution_type internal_substitution_type;
+
     const bool opt_precompile_pbes;
     const bool internal_opt_store_as_tree;
 
@@ -2089,8 +2092,8 @@ class boolean_equation_system
 
       // Declare two variable substitutions for use in the rewriters. Only one is necessary if precompilation
       // can be switched off. 
-      mcrl2::data::mutable_map_substitution< > sigma;
-      mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > sigma_internal;
+      substitution_type sigma;
+      internal_substitution_type sigma_internal;
 
       std::set < sort_expression > bounded_sorts;
       for(std::set < mcrl2::data::variable > :: const_iterator i=diff_set.begin(); i!=diff_set.end(); ++i)

@@ -54,7 +54,6 @@ class rewrite_conversion_helper
 
     /// \brief the known sorts (pointer type to allow assignment)
     // data_specification const*                                m_data_specification;
-
     /// \brief associated rewriter object (pointer type to allow assignment)
     Rewriter*                                                m_rewriter;
 
@@ -287,7 +286,7 @@ class rewrite_conversion_helper
               vl=push_front(vl,fresh_variable);
             }
             vl=reverse(vl);
-            mutable_map_substitution<atermpp::map < variable,data_expression> > sigma;
+            typename Rewriter::substitution_type sigma;
             return exists(vl,reconstruct((data_expression)m_rewriter->rewrite(application(*expression.arguments().begin(),vl),sigma)));
           }
 
@@ -311,7 +310,7 @@ class rewrite_conversion_helper
               vl=push_front(vl,fresh_variable);
             }
             vl=reverse(vl);
-            mutable_map_substitution<atermpp::map < variable,data_expression> > sigma;
+            typename Rewriter::substitution_type sigma;
             return forall(vl,reconstruct((data_expression)m_rewriter->rewrite(application(*expression.arguments().begin(),vl),sigma)));
           }
 

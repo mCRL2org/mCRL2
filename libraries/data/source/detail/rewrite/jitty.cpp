@@ -526,7 +526,7 @@ static bool match_jitty(
 
 atermpp::aterm_appl RewriterJitty::rewrite_aux(
                       const atermpp::aterm_appl term, 
-                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+                      internal_substitution_type &sigma)
 {
   if (gsIsDataVarId(term))
   {
@@ -646,7 +646,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
                       const atermpp::aterm_int op,
                       const atermpp::aterm_appl term, 
-                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+                      internal_substitution_type &sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
   
@@ -770,10 +770,10 @@ data_expression RewriterJitty::fromRewriteFormat(const atermpp::aterm_appl term)
   return fromInner(term);
 }
 
-data_expression RewriterJitty::rewrite(const data_expression term, mutable_map_substitution<> &sigma)
+data_expression RewriterJitty::rewrite(const data_expression term, substitution_type &sigma)
 {
-  mutable_map_substitution<atermpp::map < variable, atermpp::aterm_appl> > internal_sigma;
-  for(mutable_map_substitution<>::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+  internal_substitution_type internal_sigma;
+  for(substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
   {
     internal_sigma[i->first]=toRewriteFormat(i->second);
   }
@@ -782,7 +782,7 @@ data_expression RewriterJitty::rewrite(const data_expression term, mutable_map_s
 
 atermpp::aterm_appl RewriterJitty::rewrite_internal(
      const atermpp::aterm_appl term,
-     mutable_map_substitution<atermpp::map < variable, atermpp::aterm_appl> > &sigma)
+     internal_substitution_type &sigma)
 {
   if (need_rebuild)
   {

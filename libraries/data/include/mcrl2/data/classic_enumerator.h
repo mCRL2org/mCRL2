@@ -51,7 +51,9 @@ class classic_enumerator
 
   public:
     /// \brief The type of objects that represent substitutions
-    typedef mcrl2::data::mutable_map_substitution< atermpp::map< data::variable, data_expression > >  substitution_type;
+    typedef typename Evaluator::substitution_type  substitution_type;
+    typedef typename Evaluator::internal_substitution_type  internal_substitution_type;
+
     /// \brief The type of objects that represent variables
     typedef typename substitution_type::variable_type                     variable_type;
     /// \brief The type of objects that represent expressions
@@ -92,7 +94,7 @@ class classic_enumerator
         iterator_internal(enclosing_classic_enumerator *e,
                           const variable_list &variables,
                           const atermpp::aterm_appl &condition,
-                          mcrl2::data::mutable_map_substitution< atermpp::map< data::variable, atermpp::aterm_appl > > &sigma,
+                          internal_substitution_type &sigma,
                           const bool not_equal_to_false=true,
                           const size_t max_internal_variables=0,
                           const bool do_not_throw_exceptions=false):
@@ -257,7 +259,7 @@ class classic_enumerator
     ///            valid solutions are being generated.
     iterator_internal begin_internal(const variable_list variables,
                                      const atermpp::aterm_appl condition_in_internal_format,
-                                     mcrl2::data::mutable_map_substitution< atermpp::map< data::variable, atermpp::aterm_appl > > &sigma,
+                                     internal_substitution_type &sigma,
                                      const size_t max_internal_variables=0,
                                      const bool not_equal_to_false=true,
                                      const bool do_not_throw_exceptions=false)
@@ -292,7 +294,7 @@ class classic_enumerator
         variable_list m_vars;
         bool m_solution_is_exact;
         bool m_solution_possible;
-        mcrl2::data::mutable_map_substitution< atermpp::map< data::variable, atermpp::aterm_appl > > internal_sigma;
+        internal_substitution_type internal_sigma;
         detail::EnumeratorSolutionsStandard m_generator;
 
       public:

@@ -260,7 +260,7 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
     substituted_vars=push_front(substituted_vars,var); 
     vals = push_front(vals,val); 
 
-    mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > sigma;
+    internal_substitution_type sigma;
     sigma[var]=val;
     // Use a rewrite here to remove occurrences of subexpressions the form t==t caused by
     // replacing in x==t the variable x by t.
@@ -314,6 +314,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
   else if (gsIsWhr(t))
   {
     assert(0); // This is a non expected case as t is a normalform.
+    return t; // compiler warning
   }
   else if (gsIsBinder(t))
   {

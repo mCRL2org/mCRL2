@@ -29,6 +29,9 @@ struct legacy_rewriter : public mcrl2::data::rewriter
 {
   public:
 
+    typedef mcrl2::data::rewriter::substitution_type substitution_type;
+    typedef mcrl2::data::rewriter::internal_substitution_type internal_substitution_type;
+
     template < typename EquationSelector >
     legacy_rewriter(mcrl2::data::data_specification const& d, EquationSelector const& selector, strategy s = jitty) :
         mcrl2::data::rewriter(d, selector, s)
@@ -55,10 +58,10 @@ struct legacy_rewriter : public mcrl2::data::rewriter
       return m_rewriter->toRewriteFormat(t);
     }
   
-    mutable_map_substitution < atermpp::map < variable,atermpp::aterm_appl> > convert_to(const mutable_map_substitution <> &sigma) const
+    internal_substitution_type convert_to(const substitution_type &sigma) const
     {
-      mutable_map_substitution < atermpp::map < variable,atermpp::aterm_appl> > sigma_in_internal_format;
-      for(mutable_map_substitution <>::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+      internal_substitution_type sigma_in_internal_format;
+      for(substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
       {
         sigma_in_internal_format[i->first]=convert_to(i->second);
       }
@@ -70,14 +73,14 @@ struct legacy_rewriter : public mcrl2::data::rewriter
       return m_rewriter->fromRewriteFormat(t);
     }
   
-    atermpp::aterm_appl rewrite_internal(atermpp::aterm_appl const& t, mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) const
+    atermpp::aterm_appl rewrite_internal(atermpp::aterm_appl const& t, internal_substitution_type &sigma) const
     {
       return m_rewriter->rewrite_internal(t,sigma);
     } 
   
     atermpp::term_list <atermpp::aterm_appl> rewrite_internal_list(
          const atermpp::term_list<atermpp::aterm_appl> & t,
-         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) const
+         internal_substitution_type &sigma) const
     {
       return m_rewriter->rewrite_internal_list(t,sigma);
     } 

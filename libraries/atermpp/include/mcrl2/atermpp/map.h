@@ -99,7 +99,7 @@ class map: public std::map<Key, T, Compare, Allocator>, IProtectedATerm
     }
 
     /// Destructor.
-    ~map()
+    virtual ~map()
     {
       ATunprotectProtectedATerm(this);
     }
@@ -195,7 +195,7 @@ class multimap: public std::multimap<Key, T, Compare, Allocator>, IProtectedATer
     }
 
     /// Destructor.
-    ~multimap()
+    virtual ~multimap()
     {
       ATunprotectProtectedATerm(this);
     }

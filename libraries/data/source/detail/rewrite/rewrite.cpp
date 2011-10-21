@@ -77,7 +77,7 @@ bool occur_check(const variable v, const atermpp::aterm_appl e)
 
 data_expression_list Rewriter::rewrite_list(
      const data_expression_list terms,
-     mutable_map_substitution<> &sigma)
+     substitution_type &sigma)
 {
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array,data_expression, terms.size());
   size_t position=0;
@@ -95,21 +95,21 @@ data_expression_list Rewriter::rewrite_list(
   return l;
 }
 
-atermpp::aterm_appl Rewriter::toRewriteFormat(const data_expression Term)
+atermpp::aterm_appl Rewriter::toRewriteFormat(const data_expression /*Term*/)
 {
   assert(0);
   return atermpp::aterm_appl();
 }
 
-data_expression Rewriter::fromRewriteFormat(const atermpp::aterm_appl Term)
+data_expression Rewriter::fromRewriteFormat(const atermpp::aterm_appl /*Term*/)
 {
   assert(0);
   return data_expression();
 }
 
 atermpp::aterm_appl Rewriter::rewrite_internal(
-     const atermpp::aterm_appl Term, 
-     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+     const atermpp::aterm_appl /*Term*/,
+     internal_substitution_type & /*sigma*/)
 {
   assert(0);
   return data_expression();
@@ -117,7 +117,7 @@ atermpp::aterm_appl Rewriter::rewrite_internal(
 
 atermpp::term_list<atermpp::aterm_appl> Rewriter::rewrite_internal_list(
     const atermpp::term_list<atermpp::aterm_appl> terms, 
-    mutable_map_substitution<atermpp::map < variable, atermpp::aterm_appl> > &sigma)
+    internal_substitution_type &sigma)
 {
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(term_array, atermpp::aterm_appl, terms.size());
   size_t position=0;
@@ -148,7 +148,7 @@ bool Rewriter::removeRewriteRule(const data_equation /*Rule*/)
 
 atermpp::aterm_appl Rewriter::rewrite_where(
                       const atermpp::aterm_appl term,
-                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+                      internal_substitution_type &sigma)
 {
   using namespace atermpp;
   const term_list < atermpp::aterm_appl > assignment_list(term(1));
@@ -177,7 +177,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
 atermpp::aterm_appl Rewriter::rewrite_single_lambda(
                       const variable_list vl,
                       const atermpp::aterm_appl body,
-                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+                      internal_substitution_type &sigma)
 {
   assert(vl.size()>0);
   // A lambda term without arguments; Take care that the bound variable is made unique with respect to 
@@ -191,7 +191,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   {
     // Restrict the scope of variables_in_sigma.
     std::set < variable > variables_in_sigma;
-    for(mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> >::const_iterator it=sigma.begin();
+    for(internal_substitution_type::const_iterator it=sigma.begin();
                   it!=sigma.end(); ++it)
     {
       variables_in_sigma.insert(it->first);
@@ -268,7 +268,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 atermpp::aterm_appl Rewriter::rewrite_lambda_application(
                       const atermpp::aterm_appl lambda_term,
                       const atermpp::aterm_appl t,
-                      mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+                      internal_substitution_type &sigma)
 {
    using namespace atermpp;
 
@@ -314,7 +314,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
 
 atermpp::aterm_appl Rewriter::new_internal_existential_quantifier_enumeration(
      const atermpp::aterm_appl t,
-     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) 
+     internal_substitution_type &sigma)
 {
   // This is a quantifier elimination that works on the existential quantifier as specified
   // in data types, i.e. without applying the implement function anymore. This function is
@@ -369,7 +369,7 @@ atermpp::aterm_appl Rewriter::new_internal_existential_quantifier_enumeration(
 
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
      const atermpp::aterm_appl t,
-     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma) 
+     internal_substitution_type &sigma)
 {
   /* Get Body of Exists */
   const atermpp::aterm_appl t1 = t(1);
@@ -456,7 +456,7 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
 
 atermpp::aterm_appl Rewriter::new_internal_universal_quantifier_enumeration(
      const atermpp::aterm_appl t,
-     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+     internal_substitution_type &sigma)
 {
   /* Get Body of forall */
   const atermpp::aterm_appl t1 = t(2);
@@ -526,7 +526,7 @@ atermpp::aterm_appl Rewriter::new_internal_universal_quantifier_enumeration(
 
 atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
      const atermpp::aterm_appl t,
-     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+     internal_substitution_type &sigma)
 {
   /* Get Body of forall */
   const atermpp::aterm_appl t1 = t(1);
@@ -635,7 +635,7 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
 
 atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(
      const atermpp::aterm_appl t,
-     mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma)
+     internal_substitution_type &sigma)
 {
   atermpp::aterm_appl result=t;
 #ifndef MCRL2_DISABLE_QUANTIFIER_ENUMERATION
@@ -757,7 +757,7 @@ void CheckRewriteRule(const data_equation DataEqn)
   {
     check_vars(DataEqn.lhs(),rule_vars,lhs_vars);
   }
-  catch (variable var)
+  catch (variable& var)
   {
     // This should never occur if DataEqn is a valid data equation
     mCRL2log(log::error) << "Data Equation: " << atermpp::aterm_appl(DataEqn) << std::endl;
@@ -771,7 +771,7 @@ void CheckRewriteRule(const data_equation DataEqn)
     std::set <variable> dummy;
     check_vars(DataEqn.condition(),lhs_vars,dummy);
   }
-  catch (variable var)
+  catch (variable& var)
   {
     throw runtime_error("variable " + pp(var) + " occurs in condition of equation but not in left-hand side (in equation: " + 
                     pp(DataEqn) + "); equation cannot be used as rewrite rule");
@@ -783,7 +783,7 @@ void CheckRewriteRule(const data_equation DataEqn)
     std::set <variable> dummy;
     check_vars(DataEqn.rhs(),lhs_vars,dummy);
   }
-  catch (variable var)
+  catch (variable& var)
   {
     throw runtime_error("variable " + pp(var) + " occurs in right-hand side of equation but not in left-hand side (in equation: " + 
                 pp(DataEqn) + "); equation cannot be used as rewrite rule");
@@ -815,6 +815,7 @@ bool isValidRewriteRule(const data_equation data_eqn)
   {
     return false;
   }
+  return false; // compiler warning
 }
 
 void PrintRewriteStrategy(FILE* stream, RewriteStrategy strat)

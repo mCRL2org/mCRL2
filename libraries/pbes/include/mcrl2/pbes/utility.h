@@ -199,8 +199,8 @@ static pbes_expression make_disjunction(const atermpp::set < pbes_expression> &d
 static void restore_saved_substitution(const atermpp::map<data::variable,atermpp::aterm_appl> &saved_substitutions,
                                        data::detail::legacy_rewriter& /* r */,
                                        const bool use_internal_rewrite_format,
-                                       data::mutable_map_substitution< > &sigma,
-                                       data::mutable_map_substitution< atermpp::map < data::variable, atermpp::aterm_appl > > &sigma_internal)
+                                       data::detail::legacy_rewriter::substitution_type &sigma,
+                                       data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
   for (atermpp::map<data::variable,atermpp::aterm_appl>::const_iterator i=saved_substitutions.begin();
        i!=saved_substitutions.end(); ++i)
@@ -257,8 +257,8 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
   const data::data_specification& data,
   data::detail::legacy_rewriter& r,
   const bool use_internal_rewrite_format,
-  data::mutable_map_substitution< > &sigma,
-  data::mutable_map_substitution< atermpp::map < data::variable, atermpp::aterm_appl > > &sigma_internal)
+  data::detail::legacy_rewriter::substitution_type &sigma,
+  data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
 {
   using namespace pbes_system::pbes_expr;
   using namespace pbes_system::accessors;

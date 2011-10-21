@@ -34,6 +34,8 @@ struct ns_info
 
   // Uses terms in internal format... *Sigh*
   typedef mcrl2::data::classic_enumerator< mcrl2::data::detail::legacy_rewriter > enumerator_type;
+  typedef enumerator_type::substitution_type substitution_type;
+  typedef enumerator_type::internal_substitution_type internal_substitution_type;
 
   const mcrl2::data::data_specification &m_specification;
   // Storing the legacy rewriter below by reference can lead to problems.
@@ -52,7 +54,7 @@ struct ns_info
   size_t* current_id;
 
   enumerator_type::iterator_internal get_sols(ATermList v, const ATerm c, 
-                                              mcrl2::data::mutable_map_substitution<atermpp::map < mcrl2::data::variable,atermpp::aterm_appl> > &sigma)
+                                              internal_substitution_type &sigma)
   {
     return m_enumerator.begin_internal(mcrl2::data::variable_list(v),(ATermAppl)c, sigma); // Laatste expressie is intern.
   }
@@ -71,6 +73,9 @@ struct ns_info
 class NextStateGenerator 
 {
   public:
+    typedef ns_info::substitution_type substitution_type;
+    typedef ns_info::internal_substitution_type internal_substitution_type;
+
     NextStateGenerator(ATerm State, ns_info& Info, size_t identifier, bool SingleSummand = false, size_t SingleSummandIndex = 0);
     ~NextStateGenerator();
 
@@ -89,7 +94,7 @@ class NextStateGenerator
     size_t sum_idx;
 
     ATerm cur_state;
-    mcrl2::data::mutable_map_substitution<atermpp::map < mcrl2::data::variable,atermpp::aterm_appl> > current_substitution;
+    internal_substitution_type current_substitution;
     ATerm cur_act;
     ATermList cur_nextstate;
 
@@ -110,6 +115,9 @@ class NextState
 {
     friend class NextStateGenerator;
   public:
+    typedef NextStateGenerator::substitution_type substitution_type;
+    typedef NextStateGenerator::internal_substitution_type internal_substitution_type;
+
     NextState(mcrl2::lps::specification const& spec, bool allow_free_vars, int state_format, const mcrl2::data::detail::legacy_rewriter& e);
     ~NextState();
 

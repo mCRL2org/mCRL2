@@ -32,22 +32,25 @@ namespace detail
 class RewriterCompilingJitty: public Rewriter
 {
   public:
+    typedef Rewriter::substitution_type substitution_type;
+    typedef Rewriter::internal_substitution_type internal_substitution_type;
+
     RewriterCompilingJitty(const data_specification& DataSpec, const used_data_equation_selector &);
     virtual ~RewriterCompilingJitty();
 
     RewriteStrategy getStrategy();
 
-    data_expression rewrite(const data_expression term, mutable_map_substitution<> &sigma);
+    data_expression rewrite(const data_expression term, substitution_type &sigma);
 
     atermpp::aterm_appl rewrite_internal(
          const atermpp::aterm_appl term,
-         mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &sigma);
+         internal_substitution_type &sigma);
 
     atermpp::aterm_appl toRewriteFormat(const data_expression term);
     data_expression fromRewriteFormat(const atermpp::aterm_appl term);
     bool addRewriteRule(const data_equation rule);
     bool removeRewriteRule(const data_equation rule);
-    mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > *global_sigma;
+    internal_substitution_type *global_sigma;
 
   private:
     atermpp::set < data_equation > rewrite_rules;
@@ -75,7 +78,6 @@ class RewriterCompilingJitty: public Rewriter
 
     void (*so_rewr_init)(RewriterCompilingJitty *);
     void (*so_rewr_cleanup)();
-    // atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl,mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > &);
     atermpp::aterm_appl(*so_rewr)(const atermpp::aterm_appl);
 
     void add_base_nfs(nfs_array &a, const atermpp::aterm_int opid, size_t arity);

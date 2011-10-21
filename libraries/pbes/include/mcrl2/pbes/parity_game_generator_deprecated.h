@@ -157,8 +157,8 @@ class parity_game_generator_deprecated: public parity_game_generator
     /// \brief Translate equations to internal format, and store them in m_internal_equations
     void populate_internal_equations()
     {
-      mcrl2::data::mutable_map_substitution< > sigma;
-      mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > sigma_internal;
+      data::detail::legacy_rewriter::substitution_type sigma;
+      data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
       for (atermpp::vector<pbes_equation>::const_iterator i = m_pbes.equations().begin(); i != m_pbes.equations().end(); ++i)
       {
         m_internal_equations.push_back(
@@ -174,8 +174,8 @@ class parity_game_generator_deprecated: public parity_game_generator
     /// \brief Simplify expression e.
     pbes_expression rewrite_and_simplify(
            const pbes_expression& e,
-           mcrl2::data::mutable_map_substitution< > &sigma,
-           mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
+           data::detail::legacy_rewriter::substitution_type &sigma,
+           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
     {
       return ::bes::pbes_expression_rewrite_and_simplify(e, m_precompile_pbes, datar_internal,sigma,sigma_internal);
     }
@@ -183,8 +183,8 @@ class parity_game_generator_deprecated: public parity_game_generator
     /// \brief Substitute and rewrite e.
     pbes_expression substitute_and_rewrite(
            const pbes_expression& e,
-           mcrl2::data::mutable_map_substitution< > &sigma,
-           mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
+           data::detail::legacy_rewriter::substitution_type &sigma,
+           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
     {
       return detail::pbes_expression_substitute_and_rewrite
           (e,
@@ -210,8 +210,8 @@ class parity_game_generator_deprecated: public parity_game_generator
     void make_substitution_internal(
            const data::variable_list& v,
            const data::data_expression_list& e,
-           mcrl2::data::mutable_map_substitution< > &sigma,
-           mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
+           data::detail::legacy_rewriter::substitution_type &sigma,
+           data::detail::legacy_rewriter::internal_substitution_type &sigma_internal)
     {
       data::variable_list::const_iterator i = v.begin();
       for(data::data_expression_list::const_iterator j = e.begin();
@@ -230,27 +230,6 @@ class parity_game_generator_deprecated: public parity_game_generator
       }
     }
 
-    /// \brief Remove a substitution from the internal rewriter; Became superfluous... JFG
-    /* void clear_substitution_internal(
-        const data::variable_list& v,
-        mcrl2::data::mutable_map_substitution< > &sigma,
-        mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > &sigma_internal)
-    {
-      for(data::variable_list::const_iterator i = v.begin();
-          i != v.end(); ++i)
-      {
-        // datar_internal.clear_internally_associated_value(*i);
-        if (m_precompile_pbes)
-        {
-          sigma_internal[*i]=atermpp::aterm(*i);
-        }
-        else
-        {
-          sigma[*i]=data::data_expression(*i);
-        }
-      }
-    } */
-
     virtual
     pbes_expression expand_rhs(const pbes_expression& psi)
     {
@@ -263,11 +242,10 @@ class parity_game_generator_deprecated: public parity_game_generator
 
         pbes_expression result;
 
-        mcrl2::data::mutable_map_substitution< > sigma;
-        mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > sigma_internal;
+        data::detail::legacy_rewriter::substitution_type sigma;
+        data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
         make_substitution_internal(pbes_eqn.variable().parameters(), tr::param(psi),sigma,sigma_internal);
         result = substitute_and_rewrite(pbes_eqn.formula(),sigma,sigma_internal);
-        // clear_substitution_internal(pbes_eqn.variable().parameters(),sigma,sigma_internal);
 
         mCRL2log(log::debug2, "parity_game_generator") << (m_precompile_pbes?(result.to_string()):(tr::pp(result))) << std::endl;
 
@@ -300,8 +278,8 @@ class parity_game_generator_deprecated: public parity_game_generator
         compute_priorities(m_pbes.equations());
 
         // Add a BES equation for the initial state.
-        mcrl2::data::mutable_map_substitution< > sigma;
-        mcrl2::data::mutable_map_substitution< atermpp::map < mcrl2::data::variable, atermpp::aterm_appl > > sigma_internal;
+        data::detail::legacy_rewriter::substitution_type sigma;
+        data::detail::legacy_rewriter::internal_substitution_type sigma_internal;
         propositional_variable_instantiation phi = rewrite_and_simplify(m_pbes.initial_state(),sigma,sigma_internal);
         add_bes_equation(phi, m_priorities[phi.name()]);
 

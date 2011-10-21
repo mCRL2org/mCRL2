@@ -62,6 +62,10 @@ enum Answer
 
 class Prover:protected mcrl2::data::rewriter
 {
+  public:
+    typedef mcrl2::data::rewriter::substitution_type substitution_type;
+    typedef mcrl2::data::rewriter::internal_substitution_type internal_substitution_type;
+
   protected:
     /// \brief An expression of sort Bool in the internal format of mCRL2.
     data_expression f_formula;

@@ -82,6 +82,10 @@ namespace detail
 
 class BDD_Prover: public Prover
 {
+  public:
+    typedef Prover::substitution_type substitution_type;
+    typedef Prover::internal_substitution_type internal_substitution_type;
+
   private:
 
     /// \brief Flag indicating whether or not the result of the comparison between the first two arguments
@@ -410,7 +414,7 @@ class BDD_Prover: public Prover
 
     /// \brief A binary decision diagram in the internal representation of the rewriter.
     atermpp::aterm_appl f_internal_bdd;
-    mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > bdd_sigma;
+    internal_substitution_type bdd_sigma;
 
     /// \brief A binary decision diagram in the internal representation of mCRL2.
     data_expression f_bdd;
@@ -468,20 +472,20 @@ class BDD_Prover: public Prover
     }
   
     /// \brief Set the substitution to be used to construct the BDD
-    void set_substitution(mutable_map_substitution< > &sigma)
+    void set_substitution(substitution_type &sigma)
     {
       bdd_sigma.clear();
-      for(mutable_map_substitution<>::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+      for(substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
       { 
         bdd_sigma[i->first]=m_rewriter->toRewriteFormat(i->second);
       }
     }
 
     /// \brief Set the substitution in internal format to be used to construct the BDD
-    void set_substitution_internal(mutable_map_substitution< atermpp::map < variable, atermpp::aterm_appl> >&sigma)
+    void set_substitution_internal(internal_substitution_type &sigma)
     {
       bdd_sigma.clear();
-      for(mutable_map_substitution< atermpp::map < variable, atermpp::aterm_appl> >::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
+      for(internal_substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
       { 
         bdd_sigma[i->first]=i->second;
       }

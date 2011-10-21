@@ -649,7 +649,7 @@ NextState::NextState(mcrl2::lps::specification const& spec,
   // Rewrite the state arguments en block, as otherwise the generation of new symbols in the
   // rewriter is intermingled with rewriting, causing the rewriter to rewrite too often.
   
-  mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > dummy;
+  internal_substitution_type dummy;
   for (size_t i=0; i<info.statelen; i++)
   {
     stateargs[i] = (ATerm)(ATermAppl)info.m_rewriter.rewrite_internal((atermpp::aterm_appl)stateargs[i],dummy);
@@ -960,6 +960,8 @@ NextStateGenerator::NextStateGenerator(ATerm State, ns_info& Info, size_t identi
   }
   ATprotectArray(stateargs,info.statelen);
 
+  //current_substitution.reserve(info.statelen);
+
   reset(State, SingleSummandIndex);
 }
 
@@ -999,6 +1001,7 @@ void NextStateGenerator::set_substitutions()
 #endif
         }
       }
+
       break;
     case GS_STATE_TREE:
       SetTreeStateVars(cur_state,&l);

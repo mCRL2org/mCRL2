@@ -234,6 +234,7 @@ int TakeComponent(ATerm t)
   {
     return s_pt;
   }
+  else
   {
     ATermList sources = (ATermList) ATtableGet(graph_i, t);
     if (visited[d] == dfsn)
@@ -857,11 +858,10 @@ SVCstateIndex ReturnEquivalenceClasses(SVCstateIndex initState, bool
 {
   ATermList blocks = StableBlockNumbers();
   omitTauLoops = deleteTauLoops;
-  {
-    SVCstateIndex result =  MakeEquivalenceClasses(initState, blocks);
-    BlockCode(-1);
-    return result;
-  }
+
+  SVCstateIndex result =  MakeEquivalenceClasses(initState, blocks);
+  BlockCode(-1);
+  return result;
 }
 
 int WriteData(SVCstateIndex initState, int omit_tauloops)
