@@ -55,7 +55,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
                                 )
   {
     typedef typename Container::value_type T;
-    
+
     // print nothing if the container is empty
     if (container.empty())
     {
@@ -65,7 +65,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     typename Container::const_iterator first = container.begin();
     typename Container::const_iterator last = container.end();
 
-    derived().print(opener);   
+    derived().print(opener);
 
     while (first != last)
     {
@@ -87,7 +87,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
         derived().print(": ");
         print_list(first->sorts(), "", "", " # ");
       }
-      
+
       first = i;
     }
     derived().print(closer);
@@ -102,7 +102,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
                                                  )
   {
     typedef typename Container::value_type T;
-    
+
     // print nothing if the container is empty
     if (container.empty())
     {
@@ -126,7 +126,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     }
 
     // do the actual printing
-    derived().print(opener);   
+    derived().print(opener);
     for (std::vector<data::sort_expression_list>::iterator i = sort_lists.begin(); i != sort_lists.end(); ++i)
     {
       if (i != sort_lists.begin())
@@ -180,7 +180,7 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     }
     else
     {
-      derived()(x.actions());
+      print_list(x.actions(), "", "", "|");
     }
     if (x.has_time())
     {
@@ -260,46 +260,24 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
 
 } // namespace detail
 
-/// \brief Prints the object t to a stream.
-template <typename T>
-void print(const T& t, std::ostream& out)
+/// \brief Prints the object x to a stream.
+struct stream_printer
 {
-  core::detail::apply_printer<lps::detail::printer> printer(out);
-  printer(t);
-}
+  template <typename T>
+  void operator()(const T& x, std::ostream& out)
+  {
+    core::detail::apply_printer<lps::detail::printer> printer(out);
+    printer(x);
+  }
+};
 
-/// \brief Returns a string representation of the object t.
+/// \brief Returns a string representation of the object x.
 template <typename T>
-std::string print(const T& t)
+std::string pp(const T& x)
 {
   std::ostringstream out;
-  lps::print(t, out);
+  stream_printer()(x, out);
   return out.str();
-}
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
-std::string pp(const T& t)
-{
-  MCRL2_CHECK_PP(core::pp(t), lps::print(t), t.to_string());
-  return core::pp(t);
-}
-
-/// \brief Pretty print a linear process
-inline
-std::string pp(const linear_process& p, core::t_pp_format pp_format = core::ppDefault)
-{
-  MCRL2_CHECK_PP(core::pp(linear_process_to_aterm(p)), lps::print(p), linear_process_to_aterm(p).to_string());
-  return core::pp(linear_process_to_aterm(p), pp_format);
-}
-
-/// \brief Pretty print a specification 
-inline
-std::string pp(const specification& spec, core::t_pp_format pp_format = core::ppDefault)
-{
-  MCRL2_CHECK_PP(core::pp(specification_to_aterm(spec)), lps::print(spec), specification_to_aterm(spec).to_string());
-  return core::pp(specification_to_aterm(spec), pp_format);
 }
 
 } // namespace lps

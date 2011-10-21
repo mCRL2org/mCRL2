@@ -236,7 +236,7 @@ class specification_basic_type:public boost::noncopyable
       timeIsBeingUsed(false)
     {
       objectIndexTable=ATindexedSetCreate(1024,75);
-      
+
       // find_identifiers does not find the identifiers in the enclosed data specification.
       fresh_identifier_generator.add_identifiers(process::find_identifiers(procspec));
       // So, the identifiers in the data type must be added explicitly.
@@ -690,7 +690,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (isnew==0)
       {
-        throw mcrl2::runtime_error("Action " + core::pp(actionId) + " is added twice\n");
+        throw mcrl2::runtime_error("Action " + lps::pp(actionId) + " is added twice\n");
       }
 
       const identifier_string str=actionId.name();
@@ -5234,9 +5234,9 @@ class specification_basic_type:public boost::noncopyable
           {
             // set equaluptillnow if the arguments of this case function are all equal,
             // or are all equal to global variables. Setting a case function
-            // C(e,v,dc1) to the value v, where dc1 is a global variable can result in 
+            // C(e,v,dc1) to the value v, where dc1 is a global variable can result in
             // the growth of the state space, as dc1 is not set to a default value, but
-            // keeps the value v. 
+            // keeps the value v.
             equaluptillnow=((equalterm==auxresult1)||
                                ((equalterm==data_expression()||is_global_variable(equalterm))&&
                                                     is_global_variable(auxresult1)));
@@ -7616,7 +7616,7 @@ class specification_basic_type:public boost::noncopyable
         bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then);
         if (ct && options.add_delta)
         {
-          mCRL2log(log::warning) << "process " << procId.name() << 
+          mCRL2log(log::warning) << "process " << procId.name() <<
               " contains time, which is now not preserved. Use --timed or -T or untick add deadlocks for a corrent timed linearisation..\n";
         }
         if (objectdata[n].containstime!=ct)
@@ -7993,7 +7993,7 @@ class specification_basic_type:public boost::noncopyable
         if (multiaction==push_front(action_list(),terminationAction))
         {
           acts=push_front(acts,terminationAction.label());
-          mCRL2log(log::warning) << "The action " << core::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
+          mCRL2log(log::warning) << "The action " << lps::pp(terminationAction) << " is added to signal termination of the linear process." << std::endl;
           return;
         }
       }

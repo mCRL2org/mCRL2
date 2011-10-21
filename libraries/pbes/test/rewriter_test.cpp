@@ -153,7 +153,7 @@ template <typename Term>
 std::string printer(const Term& x)
 {
   std::ostringstream out;
-  out << core::pp(x);
+  out << pbes_system::pp(x);
 #ifdef PBES_REWRITE_TEST_DEBUG
   out << " " << x;
 #endif

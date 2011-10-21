@@ -95,11 +95,11 @@ void test_fresh_variables()
   context.insert("n0_Sx0");
   context.insert("n_S");
   context.insert("s3_S");
-  std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
+  std::cout << "\n" << core::detail::print_set(context, core::detail::default_printer(), "context") << std::endl;
   variable_list yi = atermpp::make_list(variable("e3_S", basic_sort("A")));
-  std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
+  std::cout << "\nyi " << data::pp(yi) << std::endl;
   variable_list y = fresh_variables(yi, context);
-  std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
+  std::cout << "\ny " << data::pp(y) << std::endl;
   BOOST_CHECK(y.size() == 1);
   BOOST_CHECK(std::string(y.front().name()) != " e3_Sx0");
 }

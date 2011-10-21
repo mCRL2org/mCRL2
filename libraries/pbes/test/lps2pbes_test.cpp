@@ -238,7 +238,7 @@ void test_lps2pbes3()
   bool timed = false;
   p = lps2pbes(SPEC, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
-  std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
+  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
   core::garbage_collect();
 }
 
@@ -269,7 +269,7 @@ void test_lps2pbes4()
   std::cout << "formula = " << state_formulas::pp(formula) << std::endl;
   bool timed = false;
   pbes<> p = lps2pbes(spec, formula, timed);
-  std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
+  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
   BOOST_CHECK(p.is_well_typed());
   core::garbage_collect();
 }
@@ -462,7 +462,7 @@ void test_example()
   bool timed = false;
   p = lps2pbes(SPEC, FORMULA, timed);
   BOOST_CHECK(p.is_well_typed());
-  std::cerr << "p = " << core::pp(pbes_to_aterm(p)) << std::endl;
+  std::cerr << "p = " << pbes_system::pp(p) << std::endl;
 
   bool result = pbes2_bool_test(p);
   BOOST_CHECK(result == true);

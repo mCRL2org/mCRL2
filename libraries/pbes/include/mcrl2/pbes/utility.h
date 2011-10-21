@@ -454,7 +454,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                       std::cerr << "Used " << no_variables << " variables when eliminating universal quantifier\n";
                       if (!use_internal_rewrite_format)
                       {
-                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
+                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                       }
                     }
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);
@@ -512,7 +512,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
         if (!use_internal_rewrite_format)
         {
-          message.append(" in ").append(mcrl2::core::pp(p));
+          message.append(" in ").append(mcrl2::data::pp(p));
         }
 
         throw mcrl2::runtime_error(message);
@@ -632,7 +632,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                       std::cerr << "Used " << no_variables << " variables when eliminating existential quantifier\n";
                       if (!use_internal_rewrite_format)
                       {
-                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::core::pp(*t) << std::endl;
+                        std::cerr << "Vars: " << data::pp(data_vars) << "\nExpression: " << mcrl2::pbes_system::pp(*t) << std::endl;
                       }
                     }
                     new_data_vars = atermpp::push_front(new_data_vars, new_variable);
@@ -689,7 +689,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
 
         if (!use_internal_rewrite_format)
         {
-          message.append(" in ").append(mcrl2::core::pp(p));
+          message.append(" in ").append(mcrl2::pbes_system::pp(p));
         }
 
         throw mcrl2::runtime_error(message);

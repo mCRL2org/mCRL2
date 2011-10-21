@@ -1,4 +1,4 @@
-// Author(s): Aad Mathijssen
+// Author(s): Wieger Wesselink
 // Copyright: see the accompanying file COPYING or copy at
 // https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
 //
@@ -23,6 +23,7 @@
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/atermpp/aterm.h"
+#include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/core/detail/precedence.h"
@@ -83,41 +84,9 @@ void PrintPart_CXX(std::ostream& out_stream, const ATerm part,
 **/
 std::string PrintPart_CXX(const ATerm part, t_pp_format pp_format = ppDefault);
 
-/** \brief Return a textual description of an ATerm representation of an
- *         mCRL2 specification or expression.
- *  \param[in] part An ATerm representation of a part of an mCRL2
- *             specification or expression.
- *  \param[in] pp_format A pretty print format.
- *  \return A textual representation of part according to method pp_format.
-**/
-template <typename Term>
-std::string pp(Term part, t_pp_format pp_format = ppDefault)
-{
-  return PrintPart_CXX(atermpp::aterm_traits<Term>::term(part), pp_format);
-}
-
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-
-inline
-void check_pp(const std::string& s1, const std::string& s2, const std::string& s3)
-{
-#ifndef MCRL2_DISABLE_PRINT_CHECKS
-  if (s1 != s2)
-  {
-    std::clog << "--- WARNING: difference detected between old and new pretty printer ---\n";
-    std::clog << "old:   " << s1 << std::endl;
-    std::clog << "new:   " << s2 << std::endl;
-    std::clog << "aterm: " << s3 << std::endl;
-#ifdef MCRL2_THROW_ON_PRINT_DIFFERENCES
-    throw mcrl2::runtime_error("pretty print difference detected");
-#endif
-  }
-#endif
-}
-
-#define MCRL2_CHECK_PP(s1, s2, s3) core::detail::check_pp(s1, s2, s3);
 
 template <typename Derived>
 struct printer: public core::traverser<Derived>
@@ -207,21 +176,54 @@ struct printer: public core::traverser<Derived>
   }
 
   template <typename T>
+  void operator()(const atermpp::term_appl<T>& x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(x.to_string());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  template <typename T>
   void operator()(const atermpp::term_list<T>& x)
   {
+    static_cast<Derived&>(*this).enter(x);
     print_list(x, "", "", ", ");
+    static_cast<Derived&>(*this).leave(x);
   }
 
   template <typename T>
   void operator()(const atermpp::set<T>& x)
   {
+    static_cast<Derived&>(*this).enter(x);
     print_list(x, "", "", ", ");
+    static_cast<Derived&>(*this).leave(x);
   }
 
   void operator()(const core::identifier_string& x)
   {
     static_cast<Derived&>(*this).enter(x);
     static_cast<Derived&>(*this).print(std::string(x));
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(aterm::ATerm x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(atermpp::aterm(x).to_string());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(aterm::ATermList x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(atermpp::aterm_list(x).to_string());
+    static_cast<Derived&>(*this).leave(x);
+  }
+
+  void operator()(aterm::ATermAppl x)
+  {
+    static_cast<Derived&>(*this).enter(x);
+    static_cast<Derived&>(*this).print(atermpp::aterm_appl(x).to_string());
     static_cast<Derived&>(*this).leave(x);
   }
 };
@@ -249,24 +251,28 @@ struct apply_printer: public Traverser<apply_printer<Traverser> >
 } // namespace detail
 /// \endcond
 
-/// \brief Prints the object t to a stream.
-template <typename T>
-void print(const T& t, std::ostream& out)
+/// \brief Prints the object x to a stream.
+struct stream_printer
 {
-  detail::apply_printer<core::detail::printer> printer(out);
-  printer(t);
-}
+  template <typename T>
+  void operator()(const T& x, std::ostream& out)
+  {
+    core::detail::apply_printer<core::detail::printer> printer(out);
+    printer(x);
+  }
+};
 
-/// \brief Returns a string representation of the object t.
+/// \brief Returns a string representation of the object x.
 template <typename T>
-std::string print(const T& t)
+std::string pp(const T& x)
 {
   std::ostringstream out;
-  print(t, out);
+  stream_printer()(x, out);
   return out.str();
 }
 
-}
-}
+} // namespace core
 
-#endif //MCRL2_PRINT_H
+} // namespace mcrl2
+
+#endif // MCRL2_PRINT_H

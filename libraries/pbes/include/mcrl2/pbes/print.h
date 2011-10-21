@@ -114,7 +114,7 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
     derived()(x.variable());
     // TODO: change the weird convention of putting the rhs of an equation on a new line
     derived().print(" =\n       ");
-	derived()(x.formula());
+    derived()(x.formula());
     derived().print(";");
     derived().leave(x);
   }
@@ -208,54 +208,24 @@ struct printer: public pbes_system::add_traverser_sort_expressions<data::detail:
 
 } // namespace detail
 
-/// \brief Prints the object t to a stream.
-template <typename T>
-void print(const T& t, std::ostream& out)
+/// \brief Prints the object x to a stream.
+struct stream_printer
 {
-  core::detail::apply_printer<pbes_system::detail::printer> printer(out);
-  printer(t);
-}
+  template <typename T>
+  void operator()(const T& x, std::ostream& out)
+  {
+    core::detail::apply_printer<pbes_system::detail::printer> printer(out);
+    printer(x);
+  }
+};
 
-/// \brief Returns a string representation of the object t.
+/// \brief Returns a string representation of the object x.
 template <typename T>
-std::string print(const T& t)
+std::string pp(const T& x)
 {
   std::ostringstream out;
-  pbes_system::print(t, out);
+  stream_printer()(x, out);
   return out.str();
-}
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
-std::string pp(const T& t)
-{
-  MCRL2_CHECK_PP(core::pp(t), pbes_system::print(t), t.to_string());
-  return core::pp(t);
-}
-
-inline
-std::string pp(const propositional_variable_instantiation& t)
-{
-  MCRL2_CHECK_PP(core::pp(t), pbes_system::print(t), t.to_string());
-  return core::pp(t);
-}
-
-inline
-std::string pp(const pbes_equation& eqn)
-{
-  MCRL2_CHECK_PP(core::pp(pbes_equation_to_aterm(eqn)), pbes_system::print(eqn), pbes_equation_to_aterm(eqn).to_string());
-  return core::pp(pbes_equation_to_aterm(eqn));
-}
-
-/// \brief Pretty print function
-/// \param spec A pbes specification
-/// \return A pretty print representation of the specification
-template <typename Container>
-std::string pp(const pbes<Container>& spec, core::t_pp_format pp_format = core::ppDefault)
-{
-  MCRL2_CHECK_PP(core::pp(pbes_to_aterm(spec)), pbes_system::print(spec), pbes_to_aterm(spec).to_string());
-  return core::pp(pbes_to_aterm(spec), pp_format);
 }
 
 } // namespace pbes_system

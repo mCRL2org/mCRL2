@@ -17,7 +17,7 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/print.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 
 namespace mcrl2
@@ -76,13 +76,13 @@ class BDD2Dot
         int v_true_number = f_visited[v_true_branch].value();
         int v_false_number = f_visited[v_false_branch].value();
         const data_expression v_guard = f_bdd_info.get_guard(a_bdd);
-        f_dot_file << "  " << f_node_number << " [label=\"" << mcrl2::core::pp(v_guard) << "\"];" << std::endl;
+        f_dot_file << "  " << f_node_number << " [label=\"" << mcrl2::data::pp(v_guard) << "\"];" << std::endl;
         f_dot_file << "  " << f_node_number << " -> " << v_true_number << ";" << std::endl;
         f_dot_file << "  " << f_node_number << " -> " << v_false_number << " [style=dashed];" << std::endl;
       }
       else
       {
-        f_dot_file << "  " << f_node_number << " [shape=box, label=\"" << mcrl2::core::pp(a_bdd) << "\"];" << std::endl;
+        f_dot_file << "  " << f_node_number << " [shape=box, label=\"" << mcrl2::data::pp(a_bdd) << "\"];" << std::endl;
       }
       f_visited[a_bdd]= atermpp::aterm_int(f_node_number++);
     }

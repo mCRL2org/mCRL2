@@ -43,7 +43,7 @@ namespace detail
  * prover's rewriter with the data equations in internal mCRL2 format
  * contained in the LPS passed as parameter a_lps and the rewrite
  * strategy passed as parameter a_rewrite_strategy. The parameter
- * a_rewrite_strategy can be set to either 
+ * a_rewrite_strategy can be set to either
  * GS_REWR_JITTY or GS_REWR_JITTYC. To limit the
  * number of seconds spent on proving a single formula, a time limit
  * can be set. If the time limit is set to 0, no time limit will be
@@ -128,14 +128,14 @@ class BDD_Prover: public Prover
       atermpp::aterm_appl v_previous_1;
       atermpp::aterm_appl v_previous_2;
 
-      mCRL2log(log::debug) << "Formula: " << core::pp( f_formula) << std::endl;
+      mCRL2log(log::debug) << "Formula: " << data::pp( f_formula) << std::endl;
 
       f_internal_bdd = m_rewriter->toRewriteFormat(f_formula);
 
       f_internal_bdd = m_rewriter->rewrite_internal(f_internal_bdd,bdd_sigma);
       f_internal_bdd = f_manipulator.orient(f_internal_bdd);
 
-      mCRL2log(log::debug) << "Formula rewritten and oriented: " << core::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
+      mCRL2log(log::debug) << "Formula rewritten and oriented: " << data::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
 
       while (v_previous_1 != f_internal_bdd && v_previous_2 != f_internal_bdd)
       {
@@ -143,11 +143,11 @@ class BDD_Prover: public Prover
         v_previous_1 = f_internal_bdd;
         f_internal_bdd = bdd_down(f_internal_bdd);
         mCRL2log(log::debug) << "End of iteration." << std::endl;
-        mCRL2log(log::debug) << "Intermediate BDD: " << core::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
+        mCRL2log(log::debug) << "Intermediate BDD: " << data::pp( m_rewriter->fromRewriteFormat(f_internal_bdd)) << std::endl;
       }
 
       f_bdd = m_rewriter->fromRewriteFormat(f_internal_bdd);
-      mCRL2log(log::debug) << "Resulting BDD: " << core::pp( f_bdd) << std::endl;
+      mCRL2log(log::debug) << "Resulting BDD: " << data::pp( f_bdd) << std::endl;
 
     }
 
@@ -192,7 +192,7 @@ class BDD_Prover: public Prover
       }
       else
       {
-        mCRL2log(log::debug) << a_indent << "Smallest guard: " << core::pp(m_rewriter->fromRewriteFormat(v_guard)) << std::endl;
+        mCRL2log(log::debug) << a_indent << "Smallest guard: " << data::pp(m_rewriter->fromRewriteFormat(v_guard)) << std::endl;
       }
 
       atermpp::aterm_appl v_term1, v_term2;
@@ -200,16 +200,16 @@ class BDD_Prover: public Prover
       v_term1 = f_manipulator.set_true(a_formula, v_guard);
       v_term1 = m_rewriter->rewrite_internal(v_term1,bdd_sigma);
       v_term1 = f_manipulator.orient(v_term1);
-      mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
+      mCRL2log(log::debug) << a_indent << "True-branch after rewriting and orienting: " << data::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
       v_term1 = bdd_down(v_term1, a_indent);
-      mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
+      mCRL2log(log::debug) << a_indent << "BDD of the true-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term1)) << std::endl;
 
       v_term2 = f_manipulator.set_false(a_formula, v_guard);
       v_term2 = m_rewriter->rewrite_internal(atermpp::aterm_appl(v_term2),bdd_sigma);
       v_term2 = f_manipulator.orient(v_term2);
-      mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
+      mCRL2log(log::debug) << a_indent << "False-branch after rewriting and orienting: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
       v_term2 = bdd_down(v_term2, a_indent);
-      mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << core::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
+      mCRL2log(log::debug) << a_indent << "BDD of the false-branch: " << data::pp(m_rewriter->fromRewriteFormat(v_term2)) << std::endl;
 
       atermpp::aterm_appl v_bdd = f_manipulator.make_reduced_if_then_else(v_guard, v_term1, v_term2);
       f_formula_to_bdd[a_formula]=v_bdd;
@@ -230,7 +230,7 @@ class BDD_Prover: public Prover
         mCRL2log(log::debug) << "Simplifying the BDD:" << std::endl;
         f_bdd_simplifier->set_time_limit((std::max)(v_new_time_limit, time(0)));
         f_bdd = f_bdd_simplifier->simplify(f_bdd);
-        mCRL2log(log::debug) << "Resulting BDD: " << core::pp( f_bdd) << std::endl;
+        mCRL2log(log::debug) << "Resulting BDD: " << data::pp( f_bdd) << std::endl;
       }
     }
 
@@ -470,13 +470,13 @@ class BDD_Prover: public Prover
       delete f_bdd_simplifier;
       f_bdd_simplifier = 0;
     }
-  
+
     /// \brief Set the substitution to be used to construct the BDD
     void set_substitution(substitution_type &sigma)
     {
       bdd_sigma.clear();
       for(substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-      { 
+      {
         bdd_sigma[i->first]=m_rewriter->toRewriteFormat(i->second);
       }
     }
@@ -486,7 +486,7 @@ class BDD_Prover: public Prover
     {
       bdd_sigma.clear();
       for(internal_substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-      { 
+      {
         bdd_sigma[i->first]=i->second;
       }
     }
@@ -516,7 +516,7 @@ class BDD_Prover: public Prover
     virtual data_expression get_witness()
     {
       update_answers();
-      if (is_contradiction() == answer_yes) 
+      if (is_contradiction() == answer_yes)
       {
         mCRL2log(log::debug) << "The formula is a contradiction." << std::endl;
         return sort_bool::true_();
@@ -543,7 +543,7 @@ class BDD_Prover: public Prover
     virtual data_expression get_counter_example()
     {
       update_answers();
-      if (is_contradiction() == answer_yes) 
+      if (is_contradiction() == answer_yes)
       {
         mCRL2log(log::debug) << "The formula is a contradiction." << std::endl;
         return sort_bool::false_();

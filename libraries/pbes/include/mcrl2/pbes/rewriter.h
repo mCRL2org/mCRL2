@@ -262,7 +262,7 @@ class enumerate_quantifiers_rewriter
       term_type result = r(x, sigma);
 
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-      std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << std::endl;
+      std::cerr << "<enumerate-quantifiers>" << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << std::endl;
 #endif
       return result;
     }
@@ -281,7 +281,7 @@ class enumerate_quantifiers_rewriter
       term_type result = r(x, substitution_function(sigma));
 
 #ifdef MCRL2_ENUMERATE_QUANTIFIERS_REWRITER_DEBUG
-      std::cerr << "<enumerate-quantifiers>" << core::pp(x) << " -> " << core::pp(result) << data::print_substitution(sigma) << std::endl;
+      std::cerr << "<enumerate-quantifiers>" << pbes_system::pp(x) << " -> " << pbes_system::pp(result) << data::print_substitution(sigma) << std::endl;
 #endif
       return result;
     }

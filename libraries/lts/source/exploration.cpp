@@ -124,7 +124,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
     // the rewrite rules for > will not be removed.
     if ((lgopts->expl_strat == es_value_random_prioritized) ||
         (lgopts->expl_strat == es_value_prioritized))
-    { 
+    {
       used_function_symbols.insert(mcrl2::data::greater(mcrl2::data::sort_nat::nat()));
     }
 
@@ -142,7 +142,7 @@ bool lps2lts_algorithm::initialise_lts_generation(lts_generation_options* opts)
 std::clog << "--- rewrite rule selection specification ---\n";
 std::clog << lps::pp(lgopts->specification) << std::endl;
 std::clog << "--- rewrite rule selection function symbols ---\n";
-std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->specification)) << std::endl;
+std::clog << core::detail::print_pp_set(lps::find_function_symbols(lgopts->specification), data::stream_printer()) << std::endl;
 #endif
   }
   else
@@ -787,7 +787,7 @@ bool lps2lts_algorithm::generate_lts()
     {
       mcrl2::data::rewriter& rewriter=nstate->getRewriter();
       NextStateGenerator* nsgen = NULL;
-      while (!must_abort && (current_state < lgopts->max_states) && (current_state < num_states) && 
+      while (!must_abort && (current_state < lgopts->max_states) && (current_state < num_states) &&
                              (!lgopts->trace || (tracecnt < lgopts->max_traces)))
       {
         ATermList tmp_trans = ATmakeList0();
@@ -839,7 +839,7 @@ bool lps2lts_algorithm::generate_lts()
                     lowest_first_action_parameter=first_argument;
                   }
                   else
-                  { 
+                  {
                     using namespace mcrl2::data;
                     ATermAppl result=rewriter(greater(
                                                 data_expression(lowest_first_action_parameter),
@@ -1032,7 +1032,7 @@ bool lps2lts_algorithm::generate_lts()
                     {
                       throw mcrl2::runtime_error("Fail to rewrite term " + pp(data_expression(result)) +
                                                  " to true or false.");
-                      
+
                     }
                   }
                 }

@@ -63,9 +63,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
       desc.add_option("format", make_mandatory_argument("FORMAT"),
                       "print the PBES in the specified FORMAT:\n"
                       "  'default' for a PBES specification (default),\n"
-                      "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, and each data equation is put in a separate data equation section,\n"
-                      "  'internal' for a textual ATerm representation of the internal format, or\n"
-                      "  'internal-debug' for 'internal' with an indented layout", 'f');
+                      "  'internal' for a textual ATerm representation of the internal format", 'f');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -77,14 +75,6 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
         if (str_format == "internal")
         {
           format = ppInternal;
-        }
-        else if (str_format == "internal-debug")
-        {
-          format = ppInternalDebug;
-        }
-        else if (str_format == "debug")
-        {
-          format = ppDebug;
         }
         else if (str_format != "default")
         {
@@ -106,14 +96,28 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
 
       if (output_filename().empty())
       {
-        std::cout << pbes_system::pp(pbes_specification, format);
+        if (format == ppInternal)
+        {
+          std::cout << pbes_system::pbes_to_aterm(pbes_specification);
+        }
+        else
+        {
+          std::cout << pbes_system::pp(pbes_specification);
+        }
       }
       else
       {
         std::ofstream output_stream(output_filename().c_str());
         if (output_stream.is_open())
         {
-          output_stream << pbes_system::pp(pbes_specification, format);
+          if (format == ppInternal)
+          {
+            std::cout << pbes_system::pbes_to_aterm(pbes_specification);
+          }
+          else
+          {
+            std::cout << pbes_system::pp(pbes_specification);
+          }
           output_stream.close();
         }
         else

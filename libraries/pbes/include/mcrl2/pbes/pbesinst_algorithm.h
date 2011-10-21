@@ -44,7 +44,7 @@ std::ostream& operator<<(std::ostream& out, const pbesinst_substitution_function
 {
   for (pbesinst_substitution_function::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
   {
-    out << "  " << core::pp(i->first) << " -> " << core::pp(i->second) << std::endl;
+    out << "  " << data::pp(i->first) << " -> " << data::pp(i->second) << std::endl;
   }
   return out;
 }
@@ -164,7 +164,7 @@ class pbesinst_algorithm
         pbes_equation new_eqn(eqn.symbol(), propositional_variable(X_e.name(), data::variable_list()), psi_e);
         if (m_print_equations)
         {
-          std::cerr << core::pp(eqn.symbol()) << " " << core::pp(X_e) << " = " << core::pp(psi_e) << std::endl;
+          std::cerr << pbes_system::pp(eqn.symbol()) << " " << pbes_system::pp(X_e) << " = " << pbes_system::pp(psi_e) << std::endl;
         }
         E[index].push_back(new_eqn);
         mCRL2log(log::verbose) << print_equation_count(++m_equation_count);

@@ -35,6 +35,8 @@ namespace mcrl2
 namespace pbes_system
 {
 
+template <typename T> std::string pp(const T& t);
+
 using namespace core::detail::precedences;
 
 //--- start generated classes ---//
@@ -1290,7 +1292,7 @@ struct term_traits<pbes_system::pbes_expression>
   static inline
   std::string pp(const term_type& t)
   {
-    return core::pp(t);
+    return pbes_system::pp(t);
   }
 };
 

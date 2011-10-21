@@ -15,6 +15,7 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/detail/bdd_prover.h"
 #include "mcrl2/data/detail/prover/bdd2dot.h"
@@ -97,7 +98,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(log::info) << "  Witness: " << core::pp(v_witness) << std::endl;
+          mCRL2log(log::info) << "  Witness: " << data::pp(v_witness) << std::endl;
         }
       }
     }
@@ -117,7 +118,7 @@ class Formula_Checker
         }
         else
         {
-          mCRL2log(log::info) << "  Counter-example: " << core::pp(v_counter_example) << std::endl;
+          mCRL2log(log::info) << "  Counter-example: " << data::pp(v_counter_example) << std::endl;
         }
       }
     }
@@ -170,7 +171,7 @@ class Formula_Checker
                 i!=a_formulas.end(); ++i)
       {
         atermpp::aterm_appl v_formula = *i;
-        mCRL2log(log::info) << "'" << core::pp(v_formula) << "'";
+        mCRL2log(log::info) << "'" << data::pp(v_formula) << "'";
         f_bdd_prover.set_formula(v_formula);
         Answer v_is_tautology = f_bdd_prover.is_tautology();
         Answer v_is_contradiction = f_bdd_prover.is_contradiction();

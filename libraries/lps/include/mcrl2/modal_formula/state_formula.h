@@ -799,12 +799,6 @@ inline int precedence(const must& x) { return precedence(static_cast<const state
 inline int precedence(const may& x) { return precedence(static_cast<const state_formula&>(x)); }
 inline int precedence(const not_& x) { return precedence(static_cast<const state_formula&>(x)); }
 
-/// \brief Returns a pretty print representation of f.
-inline std::string pp(const state_formula& f)
-{
-  return core::pp(f);
-}
-
 } // namespace state_formulas
 
 } // namespace mcrl2

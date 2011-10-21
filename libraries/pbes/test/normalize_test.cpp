@@ -183,7 +183,7 @@ pbes_expression parse(const std::string& expr)
 inline
 std::string printer(const pbes_expression& x)
 {
-  return core::pp(x);
+  return pbes_system::pp(x);
 }
 
 inline

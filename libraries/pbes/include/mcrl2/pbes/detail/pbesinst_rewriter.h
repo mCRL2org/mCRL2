@@ -71,25 +71,25 @@ struct pbesinst_rewrite_builder: public enumerate_quantifiers_builder<pbes_expre
         if (is_function_symbol(*del_i))
         {
           propvar_name_current += "@";
-          propvar_name_current += mcrl2::core::pp(*del_i);
+          propvar_name_current += mcrl2::data::pp(*del_i);
         }
         else if (is_application(*del_i))
         {
           propvar_name_current += "@";
-          propvar_name_current += mcrl2::core::pp(*del_i);
+          propvar_name_current += mcrl2::data::pp(*del_i);
         }
         else if (is_abstraction(*del_i)) // case added by Wieger, 24-05-2011
         {
           propvar_name_current += "@";
-          propvar_name_current += mcrl2::core::pp(*del_i);
+          propvar_name_current += mcrl2::data::pp(*del_i);
         }
         // else if (data::is_variable(*del_i))
         // {
-        //   throw mcrl2::runtime_error(std::string("Could not rename the variable ") + core::pp(v));
+        //   throw mcrl2::runtime_error(std::string("Could not rename the variable ") + data::pp(v));
         // }
         else
         {
-          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + core::pp(v) + " " + core::pp(*del_i) + " " + del_i->to_string());
+          throw mcrl2::runtime_error(std::string("pbesinst_rewrite_builder: could not rename the variable ") + pbes_system::pp(v) + " " + data::pp(*del_i) + " " + del_i->to_string());
         }
       }
     }
@@ -142,7 +142,7 @@ class pbesinst_rewriter
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << core::pp(x) << " [default]-> " << core::pp(result) << std::endl;
+        std::cerr << pbes_system::pp(x) << " [default]-> " << pbes_system::pp(result) << std::endl;
       }
       return result;
     }
@@ -157,7 +157,7 @@ class pbesinst_rewriter
       term_type result = r(x, sigma);
       if (m_print_rewriter_output)
       {
-        std::cerr << core::pp(x) << "   " << data::print_substitution(sigma) << " [subst]-> " << core::pp(result) << std::endl;
+        std::cerr << pbes_system::pp(x) << "   " << data::print_substitution(sigma) << " [subst]-> " << pbes_system::pp(result) << std::endl;
       }
       return result;
     }

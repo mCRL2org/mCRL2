@@ -75,10 +75,10 @@ void test_pfnf_expression(std::string s)
   {
     BOOST_CHECK(R(t1) == R(t2));
     std::cout << "--- failed test --- " << std::endl;
-    std::cout << "t1    " << core::pp(t1) << std::endl;
-    std::cout << "t2    " << core::pp(t2) << std::endl;
-    std::cout << "R(t1) " << core::pp(R(t1)) << std::endl;
-    std::cout << "R(t2) " << core::pp(R(t2)) << std::endl;
+    std::cout << "t1    " << pbes_system::pp(t1) << std::endl;
+    std::cout << "t2    " << pbes_system::pp(t2) << std::endl;
+    std::cout << "R(t1) " << pbes_system::pp(R(t1)) << std::endl;
+    std::cout << "R(t2) " << pbes_system::pp(R(t2)) << std::endl;
   }
   core::garbage_collect();
 }

@@ -38,6 +38,8 @@ namespace mcrl2
 namespace bes
 {
 
+template <typename T> std::string pp(const T& t);
+
 using namespace core::detail::precedences;
 
 //--- start generated classes ---//
@@ -627,7 +629,7 @@ struct term_traits<bes::boolean_expression>
   static inline
   std::string pp(term_type t)
   {
-    return mcrl2::core::pp(t);
+    return bes::pp(t);
   }
 };
 

@@ -52,7 +52,7 @@ struct simplify_rewrite_builder: public pbes_expr_builder<Term, SubstitutionFunc
   data_term_type rewrite(data_term_type d, T& sigma)
   {
 //data_term_type result = m_data_rewriter(d, sigma);
-//std::cerr << m_data_rewriter.type() << "<d>" << core::pp(d) << " => " << core::term_traits<data_term_type>::pp(result) << std::endl;
+//std::cerr << m_data_rewriter.type() << "<d>" << data::pp(d) << " => " << core::term_traits<data_term_type>::pp(result) << std::endl;
     return m_data_rewriter(d, sigma);
   }
 

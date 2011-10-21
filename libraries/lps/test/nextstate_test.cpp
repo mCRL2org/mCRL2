@@ -54,7 +54,7 @@ void test_nextstate(specification s, size_t expected_states, size_t expected_tra
 std::clog << "--- rewrite rule selection specification ---\n";
 std::clog << lps::pp(s) << std::endl;
 std::clog << "--- rewrite rule selection function symbols ---\n";
-std::clog << core::detail::print_pp_set(lps::find_function_symbols(s)) << std::endl;
+std::clog << core::detail::print_set(lps::find_function_symbols(s), lps::stream_printer()) << std::endl;
 #endif
 
   NextState* nstate = createNextState(s, R, false);

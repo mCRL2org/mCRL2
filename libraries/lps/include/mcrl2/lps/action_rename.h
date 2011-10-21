@@ -29,6 +29,7 @@
 #include "mcrl2/lps/translate_user_notation.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/find.h"
+#include "mcrl2/lps/print.h"
 
 // //Action rename rules
 // <ActionRenameRules>
@@ -608,7 +609,7 @@ lps::specification action_rename(
       if (!is_variable(*rule_old_argument_i) &&
           (!(data::find_variables(*rule_old_argument_i).empty())))
       {
-        throw mcrl2::runtime_error("The arguments of the lhs " + core::pp(rule_old_action) +
+        throw mcrl2::runtime_error("The arguments of the lhs " + lps::pp(rule_old_action) +
                                    " are not variables or closed expressions");
       }
     }
@@ -620,8 +621,8 @@ lps::specification action_rename(
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_new_rule.begin(),variables_in_new_rule.end()))
     {
-      throw mcrl2::runtime_error("There are variables occurring in rhs " + core::pp(rule_new_action) +
-                                 " of a rename rule not occurring in lhs " + core::pp(rule_old_action));
+      throw mcrl2::runtime_error("There are variables occurring in rhs " + lps::pp(rule_new_action) +
+                                 " of a rename rule not occurring in lhs " + lps::pp(rule_old_action));
     }
 
     // Check whether the variables in condition are included in the lefthandside.
@@ -629,8 +630,8 @@ lps::specification action_rename(
     if (!includes(variables_in_old_rule.begin(),variables_in_old_rule.end(),
                   variables_in_condition.begin(),variables_in_condition.end()))
     {
-      throw mcrl2::runtime_error("There are variables occurring in the condition " + core::pp(rule_condition) +
-                                 " of a rename rule not occurring in lhs " + core::pp(rule_old_action));
+      throw mcrl2::runtime_error("There are variables occurring in the condition " + data::pp(rule_condition) +
+                                 " of a rename rule not occurring in lhs " + lps::pp(rule_old_action));
     }
 
     // check for double occurrences of variables in the lhs. Note that variables_in_old_rule
@@ -642,8 +643,8 @@ lps::specification action_rename(
       {
         if (variables_in_old_rule.find(*i)==variables_in_old_rule.end())
         {
-          throw mcrl2::runtime_error("Variable " + core::pp(*i) + " occurs more than once in lhs " +
-                                     core::pp(rule_old_action) + " of an action rename rule");
+          throw mcrl2::runtime_error("Variable " + data::pp(*i) + " occurs more than once in lhs " +
+                                     lps::pp(rule_old_action) + " of an action rename rule");
         }
         else
         {
@@ -684,7 +685,7 @@ lps::specification action_rename(
 
         if (equal_signatures(lps_old_action, rule_old_action))
         {
-          mCRL2log(log::debug) << "Renaming action " << core::pp(rule_old_action) << "\n";
+          mCRL2log(log::debug) << "Renaming action " << lps::pp(rule_old_action) << "\n";
 
           //rename all previously used variables
           data_expression renamed_rule_condition=rule_condition;

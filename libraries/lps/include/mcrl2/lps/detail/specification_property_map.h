@@ -28,6 +28,7 @@
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/lps/print.h"
 
 namespace mcrl2
 {
@@ -73,12 +74,12 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
 
     std::string print(const action_label l) const
     {
-      return core::pp(l.name());
+      return lps::pp(l.name());
     }
 
     std::string print(const action& a) const
     {
-      return core::pp(a);
+      return lps::pp(a);
     }
 
     std::string print(const deadlock&) const

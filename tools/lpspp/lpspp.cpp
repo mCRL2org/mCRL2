@@ -61,9 +61,7 @@ class lpspp_tool: public input_output_tool
       desc.add_option("format", make_mandatory_argument("FORMAT"),
                       "print the LPS in the specified FORMAT:\n"
                       "  'default' for a process specification (default),\n"
-                      "  'debug' for 'default' with the exceptions that data expressions are printed in prefix notation using identifiers from the internal format, each data equation is put in a separate data equation section, and next states of process references are printed in assignment notation,\n"
-                      "  'internal' for a textual ATerm representation of the internal format, or\n"
-                      "  'internal-debug' for 'internal' with an indented layout", 'f');
+                      "  'internal' for a textual ATerm representation of the internal format", 'f');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -75,14 +73,6 @@ class lpspp_tool: public input_output_tool
         if (str_format == "internal")
         {
           format = ppInternal;
-        }
-        else if (str_format == "internal-debug")
-        {
-          format = ppInternalDebug;
-        }
-        else if (str_format == "debug")
-        {
-          format = ppDebug;
         }
         else if (str_format != "default")
         {
@@ -104,14 +94,28 @@ class lpspp_tool: public input_output_tool
 
       if (output_filename().empty())
       {
-        std::cout << lps::pp(specification, format);
+        if (format == ppInternal)
+        {
+          std::cout << specification_to_aterm(specification);
+        }
+        else
+        {
+          std::cout << lps::pp(specification);
+        }
       }
       else
       {
         std::ofstream output_stream(output_filename().c_str());
         if (output_stream.is_open())
         {
-          output_stream << lps::pp(specification, format);
+          if (format == ppInternal)
+          {
+            std::cout << specification_to_aterm(specification);
+          }
+          else
+          {
+            std::cout << lps::pp(specification);
+          }
           output_stream.close();
         }
         else
@@ -133,9 +137,7 @@ class lpspp_gui_tool: public mcrl2_gui_tool<lpspp_tool>
 
       values.clear();
       values.push_back("default");
-      values.push_back("debug");
       values.push_back("internal");
-      values.push_back("internal-debug");
       m_gui_options["format"] = create_radiobox_widget(values);
     }
 };

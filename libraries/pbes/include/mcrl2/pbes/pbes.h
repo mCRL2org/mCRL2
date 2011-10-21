@@ -48,8 +48,6 @@ namespace mcrl2
 namespace pbes_system
 {
 
-using mcrl2::core::pp;
-
 template <typename Container> class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
@@ -502,7 +500,7 @@ class pbes
            )
         {
           std::cerr << "pbes::is_well_typed() failed: some of the sorts of the binding variable "
-                    << mcrl2::core::pp(i->variable())
+                    << data::pp(i->variable())
                     << " are not declared in the data specification "
                     << data::pp(data().sorts())
                     << std::endl;
@@ -575,7 +573,7 @@ class pbes
       {
         if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), *i))
         {
-          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << mcrl2::core::pp(*i) << " conflicts with its declaration!" << std::endl;
+          std::cerr << "pbes::is_well_typed() failed: the occurring variable " << data::pp(*i) << " conflicts with its declaration!" << std::endl;
           return false;
         }
       }
@@ -583,7 +581,7 @@ class pbes
       // check 9)
       if (has_conflicting_type(declared_variables.begin(), declared_variables.end(), initial_state()))
       {
-        std::cerr << "pbes::is_well_typed() failed: the initial state " << mcrl2::core::pp(initial_state()) << " conflicts with its declaration!" << std::endl;
+        std::cerr << "pbes::is_well_typed() failed: the initial state " << pbes_system::pp(initial_state()) << " conflicts with its declaration!" << std::endl;
         return false;
       }
 
@@ -677,6 +675,10 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 
 #ifndef MCRL2_PBES_FIND_H
 #include "mcrl2/pbes/find.h"
+#endif
+
+#ifndef MCRL2_PBES_PRINT_H
+#include "mcrl2/pbes/print.h"
 #endif
 
 #endif // MCRL2_PBES_PBES_H

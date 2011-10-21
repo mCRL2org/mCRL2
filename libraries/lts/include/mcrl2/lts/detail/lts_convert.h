@@ -149,7 +149,7 @@ class lts_fsm_convertor
         {
           const size_t element_index=state_element_values_sets[i].size();
           result.push_back(element_index);
-          lts_out.add_state_element_value(i,core::pp(t));
+          lts_out.add_state_element_value(i,data::pp(t));
           state_element_values_sets[i][t]=element_index;
         }
         else
@@ -173,7 +173,7 @@ inline void lts_convert(
     for (data::variable_list::const_iterator i=lts_in.process_parameters().begin();
          i!=lts_in.process_parameters().end(); ++i)
     {
-      lts_out.add_process_parameter(core::pp(*i),core::pp(i->sort()));
+      lts_out.add_process_parameter(data::pp(*i),data::pp(i->sort()));
     }
   }
 

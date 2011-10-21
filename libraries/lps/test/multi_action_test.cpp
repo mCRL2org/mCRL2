@@ -17,6 +17,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/print.h"
 
 using namespace mcrl2;
 using namespace mcrl2::data;
@@ -93,7 +94,7 @@ void test_pp()
   action_list b1  = make_list(act("b", make_list(d1)));
   action_list a11 = make_list(act("a", make_list(d1)), act("a", make_list(d1)));
   multi_action m(a11);
-  std::string s = pp1(m);
+  std::string s = lps::pp(m);
   std::cout << "s = " << s << std::endl;
   BOOST_CHECK(s == "a(d1)|a(d1)");
 }

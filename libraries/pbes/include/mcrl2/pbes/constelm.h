@@ -403,8 +403,8 @@ void print_constraint_map(const MapContainer& constraints)
 {
   for (typename MapContainer::const_iterator i = constraints.begin(); i != constraints.end(); ++i)
   {
-    std::string lhs = mcrl2::core::pp(i->first);
-    std::string rhs = mcrl2::core::pp(i->second);
+    std::string lhs = data::pp(i->first);
+    std::string rhs = data::pp(i->second);
     std::cout << "{" << lhs << " := " << rhs << "} ";
   }
 }
@@ -499,7 +499,7 @@ class pbes_constelm_algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << mcrl2::core::pp(m_target) << "  condition = " << mcrl2::core::pp(condition());
+          out << "(" << mcrl2::core::pp(m_source.name()) << ", " << mcrl2::core::pp(m_target.name()) << ")  label = " << pbes_system::pp(m_target) << "  condition = " << mcrl2::data::pp(condition());
           return out.str();
         }
 
@@ -604,11 +604,11 @@ class pbes_constelm_algorithm
         std::string to_string() const
         {
           std::ostringstream out;
-          out << mcrl2::core::pp(m_variable) << "  assertions = ";
+          out << mcrl2::data::pp(m_variable) << "  assertions = ";
           for (typename constraint_map::const_iterator i = m_constraints.begin(); i != m_constraints.end(); ++i)
           {
-            std::string lhs = mcrl2::core::pp(i->first);
-            std::string rhs = mcrl2::core::pp(i->second);
+            std::string lhs = mcrl2::data::pp(i->first);
+            std::string rhs = mcrl2::data::pp(i->second);
             out << "{" << lhs << " := " << rhs << "} ";
           }
           return out.str();
@@ -740,14 +740,14 @@ class pbes_constelm_algorithm
     std::string print_condition(const edge& e, const vertex& u, const term_type& value)
     {
       std::ostringstream out;
-      out << "\nEvaluated condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << core::pp(value) << std::endl;
+      out << "\nEvaluated condition " << pbes_system::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to " << data::pp(value) << std::endl;
       return out.str();
     }
 
     std::string print_evaluation_failure(const edge& e, const vertex& u)
     {
       std::ostringstream out;
-      out << "\nCould not evaluate condition " << core::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
+      out << "\nCould not evaluate condition " << pbes_system::pp(pbes_system::replace_free_variables(e.condition(), data::make_map_substitution(u.constraints()))) << " to true or false";
       return out.str();
     }
 
@@ -933,7 +933,7 @@ class pbes_constelm_algorithm
         {
           for (typename std::vector<variable_type>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
           {
-            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i->first.name()) << ", " << core::pp(*j) << ")" << std::endl;
+            mCRL2log(log::verbose) << "  (" << mcrl2::core::pp(i->first.name()) << ", " << data::pp(*j) << ")" << std::endl;
           }
         }
       }

@@ -27,6 +27,7 @@
 #include "mcrl2/data/selection.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 
@@ -99,7 +100,7 @@ class parity_game_generator
     virtual
     std::string print(const pbes_expression& e)
     {
-      return core::pp(e);
+      return pbes_system::pp(e);
     }
 
     /// \brief Check whether e corresponds to true
@@ -469,7 +470,7 @@ class parity_game_generator
       }
       for (std::map<size_t, pbes_expression>::iterator i = m.begin(); i != m.end(); ++i)
       {
-        std::cerr << std::setw(4) << i->first << " " << core::pp(i->second) << std::endl;
+        std::cerr << std::setw(4) << i->first << " " << pbes_system::pp(i->second) << std::endl;
       }
       std::cerr << "--- priorities ---" << std::endl;
       for (std::map<core::identifier_string, size_t>::iterator i = m_priorities.begin(); i != m_priorities.end(); ++i)

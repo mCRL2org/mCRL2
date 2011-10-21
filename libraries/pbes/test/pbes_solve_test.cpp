@@ -183,7 +183,7 @@ void test_pbes2bool(const std::string& pbes_spec, bool expected_result, data::re
   if (result != expected_result)
   {
     std::cout << "--- pbes2bool failed ---\n";
-    std::cout << core::pp(pbes_to_aterm(p)) << std::endl;
+    std::cout << pbes_system::pp(p) << std::endl;
     std::cout << "result: " << std::boolalpha << result << std::endl;
     std::cout << "expected result: " << std::boolalpha << expected_result << std::endl;
   }

@@ -22,6 +22,8 @@ namespace mcrl2
 namespace lts
 {
 
+using namespace aterm;
+
 class bit_hash_table
 {
   private:

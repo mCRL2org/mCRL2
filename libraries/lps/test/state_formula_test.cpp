@@ -367,17 +367,17 @@ void test_normalize()
   f = imp(not_(x), y);
   f1 = normalize(f);
   f2 = or_(x, y);
-  std::cout << "f  = " << pp(f) << std::endl;
-  std::cout << "f1 = " << pp(f1) << std::endl;
-  std::cout << "f2 = " << pp(f2) << std::endl;
+  std::cout << "f  = " << state_formulas::pp(f) << std::endl;
+  std::cout << "f1 = " << state_formulas::pp(f1) << std::endl;
+  std::cout << "f2 = " << state_formulas::pp(f2) << std::endl;
   BOOST_CHECK(f1 == f2);
 
   f  = not_(and_(not_(x), not_(y)));
   f1 = normalize(f);
   f2 = or_(x, y);
-  std::cout << "f  = " << pp(f) << std::endl;
-  std::cout << "f1 = " << pp(f1) << std::endl;
-  std::cout << "f2 = " << pp(f2) << std::endl;
+  std::cout << "f  = " << state_formulas::pp(f) << std::endl;
+  std::cout << "f1 = " << state_formulas::pp(f1) << std::endl;
+  std::cout << "f2 = " << state_formulas::pp(f2) << std::endl;
   BOOST_CHECK(f1 == f2);
 
   /* this takes too much time with linearise...

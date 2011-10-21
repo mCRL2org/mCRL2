@@ -907,6 +907,17 @@ int precedence(const process_expression& x)
   return max_precedence;
 }
 
+inline int precedence(const choice& x)       { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const sum& x)          { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const merge& x)        { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const left_merge& x)   { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const if_then& x)      { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const if_then_else& x) { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const bounded_init& x) { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const seq& x)          { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const at& x)           { return precedence(static_cast<const process_expression&>(x)); }
+inline int precedence(const sync& x)         { return precedence(static_cast<const process_expression&>(x)); }
+
 } // namespace process
 
 } // namespace mcrl2

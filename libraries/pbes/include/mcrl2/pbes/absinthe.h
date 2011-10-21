@@ -36,6 +36,7 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/identifier_generator.h"
 #include "mcrl2/utilities/text_utility.h"
@@ -781,7 +782,7 @@ struct absinthe_algorithm
       data::function_symbol f2 = i->second;
       data::function_symbol f3 = lift_function_symbol_2_3()(f2);
 
-      mCRL2log(log::debug, "absinthe") << "adding mapping: " << core::pp(f3) << " " << core::pp(f3.sort()) << std::endl;
+      mCRL2log(log::debug, "absinthe") << "adding mapping: " << data::pp(f3) << " " << data::pp(f3.sort()) << std::endl;
       dataspec.add_mapping(f3);
 
       // update sigmaF
@@ -789,7 +790,7 @@ struct absinthe_algorithm
 
       // make an equation for the lifted function symbol f
       data::data_equation eq = lift_equation_2_3(sigmaS)(f2, f3);
-      mCRL2log(log::debug, "absinthe") << "adding equation: " << core::pp(eq) << std::endl;
+      mCRL2log(log::debug, "absinthe") << "adding equation: " << data::pp(eq) << std::endl;
       dataspec.add_equation(eq);
     }
   }

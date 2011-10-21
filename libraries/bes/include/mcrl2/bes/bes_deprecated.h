@@ -2033,12 +2033,12 @@ class boolean_equation_system
       if (opt_precompile_pbes)
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::core::pp(Mucks_rewriter.convert_from((ATermAppl)p)));
+                                   mcrl2::data::pp(Mucks_rewriter.convert_from((ATermAppl)p)));
       }
       else
       {
         throw mcrl2::runtime_error("Unexpected expression. Most likely because expression fails to rewrite to true or false: " +
-                                   mcrl2::core::pp(p));
+                                   mcrl2::data::pp(p));
       }
       return false_();
     }
@@ -2333,7 +2333,7 @@ class boolean_equation_system
               prop_var=propositional_variable_instantiation(prop_var.name(),reverse(resulting_pars));
             }
             throw mcrl2::runtime_error(std::string(e.what()) + "\nError occurred when investigating " + 
-                  mcrl2::core::pp(prop_var));
+                  mcrl2::pbes_system::pp(prop_var));
           }
 
           /* No need to clear up sigma, as it was locally declared. */
@@ -2505,12 +2505,12 @@ class boolean_equation_system
         if (opt_precompile_pbes)
         {
           data_expression t1(Mucks_rewriter.convert_from((ATerm)t));
-          f << c << mcrl2::core::pp(t1);
+          f << c << mcrl2::data::pp(t1);
         }
         else
         {
           data_expression t1(t);
-          f << c << mcrl2::core::pp(t1);
+          f << c << mcrl2::data::pp(t1);
         }
       }
     }
@@ -2551,11 +2551,11 @@ class boolean_equation_system
           if (opt_precompile_pbes)
           {
             const atermpp::aterm_appl term=*t;
-            f << mcrl2::core::pp(Mucks_rewriter.convert_from(term));
+            f << mcrl2::data::pp(Mucks_rewriter.convert_from(term));
           }
           else
           {
-            f << mcrl2::core::pp(*t);
+            f << mcrl2::data::pp(*t);
           }
         }
         f << ((t==tl.begin())?"":")"); // No closing bracket if there are tl.begin()==tl.end()

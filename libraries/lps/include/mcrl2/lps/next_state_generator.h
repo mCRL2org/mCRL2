@@ -41,7 +41,7 @@ class next_state_generator
     data::rewriter::strategy m_rewriter_strategy;
     mcrl2::data::detail::legacy_rewriter m_rewriter;
     NextState* m_NextState;
-    
+
   public:
     /// \brief A type that represents a transition to a 'next' state.
     struct state_type
@@ -206,7 +206,7 @@ class next_state_generator
 std::clog << "--- rewrite rule selection specification ---\n";
 std::clog << lps::pp(lps_spec) << std::endl;
 std::clog << "--- rewrite rule selection function symbols ---\n";
-std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) << std::endl;
+std::clog << core::detail::print_set(lps::find_function_symbols(lps_spec), data::stream_printer()) << std::endl;
 #endif
     }
 
@@ -249,7 +249,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
     {
       ATerm t = s[i];
       return atermpp::aterm_appl(m_rewriter.convert_from(t));
-    }     
+    }
 
     /// \brief Converts a value in next state format to a data expression.
     data::data_expression aterm2expression(const atermpp::aterm& x) const
@@ -257,13 +257,13 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
       ATerm a = x;
       atermpp::aterm_appl result = m_rewriter.convert_from(a);
       return result;
-    }     
+    }
 
     /// \brief Converts a data expression to a value in next state format.
     atermpp::aterm expression2aterm(const data::data_expression& x) const
     {
       return m_rewriter.convert_to(x);
-    }     
+    }
 
     /// \brief Returns a string representation of the given state.
     std::string print_state(const state_type& state) const
@@ -275,7 +275,7 @@ std::clog << core::detail::print_pp_set(lps::find_function_symbols(lps_spec)) <<
         {
           result.append(", ");
         }
-        result.append(core::pp(state_component(state, index)));
+        result.append(data::pp(state_component(state, index)));
       }
       result.append(")");
       return result;

@@ -571,9 +571,9 @@ void compare_parse_results(const std::string& text, const T& x1, const T& x2)
   {
     std::clog << "--- WARNING: difference detected between old and new parser ---\n";
     std::clog << "string: " << text << std::endl;
-    std::clog << "old:    " << data::print(x1) << std::endl;
+    std::clog << "old:    " << data::pp(x1) << std::endl;
     core::print_aterm(x1);
-    std::clog << "new:    " << data::print(x2) << std::endl;
+    std::clog << "new:    " << data::pp(x2) << std::endl;
     core::print_aterm(x2);
 #ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
     throw mcrl2::runtime_error("difference detected between old and new parser");

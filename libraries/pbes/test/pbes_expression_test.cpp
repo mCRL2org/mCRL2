@@ -31,8 +31,6 @@ using namespace mcrl2::core;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::pbes_system::detail;
 
-using mcrl2::core::pp;
-
 std::string EXPRESSIONS =
   "datavar                                  \n"
   "  n: Nat;                                \n"
@@ -48,7 +46,7 @@ void print(atermpp::set<pbes_expression> q)
 {
   for (atermpp::set<pbes_expression>::iterator i = q.begin(); i != q.end(); ++i)
   {
-    std::cout << mcrl2::core::pp(*i) << std::endl;
+    std::cout << pbes_system::pp(*i) << std::endl;
   }
 }
 

@@ -21,6 +21,7 @@
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/remove_parameters.h"
@@ -114,7 +115,7 @@ class pbes_eqelm_algorithm
       std::ostringstream out;
       for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
-        out << core::pp(i->first) << " -> [ ";
+        out << data::pp(i->first) << " -> [ ";
         const std::vector<equivalence_class>& v = i->second;
         for (typename std::vector<equivalence_class>::const_iterator j = v.begin(); j != v.end(); ++j)
         {
@@ -122,7 +123,7 @@ class pbes_eqelm_algorithm
           {
             out << ", ";
           }
-          out << core::detail::print_pp_set(*j);
+          out << core::detail::print_set(*j, pbes_system::stream_printer());
         }
         out << " ]" << std::endl;
       }
@@ -135,7 +136,7 @@ class pbes_eqelm_algorithm
       std::ostringstream out;
       for (typename std::map<string_type, atermpp::set<propositional_variable_type> >::const_iterator i = m_edges.begin(); i != m_edges.end(); ++i)
       {
-        out << core::pp(i->first) << " -> " << core::detail::print_pp_set(i->second) << std::endl;
+        out << data::pp(i->first) << " -> " << core::detail::print_set(i->second, pbes_system::stream_printer()) << std::endl;
       }
       return out.str();
     }
@@ -146,10 +147,10 @@ class pbes_eqelm_algorithm
       std::ostringstream out;
       for (typename std::map<string_type, std::vector<equivalence_class> >::const_iterator i = m_vertices.begin(); i != m_vertices.end(); ++i)
       {
-        out << "  vertex " << core::pp(i->first) << ": ";
+        out << "  vertex " << data::pp(i->first) << ": ";
         for (typename std::vector<equivalence_class>::const_iterator j = i->second.begin(); j != i->second.end(); ++j)
         {
-          out << core::detail::print_pp_set(*j) << " ";
+          out << core::detail::print_set(*j, pbes_system::stream_printer()) << " ";
         }
         out << std::endl;
       }
@@ -160,7 +161,7 @@ class pbes_eqelm_algorithm
     void log_todo_list(const std::set<string_type>& todo, const std::string& msg = "") const
     {
       mCRL2log(log::debug) << msg;
-      mCRL2log(log::debug) << core::detail::print_pp_set(todo) << "\n";
+      mCRL2log(log::debug) << core::detail::print_set(todo, pbes_system::stream_printer()) << "\n";
     }
 
     /// \brief Returns true if the vertex X should propagate its values to Y
@@ -324,12 +325,12 @@ class pbes_eqelm_algorithm
       // propagate constraints over the edges until the todo list is empty
       while (!todo.empty())
       {
-        mCRL2log(log::debug) << "todo list = " << core::detail::print_pp_set(todo) << "\n";
+        mCRL2log(log::debug) << "todo list = " << core::detail::print_set(todo, pbes_system::stream_printer()) << "\n";
         mCRL2log(log::verbose) << "--- vertices ---\n" << print_vertices();
 
         string_type X = *todo.begin();
         todo.erase(X);
-        mCRL2log(log::debug) << "choose todo element " << core::pp(X) << "\n";
+        mCRL2log(log::debug) << "choose todo element " << pbes_system::pp(X) << "\n";
 
         // create a substitution function that corresponds to cX
         data::mutable_map_substitution<> vX = compute_substitution(X);

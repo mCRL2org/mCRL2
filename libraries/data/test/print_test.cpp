@@ -35,20 +35,10 @@ using namespace mcrl2::data::sort_nat;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
-#ifdef MCRL2_PRINT_PROBLEM_CASES
 template <typename T>
 void test_term(const std::string& s, const T& x)
 {
-  std::clog << "--- testing term " << core::pp(x) << " ---" << std::endl;
-  std::string s1 = data::pp(x);
-  std::string s2 = data::print(x);
-  if (s1 != s2)
-  {
-    std::clog << "<pp>   " << s1 << std::endl;
-    std::clog << "<print>" << s2 << std::endl;
-    std::clog << "<aterm>" << s  << std::endl;
-    BOOST_CHECK(s1 == s2);
-  }
+  std::cout << data::pp(x) << std::endl;
 }
 
 void test_term(const std::string& s)
@@ -179,7 +169,6 @@ BOOST_AUTO_TEST_CASE(problem_cases)
   test_term("DataAppl(OpId(\"@setcomp\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\")))])");
   test_term("DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"f\",SortArrow([SortId(\"Bool\")],SortId(\"Bool\"))),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))])");
 }
-#endif
 
 template <typename ExpressionType>
 bool print_check(ExpressionType const& left, std::string const& right)
@@ -191,18 +180,6 @@ bool print_check(ExpressionType const& left, std::string const& right)
 
     return false;
   }
-
-#ifdef MCRL2_NEW_PRINT_TEST
-  bool result = print(left) == right;
-  if (!result)
-  {
-    std::clog << "-----------------" << std::endl;
-    std::clog << "pp(left)    = " << data::pp(left) << std::endl;
-    std::clog << "print(left) = " << data::print(left) << std::endl;
-    std::clog << "expected    = " << right << std::endl;
-  }
-  return result;
-#endif
 
   return true;
 }

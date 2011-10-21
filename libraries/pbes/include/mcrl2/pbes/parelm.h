@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/print.h"
 
 namespace mcrl2
 {
@@ -79,29 +80,6 @@ class pbes_parelm_algorithm
     }
 
     /// \cond INTERNAL_DOCS
-
-    /// \brief Prints a container of terms to standard error
-    /// \param v A container
-    /// \param message A string
-    /// \param print_index If true, an index is written in front of each term
-    template <typename Container>
-    void print_pp_container(const Container& v, std::string message = "<variables>", bool print_index = false) const
-    {
-      std::cerr << message << std::endl;
-      int index = 0;
-      for (typename Container::const_iterator i = v.begin(); i != v.end(); ++i)
-      {
-        if (print_index)
-        {
-          std::cerr << index++ << " " << mcrl2::core::pp(*i) << std::endl;
-        }
-        else
-        {
-          std::cerr << mcrl2::core::pp(*i) << " ";
-        }
-      }
-      std::cerr << std::endl;
-    }
 
     /// \brief FUNCTION_DESCRIPTION
     // \brief Prints a container to standard error
@@ -190,7 +168,7 @@ class pbes_parelm_algorithm
           int k = variable_index(i->variable().parameters(), *j);
           if (k < 0)
           {
-            std::cerr << "<variable error>" << mcrl2::core::pp(*j) << std::endl;
+            std::cerr << "<variable error>" << data::pp(*j) << std::endl;
             continue;
           }
           v.insert(offset + k);
@@ -266,7 +244,7 @@ class pbes_parelm_algorithm
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::variable v1 = predicate_variables[*i];
-          mCRL2log(log::debug) << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+          mCRL2log(log::debug) << "(" + pbes_system::pp(X1) + ", " + pbes_system::pp(v1) + ")\n";
         }
         mCRL2log(log::debug) << "\ndependencies:" << std::endl;
         typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
@@ -282,8 +260,8 @@ class pbes_parelm_algorithm
           size_t i2 = boost::target(e, G);
           core::identifier_string X2 = find_predicate_variable(p, i2);
           data::variable v2 = predicate_variables[i2];
-          std::string left  = "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")";
-          std::string right = "(" + mcrl2::core::pp(X2) + ", " + mcrl2::core::pp(v2) + ")";
+          std::string left  = "(" + pbes_system::pp(X1) + ", " + pbes_system::pp(v1) + ")";
+          std::string right = "(" + pbes_system::pp(X2) + ", " + pbes_system::pp(v2) + ")";
           mCRL2log(log::debug) << left << " -> " << right << std::endl;
         }
       }
@@ -299,7 +277,7 @@ class pbes_parelm_algorithm
           for (std::vector<size_t>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
             data::variable v1 = predicate_variables[*j + propvar_offsets[X1]];
-            mCRL2log(log::verbose) << "(" + mcrl2::core::pp(X1) + ", " + mcrl2::core::pp(v1) + ")\n";
+            mCRL2log(log::verbose) << "(" + pbes_system::pp(X1) + ", " + data::pp(v1) + ")\n";
           }
         }
       }

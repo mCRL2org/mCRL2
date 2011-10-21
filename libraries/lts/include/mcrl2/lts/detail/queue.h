@@ -12,6 +12,7 @@
 #define MCRL2_LTS_DETAIL_QUEUE_H
 
 #include <limits.h>
+#include <cassert>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/deque.h"
 #include "mcrl2/utilities/logger.h"

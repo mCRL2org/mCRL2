@@ -113,7 +113,7 @@ struct printer: public action_formulas::add_traverser_sort_expressions<lps::deta
 
 /// \brief Prints the object t to a stream.
 template <typename T>
-void print(const T& t, std::ostream& out)
+void pp(const T& t, std::ostream& out)
 {
   core::detail::apply_printer<action_formulas::detail::printer> printer(out);
   printer(t);
@@ -121,23 +121,11 @@ void print(const T& t, std::ostream& out)
 
 /// \brief Returns a string representation of the object t.
 template <typename T>
-std::string print(const T& t)
-{
-  std::ostringstream out;
-  action_formulas::print(t, out);
-  return out.str();
-}
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
 std::string pp(const T& t)
 {
-  MCRL2_CHECK_PP(core::pp(t),
-                 action_formulas::print(t),
-                 t.to_string()
-                );
-  return core::pp(t);
+  std::ostringstream out;
+  action_formulas::pp(t, out);
+  return out.str();
 }
 
 } // namespace action_formulas
@@ -207,7 +195,7 @@ struct printer: public regular_formulas::add_traverser_sort_expressions<action_f
 
 /// \brief Prints the object t to a stream.
 template <typename T>
-void print(const T& t, std::ostream& out)
+void pp(const T& t, std::ostream& out)
 {
   core::detail::apply_printer<regular_formulas::detail::printer> printer(out);
   printer(t);
@@ -215,23 +203,11 @@ void print(const T& t, std::ostream& out)
 
 /// \brief Returns a string representation of the object t.
 template <typename T>
-std::string print(const T& t)
-{
-  std::ostringstream out;
-  regular_formulas::print(t, out);
-  return out.str();
-}
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
 std::string pp(const T& t)
 {
-  MCRL2_CHECK_PP(core::pp(t),
-                 regular_formulas::print(t),
-                 t.to_string()
-                );
-  return core::pp(t);
+  std::ostringstream out;
+  regular_formulas::pp(t, out);
+  return out.str();
 }
 
 } // namespace regular_formulas
@@ -385,7 +361,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().print("nu ");
     derived()(x.name());
     print_assignments(x.assignments(), false);
-    derived().print(" . ");
+    derived().print(". ");
     derived()(x.operand());
     derived().leave(x);
   }
@@ -396,7 +372,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
     derived().print("mu ");
     derived()(x.name());
     print_assignments(x.assignments(), false);
-    derived().print(" . ");
+    derived().print(". ");
     derived()(x.operand());
     derived().leave(x);
   }
@@ -406,7 +382,7 @@ struct printer: public state_formulas::add_traverser_sort_expressions<regular_fo
 
 /// \brief Prints the object t to a stream.
 template <typename T>
-void print(const T& t, std::ostream& out)
+void pp(const T& t, std::ostream& out)
 {
   core::detail::apply_printer<state_formulas::detail::printer> printer(out);
   printer(t);
@@ -414,23 +390,11 @@ void print(const T& t, std::ostream& out)
 
 /// \brief Returns a string representation of the object t.
 template <typename T>
-std::string print(const T& t)
-{
-  std::ostringstream out;
-  state_formulas::print(t, out);
-  return out.str();
-}
-
-/// \brief Pretty prints a term.
-/// \param[in] t A term
-template <typename T>
 std::string pp(const T& t)
 {
-  MCRL2_CHECK_PP(core::pp(t),
-                 state_formulas::print(t),
-                 t.to_string()
-                );
-  return core::pp(t);
+  std::ostringstream out;
+  state_formulas::pp(t, out);
+  return out.str();
 }
 
 } // namespace state_formulas

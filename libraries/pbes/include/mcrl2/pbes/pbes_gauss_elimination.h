@@ -79,7 +79,7 @@ struct pbes_traits
     static inline
     std::string print(const equation_type& eq)
     {
-      return core::pp(eq.symbol()) + " " + core::pp(eq.variable()) + " = " + core::pp(eq.formula());
+      return pbes_system::pp(eq.symbol()) + " " + pbes_system::pp(eq.variable()) + " = " + pbes_system::pp(eq.formula());
     }
 };
 

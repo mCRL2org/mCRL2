@@ -224,7 +224,7 @@ class pbes_equation
           )
          )
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << mcrl2::core::pp(pbes_equation_to_aterm(*this)) << std::endl;
+        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pbes_system::pp(*this) << std::endl;
         return false;
       }
 
@@ -233,7 +233,7 @@ class pbes_equation
       nvisitor.visit(formula());
       if (nvisitor.result)
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the quantifier variable " << mcrl2::core::pp(nvisitor.name_clash) << " occurs within the scope of a quantifier variable with the same name." << std::endl;
+        std::cerr << "pbes_equation::is_well_typed() failed: the quantifier variable " << data::pp(nvisitor.name_clash) << " occurs within the scope of a quantifier variable with the same name." << std::endl;
         return false;
       }
 

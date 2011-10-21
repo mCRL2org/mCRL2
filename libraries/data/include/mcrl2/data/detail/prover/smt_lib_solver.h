@@ -124,13 +124,13 @@ class SMT_LIB_Solver: public SMT_Solver
               v_sort_domain_list = sort_expression_list(v_sort);
               v_sort = sort_expression();
             }
-            for (sort_expression_list::const_iterator l = v_sort_domain_list.begin(); 
+            for (sort_expression_list::const_iterator l = v_sort_domain_list.begin();
                                  l!=v_sort_domain_list.end() ; ++l)
             {
               sort_expression v_sort_domain_elt(*l);
               if (is_function_sort(v_sort_domain_elt))
               {
-                throw mcrl2::runtime_error("Function " + core::pp(v_operator) +
+                throw mcrl2::runtime_error("Function " + data::pp(v_operator) +
                                            " cannot be translated to the SMT-LIB format.");
               }
               if (sort_int::is_int(v_sort_domain_elt))
@@ -171,7 +171,7 @@ class SMT_LIB_Solver: public SMT_Solver
     {
       f_variables_extrafuns = "";
       if (!f_variables.empty())
-      { 
+      {
         f_variables_extrafuns = "  :extrafuns (";
       }
 
@@ -208,7 +208,7 @@ class SMT_LIB_Solver: public SMT_Solver
         }
       }
       if (!f_variables.empty())
-      { 
+      {
         f_variables_extrafuns = f_variables_extrafuns + ")\n";
       }
     }
@@ -428,7 +428,7 @@ class SMT_LIB_Solver: public SMT_Solver
       else
       {
         throw mcrl2::runtime_error("Unable to handle the current clause (" +
-                                   core::pp(a_clause) + ").");
+                                   data::pp(a_clause) + ").");
       }
     }
 
@@ -754,7 +754,7 @@ class SMT_LIB_Solver: public SMT_Solver
     void add_nat_clauses()
     {
       for(atermpp::set < variable >::const_iterator i=f_nat_variables.begin(); i!=f_nat_variables.end(); ++i)
-      { 
+      {
         char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(*i, 0));
         f_formula = f_formula + " (>= " + v_variable_string + " 0)";
       }
@@ -762,7 +762,7 @@ class SMT_LIB_Solver: public SMT_Solver
 
     void add_pos_clauses()
     {
-      for(atermpp::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)  
+      for(atermpp::set < variable >::const_iterator i=f_pos_variables.begin(); i!=f_pos_variables.end(); ++i)
       {
         char* v_variable_string = core::detail::gsATermAppl2String(ATAgetArgument(*i, 0));
         f_formula = f_formula + " (>= " + v_variable_string + " 1)";
@@ -787,7 +787,7 @@ class SMT_LIB_Solver: public SMT_Solver
       f_bool2pred = false;
 
       f_formula = "  :formula (and";
-      mCRL2log(log::verbose) << "Formula to be solved: " << core::pp(a_formula) << std::endl;
+      mCRL2log(log::verbose) << "Formula to be solved: " << data::pp(a_formula) << std::endl;
       while (!a_formula.empty())
       {
         v_clause = a_formula.front();

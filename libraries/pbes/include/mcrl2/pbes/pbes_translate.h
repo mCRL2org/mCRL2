@@ -29,6 +29,7 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/modal_formula/find.h"
+#include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -91,7 +92,7 @@ std::string myprint(const atermpp::vector<pbes_equation>& v)
   out << "[";
   for (atermpp::vector<pbes_equation>::const_iterator i = v.begin(); i != v.end(); ++i)
   {
-    out << "\n  " << core::pp(i->symbol()) << " " << core::pp(i->variable()) << " = " << core::pp(i->formula());
+    out << "\n  " << pbes_system::pp(i->symbol()) << " " << pbes_system::pp(i->variable()) << " = " << pbes_system::pp(i->formula());
   }
   out << "\n]";
   return out.str();
@@ -192,7 +193,7 @@ class pbes_translate_algorithm
         assert(false);
       }
 #ifdef MCRL2_PBES_TRANSLATE_PAR_DEBUG
-      std::cerr << "\n<Par>(" << core::pp(x) << ", " << core::pp(l) << ", " << core::pp(f) << ") = " << core::pp(result) << std::endl;
+      std::cerr << "\n<Par>(" << core::pp(x) << ", " << data::pp(l) << ", " << state_formulas::pp(f) << ") = " << data::pp(result) << std::endl;
 #endif
       return result;
     }
@@ -215,7 +216,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
     pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<sat timed>" << x.to_string() << " " << action_formulas::pp(b) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<sat timed>" << lps::pp(x) << " " << action_formulas::pp(b) << std::flush;
       lps2pbes_increase_indent();
 #endif
       using namespace action_formulas::detail::accessors;
@@ -284,7 +285,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       }
       else
       {
-        throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + b.to_string());
+        throw mcrl2::runtime_error(std::string("sat_top[timed] error: unknown lps::action formula ") + action_formulas::pp(b));
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
@@ -377,8 +378,8 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
             pbes_expression rhs = RHS(f0, phi, lps, T, context);
 //std::cout << "\n" << core::detail::print_set(context, "context") << std::endl;
             data::variable_list y = fresh_variables(yi, context);
-//std::cout << "\n" << core::detail::print_pp_list(yi, "yi") << std::endl;
-//std::cout << "\n" << core::detail::print_pp_list(y, "y") << std::endl;
+//std::cout << "\n" << core::detail::print_list(yi, data::stream_printer(), "yi") << std::endl;
+//std::cout << "\n" << core::detail::print_list(y, data::stream_printer(), "y") << std::endl;
             ci = data::replace_free_variables(ci, data::make_sequence_sequence_substitution(yi, y));
             lps::replace_free_variables(ai, data::make_sequence_sequence_substitution(yi, y));
             gi = data::replace_free_variables(gi, data::make_sequence_sequence_substitution(yi, y));
@@ -495,7 +496,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else
         {
-          throw mcrl2::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("RHS[timed] error: unknown state formula ") + state_formulas::pp(f));
         }
       }
       else // the formula is a negation
@@ -583,7 +584,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else
         {
-          throw mcrl2::runtime_error(std::string("RHS[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("RHS[timed] error: unknown state formula ") + state_formulas::pp(f));
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -682,7 +683,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else
         {
-          throw mcrl2::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[timed] error: unknown state formula ") + state_formulas::pp(f));
         }
       }
       else // the formula is a negation
@@ -760,7 +761,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else
         {
-          throw mcrl2::runtime_error(std::string("E[timed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[timed] error: unknown state formula ") + state_formulas::pp(f));
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -832,7 +833,7 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
     pbes_expression sat_top(const lps::multi_action& x, const action_formulas::action_formula& b)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<sat>" << x.to_string() << " " << action_formulas::pp(b) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<sat>" << lps::pp(x) << " " << action_formulas::pp(b) << std::flush;
       lps2pbes_increase_indent();
 #endif
       using namespace action_formulas::detail::accessors;
@@ -905,7 +906,7 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
       }
       else
       {
-        throw mcrl2::runtime_error(std::string("sat_top[untimed] error: unknown lps::action formula ") + b.to_string());
+        throw mcrl2::runtime_error(std::string("sat_top[untimed] error: unknown lps::action formula ") + action_formulas::pp(b));
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
       lps2pbes_decrease_indent();
@@ -1054,7 +1055,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else
         {
-          throw mcrl2::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + state_formulas::pp(f));
         }
       }
       else // the formula is a negation
@@ -1140,7 +1141,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else
         {
-          throw mcrl2::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("RHS[untimed] error: unknown state formula ") + state_formulas::pp(f));
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
@@ -1239,7 +1240,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else
         {
-          throw mcrl2::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[untimed] error: unknown state formula ") + state_formulas::pp(f));
         }
       }
       else // the formula is a negation
@@ -1317,7 +1318,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else
         {
-          throw mcrl2::runtime_error(std::string("E[untimed] error: unknown state formula ") + f.to_string());
+          throw mcrl2::runtime_error(std::string("E[untimed] error: unknown state formula ") + state_formulas::pp(f));
         }
       }
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG

@@ -136,42 +136,6 @@ class multi_action
       return front(m_actions).arguments();
     }
 
-    /// \brief Returns a string representation of the multi action
-    std::string to_string() const
-    {
-      std::string result;
-      if (m_actions.size()==0)
-      {
-        result="tau";
-      }
-      else
-      {
-        if (has_time() && m_actions.size()>1)
-        {
-          result="(";
-        }
-        for (action_list::const_iterator i=m_actions.begin(); i!=m_actions.end(); ++i)
-        {
-          result = result+core::pp(*i);
-          action_list::const_iterator i_next=i;
-          i_next++;
-          if (i_next!=m_actions.end())
-          {
-            result=result+"|";
-          }
-        }
-      }
-      if (has_time())
-      {
-        if (m_actions.size()>1)
-        {
-          result=result+")";
-        }
-        result=result+("@ " + core::pp(m_time));
-      }
-      return result;
-    }
-
     /// \brief Joins the actions of both multi actions.
     /// \pre The time of both multi actions must be equal.
     multi_action operator+(const multi_action& other) const
@@ -217,7 +181,7 @@ atermpp::aterm_appl multi_action_to_aterm(const multi_action& m)
 {
   return core::detail::gsMakeMultAct(m.actions());
 }
-   
+
 /// \brief Visits all permutations of the arrays, and calls f for each instance.
 /// \pre The range [first, last) contains sorted arrays.
 /// \param first Start of a sequence of arrays
@@ -376,13 +340,6 @@ struct not_equal_multi_actions_builder
 
 } // namespace detail
 /// \endcond
-
-/// \brief Returns a string representation of a multi action
-inline
-std::string pp1(const multi_action& m)
-{
-  return m.to_string();
-}
 
 /// \brief Returns a data expression that expresses under which conditions the
 /// multi actions a and b are equal. The multi actions may contain free variables.

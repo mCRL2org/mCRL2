@@ -96,11 +96,11 @@ class parity_game_generator_deprecated: public parity_game_generator
     {
       if (m_precompile_pbes)
       {
-        return e.to_string() + " (" + core::pp(from_rewrite_format(e)) + ")";
+        return e.to_string() + " (" + data::pp(from_rewrite_format(e)) + ")";
       }
       else
       {
-        return core::pp(e);
+        return pbes_system::pp(e);
       }
     }
 

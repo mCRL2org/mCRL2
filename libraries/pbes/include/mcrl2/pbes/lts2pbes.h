@@ -16,6 +16,7 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/traverser.h"
+#include "mcrl2/modal_formula/print.h"
 #include "mcrl2/pbes/pbes_translate.h"
 
 namespace mcrl2 {

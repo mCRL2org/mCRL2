@@ -118,20 +118,20 @@ core::identifier_string create_propvar_name(core::identifier_string propvar_name
       {
         //If p is a OpId
         propvar_name_current += "@";
-        propvar_name_current += mcrl2::core::pp(*del_i);
+        propvar_name_current += mcrl2::data::pp(*del_i);
       }
       else if (is_application(*del_i))
       {
         // If p is a data application
         propvar_name_current += "@";
-        propvar_name_current += mcrl2::core::pp(*del_i);
+        propvar_name_current += mcrl2::data::pp(*del_i);
       }
       // else if (is_variable(*del_i))
       // { // If p is a freevar
       // }
       else
       {
-        throw mcrl2::runtime_error(std::string("pbesinst: could not rename the variable ") + core::pp(propositional_variable_instantiation(propvar_name, del)));
+        throw mcrl2::runtime_error(std::string("pbesinst: could not rename the variable ") + pbes_system::pp(propositional_variable_instantiation(propvar_name, del)));
       }
     }
   }
@@ -164,7 +164,7 @@ propositional_variable_instantiation create_naive_propositional_variable_instant
           "The propositional variable contains a variable of finite sort.\n"
           "Can not handle variables of finite sort when creating a propositional variable name.\n"
           "Computation aborted.\n"
-          "Problematic Term: " + mcrl2::core::pp(*p));
+          "Problematic Term: " + mcrl2::data::pp(*p));
       }
     }
     else

@@ -52,7 +52,7 @@ BOOST_AUTO_TEST_CASE(pbes_print)
 
   pbes<> p;
   p = txt2pbes(PBES);
-  pbes_system::print(p);
+  pbes_system::pp(p);
 }
 
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])

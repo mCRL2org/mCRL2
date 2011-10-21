@@ -168,9 +168,9 @@ void compare_parse_results(const std::string& text, const T& x1, const T& x2)
   {
     std::clog << "--- WARNING: difference detected between old and new parser ---\n";
     std::clog << "string: " << text << std::endl;
-    std::clog << "old:    " << pbes_system::print(x1) << std::endl;
+    std::clog << "old:    " << pbes_system::pp(x1) << std::endl;
     core::print_aterm(x1);
-    std::clog << "new:    " << pbes_system::print(x2) << std::endl;
+    std::clog << "new:    " << pbes_system::pp(x2) << std::endl;
     core::print_aterm(x2);
 #ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
     throw mcrl2::runtime_error("difference detected between old and new parser");
@@ -195,7 +195,7 @@ std::istream& operator>>(std::istream& from, pbes<Container>& p)
   std::string filename = utilities::create_filename("pbes", ".txt");
   std::ofstream out(filename.c_str());
   out << "CHECK PBES " << core::detail::check_rule_PBES(result) << std::endl;
-  out << core::pp(result) << std::endl << std::endl;
+  out << pbes_system::pp(result) << std::endl << std::endl;
   out << atermpp::aterm_appl(result).to_string() << std::endl;
 #endif
 
@@ -437,12 +437,12 @@ pbes_expression parse_pbes_expression(std::string expr, std::string subst, const
   for (typename SubstitutionFunction::iterator i = sigma.begin(); i != sigma.end(); ++i)
   {
     data::variable v = i->first;
-    datavar_text = datavar_text + (i == sigma.begin() ? "" : ", ") + core::pp(v) + ": " + core::pp(v.sort());
+    datavar_text = datavar_text + (i == sigma.begin() ? "" : ", ") + data::pp(v) + ": " + data::pp(v.sort());
   }
 
   pbes<> q = p;
   q.initial_state() == tr::true_();
-  std::string pbesspec = core::pp(q);
+  std::string pbesspec = pbes_system::pp(q);
   std::string init("init");
   // remove the init declaration
   pbesspec = pbesspec.substr(0, std::find_end(pbesspec.begin(), pbesspec.end(), init.begin(), init.end()) - pbesspec.begin());
