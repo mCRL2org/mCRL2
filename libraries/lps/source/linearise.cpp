@@ -4690,7 +4690,7 @@ class specification_basic_type:public boost::noncopyable
     /// \brief Join the variables in v1 with those in v2, but do not add duplicates.
     /// \details As it stands renamings has no function.
 
-    variable_list merge_var_simple(
+/*    variable_list merge_var_simple(
       const variable_list v1,
       const variable_list v2)
     {
@@ -4724,9 +4724,10 @@ class specification_basic_type:public boost::noncopyable
       }
       return result;
     }
+*/
 
 
-    variable_list merge_var(
+   variable_list merge_var(
       const variable_list v1,
       const variable_list v2,
       atermpp::vector < variable_list> &renamings_pars,
@@ -4947,7 +4948,7 @@ class specification_basic_type:public boost::noncopyable
 
       /* we construct the resulting condition */
       data_expression_list auxresult;
-      atermpp::vector < variable_list >  ::const_iterator auxrename_list_pars=rename_list_pars.begin();
+      atermpp::vector < variable_list >::const_iterator auxrename_list_pars=rename_list_pars.begin();
       atermpp::vector < data_expression_list >::const_iterator auxrename_list_args=rename_list_args.begin();
 
       data_expression equalterm;
@@ -6696,7 +6697,7 @@ class specification_basic_type:public boost::noncopyable
           used_sumvars = push_front(used_sumvars, *s);
         }
       }
-      used_sumvars = reverse(used_sumvars);
+      used_sumvars = reverse(used_sumvars); 
 
       return result;
     }
@@ -6731,7 +6732,10 @@ class specification_basic_type:public boost::noncopyable
          be generated. So, we must now traverse all conditions
          to generate a non trivial ultimate delay condition */
 
-      data_expression  result=sort_bool::false_();
+      data_expression_list results;
+      data_expression_list condition_list;
+      atermpp::vector < variable_list> renamings_pars;
+      atermpp::vector < data_expression_list> renamings_args;
       for (deprecated::summand_list::const_iterator walker=sumlist.begin();
            walker!=sumlist.end(); ++walker)
       {
@@ -6741,19 +6745,39 @@ class specification_basic_type:public boost::noncopyable
         const data_expression condition=smmnd.condition();
 
         variable_list new_existentially_quantified_variables;
-        const data_expression intermediate_result=
-          makesingleultimatedelaycondition(
-            sumvars,
-            freevars,
-            condition,
-            walker->has_time(),
-            timevariable,
-            actiontime,
-            new_existentially_quantified_variables);
-        existentially_quantified_variables=merge_var_simple(
+        const data_expression ult_del_condition=
+             makesingleultimatedelaycondition(
+                             sumvars,
+                             freevars,
+                             condition,
+                             walker->has_time(),
+                             timevariable,
+                             actiontime,
+                             new_existentially_quantified_variables);
+        existentially_quantified_variables=merge_var(
+                                             new_existentially_quantified_variables,
                                              existentially_quantified_variables,
-                                             new_existentially_quantified_variables);
-        result=lazy::or_(result,intermediate_result);
+                                             renamings_pars,
+                                             renamings_args,
+                                             condition_list); 
+        results=push_front(results,ult_del_condition);
+      }
+
+      data_expression result=sort_bool::false_();
+
+      assert(results.size()==condition_list.size());
+      assert(results.size()==renamings_pars.size());
+      assert(results.size()==renamings_args.size());
+
+      atermpp::vector < variable_list>::const_iterator renamings_par=renamings_pars.begin();
+      atermpp::vector < data_expression_list>::const_iterator renamings_arg=renamings_args.begin();
+      condition_list=reverse(condition_list);
+      results=reverse(results);
+      data_expression_list::const_iterator j=condition_list.begin(); 
+      for(data_expression_list::const_iterator i=results.begin(); 
+              i!=results.end(); ++i,++j,++renamings_par,++renamings_arg)
+      {   
+        result=lazy::or_(result,substitute_data(*renamings_arg,*renamings_par,lazy::and_(*i,*j)));
       }
       return result;
     }
@@ -6850,9 +6874,8 @@ class specification_basic_type:public boost::noncopyable
       variable timevar=get_fresh_variable("timevar",sort_real::real_());
       variable_list ultimate_delay_sumvars1;
       data_expression ultimatedelaycondition=
-        (options.add_delta?sort_bool::true_():
-         static_cast< data_expression const& >(getUltimateDelayCondition(sumlist2,parametersOfsumlist2,
-             timevar,ultimate_delay_sumvars1)));
+        (options.add_delta?data_expression(sort_bool::true_()):
+           getUltimateDelayCondition(sumlist2,parametersOfsumlist2,timevar,ultimate_delay_sumvars1));
 
       for (deprecated::summand_list::const_iterator walker1=sumlist1.begin();
            walker1!=sumlist1.end(); ++walker1)
@@ -6909,9 +6932,8 @@ class specification_basic_type:public boost::noncopyable
       /* second we enumerate the summands of sumlist2 */
 
       variable_list ultimate_delay_sumvars2;
-      ultimatedelaycondition=(options.add_delta?sort_bool::true_():
-                              static_cast< data_expression const& >(getUltimateDelayCondition(sumlist1,par1,
-                                  timevar,ultimate_delay_sumvars2)));
+      ultimatedelaycondition=(options.add_delta?data_expression(sort_bool::true_()):
+                  getUltimateDelayCondition(sumlist1,par1, timevar,ultimate_delay_sumvars2));
 
       for (deprecated::summand_list::const_iterator walker2=sumlist2.begin();
            walker2!=sumlist2.end(); ++walker2)
