@@ -4658,7 +4658,7 @@ class specification_basic_type:public boost::noncopyable
       const variable var,
       const data_expression_list conditionlist)
     {
-      const data_expression unique=representative_generator_internal(var.sort(),true);
+      const data_expression unique=representative_generator_internal(var.sort(),false);
       const data_expression newcondition=equal_to(var,unique);
       return extend(newcondition,conditionlist);
     }

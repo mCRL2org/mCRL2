@@ -726,8 +726,6 @@ lps::deprecated::summand generate_summand(summand_information& summand_info,
   lps::deprecated::summand result = lps::deprecated::summand(get_nonreal_variables(s.summation_variables()),
                            new_condition, s.is_delta(), new_actions, nextstate);
 
-  // mCRL2log(debug) << "Generated summand " << core::pp(result) << std::endl;
-
   return result;
 }
 
@@ -914,8 +912,8 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   mCRL2log(verbose) << "Generated the following variables in " <<  iteration << " iterations:" << std::endl;
   for (context_type::iterator i = context.begin(); i != context.end(); ++i)
   {
-    mCRL2log(verbose) << "< " << core::pp(atermpp::aterm_appl(i->get_lowerbound())) << ", " << core::pp(atermpp::aterm_appl(i->get_upperbound()))
-                      << " > " << core::pp(atermpp::aterm_appl(i->get_variable())) << std::endl;
+    mCRL2log(verbose) << "< " << data::pp(i->get_lowerbound()) << ", " << data::pp(i->get_upperbound())
+                      << " > " << data::pp(i->get_variable()) << std::endl;
   }
 
   if (!new_inequalities_sizes.empty())
