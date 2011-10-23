@@ -8,6 +8,7 @@
 
 #include "wx.hpp" // precompiled headers
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/lts/lts_algorithm.h"
 #include "mcrl2/lts/lts_io.h"
@@ -912,7 +913,7 @@ void LTS::loadTrace(std::string const& path)
   {
 
     ATerm currVal = ATgetArgument(currState, i);
-    string value = PrintPart_CXX(currVal, ppDefault);
+    string value = mcrl2::core::pp_deprecated(currVal);
 
     std::string paramValue = getStateParameterValueStr(initState,i);
   }
@@ -921,9 +922,8 @@ void LTS::loadTrace(std::string const& path)
 
   while (tr.getPosition() != tr.getLength())
   {
-    std::string action = PrintPart_CXX(ATgetArgument(
-                                         ATgetArgument(tr.nextAction(),0),0),
-                                       ppDefault);
+    std::string action = mcrl2::core::pp_deprecated(ATgetArgument(
+                                         ATgetArgument(tr.nextAction(),0),0));
 
     std::vector<Transition*> posTrans = sim->getPosTrans();
     int possibilities = 0;
@@ -962,8 +962,7 @@ void LTS::loadTrace(std::string const& path)
              ++i)
         {
 
-          std::string currVal = PrintPart_CXX(ATgetArgument(currState, i),
-                                              ppDefault);
+          std::string currVal = mcrl2::core::pp_deprecated(ATgetArgument(currState, i));
 
           std::map<std::string, std::string>::iterator it;
 

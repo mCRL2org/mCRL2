@@ -31,6 +31,7 @@
 #include "xsimmain.h"
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
 #if (wxMINOR_VERSION < 8)
@@ -822,7 +823,7 @@ void XSimMain::SetCurrentState(ATerm state, bool showchange)
     }
     else
     {
-      stateview->SetItem(i,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) newval, ppDefault).c_str()));
+      stateview->SetItem(i,1,wxConvLocal.cMB2WX(mcrl2::core::pp_deprecated((ATerm) newval).c_str()));
     }
 
     if (showchange && !(ATisEqual(oldval,newval) || (mcrl2::data::is_variable(oldval) && mcrl2::data::is_variable(newval))))
@@ -936,7 +937,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
   long i = 0;
   for (ATermList l=nextstates; !ATisEmpty(l); l=ATgetNext(l), i++)
   {
-    actions.Add(wxConvLocal.cMB2WX(PrintPart_CXX(ATgetFirst(ATLgetFirst(l)), ppDefault).c_str()));
+    actions.Add(wxConvLocal.cMB2WX(mcrl2::core::pp_deprecated(ATgetFirst(ATLgetFirst(l))).c_str()));
     indices.Add(i);
     if ((trace_next_state != NULL) &&
         ATisEqual(ATgetFirst(ATLgetFirst(l)),trace_next_transition) &&
@@ -969,7 +970,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
         {
           comma = true;
         }
-        PrintPart_CXX(ss, ATgetFirst(o), ppDefault);
+        ss << mcrl2::core::pp_deprecated(ATgetFirst(o));
         ss << " := ";
         if (mcrl2::data::is_variable(newval))
         {
@@ -977,7 +978,7 @@ void XSimMain::UpdateTransitions(ATermList nextstates)
         }
         else
         {
-          PrintPart_CXX(ss, (ATerm) newval, ppDefault);
+          ss << mcrl2::core::pp_deprecated((ATerm) newval);
         }
       }
 

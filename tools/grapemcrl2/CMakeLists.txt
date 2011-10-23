@@ -129,6 +129,7 @@ include_directories(${CMAKE_CURRENT_SOURCE_DIR}/grapeapp/dialogs)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/libgrape)
 include_directories(${CMAKE_CURRENT_SOURCE_DIR}/mcrl2gen)
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)

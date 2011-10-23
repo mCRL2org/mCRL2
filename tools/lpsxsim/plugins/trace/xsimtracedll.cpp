@@ -25,6 +25,7 @@
 #include "simbasegui.h"
 #include "xsimtracedll.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
@@ -60,7 +61,7 @@ static void PrintState(stringstream& ss, ATerm state, NextState* ns)
     }
     else
     {
-      PrintPart_CXX(ss, (ATerm) a, ppDefault);
+      ss << mcrl2::core::pp_deprecated((ATerm) a);
     }
   }
 }
@@ -96,7 +97,7 @@ void XSimTraceDLL::_add_state(ATermAppl Transition, ATerm State, bool enabled)
     real_l = traceview->InsertItem(l,wxString::Format(wxT("%li"),l));
     traceview->SetItemData(real_l,l);
     real_l = traceview->FindItem(-1,l);
-    traceview->SetItem(real_l,1,wxConvLocal.cMB2WX(PrintPart_CXX((ATerm) Transition, ppDefault).c_str()));
+    traceview->SetItem(real_l,1,wxConvLocal.cMB2WX(mcrl2::core::pp_deprecated((ATerm) Transition).c_str()));
     PrintState(ss,State,simulator->GetNextState());
     traceview->SetItem(real_l,2,wxConvLocal.cMB2WX(ss.str().c_str()));
     traceview->SetColumnWidth(2,wxLIST_AUTOSIZE);
