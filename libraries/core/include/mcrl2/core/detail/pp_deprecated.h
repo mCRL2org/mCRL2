@@ -39,6 +39,10 @@ std::string pp_deprecated(const atermpp::aterm_appl& x)
   {
     return lps::pp(lps::action_label(x));
   }
+  else if (lps::is_multi_action(x))
+  {
+    return lps::pp(lps::multi_action(x));
+  }
   else if (process::is_process_expression(x))
   {
     return process::pp(process::process_expression(x));
@@ -76,6 +80,24 @@ std::string pp_deprecated(const atermpp::aterm_list& x)
   }
   throw mcrl2::runtime_error("pp_deprecated: encountered unknown term " + x.to_string());
   return "";
+}
+
+inline
+std::string pp_deprecated(aterm::ATerm x)
+{
+  if (aterm::ATgetType(x) == aterm::AT_APPL)
+  {
+    pp_deprecated((aterm::ATermAppl) x);
+  }
+  else if (aterm::ATgetType(x) == aterm::AT_LIST)
+  {
+    pp_deprecated((aterm::ATermList) x);
+  }
+  // TODO: MultAct([Action(ActId("a",[]),[])]) is not recognized as an ATermAppl, so we force it...
+  return pp_deprecated((ATermAppl) x);
+  //std::cout << "<HO>" << atermpp::aterm(x).to_string() << std::endl;
+  //throw mcrl2::runtime_error("pp_deprecated: encountered unknown term " + atermpp::aterm(x).to_string());
+  //return "";
 }
 
 } // namespace core

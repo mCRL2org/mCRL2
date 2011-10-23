@@ -37,7 +37,7 @@ namespace core
 using namespace core::detail::precedences;
 
 /// \brief t_pp_format represents the available pretty print formats
-typedef enum { ppDefault, ppDebug, ppInternal, ppInternalDebug} t_pp_format;
+typedef enum { ppDefault, ppInternal } t_pp_format;
 
 /// \brief Print string representation of pretty print format
 /// \param pp_format a pretty print format
@@ -51,38 +51,12 @@ std::string pp_format_to_string(const t_pp_format pp_format)
   {
     case ppDefault:
       return "default";
-    case ppDebug:
-      return "debug";
     case ppInternal:
       return "internal";
-    case ppInternalDebug:
-      return "internal_debug";
     default:
       throw mcrl2::runtime_error("Unknown pretty print format");
   }
 }
-
-
-/** \brief Print a textual description of an ATerm representation of an
- *         mCRL2 specification or expression to an output stream.
- *  \param[in] out_stream A stream to which can be written.
- *  \param[in] part An ATerm representation of a part of an mCRL2
- *             specification or expression.
- *  \param[in] pp_format A pretty print format.
- *  \post A textual representation of part is written to out_stream using
- *        method pp_format.
-**/
-void PrintPart_CXX(std::ostream& out_stream, const ATerm part,
-                   t_pp_format pp_format = ppDefault);
-
-/** \brief Return a textual description of an ATerm representation of an
- *         mCRL2 specification or expression.
- *  \param[in] part An ATerm representation of a part of an mCRL2
- *             specification or expression.
- *  \param[in] pp_format A pretty print format.
- *  \return A textual representation of part according to method pp_format.
-**/
-std::string PrintPart_CXX(const ATerm part, t_pp_format pp_format = ppDefault);
 
 /// \cond INTERNAL_DOCS
 namespace detail

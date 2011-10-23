@@ -26,6 +26,7 @@
 #include <string>
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/detail/struct_core.h"
 
@@ -660,7 +661,7 @@ class Trace
       {
         if (core::detail::gsIsMultAct(actions[i]))
         {
-          core::PrintPart_CXX(os,(ATerm) actions[i],core::ppDefault);
+          os << core::pp_deprecated((ATerm) actions[i]);
         }
         else
         {

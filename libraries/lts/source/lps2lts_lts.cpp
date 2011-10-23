@@ -12,6 +12,7 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/lts/detail/lps2lts_lts.h"
@@ -106,7 +107,7 @@ void lps2lts_lts::save_transition(size_t idx_from, ATerm from, ATermAppl action,
         idx_to = 0;
       }
       aut << "(" << idx_from << ",\"";
-      PrintPart_CXX(aut,(ATerm) action,ppDefault);
+      aut << core::pp_deprecated((ATerm) action);
       aut << "\"," << idx_to << ")\n";
       break;
     default:

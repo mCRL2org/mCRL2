@@ -16,26 +16,21 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/pbes/typecheck.h"
+#include "mcrl2/pbes/parse.h"
 
 using namespace mcrl2;
 
 void test_pbes_specification(const std::string& pbes_in, bool test_type_checker = true)
 {
-  std::istringstream pbes_in_stream(pbes_in);
-  ATermAppl pbes_aterm = core::parse_pbes_spec(pbes_in_stream);
-  BOOST_REQUIRE(pbes_aterm != NULL);
-
-  std::string pbes_out = core::PrintPart_CXX((ATerm) pbes_aterm);
-  //std::cerr << "The following PBES specifications should be the same:" << std::endl << pbes_in << std::endl << "and" << std::endl << pbes_out << std::endl;
+  pbes_system::pbes<> p = pbes_system::parse_pbes_old(pbes_in);
+  std::string pbes_out = pbes_system::pp(p);
   BOOST_CHECK(pbes_in == pbes_out);
 
   if (test_type_checker)
   {
-    pbes_system::pbes<> p(pbes_aterm);
     pbes_system::type_check(p);
-
-    //pbes_out = core::PrintPart_CXX((ATerm) pbes_aterm);
     pbes_out = pbes_system::pp(p);
     //std::cerr << "The following PBES specifications should be the same:" << std::endl << pbes_in  << std::endl << "and" << std::endl << pbes_out << std::endl;
     BOOST_CHECK(pbes_in == pbes_out);

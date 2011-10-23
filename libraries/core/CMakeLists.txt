@@ -58,7 +58,6 @@ set(mcrl2_core_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/struct_core.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2parser.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2lexer.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/print.cpp
 )
 
 set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)

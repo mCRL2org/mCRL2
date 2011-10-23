@@ -17,6 +17,7 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/utilities/logger.h"
@@ -739,7 +740,7 @@ static void checkPattern(ATermAppl p)
   {
     if (gsIsDataVarId(ATAgetArgument(p,0)))
     {
-      throw string("variable "+PrintPart_CXX(ATgetArgument(p,0),ppDefault)+" is used as head symbol in an application, which is not supported");
+      throw string("variable "+core::pp_deprecated(ATgetArgument(p,0))+" is used as head symbol in an application, which is not supported");
     }
     checkPattern(ATAgetArgument(p,0));
     checkPattern(ATLgetArgument(p,1));

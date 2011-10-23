@@ -5,6 +5,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 
 using namespace std;
 using namespace mcrl2::trace;
@@ -37,7 +38,7 @@ void test_next_action(Trace& t, const char* s)
   BOOST_CHECK((a != NULL) && (ATgetType(a) == AT_APPL));
   if ((a != NULL) && (ATgetType(a) == AT_APPL))
   {
-    string action(mcrl2::core::PrintPart_CXX(a));
+    string action(mcrl2::core::pp_deprecated(a));
     BOOST_CHECK(action == s);
   }
 }

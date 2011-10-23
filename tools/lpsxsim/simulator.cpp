@@ -21,6 +21,7 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/core/print.h"
@@ -28,6 +29,7 @@
 #include "mcrl2/trace/trace.h"
 #include "simulator.h"
 
+using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::trace;
@@ -452,7 +454,7 @@ void StandardSimulator::LoadTrace(const std::string& filename)
       {
         std::stringstream ss;
         ss << "could not perform action " << idx << " (";
-        PrintPart_CXX(ss,(ATerm) act,ppDefault);
+        ss << core::pp_deprecated((ATerm) act);
         ss << ") from trace";
         throw mcrl2::runtime_error(ss.str());
       }
@@ -467,7 +469,7 @@ void StandardSimulator::LoadTrace(const std::string& filename)
       bool found = false;
       while (nextstategen->next(&Transition,&NewState))
       {
-        std::string t = PrintPart_CXX((ATerm) Transition, ppDefault);
+        std::string t = core::pp_deprecated((ATerm) Transition);
         if (s == t)
         {
           if ((tr.currentState() == NULL) || ((NewState = nextstate->parseStateVector(tr.currentState(),NewState)) != NULL))
