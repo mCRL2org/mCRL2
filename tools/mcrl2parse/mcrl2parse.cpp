@@ -637,22 +637,21 @@ class mcrl2parse_tool : public input_tool
           {
             case actfrm_e   :
             {
-              std::cout << "Warning: this test may fail due to the absence of a type checker" << std::endl;
               separate_action_specification(text, "actfrm", lpsspec, text);
               action_formulas::action_formula x = action_formulas::parse_action_formula_new(text);
-              compare(text, action_formulas::pp(x), action_formulas::print(x));
+              std::cout << action_formulas::pp(x) << std::endl;
               break;
             }
             case besexpr_e  :
             {
               bes::boolean_expression x = bes::parse_boolean_expression_new(text);
-              compare(text, bes::pp(x), bes::print(x));
+              std::cout << bes::pp(x) << std::endl;
               break;
             }
             case besspec_e  :
             {
               bes::boolean_equation_system<> x = bes::parse_boolean_equation_system_new(text);
-              compare(text, bes::pp(x), bes::print(x));
+              std::cout << bes::pp(x) << std::endl;
               break;
             }
             case dataexpr_e :
@@ -661,26 +660,26 @@ class mcrl2parse_tool : public input_tool
               separate_data_specification(text, "dataexpr", "variables", dataspec, text, variable_text);
               data::variable_vector v = parse_data_variables(variable_text, dataspec);
               data::data_expression x = data::parse_data_expression(text, v.begin(), v.end(), dataspec);
-              compare(text, data::pp(x), data::print(x));
+              std::cout << data::pp(x) << std::endl;
               break;
             }
             case dataspec_e :
             {
               data::data_specification x = data::parse_data_specification(text);
-              compare(text, data::pp(x), data::print(x));
+              std::cout << data::pp(x) << std::endl;
               break;
             }
             case mcrl2spec_e:
             {
               process::process_specification x = process::parse_process_specification(text, false);
-              compare(text, process::pp(x), process::print(x));
+              std::cout << process::pp(x) << std::endl;
               break;
             }
             case multact_e  :
             {
               separate_action_specification(text, "multact", lpsspec, text);
               lps::multi_action x = lps::parse_multi_action(text, lpsspec.action_labels(), lpsspec.data());
-              compare(text, core::pp(lps::detail::multi_action_to_aterm(x)), lps::print(x));
+              std::cout << lps::pp(x) << std::endl;
               break;
             }
             case pbesexpr_e :
@@ -688,43 +687,41 @@ class mcrl2parse_tool : public input_tool
               std::cout << "Warning: this test may fail due to the absence of a type checker" << std::endl;
               separate_pbes_specification(text, "pbesexpr", pbesspec, text);
               pbes_system::pbes_expression x = pbes_system::parse_pbes_expression_new(text);
-              compare(text, core::pp(x), pbes_system::print(x));
+              std::cout << pbes_system::pp(x) << std::endl;
               break;
             }
             case pbesspec_e :
             {
               pbes_system::pbes<> x = pbes_system::parse_pbes(text);
-              compare(text, pbes_system::pp(x), pbes_system::print(x));
+              std::cout << pbes_system::pp(x) << std::endl;
               break;
             }
             case procexpr_e :
             {
-              std::cout << "Warning: this test may fail due to the absence of a type checker" << std::endl;
               separate_process_specification(text, "procexpr", procspec, text);
               process::process_expression x = process::parse_process_expression(text, process::pp(procspec));
-              compare(text, process::pp(x), process::print(x));
+              std::cout << process::pp(x) << std::endl;
               break;
             }
             case regfrm_e   :
             {
-              std::cout << "Warning: this test may fail due to the absence of a type checker" << std::endl;
               separate_action_specification(text, "regfrm", lpsspec, text);
               regular_formulas::regular_formula x = regular_formulas::parse_regular_formula_new(text);
-              compare(text, regular_formulas::pp(x), regular_formulas::print(x));
+              std::cout << regular_formulas::pp(x) << std::endl;
               break;
             }
             case sortexpr_e :
             {
               separate_data_specification(text, "sortexpr", dataspec, text);
               data::sort_expression x = data::parse_sort_expression(text, dataspec);
-              compare(text, data::pp(x), data::print(x));
+              std::cout << data::pp(x) << std::endl;
               break;
             }
             case statefrm_e :
             {
               separate_action_specification(text, "statefrm", lpsspec, text);
               state_formulas::state_formula x = state_formulas::parse_state_formula(text, lpsspec, false);
-              compare(text, state_formulas::pp(x), state_formulas::print(x));
+              std::cout << state_formulas::pp(x) << std::endl;
               break;
             }
           }
