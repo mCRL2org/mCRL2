@@ -16,6 +16,7 @@ add_executable(${PROJECT_NAME}
   ltsinfo.cpp
 )
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)

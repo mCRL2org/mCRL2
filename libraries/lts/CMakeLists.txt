@@ -12,6 +12,7 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/trace/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)

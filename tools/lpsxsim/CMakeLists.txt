@@ -14,6 +14,7 @@ cmake_minimum_required(VERSION 2.6)
 
 project(mcrl2_simulator)
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include)

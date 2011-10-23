@@ -18,6 +18,7 @@ add_executable(${PROJECT_NAME}
 )
 
 # Headers:
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/bes/include)
