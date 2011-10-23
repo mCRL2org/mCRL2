@@ -17,6 +17,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/representative_generator.h"
@@ -76,7 +77,7 @@ static std::string print_assignments(atermpp::aterm_list a, ns_info const& info)
     }
   }
   res = atermpp::reverse(res);
-  return core::pp(res);
+  return core::pp_deprecated(res);
 }
 #endif // MCRL2_NEXTSTATE_DEBUG
 
@@ -441,7 +442,7 @@ ATermAppl NextState::ActionToRewriteFormat(ATermAppl act, ATermList free_vars)
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::ActionToRewriteFormat(act, free_vars) called, with" << std::endl <<
             "  act = " << atermpp::aterm_appl(act) << std::endl <<
-            "  act (human readable): " << core::pp(atermpp::aterm_appl(act)) << std::endl <<
+            "  act (human readable): " << core::pp_deprecated(atermpp::aterm_appl(act)) << std::endl <<
             "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
   ATermList l = ATLgetArgument(act,0);
@@ -463,7 +464,7 @@ ATermList NextState::AssignsToRewriteFormat(ATermList assigns, ATermList free_va
 #ifdef MCRL2_NEXTSTATE_DEBUG
   std::clog << "NextState::AssignsToRewriteFormat(assigns, free_vars) called, with: " << std::endl <<
             "  assigns = " << atermpp::aterm_list(assigns) << std::endl <<
-            "  (human readable assigns): " << core::pp(atermpp::aterm_list(assigns)) << std::endl <<
+            "  (human readable assigns): " << core::pp_deprecated(atermpp::aterm_list(assigns)) << std::endl <<
             "  free_vars = " << atermpp::aterm_list(free_vars) << std::endl;
 #endif
   size_t i = 0;
@@ -1036,9 +1037,9 @@ void NextStateGenerator::reset(ATerm State, size_t SummandIndex)
 #ifdef MCRL2_NEXTSTATE_DEBUG
     std::clog << "Getting solutions for this summand" << std::endl <<
               "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[SummandIndex],0)) << std::endl <<
-              "                 " << core::pp(atermpp::aterm(ATLgetArgument(info.summands[SummandIndex],0))) << std::endl <<
+              "                 " << core::pp_deprecated(atermpp::aterm(ATLgetArgument(info.summands[SummandIndex],0))) << std::endl <<
               "  Condition: " << atermpp::aterm(ATgetArgument(info.summands[SummandIndex],1)) << std::endl <<
-              "             " << core::pp(atermpp::aterm_appl(info.m_rewriter.convert_from(ATgetArgument(info.summands[SummandIndex],1)))) << std::endl;
+              "             " << core::pp_deprecated(atermpp::aterm_appl(info.m_rewriter.convert_from(ATgetArgument(info.summands[SummandIndex],1)))) << std::endl;
 #endif
 
     cur_act = ATgetArgument(info.summands[SummandIndex],2);
@@ -1080,9 +1081,9 @@ bool NextStateGenerator::next(ATermAppl* Transition, ATerm* State, bool* priorit
 #ifdef MCRL2_NEXTSTATE_DEBUG
     std::clog << "Getting solutions for summand " << sum_idx << std::endl <<
               "  Sum variables: " << atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0)) << std::endl <<
-              "                 " << core::pp(atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0))) << std::endl <<
+              "                 " << core::pp_deprecated(atermpp::aterm(ATLgetArgument(info.summands[sum_idx],0))) << std::endl <<
               "  Condition: " << atermpp::aterm(ATgetArgument(info.summands[sum_idx],1)) << std::endl <<
-              "             " << core::pp(atermpp::aterm_appl(info.m_rewriter.convert_from(ATgetArgument(info.summands[sum_idx],1)))) << std::endl;
+              "             " << core::pp_deprecated(atermpp::aterm_appl(info.m_rewriter.convert_from(ATgetArgument(info.summands[sum_idx],1)))) << std::endl;
 #endif
 
     enumerated_variables=ATLgetArgument(info.summands[sum_idx],0);

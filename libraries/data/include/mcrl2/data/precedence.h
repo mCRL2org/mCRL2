@@ -284,9 +284,6 @@ int precedence(const application& x)
   {
     return 11;
   }
-//#ifdef MCRL2_ENABLE_CHECK_PP
-//  std::cout << "<max_precedence>" << core::pp(x) << " " << x << std::endl;
-//#endif
   return max_precedence;
 }
 

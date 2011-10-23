@@ -160,7 +160,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
     const variable v=variable((*i)(0));
     const variable v_fresh(generator(v.sort()));
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    //std::cout << "  INNER ASS1:"<< core::pp( fromInner( (*i)(1))) << std::endl;
+    //std::cout << "  INNER ASS1:"<< data::pp( fromInner( (*i)(1))) << std::endl;
     sigma[v_fresh]=rewrite_internal((*i)(1),sigma);
   }
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(body,variable_renaming),sigma);

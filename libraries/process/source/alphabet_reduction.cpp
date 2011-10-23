@@ -15,6 +15,7 @@
 #include <sstream>
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/aterm/aterm_ext.h"
@@ -1388,7 +1389,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
         }
         while (ATAtableGet(procs,(ATerm)new_pn));
 
-        mCRL2log(verbose) << "- created process " << core::pp(new_pn) << "\n";
+        mCRL2log(verbose) << "- created process " << core::pp_deprecated(new_pn) << "\n";
         ATermAppl p=ATAtableGet(procs,(ATerm)pn);
         assert(p);
         p=PushAllow(V,p);
@@ -1410,9 +1411,9 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
       if (ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),1),nrec_aterm) &&
           ATisEqual(ATAgetArgument(ATAtableGet(props,(ATerm)pn),0),pCRL_aterm))
       {
-        mCRL2log(warning) << "an allow operation allowing only the (multi-)action(s) from " << core::pp(V) << std::endl
-                          << "is applied to sequential non-directly-recursive process " << core::pp(pn) << "." << std::endl
-                          << "This disallows (multi-)action(s) " << core::pp(list_minus(gsaMakeMultActNameL(untypeMAL(ll)),V)) << "of this process." << std::endl
+        mCRL2log(warning) << "an allow operation allowing only the (multi-)action(s) from " << core::pp_deprecated(V) << std::endl
+                          << "is applied to sequential non-directly-recursive process " << core::pp_deprecated(pn) << "." << std::endl
+                          << "This disallows (multi-)action(s) " << core::pp_deprecated(list_minus(gsaMakeMultActNameL(untypeMAL(ll)),V)) << "of this process." << std::endl
                           << "This warning could also indicate a forgotten (multi-)action in this allow operation." << std::endl << std::endl;
       }
 
@@ -2457,17 +2458,17 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
     }
     if (!new_k)
     {
-      mCRL2log(error) << "the parameter in the process term " << core::pp(a) << " is not a concrete positive number. As the expansion of n-parallel processes is done"
+      mCRL2log(error) << "the parameter in the process term " << core::pp_deprecated(a) << " is not a concrete positive number. As the expansion of n-parallel processes is done"
                       << "by preprocessing, it is not possible to use a variable, and define it using an equation." << std::endl;
       return NULL;
     }
     // Transform k into an aterm with a string representing a value,
     // instead of an expression in internal format.
-    new_k=gsMakeOpId(ATmakeAppl0(ATmakeAFun(core::pp(new_k).c_str(),0,false)),data::sort_pos::pos());
+    new_k=gsMakeOpId(ATmakeAppl0(ATmakeAFun(core::pp_deprecated(new_k).c_str(),0,false)),data::sort_pos::pos());
 
     if (!gsIsDataExprNumber(new_k))
     {
-      mCRL2log(error) << "The parameter " << core::pp(par) << " should be a number; it equals " << core::pp(new_k) << std::endl;
+      mCRL2log(error) << "The parameter " << core::pp_deprecated(par) << " should be a number; it equals " << core::pp_deprecated(new_k) << std::endl;
       return NULL;
     }
     k=ATAgetArgument(new_k,0);
@@ -2896,13 +2897,13 @@ nP_checked:
 
       if (good)
       {
-        mCRL2log(verbose) << "- process " << core::pp(p) << " is a recursive parallel process in n-parallel pCRL format\n";
+        mCRL2log(verbose) << "- process " << core::pp_deprecated(p) << " is a recursive parallel process in n-parallel pCRL format\n";
         ATtablePut(props,(ATerm)p,(ATerm)ATmakeAppl2(props_afun,(ATerm)npCRL_aterm,(ATerm)rec_aterm));
         ATtablePut(subs_npCRL,(ATerm)p,(ATerm)ATmakeList0());
       }
       else
       {
-        throw mcrl2::runtime_error("Process " + core::pp(p) + " is a recursive parallel process not in n-parallel pCRL format.");
+        throw mcrl2::runtime_error("Process " + core::pp_deprecated(p) + " is a recursive parallel process not in n-parallel pCRL format.");
       }
     }
   }
@@ -2946,7 +2947,7 @@ nP_checked:
       ATermAppl new_p=gsaSubstNP(subs_npCRL,consts,ATAtableGet(procs,(ATerm)p));
       if (!new_p)
       {
-        throw mcrl2::runtime_error("Could not replace all npCRL processes (reason: " + core::pp(p) +").\n"
+        throw mcrl2::runtime_error("Could not replace all npCRL processes (reason: " + core::pp_deprecated(p) +").\n"
                                    "In this case alphabet reductions may not stop, or may not be performed completely.");
         success=false;
         // no break; because we are not lazy

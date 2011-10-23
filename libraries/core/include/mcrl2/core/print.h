@@ -202,7 +202,14 @@ struct printer: public core::traverser<Derived>
   void operator()(const core::identifier_string& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    static_cast<Derived&>(*this).print(std::string(x));
+    if (x == core::identifier_string())
+    {
+      static_cast<Derived&>(*this).print("@NoValue");
+    }
+    else
+    {
+      static_cast<Derived&>(*this).print(std::string(x));
+    }
     static_cast<Derived&>(*this).leave(x);
   }
 

@@ -46,10 +46,10 @@ void test_multi_actions(action_list a, action_list b, data_expression expected_r
 {
   std::cout << "--- test_multi_actions ---" << std::endl;
   data_expression result = equal_multi_actions(a, b);
-  std::cout << "a               = " << core::pp(a) << std::endl;
-  std::cout << "b               = " << core::pp(b) << std::endl;
-  std::cout << "result          = " << core::pp(result) << std::endl;
-  std::cout << "expected_result = " << core::pp(expected_result) << std::endl;
+  std::cout << "a               = " << lps::pp(a) << std::endl;
+  std::cout << "b               = " << lps::pp(b) << std::endl;
+  std::cout << "result          = " << lps::pp(result) << std::endl;
+  std::cout << "expected_result = " << lps::pp(expected_result) << std::endl;
   BOOST_CHECK(expected_result == data_expression() || result == expected_result);
   core::garbage_collect();
 }

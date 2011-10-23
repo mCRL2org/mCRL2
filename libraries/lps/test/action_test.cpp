@@ -14,11 +14,12 @@
 #include <set>
 #include <boost/test/minimal.hpp>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/data/function_symbol.h"
 #include "mcrl2/atermpp/container_utility.h"
-#include "mcrl2/lps/action.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/function_symbol.h"
+#include "mcrl2/lps/action.h"
+#include "mcrl2/lps/print.h"
 
 using namespace mcrl2;
 using namespace mcrl2::core;
@@ -52,8 +53,8 @@ int test_main(int argc, char** argv)
   BOOST_CHECK(!equal_signatures(a1, a3));
 
   action empty = action();
-  std::cerr << core::pp(empty) << std::endl;
-  std::cerr << core::pp(action()) << std::endl;
+  std::cerr << lps::pp(empty) << std::endl;
+  std::cerr << lps::pp(action()) << std::endl;
 
   core::garbage_collect();
 

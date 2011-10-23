@@ -735,17 +735,6 @@ void test_specification()
   BOOST_CHECK(spec.constructors(basic_sort("D")).size() == 2);
 }
 
-/// \brief Pretty print a data specification
-///
-/// \param[in] data_spec A data specification.
-/// \return A pretty printed data specification
-
-inline
-std::string mypp(const data_specification& data_spec)
-{
-  return core::pp(detail::data_specification_to_aterm_data_spec(data_spec));
-}
-
 void test_bke()
 {
   std::cout << "test_bke" << std::endl;

@@ -120,7 +120,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
       }
       std::set<data::variable> to_be_removed = data::detail::set_difference(process_parameters, significant_variables);
 #ifdef MCRL2_LPS_PARELM_DEBUG
-      std::clog << "to be removed: " << core::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
+      std::clog << "to be removed: " << data::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);
@@ -206,7 +206,7 @@ class parelm_algorithm: public lps::detail::lps_algorithm
         }
       }
 #ifdef MCRL2_LPS_PARELM_DEBUG
-      std::clog << "to be removed: " << core::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
+      std::clog << "to be removed: " << data::pp(data::variable_list(to_be_removed.begin(), to_be_removed.end())) << std::endl;
 #endif
       report_results(to_be_removed);
       lps::remove_parameters(m_spec, to_be_removed);

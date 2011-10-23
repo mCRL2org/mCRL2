@@ -17,6 +17,7 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/modal_formula/detail/regfrmtrans.h"
@@ -80,7 +81,7 @@ ATermAppl translate_reg_frms(ATermAppl state_frm)
 static
 ATermAppl translate_reg_frms_appl(ATermAppl part)
 {
-  mCRL2log(debug) << "reducing expression\n  " << core::pp( part) << std::endl;
+  mCRL2log(debug) << "reducing expression\n  " << core::pp_deprecated( part) << std::endl;
   if (gsIsDataExpr(part) || gsIsMultAct(part) ||
       gsIsStateVar(part) || gsIsDataVarIdInit(part))
   {

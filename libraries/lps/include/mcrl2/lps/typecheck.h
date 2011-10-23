@@ -40,7 +40,7 @@ void type_check(
                   (ATermList)action_decls);
   if (!t)
   {
-    throw mcrl2::runtime_error("could not type check multi action " + core::pp(core::detail::gsMakeMultAct(mult_act.actions())));
+    throw mcrl2::runtime_error("could not type check multi action " + lps::pp(mult_act));
   }
   mult_act = multi_action(t);
 }

@@ -17,6 +17,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/find.h"
+#include "mcrl2/data/print.h"
 
 namespace mcrl2
 {
@@ -37,7 +38,7 @@ void type_check(sort_expression& sort_expr, const data_specification& data_spec)
   t = core::type_check_sort_expr(t, detail::data_specification_to_aterm_data_spec(data_spec));
   if (!t)
   {
-    throw mcrl2::runtime_error("could not type check " + core::pp(atermpp::aterm_appl(t)));
+    throw mcrl2::runtime_error("could not type check " + data::pp(sort_expr));
   }
   sort_expr = sort_expression(t);
 #ifndef MCRL2_DISABLE_TYPECHECK_ASSERTIONS

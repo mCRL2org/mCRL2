@@ -100,7 +100,6 @@ void test1()
   data_expression n9    = find_mapping(spec.data(), "_9");
   data_expression plus  = find_mapping(spec.data(), "plus");
 
-  // cout << mcrl2::core::pp(application(plus, make_list(n4, n5))) << endl;
   BOOST_CHECK(r(plus(n4, n5)) == r(plus(n2, n7)));
 
   specification spec1 = spec;

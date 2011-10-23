@@ -353,7 +353,6 @@ void test_rename()
 
 void test_normalize()
 {
-  using mcrl2::core::pp;
   using namespace state_formulas::detail::accessors;
   std::cerr << "test_normalize\n";
 
@@ -443,7 +442,7 @@ void test_parse()
   std::string formula_text = "<a(1)>true";
   lps::specification spec = lps::linearise(spec_text);
   state_formulas::state_formula f = state_formulas::parse_state_formula(formula_text, spec);
-  std::cerr << "--- f ---\n" << core::pp(f) << "\n\n" << f << std::endl;
+  std::cerr << "--- f ---\n" << state_formulas::pp(f) << "\n\n" << f << std::endl;
   std::set<core::identifier_string> ids = state_formulas::find_identifiers(f);
   BOOST_CHECK(ids.find(core::identifier_string("1")) == ids.end());
   BOOST_CHECK(ids.find(core::identifier_string("@c1")) != ids.end());

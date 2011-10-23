@@ -114,7 +114,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_sort(const application& x)
   {
-    std::cout << "<value>" << core::pp(x) << " " << x << " ";
+    std::cout << "<value>" << x << " ";
     if (is_numeric_value(x))
     {
       std::cout << "<numeric value>";
@@ -663,7 +663,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
 
   void print_fbag_default(const data_expression& x)
   {
-    // std::cout << "<fbag_default>" << core::pp(x) << " " << core::pp(sort_bag::left(x)) << " " << sort_bag::left(x) << std::endl;
     sort_expression s = function_sort(sort_bag::left(x).sort()).domain().front();
     core::identifier_string name = generate_identifier("x", x);
     variable var(name, s);
@@ -1090,7 +1089,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     if (is_numeric_value(x))
     {
-//std::cout << "<reconstruct>" << core::pp(x) << " -> ";
       data_expression z = detail::reconstruct_numeric_expression(x);
       if (is_function_symbol(z))
       {

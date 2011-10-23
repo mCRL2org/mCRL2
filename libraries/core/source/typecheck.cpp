@@ -13,6 +13,7 @@
 
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/core/detail/struct_core.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/aterm/aterm_ext.h"
@@ -295,7 +296,7 @@ ATermAppl type_check_proc_spec(ATermAppl proc_spec)
 
   ATermAppl Result=NULL;
 
-  mCRL2log(debug) << "type checking phase started: " << core::pp(proc_spec) << "" << std::endl;
+  mCRL2log(debug) << "type checking phase started: " << core::pp_deprecated(proc_spec) << "" << std::endl;
   gstcDataInit();
 
   ATermAppl data_spec = ATAgetArgument(proc_spec, 0);
@@ -584,7 +585,7 @@ ATermList type_check_mult_actions(
         if (!o)
         {
           ATtableDestroy(Vars);
-          throw mcrl2::runtime_error("Typechecking action failed: "+ core::pp(ATAgetFirst(l)));
+          throw mcrl2::runtime_error("Typechecking action failed: "+ core::pp_deprecated(ATAgetFirst(l)));
         }
         r=ATinsert(r,(ATerm)o);
       }
@@ -777,7 +778,7 @@ ATermAppl type_check_action_rename_spec(ATermAppl ar_spec, ATermAppl lps_spec)
           if (!gstcVarsUnique(VarList))
           {
             b = false;
-            mCRL2log(error) << "the variables " << core::pp(VarList) << " in action rename rule " << core::pp(Rule) << " are not unique" << std::endl;
+            mCRL2log(error) << "the variables " << core::pp_deprecated(VarList) << " in action rename rule " << core::pp_deprecated(Rule) << " are not unique" << std::endl;
             break;
           }
 
@@ -1036,7 +1037,7 @@ ATermAppl gstcUpdateSortSpec(ATermAppl Spec, ATermAppl SortSpec)
 ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 {
   assert(gsIsDataSpec(Spec) || gsIsProcSpec(Spec) || gsIsLinProcSpec(Spec) || gsIsPBES(Spec) || gsIsActionRenameSpec(Spec));
-  mCRL2log(debug) << "specification before folding:" << core::pp(Spec) << "" << std::endl;
+  mCRL2log(debug) << "specification before folding:" << core::pp_deprecated(Spec) << "" << std::endl;
   //get sort declarations
   ATermAppl DataSpec;
   if (gsIsDataSpec(Spec))
@@ -1092,7 +1093,7 @@ ATermAppl gstcFoldSortRefs(ATermAppl Spec)
 
   //add the removed sort references back to Spec
   Spec = gstcUpdateSortSpec(Spec, gsMakeSortSpec(ATconcat(SortIds, SortRefs)));
-  mCRL2log(debug) << "specification after folding:\n" << core::pp(Spec) << "\n" ;
+  mCRL2log(debug) << "specification after folding:\n" << core::pp_deprecated(Spec) << "\n" ;
   return Spec;
 }
 
@@ -1106,7 +1107,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
   do
   {
     SortRefs = NewSortRefs;
-    mCRL2log(debug) << "SortRefs contains the following sort references:\n" << core::pp(gsMakeSortSpec(SortRefs)) << "" << std::endl;
+    mCRL2log(debug) << "SortRefs contains the following sort references:\n" << core::pp_deprecated(gsMakeSortSpec(SortRefs)) << "" << std::endl;
     //perform substitutions implied by sort references in NewSortRefs to the
     //other elements in NewSortRefs
     for (size_t i = 0; i < n; i++)
@@ -1126,7 +1127,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
         //make backward substitution
         Subst = gsMakeSubst_Appl(RHS, LHS);
       }
-      mCRL2log(debug) << "performing substition " << core::pp(ATgetArgument(Subst, 0)) << " := " << core::pp(ATgetArgument(Subst, 1)) << "" << std::endl;
+      mCRL2log(debug) << "performing substition " << core::pp_deprecated(ATgetArgument(Subst, 0)) << " := " << core::pp_deprecated(ATgetArgument(Subst, 1)) << "" << std::endl;
       //perform Subst on all elements of NewSortRefs except for the i'th
       ATermList Substs = ATmakeList1((ATerm) Subst);
       for (size_t j = 0; j < n; j++)
@@ -1158,7 +1159,7 @@ ATermList gstcFoldSortRefsInSortRefs(ATermList SortRefs)
     SortRefs = ATgetNext(SortRefs);
   }
   SortRefs = ATreverse(l);
-  mCRL2log(debug) << "SortRefs, after removing self references:\n" << core::pp(gsMakeSortSpec(SortRefs)) << "" << std::endl;
+  mCRL2log(debug) << "SortRefs, after removing self references:\n" << core::pp_deprecated(gsMakeSortSpec(SortRefs)) << "" << std::endl;
   return SortRefs;
 }
 
@@ -1492,7 +1493,7 @@ static bool gstcReadInSorts(ATermList Sorts)
         || ATAtableGet(context.defined_sorts, (ATerm)SortName))
     {
 
-      mCRL2log(error) << "double declaration of sort " << core::pp(SortName) << std::endl;
+      mCRL2log(error) << "double declaration of sort " << core::pp_deprecated(SortName) << std::endl;
       return false;
     }
     if (gsIsSortId(Sort))
@@ -1502,7 +1503,7 @@ static bool gstcReadInSorts(ATermList Sorts)
     else if (gsIsSortRef(Sort))
     {
       ATtablePut(context.defined_sorts, (ATerm)SortName, (ATerm)ATAgetArgument(Sort,1));
-      mCRL2log(debug) << "Add sort alias " << core::pp(SortName) << "  " << core::pp((ATerm)ATAgetArgument(Sort,1)) << "" << std::endl;
+      mCRL2log(debug) << "Add sort alias " << core::pp_deprecated(SortName) << "  " << core::pp_deprecated((ATerm)ATAgetArgument(Sort,1)) << "" << std::endl;
     }
     else
     {
@@ -1525,7 +1526,7 @@ static bool gstcReadInSorts(ATermList Sorts)
     const sort_expression ar(aterm_reference);
     if (gstc_check_for_sort_alias_loop_through_function_sort_via_expression(ar,s,visited,false))
     {
-      mCRL2log(error) << "sort " << core::pp(ATgetFirst(sort_aliases)) << " is recursively defined via a function sort, or a set or a bag type container" << std::endl;
+      mCRL2log(error) << "sort " << core::pp_deprecated(ATgetFirst(sort_aliases)) << " is recursively defined via a function sort, or a set or a bag type container" << std::endl;
       return false;
     }
   }
@@ -1843,12 +1844,12 @@ static bool gstcReadInFuncs(ATermList Cons, ATermList Maps)
           sort_real::is_real(sort_expression(ConstructorType))
           )
       {
-        mCRL2log(error) << "Could not add constructor " << core::pp(FuncName) << " of sort " << core::pp(FuncType) << ". Constructors of built-in sorts are not allowed." << std::endl;
+        mCRL2log(error) << "Could not add constructor " << core::pp_deprecated(FuncName) << " of sort " << core::pp_deprecated(FuncType) << ". Constructors of built-in sorts are not allowed." << std::endl;
         return false;
       }
     }
 
-    mCRL2log(debug) << "Read-in Func " << core::pp(FuncName) << ", Types " << core::pp(FuncType) << "" << std::endl;
+    mCRL2log(debug) << "Read-in Func " << core::pp_deprecated(FuncName) << ", Types " << core::pp_deprecated(FuncType) << "" << std::endl;
   }
 
   // Check that the constructors are defined such that they cannot generate an empty sort.
@@ -1889,7 +1890,7 @@ static bool gstcReadInActs(ATermList Acts)
       // in the list. If so -- error, otherwise -- add
       if (gstcInTypesL(ActType, Types))
       {
-        mCRL2log(error) << "double declaration of action " << core::pp(ActName) << std::endl;
+        mCRL2log(error) << "double declaration of action " << core::pp_deprecated(ActName) << std::endl;
         return false;
       }
       else
@@ -1898,7 +1899,7 @@ static bool gstcReadInActs(ATermList Acts)
       }
     }
     ATtablePut(context.actions,(ATerm)ActName,(ATerm)Types);
-    mCRL2log(debug) << "Read-in Act Name " << core::pp(ActName) << ", Types " << core::pp(atermpp::aterm_list(Types)) << std::endl;
+    mCRL2log(debug) << "Read-in Act Name " << core::pp_deprecated(ActName) << ", Types " << core::pp_deprecated(atermpp::aterm_list(Types)) << std::endl;
   }
 
   return Result;
@@ -1914,7 +1915,7 @@ static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
 
     if (ATLtableGet(context.actions, (ATerm)ProcName))
     {
-      mCRL2log(error) << "declaration of both process and action " << core::pp(ProcName) << std::endl;
+      mCRL2log(error) << "declaration of both process and action " << core::pp_deprecated(ProcName) << std::endl;
       return false;
     }
 
@@ -1937,7 +1938,7 @@ static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
       // in the list. If so -- error, otherwise -- add
       if (gstcInTypesL(ProcType, Types))
       {
-        mCRL2log(error) << "double declaration of process " << core::pp(ProcName) << std::endl;
+        mCRL2log(error) << "double declaration of process " << core::pp_deprecated(ProcName) << std::endl;
         return false;
       }
       else
@@ -1951,7 +1952,7 @@ static bool gstcReadInProcsAndInit(ATermList Procs, ATermAppl Init)
     ATermList ProcVars=ATLgetArgument(Proc,1);
     if (!gstcVarsUnique(ProcVars))
     {
-      mCRL2log(error) << "the formal variables in process " << core::pp(Proc) << " are not unique" << std::endl;
+      mCRL2log(error) << "the formal variables in process " << core::pp_deprecated(Proc) << " are not unique" << std::endl;
       return false;
     }
 
@@ -1998,14 +1999,14 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
     else
     {
       // temporarily prohibit overloading here
-      mCRL2log(error) << "attempt to overload propositional variable " << core::pp(PBName) << std::endl;
+      mCRL2log(error) << "attempt to overload propositional variable " << core::pp_deprecated(PBName) << std::endl;
       return false;
       // the table context.PBs contains a list of types for each
       // PBES name. We need to check if there is already such a type
       // in the list. If so -- error, otherwise -- add
       if (gstcInTypesL(PBType, Types))
       {
-        mCRL2log(error) << "double declaration of propositional variable " << core::pp(PBName) << std::endl;
+        mCRL2log(error) << "double declaration of propositional variable " << core::pp_deprecated(PBName) << std::endl;
         return false;
       }
       else
@@ -2023,7 +2024,7 @@ static bool gstcReadInPBESAndInit(ATermAppl PBEqnSpec, ATermAppl PBInit)
     //ATtablePut(body.proc_freevars,(ATerm)Index,(ATerm)PBFreeVars);
     ATtablePut(body.proc_pars,(ATerm)Index,(ATerm)PBVars);
     ATtablePut(body.proc_bodies,(ATerm)Index,(ATerm)ATAgetArgument(PBEqn,2));
-    mCRL2log(debug) << "Read-in Proc Name " << core::pp(PBName) << ", Types " << core::pp(atermpp::aterm_list(Types)) << std::endl;
+    mCRL2log(debug) << "Read-in Proc Name " << core::pp_deprecated(PBName) << ", Types " << core::pp_deprecated(atermpp::aterm_list(Types)) << std::endl;
   }
   //ATtablePut(body.proc_freevars,(ATerm)INIT_KEY(),(ATerm)PBFreeVars);
   ATtablePut(body.proc_pars,(ATerm)INIT_KEY(),(ATerm)ATmakeList0());
@@ -2096,7 +2097,7 @@ static bool gstcTransformVarConsTypeData(void)
     if (!gstcVarsUnique(VarList))
     {
       b = false;
-      mCRL2log(error) << "the variables " << core::pp(VarList) << " in equation declaration " << core::pp(Eqn) << " are not unique" << std::endl;
+      mCRL2log(error) << "the variables " << core::pp_deprecated(VarList) << " in equation declaration " << core::pp_deprecated(Eqn) << " are not unique" << std::endl;
       break;
     }
 
@@ -2116,13 +2117,13 @@ static bool gstcTransformVarConsTypeData(void)
     if (!LeftType)
     {
       b = false;
-      mCRL2log(error) << "error occurred while typechecking " << core::pp(Left) << " as left hand side of equation " << core::pp(Eqn) << std::endl;
+      mCRL2log(error) << "error occurred while typechecking " << core::pp_deprecated(Left) << " as left hand side of equation " << core::pp_deprecated(Eqn) << std::endl;
       break;
     }
     if (was_warning_upcasting)
     {
       was_warning_upcasting=false;
-      mCRL2log(warning) << "warning occurred while typechecking " << core::pp(Left) << " as left hand side of equation " << core::pp(Eqn) << std::endl;
+      mCRL2log(warning) << "warning occurred while typechecking " << core::pp_deprecated(Left) << " as left hand side of equation " << core::pp_deprecated(Eqn) << std::endl;
     }
 
     ATermAppl Cond=ATAgetArgument(Eqn,1);
@@ -2136,7 +2137,7 @@ static bool gstcTransformVarConsTypeData(void)
     if (!RightType)
     {
       b = false;
-      mCRL2log(error) << "error occurred while typechecking " << core::pp(Right) << " as right hand side of equation " << core::pp(Eqn) << std::endl;
+      mCRL2log(error) << "error occurred while typechecking " << core::pp_deprecated(Right) << " as right hand side of equation " << core::pp_deprecated(Eqn) << std::endl;
       break;
     }
 
@@ -2146,7 +2147,7 @@ static bool gstcTransformVarConsTypeData(void)
       ATermAppl Type=gstcTypeMatchA(LeftType,RightType);
       if (!Type)
       {
-        mCRL2log(error) << "types of the left- (" << core::pp(LeftType) << ") and right- (" << core::pp(RightType) << ") hand-sides of the equation " << core::pp(Eqn) << " do not match" << std::endl;
+        mCRL2log(error) << "types of the left- (" << core::pp_deprecated(LeftType) << ") and right- (" << core::pp_deprecated(RightType) << ") hand-sides of the equation " << core::pp_deprecated(Eqn) << " do not match" << std::endl;
         b = false;
         break;
       }
@@ -2156,32 +2157,32 @@ static bool gstcTransformVarConsTypeData(void)
       if (!LeftType)
       {
         b = false;
-        mCRL2log(error) << "types of the left- and right-hand-sides of the equation " << core::pp(Eqn) << " do not match" << std::endl;
+        mCRL2log(error) << "types of the left- and right-hand-sides of the equation " << core::pp_deprecated(Eqn) << " do not match" << std::endl;
         break;
       }
       if (was_warning_upcasting)
       {
         was_warning_upcasting=false;
-        mCRL2log(warning) << "warning occurred while typechecking " << core::pp(Left) << " as left hand side of equation " << core::pp(Eqn) << std::endl;
+        mCRL2log(warning) << "warning occurred while typechecking " << core::pp_deprecated(Left) << " as left hand side of equation " << core::pp_deprecated(Eqn) << std::endl;
       }
       Right=ATAgetArgument(Eqn,3);
       RightType=gstcTraverseVarConsTypeD(DeclaredVars,DeclaredVars,&Right,LeftType,FreeVars);
       if (!RightType)
       {
         b = false;
-        mCRL2log(error) << "types of the left- and right-hand-sides of the equation " << core::pp(Eqn) << " do not match" << std::endl;
+        mCRL2log(error) << "types of the left- and right-hand-sides of the equation " << core::pp_deprecated(Eqn) << " do not match" << std::endl;
         break;
       }
       Type=gstcTypeMatchA(LeftType,RightType);
       if (!Type)
       {
-        mCRL2log(error) << "types of the left- (" << core::pp(LeftType) << ") and right- (" << core::pp(RightType) << ") hand-sides of the equation " << core::pp(Eqn) << " do not match" << std::endl;
+        mCRL2log(error) << "types of the left- (" << core::pp_deprecated(LeftType) << ") and right- (" << core::pp_deprecated(RightType) << ") hand-sides of the equation " << core::pp_deprecated(Eqn) << " do not match" << std::endl;
         b = false;
         break;
       }
       if (gstcHasUnknown(Type))
       {
-        mCRL2log(error) << "types of the left- (" << core::pp(LeftType) << ") and right- (" << core::pp(RightType) << ") hand-sides of the equation " << core::pp(Eqn) << " cannot be uniquely determined" << std::endl;
+        mCRL2log(error) << "types of the left- (" << core::pp_deprecated(LeftType) << ") and right- (" << core::pp_deprecated(RightType) << ") hand-sides of the equation " << core::pp_deprecated(Eqn) << " cannot be uniquely determined" << std::endl;
         b = false;
         break;
       }
@@ -2359,7 +2360,7 @@ static bool gstcIsSortExprDeclared(ATermAppl SortExpr)
     ATermAppl SortName=ATAgetArgument(SortExpr,0);
     if (!gstcIsSortDeclared(SortName))
     {
-      mCRL2log(error) << "basic or defined sort " << core::pp(SortName) << " is not declared" << std::endl;
+      mCRL2log(error) << "basic or defined sort " << core::pp_deprecated(SortName) << " is not declared" << std::endl;
       return false;
     }
     return true;
@@ -2430,7 +2431,7 @@ static bool gstcReadInSortStruct(ATermAppl SortExpr)
     ATermAppl SortName=ATAgetArgument(SortExpr,0);
     if (!gstcIsSortDeclared(SortName))
     {
-      mCRL2log(error) << "basic or defined sort " << core::pp(SortName) << " is not declared" << std::endl;
+      mCRL2log(error) << "basic or defined sort " << core::pp_deprecated(SortName) << " is not declared" << std::endl;
       return false;
     }
     return true;
@@ -2528,13 +2529,13 @@ static bool gstcAddConstant(ATermAppl OpId, const char* msg)
 
   if (ATAtableGet(context.constants, (ATerm)Name) /*|| ATLtableGet(context.functions, (ATerm)Name)*/)
   {
-    mCRL2log(error) << "double declaration of " << msg << " " << core::pp(Name) << std::endl;
+    mCRL2log(error) << "double declaration of " << msg << " " << core::pp_deprecated(Name) << std::endl;
     return false;
   }
 
   if (ATLtableGet(gssystem.constants, (ATerm)Name) || ATLtableGet(gssystem.functions, (ATerm)Name))
   {
-    mCRL2log(error) << "attempt to declare a constant with the name that is a built-in identifier (" << core::pp(Name) << ")" << std::endl;
+    mCRL2log(error) << "attempt to declare a constant with the name that is a built-in identifier (" << core::pp_deprecated(Name) << ")" << std::endl;
     return false;
   }
 
@@ -2560,7 +2561,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
   {
     if (ATAtableGet(gssystem.constants, (ATerm)Name))
     {
-      mCRL2log(error) << "attempt to redeclare the system constant with " << msg << " " << core::pp(OpId) << std::endl;
+      mCRL2log(error) << "attempt to redeclare the system constant with " << msg << " " << core::pp_deprecated(OpId) << std::endl;
       return false;
     }
   }
@@ -2572,7 +2573,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
       if (gstcTypeMatchA(Sort,(ATermAppl)ATgetFirst(L))!=NULL)
       {
         // f matches a predefined function
-        mCRL2log(error) << "attempt to redeclare a system function with " << msg << " " << core::pp(OpId) << ":" << core::pp(Sort) << std::endl;
+        mCRL2log(error) << "attempt to redeclare a system function with " << msg << " " << core::pp_deprecated(OpId) << ":" << core::pp_deprecated(Sort) << std::endl;
         return false;
       }
     }
@@ -2586,7 +2587,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
   {
     if (!allow_double_decls)
     {
-      mCRL2log(error) << "double declaration of " << msg << " " << core::pp(Name) << std::endl;
+      mCRL2log(error) << "double declaration of " << msg << " " << core::pp_deprecated(Name) << std::endl;
       return false;
     }
   }
@@ -2599,7 +2600,7 @@ static bool gstcAddFunction(ATermAppl OpId, const char* msg, bool allow_double_d
     Types=ATappend(Types,(ATerm)Sort);
     ATtablePut(context.functions,(ATerm)Name,(ATerm)Types);
   }
-  mCRL2log(debug) << "Read-in " << msg << " " << core::pp(Name) << ". Type " << core::pp(Types) << "" << std::endl;
+  mCRL2log(debug) << "Read-in " << msg << " " << core::pp_deprecated(Name) << ". Type " << core::pp_deprecated(Types) << "" << std::endl;
   return Result;
 }
 
@@ -2732,7 +2733,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
       }
       else
       {
-        mCRL2log(error) << "action or process " << core::pp(Name) << " not declared" << std::endl;
+        mCRL2log(error) << "action or process " << core::pp_deprecated(Name) << " not declared" << std::endl;
         return NULL;
       }
     }
@@ -2741,7 +2742,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
   {
     if (!(ParList=ATLtableGet(context.PBs,(ATerm)Name)))
     {
-      mCRL2log(error) << "propositional variable " << core::pp(Name) << " not declared" << std::endl;
+      mCRL2log(error) << "propositional variable " << core::pp_deprecated(Name) << " not declared" << std::endl;
       return NULL;
     }
   }
@@ -2767,9 +2768,9 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
 
   if (ATisEmpty(ParList))
   {
-    mCRL2log(error) << "no " << msg << " " << core::pp(Name)
+    mCRL2log(error) << "no " << msg << " " << core::pp_deprecated(Name)
                     << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"")
-                    << " is declared (while typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+                    << " is declared (while typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
     return NULL;
   }
 
@@ -2800,7 +2801,7 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
 
     if (!NewPosType)
     {
-      mCRL2log(error) << "cannot typecheck " << core::pp(Par) << " as type " << core::pp(gstcExpandNumTypesDown(PosType)) << " (while typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+      mCRL2log(error) << "cannot typecheck " << core::pp_deprecated(Par) << " as type " << core::pp_deprecated(gstcExpandNumTypesDown(PosType)) << " (while typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       return NULL;
     }
     NewPars=ATinsert(NewPars,(ATerm)Par);
@@ -2826,9 +2827,9 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
       ATermAppl CastedNewPosType=gstcUpCastNumericType(PosType,NewPosType,&Par);
       if (!CastedNewPosType)
       {
-        mCRL2log(error) << "cannot cast " << core::pp(NewPosType) << " to "
-                        << core::pp(PosType) << "(while typechecking " << core::pp(Par)
-                        << " in " << core::pp(ProcTerm) << std::endl;
+        mCRL2log(error) << "cannot cast " << core::pp_deprecated(NewPosType) << " to "
+                        << core::pp_deprecated(PosType) << "(while typechecking " << core::pp_deprecated(Par)
+                        << " in " << core::pp_deprecated(ProcTerm) << std::endl;
         return NULL;
       }
 
@@ -2843,15 +2844,15 @@ static ATermAppl gstcRewrActProc(ATermTable Vars, ATermAppl ProcTerm, bool is_pb
 
   if (!PosTypeList)
   {
-    mCRL2log(error) << "no " << msg << " " << core::pp(Name) << "with type "
-                    << core::pp(NewPosTypeList) << " is declared (while typechecking "
-                    << core::pp(ProcTerm) << ")" << std::endl;
+    mCRL2log(error) << "no " << msg << " " << core::pp_deprecated(Name) << "with type "
+                    << core::pp_deprecated(NewPosTypeList) << " is declared (while typechecking "
+                    << core::pp_deprecated(ProcTerm) << ")" << std::endl;
     return NULL;
   }
 
   if (gstcIsNotInferredL(PosTypeList))
   {
-    mCRL2log(error) << "ambiguous " << msg << " " << core::pp(Name) << std::endl;
+    mCRL2log(error) << "ambiguous " << msg << " " << core::pp_deprecated(Name) << std::endl;
     return NULL;
   }
 
@@ -2889,7 +2890,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     ATermList ParList=ATLtableGet(context.processes,(ATerm)Name);
     if (!ParList)
     {
-      mCRL2log(error) << "process " << core::pp(Name) << " not declared" << std::endl;
+      mCRL2log(error) << "process " << core::pp_deprecated(Name) << " not declared" << std::endl;
       return NULL;
     }
 
@@ -2905,8 +2906,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       }
       else
       {
-        mCRL2log(error) << "Double assignment to variable " << core::pp(ATAgetArgument(a,0))
-                        << " (detected assigned values are " << core::pp(existing_rhs)
+        mCRL2log(error) << "Double assignment to variable " << core::pp_deprecated(ATAgetArgument(a,0))
+                        << " (detected assigned values are " << core::pp_deprecated(existing_rhs)
                         << " and " << ATAgetArgument(a,1) << ")" << std::endl;
         return NULL;
       }
@@ -2945,15 +2946,15 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       if (ATisEmpty(ParList))
       {
         ATtableDestroy(As);
-        mCRL2log(error) << "no process " << core::pp(Name) << " containing all assignments in "
-                        << core::pp(ProcTerm) << "." << std::endl
-                        << "Problematic variable is " << core::pp(Culprit) << "." << std::endl;
+        mCRL2log(error) << "no process " << core::pp_deprecated(Name) << " containing all assignments in "
+                        << core::pp_deprecated(ProcTerm) << "." << std::endl
+                        << "Problematic variable is " << core::pp_deprecated(Culprit) << "." << std::endl;
         return NULL;
       }
       if (!ATisEmpty(ATgetNext(ParList)))
       {
         ATtableDestroy(As);
-        mCRL2log(error) << "ambiguous process " << core::pp(Name) << " containing all assignments in " << core::pp(ProcTerm) << "." << std::endl;
+        mCRL2log(error) << "ambiguous process " << core::pp_deprecated(Name) << " containing all assignments in " << core::pp_deprecated(ProcTerm) << "." << std::endl;
         return NULL;
       }
     }
@@ -2980,7 +2981,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     if (!TypeCheckedProcTerm)
     {
       ATtableDestroy(As);
-      mCRL2log(error) << "type error occurred while typechecking the process call with short-hand assignments " << core::pp(ProcTerm) << std::endl;
+      mCRL2log(error) << "type error occurred while typechecking the process call with short-hand assignments " << core::pp_deprecated(ProcTerm) << std::endl;
       return NULL;
     }
 
@@ -3034,7 +3035,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       ATermList ActList=ATLgetArgument(ProcTerm,0);
       if (ATisEmpty(ActList))
       {
-        mCRL2log(warning) << msg << " empty set of actions (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+        mCRL2log(warning) << msg << " empty set of actions (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       }
 
       ATermIndexedSet Acts=ATindexedSetCreate(63,50);
@@ -3045,14 +3046,14 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
         //Actions must be declared
         if (!ATtableGet(context.actions,(ATerm)Act))
         {
-          mCRL2log(error) << msg << " an undefined action " << core::pp(Act) << " (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+          mCRL2log(error) << msg << " an undefined action " << core::pp_deprecated(Act) << " (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
           return NULL;
         }
         bool nnew;
         ATindexedSetPut(Acts,(ATerm)Act,&nnew);
         if (!nnew)
         {
-          mCRL2log(warning) << msg << " action " << core::pp(Act) << " twice (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+          mCRL2log(warning) << msg << " action " << core::pp_deprecated(Act) << " twice (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
         }
       }
       ATindexedSetDestroy(Acts);
@@ -3065,7 +3066,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
       if (ATisEmpty(RenList))
       {
-        mCRL2log(warning) << "renaming empty set of actions (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+        mCRL2log(warning) << "renaming empty set of actions (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       }
 
       ATermIndexedSet ActsFrom=ATindexedSetCreate(63,50);
@@ -3078,26 +3079,26 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
         if (ATisEqual(ActFrom,ActTo))
         {
-          mCRL2log(warning) << "renaming action " << core::pp(ActFrom) << " into itself (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+          mCRL2log(warning) << "renaming action " << core::pp_deprecated(ActFrom) << " into itself (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
         }
 
         //Actions must be declared and of the same types
         ATermList TypesFrom,TypesTo;
         if (!(TypesFrom=ATLtableGet(context.actions,(ATerm)ActFrom)))
         {
-          mCRL2log(error) << "renaming an undefined action " << core::pp(ActFrom) << " (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+          mCRL2log(error) << "renaming an undefined action " << core::pp_deprecated(ActFrom) << " (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
           return NULL;
         }
         if (!(TypesTo=ATLtableGet(context.actions,(ATerm)ActTo)))
         {
-          mCRL2log(error) << "renaming into an undefined action " << core::pp(ActTo) << " (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+          mCRL2log(error) << "renaming into an undefined action " << core::pp_deprecated(ActTo) << " (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
           return NULL;
         }
 
         TypesTo=gstcTypeListsIntersect(TypesFrom,TypesTo);
         if (!TypesTo || ATisEmpty(TypesTo))
         {
-          mCRL2log(error) << "renaming action " << core::pp(ActFrom) << " into action " << core::pp(ActTo) << ": these two have no common type (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+          mCRL2log(error) << "renaming action " << core::pp_deprecated(ActFrom) << " into action " << core::pp_deprecated(ActTo) << ": these two have no common type (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
           return NULL;
         }
 
@@ -3105,7 +3106,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
         ATindexedSetPut(ActsFrom,(ATerm)ActFrom,&nnew);
         if (!nnew)
         {
-          mCRL2log(error) << "renaming action " << core::pp(ActFrom) << " twice (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+          mCRL2log(error) << "renaming action " << core::pp_deprecated(ActFrom) << " twice (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
           return NULL;
         }
       }
@@ -3119,7 +3120,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
       if (ATisEmpty(CommList))
       {
-        mCRL2log(warning) << "synchronizing empty set of (multi)actions (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+        mCRL2log(warning) << "synchronizing empty set of (multi)actions (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       }
       else
       {
@@ -3135,8 +3136,8 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
           if (ATgetLength(MActFrom)==1)
           {
-            mCRL2log(error) << "using synchronization as renaming/hiding of action " << core::pp(ATgetFirst(MActFrom))
-                            << " into " << core::pp(ActTo) << " (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+            mCRL2log(error) << "using synchronization as renaming/hiding of action " << core::pp_deprecated(ATgetFirst(MActFrom))
+                            << " into " << core::pp_deprecated(ActTo) << " (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
             return NULL;
           }
 
@@ -3148,7 +3149,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
             ResTypes=ATLtableGet(context.actions,(ATerm)ActTo);
             if (!ResTypes)
             {
-              mCRL2log(error) << "synchronizing to an undefined action " << core::pp(ActTo) << " (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+              mCRL2log(error) << "synchronizing to an undefined action " << core::pp_deprecated(ActTo) << " (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
               return NULL;
             }
           }
@@ -3159,14 +3160,14 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
             ATermList Types=ATLtableGet(context.actions,(ATerm)Act);
             if (!Types)
             {
-              mCRL2log(error) << "synchronizing an undefined action " << core::pp(Act) << " in (multi)action " << core::pp(MActFrom) << " (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+              mCRL2log(error) << "synchronizing an undefined action " << core::pp_deprecated(Act) << " in (multi)action " << core::pp_deprecated(MActFrom) << " (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
               return NULL;
             }
             ResTypes=(ResTypes)?gstcTypeListsIntersect(ResTypes,Types):Types;
             if (!ResTypes || ATisEmpty(ResTypes))
             {
-              mCRL2log(error) << "synchronizing action " << core::pp(Act) << " from (multi)action " << core::pp(BackupMActFrom)
-                              << " into action " << core::pp(ActTo) << ": these have no common type (typechecking " << core::pp(ProcTerm) << "), ResTypes: " << atermpp::aterm(ResTypes) << std::endl;
+              mCRL2log(error) << "synchronizing action " << core::pp_deprecated(Act) << " from (multi)action " << core::pp_deprecated(BackupMActFrom)
+                              << " into action " << core::pp_deprecated(ActTo) << ": these have no common type (typechecking " << core::pp_deprecated(ProcTerm) << "), ResTypes: " << atermpp::aterm(ResTypes) << std::endl;
               return NULL;
             }
           }
@@ -3188,7 +3189,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
             ATermAppl Act=ATAgetFirst(Acts);
             if (ATindexOf(ActsFrom,(ATerm)Act,0)!=ATERM_NON_EXISTING_POSITION)
             {
-              mCRL2log(error) << "synchronizing action " << core::pp(Act) << " in different ways (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+              mCRL2log(error) << "synchronizing action " << core::pp_deprecated(Act) << " in different ways (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
               return NULL;
             }
             else
@@ -3207,7 +3208,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
 
       if (ATisEmpty(MActList))
       {
-        mCRL2log(warning) << "allowing empty set of (multi) actions (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+        mCRL2log(warning) << "allowing empty set of (multi) actions (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
       }
       else
       {
@@ -3223,7 +3224,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
             ATermAppl Act=ATAgetFirst(MAct);
             if (!ATLtableGet(context.actions,(ATerm)Act))
             {
-              mCRL2log(error) << "allowing an undefined action " << core::pp(Act) << " in (multi)action " << core::pp(MAct) << " (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+              mCRL2log(error) << "allowing an undefined action " << core::pp_deprecated(Act) << " in (multi)action " << core::pp_deprecated(MAct) << " (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
               return NULL;
             }
           }
@@ -3231,7 +3232,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
           MAct=ATLgetArgument(ATAgetFirst(MActList),0);
           if (gstcMActIn(MAct,MActs))
           {
-            mCRL2log(warning) << "allowing (multi)action " << core::pp(MAct) << " twice (typechecking " << core::pp(ProcTerm) << ")" << std::endl;
+            mCRL2log(warning) << "allowing (multi)action " << core::pp_deprecated(MAct) << " twice (typechecking " << core::pp_deprecated(ProcTerm) << ")" << std::endl;
           }
           else
           {
@@ -3286,7 +3287,7 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
       ATermAppl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
       if (!CastedNewType)
       {
-        mCRL2log(error) << "cannot (up)cast time value " << core::pp(Time) << " to type Real" << std::endl;
+        mCRL2log(error) << "cannot (up)cast time value " << core::pp_deprecated(Time) << " to type Real" << std::endl;
         return NULL;
       }
     }
@@ -3340,14 +3341,14 @@ static ATermAppl gstcTraverseActProcVarConstP(ATermTable Vars, ATermAppl ProcTer
     if (!NewVars)
     {
       ATtableDestroy(CopyVars);
-      mCRL2log(error) << "type error while typechecking " << core::pp(ProcTerm) << std::endl;
+      mCRL2log(error) << "type error while typechecking " << core::pp_deprecated(ProcTerm) << std::endl;
       return NULL;
     }
     ATermAppl NewProc=gstcTraverseActProcVarConstP(NewVars,ATAgetArgument(ProcTerm,1));
     ATtableDestroy(CopyVars);
     if (!NewProc)
     {
-      mCRL2log(error) << "while typechecking " << core::pp(ProcTerm) << std::endl;
+      mCRL2log(error) << "while typechecking " << core::pp_deprecated(ProcTerm) << std::endl;
       return NULL;
     }
     return ATsetArgument(ProcTerm,(ATerm)NewProc,1);
@@ -3410,14 +3411,14 @@ static ATermAppl gstcTraversePBESVarConstPB(ATermTable Vars, ATermAppl PBESTerm)
     if (!NewVars)
     {
       ATtableDestroy(CopyVars);
-      mCRL2log(error) << "type error while typechecking " << core::pp(PBESTerm) << std::endl;
+      mCRL2log(error) << "type error while typechecking " << core::pp_deprecated(PBESTerm) << std::endl;
       return NULL;
     }
     ATermAppl NewPBES=gstcTraversePBESVarConstPB(NewVars,ATAgetArgument(PBESTerm,1));
     ATtableDestroy(CopyVars);
     if (!NewPBES)
     {
-      mCRL2log(error) << "while typechecking " << core::pp(PBESTerm) << std::endl;
+      mCRL2log(error) << "while typechecking " << core::pp_deprecated(PBESTerm) << std::endl;
       return NULL;
     }
     return ATsetArgument(PBESTerm,(ATerm)NewPBES,1);
@@ -3451,15 +3452,15 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
   ATermAppl Result=NULL;
 
-  mCRL2log(debug) << "gstcTraverseVarConsTypeD: DataTerm " << core::pp(*DataTerm) <<
-              " with PosType " << core::pp(PosType) << "" << std::endl;
+  mCRL2log(debug) << "gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(*DataTerm) <<
+              " with PosType " << core::pp_deprecated(PosType) << "" << std::endl;
 
   if (gsIsBinder(*DataTerm))
   {
     //The variable declaration of a binder should have at least 1 declaration
     if (ATAgetFirst(ATLgetArgument(*DataTerm, 1)) == NULL)
     {
-      mCRL2log(error) << "binder " << core::pp(*DataTerm) << " should have at least one declared variable" << std::endl;
+      mCRL2log(error) << "binder " << core::pp_deprecated(*DataTerm) << " should have at least one declared variable" << std::endl;
       return NULL;
     }
 
@@ -3481,7 +3482,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       VarDecls=ATgetNext(VarDecls);
       if (ATAgetFirst(VarDecls) != NULL)
       {
-        mCRL2log(error) << "set/bag comprehension " << core::pp(*DataTerm) << " should have exactly one declared variable" << std::endl;
+        mCRL2log(error) << "set/bag comprehension " << core::pp_deprecated(*DataTerm) << " should have exactly one declared variable" << std::endl;
         return NULL;
       }
 
@@ -3509,7 +3510,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
       if (!ResType)
       {
-        mCRL2log(error) << "the condition or count of a set/bag comprehension " << core::pp(*DataTerm) << " cannot be determined\n";
+        mCRL2log(error) << "the condition or count of a set/bag comprehension " << core::pp_deprecated(*DataTerm) << " cannot be determined\n";
         return NULL;
       }
       if (gstcTypeMatchA(sort_bool::bool_(),ResType))
@@ -3530,14 +3531,14 @@ static ATermAppl gstcTraverseVarConsTypeD(
       }
       else
       {
-        mCRL2log(error) << "the condition or count of a set/bag comprehension is not of sort Bool, Nat or Pos, but of sort " << core::pp(ResType) << std::endl;
+        mCRL2log(error) << "the condition or count of a set/bag comprehension is not of sort Bool, Nat or Pos, but of sort " << core::pp_deprecated(ResType) << std::endl;
         return NULL;
       }
 
       if (!(NewType=gstcTypeMatchA(NewType,PosType)))
       {
-        mCRL2log(error) << "a set or bag comprehension of type " << core::pp(ATAgetArgument(VarDecl, 1)) << " does not match possible type " <<
-                            core::pp(PosType) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+        mCRL2log(error) << "a set or bag comprehension of type " << core::pp_deprecated(ATAgetArgument(VarDecl, 1)) << " does not match possible type " <<
+                            core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
         return NULL;
       }
 
@@ -3619,14 +3620,14 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         ATtableDestroy(CopyAllowedVars);
         ATtableDestroy(CopyDeclaredVars);
-        mCRL2log(error) << "no functions with arguments " << core::pp(ArgTypes) << " among " << core::pp(PosType) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+        mCRL2log(error) << "no functions with arguments " << core::pp_deprecated(ArgTypes) << " among " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
         return NULL;
       }
       ATermAppl Data=ATAgetArgument(*DataTerm,2);
 
       NewType=gstcTraverseVarConsTypeD(NewDeclaredVars,NewAllowedVars,&Data,NewType,FreeVars,strict_ambiguous,warn_upcasting);
 
-      mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp(Data) << "" << std::endl;
+      mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
       ATtableDestroy(CopyAllowedVars);
       ATtableDestroy(CopyDeclaredVars);
@@ -3729,7 +3730,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         ATermAppl Type=gstcUnList(PosType);
         if (!Type)
         {
-          mCRL2log(error) << "not possible to cast list to " << core::pp(PosType) << " (while typechecking " << core::pp(Arguments) << ")" << std::endl;
+          mCRL2log(error) << "not possible to cast list to " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(Arguments) << ")" << std::endl;
           return NULL;
         }
 
@@ -3781,7 +3782,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         ATermAppl Type=gstcUnSet(PosType);
         if (!Type)
         {
-          mCRL2log(error) << "not possible to cast set to " << core::pp(PosType) << " (while typechecking " << core::pp(Arguments) << ")" << std::endl;
+          mCRL2log(error) << "not possible to cast set to " << core::pp_deprecated(PosType) << " (while typechecking " << core::pp_deprecated(Arguments) << ")" << std::endl;
           return NULL;
         }
 
@@ -3795,7 +3796,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
           if (!Type0)
           {
-            mCRL2log(error) << "not possible to cast element to " << core::pp(Type) << " (while typechecking " << core::pp(Argument) << ")" << std::endl;
+            mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument) << ")" << std::endl;
             return NULL;
           }
 
@@ -3811,7 +3812,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
           if (NewType==NULL)
           {
-            mCRL2log(error) << "Set contains incompatible elements of sorts " << core::pp(OldNewType) << " and " << core::pp(Type0) << " (while typechecking " << core::pp(Argument) << std::endl;
+            mCRL2log(error) << "Set contains incompatible elements of sorts " << core::pp_deprecated(OldNewType) << " and " << core::pp_deprecated(Type0) << " (while typechecking " << core::pp_deprecated(Argument) << std::endl;
             return NULL;
           }
         }
@@ -3829,7 +3830,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument,Type,FreeVars,strict_ambiguous,warn_upcasting);
           if (!Type0)
           {
-            mCRL2log(error) << "not possible to cast element to " << core::pp(Type) << " (while typechecking " << core::pp(Argument) << ")" << std::endl;
+            mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument) << ")" << std::endl;
             return NULL;
           }
           NewArguments=ATinsert(NewArguments,(ATerm)Argument);
@@ -3845,7 +3846,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         ATermAppl Type=gstcUnBag(PosType);
         if (!Type)
         {
-          mCRL2log(error) << "not possible to cast bag to " << core::pp(PosType) << "(while typechecking " << core::pp(Arguments) << ")" << std::endl;
+          mCRL2log(error) << "not possible to cast bag to " << core::pp_deprecated(PosType) << "(while typechecking " << core::pp_deprecated(Arguments) << ")" << std::endl;
           return NULL;
         }
 
@@ -3861,13 +3862,13 @@ static ATermAppl gstcTraverseVarConsTypeD(
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
           if (!Type0)
           {
-            mCRL2log(error) << "not possible to cast element to " << core::pp(Type) << " (while typechecking " << core::pp(Argument0) << ")" << std::endl;
+            mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument0) << ")" << std::endl;
             return NULL;
           }
           ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
           if (!Type1)
           {
-            mCRL2log(error) << "not possible to cast number to " << data::pp(sort_nat::nat()) << " (while typechecking " << core::pp(Argument1) << ")" << std::endl;
+            mCRL2log(error) << "not possible to cast number to " << data::pp(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
             return NULL;
           }
           ATermAppl OldNewType=NewType;
@@ -3881,7 +3882,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
           }
           if (NewType==NULL)
           {
-            mCRL2log(error) << "Bag contains incompatible elements of sorts " << core::pp(OldNewType) << " and " << core::pp(Type0) << " (while typechecking " << core::pp(Argument0) << ")" << std::endl;
+            mCRL2log(error) << "Bag contains incompatible elements of sorts " << core::pp_deprecated(OldNewType) << " and " << core::pp_deprecated(Type0) << " (while typechecking " << core::pp_deprecated(Argument0) << ")" << std::endl;
             return NULL;
           }
         }
@@ -3899,13 +3900,13 @@ static ATermAppl gstcTraverseVarConsTypeD(
           ATermAppl Type0=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument0,Type,FreeVars,strict_ambiguous,warn_upcasting);
           if (!Type0)
           {
-            mCRL2log(error) << "not possible to cast element to " << core::pp(Type) << " (while typechecking " << core::pp(Argument0) << ")" << std::endl;
+            mCRL2log(error) << "not possible to cast element to " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Argument0) << ")" << std::endl;
             return NULL;
           }
           ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
           if (!Type1)
           {
-            mCRL2log(error) << "not possible to cast number to " << data::pp(sort_nat::nat()) << " (while typechecking " << core::pp(Argument1) << ")" << std::endl;
+            mCRL2log(error) << "not possible to cast number to " << data::pp(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
             return NULL;
           }
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
@@ -3941,7 +3942,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     ATermAppl NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
                       &Data,data::unknown_sort()/*gsMakeSortArrow(ArgumentTypes,PosType)*/,
                       FreeVars,false,nArguments,warn_upcasting);
-    mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp(Data) << "" << std::endl;
+    mCRL2log(debug) << "Result of gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
     if (!NewType)
     {
@@ -3953,7 +3954,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
       }
-      mCRL2log(error) << "type error while trying to cast " << core::pp(gsMakeDataAppl(Data,Arguments)) << " to type " << core::pp(PosType) << std::endl;
+      mCRL2log(error) << "type error while trying to cast " << core::pp_deprecated(gsMakeDataAppl(Data,Arguments)) << " to type " << core::pp_deprecated(PosType) << std::endl;
       return NULL;
     }
 
@@ -3966,8 +3967,8 @@ static ATermAppl gstcTraverseVarConsTypeD(
     {
       ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
 
-      mCRL2log(debug) << "Arguments again: NeededArgumentTypes: " << core::pp(NeededArgumentTypes) <<
-                  ", ArgumentTypes: " << core::pp(ArgumentTypes) << "" << std::endl;
+      mCRL2log(debug) << "Arguments again: NeededArgumentTypes: " << core::pp_deprecated(NeededArgumentTypes) <<
+                  ", ArgumentTypes: " << core::pp_deprecated(ArgumentTypes) << "" << std::endl;
 
       //arguments again
       ATermList NewArgumentTypes=ATmakeList0();
@@ -3990,7 +3991,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         if (!gstcEqTypesA(NeededType,Type))
         {
-          mCRL2log(debug) << "Doing again on " << core::pp(Arg) << ", Type: " << core::pp(Type) << ", Needed type: " << core::pp(NeededType) << "" << std::endl;
+          mCRL2log(debug) << "Doing again on " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if (!NewArgType)
           {
@@ -4001,11 +4002,11 @@ static ATermAppl gstcTraverseVarConsTypeD(
             NewArgType=NeededType;
           }
           NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
-          mCRL2log(debug) << "Result of Doing again gstcTraverseVarConsTypeD: DataTerm " << core::pp(Arg) << "" << std::endl;
+          mCRL2log(debug) << "Result of Doing again gstcTraverseVarConsTypeD: DataTerm " << core::pp_deprecated(Arg) << "" << std::endl;
           if (!NewArgType)
           {
-            mCRL2log(error) << "needed type " << core::pp(NeededType) << " does not match possible type "
-                            << core::pp(Type) << " (while typechecking " << core::pp(Arg) << " in " << core::pp(*DataTerm) << ")" << std::endl;
+            mCRL2log(error) << "needed type " << core::pp_deprecated(NeededType) << " does not match possible type "
+                            << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Arg) << " in " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
             return NULL;
           }
           Type=NewArgType;
@@ -4021,7 +4022,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
     NewType=gstcTraverseVarConsTypeDN(DeclaredVars,AllowedVars,
                                       &Data,gsMakeSortArrow(ArgumentTypes,PosType),FreeVars,strict_ambiguous,nArguments,warn_upcasting);
 
-    mCRL2log(debug) << "Result of gstcTraverseVarConsTypeDN: DataTerm " << core::pp(Data) << "" << std::endl;
+    mCRL2log(debug) << "Result of gstcTraverseVarConsTypeDN: DataTerm " << core::pp_deprecated(Data) << "" << std::endl;
 
     if (!NewType)
     {
@@ -4033,12 +4034,12 @@ static ATermAppl gstcTraverseVarConsTypeD(
       {
         gstcErrorMsgCannotCast(ATAgetArgument(Data,1),Arguments,ArgumentTypes);
       }
-      mCRL2log(error) << "type error while trying to cast " << core::pp(gsMakeDataAppl(Data,Arguments)) << " to type " << core::pp(PosType) << std::endl;
+      mCRL2log(error) << "type error while trying to cast " << core::pp_deprecated(gsMakeDataAppl(Data,Arguments)) << " to type " << core::pp_deprecated(PosType) << std::endl;
       return NULL;
     }
 
-    mCRL2log(debug) << "Arguments once more: Arguments " << core::pp(Arguments) << ", ArgumentTypes: " <<
-                core::pp(ArgumentTypes) << ", NewType: " << core::pp(NewType) << "" << std::endl;
+    mCRL2log(debug) << "Arguments once more: Arguments " << core::pp_deprecated(Arguments) << ", ArgumentTypes: " <<
+                core::pp_deprecated(ArgumentTypes) << ", NewType: " << core::pp_deprecated(NewType) << "" << std::endl;
 
     //and the arguments once more
     if (gsIsSortArrow(gstcUnwindType(NewType)))
@@ -4064,7 +4065,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         }
         if (!gstcEqTypesA(NeededType,Type))
         {
-          mCRL2log(debug) << "Doing again on " << core::pp(Arg) << ", Type: " << core::pp(Type) << ", Needed type: " << core::pp(NeededType) << "" << std::endl;
+          mCRL2log(debug) << "Doing again on " << core::pp_deprecated(Arg) << ", Type: " << core::pp_deprecated(Type) << ", Needed type: " << core::pp_deprecated(NeededType) << "" << std::endl;
           ATermAppl NewArgType=gstcTypeMatchA(NeededType,Type);
           if (!NewArgType)
           {
@@ -4077,8 +4078,8 @@ static ATermAppl gstcTraverseVarConsTypeD(
           NewArgType=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Arg,NewArgType,FreeVars,strict_ambiguous,warn_upcasting);
           if (!NewArgType)
           {
-            mCRL2log(error) << "needed type " << core::pp(NeededType) << " does not match possible type "
-                            << core::pp(Type) << " (while typechecking " << core::pp(Arg) << " in " << core::pp(*DataTerm) << ")" << std::endl;
+            mCRL2log(error) << "needed type " << core::pp_deprecated(NeededType) << " does not match possible type "
+                            << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(Arg) << " in " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
             return NULL;
           }
           Type=NewArgType;
@@ -4091,7 +4092,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ArgumentTypes=ATreverse(NewArgumentTypes);
     }
 
-    mCRL2log(debug) << "Arguments after once more: Arguments " << core::pp(Arguments) << ", ArgumentTypes: " << core::pp(ArgumentTypes) << "" << std::endl;
+    mCRL2log(debug) << "Arguments after once more: Arguments " << core::pp_deprecated(Arguments) << ", ArgumentTypes: " << core::pp_deprecated(ArgumentTypes) << "" << std::endl;
 
     *DataTerm=gsMakeDataAppl(Data,Arguments);
 
@@ -4102,7 +4103,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
     if (gstcHasUnknown(gstcUnArrowProd(ArgumentTypes,NewType)))
     {
-      mCRL2log(error) << "Fail to properly type " << core::pp(*DataTerm) << std::endl;
+      mCRL2log(error) << "Fail to properly type " << core::pp_deprecated(*DataTerm) << std::endl;
       return NULL;
     }
     return gstcUnArrowProd(ArgumentTypes,NewType);
@@ -4133,7 +4134,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Sort,DataTerm,warn_upcasting);
       if (!CastedNewType)
       {
-        mCRL2log(error) << "cannot (up)cast number " << core::pp(*DataTerm) << " to type " << core::pp(PosType) << std::endl;
+        mCRL2log(error) << "cannot (up)cast number " << core::pp_deprecated(*DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
         return NULL;
       }
       return CastedNewType;
@@ -4142,12 +4143,12 @@ static ATermAppl gstcTraverseVarConsTypeD(
     ATermAppl Type=ATAtableGet(DeclaredVars,(ATerm)Name);
     if (Type)
     {
-      mCRL2log(debug) << "Recognised declared variable " << core::pp(Name) << ", Type: " << core::pp(Type) << "" << std::endl;
+      mCRL2log(debug) << "Recognised declared variable " << core::pp_deprecated(Name) << ", Type: " << core::pp_deprecated(Type) << "" << std::endl;
       *DataTerm=gsMakeDataVarId(Name,Type);
 
       if (!ATAtableGet(AllowedVars,(ATerm)Name))
       {
-        mCRL2log(error) << "variable " << core::pp(Name) << " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side" << std::endl;
+        mCRL2log(error) << "variable " << core::pp_deprecated(Name) << " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side" << std::endl;
         return NULL;
       }
 
@@ -4162,7 +4163,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         ATermAppl CastedNewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
         if (!CastedNewType)
         {
-          mCRL2log(error) << "cannot (up)cast variable " << core::pp(*DataTerm) << " to type " << core::pp(PosType) << std::endl;
+          mCRL2log(error) << "cannot (up)cast variable " << core::pp_deprecated(*DataTerm) << " to type " << core::pp_deprecated(PosType) << std::endl;
           return NULL;
         }
 
@@ -4194,7 +4195,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
         ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
         if (NewType==NULL)
         {
-          mCRL2log(error) << "no constant " << core::pp(*DataTerm) << " with type " << core::pp(PosType) << std::endl;
+          mCRL2log(error) << "no constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
           return NULL;
         }
         else
@@ -4219,7 +4220,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ParList=ATreverse(NewParList);
       if (ATisEmpty(ParList))
       {
-        mCRL2log(error) << "no system constant " << core::pp(*DataTerm) << " with type " << core::pp(PosType) << std::endl;
+        mCRL2log(error) << "no system constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
         return NULL;
       }
 
@@ -4249,7 +4250,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
 
     if (!ParList)
     {
-      mCRL2log(error) << "unknown operation " << core::pp(Name) << std::endl;
+      mCRL2log(error) << "unknown operation " << core::pp_deprecated(Name) << std::endl;
       return NULL;
     }
 
@@ -4260,7 +4261,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
       ATermAppl NewType=gstcUpCastNumericType(PosType,Type,DataTerm,warn_upcasting);
       if (NewType==NULL)
       {
-        mCRL2log(error) << "no constant " << core::pp(*DataTerm) << " with type " << core::pp(PosType) << std::endl;
+        mCRL2log(error) << "no constant " << core::pp_deprecated(*DataTerm) << " with type " << core::pp_deprecated(PosType) << std::endl;
         return NULL;
       }
       return NewType;
@@ -4289,8 +4290,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(
   const bool warn_upcasting)
 {
   // ATERM_NON_EXISTING_POSITION for nFactPars means the number of arguments is not known.
-  mCRL2log(debug) << "gstcTraverseVarConsTypeDN: DataTerm " << core::pp(*DataTerm)
-                  << " with PosType " << core::pp(PosType) << ", nFactPars " << nFactPars << "" << std::endl;
+  mCRL2log(debug) << "gstcTraverseVarConsTypeDN: DataTerm " << core::pp_deprecated(*DataTerm)
+                  << " with PosType " << core::pp_deprecated(PosType) << ", nFactPars " << nFactPars << "" << std::endl;
   if (gsIsId(*DataTerm)||gsIsOpId(*DataTerm))
   {
     ATermAppl Name=ATAgetArgument(*DataTerm,0);
@@ -4304,7 +4305,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         variable=true;
         if (!ATAtableGet(AllowedVars,(ATerm)Name))
         {
-          mCRL2log(error) << "variable " << core::pp(Name) << " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side" << std::endl;
+          mCRL2log(error) << "variable " << core::pp_deprecated(Name) << " occurs freely in the right-hand-side or condition of an equation, but not in the left-hand-side" << std::endl;
           return NULL;
         }
 
@@ -4327,8 +4328,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       {
         if (!gstcTypeMatchA(Type,PosType))
         {
-          mCRL2log(error) << "the type " << core::pp(Type) << " of variable " << core::pp(Name)
-                          << " is incompatible with " << core::pp(PosType) << " (typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the type " << core::pp_deprecated(Type) << " of variable " << core::pp_deprecated(Name)
+                          << " is incompatible with " << core::pp_deprecated(PosType) << " (typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         *DataTerm=gsMakeDataVarId(Name,Type);
@@ -4338,8 +4339,8 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       {
         if (!gstcTypeMatchA(Type,PosType))
         {
-          mCRL2log(error) << "the type " << core::pp(Type) << " of constant " << core::pp(Name)
-                          << " is incompatible with " << core::pp(PosType) << " (typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the type " << core::pp_deprecated(Type) << " of constant " << core::pp_deprecated(Name)
+                          << " is incompatible with " << core::pp_deprecated(PosType) << " (typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         *DataTerm=gsMakeOpId(Name,Type);
@@ -4357,14 +4358,14 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
           else
           {
-            mCRL2log(warning) << "ambiguous system constant " << core::pp(Name) << std::endl;
+            mCRL2log(warning) << "ambiguous system constant " << core::pp_deprecated(Name) << std::endl;
             *DataTerm=gsMakeOpId(Name,data::unknown_sort());
             return Type;
           }
         }
         else
         {
-          mCRL2log(error) << "unknown constant " << core::pp(Name) << std::endl;
+          mCRL2log(error) << "unknown constant " << core::pp_deprecated(Name) << std::endl;
           return NULL;
         }
       }
@@ -4392,16 +4393,16 @@ static ATermAppl gstcTraverseVarConsTypeDN(
     {
       if (nFactPars!=ATERM_NON_EXISTING_POSITION)
       {
-        mCRL2log(error) << "unknown operation " << core::pp(Name) << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"") << std::endl;
+        mCRL2log(error) << "unknown operation " << core::pp_deprecated(Name) << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"") << std::endl;
       }
       else
       {
-        mCRL2log(error) << "unknown operation " << core::pp(Name) << std::endl;;
+        mCRL2log(error) << "unknown operation " << core::pp_deprecated(Name) << std::endl;;
       }
       return NULL;
     }
-    mCRL2log(debug) << "Possible types for Op/Var " << core::pp(Name) << " with " << nFactPars <<
-                " argument are (ParList: " << core::pp(ParList) << "; PosType: " << core::pp(PosType) << ")" << std::endl;
+    mCRL2log(debug) << "Possible types for Op/Var " << core::pp_deprecated(Name) << " with " << nFactPars <<
+                " argument are (ParList: " << core::pp_deprecated(ParList) << "; PosType: " << core::pp_deprecated(PosType) << ")" << std::endl;
 
     ATermList CandidateParList=ParList;
 
@@ -4445,7 +4446,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       }
       NewParList=ATreverse(NewParList);
 
-      mCRL2log(debug) << "Possible matches w/o casting for Op/Var " << core::pp(Name) << " with "<< nFactPars <<               " argument are (ParList: " << core::pp(NewParList) << "; PosType: " << core::pp(PosType) << "" << std::endl;
+      mCRL2log(debug) << "Possible matches w/o casting for Op/Var " << core::pp_deprecated(Name) << " with "<< nFactPars <<               " argument are (ParList: " << core::pp_deprecated(NewParList) << "; PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
 
       if (ATisEmpty(NewParList))
       {
@@ -4456,7 +4457,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         //and get the list. Then we take the min of the list.
 
         ParList=BackupParList;
-        mCRL2log(debug) << "Trying casting for Op " << core::pp(Name) << " with " << nFactPars << " argument (ParList: " <<                             core::pp(ParList) << "; PosType: " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Trying casting for Op " << core::pp_deprecated(Name) << " with " << nFactPars << " argument (ParList: " <<                             core::pp_deprecated(ParList) << "; PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
         PosType=gstcExpandNumTypesUp(PosType);
         for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
         {
@@ -4467,7 +4468,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
         }
         NewParList=ATreverse(NewParList);
-        mCRL2log(debug) << "The result of casting is " << core::pp(NewParList) << "" << std::endl;
+        mCRL2log(debug) << "The result of casting is " << core::pp_deprecated(NewParList) << "" << std::endl;
         if (ATgetLength(NewParList)>1)
         {
           NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
@@ -4480,7 +4481,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
         //Let's try to be more relaxed about the result, e.g. returning Pos or Nat is not a bad idea for int.
 
         ParList=BackupParList;
-        mCRL2log(debug) << "Trying result casting for Op " << core::pp(Name) << " with " << nFactPars << " argument (ParList: "                       << "; PosType: " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Trying result casting for Op " << core::pp_deprecated(Name) << " with " << nFactPars << " argument (ParList: "                       << "; PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
         PosType=gstcExpandNumTypesDown(gstcExpandNumTypesUp(PosType));
         for (; !ATisEmpty(ParList); ParList=ATgetNext(ParList))
         {
@@ -4491,7 +4492,7 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           }
         }
         NewParList=ATreverse(NewParList);
-        mCRL2log(debug) << "The result of casting is " << core::pp(NewParList) << "" << std::endl;
+        mCRL2log(debug) << "The result of casting is " << core::pp_deprecated(NewParList) << "" << std::endl;
         if (ATgetLength(NewParList)>1)
         {
           NewParList=ATmakeList1((ATerm)gstcMinType(NewParList));
@@ -4515,13 +4516,13 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       *DataTerm=gsMakeOpId(Name,Sort);
       if (nFactPars!=ATERM_NON_EXISTING_POSITION)
       {
-        mCRL2log(error) << "unknown operation/variable " << core::pp(Name)
+        mCRL2log(error) << "unknown operation/variable " << core::pp_deprecated(Name)
                         << " with " << nFactPars << " argument" << ((nFactPars != 1)?"s":"")
-                        << " that matches type " << core::pp(PosType) << std::endl;
+                        << " that matches type " << core::pp_deprecated(PosType) << std::endl;
       }
       else
       {
-        mCRL2log(error) << "unknown operation/variable " << core::pp(Name) << " that matches type " << core::pp(PosType) << std::endl;
+        mCRL2log(error) << "unknown operation/variable " << core::pp_deprecated(Name) << " that matches type " << core::pp_deprecated(PosType) << std::endl;
       }
       return NULL;
     }
@@ -4541,17 +4542,17 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       }
       if (Type==NULL)
       {
-        mCRL2log(error) << "fail to match sort " << core::pp(OldType) << " with " << core::pp(PosType) << std::endl;
+        mCRL2log(error) << "fail to match sort " << core::pp_deprecated(OldType) << " with " << core::pp_deprecated(PosType) << std::endl;
         return NULL;
       }
 
       if (ATisEqual(static_cast<ATermAppl>(data::detail::if_symbol()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing if matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing if matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchIf(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function if has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function if has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4565,11 +4566,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           || ATisEqual(static_cast<ATermAppl>(data::detail::greater_equal_symbol()),ATAgetArgument(*DataTerm,0))
          )
       {
-        mCRL2log(debug) << "Doing ==, !=, <, <=, >= or > matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing ==, !=, <, <=, >= or > matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchEqNeqComparison(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function " << core::pp(ATAgetArgument(*DataTerm, 0)) << " has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function " << core::pp_deprecated(ATAgetArgument(*DataTerm, 0)) << " has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4577,11 +4578,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::cons_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing |> matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing |> matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpCons(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function |> has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function |> has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4589,11 +4590,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::snoc_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing <| matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing <| matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpSnoc(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function <| has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function <| has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4601,11 +4602,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::concat_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing ++ matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing ++ matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpConcat(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function ++ has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function ++ has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4613,11 +4614,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::element_at_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing @ matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << ", DataTerm: " << core::pp(*DataTerm) << "" << std::endl;
+        mCRL2log(debug) << "Doing @ matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << ", DataTerm: " << core::pp_deprecated(*DataTerm) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpEltAt(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function @ has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function @ has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4626,12 +4627,12 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       if (ATisEqual(static_cast<ATermAppl>(sort_list::head_name()),ATAgetArgument(*DataTerm,0))||
           ATisEqual(static_cast<ATermAppl>(sort_list::rhead_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing {R,L}head matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing {R,L}head matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
 // Type==NULL
         ATermAppl NewType=gstcMatchListOpHead(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function {R,L}head has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function {R,L}head has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4640,11 +4641,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       if (ATisEqual(static_cast<ATermAppl>(sort_list::tail_name()),ATAgetArgument(*DataTerm,0))||
           ATisEqual(static_cast<ATermAppl>(sort_list::rtail_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing {R,L}tail matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing {R,L}tail matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListOpTail(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function {R,L}tail has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function {R,L}tail has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4652,11 +4653,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_bag::set2bag_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing Set2Bag matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing Set2Bag matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchSetOpSet2Bag(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function Set2Bag has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function Set2Bag has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4664,11 +4665,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_list::in_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing {List,Set,Bag} matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing {List,Set,Bag} matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchListSetBagOpIn(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function {List,Set,Bag}In has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function {List,Set,Bag}In has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4678,11 +4679,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
           ATisEqual(static_cast<ATermAppl>(sort_set::setdifference_name()),ATAgetArgument(*DataTerm,0))||
           ATisEqual(static_cast<ATermAppl>(sort_set::setintersection_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing {Set,Bag}{Union,Difference,Intersect} matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchSetBagOpUnionDiffIntersect(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function {Set,Bag}{Union,Difference,Intersect} has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4690,11 +4691,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_set::setcomplement_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing SetCompl matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing SetCompl matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchSetOpSetCompl(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function SetCompl has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function SetCompl has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4702,11 +4703,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_bag::bag2set_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing Bag2Set matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing Bag2Set matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchBagOpBag2Set(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function Bag2Set has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function Bag2Set has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4714,11 +4715,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(sort_bag::bagcount_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing BagCount matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing BagCount matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchBagOpBagCount(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "the function BagCount has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "the function BagCount has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4727,11 +4728,11 @@ static ATermAppl gstcTraverseVarConsTypeDN(
 
       if (ATisEqual(static_cast<ATermAppl>(data::function_update_name()),ATAgetArgument(*DataTerm,0)))
       {
-        mCRL2log(debug) << "Doing FuncUpdate matching Type " << core::pp(Type) << ", PosType " << core::pp(PosType) << "" << std::endl;
+        mCRL2log(debug) << "Doing FuncUpdate matching Type " << core::pp_deprecated(Type) << ", PosType " << core::pp_deprecated(PosType) << "" << std::endl;
         ATermAppl NewType=gstcMatchFuncUpdate(Type);
         if (!NewType)
         {
-          mCRL2log(error) << "function update has incompatible argument types " << core::pp(Type) << " (while typechecking " << core::pp(*DataTerm) << ")" << std::endl;
+          mCRL2log(error) << "function update has incompatible argument types " << core::pp_deprecated(Type) << " (while typechecking " << core::pp_deprecated(*DataTerm) << ")" << std::endl;
           return NULL;
         }
         Type=NewType;
@@ -4752,14 +4753,14 @@ static ATermAppl gstcTraverseVarConsTypeDN(
       was_ambiguous=true;
       if (strict_ambiguous)
       {
-        mCRL2log(debug) << "ambiguous operation " << core::pp(Name) << " (ParList " << core::pp(ParList) << ")" << std::endl;
+        mCRL2log(debug) << "ambiguous operation " << core::pp_deprecated(Name) << " (ParList " << core::pp_deprecated(ParList) << ")" << std::endl;
         if (nFactPars!=ATERM_NON_EXISTING_POSITION)
         {
-          mCRL2log(error) << "ambiguous operation " << core::pp(Name) << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"") << std::endl;
+          mCRL2log(error) << "ambiguous operation " << core::pp_deprecated(Name) << " with " << nFactPars << " parameter" << ((nFactPars != 1)?"s":"") << std::endl;
         }
         else
         {
-          mCRL2log(error) << "ambiguous operation " << core::pp(Name) << std::endl;
+          mCRL2log(error) << "ambiguous operation " << core::pp_deprecated(Name) << std::endl;
         }
         return NULL;
       }
@@ -4833,7 +4834,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
   // Makes upcasting from Type to Needed Type for Par. Returns the resulting type.
   // Moreover, *Par is extended with the required type transformations.
 
-  mCRL2log(debug) << "gstcUpCastNumericType " << core::pp(NeededType) << " -- " << core::pp(Type) << "" << std::endl;
+  mCRL2log(debug) << "gstcUpCastNumericType " << core::pp_deprecated(NeededType) << " -- " << core::pp_deprecated(Type) << "" << std::endl;
 
   if (data::is_unknown_sort(data::sort_expression(Type)))
   {
@@ -4872,7 +4873,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << core::pp(OldPar) << " to sort Nat by applying Pos2Nat to it." << std::endl;
+        mCRL2log(warning) << "Upcasting " << core::pp_deprecated(OldPar) << " to sort Nat by applying Pos2Nat to it." << std::endl;
       }
       return sort_nat::nat();
     }
@@ -4892,7 +4893,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << core::pp(OldPar) << " to sort Int by applying Pos2Int to it." << std::endl;
+        mCRL2log(warning) << "Upcasting " << core::pp_deprecated(OldPar) << " to sort Int by applying Pos2Int to it." << std::endl;
       }
       return sort_int::int_();
     }
@@ -4903,7 +4904,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << core::pp(OldPar) << " to sort Int by applying Nat2Int to it." << std::endl;
+        mCRL2log(warning) << "Upcasting " << core::pp_deprecated(OldPar) << " to sort Int by applying Nat2Int to it." << std::endl;
       }
       return sort_int::int_();
     }
@@ -4926,7 +4927,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << core::pp(OldPar) << " to sort Real by applying Pos2Real to it." << std::endl;
+        mCRL2log(warning) << "Upcasting " << core::pp_deprecated(OldPar) << " to sort Real by applying Pos2Real to it." << std::endl;
       }
       return sort_real::real_();
     }
@@ -4939,7 +4940,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << core::pp(OldPar) << " to sort Real by applying Nat2Real to it." << std::endl;
+        mCRL2log(warning) << "Upcasting " << core::pp_deprecated(OldPar) << " to sort Real by applying Nat2Real to it." << std::endl;
       }
       return sort_real::real_();
     }
@@ -4952,7 +4953,7 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
       if (warn_upcasting)
       {
         was_warning_upcasting=true;
-        mCRL2log(warning) << "Upcasting " << core::pp(OldPar) << " to sort Real by applying Int2Real to it." << std::endl;
+        mCRL2log(warning) << "Upcasting " << core::pp_deprecated(OldPar) << " to sort Real by applying Int2Real to it." << std::endl;
       }
       return sort_real::real_();
     }
@@ -5072,7 +5073,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
   // It returns the matching instantiation of Type. If matching fails,
   // it returns NULL.
 
-  mCRL2log(debug) << "gstcTypeMatchA Type: " << core::pp(Type) << ";    PosType: " << core::pp(PosType) << " " << std::endl;
+  mCRL2log(debug) << "gstcTypeMatchA Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) << " " << std::endl;
 
   if (data::is_unknown_sort(Type))
   {
@@ -5094,19 +5095,19 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
     for (ATermList PosTypeList=ATLgetArgument(PosType,0); !ATisEmpty(PosTypeList); PosTypeList=ATgetNext(PosTypeList))
     {
       ATermAppl NewPosType=ATAgetFirst(PosTypeList);
-      mCRL2log(debug) << "Matching candidate gstcTypeMatchA Type: " << core::pp(Type) << ";    PosType: "
-                  << core::pp(PosType) << " New Type: " << core::pp(NewPosType) << "" << std::endl;
+      mCRL2log(debug) << "Matching candidate gstcTypeMatchA Type: " << core::pp_deprecated(Type) << ";    PosType: "
+                  << core::pp_deprecated(PosType) << " New Type: " << core::pp_deprecated(NewPosType) << "" << std::endl;
 
       if ((NewPosType=gstcTypeMatchA(Type,NewPosType)))
       {
-        mCRL2log(debug) << "Match gstcTypeMatchA Type: " << core::pp(Type) << ";    PosType: " << core::pp(PosType) <<
-                    " New Type: " << core::pp(NewPosType) << "" << std::endl;
+        mCRL2log(debug) << "Match gstcTypeMatchA Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) <<
+                    " New Type: " << core::pp_deprecated(NewPosType) << "" << std::endl;
         NewTypeList=ATinsert(NewTypeList,(ATerm)NewPosType);
       }
     }
     if (ATisEmpty(NewTypeList))
     {
-      mCRL2log(debug) << "No match gstcTypeMatchA Type: " << core::pp(Type) << ";    PosType: " << core::pp(PosType) << " " << std::endl;
+      mCRL2log(debug) << "No match gstcTypeMatchA Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) << " " << std::endl;
       return NULL;
     }
 
@@ -5200,7 +5201,7 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
         return NULL;
       }
       Type=gsMakeSortArrow(ArgTypes,ResType);
-      mCRL2log(debug) << "gstcTypeMatchA Done: Type: " << core::pp(Type) << ";    PosType: " << core::pp(PosType) << "" << std::endl;
+      mCRL2log(debug) << "gstcTypeMatchA Done: Type: " << core::pp_deprecated(Type) << ";    PosType: " << core::pp_deprecated(PosType) << "" << std::endl;
       return Type;
     }
   }
@@ -5210,8 +5211,8 @@ static ATermAppl gstcTypeMatchA(ATermAppl Type, ATermAppl PosType)
 
 static ATermList gstcTypeMatchL(ATermList TypeList, ATermList PosTypeList)
 {
-  mCRL2log(debug) << "gstcTypeMatchL TypeList: " << core::pp(TypeList) << ";    PosTypeList: " <<
-              core::pp(PosTypeList) << "" << std::endl;
+  mCRL2log(debug) << "gstcTypeMatchL TypeList: " << core::pp_deprecated(TypeList) << ";    PosTypeList: " <<
+              core::pp_deprecated(PosTypeList) << "" << std::endl;
 
   if (ATgetLength(TypeList)!=ATgetLength(PosTypeList))
   {
@@ -5792,7 +5793,7 @@ static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2)
     }
     if (!Res)
     {
-      mCRL2log(debug) << "gstcUnifyMinType: No match: Type1 " << core::pp(Type1) << "; Type2 " << core::pp(Type2) << "; " << std::endl;
+      mCRL2log(debug) << "gstcUnifyMinType: No match: Type1 " << core::pp_deprecated(Type1) << "; Type2 " << core::pp_deprecated(Type2) << "; " << std::endl;
       return NULL;
     }
   }
@@ -5801,7 +5802,7 @@ static ATermAppl gstcUnifyMinType(ATermAppl Type1, ATermAppl Type2)
   {
     Res=ATAgetFirst(ATLgetArgument(Res,0));
   }
-  mCRL2log(debug) << "gstcUnifyMinType: Type1 " << core::pp(Type1) << "; Type2 " << core::pp(Type2) << "; Res: " << core::pp(Res) << "" << std::endl;
+  mCRL2log(debug) << "gstcUnifyMinType: Type1 " << core::pp_deprecated(Type1) << "; Type2 " << core::pp_deprecated(Type2) << "; Res: " << core::pp_deprecated(Res) << "" << std::endl;
   return Res;
 }
 
@@ -6435,7 +6436,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
       {
         Sort=multiple_possible_sorts(atermpp::aterm_list(PosTypes));
       }
-      mCRL2log(error) << "this is, for instance, because cannot cast " << core::pp(ATAgetFirst(l)) << " to type " << core::pp(Sort) << std::endl;
+      mCRL2log(error) << "this is, for instance, because cannot cast " << core::pp_deprecated(ATAgetFirst(l)) << " to type " << core::pp_deprecated(Sort) << std::endl;
       break;
     }
   }
@@ -6447,7 +6448,7 @@ static void gstcErrorMsgCannotCast(ATermAppl CandidateType, ATermList Arguments,
 
 static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATermAppl StateFrm)
 {
-  mCRL2log(debug) << "gstcTraverseStateFrm: " + core::pp(StateFrm) + "" << std::endl;
+  mCRL2log(debug) << "gstcTraverseStateFrm: " + core::pp_deprecated(StateFrm) + "" << std::endl;
 
   if (gsIsStateTrue(StateFrm) || gsIsStateFalse(StateFrm) || gsIsStateDelay(StateFrm) || gsIsStateYaled(StateFrm))
   {
@@ -6532,7 +6533,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       ATermAppl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
       if (!CastedNewType)
       {
-        mCRL2log(error) << "cannot (up)cast time value " << core::pp(Time) << " to type Real (typechecking state formula " << core::pp(StateFrm) << ")" << std::endl;
+        mCRL2log(error) << "cannot (up)cast time value " << core::pp_deprecated(Time) << " to type Real (typechecking state formula " << core::pp_deprecated(StateFrm) << ")" << std::endl;
         return NULL;
       }
     }
@@ -6545,14 +6546,14 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     ATermList TypeList=ATLtableGet(StateVars,(ATerm)StateVarName);
     if (!TypeList)
     {
-      mCRL2log(error) << "undefined state variable " << core::pp(StateVarName) << " (typechecking state formula " << core::pp(StateFrm) << ")" << std::endl;
+      mCRL2log(error) << "undefined state variable " << core::pp_deprecated(StateVarName) << " (typechecking state formula " << core::pp_deprecated(StateFrm) << ")" << std::endl;
       return NULL;
     }
 
     ATermList Pars=ATLgetArgument(StateFrm,1);
     if (ATgetLength(TypeList)!=ATgetLength(Pars))
     {
-      mCRL2log(error) << "incorrect number of parameters for state variable " << core::pp(StateVarName) << " (typechecking state formula " << core::pp(StateFrm) << ")" << std::endl;
+      mCRL2log(error) << "incorrect number of parameters for state variable " << core::pp_deprecated(StateVarName) << " (typechecking state formula " << core::pp_deprecated(StateFrm) << ")" << std::endl;
       return NULL;
     }
 
@@ -6565,7 +6566,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       ATermAppl NewParType=gstcTraverseVarConsTypeD(Vars,Vars,&Par,gstcExpandNumTypesDown(ParType));
       if (!NewParType)
       {
-        mCRL2log(error) << "typechecking " << core::pp(StateFrm) << std::endl;
+        mCRL2log(error) << "typechecking " << core::pp_deprecated(StateFrm) << std::endl;
         success=false;
         break;
       }
@@ -6576,7 +6577,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         NewParType=gstcUpCastNumericType(ParType,NewParType,&Par);
         if (!NewParType)
         {
-          mCRL2log(error) << "cannot (up)cast " << core::pp(Par) << " to type " << core::pp(ParType) << " (typechecking state formula " << core::pp(StateFrm) << ")" << std::endl;
+          mCRL2log(error) << "cannot (up)cast " << core::pp_deprecated(Par) << " to type " << core::pp_deprecated(ParType) << " (typechecking state formula " << core::pp_deprecated(StateFrm) << ")" << std::endl;
           success=false;
           break;
         }
@@ -6611,7 +6612,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       ATermAppl VarName=ATAgetArgument(ATAgetArgument(o,0),0);
       if (ATAtableGet(FormPars,(ATerm)VarName))
       {
-        mCRL2log(error) << "non-unique formal parameter " << core::pp(VarName) << " (typechecking " << core::pp(StateFrm) << ")" << std::endl;
+        mCRL2log(error) << "non-unique formal parameter " << core::pp_deprecated(VarName) << " (typechecking " << core::pp_deprecated(StateFrm) << ")" << std::endl;
         success=false;
         break;
       }
@@ -6619,7 +6620,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       ATermAppl VarType=ATAgetArgument(ATAgetArgument(o,0),1);
       if (!gstcIsSortExprDeclared(VarType))
       {
-        mCRL2log(error) << "type error occurred while typechecking " << core::pp(StateFrm) << std::endl;
+        mCRL2log(error) << "type error occurred while typechecking " << core::pp_deprecated(StateFrm) << std::endl;
         success=false;
         break;
       }
@@ -6630,7 +6631,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
       ATermAppl VarInitType=gstcTraverseVarConsTypeD(Vars,Vars,&VarInit,gstcExpandNumTypesDown(VarType));
       if (!VarInitType)
       {
-        mCRL2log(error) << "typechecking " << core::pp(StateFrm) << std::endl;
+        mCRL2log(error) << "typechecking " << core::pp_deprecated(StateFrm) << std::endl;
         success=false;
         break;
       }
@@ -6641,7 +6642,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
         VarInitType=gstcUpCastNumericType(VarType,VarInitType,&VarInit);
         if (!VarInitType)
         {
-          mCRL2log(error) << "cannot (up)cast " << core::pp(VarInit) << " to type " << core::pp(VarType) << " (typechecking state formula " << core::pp(StateFrm) << std::endl;
+          mCRL2log(error) << "cannot (up)cast " << core::pp_deprecated(VarInit) << " to type " << core::pp_deprecated(VarType) << " (typechecking state formula " << core::pp_deprecated(StateFrm) << std::endl;
           success=false;
           break;
         }
@@ -6670,7 +6671,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
     ATtableDestroy(CopyVars);
     if (!NewArg)
     {
-      mCRL2log(error) << "while typechecking " << core::pp(StateFrm) << std::endl;
+      mCRL2log(error) << "while typechecking " << core::pp_deprecated(StateFrm) << std::endl;
       return NULL;
     }
     return ATsetArgument(StateFrm,(ATerm)NewArg,2);
@@ -6692,7 +6693,7 @@ static ATermAppl gstcTraverseStateFrm(ATermTable Vars, ATermTable StateVars, ATe
 
 static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm)
 {
-  mCRL2log(debug) << "gstcTraverseRegFrm: " + core::pp(RegFrm) + "" << std::endl;
+  mCRL2log(debug) << "gstcTraverseRegFrm: " + core::pp_deprecated(RegFrm) + "" << std::endl;
   if (gsIsRegNil(RegFrm))
   {
     return RegFrm;
@@ -6734,7 +6735,7 @@ static ATermAppl gstcTraverseRegFrm(ATermTable Vars, ATermAppl RegFrm)
 
 static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm)
 {
-  mCRL2log(debug) << "gstcTraverseActFrm: " + core::pp(ActFrm) + "" << std::endl;
+  mCRL2log(debug) << "gstcTraverseActFrm: " + core::pp_deprecated(ActFrm) + "" << std::endl;
 
   if (gsIsActTrue(ActFrm) || gsIsActFalse(ActFrm))
   {
@@ -6810,7 +6811,7 @@ static ATermAppl gstcTraverseActFrm(ATermTable Vars, ATermAppl ActFrm)
       ATermAppl CastedNewType=gstcUpCastNumericType(sort_real::real_(),NewType,&Time);
       if (!CastedNewType)
       {
-        mCRL2log(error) << "cannot (up)cast time value " << core::pp(Time) << " to type Real (typechecking action formula " << core::pp(ActFrm) << ")" << std::endl;
+        mCRL2log(error) << "cannot (up)cast time value " << core::pp_deprecated(Time) << " to type Real (typechecking action formula " << core::pp_deprecated(ActFrm) << ")" << std::endl;
         return NULL;
       }
     }
