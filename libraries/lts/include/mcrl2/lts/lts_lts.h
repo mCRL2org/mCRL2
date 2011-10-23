@@ -24,7 +24,6 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 // #include "mcrl2/atermpp/aterm_balanced_tree.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/variable.h"
@@ -141,7 +140,7 @@ inline std::string pp(const state_label_lts l)
   s = "(";
   for (size_t i=0; i<l.size(); ++i)
   {
-    s += core::pp_deprecated(atermpp::aterm_appl(l[i]));
+    s += data::pp(l[i]);
     if (i+1<l.size())
     {
       s += ",";

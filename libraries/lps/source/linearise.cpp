@@ -4687,45 +4687,10 @@ class specification_basic_type:public boost::noncopyable
                         transform_matching_list(matchinglist));
     }
 
-    /// \brief Join the variables in v1 with those in v2, but do not add duplicates.
-    /// \details As it stands renamings has no function.
-
-/*    variable_list merge_var_simple(
-      const variable_list v1,
-      const variable_list v2)
-    {
-      const variable_list v1h=reverse(v1);
-      variable_list result=v2;
-      for (variable_list::const_iterator i1=v1h.begin() ; i1!=v1h.end() ; ++i1)
-      {
-        bool found=false;
-        for (variable_list::const_iterator i2=v2.begin() ; i2!=v2.end() ; ++i2)
-        {
-          if (*i1==*i2)
-          {
-            // Check whether the names are the same, but the types differ
-            found=true;
-            break;
-          }
-          else
-          {
-            if (i1->name()==i2->name())
-            {
-              assert(0); // We need to deal with this later. This can
-              // only occur when variables with the same string
-              // and different types are used.
-            }
-          }
-        }
-        if (!found)
-        {
-          result=push_front(result,*i1);
-        }
-      }
-      return result;
-    }
-*/
-
+/* Join the variables of v1 to v2 and rename the variables in v1
+ * if needed. The conditionlist gives conditions to restrain variables
+ * that did not occur in the other list. renaming pars and args give
+ * renamings to be applied if variables in v1 had to be renamed */
 
    variable_list merge_var(
       const variable_list v1,
