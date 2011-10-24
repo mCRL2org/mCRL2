@@ -25,6 +25,7 @@
 #include "mcrl2/lps/find.h"
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/lps/detail/instantiate_global_variables.h"
+#include "mcrl2/lps/multi_action.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/lts/detail/exploration.h"
 #include "mcrl2/lts/detail/lps2lts_lts.h"
@@ -361,17 +362,17 @@ void lps2lts_algorithm::check_actiontrace(const state_t OldState, ATermAppl Tran
           if (saved_ok)
           {
             mCRL2log(info) << "detect: action '"
-                           << core::pp_deprecated(Transition)
+                           << lps::pp(mcrl2::lps::multi_action(Transition))
                            << "' found and saved to '"
-                           << lgopts->trace_prefix << "_act_" << tracecnt << "_" << core::pp_deprecated(*j) << ".trc'"
+                           << lgopts->trace_prefix << "_act_" << tracecnt << "_" << lps::pp(mcrl2::lps::multi_action(*j)) << ".trc'"
                            << "(state index: " << states.index(OldState) << ")." << std::endl;
           }
           else
           {
             mCRL2log(info) << "detect: action '"
-                           << core::pp_deprecated(Transition)
+                           << lps::pp(mcrl2::lps::multi_action(Transition))
                            << "' found, but could not be saved to '"
-                           << lgopts->trace_prefix << "_act_" << tracecnt << "_" << core::pp_deprecated(*j) << ".trc'"
+                           << lgopts->trace_prefix << "_act_" << tracecnt << "_" << lps::pp(mcrl2::lps::multi_action(*j)) << ".trc'"
                            << "(state index: " << states.index(OldState) << ")." << std::endl;
           }
         }
@@ -380,7 +381,7 @@ void lps2lts_algorithm::check_actiontrace(const state_t OldState, ATermAppl Tran
       else
       {
         mCRL2log(info) << "detect: action '"
-                       << core::pp_deprecated(Transition)
+                       << lps::pp(mcrl2::lps::multi_action(Transition))
                        << "' found (state index: " << states.index(OldState) << ")." << std::endl;
       }
     }

@@ -1233,7 +1233,7 @@ void RewriterCompilingJitty::add_base_nfs(nfs_array &nfs, const atermpp::aterm_i
 
 void RewriterCompilingJitty::extend_nfs(nfs_array &nfs, const atermpp::aterm_int opid, size_t arity)
 {
-  data_equation_list eqns = (opid.value()<jittyc_eqns.size()?jittyc_eqns[opid.value()]:data_equation_list());
+  data_equation_list eqns = (size_t(opid.value())<jittyc_eqns.size()?jittyc_eqns[opid.value()]:data_equation_list());
   if (eqns.empty())
   {
     nfs.fill(arity);
@@ -1260,7 +1260,7 @@ bool RewriterCompilingJitty::opid_is_nf(const atermpp::aterm_int opid, size_t nu
   }
 
   // Otherwise check whether there are applicable rewrite rules.
-  data_equation_list l = (opid.value()<jittyc_eqns.size()?jittyc_eqns[opid.value()]:data_equation_list());
+  data_equation_list l = (size_t(opid.value())<jittyc_eqns.size()?jittyc_eqns[opid.value()]:data_equation_list());
 
   if (l.empty())
   {
@@ -2128,7 +2128,7 @@ void RewriterCompilingJitty::fill_always_rewrite_array()
   for(std::map <int,int> ::const_iterator it=int2ar_idx.begin(); it!=int2ar_idx.end(); ++it)
   {
     size_t arity = getArity(get_int2term(it->first));
-    data_equation_list eqns = (it->first<jittyc_eqns.size()?jittyc_eqns[it->first]:data_equation_list());
+    data_equation_list eqns = (size_t(it->first)<jittyc_eqns.size()?jittyc_eqns[it->first]:data_equation_list());
     int idx = it->second;
     for (size_t i=1; i<=arity; i++)
     {

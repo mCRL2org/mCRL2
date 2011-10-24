@@ -283,9 +283,9 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
 
      atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
 
-    if (ATgetInt(i)>=jitty_strat.size())
+    if (size_t(ATgetInt(i))>=jitty_strat.size())
     {
-      int oldsize=jitty_strat.size();
+      size_t oldsize=jitty_strat.size();
       jitty_strat.resize(ATgetInt(i)+1);
       for( ; oldsize<jitty_strat.size(); ++oldsize)
       {
@@ -754,7 +754,7 @@ atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
   atermpp::aterm_appl a = toInner(term,true);
   if (old_opids < get_num_opids())
   {
-    int oldsize=jitty_strat.size();
+    size_t oldsize=jitty_strat.size();
     jitty_strat.resize(get_num_opids());
     for( ; oldsize<jitty_strat.size(); ++oldsize)
     {

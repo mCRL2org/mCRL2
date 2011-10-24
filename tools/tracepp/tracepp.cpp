@@ -18,12 +18,15 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/print.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/print.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -46,7 +49,7 @@ static void print_state(ostream& os, ATermAppl state)
     {
       os << ",";
     }
-    os << core::pp_deprecated(ATgetArgument(state,i));
+    os << mcrl2::data::pp(mcrl2::data::data_expression(ATgetArgument(state,i)));
   }
   os << ")";
 }
@@ -76,7 +79,7 @@ static void trace2dot(ostream& os, Trace& trace, char const* name)
     os << i << " -> " << i+1 << " [label=\"";
     if (mcrl2::core::detail::gsIsMultAct(act))
     {
-      os << core::pp_deprecated((ATerm) act);
+      os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
     }
     else
     {
@@ -101,7 +104,7 @@ static void trace2statevector(ostream& os, Trace& trace)
     os << " -";
     if (mcrl2::core::detail::gsIsMultAct(act))
     {
-      os << core::pp_deprecated((ATerm) act);
+      os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
     }
     else
     {
@@ -128,7 +131,7 @@ static void trace2aut(ostream& os, Trace& trace)
     os << "(" << i << ",\"";
     if (mcrl2::core::detail::gsIsMultAct(act))
     {
-      os << core::pp_deprecated((ATerm) act);
+      os << mcrl2::lps::pp(mcrl2::lps::multi_action(act));
     }
     else
     {

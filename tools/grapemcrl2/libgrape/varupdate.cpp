@@ -18,7 +18,8 @@
 #include "mcrl2/core/parse.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/core/identifier_string.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
+#include "mcrl2/data/data_expression.h"
+#include "mcrl2/data/print.h"
 
 #include "varupdate.h"
 
@@ -70,7 +71,7 @@ bool varupdate::set_varupdate(const wxString& p_varupdate)
     ATermAppl a_parsed_data_expr = mcrl2::core::parse_data_expr(s);
     if (a_parsed_data_expr)
     {
-      string a_value = mcrl2::core::pp_deprecated(a_parsed_data_expr);
+      string a_value = mcrl2::data::pp(mcrl2::data::data_expression(a_parsed_data_expr));
       set_rhs(wxString(a_value.c_str(), wxConvLocal));
       return true;
     }

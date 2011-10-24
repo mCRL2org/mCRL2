@@ -17,7 +17,6 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/core/print.h"
 #include "mcrl2/atermpp/algorithm.h"
 #include "mcrl2/utilities/logger.h"
@@ -161,7 +160,6 @@ atermpp::aterm_appl Rewriter::rewrite_where(
     const variable v=variable((*i)(0));
     const variable v_fresh(generator(v.sort()));
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
-    //std::cout << "  INNER ASS1:"<< data::pp( fromInner( (*i)(1))) << std::endl;
     sigma[v_fresh]=rewrite_internal((*i)(1),sigma);
   }
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(body,variable_renaming),sigma);
@@ -740,7 +738,8 @@ static void checkPattern(ATermAppl p)
   {
     if (gsIsDataVarId(ATAgetArgument(p,0)))
     {
-      throw string("variable "+core::pp_deprecated(ATgetArgument(p,0))+" is used as head symbol in an application, which is not supported");
+      throw string("variable "+data::pp(variable(ATgetArgument(p,0))) + 
+               " is used as head symbol in an application, which is not supported");
     }
     checkPattern(ATAgetArgument(p,0));
     checkPattern(ATLgetArgument(p,1));

@@ -19,7 +19,6 @@
 #include "mcrl2/core/parse.h"                // Parse library.
 #include "mcrl2/core/typecheck.h"            // Type check library.
 #include "mcrl2/core/print.h"
-#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/pos.h"
@@ -27,6 +26,7 @@
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/print.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;
@@ -1933,7 +1933,7 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode* p_transition_
           // get action parameter type
           ATermAppl sort_expr = mcrl2::data::data_expression(a_type_checked_action_param_expr).sort();
           ATermAppl new_sort_expr = convert_numeric_sorts_to_real(sort_expr);
-          string sort_expr_string = core::pp_deprecated(ATerm(new_sort_expr));
+          string sort_expr_string = mcrl2::data::pp(mcrl2::data::sort_expression(new_sort_expr));
           wxString action_param_type = wxString(sort_expr_string.c_str(), wxConvLocal);
 
           dataexpression param;

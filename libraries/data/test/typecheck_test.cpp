@@ -861,9 +861,8 @@ void test_data_expression_in_specification_context(const std::string& de_in,
     if (expect_success)
     {
       data::type_check(de, begin, end, ds);
-      atermpp::aterm de_aterm = de;
 
-      std::string de_out = core::pp_deprecated((ATerm) de_aterm);
+      std::string de_out = mcrl2::data::pp(de);
 
       BOOST_CHECK_EQUAL(de_in, de_out);
       if (expected_sort != "")
