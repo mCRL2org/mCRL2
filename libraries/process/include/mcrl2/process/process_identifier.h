@@ -80,7 +80,7 @@ typedef atermpp::vector<process_identifier>    process_identifier_vector;
 inline
 bool is_process_identifier(const atermpp::aterm_appl& t)
 {
-  return core::detail::gsIsProcExpr(t);
+  return core::detail::gsIsProcVarId(t);
 }
 
 } // namespace process
