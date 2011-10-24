@@ -12,14 +12,14 @@ cmake_minimum_required(VERSION 2.6)
 
 if ( MCRL2_ENABLE_GUI_TOOLS )
 
-if(MCRL2_WITH_WXSTC)			
+if(MCRL2_WITH_WXSTC)
  add_definitions( -DMCRL2_WITH_WXSTC )
-endif(MCRL2_WITH_WXSTC)			
+endif(MCRL2_WITH_WXSTC)
 
 # ######### General setup ##########
 IF(APPLE)
   set(MACOSX_BUNDLE_ICON_FILE mcrl2xi.icns)
-ENDIF(APPLE)  
+ENDIF(APPLE)
 
 IF(WIN32)
   include_directories(${CMAKE_SOURCE_DIR}/build/msvc)
@@ -50,11 +50,14 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
   mcrl2_utilities
+  mcrl2_syntax
+  dparser
 
   ${wxWidgets_LIBRARIES}
 )

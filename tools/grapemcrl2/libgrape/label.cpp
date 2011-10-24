@@ -81,7 +81,7 @@ void label::set_actions_text(const wxString& p_actions)
   atermpp::aterm_appl a_parsed_multi_action;
   try
   {
-    a_parsed_multi_action = lps::detail::multi_action_to_aterm(lps::parse_multi_action_new(s));
+    a_parsed_multi_action = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::lps::parse_multi_action_new(s));
   }
   catch (...)
   {

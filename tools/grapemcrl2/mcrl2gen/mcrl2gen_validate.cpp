@@ -115,7 +115,7 @@ ATermList grape::mcrl2gen::convert_numeric_sorts_to_real(ATermList sort_exprs)
 
 ATermAppl grape::mcrl2gen::parse_identifier(wxString p_identifier)
 {
-  return mcrl2::core::identifier_string(p_identifier.mb_str());
+  return mcrl2::core::identifier_string(std::string(p_identifier.mb_str()));
 }
 
 ATermAppl grape::mcrl2gen::parse_sort_expr(wxString p_sort_expression)
@@ -855,7 +855,7 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode* p_doc_root, ATe
     }
 
     // parse succeeded: try to type check
-    ATermAppl a_parsed_mcrl2_datatype_specification = data::detail::data_specification_to_aterm(dataspec);
+    ATermAppl a_parsed_mcrl2_datatype_specification = data::detail::data_specification_to_aterm_data_spec(dataspec);
     ATermAppl a_type_checked_mcrl2_datatype_specification = type_check_data_spec(a_parsed_mcrl2_datatype_specification);
     if (a_type_checked_mcrl2_datatype_specification == 0)
     {

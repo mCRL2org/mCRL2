@@ -81,12 +81,12 @@ bool varupdate::set_varupdate(const wxString& p_varupdate)
 
   try
   {
-    std::string lhs = variable_update_lhs.mb_str();
-    core::parse_identifier(lhs); // will throw if lhs is not a valid identifier
+    std::string lhs(variable_update_lhs.mb_str());
+    mcrl2::core::parse_identifier(lhs); // will throw if lhs is not a valid identifier
     set_lhs(wxString(lhs.c_str(), wxConvLocal));
 
-    std::string rhs = variable_update_rhs.mb_str();
-    core::parse_identifier(rhs); // will throw if rhs is not a valid identifier
+    std::string rhs(variable_update_rhs.mb_str());
+    mcrl2::core::parse_identifier(rhs); // will throw if rhs is not a valid identifier
     set_rhs(wxString(rhs.c_str(), wxConvLocal));
 
     return true;

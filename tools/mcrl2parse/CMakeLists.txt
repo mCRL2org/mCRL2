@@ -29,8 +29,8 @@ include_directories(
   ${CMAKE_SOURCE_DIR}/libraries/pbes/include
   ${CMAKE_SOURCE_DIR}/libraries/atermpp/include
   ${CMAKE_SOURCE_DIR}/libraries/aterm/include
-  ${CMAKE_SOURCE_DIR}/build/precompile
   ${CMAKE_SOURCE_DIR}/3rd-party/dparser
+  ${CMAKE_SOURCE_DIR}/build/precompile
 )
 
 target_link_libraries(${PROJECT_NAME}
