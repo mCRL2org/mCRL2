@@ -26,6 +26,7 @@
 #include "mcrl2/data/int.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
 
 using namespace grape::mcrl2gen;
@@ -118,8 +119,16 @@ ATermAppl grape::mcrl2gen::parse_identifier(wxString p_identifier)
 
 ATermAppl grape::mcrl2gen::parse_sort_expr(wxString p_sort_expression)
 {
-  istringstream r(string(p_sort_expression.mb_str()).c_str());
-  return mcrl2::core::parse_sort_expr(r);
+  std::string s(p_sort_expression.mb_str());
+  try
+  {
+    return data::parse_sort_expression_new(s);
+  }
+  catch (...)
+  {
+    return 0;
+  }
+  return 0;
 }
 
 ATermAppl grape::mcrl2gen::parse_data_expr(wxString p_data_expression)

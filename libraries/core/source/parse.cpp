@@ -34,12 +34,6 @@ ATerm parse_tagged_stream(const string& tag, istream& stream);
        NULL, otherwise
 */
 
-ATermAppl parse_sort_expr(istream& se_stream)
-{
-  mCRL2log(debug) << "parsing sort expression..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("sort_expr", se_stream);
-}
-
 ATermAppl parse_data_expr(istream& de_stream)
 {
   mCRL2log(debug) << "parsing data expression..." << std::endl;

@@ -486,24 +486,6 @@ inline static data_specification const& default_specification()
 /// \endcond
 
 inline
-sort_expression parse_sort_expression_old(std::istream& in)
-{
-  atermpp::aterm_appl x = core::parse_sort_expr(in);
-  if (!x)
-  {
-    throw mcrl2::runtime_error("Error while parsing sort expression");
-  }
-  return sort_expression(x);
-}
-
-inline
-sort_expression parse_sort_expression_old(const std::string& text)
-{
-  std::istringstream in(text);
-  return parse_sort_expression_old(in);
-}
-
-inline
 data_expression parse_data_expression_old(std::istream& in)
 {
   atermpp::aterm_appl x = core::parse_data_expr(in);
@@ -915,17 +897,9 @@ inline
 sort_expression parse_sort_expression(std::istream& in,
                                       const data_specification& data_spec = detail::default_specification())
 {
-#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  sort_expression result = parse_sort_expression_old(text);
+  sort_expression result = parse_sort_expression_new(text);
   complete_sort_expression(result, data_spec);
-  sort_expression result2 = parse_sort_expression_new(text);
-  complete_sort_expression(result2, data_spec);
-  compare_parse_results(text, result, result2);
-#else
-  sort_expression result = parse_sort_expression_old(in);
-  complete_sort_expression(result, data_spec);
-#endif
   return result;
 }
 

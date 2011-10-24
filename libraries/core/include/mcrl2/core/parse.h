@@ -160,24 +160,6 @@ void print_aterm(const atermpp::aterm_appl& x)
   std::clog << "aterm: " << x << std::endl;
 }
 
-/** \brief  Parse an mCRL2 identifier.
-  * \param[in] se_stream An input stream from which can be read.
-  * \post   The content of se_stream is parsed as an mCRL2 identifier.
-  * \return The parsed identifier, if everything went well;
-  *         NULL, otherwise.
-**/
-aterm::ATermAppl parse_identifier(std::istream& se_stream);
-
-
-/** \brief  Parse an mCRL2 sort expression.
-  * \param[in] se_stream An input stream from which can be read.
-  * \post   The content of se_stream is parsed as an mCRL2 sort expression.
-  * \return The parsed sort expression, if everything went well;
-  *         NULL, otherwise.
-**/
-aterm::ATermAppl parse_sort_expr(std::istream& se_stream);
-
-
 /** \brief  Parse an mCRL2 data expression.
   * \param[in] de_stream An input stream from which can be read.
   * \post   The content of de_stream is parsed as an mCRL2 data expression.
