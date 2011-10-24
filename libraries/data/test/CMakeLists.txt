@@ -21,12 +21,13 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include/)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
 
 file(GLOB TERM_OBJS "*.cpp")
 
 #set(FAILING_TESTS
-# data_typecheck_test      
+# data_typecheck_test
 #)
 
 foreach( OBJ ${TERM_OBJS} )
@@ -35,11 +36,13 @@ foreach( OBJ ${TERM_OBJS} )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_data
      mcrl2_utilities
+     mcrl2_syntax
+     dparser
   )
   # MACRO is defined in CMakeLists.txt in root of source tree
   build_and_run_test_target( ${PREFIX}_${result} )
 
-  list(FIND FAILING_TESTS "${PREFIX}_${result}" FIND_ELM ) 
+  list(FIND FAILING_TESTS "${PREFIX}_${result}" FIND_ELM )
   if( -1 EQUAL FIND_ELM )
     set_tests_properties("${PREFIX}_${result}" PROPERTIES LABELS "${MCRL2_TEST_LABEL}" )
   else( -1 EQUAL FIND_ELM )

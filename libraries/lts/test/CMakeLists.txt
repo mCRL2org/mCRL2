@@ -12,7 +12,7 @@ cmake_minimum_required(VERSION 2.6)
 
 # ######### General setup ##########
 
-set(PREFIX "lts") 
+set(PREFIX "lts")
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/lts/include)
@@ -26,6 +26,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/workarounds/)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include/)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
@@ -39,8 +40,10 @@ foreach( OBJ ${TERM_OBJS} )
   )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_lts
+     mcrl2_syntax
+     dparser
   )
   # MACRO is defined in CMakeLists.txt in root of source tree
   build_and_run_test_target( ${PREFIX}_${result} )
 
-endforeach( OBJ )  
+endforeach( OBJ )
