@@ -25,7 +25,6 @@
 #include "mcrl2/data/detail/parse_substitutions.h"
 #include "mcrl2/core/garbage_collection.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;

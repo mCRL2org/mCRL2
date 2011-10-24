@@ -21,7 +21,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2::core;
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;

@@ -126,7 +126,6 @@ class process_specification
     /// \return The data specification
     data::data_specification& data()
     {
-      using namespace atermpp;
       return m_data;
     }
 

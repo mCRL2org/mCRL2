@@ -26,7 +26,6 @@
 #include "mcrl2/data/fresh_variable_generator.h"
 #include "mcrl2/core/garbage_collection.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::core::detail;

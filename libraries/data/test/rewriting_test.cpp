@@ -34,7 +34,6 @@
 #include "mcrl2/utilities/test_utilities.h"
 
 using mcrl2::utilities::collect_after_test_case;
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
@@ -371,7 +370,7 @@ BOOST_AUTO_TEST_CASE(struct_list_rewrite_test)
   using namespace mcrl2::data::sort_list;
   std::cerr << "struct_list_rewrite_test\n";
   data_specification specification=parse_data_specification("sort L = struct l( R: List(Bool) );"
-                                                            "map  f:Set(L);");   // Map is added to guarantee that rewrite rules for sets 
+                                                            "map  f:Set(L);");   // Map is added to guarantee that rewrite rules for sets
                                                                                   // are present.
 
 
@@ -870,7 +869,7 @@ BOOST_AUTO_TEST_CASE(test_lambda_expression)
     data::rewriter R(specification, *strat);
 
     data::data_expression e(parse_data_expression("(insert(d2,2,insert(d1,1,emptyBuf)))(nat_const)", specification));
-    data_rewrite_test(R, e, R(e));  
+    data_rewrite_test(R, e, R(e));
     e=parse_data_expression("insert(d1,1,emptyBuf)(1)==data(d1)", specification);
     data_rewrite_test(R, e, sort_bool::true_());
     e=parse_data_expression("insert(d1,1,emptyBuf)(1)==empty", specification);
@@ -910,16 +909,16 @@ BOOST_AUTO_TEST_CASE(test_whether_lists_can_be_put_in_sets)
 BOOST_AUTO_TEST_CASE(lambda_predicate_matching)
 {
 //  Taken from the specification:
-//  ================================  
+//  ================================
 //        map  match :(Nat -> Bool)#List(Nat)     -> List(Nat) ;
 //             pre: Nat -> Bool;
 //             emptyList: List(Nat);
 //        eqn  match (pre, [])      = [];
 //             emptyList = [];
-//        
+//
 //        init ( match( lambda i:Nat. true, [] ) == emptyList  ) -> tau;
-//  ================================  
-  
+//  ================================
+
 
   std::string s(
      "map  match    : (Nat -> Bool)#List(Nat) -> List(Nat);\n"
@@ -942,12 +941,12 @@ BOOST_AUTO_TEST_CASE(lambda_predicate_matching)
     data_rewrite_test(R, e, f);
   }
 
-} 
+}
 
 BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
 {
   /* Taken from the specification:
-  ================================  
+  ================================
   map F1: List(Bool)#Bool#List(Bool)#Bag(Bool) -> List(Bool);
       F2: List(Bool) -> Bag(Bool);
       ELM: List(Bool)#Bool#List(Bool) -> List(Bool);
@@ -957,18 +956,18 @@ BOOST_AUTO_TEST_CASE(difficult_empty_list_in_set)
       bs: List(Bool);
       m: Bag(Bool);
       a: Bool;
-  eqn 
+  eqn
       F1( cal, b, [] ,  m ) = [];
       F1( cal, b, a |> bs, m ) = if( m <= {}, ELM( cal, b, a |> bs ) , [] );
       ELM( [] , b, bs ) =  F1( [] , b, bs, { false:1 } );
       ELM( ca |> cal, b, bs ) = ELM( cal, b , bs );
-  
+
   act a: List(Bool);
-   
+
   proc X = sum r: List(Bool). ( r in { a: List(Bool) | exists ac': List(Bool). a ==  F1( [false], false, ac', { false:1 })} )-> a(r) . X;
 
   init X;
-  ================================  
+  ================================
   */
 
   std::string s(

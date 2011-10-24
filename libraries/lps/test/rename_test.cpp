@@ -20,7 +20,6 @@
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace std;
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;

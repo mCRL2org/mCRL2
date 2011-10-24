@@ -7,7 +7,6 @@
 #include "mcrl2/pbes/pbespgsolve.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::lps;
 using namespace mcrl2::pbes_system;

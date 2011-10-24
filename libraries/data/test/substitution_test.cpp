@@ -137,8 +137,6 @@ void test_my_assignment_sequence_substitution()
 
 void test_my_list_substitution()
 {
-  using namespace atermpp;
-
   variable x("x", sort_nat::nat());
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());
@@ -194,8 +192,6 @@ void test_assignment_sequence_substitution()
 
 void test_list_substitution()
 {
-  using namespace atermpp;
-
   variable x("x", sort_nat::nat());
   variable y("y", sort_nat::nat());
   variable z("z", sort_nat::nat());

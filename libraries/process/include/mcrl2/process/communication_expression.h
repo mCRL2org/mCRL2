@@ -51,16 +51,14 @@ class communication_expression: public atermpp::aterm_appl
     /// \return The name of the action
     action_name_multiset action_name() const
     {
-      using namespace atermpp;
-      return arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     /// \brief Returns the name of the communication expression
     /// \return The name of the communication expression
     core::identifier_string name() const
     {
-      using namespace atermpp;
-      return arg2(*this);
+      return atermpp::arg2(*this);
     }
 };
 

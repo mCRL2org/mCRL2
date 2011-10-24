@@ -60,17 +60,15 @@ class process_equation: public atermpp::aterm_appl
     /// \return The name of the process equation
     process_identifier identifier() const
     {
-      using namespace atermpp;
-      return arg1(*this);
+      return atermpp::arg1(*this);
     }
 
     /// \brief Returns the formal parameters of the equation
     /// \return The formal parameters of the equation
     data::variable_list formal_parameters() const
     {
-      using namespace atermpp;
       return data::variable_list(
-               atermpp::term_list_iterator<data::variable>(list_arg2(*this)),
+               atermpp::term_list_iterator<data::variable>(atermpp::list_arg2(*this)),
                atermpp::term_list_iterator<data::variable>());
     }
 
@@ -78,8 +76,7 @@ class process_equation: public atermpp::aterm_appl
     /// \return The expression of the process equation
     process_expression expression() const
     {
-      using namespace atermpp;
-      return arg3(*this);
+      return atermpp::arg3(*this);
     }
 };
 

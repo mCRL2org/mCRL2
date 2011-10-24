@@ -52,8 +52,7 @@ class action_name_multiset: public atermpp::aterm_appl
     /// \return The names of the multi-action
     core::identifier_string_list names() const
     {
-      using namespace atermpp;
-      return list_arg1(*this);
+      return atermpp::list_arg1(*this);
     }
 };
 

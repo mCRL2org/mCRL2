@@ -414,42 +414,41 @@ static atermpp::aterm subst_values(ATermAppl* vars, ATerm* vals, size_t len, con
         assert(*it!=vars[i]);
       }
     }
-#endif 
-    return gsMakeBinder(binder,bound_variables,body); 
-    
+#endif
+    return gsMakeBinder(binder,bound_variables,body);
+
   }
   else if (gsIsWhr((ATerm)t))
   {
-    using namespace atermpp;
-    const aterm_appl t1=t;
-    const term_list < atermpp::aterm_appl > assignment_list=t1(1);
-    const aterm_appl body=subst_values(vars,vals,len,t1(0));
+    const atermpp::aterm_appl t1=t;
+    const atermpp::term_list < atermpp::aterm_appl > assignment_list=t1(1);
+    const atermpp::aterm_appl body=subst_values(vars,vals,len,t1(0));
 
 #ifndef NDEBUG
     // Check that variables in right hand sides of equations do not clash with bound variables.
     for(size_t i=0; i<len; ++i)
     {
-      for(term_list < atermpp::aterm_appl >::const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
+      for(atermpp::term_list < atermpp::aterm_appl >::const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
       {
         assert(atermpp::aterm_appl(*it)(0)!=vars[i]);
       }
     }
-#endif 
+#endif
 
     atermpp::vector < atermpp::aterm_appl > new_assignments;
 
-    for(term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
-    {   
-      const aterm_appl assignment= *it;
+    for(atermpp::term_list < atermpp::aterm_appl > :: const_iterator it=assignment_list.begin(); it!=assignment_list.end(); ++it)
+    {
+      const atermpp::aterm_appl assignment= *it;
       new_assignments.push_back(core::detail::gsMakeDataVarIdInit(variable(assignment(0)),
-    		(aterm_appl)  subst_values(vars,vals,len,(aterm_appl)assignment(1))));
-    } 
-    term_list < atermpp::aterm_appl > new_assignment_list;
+    		(atermpp::aterm_appl)  subst_values(vars,vals,len,(atermpp::aterm_appl)assignment(1))));
+    }
+    atermpp::term_list < atermpp::aterm_appl > new_assignment_list;
     for(atermpp::vector < atermpp::aterm_appl >::const_reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
     {
       new_assignment_list=push_front(new_assignment_list,*it);
     }
-    return gsMakeWhr(body,new_assignment_list); 
+    return gsMakeWhr(body,new_assignment_list);
   }
   else
   {
@@ -465,10 +464,10 @@ static atermpp::aterm subst_values(ATermAppl* vars, ATerm* vals, size_t len, con
 }
 
 static bool match_jitty(
-                    ATerm t, 
-                    ATerm p, 
-                    ATermAppl* vars, 
-                    ATerm* vals, 
+                    ATerm t,
+                    ATerm p,
+                    ATermAppl* vars,
+                    ATerm* vals,
                     size_t* len,
                     const size_t maxlen)
 {
@@ -525,7 +524,7 @@ static bool match_jitty(
 }
 
 atermpp::aterm_appl RewriterJitty::rewrite_aux(
-                      const atermpp::aterm_appl term, 
+                      const atermpp::aterm_appl term,
                       internal_substitution_type &sigma)
 {
   if (gsIsDataVarId(term))
@@ -534,19 +533,19 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
   }
   else if (gsIsWhr(term))
   {
-    return rewrite_where(term,sigma); 
+    return rewrite_where(term,sigma);
   }
   else if (gsIsBinder(term))
   {
     atermpp::aterm_appl binder=term(0);
     if (binder==gsMakeExists())
     {
-      atermpp::aterm_appl a= new_internal_existential_quantifier_enumeration(term,sigma); 
+      atermpp::aterm_appl a= new_internal_existential_quantifier_enumeration(term,sigma);
       return a;
     }
     if (binder==gsMakeForall())
     {
-      atermpp::aterm_appl a=new_internal_universal_quantifier_enumeration(term,sigma); 
+      atermpp::aterm_appl a=new_internal_universal_quantifier_enumeration(term,sigma);
       return a;
     }
     if (binder==gsMakeLambda())
@@ -568,7 +567,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
       atermpp::aterm_appl a= rewrite_aux_function_symbol(atermpp::aterm_int(op),term,sigma);
       return a;
     }
-    else if (gsIsDataVarId(op))    
+    else if (gsIsDataVarId(op))
     {
       head=sigma(variable(op));
     }
@@ -577,17 +576,17 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
       head=op;
     }
     else if (gsIsWhr(op))
-    { 
+    {
       head = rewrite_aux(atermpp::aterm_appl(op),sigma);
     }
-    else 
+    else
     {
-      // op has the shape = @REWR@(u1,...,un). 
+      // op has the shape = @REWR@(u1,...,un).
       head=op;
     }
 
     // Here head has the shape
-    // u(u1,...,um), lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u, 
+    // u(u1,...,um), lambda y1,....,ym.u, forall y1,....,ym.u or exists y1,....,ym.u,
     if (gsIsBinder(head))
     {
       const atermpp::aterm_appl binder=head(0);
@@ -611,7 +610,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
 
 
     // Here head has the shape @REWR@(u0,u1,...,un).
- 
+
     if (gsIsDataVarId(head))
     {
       MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity);
@@ -642,17 +641,17 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
   }
 }
-    
+
 atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
                       const atermpp::aterm_int op,
-                      const atermpp::aterm_appl term, 
+                      const atermpp::aterm_appl term,
                       internal_substitution_type &sigma)
 {
   // The first term is function symbol; apply the necessary rewrite rules using a jitty strategy.
-  
+
   ATermList strat;
   const size_t arity=term.size();
-  
+
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(rewritten,atermpp::aterm, arity);
   MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm, arity);
 
@@ -707,7 +706,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
           }
         }
         assert(len<=max_len);
-        if (matches && (ATAelementAt(rule,1)==internal_true || 
+        if (matches && (ATAelementAt(rule,1)==internal_true ||
                         (ATermAppl)rewrite_aux(subst_values(vars,vals,len,ATelementAt(rule,1)),sigma)==internal_true))
         {
           atermpp::aterm_appl rhs = ATAelementAt(rule,3);
@@ -734,7 +733,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
       }
     }
   }
- 
+
   // No rewrite rule is applicable. Rewrite the not yet rewritten arguments.
   rewritten[0] = op;
   for (size_t i=1; i<arity; i++)
