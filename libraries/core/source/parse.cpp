@@ -34,12 +34,6 @@ ATerm parse_tagged_stream(const string& tag, istream& stream);
        NULL, otherwise
 */
 
-ATermAppl parse_mult_act(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing multiaction..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("mult_act", pe_stream);
-}
-
 ATermAppl parse_proc_expr(istream& pe_stream)
 {
   mCRL2log(debug) << "parsing process expression..." << std::endl;

@@ -231,14 +231,8 @@ inline action_label_lts parse_lts_action(
   const data::data_specification& data_spec,
   const lps::action_list& act_decls)
 {
-  std::stringstream ss(multi_action_string);
-
-  ATermAppl t = mcrl2::core::parse_mult_act(ss);
-  if (t == NULL)
-  {
-    throw mcrl2::runtime_error("Fail to parse multi action " + multi_action_string);
-  }
-
+  // TODO: rewrite this cryptic code
+  ATermAppl t = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::core::parse_multi_action_new(multi_action_string));
   lps::multi_action ma=lps::action_list((ATermList)ATgetArgument(t,0));
   lps::type_check(ma,data_spec,act_decls);
   lps::translate_user_notation(ma);

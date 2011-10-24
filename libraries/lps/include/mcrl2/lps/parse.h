@@ -167,17 +167,9 @@ specification parse_linear_process_specification(const std::string& text)
 inline
 multi_action parse_multi_action(std::stringstream& in, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
-#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  multi_action result = parse_multi_action_old(text);
+  multi_action result = parse_multi_action_new(text);
   complete_multi_action(result, action_decls, data_spec);
-  multi_action result2 = parse_multi_action_new(text);
-  complete_multi_action(result2, action_decls, data_spec);
-  compare_parse_results(text, result, result2);
-#else
-  multi_action result = parse_multi_action_old(in);
-  complete_multi_action(result, action_decls, data_spec);
-#endif
   return result;
 }
 /// \brief Parses a linear process specification from a string

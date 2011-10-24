@@ -84,24 +84,6 @@ multi_action parse_multi_action_new(const std::string& text)
 }
 
 inline
-multi_action parse_multi_action_old(std::istream& in)
-{
-  atermpp::aterm_appl x = core::parse_mult_act(in);
-  if (!x)
-  {
-    throw mcrl2::runtime_error("Error while parsing multi action");
-  }
-  return multi_action(x);
-}
-
-inline
-multi_action parse_multi_action_old(const std::string& text)
-{
-  std::istringstream in(text);
-  return parse_multi_action_old(in);
-}
-
-inline
 void complete_multi_action(multi_action& x, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
   lps::type_check(x, data_spec, action_decls);

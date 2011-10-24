@@ -160,15 +160,6 @@ void print_aterm(const atermpp::aterm_appl& x)
   std::clog << "aterm: " << x << std::endl;
 }
 
-/** \brief  Parse an mCRL2 multiaction.
-  * \param[in] ma_stream An input stream from which can be read.
-  * \post   The content of ma_stream is parsed as an mCRL2 multiaction.
-  * \return The parsed multiaction, if everything went well;
-  *         NULL, otherwise.
-**/
-aterm::ATermAppl parse_mult_act(std::istream& ma_stream);
-
-
 /** \brief  Parse an mCRL2 process expression.
   * \param[in] pe_stream An input stream from which can be read.
   * \post   The content of pe_stream is parsed as an mCRL2 process expression.
