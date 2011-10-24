@@ -762,7 +762,7 @@ bool lps2lts_algorithm::generate_lts()
           cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
-          break;
+          exit(EXIT_FAILURE);
         }
 
         if (number_of_outgoing_transitions > 0)
@@ -921,7 +921,7 @@ bool lps2lts_algorithm::generate_lts()
           cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
-          break;
+          exit(EXIT_FAILURE);
         }
 
         size_t len = ATgetLength(tmp_trans);
@@ -1112,7 +1112,7 @@ bool lps2lts_algorithm::generate_lts()
           cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
-          break;
+          exit(EXIT_FAILURE);
         }
 
         size_t len = ATgetLength(tmp_trans);
@@ -1211,7 +1211,7 @@ bool lps2lts_algorithm::generate_lts()
           cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
-          break;
+          exit(EXIT_FAILURE);
         }
 
         if (deadlockstate)
@@ -1345,7 +1345,7 @@ bool lps2lts_algorithm::generate_lts()
           cerr << "Error while exploring state space: " << e.what() << "\n";
           lg_error = true;
           save_error_trace(state);
-          break;
+          exit(EXIT_FAILURE);
         }
 
         if (state_is_deadlock)
