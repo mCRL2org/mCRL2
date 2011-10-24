@@ -45,17 +45,17 @@ data::sort_expression parse_sort_expression(const std::string& de_in)
   data::sort_expression result;
   try {
     result = data::parse_sort_expression_old(de_in);
+#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
     std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
-#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
       std::clog << "aterm : " << result << std::endl;
       std::clog << "de_in : " << de_in << std::endl;
       std::clog << "de_out: " << de_out << std::endl;
       std::clog << "The following sort expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
       BOOST_CHECK_EQUAL(de_in, de_out);
-#endif
     }
+#endif
   }
   catch (...)
   {
@@ -69,17 +69,17 @@ data::data_expression parse_data_expression(const std::string& de_in)
   data::data_expression result;
   try {
     result = data::parse_data_expression_old(de_in);
+#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
     std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
-#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
       std::clog << "aterm : " << result << std::endl;
       std::clog << "de_in : " << de_in << std::endl;
       std::clog << "de_out: " << de_out << std::endl;
       std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
       BOOST_CHECK_EQUAL(de_in, de_out);
-#endif
     }
+#endif
   }
   catch (...)
   {
@@ -93,17 +93,17 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
   data::data_specification result;
   try {
     result = data::parse_data_specification_old(de_in);
+#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
     std::string de_out = data::pp(result);
     if (de_in != de_out)
     {
-#ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
       std::clog << "aterm : " << data::detail::data_specification_to_aterm_data_spec(result) << std::endl;
       std::clog << "de_in : " << de_in << std::endl;
       std::clog << "de_out: " << de_out << std::endl;
       std::clog << "The following data specifications should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
       BOOST_CHECK_EQUAL(de_in, de_out);
-#endif
     }
+#endif
   }
   catch (...)
   {
