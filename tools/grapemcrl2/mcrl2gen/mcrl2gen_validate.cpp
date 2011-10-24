@@ -113,8 +113,7 @@ ATermList grape::mcrl2gen::convert_numeric_sorts_to_real(ATermList sort_exprs)
 
 ATermAppl grape::mcrl2gen::parse_identifier(wxString p_identifier)
 {
-  istringstream r(string(p_identifier.mb_str()).c_str());
-  return mcrl2::core::parse_identifier(r);
+  return mcrl2::core::identifier_string(p_identifier.mb_str());
 }
 
 ATermAppl grape::mcrl2gen::parse_sort_expr(wxString p_sort_expression)

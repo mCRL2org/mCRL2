@@ -60,21 +60,40 @@ bool varupdate::set_varupdate(const wxString& p_varupdate)
     return false;
   }
 
-  istringstream r(string(variable_update_lhs.mb_str()).c_str());
-  ATermAppl a_parsed_identifier = mcrl2::core::parse_identifier(r);
-  if (a_parsed_identifier)
-  {
-    string a_name = identifier_string(a_parsed_identifier);
-    set_lhs(wxString(a_name.c_str(), wxConvLocal));
+//--- Commented out this incomprehensible code, and replaced it by something more high level (Wieger)
+//  istringstream r(string(variable_update_lhs.mb_str()).c_str());
+//  ATermAppl a_parsed_identifier = mcrl2::core::parse_identifier(r);
+//  if (a_parsed_identifier)
+//  {
+//    string a_name = identifier_string(a_parsed_identifier);
+//    set_lhs(wxString(a_name.c_str(), wxConvLocal));
+//
+//    istringstream s(string(variable_update_rhs.mb_str()).c_str());
+//    ATermAppl a_parsed_data_expr = mcrl2::core::parse_data_expr(s);
+//    if (a_parsed_data_expr)
+//    {
+//      string a_value = mcrl2::data::pp(mcrl2::data::data_expression(a_parsed_data_expr));
+//      set_rhs(wxString(a_value.c_str(), wxConvLocal));
+//      return true;
+//    }
+//  }
+//  return false;
 
-    istringstream s(string(variable_update_rhs.mb_str()).c_str());
-    ATermAppl a_parsed_data_expr = mcrl2::core::parse_data_expr(s);
-    if (a_parsed_data_expr)
-    {
-      string a_value = mcrl2::data::pp(mcrl2::data::data_expression(a_parsed_data_expr));
-      set_rhs(wxString(a_value.c_str(), wxConvLocal));
-      return true;
-    }
+  try
+  {
+    std::string lhs = variable_update_lhs.mb_str();
+    core::parse_identifier(lhs); // will throw if lhs is not a valid identifier
+    set_lhs(wxString(lhs.c_str(), wxConvLocal));
+
+    std::string rhs = variable_update_rhs.mb_str();
+    core::parse_identifier(rhs); // will throw if rhs is not a valid identifier
+    set_rhs(wxString(rhs.c_str(), wxConvLocal));
+
+    return true;
+  }
+  catch (...)
+  {
+    return false;
   }
   return false;
 }

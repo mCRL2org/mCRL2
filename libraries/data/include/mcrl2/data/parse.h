@@ -39,8 +39,6 @@ namespace mcrl2
 namespace data
 {
 
-#ifdef MCRL2_USE_NEW_PARSER
-
 struct sort_expression_actions: public core::default_parser_actions
 {
   sort_expression_actions(const core::parser_table& table_)
@@ -474,8 +472,6 @@ data_specification parse_data_specification_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return data_specification_actions(parser_tables_mcrl2).parse_DataSpec(node);
 }
-
-#endif // MCRL2_USE_NEW_PARSER
 
 /// \cond INTERNAL_DOCS
 namespace detail

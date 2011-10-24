@@ -21,8 +21,6 @@ namespace mcrl2 {
 
 namespace lps {
 
-#ifdef MCRL2_USE_NEW_PARSER
-
 struct action_actions: public data::data_specification_actions
 {
   action_actions(const core::parser_table& table_)
@@ -84,8 +82,6 @@ multi_action parse_multi_action_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return action_actions(parser_tables_mcrl2).parse_MultAct(node);
 }
-
-#endif // MCRL2_USE_NEW_PARSER
 
 inline
 multi_action parse_multi_action_old(std::istream& in)

@@ -34,11 +34,6 @@ ATerm parse_tagged_stream(const string& tag, istream& stream);
        NULL, otherwise
 */
 
-ATermAppl parse_identifier(istream& se_stream)
-{
-  return (ATermAppl) parse_tagged_stream("identifier", se_stream);
-}
-
 ATermAppl parse_sort_expr(istream& se_stream)
 {
   mCRL2log(debug) << "parsing sort expression..." << std::endl;
@@ -108,21 +103,6 @@ ATerm parse_tagged_stream(const string& tag, istream& stream)
   ATerm result = parse_streams(*streams);
   delete tag_stream;
   delete streams;
-  return result;
-}
-
-bool is_user_identifier(std::string const& s)
-{
-  std::istringstream stream(s);
-  // When parsing an identifier, we do not want to
-  // see error messages being printed on the console, if
-  // the identifier is not proper. This should be replaced
-  // by a try/catch block, after the parser has been adapted
-  // to throw an exception, instead of printing an error.
-  log_level_t old_level = mcrl2_logger::get_reporting_level();
-  mcrl2_logger::set_reporting_level(quiet);
-  const bool result=parse_identifier(stream) != NULL;
-  mcrl2_logger::set_reporting_level(old_level);
   return result;
 }
 

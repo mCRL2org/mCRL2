@@ -23,8 +23,6 @@ namespace mcrl2
 namespace bes
 {
 
-#ifdef MCRL2_USE_NEW_PARSER
-
 struct bes_actions: public core::default_parser_actions
 {
   bes_actions(const core::parser_table& table_)
@@ -103,8 +101,6 @@ boolean_equation_system<> parse_boolean_equation_system_new(const std::string& t
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return bes_actions(parser_tables_mcrl2).parse_BesSpec(node);
 }
-
-#endif // MCRL2_USE_NEW_PARSER
 
 /// \brief Converts a pbes expression to a boolean expression.
 /// Throws an mcrl2_error if it is not a valid boolean expression.

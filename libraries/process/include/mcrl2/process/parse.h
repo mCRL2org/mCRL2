@@ -30,8 +30,6 @@ namespace mcrl2
 namespace process
 {
 
-#ifdef MCRL2_USE_NEW_PARSER
-
 struct process_actions: public lps::action_actions
 {
   process_actions(const core::parser_table& table_)
@@ -222,8 +220,6 @@ process_specification parse_process_specification_new(const std::string& text)
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return process_actions(parser_tables_mcrl2).parse_mCRL2Spec(node);
 }
-
-#endif // MCRL2_USE_NEW_PARSER
 
 inline
 process_specification parse_process_specification_old(std::istream& in)

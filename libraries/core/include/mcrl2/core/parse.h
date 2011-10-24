@@ -22,21 +22,17 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/exception.h"
-
-#ifdef MCRL2_USE_NEW_PARSER
 #include "mcrl2/core/dparser.h"
+
 extern "C"
 {
   extern D_ParserTables parser_tables_mcrl2;
 }
-#endif // MCRL2_USE_NEW_PARSER
 
 namespace mcrl2
 {
 namespace core
 {
-
-#ifdef MCRL2_USE_NEW_PARSER
 
 struct default_parser_actions
 {
@@ -151,8 +147,6 @@ struct default_parser_actions
     return parse_list<core::identifier_string>(node, "Id", boost::bind(&default_parser_actions::parse_Id, this, _1));
   }
 };
-
-#endif // MCRL2_USE_NEW_PARSER
 
 template <typename T>
 void print_aterm(const T&)
@@ -270,12 +264,30 @@ aterm::ATermAppl parse_pbes_spec(std::istream& pbes_spec_stream);
 **/
 aterm::ATermList parse_data_vars(std::istream& sf_stream);
 
-/** \brief  Returns wheter s is a valid user identifier
- *  \param[in] s An input string
- *  \return true iff s is a user identifier, i.e. if s is not a reserved
- *          identifer.
-**/
-bool is_user_identifier(std::string const& s);
+/// \brief Parse an identifier.
+inline
+identifier_string parse_identifier(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("Id");
+  bool partial_parses = false;
+  core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
+  return default_parser_actions(parser_tables_mcrl2).parse_Id(node);
+}
+
+inline
+bool is_user_identifier(std::string const& s)
+{
+  try
+  {
+    parse_identifier(s);
+  }
+  catch (...)
+  {
+    return false;
+  }
+  return true;
+}
 
 }
 }
