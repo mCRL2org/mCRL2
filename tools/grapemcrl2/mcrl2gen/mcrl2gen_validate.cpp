@@ -133,8 +133,16 @@ ATermAppl grape::mcrl2gen::parse_sort_expr(wxString p_sort_expression)
 
 ATermAppl grape::mcrl2gen::parse_data_expr(wxString p_data_expression)
 {
-  istringstream r(string(p_data_expression.mb_str()).c_str());
-  return mcrl2::core::parse_data_expr(r);
+  std::string s(p_data_expression.mb_str());
+  try
+  {
+    return data::parse_data_expression_new(s);
+  }
+  catch (...)
+  {
+    return 0;
+  }
+  return 0;
 }
 
 ATermAppl grape::mcrl2gen::parse_proc_spec(wxString p_proc_spec)

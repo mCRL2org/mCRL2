@@ -486,24 +486,6 @@ inline static data_specification const& default_specification()
 /// \endcond
 
 inline
-data_expression parse_data_expression_old(std::istream& in)
-{
-  atermpp::aterm_appl x = core::parse_data_expr(in);
-  if (!x)
-  {
-    throw mcrl2::runtime_error("Error while parsing data expression");
-  }
-  return data_expression(x);
-}
-
-inline
-data_expression parse_data_expression_old(const std::string& text)
-{
-  std::istringstream in(text);
-  return parse_data_expression_old(in);
-}
-
-inline
 data_specification parse_data_specification_old(std::istream& in)
 {
   atermpp::aterm_appl x = core::parse_data_spec(in);
@@ -812,17 +794,9 @@ data_expression parse_data_expression(std::istream& in,
                                       const Variable_iterator last,
                                       const data_specification& data_spec = detail::default_specification())
 {
-#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  data_expression result = parse_data_expression_old(text);
+  data_expression result = parse_data_expression_new(text);
   complete_data_expression(result, first, last, data_spec);
-  data_expression result2 = parse_data_expression_new(text);
-  complete_data_expression(result2, first, last, data_spec);
-  compare_parse_results(text, result, result2);
-#else
-  data_expression result = parse_data_expression_old(in);
-  complete_data_expression(result, first, last, data_spec);
-#endif
   return result;
 }
 
