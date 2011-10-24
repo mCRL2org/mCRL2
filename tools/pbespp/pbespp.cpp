@@ -112,11 +112,11 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
         {
           if (format == ppInternal)
           {
-            std::cout << pbes_system::pbes_to_aterm(pbes_specification);
+            output_stream << pbes_system::pbes_to_aterm(pbes_specification);
           }
           else
           {
-            std::cout << pbes_system::pp(pbes_specification);
+            output_stream << pbes_system::pp(pbes_specification);
           }
           output_stream.close();
         }

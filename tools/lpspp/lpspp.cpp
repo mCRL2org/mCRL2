@@ -110,11 +110,11 @@ class lpspp_tool: public input_output_tool
         {
           if (format == ppInternal)
           {
-            std::cout << specification_to_aterm(specification);
+            output_stream << specification_to_aterm(specification);
           }
           else
           {
-            std::cout << lps::pp(specification);
+            output_stream << lps::pp(specification);
           }
           output_stream.close();
         }
