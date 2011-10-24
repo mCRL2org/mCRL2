@@ -22,6 +22,7 @@
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/utilities/text_utility.h"
 
 using namespace mcrl2;
 
@@ -33,7 +34,8 @@ void compatibility_test()
     "map f:S -> List(S);\n"
   );
 
-  atermpp::aterm_appl data_spec_aterm = data::detail::data_specification_to_aterm(data::parse_data_specification_new(data_stream));
+  std::string text = utilities::read_text(data_stream);
+  atermpp::aterm_appl data_spec_aterm = data::detail::data_specification_to_aterm_data_spec(data::parse_data_specification_new(text));
   if (data_spec_aterm == 0)
   {
     throw mcrl2::runtime_error("Error while parsing data specification");
