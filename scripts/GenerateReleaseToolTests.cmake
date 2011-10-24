@@ -108,9 +108,7 @@ endmacro( )
 
 macro( gen_lpspp_release_tests )
 	add_lpspp_release_test( "-fdefault" "SAVE")
-	add_lpspp_release_test( "-fdebug" "")
 	add_lpspp_release_test( "-finternal" "")
-	add_lpspp_release_test( "-finternal-debug" "")
 endmacro( gen_lpspp_release_tests )
 
 ################### 
@@ -771,9 +769,7 @@ endmacro( add_pbespp_release_test ARGS SAVE)
 
 macro( gen_pbespp_release_tests )
 					add_pbespp_release_test(  "-fdefault" "SAVE")
-					add_pbespp_release_test(  "-fdebug" "")
 					add_pbespp_release_test(  "-finternal" "")
-					add_pbespp_release_test(  "-finternal-debug" "")
 endmacro( gen_pbespp_release_tests )
 
 #########################
