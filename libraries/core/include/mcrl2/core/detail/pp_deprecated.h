@@ -47,6 +47,10 @@ std::string pp_deprecated(const atermpp::aterm_appl& x)
   {
     return process::pp(process::process_expression(x));
   }
+  else if (process::is_process_identifier(x))
+  {
+    return process::pp(process::process_identifier(x));
+  }
   throw mcrl2::runtime_error("pp_deprecated: encountered unknown term " + x.to_string());
   return "";
 }
@@ -77,6 +81,10 @@ std::string pp_deprecated(const atermpp::aterm_list& x)
   else if (process::is_process_expression(x.front()))
   {
     return process::pp(process::process_expression_list(x));
+  }
+  else if (process::is_process_identifier(x.front()))
+  {
+    return process::pp(process::process_identifier_list(x));
   }
   throw mcrl2::runtime_error("pp_deprecated: encountered unknown term " + x.to_string());
   return "";

@@ -13,6 +13,7 @@
 #define MCRL2_PROCESS_PROCESS_IDENTIFIER_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
@@ -66,6 +67,21 @@ class process_identifier: public atermpp::aterm_appl
                atermpp::term_list_iterator<data::sort_expression>());
     }
 };
+
+/// \brief list of process identifierss
+typedef atermpp::term_list<process_identifier> process_identifier_list;
+
+/// \brief vector of process_identifiers
+typedef atermpp::vector<process_identifier>    process_identifier_vector;
+
+/// \brief Test for a process_identifier expression
+/// \param t A term
+/// \return True if it is a process_identifier expression
+inline
+bool is_process_identifier(const atermpp::aterm_appl& t)
+{
+  return core::detail::gsIsProcExpr(t);
+}
 
 } // namespace process
 
