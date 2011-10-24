@@ -40,63 +40,70 @@ BOOST_AUTO_TEST_CASE_EXPECTED_FAILURES(test_ambiguous_function_application4a, 1)
 
 // Parse functions that do not change any context (i.e. do not typecheck and
 // normalise sorts).
-data::sort_expression parse_sort_expression(const std::string& se_in)
+data::sort_expression parse_sort_expression(const std::string& de_in)
 {
-  std::istringstream se_in_stream(se_in);
-  atermpp::aterm_appl se_aterm = core::parse_sort_expr(se_in_stream);
-  bool test = se_aterm != NULL;
-  BOOST_CHECK(se_aterm != NULL);
-
-  if (test)
-  {
-    return data::sort_expression(se_aterm);
+  data::sort_expression result;
+  try {
+    result = data::parse_sort_expression_old(de_in);
+    std::string de_out = data::pp(result);
+    if (de_in != de_out)
+    {
+      std::clog << "aterm : " << result << std::endl;
+      std::clog << "de_in : " << de_in << std::endl;
+      std::clog << "de_out: " << de_out << std::endl;
+      std::clog << "The following sort expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+      BOOST_CHECK_EQUAL(de_in, de_out);
+    }
   }
-
-  return data::sort_expression();
+  catch (...)
+  {
+    BOOST_CHECK(false);
+  }
+  return result;
 }
 
 data::data_expression parse_data_expression(const std::string& de_in)
 {
-  std::istringstream de_in_stream(de_in);
-  ATermAppl de_aterm = core::parse_data_expr(de_in_stream);
-  bool test = de_aterm != NULL;
-  BOOST_CHECK(de_aterm != NULL);
-
-  if (test)
-  {
-    //std::string de_out = core::pp_deprecated((ATerm) de_aterm);
-    //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-    //BOOST_CHECK_EQUAL(de_in, de_out);
-
-    return data::data_expression(de_aterm);
+  data::data_expression result;
+  try {
+    result = data::parse_data_expression_old(de_in);
+    std::string de_out = data::pp(result);
+    if (de_in != de_out)
+    {
+      std::clog << "aterm : " << result << std::endl;
+      std::clog << "de_in : " << de_in << std::endl;
+      std::clog << "de_out: " << de_out << std::endl;
+      std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+      BOOST_CHECK_EQUAL(de_in, de_out);
+    }
   }
-  else
+  catch (...)
   {
-    return data::data_expression();
+    BOOST_CHECK(false);
   }
+  return result;
 }
 
-data::data_specification parse_data_specification(const std::string& ds_in, bool expect_success = true)
+data::data_specification parse_data_specification(const std::string& de_in, bool expect_success = true)
 {
-  std::istringstream ds_in_stream(ds_in);
-  ATermAppl ds_aterm = core::parse_data_spec(ds_in_stream);
-  bool test = ds_aterm != NULL;
-
-  if (expect_success)
-  {
-    BOOST_CHECK(test);
+  data::data_specification result;
+  try {
+    result = data::parse_data_specification_old(de_in);
+    std::string de_out = data::pp(result);
+    if (de_in != de_out)
+    {
+      std::clog << "aterm : " << data::detail::data_specification_to_aterm_data_spec(result) << std::endl;
+      std::clog << "de_in : " << de_in << std::endl;
+      std::clog << "de_out: " << de_out << std::endl;
+      std::clog << "The following data specifications should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
+      BOOST_CHECK_EQUAL(de_in, de_out);
+    }
   }
-
-  if (test) // If term is successfully parsed, always check that the printed result is equal!
+  catch (...)
   {
-    //std::string ds_out = core::pp_deprecated((ATerm) ds_aterm);
-    //std::clog << "The following data specifications should be the same:" << std::endl << ds_in << std::endl << "and" << std::endl << ds_out << std::endl;
-    //BOOST_CHECK_EQUAL(ds_in, ds_out);
-
-    return data::data_specification(ds_aterm);
+    BOOST_CHECK(!expect_success);
   }
-
-  return data::data_specification();
+  return result;
 }
 
 template <typename VariableIterator>
@@ -114,7 +121,7 @@ void test_data_expression(const std::string& de_in,
             << "  expect success: " << (expect_success?("yes"):("no")) << std::endl
             << "  expected type: " << expected_sort << std::endl;
 
-  data::data_expression x(parse_data_expression(de_in));
+  data::data_expression x = parse_data_expression(de_in);
 
   if (test_type_checker)
   {
@@ -817,7 +824,7 @@ BOOST_AUTO_TEST_CASE(test_recursive_struct_list_indirect)
   );
 }
 
-BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this. 
+BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this.
 {
   test_data_specification(
     "sort B = List(struct f(B));\n",
@@ -854,7 +861,7 @@ void test_data_expression_in_specification_context(const std::string& de_in,
     //
   }
 
-  data::data_expression de(parse_data_expression(de_in));
+  data::data_expression de = parse_data_expression(de_in);
 
   if (test_type_checker)
   {

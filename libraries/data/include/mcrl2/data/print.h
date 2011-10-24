@@ -78,11 +78,19 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     {
       return false;
     }
-    if (!is_function_symbol(x.head()))
+    core::identifier_string name;
+    if (is_function_symbol(x.head()))
+    {
+      name = function_symbol(x.head()).name();
+    }
+    else if (is_identifier(x.head()))
+    {
+      name = identifier(x.head()).name();
+    }
+    else
     {
       return false;
     }
-    core::identifier_string name = function_symbol(x.head()).name();
     return
       (name == data::sort_bool::implies_name())          ||
       (name == data::sort_bool::and_name())          ||

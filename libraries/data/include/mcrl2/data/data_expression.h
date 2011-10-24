@@ -22,6 +22,7 @@
 #include "mcrl2/core/detail/struct_core.h" // for gsIsDataExpr
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/data/function_sort.h"
+#include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/container_sort.h"
 #include "mcrl2/exception.h"
 
@@ -222,7 +223,7 @@ class data_expression: public atermpp::aterm_appl
       else if (is_application(*this))
       {
         sort_expression s(data_expression(atermpp::arg1(*this)).sort());
-        if (!is_function_sort(s))
+        if (!is_function_sort(s) && !is_identifier(s))
         {
           throw mcrl2::runtime_error("Sort " + s.to_string() + " of " + atermpp::arg1(*this).to_string() + " is not a function sort.");
         }
