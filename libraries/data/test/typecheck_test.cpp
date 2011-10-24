@@ -92,7 +92,7 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
 {
   data::data_specification result;
   try {
-    result = data::parse_data_specification_old(de_in);
+    result = data::parse_data_specification_new(de_in);
 #ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
     std::string de_out = data::pp(result);
     if (de_in != de_out)

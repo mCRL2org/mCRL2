@@ -831,26 +831,29 @@ bool grape::mcrl2gen::validate_datatype_specification(wxXmlNode* p_doc_root, ATe
   // make datatype specification
   if (!datatype_specification.IsEmpty())
   {
+    std::string s(datatype_specification.mb_str());
+
     // try to parse the mCRL2 specification
-    istringstream r(string(datatype_specification.mb_str()).c_str());
-    ATermAppl a_parsed_mcrl2_datatype_specification = parse_data_spec(r);
-    if (a_parsed_mcrl2_datatype_specification == 0)
+    data::data_specification dataspec;
+    try
+    {
+      dataspec = data::parse_data_specification_new(s);
+    }
+    catch (...)
     {
       throw DATA_TYPE_SPEC_PARSE_ERROR;
+    }
+
+    // parse succeeded: try to type check
+    ATermAppl a_parsed_mcrl2_datatype_specification = data::detail::data_specification_to_aterm(dataspec);
+    ATermAppl a_type_checked_mcrl2_datatype_specification = type_check_data_spec(a_parsed_mcrl2_datatype_specification);
+    if (a_type_checked_mcrl2_datatype_specification == 0)
+    {
+      throw DATA_TYPE_SPEC_TYPE_CHECK_ERROR;
       return false;
     }
-    else
-    {
-      // parse succeeded: try to type check
-      ATermAppl a_type_checked_mcrl2_datatype_specification = type_check_data_spec(a_parsed_mcrl2_datatype_specification);
-      if (a_type_checked_mcrl2_datatype_specification == 0)
-      {
-        throw DATA_TYPE_SPEC_TYPE_CHECK_ERROR;
-        return false;
-      }
-      // update datatype specification
-      datatype_spec = a_type_checked_mcrl2_datatype_specification;
-    }
+    // update datatype specification
+    datatype_spec = a_type_checked_mcrl2_datatype_specification;
   }
   return true;
 }

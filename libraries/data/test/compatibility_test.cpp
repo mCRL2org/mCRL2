@@ -18,6 +18,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/parse.h"
+#include "mcrl2/data/parse.h"
 #include "mcrl2/data/typecheck.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/data/data_specification.h"
@@ -32,7 +33,7 @@ void compatibility_test()
     "map f:S -> List(S);\n"
   );
 
-  atermpp::aterm_appl data_spec_aterm = mcrl2::core::parse_data_spec(data_stream);
+  atermpp::aterm_appl data_spec_aterm = data::detail::data_specification_to_aterm(data::parse_data_specification_new(data_stream));
   if (data_spec_aterm == 0)
   {
     throw mcrl2::runtime_error("Error while parsing data specification");

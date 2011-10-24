@@ -486,24 +486,6 @@ inline static data_specification const& default_specification()
 /// \endcond
 
 inline
-data_specification parse_data_specification_old(std::istream& in)
-{
-  atermpp::aterm_appl x = core::parse_data_spec(in);
-  if (!x)
-  {
-    throw mcrl2::runtime_error("Error while parsing data specification");
-  }
-  return data_specification(x);
-}
-
-inline
-data_specification parse_data_specification_old(const std::string& text)
-{
-  std::istringstream in(text);
-  return parse_data_specification_old(in);
-}
-
-inline
 void complete_sort_expression(sort_expression& x, const data_specification& data_spec = detail::default_specification())
 {
   type_check(x, data_spec);
@@ -564,17 +546,9 @@ void compare_parse_results(const std::string& text, const T& x1, const T& x2)
 inline
 data_specification parse_data_specification(std::istream& in)
 {
-#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  data_specification result = parse_data_specification_old(text);
+  data_specification result = parse_data_specification_new(text);
   complete_data_specification(result);
-  data_specification result2 = parse_data_specification_new(text);
-  complete_data_specification(result2);
-  compare_parse_results(text, result, result2);
-#else
-  data_specification result = parse_data_specification_old(in);
-  complete_data_specification(result);
-#endif
   return result;
 }
 
