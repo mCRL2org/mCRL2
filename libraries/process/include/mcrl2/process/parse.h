@@ -222,24 +222,6 @@ process_specification parse_process_specification_new(const std::string& text)
 }
 
 inline
-process_specification parse_process_specification_old(std::istream& in)
-{
-  atermpp::aterm_appl x = core::parse_proc_spec(in);
-  if (!x)
-  {
-    throw mcrl2::runtime_error("Error while parsing process specification");
-  }
-  return process_specification(x);
-}
-
-inline
-process_specification parse_process_specification_old(const std::string& text)
-{
-  std::istringstream in(text);
-  return parse_process_specification_old(in);
-}
-
-inline
 void complete_process_specification(process_specification& x, bool alpha_reduce = false)
 {
   type_check(x);
@@ -275,24 +257,9 @@ void compare_parse_results(const std::string& text, const T& x1, const T& x2)
 inline
 process_specification parse_process_specification(std::istream& in, bool alpha_reduce = false)
 {
-#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  process_specification result = parse_process_specification_old(text);
-  atermpp::aterm_appl t1(process::process_specification_to_aterm(result));
+  process_specification result = parse_process_specification_new(text);
   complete_process_specification(result, alpha_reduce);
-  process_specification result2 = parse_process_specification_new(text);
-  atermpp::aterm_appl t2(process::process_specification_to_aterm(result2));
-  complete_process_specification(result2, alpha_reduce);
-  if (t1 != t2)
-  {
-std::clog << "old: " << t1 << std::endl;
-std::clog << "new: " << t2 << std::endl;
-    compare_parse_results(text, result, result2);
-  }
-#else
-  process_specification result = parse_process_specification_old(in);
-  complete_process_specification(result, alpha_reduce);
-#endif
   return result;
 }
 

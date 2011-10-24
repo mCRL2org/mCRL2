@@ -28,6 +28,7 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/process/parse.h"
 
 using namespace grape::mcrl2gen;
 using namespace grape::libgrape;
@@ -147,8 +148,17 @@ ATermAppl grape::mcrl2gen::parse_data_expr(wxString p_data_expression)
 
 ATermAppl grape::mcrl2gen::parse_proc_spec(wxString p_proc_spec)
 {
-  istringstream r(string(p_proc_spec.mb_str()).c_str());
-  return mcrl2::core::parse_proc_spec(r);
+  std::string s(p_proc_spec.mb_str());
+  try
+  {
+    mcrl2::process::process_specification procspec = mcrl2::process::parse_process_specification_new(s);
+    return mcrl2::process::process_specification_to_aterm(procspec);
+  }
+  catch (...)
+  {
+    return 0;
+  }
+  return 0;
 }
 
 // TODO: when is_user_identifier is working properly. This function can be removed.

@@ -29,6 +29,7 @@
 #include "mcrl2/data/variable.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/multi_action.h"
+#include "mcrl2/lps/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/translate_user_notation.h"
@@ -232,7 +233,7 @@ inline action_label_lts parse_lts_action(
   const lps::action_list& act_decls)
 {
   // TODO: rewrite this cryptic code
-  ATermAppl t = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::core::parse_multi_action_new(multi_action_string));
+  ATermAppl t = mcrl2::lps::detail::multi_action_to_aterm(mcrl2::lps::parse_multi_action_new(multi_action_string));
   lps::multi_action ma=lps::action_list((ATermList)ATgetArgument(t,0));
   lps::type_check(ma,data_spec,act_decls);
   lps::translate_user_notation(ma);

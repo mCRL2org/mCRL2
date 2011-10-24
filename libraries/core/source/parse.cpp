@@ -34,18 +34,6 @@ ATerm parse_tagged_stream(const string& tag, istream& stream);
        NULL, otherwise
 */
 
-ATermAppl parse_proc_expr(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing process expression..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("proc_expr", pe_stream);
-}
-
-ATermAppl parse_proc_spec(istream& ps_stream)
-{
-  mCRL2log(debug) << "parsing process specification..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("proc_spec", ps_stream);
-}
-
 ATermAppl parse_state_frm(istream& pe_stream)
 {
   mCRL2log(debug) << "parsing state formula..." << std::endl;

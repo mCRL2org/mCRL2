@@ -160,25 +160,6 @@ void print_aterm(const atermpp::aterm_appl& x)
   std::clog << "aterm: " << x << std::endl;
 }
 
-/** \brief  Parse an mCRL2 process expression.
-  * \param[in] pe_stream An input stream from which can be read.
-  * \post   The content of pe_stream is parsed as an mCRL2 process expression.
-  * \return The parsed process expression, if everything went well;
-  *         NULL, otherwise.
-**/
-aterm::ATermAppl parse_proc_expr(std::istream& pe_stream);
-
-
-/** \brief  Parse an mCRL2 process specification.
-  * \param[in] ps_stream An input stream from which can be read.
-  * \post   The content of ps_stream is parsed as an mCRL2 process
-  *         specification.
-  * \return the parsed process specification, if everything went well;
-  *         NULL, otherwise.
-**/
-aterm::ATermAppl parse_proc_spec(std::istream& ps_stream);
-
-
 /** \brief  Parse an mCRL2 state formula.
   * \param[in] sf_stream An input stream from which can be read.
   * \post   The content of sf_stream is parsed as an mCRL2 state formula.
