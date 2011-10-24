@@ -115,7 +115,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
   void print_sort(const application& x)
   {
     std::cout << "<value>" << x << " ";
-    if (is_numeric_value(x))
+    if (is_numeric_expression(x))
     {
       std::cout << "<numeric value>";
     }
@@ -503,11 +503,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
            || data::sort_real::is_nat2real_application(x)
            || data::sort_real::is_int2real_application(x)
            ;
-  }
-
-  bool is_numeric_value(const application& x)
-  {
-    return is_numeric_expression(x);
   }
 
   bool is_numeric_expression(const application& x)
@@ -1087,7 +1082,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     //-------------------------------------------------------------------//
     //                            numeric values
     //-------------------------------------------------------------------//
-    if (is_numeric_value(x))
+    if (is_numeric_expression(x))
     {
       data_expression z = detail::reconstruct_numeric_expression(x);
       if (is_function_symbol(z))
