@@ -22,6 +22,7 @@
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/pbes/pbes.h"
+#include "mcrl2/data/parse.h"
 
 namespace mcrl2
 {

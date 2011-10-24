@@ -177,24 +177,6 @@ state_formula parse_state_formula_new(const std::string& text)
   return state_formula_actions(parser_tables_mcrl2).parse_StateFrm(node);
 }
 
-inline
-state_formula parse_state_formula_old(std::istream& in)
-{
-  atermpp::aterm_appl x = core::parse_state_frm(in);
-  if (!x)
-  {
-    throw mcrl2::runtime_error("Error while parsing state formula");
-  }
-  return state_formula(x);
-}
-
-inline
-state_formula parse_state_formula_old(const std::string& text)
-{
-  std::istringstream in(text);
-  return parse_state_formula_old(in);
-}
-
 /// \brief Translates regular formulas appearing in f into action formulas.
 /// \param f A state formula
 inline
@@ -245,25 +227,13 @@ void compare_parse_results(const std::string& text, const T& x1, const T& x2)
 inline
 state_formula parse_state_formula(std::istream& in, lps::specification& spec, bool check_monotonicity = true)
 {
-#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  state_formula result = parse_state_formula_old(text);
+  state_formula result = parse_state_formula_new(text);
   if (find_nil(result))
   {
     throw mcrl2::runtime_error("regular formulas containing nil are unsupported!");
   }
   complete_state_formula(result, spec, check_monotonicity);
-  state_formula result2 = parse_state_formula_new(text);
-  complete_state_formula(result2, spec, check_monotonicity);
-  compare_parse_results(text, result, result2);
-#else
-  state_formula result = parse_state_formula_old(in);
-  if (find_nil(result))
-  {
-    throw mcrl2::runtime_error("regular formulas containing nil are unsupported!");
-  }
-  complete_state_formula(result, spec, check_monotonicity);
-#endif
   return result;
 }
 

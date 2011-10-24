@@ -60,6 +60,9 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
 template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o);
 
+template <typename T>
+std::string pp(const T&);
+
 /// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
 /// \param first Start of a range of pbes equations
 /// \param last End of a range of pbes equations

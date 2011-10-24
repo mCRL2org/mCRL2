@@ -160,15 +160,6 @@ void print_aterm(const atermpp::aterm_appl& x)
   std::clog << "aterm: " << x << std::endl;
 }
 
-/** \brief  Parse an mCRL2 state formula.
-  * \param[in] sf_stream An input stream from which can be read.
-  * \post   The content of sf_stream is parsed as an mCRL2 state formula.
-  * \return The parsed state formula, if everything went well;
-  *         NULL, otherwise.
-**/
-aterm::ATermAppl parse_state_frm(std::istream& sf_stream);
-
-
 /** \brief  Parse an mCRL2 action rename specification.
   * \param[in] sf_stream An input stream from which can be read.
   * \post   The content of sf_stream is parsed as an mCRL2 action rename
@@ -177,18 +168,6 @@ aterm::ATermAppl parse_state_frm(std::istream& sf_stream);
   *         NULL, otherwise.
 **/
 aterm::ATermAppl parse_action_rename_spec(std::istream& sf_stream);
-
-
-/** \brief  Parse an mCRL2 parameterised boolean equation system (PBES)
-  *  specification.
-  * \param[in] pbes_spec_stream An input stream from which can be read.
-  * \post   The content of pbes_spec_stream is parsed as an mCRL2
-  *         PBES specification.
-  * \return The parsed PBES specification, if everything went well;
-  *         NULL, otherwise.
-**/
-aterm::ATermAppl parse_pbes_spec(std::istream& pbes_spec_stream);
-
 
 /** \brief  Parse mCRL2 data variables, according to the syntax of
   *         data variable declarations following the var keyword

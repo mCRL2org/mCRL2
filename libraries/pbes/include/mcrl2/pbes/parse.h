@@ -131,24 +131,6 @@ pbes<> parse_pbes_new(const std::string& text)
 }
 
 inline
-pbes<> parse_pbes_old(std::istream& in)
-{
-  atermpp::aterm_appl x = core::parse_pbes_spec(in);
-  if (!x)
-  {
-    throw mcrl2::runtime_error("Error while parsing pbes specification");
-  }
-  return pbes<>(x);
-}
-
-inline
-pbes<> parse_pbes_old(const std::string& text)
-{
-  std::istringstream in(text);
-  return parse_pbes_old(in);
-}
-
-inline
 void complete_pbes(pbes<>& x)
 {
   type_check(x);
@@ -176,16 +158,13 @@ void compare_parse_results(const std::string& text, const T& x1, const T& x2)
 
 /// \brief Reads a PBES from an input stream.
 /// \param from An input stream
-/// \param p A PBES
+/// \param result A PBES
 /// \return The input stream
-template <typename Container>
-std::istream& operator>>(std::istream& from, pbes<Container>& p)
+inline
+std::istream& operator>>(std::istream& from, pbes<>& result)
 {
-  ATermAppl result = core::parse_pbes_spec(from);
-  if (result == NULL)
-  {
-    throw mcrl2::runtime_error("parsing failed");
-  }
+  std::string text = utilities::read_text(from);
+  result = pbes_system::parse_pbes_new(text);
 
 #ifdef MCRL2_LOG_PARSER_OUTPUT
   std::string filename = utilities::create_filename("pbes", ".txt");
@@ -195,35 +174,19 @@ std::istream& operator>>(std::istream& from, pbes<Container>& p)
   out << atermpp::aterm_appl(result).to_string() << std::endl;
 #endif
 
-  p = pbes<Container>(result,false);
-  type_check(p);
-  pbes_system::translate_user_notation(p);
-  pbes_system::normalize_sorts(p, p.data());
-  complete_data_specification(p);
+  type_check(result);
+  pbes_system::translate_user_notation(result);
+  pbes_system::normalize_sorts(result, result.data());
+  complete_data_specification(result);
   return from;
 }
 
 inline
 pbes<> parse_pbes(std::istream& in)
 {
-#ifdef MCRL2_CHECK_PARSER
   std::string text = utilities::read_text(in);
-  pbes<> result = parse_pbes_old(text);
-  atermpp::aterm_appl t1(pbes_to_aterm(result));
+  pbes<> result = parse_pbes_new(text);
   complete_pbes(result);
-  pbes<> result2 = parse_pbes_new(text);
-  atermpp::aterm_appl t2(pbes_to_aterm(result2));
-  complete_pbes(result2);
-  if (t1 != t2)
-  {
-std::clog << "old: " << t1 << std::endl;
-std::clog << "new: " << t2 << std::endl;
-    compare_parse_results(text, result, result2);
-  }
-#else
-  pbes<> result = parse_pbes_old(in);
-  complete_pbes(result);
-#endif
   return result;
 }
 

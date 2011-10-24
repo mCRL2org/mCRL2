@@ -34,22 +34,10 @@ ATerm parse_tagged_stream(const string& tag, istream& stream);
        NULL, otherwise
 */
 
-ATermAppl parse_state_frm(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing state formula..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("state_frm", pe_stream);
-}
-
 ATermAppl parse_action_rename_spec(istream& pe_stream)
 {
   mCRL2log(debug) << "parsing action rename specification..." << std::endl;
   return (ATermAppl) parse_tagged_stream("action_rename", pe_stream);
-}
-
-ATermAppl parse_pbes_spec(istream& pbes_spec_stream)
-{
-  mCRL2log(debug)<< "parsing BPES specification..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("pbes_spec", pbes_spec_stream);
 }
 
 ATermList parse_data_vars(istream& pe_stream)
