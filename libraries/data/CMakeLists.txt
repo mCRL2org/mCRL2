@@ -15,7 +15,7 @@ cmake_minimum_required(VERSION 2.6)
 #jitty.c requires DL_LIBS
 if(UNIX)
   LINK_LIBRARIES(${CMAKE_THREAD_LIBS} ${CMAKE_DL_LIBS})
-  set(COMP_REWRITERS 
+  set(COMP_REWRITERS
    ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jittyc.cpp
 #   ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/innerc.cpp
   )
@@ -23,9 +23,9 @@ endif(UNIX)
 
 set(mcrl2_data_src
  ${CMAKE_CURRENT_SOURCE_DIR}/source/data_specification.cpp
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/enumerate/enum_standard.cpp 
- ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/prover/smt_lib_solver.cpp 
- 
+ ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/enumerate/enum_standard.cpp
+ ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/prover/smt_lib_solver.cpp
+
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/with_prover.cpp
  # ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/inner.cpp
  ${CMAKE_CURRENT_SOURCE_DIR}/source/detail/rewrite/jitty.cpp
@@ -42,6 +42,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 #The following include directory is required by out-of-source builds for finding setup.h

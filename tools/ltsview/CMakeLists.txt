@@ -73,6 +73,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/svc/include)
 include_directories(${CMAKE_SOURCE_DIR}/3rd-party/tr/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 if(GL2PS_FOUND)
   include_directories(${GL2PS_INCLUDE_DIRS})
 else(GL2PS_FOUND)
@@ -85,6 +86,8 @@ target_link_libraries(${PROJECT_NAME}
   mcrl2_lts
   mcrl2_utilities
   mcrl2_utilities_wx
+  mcrl2_syntax
+  dparser
   tr
 )
 
