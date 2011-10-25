@@ -24,6 +24,8 @@
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 
+#include "mcrl2/lps/print.h"
+
 namespace mcrl2
 {
 
@@ -52,7 +54,7 @@ struct action_rename_actions: public lps::action_actions
     {
       condition = parse_DataExpr(node.child(0).child(1));
     }
-    return action_rename_rule(data::variable_list(), condition, parse_Action(node.child(2)), parse_ActionRenameRuleRHS(node.child(4)));
+    return action_rename_rule(core::detail::gsMakeActionRenameRule(data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
   }
 
   atermpp::vector<lps::action_rename_rule> parse_ActionRenameRuleList(const core::parse_node& node)
@@ -66,7 +68,7 @@ struct action_rename_actions: public lps::action_actions
     atermpp::vector<lps::action_rename_rule> rules = parse_ActionRenameRuleList(node.child(2));
     for (atermpp::vector<lps::action_rename_rule>::iterator i = rules.begin(); i != rules.end(); ++i)
     {
-      *i = lps::action_rename_rule(variables, i->condition(), i->lhs(), i->rhs());
+      i->variables() = variables;
     }
     return rules;
   }
@@ -119,6 +121,43 @@ action_rename_specification parse_action_rename_specification_new(const std::str
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
   return action_rename_actions(parser_tables_mcrl2).parse_ActionRenameSpec(node);
+}
+
+inline
+void complete_action_rename_specification(action_rename_specification& x, const lps::specification& spec)
+{
+  atermpp::aterm_appl result = lps::action_rename_specification_to_aterm(x);
+  atermpp::aterm_appl lps_spec = lps::specification_to_aterm(spec);
+  result = lps::detail::type_check_action_rename_specification(result, lps_spec);
+  x = action_rename_specification(result);
+  x = detail::translate_user_notation_and_normalise_sorts_action_rename_spec(x);
+}
+
+/// \brief Parses a process specification from an input stream
+/// \param in An input stream
+/// \param alpha_reduce Indicates whether alphabet reductions need to be performed
+/// \return The parse result
+inline
+action_rename_specification parse_action_rename_specification(std::istream& in, const lps::specification& spec)
+{
+  std::string text = utilities::read_text(in);
+  action_rename_specification result = parse_action_rename_specification_new(text);
+  complete_action_rename_specification(result, spec);
+  return result;
+}
+
+/// \brief Parses an action rename specification.
+/// Parses an acion rename specification.
+/// If the action rename specification contains data types that are not
+/// present in the data specification of \p spec they are added to it.
+/// \param in An input stream
+/// \param spec A linear process specification
+/// \return An action rename specification
+inline
+action_rename_specification parse_action_rename_specification(const std::string& spec_string, const lps::specification& spec)
+{
+  std::istringstream in(spec_string);
+  return parse_action_rename_specification(in, spec);
 }
 
 /// \brief Parses a linear process specification from an input stream

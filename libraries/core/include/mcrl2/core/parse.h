@@ -160,15 +160,6 @@ void print_aterm(const atermpp::aterm_appl& x)
   std::clog << "aterm: " << x << std::endl;
 }
 
-/** \brief  Parse an mCRL2 action rename specification.
-  * \param[in] sf_stream An input stream from which can be read.
-  * \post   The content of sf_stream is parsed as an mCRL2 action rename
-  *         specification.
-  * \return The parsed rename rule file, if everything went well;
-  *         NULL, otherwise.
-**/
-aterm::ATermAppl parse_action_rename_spec(std::istream& sf_stream);
-
 /** \brief  Parse mCRL2 data variables, according to the syntax of
   *         data variable declarations following the var keyword
   * \param[in] sf_stream An input stream from which can be read.

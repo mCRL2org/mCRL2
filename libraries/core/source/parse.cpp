@@ -34,12 +34,6 @@ ATerm parse_tagged_stream(const string& tag, istream& stream);
        NULL, otherwise
 */
 
-ATermAppl parse_action_rename_spec(istream& pe_stream)
-{
-  mCRL2log(debug) << "parsing action rename specification..." << std::endl;
-  return (ATermAppl) parse_tagged_stream("action_rename", pe_stream);
-}
-
 ATermList parse_data_vars(istream& pe_stream)
 {
   mCRL2log(debug) << "parsing data variables..." << std::endl;

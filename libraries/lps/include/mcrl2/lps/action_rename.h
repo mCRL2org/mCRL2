@@ -58,42 +58,34 @@ namespace lps
 {
 
 /// \brief Right hand side of an action rename rule
-class action_rename_rule_rhs
+class action_rename_rule_rhs: public atermpp::aterm_appl
 {
-    action m_act;
-    bool m_is_delta;
-    bool m_is_tau;
-
   public:
-    /// \brief Constructor.
+    /// \brief Default constructor.
     action_rename_rule_rhs()
-      : m_act(),
-        m_is_delta(false),
-        m_is_tau(false)
-    { }
+      : atermpp::aterm_appl(core::detail::constructActionRenameRuleRHS())
+    {}
 
     /// \brief Constructor.
-    /// \param t A term
-    action_rename_rule_rhs(atermpp::aterm_appl t)
-      : m_act(core::detail::gsIsDelta(t)||core::detail::gsIsTau(t)?action():t),
-        m_is_delta(core::detail::gsIsDelta(t)),
-        m_is_tau(core::detail::gsIsTau(t))
+    /// \param term A term
+    action_rename_rule_rhs(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
     {
-      assert(core::detail::check_rule_ActionRenameRuleRHS(t));
+      assert(core::detail::check_rule_ActionRenameRuleRHS(m_term));
     }
 
     /// \brief Returns true if the right hand side is equal to delta.
     /// \return True if the right hand side is equal to delta.
     bool is_delta() const
     {
-      return m_is_delta;
+      return core::detail::gsIsDelta(*this);
     }
 
     /// \brief Returns true if the right hand side is equal to tau.
     /// \return True if the right hand side is equal to tau.
     bool is_tau() const
     {
-      return m_is_tau;
+      return core::detail::gsIsTau(*this);
     }
 
     /// \brief Returns the action.
@@ -101,25 +93,8 @@ class action_rename_rule_rhs
     /// \return The action.
     action act() const
     {
-      return m_act;
-    }
-
-    /// \brief Protects the aterms in this class
-    void protect() const
-    {
-      m_act.protect();
-    }
-
-    /// \brief Unprotects the aterms in this class
-    void unprotect() const
-    {
-      m_act.unprotect();
-    }
-
-    /// \brief Marks the aterms in this class
-    void mark() const
-    {
-      m_act.mark();
+      atermpp::aterm_appl result = *this;
+      return action(result);
     }
 };
 
@@ -137,7 +112,7 @@ class action_rename_rule
     data::data_expression    m_condition;
 
     /// \brief The left hand side of the rule
-    action                   m_lhs;
+    atermpp::aterm_appl      m_lhs;
 
     /// \brief right hand side of the rule
     action_rename_rule_rhs   m_rhs;
@@ -161,17 +136,24 @@ class action_rename_rule
 
     /// \brief Constructor.
     /// \param t A term
-    action_rename_rule(const data::variable_list    variables,
-                       const data::data_expression  condition,
-                       const action                 lhs,
-                       const action_rename_rule_rhs rhs)
+    action_rename_rule(const data::variable_list&   variables,
+                       const data::data_expression& condition,
+                       const action&                lhs,
+                       const action_rename_rule_rhs& rhs)
       : m_variables(variables), m_condition(condition), m_lhs(lhs), m_rhs(rhs)
     {
     }
 
     /// \brief Returns the variables of the rule.
     /// \return The variables of the rule.
-    data::variable_list variables() const
+    const data::variable_list& variables() const
+    {
+      return m_variables;
+    }
+
+    /// \brief Returns the variables of the rule.
+    /// \return The variables of the rule.
+    data::variable_list& variables()
     {
       return m_variables;
     }
@@ -186,6 +168,15 @@ class action_rename_rule
     /// \brief Returns the left hand side of the rule.
     /// \return The left hand side of the rule.
     action lhs() const
+    {
+      return m_lhs;
+    }
+
+    /// \brief Returns the left hand side of the rule as an aterm_appl.
+    /// Needed because it can contain a ParamId instead of an action.
+    /// This is dictated by the type checker.
+    /// \return The left hand side of the rule.
+    atermpp::aterm_appl lhs_aterm() const
     {
       return m_lhs;
     }
@@ -314,7 +305,7 @@ class action_rename_specification
 
     /// \brief Returns the action rename rules.
     /// \return The action rename rules.
-    atermpp::vector <action_rename_rule> rules() const
+    const atermpp::vector<action_rename_rule>& rules() const
     {
       return m_rules;
     }
@@ -353,29 +344,33 @@ class action_rename_specification
     }
 };
 
+inline
+atermpp::aterm_appl action_rename_rule_to_aterm(const action_rename_rule& rule)
+{
+  return core::detail::gsMakeActionRenameRule(rule.variables(), rule.condition(), rule.lhs_aterm(), rule.rhs());
+}
+
+inline
+atermpp::aterm_appl action_rename_specification_to_aterm(const action_rename_specification& spec)
+{
+  atermpp::vector<atermpp::aterm_appl> rules;
+  for (atermpp::vector<action_rename_rule>::const_iterator i = spec.rules().begin(); i != spec.rules().end(); ++i)
+  {
+    rules.push_back(action_rename_rule_to_aterm(*i));
+  }
+  return core::detail::gsMakeActionRenameSpec(
+    data::detail::data_specification_to_aterm_data_spec(spec.data()),
+    core::detail::gsMakeActSpec(spec.action_labels()),
+    core::detail::gsMakeActionRenameRules(atermpp::aterm_list(rules.begin(), rules.end()))
+  );
+}
+
 }
 }
 
 /// \cond INTERNAL_DOCS
 namespace atermpp
 {
-template<>
-struct aterm_traits<mcrl2::lps::action_rename_rule_rhs>
-{
-  static void protect(const mcrl2::lps::action_rename_rule_rhs& t)
-  {
-    t.act().protect();
-  }
-  static void unprotect(const mcrl2::lps::action_rename_rule_rhs& t)
-  {
-    t.act().unprotect();
-  }
-  static void mark(const mcrl2::lps::action_rename_rule_rhs& t)
-  {
-    t.act().mark();
-  }
-};
-
 template<>
 struct aterm_traits<mcrl2::lps::action_rename_rule>
 {
@@ -421,20 +416,6 @@ namespace lps
 /// \cond INTERNAL_DOCS
 namespace detail
 {
-/// \brief Reads an action rename specification from a stream
-/// \param from An input stream
-/// \return A term in an undocumented format
-inline
-ATermAppl parse_action_rename_specification(std::istream& from)
-{
-  ATermAppl result = core::parse_action_rename_spec(from);
-  if (result == NULL)
-  {
-    throw runtime_error("parse error");
-  }
-  return result;
-}
-
 /// \brief Type checks an action rename specification
 /// \param ar_spec A term
 /// \param spec A term
@@ -523,28 +504,6 @@ action_rename_specification translate_user_notation_and_normalise_sorts_action_r
 } // namespace detail
 /// \endcond
 
-/// \brief Parses an action rename specification.
-/// Parses an acion rename specification.
-/// If the action rename specification contains data types that are not
-/// present in the data specification of \p spec they are added to it.
-/// \param in An input stream
-/// \param spec A linear process specification
-/// \return An action rename specification
-inline
-action_rename_specification parse_action_rename_specification(
-  std::istream& in,
-  lps::specification const& spec)
-{
-  ATermAppl result = detail::parse_action_rename_specification(in);
-  // lps::specification copy_specification(spec);
-  /* copy_specification.data() = mcrl2::data::remove_all_system_defined(spec.data()); */
-  ATermAppl lps_spec = specification_to_aterm(spec);
-  result           = detail::type_check_action_rename_specification(result, lps_spec);
-  action_rename_specification result_act(result);
-  return detail::translate_user_notation_and_normalise_sorts_action_rename_spec(result_act);
-}
-
-
 /// \brief  Rename the actions in a linear specification using a given action_rename_spec
 /// \details The actions in a linear specification are renamed according to a given
 ///         action rename specification.
@@ -586,8 +545,12 @@ lps::specification action_rename(
     action rule_old_action =  i->lhs();
     action rule_new_action;
     action_rename_rule_rhs new_element = i->rhs();
-
+    if (new_element.is_tau() || new_element.is_delta())
+    {
+      throw mcrl2::runtime_error("It is not allowed to call new_element.act() under these circumstances!");
+    }
     rule_new_action =  new_element.act();
+
     const bool to_tau = new_element.is_tau();
     const bool to_delta = new_element.is_delta();
 

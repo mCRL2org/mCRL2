@@ -15,8 +15,8 @@
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/lps/rewrite.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/remove.h"
-
 
 using namespace mcrl2;
 using lps::specification;
@@ -102,6 +102,6 @@ int test_main(int argc, char** argv)
   test2();
   core::garbage_collect();
   test3();
-  
+
   return 0;
 }
