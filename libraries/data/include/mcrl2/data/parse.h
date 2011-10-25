@@ -454,6 +454,20 @@ sort_expression parse_sort_expression_new(const std::string& text)
 }
 
 inline
+variable_list parse_variables_new(const std::string& text)
+{
+  core::parser p(parser_tables_mcrl2);
+  unsigned int start_symbol_index = p.start_symbol_index("VarSpec");
+  bool partial_parses = false;
+  std::string var_text("var " + text);
+std::ofstream to("/home/wieger/Desktop/blaat.txt", std::ios::app);
+to << var_text << "\n------------------------------\n";
+to.close();
+  core::parse_node node = p.parse(var_text, start_symbol_index, partial_parses);
+  return data_specification_actions(parser_tables_mcrl2).parse_VarSpec(node);
+}
+
+inline
 data_expression parse_data_expression_new(const std::string& text)
 {
   core::parser p(parser_tables_mcrl2);
@@ -595,19 +609,16 @@ data_specification parse_data_specification(const std::string& text)
 /// \param[in] data_spec The data specification that is used for type checking.
 
 template < typename Output_iterator, typename Variable_iterator >
-void parse_variables(std::istream& text,
+void parse_variables(std::istream& in,
                      Output_iterator o,
                      const Variable_iterator begin,
                      const Variable_iterator end,
                      const data_specification& data_spec = detail::default_specification())
 {
   // Parse the variables list.
-  ATermList temporary_data_vars = core::parse_data_vars(text);
-  if (temporary_data_vars == 0)
-  {
-    throw mcrl2::runtime_error("Error while parsing data variable declarations.");
-  }
-  variable_list data_vars = temporary_data_vars;
+  std::string text = utilities::read_text(in);
+  variable_list data_vars = parse_variables_new(text);
+  aterm::ATermList temporary_data_vars = data_vars;
 
   // Type check the variable list.
   /* atermpp::aterm_appl d=mcrl2::data::detail::data_specification_to_aterm_data_spec(

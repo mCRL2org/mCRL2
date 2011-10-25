@@ -54,10 +54,7 @@ endif(COMMAND cmake_policy)
 
 set(mcrl2_core_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/parse.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/struct_core.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2parser.cpp
-  ${CMAKE_CURRENT_SOURCE_DIR}/source/mcrl2lexer.cpp
 )
 
 set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
