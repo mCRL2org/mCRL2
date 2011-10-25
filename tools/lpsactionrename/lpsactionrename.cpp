@@ -17,8 +17,8 @@
 #include <fstream>
 #include <iostream>
 #include <algorithm>
-#include "mcrl2/core/parse.h"
 #include "mcrl2/core/typecheck.h"
+#include "mcrl2/lps/parse.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/sumelm.h"
@@ -151,7 +151,7 @@ class action_rename_tool: public rewriter_tool<input_output_tool >
       // Note that all parsed data and action declarations in rename_stream are
       // added to lps_old_spec.
       action_rename_specification action_rename_spec =
-        parse_action_rename_specification(rename_stream,lps_old_spec);
+        lps::parse_action_rename_specification(rename_stream,lps_old_spec);
       rename_stream.close();
 
       //rename all assigned actions
