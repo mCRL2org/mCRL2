@@ -460,9 +460,6 @@ variable_list parse_variables_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("VarSpec");
   bool partial_parses = false;
   std::string var_text("var " + text);
-std::ofstream to("/home/wieger/Desktop/blaat.txt", std::ios::app);
-to << var_text << "\n------------------------------\n";
-to.close();
   core::parse_node node = p.parse(var_text, start_symbol_index, partial_parses);
   return data_specification_actions(parser_tables_mcrl2).parse_VarSpec(node);
 }
