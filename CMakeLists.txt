@@ -450,6 +450,12 @@ install(
   DESTINATION include
   PATTERN ".svn" EXCLUDE
 )
+FILE(GLOB dparser_headers "3rd-party/dparser/*.h")
+install(
+  FILES
+    ${dparser_headers}
+  DESTINATION include
+)
 endif( MCRL2_INSTALL_HEADERS )
 
 ##---------------------------------------------------

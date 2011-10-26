@@ -30,6 +30,8 @@ target_link_libraries(mcrl2_syntax
   dparser
 )
 
+# add install target:
+install(TARGETS mcrl2_syntax DESTINATION ${MCRL2_LIB_DIR})
 
 # ######### Set policies ############
 
