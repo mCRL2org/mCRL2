@@ -90,6 +90,7 @@ class Prover:protected mcrl2::data::rewriter
 
     /// \brief A timestamp representing the moment when the maximal amount of seconds has been spent on processing the current formula.
     time_t f_deadline;
+
   public:
     /// \brief Constructor that initializes Prover::f_rewriter and Prover::f_time_limit.
     Prover(const data_specification& a_data_spec,

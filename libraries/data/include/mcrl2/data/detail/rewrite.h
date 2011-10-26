@@ -72,6 +72,10 @@ class Rewriter
 
     typedef mutable_map_substitution<atermpp::map < variable,atermpp::aterm_appl> > internal_substitution_type;
     typedef mutable_map_substitution<atermpp::map < variable, data_expression > > substitution_type;
+    /*
+    typedef mutable_indexed_substitution<atermpp::vector< atermpp::aterm_appl > > internal_substitution_type;
+    typedef mutable_indexed_substitution<atermpp::vector< data::data_expression > > substitution_type;
+    */
 
     const atermpp::aterm_appl internal_true;
     const atermpp::aterm_appl internal_false;

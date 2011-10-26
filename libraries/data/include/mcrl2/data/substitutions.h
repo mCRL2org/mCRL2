@@ -407,6 +407,233 @@ make_mutable_map_substitution(const VariableContainer& vc, const ExpressionConta
   return mutable_map_substitution<std::map<typename VariableContainer::value_type, typename ExpressionContainer::value_type> >(vc, ec);
 }
 
+namespace detail
+{
+  struct variable_to_index : public std::unary_function< data::variable, size_t >
+  {
+    variable_to_index()
+    {}
+
+    size_t operator()(const data::variable& v) const
+    {
+      size_t result = v.name().function();
+      return result;
+    }
+  };
+}
+
+/// \brief Generic substitution function.
+/// \details This substitution assumes a function variable -> size_t, that, for
+///          each variable gives a unique index. The substitutions are stored
+///          internally as a vector, mapping size_t to expression.
+///          Provided that, given a variable, its index can be computed in O(1)
+///          time, insertion is O(1) amortized, and lookup is O(1).
+///          Memory required is O(n) where n is the largest index used.
+template <typename ExpressionSequence = atermpp::vector<data_expression> >
+struct mutable_indexed_substitution : public std::unary_function<data::variable, typename ExpressionSequence::value_type>
+{
+  typedef data::variable variable_type;
+  typedef typename ExpressionSequence::value_type expression_type;
+
+  ExpressionSequence m_container;
+
+  atermpp::map<core::identifier_string, variable_type> m_variables;
+
+  mutable_indexed_substitution()
+  {}
+
+  mutable_indexed_substitution(const ExpressionSequence& c)
+    : m_container(c)
+  {}
+
+  /// \brief Wrapper class for internal storage and substitution updates using operator()
+  struct assignment
+  {
+    data::variable        m_variable;
+    ExpressionSequence& m_container;
+    atermpp::map<core::identifier_string, variable_type>& m_variables;
+
+    /// \brief Constructor.
+    ///
+    /// \param[in] v a variable.
+    /// \param[in] c a container of expressions.
+    assignment(variable_type v, ExpressionSequence& c, atermpp::map<core::identifier_string, variable_type>& vs) :
+      m_variable(v), m_container(c), m_variables(vs)
+    { }
+
+    template <typename AssignableToExpression>
+    void operator=(AssignableToExpression const& e)
+    {
+      size_t i = detail::variable_to_index()(m_variable);
+      // Resize container if needed
+      if(i >= m_container.size())
+      {
+        m_container.resize(i+1, expression_type());
+      }
+
+      atermpp::map<core::identifier_string, variable_type>::const_iterator it = m_variables.find(m_variable.name());
+      if(it != m_variables.end() && it->second != m_variable)
+      {
+        std::cerr << "Found duplicate variables " << it->second << " and " << m_variable << std::endl;
+      }
+      else
+      {
+        std::cerr << "Inserting variable " << m_variable << std::endl;
+        m_variables[m_variable.name()] = m_variable;
+      }
+
+      // update substitution
+      if (e != m_variable)
+      {
+        m_container[i] = e;
+      }
+      else
+      {
+        m_container[i] = expression_type();
+      }
+    }
+  };
+
+  assignment operator[](variable_type const& v)
+  {
+    return assignment(v, this->m_container, this->m_variables);
+  }
+
+  void clear()
+  {
+    m_container.assign(m_container.size(), expression_type());
+  }
+
+  size_t size() const
+  {
+    return m_container.size();
+  }
+
+  void resize(const size_t n)
+  {
+    m_container.resize(n);
+  }
+
+  void set(const size_t i, const expression_type& e)
+  {
+    m_container[i] = e;
+  }
+
+  expression_type get(const size_t i) const
+  {
+    assert(i < m_container.size());
+    return m_container[i];
+  }
+
+  expression_type operator()(const variable_type& v) const
+  {
+    size_t i = detail::variable_to_index()(v);
+    if(i < m_container.size() && m_container[i] != expression_type())
+    {
+      return m_container[i];
+    }
+    else
+    {
+      return v;
+    }
+  }
+
+  /// \brief Returns true if the substitution is empty
+  bool empty()
+  {
+    for(typename ExpressionSequence::const_iterator i = m_container.begin(); i != m_container.end(); ++i)
+    {
+      if(*i != expression_type())
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
+  template <typename Substitution>
+  bool operator==(const Substitution&) const
+  {
+    return false;
+  }
+
+  mutable_indexed_substitution & operator=(const mutable_indexed_substitution& other) 
+  {
+    m_container=other.m_container;
+    return *this;
+  }
+
+/*
+  template <typename Expression>
+  expression_type operator()(const Expression&) const
+  {
+    throw std::runtime_error("data::mutable_indexed_substitution::operator(const Expression&) is a deprecated interface!");
+    return data_expression();
+  }*/
+};
+
+/// \deprecated
+/// Provided for use with the rewriters in internal format
+template<typename RhsType>
+atermpp::set<core::identifier_string> get_identifiers(const mutable_indexed_substitution<atermpp::vector<RhsType> >& sigma)
+{
+  typedef typename atermpp::vector<RhsType>::value_type expression_type;
+
+  atermpp::set<core::identifier_string> result;
+  for(size_t i = 0; i < sigma.size(); ++i)
+  {
+    if(sigma.get(i) != expression_type())
+    {
+      result.insert(core::identifier_string(static_cast<atermpp::function_symbol>(i).name()));
+      find_all_if(sigma.get(i),core::is_identifier_string,std::inserter(result,result.begin()));
+    }
+  }
+  return result;
+}
+
+/// \deprecated
+/// Provided for use with the rewriters in internal format
+template<typename RhsType>
+atermpp::set<core::identifier_string> get_identifiers(const mutable_map_substitution<atermpp::map<variable,RhsType> >& sigma)
+{
+  atermpp::set<core::identifier_string> result;
+  for(typename mutable_map_substitution<atermpp::map<variable,RhsType> >::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    result.insert(i->first.name());
+    find_all_if(i->second,core::is_identifier_string,std::inserter(result,result.begin()));
+  }
+  return result;
+}
+
+/// \deprecated
+/// Provided for use with the rewriters in internal format
+template<typename UnaryOperator>
+mutable_indexed_substitution<atermpp::vector<atermpp::aterm_appl> >
+apply(const mutable_indexed_substitution<>& sigma, UnaryOperator f)
+{
+  mutable_indexed_substitution<atermpp::vector<atermpp::aterm_appl> > result;
+  result.resize(sigma.size());
+  for(size_t i = 0; i < sigma.size(); ++i)
+  {
+    result.set(i, f(sigma.get(i)));
+  }
+  return result;
+}
+
+/// \deprecated
+/// Provided for use with the rewriters in internal format
+template<typename UnaryOperator>
+mutable_map_substitution< atermpp::map<variable, atermpp::aterm_appl> >
+apply(const mutable_map_substitution<atermpp::map<variable,data_expression> >& sigma, UnaryOperator f)
+{
+  mutable_map_substitution< atermpp::map<variable, atermpp::aterm_appl> > result;
+  for(mutable_map_substitution<atermpp::map<variable,data_expression> >::const_iterator i = sigma.begin(); i != sigma.end(); ++i)
+  {
+    result[i->first] = f(i->second);
+  }
+  return result;
+}
+
 /// \brief An adapter that makes an arbitrary substitution function mutable.
 template <typename Substitution>
 class mutable_substitution_composer: public std::unary_function<typename Substitution::variable_type, typename Substitution::expression_type>
@@ -537,6 +764,33 @@ std::string print_substitution(const Substitution& sigma)
   result << "]";
   return result.str();
 }
+
+template <typename RhsType>
+std::string print_substitution(const mutable_indexed_substitution<atermpp::vector<RhsType> >& sigma)
+{
+  typedef typename atermpp::vector<RhsType>::value_type expression_type;
+  std::stringstream result;
+  bool first = true;
+  result << "[";
+  for (size_t i = 0; i < sigma.size(); ++i)
+  {
+    if(sigma.get(i) != expression_type())
+    {
+      if(first)
+      {
+        first = false;
+      }
+      else
+      {
+        result << "; ";
+      }
+      result << core::identifier_string(static_cast<atermpp::function_symbol>(i).name()) << " := " << data::pp(sigma.get(i));
+    }
+  }
+  result << "]";
+  return result.str();
+}
+
 
 /// \brief Returns a string representation of the map, for example [a := 3, b := true].
 /// \param[in] sigma a constant reference to an object of a mutable_substitution_composer instance

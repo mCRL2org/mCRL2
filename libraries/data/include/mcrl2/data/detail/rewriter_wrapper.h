@@ -14,6 +14,7 @@
 #ifndef _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
 #define _MCRL2_DATA_DETAIL_REWRITER_WRAPPER_H
 
+#include <boost/bind.hpp>
 #include "mcrl2/data/rewriter.h"
 
 namespace mcrl2
@@ -52,22 +53,17 @@ struct legacy_rewriter : public mcrl2::data::rewriter
     {
     }
 
-  
+
     atermpp::aterm_appl convert_to(const data_expression &t) const
     {
-      return m_rewriter->toRewriteFormat(t);
+      return convert_expression_to(t);
     }
-  
-    internal_substitution_type convert_to(const substitution_type &sigma) const
+
+    internal_substitution_type convert_to(const substitution_type& sigma) const
     {
-      internal_substitution_type sigma_in_internal_format;
-      for(substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-      {
-        sigma_in_internal_format[i->first]=convert_to(i->second);
-      }
-      return sigma_in_internal_format;
+      return convert_substitution_to(sigma);
     }
-  
+
     data_expression convert_from(const atermpp::aterm_appl t) const
     {
       return m_rewriter->fromRewriteFormat(t);

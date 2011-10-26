@@ -327,7 +327,8 @@ pbes<> do_finite_algorithm(pbes<> pbes_spec, PbesRewriter& rewrite, const mcrl2:
           for(typename enumerator_type::iterator i=enumerator.begin(std::vector<variable>(1,x),sort_bool::true_());
                    i!=enumerator.end(); ++i)
             {
-              const data_expression d=i->find(x)->second;
+              //const data_expression d=i->find(x)->second;
+              const data_expression d=(*i)(x);
               l=push_front(l,d);
             }
           sort_enumerations.put(current_sort, l);

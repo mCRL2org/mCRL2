@@ -57,6 +57,7 @@ struct is_a_variable
   }
 };
 
+static
 bool occur_check(const variable v, const atermpp::aterm_appl e)
 {
   if (v==e)
@@ -187,21 +188,15 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   size_t count=0;
   atermpp::vector <variable> new_variables(vl.size());
   {
-    // Restrict the scope of variables_in_sigma.
-    std::set < variable > variables_in_sigma;
-    for(internal_substitution_type::const_iterator it=sigma.begin();
-                  it!=sigma.end(); ++it)
-    {
-      variables_in_sigma.insert(it->first);
-      find_all_if(it->second,is_a_variable(),std::inserter(variables_in_sigma,variables_in_sigma.begin()));
-    }
+    // Restrict the scope of identifiers_in_sigma.
+    atermpp::set < core::identifier_string > identifiers_in_sigma(get_identifiers(sigma));
 
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
     {
       const variable v= *it;
-      if ((variables_in_sigma.count(v)>0))
+      if (identifiers_in_sigma.find(v.name()) != identifiers_in_sigma.end())
       {
         number_of_renamed_variables++;
         new_variables[count]=generator(v.sort());

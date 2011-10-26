@@ -474,21 +474,13 @@ class BDD_Prover: public Prover
     /// \brief Set the substitution to be used to construct the BDD
     void set_substitution(substitution_type &sigma)
     {
-      bdd_sigma.clear();
-      for(substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-      {
-        bdd_sigma[i->first]=m_rewriter->toRewriteFormat(i->second);
-      }
+      bdd_sigma = convert_substitution_to(sigma);
     }
 
     /// \brief Set the substitution in internal format to be used to construct the BDD
     void set_substitution_internal(internal_substitution_type &sigma)
     {
-      bdd_sigma.clear();
-      for(internal_substitution_type::const_iterator i=sigma.begin(); i!=sigma.end(); ++i)
-      {
-        bdd_sigma[i->first]=i->second;
-      }
+      bdd_sigma = sigma;
     }
 
     /// \brief Indicates whether or not the formula Prover::f_formula is a tautology.
