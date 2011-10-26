@@ -23,6 +23,7 @@
 #include "mcrl2/data/data_specification.h"
 
 using namespace mcrl2::core;
+using namespace mcrl2::data;
 using namespace mcrl2::core::detail;
 using namespace mcrl2::log;
 
@@ -39,7 +40,7 @@ static ATermList gsaGetSyncAlpha(ATermAppl a, size_t length=0, ATermList allowed
 
 static inline ATermAppl INIT_KEY(void)
 {
-  return gsMakeProcVarId(gsString2ATermAppl("init"),ATmakeList0());
+  return static_cast<atermpp::aterm_appl>(process_identifier(core::identifier_string("init"), sort_expression_list()));
 }
 
 static ATermTable alphas;
@@ -234,7 +235,8 @@ static inline ATermList add_typeMA(ATermList ma, ATermList s)
   ATermList r=ATmakeList0();
   for (; !ATisEmpty(ma); ma=ATgetNext(ma))
   {
-    r=ATinsert(r,(ATerm)gsMakeActId(ATAgetFirst(ma),s));
+    r=ATinsert(r,(ATerm)static_cast<atermpp::aterm>(lps::action_label(core::identifier_string(ATAgetFirst(ma)),
+                                                                           sort_expression_list(s))));
   }
   return gsaATsortList(r);
 }
@@ -408,7 +410,7 @@ static ATermList filter_allow_list(ATermList l, ATermList V)
   ATermList m=ATmakeList0();
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    if (ATindexOf(V,(ATerm)gsMakeMultActName(untypeMA(ATLgetFirst(l))),0) != ATERM_NON_EXISTING_POSITION)
+    if (ATindexOf(V,(ATerm)static_cast<atermpp::aterm>(process::action_name_multiset(core::identifier_string_list(untypeMA(ATLgetFirst(l))))),0) != ATERM_NON_EXISTING_POSITION)
     {
       m = ATinsert(m,(ATerm)ATLgetFirst(l));
     }
@@ -483,7 +485,7 @@ static ATermList sort_multiactions_allow(ATermList V)
   ATermList m = ATmakeList0();
   for (; !ATisEmpty(V); V=ATgetNext(V))
   {
-    m = ATinsert(m,(ATerm)gsMakeMultActName(gsaATsortList(ATLgetArgument(ATAgetFirst(V),0))));
+    m = ATinsert(m,(ATerm)static_cast<atermpp::aterm>(process::action_name_multiset(core::identifier_string_list(gsaATsortList(ATLgetArgument(ATAgetFirst(V),0))))));
   }
 
   return ATreverse(m);
@@ -516,11 +518,11 @@ static ATermList split_allow(ATermList V, ATermList ulp, ATermList ulq)
   for (; !ATisEmpty(ulp); ulp=ATgetNext(ulp))
   {
     ATermList up=ATLgetFirst(ulp);
-    ATermAppl ma=gsMakeMultActName(ATLgetFirst(ulp));
+    ATermAppl ma=static_cast<atermpp::aterm_appl>(process::action_name_multiset(core::identifier_string_list(ATLgetFirst(ulp))));
     ATermList tulq=ulq;
     for (; !ATisEmpty(ulq); ulq=ATgetNext(ulq))
     {
-      if (ATindexedSetGetIndex(VV,(ATerm)gsMakeMultActName(sync_mact(up,ATLgetFirst(ulq))))>=0)
+      if (ATindexedSetGetIndex(VV,(ATerm)static_cast<atermpp::aterm>(process::action_name_multiset(core::identifier_string_list(sync_mact(up,ATLgetFirst(ulq))))))>=0)
       {
         m = ATinsert(m,(ATerm)ma);
         break;
@@ -657,9 +659,9 @@ static ATermList extend_hide(ATermList V, ATermList I, ATermList L)
 
   for (; !ATisEmpty(L); L=ATgetNext(L))
   {
-    ATermAppl ma=gsMakeMultActName(ATLgetFirst(L));
-    ATermAppl maH=gsMakeMultActName(apply_hide(I,ATLgetFirst(L)));
-    if ((ATisEqual(maH,gsMakeMultActName(ATmakeList0())) || ATindexOf(V,(ATerm)maH,0)!=ATERM_NON_EXISTING_POSITION)&& ATindexOf(r,(ATerm)ma,0)==ATERM_NON_EXISTING_POSITION)
+    ATermAppl ma=static_cast<atermpp::aterm_appl>(process::action_name_multiset(core::identifier_string_list(ATLgetFirst(L))));
+    ATermAppl maH=static_cast<atermpp::aterm_appl>(process::action_name_multiset(core::identifier_string_list(apply_hide(I,ATLgetFirst(L)))));
+    if ((ATisEqual(maH,static_cast<atermpp::aterm>(process::action_name_multiset(core::identifier_string_list()))) || ATindexOf(V,(ATerm)maH,0)!=ATERM_NON_EXISTING_POSITION)&& ATindexOf(r,(ATerm)ma,0)==ATERM_NON_EXISTING_POSITION)
     {
       r=ATinsert(r,(ATerm)ma);
     }
@@ -780,7 +782,7 @@ static ATermList gsaMakeMultActNameL(ATermList l)
   ATermList r=ATmakeList0();
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    r=ATinsert(r,(ATerm)gsMakeMultActName(ATLgetFirst(l)));
+    r=ATinsert(r,(ATerm)static_cast<atermpp::aterm>(process::action_name_multiset(core::identifier_string_list(ATLgetFirst(l)))));
   }
 
   return ATreverse(r);
@@ -851,7 +853,7 @@ static ATermList apply_comms(ATermList l, ATermList C, ATermList lhs)
         c = ATremoveElement(c,(ATerm)ATAgetArgument(a,0));
         for (; !ATisEmpty(c); c=ATgetNext(c))
         {
-          ATermAppl act = gsMakeActId(ATAgetFirst(c),s);
+          ATermAppl act = static_cast<atermpp::aterm_appl>(lps::action_label(core::identifier_string(ATAgetFirst(c)),sort_expression_list(s)));
           if (ATindexOf(tr,(ATerm) act,0) != ATERM_NON_EXISTING_POSITION)
           {
             tr = ATremoveElement(tr,(ATerm) act);
@@ -875,7 +877,7 @@ static ATermList apply_comms(ATermList l, ATermList C, ATermList lhs)
           }
           if (!gsIsNil(rhs_c))
           {
-            tm=merge_list(tm,ATmakeList1((ATerm)ATmakeList1((ATerm)gsMakeActId(rhs_c,s))));
+            tm=merge_list(tm,ATmakeList1((ATerm)ATmakeList1((ATerm)static_cast<atermpp::aterm>(lps::action_label(core::identifier_string(rhs_c),sort_expression_list(s))))));
           }
           else
           {
@@ -936,7 +938,7 @@ static ATermList extend_allow_comm_with_alpha(ATermList V, ATermList C, ATermLis
 
   for (; !ATisEmpty(l); l=ATgetNext(l))
   {
-    ATermAppl ma=gsMakeMultActName(untypeMA(ATLgetFirst(l)));
+    ATermAppl ma=static_cast<atermpp::aterm_appl>(process::action_name_multiset(core::identifier_string_list(untypeMA(ATLgetFirst(l)))));
     if (ATindexOf(r,(ATerm)ma,0)==ATERM_NON_EXISTING_POSITION)
     {
       ATermList mas=untypeMAL(apply_comms(ATLgetFirst(l),C,lhs));
@@ -1075,7 +1077,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a)
   }
   else if (gsIsAction(a))
   {
-    return (ATindexOf(H,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)!=ATERM_NON_EXISTING_POSITION)?gsMakeDelta():a;
+    return (ATindexOf(H,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)!=ATERM_NON_EXISTING_POSITION)?static_cast<atermpp::aterm_appl>(process::delta()):static_cast<atermpp::aterm_appl>(a);
   }
   else if (gsIsProcess(a) || gsIsProcessAssignment(a))
   {
@@ -1088,7 +1090,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a)
     l = filter_block_list(l,H);
     // XXX also adjust H
 
-    a = gsMakeBlock(H,a);
+    a = static_cast<atermpp::aterm_appl>(process::block(core::identifier_string_list(H),process::process_expression(a)));
 
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
@@ -1114,7 +1116,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a)
 
     p = PushBlock(H,p);
 
-    a = gsMakeHide(ATLgetArgument(a,0),p);
+    a = static_cast<atermpp::aterm_appl>(process::comm(core::identifier_string_list(ATLgetArgument(a,0)),process::process_expression(p)));
 
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
@@ -1128,7 +1130,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a)
     {
       l=gsaGetAlpha(a);
     }
-    a = gsMakeBlock(H,a);
+    a = static_cast<atermpp::aterm_appl>(process::block(core::identifier_string_list(H),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
     return a;
   }
@@ -1155,7 +1157,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a)
     if (!ATisEmpty(Hc))
     {
       a = PushBlock(Hc,ATAgetArgument(a,1));
-      a = gsMakeComm(C,a);
+      a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
     }
 
     a = gsApplyAlpha(a);
@@ -1163,7 +1165,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a)
 
     if (!ATisEmpty(Ha))
     {
-      a = gsMakeBlock(Ha,a);
+      a = static_cast<atermpp::aterm_appl>(process::block(core::identifier_string_list(Ha),process::process_expression(a)));
       ATtablePut(alphas,(ATerm) a,(ATerm) filter_block_list(l,Ha));
     }
 
@@ -1178,7 +1180,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a)
       l=gsaGetAlpha(a);
     }
     a = gsApplyAlpha(a);
-    a = gsMakeBlock(H,a);
+    a = static_cast<atermpp::aterm_appl>(process::block(core::identifier_string_list(H),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
     return a;
   }
@@ -1188,7 +1190,7 @@ static ATermAppl PushBlock(ATermList H, ATermAppl a)
     // Do not distribute over these operator.
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeBlock(H,a);
+    a = static_cast<atermpp::aterm_appl>(process::block(core::identifier_string_list(H),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
     return a;
     /* short ia1=0,ia2=1,args=2;
@@ -1227,7 +1229,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
   }
   else if (gsIsAction(a))
   {
-    return (ATindexOf(I,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)!=ATERM_NON_EXISTING_POSITION)?gsMakeTau():a;
+    return (ATindexOf(I,(ATerm)ATAgetArgument(ATAgetArgument(a,0),0),0)!=ATERM_NON_EXISTING_POSITION)?static_cast<atermpp::aterm_appl>(process::tau()):static_cast<atermpp::aterm_appl>(a);
   }
   else if (gsIsProcess(a) || gsIsProcessAssignment(a))
   {
@@ -1241,7 +1243,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
 
     a = gsApplyAlpha(a);
 
-    a = gsMakeHide(I,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(core::identifier_string_list(I),process::process_expression(a)));
 
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
@@ -1251,7 +1253,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeHide(I,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(core::identifier_string_list(I),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_hide_list(l,I));
     return a;
   }
@@ -1263,7 +1265,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeHide(I,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(core::identifier_string_list(I),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_hide_list(l,I));
     return a;
   }
@@ -1271,7 +1273,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeHide(I,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(core::identifier_string_list(I),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_hide_list(l,I));
     return a;
   }
@@ -1279,7 +1281,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeHide(I,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(core::identifier_string_list(I),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_hide_list(l,I));
     return a;
   }
@@ -1291,7 +1293,7 @@ static ATermAppl PushHide(ATermList I, ATermAppl a)
 
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeHide(I,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(core::identifier_string_list(I),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
     return a;
     /* // all distributing rules together
@@ -1332,9 +1334,9 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
   }
   else if (gsIsAction(a))
   {
-    if (ATindexOf(V,(ATerm)gsMakeMultActName(ATmakeList1((ATerm)ATAgetArgument(ATAgetArgument(a,0),0))),0)==ATERM_NON_EXISTING_POSITION)
+    if (ATindexOf(V,(ATerm)static_cast<atermpp::aterm>(process::action_name_multiset(core::identifier_string_list(ATmakeList1((ATerm)ATAgetArgument(ATAgetArgument(a,0),0))))),0)==ATERM_NON_EXISTING_POSITION)
     {
-      return gsMakeDelta();
+      return static_cast<atermpp::aterm_appl>(process::delta());
     }
     return gsApplyAlpha(a);
   }
@@ -1368,7 +1370,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
     ATermList ul=untypeMAL(l);
     V = optimize_allow_list(V,ul);
 
-    // here we create (in case pn is not recursive) a new process equation to replace gsMakeAllow(V,a);
+    // here we create (in case pn is not recursive) a new process equation to replace static_cast<atermpp::aterm_appl>(process::allow(process::action_name_multiset_list(V),process::process_expression(a)));
     // we call it pn_allow_i, where i is such that pn_allow_i is a fresh process name.
     // the parameters are the same as in pn.
     // ADDITION 2006-09-11: if this is a pCRL process we don't do this (not to break the current linearizer)
@@ -1417,7 +1419,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
                           << "This warning could also indicate a forgotten (multi-)action in this allow operation." << std::endl << std::endl;
       }
 
-      a = gsMakeAllow(V,a);
+      a = static_cast<atermpp::aterm_appl>(process::allow(process::action_name_multiset_list(V),process::process_expression(a)));
       ATtablePut(alphas,(ATerm) a,(ATerm) filter_allow_list(l,V));
     }
 
@@ -1523,12 +1525,12 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
     if (gsIsAllow(a))
     {
       push_comm_through_allow=false;
-      a = gsMakeAllow(V,a);
+      a = static_cast<atermpp::aterm_appl>(process::allow(process::action_name_multiset_list(V),process::process_expression(a)));
       a = gsApplyAlpha(a);
     }
     else
     {
-      a = gsMakeAllow(V,a);
+      a = static_cast<atermpp::aterm_appl>(process::allow(process::action_name_multiset_list(V),process::process_expression(a)));
     }
 
     ATtablePut(alphas,(ATerm) a,(ATerm)filter_allow_list(l,V));
@@ -1588,7 +1590,7 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
     }
 
     V = optimize_allow_list(V,untypeMAL(l));
-    a = gsMakeAllow(V,a);
+    a = static_cast<atermpp::aterm_appl>(process::allow(process::action_name_multiset_list(V),process::process_expression(a)));
     assert(l);
     ATtablePut(alphas,(ATerm) a,(ATerm)l);
     return a;
@@ -1598,11 +1600,11 @@ static ATermAppl PushAllow(ATermList V, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeAllow(V,a);
+    a = static_cast<atermpp::aterm_appl>(process::allow(process::action_name_multiset_list(V),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
     return a;
     // all distributing rules together
-    // return gsMakeAllow(I,a); // Distributing hide over these operators disallows the
+    // return static_cast<atermpp::aterm_appl>(process::allow(process::action_name_multiset_list(I),process::process_expression(a))); // Distributing hide over these operators disallows the
     // linearizer to work properly.
 
     /* short ia1=0,ia2=1,args=2;
@@ -1650,7 +1652,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
     l = filter_comm_list(l,C);
     // XXX also adjust C?
 
-    a = gsMakeComm(C,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
 
     ATtablePut(alphas,(ATerm) a,(ATerm) l);
 
@@ -1660,7 +1662,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeComm(C,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   }
@@ -1668,7 +1670,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeComm(C,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   }
@@ -1676,7 +1678,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeComm(C,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   }
@@ -1684,7 +1686,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
   {
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeComm(C,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   }
@@ -1712,13 +1714,13 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
         ATermAppl p=ATAgetArgument(a,1);
         p=PushComm(C,p);
         ATermList l1=ATLtableGet(alphas,(ATerm) p);
-        a=gsMakeAllow(V2,p);
+        a=static_cast<atermpp::aterm_appl>(process::allow(process::action_name_multiset_list(V2),process::process_expression(p)));
         ATtablePut(alphas,(ATerm) a,(ATerm) filter_allow_list(l1,V2));
         return a;
       }
     }
 
-    a = gsMakeComm(C,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   }
@@ -1815,7 +1817,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
 
       if (!ATisEmpty(Ca))
       {
-        a = gsMakeComm(Ca,a);
+        a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(Ca),process::process_expression(a)));
         //gsWarningMsg("tick2 l: %d\n",ATgetLength(l));
         l = filter_comm_list(l,Ca);
         ATtablePut(alphas,(ATerm) a,(ATerm) l);
@@ -1830,7 +1832,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
       {
         l=gsaGetAlpha(a);
       }
-      a = gsMakeComm(C,a);
+      a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
       ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
       return a;
     }
@@ -1866,7 +1868,7 @@ static ATermAppl PushComm(ATermList C, ATermAppl a)
     //{  Yarick, 2009-05-25: do not distribute comm over seq compositions.
     a = gsApplyAlpha(a);
     ATermList l = ATLtableGet(alphas,(ATerm) a);
-    a = gsMakeComm(C,a);
+    a = static_cast<atermpp::aterm_appl>(process::comm(process::communication_expression_list(C),process::process_expression(a)));
     ATtablePut(alphas,(ATerm) a,(ATerm) filter_comm_list(l,C));
     return a;
   }
@@ -2464,7 +2466,8 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
     }
     // Transform k into an aterm with a string representing a value,
     // instead of an expression in internal format.
-    new_k=gsMakeOpId(ATmakeAppl0(ATmakeAFun(core::pp_deprecated(new_k).c_str(),0,false)),data::sort_pos::pos());
+    new_k=static_cast<atermpp::aterm_appl>(data::function_symbol(core::pp_deprecated(new_k),
+                                                                 data::sort_pos::pos()));
 
     if (!gsIsDataExprNumber(new_k))
     {
@@ -2481,7 +2484,7 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
         ATermAppl pair=ATAgetFirst(l);
         if (ATisEqual(ATAgetArgument(pair,0),k))
         {
-          return gsMakeProcess(ATAgetArgument(pair,1),ATgetNext(ATLgetArgument(a,1)));
+          return static_cast<atermpp::aterm_appl>(process::process_instance(process::process_identifier(ATAgetArgument(pair,1)),data::data_expression_list(ATgetNext(ATLgetArgument(a, 1)))));
         }
       }
       l=l1;
@@ -2497,7 +2500,7 @@ ATermAppl gsaSubstNP(ATermTable subs_npCRL, ATermTable consts, ATermAppl a)
     while (ATAtableGet(procs,(ATerm)new_pn));
 
     ATtablePut(subs_npCRL,(ATerm)pn,(ATerm)ATinsert(l,(ATerm)Pair((ATerm)k,(ATerm)new_pn)));
-    return gsMakeProcess(new_pn,ATgetNext(ATLgetArgument(a,1)));
+    return static_cast<atermpp::aterm_appl>(process::process_instance(process::process_identifier(new_pn),data::data_expression_list(ATgetNext(ATLgetArgument(a, 1)))));
   }
   else if (gsIsSum(a) || gsIsAtTime(a) || gsIsChoice(a) || gsIsSeq(a)
            || gsIsBlock(a) || gsIsHide(a) || gsIsRename(a) || gsIsAllow(a) || gsIsComm(a)
@@ -2560,7 +2563,7 @@ static ATermAppl gsaGenNInst(ATermAppl number, ATermAppl P, bool add_number=true
     {
       Params=ATinsert(Params,(ATerm)gsMakeOpId(ATmakeAppl0(ATmakeAFunInt0(i)),data::sort_pos::pos()));
     }
-    ATermAppl r1=gsMakeProcess(P,Params);
+    ATermAppl r1=static_cast<atermpp::aterm_appl>(process::process_instance(process::process_identifier(P), data::data_expression_list(Params)));
     if (r)
     {
       r=gsMakeMerge(r,r1);
@@ -3056,8 +3059,8 @@ nP_checked:
     ATtablePut(alphas,(ATerm)pn,(ATerm)ATmakeList0());
   }
 
-  ATtablePut(alphas,(ATerm)gsMakeDelta(),(ATerm) ATmakeList0());
-  ATtablePut(alphas,(ATerm)gsMakeTau(),(ATerm) ATmakeList0());
+  ATtablePut(alphas,(ATerm)static_cast<atermpp::aterm>(process::delta()),(ATerm) ATmakeList0());
+  ATtablePut(alphas,(ATerm)static_cast<atermpp::aterm>(process::tau()),(ATerm) ATmakeList0());
 
   todo=ATLtableGet(deps,(ATerm)INIT_KEY());
   if (todo)

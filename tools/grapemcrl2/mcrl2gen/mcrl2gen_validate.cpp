@@ -37,80 +37,23 @@ using namespace mcrl2::core;
 using namespace mcrl2::core::detail;
 using namespace std;
 
-ATermAppl grape::mcrl2gen::convert_numeric_sorts_to_real(ATermAppl sort_expr)
+data::sort_expression grape::mcrl2gen::convert_numeric_sorts_to_real(data::sort_expression sort_expr)
 {
-  assert(gsIsSortExpr(sort_expr));
-  if (data::sort_pos::is_pos(data::sort_expression(sort_expr)) ||
-      data::sort_nat::is_nat(data::sort_expression(sort_expr)) ||
-      data::sort_int::is_int(data::sort_expression(sort_expr)))
-  {
-    return data::sort_real::real_();
-  }
-  else if (gsIsSortId(sort_expr))
-  {
-    return sort_expr;
-  }
-  else if (gsIsSortCons(sort_expr))
-  {
-    ATermAppl sort_cons_type = ATAgetArgument(sort_expr, 0);
-    ATermAppl sort_cons_arg  = convert_numeric_sorts_to_real(ATAgetArgument(sort_expr, 1));
-    return gsMakeSortCons(sort_cons_type, sort_cons_arg);
-  }
-  else if (gsIsSortStruct(sort_expr))
-  {
-    ATermList struct_conss = ATmakeList0();
-    for (ATermList l = ATLgetArgument(sort_expr, 0); !ATisEmpty(l); l = ATgetNext(l))
-    {
-      ATermAppl struct_cons = ATAgetFirst(l);
-      ATermAppl struct_cons0 = ATAgetArgument(struct_cons, 0);
-      ATermList struct_cons1 = ATLgetArgument(struct_cons, 1);
-      ATermAppl struct_cons2 = ATAgetArgument(struct_cons, 2);
-      ATermList struct_projs = ATmakeList0();
-      for (ATermList m = struct_cons1; !ATisEmpty(m); m = ATgetNext(m))
-      {
-        ATermAppl struct_proj = ATAgetFirst(m);
-        ATermAppl struct_proj0 = ATAgetArgument(struct_proj, 0);
-        ATermAppl struct_proj1 = ATAgetArgument(struct_proj, 1);
-        struct_proj = gsMakeStructProj(struct_proj0, convert_numeric_sorts_to_real(struct_proj1));
-        struct_projs = ATinsert(struct_projs, (ATerm) struct_proj);
-      }
-      struct_projs = ATreverse(struct_projs);
-      struct_cons = gsMakeStructCons(struct_cons0, struct_projs, struct_cons2);
-      struct_conss = ATinsert(struct_conss, (ATerm) struct_cons);
-    }
-    struct_conss = ATreverse(struct_conss);
-    return gsMakeSortStruct(struct_conss);
-  }
-  else if (gsIsSortArrow(sort_expr))
-  {
-    ATermList domain = convert_numeric_sorts_to_real(ATLgetArgument(sort_expr, 0));
-    ATermAppl result = convert_numeric_sorts_to_real(ATAgetArgument(sort_expr, 1));
-    return gsMakeSortArrow(domain, result);
-  }
-  else if (gsIsSortUnknown(sort_expr))
-  {
-    return sort_expr;
-  }
-  else if (gsIsSortsPossible(sort_expr))
-  {
-    ATermList sort_exprs = convert_numeric_sorts_to_real(ATLgetArgument(sort_expr, 0));
-    return gsMakeSortsPossible(sort_exprs);
-  }
-  else
-  {
-    throw mcrl2::runtime_error(pp(sort_expr) + "is not a sort expression");
-  }
+  atermpp::map<data::basic_sort, data::sort_expression> substitution;
+  substitution[data::sort_pos::pos()] = data::sort_real::real_();
+  substitution[data::sort_nat::nat()] = data::sort_real::real_();
+  substitution[data::sort_int::int_()] = data::sort_real::real_();
+  return data::substitute_sorts(sort_expr, data::make_map_substitution(substitution));
 }
 
-ATermList grape::mcrl2gen::convert_numeric_sorts_to_real(ATermList sort_exprs)
+data::sort_expression_list grape::mcrl2gen::convert_numeric_sorts_to_real(data::sort_expression_list sort_exprs)
 {
-  ATermList result = ATmakeList0();
-  for (ATermList l = sort_exprs; !ATisEmpty(l); l = ATgetNext(l))
+  data::sort_expression_list result;
+  for (data::sort_expression_list::const_iterator i = sort_exprs.begin(); i != sort_exprs.end(); ++i)
   {
-    ATermAppl sort_expr = convert_numeric_sorts_to_real(ATAgetFirst(l));
-    result = ATinsert(result, (ATerm) sort_expr);
+    result = push_front(result, convert_numeric_sorts_to_real(*i));
   }
-  return ATreverse(result);
+  return reverse(result);
 }
 
 ATermAppl grape::mcrl2gen::parse_identifier(wxString p_identifier)

@@ -21,6 +21,7 @@
 
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/atermpp/table.h"
+#include "mcrl2/data/sort_expression.h"
 
 #define CONVERSION_ERROR                17
 #define XML_ERROR                       18
@@ -141,14 +142,14 @@ ATermAppl parse_proc_spec(wxString p_proc_spec);
  * @param sort_expr An ATerm representation of a sort expression
  * @return sort_expr in which the sorts Pos, Nat and Int are replaced by Real
  */
-ATermAppl convert_numeric_sorts_to_real(ATermAppl sort_expr);
+mcrl2::data::sort_expression convert_numeric_sorts_to_real(mcrl2::data::sort_expression sort_expr);
 
 /**
  * Convert numeric sorts in a list of sort expressions to sort Real
  * @param sort_exprs An ATerm representation of a list of sort expression
  * @return sort_exprs in which the sorts Pos, Nat and Int are replaced by Real
  */
-ATermList convert_numeric_sorts_to_real(ATermList sort_exprs);
+mcrl2::data::sort_expression_list convert_numeric_sorts_to_real(mcrl2::data::sort_expression_list sort_exprs);
 
 /**
  * TODO: is to be removed when is_user_identfier is working properly.
