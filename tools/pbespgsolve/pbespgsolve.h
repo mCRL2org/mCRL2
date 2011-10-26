@@ -139,6 +139,11 @@ class pbespgsolve_algorithm
           new ComponentSolverFactory(*solver_factory.release()));
       }
 
+      if (options.use_decycle_solver && options.use_deloop_solver)
+      {
+        throw mcrl2::runtime_error("pbespgsolve: cannot use self-loop removal and cycle removal simultaneously");
+      }
+
       if (options.use_decycle_solver)
       {
         solver_factory.reset(
