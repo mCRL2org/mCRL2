@@ -1903,9 +1903,9 @@ bool grape::mcrl2gen::validate_transition_label_actions(wxXmlNode* p_transition_
           }
 
           // get action parameter type
-          ATermAppl sort_expr = mcrl2::data::data_expression(a_type_checked_action_param_expr).sort();
-          ATermAppl new_sort_expr = convert_numeric_sorts_to_real(sort_expr);
-          string sort_expr_string = mcrl2::data::pp(mcrl2::data::sort_expression(new_sort_expr));
+          data::sort_expression sort_expr = mcrl2::data::data_expression(a_type_checked_action_param_expr).sort();
+          data::sort_expression new_sort_expr = convert_numeric_sorts_to_real(sort_expr);
+          string sort_expr_string = mcrl2::data::pp(new_sort_expr);
           wxString action_param_type = wxString(sort_expr_string.c_str(), wxConvLocal);
 
           dataexpression param;
