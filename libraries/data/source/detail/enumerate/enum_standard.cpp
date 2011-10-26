@@ -256,6 +256,8 @@ void EnumeratorSolutionsStandard::EliminateVars(fs_expr &e)
   while (!vars.empty() && FindInnerCEquality(expr,vars,var,val))
   {
     vars = (variable_list)ATremoveElement((ATermList)vars, (ATerm)(ATermAppl)var);
+    substituted_vars=push_front(substituted_vars,var);  
+    vals = push_front(vals,val);  
 
     internal_substitution_type sigma;
     sigma[var]=val;
