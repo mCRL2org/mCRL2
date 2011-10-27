@@ -29,7 +29,7 @@ using namespace mcrl2::data;
 
 void enumerate(const data_specification & d,
                const atermpp::set< variable > & v,
-               const data_expression & c, 
+               const data_expression & c,
                const size_t expected_no_of_solutions,
                const bool more_solutions_possible=false)
 {
@@ -47,8 +47,8 @@ void enumerate(const data_specification & d,
   BOOST_CHECK(number_of_solutions==expected_no_of_solutions && (!more_solutions_possible || i==enumerator.end()));
 }
 
-void enumerate(const std::string &specification, 
-               const std::string &enum_variables, 
+void enumerate(const std::string &specification,
+               const std::string &enum_variables,
                const std::string &condition,
                const std::string &free_variables,
                const size_t number_of_solutions,
@@ -62,7 +62,7 @@ void enumerate(const std::string &specification,
                               enum_vars,
                               cond,
                               number_of_solutions);
-} 
+}
 
 void empty_test()
 {
@@ -80,19 +80,18 @@ void empty_test()
 
   // explicit with condition evaluator and condition
   enumerator_type enumerator(specification,evaluator);
-  for (enumerator_type::iterator i=enumerator.begin(variables,sort_bool::true_()); i != enumerator.end(); ++i, ++count)
-  {
-    BOOST_CHECK(i->begin() == i->end()); // trivial valuation
-  }
 
+  for (enumerator_type::iterator i=enumerator.begin(variables,sort_bool::true_()); i != enumerator.end(); ++i)
+  {
+    count++;
+  }
   BOOST_CHECK(count == 1);
 
   // explicit with condition but without condition evaluator
-  for (enumerator_type::iterator i=enumerator.begin(variables, sort_bool::true_()); i != enumerator.end(); ++i, ++count)
+  for (enumerator_type::iterator i=enumerator.begin(variables,sort_bool::true_()); i != enumerator.end(); ++i)
   {
-    BOOST_CHECK(i->begin() == i->end()); //trivial valuation
+    count++;
   }
-
   BOOST_CHECK(count == 2);
 
   variables.insert(variable("y", sort_nat::nat()));
@@ -106,7 +105,7 @@ void empty_test()
 
 void list_test()
 {
-  
+
   const std::string boolean_list_specification =
     "sort list_of_booleans;                                    \n"
     "cons empty : list_of_booleans;                            \n"
@@ -136,35 +135,35 @@ void equality_substitution_test()
   variables.insert(variable("x", basic_sort("Pos")));
   std::clog << "Test1 equality\n";
   enumerate(spec,
-            variables, 
-            parse_data_expression("x==17 && x!=17", "x : Pos;", spec), 
+            variables,
+            parse_data_expression("x==17 && x!=17", "x : Pos;", spec),
             0);
   std::clog << "Test2 equality\n";
   enumerate(spec,
-            variables, 
-            parse_data_expression("x==17 && x==x", "x : Pos;", spec), 
+            variables,
+            parse_data_expression("x==17 && x==x", "x : Pos;", spec),
             1);
   std::clog << "Test3 equality\n";
   enumerate(spec,
-            variables, 
-            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+            variables,
+            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec),
             1);
   std::clog << "Test4 equality\n";
   variables.insert(variable("b", basic_sort("Bool")));
   enumerate(spec,
             variables,
-            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec),
             2);
   std::clog << "Test4 equality: return two non exact solutions\n";
   atermpp::set< variable > bvar;
   enumerate(spec,
             bvar, // intentionally empty.
-            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec),
             1);
   bvar.insert(variable("b", basic_sort("Bool")));
   enumerate(spec,
             bvar,
-            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec), 
+            parse_data_expression("x==17 && 2*x==34", "x : Pos;", spec),
             2);
 }
 
