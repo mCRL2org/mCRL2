@@ -51,6 +51,10 @@ std::string pp_deprecated(const atermpp::aterm_appl& x)
   {
     return process::pp(process::process_identifier(x));
   }
+  else if (core::detail::gsIsDataEqn(x))
+  {
+    return core::pp(x);
+  }
   throw mcrl2::runtime_error("pp_deprecated: encountered unknown term " + x.to_string());
   return "";
 }
