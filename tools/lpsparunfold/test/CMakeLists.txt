@@ -22,6 +22,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/build/workarounds)
 include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 include_directories(${CMAKE_SOURCE_DIR}/tools/lpsparunfold/test)
 
 file(GLOB TERM_OBJS "*.cpp")
@@ -32,6 +33,8 @@ foreach( OBJ ${TERM_OBJS} )
   add_executable("${PREFIX}_${result}" "${OBJ}" "${CMAKE_SOURCE_DIR}/tools/lpsparunfold/lpsparunfoldlib.cpp")
 
   target_link_libraries("${PREFIX}_${result}"
+    dparser
+    mcrl2_syntax
     mcrl2_lps
     mcrl2_utilities
   )
