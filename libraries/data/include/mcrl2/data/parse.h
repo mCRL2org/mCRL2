@@ -449,7 +449,6 @@ sort_expression parse_sort_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("SortExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  p.print_tree(node);
   return data_expression_actions(parser_tables_mcrl2).parse_SortExpr(node);
 }
 
