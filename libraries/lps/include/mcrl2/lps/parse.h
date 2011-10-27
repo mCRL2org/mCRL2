@@ -50,9 +50,9 @@ struct action_rename_actions: public lps::action_actions
   lps::action_rename_rule parse_ActionRenameRule(const core::parse_node& node)
   {
     data::data_expression condition = data::sort_bool::true_();
-    if (node.child(0).child(1))
+    if (node.child(0).child(0))
     {
-      condition = parse_DataExpr(node.child(0).child(1));
+      condition = parse_DataExpr(node.child(0).child(0).child(0));
     }
     return action_rename_rule(core::detail::gsMakeActionRenameRule(data::variable_list(), condition, parse_Action(node.child(1)), parse_ActionRenameRuleRHS(node.child(3))));
   }

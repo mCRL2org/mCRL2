@@ -66,14 +66,6 @@ class action_rename_rule_rhs: public atermpp::aterm_appl
       : atermpp::aterm_appl(core::detail::constructActionRenameRuleRHS())
     {}
 
-    /// \brief Constructor.
-    /// \param term A term
-    action_rename_rule_rhs(const atermpp::aterm_appl& term)
-      : atermpp::aterm_appl(term)
-    {
-      assert(core::detail::check_rule_ActionRenameRuleRHS(m_term));
-    }
-
     /// \brief Returns true if the right hand side is equal to delta.
     /// \return True if the right hand side is equal to delta.
     bool is_delta() const
@@ -88,11 +80,23 @@ class action_rename_rule_rhs: public atermpp::aterm_appl
       return core::detail::gsIsTau(*this);
     }
 
+    /// \brief Constructor.
+    /// \param term A term
+    action_rename_rule_rhs(const atermpp::aterm_appl& term)
+      : atermpp::aterm_appl(term)
+    {
+      assert(core::detail::check_rule_ActionRenameRuleRHS(m_term));
+    }
+
     /// \brief Returns the action.
     /// \pre The right hand side must be an action
     /// \return The action.
     action act() const
     {
+      if (is_tau() || is_delta())
+      {
+        return action();
+      }
       atermpp::aterm_appl result = *this;
       return action(result);
     }
@@ -160,7 +164,14 @@ class action_rename_rule
 
     /// \brief Returns the condition of the rule.
     /// \return The condition of the rule.
-    data::data_expression condition() const
+    const data::data_expression& condition() const
+    {
+      return m_condition;
+    }
+
+    /// \brief Returns the condition of the rule.
+    /// \return The condition of the rule.
+    data::data_expression& condition()
     {
       return m_condition;
     }
@@ -545,10 +556,6 @@ lps::specification action_rename(
     action rule_old_action =  i->lhs();
     action rule_new_action;
     action_rename_rule_rhs new_element = i->rhs();
-    if (new_element.is_tau() || new_element.is_delta())
-    {
-      throw mcrl2::runtime_error("It is not allowed to call new_element.act() under these circumstances!");
-    }
     rule_new_action =  new_element.act();
 
     const bool to_tau = new_element.is_tau();
