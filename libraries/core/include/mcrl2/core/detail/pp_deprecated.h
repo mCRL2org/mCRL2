@@ -51,12 +51,17 @@ std::string pp_deprecated(const atermpp::aterm_appl& x)
   {
     return process::pp(process::process_identifier(x));
   }
-  else if (core::detail::gsIsDataEqn(x))
+  else if (core::is_identifier_string(x))
   {
     return core::pp(x);
   }
-  throw mcrl2::runtime_error("pp_deprecated: encountered unknown term " + x.to_string());
-  return "";
+  else if (core::detail::gsIsDataEqn(x))
+  {
+    // print as ATerm, since pretty printing does not work before type checking...
+    return core::pp(x);
+  }
+  std::cerr << "Warning: encountered unknown term in pp_deprecated " << x << std::endl;
+  return core::pp(x);
 }
 
 inline
@@ -90,8 +95,8 @@ std::string pp_deprecated(const atermpp::aterm_list& x)
   {
     return process::pp(process::process_identifier_list(x));
   }
-  throw mcrl2::runtime_error("pp_deprecated: encountered unknown term " + x.to_string());
-  return "";
+  std::cerr << "Warning: encountered unknown term in pp_deprecated " << x << std::endl;
+  return core::pp(x);
 }
 
 inline
