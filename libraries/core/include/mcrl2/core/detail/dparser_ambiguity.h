@@ -40,9 +40,9 @@ struct D_ParseNode* ambiguity_fn(struct D_Parser *p, int n, struct D_ParseNode *
   {
     core::parse_node v0(v[0]);
     core::parse_node v1(v[1]);
-    if (table.symbol_name(v0) == "ProcExpr" and
-        table.symbol_name(v1) == "ProcExpr" and
-        v0.child_count() == 3 and
+    if (table.symbol_name(v0) == "ProcExpr" &&
+        table.symbol_name(v1) == "ProcExpr" &&
+        v0.child_count() == 3 &&
         v1.child_count() == 3)
     {
       if (table.symbol_name(v0.child(1)) == "IfThen")
