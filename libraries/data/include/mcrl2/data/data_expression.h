@@ -224,7 +224,7 @@ class data_expression: public atermpp::aterm_appl
       {
         data_expression head = atermpp::arg1(*this);
         sort_expression s(head.sort());
-        if (s == sort_expression() && is_identifier(head))
+        if (s == sort_expression())
         {
           result = s;
         }
