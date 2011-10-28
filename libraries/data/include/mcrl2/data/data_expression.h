@@ -222,13 +222,20 @@ class data_expression: public atermpp::aterm_appl
       }
       else if (is_application(*this))
       {
-        sort_expression s(data_expression(atermpp::arg1(*this)).sort());
-        if (!is_function_sort(s) && !is_identifier(s))
+        data_expression head = atermpp::arg1(*this);
+        sort_expression s(head.sort());
+        if (s == sort_expression() && is_identifier(head))
+        {
+          result = s;
+        }
+        else if (is_function_sort(s))
+        {
+          result = atermpp::arg2(s);
+        }
+        else
         {
           throw mcrl2::runtime_error("Sort " + s.to_string() + " of " + atermpp::arg1(*this).to_string() + " is not a function sort.");
         }
-
-        result = atermpp::arg2(s);
       }
       else if (is_where_clause(*this))
       {
