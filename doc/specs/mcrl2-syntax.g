@@ -9,9 +9,8 @@
 /// \file mcrl2-syntax.g
 /// \brief dparser grammar of the mCRL2 language
 
-{
-#include "d.h"
-}
+${declare tokenize}
+${declare longest_match}
 
 //--- Sort expressions and sort declarations
 
@@ -363,71 +362,10 @@ ActionRenameRuleRHS
 
 IdList: Id ( ',' Id )* ;
 
-//-- start Id definition --//
-// This section contains the definition of an Id. Some C-code (between braces)
-// and a semantic action (between brackets) have been added to disallow reserved
-// words to be used as an Id.
-{
-  const char *reserved_words[] = {
-    "sort"  ,
-    "cons"  ,
-    "map"   ,
-    "var"   ,
-    "eqn"   ,
-    "act"   ,
-    "proc"  ,
-    "init"  ,
-    "delta" ,
-    "tau"   ,
-    "sum"   ,
-    "block" ,
-    "allow" ,
-    "hide"  ,
-    "rename",
-    "comm"  ,
-    "struct",
-    "Bool"  ,
-    "Pos"   ,
-    "Nat"   ,
-    "Int"   ,
-    "Real"  ,
-    "List"  ,
-    "Set"   ,
-    "Bag"   ,
-    "true"  ,
-    "false" ,
-    "whr"   ,
-    "end"   ,
-    "lambda",
-    "forall",
-    "exists",
-    "div"   ,
-    "mod"   ,
-    "in"    ,
-    "pbes"  ,
-    "bes"   ,
-    "nil"   ,
-    NULL
-  };
-  static int is_one_of(char *s, const char **list) {
-    while (*list) { if (!strcmp(s, *list)) return 1; list++; }
-    return 0;
-  }
-}
+Id: "[A-Za-z_][A-Za-z_0-9']*" $term -1 ;
 
-Id: "[A-Za-z_][A-Za-z_0-9']*"
-[
-  char *ts = dup_str($n0.start_loc.s, $n0.end);
-  if (is_one_of(ts, reserved_words)) {
-    d_free(ts);
-    ${reject};
-  }
-  d_free(ts);
-];
-//-- end Id definition --//
-
-Number: "0|([1-9][0-9]*)" ;
+Number: "0|([1-9][0-9]*)" $term -1 ;
 
 //--- Whitespace
 
-whitespace: "([ \t\n]|(%[^\n]*\n))*" ;
+whitespace: "([ \t\n\r]|(%[^\n\r]*))*" ;
