@@ -35,14 +35,14 @@ install(TARGETS mcrl2_syntax DESTINATION ${MCRL2_LIB_DIR})
 
 # ######### Set policies ############
 
-# ################################### 
-# "core" links to some transitive 
+# ###################################
+# "core" links to some transitive
 # libraries for which the linker must
 # search:
 #   wxWidgets
 # Therefore CMP0003 is set to NEW
 # If not set, a BUILD_SHARED_LIB=TRUE
-# combined with a wxWidgets build 
+# combined with a wxWidgets build
 # raises a warning
 # ###################################
 
@@ -54,6 +54,7 @@ endif(COMMAND cmake_policy)
 
 set(mcrl2_core_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/parse.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/struct_core.cpp
 )
 
@@ -76,6 +77,7 @@ add_library(${PROJECT_NAME}
 target_link_libraries(${PROJECT_NAME}
   mcrl2_aterm
   mcrl2_utilities
+  mcrl2_syntax
 )
 
 

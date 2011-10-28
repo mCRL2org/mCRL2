@@ -445,7 +445,7 @@ struct data_specification_actions: public data_expression_actions
 inline
 sort_expression parse_sort_expression_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
   unsigned int start_symbol_index = p.start_symbol_index("SortExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
@@ -455,7 +455,7 @@ sort_expression parse_sort_expression_new(const std::string& text)
 inline
 variable_list parse_variables_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
   unsigned int start_symbol_index = p.start_symbol_index("VarSpec");
   bool partial_parses = false;
   std::string var_text("var " + text);
@@ -466,7 +466,7 @@ variable_list parse_variables_new(const std::string& text)
 inline
 data_expression parse_data_expression_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
   unsigned int start_symbol_index = p.start_symbol_index("DataExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
@@ -476,7 +476,7 @@ data_expression parse_data_expression_new(const std::string& text)
 inline
 data_specification parse_data_specification_new(const std::string& text)
 {
-  core::parser p(parser_tables_mcrl2);
+  core::parser p(parser_tables_mcrl2, core::detail::ambiguity_fn);
   unsigned int start_symbol_index = p.start_symbol_index("DataSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
