@@ -7582,7 +7582,8 @@ class specification_basic_type:public boost::noncopyable
         if (ct && options.add_delta)
         {
           mCRL2log(log::warning) << "process " << procId.name() <<
-              " contains time, which is now not preserved. Use --timed or -T or untick add deadlocks for a corrent timed linearisation..\n";
+              " contains time, which is now not preserved. \n";
+              "Use --timed or -T, or untick `add deadlocks' for a correct timed linearisation...\n";
         }
         if (objectdata[n].containstime!=ct)
         {
