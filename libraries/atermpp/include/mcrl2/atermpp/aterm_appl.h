@@ -32,7 +32,7 @@ class term_appl: public aterm_base
     /// built-in C++ operator[](ATermAppl, int)
     /// \param i A positive integer
     /// \return The default constructed term
-    Term operator[](size_t i) const
+    Term operator[](size_t /*i*/) const
     {
       return Term();
     }
