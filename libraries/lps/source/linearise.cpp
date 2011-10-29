@@ -7579,11 +7579,13 @@ class specification_basic_type:public boost::noncopyable
       {
         visited.insert(procId);
         bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then);
-        if (ct && options.add_delta)
-        {
+        static bool show_only_once=true;
+        if (ct && options.add_delta && show_only_once)
+        { 
           mCRL2log(log::warning) << "process " << procId.name() <<
-              " contains time, which is now not preserved. \n";
+              " contains time, which is now not preserved. \n"  <<
               "Use --timed or -T, or untick `add deadlocks' for a correct timed linearisation...\n";
+          show_only_once=false;
         }
         if (objectdata[n].containstime!=ct)
         {
