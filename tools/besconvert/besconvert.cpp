@@ -521,7 +521,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
 
     void run(utilities::execution_timer& timing)
     {
-      mCRL2log(verbose) << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
+      mCRL2log(log::verbose) << "Reducing BES modulo " << m_equivalence_strings[m_equivalence] << std::endl;
       mCRL2log(debug) << "Converting BES to standard form" << std::endl;
 
       timing.start("standard form conversion");
@@ -547,7 +547,7 @@ class bes_reduction_algorithm: public detail::bes_algorithm<Container>
       lts_to_bes();
       timing.finish("conversion to BES");
 
-      mCRL2log(verbose) << "Removing unreachable equations" << std::endl;
+      mCRL2log(log::verbose) << "Removing unreachable equations" << std::endl;
       super::remove_unreachable_equations();
     }
 

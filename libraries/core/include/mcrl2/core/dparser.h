@@ -16,6 +16,7 @@
 #include <iostream>
 #include <iomanip>
 #include <set>
+#include <string>
 #include <vector>
 #include "dparse.h"
 

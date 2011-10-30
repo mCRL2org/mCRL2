@@ -23,7 +23,6 @@
 #include "realelm.h"
 #include "linear_inequalities.h"
 
-using namespace atermpp;
 using namespace mcrl2;
 using namespace mcrl2::core;
 using namespace mcrl2::data;
@@ -210,7 +209,7 @@ static data_expression else_part(const data_expression e)
 /// \brief Splits a condition in expressions ranging over reals and the others
 /// \details Conceptually, the condition is first transformed to conjunctive
 ///          normalform. For each conjunct, there will be an entry in both
-///          resulting vectors, where the real conditions are in "real_conditions",
+///          resulting std::vectors, where the real conditions are in "real_conditions",
 ///          and the others in non_real_conditions. If there are conjuncts with
 ///          both real and non-real variables an exception is thrown. If negate
 ///          is true the result will be negated.
@@ -361,7 +360,7 @@ static void normalize_specification(
       {
         t=set_condition(t,c);
 
-        vector < linear_inequality > inequalities;
+        std::vector < linear_inequality > inequalities;
         // Collect all real conditions from the condition from this summand and put them
         // into inequalities.
         for (data_expression_list::const_iterator k=j_r->begin(); k!=j_r->end(); k++)
@@ -400,7 +399,7 @@ static void normalize_specification(
           }
         }
 
-        vector < linear_inequality > new_inequalities;
+        std::vector < linear_inequality > new_inequalities;
         fourier_motzkin(inequalities,
                         eliminatable_real_sum_variables.begin(),
                         eliminatable_real_sum_variables.end(),
@@ -462,7 +461,7 @@ static void normalize_specification(
 static
 void determine_real_inequalities(
   const data_expression& e,
-  vector < linear_inequality > &inequalities,
+  std::vector < linear_inequality > &inequalities,
   const rewriter& r)
 {
   // mCRL2log(debug) << "Real inequalities in" << data::pp(e) << "\n";
@@ -541,7 +540,7 @@ static void add_inequalities_to_context_postponed(
   assert(inequalities_to_add_lhs.size()==inequalities_to_add_lhs_size.size() &&
          inequalities_to_add_lhs.size() ==inequalities_to_add_rhs.size());
   // mCRL2log(debug) << "Inequalities to add: " << pp_vector(inequalities_to_add) << "\n";
-  for (vector < linear_inequality > ::iterator i = l.begin(); i != l.end();)
+  for (std::vector < linear_inequality > ::iterator i = l.begin(); i != l.end();)
   {
     data_expression left;
     data_expression right;
@@ -797,22 +796,22 @@ specification realelm(specification s, int max_iterations, const rewriter& r)
   ds.add_alias(alias(c.basic_sort_name(),c));
   ds.add_mapping(negate_function_symbol(c.sort()));
   ds.add_equation(data_equation(  // negate(larger)=smaller;
-                    vector <variable>(),
+                    std::vector <variable>(),
                     sort_bool::true_(),
                     make_application(negate_function_symbol(c.sort()),c.larger()),
                     c.smaller()));
   ds.add_equation(data_equation(  // negate(smaller)=larger;
-                    vector <variable>(),
+                    std::vector <variable>(),
                     sort_bool::true_(),
                     make_application(negate_function_symbol(c.sort()),c.smaller()),
                     c.larger()));
   ds.add_equation(data_equation(  // negate(equal)=equal;
-                    vector <variable>(),
+                    std::vector <variable>(),
                     sort_bool::true_(),
                     make_application(negate_function_symbol(c.sort()),c.equal()),
                     c.equal()));
   variable v("x",c.sort());
-  vector <variable> vars;
+  std::vector <variable> vars;
   vars.push_back(v);
   ds.add_equation(data_equation(  // negate(negate(x))=x;
                     vars,
