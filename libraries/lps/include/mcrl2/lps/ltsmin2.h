@@ -361,8 +361,20 @@ class pins
       return *m_data_types.back();
     }
 
+    /// \brief Returns the action data type
+    const pins_data_type& action_label_type_map() const
+    {
+      return *m_data_types.back();
+    }
+
     /// \brief Returns the data type of the i-th state parameter
     pins_data_type& state_type_map(std::size_t i)
+    {
+      return *m_data_types[i];
+    }
+
+    /// \brief Returns the data type of the i-th state parameter
+    const pins_data_type& state_type_map(std::size_t i) const
     {
       return *m_data_types[i];
     }
