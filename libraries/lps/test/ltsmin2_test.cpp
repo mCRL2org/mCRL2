@@ -103,15 +103,7 @@ void test_ltsmin()
   std::size_t N = p.process_parameter_count();
 
   BOOST_CHECK(p.edge_label_count() == 1);
-  BOOST_CHECK(p.edge_label_name(0) == "action");
-  BOOST_CHECK(p.edge_label_type(0) == 1);
-
   BOOST_CHECK(p.process_parameter_count() == 11);
-  for (std::size_t i = 0; i < p.process_parameter_count(); i++)
-  {
-    BOOST_CHECK(p.process_parameter_type(i) == 0);
-  }
-
   BOOST_CHECK(p.datatype_count() == p.process_parameter_count() + 1);
   BOOST_CHECK(p.group_count() == 10);
 
