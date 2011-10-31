@@ -75,7 +75,7 @@ std::vector<std::string> generate_values(const data::data_specification& dataspe
   v.push_back(x);
   for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(v, data::sort_bool::true_(), max_size); i != enumerator.end() ; ++i)
   {
-    result.push_back(lps::pp((*i)(x)));
+    result.push_back((*i)(x).to_string());
   }
   return result;
 }
