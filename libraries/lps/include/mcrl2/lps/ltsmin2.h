@@ -64,9 +64,9 @@ data::rewriter::strategy parse_rewriter_strategy(const std::string& rewriter_str
 
 /// \brief Generates possible values of the data type (at most max_size).
 inline
-data::data_expression_vector generate_values(const data::data_specification& dataspec, const data::sort_expression& s, std::size_t max_size = 1000)
+std::vector<std::string> generate_values(const data::data_specification& dataspec, const data::sort_expression& s, std::size_t max_size = 1000)
 {
-  data::data_expression_vector result;
+  std::vector<std::string> result;
 
   data::rewriter rewr(dataspec);
   data::classic_enumerator<data::rewriter> enumerator(dataspec, rewr);
@@ -75,7 +75,7 @@ data::data_expression_vector generate_values(const data::data_specification& dat
   v.push_back(x);
   for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(v, data::sort_bool::true_(), max_size); i != enumerator.end() ; ++i)
   {
-    result.push_back((*i)(x));
+    result.push_back(lps::pp((*i)(x)));
   }
   return result;
 }
@@ -166,9 +166,9 @@ class pins_data_type
 
     /// \brief Returns the name of the data type.
     virtual const std::string& name() const = 0;
-   
+
     /// \brief Generates possible values of the data type (at most max_size).
-    virtual data::data_expression_vector generate_values(std::size_t max_size = 1000) const = 0;
+    virtual std::vector<std::string> generate_values(std::size_t max_size = 1000) const = 0;
 
     /// \brief Returns true if the number of elements is bounded. If this property can
     /// not be computed for a data type, false is returned.
@@ -266,11 +266,11 @@ class state_data_type: public pins_data_type
     {
       return m_name;
     }
-    
-    data::data_expression_vector generate_values(std::size_t max_size = 1000) const
+
+    std::vector<std::string> generate_values(std::size_t max_size = 1000) const
     {
       return lps::generate_values(m_generator.get_specification().data(), m_sort, max_size);
-    }  
+    }
 };
 
 /// \brief Models the mapping of mCRL2 action labels to integers.
@@ -327,11 +327,11 @@ class action_label_data_type: public pins_data_type
     {
       return m_name;
     }
-    
-    data::data_expression_vector generate_values(std::size_t max_size = 1000) const
+
+    std::vector<std::string> generate_values(std::size_t max_size = 1000) const
     {
-      return data::data_expression_vector();
-    }  
+      return std::vector<std::string>();
+    }
 };
 
 class pins
@@ -775,8 +775,8 @@ class pins
             << " bounded = " << std::boolalpha << type.is_bounded() << "\n";
         if (type.is_bounded())
         {
-          out << " possible values: " << core::detail::print_set(type.generate_values(10), data::stream_printer()) << std::endl;
-        }       
+          out << " possible values: " << core::detail::print_set(type.generate_values(10), core::detail::default_printer()) << std::endl;
+        }
         out << std::endl;
       }
 
