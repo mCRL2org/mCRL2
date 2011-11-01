@@ -13,10 +13,7 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/atermpp/aterm_init.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/abstract.h"
-#include "mcrl2/pbes/detail/pbes_parameter_map.h"
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 
 using namespace mcrl2;
@@ -92,18 +89,11 @@ class pbes_abstract_tool: public input_output_tool
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  parameters:         " << m_parameter_selection << std::endl;
 
-      // load the pbes
-      pbes<> p;
-      load_pbes(p, m_input_filename);
-
-      // run the algorithm
-      pbes_abstract_algorithm algorithm;
-      pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, m_parameter_selection);
-      algorithm.run(p, parameter_map, m_value_true);
-
-      // save the result
-      p.save(m_output_filename);
-
+      pbesabstract(input_filename(),
+                   output_filename(),
+                   m_parameter_selection,
+                   m_value_true
+                 );
       return true;
     }
 };

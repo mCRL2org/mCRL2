@@ -30,9 +30,7 @@ enum pbes_rewriter_type
   pfnf
 };
 
-/// \brief Returns the string corresponding to a pbes rewriter type
-/// \param type A string
-/// \return A string corresponding to the pbes rewriter type
+/// \brief Parses a pbes rewriter type
 inline
 pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
 {
@@ -60,8 +58,6 @@ pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
 }
 
 /// \brief Returns a description of a pbes rewriter
-/// \param type A rewriter type
-/// \return A description of the rewriter type
 inline
 std::string pbes_rewriter_description(pbes_rewriter_type type)
 {

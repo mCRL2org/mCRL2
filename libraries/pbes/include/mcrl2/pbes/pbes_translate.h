@@ -176,7 +176,7 @@ class pbes_translate_algorithm
         else
         {
           data::variable_list xf = detail::mu_variables(f);
-          state_formulas::state_formula g = arg3(f);
+          state_formulas::state_formula g = atermpp::arg3(f);
           result = Par(x, l + xf, g);
         }
       }

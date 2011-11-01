@@ -12,14 +12,24 @@
 #include <cassert>
 #include <sstream>
 
+#include <boost/lexical_cast.hpp>
+
 #include "mcrl2/data/enumerator.h"
 #include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/lps/specification.h"
+#include "mcrl2/modal_formula/state_formula.h"
+#include "mcrl2/modal_formula/parse.h"
+#include "mcrl2/pbes/bisimulation.h"
+#include "mcrl2/pbes/absinthe.h"
+#include "mcrl2/pbes/abstract.h"
 #include "mcrl2/pbes/constelm.h"
 #include "mcrl2/pbes/detail/pbes_property_map.h"
 #include "mcrl2/pbes/detail/pbes_parameter_map.h"
 #include "mcrl2/pbes/eqelm.h"
 #include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/lps2pbes.h"
+#include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbesinst.h"
@@ -34,6 +44,7 @@
 #include "mcrl2/pbes/remove_equations.h"
 #include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/logger.h"
+#include "mcrl2/utilities/text_utility.h"
 
 namespace mcrl2
 {
@@ -396,6 +407,142 @@ void txt2pbes(const std::string& input_filename,
   {
     mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
   }
+  p.save(output_filename);
+}
+
+void lps2pbes(const std::string& input_filename,
+              const std::string& output_filename,
+              const std::string& formfilename,
+              bool timed
+             )
+{
+  if (formfilename.empty())
+  {
+    throw mcrl2::runtime_error("option -f is not specified");
+  }
+
+  //load LPS
+  if (input_filename.empty())
+  {
+    mCRL2log(log::verbose) << "reading LPS from stdin..." << std::endl;
+  }
+  else
+  {
+    mCRL2log(log::verbose) << "reading LPS from file '" <<  input_filename << "'..." << std::endl;
+  }
+  lps::specification spec;
+  spec.load(input_filename);
+  //load formula file
+  mCRL2log(log::verbose) << "reading input from file '" <<  formfilename << "'..." << std::endl;
+  std::ifstream instream(formfilename.c_str(), std::ifstream::in|std::ifstream::binary);
+  if (!instream)
+  {
+    throw mcrl2::runtime_error("cannot open state formula file: " + formfilename);
+  }
+  state_formulas::state_formula formula = state_formulas::parse_state_formula(instream, spec);
+  instream.close();
+  //convert formula and LPS to a PBES
+  mCRL2log(log::verbose) << "converting state formula and LPS to a PBES..." << std::endl;
+  pbes_system::pbes<> result = pbes_system::lps2pbes(spec, formula, timed);
+  //save the result
+  if (output_filename.empty())
+  {
+    mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
+  }
+  else
+  {
+    mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
+  }
+  result.save(output_filename);
+}
+
+void lpsbisim2pbes(const std::string& input_filename1,
+                   const std::string& input_filename2,
+                   const std::string& output_filename,
+                   bisimulation_type type,
+                   bool normalize
+                  )
+{
+  lps::specification M;
+  lps::specification S;
+
+  M.load(input_filename1);
+  S.load(input_filename2);
+  pbes<> result;
+  switch (type)
+  {
+    case strong_bisim:
+      result = strong_bisimulation(M, S);
+      break;
+    case weak_bisim:
+      result = weak_bisimulation(M, S);
+      break;
+    case branching_bisim:
+      result = branching_bisimulation(M, S);
+      break;
+    case branching_sim:
+      result = branching_simulation_equivalence(M, S);
+      break;
+  }
+  if (normalize)
+  {
+    pbes_system::normalize(result);
+  }
+  result.save(output_filename);
+}
+
+void pbesabstract(const std::string& input_filename,
+                  const std::string& output_filename,
+                  const std::string& parameter_selection,
+                  bool value_true
+                 )
+{
+  // load the pbes
+  pbes<> p;
+  load_pbes(p, input_filename);
+
+  // run the algorithm
+  pbes_abstract_algorithm algorithm;
+  pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, parameter_selection);
+  algorithm.run(p, parameter_map, value_true);
+
+  // save the result
+  p.save(output_filename);
+}
+
+void pbesabsinthe(const std::string& input_filename,
+                  const std::string& output_filename,
+                  const std::string& abstraction_file,
+                  absinthe_strategy strategy,
+                  bool print_used_function_symbols,
+                  bool enable_logging
+                 )
+{
+  // load the pbes
+  pbes<> p;
+  p.load(input_filename);
+
+  if (print_used_function_symbols)
+  {
+    pbes_system::detail::print_used_function_symbols(p);
+  }
+
+  std::string abstraction_text;
+  if (!abstraction_file.empty())
+  {
+    abstraction_text = utilities::read_text(abstraction_file);
+  }
+
+  bool over_approximation = (strategy == absinthe_over);
+
+  absinthe_algorithm algorithm;
+  if (enable_logging)
+  {
+    algorithm.enable_logging();
+  }
+  algorithm.run(p, abstraction_text, over_approximation);
+
+  // save the result
   p.save(output_filename);
 }
 

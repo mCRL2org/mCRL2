@@ -15,6 +15,8 @@
 #include <string>
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/rewriter.h"
+#include "mcrl2/pbes/absinthe_strategy.h"
+#include "mcrl2/pbes/bisimulation_type.h"
 #include "mcrl2/pbes/file_formats.h"
 #include "mcrl2/pbes/pbesinst_strategy.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
@@ -73,6 +75,33 @@ void pbespp(const std::string& input_filename,
 
 void txt2pbes(const std::string& input_filename,
               const std::string& output_filename);
+
+void lps2pbes(const std::string& input_filename,
+              const std::string& output_filename,
+              const std::string& formfilename,
+              bool timed
+             );
+
+void lpsbisim2pbes(const std::string& input_filename1,
+                   const std::string& input_filename2,
+                   const std::string& output_filename,
+                   bisimulation_type type,
+                   bool normalize
+                  );
+
+void pbesabstract(const std::string& input_filename,
+                  const std::string& output_filename,
+                  const std::string& parameter_selection,
+                  bool value_true
+                 );
+
+void pbesabsinthe(const std::string& input_filename,
+                  const std::string& output_filename,
+                  const std::string& abstraction_file,
+                  absinthe_strategy strategy,
+                  bool print_used_function_symbols,
+                  bool enable_logging
+                 );
 
 } // namespace pbes_system
 

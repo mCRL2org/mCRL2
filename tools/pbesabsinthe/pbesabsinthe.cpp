@@ -12,14 +12,12 @@
 
 #include <iostream>
 #include <string>
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/absinthe_strategy.h"
+#include "mcrl2/pbes/tools.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/utilities/text_utility.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/absinthe.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -36,38 +34,12 @@ class pbes_absinthe_tool: public input_output_tool
     std::string m_abstraction_file;
     bool m_print_used_function_symbols;
     bool m_enable_logging;
-
-    /// The transformation strategies of the tool.
-    enum approximation_strategy
-    {
-      as_over,
-      as_under
-    };
-
-    approximation_strategy m_strategy;
-
-    /// Sets the output format.
-    /// \param format An output format.
-    void set_approximation_strategy(const std::string& strategy)
-    {
-      if (strategy == "over")
-      {
-        m_strategy = as_over;
-      }
-      else if (strategy == "under")
-      {
-        m_strategy = as_under;
-      }
-      else
-      {
-        throw std::runtime_error("unknown approximation strategy specified (got `" + strategy + "')");
-      }
-    }
+    absinthe_strategy m_strategy;
 
     void parse_options(const command_line_parser& parser)
     {
       super::parse_options(parser);
-      set_approximation_strategy(parser.option_argument("strategy"));
+      m_strategy = parse_absinthe_strategy(parser.option_argument("strategy"));
       m_abstraction_file = parser.option_argument("abstraction-file");
       m_print_used_function_symbols = parser.options.count("used-function-symbols") > 0;
       m_enable_logging = parser.options.count("enable-logging") > 0;
@@ -110,35 +82,15 @@ class pbes_absinthe_tool: public input_output_tool
       mCRL2log(verbose) << "  input file:             " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:            " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  abstraction file:       " << m_abstraction_file << std::endl;
-      mCRL2log(verbose) << "  approximation strategy: " << (m_strategy == as_over ? "over" : "under")  << std::endl;
+      mCRL2log(verbose) << "  approximation strategy: " << print_absinthe_strategy(m_strategy) << std::endl;
 
-      // load the pbes
-      pbes<> p;
-      p.load(m_input_filename);
-
-      if (m_print_used_function_symbols)
-      {
-        pbes_system::detail::print_used_function_symbols(p);
-      }
-
-      std::string abstraction_text;
-      if (!m_abstraction_file.empty())
-      {
-        abstraction_text = utilities::read_text(m_abstraction_file);
-      }
-
-      bool over_approximation = m_strategy == as_over;
-
-      absinthe_algorithm algorithm;
-      if (m_enable_logging)
-      {
-        algorithm.enable_logging();
-      }
-      algorithm.run(p, abstraction_text, over_approximation);
-
-      // save the result
-      p.save(m_output_filename);
-
+      pbesabsinthe(input_filename(),
+                   output_filename(),
+                   m_abstraction_file,
+                   m_strategy,
+                   m_print_used_function_symbols,
+                   m_enable_logging
+                 );
       return true;
     }
 
