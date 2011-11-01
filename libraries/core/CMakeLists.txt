@@ -55,6 +55,7 @@ endif(COMMAND cmake_policy)
 set(mcrl2_core_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/typecheck.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/parse.cpp
+  ${CMAKE_CURRENT_SOURCE_DIR}/source/print.cpp
   ${CMAKE_CURRENT_SOURCE_DIR}/source/struct_core.cpp
 )
 
@@ -62,8 +63,6 @@ set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include )
-include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/atermpp/include)
 include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
