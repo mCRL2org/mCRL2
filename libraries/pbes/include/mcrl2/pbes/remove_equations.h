@@ -17,10 +17,27 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
+#include "mcrl2/pbes/print.h"
 
 namespace mcrl2 {
 
 namespace pbes_system {
+
+namespace detail {
+
+inline
+std::string print_removed_equations(const atermpp::vector<propositional_variable>& removed)
+{
+  std::ostringstream out;
+  out << "\nremoved the following equations:" << std::endl;
+  for (atermpp::vector<propositional_variable>::const_iterator i = removed.begin(); i != removed.end(); ++i)
+  {
+    out << "  " << pbes_system::pp(*i) << std::endl;
+  }
+  return out.str();
+}
+
+} // namespace detail
 
 template <typename Container>
 std::set<propositional_variable> reachable_variables(const pbes<Container>& p)

@@ -1,0 +1,373 @@
+// Author(s): Wieger Wesselink
+// Copyright: see the accompanying file COPYING or copy at
+// https://svn.win.tue.nl/trac/MCRL2/browser/trunk/COPYING
+//
+// Distributed under the Boost Software License, Version 1.0.
+// (See accompanying file LICENSE_1_0.txt or copy at
+// http://www.boost.org/LICENSE_1_0.txt)
+//
+/// \file pbes/source/tools.cpp
+/// \brief Tool implementations.
+
+#include <cassert>
+#include <sstream>
+
+#include "mcrl2/data/enumerator.h"
+#include "mcrl2/data/identifier_generator.h"
+#include "mcrl2/pbes/constelm.h"
+#include "mcrl2/pbes/detail/pbes_property_map.h"
+#include "mcrl2/pbes/detail/pbes_parameter_map.h"
+#include "mcrl2/pbes/eqelm.h"
+#include "mcrl2/pbes/file_formats.h"
+#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/parelm.h"
+#include "mcrl2/pbes/pbes.h"
+#include "mcrl2/pbes/pbesinst.h"
+#include "mcrl2/pbes/pbesinst_algorithm.h"
+#include "mcrl2/pbes/pbesinst_strategy.h"
+#include "mcrl2/pbes/pbesinst_finite_algorithm.h"
+#include "mcrl2/pbes/pbes_rewriter_type.h"
+#include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/rewrite.h"
+#include "mcrl2/pbes/rewriter.h"
+#include "mcrl2/pbes/remove_equations.h"
+#include "mcrl2/utilities/logger.h"
+
+namespace mcrl2
+{
+
+namespace pbes_system
+{
+
+namespace tools
+{
+
+void pbesrewr(const std::string& input_filename,
+              const data::rewriter::strategy rewrite_strategy,
+              pbes_rewriter_type rewriter_type,
+              bool skip_data
+             )
+{
+  // load the pbes
+  pbes<> p;
+  load_pbes(p, input_filename);
+
+  // data rewriter
+  data::rewriter datar(p.data(), rewrite_strategy);
+
+  // pbes rewriter
+  switch (rewriter_type)
+  {
+    case simplify:
+    {
+      simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
+      pbes_rewrite(p, pbesr);
+      break;
+    }
+    case quantifier_all:
+    {
+      data::number_postfix_generator generator("UNIQUE_PREFIX");
+      data::data_enumerator<> datae(p.data(), datar, generator);
+      data::rewriter_with_variables datarv(datar);
+      bool enumerate_infinite_sorts = true;
+      enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts, skip_data);
+      pbes_rewrite(p, pbesr);
+      break;
+    }
+    case quantifier_finite:
+    {
+      data::number_postfix_generator generator("UNIQUE_PREFIX");
+      data::data_enumerator<> datae(p.data(), datar, generator);
+      data::rewriter_with_variables datarv(datar);
+      bool enumerate_infinite_sorts = false;
+      enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts, skip_data);
+      pbes_rewrite(p, pbesr);
+      break;
+    }
+    case pfnf:
+    {
+      pfnf_rewriter pbesr;
+      pbes_rewrite(p, pbesr);
+      break;
+    }
+    case prover:
+    default:
+    {
+      // Just ignore.
+      assert(0);  // The PBES rewriter cannot be activated through
+      // the commandline. So, we cannot end up here.
+      break;
+    }
+  }
+}
+
+void pbesconstelm(const std::string& input_filename,
+                  const std::string& output_filename,
+                  data::rewriter::strategy rewrite_strategy,
+                  pbes_rewriter_type rewriter_type,
+                  bool compute_conditions,
+                  bool remove_redundant_equations
+                 )
+{
+  // load the pbes
+  pbes<> p;
+  load_pbes(p, input_filename);
+
+  // data rewriter
+  data::rewriter datar(p.data(), rewrite_strategy);
+
+  // pbes rewriter
+  switch (rewriter_type)
+  {
+    case simplify:
+    {
+      typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
+      my_pbes_rewriter pbesr(datar);
+      pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+      data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+      algorithm.run(p, compute_conditions);
+      if (remove_redundant_equations)
+      {
+        atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
+      }
+      break;
+    }
+    case quantifier_all:
+    case quantifier_finite:
+    {
+      typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
+      bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
+      data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+      data::data_enumerator<> datae(p.data(), datar, name_generator);
+      data::rewriter_with_variables datarv(datar);
+      my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
+      pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+      algorithm.run(p, compute_conditions);
+      if (remove_redundant_equations)
+      {
+        atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+        mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
+      }
+      break;
+    }
+    default:
+    { }
+  }
+
+  // save the result
+  p.save(output_filename);
+}
+
+bool pbesinst(const std::string& input_filename,
+              const std::string& output_filename,
+              pbes_file_format pbes_input_format,
+              pbes_file_format pbes_output_format,
+              data::rewriter::strategy rewrite_strategy,
+              pbesinst_strategy m_strategy,
+              const std::string& finite_parameter_selection,
+              bool remove_redundant_equations,
+              bool aterm_ascii
+             )
+{
+  // load the pbes
+  pbes<> p;
+  load_pbes(p, input_filename, pbes_input_format);
+
+  // data rewriter
+  data::rewriter datar(p.data(), rewrite_strategy);
+
+  if (!p.is_closed())
+  {
+    mCRL2log(log::error) << "The PBES is not closed. Pbes2bes cannot handle this kind of PBESs" << std::endl << "Computation aborted." << std::endl;
+    return false;
+  }
+
+  if (m_strategy == pbesinst_lazy)
+  {
+    pbesinst_algorithm algorithm(p.data(), rewrite_strategy, false, false);
+    algorithm.run(p);
+    p = algorithm.get_result();
+  }
+  else if (m_strategy == pbesinst_finite)
+  {
+    pbesinst_finite_algorithm algorithm(rewrite_strategy);
+    pbes_system::detail::pbes_parameter_map parameter_map = pbes_system::detail::parse_pbes_parameter_map(p, finite_parameter_selection);
+    algorithm.run(p, parameter_map);
+  }
+
+  if (log::mcrl2_logger::get_reporting_level() >= log::verbose)
+  {
+    if (is_bes(p))
+    {
+      mCRL2log(log::debug) << "The result is a BES.\n";
+    }
+    else
+    {
+       mCRL2log(log::debug) << "The result is a PBES.\n";
+    }
+  }
+
+  if (remove_redundant_equations)
+  {
+    atermpp::vector<propositional_variable> V = remove_unreachable_variables(p);
+    mCRL2log(log::verbose) << pbes_system::detail::print_removed_equations(V);
+  }
+
+  // save the result
+  save_pbes(p, output_filename, pbes_output_format, aterm_ascii);
+
+  return true;
+}
+
+void pbesinfo(const std::string& input_filename, const std::string& input_file_message, pbes_file_format file_format, bool opt_full)
+{
+  pbes<> p;
+  load_pbes(p, input_filename, file_format);
+
+  pbes_system::detail::pbes_property_map info(p);
+
+  // Show file from which PBES was read
+  std::cout << input_file_message << "\n\n";
+
+  // Show if PBES is closed and well formed
+  std::cout << "The PBES is " << (p.is_closed() ? "" : "not ") << "closed and " << (p.is_well_typed() ? "" : "not ") << "well formed" << std::endl;
+
+  // Show number of equations
+  std::cout << "Number of equations: " << p.equations().size() << std::endl;
+
+  // Show number of mu's with the predicate variables from the mu's
+  std::cout << "Number of mu's:      " << info["mu_equation_count"] << std::endl;
+
+  // Show number of nu's with the predicate variables from the nu's
+  std::cout << "Number of nu's:      " << info["nu_equation_count"] << std::endl;
+
+  // Show number of nu's with the predicate variables from the nu's
+  std::cout << "Block nesting depth: " << info["block_nesting_depth"] << std::endl;
+
+  // Show binding variables with their signature
+  if (opt_full)
+  {
+    std::cout << "Predicate variables:\n";
+    for (atermpp::vector<pbes_equation>::const_iterator i = p.equations().begin(); i != p.equations().end(); ++i)
+    {
+      std::cout << core::pp(i->symbol()) << "." << pbes_system::pp(i->variable()) << std::endl;
+    }
+  }
+}
+
+void pbesparelm(const std::string& input_filename,
+                const std::string& output_filename
+               )
+{
+  // load the pbes
+  pbes<> p;
+  load_pbes(p, input_filename);
+
+  // apply the algorithm
+  pbes_system::pbes_parelm_algorithm algorithm;
+  algorithm.run(p);
+
+  // save the result
+  p.save(output_filename);
+}
+
+void pbespareqelm(const std::string& input_filename,
+                  const std::string& output_filename,
+                  data::rewriter::strategy rewrite_strategy,
+                  pbes_rewriter_type rewriter_type,
+                  bool ignore_initial_state
+                 )
+{
+  // load the pbes
+  pbes<> p;
+  load_pbes(p, input_filename);
+
+  // data rewriter
+  data::rewriter datar(p.data(), rewrite_strategy);
+
+  // pbes rewriter
+  switch (rewriter_type)
+  {
+    case simplify:
+    {
+      typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
+      my_pbes_rewriter pbesr(datar);
+      pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+      data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+      algorithm.run(p, ignore_initial_state);
+      break;
+    }
+    case quantifier_all:
+    case quantifier_finite:
+    {
+      typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
+      bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
+      data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+      data::data_enumerator<> datae(p.data(), datar, name_generator);
+      data::rewriter_with_variables datarv(datar);
+      my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
+      pbes_eqelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
+      algorithm.run(p, ignore_initial_state);
+      break;
+    }
+    default:
+    { }
+  }
+
+  // save the result
+  p.save(output_filename);
+}
+
+void pbespp(const std::string& input_filename,
+            const std::string& output_filename,
+            pbes_file_format pbes_input_format,
+            core::t_pp_format format
+           )
+{
+  pbes_system::pbes<> p;
+  load_pbes(p, input_filename, pbes_input_format);
+
+  mCRL2log(log::verbose) << "printing PBES from "
+                         << (input_filename.empty()?"standard input":input_filename)
+                         << " to " << (output_filename.empty()?"standard output":output_filename)
+                         << " in the " << core::pp_format_to_string(format) << " format" << std::endl;
+
+  if (output_filename.empty())
+  {
+    if (format == core::ppInternal)
+    {
+      std::cout << pbes_system::pbes_to_aterm(p);
+    }
+    else
+    {
+      std::cout << pbes_system::pp(p);
+    }
+  }
+  else
+  {
+    std::ofstream out(output_filename.c_str());
+    if (out)
+    {
+      if (format == core::ppInternal)
+      {
+        out << pbes_system::pbes_to_aterm(p);
+      }
+      else
+      {
+        out << pbes_system::pp(p);
+      }
+      out.close();
+    }
+    else
+    {
+      throw mcrl2::runtime_error("could not open output file " + output_filename + " for writing");
+    }
+  }
+}
+
+} // tools
+
+} // namespace pbes_system
+
+} // namespace mcrl2
