@@ -36,6 +36,7 @@ foreach( OBJ ${TERM_OBJS} )
     dparser
     mcrl2_syntax
     mcrl2_lps
+    mcrl2_process
     mcrl2_utilities
   )
 
