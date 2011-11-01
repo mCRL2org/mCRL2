@@ -9,6 +9,7 @@
 /// \file print.cpp
 
 #include "mcrl2/exception.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 #include "mcrl2/lps/print.h"
 #include "mcrl2/process/print.h"
 

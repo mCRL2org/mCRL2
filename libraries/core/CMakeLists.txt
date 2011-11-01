@@ -61,6 +61,8 @@ set(mcrl2_core_src
 
 set(mcrl2_core_src ${mcrl2_core_src} PARENT_SCOPE)
 
+include_directories(${CMAKE_SOURCE_DIR}/libraries/process/include )
+include_directories(${CMAKE_SOURCE_DIR}/libraries/lps/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/core/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/data/include )
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include )
