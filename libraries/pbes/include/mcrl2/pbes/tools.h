@@ -71,6 +71,9 @@ void pbespp(const std::string& input_filename,
             core::t_pp_format format
            );
 
+void txt2pbes(const std::string& input_filename,
+              const std::string& output_filename);
+
 } // namespace pbes_system
 
 } // namespace mcrl2

@@ -32,6 +32,7 @@
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/remove_equations.h"
+#include "mcrl2/pbes/txt2pbes.h"
 #include "mcrl2/utilities/logger.h"
 
 namespace mcrl2
@@ -362,6 +363,40 @@ void pbespp(const std::string& input_filename,
       throw mcrl2::runtime_error("could not open output file " + output_filename + " for writing");
     }
   }
+}
+
+void txt2pbes(const std::string& input_filename,
+              const std::string& output_filename
+             )
+{
+  pbes_system::pbes<> p;
+  if (input_filename.empty())
+  {
+    //parse specification from stdin
+    mCRL2log(log::verbose) << "reading input from stdin..." << std::endl;
+    p = pbes_system::txt2pbes(std::cin);
+  }
+  else
+  {
+    //parse specification from input filename
+    mCRL2log(log::verbose) << "reading input from file '" <<  input_filename << "'..." << std::endl;
+    std::ifstream instream(input_filename.c_str(), std::ifstream::in|std::ifstream::binary);
+    if (!instream)
+    {
+      throw mcrl2::runtime_error("cannot open input file: " + input_filename);
+    }
+    p = pbes_system::txt2pbes(instream);
+    instream.close();
+  }
+  if (output_filename.empty())
+  {
+    mCRL2log(log::verbose) << "writing PBES to stdout..." << std::endl;
+  }
+  else
+  {
+    mCRL2log(log::verbose) << "writing PBES to file '" <<  output_filename << "'..." << std::endl;
+  }
+  p.save(output_filename);
 }
 
 } // namespace pbes_system
