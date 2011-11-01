@@ -12,18 +12,12 @@
 
 #include <iostream>
 #include <string>
+#include "mcrl2/atermpp/aterm_init.h"
+#include "mcrl2/pbes/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/pbes_rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/data/identifier_generator.h"
-#include "mcrl2/data/enumerator.h"
-#include "mcrl2/data/rewriter.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/rewrite.h"
-#include "mcrl2/pbes/rewriter.h"
-#include "mcrl2/pbes/io.h"
-#include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;
 using namespace mcrl2::log;
@@ -74,61 +68,11 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  output file:        " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
-      // load the pbes
-      pbes<> p;
-      load_pbes(p,m_input_filename);
-
-      // data rewriter
-      data::rewriter datar = create_rewriter(p.data());
-
-      // pbes rewriter
-      switch (rewriter_type())
-      {
-        case simplify:
-        {
-          simplifying_rewriter<pbes_expression, data::rewriter> pbesr(datar);
-          pbes_rewrite(p, pbesr);
-          break;
-        }
-        case quantifier_all:
-        {
-          data::number_postfix_generator generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, generator);
-          data::rewriter_with_variables datarv(datar);
-          bool enumerate_infinite_sorts = true;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts, m_skip_data);
-          pbes_rewrite(p, pbesr);
-          break;
-        }
-        case quantifier_finite:
-        {
-          data::number_postfix_generator generator("UNIQUE_PREFIX");
-          data::data_enumerator<> datae(p.data(), datar, generator);
-          data::rewriter_with_variables datarv(datar);
-          bool enumerate_infinite_sorts = false;
-          enumerate_quantifiers_rewriter<pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > pbesr(datarv, datae, enumerate_infinite_sorts, m_skip_data);
-          pbes_rewrite(p, pbesr);
-          break;
-        }
-        case pfnf:
-        {
-          pfnf_rewriter pbesr;
-          pbes_rewrite(p, pbesr);
-          break;
-        }
-        case prover:
-        default:
-        {
-          // Just ignore.
-          assert(0);  // The PBES rewriter cannot be activated through
-          // the commandline. So, we cannot end up here.
-          break;
-        }
-      }
-
-      // save the result
-      p.save(m_output_filename);
-
+      pbesrewr(input_filename(),
+               rewrite_strategy(),
+               rewriter_type(),
+               m_skip_data
+             );
       return true;
     }
 

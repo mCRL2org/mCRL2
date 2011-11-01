@@ -22,13 +22,11 @@
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/pbes_input_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
-#include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/io.h"
+#include "mcrl2/pbes/tools.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::utilities;
-using namespace mcrl2::core;
 using namespace mcrl2;
 
 //local declarations
@@ -45,17 +43,21 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
               "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      format(ppDefault)
+      format(core::ppDefault)
     {}
 
     bool run()
     {
-      print_specification();
+      pbespp(input_filename(),
+             output_filename(),
+             pbes_input_format(),
+             format
+            );
       return true;
     }
 
   protected:
-    t_pp_format  format;
+    core::t_pp_format  format;
 
     void add_options(interface_description& desc)
     {
@@ -74,55 +76,11 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
         std::string str_format(parser.option_argument("format"));
         if (str_format == "internal")
         {
-          format = ppInternal;
+          format = core::ppInternal;
         }
         else if (str_format != "default")
         {
           parser.error("option -f/--format has illegal argument '" + str_format + "'");
-        }
-      }
-    }
-
-  private:
-    void print_specification()
-    {
-      pbes_system::pbes<> pbes_specification;
-      load_pbes(pbes_specification, input_filename(), pbes_input_format());
-
-      mCRL2log(verbose) << "printing PBES from "
-                        << (input_filename().empty()?"standard input":input_filename())
-                        << " to " << (output_filename().empty()?"standard output":output_filename())
-                        << " in the " << pp_format_to_string(format) << " format" << std::endl;
-
-      if (output_filename().empty())
-      {
-        if (format == ppInternal)
-        {
-          std::cout << pbes_system::pbes_to_aterm(pbes_specification);
-        }
-        else
-        {
-          std::cout << pbes_system::pp(pbes_specification);
-        }
-      }
-      else
-      {
-        std::ofstream output_stream(output_filename().c_str());
-        if (output_stream.is_open())
-        {
-          if (format == ppInternal)
-          {
-            output_stream << pbes_system::pbes_to_aterm(pbes_specification);
-          }
-          else
-          {
-            output_stream << pbes_system::pp(pbes_specification);
-          }
-          output_stream.close();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("could not open output file " + output_filename() + " for writing");
         }
       }
     }

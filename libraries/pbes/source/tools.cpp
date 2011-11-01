@@ -28,6 +28,7 @@
 #include "mcrl2/pbes/pbesinst_finite_algorithm.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
 #include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/remove_equations.h"
@@ -37,9 +38,6 @@ namespace mcrl2
 {
 
 namespace pbes_system
-{
-
-namespace tools
 {
 
 void pbesrewr(const std::string& input_filename,
@@ -365,8 +363,6 @@ void pbespp(const std::string& input_filename,
     }
   }
 }
-
-} // tools
 
 } // namespace pbes_system
 

@@ -63,7 +63,7 @@ pbes_rewriter_type parse_pbes_rewriter_type(const std::string& type)
 /// \param type A rewriter type
 /// \return A description of the rewriter type
 inline
-std::string rewriter_description(pbes_rewriter_type type)
+std::string pbes_rewriter_description(pbes_rewriter_type type)
 {
   switch (type)
   {

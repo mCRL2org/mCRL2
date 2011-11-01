@@ -26,9 +26,9 @@ enum pbesinst_strategy
   pbesinst_finite
 };
 
-/// Sets the transformation strategy.
-/// \param s A transformation strategy.
-pbesinst_strategy parse_transformation_strategy(const std::string& s)
+/// \brief Parse a pbesinst transformation strategy.
+inline
+pbesinst_strategy parse_pbesinst_strategy(const std::string& s)
 {
   if (s == "finite")
   {
@@ -40,8 +40,23 @@ pbesinst_strategy parse_transformation_strategy(const std::string& s)
   }
   else
   {
-    throw mcrl2::runtime_error("unknown output strategy specified (got `" + s + "')");
+    throw mcrl2::runtime_error("unknown pbesinst strategy specified (got `" + s + "')");
   }
+}
+
+/// \brief Returns a string representation of a pbesinst transformation strategy.
+inline
+std::string print_pbesinst_strategy(pbesinst_strategy strategy)
+{
+  if (strategy == pbesinst_finite)
+  {
+    return "finite";
+  }
+  else if (strategy == pbesinst_lazy)
+  {
+    return "lazy";
+  }
+  return "unknown";
 }
 
 } // namespace pbes_system

@@ -28,6 +28,7 @@ include_directories(${CMAKE_SOURCE_DIR}/3rd-party/dparser)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_data
+  mcrl2_pbes
   mcrl2_utilities
   mcrl2_syntax
   dparser
