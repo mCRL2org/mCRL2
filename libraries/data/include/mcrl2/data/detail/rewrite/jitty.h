@@ -59,6 +59,10 @@ class RewriterJitty: public Rewriter
                       const atermpp::aterm_appl term,
                       internal_substitution_type &sigma);
 
+    /* Auxiliary function to take care that the array jitty_strat is sufficiently large
+       to access element i */
+    void make_jitty_strat_sufficiently_larger(const size_t i);
+
 };
 }
 }

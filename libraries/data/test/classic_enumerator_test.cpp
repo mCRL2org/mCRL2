@@ -278,7 +278,7 @@ void generate_values_test()
   const data::sort_expression_vector& sorts = dataspec.user_defined_sorts();
   for (data::sort_expression_vector::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
   {
-    data::sort_expression s = *i;
+    data::sort_expression s = normalize_sorts(*i,dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data::data_expression_vector v = generate_values(dataspec, s, 10);
     std::clog << " possible values: " << core::detail::print_set(v, data::stream_printer()) << std::endl;
@@ -290,7 +290,7 @@ void generate_values_test()
   for (data::alias_vector::const_iterator i = aliases.begin(); i != aliases.end(); ++i)
   {
     data::alias a = *i;
-    data::sort_expression s = i->reference();
+    data::sort_expression s = normalize_sorts(i->reference(),dataspec);
     std::clog << "--- sort " << data::pp(s) << std::endl;
     data::data_expression_vector v = generate_values(dataspec, s, 10);
     std::clog << " possible values: " << core::detail::print_set(v, data::stream_printer()) << std::endl;

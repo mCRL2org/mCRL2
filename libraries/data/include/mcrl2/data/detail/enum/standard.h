@@ -290,7 +290,7 @@ class EnumeratorSolutionsStandard
                  const variable_list vars,
                  const variable_list substituted_vars,
                  const atermpp::term_list < atermpp::aterm_appl> exprs) const;
-    atermpp::aterm_appl build_solution_aux_innerc(
+    atermpp::aterm_appl build_solution_aux(
                  const atermpp::aterm_appl t,
                  const variable_list substituted_vars,
                  const atermpp::term_list < atermpp::aterm_appl> exprs) const;

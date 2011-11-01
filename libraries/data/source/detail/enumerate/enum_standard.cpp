@@ -297,11 +297,11 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_single(
   }
   else
   {
-    return build_solution_aux_innerc(exprs.front(),pop_front(substituted_vars),pop_front(exprs));
+    return build_solution_aux(exprs.front(),pop_front(substituted_vars),pop_front(exprs));
   }
 }
 
-atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
+atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
                  const atermpp::aterm_appl t,
                  const variable_list substituted_vars,
                  const atermpp::term_list < atermpp::aterm_appl> exprs) const
@@ -320,7 +320,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
     const atermpp::aterm_appl t1=t;
     const atermpp::aterm_appl binder=t1(0);
     const variable_list bound_variables=t1(1);
-    const atermpp::aterm_appl body=build_solution_aux_innerc(t1(2),substituted_vars,exprs);
+    const atermpp::aterm_appl body=build_solution_aux(t1(2),substituted_vars,exprs);
     return gsMakeBinder(binder,bound_variables,body);
   }
   else
@@ -356,7 +356,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux_innerc(
     args[0] = head;
     for (size_t i=1; i<arity; i++,k++)
     {
-      args[k] = build_solution_aux_innerc(t(i),substituted_vars,exprs);
+      args[k] = build_solution_aux(t(i),substituted_vars,exprs);
     }
 
     atermpp::aterm_appl r = ApplyArray(arity+extra_arity,args);
@@ -398,7 +398,6 @@ bool EnumeratorSolutionsStandard::next(
     fs_expr e=fs_stack.front();
     EliminateVars(e);
     fs_stack.pop_front();
-
     if (e.vars().empty() || e.expr()==m_enclosing_enumerator->rewr_obj->internal_false)
     {
       if (e.expr()!=m_enclosing_enumerator->rewr_obj->internal_false) // So e.vars() is empty.
@@ -503,13 +502,18 @@ bool EnumeratorSolutionsStandard::next(
           assert(target_sort==sort);
 
           variable_list var_list;
-          for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i)
+          MCRL2_SYSTEM_SPECIFIC_ALLOCA(var_array,atermpp::aterm,domain_sorts.size()+1);
+          size_t j=1;
+          var_array[0]=OpId2Int(*it);
+          for (sort_expression_list::const_iterator i=domain_sorts.begin(); i!=domain_sorts.end(); ++i,++j)
           {
             char Name[40];
             static size_t fresh_variable_index=0;
             sprintf(Name, "@enum@%ld", fresh_variable_index++);
             const variable fv = variable(gsMakeDataVarId(gsFreshString2ATermAppl(Name,(ATerm)ATempty,true),*i));
             var_list = push_front(var_list,fv);
+            var_array[j]=fv;
+
 
             used_vars++;
             if (m_max_internal_variables!=0 && used_vars > m_max_internal_variables)
@@ -552,17 +556,8 @@ bool EnumeratorSolutionsStandard::next(
               max_vars *= MAX_VARS_FACTOR;
             }
           }
-          data_expression cons_term;
-          if (var_list.empty())
-          {
-            cons_term=*it;
-          }
-          else
-          {
-            cons_term = application(*it, reverse(var_list));
-          }
+          const atermpp::aterm_appl term_rf = ApplyArray(domain_sorts.size()+1,var_array);
 
-          atermpp::aterm_appl term_rf = m_enclosing_enumerator->rewr_obj->toRewriteFormat(cons_term);
           push_on_fs_stack_and_split_or(
                                   fs_stack,
                                   uvars+var_list,

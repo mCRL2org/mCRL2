@@ -224,6 +224,19 @@ static ATermList create_strategy(ATermList rules, const atermpp::aterm_appl inte
   return ATreverse(strat);
 }
 
+void RewriterJitty::make_jitty_strat_sufficiently_larger(const size_t i)
+{ 
+  if (i>=jitty_strat.size())
+  {
+    size_t oldsize=jitty_strat.size();
+    jitty_strat.resize(i+1);
+    for( ; oldsize<jitty_strat.size(); ++oldsize)
+    {
+      jitty_strat[oldsize]=NULL;
+    }
+  }
+}
+
 RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::data::used_data_equation_selector& equation_selector):
         Rewriter()
 {
@@ -231,8 +244,6 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
   ATermInt i;
 
   m_data_specification_for_enumeration = DataSpec;
-
-  // initialise_common();
 
   max_vars = 0;
   need_rebuild = false;
@@ -280,33 +291,23 @@ RewriterJitty::RewriterJitty(const data_specification& DataSpec, const mcrl2::da
   {
 
     i = l1->second;
+    atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
 
-     atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
-
-    if (size_t(ATgetInt(i))>=jitty_strat.size())
-    {
-      size_t oldsize=jitty_strat.size();
-      jitty_strat.resize(ATgetInt(i)+1);
-      for( ; oldsize<jitty_strat.size(); ++oldsize)
-      {
-        jitty_strat[oldsize]=NULL;
-      }
-    }
+    const size_t j=ATgetInt(i);
+    make_jitty_strat_sufficiently_larger(j);
     if (it == jitty_eqns.end() )
     {
-      jitty_strat[ATgetInt(i)] = NULL;
+      jitty_strat[j] = NULL;
     }
     else
     {
-      jitty_strat[ATgetInt(i)] = create_strategy(ATreverse( it->second), internal_true);
+      jitty_strat[j] = create_strategy(ATreverse( it->second), internal_true);
     }
   }
 }
 
 RewriterJitty::~RewriterJitty()
 {
-  // ATunprotectAppl(&jitty_true);
-  // finalise_common();
 }
 
 bool RewriterJitty::addRewriteRule(const data_equation rule)
@@ -337,7 +338,9 @@ bool RewriterJitty::addRewriteRule(const data_equation rule)
                             (ATerm) u,
                             (ATerm)(ATermAppl)toRewriteFormat(rule.rhs())));
   jitty_eqns[ (ATermInt) ATgetArgument(u,0)] = n;
-  jitty_strat[ATgetInt((ATermInt) ATgetArgument(u,0))] = NULL; //create_strategy(n);
+  const size_t j=ATgetInt((ATermInt) ATgetArgument(u,0));
+  make_jitty_strat_sufficiently_larger(j);
+  jitty_strat[j] = NULL; //create_strategy(n);
   need_rebuild = true;
 
   return true;
@@ -366,16 +369,18 @@ bool RewriterJitty::removeRewriteRule(const data_equation rule)
     }
   }
   ATermInt i = (ATermInt) ATgetArgument(u,0);
+  const size_t j=ATgetInt(i);
+  make_jitty_strat_sufficiently_larger(j);
   if (ATisEmpty(n))
   {
     atermpp::map< ATermInt, ATermList >::iterator it = jitty_eqns.find( i );
     jitty_eqns.erase( it );
-    jitty_strat[ATgetInt(i)] = NULL;
+    jitty_strat[j] = NULL;
   }
   else
   {
     jitty_eqns[i] = n;
-    jitty_strat[ATgetInt(i)] = NULL;//create_strategy(n);
+    jitty_strat[j] = NULL;//create_strategy(n);
     need_rebuild = true;
   }
 
@@ -661,7 +666,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
     args[i]=term(i);
   }
 
-
+  make_jitty_strat_sufficiently_larger(op.value());
   if ((strat = jitty_strat[op.value()]) != NULL)
   {
     for (; !ATisEmpty(strat); strat=ATgetNext(strat))
@@ -749,19 +754,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux_function_symbol(
 
 atermpp::aterm_appl RewriterJitty::toRewriteFormat(const data_expression term)
 {
-  size_t old_opids = get_num_opids();
-  atermpp::aterm_appl a = toInner(term,true);
-  if (old_opids < get_num_opids())
-  {
-    size_t oldsize=jitty_strat.size();
-    jitty_strat.resize(get_num_opids());
-    for( ; oldsize<jitty_strat.size(); ++oldsize)
-    {
-      jitty_strat[oldsize]=NULL;
-    }
-  }
-
-  return a;
+  return toInner(term,true);
 }
 
 data_expression RewriterJitty::fromRewriteFormat(const atermpp::aterm_appl term)
@@ -786,9 +779,11 @@ atermpp::aterm_appl RewriterJitty::rewrite_internal(
         ; ++opids )
     {
       ATermInt i = opids->first;
-      if (jitty_strat[ATgetInt(i)] == NULL)
+      const size_t j=ATgetInt(i);
+      make_jitty_strat_sufficiently_larger(j);
+      if (jitty_strat[j] == NULL)
       {
-        jitty_strat[ATgetInt(i)] = create_strategy(opids->second, internal_true);
+        jitty_strat[j] = create_strategy(opids->second, internal_true);
       }
     }
     need_rebuild = false;
