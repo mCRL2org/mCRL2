@@ -67,15 +67,20 @@ inline
 std::vector<std::string> generate_values(const data::data_specification& dataspec, const data::sort_expression& s, std::size_t max_size = 1000)
 {
   std::vector<std::string> result;
+  std::size_t max_internal_variables = 10000;
 
   data::rewriter rewr(dataspec);
   data::classic_enumerator<data::rewriter> enumerator(dataspec, rewr);
   data::variable x("x", s);
   data::variable_vector v;
   v.push_back(x);
-  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(v, data::sort_bool::true_(), max_size); i != enumerator.end() ; ++i)
+  for (data::classic_enumerator<data::rewriter>::iterator i = enumerator.begin(v, data::sort_bool::true_(), max_internal_variables); i != enumerator.end() ; ++i)
   {
     result.push_back((*i)(x).to_string());
+    if (result.size() >= max_size)
+    {
+      break;
+    }
   }
   return result;
 }
