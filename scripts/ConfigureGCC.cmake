@@ -101,7 +101,7 @@ if(BUILD_SHARED_LIBS)
       set(CMAKE_CXX_FLAGS "-fPIC ${CMAKE_CXX_FLAGS}")
       set(CMAKE_C_FLAGS "-fPIC ${CMAKE_C_FLAGS}")
       set(BUILD_SHARED_LIBS_OPTION "-fPIC")
-    endif( CXX_ACCEPTS_FPIC )
+    endif( CXX_ACCEPTS_FPIC AND C_ACCEPTS_FPIC )
 endif(BUILD_SHARED_LIBS)
 
 ## --------------------------------------------------
