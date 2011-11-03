@@ -23,6 +23,7 @@ add_definitions(-D_CRT_SECURE_NO_WARNINGS)
 add_definitions(-D_SCL_SECURE_NO_DEPRECATE)
 add_definitions(-D_SCL_SECURE_NO_WARNINGS)
 add_definitions(-DBOOST_ALL_NO_LIB=1)
+add_definitions(-DWIN32)
 
 # The following definition is mCRL2 specific.
 # It prevents code being compiled for the innermost and jitty compiling rewriters

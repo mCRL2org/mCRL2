@@ -15,11 +15,9 @@ set(BUILD_SHARED_LIBS OFF)
 set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /EHs")
 set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} /EHs")
 
-## Compile with big-objects for 64-bit
-if(CMAKE_CL_64)
-  set(CMAKE_CXX_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
-  set(CMAKE_C_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
-endif(CMAKE_CL_64)
+## Compile with big-objects 
+set(CMAKE_CXX_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
+set(CMAKE_C_FLAGS "/bigobj ${CMAKE_CXX_FLAGS}")
 
 ## Compile multi-core  
 option(MCRL2_ENABLE_MULTICORE_COMPILATION "Enable/disable multi-core compilation" ON)
