@@ -28,6 +28,12 @@ set(mcrl2_pbes_src
   ${CMAKE_CURRENT_SOURCE_DIR}/source/tools.cpp
 )
 
+if(MCRL2_ENABLE_EXPERIMENTAL)
+  set(mcrl2_pbes_src
+    ${mcrl2_pbes_src}
+    ${CMAKE_CURRENT_SOURCE_DIR}/source/experimental_tools.cpp
+  )
+endif(MCRL2_ENABLE_EXPERIMENTAL)
 set(mcrl2_pbes_src ${mcrl2_pbes_src} PARENT_SCOPE)
 
 # actual target:
