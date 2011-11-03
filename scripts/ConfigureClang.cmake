@@ -26,24 +26,10 @@ if( C_ACCEPTS_WNO-INLINE )
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-inline" )
 endif( C_ACCEPTS_WNO-INLINE )
 
-# check_c_compiler_flag(-fno-strict-overflow C_ACCEPTS_FNO-STRICT-OVERFLOW )
-# if( C_ACCEPTS_FNO-STRICT-OVERFLOW )
-#   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -fno-strict-overflow" )
-# endif( C_ACCEPTS_FNO-STRICT-OVERFLOW )
-
 check_c_compiler_flag(-pipe C_ACCEPTS_PIPE )
 if( C_ACCEPTS_PIPE )
   set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -pipe" )
 endif( C_ACCEPTS_PIPE )
-
-# Following flag will cause warning on MacOSX, if enabled:
-#686-apple-darwin9-g++-4.0.1: -as-needed: linker input file unused because linking not done
-if( NOT APPLE)
-  check_c_compiler_flag(-Wl,-as-needed C_ACCEPTS_AS_NEEDED )
-  if( C_ACCEPTS_AS_NEEDED )
-    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wl,-as-needed" )
-  endif( C_ACCEPTS_AS_NEEDED )
-endif( NOT APPLE )
 
 ##---------------------------------------------------
 ## Set CXX compile flags 
@@ -67,16 +53,6 @@ check_cxx_compiler_flag(-pipe CXX_ACCEPTS_PIPE )
 if( CXX_ACCEPTS_PIPE )
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -pipe" )
 endif( CXX_ACCEPTS_PIPE )
-
-# Following flag will cause warning on MacOSX, if enabled:
-#686-apple-darwin9-g++-4.0.1: -as-needed: linker input file unused because linking not done
-if( NOT APPLE)
-  check_cxx_compiler_flag(-Wl,-as-needed CXX_ACCEPTS_AS_NEEDED )
-  if( CXX_ACCEPTS_AS_NEEDED )
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wl,-as-needed" )
-  endif( CXX_ACCEPTS_AS_NEEDED )
-endif( NOT APPLE )
-
 
 if(BUILD_SHARED_LIBS)
     check_cxx_compiler_flag(-fPIC CXX_ACCEPTS_FPIC )
