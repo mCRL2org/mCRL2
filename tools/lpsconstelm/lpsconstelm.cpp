@@ -11,17 +11,14 @@
 #include "boost.hpp" // precompiled headers
 
 //mCRL2
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/constelm.h"
-
+#include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
-
 using namespace mcrl2;
-using namespace mcrl2::data;
+using namespace mcrl2::lps;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 
@@ -85,28 +82,14 @@ class lpsconstelm_tool: public rewriter_tool<input_output_tool >
     ///applies instantiation of sums to it and writes the result to output_file.
     bool run()
     {
-      lps::specification spec;
-      spec.load(m_input_filename);
-      mcrl2::data::rewriter R = create_rewriter(spec.data());
-
-      lps::constelm_algorithm<data::rewriter> algorithm(spec, R);
-
-      // preprocess: remove single element sorts
-      if (m_remove_singleton_sorts)
-      {
-        algorithm.remove_singleton_sorts();
-      }
-
-      // apply constelm
-      algorithm.run(m_instantiate_free_variables, m_ignore_conditions);
-
-      // postprocess: remove trivial summands
-      if (m_remove_trivial_summands)
-      {
-        algorithm.remove_trivial_summands();
-      }
-
-      spec.save(m_output_filename);
+      lpsconstelm(input_filename(),
+                  output_filename(),
+                  rewrite_strategy(),
+                  m_instantiate_free_variables,
+                  m_ignore_conditions,
+                  m_remove_trivial_summands,
+                  m_remove_singleton_sorts
+                );
       return true;
     }
 

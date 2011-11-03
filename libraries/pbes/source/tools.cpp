@@ -145,7 +145,10 @@ void pbesconstelm(const std::string& input_filename,
   p.save(output_filename);
 }
 
-void pbesinfo(const std::string& input_filename, const std::string& input_file_message, pbes_file_format file_format, bool opt_full)
+void pbesinfo(const std::string& input_filename,
+              const std::string& input_file_message,
+              pbes_file_format file_format, bool opt_full
+             )
 {
   pbes<> p;
   load_pbes(p, input_filename, file_format);

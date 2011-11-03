@@ -7,9 +7,7 @@
 /// \file lpsrewr.cpp
 /// \brief Tool for rewriting a linear process specification.
 
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/rewrite.h"
-#include "mcrl2/lps/remove.h"
+#include "mcrl2/lps/tools.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/rewriter_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
@@ -46,17 +44,6 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
       }
     }
 
-    template <typename DataRewriter>
-    void run_bench_mark(const lps::specification& spec, const DataRewriter& R)
-    {
-      std::clog << "rewriting LPS " << m_bench_times << " times...\n";
-      for (unsigned long i=0; i < m_bench_times; i++)
-      {
-        lps::specification spec1 = spec;
-        lps::rewrite(spec1, R);
-      }
-    }
-
   public:
     lps_rewriter_tool()
       : super(
@@ -73,16 +60,12 @@ class lps_rewriter_tool : public rewriter_tool< input_output_tool >
 
     bool run()
     {
-      lps::specification spec;
-      spec.load(input_filename());
-      data::rewriter R = create_rewriter(spec.data());
-      if (m_benchmark)
-      {
-        run_bench_mark(spec, R);
-      }
-      lps::rewrite(spec, R);
-      lps::remove_trivial_summands(spec);
-      spec.save(output_filename());
+      lps::lpsrewr(input_filename(),
+                   output_filename(),
+                   rewrite_strategy(),
+                   m_benchmark,
+                   m_bench_times
+                 );
       return true;
     }
 

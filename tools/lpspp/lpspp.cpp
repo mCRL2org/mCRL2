@@ -15,14 +15,12 @@
 
 #include <string>
 #include <iostream>
-#include <fstream>
 
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/input_output_tool.h"
-#include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
+#include "mcrl2/lps/tools.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::utilities::tools;
@@ -48,7 +46,10 @@ class lpspp_tool: public input_output_tool
 
     bool run()
     {
-      print_specification();
+      lps::lpspp(input_filename(),
+                 output_filename(),
+                 format
+                );
       return true;
     }
 
@@ -80,51 +81,6 @@ class lpspp_tool: public input_output_tool
         }
       }
     }
-
-  private:
-    void print_specification()
-    {
-      lps::specification specification;
-      specification.load(input_filename());
-
-      mCRL2log(verbose) << "printing LPS from "
-                        << (input_filename().empty()?"standard input":input_filename())
-                        << " to " << (output_filename().empty()?"standard output":output_filename())
-                        << " in the " << pp_format_to_string(format) << " format" << std::endl;
-
-      if (output_filename().empty())
-      {
-        if (format == ppInternal)
-        {
-          std::cout << specification_to_aterm(specification);
-        }
-        else
-        {
-          std::cout << lps::pp(specification);
-        }
-      }
-      else
-      {
-        std::ofstream output_stream(output_filename().c_str());
-        if (output_stream.is_open())
-        {
-          if (format == ppInternal)
-          {
-            output_stream << specification_to_aterm(specification);
-          }
-          else
-          {
-            output_stream << lps::pp(specification);
-          }
-          output_stream.close();
-        }
-        else
-        {
-          throw mcrl2::runtime_error("could not open output file " + output_filename() + " for writing");
-        }
-      }
-    }
-
 };
 
 class lpspp_gui_tool: public mcrl2_gui_tool<lpspp_tool>
