@@ -360,6 +360,9 @@ class pins
     // where N is the number of process parameters
     std::vector<pins_data_type*> m_data_types;
 
+    /// The unique type mappings (is contained in m_data_types).
+    std::vector<pins_data_type*> m_unique_data_types;
+
     /// \brief Returns the action data type
     pins_data_type& action_label_type_map()
     {
@@ -563,6 +566,7 @@ class pins
         {
           pins_data_type* dt = new state_data_type(m_generator, s);
           m_data_types.push_back(dt);
+          m_unique_data_types.push_back(dt);
           existing_type_maps[s] = dt;
         }
         else
@@ -570,7 +574,9 @@ class pins
           m_data_types.push_back(j->second);
         }
       }
-      m_data_types.push_back(new action_label_data_type(m_generator));
+      pins_data_type* dt = new action_label_data_type(m_generator);
+      m_data_types.push_back(dt);
+      m_unique_data_types.push_back(dt);
     }
 
     ~pins()
@@ -587,10 +593,11 @@ class pins
       }
     }
 
-    /// \brief Returns the number of datatype maps.
+    /// \brief Returns the number of unique datatype maps. Note that the datatype map for action labels is included,
+    /// so this number equals the number of different process parameter types + 1.
     std::size_t datatype_count() const
     {
-      return m_data_types.size();
+      return m_unique_data_types.size();
     }
 
     /// \brief Returns a reference to the datatype map with index i.
@@ -598,7 +605,7 @@ class pins
     pins_data_type& data_type(std::size_t i)
     {
       assert (i < m_data_types.size());
-      return *m_data_types[i];
+      return *m_unique_data_types[i];
     }
 
     /// \brief Indices of process parameters that influence event or next state of a summand by being read

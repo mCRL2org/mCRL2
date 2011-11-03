@@ -104,7 +104,13 @@ void test_ltsmin()
 
   BOOST_CHECK(p.edge_label_count() == 1);
   BOOST_CHECK(p.process_parameter_count() == 11);
-  BOOST_CHECK(p.datatype_count() == p.process_parameter_count() + 1);
+
+  std::set<data::sort_expression> params;
+  for (data::variable_list::const_iterator i = spec.process().process_parameters().begin(); i != spec.process().process_parameters().end(); ++i)
+  {
+    params.insert(i->sort());
+  }
+  BOOST_CHECK(p.datatype_count() == params.size() + 1);
   BOOST_CHECK(p.group_count() == 10);
 
   std::cout << p.info() << std::endl;
