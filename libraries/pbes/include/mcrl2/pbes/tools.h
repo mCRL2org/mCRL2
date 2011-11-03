@@ -26,6 +26,7 @@ namespace mcrl2 {
 namespace pbes_system {
 
 void pbesrewr(const std::string& input_filename,
+              const std::string& output_filename,
               const data::rewriter::strategy rewrite_strategy,
               pbes_rewriter_type rewriter_type,
               bool skip_data

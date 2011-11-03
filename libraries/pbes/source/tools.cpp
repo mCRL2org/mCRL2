@@ -245,6 +245,7 @@ void pbespp(const std::string& input_filename,
 }
 
 void pbesrewr(const std::string& input_filename,
+              const std::string& output_filename,
               const data::rewriter::strategy rewrite_strategy,
               pbes_rewriter_type rewriter_type,
               bool skip_data
@@ -301,6 +302,7 @@ void pbesrewr(const std::string& input_filename,
       break;
     }
   }
+  p.save(output_filename);
 }
 
 void txt2pbes(const std::string& input_filename,

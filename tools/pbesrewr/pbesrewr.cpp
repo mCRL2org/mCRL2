@@ -69,6 +69,7 @@ class pbes_rewriter : public pbes_rewriter_tool<rewriter_tool<input_output_tool>
       mCRL2log(verbose) << "  pbes rewriter:      " << m_pbes_rewriter_type << std::endl;
 
       pbesrewr(input_filename(),
+               output_filename(),
                rewrite_strategy(),
                rewriter_type(),
                m_skip_data
