@@ -27,6 +27,7 @@
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/specification.h"
+#include "mcrl2/core/detail/pp_deprecated.h"
 // #include "mcrl2/lps/nextstate.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/exception.h"
@@ -36,6 +37,7 @@
 
 #include "simulator.h"
 
+using namespace mcrl2;
 using namespace mcrl2::utilities;
 using namespace mcrl2::utilities::tools;
 using namespace mcrl2::core;
@@ -63,7 +65,7 @@ class sim_tool : public rewriter_tool< input_tool >
         }
         else
         {
-        	std::cout << pp(a);
+        	std::cout << core::pp_deprecated(a);
         }
       }
     }
@@ -123,7 +125,7 @@ class sim_tool : public rewriter_tool< input_tool >
           {
             ATermAppl Transition = ATAgetFirst(ATLgetFirst(l));
             ATerm NewState = ATgetFirst(ATgetNext(ATLgetFirst(l)));
-            std::cout << i <<": " << pp(Transition) << "  ->  [ ";
+            std::cout << i <<": " << core::pp_deprecated(Transition) << "  ->  [ ";
             PrintState(NewState,simulator.GetNextState());
             std::cout << " ]" << std::endl << std::endl;
             i++;
@@ -181,7 +183,7 @@ class sim_tool : public rewriter_tool< input_tool >
             sscanf(s.c_str(),"%lu",&idx);
             if (idx < ATgetLength(next_states))
             {
-              std::cout << std::endl << "transition: " << pp(ATAgetFirst(ATLelementAt(next_states,idx))) << std::endl << std::endl;
+              std::cout << std::endl << "transition: " << core::pp_deprecated(ATAgetFirst(ATLelementAt(next_states,idx))) << std::endl << std::endl;
               simulator.ChooseTransition(idx);
               std::cout << "current state: [ ";
               PrintState(simulator.GetState(),simulator.GetNextState());
@@ -227,7 +229,7 @@ class sim_tool : public rewriter_tool< input_tool >
             if (trans != NULL)
             {
               simulator.Redo();
-              std::cout << std::endl << "transition: "<< pp(trans) << std::endl << std::endl;
+              std::cout << std::endl << "transition: "<< core::pp_deprecated(trans) << std::endl << std::endl;
               std::cout << "current state: [ ";
               PrintState(simulator.GetState(),simulator.GetNextState());
               std::cout << " ]" << std::endl << std::endl;
@@ -276,7 +278,7 @@ class sim_tool : public rewriter_tool< input_tool >
               }
               else
               {
-                std::cout << pp(Transition)<< "  ->";
+                std::cout << core::pp_deprecated(Transition)<< "  ->";
               }
               std::cout <<"  [ ";
               if (i==pos)
