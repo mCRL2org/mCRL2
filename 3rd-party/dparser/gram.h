@@ -135,7 +135,7 @@ typedef struct Term {
   AssocKind		op_assoc;
   int			op_priority;
   char			*string;
-  int			string_len;
+  uint			string_len;
   uint			scan_kind:3;
   uint			ignore_case:1;
   uint			trailing_context:1;
@@ -204,28 +204,28 @@ typedef struct Grammar {
   Vec(Action *)		actions;
   Code			scanner;
   Code			*code;
-  int			ncode;
+  uint			ncode;
   Vec(Declaration *)	declarations;
   Vec(D_Pass *)		passes;
   Vec(char *)		all_pathnames;
   char			*default_white_space;
   /* grammar construction options */
-  int			set_op_priority_from_rule;
-  int			right_recursive_BNF;
-  int			states_for_whitespace;
-  int			states_for_all_nterms;
-  int			tokenizer;
-  int			longest_match;
-  int			save_parse_tree;
+  uint		set_op_priority_from_rule;
+  uint		right_recursive_BNF;
+  uint		states_for_whitespace;
+  uint		states_for_all_nterms;
+  uint		tokenizer;
+  uint		longest_match;
+  uint		save_parse_tree;
   /* grammar writing options */
-  char			grammar_ident[256];
-  int			scanner_blocks;
-  int			scanner_block_size;
-  int			write_line_directives;
-  int			write_header;
+  char		grammar_ident[256];
+  uint  	scanner_blocks;
+  uint		scanner_block_size;
+  int 		write_line_directives;
+  int		  write_header;
   int			token_type;
   int			write_cpp;
-  char			write_extension[256];
+  char		write_extension[256];
   /* temporary variables for grammar construction */
   struct Production *	p;
   struct Rule *		r;
@@ -249,7 +249,7 @@ void print_rdebug_grammar(Grammar *g, char *pathname);
 void print_states(Grammar *g);
 void print_rule(Rule *r);
 void print_term(Term *t);
-Production *lookup_production(Grammar *g, char *name, int len);
+Production *lookup_production(Grammar *g, char *name, uint len);
 
 /* for creating grammars */
 #define last_elem(_r) ((_r)->elems.v[(_r)->elems.n-1])
@@ -263,7 +263,7 @@ Elem *new_utf8_char(Grammar *g, char *s, char *e, Rule *r);
 Elem *new_ident(char *s, char *e, Rule *r);
 void new_token(Grammar *g, char *s, char *e);
 Elem *new_code(Grammar *g, char *s, char *e, Rule *r);
-void add_global_code(Grammar *g, char *start, char *end, int line);
+void add_global_code(Grammar *g, char *start, char *end, uint line);
 Production *new_internal_production(Grammar *g, Production *p);
 Elem * dup_elem(Elem *e, Rule *r);
 void add_declaration(Grammar *g, char *start, char *end, uint kind, uint line);
@@ -274,9 +274,9 @@ D_Pass *find_pass(Grammar *g, char *start, char *end);
 void conditional_EBNF(Grammar *g); /* applied to g->e,g->r,g->p */
 void star_EBNF(Grammar *g); /* ditto */
 void plus_EBNF(Grammar *g); /* ditto */
-void rep_EBNF(Grammar *g, int minimum, int maximum);
+void rep_EBNF(Grammar *g, uint minimum, uint maximum);
 void initialize_productions(Grammar *g);
 void finalize_productions(Grammar *g);
-int state_for_declaration(Grammar *g, int iproduction);
+int state_for_declaration(Grammar *g, uint iproduction);
 
 #endif

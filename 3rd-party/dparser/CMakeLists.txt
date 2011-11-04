@@ -17,6 +17,8 @@ add_definitions(
   -DD_USE_FREELISTS=1
 )
 
+set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
+
 if(MSVC)
 add_definitions(
   -Dstrtoll=_strtoi64
@@ -36,7 +38,7 @@ add_library(dparser
   symtab.c 
   util.c 
   read_binary.c 
-  dparse_tree.c
+  #dparse_tree.c
 )
 
 add_executable(make_dparser 

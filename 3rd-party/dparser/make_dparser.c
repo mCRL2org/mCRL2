@@ -59,7 +59,7 @@ static ArgumentDescription arg_desc[] = {
  {"rdebug_grammar", 'R', "Replace actions with ones printing productions", "+", 
    &d_rdebug_grammar_level, "D_MAKE_RDEBUG_GRAMMAR", NULL},
  {"help", 'h', "Help", NULL, NULL, NULL, help},
- {0}
+ {NULL, 0, NULL, NULL, NULL, NULL, NULL}
 };
 
 static ArgumentState arg_state = {
