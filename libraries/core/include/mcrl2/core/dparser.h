@@ -19,32 +19,11 @@
 #include <string>
 #include <vector>
 #include "dparse.h"
+#include "mcrl2/exception.h"
 
 namespace mcrl2 {
 
 namespace core {
-
-class parse_error: public std::exception
-{ };
-
-class user_error: public std::exception
-{
-  public:
-    user_error(std::string msg)
-      : m_what(msg)
-    { }
-
-    ~user_error() throw()
-    { }
-
-    virtual const char* what() const throw()
-    {
-      return m_what.c_str();
-    }
-
-  private:
-    std::string m_what;
-};
 
 /// \brief Wrapper for D_ParseNode
 struct parse_node
@@ -139,7 +118,7 @@ struct parser_table
         return start_symbol(i);
       }
     }
-    throw user_error("unknown start symbol '" + name + "'");
+    throw mcrl2::runtime_error("unknown start symbol '" + name + "'");
     return 0;
   }
 
@@ -198,7 +177,7 @@ struct parser
     D_ParseNode* result = dparse(m_parser, const_cast<char*>(text.c_str()), text.size());
     if (!result || m_parser->syntax_errors)
     {
-      throw parse_error();
+      throw mcrl2::runtime_error("syntax error");
     }
     return parse_node(result);
   }
