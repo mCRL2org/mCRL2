@@ -9,6 +9,7 @@
 # ########## Project setup ##########
 project(dparser)
 cmake_minimum_required(VERSION 2.6)
+include(CheckCCompilerFlag)
 
 add_definitions(
   -DD_MAJOR_VERSION=1
@@ -17,7 +18,12 @@ add_definitions(
   -DD_USE_FREELISTS=1
 )
 
-set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
+if(NOT MSVC)
+  check_c_compiler_flag(-Wno-unused-parameter C_ACCEPTS_WNO_UNUSED_PARAMETER )
+  if(C_ACCEPTS_WNO_UNUSED_PARAMETER)
+    set(CMAKE_C_FLAGS "${CMAKE_C_FLAGS} -Wno-unused-parameter")
+  endif(C_ACCEPTS_WNO_UNUSED_PARAMETER)
+endif(NOT MSVC)
 
 if(MSVC)
 add_definitions(

@@ -36,10 +36,10 @@ typedef struct D_Reduction {
   D_ReductionCode	final_code;
   unsigned short	op_assoc;
   unsigned short	rule_assoc;
-  int 			op_priority;
-  int 			rule_priority;
-  int			action_index;
-  uint			npass_code;
+  int 				op_priority;
+  int 				rule_priority;
+  int				action_index;
+  unsigned int		npass_code;
   D_ReductionCode	*pass_code;
 } D_Reduction;
 

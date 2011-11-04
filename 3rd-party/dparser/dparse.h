@@ -26,7 +26,7 @@ typedef void *d_voidp;
 
 typedef void (*D_SyntaxErrorFn)(struct D_Parser *);
 typedef struct D_ParseNode *(*D_AmbiguityFn)(struct D_Parser *, 
-					     uint n, struct D_ParseNode **v);
+					     unsigned int n, struct D_ParseNode **v);
 typedef void (*D_FreeNodeFn)(struct D_ParseNode *d);
 
 typedef struct D_Parser {
@@ -73,14 +73,14 @@ void free_D_ParseNode(D_Parser *p, D_ParseNode *pn);
 void free_D_ParseTreeBelow(D_Parser *p, D_ParseNode *pn);
 
 int d_get_number_of_children(D_ParseNode *pn);
-D_ParseNode *d_get_child(D_ParseNode *pn, uint child);
+D_ParseNode *d_get_child(D_ParseNode *pn, unsigned int child);
 D_ParseNode *d_find_in_tree(D_ParseNode *pn, int symbol);
 char *d_ws_before(D_Parser *p, D_ParseNode *pn); /* points BEFORE leading ws */
 char *d_ws_after(D_Parser *p, D_ParseNode *pn); /* points AFTER trailing ws */
 
-void d_pass(D_Parser *p, D_ParseNode *pn, uint pass_number);
+void d_pass(D_Parser *p, D_ParseNode *pn, unsigned int pass_number);
 
-int resolve_amb_greedy(D_Parser *dp, uint n, D_ParseNode **v);
+int resolve_amb_greedy(D_Parser *dp, unsigned int n, D_ParseNode **v);
 
 char *d_dup_pathname_str(const char *str);
 
