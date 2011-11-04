@@ -60,9 +60,6 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
 template <typename Container, typename OutputIterator>
 void find_sort_expressions(Container const& container, OutputIterator o);
 
-template <typename T>
-std::string pp(const T&);
-
 /// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
 /// \param first Start of a range of pbes equations
 /// \param last End of a range of pbes equations
@@ -598,6 +595,9 @@ class pbes
     }
 };
 
+// template function overloads
+std::string pp(const pbes<>& x);
+
 /// \brief Conversion to ATermAppl.
 /// \return The PBES converted to ATerm format.
 template <typename Container>
@@ -678,10 +678,6 @@ struct aterm_traits<mcrl2::pbes_system::pbes<Container> >
 
 #ifndef MCRL2_PBES_FIND_H
 #include "mcrl2/pbes/find.h"
-#endif
-
-#ifndef MCRL2_PBES_PRINT_H
-#include "mcrl2/pbes/print.h"
 #endif
 
 #endif // MCRL2_PBES_PBES_H

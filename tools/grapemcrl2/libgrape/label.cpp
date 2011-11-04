@@ -16,7 +16,6 @@
 
 #include <sstream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/lps/action_parse.h"
 #include "label.h"
 #include "action.h"
@@ -96,7 +95,7 @@ void label::set_actions_text(const wxString& p_actions)
     for (atermpp::aterm_list::const_iterator i = al.begin(); i != al.end(); ++i)
     {
       action action;
-      action.set_name(wxString(pp(atermpp::aterm_appl(*i).argument(0)).c_str(), wxConvLocal));
+      action.set_name(wxString(mcrl2::core::pp(atermpp::aterm_appl(*i).argument(0)).c_str(), wxConvLocal));
       action.set_parameters_text(atermpp::aterm_appl(*i).argument(1));
       m_actions.Add(action);
     }

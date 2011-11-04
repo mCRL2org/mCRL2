@@ -20,7 +20,6 @@
 #ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
 #include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
-#include "mcrl2/data/print.h"
 #include <iterator>
 #endif
 

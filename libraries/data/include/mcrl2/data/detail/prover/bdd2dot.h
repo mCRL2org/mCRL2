@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/aterm_int.h"
 #include "mcrl2/atermpp/map.h"
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/prover/bdd_info.h"
 
 namespace mcrl2

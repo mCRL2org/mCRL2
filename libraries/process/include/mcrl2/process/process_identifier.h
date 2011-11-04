@@ -81,6 +81,11 @@ bool is_process_identifier(const atermpp::aterm_appl& t)
   return core::detail::gsIsProcVarId(t);
 }
 
+// template function overloads
+std::string pp(const process_identifier& x);
+std::string pp(const process_identifier_list& x);
+std::string pp(const process_identifier_vector& x);
+
 } // namespace process
 
 } // namespace mcrl2

@@ -28,7 +28,6 @@
 #include "mcrl2/atermpp/convert.h"
 #include "mcrl2/data/detail/data_property_map.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/lps/print.h"
 
 namespace mcrl2
 {
@@ -74,7 +73,7 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
 
     std::string print(const action_label l) const
     {
-      return lps::pp(l.name());
+      return core::pp(l.name());
     }
 
     std::string print(const action& a) const
@@ -82,14 +81,14 @@ class specification_property_map : protected mcrl2::data::detail::data_property_
       return lps::pp(a);
     }
 
-    std::string print(const deadlock&) const
+    std::string print(const deadlock& x) const
     {
-      return "<pp(deadlock) Not yet implemented>";
+      return lps::pp(x);
     }
 
-    std::string print(const multi_action&) const
+    std::string print(const multi_action& x) const
     {
-      return "<pp(multi_action) Not yet implemented>";
+      return lps::pp(x);
     }
 
     std::string print(const std::set<std::multiset<action_label> >& v) const

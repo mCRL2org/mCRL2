@@ -170,6 +170,9 @@ bool is_multi_action(const atermpp::aterm_appl& t)
   return core::detail::gsIsMultAct(t);
 }
 
+// template function overloads
+std::string pp(const multi_action& x);
+
 /// \cond INTERNAL_DOCS
 namespace detail
 {

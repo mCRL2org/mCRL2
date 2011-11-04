@@ -18,7 +18,6 @@
 #include "mcrl2/data/bool.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/data/abstraction.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/data_sequence_algorithm.h"
 
 namespace mcrl2

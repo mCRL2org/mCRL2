@@ -65,6 +65,10 @@ bool has_propositional_variables(const pbes_expression& t)
 class pbes_equation;
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
 
+// template function overloads
+std::string pp(const pbes_equation& x);
+std::string pp(const atermpp::vector<pbes_equation>& x);
+
 /// \brief pbes equation.
 class pbes_equation
 {

@@ -26,7 +26,6 @@
 #include "mcrl2/pbes/parelm.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/pbes_rewriter_type.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/tools.h"
 #include "mcrl2/pbes/rewrite.h"
 #include "mcrl2/pbes/rewriter.h"

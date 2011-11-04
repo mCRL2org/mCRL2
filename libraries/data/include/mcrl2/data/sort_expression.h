@@ -125,6 +125,11 @@ typedef atermpp::term_list< sort_expression >  sort_expression_list;
 /// \brief vector of sorts
 typedef atermpp::vector< sort_expression >     sort_expression_vector;
 
+// template function overloads
+std::string pp(const sort_expression& x);
+std::string pp(const sort_expression_list& x);
+std::string pp(const sort_expression_vector& x);
+
 } // namespace data
 
 } // namespace mcrl2

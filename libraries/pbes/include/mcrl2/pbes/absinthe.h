@@ -36,7 +36,6 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/identifier_generator.h"
 #include "mcrl2/utilities/text_utility.h"

@@ -8,7 +8,6 @@
 //
 /// \file ltsmindata.cpp
 
-#include "mcrl2/core/print.h"
 #include "ltsmin.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/text_utility.h"

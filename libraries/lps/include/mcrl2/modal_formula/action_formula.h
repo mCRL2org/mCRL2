@@ -476,12 +476,11 @@ inline int precedence(const or_& x) { return precedence(static_cast<const action
 inline int precedence(const at& x) { return precedence(static_cast<const action_formula&>(x)); }
 inline int precedence(const not_& x) { return precedence(static_cast<const action_formula&>(x)); }
 
+// template function overloads
+std::string pp(const action_formula& x);
+
 } // namespace action_formulas
 
 } // namespace mcrl2
-
-//#ifndef MCRL2_MODAL_FORMULA_PRINT_H
-//#include "mcrl2/modal_formula/print.h"
-//#endif
 
 #endif // MCRL2_MODAL_ACTION_FORMULA_H

@@ -17,7 +17,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/print.h"
 
 namespace mcrl2
 {

@@ -35,7 +35,6 @@
 
 // linear process libraries.
 #include "mcrl2/lps/linearise.h"
-#include "mcrl2/process/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/lps/sumelm.h"
@@ -50,7 +49,6 @@
 #include "mcrl2/data/structured_sort.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/standard_utility.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
 #include "mcrl2/data/normalize_sorts.h"
@@ -6662,7 +6660,7 @@ class specification_basic_type:public boost::noncopyable
           used_sumvars = push_front(used_sumvars, *s);
         }
       }
-      used_sumvars = reverse(used_sumvars); 
+      used_sumvars = reverse(used_sumvars);
 
       return result;
     }
@@ -6724,7 +6722,7 @@ class specification_basic_type:public boost::noncopyable
                                              existentially_quantified_variables,
                                              renamings_pars,
                                              renamings_args,
-                                             condition_list); 
+                                             condition_list);
         results=push_front(results,ult_del_condition);
       }
 
@@ -6738,10 +6736,10 @@ class specification_basic_type:public boost::noncopyable
       atermpp::vector < data_expression_list>::const_iterator renamings_arg=renamings_args.begin();
       condition_list=reverse(condition_list);
       results=reverse(results);
-      data_expression_list::const_iterator j=condition_list.begin(); 
-      for(data_expression_list::const_iterator i=results.begin(); 
+      data_expression_list::const_iterator j=condition_list.begin();
+      for(data_expression_list::const_iterator i=results.begin();
               i!=results.end(); ++i,++j,++renamings_par,++renamings_arg)
-      {   
+      {
         result=lazy::or_(result,substitute_data(*renamings_arg,*renamings_par,lazy::and_(*i,*j)));
       }
       return result;
@@ -7581,7 +7579,7 @@ class specification_basic_type:public boost::noncopyable
         bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then);
         static bool show_only_once=true;
         if (ct && options.add_delta && show_only_once)
-        { 
+        {
           mCRL2log(log::warning) << "process " << procId.name() <<
               " contains time, which is now not preserved. \n"  <<
               "Use --timed or -T, or untick `add deadlocks' for a correct timed linearisation...\n";

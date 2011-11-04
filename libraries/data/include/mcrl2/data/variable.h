@@ -76,6 +76,11 @@ typedef atermpp::vector<variable>    variable_vector;
 
 //--- end generated class variable ---//
 
+// template function overloads
+std::string pp(const variable& x);
+std::string pp(const variable_list& x);
+std::string pp(const variable_vector& x);
+
 /// \brief Converts an container with variables to a variable_list
 /// \param r A range of variables.
 /// \note This function uses implementation details of the iterator type

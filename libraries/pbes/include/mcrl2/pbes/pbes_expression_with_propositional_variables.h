@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PBES_EXPRESSION_WITH_PROPOSITIONAL_VARIABLES_H
 
 #include "mcrl2/pbes/pbes_expression_with_variables.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/atermpp/make_list.h"
 
 namespace mcrl2

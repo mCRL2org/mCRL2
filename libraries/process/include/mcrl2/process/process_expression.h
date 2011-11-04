@@ -918,6 +918,30 @@ inline int precedence(const seq& x)          { return precedence(static_cast<con
 inline int precedence(const at& x)           { return precedence(static_cast<const process_expression&>(x)); }
 inline int precedence(const sync& x)         { return precedence(static_cast<const process_expression&>(x)); }
 
+// template function overloads
+std::string pp(const process_expression& x);
+std::string pp(const process_expression_list& x);
+std::string pp(const process_expression_vector& x);
+std::string pp(const process_instance& x);
+std::string pp(const process_instance_assignment& x);
+std::string pp(const delta& x);
+std::string pp(const tau& x);
+std::string pp(const sum& x);
+std::string pp(const block& x);
+std::string pp(const hide& x);
+std::string pp(const rename& x);
+std::string pp(const comm& x);
+std::string pp(const allow& x);
+std::string pp(const sync& x);
+std::string pp(const at& x);
+std::string pp(const seq& x);
+std::string pp(const if_then& x);
+std::string pp(const if_then_else& x);
+std::string pp(const bounded_init& x);
+std::string pp(const merge& x);
+std::string pp(const left_merge& x);
+std::string pp(const choice& x);
+
 } // namespace process
 
 } // namespace mcrl2

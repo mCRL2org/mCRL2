@@ -59,6 +59,9 @@ class action_name_multiset: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of action_name_multiset expressions
 typedef atermpp::term_list<action_name_multiset> action_name_multiset_list;
 
+// template function overloads
+std::string pp(const action_name_multiset& x);
+
 } // namespace process
 
 } // namespace mcrl2

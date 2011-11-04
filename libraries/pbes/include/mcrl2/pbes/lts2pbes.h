@@ -16,7 +16,6 @@
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lts/lts_lts.h"
 #include "mcrl2/modal_formula/traverser.h"
-#include "mcrl2/modal_formula/print.h"
 #include "mcrl2/pbes/pbes_translate.h"
 
 namespace mcrl2 {
@@ -28,16 +27,16 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
 {
   public:
     typedef lts::lts_lts_t::states_size_type state_type;
-  
+
   protected:
     const lts::lts_lts_t& lts0;
     state_formulas::state_formula f0;
-    
+
     core::identifier_string make_identifier(const core::identifier_string& name, state_type s)
     {
       return core::identifier_string(std::string(name) + "@" + boost::lexical_cast<std::string>(s));
     }
-    
+
     /// \brief The \p RHS function of the translation
     /// \param f A modal formula
     /// \param s A state of an LTS
@@ -209,7 +208,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
           core::identifier_string X = make_identifier(af::name(f), s);
           propositional_variable Xs(X, d + Par(X, data::variable_list(), f0));
           v.push_back(pbes_equation(sigma, Xs, RHS(af::arg(f), s)));
-        }      
+        }
         result = v + E(af::arg(f));
       }
       else
@@ -265,7 +264,7 @@ class lts2pbes_algorithm: public pbes_translate_algorithm_untimed_base
       data::data_expression_list e = detail::mu_expressions(f0);
       propositional_variable_instantiation init(Xs0, e);
 
-      pbes<> result = pbes<>(lts0.data(), eqn, atermpp::set<data::variable>(), init);      
+      pbes<> result = pbes<>(lts0.data(), eqn, atermpp::set<data::variable>(), init);
       return result;
     }
 };

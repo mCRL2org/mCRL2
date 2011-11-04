@@ -24,8 +24,6 @@
 #include "mcrl2/process/is_linear.h"
 #include "mcrl2/process/parse.h"
 
-#include "mcrl2/lps/print.h"
-
 namespace mcrl2
 {
 

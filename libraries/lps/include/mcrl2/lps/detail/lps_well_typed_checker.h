@@ -15,7 +15,6 @@
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/sequence_algorithm.h"
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/action_utility.h"
 

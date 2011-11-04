@@ -35,8 +35,6 @@ namespace mcrl2
 namespace pbes_system
 {
 
-template <typename T> std::string pp(const T& t);
-
 using namespace core::detail::precedences;
 
 //--- start generated classes ---//
@@ -354,6 +352,14 @@ class exists: public pbes_expression
 };
 //--- end generated classes ---//
 
+// template function overloads
+std::string pp(const pbes_expression& x);
+std::string pp(const pbes_expression_list& x);
+std::string pp(const pbes_expression_vector& x);
+std::string pp(const propositional_variable_instantiation& x);
+std::string pp(const propositional_variable_instantiation_list& x);
+std::string pp(const propositional_variable_instantiation_vector& x);
+
 /// \brief Returns true if the term t is equal to true
 /// \param t A PBES expression
 /// \return True if the term t is equal to true
@@ -510,15 +516,15 @@ int precedence(const pbes_expression& x)
   {
     return 0;
   }
-  else if (is_imp(x)) 
+  else if (is_imp(x))
   {
     return 1;
   }
-  else if (is_and(x) || is_or(x)) 
+  else if (is_and(x) || is_or(x))
   {
     return 2;
   }
-  else if (is_not(x)) 
+  else if (is_not(x))
   {
     return 3;
   }

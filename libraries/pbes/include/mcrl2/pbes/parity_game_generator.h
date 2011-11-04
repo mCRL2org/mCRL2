@@ -27,7 +27,6 @@
 #include "mcrl2/data/selection.h"
 #include "mcrl2/pbes/normalize.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/detail/bes_equation_limit.h"
 

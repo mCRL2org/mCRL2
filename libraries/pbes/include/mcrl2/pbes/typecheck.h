@@ -14,7 +14,6 @@
 
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/print.h"
 
 namespace mcrl2
 {

@@ -16,10 +16,8 @@
 
 #include <sstream>
 #include "mcrl2/core/parse.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/print.h"
 
 #include "varupdate.h"
 

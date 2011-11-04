@@ -26,7 +26,6 @@
 #include "mcrl2/data/parse.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/typecheck.h"
 #include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/translate_user_notation.h"
@@ -137,23 +136,6 @@ void complete_pbes(pbes<>& x)
   pbes_system::translate_user_notation(x);
   pbes_system::normalize_sorts(x, x.data());
   complete_data_specification(x);
-}
-
-template <typename T>
-void compare_parse_results(const std::string& text, const T& x1, const T& x2)
-{
-  if (!(x1 == x2))
-  {
-    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "string: " << text << std::endl;
-    std::clog << "old:    " << pbes_system::pp(x1) << std::endl;
-    core::print_aterm(x1);
-    std::clog << "new:    " << pbes_system::pp(x2) << std::endl;
-    core::print_aterm(x2);
-#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
-    throw mcrl2::runtime_error("difference detected between old and new parser");
-#endif
-  }
 }
 
 /// \brief Reads a PBES from an input stream.

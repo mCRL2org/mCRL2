@@ -17,7 +17,6 @@
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/print.h"
 
 namespace mcrl2 {
 

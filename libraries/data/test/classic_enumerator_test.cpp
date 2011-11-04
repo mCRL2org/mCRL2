@@ -18,6 +18,7 @@
 #include "mcrl2/core/detail/print_utility.h"
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/parse.h"
+#include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/rewriter.h"
 #include "mcrl2/data/expression_traits.h"

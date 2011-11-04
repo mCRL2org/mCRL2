@@ -6,7 +6,6 @@
 #include <iostream>
 #include <string>
 #include "mcrl2/utilities/logger.h"
-#include "mcrl2/core/print.h"
 #include <iterator>
 
 #include "mcrl2/atermpp/algorithm.h"
@@ -16,7 +15,6 @@
 
 #include <mcrl2/lps/linear_process.h>
 #include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/print.h"
 
 using namespace std;
 using namespace mcrl2;
@@ -557,7 +555,7 @@ mcrl2::lps::linear_process lpsparunfold::update_linear_process(function_symbol c
     mcrl2::lps::replace_variables( new_lps, s );
   }
 
-  mCRL2log(debug) << "\nNew LPS:\n" <<  core::pp(lps::linear_process_to_aterm(new_lps)) << std::endl;
+  mCRL2log(debug) << "\nNew LPS:\n" <<  lps::pp(new_lps) << std::endl;
 
   assert(is_well_typed(new_lps));
 

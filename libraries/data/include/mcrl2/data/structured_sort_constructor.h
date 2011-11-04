@@ -282,6 +282,11 @@ typedef atermpp::term_list< structured_sort_constructor > structured_sort_constr
 /// \brief List of structured_sort_constructor.
 typedef atermpp::vector< structured_sort_constructor >    structured_sort_constructor_vector;
 
+// template function overloads
+std::string pp(const structured_sort_constructor& x);
+std::string pp(const structured_sort_constructor_list& x);
+std::string pp(const structured_sort_constructor_vector& x);
+
 } // namespace data
 
 } // namespace mcrl2

@@ -19,7 +19,6 @@
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/core/garbage_collection.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/atermpp/aterm_init.h"
 
 using namespace mcrl2;

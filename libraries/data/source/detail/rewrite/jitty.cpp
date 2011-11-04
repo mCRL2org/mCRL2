@@ -28,7 +28,6 @@
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/data/print.h"
 
 using namespace mcrl2::log;
 using namespace mcrl2::core;
@@ -225,7 +224,7 @@ static ATermList create_strategy(ATermList rules, const atermpp::aterm_appl inte
 }
 
 void RewriterJitty::make_jitty_strat_sufficiently_larger(const size_t i)
-{ 
+{
   if (i>=jitty_strat.size())
   {
     size_t oldsize=jitty_strat.size();

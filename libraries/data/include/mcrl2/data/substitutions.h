@@ -13,7 +13,6 @@
 #define MCRL2_DATA_SUBSTITUTIONS_H
 
 #include <functional>
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/data/data_expression.h"
 
@@ -26,7 +25,7 @@ struct sort_expression_assignment: public std::unary_function<sort_expression, s
 {
   typedef sort_expression variable_type;
   typedef sort_expression expression_type;
-  
+
   sort_expression lhs;
   sort_expression rhs;
 
@@ -49,7 +48,7 @@ struct data_expression_assignment: public std::unary_function<data_expression, d
 {
   typedef data_expression variable_type;
   typedef data_expression expression_type;
-  
+
   data_expression lhs;
   data_expression rhs;
 
@@ -256,7 +255,7 @@ public:
   typedef typename AssociativeContainer::mapped_type expression_type;
   typedef typename AssociativeContainer::const_iterator const_iterator;
   typedef typename AssociativeContainer::iterator iterator;
-  
+
   /// \brief Friend functions that collect some details of a substitution,
   /// needed for rewriting in internal format, as well as alpha-conversion.
   template<typename AssociativeContainer1, typename UnaryOperator>
@@ -339,8 +338,8 @@ public:
   }
 
   /// \brief Resets the substitution by letting every variable yield itself. Cf. clear() of a map.
-  ///        
-  void clear() 
+  ///
+  void clear()
   {
     m_map.clear();
   }

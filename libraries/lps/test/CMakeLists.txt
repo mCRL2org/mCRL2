@@ -33,6 +33,8 @@ foreach( OBJ ${TERM_OBJS} )
   target_link_libraries("${PREFIX}_${result}"
      ${Boost_FILESYSTEM_LIBRARY}
      ${Boost_SYSTEM_LIBRARY}
+     mcrl2_core
+     mcrl2_data
      mcrl2_lps
      mcrl2_syntax
      dparser

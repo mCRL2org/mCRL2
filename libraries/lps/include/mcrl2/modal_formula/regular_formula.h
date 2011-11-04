@@ -281,12 +281,11 @@ inline int precedence(const alt& x) { return precedence(static_cast<const regula
 inline int precedence(const trans& x) { return precedence(static_cast<const regular_formula&>(x)); }
 inline int precedence(const trans_or_nil& x) { return precedence(static_cast<const regular_formula&>(x)); }
 
+// template function overloads
+std::string pp(const regular_formula& x);
+
 } // namespace regular_formulas
 
 } // namespace mcrl2
-
-//#ifndef MCRL2_MODAL_FORMULA_PRINT_H
-//#include "mcrl2/modal_formula/print.h"
-//#endif
 
 #endif // MCRL2_MODAL_REGULAR_FORMULA_H

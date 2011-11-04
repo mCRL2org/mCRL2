@@ -276,6 +276,14 @@ inline data_expression_list make_data_expression_list(Container const& r, typena
 //--- start generated class data_expression ---//
 //--- end generated class data_expression ---//
 
+// template function overloads
+std::string pp(const data_expression& x);
+std::string pp(const data_expression_list& x);
+std::string pp(const data_expression_vector& x);
+// TODO: we have to put it somewhere...
+std::string pp(const atermpp::aterm& x);
+std::string pp(const atermpp::aterm_appl& x);
+
 } // namespace data
 
 } // namespace mcrl2

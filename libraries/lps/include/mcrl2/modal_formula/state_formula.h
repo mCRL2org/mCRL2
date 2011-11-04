@@ -870,12 +870,11 @@ bool state_formula::has_time() const
   return is_timed(*this);
 }
 
+// template function overloads
+std::string pp(const state_formula& x);
+
 } // namespace state_formulas
 
 } // namespace mcrl2
-
-//#ifndef MCRL2_MODAL_FORMULA_PRINT_H
-//#include "mcrl2/modal_formula/print.h"
-//#endif
 
 #endif // MCRL2_MODAL_STATE_FORMULA_H

@@ -29,6 +29,7 @@ include_directories(${CMAKE_SOURCE_DIR}/build/precompile)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_lps
+  mcrl2_pbes
   mcrl2_utilities
   mcrl2_syntax
   dparser

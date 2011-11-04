@@ -328,6 +328,11 @@ inline assignment_list make_assignment_vector(Container const& container, typena
 //    }
 ////--- end generated is-functions ---//
 
+// template function overloads
+std::string pp(const assignment& x);
+std::string pp(const assignment_list& x);
+std::string pp(const assignment_vector& x);
+
 } // namespace data
 
 } // namespace mcrl2

@@ -25,7 +25,6 @@
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/lps/find.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/pbes.h"

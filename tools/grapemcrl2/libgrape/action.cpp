@@ -13,7 +13,6 @@
 #include "wx/wx.h"
 
 #include "action.h"
-#include "mcrl2/data/print.h"
 
 using namespace mcrl2::core;
 using namespace grape::libgrape;

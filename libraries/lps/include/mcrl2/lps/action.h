@@ -79,6 +79,14 @@ class action: public atermpp::aterm_appl
 /// Read-only singly linked list of actions
 typedef atermpp::term_list<action> action_list;
 
+/// Vector of actions
+typedef atermpp::vector<action> action_vector;
+
+// template function overloads
+std::string pp(const action& x);
+std::string pp(const action_list& x);
+std::string pp(const action_vector& x);
+
 /// \brief Returns true if the term t is an action
 /// \param t A term
 /// \return True if the term t is an action

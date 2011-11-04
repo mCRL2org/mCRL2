@@ -17,7 +17,6 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/print.h"
 
 namespace mcrl2
 {
@@ -41,7 +40,7 @@ class used_data_equation_selector
   private:
 
     atermpp::set< function_symbol > m_used_symbols;
- 
+
     bool add_all;
 
     template < typename Range >
@@ -97,7 +96,7 @@ class used_data_equation_selector
     }
 
   public:
-    
+
     /// \brief Check whether the symbol is used.
     bool operator()(const data::function_symbol f) const
     {
@@ -132,7 +131,7 @@ class used_data_equation_selector
     used_data_equation_selector():
        add_all(true)
     {}
-    
+
     /// \brief context is a range of function symbols
     template <typename Range>
     used_data_equation_selector(data_specification const& data_spec, Range const& context):

@@ -18,15 +18,12 @@
 #include <cassert>
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/core/detail/struct_core.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/trace/trace.h"
 #include "mcrl2/utilities/input_output_tool.h"
 #include "mcrl2/utilities/mcrl2_gui_tool.h"
 #include "mcrl2/exception.h"
 #include "mcrl2/lps/multi_action.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/data/data_expression.h"
-#include "mcrl2/data/print.h"
 
 using namespace std;
 using namespace mcrl2;

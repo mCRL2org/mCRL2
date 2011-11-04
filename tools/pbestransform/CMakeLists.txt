@@ -30,6 +30,7 @@ include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
 
 target_link_libraries(${PROJECT_NAME}
   mcrl2_data
+  mcrl2_pbes
   mcrl2_utilities
 )
 

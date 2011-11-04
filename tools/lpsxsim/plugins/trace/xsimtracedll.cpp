@@ -24,7 +24,6 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "simbasegui.h"
 #include "xsimtracedll.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/aterm/aterm_ext.h"
 

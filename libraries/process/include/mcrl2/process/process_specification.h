@@ -226,6 +226,9 @@ bool operator!=(const process_specification& spec1, const process_specification&
   return !(spec1 == spec2);
 }
 
+// template function overloads
+std::string pp(const process_specification& x);
+
 } // namespace process
 
 } // namespace mcrl2

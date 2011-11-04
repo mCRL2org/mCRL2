@@ -145,6 +145,11 @@ typedef atermpp::term_list< data_equation >    data_equation_list;
 /// \brief list of data_equations
 typedef atermpp::vector< data_equation >       data_equation_vector;
 
+// template function overloads
+std::string pp(const data_equation& x);
+std::string pp(const data_equation_list& x);
+std::string pp(const data_equation_vector& x);
+
 } // namespace data
 
 } // namespace mcrl2

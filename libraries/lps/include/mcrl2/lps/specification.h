@@ -292,6 +292,9 @@ bool operator!=(const specification& spec1, const specification& spec2)
   return !(spec1 == spec2);
 }
 
+// template function overloads
+std::string pp(const specification& x);
+
 } // namespace lps
 
 } // namespace mcrl2
@@ -304,4 +307,4 @@ bool operator!=(const specification& spec1, const specification& spec2)
 #include "mcrl2/lps/detail/lps_well_typed_checker.h"
 #endif
 
-#endif // MCRL2_LPS_SPECIFICATION_H                                                                                       
+#endif // MCRL2_LPS_SPECIFICATION_H

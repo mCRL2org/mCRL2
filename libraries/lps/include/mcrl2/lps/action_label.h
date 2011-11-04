@@ -86,6 +86,11 @@ typedef atermpp::term_list<action_label> action_label_list;
 /// \brief Read-only singly linked list of action labels
 typedef atermpp::vector<action_label> action_label_vector;
 
+// template function overloads
+std::string pp(const action_label& x);
+std::string pp(const action_label_list& x);
+std::string pp(const action_label_vector& x);
+
 /// \brief Returns true if the term t is an action label
 /// \param t A term
 /// \return True if the term t is an action label

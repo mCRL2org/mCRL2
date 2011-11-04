@@ -29,7 +29,6 @@
 #include "mcrl2/lps/find.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/modal_formula/find.h"
-#include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -1162,7 +1161,7 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
       const lps::linear_process& lps)
     {
 #ifdef MCRL2_PBES_TRANSLATE_DEBUG
-      std::cerr << "\n" << lps2pbes_indent() << "<E-untimed>" << pbes_system::pp(f) << std::flush;
+      std::cerr << "\n" << lps2pbes_indent() << "<E-untimed>" << state_formulas::pp(f) << std::flush;
       lps2pbes_increase_indent();
 #endif
       using namespace state_formulas::detail::accessors;

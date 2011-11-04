@@ -81,6 +81,9 @@ class fixpoint_symbol: public atermpp::aterm_appl
     }
 };
 
+// template function overloads
+std::string pp(const fixpoint_symbol& x);
+
 } // namespace pbes_system
 
 } // namespace mcrl2

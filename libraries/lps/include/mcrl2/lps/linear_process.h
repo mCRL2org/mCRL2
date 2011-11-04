@@ -84,7 +84,7 @@ class linear_process
       }
       return result;
     }
-    
+
   public:
     /// \brief Constructor.
     linear_process()
@@ -110,7 +110,7 @@ class linear_process
       m_process_parameters(process_parameters),
       m_deadlock_summands(deadlock_summands),
       m_action_summands(action_summands)
-    { 
+    {
       m_process_parameters.protect();
     }
 
@@ -258,6 +258,9 @@ summand_list linear_process_summands(const linear_process& p)
 }
 
 } // namespace deprecated
+
+// template function overloads
+std::string pp(const linear_process& x);
 
 } // namespace lps
 

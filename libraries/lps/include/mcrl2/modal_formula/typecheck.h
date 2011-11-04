@@ -14,7 +14,6 @@
 
 #include "mcrl2/core/typecheck.h"
 #include "mcrl2/lps/specification.h"
-#include "mcrl2/modal_formula/print.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 

@@ -28,7 +28,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/pbes/find.h"
-#include "mcrl2/pbes/print.h"
 
 namespace mcrl2
 {
@@ -244,7 +243,7 @@ class pbes_parelm_algorithm
         {
           core::identifier_string X1 = find_predicate_variable(p, *i);
           data::variable v1 = predicate_variables[*i];
-          mCRL2log(log::debug) << "(" + pbes_system::pp(X1) + ", " + pbes_system::pp(v1) + ")\n";
+          mCRL2log(log::debug) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
         }
         mCRL2log(log::debug) << "\ndependencies:" << std::endl;
         typedef typename boost::graph_traits<graph>::edge_iterator edge_iterator;
@@ -260,8 +259,8 @@ class pbes_parelm_algorithm
           size_t i2 = boost::target(e, G);
           core::identifier_string X2 = find_predicate_variable(p, i2);
           data::variable v2 = predicate_variables[i2];
-          std::string left  = "(" + pbes_system::pp(X1) + ", " + pbes_system::pp(v1) + ")";
-          std::string right = "(" + pbes_system::pp(X2) + ", " + pbes_system::pp(v2) + ")";
+          std::string left  = "(" + core::pp(X1) + ", " + data::pp(v1) + ")";
+          std::string right = "(" + core::pp(X2) + ", " + data::pp(v2) + ")";
           mCRL2log(log::debug) << left << " -> " << right << std::endl;
         }
       }
@@ -277,7 +276,7 @@ class pbes_parelm_algorithm
           for (std::vector<size_t>::const_iterator j = (i->second).begin(); j != (i->second).end(); ++j)
           {
             data::variable v1 = predicate_variables[*j + propvar_offsets[X1]];
-            mCRL2log(log::verbose) << "(" + pbes_system::pp(X1) + ", " + data::pp(v1) + ")\n";
+            mCRL2log(log::verbose) << "(" + core::pp(X1) + ", " + data::pp(v1) + ")\n";
           }
         }
       }

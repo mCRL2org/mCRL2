@@ -75,6 +75,9 @@ class process_initializer: public atermpp::aterm_appl
     }
 };
 
+// template function overloads
+std::string pp(const process_initializer& x);
+
 } // namespace lps
 
 } // namespace mcrl2

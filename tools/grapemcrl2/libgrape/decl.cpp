@@ -12,7 +12,6 @@
 #include "wx/wx.h"
 #include <sstream>
 #include "mcrl2gen/mcrl2gen_validate.h"
-#include "mcrl2/core/print.h"
 
 #include "decl.h"
 

@@ -25,7 +25,6 @@
 #include "mcrl2/atermpp/table.h"
 #include "mcrl2/core/parse.h"
 #include "mcrl2/data/typecheck.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/utilities/logger.h"
@@ -514,23 +513,6 @@ inline
 void complete_data_specification(data_specification& x)
 {
   type_check(x);
-}
-
-template <typename T>
-void compare_parse_results(const std::string& text, const T& x1, const T& x2)
-{
-  if (!(x1 == x2))
-  {
-    std::clog << "--- WARNING: difference detected between old and new parser ---\n";
-    std::clog << "string: " << text << std::endl;
-    std::clog << "old:    " << data::pp(x1) << std::endl;
-    core::print_aterm(x1);
-    std::clog << "new:    " << data::pp(x2) << std::endl;
-    core::print_aterm(x2);
-#ifdef MCRL2_THROW_ON_PARSE_DIFFERENCES
-    throw mcrl2::runtime_error("difference detected between old and new parser");
-#endif
-  }
 }
 
 /// \brief Parses a and type checks a data specification.

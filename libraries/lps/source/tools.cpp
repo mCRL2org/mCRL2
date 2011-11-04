@@ -15,7 +15,6 @@
 #include "mcrl2/lps/detail/specification_property_map.h"
 #include "mcrl2/lps/parelm.h"
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/lps/print.h"
 #include "mcrl2/lps/remove.h"
 #include "mcrl2/lps/rewrite.h"
 #include "mcrl2/lps/specification.h"

@@ -30,7 +30,6 @@
 #include "simbase.h"
 #include "xsimmain.h"
 // #include "mcrl2/lps/nextstate.h"
-#include "mcrl2/core/print.h"
 #include "mcrl2/core/detail/pp_deprecated.h"
 
 // For compatibility with older wxWidgets versions (pre 2.8)
@@ -264,25 +263,25 @@ void XSimMain::UpdateSizes()
 {
 #if !defined(__APPLE__)
     int s  = stateview->GetClientSize().GetWidth() - stateview->GetColumnWidth(0);
-  
+
     if (s <= 80)
     {
       s = wxLIST_AUTOSIZE;
     }
-  
+
     /* Set column width of stateview, if necessary */
     if (stateview->GetColumnWidth(1) != s)
     {
       stateview->SetColumnWidth(1, s);
     }
-  
+
     s  = transview->GetClientSize().GetWidth() - transview->GetColumnWidth(0);
-  
+
     if (s <= 80)
     {
       s = wxLIST_AUTOSIZE;
     }
-  
+
     /* Set column width of transview, if necessary */
     if (transview->GetColumnWidth(1) != s)
     {
