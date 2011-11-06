@@ -23,7 +23,7 @@ namespace detail {
 
 /// \brief Function for resolving ambiguities in the '_ -> _ <> _' operator for
 /// process expressions.
-struct D_ParseNode* ambiguity_fn(struct D_Parser*, unsigned int, struct D_ParseNode**);
+struct D_ParseNode* ambiguity_fn(struct D_Parser*, int, struct D_ParseNode**);
 
 } // namespace detail
 

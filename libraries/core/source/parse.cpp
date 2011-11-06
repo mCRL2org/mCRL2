@@ -24,7 +24,7 @@ namespace detail {
 
 /// \brief Function for resolving ambiguities in the '_ -> _ <> _' operator for
 /// process expressions.
-struct D_ParseNode* ambiguity_fn(struct D_Parser *p, unsigned int n, struct D_ParseNode **v)
+struct D_ParseNode* ambiguity_fn(struct D_Parser *p, int n, struct D_ParseNode **v)
 {
   core::parser_table table(parser_tables_mcrl2);
   // Resolve ambiguity (* is the correct alternative):

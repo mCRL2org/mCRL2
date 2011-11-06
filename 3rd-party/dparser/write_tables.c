@@ -85,7 +85,7 @@ write_chk(const void* ptr, size_t size, size_t nmemb, File *file) {
 
 static void
 save_binary_tables(File *file) {
-  uint i;
+  int i;
   BinaryTablesHead tables;
   unsigned int len;
   
@@ -116,7 +116,7 @@ save_binary_tables(File *file) {
 
 static void
 free_tables(File *f) {
-  uint i;
+  int i;
   if (f->tables.start)
     FREE(f->tables.start);
   if (f->strings.start)
@@ -217,16 +217,11 @@ search_for_offset(File *fp, char *name) {
 
 static OffsetEntry *
 get_offset(File *fp, char* name, ...) {
-#ifndef NDEBUG
   int n;
-#endif
   char buf[256];
   va_list ap;
   va_start(ap, name);
-#ifndef NDEBUG
-  n = 
-#endif
-  vsnprintf(buf, sizeof(buf), name, ap);
+  n = vsnprintf(buf, sizeof(buf), name, ap);
   va_end(ap);
   assert(n < 256 && n >= 0);
   return search_for_offset(fp, buf);
@@ -623,7 +618,7 @@ write_scanner_data(File *fp, Grammar *g, char *tag) {
   VecScannerBlock scanner_block_hash[4], *pscanner_block_hash;
   VecScannerBlock trans_scanner_block_hash[4], *ptrans_scanner_block_hash;
   VecAction shift_hash;
-  uint nvsblocks, ivsblock, i, j, k, x, xx;
+  int nvsblocks, ivsblock, i, j, k, x, xx;
   VecScanState *ss;
   char speculative_code[256];
   Term *t;
@@ -742,7 +737,7 @@ write_scanner_data(File *fp, Grammar *g, char *tag) {
 	  /* output state scanner blocks */
 	  yv = set_add_fn(pscanner_block_hash, xv, &scanner_block_fns);
 	  if (xv == yv) {
-	    uint size = scanner_size(s);
+	    int size = scanner_size(s);
 	    start_array_fn(fp, size, "", make_type(size), make_name("d_scanner_%d_%d_%d_%s", i, j, k, tag), "SCANNER_BLOCK_SIZE", SCANNER_BLOCK_SIZE, "\n");
 	    for (x = 0; x < g->scanner_block_size; x++) {
 	      xx = x + k * g->scanner_block_size;
@@ -908,7 +903,7 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
   Vec(intptr_t) vgoto;
   State *s;
   uint8 *goto_valid = NULL;
-  uint i, j, x, again, nvalid_bytes, sym, lowest_sym;
+  int i, j, x, again, nvalid_bytes, sym, lowest_sym;
 
   nvalid_bytes = ((g->productions.n + g->terminals.n) + 7) / 8;
   goto_valid = MALLOC(nvalid_bytes);
@@ -939,7 +934,7 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
 	  x = elem_symbol(g, s->gotos.v[j]->elem);
 	  x -= lowest_sym;
 	  while (vgoto.n <= x) {
-      uint qq = 0;
+            int qq = 0;
 	    vec_add(&vgoto, 0);
             for (qq = 0; qq < vgoto.n; qq++)
               if (vgoto.v[qq] == 239847234)
@@ -948,8 +943,8 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
 	  if (vgoto.v[x]) {
 	    again = 1;
 	    /* undo the damage */
-	    while (j > 0) {
-	      x = elem_symbol(g, s->gotos.v[--j]->elem);
+	    for (--j;j >= 0;j--) {
+	      x = elem_symbol(g, s->gotos.v[j]->elem);
 	      x -= lowest_sym;
 	      vgoto.v[x] = 0;
 	    }
@@ -1021,7 +1016,7 @@ write_goto_data(File *fp, Grammar *g, char *tag) {
 
 static void
 write_scanner_code(File *file, Grammar *g, char *tag) {
-  uint i, j, l;
+  int i, j, l;
   Action *a;
   State *s;
   FILE *fp = file->fp;
@@ -1074,12 +1069,12 @@ find_symbol(Grammar *g, char *s, char *e, int kind) {
       if ((p = lookup_production(g, s, e-s)))
 	return p->index;
     } else if (kind == D_SYMBOL_STRING) {
-      uint i;
+      int i;
       int found = -1;
       for (i = 0; i < g->terminals.n;i++)
 	if (g->terminals.v[i]->kind == TERM_STRING &&
 	    ((g->terminals.v[i]->term_name &&
-	      strlen(g->terminals.v[i]->term_name) == (uint)(e-s) &&
+	      strlen(g->terminals.v[i]->term_name) == e-s &&
 	      !strncmp(s, g->terminals.v[i]->term_name, e-s)) ||
 	     (!g->terminals.v[i]->term_name &&
 	      g->terminals.v[i]->string_len == (e-s) &&
@@ -1147,7 +1142,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
       if (*c == '#') {
 	c++;
 	if (isdigit_(*c)) {
-	  uint n = atoi(c);
+	  int n = atoi(c);
 	  fprintf(fp, "(d_get_number_of_children((D_PN(_children[%d], _offset))))", n);
 	  if (n > r->elems.n-1)
 	    d_fail("$nXXXX greater than number of children at line %d", line);
@@ -1162,7 +1157,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
 	if (isdigit_(*c)) {
 	  int n = atoi(c);
 	  fprintf(fp, "(*(D_PN(_children[%d], _offset)))", n);
-	  if ((uint)n > r->elems.n-1)
+	  if (n > r->elems.n-1)
 	    d_fail("$nXXXX greater than number of children at line %d", line);
 	  while (isdigit_(*c)) c++;
 	} else 
@@ -1243,7 +1238,7 @@ write_code(FILE *fp, Grammar *g, Rule *r, char *code,
 
 static void
 write_global_code(FILE *fp, Grammar *g, char *tag) {
-  uint i;
+  int i;
   char *c;
   
   for (i = 0; i < g->ncode; i++) {
@@ -1296,7 +1291,7 @@ static char * reduction_args = "(void *_ps, void **_children, int _n_children, i
 
 static void
 write_reductions(File *file, Grammar *g, char *tag) {
-  uint i, j, k, l, pmax;
+  int i, j, k, l, pmax;
   Production *p, *pdefault;
   Rule *r, *rdefault = NULL;
   char final_code[256], speculative_code[256], pass_code[256];
@@ -1322,33 +1317,32 @@ write_reductions(File *file, Grammar *g, char *tag) {
   }
   for (i = 0; i < g->productions.n; i++) {
     p = g->productions.v[i];
-    for (j = p->rules.n; j > 0; j--) {
-      r = p->rules.v[j-1];
-      for (k = 0; k < j-1; k++)
-	      if (r->elems.n == p->rules.v[k]->elems.n &&
-	          r->speculative_code.code == p->rules.v[k]->speculative_code.code &&
-	          r->final_code.code == p->rules.v[k]->final_code.code &&
-	          r->op_priority == p->rules.v[k]->op_priority &&
-	          r->op_assoc == p->rules.v[k]->op_assoc &&
-	          r->rule_priority == p->rules.v[k]->rule_priority &&
-	          r->rule_assoc == p->rules.v[k]->rule_assoc &&
-	          r->action_index == p->rules.v[k]->action_index) 
-	      {
-	        if (r->pass_code.n != p->rules.v[k]->pass_code.n)
-	          continue;
-	        for (l = 0; l < r->pass_code.n; l++) 
-          {
-	          if (!r->pass_code.v[l] && !p->rules.v[k]->pass_code.v[l])
-	            continue;
-	          if (!r->pass_code.v[l] || !p->rules.v[k]->pass_code.v[l])
-	            goto Lcontinue;
-	          if (r->pass_code.v[l]->code != p->rules.v[k]->pass_code.v[l]->code)
-	            goto Lcontinue;
-	        }
-	        r->same_reduction = p->rules.v[k];
-	        break;
-        Lcontinue:;
-	      }
+    for (j = p->rules.n - 1; j >= 0; j--) {
+      r = p->rules.v[j];
+      for (k = 0; k < j; k++)
+	if (r->elems.n == p->rules.v[k]->elems.n &&
+	    r->speculative_code.code == p->rules.v[k]->speculative_code.code &&
+	    r->final_code.code == p->rules.v[k]->final_code.code &&
+	    r->op_priority == p->rules.v[k]->op_priority &&
+	    r->op_assoc == p->rules.v[k]->op_assoc &&
+	    r->rule_priority == p->rules.v[k]->rule_priority &&
+	    r->rule_assoc == p->rules.v[k]->rule_assoc &&
+	    r->action_index == p->rules.v[k]->action_index) 
+	{
+	  if (r->pass_code.n != p->rules.v[k]->pass_code.n)
+	    continue;
+	  for (l = 0; l < r->pass_code.n; l++) {
+	    if (!r->pass_code.v[l] && !p->rules.v[k]->pass_code.v[l])
+	      continue;
+	    if (!r->pass_code.v[l] || !p->rules.v[k]->pass_code.v[l])
+	      goto Lcontinue;
+	    if (r->pass_code.v[l]->code != p->rules.v[k]->pass_code.v[l]->code)
+	      goto Lcontinue;
+	  }
+	  r->same_reduction = p->rules.v[k];
+	  break;
+	Lcontinue:;
+	}
     }
     for (j = 0; j < p->rules.n; j++) {
       r = p->rules.v[j];
@@ -1466,7 +1460,7 @@ er_hint_hash_fn(State *a, hash_fns_t *fns) {
 
 static int
 er_hint_cmp_fn(State *a, State *b, hash_fns_t *fns) {
-  uint i;
+  int i;
   VecHint *sa = &a->error_recovery_hints, *sb = &b->error_recovery_hints;
   Term *ta, *tb;
   if (sa->n != sb->n)
@@ -1491,7 +1485,7 @@ er_hint_hash_fns = {
 
 static void
 write_error_data(File *fp, Grammar *g, VecState *er_hash, char *tag) {
-  uint i, j;
+  int i, j;
   State *s;
   Term *t;
   State *h;
@@ -1529,7 +1523,7 @@ static char *scan_kind_strings[] = {"D_SCAN_ALL", "D_SCAN_LONGEST", "D_SCAN_MIXE
 
 static void
 write_state_data(File *fp, Grammar *g, VecState *er_hash, char *tag) {
-  uint i;
+  int i;
   State *s, *h, *shifts;
   
   print(fp, "\n");
@@ -1631,7 +1625,7 @@ static int
 write_header(Grammar *g, char *base_pathname, char *tag) {
   char pathname[FILENAME_MAX];
   char ver[128];
-  uint i, tokens = 0, states = 0, col;
+  int i, tokens = 0, states = 0, col;
   FILE *hfp;
 
   for (i = 0; i < g->terminals.n; i++)
@@ -1699,7 +1693,7 @@ static int d_symbol_values[] = {
   D_SYMBOL_STRING, D_SYMBOL_REGEX, D_SYMBOL_CODE, D_SYMBOL_TOKEN };
 static void
 write_symbol_data(File *fp, Grammar *g, char *tag) {
-  uint i;
+  int i;
   start_array(fp, D_Symbol, make_name("d_symbols_%s", tag), "", 0, "\n");
   g->write_line += 1;
   for (i = 0; i < g->productions.n; i++) {
@@ -1720,12 +1714,10 @@ write_symbol_data(File *fp, Grammar *g, char *tag) {
     char *ss = escape_string(s);   /* so it is printable */
     char *name = g->terminals.v[i]->term_name ? g->terminals.v[i]->term_name : (fp->binary ? s : ss);
     int symbol_index = g->terminals.v[i]->kind;
-    int state = 0;
     start_struct_in_array(fp);
     add_struct_const_member(fp, D_Symbol, d_symbol[symbol_index], d_symbol_values[symbol_index], kind);
     add_struct_str_member(fp, D_Symbol, name, name);
     add_struct_member(fp, D_Symbol, %d, (int) strlen(name), name_len);  /*BS strlen doesn't always works here, length can change when quoted string is compiled*/
-    add_struct_member(fp, D_Symbol, %d, state, start_symbol);
     end_struct_in_array(fp, ",\n");
     g->write_line += 1;
     FREE(s);
@@ -1737,7 +1729,7 @@ write_symbol_data(File *fp, Grammar *g, char *tag) {
 
 static void
 write_passes(File *fp, Grammar *g, char *tag) {
-  uint i;
+  int i;
   if (g->passes.n) {
     start_array(fp, D_Pass, make_name("d_passes_%s", tag), "", 0, "");
     g->write_line += 1;
