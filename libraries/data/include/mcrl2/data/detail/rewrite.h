@@ -73,11 +73,11 @@ class Rewriter
     typedef mutable_indexed_substitution<data::variable, atermpp::vector< atermpp::aterm_appl > > internal_substitution_type;
     typedef mutable_indexed_substitution<data::variable, atermpp::vector< data::data_expression > > substitution_type;
 
-    const atermpp::aterm_appl internal_true;
-    const atermpp::aterm_appl internal_false;
-    const atermpp::aterm internal_not;
-    const atermpp::aterm internal_and;
-    const atermpp::aterm internal_or;
+    atermpp::aterm_appl internal_true;
+    atermpp::aterm_appl internal_false;
+    atermpp::aterm internal_not;
+    atermpp::aterm internal_and;
+    atermpp::aterm internal_or;
 
 
     used_data_equation_selector data_equation_selector;
@@ -88,15 +88,18 @@ class Rewriter
      **/
     Rewriter():
        m_conversion_helper(*this),
-       generator("x_"),
-       internal_true(toInner(sort_bool::true_(),true)),
-       internal_false(toInner(sort_bool::false_(),true)),
-       internal_not(toInner(sort_bool::not_(),true)(0)),
-       internal_and(toInner(sort_bool::and_(),true)(0)),
-       internal_or(toInner(sort_bool::or_(),true)(0))
+       generator("x_")
     { 
       internal_true.protect();
+      internal_true=toInner(sort_bool::true_(),true);
       internal_false.protect();
+      internal_false=toInner(sort_bool::false_(),true);
+      internal_not.protect();
+      internal_not=toInner(sort_bool::not_(),true)(0);
+      internal_and.protect();
+      internal_and=toInner(sort_bool::and_(),true)(0);
+      internal_or.protect();
+      internal_or=toInner(sort_bool::or_(),true)(0);
     }
 
     /** \brief Destructor. */
@@ -104,6 +107,9 @@ class Rewriter
     {
       internal_true.unprotect();
       internal_false.unprotect();
+      internal_not.unprotect();
+      internal_and.unprotect();
+      internal_or.unprotect();
     }
 
     /**
