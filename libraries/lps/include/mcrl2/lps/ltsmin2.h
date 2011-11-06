@@ -12,6 +12,7 @@
 #ifndef MCRL2_LPS_LTSMIN_H
 #define MCRL2_LPS_LTSMIN_H
 
+#include <algorithm>
 #include <cassert>
 #include <functional>
 #include <set>
@@ -363,6 +364,9 @@ class pins
     /// The unique type mappings (is contained in m_data_types).
     std::vector<pins_data_type*> m_unique_data_types;
 
+    // maps process parameter index to the corresponding index in m_unique_data_types
+    std::vector<std::size_t> m_unique_data_type_index;
+
     /// \brief Returns the action data type
     pins_data_type& action_label_type_map()
     {
@@ -577,6 +581,13 @@ class pins
       pins_data_type* dt = new action_label_data_type(m_generator);
       m_data_types.push_back(dt);
       m_unique_data_types.push_back(dt);
+      
+      for (std::size_t i = 0; i < m_data_types.size(); i++)
+      {
+      	std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_types[i]);
+        assert(j != m_unique_data_types.end());
+        m_unique_data_type_index.push_back(j - m_unique_data_types.begin());
+      }
     }
 
     ~pins()
@@ -636,7 +647,7 @@ class pins
     /// \pre 0 <= i < process_parameter_count()
     datatype_index process_parameter_type(std::size_t i) const
     {
-      return i;
+      return m_unique_data_type_index[i];
     }
 
     /// \brief Returns the number of labels per edge.

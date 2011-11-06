@@ -113,6 +113,13 @@ void test_ltsmin()
   BOOST_CHECK(p.datatype_count() == params.size() + 1);
   BOOST_CHECK(p.group_count() == 10);
 
+  std::size_t index = 0;
+  for (data::variable_list::const_iterator i = spec.process().process_parameters().begin(); i != spec.process().process_parameters().end(); ++i)
+  {
+  	const lps::pins_data_type& type = p.data_type(p.process_parameter_type(index++));
+  	BOOST_CHECK(type.name() == data::pp(i->sort()));
+  }
+
   std::cout << p.info() << std::endl;
 
   // get the initial state
