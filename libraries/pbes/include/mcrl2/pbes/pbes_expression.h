@@ -518,15 +518,15 @@ int precedence(const pbes_expression& x)
   }
   else if (is_imp(x))
   {
-    return 1;
+    return 2;
   }
   else if (is_and(x) || is_or(x))
   {
-    return 2;
+    return 3;
   }
   else if (is_not(x))
   {
-    return 3;
+    return 4;
   }
   return core::detail::precedences::max_precedence;
 }

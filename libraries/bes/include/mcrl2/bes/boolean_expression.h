@@ -344,17 +344,17 @@ bool is_boolean_variable(const boolean_expression& t)
 inline
 int precedence(const boolean_expression& x)
 {
-  if (is_imp(x)) 
-  {
-    return 1;
-  }
-  else if (is_and(x) || is_or(x)) 
+  if (is_imp(x))
   {
     return 2;
   }
-  else if (is_not(x)) 
+  else if (is_and(x) || is_or(x))
   {
     return 3;
+  }
+  else if (is_not(x))
+  {
+    return 4;
   }
   return core::detail::precedences::max_precedence;
 }

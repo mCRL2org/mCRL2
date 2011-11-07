@@ -874,35 +874,35 @@ int precedence(const process_expression& x)
 {
   if (is_choice(x))
   {
-    return 0;
+    return 1;
   }
   else if (is_sum(x))
   {
-    return 1;
+    return 2;
   }
   else if (is_merge(x) || is_left_merge(x))
   {
-    return 2;
+    return 3;
   }
   else if (is_if_then(x) || is_if_then_else(x))
   {
-    return 3;
+    return 4;
   }
   else if (is_bounded_init(x))
   {
-    return 4;
+    return 5;
   }
   else if (is_seq(x))
   {
-    return 5;
+    return 6;
   }
   else if (is_at(x))
   {
-    return 6;
+    return 7;
   }
   else if (is_sync(x))
   {
-    return 7;
+    return 8;
   }
   return max_precedence;
 }
