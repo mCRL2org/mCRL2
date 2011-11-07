@@ -281,10 +281,10 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
       std::string number_separator = "       ";
 
       // print action summands
-      print_numbered_list(x.action_summands(), separator, number_separator, 0, false);
+      print_numbered_list(x.action_summands(), separator, number_separator, 1, false);
 
       // print deadlock summands
-      print_numbered_list(x.deadlock_summands(), separator, number_separator, x.action_summands().size(), true);
+      print_numbered_list(x.deadlock_summands(), separator, number_separator, x.action_summands().size() + 1, true);
     }
     else
     {
