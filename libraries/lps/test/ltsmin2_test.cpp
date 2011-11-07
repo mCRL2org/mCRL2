@@ -102,8 +102,13 @@ void test_ltsmin()
   lps::pins p(abp_filename, "jitty");
   std::size_t N = p.process_parameter_count();
 
-  BOOST_CHECK(p.edge_label_count() == 1);
   BOOST_CHECK(p.process_parameter_count() == 11);
+
+  BOOST_CHECK(p.edge_label_count() == 1);
+  for (std::size_t i = 0; i < p.edge_label_count(); i++)
+  {
+    BOOST_CHECK(p.edge_label_type(i) == p.datatype_count() - 1);
+  }
 
   std::set<data::sort_expression> params;
   for (data::variable_list::const_iterator i = spec.process().process_parameters().begin(); i != spec.process().process_parameters().end(); ++i)

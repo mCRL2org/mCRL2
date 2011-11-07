@@ -581,7 +581,7 @@ class pins
       pins_data_type* dt = new action_label_data_type(m_generator);
       m_data_types.push_back(dt);
       m_unique_data_types.push_back(dt);
-      
+
       for (std::size_t i = 0; i < m_data_types.size(); i++)
       {
       	std::vector<pins_data_type*>::const_iterator j = std::find(m_unique_data_types.begin(), m_unique_data_types.end(), m_data_types[i]);
@@ -660,7 +660,7 @@ class pins
     /// \pre 0 <= i < edge_label_count()
     datatype_index edge_label_type(std::size_t i) const
     {
-      return m_data_types.size() - 1;
+      return m_unique_data_types.size() - 1;
     }
 
     /// \brief Returns the name of the i-th action label (always "action").
