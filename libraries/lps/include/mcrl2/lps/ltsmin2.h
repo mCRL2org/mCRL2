@@ -495,7 +495,7 @@ class pins
     /// \brief Converts state component represented as integers into aterms (in the next state format).
     /// It is used in the function initial_state, to avoid creating a temporary aterm_appl object.
     template <typename DataTypeMapIter>
-    struct state_component_converter: public std::unary_function<std::size_t, atermpp::aterm>
+    struct state_component_converter: public std::unary_function<int, atermpp::aterm>
     {
       DataTypeMapIter& iter;
 
@@ -503,7 +503,7 @@ class pins
         : iter(iter_)
       {}
 
-      atermpp::aterm operator()(std::size_t i) const
+      atermpp::aterm operator()(int i) const
       {
         return (*iter++)->indexed_set().get(i);
       }
