@@ -28,6 +28,7 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
   public:
     /// \brief Constructor.
     set()
+      : IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -35,7 +36,8 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param comp A compare function.
     explicit set(const Compare& comp)
-      : std::set<T, Compare, Allocator>(comp)
+      : std::set<T, Compare, Allocator>(comp),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -44,7 +46,8 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \param comp A compare function.
     /// \param a An allocator.
     set(const Compare& comp, const Allocator& a)
-      : std::set<T, Compare, Allocator>(comp, a)
+      : std::set<T, Compare, Allocator>(comp, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -52,7 +55,8 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \brief Constructor.
     /// \param right A set.
     set(const set& right)
-      : std::set<T, Compare, Allocator>(right)
+      : std::set<T, Compare, Allocator>(right),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -62,7 +66,8 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \param last The end of a range of set elements.
     template<class InIt>
     set(InIt first, InIt last)
-      : std::set<T, Compare, Allocator>(first, last)
+      : std::set<T, Compare, Allocator>(first, last),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -73,7 +78,8 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \param comp A compare function.
     template<class InIt>
     set(InIt first, InIt last, const Compare& comp)
-      : std::set<T, Compare, Allocator>(first, last, comp)
+      : std::set<T, Compare, Allocator>(first, last, comp),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
@@ -85,7 +91,8 @@ class set: public std::set<T, Compare, Allocator>, IProtectedATerm
     /// \param a An allocator.
     template<class InIt>
     set(InIt first, InIt last, const Compare& comp, const Allocator& a)
-      : std::set<T, Compare, Allocator>(first, last, comp, a)
+      : std::set<T, Compare, Allocator>(first, last, comp, a),
+        IProtectedATerm()
     {
       ATprotectProtectedATerm(this);
     }
