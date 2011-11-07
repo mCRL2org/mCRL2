@@ -60,6 +60,12 @@ namespace detail {
   }
 
   inline
+  bool is_divmod(const application& x)
+  {
+    return sort_nat::is_divmod_application(x);
+  }
+
+  inline
   bool is_divides(const application& x)
   {
     return sort_real::is_divides_application(x);
@@ -271,6 +277,7 @@ int precedence(const application& x)
   }
   else if (   detail::is_div(x)
            || detail::is_mod(x)
+           || detail::is_divmod(x)
            || detail::is_divides(x)
           )
   {
