@@ -427,6 +427,25 @@ BOOST_AUTO_TEST_CASE(test_standard_sort_expressions)
   BOOST_CHECK(print_check(sort_real::real_(), "Real"));
 }
 
+bool is_plus_expression(const application& x)
+{
+  return sort_int::is_plus_application(x) ||
+         sort_nat::is_plus_application(x) ||
+         sort_pos::is_plus_application(x) ||
+         sort_real::is_plus_application(x);
+}
+
+BOOST_AUTO_TEST_CASE(test_mod)
+{
+  data::data_expression x = parse_data_expression("(1 + 2) mod 3");
+  BOOST_CHECK(sort_nat::is_mod_application(x));
+
+  application left = sort_nat::arg1(x); 
+  BOOST_CHECK(is_plus_expression(left));
+
+  std::cout << "x = " << x << " " << data::pp(x) << std::endl;
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)

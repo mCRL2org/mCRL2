@@ -1220,11 +1220,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
       	data_expression y = x.arguments().front();
       	if (!sort_nat::is_divmod_application(y))
         {
-        	throw mcrl2::runtime_error("expected a divmod as first argument of " + x.to_string());
+          print_function_application(x);
         }
-        print_expression(sort_nat::arg1(y), precedence(y));
-        derived().print(" div ");
-        print_expression(sort_nat::arg2(y), precedence(y));
+        else
+        {
+          print_expression(sort_nat::arg1(y), precedence(y));
+          derived().print(" div ");
+          print_expression(sort_nat::arg2(y), precedence(y));
+        }
       }
       else if (sort_nat::is_last_application(x))
       {
@@ -1237,11 +1240,14 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         }
       	if (!sort_nat::is_divmod_application(y))
         {
-        	throw mcrl2::runtime_error("expected a divmod as first argument of " + x.to_string());
+          print_function_application(x);
         }
-        print_expression(sort_nat::arg1(y), precedence(y));
-        derived().print(" mod ");
-        print_expression(sort_nat::arg2(y), precedence(y));
+        else
+        {
+          print_expression(sort_nat::arg1(y), precedence(y));
+          derived().print(" mod ");
+          print_expression(sort_nat::arg2(y), precedence(y));
+        }
       }
       else if (sort_nat::is_exp_application(x))
       {
