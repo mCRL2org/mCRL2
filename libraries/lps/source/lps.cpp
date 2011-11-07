@@ -31,6 +31,15 @@ std::string pp(const multi_action& x) { return lps::pp< multi_action >(x); }
 std::string pp(const process_initializer& x) { return lps::pp< process_initializer >(x); }
 //--- end generated lps overloads ---//
 
+std::string pp_with_summand_numbers(const specification& x)
+{
+  std::ostringstream out;
+  core::detail::apply_printer<lps::detail::printer> printer(out);
+  printer.print_summand_numbers() = true;
+  printer(x);
+  return out.str();
+}
+
 // TODO: These should be removed when the ATerm code has been replaced.
 std::string pp(const atermpp::aterm& x) { return x.to_string(); }
 std::string pp(const atermpp::aterm_appl& x) { return x.to_string(); }

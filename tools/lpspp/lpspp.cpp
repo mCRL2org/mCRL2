@@ -31,7 +31,6 @@ using namespace mcrl2;
 class lpspp_tool: public input_output_tool
 {
   private:
-
     typedef input_output_tool super;
 
   public:
@@ -41,20 +40,22 @@ class lpspp_tool: public input_output_tool
               "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      format(ppDefault)
+      m_format(ppDefault)
     {}
 
     bool run()
     {
       lps::lpspp(input_filename(),
                  output_filename(),
-                 format
+                 m_print_summand_numbers,
+                 m_format
                 );
       return true;
     }
 
   protected:
-    t_pp_format  format;
+    t_pp_format m_format;
+    bool m_print_summand_numbers;
 
     void add_options(interface_description& desc)
     {
@@ -63,6 +64,7 @@ class lpspp_tool: public input_output_tool
                       "print the LPS in the specified FORMAT:\n"
                       "  'default' for a process specification (default),\n"
                       "  'internal' for a textual ATerm representation of the internal format", 'f');
+      desc.add_option("print-summand_numbers", "print numbers in front of summands", 'n');
     }
 
     void parse_options(const command_line_parser& parser)
@@ -73,13 +75,14 @@ class lpspp_tool: public input_output_tool
         std::string str_format(parser.option_argument("format"));
         if (str_format == "internal")
         {
-          format = ppInternal;
+          m_format = ppInternal;
         }
         else if (str_format != "default")
         {
           parser.error("option -f/--format has illegal argument '" + str_format + "'");
         }
       }
+      m_print_summand_numbers = parser.options.count("print-summand_numbers") > 0;
     }
 };
 

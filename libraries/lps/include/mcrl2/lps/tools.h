@@ -39,6 +39,7 @@ void lpsparelm(const std::string& input_filename,
 
 void lpspp(const std::string& input_filename,
            const std::string& output_filename,
+           bool print_summand_numbers,
            core::t_pp_format format
           );
 

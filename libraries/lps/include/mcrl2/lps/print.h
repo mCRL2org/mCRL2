@@ -12,6 +12,8 @@
 #ifndef MCRL2_LPS_PRINT_H
 #define MCRL2_LPS_PRINT_H
 
+#include <boost/lexical_cast.hpp>
+
 #include "mcrl2/core/print.h"
 #include "mcrl2/data/print.h"
 #include "mcrl2/lps/traverser.h"
@@ -41,9 +43,53 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
   using super::print_list;
   using super::print_variables;
 
+  bool m_print_summand_numbers;
+
+  printer()
+    : m_print_summand_numbers(false)
+  {}
+
+  bool& print_summand_numbers()
+  {
+  	return m_print_summand_numbers;
+  }
+
   Derived& derived()
   {
     return static_cast<Derived&>(*this);
+  }
+
+  template <typename Container>
+  void print_numbered_list(const Container& container,
+                           const std::string& separator = ", ",
+                           const std::string& number_separator = "",
+                           std::size_t index = 0,
+                           bool print_start_separator = false,
+                           bool print_empty_container = false
+                          )
+  {
+    if (container.empty() && !print_empty_container)
+    {
+      return;
+    }
+    for (typename Container::const_iterator i = container.begin(); i != container.end(); ++i)
+    {
+      derived().print("\n");
+      derived().print(number_separator);
+      derived().print("%");
+      derived().print(boost::lexical_cast<std::string>(index++));
+
+      derived().print("\n");
+      if (i == container.begin() && !print_start_separator)
+      {
+        derived().print(number_separator);
+      }
+      else
+      {
+        derived().print(separator);
+      }
+      derived()(*i);
+    }
   }
 
   // Container contains elements of type T such that t.sort() is a sort_expression.
@@ -226,20 +272,38 @@ struct printer: public lps::add_traverser_sort_expressions<data::detail::printer
     derived().enter(x);
     derived().print("proc P");
     print_variables(x.process_parameters(), true, true, false, "(", ")", ", ");
-    derived().print(" =\n       ");
 
-    // print action summands
-    std::string opener = "";
-    std::string closer = "";
-    std::string separator = "\n     + ";
-    print_list(x.action_summands(), opener, closer, separator);
-
-    // print deadlock summands
-    if (!x.deadlock_summands().empty())
+    if (m_print_summand_numbers)
     {
-      opener = separator;
+      derived().print(" =");
+
+      std::string separator        = "     + ";
+      std::string number_separator = "       ";
+
+      // print action summands
+      print_numbered_list(x.action_summands(), separator, number_separator, 0, false);
+
+      // print deadlock summands
+      print_numbered_list(x.deadlock_summands(), separator, number_separator, x.action_summands().size(), true);
     }
-    print_list(x.deadlock_summands(), opener, closer, separator);
+    else
+    {
+      derived().print(" =\n       ");
+
+      // print action summands
+      std::string opener = "";
+      std::string closer = "";
+      std::string separator = "\n     + ";
+      print_list(x.action_summands(), opener, closer, separator);
+
+      // print deadlock summands
+      if (!x.action_summands().empty())
+      {
+        opener = separator;
+      }
+      print_list(x.deadlock_summands(), opener, closer, separator);
+    }
+
     derived().print(";\n");
     derived().leave(x);
   }

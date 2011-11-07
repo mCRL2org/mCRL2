@@ -294,6 +294,7 @@ bool operator!=(const specification& spec1, const specification& spec2)
 
 // template function overloads
 std::string pp(const specification& x);
+std::string pp_with_summand_numbers(const specification& x);
 
 } // namespace lps
 

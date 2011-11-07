@@ -81,41 +81,37 @@ void lpsparelm(const std::string& input_filename,
 
 void lpspp(const std::string& input_filename,
            const std::string& output_filename,
+           bool print_summand_numbers,
            core::t_pp_format format
           )
 {
-  lps::specification specification;
-  specification.load(input_filename);
+  lps::specification spec;
+  spec.load(input_filename);
 
   mCRL2log(log::verbose) << "printing LPS from "
                     << (input_filename.empty()?"standard input":input_filename)
                     << " to " << (output_filename.empty()?"standard output":output_filename)
                     << " in the " << core::pp_format_to_string(format) << " format" << std::endl;
 
+  std::string text;
+  if (format == core::ppInternal)
+  {
+  	text = specification_to_aterm(spec).to_string();
+  }
+  else
+  {
+  	text = print_summand_numbers ? lps::pp_with_summand_numbers(spec) : lps::pp(spec);
+  }
   if (output_filename.empty())
   {
-    if (format == core::ppInternal)
-    {
-      std::cout << specification_to_aterm(specification);
-    }
-    else
-    {
-      std::cout << lps::pp(specification);
-    }
+  	std::cout << text;
   }
   else
   {
     std::ofstream output_stream(output_filename.c_str());
-    if (output_stream.is_open())
+    if (output_stream)
     {
-      if (format == core::ppInternal)
-      {
-        output_stream << specification_to_aterm(specification);
-      }
-      else
-      {
-        output_stream << lps::pp(specification);
-      }
+      output_stream << text;
       output_stream.close();
     }
     else
