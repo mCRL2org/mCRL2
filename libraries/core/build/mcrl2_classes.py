@@ -1186,8 +1186,8 @@ def make_modifiability_map(all_classes):
         value = (c.aterm == None) or ('M' in c.modifiers())
         result[classname] = value
         if 'C' in c.modifiers():
-            result[classname + '_list'] = value
-            result[classname + '_vector'] = value
+            result[classname + '_list'] = False
+            result[classname + '_vector'] = True
     return result
 
 def is_modifiable_type(type, modifiability_map):
@@ -1245,3 +1245,16 @@ def parse_classnames(text, namespace):
         if not classname in result:
             result.append(classname)
     return result
+
+def mcrl2_class_map():
+    return {
+          'core'             : CORE_CLASSES,
+          'data'             : DATA_EXPRESSION_CLASSES + ASSIGNMENT_EXPRESSION_CLASSES + SORT_EXPRESSION_CLASSES + CONTAINER_TYPES + BINDER_TYPES + ABSTRACTION_EXPRESSION_CLASSES + STRUCTURED_SORT_ELEMENTS + DATA_CLASSES,
+          'state_formulas'   : STATE_FORMULA_CLASSES,
+          'regular_formulas' : REGULAR_FORMULA_CLASSES,
+          'action_formulas'  : ACTION_FORMULA_CLASSES,
+          'lps'              : LPS_CLASSES,
+          'process'          : PROCESS_CLASSES + PROCESS_EXPRESSION_CLASSES,
+          'pbes_system'      : PBES_CLASSES + PBES_EXPRESSION_CLASSES,
+          'bes'              : BOOLEAN_CLASSES + BOOLEAN_EXPRESSION_CLASSES
+        }
