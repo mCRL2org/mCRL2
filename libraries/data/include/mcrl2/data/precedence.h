@@ -30,45 +30,70 @@ using namespace core::detail::precedences;
 namespace detail {
 
   inline
+  bool is_numeric_cast(const data_expression& x)
+  {
+    return data::sort_nat::is_pos2nat_application(x)
+           || data::sort_int::is_pos2int_application(x)
+           || data::sort_real::is_pos2real_application(x)
+           || data::sort_int::is_nat2int_application(x)
+           || data::sort_real::is_nat2real_application(x)
+           || data::sort_real::is_int2real_application(x)
+           || data::sort_nat::is_cnat_application(x)
+           || data::sort_int::is_cint_application(x)
+           || data::sort_real::is_creal_application(x)
+           ;
+  }
+  
+  inline
+  data_expression remove_numeric_casts(data_expression x)
+  {
+  	while (is_numeric_cast(x))
+    {
+    	x = static_cast<application>(x).arguments().front();
+    }
+    return x;
+  }
+
+  inline
   bool is_plus(const application& x)
   {
-    return sort_int::is_plus_application(x) ||
-           sort_nat::is_plus_application(x) ||
-           sort_pos::is_plus_application(x) ||
-           sort_real::is_plus_application(x);
+    return sort_int::is_plus_application(remove_numeric_casts(x)) ||
+           sort_nat::is_plus_application(remove_numeric_casts(x)) ||
+           sort_pos::is_plus_application(remove_numeric_casts(x)) ||
+           sort_real::is_plus_application(remove_numeric_casts(x));
   }
 
   inline
   bool is_minus(const application& x)
   {
-    return sort_int::is_minus_application(x) ||
-           sort_real::is_minus_application(x);
+    return sort_int::is_minus_application(remove_numeric_casts(x)) ||
+           sort_real::is_minus_application(remove_numeric_casts(x));
   }
 
   inline
   bool is_mod(const application& x)
   {
-    return sort_int::is_mod_application(x) ||
-           sort_nat::is_mod_application(x);
+    return sort_int::is_mod_application(remove_numeric_casts(x)) ||
+           sort_nat::is_mod_application(remove_numeric_casts(x));
   }
 
   inline
   bool is_div(const application& x)
   {
-    return sort_int::is_div_application(x) ||
-           sort_nat::is_div_application(x);
+    return sort_int::is_div_application(remove_numeric_casts(x)) ||
+           sort_nat::is_div_application(remove_numeric_casts(x));
   }
 
   inline
   bool is_divmod(const application& x)
   {
-    return sort_nat::is_divmod_application(x);
+    return sort_nat::is_divmod_application(remove_numeric_casts(x));
   }
 
   inline
   bool is_divides(const application& x)
   {
-    return sort_real::is_divides_application(x);
+    return sort_real::is_divides_application(remove_numeric_casts(x));
   }
 
   inline
@@ -158,7 +183,7 @@ namespace detail {
   inline
   bool is_times(const application& x)
   {
-    return sort_int::is_times_application(x);
+    return sort_int::is_times_application(remove_numeric_casts(x));
   }
 
   inline

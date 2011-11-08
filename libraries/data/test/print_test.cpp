@@ -427,22 +427,37 @@ BOOST_AUTO_TEST_CASE(test_standard_sort_expressions)
   BOOST_CHECK(print_check(sort_real::real_(), "Real"));
 }
 
-bool is_plus_expression(const application& x)
-{
-  return sort_int::is_plus_application(x) ||
-         sort_nat::is_plus_application(x) ||
-         sort_pos::is_plus_application(x) ||
-         sort_real::is_plus_application(x);
-}
-
 BOOST_AUTO_TEST_CASE(test_mod)
 {
   data::data_expression x = parse_data_expression("(1 + 2) mod 3");
   BOOST_CHECK(sort_nat::is_mod_application(x));
 
-  application left = sort_nat::arg1(x); 
-  BOOST_CHECK(is_plus_expression(left));
+  application left = sort_nat::arg1(x);
+  std::cout << "left = " << left << " " << data::pp(left) << std::endl;
+  BOOST_CHECK(data::detail::is_plus(left));
 
+  data_expression left1 = remove_numeric_casts(left);
+  std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
+  BOOST_CHECK(data::detail::is_plus(left1));
+
+  BOOST_CHECK(data::pp(x) == "(1 + 2) mod 3");
+  std::cout << "x = " << x << " " << data::pp(x) << std::endl;
+
+  x = parse_data_expression("(2 - 1) mod 3");
+  left = sort_int::arg1(x);
+  std::cout << "left = " << left << " " << data::pp(left) << std::endl;
+  BOOST_CHECK(data::detail::is_minus(left));
+  std::cout << "precedence(left) = " << precedence(left) << std::endl;
+
+  BOOST_CHECK(data::sort_nat::is_nat(x.sort()));
+  BOOST_CHECK(data::sort_int::is_mod_application(x));
+
+  left1 = remove_numeric_casts(left);
+  std::cout << "left1 = " << left1 << " " << data::pp(left1) << std::endl;
+  BOOST_CHECK(data::detail::is_minus(left1));
+  std::cout << "precedence(left1) = " << precedence(left1) << std::endl;
+
+  BOOST_CHECK(data::pp(x) == "(2 - 1) mod 3");
   std::cout << "x = " << x << " " << data::pp(x) << std::endl;
 }
 

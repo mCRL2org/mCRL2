@@ -72,7 +72,6 @@ struct printer: public core::traverser<Derived>
     return static_cast<Derived&>(*this);
   }
 
-
   // using super::enter;
   // using super::leave;
   using super::operator();
@@ -92,6 +91,10 @@ struct printer: public core::traverser<Derived>
   template <typename T>
   void print_expression(const T& x, int prec = 5)
   {
+#ifdef MCRL2_DEBUG_PRECEDENCE
+    std::cout << "<print_expression> precedence = " << prec << std::endl;
+    std::cout << "<x>" << x.to_string() << " precedence = " << precedence(x) << std::endl;
+#endif
     bool print_parens = (precedence(x) < prec);
     if (print_parens)
     {
@@ -114,7 +117,7 @@ struct printer: public core::traverser<Derived>
   template <typename T>
   void print_binary_operation(const T& x, const std::string& op)
   {
-#ifdef MCRL2_DEBUG_BINARY_OPERATION
+#ifdef MCRL2_DEBUG_PRECEDENCE
     std::cout << "<binary>" << std::endl;
     std::cout << "<x>" << x.to_string() << " precedence = " << precedence(x) << std::endl;
     std::cout << "<left>" << x.left().to_string() << " precedence = " << precedence(x.left()) << std::endl;

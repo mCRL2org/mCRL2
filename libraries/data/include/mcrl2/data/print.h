@@ -1214,6 +1214,13 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         derived().print(" mod ");
         print_expression(sort_nat::arg2(x), precedence(x));
       }
+      else if (sort_int::is_mod_application(x))
+      {
+        // TODO: make a proper binary operation of mod
+        print_expression(sort_int::arg1(x), precedence(x));
+        derived().print(" mod ");
+        print_expression(sort_int::arg2(x), precedence(x));
+      }
       else if (sort_nat::is_first_application(x))
       {
       	// TODO: verify if this is the correct way of dealing with first/divmod
@@ -1291,13 +1298,6 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
         // TODO: make a proper binary operation of div
         print_expression(sort_int::arg1(x), precedence(x));
         derived().print(" div ");
-        print_expression(sort_int::arg2(x), precedence(x));
-      }
-      else if (sort_int::is_mod_application(x))
-      {
-        // TODO: make a proper binary operation of mod
-        print_expression(sort_int::arg1(x), precedence(x));
-        derived().print(" mod ");
         print_expression(sort_int::arg2(x), precedence(x));
       }
       else if (sort_int::is_cint_application(x))
