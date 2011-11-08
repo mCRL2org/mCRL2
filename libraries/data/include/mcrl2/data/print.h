@@ -623,9 +623,7 @@ struct printer: public data::add_traverser_sort_expressions<core::detail::printe
     }
     else
     {
-      derived().print("{");
       derived()(y);
-      derived().print("}");
     }
   }
 
