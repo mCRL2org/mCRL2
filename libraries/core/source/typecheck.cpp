@@ -1619,15 +1619,15 @@ atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_al
       result_sort= normalised_aliases.find(result_sort)->second;
       if (sort_already_seen.count(result_sort))
       {
-        throw mcrl2::runtime_error("Sort alias " + data::pp(result_sort) + " is defined in terms of itself.");
+        throw mcrl2::runtime_error("Sort alias " + core::pp_deprecated(result_sort) + " is defined in terms of itself.");
       }
 
       for (std::set< sort_expression >::const_iterator j = all_sorts.begin(); j != all_sorts.end(); ++j)
       {
         if (*j==result_sort)
         {
-          throw mcrl2::runtime_error("Sort alias " + data::pp(i->first) + " depends on sort" +
-                                     data::pp(result_sort) + ", which is circularly defined.\n");
+          throw mcrl2::runtime_error("Sort alias " + core::pp_deprecated(i->first) + " depends on sort" +
+                                     core::pp_deprecated(result_sort) + ", which is circularly defined.\n");
         }
       }
     }
@@ -1761,7 +1761,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
       for (std::set < sort_expression >:: const_iterator i=possibly_empty_constructor_sorts.begin();
            i!=possibly_empty_constructor_sorts.end(); ++i)
       {
-        mCRL2log(error) << data::pp(*i) << std::endl;
+        mCRL2log(error) << core::pp_deprecated(*i) << std::endl;
       }
       return false;
     }
@@ -3868,7 +3868,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
           ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
           if (!Type1)
           {
-            mCRL2log(error) << "not possible to cast number to " << data::pp(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
+            mCRL2log(error) << "not possible to cast number to " << core::pp_deprecated(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
             return NULL;
           }
           ATermAppl OldNewType=NewType;
@@ -3906,7 +3906,7 @@ static ATermAppl gstcTraverseVarConsTypeD(
           ATermAppl Type1=gstcTraverseVarConsTypeD(DeclaredVars,AllowedVars,&Argument1,sort_nat::nat(),FreeVars,strict_ambiguous,warn_upcasting);
           if (!Type1)
           {
-            mCRL2log(error) << "not possible to cast number to " << data::pp(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
+            mCRL2log(error) << "not possible to cast number to " << core::pp_deprecated(sort_nat::nat()) << " (while typechecking " << core::pp_deprecated(Argument1) << ")" << std::endl;
             return NULL;
           }
           NewArguments=ATinsert(NewArguments,(ATerm)Argument0);
