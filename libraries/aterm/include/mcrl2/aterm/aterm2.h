@@ -167,6 +167,11 @@ int ATgetInt(const ATermInt t)
 
 /* The ATermAppl type */
 ATermAppl ATmakeAppl(const AFun sym, ...);
+
+/* The implementation of the function below can be found in memory.h */
+template <class TERM_ITERATOR>
+ATermAppl ATmakeAppl(const AFun sym, const TERM_ITERATOR begin, const TERM_ITERATOR end);
+
 ATermAppl ATmakeAppl0(const AFun sym);
 ATermAppl ATmakeAppl1(const AFun sym, const ATerm arg0);
 ATermAppl ATmakeAppl2(const AFun sym, const ATerm arg0, const ATerm arg1);
@@ -177,6 +182,9 @@ ATermAppl ATmakeAppl5(const AFun sym, const ATerm arg0, const ATerm arg1, const 
                       const ATerm arg4, const ATerm arg5);
 ATermAppl ATmakeAppl6(const AFun sym, const ATerm arg0, const ATerm arg1, const ATerm arg2,
                       const ATerm arg4, const ATerm arg5, const ATerm arg6);
+
+
+
 
 /*AFun    ATgetAFun(ATermAppl appl);*/
 inline

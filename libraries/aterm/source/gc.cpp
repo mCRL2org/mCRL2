@@ -711,7 +711,9 @@ void check_unmarked_block(size_t blocks)
       header_type* cur;
       for (cur=block->data ; cur<end ; cur+=size)
       {
+#ifndef NDEBUG
         ATerm t = (ATerm)cur;
+#endif
         if (blocks==AT_OLD_BLOCK)
         {
           assert(GET_TYPE(t->header)==AT_FREE || IS_OLD(t->header));

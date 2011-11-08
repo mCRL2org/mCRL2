@@ -829,7 +829,7 @@ static ATermAppl build_tree(build_pars pars, int i)
       else
       {
         inc_usedcnt((ATermList) ATgetArgument(r,1));
-        tree = ATmakeAppl(afunR,ATgetArgument(r,0));
+        tree = ATmakeAppl1(afunR,ATgetArgument(r,0));
       }
 
       return ATmakeAppl1(afunN,(ATerm) tree);

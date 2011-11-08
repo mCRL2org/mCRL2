@@ -57,6 +57,7 @@ struct is_a_variable
   }
 };
 
+#ifndef NDEBUG
 static
 bool occur_check(const variable v, const atermpp::aterm_appl e)
 {
@@ -73,7 +74,7 @@ bool occur_check(const variable v, const atermpp::aterm_appl e)
   }
   return true;
 }
-
+#endif
 
 
 data_expression_list Rewriter::rewrite_list(

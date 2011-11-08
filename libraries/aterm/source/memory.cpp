@@ -22,14 +22,13 @@ namespace aterm
 
 /*{{{  defines */
 
-static const size_t INITIAL_TERM_TABLE_CLASS = 17;
+/* static const size_t INITIAL_TERM_TABLE_CLASS = 17;
 
 inline
 void CHECK_HEADER(const header_type h)
 {
   assert(GET_AGE(h)==0 && !IS_MARKED(h));
 }
-//#define CHECK_HEADER(h) assert((GET_AGE(h)==0) && !IS_MARKED(h) )
 
 inline
 void CHECK_ARGUMENT(const ATermAppl t, const size_t n)
@@ -37,61 +36,36 @@ void CHECK_ARGUMENT(const ATermAppl t, const size_t n)
   assert((GET_AGE(t->header) <= GET_AGE(ATgetArgument(t,n)->header)));
   assert((GET_AGE(t->header) <= GET_AGE(at_lookup_table[ATgetAFun((ATermAppl)t)]->header)));
 }
-/*
-#define CHECK_ARGUMENT(t,n) { assert( (GET_AGE(t->header) <= GET_AGE(ATgetArgument(t,n)->header)) );\
-    assert( (GET_AGE(t->header) <= GET_AGE(at_lookup_table[ATgetAFun((ATermAppl)t)]->header))); }
-*/
 
 inline
 void CHECK_ARITY(const size_t ari1, const size_t ari2)
 {
   assert((ari1) == (ari2));
 }
-//#define CHECK_ARITY(ari1,ari2) (assert((ari1) == (ari2)))
-
-/* Uncomment the second line, to do a garbage collection before a term
- * is constructed. This can be used to find subtle garbage collection problems.
- * Note that this is very time consuming... The first line below expresses that
- * no agressive checking is done, which is the default. */
-/* #define DO_AGGRESSIVE_GARBAGE_COLLECT  */
-
-#ifdef DO_AGGRESSIVE_GARBAGE_COLLECT
-#define AGGRESSIVE_GARBAGE_COLLECT_CHECK AT_collect()
-#else
-#define AGGRESSIVE_GARBAGE_COLLECT_CHECK
-#endif
-
-
-/* #define IDX(w)         HN(((w>>2) ^ (w>>10)) & 0xFF) */
-/* #define SHIFT(w)       HN((w>>3) & 0xF) */
 
 inline
 size_t START(const MachineWord w)
 {
   return FOLD(HIDE_AGE_MARK(w));
 }
-//#define START(w)       FOLD(HIDE_AGE_MARK(w))
 
 inline
 size_t COMBINE(const HashNumber hnr, const MachineWord w)
 {
   return ((hnr)<<1 ^(hnr)>>1 ^ HN(FOLD(w)));
 }
-//#define COMBINE(hnr,w) ((hnr)<<1 ^ (hnr)>>1 ^ HN(FOLD(w)))
 
 inline
 HashNumber FINISH(const HashNumber hnr)
 {
   return hnr;
 }
-//#define FINISH(hnr)    (hnr)
 
 inline
 void CHECK_TERM(const ATerm t)
 {
   assert((t) != NULL && (AT_isValidTerm(t)));
-}
-//#define CHECK_TERM(t) assert((t) != NULL && (AT_isValidTerm(t) ))
+} */
 
 /*}}}  */
 /*{{{  globals */
@@ -110,7 +84,7 @@ size_t total_nodes = 0;
 
 static size_t table_class = INITIAL_TERM_TABLE_CLASS;
 static HashNumber table_size    = AT_TABLE_SIZE(INITIAL_TERM_TABLE_CLASS);
-static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
+// static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS); 
 
 /*
  * For GC tuning
@@ -121,7 +95,7 @@ size_t old_bytes_in_old_blocks_after_last_major = 0; /* only live old cells in o
 size_t old_bytes_in_young_blocks_since_last_major = 0; /* only live cells */
 
 static int maxload = 80;
-static ATerm* hashtable;
+ATerm* hashtable;
 
 extern void AT_initMemmgnt();
 

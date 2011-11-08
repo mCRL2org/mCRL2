@@ -8041,10 +8041,14 @@ class specification_basic_type:public boost::noncopyable
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
-      if (determinewhetherprocessescontaintime(init1) && options.add_delta)
-      {
-        mCRL2log(log::warning) << "Warning: specification contains time due to translating c->p to c->p<>delta@0. The current linearisation run does not preserve timing information. Use -T, or --timed to preserving time information. " << std::endl;
+      if (options.add_delta) 
+      { 
+        /* Warn if a process contains time */
+        determinewhetherprocessescontaintime(init1);
       }
+
+        /* mCRL2log(log::warning) << "Warning: specification contains time due to translating c->p to c->p<>delta@0. The current linearisation run does not preserve timing information. Use -T, or --timed to preserving time information. " << std::endl;
+        */
       atermpp::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);
       if (pcrlprocesslist.size()==0)

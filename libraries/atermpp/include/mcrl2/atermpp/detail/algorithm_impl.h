@@ -70,18 +70,9 @@ aterm_appl appl_apply(term_appl<Term> a, const Function f)
   if (n > 0)
   {
     bool term_changed = false;
-    // Removed scoped array, because it is not
-    // very efficient, compared to alloca.
-    // Alloca assigns on the stack and therefore
-    // does not need explicit protection or initialisation. JFG.
 
-    // boost::scoped_array< ATerm > t(new ATerm[n]);
     MCRL2_SYSTEM_SPECIFIC_ALLOCA(t,ATerm,n);
-    /* for (unsigned int i = 0; i < n; ++i)
-    {
-      t[i] = 0;
-    }
-    ATprotectArray(t.get(), n); */
+
     for (unsigned int i = 0; i < n; i++)
     {
       t[i] = f(a(i));
@@ -93,10 +84,8 @@ aterm_appl appl_apply(term_appl<Term> a, const Function f)
     }
     if (term_changed)
     {
-      // a = ATmakeApplArray(a.function(), t.get());
       a = ATmakeApplArray(a.function(), t);
     }
-    // ATunprotectArray(t.get());
   }
   return a;
 }
