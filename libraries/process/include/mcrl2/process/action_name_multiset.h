@@ -18,6 +18,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {

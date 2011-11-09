@@ -20,6 +20,7 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/vector.h"
 #include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/multi_action.h"
 
 namespace mcrl2

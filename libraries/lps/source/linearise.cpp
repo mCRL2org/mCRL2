@@ -51,7 +51,6 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/representative_generator.h"
 #include "mcrl2/data/function_sort.h"
-#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/replace.h"
 
 //mCRL2 processes

@@ -597,6 +597,8 @@ class pbes
 
 // template function overloads
 std::string pp(const pbes<>& x);
+void normalize_sorts(pbes<>& x, const data::data_specification& dataspec);
+void translate_user_notation(pbes_system::pbes<>& x);
 
 /// \brief Conversion to ATermAppl.
 /// \return The PBES converted to ATerm format.

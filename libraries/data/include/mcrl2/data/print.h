@@ -37,7 +37,6 @@
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
 #include "mcrl2/exception.h"

@@ -9,8 +9,12 @@
 /// \file lps.cpp
 /// \brief
 
+#include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/print.h"
+#include "mcrl2/lps/translate_user_notation.h"
+#include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/print.h"
+#include "mcrl2/modal_formula/translate_user_notation.h"
 
 namespace mcrl2
 {
@@ -19,16 +23,21 @@ namespace lps
 {
 
 //--- start generated lps overloads ---//
-std::string pp(const specification& x) { return lps::pp< specification >(x); }
-std::string pp(const linear_process& x) { return lps::pp< linear_process >(x); }
-std::string pp(const action& x) { return lps::pp< action >(x); }
-std::string pp(const action_list& x) { return lps::pp< action_list >(x); }
-std::string pp(const action_vector& x) { return lps::pp< action_vector >(x); }
-std::string pp(const action_label& x) { return lps::pp< action_label >(x); }
-std::string pp(const action_label_list& x) { return lps::pp< action_label_list >(x); }
-std::string pp(const action_label_vector& x) { return lps::pp< action_label_vector >(x); }
-std::string pp(const multi_action& x) { return lps::pp< multi_action >(x); }
-std::string pp(const process_initializer& x) { return lps::pp< process_initializer >(x); }
+std::string pp(const lps::specification& x) { return lps::pp< lps::specification >(x); }
+std::string pp(const lps::linear_process& x) { return lps::pp< lps::linear_process >(x); }
+std::string pp(const lps::action& x) { return lps::pp< lps::action >(x); }
+std::string pp(const lps::action_list& x) { return lps::pp< lps::action_list >(x); }
+std::string pp(const lps::action_vector& x) { return lps::pp< lps::action_vector >(x); }
+std::string pp(const lps::action_label& x) { return lps::pp< lps::action_label >(x); }
+std::string pp(const lps::action_label_list& x) { return lps::pp< lps::action_label_list >(x); }
+std::string pp(const lps::action_label_vector& x) { return lps::pp< lps::action_label_vector >(x); }
+std::string pp(const lps::multi_action& x) { return lps::pp< lps::multi_action >(x); }
+std::string pp(const lps::process_initializer& x) { return lps::pp< lps::process_initializer >(x); }
+lps::action normalize_sorts(const lps::action& x, const data::data_specification& dataspec) { return lps::normalize_sorts< lps::action >(x, dataspec); }
+lps::action_label_list normalize_sorts(const lps::action_label_list& x, const data::data_specification& dataspec) { return lps::normalize_sorts< lps::action_label_list >(x, dataspec); }
+void normalize_sorts(lps::multi_action& x, const data::data_specification& dataspec) { lps::normalize_sorts< lps::multi_action >(x, dataspec); }
+lps::action translate_user_notation(const lps::action& x) { return lps::translate_user_notation< lps::action >(x); }
+void translate_user_notation(lps::multi_action& x) { lps::translate_user_notation< lps::multi_action >(x); }
 //--- end generated lps overloads ---//
 
 std::string pp_with_summand_numbers(const specification& x)
@@ -50,7 +59,7 @@ namespace action_formulas
 {
 
 //--- start generated action_formulas overloads ---//
-std::string pp(const action_formula& x) { return action_formulas::pp< action_formula >(x); }
+std::string pp(const action_formulas::action_formula& x) { return action_formulas::pp< action_formulas::action_formula >(x); }
 //--- end generated action_formulas overloads ---//
 
 } // namespace action_formulas
@@ -59,7 +68,7 @@ namespace regular_formulas
 {
 
 //--- start generated regular_formulas overloads ---//
-std::string pp(const regular_formula& x) { return regular_formulas::pp< regular_formula >(x); }
+std::string pp(const regular_formulas::regular_formula& x) { return regular_formulas::pp< regular_formulas::regular_formula >(x); }
 //--- end generated regular_formulas overloads ---//
 
 } // namespace regular_formulas
@@ -68,7 +77,9 @@ namespace state_formulas
 {
 
 //--- start generated state_formulas overloads ---//
-std::string pp(const state_formula& x) { return state_formulas::pp< state_formula >(x); }
+std::string pp(const state_formulas::state_formula& x) { return state_formulas::pp< state_formulas::state_formula >(x); }
+state_formulas::state_formula normalize_sorts(const state_formulas::state_formula& x, const data::data_specification& dataspec) { return state_formulas::normalize_sorts< state_formulas::state_formula >(x, dataspec); }
+state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x) { return state_formulas::translate_user_notation< state_formulas::state_formula >(x); }
 //--- end generated state_formulas overloads ---//
 
 } // namespace state_formulas

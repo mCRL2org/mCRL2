@@ -67,8 +67,11 @@ void test_pfnf_expression(std::string s)
 {
   pbes_system::detail::pfnf_visitor visitor;
   pbes_system::pbes_expression t1 = expr(s);
+std::cerr << "t1 = " << pbes_system::pp(t1) << " " << t1 << std::endl;
   visitor.visit(t1);
   pbes_system::pbes_expression t2 = visitor.evaluate();
+std::cerr << "t2 = " << pbes_system::pp(t2) << " " << t2 << std::endl;
+  visitor.visit(t1);
   data::rewriter datar;
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> R(datar);
   if (R(t1) != R(t2))

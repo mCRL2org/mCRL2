@@ -9,7 +9,9 @@
 /// \file data.cpp
 /// \brief
 
+#include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/translate_user_notation.h"
 
 namespace mcrl2
 {
@@ -18,28 +20,39 @@ namespace data
 {
 
 //--- start generated data overloads ---//
-std::string pp(const sort_expression& x) { return data::pp< sort_expression >(x); }
-std::string pp(const sort_expression_list& x) { return data::pp< sort_expression_list >(x); }
-std::string pp(const sort_expression_vector& x) { return data::pp< sort_expression_vector >(x); }
-std::string pp(const data_expression& x) { return data::pp< data_expression >(x); }
-std::string pp(const data_expression_list& x) { return data::pp< data_expression_list >(x); }
-std::string pp(const data_expression_vector& x) { return data::pp< data_expression_vector >(x); }
-std::string pp(const assignment& x) { return data::pp< assignment >(x); }
-std::string pp(const assignment_list& x) { return data::pp< assignment_list >(x); }
-std::string pp(const assignment_vector& x) { return data::pp< assignment_vector >(x); }
-std::string pp(const variable& x) { return data::pp< variable >(x); }
-std::string pp(const variable_list& x) { return data::pp< variable_list >(x); }
-std::string pp(const variable_vector& x) { return data::pp< variable_vector >(x); }
-std::string pp(const function_symbol& x) { return data::pp< function_symbol >(x); }
-std::string pp(const function_symbol_list& x) { return data::pp< function_symbol_list >(x); }
-std::string pp(const function_symbol_vector& x) { return data::pp< function_symbol_vector >(x); }
-std::string pp(const structured_sort_constructor& x) { return data::pp< structured_sort_constructor >(x); }
-std::string pp(const structured_sort_constructor_list& x) { return data::pp< structured_sort_constructor_list >(x); }
-std::string pp(const structured_sort_constructor_vector& x) { return data::pp< structured_sort_constructor_vector >(x); }
-std::string pp(const data_equation& x) { return data::pp< data_equation >(x); }
-std::string pp(const data_equation_list& x) { return data::pp< data_equation_list >(x); }
-std::string pp(const data_equation_vector& x) { return data::pp< data_equation_vector >(x); }
+std::string pp(const data::sort_expression& x) { return data::pp< data::sort_expression >(x); }
+std::string pp(const data::sort_expression_list& x) { return data::pp< data::sort_expression_list >(x); }
+std::string pp(const data::sort_expression_vector& x) { return data::pp< data::sort_expression_vector >(x); }
+std::string pp(const data::data_expression& x) { return data::pp< data::data_expression >(x); }
+std::string pp(const data::data_expression_list& x) { return data::pp< data::data_expression_list >(x); }
+std::string pp(const data::data_expression_vector& x) { return data::pp< data::data_expression_vector >(x); }
+std::string pp(const data::assignment& x) { return data::pp< data::assignment >(x); }
+std::string pp(const data::assignment_list& x) { return data::pp< data::assignment_list >(x); }
+std::string pp(const data::assignment_vector& x) { return data::pp< data::assignment_vector >(x); }
+std::string pp(const data::variable& x) { return data::pp< data::variable >(x); }
+std::string pp(const data::variable_list& x) { return data::pp< data::variable_list >(x); }
+std::string pp(const data::variable_vector& x) { return data::pp< data::variable_vector >(x); }
+std::string pp(const data::function_symbol& x) { return data::pp< data::function_symbol >(x); }
+std::string pp(const data::function_symbol_list& x) { return data::pp< data::function_symbol_list >(x); }
+std::string pp(const data::function_symbol_vector& x) { return data::pp< data::function_symbol_vector >(x); }
+std::string pp(const data::structured_sort_constructor& x) { return data::pp< data::structured_sort_constructor >(x); }
+std::string pp(const data::structured_sort_constructor_list& x) { return data::pp< data::structured_sort_constructor_list >(x); }
+std::string pp(const data::structured_sort_constructor_vector& x) { return data::pp< data::structured_sort_constructor_vector >(x); }
+std::string pp(const data::data_equation& x) { return data::pp< data::data_equation >(x); }
+std::string pp(const data::data_equation_list& x) { return data::pp< data::data_equation_list >(x); }
+std::string pp(const data::data_equation_vector& x) { return data::pp< data::data_equation_vector >(x); }
+data::data_equation normalize_sorts(const data::data_equation& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::data_equation >(x, dataspec); }
+data::data_equation_list normalize_sorts(const data::data_equation_list& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::data_equation_list >(x, dataspec); }
+void normalize_sorts(data::data_equation_vector& x, const data::data_specification& dataspec) { data::normalize_sorts< data::data_equation_vector >(x, dataspec); }
+data::data_expression normalize_sorts(const data::data_expression& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::data_expression >(x, dataspec); }
+data::sort_expression normalize_sorts(const data::sort_expression& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::sort_expression >(x, dataspec); }
+data::variable_list normalize_sorts(const data::variable_list& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::variable_list >(x, dataspec); }
+data::data_expression translate_user_notation(const data::data_expression& x) { return data::translate_user_notation< data::data_expression >(x); }
+data::data_equation translate_user_notation(const data::data_equation& x) { return data::translate_user_notation< data::data_equation >(x); }
 //--- end generated data overloads ---//
+
+std::string pp(const std::set<variable>& x) { return data::pp< std::set<variable> >(x); }
+std::string pp(const atermpp::set<variable>& x) { return data::pp< atermpp::set<variable> >(x); }
 
 // TODO: These should be removed when the ATerm code has been replaced.
 std::string pp(const atermpp::aterm& x) { return x.to_string(); }

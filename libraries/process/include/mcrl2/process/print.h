@@ -13,7 +13,6 @@
 #define MCRL2_PROCESS_PRINT_H
 
 #include "mcrl2/lps/print.h"
-#include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/traverser.h"
 
 namespace mcrl2 {

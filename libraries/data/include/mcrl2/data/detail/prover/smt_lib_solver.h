@@ -17,6 +17,7 @@
 #include "mcrl2/aterm/aterm2.h"
 #include "mcrl2/aterm/aterm_ext.h"
 #include "mcrl2/core/print.h"
+#include "mcrl2/data/standard_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/numeric_string.h"
 #include "mcrl2/exception.h"

@@ -22,7 +22,7 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/soundness_checks.h"
-#include "mcrl2/data/print.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/propositional_variable.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/detail/compare_pbes_expression_visitor.h"

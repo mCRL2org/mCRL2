@@ -31,8 +31,6 @@
 #include "mcrl2/lps/multi_action.h"
 #include "mcrl2/lps/action_parse.h"
 #include "mcrl2/lps/typecheck.h"
-#include "mcrl2/lps/normalize_sorts.h"
-#include "mcrl2/lps/translate_user_notation.h"
 #include "mcrl2/lts/lts.h"
 #include "mcrl2/lps/detail/multi_action_print.h"
 

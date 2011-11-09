@@ -15,6 +15,7 @@
 #include "mcrl2/atermpp/aterm_init.h"
 #include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/parse.h"
+#include "mcrl2/pbes/print.h"
 #include "mcrl2/pbes/txt2pbes.h"
 
 using namespace mcrl2;

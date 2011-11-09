@@ -28,7 +28,6 @@
 // utilities
 #include "mcrl2/atermpp/container_utility.h"
 #include "mcrl2/data/utility.h"
-#include "mcrl2/data/translate_user_notation.h"
 
 // data expressions
 #include "mcrl2/data/data_expression.h"
@@ -37,7 +36,6 @@
 #include "mcrl2/data/assignment.h"
 #include "mcrl2/data/where_clause.h"
 #include "mcrl2/data/function_update.h"
-#include "mcrl2/data/detail/normalize_sorts_fwd.h"
 
 // sorts
 #include "mcrl2/data/sort_expression.h"
@@ -64,6 +62,14 @@ namespace data
 
 // prototype
 class data_specification;
+
+// template function overloads
+sort_expression normalize_sorts(const sort_expression& x, const data::data_specification& dataspec);
+data_expression normalize_sorts(const data_expression& x, const data::data_specification& dataspec);
+variable_list normalize_sorts(const variable_list& x, const data::data_specification& dataspec);
+data::data_equation normalize_sorts(const data::data_equation& x, const data::data_specification& dataspec); 
+data_equation_list normalize_sorts(const data_equation_list& x, const data::data_specification& dataspec);
+void normalize_sorts(data_equation_vector& x, const data::data_specification& dataspec);
 
 // prototype, find.h included at the end of this file to prevent circular dependencies.
 template < typename Container >
@@ -616,7 +622,7 @@ class data_specification
     void add_equation(const data_equation& e)
     {
       assert(m_data_specification_is_type_checked);
-      m_equations.push_back(detail::translate_user_notation_data_equation(e));
+      m_equations.push_back(data::translate_user_notation(e));
       data_is_not_necessarily_normalised_anymore();
     }
 
@@ -1022,7 +1028,7 @@ class data_specification
     void remove_equation(const data_equation& e)
     {
       assert(m_data_specification_is_type_checked);
-      const data_equation e1=data::detail::translate_user_notation_data_equation(e);
+      const data_equation e1=data::translate_user_notation(e);
 
       detail::remove(m_normalised_equations, normalize_sorts(e1,*this));
       detail::remove(m_equations, e1);
@@ -1196,12 +1202,6 @@ data_equation_vector find_equations(data_specification const& specification, con
 #ifndef MCRL2_DATA_FIND_H
 #include "mcrl2/data/find.h"
 #endif
-
-#ifndef MCRL2_DATA_TRANSLATE_USER_NOTATION_H
-#include "mcrl2/data/translate_user_notation.h"
-#endif
-
-#include "mcrl2/data/normalize_sorts.h"
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H
 

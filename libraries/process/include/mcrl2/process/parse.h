@@ -21,8 +21,6 @@
 #include "mcrl2/process/process_specification.h"
 #include "mcrl2/process/typecheck.h"
 #include "mcrl2/process/alphabet_reduction.h"
-#include "mcrl2/process/normalize_sorts.h"
-#include "mcrl2/process/translate_user_notation.h"
 
 namespace mcrl2
 {

@@ -228,6 +228,8 @@ bool operator!=(const process_specification& spec1, const process_specification&
 
 // template function overloads
 std::string pp(const process_specification& x);
+void normalize_sorts(process_specification& x, const data::data_specification& dataspec);
+void translate_user_notation(process::process_specification& x);
 
 } // namespace process
 

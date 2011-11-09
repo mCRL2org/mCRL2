@@ -17,7 +17,7 @@
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/core/detail/constructors.h"
-#include "mcrl2/data/sort_expression.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/process/action_name_multiset.h"
 
 namespace mcrl2
@@ -85,6 +85,7 @@ bool is_process_identifier(const atermpp::aterm_appl& t)
 std::string pp(const process_identifier& x);
 std::string pp(const process_identifier_list& x);
 std::string pp(const process_identifier_vector& x);
+void normalize_sorts(process_identifier_vector& x, const data::data_specification& dataspec);
 
 } // namespace process
 

@@ -280,6 +280,8 @@ inline data_expression_list make_data_expression_list(Container const& r, typena
 std::string pp(const data_expression& x);
 std::string pp(const data_expression_list& x);
 std::string pp(const data_expression_vector& x);
+data::data_expression translate_user_notation(const data::data_expression& x);
+
 // TODO: we have to put it somewhere...
 std::string pp(const atermpp::aterm& x);
 std::string pp(const atermpp::aterm_appl& x);

@@ -23,6 +23,7 @@
 #include "mcrl2/core/detail/constructors.h"
 #include "mcrl2/core/detail/precedence.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {

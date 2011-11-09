@@ -28,7 +28,6 @@
 
 //DATA
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/normalize_sorts.h"
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"

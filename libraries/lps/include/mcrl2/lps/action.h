@@ -15,6 +15,7 @@
 #include <cassert>
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/detail/data_functional.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/lps/action_label.h"
 
 namespace mcrl2
@@ -86,6 +87,8 @@ typedef atermpp::vector<action> action_vector;
 std::string pp(const action& x);
 std::string pp(const action_list& x);
 std::string pp(const action_vector& x);
+action normalize_sorts(const action& x, const data::data_specification& dataspec);
+lps::action translate_user_notation(const lps::action& x);
 
 /// \brief Returns true if the term t is an action
 /// \param t A term

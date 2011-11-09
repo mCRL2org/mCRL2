@@ -25,8 +25,6 @@
 #include "mcrl2/core/detail/struct_core.h"
 #include "mcrl2/modal_formula/regular_formula.h"
 #include "mcrl2/modal_formula/action_formula.h"
-#include "mcrl2/data/variable.h"
-#include "mcrl2/data/assignment.h"
 
 namespace mcrl2
 {
@@ -872,6 +870,8 @@ bool state_formula::has_time() const
 
 // template function overloads
 std::string pp(const state_formula& x);
+state_formula normalize_sorts(const state_formula& x, const data::data_specification& dataspec);
+state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x);
 
 } // namespace state_formulas
 

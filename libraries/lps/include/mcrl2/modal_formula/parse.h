@@ -17,8 +17,6 @@
 #include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
-#include "mcrl2/modal_formula/translate_user_notation.h"
-#include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/detail/regfrmtrans.h"
 
 namespace mcrl2

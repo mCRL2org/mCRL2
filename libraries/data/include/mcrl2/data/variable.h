@@ -80,6 +80,8 @@ typedef atermpp::vector<variable>    variable_vector;
 std::string pp(const variable& x);
 std::string pp(const variable_list& x);
 std::string pp(const variable_vector& x);
+std::string pp(const std::set<variable>& x);
+std::string pp(const atermpp::set<variable>& x);
 
 /// \brief Converts an container with variables to a variable_list
 /// \param r A range of variables.

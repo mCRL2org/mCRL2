@@ -27,8 +27,6 @@
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
-#include "mcrl2/pbes/normalize_sorts.h"
-#include "mcrl2/pbes/translate_user_notation.h"
 
 //#define MCRL2_LOG_PARSER_OUTPUT
 #ifdef MCRL2_LOG_PARSER_OUTPUT

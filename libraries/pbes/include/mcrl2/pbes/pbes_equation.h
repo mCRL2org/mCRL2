@@ -14,7 +14,9 @@
 
 #include <string>
 #include <sstream>
+#include "mcrl2/atermpp/vector.h"
 #include "mcrl2/data/detail/sequence_algorithm.h"
+#include "mcrl2/data/data_specification.h"
 #include "mcrl2/pbes/fixpoint_symbol.h"
 #include "mcrl2/pbes/pbes_expression.h"
 #include "mcrl2/pbes/propositional_variable.h"
@@ -64,10 +66,6 @@ bool has_propositional_variables(const pbes_expression& t)
 
 class pbes_equation;
 atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn);
-
-// template function overloads
-std::string pp(const pbes_equation& x);
-std::string pp(const atermpp::vector<pbes_equation>& x);
 
 /// \brief pbes equation.
 class pbes_equation
@@ -228,7 +226,7 @@ class pbes_equation
           )
          )
       {
-        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pbes_system::pp(*this) << std::endl;
+        std::cerr << "pbes_equation::is_well_typed() failed: the names of the quantifier variables and the names of the binding variable parameters are not disjoint in expression " << pbes_system::pp(formula()) << std::endl;
         return false;
       }
 
@@ -266,6 +264,14 @@ atermpp::aterm_appl pbes_equation_to_aterm(const pbes_equation& eqn)
 {
   return core::detail::gsMakePBEqn(eqn.symbol(), eqn.variable(), eqn.formula());
 }
+
+/// \brief vector of process equations
+typedef atermpp::vector<pbes_equation> pbes_equation_vector;
+
+// template function overloads
+std::string pp(const pbes_equation& x);
+std::string pp(const pbes_equation_vector& x);
+void normalize_sorts(pbes_equation_vector& x, const data::data_specification& dataspec);
 
 } // namespace pbes_system
 

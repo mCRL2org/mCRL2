@@ -13,7 +13,6 @@
 #define MCRL2_PBES_PRINT_H
 
 #include "mcrl2/data/print.h"
-#include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/traverser.h"
 
 namespace mcrl2 {

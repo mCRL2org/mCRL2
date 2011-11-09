@@ -25,8 +25,6 @@
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/postfix_identifier_generator.h"
-#include "mcrl2/lps/normalize_sorts.h"
-#include "mcrl2/lps/translate_user_notation.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/find.h"
 

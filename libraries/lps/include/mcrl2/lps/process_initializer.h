@@ -22,6 +22,7 @@
 #include "mcrl2/data/print.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/replace.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {

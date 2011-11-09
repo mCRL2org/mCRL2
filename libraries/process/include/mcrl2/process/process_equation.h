@@ -83,6 +83,15 @@ class process_equation: public atermpp::aterm_appl
 /// \brief Read-only singly linked list of process equations
 typedef atermpp::term_list<process_equation> process_equation_list;
 
+/// \brief vector of process equations
+typedef atermpp::vector<process_equation> process_equation_vector;
+
+// template function overloads
+std::string pp(const process_equation& x);
+std::string pp(const process_equation_list& x);
+std::string pp(const process_equation_vector& x);
+void normalize_sorts(process_equation_vector& x, const data::data_specification& dataspec);
+
 } // namespace process
 
 } // namespace mcrl2

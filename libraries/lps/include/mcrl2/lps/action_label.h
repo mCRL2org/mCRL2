@@ -16,9 +16,9 @@
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
-#include "mcrl2/data/sort_expression.h"
 #include "mcrl2/core/identifier_string.h"
 #include "mcrl2/core/detail/soundness_checks.h"
+#include "mcrl2/data/data_specification.h"
 
 namespace mcrl2
 {
@@ -90,6 +90,7 @@ typedef atermpp::vector<action_label> action_label_vector;
 std::string pp(const action_label& x);
 std::string pp(const action_label_list& x);
 std::string pp(const action_label_vector& x);
+action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);
 
 /// \brief Returns true if the term t is an action label
 /// \param t A term

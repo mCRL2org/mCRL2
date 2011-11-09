@@ -9,7 +9,9 @@
 /// \file pbes.cpp
 /// \brief
 
+#include "mcrl2/pbes/normalize_sorts.h"
 #include "mcrl2/pbes/print.h"
+#include "mcrl2/pbes/translate_user_notation.h"
 
 namespace mcrl2
 {
@@ -18,19 +20,22 @@ namespace pbes_system
 {
 
 //--- start generated pbes_system overloads ---//
-std::string pp(const fixpoint_symbol& x) { return pbes_system::pp< fixpoint_symbol >(x); }
-std::string pp(const pbes<>& x) { return pbes_system::pp< pbes<> >(x); }
-std::string pp(const pbes_equation& x) { return pbes_system::pp< pbes_equation >(x); }
-std::string pp(const atermpp::vector<pbes_equation>& x) { return pbes_system::pp< atermpp::vector<pbes_equation> >(x); }
-std::string pp(const pbes_expression& x) { return pbes_system::pp< pbes_expression >(x); }
-std::string pp(const pbes_expression_list& x) { return pbes_system::pp< pbes_expression_list >(x); }
-std::string pp(const pbes_expression_vector& x) { return pbes_system::pp< pbes_expression_vector >(x); }
-std::string pp(const propositional_variable& x) { return pbes_system::pp< propositional_variable >(x); }
-std::string pp(const propositional_variable_list& x) { return pbes_system::pp< propositional_variable_list >(x); }
-std::string pp(const propositional_variable_vector& x) { return pbes_system::pp< propositional_variable_vector >(x); }
-std::string pp(const propositional_variable_instantiation& x) { return pbes_system::pp< propositional_variable_instantiation >(x); }
-std::string pp(const propositional_variable_instantiation_list& x) { return pbes_system::pp< propositional_variable_instantiation_list >(x); }
-std::string pp(const propositional_variable_instantiation_vector& x) { return pbes_system::pp< propositional_variable_instantiation_vector >(x); }
+std::string pp(const pbes_system::fixpoint_symbol& x) { return pbes_system::pp< pbes_system::fixpoint_symbol >(x); }
+std::string pp(const pbes_system::pbes<>& x) { return pbes_system::pp< pbes_system::pbes<> >(x); }
+std::string pp(const pbes_system::pbes_equation& x) { return pbes_system::pp< pbes_system::pbes_equation >(x); }
+std::string pp(const pbes_system::pbes_equation_vector& x) { return pbes_system::pp< pbes_system::pbes_equation_vector >(x); }
+std::string pp(const pbes_system::pbes_expression& x) { return pbes_system::pp< pbes_system::pbes_expression >(x); }
+std::string pp(const pbes_system::pbes_expression_list& x) { return pbes_system::pp< pbes_system::pbes_expression_list >(x); }
+std::string pp(const pbes_system::pbes_expression_vector& x) { return pbes_system::pp< pbes_system::pbes_expression_vector >(x); }
+std::string pp(const pbes_system::propositional_variable& x) { return pbes_system::pp< pbes_system::propositional_variable >(x); }
+std::string pp(const pbes_system::propositional_variable_list& x) { return pbes_system::pp< pbes_system::propositional_variable_list >(x); }
+std::string pp(const pbes_system::propositional_variable_vector& x) { return pbes_system::pp< pbes_system::propositional_variable_vector >(x); }
+std::string pp(const pbes_system::propositional_variable_instantiation& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation >(x); }
+std::string pp(const pbes_system::propositional_variable_instantiation_list& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation_list >(x); }
+std::string pp(const pbes_system::propositional_variable_instantiation_vector& x) { return pbes_system::pp< pbes_system::propositional_variable_instantiation_vector >(x); }
+void normalize_sorts(pbes_system::pbes_equation_vector& x, const data::data_specification& dataspec) { pbes_system::normalize_sorts< pbes_system::pbes_equation_vector >(x, dataspec); }
+void normalize_sorts(pbes_system::pbes<>& x, const data::data_specification& dataspec) { pbes_system::normalize_sorts< pbes_system::pbes<> >(x, x.data()); }
+void translate_user_notation(pbes_system::pbes<>& x) { pbes_system::translate_user_notation< pbes_system::pbes<> >(x); }
 //--- end generated pbes_system overloads ---//
 
 // TODO: These should be removed when the ATerm code has been replaced.

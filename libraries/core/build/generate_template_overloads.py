@@ -5,169 +5,190 @@ class_map = mcrl2_class_map()
 all_classes = parse_class_map(class_map)
 modifiability_map = make_modifiability_map(all_classes)
 
-CORE = '''
-identifier_string
+file_map = {
+  'action_formulas' : '../../lps/source/lps.cpp',
+  'core' : '../../core/source/core.cpp',
+  'data' : '../../data/source/data.cpp',
+  'lps' : '../../lps/source/lps.cpp',
+  'pbes_system' : '../../pbes/source/pbes.cpp',
+  'process' : '../../process/source/process.cpp',
+  'regular_formulas' : '../../lps/source/lps.cpp',
+  'state_formulas' : '../../lps/source/lps.cpp',
+}
+
+PP_CLASSNAMES = '''
+core::identifier_string
+data::sort_expression
+data::sort_expression_list
+data::sort_expression_vector
+data::data_expression
+data::data_expression_list
+data::data_expression_vector
+data::assignment
+data::assignment_list
+data::assignment_vector
+data::variable
+data::variable_list
+data::variable_vector
+data::function_symbol
+data::function_symbol_list
+data::function_symbol_vector
+data::structured_sort_constructor
+data::structured_sort_constructor_list
+data::structured_sort_constructor_vector
+data::data_equation
+data::data_equation_list
+data::data_equation_vector
+lps::specification
+lps::linear_process
+lps::action
+lps::action_list
+lps::action_vector
+lps::action_label
+lps::action_label_list
+lps::action_label_vector
+lps::multi_action
+lps::process_initializer
+pbes_system::fixpoint_symbol
+pbes_system::pbes<>
+pbes_system::pbes_equation
+pbes_system::pbes_equation_vector
+pbes_system::pbes_expression
+pbes_system::pbes_expression_list
+pbes_system::pbes_expression_vector
+pbes_system::propositional_variable
+pbes_system::propositional_variable_list
+pbes_system::propositional_variable_vector
+pbes_system::propositional_variable_instantiation
+pbes_system::propositional_variable_instantiation_list
+pbes_system::propositional_variable_instantiation_vector
+process::action_name_multiset
+process::process_identifier
+process::process_identifier_list
+process::process_identifier_vector
+process::process_specification
+process::process_expression
+process::process_expression_list
+process::process_expression_vector
+process::process_equation
+process::process_equation_list
+process::process_equation_vector
+process::process_instance
+process::process_instance_assignment
+process::delta
+process::tau
+process::sum
+process::block
+process::hide
+process::rename
+process::comm
+process::allow
+process::sync
+process::at
+process::seq
+process::if_then
+process::if_then_else
+process::bounded_init
+process::merge
+process::left_merge
+process::choice
+action_formulas::action_formula
+regular_formulas::regular_formula
+state_formulas::state_formula
 '''
 
-DATA = '''
-sort_expression
-sort_expression_list
-sort_expression_vector
-data_expression
-data_expression_list
-data_expression_vector
-assignment
-assignment_list
-assignment_vector
-variable
-variable_list
-variable_vector
-function_symbol
-function_symbol_list
-function_symbol_vector
-structured_sort_constructor
-structured_sort_constructor_list
-structured_sort_constructor_vector
-data_equation
-data_equation_list
-data_equation_vector
+NORMALIZE_SORTS_CLASSNAMES = '''
+data::data_equation
+data::data_equation_list
+data::data_equation_vector
+data::data_expression
+data::sort_expression
+data::variable_list
+lps::action
+lps::action_label_list
+lps::multi_action
+process::process_equation_vector
+process::process_specification
+pbes_system::pbes_equation_vector
+pbes_system::pbes<>
+state_formulas::state_formula
 '''
 
-LPS = '''
-specification
-linear_process
-action
-action_list
-action_vector
-action_label
-action_label_list
-action_label_vector
-multi_action
-process_initializer
+TRANSLATE_USER_NOTATION_CLASSNAMES = '''
+data::data_expression
+data::data_equation
+lps::action
+lps::multi_action
+pbes_system::pbes<>
+process::process_specification
+state_formulas::state_formula
 '''
 
-PBES = '''
-fixpoint_symbol
-pbes<>
-pbes_equation
-atermpp::vector<pbes_equation>
-pbes_expression
-pbes_expression_list
-pbes_expression_vector
-propositional_variable
-propositional_variable_list
-propositional_variable_vector
-propositional_variable_instantiation
-propositional_variable_instantiation_list
-propositional_variable_instantiation_vector
-'''
+def has_specification(type):
+    return type.endswith('specification') or type.endswith('pbes<>')
 
-PROCESS = '''
-action_name_multiset
-process_identifier
-process_identifier_list
-process_identifier_vector
-process_specification
-process_expression
-process_expression_list
-process_expression_vector
-process_instance
-process_instance_assignment
-delta
-tau
-sum
-block
-hide
-rename
-comm
-allow
-sync
-at
-seq
-if_then
-if_then_else
-bounded_init
-merge
-left_merge
-choice
-'''
+def is_modifiable(type):
+    if type in modifiability_map:
+        return modifiability_map[type]
+    elif type.endswith('_list'):
+        return False
+    elif type.endswith('_vector'):
+        return True
+    elif type.endswith('pbes<>'):
+        return True
+    elif type.endswith('vector<pbes_equation>'):
+        return True
+    raise Exception('Unknown type %s!' % type)
 
-ACTION_FORMULAS = '''
-action_formula
-'''
+def extract_namespace(classname):
+    return re.sub('::.*', '', classname)
 
-REGULAR_FORMULAS = '''
-regular_formula
-'''
+def generate_pp_overloads(classnames, result):
+    for classname in classnames:
+        namespace = extract_namespace(classname)
+        text = re.sub('>>', '> >', 'std::string pp(const %s& x) { return %s::pp< %s >(x); }\n' % (classname, namespace, classname))
+        result[namespace].append(text)
 
-STATE_FORMULAS = '''
-state_formula
-'''
-
-def pp_overloads(text, namespace):
-    words = text.split()
-    for word in words:
-        print 'std::string pp(const %s& x);' % word
-
-    result = ''
-    for word in words:
-        result = result + re.sub('>>', '> >', 'std::string pp(const %s& x) { return %s::pp< %s >(x); }\n' % (word, namespace, word))
-    return result
-
-def normalize_sorts_overloads(text, namespace):
-    result = ''
-    words = text.split()
-    for word in words:
-        type = '%s::%s' % (namespace, word)
-        if modifiability_map[type]:
-            print 'void normalize_sorts(%s& x, const data::data_specification& dataspec);' % word
-            result = result + 'void normalize_sorts(%s& x, const data::data_specification& dataspec) { %s::normalize_sorts(x, dataspec); }\n' % (word, namespace)
+def generate_normalize_sorts_overloads(classnames, result):
+    for classname in classnames:
+        namespace = extract_namespace(classname)
+        if is_modifiable(classname):
+            text = 'void normalize_sorts(%s& x, const data::data_specification& dataspec) { %s::normalize_sorts< %s >(x, dataspec); }\n' % (classname, namespace, classname)
         else:
-            print '%s normalize_sorts(const %s& x, const data::data_specification& dataspec);' % (word, word)
-            result = result + '%s normalize_sorts(const %s& x, const data::data_specification& dataspec) { return %s::normalize_sorts(x, dataspec); }\n' % (word, word, namespace)
-    return result
+            text = '%s normalize_sorts(const %s& x, const data::data_specification& dataspec) { return %s::normalize_sorts< %s >(x, dataspec); }\n' % (classname, classname, namespace, classname)
+        if has_specification(classname):
+            text = re.sub('x, dataspec', 'x, x.data()', text)
+        result[namespace].append(text)
 
-def make_overloads(filename, text, namespace):
-    insert_text_in_file(filename, text, 'generated %s overloads' % namespace)
+def generate_translate_user_notation_overloads(classnames, result):
+    for classname in classnames:
+        namespace = extract_namespace(classname)
+        if is_modifiable(classname):
+            text = 'void translate_user_notation(%s& x) { %s::translate_user_notation< %s >(x); }\n' % (classname, namespace, classname)
+        else:
+            text = '%s translate_user_notation(const %s& x) { return %s::translate_user_notation< %s >(x); }\n' % (classname, classname, namespace, classname)
+        result[namespace].append(text)
 
-filename = '../../core/source/core.cpp'
-namespace = 'core'
-text = pp_overloads(CORE, namespace)
-make_overloads(filename, text, namespace)
+result = {}
+for namespace in file_map:
+    result[namespace] = []
 
-filename = '../../data/source/data.cpp'
-namespace = 'data'
-text = pp_overloads(DATA, namespace)
-make_overloads(filename, text, namespace)
+classnames = PP_CLASSNAMES.strip().split()
+generate_pp_overloads(classnames, result)
 
-filename = '../../lps/source/lps.cpp'
-namespace = 'action_formulas'
-text = pp_overloads(ACTION_FORMULAS , namespace)
-make_overloads(filename, text, namespace)
+classnames = NORMALIZE_SORTS_CLASSNAMES.strip().split()
+generate_normalize_sorts_overloads(classnames, result)
 
-filename = '../../lps/source/lps.cpp'
-namespace = 'regular_formulas'
-text = pp_overloads(REGULAR_FORMULAS, namespace)
-make_overloads(filename, text, namespace)
+classnames = TRANSLATE_USER_NOTATION_CLASSNAMES.strip().split()
+generate_translate_user_notation_overloads(classnames, result)
 
-filename = '../../lps/source/lps.cpp'
-namespace = 'state_formulas'
-text = pp_overloads(STATE_FORMULAS , namespace)
-make_overloads(filename, text, namespace)
+#make_overloads(filename, text, namespace)
 
-filename = '../../lps/source/lps.cpp'
-namespace = 'lps'
-text = pp_overloads(LPS , namespace)
-make_overloads(filename, text, namespace)
+for namespace in result:
+    filename = file_map[namespace]
+    text = ''.join(result[namespace])
+    label = 'generated %s overloads' % namespace
+    insert_text_in_file(filename, text, label)
 
-filename = '../../pbes/source/pbes.cpp'
-namespace = 'pbes_system'
-text = pp_overloads(PBES , namespace)
-make_overloads(filename, text, namespace)
-
-filename = '../../process/source/process.cpp'
-namespace = 'process'
-text = pp_overloads(PROCESS , namespace)
-make_overloads(filename, text, namespace)
-
-normalize_sorts_overloads(LPS, 'lps')
+    print '--- %s ---' % namespace   
+    print re.sub(' \{.*\}', ';', text)
