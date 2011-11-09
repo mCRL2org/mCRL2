@@ -124,6 +124,33 @@ process::process_specification
 state_formulas::state_formula
 '''
 
+FIND_SORT_EXPRESSIONS_CLASSNAMES = '''
+data::data_equation
+data::data_expression
+data::sort_expression
+lps::action_label_list
+lps::specification
+pbes_system::pbes<>
+process::process_equation_vector
+process::process_expression
+process::process_specification
+state_formulas::state_formula
+'''
+
+FIND_VARIABLES_CLASSNAMES = '''
+action_formulas::action_formula
+data::data_expression
+data::data_expression_list
+data::function_symbol
+data::variable
+data::variable_list
+lps::specification
+lps::deadlock
+lps::multi_action
+pbes_system::pbes<>
+state_formulas::state_formula
+'''
+
 def has_specification(type):
     return type.endswith('specification') or type.endswith('pbes<>')
 
@@ -143,12 +170,22 @@ def is_modifiable(type):
 def extract_namespace(classname):
     return re.sub('::.*', '', classname)
 
-def generate_pp_overloads(classnames, result):
+def generate_traverser_overloads(classnames, function, result):
     for classname in classnames:
         namespace = extract_namespace(classname)
-        text = re.sub('>>', '> >', 'std::string pp(const %s& x) { return %s::pp< %s >(x); }\n' % (classname, namespace, classname))
+        text = re.sub('>>', '> >', 'std::string %s(const %s& x) { return %s::%s< %s >(x); }\n' % (function, classname, namespace, function, classname))
         result[namespace].append(text)
 
+def generate_builder_overloads(classnames, function, result):
+    for classname in classnames:
+        namespace = extract_namespace(classname)
+        if is_modifiable(classname):
+            text = 'void %s(%s& x) { %s::%s< %s >(x); }\n' % (function, classname, namespace, function, classname)
+        else:
+            text = '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (classname, function, classname, namespace, function, classname)
+        result[namespace].append(text)
+
+# special because of additional data_specification argument
 def generate_normalize_sorts_overloads(classnames, result):
     for classname in classnames:
         namespace = extract_namespace(classname)
@@ -160,29 +197,24 @@ def generate_normalize_sorts_overloads(classnames, result):
             text = re.sub('x, dataspec', 'x, x.data()', text)
         result[namespace].append(text)
 
-def generate_translate_user_notation_overloads(classnames, result):
-    for classname in classnames:
-        namespace = extract_namespace(classname)
-        if is_modifiable(classname):
-            text = 'void translate_user_notation(%s& x) { %s::translate_user_notation< %s >(x); }\n' % (classname, namespace, classname)
-        else:
-            text = '%s translate_user_notation(const %s& x) { return %s::translate_user_notation< %s >(x); }\n' % (classname, classname, namespace, classname)
-        result[namespace].append(text)
-
 result = {}
 for namespace in file_map:
     result[namespace] = []
 
 classnames = PP_CLASSNAMES.strip().split()
-generate_pp_overloads(classnames, result)
+generate_traverser_overloads(classnames, 'pp', result)
 
 classnames = NORMALIZE_SORTS_CLASSNAMES.strip().split()
 generate_normalize_sorts_overloads(classnames, result)
 
 classnames = TRANSLATE_USER_NOTATION_CLASSNAMES.strip().split()
-generate_translate_user_notation_overloads(classnames, result)
+generate_builder_overloads(classnames, 'translate_user_notation', result)
 
-#make_overloads(filename, text, namespace)
+classnames = FIND_SORT_EXPRESSIONS_CLASSNAMES.strip().split()
+#generate_traverser_overloads(classnames, 'find_sort_expressions', result)
+
+classnames = FIND_VARIABLES_CLASSNAMES.strip().split()
+#generate_traverser_overloads(classnames, 'find_variables', result)
 
 for namespace in result:
     filename = file_map[namespace]
