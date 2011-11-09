@@ -177,6 +177,7 @@ eqn initial_board= [[None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None],
+                    [None,None,None,None,None,None,None],
                     [None,None,None,None,None,None,None]];
 
 
