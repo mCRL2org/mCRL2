@@ -48,17 +48,20 @@ namespace mcrl2
 namespace pbes_system
 {
 
-template <typename Container> class pbes;
+template <typename Container = atermpp::vector<pbes_equation> > class pbes;
 template <typename Container> void complete_data_specification(pbes<Container>&);
 
-template <typename Container>
-std::set<data::variable> find_free_variables(Container const& container);
+// template function overloads
+std::string pp(const pbes<>& x);
+void normalize_sorts(pbes<>& x, const data::data_specification& dataspec);
+void translate_user_notation(pbes_system::pbes<>& x);
+std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes<>& x);
+std::set<data::variable> find_variables(const pbes_system::pbes<>& x);
+std::set<data::variable> find_free_variables(const pbes_system::pbes<>& x);
+std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes<>& x);
 
 template <typename Container>
 atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p);
-
-template <typename Container, typename OutputIterator>
-void find_sort_expressions(Container const& container, OutputIterator o);
 
 /// \brief Computes the quantifier variables that occur in the sequence [first, last) of pbes equations.
 /// \param first Start of a range of pbes equations
@@ -81,7 +84,7 @@ std::set<data::variable> compute_quantifier_variables(Iterator first, Iterator l
 /// \brief parameterized boolean equation system
 // <PBES>         ::= PBES(<DataSpec>, <GlobVarSpec>, <PBEqnSpec>, <PBInit>)
 // <PBEqnSpec>    ::= PBEqnSpec(<PBEqn>*)
-template <typename Container = atermpp::vector<pbes_equation> >
+template <typename Container>
 class pbes
 {
     friend struct atermpp::aterm_traits<pbes<Container> >;
@@ -595,15 +598,6 @@ class pbes
     }
 };
 
-// template function overloads
-std::string pp(const pbes<>& x);
-void normalize_sorts(pbes<>& x, const data::data_specification& dataspec);
-void translate_user_notation(pbes_system::pbes<>& x);
-std::set<data::sort_expression> find_sort_expressions(const pbes_system::pbes<>& x);
-std::set<data::variable> find_variables(const pbes_system::pbes<>& x);
-std::set<data::variable> find_free_variables(const pbes_system::pbes<>& x);
-std::set<data::function_symbol> find_function_symbols(const pbes_system::pbes<>& x);
-
 /// \brief Conversion to ATermAppl.
 /// \return The PBES converted to ATerm format.
 template <typename Container>
@@ -636,8 +630,7 @@ atermpp::aterm_appl pbes_to_aterm(const pbes<Container>& p)
 template <typename Container>
 void complete_data_specification(pbes<Container>& p)
 {
-  std::set<data::sort_expression> s;
-  pbes_system::find_sort_expressions(p, std::inserter(s, s.end()));
+  std::set<data::sort_expression> s = pbes_system::find_sort_expressions(p);
   p.data().add_context_sorts(s);
 }
 

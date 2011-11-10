@@ -27,12 +27,16 @@ namespace mcrl2
 namespace process
 {
 
-template <typename Container, typename OutputIterator>
-void find_sort_expressions(Container const& container, OutputIterator o);
-
 class process_specification;
 atermpp::aterm_appl process_specification_to_aterm(const process_specification& spec);
 void complete_data_specification(process_specification&);
+
+// template function overloads
+std::string pp(const process_specification& x);
+void normalize_sorts(process_specification& x, const data::data_specification& dataspec);
+void translate_user_notation(process::process_specification& x);
+std::set<data::sort_expression> find_sort_expressions(const process::process_specification& x);
+std::set<core::identifier_string> find_identifiers(const process::process_specification& x);
 
 /// \brief Process specification consisting of a data specification, action labels, a sequence of process equations and a process initialization.
 //<ProcSpec>     ::= ProcSpec(<DataSpec>, <ActSpec>, <GlobVarSpec>, <ProcEqnSpec>, <ProcInit>)
@@ -192,8 +196,7 @@ class process_specification
 inline
 void complete_data_specification(process_specification& spec)
 {
-  std::set<data::sort_expression> s;
-  process::find_sort_expressions(spec, std::inserter(s, s.end()));
+  std::set<data::sort_expression> s = process::find_sort_expressions(spec);
   spec.data().add_context_sorts(s);
 }
 
@@ -225,13 +228,6 @@ bool operator!=(const process_specification& spec1, const process_specification&
 {
   return !(spec1 == spec2);
 }
-
-// template function overloads
-std::string pp(const process_specification& x);
-void normalize_sorts(process_specification& x, const data::data_specification& dataspec);
-void translate_user_notation(process::process_specification& x);
-std::set<data::sort_expression> find_sort_expressions(const process::process_specification& x);
-std::set<core::identifier_string> find_identifiers(const process::process_specification& x);
 
 } // namespace process
 
