@@ -22,7 +22,6 @@
 #include "mcrl2/data/replace.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes_expression_visitor.h"
 #include "mcrl2/pbes/remove_parameters.h"
 #include "mcrl2/utilities/logger.h"
@@ -837,15 +836,12 @@ class pbes_constelm_algorithm
       }
 
       // initialize the todo list of vertices that need to be processed
+      propositional_variable_instantiation init = p.initial_state();
       std::deque<propositional_variable_decl_type> todo;
-      std::set<propositional_variable_type> inst = find_propositional_variable_instantiations(p.initial_state());
-      for (typename std::set<propositional_variable_type>::iterator i = inst.begin(); i != inst.end(); ++i)
-      {
-        data_term_sequence_type e = i->parameters();
-        vertex& u = m_vertices[i->name()];
-        u.update(e, constraint_map(), m_data_rewriter);
-        todo.push_back(u.variable());
-      }
+      data_term_sequence_type e = init.parameters();
+      vertex& u = m_vertices[init.name()];
+      u.update(e, constraint_map(), m_data_rewriter);
+      todo.push_back(u.variable());
 
       mCRL2log(log::debug) << "\n--- initial vertices ---\n" << print_vertices();
       mCRL2log(log::debug) << "\n--- edges ---\n" << print_edges();

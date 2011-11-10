@@ -21,7 +21,6 @@
 #include "mcrl2/data/data_equation.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/traverser.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/selection.h"
 #include "mcrl2/lps/nextstate/standard.h"
 #include "mcrl2/lps/specification.h"

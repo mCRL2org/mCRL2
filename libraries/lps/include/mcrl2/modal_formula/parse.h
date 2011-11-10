@@ -14,7 +14,6 @@
 
 #include <iostream>
 #include "mcrl2/lps/parse.h"
-#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/typecheck.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/detail/regfrmtrans.h"

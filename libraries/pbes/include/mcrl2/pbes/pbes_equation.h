@@ -272,6 +272,7 @@ typedef atermpp::vector<pbes_equation> pbes_equation_vector;
 std::string pp(const pbes_equation& x);
 std::string pp(const pbes_equation_vector& x);
 void normalize_sorts(pbes_equation_vector& x, const data::data_specification& dataspec);
+std::set<data::variable> find_free_variables(const pbes_system::pbes_equation& x);
 
 } // namespace pbes_system
 

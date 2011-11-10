@@ -9,11 +9,16 @@
 /// \file lps.cpp
 /// \brief
 
+#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/normalize_sorts.h"
 #include "mcrl2/lps/print.h"
+#include "mcrl2/lps/replace.h"
 #include "mcrl2/lps/translate_user_notation.h"
+
+#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/normalize_sorts.h"
 #include "mcrl2/modal_formula/print.h"
+#include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/translate_user_notation.h"
 
 namespace mcrl2
@@ -38,6 +43,20 @@ lps::action_label_list normalize_sorts(const lps::action_label_list& x, const da
 void normalize_sorts(lps::multi_action& x, const data::data_specification& dataspec) { lps::normalize_sorts< lps::multi_action >(x, dataspec); }
 lps::action translate_user_notation(const lps::action& x) { return lps::translate_user_notation< lps::action >(x); }
 void translate_user_notation(lps::multi_action& x) { lps::translate_user_notation< lps::multi_action >(x); }
+std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x) { return lps::find_sort_expressions< lps::action_label_list >(x); }
+std::set<data::sort_expression> find_sort_expressions(const lps::specification& x) { return lps::find_sort_expressions< lps::specification >(x); }
+std::set<data::variable> find_variables(const lps::linear_process& x) { return lps::find_variables< lps::linear_process >(x); }
+std::set<data::variable> find_variables(const lps::specification& x) { return lps::find_variables< lps::specification >(x); }
+std::set<data::variable> find_variables(const lps::deadlock& x) { return lps::find_variables< lps::deadlock >(x); }
+std::set<data::variable> find_variables(const lps::multi_action& x) { return lps::find_variables< lps::multi_action >(x); }
+std::set<data::variable> find_free_variables(const lps::action& x) { return lps::find_free_variables< lps::action >(x); }
+std::set<data::variable> find_free_variables(const lps::linear_process& x) { return lps::find_free_variables< lps::linear_process >(x); }
+std::set<data::variable> find_free_variables(const lps::specification& x) { return lps::find_free_variables< lps::specification >(x); }
+std::set<data::variable> find_free_variables(const lps::deadlock& x) { return lps::find_free_variables< lps::deadlock >(x); }
+std::set<data::variable> find_free_variables(const lps::multi_action& x) { return lps::find_free_variables< lps::multi_action >(x); }
+std::set<data::variable> find_free_variables(const lps::process_initializer& x) { return lps::find_free_variables< lps::process_initializer >(x); }
+std::set<data::function_symbol> find_function_symbols(const lps::specification& x) { return lps::find_function_symbols< lps::specification >(x); }
+std::set<core::identifier_string> find_identifiers(const lps::specification& x) { return lps::find_identifiers< lps::specification >(x); }
 //--- end generated lps overloads ---//
 
 std::string pp_with_summand_numbers(const specification& x)
@@ -60,6 +79,7 @@ namespace action_formulas
 
 //--- start generated action_formulas overloads ---//
 std::string pp(const action_formulas::action_formula& x) { return action_formulas::pp< action_formulas::action_formula >(x); }
+std::set<data::variable> find_variables(const action_formulas::action_formula& x) { return action_formulas::find_variables< action_formulas::action_formula >(x); }
 //--- end generated action_formulas overloads ---//
 
 } // namespace action_formulas
@@ -80,6 +100,11 @@ namespace state_formulas
 std::string pp(const state_formulas::state_formula& x) { return state_formulas::pp< state_formulas::state_formula >(x); }
 state_formulas::state_formula normalize_sorts(const state_formulas::state_formula& x, const data::data_specification& dataspec) { return state_formulas::normalize_sorts< state_formulas::state_formula >(x, dataspec); }
 state_formulas::state_formula translate_user_notation(const state_formulas::state_formula& x) { return state_formulas::translate_user_notation< state_formulas::state_formula >(x); }
+std::set<data::sort_expression> find_sort_expressions(const state_formulas::state_formula& x) { return state_formulas::find_sort_expressions< state_formulas::state_formula >(x); }
+std::set<data::variable> find_variables(const state_formulas::state_formula& x) { return state_formulas::find_variables< state_formulas::state_formula >(x); }
+std::set<data::variable> find_free_variables(const state_formulas::state_formula& x) { return state_formulas::find_free_variables< state_formulas::state_formula >(x); }
+std::set<core::identifier_string> find_identifiers(const state_formulas::state_formula& x) { return state_formulas::find_identifiers< state_formulas::state_formula >(x); }
+bool find_nil(const state_formulas::state_formula& x) { return state_formulas::find_nil< state_formulas::state_formula >(x); }
 //--- end generated state_formulas overloads ---//
 
 } // namespace state_formulas

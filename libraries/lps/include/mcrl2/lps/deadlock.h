@@ -100,6 +100,11 @@ class deadlock
       return !(*this == other);
     }
 };
+
+// template function overloads
+std::set<data::variable> find_variables(const lps::deadlock& x);
+std::set<data::variable> find_free_variables(const lps::deadlock& x);
+
 } // namespace lps
 
 } // namespace mcrl2

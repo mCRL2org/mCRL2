@@ -18,7 +18,6 @@
 #include "mcrl2/data/standard.h"
 
 #ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/parse.h"
 #include <iterator>
 #endif

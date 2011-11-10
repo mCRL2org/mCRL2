@@ -91,6 +91,7 @@ std::string pp(const process_equation& x);
 std::string pp(const process_equation_list& x);
 std::string pp(const process_equation_vector& x);
 void normalize_sorts(process_equation_vector& x, const data::data_specification& dataspec);
+std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x);
 
 } // namespace process
 

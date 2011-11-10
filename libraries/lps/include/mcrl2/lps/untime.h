@@ -13,7 +13,6 @@
 #define MCRL2_LPS_UNTIME_H
 
 #include "mcrl2/lps/detail/lps_algorithm.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/data/set_identifier_generator.h"
 
 namespace mcrl2

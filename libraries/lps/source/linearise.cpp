@@ -54,6 +54,7 @@
 #include "mcrl2/data/replace.h"
 
 //mCRL2 processes
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/process_expression.h"
 #include "mcrl2/process/process_equation.h"
 #include "mcrl2/process/process_specification.h"
@@ -7525,7 +7526,7 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_if_then(t))
       {
-        contains_if_then=true;   
+        contains_if_then=true;
         return !options.add_delta; // If delta is added, c->p is translated into c->p<>delta,
                                    // otherwise into c->p<>delta@0. In this last case the process
                                    // contains time.
@@ -8042,8 +8043,8 @@ class specification_basic_type:public boost::noncopyable
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
-      if (options.add_delta) 
-      { 
+      if (options.add_delta)
+      {
         /* Warn if a process contains time */
         determinewhetherprocessescontaintime(init1);
       }

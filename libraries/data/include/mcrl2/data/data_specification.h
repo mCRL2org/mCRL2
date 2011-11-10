@@ -17,8 +17,6 @@
 #include <vector>
 
 #include "boost/bind.hpp"
-#include "boost/iterator/transform_iterator.hpp"
-#include "boost/range/iterator_range.hpp"
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/map.h"
@@ -67,13 +65,9 @@ class data_specification;
 sort_expression normalize_sorts(const sort_expression& x, const data::data_specification& dataspec);
 data_expression normalize_sorts(const data_expression& x, const data::data_specification& dataspec);
 variable_list normalize_sorts(const variable_list& x, const data::data_specification& dataspec);
-data::data_equation normalize_sorts(const data::data_equation& x, const data::data_specification& dataspec); 
+data::data_equation normalize_sorts(const data::data_equation& x, const data::data_specification& dataspec);
 data_equation_list normalize_sorts(const data_equation_list& x, const data::data_specification& dataspec);
 void normalize_sorts(data_equation_vector& x, const data::data_specification& dataspec);
-
-// prototype, find.h included at the end of this file to prevent circular dependencies.
-template < typename Container >
-std::set<sort_expression> find_sort_expressions(Container const& container);
 
 /// \cond INTERNAL_DOCS
 namespace detail
@@ -1198,10 +1192,6 @@ data_equation_vector find_equations(data_specification const& specification, con
 } // namespace data
 
 } // namespace mcrl2
-
-#ifndef MCRL2_DATA_FIND_H
-#include "mcrl2/data/find.h"
-#endif
 
 #endif // MCRL2_DATA_DATA_SPECIFICATION_H
 

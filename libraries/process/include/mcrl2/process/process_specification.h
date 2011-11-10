@@ -230,14 +230,12 @@ bool operator!=(const process_specification& spec1, const process_specification&
 std::string pp(const process_specification& x);
 void normalize_sorts(process_specification& x, const data::data_specification& dataspec);
 void translate_user_notation(process::process_specification& x);
+std::set<data::sort_expression> find_sort_expressions(const process::process_specification& x);
+std::set<core::identifier_string> find_identifiers(const process::process_specification& x);
 
 } // namespace process
 
 } // namespace mcrl2
-
-#ifndef MCRL2_PROCESS_FIND_H
-#include "mcrl2/process/find.h"
-#endif
 
 #endif // MCRL2_PROCESS_PROCESS_SPECIFICATION_H
 

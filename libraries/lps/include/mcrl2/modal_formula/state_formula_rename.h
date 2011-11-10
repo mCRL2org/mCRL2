@@ -13,9 +13,7 @@
 #define MCRL2_MODAL_STATE_VARIABLE_RENAME_H
 
 #include <deque>
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/state_formula.h"
 #include "mcrl2/modal_formula/builder.h"
 #include "mcrl2/modal_formula/replace.h"

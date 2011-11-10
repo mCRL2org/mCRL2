@@ -174,16 +174,16 @@ ProcExpr
   | 'rename' '(' RenExprSet ',' ProcExpr ')'
   | 'comm' '(' CommExprSet ',' ProcExpr ')'
   | '(' ProcExpr ')'
-  | ProcExpr '+'   ProcExpr                     $binary_right 1
+  | ProcExpr '+'   ProcExpr                     $binary_left  1
+  | 'sum' VarsDeclList '.' ProcExpr             $unary_right  2
   | ProcExpr '||'  ProcExpr                     $binary_right 3
   | ProcExpr '||_' ProcExpr                     $binary_right 3
-  | ProcExpr '.'   ProcExpr                     $binary_right 6
-  | ProcExpr '<<'  ProcExpr                     $binary_left 5
-  | ProcExpr '@' DataExprUnit                   $binary_left 7
+  | DataExprUnit '->' ProcExpr                  $unary_right  4
+  | DataExprUnit IfThen ProcExpr                $unary_right  4
+  | ProcExpr '<<'  ProcExpr                     $binary_left  5
+  | ProcExpr '.'   ProcExpr                     $binary_left 6
+  | ProcExpr '@' DataExprUnit                   $binary_left  7
   | ProcExpr '|'   ProcExpr                     $binary_right 8
-  | DataExprUnit '->' ProcExpr                  $unary_right 4
-  | DataExprUnit IfThen ProcExpr                $unary_right 4
-  | 'sum' VarsDeclList '.' ProcExpr             $unary_right 2
   ;
 
 IfThen: '->' ProcExpr '<>' $left 0 ;

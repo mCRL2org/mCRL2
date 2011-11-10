@@ -261,6 +261,8 @@ summand_list linear_process_summands(const linear_process& p)
 
 // template function overloads
 std::string pp(const linear_process& x);
+std::set<data::variable> find_variables(const lps::linear_process& x);
+std::set<data::variable> find_free_variables(const lps::linear_process& x);
 
 } // namespace lps
 

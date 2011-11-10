@@ -1611,7 +1611,7 @@ atermpp::map < data::sort_expression, data::basic_sort > construct_normalised_al
     std::set< sort_expression > all_sorts;
     if (is_container_sort(i->first) || is_function_sort(i->first))
     {
-      find_sort_expressions(i->first, std::inserter(all_sorts, all_sorts.end()));
+      find_sort_expressions<sort_expression>(i->first, std::inserter(all_sorts, all_sorts.end()));
     }
     while (normalised_aliases.count(result_sort)>0)
     {
@@ -1670,7 +1670,7 @@ static bool gstc_check_for_empty_constructor_domains(ATermList constructor_list)
       const basic_sort s(core::identifier_string(gstcUnwindType(ATAgetFirst(defined_sorts))));
       ATermAppl reference=ATAtableGet(context.defined_sorts,(ATerm)static_cast<ATermAppl>(s.name()));
       // if (is_container_sort(i->first) || is_function_sort(i->first))
-      find_sort_expressions(sort_expression(reference), std::inserter(all_sorts, all_sorts.end()));
+      find_sort_expressions<sort_expression>(sort_expression(reference), std::inserter(all_sorts, all_sorts.end()));
     }
 
     for (std::set< sort_expression > ::const_iterator i=all_sorts.begin(); i!=all_sorts.end(); ++i)

@@ -27,7 +27,6 @@
 #include "mcrl2/data/detail/data_expression_with_variables_traits.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/replace.h"
-#include "mcrl2/data/find.h"
 
 namespace mcrl2
 {
@@ -241,12 +240,12 @@ class rewriter: public basic_rewriter<data_expression>
       substitution_type sigma;
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       mCRL2log(debug) << "REWRITE: " << d;
-#endif 
+#endif
       data_expression result(m_rewriter->rewrite(d,sigma));
 
 #ifdef MCRL2_PRINT_REWRITE_STEPS
       mCRL2log(debug) << " ------------> " << result << std::endl;
-#endif 
+#endif
       return result;
     }
 
@@ -271,9 +270,9 @@ class rewriter: public basic_rewriter<data_expression>
       {
         sigma_with_iterator[*it]=sigma(*it);
       }
-        
+
       data_expression result(m_rewriter->rewrite(d,sigma_with_iterator));
-      
+
 # ifdef MCRL2_PRINT_REWRITE_STEPS
       mCRL2log(debug) << " ------------> " << result << std::endl;
 #endif
@@ -346,7 +345,7 @@ class rewriter_with_variables: public basic_rewriter<data_expression>
       {
         sigma_with_iterator[*it]=sigma(*it);
       }
-        
+
       data_expression t(m_rewriter->rewrite(static_cast< const data_expression& >(d),sigma_with_iterator));
       data_expression_with_variables result(t, find_free_variables(t));
 #ifdef MCRL2_PRINT_REWRITE_STEPS

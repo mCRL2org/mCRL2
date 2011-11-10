@@ -12,6 +12,7 @@
 #ifndef MCRL2_MODAL_FORMULA_FIND_H
 #define MCRL2_MODAL_FORMULA_FIND_H
 
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/variable.h"
 #include "mcrl2/modal_formula/traverser.h"
 #include "mcrl2/modal_formula/add_binding.h"

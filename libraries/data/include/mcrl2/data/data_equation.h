@@ -150,6 +150,8 @@ std::string pp(const data_equation& x);
 std::string pp(const data_equation_list& x);
 std::string pp(const data_equation_vector& x);
 data::data_equation translate_user_notation(const data::data_equation& x);
+std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x);
+std::set<data::function_symbol> find_function_symbols(const data::data_equation& x);
 
 } // namespace data
 

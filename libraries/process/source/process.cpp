@@ -9,8 +9,10 @@
 /// \file process.cpp
 /// \brief
 
+#include "mcrl2/process/find.h"
 #include "mcrl2/process/normalize_sorts.h"
 #include "mcrl2/process/print.h"
+#include "mcrl2/process/replace.h"
 #include "mcrl2/process/translate_user_notation.h"
 
 namespace mcrl2
@@ -53,6 +55,10 @@ std::string pp(const process::choice& x) { return process::pp< process::choice >
 void normalize_sorts(process::process_equation_vector& x, const data::data_specification& dataspec) { process::normalize_sorts< process::process_equation_vector >(x, dataspec); }
 void normalize_sorts(process::process_specification& x, const data::data_specification& dataspec) { process::normalize_sorts< process::process_specification >(x, x.data()); }
 void translate_user_notation(process::process_specification& x) { process::translate_user_notation< process::process_specification >(x); }
+std::set<data::sort_expression> find_sort_expressions(const process::process_equation_vector& x) { return process::find_sort_expressions< process::process_equation_vector >(x); }
+std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x) { return process::find_sort_expressions< process::process_expression >(x); }
+std::set<data::sort_expression> find_sort_expressions(const process::process_specification& x) { return process::find_sort_expressions< process::process_specification >(x); }
+std::set<core::identifier_string> find_identifiers(const process::process_specification& x) { return process::find_identifiers< process::process_specification >(x); }
 //--- end generated process overloads ---//
 
 // TODO: These should be removed when the ATerm code has been replaced.

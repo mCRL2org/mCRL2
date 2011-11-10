@@ -359,6 +359,9 @@ std::string pp(const pbes_expression_vector& x);
 std::string pp(const propositional_variable_instantiation& x);
 std::string pp(const propositional_variable_instantiation_list& x);
 std::string pp(const propositional_variable_instantiation_vector& x);
+std::set<pbes_system::propositional_variable_instantiation> find_propositional_variable_instantiations(const pbes_system::pbes_expression& x);
+std::set<core::identifier_string> find_identifiers(const pbes_system::pbes_expression& x);
+bool search_variable(const pbes_system::pbes_expression& x, const data::variable& v);
 
 /// \brief Returns true if the term t is equal to true
 /// \param t A PBES expression

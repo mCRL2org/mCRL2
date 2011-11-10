@@ -20,15 +20,13 @@
 #include <algorithm>
 #include "mcrl2/atermpp/detail/aterm_list_utility.h"
 #include "mcrl2/core/detail/print_utility.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/detail/data_utility.h"
+#include "mcrl2/data/detail/find.h"
 #include "mcrl2/data/replace.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/make_timed_lps.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/replace.h"
-#include "mcrl2/modal_formula/find.h"
 #include "mcrl2/modal_formula/replace.h"
 #include "mcrl2/modal_formula/monotonicity.h"
 #include "mcrl2/modal_formula/state_formula.h"
@@ -269,7 +267,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         data::variable_list v = var(b);
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
+        std::set<std::string> names = data::detail::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
         data::variable_list b = fresh_variables(v, names, false);
         result = z::forall(b, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       }
@@ -278,7 +276,7 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         data::variable_list v = var(b);
         assert(v.size() > 0);
         action_formulas::action_formula alpha = arg(b);
-        std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
+        std::set<std::string> names = data::detail::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
         data::variable_list b = fresh_variables(v, names, false);
         result = z::exists(b, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, b))));
       }
@@ -350,13 +348,13 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else if (s::is_forall(f))
         {
-          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
+          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::forall(a::var(f), RHS(f0, a::arg(f), lps, T, context));
         }
         else if (s::is_exists(f))
         {
-          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
+          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(a::var(f), RHS(f0, a::arg(f), lps, T, context));
         }
@@ -531,13 +529,13 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
         }
         else if (s::is_forall(f))
         {
-          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
+          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, T, context));
         }
         else if (s::is_exists(f))
         {
-          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
+          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::forall(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, T, context));
         }
@@ -791,9 +789,10 @@ class pbes_translate_algorithm_timed: public pbes_translate_algorithm
       state_formulas::state_formula f = state_formulas::preprocess_state_formula(formula, spec);
 
       // make sure the lps is timed
-      std::set<core::identifier_string> context;
-      lps::find_identifiers(spec, std::inserter(context, context.end()));
-      state_formulas::find_identifiers(f, std::inserter(context, context.end()));
+      std::set<core::identifier_string> context = lps::find_identifiers(spec);
+      std::set<core::identifier_string> fcontext = state_formulas::find_identifiers(f);
+      context.insert(fcontext.begin(), fcontext.end());
+
       data::variable T = fresh_variable(context, data::sort_real::real_(), "T");
       context.insert(T.name());
       lps::detail::make_timed_lps(lps, context);
@@ -879,7 +878,7 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
         action_formulas::action_formula alpha = arg(b);
         if (v.size() > 0)
         {
-          std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
+          std::set<std::string> names = data::detail::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
           data::variable_list y = fresh_variables(v, names, false);
           result = p::forall(y, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
@@ -894,7 +893,7 @@ class pbes_translate_algorithm_untimed_base: public pbes_translate_algorithm
         action_formulas::action_formula alpha = arg(b);
         if (v.size() > 0)
         {
-          std::set<std::string> names = data::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
+          std::set<std::string> names = data::detail::variable_name_strings(lps::find_variables(x), action_formulas::find_variables(b));
           data::variable_list y = fresh_variables(v, names, false);
           result = p::exists(y, sat_top(x, action_formulas::replace_free_variables(alpha, data::make_sequence_sequence_substitution(v, y))));
         }
@@ -972,13 +971,13 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else if (s::is_forall(f))
         {
-          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
+          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::forall(a::var(f), RHS(f0, a::arg(f), lps, context));
         }
         else if (s::is_exists(f))
         {
-          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
+          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(a::var(f), RHS(f0, a::arg(f), lps, context));
         }
@@ -1090,13 +1089,13 @@ class pbes_translate_algorithm_untimed: public pbes_translate_algorithm_untimed_
         }
         else if (s::is_forall(f))
         {
-          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
+          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::exists(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, context));
         }
         else if (s::is_exists(f))
         {
-          std::set<std::string> names = data::variable_name_strings(data::find_variables(a::var(f)));
+          std::set<std::string> names = data::detail::variable_name_strings(data::find_variables(a::var(f)));
           context.insert(names.begin(), names.end());
           result = pbes_expr::forall(a::var(f), RHS(f0, s::not_(a::arg(f)), lps, context));
         }

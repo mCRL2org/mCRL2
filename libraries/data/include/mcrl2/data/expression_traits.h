@@ -23,15 +23,6 @@
 namespace mcrl2
 {
 
-namespace data
-{
-template < typename Container >
-std::set< variable > find_free_variables(Container const& container);
-
-template < typename Container >
-std::set< variable > find_variables(Container const& container);
-}
-
 namespace core
 {
 
@@ -331,9 +322,5 @@ struct expression_traits : public core::term_traits< Expression >
 } // namespace core
 
 } // namespace mcrl2
-
-#ifndef MCRL2_DATA_FIND_H
-#include "mcrl2/data/find.h"
-#endif
 
 #endif // MCRL2_DATA_TERM_TRAITS_H

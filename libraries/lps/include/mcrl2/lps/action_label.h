@@ -13,6 +13,7 @@
 #define MCRL2_LPS_ACTION_LABEL_H
 
 #include <cassert>
+#include <set>
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/vector.h"
@@ -91,6 +92,7 @@ std::string pp(const action_label& x);
 std::string pp(const action_label_list& x);
 std::string pp(const action_label_vector& x);
 action_label_list normalize_sorts(const action_label_list& x, const data::data_specification& dataspec);
+std::set<data::sort_expression> find_sort_expressions(const lps::action_label_list& x);
 
 /// \brief Returns true if the term t is an action label
 /// \param t A term

@@ -14,7 +14,6 @@
 
 #include <boost/iterator/transform_iterator.hpp>
 #include "mcrl2/data/detail/sequence_algorithm.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/detail/action_utility.h"
 
@@ -23,9 +22,6 @@ namespace mcrl2
 
 namespace lps
 {
-
-template <typename T>
-std::set<data::variable> find_free_variables(const T& x);
 
 template <typename T>
 std::string pp(const T&);

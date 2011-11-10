@@ -78,6 +78,7 @@ class process_initializer: public atermpp::aterm_appl
 
 // template function overloads
 std::string pp(const process_initializer& x);
+std::set<data::variable> find_free_variables(const lps::process_initializer& x);
 
 } // namespace lps
 

@@ -144,11 +144,53 @@ data::data_expression_list
 data::function_symbol
 data::variable
 data::variable_list
+lps::linear_process
 lps::specification
 lps::deadlock
 lps::multi_action
 pbes_system::pbes<>
 state_formulas::state_formula
+'''
+
+FIND_FREE_VARIABLES_CLASSNAMES = '''
+data::data_expression
+data::data_expression_list
+lps::action
+lps::linear_process
+lps::specification
+lps::deadlock
+lps::multi_action
+lps::process_initializer
+pbes_system::pbes<>
+pbes_system::pbes_equation
+state_formulas::state_formula
+'''
+
+FIND_FUNCTION_SYMBOLS_CLASSNAMES = '''
+data::data_equation
+lps::specification
+pbes_system::pbes<>
+'''
+
+FIND_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES = '''
+pbes_system::pbes_expression
+'''
+
+FIND_IDENTIFIERS_CLASSNAMES = '''
+data::variable_list
+lps::specification
+process::process_specification
+pbes_system::pbes_expression
+state_formulas::state_formula
+'''
+
+FIND_NIL_CLASSNAMES = '''
+state_formulas::state_formula
+'''
+
+SEARCH_VARIABLE_CLASSNAMES = '''
+data::data_expression
+pbes_system::pbes_expression
 '''
 
 def has_specification(type):
@@ -170,10 +212,10 @@ def is_modifiable(type):
 def extract_namespace(classname):
     return re.sub('::.*', '', classname)
 
-def generate_traverser_overloads(classnames, function, result):
+def generate_traverser_overloads(classnames, function, return_type, result):
     for classname in classnames:
         namespace = extract_namespace(classname)
-        text = re.sub('>>', '> >', 'std::string %s(const %s& x) { return %s::%s< %s >(x); }\n' % (function, classname, namespace, function, classname))
+        text = re.sub('>>', '> >', '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (return_type, function, classname, namespace, function, classname))
         result[namespace].append(text)
 
 def generate_builder_overloads(classnames, function, result):
@@ -183,6 +225,13 @@ def generate_builder_overloads(classnames, function, result):
             text = 'void %s(%s& x) { %s::%s< %s >(x); }\n' % (function, classname, namespace, function, classname)
         else:
             text = '%s %s(const %s& x) { return %s::%s< %s >(x); }\n' % (classname, function, classname, namespace, function, classname)
+        result[namespace].append(text)
+
+# special because of additional variable argument
+def generate_search_variable_overloads(classnames, function, return_type, result):
+    for classname in classnames:
+        namespace = extract_namespace(classname)
+        text = re.sub('>>', '> >', '%s %s(const %s& x, const data::variable& v) { return %s::%s< %s >(x, v); }\n' % (return_type, function, classname, namespace, function, classname))
         result[namespace].append(text)
 
 # special because of additional data_specification argument
@@ -202,7 +251,7 @@ for namespace in file_map:
     result[namespace] = []
 
 classnames = PP_CLASSNAMES.strip().split()
-generate_traverser_overloads(classnames, 'pp', result)
+generate_traverser_overloads(classnames, 'pp', 'std::string', result)
 
 classnames = NORMALIZE_SORTS_CLASSNAMES.strip().split()
 generate_normalize_sorts_overloads(classnames, result)
@@ -211,10 +260,28 @@ classnames = TRANSLATE_USER_NOTATION_CLASSNAMES.strip().split()
 generate_builder_overloads(classnames, 'translate_user_notation', result)
 
 classnames = FIND_SORT_EXPRESSIONS_CLASSNAMES.strip().split()
-#generate_traverser_overloads(classnames, 'find_sort_expressions', result)
+generate_traverser_overloads(classnames, 'find_sort_expressions', 'std::set<data::sort_expression>', result)
 
 classnames = FIND_VARIABLES_CLASSNAMES.strip().split()
-#generate_traverser_overloads(classnames, 'find_variables', result)
+generate_traverser_overloads(classnames, 'find_variables', 'std::set<data::variable>', result)
+
+classnames = FIND_FREE_VARIABLES_CLASSNAMES.strip().split()
+generate_traverser_overloads(classnames, 'find_free_variables', 'std::set<data::variable>', result)
+
+classnames = FIND_FUNCTION_SYMBOLS_CLASSNAMES.strip().split()
+generate_traverser_overloads(classnames, 'find_function_symbols', 'std::set<data::function_symbol>', result)
+
+classnames = FIND_PROPOSITIONAL_VARIABLE_INSTANTIATIONS_CLASSNAMES.strip().split()
+generate_traverser_overloads(classnames, 'find_propositional_variable_instantiations', 'std::set<pbes_system::propositional_variable_instantiation>', result)
+
+classnames = FIND_IDENTIFIERS_CLASSNAMES.strip().split()
+generate_traverser_overloads(classnames, 'find_identifiers', 'std::set<core::identifier_string>', result)
+
+classnames = FIND_NIL_CLASSNAMES.strip().split()
+generate_traverser_overloads(classnames, 'find_nil', 'bool', result)
+
+classnames = SEARCH_VARIABLE_CLASSNAMES.strip().split()
+generate_search_variable_overloads(classnames, 'search_variable', 'bool', result)
 
 for namespace in result:
     filename = file_map[namespace]
@@ -222,5 +289,5 @@ for namespace in result:
     label = 'generated %s overloads' % namespace
     insert_text_in_file(filename, text, label)
 
-    print '--- %s ---' % namespace   
+    print '--- %s ---' % namespace
     print re.sub(' \{.*\}', ';', text)

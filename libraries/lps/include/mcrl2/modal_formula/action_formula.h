@@ -479,6 +479,7 @@ inline int precedence(const not_& x) { return precedence(static_cast<const actio
 
 // template function overloads
 std::string pp(const action_formula& x);
+std::set<data::variable> find_variables(const action_formulas::action_formula& x);
 
 } // namespace action_formulas
 

@@ -36,9 +36,6 @@ namespace mcrl2
 namespace lps
 {
 
-template <typename Container, typename OutputIterator>
-void find_sort_expressions(Container const& container, OutputIterator o);
-
 template <typename Object>
 bool is_well_typed(const Object& o);
 
@@ -254,13 +251,21 @@ class specification
     }
 };
 
+// template function overloads
+std::string pp(const specification& x);
+std::string pp_with_summand_numbers(const specification& x);
+std::set<data::sort_expression> find_sort_expressions(const lps::specification& x);
+std::set<data::variable> find_variables(const lps::specification& x);
+std::set<data::variable> find_free_variables(const lps::specification& x);
+std::set<data::function_symbol> find_function_symbols(const lps::specification& x);
+std::set<core::identifier_string> find_identifiers(const lps::specification& x);
+
 /// \brief Adds all sorts that appear in the process of l to the data specification of l.
 /// \param l A linear process specification
 inline
 void complete_data_specification(lps::specification& spec)
 {
-  std::set<data::sort_expression> s;
-  lps::find_sort_expressions(spec, std::inserter(s, s.end()));
+  std::set<data::sort_expression> s = lps::find_sort_expressions(spec);
   spec.data().add_context_sorts(s);
 }
 
@@ -292,17 +297,9 @@ bool operator!=(const specification& spec1, const specification& spec2)
   return !(spec1 == spec2);
 }
 
-// template function overloads
-std::string pp(const specification& x);
-std::string pp_with_summand_numbers(const specification& x);
-
 } // namespace lps
 
 } // namespace mcrl2
-
-#ifndef MCRL2_LPS_FIND_H
-#include "mcrl2/lps/find.h"
-#endif
 
 #ifndef MCRL2_LPS_DETAIL_LPS_WELL_TYPED_CHECKER_H
 #include "mcrl2/lps/detail/lps_well_typed_checker.h"

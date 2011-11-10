@@ -20,14 +20,12 @@
 #include "mcrl2/utilities/reachable_nodes.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/iota.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/assignment_functional.h"
 #include "mcrl2/data/detail/sorted_sequence_algorithm.h"
 #include "mcrl2/pbes/detail/free_variable_visitor.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/remove_parameters.h"
-#include "mcrl2/pbes/find.h"
 
 namespace mcrl2
 {

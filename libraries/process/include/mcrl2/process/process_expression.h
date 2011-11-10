@@ -12,6 +12,7 @@
 #ifndef MCRL2_PROCESS_PROCESS_EXPRESSION_H
 #define MCRL2_PROCESS_PROCESS_EXPRESSION_H
 
+#include <set>
 #include "mcrl2/atermpp/aterm_access.h"
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/detail/struct_core.h"
@@ -941,6 +942,7 @@ std::string pp(const bounded_init& x);
 std::string pp(const merge& x);
 std::string pp(const left_merge& x);
 std::string pp(const choice& x);
+std::set<data::sort_expression> find_sort_expressions(const process::process_expression& x);
 
 } // namespace process
 

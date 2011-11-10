@@ -12,7 +12,7 @@
 #ifndef MCRL2_PBES_UTILITY_H
 #define MCRL2_PBES_UTILITY_H
 
-#include "mcrl2/atermpp/algorithm.h" 
+#include "mcrl2/atermpp/algorithm.h"
 
 #include "mcrl2/data/data_expression.h"
 #include "mcrl2/data/utility.h"
@@ -23,7 +23,6 @@
 #include "mcrl2/data/detail/rewriter_wrapper.h"
 #include "mcrl2/data/detail/rewrite.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 
 namespace mcrl2
 {
@@ -51,17 +50,17 @@ struct compare_variableL
 //  variable v occurs in l.
 
 static bool occurs_in_varL(
-                  const pbes_system::pbes_expression& l, 
+                  const pbes_system::pbes_expression& l,
                   const data::variable &v,
                   const bool use_internal_rewrite_format)
-{ 
+{
   // In the internal format, the pbes_expression l contains data expressions
   // in internal rewrite format. Therefore the function find_if defined on
   // aterms must be used, instead of the function search variable which works
   // on a pbes_expression, and which will not recognize (and therefore skip)
   // expressions in internal format. So, it will not search the whole expression.
   if (use_internal_rewrite_format)
-  { 
+  {
     return find_if(l, compare_variableL(v)) != atermpp::aterm();
   }
   else
@@ -216,7 +215,7 @@ static void restore_saved_substitution(const atermpp::map<data::variable,atermpp
       sigma[i->first]=data::data_expression(i->second);
     }
   }
-} 
+}
 
 ///\brief Substitute in p, remove quantifiers and return the result after rewriting.
 /// Given a substitution, which is prepared within the rewriter, this function first
@@ -364,7 +363,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       {
         atermpp::aterm_appl d;
         if (use_internal_rewrite_format)
-        { 
+        {
           d=r.rewrite_internal((atermpp::aterm)*i,sigma_internal);
         }
         else
@@ -377,11 +376,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           saved_substitutions[*i]=d;
           // r.clear_internally_associated_value(*i);
           if (use_internal_rewrite_format)
-          { 
+          {
             sigma_internal[*i]= atermpp::aterm_appl(*i);
           }
           else
-          { 
+          {
             sigma[*i]= *i;
           }
 
@@ -414,7 +413,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
             for (atermpp::set <pbes_expression >::iterator t=conjunction_set.begin() ;
                  t!=conjunction_set.end() ; t++)
             {
-              if (!occurs_in_varL(*t,*i,use_internal_rewrite_format)) 
+              if (!occurs_in_varL(*t,*i,use_internal_rewrite_format))
               {
                 new_conjunction_set.insert(*t);
               }
@@ -467,22 +466,22 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   // sigma[*i]=d;
                   // r.set_internally_associated_value(*i,d);
                   if (use_internal_rewrite_format)
-                  { 
+                  {
                     sigma_internal[*i]= r.convert_to(d);
                   }
                   else
-                  { 
+                  {
                     sigma[*i]= d;
                   }
                   pbes_expression rt(pbes_expression_substitute_and_rewrite(*t,data,r,use_internal_rewrite_format,sigma,sigma_internal));
                   // sigma[*i] = *i; // erase *i
                   // r.clear_internally_associated_value(*i);
                   if (use_internal_rewrite_format)
-                  { 
+                  {
                     sigma_internal[*i]= atermpp::aterm_appl(*i);
                   }
                   else
-                  { 
+                  {
                     sigma[*i]= *i;
                   }
                   if (is_pbes_false(rt)) /* the resulting expression is false, so we can terminate */
@@ -545,7 +544,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
       {
         atermpp::aterm_appl d;
         if (use_internal_rewrite_format)
-        { 
+        {
           d=r.rewrite_internal((atermpp::aterm)*i,sigma_internal);
         }
         else
@@ -558,11 +557,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
           saved_substitutions[*i]=d;
           // r.clear_internally_associated_value(*i);
           if (use_internal_rewrite_format)
-          { 
+          {
             sigma_internal[*i]= atermpp::aterm_appl(*i);
           }
           else
-          { 
+          {
             sigma[*i]= *i;
           }
         }
@@ -644,7 +643,7 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   //r.set_internally_associated_value(*i,d);
                   // sigma[*i]=d;
                   if (use_internal_rewrite_format)
-                  { 
+                  {
                     sigma_internal[*i]=r.convert_to(d);
                   }
                   else
@@ -655,11 +654,11 @@ inline pbes_expression pbes_expression_substitute_and_rewrite(
                   // sigma[*i] = *i; // erase *i
                   // r.clear_internally_associated_value(*i);
                   if (use_internal_rewrite_format)
-                  { 
+                  {
                     sigma_internal[*i]= atermpp::aterm_appl(*i);
                   }
                   else
-                  { 
+                  {
                     sigma[*i]= *i;
                   }
                   if (is_pbes_true(rt)) /* the resulting expression is true, so we can terminate */

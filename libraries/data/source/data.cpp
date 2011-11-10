@@ -9,8 +9,10 @@
 /// \file data.cpp
 /// \brief
 
+#include "mcrl2/data/find.h"
 #include "mcrl2/data/normalize_sorts.h"
 #include "mcrl2/data/print.h"
+#include "mcrl2/data/replace.h"
 #include "mcrl2/data/translate_user_notation.h"
 
 namespace mcrl2
@@ -49,6 +51,19 @@ data::sort_expression normalize_sorts(const data::sort_expression& x, const data
 data::variable_list normalize_sorts(const data::variable_list& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::variable_list >(x, dataspec); }
 data::data_expression translate_user_notation(const data::data_expression& x) { return data::translate_user_notation< data::data_expression >(x); }
 data::data_equation translate_user_notation(const data::data_equation& x) { return data::translate_user_notation< data::data_equation >(x); }
+std::set<data::sort_expression> find_sort_expressions(const data::data_equation& x) { return data::find_sort_expressions< data::data_equation >(x); }
+std::set<data::sort_expression> find_sort_expressions(const data::data_expression& x) { return data::find_sort_expressions< data::data_expression >(x); }
+std::set<data::sort_expression> find_sort_expressions(const data::sort_expression& x) { return data::find_sort_expressions< data::sort_expression >(x); }
+std::set<data::variable> find_variables(const data::data_expression& x) { return data::find_variables< data::data_expression >(x); }
+std::set<data::variable> find_variables(const data::data_expression_list& x) { return data::find_variables< data::data_expression_list >(x); }
+std::set<data::variable> find_variables(const data::function_symbol& x) { return data::find_variables< data::function_symbol >(x); }
+std::set<data::variable> find_variables(const data::variable& x) { return data::find_variables< data::variable >(x); }
+std::set<data::variable> find_variables(const data::variable_list& x) { return data::find_variables< data::variable_list >(x); }
+std::set<data::variable> find_free_variables(const data::data_expression& x) { return data::find_free_variables< data::data_expression >(x); }
+std::set<data::variable> find_free_variables(const data::data_expression_list& x) { return data::find_free_variables< data::data_expression_list >(x); }
+std::set<data::function_symbol> find_function_symbols(const data::data_equation& x) { return data::find_function_symbols< data::data_equation >(x); }
+std::set<core::identifier_string> find_identifiers(const data::variable_list& x) { return data::find_identifiers< data::variable_list >(x); }
+bool search_variable(const data::data_expression& x, const data::variable& v) { return data::search_variable< data::data_expression >(x, v); }
 //--- end generated data overloads ---//
 
 std::string pp(const std::set<variable>& x) { return data::pp< std::set<variable> >(x); }

@@ -24,7 +24,6 @@
 #include "mcrl2/data/classic_enumerator.h"
 #include "mcrl2/lps/detail/lps_algorithm.h"
 #include "mcrl2/lps/replace.h"
-#include "mcrl2/lps/find.h"
 
 namespace mcrl2
 {
@@ -129,7 +128,7 @@ class binary_algorithm: public lps::detail::lps_algorithm
           // for (enumerator_type j(enumerator_type(m_spec.data(),par,m_rewriter,data::data_expression(data::sort_bool::true_()))); j != enumerator_type() ; ++j)
           for (enumerator_type::iterator j=enumerator.begin(
                            push_front(data::variable_list(),par),
-                           data::data_expression(data::sort_bool::true_())); 
+                           data::data_expression(data::sort_bool::true_()));
                 j != enumerator.end() ; ++j)
           {
             enumerated_elements.push_back((*j)(par));

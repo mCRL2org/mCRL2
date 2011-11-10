@@ -24,7 +24,6 @@
 #include "mcrl2/data/utility.h"
 #include "mcrl2/data/detail/data_functional.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/lps/find.h"
 #include "mcrl2/lps/specification.h"
 #include "mcrl2/lps/replace.h"
 #include "mcrl2/pbes/pbes.h"
@@ -718,9 +717,10 @@ class weak_bisimulation_algorithm : public bisimulation_algorithm
         }
 
         // replace e' (e1) by fresh variables e'' (e1_new)
-        std::set<data::variable> used_variables;
-        lps::find_variables(p, std::inserter(used_variables, used_variables.end()));
-        lps::find_variables(q, std::inserter(used_variables, used_variables.end()));
+        std::set<data::variable> used_variables = lps::find_variables(p);
+        std::set<data::variable> tmp = lps::find_variables(q);
+        used_variables.insert(tmp.begin(), tmp.end());
+
         std::set<std::string> used_names;
         for (std::set<data::variable>::const_iterator k = used_variables.begin(); k != used_variables.end(); ++k)
         {

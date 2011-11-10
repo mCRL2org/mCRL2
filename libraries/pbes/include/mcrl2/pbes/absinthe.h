@@ -34,7 +34,6 @@
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/detail/data_construction.h"
 #include "mcrl2/pbes/builder.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/utilities/identifier_generator.h"

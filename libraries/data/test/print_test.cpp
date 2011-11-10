@@ -35,6 +35,8 @@ using namespace mcrl2::data::sort_nat;
 
 BOOST_GLOBAL_FIXTURE(collect_after_test_case)
 
+
+
 template <typename T>
 void test_term(const std::string& s, const T& x)
 {
@@ -68,6 +70,8 @@ void test_term(const std::string& s)
 
 BOOST_AUTO_TEST_CASE(problem_cases)
 {
+  test_term("DataAppl(OpId(\"@bag\",SortArrow([SortArrow([SortId(\"ActionLabel\")],SortId(\"Nat\")),SortCons(SortFBag,SortId(\"ActionLabel\"))],SortCons(SortBag,SortId(\"ActionLabel\")))),[OpId(\"@zero_\",SortArrow([SortId(\"ActionLabel\")],SortId(\"Nat\"))),DataAppl(OpId(\"@fbag_cons\",SortArrow([SortId(\"ActionLabel\"),SortId(\"Pos\"),SortCons(SortFBag,SortId(\"ActionLabel\"))],SortCons(SortFBag,SortId(\"ActionLabel\")))),[OpId(\"a1\",SortId(\"ActionLabel\")),OpId(\"@c1\",SortId(\"Pos\")),OpId(\"@fbag_empty\",SortCons(SortFBag,SortId(\"ActionLabel\")))])])");
+
   test_term("DataEqn([DataVarId(\"X0\",SortCons(SortSet,SortId(\"Bool\"))),DataVarId(\"X1\",SortCons(SortSet,SortId(\"Bool\")))],OpId(\"true\",SortId(\"Bool\")),DataAppl(OpId(\"LiftGenerated_not\",SortArrow([SortCons(SortSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataVarId(\"X0\",SortCons(SortSet,SortId(\"Bool\")))]),DataAppl(OpId(\"@set\",SortArrow([SortArrow([SortId(\"Bool\")],SortId(\"Bool\")),SortCons(SortFSet,SortId(\"Bool\"))],SortCons(SortSet,SortId(\"Bool\")))),[DataAppl(OpId(\"lambda@1\",SortArrow([SortCons(SortSet,SortId(\"Bool\"))],SortArrow([SortId(\"Bool\")],SortId(\"Bool\")))),[DataVarId(\"X0\",SortCons(SortSet,SortId(\"Bool\")))]),OpId(\"@fset_empty\",SortCons(SortFSet,SortId(\"Bool\")))]))");
 
   test_term("DataAppl(OpId(\"==\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Bool\"))),[DataAppl(OpId(\"*\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"x\",SortId(\"Int\")),DataAppl(OpId(\"@cInt\",SortArrow([SortId(\"Nat\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"q\",SortId(\"Pos\"))])])]),DataAppl(OpId(\"*\",SortArrow([SortId(\"Int\"),SortId(\"Int\")],SortId(\"Int\"))),[DataVarId(\"y\",SortId(\"Int\")),DataAppl(OpId(\"@cInt\",SortArrow([SortId(\"Nat\")],SortId(\"Int\"))),[DataAppl(OpId(\"@cNat\",SortArrow([SortId(\"Pos\")],SortId(\"Nat\"))),[DataVarId(\"p\",SortId(\"Pos\"))])])])])");

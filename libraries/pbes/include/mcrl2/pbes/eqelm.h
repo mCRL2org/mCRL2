@@ -20,7 +20,6 @@
 #include <algorithm>
 #include "mcrl2/data/sort_expression.h"
 #include "mcrl2/pbes/pbes.h"
-#include "mcrl2/pbes/find.h"
 #include "mcrl2/pbes/rewriter.h"
 #include "mcrl2/pbes/replace.h"
 #include "mcrl2/pbes/remove_parameters.h"

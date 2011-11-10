@@ -26,7 +26,6 @@
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/list.h"
 #include "mcrl2/data/data_specification.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/multiple_possible_sorts.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/standard.h"
@@ -36,9 +35,9 @@
 #include "mcrl2/data/set.h"
 #include "mcrl2/data/real.h"
 #include "mcrl2/data/set_identifier_generator.h"
-#include "mcrl2/data/find.h"
 #include "mcrl2/data/detail/print_utility.h"
 #include "mcrl2/data/detail/data_expression_with_variables.h"
+#include "mcrl2/data/traverser.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2
@@ -46,9 +45,6 @@ namespace mcrl2
 
 namespace data
 {
-
-// forward declaration
-template <typename T> std::string pp(const T& t);
 
 namespace detail
 {
