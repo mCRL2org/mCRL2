@@ -7525,8 +7525,10 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_if_then(t))
       {
-        contains_if_then=true;
-        return true;
+        contains_if_then=true;   
+        return !options.add_delta; // If delta is added, c->p is translated into c->p<>delta,
+                                   // otherwise into c->p<>delta@0. In this last case the process
+                                   // contains time.
       }
 
       if (is_if_then_else(t))
@@ -7575,7 +7577,7 @@ class specification_basic_type:public boost::noncopyable
       if (visited.count(procId)==0)
       {
         visited.insert(procId);
-        bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then);
+        const bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then);
         static bool show_only_once=true;
         if (ct && options.add_delta && show_only_once)
         {

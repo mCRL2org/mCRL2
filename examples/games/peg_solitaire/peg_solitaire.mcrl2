@@ -75,10 +75,10 @@
 % We currently use the following commands to explore the state
 % space:
 %
-% mcrl22lps -n -D peg_solitaire.mcrl2 temps1.lps
+% mcrl22lps -n peg_solitaire.mcrl2 temps1.lps
 % lpssuminst temps1.lps temps2.lps
 % lpsrewr temps2.lps temps3.lps
-% lps2lts -vrjittyc -ftree -t -aready temps3.lps
+% lps2lts -vrjittyc -t -aready temps3.lps
 %
 % It is expected that the speed of state space generation will
 % increase a factor 10, after applying lpsstructelm to replace
