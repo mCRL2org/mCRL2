@@ -173,6 +173,10 @@ class next_state_generator
     /// \param filename The name of a file containing an mCRL2 specification
     void load(const std::string& filename)
     {
+      if (m_NextState)
+      {
+        delete m_NextState;
+      }
       m_specification.load(filename);
       m_specification.process().deadlock_summands().clear();
       lps::detail::instantiate_global_variables(m_specification);
@@ -185,8 +189,8 @@ class next_state_generator
     /// \param rewriter_strategy The rewriter strategy used for generating next states
     next_state_generator(const std::string& filename, data::rewriter::strategy rewriter_strategy = data::rewriter::jitty)
       : m_rewriter_strategy(rewriter_strategy),
-        m_rewriter(data::data_specification())
-        // m_enumerator(data::data_specification(), m_rewriter)
+        m_rewriter(data::data_specification()),
+        m_NextState(0)
     {
       load(filename);
     }
@@ -207,6 +211,15 @@ std::clog << lps::pp(lps_spec) << std::endl;
 std::clog << "--- rewrite rule selection function symbols ---\n";
 std::clog << core::detail::print_set(lps::find_function_symbols(lps_spec), data::stream_printer()) << std::endl;
 #endif
+    }
+
+    /// \brief Destructor
+    ~next_state_generator()
+    {
+      if (m_NextState)
+      {
+        delete m_NextState;
+      }
     }
 
     /// \brief Returns an iterator for generating the successors of the initial state.

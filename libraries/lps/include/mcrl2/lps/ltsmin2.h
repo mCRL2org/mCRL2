@@ -785,7 +785,7 @@ class pins
       ltsmin_state_type init = new int[process_parameter_count()];
       get_initial_state(init);
       out << "initial state = " << print_vector(init, init + process_parameter_count()) << std::endl;
-      delete init;
+      delete[] init;
 
       out << "\n--- DATA TYPE MAPS ---\n";
       out << "datatype_count() = " << datatype_count() << std::endl;
