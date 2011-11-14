@@ -79,7 +79,9 @@ multi_action parse_multi_action_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("MultAct");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return action_actions(parser_tables_mcrl2).parse_MultAct(node);
+  multi_action result = action_actions(parser_tables_mcrl2).parse_MultAct(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline

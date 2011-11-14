@@ -448,7 +448,9 @@ sort_expression parse_sort_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("SortExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return data_expression_actions(parser_tables_mcrl2).parse_SortExpr(node);
+  sort_expression result = data_expression_actions(parser_tables_mcrl2).parse_SortExpr(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline
@@ -459,7 +461,9 @@ variable_list parse_variables_new(const std::string& text)
   bool partial_parses = false;
   std::string var_text("var " + text);
   core::parse_node node = p.parse(var_text, start_symbol_index, partial_parses);
-  return data_specification_actions(parser_tables_mcrl2).parse_VarSpec(node);
+  variable_list result = data_specification_actions(parser_tables_mcrl2).parse_VarSpec(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline
@@ -469,7 +473,9 @@ data_expression parse_data_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("DataExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return data_expression_actions(parser_tables_mcrl2).parse_DataExpr(node);
+  data_expression result = data_expression_actions(parser_tables_mcrl2).parse_DataExpr(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline
@@ -479,7 +485,9 @@ data_specification parse_data_specification_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("DataSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return data_specification_actions(parser_tables_mcrl2).parse_DataSpec(node);
+  data_specification result = data_specification_actions(parser_tables_mcrl2).parse_DataSpec(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 /// \cond INTERNAL_DOCS

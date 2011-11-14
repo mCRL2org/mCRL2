@@ -170,6 +170,8 @@ struct parser
     return m_table.start_symbol_index(name);
   }
 
+  /// \brief Parses a string. N.B. The user is responsible for destruction of the returned
+  /// value by calling destroy_parse_node!!!
   parse_node parse(const std::string& text, unsigned int start_symbol_index = 0, bool partial_parses = false)
   {
     m_parser->start_state = start_symbol_index;
@@ -218,6 +220,11 @@ struct parser
         print_tree(node.child(i), level + 1);
       }
     }
+  }
+
+  void destroy_parse_node(const parse_node& node)
+  {
+    free_D_ParseNode(m_parser, node.node);
   }
 
   /// \brief Callback function for nodes in the parse tree

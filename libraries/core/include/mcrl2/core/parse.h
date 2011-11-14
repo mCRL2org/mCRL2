@@ -169,7 +169,9 @@ identifier_string parse_identifier(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("Id");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return default_parser_actions(parser_tables_mcrl2).parse_Id(node);
+  identifier_string result = default_parser_actions(parser_tables_mcrl2).parse_Id(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline

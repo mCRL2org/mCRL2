@@ -89,7 +89,9 @@ boolean_expression parse_boolean_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("BesExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return bes_actions(parser_tables_mcrl2).parse_BesExpr(node);
+  boolean_expression result = bes_actions(parser_tables_mcrl2).parse_BesExpr(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline
@@ -99,7 +101,9 @@ boolean_equation_system<> parse_boolean_equation_system_new(const std::string& t
   unsigned int start_symbol_index = p.start_symbol_index("BesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return bes_actions(parser_tables_mcrl2).parse_BesSpec(node);
+  boolean_equation_system<> result = bes_actions(parser_tables_mcrl2).parse_BesSpec(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 /// \brief Converts a pbes expression to a boolean expression.

@@ -118,7 +118,9 @@ action_rename_specification parse_action_rename_specification_new(const std::str
   unsigned int start_symbol_index = p.start_symbol_index("ActionRenameSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return action_rename_actions(parser_tables_mcrl2).parse_ActionRenameSpec(node);
+  action_rename_specification result = action_rename_actions(parser_tables_mcrl2).parse_ActionRenameSpec(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline

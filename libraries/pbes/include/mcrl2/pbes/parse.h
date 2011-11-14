@@ -114,7 +114,9 @@ pbes_expression parse_pbes_expression_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("PbesExpr");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
+  pbes_expression result = pbes_actions(parser_tables_mcrl2).parse_PbesExpr(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline
@@ -124,7 +126,9 @@ pbes<> parse_pbes_new(const std::string& text)
   unsigned int start_symbol_index = p.start_symbol_index("PbesSpec");
   bool partial_parses = false;
   core::parse_node node = p.parse(text, start_symbol_index, partial_parses);
-  return pbes_actions(parser_tables_mcrl2).parse_PbesSpec(node);
+  pbes<> result = pbes_actions(parser_tables_mcrl2).parse_PbesSpec(node);
+  p.destroy_parse_node(node);
+  return result;
 }
 
 inline
