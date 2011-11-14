@@ -92,14 +92,14 @@ void test_data_type(lps::pins_data_type& type)
   }
 }
 
-void test_ltsmin()
+void test_ltsmin(const std::string& rewriter_strategy)
 {
   // create an input file
   lps::specification spec = lps::linearise(lps::detail::ABP_SPECIFICATION());
   std::string abp_filename = "temporary_abp.lps";
   spec.save(abp_filename);
 
-  lps::pins p(abp_filename, "jitty");
+  lps::pins p(abp_filename, rewriter_strategy);
   std::size_t N = p.process_parameter_count();
 
   BOOST_CHECK(p.process_parameter_count() == 11);
@@ -171,7 +171,8 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
-  test_ltsmin();
+  test_ltsmin("jitty");
+  test_ltsmin("jittyc");
 
   return 0;
 }
