@@ -113,6 +113,18 @@ void test_search()
   lps::search_free_variable(spec.process().action_summands(), d);
 }
 
+void test_search_sort_expression()
+{
+  std::string text =
+    "act a: List(Bool);                   \n"
+    "proc X(x: List(Bool)) = a(x) . X(x); \n"
+    "init X([true]);                      \n"
+    ;
+  lps::specification spec = parse_linear_process_specification(text);
+  data::sort_expression s = data::parse_sort_expression("List(Bool)");
+  BOOST_CHECK(data::search_sort_expression(spec.data().sorts(), s));
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv);
@@ -120,6 +132,7 @@ int test_main(int argc, char* argv[])
   test_find();
   test_free_variables();
   test_search();
+  test_search_sort_expression();
 
   return EXIT_SUCCESS;
 }
