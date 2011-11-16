@@ -62,7 +62,7 @@ class classic_enumerator
 
   protected:
     const detail::legacy_rewriter                                m_evaluator;     // Only here for conversion trick
-    detail::EnumeratorStandard*                                  m_enumerator;    // The real enumeration is done in an EnumeratorStandard
+    detail::EnumeratorStandard                                   m_enumerator;    // The real enumeration is done in an EnumeratorStandard
                                                                                   // class.
 
   public:
@@ -123,7 +123,7 @@ class classic_enumerator
                                                               condition,
                                                               sigma,
                                                               not_equal_to_false,
-                                                              m_enclosing_enumerator->m_enumerator,
+                                                              &(m_enclosing_enumerator->m_enumerator),
                                                               max_internal_variables));
             m_assignments.protect();
             increment();
@@ -317,7 +317,7 @@ class classic_enumerator
                       m_enclosing_enumerator->m_evaluator.convert_to(condition),
                       internal_sigma,
                       not_equal_to_false,
-                      m_enclosing_enumerator->m_enumerator,
+                      &(m_enclosing_enumerator->m_enumerator),
                       max_internal_variables)
         {
           /* for (substitution_type::const_iterator i=substitution.begin(); i!=substitution.end(); ++i)
@@ -451,7 +451,7 @@ class classic_enumerator
     classic_enumerator(const data_specification &specification,
                        const evaluator_type &evaluator):
       m_evaluator(evaluator),
-      m_enumerator(new detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter()))
+      m_enumerator(detail::EnumeratorStandard(specification, &m_evaluator.get_rewriter()))
     {
     }
 
