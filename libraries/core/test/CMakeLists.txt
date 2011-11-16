@@ -30,7 +30,7 @@ foreach( OBJ ${TERM_OBJS} )
   add_executable("${PREFIX}_${result}" EXCLUDE_FROM_ALL "${OBJ}" )
   target_link_libraries("${PREFIX}_${result}"
      mcrl2_core
-     mcrl2_data
+#     mcrl2_data This should not be needed!
      mcrl2_syntax
      dparser
   )
