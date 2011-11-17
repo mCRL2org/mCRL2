@@ -46,7 +46,7 @@ data::sort_expression parse_sort_expression(const std::string& de_in)
   try {
     result = data::parse_sort_expression_new(de_in);
 #ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
-    std::string de_out = data::pp(result);
+    std::string de_out = core::pp_deprecated(result);
     if (de_in != de_out)
     {
       std::clog << "aterm : " << result << std::endl;
@@ -70,7 +70,7 @@ data::data_expression parse_data_expression(const std::string& de_in)
   try {
     result = data::parse_data_expression_new(de_in);
 #ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
-    std::string de_out = data::pp(result);
+    std::string de_out = core::pp_deprecated(result);
     if (de_in != de_out)
     {
       std::clog << "aterm : " << result << std::endl;
@@ -94,7 +94,7 @@ data::data_specification parse_data_specification(const std::string& de_in, bool
   try {
     result = data::parse_data_specification_new(de_in);
 #ifdef MCRL2_ENABLE_TYPECHECK_PP_TESTS
-    std::string de_out = data::pp(result);
+    std::string de_out = core::pp_deprecated(result);
     if (de_in != de_out)
     {
       std::clog << "aterm : " << data::detail::data_specification_to_aterm_data_spec(result) << std::endl;
@@ -127,7 +127,7 @@ void test_data_expression(const std::string& de_in,
             << "  expect success: " << (expect_success?("yes"):("no")) << std::endl
             << "  expected type: " << expected_sort << std::endl;
 
-  data::data_expression x = parse_data_expression(de_in);
+  data::data_expression x(parse_data_expression(de_in));
 
   if (test_type_checker)
   {
@@ -140,9 +140,9 @@ void test_data_expression(const std::string& de_in,
       // If exception was thrown, x is data_expression()
       if (x != data::data_expression())
       {
-        //std::string de_out = core::pp_deprecated((ATerm) de_aterm);
+        std::string de_out = core::pp_deprecated((ATerm) de_aterm);
         //std::clog << "The following data expressions should be the same:" << std::endl << "  " << de_in  << std::endl << "  " << de_out << std::endl;
-        //BOOST_CHECK_EQUAL(de_in, de_out);
+        BOOST_CHECK_EQUAL(de_in, de_out);
         // TODO: this check should be uncommented
         //BOOST_CHECK(!search_sort_expression(x.sort(), data::unknown_sort()));
         if (expected_sort != "")
@@ -830,7 +830,7 @@ BOOST_AUTO_TEST_CASE(test_recursive_struct_list_indirect)
   );
 }
 
-BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this.
+BOOST_AUTO_TEST_CASE(test_alias_loop) // Expected to fail, but the type checker does not detect this. 
 {
   test_data_specification(
     "sort B = List(struct f(B));\n",
@@ -867,15 +867,16 @@ void test_data_expression_in_specification_context(const std::string& de_in,
     //
   }
 
-  data::data_expression de = parse_data_expression(de_in);
+  data::data_expression de(parse_data_expression(de_in));
 
   if (test_type_checker)
   {
     if (expect_success)
     {
       data::type_check(de, begin, end, ds);
+      atermpp::aterm de_aterm = de;
 
-      std::string de_out = mcrl2::data::pp(de);
+      std::string de_out = core::pp_deprecated((ATerm) de_aterm);
 
       BOOST_CHECK_EQUAL(de_in, de_out);
       if (expected_sort != "")

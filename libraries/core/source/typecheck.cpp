@@ -31,7 +31,6 @@
 #include "mcrl2/data/standard.h"
 #include "mcrl2/data/standard_utility.h"
 #include "mcrl2/data/find.h"
-#include "mcrl2/data/print.h"
 #include "mcrl2/data/unknown_sort.h"
 #include "mcrl2/data/multiple_possible_sorts.h"
 #include "mcrl2/data/function_update.h"
