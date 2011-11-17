@@ -40,7 +40,7 @@ class lpspp_tool: public input_output_tool
               "Print the mCRL2 LPS in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      m_format(ppDefault)
+      m_format(print_default)
     {}
 
     bool run()
@@ -54,7 +54,7 @@ class lpspp_tool: public input_output_tool
     }
 
   protected:
-    t_pp_format m_format;
+    print_format_type m_format;
     bool m_print_summand_numbers;
 
     void add_options(interface_description& desc)
@@ -75,7 +75,7 @@ class lpspp_tool: public input_output_tool
         std::string str_format(parser.option_argument("format"));
         if (str_format == "internal")
         {
-          m_format = ppInternal;
+          m_format = print_internal;
         }
         else if (str_format != "default")
         {

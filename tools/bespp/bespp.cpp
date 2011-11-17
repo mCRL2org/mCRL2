@@ -46,7 +46,7 @@ class bespp_tool: public bes_input_tool<input_output_tool>
               "Print the BES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      format(ppDefault)
+      format(print_default)
     {}
 
     bool run()
@@ -56,7 +56,7 @@ class bespp_tool: public bes_input_tool<input_output_tool>
     }
 
   protected:
-    t_pp_format  format;
+    print_format_type  format;
 
     void add_options(interface_description& desc)
     {
@@ -89,14 +89,14 @@ class bespp_tool: public bes_input_tool<input_output_tool>
                         << " to " << (output_filename().empty()?"standard output":output_filename())
                         << " in the " << pp_format_to_string(format) << " format";
 
-      if (format != ppDefault)
+      if (format != print_default)
       {
         throw mcrl2::runtime_error("Pretty printing in " + pp_format_to_string(format) + " format is currently not supported");
       }
 
       if (output_filename().empty())
       {
-        if (format == ppDefault)
+        if (format == print_default)
         {
           std::cout << bes::pp(bes);
         }
@@ -111,7 +111,7 @@ class bespp_tool: public bes_input_tool<input_output_tool>
         std::ofstream output_stream(output_filename().c_str());
         if (output_stream.is_open())
         {
-          if (format == ppDefault)
+          if (format == print_default)
           {
             output_stream << bes::pp(bes);
           }

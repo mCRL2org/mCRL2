@@ -43,7 +43,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
               "Print the PBES in INFILE to OUTFILE in a human readable format. If OUTFILE "
               "is not present, stdout is used. If INFILE is not present, stdin is used."
              ),
-      format(core::ppDefault)
+      format(core::print_default)
     {}
 
     bool run()
@@ -57,7 +57,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
     }
 
   protected:
-    core::t_pp_format  format;
+    core::print_format_type  format;
 
     void add_options(interface_description& desc)
     {
@@ -76,7 +76,7 @@ class pbespp_tool: public pbes_input_tool<input_output_tool>
         std::string str_format(parser.option_argument("format"));
         if (str_format == "internal")
         {
-          format = core::ppInternal;
+          format = core::print_internal;
         }
         else if (str_format != "default")
         {

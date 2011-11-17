@@ -202,7 +202,7 @@ void pbesparelm(const std::string& input_filename,
 void pbespp(const std::string& input_filename,
             const std::string& output_filename,
             pbes_file_format pbes_input_format,
-            core::t_pp_format format
+            core::print_format_type format
            )
 {
   pbes_system::pbes<> p;
@@ -215,7 +215,7 @@ void pbespp(const std::string& input_filename,
 
   if (output_filename.empty())
   {
-    if (format == core::ppInternal)
+    if (format == core::print_internal)
     {
       std::cout << pbes_system::pbes_to_aterm(p);
     }
@@ -229,7 +229,7 @@ void pbespp(const std::string& input_filename,
     std::ofstream out(output_filename.c_str());
     if (out)
     {
-      if (format == core::ppInternal)
+      if (format == core::print_internal)
       {
         out << pbes_system::pbes_to_aterm(p);
       }

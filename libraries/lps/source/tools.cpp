@@ -82,7 +82,7 @@ void lpsparelm(const std::string& input_filename,
 void lpspp(const std::string& input_filename,
            const std::string& output_filename,
            bool print_summand_numbers,
-           core::t_pp_format format
+           core::print_format_type format
           )
 {
   lps::specification spec;
@@ -94,7 +94,7 @@ void lpspp(const std::string& input_filename,
                     << " in the " << core::pp_format_to_string(format) << " format" << std::endl;
 
   std::string text;
-  if (format == core::ppInternal)
+  if (format == core::print_internal)
   {
   	text = specification_to_aterm(spec).to_string();
   }

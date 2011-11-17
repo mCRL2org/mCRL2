@@ -71,7 +71,7 @@ void pbespareqelm(const std::string& input_filename,
 void pbespp(const std::string& input_filename,
             const std::string& output_filename,
             pbes_file_format pbes_input_format,
-            core::t_pp_format format
+            core::print_format_type format
            );
 
 void txt2pbes(const std::string& input_filename,

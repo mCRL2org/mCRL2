@@ -27,6 +27,7 @@
 #include "mcrl2/atermpp/set.h"
 #include "mcrl2/core/traverser.h"
 #include "mcrl2/core/detail/precedence.h"
+#include "mcrl2/core/print_format.h"
 #include "mcrl2/exception.h"
 
 namespace mcrl2
@@ -35,28 +36,6 @@ namespace core
 {
 
 using namespace core::detail::precedences;
-
-/// \brief t_pp_format represents the available pretty print formats
-typedef enum { ppDefault, ppInternal } t_pp_format;
-
-/// \brief Print string representation of pretty print format
-/// \param pp_format a pretty print format
-/// \return string representation of the pretty print format
-/// \throws mcrl2::runtime error if an unknown pretty print format
-///         is passed into the function.
-inline
-std::string pp_format_to_string(const t_pp_format pp_format)
-{
-  switch (pp_format)
-  {
-    case ppDefault:
-      return "default";
-    case ppInternal:
-      return "internal";
-    default:
-      throw mcrl2::runtime_error("Unknown pretty print format");
-  }
-}
 
 /// \cond INTERNAL_DOCS
 namespace detail
