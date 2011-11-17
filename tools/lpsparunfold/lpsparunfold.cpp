@@ -28,6 +28,7 @@
 
 //DATA
 #include "mcrl2/data/data_specification.h"
+#include "mcrl2/data/parse.h"
 
 //LPSPARUNFOLDLIB
 #include "lpsparunfoldlib.h"
@@ -172,7 +173,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
         {
           m_set_index.clear();
 
-          mcrl2::data::basic_sort b_sort(m_unfoldsort);
+          data::sort_expression b_sort = mcrl2::data::parse_sort_expression( m_unfoldsort );
           mcrl2::data::sort_expression sort = normalize_sorts(b_sort, lps_specification.data());
 
 
