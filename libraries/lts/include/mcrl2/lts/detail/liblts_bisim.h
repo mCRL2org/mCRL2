@@ -48,7 +48,14 @@ size_t determine_tau_label(const LTS_TYPE& l)
       break;
     }
   }
-  mCRL2log(mcrl2::log::debug) << "Using <" << pp(l.action_label(tau_label)) << "> as tau label.\n";
+  if (tau_label==l.num_action_labels())
+  {
+    mCRL2log(mcrl2::log::debug) << "Note that there is no tau action\n";
+  }
+  else
+  {
+    mCRL2log(mcrl2::log::debug) << "Using <" << pp(l.action_label(tau_label)) << "> as tau label.\n";
+  }
   return tau_label;
 }
 
