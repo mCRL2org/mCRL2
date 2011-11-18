@@ -7526,10 +7526,18 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_if_then(t))
       {
+        // If delta is added, c->p is translated into c->p<>delta,
+        // otherwise into c->p<>delta@0. In this last case the process
+        // contains time.
         contains_if_then=true;
-        return !options.add_delta; // If delta is added, c->p is translated into c->p<>delta,
-                                   // otherwise into c->p<>delta@0. In this last case the process
-                                   // contains time.
+        if (options.add_delta)     
+        { 
+          return containstimebody(if_then(t).then_case(),stable,visited,allowrecursion,contains_if_then);
+        }
+        else 
+        {
+          return true;
+        }
       }
 
       if (is_if_then_else(t))
@@ -7578,7 +7586,7 @@ class specification_basic_type:public boost::noncopyable
       if (visited.count(procId)==0)
       {
         visited.insert(procId);
-        const bool ct=containstimebody(objectdata[n].processbody,stable,visited,1,contains_if_then);
+        const bool ct=containstimebody(objectdata[n].processbody,stable,visited,true,contains_if_then);
         static bool show_only_once=true;
         if (ct && options.add_delta && show_only_once)
         {
@@ -8043,14 +8051,8 @@ class specification_basic_type:public boost::noncopyable
       determine_process_status(init,mCRL);
       determinewhetherprocessescanterminate(init);
       const process_identifier init1=splitmCRLandpCRLprocsAndAddTerminatedAction(init);
-      if (options.add_delta)
-      {
-        /* Warn if a process contains time */
-        determinewhetherprocessescontaintime(init1);
-      }
+      determinewhetherprocessescontaintime(init1);
 
-        /* mCRL2log(log::warning) << "Warning: specification contains time due to translating c->p to c->p<>delta@0. The current linearisation run does not preserve timing information. Use -T, or --timed to preserving time information. " << std::endl;
-        */
       atermpp::vector <process_identifier> pcrlprocesslist;
       collectPcrlProcesses(init1,pcrlprocesslist);
       if (pcrlprocesslist.size()==0)
