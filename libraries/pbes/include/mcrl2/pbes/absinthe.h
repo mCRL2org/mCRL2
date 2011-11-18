@@ -200,9 +200,7 @@ struct absinthe_algorithm
       {
         return i->second;
       }
-      // TODO: should this check be removed?
-      //throw mcrl2::runtime_error("function symbol " + print_symbol(x) + " not present in the function symbol mapping!");
-      std::cerr << "WARNING: function symbol " << print_symbol(x) << " is not present in the function symbol mapping!" << std::endl;
+      throw mcrl2::runtime_error("function symbol " + print_symbol(x) + " not present in the function symbol mapping!");
       return data::data_expression();
     }
 
@@ -257,25 +255,21 @@ struct absinthe_algorithm
 
     data::data_expression lift(const data::data_expression& x)
     {
-mCRL2log(log::debug, "absinthe") << "visiting data expression " << data::pp(x) << " " << x << std::endl;
       return absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(x);
     }
 
     data::data_expression_list lift(const data::data_expression_list& x)
     {
-mCRL2log(log::debug, "absinthe") << "visiting data expression list " << data::pp(x) << " " << x << std::endl;
       return absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(x);
     }
 
     data::variable_list lift(const data::variable_list& x)
     {
-mCRL2log(log::debug, "absinthe") << "visiting variable list " << data::pp(x) << " " << x << std::endl;
       return absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(x);
     }
 
     pbes_system::propositional_variable lift(const pbes_system::propositional_variable& x)
     {
-mCRL2log(log::debug, "absinthe") << "visiting prop var " << data::pp(x) << " " << x << std::endl;
       return absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(x);
     }
 
@@ -499,6 +493,7 @@ mCRL2log(log::debug, "absinthe") << "visiting prop var " << data::pp(x) << " " <
       unprintable["&&"] = "and";
       unprintable["!"] = "not";
       unprintable["#"] = "len";
+      unprintable["."] = "element_at";
       unprintable["+"] = "plus";
       unprintable["-"] = "minus";
       unprintable[">"] = "greater";
@@ -651,10 +646,12 @@ mCRL2log(log::debug, "absinthe") << "visiting prop var " << data::pp(x) << " " <
         //   f2:   generated_emptylist : List(AbsNat)
         //  eqn:   generated_emptylist = []                    met [] : List(AbsNat)
         // tail: List(AbsNat) -> List(Nat)
-        sort_expression_substitution_map::const_iterator i = sigmaS.find(s1);
-        if (i != sigmaS.end())
-        {
-        }
+        lhs = f2;
+        rhs = f1;
+        //sort_expression_substitution_map::const_iterator i = sigmaS.find(s1);
+        //if (i != sigmaS.end())
+        //{
+        //}
       }
       else
       {
@@ -731,9 +728,11 @@ mCRL2log(log::debug, "absinthe") << "visiting prop var " << data::pp(x) << " " <
         data::data_expression body = data::sort_bool::and_(enumerate_domain(x, X), data::detail::create_set_in(y, Y));
         rhs = data::detail::create_set_comprehension(y, data::exists(x, body));
       }
-//      else if (data::is_container_sort(s2))
-//      {
-//      }
+      else if (data::is_container_sort(s2))
+      {
+        lhs = f3;
+        rhs = data::detail::create_finite_set(f2);
+      }
       else
       {
         throw mcrl2::runtime_error("absinthe algorithm (lift_equation_2_3): unsupported sort " + print_term(s2) + " detected!");
@@ -810,17 +809,33 @@ mCRL2log(log::debug, "absinthe") << "visiting prop var " << data::pp(x) << " " <
 
     // add lifted versions of used function symbols that are not specified by the user to sigmaF, and adds them to the data specification as well
     std::set<data::function_symbol> used_function_symbols = pbes_system::find_function_symbols(p);
+
+    // add List containers for user defined sorts, since they are used in the translation
+    const data::sort_expression_vector& sorts = dataspec.user_defined_sorts();
+    for (data::sort_expression_vector::const_iterator i = sorts.begin(); i != sorts.end(); ++i)
+    {
+      data::sort_expression s = data::container_sort(data::list_container(), *i);
+      dataspec.add_context_sort(s);
+    }
+
+    // add List containers of left hand sides of sigmaA to used_function_symbols
+    for (abstraction_map::const_iterator i = sigmaA.begin(); i != sigmaA.end(); ++i)
+    {
+      data::sort_expression s = data::container_sort(data::list_container(), i->first);
+      dataspec.add_context_sort(s);
+      function_symbol_vector list_constructors = dataspec.constructors(s);
+      for (function_symbol_vector::iterator j = list_constructors.begin(); j != list_constructors.end(); ++j)
+      {
+        used_function_symbols.insert(*j);
+      }
+    }
+
     for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
     {
       mCRL2log(log::debug, "absinthe") << "lifting function symbol: " << data::pp(*i) << std::endl;
       data::function_symbol f1 = *i;
       if (sigmaF.find(f1) == sigmaF.end())
       {
-        if (data::is_container_sort(f1.sort()))
-        {
-          // We don't need to lift container sorts that were not explicitly specified by the user
-          break;
-        }
         data::function_symbol f2 = lift_function_symbol_1_2(sigmaA, sigmaS, sigmaF)(f1); // sigmaS is not applied, but only used for checking
         mCRL2log(log::debug, "absinthe") << "lifted function symbol: " << data::pp(f1) << " to " << data::pp(f2) << std::endl;
         check_consistency(f1, f2, sigmaS_consistency);
@@ -956,7 +971,6 @@ mCRL2log(log::debug, "absinthe") << "visiting prop var " << data::pp(x) << " " <
     mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping after lifting ---\n" << print_mapping(sigmaF) << std::endl;
 
     mCRL2log(log::debug, "absinthe") << "--- pbes before ---\n" << pbes_system::pp(p) << std::endl;
-    mCRL2log(log::debug, "absinthe") << "--- pbes before ---\n" << pbes_system::pbes_to_aterm(p) << std::endl;
 
     p.data() = data_spec;
 
