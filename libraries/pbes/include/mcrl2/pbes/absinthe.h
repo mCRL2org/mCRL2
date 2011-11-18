@@ -539,9 +539,8 @@ mCRL2log(log::debug, "absinthe") << "visiting prop var " << data::pp(x) << " " <
       data::sort_expression s = f.sort();
       if (data::is_basic_sort(s))
       {
-        // TODO: klopt het om hier sigmaS niet toe te passen?
-        check_sort(f, s);
-        return data::function_symbol(name, s);
+        data::sort_expression s1 = absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(s);
+        return data::function_symbol(name, s1);
       }
       else if (data::is_function_sort(s))
       {
@@ -550,13 +549,13 @@ mCRL2log(log::debug, "absinthe") << "visiting prop var " << data::pp(x) << " " <
         //   result:   generated_tail: List(AbsNat) -> Set(List(AbsNat))
         data::function_sort fs = absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(s);
 
-        // check the sorts
-        data::sort_expression_list domain = fs.domain();
-        for (data::sort_expression_list::iterator i = domain.begin(); i != domain.end(); ++i)
-        {
-          check_sort(f, *i);
-        }
-        check_sort(f, fs.codomain());
+        // TODO: do these checks still make sense?
+        // data::sort_expression_list domain = fs.domain();
+        // for (data::sort_expression_list::iterator i = domain.begin(); i != domain.end(); ++i)
+        // {
+        //   check_sort(f, *i);
+        // }
+        // check_sort(f, fs.codomain());
 
         return data::function_symbol(name, data::function_sort(fs.domain(), make_set()(fs.codomain())));
       }
