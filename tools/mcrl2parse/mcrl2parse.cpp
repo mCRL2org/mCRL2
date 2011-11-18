@@ -263,6 +263,7 @@ class mcrl2parse_tool : public input_tool
       statefrm_e
     } file_type_t;
 
+    std::string text;
     file_type_t file_type;
     bool partial_parses;
     bool print_tree;
@@ -294,6 +295,11 @@ class mcrl2parse_tool : public input_tool
     void add_options(interface_description& desc)
     {
       super::add_options(desc);
+      desc.add_option("expression",
+           make_optional_argument("EXPR", ""),
+             "parse EXPR instead of a file",
+             'e'
+           );
       desc.add_option("filetype",
            make_optional_argument("NAME", "mcrl2spec"),
              "input has the file type NAME:\n"
@@ -336,6 +342,7 @@ class mcrl2parse_tool : public input_tool
       check_parser   = 0 < parser.options.count("check-parser");
       check_printer  = 0 < parser.options.count("check-printer");
       aterm_format   = 0 < parser.options.count("aterm-format");
+      text = parser.option_argument("expression");
     }
 
     std::string read_text(std::istream& from)
@@ -361,15 +368,17 @@ class mcrl2parse_tool : public input_tool
 
     bool run()
     {
-      std::string text;
-      if (input_filename().empty())
+      if (text.empty())
       {
-        text = read_text(std::cin);
-      }
-      else
-      {
-        std::ifstream from(input_filename().c_str());
-        text = read_text(from);
+        if (input_filename().empty())
+        {
+          text = read_text(std::cin);
+        }
+        else
+        {
+          std::ifstream from(input_filename().c_str());
+          text = read_text(from);
+        }
       }
 
       data::data_specification dataspec;
