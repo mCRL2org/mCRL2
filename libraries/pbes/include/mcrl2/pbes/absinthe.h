@@ -185,7 +185,6 @@ struct absinthe_algorithm
 
     data::sort_expression operator()(const data::sort_expression& x)
     {
-mCRL2log(log::debug, "absinthe") << "visiting sort " << data::pp(x) << " " << x << std::endl;
       sort_expression_substitution_map::const_iterator i = sigmaS.find(x);
       if (i != sigmaS.end())
       {
@@ -214,7 +213,7 @@ mCRL2log(log::debug, "absinthe") << "visiting sort " << data::pp(x) << " " << x 
       if (i != sigmaA.end() && data::find_variables(x).empty())
       {
         data::data_expression_list args = atermpp::make_list(x);
-        return data::application(i->second, args);
+        return data::detail::create_finite_set(data::application(i->second, args));
       }
 
       // first apply the sort and function symbol transformations
