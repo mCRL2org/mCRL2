@@ -103,14 +103,3 @@ if(BUILD_SHARED_LIBS)
       set(BUILD_SHARED_LIBS_OPTION "-fPIC")
     endif( CXX_ACCEPTS_FPIC AND C_ACCEPTS_FPIC )
 endif(BUILD_SHARED_LIBS)
-
-## --------------------------------------------------
-## Set Aterm Flags for compiling rewriters
-## --------------------------------------------------
-
-if (CMAKE_SIZEOF_VOID_P MATCHES "8")
-  add_definitions("-DAT_64BIT")
-  set(ATERM_FLAGS "-m64 -DAT_64BIT")
-else(CMAKE_SIZEOF_VOID_P MATCHES "8")
-  set(ATERM_FLAGS "-m32")
-endif (CMAKE_SIZEOF_VOID_P MATCHES "8")

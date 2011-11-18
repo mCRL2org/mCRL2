@@ -307,7 +307,7 @@ void MainFrame::onQuit(wxCommandEvent&)
 void MainFrame::onClose(wxCloseEvent&)
 {
   app->getAlgorithm(0)->stop();
-  Close(true);
+  Destroy();
 }
 
 GLCanvas* MainFrame::getGLCanvas()

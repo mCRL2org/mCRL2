@@ -30,6 +30,9 @@
 #include "mcrl2/data/pos.h"
 #include "mcrl2/data/nat.h"
 
+// Workaround for OS X with Apples patched gcc 4.0.1
+#undef nil
+
 namespace mcrl2 {
 
   namespace data {
