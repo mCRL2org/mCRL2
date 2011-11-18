@@ -181,7 +181,7 @@ ProcExpr
   | DataExprUnit '->' ProcExpr                  $unary_right  4
   | DataExprUnit IfThen ProcExpr                $unary_right  4
   | ProcExpr '<<'  ProcExpr                     $binary_left  5
-  | ProcExpr '.'   ProcExpr                     $binary_left 6
+  | ProcExpr '.'   ProcExpr                     $binary_right 6
   | ProcExpr '@' DataExprUnit                   $binary_left  7
   | ProcExpr '|'   ProcExpr                     $binary_right 8
   ;
@@ -203,7 +203,7 @@ ProcExprNoIf
   | ProcExprNoIf '||_' ProcExprNoIf             $binary_right 3
   | DataExprUnit IfThen ProcExprNoIf            $unary_right  4
   | ProcExprNoIf '<<'  ProcExprNoIf             $binary_left  5
-  | ProcExprNoIf '.'   ProcExprNoIf             $binary_left 6
+  | ProcExprNoIf '.'   ProcExprNoIf             $binary_right 6
   | ProcExprNoIf '@' DataExprUnit               $binary_left  7
   | ProcExprNoIf '|'   ProcExprNoIf             $binary_right 8
   ;
