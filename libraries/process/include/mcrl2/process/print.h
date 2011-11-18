@@ -177,8 +177,11 @@ struct printer: public process::add_traverser_sort_expressions<lps::detail::prin
   {
     derived().enter(x);
     derived()(x.action_name());
-    derived().print(" -> ");
-    derived()(x.name());
+    if (!data::is_nil(x.name()))
+    {
+      derived().print(" -> ");
+      derived()(x.name());
+    }
     derived().leave(x);
   }
 

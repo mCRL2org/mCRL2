@@ -58,9 +58,12 @@ struct process_actions: public lps::action_actions
   {
     // TODO: get rid of this 'nil'
     core::identifier_string result = core::detail::gsMakeNil();
-    if (node.child(1))
+    if (node)
     {
-      result = parse_Id(node.child(1));
+      if (symbol_name(node.child(1).child(0)) == "Id")
+      {
+        result = parse_Id(node.child(1).child(0));
+      }
     }
     return result;
   }
