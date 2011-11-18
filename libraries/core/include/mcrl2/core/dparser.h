@@ -17,6 +17,7 @@
 #include <iomanip>
 #include <set>
 #include <string>
+#include <sstream>
 #include <vector>
 #include "dparse.h"
 #include "mcrl2/exception.h"
@@ -58,6 +59,18 @@ struct parse_node
   std::string string() const
   {
     return std::string(node->start_loc.s, node->end - node->start_loc.s);
+  }
+
+  std::string tree() const
+  {
+    if (child_count() < 2)
+      return this->string();
+    std::stringstream result;
+    result << "(" << child(0).tree();
+    for (int i = 1; i < child_count(); ++i)
+      result << " " << child(i).tree();
+    result << ")";
+    return result.str();
   }
 
   operator bool() const
@@ -149,10 +162,10 @@ struct parser
     m_parser->save_parse_tree = 1;
     m_parser->initial_scope = NULL;
     m_parser->dont_use_greediness_for_disambiguation = 1;
-//    if (ambiguity_fn)
-//    {
-//      m_parser->ambiguity_fn = ambiguity_fn;
-//    }
+    if (ambiguity_fn)
+    {
+      m_parser->ambiguity_fn = ambiguity_fn;
+    }
   }
 
   ~parser()

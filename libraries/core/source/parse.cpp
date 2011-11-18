@@ -10,6 +10,8 @@
 
 #include "mcrl2/core/detail/dparser_ambiguity.h"
 #include "mcrl2/exception.h"
+#include "mcrl2/utilities/logger.h" 
+#include <sstream>
 
 extern "C"
 {
@@ -22,37 +24,14 @@ namespace core {
 
 namespace detail {
 
-/// \brief Function for resolving ambiguities in the '_ -> _ <> _' operator for
-/// process expressions.
+/// \brief Function for resolving parser ambiguities.
 struct D_ParseNode* ambiguity_fn(struct D_Parser *p, int n, struct D_ParseNode **v)
 {
-  core::parser_table table(parser_tables_mcrl2);
-  // Resolve ambiguity (* is the correct alternative):
-  //    ProcExpr(a, IfThen('->', ProcExpr(b, '->', c), '<>'), d))
-  //  * ProcExpr(a, '->', ProcExpr(b, IfThen('->', c, '<>'), d))
-  //
-  // We do this by seeing if we have 2 alternatives. If this is the case, and
-  // both alternatives are procexpr, then we discard an alternative if it is
-  // of the form ProcExpr(a, IfThen, b); this is valid, because apparently there
-  // is an alternative where the IfThen occurs deeper in the tree (the '<>'
-  // symbol guarantees this).
-  if (n == 2)
+  // Print all ambiguities on the debug output, then throw an exception.
+  for (int i = 0; i < n; ++i)
   {
-    core::parse_node v0(v[0]);
-    core::parse_node v1(v[1]);
-    if (table.symbol_name(v0) == "ProcExpr" &&
-        table.symbol_name(v1) == "ProcExpr" &&
-        v0.child_count() == 3 &&
-        v1.child_count() == 3)
-    {
-      if (table.symbol_name(v0.child(1)) == "IfThen")
-        return v1.node;
-      else
-        return v0.node;
-    }
+    mCRL2log(log::debug, "parser") << "Ambiguity: " << core::parse_node(v[i]).tree() << std::endl;
   }
-  // If the ambiguity has not been resolved now, then we simply don't know which
-  // to choose, so we throw an error.
   throw mcrl2::runtime_error("Unresolved ambiguity.");
 }
 
