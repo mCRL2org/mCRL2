@@ -186,7 +186,29 @@ ProcExpr
   | ProcExpr '|'   ProcExpr                     $binary_right 8
   ;
 
-IfThen: '->' ProcExpr '<>' $left 0 ;
+ProcExprNoIf
+  : Action
+  | Id '(' AssignmentList? ')'
+  | 'delta'
+  | 'tau'
+  | 'block' '(' ActIdSet ',' ProcExpr ')'
+  | 'allow' '(' MultActIdSet ',' ProcExpr ')'
+  | 'hide' '(' ActIdSet ',' ProcExpr ')'
+  | 'rename' '(' RenExprSet ',' ProcExpr ')'
+  | 'comm' '(' CommExprSet ',' ProcExpr ')'
+  | '(' ProcExpr ')'
+  | ProcExprNoIf '+'   ProcExprNoIf             $binary_left  1
+  | 'sum' VarsDeclList '.' ProcExprNoIf         $unary_right  2
+  | ProcExprNoIf '||'  ProcExprNoIf             $binary_right 3
+  | ProcExprNoIf '||_' ProcExprNoIf             $binary_right 3
+  | DataExprUnit IfThen ProcExprNoIf            $unary_right  4
+  | ProcExprNoIf '<<'  ProcExprNoIf             $binary_left  5
+  | ProcExprNoIf '.'   ProcExprNoIf             $binary_left 6
+  | ProcExprNoIf '@' DataExprUnit               $binary_left  7
+  | ProcExprNoIf '|'   ProcExprNoIf             $binary_right 8
+  ;
+
+IfThen: '->' ProcExprNoIf '<>' $left 0 ;
 
 //--- Actions
 

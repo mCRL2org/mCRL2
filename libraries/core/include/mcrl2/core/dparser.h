@@ -149,10 +149,10 @@ struct parser
     m_parser->save_parse_tree = 1;
     m_parser->initial_scope = NULL;
     m_parser->dont_use_greediness_for_disambiguation = 1;
-    if (ambiguity_fn)
-    {
-      m_parser->ambiguity_fn = ambiguity_fn;
-    }
+//    if (ambiguity_fn)
+//    {
+//      m_parser->ambiguity_fn = ambiguity_fn;
+//    }
   }
 
   ~parser()
