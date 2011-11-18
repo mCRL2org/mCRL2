@@ -1,0 +1,11 @@
+mcrl22lps -fDnw ../bakery.mcrl2 |lpsconstelm | lpsparelm > ../bakery.lps
+lps2pbes -f mutual_exclusion.mcf ../bakery.lps | pbesrewr -pquantifier-finite | pbesconstelm | pbesparelm | pbesrewr -psimplify > bakery.mutual_exclusion.pbes
+echo -ne 'Answer by under-approximation: '
+pbesabsinthe -sunder -a../aggressive_abstraction.txt bakery.mutual_exclusion.pbes bakery.mutual_exclusion.absinthe.pbes
+pbes2bool bakery.mutual_exclusion.absinthe.pbes
+echo -ne 'Answer by over-approximation: '
+pbesabsinthe -sover -a../aggressive_abstraction.txt bakery.mutual_exclusion.pbes bakery.mutual_exclusion.absinthe.pbes
+pbes2bool bakery.mutual_exclusion.absinthe.pbes
+rm *.pbes
+rm ../*.lps
+

@@ -1,0 +1,4 @@
+% All processes requesting a number inevitably enter the critical section.
+% Described in "A Checker for Modal Formulas on Processed with Data",
+% J.F. Groote and T.A.C. Willemse
+nu X.([true]X && forall b:Bool.[request(b)] mu Y.(([true]Y && <true>true) || <enter(b)>true))

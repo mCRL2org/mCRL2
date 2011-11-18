@@ -1,0 +1,11 @@
+mcrl22lps -fDnw ../bakery.mcrl2 |lpsconstelm | lpsparelm > ../bakery.lps
+lps2pbes -f request_must_eventually_enter.mcf ../bakery.lps | pbesrewr -psimplify | pbesconstelm | pbesparelm  > bakery.request_must_eventually_enter.pbes
+echo -ne 'Answer by under-approximation: '
+pbesabsinthe -sunder -a../abstraction.txt bakery.request_must_eventually_enter.pbes bakery.request_must_eventually_enter.absinthe.pbes
+pbes2bool -s3 bakery.request_must_eventually_enter.absinthe.pbes
+echo -ne 'Answer by over-approximation: '
+pbesabsinthe -sover -a../abstraction.txt bakery.request_must_eventually_enter.pbes bakery.request_must_eventually_enter.absinthe.pbes
+pbes2bool -s3 bakery.request_must_eventually_enter.absinthe.pbes
+rm *.pbes
+rm ../*.lps
+

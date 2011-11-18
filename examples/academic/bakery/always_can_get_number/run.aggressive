@@ -1,0 +1,11 @@
+mcrl22lps -fDnw ../bakery.mcrl2 |lpsconstelm | lpsparelm > ../bakery.lps
+lps2pbes -f always_can_get_number.mcf ../bakery.lps | pbesrewr -psimplify | pbesconstelm  | pbesparelm  > bakery.always_can_get_number.pbes
+echo -ne 'Answer by under-approximation: '
+pbesabsinthe -sunder -a../aggressive_abstraction.txt bakery.always_can_get_number.pbes bakery.always_can_get_number.absinthe.pbes
+pbes2bool  bakery.always_can_get_number.absinthe.pbes
+echo -ne 'Answer by over-approximation: '
+pbesabsinthe -sover -a../aggressive_abstraction.txt bakery.always_can_get_number.pbes bakery.always_can_get_number.absinthe.pbes
+pbes2bool  bakery.always_can_get_number.absinthe.pbes
+rm *.pbes
+rm ../*.lps
+
