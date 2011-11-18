@@ -276,6 +276,11 @@ endif(MCRL2_ENABLE_GUI_TOOLS)
 ##---------------------------------------------------
 
 ##---------------------------------------------------
+## Option to enable/disable CADP support 
+##---------------------------------------------------
+option(MCRL2_ENABLE_CADP_SUPPORT "Enable/disable support for CADP" OFF)
+
+##---------------------------------------------------
 ## Setup dependency to CADP
 ##---------------------------------------------------
 
