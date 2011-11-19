@@ -272,14 +272,6 @@ class bisim_partitioner
 
     {
       using namespace std;
-      // blocks.reserve(2*aut.num_states()); // Reserving blocks is done to avoid
-      // messing around with blocks in memory,
-      // which can be very time consuming, and will
-      // lead to core dumps if it happens. As the
-      // blocks have a tree structure, two times
-      // the maximal number of blocks must be reserved.
-      // This does not seem to be necessary after a change
-      // by Jeroen Keiren on 8/9/2010.
 
       to_be_processed.clear();
 
@@ -292,9 +284,31 @@ class bisim_partitioner
       bool bottom_state=true;
       std::vector < state_type > current_inert_transitions;
 
-      // Reserve enough space, such that no reallocations of the vector are required when adding transitions.
-      current_inert_transitions.reserve(aut.num_transitions());
-      initial_partition.non_inert_transitions.reserve(aut.num_transitions());
+      {
+        // Reserve enough space, such that no reallocations of the vector are required when adding transitions.
+        // For this purpose, first the number of inert transitions must be counted, to avoid reserving too much
+        // space. This for instance leads to a waste of memory (terabytes for reducing 30M states), especially, 
+        // when calculating ia strong bisimulation reduction.
+        size_t initial_partition_non_inert_counter=0;
+        size_t current_inert_transition_counter=0;
+        for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
+        { 
+          const transition t=r.front();
+          if (branching && aut.is_tau(t.label()))
+          {
+            if (preserve_divergences && t.from()==t.to())
+            {
+              initial_partition_non_inert_counter++;
+            }
+            else
+            {
+              current_inert_transition_counter++;
+            }
+          }
+        }
+        current_inert_transitions.reserve(initial_partition_non_inert_counter);
+        initial_partition.non_inert_transitions.reserve(current_inert_transition_counter);
+      }
 
       for (transition_const_range r=aut.get_transitions(); !r.empty(); r.advance_begin(1))
       {
@@ -656,8 +670,27 @@ class bisim_partitioner
             }
           }
 
-          non_flagged_non_inert_transitions.swap(blocks[new_block1].non_inert_transitions);
-          flagged_non_inert_transitions.swap(blocks[new_block2].non_inert_transitions);
+          // Only put the parts that we need to store. Avoid that reserved space for
+          // current_inert_transition_counter and flagged_non_inert_transitions is stored
+          // in the non_inert_transitions in both blocks. Therefore, we do not use a copy
+          // constructor, but put elements in there one by one.
+          // The two lines below were old code, wasting memory bandwidth.
+          // non_flagged_non_inert_transitions.swap(blocks[new_block1].non_inert_transitions);
+          // flagged_non_inert_transitions.swap(blocks[new_block2].non_inert_transitions);
+
+          blocks[new_block1].non_inert_transitions.reserve(non_flagged_non_inert_transitions.size());
+          for(std::vector < transition > ::const_iterator i=non_flagged_non_inert_transitions.begin();
+                    i!=non_flagged_non_inert_transitions.end(); i++)
+          {
+            blocks[new_block1].non_inert_transitions.push_back(*i);
+          }
+
+          blocks[new_block2].non_inert_transitions.reserve(flagged_non_inert_transitions.size());
+          for(std::vector < transition > ::const_iterator i=flagged_non_inert_transitions.begin();
+                    i!=flagged_non_inert_transitions.end(); i++)
+          {
+            blocks[new_block2].non_inert_transitions.push_back(*i);
+          }
         }
         else
         {
