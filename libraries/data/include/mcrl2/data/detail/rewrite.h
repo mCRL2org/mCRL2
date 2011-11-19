@@ -16,7 +16,7 @@
 #include "mcrl2/data/substitutions.h"
 #include "mcrl2/data/data_specification.h"
 #include "mcrl2/data/selection.h"
-#include "mcrl2/data/detail/rewrite_conversion_helper.h"
+// #include "mcrl2/data/detail/rewrite_conversion_helper.h"
 #include "mcrl2/data/fresh_variable_generator.h"
 
 #ifndef NO_DYNLOAD
@@ -65,7 +65,7 @@ atermpp::aterm_appl toInner(const data_expression term, const bool add_opids);
 class Rewriter
 {
   protected:
-    detail::rewrite_conversion_helper< Rewriter> m_conversion_helper; 
+    // detail::rewrite_conversion_helper< Rewriter> m_conversion_helper; 
     data::fresh_variable_generator<> generator;  //name for variables.
 
   public:
@@ -87,7 +87,7 @@ class Rewriter
      * \sa createRewriter()
      **/
     Rewriter():
-       m_conversion_helper(*this),
+       // m_conversion_helper(*this),
        generator("x_")
     { 
       internal_true.protect();
@@ -190,18 +190,28 @@ class Rewriter
 
   public:
   /* The functions below are public, because they are used in the compiling jitty rewriter */
+    /* atermpp::aterm_appl internal_existential_quantifier_enumeration(
+         const atermpp::aterm_appl termInInnerFormat,
+         internal_substitution_type &sigma); */
     atermpp::aterm_appl internal_existential_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
          internal_substitution_type &sigma);
-    atermpp::aterm_appl new_internal_existential_quantifier_enumeration(
-         const atermpp::aterm_appl termInInnerFormat,
+    atermpp::aterm_appl internal_existential_quantifier_enumeration(
+         const variable_list vl,
+         const atermpp::aterm_appl t1,
+         const bool t1_is_normal_form,
          internal_substitution_type &sigma);
 
+    /* atermpp::aterm_appl internal_universal_quantifier_enumeration(
+         const atermpp::aterm_appl termInInnerFormat,
+         internal_substitution_type &sigma); */
     atermpp::aterm_appl internal_universal_quantifier_enumeration(
          const atermpp::aterm_appl termInInnerFormat,
          internal_substitution_type &sigma);
-    atermpp::aterm_appl new_internal_universal_quantifier_enumeration(
-         const atermpp::aterm_appl termInInnerFormat,
+    atermpp::aterm_appl internal_universal_quantifier_enumeration(
+         const variable_list vl,
+         const atermpp::aterm_appl t1,
+         const bool t1_is_normal_form,
          internal_substitution_type &sigma);
 
     // Rewrite a where expression where the subdataexpressions are in internal format.
@@ -217,6 +227,7 @@ class Rewriter
     atermpp::aterm_appl rewrite_single_lambda(
                       const variable_list vl,
                       const atermpp::aterm_appl body,
+                      const bool body_in_normal_form,
                       internal_substitution_type &sigma);
 
     atermpp::aterm_appl rewrite_lambda_application(
@@ -232,7 +243,7 @@ class Rewriter
          const atermpp::aterm_appl termInInnerFormat,
          internal_substitution_type &sigma);
 
-    core::identifier_string forall_function_symbol()
+/*     core::identifier_string forall_function_symbol()
     {
       static core::identifier_string forall_function_symbol = initialise_static_expression(forall_function_symbol, core::identifier_string("forall"));
       return forall_function_symbol;
@@ -243,6 +254,7 @@ class Rewriter
       static core::identifier_string exists_function_symbol = initialise_static_expression(exists_function_symbol, core::identifier_string("exists"));
       return exists_function_symbol;
     }
+*/
 
 };
 

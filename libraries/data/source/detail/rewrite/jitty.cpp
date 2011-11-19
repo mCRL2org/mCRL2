@@ -544,17 +544,17 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     atermpp::aterm_appl binder=term(0);
     if (binder==gsMakeExists())
     {
-      atermpp::aterm_appl a= new_internal_existential_quantifier_enumeration(term,sigma);
+      atermpp::aterm_appl a= internal_existential_quantifier_enumeration(term,sigma);
       return a;
     }
     if (binder==gsMakeForall())
     {
-      atermpp::aterm_appl a=new_internal_universal_quantifier_enumeration(term,sigma);
+      atermpp::aterm_appl a=internal_universal_quantifier_enumeration(term,sigma);
       return a;
     }
     if (binder==gsMakeLambda())
     {
-      atermpp::aterm_appl a=rewrite_single_lambda(term(1),term(2),sigma);
+      atermpp::aterm_appl a=rewrite_single_lambda(term(1),term(2),false,sigma);
       return a;
     }
     assert(0);
@@ -601,19 +601,16 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
       }
       if (binder==gsMakeExists())
       {
-        atermpp::aterm_appl a=  new_internal_existential_quantifier_enumeration(head,sigma);
+        atermpp::aterm_appl a=  internal_existential_quantifier_enumeration(head,sigma);
         return a;
       }
       if (binder==gsMakeForall())
       {
-        atermpp::aterm_appl a= new_internal_universal_quantifier_enumeration(head,sigma);
+        atermpp::aterm_appl a= internal_universal_quantifier_enumeration(head,sigma);
         return a;
       }
       assert(0); // One cannot end up here.
     }
-
-
-    // Here head has the shape @REWR@(u0,u1,...,un).
 
     if (gsIsDataVarId(head))
     {
@@ -628,6 +625,8 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
     else
     {
+    // Here head has the shape @REWR@(u0,u1,...,un).
+
       atermpp::aterm_appl term_op=head;
       assert(ATisInt(term_op(0)));
       const size_t arity_op=term_op.size();

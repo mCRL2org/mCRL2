@@ -177,6 +177,7 @@ atermpp::aterm_appl Rewriter::rewrite_where(
 atermpp::aterm_appl Rewriter::rewrite_single_lambda(
                       const variable_list vl,
                       const atermpp::aterm_appl body,
+                      const bool body_in_normal_form,
                       internal_substitution_type &sigma)
 {
   assert(vl.size()>0);
@@ -191,7 +192,6 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   {
     // Restrict the scope of identifiers_in_sigma.
     atermpp::set < core::identifier_string > identifiers_in_sigma(get_identifiers(sigma));
-
     // Create new unique variables to replace the old and create storage for
     // storing old values for variables in vl.
     for(variable_list::const_iterator it=vl.begin(); it!=vl.end(); ++it,count++)
@@ -208,7 +208,8 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 
   if (number_of_renamed_variables==0)
   {
-    return gsMakeBinder(gsMakeLambda(),vl,rewrite_internal(body,sigma));
+    atermpp::aterm_appl a=gsMakeBinder(gsMakeLambda(),vl,(body_in_normal_form?body:rewrite_internal(body,sigma)));
+    return a;
   }
 
   atermpp::vector <atermpp::aterm_appl> saved_substitutions;
@@ -224,7 +225,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
       sigma[v]=atermpp::aterm_appl(new_variables[count]);
     }
   }
-  const atermpp::aterm_appl result= rewrite_internal(body,sigma);
+  const atermpp::aterm_appl result=(body_in_normal_form?body:rewrite_internal(body,sigma));
 
   // restore saved substitutions;
 
@@ -249,7 +250,8 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
   {
     new_variable_list=push_front(new_variable_list,*it);
   }
-  return gsMakeBinder(gsMakeLambda(),new_variable_list,result);
+  const atermpp::aterm_appl a=gsMakeBinder(gsMakeLambda(),new_variable_list,result);
+  return a;
 }
 
 
@@ -280,7 +282,6 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
     sigma[v_fresh]=rewrite_internal(t(count),sigma);
   }
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
-
   // Reset variables in sigma
   for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
                  it!=variable_renaming.end(); ++it)
@@ -304,7 +305,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
   return rewrite_internal(ApplyArray(arity-vl.size(),args),sigma);
 }
 
-atermpp::aterm_appl Rewriter::new_internal_existential_quantifier_enumeration(
+atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
      const atermpp::aterm_appl t,
      internal_substitution_type &sigma)
 {
@@ -312,12 +313,24 @@ atermpp::aterm_appl Rewriter::new_internal_existential_quantifier_enumeration(
   // in data types, i.e. without applying the implement function anymore. This function is
   // to replace internal_existential_quantifier_enumeration and should then not be called new anymore.
 
+  assert(gsIsBinder(t) && t(0)==gsMakeExists());
   /* Get Body of Exists */
   const atermpp::aterm_appl t1 = t(2);
 
   // Put the variables in the right order in vl.
   variable_list vl=t(1);
+  return internal_existential_quantifier_enumeration(vl,t1,false,sigma);
+}
 
+// Generate a term equivalent to forall vl.t1. 
+// The variable t1_is_normal_form indicates whether t1 is in normal
+// form, but this information is not used as it stands.
+atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
+      const variable_list vl,
+      const atermpp::aterm_appl t1,
+      const bool t1_is_normal_form,
+      internal_substitution_type &sigma)
+{
   /* Create Enumerator */
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
@@ -359,18 +372,18 @@ atermpp::aterm_appl Rewriter::new_internal_existential_quantifier_enumeration(
 }
 
 
-atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
+/* atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
      const atermpp::aterm_appl t,
      internal_substitution_type &sigma)
 {
-  /* Get Body of Exists */
+  /* Get Body of Exists * /
   const atermpp::aterm_appl t1 = t(1);
 
-  /* Get Sort for enumeration from t */
+  /* Get Sort for enumeration from t * /
   const sort_expression sort_of_exists = get_int2term(ATgetInt((ATermInt)(ATerm)t(0))).sort();
   const sort_expression_list fsdomain = function_sort(function_sort(sort_of_exists).domain().front()).domain();
 
-  /* Create for each of the sorts for enumeration a new variable*/
+  /* Create for each of the sorts for enumeration a new variable* /
   size_t arity=fsdomain.size();
   if (ATisInt((ATerm)(ATermAppl)t1))
   {
@@ -406,13 +419,13 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
     vl=push_front(vl, variable(terms[count]));
   }
 
-  /* Create Enumerator */
+  /* Create Enumerator * /
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
-  /* Find A solution*/
+  /* Find A solution* /
   EnumeratorSolutionsStandard sol(vl, ApplyArray(arity,terms), sigma,true,&ES,100);
 
-  /* Create a list to store solutions */
+  /* Create a list to store solutions * /
   atermpp::term_list<atermpp::aterm_appl> x;
   atermpp::aterm_appl evaluated_condition=internal_false;
   atermpp::aterm_appl partial_result=internal_false;
@@ -444,16 +457,28 @@ atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
   }
 
   return Apply1(t(0),rewrite_internal(t1,sigma));
-}
+} */
 
-atermpp::aterm_appl Rewriter::new_internal_universal_quantifier_enumeration(
+atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
      const atermpp::aterm_appl t,
      internal_substitution_type &sigma)
 {
+  assert(gsIsBinder(t) && t(0)==gsMakeForall());
   /* Get Body of forall */
   const atermpp::aterm_appl t1 = t(2);
   const variable_list vl=t(1);
+  return internal_universal_quantifier_enumeration(vl,t1,false,sigma);
+}
 
+// Generate a term equivalent to forall vl.t1. 
+// The variable t1_is_normal_form indicates whether t1 is in normal
+// form, but this information is not used as it stands.
+atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
+      const variable_list vl,
+      const atermpp::aterm_appl t1,
+      const bool t1_is_normal_form,
+      internal_substitution_type &sigma)
+{
   /* Create Enumerator */
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
@@ -516,18 +541,18 @@ atermpp::aterm_appl Rewriter::new_internal_universal_quantifier_enumeration(
   return gsMakeBinder(gsMakeForall(),vl,rewrite_internal(t1,sigma));
 }
 
-atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
+/* atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
      const atermpp::aterm_appl t,
      internal_substitution_type &sigma)
 {
-  /* Get Body of forall */
+  /* Get Body of forall * /
   const atermpp::aterm_appl t1 = t(1);
 
-  /* Get Sort for enumeration from t */
+  /* Get Sort for enumeration from t * /
   const sort_expression sort_of_exists = get_int2term(ATgetInt((ATermInt)(ATerm)t(0))).sort();
   const sort_expression_list fsdomain = function_sort(function_sort(sort_of_exists).domain().front()).domain();
 
-  /* Create for each of the sorts for enumeration a new variable*/
+  /* Create for each of the sorts for enumeration a new variable* /
   size_t arity=fsdomain.size();
   if (ATisInt((ATerm)(ATermAppl)t1))
   {
@@ -563,13 +588,13 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
     vl=push_front(vl, variable(terms[count]));
   }
 
-  /* Create Enumerator */
+  /* Create Enumerator * /
   EnumeratorStandard ES(m_data_specification_for_enumeration, this);
 
-  /* Find A solution*/
+  /* Find A solution* /
   EnumeratorSolutionsStandard sol(vl, ApplyArray(arity,terms), sigma,false,&ES,100);
 
-  /* Create ATermList to store solutions */
+  /* Create ATermList to store solutions * /
   atermpp::term_list<atermpp::aterm_appl> x;
   atermpp::aterm_appl evaluated_condition=internal_true;
   atermpp::aterm_appl partial_result=internal_true;
@@ -623,9 +648,9 @@ atermpp::aterm_appl Rewriter::internal_universal_quantifier_enumeration(
   }
 
   return Apply1(t(0),rewrite_internal(t1,sigma));
-}
+} */
 
-atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(
+/* atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(
      const atermpp::aterm_appl t,
      internal_substitution_type &sigma)
 {
@@ -635,20 +660,20 @@ atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(
   {
     ATerm arg = ATgetArgument(t,0);
 
-    /* Make sure that we have indeed a rewrite rule */
+    /* Make sure that we have indeed a rewrite rule * /
     if (ATisInt(arg))
     {
-      /* Convert internal rewrite number to ATerm representation*/
+      /* Convert internal rewrite number to ATerm representation* /
       ATermAppl a = get_int2term(ATgetInt((ATermInt) arg));
 
       if (is_function_symbol(a))
       {
-        /* Check for universal quantifier */
+        /* Check for universal quantifier * /
         if (function_symbol(a).name() == forall_function_symbol())
         {
           result = internal_universal_quantifier_enumeration(t,sigma);
         }
-        /* Check for existential quantifier */
+        /* Check for existential quantifier * /
         else if (function_symbol(a).name() == exists_function_symbol())
         {
           result = internal_existential_quantifier_enumeration(t,sigma);
@@ -658,7 +683,7 @@ atermpp::aterm_appl Rewriter::internal_quantifier_enumeration(
   }
 #endif
   return result;
-}
+} */
 
 
 Rewriter* createRewriter(
