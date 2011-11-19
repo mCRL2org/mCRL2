@@ -21,8 +21,7 @@ else(MSVC)
   ## Architecture detection for non-MSVC
 
   if (CMAKE_OSX_ARCHITECTURES MATCHES "i386" OR  CMAKE_OSX_DEPLOYMENT_TARGET MATCHES "10.5")
-    message (STATUS "DEES")
-    message (STATUS "Architecture: 32bit Unix" )
+    message (STATUS "Architecture: 32bit Unix`" )
     set(ATERM_FLAGS "-m32")
     add_definitions("-m32")
   else(CMAKE_OSX_ARCHITECTURES MATCHES "i386" OR  CMAKE_OSX_DEPLOYMENT_TARGET MATCHES "10.5")

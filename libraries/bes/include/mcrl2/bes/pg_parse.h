@@ -167,7 +167,7 @@ void parse_pgsolver(std::istream& from, boolean_equation_system<Container>& b, b
   atermpp::vector<boolean_equation> eqns;
   if(maxpg)
   {
-    for (std::map<priority_t, atermpp::set<boolean_equation> >::const_reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
+    for (std::map<priority_t, atermpp::set<boolean_equation> >::reverse_iterator i = blocks.rbegin(); i != blocks.rend(); ++i)
     {
       eqns.insert(eqns.end(), i->second.begin(), i->second.end());
     }

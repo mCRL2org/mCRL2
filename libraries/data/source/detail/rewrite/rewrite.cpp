@@ -245,7 +245,7 @@ atermpp::aterm_appl Rewriter::rewrite_single_lambda(
 
   variable_list new_variable_list;
 
-  for(atermpp::vector <variable>::const_reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
+  for(atermpp::vector <variable>::reverse_iterator it=new_variables.rbegin(); it!=new_variables.rend(); ++it)
   {
     new_variable_list=push_front(new_variable_list,*it);
   }

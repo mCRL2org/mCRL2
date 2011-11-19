@@ -448,7 +448,7 @@ static atermpp::aterm subst_values(ATermAppl* vars, ATerm* vals, size_t len, con
     		(atermpp::aterm_appl)  subst_values(vars,vals,len,(atermpp::aterm_appl)assignment(1))));
     }
     atermpp::term_list < atermpp::aterm_appl > new_assignment_list;
-    for(atermpp::vector < atermpp::aterm_appl >::const_reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
+    for(atermpp::vector < atermpp::aterm_appl >::reverse_iterator it=new_assignments.rbegin(); it!=new_assignments.rend(); ++it)
     {
       new_assignment_list=push_front(new_assignment_list,*it);
     }
