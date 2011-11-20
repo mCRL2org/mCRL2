@@ -560,7 +560,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     assert(0);
     return term;
   }
-  else // Term has the shape @REWR@(t1,...,tn);
+  else // Term has the shape #REWR#(t1,...,tn);
   {
     const atermpp::aterm op = term(0);
     const size_t arity=term.size();
@@ -585,7 +585,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
     else
     {
-      // op has the shape = @REWR@(u1,...,un).
+      // op has the shape = #REWR#(u1,...,un).
       head=op;
     }
 
@@ -625,7 +625,7 @@ atermpp::aterm_appl RewriterJitty::rewrite_aux(
     }
     else
     {
-    // Here head has the shape @REWR@(u0,u1,...,un).
+    // Here head has the shape #REWR#(u0,u1,...,un).
 
       atermpp::aterm_appl term_op=head;
       assert(ATisInt(term_op(0)));

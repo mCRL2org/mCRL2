@@ -1529,7 +1529,7 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
             {
               /* See the remark above. */
               ss << "(ATermAppl) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t)) 
-                               /* + ((1 << arity)-arity-1)+args_nfs.get_value(arity)*/ ) << "";
+                                /* + ((1 << arity)-arity-1)+args_nfs.get_value(arity)*/ ) << "";
             }
 
           }
@@ -2105,7 +2105,7 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
   }
   else if (isR(tree))
   {
-    fprintf(f,"%sconst atermpp::aterm_appl a=",whitespace(d*2));
+    fprintf(f,"%sreturn ",whitespace(d*2));
     if (level > 0)
     {
       //cur_arg = peekn_st(level);
@@ -2113,7 +2113,6 @@ void RewriterCompilingJitty::implement_tree_aux(FILE* f, ATermAppl tree, int cur
     }
     calcTerm(f,add_args(ATgetArgument(tree,0),arity-cur_arg-1),get_startarg(ATgetArgument(tree,0),cur_arg+1),nnfvars);
     fprintf(f,"; // R\n");
-    fprintf(f,"%sreturn a;\n",whitespace(d*2));
     return;
   }
   else
@@ -2475,7 +2474,8 @@ static ATerm toInner_list_odd(const data_expression t)
     return (ATerm)gsMakeWhr((ATermAppl)toInner_list_odd(w.body()),
                      (ATermList)reverse(translated_assignments));
   }
-  else assert(0);
+  assert(0);
+  return NULL;
 }
 
 
@@ -2976,18 +2976,15 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    const atermpp::aterm_appl binder=head(0);\n"
       "    if (binder==gsMakeLambda())\n"
       "    {\n"
-      "      atermpp::aterm_appl a= this_rewriter->rewrite_lambda_application(head,t,*(this_rewriter->global_sigma));\n"
-      "      return a;\n"
+      "      return this_rewriter->rewrite_lambda_application(head,t,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    if (binder==gsMakeExists())\n"
       "    {\n"
-      "      atermpp::aterm_appl a=  this_rewriter->internal_existential_quantifier_enumeration(head,*(this_rewriter->global_sigma));\n"
-      "      return a;\n"
+      "      return this_rewriter->internal_existential_quantifier_enumeration(head,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    if (binder==gsMakeForall())\n"
       "    {\n"
-      "      atermpp::aterm_appl a= this_rewriter->internal_universal_quantifier_enumeration(head,*(this_rewriter->global_sigma));\n"
-      "      return a;\n"
+      "      return this_rewriter->internal_universal_quantifier_enumeration(head,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    assert(0); // One cannot end up here.\n"
       "  }\n"
@@ -3001,12 +2998,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    {\n"
       "      args[i]=rewrite(atermpp::aterm_appl(t(i)));\n"
       "    }\n"
-      "    atermpp::aterm_appl a=ApplyArray(arity,args);\n"
-      "    return a;\n"
+      "    return ApplyArray(arity,args);\n"
       "  }\n"
       "  \n"
       "  \n"
-      "  // Here head has the shape @REWR@(u0,u1,...,un).\n"
+      "  // Here head has the shape #REWR#(u0,u1,...,un).\n"
 
       "  const atermpp::aterm_appl u=head;\n"
       "  const size_t arity_t = t.size();\n"
@@ -3049,17 +3045,42 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       get_num_opids(), max_arity
       );
 
-  fprintf(f,
+  /* fprintf(f,
       "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t)\n"
       "{\n"
       "  return rewrite(t);\n"
       "}\n"
-      "\n");
+      "\n"); */
 
   fprintf(f,
       "atermpp::aterm_appl rewrite(const atermpp::aterm_appl t)\n"
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
+      "  if (t.function()==apples[t.size()])\n"
+      "  { // Term t has the shape #REWR#(t1,...,tn)\n"
+      "    const atermpp::aterm head = t(0);\n"
+      "    if (ATisInt((ATerm)head) )\n"
+      "    {\n"
+      "      const int function_index = atermpp::aterm_int(head).value();\n"
+      "      if (function_index < %ld )\n"
+      "      {\n"
+      "        const size_t arity = t.size();\n"
+      "        assert(arity <= %ld);\n"
+      "        assert(int2func[arity][function_index] != NULL);\n"
+      "        return int2func[arity][function_index](t);\n"
+      "      }\n"
+      "      else\n"
+      "      {\n"
+      "        return rewrite_int_aux(head, t);"
+      "      }\n"
+      "    }\n"
+      "    else\n"
+      "    {\n"
+      "      return rewrite_appl_aux(head, t);\n"
+      "    }\n"
+      "  }\n"
+      "  \n"
+      "  // Term t does not have the shape #REWR#(t1,...,tn)\n"
       "  if (gsIsDataVarId(t))\n"
       "  {\n"
       "    return (*(this_rewriter->global_sigma))(t);\n"
@@ -3073,45 +3094,20 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "    atermpp::aterm_appl binder=t(0);\n"
       "    if (binder==gsMakeExists())\n"
       "    {\n"
-      "      atermpp::aterm_appl a= this_rewriter->internal_existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
-      "      return a;\n"
+      "      return this_rewriter->internal_existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    if (binder==gsMakeForall())\n"
       "    {\n"
-      "      atermpp::aterm_appl a=this_rewriter->internal_universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
-      "      return a;\n"
+      "      return this_rewriter->internal_universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
       "    }\n"
       "    if (binder==gsMakeLambda())\n"
       "    {\n"
-      "      atermpp::aterm_appl a=this_rewriter->rewrite_single_lambda(\n"
+      "      return this_rewriter->rewrite_single_lambda(\n"
       "               mcrl2::data::variable_list(atermpp::aterm_list(t(1))),\n"
       "               atermpp::aterm_appl(t(2)),false,*(this_rewriter->global_sigma));\n"
-      "      return a;\n"
       "    }\n"
       "    assert(0);\n"
       "    return t;\n"
-      "  }\n"
-      "// Term t has the shape @REWR@(t1,...,tn)\n"
-      "  const atermpp::aterm head = t(0);\n"
-      "  if (ATisInt((ATerm)head) )\n"
-      "  {\n"
-      "    const int function_index = atermpp::aterm_int(head).value();\n"
-      "    if (function_index < %ld )\n"
-      "    {\n"
-      "      const size_t arity = t.size();\n"
-      "      assert(arity <= %ld);\n"
-      "      assert(int2func[arity][function_index] != NULL);\n"
-      "      const atermpp::aterm_appl a=int2func[arity][function_index](t);\n"
-      "      return a;\n"
-      "    }\n"
-      "    else\n"
-      "    {\n"
-      "      return rewrite_int_aux(head, t);"
-      "    }\n"
-      "  }\n"
-      "  else\n"
-      "  {\n"
-      "    return rewrite_appl_aux(head, t);\n"
       "  }\n"
       "}\n",
       get_num_opids(), max_arity);
@@ -3136,7 +3132,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   {
     so_rewr_init = reinterpret_cast<void(*)(RewriterCompilingJitty *)>(rewriter_so->proc_address("rewrite_init"));
     so_rewr_cleanup = reinterpret_cast<void (*)()>(rewriter_so->proc_address("rewrite_cleanup"));
-    so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const atermpp::aterm_appl)> (rewriter_so->proc_address("rewrite_external"));
+    so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const atermpp::aterm_appl)> (rewriter_so->proc_address("rewrite"));
 
   }
   catch(std::runtime_error &e)

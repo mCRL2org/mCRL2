@@ -324,7 +324,7 @@ atermpp::aterm_appl EnumeratorSolutionsStandard::build_solution_aux(
   }
   else
   {
-    // t has the shape @REWR@(u1,...,un)
+    // t has the shape #REWR#(u1,...,un)
 
     atermpp::aterm head = t(0);
     size_t arity = t.size();
