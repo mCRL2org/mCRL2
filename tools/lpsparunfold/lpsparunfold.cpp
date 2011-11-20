@@ -173,7 +173,7 @@ class parunfold_tool: public  rewriter_tool<input_output_tool>
         {
           m_set_index.clear();
 
-          data::sort_expression b_sort = mcrl2::data::parse_sort_expression( m_unfoldsort );
+          data::sort_expression b_sort = mcrl2::data::parse_sort_expression( m_unfoldsort, lps_specification.data() );
           mcrl2::data::sort_expression sort = normalize_sorts(b_sort, lps_specification.data());
 
 
