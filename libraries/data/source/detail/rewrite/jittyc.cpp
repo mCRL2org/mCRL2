@@ -272,7 +272,6 @@ atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expressio
 {
   size_t old_opids = get_num_opids();
 
-  // atermpp::aterm_appl r = toInner(m_conversion_helper.implement(t),true); 
   atermpp::aterm_appl r = toInner(t,true); 
 
   if (old_opids != get_num_opids())
@@ -285,7 +284,6 @@ atermpp::aterm_appl RewriterCompilingJitty::toRewriteFormat(const data_expressio
 
 data_expression RewriterCompilingJitty::fromRewriteFormat(const atermpp::aterm_appl t)
 {
-  // return m_conversion_helper.lazy_reconstruct(fromInner(t));
   return fromInner(t);
 }
 
@@ -2606,42 +2604,41 @@ FILE* RewriterCompilingJitty::MakeTempFiles()
 	return result;
 }
 
-inline
-int declare_rewr_functions(FILE* f, size_t func_index, int arity, const bool generate_code)
+inline 
+void declare_rewr_functions(FILE* f, size_t func_index, int arity)
 {
   /* If generate_code is false, only the variable aux is increased to calculate the 
-     return value.
+     return value. TODO. This can be optimized.
      Declare the function that gets function func_index in normal form */
-  int aux = 0;
+  // int aux = 0;
   for (int a=0; a<=arity; a++)
   {
     int b = (a<=NF_MAX_ARITY)?a:0;
     for (size_t nfs=0; (nfs >> b) == 0; nfs++)
     {
-      if (generate_code)
+      fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_%lu(",func_index,a,nfs);
+      for (int i=0; i<a; i++)
       {
-        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_%lu(",func_index,a,nfs);
-        for (int i=0; i<a; i++)
-        {
-          fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
-        }
-        fprintf(f,  ");\n");
+        fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
       }
-  
+      fprintf(f,  ");\n");
+
       if (nfs == 0)
       {
-        if (generate_code)
+        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index, a, func_index, a);
+        for(int i = 1; i <= a; ++i)
         {
-          fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index, a, func_index, a);
-          for(int i = 1; i <= a; ++i)
-          {
-            fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %i)", (i == 1?"":", "), i);
-          }
-          fprintf(f,  "); }\n");
+          fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %i)", (i == 1?"":", "), i);
         }
+        fprintf(f,  "); }\n");
       }
       else // (nfs > 0)
       {
+        /* Declarations below declare functions that represent function symbols with partly 
+           normalized arguments. They were encoded as function symbols represented by an aterm_int
+           with an increased number, for which special space was assigned in array with encodings for
+           opIds. As this was a trick local for the compiling jitty rewriter, an alternative should
+           be found. JFG 21/11/2011.
         if (generate_code)
         {
           fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0(",func_index+1+aux,a);
@@ -2662,13 +2659,13 @@ int declare_rewr_functions(FILE* f, size_t func_index, int arity, const bool gen
             fprintf(f, (i==1)?"ATAgetArgument(t, %i)":", ATAgetArgument(t, %i)",i);
           }
           fprintf(f,  "); }\n");
-        }
+        } */
 
-        ++aux;
+        // ++aux;
       }
     }
   }
-  return aux;
+  // return aux;
 }
 
 void RewriterCompilingJitty::BuildRewriteSystem()
@@ -2744,7 +2741,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     {
       max_arity = arity;
     }
-    j += declare_rewr_functions(f, j, arity,data_equation_selector(fs));
+    if (data_equation_selector(fs))
+    {
+      declare_rewr_functions(f, j, arity);
+    }
   }
   fprintf(f,  "\n\n");
 
@@ -2822,13 +2822,13 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   for (size_t j=0; j < get_num_opids(); j++)
   {
     const function_symbol fs=get_int2term(j);
-    size_t arity = getArity(fs);
+    const size_t arity = getArity(fs);
 
     if (data_equation_selector(fs))
     {
       fprintf(f,  "// %s\n",atermpp::aterm(fs).to_string().c_str());
   
-      for (size_t a=0; a<=arity; a++)
+      for (size_t a=0; a<=arity; a++) // TODO Only generate code when number of arguments match.
       {
         nfs_array nfs_a(a);
         int b = (a<=NF_MAX_ARITY)?a:0;
@@ -2842,19 +2842,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
           fprintf(f,  ")\n"
                   "{\n"
                  );
-          /* if (a==1 && (fs.name() == exists_function_symbol())) // existential quantifier.
-          { 
-            fprintf(f,"  // existential quantifier\n");
-            fprintf(f,"  return this_rewriter->internal_existential_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),*(this_rewriter->global_sigma));\n",
-                                 (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
-          }
-          else if (a==1 && (fs.name() == forall_function_symbol())) // universal quantifier.
-          { 
-            fprintf(f,"  // universal quantifier\n");
-            fprintf(f,"  return this_rewriter->internal_universal_quantifier_enumeration(atermpp::aterm_appl(ATmakeAppl2(%li,(ATerm) %p,(ATerm)(ATermAppl)arg0)),*(this_rewriter->global_sigma));\n",
-                                 (long int) get_appl_afun_value(2),(void*)get_int2aterm_value(j));
-          }
-          else */
           if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
           {
           // Implement strategy
@@ -2879,11 +2866,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       }
       fprintf(f,  "\n");
     }
-    if (arity > NF_MAX_ARITY)
+    /* if (arity > NF_MAX_ARITY)
     {
       arity = NF_MAX_ARITY;
     }
-    j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2
+    j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2 */
   }
 
   fprintf(f,
@@ -2906,23 +2893,23 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     for (size_t j=0; j < get_num_opids(); j++)
     {
       const function_symbol fs=get_int2term(j);
-      size_t arity = getArity(fs);
+      const size_t arity = getArity(fs);
       if ((i <= arity) && data_equation_selector(fs))
       {
         fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j,j,i);
-        if (i <= NF_MAX_ARITY)
+        /* if (i <= NF_MAX_ARITY)
         {
           for (size_t k=(1 << i)-i-1; k<(1 << (i+1))-i-2; k++)
           {
             fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j+1+k,j+1+k,i);
           }
-        }
+        } */
       }
-      if (arity > NF_MAX_ARITY)
+      /* if (arity > NF_MAX_ARITY)
       {
         arity = NF_MAX_ARITY;
       }
-      j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2
+      j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2 */
     }
   }
   fprintf(f,  "}\n"

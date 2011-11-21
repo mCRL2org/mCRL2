@@ -721,28 +721,12 @@ atermpp::aterm_int OpId2Int(const function_symbol term)
     const size_t num_opids=get_num_opids();
     atermpp::aterm_int i(num_opids);
     term2int()[term] =  i;
-    int arity = getArity(term);
-    if (arity > NF_MAX_ARITY)
-    {
-      arity = NF_MAX_ARITY;
-    }
     assert(int2term().size()==num_opids);
     int2term().push_back(term);
-    size_t num_aux = (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2; Reserve extra space
-                                                   // to accomodate function symbols that represent
-                                                   // terms with partially normalized arguments.
-    if (arity <= NF_MAX_ARITY)
-    {
-      for(size_t k=0; k<num_aux; ++k)
-      {
-        int2term().push_back(function_symbol());
-      }
-    }
     return i;
   }
 
-  atermpp::aterm_int j = f->second;
-  return j;
+  return f->second;
 }
 
 atermpp::aterm_appl toInner(const data_expression term, const bool add_opids)
