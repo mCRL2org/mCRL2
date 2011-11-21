@@ -39,6 +39,7 @@ data::structured_sort_constructor_vector
 data::data_equation
 data::data_equation_list
 data::data_equation_vector
+data::data_specification
 lps::specification
 lps::linear_process
 lps::action

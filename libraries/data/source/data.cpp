@@ -43,6 +43,7 @@ std::string pp(const data::structured_sort_constructor_vector& x) { return data:
 std::string pp(const data::data_equation& x) { return data::pp< data::data_equation >(x); }
 std::string pp(const data::data_equation_list& x) { return data::pp< data::data_equation_list >(x); }
 std::string pp(const data::data_equation_vector& x) { return data::pp< data::data_equation_vector >(x); }
+std::string pp(const data::data_specification& x) { return data::pp< data::data_specification >(x); }
 data::data_equation normalize_sorts(const data::data_equation& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::data_equation >(x, dataspec); }
 data::data_equation_list normalize_sorts(const data::data_equation_list& x, const data::data_specification& dataspec) { return data::normalize_sorts< data::data_equation_list >(x, dataspec); }
 void normalize_sorts(data::data_equation_vector& x, const data::data_specification& dataspec) { data::normalize_sorts< data::data_equation_vector >(x, dataspec); }

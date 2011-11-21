@@ -62,6 +62,7 @@ namespace data
 class data_specification;
 
 // template function overloads
+std::string pp(const data::data_specification& x);
 sort_expression normalize_sorts(const sort_expression& x, const data::data_specification& dataspec);
 data_expression normalize_sorts(const data_expression& x, const data::data_specification& dataspec);
 variable_list normalize_sorts(const variable_list& x, const data::data_specification& dataspec);
