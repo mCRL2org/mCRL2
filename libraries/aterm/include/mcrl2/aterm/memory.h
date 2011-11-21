@@ -245,12 +245,21 @@ static HashNumber table_mask    = AT_TABLE_MASK(INITIAL_TERM_TABLE_CLASS);
 
 /*{{{  ATermAppl ATmakeAppl(AFun sym, ...) */
 
+struct default_aterm_converter
+{
+  template <typename T>
+  ATerm operator()(const T& x) const
+  {
+    return reinterpret_cast<ATerm>(x);
+  }
+};
+
 /**
  * Create a new ATermAppl. The argument count can be found in the symbol.
  */
 
-template <class TERM_ITERATOR>
-ATermAppl ATmakeAppl(const AFun sym, const TERM_ITERATOR begin, const TERM_ITERATOR end)
+template <class ForwardIterator, class ATermConverter>
+ATermAppl ATmakeAppl(const AFun sym, const ForwardIterator begin, const ForwardIterator end, ATermConverter convert_to_aterm = default_aterm_converter())
 {
   ATermAppl cur;
   size_t arity = ATgetArity(sym);
@@ -263,9 +272,9 @@ ATermAppl ATmakeAppl(const AFun sym, const TERM_ITERATOR begin, const TERM_ITERA
   header = APPL_HEADER(arity > MAX_INLINE_ARITY ? MAX_INLINE_ARITY+1 : arity, sym);
 
   hnr = START(header);
-  for (TERM_ITERATOR i=begin; i!=end; i++)
+  for (ForwardIterator i=begin; i!=end; i++)
   {
-    arg = reinterpret_cast<ATerm>(*i);
+    arg = convert_to_aterm(*i);
     CHECK_TERM(arg);
     hnr = COMBINE(hnr, HN(arg));
   }
@@ -278,10 +287,10 @@ ATermAppl ATmakeAppl(const AFun sym, const TERM_ITERATOR begin, const TERM_ITERA
     {
       found = true;
       size_t j=0;
-      for (TERM_ITERATOR i=begin; i!=end; i++,j++)
+      for (ForwardIterator i=begin; i!=end; i++,j++)
       {
         assert(j<arity);
-        if (!ATisEqual(ATgetArgument(cur, j), reinterpret_cast<ATerm>(*i)))
+        if (!ATisEqual(ATgetArgument(cur, j), convert_to_aterm(*i)))
         {
           found = false;
           break;
@@ -303,10 +312,10 @@ ATermAppl ATmakeAppl(const AFun sym, const TERM_ITERATOR begin, const TERM_ITERA
     cur->header = header;
     CHECK_HEADER(cur->header);
     size_t j=0;
-    for (TERM_ITERATOR i=begin; i!=end; i++,j++)
+    for (ForwardIterator i=begin; i!=end; i++,j++)
     {
       assert(j<arity);
-      ATgetArgument(cur, j) = reinterpret_cast<ATerm>(*i);
+      ATgetArgument(cur, j) = convert_to_aterm(*i);
     }
     cur->aterm.next = hashtable[hnr];
     hashtable[hnr] = (ATerm) cur;
