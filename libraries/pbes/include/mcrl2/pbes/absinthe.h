@@ -364,25 +364,10 @@ struct absinthe_algorithm
     return result;
   }
 
-  std::string parse_right_hand_sides(const std::string& text)
-  {
-    std::ostringstream out;
-    out << "map" << std::endl;
-    std::vector<std::string> lines = utilities::regex_split(text, "\\n");
-    for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
-    {
-      std::vector<std::string> words = utilities::regex_split(*i, ":=");
-      if (words.size() == 2)
-      {
-        out << "  " << words[1] << ";" << std::endl;
-      }
-    }
-    return out.str();
-  }
-
   // Parse the right hand sides of the function symbol mapping in text, and add them to dataspec if needed
   void parse_right_hand_sides(const std::string& text, data::data_specification& dataspec)
   {
+mCRL2log(log::debug, "absinthe") << "--- parse_right_hand_sides ---\n" << data::pp(dataspec) << std::endl;
     std::string dataspec_text = data::pp(dataspec);
     std::vector<std::string> lines = utilities::regex_split(text, "\\n");
     for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
@@ -391,6 +376,7 @@ struct absinthe_algorithm
       if (words.size() == 2)
       {
         data::function_symbol f = pbes_system::detail::parse_function_symbol(words[1], dataspec_text);
+mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::pp(f) << std::endl;
         if (!pbes_system::detail::is_structured_sort_constructor(dataspec, f))
         {
           dataspec.add_mapping(f);
@@ -823,8 +809,8 @@ struct absinthe_algorithm
     {
       data::sort_expression s = data::container_sort(data::list_container(), i->first);
       dataspec.add_context_sort(s);
-      function_symbol_vector list_constructors = dataspec.constructors(s);
-      for (function_symbol_vector::iterator j = list_constructors.begin(); j != list_constructors.end(); ++j)
+      data::function_symbol_vector list_constructors = dataspec.constructors(s);
+      for (data::function_symbol_vector::iterator j = list_constructors.begin(); j != list_constructors.end(); ++j)
       {
         used_function_symbols.insert(*j);
       }

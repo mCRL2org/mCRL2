@@ -73,56 +73,28 @@ void test_absinthe(const std::string& pbes_text, const std::string& abstraction_
 void test1()
 {
   std::string PBES_TEXT =
-  "sort D;                                                                                   \n"
-  "     Ack = struct ok | nok | error;                                                       \n"
-  "     Frame = struct f(data: D, acknowledgement: Ack);                                     \n"
-  "     E = struct e2 | e1 | e0;                                                             \n"
-  "                                                                                          \n"
-  "map  d0: D;                                                                               \n"
-  "     getack: Frame -> Ack;                                                                \n"
-  "                                                                                          \n"
-  "var  d: D;                                                                                \n"
-  "     a: Ack;                                                                              \n"
-  "eqn  getack(f(d, a))  =  acknowledgement(f(d, a));                                        \n"
-  "                                                                                          \n"
-  "pbes                                                                                      \n"
-  "                                                                                          \n"
-  "nu X(s: E, dd: D) =                                                                       \n"
-  "     (forall d: D. forall d': D. (val(!(d' == d)) || val(!(s == e2))) || Y(e1, d', d))    \n"
-  "  && (forall d: D. val(!(s == e2)) || X(e1, d))                                           \n"
-  "  && (forall a: Ack. val(!(s == e1 && a == ok)) || X(e0, dd))                             \n"
-  "  && (forall a: Ack. val(!(s == e1 && !(a == ok))) || X(e1, dd))                          \n"
-  "  && (val(!(s == e0)) || X(e2, d0));                                                      \n"
-  "                                                                                          \n"
-  "mu Y(s: E, dd,d: D) =                                                                     \n"
-  "       (forall d': D. val(!(s == e2)) || Y(e1, d', d))                                    \n"
-  "    && (forall a': Ack. val(!(s == e1 && a' == ok)) || Y(e0, dd, d))                      \n"
-  "    && (forall a': Ack. val(!(s == e1 && !(a' == ok))) || Y(e1, dd, d))                   \n"
-  "    && ((val(dd == d) || val(!(s == e0))) || Y(e2, d0, d));                               \n"
-  "                                                                                          \n"
-  "init X(e2, d0);                                                                           \n"
-  ;
+    "pbes                                                                                        \n"
+    "                                                                                            \n"
+    "nu X(l:List(Nat)) = (val(l == []) || X(tail(l)) ) && (val(l != []) || X([0,1,2,3,4,5,6]) ); \n"
+    "                                                                                            \n"
+    "init X([0,1,2,3,4,5,6]);                                                                    \n"
+    ;
 
   std::string ABSTRACTION_TEXT =
-  "sort                                                                \n"
-  "  AbsD;                                                             \n"
-  "  AbsFrame = struct f(data:AbsD, acknowledgement: Ack);             \n"
-  "                                                                    \n"
-  "var                                                                 \n"
-  "  d : AbsD;                                                         \n"
-  "  a : Ack;                                                          \n"
-  "                                                                    \n"
-  "eqn                                                                 \n"
-  "  Absgetack (f(d,a)) = {acknowledgement(f(d,a))};                   \n"
-  "                                                                    \n"
-  "abssort                                                             \n"
-  "  D := AbsD                                                         \n"
-  "  Frame := AbsFrame                                                 \n"
-  "                                                                    \n"
-  "absfunc                                                             \n"
-  "  getack : Frame -> Ack  := Absgetack : AbsFrame -> Set(Ack)        \n"
-  "  d0 : D                 := Absd0     : AbsD                        \n"
-  "  ==: D # D -> Bool      := Abseq     : AbsD # AbsD -> Set(Bool)    \n"
+    "sort                               \n"
+    "  AbsNat  = struct even_n | odd_n; \n"
+    "                                   \n"
+    "var n: Nat;                        \n"
+    "                                   \n"
+    "eqn                                \n"
+    "(n mod 2 == 0) -> h(n) = even_n;   \n"
+    "(n mod 2 == 1) -> h(n) = odd_n;    \n"
+    "                                   \n"
+    "absmap                             \n"
+    "h:  Nat -> AbsNat;                 \n"
+    "                                   \n"
+    "absfunc                            \n"
+    "%empty section for this example    \n"
   ;
 
   test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
@@ -185,6 +157,47 @@ void test3()
   test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
 }
 
+// test with structured sorts
+void test4()
+{
+  std::string PBES_TEXT =
+    "sort Bit = struct e0 | e1;                     \n"
+    "                                               \n"
+    "map inv : Bit -> Bit;                          \n"
+    "                                               \n"
+    "eqn                                            \n"
+    "  inv(e0) = e1;                                \n"
+    "  inv(e1) = e0;                                \n"
+    "                                               \n"
+    "pbes                                           \n"
+    "                                               \n"
+    "nu X(b:Bit) = val (b == e0) && X(inv(inv(b))); \n"
+    "                                               \n"
+    "init X(e0);                                    \n"
+    ;
+
+  std::string ABSTRACTION_TEXT =
+    "sort                                                                   \n"
+    "  AbsBit  = struct arbitrary;                                          \n"
+    "                                                                       \n"
+    "var                                                                    \n"
+    "  b:Bit;                                                               \n"
+    "eqn                                                                    \n"
+    "  h(b) = arbitrary;                                                    \n"
+    "  abseq(arbitrary,arbitrary) = {true,false};                           \n"
+    "  absinv(arbitrary) = {arbitrary};                                     \n"
+    "                                                                       \n"
+    "absmap                                                                 \n"
+    "h: Bit -> AbsBit;                                                      \n"
+    "                                                                       \n"
+    "absfunc                                                                \n"
+    "  ==: Bit # Bit -> Bool        := abseq : AbsBit # AbsBit -> Set(Bool) \n"
+    "  inv: Bit -> Bit              := absinv : AbsBit -> Set(AbsBit)       \n"
+  ;
+
+  test_absinthe(PBES_TEXT, ABSTRACTION_TEXT, true);
+}
+
 int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
@@ -193,7 +206,7 @@ int test_main(int argc, char* argv[])
   test1();
   test2();
   test3();
-  //BOOST_CHECK(false);
+  test4();
 
   return 0;
 }
