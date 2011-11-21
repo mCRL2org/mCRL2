@@ -67,7 +67,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& setconstructor_name()
       {
-        static core::identifier_string setconstructor_name = data::detail::initialise_static_expression(setconstructor_name, core::identifier_string("@set"));
+        static core::identifier_string setconstructor_name = core::detail::initialise_static_expression(setconstructor_name, core::identifier_string("@set"));
         return setconstructor_name;
       }
 
@@ -136,7 +136,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& emptyset_name()
       {
-        static core::identifier_string emptyset_name = data::detail::initialise_static_expression(emptyset_name, core::identifier_string("{}"));
+        static core::identifier_string emptyset_name = core::detail::initialise_static_expression(emptyset_name, core::identifier_string("{}"));
         return emptyset_name;
       }
 
@@ -169,7 +169,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& setfset_name()
       {
-        static core::identifier_string setfset_name = data::detail::initialise_static_expression(setfset_name, core::identifier_string("@setfset"));
+        static core::identifier_string setfset_name = core::detail::initialise_static_expression(setfset_name, core::identifier_string("@setfset"));
         return setfset_name;
       }
 
@@ -226,7 +226,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& setcomprehension_name()
       {
-        static core::identifier_string setcomprehension_name = data::detail::initialise_static_expression(setcomprehension_name, core::identifier_string("@setcomp"));
+        static core::identifier_string setcomprehension_name = core::detail::initialise_static_expression(setcomprehension_name, core::identifier_string("@setcomp"));
         return setcomprehension_name;
       }
 
@@ -283,7 +283,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& setin_name()
       {
-        static core::identifier_string setin_name = data::detail::initialise_static_expression(setin_name, core::identifier_string("in"));
+        static core::identifier_string setin_name = core::detail::initialise_static_expression(setin_name, core::identifier_string("in"));
         return setin_name;
       }
 
@@ -341,7 +341,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& setcomplement_name()
       {
-        static core::identifier_string setcomplement_name = data::detail::initialise_static_expression(setcomplement_name, core::identifier_string("!"));
+        static core::identifier_string setcomplement_name = core::detail::initialise_static_expression(setcomplement_name, core::identifier_string("!"));
         return setcomplement_name;
       }
 
@@ -398,7 +398,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& setunion_name()
       {
-        static core::identifier_string setunion_name = data::detail::initialise_static_expression(setunion_name, core::identifier_string("+"));
+        static core::identifier_string setunion_name = core::detail::initialise_static_expression(setunion_name, core::identifier_string("+"));
         return setunion_name;
       }
 
@@ -456,7 +456,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& setintersection_name()
       {
-        static core::identifier_string setintersection_name = data::detail::initialise_static_expression(setintersection_name, core::identifier_string("*"));
+        static core::identifier_string setintersection_name = core::detail::initialise_static_expression(setintersection_name, core::identifier_string("*"));
         return setintersection_name;
       }
 
@@ -514,7 +514,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& setdifference_name()
       {
-        static core::identifier_string setdifference_name = data::detail::initialise_static_expression(setdifference_name, core::identifier_string("-"));
+        static core::identifier_string setdifference_name = core::detail::initialise_static_expression(setdifference_name, core::identifier_string("-"));
         return setdifference_name;
       }
 
@@ -572,7 +572,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& false_function_name()
       {
-        static core::identifier_string false_function_name = data::detail::initialise_static_expression(false_function_name, core::identifier_string("@false_"));
+        static core::identifier_string false_function_name = core::detail::initialise_static_expression(false_function_name, core::identifier_string("@false_"));
         return false_function_name;
       }
 
@@ -629,7 +629,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& true_function_name()
       {
-        static core::identifier_string true_function_name = data::detail::initialise_static_expression(true_function_name, core::identifier_string("@true_"));
+        static core::identifier_string true_function_name = core::detail::initialise_static_expression(true_function_name, core::identifier_string("@true_"));
         return true_function_name;
       }
 
@@ -686,7 +686,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& not_function_name()
       {
-        static core::identifier_string not_function_name = data::detail::initialise_static_expression(not_function_name, core::identifier_string("@not_"));
+        static core::identifier_string not_function_name = core::detail::initialise_static_expression(not_function_name, core::identifier_string("@not_"));
         return not_function_name;
       }
 
@@ -743,7 +743,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& and_function_name()
       {
-        static core::identifier_string and_function_name = data::detail::initialise_static_expression(and_function_name, core::identifier_string("@and_"));
+        static core::identifier_string and_function_name = core::detail::initialise_static_expression(and_function_name, core::identifier_string("@and_"));
         return and_function_name;
       }
 
@@ -801,7 +801,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& or_function_name()
       {
-        static core::identifier_string or_function_name = data::detail::initialise_static_expression(or_function_name, core::identifier_string("@or_"));
+        static core::identifier_string or_function_name = core::detail::initialise_static_expression(or_function_name, core::identifier_string("@or_"));
         return or_function_name;
       }
 

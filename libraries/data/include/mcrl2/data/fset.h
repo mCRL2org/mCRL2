@@ -81,7 +81,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fset_empty_name()
       {
-        static core::identifier_string fset_empty_name = data::detail::initialise_static_expression(fset_empty_name, core::identifier_string("@fset_empty"));
+        static core::identifier_string fset_empty_name = core::detail::initialise_static_expression(fset_empty_name, core::identifier_string("@fset_empty"));
         return fset_empty_name;
       }
 
@@ -114,7 +114,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fset_cons_name()
       {
-        static core::identifier_string fset_cons_name = data::detail::initialise_static_expression(fset_cons_name, core::identifier_string("@fset_cons"));
+        static core::identifier_string fset_cons_name = core::detail::initialise_static_expression(fset_cons_name, core::identifier_string("@fset_cons"));
         return fset_cons_name;
       }
 
@@ -184,7 +184,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fsetinsert_name()
       {
-        static core::identifier_string fsetinsert_name = data::detail::initialise_static_expression(fsetinsert_name, core::identifier_string("@fset_insert"));
+        static core::identifier_string fsetinsert_name = core::detail::initialise_static_expression(fsetinsert_name, core::identifier_string("@fset_insert"));
         return fsetinsert_name;
       }
 
@@ -242,7 +242,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fsetcinsert_name()
       {
-        static core::identifier_string fsetcinsert_name = data::detail::initialise_static_expression(fsetcinsert_name, core::identifier_string("@fset_cinsert"));
+        static core::identifier_string fsetcinsert_name = core::detail::initialise_static_expression(fsetcinsert_name, core::identifier_string("@fset_cinsert"));
         return fsetcinsert_name;
       }
 
@@ -301,7 +301,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fsetin_name()
       {
-        static core::identifier_string fsetin_name = data::detail::initialise_static_expression(fsetin_name, core::identifier_string("@fset_in"));
+        static core::identifier_string fsetin_name = core::detail::initialise_static_expression(fsetin_name, core::identifier_string("@fset_in"));
         return fsetin_name;
       }
 
@@ -359,7 +359,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fsetunion_name()
       {
-        static core::identifier_string fsetunion_name = data::detail::initialise_static_expression(fsetunion_name, core::identifier_string("@fset_union"));
+        static core::identifier_string fsetunion_name = core::detail::initialise_static_expression(fsetunion_name, core::identifier_string("@fset_union"));
         return fsetunion_name;
       }
 
@@ -419,7 +419,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fsetintersection_name()
       {
-        static core::identifier_string fsetintersection_name = data::detail::initialise_static_expression(fsetintersection_name, core::identifier_string("@fset_inter"));
+        static core::identifier_string fsetintersection_name = core::detail::initialise_static_expression(fsetintersection_name, core::identifier_string("@fset_inter"));
         return fsetintersection_name;
       }
 
@@ -479,7 +479,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fsetdifference_name()
       {
-        static core::identifier_string fsetdifference_name = data::detail::initialise_static_expression(fsetdifference_name, core::identifier_string("@fset_diff"));
+        static core::identifier_string fsetdifference_name = core::detail::initialise_static_expression(fsetdifference_name, core::identifier_string("@fset_diff"));
         return fsetdifference_name;
       }
 

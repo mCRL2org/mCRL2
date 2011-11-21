@@ -6,18 +6,18 @@
 // (See accompanying file LICENSE_1_0.txt or copy at
 // http://www.boost.org/LICENSE_1_0.txt)
 //
-/// \file mcrl2/data/abstraction.h
-/// \brief The class abstraction.
+/// \file mcrl2/core/construction_utility.h
+/// \brief construction utility
 
-#ifndef MCRL2_DATA_CONSTRUCTION_UTILITY_H
-#define MCRL2_DATA_CONSTRUCTION_UTILITY_H
+#ifndef MCRL2_CORE_CONSTRUCTION_UTILITY_H
+#define MCRL2_CORE_CONSTRUCTION_UTILITY_H
 
 #include "mcrl2/atermpp/aterm_appl.h"
 #include "mcrl2/core/identifier_string.h"
 
 namespace mcrl2
 {
-namespace data
+namespace core
 {
 namespace detail
 {
@@ -55,7 +55,7 @@ struct singleton_identifier : public singleton_expression< Derived, core::identi
   {};
 
 } // namespace detail
-} // namespace data
+} // namespace core
 } // namespace mcrl2
 
 

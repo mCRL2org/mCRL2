@@ -69,7 +69,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bagconstructor_name()
       {
-        static core::identifier_string bagconstructor_name = data::detail::initialise_static_expression(bagconstructor_name, core::identifier_string("@bag"));
+        static core::identifier_string bagconstructor_name = core::detail::initialise_static_expression(bagconstructor_name, core::identifier_string("@bag"));
         return bagconstructor_name;
       }
 
@@ -138,7 +138,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& emptybag_name()
       {
-        static core::identifier_string emptybag_name = data::detail::initialise_static_expression(emptybag_name, core::identifier_string("{}"));
+        static core::identifier_string emptybag_name = core::detail::initialise_static_expression(emptybag_name, core::identifier_string("{}"));
         return emptybag_name;
       }
 
@@ -171,7 +171,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bagfbag_name()
       {
-        static core::identifier_string bagfbag_name = data::detail::initialise_static_expression(bagfbag_name, core::identifier_string("@bagfbag"));
+        static core::identifier_string bagfbag_name = core::detail::initialise_static_expression(bagfbag_name, core::identifier_string("@bagfbag"));
         return bagfbag_name;
       }
 
@@ -228,7 +228,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bagcomprehension_name()
       {
-        static core::identifier_string bagcomprehension_name = data::detail::initialise_static_expression(bagcomprehension_name, core::identifier_string("@bagcomp"));
+        static core::identifier_string bagcomprehension_name = core::detail::initialise_static_expression(bagcomprehension_name, core::identifier_string("@bagcomp"));
         return bagcomprehension_name;
       }
 
@@ -285,7 +285,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bagcount_name()
       {
-        static core::identifier_string bagcount_name = data::detail::initialise_static_expression(bagcount_name, core::identifier_string("count"));
+        static core::identifier_string bagcount_name = core::detail::initialise_static_expression(bagcount_name, core::identifier_string("count"));
         return bagcount_name;
       }
 
@@ -343,7 +343,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bagin_name()
       {
-        static core::identifier_string bagin_name = data::detail::initialise_static_expression(bagin_name, core::identifier_string("in"));
+        static core::identifier_string bagin_name = core::detail::initialise_static_expression(bagin_name, core::identifier_string("in"));
         return bagin_name;
       }
 
@@ -401,7 +401,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bagjoin_name()
       {
-        static core::identifier_string bagjoin_name = data::detail::initialise_static_expression(bagjoin_name, core::identifier_string("+"));
+        static core::identifier_string bagjoin_name = core::detail::initialise_static_expression(bagjoin_name, core::identifier_string("+"));
         return bagjoin_name;
       }
 
@@ -459,7 +459,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bagintersect_name()
       {
-        static core::identifier_string bagintersect_name = data::detail::initialise_static_expression(bagintersect_name, core::identifier_string("*"));
+        static core::identifier_string bagintersect_name = core::detail::initialise_static_expression(bagintersect_name, core::identifier_string("*"));
         return bagintersect_name;
       }
 
@@ -517,7 +517,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bagdifference_name()
       {
-        static core::identifier_string bagdifference_name = data::detail::initialise_static_expression(bagdifference_name, core::identifier_string("-"));
+        static core::identifier_string bagdifference_name = core::detail::initialise_static_expression(bagdifference_name, core::identifier_string("-"));
         return bagdifference_name;
       }
 
@@ -575,7 +575,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bag2set_name()
       {
-        static core::identifier_string bag2set_name = data::detail::initialise_static_expression(bag2set_name, core::identifier_string("Bag2Set"));
+        static core::identifier_string bag2set_name = core::detail::initialise_static_expression(bag2set_name, core::identifier_string("Bag2Set"));
         return bag2set_name;
       }
 
@@ -632,7 +632,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& set2bag_name()
       {
-        static core::identifier_string set2bag_name = data::detail::initialise_static_expression(set2bag_name, core::identifier_string("Set2Bag"));
+        static core::identifier_string set2bag_name = core::detail::initialise_static_expression(set2bag_name, core::identifier_string("Set2Bag"));
         return set2bag_name;
       }
 
@@ -689,7 +689,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& zero_function_name()
       {
-        static core::identifier_string zero_function_name = data::detail::initialise_static_expression(zero_function_name, core::identifier_string("@zero_"));
+        static core::identifier_string zero_function_name = core::detail::initialise_static_expression(zero_function_name, core::identifier_string("@zero_"));
         return zero_function_name;
       }
 
@@ -746,7 +746,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& one_function_name()
       {
-        static core::identifier_string one_function_name = data::detail::initialise_static_expression(one_function_name, core::identifier_string("@one_"));
+        static core::identifier_string one_function_name = core::detail::initialise_static_expression(one_function_name, core::identifier_string("@one_"));
         return one_function_name;
       }
 
@@ -803,7 +803,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& add_function_name()
       {
-        static core::identifier_string add_function_name = data::detail::initialise_static_expression(add_function_name, core::identifier_string("@add_"));
+        static core::identifier_string add_function_name = core::detail::initialise_static_expression(add_function_name, core::identifier_string("@add_"));
         return add_function_name;
       }
 
@@ -861,7 +861,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& min_function_name()
       {
-        static core::identifier_string min_function_name = data::detail::initialise_static_expression(min_function_name, core::identifier_string("@min_"));
+        static core::identifier_string min_function_name = core::detail::initialise_static_expression(min_function_name, core::identifier_string("@min_"));
         return min_function_name;
       }
 
@@ -919,7 +919,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& monus_function_name()
       {
-        static core::identifier_string monus_function_name = data::detail::initialise_static_expression(monus_function_name, core::identifier_string("@monus_"));
+        static core::identifier_string monus_function_name = core::detail::initialise_static_expression(monus_function_name, core::identifier_string("@monus_"));
         return monus_function_name;
       }
 
@@ -977,7 +977,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& nat2bool_function_name()
       {
-        static core::identifier_string nat2bool_function_name = data::detail::initialise_static_expression(nat2bool_function_name, core::identifier_string("@Nat2Bool_"));
+        static core::identifier_string nat2bool_function_name = core::detail::initialise_static_expression(nat2bool_function_name, core::identifier_string("@Nat2Bool_"));
         return nat2bool_function_name;
       }
 
@@ -1034,7 +1034,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& bool2nat_function_name()
       {
-        static core::identifier_string bool2nat_function_name = data::detail::initialise_static_expression(bool2nat_function_name, core::identifier_string("@Bool2Nat_"));
+        static core::identifier_string bool2nat_function_name = core::detail::initialise_static_expression(bool2nat_function_name, core::identifier_string("@Bool2Nat_"));
         return bool2nat_function_name;
       }
 

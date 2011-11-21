@@ -84,7 +84,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbag_empty_name()
       {
-        static core::identifier_string fbag_empty_name = data::detail::initialise_static_expression(fbag_empty_name, core::identifier_string("@fbag_empty"));
+        static core::identifier_string fbag_empty_name = core::detail::initialise_static_expression(fbag_empty_name, core::identifier_string("@fbag_empty"));
         return fbag_empty_name;
       }
 
@@ -117,7 +117,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbag_cons_name()
       {
-        static core::identifier_string fbag_cons_name = data::detail::initialise_static_expression(fbag_cons_name, core::identifier_string("@fbag_cons"));
+        static core::identifier_string fbag_cons_name = core::detail::initialise_static_expression(fbag_cons_name, core::identifier_string("@fbag_cons"));
         return fbag_cons_name;
       }
 
@@ -188,7 +188,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbaginsert_name()
       {
-        static core::identifier_string fbaginsert_name = data::detail::initialise_static_expression(fbaginsert_name, core::identifier_string("@fbag_insert"));
+        static core::identifier_string fbaginsert_name = core::detail::initialise_static_expression(fbaginsert_name, core::identifier_string("@fbag_insert"));
         return fbaginsert_name;
       }
 
@@ -247,7 +247,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbagcinsert_name()
       {
-        static core::identifier_string fbagcinsert_name = data::detail::initialise_static_expression(fbagcinsert_name, core::identifier_string("@fbag_cinsert"));
+        static core::identifier_string fbagcinsert_name = core::detail::initialise_static_expression(fbagcinsert_name, core::identifier_string("@fbag_cinsert"));
         return fbagcinsert_name;
       }
 
@@ -306,7 +306,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbagcount_name()
       {
-        static core::identifier_string fbagcount_name = data::detail::initialise_static_expression(fbagcount_name, core::identifier_string("@fbag_count"));
+        static core::identifier_string fbagcount_name = core::detail::initialise_static_expression(fbagcount_name, core::identifier_string("@fbag_count"));
         return fbagcount_name;
       }
 
@@ -364,7 +364,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbagin_name()
       {
-        static core::identifier_string fbagin_name = data::detail::initialise_static_expression(fbagin_name, core::identifier_string("@fbag_in"));
+        static core::identifier_string fbagin_name = core::detail::initialise_static_expression(fbagin_name, core::identifier_string("@fbag_in"));
         return fbagin_name;
       }
 
@@ -422,7 +422,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbagjoin_name()
       {
-        static core::identifier_string fbagjoin_name = data::detail::initialise_static_expression(fbagjoin_name, core::identifier_string("@fbag_join"));
+        static core::identifier_string fbagjoin_name = core::detail::initialise_static_expression(fbagjoin_name, core::identifier_string("@fbag_join"));
         return fbagjoin_name;
       }
 
@@ -482,7 +482,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbagintersect_name()
       {
-        static core::identifier_string fbagintersect_name = data::detail::initialise_static_expression(fbagintersect_name, core::identifier_string("@fbag_inter"));
+        static core::identifier_string fbagintersect_name = core::detail::initialise_static_expression(fbagintersect_name, core::identifier_string("@fbag_inter"));
         return fbagintersect_name;
       }
 
@@ -542,7 +542,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbagdifference_name()
       {
-        static core::identifier_string fbagdifference_name = data::detail::initialise_static_expression(fbagdifference_name, core::identifier_string("@fbag_diff"));
+        static core::identifier_string fbagdifference_name = core::detail::initialise_static_expression(fbagdifference_name, core::identifier_string("@fbag_diff"));
         return fbagdifference_name;
       }
 
@@ -602,7 +602,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fbag2fset_name()
       {
-        static core::identifier_string fbag2fset_name = data::detail::initialise_static_expression(fbag2fset_name, core::identifier_string("@fbag2fset"));
+        static core::identifier_string fbag2fset_name = core::detail::initialise_static_expression(fbag2fset_name, core::identifier_string("@fbag2fset"));
         return fbag2fset_name;
       }
 
@@ -660,7 +660,7 @@ namespace mcrl2 {
       inline
       core::identifier_string const& fset2fbag_name()
       {
-        static core::identifier_string fset2fbag_name = data::detail::initialise_static_expression(fset2fbag_name, core::identifier_string("@fset2fbag"));
+        static core::identifier_string fset2fbag_name = core::detail::initialise_static_expression(fset2fbag_name, core::identifier_string("@fset2fbag"));
         return fset2fbag_name;
       }
 

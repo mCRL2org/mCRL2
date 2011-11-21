@@ -15,7 +15,7 @@
 #include "mcrl2/data/function_symbol.h"
 #include "mcrl2/data/application.h"
 #include "mcrl2/data/data_equation.h"
-#include "mcrl2/data/detail/construction_utility.h"
+#include "mcrl2/core/detail/construction_utility.h"
 
 
 namespace mcrl2
@@ -40,7 +40,7 @@ namespace detail
 
 /// \ Component to facilitate code generation
 template < typename Derived >
-struct symbol : public detail::singleton_identifier< Derived >
+struct symbol : public core::detail::singleton_identifier< Derived >
 {
   static bool is_application(data_expression const& e)
   {
@@ -59,7 +59,7 @@ struct symbol : public detail::singleton_identifier< Derived >
 
   static bool is_function_symbol(function_symbol const& e)
   {
-    return e.name() == detail::singleton_identifier< Derived >();
+    return e.name() == core::detail::singleton_identifier< Derived >();
   }
 };
 

@@ -12,7 +12,7 @@ LIBSTRUCT_SYMBOL_FUNCTIONS = '''// %(name)s
 inline
 atermpp::function_symbol function_symbol_%(name)s()
 {
-  static atermpp::function_symbol function_symbol_%(name)s = data::detail::initialise_static_expression(function_symbol_%(name)s, atermpp::function_symbol("%(name)s", %(arity)d));
+  static atermpp::function_symbol function_symbol_%(name)s = core::detail::initialise_static_expression(function_symbol_%(name)s, atermpp::function_symbol("%(name)s", %(arity)d));
   return function_symbol_%(name)s;
 }
 
@@ -191,7 +191,7 @@ CONSTRUCTOR_FUNCTIONS = '''// %(name)s
 inline
 ATermAppl construct%(name)s()
 {
-  static atermpp::aterm_appl t = data::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s)));
+  static atermpp::aterm_appl t = core::detail::initialise_static_expression(t, atermpp::aterm_appl(ATmakeAppl%(arity)d(function_symbol_%(name)s()%(arguments)s)));
   return t;
 }
 
