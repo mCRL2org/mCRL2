@@ -2604,64 +2604,105 @@ FILE* RewriterCompilingJitty::MakeTempFiles()
 	return result;
 }
 
+// The function below yields true if the function indicated by the
+// function index can legitemately be used with a arguments.
+// Typically a function f:D1x...xDn->D can be used with 0 and n arguments.
+// A function f:(D1x...xDn)->(E1x...Em)->F can be used with 0, n, and n+m 
+// arguments.
+static bool arity_is_allowed(
+                     const sort_expression s,
+                     const size_t a)
+{
+// ATfprintf(stderr,"ARITY IS ALLOWED %t   %d\n",s,a);
+  if (a==0) 
+  {
+// ATfprintf(stderr,"TRUE1 %t %d\n",s,a);
+    return true;
+  }
+  if (is_function_sort(s))
+  {
+    const function_sort fs(s);
+    size_t n=fs.domain().size();
+    if (n>a)
+    { 
+// ATfprintf(stderr,"FALSE1 %t %d\n",s,a);
+      return false;
+    }
+    return arity_is_allowed(fs.codomain(),a-n);
+  }
+// ATfprintf(stderr,"FALSE2 %t %d\n",s,a);
+  return false;
+}
+
+static bool arity_is_allowed(
+                     const size_t func_index,
+                     const size_t a)
+{
+// ATfprintf(stderr,"ARITY IS ALLOWED ------- %d   %d\n",func_index,a);
+  return arity_is_allowed(get_int2term(func_index).sort(),a);
+}
+
 inline 
-void declare_rewr_functions(FILE* f, size_t func_index, int arity)
+void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity)
 {
   /* If generate_code is false, only the variable aux is increased to calculate the 
      return value. TODO. This can be optimized.
      Declare the function that gets function func_index in normal form */
   // int aux = 0;
-  for (int a=0; a<=arity; a++)
+  for (size_t a=0; a<=arity; a++)
   {
-    int b = (a<=NF_MAX_ARITY)?a:0;
-    for (size_t nfs=0; (nfs >> b) == 0; nfs++)
+    if (arity_is_allowed(func_index,a))
     {
-      fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_%lu(",func_index,a,nfs);
-      for (int i=0; i<a; i++)
+      const size_t b = (a<=NF_MAX_ARITY)?a:0;
+      for (size_t nfs=0; (nfs >> b) == 0; nfs++)
       {
-        fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
-      }
-      fprintf(f,  ");\n");
-
-      if (nfs == 0)
-      {
-        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index, a, func_index, a);
-        for(int i = 1; i <= a; ++i)
+        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%ld_%lu(",func_index,a,nfs);
+        for (size_t i=0; i<a; i++)
         {
-          fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %i)", (i == 1?"":", "), i);
+          fprintf(f, (i==0)?"atermpp::aterm_appl arg%ld":", atermpp::aterm_appl arg%ld",i);
         }
-        fprintf(f,  "); }\n");
-      }
-      else // (nfs > 0)
-      {
-        /* Declarations below declare functions that represent function symbols with partly 
-           normalized arguments. They were encoded as function symbols represented by an aterm_int
-           with an increased number, for which special space was assigned in array with encodings for
-           opIds. As this was a trick local for the compiling jitty rewriter, an alternative should
-           be found. JFG 21/11/2011.
-        if (generate_code)
-        {
-          fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0(",func_index+1+aux,a);
-          for (int i=0; i<a; i++)
-          {
-            fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
-          }
-          fprintf(f,  ") { return rewr_%lu_%i_%lu(",func_index,a,nfs);
-          for (int i=0; i<a; i++)
-          {
-            fprintf(f, (i==0)?"arg%i":",arg%i",i);
-          }
-          fprintf(f,  "); }\n");
-  
-          fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index+1+aux,a,func_index+1+aux,a);
-          for (int i=1; i<=a; i++)
-          {
-            fprintf(f, (i==1)?"ATAgetArgument(t, %i)":", ATAgetArgument(t, %i)",i);
-          }
-          fprintf(f,  "); }\n");
-        } */
+        fprintf(f,  ");\n");
 
-        // ++aux;
+        if (nfs == 0)
+        {
+          fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%ld_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%ld_0(", func_index, a, func_index, a);
+          for(size_t i = 1; i <= a; ++i)
+          {
+            fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %ld)", (i == 1?"":", "), i);
+          }
+          fprintf(f,  "); }\n");
+        }
+        else // (nfs > 0)
+        {
+          /* Declarations below declare functions that represent function symbols with partly 
+             normalized arguments. They were encoded as function symbols represented by an aterm_int
+             with an increased number, for which special space was assigned in array with encodings for
+             opIds. As this was a trick local for the compiling jitty rewriter, an alternative should
+             be found. JFG 21/11/2011.
+          if (generate_code)
+          {
+            fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0(",func_index+1+aux,a);
+            for (int i=0; i<a; i++)
+            {
+              fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
+            }
+            fprintf(f,  ") { return rewr_%lu_%i_%lu(",func_index,a,nfs);
+            for (int i=0; i<a; i++)
+            {
+              fprintf(f, (i==0)?"arg%i":",arg%i",i);
+            }
+            fprintf(f,  "); }\n");
+  
+            fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index+1+aux,a,func_index+1+aux,a);
+            for (int i=1; i<=a; i++)
+            {
+              fprintf(f, (i==1)?"ATAgetArgument(t, %i)":", ATAgetArgument(t, %i)",i);
+            }
+            fprintf(f,  "); }\n");
+          } */
+
+          // ++aux;
+        }
       }
     }
   }
@@ -2830,38 +2871,41 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   
       for (size_t a=0; a<=arity; a++) // TODO Only generate code when number of arguments match.
       {
-        nfs_array nfs_a(a);
-        int b = (a<=NF_MAX_ARITY)?a:0;
-        for (size_t nfs=0; (nfs >> b) == 0; nfs++)
+        if (arity_is_allowed(j,a))
         {
-          fprintf(f,  "static atermpp::aterm_appl rewr_%ld_%ld_%lu(",j,a,nfs);
-          for (size_t i=0; i<a; i++)
+          nfs_array nfs_a(a);
+          int b = (a<=NF_MAX_ARITY)?a:0;
+          for (size_t nfs=0; (nfs >> b) == 0; nfs++)
           {
-            fprintf(f, (i==0)?"atermpp::aterm_appl arg%ld":", atermpp::aterm_appl arg%ld",i);
-          }
-          fprintf(f,  ")\n"
-                  "{\n"
-                 );
-          if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
-          {
-          // Implement strategy
-            if (0 < a)
+            fprintf(f,  "static atermpp::aterm_appl rewr_%ld_%ld_%lu(",j,a,nfs);
+            for (size_t i=0; i<a; i++)
             {
-              nfs_a.set_value(a,nfs);
+              fprintf(f, (i==0)?"atermpp::aterm_appl arg%ld":", atermpp::aterm_appl arg%ld",i);
             }
-            implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs); 
-          }
-          else
-          {
-            MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,a);
-            for (size_t k=0; k<a; k++)
+            fprintf(f,  ")\n"
+                    "{\n"
+                   );
+            if (j<jittyc_eqns.size() && !jittyc_eqns[j].empty() )
             {
-              used[k] = ((nfs & ((size_t)1 << k)) != 0);
+            // Implement strategy
+              if (0 < a)
+              {
+                nfs_a.set_value(a,nfs);
+              }
+              implement_strategy(f,create_strategy(jittyc_eqns[j],j,a,nfs_a,true_inner),a,1,j,nfs); 
             }
-            finish_function(f,a,j,used);
-          }
+            else
+            {
+              MCRL2_SYSTEM_SPECIFIC_ALLOCA(used,bool,a);
+              for (size_t k=0; k<a; k++)
+              {
+                used[k] = ((nfs & ((size_t)1 << k)) != 0);
+              }
+              finish_function(f,a,j,used);
+            }
   
-          fprintf(f,                 "}\n");
+            fprintf(f,                 "}\n");
+          }
         }
       }
       fprintf(f,  "\n");
@@ -2894,7 +2938,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     {
       const function_symbol fs=get_int2term(j);
       const size_t arity = getArity(fs);
-      if ((i <= arity) && data_equation_selector(fs))
+      if ((i <= arity) && data_equation_selector(fs) && arity_is_allowed(j,i))
       {
         fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j,j,i);
         /* if (i <= NF_MAX_ARITY)
@@ -3042,6 +3086,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "atermpp::aterm_appl rewrite(const atermpp::aterm_appl t)\n"
       "{\n"
+// " ATfprintf(stderr,\"REWRITE %%t\\n\",t);\n"
       "  using namespace mcrl2::core::detail;\n"
       "  if (t.function()==apples[t.size()])\n"
       "  { // Term t has the shape #REWR#(t1,...,tn)\n"
