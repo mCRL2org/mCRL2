@@ -21,8 +21,9 @@ namespace detail {
   // Separates all sections with a keyword from the other keyword sections
   // Returns a pair containing consisiting of the keyword section and the other keyword sections
   inline
-  std::pair<std::string, std::string> separate_keyword_section(const std::string& text, const std::string& keyword, const std::vector<std::string>& all_keywords)
+  std::pair<std::string, std::string> separate_keyword_section(const std::string& text1, const std::string& keyword, const std::vector<std::string>& all_keywords)
   {
+    std::string text = boost::trim_copy(text1);
     std::ostringstream out1; // will contain the keyword sections
     std::ostringstream out2; // will contain the other keyword sections
 

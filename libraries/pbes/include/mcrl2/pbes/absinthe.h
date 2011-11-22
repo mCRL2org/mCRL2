@@ -861,7 +861,6 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     all_keywords.push_back("map");
     all_keywords.push_back("cons");
     all_keywords.push_back("absfunc");
-    all_keywords.push_back("abssort");
     all_keywords.push_back("absmap");
     std::pair<std::string, std::string> q;
 
@@ -870,6 +869,9 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     text = q.second;
 
     q = utilities::detail::separate_keyword_section(text, "absmap", all_keywords);
+mCRL2log(log::debug, "absinthe") << "--- q.first ---\n" << q.first << std::endl;
+mCRL2log(log::debug, "absinthe") << "--- q.second ---\n" << q.second << std::endl;
+
     abstraction_mapping_text = q.first;
     text = q.second;
 

@@ -67,7 +67,7 @@ class pbes_absinthe_tool: public input_output_tool
   public:
     pbes_absinthe_tool()
       : super(
-        "pbesabsint",
+        "pbesabsinthe",
         "Wieger Wesselink; Maciek Gazda and Tim Willemse",
         "apply data domain abstracion to a PBES",
         "Reads a file containing a PBES, and applies abstraction to it's data domain, based on a\n"
@@ -78,7 +78,7 @@ class pbes_absinthe_tool: public input_output_tool
 
     bool run()
     {
-      mCRL2log(verbose) << "pbesabsint parameters:    " << std::endl;
+      mCRL2log(verbose) << "pbesabsinthe parameters:  " << std::endl;
       mCRL2log(verbose) << "  input file:             " << m_input_filename << std::endl;
       mCRL2log(verbose) << "  output file:            " << m_output_filename << std::endl;
       mCRL2log(verbose) << "  abstraction file:       " << m_abstraction_file << std::endl;

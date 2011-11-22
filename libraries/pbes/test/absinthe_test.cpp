@@ -24,6 +24,24 @@ using namespace mcrl2::data;
 using namespace mcrl2::pbes_system;
 using namespace mcrl2::log;
 
+void test_separate_keyword_section()
+{
+  std::string text =
+    "\n"
+    "\n"
+    "absmap\n"
+    "h: Nat -> AbsNat\n"
+  ;
+
+  std::vector<std::string> all_keywords;
+  all_keywords.push_back("sort");
+  all_keywords.push_back("absmap");
+
+  std::pair<std::string, std::string> q = utilities::detail::separate_keyword_section(text, "absmap", all_keywords);
+  BOOST_CHECK(q.first.find("absmap") == 0);
+  BOOST_CHECK(boost::trim_copy(q.second).empty());
+}
+
 void test_separate_sort_declarations()
 {
   std::string DATASPEC =
@@ -145,6 +163,7 @@ int test_main(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
+  test_separate_keyword_section();
   test_separate_sort_declarations();
   test1();
   test2();
