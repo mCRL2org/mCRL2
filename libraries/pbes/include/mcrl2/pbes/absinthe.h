@@ -432,7 +432,10 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     for (data::function_symbol_vector::const_iterator i = m.begin(); i != m.end(); ++i)
     {
       data::function_sort f = i->sort();
-      assert(f.domain().size()  == 1);
+      if (f.domain().size() != 1)
+      {
+        throw mcrl2::runtime_error("cannot abstract the function " + data::pp(*i) + " since the arity of the domain is not equal to one!");
+      }
       result[f.domain().front()] = *i;
     }
     return result;
@@ -886,6 +889,11 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     mCRL2log(log::debug, "absinthe") << "--- function mapping ---\n" << function_symbol_mapping_text << std::endl;
     mCRL2log(log::debug, "absinthe") << "--- abstraction mapping ---\n" << abstraction_mapping_text << std::endl;
     mCRL2log(log::debug, "absinthe") << "--- pbes sorts ---\n" << pbes_sorts_text << std::endl;
+
+    if (abstraction_mapping_text.find("absmap") != 0)
+    {
+      throw mcrl2::runtime_error("the abstraction mapping may not be empty!");
+    }
 
     // 1) create the data specification data_spec, which consists of user_sorts_text, abstract_mapping_text and p.data()
     data::data_specification data_spec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
