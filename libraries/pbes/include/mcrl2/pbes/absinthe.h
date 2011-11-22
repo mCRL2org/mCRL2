@@ -893,7 +893,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     mCRL2log(log::debug, "absinthe") << "--- data specification 3) ---\n" << data::pp(data_spec) << std::endl;
 
     // abstraction functions (specified by the user)
-    abstraction_map sigmaA = parse_abstraction_map(user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
+    abstraction_map sigmaA = parse_abstraction_map(data::pp(data_spec) + "\n" + abstraction_mapping_text.substr(3));
 
     // sort expressions replacements (extracted from sigmaA)
     sort_expression_substitution_map sigmaS;
