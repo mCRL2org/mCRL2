@@ -226,6 +226,24 @@ struct absinthe_algorithm
     }
   };
 
+  // Applies sigmaS to a sort expression
+  struct sort_function: public std::unary_function<data::sort_expression, data::sort_expression>
+  {
+    absinthe_sort_expression_builder f;
+
+    sort_function(const abstraction_map& sigmaA,
+                  const sort_expression_substitution_map& sigmaS,
+                  const function_symbol_substitution_map& sigmaF
+                 )
+      : f(sigmaA, sigmaS, sigmaF)
+    {}
+
+    data::sort_expression operator()(const data::sort_expression& x)
+    {
+      return f(x);
+    }
+  };
+
   struct absinthe_data_expression_builder: public pbes_expression_builder<absinthe_data_expression_builder>
   {
     typedef pbes_expression_builder<absinthe_data_expression_builder> super;
@@ -237,13 +255,13 @@ struct absinthe_algorithm
 #include "mcrl2/core/detail/builder_msvc.inc.h"
 #endif
 
-    data::variable_list make_variables(const data::data_expression_list& x, const std::string& hint) const
+    data::variable_list make_variables(const data::data_expression_list& x, const std::string& hint, sort_function sigma) const
     {
       atermpp::vector<data::variable> result;
       unsigned int i = 0;
       for (data::data_expression_list::const_iterator j = x.begin(); j != x.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), apply_sigmaS(sigmaS)(j->sort())));
+        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), sigma(j->sort())));
       }
       return data::variable_list(result.begin(), result.end());
     }
@@ -299,7 +317,7 @@ struct absinthe_algorithm
     pbes_expression operator()(const propositional_variable_instantiation& x)
     {
       data::data_expression_list e = lift(x.parameters());
-      data::variable_list variables = make_variables(x.parameters(), "x");
+      data::variable_list variables = make_variables(x.parameters(), "x", sort_function(sigmaA, sigmaS, sigmaF));
       data::data_expression_list::iterator i = e.begin();
       data::variable_list::iterator j = variables.begin();
       data::data_expression_vector z;
@@ -314,6 +332,7 @@ struct absinthe_algorithm
       }
       else
       {
+        pbes_expression y = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
         return make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
       }
     }
@@ -440,41 +459,12 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     }
   };
 
-  struct apply_sigmaS
-  {
-    const sort_expression_substitution_map& sigmaS;
-
-    apply_sigmaS(const sort_expression_substitution_map& sigmaS_)
-      : sigmaS(sigmaS_)
-    {}
-
-    data::sort_expression operator()(const data::sort_expression& s) const
-    {
-      sort_expression_substitution_map::const_iterator i = sigmaS.find(s);
-      if (i != sigmaS.end())
-      {
-        return i->second;
-      }
-      return s;
-    }
-  };
-
   // function that transforms a function symbol
   struct lift_function_symbol_1_2
   {
-    const abstraction_map& sigmaA;
-    const sort_expression_substitution_map& sigmaS;
-    const function_symbol_substitution_map& sigmaF;
     std::map<std::string, std::string> unprintable;
 
-
-    lift_function_symbol_1_2(const abstraction_map& sigmaA_,
-                             const sort_expression_substitution_map& sigmaS_,
-                             const function_symbol_substitution_map& sigmaF_
-                            )
-      : sigmaA(sigmaA_),
-        sigmaS(sigmaS_),
-        sigmaF(sigmaF_)
+    lift_function_symbol_1_2()
     {
       unprintable["&&"] = "and";
       unprintable["!"] = "not";
@@ -498,15 +488,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
       unprintable["@c1"] = "c1";
     }
 
-    void check_sort(const data::function_symbol& f, const data::sort_expression& s) const
-    {
-      if (sigmaS.find(s) != sigmaS.end())
-      {
-        throw mcrl2::runtime_error("could not lift function symbol " + print_symbol(f) + " because there is a user defined abstraction for sort " + data::pp(s));
-      }
-    }
-
-    data::function_symbol operator()(const data::function_symbol& f) const
+    data::function_symbol operator()(const data::function_symbol& f, sort_function sigma) const
     {
       //mCRL2log(log::debug, "absinthe") << "lift_function_symbol_1_2 f = " << print_symbol(f) << std::endl;
       std::string name = std::string(f.name());
@@ -519,7 +501,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
       data::sort_expression s = f.sort();
       if (data::is_basic_sort(s))
       {
-        data::sort_expression s1 = absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(s);
+        data::sort_expression s1 = sigma(s);
         return data::function_symbol(name, s1);
       }
       else if (data::is_function_sort(s))
@@ -527,23 +509,14 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
         // Apply sigmaS recursively to s
         //   f:        tail:           List(Nat) -> List(Nat)
         //   result:   generated_tail: List(AbsNat) -> Set(List(AbsNat))
-        data::function_sort fs = absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(s);
-
-        // TODO: do these checks still make sense?
-        // data::sort_expression_list domain = fs.domain();
-        // for (data::sort_expression_list::iterator i = domain.begin(); i != domain.end(); ++i)
-        // {
-        //   check_sort(f, *i);
-        // }
-        // check_sort(f, fs.codomain());
-
+        data::function_sort fs = sigma(s);
         return data::function_symbol(name, data::function_sort(fs.domain(), make_set()(fs.codomain())));
       }
       else if (data::is_container_sort(s))
       {
         // Apply sigmaS recursively to s
         // Example: List(Nat) -> List(AbsNat)
-        data::sort_expression s1 = absinthe_sort_expression_builder(sigmaA, sigmaS, sigmaF)(s);
+        data::sort_expression s1 = sigma(s);
         return data::function_symbol(name, s1);
       }
       throw mcrl2::runtime_error("absinthe algorithm: unsupported sort " + print_term(s) + " detected!");
@@ -580,24 +553,21 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
   // function that generates an equation from a function symbol and it's corresponding 'generated' version
   struct lift_equation_1_2
   {
-    const sort_expression_substitution_map& sigmaS;
-
-    lift_equation_1_2(const sort_expression_substitution_map& sigmaS_)
-      : sigmaS(sigmaS_)
+    lift_equation_1_2()
     {}
 
-    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint) const
+    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
       atermpp::vector<data::variable> result;
       unsigned int i = 0;
       for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), apply_sigmaS(sigmaS)(*j)));
+        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), sigma(*j)));
       }
       return result;
     }
 
-    data::data_equation operator()(const data::function_symbol& f1, const data::function_symbol& f2) const
+    data::data_equation operator()(const data::function_symbol& f1, const data::function_symbol& f2, sort_function sigma) const
     {
       mCRL2log(log::debug, "absinthe") << "lift_equation_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
       data::variable_list variables;
@@ -620,7 +590,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
         data::function_sort fs1(f1.sort());
         data::function_sort fs2(f2.sort());
         // TODO: generate these variables in a proper way
-        atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x");
+        atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
         variables = data::variable_list(x.begin(), x.end());
         lhs = data::application(f2, data::data_expression_list(x.begin(), x.end()));
         rhs = data::detail::create_finite_set(data::application(f1, data::data_expression_list(x.begin(), x.end())));
@@ -634,10 +604,6 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
         // tail: List(AbsNat) -> List(Nat)
         lhs = f2;
         rhs = f1;
-        //sort_expression_substitution_map::const_iterator i = sigmaS.find(s1);
-        //if (i != sigmaS.end())
-        //{
-        //}
       }
       else
       {
@@ -650,19 +616,16 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
   // function that generates an equation from a function symbol and it's corresponding lifted version
   struct lift_equation_2_3
   {
-    const sort_expression_substitution_map& sigmaS;
-
-    lift_equation_2_3(const sort_expression_substitution_map& sigmaS_)
-      : sigmaS(sigmaS_)
+    lift_equation_2_3()
     {}
 
-    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint) const
+    atermpp::vector<data::variable> make_variables(const data::sort_expression_list& sorts, const std::string& hint, sort_function sigma) const
     {
       atermpp::vector<data::variable> result;
       unsigned int i = 0;
       for (data::sort_expression_list::const_iterator j = sorts.begin(); j != sorts.end(); ++i, ++j)
       {
-        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), apply_sigmaS(sigmaS)(*j)));
+        result.push_back(data::variable(hint + boost::lexical_cast<std::string>(i), sigma(*j)));
       }
       return result;
     }
@@ -683,7 +646,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
       return body;
     }
 
-    data::data_equation operator()(const data::function_symbol& f2, const data::function_symbol& f3) const
+    data::data_equation operator()(const data::function_symbol& f2, const data::function_symbol& f3, sort_function sigma) const
     {
       //mCRL2log(log::debug, "absinthe") << "lift_equation_2_3 f2 = " << print_symbol(f2) << " f3 = " << print_symbol(f3) << std::endl;
       data::variable_list variables;
@@ -704,8 +667,8 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
         data::function_sort fs3(f3.sort());
 
         // TODO: generate these variables in a proper way
-        atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x");
-        atermpp::vector<data::variable> X = make_variables(fs3.domain(), "X");
+        atermpp::vector<data::variable> x = make_variables(fs2.domain(), "x", sigma);
+        atermpp::vector<data::variable> X = make_variables(fs3.domain(), "X", sigma);
 
         variables = data::variable_list(X.begin(), X.end());
         lhs = data::application(f3, data::data_expression_list(X.begin(), X.end()));
@@ -788,6 +751,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
   void lift_data_specification(const pbes<>& p, const abstraction_map& sigmaA, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
   {
     sort_expression_substitution_map sigmaS_consistency = sigmaS; // is only used for consistency checking
+    sort_function sigma(sigmaA, sigmaS, sigmaF);
 
 #ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
   data::detail::set_data_specification(dataspec);
@@ -822,13 +786,13 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
       data::function_symbol f1 = *i;
       if (sigmaF.find(f1) == sigmaF.end())
       {
-        data::function_symbol f2 = lift_function_symbol_1_2(sigmaA, sigmaS, sigmaF)(f1); // sigmaS is not applied, but only used for checking
+        data::function_symbol f2 = lift_function_symbol_1_2()(f1, sigma);
         mCRL2log(log::debug, "absinthe") << "lifted function symbol: " << data::pp(f1) << " to " << data::pp(f2) << std::endl;
         check_consistency(f1, f2, sigmaS_consistency);
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
 
-        data::data_equation eq = lift_equation_1_2(sigmaS)(f1, f2);
+        data::data_equation eq = lift_equation_1_2()(f1, f2, sigma);
         mCRL2log(log::debug, "absinthe") << "adding equation: " << eq << std::endl;
         mCRL2log(log::debug, "absinthe") << "adding equation: " << data::pp(eq) << std::endl;
         dataspec.add_equation(eq);
@@ -848,7 +812,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
       i->second = f3;
 
       // make an equation for the lifted function symbol f
-      data::data_equation eq = lift_equation_2_3(sigmaS)(f2, f3);
+      data::data_equation eq = lift_equation_2_3()(f2, f3, sigma);
       mCRL2log(log::debug, "absinthe") << "adding equation: " << data::pp(eq) << std::endl;
       dataspec.add_equation(eq);
     }
