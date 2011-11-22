@@ -848,6 +848,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     std::string user_sorts_text;
     std::string user_equations_text;
     std::string abstraction_mapping_text;
+    std::string pbes_sorts_text;
 
     std::string text = abstraction_text;
     std::vector<std::string> all_keywords;
@@ -874,11 +875,17 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     function_symbol_mapping_text = q.first;
     user_equations_text = q.second;
 
+    // extract pbes sorts
+    std::string ptext = data::pp(p.data());
+    q = utilities::detail::separate_keyword_section(ptext, "sort", all_keywords);
+    pbes_sorts_text = q.first;
+
     // 0) split user_dataspec_text into user_sorts_text and user_equations_text
     mCRL2log(log::debug, "absinthe") << "--- user sorts ---\n" << user_sorts_text << std::endl;
     mCRL2log(log::debug, "absinthe") << "--- user equations ---\n" << user_equations_text << std::endl;
     mCRL2log(log::debug, "absinthe") << "--- function mapping ---\n" << function_symbol_mapping_text << std::endl;
     mCRL2log(log::debug, "absinthe") << "--- abstraction mapping ---\n" << abstraction_mapping_text << std::endl;
+    mCRL2log(log::debug, "absinthe") << "--- pbes sorts ---\n" << pbes_sorts_text << std::endl;
 
     // 1) create the data specification data_spec, which consists of user_sorts_text, abstract_mapping_text and p.data()
     data::data_specification data_spec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
@@ -893,7 +900,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     mCRL2log(log::debug, "absinthe") << "--- data specification 3) ---\n" << data::pp(data_spec) << std::endl;
 
     // abstraction functions (specified by the user)
-    abstraction_map sigmaA = parse_abstraction_map(data::pp(data_spec) + "\n" + abstraction_mapping_text.substr(3));
+    abstraction_map sigmaA = parse_abstraction_map(pbes_sorts_text + "\n" + user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
 
     // sort expressions replacements (extracted from sigmaA)
     sort_expression_substitution_map sigmaS;
