@@ -88,6 +88,21 @@ struct parser_table
     : m_table(table)
   { }
 
+  // Prints a tree of 
+  std::string tree(const core::parse_node& node) const
+  {
+    std::stringstream result;
+    result << symbol_name(node) << "(";
+    if (node.child_count() == 0)
+      result << '"' << node.string() << '"';
+    else
+      result << tree(node.child(0));
+    for (int i = 1; i < node.child_count(); ++i)
+      result << " " << tree(node.child(i));
+    result << ")";
+    return result.str();
+  }
+
   // Returns the number of symbols in the table
   unsigned int symbol_count() const
   {
