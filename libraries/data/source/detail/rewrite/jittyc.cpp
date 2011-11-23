@@ -2553,7 +2553,6 @@ void RewriterCompilingJitty::CompileRewriteSystem(const data_specification& Data
   {
     if (data_equation_selector(*j))
     {
-      // addRewriteRule(m_conversion_helper.implement(*j));
       addRewriteRule(*j);
     }
   }
@@ -2670,10 +2669,11 @@ void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity
         }
         fprintf(f,  ");\n");
 
-        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%ld_%lu_term(const atermpp::aterm_appl t) { return rewr_%lu_%ld_0(", func_index, a, nfs,func_index, a);
+        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%ld_%lu_term(const atermpp::aterm_appl t) { return rewr_%lu_%ld_%lu(", func_index, a, nfs,func_index, a,nfs);
         for(size_t i = 1; i <= a; ++i)
         {
-          fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %ld)", (i == 1?"":", "), i);
+          // fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %ld)", (i == 1?"":", "), i);
+          fprintf(f,  "%st(%ld)", (i == 1?"":", "), i);
         }
         fprintf(f,  "); }\n");
       }
@@ -3008,7 +3008,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  MCRL2_SYSTEM_SPECIFIC_ALLOCA(args,atermpp::aterm,(arity_u+arity_t-1));\n"
       "  args[0] = head1;\n"
       "  int function_index;\n"
-      "  if (ATisInt((ATerm)head1) && ((function_index = atermpp::aterm_int(head1).value()) < %ld) )\n"
+      "  if ((head1.type()==AT_INT) && ((function_index = atermpp::aterm_int(head1).value()) < %ld) )\n"
       "  {\n"
       "    for (size_t i=1; i<arity_u; ++i)\n"
       "    {\n"
@@ -3045,14 +3045,11 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   fprintf(f,
       "atermpp::aterm_appl rewrite(const atermpp::aterm_appl t)\n"
       "{\n"
-// "static size_t count1=0, count2=0;\n"
-// "count1++;\n"
-// " if (count1 >= 1000000) { count1=0; count2++; ATfprintf(stderr,\"REWRITE count %%d\\n\",count2);}\n"
       "  using namespace mcrl2::core::detail;\n"
       "  if (t.function()==apples[t.size()])\n"
       "  { // Term t has the shape #REWR#(t1,...,tn)\n"
       "    const atermpp::aterm head = t(0);\n"
-      "    if (ATisInt((ATerm)head) )\n"
+      "    if (head.type()==AT_INT)\n"
       "    {\n"
       "      const int function_index = atermpp::aterm_int(head).value();\n"
       "      if (function_index < %ld )\n"
