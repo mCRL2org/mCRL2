@@ -1514,20 +1514,33 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
         {
           if (b || !rewr)
           {
+            const int index=ATgetInt((ATermInt) ATgetFirst((ATermList) t));
+            const function_symbol old_head=get_int2term(index);
+            std::stringstream new_name;
+            new_name << "@_rewr" << "_" << index << "_" << ATgetLength((ATermList)t)-1 << "_" << args_nfs.get_value(arity)
+                                 << "_term";
+            const function_symbol f(new_name.str(),old_head.sort());
+            if (partially_rewritten_functions.count(f)==0)
+            {
+              OpId2Int(f);
+              partially_rewritten_functions.insert(f);
+            }            
             if (arity<=5) 
             {
               /* Exclude adding an extra increase of the OpId index, which refers to an OpId that is not available.
                  The intention of this increase is to generate an index of an OpId of which it is indicated in args_nfs
                  which arguments are guaranteed to be in normal form. For these variables it is not necessary anymore
                  to recalculate the normal form. TODO: this needs to be reconstructed. */
-              ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))
-                               /* + ((1 << arity)-arity-1)+args_nfs.get_value(arity)*/ ) << ")";
+              /* ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t))
+                               + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ")"; */
+              ss << "atermpp::aterm((ATerm) " << (void*) get_int2aterm_value(ATgetInt(OpId2Int(f))) << ")";
             }
             else
             {
               /* See the remark above. */
-              ss << "(ATermAppl) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t)) 
-                                /* + ((1 << arity)-arity-1)+args_nfs.get_value(arity)*/ ) << "";
+              /* ss << "(ATermAppl) " << (void*) get_int2aterm_value(ATgetInt((ATermInt) ATgetFirst((ATermList) t)) 
+                                 + ((1 << arity)-arity-1)+args_nfs.get_value(arity) ) << ""; */
+              ss << "(ATermAppl) " << (void*) get_int2aterm_value(ATgetInt(OpId2Int(f))) << "";
             }
 
           }
@@ -1659,7 +1672,6 @@ pair<bool,string> RewriterCompilingJitty::calc_inner_term(
           tail_second = calc_inner_terms(tail_first,arity,ATgetNext((ATermList) t),startarg,nnfvars,&rewrall);
         }
         ss << tail_second << ")";
-        /* if (rewr && (nnfvars != NULL) && (ATindexOf(nnfvars,(ATerm) ATmakeInt(startarg),0) != ATERM_NON_EXISTING_POSITION)) Removed, because an atermpp::aterm_appl( typecast has been added. */
         {
           ss << ")";
         }
@@ -2613,10 +2625,8 @@ static bool arity_is_allowed(
                      const sort_expression s,
                      const size_t a)
 {
-// ATfprintf(stderr,"ARITY IS ALLOWED %t   %d\n",s,a);
   if (a==0) 
   {
-// ATfprintf(stderr,"TRUE1 %t %d\n",s,a);
     return true;
   }
   if (is_function_sort(s))
@@ -2625,12 +2635,10 @@ static bool arity_is_allowed(
     size_t n=fs.domain().size();
     if (n>a)
     { 
-// ATfprintf(stderr,"FALSE1 %t %d\n",s,a);
       return false;
     }
     return arity_is_allowed(fs.codomain(),a-n);
   }
-// ATfprintf(stderr,"FALSE2 %t %d\n",s,a);
   return false;
 }
 
@@ -2638,7 +2646,6 @@ static bool arity_is_allowed(
                      const size_t func_index,
                      const size_t a)
 {
-// ATfprintf(stderr,"ARITY IS ALLOWED ------- %d   %d\n",func_index,a);
   return arity_is_allowed(get_int2term(func_index).sort(),a);
 }
 
@@ -2663,46 +2670,12 @@ void declare_rewr_functions(FILE* f, const size_t func_index, const size_t arity
         }
         fprintf(f,  ");\n");
 
-        if (nfs == 0)
+        fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%ld_%lu_term(const atermpp::aterm_appl t) { return rewr_%lu_%ld_0(", func_index, a, nfs,func_index, a);
+        for(size_t i = 1; i <= a; ++i)
         {
-          fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%ld_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%ld_0(", func_index, a, func_index, a);
-          for(size_t i = 1; i <= a; ++i)
-          {
-            fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %ld)", (i == 1?"":", "), i);
-          }
-          fprintf(f,  "); }\n");
+          fprintf(f,  "%s(ATermAppl)ATgetArgument(t, %ld)", (i == 1?"":", "), i);
         }
-        else // (nfs > 0)
-        {
-          /* Declarations below declare functions that represent function symbols with partly 
-             normalized arguments. They were encoded as function symbols represented by an aterm_int
-             with an increased number, for which special space was assigned in array with encodings for
-             opIds. As this was a trick local for the compiling jitty rewriter, an alternative should
-             be found. JFG 21/11/2011.
-          if (generate_code)
-          {
-            fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0(",func_index+1+aux,a);
-            for (int i=0; i<a; i++)
-            {
-              fprintf(f, (i==0)?"atermpp::aterm_appl arg%i":", atermpp::aterm_appl arg%i",i);
-            }
-            fprintf(f,  ") { return rewr_%lu_%i_%lu(",func_index,a,nfs);
-            for (int i=0; i<a; i++)
-            {
-              fprintf(f, (i==0)?"arg%i":",arg%i",i);
-            }
-            fprintf(f,  "); }\n");
-  
-            fprintf(f,  "static inline atermpp::aterm_appl rewr_%lu_%i_0_term(const atermpp::aterm_appl t) { return rewr_%lu_%i_0(", func_index+1+aux,a,func_index+1+aux,a);
-            for (int i=1; i<=a; i++)
-            {
-              fprintf(f, (i==1)?"ATAgetArgument(t, %i)":", ATAgetArgument(t, %i)",i);
-            }
-            fprintf(f,  "); }\n");
-          } */
-
-          // ++aux;
-        }
+        fprintf(f,  "); }\n");
       }
     }
   }
@@ -2869,7 +2842,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     {
       fprintf(f,  "// %s\n",atermpp::aterm(fs).to_string().c_str());
   
-      for (size_t a=0; a<=arity; a++) // TODO Only generate code when number of arguments match.
+      for (size_t a=0; a<=arity; a++) 
       {
         if (arity_is_allowed(j,a))
         {
@@ -2910,11 +2883,6 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       }
       fprintf(f,  "\n");
     }
-    /* if (arity > NF_MAX_ARITY)
-    {
-      arity = NF_MAX_ARITY;
-    }
-    j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2 */
   }
 
   fprintf(f,
@@ -2937,23 +2905,21 @@ void RewriterCompilingJitty::BuildRewriteSystem()
     for (size_t j=0; j < get_num_opids(); j++)
     {
       const function_symbol fs=get_int2term(j);
-      const size_t arity = getArity(fs);
-      if ((i <= arity) && data_equation_selector(fs) && arity_is_allowed(j,i))
+      // const size_t arity = getArity(fs);
+      if (partially_rewritten_functions.count(fs)>0)
+      { 
+        if (arity_is_allowed(j,i)) 
+        {
+          // We are dealing with a partially rewritten function here. Remove the "@_" at 
+          // the beginning of the string.
+          const string c_function_name=pp(fs.name());
+          fprintf(f,  "  int2func[%ld][%ld] = %s;\n",i+1,j,c_function_name.substr(3,c_function_name.size()-4).c_str());
+        }
+      }
+      else if (/* (i <= arity) && */ data_equation_selector(fs) && arity_is_allowed(j,i))
       {
         fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j,j,i);
-        /* if (i <= NF_MAX_ARITY)
-        {
-          for (size_t k=(1 << i)-i-1; k<(1 << (i+1))-i-2; k++)
-          {
-            fprintf(f,  "  int2func[%ld][%ld] = rewr_%ld_%ld_0_term;\n",i+1,j+1+k,j+1+k,i);
-          }
-        } */
       }
-      /* if (arity > NF_MAX_ARITY)
-      {
-        arity = NF_MAX_ARITY;
-      }
-      j += (1 << (arity+1)) - arity - 2; // 2^(arity+1) - arity - 2 */
     }
   }
   fprintf(f,  "}\n"
@@ -3076,17 +3042,12 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       get_num_opids(), max_arity
       );
 
-  /* fprintf(f,
-      "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t)\n"
-      "{\n"
-      "  return rewrite(t);\n"
-      "}\n"
-      "\n"); */
-
   fprintf(f,
       "atermpp::aterm_appl rewrite(const atermpp::aterm_appl t)\n"
       "{\n"
-// " ATfprintf(stderr,\"REWRITE %%t\\n\",t);\n"
+// "static size_t count1=0, count2=0;\n"
+// "count1++;\n"
+// " if (count1 >= 1000000) { count1=0; count2++; ATfprintf(stderr,\"REWRITE count %%d\\n\",count2);}\n"
       "  using namespace mcrl2::core::detail;\n"
       "  if (t.function()==apples[t.size()])\n"
       "  { // Term t has the shape #REWR#(t1,...,tn)\n"

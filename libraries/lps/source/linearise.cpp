@@ -1248,13 +1248,13 @@ class specification_basic_type:public boost::noncopyable
 
       if (is_abstraction(t))
       {
-        mCRL2log(log::warning) << "filtering of variables expression with binders" << std::endl;
+        // mCRL2log(log::warning) << "filtering of variables expression with binders" << std::endl;
         return;
       }
 
       if (is_where_clause(t))
       {
-        mCRL2log(log::warning) << "filtering of variables expression with where clause" << std::endl;
+        // mCRL2log(log::warning) << "filtering of variables expression with where clause" << std::endl;
         return;
       }
 

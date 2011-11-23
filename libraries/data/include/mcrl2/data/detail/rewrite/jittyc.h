@@ -62,6 +62,13 @@ class RewriterCompilingJitty: public Rewriter
       return (rewriter_binding_variable_lists[i]);
     }
 
+    // The set below contains function symbols that are locally used
+    // in the compiling rewriter to represent functions of which it is
+    // known that some of the arguments are in normal form. These are
+    // used inside the compiling rewriter, but should never be returned
+    // and show up in any normal form being returned from the rewriter.
+    atermpp::set < function_symbol > partially_rewritten_functions;
+
     // The data structures below are used to store single variables
     // that are bound in lambda, forall and exist operators. When required
     // in the compiled required, these variables can be retrieved from 
