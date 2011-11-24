@@ -268,7 +268,7 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
 {
   assert(lambda_term(0)==gsMakeLambda());  // The function symbol in this position cannot be anything else than a lambda term.
   const variable_list vl=lambda_term(1);
-  const atermpp::aterm_appl lambda_body=lambda_term(2);
+  const atermpp::aterm_appl lambda_body=rewrite_internal(lambda_term(2),sigma);
   size_t arity=t.size();
   assert(vl.size()<=arity);
 
@@ -281,7 +281,9 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
     variable_renaming[v]=atermpp::aterm_appl(v_fresh);
     sigma[v_fresh]=rewrite_internal(t(count),sigma);
   }
+  
   const atermpp::aterm_appl result=rewrite_internal(atermpp::replace(lambda_body,variable_renaming),sigma);
+  
   // Reset variables in sigma
   for(mutable_map_substitution<atermpp::map < atermpp::aterm_appl,atermpp::aterm_appl> >::const_iterator it=variable_renaming.begin();
                  it!=variable_renaming.end(); ++it)
@@ -302,7 +304,8 @@ atermpp::aterm_appl Rewriter::rewrite_lambda_application(
     args[i]=t(vl.size()+i);
   }
   // We do not employ the knowledge that the first argument is in normal form... TODO.
-  return rewrite_internal(ApplyArray(arity-vl.size(),args),sigma);
+  const atermpp::aterm_appl result1=rewrite_internal(ApplyArray(arity-vl.size(),args),sigma);
+  return result1;
 }
 
 atermpp::aterm_appl Rewriter::internal_existential_quantifier_enumeration(
