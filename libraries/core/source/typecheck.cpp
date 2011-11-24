@@ -3966,19 +3966,26 @@ static ATermAppl gstcTraverseVarConsTypeD(
     {
       ATermList NeededArgumentTypes=ATLgetArgument(gstcUnwindType(NewType),0);
 
-      mCRL2log(debug) << "Arguments again: NeededArgumentTypes: " << core::pp_deprecated(NeededArgumentTypes) <<
-                  ", ArgumentTypes: " << core::pp_deprecated(ArgumentTypes) << "" << std::endl;
+      if (ATgetLength(NeededArgumentTypes)!=ATgetLength(Arguments))
+      {
+         mCRL2log(error) << "need argumens of sorts " << core::pp_deprecated(NeededArgumentTypes) << 
+                         " which does not match the number of provided arguments "
+                            << core::pp_deprecated(Arguments) << " (while typechecking " 
+                            << core::pp_deprecated(*DataTerm) << ")" << std::endl;
+         return NULL;
 
+      }
       //arguments again
       ATermList NewArgumentTypes=ATmakeList0();
       ATermList NewArguments=ATmakeList0();
       for (; !ATisEmpty(Arguments); Arguments=ATgetNext(Arguments),
            ArgumentTypes=ATgetNext(ArgumentTypes),NeededArgumentTypes=ATgetNext(NeededArgumentTypes))
       {
+        assert(!ATisEmpty(Arguments));
+        assert(!ATisEmpty(NeededArgumentTypes));
         ATermAppl Arg=ATAgetFirst(Arguments);
         ATermAppl NeededType=ATAgetFirst(NeededArgumentTypes);
         ATermAppl Type=ATAgetFirst(ArgumentTypes);
-
         if (!gstcEqTypesA(NeededType,Type))
         {
           //upcasting
@@ -4832,7 +4839,6 @@ static ATermAppl gstcUpCastNumericType(ATermAppl NeededType, ATermAppl Type, ATe
 {
   // Makes upcasting from Type to Needed Type for Par. Returns the resulting type.
   // Moreover, *Par is extended with the required type transformations.
-
   mCRL2log(debug) << "gstcUpCastNumericType " << core::pp_deprecated(NeededType) << " -- " << core::pp_deprecated(Type) << "" << std::endl;
 
   if (data::is_unknown_sort(data::sort_expression(Type)))
