@@ -1549,6 +1549,13 @@ BOOST_AUTO_TEST_CASE(test_ambiguous_projection_function)
 }
 
 
+BOOST_AUTO_TEST_CASE(test_lambda_term_with_wrong_number_of_arguments)
+{
+  /* The typechecker couldn't catch the wrongly typed term below in november 2012,
+     which led to a core dump */
+  test_data_expression("((lambda x:Nat.x)(1,2)>0)",false);
+}
+
 boost::unit_test::test_suite* init_unit_test_suite(int argc, char* argv[])
 {
   MCRL2_ATERMPP_INIT(argc, argv)
