@@ -3043,11 +3043,49 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       );
 
   fprintf(f,
-      "atermpp::aterm_appl rewrite(const atermpp::aterm_appl t)\n"
+      "atermpp::aterm_appl rewrite_external(const atermpp::aterm_appl t)\n"
+      "{\n"
+      "  return rewrite(t);\n"
+      "}\n"
+       );
+
+  // Moved part of the rewrite function to rewrite_aux, such that the compiler
+  // can inline rewrite more often, and so gain some performance.
+  fprintf(f,
+      "static atermpp::aterm_appl rewrite_aux(const atermpp::aterm_appl t)\n"
+      "{\n"
+      "  using namespace mcrl2::core::detail;\n"
+      "  if (gsIsBinder(t))\n"
+      "  {\n"
+      "    atermpp::aterm_appl binder=t(0);\n"
+      "    if (binder==gsMakeExists())\n"
+      "    {\n"
+      "      return this_rewriter->internal_existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
+      "    }\n"
+      "    if (binder==gsMakeForall())\n"
+      "    {\n"
+      "      return this_rewriter->internal_universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
+      "    }\n"
+      "    if (binder==gsMakeLambda())\n"
+      "    {\n"
+      "      return this_rewriter->rewrite_single_lambda(\n"
+      "               mcrl2::data::variable_list(atermpp::aterm_list(t(1))),\n"
+      "               atermpp::aterm_appl(t(2)),false,*(this_rewriter->global_sigma));\n"
+      "    }\n"
+      "    assert(0);\n"
+      "    return t;\n"
+      "  }\n"
+      "  assert(gsIsWhr(t));\n"
+      "  return this_rewriter->rewrite_where(t,*(this_rewriter->global_sigma));\n"
+      "}\n");
+
+  fprintf(f,
+      "static inline atermpp::aterm_appl rewrite(const atermpp::aterm_appl t)\n"
       "{\n"
       "  using namespace mcrl2::core::detail;\n"
       "  if (t.function()==apples[t.size()])\n"
-      "  { // Term t has the shape #REWR#(t1,...,tn)\n"
+      "  {\n"
+      "    // Term t has the shape #REWR#(t1,...,tn)\n"
       "    const atermpp::aterm head = t(0);\n"
       "    if (head.type()==AT_INT)\n"
       "    {\n"
@@ -3075,32 +3113,10 @@ void RewriterCompilingJitty::BuildRewriteSystem()
       "  {\n"
       "    return (*(this_rewriter->global_sigma))(t);\n"
       "  }\n"
-      "  else if (gsIsWhr(t))\n"
-      "  {\n"
-      "    return this_rewriter->rewrite_where(t,*(this_rewriter->global_sigma));\n"
-      "  }\n"
-      "  else if (gsIsBinder(t))\n"
-      "  {\n"
-      "    atermpp::aterm_appl binder=t(0);\n"
-      "    if (binder==gsMakeExists())\n"
-      "    {\n"
-      "      return this_rewriter->internal_existential_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
-      "    }\n"
-      "    if (binder==gsMakeForall())\n"
-      "    {\n"
-      "      return this_rewriter->internal_universal_quantifier_enumeration(t,*(this_rewriter->global_sigma));\n"
-      "    }\n"
-      "    if (binder==gsMakeLambda())\n"
-      "    {\n"
-      "      return this_rewriter->rewrite_single_lambda(\n"
-      "               mcrl2::data::variable_list(atermpp::aterm_list(t(1))),\n"
-      "               atermpp::aterm_appl(t(2)),false,*(this_rewriter->global_sigma));\n"
-      "    }\n"
-      "    assert(0);\n"
-      "    return t;\n"
-      "  }\n"
+      "  return rewrite_aux(t);\n"
       "}\n",
       get_num_opids(), max_arity);
+      
 
   fclose(f);
 
@@ -3122,7 +3138,7 @@ void RewriterCompilingJitty::BuildRewriteSystem()
   {
     so_rewr_init = reinterpret_cast<void(*)(RewriterCompilingJitty *)>(rewriter_so->proc_address("rewrite_init"));
     so_rewr_cleanup = reinterpret_cast<void (*)()>(rewriter_so->proc_address("rewrite_cleanup"));
-    so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const atermpp::aterm_appl)> (rewriter_so->proc_address("rewrite"));
+    so_rewr = reinterpret_cast<atermpp::aterm_appl(*)(const atermpp::aterm_appl)> (rewriter_so->proc_address("rewrite_external"));
 
   }
   catch(std::runtime_error &e)
