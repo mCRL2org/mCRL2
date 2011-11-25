@@ -88,6 +88,7 @@ inline
 void complete_multi_action(multi_action& x, const lps::action_label_list& action_decls, const data::data_specification& data_spec = data::detail::default_specification())
 {
   lps::type_check(x, data_spec, action_decls);
+  lps::normalize_sorts(x, data_spec);
 }
 
 } // namespace lps
