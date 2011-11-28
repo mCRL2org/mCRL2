@@ -155,26 +155,26 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  data::abstraction operator()(const data::forall& x)
+  data::data_expression operator()(const data::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result = data::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::data_expression result = data::forall(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::abstraction operator()(const data::exists& x)
+  data::data_expression operator()(const data::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result = data::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::data_expression result = data::exists(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::abstraction operator()(const data::lambda& x)
+  data::data_expression operator()(const data::lambda& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result = data::lambda(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
+    data::data_expression result = data::lambda(static_cast<Derived&>(*this)(x.variables()), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -283,10 +283,10 @@ struct add_sort_expressions: public Builder<Derived>
     return result;
   }
 
-  data::abstraction operator()(const data::abstraction& x)
+  data::data_expression operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
+    data::data_expression result;
     if (data::is_forall(x))
     {
       result = static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x)));
@@ -382,26 +382,26 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  data::abstraction operator()(const data::forall& x)
+  data::data_expression operator()(const data::forall& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result = data::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::data_expression result = data::forall(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::abstraction operator()(const data::exists& x)
+  data::data_expression operator()(const data::exists& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result = data::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::data_expression result = data::exists(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
 
-  data::abstraction operator()(const data::lambda& x)
+  data::data_expression operator()(const data::lambda& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result = data::lambda(x.variables(), static_cast<Derived&>(*this)(x.body()));
+    data::data_expression result = data::lambda(x.variables(), static_cast<Derived&>(*this)(x.body()));
     static_cast<Derived&>(*this).leave(x);
     return result;
   }
@@ -462,10 +462,10 @@ struct add_data_expressions: public Builder<Derived>
     return result;
   }
 
-  data::abstraction operator()(const data::abstraction& x)
+  data::data_expression operator()(const data::abstraction& x)
   {
     static_cast<Derived&>(*this).enter(x);
-    data::abstraction result;
+    data::data_expression result;
     if (data::is_forall(x))
     {
       result = static_cast<Derived&>(*this)(data::forall(atermpp::aterm_appl(x)));

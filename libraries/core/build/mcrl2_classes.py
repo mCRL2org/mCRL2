@@ -955,6 +955,22 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
             text = 'template <typename ' + ', typename '.join(f.template_parameters()) + '>\n' + text
         return text
 
+    def builder_return_type(self, all_classes, modifiability_map):
+        classname = self.classname(True)
+        # N.B. the order of the statements below is important!
+        if is_modifiable_type(classname, modifiability_map):
+            return 'void'
+        if 'E' in self.modifiers():
+            result = self.superclass(include_namespace = True)
+            c = all_classes[result]
+            if 'E' in c.modifiers():
+                return c.builder_return_type(all_classes, modifiability_map)
+            else:
+                return result
+        if 'X' in self.modifiers():
+            return classname
+        return classname
+
     def builder_function(self, all_classes, dependencies, modifiability_map):
         text = r'''<RETURN_TYPE> operator()(<CONST><CLASS_NAME>& x)
 {
@@ -965,8 +981,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
         classname = self.classname(True)
         visit_text = ''
         dependent = False
+        return_type = self.builder_return_type(all_classes, modifiability_map)
+
         if is_modifiable_type(classname, modifiability_map):
-            return_type = 'void'
             return_statement = ''
 
             updates = []
@@ -988,7 +1005,6 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                 visit_text = '// skip'
         else:
             if 'X' in self.modifiers():
-                return_type = classname
                 classes = [all_classes[name] for name in self.expression_classes()]
                 classes.sort(cmp = lambda x, y: cmp(x.index, y.index))
                 classes.sort(cmp = lambda x, y: cmp('X' in y.modifiers(), 'X' in x.modifiers()))
@@ -1015,14 +1031,9 @@ class <CLASSNAME><SUPERCLASS_DECLARATION>
                     visit_text = '// skip'
                     return_statement = 'return x;'
                 else:
-                    visit_text = '%s result;\n' % classname + '\nelse '.join(updates)
+                    visit_text = '%s result;\n' % return_type + '\nelse '.join(updates)
                     return_statement = 'return result;'
             else:
-                if 'E' in self.modifiers():
-                    return_type = self.superclass(include_namespace = True)
-                else:
-                    return_type = classname
-
                 updates = []
                 f = self.constructor
                 for p in f.parameters():
