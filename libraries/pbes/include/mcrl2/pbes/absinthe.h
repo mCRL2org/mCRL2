@@ -13,11 +13,13 @@
 #define MCRL2_PBES_ABSINTHE_H
 
 //#define MCRL2_DEBUG_DATA_CONSTRUCTION
+#define MCRL2_ABSINTHE_CHECK_EXPRESSIONS
 
 #include <algorithm>
 #include <sstream>
 #include <utility>
 
+#include <boost/lexical_cast.hpp>
 #include <boost/algorithm/string/trim.hpp>
 
 #include "mcrl2/atermpp/make_list.h"
@@ -36,11 +38,15 @@
 #include "mcrl2/pbes/builder.h"
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/replace.h"
-#include "mcrl2/utilities/identifier_generator.h"
+#include "mcrl2/data/set_identifier_generator.h"
 #include "mcrl2/utilities/text_utility.h"
 #include "mcrl2/utilities/logger.h"
 #include "mcrl2/utilities/detail/separate_keyword_section.h"
 #include "mcrl2/exception.h"
+
+#ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
+#include "mcrl2/data/detail/print_parse_check.h"
+#endif
 
 namespace mcrl2 {
 
@@ -79,6 +85,33 @@ namespace pbes_system {
   }
 
 namespace detail {
+
+  template <class T> // note, T is only a dummy
+  struct absinthe_globals
+  {
+    static data::data_specification m_dataspec;
+  };
+
+  template <class T>
+  data::data_specification absinthe_globals<T>::m_dataspec = data::data_specification();
+
+  inline
+  data::data_specification& absinthe_data_specification()
+  {
+    return absinthe_globals<size_t>::m_dataspec;
+  }
+
+#ifdef MCRL2_ABSINTHE_CHECK_EXPRESSIONS
+  template <typename T>
+  inline void absinthe_check_expression(const T& x)
+  {
+    data::detail::print_parse_check(x, absinthe_data_specification());
+  }
+#else
+  template <typename T>
+  inline void absinthe_check_expression(const T&)
+  {}
+#endif
 
   // parse a string like 'tail: List(D) -> List(D)'
   //
@@ -137,19 +170,25 @@ namespace detail {
     }
   }
 
-  // Separates the sort declarations from the map/cons/var/eqn declarations
-  // Returns a pair containing consisiting of the combined sort spec and the combined map/eqn/var/cons declarations
+  // TODO: Is this correct if s has the shape A -> (B -> C)? Should the result be (B -> C) or C?
   inline
-  std::pair<std::string, std::string> separate_sort_declarations(const std::string& text)
+  data::sort_expression target_sort(const sort_expression& s)
   {
-    std::string keyword = "sort";
-    std::vector<std::string> all_keywords;
-    all_keywords.push_back("sort");
-    all_keywords.push_back("var");
-    all_keywords.push_back("eqn");
-    all_keywords.push_back("map");
-    all_keywords.push_back("cons");
-    return utilities::detail::separate_keyword_section(text, keyword, all_keywords);
+    if (data::is_basic_sort(s))
+    {
+      return s;
+    }
+    else if (data::is_function_sort(s))
+    {
+      data::function_sort fs = s;
+      return fs.codomain();
+    }
+    else if (data::is_container_sort(s))
+    {
+      return s;
+    }
+    throw mcrl2::runtime_error("target_sort: unsupported sort " + print_term(s) + " detected!");
+    return data::sort_expression();
   }
 
 } // namespace detail
@@ -185,12 +224,19 @@ struct absinthe_algorithm
 
     data::sort_expression operator()(const data::sort_expression& x)
     {
+      data::sort_expression result;
       sort_expression_substitution_map::const_iterator i = sigmaS.find(x);
-      if (i != sigmaS.end())
+      if (i == sigmaS.end())
       {
-        return i->second;
+        result = super::operator()(x);
+        pbes_system::detail::absinthe_check_expression(result);
       }
-      return super::operator()(x);
+      else
+      {
+        result = i->second;
+        pbes_system::detail::absinthe_check_expression(result);
+      }
+      return result;
     }
 
     data::data_expression operator()(const data::function_symbol& x)
@@ -198,30 +244,56 @@ struct absinthe_algorithm
       function_symbol_substitution_map::const_iterator i = sigmaF.find(x);
       if (i != sigmaF.end())
       {
+        pbes_system::detail::absinthe_check_expression(i->second);
         return i->second;
       }
       throw mcrl2::runtime_error("function symbol " + print_symbol(x) + " not present in the function symbol mapping!");
       return data::data_expression();
     }
 
+    data::data_expression operator()(const data::lambda& x)
+    {
+      data::data_expression body = super::operator()(x);
+      pbes_system::detail::absinthe_check_expression(body);
+      data::sort_expression s = body.sort();
+      data::set_identifier_generator generator;
+      std::set<core::identifier_string> ids = data::find_identifiers(x);
+      generator.add_identifiers(ids);
+      data::variable v(generator("v"), s);
+      data::data_expression result = data::detail::create_set_comprehension(v, data::equal_to(v, body));
+      pbes_system::detail::absinthe_check_expression(result);
+      return result;
+    }
+
     data::data_expression operator()(const data::data_expression& x)
     {
+//std::cout << "<in>" << data::pp(x) << " " << x << std::endl;
+      data::data_expression result;
+
       // check if it is a "ground term", i.e. it does not contain any variables
       abstraction_map::const_iterator i = sigmaA.find(x.sort());
       if (i != sigmaA.end() && data::find_variables(x).empty())
       {
         data::data_expression_list args = atermpp::make_list(x);
-        return data::detail::create_finite_set(data::application(i->second, args));
+        result = data::detail::create_finite_set(data::application(i->second, args));
+        pbes_system::detail::absinthe_check_expression(result);
       }
-
-      // first apply the sort and function symbol transformations
-      data::data_expression result = super::operator()(x);
-
-      // if it is a variable (in the context of a data expression), wrap it in a set
-      if (data::is_variable(x))
+      else
       {
-        result = data::detail::create_finite_set(result);
+        // first apply the sort and function symbol transformations
+//std::cout << "<build>" << data::pp(x) << " " << x << std::endl;
+        result = super::operator()(x);
+        pbes_system::detail::absinthe_check_expression(result);
+
+        // if it is a variable (in the context of a data expression), wrap it in a set
+        if (data::is_variable(result))
+        {
+          result = data::detail::create_finite_set(result);
+          pbes_system::detail::absinthe_check_expression(result);
+        }
+//std::cout << "<build-result>" << data::pp(result) << " " << result << std::endl;
       }
+//std::cout << "<out>" << data::pp(result) << " " << result << std::endl;
       return result;
     }
   };
@@ -303,19 +375,22 @@ struct absinthe_algorithm
 
     pbes_expression operator()(const data::data_expression& x)
     {
+      data::data_expression result;
       data::data_expression x1 = lift(x);
       if (m_is_over_approximation)
       {
-        return data::detail::create_set_in(data::sort_bool::true_(), x1);
+        result = data::detail::create_set_in(data::sort_bool::true_(), x1);
       }
       else
       {
-        return data::sort_bool::not_(data::detail::create_set_in(data::sort_bool::false_(), x1));
+        result = data::sort_bool::not_(data::detail::create_set_in(data::sort_bool::false_(), x1));
       }
+      return result;
     }
 
     pbes_expression operator()(const propositional_variable_instantiation& x)
     {
+      pbes_expression result;
       data::data_expression_list e = lift(x.parameters());
       data::variable_list variables = make_variables(x.parameters(), "x", sort_function(sigmaA, sigmaS, sigmaF));
       data::data_expression_list::iterator i = e.begin();
@@ -328,23 +403,26 @@ struct absinthe_algorithm
       data::data_expression q = data::lazy::join_and(z.begin(), z.end());
       if (m_is_over_approximation)
       {
-        return make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), variables)));
+        result = make_exists(variables, and_(q, propositional_variable_instantiation(x.name(), variables)));
       }
       else
       {
         pbes_expression y = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
-        return make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
+        result = make_forall(variables, imp(q, propositional_variable_instantiation(x.name(), variables)));
       }
+      return result;
     }
 
     pbes_system::pbes_expression operator()(const pbes_system::forall& x)
     {
-      return make_forall(lift(x.variables()), super::operator()(x.body()));
+      pbes_expression result = make_forall(lift(x.variables()), super::operator()(x.body()));
+      return result;
     }
 
     pbes_system::pbes_expression operator()(const pbes_system::exists& x)
     {
-      return make_exists(lift(x.variables()), super::operator()(x.body()));
+      pbes_expression result = make_exists(lift(x.variables()), super::operator()(x.body()));
+      return result;
     }
 
     void operator()(pbes_system::pbes_equation& x)
@@ -386,7 +464,6 @@ struct absinthe_algorithm
   // Parse the right hand sides of the function symbol mapping in text, and add them to dataspec if needed
   void parse_right_hand_sides(const std::string& text, data::data_specification& dataspec)
   {
-mCRL2log(log::debug, "absinthe") << "--- parse_right_hand_sides ---\n" << data::pp(dataspec) << std::endl;
     std::string dataspec_text = data::pp(dataspec);
     std::vector<std::string> lines = utilities::regex_split(text, "\\n");
     for (std::vector<std::string>::iterator i = lines.begin(); i != lines.end(); ++i)
@@ -395,7 +472,6 @@ mCRL2log(log::debug, "absinthe") << "--- parse_right_hand_sides ---\n" << data::
       if (words.size() == 2)
       {
         data::function_symbol f = pbes_system::detail::parse_function_symbol(words[1], dataspec_text);
-mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::pp(f) << std::endl;
         if (!pbes_system::detail::is_structured_sort_constructor(dataspec, f))
         {
           dataspec.add_mapping(f);
@@ -597,7 +673,8 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
       return result;
     }
 
-    data::data_equation operator()(const data::function_symbol& f1, const data::function_symbol& f2, sort_function sigma) const
+    // sigmaA is used for checking consistency of the user input
+    data::data_equation operator()(const data::function_symbol& f1, const data::function_symbol& f2, sort_function sigma, const abstraction_map& sigmaA) const
     {
       mCRL2log(log::debug, "absinthe") << "lift_equation_1_2 f1 = " << print_symbol(f1) << " f2 = " << print_symbol(f2) << std::endl;
       data::variable_list variables;
@@ -640,6 +717,12 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
       {
         throw mcrl2::runtime_error("absinthe algorithm (lift_equation_1_2): unsupported sort " + print_term(s1) + " detected!");
       }
+
+      if (lhs.sort() != rhs.sort())
+      {
+        throw mcrl2::runtime_error("absinthe algorithm (lift_equation_1_2): lhs.sort() and rhs.sort are not equal: " + data::pp(lhs.sort()) + " <-> " + data::pp(rhs.sort()));
+      }
+
       return data::data_equation(variables, condition, lhs, rhs);
     }
   };
@@ -778,23 +861,6 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
 //    }
   }
 
-  sort_expression target_sort(const sort_expression& s)
-  {
-    if (data::is_basic_sort(s))
-    {
-      return s;
-    }
-    else if (data::is_function_sort(s))
-    {
-      data::function_sort fs = s;
-      return fs.codomain();
-    }
-    else if (data::is_container_sort(s))
-    {
-      return s;
-    }
-  }
-
   // add lifted mappings and equations to the data specification
   void lift_data_specification(const pbes<>& p, const abstraction_map& sigmaA, const sort_expression_substitution_map& sigmaS, function_symbol_substitution_map& sigmaF, data::data_specification& dataspec)
   {
@@ -811,7 +877,7 @@ mCRL2log(log::debug, "absinthe") << "add mapping " << words[1] << " " << data::p
     for (std::set<data::function_symbol>::iterator i = used_function_symbols.begin(); i != used_function_symbols.end(); ++i)
     {
 mCRL2log(log::debug, "absinthe") << "Inspecting used function symbol " << data::pp(*i) << " " << *i << std::endl;
-      if (sigmaA.find(target_sort(i->sort())) != sigmaA.end())
+      if (sigmaA.find(detail::target_sort(i->sort())) != sigmaA.end())
       {
 mCRL2log(log::debug, "absinthe") << "Removing used function symbol   " << data::pp(*i) << " " << *i << std::endl;
         to_be_removed.insert(*i);
@@ -856,7 +922,7 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(*j) <
         sigmaF[f1] = f2;
         dataspec.add_mapping(f2);
 
-        data::data_equation eq = lift_equation_1_2()(f1, f2, sigma);
+        data::data_equation eq = lift_equation_1_2()(f1, f2, sigma, sigmaA);
         mCRL2log(log::debug, "absinthe") << "adding equation: " << eq << std::endl;
         mCRL2log(log::debug, "absinthe") << "adding equation: " << data::pp(eq) << std::endl;
         dataspec.add_equation(eq);
@@ -930,8 +996,6 @@ mCRL2log(log::debug, "absinthe") << "adding list constructor " << data::pp(*j) <
     text = q.second;
 
     q = utilities::detail::separate_keyword_section(text, "absmap", all_keywords);
-mCRL2log(log::debug, "absinthe") << "--- q.first ---\n" << q.first << std::endl;
-mCRL2log(log::debug, "absinthe") << "--- q.second ---\n" << q.second << std::endl;
 
     abstraction_mapping_text = q.first;
     text = q.second;
@@ -958,17 +1022,17 @@ mCRL2log(log::debug, "absinthe") << "--- q.second ---\n" << q.second << std::end
       throw mcrl2::runtime_error("the abstraction mapping may not be empty!");
     }
 
-    // 1) create the data specification data_spec, which consists of user_sorts_text, abstract_mapping_text and p.data()
-    data::data_specification data_spec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
-    mCRL2log(log::debug, "absinthe") << "--- data specification 1) ---\n" << data::pp(data_spec) << std::endl;
+    // 1) create the data specification dataspec, which consists of user_sorts_text, abstract_mapping_text and p.data()
+    data::data_specification dataspec = data::parse_data_specification(data::pp(p.data()) + "\n" + user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
+    mCRL2log(log::debug, "absinthe") << "--- data specification 1) ---\n" << data::pp(dataspec) << std::endl;
 
-    // 2) parse the right hand sides of the function symbol mapping, and add them to data_spec
-    parse_right_hand_sides(function_symbol_mapping_text, data_spec);
-    mCRL2log(log::debug, "absinthe") << "--- data specification 2) ---\n" << data::pp(data_spec) << std::endl;
+    // 2) parse the right hand sides of the function symbol mapping, and add them to dataspec
+    parse_right_hand_sides(function_symbol_mapping_text, dataspec);
+    mCRL2log(log::debug, "absinthe") << "--- data specification 2) ---\n" << data::pp(dataspec) << std::endl;
 
-    // 3) add user_equations_text to data_spec
-    data_spec = data::parse_data_specification(data::pp(data_spec) + "\n" + user_equations_text);
-    mCRL2log(log::debug, "absinthe") << "--- data specification 3) ---\n" << data::pp(data_spec) << std::endl;
+    // 3) add user_equations_text to dataspec
+    dataspec = data::parse_data_specification(data::pp(dataspec) + "\n" + user_equations_text);
+    mCRL2log(log::debug, "absinthe") << "--- data specification 3) ---\n" << data::pp(dataspec) << std::endl;
 
     // abstraction functions (specified by the user)
     abstraction_map sigmaA = parse_abstraction_map(pbes_sorts_text + "\n" + user_sorts_text + "\n" + abstraction_mapping_text.substr(3));
@@ -984,23 +1048,26 @@ mCRL2log(log::debug, "absinthe") << "--- q.second ---\n" << q.second << std::end
     mCRL2log(log::debug, "absinthe") << "\n--- sort expression mapping ---\n" << print_mapping(sigmaS) << std::endl;
 
     // function symbol replacements (specified by the user)
-    function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, data_spec);
+    function_symbol_substitution_map sigmaF = parse_function_symbol_mapping(function_symbol_mapping_text, dataspec);
     mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping ---\n" << print_mapping(sigmaF) << std::endl;
 
-    // 4) add lifted sorts, mappings and equations to data_spec
+    pbes_system::detail::absinthe_data_specification() = dataspec;
+
+    // 4) add lifted sorts, mappings and equations to dataspec
     // before: the mapping sigmaF is f1 -> f2
     // after: the mapping sigmaF is f1 -> f3
-    // after: f2 and f3 have been added to data_spec
-    // after: equations for f3 have been added to data_spec
+    // after: f2 and f3 have been added to dataspec
+    // after: equations for f3 have been added to dataspec
     // generate mapping f1 -> f2 for missing function symbols
-    lift_data_specification(p, sigmaA, sigmaS, sigmaF, data_spec);
-    mCRL2log(log::debug, "absinthe") << "--- data specification 4) ---\n" << data::pp(data_spec) << std::endl;
+    lift_data_specification(p, sigmaA, sigmaS, sigmaF, dataspec);
+    mCRL2log(log::debug, "absinthe") << "--- data specification 4) ---\n" << data::pp(dataspec) << std::endl;
 
     mCRL2log(log::debug, "absinthe") << "\n--- function symbol mapping after lifting ---\n" << print_mapping(sigmaF) << std::endl;
 
     mCRL2log(log::debug, "absinthe") << "--- pbes before ---\n" << pbes_system::pp(p) << std::endl;
 
-    p.data() = data_spec;
+    p.data() = dataspec;
+    pbes_system::detail::absinthe_data_specification() = dataspec;
 
     // then transform the data expressions and the propositional variable instantiations
     absinthe_data_expression_builder(sigmaA, sigmaS, sigmaF, is_over_approximation)(p);

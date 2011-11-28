@@ -18,8 +18,7 @@
 #include "mcrl2/data/standard.h"
 
 #ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-#include "mcrl2/data/parse.h"
-#include <iterator>
+#include "mcrl2/data/detail/print_parse_check.h"
 #endif
 
 namespace mcrl2 {
@@ -49,6 +48,16 @@ const data_specification& get_data_specification()
 {
   return *data_specification_container<int>::dataspec;
 }
+
+template <typename T>
+inline void data_construction_check_expression(const T& x)
+{
+  data::detail::print_parse_check(x, get_data_specification());
+}
+#else
+template <typename T>
+inline void data_construction_check_expression(const T&)
+{}
 #endif
 
 /// \brief Create the finite set { x }, with x a data expression.
@@ -58,20 +67,7 @@ data_expression create_finite_set(const data_expression& x)
   data_expression result = data::sort_fset::fset_empty(x.sort());
   result = data::sort_fset::fsetinsert(x.sort(), x, result);
   result = data::sort_set::setfset(x.sort(), result);
-
-#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-  std::string text = data::pp(result);
-  std::set<variable> v = data::find_free_variables(x);
-  data_expression result1 = data::parse_data_expression(text, v.begin(), v.end(), get_data_specification());
-  if (result != result1)
-  {
-    std::clog << "<checking finite set>" << data::pp(x) << " : " << data::pp(x.sort()) << " " << x << std::endl;
-    std::cout << "ERROR: in construction of " << text << std::endl;
-    std::cout << " 1) " << result << std::endl;
-    std::cout << " 2) " << result1 << std::endl;
-  }
-#endif
-
+  data_construction_check_expression(result);
   return result;
 }
 
@@ -81,21 +77,7 @@ data_expression create_set_comprehension(const variable& x, const data_expressio
 {
   assert(sort_bool::is_bool(phi.sort()));
   data_expression result = sort_set::setconstructor(x.sort(), lambda(x, phi), sort_fset::fset_empty(x.sort()));
-
-#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-  std::string text = data::pp(result);
-  std::set<variable> v = data::find_free_variables(x);
-  data::find_free_variables(phi, std::inserter(v, v.end()));
-  data_expression result1 = data::parse_data_expression(text, v.begin(), v.end(), get_data_specification());
-  if (result != result1)
-  {
-    std::clog << "<checking create_set_comprehension> x = " << data::pp(x) << ": " << data::pp(x.sort()) << x << " phi = " << data::pp(phi) << ": " << data::pp(phi.sort()) << std::endl;
-    std::cout << "ERROR: in construction of " << text << std::endl;
-    std::cout << " 1) " << result << std::endl;
-    std::cout << " 2) " << result1 << std::endl;
-  }
-#endif
-
+  data_construction_check_expression(result);
   return result;
 }
 
@@ -104,21 +86,7 @@ inline
 data_expression create_set_in(const data_expression& x, const data_expression& X)
 {
   data_expression result = sort_set::setin(x.sort(), x, X);
-
-#ifdef MCRL2_DEBUG_DATA_CONSTRUCTION
-  std::string text = data::pp(result);
-  std::set<variable> v = data::find_free_variables(x);
-  data::find_free_variables(X, std::inserter(v, v.end()));
-  data_expression result1 = data::parse_data_expression(text, v.begin(), v.end(), get_data_specification());
-  if (result != result1)
-  {
-    std::clog << "<checking create_set_in> x = " << data::pp(x) << ": " << data::pp(x.sort()) << x << " X = " << data::pp(X) << ": " << data::pp(X.sort()) << std::endl;
-    std::cout << "ERROR: in construction of " << text << std::endl;
-    std::cout << " 1) " << result << std::endl;
-    std::cout << " 2) " << result1 << std::endl;
-  }
-#endif
-
+  data_construction_check_expression(result);
   return result;
 }
 
