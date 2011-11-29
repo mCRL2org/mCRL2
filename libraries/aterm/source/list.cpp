@@ -4,9 +4,9 @@
 #include <stdlib.h>
 #include <string.h>
 #include <assert.h>
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/aterm/memory.h"
 #include "mcrl2/aterm/aterm2.h"
-#include "mcrl2/aterm/memory_utility.h"
 
 /*}}}  */
 
@@ -61,7 +61,7 @@ ATermList ATgetSlice(ATermList list, const size_t start, const size_t end)
 {
   size_t i, size;
   ATermList result = ATmakeList0();
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,(end<=start?0:end-start));
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,(end<=start?0:end-start));
 
   if (end<=start)
   {
@@ -100,7 +100,7 @@ ATermList ATappend(ATermList list, const ATerm el)
 {
   size_t i, len = ATgetLength(list);
   ATermList result;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
 
   /* Collect all elements of list in buffer */
   for (i=0; i<len; i++)
@@ -130,7 +130,7 @@ ATermList ATappend(ATermList list, const ATerm el)
 ATermList ATconcat(ATermList list1, const ATermList list2)
 {
   size_t i, len = ATgetLength(list1);
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
   ATermList result = list2;
 
   if (ATisEqual((ATerm)list2, (ATerm)ATempty))
@@ -231,7 +231,7 @@ ATermList ATremoveElement(ATermList list, const ATerm t)
   size_t i = 0;
   ATerm el = NULL;
   ATermList l = list;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list));
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,ATgetLength(list));
 
   while (!ATisEmpty(l))
   {
@@ -271,7 +271,7 @@ ATermList ATremoveElement(ATermList list, const ATerm t)
 ATermList ATremoveElementAt(ATermList list, const size_t idx)
 {
   size_t i;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
 
   for (i=0; i<idx; i++)
   {
@@ -298,7 +298,7 @@ ATermList ATremoveElementAt(ATermList list, const size_t idx)
 ATermList ATreplace(ATermList list, const ATerm el, const size_t idx)
 {
   size_t i;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,idx);
 
   for (i=0; i<idx; i++)
   {
@@ -352,7 +352,7 @@ static int compare_terms(const ATerm* t1, const ATerm* t2)
 ATermList ATsort(ATermList list, int (*compare)(const ATerm t1, const ATerm t2))
 {
   size_t idx, len = ATgetLength(list);
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
 
   idx = 0;
   while (!ATisEmpty(list))
@@ -388,7 +388,7 @@ ATermList ATgetArguments(const ATermAppl appl)
   AFun s = ATgetAFun(appl);
   size_t i, len = ATgetArity(s);
   ATermList result = ATempty;
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
+  MCRL2_SYSTEM_SPECIFIC_ALLOCA(buffer,ATerm,len);
 
   for (i=0; i<len; i++)
   {
