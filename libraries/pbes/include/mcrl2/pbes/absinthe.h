@@ -172,7 +172,7 @@ namespace detail {
 
   // TODO: Is this correct if s has the shape A -> (B -> C)? Should the result be (B -> C) or C?
   inline
-  data::sort_expression target_sort(const sort_expression& s)
+  data::sort_expression target_sort(const data::sort_expression& s)
   {
     if (data::is_basic_sort(s))
     {
