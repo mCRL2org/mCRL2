@@ -12,8 +12,8 @@
 #include <cmath>
 #include <cctype>
 
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/aterm/aterm_ext.h"
-#include "mcrl2/aterm/memory_utility.h"
 
 namespace aterm
 {
@@ -60,7 +60,7 @@ ATerm gsSubstValues(const ATermList Substs, ATerm Term, bool Recursive)
       const size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
-        ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {
           Args[i] = gsSubstValues(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);
@@ -113,7 +113,7 @@ ATerm gsSubstValuesTable(const ATermTable Substs, ATerm Term, const bool Recursi
       const size_t NrArgs = ATgetArity(Head);
       if (NrArgs > 0)
       {
-        ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
+        MCRL2_SYSTEM_SPECIFIC_ALLOCA(Args,ATerm,NrArgs);
         for (size_t i = 0; i < NrArgs; i++)
         {
           Args[i] = gsSubstValuesTable(Substs, ATgetArgument((ATermAppl) Term, i), Recursive);

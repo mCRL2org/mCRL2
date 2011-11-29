@@ -15,7 +15,7 @@
 #include <cassert>
 #include <iterator>
 #include <vector>
-#include "mcrl2/aterm/memory_utility.h"
+#include "mcrl2/utilities/detail/memory_utility.h"
 #include "mcrl2/atermpp/aterm.h"
 #include "mcrl2/atermpp/aterm_list.h"
 #include "mcrl2/atermpp/function_symbol.h"
@@ -42,7 +42,7 @@ struct aterm_converter
 template <class InputIterator>
 inline ATermAppl at_make_appl(const function_symbol& sym, InputIterator first, InputIterator last, std::input_iterator_tag)
 {
-  ATERM_MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments,ATerm,sym.arity());
+   MCRL2_SYSTEM_SPECIFIC_ALLOCA(arguments,ATerm,sym.arity());
   // std::vector<ATerm> arguments;
   size_t c=0;
   for (InputIterator i = first; i != last; ++i, ++c)

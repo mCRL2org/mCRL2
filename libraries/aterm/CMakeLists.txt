@@ -27,5 +27,6 @@ add_library(${PROJECT_NAME}
 )
 
 include_directories(${CMAKE_SOURCE_DIR}/libraries/aterm/include)
+include_directories(${CMAKE_SOURCE_DIR}/libraries/utilities/include)
 
 install(TARGETS ${PROJECT_NAME} DESTINATION ${MCRL2_LIB_DIR})
