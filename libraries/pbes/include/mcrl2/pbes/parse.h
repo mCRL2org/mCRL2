@@ -28,12 +28,6 @@
 #include "mcrl2/pbes/pbes.h"
 #include "mcrl2/pbes/typecheck.h"
 
-//#define MCRL2_LOG_PARSER_OUTPUT
-#ifdef MCRL2_LOG_PARSER_OUTPUT
-#include <fstream>
-#include "mcrl2/utilities/file_utility.h"
-#endif
-
 namespace mcrl2
 {
 
@@ -140,31 +134,6 @@ void complete_pbes(pbes<>& x)
   complete_data_specification(x);
 }
 
-/// \brief Reads a PBES from an input stream.
-/// \param from An input stream
-/// \param result A PBES
-/// \return The input stream
-inline
-std::istream& operator>>(std::istream& from, pbes<>& result)
-{
-  std::string text = utilities::read_text(from);
-  result = pbes_system::parse_pbes_new(text);
-
-#ifdef MCRL2_LOG_PARSER_OUTPUT
-  std::string filename = utilities::create_filename("pbes", ".txt");
-  std::ofstream out(filename.c_str());
-  out << "CHECK PBES " << core::detail::check_rule_PBES(result) << std::endl;
-  out << pbes_system::pp(result) << std::endl << std::endl;
-  out << atermpp::aterm_appl(result).to_string() << std::endl;
-#endif
-
-  type_check(result);
-  pbes_system::translate_user_notation(result);
-  pbes_system::normalize_sorts(result, result.data());
-  complete_data_specification(result);
-  return from;
-}
-
 inline
 pbes<> parse_pbes(std::istream& in)
 {
@@ -172,6 +141,17 @@ pbes<> parse_pbes(std::istream& in)
   pbes<> result = parse_pbes_new(text);
   complete_pbes(result);
   return result;
+}
+
+/// \brief Reads a PBES from an input stream.
+/// \param from An input stream
+/// \param result A PBES
+/// \return The input stream
+inline
+std::istream& operator>>(std::istream& from, pbes<>& result)
+{
+  result = parse_pbes(from);
+  return from;
 }
 
 inline
