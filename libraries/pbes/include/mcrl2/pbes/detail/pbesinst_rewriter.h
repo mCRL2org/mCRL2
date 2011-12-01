@@ -115,7 +115,7 @@ class pbesinst_rewriter
 {
   public:
     typedef pbes_expression_with_propositional_variables term_type;
-    typedef data::data_enumerator<data::number_postfix_generator> pbesinst_enumerator;
+    typedef data::data_enumerator<utilities::number_postfix_generator> pbesinst_enumerator;
     typedef data::data_expression_with_variables data_term_type;
     typedef data::variable variable_type;
 
@@ -184,7 +184,7 @@ class pbesinst_rewriter
   protected:
     data::rewriter datar;
     data::rewriter_with_variables datarv;
-    data::number_postfix_generator name_generator;
+    utilities::number_postfix_generator name_generator;
     pbesinst_enumerator datae;
     bool m_print_rewriter_output;
 };

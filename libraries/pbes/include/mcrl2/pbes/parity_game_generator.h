@@ -61,7 +61,7 @@ class parity_game_generator
     pbes<>& m_pbes;
 
     /// \brief Identifier generator for the enumerator. (TODO: this needs to be improved!)
-    data::number_postfix_generator generator;
+    utilities::number_postfix_generator generator;
 
     /// \brief Data rewriter.
     data::rewriter datar;

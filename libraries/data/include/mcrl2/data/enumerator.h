@@ -67,7 +67,7 @@ struct data_enumerator_helper
 /// \endcond
 
 /// \brief Class for enumerating data expressions.
-template <typename IdentifierGenerator = number_postfix_generator>
+template <typename IdentifierGenerator = utilities::number_postfix_generator>
 class data_enumerator
 {
   protected:

@@ -109,7 +109,6 @@ void pbesconstelm(const std::string& input_filename,
       typedef simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> my_pbes_rewriter;
       my_pbes_rewriter pbesr(datar);
       pbes_constelm_algorithm<pbes_system::pbes_expression, data::rewriter, my_pbes_rewriter> algorithm(datar, pbesr);
-      data::number_postfix_generator name_generator("UNIQUE_PREFIX");
       algorithm.run(p, compute_conditions);
       if (remove_redundant_equations)
       {
@@ -123,7 +122,7 @@ void pbesconstelm(const std::string& input_filename,
     {
       typedef pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > my_pbes_rewriter;
       bool enumerate_infinite_sorts = (rewriter_type == quantifier_all);
-      data::number_postfix_generator name_generator("UNIQUE_PREFIX");
+      utilities::number_postfix_generator name_generator("UNIQUE_PREFIX");
       data::data_enumerator<> datae(p.data(), datar, name_generator);
       data::rewriter_with_variables datarv(datar);
       my_pbes_rewriter pbesr(datarv, datae, enumerate_infinite_sorts);
@@ -271,7 +270,7 @@ void pbesrewr(const std::string& input_filename,
     }
     case quantifier_all:
     {
-      data::number_postfix_generator generator("UNIQUE_PREFIX");
+      utilities::number_postfix_generator generator("UNIQUE_PREFIX");
       data::data_enumerator<> datae(p.data(), datar, generator);
       data::rewriter_with_variables datarv(datar);
       bool enumerate_infinite_sorts = true;
@@ -281,7 +280,7 @@ void pbesrewr(const std::string& input_filename,
     }
     case quantifier_finite:
     {
-      data::number_postfix_generator generator("UNIQUE_PREFIX");
+      utilities::number_postfix_generator generator("UNIQUE_PREFIX");
       data::data_enumerator<> datae(p.data(), datar, generator);
       data::rewriter_with_variables datarv(datar);
       bool enumerate_infinite_sorts = false;

@@ -65,7 +65,7 @@ std::clog << core::detail::print_set(pbes_system::find_function_symbols(pbes_spe
 #endif
 
   // data::rewriter(pbes_spec.data(), mcrl2::data::used_data_equation_selector(pbes_spec.data(), pbes_spec.equations()), rewrite_strategy());
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter_with_variables datarv(datar);
   data::data_enumerator<> datae(pbes_spec.data(), datar, generator);
   const bool enumerate_infinite_sorts = true;

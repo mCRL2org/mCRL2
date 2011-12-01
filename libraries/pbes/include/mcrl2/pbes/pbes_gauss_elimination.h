@@ -125,12 +125,12 @@ pbes_equation_solver<Rewriter> make_pbes_equation_solver(const Rewriter& rewrite
 template <typename Container>
 int gauss_elimination(pbes<Container>& p)
 {
-  typedef data::data_enumerator<data::number_postfix_generator> my_enumerator;
+  typedef data::data_enumerator<utilities::number_postfix_generator> my_enumerator;
   typedef enumerate_quantifiers_rewriter<pbes_expression_with_variables, data::rewriter, my_enumerator> my_rewriter;
   typedef typename core::term_traits<pbes_expression> tr;
 
   data::rewriter datar(p.data());
-  data::number_postfix_generator name_generator("x");
+  utilities::number_postfix_generator name_generator("x");
   my_enumerator datae(p.data(), datar, name_generator);
   my_rewriter pbesr(datar, datae);
 

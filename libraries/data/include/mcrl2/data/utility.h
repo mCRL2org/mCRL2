@@ -71,7 +71,7 @@ variable_list fresh_variables(const variable_list& variables, std::set<std::stri
   variable_vector result;
   for (variable_list::const_iterator i = variables.begin(); i != variables.end(); ++i)
   {
-    number_postfix_generator generator(std::string(i->name()));
+    utilities::number_postfix_generator generator(std::string(i->name()));
     std::string name;
     do
     {

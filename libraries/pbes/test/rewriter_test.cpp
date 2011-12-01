@@ -257,8 +257,8 @@ void test_enumerate_quantifiers_rewriter()
   data::data_specification data_spec = data::data_specification();
   data_spec.add_context_sort(data::sort_nat::nat());
   data::rewriter datar(data_spec);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<utilities::number_postfix_generator> datae(data_spec, datar, generator);
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
   pbes_system::data_rewriter<pbes_system::pbes_expression, data::rewriter> r(datar);
@@ -322,8 +322,8 @@ void test_enumerate_quantifiers_rewriter(std::string expr1, std::string expr2, s
 
   data::data_specification dspec = data::parse_data_specification(data_spec);
   data::rewriter datar(dspec);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::number_postfix_generator> datae(dspec, datar, generator);
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<utilities::number_postfix_generator> datae(dspec, datar, generator);
   data::rewriter_with_variables datarv(dspec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
   test_expressions(R, expr1, R, expr2, var_decl, sigma, data_spec);
@@ -373,8 +373,8 @@ void test_enumerate_quantifiers_rewriter_finite()
   data::data_specification data_spec = data::data_specification();
   data_spec.add_context_sort(data::sort_list::list(data::sort_nat::nat()));
   data::rewriter datar(data_spec);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
-  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
+  data::data_enumerator<utilities::number_postfix_generator> datae(data_spec, datar, generator);
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae, false);
   pbes_system::simplifying_rewriter<pbes_system::pbes_expression, data::rewriter> S(datar);
@@ -443,9 +443,9 @@ void test_substitutions2()
   std::cout << "<test_substitutions2>" << std::endl;
   data::data_specification data_spec;
   data_spec.add_context_sort(data::sort_nat::nat());
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter datar(data_spec);
-  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
+  data::data_enumerator<utilities::number_postfix_generator> datae(data_spec, datar, generator);
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > R(datarv, datae);
 
@@ -553,9 +553,9 @@ void test_substitutions3()
     "     !(b . (i mod n') && m > 0)  ->  nextempty_mod(i, b, m, n')  =  i mod 2 * n';                                          \n"
     ;
   data::data_specification data_spec = data::parse_data_specification(DATA_SPEC);
-  data::number_postfix_generator generator("UNIQUE_PREFIX");
+  utilities::number_postfix_generator generator("UNIQUE_PREFIX");
   data::rewriter datar(data_spec);
-  data::data_enumerator<data::number_postfix_generator> datae(data_spec, datar, generator);
+  data::data_enumerator<utilities::number_postfix_generator> datae(data_spec, datar, generator);
   data::rewriter_with_variables datarv(data_spec);
   pbes_system::enumerate_quantifiers_rewriter<pbes_system::pbes_expression, data::rewriter_with_variables, data::data_enumerator<> > r(datarv, datae);
 
