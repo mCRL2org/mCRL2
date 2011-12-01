@@ -42,44 +42,6 @@ void test_separate_keyword_section()
   BOOST_CHECK(boost::trim_copy(q.second).empty());
 }
 
-void test_separate_sort_declarations()
-{
-  std::string DATASPEC =
-    "eqn haha; sort                              \n"
-    "  AbsD    = struct a;                       \n"
-    "  AbsList = struct empty | one | more;      \n"
-    "  AbsNat  = struct sort1 | sort2 | meer;    \n"
-    "                                            \n"
-    "eqn                                         \n"
-    "  Abstail(empty) = {empty};                 \n"
-    "  Abstail(one)   = {empty};                 \n"
-    "  Abstail(more)  = {one,more};              \n"
-    "                                            \n"
-    "  Absconc(a,empty) = {one}; sort X; eqn     \n"
-    "  Absconc(a,one)   = {more};                \n"
-    "  Absconc(a,more)  = {more};                \n"
-    "                                            \n"
-    "  Abslen(empty)    = {nul};                 \n"
-    "  Abslen(one)      = {een};                 \n"
-    "  Abslen(more)     = {meer};                \n"
-    "                                            \n"
-    "  Absge(nul,nul)   = {true};                \n"
-    "  Absge(nul,een)   = {false};               \n"
-    "  Absge(nul,meer)  = {false};               \n"
-    "  Absge(een,nul)   = {true};                \n"
-    "  Absge(een,een)   = {true};                \n"
-    "  Absge(een,meer)  = {false};               \n"
-    "  Absge(meer,nul)  = {true};                \n"
-    "  Absge(meer,een)  = {true};                \n"
-    "  Absge(meer,meer) = {false,true};          \n"
-    "                                            \n"
-    "  Abscapacity      = meer;                  \n"
-    ;
-
-  std::pair<std::string, std::string> result = pbes_system::detail::separate_sort_declarations(DATASPEC);
-  std::cout << result.first << "-----------------------------\n" << result.second << std::endl;
-}
-
 void test_absinthe(const std::string& pbes_text, const std::string& abstraction_text, bool is_over_approximation)
 {
   pbes<> p = txt2pbes(pbes_text);
@@ -164,7 +126,6 @@ int test_main(int argc, char* argv[])
   MCRL2_ATERMPP_INIT_DEBUG(argc, argv)
 
   test_separate_keyword_section();
-  test_separate_sort_declarations();
   test1();
   test2();
 
