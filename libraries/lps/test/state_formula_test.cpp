@@ -337,7 +337,7 @@ void test_rename()
   data::set_identifier_generator generator;
   generator.add_identifiers(lps::find_identifiers(spec));
   formula = rename_predicate_variables(formula, generator);
-  BOOST_CHECK(pp(formula) == "(mu X0. X0) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X0. X0)");
+  BOOST_CHECK(pp(formula) == "(mu X1. X1) && (mu X. X)" || pp(formula) == "(mu X. X) && (mu X1. X1)");
   std::cout << "formula: " << pp(formula) << std::endl;
 
   generator = data::set_identifier_generator();
@@ -346,7 +346,7 @@ void test_rename()
   std::cout << "formula: " << pp(formula) << std::endl;
   formula = rename_predicate_variables(formula, generator);
   std::cout << "formula: " << pp(formula) << std::endl;
-  BOOST_CHECK(pp(formula) == "mu X. mu X0. X0");
+  BOOST_CHECK(pp(formula) == "mu X. mu X1. X1");
   core::garbage_collect();
 }
 

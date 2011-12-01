@@ -15,8 +15,9 @@
 #include <set>
 #include <string>
 #include <sstream>
-#include "mcrl2/core/identifier_string.h"
 #include "mcrl2/atermpp/container_utility.h"
+#include "mcrl2/core/identifier_string.h"
+#include "mcrl2/utilities/identifier_generator.h"
 
 namespace mcrl2
 {
@@ -63,11 +64,13 @@ class number_postfix_generator
 /// A context is maintained containing already used identifiers.
 /// Using the operator()() and operator()(std::string) fresh
 /// identifiers are generated that do not appear in the context.
-template <typename Generator = number_postfix_generator>
+template <typename Generator = utilities::number_postfix_generator>
 class identifier_generator
 {
-  public:
+  protected:
+    Generator m_generator;
 
+  public:
     /// \brief Constructor.
     identifier_generator()
     {}
@@ -104,7 +107,7 @@ class identifier_generator
         remove_identifier(*i);
       }
     }
-   
+
     /// \brief Returns true if the identifier s appears in the context.
     /// \param s An identifier.
     /// \return True if the identifier appears in the context.
@@ -117,17 +120,10 @@ class identifier_generator
     virtual core::identifier_string operator()(const std::string& hint)
     {
       core::identifier_string id(hint);
-
-      if (has_identifier(id))
+      while (has_identifier(id))
       {
-        Generator generator(hint);
-
-        while (has_identifier(id))
-        {
-          id = core::identifier_string(generator());
-        }
+        id = core::identifier_string(m_generator(hint));
       }
-
       add_identifier(id);
       return id;
     }
